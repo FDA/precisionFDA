@@ -1,9 +1,9 @@
 /* eslint-disable max-len */
+import { ClientRequestError, IncompatibleVersionError, InternalError } from '@shared/errors'
 import axios, { AxiosInstance, AxiosRequestConfig } from 'axios'
 import { compareVersions } from 'compare-versions'
-import type { Logger } from 'pino'
+import type { Logger } from '@nestjs/common'
 import { CookieJar } from 'tough-cookie'
-import { errors } from '..'
 import { maskAuthHeader } from '../utils/logging'
 import { getLogger } from '../logger'
 
@@ -71,10 +71,10 @@ class WorkstationClient implements IWorkstationClient {
     // First get the Referer url
     const jobResponse = await this.axiosInstance.get(this.workstationUrl)
     const refrerUrl = jobResponse.config.url
-    this.log.info(`WorkstationClient obtained refrerUrl ${refrerUrl}`)
+    this.log.verbose(`WorkstationClient obtained refrerUrl ${refrerUrl}`)
 
     const url = `${this.workstationUrl}/oauth2/access?code=${authToken}`
-    this.log.info(`WorkstationClient oauth calling url ${url}`)
+    this.log.verbose(`WorkstationClient oauth calling url ${url}`)
 
     const options: AxiosRequestConfig = {
       method: 'GET',
@@ -90,14 +90,14 @@ class WorkstationClient implements IWorkstationClient {
       const response = await this.sendRequest(options, true)
       const cookie = await this.extractWorkstationCookie(response)
       if (!cookie) {
-        throw new errors.InternalError('Unable to obtain workstation cookie')
+        throw new InternalError('Unable to obtain workstation cookie')
       }
       this.cookie = cookie
 
       // Should not print cookie to logs, the following is for debugging
-      // this.log.info(`WorkstationClient got cookie: ${this.cookie}`)
+      // this.log.verbose(`WorkstationClient got cookie: ${this.cookie}`)
 
-      this.log.info({
+      this.log.verbose({
         workstationUrl: this.workstationUrl,
         host: this.host,
         baseUrl: this.baseUrl,
@@ -111,12 +111,12 @@ class WorkstationClient implements IWorkstationClient {
 
   private async extractWorkstationCookie(response: any): Promise<string | null> {
     const jar = response.config.jar as CookieJar
-    this.log.info({ jar }, 'extractWorkstationCookie jar')
+    this.log.verbose({ jar }, 'extractWorkstationCookie jar')
 
     const cookies = await jar.getCookies(this.workstationUrl)
-    this.log.info({ cookies }, 'extractWorkstationCookie cookies')
+    this.log.verbose({ cookies }, 'extractWorkstationCookie cookies')
     for (const cookie of cookies) {
-      // this.log.info({ cookie }, 'cookie')
+      // this.log.verbose({ cookie }, 'cookie')
       if (cookie.key.startsWith('job-')) {
         return `${cookie.key}=${cookie.value}`
       }
@@ -126,7 +126,7 @@ class WorkstationClient implements IWorkstationClient {
 
   private validateCookie() {
     if (this.cookie === undefined) {
-      throw new errors.InternalError('Workstation cookie is not present. Check for oauth failure')
+      throw new InternalError('Workstation cookie is not present. Check for oauth failure')
     }
   }
 
@@ -194,7 +194,7 @@ class WorkstationClient implements IWorkstationClient {
     if (this.apiVersion && compareVersions(this.apiVersion, '1.1') < 0) {
       const message = `Error: Cannot use /api/setPFDAConfig because job's api version (${this.apiVersion}) is less than 1.1`
       this.log.error(message)
-      throw new errors.IncompatibleVersionError(message)
+      throw new IncompatibleVersionError(message)
     }
 
     this.validateCookie()
@@ -214,7 +214,7 @@ class WorkstationClient implements IWorkstationClient {
     try {
       this.logClientRequest(options)
       const res = await this.axiosInstance.request(options)
-      this.log.info({ data: res.data }, 'WorkstationClient: sendRequest response')
+      this.log.verbose({ data: res.data }, 'WorkstationClient: sendRequest response')
       return returnFullResponse ? res : res.data
     } catch (err) {
       this.logClientFailed(options)
@@ -242,7 +242,7 @@ class WorkstationClient implements IWorkstationClient {
   protected logClientRequest(options: AxiosRequestConfig): void {
     const sanitized = maskAuthHeader(options.headers)
     const data = this.maskRequestData(options.data)
-    this.log.info(
+    this.log.verbose(
       {
         requestOptions: { ...options, headers: sanitized, data },
         url: options.url,
@@ -274,7 +274,7 @@ class WorkstationClient implements IWorkstationClient {
       if (customErrorThrower) {
         customErrorThrower(statusCode, errorType, errorMessage)
       }
-      throw new errors.ClientRequestError(
+      throw new ClientRequestError(
         `${errorType} (${statusCode}): ${errorMessage}`,
         {
           clientResponse: err.response.data,

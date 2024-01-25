@@ -1,10 +1,12 @@
 /* eslint-disable max-len */
 import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
+import { Folder } from '@shared/domain/user-file/folder.entity'
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
+import { User } from '@shared/domain/user/user.entity'
 import { expect } from 'chai'
 import { database } from '../../../src/database'
 import { create, db } from '@shared/test'
 import { FILE_ORIGIN_TYPE, FILE_STATE_DX, PARENT_TYPE } from '@shared/domain/user-file/user-file.types'
-import { Folder, User, UserFile } from '@shared/domain'
 import { readJsonConfigFile } from 'typescript'
 
 describe('FolderRepository tests', () => {

@@ -1,6 +1,6 @@
+import { Session } from '@shared/domain/session/session.entity'
+import { BaseOperation } from '@shared/utils/base-operation'
 import { User } from '../user.entity'
-import { Session } from '../../session'
-import { BaseOperation } from '../../../utils'
 import { UserOpsCtx } from '../../../types'
 
 /**
@@ -13,7 +13,7 @@ string,
 User
 > {
   async run(key: string): Promise<User> {
-    this.ctx.log.info('executing auth session operation')
+    this.ctx.log.verbose('executing auth session operation')
     const em = this.ctx.em.fork()
     const session = await em.findOneOrFail(Session, { key }, { populate: ['user'] })
     return session.user.getEntity()

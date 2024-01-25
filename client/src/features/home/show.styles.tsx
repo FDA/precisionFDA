@@ -4,11 +4,11 @@ import { ButtonSolidBlue } from '../../components/Button'
 import { ArrowIcon } from '../../components/icons/ArrowIcon'
 import { Svg } from '../../components/icons/Svg'
 import { Loader } from '../../components/Loader'
-import { colors, theme } from '../../styles/theme'
+import { theme } from '../../styles/theme'
 
 export const MetadataSection = styled.div`
-  border-top: 1px solid #dddddd;
-  border-bottom: 1px solid #dddddd;
+  border-top: 1px solid var(--c-layout-border);
+  border-bottom: 1px solid var(--c-layout-border);
   padding: 10px 15px;
   display: flex;
   flex-direction: column;
@@ -25,15 +25,14 @@ export const MetadataRow = styled.div`
 export const MetadataItem = styled.div``
 
 export const MetadataKey = styled.div`
-  color: ${colors.greyOnLightBlue};
-  font-weight: 300;
+  color: var(--c-text-400);
+  font-weight: 400;
   text-transform: uppercase;
   white-space: nowrap;
   font-size: 14px;
   line-height: 20px;
 `
 export const MetadataVal = styled.div`
-  color: #52698f;
   font-size: 16px;
   font-weight: 700;
   white-space: nowrap;
@@ -89,17 +88,14 @@ export const Title = styled.div`
   font-weight: bold;
   display: flex;
   align-items: center;
-  color: #52698f;
   gap: 8px;
 `
 
 export const Description = styled.div`
   font-size: 16px;
-  color: #52698f;
 `
 export const LockedRow = styled.div`
   font-size: 14px;
-  color: #52698f;
   background: ${theme.colors.lightYellow};
   border-radius: 4px;
   padding: 4px 7px;
@@ -115,7 +111,7 @@ export const LockedRow = styled.div`
 export const Pill = styled.div`
   border-radius: 10px;
   background-color: white;
-  color: ${colors.primaryBlue};
+  color: var(--primary-500);
   font-size: 0.7rem;
   font-weight: bold;
   padding: 1px 6px;

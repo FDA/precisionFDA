@@ -9,7 +9,8 @@ import {
   Property,
   Reference,
 } from '@mikro-orm/core'
-import { Tagging, User } from '..'
+import { Tagging } from '@shared/domain/tagging/tagging.entity'
+import { User } from '@shared/domain/user/user.entity'
 import { FolderRepository } from './folder.repository'
 import { Node } from './node.entity'
 import { FOLDER_STATE, FILE_STI_TYPE, FILE_ORIGIN_TYPE, PARENT_TYPE, ITrackable } from './user-file.types'

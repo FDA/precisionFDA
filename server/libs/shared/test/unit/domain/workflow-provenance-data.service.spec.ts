@@ -1,6 +1,6 @@
+import { Workflow } from '@shared/domain/workflow/entity/workflow.entity'
 import { expect } from 'chai'
 import { stub } from 'sinon'
-import { Workflow } from '../../../src/domain'
 import {
   WorkflowProvenanceDataService,
 } from '../../../src/domain/provenance/service/entity-data/workflow-provenance-data.service'

@@ -2,7 +2,7 @@
 // local types that are not to be shared
 import { EntityManager } from '@mikro-orm/mysql'
 import Koa from 'koa'
-import { Logger } from 'pino'
+import { Logger } from '@nestjs/common'
 import { types } from '@shared'
 import { BaseEntity } from '@shared/database/base-entity'
 import { MapValueObjectByKey, MapValuesToReturnType } from '@shared/utils/generics'

@@ -1,17 +1,22 @@
+import { Injectable } from '@nestjs/common'
+import { ArrayUtils } from '@shared/utils/array.utils'
 import fs from 'fs/promises'
 import path from 'path'
 import { JSDOM } from 'jsdom'
-import { ArrayUtils } from '../../..'
 import { SpaceReportPart } from '../entity/space-report-part.entity'
 import { SpaceReport } from '../entity/space-report.entity'
 import { SpaceReportPartSourceType } from '../model/space-report-part-source.type'
 
-// TODO(PFDA-4701) - use import after introducing bundler with nestjs
-const assetsPath = path.join(__dirname, '../../../../../../../../../libs/shared/src/domain/space-report/assets')
+// TODO(PFDA-4835) - use import after introducing bundler with nestjs
+const assetsPath = path.join(
+  __dirname,
+  '../../../../../../../../../libs/shared/src/domain/space-report/assets',
+)
 const triangleIcon = fs.readFile(path.join(assetsPath, 'triangle-icon.svg'), 'utf8').catch(() => '')
 const logoImage = fs.readFile(path.join(assetsPath, 'logo.svg'), 'utf8').catch(() => '')
 const html = fs.readFile(path.join(assetsPath, 'result-wrapper.html'), 'utf8').catch(() => '')
 
+@Injectable()
 export class SpaceReportResultService {
   private readonly FILES_HEADER_ID = 'header-files'
   private readonly APPS_HEADER_ID = 'header-apps'
@@ -36,11 +41,15 @@ export class SpaceReportResultService {
     container.id = 'container'
     document.body.appendChild(container)
 
-    const reportPartsMap = spaceReport.reportParts.getItems()
-      .reduce<Record<SpaceReportPartSourceType, SpaceReportPart[]>>((acc, rp) => {
-        acc[rp.sourceType].push(rp)
-        return acc
-      }, { app: [], file: [], job: [], asset: [], workflow: [] })
+    const reportPartsMap = spaceReport.reportParts
+      .getItems()
+      .reduce<Record<SpaceReportPartSourceType, SpaceReportPart[]>>(
+        (acc, rp) => {
+          acc[rp.sourceType].push(rp)
+          return acc
+        },
+        { app: [], file: [], job: [], asset: [], workflow: [] },
+      )
 
     const sidebar = await this.getSidebar(reportPartsMap, document)
     container.appendChild(sidebar)
@@ -56,17 +65,37 @@ export class SpaceReportResultService {
     const report = document.createElement('div')
     report.id = 'report'
     report.appendChild(await this.getHeader(spaceReport, document))
-    report.appendChild(this.getReportSegment('Files', this.FILES_HEADER_ID, reportPartsMap.file, document))
-    report.appendChild(this.getReportSegment('Apps', this.APPS_HEADER_ID, reportPartsMap.app, document))
-    report.appendChild(this.getReportSegment('Executions', this.JOBS_HEADER_ID, reportPartsMap.job, document))
-    report.appendChild(this.getReportSegment('Assets', this.ASSETS_HEADER_ID, reportPartsMap.asset, document))
-    report.appendChild(this.getReportSegment('Workflows', this.WORKFLOWS_HEADER_ID, reportPartsMap.workflow, document))
+    report.appendChild(
+      this.getReportSegment('Files', this.FILES_HEADER_ID, reportPartsMap.file, document),
+    )
+    report.appendChild(
+      this.getReportSegment('Apps', this.APPS_HEADER_ID, reportPartsMap.app, document),
+    )
+    report.appendChild(
+      this.getReportSegment('Executions', this.JOBS_HEADER_ID, reportPartsMap.job, document),
+    )
+    report.appendChild(
+      this.getReportSegment('Assets', this.ASSETS_HEADER_ID, reportPartsMap.asset, document),
+    )
+    report.appendChild(
+      this.getReportSegment(
+        'Workflows',
+        this.WORKFLOWS_HEADER_ID,
+        reportPartsMap.workflow,
+        document,
+      ),
+    )
     main.appendChild(report)
 
     return domContainer.serialize()
   }
 
-  private getReportSegment(title: string, id: string, reportParts: SpaceReportPart[], document: Document) {
+  private getReportSegment(
+    title: string,
+    id: string,
+    reportParts: SpaceReportPart[],
+    document: Document,
+  ) {
     const container = document.createElement('div')
 
     const spacer = document.createElement('div')
@@ -93,7 +122,7 @@ export class SpaceReportResultService {
 
     const itemList = document.createElement('div')
     itemList.classList.add('item-list')
-    reportParts.forEach(rp => itemList.appendChild(this.getReportPartContent(rp, document)))
+    reportParts.forEach((rp) => itemList.appendChild(this.getReportPartContent(rp, document)))
     container.appendChild(itemList)
 
     return container
@@ -124,24 +153,42 @@ export class SpaceReportResultService {
     return wrapper
   }
 
-  private async getSidebar(items: Record<SpaceReportPartSourceType, SpaceReportPart[]>, document: Document) {
+  private async getSidebar(
+    items: Record<SpaceReportPartSourceType, SpaceReportPart[]>,
+    document: Document,
+  ) {
     const container = document.createElement('aside')
     container.id = 'sidebar'
     container.style.width = '250px'
 
     const sidenav = document.createElement('div')
     sidenav.classList.add('sidenav')
-    sidenav.appendChild(await this.getResourceItem('Files', this.FILES_HEADER_ID, items.file, document))
-    sidenav.appendChild(await this.getResourceItem('Apps', this.APPS_HEADER_ID, items.app, document))
-    sidenav.appendChild(await this.getResourceItem('Executions', this.JOBS_HEADER_ID, items.job, document))
-    sidenav.appendChild(await this.getResourceItem('Assets', this.ASSETS_HEADER_ID, items.asset, document))
-    sidenav.appendChild(await this.getResourceItem('Workflows', this.WORKFLOWS_HEADER_ID, items.workflow, document))
+    sidenav.appendChild(
+      await this.getResourceItem('Files', this.FILES_HEADER_ID, items.file, document),
+    )
+    sidenav.appendChild(
+      await this.getResourceItem('Apps', this.APPS_HEADER_ID, items.app, document),
+    )
+    sidenav.appendChild(
+      await this.getResourceItem('Executions', this.JOBS_HEADER_ID, items.job, document),
+    )
+    sidenav.appendChild(
+      await this.getResourceItem('Assets', this.ASSETS_HEADER_ID, items.asset, document),
+    )
+    sidenav.appendChild(
+      await this.getResourceItem('Workflows', this.WORKFLOWS_HEADER_ID, items.workflow, document),
+    )
     container.appendChild(sidenav)
 
     return container
   }
 
-  private async getResourceItem(title: string, anchor: string, reportParts: SpaceReportPart[], document: Document) {
+  private async getResourceItem(
+    title: string,
+    anchor: string,
+    reportParts: SpaceReportPart[],
+    document: Document,
+  ) {
     const section = document.createElement('div')
     section.classList.add('navbar-item')
 
@@ -163,7 +210,7 @@ export class SpaceReportResultService {
 
     const subnav = document.createElement('div')
     subnav.classList.add('subnav')
-    reportParts.forEach(rp => subnav.appendChild(this.getResourceLink(rp, document)))
+    reportParts.forEach((rp) => subnav.appendChild(this.getResourceLink(rp, document)))
     section.appendChild(subnav)
 
     return section
@@ -218,18 +265,32 @@ export class SpaceReportResultService {
     const infoRow1 = document.createElement('div')
     infoRow1.classList.add('info-area')
     infoRow1.appendChild(this.getHeaderInfoPart('Space Name', report.space.name, document))
-    infoRow1.appendChild(this.getHeaderInfoPart('Report Generated On', new Date(report.createdAt).toLocaleString(), document, ['align-right']))
+    infoRow1.appendChild(
+      this.getHeaderInfoPart(
+        'Report Generated On',
+        new Date(report.createdAt).toLocaleString(),
+        document,
+        ['align-right'],
+      ),
+    )
     container.appendChild(infoRow1)
 
     const infoRow2 = document.createElement('div')
     infoRow2.classList.add('info-area')
-    infoRow2.appendChild(this.getHeaderInfoPart('Space Description', report.space.description, document))
+    infoRow2.appendChild(
+      this.getHeaderInfoPart('Space Description', report.space.description, document),
+    )
     container.appendChild(infoRow2)
 
     return container
   }
 
-  private getHeaderInfoPart(titleText: string, descriptionText: string, document: Document, classes: string[] = []) {
+  private getHeaderInfoPart(
+    titleText: string,
+    descriptionText: string,
+    document: Document,
+    classes: string[] = [],
+  ) {
     const container = document.createElement('div')
     container.classList.add('group', ...classes)
 

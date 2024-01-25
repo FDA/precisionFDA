@@ -1,10 +1,12 @@
+import { User } from '@shared/domain/user/user.entity'
+import { PlatformClient } from '@shared/platform-client'
+import { DbClusterCreateParams } from '@shared/platform-client/platform-client.params'
+import { ClassIdResponse, DbClusterDescribeResponse } from '@shared/platform-client/platform-client.responses'
 import { omit, invertObj } from 'ramda'
 import { EntityManager } from '@mikro-orm/mysql'
-import { BaseOperation } from '../../../utils'
-import * as client from '../../../platform-client'
+import { BaseOperation } from '@shared/utils/base-operation'
 import type { CreateDbClusterInput } from '../db-cluster.input'
 import { DbCluster } from '../db-cluster.entity'
-import { User } from '../../user'
 import { STATUS, ENGINE, STATUSES, ENGINES } from '../db-cluster.enum'
 import { createDbClusterSyncTask } from '../../../queue'
 import { UserOpsCtx } from '../../../types'
@@ -17,14 +19,14 @@ export class CreateDbClusterOperation extends BaseOperation<UserOpsCtx, CreateDb
     this.input = input
     this.em = this.ctx.em
 
-    const platformClient = new client.PlatformClient(this.ctx.user.accessToken, this.ctx.log)
+    const platformClient = new PlatformClient(this.ctx.user.accessToken, this.ctx.log)
 
     const user = await this.em.findOne(User, { id: this.ctx.user.id })
 
-    const newDbClusterRes: client.ClassIdResponse
+    const newDbClusterRes: ClassIdResponse
       = await platformClient.dbClusterCreate(this.buildCreateApiCall())
 
-    const describeDbClusterRes: client.DbClusterDescribeResponse
+    const describeDbClusterRes: DbClusterDescribeResponse
       = await platformClient.dbClusterDescribe({
         dxid: newDbClusterRes.id,
         project: input.project,
@@ -37,14 +39,14 @@ export class CreateDbClusterOperation extends BaseOperation<UserOpsCtx, CreateDb
     return dbCluster
   }
 
-  private buildCreateApiCall(): client.DbClusterCreateParams {
-    const payload: client.DbClusterCreateParams = {
+  private buildCreateApiCall(): DbClusterCreateParams {
+    const payload: DbClusterCreateParams = {
       ...omit(['scope', 'description'], this.input),
     }
     return payload
   }
 
-  private async persistDbCluster(describeDbClusterRes: client.DbClusterDescribeResponse): Promise<DbCluster> {
+  private async persistDbCluster(describeDbClusterRes: DbClusterDescribeResponse): Promise<DbCluster> {
     const dbCluster = this.em.create(DbCluster, {
       user: this.em.getReference(User, this.ctx.user.id),
       dxid: describeDbClusterRes.id,

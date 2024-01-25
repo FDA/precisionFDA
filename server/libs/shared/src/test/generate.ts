@@ -1,22 +1,37 @@
 /* eslint-disable max-len */
+import { AppSeries } from '@shared/domain/app-series/app-series.entity'
+import { Challenge } from '@shared/domain/challenge/challenge.entity'
+import { DbCluster } from '@shared/domain/db-cluster/db-cluster.entity'
+import { SyncDbClusterOperation } from '@shared/domain/db-cluster/ops/synchronize'
+import { Job } from '@shared/domain/job/job.entity'
+import { JobRunData } from '@shared/domain/job/job.types'
+import { SyncJobOperation } from '@shared/domain/job/ops/synchronize'
+import { NewsItem } from '@shared/domain/news-item/news-item.entity'
+import { Note } from '@shared/domain/note/note.entity'
+import { SpaceEvent } from '@shared/domain/space-event/space-event.entity'
+import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
+import { Space } from '@shared/domain/space/space.entity'
+import { Tag } from '@shared/domain/tag/tag.entity'
+import { Tagging } from '@shared/domain/tagging/tagging.entity'
+import { Asset } from '@shared/domain/user-file/asset.entity'
+import { Folder } from '@shared/domain/user-file/folder.entity'
+import { SyncFilesStateOperation } from '@shared/domain/user-file/ops/sync-files-state'
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
+import { WorkflowSeries } from '@shared/domain/workflow-series/workflow-series.entity'
 import Chance from 'chance'
 import crypto from 'crypto'
 import { DateTime } from 'luxon'
 import { nanoid } from 'nanoid'
-import { App, entities } from '../domain'
-import { AppSpec, Internal } from '../domain/app/app.entity'
+import { App, AppSpec, Internal } from '../domain/app/app.entity'
 import { ENTITY_TYPE } from '../domain/app/app.enum'
 import { CHALLENGE_STATUS } from '../domain/challenge/challenge.enum'
-import { COMPARISON_STATE } from '../domain/comparison/comparison.entity'
-import { SyncDbClusterOperation } from '../domain/db-cluster'
+import { Comparison, COMPARISON_STATE } from '../domain/comparison/comparison.entity'
 import {
   ENGINE as DB_CLUSTER_ENGINE,
   ENGINES,
   STATUS as DB_CLUSTER_STATUS,
 } from '../domain/db-cluster/db-cluster.enum'
-import { ExpertScope, ExpertState } from '../domain/expert/expert.entity'
-import { SyncJobOperation } from '../domain/job'
-import { RunData } from '../domain/job/job.entity'
+import { Expert, ExpertScope, ExpertState } from '../domain/expert/expert.entity'
 import { JOB_DB_ENTITY_TYPE, JOB_STATE } from '../domain/job/job.enum'
 import {
   PARENT_TYPE as SPACE_EVENT_PARENT_TYPE,
@@ -27,14 +42,13 @@ import {
   SPACE_MEMBERSHIP_ROLE,
   SPACE_MEMBERSHIP_SIDE,
 } from '../domain/space-membership/space-membership.enum'
-import { SyncFilesStateOperation } from '../domain/user-file'
 import {
   FILE_ORIGIN_TYPE,
   FILE_STATE_DX,
   FILE_STI_TYPE,
   PARENT_TYPE,
 } from '../domain/user-file/user-file.types'
-import { USER_STATE } from '../domain/user/user.entity'
+import { User, USER_STATE } from '../domain/user/user.entity'
 import { STATIC_SCOPE } from '../enums'
 import { TASK_TYPE } from '../queue/task.input'
 import type { AnyObject, UserCtx } from '../types'
@@ -54,12 +68,12 @@ const random = {
 
 // generators fill in random data, usually without foreign keys
 const note = {
-  simple: (): Partial<InstanceType<typeof entities.Note>> => ({
+  simple: (): Partial<InstanceType<typeof Note>> => ({
     title: random.word(),
   }),
 }
 const user = {
-  simple: (): Partial<InstanceType<typeof entities.User>> => ({
+  simple: (): Partial<InstanceType<typeof User>> => ({
     firstName: random.firstName(),
     lastName: random.lastName(),
     dxuser: `user-${random.dxstr()}`,
@@ -165,7 +179,7 @@ const app = {
       packages: ['ipython', 'pkg-config'],
     } as Internal
   },
-  regular: (): Partial<InstanceType<typeof entities.App>> => {
+  regular: (): Partial<InstanceType<typeof App>> => {
     const dxid = `app-${random.dxstr()}`
     return {
       dxid,
@@ -189,7 +203,7 @@ const app = {
       devGroup: 'devGroup',
     }
   },
-  https: (): Partial<InstanceType<typeof entities.App>> => {
+  https: (): Partial<InstanceType<typeof App>> => {
     const dxid = `app-${random.dxstr()}`
     return {
       dxid,
@@ -206,7 +220,7 @@ const app = {
       verified: true,
     }
   },
-  rshiny: (): Partial<InstanceType<typeof entities.App>> => {
+  rshiny: (): Partial<InstanceType<typeof App>> => {
     const dxid = `app-${random.dxstr()}`
     return {
       dxid,
@@ -252,7 +266,7 @@ const app = {
       app_gz: 'app-gzipped-file',
     },
   }),
-  appSeries: (): Partial<InstanceType<typeof entities.AppSeries>> => {
+  appSeries: (): Partial<InstanceType<typeof AppSeries>> => {
     const dxid = `app-${random.dxstr()}`
     return {
       dxid,
@@ -268,7 +282,7 @@ const app = {
 }
 
 const appSeries = {
-    simple: (): Partial<InstanceType<typeof entities.AppSeries>> => {
+    simple: (): Partial<InstanceType<typeof AppSeries>> => {
       const name = random.word()
       const dxid = `app-${random.dxstr()}-${name}`
         return {
@@ -280,7 +294,7 @@ const appSeries = {
 }
 
 const workflowSeries = {
-    simple: (): Partial<InstanceType<typeof entities.WorkflowSeries>> => {
+    simple: (): Partial<InstanceType<typeof WorkflowSeries>> => {
         const name = random.word()
         const dxid = `workflow-${random.dxstr()}-${name}`
         return {
@@ -292,9 +306,9 @@ const workflowSeries = {
 }
 
 const job = {
-  simple: (app: App): Partial<InstanceType<typeof entities.Job>> => {
+  simple: (app: App): Partial<InstanceType<typeof Job>> => {
     const dxid = `job-${random.dxstr()}`
-    const runData: RunData = { run_inputs: {}, run_instance_type: 'baseline-8', run_outputs: {} }
+    const runData: JobRunData = { run_inputs: {}, run_instance_type: 'baseline-8', run_outputs: {} }
     return {
       dxid,
       project: `project-${random.dxstr()}`,
@@ -320,9 +334,9 @@ const job = {
       },
     }
   },
-  regular: (): Partial<InstanceType<typeof entities.Job>> => {
+  regular: (): Partial<InstanceType<typeof Job>> => {
     const dxid = `job-${random.dxstr()}`
-    const runData: RunData = { run_inputs: {}, run_instance_type: 'baseline-8', run_outputs: {} }
+    const runData: JobRunData = { run_inputs: {}, run_instance_type: 'baseline-8', run_outputs: {} }
     return {
       dxid,
       project: `project-${random.dxstr()}`,
@@ -339,7 +353,7 @@ const job = {
 }
 
 const userFile = {
-  simple: (customDxid?: string): Partial<InstanceType<typeof entities.UserFile>> => {
+  simple: (customDxid?: string): Partial<InstanceType<typeof UserFile>> => {
     const dxid = customDxid ?? `file-${random.dxstr()}`
     return {
       dxid,
@@ -353,7 +367,7 @@ const userFile = {
       stiType: FILE_STI_TYPE.USERFILE,
     }
   },
-  simpleUploaded: (customDxid?: string): Partial<InstanceType<typeof entities.UserFile>> => {
+  simpleUploaded: (customDxid?: string): Partial<InstanceType<typeof UserFile>> => {
     const dxid = customDxid ?? `file-${random.dxstr()}`
     return {
       dxid,
@@ -367,7 +381,7 @@ const userFile = {
       stiType: FILE_STI_TYPE.USERFILE,
     }
   },
-  simpleJobOutput: (jobId: number, customDxid?: string): Partial<InstanceType<typeof entities.UserFile>> => {
+  simpleJobOutput: (jobId: number, customDxid?: string): Partial<InstanceType<typeof UserFile>> => {
     const dxid = customDxid ?? `file-${random.dxstr()}`
     return {
       dxid,
@@ -382,7 +396,7 @@ const userFile = {
       stiType: FILE_STI_TYPE.USERFILE,
     }
   },
-  simpleComparisonOutput: (comparisonId: number, customDxid?: string): Partial<InstanceType<typeof entities.UserFile>> => {
+  simpleComparisonOutput: (comparisonId: number, customDxid?: string): Partial<InstanceType<typeof UserFile>> => {
     const dxid = customDxid ?? `file-${random.dxstr()}`
     return {
       dxid,
@@ -400,7 +414,7 @@ const userFile = {
 }
 
 const asset = {
-  simple: (customDxid?: string): Partial<InstanceType<typeof entities.Asset>> => {
+  simple: (customDxid?: string): Partial<InstanceType<typeof Asset>> => {
     const dxid = customDxid ?? `file-${random.dxstr()}`
     return {
       dxid,
@@ -417,7 +431,7 @@ const asset = {
 }
 
 const folder = {
-  simple: (): Partial<InstanceType<typeof entities.Folder>> => {
+  simple: (): Partial<InstanceType<typeof Folder>> => {
     // folders do not have it
     // const dxid = `file-${random.dxstr()}`
     return {
@@ -432,7 +446,7 @@ const folder = {
       locked: false
     }
   },
-  simpleLocal: (): Partial<InstanceType<typeof entities.Folder>> => {
+  simpleLocal: (): Partial<InstanceType<typeof Folder>> => {
     return {
       name: chance.word(),
       project: undefined,
@@ -448,14 +462,14 @@ const folder = {
 }
 
 const tag = {
-  simple: (): Partial<InstanceType<typeof entities.Tag>> => ({
+  simple: (): Partial<InstanceType<typeof Tag>> => ({
     name: chance.name(),
     taggingCount: 0,
   }),
 }
 
 const tagging = {
-  userfileDefaults: (): Partial<InstanceType<typeof entities.Tagging>> => ({
+  userfileDefaults: (): Partial<InstanceType<typeof Tagging>> => ({
     taggableType: 'Node',
     taggerType: 'User',
     context: 'tags',
@@ -463,7 +477,7 @@ const tagging = {
 }
 
 const space = {
-  simple: (): Partial<InstanceType<typeof entities.Space>> => ({
+  simple: (): Partial<InstanceType<typeof Space>> => ({
     name: chance.word(),
     state: 1, // ACTIVE,
     type: 1, // review type
@@ -475,7 +489,7 @@ const space = {
     description: 'desc',
     meta: 'meta',
   }),
-  group: (): Partial<InstanceType<typeof entities.Space>> => ({
+  group: (): Partial<InstanceType<typeof Space>> => ({
     name: chance.word(),
     state: 1,
     type: 0, // GROUP type
@@ -488,7 +502,7 @@ const space = {
 }
 
 const spaceMembership = {
-  simple: (): Partial<InstanceType<typeof entities.SpaceMembership>> => ({
+  simple: (): Partial<InstanceType<typeof SpaceMembership>> => ({
     active: true,
     side: SPACE_MEMBERSHIP_SIDE.GUEST,
     role: SPACE_MEMBERSHIP_ROLE.ADMIN,
@@ -496,7 +510,7 @@ const spaceMembership = {
 }
 
 const spaceEvent = {
-  commentAdded: (): Partial<InstanceType<typeof entities.SpaceEvent>> => ({
+  commentAdded: (): Partial<InstanceType<typeof SpaceEvent>> => ({
     entityId: 1,
     entityType: SPACE_EVENT_PARENT_TYPE.COMMENT,
     activityType: SPACE_EVENT_ACTIVITY_TYPE.comment_added,
@@ -504,7 +518,7 @@ const spaceEvent = {
     side: SPACE_MEMBERSHIP_SIDE.GUEST,
     role: SPACE_MEMBERSHIP_ROLE.ADMIN,
   }),
-  contentAdded: (): Partial<InstanceType<typeof entities.SpaceEvent>> => ({
+  contentAdded: (): Partial<InstanceType<typeof SpaceEvent>> => ({
     entityId: 1,
     entityType: SPACE_EVENT_PARENT_TYPE.JOB,
     activityType: SPACE_EVENT_ACTIVITY_TYPE.job_added,
@@ -515,7 +529,7 @@ const spaceEvent = {
 }
 
 const challenge = {
-  simple: (): Partial<InstanceType<typeof entities.Challenge>> => ({
+  simple: (): Partial<InstanceType<typeof Challenge>> => ({
     name: 'test-challenge',
     scope: 'public',
     status: CHALLENGE_STATUS.SETUP,
@@ -523,7 +537,7 @@ const challenge = {
 }
 
 const comment = {
-  simple: (): Partial<InstanceType<typeof entities.Comment>> => ({
+  simple: (): Partial<InstanceType<typeof Comment>> => ({
     body: chance.sentence(),
     commentableType: 'Space',
     contentObjectType: 'Job',
@@ -533,7 +547,7 @@ const comment = {
 }
 
 const comparison = {
-  simple: (): Partial<InstanceType<typeof entities.Comparison>> => ({
+  simple: (): Partial<InstanceType<typeof Comparison>> => ({
     name: 'Test Comparison',
     description: chance.sentence(),
     state: COMPARISON_STATE.DONE,
@@ -542,7 +556,7 @@ const comparison = {
 }
 
 const dbCluster = {
-  simple: (): Partial<InstanceType<typeof entities.DbCluster>> => {
+  simple: (): Partial<InstanceType<typeof DbCluster>> => {
     const dxid = `dbcluster-${random.dxstr()}`
     return {
       dxid: dxid,
@@ -573,7 +587,7 @@ const dbCluster = {
 }
 
 const expert = {
-  simple: (): Partial<InstanceType<typeof entities.Expert>> => {
+  simple: (): Partial<InstanceType<typeof Expert>> => {
     const expertName = chance.name()
     const fileDxid = `file-${random.dxstr()}-1`
     return {
@@ -592,7 +606,7 @@ const expert = {
 }
 
 const news = {
-  create: (): Partial<InstanceType<typeof entities.NewsItem>> => {
+  create: (): Partial<InstanceType<typeof NewsItem>> => {
     return {
       title: chance.sentence(),
       content: chance.sentence(),

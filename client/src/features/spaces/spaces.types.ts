@@ -77,29 +77,30 @@ export type SideRole = 'reviewer' | 'sponsor'
 
 // PK's note: this interface represents Space, but rails transform DB entity to a different structure and node returns the data as it is stored in the DB
 export interface ISpace {
-  id: string;
+  id: number;
   description: string;
   state: 'active' | 'unactivated';
   name: string;
   type: 'groups' | 'review' | 'private_type' | 'government' | 'administrator' | number // number is the value from DB, string is value from db translated to human readable
   cts?: any;
-  protected: boolean;
+  protected: boolean | null;
   created_at: string;
   updated_at: string;
-  space_create: string;
+  space_create?: string;
   counters: Counters;
+  /** @deprecated create links from client side */
   links: Links;
   updatable: boolean;
   tags: any[];
-  spaceId: number;
-  current_user_membership: SpaceMembership;
+  spaceId?: number;
+  current_user_membership: SpaceMembership | null;
   host_lead: HostLead;
-  guest_lead: GuestLead;
+  guest_lead?: GuestLead;
   private_space_id?: string;
   shared_space_id?: string;
-  can_duplicate: boolean;
-  confidential_space: ConfidentialSpace;
-  restricted_reviewer?: boolean;
+  can_duplicate?: boolean;
+  confidential_space?: ConfidentialSpace | null;
+  restricted_reviewer?: boolean | null;
 }
 
 export const columnFilters = {

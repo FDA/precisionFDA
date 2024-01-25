@@ -1,5 +1,5 @@
+import { App } from '@shared/domain/app/app.entity'
 import { expect } from 'chai'
-import { App } from '../../../src/domain'
 import {
   SpaceReportPartAppResultMetaProvider,
 } from '../../../src/domain/space-report/service/part/space-report-part-app-result-meta.provider'

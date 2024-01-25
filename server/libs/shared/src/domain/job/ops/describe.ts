@@ -1,7 +1,7 @@
 import { wrap } from '@mikro-orm/core'
 import * as client from '../../../platform-client'
 import * as errors from '../../../errors'
-import { BaseOperation } from '../../../utils'
+import { BaseOperation } from '@shared/utils/base-operation'
 import { Job } from '../job.entity'
 import type { DescribeJobInput } from '../job.input'
 import { getJobAccessibleByContext } from '../job.permissions'

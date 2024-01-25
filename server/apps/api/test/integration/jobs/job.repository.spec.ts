@@ -1,11 +1,13 @@
+import { database } from '@shared/database'
+import { App } from '@shared/domain/app/app.entity'
+import { Job } from '@shared/domain/job/job.entity'
+import { User } from '@shared/domain/user/user.entity'
+import { JobDescribeResponse } from '@shared/platform-client/platform-client.responses'
 import { expect } from 'chai'
 import { EntityManager } from '@mikro-orm/mysql'
-import { App, Job, User } from '@shared/domain'
 import { JOB_STATE } from '@shared/domain/job/job.enum'
 import { create, generate, db } from '@shared/test'
 import { mocksReset } from '@shared/test/mocks'
-import { database } from '@shared'
-import { JobDescribeResponse } from '@shared/platform-client'
 
 const jobDxid = "job-G6BgPJ00qp9v8PxY33vfyBbf"
 const jobCreatedAt = new Date(1637185460171)

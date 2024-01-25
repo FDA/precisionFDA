@@ -53,7 +53,6 @@
 #= require jstree
 #= require jquery.caret.min.js
 #= require bootstrap-select/bootstrap-select.min.js
-#= require bundle.js
 #= require datatables.net
 #= require datatables.net-bs
 #= require_tree .

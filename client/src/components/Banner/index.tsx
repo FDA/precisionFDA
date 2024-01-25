@@ -1,17 +1,21 @@
 import styled, { css } from 'styled-components'
 import navBackground from '../../assets/NavbarBackground.png'
 import { commonStyles } from '../../styles/commonStyles'
-import { colors, fontSize, fontWeight, padding, sizing } from '../../styles/theme'
+import { fontSize, fontWeight, padding, sizing } from '../../styles/theme'
 import { Button } from '../Button'
 
 export const MainBanner = styled.div`
+  --c-banner-highlight: hsl(207, 70%, 51%);
+  --c-banner-base: white;
+  --c-banner-base-2: #ddd;
+
   width: 100%;
   background-color: rgb(22,19,14);
   background-image: url(${navBackground});
   background-repeat: no-repeat;
   background-size: cover;
   background-position: center;
-  color: white;
+  color: var(--c-banner-base);
 `
 
 export const ResourceBanner = styled(MainBanner)`
@@ -20,6 +24,7 @@ export const ResourceBanner = styled(MainBanner)`
   padding: 18px ${padding.mainContentHorizontal};
   margin: 0 auto;
   box-sizing: border-box;
+  border-bottom: 1px solid var(--c-layout-border);
 
   @media (max-width: 640px) {
     flex-flow: column wrap;
@@ -28,7 +33,7 @@ export const ResourceBanner = styled(MainBanner)`
 
 export const BannerTitle = styled.h1`
   ${commonStyles.bannerTitle}
-  color: ${colors.textWhite};
+  color: var(--c-banner-base);
   margin: auto 0;
   margin-right: 16px;
 `
@@ -45,12 +50,12 @@ export const BannerPicker = styled.div`
   margin: 0;
 `
 
-export const BannerPickerItem = styled(Button)<{ isActive?: boolean }>`
+export const BannerPickerItem = styled(Button)<{ $isActive?: boolean }>`
   display: inline-block;
   font-weight: ${fontWeight.medium};
   font-size: ${fontSize.h2};
   line-height: 20px;
-  color: ${colors.textWhite};
+  color: var(--c-banner-base);
   background: transparent;
   letter-spacing: 0;
   margin: 0;
@@ -62,32 +67,30 @@ export const BannerPickerItem = styled(Button)<{ isActive?: boolean }>`
 
   &:hover {
     background: transparent;
-    border-bottom: ${sizing.highlightBarWidth} solid ${colors.primaryBlue};
-    color: ${colors.textWhite};
+    border-bottom: ${sizing.highlightBarWidth} solid var(--c-banner-highlight);
+    color: var(--c-banner-base);
   }
 
-  ${({ isActive }) => (
-    isActive && css`
-      color: ${colors.primaryBlue};
-      border-bottom: ${sizing.highlightBarWidth} solid ${colors.primaryBlue};
+  ${({ $isActive }) => (
+    $isActive && css`
+      color: var(--c-banner-highlight);
+      border-bottom: ${sizing.highlightBarWidth} solid var(--c-banner-highlight);
 
       &:hover {
-        color: ${colors.primaryBlue};
+        color: var(--c-banner-highlight);
       }
     `
   )}
 `
 
 export const BannerDescription = styled.span`
-  color: ${colors.textWhite};
+  color: var(--c-banner-base);
   font-size: 16px;
   margin-bottom: 8px;
 `
 
 export const BannerPickedInfo = styled.span`
   margin-top: 4px;
-  color: ${colors.textLightGrey};
+  color: var(--c-banner-base-2);
   font-size: 12px;
 `
-
-// TODO: Design other background images for different areas of the site

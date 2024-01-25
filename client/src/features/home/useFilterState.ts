@@ -24,7 +24,7 @@ function fileSizeParamMap(fileSize?: [number | null, number | null]) {
   
 }
 
-const KEYS = ['name', 'tags', 'featured', 'added_by', 'title', 'state', 'status', 'engine', 'dx_instance_class', 'location', 'app_title', 'launched_by', 'type', 'guest_lead', 'host_lead', 'workflow_title']
+const KEYS = ['name', 'tags', 'featured', 'revision', 'added_by', 'title', 'state', 'status', 'engine', 'dx_instance_class', 'location', 'app_title', 'launched_by', 'type', 'guest_lead', 'host_lead', 'workflow_title']
 function getObjectKeys<T>(a: string[]) {
   const o = {} as any
   a.forEach(k => o[k] = undefined)

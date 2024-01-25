@@ -1,20 +1,15 @@
-import { Link, NavLink } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import styled, { css } from 'styled-components'
-import { MainBanner } from '../../components/Banner'
 import { Button } from '../../components/Button'
+import { NavLink } from '../../components/NavLink'
 import { BackLink } from '../../components/Page/PageBackLink'
-import { compactScrollBar } from '../../components/Page/styles'
+import { compactScrollBar, compactScrollBarV2 } from '../../components/Page/styles'
 import { Svg } from '../../components/icons/Svg'
-import { commonStyles } from '../../styles/commonStyles'
-import { colors, fontSize, fontWeight, padding, sizing } from '../../styles/theme'
+import { fontWeight } from '../../styles/theme'
 
 
 export const StyledBackLink = styled(BackLink)`
   margin: 16px 16px;
-`
-
-export const LoadingList = styled.span`
-  font-size: 14px;
 `
 
 export const MenuText = styled.span`
@@ -23,101 +18,31 @@ export const MenuText = styled.span`
   font-weight: ${fontWeight.bold};
 `
 
-export const HomeBanner = styled(MainBanner)`
-  display: flex;
-  flex-flow: row nowrap;
-  padding: 18px ${padding.mainContentHorizontal};
-  margin: 0 auto;
-
-  @media (max-width: 640px) {
-    flex-flow: column wrap;
-  }
-`
-
-export const HomeTitle = styled.h1`
-  ${commonStyles.bannerTitle}
-  color: ${colors.textWhite};
-  margin: auto 0;
-  width: 228px;
-`
-
-export const ScopeDetails = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-`
-
-export const ScopePicker = styled.div`
-  display: flex;
-  gap: 48px;
-  padding: 0 0 6px 0;
-  margin: 0;
-`
-
-export const ScopePickerItem = styled(Button)<{ active?: boolean }>`
-  display: inline-block;
-  font-weight: ${fontWeight.medium};
-  font-size: ${fontSize.h2};
-  line-height: 20px;
-  color: ${colors.textWhite};
-  background: transparent;
-  letter-spacing: 0;
-  margin: 0;
-  padding: 0;
-  border: none;
-  border-radius: 0;
-  border-bottom: ${sizing.highlightBarWidth} solid transparent;
-  cursor: pointer;
-
-  &:hover {
-    background: transparent;
-    border-bottom: ${sizing.highlightBarWidth} solid ${colors.blueOnBlack};
-    color: ${colors.textWhite};
-  }
-
-  ${({ active }) => (
-    active && css`
-      color: ${colors.blueOnBlack};
-      border-bottom: ${sizing.highlightBarWidth} solid ${colors.blueOnBlack};
-
-      &:hover {
-        color: ${colors.blueOnBlack};
-      }
-    `
-  )}
-`
-
-export const ScopeDescription = styled.span`
-  color: ${colors.textWhite};
-  font-size: 13px;
-`
-
 export const MenuItem = styled(NavLink)`
   justify-self: normal;
   display: flex;
   align-items: center;
   min-height: 44px;
   padding-left: 20px;
-  color: ${colors.textDarkGrey};
+  color: var(--c-text-700);
   font-weight: 400;
   &.active {
-    color: ${colors.textWhite};
-    background-color: ${colors.primaryBlue};
+    color: white;
+    background-color: var(--primary-500);
     &:hover {
-      color: ${colors.textWhite};
-      background-color: ${colors.primaryBlue};
+      color: white;
+      background-color: var(--primary-500);
     }
   }
   &:hover {
-    color: ${colors.textDarkGrey};
-    background-color: ${colors.subtleBlue};
+    color: var(--c-text-700);
+    background-color: var(--tertiary-100);
   }
   ${Svg} {
     margin: auto 0px;
     width: 32px;
   }
 `
-
 
 export const Row = styled.div`
   display: flex;
@@ -126,12 +51,27 @@ export const Row = styled.div`
   flex-direction: row;
   height: 0;
 `
-export const StyledMenu = styled.div<{ expanded: boolean }>`
+
+export const Expand = styled.div`
+  position: relative;
+  padding-right: 24px;
+  padding-bottom: 16px;
+  display: flex;
+  cursor: pointer;
+  justify-content: flex-end;
+  justify-self: flex-end;
+
+  svg:hover {
+    color: var(--tertiary-500);
+  }
+`
+
+export const StyledMenu = styled.div<{ $expanded: boolean }>`
   display: flex;
   flex-direction: column;
   overflow: hidden;
 
-  ${({ expanded }) => expanded
+  ${({ $expanded }) => $expanded
     ? css`
       min-width: 228px;
       max-width: 228px;
@@ -156,7 +96,7 @@ export const StyledMenu = styled.div<{ expanded: boolean }>`
       }
     `
   }
-  border-right: solid 1px #d5d5d5;
+  border-right: solid 1px var(--c-layout-border);
   overflow: none;
 `
 export const Main = styled.div`
@@ -168,19 +108,6 @@ export const Main = styled.div`
   flex-direction: column;
   ${compactScrollBar}
 `
-export const Expand = styled.div`
-  position: relative;
-  padding-right: 24px;
-  padding-bottom: 16px;
-  display: flex;
-  cursor: pointer;
-  justify-content: flex-end;
-  justify-self: flex-end;
-  color: ${colors.textDarkGrey};
-  svg:hover {
-    color: ${colors.textMediumGrey};
-  }
-`
 export const Fill = styled.div`
   flex: 1 0 auto;
   min-height: 20px;
@@ -190,7 +117,7 @@ export const StyledHomeTable = styled.div`
   overflow-y: auto;
   font-size: 14px;
   flex: 1;
-  ${compactScrollBar}
+  ${compactScrollBarV2}
 `
 
 export const QuickActions = styled.div`
@@ -203,9 +130,10 @@ export const QuickActions = styled.div`
   }
 `
 
-export const SpaceTitle = styled.h2`
+export const SpaceTitle = styled.div`
   margin: 0;
-  color: ${colors.textDarkGrey};
+  font-size: 24px;
+  font-weight: bolder;
 `
 
 export const StyledRight = styled.div`
@@ -217,17 +145,19 @@ export const StyledNameCell = styled.div<{ color?: string }>`
   display: flex;
   align-items: center;
   cursor: pointer;
-  color: ${colors.primaryBlue};
+  color: var(--c-link);
   
   ${({ color }) =>
     color && css`
-      color: ${color};  
+      color: ${color};
     `
   }
 
   ${Svg} {
     margin-right: 7px;
+    width: 15px;
   }
+  min-width: max-content;
 `
 
 export const StyledLinkCell = styled(Link)`

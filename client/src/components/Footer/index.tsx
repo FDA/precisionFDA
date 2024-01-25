@@ -12,8 +12,8 @@ import { LinkedInIcon } from '../icons/LinkedInIcon'
 import { HoverDNAnexusLogo } from '../icons/DNAnexusLogo'
 
 const StyledFooterContainer = styled.div`
-  background-color: ${theme.colors.subtleBlue};
-  border-top: 1px solid ${theme.colors.borderDefault};
+  background-color: var(--c-bg-300);
+  border-top: 1px solid var(--c-layout-border-200);
 `
 
 const StyledFooterWrapper = styled.div`
@@ -57,7 +57,6 @@ const StyledFooter = styled.footer`
   }
   p {
     margin: 0 0 10px;
-    color: #555555;
   }
 
 `

@@ -186,6 +186,7 @@ module Api
                spec: @app.spec,
                revisions: @revisions,
                jobs: [],
+               accessible_jobs_count: @app.app_series.jobs.accessible_by(@context).count,
                assigned_challenges: @app.user == @context.user ? @assigned_challenges : [],
                challenges: @assignable_challenges.select do |ch|
                  ch.accessible_by?(@context) || ch.app_owner == @context.user

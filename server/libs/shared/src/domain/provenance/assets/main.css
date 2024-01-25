@@ -20,6 +20,13 @@
   font-family: serif;
 }
 
+.node.pixelated a {
+  padding: 5px;
+  font-size: 13px;
+  border-radius: 3px;
+  border-width: 1px;
+}
+
 .node svg path {
   fill: var(--link-color);
 }
@@ -40,6 +47,11 @@
   height: 1.8rem;
   vertical-align: middle;
   padding-right: 0.5rem;
+}
+
+.node.pixelated .content svg {
+  height: 18px;
+  padding-right: 5px;
 }
 
 .node .content span {

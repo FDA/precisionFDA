@@ -55,12 +55,12 @@ bash "copy gsrs to webapps" do
   action :nothing
   live_stream true
   code <<-BASH
-    rsync -a $SOURCE_PATH $DESTINATION_PATH \
+    rsync -a --delete $SOURCE_PATH $DESTINATION_PATH \
     --exclude '.git' \
     --exclude 'ROOT/WEB-INF/classes/application.yml' \
     --exclude 'frontend/WEB-INF/classes/static/assets/data/config.json' \
-    --exclude 'substances/WEB-INF/classes/application.conf' \
-    --exclude 'substances/WEB-INF/classes/codeSystem.json'
+    --exclude 'substances/WEB-INF/classes/application.conf'
+
     chown $OWNER_USER:$OWNER_GROUP $DESTINATION_PATH/ -R
   BASH
   environment(
@@ -103,14 +103,6 @@ template "#{node[:gsrs][:tomcat_path]}/webapps/frontend/WEB-INF/classes/static/a
   variables(
     HOST: lazy { node.run_state.dig("ssm_params", "app", "environment", "HOST") },
   )
-  notifies :restart, "tomcat_service[gsrs]", :delayed
-end
-
-template "#{node[:gsrs][:tomcat_path]}/webapps/substances/WEB-INF/classes/codeSystem.json" do
-  source "gsrs/codeSystem.json.erb"
-  owner node[:gsrs][:tomcat_user]
-  group node[:gsrs][:tomcat_grop]
-  mode 0644
   notifies :restart, "tomcat_service[gsrs]", :delayed
 end
 

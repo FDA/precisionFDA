@@ -1,6 +1,6 @@
 import * as errors from '../../../errors'
 import * as client from '../../../platform-client'
-import { BaseOperation } from '../../../utils'
+import { BaseOperation } from '@shared/utils/base-operation'
 import { Job } from '../job.entity'
 import { WorkstationSyncFilesInput } from '../job.input'
 import { JOB_STATE } from '../job.enum'
@@ -19,7 +19,7 @@ export class RequestWorkstationSyncFilesOperation extends BaseOperation<UserOpsC
     }
 
     if (input.force) {
-      this.ctx.log.info('RequestWorkstationSyncFilesOperation: Force mode enabled, ignoring job state')
+      this.ctx.log.verbose('RequestWorkstationSyncFilesOperation: Force mode enabled, ignoring job state')
     }
     else if (job.state !== JOB_STATE.RUNNING) {
       throw new errors.InvalidStateError('RequestWorkstationSyncFilesOperation: Job is currently not running.')

@@ -2,12 +2,13 @@ import { useEffect } from 'react'
 import { toast } from 'react-toastify'
 import useWebSocket from 'react-use-websocket'
 import { BasicToast, ToastWithLink } from '../components/Toast'
-import { confirmNotification } from '../features/home/notifications/notifications.api'
+import { confirmNotification } from '../features/notifications/notifications.api'
 import { Notification, NOTIFICATION_ACTION, SEVERITY } from '../features/home/types'
 import { IUser } from '../types/user'
 import {
   DEFAULT_RECONNECT_ATTEMPTS,
   DEFAULT_RECONNECT_INTERVAL,
+  SHOULD_RECONNECT,
   getNodeWsUrl,
   notificationsConfig,
 } from '../utils/config'
@@ -30,7 +31,7 @@ export const useToastWSHandler = (user?: IUser) => {
     share: true,
     reconnectInterval: DEFAULT_RECONNECT_INTERVAL,
     reconnectAttempts: DEFAULT_RECONNECT_ATTEMPTS,
-    shouldReconnect: () => true,
+    shouldReconnect: () => SHOULD_RECONNECT,
   })
 
   useEffect(() => {

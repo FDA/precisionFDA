@@ -1,21 +1,21 @@
+import { FilterQuery } from '@mikro-orm/core'
+import { AppSeries } from '@shared/domain/app-series/app-series.entity'
+import { DbCluster } from '@shared/domain/db-cluster/db-cluster.entity'
+import { Job } from '@shared/domain/job/job.entity'
+import { Space } from '@shared/domain/space/space.entity'
+import { User } from '@shared/domain/user/user.entity'
+import { WorkflowSeries } from '@shared/domain/workflow-series/workflow-series.entity'
 import { GetValidKeysInput, SetPropertiesInput } from '../property.input'
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { GeneralProperty, PropertyType } from '../property.entity'
 import * as errors from '../../../errors'
 import { PermissionError } from '../../../errors'
-import { Node } from '../../user-file'
-import { Job } from '../../job'
-import { DbCluster } from '../../db-cluster'
+import { Node } from '../../user-file/node.entity'
 import { getIdFromScopeName, scopeContainsId } from '../../space/space.helper'
 import { SPACE_STATE } from '../../space/space.enum'
 import { CAN_EDIT_ROLES } from '../../space-membership/space-membership.helper'
-import { User } from '../../user'
 import { UserCtx } from '../../../types'
 import { FILE_STI_TYPE } from '../../user-file/user-file.types'
-import { WorkflowSeries } from '../../workflow-series'
-import { AppSeries } from '../../app-series'
-import { Space } from '../../space'
-import { NodeProperty } from '../node-property.entity'
 
 type SetPropertiesResponse = {
   message: string,
@@ -115,33 +115,27 @@ export class PropertyService implements IPropertyService {
   }
 
   private getConditionByType(input: { scope: string, targetType: PropertyType }, user: UserCtx) {
-    let condition = {}
+    const condition: FilterQuery<any> = {}
     if (input.scope === 'spaces') input.scope = 'space-%'
     switch (input.targetType) {
       case 'node':
-        condition = {
-          node: {
-            scope: { $like: input.scope },
-            stiType: [FILE_STI_TYPE.FOLDER, FILE_STI_TYPE.USERFILE],
-          },
+        condition['node'] = {
+          scope: { $like: input.scope },
+          stiType: [FILE_STI_TYPE.FOLDER, FILE_STI_TYPE.USERFILE],
         }
         break
       case 'asset':
-        condition = {
-          node: {
-            scope: { $like: input.scope },
-            stiType: [FILE_STI_TYPE.ASSET],
-          },
+        condition['node'] = {
+          scope: { $like: input.scope },
+          stiType: [FILE_STI_TYPE.ASSET],
         }
         break
       case 'workflowSeries':
       case 'appSeries':
       case 'job':
       case 'dbCluster':
-        condition = {
-          [input.targetType]: {
-            scope: { $like: input.scope },
-          },
+        condition[input.targetType] = {
+          scope: { $like: input.scope },
         }
         break
       default:
@@ -149,12 +143,10 @@ export class PropertyService implements IPropertyService {
     }
 
     if (input.scope == 'private') {
-      if (input.targetType == "asset") {
-        //@ts-ignore NO IDEA HOW TO FIX THIS
-        Object.assign(condition['node'], {user: user.id})
+      if (input.targetType == 'asset') {
+        condition['node'] = { ...condition['node'], user: user.id }
       } else {
-        //@ts-ignore NO IDEA HOW TO FIX THIS
-        Object.assign(condition[input.targetType], {user: user.id})
+        condition[input.targetType] = { ...condition[input.targetType], user: user.id }
       }
     }
 

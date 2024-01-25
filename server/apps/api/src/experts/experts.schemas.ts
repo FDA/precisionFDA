@@ -1,10 +1,10 @@
+import { schemas } from '@shared/utils/base-schemas'
 import { JSONSchema7 } from 'json-schema'
-import { utils } from '@shared'
 
 export const expertListQuerySchema: JSONSchema7 = {
   type: 'object',
   properties: {
-    ...utils.schemas.paginationSchema.properties,
+    ...schemas.paginationSchema.properties,
     year: {
       type: 'integer',
       minimum: 2017,

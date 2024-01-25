@@ -1,16 +1,10 @@
 import React from 'react'
-import { Route } from 'react-router'
-import { history, render, screen, waitFor } from '../../../test/test-utils'
+import { render, screen, waitFor } from '../../../test/test-utils'
 import Home2 from '../index'
 
 describe('My Home', () => {
   test('User should be allowed to view My Home and default to files list', async () => {
-    history.replace('/home')
-    render(
-      <Route path="/home">
-        <Home2 />
-      </Route>,
-    )
+    render(<Home2 />, { route: '/home' })
 
     await waitFor(() => {
       const linkEl = screen.getByTestId('home-files-link')

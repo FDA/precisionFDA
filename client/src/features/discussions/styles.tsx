@@ -9,11 +9,16 @@ export const CommentCount = styled.div`
 `
 export const DiscussionTitle = styled.div`
   display: flex;
+  margin-top: 16px;
+  margin-bottom: 16px;
 `
 export const StyledTitle = styled.div`
   display: flex;
   gap: 16px;
   align-items: center;
+  font-size: 32px;
+  font-weight: bolder;
+  height: 36px;
   svg {
     color: ${theme.colors.stateLabelGrey};
   }
@@ -22,7 +27,6 @@ export const StyledTitleEdit = styled.div`
   display: flex;
   flex: 1;
   gap: 8px;
-  min-height: 81px;
   align-items: center;
   input {
     width: 100%;
@@ -49,6 +53,8 @@ export const PageContent = styled.div`
   max-width: 880px;
   width: fill-available;
   align-self: center;
+  box-sizing: border-box;
+  width: 100%;
 
   @media (min-width: 640px) {
     padding: 32px;
@@ -69,7 +75,7 @@ export const AttachmentsLabel = styled.span`
   margin-bottom: 8px;
 `
 
-export const StyledCommentCard = styled.div<{ isAnswer?: boolean }>`
+export const StyledCommentCard = styled.div<{ $isAnswer?: boolean }>`
   font-size: 14px;
   display: flex;
   padding: 8px 16px;
@@ -77,12 +83,13 @@ export const StyledCommentCard = styled.div<{ isAnswer?: boolean }>`
   align-items: flex-start;
   align-self: stretch;
   border-radius: 6px;
-  border: 1px solid #cbcbcb;
-  background: #fff;
-  ${({ isAnswer }) =>
-    isAnswer &&
+  border: 1px solid var(--c-layout-border);
+  background: var(--background);
+  ${({ $isAnswer }) =>
+    $isAnswer &&
     css`
-      background: #fdfcf2;
+      background: var(--c-discussion-answer-bg);
+      border: 1px solid var(--c-discussion-answer-300);
     `}
 `
 
@@ -94,7 +101,7 @@ export const Li = styled.li`
     background-color: ${colors.white110};
   }
   a {
-    color: ${colors.textBlack};
+    color: var(--c-text-700);
   }
 `
 
@@ -115,7 +122,6 @@ export const Ol = styled.ol`
 
 export const UsernameLink = styled.a`
   font-weight: bold;
-  color: #000000;
 `
 export const CardLeft = styled.div`
   display: flex;
@@ -125,8 +131,10 @@ export const CardLeft = styled.div`
   font-size: 14px;
 `
 export const StyledAnswerLabel = styled.div`
+  display: flex;
+  align-items: center;
   font-weight: bold;
-  color: #7a6632;
+  color: var(--c-discussion-answer-500);
   svg {
     margin-right: 4px;
   }
@@ -154,9 +162,9 @@ export const StyledCardHeader = styled.div`
   overflow: hidden;
 `
 
-export const StyledMarkdown = styled.div<{ isAnswer?: boolean }>`
-  ${({ isAnswer }) =>
-    isAnswer &&
+export const StyledMarkdown = styled.div<{ $isAnswer?: boolean }>`
+  ${({ $isAnswer }) =>
+    $isAnswer &&
     css`
       background: #fdfcf2;
     `}

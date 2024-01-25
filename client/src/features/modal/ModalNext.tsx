@@ -46,7 +46,7 @@ export interface ModalNextProps {
   disableClose?: boolean
   id: string
 }
-const ModalComponent = (props: PropsWithChildren<ModalNextProps>) => {
+const ModalComponent = (props: PropsWithChildren<Omit<ModalNextProps, 'isShown'>>) => {
   const {
     headerText,
     hide,
@@ -58,7 +58,7 @@ const ModalComponent = (props: PropsWithChildren<ModalNextProps>) => {
   useKeyPress('Escape', () => hide())
   return (
     <>
-      <Backdrop onClick={disableClose ? undefined : hide} blur={blur} />
+      <Backdrop onClick={disableClose ? undefined : hide} $blur={blur} />
       <Wrapper
         aria-modal
         aria-label={headerText}
@@ -74,6 +74,6 @@ const ModalComponent = (props: PropsWithChildren<ModalNextProps>) => {
   )
 }
 // eslint-disable-next-line react/destructuring-assignment
-export const ModalNext = ({ children, ...rest }: PropsWithChildren<ModalNextProps>) => rest.isShown
+export const ModalNext = ({ children, isShown, ...rest }: PropsWithChildren<ModalNextProps>) => isShown
   ? ReactDOM.createPortal(<ModalComponent {...rest}>{children}</ModalComponent>, document.body, rest.id)
   : null

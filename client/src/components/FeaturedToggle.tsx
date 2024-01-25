@@ -1,11 +1,11 @@
 import React from 'react'
 import styled, { css } from 'styled-components'
-import { useFeatureMutation } from '../features/home/actionModals/useFeatureMutation'
+import { useFeatureMutation } from '../features/actionModals/useFeatureMutation'
 import { APIResource } from '../features/home/types'
 import { HeartOutlineIcon, HeartSolidIcon } from './icons/HeartIcon'
 
-const StyledFeaturedToggle = styled.div<{ pointer: boolean }>`
-  ${({ pointer }) => pointer && css`cursor: pointer;`} 
+const StyledFeaturedToggle = styled.div<{ $pointer: boolean }>`
+  ${({ $pointer }) => $pointer && css`cursor: pointer;`} 
   display: flex;
   justify-content: center;
 `
@@ -26,7 +26,7 @@ export const FeaturedToggle = ({
   const featureMutation = useFeatureMutation({ resource, onSuccess })
   const handleClick = () => !disabled && featureMutation.mutateAsync({ featured: !featured, uids })
   return (
-    <StyledFeaturedToggle onClick={handleClick} pointer={!disabled}>
+    <StyledFeaturedToggle onClick={handleClick} $pointer={!disabled}>
       {featured ? <HeartSolidIcon /> : <HeartOutlineIcon />}
     </StyledFeaturedToggle>
   )

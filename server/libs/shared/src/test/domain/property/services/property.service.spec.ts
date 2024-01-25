@@ -10,7 +10,7 @@ import {
     WorkflowSeries
 } from '../../../../domain'
 import pino from 'pino'
-import { create, db } from 'shared/src/test'
+import { create, db } from '@shared/test'
 import { database, getLogger, types } from '@shared'
 import { mocksReset } from '../../../mocks'
 import { mocksReset as localMocksReset } from '@worker-test/utils/mocks'

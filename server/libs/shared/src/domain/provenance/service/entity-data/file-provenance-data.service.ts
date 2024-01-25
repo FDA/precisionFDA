@@ -1,15 +1,18 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
-import { config } from '../../../..'
-import { Comparison } from '../../../comparison'
-import { EntityType } from '../../../entity'
-import { Job } from '../../../job'
-import { User } from '../../../user'
-import { Asset, UserFile } from '../../../user-file'
+import { Injectable } from '@nestjs/common'
+import { config } from '@shared/config'
+import { Comparison } from '@shared/domain/comparison/comparison.entity'
+import { EntityType } from '@shared/domain/entity/domain/entity.type'
+import { Job } from '@shared/domain/job/job.entity'
+import { Asset } from '@shared/domain/user-file/asset.entity'
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
+import { User } from '@shared/domain/user/user.entity'
 import { PARENT_TYPE } from '../../../user-file/user-file.types'
 import { EntityProvenanceData } from '../../model/entity-provenance-data'
 import { EntityProvenanceSourceUnion } from '../../model/entity-provenance-source-union'
 import { EntityProvenanceDataService } from './entity-provenance-data.service'
 
+@Injectable()
 export class FileProvenanceDataService implements EntityProvenanceDataService<'file'> {
   private PARENT_TYPE_TO_ENTITY_TYPE_MAP: Record<PARENT_TYPE, EntityType> = {
     [PARENT_TYPE.USER]: 'user',
@@ -50,10 +53,12 @@ export class FileProvenanceDataService implements EntityProvenanceDataService<'f
       return []
     }
 
-    return [{
-      type: this.PARENT_TYPE_TO_ENTITY_TYPE_MAP[file.parentType],
-      entity: parent,
-    } as EntityProvenanceSourceUnion]
+    return [
+      {
+        type: this.PARENT_TYPE_TO_ENTITY_TYPE_MAP[file.parentType],
+        entity: parent,
+      } as EntityProvenanceSourceUnion,
+    ]
   }
 
   private async findParentEntity<T extends PARENT_TYPE>(parentId: number, parentType: T) {

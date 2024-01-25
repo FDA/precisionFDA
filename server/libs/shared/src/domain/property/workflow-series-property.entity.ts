@@ -3,8 +3,8 @@ import {
     Ref,
     ManyToOne,
 } from '@mikro-orm/core'
+import { WorkflowSeries } from '@shared/domain/workflow-series/workflow-series.entity'
 import { GeneralProperty } from "./property.entity";
-import { WorkflowSeries } from "../workflow-series";
 
 @Entity({ discriminatorValue: 'workflowSeries' })
 export class WorkflowSeriesProperty extends GeneralProperty {

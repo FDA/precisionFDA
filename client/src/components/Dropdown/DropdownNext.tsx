@@ -11,7 +11,7 @@ export type DropdownChildProps = {
   onClick: () => void
   onMouseEnter: () => void
   onMouseLeave: () => void
-  isActive: boolean,
+  $isActive: boolean,
   hide: () => void,
 }
 
@@ -65,7 +65,7 @@ export const DropdownNext: FC<{
         onClick: () => trigger === 'click' && setShowPopper(!showPopper), // outside only
         onMouseEnter: handleMouseEnter,
         onMouseLeave: handleMouseLeave,
-        isActive: showPopper,
+        $isActive: showPopper,
       })}
       {forceShowPopper ||
         (showPopper && (
@@ -86,7 +86,7 @@ export const DropdownNext: FC<{
                 hide: () => setShowPopper(false),
                 onMouseEnter: handleMouseEnter,
                 onMouseLeave: handleMouseLeave,
-                isActive: showPopper,
+                $isActive: showPopper,
               })}
             </DropdownMenu>
           </PopperContainer>

@@ -1,15 +1,21 @@
 /* eslint-disable max-len */
+import { config } from '@shared/config'
+import { database } from '@shared/database'
+import { App } from '@shared/domain/app/app.entity'
+import { Asset } from '@shared/domain/user-file/asset.entity'
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
+import {
+  UserDataConsistencyReportOperation
+} from '@shared/domain/user/ops/user-data-consistency-report'
+import { User } from '@shared/domain/user/user.entity'
 /* eslint-disable no-inline-comments */
 /* eslint-disable no-undefined */
 import { expect } from 'chai'
 import { EntityManager } from '@mikro-orm/core'
-import { config, database } from '@shared'
-import { App, Asset, User, UserFile } from '@shared/domain'
 import { UserCtx } from '@shared/types'
 import { create, generate, db } from '@shared/test'
 import { fakes, mocksReset } from '@shared/test/mocks'
 import { fakes as queueFakes, mocksReset as queueMocksReset } from '../utils/mocks'
-import { UserDataConsistencyReportOperation } from '@shared/domain/user'
 import { MySqlDriver } from '@mikro-orm/mysql'
 import { FILE_STATE, FILE_STATE_DX, PARENT_TYPE } from '@shared/domain/user-file/user-file.types'
 

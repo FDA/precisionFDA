@@ -1,5 +1,8 @@
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
+import { User } from '@shared/domain/user/user.entity'
+import { UserNotFoundError } from '@shared/errors'
 import { differenceWith } from 'ramda'
-import { BaseOperation } from '../../../utils'
+import { BaseOperation } from '@shared/utils/base-operation'
 import { Folder } from '../folder.entity'
 import { SyncFoldersInput } from '../user-file.input'
 import { getPathsToBuild,
@@ -11,8 +14,6 @@ import { getPathsToBuild,
   getPathsToKeep,
   filterDuplicities,
   getFolderPath, getParentFolders } from '../user-file.helper'
-import { User, UserFile } from '../..'
-import { errors } from '../../..'
 import { FILE_ORIGIN_TYPE } from '../user-file.types'
 import { UserOpsCtx } from '../../../types'
 import { createFolderEvent, EVENT_TYPES } from '../../event/event.helper'
@@ -32,7 +33,7 @@ Folder[]
     const em = this.ctx.em
     const user = await em.findOne(User, { id: this.ctx.user.id })
     if (!user) {
-      throw new errors.UserNotFoundError()
+      throw new UserNotFoundError()
     }
     const repo = em.getRepository(Folder)
 
@@ -43,7 +44,7 @@ Folder[]
       projectDxid: input.projectDxid,
     })
     const localFolderPaths = folderPathsFromFolders(localFolders)
-    this.ctx.log.info({
+    this.ctx.log.verbose({
       localFolderPathsCount: localFolderPaths.length,
       remoteFolderPathsCount: remoteFolderPaths.length,
     }, 'SyncFoldersOperation: Comparing local (pFDA) and remote (platform) folders count')
@@ -86,7 +87,7 @@ Folder[]
       await em.persist(folderEvent)
       await em.flush()
 
-      this.ctx.log.info({ folderNames: res.map(f => f.name) }, 'SyncFoldersOperation: Created new folders with names')
+      this.ctx.log.verbose({ folderNames: res.map(f => f.name) }, 'SyncFoldersOperation: Created new folders with names')
     }
 
     const newAndExistingLocalFolders = localFolders.concat(newFolders)
@@ -108,8 +109,8 @@ Folder[]
       const res = detectIntersectedTraverse(newAndExistingLocalFolders, folderNames, undefined, 0, [])
       foldersToKeep = foldersToKeep.concat(res)
     })
-    // this.ctx.log.info({ foldersToKeep: foldersToKeep.map((f: Folder) => f.name) }, 'Total foldersToKeep')
-    this.ctx.log.info({ foldersToKeep: foldersToKeep.length }, 'Total foldersToKeep')
+    // this.ctx.log.verbose({ foldersToKeep: foldersToKeep.map((f: Folder) => f.name) }, 'Total foldersToKeep')
+    this.ctx.log.verbose({ foldersToKeep: foldersToKeep.length }, 'Total foldersToKeep')
 
     // we can use this -> kept folders are already persisted and have ids
     foldersToKeep = filterDuplicities(foldersToKeep) // Filter duplicate Folders based on their id
@@ -137,7 +138,7 @@ Folder[]
     // const foldersToDelete = folderPathsToDelete.map(
     //   (folderPath: string) => findFolderForPath(newAndExistingLocalFolders, splitFolderPath(folderPath), undefined))
 
-    this.ctx.log.info({
+    this.ctx.log.verbose({
       localFolderPathsCount: newAndExistingLocalFolderPaths.length,
       remoteFolderPathsCount: remoteFolderPaths.length,
       foldersToDelete: foldersToDelete.map(folder => folder?.name),
@@ -156,7 +157,7 @@ Folder[]
       )
       filesToDelete = filesToDelete.concat(files)
     }
-    this.ctx.log.info({
+    this.ctx.log.verbose({
       filesToDelete,
     }, 'SyncFoldersOperation: Files to delete')
     em.getRepository(UserFile).removeFilesWithTags(filesToDelete)

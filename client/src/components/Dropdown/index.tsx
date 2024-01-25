@@ -64,7 +64,7 @@ export const Dropdown: FC<{
         onClick: () => trigger === 'click' && setShowPopper(!showPopper), // outside only
         onMouseEnter: () => trigger === 'hover' && setShowPopper(true),
         onMouseLeave: () => trigger === 'hover' && setShowPopper(false),
-        isActive: showPopper,
+        $isActive: showPopper,
       })}
       {forceShowPopper || showPopper && (
         <PopperContainer

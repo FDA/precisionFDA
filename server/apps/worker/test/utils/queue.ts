@@ -1,8 +1,8 @@
-import { queue } from '@shared'
-
 // empty queue
+import { getMainQueue } from '@shared/queue'
+
 const emptyDefaultQueue = async () => {
-  const defaultQueue = queue.getMainQueue()
+  const defaultQueue = getMainQueue()
   await defaultQueue.empty()
 }
 

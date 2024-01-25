@@ -1,8 +1,9 @@
+import { User } from '@shared/domain/user/user.entity'
+import { getLogger } from '@shared/logger'
 import { SpaceParam } from './space.types'
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { PlatformClient } from '../../../platform-client'
 import { Space} from '../space.entity'
-import { entities, getLogger } from '@shared'
 import * as crypto from 'crypto'
 import { constructDxOrg } from '../../org/org.utils'
 import { SPACE_TYPE } from '../space.enum'
@@ -30,7 +31,7 @@ export class SpaceService implements ISpaceService {
   }
 
   private createSpaceInDB = async(input: SpaceParam): Promise<Space> => {
-    logger.info('SpaceService: creating space in database')
+    logger.verbose('SpaceService: creating space in database')
     const uuid = crypto.randomBytes(5).toString('hex')
 
     const space = new Space()
@@ -46,7 +47,7 @@ export class SpaceService implements ISpaceService {
     space.protected = input.protected
     if (input.type === SPACE_TYPE.REVIEW && input.sponsorLeadDxUser) {
       const sponsor = await this.em.findOneOrFail(
-        entities.User,
+        User,
         { dxuser: input.sponsorLeadDxUser }, { populate: ['organization']}
       )
       space.sponsorOrgId = sponsor.organization.id
@@ -57,14 +58,14 @@ export class SpaceService implements ISpaceService {
   }
 
   private createOrgs = async (orgs: string[]) => {
-    logger.info(`SpaceService: creating orgs ${orgs}`)
+    logger.verbose(`SpaceService: creating orgs ${orgs}`)
     for (const orgDxid in orgs) {
       await this.orgService.create(orgDxid, false)
     }
   }
 
   create = async(input: SpaceParam): Promise<number> => {
-    logger.info(input, 'SpaceService: creating space')
+    logger.verbose(input, 'SpaceService: creating space')
     // create space in DB
     const space = await this.createSpaceInDB(input)
 

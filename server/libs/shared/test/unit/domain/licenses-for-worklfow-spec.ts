@@ -1,17 +1,20 @@
 import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
+import { database } from '@shared/database'
+import { LicensesForWorkflowOperation } from '@shared/domain/license/ops/licenses-for-workflow'
+import { LicensedItem } from '@shared/domain/licensed-item/licensed-item.entity'
+import { User } from '@shared/domain/user/user.entity'
+import { getLogger } from '@shared/logger'
 import { expect } from 'chai'
 import { wrap } from '@mikro-orm/core'
-import { database, getLogger, types } from '@shared'
 import { PARENT_TYPE } from '../../../src/domain/user-file/user-file.types'
 import { create, db } from '../../../src/test'
-import { entities, license, User } from '../../../src/domain'
 import { UidInput } from '../../../src/types'
 
 describe('licenses for workflow tests', () => {
   let em: EntityManager<MySqlDriver>
   let user: User
   let log: any
-  let userCtx: types.UserCtx
+  let userCtx: UserCtx
 
   beforeEach(async () => {
     await db.dropData(database.connection())
@@ -49,7 +52,7 @@ describe('licenses for workflow tests', () => {
       em, { user, asset: asset1 },
       { content: 'approval required', title: 'with approval', approvalRequired: true },
     )
-    const licensedItem1 = wrap(new entities.LicensedItem(license1, asset1.id))
+    const licensedItem1 = wrap(new LicensedItem(license1, asset1.id))
       .assign({ licenseableType: 'Node' }, { em })
     em.persist(licensedItem1)
 
@@ -57,7 +60,7 @@ describe('licenses for workflow tests', () => {
       em, { user, asset: asset2 },
       { content: 'accepted license', title: 'with accepted license', approvalRequired: true },
     )
-    const licensedItem2 = wrap(new entities.LicensedItem(license2, asset2.id))
+    const licensedItem2 = wrap(new LicensedItem(license2, asset2.id))
       .assign({ licenseableType: 'Node' }, { em })
     em.persist(licensedItem2)
 
@@ -70,7 +73,7 @@ describe('licenses for workflow tests', () => {
     em.persist(workflow)
     await em.flush()
 
-    const op = new license.LicensesForWorkflowOperation({
+    const op = new LicensesForWorkflowOperation({
       em: database.orm().em.fork() as EntityManager<MySqlDriver>,
       log,
       user: userCtx,

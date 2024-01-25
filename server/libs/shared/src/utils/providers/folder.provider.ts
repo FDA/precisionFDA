@@ -1,4 +1,4 @@
-import { Folder } from '../../domain/user-file'
+import { Folder } from '@shared/domain/user-file/folder.entity'
 import { EntityDataProvider } from './entity-data.provider'
 import { ENTITY_TYPE, SPACE_EVENT_OBJECT_TYPE } from '../../domain/space-event/space-event.enum'
 

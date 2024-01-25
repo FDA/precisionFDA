@@ -1,11 +1,17 @@
+import { database } from '@shared/database'
+import { App } from '@shared/domain/app/app.entity'
+import { Job } from '@shared/domain/job/job.entity'
+import { Tag } from '@shared/domain/tag/tag.entity'
+import { Folder } from '@shared/domain/user-file/folder.entity'
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
+import { User } from '@shared/domain/user/user.entity'
+import { ErrorCodes } from '@shared/errors'
 import { expect } from 'chai'
 import { EntityManager } from '@mikro-orm/core'
 import supertest from 'supertest'
-import { App, Folder, Job, Tag, User, UserFile } from '@shared/domain'
 import { JOB_STATE } from '@shared/domain/job/job.enum'
 import { create, generate, db } from '@shared/test'
 import { fakes, mocksReset } from '@shared/test/mocks'
-import { database, errors } from '@shared'
 import { getServer } from '../../../src/server'
 import { getDefaultHeaderData } from '../../utils/expect-helper'
 
@@ -199,7 +205,7 @@ describe('DELETE /folders/:id', () => {
         .delete(`/folders/${folder.id}`)
         .set(getDefaultHeaderData(user))
         .expect(404)
-      expect(body.error).to.have.property('code', errors.ErrorCodes.FOLDER_NOT_FOUND)
+      expect(body.error).to.have.property('code', ErrorCodes.FOLDER_NOT_FOUND)
     })
   })
 })

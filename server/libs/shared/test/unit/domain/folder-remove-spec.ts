@@ -1,10 +1,15 @@
 import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
+import { database } from '@shared/database'
+import { Tag } from '@shared/domain/tag/tag.entity'
+import { Folder } from '@shared/domain/user-file/folder.entity'
+import { FolderRemoveOperation } from '@shared/domain/user-file/ops/folder-remove'
+import { User } from '@shared/domain/user/user.entity'
+import { Event } from '@shared/domain/event/event.entity'
+import { getLogger } from '@shared/logger'
 import { expect } from 'chai'
 import pino from 'pino'
 import { fakes } from '../../../src/test/mocks'
-import { Tag, User, Event, userFile, Folder } from '../../../src/domain'
 import { create, db } from '../../../src/test'
-import { database, getLogger, types } from '@shared'
 import { SPACE_STATE, SPACE_TYPE } from '../../../src/domain/space/space.enum'
 import { SPACE_MEMBERSHIP_ROLE } from '../../../src/domain/space-membership/space-membership.enum'
 import { FILE_ORIGIN_TYPE } from '../../../src/domain/user-file/user-file.types'
@@ -13,7 +18,7 @@ describe('remove folder tests', () => {
   let em: EntityManager<MySqlDriver>
   let user: User
   let log: pino.Logger
-  let userCtx: types.UserCtx
+  let userCtx: UserCtx
 
   beforeEach(async () => {
     await db.dropData(database.connection())
@@ -36,7 +41,7 @@ describe('remove folder tests', () => {
     create.tagsHelper.createTagging(em, { tag: tagBbb }, { taggableId: folder1.id })
     await em.flush()
 
-    const op = new userFile.FolderRemoveOperation({
+    const op = new FolderRemoveOperation({
       em: database.orm().em.fork(),
       log,
       user: userCtx,
@@ -69,7 +74,7 @@ describe('remove folder tests', () => {
     )
     await em.flush()
 
-    const op = new userFile.FolderRemoveOperation({
+    const op = new FolderRemoveOperation({
       em: database.orm().em.fork() as EntityManager<MySqlDriver>,
       log,
       user: userCtx,
@@ -98,7 +103,7 @@ describe('remove folder tests', () => {
     )
     await em.flush()
 
-    const op = new userFile.FolderRemoveOperation({
+    const op = new FolderRemoveOperation({
       em: database.orm().em.fork() as EntityManager<MySqlDriver>,
       log,
       user: userCtx,
@@ -130,7 +135,7 @@ describe('remove folder tests', () => {
     )
     await em.flush()
 
-    const op = new userFile.FolderRemoveOperation({
+    const op = new FolderRemoveOperation({
       em: database.orm().em.fork(),
       log,
       user: userCtx,
@@ -163,7 +168,7 @@ describe('remove folder tests', () => {
     )
     await em.flush()
 
-    const op = new userFile.FolderRemoveOperation({
+    const op = new FolderRemoveOperation({
       em: database.orm().em.fork() as EntityManager<MySqlDriver>,
       log,
       user: userCtx,

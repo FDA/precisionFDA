@@ -1,11 +1,19 @@
 import { LockMode, Reference } from '@mikro-orm/core'
 import type { SqlEntityManager } from '@mikro-orm/mysql'
-import type { notification, provenance, UserFileCreateFacade } from '@shared'
-import { ENUMS, spaceReport } from '@shared'
-import { SpaceMembership } from '@shared/domain'
+import { NotificationService } from '@shared/domain/notification/services/notification.service'
+import {
+  EntityProvenanceService
+} from '@shared/domain/provenance/service/entity-provenance.service'
+import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
+import { SpaceReport } from '@shared/domain/space-report/entity/space-report.entity'
+import { SpaceReportService } from '@shared/domain/space-report/service/space-report.service'
+import { NOTIFICATION_ACTION, SEVERITY } from '@shared/enums'
+import { UserFileCreateFacade } from '@shared/facade/file-create/user-file-create.facade'
 import { expect } from 'chai'
 import { restore, stub } from 'sinon'
-import { SpaceReportResultGenerateFacade } from '../../src/facade/space-report-result-generate.facade'
+import {
+  SpaceReportResultGenerateFacade
+} from '../../src/facade/space-report/space-report-result-generate.facade'
 
 describe('SpaceReportResultGenerateFacade', () => {
   const REPORT_ID = 0
@@ -63,7 +71,7 @@ describe('SpaceReportResultGenerateFacade', () => {
     findOneStub.throws()
     findOneStub
       .withArgs(
-        spaceReport.SpaceReport,
+        SpaceReport,
         { id: REPORT_ID, state: { $in: ['CREATED', 'ERROR'] } },
         { lockMode: LockMode.PESSIMISTIC_WRITE },
       )
@@ -101,10 +109,10 @@ describe('SpaceReportResultGenerateFacade', () => {
     createNotificationStub.throws()
     createNotificationStub
       .withArgs({
-        severity: ENUMS.SEVERITY.INFO,
+        severity: SEVERITY.INFO,
         userId: CREATOR_ID,
         message: 'Report of space "space name" successfully generated',
-        action: ENUMS.NOTIFICATION_ACTION.SPACE_REPORT_DONE,
+        action: NOTIFICATION_ACTION.SPACE_REPORT_DONE,
         meta: {
           linkTitle: 'Go to Reports',
           linkUrl: '/spaces/100/reports',
@@ -233,7 +241,7 @@ describe('SpaceReportResultGenerateFacade', () => {
 
     const spaceReportService = {
       generateResult: generateResultStub,
-    } as unknown as spaceReport.SpaceReportService
+    } as unknown as SpaceReportService
 
     const userFileCreateFacade = {
       createFileWithContent: createFileWithContentStub,
@@ -241,11 +249,11 @@ describe('SpaceReportResultGenerateFacade', () => {
 
     const entityProvenanceService = {
       getSvgStyles: getSvgStylesStub,
-    } as unknown as provenance.EntityProvenanceService
+    } as unknown as EntityProvenanceService
 
     const notificationService = {
       createNotification: createNotificationStub,
-    } as unknown as notification.NotificationService
+    } as unknown as NotificationService
 
     return new SpaceReportResultGenerateFacade(
       em,

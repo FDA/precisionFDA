@@ -1,9 +1,12 @@
 /* eslint-disable max-len */
 import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
+import { database } from '@shared/database'
+import { Challenge } from '@shared/domain/challenge/challenge.entity'
+import { ChallengeRepository } from '@shared/domain/challenge/challenge.repository'
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
+import { User } from '@shared/domain/user/user.entity'
 // eslint-disable-next-line import/no-extraneous-dependencies
-import { Challenge, User, UserFile } from '@shared/domain'
 import { expect } from 'chai'
-import { database } from '@shared'
 import { create, db } from '../../../src/test'
 
 describe('ChallengeRepository tests', () => {

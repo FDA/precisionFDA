@@ -1,7 +1,7 @@
+import { schemas } from '@shared/utils/base-schemas'
 import type { JSONSchema7 } from 'json-schema'
 import { ENGINES, allowedInstanceTypes, allowedEngineVersions } from './db-cluster.enum'
 import { config } from '../../config'
-import { schemas } from '../../utils'
 import { STATIC_SCOPE } from '../../enums'
 
 type CreateDbClusterInput = {

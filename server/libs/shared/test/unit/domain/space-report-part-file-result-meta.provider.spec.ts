@@ -1,5 +1,5 @@
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { expect } from 'chai'
-import { UserFile } from '../../../src/domain'
 import {
   SpaceReportPartFileResultMetaProvider,
 } from '../../../src/domain/space-report/service/part/space-report-part-file-result-meta.provider'

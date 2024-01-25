@@ -1,6 +1,5 @@
 import styled from 'styled-components'
 import { Button } from '../../components/Button'
-import { fontWeight } from '../../styles/theme'
 
 export const DateArea = styled.div`
   display: flex;
@@ -11,7 +10,7 @@ export const DateArea = styled.div`
 
   .challenge-date-label {
     font-size: 10px;
-    color: #667070;
+    color: var(--c-text-500);
     text-transform: uppercase;
   }
   .challenge-date {
@@ -24,6 +23,6 @@ export const DateArea = styled.div`
 `
 
 export const ViewDetailsButton = styled(Button)`
-  font-weight: ${fontWeight.bold};
+  font-weight: bold;
   width: fit-content;
 `

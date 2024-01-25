@@ -1,6 +1,8 @@
+import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
+import { User } from '@shared/domain/user/user.entity'
+import { TASK_TYPE } from '@shared/queue/task.input'
 import mjml2html from 'mjml'
 import { isNil } from 'ramda'
-import { SpaceMembership, User } from '..'
 import { Maybe, OpsCtx } from '../../types'
 import {
   SPACE_MEMBERSHIP_ROLE,
@@ -13,7 +15,6 @@ import {
   NOTIFICATION_TYPES,
   EMAIL_TYPES,
 } from './email.config'
-import { types } from '../../queue'
 import { nanoid } from 'nanoid'
 
 type EmailHelperCtx = OpsCtx & {
@@ -134,7 +135,7 @@ const buildFilterByUserSettings =
           membershipOrUser instanceof SpaceMembership
             ? membershipOrUser.user.id
             : membershipOrUser.id
-        log.info(
+        log.verbose(
           {
             receiverId: userId,
             emailTypeId: config.emailId,
@@ -158,7 +159,7 @@ const buildEmailTemplate = <N>(templateBuilder: (input: N) => string, payload: N
 }
 
 const getBullJobIdForEmailOperation = (emailType: EMAIL_TYPES, customSuffix?: string): string => {
-  const prefix = `${types.TASK_TYPE.SEND_EMAIL}.${EMAIL_TYPES[emailType]}`
+  const prefix = `${TASK_TYPE.SEND_EMAIL}.${EMAIL_TYPES[emailType]}`
   const suffix = customSuffix ?? nanoid()
   return `${prefix}.${suffix}`
 }

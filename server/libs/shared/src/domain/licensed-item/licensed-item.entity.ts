@@ -1,6 +1,6 @@
 import { Entity, EntityRepositoryType, Ref, ManyToOne, PrimaryKey, Property, Reference } from '@mikro-orm/core'
+import { License } from '@shared/domain/license/license.entity'
 import { BaseEntity } from '../../database/base-entity'
-import { License } from '../license'
 import { LicensedItemRepository } from './licensed-item.repository'
 
 @Entity({ tableName: 'licensed_items', customRepository: () => LicensedItemRepository})

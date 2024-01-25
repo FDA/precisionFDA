@@ -1,11 +1,11 @@
+import { database } from '@shared/database'
+import { User } from '@shared/domain/user/user.entity'
 import { expect } from 'chai'
 import { EntityManager } from '@mikro-orm/core'
 import supertest from 'supertest'
-import { App, Folder, Job, Tag, User, UserFile } from '@shared/domain'
 import { PARENT_TYPE } from '@shared/domain/user-file/user-file.types'
 import { create, generate, db } from '@shared/test'
 import { fakes, mocksReset } from '@shared/test/mocks'
-import { database, errors } from '@shared'
 import { getServer } from '../../../src/server'
 import { getDefaultHeaderData } from '../../utils/expect-helper'
 

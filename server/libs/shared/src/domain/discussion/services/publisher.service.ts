@@ -1,22 +1,25 @@
-import { config } from '@shared'
 import type { SqlEntityManager } from '@mikro-orm/mysql'
-import { SCOPE } from '../../../types/common'
-import { Node } from '../../user-file'
-import type { User } from '../../user'
-import { App } from '../../app'
-import type { Comparison } from '../../comparison'
-import type { Job } from '../../job'
+import { config } from '@shared/config'
+import { AppSeries } from '@shared/domain/app-series/app-series.entity'
+import { App } from '@shared/domain/app/app.entity'
+import { Job } from '@shared/domain/job/job.entity'
+import { Space } from '@shared/domain/space/space.entity'
+import { Node } from '@shared/domain/user-file/node.entity'
+import { User } from '@shared/domain/user/user.entity'
 import * as errors from '../../../errors'
-import { FILE_STATE_DX, FILE_STATE_PFDA, FILE_STI_TYPE, PARENT_TYPE } from '../../user-file/user-file.types'
-import type { PlatformClient } from '../../../platform-client'
 import { defaultLogger as logger } from '../../../logger'
-import { COMPARISON_STATE } from '../../comparison/comparison.entity'
-import { AppSeries } from '../../app-series'
-import { Space } from '../../space'
-import { getIdFromScopeName, scopeContainsId } from '../../space/space.helper'
-import { createAppPublished } from '../../event/event.helper'
+import type { PlatformClient } from '../../../platform-client'
 import type { UserCtx } from '../../../types'
-
+import { SCOPE } from '../../../types/common'
+import { Comparison, COMPARISON_STATE } from '../../comparison/comparison.entity'
+import { createAppPublished } from '../../event/event.helper'
+import { getIdFromScopeName } from '../../space/space.helper'
+import {
+  FILE_STATE_DX,
+  FILE_STATE_PFDA,
+  FILE_STI_TYPE,
+  PARENT_TYPE,
+} from '../../user-file/user-file.types'
 
 export interface IPublisherService {
   publishNodes(nodes: Node[], user: User, scope: string): Promise<number>

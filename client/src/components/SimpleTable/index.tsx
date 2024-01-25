@@ -9,7 +9,7 @@ const Styles = styled.div`
     border-spacing: 0;
     border: 1px solid black;
     tr {
-      :last-child {
+      &:last-child {
         td {
           border-bottom: 0;
         }
@@ -21,7 +21,7 @@ const Styles = styled.div`
       padding: 0.5rem;
       border-bottom: 1px solid black;
       border-right: 1px solid black;
-      :last-child {
+      &:last-child {
         border-right: 0;
       }
     }

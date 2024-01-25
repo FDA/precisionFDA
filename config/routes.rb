@@ -163,7 +163,7 @@ Rails.application.routes.draw do
 
     get "/discussions/create", to: "discussions#index2"
 
-    if ENV["GSRS_ENABLED"]
+    if ActiveRecord::Type::Boolean.new.cast(ENV["GSRS_ENABLED"])
       match "/ginas/app/logout", to: "main#destroy", via: :all
       get "/ginas/app/api/v1/substances:path", to: "ginas#skip_request",
         constraints: ->(request) { request.fullpath.ends_with? "(undefined)?view=internal" }
@@ -517,6 +517,7 @@ Rails.application.routes.draw do
       get "list_licenses"
       get "cli_latest_version"
       post "list_licenses_for_files"
+      get "tracks/provenance", action: :track_provenance, as: "track_provenance"
     end
     # end API
 

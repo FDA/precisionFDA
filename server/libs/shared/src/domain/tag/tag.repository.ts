@@ -1,5 +1,5 @@
 import { EntityRepository } from '@mikro-orm/mysql'
-import { Tag } from '..'
+import { Tag } from '@shared/domain/tag/tag.entity'
 
 export class TagRepository extends EntityRepository<Tag> {
   async findOneOrCreate(name: string): Promise<Tag> {

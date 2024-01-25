@@ -1,6 +1,10 @@
 import { EntityManager, SqlEntityManager } from '@mikro-orm/mysql'
+import { Space } from '@shared/domain/space/space.entity'
+import { Folder } from '@shared/domain/user-file/folder.entity'
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
+import { Node } from '@shared/domain/user-file/node.entity'
+import { User } from '@shared/domain/user/user.entity'
 import { difference, intersection, isNil, uniqBy } from 'ramda'
-import { User, Node, UserFile, Asset, entities, Space, Folder } from '..'
 import { SPACE_MEMBERSHIP_ROLE } from '../space-membership/space-membership.enum'
 import { SPACE_STATE, SPACE_TYPE } from '../space/space.enum'
 import { getIdFromScopeName, scopeContainsId } from '../space/space.helper'
@@ -12,6 +16,7 @@ import { UserFileRepository } from './user-file.repository'
 import { FILE_STI_TYPE, IFileOrAsset } from './user-file.types'
 import { PermissionError } from '../../errors'
 import { CAN_EDIT_ROLES } from '../space-membership/space-membership.helper'
+import { Asset } from './asset.entity'
 
 const getStiEnumTypeFromInstance = (node: Node): FILE_STI_TYPE => {
   if (node instanceof Folder) {
@@ -351,7 +356,7 @@ const validateEditableBy = async (em: SqlEntityManager, node: Node, currentUser:
   }
   if (scopeContainsId(node.scope)) {
     const spaceId = getIdFromScopeName(node.scope)
-    const space = await em.findOne(entities.Space, {
+    const space = await em.findOne(Space, {
       id: spaceId,
       state: SPACE_STATE.ACTIVE,
       spaceMemberships: {
@@ -458,7 +463,7 @@ const collectChildren = async (parentFolder: Folder, wholeTree: Node[], em: SqlE
  * @returns
  */
 const loadNodes = async (em: SqlEntityManager, input: IdsInput, filters: nodeQueryFilter) => {
-  const nodes: Node[] = await em.find(entities.Node, {
+  const nodes: Node[] = await em.find(Node, {
     $or: [
       {
         id: { $in: input.ids },

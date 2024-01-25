@@ -1,5 +1,5 @@
+import { Asset } from '@shared/domain/user-file/asset.entity'
 import { expect } from 'chai'
-import { Asset } from '../../../src/domain'
 import {
   AssetProvenanceDataService,
 } from '../../../src/domain/provenance/service/entity-data/asset-provenance-data.service'

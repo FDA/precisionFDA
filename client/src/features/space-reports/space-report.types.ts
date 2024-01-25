@@ -1,4 +1,4 @@
-import { IFile } from '../home/files/files.types'
+import { IFile } from '../files/files.types'
 
 export type SpaceReportState = 'CREATED' | 'DONE' | 'ERROR'
 

@@ -1,7 +1,8 @@
 import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
+import { Organization } from '@shared/domain/org/org.entity'
+import { User } from '@shared/domain/user/user.entity'
 import { expect } from 'chai'
 import { database } from '../../../src/database'
-import { Organization, User } from '@shared/domain'
 import { create, db } from '@shared/test'
 
 describe('org entity tests', () => {

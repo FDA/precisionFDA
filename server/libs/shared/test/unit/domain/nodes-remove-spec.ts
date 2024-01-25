@@ -1,9 +1,14 @@
 import { EntityManager, MySqlDriver, SqlEntityManager } from '@mikro-orm/mysql'
+import { database } from '@shared/database'
+import { NodesRemoveOperation } from '@shared/domain/user-file/ops/nodes-remove'
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
+import { Node } from '@shared/domain/user-file/node.entity'
+import { User } from '@shared/domain/user/user.entity'
+import { Event } from '@shared/domain/event/event.entity'
+import { getLogger } from '@shared/logger'
 import pino from 'pino'
 import { expect } from 'chai'
 import { create, db } from '../../../src/test'
-import { Event, Node, User, UserFile, userFile } from '../../../src/domain'
-import { database, getLogger, types } from '@shared'
 import { EVENT_TYPES } from '../../../src/domain/event/event.helper'
 import { STATIC_SCOPE } from '../../../src/enums'
 import { scopeContainsId } from '../../../src/domain/space/space.helper'
@@ -15,7 +20,7 @@ describe('remove nodes tests', () => {
   let em: EntityManager<MySqlDriver>
   let user: User
   let log: pino.Logger
-  let userCtx: types.UserCtx
+  let userCtx: UserCtx
   const ids: number[] = []
 
   const createFileStructure = async (scope: SCOPE) => {
@@ -137,7 +142,7 @@ describe('remove nodes tests', () => {
   it('test remove nodes - private scope', async () => {
     await createFileStructure(STATIC_SCOPE.PRIVATE)
 
-    const op = new userFile.NodesRemoveOperation({
+    const op = new NodesRemoveOperation({
       em: database.orm().em.fork(),
       log,
       user: userCtx,
@@ -152,7 +157,7 @@ describe('remove nodes tests', () => {
   it('test remove nodes - public scope', async () => {
     await createFileStructure(STATIC_SCOPE.PUBLIC)
 
-    const op = new userFile.NodesRemoveOperation({
+    const op = new NodesRemoveOperation({
       em: database.orm().em.fork() as EntityManager<MySqlDriver>,
       log,
       user: userCtx,
@@ -167,7 +172,7 @@ describe('remove nodes tests', () => {
   it('test remove nodes - space-1 scope', async () => {
     await createFileStructure('space-1')
 
-    const op = new userFile.NodesRemoveOperation({
+    const op = new NodesRemoveOperation({
       em: database.orm().em.fork(),
       log,
       user: userCtx,
@@ -191,7 +196,7 @@ describe('remove nodes tests', () => {
     )
     await em.flush()
 
-    const op = new userFile.NodesRemoveOperation({
+    const op = new NodesRemoveOperation({
       em: database.orm().em.fork() as SqlEntityManager,
       log,
       user: userCtx,
@@ -215,7 +220,7 @@ describe('remove nodes tests', () => {
     )
     await em.flush()
 
-    const op = new userFile.NodesRemoveOperation({
+    const op = new NodesRemoveOperation({
       em: database.orm().em.fork() as SqlEntityManager,
       log,
       user: userCtx,

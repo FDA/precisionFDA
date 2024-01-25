@@ -1,11 +1,11 @@
+import { ENVS } from '@shared/enums'
 import axios, { AxiosRequestConfig } from 'axios';
-import { ENUMS } from '..';
 import { config } from '../config'
 
 export class CaptchaService {
 
   async verifyCaptchaAssessment(token: string, recaptchaAction: string, minimalScore = 0.7): Promise<boolean> {
-    if ([ENUMS.ENVS.DEVELOPMENT, ENUMS.ENVS.TEST, ENUMS.ENVS.LOCAL].includes(config.env)) {
+    if ([ENVS.DEVELOPMENT, ENVS.TEST].includes(config.env)) {
       return true
     }
 

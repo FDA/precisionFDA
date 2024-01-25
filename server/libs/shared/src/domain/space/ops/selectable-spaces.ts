@@ -1,7 +1,6 @@
-import { entities } from '../..'
+import { Space } from '@shared/domain/space/space.entity'
 import { UserOpsCtx } from '../../../types'
-import { BaseOperation } from '../../../utils'
-import { Space } from '../../space'
+import { BaseOperation } from '@shared/utils/base-operation'
 import { SPACE_TYPE } from '../../space/space.enum'
 
 /**
@@ -16,7 +15,7 @@ Space[]
   async run(id: number): Promise<Space[]> {
     const em = this.ctx.em
 
-    const space = await em.findOneOrFail(entities.Space, { id })
+    const space = await em.findOneOrFail(Space, { id })
 
     // is the space in correct state?
     if (!(space.type === SPACE_TYPE.REVIEW
@@ -27,7 +26,7 @@ Space[]
     }
 
     // collect ids of confidential spaces + space id
-    const confidentialSpaces = await em.find(entities.Space, { spaceId: space.id })
+    const confidentialSpaces = await em.find(Space, { spaceId: space.id })
     const spaceIds = confidentialSpaces.map(space => space.id)
     spaceIds.push(space.id)
 

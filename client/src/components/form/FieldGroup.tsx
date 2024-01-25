@@ -8,10 +8,11 @@ const Row = styled.div`
 `
 const Pill = styled.div`
   font-size: 12px;
-  color: #272727;
   letter-spacing: 0;
+  color: var(--c-text-700);
   line-height: 16px;
-  background-color: #e3e8ee;
+  background-color: var(--tertiary-200);
+  border: 1px solid var(--base-opacity-06);
   padding: 3px 4px;
   border-radius: 3px;
   margin-left: 4px;

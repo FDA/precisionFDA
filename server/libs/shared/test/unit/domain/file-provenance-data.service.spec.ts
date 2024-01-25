@@ -1,7 +1,11 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
+import { Comparison } from '@shared/domain/comparison/comparison.entity'
+import { Job } from '@shared/domain/job/job.entity'
+import { Asset } from '@shared/domain/user-file/asset.entity'
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
+import { User } from '@shared/domain/user/user.entity'
 import { expect } from 'chai'
 import { stub } from 'sinon'
-import { Asset, Comparison, Job, User, UserFile } from '../../../src/domain'
 import {
   FileProvenanceDataService,
 } from '../../../src/domain/provenance/service/entity-data/file-provenance-data.service'

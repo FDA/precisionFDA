@@ -1,8 +1,14 @@
 import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
-import { client, database, discussion as discussionDomain, types } from '@shared'
+import { database } from '@shared/database'
+import { App } from '@shared/domain/app/app.entity'
+import { Comparison } from '@shared/domain/comparison/comparison.entity'
+import { PublisherService } from '@shared/domain/discussion/services/publisher.service'
+import { Job } from '@shared/domain/job/job.entity'
+import { User } from '@shared/domain/user/user.entity'
+import { Node } from '@shared/domain/user-file/node.entity'
+import { PlatformClient } from '@shared/platform-client'
 import { mocksReset } from '@worker-test/utils/mocks'
 import { expect } from 'chai'
-import { entities, User } from '../../../src/domain'
 import { PARENT_TYPE } from '../../../src/domain/user-file/user-file.types'
 import { STATIC_SCOPE } from '../../../src/enums'
 import { create, db } from '../../../src/test'
@@ -10,8 +16,8 @@ import { create, db } from '../../../src/test'
 describe('PublisherService tests', () => {
   let em: EntityManager<MySqlDriver>
   let user: User
-  let userCtx: types.UserCtx
-  let publisherService: discussionDomain.PublisherService
+  let userCtx: UserCtx
+  let publisherService: PublisherService
 
   beforeEach(async () => {
     await db.dropData(database.connection())
@@ -19,7 +25,7 @@ describe('PublisherService tests', () => {
     user = create.userHelper.create(em)
     await em.flush()
     userCtx = { ...user, accessToken: 'foo' }
-    publisherService = new discussionDomain.PublisherService(em, userCtx, new client.PlatformClient('foo'))
+    publisherService = new PublisherService(em, userCtx, new PlatformClient('foo'))
     // using mocked platform client to avoid actual calls to platform
     mocksReset()
   })
@@ -31,9 +37,9 @@ describe('PublisherService tests', () => {
     await em.flush()
     const count = await publisherService.publishNodes([node1, node2, node3], user, STATIC_SCOPE.PUBLIC)
     em.clear()
-    const loadedNode1 = await em.findOneOrFail(entities.Node, { id: node1.id })
-    const loadedNode2 = await em.findOneOrFail(entities.Node, { id: node2.id })
-    const loadedNode3 = await em.findOneOrFail(entities.Node, { id: node3.id })
+    const loadedNode1 = await em.findOneOrFail(Node, { id: node1.id })
+    const loadedNode2 = await em.findOneOrFail(Node, { id: node2.id })
+    const loadedNode3 = await em.findOneOrFail(Node, { id: node3.id })
     expect(count).eq(3)
     expect(loadedNode1.scope).eq(STATIC_SCOPE.PUBLIC)
     expect(loadedNode2.scope).eq(STATIC_SCOPE.PUBLIC)
@@ -65,8 +71,8 @@ describe('PublisherService tests', () => {
 
     const count = await publisherService.publishApps([app1, app2], user, STATIC_SCOPE.PUBLIC)
     em.clear()
-    const loadedApp1 = await em.findOneOrFail(entities.App, { id: app1.id })
-    const loadedApp2 = await em.findOneOrFail(entities.App, { id: app2.id })
+    const loadedApp1 = await em.findOneOrFail(App, { id: app1.id })
+    const loadedApp2 = await em.findOneOrFail(App, { id: app2.id })
     expect(count).eq(2)
     expect(loadedApp1.scope).eq(STATIC_SCOPE.PUBLIC)
     expect(appSeries1.scope).eq(STATIC_SCOPE.PUBLIC)
@@ -81,7 +87,7 @@ describe('PublisherService tests', () => {
     const count = await publisherService.publishJobs([job1], user, STATIC_SCOPE.PUBLIC)
     expect(count).eq(1)
     em.clear()
-    const loadedJob1 = await em.findOneOrFail(entities.Job, { id: job1.id })
+    const loadedJob1 = await em.findOneOrFail(Job, { id: job1.id })
     expect(loadedJob1.scope).eq(STATIC_SCOPE.PUBLIC)
   })
 
@@ -112,8 +118,8 @@ describe('PublisherService tests', () => {
     const count = await publisherService.publishComparisons([comparison1, comparison2], user, STATIC_SCOPE.PUBLIC)
     expect(count).eq(2)
     em.clear()
-    const loadedComparison1 = await em.findOneOrFail(entities.Comparison, { id: comparison1.id })
-    const loadedComparison2 = await em.findOneOrFail(entities.Comparison, { id: comparison2.id })
+    const loadedComparison1 = await em.findOneOrFail(Comparison, { id: comparison1.id })
+    const loadedComparison2 = await em.findOneOrFail(Comparison, { id: comparison2.id })
     expect(loadedComparison1.scope).eq(STATIC_SCOPE.PUBLIC)
     expect(loadedComparison2.scope).eq(STATIC_SCOPE.PUBLIC)
   })
@@ -130,8 +136,8 @@ describe('PublisherService tests', () => {
       expect(error.message).eq(`Unable to publish node ${folder.id}: folders are not supported.`)
     }
     em.clear()
-    const loadedFolder = await em.findOneOrFail(entities.Node, { id: folder.id })
-    const loadedNode = await em.findOneOrFail(entities.Node, { id: node.id })
+    const loadedFolder = await em.findOneOrFail(Node, { id: folder.id })
+    const loadedNode = await em.findOneOrFail(Node, { id: node.id })
     // scope should stay private after an error
     expect(loadedFolder.scope).eq(STATIC_SCOPE.PRIVATE)
     expect(loadedNode.scope).eq(STATIC_SCOPE.PRIVATE)

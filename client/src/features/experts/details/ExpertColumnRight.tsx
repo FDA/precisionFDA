@@ -6,13 +6,13 @@ import styled from 'styled-components'
 import { ButtonSolidBlue } from '../../../components/Button'
 import { EXPERT_STATE } from '../../../constants'
 import { IUser } from '../../../types/user'
-import history from '../../../utils/history'
 import { ToC } from '../../markdown/Toc'
 import { useModal } from '../../modal/useModal'
 import { askQuestion } from '../api'
 import { ExpertDetails } from '../types'
 import { ExpertAskQuestionModal } from './ExpertAskQuestionModal'
 import { StyledPageRightColumn } from './styles'
+import { useNavigate } from 'react-router'
 
 const ActionRow = styled.div`
   margin-top: 64px;
@@ -30,6 +30,7 @@ export const ExpertColumnRight = ({
   toc?: any[]
 }) => {
   const modal = useModal()
+  const navigate = useNavigate()
   const queryClient = useQueryClient()
   const userExpert = expert && expert.user_id === user?.id
   const expertIsOpened = expert && expert.state === EXPERT_STATE.OPEN
@@ -60,7 +61,7 @@ export const ExpertColumnRight = ({
           queryClient.invalidateQueries(['queryExpertDetails'])
           toast.success('Your question was submitted successfully')
           modal.setShowModal(false)
-          history.push(`/experts/${expert.id}`)
+          navigate(`/experts/${expert.id}`)
         } else {
           const errorMessage = response.payload?.error?.message
           toast.error(errorMessage || 'Your question was not submitted')

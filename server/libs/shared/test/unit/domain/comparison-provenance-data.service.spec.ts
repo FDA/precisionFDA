@@ -1,6 +1,6 @@
+import { Comparison } from '@shared/domain/comparison/comparison.entity'
 import { expect } from 'chai'
 import { stub } from 'sinon'
-import { Comparison } from '../../../src/domain'
 import {
   ComparisonProvenanceDataService,
 } from '../../../src/domain/provenance/service/entity-data/comparison-provenance-data.service'
