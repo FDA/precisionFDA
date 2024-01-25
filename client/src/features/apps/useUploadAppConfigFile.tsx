@@ -1,4 +1,3 @@
-import { Editor } from '@monaco-editor/react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import React, { ChangeEvent, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
@@ -11,6 +10,7 @@ import { Footer } from '../modal/styles'
 import { useModal } from '../modal/useModal'
 import { uploadAppConfigFileRequest } from './apps.api'
 import { FileType } from './apps.types'
+import MonacoEditor from '../../components/MonacoEditor/MonacoEditor'
 
 const StyledFileUpload = styled.div`
   padding-bottom: 0;
@@ -106,7 +106,7 @@ const FileUpload = ({
         hide={() => setShowModal(false)}
       />
       <StyledFileUpload>
-        <Editor
+        <MonacoEditor
           options={{
             minimap: {
               enabled: false,

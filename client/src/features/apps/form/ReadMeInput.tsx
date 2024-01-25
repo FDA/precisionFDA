@@ -1,10 +1,10 @@
-import Editor from '@monaco-editor/react'
 import React, { useState } from 'react'
 import styled, { css } from 'styled-components'
 import { Button } from '../../../components/Button'
 import { Markdown } from '../../../components/Markdown'
 import { FormFields, Help } from './styles'
 import ExternalLink from '../../../components/Controls/ExternalLink'
+import MonacoEditor from '../../../components/MonacoEditor/MonacoEditor'
 
 const ButtonRow = styled.div`
   display: flex;
@@ -73,16 +73,11 @@ export const ReadMeInput = ({
       </TopReadme>
 
       <View $shouldDisplay={selected === 'edit'}>
-        <Editor
+        <MonacoEditor
           height="40vh"
           onChange={val => onChange(val)}
           defaultLanguage="markdown"
           defaultValue={value}
-          options={{
-            minimap: {
-              enabled: false,
-            },
-          }}
         />
       </View>
 
