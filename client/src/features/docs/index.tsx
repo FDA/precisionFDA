@@ -29,7 +29,6 @@ import { Tracking } from './pages/Tracking'
 import { Workflows } from './pages/Workflows'
 import { Workstations } from './pages/Workstations'
 import { DocsContent, DocsMainContainer, DocsMainForFooter, DocsNav, DocsPageContainer, DocsTitle, NavItem } from './styles'
-import { TutorialMarkdown } from './tutorials/TutorialMarkdown'
 import PFDAFooter from '../../components/Footer'
 import NavigationBar from '../../components/NavigationBar/NavigationBar'
 
@@ -56,20 +55,11 @@ const Docs = () => {
         <DocsPageContainer>
           <DocsNav>
             <DocsTitle>Tutorials</DocsTitle>
-            <NavItem
-              activeClassName='active'
-              $active={isActiveLink('/docs/tutorials/apps-workflows', pathname)}
-              to="/docs/tutorials/apps-workflows"
-              data-turbolinks="false"
-            >
+
+            <NavItem as="a" href="/pdfs/Tutorial_-_Apps_and_Workflows_-_20221130.pdf" target='_blank'>
               Design Patterns for Apps and Workflows
             </NavItem>
-            <NavItem
-              activeClassName='active'
-              $active={isActiveLink('/docs/tutorials/workstations', pathname)}
-              to="/docs/tutorials/workstations"
-              data-turbolinks="false"
-            >
+            <NavItem as="a" href="/pdfs/Tutorial_-_Workstations_and_Databases_-_20231122.pdf" target='_blank'>
               Collaborative Data Science with Interactive Workstations and Databases
             </NavItem>
 
@@ -249,14 +239,6 @@ const Docs = () => {
             <Routes>
               <Route path="/" element={<Navigate to="/docs/introduction" replace />} />
               <Route path="/introduction" element={<Intro />} />
-              <Route
-                path="/tutorials/apps-workflows"
-                element={<TutorialMarkdown fileName="apps.md" />}
-              />
-              <Route
-                path="/tutorials/workstations"
-                element={<TutorialMarkdown fileName="workstations.md" />}
-              />
               <Route path="/discussions" element={<Discussions />} />
               <Route path="/notes" element={<Notes />} />
               <Route path="/files" element={<Files />} />

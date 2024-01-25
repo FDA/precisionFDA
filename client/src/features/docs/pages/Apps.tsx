@@ -11,14 +11,14 @@ import {
 } from '../styles'
 import exportScreenshot from '../images/export_screenshot.png'
 import { useScrollToHash } from '../../../hooks/useScrollToHash'
-import { OutdatedDocs } from '../common'
+import { OutdatedDocsApps } from '../common'
 
 export const Apps = () => {
   useScrollToHash()
   return (
     <DocRow>
       <DocBody>
-        <OutdatedDocs />
+        <OutdatedDocsApps />
         <h1>Apps</h1>
 
         <p>

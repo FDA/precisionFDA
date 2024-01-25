@@ -9,14 +9,14 @@ import configureapps from '../images/configure_apps.png'
 import selectoutputs from '../images/select_outputs.png'
 import finish from '../images/finish.png'
 import { useScrollToHash } from '../../../hooks/useScrollToHash'
-import { OutdatedDocs } from '../common'
+import { OutdatedDocsApps } from '../common'
 
 export const Workflows = () => {
   useScrollToHash()
   return (
     <DocRow>
       <DocBody>
-        <OutdatedDocs />
+        <OutdatedDocsApps />
         <h1>Workflows</h1>
 
         <p>

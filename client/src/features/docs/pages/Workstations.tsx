@@ -3,7 +3,7 @@ import React from 'react'
 import { Link } from 'react-router-dom'
 
 import { useScrollToHash } from '../../../hooks/useScrollToHash'
-import { OutdatedDocs } from '../common'
+import { OutdatedDocsWorkstations } from '../common'
 import runningworkstation from '../images/running_workstation.png'
 import { DocBody, DocRow, PageMap, RightSide } from '../styles'
 
@@ -12,7 +12,7 @@ export const Workstations = () => {
   return (
     <DocRow>
       <DocBody>
-        <OutdatedDocs />
+        <OutdatedDocsWorkstations />
         <h1>Workstation Apps</h1>
 
         <p>
