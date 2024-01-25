@@ -2,7 +2,7 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
 import { useScrollToHash } from '../../../hooks/useScrollToHash'
-import { OutdatedDocs } from '../common'
+import { OutdatedDocsApps } from '../common'
 import cwlwdlcreateapp from '../images/cwl_wdl_create_app.png'
 import importcwlio from '../images/import_cwl_io.png'
 import importcwlmodal from '../images/import_cwl_modal.png'
@@ -34,7 +34,7 @@ export const CreatingApps = () => {
   return (
     <DocRow>
       <DocBody>
-        <OutdatedDocs />
+        <OutdatedDocsApps />
         <h1>Creating Apps</h1>
 
         <p>
