@@ -1,7 +1,8 @@
+import { database } from '@shared/database'
+import { SyncSpacesPermissionsOperation } from '@shared/domain/space/ops/permissions-synchronize'
 import { Job } from 'bull'
-import { database, space } from '@shared'
 import { SyncSpacesPermissionsJob } from '@shared/queue/task.input'
-import { getChildLogger } from '../utils'
+import { getChildLogger } from '../utils/logger'
 
 export const syncSpacesPermissionsHandler = async (bullJob: Job<SyncSpacesPermissionsJob>) => {
   const requestId = String(bullJob.id)
@@ -16,5 +17,5 @@ export const syncSpacesPermissionsHandler = async (bullJob: Job<SyncSpacesPermis
     job: bullJob,
   }
 
-  await new space.SyncSpacesPermissionsOperation(ctx).execute()
+  await new SyncSpacesPermissionsOperation(ctx).execute()
 }

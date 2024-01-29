@@ -1,6 +1,6 @@
 import React from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useHistory, useParams } from 'react-router'
+import { useNavigate, useParams } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import { Loader } from '../../../components/Loader'
 import { BackLinkMargin } from '../../../components/Page/PageBackLink'
@@ -8,9 +8,11 @@ import { PageTitle } from '../../../components/Page/styles'
 import { createSpaceRequest, spaceRequest } from '../spaces.api'
 import { SpaceForm } from './CreateSpaceForm'
 import { StyledPageCenter, StyledPageContent } from './styles'
+import { UserLayout } from '../../../layouts/UserLayout'
+import { ScrollableInnerGlobalStyles } from '../../../styles/global'
 
 export const DuplicateSpace = () => {
-  const history = useHistory()
+  const navigate = useNavigate()
   const { spaceId } = useParams<{ spaceId: string }>()
   const { data } = useQuery(['space', spaceId], () =>
     spaceRequest({ id: spaceId }),
@@ -22,7 +24,7 @@ export const DuplicateSpace = () => {
     mutationFn: createSpaceRequest,
     onSuccess: res => {
       if (res?.space) {
-        history.push(`/spaces/${res?.space?.id}`)
+        navigate(`/spaces/${res?.space?.id}`)
         queryClient.invalidateQueries(['spaces'])
         toast.success('Success: duplicating space')
       } else if (res?.error) {
@@ -40,7 +42,9 @@ export const DuplicateSpace = () => {
     return <Loader />
   }
 
-  return (
+  return (<>
+    <ScrollableInnerGlobalStyles />
+    <UserLayout>
     <StyledPageCenter>
       <StyledPageContent>
         <BackLinkMargin linkTo={`/spaces/${spaceId}`}>Back to Space</BackLinkMargin>
@@ -56,8 +60,10 @@ export const DuplicateSpace = () => {
             cts: data.space.cts,
           }}
           isDuplicate
-        />
+          />
       </StyledPageContent>
     </StyledPageCenter>
+    </UserLayout>
+  </>
   )
 }

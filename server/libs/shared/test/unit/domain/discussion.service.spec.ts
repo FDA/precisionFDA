@@ -1,7 +1,16 @@
 import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
-import { client, database, discussion as discussionDomain, types, entityFetcher } from '@shared'
+import { database } from '@shared/database'
+import { App } from '@shared/domain/app/app.entity'
+import { Comparison } from '@shared/domain/comparison/comparison.entity'
+import { Discussion } from '@shared/domain/discussion/discussion.entity'
+import { DiscussionService } from '@shared/domain/discussion/services/discussion.service'
+import { PublisherService } from '@shared/domain/discussion/services/publisher.service'
+import { Follow } from '@shared/domain/follow/follow.entity'
+import { Job } from '@shared/domain/job/job.entity'
+import { User } from '@shared/domain/user/user.entity'
+import { PlatformClient } from '@shared/platform-client'
+import { EntityFetcherService } from '@shared/services/entity-fetcher.service'
 import { expect } from 'chai'
-import { App, Comparison, entities, Job, Node, User } from '../../../src/domain'
 import {
   BaseInput,
   PublishDiscussionInput,
@@ -17,8 +26,8 @@ import { create, db, generate } from '../../../src/test'
 describe('DiscussionService tests', () => {
   let em: EntityManager<MySqlDriver>
   let user: User
-  let userCtx: types.UserCtx
-  let discussionService: discussionDomain.DiscussionService
+  let userCtx: UserCtx
+  let discussionService: DiscussionService
 
   beforeEach(async () => {
     await db.dropData(database.connection())
@@ -40,8 +49,8 @@ describe('DiscussionService tests', () => {
         return jobs.length
       },
     } as discussionDomain.PublisherService
-    const fetcher = new entityFetcher.EntityFetcherService(em, userCtx)
-    discussionService = new discussionDomain.DiscussionService(em, userCtx, mockedPublisherService, fetcher)
+    const fetcher = new EntityFetcherService(em, userCtx)
+    discussionService = new DiscussionService(em, userCtx, mockedPublisherService, fetcher)
   })
 
   it('create discussion', async () => {
@@ -70,7 +79,7 @@ describe('DiscussionService tests', () => {
     const result = await discussionService.createDiscussion(createDiscussionInput)
 
     const loadedDiscussion = await em.findOneOrFail(
-      entities.Discussion,
+      Discussion,
       { id: result.id },
       { populate: ['note', 'answers', 'comments'] },
     )
@@ -80,7 +89,7 @@ describe('DiscussionService tests', () => {
     expect(note.scope).eq('private')
     expect(note.noteType).eq('Discussion')
 
-    const follow = await em.findOneOrFail(entities.Follow, { followableId: loadedDiscussion.id })
+    const follow = await em.findOneOrFail(Follow, { followableId: loadedDiscussion.id })
     expect(follow.followableType).eq('Discussion')
     expect(follow.followerId).eq(user.id)
     expect(follow.followerType).eq('User')
@@ -102,9 +111,9 @@ describe('DiscussionService tests', () => {
 
   it('create discussion with non existing user', async () => {
     userCtx = { id: 10, dxuser: 'non-existing', accessToken: 'foo' }
-    const publisherService = new discussionDomain.PublisherService(em, userCtx, new client.PlatformClient('foo'))
-    const fetcher = new entityFetcher.EntityFetcherService(em, userCtx)
-    discussionService = new discussionDomain.DiscussionService(em, userCtx, publisherService, fetcher)
+    const publisherService = new PublisherService(em, userCtx, new PlatformClient('foo'))
+    const fetcher = new EntityFetcherService(em, userCtx)
+    discussionService = new DiscussionService(em, userCtx, publisherService, fetcher)
 
     const createDiscussionInput: BaseInput = {
       title: 'test-discussion',
@@ -180,7 +189,7 @@ describe('DiscussionService tests', () => {
     await discussionService.updateDiscussion(updateDiscussionInput)
 
     let loadedDiscussion = await em.findOneOrFail(
-      entities.Discussion,
+      Discussion,
       { id: discussion.id },
       { populate: ['note', 'note.attachments'] },
     )
@@ -207,7 +216,7 @@ describe('DiscussionService tests', () => {
     await discussionService.updateDiscussion(updateDiscussionInput)
 
     loadedDiscussion = await em.findOneOrFail(
-      entities.Discussion,
+      Discussion,
       { id: discussion.id },
       { populate: ['note', 'note.attachments'] },
     )
@@ -247,9 +256,9 @@ describe('DiscussionService tests', () => {
 
   it('publish discussion with non existing user', async () => {
     userCtx = { id: 10, dxuser: 'non-existing', accessToken: 'foo' }
-    const publisherService = new discussionDomain.PublisherService(em, userCtx, new client.PlatformClient('foo'))
-    const fetcher = new entityFetcher.EntityFetcherService(em, userCtx)
-    discussionService = new discussionDomain.DiscussionService(em, userCtx, publisherService, fetcher)
+    const publisherService = new PublisherService(em, userCtx, new PlatformClient('foo'))
+    const fetcher = new EntityFetcherService(em, userCtx)
+    discussionService = new DiscussionService(em, userCtx, publisherService, fetcher)
 
     const publishDiscussionInput: PublishDiscussionInput = {
       id: 10,

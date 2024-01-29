@@ -1,22 +1,53 @@
 import { EntityManager } from '@mikro-orm/mysql'
 import { Reference, wrap } from '@mikro-orm/core'
+import { AcceptedLicense } from '@shared/domain/accepted-license/accepted-license.entity'
+import { ADMIN_GROUP_ROLES, AdminGroup } from '@shared/domain/admin-group/admin-group.entity'
+import { AdminMembership } from '@shared/domain/admin-membership/admin-membership.entity'
+import { AppSeries } from '@shared/domain/app-series/app-series.entity'
+import { App } from '@shared/domain/app/app.entity'
+import { Attachment } from '@shared/domain/attachment/attachment.entity'
+import { ChallengeResource } from '@shared/domain/challenge/challenge-resource.entity'
+import { Challenge } from '@shared/domain/challenge/challenge.entity'
+import { Comment } from '@shared/domain/comment/comment.entity'
+import { ComparisonInput } from '@shared/domain/comparison-input/comparison-input.entity'
+import { Comparison } from '@shared/domain/comparison/comparison.entity'
+import { DataPortal } from '@shared/domain/data-portal/data-portal.entity'
+import { DbCluster } from '@shared/domain/db-cluster/db-cluster.entity'
+import { Discussion } from '@shared/domain/discussion/discussion.entity'
+import { Expert } from '@shared/domain/expert/expert.entity'
+import { Job } from '@shared/domain/job/job.entity'
+import { License } from '@shared/domain/license/license.entity'
+import { LicensedItem } from '@shared/domain/licensed-item/licensed-item.entity'
+import { NewsItem } from '@shared/domain/news-item/news-item.entity'
+import { Note } from '@shared/domain/note/note.entity'
+import { Organization } from '@shared/domain/org/org.entity'
+import { Resource } from '@shared/domain/resource/resource.entity'
+import { SpaceEvent } from '@shared/domain/space-event/space-event.entity'
+import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
+import { Space } from '@shared/domain/space/space.entity'
+import { Tag } from '@shared/domain/tag/tag.entity'
+import { Tagging } from '@shared/domain/tagging/tagging.entity'
+import { Asset } from '@shared/domain/user-file/asset.entity'
+import { Folder } from '@shared/domain/user-file/folder.entity'
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
+import { User } from '@shared/domain/user/user.entity'
+import { WorkflowSeries } from '@shared/domain/workflow-series/workflow-series.entity'
+import { Workflow } from '@shared/domain/workflow/entity/workflow.entity'
+import { STATIC_SCOPE } from '@shared/enums'
 import { config } from '../config'
-import { entities, Expert } from '../domain'
 import * as generate from './generate'
 import { getScopeFromSpaceId } from '../domain/space/space.helper'
 import { PARENT_TYPE } from '../domain/user-file/user-file.types'
-import { ADMIN_GROUP_ROLES } from '../domain/admin-group'
-import { STATIC_SCOPE } from "../enums";
 
 const attachmentHelper = {
   create: (
     em: EntityManager,
     references: {
-      note: InstanceType<typeof entities.Note>
+      note: InstanceType<typeof Note>
     },
-    data: Partial<InstanceType<typeof entities.Attachment>>,
+    data: Partial<InstanceType<typeof Attachment>>,
   ) => {
-    const attachment = wrap(new entities.Attachment(references.note)).assign(data, { em })
+    const attachment = wrap(new Attachment(references.note)).assign(data, { em })
     em.persist(attachment)
     return attachment
   },
@@ -25,18 +56,18 @@ const discussionHelper = {
   create: (
     em: EntityManager,
     references: {
-      user: InstanceType<typeof entities.User>
+      user: InstanceType<typeof User>
     },
-    data?: Partial<InstanceType<typeof entities.Discussion>>,
+    data?: Partial<InstanceType<typeof Discussion>>,
   ) => {
-    const note = wrap(new entities.Note(references.user)).assign({
+    const note = wrap(new Note(references.user)).assign({
       title: generate.random.word(),
       content: generate.random.chance.paragraph(),
       scope: 'private',
       noteType: 'Discussion',
     })
     em.persist(note)
-    const discussion = wrap(new entities.Discussion(note, references.user)).assign(data ?? {}, { em })
+    const discussion = wrap(new Discussion(note, references.user)).assign(data ?? {}, { em })
     em.persist(discussion)
     return discussion
   },
@@ -46,13 +77,13 @@ const acceptedLicenseHelper = {
   create: (
     em: EntityManager,
     references: {
-      license: InstanceType<typeof entities.License>
-      user: InstanceType<typeof entities.User>
+      license: InstanceType<typeof License>
+      user: InstanceType<typeof User>
     },
-    data?: Partial<InstanceType<typeof entities.AcceptedLicense>>,
+    data?: Partial<InstanceType<typeof AcceptedLicense>>,
   ) => {
     const acceptedLicense
-      = wrap(new entities.AcceptedLicense(references.license, references.user)).assign(data ?? {}, { em })
+      = wrap(new AcceptedLicense(references.license, references.user)).assign(data ?? {}, { em })
     em.persist(acceptedLicense)
     return acceptedLicense
   },
@@ -61,8 +92,8 @@ const acceptedLicenseHelper = {
 const assetHelper = {
   create: (
     em: EntityManager,
-    references: { user: InstanceType<typeof entities.User> },
-    data?: Partial<InstanceType<typeof entities.Asset>>,
+    references: { user: InstanceType<typeof User> },
+    data?: Partial<InstanceType<typeof Asset>>,
   ) => {
     const defaults = generate.asset.simple()
     const input = {
@@ -71,7 +102,7 @@ const assetHelper = {
     }
     input.parentType = PARENT_TYPE.ASSET
 
-    const asset = wrap(new entities.Asset(references.user)).assign(input, { em })
+    const asset = wrap(new Asset(references.user)).assign(input, { em })
     em.persist(asset)
     return asset
   },
@@ -80,24 +111,24 @@ const assetHelper = {
 const licenceHelper = {
   create: (
     em: EntityManager,
-    references: { user: InstanceType<typeof entities.User> },
-    data?: Partial<InstanceType<typeof entities.License>>,
+    references: { user: InstanceType<typeof User> },
+    data?: Partial<InstanceType<typeof License>>,
   ) => {
-    const license = wrap(new entities.License(references.user)).assign(data ?? {}, { em })
+    const license = wrap(new License(references.user)).assign(data ?? {}, { em })
     em.persist(license)
     return license
   },
   createForAsset: (
     em: EntityManager,
     references: {
-      user: InstanceType<typeof entities.User>
-      asset: InstanceType<typeof entities.Asset>
+      user: InstanceType<typeof User>
+      asset: InstanceType<typeof Asset>
     },
-    data?: Partial<InstanceType<typeof entities.License>>,
+    data?: Partial<InstanceType<typeof License>>,
   ) => {
-    const license = wrap(new entities.License(references.user)).assign(data ?? {}, { em })
+    const license = wrap(new License(references.user)).assign(data ?? {}, { em })
     em.persist(license)
-    const licensedItem = wrap(new entities.LicensedItem(license, references.asset.id))
+    const licensedItem = wrap(new LicensedItem(license, references.asset.id))
       .assign({ licenseableType: 'Node' }, { em })
     em.persist(licensedItem)
     return license
@@ -106,7 +137,7 @@ const licenceHelper = {
 
 const orgHelper = {
   create: (em: EntityManager) => {
-    const org = wrap(new entities.Organization()).assign({
+    const org = wrap(new Organization()).assign({
       handle: `${generate.random.dxstr()}`,
       name: generate.random.chance.name(),
     })
@@ -119,7 +150,7 @@ const adminGroupHelper = {
   createReviewSpaceAdminGroup: (
     em: EntityManager,
   ) => {
-    const RSAGroup = wrap(new entities.AdminGroup()).assign({
+    const RSAGroup = wrap(new AdminGroup()).assign({
       role: ADMIN_GROUP_ROLES.ROLE_REVIEW_SPACE_ADMIN,
     })
     em.persist(RSAGroup)
@@ -129,7 +160,7 @@ const adminGroupHelper = {
   createSiteAdminGroup: (
     em: EntityManager,
   ) => {
-    const group = wrap(new entities.AdminGroup()).assign({
+    const group = wrap(new AdminGroup()).assign({
       role: ADMIN_GROUP_ROLES.ROLE_SITE_ADMIN,
     })
     em.persist(group)
@@ -139,7 +170,7 @@ const adminGroupHelper = {
   createChallengeAdminGroup: (
     em: EntityManager,
   ) => {
-    const group = wrap(new entities.AdminGroup()).assign({
+    const group = wrap(new AdminGroup()).assign({
       role: ADMIN_GROUP_ROLES.ROLE_CHALLENGE_ADMIN,
     })
     em.persist(group)
@@ -148,7 +179,7 @@ const adminGroupHelper = {
 }
 
 const userHelper = {
-  create: (em: EntityManager, data?: Partial<InstanceType<typeof entities.User>>) => {
+  create: (em: EntityManager, data?: Partial<InstanceType<typeof User>>) => {
     let org = orgHelper.create(em)
     em.persist(org)
     // console.log("ORG !!!!", org)
@@ -156,13 +187,13 @@ const userHelper = {
     return userHelper.createUsingOrg(em, org, data)
   },
 
-  createUsingOrg: (em: EntityManager, org: entities.Organization, data?: Partial<InstanceType<typeof entities.User>>) => {
+  createUsingOrg: (em: EntityManager, org: Organization, data?: Partial<InstanceType<typeof User>>) => {
     const defaults = generate.user.simple()
     const input = {
       ...defaults,
       ...data,
     }
-    const user = wrap(new entities.User(org)).assign(input, { em })
+    const user = wrap(new User(org)).assign(input, { em })
     em.persist(user)
     return user
   },
@@ -177,7 +208,7 @@ const userHelper = {
   createRSA: (em: EntityManager) => {
     const user = userHelper.create(em)
     const adminGroup = adminGroupHelper.createReviewSpaceAdminGroup(em)
-    const adminMembership = wrap(new entities.AdminMembership(user, adminGroup)).assign({}, { em })
+    const adminMembership = wrap(new AdminMembership(user, adminGroup)).assign({}, { em })
     em.persist(adminMembership)
     return user
   },
@@ -185,7 +216,7 @@ const userHelper = {
   createSiteAdmin: (em: EntityManager) => {
     const user = userHelper.create(em)
     const adminGroup = adminGroupHelper.createSiteAdminGroup(em)
-    const adminMembership = wrap(new entities.AdminMembership(user, adminGroup)).assign({}, { em })
+    const adminMembership = wrap(new AdminMembership(user, adminGroup)).assign({}, { em })
     em.persist(adminMembership)
     return user
   },
@@ -193,7 +224,7 @@ const userHelper = {
   createChallengeAdmin: (em: EntityManager) => {
     const user = userHelper.create(em)
     const adminGroup = adminGroupHelper.createChallengeAdminGroup(em)
-    const adminMembership = wrap(new entities.AdminMembership(user, adminGroup)).assign({}, { em })
+    const adminMembership = wrap(new AdminMembership(user, adminGroup)).assign({}, { em })
     em.persist(adminMembership)
     return user
   },
@@ -204,23 +235,23 @@ const userHelper = {
     })
   },
 
-  addRSARole: (em: EntityManager, user: InstanceType<typeof entities.User>) => {
+  addRSARole: (em: EntityManager, user: InstanceType<typeof User>) => {
     const adminGroup = adminGroupHelper.createReviewSpaceAdminGroup(em)
-    const adminMembership = wrap(new entities.AdminMembership(user, adminGroup)).assign({}, { em })
+    const adminMembership = wrap(new AdminMembership(user, adminGroup)).assign({}, { em })
     em.persist(adminMembership)
     return user
   },
 
-  addSiteAdminRole: (em: EntityManager, user: InstanceType<typeof entities.User>) => {
+  addSiteAdminRole: (em: EntityManager, user: InstanceType<typeof User>) => {
     const adminGroup = adminGroupHelper.createSiteAdminGroup(em)
-    const adminMembership = wrap(new entities.AdminMembership(user, adminGroup)).assign({}, { em })
+    const adminMembership = wrap(new AdminMembership(user, adminGroup)).assign({}, { em })
     em.persist(adminMembership)
     return user
   },
 
-  addChallengeAdminRole: (em: EntityManager, user: InstanceType<typeof entities.User>) => {
+  addChallengeAdminRole: (em: EntityManager, user: InstanceType<typeof User>) => {
     const adminGroup = adminGroupHelper.createChallengeAdminGroup(em)
-    const adminMembership = wrap(new entities.AdminMembership(user, adminGroup)).assign({}, { em })
+    const adminMembership = wrap(new AdminMembership(user, adminGroup)).assign({}, { em })
     em.persist(adminMembership)
     return user
   },
@@ -231,15 +262,15 @@ const userHelper = {
 const dbClusterHelper = {
   create: (
     em: EntityManager,
-    references: { user: InstanceType<typeof entities.User> },
-    data?: Partial<InstanceType<typeof entities.DbCluster>>,
+    references: { user: InstanceType<typeof User> },
+    data?: Partial<InstanceType<typeof DbCluster>>,
   ) => {
     const defaults = generate.dbCluster.simple()
     const input = {
       ...defaults,
       ...data,
     }
-    const dbCluster = wrap(new entities.DbCluster(references.user)).assign(input, { em })
+    const dbCluster = wrap(new DbCluster(references.user)).assign(input, { em })
     em.persist(dbCluster)
     return dbCluster
   },
@@ -249,10 +280,10 @@ const jobHelper = {
   create: (
     em: EntityManager,
     references: {
-      user: InstanceType<typeof entities.User>
-      app?: InstanceType<typeof entities.App>
+      user: InstanceType<typeof User>
+      app?: InstanceType<typeof App>
     },
-    data?: Partial<InstanceType<typeof entities.Job>>,
+    data?: Partial<InstanceType<typeof Job>>,
   ) => {
     const isHTTPS = references.app?.isHTTPS()
     const defaults = isHTTPS ? generate.job.simple(references.app!) : generate.job.regular()
@@ -260,7 +291,7 @@ const jobHelper = {
       ...defaults,
       ...data,
     }
-    const job = wrap(new entities.Job(references.user, references.app)).assign(input, { em })
+    const job = wrap(new Job(references.user, references.app)).assign(input, { em })
     em.persist(job)
     return job
   },
@@ -269,8 +300,8 @@ const jobHelper = {
 const appHelper = {
   createRegular: (
     em: EntityManager,
-    references: { user: InstanceType<typeof entities.User> },
-    data?: Partial<InstanceType<typeof entities.App>>,
+    references: { user: InstanceType<typeof User> },
+    data?: Partial<InstanceType<typeof App>>,
   ) => {
     const defaults = generate.app.regular()
     const input = {
@@ -278,40 +309,40 @@ const appHelper = {
       ...data,
     }
     // const appSeriesDefaults  = generate.app.appSeries()
-    // const appSeries = wrap(new entities.AppSeries(references.user)).assign(appSeriesDefaults, { em })
+    // const appSeries = wrap(new AppSeries(references.user)).assign(appSeriesDefaults, { em })
     // em.persist(appSeries)
-    const app = wrap(new entities.App(references.user)).assign(input, { em })
+    const app = wrap(new App(references.user)).assign(input, { em })
     em.persist(app)
     return app
   },
   createHTTPS: (
     em: EntityManager,
-    references: { user: InstanceType<typeof entities.User> },
-    data?: Partial<InstanceType<typeof entities.App>>,
+    references: { user: InstanceType<typeof User> },
+    data?: Partial<InstanceType<typeof App>>,
   ) => {
     const defaults = generate.app.https()
     const input = {
       ...defaults,
       ...data,
     }
-    const app = wrap(new entities.App(references.user)).assign(input, { em })
+    const app = wrap(new App(references.user)).assign(input, { em })
     em.persist(app)
     return app
   },
   createWithSpace: (
     em: EntityManager,
-    references: { user: InstanceType<typeof entities.User> },
-    appData: Partial<InstanceType<typeof entities.App>>,
-    spaceData: Partial<InstanceType<typeof entities.Space>>,
+    references: { user: InstanceType<typeof User> },
+    appData: Partial<InstanceType<typeof App>>,
+    spaceData: Partial<InstanceType<typeof Space>>,
   ) => {
     const appDefaults = generate.app.regular()
     const appInput = {
       ...appDefaults,
       ...appData,
     }
-    const space = wrap(new entities.Space()).assign(spaceData, { em })
+    const space = wrap(new Space()).assign(spaceData, { em })
     em.persist(space)
-    const app = wrap(new entities.App(references.user)).assign(appInput, { em })
+    const app = wrap(new App(references.user)).assign(appInput, { em })
     app.scope = getScopeFromSpaceId(space.id)
     em.persist(app)
     return app
@@ -321,15 +352,15 @@ const appHelper = {
 const appSeriesHelper = {
     create: (
         em: EntityManager,
-        references: { user: InstanceType<typeof entities.User> },
-        appSeriesData: Partial<InstanceType<typeof entities.AppSeries>>) => {
+        references: { user: InstanceType<typeof User> },
+        appSeriesData: Partial<InstanceType<typeof AppSeries>>) => {
         const appSeriesDefaults = generate.appSeries.simple()
         const appSeriesInput = {
             ...appSeriesDefaults,
             ...appSeriesData,
         }
 
-        const appSeries = wrap(new entities.AppSeries(references.user)).assign(appSeriesInput, { em })
+        const appSeries = wrap(new AppSeries(references.user)).assign(appSeriesInput, { em })
         em.persist(appSeries)
         return appSeries
     }
@@ -340,11 +371,11 @@ const filesHelper = {
   create: (
     em: EntityManager,
     references: {
-      user: InstanceType<typeof entities.User>
-      parentFolder?: InstanceType<typeof entities.Folder>
-      parent?: InstanceType<typeof entities.UserFile>
+      user: InstanceType<typeof User>
+      parentFolder?: InstanceType<typeof Folder>
+      parent?: InstanceType<typeof UserFile>
     },
-    data?: Partial<InstanceType<typeof entities.UserFile>>,
+    data?: Partial<InstanceType<typeof UserFile>>,
   ) => {
     const defaults = generate.userFile.simple(data?.dxid)
     const input = {
@@ -354,7 +385,7 @@ const filesHelper = {
     if (references.parent) {
       input.parentId = references.parent.id
     }
-    const file = wrap(new entities.UserFile(references.user)).assign(input, { em })
+    const file = wrap(new UserFile(references.user)).assign(input, { em })
     if (references.parentFolder) {
       if (!data?.scope || [STATIC_SCOPE.PRIVATE.toString(), STATIC_SCOPE.PUBLIC.toString()].includes(data?.scope)) {
         file.parentFolder = references.parentFolder
@@ -368,10 +399,10 @@ const filesHelper = {
   createUploaded: (
     em: EntityManager,
     references: {
-      user: InstanceType<typeof entities.User>
-      parentFolder?: InstanceType<typeof entities.Folder>
+      user: InstanceType<typeof User>
+      parentFolder?: InstanceType<typeof Folder>
     },
-    data?: Partial<InstanceType<typeof entities.UserFile>>,
+    data?: Partial<InstanceType<typeof UserFile>>,
   ) => {
     const defaults = generate.userFile.simpleUploaded(data?.dxid)
     const input = {
@@ -379,7 +410,7 @@ const filesHelper = {
       ...data,
       parentId: references.user.id,
     }
-    const file = wrap(new entities.UserFile(references.user)).assign(input, { em })
+    const file = wrap(new UserFile(references.user)).assign(input, { em })
     if (references.parentFolder) {
       file.parentFolder = references.parentFolder
     }
@@ -389,9 +420,9 @@ const filesHelper = {
   createUploadedAsset: (
     em: EntityManager,
     references: {
-      user: InstanceType<typeof entities.User>
+      user: InstanceType<typeof User>
     },
-    data?: Partial<InstanceType<typeof entities.Asset>>,
+    data?: Partial<InstanceType<typeof Asset>>,
   ) => {
     const defaults = generate.asset.simple(data?.dxid)
     const input = {
@@ -399,58 +430,58 @@ const filesHelper = {
       ...data,
       parentId: references.user.id,
     }
-    const file = wrap(new entities.Asset(references.user)).assign(input, { em })
+    const file = wrap(new Asset(references.user)).assign(input, { em })
     em.persist(file)
     return file
   },
   createJobOutput: (
     em: EntityManager,
     params: {
-      user: InstanceType<typeof entities.User>
+      user: InstanceType<typeof User>
       jobId: number
     },
-    data?: Partial<InstanceType<typeof entities.UserFile>>,
+    data?: Partial<InstanceType<typeof UserFile>>,
   ) => {
     const defaults = generate.userFile.simpleJobOutput(params.jobId, data?.dxid)
     const input = {
       ...defaults,
       ...data,
     }
-    const file = wrap(new entities.UserFile(params.user)).assign(input, { em })
+    const file = wrap(new UserFile(params.user)).assign(input, { em })
     em.persist(file)
     return file
   },
   createComparisonOutput: (
     em: EntityManager,
     params: {
-      user: InstanceType<typeof entities.User>
+      user: InstanceType<typeof User>
       comparisonId: number
     },
-    data?: Partial<InstanceType<typeof entities.UserFile>>,
+    data?: Partial<InstanceType<typeof UserFile>>,
   ) => {
     const defaults = generate.userFile.simpleComparisonOutput(params.comparisonId, data?.dxid)
     const input = {
       ...defaults,
       ...data,
     }
-    const file = wrap(new entities.UserFile(params.user)).assign(input, { em })
+    const file = wrap(new UserFile(params.user)).assign(input, { em })
     em.persist(file)
     return file
   },
   createFolder: (
     em: EntityManager,
     references: {
-      user: InstanceType<typeof entities.User>
-      parentFolder?: InstanceType<typeof entities.Folder>
+      user: InstanceType<typeof User>
+      parentFolder?: InstanceType<typeof Folder>
     },
-    data?: Partial<InstanceType<typeof entities.Folder>>,
+    data?: Partial<InstanceType<typeof Folder>>,
   ) => {
     const defaults = generate.folder.simple()
     const input = {
       ...defaults,
       ...data,
     }
-    const folder = wrap(new entities.Folder(references.user)).assign(input)
+    const folder = wrap(new Folder(references.user)).assign(input)
     if (references.parentFolder) {
       if (!data?.scope || [STATIC_SCOPE.PRIVATE.toString(), STATIC_SCOPE.PUBLIC.toString()].includes(data?.scope)) {
         folder.parentFolder = references.parentFolder
@@ -464,17 +495,17 @@ const filesHelper = {
   createLocalOnlyFolder: (
     em: EntityManager,
     references: {
-      user: InstanceType<typeof entities.User>
-      parentFolder?: InstanceType<typeof entities.Folder>
+      user: InstanceType<typeof User>
+      parentFolder?: InstanceType<typeof Folder>
     },
-    data?: Partial<InstanceType<typeof entities.Folder>>,
+    data?: Partial<InstanceType<typeof Folder>>,
   ) => {
     const defaults = generate.folder.simpleLocal()
     const input = {
       ...defaults,
       ...data,
     }
-    const folder = wrap(new entities.Folder(references.user)).assign(input)
+    const folder = wrap(new Folder(references.user)).assign(input)
     if (references.parentFolder) {
       folder.parentFolder = references.parentFolder
     }
@@ -487,19 +518,19 @@ const dataPortalsHelper = {
   create: (
     em: EntityManager,
     references: {
-      space: InstanceType<typeof entities.Space>
+      space: InstanceType<typeof Space>
     },
-    data?: Partial<InstanceType<typeof entities.DataPortal>>,
+    data?: Partial<InstanceType<typeof DataPortal>>,
   ) => {
-    const dataPortal = wrap(new entities.DataPortal(references.space)).assign(data ?? {}, { em })
+    const dataPortal = wrap(new DataPortal(references.space)).assign(data ?? {}, { em })
     em.persist(dataPortal)
     return dataPortal
   },
   addResource: (
     em: EntityManager,
     references: {
-      user: InstanceType<typeof entities.User>,
-      dataPortal: InstanceType<typeof entities.DataPortal>
+      user: InstanceType<typeof User>,
+      dataPortal: InstanceType<typeof DataPortal>
     },
     name: string, dxid: string,
   ) => {
@@ -507,7 +538,7 @@ const dataPortalsHelper = {
       name: name,
       uid: `${dxid}-1`,
     })
-    const resource = new entities.Resource(references.user, userFile)
+    const resource = new Resource(references.user, userFile)
     resource.dataPortal = references.dataPortal
     em.persist(resource)
     return resource
@@ -515,20 +546,20 @@ const dataPortalsHelper = {
 }
 
 const tagsHelper = {
-  create: (em: EntityManager, data?: Partial<InstanceType<typeof entities.Tag>>) => {
+  create: (em: EntityManager, data?: Partial<InstanceType<typeof Tag>>) => {
     const defaults = generate.tag.simple()
     const input = {
       ...defaults,
       ...data,
     }
-    const newTag = wrap(new entities.Tag()).assign(input)
+    const newTag = wrap(new Tag()).assign(input)
     em.persist(newTag)
     return newTag
   },
   createTagging: (
     em: EntityManager,
-    references: { tag: InstanceType<typeof entities.Tag> },
-    data?: Partial<InstanceType<typeof entities.Tagging>>,
+    references: { tag: InstanceType<typeof Tag> },
+    data?: Partial<InstanceType<typeof Tagging>>,
   ) => {
     const defaults = generate.tagging.userfileDefaults()
     const input = {
@@ -536,7 +567,7 @@ const tagsHelper = {
       tag: references.tag,
       ...data,
     }
-    const tagging = new entities.Tagging()
+    const tagging = new Tagging()
     wrap(tagging).assign(input, { em })
     references.tag.taggings.add(tagging)
     references.tag.taggingCount++
@@ -546,30 +577,30 @@ const tagsHelper = {
 }
 
 const spacesHelper = {
-  create: (em: EntityManager, data?: Partial<InstanceType<typeof entities.Space>>) => {
+  create: (em: EntityManager, data?: Partial<InstanceType<typeof Space>>) => {
     const defaults = generate.space.simple()
     const input = {
       ...defaults,
       ...data,
     }
-    const space = wrap(new entities.Space()).assign(input)
+    const space = wrap(new Space()).assign(input)
     em.persist(space)
     return space
   },
   addMember: (
     em: EntityManager,
     references: {
-      user: InstanceType<typeof entities.User>
-      space: InstanceType<typeof entities.Space>
+      user: InstanceType<typeof User>
+      space: InstanceType<typeof Space>
     },
-    data?: Partial<InstanceType<typeof entities.SpaceMembership>>,
+    data?: Partial<InstanceType<typeof SpaceMembership>>,
   ) => {
     const defaults = generate.spaceMembership.simple()
     const input = {
       ...defaults,
       ...data,
     }
-    const membership = wrap(new entities.SpaceMembership(references.user, references.space)).assign(
+    const membership = wrap(new SpaceMembership(references.user, references.space)).assign(
       input,
     )
     em.persist(membership)
@@ -578,17 +609,17 @@ const spacesHelper = {
   createEvent: (
     em: EntityManager,
     references: {
-      user: InstanceType<typeof entities.User>
-      space: InstanceType<typeof entities.Space>
+      user: InstanceType<typeof User>
+      space: InstanceType<typeof Space>
     },
-    data?: Partial<InstanceType<typeof entities.SpaceEvent>>,
+    data?: Partial<InstanceType<typeof SpaceEvent>>,
   ) => {
     const defaults = generate.spaceEvent.contentAdded()
     const input = {
       ...defaults,
       ...data,
     }
-    const event = wrap(new entities.SpaceEvent(references.user, references.space)).assign(input)
+    const event = wrap(new SpaceEvent(references.user, references.space)).assign(input)
     em.persist(event)
     return event
   },
@@ -597,8 +628,8 @@ const spacesHelper = {
 const challengeHelper = {
   create: (
     em: EntityManager,
-    references: { userAndAdmin: InstanceType<typeof entities.User> },
-    data?: Partial<InstanceType<typeof entities.Challenge>>,
+    references: { userAndAdmin: InstanceType<typeof User> },
+    data?: Partial<InstanceType<typeof Challenge>>,
   ) => {
     const defaults = generate.challenge.simple()
     const input = {
@@ -606,7 +637,7 @@ const challengeHelper = {
       ...data,
     }
     const challenge = wrap(
-      new entities.Challenge(references.userAndAdmin, references.userAndAdmin),
+      new Challenge(references.userAndAdmin, references.userAndAdmin),
     ).assign(input)
     em.persist(challenge)
     return challenge
@@ -617,16 +648,16 @@ const challengeResourceHelper = {
   create: (
     em: EntityManager,
     references: {
-      user?: InstanceType<typeof entities.User>
-      challenge?: InstanceType<typeof entities.Challenge>
-      file?: InstanceType<typeof entities.UserFile>
+      user?: InstanceType<typeof User>
+      challenge?: InstanceType<typeof Challenge>
+      file?: InstanceType<typeof UserFile>
     },
-    data?: Partial<InstanceType<typeof entities.ChallengeResource>>,
+    data?: Partial<InstanceType<typeof ChallengeResource>>,
   ) => {
     const input = {
       ...data,
     }
-    const challengeResource = wrap(new entities.ChallengeResource()).assign(input, { em })
+    const challengeResource = wrap(new ChallengeResource()).assign(input, { em })
     if (references.user) {
       challengeResource.user = Reference.create(references.user)
     }
@@ -644,15 +675,15 @@ const challengeResourceHelper = {
 const commentHelper = {
   create: (
     em: EntityManager,
-    references: { user: InstanceType<typeof entities.User> },
-    data?: Partial<InstanceType<typeof entities.Comment>>,
+    references: { user: InstanceType<typeof User> },
+    data?: Partial<InstanceType<typeof Comment>>,
   ) => {
     const defaults = generate.comment.simple()
     const input = {
       ...defaults,
       ...data,
     }
-    const comment = wrap(new entities.Comment(references.user)).assign(input, { em})
+    const comment = wrap(new Comment(references.user)).assign(input, { em})
     em.persist(comment)
     return comment
   },
@@ -661,15 +692,15 @@ const commentHelper = {
 const noteHelper = {
   create: (
     em: EntityManager,
-    references: { user: InstanceType<typeof entities.User> },
-    data?: Partial<InstanceType<typeof entities.Note>>,
+    references: { user: InstanceType<typeof User> },
+    data?: Partial<InstanceType<typeof Note>>,
   ) => {
     const defaults = generate.note.simple()
     const input = {
       ...defaults,
       ...data,
     }
-    const note = wrap(new entities.Note(references.user)).assign(input)
+    const note = wrap(new Note(references.user)).assign(input)
     em.persist(note)
     return note
   },
@@ -678,29 +709,29 @@ const comparisonHelper = {
   create: (
     em: EntityManager,
     references: {
-      app: InstanceType<typeof entities.App>
-      user: InstanceType<typeof entities.User>
+      app: InstanceType<typeof App>
+      user: InstanceType<typeof User>
     },
-    data?: Partial<InstanceType<typeof entities.Comparison>>,
+    data?: Partial<InstanceType<typeof Comparison>>,
   ) => {
     const defaults = generate.comparison.simple()
     const input = {
       ...defaults,
       ...data,
     }
-    const comparison = wrap(new entities.Comparison(references.user, references.app)).assign(input)
+    const comparison = wrap(new Comparison(references.user, references.app)).assign(input)
     em.persist(comparison)
     return comparison
   },
   createInput: (
     em: EntityManager,
     references: {
-      comparison: InstanceType<typeof entities.Comparison>
-      userFile: InstanceType<typeof entities.UserFile>
+      comparison: InstanceType<typeof Comparison>
+      userFile: InstanceType<typeof UserFile>
     },
-    data?: Partial<InstanceType<typeof entities.ComparisonInput>>,
+    data?: Partial<InstanceType<typeof ComparisonInput>>,
   ) => {
-    const comparisonInput = wrap(new entities.ComparisonInput(
+    const comparisonInput = wrap(new ComparisonInput(
       references.comparison,
       references.userFile,
     )).assign(data ?? {}, { em })
@@ -712,15 +743,15 @@ const comparisonHelper = {
 const expertHelper = {
   create: (
     em: EntityManager,
-    references: { user: InstanceType<typeof entities.User> },
-    data?: Partial<InstanceType<typeof entities.Comment>>,
+    references: { user: InstanceType<typeof User> },
+    data?: Partial<InstanceType<typeof Comment>>,
   ): Expert => {
     const defaults = generate.expert.simple()
     const input = {
       ...defaults,
       ...data,
     }
-    const expert = wrap(new entities.Expert(references.user)).assign(input)
+    const expert = wrap(new Expert(references.user)).assign(input)
     em.persist(expert)
     return expert
   },
@@ -729,15 +760,15 @@ const expertHelper = {
 const newsHelper = {
   create: (
     em: EntityManager,
-    references: { user: InstanceType<typeof entities.User> },
-    data?: Partial<InstanceType<typeof entities.NewsItem>>,
+    references: { user: InstanceType<typeof User> },
+    data?: Partial<InstanceType<typeof NewsItem>>,
   ) => {
     const defaults = generate.news.create()
     const input = {
       ...defaults,
       ...data,
     }
-    const news = wrap(new entities.NewsItem(references.user)).assign(input)
+    const news = wrap(new NewsItem(references.user)).assign(input)
     em.persist(news)
     return news
   },
@@ -746,10 +777,10 @@ const newsHelper = {
 const workflowHelper = {
   create: (
     em: EntityManager,
-    references: { user: InstanceType<typeof entities.User> },
-    data?: Partial<InstanceType<typeof entities.Workflow>>,
+    references: { user: InstanceType<typeof User> },
+    data?: Partial<InstanceType<typeof Workflow>>,
   ) => {
-    const workflow = wrap(new entities.Workflow(references.user)).assign(data ?? { scope: 'private' }, { em })
+    const workflow = wrap(new Workflow(references.user)).assign(data ?? { scope: 'private' }, { em })
     em.persist(workflow)
     return workflow
   },
@@ -758,8 +789,8 @@ const workflowHelper = {
 const workflowSeriesHelper = {
     create: (
     em: EntityManager,
-    references: { user: InstanceType<typeof entities.User> },
-    data?: Partial<InstanceType<typeof entities.WorkflowSeries>>,
+    references: { user: InstanceType<typeof User> },
+    data?: Partial<InstanceType<typeof WorkflowSeries>>,
     ) => {
     const workflowSeriesDefaults = generate.workflowSeries.simple()
     const workflowSeriesInput = {
@@ -767,7 +798,7 @@ const workflowSeriesHelper = {
         ...data,
     }
 
-    const workflowSeries = wrap(new entities.WorkflowSeries(references.user)).assign(workflowSeriesInput, { em })
+    const workflowSeries = wrap(new WorkflowSeries(references.user)).assign(workflowSeriesInput, { em })
     em.persist(workflowSeries)
     return workflowSeries
     }

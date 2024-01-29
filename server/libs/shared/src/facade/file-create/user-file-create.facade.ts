@@ -1,25 +1,19 @@
-import { PlatformFileService } from '../../domain/platform'
-import { UserFileService } from '../../domain/user-file'
+import { Injectable } from '@nestjs/common'
+import { PlatformFileService } from '@shared/domain/platform/service/platform-file.service'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { UserFileService } from '@shared/domain/user-file/service/user-file.service'
+import { InternalError } from '@shared/errors'
 import { FILE_STATE_DX, PARENT_TYPE } from '../../domain/user-file/user-file.types'
-import { UserCtx } from '../../types'
 import { FileCreate } from './model/file-create'
 import { FileCreateWithContent } from './model/file-create-with-content'
-import { errors } from '../..'
 
+@Injectable()
 export class UserFileCreateFacade {
-  private readonly userCtx: UserCtx
-  private readonly platformFileService: PlatformFileService
-  private readonly userFileService: UserFileService
-
   constructor(
-    userCtx: UserCtx,
-    platformFileService: PlatformFileService,
-    userFileService: UserFileService,
-  ) {
-    this.userCtx = userCtx
-    this.platformFileService = platformFileService
-    this.userFileService = userFileService
-  }
+    private readonly user: UserContext,
+    private readonly platformFileService: PlatformFileService,
+    private readonly userFileService: UserFileService,
+  ) {}
 
   async createFileWithContent(props: FileCreateWithContent) {
     const file = await this.createFile(props)
@@ -32,13 +26,13 @@ export class UserFileCreateFacade {
     const dxid = (await this.platformFileService.createFile({ name, project, description }))?.id
 
     if (dxid == null) {
-      throw new errors.InternalError('Failed to create the file on the platform')
+      throw new InternalError('Failed to create the file on the platform')
     }
 
     return await this.userFileService.createFile({
-      parentId: this.userCtx.id,
+      parentId: this.user.id,
       parentType: PARENT_TYPE.USER,
-      userId: this.userCtx.id,
+      userId: this.user.id,
       name,
       state: FILE_STATE_DX.OPEN,
       scope,

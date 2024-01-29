@@ -26,6 +26,7 @@ module.exports = ({ urlLoaderOptions }) => ({
       RECAPTCHA_SITE_KEY: JSON.stringify(captchaKey),
       PROD_OR_STAGE: JSON.stringify(isProdOrStage),
       NODE_ENV: JSON.stringify(process.env.NODE_ENV),
+      ENABLE_DEV_MSW: JSON.stringify(Boolean(process.env.ENABLE_DEV_MSW)),
     }),
     new CopyWebpackPlugin({
       patterns: [

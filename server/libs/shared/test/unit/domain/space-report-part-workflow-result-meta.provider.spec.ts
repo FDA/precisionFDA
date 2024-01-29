@@ -1,5 +1,5 @@
+import { Workflow } from '@shared/domain/workflow/entity/workflow.entity'
 import { expect } from 'chai'
-import { Workflow } from '../../../src/domain'
 import {
   SpaceReportPartWorkflowResultMetaProvider,
 } from '../../../src/domain/space-report/service/part/space-report-part-workflow-result-meta.provider'

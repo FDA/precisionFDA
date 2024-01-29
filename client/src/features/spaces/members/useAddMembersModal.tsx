@@ -3,7 +3,6 @@ import { yupResolver } from '@hookform/resolvers/yup'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import React from 'react'
 import { Controller, useForm } from 'react-hook-form'
-import Select from 'react-select'
 import { toast } from 'react-toastify'
 import * as Yup from 'yup'
 import { Button, ButtonSolidBlue } from '../../../components/Button'
@@ -15,6 +14,7 @@ import { useModal } from '../../modal/useModal'
 import { addMembersToSpaceRequest } from './members.api'
 import { MemberRole } from './members.types'
 import { StyledFields, StyledFooter } from './members.styles'
+import { Select } from '../../../components/Select'
 
 interface FormValues {
   invitees_role: { label: string; value: MemberRole }

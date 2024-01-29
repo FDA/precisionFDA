@@ -38,12 +38,12 @@ const statusCss = css`
   font-weight: bold;
   font-size: 12px;
 `
-export const ItemImage = styled.div<{ timeStatus: TimeStatus }>`
+export const ItemImage = styled.div<{ $timeStatus: TimeStatus }>`
   min-width: 200px;
   max-width: 200px;
 
   ${props => {
-    if (props.timeStatus === 'current')
+    if (props.$timeStatus === 'current')
       return css`
         &:before {
           ${statusCss}
@@ -51,7 +51,7 @@ export const ItemImage = styled.div<{ timeStatus: TimeStatus }>`
           content: 'OPEN';
         }
       `
-    if (props.timeStatus === 'upcoming')
+    if (props.$timeStatus === 'upcoming')
       return css`
         &:before {
           ${statusCss}
@@ -59,7 +59,7 @@ export const ItemImage = styled.div<{ timeStatus: TimeStatus }>`
           content: 'UPCOMING';
         }
       `
-    if (props.timeStatus === 'ended')
+    if (props.$timeStatus === 'ended')
       return css`
         &:before {
           ${statusCss}

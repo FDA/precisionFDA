@@ -1,17 +1,20 @@
 import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
+import { database } from '@shared/database'
+import { LicensesForFilesOperation } from '@shared/domain/license/ops/licenses-for-files'
+import { LicensedItem } from '@shared/domain/licensed-item/licensed-item.entity'
+import { User } from '@shared/domain/user/user.entity'
+import { getLogger } from '@shared/logger'
 import { create, db } from '../../../src/test'
-import { database, getLogger, types } from '@shared'
 import { expect } from 'chai'
 import { wrap } from '@mikro-orm/core'
 import { FilesInput } from '../../../src/domain/license/license.input'
-import { entities, license, User } from '../../../src/domain'
 import P from 'pino'
 
 describe('licenses for files tests', () => {
   let em: EntityManager<MySqlDriver>
   let user: User
   let log: P.Logger
-  let userCtx: types.UserCtx
+  let userCtx: UserCtx
 
   beforeEach(async () => {
     await db.dropData(database.connection())
@@ -37,18 +40,18 @@ describe('licenses for files tests', () => {
     em.persist(license2)
     await em.flush()
 
-    const licensedItem1 = wrap(new entities.LicensedItem(license1, file1.id))
+    const licensedItem1 = wrap(new LicensedItem(license1, file1.id))
       .assign({ licenseableType: 'Node' }, { em })
     em.persist(licensedItem1)
-    const licensedItem2 = wrap(new entities.LicensedItem(license1, file2.id))
+    const licensedItem2 = wrap(new LicensedItem(license1, file2.id))
       .assign({ licenseableType: 'Node' }, { em })
     em.persist(licensedItem2)
-    const licensedItem3 = wrap(new entities.LicensedItem(license2, file3.id))
+    const licensedItem3 = wrap(new LicensedItem(license2, file3.id))
       .assign({ licenseableType: 'Node' }, { em })
     em.persist(licensedItem3)
     await em.flush()
 
-    const op = new license.LicensesForFilesOperation({
+    const op = new LicensesForFilesOperation({
       em: database.orm().em.fork() as EntityManager<MySqlDriver>,
       log,
       user: userCtx,

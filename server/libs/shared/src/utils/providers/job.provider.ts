@@ -1,5 +1,5 @@
+import { Job } from '@shared/domain/job/job.entity'
 import { ENTITY_TYPE, SPACE_EVENT_OBJECT_TYPE } from '../../domain/space-event/space-event.enum'
-import { Job } from '../../domain/job'
 import { EntityDataProvider } from './entity-data.provider'
 
 export class SpaceEventJobEntityDataProvider extends EntityDataProvider<'job'> {

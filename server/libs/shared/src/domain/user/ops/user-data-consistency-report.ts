@@ -1,17 +1,20 @@
 /* eslint-disable @typescript-eslint/no-floating-promises */
-import { BaseOperation } from '../../../utils/base-operation'
+import { config } from '@shared/config'
+import { database } from '@shared/database'
+import { EmailSendOperation } from '@shared/domain/email/ops/email-send'
+import { Folder } from '@shared/domain/user-file/folder.entity'
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
+import { User } from '@shared/domain/user/user.entity'
+import { Node } from '@shared/domain/user-file/node.entity'
+import { BaseOperation } from '@shared/utils/base-operation'
 import { UserCtx, UserOpsCtx } from '../../../types'
 import { PlatformClient } from '../../../platform-client'
-import {  Folder, Node, UserFile } from '../../user-file'
-import { User } from '../..'
 import { Task, TASK_TYPE } from '../../../queue/task.input'
-import { config, database, queue } from '@shared'
 import { Job } from 'bull'
 import { findUnclosedFilesOrAssets, getNodePath } from '../../user-file/user-file.helper'
 import { SPACE_MEMBERSHIP_SIDE } from '../../space-membership/space-membership.enum'
 import { EMAIL_TYPES, EmailSendInput } from '../../email/email.config'
-import { EmailSendOperation } from '../../email'
-import { createSendEmailTask } from '../../../queue'
+import { addToQueueEnsureUnique, createSendEmailTask, getFileSyncQueue } from '../../../queue'
 import { userDataConsistencyReportTemplate } from '../../email/templates/mjml/user-data-consistency-report.template'
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { wrap } from '@mikro-orm/core'
@@ -74,7 +77,7 @@ UserDataConsistencyReportOutput
       user: userCtx,
     }
     const jobId = UserDataConsistencyReportOperation.getBullJobId(userCtx.dxuser)
-    return await queue.addToQueueEnsureUnique(queue.getFileSyncQueue(), queueData, jobId)
+    return await addToQueueEnsureUnique(getFileSyncQueue(), queueData, jobId)
   }
 
   async run(): Promise<any> {
@@ -82,16 +85,14 @@ UserDataConsistencyReportOutput
     const log = this.ctx.log
     let em: SqlEntityManager = this.ctx.em
     try {
-      const dbReplicaService = await database.createDatabaseReplicaService()
-      await dbReplicaService.start()
-      em = dbReplicaService.getOrm()!.em
+      em = await database.getReadOnlyEM()
     } catch (error) {
-      log.warn('Cannot create dbReplicaService, using main db')
+      log.warn('Not connected to the readonly replica db, using main db')
     }
 
     let output: UserDataConsistencyReportOutput = {}
 
-    log.info({
+    log.verbose({
       id: userCtx.id,
       dxuser: userCtx.dxuser,
     }, 'UserDataConsistencyReportOperation: Starting')
@@ -312,7 +313,7 @@ UserDataConsistencyReportOutput
 
       await this.sendReportEmail(output)
 
-      log.info({
+      log.verbose({
         id: userCtx.id,
         dxuser: userCtx.dxuser,
         output,
@@ -338,7 +339,7 @@ UserDataConsistencyReportOutput
     }
 
     const jobId = EmailSendOperation.getBullJobId(EMAIL_TYPES.userDataConsistencyReport)
-    this.ctx.log.info('UserDataConsistencyReportOperation: Sending report email to admin')
+    this.ctx.log.verbose('UserDataConsistencyReportOperation: Sending report email to admin')
     const tempUserCtx: UserCtx = { id: adminUser.id, dxuser: adminUser.dxuser, accessToken: 'notUsed' }
     await createSendEmailTask(email, tempUserCtx, jobId)
   }

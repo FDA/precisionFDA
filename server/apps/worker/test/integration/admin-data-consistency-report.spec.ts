@@ -1,10 +1,17 @@
 /* eslint-disable max-len */
+import { database } from '@shared/database'
+import {
+  AdminDataConsistencyReportOperation
+} from '@shared/debug/ops/admin-data-consistency-report'
+import { App } from '@shared/domain/app/app.entity'
+import { Job } from '@shared/domain/job/job.entity'
+import { Space } from '@shared/domain/space/space.entity'
+import { User } from '@shared/domain/user/user.entity'
+import { Node } from '@shared/domain/user-file/node.entity'
+import { getLogger } from '@shared/logger'
 /* eslint-disable no-inline-comments */
 /* eslint-disable no-undefined */
 import { expect } from 'chai'
-import { debug } from '@shared'
-import { database, getLogger } from '@shared'
-import { App, Job, Node, Space, User, user } from '@shared/domain'
 import { UserCtx } from '@shared/types'
 import { create, db, generate } from '@shared/test'
 import { fakes, mocksReset } from '@shared/test/mocks'
@@ -80,18 +87,18 @@ describe('TASK: AdminDataConsistencyReportOperation', () => {
   })
 
   it('enqueues correctly', async () => {
-    await debug.AdminDataConsistencyReportOperation.enqueue()
+    await AdminDataConsistencyReportOperation.enqueue()
     expect(queueFakes.addToQueueStub.callCount).to.equal(1)
   })
 
   it('checkInconsistentSpaces', async () => {
-    const op = new debug.AdminDataConsistencyReportOperation({ em, log })
+    const op = new AdminDataConsistencyReportOperation({ em, log })
     const output = await op.checkInconsistentSpaces()
     expect(output).to.have.length(2)
   })
 
   it('checkRunningJobs returns user info', async () => {
-    const op = new debug.AdminDataConsistencyReportOperation({ em, log })
+    const op = new AdminDataConsistencyReportOperation({ em, log })
     const output = await op.checkRunningJobs()
     expect(output).to.have.length(2)
     expect(output[0].userDxid).to.be.equal(user.dxid)
@@ -99,7 +106,7 @@ describe('TASK: AdminDataConsistencyReportOperation', () => {
   })
 
   it('checkInconsistentNodes', async () => {
-    const op = new debug.AdminDataConsistencyReportOperation({ em, log })
+    const op = new AdminDataConsistencyReportOperation({ em, log })
     const output = await op.checkInconsistentNodes()
     expect(output).to.have.length(2)
     expect(output[0].parentFolderId).to.not.be.null()
@@ -109,7 +116,7 @@ describe('TASK: AdminDataConsistencyReportOperation', () => {
   })
 
   it('runs', async () => {
-    const op = new debug.AdminDataConsistencyReportOperation({ em, log })
+    const op = new AdminDataConsistencyReportOperation({ em, log })
     const output = await op.run()
     expect(output).to.not.be.null()
   })

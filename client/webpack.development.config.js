@@ -38,21 +38,6 @@ module.exports = merge(base({ urlLoaderOptions }), swc({ swcLoaderOptions }), {
     path: path.resolve(__dirname, 'dist'),
     publicPath: '/',
   },
-  module: {
-    rules: [
-      {
-        test: /\.(ts|js)x?$/,
-        exclude: [/node_modules/, /dist/, /.build_cache/],
-        loader: 'babel-loader',
-        options: {
-          plugins: ['babel-plugin-styled-components'],
-          presets: [],
-          cacheDirectory: true,
-          cacheCompression: false,
-        },
-      },
-    ],
-  },
   watchOptions: {
     ignored: [
       path.resolve(__dirname, 'dist'),
@@ -67,7 +52,7 @@ module.exports = merge(base({ urlLoaderOptions }), swc({ swcLoaderOptions }), {
     client: {
       overlay: false,
     },
-    static: ['./dist', path.join(__dirname, '../public')],
+    static: ['./dist', path.join(__dirname, '../public'), path.join(__dirname, './public')],
     historyApiFallback: true, // See https://stackoverflow.com/questions/56573363/react-router-v4-nested-routes-not-work-with-webpack-dev-server
     host: '0.0.0.0', // See https://github.com/webpack/webpack-dev-server/issues/547
     port: 4000,

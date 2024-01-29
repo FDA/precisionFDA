@@ -20,17 +20,17 @@ const StyledHeaderCell = styled.th`
   text-align: center;
 `
 const StyledBodyCell = styled.td<{
-  bold?: boolean,
-  textAlign: 'left' | 'right'
-  bgColor: string
+  $bold?: boolean,
+  $textAlign: 'left' | 'right'
+  $bgColor: string
 }>`
-  ${({ bold }) => bold && css`
+  ${({ $bold }) => $bold && css`
     font-weight: bold;
   `}
-  ${({ textAlign, bgColor }) => (
+  ${({ $textAlign, $bgColor }) => (
     css`
-      text-align: ${textAlign};
-      background-color: ${bgColor};
+      text-align: ${$textAlign};
+      background-color: ${$bgColor};
     `
   )}
   padding: 0 20px;
@@ -89,12 +89,12 @@ const CloudUsageReport = ({ stats }: CloudUsageReportProps) => {
       <tbody>
         {tableBodyConfig.map((row, index) => (
           <tr key={row.resource}>
-            <StyledBodyCell bold={row.bold} textAlign='left' bgColor={
+            <StyledBodyCell $bold={row.bold} $textAlign='left' $bgColor={
               index % 2 === 0 ? colors.borderDefault : colors.backgroundLightGray
             }>
               {row.resource}
             </StyledBodyCell>
-            <StyledBodyCell bold={row.bold} textAlign='right' bgColor={
+            <StyledBodyCell $bold={row.bold} $textAlign='right' $bgColor={
               index % 2 === 0 ? colors.borderDefault : colors.backgroundLightGray
             }>
               {`$${row.usage.toFixed(2)}`}

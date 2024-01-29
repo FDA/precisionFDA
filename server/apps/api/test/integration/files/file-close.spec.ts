@@ -1,17 +1,20 @@
 /* eslint-disable max-len */
+import { database } from '@shared/database'
+import { Asset } from '@shared/domain/user-file/asset.entity'
+import { SyncFilesStateOperation } from '@shared/domain/user-file/ops/sync-files-state'
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
+import { User } from '@shared/domain/user/user.entity'
+import { ErrorCodes } from '@shared/errors'
 import { expect } from 'chai'
 import { EntityManager } from '@mikro-orm/mysql'
 import supertest from 'supertest'
-import { Asset, User, UserFile } from '@shared/domain'
 import { create, generate, db } from '@shared/test'
 import { fakes, mocksReset } from '@shared/test/mocks'
-import { database, errors } from '@shared'
 import { getServer } from '../../../src/server'
 import { getDefaultHeaderData } from '../../utils/expect-helper'
 import { FILE_STATE, FILE_STATE_DX, PARENT_TYPE } from '@shared/domain/user-file/user-file.types'
 import { AbstractSqlDriver } from '@mikro-orm/mysql'
 import { FileCloseParams } from '@shared/platform-client/platform-client.params'
-import { SyncFilesStateOperation } from '@shared/domain/user-file'
 
 
 describe('PATCH /files/:id/close', () => {
@@ -331,7 +334,7 @@ describe('PATCH /files/:id/close', () => {
       .set(getDefaultHeaderData(user2))
       .expect(403)
 
-    expect(res.body.error).to.have.property('code', errors.ErrorCodes.NOT_PERMITTED)
+    expect(res.body.error).to.have.property('code', ErrorCodes.NOT_PERMITTED)
     expect(fakes.client.fileCloseFake.callCount).to.equal(0)
     expect(fakes.queue.createSyncFilesStateTask.callCount).to.equal(0)
   })
@@ -344,7 +347,7 @@ describe('PATCH /files/:id/close', () => {
       .set(getDefaultHeaderData(user2))
       .expect(404)
 
-    expect(res.body.error).to.have.property('code', errors.ErrorCodes.USER_FILE_NOT_FOUND)
+    expect(res.body.error).to.have.property('code', ErrorCodes.USER_FILE_NOT_FOUND)
     expect(fakes.client.fileCloseFake.callCount).to.equal(0)
     expect(fakes.queue.createSyncFilesStateTask.callCount).to.equal(0)
   })

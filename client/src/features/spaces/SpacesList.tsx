@@ -5,7 +5,7 @@ import styled from 'styled-components'
 import { ButtonSolidBlue } from '../../components/Button'
 import { HoverDNAnexusLogo } from '../../components/icons/DNAnexusLogo'
 import { ContentFooter } from '../../components/Page/ContentFooter'
-import { compactScrollBar, Filler, PageTitle } from '../../components/Page/styles'
+import { compactScrollBarV2, Filler, PageTitle } from '../../components/Page/styles'
 import { Pagination } from '../../components/Pagination'
 import { EmptyTable, ReactTableStyles } from '../../components/Table/styles'
 import Table from '../../components/Table/Table'
@@ -20,6 +20,8 @@ import { spacesListRequest } from './spaces.api'
 import { columnFilters, ISpace } from './spaces.types'
 import { useSpacesColumns } from './useSpacesColumns'
 import { useHiddenColumnLocalStorage } from '../../hooks/useHiddenColumnLocalStorage'
+import { ScrollableInnerGlobalStyles } from '../../styles/global'
+import { UserLayout } from '../../layouts/UserLayout'
 
 const SpacesHeader = styled.div`
   display: flex;
@@ -89,6 +91,8 @@ const SpacesList = () => {
 
   return (
     <>
+    <ScrollableInnerGlobalStyles />
+    <UserLayout>
       <SpacesHeader>
         <PageTitle>Spaces</PageTitle>
         <ButtonSolidBlue as={Link} to="/spaces/new">
@@ -125,6 +129,7 @@ const SpacesList = () => {
         />
         <HoverDNAnexusLogo opacity height={14} />
       </ContentFooter>
+    </UserLayout>
     </>
   )
 }
@@ -135,14 +140,14 @@ const StyledTable = styled.div`
   flex-grow: 1;
   height: 0;
 
-  ${compactScrollBar}
+  ${compactScrollBarV2}
 
   ${ReactTableStyles} {
     margin-inline: auto;
     width: min(100% - 32px, 100%);
     font-size: 14px;
     .table {
-      border-left:1px solid #d5d5d5;
+      border-left:1px solid var(--c-layout-border);
       .tr {
         height: 56px;
         .td {
@@ -212,7 +217,7 @@ const TableTable = ({
         selectedRows={selectedRows}
         setSelectedRows={setSelectedRows}
       />
-      <Filler size={16} />
+      <Filler $size={16} />
     </StyledTable>
   )
 }

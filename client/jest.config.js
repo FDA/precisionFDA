@@ -63,6 +63,7 @@ module.exports = {
   globals: {
     'PROD_OR_STAGE': 'false',
     'RECAPTCHA_SITE_KEY': 'some-key',
+    ENABLE_DEV_MSW: false,
   },
 
   // The maximum amount of workers used to run your tests. Can be specified as % or a number. E.g. maxWorkers: 10% will use 10% of your CPU amount + 1 as the maximum worker number. maxWorkers: 2 will use a maximum of 2 workers.
@@ -134,7 +135,7 @@ module.exports = {
   // runner: "jest-runner",
 
   // The paths to modules that run some code to configure or set up the testing environment before each test
-  // setupFiles: [],
+  setupFiles: ['./jest.polyfills.js'],
 
   // A list of paths to modules that run some code to configure or set up the testing framework before each test
   // setupFilesAfterEnv: ['./jest.setup.js'],
@@ -143,9 +144,9 @@ module.exports = {
   // snapshotSerializers: [],
 
   // Options that will be passed to the testEnvironment
-  // testEnvironmentOptions: {
-  //   enzymeAdapter: 'react16',
-  // },
+  testEnvironmentOptions: {
+    customExportConditions: [''],
+  },
     
   // The test environment that will be used for testing
   testEnvironment: 'jsdom',

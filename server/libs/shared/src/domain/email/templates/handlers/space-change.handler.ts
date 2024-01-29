@@ -1,6 +1,8 @@
+import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
+import { Space } from '@shared/domain/space/space.entity'
+import { User } from '@shared/domain/user/user.entity'
+import { ErrorCodes, NotFoundError } from '@shared/errors'
 import { pipe, filter, uniqBy } from 'ramda'
-import { errors } from '../../../..'
-import { User, SpaceMembership, Space } from '../../..'
 import {
   EmailSendInput,
   EmailTemplate,
@@ -8,7 +10,7 @@ import {
   NOTIFICATION_TYPES_BASE,
   EMAIL_TYPES,
 } from '../../email.config'
-import { BaseTemplate } from '../base-template'
+import { BaseTemplate } from '@shared/domain/email/templates/base-template'
 import { SpaceChangeTemplateInput, spaceChangedTemplate } from '../mjml/space-change.template'
 import {
   buildEmailTemplate,
@@ -38,16 +40,16 @@ export class SpaceChangedEmailHandler extends BaseTemplate<SpaceChanged> impleme
       id: this.validatedInput.spaceId,
     })
     if (!this.space) {
-      throw new errors.NotFoundError(
+      throw new NotFoundError(
         `Space id ${this.validatedInput.spaceId.toString()} not found`,
-        { code: errors.ErrorCodes.EMAIL_PAYLOAD_NOT_FOUND },
+        { code: ErrorCodes.EMAIL_PAYLOAD_NOT_FOUND },
       )
     }
     this.user = await this.ctx.em.findOneOrFail(User, { id: this.validatedInput.initUserId })
     if (!this.user) {
-      throw new errors.NotFoundError(
+      throw new NotFoundError(
         `User id ${this.validatedInput.initUserId.toString()} not found`,
-        { code: errors.ErrorCodes.EMAIL_PAYLOAD_NOT_FOUND },
+        { code: ErrorCodes.EMAIL_PAYLOAD_NOT_FOUND },
       )
     }
 

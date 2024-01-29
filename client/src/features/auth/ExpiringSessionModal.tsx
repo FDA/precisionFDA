@@ -74,7 +74,7 @@ export const ExpiringSessionModal: React.FC<{ modal: UseModal }> = ({
         headerText={sessionExpirationPassed ? 'Session Expired' : 'Session Expiring'}
         hide={() => modal.setShowModal(false)}
       />
-      <Content overflowContent={false}>
+      <Content $overflowContent={false}>
         {sessionExpirationPassed
           ? 'You have been automatically logged out due to inactivity.'
           : `You are about to be logged out in ${timer} ${pluralize('second', timer)} due to inactivity.`}

@@ -1,3 +1,4 @@
+import { IOType } from '@shared/types/common'
 import type { JOB_STATE } from './job.enum'
 
 interface IJobProperties {
@@ -49,4 +50,15 @@ export interface IJobDescribe {
   failureMessage: string
   failureReason: string
   runInput: IRunInput
+}
+
+export interface JobRunData {
+  output_folder_path?: string
+  run_instance_type: string
+  run_inputs: {
+    [key: string]: IOType
+  }
+  run_outputs: {
+    [key: string]: IOType
+  }
 }

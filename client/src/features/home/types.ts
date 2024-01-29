@@ -105,12 +105,13 @@ export interface MetaPath {
 }
 export interface IMeta {
   links: {
-    copy_private: string
-    comments: string
+    copy_private?: string
+    comments?: string
+    edit_tags?: string
   }
   path: MetaPath[]
   count: number
-  challenges: IChallenge[]
+  challenges: IChallenge[] | null
   pagination: {
     current_page: number
     next_page: null | number

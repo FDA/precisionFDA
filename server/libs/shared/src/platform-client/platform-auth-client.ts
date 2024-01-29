@@ -1,7 +1,7 @@
 /* eslint-disable max-len */
+import { MfaAlreadyResetError } from '@shared/errors'
 import axios, { AxiosInstance, AxiosRequestConfig } from 'axios'
-import type { Logger } from 'pino'
-import { errors } from '..'
+import type { Logger } from '@nestjs/common'
 import { config } from '../config'
 import { getLogger } from '../logger'
 import { PlatformClientBase } from './platform-client-base'
@@ -77,9 +77,9 @@ class PlatformAuthClient extends PlatformClientBase implements IPlatformAuthClie
       headers,
     }
 
-    this.log.info({ options }, 'PlatformAuthClient sending newAuthToken request')
+    this.log.verbose({ options }, 'PlatformAuthClient sending newAuthToken request')
     const res = await this.axiosInstance.request(options)
-    this.log.info({
+    this.log.verbose({
       headers: res.headers,
       config: res.config,
       data: res.data,
@@ -107,7 +107,7 @@ class PlatformAuthClient extends PlatformClientBase implements IPlatformAuthClie
       this.logClientFailed(options)
       return this.handleFailed(err, (_, __, message) => {
         if (message.includes('MFA is already reset')) {
-          throw new errors.MfaAlreadyResetError()
+          throw new MfaAlreadyResetError()
         }
       })
     }

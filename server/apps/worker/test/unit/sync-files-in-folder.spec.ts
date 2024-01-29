@@ -1,6 +1,13 @@
 import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
+import { database } from '@shared/database'
+import { Job } from '@shared/domain/job/job.entity'
+import { Asset } from '@shared/domain/user-file/asset.entity'
+import { Folder } from '@shared/domain/user-file/folder.entity'
+import { SyncFilesInFolderOperation } from '@shared/domain/user-file/ops/sync-folder-files'
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
+import { User } from '@shared/domain/user/user.entity'
+import { getLogger } from '@shared/logger'
 import { expect } from 'chai'
-import { User, Folder, Job, UserFile, Asset } from '@shared/domain'
 import { create, db } from '@shared/test'
 import type {
   SyncFilesInFolderInput,
@@ -10,7 +17,6 @@ import {
   PARENT_TYPE,
 } from '@shared/domain/user-file/user-file.types'
 import { fakes, mocksReset } from '@shared/test/mocks'
-import { userFile, database, getLogger, types } from '@shared'
 import {
   FILES_DESC_RES,
   FILES_LIST_RES_ROOT,
@@ -22,7 +28,7 @@ describe('syncFilesInFolder operation', () => {
   let job: Job
   let folder: Folder
   let log: any
-  let userCtx: types.UserCtx
+  let userCtx: UserCtx
   let defaultInput: SyncFilesInFolderInput
   const project = 'project-foo'
 
@@ -83,7 +89,7 @@ describe('syncFilesInFolder operation', () => {
       },
     )
     await em.flush()
-    const op = new userFile.SyncFilesInFolderOperation({
+    const op = new SyncFilesInFolderOperation({
       em: database.orm().em.fork(),
       log,
       user: userCtx,
@@ -130,7 +136,7 @@ describe('syncFilesInFolder operation', () => {
       },
     )
     await em.flush()
-    const op = new userFile.SyncFilesInFolderOperation({
+    const op = new SyncFilesInFolderOperation({
       em: database.orm().em.fork(),
       log,
       user: userCtx,
@@ -174,7 +180,7 @@ describe('syncFilesInFolder operation', () => {
       },
     )
     await em.flush()
-    const op = new userFile.SyncFilesInFolderOperation({
+    const op = new SyncFilesInFolderOperation({
       em: database.orm().em.fork(),
       log,
       user: userCtx,
@@ -215,7 +221,7 @@ describe('syncFilesInFolder operation', () => {
       },
     )
     await em.flush()
-    const op = new userFile.SyncFilesInFolderOperation({
+    const op = new SyncFilesInFolderOperation({
       em: database.orm().em.fork(),
       log,
       user: userCtx,
@@ -246,7 +252,7 @@ describe('syncFilesInFolder operation', () => {
       },
     )
     await em.flush()
-    const op = new userFile.SyncFilesInFolderOperation({
+    const op = new SyncFilesInFolderOperation({
       em: database.orm().em.fork(),
       log,
       user: userCtx,
@@ -295,7 +301,7 @@ describe('syncFilesInFolder operation', () => {
       },
     )
     await em.flush()
-    const op = new userFile.SyncFilesInFolderOperation({
+    const op = new SyncFilesInFolderOperation({
       em: database.orm().em.fork(),
       log,
       user: userCtx,
@@ -341,7 +347,7 @@ describe('syncFilesInFolder operation', () => {
     fakes.client.filesListFake
       .onCall(0)
       .returns(FILES_LIST_RES_ROOT.slice(0, 2))
-    const op = new userFile.SyncFilesInFolderOperation({
+    const op = new SyncFilesInFolderOperation({
       em: database.orm().em.fork(),
       log,
       user: userCtx,
@@ -388,7 +394,7 @@ describe('syncFilesInFolder operation', () => {
     fakes.client.filesListFake
       .onCall(0)
       .returns(FILES_LIST_RES_ROOT.slice(0, 2))
-    const op = new userFile.SyncFilesInFolderOperation({
+    const op = new SyncFilesInFolderOperation({
       em: database.orm().em.fork(),
       log,
       user: userCtx,
@@ -438,7 +444,7 @@ describe('syncFilesInFolder operation', () => {
     fakes.client.filesListFake
       .onCall(0)
       .returns(FILES_LIST_RES_ROOT.slice(0, 2))
-    const op = new userFile.SyncFilesInFolderOperation({
+    const op = new SyncFilesInFolderOperation({
       em: database.orm().em.fork(),
       log,
       user: userCtx,
@@ -471,7 +477,7 @@ describe('syncFilesInFolder operation', () => {
       },
     )
     await em.flush()
-    const op = new userFile.SyncFilesInFolderOperation({
+    const op = new SyncFilesInFolderOperation({
       em: database.orm().em.fork(),
       log,
       user: userCtx,

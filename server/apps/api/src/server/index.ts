@@ -1,69 +1,72 @@
-import http from 'http'
-import https from 'https'
+import { INestApplication } from '@nestjs/common'
+import { NestApplicationOptions } from '@nestjs/common/interfaces/nest-application-options.interface'
+import { NestFactory } from '@nestjs/core'
+import { setupNestApp } from '@shared/app-initialization'
+import { config } from '@shared/config'
 import fs from 'fs'
-import { config } from '@shared'
+import { ApiModule } from '../api.module'
 import { log } from '../logger'
-import { createApp } from './app'
 import { setupWSServer } from './middleware/notifications'
-
-export type KoaCallback = ReturnType<ReturnType<typeof createApp>['callback']>
 
 // the null type here is "ignored" because in allow-strict-null-checks = false mode
 // it is considered a subtype of T
 // we can consider using the strict null checks option
-let server: null | http.Server = null
+let app: null | INestApplication = null
 let wss: any = null
 
-export const getServer = () => server
+export const getServer = () => app.getHttpServer()
 
-export function createServer(callback: KoaCallback) {
+const startApp = async (cfg: { ssl: boolean }) => {
+  const options: NestApplicationOptions = {}
+
+  if (cfg?.ssl) {
+    options.httpsOptions = {
+      key: fs.readFileSync(config.api.keyCertPath),
+      cert: fs.readFileSync(config.api.certPath),
+    }
+  }
+
+  app = await NestFactory.create(ApiModule, options)
+
+  await setupNestApp(app)
+
+  await app.listen(config.api.port)
+
+  log.log(`${cfg?.ssl ? 'HTTPS' : 'HTTP'} Server: started (port: ${config.api.port.toString()})`)
+}
+
+export function createServer() {
   const startWSServer = async (): Promise<void> => {
-    if (server !== null) {
-      wss = await setupWSServer(server)
-      log.info('WebSocket server initialized')
+    if (app !== null) {
+      wss = await setupWSServer(app.getHttpServer())
+      log.log('WebSocket server initialized')
     }
   }
 
   const startHttpServer = async (): Promise<void> => {
-    await new Promise(resolve => {
-      const startedServer = http
-        .createServer(callback)
-        .listen(config.api.port, resolve as () => void)
-      server = startedServer
-    })
-    log.info(`HTTP Server: started (port: ${config.api.port.toString()})`)
+    await startApp({ ssl: false })
   }
 
   const startHttpsServer = async (): Promise<void> => {
     // Uncomment to debug server config
-    // log.info({config: config} , 'HTTP Server config')
+    // log.log({config: config} , 'HTTP Server config')
 
-    await new Promise(resolve => {
-      const startedServer = https
-        .createServer(
-          {
-            // eslint-disable-next-line no-sync
-            key: fs.readFileSync(config.api.keyCertPath),
-            // eslint-disable-next-line no-sync
-            cert: fs.readFileSync(config.api.certPath),
-          },
-          callback,
-        )
-        .listen(config.api.port, resolve as () => void)
-      server = startedServer
-    })
-    log.info(`HTTPS Server: started (port: ${config.api.port.toString()})`)
+    await startApp({ ssl: true })
   }
 
   const stopServer = async (): Promise<void> => {
-    await wss?.close(() => {
-      log.info('WebSocket server closed')
-    })
+    await new Promise<void>((resolve) => {
+      if (!wss) {
+        resolve()
+        return
+      }
 
-    if (server?.listening) {
-      await new Promise(done => server!.close(done))
-    }
-    log.info('Server: closed')
+      wss.close(resolve)
+    })
+    log.log('WebSocket server closed')
+
+    await app?.close()
+    log.log('Server: closed')
   }
 
   return {

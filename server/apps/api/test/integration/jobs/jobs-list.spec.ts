@@ -1,10 +1,14 @@
 import type { EntityManager } from '@mikro-orm/core'
 import { Reference } from '@mikro-orm/core'
-import { database, errors } from '@shared'
-import type { App, Job, Space, User } from '@shared/domain'
+import { database } from '@shared/database'
+import { App } from '@shared/domain/app/app.entity'
+import { Job } from '@shared/domain/job/job.entity'
 import { JOB_STATE } from '@shared/domain/job/job.enum'
+import { Space } from '@shared/domain/space/space.entity'
 import { getScopeFromSpaceId } from '@shared/domain/space/space.helper'
+import { User } from '@shared/domain/user/user.entity'
 import { HOME_SCOPE } from '@shared/enums'
+import { ErrorCodes } from '@shared/errors'
 import { create, db } from '@shared/test'
 import { mocksReset } from '@shared/test/mocks'
 import { expect } from 'chai'
@@ -160,7 +164,7 @@ describe.skip('GET /jobs', () => {
         .query({ scope: badScope })
         .expect(400)
 
-      expect(body.error).to.have.property('code', errors.ErrorCodes.USER_CONTEXT_QUERY_INVALID)
+      expect(body.error).to.have.property('code', ErrorCodes.USER_CONTEXT_QUERY_INVALID)
     })
 
     it('returns 400 when spaceId is invalid', async () => {
@@ -170,7 +174,7 @@ describe.skip('GET /jobs', () => {
         .set(getDefaultHeaderData(user1))
         .query({ spaceId: badSpaceId })
         .expect(400)
-      expect(body.error).to.have.property('code', errors.ErrorCodes.VALIDATION)
+      expect(body.error).to.have.property('code', ErrorCodes.VALIDATION)
       expect(body.props).to.have.property('validationErrors')
     })
   })

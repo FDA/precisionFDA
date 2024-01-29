@@ -1,6 +1,6 @@
+import { App } from '@shared/domain/app/app.entity'
 import { expect } from 'chai'
 import { stub } from 'sinon'
-import { App } from '../../../src/domain'
 import {
   AppProvenanceDataService,
 } from '../../../src/domain/provenance/service/entity-data/app-provenance-data.service'

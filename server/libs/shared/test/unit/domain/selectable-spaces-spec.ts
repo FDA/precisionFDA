@@ -1,15 +1,17 @@
 import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
+import { database } from '@shared/database'
+import { SelectableSpacesOperation } from '@shared/domain/space/ops/selectable-spaces'
+import { User } from '@shared/domain/user/user.entity'
+import { getLogger } from '@shared/logger'
 import { create, db } from '../../../src/test'
-import { database, getLogger, types } from '@shared'
 import { expect } from 'chai'
 import P from 'pino'
-import { space, User } from '../../../src/domain'
 
 describe('selectable spaces tests', () => {
   let em: EntityManager<MySqlDriver>
   let user: User
   let log: P.Logger
-  let userCtx: types.UserCtx
+  let userCtx: UserCtx
 
   beforeEach(async () => {
     await db.dropData(database.connection())
@@ -31,7 +33,7 @@ describe('selectable spaces tests', () => {
     )
     await em.flush()
 
-    const op = new space.SelectableSpacesOperation({
+    const op = new SelectableSpacesOperation({
       em: database.orm().em.fork() as EntityManager<MySqlDriver>,
       log,
       user: userCtx,
@@ -50,7 +52,7 @@ describe('selectable spaces tests', () => {
     const scopedApp = create.appHelper.createRegular(em, { user }, { title: 'private-app', scope: `space-${masterSpace.id}` })
     await em.flush()
 
-    const op = new space.SelectableSpacesOperation({
+    const op = new SelectableSpacesOperation({
       em: database.orm().em.fork() as EntityManager<MySqlDriver>,
       log,
       user: userCtx,

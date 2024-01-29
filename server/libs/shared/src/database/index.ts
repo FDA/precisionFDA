@@ -1,43 +1,27 @@
 import { Connection, MikroORM } from '@mikro-orm/core'
 import { MySqlDriver } from '@mikro-orm/mysql'
-import { config } from '..'
-import { DatabaseService, IDatabaseService } from './database.service'
 
-let db: IDatabaseService | null
-let dbReplica: IDatabaseService | null
+let mainORM: MikroORM<MySqlDriver>
+let readOnlyORM: MikroORM<MySqlDriver>
 
-const createDatabaseService = (): IDatabaseService => {
-  db = new DatabaseService(config.database.clientUrl, config.database.debug)
-  return db
+const init = (main: MikroORM<MySqlDriver>, readOnly: MikroORM<MySqlDriver>) => {
+  mainORM = main
+  readOnlyORM = readOnly
 }
 
-const createDatabaseReplicaService = (): IDatabaseService => {
-  dbReplica = new DatabaseService(config.databaseReplica.clientUrl, config.databaseReplica.debug)
-  return dbReplica
-}
+const getReadOnlyEM = async () => {
+  const connected = await readOnlyORM?.isConnected()
 
-const start = async(): Promise<void> => {
-  if (!db) {
-    db = createDatabaseService()
+  if (!connected) {
+    throw new Error('Readonly DB connection not established')
   }
-  await db.start()
+
+  return readOnlyORM.em.fork()
 }
 
-const stop = async(): Promise<void> => {
-  if (db) {
-    await db.stop()
-  }
-  if (dbReplica) {
-    await dbReplica.stop()
-  }
-}
-
-// TODO: In the future this will be created and injected by DI, but for now
-//       keeping the exported functions as-is because the refactor touches many files
 export const database = {
-  start: start,
-  stop: stop,
-  orm: (): MikroORM<MySqlDriver> => db!.getOrm()!,
-  connection: (): Connection => db!.getOrm()!.em.getConnection(),
-  createDatabaseReplicaService,
+  init,
+  orm: () => mainORM,
+  getReadOnlyEM,
+  connection: (): Connection => mainORM.em.getConnection(),
 }

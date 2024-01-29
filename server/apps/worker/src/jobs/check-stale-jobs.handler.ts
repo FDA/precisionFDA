@@ -1,8 +1,11 @@
-import { database, job, entities, config } from '@shared'
+import { config } from '@shared/config'
+import { database } from '@shared/database'
+import { CheckStaleJobsOperation } from '@shared/domain/job/ops/check-stale'
+import { User } from '@shared/domain/user/user.entity'
 import type { CheckStaleJobsJob } from '@shared/queue/task.input'
 import { Job } from 'bull'
 import { nanoid } from 'nanoid'
-import { getChildLogger } from '../utils'
+import { getChildLogger } from '../utils/logger'
 
 export const checkStaleJobsHandler = async (bullJob: Job<CheckStaleJobsJob>) => {
   const data = bullJob.data
@@ -11,7 +14,7 @@ export const checkStaleJobsHandler = async (bullJob: Job<CheckStaleJobsJob>) => 
   // this way we can set up worker operation that needs to run under admin account
   // TODO(samuel) fix by declaration merging
   const em = database.orm().em.fork() as any
-  const adminUser = await em.getRepository(entities.User).findAdminUser()
+  const adminUser = await em.getRepository(User).findAdminUser()
   const adminUserCtx = {
     id: adminUser.id,
     dxuser: adminUser.dxuser,
@@ -23,5 +26,5 @@ export const checkStaleJobsHandler = async (bullJob: Job<CheckStaleJobsJob>) => 
     user: adminUserCtx,
     job: bullJob,
   }
-  await new job.CheckStaleJobsOperation(ctx).execute(data.payload)
+  await new CheckStaleJobsOperation(ctx).execute(data.payload)
 }

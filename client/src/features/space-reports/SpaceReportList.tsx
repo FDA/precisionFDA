@@ -11,7 +11,7 @@ import { PlusIcon } from '../../components/icons/PlusIcon'
 import { ContentFooter } from '../../components/Page/ContentFooter'
 import { EmptyTable } from '../../components/Table/styles'
 import Table from '../../components/Table/Table'
-import { DEFAULT_RECONNECT_ATTEMPTS, DEFAULT_RECONNECT_INTERVAL, getNodeWsUrl } from '../../utils/config'
+import { DEFAULT_RECONNECT_ATTEMPTS, DEFAULT_RECONNECT_INTERVAL, SHOULD_RECONNECT, getNodeWsUrl } from '../../utils/config'
 import { getSelectedObjectsFromIndexes } from '../../utils/object'
 import { ActionsDropdownContent } from '../home/ActionDropdownContent'
 import { ActionsRow, QuickActions, StyledHomeTable } from '../home/home.styles'
@@ -98,7 +98,7 @@ export const SpaceReportList =({ spaceId }: { spaceId: number }) => {
     share: true,
     reconnectInterval: DEFAULT_RECONNECT_INTERVAL,
     reconnectAttempts: DEFAULT_RECONNECT_ATTEMPTS,
-    shouldReconnect: () => true,
+    shouldReconnect: () => SHOULD_RECONNECT,
   })
 
   useEffect(() => {

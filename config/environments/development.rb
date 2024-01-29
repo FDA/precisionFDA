@@ -89,6 +89,9 @@ Rails.application.configure do
   # SSL
   config.force_ssl = true
 
+  # Log level
+  config.log_level = :debug
+
   # Allow access from any ip
   config.web_console.whiny_requests = false
 end

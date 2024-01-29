@@ -1,20 +1,20 @@
-import React, { useEffect, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import Select from 'react-select'
-import {
-  PageHeader,
-  PageTitle,
-  PageActions,
-} from '../../../components/Page/styles'
+import React, { useState } from 'react'
+import { Controller, useForm } from 'react-hook-form'
+import { toast } from 'react-toastify'
 import { ButtonSolidBlue } from '../../../components/Button'
-import { Checkbox } from '../../../components/Checkbox'
-import { FieldGroup, SectionTitle, StyledNotifications, StyledPageContainer, StyledSelectWrap } from './styles'
-import { fetchNotificationsPreferences, saveNotificationsPreferences } from './api'
+import { Checkbox } from '../../../components/CheckboxNext'
 import { GuestNotAllowed } from '../../../components/GuestNotAllowed'
-import { mapValues } from '../../../utils/object'
+import { Loader } from '../../../components/Loader'
+import { PageActions, PageHeader, PageTitle } from '../../../components/Page/styles'
+import { Select } from '../../../components/Select'
+import { FieldLabelRow } from '../../../components/form/styles'
 import { useAuthUser } from '../../../features/auth/useAuthUser'
-import { UserLayout } from '../../../layouts/UserLayout'
 import { usePageMeta } from '../../../hooks/usePageMeta'
+import { UserLayout } from '../../../layouts/UserLayout'
+import { fetchNotificationsPreferences, saveNotificationsPreferences } from './api'
+import { FieldGroup, SectionTitle, StyledNotifications, StyledPageContainer, StyledSelectWrap } from './styles'
+import { AllNotification, NotificationPreferences, NotificationPreferencesPayload } from './types'
 
 enum Roles {
   'reviewer' = 'reviewer',
@@ -64,214 +64,190 @@ const NotificationLabel: any = {
   reviewer_content_added_or_deleted: 'Content Added or Deleted',
 }
 
-const preference = {
-  reviewer: {
-    reviewer_membership_changed: false,
-    reviewer_comment_activity: false,
-    reviewer_content_added_or_deleted: false,
-  },
-  sponsor: {
-    sponsor_membership_changed: false,
-    sponsor_comment_activity: false,
-    sponsor_content_added_or_deleted: false,
-  },
-  reviewer_lead: {
-    reviewer_lead_membership_changed: false,
-    reviewer_lead_comment_activity: false,
-    reviewer_lead_content_added_or_deleted: false,
-    reviewer_lead_member_added_to_space: false,
-    reviewer_lead_space_locked_unlocked_deleted: false,
-  },
-  sponsor_lead: {
-    sponsor_lead_membership_changed: false,
-    sponsor_lead_comment_activity: false,
-    sponsor_lead_content_added_or_deleted: false,
-    sponsor_lead_member_added_to_space: false,
-    sponsor_lead_space_locked_unlocked_deleted: false,
-  },
-  admin: {
-    admin_membership_changed: false,
-    admin_comment_activity: false,
-    admin_content_added_or_deleted: false,
-    admin_member_added_to_space: false,
-    admin_space_locked_unlocked_deleted: false,
-  },
-  private: {
-    private_job_finished: false,
-    private_challenge_opened: false,
-    private_challenge_preregister: false,
-  },
+type NotificationPreferencesForm = NotificationPreferences
+
+const NotificationForm = ({ preferences, onSave }: { preferences: NotificationPreferences; onSave: (v: NotificationPreferences) => void }) => {
+  const [selectedRole, setSelectedRole] = useState<Roles>(Roles['reviewer'])
+  const spaceNotificationRoles = Object.keys(preferences).filter(i => i !== 'private') as Array<Roles>
+  const options = spaceNotificationRoles.map(value => ({ value, label: RoleLabel[value] }))
+  const { control, handleSubmit, setValue, getValues, watch, formState: { isSubmitting }} = useForm<NotificationPreferencesForm>({
+    defaultValues: preferences,
+  })
+
+  const handleSelectAll = (role: Roles, checked: boolean) => {
+    Object.keys(getValues(role)).forEach(notification => {
+      setValue(`${role}.${notification}`, checked)
+    })
+  }
+
+  const isAllChecked = (role: Roles) => {
+    return Object.values(watch()[role])?.every(value => value)
+  }
+
+  return (
+    <form onSubmit={handleSubmit(onSave)}>
+      <StyledNotifications>
+        <SectionTitle>Site Notifications</SectionTitle>
+        <FieldGroup>
+          <Controller
+            name="private.private_challenge_opened"
+            defaultValue={false}
+            control={control}
+            render={({ field }) => (
+              <FieldLabelRow >
+                <Checkbox
+                  {...field}
+                  disabled={isSubmitting}
+                  checked={field.value}
+                  onChange={e => setValue(field.name, e.target.checked)}
+                />
+                Notify me when a new precisionFDA challenge is opened.
+              </FieldLabelRow>
+            )}
+          />
+        </FieldGroup>
+        <FieldGroup>
+          <Controller
+            name="private.private_challenge_preregister"
+            control={control}
+            defaultValue={false}
+            render={({ field }) => (
+              <FieldLabelRow id="preregChallenge">
+                <Checkbox
+                  {...field}
+                  disabled={isSubmitting}
+                  checked={field.value}
+                  onChange={e => setValue(`${StaticRoles.private}.private_challenge_preregister`, e.target.checked)}
+                />
+                Notify me when a new precisionFDA challenge is open for pre-registration.
+              </FieldLabelRow>
+            )}
+          />
+        </FieldGroup>
+        <FieldGroup>
+          <Controller
+            name="private.private_job_finished"
+            control={control}
+            defaultValue={false}
+            render={({ field }) => (
+              <FieldLabelRow id="finishedExecution">
+                <Checkbox
+                  {...field}
+                  disabled={isSubmitting}
+                  id="finishedExecution"
+                  checked={field.value}
+                  onChange={e => setValue('private.private_job_finished', e.target.checked)}
+                />
+                Notify me when an execution has finished.
+              </FieldLabelRow>
+            )}
+          />
+        </FieldGroup>
+
+        <SectionTitle>Space Notifications</SectionTitle>
+
+        <StyledSelectWrap>
+          <Select
+            options={options}
+            isDisabled={isSubmitting}
+            value={options.find(i => i.value === selectedRole)}
+            onChange={(selected: any) => setSelectedRole(selected?.value)}
+          />
+        </StyledSelectWrap>
+
+        <FieldGroup>
+          <FieldLabelRow id="all">
+            <Checkbox
+              id="all"
+              disabled={isSubmitting}
+              checked={isAllChecked(selectedRole)}
+              onChange={e => handleSelectAll(selectedRole, e.target.checked)}
+            />
+            All
+          </FieldLabelRow>
+        </FieldGroup>
+
+        {Object.keys(watch()[selectedRole]).map(notification => {
+          const name = `${selectedRole}.${notification}`
+          return (
+            <FieldGroup key={name}>
+              <Controller
+                name={name}
+                disabled={isSubmitting}
+                control={control}
+                render={({ field }) => (
+                  <FieldLabelRow id={name}>
+                    <Checkbox
+                      {...field}
+                      checked={field.value}
+                      onChange={e => setValue(name, e.target.checked)}
+                    />
+                    {NotificationLabel[notification]}
+                  </FieldLabelRow>
+                )}
+              />
+            </FieldGroup>
+          )
+        })}
+      </StyledNotifications>
+      <PageActions>
+        <ButtonSolidBlue type="submit" disabled={isSubmitting}>Save Settings</ButtonSolidBlue>
+      </PageActions>
+    </form>
+  )
 }
 
 const NotificationsPage = () => {
   usePageMeta({ title: 'Notifications - precisionFDA' })
   const user = useAuthUser()
-  const [localPrefSelection, setLocalPrefSelection] = useState<any>(preference)
-  const roles = Object.keys(localPrefSelection) as Array<Roles>
-  const options = roles.map(value => ({ value, label: RoleLabel[value] }))
-  const [selectedRole, setSelectedRole] = useState<Roles>(Roles['reviewer'])
-
-  const { data, status, error } = useQuery<any>(['notifications'], fetchNotificationsPreferences)
+  const { data, status, error } = useQuery(['notifications'], fetchNotificationsPreferences)
 
   const queryCache = useQueryClient()
-  const { mutateAsync: notificationsMutation } = useMutation(
-    {
-      mutationKey: ['save-notifications-pref'],
-      mutationFn: saveNotificationsPreferences,
-      onSuccess: () => {
-        queryCache.invalidateQueries(['notifications'])
-      },
-      onError: () => {
-      },
+  const { mutateAsync: notificationsMutation } = useMutation({
+    mutationKey: ['save-notifications-pref'],
+    mutationFn: saveNotificationsPreferences,
+    onSuccess: () => {
+      queryCache.invalidateQueries(['notifications'])
+      toast.success('Saved notification preferences')
     },
-  )
+    onError: () => {},
+  })
 
-  useEffect(() => {
-    if (data?.preference) {
-      setLocalPrefSelection(data?.preference)
-    }
-  }, [data])
+  const handleOnsSubmit = async (variables: NotificationPreferences) => {
+    const all = {
+      ...variables.reviewer,
+      ...variables.sponsor,
+      ...variables.reviewer_lead,
+      ...variables.sponsor_lead,
+      ...variables.admin,
+      ...variables.private,
+    } satisfies Record<AllNotification, boolean>
 
-  const isAllChecked = (keys: { [key: string]: boolean }) => {
-    const includesFalse = Object.keys(keys)
-      .map(k => keys[k])
-      .includes(false)
-    return !includesFalse
-  }
-
-  const handleSelection = (role: Roles | StaticRoles, notification: string) => {
-    setLocalPrefSelection({
-      ...localPrefSelection,
-      [role]: {
-        ...localPrefSelection[role],
-        [notification]: !localPrefSelection[role][notification],
-      },
+    const payload = {} as NotificationPreferencesPayload
+    Object.entries(all).forEach(([key, value]) => {
+      const newValue = value === true ? 1 : 0
+      payload[key] = newValue
     })
+
+    return notificationsMutation(payload)
   }
 
-  const handleCheckAll = (role: Roles) => {
-    const newVals = mapValues(
-      localPrefSelection[role],
-      () => !isAllChecked(localPrefSelection[role]),
+  if (user?.is_guest) {
+    return (
+      <UserLayout>
+        <GuestNotAllowed />
+      </UserLayout>
     )
-    setLocalPrefSelection({
-      ...localPrefSelection,
-      [role]: {
-        ...newVals,
-      },
-    })
-  }
-
-  const handleSave = () => {
-    notificationsMutation(localPrefSelection)
-  }
-
-  const siteNotificationsRole = StaticRoles.private
-  const enableJobNotificationSettings: any = localPrefSelection[siteNotificationsRole]?.private_job_finished //true
-  const enableChallengeOpenNotificationSettins: any = localPrefSelection[siteNotificationsRole]?.private_challenge_opened //true
-  const enableChallengePreregNotificationSettins: any = localPrefSelection[siteNotificationsRole]?.private_challenge_preregister //true
-
-  if(user?.is_guest) {
-    return <UserLayout><GuestNotAllowed /></UserLayout>
   }
 
   return (
     <UserLayout>
-      <form>
-        <StyledPageContainer>
-          <PageHeader>
-            <PageTitle>Notification Preferences</PageTitle>
-            <PageActions>
-              <ButtonSolidBlue type="button" onClick={handleSave}>Save Settings</ButtonSolidBlue>
-            </PageActions>
-          </PageHeader>
-
-          <StyledNotifications>
-            <SectionTitle>Site Notifications</SectionTitle>
-            <FieldGroup>
-              <Checkbox
-                id="newChallenge"
-                name="newChallenge"
-                type="checkbox"
-                checked={enableChallengeOpenNotificationSettins}
-                onChange={() =>
-                  handleSelection(siteNotificationsRole, 'private_challenge_opened')
-                }
-              />
-              <label htmlFor="newChallenge">
-                Notify me when a new precisionFDA challenge is opened.
-              </label>
-            </FieldGroup>
-            <FieldGroup>
-              <Checkbox
-                id="preregChallenge"
-                name="preregChallenge"
-                type="checkbox"
-                checked={enableChallengePreregNotificationSettins}
-                onChange={() =>
-                  handleSelection(siteNotificationsRole, 'private_challenge_preregister')
-                }
-              />
-              <label htmlFor="preregChallenge">
-                Notify me when a new precisionFDA challenge is open for pre-registration.
-              </label>
-            </FieldGroup>
-            <FieldGroup>
-              <Checkbox
-                id="finishedExecution"
-                name="finishedExecution"
-                type="checkbox"
-                checked={enableJobNotificationSettings}
-                onChange={() =>
-                  handleSelection(siteNotificationsRole, 'private_job_finished')
-                }
-              />
-              <label htmlFor="finishedExecution">
-                Notify me when an execution has finished.
-              </label>
-            </FieldGroup>
-            <SectionTitle>Space Notifications</SectionTitle>
-
-            <StyledSelectWrap>
-              <Select
-                options={options}
-                defaultValue={{
-                  value: selectedRole,
-                  label: RoleLabel[selectedRole],
-                }}
-                onChange={(selected: any) => setSelectedRole(selected?.value)}
-              />
-            </StyledSelectWrap>
-
-            <FieldGroup>
-              <Checkbox
-                id="all"
-                name="all"
-                type="checkbox"
-                checked={isAllChecked(localPrefSelection[selectedRole])}
-                onChange={() => handleCheckAll(selectedRole)}
-              />
-              <label htmlFor="all">All</label>
-            </FieldGroup>
-
-            {Object.keys(localPrefSelection[selectedRole]).map(notification => {
-                const key = `${localPrefSelection[selectedRole]}.${notification}`
-                return (
-                  <FieldGroup key={key}>
-                    <Checkbox
-                      id={key}
-                      name={key}
-                      type="checkbox"
-                      checked={localPrefSelection[selectedRole][notification]}
-                      onChange={() => handleSelection(selectedRole, notification)}
-                    />
-                    <label htmlFor={key}>{NotificationLabel[notification]}</label>
-                  </FieldGroup>
-                )
-              })}
-          </StyledNotifications>
-        </StyledPageContainer>
-      </form>
+      <StyledPageContainer>
+        <PageHeader>
+          <PageTitle>Notification Preferences</PageTitle>
+        </PageHeader>
+        {status === 'loading' ? <Loader /> : <NotificationForm onSave={handleOnsSubmit} preferences={data!.preference} />}
+      </StyledPageContainer>
     </UserLayout>
   )
 }

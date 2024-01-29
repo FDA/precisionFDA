@@ -1,7 +1,6 @@
 import { AxiosError } from 'axios'
 import React, { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useHistory } from 'react-router'
 import { toast } from 'react-toastify'
 import { GoogleReCaptchaProvider } from 'react-google-recaptcha-v3'
 import { Link } from 'react-router-dom'
@@ -65,7 +64,6 @@ color: #000;
 `
 
 const ProposeChallengePage = () => {
-  const history = useHistory()
   const user = useAuthUser()
   const isLoggedIn = user && Object.keys(user).length > 0
   const [isSavingChallenge, setIsSavingChallenge] = useState(false)

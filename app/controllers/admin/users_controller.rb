@@ -226,7 +226,7 @@ module Admin
         if e.message =~ /MFA is already reset/
           redirect_back(
             fallback_location: user_path(user),
-            alert: "MFA is already reset or not yet configured for the user",
+            alert: "MFA is already reset or not yet configured",
           )
         else
           redirect_back(

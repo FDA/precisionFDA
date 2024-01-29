@@ -1,8 +1,10 @@
+import { database } from '@shared/database'
+import { sendJobFailedEmails } from '@shared/domain/job/job.helper'
+import { NodesUnlockOperation } from '@shared/domain/user-file/ops/node-unlock'
 import { Job } from 'bull'
-import { database, userFile, job } from '@shared'
 import { SqlEntityManager } from '@mikro-orm/mysql'
-import { getChildLogger } from '../utils'
 import { UserOpsCtx, WorkerOpsCtx } from '@shared/types'
+import { getChildLogger } from '../utils/logger'
 
 export const unlockNodesHandler = async (bullJob: Job) => {
   const ids: number[] = bullJob.data.payload as number[]
@@ -18,8 +20,8 @@ export const unlockNodesHandler = async (bullJob: Job) => {
   }
 
   try {
-    await new userFile.NodesUnlockOperation(ctx).execute({ ids, async: true })
+    await new NodesUnlockOperation(ctx).execute({ ids, async: true })
   } catch (error) {
-    await job.sendJobFailedEmails(bullJob.id.toString(), ctx)
+    await sendJobFailedEmails(bullJob.id.toString(), ctx)
   }
 }

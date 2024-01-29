@@ -1,14 +1,14 @@
+import { User } from '@shared/domain/user/user.entity'
 import type { IdInput, UserOpsCtx } from '../../../types'
-import { BaseOperation } from '../../../utils'
+import { BaseOperation } from '@shared/utils/base-operation'
 import { createFileEvent, EVENT_TYPES } from '../../event/event.helper'
-import { User } from '../../user'
 import { UserFile } from '../user-file.entity'
 import { getNodePath } from '../user-file.helper'
 import { FILE_STATE_DX } from '../user-file.types'
 
 class FileLockOperation extends BaseOperation<UserOpsCtx, IdInput[], void> {
   async run(input: IdInput[]): Promise<void> {
-    this.ctx.log.info(input, 'Locking files')
+    this.ctx.log.verbose(input, 'Locking files')
 
     const em = this.ctx.em
     const userFileRepo = em.getRepository(UserFile)
@@ -30,7 +30,7 @@ class FileLockOperation extends BaseOperation<UserOpsCtx, IdInput[], void> {
   }
 
   private logOperation(file: UserFile): void {
-    this.ctx.log.info({ fileName: file.name }, 'Locked file')
+    this.ctx.log.verbose({ fileName: file.name }, 'Locked file')
   }
 
   private async createEvent(file: UserFile): Promise<void> {

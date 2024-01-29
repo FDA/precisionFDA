@@ -1,14 +1,19 @@
 import type { SqlEntityManager } from '@mikro-orm/mysql'
-import type { EntityName, FilterQuery, ObjectQuery } from '@mikro-orm/core/typings'
+import type { EntityName, FilterQuery, ObjectQuery } from '@mikro-orm/core'
 import type { FindOneOptions, FindOptions } from '@mikro-orm/core'
+import { Answer } from '@shared/domain/answer/answer.entity'
+import { AnswerComment } from '@shared/domain/comment/answer-comment.entity'
+import { DiscussionComment } from '@shared/domain/comment/discussion-comment.entity'
+import { Discussion } from '@shared/domain/discussion/discussion.entity'
+import { Space } from '@shared/domain/space/space.entity'
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
+import { User } from '@shared/domain/user/user.entity'
+import { ServiceError } from '@shared/errors'
 import type { UserCtx } from '../types'
-import { Answer, Discussion, Space, User, UserFile } from '../domain'
 import { STATIC_SCOPE } from '../enums'
 import { CAN_EDIT_ROLES } from '../domain/space-membership/space-membership.helper'
 import { defaultLogger as logger } from '../logger'
 import { getIdFromScopeName } from '../domain/space/space.helper'
-import { Comment, AnswerComment, DiscussionComment } from '../domain/comment'
-import { errors } from '..'
 
 
 export type UID<PREFIX extends string> = `${PREFIX}-${string}-${number}`
@@ -216,7 +221,7 @@ export class EntityFetcherService {
   async getAccessibleById<E extends IdEntity, H extends string = never>(type: EntityName<E>, id: E['id'], where?: ObjectQuery<E>, options?: FindOneOptions<E, H>) {
     await this.checkInitialized()
     if (this.isSpace(type) && id != null) {
-      throw new errors.ServiceError('Currently unsupported for spaces')
+      throw new ServiceError('Currently unsupported for spaces')
     }
     return this.em.findOne(type, { ...{ ...this.accessibleByCurrentUserCondition(type), id }, ...where } as FilterQuery<E>, options)
   }
@@ -224,7 +229,7 @@ export class EntityFetcherService {
   async getEditableById<E extends IdEntity, H extends string = never>(type: EntityName<E>, id: E['id'], where?: ObjectQuery<E>, options?: FindOneOptions<E, H>) {
     await this.checkInitialized()
     if (this.isSpace(type) && id != null) {
-      throw new errors.ServiceError('Currently unsupported for spaces')
+      throw new ServiceError('Currently unsupported for spaces')
     }
     return this.em.findOne(type, { ...this.editableByCurrentUserCondition(type), ...where, id } as FilterQuery<E>, options)
   }

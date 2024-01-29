@@ -1,8 +1,8 @@
-import { BaseOperation } from '../../../utils'
+import { LicensedItem } from '@shared/domain/licensed-item/licensed-item.entity'
+import { BaseOperation } from '@shared/utils/base-operation'
 import { UserOpsCtx } from '../../../types'
 import { License } from '../license.entity'
 import { FilesInput } from '../license.input'
-import { entities } from '../..'
 
 export class LicensesForFilesOperation extends BaseOperation<
 UserOpsCtx,
@@ -12,7 +12,7 @@ License[]> {
     const em = this.ctx.em
 
     const items = await em.find(
-      entities.LicensedItem,
+      LicensedItem,
       { licenseableId: { $in: fileInput.ids } },
       { populate: ['license'] },
     )

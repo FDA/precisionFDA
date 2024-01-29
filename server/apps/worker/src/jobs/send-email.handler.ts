@@ -1,9 +1,10 @@
-import { database, email } from '@shared'
+import { database } from '@shared/database'
+import { EmailSendOperation } from '@shared/domain/email/ops/email-send'
 import type { SendEmailJob } from '@shared/queue/task.input'
 import { Job } from 'bull'
 import { nanoid } from 'nanoid'
 import { UserOpsCtx, WorkerOpsCtx } from '@shared/types'
-import { getChildLogger } from '../utils'
+import { getChildLogger } from '../utils/logger'
 
 export const sendEmailHandler = async (bullJob: Job) => {
   const data = bullJob.data as SendEmailJob
@@ -20,5 +21,5 @@ export const sendEmailHandler = async (bullJob: Job) => {
     user: data.user,
     job: bullJob,
   }
-  await new email.EmailSendOperation(ctx).execute(data.payload)
+  await new EmailSendOperation(ctx).execute(data.payload)
 }

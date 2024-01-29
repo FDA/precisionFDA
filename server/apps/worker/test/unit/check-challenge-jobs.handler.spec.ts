@@ -1,7 +1,10 @@
 import { EntityManager } from '@mikro-orm/core'
-import { config, database, job as jobDomain } from '@shared'
 import { SqlEntityManager } from '@mikro-orm/mysql'
-import { Job, User } from '@shared/domain'
+import { config } from '@shared/config'
+import { database } from '@shared/database'
+import { Job } from '@shared/domain/job/job.entity'
+import { JobService } from '@shared/domain/job/job.service'
+import { User } from '@shared/domain/user/user.entity'
 import { create, db } from '@shared/test'
 import { CheckChallengeJobsHandler } from '../../src/jobs/check-challenge-jobs.handler'
 import { JOB_STATE } from '@shared/domain/job/job.enum'
@@ -31,7 +34,7 @@ describe('CheckChallengeJobsHandler tests', () => {
         jobDxIdParam = jobDxId
         userIdParam = userId
       }
-    } as jobDomain.JobService
+    } as JobService
     handler = new CheckChallengeJobsHandler(em, jobService)
 
     await handler.handle({ id: '1' } as any)

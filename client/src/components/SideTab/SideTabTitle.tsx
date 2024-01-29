@@ -6,18 +6,18 @@ const StyledTitleWrapper = styled.div`
   display: inline-block;
 `
 
-const StyledTitle = styled.div<{ isActive: boolean }>`
+const StyledTitle = styled.div<{ $isActive: boolean }>`
   cursor: 'pointer';
   display: block;
   padding: 10px;
   color: ${colors.textDarkGrey};
   border-bottom-color: ${colors.textWhite};
   background-color: ${colors.textWhite};
-  ${({ isActive }) => isActive && css`
+  ${({ $isActive }) => $isActive && css`
   color: ${colors.highlightBlue};
     background-color: ${colors.subtleBlue};
   `}
-  :hover {
+  &:hover {
     cursor: pointer;
     background-color: ${colors.subtleBlue};
   }
@@ -37,7 +37,7 @@ export const SideTabTitle: React.FC<Props> = ({ title, setSelectedTab, index, ac
 
   return (
     <StyledTitleWrapper onClick={onClick}>
-      <StyledTitle isActive={active}> {title}</StyledTitle>
+      <StyledTitle $isActive={active}> {title}</StyledTitle>
     </StyledTitleWrapper>
   )
 }

@@ -1,5 +1,5 @@
+import { ErrorCodes, ServiceError } from '@shared/errors'
 import * as nodemailer from 'nodemailer'
-import { errors } from '..'
 import { config } from '../config'
 import { SendEmailJob } from '../queue/task.input'
 import { getLogger } from '../logger'
@@ -30,7 +30,7 @@ class EmailClient implements IEmailService {
     this.transporter = nodemailer.createTransport(transportConfig)
     this.transporter.verify((error, success) => {
       if (success) {
-        log.info({ success }, 'SMTP connection configuration is successful')
+        log.verbose({ success }, 'SMTP connection configuration is successful')
       }
       if (error) {
         log.error({ error }, 'SMTP connection configuration failed')
@@ -39,38 +39,36 @@ class EmailClient implements IEmailService {
   }
 
   async sendEmail(input: SendEmailJob['payload']): Promise<void> {
-    return this.transporter.sendMail(
-      {
+    try {
+      const info = await this.transporter.sendMail({
         from: config.emails.smtp.fromAddress,
         cc: [],
         to: input.to,
         subject: input.subject,
         html: input.body,
-      },
-      (error, info) => {
-        if (info) {
-          log.info({ info }, 'SMTP request successful')
-        }
-        if (error) {
-          log.error({ error: error }, 'SendEmail failed')
-          throw new errors.ServiceError('SMTP request failed', {
-            code: errors.ErrorCodes.AWS_SES_SERVICE_ERROR,
-            clientResponse: error.message,
-            clientStatusCode: 424,
-          })
-        }
-      },
-    )
+      })
+
+      if (info) {
+        log.verbose({ info }, 'SMTP request successful')
+      }
+    } catch (error) {
+      log.error({ error: error }, 'SendEmail failed')
+      throw new ServiceError('SMTP request failed', {
+        code: ErrorCodes.AWS_SES_SERVICE_ERROR,
+        clientResponse: error?.message,
+        clientStatusCode: 424,
+      })
+    }
   }
 }
 
 class SaveEmailToFileClient implements IEmailService {
   constructor() {
-    log.info('Email saving to file is enabled')
+    log.verbose('Email saving to file is enabled')
   }
 
   async sendEmail(input: SendEmailJob['payload']): Promise<void> {
-    log.info('Email saving to file is started')
+    log.verbose('Email saving to file is started')
     const html = `
     <pre>email: ${input.to}\n
     subject: ${input.subject}\n</pre>
@@ -82,7 +80,7 @@ class SaveEmailToFileClient implements IEmailService {
       `test-email-${input.emailType}-${currentDate}.html`,
     )
     await fs.promises.writeFile(targetPath, html)
-    log.info({ targetPath }, 'Email has been successfully saved to file')
+    log.verbose({ targetPath }, 'Email has been successfully saved to file')
   }
 }
 

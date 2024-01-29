@@ -1,9 +1,9 @@
-import { User, userFile } from '../..'
-import { errors } from '../../..'
+import { NotificationService } from '@shared/domain/notification/services/notification.service'
+import { User } from '@shared/domain/user/user.entity'
+import { InvalidStateError } from '@shared/errors'
 import { NOTIFICATION_ACTION, SEVERITY } from '../../../enums'
 import type { UserOpsCtx } from '../../../types'
-import { BaseOperation } from '../../../utils'
-import { NotificationService } from '../../notification'
+import { BaseOperation } from '@shared/utils/base-operation'
 import type { Node } from '../node.entity'
 import { filterNodesByUser, getSuccessMessage, loadNodes } from '../user-file.helper'
 import type { NodesInput } from '../user-file.input'
@@ -18,11 +18,11 @@ class NodesLockOperation extends BaseOperation<UserOpsCtx, NodesInput, void> {
     super(ctx)
 
     this.notificationService = new NotificationService(ctx.em)
-    this.fileLockOp = new userFile.FileLockOperation(ctx)
+    this.fileLockOp = new FileLockOperation(ctx)
   }
 
   async run(input: NodesInput): Promise<void> {
-    this.ctx.log.info(input.ids, 'NodesLockOperation: Locking ids')
+    this.ctx.log.verbose(input.ids, 'NodesLockOperation: Locking ids')
     const em = this.ctx.em
     const nodes: Node[] = await loadNodes(em, input, { locked: false })
     const filteredNodes = await this.filterNodes(nodes)
@@ -39,7 +39,7 @@ class NodesLockOperation extends BaseOperation<UserOpsCtx, NodesInput, void> {
         await this.notifyUserSuccess(filteredNodes.length)
       }
 
-      this.ctx.log.info(
+      this.ctx.log.verbose(
         { filesCount: filteredNodes.length },
         'NodesLockOperation: Locked total objects',
       )
@@ -77,7 +77,7 @@ class NodesLockOperation extends BaseOperation<UserOpsCtx, NodesInput, void> {
     const errorMsg = `Unsupported node type "${node.stiType}" of node id: ${node.uid}`
 
     this.ctx.log.error(`NodesLockOperation: ${errorMsg}`)
-    throw new errors.InvalidStateError(errorMsg)
+    throw new InvalidStateError(errorMsg)
   }
 
   private async filterNodes(nodes: Node[]): Promise<Node[]> {

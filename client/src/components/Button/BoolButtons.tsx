@@ -44,12 +44,12 @@ export const BoolButton = styled(Button)<IButton>`
 export const BoolButtonGroup = styled.div`
   display: flex;
 
-  & :first-child {
+  &:first-child {
     border-top-left-radius: 2px;
     border-bottom-left-radius: 2px;
     border-right: 0px;
   }
-  & :last-child {
+  &:last-child {
     border-top-right-radius: 2px;
     border-bottom-right-radius: 2px;
   }

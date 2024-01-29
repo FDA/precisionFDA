@@ -11,14 +11,14 @@ export const SpaceTypeTabs = ({ space }: { space: ISpace }) => (
           <Tab
             as={Link}
             to={`/spaces/${space.private_space_id}`}
-            isactive={undefined}
+            $isactive={undefined}
           >
             Private Area
           </Tab>
           <Tab
             as={Link}
             to={`/spaces/${space.id}`}
-            isactive="true"
+            $isactive="true"
           >
             Shared Area
           </Tab>
@@ -29,14 +29,14 @@ export const SpaceTypeTabs = ({ space }: { space: ISpace }) => (
           <Tab
             as={Link}
             to={`/spaces/${space.id}`}
-            isactive="true"
+            $isactive="true"
           >
             Private Area
           </Tab>
           <Tab
             as={Link}
             to={`/spaces/${space.shared_space_id}`}
-            isactive={undefined}
+            $isactive={undefined}
           >
             Shared Area
           </Tab>
@@ -46,7 +46,7 @@ export const SpaceTypeTabs = ({ space }: { space: ISpace }) => (
         <Tab
           as={Link}
           to={`/spaces/${space.id}`}
-          isactive="true"
+          $isactive="true"
         >
           Shared Area
         </Tab>
@@ -55,14 +55,14 @@ export const SpaceTypeTabs = ({ space }: { space: ISpace }) => (
         <Tab
           as={Link}
           to={`/spaces/${space.id}`}
-          isactive="true"
+          $isactive="true"
         >
           Private Area
         </Tab>
       )}
       {space.type === 'groups' && (
         <Tab
-          isactive="true"
+          $isactive="true"
         >
           Shared Area
         </Tab>

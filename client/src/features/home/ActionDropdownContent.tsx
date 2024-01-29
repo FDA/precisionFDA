@@ -1,21 +1,21 @@
 import React from 'react'
-import { NavLink } from 'react-router-dom'
 import styled, { css } from 'styled-components'
 import { CloudResourcesConditionalAnchor } from '../../components/ConditionalAnchor'
 import { CloudResourcesConditionType } from '../../hooks/useCloudResourcesCondition'
 import { colors } from '../../styles/theme'
 import { ActionFunctionsType, ActionGroupType, Link as LinkType } from './types'
 import { CheckIcon } from '../../components/icons/CheckIcon'
+import { NavLink } from '../../components/NavLink'
 
 // Updated disbaled text color for remediation using textMediumGrey
 export const StyledActionItem = styled.li<{ disabled?: boolean, selected?: boolean }>`
   /* padding: 0 16px; */
   margin: 0;
   list-style: none;
-  color: #272727;
+  color: var(--c-text-700);
   cursor: pointer;
   a {
-    color: #272727;
+    color: var(--c-text-700);
     display: inline-block;
     width: 100%;
   }
@@ -23,19 +23,19 @@ export const StyledActionItem = styled.li<{ disabled?: boolean, selected?: boole
   ${({ disabled }) =>
     disabled &&
     css`
-      color: ${colors.textMediumGrey};
+      color: var(--c-text-500);
       cursor: not-allowed;
       a {
         cursor: not-allowed;
         /* pointer-events: none; */
-        color: ${colors.textMediumGrey};
+        color: var(--c-text-500);
       }
     `}
   ${({ selected }) => selected && css`
     font-weight: 600;
   `}
   &:hover {
-    background: rgb(242, 242, 242);
+    background: var(--tertiary-100);
   }
 `
 
@@ -59,7 +59,7 @@ const StyleSelectionIcon = styled.div`
 const StyleGroupActionTitle = styled.div`
   padding: 8px;
   line-height: 12px;
-  color: ${colors.textDarkGrey};
+  color: var(--c-text-700);
   font-style: italic;
 `
 
@@ -114,7 +114,7 @@ export const StyledActionsMessage = styled.div`
   font-style: italic;
   font-size: 14px;
   line-height: 23px;
-  color: ${colors.textDarkGrey};
+  color: var(--c-text-700);
 `
 
 const LinkAction = ({
@@ -162,7 +162,7 @@ const ActionItem = ({
           {isDisabled ? (
             <span>{action.key}</span>
           ) : (
-            <NavLink to={action?.to} exact>
+            <NavLink to={action?.to}>
               {action.key}
             </NavLink>
           )}

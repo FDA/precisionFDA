@@ -1,21 +1,26 @@
-import P from 'pino'
-import { WorkerBaseOperation } from '../../../utils/base-operation'
-import { Maybe, UserOpsCtx, UserCtx } from '../../../types'
-import { DbCluster } from '../db-cluster.entity'
+import { Logger } from '@nestjs/common'
+import { createDbClusterSyncTask, findRepeatable } from '@shared/queue'
 import { PlatformClient } from '../../../platform-client'
-import { queue } from '../../..'
+import { Maybe, UserCtx, UserOpsCtx } from '../../../types'
+import { WorkerBaseOperation } from '../../../utils/base-operation'
+import { DbCluster } from '../db-cluster.entity'
 import { SyncDbClusterOperation } from './synchronize'
 
-
-const recreateDbSyncOperationIfMissing = async (dbCluster: DbCluster, log: P.Logger, userCtx: UserCtx): Promise<void> => {
-  log.info(`Checking dbcluster ${dbCluster.dxid}, userId ${userCtx.id}, status ${dbCluster.status}`)
-  const dbSyncOperation = await queue.findRepeatable(SyncDbClusterOperation.getBullJobId(dbCluster.dxid))
+const recreateDbSyncOperationIfMissing = async (
+  dbCluster: DbCluster,
+  log: Logger,
+  userCtx: UserCtx,
+): Promise<void> => {
+  log.verbose(`Checking dbcluster ${dbCluster.dxid}, userId ${userCtx.id}, status ${dbCluster.status}`)
+  const dbSyncOperation = await findRepeatable(
+    SyncDbClusterOperation.getBullJobId(dbCluster.dxid),
+  )
   if (!dbSyncOperation) {
-    log.info(
+    log.verbose(
       { dbCluster, userId: userCtx.id },
       'CheckUserDbClustersOperation: Recreating missing DB Cluster sync operation',
     )
-    await queue.createDbClusterSyncTask({ dxid: dbCluster.dxid }, userCtx)
+    await createDbClusterSyncTask({ dxid: dbCluster.dxid }, userCtx)
   }
 }
 
@@ -39,7 +44,7 @@ export class CheckUserDbClustersOperation extends WorkerBaseOperation<UserOpsCtx
       },
     })
 
-    this.ctx.log.info(
+    this.ctx.log.verbose(
       { nonTerminatedDbClusters, userId },
       'CheckUserDbClustersOperation: Found DB Clusters for userId'
     )

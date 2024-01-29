@@ -12,8 +12,8 @@ const StyledChallengesOverview = styled.div`
   margin-bottom: 64px;
 `
 
-const StyledSectionTitle = styled(SectionTitle)<{ tscolor?: string }>`
-  border-top: 3px solid ${({ tscolor }) => tscolor};
+const StyledSectionTitle = styled(SectionTitle)<{ $tscolor?: string }>`
+  border-top: 3px solid ${({ $tscolor }) => $tscolor};
   padding-top: 8px;
 `
 
@@ -71,7 +71,7 @@ export default function ChallengesOverviewList() {
         current?.challenges &&
         current.challenges.length > 0 && (
           <Row>
-            <StyledSectionTitle tscolor={getTimeStatusColor('current')}>
+            <StyledSectionTitle $tscolor={getTimeStatusColor('current')}>
               Current Challenges
             </StyledSectionTitle>
             <StyledChallengeList>
@@ -86,7 +86,7 @@ export default function ChallengesOverviewList() {
         upcoming?.challenges &&
         upcoming.challenges.length > 0 && (
           <Row>
-            <StyledSectionTitle tscolor={getTimeStatusColor('upcoming')}>
+            <StyledSectionTitle $tscolor={getTimeStatusColor('upcoming')}>
               Upcoming Challenges
             </StyledSectionTitle>
             <StyledChallengeList>
@@ -103,7 +103,7 @@ export default function ChallengesOverviewList() {
         current?.challenges.length === 0 &&
         upcoming?.challenges.length === 0 && (
           <Row>
-            <StyledSectionTitle tscolor={getTimeStatusColor('ended')}>
+            <StyledSectionTitle $tscolor={getTimeStatusColor('ended')}>
               Ended Challenges
             </StyledSectionTitle>
             <StyledChallengeList>

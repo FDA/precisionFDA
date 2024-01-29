@@ -1,8 +1,8 @@
 import type { SqlEntityManager } from '@mikro-orm/mysql'
+import { App } from '@shared/domain/app/app.entity'
+import { Workflow } from '@shared/domain/workflow/entity/workflow.entity'
 import { expect } from 'chai'
 import { stub } from 'sinon'
-import type { Workflow } from '../../../src/domain'
-import { App } from '../../../src/domain'
 import { WorkflowService } from '../../../src/domain/workflow/service/workflow.service'
 
 describe('WorkflowService', () => {

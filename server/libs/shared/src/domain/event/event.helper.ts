@@ -1,11 +1,11 @@
 import { wrap } from '@mikro-orm/core'
-import { JobDescribeResponse } from '../../platform-client'
-import { Job } from '../job'
-import { User } from '../user'
-import { Folder } from '../user-file'
+import { App } from '@shared/domain/app/app.entity'
+import { Job } from '@shared/domain/job/job.entity'
+import { Folder } from '@shared/domain/user-file/folder.entity'
+import { User } from '@shared/domain/user/user.entity'
+import { JobDescribeResponse } from '@shared/platform-client/platform-client.responses'
 import { IFileOrAsset } from '../user-file/user-file.types'
 import { Event } from './event.entity'
-import { App } from '../app'
 
 const EVENT_TYPES = {
   FOLDER_CREATED: 'Event::FolderCreated',

@@ -18,7 +18,7 @@ export const ArrowLeftIcon = ({
   height?: number
 }) => (
   <StyledArrow
-    StyledArrow-hidden="true"
+    aria-hidden="true"
     data-icon="arrow-left"
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 448 512"

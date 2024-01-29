@@ -1,5 +1,6 @@
 /* eslint-disable max-len */
-import { config } from '../../../../..'
+
+import { config } from '@shared/config'
 
 const header = `
   <mjml>

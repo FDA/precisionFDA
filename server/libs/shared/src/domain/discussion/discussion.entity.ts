@@ -8,11 +8,11 @@ import {
   Collection,
   Property, Cascade, Formula,
 } from '@mikro-orm/core'
+import { Answer } from '@shared/domain/answer/answer.entity'
+import { DiscussionComment } from '@shared/domain/comment/discussion-comment.entity'
+import { Note } from '@shared/domain/note/note.entity'
+import { User } from '@shared/domain/user/user.entity'
 import { BaseEntity } from '../../database/base-entity'
-import { User } from '../user'
-import { Note } from '../note'
-import { Answer } from '../answer'
-import { DiscussionComment } from '../comment'
 
 @Entity({ tableName: 'discussions' })
 export class Discussion extends BaseEntity {

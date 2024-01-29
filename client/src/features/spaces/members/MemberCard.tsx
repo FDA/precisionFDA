@@ -1,16 +1,17 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
-import styled from 'styled-components'
+import styled, { css } from 'styled-components'
 import { Identicon } from '../../../components/Identicon'
-import { colors } from '../../../styles/theme'
 import MemberEditButton from './MemberEditButton'
 import { SpaceMembership } from './members.types'
 
-export const StyledMemberCard = styled.div<{ isDeactivated: boolean }>`
+export const StyledMemberCard = styled.div<{ $isDeactivated: boolean }>`
+  --c-border: var(--c-layout-border);
+
   min-width: 300px;
-  border: 1px solid #cbcbcb;
-  ${({ isDeactivated }) =>
-    isDeactivated && `border: 1px solid ${colors.borderDefault};;`}
+  border: 1px solid var(--c-border);
+  ${({ $isDeactivated }) =>
+    $isDeactivated && css`border: 1px solid var(--c-border);`}
   margin-bottom: 16px;
   display: flex;
   flex-direction: column;
@@ -20,7 +21,7 @@ export const StyledCardHeader = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid #cbcbcb;
+  border-bottom: 1px solid var(--c-border);
   padding: 4px;
   padding-right: 8px;
 
@@ -44,9 +45,9 @@ export const Gravatar = styled.img`
   height: 30px;
   margin-right: 5px;
 `
-export const StyledDetails = styled.div<{ isDeactivated: boolean }>`
-  ${({ isDeactivated }) =>
-    isDeactivated && `color: ${colors.textDarkGreyInactive};`}
+export const StyledDetails = styled.div<{ $isDeactivated: boolean }>`
+  ${({ $isDeactivated }) =>
+    $isDeactivated && css`color: var(--c-text-400);`}
   font-size: 14px;
   line-height: 22px;
   ul {
@@ -68,7 +69,7 @@ export function MemberCard({
   spaceId: number
 }) {
   return (
-    <StyledMemberCard isDeactivated={!member.active}>
+    <StyledMemberCard $isDeactivated={!member.active}>
       <StyledCardHeader>
         <Link
           to={`/users/${member.user_name}`}
@@ -82,7 +83,7 @@ export function MemberCard({
           <MemberEditButton spaceId={spaceId} member={member} />
         )}
       </StyledCardHeader>
-      <StyledDetails isDeactivated={!member.active}>
+      <StyledDetails $isDeactivated={!member.active}>
         <ul>
           <li>
             <Key>Username:</Key>

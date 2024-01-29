@@ -1,12 +1,11 @@
+import { WorkstationService } from '@shared/domain/job/workstation.service'
 import * as errors from '../../../errors'
-import { queue } from '../../..'
 import { NOTIFICATION_ACTION, SEVERITY } from '../../../enums'
 import { UserOpsCtx } from '../../../types'
-import { WorkstationService } from '..'
 import { omit } from 'ramda'
 import { WorkstationBaseOperation } from './workstation-base-operation'
 import { TASK_TYPE } from '../../../queue/task.input'
-import { createSyncWorkstationFilesTask } from '../../../queue'
+import { addToQueueEnsureUnique, createSyncWorkstationFilesTask, getFileSyncQueue } from '../../../queue'
 import { JOB_STATE } from '../job.enum'
 import { getServiceFactory } from '../../../services/service-factory'
 import { compareVersions } from 'compare-versions'
@@ -49,12 +48,12 @@ any
       user: this.ctx.user,
     }
     const jobId = WorkstationSnapshotOperation.getBullJobId(input.jobDxid)
-    return await queue.addToQueueEnsureUnique(queue.getFileSyncQueue(), queueData, jobId)
+    return await addToQueueEnsureUnique(getFileSyncQueue(), queueData, jobId)
   }
 
   async run(input: WorkstationSnapshotOperationParams): Promise<any> {
     const log = this.ctx.log
-    log.info({ ...omit(['code', 'key'], input) },
+    log.verbose({ ...omit(['code', 'key'], input) },
       'WorkstationSnapshotOperation: Start',
     )
 
@@ -70,7 +69,7 @@ any
       const terminate = input.terminate ?? false
       const res = await workstationService.snapshot(input.key, input.name, terminate)
 
-      log.info({ res },
+      log.verbose({ res },
         'WorkstationSnapshotOperation: Received snapshot response',
       )
 
@@ -84,7 +83,7 @@ any
             // Snapshot is created, now we should invoke workstation sync for the file to appear in My Home
             await createSyncWorkstationFilesTask({ dxid: job.dxid }, this.ctx.user)
           } catch (err) {
-            log.info({ err },
+            log.verbose({ err },
               // Most likely a sync file operation already queued up or processing,
               // either because user invoked Snapshot twice quickly or they had clicked Sync Files
               'WorkstationSnapshotOperation: Unable to queue SyncWorkstationFiles',

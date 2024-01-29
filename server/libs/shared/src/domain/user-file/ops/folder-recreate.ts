@@ -1,9 +1,11 @@
+import { Folder } from '@shared/domain/user-file/folder.entity'
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
+import { User } from '@shared/domain/user/user.entity'
+import { UserNotFoundError } from '@shared/errors'
 import { PlatformClient } from '../../../platform-client'
-import { Folder, User, UserFile } from '../..'
-import { BaseOperation } from '../../../utils'
+import { BaseOperation } from '@shared/utils/base-operation'
 import { filterLeafPaths, getFolderPath, getPathsToBuild } from '../user-file.helper'
 import { FILE_STI_TYPE } from '../user-file.types'
-import { errors } from '../../..'
 import { UserOpsCtx } from '../../../types'
 
 type RecreateFolderInput = {}
@@ -20,7 +22,7 @@ void
     const userId = this.ctx.user.id
     const user = await em.findOne(User, { id: userId })
     if (!user) {
-      throw new errors.UserNotFoundError()
+      throw new UserNotFoundError()
     }
     const projectId = user.privateFilesProject || ''
     // todo: run for more than this project?

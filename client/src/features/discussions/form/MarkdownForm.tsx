@@ -19,8 +19,8 @@ const StyledForm = styled.form`
   padding-top: 8px;
   align-self: stretch;
   border-radius: 6px;
-  border: 1px solid #cbcbcb;
-  background: #fff;
+  border: 1px solid var(--c-layout-border);
+  background: var(--background);
 `
 
 const ButtonRow = styled.div`

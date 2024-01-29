@@ -3,8 +3,8 @@ import {
     Ref,
     ManyToOne,
 } from '@mikro-orm/core'
-import { Node } from "../user-file";
-import { GeneralProperty } from "./property.entity";
+import { GeneralProperty } from '@shared/domain/property/property.entity'
+import { Node } from '../user-file/node.entity'
 
 @Entity({ discriminatorValue: 'node' })
 export class NodeProperty extends GeneralProperty {

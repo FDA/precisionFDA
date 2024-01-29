@@ -20,7 +20,7 @@ const StyledChallengeListItem = styled.div`
 
 export const ChallengeListItem = ({ challenge }: { challenge: Challenge }) => (
   <StyledChallengeListItem>
-    <ItemImage timeStatus={getTimeStatus(challenge.start_at, challenge.end_at)}>
+    <ItemImage $timeStatus={getTimeStatus(challenge.start_at, challenge.end_at)}>
       <img width="100%" src={challenge.card_image_url} alt="sf" />
     </ItemImage>
     <ItemBody>

@@ -1,16 +1,15 @@
-import {
-  App,
-  Asset,
-  Comment,
-  Comparison,
-  Folder,
-  Job,
-  Note,
-  Space, SpaceMembership,
-  UserFile,
-  Workflow,
-  User,
-} from '../domain'
+import { App } from '@shared/domain/app/app.entity'
+import { Comparison } from '@shared/domain/comparison/comparison.entity'
+import { Job } from '@shared/domain/job/job.entity'
+import { Comment } from '@shared/domain/comment/comment.entity'
+import { Note } from '@shared/domain/note/note.entity'
+import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
+import { Space } from '@shared/domain/space/space.entity'
+import { Asset } from '@shared/domain/user-file/asset.entity'
+import { Folder } from '@shared/domain/user-file/folder.entity'
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
+import { User } from '@shared/domain/user/user.entity'
+import { Workflow } from '@shared/domain/workflow/entity/workflow.entity'
 import { ENTITY_TYPE, SPACE_EVENT_OBJECT_TYPE } from '../domain/space-event/space-event.enum'
 import { AppEntityDataProvider } from './providers/app.provider'
 import { AssetEntityDataProvider } from './providers/asset.provider'

@@ -5,7 +5,7 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
 
   GSRS_DEFAULT_URL = "http://localhost:8080".freeze
   GSRS_URL = ENV.fetch("GSRS_URL", GSRS_DEFAULT_URL)
-  GSRS_ENABLED = ENV.fetch("GSRS_ENABLED", false)
+  GSRS_ENABLED = ActiveRecord::Type::Boolean.new.cast(ENV["GSRS_ENABLED"])
   GSRS_HEADER_USER_NAME =
     ENV.fetch("GSRS_AUTHENTICATION_HEADER_NAME", "AUTHENTICATION_HEADER_NAME")
   GSRS_HEADER_USER_EMAIL =
@@ -147,7 +147,7 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
       Auditor.perform_audit(action: "destroy", record_type: "Session", record: { message: "User #{session[:username]} logged out" })
     end
 
-    if GSRS_ENABLED == true
+    if GSRS_ENABLED
       session_key = http_request(
         "#{GSRS_URL}/api/v1/whoami",
         {},
@@ -637,19 +637,6 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
     js graph: GraphDecorator.for_publisher(@context, item, scope),
        space: space.nil? ? nil : space.slice(:uid, :title),
        scope_to_publish_to: scope, message: t("main.publish.apps_notification")
-  end
-
-  def track
-    id = unsafe_params[:id]
-    raise "Missing id in track route" unless id.is_a?(String) && id.present?
-
-    @item = item_from_uid(id)
-    unless @item.accessible_by?(@context)
-      flash[:error] = "This item is not accessible by you"
-      redirect_to :root
-      return
-    end
-    @graph = GraphDecorator.build(@context, @item)
   end
 
   def tokify

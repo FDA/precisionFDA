@@ -1,6 +1,6 @@
-import React, { useEffect } from 'react'
+import React from 'react'
 import { InputSelect } from '../../form/styles'
-import { StyledInput } from '../../InputText'
+import { InputNumber, InputText } from '../../InputText'
 export * from './numericFilter'
 
 const sanitizeRangeFilterValue = (rawValue: string | [number | null | undefined, number | null | undefined]) => {
@@ -27,9 +27,8 @@ export function NumberRangeColumnFilter({
       }}
       data-testid={filterDataTestId}
     >
-      <StyledInput
+      <InputNumber
         value={parsedFilterValue[0] || ''}
-        type="number"
         onChange={e => {
           const val = e.target.value
           setFilter((old = []) => [val ? parseInt(val, 10) : null, old[1]])
@@ -43,7 +42,7 @@ export function NumberRangeColumnFilter({
           paddingRight: 2
         }}
       />
-      <StyledInput
+      <InputNumber
         value={parsedFilterValue[1] || ''}
         type="number"
         onChange={e => {
@@ -92,7 +91,7 @@ export function DefaultColumnFilter({
   dataTestId?: string
 }) {
   return (
-    <StyledInput
+    <InputText
       value={filterValue || ''}
       onChange={e => setFilter(e.target.value)}
       placeholder={`--`}

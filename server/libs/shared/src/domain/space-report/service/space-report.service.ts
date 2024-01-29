@@ -1,12 +1,17 @@
 import { QueryOrder } from '@mikro-orm/core'
 import { SqlEntityManager } from '@mikro-orm/mysql'
-import { ArrayUtils, errors } from '../../..'
-import { App } from '../../app'
-import { Job } from '../../job'
-import { Space } from '../../space'
-import { User } from '../../user'
-import { Asset, UserFile } from '../../user-file'
-import { Workflow } from '../../workflow'
+import { Injectable } from '@nestjs/common'
+import { App } from '@shared/domain/app/app.entity'
+import { Job } from '@shared/domain/job/job.entity'
+import { Space } from '@shared/domain/space/space.entity'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { Asset } from '@shared/domain/user-file/asset.entity'
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
+import { User } from '@shared/domain/user/user.entity'
+import { Workflow } from '@shared/domain/workflow/entity/workflow.entity'
+import { InvalidStateError, NotFoundError } from '@shared/errors'
+import { SCOPE } from '@shared/types/common'
+import { ArrayUtils } from '@shared/utils/array.utils'
 import { SpaceReportPart } from '../entity/space-report-part.entity'
 import { SpaceReport } from '../entity/space-report.entity'
 import { BatchComplete } from '../model/batch-complete'
@@ -16,35 +21,28 @@ import { SpaceReportPartSourceType } from '../model/space-report-part-source.typ
 import { SpaceReportPartService } from './part/space-report-part.service'
 import { SpaceReportResultService } from './space-report-result.service'
 
+@Injectable()
 export class SpaceReportService {
-  private readonly em
-  private readonly spaceReportPartService
-  private readonly spaceReportResultService
-
   constructor(
-    em: SqlEntityManager,
-    spaceReportPartService: SpaceReportPartService,
-    spaceReportResultService: SpaceReportResultService,
-  ) {
-    this.em = em
-    this.spaceReportPartService = spaceReportPartService
-    this.spaceReportResultService = spaceReportResultService
-  }
+    private readonly em: SqlEntityManager,
+    private readonly spaceReportPartService: SpaceReportPartService,
+    private readonly spaceReportResultService: SpaceReportResultService,
+    private readonly user: UserContext,
+  ) {}
 
-  // TODO(PFDA-4701) - get the current user from the IOC
-  async createReport(spaceId: number, user: User) {
+  async createReport(spaceId: number) {
     if (spaceId == null) {
-      throw new errors.InvalidStateError('Space id is required for creating a report')
+      throw new InvalidStateError('Space id is required for creating a report')
     }
 
     return await this.em.transactional(async () => {
-      const space = await this.getSpaceForUserValidated(spaceId, user)
-      const spaceReport = new SpaceReport(user)
+      const space = await this.getSpaceForUserValidated(spaceId)
+      const spaceReport = new SpaceReport(this.em.getReference(User, this.user.id))
       spaceReport.space = space
-      spaceReport.reportParts.add(await this.createSpaceReportParts(spaceReport, space.scope))
+      spaceReport.reportParts.add(await this.createSpaceReportParts(space.scope))
 
       if (ArrayUtils.isEmpty(spaceReport.reportParts.getItems())) {
-        throw new errors.InvalidStateError('Report not generated: No entities to report on in this space')
+        throw new InvalidStateError('Report not generated: No entities to report on in this space')
       }
 
       this.em.persist(spaceReport)
@@ -57,10 +55,9 @@ export class SpaceReportService {
     return await this.em.find(SpaceReport, ids)
   }
 
-  // TODO(PFDA-4701) - get the current user from the IOC
-  async getReportsForSpace(spaceId: number, user: User) {
+  async getReportsForSpace(spaceId: number) {
     return await this.em.transactional(async () => {
-      const space = await this.getSpaceForUserValidated(spaceId, user)
+      const space = await this.getSpaceForUserValidated(spaceId)
       const reports = await this.em.find(
         SpaceReport,
         { space },
@@ -70,7 +67,7 @@ export class SpaceReportService {
         },
       )
 
-      return reports.map(r => ({
+      return reports.map((r) => ({
         id: r.id,
         createdAt: r.createdAt,
         state: r.state,
@@ -86,7 +83,7 @@ export class SpaceReportService {
 
     await this.em.transactional(async () => this.em.remove(reports))
 
-    return reports.map(r => r.id)
+    return reports.map((r) => r.id)
   }
 
   async completePartsBatch(batches: BatchComplete[]) {
@@ -97,79 +94,54 @@ export class SpaceReportService {
     return await this.spaceReportResultService.generateResult(report, styles)
   }
 
-  async hasPendingBatch(reportId: number) {
-    const pendingTask = await this.em.findOne(SpaceReportPart, {
+  async hasAllBatchesDone(reportId: number) {
+    const notDoneTask = await this.em.findOne(SpaceReportPart, {
       spaceReport: reportId,
-      state: 'CREATED',
+      state: { $ne: 'DONE' },
     })
 
-    return Boolean(pendingTask)
+    return !Boolean(notDoneTask)
   }
 
-  async setSpaceReportError(id: number) {
-    return await this.em.transactional(async () => {
-      const spaceReport = await this.em.findOneOrFail(SpaceReport, id)
-
-      if (spaceReport.state === 'ERROR') {
-        return null
-      }
-
-      spaceReport.state = 'ERROR'
-      return spaceReport
-    })
-  }
-
-  async setSpaceReportPartsError(ids: number[]) {
-    await this.spaceReportPartService.setReportPartsError(ids)
-  }
-
-  private async getSpaceForUserValidated(spaceId: number, user: User) {
-    const spaces = await this.getSpacesForUser([spaceId], user)
+  private async getSpaceForUserValidated(spaceId: number) {
+    const spaces = await this.getSpacesForUser([spaceId])
 
     if (ArrayUtils.isEmpty(spaces)) {
-      throw new errors.NotFoundError('Space not found')
+      throw new NotFoundError('Space not found')
     }
 
     return spaces[0]
   }
 
-  async getSpacesForUser(spaceIds: number[], user: User) {
-    return await this.em.createQueryBuilder(Space, 'space')
+  async getSpacesForUser(spaceIds: number[]) {
+    return await this.em
+      .createQueryBuilder(Space, 'space')
       .joinAndSelect('space.spaceMemberships', 'membership')
       .joinAndSelect('membership.user', 'user')
-      .where({ 'space.id': spaceIds, 'user.id': user.id })
+      .where({ 'space.id': spaceIds, 'user.id': this.user.id })
       .getResult()
   }
 
-  getSpaceReportPartMetaData<T extends SpaceReportPartSourceType>(source: SpaceReportPartSourceEntity<T>) {
+  getSpaceReportPartMetaData<T extends SpaceReportPartSourceType>(
+    source: SpaceReportPartSourceEntity<T>,
+  ) {
     return this.spaceReportPartService.getSpaceReportPartMetaData(source)
   }
 
-  private async createSpaceReportParts(spaceReport: SpaceReport, scope: string): Promise<SpaceReportPart[]> {
+  private async createSpaceReportParts(scope: SCOPE): Promise<SpaceReportPart[]> {
     const spaceFiles = await this.em.find(UserFile, { scope })
     const spaceApps = await this.em.find(App, { scope })
     const spaceJobs = await this.em.find(Job, { scope })
     const spaceAssets = await this.em.find(Asset, { scope })
     const spaceWorkflows = await this.em.find(Workflow, { scope })
     const reportPartSources: SpaceReportPartSource[] = [
-      ...spaceFiles.map(f => ({ type: 'file' as const, id: f.id })),
-      ...spaceApps.map(a => ({ type: 'app' as const, id: a.id })),
-      ...spaceJobs.map(j => ({ type: 'job' as const, id: j.id })),
-      ...spaceAssets.map(a => ({ type: 'asset' as const, id: a.id })),
-      ...spaceWorkflows.map(w => ({ type: 'workflow' as const, id: w.id })),
+      ...spaceFiles.map((f) => ({ type: 'file' as const, id: f.id })),
+      ...spaceApps.map((a) => ({ type: 'app' as const, id: a.id })),
+      ...spaceJobs.map((j) => ({ type: 'job' as const, id: j.id })),
+      ...spaceAssets.map((a) => ({ type: 'asset' as const, id: a.id })),
+      ...spaceWorkflows.map((w) => ({ type: 'workflow' as const, id: w.id })),
     ]
 
     return this.spaceReportPartService.createReportParts(reportPartSources)
-  }
-
-  // TODO(PFDA-4701) - Remove with IOC
-  static getInstance(em: SqlEntityManager) {
-    const spaceReportPartService = new SpaceReportPartService(em)
-    const spaceReportResultService = new SpaceReportResultService()
-    return new SpaceReportService(
-      em,
-      spaceReportPartService,
-      spaceReportResultService,
-    )
   }
 }

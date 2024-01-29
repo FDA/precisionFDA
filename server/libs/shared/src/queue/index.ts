@@ -1,27 +1,36 @@
 /* eslint-disable no-warning-comments */
+import { AdminDataConsistencyReportOperation } from '@shared/debug/ops/admin-data-consistency-report'
+import { SyncDbClusterOperation } from '@shared/domain/db-cluster/ops/synchronize'
+import { EmailSendOperation } from '@shared/domain/email/ops/email-send'
+import { SyncJobOperation } from '@shared/domain/job/ops/synchronize'
+import { NotificationService } from '@shared/domain/notification/services/notification.service'
+import { SyncFilesStateOperation } from '@shared/domain/user-file/ops/sync-files-state'
+import { QueueProxy } from '@shared/queue/queue.proxy'
+import { ArrayUtils } from '@shared/utils/array.utils'
+import { TimeUtils } from '@shared/utils/time.utils'
 /* eslint-disable @typescript-eslint/no-floating-promises */
 /* eslint-disable require-await */
 /* eslint-disable multiline-ternary */
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
-import Bull, { Job, JobInformation, JobOptions, Queue, QueueOptions } from 'bull'
+import Bull, { Job, JobInformation, JobOptions, Queue } from 'bull'
 import { config } from '../config'
 import { database } from '../database'
-import { AdminDataConsistencyReportOperation } from '../debug'
-import { SyncDbClusterOperation } from '../domain/db-cluster'
-import { EmailSendOperation } from '../domain/email'
-import { SyncJobOperation } from '../domain/job'
-import { NotificationService } from '../domain/notification'
-import { SpaceReportService } from '../domain/space-report'
-import { SyncFilesStateOperation } from '../domain/user-file'
 import { InvalidStateError } from '../errors'
 import { SpaceReportErrorFacade } from '../facade/space-report-error/space-report-error.facade'
 import { defaultLogger as log } from '../logger'
 import { UserCtx } from '../types'
-import { ArrayUtils, TimeUtils } from '../utils'
 import { formatDuration } from '../utils/format'
-import * as utils from './queue.utils'
-import * as types from './task.input'
-import { CheckStatusJob, SyncWorkstationFiles } from './task.input'
+import { getJobStatusMessage, getJobStatusMessageWithElapsedTime } from './queue.utils'
+import {
+  BasicUserJob,
+  CheckStatusJob,
+  SendEmailJob,
+  SyncDbClusterJob,
+  SyncWorkstationFiles,
+  Task,
+  TASK_TYPE,
+} from './task.input'
+import { clearOrphanedRepeatableJobs as utilsClearOrphanedRepeatableJobs } from './queue.utils'
 
 let mainQueue: Bull.Queue
 let fileSyncQueue: Bull.Queue
@@ -34,71 +43,30 @@ const getFileSyncQueue = (): Bull.Queue => fileSyncQueue
 const getEmailsQueue = (): Bull.Queue => emailsQueue
 const getMaintenanceQueue = (): Bull.Queue => maintenanceQueue
 
-const getQueues = (): Bull.Queue[] => [mainQueue, fileSyncQueue, spaceReportQueue, emailsQueue, maintenanceQueue]
+const getQueues = (): Bull.Queue[] => [
+  mainQueue,
+  fileSyncQueue,
+  spaceReportQueue,
+  emailsQueue,
+  maintenanceQueue,
+]
 
 const clearOrphanedRepeatableJobs = async (q: Queue): Promise<Bull.JobInformation[]> => {
-  return await utils.clearOrphanedRepeatableJobs(q)
+  return await utilsClearOrphanedRepeatableJobs(q)
 }
 
 // set up the queues
-const createQueues = async (): Promise<void> => {
-  log.info({}, 'Initializing queues')
+const createQueues = async (provider: QueueProxy): Promise<void> => {
+  log.verbose({}, 'Initializing queues')
 
-  // other config passed into IORedis constructor
-  const redisOptions: QueueOptions['redis'] = {
-    tls: config.redis.isSecure as any,
-  }
-  if (config.redis.isSecure) {
-    redisOptions.password = config.redis.authPassword
-    redisOptions.connectTimeout = config.redis.connectTimeout
-  }
-
-  mainQueue = new Bull(config.workerJobs.queues.default.name, config.redis.url, {
-    redis: redisOptions,
-    defaultJobOptions: {
-      // if set to false, it will eventually eat up space in the redis instance
-      removeOnComplete: true,
-      removeOnFail: true,
-      priority: 3,
-    },
-  })
-
-  emailsQueue = new Bull(config.workerJobs.queues.emails.name, config.redis.url, {
-    redis: redisOptions,
-    defaultJobOptions: {
-      removeOnComplete: true,
-      removeOnFail: true,
-      attempts: 3, // Re-try sending the email a few times in case of network issue
-      backoff: 5 * 60 * 1000, // 5 min delay between retries
-      priority: 5,
-    },
-  })
-
-  fileSyncQueue = new Bull(config.workerJobs.queues.fileSync.name, config.redis.url, {
-    redis: redisOptions,
-    defaultJobOptions: {
-      // if set to false, it will eventually eat up space in the redis instance
-      removeOnComplete: true,
-      removeOnFail: true,
-      priority: 7,
-    },
-  })
-
-  spaceReportQueue = new Bull(config.workerJobs.queues.spaceReport.name, config.redis.url, {
-    redis: redisOptions,
-    defaultJobOptions: {
-      removeOnComplete: true,
-      removeOnFail: { age: TimeUtils.weeksToSeconds(1) },
-      priority: 2,
-      attempts: 3,
-      backoff: TimeUtils.minutesToMilliseconds(1),
-    },
-  })
+  mainQueue = provider.mainQueue
+  emailsQueue = provider.emailQueue
+  fileSyncQueue = provider.fileSyncQueue
+  spaceReportQueue = provider.spaceReportQueue
 
   const em = database.orm().em.fork({ useContext: true })
-  const spaceReportService = SpaceReportService.getInstance(em)
   const notificationService = new NotificationService(em.fork({ useContext: true }))
-  const spaceReportErrorFacade = new SpaceReportErrorFacade(em, spaceReportService, notificationService)
+  const spaceReportErrorFacade = new SpaceReportErrorFacade(em, notificationService)
   spaceReportQueue.on('failed', (job, error) => {
     log.error({ job, error }, 'Space report queue error')
 
@@ -106,10 +74,10 @@ const createQueues = async (): Promise<void> => {
       return
     }
 
-    const type = job?.data?.type
+    const type = job?.name
     const payload = job?.data?.payload
 
-    if (type === types.TASK_TYPE.GENERATE_SPACE_REPORT_RESULT) {
+    if (type === TASK_TYPE.GENERATE_SPACE_REPORT_RESULT) {
       if (Number.isNaN(payload)) {
         return
       }
@@ -122,7 +90,7 @@ const createQueues = async (): Promise<void> => {
       return
     }
 
-    const filteredPayload = payload.filter(i => !Number.isNaN(i))
+    const filteredPayload = payload.filter((i) => !Number.isNaN(i))
 
     if (ArrayUtils.isEmpty(filteredPayload)) {
       return
@@ -131,14 +99,7 @@ const createQueues = async (): Promise<void> => {
     spaceReportErrorFacade.setSpaceReportPartsError(filteredPayload)
   })
 
-  maintenanceQueue = new Bull(config.workerJobs.queues.maintenance.name, config.redis.url, {
-    redis: redisOptions,
-    defaultJobOptions: {
-      removeOnComplete: true,
-      removeOnFail: true,
-      priority: 10,
-    },
-  })
+  maintenanceQueue = provider.maintenanceQueue
   await mainQueue.isReady()
   await fileSyncQueue.isReady()
   await spaceReportQueue.isReady()
@@ -151,11 +112,26 @@ const createQueues = async (): Promise<void> => {
   //        by exceeding timeout on GitHub but it works fine locally.
   //        Find a better solution at some point.
   const removedJobs = clearOrphanedRepeatableJobs(mainQueue)
-  log.info({ removedJobs }, 'createQueues: Removed orphaned repeatable jobs.')
+  log.verbose({ removedJobs }, 'createQueues: Removed orphaned repeatable jobs.')
 }
 
-const getTaskInfo = (task: types.Task, payloadFn?: (payload: any) => any) => {
-  const whitelistPayloadFn = payloadFn ?? (payload => payload)
+const logQueueStatus = async () => {
+  await Promise.all(
+    getQueues().map(async (q) => {
+      log.verbose(
+        {
+          queueStatus: q.client.status,
+          currentJobCounts: await q.getJobCounts(),
+          repeatableJobs: await q.getRepeatableJobs(),
+        },
+        `${q.name} status on startup`,
+      )
+    }),
+  )
+}
+
+const getTaskInfo = (task: Task, payloadFn?: (payload: any) => any) => {
+  const whitelistPayloadFn = payloadFn ?? ((payload) => payload)
 
   return {
     type: task.type,
@@ -165,30 +141,29 @@ const getTaskInfo = (task: types.Task, payloadFn?: (payload: any) => any) => {
   }
 }
 
-
 const validateQueue = (queue: Bull.Queue) => {
   if (typeof queue === 'undefined') {
     throw new Error('The queue was not started')
   }
 }
 
-const addBulkToQueue = async <T extends types.Task>(
+const addBulkToQueue = async <T extends Task>(
   tasks: Parameters<Bull.Queue<T>['addBulk']>[0],
   queue: Bull.Queue<T>,
 ) => {
   validateQueue(queue)
 
-  log.info(
+  log.verbose(
     {
-      tasks: tasks.map(t => getTaskInfo(t.data)),
+      tasks: tasks.map((t) => getTaskInfo(t.data)),
     },
     'adding a bulk of task to queue',
   )
 
-  return await queue.addBulk(tasks)
+  return await queue.addBulk(tasks.map((t) => ({ name: t.data.type, data: t.data })))
 }
 
-const addToQueue = async <T extends types.Task>(
+const addToQueue = async <T extends Task>(
   task: T,
   queue: Bull.Queue<T>,
   options?: JobOptions,
@@ -196,7 +171,7 @@ const addToQueue = async <T extends types.Task>(
 ): Promise<Job<T>> => {
   validateQueue(queue)
 
-  log.info(
+  log.verbose(
     {
       task: getTaskInfo(task, payloadFn),
       job: {
@@ -206,42 +181,35 @@ const addToQueue = async <T extends types.Task>(
     'adding a task to queue',
   )
 
-  return await queue.add(task, options)
+  return await queue.add(task.type, task, options)
 }
 
 const initMaintenanceQueue = async () => {
-  log.info({}, 'Initializing maintenance queue')
+  log.verbose({}, 'Initializing maintenance queue')
   if (config.workerJobs.queues.maintenance.onInit.checkNonterminatedClusters) {
-    await addToQueue({ type: types.TASK_TYPE.CHECK_NON_TERMINATED_DBCLUSTERS as const }, maintenanceQueue, {
-      repeat: {
-        cron: config.workerJobs.nonTerminatedDbClusters.repeatPattern,
+    await addToQueue(
+      { type: TASK_TYPE.CHECK_NON_TERMINATED_DBCLUSTERS as const },
+      maintenanceQueue,
+      {
+        repeat: {
+          cron: config.workerJobs.nonTerminatedDbClusters.repeatPattern,
+        },
+        jobId: TASK_TYPE.CHECK_NON_TERMINATED_DBCLUSTERS,
       },
-      jobId: types.TASK_TYPE.CHECK_NON_TERMINATED_DBCLUSTERS,
-    })
+    )
   }
 
-  await addToQueue({type: types.TASK_TYPE.CHECK_CHALLENGE_JOBS as const}, maintenanceQueue, {
+  await addToQueue({ type: TASK_TYPE.CHECK_CHALLENGE_JOBS as const }, maintenanceQueue, {
     repeat: {
       cron: config.workerJobs.checkChallengeJobs.repeatPattern,
     },
-    jobId: types.TASK_TYPE.CHECK_CHALLENGE_JOBS
+    jobId: TASK_TYPE.CHECK_CHALLENGE_JOBS,
   })
 
   if (config.workerJobs.queues.maintenance.onInit.adminDataConsistencyReport) {
     await AdminDataConsistencyReportOperation.enqueue()
   }
 }
-
-const disconnectQueues = async (): Promise<void> => {
-  log.info('Disconnecting queues')
-  await mainQueue.close(true)
-  await fileSyncQueue.close(true)
-  await spaceReportQueue.close(true)
-  await emailsQueue.close(true)
-  await maintenanceQueue.close(true)
-  log.info('Queues disconnected')
-}
-
 
 // removeRepeatable and removeRepeatableJob explanation:
 //     removeRepeatable calls calls queue.removeJobs, removing the job task
@@ -254,14 +222,14 @@ const removeRepeatable = async (job: Job, queue?: Queue) => {
   if (typeof mainQueue === 'undefined') {
     throw new Error('The queue was not started')
   }
-  log.info({ jobId: job.id }, 'trying to remove repeatable job id')
+  log.verbose({ jobId: job.id }, 'trying to remove repeatable job id')
   // this does not work because we need to remove the next scheduled job
   const [prefix, id] = job.id.toString().split(':')
   await (queue ?? mainQueue).removeJobs(`${prefix}:${id}:*`)
 }
 
 const removeRepeatableJob = async (job: JobInformation, queue: Queue) => {
-  log.info(
+  log.verbose(
     { jobId: job.id, cron: job.cron },
     'removeRepeatableJob: trying to remove repeatable job',
   )
@@ -271,17 +239,17 @@ const removeRepeatableJob = async (job: JobInformation, queue: Queue) => {
 
 const findRepeatable = async (bullJobId: string) => {
   const repeatableJobs = await mainQueue.getRepeatableJobs()
-  const result = repeatableJobs.find(j => j.id === bullJobId)
+  const result = repeatableJobs.find((j) => j.id === bullJobId)
   return result
 }
 
 // TASK PRODUCERS
 
 const createSyncFilesStateTask = async (user: UserCtx) => {
-  log.info({ userId: user.id }, 'Creating SyncFilesStateTask')
+  log.verbose({ userId: user.id }, 'Creating SyncFilesStateTask')
 
   const task = {
-    type: types.TASK_TYPE.SYNC_FILES_STATE as const,
+    type: TASK_TYPE.SYNC_FILES_STATE as const,
     user,
   }
 
@@ -293,9 +261,9 @@ const createSyncFilesStateTask = async (user: UserCtx) => {
   return await addToQueue(task, mainQueue, options)
 }
 
-const createSyncJobStatusTask = async (data: types.CheckStatusJob['payload'], user: UserCtx) => {
+const createSyncJobStatusTask = async (data: CheckStatusJob['payload'], user: UserCtx) => {
   const wrapped = {
-    type: types.TASK_TYPE.SYNC_JOB_STATUS as const,
+    type: TASK_TYPE.SYNC_JOB_STATUS as const,
     payload: data,
     user,
   }
@@ -315,16 +283,12 @@ const createSyncJobStatusTask = async (data: types.CheckStatusJob['payload'], us
   return await addToQueue(wrapped, mainQueue, options)
 }
 
-const createSyncTask = async <T extends types.Task> (
-  task: T,
-  queue: Bull.Queue,
-  dxid: string,
-) => {
+const createSyncTask = async <T extends Task>(task: T, queue: Bull.Queue, dxid: string) => {
   const jobId = `${task.type}.${dxid}`
   const existingJob = await fileSyncQueue.getJob(jobId)
   if (existingJob !== null) {
     // Do not allow a second file sync job to be added to the queue
-    let errorMessage = await utils.getJobStatusMessage(existingJob, 'File sync')
+    let errorMessage = await getJobStatusMessage(existingJob, 'File sync')
     const elapsedTime = Date.now() - existingJob.timestamp
     errorMessage += `. Current state is ${await existingJob.getState()}`
     errorMessage += `. Elapsed time ${formatDuration(elapsedTime)}`
@@ -338,24 +302,18 @@ const createSyncTask = async <T extends types.Task> (
   return await addToQueue(task, queue, options)
 }
 
-const createSyncOutputsTask = async (
-  data: types.CheckStatusJob['payload'],
-  user: UserCtx,
-) => {
+const createSyncOutputsTask = async (data: CheckStatusJob['payload'], user: UserCtx) => {
   const wrapped: CheckStatusJob = {
-    type: types.TASK_TYPE.SYNC_JOB_OUTPUTS,
+    type: TASK_TYPE.SYNC_JOB_OUTPUTS,
     payload: data,
     user,
   }
   await createSyncTask(wrapped, fileSyncQueue, data.dxid)
 }
 
-const createSyncWorkstationFilesTask = async (
-  data: types.CheckStatusJob['payload'],
-  user: UserCtx,
-) => {
+const createSyncWorkstationFilesTask = async (data: CheckStatusJob['payload'], user: UserCtx) => {
   const wrapped: SyncWorkstationFiles = {
-    type: types.TASK_TYPE.SYNC_WORKSTATION_FILES,
+    type: TASK_TYPE.SYNC_WORKSTATION_FILES,
     payload: data,
     user,
   }
@@ -365,28 +323,26 @@ const createSyncWorkstationFilesTask = async (
 // Specifying a taskId will prevent multiple emails of that
 // type and id to be sent
 const createSendEmailTask = async (
-  data: types.SendEmailJob['payload'],
+  data: SendEmailJob['payload'],
   user: UserCtx | undefined,
   taskId?: string,
 ) => {
   const wrapped = {
-    type: types.TASK_TYPE.SEND_EMAIL as const,
+    type: TASK_TYPE.SEND_EMAIL as const,
     payload: data,
     user,
   }
   const options: JobOptions = taskId
     ? {
-      jobId: taskId,
-      // The following is important for emails that should not be repeated
-      removeOnComplete: { age: TimeUtils.daysToSeconds(1), count: 100 },
-      removeOnFail: { age: TimeUtils.weeksToSeconds(1), count: 500 },
-    }
+        jobId: taskId,
+        // The following is important for emails that should not be repeated
+        removeOnComplete: { age: TimeUtils.daysToSeconds(1), count: 100 },
+        removeOnFail: { age: TimeUtils.weeksToSeconds(1), count: 500 },
+      }
     : {
-      jobId: EmailSendOperation.getBullJobId(data.emailType),
-    }
-  const handlePayloadFn = (
-    payload: types.SendEmailJob['payload'],
-  ): types.SendEmailJob['payload'] => ({
+        jobId: EmailSendOperation.getBullJobId(data.emailType),
+      }
+  const handlePayloadFn = (payload: SendEmailJob['payload']): SendEmailJob['payload'] => ({
     ...payload,
     body: '[too-long]',
   })
@@ -399,27 +355,27 @@ const removeFromEmailQueue = (jobId: string) => {
 
 const createCheckStaleJobsTask = async (user: UserCtx) => {
   const wrapped = {
-    type: types.TASK_TYPE.CHECK_STALE_JOBS as const,
+    type: TASK_TYPE.CHECK_STALE_JOBS as const,
     payload: undefined as any,
     user,
   }
-  const options: JobOptions = { jobId: types.TASK_TYPE.CHECK_STALE_JOBS }
+  const options: JobOptions = { jobId: TASK_TYPE.CHECK_STALE_JOBS }
   return await addToQueue(wrapped, maintenanceQueue, options)
 }
 
 const createSyncSpacesPermissionsTask = async (user: UserCtx) => {
   const wrapped = {
-    type: types.TASK_TYPE.SYNC_SPACES_PERMISSIONS as const,
+    type: TASK_TYPE.SYNC_SPACES_PERMISSIONS as const,
     payload: undefined as any,
     user,
   }
-  const options: JobOptions = { jobId: types.TASK_TYPE.SYNC_SPACES_PERMISSIONS }
+  const options: JobOptions = { jobId: TASK_TYPE.SYNC_SPACES_PERMISSIONS }
   return await addToQueue(wrapped, maintenanceQueue, options)
 }
 
 const createRemoveNodesJobTask = async (ids: number[], user: UserCtx) => {
   const wrapped = {
-    type: types.TASK_TYPE.REMOVE_NODES as const,
+    type: TASK_TYPE.REMOVE_NODES as const,
     payload: ids,
     user,
   }
@@ -430,7 +386,7 @@ const createRemoveNodesJobTask = async (ids: number[], user: UserCtx) => {
 }
 const createLockNodesJobTask = async (ids: number[], user: UserCtx) => {
   const wrapped = {
-    type: types.TASK_TYPE.LOCK_NODES as const,
+    type: TASK_TYPE.LOCK_NODES as const,
     payload: ids,
     user,
   }
@@ -441,7 +397,7 @@ const createLockNodesJobTask = async (ids: number[], user: UserCtx) => {
 }
 const createUnlockNodesJobTask = async (ids: number[], user: UserCtx) => {
   const wrapped = {
-    type: types.TASK_TYPE.UNLOCK_NODES as const,
+    type: TASK_TYPE.UNLOCK_NODES as const,
     payload: ids,
     user,
   }
@@ -451,9 +407,9 @@ const createUnlockNodesJobTask = async (ids: number[], user: UserCtx) => {
   return await addToQueue(wrapped, fileSyncQueue, options)
 }
 
-const createDbClusterSyncTask = async (data: types.SyncDbClusterJob['payload'], user: UserCtx) => {
+const createDbClusterSyncTask = async (data: SyncDbClusterJob['payload'], user: UserCtx) => {
   const wrapped = {
-    type: types.TASK_TYPE.SYNC_DBCLUSTER_STATUS as const,
+    type: TASK_TYPE.SYNC_DBCLUSTER_STATUS as const,
     payload: data,
     user,
   }
@@ -467,9 +423,9 @@ const createDbClusterSyncTask = async (data: types.SyncDbClusterJob['payload'], 
 }
 
 const createGenerateSpaceReportBatchTasks = async (batches: number[][], user: UserCtx) => {
-  const wrapped = batches.map(b => ({
+  const wrapped = batches.map((b) => ({
     data: {
-      type: types.TASK_TYPE.GENERATE_SPACE_REPORT_BATCH as const,
+      type: TASK_TYPE.GENERATE_SPACE_REPORT_BATCH as const,
       payload: b,
       user,
     },
@@ -480,7 +436,7 @@ const createGenerateSpaceReportBatchTasks = async (batches: number[][], user: Us
 
 const createGenerateSpaceReportResultTask = async (reportId: number, user: UserCtx) => {
   const wrapped = {
-    type: types.TASK_TYPE.GENERATE_SPACE_REPORT_RESULT as const,
+    type: TASK_TYPE.GENERATE_SPACE_REPORT_RESULT as const,
     payload: reportId,
     user,
   }
@@ -488,18 +444,18 @@ const createGenerateSpaceReportResultTask = async (reportId: number, user: UserC
   return await addToQueue(wrapped, spaceReportQueue)
 }
 
-const createUserCheckupTask = async (data: types.BasicUserJob) => {
+const createUserCheckupTask = async (data: BasicUserJob) => {
   const wrapped = {
-    type: types.TASK_TYPE.USER_CHECKUP as const,
+    type: TASK_TYPE.USER_CHECKUP as const,
     user: data.user,
   }
   const options: JobOptions = { jobId: `${wrapped.type}.${data.user.dxuser}` }
   return await addToQueue(wrapped, maintenanceQueue, options)
 }
 
-const createCheckUserJobsTask = async (data: types.BasicUserJob) => {
+const createCheckUserJobsTask = async (data: BasicUserJob) => {
   const wrapped = {
-    type: types.TASK_TYPE.CHECK_USER_JOBS as const,
+    type: TASK_TYPE.CHECK_USER_JOBS as const,
     user: data.user,
   }
   const options: JobOptions = { jobId: `${wrapped.type}.${data.user.dxuser}` }
@@ -507,14 +463,14 @@ const createCheckUserJobsTask = async (data: types.BasicUserJob) => {
 }
 
 const createTestMaxMemoryTask = async (): Promise<any> => {
-  maintenanceQueue.removeJobs(types.TASK_TYPE.DEBUG_MAX_MEMORY)
+  maintenanceQueue.removeJobs(TASK_TYPE.DEBUG_MAX_MEMORY)
 
   const data = {
-    type: types.TASK_TYPE.DEBUG_MAX_MEMORY as const,
+    type: TASK_TYPE.DEBUG_MAX_MEMORY as const,
   }
 
   const options: JobOptions = {
-    jobId: types.TASK_TYPE.DEBUG_MAX_MEMORY,
+    jobId: TASK_TYPE.DEBUG_MAX_MEMORY,
   }
   return await addToQueue(data, maintenanceQueue, options)
 }
@@ -526,7 +482,7 @@ const createTestMaxMemoryTask = async (): Promise<any> => {
 //    allow a duplicate job with the same bull jobId to be added
 //    repeatable jobs should not use this function
 // TODO: The queue methods should be cleaned up and a lot of code could be consolidated
-const addToQueueEnsureUnique = async <T extends types.Task>(
+const addToQueueEnsureUnique = async <T extends Task>(
   q: Queue,
   task: T,
   jobId: string | undefined,
@@ -537,7 +493,7 @@ const addToQueueEnsureUnique = async <T extends types.Task>(
     const existingJob = await q.getJob(jobId)
     if (existingJob) {
       let errorMessage = existingJob.hasOwnProperty('getState')
-        ? await utils.getJobStatusMessageWithElapsedTime(existingJob, task.type)
+        ? await getJobStatusMessageWithElapsedTime(existingJob, task.type)
         : `Job with id ${jobId} already exists in queue`
       throw new InvalidStateError(errorMessage)
     }
@@ -573,9 +529,6 @@ export {
   getEmailsQueue,
   getMaintenanceQueue,
   getQueues,
-  disconnectQueues,
-  types,
-  utils,
   removeRepeatable,
   removeRepeatableJob,
   findRepeatable,
@@ -586,4 +539,5 @@ export {
   createUnlockNodesJobTask,
   createGenerateSpaceReportBatchTasks,
   createGenerateSpaceReportResultTask,
+  logQueueStatus,
 }

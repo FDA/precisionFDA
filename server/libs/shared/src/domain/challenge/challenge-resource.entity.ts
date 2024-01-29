@@ -4,9 +4,9 @@ import {
   ManyToOne,
   Property,
 } from '@mikro-orm/core'
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
+import { User } from '@shared/domain/user/user.entity'
 import { BaseEntity } from '../../database/base-entity'
-import { User } from '../user'
-import { UserFile } from '../user-file'
 import { WorkaroundJsonType } from '../../database/custom-json-type'
 import { Challenge } from './challenge.entity'
 

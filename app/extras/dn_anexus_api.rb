@@ -25,7 +25,7 @@ class DNAnexusAPI
   end
 
   def initialize(bearer_token, apiserver_url = DNANEXUS_APISERVER_URI)
-    raise "Bearer token is null" if bearer_token.nil?
+    raise "Bearer token for DNAnexus API is not set" if bearer_token.blank?
 
     @transport = DXClient::Transport.new(bearer_token, apiserver_url)
   end

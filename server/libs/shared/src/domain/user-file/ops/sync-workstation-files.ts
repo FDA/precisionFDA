@@ -1,10 +1,10 @@
+import { Job } from '@shared/domain/job/job.entity'
 import { isNil } from "ramda"
 import { PlatformClient } from "../../../platform-client"
 import { CheckStatusJob } from "../../../queue/task.input"
 import { Maybe, UserOpsCtx } from "../../../types"
 import { WorkerBaseOperation } from "../../../utils/base-operation"
 import { removeRepeatable } from '../../../queue'
-import { Job } from "../../job"
 import { Tag } from "../../tag/tag.entity"
 import { Folder } from "../folder.entity"
 import { assignTags } from "../user-file-tags"
@@ -35,7 +35,7 @@ export class WorkstationSyncFilesOperation extends WorkerBaseOperation<
       return
     }
 
-    this.ctx.log.info({ jobId: job.id }, 'WorkstationSyncFilesOperation: Beginning files sync for job')
+    this.ctx.log.verbose({ jobId: job.id }, 'WorkstationSyncFilesOperation: Beginning files sync for job')
 
     const projectDesc = await client.foldersList({
       projectId: job.project,
@@ -56,7 +56,7 @@ export class WorkstationSyncFilesOperation extends WorkerBaseOperation<
     // for each local folder query files and check for differences
     // null is added -> root folder
     const folderPathsToCheck: Array<Folder | null> = [null, ...localFolders]
-    this.ctx.log.info({
+    this.ctx.log.verbose({
       foldersToCheckCount: folderPathsToCheck.length,
     }, 'WorkstationSyncFilesOperation: About to sync files in folders')
 
@@ -133,6 +133,6 @@ export class WorkstationSyncFilesOperation extends WorkerBaseOperation<
     )
     await em.flush()
 
-    this.ctx.log.info({ jobId: job.id }, 'WorkstationSyncFilesOperation: Completed sync')
+    this.ctx.log.verbose({ jobId: job.id }, 'WorkstationSyncFilesOperation: Completed sync')
   }
 }

@@ -9,10 +9,10 @@ import {
   Ref,
   Reference,
 } from '@mikro-orm/core'
+import { Attachment } from '@shared/domain/attachment/attachment.entity'
+import { User } from '@shared/domain/user/user.entity'
 import { BaseEntity } from '../../database/base-entity'
 import { SCOPE } from '../../types/common'
-import { Attachment } from '../attachment'
-import { User } from '../user'
 
 export type NoteType = 'Discussion' | 'Answer'
 

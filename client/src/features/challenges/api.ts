@@ -1,7 +1,7 @@
 import axios from 'axios'
 import { convertDateToUserTime } from '../../utils/datetime'
 import { cleanObject } from '../../utils/object'
-import { Pagination } from '../home/executions/executions.types'
+import { Pagination } from '../executions/executions.types'
 import { Challenge, ChallengeListParams } from './types'
 import { processFile } from '../resources/uploadImage'
 

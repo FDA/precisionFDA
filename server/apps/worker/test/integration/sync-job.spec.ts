@@ -1,22 +1,22 @@
 import { wrap, EntityManager } from '@mikro-orm/core'
+import { database } from '@shared/database'
+import { App } from '@shared/domain/app/app.entity'
+import { Job } from '@shared/domain/job/job.entity'
+import { SyncJobOperation } from '@shared/domain/job/ops/synchronize'
+import { Tag } from '@shared/domain/tag/tag.entity'
+import { Tagging } from '@shared/domain/tagging/tagging.entity'
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
+import { User } from '@shared/domain/user/user.entity'
+import { getMainQueue } from '@shared/queue'
+import { TASK_TYPE } from '@shared/queue/task.input'
 import { DateTime } from 'luxon'
-import { database, queue, errors } from '@shared'
-import { App, User, Job, UserFile, Tag, Tagging, Folder } from '@shared/domain'
 import { JOB_STATE } from '@shared/domain/job/job.enum'
 import type { CheckStatusJob } from '@shared/queue/task.input'
 import { expect } from 'chai'
 import { create, generate, db } from '@shared/test'
 import { fakes, mocksReset } from '@shared/test/mocks'
-import {
-  FILES_DESC_RES,
-  FILES_LIST_RES_ROOT,
-  FOLDERS_LIST_RES,
-} from '@shared/test/mock-responses'
-import {
-  FILE_STI_TYPE,
-  PARENT_TYPE,
-} from '@shared/domain/user-file/user-file.types'
-import { SyncJobOperation } from '@shared/domain/job'
+import { FILES_DESC_RES, FILES_LIST_RES_ROOT, FOLDERS_LIST_RES } from '@shared/test/mock-responses'
+import { FILE_STI_TYPE, PARENT_TYPE } from '@shared/domain/user-file/user-file.types'
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { fakes as localFakes, mocksReset as localMocksReset } from '../utils/mocks'
 import { stripEntityDates } from '../utils/expect-helper'
@@ -41,10 +41,10 @@ const createSyncJobTask = async (
   payload: CheckStatusJob['payload'],
   user: CheckStatusJob['user'],
 ) => {
-  const defaultTestQueue = queue.getMainQueue()
+  const defaultTestQueue = getMainQueue()
   // .add() is stubbed by default
-  await defaultTestQueue.add({
-    type: queue.types.TASK_TYPE.SYNC_JOB_STATUS,
+  await defaultTestQueue.add(TASK_TYPE.SYNC_JOB_STATUS, {
+    type: TASK_TYPE.SYNC_JOB_STATUS,
     payload,
     user,
   })
@@ -163,7 +163,10 @@ describe('TASK: sync_job_status', () => {
     expect(updatedJob).to.have.property('updatedAt').that.is.not.equal(job.updatedAt)
     // fetch created event
     // TODO(samuel) fix entity manager type
-    const events = await (afterEm as any as SqlEntityManager).createQueryBuilder('events').select('*').execute()
+    const events = await (afterEm as any as SqlEntityManager)
+      .createQueryBuilder('events')
+      .select('*')
+      .execute()
     expect(events).to.be.an('array').with.lengthOf(1)
     expect(stripEntityDates(events[0])).to.be.deep.equal({
       id: 1,
@@ -251,10 +254,7 @@ describe('TASK: sync_job_status', () => {
       expect(fakes.queue.createEmailSendTaskFake.calledOnce).to.be.true()
       const [email, userCtx] = fakes.queue.createEmailSendTaskFake.getCall(0).args
       expect(email).to.have.property('to', user.email)
-      expect(email).to.have.property(
-        'subject',
-        `Job ${job.name} will terminate in 24 hours`,
-      )
+      expect(email).to.have.property('subject', `Job ${job.name} will terminate in 24 hours`)
       expect(userCtx).to.have.property('id', user.id)
       // not called - the interval for email is shorter
       expect(fakes.client.jobTerminateFake.notCalled).to.be.true()
@@ -272,9 +272,7 @@ describe('TASK: sync_job_status', () => {
       await em.flush()
       fakes.client.jobDescribeFake.returns({ state: JOB_STATE.TERMINATED })
       // first client.filesList() for all the files
-      fakes.client.filesListFake.onCall(0).returns(
-        FILES_LIST_RES_ROOT.results.slice(0, 2),
-      )
+      fakes.client.filesListFake.onCall(0).returns(FILES_LIST_RES_ROOT.results.slice(0, 2))
       // second client.filesList() for snapshots subfolder
       fakes.client.filesListFake.onCall(1).returns([])
       fakes.client.filesDescFake.returns({
@@ -324,8 +322,9 @@ describe('TASK: sync_job_status', () => {
       // @ts-expect-error Fix - ts says that array has smaller length
       const firstFileDxid = FILES_LIST_RES_ROOT.results[5].id
       fakes.client.filesListFake.returns(
-      // @ts-expect-error Fix - ts says that array has smaller length
-        [FILES_LIST_RES_ROOT.results[5]])
+        // @ts-expect-error Fix - ts says that array has smaller length
+        [FILES_LIST_RES_ROOT.results[5]],
+      )
       fakes.client.filesDescFake.returns({
         results: [FILES_DESC_RES.results[5]],
       })
@@ -371,11 +370,13 @@ describe('TASK: sync_job_status', () => {
       // all the files
       fakes.client.filesListFake.onCall(0).returns(
         // @ts-expect-error FILE_TYPE enum does not exist
-        [FILES_LIST_RES_ROOT.results[0], FILES_LIST_RES_ROOT.results[5]])
+        [FILES_LIST_RES_ROOT.results[0], FILES_LIST_RES_ROOT.results[5]],
+      )
       // snapshot files
       fakes.client.filesListFake.onCall(1).returns(
         // @ts-expect-error FILE_TYPE enum does not exist
-        [FILES_LIST_RES_ROOT.results[5]])
+        [FILES_LIST_RES_ROOT.results[5]],
+      )
       fakes.client.filesDescFake.returns({
         results: [FILES_DESC_RES.results[0], FILES_DESC_RES.results[5]],
       })
@@ -391,9 +392,9 @@ describe('TASK: sync_job_status', () => {
       )
       expect(filesInDb).to.be.an('array').with.lengthOf(2)
       // @ts-expect-error FILE_TYPE enum does not exist
-      const regularFile = filesInDb.find(file => file.entityType === FILE_TYPE.REGULAR)
+      const regularFile = filesInDb.find((file) => file.entityType === FILE_TYPE.REGULAR)
       // @ts-expect-error FILE_TYPE enum does not exist
-      const snapshotFile = filesInDb.find(file => file.entityType === FILE_TYPE.SNAPSHOT)
+      const snapshotFile = filesInDb.find((file) => file.entityType === FILE_TYPE.SNAPSHOT)
       expect(regularFile).to.not.be.undefined()
       expect(regularFile.taggings.count()).to.equal(1)
       expect(regularFile.taggings.getItems()[0].tag).to.have.property('id', 1)

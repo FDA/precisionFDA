@@ -1,4 +1,4 @@
-import { Logger } from 'pino'
+import { Logger } from '@nestjs/common'
 import Bull, { Job, JobInformation, Queue } from 'bull'
 import { removeRepeatableJob } from '.'
 import { formatDuration } from '../utils/format'
@@ -56,12 +56,12 @@ const clearJobs = async (q: Queue, state: any, log: Logger): Promise<Job[]> => {
   const jobs = await q.getJobs([state])
   const count = jobs.length
   if (count > 0) {
-    log.info({ jobs }, `CleanupWorkerQueueOperation: Removing ${state} jobs from ${q.name}`)
+    log.verbose({ jobs }, `CleanupWorkerQueueOperation: Removing ${state} jobs from ${q.name}`)
     q.clean(0, state)
-    log.info({ count }, `CleanupWorkerQueueOperation: Removed ${count} ${state} jobs from ${q.name}`)
+    log.verbose({ count }, `CleanupWorkerQueueOperation: Removed ${count} ${state} jobs from ${q.name}`)
   }
   else {
-    log.info(`CleanupWorkerQueueOperation: No ${state} jobs in ${q.name}`)
+    log.verbose(`CleanupWorkerQueueOperation: No ${state} jobs in ${q.name}`)
   }
   return jobs
 }
