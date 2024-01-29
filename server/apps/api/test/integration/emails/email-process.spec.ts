@@ -1,11 +1,14 @@
+import { database } from '@shared/database'
+import { App } from '@shared/domain/app/app.entity'
+import { Job } from '@shared/domain/job/job.entity'
+import { SpaceEvent } from '@shared/domain/space-event/space-event.entity'
+import { User } from '@shared/domain/user/user.entity'
 import { expect } from 'chai'
 import { EntityManager } from '@mikro-orm/core'
 import supertest from 'supertest'
-import { App, Job, SpaceEvent, User } from '@shared/domain'
 import { JOB_STATE } from '@shared/domain/job/job.enum'
 import { create, generate, db } from '@shared/test'
 import { fakes, mocksReset } from '@shared/test/mocks'
-import { database } from '@shared'
 import { EMAIL_CONFIG } from '@shared/domain/email/email.config'
 import { getServer } from '../../../src/server'
 import { getDefaultHeaderData } from '../../utils/expect-helper'
@@ -42,12 +45,12 @@ describe('POST /emails/:id/send', () => {
   })
 
   it('response shape & mocks call shape (JOB_FINISHED email) - is now deprecated', async () => {
-    const { body } = await supertest(getServer())
+    const { text } = await supertest(getServer())
       .post(`/emails/${EMAIL_ID_JOB_FINISHED}/send`)
       .set(getDefaultHeaderData(user))
       .send({ input: { jobId: job.id } })
       .expect(200)
-    expect(body).to.be.true()
+    expect(text).to.eq('true')
     const [taskInput] = fakes.queue.createEmailSendTaskFake.getCall(0).args
 
     expect(taskInput).to.have.property('to', user.email)
@@ -69,13 +72,13 @@ describe('POST /emails/:id/send', () => {
     }
     await em.flush()
 
-    const { body } = await supertest(getServer())
+    const { text } = await supertest(getServer())
       .post(`/emails/${emailId}/send`)
       .set(getDefaultHeaderData(user))
       .send({ input: { jobId: job.id } })
       .expect(200)
 
-    expect(body).to.be.true()
+    expect(text).to.eq('true')
     const [taskInput] = fakes.queue.createEmailSendTaskFake.getCall(0).args
 
     expect(taskInput).to.have.property('to', user.email)
@@ -84,12 +87,12 @@ describe('POST /emails/:id/send', () => {
   })
 
   it('mocks call shape (SPACE_CONTENT_CHANGE email)', async () => {
-    const { body } = await supertest(getServer())
+    const { text } = await supertest(getServer())
       .post(`/emails/${EMAIL_ID_SPACE_CONTENT}/send`)
       .set(getDefaultHeaderData(user))
       .send({ input: { spaceEventId: spaceEventJobAdded.id } })
       .expect(200)
-    expect(body).to.be.true()
+    expect(text).to.eq('true')
     expect(fakes.queue.createEmailSendTaskFake.calledOnce).to.be.true()
     // user - the owner is filtered out
     const [taskInput] = fakes.queue.createEmailSendTaskFake.getCall(0).args

@@ -5,18 +5,18 @@ export const PfTabTitle = styled.div`
   font-weight: bold;
 `
 
-export const PfTabContent = styled.div<{ isShown?: boolean }>`
+export const PfTabContent = styled.div<{ $isShown?: boolean }>`
   display: none;
   margin-bottom: 32px;
   padding: 16px;
   line-height: 24px;
 
-  ${({ isShown }) =>
-    isShown &&
+  ${({ $isShown }) =>
+    $isShown &&
     css`
       box-sizing: border-box;
       display: inline-block;
-      border: 1px solid #ddd;
+      border: 1px solid var(--c-layout-border);
       border-top: 0;
       width: 100%;
       padding-top: 16px;
@@ -26,11 +26,13 @@ export const PfTabContent = styled.div<{ isShown?: boolean }>`
     margin-top: 20px;
     margin-bottom: 20px;
     border: 0;
-    border-top: 1px solid #eeeeee;
+    border-top: 1px solid var(--c-layout-border-200);
   }
 `
 
-export const PfTab = styled.div<{ isActive?: boolean }>`
+export const PfTab = styled.div<{ $isActive?: boolean }>`
+  border-top-left-radius: 3px;
+  border-top-right-radius: 3px;
   position: relative;
   top: 1px;
   cursor: pointer;
@@ -42,17 +44,17 @@ export const PfTab = styled.div<{ isActive?: boolean }>`
   justify-content: center;
   padding: 8px 16px;
   color: inherit;
-  background-color: #fafafa;
-  border: 1px solid #ddd;
+  background-color: var(--tertiary-70);
+  border: 1px solid var(--c-layout-border);
 
-  ${({ isActive }) =>
-    isActive
+  ${({ $isActive }) =>
+    $isActive
       ? css`
-          background-color: white;
+          background-color: var(--background);
           border-bottom: 1px solid transparent;
         `
       : css`
-          border-bottom: 1px solid #ddd;
+          border-bottom: 1px solid var(--c-layout-border);
           &:hover {
             color: inherit;
           }
@@ -67,6 +69,6 @@ export const PfTabRow = styled.div`
   @media (min-width: 1000px) {
     flex-direction: row;
     gap: 8px;
-    border-bottom: 1px solid #ddd;
+    border-bottom: 1px solid var(--c-layout-border);
   }
 `

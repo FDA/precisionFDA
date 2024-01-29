@@ -58,7 +58,7 @@ export const removeJobs = async (pattern: string): Promise<any> => {
   return `${jobsCountBefore - jobsCountAfter} jobs removed`
 }
 
-export const removeRepeatable = async (key: string): Promise<any> => {
+export const removeRepeatableDebug = async (key: string): Promise<any> => {
   const queues = getQueues()
   let jobsCountBefore = 0
   let jobsCountAfter = 0

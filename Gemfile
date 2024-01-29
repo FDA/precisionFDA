@@ -81,7 +81,7 @@ gem "acts-as-taggable-on", "~> 9.0", github: "mbleigh/acts-as-taggable-on"
 gem "acts_as_commentable_with_threading", ">= 2.0.1"
 gem "awesome_nested_set", github: "collectiveidea/awesome_nested_set"
 
-gem "acts_as_follower", github: "tcocca/acts_as_follower", branch: "master"
+gem "acts_as_follower", "~> 0.2.1"
 gem "acts_as_votable"
 
 # For inline-css in emails
@@ -173,5 +173,5 @@ end
 
 group :production, :staging, :dev do
   gem "exception_notification", "~> 4.4"
-  gem "puma", "~> 6.3"
+  gem "puma", "~> 6.4"
 end

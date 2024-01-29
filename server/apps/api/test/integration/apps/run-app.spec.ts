@@ -1,8 +1,12 @@
+import { USER_CONTEXT_HTTP_HEADERS } from '@shared/config/consts'
+import { database } from '@shared/database'
+import { App } from '@shared/domain/app/app.entity'
+import { Job } from '@shared/domain/job/job.entity'
+import { User } from '@shared/domain/user/user.entity'
+import { ErrorCodes } from '@shared/errors'
 import { expect } from 'chai'
 import { EntityManager } from '@mikro-orm/mysql'
 import supertest from 'supertest'
-import { errors, database, USER_CONTEXT_HTTP_HEADERS } from '@shared'
-import { App, Job, User } from '@shared/domain'
 import {
   JOB_STATE,
   JOB_DB_ENTITY_TYPE,
@@ -304,7 +308,7 @@ describe('POST /apps/:id/run', () => {
         })
         .send(generate.app.runAppInput())
         .expect(404)
-      expect(body.error).to.have.property('code', errors.ErrorCodes.USER_NOT_FOUND)
+      expect(body.error).to.have.property('code', ErrorCodes.USER_NOT_FOUND)
     })
 
     it('throws 404 when user does not have the project set', async () => {
@@ -316,7 +320,7 @@ describe('POST /apps/:id/run', () => {
         .query({ id: user.id })
         .send(generate.app.runAppInput())
         .expect(404)
-      expect(body.error).to.have.property('code', errors.ErrorCodes.PROJECT_NOT_FOUND)
+      expect(body.error).to.have.property('code', ErrorCodes.PROJECT_NOT_FOUND)
     })
 
     // deprecated, admin owns the apps
@@ -328,7 +332,7 @@ describe('POST /apps/:id/run', () => {
         .post(`/apps/${anotherApp.dxid}/run`)
        .set(getDefaultHeaderData(user))
         .send(generate.app.runAppInput())
-      expect(body.error).to.have.property('code', errors.ErrorCodes.APP_NOT_FOUND)
+      expect(body.error).to.have.property('code', ErrorCodes.APP_NOT_FOUND)
     })
 
     it('throws 404 if requested app does not follow the requirements', async () => {
@@ -339,7 +343,7 @@ describe('POST /apps/:id/run', () => {
        .set(getDefaultHeaderData(user))
         .send(generate.app.runAppInput())
         .expect(404)
-      expect(body.error).to.have.property('code', errors.ErrorCodes.APP_NOT_FOUND)
+      expect(body.error).to.have.property('code', ErrorCodes.APP_NOT_FOUND)
     })
 
     it('throws 404 when snapshot is provided but file does not exist', async () => {
@@ -348,7 +352,7 @@ describe('POST /apps/:id/run', () => {
        .set(getDefaultHeaderData(user))
         .send({ ...generate.app.runAppInput(), input: { snapshot: generate.random.dxstr() } })
         .expect(404)
-      expect(body.error).to.have.property('code', errors.ErrorCodes.USER_FILE_NOT_FOUND)
+      expect(body.error).to.have.property('code', ErrorCodes.USER_FILE_NOT_FOUND)
     })
   })
 })

@@ -1,11 +1,14 @@
 
+import { database } from '@shared/database'
+import { NotificationService } from '@shared/domain/notification/services/notification.service'
+import { AuthSessionOperation } from '@shared/domain/user/ops/auth.session'
+import { User } from '@shared/domain/user/user.entity'
+import { createRedisClient, NOTIFICATIONS_QUEUE } from '@shared/services/redis.service'
 import http from 'http'
 import ws from 'ws'
 import { SqlEntityManager } from '@mikro-orm/mysql'
-import { user as userDomain, redis, database } from '@shared'
 import { log } from '../../logger'
 import { UserCtx } from '@shared/types'
-import { notification as notificationDomain } from '@shared'
 
 // list of client connections grouped together by user id for faster access
 const clientConnections = new Map<number, WebSocketConnection[]>()
@@ -23,20 +26,20 @@ const connectionsCleanup = () => {
   })
 }
 
-const storeConnection = (user: userDomain.User, wsc: WebSocketConnection) => {
+const storeConnection = (user: User, wsc: WebSocketConnection) => {
   if (!clientConnections.get(user.id) || clientConnections.get(user.id)?.length === 0) {
-    log.info(`Store WS connection`)
+    log.verbose(`Store WS connection`)
     clientConnections.set(user.id, [wsc])
   } else {
     clientConnections.get(user.id)?.push(wsc)
   }
-  log.info(`User ${user.dxuser} successfully authenticated for receiving WebSocket notifications`)
-  log.info(`Count of connectedClients ${clientConnections.size}`)
+  log.verbose(`User ${user.dxuser} successfully authenticated for receiving WebSocket notifications`)
+  log.verbose(`Count of connectedClients ${clientConnections.size}`)
 }
 
 const authenticateUserConnection = async (connection: any, message: any) => {
-  const notificationService = new notificationDomain.NotificationService(database.orm().em.fork() as SqlEntityManager)
-  const authSessionOp = new userDomain.AuthSessionOperation({
+  const notificationService = new NotificationService(database.orm().em.fork() as SqlEntityManager)
+  const authSessionOp = new AuthSessionOperation({
     log,
     em: database.orm().em as SqlEntityManager,
     user: {} as UserCtx,
@@ -67,21 +70,22 @@ export const setupWSServer = async (server: http.Server) => {
   wss.on('connection', conn => {
     //@ts-ignore
     conn.on('message', messagePayload => {
-      log.info(`WS messagePayload ${messagePayload}`)
+      log.verbose(`WS messagePayload ${messagePayload}`)
       const message = JSON.parse(messagePayload.toString())
       if (message.action === 'login') {
-        log.info('starting login session')
+        log.verbose('starting login session')
         authenticateUserConnection(conn, message)
       }
     })
     conn.on('close', () => {
+      console.log('connection close listener')
       connectionsCleanup()
     })
   })
 
-  const client = await redis.createRedisClient('worker')
+  const client = await createRedisClient('worker')
 
-  client.subscribe(redis.NOTIFICATIONS_QUEUE, eventPayload => {
+  client.subscribe(NOTIFICATIONS_QUEUE, eventPayload => {
     //@ts-ignore compilation says it's instance of Error, but it's actually a string
     const notification = JSON.parse(eventPayload)
     const userId = notification.user.id
@@ -89,7 +93,7 @@ export const setupWSServer = async (server: http.Server) => {
     const wscs = clientConnections.get(userId)
     wscs?.forEach(wsc => {
       try {
-        log.info(`sending notification to client ${JSON.stringify(notification)}`)
+        log.verbose(`sending notification to client ${JSON.stringify(notification)}`)
         wsc.connection.send(JSON.stringify(notification))
       } catch (error) {
         log.error(`error: ${error}`)
@@ -98,7 +102,8 @@ export const setupWSServer = async (server: http.Server) => {
   })
 
   wss.on('close', () => {
-    log.info('closing redis connection')
+    console.log('on close event')
+    log.verbose('closing redis connection')
     client.quit()
   })
 

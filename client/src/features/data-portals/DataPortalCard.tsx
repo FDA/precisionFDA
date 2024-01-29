@@ -5,12 +5,13 @@ import { Button } from '../../components/Button'
 import { DataPortal } from './types'
 
 export const StyledCard = styled.div`
+  gap: 16px;
   display: flex;
   flex-direction: column;
-  background-color: white;
-  border: 1px solid #b6c8d2;
+  background-color: transparent;
   padding: 12px;
-  border-radius: 12px;
+  padding-bottom: 0;
+  padding-top: 32px;
 
   img {
     flex: 1 0 auto;
@@ -25,22 +26,24 @@ export const StyledCard = styled.div`
 
 export const CardDetails = styled.div`
   align-self: center;
-  padding: 16px 8px 8px 8px;
+  padding: 0 8px 8px 8px;
   max-width: 220px;
 `
 
 const CardName = styled.div`
-  font-size: 24px;
+  font-size: 18px;
   font-weight: 600;
   line-height: 1.2;
   margin-bottom: 12px;
-`
+  text-wrap: pretty;
+  `
 
 const CardDesc = styled.div`
   font-size: 14px;
   color: #7f8c9b;
   line-height: 150%;
-  margin-bottom: 12px;
+  margin-bottom: 16px;
+  text-wrap: pretty;
 `
 
 export const DataPortalCard = ({ portal, canViewSpaceLink = false }: { portal: DataPortal, canViewSpaceLink: boolean }) => {

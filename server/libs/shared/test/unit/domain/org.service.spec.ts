@@ -1,9 +1,11 @@
 import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
+import { database } from '@shared/database'
+import { User } from '@shared/domain/user/user.entity'
+import { getLogger } from '@shared/logger'
+import { ClassIdResponse } from '@shared/platform-client/platform-client.responses'
 import { create, db } from '../../../src/test'
-import { database, getLogger, types } from '@shared'
 import P from 'pino'
-import { User } from '../../../src/domain'
-import { ClassIdResponse, PlatformClient } from '../../../src/platform-client'
+import { PlatformClient } from '../../../src/platform-client'
 import { expect } from 'chai'
 import { OrgService } from '../../../src/domain/org/service/org.service'
 
@@ -11,7 +13,7 @@ describe('org service tests', () => {
   let em: EntityManager<MySqlDriver>
   let user: User
   let log: P.Logger
-  let userCtx: types.UserCtx
+  let userCtx: UserCtx
   let adminPlatformClient: PlatformClient
   let userPlatformClient: PlatformClient
   let createOrgHandleParam: string

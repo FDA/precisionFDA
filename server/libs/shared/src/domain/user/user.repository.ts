@@ -1,6 +1,5 @@
 import { FindOptions } from '@mikro-orm/core'
 import { config } from '../../config'
-import { User } from '..'
 import { PaginatedEntityRepository } from '../../database/paginated-repository'
 import { buildJsonPath } from '../../utils/path'
 import { mysqlJsonArrayAppend, mysqlJsonSet } from '../../utils/sql-json-column-utils'
@@ -9,7 +8,7 @@ import { PlatformClient } from '../../platform-client'
 import { UserCtx } from '../../types'
 import { MfaAlreadyResetError, ValidationError } from '../../errors'
 import { classifyErrorTypes } from '../../utils/classify-error-types'
-import { RESOURCE_TYPES, USER_STATE } from './user.entity'
+import { RESOURCE_TYPES, User, USER_STATE } from './user.entity'
 
 type Resource = (typeof RESOURCE_TYPES)[number]
 

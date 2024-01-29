@@ -1,5 +1,5 @@
+import { Asset } from '@shared/domain/user-file/asset.entity'
 import { expect } from 'chai'
-import { Asset } from '../../../src/domain'
 import {
   SpaceReportPartAssetResultMetaProvider,
 } from '../../../src/domain/space-report/service/part/space-report-part-asset-result-meta.provider'

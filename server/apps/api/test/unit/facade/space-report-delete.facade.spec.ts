@@ -1,10 +1,11 @@
 import type { SqlEntityManager } from '@mikro-orm/mysql'
-import type { spaceReport, user, userFile } from '@shared'
-import { errors } from '@shared'
+import { SpaceReportService } from '@shared/domain/space-report/service/space-report.service'
+import { NodesRemoveOperation } from '@shared/domain/user-file/ops/nodes-remove'
+import { InvalidStateError, NotFoundError } from '@shared/errors'
 import { expect } from 'chai'
 import type { SinonStub } from 'sinon'
 import { stub } from 'sinon'
-import { SpaceReportDeleteFacade } from '../../../src/facade/space-report-delete.facade'
+import { SpaceReportDeleteFacade } from '../../../src/facade/space-report/space-report-delete.facade'
 
 describe('SpaceReportDeleteFacade', () => {
   const SPACE_REPORT_1_ID = 0
@@ -44,9 +45,6 @@ describe('SpaceReportDeleteFacade', () => {
 
   const SPACE_REPORTS = [SPACE_REPORT_1, SPACE_REPORT_2]
 
-  const USER_ID = 1000
-  const USER = { id: USER_ID } as unknown as user.User
-
   let transactionalStub: SinonStub
   let getReportsStub: SinonStub
   let getSpacesForUserStub: SinonStub
@@ -60,7 +58,7 @@ describe('SpaceReportDeleteFacade', () => {
     getReportsStub.withArgs(SPACE_REPORT_IDS).returns(SPACE_REPORTS)
 
     getSpacesForUserStub = stub().throws()
-    getSpacesForUserStub.withArgs(SPACE_IDS, USER).returns(SPACES)
+    getSpacesForUserStub.withArgs(SPACE_IDS).returns(SPACES)
 
     deleteReportsStub = stub().throws()
     deleteReportsStub.withArgs(SPACE_REPORTS).returns(SPACE_REPORT_IDS)
@@ -70,7 +68,7 @@ describe('SpaceReportDeleteFacade', () => {
   })
 
   it('should run under transaction', async () => {
-    await getInstance().deleteSpaceReports(SPACE_REPORT_IDS, USER)
+    await getInstance().deleteSpaceReports(SPACE_REPORT_IDS)
 
     expect(transactionalStub.calledOnce).to.be.true()
   })
@@ -106,48 +104,48 @@ describe('SpaceReportDeleteFacade', () => {
   it('should throw an error if no reports found and rollback transaction', async () => {
     getReportsStub.withArgs(SPACE_REPORT_IDS).returns([])
 
-    await expectReject(errors.NotFoundError, 'Space report not found')
+    await expectReject(NotFoundError, 'Space report not found')
   })
 
   it('should throw an error if some reports not found and rollback transaction', async () => {
     getReportsStub.withArgs(SPACE_REPORT_IDS).returns([SPACE_REPORT_1])
 
-    await expectReject(errors.NotFoundError, 'Space report not found')
+    await expectReject(NotFoundError, 'Space report not found')
   })
 
   it('should throw an error if some reports not in a terminal state and rollback transaction', async () => {
     const SPACE_REPORT_2_NON_TERMINAL = { ...SPACE_REPORT_2, state: 'CREATED' }
     getReportsStub.withArgs(SPACE_REPORT_IDS).returns([SPACE_REPORT_1, SPACE_REPORT_2_NON_TERMINAL])
 
-    await expectReject(errors.InvalidStateError, 'Cannot delete a report in non terminal state')
+    await expectReject(InvalidStateError, 'Cannot delete a report in non terminal state')
   })
 
   it('should throw an error if no spaces found and rollback transaction', async () => {
-    getSpacesForUserStub.withArgs(SPACE_IDS, USER).returns([])
+    getSpacesForUserStub.withArgs(SPACE_IDS).returns([])
 
-    await expectReject(errors.NotFoundError, 'Space not found')
+    await expectReject(NotFoundError, 'Space not found')
   })
 
   it('should throw an error if some spaces not found and rollback transaction', async () => {
-    getSpacesForUserStub.withArgs(SPACE_IDS, USER).returns([SPACE_2])
+    getSpacesForUserStub.withArgs(SPACE_IDS).returns([SPACE_2])
 
-    await expectReject(errors.NotFoundError, 'Space not found')
+    await expectReject(NotFoundError, 'Space not found')
   })
 
   it('should call nodesRemoveOperation with all file ids', async () => {
-    await getInstance().deleteSpaceReports(SPACE_REPORT_IDS, USER)
+    await getInstance().deleteSpaceReports(SPACE_REPORT_IDS)
 
     expect(nodesRemoveExecuteStub.calledOnce).to.be.true()
   })
 
   it('should return the result of deleteReports', async () => {
-    const result = getInstance().deleteSpaceReports(SPACE_REPORT_IDS, USER)
+    const result = getInstance().deleteSpaceReports(SPACE_REPORT_IDS)
 
     expect(await result).to.be.eq(SPACE_REPORT_IDS)
   })
 
   async function expectReject(error: Error | Function, message?: string) {
-    const result = getInstance().deleteSpaceReports(SPACE_REPORT_IDS, USER)
+    const result = getInstance().deleteSpaceReports(SPACE_REPORT_IDS)
 
     await expect(result).to.be.rejectedWith(error, message)
     await expect(transactionalStub.getCall(0).returnValue).to.be.rejected()
@@ -160,9 +158,11 @@ describe('SpaceReportDeleteFacade', () => {
       getReports: getReportsStub,
       getSpacesForUser: getSpacesForUserStub,
       deleteReports: deleteReportsStub,
-    } as unknown as spaceReport.SpaceReportService
+    } as unknown as SpaceReportService
 
-    const nodesRemoveOperation = { execute: nodesRemoveExecuteStub } as unknown as userFile.NodesRemoveOperation
+    const nodesRemoveOperation = {
+      execute: nodesRemoveExecuteStub,
+    } as unknown as NodesRemoveOperation
 
     return new SpaceReportDeleteFacade(em, spaceReportService, nodesRemoveOperation)
   }

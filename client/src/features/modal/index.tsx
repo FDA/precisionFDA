@@ -32,7 +32,7 @@ const ModalComponent = ({ header, headerText, isShown, hide, children, footer, b
   useKeyPress('Escape', () => hide())
   return (
     <>
-      <Backdrop onClick={disableClose ? undefined : hide} blur={blur} />
+      <Backdrop onClick={disableClose ? undefined : hide} $blur={blur} />
       <Wrapper aria-modal aria-label={headerText} tabIndex={-1} role="dialog" {...rest}>
         <StyledModal>
           <Header>
@@ -46,7 +46,7 @@ const ModalComponent = ({ header, headerText, isShown, hide, children, footer, b
             </HeaderTop>
             {header && <div>{header}</div>}
           </Header>
-          <Content overflowContent={overflowContent}>
+          <Content $overflowContent={overflowContent}>
             {children}
           </Content>
           {footer && <Footer>{footer}</Footer>}

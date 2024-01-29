@@ -1,10 +1,13 @@
 import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
+import { database } from '@shared/database'
+import { LicensesForAppOperation } from '@shared/domain/license/ops/licenses-for-app'
+import { LicensedItem } from '@shared/domain/licensed-item/licensed-item.entity'
+import { User } from '@shared/domain/user/user.entity'
+import { getLogger } from '@shared/logger'
 import { create, db } from '../../../src/test'
-import { database, getLogger, types } from '../../..'
 import { expect } from 'chai'
 import { wrap } from '@mikro-orm/core'
 import P from 'pino'
-import { entities, license, User } from '../../../src/domain'
 import { PARENT_TYPE } from '../../../src/domain/user-file/user-file.types'
 import { UidInput } from '../../../src/types'
 
@@ -12,7 +15,7 @@ describe('licenses for app\'s assets tests', () => {
   let em: EntityManager<MySqlDriver>
   let user: User
   let log: P.Logger
-  let userCtx: types.UserCtx
+  let userCtx: UserCtx
 
   beforeEach(async () => {
     await db.dropData(database.connection())
@@ -49,16 +52,16 @@ describe('licenses for app\'s assets tests', () => {
       { title: 'license for assets' },
     )
 
-    const licensedItemForAsset1 = wrap(new entities.LicensedItem(licenseOnAssets, asset1.id))
+    const licensedItemForAsset1 = wrap(new LicensedItem(licenseOnAssets, asset1.id))
       .assign({ licenseableType: 'Node' }, { em })
     em.persist(licensedItemForAsset1)
-    const licensedItemForAsset2 = wrap(new entities.LicensedItem(licenseOnAssets, asset2.id))
+    const licensedItemForAsset2 = wrap(new LicensedItem(licenseOnAssets, asset2.id))
       .assign({ licenseableType: 'Node' }, { em })
     em.persist(licensedItemForAsset2)
 
     await em.flush()
 
-    const op = new license.LicensesForAppOperation({
+    const op = new LicensesForAppOperation({
       em: database.orm().em.fork() as EntityManager<MySqlDriver>,
       log,
       user: userCtx,
@@ -72,7 +75,7 @@ describe('licenses for app\'s assets tests', () => {
   })
 
   it('fail for incorrect app id', async () => {
-    const op = new license.LicensesForAppOperation({
+    const op = new LicensesForAppOperation({
       em: database.orm().em.fork() as EntityManager<MySqlDriver>,
       log,
       user: userCtx,
@@ -94,7 +97,7 @@ describe('licenses for app\'s assets tests', () => {
     )
     await em.flush()
 
-    const op = new license.LicensesForAppOperation({
+    const op = new LicensesForAppOperation({
       em: database.orm().em.fork() as EntityManager<MySqlDriver>,
       log,
       user: userCtx,

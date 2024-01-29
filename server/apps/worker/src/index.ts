@@ -1,44 +1,44 @@
+import { NestFactory } from '@nestjs/core'
+import { setupNestApp } from '@shared/app-initialization'
+import { logQueueStatus } from '@shared/queue'
 import { writeHeapSnapshot } from 'v8'
-import { database, queue } from '@shared'
-import { setupHandlers } from './queues'
-import { log } from './utils'
+import { log } from './utils/logger'
+import { WorkerModule } from './worker.module'
 
 process.on('SIGUSR2', () => {
   const fileName = writeHeapSnapshot()
-  log.info(`Created heap dump file: ${fileName}`)
+  log.verbose(`Created heap dump file: ${fileName}`)
 })
 
 const stopWorker = async (): Promise<void> => {
-  log.info('worker closing')
+  log.verbose('worker closing')
 
   process.removeAllListeners('SIGINT')
   process.removeAllListeners('SIGTREM')
 
-  await queue.disconnectQueues()
-  await database.stop()
   // eslint-disable-next-line node/no-process-exit
   process.exit(1)
 }
 
 const handleFatalError = async (err: Error): Promise<void> => {
-  log.fatal({ error: err }, 'Fatal error occurred. Exiting the worker')
+  log.fatal(err, 'Fatal error occurred. Exiting the worker')
   // eslint-disable-next-line node/no-process-exit
   setTimeout(() => process.exit(2), 10000)
   try {
     await stopWorker()
   } catch (err) {
-    log.error({ error: err }, 'Error stopping worker')
+    log.error(err, 'Error stopping worker')
   }
 }
 
-const startWorker = async (): Promise<void> => {
-  log.info('worker starting')
-  process.once('uncaughtException', err => {
+export const startWorker = async (): Promise<void> => {
+  log.verbose('worker starting')
+  process.once('uncaughtException', (err) => {
     log.error('Worker crash: Uncaught exception')
     handleFatalError(err)
   })
 
-  process.once('unhandledRejection', err => {
+  process.once('unhandledRejection', (err) => {
     log.error('Worker crash: Unhandled rejection')
     handleFatalError(err as Error)
   })
@@ -49,9 +49,12 @@ const startWorker = async (): Promise<void> => {
   process.once('SIGTERM', async () => await stopWorker())
 
   // start consuming queues
+  const app = await NestFactory.createApplicationContext(WorkerModule)
 
-  await database.start()
-  await setupHandlers()
+  await setupNestApp(app)
+  await logQueueStatus()
+
+  await app.init()
 }
 
 Promise.resolve()
@@ -59,4 +62,4 @@ Promise.resolve()
     // this is blocking, no other promise is resolved
     await startWorker()
   })
-  .catch(err => handleFatalError(err))
+  .catch((err) => handleFatalError(err))

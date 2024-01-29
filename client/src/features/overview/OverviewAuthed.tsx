@@ -14,7 +14,6 @@ import {
   SectionTitle,
 } from '../../components/Public/styles'
 import { usePageMeta } from '../../hooks/usePageMeta'
-import { colors, fontWeight } from '../../styles/theme'
 import { IUser } from '../../types/user'
 import GuestRestrictedLink from '../../components/Controls/GuestRestrictedLink'
 import NavigationBar from '../../components/NavigationBar/NavigationBar'
@@ -22,8 +21,8 @@ import PublicLayout from '../../layouts/PublicLayout'
 import { useAuthUser } from '../auth/useAuthUser'
 import { ExpertListItem } from '../experts/list/ExpertListItem'
 import { useExpertsListQuery } from '../experts/useExpertsListQuery'
-import { fetchApps } from '../home/apps/apps.api'
-import { IApp } from '../home/apps/apps.types'
+import { fetchApps } from '../apps/apps.api'
+import { IApp } from '../apps/apps.types'
 import { ChallengesBanner } from './ChallengesBanner'
 import ChallengesOverviewList from './ChallengesOverviewList'
 import { OverviewNewsList } from './OverviewNewsList'
@@ -35,19 +34,20 @@ import {
   Hr,
   InfoRow,
   PFDATeamSection,
+  PageOverviewMainBody,
 } from './styles'
 import { AppTypeIconBlue } from '../../components/icons/AppTypeIconBlue'
 import { AppTypeIconYellow } from '../../components/icons/AppTypeIconYellow'
 
 const StyledGetStarted = styled.div`
-  background-color: rgb(242, 242, 242);
+  background-color: var(--tertiary-100);
   padding: 16px;
   margin-bottom: 32px;
 `
 
 const GettingStartedHr = styled.hr`
   margin: 12px 0;
-  border-top: 1px solid ${colors.highlightBlue};
+  border-top: 1px solid var(--c-layout-border);
 `
 
 const Row = styled.div`
@@ -140,22 +140,22 @@ const StyledTopAppItem = styled.div`
 
 const Title = styled.div`
   a {
-    color: ${colors.textBlack};
-    font-weight: ${fontWeight.black};
+    color: var(--c-text-700);
+    font-weight: bolder;
     line-height: 20px;
     font-size: 14px;
   }
   a:hover {
-    color: ${colors.primaryBlue};
+    color: var(--primary-500);
   }
 `
 const AppOrg = styled.div`
-  color: ${colors.textMediumGrey};
+  color: var(--c-text-500);
   line-height: 20px;
   font-size: 12px;
 `
 const AppUpdatedAt = styled.div`
-  color: ${colors.blacktextOnWhite};
+  color: var(--c-text-700);
   line-height: 20px;
   font-size: 12px;
 `
@@ -209,9 +209,7 @@ export const TopApps = () => {
           {isLoadingRecentAppsData ? (
             <Loader className="inline" />
           ) : (
-            recentAppsData?.apps
-              .slice(0, 4)
-              .map(a => <TopAppItem key={a.id} app={a} />)
+            recentAppsData?.apps?.slice(0, 4).map(a => <TopAppItem key={a.id} app={a} />)
           )}
         </TopAppsList>
       </TopAppsColumn>
@@ -221,8 +219,7 @@ export const TopApps = () => {
           {isLoadingFeaturedAppsData ? (
             <Loader className="inline" />
           ) : (
-            featuredAppsData?.apps
-              .slice(0, 4)
+            featuredAppsData?.apps?.slice(0, 4)
               .map(a => <TopAppItem key={a.id} app={a} />)
           )}
         </TopAppsList>
@@ -242,7 +239,7 @@ export const OverviewAuthed = () => {
       <NavigationBar user={user} title="Overview" />
       <PageContainerMargin>
         <PageRow>
-          <PageMainBody>
+          <PageOverviewMainBody>
             <TopApps />
             <ChallengesBanner />
             <ChallengesOverviewList />
@@ -254,7 +251,7 @@ export const OverviewAuthed = () => {
                 <ExpertListItem expert={expertsData.experts[0]} />
               ))}
             </ExpertSection>
-          </PageMainBody>
+          </PageOverviewMainBody>
           <RightSide>
             <GetStarted user={user} />
             <RightSideItem>

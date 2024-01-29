@@ -1,6 +1,9 @@
 import { Entity, EntityRepositoryType, ManyToOne, PrimaryKey, Property } from '@mikro-orm/core'
-import { UserFile, User, Tag, Folder } from '..'
-import { Asset } from '../user-file'
+import { Tag } from '@shared/domain/tag/tag.entity'
+import { Asset } from '@shared/domain/user-file/asset.entity'
+import { Folder } from '@shared/domain/user-file/folder.entity'
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
+import { User } from '@shared/domain/user/user.entity'
 import { TaggingRepository } from './tagging.repository'
 
 @Entity({ tableName: 'taggings', customRepository: () => TaggingRepository })

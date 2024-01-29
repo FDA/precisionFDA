@@ -1,6 +1,13 @@
 import { LoadedReference } from '@mikro-orm/core'
+import { App } from '@shared/domain/app/app.entity'
+import { Comment } from '@shared/domain/comment/comment.entity'
+import { Job } from '@shared/domain/job/job.entity'
+import { SpaceEvent } from '@shared/domain/space-event/space-event.entity'
+import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
+import { Space } from '@shared/domain/space/space.entity'
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
+import { User } from '@shared/domain/user/user.entity'
 import { pipe, filter, uniqBy } from 'ramda'
-import { Comment, UserFile, App, Job, SpaceEvent, Space, User, SpaceMembership } from '../../..'
 import {
   CommentAdded,
   EmailSendInput,
@@ -13,7 +20,7 @@ import {
   buildFilterByUserSettings,
   buildIsNotificationEnabled,
 } from '../../email.helper'
-import { BaseTemplate } from '../base-template'
+import { BaseTemplate } from '@shared/domain/email/templates/base-template'
 import { commentAddedTemplate, CommentAddedTemplateInput } from '../mjml/comment-added.template'
 import { generateObjectCommentsLink } from '../mjml/common'
 

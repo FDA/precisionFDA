@@ -11,7 +11,7 @@ import { PageContainerMargin } from '../../Page/styles'
 
 
 const NavigationBarBanner = styled.div`
-  padding: 32px 0;
+  padding: 20px 0;
   display: flex;
   flex-flow: row nowrap;
   justify-content: space-between;
@@ -28,13 +28,13 @@ export const NavigationBarPublicLandingTitle = styled.div`
 
   h1 {
     color: #fff;
-    font-size: 32px;
+    font-size: 28px;
     font-weight: 400;
     margin: 0;
   }
 
   h2 {
-    font-size: 20px;
+    font-size: 18px;
     font-weight: 400;
     line-height: 133%;
     padding-bottom: 0px;

@@ -1,4 +1,4 @@
-import { EntityType } from '../../../entity'
+import { EntityType } from '@shared/domain/entity/domain/entity.type'
 import { EntityProvenanceData } from '../../model/entity-provenance-data'
 import { EntityProvenanceSource } from '../../model/entity-provenance-source'
 import { EntityProvenanceSourceUnion } from '../../model/entity-provenance-source-union'

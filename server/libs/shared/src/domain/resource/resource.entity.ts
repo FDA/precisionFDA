@@ -5,10 +5,10 @@ import {
   Property,
   Reference
 } from '@mikro-orm/core'
+import { DataPortal } from '@shared/domain/data-portal/data-portal.entity'
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
+import { User } from '@shared/domain/user/user.entity'
 import { BaseEntity } from '../../database/base-entity'
-import { User } from '../user'
-import { UserFile } from '../user-file'
-import { DataPortal } from '../data-portal'
 
 @Entity({ tableName: 'resources' })
 class Resource extends BaseEntity {

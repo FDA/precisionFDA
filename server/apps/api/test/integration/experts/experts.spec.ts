@@ -1,13 +1,13 @@
+import { database } from '@shared/database'
+import { User } from '@shared/domain/user/user.entity'
 import { expect } from 'chai'
 import { EntityManager } from '@mikro-orm/mysql'
 import supertest from 'supertest'
-import { database } from '@shared'
-import { Expert, User } from '@shared/domain'
 import { create, generate, db } from '@shared/test'
 import { fakes, mocksReset } from '@shared/test/mocks'
 import { getServer } from '../../../src/server'
 import { getDefaultHeaderData } from '../../utils/expect-helper'
-import { ExpertScope, ExpertState } from '@shared/domain/expert/expert.entity'
+import { Expert, ExpertScope, ExpertState } from '@shared/domain/expert/expert.entity'
 
 describe('/experts', () => {
   let em: EntityManager

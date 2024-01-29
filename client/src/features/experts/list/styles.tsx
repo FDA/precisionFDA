@@ -29,14 +29,14 @@ export const ExpertRow = styled.div`
 
 export const Name = styled.div`
   font-weight: bold;
-  color: #333333;
+  color: var(--c-text-700);
 `
 
 export const Info = styled.div`
   display: flex;
   gap: 8px;
   font-size: 14px;
-  color: #646464;
+  color: var(--c-text-500);
 `
 
 export const ExpertButtonRowWrap = styled.div`

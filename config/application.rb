@@ -1,11 +1,13 @@
-require_relative 'boot'
+require_relative "boot"
 require_relative "../app/middleware/rack/permanent_redirect"
 
-require 'rails/all'
+require "rails/all"
 
 # Require the gems listed in Gemfile, including any gems
 # you've limited to :test, :development, or :production.
 Bundler.require(*Rails.groups)
+
+require_relative "../app/extras/error_logger"
 
 module PrecisionFda
   class Application < Rails::Application
@@ -37,10 +39,10 @@ module PrecisionFda
     config.middleware.use Rack::PermanentRedirect
 
     config.middleware.insert 0,
-        Rack::UTF8Sanitizer,
-        sanitizable_content_types: ['application/x-www-form-urlencoded'],
-        only: ['rack.input', 'QUERY_STRING', 'PATH_INFO'],
-        strategy: :replace
+                             Rack::UTF8Sanitizer,
+                             sanitizable_content_types: ["application/x-www-form-urlencoded"],
+                             only: %w(rack.input QUERY_STRING PATH_INFO),
+                             strategy: :replace
 
     # Minimum Sass number precision required by bootstrap-sass
     ::SassC::Script::Value::Number.precision = [8, ::SassC::Script::Value::Number.precision].max
@@ -87,23 +89,46 @@ module PrecisionFda
     # of the relation's cache key into the cache version to support recycling cache key.
     config.active_record.collection_cache_versioning = true
 
-    # # STDOUT logging
-    if ENV["RAILS_ENV"] != "production"
-      if ENV["RAILS_LOG_TO_STDOUT"]
-        $stdout.sync = true
-        logger = ActiveSupport::Logger.new($stdout)
-        logger.formatter = config.log_formatter
-        config.logger = ActiveSupport::TaggedLogging.new(logger)
-      end
-      if ENV["LOG_REQUESTS"]
-        config.after_initialize do
-          # @see https://github.com/trusche/httplog#configuration
-          HttpLog.configure do |httplog_config|
-            httplog_config.logger = Rails.logger
-            httplog_config.log_headers = true
-          end
-        end
-      end
+    # Logging configuration
+    log_output = "log/puma.log"
+    error_log_output = "log/ruby_errors.log"
+
+    LOG_TO_STDOUT = ActiveRecord::Type::Boolean.new.cast(ENV["RAILS_LOG_TO_STDOUT"])
+    LOG_OUTGOING_HTTP_REQUESTS = ActiveRecord::Type::Boolean.new.cast(ENV["LOG_REQUESTS"])
+
+    if LOG_TO_STDOUT
+      $stdout.sync = true
+      log_output = $stdout
+    end
+
+    # Main logger logs everything either to the STDOUT or to the file specified in the log_output variable
+    # The log level can be set differently for every environment in respective environment file (eg. development.rb),
+    # variable config.log_level
+    main_logger = ActiveSupport::Logger.new(log_output)
+    main_logger.formatter = ::Logger::Formatter.new
+    config.log_level = :debug
+
+    # Error logger logs only messages having ERROR, FATAL and UNKNOWN severity
+    # Log level of this logger cannot be overridden
+    # The messages are written in file specified in the error_log_output variable
+    err_logger = ErrorLogger.new(error_log_output)
+    err_logger.formatter = ::Logger::Formatter.new
+    err_logger.progname = "Ruby"
+
+    main_logger.extend(ActiveSupport::Logger.broadcast(err_logger))
+
+    # The logger is tagged, meaning one can tag the log messages, eg. in order ro assign them to a specific topic
+    # https://api.rubyonrails.org/classes/ActiveSupport/TaggedLogging.html
+    config.logger = ActiveSupport::TaggedLogging.new(main_logger)
+
+    # Logging of outgoing HTTP requests, general logger setup (as configured above) is used
+    # Controlled by the LOG_REQUESTS environment variable
+    # The requests are logged as DEBUG messages. Make sure the appropriate log level is applied!
+    # @see https://github.com/trusche/httplog#configuration
+    HttpLog.configure do |httplog_config|
+      httplog_config.enabled = false unless LOG_OUTGOING_HTTP_REQUESTS
+      httplog_config.logger = config.logger
+      httplog_config.log_headers = true
     end
   end
 end

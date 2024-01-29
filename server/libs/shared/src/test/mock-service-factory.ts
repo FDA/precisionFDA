@@ -1,13 +1,12 @@
-import { AxiosInstance } from "axios";
-import { Logger } from "pino";
-import sinon from "sinon";
-import { Job } from "../domain/job";
-import { INotificationService } from "../domain/notification/services/notification.service";
-import { IPlatformAuthClient } from "../platform-client";
-import { ServiceFactory, setServiceFactory } from "../services/service-factory";
-import { IEmailService } from "../services/smtp.service";
-import { IWorkstationClient } from "../workstation-client";
-
+import { Job } from '@shared/domain/job/job.entity'
+import { IPlatformAuthClient } from '@shared/platform-client/platform-auth-client'
+import { IWorkstationClient } from '@shared/workstation-client/workstation-client'
+import { AxiosInstance } from 'axios'
+import { Logger } from '@nestjs/common'
+import sinon from 'sinon'
+import { INotificationService } from '../domain/notification/services/notification.service'
+import { ServiceFactory, setServiceFactory } from '../services/service-factory'
+import { IEmailService } from '../services/smtp.service'
 
 class MockServiceFactory extends ServiceFactory {
   emailService = {
@@ -18,7 +17,7 @@ class MockServiceFactory extends ServiceFactory {
     createNotification: sinon.stub(),
     reset: () => {
       this.notificationService.createNotification.callsFake(() => {})
-      this.notificationService.createNotification.resetHistory()  
+      this.notificationService.createNotification.resetHistory()
     }
   }
 
@@ -27,10 +26,10 @@ class MockServiceFactory extends ServiceFactory {
     userResetMfa: sinon.stub(),
     reset: () => {
       this.platformAuthClient.newAuthToken.callsFake(() => ({ 'authorization_code': '12345678' }))
-      this.platformAuthClient.newAuthToken.resetHistory()  
+      this.platformAuthClient.newAuthToken.resetHistory()
 
       this.platformAuthClient.userResetMfa.callsFake(() => ({ 'authorization_code': '12345678' }))
-      this.platformAuthClient.userResetMfa.resetHistory()  
+      this.platformAuthClient.userResetMfa.resetHistory()
     }
   }
 

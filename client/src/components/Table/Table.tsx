@@ -59,7 +59,7 @@ const StyledColumnSelect = styled.div`
 
 const Back = styled.div`
   grid-area: 1 / 1;
-  background-color: white;
+  background-color: var(--background);
   width: 48px;
   height: 32px;
   margin-right: -4px;
@@ -74,7 +74,7 @@ const Front = styled(Dropdown)`
   z-index: 3;
   width: 32px;
   svg {
-    color: #3c4043;
+    color: var(--tertiary-400);
   }
 `
 
@@ -358,8 +358,8 @@ export default function Table<T extends object>(
   return (
     <StyledTable data-testid="pfda-table">
       <ReactTableStyles
-        shouldFillWidth={fillWidth}
-        shouldAllowScrollbar={shouldAllowScrollbar}
+        $shouldFillWidth={fillWidth}
+        $shouldAllowScrollbar={shouldAllowScrollbar}
       >
         <div className="tableWrap" ref={containerRef}>
           <div {...getTableProps()} className="table sticky">

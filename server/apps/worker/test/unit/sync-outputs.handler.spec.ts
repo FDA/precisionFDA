@@ -1,7 +1,8 @@
 import { EntityManager } from '@mikro-orm/core'
-import { User } from '@shared/domain'
+import { database } from '@shared/database'
+import { JobService } from '@shared/domain/job/job.service'
+import { User } from '@shared/domain/user/user.entity'
 import { SyncOutputsHandler } from '../../src/jobs/sync-outputs.handler'
-import { database, job } from '@shared'
 import { db, create } from '@shared/test'
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { expect } from 'chai'
@@ -31,7 +32,7 @@ describe('SyncOutputsHandler tests', () => {
         jobDxIdParam = jobDxId
         userIdParam = userId
       }
-    } as job.JobService
+    } as JobService
 
     handler = new SyncOutputsHandler(em, jobService)
     await handler.handle({ data: { payload: { dxid: job.dxid }, user } } as any)
@@ -42,7 +43,7 @@ describe('SyncOutputsHandler tests', () => {
 
   it('Test execute fail with unknown job dxid', async () => {
     const jobService = {
-    } as job.JobService
+    } as JobService
 
     handler = new SyncOutputsHandler(em, jobService)
     try {

@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import React from 'react'
-import { useHistory } from 'react-router'
+import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import { BackLink } from '../../../components/Page/PageBackLink'
 import { PageTitle } from '../../../components/Page/styles'
@@ -11,13 +11,13 @@ import { CreateNewsForm, NewsItemForm } from './NewsItemForm'
 import { FormPageContainer } from './styles'
 
 const CreateNewsItemPage = () => {
-  const history = useHistory()
+  const navigate = useNavigate()
   const queryClient = useQueryClient()
   const createNewsItemMutation = useMutation({
     mutationKey: ['create-news-item'],
     mutationFn: (payload: any) => createNewsItemRequest(payload),
     onSuccess: res => {
-      history.push('/admin/news')
+      navigate('/admin/news')
       queryClient.invalidateQueries(['news'])
       toast.success('Created news item')
     },

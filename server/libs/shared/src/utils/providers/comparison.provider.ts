@@ -1,5 +1,5 @@
+import { Comparison } from '@shared/domain/comparison/comparison.entity'
 import { ENTITY_TYPE, SPACE_EVENT_OBJECT_TYPE } from '../../domain/space-event/space-event.enum'
-import { Comparison } from '../../domain/comparison'
 import { EntityDataProvider } from './entity-data.provider'
 
 export class ComparisonEntityDataProvider extends EntityDataProvider<'comparison'> {

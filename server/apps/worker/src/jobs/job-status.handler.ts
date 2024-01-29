@@ -1,13 +1,14 @@
-import { database, job } from '@shared'
+import { database } from '@shared/database'
+import { SyncJobOperation } from '@shared/domain/job/ops/synchronize'
 import type { CheckStatusJob } from '@shared/queue/task.input'
 import { Job } from 'bull'
 import { UserOpsCtx, WorkerOpsCtx } from '@shared/types'
-import { getChildLogger } from '../utils'
+import { getChildLogger } from '../utils/logger'
 
 export const jobStatusHandler = async (bullJob: Job) => {
   const data = bullJob.data as CheckStatusJob
   // This used to be nanoid(), but it makes it hard to track in the logs which
-  // operation invocation is assocated with which task requests in 
+  // operation invocation is assocated with which task requests in
   const requestId = String(bullJob.id)
   const log = getChildLogger(requestId)
   // this is like a router endpoint
@@ -20,5 +21,5 @@ export const jobStatusHandler = async (bullJob: Job) => {
     user: data.user,
     job: bullJob,
   }
-  await new job.SyncJobOperation(ctx).execute(data.payload)
+  await new SyncJobOperation(ctx).execute(data.payload)
 }

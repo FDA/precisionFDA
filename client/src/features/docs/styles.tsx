@@ -1,10 +1,11 @@
-import { NavLink } from 'react-router-dom'
 import styled from 'styled-components'
 import { breakPoints, colors } from '../../styles/theme'
+import { NavLink } from '../../components/NavLink'
+import { compactScrollBarV2 } from '../../components/Page/styles'
 
 export const DocsLayout = styled.div`
   display: flex;
-  height: auto;
+  height: 0;
   flex: 1 0 auto;
 `
 export const ButtonRow = styled.div`
@@ -12,38 +13,60 @@ export const ButtonRow = styled.div`
   gap: 2px;
 `
 export const DocCallout = styled.div`
-  border: 1px solid #eee;
-  border-left-color: #428bca;
-  background: #fafafa;
+  border: 1px solid var(--c-layout-border);
+  border-left-color: var(--primary-600);
   padding: 20px;
   margin: 20px 0;
   border-left-width: 5px;
   border-radius: 3px;
 `
-export const DocsContent = styled.main`
+export const DocsMainContainer = styled.div`
+  ${compactScrollBarV2}
+  overflow-y: scroll;
+  flex-grow: 1;
+  justify-content: center;
+`
+export const DocsContent = styled.div`
   display: flex;
   flex: 1 1 auto;
-  color: #333333;
-  line-height: 1.428571429;
+  color: var(--c-text-700);
   font-size: 16px;
   padding: 0 16px;
   padding-top: 32px;
   box-sizing: border-box;
 
-  p {
-    margin-top: 8px;
-    margin-bottom: 8px;
+  color: var(--c-text-700);
+  line-height: 1.45;
+  font-weight: 400;
+  font-size: 15px;
+
+  ul, ol {
+    list-style-position: inside;
+  }
+  li {
+    text-wrap: pretty;
   }
 
+  p {
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    text-wrap: pretty;
+  }
+
+  h1, h2, h3, h4 {
+    font-weight: bold;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+  }
   h1 {
-    margin-top: 3rem;
     margin-bottom: 1rem;
     font-size: 32px;
-    color: #333333;
+    &:first-of-type {
+      margin-top: 0rem;
+    }
   }
-  h2, h3, h4 {
-    margin-top: 2.5rem;
-    margin-bottom: 1rem;
+  h2 {
+    font-size: 20px;
   }
 
   code.inline {
@@ -56,7 +79,6 @@ export const DocsContent = styled.main`
 
   pre {
     -webkit-text-size-adjust: 100%;
-    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
     box-sizing: border-box;
     overflow: auto;
     display: block;
@@ -66,23 +88,23 @@ export const DocsContent = styled.main`
     line-height: 1.428571429;
     word-break: break-all;
     word-wrap: break-word;
-    color: #333333;
     background-color: #f5f5f5;
     border: 1px solid #ccc;
     border-radius: 3px;
     white-space: pre-line;
   }
 `
-export const DocsNav = styled.nav`
+export const DocsNav = styled.div`
+  ${compactScrollBarV2}
+  border-right: 1px solid var(--c-layout-border-200);
   display: flex;
   flex-direction: column;
   min-width: 300px;
   max-width: 300px;
-  background-color: #f2f2f2;
-  color: #333333;
   overflow: auto;
   padding-top: 16px;
   padding-bottom: 32px;
+  font-size: 14px;
 `
 
 export const NavItem = styled(NavLink)<{$active?: boolean}>`
@@ -99,7 +121,13 @@ export const DocsTitle = styled.div`
   font-weight: bold;
 `
 
-export const DocsPageContainer = styled.div``
+export const DocsPageContainer = styled.div`
+  display: flex;
+  align-items: stretch;
+  flex: 1 1 auto;
+  flex-direction: row;
+  height: 0;
+`
 
 export const DocsTip = styled.div`
   background-color: #d9edf7;
@@ -138,6 +166,10 @@ export const DocBody = styled.div`
   margin-left: auto;
   margin-right: auto;
   padding-bottom: 48px;
+  min-height: calc(100vh - 65px);
+`
+
+export const DocsMainForFooter =  styled.div`
 `
 
 export const RightSide = styled.div`
@@ -150,7 +182,7 @@ export const DocRow = styled.div`
   display: flex;
   width: 100%;
   flex-direction: column-reverse;
-  padding: 0 16px 64px 16px;
+
   @media (min-width: ${breakPoints.large}px) {
     gap: 32px;
     flex-direction: row;
@@ -200,17 +232,17 @@ export const DocTable = styled.table`
   }
 `
 export const PageMap = styled.ol`
+  font-size: 14px;
   position: sticky;
   height: 300px;
-  top: 83px;
+  top: 40px;
   padding: 0;
   margin: 0;
   list-style-type: none;
-  font-size: 16px;
-  line-height: 20px;
+  line-height: 18px;
 
   li {
-    margin-bottom: 16px;
+    margin-bottom: 8px;
     text-decoration: none;
     border-left: 1px solid transparent;
     padding-left: 16px;

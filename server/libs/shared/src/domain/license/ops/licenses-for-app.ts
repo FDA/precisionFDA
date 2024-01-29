@@ -1,10 +1,9 @@
-import { entities } from '../..'
+import { App } from '@shared/domain/app/app.entity'
+import { LicensedItemRepository } from '@shared/domain/licensed-item/licensed-item.repository'
 import { UidInput, UserOpsCtx } from '../../../types'
-import { BaseOperation } from '../../../utils'
-import { App } from '../../app'
+import { BaseOperation } from '@shared/utils/base-operation'
 import { License } from '../license.entity'
 import { LicensedItem } from '../../licensed-item/licensed-item.entity'
-import { LicensedItemRepository } from '../../licensed-item'
 
 /**
  * Operation that gets licenses attached to all assets used by given application.
@@ -18,7 +17,7 @@ License[]> {
     const em = this.ctx.em
     const licensedItemRepo = em.getRepository(LicensedItem) as LicensedItemRepository
 
-    const currentApp: App = await em.findOneOrFail(entities.App, { uid: input.uid })
+    const currentApp: App = await em.findOneOrFail(App, { uid: input.uid })
     await currentApp.assets.init()
 
     const licensePromises = await Promise.all(currentApp.assets.getItems()

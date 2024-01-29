@@ -1,6 +1,6 @@
 /* eslint-disable no-undefined */
 /* eslint-disable multiline-ternary */
-import { FilterQuery } from '@mikro-orm/core/typings'
+import { FilterQuery } from '@mikro-orm/core'
 import { EntityRepository } from '@mikro-orm/mysql'
 import { FilterSchemaNode, FilterWithColumnNode } from '../utils/filters'
 import { ColumnNode, resolveColumnNode } from '../utils/sql-json-column-utils'

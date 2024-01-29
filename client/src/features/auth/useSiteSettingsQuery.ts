@@ -12,10 +12,10 @@ export const CDMHNames: Record<CDMHKey, string> = {
 export interface SiteSettingsResponse {
     cdmh: {
         isEnabled: boolean,
-        data: Record<CDMHKey, string> },
+        data?: Record<CDMHKey, string> },
     ssoButton: {
         isEnabled: boolean
-        data: {
+        data?: {
             fdaSsoUrl: string
         },
     },

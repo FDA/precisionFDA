@@ -1,0 +1,37 @@
+import React from 'react'
+import { SpecTable } from './SpecTable'
+import { StyledSpecTab } from './styles'
+import { AppSpec } from '../apps.types'
+import { MetadataKey } from '../../home/show.styles'
+
+
+export const SpecTab = ({ spec, spaceId }: { spec: AppSpec, spaceId?: string }) => {
+  const internetAccess = spec.internet_access ? 'Yes' : 'No'
+
+  return (
+    <StyledSpecTab>
+      <div className="__header">
+        <div className="__header_item">
+          <MetadataKey>
+            default instance type
+          </MetadataKey>
+          <div className="__header_item_value">
+            {spec.instance_type}
+          </div>
+        </div>
+        <div className="__header_item">
+          <MetadataKey>
+            has internet access
+          </MetadataKey>
+          <div className="__header_item_value">
+            {internetAccess}
+          </div>
+        </div>
+      </div>
+      <div className="__table-container">
+        <SpecTable spaceId={spaceId} title="app inputs" config={spec.input_spec} />
+        <SpecTable spaceId={spaceId} title="app outputs" config={spec.output_spec} />
+      </div>
+    </StyledSpecTab>
+  )
+}

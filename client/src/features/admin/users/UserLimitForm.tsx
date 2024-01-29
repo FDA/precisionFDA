@@ -1,6 +1,6 @@
 import React from 'react'
 import styled from 'styled-components'
-import { StyledInput } from '../../../components/InputText'
+import { InputNumber, InputText } from '../../../components/InputText'
 import { ButtonSolidBlue } from '../../../components/Button'
 import { User } from './types'
 
@@ -20,8 +20,7 @@ const LimitButtonWrapper = styled.div`
 
 export const UserLimitForm = ({ buttonText, selectedUsers, onSubmit, onChange, isSubmitButtonDisabled }: Props) => (
   <LimitButtonWrapper>
-    <StyledInput
-      type="number"
+    <InputNumber
       step={0.01}
       onChange={(e) => {
         onChange(parseFloat(e.target.value))

@@ -16,7 +16,7 @@ export const StyledForm = styled.form`
 export const HintText = styled.div`
   margin-top: 4px;
   font-size: 14px;
-  color: ${colors.blacktextOnWhite};
+  color: var(--tertiary-700);
 
   li {
     margin-bottom: 8px;

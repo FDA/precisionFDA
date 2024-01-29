@@ -1,9 +1,14 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
+import { Job } from '@shared/domain/job/job.entity'
+import { NotificationService } from '@shared/domain/notification/services/notification.service'
+import { CreateSpaceEventOperation } from '@shared/domain/space-event/ops/create-space-event'
+import { Folder } from '@shared/domain/user-file/folder.entity'
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
+import { User } from '@shared/domain/user/user.entity'
 import { getLogger } from '../../logger'
 import { PlatformClient } from '../../platform-client'
 import { EntityManager } from '@mikro-orm/core'
 import { FILE_STATE_DX, PARENT_TYPE } from '../user-file/user-file.types'
-import { NotificationService} from '../notification'
 import { NOTIFICATION_ACTION, SEVERITY, STATIC_SCOPE } from '../../enums'
 import { createFileEvent, EVENT_TYPES } from '../event/event.helper'
 import {
@@ -11,7 +16,6 @@ import {
   FileStateResult,
   JobOutput,
 } from '../../platform-client/platform-client.responses'
-import { Job, User, UserFile, Folder, spaceEvent } from '..'
 import type { UserCtx } from '../../types'
 import * as errors from '../../errors'
 import { getIdFromScopeName, scopeContainsId } from '../space/space.helper'
@@ -63,7 +67,7 @@ export class JobService implements IJobService {
    * @param userId
    */
   async syncOutputs(jobDxId: string, userId: number): Promise<void> {
-    logger.info(`JobService: syncing output files for job ${jobDxId}`)
+    logger.verbose(`JobService: syncing output files for job ${jobDxId}`)
 
     const user = await this.userRepo.findOneOrFail({ id: userId })
     const job = await this.jobRepo.findOneOrFail({ dxid: jobDxId })
@@ -88,7 +92,7 @@ export class JobService implements IJobService {
 
       await this.createNotification(jobDxId, userId)
       await this.em.commit()
-      logger.info(`JobService: outputs for job ${jobDxId} have been synchronized`)
+      logger.verbose(`JobService: outputs for job ${jobDxId} have been synchronized`)
     } catch (error) {
       logger.error('JobService: error synchronizing outputs', error)
       await this.em.rollback()
@@ -117,7 +121,7 @@ export class JobService implements IJobService {
 
   private async createSpaceEvent(job: Job, userId: number) {
     const spaceId = getIdFromScopeName(job.scope)
-    const eventOp = new spaceEvent.CreateSpaceEventOperation({
+    const eventOp = new CreateSpaceEventOperation({
       user: { id: userId } as UserCtx,
       em: this.em as SqlEntityManager,
       log: logger,

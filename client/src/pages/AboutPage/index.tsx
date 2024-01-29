@@ -53,21 +53,21 @@ const AboutPage = () => {
       <PageContainerMargin>
         <PfTabRow>
           <PfTab
-            isActive={selectedSection === 'why'}
+            $isActive={selectedSection === 'why'}
             onClick={() => setSelectedSection('why')}
           >
             <PfTabTitle>Why</PfTabTitle>
             <div>Background and motivation</div>
           </PfTab>
           <PfTab
-            isActive={selectedSection === 'what'}
+            $isActive={selectedSection === 'what'}
             onClick={() => setSelectedSection('what')}
           >
             <PfTabTitle>What</PfTabTitle>
             <div>A genomics community and platform</div>
           </PfTab>
           <PfTab
-            isActive={selectedSection === 'who'}
+            $isActive={selectedSection === 'who'}
             onClick={() => setSelectedSection('who')}
           >
             <PfTabTitle>Who</PfTabTitle>
@@ -79,7 +79,7 @@ const AboutPage = () => {
           </PfTab>
         </PfTabRow>
 
-        <PfTabContent isShown={selectedSection === 'why'}>
+        <PfTabContent $isShown={selectedSection === 'why'}>
           <MainLine>
             The Food and Drug Administration (FDA) plays an integral role in
             precision medicine, which foresees the day when an individual’s
@@ -119,7 +119,7 @@ const AboutPage = () => {
           </Row>
         </PfTabContent>
 
-        <PfTabContent isShown={selectedSection === 'what'}>
+        <PfTabContent $isShown={selectedSection === 'what'}>
           <MainLine>
             PrecisionFDA provides the genomics community with a secure,
             cloud-based platform where participants can access and share
@@ -152,7 +152,7 @@ const AboutPage = () => {
           </ul>
         </PfTabContent>
 
-        <PfTabContent isShown={selectedSection === 'who'}>
+        <PfTabContent $isShown={selectedSection === 'who'}>
           <MainLine>
             PrecisionFDA is an initiative in the Office of Health Informatics
             (OHI) at the Food and Drug Administration led by the Chief Health

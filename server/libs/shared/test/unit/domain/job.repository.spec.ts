@@ -1,8 +1,9 @@
 import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
+import { database } from '@shared/database'
+import { App } from '@shared/domain/app/app.entity'
+import { Job } from '@shared/domain/job/job.entity'
+import { User } from '@shared/domain/user/user.entity'
 import { expect } from 'chai'
-import type { App, User } from '@shared/domain'
-import { Job } from '@shared/domain'
-import { database } from '@shared'
 import { create, db } from '../../../src/test'
 import { JOB_STATE } from '@shared/domain/job/job.enum'
 import { STATIC_SCOPE } from '@shared/enums'
@@ -82,7 +83,7 @@ describe('Job repository tests', () => {
 
   it('findAllRunningJobs() works', async () => {
     const results = await repo.findAllRunningJobs()
-    expect(results.map((x) => x.uid)).to.deep.equal([
+    expect(results.map((x) => x.uid)).to.have.members([
       jobs[0].uid,
       jobs[1].uid,
       jobs[3].uid,

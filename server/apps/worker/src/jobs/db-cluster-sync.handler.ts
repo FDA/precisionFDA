@@ -1,8 +1,9 @@
-import { database, dbCluster } from '@shared'
+import { database } from '@shared/database'
+import { SyncDbClusterOperation } from '@shared/domain/db-cluster/ops/synchronize'
 import type { SyncDbClusterJob } from '@shared/queue/task.input'
 import { Job } from 'bull'
 import { UserOpsCtx, WorkerOpsCtx } from '@shared/types'
-import { getChildLogger } from '../utils'
+import { getChildLogger } from '../utils/logger'
 
 export const dbClusterSyncHandler = async (bullJob: Job) => {
   const data = bullJob.data as SyncDbClusterJob
@@ -15,5 +16,5 @@ export const dbClusterSyncHandler = async (bullJob: Job) => {
     user: data.user,
     job: bullJob,
   }
-  await new dbCluster.SyncDbClusterOperation(ctx).execute(data.payload)
+  await new SyncDbClusterOperation(ctx).execute(data.payload)
 }

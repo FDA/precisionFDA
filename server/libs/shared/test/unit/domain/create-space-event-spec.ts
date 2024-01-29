@@ -1,9 +1,14 @@
 import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
+import { database } from '@shared/database'
+import { CreateSpaceEventOperation } from '@shared/domain/space-event/ops/create-space-event'
+import { SpaceEvent } from '@shared/domain/space-event/space-event.entity'
+import { Space } from '@shared/domain/space/space.entity'
+import { User } from '@shared/domain/user/user.entity'
+import { getLogger } from '@shared/logger'
+import { spaceEvent } from '@shared/test/generate'
 import { expect } from 'chai'
 import pino from 'pino'
-import { Space, SpaceEvent, spaceEvent, User } from '../../../src/domain'
 import { create, db } from '../../../src/test'
-import { database, getLogger, types } from '@shared'
 import { SPACE_MEMBERSHIP_ROLE, SPACE_MEMBERSHIP_SIDE }
   from '../../../src/domain/space-membership/space-membership.enum'
 import { SPACE_EVENT_ACTIVITY_TYPE, SPACE_EVENT_OBJECT_TYPE }
@@ -15,8 +20,8 @@ describe('create space event tests', () => {
   let em: EntityManager<MySqlDriver>
   let user: User
   let log: pino.Logger
-  let userCtx: types.UserCtx
-  let op: spaceEvent.CreateSpaceEventOperation
+  let userCtx: UserCtx
+  let op: CreateSpaceEventOperation
 
   beforeEach(async () => {
     await db.dropData(database.connection())
@@ -38,7 +43,7 @@ describe('create space event tests', () => {
     const file = create.filesHelper.create(em, { user }, { name: 'test' })
     await em.flush()
 
-    op = new spaceEvent.CreateSpaceEventOperation({
+    op = new CreateSpaceEventOperation({
       em,
       log,
       user: userCtx,
@@ -72,7 +77,7 @@ describe('create space event tests', () => {
                                  entityType: ENTITY_TYPE,
                                  objectType: SPACE_EVENT_OBJECT_TYPE,
                                  data: string) => {
-    op = new spaceEvent.CreateSpaceEventOperation({
+    op = new CreateSpaceEventOperation({
       em,
       log,
       user: userCtx,

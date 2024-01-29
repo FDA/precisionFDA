@@ -1,10 +1,13 @@
+import { database } from '@shared/database'
+import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
+import { Space } from '@shared/domain/space/space.entity'
+import { User } from '@shared/domain/user/user.entity'
+import { ErrorCodes } from '@shared/errors'
 import { expect } from 'chai'
 import { EntityManager } from '@mikro-orm/mysql'
 import supertest from 'supertest'
-import { Space, SpaceMembership, User } from '@shared/domain'
 import { create, generate, db } from '@shared/test'
 import { mocksReset, fakes } from '@shared/test/mocks'
-import { errors, database } from '@shared'
 import { getServer } from '../../../src/server'
 import { getDefaultHeaderData } from '../../utils/expect-helper'
 import { SPACE_MEMBERSHIP_ROLE, SPACE_MEMBERSHIP_SIDE } from '@shared/domain/space-membership/space-membership.enum'
@@ -72,7 +75,7 @@ describe('PATCH /spaces/:id/unlock', () => {
         .patch(`/spaces/4848/unlock`)
         .set(getDefaultHeaderData(user))
         .expect(404)
-      expect(body.error).to.have.property('code', errors.ErrorCodes.SPACE_NOT_FOUND)
+      expect(body.error).to.have.property('code', ErrorCodes.SPACE_NOT_FOUND)
     })
 
     it('does not allow to unlock space (user is not RSA) and returns 403', async () => {
@@ -80,7 +83,7 @@ describe('PATCH /spaces/:id/unlock', () => {
         .patch(`/spaces/${space.id}/unlock`)
         .set(getDefaultHeaderData(hostLead))
         .expect(403)
-      expect(body.error).to.have.property('code', errors.ErrorCodes.NOT_PERMITTED)
+      expect(body.error).to.have.property('code', ErrorCodes.NOT_PERMITTED)
     })
 
     it('does not allow to unlock space (space already unlocked) and returns 403', async () => {
@@ -92,7 +95,7 @@ describe('PATCH /spaces/:id/unlock', () => {
         .patch(`/spaces/${alreadyUnlockedSpace.id}/unlock`)
         .set(getDefaultHeaderData(user))
         .expect(403)
-      expect(body.error).to.have.property('code', errors.ErrorCodes.NOT_PERMITTED)
+      expect(body.error).to.have.property('code', ErrorCodes.NOT_PERMITTED)
     })
 
   })

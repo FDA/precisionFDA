@@ -2,7 +2,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { AxiosError } from 'axios'
 import React from 'react'
-import { useHistory, useParams } from 'react-router'
+import { useNavigate, useParams } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import { Loader } from '../../../components/Loader'
 import NavigationBar from '../../../components/NavigationBar/NavigationBar'
@@ -19,7 +19,7 @@ import { ChallengeForm, IChallengeForm } from './ChallengeForm'
 import { formatMutationErrors, mapFormToPayload, subtitle, title } from './common'
 
 const EditChallengePage = () => {
-  const history = useHistory()
+  const navigate = useNavigate()
   const user = useAuthUser()
   const queryClient = useQueryClient()
   const { challengeId } = useParams<{ challengeId: string }>()
@@ -32,7 +32,7 @@ const EditChallengePage = () => {
     onSuccess: () => {
       queryClient.invalidateQueries(['challenge-custom', challengeId])
       queryClient.invalidateQueries(['challenge', challengeId])
-      history.push('/challenges')
+      navigate('/challenges')
       toast.success('Challenge successfully edited')
     },
     onError: (e: AxiosError) => {

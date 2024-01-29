@@ -2,35 +2,20 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import React, { useRef } from 'react'
 import styled from 'styled-components'
 import { Button, ButtonSolidBlue } from '../../../components/Button'
-import { theme } from '../../../styles/theme'
 import { editDiscussionRequest } from '../api'
 import { Discussion } from '../discussions.types'
+import { InputText } from '../../../components/InputText'
 
-export const CommentCount = styled.div`
-  line-height: 32px;
-  font-weight: bold;
-`
-export const DiscussionTitle = styled.div`
-  display: flex;
-`
-export const StyledTitle = styled.div`
-  display: flex;
-  gap: 16px;
-  align-items: center;
-  svg {
-    color: ${theme.colors.stateLabelGrey};
-  }
-`
+
 export const StyledTitleEdit = styled.div`
   display: flex;
   flex: 1;
   gap: 8px;
-  min-height: 81px;
   align-items: center;
-  input {
-    width: 100%;
+
+  ${InputText} {
     max-width: 300px;
-    height: 32px;
+    height: 36px;
     padding: 0 8px;
   }
 `
@@ -81,7 +66,7 @@ export function EditDiscussionTitle({
   })
   return (
     <StyledTitleEdit>
-      <input
+      <InputText
         ref={inputRef}
         type="text"
         defaultValue={defaultValue}

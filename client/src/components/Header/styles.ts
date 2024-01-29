@@ -33,28 +33,28 @@ export const Nav = styled.nav`
   }
 `
 
-export const HeaderItem = styled.div<{ active?: boolean }>`
+export const HeaderItem = styled.div<{ $active?: boolean }>`
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
   align-items: center;
   cursor: pointer;
-  color: ${theme.colors.textWhite};
+  color: var(--c-app-header-menu-base);
   box-sizing: border-box;
 
-  ${({ active = false }) => {
-    if (active) {
+  ${({ $active = false }) => {
+    if ($active) {
       return css`
-        background-color: ${theme.colors.mediumDarkBlue};
-        color: ${theme.colors.textWhite};
+        background-color: var(--c-app-header-menu-active-bg);
+        color: var(--c-app-header-menu-hover);
       `
     } 
     return css`
-      &:hover {
-        color: ${theme.colors.lightBlue};
-      }
     `
   }}
+  &:hover {
+    color: var(--c-app-header-menu-hover);
+  }
 
   ${bpMedium} {
     height: ${theme.sizing.navigationBarHeight};
@@ -71,13 +71,14 @@ export const MenuItem = styled(HeaderItem)`
 export const HeaderItemText = styled.div`
   margin-top: 4px;
   display: none;
+  align-items: center;
 `
 
 export const StyledHeaderDropItem = styled(HeaderItem)`
   display: none;
 
   &:hover {
-    background-color: ${theme.colors.mediumDarkBlue};
+    background-color: var(--c-app-header-menu-active-bg);
   }
 
   ${Svg} {
@@ -103,7 +104,8 @@ export const DropdownMenuItem = styled(MenuItem)`
 `
 
 export const HeaderSpacer = styled.div`
-  border-right: 1px solid #5f768a;
+  border-right: 1px solid var(--c-layout-border);
+  opacity: 0.6;
   margin: 0 4px;
   height: 38px;
 `
@@ -113,25 +115,26 @@ export const StyledDropMenuLinks = styled.div`
   line-height: 28px;
   display: flex;
   flex-direction: column;
-  color: ${theme.colors.textDarkGrey};
+  color: var(--c-text-700);
   border: 1px solid rgba(0,0,0,0.15);
   border-radius: 3px;
   box-shadow: 0 6px 12px rgba(0,0,0,0.175);
 `
 
 export const StyledDivider = styled.div`
-  border-bottom: 1px solid ${theme.colors.borderDefault};
+  border-bottom: 1px solid var(--c-layout-border);
   padding-top: 6px;
   margin-bottom: 6px;
 `
 
 const linkCss = css`
+  background-color: var(--c-dropdown-bg);
   width: auto;
   transition: color 0.3s ease;
   padding: 0 12px;
   line-height: 30px;
   &:hover {
-    background-color: ${theme.colors.textLightGrey};
+    background-color: var(--c-dropdown-hover-bg);
   }
 `
 
@@ -158,7 +161,7 @@ export const HeaderLeft = styled.div`
 
   ${bpSmall} {
     ${HeaderItemText} {
-      display: inline;
+      display: flex;
     }
     ${IconWrap} {
       align-items: flex-end;
@@ -174,7 +177,7 @@ export const HeaderRight = styled.div`
 
   ${bpMedium} {
     ${HeaderItemText} {
-      display: inline;
+      display: flex;
     }
 
     ${IconWrap} {
@@ -184,8 +187,10 @@ export const HeaderRight = styled.div`
 `
 
 export const StyledHeader = styled.header`
-  background-color: ${theme.colors.darkBlue};
-  color: ${theme.colors.textWhite};
+  box-sizing: border-box;
+  background-color: var(--c-app-header-bg);
+  border-bottom: 1px solid var(--c-app-header-border, transparent);
+  color: var(--c-app-header-menu-base);
   padding: 0 8px;
 
   ${bpSmall} {

@@ -1,21 +1,6 @@
-import pino from 'pino'
-import { config } from '../config'
+import { Logger } from '@nestjs/common'
 
-const getLogger = (name = 'pino-logger-name'): pino.Logger =>
-  pino({
-    name,
-    transport: config.logs.pretty ? {
-      target: 'pino-pretty',
-      options: {
-        translateTime: true,
-      }
-    } : undefined,
-    level: config.logs.level,
-    // todo: serializers
-    serializers: {
-      error: pino.stdSerializers.err
-    },
-  })
+const getLogger = (name = 'pino-logger-name') => new Logger(name)
 
 const defaultLogger = getLogger()
 

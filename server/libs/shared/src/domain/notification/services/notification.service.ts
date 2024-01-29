@@ -1,10 +1,11 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
-import { errors } from '@shared'
+import { Injectable, Optional } from '@nestjs/common'
+import { User } from '@shared/domain/user/user.entity'
+import { NotFoundError, PermissionError } from '@shared/errors'
 import { createClient } from 'redis'
 import { defaultLogger as logger } from '../../../logger'
-import { createRedisClient, NOTIFICATIONS_QUEUE } from '../../../services/redis.service'
-import { User } from '../../user'
-import { Notification } from '../notification.entity'
+import { createRedisClient, NOTIFICATIONS_QUEUE } from '@shared/services/redis.service'
+import { Notification } from '@shared/domain/notification/notification.entity'
 import { NotificationInput } from '../notification.input'
 
 export type RedisClientType = ReturnType<typeof createClient>
@@ -13,13 +14,12 @@ export interface INotificationService {
   createNotification: (notificationInput: NotificationInput) => Promise<void>
 }
 
+@Injectable()
 export class NotificationService implements INotificationService {
-  private redisClient?
-  protected em
-
-  constructor(em: SqlEntityManager, redisClient?: RedisClientType) {
-    this.em = em
-    this.redisClient = redisClient
+  constructor(
+    private readonly em: SqlEntityManager,
+    @Optional() private redisClient?: RedisClientType,
+  ) {
     logger.debug('NotificationService initialized')
   }
 
@@ -38,8 +38,15 @@ export class NotificationService implements INotificationService {
     if (notificationInput.userId) {
       user = await this.em.findOneOrFail(User, notificationInput.userId)
     }
-    const notification = new Notification(user, notificationInput.action, notificationInput.message,
-      notificationInput.severity, new Date(), new Date(), notificationInput.meta)
+    const notification = new Notification(
+      user,
+      notificationInput.action,
+      notificationInput.message,
+      notificationInput.severity,
+      new Date(),
+      new Date(),
+      notificationInput.meta,
+    )
 
     await this.em.persistAndFlush(notification)
 
@@ -51,7 +58,7 @@ export class NotificationService implements INotificationService {
    * Returns notifications for current user that have empty deliveredAt flag.
    */
   async getUnreadNotifications(userId: number): Promise<Notification[]> {
-    logger.info(`NotificationService: getting unread notifications for user id: ${userId}`)
+    logger.verbose(`NotificationService: getting unread notifications for user id: ${userId}`)
     const unread = await this.em.find(Notification, { user: userId, deliveredAt: null })
     return unread
   }
@@ -72,7 +79,7 @@ export class NotificationService implements INotificationService {
         populate: ['user'],
       })
       if (loadedFromDb.user?.id !== userId) {
-        throw new errors.PermissionError()
+        throw new PermissionError()
       }
 
       loadedFromDb.updatedAt = new Date()
@@ -83,7 +90,7 @@ export class NotificationService implements INotificationService {
       await this.em.flush()
       return loadedFromDb
     } else {
-      throw new errors.NotFoundError()
+      throw new NotFoundError()
     }
   }
 }

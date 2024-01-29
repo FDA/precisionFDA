@@ -1,14 +1,17 @@
 /* eslint-disable no-warning-comments */
 import { EntityManager } from '@mikro-orm/mysql'
-import { UserFile } from '../..'
+import { config } from '@shared/config'
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
+import { FileNotFoundError, PermissionError } from '@shared/errors'
+import { PlatformClient } from '@shared/platform-client'
+import { isJobOrphaned } from '@shared/queue/queue.utils'
 import { createFileEvent, EVENT_TYPES } from '../../event/event.helper'
 import { User } from '../../user/user.entity'
-import { client, config, errors, queue } from '../../..'
-import { BaseOperation } from '../../../utils/base-operation'
+import { BaseOperation } from '@shared/utils/base-operation'
 import { UserCtx, UserOpsCtx } from '../../../types'
 import { UserRepository } from '../../user/user.repository'
 import { FILE_STATE_DX, FILE_STATE_PFDA, IFileOrAsset } from '../user-file.types'
-import { createSyncFilesStateTask } from '../../../queue'
+import { createSyncFilesStateTask, findRepeatable, getMainQueue, removeRepeatableJob } from '../../../queue'
 import { findFileOrAssetWithUid } from '../user-file.helper'
 import { SyncFilesStateOperation } from './sync-files-state'
 import { FileUpdateOperation } from './file-update'
@@ -58,7 +61,7 @@ class FileCloseOperation extends BaseOperation<
     const fileOrAsset = await findFileOrAssetWithUid(em, input.id)
     if (!fileOrAsset) {
       log.error(`FileCloseOperation: File or asset with uid ${input.id} not found`)
-      throw new errors.FileNotFoundError(`File or asset with uid ${input.id} not found`)
+      throw new FileNotFoundError(`File or asset with uid ${input.id} not found`)
     }
 
     const userRepo = em.getRepository(User) as UserRepository
@@ -73,25 +76,25 @@ class FileCloseOperation extends BaseOperation<
       await em.populate(file, ['challengeResources'])
       isChallengeBotFile = file.isCreatedByChallengeBot() && (await user.isSiteAdmin() || await user.isChallengeAdmin())
       if (isChallengeBotFile) {
-        log.info({ fileDxid: fileOrAsset.dxid }, 'FileCloseOperation: Challenge bot file')
+        log.verbose({ fileDxid: fileOrAsset.dxid }, 'FileCloseOperation: Challenge bot file')
       } else {
         log.error(
           { fileDxid: fileOrAsset.dxid },
           `FileCloseOperation: User ${user.dxuser} does not have access to file ${input.id}`,
         )
-        throw new errors.PermissionError(`User ${user.dxuser} does not have access to file ${input.id}`)
+        throw new PermissionError(`User ${user.dxuser} does not have access to file ${input.id}`)
       }
       accessToken = config.platform.challengeBotAccessToken
     }
 
     if (fileOrAsset.state === FILE_STATE_DX.OPEN) {
-      log.info({ fileDxid: fileOrAsset.dxid }, 'FileCloseOperation: File is in open state. Syncing from platform')
+      log.verbose({ fileDxid: fileOrAsset.dxid }, 'FileCloseOperation: File is in open state. Syncing from platform')
 
-      const userClient = new client.PlatformClient(accessToken, this.ctx.log)
+      const userClient = new PlatformClient(accessToken, this.ctx.log)
       const response = await userClient.fileClose({
         fileDxid: fileOrAsset.dxid,
       })
-      log.info({ response }, 'FileCloseOperation: Received response from platform')
+      log.verbose({ response }, 'FileCloseOperation: Received response from platform')
 
       fileOrAsset.state = FILE_STATE_DX.CLOSING
       await em.flush()
@@ -99,17 +102,17 @@ class FileCloseOperation extends BaseOperation<
       const syncFilesOpDxuser = isChallengeBotFile ? config.platform.challengeBotUser : this.ctx.user.dxuser
 
       const bullJobId = SyncFilesStateOperation.getBullJobId(syncFilesOpDxuser)
-      log.info({ bullJobId }, 'FileCloseOperation: Looking for existing sync task in queue')
-      let bullJob = await queue.findRepeatable(bullJobId)
-      if (bullJob && queue.utils.isJobOrphaned(bullJob)) {
-        log.info('FileCloseOperation: Existing SyncFilesStateTask is orphaned, removing it')
-        await queue.removeRepeatableJob(bullJob, queue.getMainQueue())
+      log.verbose({ bullJobId }, 'FileCloseOperation: Looking for existing sync task in queue')
+      let bullJob = await findRepeatable(bullJobId)
+      if (bullJob && isJobOrphaned(bullJob)) {
+        log.verbose('FileCloseOperation: Existing SyncFilesStateTask is orphaned, removing it')
+        await removeRepeatableJob(bullJob, getMainQueue())
         bullJob = undefined
       }
 
       if (!bullJob) {
         if (isChallengeBotFile) {
-          log.info('FileCloseOperation: Creating SyncFilesStateTask for challenge bot user')
+          log.verbose('FileCloseOperation: Creating SyncFilesStateTask for challenge bot user')
           const challengeBotUser = await userRepo.findChallengeBotUser()
           const challengeBotCtx: UserCtx = {
             id: challengeBotUser.id,
@@ -118,11 +121,11 @@ class FileCloseOperation extends BaseOperation<
           }
           createSyncFilesStateTask(challengeBotCtx)
         } else {
-          log.info(`FileCloseOperation: Creating SyncFilesStateTask for user ${this.ctx.user.dxuser}`)
+          log.verbose(`FileCloseOperation: Creating SyncFilesStateTask for user ${this.ctx.user.dxuser}`)
           createSyncFilesStateTask(this.ctx.user)
         }
       } else {
-        log.info({ bullJob }, 'FileCloseOperation: Not creating SyncFilesStateTask because one already exists')
+        log.verbose({ bullJob }, 'FileCloseOperation: Not creating SyncFilesStateTask because one already exists')
       }
 
       const challengeBotCtx = await getChallengeBotCtx(userRepo)
@@ -136,13 +139,13 @@ class FileCloseOperation extends BaseOperation<
       const delay = (ms: number) => new Promise(r => setTimeout(r, ms))
       const refreshFileState = async () => {
         await delay(500).then(async () => {
-          log.info('FileCloseOperation: Invoking FileUpdateOperation after delay to close file')
+          log.verbose('FileCloseOperation: Invoking FileUpdateOperation after delay to close file')
           await new FileUpdateOperation(ctxForUpdate).execute({ uid: fileOrAsset.uid })
 
           const updatedFileOrAsset = await findFileOrAssetWithUid(em, input.id)
           if (updatedFileOrAsset) {
             if (updatedFileOrAsset.state === FILE_STATE_DX.CLOSED) {
-              log.info({
+              log.verbose({
                 uid: input.id,
                 state: updatedFileOrAsset.state,
                 size: updatedFileOrAsset.fileSize,
@@ -157,7 +160,7 @@ class FileCloseOperation extends BaseOperation<
                 while (numberOfRetries < 11 && !updateFinished) {
                   await delay(1000).then(async () => {
                     numberOfRetries++
-                    log.info({
+                    log.verbose({
                       uid: input.id,
                       state: updatedFileOrAsset.state,
                       size: updatedFileOrAsset.fileSize,
@@ -165,7 +168,7 @@ class FileCloseOperation extends BaseOperation<
                     await new FileUpdateOperation(ctxForUpdate).execute({ uid: fileOrAsset.uid })
                     const updatedNode = await findFileOrAssetWithUid(em, input.id)
                     if (updatedNode?.state === FILE_STATE_DX.CLOSED) {
-                      log.info({
+                      log.verbose({
                         uid: input.id,
                         state: updatedFileOrAsset.state,
                         size: updatedFileOrAsset.fileSize,
@@ -176,7 +179,7 @@ class FileCloseOperation extends BaseOperation<
                   })
                 }
               } else {
-                log.info({
+                log.verbose({
                   uid: input.id,
                   state: updatedFileOrAsset.state,
                   size: updatedFileOrAsset.fileSize,
@@ -184,7 +187,7 @@ class FileCloseOperation extends BaseOperation<
               }
             }
           } else {
-            log.info({
+            log.verbose({
               uid: input.id,
             }, 'FileCloseOperation: File no longer exists after FileUpdateOperation?? What?!')
           }

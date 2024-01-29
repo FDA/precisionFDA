@@ -1,7 +1,9 @@
+import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
+import { Space } from '@shared/domain/space/space.entity'
+import { User } from '@shared/domain/user/user.entity'
+import { ErrorCodes, NotFoundError } from '@shared/errors'
 import { filter, pipe, uniqBy } from 'ramda'
 import { LoadedReference } from '@mikro-orm/core'
-import { errors } from '../../../..'
-import { Space, SpaceMembership, User } from '../../..'
 import {
   EmailSendInput,
   EmailTemplate,
@@ -11,7 +13,7 @@ import {
 } from '../../email.config'
 import { SPACE_EVENT_ACTIVITY_TYPE } from '../../../space-event/space-event.enum'
 import { SPACE_MEMBERSHIP_ROLE } from '../../../space-membership/space-membership.enum'
-import { BaseTemplate } from '../base-template'
+import { BaseTemplate } from '@shared/domain/email/templates/base-template'
 import { memberChangedTemplate, MemberChangeTemplateInput } from '../mjml/member-change.template'
 import {
   buildEmailTemplate,
@@ -46,10 +48,10 @@ export class MemberChangedEmailHandler
       })
     } catch (err) {
       this.ctx.log.error({ err }, 'space not found - DB error')
-      throw new errors.NotFoundError(
+      throw new NotFoundError(
         `Space id ${this.validatedInput.spaceId.toString()} not found`,
         {
-          code: errors.ErrorCodes.SPACE_NOT_FOUND,
+          code: ErrorCodes.SPACE_NOT_FOUND,
         },
       )
     }
@@ -57,9 +59,9 @@ export class MemberChangedEmailHandler
       this.user = await this.ctx.em.findOneOrFail(User, { id: this.validatedInput.initUserId })
     } catch (err) {
       this.ctx.log.error({ err }, 'user in space not found - DB error')
-      throw new errors.NotFoundError(
+      throw new NotFoundError(
         `User id ${this.validatedInput.initUserId.toString()} not found`,
-        { code: errors.ErrorCodes.EMAIL_PAYLOAD_NOT_FOUND },
+        { code: ErrorCodes.EMAIL_PAYLOAD_NOT_FOUND },
       )
     }
 
@@ -73,9 +75,9 @@ export class MemberChangedEmailHandler
       )
     } catch (err) {
       this.ctx.log.error({ err }, 'updated space membership in space not found - DB error')
-      throw new errors.NotFoundError(
+      throw new NotFoundError(
         `Space membership id ${this.validatedInput.updatedMembershipId.toString()} not found`,
-        { code: errors.ErrorCodes.EMAIL_PAYLOAD_NOT_FOUND },
+        { code: ErrorCodes.EMAIL_PAYLOAD_NOT_FOUND },
       )
     }
   }
@@ -85,10 +87,10 @@ export class MemberChangedEmailHandler
     const activityKey = this.validatedInput.activityType
     const actionValue = ACTION_NAMES[activityKey]
     if (!actionValue) {
-      throw new errors.NotFoundError(
+      throw new NotFoundError(
         `SpaceEvent with activityType id ${activityKey.toString()} does not
         correspond with action types for the email`,
-        { code: errors.ErrorCodes.EMAIL_PAYLOAD_NOT_FOUND },
+        { code: ErrorCodes.EMAIL_PAYLOAD_NOT_FOUND },
       )
     }
     return actionValue
@@ -172,9 +174,9 @@ export class MemberChangedEmailHandler
   async getTemplateContent(): Promise<MemberChangeTemplateInput['content']> {
     const membership = this.updatedMembership
     if (!membership || !membership.user.unwrap()) {
-      throw new errors.NotFoundError(
+      throw new NotFoundError(
         `New space member id ${this.validatedInput.updatedMembershipId.toString()} not found`,
-        { code: errors.ErrorCodes.EMAIL_PAYLOAD_NOT_FOUND },
+        { code: ErrorCodes.EMAIL_PAYLOAD_NOT_FOUND },
       )
     }
 

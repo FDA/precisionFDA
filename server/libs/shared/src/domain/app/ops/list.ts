@@ -1,6 +1,6 @@
+import { User } from '@shared/domain/user/user.entity'
+import { BaseOperation, DefaultInput } from '@shared/utils/base-operation'
 import { App } from '../app.entity'
-import { User } from '../../user'
-import { BaseOperation, DefaultInput } from '../../../utils'
 import { UserOpsCtx } from '../../../types'
 
 export class ListAppsOperation extends BaseOperation<UserOpsCtx, DefaultInput, App[]> {

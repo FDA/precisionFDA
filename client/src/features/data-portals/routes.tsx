@@ -1,5 +1,5 @@
 import React from 'react'
-import { Route, Switch, useRouteMatch } from 'react-router-dom'
+import { Route, Routes, useLocation } from 'react-router-dom'
 import NavigationBar, {
   NavigationBarBanner,
   NavigationBarPublicLandingTitle,
@@ -32,7 +32,7 @@ const DataPortalResourcesPage = React.lazy(
 
 const DataPortalRoutes = () => {
   usePageMeta({ title: 'DAaaS - precisionFDA' })
-  const { path } = useRouteMatch()
+  const location = useLocation()
   const { loading, user } = useAuthUser(true)
 
   const modal = useModal()
@@ -55,29 +55,15 @@ const DataPortalRoutes = () => {
   }
 
   return (
-    <Switch>
-      <Route exact path={`${path}`}>
-        <DataPortalsListPage />
-      </Route>
-      <Route exact path={`${path}/create`}>
-        <CreateDataPortalPage />
-      </Route>
-      <Route exact path={`${path}/main`}>
-        <MainDataPortalDetailsPage />
-      </Route>
-      <Route exact path={`${path}/:portalId`}>
-        <DataPortalDetailsPage />
-      </Route>
-      <Route exact path={`${path}/:portalId/resources`}>
-        <DataPortalResourcesPage />
-      </Route>
-      <Route exact path={`${path}/:portalId/content`}>
-        <DataPortalContentEditPage />
-      </Route>
-      <Route exact path={`${path}/:portalId/edit`}>
-        <EditDataPortalPage />
-      </Route>
-    </Switch>
+    <Routes>
+      <Route path={``} element={<DataPortalsListPage />} />
+      <Route path={`create`} element={<CreateDataPortalPage />} />
+      <Route index path={`main`} element={<MainDataPortalDetailsPage />} />
+      <Route path={`:portalId`} element={<DataPortalDetailsPage />} />
+      <Route path={`:portalId/resources`} element={<DataPortalResourcesPage />} />
+      <Route path={`:portalId/content`} element={<DataPortalContentEditPage />} />
+      <Route path={`:portalId/edit`} element={<EditDataPortalPage />} />
+    </Routes>
   )
 }
 

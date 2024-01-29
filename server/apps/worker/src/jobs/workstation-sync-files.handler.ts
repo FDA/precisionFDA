@@ -1,9 +1,10 @@
-import { database, userFile } from '@shared'
+import { database } from '@shared/database'
+import { WorkstationSyncFilesOperation } from '@shared/domain/user-file/ops/sync-workstation-files'
 import type { CheckStatusJob } from '@shared/queue/task.input'
 import { Job } from 'bull'
 import { nanoid } from 'nanoid'
 import { UserOpsCtx, WorkerOpsCtx } from '@shared/types'
-import { getChildLogger } from '../utils'
+import { getChildLogger } from '../utils/logger'
 
 export const workstationSyncFilesHandler = async (bullJob: Job) => {
   const data = bullJob.data as CheckStatusJob
@@ -17,5 +18,5 @@ export const workstationSyncFilesHandler = async (bullJob: Job) => {
     user: data.user,
     job: bullJob,
   }
-  await new userFile.WorkstationSyncFilesOperation(ctx).execute(data.payload)
+  await new WorkstationSyncFilesOperation(ctx).execute(data.payload)
 }

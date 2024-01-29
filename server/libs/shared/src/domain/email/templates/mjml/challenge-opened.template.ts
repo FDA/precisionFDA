@@ -1,5 +1,5 @@
 /* eslint-disable max-len */
-import { EmailTemplateInput } from '../../email.config'
+import { EmailTemplateInput } from '@shared/domain/email/email.config'
 import { header, footer, getBottomSpacer, getChallengeCtoButton, getMiddleSpacer } from './common'
 
 export type ChallengeOpenedTemplateInput = EmailTemplateInput & {

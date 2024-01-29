@@ -30,7 +30,6 @@ class AppSerializer < ApplicationSerializer # rubocop:disable Metrics/ClassLengt
 
   attribute :all_tags_list, key: :tags
   attribute :properties_object, key: :properties
-  attribute :job_count, key: :job_count
   attribute :latest_revision, key: :latest_revision
   attribute :scope_id, key: :scope
   delegate :updated_at, to: :object
@@ -38,10 +37,6 @@ class AppSerializer < ApplicationSerializer # rubocop:disable Metrics/ClassLengt
 
   def scope_id
     object.scope
-  end
-
-  def job_count
-    object.app_series.jobs.distinct.count
   end
 
   # Returns a tags list for an App

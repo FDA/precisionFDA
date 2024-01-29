@@ -1,7 +1,6 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import React, { useRef, useState } from 'react'
-import { useHistory, useParams } from 'react-router'
-import { useRouteMatch } from 'react-router-dom'
+import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { TransparentButton } from '../../components/Button'
 import { BackLink } from '../../components/Page/PageBackLink'
 import { PencilIcon } from '../../components/icons/PencilIcon'
@@ -25,14 +24,14 @@ import {
 } from './styles'
 
 export const DiscussionShow = ({ space }: { space: ISpace }) => {
-  const history = useHistory()
+  const navigate = useNavigate()
   const queryClient = useQueryClient()
   const [isEditing, setIsEditing] = useState(false)
   const markdownInputRef = useRef<HTMLInputElement | null>(null)
   const { discussionId: discussionIdParam } = useParams<{ discussionId: string }>()
   const discussionId = parseInt(discussionIdParam, 10)
   
-  const { url } = useRouteMatch()
+  const location = useLocation()
   const user = useAuthUser()
 
   const { data: discussion, status } = useQuery(
@@ -48,7 +47,7 @@ export const DiscussionShow = ({ space }: { space: ISpace }) => {
   const handleDeleteDiscussion = () => {
     queryClient.invalidateQueries(['space'])
     queryClient.invalidateQueries(['discussions'])
-    history.push(`/spaces/${space.id}/discussions/`)
+    navigate(`/spaces/${space.id}/discussions/`)
   }
 
   if (status === 'loading') {
@@ -65,7 +64,7 @@ export const DiscussionShow = ({ space }: { space: ISpace }) => {
       </NotFound>
     )
 
-  const backPath = url.replace(`/${discussionId}`, '')
+  const backPath = location.pathname.replace(`/${discussionId}`, '')
   const canReply = space.current_user_membership.role !== 'viewer'
   const isLead = space.current_user_membership.role === 'lead'
   const canUserEdit = (noteUserId: number) => user?.id === noteUserId || isLead
@@ -85,7 +84,7 @@ export const DiscussionShow = ({ space }: { space: ISpace }) => {
           />
         ) : (
           <StyledTitle>
-            <h1>{discussion.note.title}</h1>
+            {discussion.note.title}
             {canUserEdit(discussion.note.user.id) && (
               <TransparentButton onClick={() => setIsEditing(true)}>
                 <PencilIcon height={16} />

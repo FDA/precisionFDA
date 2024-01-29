@@ -1,7 +1,7 @@
-import { BaseOperation } from '../../../utils'
+import { ValidationError } from '@shared/errors'
+import { BaseOperation } from '@shared/utils/base-operation'
 import { UserOpsCtx } from '../../../types'
 import { CaptchaService } from '../../../services/captcha.service'
-import { errors } from '../../..'
 
 export type ChallengeProposeInput = {
   name: string,
@@ -33,7 +33,7 @@ export class ChallengeProposeOperation extends BaseOperation<
       // SEND CHALLENGE PROPOSE EMAIL WHEN TEMPLATE READY FOR NODE
     }
     else {
-      throw new errors.ValidationError("Not permitted to propose a challenge!")
+      throw new ValidationError("Not permitted to propose a challenge!")
     }
 
   }

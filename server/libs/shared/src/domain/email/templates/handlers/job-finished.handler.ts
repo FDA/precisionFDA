@@ -1,8 +1,9 @@
+import { BaseTemplate } from '@shared/domain/email/templates/base-template'
+import { Job } from '@shared/domain/job/job.entity'
+import { User } from '@shared/domain/user/user.entity'
 import { pipe, uniqBy } from 'ramda'
 import { EmailSendInput, EmailTemplate, EMAIL_TYPES, NOTIFICATION_TYPES_BASE } from '../../email.config'
-import { Job, User } from '../../..'
 import { JobFinishedInputTemplate, jobFinishedTemplate } from '../mjml/job-finished.template'
-import { BaseTemplate } from '..'
 import {
   buildEmailTemplate,
   buildFilterByUserSettings,
@@ -29,12 +30,12 @@ export class JobFinishedEmailHandler
 
   async determineReceivers(): Promise<User[]> {
     if (isJobPublic(this.job)) {
-      this.ctx.log.info({ jobId: this.job.id }, 'Job is public, noone is notified')
+      this.ctx.log.verbose({ jobId: this.job.id }, 'Job is public, noone is notified')
       return []
     }
     // todo: other users if job runs in a space?
     if (isJobInSpace(this.job)) {
-      this.ctx.log.info({ jobId: this.job.id }, 'Job is in a space, todo')
+      this.ctx.log.verbose({ jobId: this.job.id }, 'Job is in a space, todo')
       return []
     }
     // JOB IS PRIVATE

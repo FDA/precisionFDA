@@ -2,8 +2,10 @@ import React from 'react'
 import styled from 'styled-components'
 import { Loader } from '../../components/Loader'
 import { useParticipantsQuery } from './useParticipantsQuery'
+import { compactScrollBar } from '../../components/Page/styles'
 
 const StyledParticipantsList = styled.ul`
+  ${compactScrollBar}
   display: grid;
   grid-template-rows: 72px 72px;
   grid-auto-flow: column;
@@ -11,6 +13,7 @@ const StyledParticipantsList = styled.ul`
   grid-gap: 5px;
   overflow-x: auto;
   list-style-type: none;
+
 
   li {
     display: inline-block;

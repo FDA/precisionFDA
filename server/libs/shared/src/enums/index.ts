@@ -1,5 +1,6 @@
 enum ENVS {
-  LOCAL = 'local',
+  DEV = 'dev',
+  STAGING = 'staging',
   DEVELOPMENT = 'development',
   PRODUCTION = 'production',
   TEST = 'test',

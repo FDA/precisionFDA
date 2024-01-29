@@ -1,9 +1,11 @@
+import { database } from '@shared/database'
+import { DbCluster } from '@shared/domain/db-cluster/db-cluster.entity'
+import { User } from '@shared/domain/user/user.entity'
+import { ErrorCodes } from '@shared/errors'
 import { expect } from 'chai'
 import { EntityManager } from '@mikro-orm/mysql'
 import supertest from 'supertest'
-import { errors, database } from '@shared'
 import { create, generate, db } from '@shared/test'
-import { DbCluster, User } from '@shared/domain'
 import {
   STATUS as DB_CLUSTER_STATUS,
   ENGINE as DB_CLUSTER_ENGINE,
@@ -76,7 +78,7 @@ describe('POST /dbclusters/stop', () => {
         .send({ dxids: [dxids[0], `dbcluster-${generate.random.dxstr()}`] })
         .expect(404)
 
-      expect(body.error).to.have.property('code', errors.ErrorCodes.DB_CLUSTER_NOT_FOUND)
+      expect(body.error).to.have.property('code', ErrorCodes.DB_CLUSTER_NOT_FOUND)
     })
 
     it('throws error when the dbcluster status is not available', async () => {
@@ -89,7 +91,7 @@ describe('POST /dbclusters/stop', () => {
         .send({ dxids: dxids })
         .expect(400)
 
-      expect(body.error).to.have.property('code', errors.ErrorCodes.DB_CLUSTER_STATUS_MISMATCH)
+      expect(body.error).to.have.property('code', ErrorCodes.DB_CLUSTER_STATUS_MISMATCH)
     })
   })
 })

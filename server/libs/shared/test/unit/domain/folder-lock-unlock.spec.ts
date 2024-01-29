@@ -1,15 +1,18 @@
 import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
+import { database } from '@shared/database'
+import { Folder } from '@shared/domain/user-file/folder.entity'
+import { FolderUnlockOperation } from '@shared/domain/user-file/ops/folder-unlock'
+import { User } from '@shared/domain/user/user.entity'
+import { getLogger } from '@shared/logger'
 import { expect } from 'chai'
 import pino from 'pino'
-import { User, userFile, Folder } from '../../../src/domain'
 import { create, db } from '../../../src/test'
-import { database, getLogger, types } from '@shared'
 
 describe('lock/unlock folder tests', () => {
   let em: EntityManager<MySqlDriver>
   let user: User
   let log: pino.Logger
-  let userCtx: types.UserCtx
+  let userCtx: UserCtx
 
   beforeEach(async () => {
     await db.dropData(database.connection())
@@ -28,7 +31,7 @@ describe('lock/unlock folder tests', () => {
     const folder2 = create.filesHelper.createFolder(em, { user }, { name: 'folder2', locked: true })
     await em.flush()
 
-    const op = new userFile.FolderUnlockOperation({
+    const op = new FolderUnlockOperation({
       em: database.orm().em.fork(),
       log,
       user: userCtx,

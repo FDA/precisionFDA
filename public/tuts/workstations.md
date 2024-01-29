@@ -12,25 +12,16 @@ Users can however use the power of the cloud to efficiently achieve their collab
 
 Through this hands-on tutorial you will:
 
--   Use the precisionFDA command line utility (pfda) to programmatically transfer files to and from precisionFDA and workstations and notebooks.
-
--   Configure ttyd workstations to present web services on ports 8080 and 8081 for secure browser-based access with a rich UI.
-
--   Launch a data analysis ttyd workstation with a local PostgreSQL database server, psql command line database client, pgadmin GUI database client, and RStudio configured with PostgreSQL access.
-
--   Launch a precisionFDA Database cluster and access it from the data analysis workstation using psql and pgadmin to configure and install a database on the cluster from DDL and delimited data files.
-
--   Use pgadmin to backup the cluster database to a precisionFDA file.
-
--   Use pgadmin to restore the database backup to the data analysis workstation local database.
-
--   Access the cluster and the workstation local databases from RStudio.
-
--   Launch a jupyterLab workstation with a local PostgreSQL database server, and psql command line database client, and an example Python database analysis notebook.
-
--   Use pgadmin to restore the database backup to the jupyterLab workstation local database.
-
--   Access the cluster and the workstation local databases from a Python notebook.
+- Use the precisionFDA command line utility (pfda) to programmatically transfer files to and from precisionFDA and workstations and notebooks.
+- Configure ttyd workstations to present web services on ports 8080 and 8081 for secure browser-based access with a rich UI.
+- Launch a data analysis ttyd workstation with a local PostgreSQL database server, psql command line database client, pgadmin GUI database client, and RStudio configured with PostgreSQL access.
+- Launch a precisionFDA Database cluster and access it from the data analysis workstation using psql and pgadmin to configure and install a database on the cluster from DDL and delimited data files.
+- Use pgadmin to backup the cluster database to a precisionFDA file.
+- Use pgadmin to restore the database backup to the data analysis workstation local database.
+- Access the cluster and the workstation local databases from RStudio.
+- Launch a jupyterLab workstation with a local PostgreSQL database server, and psql command line database client, and an example Python database analysis notebook.
+- Use pgadmin to restore the database backup to the jupyterLab workstation local database.
+- Access the cluster and the workstation local databases from a Python notebook.
 
 ![](https://pfda-production-static-files.s3.amazonaws.com/tuts/workstations-media/image1.png)
 

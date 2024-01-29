@@ -234,7 +234,7 @@ export class ServiceError extends BaseError {
 
 export class MfaAlreadyResetError extends BaseError {
   constructor(
-    message = 'MFA is already reset or not yet configured for the user',
+    message = 'MFA is already reset or not yet configured',
     props: MaybeBaseErrorProps = {},
   ) {
     super(message, {

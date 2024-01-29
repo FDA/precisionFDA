@@ -8,10 +8,11 @@ export const StyledInputJumpTo = styled.input`
   width: 60px;
   margin-right: 5px;
   padding-left: 10px;
-  border: 1px solid #d9d9d9;
+  border: 1px solid var(--c-input-border);
   border-radius: 2px;
   transition: all 0.3s;
   ${inputFocus}
+  background-color: var(--background);
 `
 
 export const JumpToForm = styled.form`
@@ -50,6 +51,7 @@ export const PerPage = styled.div`
 export const StyledPerPageSelect = styled(InputSelect)`
   margin-right: 5px;
   height: 34px;
+  border-color: var(--c-input-border);
 `
 
 export function hidePagination(

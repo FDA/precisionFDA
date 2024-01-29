@@ -1,17 +1,17 @@
+import { database } from '@shared/database'
+import { Job } from '@shared/domain/job/job.entity'
+import {
+  NotificationPreference
+} from '@shared/domain/notification-preference/notification-preference.entity'
+import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
+import { Space } from '@shared/domain/space/space.entity'
+import { User } from '@shared/domain/user/user.entity'
+import { Comment } from '@shared/domain/comment/comment.entity'
 import { expect } from 'chai'
 import { EntityManager, Reference } from '@mikro-orm/core'
-import { database } from '@shared'
-import {
-  Job,
-  SpaceMembership,
-  User,
-  Space,
-  Comment,
-  NotificationPreference
-} from '@shared/domain'
 import { create, generate, db } from '@shared/test'
 import { EMAIL_CONFIG } from '@shared/domain/email/email.config'
-import { CommentAddedEmailHandler } from '@shared/domain/email/templates/handlers'
+import { CommentAddedEmailHandler } from '@shared/domain/email/templates/handlers/comment-added.handler'
 import { UserOpsCtx } from '@shared/types'
 import { defaultLogger } from '@shared/logger'
 import { SPACE_MEMBERSHIP_ROLE } from '@shared/domain/space-membership/space-membership.enum'

@@ -1,22 +1,20 @@
-import { database, queue } from '@shared'
-import { createServer, KoaCallback } from '../server'
 import { log } from '../logger'
+import { createServer } from '../server'
 
 // NOTE(samuel) callback parameter is for watch mode, shoutout to `ts-node-dev` (slow variant used up until now)
 // callback cannot be passed directly as function arg, as it is updated during runtime
 // especially when recompilation occurs
-export function createEntrypoint(getAppCallback: () => KoaCallback) {
-
+export function createEntrypoint() {
   let api = null as null | ReturnType<typeof createServer>
   const handleFatalError = (err: Error): void => {
     process.removeAllListeners('uncaughtException')
     process.removeAllListeners('unhandledRejection')
 
-    log.fatal({ error: err }, 'Fatal error occured. Exiting the app')
+    log.fatal(err, 'Fatal error occured. Exiting the app')
   }
 
   const stopAll = async (): Promise<void> => {
-    log.info('App closing')
+    log.log('App closing')
 
     process.removeAllListeners('SIGTERM')
 
@@ -24,12 +22,10 @@ export function createEntrypoint(getAppCallback: () => KoaCallback) {
     if (api) {
       await api.stopServer()
     }
-    await database.stop()
-    await queue.disconnectQueues()
   }
 
   const startAll = async (): Promise<void> => {
-    api = createServer(getAppCallback())
+    api = createServer()
 
     process.once('uncaughtException', err => {
       log.error('App crash: Uncaught exception')
@@ -47,7 +43,6 @@ export function createEntrypoint(getAppCallback: () => KoaCallback) {
     process.once('SIGTERM', stopAll)
 
     // start the services in correct order
-    await queue.createQueues()
     await api.startHttpsServer()
     await api.startWSServer()
   }

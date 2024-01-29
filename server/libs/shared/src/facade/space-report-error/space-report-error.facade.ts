@@ -1,34 +1,37 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
-import { ArrayUtils, ENUMS } from '../..'
-import { NotificationService } from '../../domain/notification'
-import { SpaceReportPart, SpaceReportService } from '../../domain/space-report'
+import { NotificationService } from '@shared/domain/notification/services/notification.service'
+import { SpaceReportPart } from '@shared/domain/space-report/entity/space-report-part.entity'
+import { SpaceReport } from '@shared/domain/space-report/entity/space-report.entity'
+import { NOTIFICATION_ACTION, SEVERITY } from '@shared/enums'
+import { ArrayUtils } from '@shared/utils/array.utils'
 
 export class SpaceReportErrorFacade {
-  private readonly em
-  private readonly spaceReportService
-  private readonly notificationService
   constructor(
-    em: SqlEntityManager,
-    spaceReportService: SpaceReportService,
-    notificationService: NotificationService,
-  ) {
-    this.em = em
-    this.spaceReportService = spaceReportService
-    this.notificationService = notificationService
-  }
+    private readonly em: SqlEntityManager,
+    private readonly notificationService: NotificationService,
+  ) {}
 
   async setSpaceReportError(id: number) {
-    const report = await this.spaceReportService.setSpaceReportError(id)
+    const report = await this.em.transactional(async () => {
+      const spaceReport = await this.em.findOneOrFail(SpaceReport, id)
+
+      if (spaceReport.state === 'ERROR') {
+        return null
+      }
+
+      spaceReport.state = 'ERROR'
+      return spaceReport
+    })
 
     if (!report) {
       return
     }
 
     await this.notificationService.createNotification({
-      severity: ENUMS.SEVERITY.ERROR,
+      severity: SEVERITY.ERROR,
       userId: report.createdBy.id,
       message: 'Space report generation failed',
-      action: ENUMS.NOTIFICATION_ACTION.SPACE_REPORT_ERROR,
+      action: NOTIFICATION_ACTION.SPACE_REPORT_ERROR,
     })
   }
 
@@ -45,7 +48,7 @@ export class SpaceReportErrorFacade {
       }
 
       await Promise.all([
-        this.spaceReportService.setSpaceReportPartsError(ids),
+        await this.em.nativeUpdate(SpaceReportPart, { id: { $in: ids } }, { state: 'ERROR' }),
         this.setSpaceReportError(part.spaceReport.id),
       ])
     })

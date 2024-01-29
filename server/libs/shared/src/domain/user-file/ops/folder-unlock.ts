@@ -1,9 +1,9 @@
-import { Folder } from '../..'
-import { BaseOperation } from '../../../utils'
-import { errors } from '../../..'
+import { Folder } from '@shared/domain/user-file/folder.entity'
+import { User } from '@shared/domain/user/user.entity'
+import { FolderNotFoundError } from '@shared/errors'
+import { BaseOperation } from '@shared/utils/base-operation'
 import { IdInput, UserOpsCtx } from '../../../types'
 import { createFolderEvent, EVENT_TYPES } from '../../event/event.helper'
-import { User } from '../../user'
 import { getNodePath } from '../user-file.helper'
 
 class FolderUnlockOperation extends BaseOperation<UserOpsCtx, IdInput, void> {
@@ -14,7 +14,7 @@ class FolderUnlockOperation extends BaseOperation<UserOpsCtx, IdInput, void> {
     const repo = em.getRepository(Folder)
     const folderToUnlock = await repo.findOne(input.id)
     if (!folderToUnlock) {
-      throw new errors.FolderNotFoundError()
+      throw new FolderNotFoundError()
     }
     try {
       await em.begin()
@@ -29,7 +29,7 @@ class FolderUnlockOperation extends BaseOperation<UserOpsCtx, IdInput, void> {
       folderToUnlock.state = null
       await em.persistAndFlush(folderEvent)
       await em.commit()
-      this.ctx.log.info({ folderName: folderToUnlock.name }, 'Unlocked folder')
+      this.ctx.log.verbose({ folderName: folderToUnlock.name }, 'Unlocked folder')
     } catch (err) {
       await em.rollback()
       throw err

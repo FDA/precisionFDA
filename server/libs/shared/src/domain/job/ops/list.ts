@@ -1,4 +1,4 @@
-import { BaseOperation } from '../../../utils'
+import { BaseOperation } from '@shared/utils/base-operation'
 import { Job } from '../job.entity'
 import type { ListJobsInput, PageJobs } from '../job.input'
 import { getSpaceIsAccessibleByContext } from '../../space/space.permissions'

@@ -1,11 +1,17 @@
+import { App } from '@shared/domain/app/app.entity'
+import { JobRunData } from '@shared/domain/job/job.types'
+import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
+import { Space } from '@shared/domain/space/space.entity'
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
+import { User } from '@shared/domain/user/user.entity'
+import { getProjectToRunApp } from '@shared/domain/user/user.helper'
+import { PlatformClient } from '@shared/platform-client'
+import { JobCreateParams } from '@shared/platform-client/platform-client.params'
 import { difference, intersection, isNil, prop } from 'ramda'
-import * as client from '../../../platform-client'
 import * as errors from '../../../errors'
 import type { RunAppInput, Provenance } from '../job.input'
-import { BaseOperation } from '../../../utils'
-import { Job, RunData } from '../job.entity'
-import { App } from '../../app'
-import { User, helper as userHelper } from '../../user'
+import { BaseOperation } from '@shared/utils/base-operation'
+import { Job } from '../job.entity'
 import {
   JOB_STATE,
   allowedInstanceTypes,
@@ -15,7 +21,6 @@ import {
 import { createSyncJobStatusTask } from '../../../queue'
 import { AppInputSpecItem } from '../../app/app.enum'
 import { AnyObject, UserOpsCtx } from '../../../types'
-import { Space, SpaceMembership, UserFile } from '../..'
 import { config } from '../../../config'
 import { getIdFromScopeName, getProjectDxid } from '../../space/space.helper'
 import { MAX_PLATFORM_ALLOWED_TIMEOUT_SECONDS } from '../../../config/constants'
@@ -31,7 +36,7 @@ export class CreateJobOperation extends BaseOperation<UserOpsCtx, RunAppInput, J
     this.input = input
     this.jobInput = input.input ?? {}
     const em = this.ctx.em
-    const platformClient = new client.PlatformClient(this.ctx.user.accessToken, this.ctx.log)
+    const platformClient = new PlatformClient(this.ctx.user.accessToken, this.ctx.log)
 
     const user = await em.findOne(User, { id: this.ctx.user.id })
     // whitelist https public apps
@@ -72,7 +77,7 @@ export class CreateJobOperation extends BaseOperation<UserOpsCtx, RunAppInput, J
 
 
     if (input.scope === 'private') {
-      this.projectId = userHelper.getProjectToRunApp(user)
+      this.projectId = getProjectToRunApp(user)
     } else {
       let spaceId = getIdFromScopeName(input.scope)
       const space = await em.findOne(Space, {id: spaceId})
@@ -96,7 +101,7 @@ export class CreateJobOperation extends BaseOperation<UserOpsCtx, RunAppInput, J
     // add all the data to the database
     await em.begin()
     let job: Job
-    const runData: RunData = {
+    const runData: JobRunData = {
       run_instance_type: this.input.instanceType,
       run_inputs: runInputDb,
       run_outputs: {},
@@ -242,9 +247,9 @@ export class CreateJobOperation extends BaseOperation<UserOpsCtx, RunAppInput, J
     return Math.min(platformTimeoutInMinutes, maxPlatformAllowedTimeoutInMinutes)
   }
 
-  private buildClientApiCall(app: App): client.JobCreateParams {
+  private buildClientApiCall(app: App): JobCreateParams {
     // shared payload here
-    const payload: client.JobCreateParams = {
+    const payload: JobCreateParams = {
       project: this.projectId,
       appId: app.dxid,
       systemRequirements: {

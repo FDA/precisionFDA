@@ -1,8 +1,8 @@
 import { EntityRepository } from '@mikro-orm/mysql'
+import { User } from '@shared/domain/user/user.entity'
 import { SCOPE } from '@shared/types/common'
 import { Asset } from './asset.entity'
 import { FILE_STATE_DX } from './user-file.types'
-import { User } from '../user'
 import { STATIC_SCOPE } from '../../enums'
 
 export class AssetRepository extends EntityRepository<Asset> {

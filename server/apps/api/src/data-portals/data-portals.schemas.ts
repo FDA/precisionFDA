@@ -1,5 +1,5 @@
+import { DATA_PORTAL_STATUS } from '@shared/domain/data-portal/data-portal.enum'
 import { JSONSchema7 } from 'json-schema'
-import { dataPortal } from '@shared'
 
 const file: JSONSchema7 = {
   type: 'object',
@@ -22,7 +22,7 @@ const dataPortalCreate: JSONSchema7 = {
     guestLeadDxUser: { type: 'string' },
     spaceId: { type: 'string' },
     sortOrder: { type: 'number' },
-    status: { type: 'string', enum: [dataPortal.DATA_PORTAL_STATUS.OPEN, dataPortal.DATA_PORTAL_STATUS.CLOSED] },
+    status: { type: 'string', enum: [DATA_PORTAL_STATUS.OPEN, DATA_PORTAL_STATUS.CLOSED] },
   },
   required: ['name', 'hostLeadDxUser', 'guestLeadDxUser',
     'spaceId', 'sortOrder', 'status'],
@@ -42,7 +42,7 @@ const dataPortalUpdate: JSONSchema7 = {
     editorState: { type: 'string' },
     cardImageUid: { type: 'string' },
     sortOrder: { type: 'number' },
-    status: { type: 'string', enum: [dataPortal.DATA_PORTAL_STATUS.OPEN, dataPortal.DATA_PORTAL_STATUS.CLOSED] },
+    status: { type: 'string', enum: [DATA_PORTAL_STATUS.OPEN, DATA_PORTAL_STATUS.CLOSED] },
   },
   required: ['id'],
   additionalProperties: false,

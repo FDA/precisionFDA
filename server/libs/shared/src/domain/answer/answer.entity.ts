@@ -10,11 +10,11 @@ import {
   Ref,
   Reference,
 } from '@mikro-orm/core'
+import { AnswerComment } from '@shared/domain/comment/answer-comment.entity'
+import { Discussion } from '@shared/domain/discussion/discussion.entity'
+import { Note } from '@shared/domain/note/note.entity'
+import { User } from '@shared/domain/user/user.entity'
 import { BaseEntity } from '../../database/base-entity'
-import { User } from '../user'
-import { Note } from '../note'
-import { Discussion } from '../discussion'
-import { AnswerComment } from '../comment'
 
 @Entity({ tableName: 'answers' })
 export class Answer extends BaseEntity {

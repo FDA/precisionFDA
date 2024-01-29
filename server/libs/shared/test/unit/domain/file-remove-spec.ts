@@ -1,10 +1,15 @@
 import { EntityManager, MySqlDriver, SqlEntityManager } from '@mikro-orm/mysql'
+import { database } from '@shared/database'
+import { Tag } from '@shared/domain/tag/tag.entity'
+import { Event } from '@shared/domain/event/event.entity'
+import { FileRemoveOperation } from '@shared/domain/user-file/ops/file-remove'
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
+import { User } from '@shared/domain/user/user.entity'
+import { getLogger } from '@shared/logger'
 import { expect } from 'chai'
 import pino from 'pino'
 import { fakes } from '../../../src/test/mocks'
-import { Tag, User, UserFile, Event, userFile } from '../../../src/domain'
 import { create, db } from '../../../src/test'
-import { database, getLogger, types } from '@shared'
 import { SPACE_STATE, SPACE_TYPE } from '../../../src/domain/space/space.enum'
 import { SPACE_MEMBERSHIP_ROLE } from '../../../src/domain/space-membership/space-membership.enum'
 
@@ -12,7 +17,7 @@ describe('remove file tests', () => {
   let em: EntityManager<MySqlDriver>
   let user: User
   let log: pino.Logger
-  let userCtx: types.UserCtx
+  let userCtx: UserCtx
 
   beforeEach(async () => {
     await db.dropData(database.connection())
@@ -31,7 +36,7 @@ describe('remove file tests', () => {
     create.comparisonHelper.createInput(em, { comparison, userFile: fileToDelete }, { })
     await em.flush()
 
-    const op = new userFile.FileRemoveOperation({
+    const op = new FileRemoveOperation({
       em: database.orm().em.fork() as SqlEntityManager,
       log,
       user: userCtx,
@@ -63,7 +68,7 @@ describe('remove file tests', () => {
     )
     await em.flush()
 
-    const op = new userFile.FileRemoveOperation({
+    const op = new FileRemoveOperation({
       em: database.orm().em.fork() as SqlEntityManager,
       log,
       user: userCtx,
@@ -93,7 +98,7 @@ describe('remove file tests', () => {
     )
     await em.flush()
 
-    const op = new userFile.FileRemoveOperation({
+    const op = new FileRemoveOperation({
       em: database.orm().em.fork() as SqlEntityManager,
       log,
       user: userCtx,
@@ -127,7 +132,7 @@ describe('remove file tests', () => {
     )
     await em.flush()
 
-    const op = new userFile.FileRemoveOperation({
+    const op = new FileRemoveOperation({
       em: database.orm().em.fork() as SqlEntityManager,
       log,
       user: userCtx,
@@ -163,7 +168,7 @@ describe('remove file tests', () => {
     create.tagsHelper.createTagging(em, { tag: tagBbb }, { taggableId: firstFile.id })
     await em.flush()
 
-    const op = new userFile.FileRemoveOperation({
+    const op = new FileRemoveOperation({
       em: database.orm().em.fork() as SqlEntityManager,
       log,
       user: userCtx,
@@ -201,7 +206,7 @@ describe('remove file tests', () => {
     create.spacesHelper.addMember(em, {user, space}, { role: SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR })
     await em.flush()
 
-    const op = new userFile.FileRemoveOperation({
+    const op = new FileRemoveOperation({
       em: database.orm().em.fork() as SqlEntityManager,
       log,
       user: userCtx,
@@ -225,7 +230,7 @@ describe('remove file tests', () => {
     create.spacesHelper.addMember(em, {user: user, space}, { role: SPACE_MEMBERSHIP_ROLE.LEAD })
     await em.flush()
 
-    const op = new userFile.FileRemoveOperation({
+    const op = new FileRemoveOperation({
       em: database.orm().em.fork() as SqlEntityManager,
       log,
       user: userCtx,
@@ -242,7 +247,7 @@ describe('remove file tests', () => {
     const file = create.filesHelper.create(em, { user }, { locked: true })
     await em.flush()
 
-    const op = new userFile.FileRemoveOperation({
+    const op = new FileRemoveOperation({
       em: database.orm().em.fork() as SqlEntityManager,
       log,
       user: userCtx,
