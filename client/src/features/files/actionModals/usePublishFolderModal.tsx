@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
-import { Button, ButtonSolidBlue } from '../../../components/Button'
+import { Button } from '../../../components/Button'
 import { FileIcon } from '../../../components/icons/FileIcon'
 import { Loader } from '../../../components/Loader'
 import { VerticalCenter } from '../../../components/Page/styles'
@@ -88,9 +88,9 @@ export const usePublishFolderModal = (
         <>
           {mutation.isLoading && <Loader />}
           <Button onClick={() => setShowModal(false)} disabled={mutation.isLoading}>Cancel</Button>
-          <ButtonSolidBlue onClick={handleSubmit} disabled={mutation.isLoading}>
+          <Button variant="primary" onClick={handleSubmit} disabled={mutation.isLoading}>
             Publish
-          </ButtonSolidBlue>
+          </Button>
         </>
       }
     >

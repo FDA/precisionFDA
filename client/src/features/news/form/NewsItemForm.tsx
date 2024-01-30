@@ -4,23 +4,19 @@ import React from 'react'
 import { useForm } from 'react-hook-form'
 import styled from 'styled-components'
 import * as Yup from 'yup'
-import { ButtonGroup } from '../../../components/Button/ButtonGroup'
-import { ButtonSolidBlue, ButtonSolidRed } from '../../../components/Button/index'
 import { Checkbox } from '../../../components/Checkbox'
 import { InputDate } from '../../../components/form/InputDate'
 import { FieldGroup, InputError } from '../../../components/form/styles'
-import { InputText } from '../../../components/InputText'
+import { InputText, InputTextArea } from '../../../components/InputText'
 import { CheckboxLabel } from '../../spaces/form/styles'
+import { Button } from '../../../components/Button'
+import { ButtonRow } from '../../modal/styles'
 
 const StyledForm = styled.form`
   display: flex;
   flex-direction: column;
   gap: 1rem;
   margin-bottom: 2rem;
-
-  ${ButtonGroup} {
-    gap: 4px;
-  }
 `
 
 export interface CreateNewsForm {
@@ -82,7 +78,6 @@ export const NewsItemForm = ({ onDelete, onSubmit, defaultValues } : { onDelete?
       <FieldGroup>
         <label>Title</label>
         <InputText
-          label="Title"
           {...register('title', { required: 'title is required.' })}
           disabled={isSubmitting}
         />
@@ -111,7 +106,6 @@ export const NewsItemForm = ({ onDelete, onSubmit, defaultValues } : { onDelete?
       <FieldGroup>
         <label>Link</label>
         <InputText
-          label="Link"
           {...register('link')}
           disabled={isSubmitting}
         />
@@ -124,9 +118,7 @@ export const NewsItemForm = ({ onDelete, onSubmit, defaultValues } : { onDelete?
 
       <FieldGroup>
         <label>Content</label>
-        <InputText
-          as="textarea"
-          label="Content"
+        <InputTextArea
           {...register('content')}
           disabled={isSubmitting}
         />
@@ -140,7 +132,6 @@ export const NewsItemForm = ({ onDelete, onSubmit, defaultValues } : { onDelete?
       <FieldGroup>
         <label>Video</label>
         <InputText
-          label="Video"
           {...register('video')}
           disabled={isSubmitting}
         />
@@ -183,10 +174,10 @@ export const NewsItemForm = ({ onDelete, onSubmit, defaultValues } : { onDelete?
           render={({ message }) => <InputError>{message}</InputError>}
         />
       </FieldGroup>
-      <ButtonGroup>
-        <ButtonSolidBlue type="submit" disabled={isSubmitting || Object.keys(errors).length > 0}>Save</ButtonSolidBlue>
-        {onDelete && <ButtonSolidRed type="button" onClick={deleteNewsItem}>Delete</ButtonSolidRed>}
-      </ButtonGroup>
+      <ButtonRow>
+        <Button variant='primary' type="submit" disabled={isSubmitting || Object.keys(errors).length > 0}>Save</Button>
+        {onDelete && <Button variant='warning' type="button" onClick={deleteNewsItem}>Delete</Button>}
+      </ButtonRow>
     </StyledForm>
   )
 }

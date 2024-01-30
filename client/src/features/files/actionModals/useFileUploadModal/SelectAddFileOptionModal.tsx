@@ -1,7 +1,7 @@
 import React from 'react'
-import { ButtonSolidBlue } from '../../../../components/Button'
 import { Modal } from '../../../modal'
 import { useModal } from '../../../modal/useModal'
+import { Button } from '../../../../components/Button'
 
 export const SelectAddFileOptionModal = ({ cb }: any) => {
   const { isShown, setShowModal } = useModal()
@@ -13,8 +13,8 @@ export const SelectAddFileOptionModal = ({ cb }: any) => {
       hide={() => setShowModal(false)}
     >
       <div>
-        <ButtonSolidBlue onClick={() => cb('copy')}>Copy</ButtonSolidBlue>
-        <ButtonSolidBlue onClick={() => cb('upload')}>Add</ButtonSolidBlue>
+        <Button variant="primary" onClick={() => cb('copy')}>Copy</Button>
+        <Button variant="primary" onClick={() => cb('upload')}>Add</Button>
       </div>
     </Modal>
   )

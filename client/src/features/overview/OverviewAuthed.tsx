@@ -3,7 +3,6 @@ import React from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import styled from 'styled-components'
-import { ButtonSolidBlue } from '../../components/Button'
 import { Loader } from '../../components/Loader'
 import { PageContainerMargin } from '../../components/Page/styles'
 import {
@@ -38,6 +37,7 @@ import {
 } from './styles'
 import { AppTypeIconBlue } from '../../components/icons/AppTypeIconBlue'
 import { AppTypeIconYellow } from '../../components/icons/AppTypeIconYellow'
+import { Button } from '../../components/Button'
 
 const StyledGetStarted = styled.div`
   background-color: var(--tertiary-100);
@@ -272,9 +272,9 @@ export const OverviewAuthed = () => {
 
       <PageMainBody>
         <InfoRow>
-          <ButtonSolidBlue as={Link} to="/docs">
+          <Button variant="primary" as={Link} to="/docs">
             Learn more about precisionFDA
-          </ButtonSolidBlue>
+          </Button>
           <a href="mailto:precisionfda@fda.hhs.gov">Feedback</a>
         </InfoRow>
       </PageMainBody>

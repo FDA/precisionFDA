@@ -35,23 +35,6 @@ export const useExecutionColumns = ({
   const queryClient = useQueryClient()
   return [
     {
-      Header: 'State',
-      id: 'state',
-      accessor: 'state',
-      width: colWidths?.state || 100,
-      Filter: DefaultColumnFilter,
-      disableSortBy: true,
-      Cell: (props: any) => {
-        const { jobs } = props.row.original
-        if (jobs) {
-          return <div>{jobs[jobs.length - 1].state}</div>
-        }
-          return <div>{props.row.original.state}</div>
-
-      },
-      ...(filterDataTestIdPrefix ? { filterDataTestId: `${filterDataTestIdPrefix}-state` } : {}),
-    },
-    {
       Header: 'Execution Name',
       accessor: 'name',
       Filter: DefaultColumnFilter,
@@ -74,6 +57,23 @@ export const useExecutionColumns = ({
           )
         },
         ...(filterDataTestIdPrefix ? { filterDataTestId: `${filterDataTestIdPrefix}-execution-name` } : {}),
+      },
+      {
+        Header: 'State',
+        id: 'state',
+        accessor: 'state',
+        width: colWidths?.state || 100,
+        Filter: DefaultColumnFilter,
+        disableSortBy: true,
+        Cell: (props: any) => {
+          const { jobs } = props.row.original
+          if (jobs) {
+            return <div>{jobs[jobs.length - 1].state}</div>
+          }
+            return <div>{props.row.original.state}</div>
+  
+        },
+        ...(filterDataTestIdPrefix ? { filterDataTestId: `${filterDataTestIdPrefix}-state` } : {}),
       },
     {
       Header: 'Workflow',

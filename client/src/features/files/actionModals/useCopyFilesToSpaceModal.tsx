@@ -1,12 +1,11 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { DataNode } from 'rc-tree/lib/interface'
 import React, { useState } from 'react'
-import styled from 'styled-components'
 import { useImmer } from 'use-immer'
 import { useQueryParam } from 'use-query-params'
-import { Button, ButtonSolidBlue } from '../../../components/Button'
+import { Button } from '../../../components/Button'
 import { ModalHeaderTop, ModalNext } from '../../modal/ModalNext'
-import { ButtonRow, Footer, ModalScroll, StyledModalScroll } from '../../modal/styles'
+import { ButtonRow, Footer, StyledModalScroll } from '../../modal/styles'
 import { useModal } from '../../modal/useModal'
 import { addData } from '../../spaces/spaces.api'
 import { fetchFolderChildren } from '../files.api'
@@ -113,13 +112,14 @@ export const useCopyFilesToSpaceModal = ({ spaceId }: { spaceId?: string }) => {
           >
             Cancel
           </Button>
-          <ButtonSolidBlue
+          <Button
+            variant="primary"
             type="submit"
             onClick={() => mutateAsync()}
             disabled={isLoading}
           >
             Add
-          </ButtonSolidBlue>
+          </Button>
         </ButtonRow>
       </Footer>
     </ModalNext>

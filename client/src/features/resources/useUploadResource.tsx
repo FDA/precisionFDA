@@ -1,7 +1,6 @@
 import React, { ChangeEvent, FormEvent, useEffect, useState } from 'react'
 import { toast } from 'react-toastify'
 import styled from 'styled-components'
-import { Button } from '../../components/Button'
 import { InputText } from '../../components/InputText'
 import { processFile } from './uploadImage'
 import {
@@ -12,6 +11,7 @@ import { getExt, isImageFromExt } from './util'
 import { FileIcon } from '../../components/icons/FileIcon'
 import { FileThumb } from './styles'
 import { FileWithPreview } from './types'
+import { Button } from '../../components/Button'
 
 
 // Convert file to base64

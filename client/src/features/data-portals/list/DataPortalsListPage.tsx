@@ -2,7 +2,6 @@ import { useQuery } from '@tanstack/react-query'
 import React from 'react'
 import { Link } from 'react-router-dom'
 import styled from 'styled-components'
-import { ButtonSolidBlue } from '../../../components/Button'
 import { Loader } from '../../../components/Loader'
 import { PageContainerMargin, PageTitle } from '../../../components/Page/styles'
 import { PageLoaderWrapper } from '../../../components/Public/styles'
@@ -15,6 +14,7 @@ import { DataPortalListItem } from './DataPortalListItem'
 import { useAuthUser } from '../../auth/useAuthUser'
 import { theme } from '../../../styles/theme'
 import { useMainDataPortal } from '../queries'
+import { Button } from '../../../components/Button'
 
 const List = styled.div`
   display: flex;
@@ -71,13 +71,14 @@ const DataPortalsListPage = () => {
             <TopRow>
               <PageTitle>Data Portals</PageTitle>
               {user?.isAdmin && (
-                <ButtonSolidBlue
+                <Button
+                  variant="primary"
                   as={Link}
                   to="/data-portals/create"
                   data-turbolinks="false"
                 >
                   Create a Data Portal
-                </ButtonSolidBlue>
+                </Button>
               )}
             </TopRow>
 

@@ -3,7 +3,6 @@ import { yupResolver } from '@hookform/resolvers/yup'
 import React, { useEffect } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { UseMutationResult } from '@tanstack/react-query'
-import { ButtonSolidBlue } from '../../../components/Button'
 import { Divider, FieldLabelRow, InputError } from '../../../components/form/styles'
 import { FieldGroup } from '../../../components/form/FieldGroup'
 import { InputText } from '../../../components/InputText'
@@ -20,6 +19,7 @@ import {
 } from './helpers'
 import { Checkbox } from '../../../components/CheckboxNext'
 import { useConfirm } from '../../modal/useConfirm'
+import { Button } from '../../../components/Button'
 
 interface SpaceCreateForm {
   space_type: ISpace['type']
@@ -190,7 +190,6 @@ export const SpaceForm = ({
 
       <FieldGroup label="Name" required>
         <InputText
-          label="Space Name"
           {...register('name', { required: 'Name is required.' })}
           disabled={isSubmitting}
         />
@@ -202,7 +201,6 @@ export const SpaceForm = ({
       </FieldGroup>
       <FieldGroup label="Description" required>
         <InputText
-          label="Description"
           {...register('description')}
           disabled={isSubmitting}
         />
@@ -301,7 +299,7 @@ export const SpaceForm = ({
               Space Protection
             </FieldLabelRow>
             <HintText>
-              When enabled the space will be subject to the following restrictions:
+              <p>When enabled the space will be subject to the following restrictions:</p>
               <ul>
                 <li>Data in this space cannot be copied to My Home or Private Spaces, nor downloaded, except by a lead of the space.</li>
                 <li>Data in this space can only be copied to Spaces that also have protection enabled, and the copying user must be a lead member of both the source and destination spaces.</li>
@@ -329,13 +327,14 @@ export const SpaceForm = ({
       )}
 
       <Row>
-        <ButtonSolidBlue
+        <Button
+          variant='primary'
           disabled={Object.keys(errors).length > 0 || isSubmitting}
           type="button"
           onClick={getValues().protected || getValues().restricted_reviewer ? openConfirmation: handleSubmit(onSubmit)}
         >
           Create Space
-        </ButtonSolidBlue>
+        </Button>
         {isSubmitting && <Loader />}
       </Row>
       <ConfirmSubmit />

@@ -3,7 +3,7 @@ import { omit } from 'ramda'
 import React from 'react'
 import { Link } from 'react-router-dom'
 import { toast } from 'react-toastify'
-import { ButtonSolidBlue } from '../../components/Button'
+import { Button } from '../../components/Button'
 import Dropdown from '../../components/Dropdown'
 import { SyncIcon } from '../../components/icons/SyncIcon'
 import { getSpaceIdFromScope } from '../../utils'
@@ -98,18 +98,18 @@ export const ExecutionActionsRow = ({
         </StyledRefresh>
       )}
       {isJobOwner && execution.links.open_external && (
-          <ButtonSolidBlue onClick={onOpenWorkstationClick}>
+          <Button variant="primary" onClick={onOpenWorkstationClick}>
             Open Workstation
-          </ButtonSolidBlue>
+          </Button>
       )}
       {isJobOwner && hasWorkstationAPI && execution.links.open_external && (
-        <ButtonSolidBlue onClick={() => actions['Snapshot'].func()}>Snapshot</ButtonSolidBlue>
+        <Button variant="primary" onClick={() => actions['Snapshot'].func()}>Snapshot</Button>
       )}
       {isJobOwner && execution.links.sync_files && (
-        <ButtonSolidBlue onClick={onSyncFilesClick}>Sync Files</ButtonSolidBlue>
+        <Button variant="primary" onClick={onSyncFilesClick}>Sync Files</Button>
       )}
       <Link to={`/${getBaseLink(getSpaceIdFromScope(execution.scope))}/apps/${execution.links.app?.replace('/apps/', '')}/jobs/new`}>
-        <ButtonSolidBlue>Re-Run Execution</ButtonSolidBlue>
+        <Button variant="primary">Re-Run Execution</Button>
       </Link>
       <Dropdown
         trigger="click"

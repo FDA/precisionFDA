@@ -5,7 +5,6 @@ import React from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import styled from 'styled-components'
-import { ButtonSolidBlue } from '../../../components/Button'
 import { Loader } from '../../../components/Loader'
 import { BackLink } from '../../../components/Page/PageBackLink'
 import { LexiContext } from '../../lexi'
@@ -16,6 +15,7 @@ import { DataPortal } from '../types'
 import { NotAllowedPage } from '../../../components/NotAllowed'
 import { useAuthUser } from '../../auth/useAuthUser'
 import { canEditContent } from '../utils'
+import { Button } from '../../../components/Button'
 
 const ContentEditButtonRow = styled.div`
   display: flex;
@@ -58,7 +58,7 @@ const TopBar = ({ portalId, data }: { portalId: string | number, data: DataPorta
       <BackLink linkTo={`/data-portals/${portalId}`}>Back to Portal</BackLink>
       <SubmitRow>
         {mutation.isLoading && <Loader />}
-        <ButtonSolidBlue disabled={mutation.isLoading} onClick={() => handleSave()}>Save</ButtonSolidBlue>
+        <Button variant="primary" disabled={mutation.isLoading} onClick={() => handleSave()}>Save</Button>
       </SubmitRow>
     </ContentEditButtonRow>
   )

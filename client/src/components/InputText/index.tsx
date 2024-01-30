@@ -30,6 +30,14 @@ export const InputText = styled.input.attrs({ type: 'text' })`
       box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
     }
 
+    &:-webkit-autofill,
+    &:-webkit-autofill:focus {
+      transition: background-color 600000s 0s, color 600000s 0s;
+    }
+    &[data-autocompleted] {
+      background-color: transparent !important;
+    }
+
     ${({ disabled }) => disabled && css`
       background-color: var(--tertiary-100);
     `}
@@ -38,3 +46,6 @@ export const InputText = styled.input.attrs({ type: 'text' })`
 export const InputDateTime = styled(InputText).attrs({ type: 'datetime-local' })``
 export const InputFile = styled(InputText).attrs({ type: 'file' })``
 export const InputNumber = styled(InputText).attrs({ type: 'number' })``
+export const InputTextArea = styled(InputText).attrs({ as: 'textarea' })`
+  transition: none;
+`

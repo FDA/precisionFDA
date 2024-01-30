@@ -1,7 +1,6 @@
 import React, { useMemo } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { Column, SortingRule, UseResizeColumnsState } from 'react-table'
-import { ButtonSolidBlue } from '../../components/Button'
 import Dropdown from '../../components/Dropdown'
 import { ContentFooter } from '../../components/Page/ContentFooter'
 import { Pagination } from '../../components/Pagination'
@@ -22,6 +21,7 @@ import { IApp } from './apps.types'
 import { useAppListActions } from './useAppListActions'
 import { useAppSelectionActions } from './useAppSelectionActions'
 import { useAppsColumns } from './useAppsColumns'
+import { Button } from '../../components/Button'
 
 type ListType = { apps: IApp[]; meta: IMeta }
 
@@ -93,24 +93,26 @@ export const AppList = ({ homeScope, spaceId }: { homeScope?: HomeScope, spaceId
         <ActionsRow>
           <QuickActions>
             {homeScope === 'me' && (
-              <ButtonSolidBlue
+              <Button
+                variant='primary'
                 as={Link}
                 to="/home/apps/create"
                 data-turbolinks="false"
                 data-testid="home-apps-create-button"
               >
                 <PlusIcon height={12} /> Create App
-              </ButtonSolidBlue>
+              </Button>
             )}
             {spaceId && (
-              <ButtonSolidBlue
+              <Button
+                variant='primary'
                 data-testid="spaces-apps-add-app-button"
                 onClick={() =>
                   listActions['Add App']?.func({ showModal: true })
                 }
               >
                 <PlusIcon height={12} /> Add App
-              </ButtonSolidBlue>
+              </Button>
             )}
           </QuickActions>
           <Dropdown

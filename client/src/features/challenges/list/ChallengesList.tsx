@@ -2,7 +2,6 @@ import queryString from 'query-string'
 import React from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Link, useLocation } from 'react-router-dom'
-import { ButtonSolidBlue } from '../../../components/Button'
 import { Loader } from '../../../components/Loader'
 import { PageContainerMargin } from '../../../components/Page/styles'
 import { hidePagination, Pagination } from '../../../components/Pagination'
@@ -28,6 +27,7 @@ import { challengesYearsListRequest } from '../api'
 import { getTimeStatusName, renderEmpty } from '../util'
 import { ChallengeListItem } from './ChallengeListItem'
 import { useChallengesListQuery } from './useChallengesListQuery'
+import { Button } from '../../../components/Button'
 
 
 const ChallengesList = () => {
@@ -101,9 +101,9 @@ const ChallengesList = () => {
             {userCanCreateChallenge && (
               <RightSideItem>
                 <ButtonRow>
-                  <ButtonSolidBlue as={Link} to="/challenges/create" data-turbolinks="false">
+                  <Button variant='primary' as={Link} to="/challenges/create" data-turbolinks="false">
                     Create a new challenge
-                  </ButtonSolidBlue>
+                  </Button>
                 </ButtonRow>
               </RightSideItem>
             )}

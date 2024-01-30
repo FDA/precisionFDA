@@ -3,7 +3,6 @@ import classNames from 'classnames'
 import React, { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { Tab, TabList, TabPanel, Tabs } from 'react-tabs'
-import { ButtonSolidBlue } from '../../../components/Button/index'
 import { Loader } from '../../../components/Loader'
 import { PageContainerMargin } from '../../../components/Page/styles'
 import {
@@ -30,6 +29,7 @@ import { ChallengeNotFound } from './ChallengeNotFound'
 import { CallToActionButton, NoInfo, StyledTabs } from './styles'
 import { setTocFromRef, ToC, IToCItem } from '../../markdown/TocNext'
 import { AddIdsToHeaders } from '../../../components/Markdown/AddIdsToHeaders'
+import { Button } from '../../../components/Button'
 
 export const ChallengeDetails = ({
   challenge,
@@ -284,7 +284,8 @@ export const ChallengeDetails = ({
               </RightSideItem>
             ) : (
               <RightSideItem>
-                <ButtonSolidBlue
+                <Button
+                  variant="primary"
                   className={joinChallengeButtonClasses}
                   onClick={() => {
                     if (userCanJoin) {
@@ -293,7 +294,7 @@ export const ChallengeDetails = ({
                   }}
                 >
                   {joinChallengeButtonTitle}
-                </ButtonSolidBlue>
+                </Button>
               </RightSideItem>
             )}
 

@@ -1,10 +1,10 @@
 import React, { useState } from 'react'
 import { GoogleReCaptchaProvider } from 'react-google-recaptcha-v3'
 import styled from 'styled-components'
-import { Button, ButtonSolidBlue } from '../../../components/Button'
 import { GoogleReCaptchaV3 } from '../../../components/ReCaptchaV3'
 import { theme } from '../../../styles/theme'
 import { Modal } from '../../modal'
+import { Button } from '../../../components/Button'
 
 
 const Asking = styled.div`
@@ -25,9 +25,9 @@ const Content = styled.div`
 const Footer = ({ hideAction, action, isAskingDisabled }: any) => (
   <>
     <Button onClick={hideAction}>Cancel</Button>
-    <ButtonSolidBlue onClick={action} disabled={isAskingDisabled}>
+    <Button variant="primary" onClick={action} disabled={isAskingDisabled}>
       Submit
-    </ButtonSolidBlue>
+    </Button>
   </>
 )
 

@@ -1,6 +1,5 @@
 import { differenceInSeconds, fromUnixTime, subSeconds } from 'date-fns/esm'
 import React, { useEffect, useState } from 'react'
-import { ButtonSolidBlue } from '../../components/Button'
 import { useInterval } from '../../hooks/useInterval'
 import { getCookie } from '../../utils/cookies'
 import { pluralize } from '../../utils/formatting'
@@ -11,6 +10,7 @@ import { useAuthUserQuery } from './api'
 import {
   onLogInWithSSO, useSiteSettingsQuery,
 } from './useSiteSettingsQuery'
+import { Button } from '../../components/Button'
 
 const getSessionExpiredAt = () => {
   const cookie = getCookie('sessionExpiredAt')
@@ -83,19 +83,19 @@ export const ExpiringSessionModal: React.FC<{ modal: UseModal }> = ({
         {sessionExpirationPassed ? (
           <>
             {ssoButtonResponse?.ssoButton.isEnabled && (
-              <ButtonSolidBlue onClick={() => onLogInWithSSO(ssoButtonResponse.ssoButton.data.fdaSsoUrl)}>
+              <Button variant="primary" onClick={() => onLogInWithSSO(ssoButtonResponse.ssoButton.data.fdaSsoUrl)}>
                 Log In with SSO
-              </ButtonSolidBlue>
+              </Button>
             )}
             {/*{TODO: this does not consider location to return to after login.}*/}
-            <ButtonSolidBlue onClick={() => window.location.assign('/login')}>
+            <Button variant="primary" onClick={() => window.location.assign('/login')}>
               Log In again
-            </ButtonSolidBlue>
+            </Button>
           </>
         ) : (
-          <ButtonSolidBlue onClick={handleStayLoggedIn}>
+          <Button variant="primary" onClick={handleStayLoggedIn}>
             Extend session
-          </ButtonSolidBlue>
+          </Button>
         )}
       </Footer>
     </ModalNext>

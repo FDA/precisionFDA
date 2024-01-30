@@ -11,7 +11,6 @@ import { toast } from 'react-toastify'
 import styled from 'styled-components'
 import * as Yup from 'yup'
 import { getDatabaseAllowedInstances } from '../../../api/home'
-import { ButtonSolidBlue } from '../../../components/Button'
 import { FieldGroup, FieldLabelRow, Hint, InputError } from '../../../components/form/styles'
 import { InputText } from '../../../components/InputText'
 import { Loader } from '../../../components/Loader'
@@ -20,6 +19,7 @@ import { NotFound } from '../../home/show.styles'
 import { createDatabaseRequest, fetchAccessibleFiles, IAccessibleFile } from '../databases.api'
 import { DatabaseEngineType, versionsOptions } from './options'
 import { Select } from '../../../components/Select'
+import { Button } from '../../../components/Button'
 
 const useAccessibleFiles = (inputValue: string) => useQuery(['accessible-files', inputValue],
   () => fetchAccessibleFiles({ search_string: inputValue, limit: 100, offset: 0 }).then(v => v?.objects), {
@@ -352,7 +352,7 @@ export const CreateDatabase = () => {
             render={({ message }) => <InputError>{message}</InputError>}
           />
         </FieldGroup>
-        <Row><ButtonSolidBlue disabled={Object.keys(errors).length > 0 || isSubmitting} type="submit">Submit</ButtonSolidBlue>{isSubmitting && <Loader />}</Row>
+        <Row><Button variant="primary" disabled={Object.keys(errors).length > 0 || isSubmitting} type="submit">Submit</Button>{isSubmitting && <Loader />}</Row>
       </StyledForm>
     </>
   )

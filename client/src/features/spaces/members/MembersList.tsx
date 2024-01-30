@@ -1,7 +1,6 @@
 import React, { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import styled from 'styled-components'
-import { ButtonSolidBlue } from '../../../components/Button'
 import { RadioButtonGroup } from '../../../components/form/RadioButtonGroup'
 import { Loader } from '../../../components/Loader'
 import { ErrorBoundary } from '../../../utils/ErrorBoundry'
@@ -11,6 +10,7 @@ import { spacesMembersListRequest } from './members.api'
 import { useAddMembersModal } from './useAddMembersModal'
 import { SpaceTitle } from '../../home/home.styles'
 import { PlusIcon } from '../../../components/icons/PlusIcon'
+import { Button } from '../../../components/Button'
 
 
 const StyledMemberListPage = styled.div`
@@ -34,7 +34,7 @@ const StyledButtonGroup = styled.div`
   gap: 16px;
 `
 
-const AddButton = styled(ButtonSolidBlue)`
+const AddButton = styled(Button)`
   svg {
     margin-right: 4px;
   }
@@ -68,7 +68,7 @@ export const MembersList = ({ space }: { space: ISpace }) => {
           )}
 
           {space.updatable && canAddMember && (
-            <AddButton type="button" onClick={() => setShowModal(true)}>
+            <AddButton variant='primary' type="button" onClick={() => setShowModal(true)}>
               <PlusIcon height={12} />
               Add Members
             </AddButton>

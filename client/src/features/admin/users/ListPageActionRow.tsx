@@ -8,7 +8,6 @@ import {
   getApiRequestOpts,
 } from '../../../utils/api'
 import { UnlockIcon } from '../../../components/icons/UnlockIcon'
-import { ButtonSolidBlue } from '../../../components/Button'
 import { PlusIcon } from '../../../components/icons/PlusIcon'
 import { User } from './types'
 import { ArrowIcon } from '../../../components/icons/ArrowIcon'
@@ -17,6 +16,7 @@ import { ResourceDropdownContent } from './ResourceDropdown'
 import { UserLimitForm } from './UserLimitForm'
 import { buildMessageFromMfaResponse } from './buildMfaErrorMessage'
 import { useAuthUser } from '../../auth/useAuthUser'
+import { Button } from '../../../components/Button'
 
 const ButtonsRow = styled.div`
   display: flex;
@@ -82,10 +82,10 @@ const bulkDeactivate = async (ids: User['id'][]) =>
 // eslint-disable-next-line react/display-name
 const DropdownButton = React.forwardRef((props: any, ref) => (
   // eslint-disable-next-line react/jsx-props-no-spreading
-  <ButtonSolidBlue ref={ref} {...props}>
+  <Button variant="primary" ref={ref} {...props}>
     Resources &nbsp;
     <ArrowIcon />
-  </ButtonSolidBlue>
+  </Button>
 ))
 
 type UserListActionRowProps = {
@@ -185,7 +185,8 @@ export const UsersListActionRow = ({
 
   return (
     <ButtonsRow>
-      <ButtonSolidBlue
+      <Button
+        variant="primary"
         as="a"
         href="/admin/invitations"
         data-testid="admin-users-provision-button"
@@ -193,16 +194,18 @@ export const UsersListActionRow = ({
       >
         <PlusIcon height={12} />
         &nbsp;Provision new users
-      </ButtonSolidBlue>
-      <ButtonSolidBlue
+      </Button>
+      <Button
+        variant="primary"
         data-testid="admin-users-reset-button"
         disabled={selectedUsers.length === 0}
         onClick={() => resetMutation.mutateAsync()}
       >
         Reset
-      </ButtonSolidBlue>
+      </Button>
       {!areAllSelectedUsersInDeactivatedState && (
-        <ButtonSolidBlue
+        <Button
+          variant="primary"
           data-testid="admin-users-deactivate-button"
           disabled={
             selectedUsers.length === 0 ||
@@ -212,18 +215,20 @@ export const UsersListActionRow = ({
           onClick={() => deactivateMutation.mutateAsync()}
         >
           Deactivate
-        </ButtonSolidBlue>
+        </Button>
       )}
       {areAllSelectedUsersInDeactivatedState && (
-        <ButtonSolidBlue
+        <Button
+          variant="primary"
           data-testid="admin-users-activate-button"
           disabled={isCurrentUserSelected}
           onClick={() => activateMutation.mutateAsync()}
         >
           Activate
-        </ButtonSolidBlue>
+        </Button>
       )}
-      <ButtonSolidBlue
+      <Button
+        variant="primary"
         data-testid="admin-users-unlock-button"
         disabled={
           selectedUsers.length === 0 || !areAllSelectedUsersInLockedState
@@ -232,7 +237,7 @@ export const UsersListActionRow = ({
       >
         <UnlockIcon height={12} />
         &nbsp;Unlock
-      </ButtonSolidBlue>
+      </Button>
       <UserLimitForm
         buttonText="Set Total Limit ($)"
         selectedUsers={selectedUsers}

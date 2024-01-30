@@ -1,11 +1,11 @@
 import React from 'react'
 import { useMutation } from '@tanstack/react-query'
 import styled from 'styled-components'
-import { Button, ButtonSolidBlue } from '../../components/Button'
 import { InputText } from '../../components/InputText'
 import { Modal } from '../modal'
 import { useModal } from '../modal/useModal'
 import { createWorkflowRequest } from './workflows.api'
+import { Button } from '../../components/Button'
 
 const StyledForm = styled.form`
   display: flex;
@@ -18,7 +18,7 @@ export const useCreateWorkflowModal = () => {
     <Modal headerText="Create an workflow" isShown={isShown} hide={() => setShowModal(false)} >
       <StyledForm onSubmit={(e) => mutation.mutateAsync(e.currentTarget.name)}>
         <InputText label="Workflow Name" name="name" placeholder="Enter Name..." autoFocus disabled={mutation.isLoading} />
-        <ButtonSolidBlue type="submit" disabled={mutation.isLoading}>Create</ButtonSolidBlue>
+        <Button variant="primary" type="submit" disabled={mutation.isLoading}>Create</Button>
       </StyledForm>
       <Button onClick={() => setShowModal(false)} disabled={mutation.isLoading}>Cancel</Button>
     </Modal>

@@ -2,7 +2,6 @@ import React, { useMemo } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { SortingRule, UseResizeColumnsState } from 'react-table'
 import styled from 'styled-components'
-import { ButtonSolidBlue } from '../../components/Button'
 import Dropdown from '../../components/Dropdown'
 import { ContentFooter } from '../../components/Page/ContentFooter'
 import { BackLink } from '../../components/Page/PageBackLink'
@@ -28,6 +27,7 @@ import { fetchDatabaseList } from './databases.api'
 import { IDatabase } from './databases.types'
 import { useDatabaseColumns } from './useDatabaseColumns'
 import { useDatabaseSelectActions } from './useDatabaseSelectActions'
+import { Button } from '../../components/Button'
 
 const DBStyledRight = styled(StyledRight)`
   gap: 20px;
@@ -97,13 +97,14 @@ export const DatabaseList = ({ homeScope }: { homeScope?: HomeScope }) => {
       <div>
         <ActionsRow>
           <QuickActions>
-            <ButtonSolidBlue
+            <Button
+              variant='primary'
               data-testid="home-databases-create-link"
               as={Link}
               to="/home/databases/create"
             >
               <PlusIcon height={12} /> Create Database
-            </ButtonSolidBlue>
+            </Button>
           </QuickActions>
           <DBStyledRight>
             <Refresh $spin={query.isFetching} onClick={() => query.refetch()}>

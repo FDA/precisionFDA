@@ -9,7 +9,7 @@ import {
   BreadcrumbLabel,
   StyledBreadcrumbs,
 } from '../../components/Breadcrumb'
-import { ButtonSolidBlue } from '../../components/Button'
+import { Button } from '../../components/Button'
 import Dropdown from '../../components/Dropdown'
 import { ContentFooter } from '../../components/Page/ContentFooter'
 import { Pagination } from '../../components/Pagination'
@@ -151,22 +151,24 @@ export const FileList = ({ homeScope, space, showFolderActions = false }: { home
           <QuickActions>
             {showFolderActions && (
               <>
-                <ButtonSolidBlue
+                <Button
+                  variant='primary'
                   data-testid="home-files-add-folder-button"
                   onClick={() =>
                     listActions['Add Folder']?.func({ showModal: true })
                   }
                 >
                   <PlusIcon height={12} /> Add Folder
-                </ButtonSolidBlue>
-                <ButtonSolidBlue
+                </Button>
+                <Button
+                  variant='primary'
                   data-testid="home-files-add-files-button"
                   onClick={() =>
                     listActions[space?.id ? 'Choose Add Option' : 'Add Files']?.func({ showModal: true })
                   }
                 >
                   <PlusIcon height={12} /> Add Files
-                </ButtonSolidBlue>
+                </Button>
               </>
             )}
           </QuickActions>
