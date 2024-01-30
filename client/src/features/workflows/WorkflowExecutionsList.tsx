@@ -134,6 +134,7 @@ export const ExecutionsListTable = ({
   ) => void
 }) => {
   const col = useExecutionColumns({ colWidths, filterDataTestIdPrefix: 'workflow-executions-list' })
+      .filter((col) => col.id !== 'workflow_title')
   const [hiddenColumns, sethiddenColumns] = useState<string[]>(['workflow', 'featured', 'location', 'tags'])
   const columns = useMemo(() => col, [col])
 

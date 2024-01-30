@@ -278,21 +278,6 @@ export default function Table<T extends object>(
     return containerWidth > sum ? containerWidth - sum - 8 : 50
   }, [visibleColumns])
 
-  const visibleFilters: FilterSelectColumn = useMemo(() => ({
-    ...visibleColumns
-    .filter((col: any) => typeof col.Header === 'string')
-    .reduce((value: FilterSelectColumn, curr: any) => ({
-      ...value,
-      [curr.id]: {
-        key: curr.id,
-        title: curr.Header,
-        isVisible: true,
-        groupTitle: 'Default Columns',
-    }}), {}),
-  }), [visibleColumns])
-
-  const [filterColumns, setFilterColumns] = useState<FilterSelectColumn>({})
-
   useMountedLayoutEffect(() => {
     if (setSelectedRows) setSelectedRows(selectedRowIds)
   }, [selectedRowIds, setSelectedRows])
