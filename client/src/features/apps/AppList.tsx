@@ -1,4 +1,3 @@
-import { omit } from 'ramda'
 import React, { useMemo } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { Column, SortingRule, UseResizeColumnsState } from 'react-table'
@@ -84,7 +83,6 @@ export const AppList = ({ homeScope, spaceId }: { homeScope?: HomeScope, spaceId
   } else {
     // Disable actions in spaces
     delete actions['Make public']
-    delete actions['Copy to My Home (private)']
   }
 
   if (status === 'error') return <div>Error! {JSON.stringify(error)}</div>
@@ -119,7 +117,7 @@ export const AppList = ({ homeScope, spaceId }: { homeScope?: HomeScope, spaceId
             trigger="click"
             content={
               <ActionsDropdownContent
-                actions={omit(['Comments'], actions)}
+                actions={actions}
                 message={
                   homeScope === 'spaces' &&
                   'To perform other actions on this app, access it from the Space'
@@ -180,6 +178,7 @@ export const AppList = ({ homeScope, spaceId }: { homeScope?: HomeScope, spaceId
       {actions['Edit properties']?.modal}
       {actions['Export to']?.modal}
       {actions['Set as Challenge App']?.modal}
+      {actions['Copy to My Home (private)']?.modal}
       
       {listActions['Add App']?.modal}
     </>
