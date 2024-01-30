@@ -1,7 +1,6 @@
 import React from 'react'
 import styled, { css } from 'styled-components'
 import { Button } from '../../components/Button'
-import { ButtonGroup } from '../../components/Button/ButtonGroup'
 import { pluralize } from '../../utils/formatting'
 import {
   useSelectFileModal,
@@ -10,9 +9,14 @@ import {
 import { theme } from '../../styles/theme'
 import { IAccessibleFile } from '../databases/databases.api'
 import { DialogType } from '../home/types'
+import { ButtonRow } from '../modal/styles'
+
+const StyledButtonRow = styled(ButtonRow)`
+  justify-content: flex-start;
+  gap: 4px;
+`
 
 const FileButton = styled(Button)<{ $isError?: boolean }>`
-  margin-right: 4px;
   ${({ $isError }) => $isError && css`
     border-color: ${theme.colors.darkRed};
     color: ${theme.colors.darkRed};
@@ -66,7 +70,7 @@ export const SelectMultiFileInput = ({
   return (
     <>
       {modalComp}
-      <ButtonGroup>
+      <StyledButtonRow>
         <FileButton
           $isError={isError}
           type="button"
@@ -85,7 +89,7 @@ export const SelectMultiFileInput = ({
             Clear
           </Button>
         )}
-      </ButtonGroup>
+      </StyledButtonRow>
     </>
   )
 }

@@ -3,7 +3,6 @@ import React, { useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import styled from 'styled-components'
-import { ButtonSolidBlue } from '../../components/Button'
 import { InfoCircleIcon } from '../../components/icons/InfoCircleIcon'
 import { Svg } from '../../components/icons/Svg'
 import { Loader } from '../../components/Loader'
@@ -12,6 +11,7 @@ import { ModalHeaderTop, ModalNext } from '../modal/ModalNext'
 import { ModalScroll } from '../modal/styles'
 import { useModal } from '../modal/useModal'
 import { generateKeyRequest } from './api'
+import { Button } from '../../components/Button'
 
 const StyledButtonRow = styled.div`
   display: flex;
@@ -104,10 +104,10 @@ const GenerateKey = ({ handleClose }: { handleClose: () => void }) => {
         </Link>
       </InfoRow>
       <StyledButtonRow>
-        <ButtonSolidBlue onClick={copyToClipboard}>
+        <Button variant="primary" onClick={copyToClipboard}>
           Copy to Clipboard
-        </ButtonSolidBlue>
-        <ButtonSolidBlue onClick={handleClose}>Close</ButtonSolidBlue>
+        </Button>
+        <Button variant="primary" onClick={handleClose}>Close</Button>
       </StyledButtonRow>
     </>
   )

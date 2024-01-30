@@ -4,7 +4,6 @@ import React from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import styled from 'styled-components'
 import * as Yup from 'yup'
-import { ButtonSolidBlue, ButtonSolidRed } from '../../../components/Button'
 import { InputText } from '../../../components/InputText'
 import { MarkdownEditor } from '../../../components/Markdown/MarkdownEditor'
 import { FieldGroup } from '../../../components/form/FieldGroup'
@@ -16,6 +15,7 @@ import { DiscussionForm as DiscussionFormType } from '../discussions.types'
 import { areAttachmentsEmpty } from '../helpers'
 import { Attachments } from './Attachments'
 import { StyledPage } from './styles'
+import { Button } from '../../../components/Button'
 
 const StyledAttachments = styled.div`
   display: flex;
@@ -135,18 +135,19 @@ export const DiscussionForm = ({
         <ButtonRow>
           <Attachments scope={scope} value={attachments} setValue={setValue} />
           {onDelete && (
-            <ButtonSolidRed type="button" onClick={deleteDiscussion}>
+            <Button variant="warning" type="button" onClick={deleteDiscussion}>
               Delete
-            </ButtonSolidRed>
+            </Button>
           )}
-          <ButtonSolidBlue
+          <Button
+            variant="primary"
             type="button"
             form="discussionForm"
             disabled={isSubmitting || !isValid}
             onClick={handleSubmit(onSubmitForm)}
           >
             {isSubmitting ? 'Saving' : 'Create'}
-          </ButtonSolidBlue>
+          </Button>
         </ButtonRow>
       </StyledForm>
     </StyledPage>

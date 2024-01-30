@@ -1,9 +1,9 @@
 import React from 'react'
-import { ButtonSolidBlue } from '../../components/Button'
 import { ModalHeaderTop, ModalNext } from '../modal/ModalNext'
 import { ButtonRow, Content, Footer } from '../modal/styles'
 import { UseModal } from '../modal/useModal'
 import { onLogInWithSSO, useSiteSettingsQuery } from './useSiteSettingsQuery'
+import { Button } from '../../components/Button'
 
 
 export const AuthModal: React.FC<UseModal> = props => {
@@ -28,13 +28,13 @@ export const AuthModal: React.FC<UseModal> = props => {
       <Footer>
         <ButtonRow>
           {data?.ssoButton.isEnabled && (
-            <ButtonSolidBlue onClick={() => onLogInWithSSO(data.ssoButton.data.fdaSsoUrl)}>
+            <Button variant="primary" onClick={() => onLogInWithSSO(data.ssoButton.data.fdaSsoUrl)}>
               Log In with SSO
-            </ButtonSolidBlue>
+            </Button>
           )}
-          <ButtonSolidBlue onClick={() => (window.location = '/login')}>
+          <Button variant="primary" onClick={() => (window.location = '/login')}>
             Log in
-          </ButtonSolidBlue>
+          </Button>
         </ButtonRow>
       </Footer>
     </ModalNext>

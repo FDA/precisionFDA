@@ -5,7 +5,6 @@ import { useForm } from 'react-hook-form'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useNavigate, useParams } from 'react-router-dom'
 import { toast } from 'react-toastify'
-import { ButtonOutlineGrey, ButtonSolidBlue } from '../../../components/Button'
 import { FieldGroup } from '../../../components/form/FieldGroup'
 import { Divider, InputError } from '../../../components/form/styles'
 import { InputText } from '../../../components/InputText'
@@ -23,6 +22,7 @@ import { validationSchema } from './helpers'
 import { HintText, Row, StyledButton, StyledForm, StyledPageCenter, StyledPageContent } from './styles'
 import { UserLayout } from '../../../layouts/UserLayout'
 import { ScrollableMainGlobalStyles } from '../../../styles/global'
+import { Button } from '../../../components/Button'
 
 const EditTags = ({ spaceId, tags = [] }: { spaceId: string; tags?: string[] }) => {
   const queryClient = useQueryClient()
@@ -139,10 +139,10 @@ export const SpaceSettingsForm = ({ space }: ISpaceSettingsForm) => {
     <StyledForm onSubmit={handleSubmit(onSubmit)}>
       {!spaceActions['Lock/Unlock']?.shouldHide && (
         <div>
-          <ButtonOutlineGrey type="button" data-testid="lock-space-button" onClick={() => spaceActions['Lock/Unlock']?.func()}>
+          <Button type="button" data-testid="lock-space-button" onClick={() => spaceActions['Lock/Unlock']?.func()}>
             {space.links.unlock && 'Unlock Space'}
             {space.links.lock && 'Lock Space'}
-          </ButtonOutlineGrey>
+          </Button>
           {spaceActions['Lock/Unlock']?.modal}
         </div>
       )}
@@ -208,9 +208,9 @@ export const SpaceSettingsForm = ({ space }: ISpaceSettingsForm) => {
       )}
 
       <Row>
-        <ButtonSolidBlue disabled={Object.keys(errors).length > 0 || isSubmitting} type="submit">
+        <Button variant="primary" disabled={Object.keys(errors).length > 0 || isSubmitting} type="submit">
           Save
-        </ButtonSolidBlue>
+        </Button>
         {isSubmitting && <Loader />}
         {formError && <InputError>{formError}</InputError>}
       </Row>

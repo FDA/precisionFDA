@@ -1,6 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
 import React, { useState } from 'react'
-import { Button, ButtonSolidBlue } from '../../../components/Button'
 import { Checkbox } from '../../../components/Checkbox'
 import { InputText } from '../../../components/InputText'
 import { Loader } from '../../../components/Loader'
@@ -27,6 +26,7 @@ import {
 import { DialogType } from '../../home/types'
 import { fetchFilteredApps } from '../apps.api'
 import { IApp } from '../apps.types'
+import { Button } from '../../../components/Button'
 
 const Row = ({
   app,
@@ -226,12 +226,13 @@ export const useSelectAppModal = (
           >
             Cancel
           </Button>
-          <ButtonSolidBlue
+          <Button
+            variant="primary"
             onClick={handleSubmit}
             disabled={selectedApps?.length === 0}
           >
             Select &nbsp;<ButtonBadge>{selectedApps?.length}</ButtonBadge>
-          </ButtonSolidBlue>
+          </Button>
         </ButtonRow>
       </Footer>
     </ModalNext>

@@ -3,7 +3,6 @@
 /* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
 import classNames from 'classnames'
 import React, { useEffect, useState } from 'react'
-import { Button, ButtonSolidBlue, TransparentButton } from '../../../components/Button'
 import { CrossIcon } from '../../../components/icons/PlusIcon'
 import { SearchIcon } from '../../../components/icons/SearchIcon'
 import { InputText } from '../../../components/InputText'
@@ -20,6 +19,7 @@ import {
 } from './styles'
 import { useAttachToMutation } from './useAttachToMutation'
 import { useListNotesQuery } from './useListNotesQuery'
+import { Button, TransparentButton } from '../../../components/Button'
 
 const types = {
   FILE: 'UserFile',
@@ -184,12 +184,13 @@ export const AttachToModal = ({
         <ButtonRow>
           {mutation.isLoading && <Loader />}
           <Button onClick={hideAction}>Cancel</Button>
-          <ButtonSolidBlue
+          <Button
+            variant="primary"
             onClick={() => onClickAttachAction()}
             disabled={!checkedItemIds.size || mutation.isLoading}
           >
             Attach
-          </ButtonSolidBlue>
+          </Button>
         </ButtonRow>
       </Footer>
     </ModalNext>

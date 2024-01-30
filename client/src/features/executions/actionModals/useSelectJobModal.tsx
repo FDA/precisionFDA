@@ -1,6 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
 import React, { useState } from 'react'
-import { Button, ButtonSolidBlue } from '../../../components/Button'
 import { Checkbox } from '../../../components/Checkbox'
 import { InputText } from '../../../components/InputText'
 import { Loader } from '../../../components/Loader'
@@ -32,6 +31,7 @@ import {
 import { DialogType } from '../../home/types'
 import { fetchFilteredJobs } from '../executions.api'
 import { IJob } from '../executions.types'
+import { Button } from '../../../components/Button'
 
 const Row = ({
   job,
@@ -245,12 +245,13 @@ export const useSelectJobModal = (
           >
             Cancel
           </Button>
-          <ButtonSolidBlue
+          <Button
+            variant="primary"
             onClick={handleSubmit}
             disabled={selectedJobs?.length === 0}
           >
             Select &nbsp;<ButtonBadge>{selectedJobs?.length}</ButtonBadge>
-          </ButtonSolidBlue>
+          </Button>
         </ButtonRow>
       </Footer>
     </ModalNext>

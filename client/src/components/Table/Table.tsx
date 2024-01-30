@@ -73,8 +73,9 @@ const Front = styled(Dropdown)`
   justify-content: flex-end;
   z-index: 3;
   width: 32px;
-  svg {
-    color: var(--tertiary-400);
+  color: var(--tertiary-400);
+  &:hover {
+    color: var(--tertiary-500);
   }
 `
 

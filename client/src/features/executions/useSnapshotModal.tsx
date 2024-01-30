@@ -7,7 +7,6 @@ import { useForm } from 'react-hook-form'
 import { toast } from 'react-toastify'
 import styled from 'styled-components'
 import * as Yup from 'yup'
-import { Button, ButtonSolidBlue } from '../../components/Button'
 import { Checkbox } from '../../components/Checkbox'
 import { FieldGroup } from '../../components/form/FieldGroup'
 import { InputError } from '../../components/form/styles'
@@ -20,6 +19,7 @@ import { useModal } from '../modal/useModal'
 import { CheckboxLabel } from '../spaces/form/styles'
 import { workstationSnapshotRequest } from './executions.api'
 import { IExecution } from './executions.types'
+import { Button } from '../../components/Button'
 
 const StyledForm = styled.form`
   padding: 24px;
@@ -158,13 +158,14 @@ export function useSnapshotModal<T extends { ids: string[]; name: string }>({
         <ButtonRow>
           {mutation.isLoading && <Loader />}
           <Button onClick={() => setShowModal(false)}>Cancel</Button>
-          <ButtonSolidBlue
+          <Button
+            variant="primary"
             type="submit"
             form="create-snapshot-form"
             disabled={mutation.isLoading}
           >
             Create Snapshot
-          </ButtonSolidBlue>
+          </Button>
         </ButtonRow>
       </Footer>
     </ModalNext>

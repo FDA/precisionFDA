@@ -5,7 +5,6 @@ import React, { useEffect } from 'react'
 import { unstable_usePrompt } from 'react-router-dom'
 import { Controller, useForm } from 'react-hook-form'
 import styled from 'styled-components'
-import { ButtonSolidBlue } from '../../../components/Button'
 import { FieldGroup, InputError } from '../../../components/form/styles'
 import { InputText } from '../../../components/InputText'
 import { Loader } from '../../../components/Loader'
@@ -14,6 +13,7 @@ import { MutationErrors } from '../../../types/utils'
 import { RadioButtonGroup } from '../../../components/form/RadioButtonGroup'
 import { proposeValidationSchema } from './common'
 import { SectionTitle } from '../../../components/Public/styles'
+import { Button } from '../../../components/Button'
 
 interface ProposeChallengeForm {
   name: string,
@@ -100,7 +100,6 @@ export const PrososeChallengeForm = ({
   })
 
   return (
-    <>
       <div>
         <SectionTitle>PrecisionFDA Challenge Inquiry</SectionTitle>
         <p>Please complete this form for your new challenge proposal. Thank you!</p>
@@ -152,7 +151,7 @@ export const PrososeChallengeForm = ({
             <Controller
               name="specific_question"
               control={control}
-              render={({ field: { value, onChange, onBlur } }) => (
+              render={({ field: { value, onChange, onBlur }}) => (
                 <RadioButtonGroup
                   name="specific_question"
                   ariaLabel='challenge-question'
@@ -161,7 +160,7 @@ export const PrososeChallengeForm = ({
                   onBlur={onBlur}
                   options={[
                     { value: 'Yes', label: 'Yes' },
-                    { value: 'No', label: 'No' }
+                    { value: 'No', label: 'No' },
                   ]}
                 />
               )}
@@ -193,7 +192,7 @@ export const PrososeChallengeForm = ({
             <Controller
               name="data_details"
               control={control}
-              render={({ field: { value, onChange, onBlur } }) => (
+              render={({ field: { value, onChange, onBlur }}) => (
                 <RadioButtonGroup
                   name="data_details"
                   ariaLabel='data-details'
@@ -202,7 +201,7 @@ export const PrososeChallengeForm = ({
                   onBlur={onBlur}
                   options={[
                     { value: 'Yes', label: 'Yes' },
-                    { value: 'No', label: 'No' }
+                    { value: 'No', label: 'No' },
                   ]}
                 />
               )}
@@ -230,17 +229,16 @@ export const PrososeChallengeForm = ({
           </FieldGroup>
 
           <Row>
-            <ButtonSolidBlue
+            <Button
+              variant="primary"
               disabled={Object.keys(errors).length > 0 || isSubmitting}
               type="submit"
             >
               Submit Inquiry
-            </ButtonSolidBlue>
+            </Button>
             {isSubmitting && <Loader />}
           </Row>
         </StyledForm>
       </div>
-
-    </>
   )
 }

@@ -1,8 +1,8 @@
 import React, { FunctionComponent, useState } from 'react'
 import styled from 'styled-components'
-import { Button, ButtonSolidBlue } from '../../Button'
 import { ModalHeaderTop, ModalNext } from '../../../features/modal/ModalNext'
 import { ButtonRow, Footer } from '../../../features/modal/styles'
+import { Button } from '../../Button'
 
 const StyledLink = styled.a`
   cursor: pointer;
@@ -67,7 +67,7 @@ const ExternalLink: FunctionComponent<IExternalLinkProps> = ({
         <Footer>
           <ButtonRow>
             <Button onClick={closeModal}>Cancel</Button>
-            <ButtonSolidBlue onClick={openLink}>Continue</ButtonSolidBlue>
+            <Button variant='primary' onClick={openLink}>Continue</Button>
           </ButtonRow>
         </Footer>
       </ModalNext>

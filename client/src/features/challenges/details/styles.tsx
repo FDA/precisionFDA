@@ -1,9 +1,9 @@
 import styled, { css } from 'styled-components'
-import { ButtonSolidBlue } from '../../../components/Button'
 import { PageContainer, pagePadding } from '../../../components/Page/styles'
 import { commonStyles } from '../../../styles/commonStyles'
 import { breakPoints, colors, theme } from '../../../styles/theme'
 import { TimeStatus } from '../types'
+import { Button } from '../../../components/Button'
 
 export const LeftColumn = styled.div`
   display: flex;
@@ -177,7 +177,7 @@ export const StyledTabs = styled.div`
   }
 `
 
-export const CallToActionButton = styled(ButtonSolidBlue)`
+export const CallToActionButton = styled(Button).attrs({ variant: 'primary' })`
   display: block;
   width: 100%;
   margin-bottom: 0px;
