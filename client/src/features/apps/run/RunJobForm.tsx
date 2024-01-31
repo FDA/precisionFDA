@@ -207,9 +207,10 @@ export const RunJobForm = ({
           await runJobMutation.mutateAsync(req)
         }
       } catch (e) {
-        toast.error('Failed to run app')
         if (e?.response?.data?.error?.message) {
           toast.error(e?.response?.data?.error?.message)
+        } else {
+          toast.error('Failed to run app')
         }
       }
     }

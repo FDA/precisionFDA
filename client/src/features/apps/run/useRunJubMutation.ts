@@ -23,7 +23,6 @@ export const useRunJobMutation = (scope: ServerScope) => {
       }
     },
     onError: () => {
-      toast.error('Error: Running job.')
     },
   })
 }

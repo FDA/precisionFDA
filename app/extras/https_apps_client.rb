@@ -998,14 +998,20 @@ class HttpsAppsClient # rubocop:disable Metrics/ClassLength
   # @param response [String] Response string.
   # @return [Hash] Response from server converted to hash.
   def handle_response(response)
-    response.value
-    parsed = JSON.parse(response.body || "")
-    parsed.is_a?(Hash) ? parsed.with_indifferent_access : parsed
+    if response.is_a?(Net::HTTPSuccess)
+      response.value
+      parsed = JSON.parse(response.body || "")
+      parsed.is_a?(Hash) ? parsed.with_indifferent_access : parsed
+    else
+      error_details = JSON.parse(response.body)
+      error_message = error_details.dig("error", "message")
+      raise StandardError, error_message
+    end
   rescue JSON::ParserError
     response.body
   rescue Net::HTTPClientException => e
     raise e
-  rescue StandardError
-    raise Error, "Something went wrong"
+  rescue StandardError => e
+    raise Error, e.message
   end
 end
