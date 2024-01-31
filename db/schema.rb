@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2023_11_08_104920) do
+ActiveRecord::Schema.define(version: 2024_01_25_172500) do
 
   create_table "accepted_licenses", id: :integer, charset: "utf8mb3", collation: "utf8mb3_unicode_ci", force: :cascade do |t|
     t.integer "license_id"
@@ -38,6 +38,16 @@ ActiveRecord::Schema.define(version: 2023_11_08_104920) do
     t.index ["admin_group_id"], name: "index_admin_memberships_on_admin_group_id"
     t.index ["user_id", "admin_group_id"], name: "index_admin_memberships_on_user_id_and_admin_group_id", unique: true
     t.index ["user_id"], name: "index_admin_memberships_on_user_id"
+  end
+
+  create_table "alerts", charset: "utf8mb3", collation: "utf8mb3_unicode_ci", force: :cascade do |t|
+    t.string "title", null: false
+    t.text "content", null: false
+    t.string "type", null: false
+    t.datetime "start_time", null: false
+    t.datetime "end_time", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
   end
 
   create_table "analyses", id: :integer, charset: "utf8mb3", collation: "utf8mb3_unicode_ci", force: :cascade do |t|

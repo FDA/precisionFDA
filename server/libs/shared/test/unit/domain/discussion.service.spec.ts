@@ -15,12 +15,12 @@ import {
   BaseInput,
   PublishDiscussionInput,
   UpdateDiscussionInput,
-} from '../../../src/domain/discussion/discussion.types'
+} from '@shared/domain/discussion/discussion.types'
 import {
   SPACE_MEMBERSHIP_ROLE,
   SPACE_MEMBERSHIP_SIDE,
-} from '../../../src/domain/space-membership/space-membership.enum'
-import { STATIC_SCOPE } from '../../../src/enums'
+} from '@shared/domain/space-membership/space-membership.enum'
+import { STATIC_SCOPE } from '@shared/enums'
 import { create, db, generate } from '../../../src/test'
 
 describe('DiscussionService tests', () => {
