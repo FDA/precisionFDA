@@ -88,6 +88,51 @@ const user = {
   }),
 }
 
+const alert = {
+  active: () => {
+    const now = new Date()
+    const startTime = new Date(now.getTime())
+    const endTime = new Date(now.getTime())
+    startTime.setHours(now.getHours() - 2)
+    endTime.setDate(now.getDate() + 2)
+    return {
+      title: 'Planned Downtime',
+      content: 'Our application will soon be offline for upgrades. Please ensure your work is saved. Thank you.',
+      type: 'danger' as 'danger' | 'info' | 'warning',
+      startTime: startTime,
+      endTime: endTime
+    }
+  },
+  expired: () => {
+    const now = new Date();
+    const startTime = new Date(now.getTime());
+    const endTime = new Date(now.getTime());
+    startTime.setDate(now.getDate() - 3);
+    endTime.setDate(now.getDate() - 1);
+    return {
+      title: 'Scheduled Maintenance',
+      content: 'Scheduled maintenance is coming up, during which the application may be briefly unavailable. Thanks for your patience.',
+      type: 'warning' as 'danger' | 'info' | 'warning',
+      startTime: startTime,
+      endTime: endTime,
+    }
+  },
+  future: () => {
+    const now = new Date();
+    const startTime = new Date(now.getTime());
+    const endTime = new Date(now.getTime());
+    startTime.setDate(now.getDate() + 2);
+    endTime.setDate(now.getDate() + 4);
+    return {
+      title: 'System Update',
+      content: 'An exciting system update is on the way, bringing new features. Minimal downtime expected.',
+      type: 'info' as 'danger' | 'info' | 'warning',
+      startTime: startTime,
+      endTime: endTime,
+    }
+  },
+
+}
 const app = {
   jupyterAppSpecData: () => {
     return {
@@ -693,6 +738,7 @@ export {
   user,
   job,
   app,
+  alert,
   appSeries,
   workflowSeries,
   comparison,

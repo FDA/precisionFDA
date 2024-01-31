@@ -203,6 +203,10 @@ Rails.application.routes.draw do
         get "submissions_created"
       end
 
+      resources :alerts, only: %i(create update destroy) do
+        get :index, on: :collection
+      end
+
       resources :site_settings do
         get :index, on: :collection
       end
