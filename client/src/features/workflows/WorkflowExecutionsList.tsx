@@ -1,17 +1,13 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { SortingRule, UseResizeColumnsState } from 'react-table'
-import styled from 'styled-components'
 import { useQueryClient } from '@tanstack/react-query'
 import useWebSocket from 'react-use-websocket'
 import { hidePagination, Pagination } from '../../components/Pagination'
 import { EmptyTable } from '../../components/Table/styles'
 import Table from '../../components/Table/Table'
-import { colors } from '../../styles/theme'
 import { ErrorBoundary } from '../../utils/ErrorBoundry'
 import { columnFilters } from '../home/columnFilters'
 import { IExecution } from '../executions/executions.types'
-import { getStateBgColorFromState } from '../executions/executions.util'
-import { getSubComponentValue } from '../executions/getSubComponentValue'
 import { useExecutionColumns } from '../executions/useExecutionColumns'
 import {
   StyledHomeTable,
@@ -25,10 +21,9 @@ import { fetchWorkflowExecutions } from './workflows.api'
 import { usePaginationParams } from '../../hooks/usePaginationState'
 import { toArrayFromObject } from '../../utils/object'
 import { DEFAULT_RECONNECT_ATTEMPTS, DEFAULT_RECONNECT_INTERVAL, SHOULD_RECONNECT, getNodeWsUrl } from '../../utils/config'
+import { ExecutionSubTable } from '../executions/ExecutionSubTable'
+import { ContentFooter } from '../../components/Page/ContentFooter'
 
-const ExecutionsPagination = styled.div`
-  padding: 8px 12px;
-`
 
 type ListType = { jobs: IExecution[]; meta: IMeta }
 
@@ -93,7 +88,7 @@ export const WorkflowExecutionsList = ({ uid }: { uid: string }) => {
         saveColumnResizeWidth={saveColumnResizeWidth}
         colWidths={colWidths}
       />
-      <ExecutionsPagination>
+      <ContentFooter>
         <Pagination
           page={data?.meta?.pagination?.current_page}
           totalCount={data?.meta?.pagination?.total_count}
@@ -105,7 +100,7 @@ export const WorkflowExecutionsList = ({ uid }: { uid: string }) => {
           setPage={setPageParam}
           onPerPageSelect={setPerPage}
         />
-      </ExecutionsPagination>
+      </ContentFooter>
     </ErrorBoundary>
   )
 }
@@ -160,22 +155,6 @@ export const ExecutionsListTable = ({
         isFilterable
         saveColumnResizeWidth={saveColumnResizeWidth}
         isExpandable
-        cellProps={cell => 
-          cell.column.id === 'state'
-            ? {
-                style: {
-                  backgroundColor: cell.row.original.jobs
-                    ? getStateBgColorFromState(
-                        cell.row.original.jobs[
-                          cell.row.original.jobs.length - 1
-                        ].state,
-                      )
-                    : getStateBgColorFromState(cell.row.original.state),
-                  boxShadow: 'none',
-                },
-              }
-            : {}
-        }
         rowProps={row => ({
           className: 'hideExpand',
         })}
@@ -183,24 +162,7 @@ export const ExecutionsListTable = ({
           ...row,
           hideExpand: !row.original.jobs,
         })}
-        subcomponent={row => (
-            <>
-              {row.original.jobs &&
-                row.original.jobs.map((job, index) => (
-                    <div
-                      className="tr sub"
-                      {...row.getRowProps()}
-                      key={`${row.getRowProps().key}-sub-${index}`}
-                      style={{
-                        ...row.getRowProps().style,
-                        backgroundColor: colors.backgroundLightGray,
-                      }}
-                    >
-                      {row.cells.map(cell => getSubComponentValue(job, cell))}
-                    </div>
-                  ))}
-            </>
-          )}
+        subcomponent={ExecutionSubTable}
       />
     </StyledHomeTable>
   )

@@ -1,12 +1,12 @@
 import React from 'react'
-import styled, { css } from 'styled-components'
 import { Link } from 'react-router-dom'
+import styled, { css } from 'styled-components'
 import { Dropdown } from '.'
+import { Revision } from '../../features/workflows/workflows.types'
+import { colors } from '../../styles/theme'
+import { compactScrollBarV2 } from '../Page/styles'
 import { CaretIcon } from '../icons/CaretIcon'
 import { HistoryIcon } from '../icons/HistoryIcon'
-import { colors } from '../../styles/theme'
-import { Revision } from '../../features/workflows/workflows.types'
-import { compactScrollBar } from '../Page/styles'
 
 const StyledRevisionDropdownButton = styled.button`
   width: fit-content;
@@ -40,7 +40,7 @@ const TagPill = styled.div`
 const DropdownIcon = styled.div`
   display: flex;
   align-items: center;
-  color: ${colors.darkRed};
+  color: var(--warning-500);
 `
 
 const LiTitle = styled.li`
@@ -50,10 +50,17 @@ const LiTitle = styled.li`
 `
 const Li = styled.li<{$active: boolean}>`
   white-space: nowrap;
-  ${({ $active }) => $active && css`background-color: ${colors.subtleBlue};`}
-  &:hover {background-color: ${colors.white110};}
+  &:hover {
+    background-color: var(--c-dropdown-hover-bg);
+  }
+  ${({ $active }) => $active && css`
+    background-color: var(--c-dropdown-active-bg);
+    &:hover {
+      background-color: var(--c-dropdown-active-bg);
+    }
+  `}
   a {
-    color: ${colors.textBlack};
+    color: var(--base);
   }
 `
 export const StyledLink = styled(Link)`
@@ -63,8 +70,8 @@ export const StyledLink = styled(Link)`
 `
 
 const Ol = styled.ol`
-  ${compactScrollBar}
-  overflow-y: scroll;
+  ${compactScrollBarV2}
+  overflow-y: auto;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -72,8 +79,6 @@ const Ol = styled.ol`
   width: 100%;
   min-width: 180px;
   max-height: 350px;
-  background-color: #fff;
-  border: 1px solid #ccc;
   border: 1px solid rgba(0,0,0,0.15);
   border-radius: 3px;
   box-shadow: 0 6px 12px rgb(0 0 0 / 18%);
