@@ -179,6 +179,7 @@ export const themes = css`
 
   --c-dropdown-bg: var(--tertiary-50);
   --c-dropdown-hover-bg: var(--tertiary-100);
+  --c-dropdown-active-bg: var(--tertiary-200);
 
   --c-scrollbar: rgba(193, 200, 212, 0.8);
   --c-scrollbar-2: rgba(193, 200, 212, 1);

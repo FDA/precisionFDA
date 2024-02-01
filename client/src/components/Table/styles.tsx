@@ -16,6 +16,10 @@ export const SelectCheckLabel = styled.label`
   align-items: center;
 `
 
+export const StyledExpander = styled.div`
+  user-select: none;
+`
+
 export const EmptyTable = styled.div`
   display: flex;
   justify-content: center;
@@ -67,6 +71,15 @@ export const ReactTableStyles = styled.div<ReactTableStylesProps>`
         max-height: 50vh;
         overflow-y: scroll;
       `}
+    }
+
+    .sub {
+      background-color: var(--tertiary-100);
+    }
+
+    .row-expander {
+      justify-content: center;
+      display: flex;
     }
 
     .tr {

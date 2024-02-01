@@ -164,6 +164,7 @@ export const StyledLinkCell = styled(Link)`
   gap: 5px;
   ${Svg} {
     margin-top: 2px;
+    min-width: 14px;
   }
 `
 

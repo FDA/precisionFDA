@@ -1,6 +1,6 @@
 import React from 'react'
-import PropTypes from 'prop-types'
-import { StyledWorkflowSpec } from './styles'
+import { StyledSpecTab } from '../../apps/SpecTab/styles'
+import { MetadataKey, MetadataVal } from '../../home/show.styles'
 import { WorkflowSpecTable } from './WorkflowSpecTable'
 
 
@@ -19,48 +19,41 @@ const renderEmptySpec = (type: string) => {
 
 const renderSpecs = (stages: any[]) => {
   if (!stages.length) return renderEmptySpec('type')
-
-  const list = stages.map((stage, i) => {
-
-    return(
-      <div key={`workflow-stage-${i}`}>
-        <div className='__header'>
-          <div className='__header_item'>
-            <div className='__header_item_label'>stage</div>
-            <div className='__header_item_value'>{`${stage.stageIndex +1 }`}</div>
-          </div>
-          <div className='__header_item'>
-            <div className='__header_item_label'>name</div>
-            <div className='__header_item_value'>{stage.name}</div>
-          </div>
-          <div className='__header_item'>
-            <div className='__header_item_label'>default instance type</div>
-            <div className='__header_item_value'>{stage.instanceType}</div>
-          </div>
-        </div>
-        <div className='__table-block'>
-
-          <WorkflowSpecTable title={'inputs'} config={stage.inputs} />
-          <WorkflowSpecTable title={'outputs'} config={stage.outputs} />
-        </div>
-      </div>
-    )
-  })
   return (
-    <>{ list }</>
+    stages.map((stage, i) => {
+
+      return(
+        <React.Fragment key={`workflow-stage-${i}`}>
+          <div className='__header'>
+            <div className='__header_item'>
+              <MetadataKey>stage</MetadataKey>
+              <MetadataVal>{`${stage.stageIndex +1 }`}</MetadataVal>
+            </div>
+            <div className='__header_item'>
+              <MetadataKey>name</MetadataKey>
+              <MetadataVal>{stage.name}</MetadataVal>
+            </div>
+            <div className='__header_item'>
+              <MetadataKey>default instance type</MetadataKey>
+              <MetadataVal>{stage.instanceType}</MetadataVal>
+            </div>
+          </div>
+          <div className='__table-block'>
+            <WorkflowSpecTable title="inputs" config={stage.inputs} />
+            <WorkflowSpecTable title="outputs" config={stage.outputs} />
+          </div>
+        </React.Fragment>
+      )
+    })
   )
 }
 
 const HomeWorkflowsSpec = ({ spec = {}}: { spec: any}) => {
   return (
-    <StyledWorkflowSpec>
+    <StyledSpecTab>
       {spec.input_spec && renderSpecs(spec.input_spec.stages)}
-    </StyledWorkflowSpec>
+    </StyledSpecTab>
   )
-}
-
-HomeWorkflowsSpec.propTypes = {
-  spec: PropTypes.object,
 }
 
 export default HomeWorkflowsSpec

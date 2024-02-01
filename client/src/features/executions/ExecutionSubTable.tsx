@@ -1,18 +1,18 @@
 import React from 'react'
-import { Link } from 'react-router-dom'
 import { Cell } from 'react-table'
+import styled from 'styled-components'
+import { Link } from 'react-router-dom'
+import { IExecution, Job } from './executions.types'
 import { CogsIcon } from '../../components/icons/Cogs'
 import { CubeIcon } from '../../components/icons/CubeIcon'
 import { StyledNameCell } from '../home/home.styles'
-import { IExecution, Job } from './executions.types'
-import { getStateBgColorFromState } from './executions.util'
+import { StateCell } from './StateCell'
 
 export const getSubComponentValue = (job: Job, cell: Cell<IExecution, any>) => {
-  let backgroundColor = undefined
-  let val = undefined
+  let val
+
   if (cell.column.id === 'state') {
-    backgroundColor = getStateBgColorFromState(job.state)
-    val = job.state
+    val = <StateCell state={job.state} />
   }
   if (cell.column.id === 'instance_type') val = job.instance_type
   if (cell.column.id === 'name') {
@@ -38,10 +38,25 @@ export const getSubComponentValue = (job: Job, cell: Cell<IExecution, any>) => {
       {...cell.getCellProps()}
       style={{
         ...cell.getCellProps().style,
-        backgroundColor,
       }}
     >
       {val}
     </div>
   )
 }
+
+
+const SubTable = styled.div``
+
+export const ExecutionSubTable = (row: any) =>
+  row.original.jobs &&
+  row.original.jobs.map((job: Job) => (
+    <SubTable
+      className="tr sub"
+      {...row.getRowProps()}
+      key={`${row.getRowProps().key}-sub-${job.id}`}
+      style={row.getRowProps().style}
+    >
+      {row.cells.map((cell: Cell<IExecution, any>) => getSubComponentValue(job, cell))}
+    </SubTable>
+  ))

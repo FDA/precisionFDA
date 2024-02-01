@@ -1,7 +1,5 @@
-import styled, { css } from 'styled-components'
+import styled from 'styled-components'
 import { Refresh } from '../../../components/Page/styles'
-import { colors } from '../../../styles/theme'
-import { JobState } from '../executions.types'
 
 export const StyledRefresh = styled(Refresh)`
   margin-right: 16px;
@@ -11,50 +9,23 @@ export const StyledStatusText = styled.div`
   margin-right: 16px;
  `
 
-export const StyledExecutionState = styled.span<{ state: JobState }>`
-  padding: 3px 5px;
-  border-radius: 3px;
+export const StyledExecutionState = styled.span`
+  border-radius: 8px;
   font-size: 13px;
+  margin-right: 8px;
+  font-weight: bold;
+`
 
-  ${({ state }) =>
-    state === 'running' &&
-    css`
-      color: ${colors.stateRunningColor};
-      background-color: ${colors.stateRunningBackground};
-    `}
-  ${({ state }) =>
-    state === 'idle' &&
-    css`
-      color: ${colors.stateRunningColor};
-      background-color: ${colors.stateRunningBackground};
-    `}
-
-  ${({ state }) =>
-    state === 'done' &&
-    css`
-      color: #336534;
-      background-color: ${colors.stateDoneBackground};
-    `}
-
-  ${({ state }) =>
-    state === 'terminated' &&
-    css`
-      color: ${colors.stateFailedColor};
-      background-color: ${colors.stateFailedBackground};
-    `}
-
-  ${({ state }) =>
-    state === 'failed' &&
-    css`
-      color: ${colors.stateFailedColor};
-      background-color: ${colors.stateFailedBackground};
-    `}
+export const TitleLeft = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 `
 
 export const FailureMessage = styled.div`
-  color: ${colors.stateFailedColor};
-  background-color: ${colors.stateFailedBackground};
+  color: white;
+  background-color: var(--warning-500);
   padding: 3px 5px;
   border-radius: 3px;
-  /* font-size: 13px; */
+  font-size: 14px;
 `

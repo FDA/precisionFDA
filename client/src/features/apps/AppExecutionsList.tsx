@@ -1,34 +1,27 @@
-import React, {useEffect, useMemo, useState} from 'react'
-import { SortingRule, UseResizeColumnsState } from 'react-table'
-import styled from 'styled-components'
 import { useQueryClient } from '@tanstack/react-query'
+import React, { useEffect, useMemo, useState } from 'react'
+import { SortingRule, UseResizeColumnsState } from 'react-table'
 import useWebSocket from 'react-use-websocket'
-import { hidePagination, Pagination } from '../../components/Pagination'
-import { EmptyTable } from '../../components/Table/styles'
+import { ContentFooter } from '../../components/Page/ContentFooter'
+import { Pagination, hidePagination } from '../../components/Pagination'
 import Table from '../../components/Table/Table'
+import { EmptyTable } from '../../components/Table/styles'
+import { useColumnWidthLocalStorage } from '../../hooks/useColumnWidthLocalStorage'
+import { useOrderByState } from '../../hooks/useOrderByState'
+import { usePaginationParams } from '../../hooks/usePaginationState'
 import { ErrorBoundary } from '../../utils/ErrorBoundry'
-import { columnFilters } from '../home/columnFilters'
+import { DEFAULT_RECONNECT_ATTEMPTS, DEFAULT_RECONNECT_INTERVAL, SHOULD_RECONNECT, getNodeWsUrl } from '../../utils/config'
+import { toArrayFromObject } from '../../utils/object'
 import { IExecution } from '../executions/executions.types'
-import { getStateBgColorFromState } from '../executions/executions.util'
 import { useExecutionColumns } from '../executions/useExecutionColumns'
+import { columnFilters } from '../home/columnFilters'
 import {
   StyledHomeTable,
 } from '../home/home.styles'
-import {IFilter, IMeta, KeyVal, Notification, NOTIFICATION_ACTION} from '../home/types'
-import { useColumnWidthLocalStorage } from '../../hooks/useColumnWidthLocalStorage'
+import { IFilter, IMeta, KeyVal, NOTIFICATION_ACTION, Notification } from '../home/types'
 import { useFilterParams } from '../home/useFilterState'
 import { useListQuery } from '../home/useListQuery'
-import { useOrderByState } from '../../hooks/useOrderByState'
 import { fetchAppExecutions } from './apps.api'
-import { usePaginationParams } from '../../hooks/usePaginationState'
-import { toArrayFromObject } from '../../utils/object'
-import { DEFAULT_RECONNECT_ATTEMPTS, DEFAULT_RECONNECT_INTERVAL, SHOULD_RECONNECT, getNodeWsUrl } from '../../utils/config'
-
-const ExecutionsPagination = styled.div`
-  padding-left: 12px;
-  padding-top: 16px;
-  padding-bottom: 16px;
-`
 
 type ListType = { jobs: IExecution[]; meta: IMeta }
 
@@ -95,7 +88,7 @@ export const AppExecutionsList = ({ appUid }: { appUid: string }) => {
         saveColumnResizeWidth={saveColumnResizeWidth}
         colWidths={colWidths}
       />
-      <ExecutionsPagination>
+      <ContentFooter>
         <Pagination
           page={data?.meta?.pagination?.current_page}
           totalCount={data?.meta?.pagination?.total_count}
@@ -107,7 +100,7 @@ export const AppExecutionsList = ({ appUid }: { appUid: string }) => {
           setPage={setPageParam}
           onPerPageSelect={setPerPage}
         />
-      </ExecutionsPagination>
+      </ContentFooter>
     </ErrorBoundary>
   )
 }
@@ -160,22 +153,6 @@ export const ExecutionsListTable = ({
         isSortable
         isFilterable
         saveColumnResizeWidth={saveColumnResizeWidth}
-        cellProps={cell => 
-          cell.column.id === 'state'
-            ? {
-                style: {
-                  backgroundColor: cell.row.original.jobs
-                    ? getStateBgColorFromState(
-                        cell.row.original.jobs[
-                          cell.row.original.jobs.length - 1
-                        ].state,
-                      )
-                    : getStateBgColorFromState(cell.row.original.state),
-                  boxShadow: 'none',
-                },
-              }
-            : {}
-        }
         rowProps={row => ({
           className: 'hideExpand',
         })}

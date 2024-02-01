@@ -22,12 +22,7 @@ const StyledExportTo = styled.div`
     a {
       padding: 5px 15px;
       flex: 1 0 auto;
-      color: #333333;
       display: block;
-
-      &:hover {
-        background: #f5f5f5;
-      }
     }
   }
 `
