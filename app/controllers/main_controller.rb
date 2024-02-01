@@ -547,8 +547,10 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
 
       # Files to publish:
       # - All real_files selected by the user
-      # - All assets selected by the user
-      files = items.select { |item| item.klass == "file" || item.klass == "asset" }
+      files = items.select { |item| item.klass == "file" }
+
+      # Assets
+      assets = items.select { |item| item.klass == "asset" }
 
       # Comparisons
       comparisons = items.select { |item| item.klass == "comparison" }
@@ -575,6 +577,8 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
 
       # Files
       published_count += UserFile.publish(files, @context, scope) unless files.empty?
+
+      published_count += Asset.publish(assets, @context, scope) unless assets.empty?
 
       # Comparisons
       published_count += Comparison.publish(comparisons, @context, scope) unless comparisons.empty?
