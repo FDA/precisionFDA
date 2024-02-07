@@ -11,6 +11,7 @@ module Api
       data_portal = {
         name: data_portal_params[:name],
         description: data_portal_params[:description],
+        cardImageFileName: data_portal_params[:card_image_file_name],
         status: data_portal_params[:status],
         spaceId: space.id,
         sortOrder: data_portal_params[:sort_order],
@@ -36,14 +37,6 @@ module Api
     def show
       portal = https_apps_client.data_portals_get(params[:id])
       render json: portal,
-             adapter: :json
-    rescue Net::HTTPClientException => e
-      render status: e.response.code, json: e.response.body
-    end
-
-    def create_resource_link
-      resource = https_apps_client.data_portal_create_resource_link(params[:data_portal_id], params[:resource_id])
-      render json: resource,
              adapter: :json
     rescue Net::HTTPClientException => e
       render status: e.response.code, json: e.response.body
@@ -140,6 +133,7 @@ module Api
           :id,
           :name,
           :description,
+          :card_image_file_name,
           :status,
           :default,
           :card_image_uid,

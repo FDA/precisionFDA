@@ -3,13 +3,16 @@ import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Injectable } from '@nestjs/common'
 import { App } from '@shared/domain/app/app.entity'
 import { Job } from '@shared/domain/job/job.entity'
+import { NotificationService } from '@shared/domain/notification/services/notification.service'
 import { Space } from '@shared/domain/space/space.entity'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { Asset } from '@shared/domain/user-file/asset.entity'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { Workflow } from '@shared/domain/workflow/entity/workflow.entity'
+import { NOTIFICATION_ACTION, SEVERITY } from '@shared/enums'
 import { InvalidStateError, NotFoundError } from '@shared/errors'
+import { UID } from '@shared/services/entity-fetcher.service'
 import { SCOPE } from '@shared/types/common'
 import { ArrayUtils } from '@shared/utils/array.utils'
 import { SpaceReportPart } from '../entity/space-report-part.entity'
@@ -28,6 +31,7 @@ export class SpaceReportService {
     private readonly spaceReportPartService: SpaceReportPartService,
     private readonly spaceReportResultService: SpaceReportResultService,
     private readonly user: UserContext,
+    private readonly notificationService: NotificationService,
   ) {}
 
   async createReport(spaceId: number) {
@@ -101,6 +105,31 @@ export class SpaceReportService {
     })
 
     return !Boolean(notDoneTask)
+  }
+
+  async completeReportForResultFile(resultFileUid: UID<'file'>) {
+    const report = await this.em.transactional(async () => {
+      const report = await this.em.findOneOrFail(
+        SpaceReport,
+        { resultFile: { uid: resultFileUid } },
+        { populate: ['space'] },
+      )
+
+      report.state = 'DONE'
+
+      return report
+    })
+
+    await this.notificationService.createNotification({
+      severity: SEVERITY.INFO,
+      userId: report.createdBy.id,
+      message: `Report of space "${report.space.name}" successfully generated`,
+      action: NOTIFICATION_ACTION.SPACE_REPORT_DONE,
+      meta: {
+        linkTitle: 'Go to Reports',
+        linkUrl: `/spaces/${report.space.id}/reports`,
+      },
+    })
   }
 
   private async getSpaceForUserValidated(spaceId: number) {

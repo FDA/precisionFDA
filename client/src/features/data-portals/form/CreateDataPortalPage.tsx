@@ -8,7 +8,8 @@ import { PageTitle } from '../../../components/Page/styles'
 import { UserLayout } from '../../../layouts/UserLayout'
 import { useAuthUser } from '../../auth/useAuthUser'
 import { StyledPageCenter, StyledPageContent } from '../../spaces/form/styles'
-import { createDataPortalRequest } from '../api'
+import { CreateDataPortalRequest, createDataPortalRequest } from '../api'
+import { DataPortal, CreateDataPortalData } from '../types'
 import { DataPortalForm } from './DataPortalForm'
 import { ScrollableMainGlobalStyles } from '../../../styles/global'
 import styled from 'styled-components'
@@ -24,7 +25,7 @@ const CreateDataPortalPage = () => {
   const queryClient = useQueryClient()
   const mutation = useMutation({
     mutationKey: ['create-data-portal'],
-    mutationFn: (payload: any) => createDataPortalRequest(payload),
+    mutationFn: (payload: CreateDataPortalData) => createDataPortalRequest(payload),
     onSuccess: res => {
       if (!res?.error) {
         queryClient.invalidateQueries(['data-portal-list'])
@@ -42,14 +43,17 @@ const CreateDataPortalPage = () => {
   })
 
   const handleSubmit = async (v: any) => {
-    return mutation.mutateAsync({
-      name: v.name,
-      description: v.description,
-      default: v.default,
-      app_owner_id: v.app_owner_id?.value,
-      status: v.status?.value,
-      host_lead_dxuser: v.host_lead_dxuser?.value,
-      guest_lead_dxuser: v.guest_lead_dxuser?.value,
+    return mutation.mutateAsync(
+      {
+        dataPortal: {
+          name: v.name,
+          description: v.description,
+          card_image_file_name: v.card_image_file[0]?.name,
+          default: v.default,
+          status: v.status?.value,
+          host_lead_dxuser: v.host_lead_dxuser?.value,
+          guest_lead_dxuser: v.guest_lead_dxuser?.value,
+        },
       image: v.card_image_file[0],
     })
   }

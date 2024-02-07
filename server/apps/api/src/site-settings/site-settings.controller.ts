@@ -1,19 +1,17 @@
-import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Controller, Get, Headers, Inject, Logger } from '@nestjs/common'
 import { config } from '@shared/config'
 import { DEPRECATED_SQL_ENTITY_MANAGER } from '@shared/database/provider/deprecated-sql-entity-manager.provider'
 import { AlertService } from '@shared/domain/alert/service/alert.service'
 import { DataPortalService } from '@shared/domain/data-portal/service/data-portal.service'
-import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { NotFoundError, PermissionError, ServiceError } from '@shared/errors'
-import { PlatformClient } from '@shared/platform-client'
 import { isRequestFromAuthenticatedUser, isRequestFromFdaSubnet } from '../server/utils'
+import { SqlEntityManager } from '@mikro-orm/mysql'
 
 @Controller('/site-settings')
 export class SiteSettingsController {
   constructor(
-    private readonly user: UserContext,
     private readonly log: Logger,
+    private readonly dataPortalService: DataPortalService,
     private readonly alertService: AlertService,
     @Inject(DEPRECATED_SQL_ENTITY_MANAGER) private readonly em: SqlEntityManager,
   ) {}
@@ -49,8 +47,7 @@ export class SiteSettingsController {
       return body
     }
     try {
-      const dataPortalService = new DataPortalService(this.em, {} as PlatformClient)
-      await dataPortalService.getDefault(this.user.id)
+      await this.dataPortalService.getDefault()
       body.dataPortals = { isEnabled: true }
       return body
     } catch (error) {

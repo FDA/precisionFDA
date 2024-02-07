@@ -1,7 +1,8 @@
-import { useQuery } from '@tanstack/react-query'
-import React from 'react'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import React, { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import styled from 'styled-components'
+import useWebSocket from 'react-use-websocket'
 import { Loader } from '../../../components/Loader'
 import { PageContainerMargin, PageTitle } from '../../../components/Page/styles'
 import { PageLoaderWrapper } from '../../../components/Public/styles'
@@ -15,6 +16,8 @@ import { useAuthUser } from '../../auth/useAuthUser'
 import { theme } from '../../../styles/theme'
 import { useMainDataPortal } from '../queries'
 import { Button } from '../../../components/Button'
+import { Notification, NOTIFICATION_ACTION } from '../../home/types'
+import { DEFAULT_RECONNECT_ATTEMPTS, DEFAULT_RECONNECT_INTERVAL, getNodeWsUrl } from '../../../utils/config'
 
 const List = styled.div`
   display: flex;
@@ -62,6 +65,23 @@ const DataPortalsListPage = () => {
     queryKey: ['data-portals-list'],
     queryFn: () => dataPortalsListRequest(),
   })
+  const queryClient = useQueryClient()
+
+  const { lastJsonMessage: notification } = useWebSocket<Notification>(getNodeWsUrl(), {
+    share: true,
+    reconnectInterval: DEFAULT_RECONNECT_INTERVAL,
+    reconnectAttempts: DEFAULT_RECONNECT_ATTEMPTS,
+    shouldReconnect: () => true,
+  })
+
+  useEffect(() => {
+    if (notification == null) {
+      return
+    }
+    if (NOTIFICATION_ACTION.DATA_PORTAL_CARD_IMAGE_URL_UPDATED === notification.action) {
+      queryClient.invalidateQueries(['data-portals-list'])
+    }
+  }, [notification])
 
   return (
     <UserLayout>

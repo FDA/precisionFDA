@@ -4,7 +4,6 @@ import styled from 'styled-components'
 import { InputText } from '../../components/InputText'
 import { processFile } from './uploadImage'
 import {
-  createResourceLinkRequest,
   useCreateResourceMutation,
 } from './useCreateResource'
 import { getExt, isImageFromExt } from './util'
@@ -45,11 +44,8 @@ export const useUploadResource = ({
 
     newFiles[index].uploadStatus = 'uploading'
     setSelectedFiles(newFiles)
-    await processFile(s.file, fileUid)
 
-    newFiles[index].uploadStatus = 'linking'
-    setSelectedFiles(newFiles)
-    await createResourceLinkRequest(id, resourceId)
+    await processFile(s.file, fileUid)
 
     newFiles[index].uploadStatus = 'uploaded'
     setSelectedFiles(newFiles)

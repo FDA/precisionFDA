@@ -104,7 +104,7 @@ export class App extends BaseEntity {
   @ManyToMany(() => Asset, 'apps', {
     pivotTable: 'apps_assets',
     owner: true,
-    inverseJoinColumn: 'asset_id'
+    inverseJoinColumn: 'asset_id',
   })
   assets = new Collection<Asset>(this)
 
@@ -116,7 +116,7 @@ export class App extends BaseEntity {
   }
 
   isHTTPS() {
-      return this.entityType === ENTITY_TYPE.HTTPS
+    return this.entityType === ENTITY_TYPE.HTTPS
   }
 
   @Property({ persist: false })

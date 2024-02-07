@@ -1,3 +1,4 @@
+import { UidInput } from '@shared/types'
 import type { JSONSchema7 } from 'json-schema'
 import { config } from '../../config'
 import { FILE_ORIGIN_TYPE, PARENT_TYPE } from './user-file.types'
@@ -11,10 +12,28 @@ type SyncFoldersInput = {
   scope: string
 }
 
-export type CloseFileInput = {
-  id: string,
-  forceWaitForClose?: boolean
+export type FOLLOW_UP_ACTION =
+  | 'UPDATE_DATA_PORTAL_RESOURCE_URL'
+  | 'UPDATE_DATA_PORTAL_IMAGE_URL'
+  | 'UPDATE_CHALLENGE_IMAGE_URL'
+  | 'UPDATE_CHALLENGE_RESOURCE_URL'
+  | 'COMPLETE_SPACE_REPORT'
+
+export type FileUidInput = {
+  fileUid: string
 }
+
+export type FollowUpInput = {
+  followUpAction: FOLLOW_UP_ACTION
+}
+
+export type SyncFileJobInput = FileUidInput &
+  FollowUpInput & {
+    isChallengeBotFile: boolean
+    followUpAction?: FOLLOW_UP_ACTION
+  }
+
+export type UidAndFollowUpInput = UidInput & FollowUpInput
 
 type SyncFilesInFolderInput = {
   folderId: number | null
@@ -64,15 +83,6 @@ type nodeQueryFilter = {
   locked?: boolean
 }
 
-const uidListSchema: JSONSchema7 = {
-  type: 'object',
-  properties: {
-    ids: { type: 'array' },
-  },
-  required: ['ids'],
-  additionalProperties: false,
-}
-
 const CLINodeSearchSchema: JSONSchema7 = {
   type: 'object',
   properties: {
@@ -98,7 +108,6 @@ export {
   RenameFolderInput,
   NodesInput,
   renameFolderSchema,
-  uidListSchema,
   IdsInput,
   nodesSchema,
   nodeQueryFilter,

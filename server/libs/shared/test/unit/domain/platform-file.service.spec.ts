@@ -1,5 +1,4 @@
 import { PlatformFileService } from '@shared/domain/platform/service/platform-file.service'
-import { FileCloseOperation } from '@shared/domain/user-file/ops/file-close'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { PlatformClient } from '@shared/platform-client'
 import { expect } from 'chai'
@@ -36,9 +35,8 @@ describe('PlatformFileService', () => {
 
     function getInstance() {
       const platformClient = { fileCreate: clientCreateFileStub } as unknown as PlatformClient
-      const fileCloseOperation = null as unknown as FileCloseOperation
 
-      return new PlatformFileService(platformClient, fileCloseOperation)
+      return new PlatformFileService(platformClient)
     }
   })
 
@@ -66,7 +64,6 @@ describe('PlatformFileService', () => {
 
     let clientGetFileUploadUrlStub: SinonStub
     const fetchStub: SinonStub = stub(global, 'fetch')
-    let fileCloseOperationExecuteStub: SinonStub
 
     beforeEach(() => {
       clientGetFileUploadUrlStub = stub().throws()
@@ -102,14 +99,6 @@ describe('PlatformFileService', () => {
           headers: UPLOAD_HEADERS_2,
         })
         .resolves(undefined)
-
-      fileCloseOperationExecuteStub = stub().throws()
-      fileCloseOperationExecuteStub
-        .withArgs({
-          id: UID,
-          forceWaitForClose: true,
-        })
-        .resolves(undefined)
     })
 
     afterEach(() => {
@@ -120,7 +109,9 @@ describe('PlatformFileService', () => {
       const error = new Error('my error')
       clientGetFileUploadUrlStub = stub().throws(error)
 
-      await expect(getInstance().uploadFileContent(FILE as UserFile, CONTENT)).to.be.rejectedWith(error)
+      await expect(getInstance().uploadFileContent(FILE as UserFile, CONTENT)).to.be.rejectedWith(
+        error,
+      )
     })
 
     it('should not catch error from fetch', async () => {
@@ -128,38 +119,15 @@ describe('PlatformFileService', () => {
       fetchStub.resetBehavior()
       fetchStub.throws(error)
 
-      await expect(getInstance().uploadFileContent(FILE as UserFile, CONTENT)).to.be.rejectedWith(error)
-    })
-
-    it('should not catch error from fileClose', async () => {
-      const error = new Error('my error')
-      fileCloseOperationExecuteStub = stub().throws(error)
-
-      await expect(getInstance().uploadFileContent(FILE as UserFile, CONTENT)).to.be.rejectedWith(error)
+      await expect(getInstance().uploadFileContent(FILE as UserFile, CONTENT)).to.be.rejectedWith(
+        error,
+      )
     })
 
     it('should upload two parts', async () => {
       await getInstance().uploadFileContent(FILE as UserFile, CONTENT)
 
       expect(fetchStub.calledTwice).to.be.true()
-    })
-
-    it('should close the file', async () => {
-      await getInstance().uploadFileContent(FILE as UserFile, CONTENT)
-
-      expect(fileCloseOperationExecuteStub.calledOnce).to.be.true()
-    })
-
-    it('should close file with empty content', async () => {
-      await getInstance().uploadFileContent(FILE as UserFile, '')
-
-      expect(fileCloseOperationExecuteStub.calledOnce).to.be.true()
-    })
-
-    it('should close file with null content', async () => {
-      await getInstance().uploadFileContent(FILE as UserFile, null)
-
-      expect(fileCloseOperationExecuteStub.calledOnce).to.be.true()
     })
 
     it('should not upload anything with empty content', async () => {
@@ -175,10 +143,11 @@ describe('PlatformFileService', () => {
     })
 
     function getInstance() {
-      const platformClient = { getFileUploadUrl: clientGetFileUploadUrlStub } as unknown as PlatformClient
-      const fileCloseOperation = { execute: fileCloseOperationExecuteStub } as unknown as FileCloseOperation
+      const platformClient = {
+        getFileUploadUrl: clientGetFileUploadUrlStub,
+      } as unknown as PlatformClient
 
-      return new PlatformFileService(platformClient, fileCloseOperation)
+      return new PlatformFileService(platformClient)
     }
   })
 })

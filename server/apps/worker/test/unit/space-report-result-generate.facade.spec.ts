@@ -1,19 +1,14 @@
 import { LockMode, Reference } from '@mikro-orm/core'
 import type { SqlEntityManager } from '@mikro-orm/mysql'
-import { NotificationService } from '@shared/domain/notification/services/notification.service'
-import {
-  EntityProvenanceService
-} from '@shared/domain/provenance/service/entity-provenance.service'
+import { EntityProvenanceService } from '@shared/domain/provenance/service/entity-provenance.service'
 import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
 import { SpaceReport } from '@shared/domain/space-report/entity/space-report.entity'
 import { SpaceReportService } from '@shared/domain/space-report/service/space-report.service'
-import { NOTIFICATION_ACTION, SEVERITY } from '@shared/enums'
+import { UserFileService } from '@shared/domain/user-file/service/user-file.service'
 import { UserFileCreateFacade } from '@shared/facade/file-create/user-file-create.facade'
 import { expect } from 'chai'
 import { restore, stub } from 'sinon'
-import {
-  SpaceReportResultGenerateFacade
-} from '../../src/facade/space-report/space-report-result-generate.facade'
+import { SpaceReportResultGenerateFacade } from '../../src/facade/space-report/space-report-result-generate.facade'
 
 describe('SpaceReportResultGenerateFacade', () => {
   const REPORT_ID = 0
@@ -40,7 +35,7 @@ describe('SpaceReportResultGenerateFacade', () => {
     createdBy: CREATOR,
     space: SPACE,
     createdAt: REPORT_CREATED_AT,
-  }
+  } as SpaceReport
 
   const SPACE_MEMBERSHIP_IS_HOST = true
   const SPACE_MEMBERSHIP = { isHost: () => SPACE_MEMBERSHIP_IS_HOST }
@@ -49,18 +44,21 @@ describe('SpaceReportResultGenerateFacade', () => {
   const RESULT = 'result'
 
   const FILE_ID = 1000
-  const FILE = { id: FILE_ID }
+  const FILE_UID = 'file-uid-1'
+  const FILE = { id: FILE_ID, uid: FILE_UID }
 
   const transactionalStub = stub()
   const findOneStub = stub()
   const populateStub = stub()
   const generateResultStub = stub()
   const createFileWithContentStub = stub()
-  const createNotificationStub = stub()
   const getSvgStylesStub = stub()
+  const closeFileStub = stub()
 
   before(() => {
-    stub(Reference, 'create').withArgs(FILE).returns(FILE)
+    stub(Reference, 'create')
+      .withArgs(FILE)
+      .returns({ getEntity: () => FILE } as unknown as Reference<object>)
   })
 
   beforeEach(() => {
@@ -105,20 +103,9 @@ describe('SpaceReportResultGenerateFacade', () => {
       })
       .resolves(FILE)
 
-    createNotificationStub.reset()
-    createNotificationStub.throws()
-    createNotificationStub
-      .withArgs({
-        severity: SEVERITY.INFO,
-        userId: CREATOR_ID,
-        message: 'Report of space "space name" successfully generated',
-        action: NOTIFICATION_ACTION.SPACE_REPORT_DONE,
-        meta: {
-          linkTitle: 'Go to Reports',
-          linkUrl: '/spaces/100/reports',
-        },
-      })
-      .resolves()
+    closeFileStub.reset()
+    closeFileStub.throws()
+    closeFileStub.withArgs(FILE_UID).resolves()
   })
 
   after(() => {
@@ -171,14 +158,6 @@ describe('SpaceReportResultGenerateFacade', () => {
     await expect(getInstance().generate(REPORT_ID)).to.be.rejectedWith(error)
   })
 
-  it('should not catch an error from createNotification', async () => {
-    const error = new Error('my error')
-    createNotificationStub.reset()
-    createNotificationStub.throws(error)
-
-    await expect(getInstance().generate(REPORT_ID)).to.be.rejectedWith(error)
-  })
-
   it('should not catch an error from getSvgStyles', async () => {
     const error = new Error('my error')
     getSvgStylesStub.reset()
@@ -187,23 +166,29 @@ describe('SpaceReportResultGenerateFacade', () => {
     await expect(getInstance().generate(REPORT_ID)).to.be.rejectedWith(error)
   })
 
+  it('should not catch an error from closeFile', async () => {
+    const error = new Error('my error')
+    closeFileStub.reset()
+    closeFileStub.throws(error)
+
+    await expect(getInstance().generate(REPORT_ID)).to.be.rejectedWith(error)
+  })
+
   it('should update the report with result file and state', async () => {
     await getInstance().generate(REPORT_ID)
 
-    expect(REPORT).to.deep.eq({
-      id: REPORT_ID,
-      createdBy: CREATOR,
-      space: SPACE,
-      createdAt: REPORT_CREATED_AT,
-      resultFile: FILE,
-      state: 'DONE',
-    })
+    expect(REPORT.id).to.eq(REPORT_ID)
+    expect(REPORT.createdBy).to.deep.eq(CREATOR)
+    expect(REPORT.space).to.deep.eq(SPACE)
+    expect(REPORT.createdAt).to.eq(REPORT_CREATED_AT)
+    expect(REPORT.resultFile.getEntity()).to.deep.eq(FILE)
+    expect(REPORT.state).to.eq('CLOSING_RESULT_FILE')
   })
 
-  it('should create notification', async () => {
+  it('should start closing the result file', async () => {
     await getInstance().generate(REPORT_ID)
 
-    expect(createNotificationStub.calledOnce).to.be.true()
+    expect(closeFileStub.calledOnce).to.be.true()
   })
 
   it('should use guest project when membership is not host', async () => {
@@ -251,16 +236,16 @@ describe('SpaceReportResultGenerateFacade', () => {
       getSvgStyles: getSvgStylesStub,
     } as unknown as EntityProvenanceService
 
-    const notificationService = {
-      createNotification: createNotificationStub,
-    } as unknown as NotificationService
+    const userFileService = {
+      closeFile: closeFileStub,
+    } as unknown as UserFileService
 
     return new SpaceReportResultGenerateFacade(
       em,
       spaceReportService,
       userFileCreateFacade,
-      notificationService,
       entityProvenanceService,
+      userFileService,
     )
   }
 })
