@@ -14,6 +14,7 @@ export const SelectCheckLabel = styled.label`
   padding-left: 12px;
   display: flex;
   align-items: center;
+  position: relative;
 `
 
 export const StyledExpander = styled.div`

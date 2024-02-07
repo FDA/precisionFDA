@@ -94,8 +94,8 @@ export const Pagination = ({
   if (isHidden) {
     return null
   }
-  const [localTotal, setLocalTotal] = useState<number>(totalPages || 0)
-  const [localPage, setLocalPage] = useState<number>(page || 0)
+  const [localTotal, setLocalTotal] = useState<number>(totalPages || 1)
+  const [localPage, setLocalPage] = useState<number>(page || 1)
   const pageLowerBound = (page - 1) * perPage + 1
   const pageUpperBound = page * perPage
 
@@ -190,6 +190,7 @@ export const Pagination = ({
             variant='primary'
             data-testid="pagination-submit-jumpto-button"
             type="submit"
+            disabled={localTotal <= 1}
           >
             Jump
           </Button>
