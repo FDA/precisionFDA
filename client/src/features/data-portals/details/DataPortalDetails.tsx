@@ -128,7 +128,7 @@ export const DataPortalDetails = ({
             )}
           </NoContent>
         )}
-        <AddIdsToHeaders as={StyledInnerHTML} docRef={docRef} content={portal.content ?? ''} />,
+        <AddIdsToHeaders as={StyledInnerHTML} docRef={docRef} content={portal.content ?? ''} />
       </PageMainBody>
     </Row>
   )

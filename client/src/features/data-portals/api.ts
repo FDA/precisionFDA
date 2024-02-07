@@ -1,12 +1,7 @@
 import axios from 'axios'
-import { Pagination } from '../../types/pagination'
+import { createFile } from '../files/files.api'
 import { processFile } from '../resources/uploadImage'
-import { DataPortal } from './types'
-
-export interface DataPortalListResponse {
-  dataPortals: DataPortal[]
-  meta: Pagination
-}
+import { DataPortal, CreateDataPortalData, UpdateDataPortalData } from './types'
 
 export async function fetchGovUsers(): Promise<[]> {
   return axios.get('/api/users/government').then(r => r.data)
@@ -28,48 +23,45 @@ export async function fetchMainDataPortal() {
   return axios.get('/api/data_portals/default').then(res => res.data as DataPortal)
 }
 
-export async function createDataPortalImage(file: File, portalId: number) {
-  const response = await axios.post(`/api/data_portals/${portalId}/card_image`, { name: file.name })
-  const fileUid = response.data
-
-  await processFile(file, fileUid)
-  return fileUid
-}
-
 export interface CreateDataPortalRequest {
-  card_image_uid: string
+  card_image_uid?: string
   name: string
   description?: string
   status: string
   host_lead_dxuser: string
   guest_lead_dxuser: string
+  card_image_file_name: string
+  default: boolean
 }
-export interface EditDataPortalRequest {
+
+export interface UpdateDataPortalRequest {
+  id: number
   name?: string
   description?: string
-  card_image_uid?: string
-  image?: File
-  status?: string
-  sort_order?: number
   default?: boolean
+  sort_order?: number
+  card_image_uid: string
+  space_id: number
+  content: string
+  editor_state: string
 }
 
-export async function updateDataPortalRequest(payload: CreateDataPortalRequest | EditDataPortalRequest, id: number | string) {
-  return axios.patch(`/api/data_portals/${id}`, payload).then(res => res.data as DataPortal)
+export async function updateDataPortalRequest(payload: UpdateDataPortalRequest) {
+  return axios.patch(`/api/data_portals/${payload.id}`, payload).then(res => res.data as DataPortal)
 }
 
-export async function editDataPortalRequest({ image, ...payload }: EditDataPortalRequest, id: number) {
-  const body = payload
-  if(image) {
-    const portalImage = await createDataPortalImage(image, id)
-    body.card_image_uid = portalImage
+export async function editDataPortalRequest(dataPortalData : UpdateDataPortalData) {
+  const { dataPortal } = dataPortalData
+  if (dataPortalData.image) {
+    const cardImage = await createFile(dataPortalData.image.name, `space-${dataPortalData.dataPortal.space_id}`, null)
+    await processFile(dataPortalData.image, cardImage.id)
+    dataPortal.card_image_uid = cardImage.id // TODO fix some day when rewriting create_file on backend
   }
-  return updateDataPortalRequest(body, id)
+  return updateDataPortalRequest(dataPortal)
 }
 
-export async function createDataPortalRequest({ image, ...payload }: CreateDataPortalRequest) {
-  const portal = await axios.post('/api/data_portals', payload).then(res => res.data as DataPortal)
-  const portalImage = await createDataPortalImage(image, portal.id)
-  return updateDataPortalRequest({ card_image_uid: portalImage }, portal.id)
+export async function createDataPortalRequest(dataPortalData: CreateDataPortalData) {
+  const createPortalResponse = await axios.post('/api/data_portals', dataPortalData.dataPortal).then(res => res.data as DataPortal)
+  await processFile(dataPortalData.image, createPortalResponse.cardImageUid)
+  return createPortalResponse
 }
-

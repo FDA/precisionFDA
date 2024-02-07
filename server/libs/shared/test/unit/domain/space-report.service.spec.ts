@@ -2,6 +2,7 @@ import { QueryOrder, Reference } from '@mikro-orm/core'
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { App } from '@shared/domain/app/app.entity'
 import { Job } from '@shared/domain/job/job.entity'
+import { NotificationService } from '@shared/domain/notification/services/notification.service'
 import { SpaceReportPart } from '@shared/domain/space-report/entity/space-report-part.entity'
 import { SpaceReport } from '@shared/domain/space-report/entity/space-report.entity'
 import { BatchComplete } from '@shared/domain/space-report/model/batch-complete'
@@ -13,6 +14,7 @@ import { Asset } from '@shared/domain/user-file/asset.entity'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { Workflow } from '@shared/domain/workflow/entity/workflow.entity'
+import { NOTIFICATION_ACTION, SEVERITY } from '@shared/enums'
 import { InvalidStateError, NotFoundError } from '@shared/errors'
 import { expect } from 'chai'
 import { restore, stub } from 'sinon'
@@ -269,8 +271,15 @@ describe('SpaceReportService', () => {
         createReportParts: createPartsStub,
       } as unknown as SpaceReportPartService
       const spaceReportResultService = {} as unknown as SpaceReportResultService
+      const notificationService = {} as unknown as NotificationService
 
-      return new SpaceReportService(em, spaceReportPartService, spaceReportResultService, USER)
+      return new SpaceReportService(
+        em,
+        spaceReportPartService,
+        spaceReportResultService,
+        USER,
+        notificationService,
+      )
     }
   })
   describe('#getReports', () => {
@@ -311,8 +320,15 @@ describe('SpaceReportService', () => {
       } as unknown as SqlEntityManager
       const spaceReportPartService = {} as unknown as SpaceReportPartService
       const spaceReportResultService = {} as unknown as SpaceReportResultService
+      const notificationService = {} as unknown as NotificationService
 
-      return new SpaceReportService(em, spaceReportPartService, spaceReportResultService, null)
+      return new SpaceReportService(
+        em,
+        spaceReportPartService,
+        spaceReportResultService,
+        null,
+        notificationService,
+      )
     }
   })
   describe('#getReportsForSpace', () => {
@@ -499,8 +515,15 @@ describe('SpaceReportService', () => {
       } as unknown as SqlEntityManager
       const spaceReportPartService = {} as unknown as SpaceReportPartService
       const spaceReportResultService = {} as unknown as SpaceReportResultService
+      const notificationService = {} as unknown as NotificationService
 
-      return new SpaceReportService(em, spaceReportPartService, spaceReportResultService, USER)
+      return new SpaceReportService(
+        em,
+        spaceReportPartService,
+        spaceReportResultService,
+        USER,
+        notificationService,
+      )
     }
   })
   describe('#deleteReports', () => {
@@ -577,8 +600,15 @@ describe('SpaceReportService', () => {
       } as unknown as SqlEntityManager
       const spaceReportPartService = {} as unknown as SpaceReportPartService
       const spaceReportResultService = {} as unknown as SpaceReportResultService
+      const notificationService = {} as unknown as NotificationService
 
-      return new SpaceReportService(em, spaceReportPartService, spaceReportResultService, null)
+      return new SpaceReportService(
+        em,
+        spaceReportPartService,
+        spaceReportResultService,
+        null,
+        notificationService,
+      )
     }
   })
   describe('#completePartsBatch', () => {
@@ -620,8 +650,15 @@ describe('SpaceReportService', () => {
         completeBatch: completeBatchStub,
       } as unknown as SpaceReportPartService
       const spaceReportResultService = {} as unknown as SpaceReportResultService
+      const notificationService = {} as unknown as NotificationService
 
-      return new SpaceReportService(em, spaceReportPartService, spaceReportResultService, null)
+      return new SpaceReportService(
+        em,
+        spaceReportPartService,
+        spaceReportResultService,
+        null,
+        notificationService,
+      )
     }
   })
   describe('#generateResult', () => {
@@ -669,8 +706,15 @@ describe('SpaceReportService', () => {
       const spaceReportResultService = {
         generateResult: generateResultStub,
       } as unknown as SpaceReportResultService
+      const notificationService = {} as unknown as NotificationService
 
-      return new SpaceReportService(em, spaceReportPartService, spaceReportResultService, null)
+      return new SpaceReportService(
+        em,
+        spaceReportPartService,
+        spaceReportResultService,
+        null,
+        notificationService,
+      )
     }
   })
   describe('#hasAllBatchesDone', () => {
@@ -720,11 +764,17 @@ describe('SpaceReportService', () => {
       } as unknown as SqlEntityManager
       const spaceReportPartService = {} as unknown as SpaceReportPartService
       const spaceReportResultService = {} as unknown as SpaceReportResultService
+      const notificationService = {} as unknown as NotificationService
 
-      return new SpaceReportService(em, spaceReportPartService, spaceReportResultService, null)
+      return new SpaceReportService(
+        em,
+        spaceReportPartService,
+        spaceReportResultService,
+        null,
+        notificationService,
+      )
     }
   })
-
   describe('#getSpacesForUser', () => {
     const USER_ID = 0
     const USER = { id: USER_ID } as unknown as UserContext
@@ -826,8 +876,15 @@ describe('SpaceReportService', () => {
       } as unknown as SqlEntityManager
       const spaceReportPartService = {} as unknown as SpaceReportPartService
       const spaceReportResultService = {} as unknown as SpaceReportResultService
+      const notificationService = {} as unknown as NotificationService
 
-      return new SpaceReportService(em, spaceReportPartService, spaceReportResultService, USER)
+      return new SpaceReportService(
+        em,
+        spaceReportPartService,
+        spaceReportResultService,
+        USER,
+        notificationService,
+      )
     }
   })
   describe('#getSpaceReportPartMetaData', () => {
@@ -867,8 +924,114 @@ describe('SpaceReportService', () => {
         getSpaceReportPartMetaData: getSpaceReportPartMetaDataStub,
       } as unknown as SpaceReportPartService
       const spaceReportResultService = {} as unknown as SpaceReportResultService
+      const notificationService = {} as unknown as NotificationService
 
-      return new SpaceReportService(em, spaceReportPartService, spaceReportResultService, null)
+      return new SpaceReportService(
+        em,
+        spaceReportPartService,
+        spaceReportResultService,
+        null,
+        notificationService,
+      )
+    }
+  })
+
+  describe('#completeReportForResultFile', () => {
+    const FILE_UID = 'file-uid-1'
+
+    const SPACE_ID = 0
+    const SPACE_NAME = 'space name'
+    const SPACE = { id: SPACE_ID, name: SPACE_NAME }
+
+    const CREATOR_ID = 10
+    const CREATOR = { id: CREATOR_ID }
+
+    const REPORT = { space: SPACE, createdBy: CREATOR } as unknown as SpaceReport
+
+    const findOneOrFailStub = stub()
+    const transactionalStub = stub()
+    const createNotificationStub = stub()
+
+    beforeEach(() => {
+      findOneOrFailStub.reset()
+      findOneOrFailStub.throws()
+      findOneOrFailStub
+        .withArgs(SpaceReport, { resultFile: { uid: FILE_UID } }, { populate: ['space'] })
+        .returns(REPORT)
+
+      transactionalStub.reset()
+      transactionalStub.callsArg(0)
+
+      createNotificationStub.reset()
+      createNotificationStub.throws()
+      createNotificationStub
+        .withArgs({
+          severity: SEVERITY.INFO,
+          userId: CREATOR_ID,
+          message: `Report of space "space name" successfully generated`,
+          action: NOTIFICATION_ACTION.SPACE_REPORT_DONE,
+          meta: {
+            linkTitle: 'Go to Reports',
+            linkUrl: `/spaces/0/reports`,
+          },
+        })
+        .resolves()
+    })
+
+    it('should not catch error from transactional', async () => {
+      const error = new Error('my error')
+      transactionalStub.reset()
+      transactionalStub.throws(error)
+
+      await expect(getInstance().completeReportForResultFile(FILE_UID)).to.be.rejectedWith(error)
+    })
+
+    it('should not catch error from findOneOrFail', async () => {
+      const error = new Error('my error')
+      findOneOrFailStub.reset()
+      findOneOrFailStub.throws(error)
+
+      await expect(getInstance().completeReportForResultFile(FILE_UID)).to.be.rejectedWith(error)
+    })
+
+    it('should not catch error from createNotification', async () => {
+      const error = new Error('my error')
+      createNotificationStub.reset()
+      createNotificationStub.throws(error)
+
+      await expect(getInstance().completeReportForResultFile(FILE_UID)).to.be.rejectedWith(error)
+    })
+
+    it('should set the report state to DONE', async () => {
+      await getInstance().completeReportForResultFile(FILE_UID)
+
+      expect(REPORT.state).to.eq('DONE')
+    })
+
+    it('should create notification', async () => {
+      await getInstance().completeReportForResultFile(FILE_UID)
+
+      expect(createNotificationStub.calledOnce).to.be.true()
+    })
+
+    function getInstance() {
+      const em = {
+        findOneOrFail: findOneOrFailStub,
+        transactional: transactionalStub,
+      } as unknown as SqlEntityManager
+      const spaceReportPartService = {} as unknown as SpaceReportPartService
+      const spaceReportResultService = {} as unknown as SpaceReportResultService
+      const notificationService = {
+        createNotification: createNotificationStub,
+      } as unknown as NotificationService
+
+      return new SpaceReportService(
+        em,
+        spaceReportPartService,
+        spaceReportResultService,
+        null,
+        notificationService,
+      )
     }
   })
 })

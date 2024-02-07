@@ -1,7 +1,5 @@
-import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Injectable } from '@nestjs/common'
 import * as errors from '../../../errors'
-import { WorkflowService } from '../../workflow/service/workflow.service'
 import { EntityProvenanceFormatType } from '../model/entity-provenance-format.type'
 import { EntityProvenanceOptionsType } from '../model/entity-provenance-options.type'
 import { EntityProvenanceResultType } from '../model/entity-provenance-result.type'

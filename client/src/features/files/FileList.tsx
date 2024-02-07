@@ -92,7 +92,7 @@ export const FileList = ({ homeScope, space, showFolderActions = false }: { home
     if (notification == null) {
       return
     }
-    if (['NODES_REMOVED', 'NODES_COPIED'].includes(notification.action)) {
+    if (['NODES_REMOVED', 'NODES_COPIED', 'FILE_CLOSED'].includes(notification.action)) {
       queryCache.invalidateQueries(['files'])
       queryCache.invalidateQueries(['counters'])
     }

@@ -10,7 +10,7 @@ import { getMainQueue } from '@shared/queue'
 import { expect } from 'chai'
 import { create, generate, db } from '@shared/test'
 import { fakes, mocksReset } from '@shared/test/mocks'
-import { fakes as queueFakes, mocksReset as queueMocksReset } from '../utils/mocks'
+import { mocksReset as queueMocksReset } from '../utils/mocks'
 import {
   FILE_STATE,
   FILE_STATE_DX,
