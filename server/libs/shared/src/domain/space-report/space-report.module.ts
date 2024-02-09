@@ -1,6 +1,9 @@
+import { MikroOrmModule } from '@mikro-orm/nestjs'
 import { BullModule } from '@nestjs/bull'
 import { Module } from '@nestjs/common'
 import { config } from '@shared/config'
+import { NotificationModule } from '@shared/domain/notification/notification.module'
+import { SpaceReport } from '@shared/domain/space-report/entity/space-report.entity'
 import { SpaceReportPartAppResultMetaProvider } from '@shared/domain/space-report/service/part/space-report-part-app-result-meta.provider'
 import { SpaceReportPartAssetResultMetaProvider } from '@shared/domain/space-report/service/part/space-report-part-asset-result-meta.provider'
 import { SpaceReportPartFileResultMetaProvider } from '@shared/domain/space-report/service/part/space-report-part-file-result-meta.provider'
@@ -23,7 +26,9 @@ import { TimeUtils } from '@shared/utils/time.utils'
         backoff: TimeUtils.minutesToMilliseconds(1),
       },
     }),
+    MikroOrmModule.forFeature([SpaceReport]),
     SpaceReportPartModule,
+    NotificationModule,
   ],
   providers: [
     SpaceReportService,
@@ -34,6 +39,6 @@ import { TimeUtils } from '@shared/utils/time.utils'
     SpaceReportPartFileResultMetaProvider,
     SpaceReportPartAssetResultMetaProvider,
   ],
-  exports: [SpaceReportService, BullModule],
+  exports: [SpaceReportService, BullModule, MikroOrmModule],
 })
 export class SpaceReportModule {}

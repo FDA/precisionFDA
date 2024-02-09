@@ -150,7 +150,11 @@ export const StyledRemove = styled.div`
   margin-right: 12px;
 
   button {
-    padding: 6px;
+    padding: 3px;
+    min-width: 16px;
+    svg {
+      width: 16px;
+    }
   }
 `
 

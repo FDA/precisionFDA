@@ -7,7 +7,6 @@ import { useNavigate } from 'react-router-dom'
 import Select from 'react-select'
 import { toast } from 'react-toastify'
 import * as Yup from 'yup'
-import { Button, ButtonSolidBlue } from '../../../components/Button'
 import { InputText } from '../../../components/InputText'
 import { FieldGroup, Hint, InputError } from '../../../components/form/styles'
 import { capitalize } from '../../../utils/formatting'
@@ -17,6 +16,7 @@ import { useModal } from '../../modal/useModal'
 import { changeMembershipRoleRequest } from './members.api'
 import { MemberRole, SpaceMembership } from './members.types'
 import { StyledFields, StyledFooter } from './members.styles'
+import { Button } from '../../../components/Button'
 
 interface FormValues {
   role: { label: string; value: MemberRole }
@@ -164,13 +164,14 @@ export const useChangeMemberRoleModal = ({
           >
             Cancel
           </Button>
-          <ButtonSolidBlue
+          <Button
+            variant="primary"
             type="submit"
             disabled={Object.keys(errors).length > 0 || mutation.isLoading}
             aria-label="Change member role"
           >
             Change Role
-          </ButtonSolidBlue>
+          </Button>
         </StyledFooter>
       </form>
     </ModalNext>

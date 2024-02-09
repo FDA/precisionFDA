@@ -35,8 +35,6 @@ type PaginationOpts<
 const DEFAULT_PER_PAGE = 20
 const DEFAULT_PAGE = 1
 
-const defaultKeyMapper = (key: string) => `filters[${key}]`
-
 @Injectable()
 export class AdminUsersPaginationPipe<
   T extends BaseEntity,
@@ -82,7 +80,6 @@ export class AdminUsersPaginationPipe<
   private readonly defaultOrderDir = this.opts?.sort?.defaultOrderDir ?? 'ASC'
   private readonly sortableColums = this.opts?.sort?.sortableColumns ?? []
   // @ts-ignore
-  private readonly filterKeyMapper = this.opts?.filter?.keyMapper ?? defaultKeyMapper
   private readonly orderByParser = parseEnumValueFromString<
     Extract<(typeof this.opts)['sort']['sortableColumns'][number], string>
   >(
@@ -131,7 +128,7 @@ export class AdminUsersPaginationPipe<
     const filters = Object.fromEntries(
       Object.entries(
         bindGetValueToSchema(
-          (key) => value[this.filterKeyMapper(key)]?.toString(),
+          (key) => value.filters?.[key]?.toString(),
           (this.opts?.filter?.schema ?? {}) as FilterSchemaT,
         ),
       ).map(([schemaKey, schemaValue]) => [schemaKey, schemaValue.parser(schemaKey)]),

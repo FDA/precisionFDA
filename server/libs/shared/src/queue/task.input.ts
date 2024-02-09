@@ -1,6 +1,7 @@
-import { EmailSendInput } from '../domain/email/email.config'
-import { WorkstationSnapshotOperationParams } from '../domain/job/ops/workstation-snapshot'
-import { UserCtx } from '../types'
+import type { EmailSendInput } from '../domain/email/email.config'
+import type { WorkstationSnapshotOperationParams } from '../domain/job/ops/workstation-snapshot'
+import type { UserCtx } from '../types'
+import { FileUidInput } from '@shared/domain/user-file/user-file.input'
 
 export type Task = {
   type: TASK_TYPE
@@ -18,13 +19,16 @@ type TaskWithMaybeAuth = Task & {
 
 export enum TASK_TYPE {
   SYNC_FILES_STATE = 'sync_files_state',
+  SYNC_FILE_STATE = 'sync_file_state',
   SYNC_JOB_STATUS = 'sync_job_status',
   SYNC_JOB_OUTPUTS = 'sync_job_outputs',
   SYNC_WORKSTATION_FILES = 'sync_workstation_files',
   SEND_EMAIL = 'send_email',
+  CLOSE_FILE = 'close_file',
   CHECK_CHALLENGE_JOBS = 'check_challenge_jobs',
   CHECK_STALE_JOBS = 'check_stale_jobs',
   CHECK_USER_JOBS = 'check_user_jobs',
+  FOLLOW_UP_ACTION = 'follow_up_action',
   CHECK_NON_TERMINATED_DBCLUSTERS = 'check_non_terminated_dbclusters',
   SYNC_DBCLUSTER_STATUS = 'sync_dbcluster_status',
   SYNC_SPACES_PERMISSIONS = 'sync_spaces_permissions',
@@ -55,6 +59,11 @@ export type CheckStatusJob = TaskWithAuth & {
 export type SendEmailJob = TaskWithMaybeAuth & {
   type: TASK_TYPE.SEND_EMAIL
   payload: EmailSendInput
+}
+
+export type CloseFileJob = TaskWithAuth & {
+  type: TASK_TYPE.CLOSE_FILE
+  payload: FileUidInput
 }
 
 export type RemoveNodesJob = TaskWithAuth & {

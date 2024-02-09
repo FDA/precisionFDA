@@ -1,7 +1,6 @@
 import React, { useMemo } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
-import { Button, ButtonSolidBlue } from '../../components/Button'
 import { Loader } from '../../components/Loader'
 import { ResourceTable } from '../../components/ResourceTable'
 import { Modal } from '../modal'
@@ -9,6 +8,7 @@ import { ButtonRow } from '../modal/styles'
 import { useModal } from '../modal/useModal'
 import { databaseMethodRequest } from './databases.api'
 import { MethodType } from './databases.types'
+import { Button } from '../../components/Button'
 
 export function useMethodModal<T extends { dxid: string; name: string }>({
   method,
@@ -52,9 +52,9 @@ export function useMethodModal<T extends { dxid: string; name: string }>({
         <ButtonRow>
           {mutation.isLoading && <Loader />}
           <Button onClick={() => setShowModal(false)} disabled={mutation.isLoading}>Cancel</Button>
-          <ButtonSolidBlue onClick={handleSubmit} disabled={mutation.isLoading}>
+          <Button variant="primary" onClick={handleSubmit} disabled={mutation.isLoading}>
             {method}
-          </ButtonSolidBlue>
+          </Button>
         </ButtonRow>
       }
     >

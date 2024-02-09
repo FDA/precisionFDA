@@ -1,7 +1,6 @@
 import styled from 'styled-components'
-import { Button } from '../../../components/Button'
 import { BackLink } from '../../../components/Page/PageBackLink'
-import { colors } from '../../../styles/theme'
+import { Button } from '../../../components/Button'
 
 export const StyledForm = styled.form`
   display: flex;
@@ -17,6 +16,10 @@ export const HintText = styled.div`
   margin-top: 4px;
   font-size: 14px;
   color: var(--tertiary-700);
+
+  p {
+    margin-bottom: 1.5rem;
+  }
 
   li {
     margin-bottom: 8px;

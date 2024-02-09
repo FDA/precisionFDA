@@ -63,11 +63,11 @@ export interface FileLinks {
 export interface IFile {
   'id': number,
   'name': string,
-  'size': string,
+  'size'?: string,
   'type': FileType,
   'locked': boolean,
-  'locking': boolean,
-  'state': FileState,
+  'locking'?: boolean,
+  'state': FileState | null,
   'location': FileLocation,
   'added_by': string,
   'created_at': string,
@@ -93,14 +93,41 @@ export interface IFile {
     id: string
     title: string
     uid: string
-  },
+  } | Record<string, never>,
   'show_license_pending': boolean,
-  'private': boolean,
-  'public': boolean,
-  'user': FileUser,
-  'org': FileOrg,
-  'file_path': string,
-  'path': string
+  'private'?: boolean,
+  'public'?: boolean,
+  'user'?: FileUser,
+  'org'?: FileOrg,
+}
+
+export interface IFolder {
+  path: { id: 14 | null, name: string}[]
+  file_path?: string,
+  state: null
+  id: number,
+  name: string,
+  size?: string,
+  type: FileType,
+  locked: boolean,
+  locking?: boolean,
+  location: FileLocation,
+  added_by: string,
+  created_at: string,
+  featured: boolean,
+  scope: ServerScope,
+  space_id: string | null,
+  tags: string[],
+  properties: {
+    [key: string]: string,
+  },
+  created_at_date_time: string,
+  /** @deprecated create links from client side */
+  links: FileLinks,
+  private?: boolean,
+  public?: boolean,
+  user?: FileUser,
+  org?: FileOrg,
 }
 
 

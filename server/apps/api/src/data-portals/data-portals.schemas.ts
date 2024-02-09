@@ -17,6 +17,7 @@ const dataPortalCreate: JSONSchema7 = {
   properties: {
     name: { type: 'string' },
     description: { type: 'string' },
+    cardImageFileName: { type: 'string' },
     default: { type: 'boolean', default: false },
     hostLeadDxUser: { type: 'string' },
     guestLeadDxUser: { type: 'string' },
@@ -24,8 +25,15 @@ const dataPortalCreate: JSONSchema7 = {
     sortOrder: { type: 'number' },
     status: { type: 'string', enum: [DATA_PORTAL_STATUS.OPEN, DATA_PORTAL_STATUS.CLOSED] },
   },
-  required: ['name', 'hostLeadDxUser', 'guestLeadDxUser',
-    'spaceId', 'sortOrder', 'status'],
+  required: [
+    'name',
+    'cardImageFileName',
+    'hostLeadDxUser',
+    'guestLeadDxUser',
+    'spaceId',
+    'sortOrder',
+    'status',
+  ],
   additionalProperties: false,
 }
 

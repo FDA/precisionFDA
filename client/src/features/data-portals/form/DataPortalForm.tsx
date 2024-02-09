@@ -5,7 +5,6 @@ import React, { useEffect } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { unstable_usePrompt } from 'react-router-dom'
 import styled from 'styled-components'
-import { ButtonSolidBlue } from '../../../components/Button'
 import { Checkbox } from '../../../components/CheckboxNext'
 import { InputFile, InputNumber, InputText } from '../../../components/InputText'
 import { Loader } from '../../../components/Loader'
@@ -15,6 +14,7 @@ import { SavingModal } from './SavingModal'
 import { StatusSelect } from './StatusSelect'
 import { UsersSelect } from './UsersSelect'
 import { createValidationSchema, editValidationSchema } from './common'
+import { Button } from '../../../components/Button'
 
 type SelectItem = { label: string; value: string }
 
@@ -307,9 +307,9 @@ export const DataPortalForm = ({
             />
           </Row>
           <Row>
-            <ButtonSolidBlue disabled={Object.keys(submitErrors).length > 0 || isSubmitting || isSaving} type="submit">
+            <Button variant="primary" disabled={Object.keys(submitErrors).length > 0 || isSubmitting || isSaving} type="submit">
               Submit
-            </ButtonSolidBlue>
+            </Button>
             {isSubmitting && <Loader />}
           </Row>
         </StyledForm>

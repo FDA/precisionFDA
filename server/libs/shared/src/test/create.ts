@@ -3,6 +3,7 @@ import { Reference, wrap } from '@mikro-orm/core'
 import { AcceptedLicense } from '@shared/domain/accepted-license/accepted-license.entity'
 import { ADMIN_GROUP_ROLES, AdminGroup } from '@shared/domain/admin-group/admin-group.entity'
 import { AdminMembership } from '@shared/domain/admin-membership/admin-membership.entity'
+import { Alert } from '@shared/domain/alert/entity/alert.entity'
 import { AppSeries } from '@shared/domain/app-series/app-series.entity'
 import { App } from '@shared/domain/app/app.entity'
 import { Attachment } from '@shared/domain/attachment/attachment.entity'
@@ -89,6 +90,47 @@ const acceptedLicenseHelper = {
   },
 }
 
+const alertHelper = {
+  createActive: (
+    em: EntityManager,
+    data?: Partial<InstanceType<typeof Alert>>,
+  ) => {
+    const defaults = generate.alert.active()
+    const input = {
+      ...defaults,
+      ...data,
+    }
+    const alert = wrap(new Alert()).assign(input, { em })
+    em.persist(alert)
+    return alert
+  },
+  createFuture: (
+    em: EntityManager,
+    data?: Partial<InstanceType<typeof Alert>>,
+  ) => {
+    const defaults = generate.alert.future()
+    const input = {
+      ...defaults,
+      ...data,
+    }
+    const alert = wrap(new Alert()).assign(input, { em })
+    em.persist(alert)
+    return alert
+  },
+  createExpired: (
+    em: EntityManager,
+    data?: Partial<InstanceType<typeof Alert>>,
+  ) => {
+    const defaults = generate.alert.expired()
+    const input = {
+      ...defaults,
+      ...data,
+    }
+    const alert = wrap(new Alert()).assign(input, { em })
+    em.persist(alert)
+    return alert
+  },
+}
 const assetHelper = {
   create: (
     em: EntityManager,
@@ -806,6 +848,7 @@ const workflowSeriesHelper = {
 
 export {
   assetHelper,
+  alertHelper,
   attachmentHelper,
   dataPortalsHelper,
   orgHelper,

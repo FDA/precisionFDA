@@ -1,4 +1,4 @@
-import { INestApplication } from '@nestjs/common'
+import { INestApplication, ValidationPipe } from '@nestjs/common'
 import { NestApplicationOptions } from '@nestjs/common/interfaces/nest-application-options.interface'
 import { NestFactory } from '@nestjs/core'
 import { setupNestApp } from '@shared/app-initialization'
@@ -29,6 +29,8 @@ const startApp = async (cfg: { ssl: boolean }) => {
   app = await NestFactory.create(ApiModule, options)
 
   await setupNestApp(app)
+
+  app.useGlobalPipes(new ValidationPipe({transform: true}))
 
   await app.listen(config.api.port)
 

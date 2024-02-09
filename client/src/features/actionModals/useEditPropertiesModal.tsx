@@ -8,7 +8,7 @@ import { toast } from 'react-toastify'
 import ReactTooltip from 'react-tooltip'
 import styled from 'styled-components'
 import * as Yup from 'yup'
-import { Button, ButtonSolidBlue, ButtonText } from '../../components/Button'
+import { TransparentButton, Button } from '../../components/Button'
 import { FieldGroup } from '../../components/form/styles'
 import { CrossIcon } from '../../components/icons/PlusIcon'
 import '../../utils/yupValidators'
@@ -28,8 +28,12 @@ const StyledForm = styled.form`
 const StyledFieldGroup = styled(FieldGroup)`
   padding: 16px 8px 16px 24px;
 `
-const StyledButtonText = styled(ButtonText)`
+const StyledButtonText = styled(TransparentButton)`
   justify-self: flex-start;
+  color: var(--primary-500);
+  &:hover {
+    color: var(--primary-400);
+  }
 `
 const StyledFooter = styled(Footer)`
   justify-content: space-between;
@@ -258,13 +262,14 @@ const EditPropertiesForm = ({
           >
             Cancel
           </Button>
-          <ButtonSolidBlue
+          <Button
+            variant="primary"
             type="submit"
             form="edit-properties-form"
             disabled={mutation.isLoading || Object.keys(errors).length > 0}
           >
             Edit Properties
-          </ButtonSolidBlue>
+          </Button>
         </ButtonRow>
       </StyledFooter>
     </>

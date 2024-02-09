@@ -24,7 +24,7 @@ interface IServiceFactory {
   getNotificationService: (
     em: SqlEntityManager,
     redisClient?: RedisClientType,
-  ) => INotificationService
+  ) => NotificationService
   getPlatformAuthClient(
     accessToken: string,
     logger?: Logger,
@@ -45,10 +45,7 @@ export class ServiceFactory implements IServiceFactory {
     return emailClient
   }
 
-  getNotificationService(
-    em: SqlEntityManager,
-    redisClient?: RedisClientType,
-  ): INotificationService {
+  getNotificationService(em: SqlEntityManager, redisClient?: RedisClientType): NotificationService {
     return new NotificationService(em, redisClient)
   }
 

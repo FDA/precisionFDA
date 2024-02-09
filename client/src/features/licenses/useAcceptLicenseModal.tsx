@@ -2,12 +2,12 @@ import React from 'react'
 import { useMutation } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
 import styled from 'styled-components'
-import { Button, ButtonSolidBlue } from '../../components/Button'
 import { Modal } from '../modal'
 import { useModal } from '../modal/useModal'
 import { FileLicense } from '../assets/assets.types'
 import { APIResource } from '../home/types'
 import { acceptLicenseRequest } from './api'
+import { Button } from '../../components/Button'
 
 
 const ScrollWrapper = styled.div`
@@ -61,9 +61,9 @@ export function useAcceptLicenseModal<
       footer={
         <>
           <Button onClick={handleClose}>Cancel</Button>
-          <ButtonSolidBlue onClick={() => handleSubmit()}>
+          <Button variant="primary" onClick={() => handleSubmit()}>
             Accept
-          </ButtonSolidBlue>
+          </Button>
         </>
       }
     >

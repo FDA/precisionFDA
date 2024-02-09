@@ -3,7 +3,7 @@ import { AxiosError } from 'axios'
 import React, { useMemo, useState } from 'react'
 import { toast } from 'react-toastify'
 import styled from 'styled-components'
-import { Button, ButtonSolidRed } from '../../../components/Button'
+import { Button } from '../../../components/Button'
 import { Loader } from '../../../components/Loader'
 import { VerticalCenter } from '../../../components/Page/styles'
 import { ResourceTable, StyledName } from '../../../components/ResourceTable'
@@ -174,9 +174,9 @@ export const useDeleteFileModal = ({
           >
             Cancel
           </Button>
-          <ButtonSolidRed onClick={handleSubmit} disabled={!nodesToBeDeleted.length || mutation.isLoading}>
+          <Button variant="warning" onClick={handleSubmit} disabled={!nodesToBeDeleted.length || mutation.isLoading}>
             Delete
-          </ButtonSolidRed>
+          </Button>
         </ButtonRow>
       </Footer>
     </ModalNext>

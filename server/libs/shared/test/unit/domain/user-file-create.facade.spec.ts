@@ -1,5 +1,6 @@
 import { PlatformFileService } from '@shared/domain/platform/service/platform-file.service'
 import { UserFileService } from '@shared/domain/user-file/service/user-file.service'
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { InternalError } from '@shared/errors'
 import { UserFileCreateFacade } from '@shared/facade/file-create/user-file-create.facade'
 import { expect } from 'chai'
@@ -29,10 +30,14 @@ describe('UserFileCreateFacade', () => {
     description: DESCRIPTION,
   }
 
-  const SERVICE_RESULT = 'result'
+  const SERVICE_RESULT = {
+    name: NAME,
+    uid: `${DXID}-1`,
+  } as UserFile
 
   const platformCreateFileStub = stub()
   const serviceCreateFileStub = stub()
+  const serviceCloseFileStub = stub()
   const uploadFileContentStub = stub()
 
   beforeEach(() => {
@@ -57,6 +62,10 @@ describe('UserFileCreateFacade', () => {
         description: DESCRIPTION,
       })
       .resolves(SERVICE_RESULT)
+
+    serviceCloseFileStub.reset()
+    serviceCloseFileStub.throws()
+    serviceCloseFileStub.withArgs(`${DXID}-1`).resolves()
 
     uploadFileContentStub.reset()
     uploadFileContentStub.throws()
@@ -133,12 +142,14 @@ describe('UserFileCreateFacade', () => {
       const res = await getInstance().createFileWithContent(FILE_CREATE_WITH_CONTENT)
 
       expect(res).to.eq(SERVICE_RESULT)
+      expect(serviceCloseFileStub.calledOnce).to.be.true()
     })
 
     it('should upload content correctly', async () => {
       await getInstance().createFileWithContent(FILE_CREATE_WITH_CONTENT)
 
       expect(uploadFileContentStub.calledOnce).to.be.true()
+      expect(serviceCloseFileStub.calledOnce).to.be.true()
     })
   })
 
@@ -147,7 +158,10 @@ describe('UserFileCreateFacade', () => {
       createFile: platformCreateFileStub,
       uploadFileContent: uploadFileContentStub,
     } as unknown as PlatformFileService
-    const userFileService = { createFile: serviceCreateFileStub } as unknown as UserFileService
+    const userFileService = {
+      createFile: serviceCreateFileStub,
+      closeFile: serviceCloseFileStub,
+    } as unknown as UserFileService
 
     return new UserFileCreateFacade(USER_CTX, platformFileService, userFileService)
   }

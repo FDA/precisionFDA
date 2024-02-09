@@ -1,15 +1,14 @@
 import { useQuery } from '@tanstack/react-query'
 import axios from 'axios'
 import React from 'react'
-import { useParams } from 'react-router-dom'
-import { Link } from 'react-router-dom'
+import { useParams, Link } from 'react-router-dom'
 import styled from 'styled-components'
-import { Button, TransparentButton } from '../../../components/Button'
 import { Loader } from '../../../components/Loader'
 import { NoContent } from '../../../components/Public/styles'
 import { theme } from '../../../styles/theme'
 import ResourcesSelect from './ResourcesSelect'
 import { ModalScroll } from '../../modal/styles'
+import { Button, TransparentButton } from '../../../components/Button'
 
 const StyledRefresh = styled.span`
   color: ${theme.colors.primaryBlue};

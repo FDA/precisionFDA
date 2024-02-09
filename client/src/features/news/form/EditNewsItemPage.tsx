@@ -58,7 +58,7 @@ const EditNewsItemMutation = ({ data }: { data: NewsItem }) => {
     if (window.confirm('Are you sure you wish to delete this item?')) deleteNewsItemMutation.mutateAsync()
   }
 
-  const tData = { ...data, createdAt: new Date(data.created_at)?.toISOString().substring(0,10) } satisfies NewsItem
+  const tData = { ...data, createdAt: new Date(data.createdAt)?.toISOString().substring(0,10) } satisfies NewsItem
 
   return <NewsItemForm onSubmit={handleSubmit} onDelete={handleDelete} defaultValues={tData} />
 }

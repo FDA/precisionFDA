@@ -1,13 +1,13 @@
 import React from 'react'
 import { useMutation } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
-import { Button, ButtonSolidBlue } from '../../components/Button'
 import { Modal } from '../modal'
 import { StyledModalContent } from '../modal/styles'
 import { useModal } from '../modal/useModal'
 import { FileLicense } from '../assets/assets.types'
 import { APIResource } from '../home/types'
 import { detachLicenseRequest } from './api'
+import { Button } from '../../components/Button'
 
 export function useDetachLicenseModal<
   T extends { uid?: string; dxid?: string, file_license?: FileLicense },
@@ -53,7 +53,7 @@ export function useDetachLicenseModal<
       footer={
         <>
           <Button onClick={handleClose}>Cancel</Button>
-          <ButtonSolidBlue type="button" onClick={onSubmit}>Detach</ButtonSolidBlue>
+          <Button variant="primary" type="button" onClick={onSubmit}>Detach</Button>
         </>
       }
     >

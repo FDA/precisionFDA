@@ -5,7 +5,7 @@ import { yupResolver } from '@hookform/resolvers/yup'
 import React, { useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { Link } from 'react-router-dom'
-import { Button, ButtonSolidBlue } from '../../../components/Button'
+import { Button } from '../../../components/Button'
 import { InputText } from '../../../components/InputText'
 import { Loader } from '../../../components/Loader'
 import { PageTitle } from '../../../components/Page/styles'
@@ -151,14 +151,15 @@ export const AppForm = ({
                 <ArrowLeftIcon right height={14} />
               </>
             )}
-            <ButtonSolidBlue
+            <Button
               disabled={Object.keys(errors).length > 0 || isSubmitting}
+              variant='primary'
               type="submit"
             >
               {isEdit && <div>Save Revision {(app?.revision || 0) + 1}</div>}
               {isFork && <div>Save Fork</div>}
               {!isFork && !isEdit && <div>Create App</div>}
-            </ButtonSolidBlue>
+            </Button>
           </SubmitRow>
         </Row>
         <ButtonRow>

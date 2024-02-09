@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import React, { useState } from 'react'
 import styled from 'styled-components'
-import { Button, ButtonSolidBlue } from '../../../components/Button'
+import { Button } from '../../../components/Button'
 import { Checkbox } from '../../../components/Checkbox'
 import { FieldInfo } from '../../../components/form/FieldInfo'
 import { InputText } from '../../../components/InputText'
@@ -321,12 +321,13 @@ const FileSelectTabs = ({
           >
             Cancel
           </Button>
-          <ButtonSolidBlue
+          <Button
+            variant='primary'
             onClick={handleSubmit}
             disabled={selectedFiles?.length === 0}
           >
             Select &nbsp;<ButtonBadge>{selectedFiles?.length}</ButtonBadge>
-          </ButtonSolidBlue>
+          </Button>
         </ButtonRow>
       </Footer>
     </>

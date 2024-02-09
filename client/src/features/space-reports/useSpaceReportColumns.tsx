@@ -7,6 +7,7 @@ import { ISpaceReport, SpaceReportState } from './space-report.types'
 
 export const reportStateToTextMap: Record<SpaceReportState, string> = {
   CREATED: 'Generating...',
+  CLOSING_RESULT_FILE: 'Generating...',
   DONE: 'Done',
   ERROR: 'Error',
 }

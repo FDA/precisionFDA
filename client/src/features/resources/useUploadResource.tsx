@@ -1,17 +1,16 @@
 import React, { ChangeEvent, FormEvent, useEffect, useState } from 'react'
 import { toast } from 'react-toastify'
 import styled from 'styled-components'
-import { Button } from '../../components/Button'
 import { InputText } from '../../components/InputText'
 import { processFile } from './uploadImage'
 import {
-  createResourceLinkRequest,
   useCreateResourceMutation,
 } from './useCreateResource'
 import { getExt, isImageFromExt } from './util'
 import { FileIcon } from '../../components/icons/FileIcon'
 import { FileThumb } from './styles'
 import { FileWithPreview } from './types'
+import { Button } from '../../components/Button'
 
 
 // Convert file to base64
@@ -45,11 +44,8 @@ export const useUploadResource = ({
 
     newFiles[index].uploadStatus = 'uploading'
     setSelectedFiles(newFiles)
-    await processFile(s.file, fileUid)
 
-    newFiles[index].uploadStatus = 'linking'
-    setSelectedFiles(newFiles)
-    await createResourceLinkRequest(id, resourceId)
+    await processFile(s.file, fileUid)
 
     newFiles[index].uploadStatus = 'uploaded'
     setSelectedFiles(newFiles)

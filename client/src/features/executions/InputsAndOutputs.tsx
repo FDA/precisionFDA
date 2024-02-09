@@ -5,11 +5,10 @@ import styled from 'styled-components'
 
 
 const StyledInputsAndOutputs = styled.div`
-  background-color: #f4f8fd;
-  border: 1px solid #ddd;
   border-bottom-right-radius: 3px;
   border-bottom-left-radius: 3px;
   display: flex;
+  flex-wrap: wrap;
 `
 
 const StyledGrid = styled.div`
@@ -19,10 +18,11 @@ const StyledGrid = styled.div`
 
 const StyledTable = styled.div`
   padding: 10px 15px;
-  width: 50%;
+  font-size: 14px;
+  flex: 0 1 auto;
+  min-width: 300px;
 
   .title {
-    color: #8198bc;
     text-transform: uppercase;
     font-weight: 400;
     font-size: 14px;
@@ -32,16 +32,14 @@ const StyledTable = styled.div`
   .row {
     display: flex;
     padding: 8px;
-    border-top: 1px solid #ddd;
+    border-top: 1px solid var(--c-layout-border);
   }
   .even {
-    background: #ebf3fb;
     display: flex;
     padding: 8px;
-    border-top: 1px solid #ddd;
+    border-top: 1px solid var(--c-layout-border);
   }
   .type {
-    color: #8198bc;
     font-family: 'PT Mono', Menlo, Monaco, Consolas, 'Courier New', monospace;
   }
 `

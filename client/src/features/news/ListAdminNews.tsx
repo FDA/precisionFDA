@@ -1,23 +1,23 @@
 import { format } from 'date-fns'
 import React from 'react'
-import { Link, Navigate, Redirect } from 'react-router-dom'
+import { Link, Navigate } from 'react-router-dom'
 import ReactTooltip from 'react-tooltip'
 import styled from 'styled-components'
 import { StringParam, useQueryParam } from 'use-query-params'
-import { ButtonSolidBlue, TransparentButton } from '../../components/Button'
-import { ButtonGroup } from '../../components/Button/ButtonGroup'
 import { ArrowLeftIcon } from '../../components/icons/ArrowLeftIcon'
 import { GlobeIcon } from '../../components/icons/GlobeIcon'
 import { NewspaperIcon } from '../../components/icons/NewspaperIcon'
 import { Svg } from '../../components/icons/Svg'
 import { Loader } from '../../components/Loader'
 import { BackLink } from '../../components/Page/PageBackLink'
-import { PageContainerMargin } from '../../components/Page/styles'
+import { PageContainerMargin, PageTitle } from '../../components/Page/styles'
 import ExternalLink from '../../components/Controls/ExternalLink'
 import { UserLayout } from '../../layouts/UserLayout'
 import { useAuthUserQuery } from '../auth/api'
 import { NewsItem } from './types'
 import { useNewsAdminAllRequest } from './useNewsListQuery'
+import { Button, TransparentButton } from '../../components/Button'
+import { ButtonRow } from '../modal/styles'
 
 const StyledCard = styled.div`
   display: flex;
@@ -34,6 +34,10 @@ const PageHeader = styled.div`
   width: 100%;
   flex: 1 0 auto;
   padding-top: 32px;
+
+  ${PageTitle} {
+    margin: 16px 0;
+  }
 `
 
 const StyledList = styled.div`
@@ -59,7 +63,7 @@ const CardRight = styled.div`
   }
 `
 
-const ButtonRow = styled.div`
+const Row = styled.div`
   display: flex;
   justify-content: space-between;
   margin-bottom: 16px;
@@ -156,12 +160,12 @@ function ListAdminNews() {
       <NewsPageContainerMargin>
         <PageHeader>
           <BackLink linkTo="/news">Back to news list</BackLink>
-          <h1>Admin News Items</h1>
-          <ButtonRow>
+          <PageTitle>Admin News Items</PageTitle>
+          <Row>
             <Link to="/admin/news/create">
-              <ButtonSolidBlue>Add News Item</ButtonSolidBlue>
+              <Button variant='primary'>Add News Item</Button>
             </Link>
-            <ButtonGroup>
+            <ButtonRow>
               <TypeSelect selected={!typeParam} onClick={() => setTypeParam(null, 'replaceIn')}>
                 All
               </TypeSelect>
@@ -173,8 +177,8 @@ function ListAdminNews() {
               <TypeSelect selected={typeParam === 'article'} onClick={() => setTypeParam('article', 'replaceIn')}>
                 Articles
               </TypeSelect>
-            </ButtonGroup>
-          </ButtonRow>
+            </ButtonRow>
+          </Row>
         </PageHeader>
 
         <StyledList>

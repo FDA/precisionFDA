@@ -1,10 +1,10 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import React, { useRef } from 'react'
 import styled from 'styled-components'
-import { Button, ButtonSolidBlue } from '../../../components/Button'
 import { editDiscussionRequest } from '../api'
 import { Discussion } from '../discussions.types'
 import { InputText } from '../../../components/InputText'
+import { Button } from '../../../components/Button'
 
 
 export const StyledTitleEdit = styled.div`
@@ -79,7 +79,8 @@ export function EditDiscussionTitle({
       >
         Cancel
       </Button>
-      <ButtonSolidBlue
+      <Button
+        variant="primary"
         type="button"
         onClick={() =>
           inputRef.current?.value &&
@@ -94,7 +95,7 @@ export function EditDiscussionTitle({
         disabled={editTitleMutation.isLoading}
       >
         Save
-      </ButtonSolidBlue>
+      </Button>
     </StyledTitleEdit>
   )
 }

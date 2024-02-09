@@ -1,4 +1,5 @@
 import { SpaceMembership } from '../spaces/spaces.types'
+import { CreateDataPortalRequest, UpdateDataPortalRequest } from './api'
 
 export interface DataPortalMember {
   dxuser: string
@@ -13,6 +14,7 @@ export interface DataPortal {
   sortOrder: number
   cardImageUid: string
   cardImageUrl: string
+  cardImageFileName?: string
   status: 'open' | string
   spaceId: number
   hostLeadDxuser: string
@@ -20,4 +22,14 @@ export interface DataPortal {
   content: string | null
   editorState: string
   members: DataPortalMember[]
+}
+
+export interface CreateDataPortalData {
+  dataPortal: CreateDataPortalRequest
+  image: File
+}
+
+export interface UpdateDataPortalData {
+  dataPortal: UpdateDataPortalRequest
+  image: File
 }

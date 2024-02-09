@@ -1,7 +1,7 @@
 import React from 'react'
 import { Hooks, HeaderProps, CellProps, useResizeColumns } from 'react-table'
 import initial from 'lodash/initial'
-import { ExpandArrowIcon, SelectCheckLabel } from './styles'
+import { ExpandArrowIcon, SelectCheckLabel, StyledExpander } from './styles'
 import { TransparentButton } from '../Button'
 import { Checkbox } from '../CheckboxNext'
 
@@ -71,7 +71,7 @@ export const useEmptyCol = (width: number) => (hooks: Hooks<any>) => {
 export const expandHook = (hooks: Hooks<any>) => {
   hooks.visibleColumns.push(columns => [
     {
-      id: 'expander',
+      id: 'row-expander',
       disableResizing: true,
       disableGroupBy: true,
       width: 45,
@@ -83,11 +83,11 @@ export const expandHook = (hooks: Hooks<any>) => {
       ),
       Cell: (cell: CellProps<any>) => {
         return (
-          <div {...cell.row.getToggleRowExpandedProps()}>
+          <StyledExpander {...cell.row.getToggleRowExpandedProps({ className: 'expander' })}>
             {cell.row.hideExpand ? (
-              <ExpandArrowIcon hide={true} />
+              <ExpandArrowIcon hide />
             ) : <ExpandArrowIcon expanded={cell.row.isExpanded} />}
-          </div>
+          </StyledExpander>
         )
       },
     },

@@ -1,6 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
 import React, { useState } from 'react'
-import { Button, ButtonSolidBlue } from '../../../components/Button'
 import { Checkbox } from '../../../components/Checkbox'
 import { InputText } from '../../../components/InputText'
 import { Loader } from '../../../components/Loader'
@@ -32,6 +31,7 @@ import {
 import { DialogType } from '../../home/types'
 import { fetchFilteredComparisons } from '../comparisons.api'
 import { IComparison } from '../comparisons.types'
+import { Button } from '../../../components/Button'
 
 const Row = ({
   comparison,
@@ -253,13 +253,14 @@ export const useSelectComparisonModal = (
           >
             Cancel
           </Button>
-          <ButtonSolidBlue
+          <Button
+            variant="primary"
             onClick={handleSubmit}
             disabled={selectedComparisons?.length === 0}
           >
             Select &nbsp;
             <ButtonBadge>{selectedComparisons?.length}</ButtonBadge>
-          </ButtonSolidBlue>
+          </Button>
         </ButtonRow>
       </Footer>
     </ModalNext>

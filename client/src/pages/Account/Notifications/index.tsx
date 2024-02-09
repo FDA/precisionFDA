@@ -2,7 +2,6 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import React, { useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { toast } from 'react-toastify'
-import { ButtonSolidBlue } from '../../../components/Button'
 import { Checkbox } from '../../../components/CheckboxNext'
 import { GuestNotAllowed } from '../../../components/GuestNotAllowed'
 import { Loader } from '../../../components/Loader'
@@ -15,6 +14,7 @@ import { UserLayout } from '../../../layouts/UserLayout'
 import { fetchNotificationsPreferences, saveNotificationsPreferences } from './api'
 import { FieldGroup, SectionTitle, StyledNotifications, StyledPageContainer, StyledSelectWrap } from './styles'
 import { AllNotification, NotificationPreferences, NotificationPreferencesPayload } from './types'
+import { Button } from '../../../components/Button'
 
 enum Roles {
   'reviewer' = 'reviewer',
@@ -191,7 +191,7 @@ const NotificationForm = ({ preferences, onSave }: { preferences: NotificationPr
         })}
       </StyledNotifications>
       <PageActions>
-        <ButtonSolidBlue type="submit" disabled={isSubmitting}>Save Settings</ButtonSolidBlue>
+        <Button variant="primary" type="submit" disabled={isSubmitting}>Save Settings</Button>
       </PageActions>
     </form>
   )
