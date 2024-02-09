@@ -53,6 +53,7 @@ describe('UserFileService', () => {
 
   const userRepoFindOneOrFailStub = stub()
   const fileRepoFindOneOrFailStub = stub()
+  const fileRepoFindOneStub = stub()
   const fileLoadIfAccessibleByUserStub = stub()
   const nodeRepoFindOneOrFailStub = stub()
   const nodeLoadIfAccessibleByUserStub = stub()
@@ -88,6 +89,7 @@ describe('UserFileService', () => {
   const fileRepository = {
     loadIfAccessibleByUser: fileRepoFindOneOrFailStub,
     findOneOrFail: fileRepoFindOneOrFailStub,
+    findOne: fileRepoFindOneStub,
   } as unknown as UserFileRepository
   const userRepository = {
     findOneOrFail: userRepoFindOneOrFailStub,
@@ -124,6 +126,9 @@ describe('UserFileService', () => {
 
     fileRepoFindOneOrFailStub.reset()
     fileRepoFindOneOrFailStub.throws()
+
+    fileRepoFindOneStub.reset()
+    fileRepoFindOneStub.throws()
 
     userRepoFindOneOrFailStub.reset()
     userRepoFindOneOrFailStub.throws()
@@ -243,7 +248,7 @@ describe('UserFileService', () => {
         isCreatedByChallengeBot: () => true,
       } as unknown as UserFile
 
-      fileRepoFindOneOrFailStub.withArgs({ uid: UID }, match.any).returns(userFile)
+      fileRepoFindOneStub.withArgs({ uid: UID }, match.any).returns(userFile)
       createFileSynchronizeJobTaskStub.reset()
 
       await getInstance().closeFile(UID, 'UPDATE_DATA_PORTAL_IMAGE_URL')
