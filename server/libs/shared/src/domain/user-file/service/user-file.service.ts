@@ -48,14 +48,11 @@ export class UserFileService {
     const userIsAdmin = (await user.isSiteAdmin()) || (await user.isChallengeAdmin())
     if (userIsAdmin) {
       // first read file to find out if it's a challenge file
-      const challengeFile = await this.fileRepo.findOneOrFail(
+      const challengeFile = await this.fileRepo.findOne(
         { uid: fileUid },
         { populate: ['challengeResources', 'user'] },
       )
-      if (!challengeFile) {
-        throw new FileNotFoundError(`File with uid ${fileUid} was not found`)
-      }
-      if (challengeFile.isCreatedByChallengeBot()) {
+      if (challengeFile?.isCreatedByChallengeBot()) {
         return [challengeFile, true]
       }
     }
