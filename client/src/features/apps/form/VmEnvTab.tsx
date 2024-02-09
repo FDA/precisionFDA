@@ -3,9 +3,7 @@ import { Control, Controller } from 'react-hook-form'
 import { Link } from 'react-router-dom'
 import styled from 'styled-components'
 import {
-  Button,
-  ButtonSolidBlue,
-  TransparentButton,
+  TransparentButton, Button,
 } from '../../../components/Button'
 import ExternalLink from '../../../components/Controls/ExternalLink'
 import {
@@ -71,6 +69,9 @@ const AssetButtonRow = styled.div`
     align-items: center;
     gap: 8px;
     font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
   }
 
   ${Svg} {
@@ -144,6 +145,7 @@ const PackageRow = styled.div`
 `
 
 const PackageList = styled.ul`
+  list-style: none;
   button {
     margin-left: 16px;
     display: flex;
@@ -180,9 +182,9 @@ const UbuntuPackageSelect = ({
       <Box>
         <PackagesInputRow>
           <InputTextS ref={inputRef} placeholder="Package name" />
-          <ButtonSolidBlue type="button" onClick={addItem}>
+          <Button variant='primary' type="button" onClick={addItem}>
             Add
-          </ButtonSolidBlue>
+          </Button>
         </PackagesInputRow>
         <Tip>
           <b>TIP:</b> Find packages within the distribution using{' '}

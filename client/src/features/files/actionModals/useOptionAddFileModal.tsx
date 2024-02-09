@@ -1,8 +1,8 @@
 import React from 'react'
 import styled from 'styled-components'
-import { ButtonSolidBlue } from '../../../components/Button'
 import { useModal } from '../../modal/useModal'
 import { ModalHeaderTop, ModalNext } from '../../modal/ModalNext'
+import { Button } from '../../../components/Button'
 
 const Row = styled.div`
   display: flex;
@@ -64,14 +64,15 @@ export const useOptionAddFileModal = ({
               <p>This includes files, apps, workflows, and jobs</p>
             </div>
             <div>
-              <ButtonSolidBlue
+              <Button
+                variant="primary"
                 onClick={() => {
                   setShowModal(false)
                   setShowCopyFilesModal(true)
                 }}
               >
                 Copy Files
-              </ButtonSolidBlue>
+              </Button>
             </div>
           </Option>
           <Spacer />
@@ -85,14 +86,15 @@ export const useOptionAddFileModal = ({
               </p>
             </div>
             <div>
-              <ButtonSolidBlue
+              <Button
+                variant="primary"
                 onClick={() => {
                   setShowModal(false)
                   setShowFileUploadModal(true)
                 }}
               >
                 Upload Files
-              </ButtonSolidBlue>
+              </Button>
             </div>
           </Option>
         </Row>

@@ -15,9 +15,13 @@ export class UserFileCreateFacade {
     private readonly userFileService: UserFileService,
   ) {}
 
-  async createFileWithContent(props: FileCreateWithContent) {
+  async createFileWithContent(props: FileCreateWithContent, initCloseFile = true) {
     const file = await this.createFile(props)
     await this.platformFileService.uploadFileContent(file, props.content)
+
+    if (initCloseFile) {
+      await this.userFileService.closeFile(file.uid)
+    }
 
     return file
   }

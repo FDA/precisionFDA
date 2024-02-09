@@ -1,3 +1,4 @@
+import React, { useEffect } from 'react'
 import {
   UseMutationOptions,
   useMutation,
@@ -5,10 +6,10 @@ import {
   useQueryClient,
 } from '@tanstack/react-query'
 import axios from 'axios'
-import React from 'react'
 import { useParams } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import ReactTooltip from 'react-tooltip'
+import useWebSocket from 'react-use-websocket'
 import styled from 'styled-components'
 import { Loader } from '../../../components/Loader'
 import { NotAllowedPage } from '../../../components/NotAllowed'
@@ -18,7 +19,9 @@ import { BookIcon } from '../../../components/icons/BookIcon'
 import { CrossIcon } from '../../../components/icons/PlusIcon'
 import { UserLayout } from '../../../layouts/UserLayout'
 import { theme } from '../../../styles/theme'
+import { DEFAULT_RECONNECT_ATTEMPTS, DEFAULT_RECONNECT_INTERVAL, getNodeWsUrl } from '../../../utils/config'
 import { useAuthUser } from '../../auth/useAuthUser'
+import { Notification, NOTIFICATION_ACTION } from '../../home/types'
 import { CreateResource } from '../../resources/CreateResource'
 import { ResourceThumb } from '../../resources/ResourceThumb'
 import { StyledPageCenter } from '../../spaces/form/styles'
@@ -147,6 +150,22 @@ const DataPortalResourcesPage = () => {
       queryClient.invalidateQueries(['resources-list-portal'])
     },
   })
+
+  const { lastJsonMessage: notification } = useWebSocket<Notification>(getNodeWsUrl(), {
+    share: true,
+    reconnectInterval: DEFAULT_RECONNECT_INTERVAL,
+    reconnectAttempts: DEFAULT_RECONNECT_ATTEMPTS,
+    shouldReconnect: () => true,
+  })
+
+  useEffect(() => {
+    if (notification == null) {
+      return
+    }
+    if (NOTIFICATION_ACTION.RESOURCE_URL_UPDATED === notification.action) {
+      queryClient.invalidateQueries(['resources-list-portal'])
+    }
+  }, [notification])
 
   const handleRemove = async (id: number) => {
     if (

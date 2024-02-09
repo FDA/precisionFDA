@@ -1,4 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { parseInt } from 'lodash'
 import React from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { toast } from 'react-toastify'
@@ -9,8 +10,9 @@ import { PageTitle } from '../../../components/Page/styles'
 import { UserLayout } from '../../../layouts/UserLayout'
 import { useAuthUser } from '../../auth/useAuthUser'
 import { StyledPageCenter, StyledPageContent } from '../../spaces/form/styles'
-import { EditDataPortalRequest, editDataPortalRequest } from '../api'
+import { editDataPortalRequest, UpdateDataPortalRequest } from '../api'
 import { useDataPortalByIdQuery } from '../queries'
+import { UpdateDataPortalData } from '../types'
 import { canEditSettings, isUserInMemberRole } from '../utils'
 import { CreateDataPortalForm, DataPortalForm } from './DataPortalForm'
 import { ScrollableMainGlobalStyles } from '../../../styles/global'
@@ -23,7 +25,7 @@ const EditDataPortalPage = () => {
   const queryClient = useQueryClient()
   const mutation = useMutation({
     mutationKey: ['update-data-portal'],
-    mutationFn: (payload: any) => editDataPortalRequest(payload, portal.id),
+    mutationFn: (payload: UpdateDataPortalData) => editDataPortalRequest(payload),
     onSuccess: res => {
       if (!res?.error) {
         queryClient.invalidateQueries(['data-portal-list'])
@@ -41,16 +43,16 @@ const EditDataPortalPage = () => {
   })
 
   const handleSubmit = async (v: CreateDataPortalForm) => {
-    const payload: EditDataPortalRequest = {
-      name: v.name,
-      description: v.description,
-      default: v.default,
-      sort_order: v.sort_order,
-    }
-    
-    if(v?.card_image_file && v?.card_image_file[0]) {
-      // eslint-disable-next-line prefer-destructuring
-      payload['image'] = v.card_image_file[0]
+    const payload: UpdateDataPortalData = {
+      dataPortal: {
+        id: parseInt(portalId, 10),
+        name: v.name,
+        description: v.description,
+        default: v.default,
+        sort_order: v.sort_order,
+        ...portal && { space_id: portal.spaceId },
+      } as UpdateDataPortalRequest,
+      image: v.card_image_file ? v.card_image_file[0] : null,
     }
     return mutation.mutateAsync(payload).catch(() => {})
   }

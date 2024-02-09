@@ -1,12 +1,12 @@
 import React from 'react'
 import { useMutation } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
-import { Button, ButtonSolidBlue } from '../../components/Button'
 import { Modal } from '../modal'
 import { ButtonRow } from '../modal/styles'
 import { useModal } from '../modal/useModal'
 import { unlockSpaceRequest } from './spaces.api'
 import { ISpace } from './spaces.types'
+import { Button } from '../../components/Button'
 
 export const useUnlockSpaceModal = ({
   space,
@@ -48,7 +48,8 @@ export const useUnlockSpaceModal = ({
         <Button type="button" onClick={handleClose}>
           Cancel
         </Button>
-        <ButtonSolidBlue
+        <Button
+          variant="primary"
           type="button"
           onClick={() =>
             unlockSpaceMutation.mutateAsync({
@@ -59,7 +60,7 @@ export const useUnlockSpaceModal = ({
           }
         >
           {isLocked ? 'Unlock' : 'Lock'}
-        </ButtonSolidBlue>
+        </Button>
       </ButtonRow>
     </Modal>
   )

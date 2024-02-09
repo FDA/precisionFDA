@@ -1,6 +1,6 @@
 import { useQueryClient } from '@tanstack/react-query'
 import React, { useEffect, useMemo } from 'react'
-import { useNavigate, useLocation } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { Column, SortingRule, UseResizeColumnsState } from 'react-table'
 import useWebSocket from 'react-use-websocket'
 import Dropdown from '../../components/Dropdown'
@@ -9,7 +9,6 @@ import { Pagination } from '../../components/Pagination'
 import Table from '../../components/Table/Table'
 import { EmptyTable } from '../../components/Table/styles'
 import { HoverDNAnexusLogo } from '../../components/icons/DNAnexusLogo'
-import { colors } from '../../styles/theme'
 import { ErrorBoundary } from '../../utils/ErrorBoundry'
 import { DEFAULT_RECONNECT_ATTEMPTS, DEFAULT_RECONNECT_INTERVAL, SHOULD_RECONNECT, getNodeWsUrl } from '../../utils/config'
 import { getSelectedObjectsFromIndexes, toArrayFromObject } from '../../utils/object'
@@ -19,15 +18,15 @@ import {
   ActionsRow, StyledHomeTable,
 } from '../home/home.styles'
 import { ActionsButton } from '../home/show.styles'
-import { IFilter, IMeta, KeyVal, NOTIFICATION_ACTION, Notification, HomeScope } from '../home/types'
+import { HomeScope, IFilter, IMeta, KeyVal, NOTIFICATION_ACTION, Notification } from '../home/types'
 import { useList } from '../home/useList'
 import { usePropertiesQuery } from '../home/usePropertiesQuery'
+import { ExecutionSubTable } from './ExecutionSubTable'
 import { fetchExecutions } from './executions.api'
 import { IExecution } from './executions.types'
-import { getStateBgColorFromState } from './executions.util'
-import { getSubComponentValue } from './getSubComponentValue'
 import { useExecutionColumns } from './useExecutionColumns'
 import { useExecutionActions } from './useExecutionSelectActions'
+
 
 type ListType = { jobs: IExecution[]; meta: IMeta }
 
@@ -251,22 +250,6 @@ export const ExecutionsListTable = ({
         isFilterable
         saveColumnResizeWidth={saveColumnResizeWidth}
         isExpandable
-        cellProps={cell => 
-          cell.column.id === 'state'
-            ? {
-                style: {
-                  backgroundColor: cell.row.original.jobs
-                    ? getStateBgColorFromState(
-                        cell.row.original.jobs[
-                          cell.row.original.jobs.length - 1
-                        ].state,
-                      )
-                    : getStateBgColorFromState(cell.row.original.state),
-                  boxShadow: 'none',
-                },
-              }
-            : {}
-        }
         rowProps={row => ({
           className: 'hideExpand',
         })}
@@ -274,24 +257,7 @@ export const ExecutionsListTable = ({
           ...row,
           hideExpand: !row.original.jobs,
         })}
-        subcomponent={row => (
-            <>
-              {row.original.jobs &&
-                row.original.jobs.map((job, index) => (
-                    <div
-                      className="tr sub"
-                      {...row.getRowProps()}
-                      key={`${row.getRowProps().key}-sub-${index}`}
-                      style={{
-                        ...row.getRowProps().style,
-                        backgroundColor: colors.backgroundLightGray,
-                      }}
-                    >
-                      {row.cells.map(cell => getSubComponentValue(job, cell))}
-                    </div>
-                  ))}
-            </>
-          )}
+        subcomponent={ExecutionSubTable}
       />
     </StyledHomeTable>
   )

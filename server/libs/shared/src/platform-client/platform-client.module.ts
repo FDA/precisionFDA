@@ -1,8 +1,11 @@
 import { Module } from '@nestjs/common'
-import { platformClientProvider } from '@shared/platform-client/providers/platform-client.provider'
+import {
+  challengeBotClientProvider,
+  platformClientProvider,
+} from '@shared/platform-client/providers/platform-client.provider'
 
 @Module({
-  providers: [platformClientProvider],
-  exports: [platformClientProvider],
+  providers: [platformClientProvider, challengeBotClientProvider],
+  exports: [platformClientProvider, challengeBotClientProvider],
 })
 export class PlatformClientModule {}

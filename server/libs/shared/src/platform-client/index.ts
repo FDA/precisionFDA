@@ -291,7 +291,11 @@ export class PlatformClient {
     const url = `${config.platform.apiUrl}/${params.fileDxid}/describe`
     const data: AnyObject = {
       project: params.projectDxid,
-      defaultFields: true,
+      fields: {
+        id: true,
+        state: true,
+        size: true,
+      },
     }
     const options: AxiosRequestConfig = {
       method: 'POST',

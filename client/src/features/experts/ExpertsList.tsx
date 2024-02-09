@@ -4,7 +4,6 @@ import React from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Link, useLocation } from 'react-router-dom'
 import styled from 'styled-components'
-import { Button, ButtonSolidBlue } from '../../components/Button'
 import { Loader } from '../../components/Loader'
 import { hidePagination, Pagination } from '../../components/Pagination'
 import {
@@ -34,6 +33,7 @@ import {
 } from './useExpertsListQuery'
 import { PageContainerMargin } from '../../components/Page/styles'
 import { usePageMeta } from '../../hooks/usePageMeta'
+import { Button } from '../../components/Button'
 
 export const ExpertListItem = styled.div`
   display: flex;
@@ -223,13 +223,14 @@ const ExpertsList = () => {
             {userCanCreateExpert && (
               <RightSideItem>
                 <ButtonRow>
-                  <ButtonSolidBlue
+                  <Button
+                    variant="primary"
                     as="a"
                     data-turbolinks="false"
                     href="/experts/new"
                   >
                     Add an expert
-                  </ButtonSolidBlue>
+                  </Button>
                 </ButtonRow>
               </RightSideItem>
             )}

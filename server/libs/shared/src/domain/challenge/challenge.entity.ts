@@ -7,7 +7,9 @@ import {
   PrimaryKey,
   Property,
   Reference,
+  OneToOne,
 } from '@mikro-orm/core'
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { BaseEntity } from '../../database/base-entity'
 import { ChallengeResource } from './challenge-resource.entity'
@@ -27,6 +29,9 @@ export class Challenge extends BaseEntity {
 
   @Property()
   meta: string
+
+  @OneToOne(() => UserFile)
+  cardImage: Ref<UserFile>
 
   @Property()
   startAt: Date

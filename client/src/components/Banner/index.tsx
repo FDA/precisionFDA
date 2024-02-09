@@ -1,7 +1,6 @@
 import styled, { css } from 'styled-components'
 import navBackground from '../../assets/NavbarBackground.png'
 import { commonStyles } from '../../styles/commonStyles'
-import { fontSize, fontWeight, padding, sizing } from '../../styles/theme'
 import { Button } from '../Button'
 
 export const MainBanner = styled.div`
@@ -21,7 +20,8 @@ export const MainBanner = styled.div`
 export const ResourceBanner = styled(MainBanner)`
   display: flex;
   flex-flow: row nowrap;
-  padding: 18px ${padding.mainContentHorizontal};
+  gap: 64px;
+  padding: 18px 32px;
   margin: 0 auto;
   box-sizing: border-box;
   border-bottom: 1px solid var(--c-layout-border);
@@ -52,8 +52,8 @@ export const BannerPicker = styled.div`
 
 export const BannerPickerItem = styled(Button)<{ $isActive?: boolean }>`
   display: inline-block;
-  font-weight: ${fontWeight.medium};
-  font-size: ${fontSize.h2};
+  font-weight: 500;
+  font-size: 18px;
   line-height: 20px;
   color: var(--c-banner-base);
   background: transparent;
@@ -62,19 +62,19 @@ export const BannerPickerItem = styled(Button)<{ $isActive?: boolean }>`
   padding: 0;
   border: none;
   border-radius: 0;
-  border-bottom: ${sizing.highlightBarWidth} solid transparent;
+  border-bottom: 4px solid transparent;
   cursor: pointer;
 
   &:hover {
     background: transparent;
-    border-bottom: ${sizing.highlightBarWidth} solid var(--c-banner-highlight);
+    border-bottom: 4px solid var(--c-banner-highlight);
     color: var(--c-banner-base);
   }
 
   ${({ $isActive }) => (
     $isActive && css`
       color: var(--c-banner-highlight);
-      border-bottom: ${sizing.highlightBarWidth} solid var(--c-banner-highlight);
+      border-bottom: 4px solid var(--c-banner-highlight);
 
       &:hover {
         color: var(--c-banner-highlight);

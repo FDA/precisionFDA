@@ -58,13 +58,11 @@ describe('app service tests', () => {
         removeObjectsContainerParam = containerId
         removeObjectsParam = params
         return { id: containerId }
-      }
+      },
     } as PlatformClient
-
-    // mocksReset()
   })
 
-  const getDefaultApp = (): AppInput =>  {
+  const getDefaultApp = (): AppInput => {
     return {
       is_new: true,
       name: 'test-app1',

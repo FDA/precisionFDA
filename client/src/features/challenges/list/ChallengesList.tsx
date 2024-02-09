@@ -1,7 +1,8 @@
 import queryString from 'query-string'
-import React from 'react'
-import { useQuery } from '@tanstack/react-query'
+import React, { useEffect } from 'react'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link, useLocation } from 'react-router-dom'
+import useWebSocket from 'react-use-websocket'
 import { ButtonSolidBlue } from '../../../components/Button'
 import { Loader } from '../../../components/Loader'
 import { PageContainerMargin } from '../../../components/Page/styles'
@@ -22,12 +23,16 @@ import {
 import { usePageMeta } from '../../../hooks/usePageMeta'
 import { usePaginationParams } from '../../../hooks/usePaginationState'
 import NavigationBar from '../../../components/NavigationBar/NavigationBar'
+import { useToastWSHandler } from '../../../hooks/useToastWSHandler'
 import PublicLayout from '../../../layouts/PublicLayout'
+import { DEFAULT_RECONNECT_ATTEMPTS, DEFAULT_RECONNECT_INTERVAL, getNodeWsUrl } from '../../../utils/config'
 import { useAuthUser } from '../../auth/useAuthUser'
+import { Notification, NOTIFICATION_ACTION } from '../../home/types'
 import { challengesYearsListRequest } from '../api'
 import { getTimeStatusName, renderEmpty } from '../util'
 import { ChallengeListItem } from './ChallengeListItem'
 import { useChallengesListQuery } from './useChallengesListQuery'
+import { Button } from '../../../components/Button'
 
 
 const ChallengesList = () => {
@@ -36,6 +41,7 @@ const ChallengesList = () => {
   const userCanCreateChallenge = user?.can_create_challenges
   const location = useLocation()
   const { year, time_status }: any = queryString.parse(location.search)
+  const queryClient = useQueryClient()
 
   const pagination = usePaginationParams()
 
@@ -51,7 +57,23 @@ const ChallengesList = () => {
     },
   })
 
+  useToastWSHandler(user)
 
+  const { lastJsonMessage: notification } = useWebSocket<Notification>(getNodeWsUrl(), {
+    share: true,
+    reconnectInterval: DEFAULT_RECONNECT_INTERVAL,
+    reconnectAttempts: DEFAULT_RECONNECT_ATTEMPTS,
+    shouldReconnect: () => true,
+  })
+
+  useEffect(() => {
+    if (notification == null) {
+      return
+    }
+    if (NOTIFICATION_ACTION.CHALLENGE_CARD_IMAGE_URL_UPDATED === notification.action) {
+      queryClient.invalidateQueries(['challengesList'])
+    }
+  }, [notification])
 
   return (
     <PublicLayout>
@@ -101,9 +123,9 @@ const ChallengesList = () => {
             {userCanCreateChallenge && (
               <RightSideItem>
                 <ButtonRow>
-                  <ButtonSolidBlue as={Link} to="/challenges/create" data-turbolinks="false">
+                  <Button variant='primary' as={Link} to="/challenges/create" data-turbolinks="false">
                     Create a new challenge
-                  </ButtonSolidBlue>
+                  </Button>
                 </ButtonRow>
               </RightSideItem>
             )}

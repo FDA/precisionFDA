@@ -1,11 +1,11 @@
 import React from 'react'
-import { ButtonSolidBlue } from '../../components/Button'
 import { ModalHeaderTop, ModalNext } from '../modal/ModalNext'
 import { Content, Footer } from '../modal/styles'
 import { UseModal } from '../modal/useModal'
 import {
   onLogInWithSSO, useSiteSettingsQuery,
 } from './useSiteSettingsQuery'
+import { Button } from '../../components/Button'
 
 
 /*
@@ -45,14 +45,14 @@ export const DataPortalsAuthPickerModal: React.FC<{ modal: UseModal }> = ({
       <Footer>
         <>
           {siteSettings?.ssoButton.isEnabled && (
-            <ButtonSolidBlue onClick={() => handleSSOLoginWithDaasRedirect(siteSettings.ssoButton.data.fdaSsoUrl)}>
+            <Button variant="primary" onClick={() => handleSSOLoginWithDaasRedirect(siteSettings.ssoButton.data.fdaSsoUrl)}>
               Log In with FDA SSO
-            </ButtonSolidBlue>
+            </Button>
           )}
-          <ButtonSolidBlue
+          <Button variant="primary"
             onClick={() => window.location.assign(`/login?user_return_to=${encodeURIComponent('/data-portals/main')}`)}>
             Log In with Password and MFA
-          </ButtonSolidBlue>
+          </Button>
         </>
       </Footer>
     </ModalNext>

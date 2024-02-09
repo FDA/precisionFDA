@@ -44,6 +44,7 @@ import { DefaultColumnFilter } from './helpers'
 import { ReactTableStyles, StyledTable } from './styles'
 import { expandHook, selectionHook } from './tableHooks'
 import { useComponentWidth } from './useComponentWidth'
+import classNames from 'classnames'
 
 const StyledColumnSelect = styled.div`
   position: sticky;
@@ -73,8 +74,9 @@ const Front = styled(Dropdown)`
   justify-content: flex-end;
   z-index: 3;
   width: 32px;
-  svg {
-    color: var(--tertiary-400);
+  color: var(--tertiary-400);
+  &:hover {
+    color: var(--tertiary-500);
   }
 `
 
@@ -278,21 +280,6 @@ export default function Table<T extends object>(
     return containerWidth > sum ? containerWidth - sum - 8 : 50
   }, [visibleColumns])
 
-  const visibleFilters: FilterSelectColumn = useMemo(() => ({
-    ...visibleColumns
-    .filter((col: any) => typeof col.Header === 'string')
-    .reduce((value: FilterSelectColumn, curr: any) => ({
-      ...value,
-      [curr.id]: {
-        key: curr.id,
-        title: curr.Header,
-        isVisible: true,
-        groupTitle: 'Default Columns',
-    }}), {}),
-  }), [visibleColumns])
-
-  const [filterColumns, setFilterColumns] = useState<FilterSelectColumn>({})
-
   useMountedLayoutEffect(() => {
     if (setSelectedRows) setSelectedRows(selectedRowIds)
   }, [selectedRowIds, setSelectedRows])
@@ -370,44 +357,49 @@ export default function Table<T extends object>(
                 onChangeVisible={onChangeVisible}
                 />
               }
-              {visibleColumns.map((column, i) => (
-                // eslint-disable-next-line react/jsx-key
-                <div {...column.getHeaderProps()} className="th">
-                  {isColsResizable && column.getResizerProps && (
-                    <div
-                      {...column.getResizerProps()}
-                      className={`resizer ${column.isResizing ? 'isResizing' : ''
-                        }`}
-                    />
-                  )}
-                  {isSortable && column.canSort ? (
-                    <div {...column.getSortByToggleProps()} className="sort">
-                      {column.render('Header')}
-                      <span>
-                        {/* eslint-disable-next-line no-nested-ternary */}
-                        {column.isSorted
-                          ? column.isSortedDesc
-                            ? ' ↓'
-                            : ' ↑'
-                          : ''}
-                      </span>
-                    </div>
-                  ) : (
-                    <>{column.render('Header')}</>
-                  )}
-                </div>
-              ))}
+              {visibleColumns.map((column) => {
+                const classes = classNames('th', { 'row-expander': column.id === 'row-expander' })
+                return (
+                  // eslint-disable-next-line react/jsx-key
+                  <div {...column.getHeaderProps()} className={classes}>
+                    {isColsResizable && column.getResizerProps && (
+                      <div
+                        {...column.getResizerProps()}
+                        className={`resizer ${column.isResizing ? 'isResizing' : ''
+                          }`}
+                      />
+                    )}
+                    {isSortable && column.canSort ? (
+                      <div {...column.getSortByToggleProps()} className="sort">
+                        {column.render('Header')}
+                        <span>
+                          {/* eslint-disable-next-line no-nested-ternary */}
+                          {column.isSorted
+                            ? column.isSortedDesc
+                              ? ' ↓'
+                              : ' ↑'
+                            : ''}
+                        </span>
+                      </div>
+                    ) : (
+                      <>{column.render('Header')}</>
+                    )}
+                  </div>
+                )
+              })}
               <div className="th" style={{ width: spacerWidth, minWidth: 50 }} />
             </div>
 
             {isFilterable && (
               <div className="thead filters" role="row">
-                {visibleColumns.map((column, i) => (
+                {visibleColumns.map((column, i) => {
+                  const classes = classNames('th', { 'row-expander': column.id === 'row-expander' })
+                  return (
                   // eslint-disable-next-line react/jsx-key
-                  <div {...column.getHeaderProps()} className="th">
+                  <div {...column.getHeaderProps()} className={classes}>
                     {column.canFilter ? column.render('Filter') : null}
                   </div>
-                ))}
+                )})}
               </div>
             )}
 
@@ -432,16 +424,18 @@ export default function Table<T extends object>(
                       role="row"
                       data-testid="data-row"
                     >
-                      {r.cells.map(cell => (
+                      {r.cells.map(cell => {
+                        const classes = classNames('td', { 'row-expander': cell.column.id === 'row-expander' })
+                        return (
                         // eslint-disable-next-line react/jsx-key
                         <div
                           {...cell.getCellProps(cellProps && cellProps(cell))}
-                          className="td"
+                          className={classes}
                           data-testid={`table-col-${cell.column.id}`}
                         >
                           {cell.render('Cell')}
                         </div>
-                      ))}
+                      )})}
                     </div>
                     {isExpandable && r.isExpanded
                       ? subcomponent && subcomponent(r)

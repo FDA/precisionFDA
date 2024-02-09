@@ -1,19 +1,17 @@
 /* eslint-disable react/no-unescaped-entities */
-import React, { useState } from 'react'
-import { ButtonSolidBlue } from '../../../components/Button'
+import React from 'react'
+import styled from 'styled-components'
 import {
   ButtonRow,
   DocBody,
   DocRow,
-  DocsTip,
-  DocsTip2,
   PageMap,
   RightSide,
 } from '../styles'
 
-import styled from 'styled-components'
 import { DownloadIcon } from '../../../components/icons/DownloadIcon'
 import { useScrollToHash } from '../../../hooks/useScrollToHash'
+import { Button } from '../../../components/Button'
 
 const HelpSection = styled.div`
   background-color: #d9edf7;
@@ -99,27 +97,27 @@ export const CLI = () => {
             target="_blank"
             rel="noreferrer"
           >
-            <ButtonSolidBlue>
+            <Button variant="primary">
               <DownloadIcon/> Linux
-            </ButtonSolidBlue>
+            </Button>
           </a>
           <a
             href="https://pfda-production-static-files.s3.amazonaws.com/cli/pfda-darwin-2.5.0.tar.gz"
             target="_blank"
             rel="noreferrer"
           >
-            <ButtonSolidBlue>
+            <Button variant="primary">
               <DownloadIcon/> Mac OS X
-            </ButtonSolidBlue>
+            </Button>
           </a>
           <a
             href="https://pfda-production-static-files.s3.amazonaws.com/cli/pfda-windows-2.5.0.zip"
             target="_blank"
             rel="noreferrer"
           >
-            <ButtonSolidBlue>
+            <Button variant="primary">
               <DownloadIcon/> Windows
-            </ButtonSolidBlue>
+            </Button>
           </a>
         </ButtonRow>
 

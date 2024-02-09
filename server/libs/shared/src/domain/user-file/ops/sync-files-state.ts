@@ -9,13 +9,17 @@ import { User } from '../../user/user.entity'
 import { TASK_TYPE } from '../../../queue/task.input'
 import { PlatformClient } from '../../../platform-client'
 import { FileStatesParams } from '../../../platform-client/platform-client.params'
-import { findFileOrAssetsWithDxid, findFileOrAssetWithUid, findUnclosedFilesOrAssets, getNodePath } from '../user-file.helper'
+import {
+  findFileOrAssetsWithDxid,
+  findFileOrAssetWithUid,
+  findUnclosedFilesOrAssets,
+  getNodePath,
+} from '../user-file.helper'
 import { FILE_STATE_DX, IFileOrAsset } from '../user-file.types'
 import { ChallengeUpdateCardImageUrlOperation } from '../../challenge/ops/update-challenge-card-image-url'
 import { ChallengeRepository } from '../../challenge/challenge.repository'
 import { removeRepeatable } from '../../../queue'
 import { createFileEvent, EVENT_TYPES } from '../../event/event.helper'
-
 
 // Sync all files in non-closed states given a user context
 //
@@ -205,6 +209,4 @@ void> {
   }
 }
 
-export {
-  SyncFilesStateOperation,
-}
+export { SyncFilesStateOperation }

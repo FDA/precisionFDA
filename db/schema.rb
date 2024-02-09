@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2023_11_08_104920) do
+ActiveRecord::Schema.define(version: 2024_02_06_104430) do
 
   create_table "accepted_licenses", id: :integer, charset: "utf8mb3", collation: "utf8mb3_unicode_ci", force: :cascade do |t|
     t.integer "license_id"
@@ -38,6 +38,16 @@ ActiveRecord::Schema.define(version: 2023_11_08_104920) do
     t.index ["admin_group_id"], name: "index_admin_memberships_on_admin_group_id"
     t.index ["user_id", "admin_group_id"], name: "index_admin_memberships_on_user_id_and_admin_group_id", unique: true
     t.index ["user_id"], name: "index_admin_memberships_on_user_id"
+  end
+
+  create_table "alerts", charset: "utf8mb3", collation: "utf8mb3_unicode_ci", force: :cascade do |t|
+    t.string "title", null: false
+    t.text "content", null: false
+    t.string "type", null: false
+    t.datetime "start_time", null: false
+    t.datetime "end_time", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
   end
 
   create_table "analyses", id: :integer, charset: "utf8mb3", collation: "utf8mb3_unicode_ci", force: :cascade do |t|
@@ -249,13 +259,14 @@ ActiveRecord::Schema.define(version: 2023_11_08_104920) do
     t.text "content"
     t.text "editor_state"
     t.string "card_image_url"
-    t.string "card_image_id"
+    t.integer "card_image_id"
     t.integer "sort_order"
     t.string "status"
     t.integer "space_id"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.boolean "default", default: false
+    t.index ["card_image_id"], name: "fk_rails_807efcbd20"
     t.index ["space_id"], name: "fk_rails_59bf9507a5"
   end
 
@@ -996,6 +1007,7 @@ ActiveRecord::Schema.define(version: 2023_11_08_104920) do
   add_foreign_key "challenges", "users", column: "admin_id"
   add_foreign_key "challenges", "users", column: "app_owner_id"
   add_foreign_key "comparisons", "users"
+  add_foreign_key "data_portals", "nodes", column: "card_image_id"
   add_foreign_key "data_portals", "spaces"
   add_foreign_key "dbclusters", "users"
   add_foreign_key "discussions", "notes"

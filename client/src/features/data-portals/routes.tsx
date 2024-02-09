@@ -6,6 +6,7 @@ import NavigationBar, {
 } from '../../components/NavigationBar/NavigationBar'
 import { PageContainerMargin } from '../../components/Page/styles'
 import { usePageMeta } from '../../hooks/usePageMeta'
+import { useToastWSHandler } from '../../hooks/useToastWSHandler'
 import PublicLayout from '../../layouts/PublicLayout'
 import { Tagline } from '../../pages/Tagline'
 import { DataPortalsAuthPickerModal } from '../auth/DataPortalsAuthPickerModal'
@@ -34,6 +35,8 @@ const DataPortalRoutes = () => {
   usePageMeta({ title: 'DAaaS - precisionFDA' })
   const location = useLocation()
   const { loading, user } = useAuthUser(true)
+
+  useToastWSHandler(user)
 
   const modal = useModal()
 

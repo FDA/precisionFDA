@@ -1,9 +1,8 @@
 import { Link } from 'react-router-dom'
 import styled, { css } from 'styled-components'
-import { Button } from '../../components/Button'
 import { NavLink } from '../../components/NavLink'
 import { BackLink } from '../../components/Page/PageBackLink'
-import { compactScrollBar, compactScrollBarV2 } from '../../components/Page/styles'
+import { compactScrollBarV2 } from '../../components/Page/styles'
 import { Svg } from '../../components/icons/Svg'
 import { fontWeight } from '../../styles/theme'
 
@@ -106,7 +105,7 @@ export const Main = styled.div`
   overflow: auto;
   display: flex;
   flex-direction: column;
-  ${compactScrollBar}
+  ${compactScrollBarV2}
 `
 export const Fill = styled.div`
   flex: 1 0 auto;
@@ -122,10 +121,8 @@ export const StyledHomeTable = styled.div`
 
 export const QuickActions = styled.div`
   display: flex;
+  gap: 4px;
   ${Svg} {
-    margin-right: 4px;
-  }
-  ${Button} {
     margin-right: 4px;
   }
 `
@@ -167,6 +164,7 @@ export const StyledLinkCell = styled(Link)`
   gap: 5px;
   ${Svg} {
     margin-top: 2px;
+    min-width: 14px;
   }
 `
 

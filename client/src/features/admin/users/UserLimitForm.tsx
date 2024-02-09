@@ -1,8 +1,8 @@
 import React from 'react'
 import styled from 'styled-components'
-import { InputNumber, InputText } from '../../../components/InputText'
-import { ButtonSolidBlue } from '../../../components/Button'
+import { InputNumber } from '../../../components/InputText'
 import { User } from './types'
+import { Button } from '../../../components/Button'
 
 type Props = {
   buttonText: string
@@ -33,12 +33,13 @@ export const UserLimitForm = ({ buttonText, selectedUsers, onSubmit, onChange, i
         paddingRight: 2,
       }}
     />
-    <ButtonSolidBlue
+    <Button
+      variant="primary"
       data-testid="admin-users-set-total-limit-button"
       disabled={selectedUsers.length === 0 || isSubmitButtonDisabled}
       onClick={onSubmit}
     >
       {buttonText}
-    </ButtonSolidBlue>
+    </Button>
   </LimitButtonWrapper>
 )

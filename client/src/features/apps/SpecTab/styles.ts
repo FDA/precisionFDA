@@ -50,6 +50,11 @@ export const StyledSpecTab = styled.div`
     display: flex;
     flex-wrap: wrap;
   }
+  .__table-block {
+    display: flex;
+    flex-wrap: wrap;
+    margin-top: 32px;
+  }
   .__table {
     flex: 0 1 auto;
     padding: 10px 15px;
@@ -67,7 +72,7 @@ export const StyledSpecTab = styled.div`
       font-size: 14px;
       display: flex;
       padding: 8px;
-      border-top: 1px solid var(--c-layout-border);
+      border-top: 1px solid var(--c-layout-border-200);
     }
     &_type {
       min-width: 100px;
@@ -96,8 +101,8 @@ export const StyledSpecTab = styled.div`
     &_required-label {
       text-transform: uppercase;
       font-size: 10px;
-      background-color: #a2b3ce;
-      color: #ffffff;
+      background-color: var(--primary-300);
+      color: white;
       padding: 2px 6px 3px;
       border-radius: 2px;
       font-weight: 700;

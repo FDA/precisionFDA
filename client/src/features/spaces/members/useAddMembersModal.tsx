@@ -5,7 +5,6 @@ import React from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { toast } from 'react-toastify'
 import * as Yup from 'yup'
-import { Button, ButtonSolidBlue } from '../../../components/Button'
 import { InputText } from '../../../components/InputText'
 import { FieldGroup, Hint, InputError } from '../../../components/form/styles'
 import { ModalHeaderTop, ModalNext } from '../../modal/ModalNext'
@@ -15,6 +14,7 @@ import { addMembersToSpaceRequest } from './members.api'
 import { MemberRole } from './members.types'
 import { StyledFields, StyledFooter } from './members.styles'
 import { Select } from '../../../components/Select'
+import { Button } from '../../../components/Button'
 
 interface FormValues {
   invitees_role: { label: string; value: MemberRole }
@@ -147,13 +147,14 @@ export const useAddMembersModal = ({ spaceId }: { spaceId: string }) => {
             >
               Cancel
             </Button>
-            <ButtonSolidBlue
+            <Button
+              variant="primary"
               type="submit"
               disabled={Object.keys(errors).length > 0 || mutation.isLoading}
               aria-label="Submit add members"
             >
               Add Members
-            </ButtonSolidBlue>
+            </Button>
           </ButtonRow>
         </StyledFooter>
       </form>

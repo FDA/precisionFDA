@@ -1,6 +1,6 @@
 import React from 'react'
 import styled, { css } from 'styled-components'
-import { ButtonSolidBlue } from '../../components/Button'
+import { Button } from '../../components/Button'
 import { ArrowIcon } from '../../components/icons/ArrowIcon'
 import { Svg } from '../../components/icons/Svg'
 import { Loader } from '../../components/Loader'
@@ -69,7 +69,7 @@ export const Topbox = styled.div`
   margin-bottom: 40px;
 `
 
-export const HeaderButton = styled(ButtonSolidBlue)`
+export const HeaderButton = styled(Button).attrs({ variant: 'primary' })`
   max-height: 34px;
   box-sizing: border-box;
   ${({ disabled }) =>
@@ -120,11 +120,11 @@ export const Pill = styled.div`
 export const HomeLoader = styled(Loader)`
   justify-self: center;
 `
-export const StyledActionsButton = styled(ButtonSolidBlue)`
+export const StyledActionsButton = styled(Button)`
   gap: 6px;
 `
 export const ActionsButton = React.forwardRef((props: any, ref) => (
-  <StyledActionsButton ref={ref} {...props}>
+  <StyledActionsButton variant='primary' ref={ref} {...props}>
     Actions <ArrowIcon />
   </StyledActionsButton>
 ))

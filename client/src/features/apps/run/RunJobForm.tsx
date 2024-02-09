@@ -4,7 +4,6 @@ import React, { useEffect, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { Link } from 'react-router-dom'
 import { toast } from 'react-toastify'
-import { Button, ButtonSolidBlue } from '../../../components/Button'
 import { InputNumber, InputText } from '../../../components/InputText'
 import { EmptyTable } from '../../../components/Table/styles'
 import { FieldGroup } from '../../../components/form/FieldGroup'
@@ -46,6 +45,7 @@ import {
   prepareValidations,
 } from './utils'
 import { Select } from '../../../components/Select'
+import { Button } from '../../../components/Button'
 
 const buildPath = (node: FileTreeNode): string => {
   if (!node || node.title === '/') {
@@ -207,9 +207,10 @@ export const RunJobForm = ({
           await runJobMutation.mutateAsync(req)
         }
       } catch (e) {
-        toast.error('Failed to run app')
         if (e?.response?.data?.error?.message) {
           toast.error(e?.response?.data?.error?.message)
+        } else {
+          toast.error('Failed to run app')
         }
       }
     }
@@ -232,7 +233,6 @@ export const RunJobForm = ({
               <StyledJobName>
                 <FieldGroup label="Job Name" required>
                   <InputText
-                    label="jobName"
                     {...register('jobName')}
                     disabled={isSubmitting}
                   />
@@ -241,7 +241,6 @@ export const RunJobForm = ({
               </StyledJobName>
               <FieldGroup label="Execution Cost Limit ($)" required>
                 <InputNumber
-                  label="jobLimit"
                   min="0"
                   step="10"
                   {...register('jobLimit')}
@@ -399,14 +398,15 @@ export const RunJobForm = ({
           />
         )}
       </AppsConfiguration>
-      <ButtonSolidBlue
+      <Button
+        variant="primary"
         disabled={isSubmitting}
         type="button"
         form="submitJobForm"
         onClick={handleSubmit(onSubmit)}
       >
         {isSubmitting ? 'Running' : 'Run App'}
-      </ButtonSolidBlue>
+      </Button>
       {licensesModal}
       {organizeFileModal}
     </StyledForm>

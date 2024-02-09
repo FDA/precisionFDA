@@ -203,6 +203,10 @@ Rails.application.routes.draw do
         get "submissions_created"
       end
 
+      resources :alerts, only: %i(create update destroy) do
+        get :index, on: :collection
+      end
+
       resources :site_settings do
         get :index, on: :collection
       end
@@ -253,7 +257,6 @@ Rails.application.routes.draw do
         get :resources, on: :member, to: "data_portals#list_resources"
         post :card_image, on: :member
         delete "/resources/:resource_id" => "data_portals#remove_resource", as: :delete_resource_route
-        post "/resources/:resource_id" => "data_portals#create_resource_link", as: :create_resource_link
         get :custom, on: :collection, to: "data_portals#custom"
       end
 

@@ -19,3 +19,8 @@ export type IOType = | string[]
   | number
   | boolean
   | DnanexusLink[]
+
+export class IdOrUid {
+  id?: number
+  uid?: string
+}

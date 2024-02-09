@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common'
-import { FileCloseOperation } from '@shared/domain/user-file/ops/file-close'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { createHash } from 'crypto'
 import { PlatformClient } from '../../../platform-client'
@@ -9,10 +8,7 @@ import type { FileCreateParams } from '../../../platform-client/platform-client.
 export class PlatformFileService {
   private readonly CHUNK_SIZE = 50 * 1024 * 1024 // 50MB
 
-  constructor(
-    private readonly platformClient: PlatformClient,
-    private readonly fileCloseOperation: FileCloseOperation,
-  ) {}
+  constructor(private readonly platformClient: PlatformClient) {}
 
   async createFile(params: FileCreateParams) {
     return await this.platformClient.fileCreate(params)
@@ -22,8 +18,6 @@ export class PlatformFileService {
     const chunks = this.getChunksFromString(content)
 
     await Promise.all(chunks.map((ch, i) => this.uploadChunk(file.dxid, ch, i)))
-
-    await this.fileCloseOperation.execute({ id: file.uid, forceWaitForClose: true })
   }
 
   private async uploadChunk(fileUid: string, content: Buffer, index: number) {

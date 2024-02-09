@@ -27,9 +27,9 @@ const Group = styled.div<{ disabled: boolean }>`
       float: left;
       padding: 0.5em 1em;
       cursor: pointer;
-      border: 1px solid ${colors.primaryBlue};
+      border: 1px solid var(--primary-500);
       margin-right: -1px;
-      color: ${colors.primaryBlue};
+      color: var(--primary-500);
 
       &:first-of-type {
         border-radius: 3px 0 0 3px;
@@ -45,8 +45,8 @@ const Group = styled.div<{ disabled: boolean }>`
     }
 
     &:checked + label {
-      background-color: ${colors.primaryBlue};
-      color: ${colors.textWhite};
+      background-color: var(--primary-500);
+      color: white;
     }
   }
 

@@ -2,7 +2,6 @@ import { useMutation, useQuery } from '@tanstack/react-query'
 import React, { useMemo, useState } from 'react'
 import { toast } from 'react-toastify'
 import styled from 'styled-components'
-import { Button, ButtonSolidBlue } from '../../components/Button'
 import { CircleCheckIcon } from '../../components/icons/CircleCheckIcon'
 import { TrophyIcon } from '../../components/icons/TrophyIcon'
 import { Loader } from '../../components/Loader'
@@ -26,6 +25,7 @@ import { useModal } from '../modal/useModal'
 import { APIResource } from '../home/types'
 import { fetchApp } from './apps.api'
 import { IApp } from './apps.types'
+import { Button } from '../../components/Button'
 
 const StyledCheckCol = styled(CheckCol)`
   justify-content: flex-end;
@@ -177,13 +177,14 @@ const ChallengeAppForm = ({
           >
             Cancel
           </Button>
-          <ButtonSolidBlue
+          <Button
+            variant="primary"
             type="submit"
             form="attach-to-challenge-form"
             disabled={!selectedId || mutation.isLoading}
           >
             Assign
-          </ButtonSolidBlue>
+          </Button>
         </ButtonRow>
       </Footer>
     </>

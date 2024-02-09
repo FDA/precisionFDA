@@ -4,7 +4,6 @@ import React, { useEffect, useMemo } from 'react'
 import { UseResizeColumnsState } from 'react-table'
 import { toast } from 'react-toastify'
 import useWebSocket from 'react-use-websocket'
-import { ButtonSolidBlue } from '../../components/Button'
 import Dropdown from '../../components/Dropdown'
 import { HoverDNAnexusLogo } from '../../components/icons/DNAnexusLogo'
 import { PlusIcon } from '../../components/icons/PlusIcon'
@@ -22,6 +21,7 @@ import { ISpaceReport } from './space-report.types'
 import { createReport, fetchReports } from './space-reports.api'
 import { useSpaceReportColumns } from './useSpaceReportColumns'
 import { userReportSelectActions } from './useSpaceReportSelectActions'
+import { Button } from '../../components/Button'
 
 type ListType = { reports: ISpaceReport[]; meta: IMeta }
 
@@ -132,12 +132,13 @@ export const SpaceReportList =({ spaceId }: { spaceId: number }) => {
       <div>
         <ActionsRow>
           <QuickActions>
-            <ButtonSolidBlue
+            <Button
+              variant="primary"
               disabled={query.status === 'loading' || generate.status === 'loading'}
               onClick={generateReport}
             >
               <PlusIcon height={12}/> Generate report
-            </ButtonSolidBlue>
+            </Button>
           </QuickActions>
           <Dropdown
             trigger="click"

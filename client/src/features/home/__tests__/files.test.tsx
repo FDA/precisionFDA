@@ -14,7 +14,7 @@ describe('My Home / Files', () => {
       const tableEl = screen.getByTestId('pfda-table')
       expect(tableEl).toBeInTheDocument()
       const rowEls = screen.getAllByTestId('data-row')
-      expect(rowEls.length).toBe(5)
+      expect(rowEls.length).toBe(6)
     })
   })
 })
