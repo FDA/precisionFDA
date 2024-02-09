@@ -999,8 +999,8 @@ class ApiController < ApplicationController
   #
   def close_file
     uid = unsafe_params[:uid] || unsafe_params[:id]
-    result = https_apps_client.file_close(uid, unsafe_params)
-    render json: result
+    https_apps_client.file_close(uid, unsafe_params)
+    render json: {}
   end
 
   # Inputs:
@@ -1013,8 +1013,8 @@ class ApiController < ApplicationController
     # TODO: Deprecate this when moving to node, use classic close_file route instead.
     # This API is still used by the CLI
     id = unsafe_params[:id]
-    result = https_apps_client.file_close(id, unsafe_params)
-    render json: result
+    https_apps_client.file_close(id, unsafe_params)
+    render json: {}
   end
 
   # Inputs
