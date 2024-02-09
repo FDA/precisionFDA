@@ -155,8 +155,10 @@ group :development, :test, :ui_test do
   gem "thin", "~> 1.8"
 end
 
-# View outgoing HTTP requests in logs
-gem "httplog"
+group :development, :test, :ui_test, :staging, :dev do
+  # View outgoing HTTP requests in logs
+  gem "httplog"
+end
 
 group :test do
   gem "database_cleaner", "~> 1.5", ">= 1.5.3"
