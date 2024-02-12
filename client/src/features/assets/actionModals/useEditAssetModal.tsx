@@ -3,7 +3,6 @@ import React, { useMemo } from 'react'
 import { useForm } from 'react-hook-form'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
-import { Button, ButtonSolidBlue } from '../../../components/Button'
 import { FieldGroup, InputError } from '../../../components/form/styles'
 import { InputText } from '../../../components/InputText'
 import { ButtonRow, Footer, StyledForm } from '../../modal/styles'
@@ -11,6 +10,7 @@ import { useModal } from '../../modal/useModal'
 import { editAssetRequest } from '../assets.api'
 import { IAsset } from '../assets.types'
 import { ModalHeaderTop, ModalNext } from '../../modal/ModalNext'
+import { Button } from '../../../components/Button'
 
 const EditAssetInfoForm = ({
   asset,
@@ -84,13 +84,14 @@ const EditAssetInfoForm = ({
           >
             Cancel
           </Button>
-          <ButtonSolidBlue
+          <Button
+            variant="primary"
             type="submit"
             form="edit-asset-form"
             disabled={editMutation.isLoading}
           >
             Edit
-          </ButtonSolidBlue>
+          </Button>
         </ButtonRow>
       </Footer>
     </>

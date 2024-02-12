@@ -1,6 +1,5 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
-import { ButtonSolidBlue } from '../../components/Button'
 import { Loader } from '../../components/Loader'
 import { PageContainerMargin } from '../../components/Page/styles'
 import {
@@ -35,6 +34,7 @@ import {
   PFDATeamSection,
   PageOverviewMainBody,
 } from './styles'
+import { Button } from '../../components/Button'
 
 export const OverviewPublic = () => {
   usePageMeta({ title: 'precisionFDA - Overview' })
@@ -91,9 +91,9 @@ export const OverviewPublic = () => {
 
       <PageMainBody>
         <InfoRow>
-          <ButtonSolidBlue as={Link} to="/docs">
+          <Button variant="primary" as={Link} to="/docs">
             Learn more about precisionFDA
-          </ButtonSolidBlue>
+          </Button>
           <a href="mailto:precisionfda@fda.hhs.gov">Feedback</a>
         </InfoRow>
       </PageMainBody>

@@ -1,13 +1,12 @@
 import { LockMode, Reference } from '@mikro-orm/core'
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Injectable } from '@nestjs/common'
-import { NotificationService } from '@shared/domain/notification/services/notification.service'
 import { EntityProvenanceService } from '@shared/domain/provenance/service/entity-provenance.service'
 import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
 import { SpaceReport } from '@shared/domain/space-report/entity/space-report.entity'
 import { SpaceReportService } from '@shared/domain/space-report/service/space-report.service'
 import { getProjectDxid } from '@shared/domain/space/space.helper'
-import { NOTIFICATION_ACTION, SEVERITY } from '@shared/enums'
+import { UserFileService } from '@shared/domain/user-file/service/user-file.service'
 import { NotFoundError } from '@shared/errors'
 import { UserFileCreateFacade } from '@shared/facade/file-create/user-file-create.facade'
 
@@ -17,27 +16,12 @@ export class SpaceReportResultGenerateFacade {
     private readonly em: SqlEntityManager,
     private readonly spaceReportService: SpaceReportService,
     private readonly userFileCreateFacade: UserFileCreateFacade,
-    private readonly notificationService: NotificationService,
     private readonly entityProvenanceService: EntityProvenanceService,
+    private readonly userFileService: UserFileService,
   ) {}
 
   async generate(reportId: number) {
-    const report = await this.generateAndUploadReport(reportId)
-
-    void this.notificationService.createNotification({
-      severity: SEVERITY.INFO,
-      userId: report.createdBy.id,
-      message: `Report of space "${report.space.name}" successfully generated`,
-      action: NOTIFICATION_ACTION.SPACE_REPORT_DONE,
-      meta: {
-        linkTitle: 'Go to Reports',
-        linkUrl: `/spaces/${report.space.id}/reports`,
-      },
-    })
-  }
-
-  private async generateAndUploadReport(reportId: number) {
-    return await this.em.transactional(async () => {
+    const report = await this.em.transactional(async () => {
       const report = await this.em.findOne(
         SpaceReport,
         { id: reportId, state: { $in: ['CREATED', 'ERROR'] } },
@@ -67,19 +51,26 @@ export class SpaceReportResultGenerateFacade {
         )
       }
 
-      const file = await this.userFileCreateFacade.createFileWithContent({
-        scope: report.space.scope,
-        project: getProjectDxid(report.space, membership),
-        name: this.getName(report),
-        content: reportResult,
-        description: this.getDescription(report),
-      })
+      const file = await this.userFileCreateFacade.createFileWithContent(
+        {
+          scope: report.space.scope,
+          project: getProjectDxid(report.space, membership),
+          name: this.getName(report),
+          content: reportResult,
+          description: this.getDescription(report),
+        },
+        false,
+      )
 
       report.resultFile = Reference.create(file)
-      report.state = 'DONE'
+      report.state = 'CLOSING_RESULT_FILE'
 
       return report
     })
+
+    await this.userFileService.closeFile(report.resultFile.getEntity().uid)
+
+    return report
   }
 
   private getName(report: SpaceReport) {

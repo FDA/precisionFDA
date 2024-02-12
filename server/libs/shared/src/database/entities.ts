@@ -2,6 +2,7 @@ import { AcceptedLicense } from '@shared/domain/accepted-license/accepted-licens
 import { AdminGroup } from '@shared/domain/admin-group/admin-group.entity'
 import { AdminMembership } from '@shared/domain/admin-membership/admin-membership.entity'
 import { Answer } from '@shared/domain/answer/answer.entity'
+import { Alert } from '@shared/domain/alert/entity/alert.entity'
 import { AppSeries } from '@shared/domain/app-series/app-series.entity'
 import { App } from '@shared/domain/app/app.entity'
 import { Attachment } from '@shared/domain/attachment/attachment.entity'
@@ -52,6 +53,7 @@ export const entities = [
   AdminGroup,
   AdminMembership,
   App,
+  Alert,
   Attachment,
   AppSeries,
   DataPortal,

@@ -16,7 +16,7 @@ const processor = {
 const jobToProcessorMap: Partial<
   Record<TASK_TYPE, (job: Job) => Promise<void> | void>
 > = {
-  [TASK_TYPE.SYNC_FILES_STATE]: (job) => processor.MAIN().syncFileState(job),
+  [TASK_TYPE.SYNC_FILES_STATE]: (job) => processor.MAIN().syncFilesState(job),
   [TASK_TYPE.CHECK_CHALLENGE_JOBS]: (job) =>
     processor.MAINTENANCE().checkChallengeJobs(job),
   [TASK_TYPE.SYNC_JOB_OUTPUTS]: (job) => processor.FILE().syncJobOutputs(job),

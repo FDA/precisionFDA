@@ -26,7 +26,6 @@ describe('AppProvenanceDataService', () => {
     assets: { loadItems: loadAssetsStub },
   } as unknown as App
 
-
   beforeEach(() => {
     loadAssetsStub.reset()
     loadAssetsStub.resolves(ASSETS)

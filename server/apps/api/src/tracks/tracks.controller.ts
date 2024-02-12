@@ -1,8 +1,8 @@
-import { Controller, UseGuards, Query, Get, UsePipes } from '@nestjs/common'
+import { Controller, UseGuards, Query, Get } from '@nestjs/common'
 import { UserContextGuard } from '../user-context/guard/user-context.guard'
 import { TrackApiFacade } from './facade/track-api.facade'
 import { ZodPipe } from '../validation/pipes/zod.pipe'
-import { schemas } from '@shared/utils/base-schemas'
+import { TrackProvenanceUidSchema } from './tracks.schema'
 
 @UseGuards(UserContextGuard)
 @Controller('/tracks')
@@ -12,9 +12,8 @@ export class TracksController {
   ) {}
 
   @Get('/provenance')
-  @UsePipes(new ZodPipe(schemas.uidSchema))
   async getTrackProvenance(
-    @Query('uid') uid: string,
+    @Query('uid', new ZodPipe(TrackProvenanceUidSchema)) uid: string,
   ) {
     return await this.trackApiFacade.getProvenance(uid)
   }

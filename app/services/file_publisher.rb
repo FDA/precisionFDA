@@ -10,9 +10,9 @@ class FilePublisher
 
   def self.by_challenge_bot
     new(
-        api: DNAnexusAPI.new(CHALLENGE_BOT_TOKEN),
-        user: User.challenge_bot,
-        )
+      api: DNAnexusAPI.new(CHALLENGE_BOT_TOKEN),
+      user: User.challenge_bot,
+    )
   end
 
   def initialize(api:, user:)
@@ -20,7 +20,7 @@ class FilePublisher
     @user = user
   end
 
-  # Publish a file - to make its scope 'public'
+  # Publish a file - creates a copy of the original file with desired scope.
   #   When file is from challenge, its project is taken from describe call, since
   #   Challenge Submission Job is being transferred to space 'scope' and output file has
   #   Challenge Bot privte files project.
@@ -39,7 +39,7 @@ class FilePublisher
       next unless file.publishable?(user)
 
       unless [UserFile::STATE_CLOSED, UserFile::STATE_COPYING].include?(file.state) ||
-             (file.klass == "folder")
+        (file.klass == "folder")
         raise "Unable to publish #{file.name} - file is not closed"
       end
 
@@ -70,23 +70,17 @@ class FilePublisher
             raise "Race condition for #{file.klass} #{file.id} (#{file.dxid})"
           end
 
-          new_file = CopyService::FileCopier.copy_record(
+          CopyService::FileCopier.copy_record(
             file,
             scope,
             destination_project,
             state: UserFile::STATE_CLOSED,
           )
-          new_file.update!(parent_type: "Asset") if new_file.asset?
 
           count += 1
 
           if scope =~ /^space-(\d+)$/
-            event_type =
-              if file.klass == "asset"
-                :asset_added
-              elsif file.klass == "file"
-                :file_added
-              end
+            event_type = :file_added if file.klass == "file"
             if event_type.present?
               SpaceEventService.call(Regexp.last_match(1).to_i, user.id, nil, file, event_type)
             end
@@ -98,6 +92,74 @@ class FilePublisher
 
     count
   end
+
+  # Publishes an asset - to make its scope 'public'
+  def publish_assets(assets, scope = "public")
+    count = 0
+    destination_project = UserFile.publication_project!(user, scope)
+    projects = {}
+    assets.uniq.each do |asset|
+      next unless asset.publishable?(user)
+
+      unless [UserFile::STATE_CLOSED, UserFile::STATE_COPYING].include?(asset.state)
+        raise "Unable to publish #{asset.name} - file is not closed"
+      end
+
+      if destination_project == asset.project
+        raise "Source and destination collision for file #{asset.id} (#{asset.dxid})"
+      end
+
+      projects[asset.project] = [] unless projects.key?(asset.project)
+      projects[asset.project].push(asset)
+    end
+
+    # rubocop:disable Metrics/BlockLength
+    projects.each do |project, project_assets|
+      # clone only files, not folders
+      clone_challenge_objects(project_assets, destination_project)
+
+      non_challenge_files_dxids =
+        project_assets.map { |file| file.dxid unless file.challenge_file? }.compact
+      if project.present? && !non_challenge_files_dxids.empty?
+        api.project_clone(project, destination_project, { objects: non_challenge_files_dxids })
+      end
+
+      Asset.transaction do
+        project_assets.each do |file|
+          file.reload
+
+          unless file.publishable?(user)
+            raise "Race condition for #{file.klass} #{file.id} (#{file.dxid})"
+          end
+
+          file.update!(
+            state: UserFile::STATE_CLOSED,
+            scope: scope,
+            project: destination_project,
+            scoped_parent_folder_id: nil,
+          )
+
+          count += 1
+          
+          if scope =~ /^space-(\d+)$/
+            event_type = :asset_added if file.klass == "asset"
+            if event_type.present?
+              SpaceEventService.call(Regexp.last_match(1).to_i, user.id, nil, file, event_type)
+            end
+          end
+        end
+      end
+
+      if project.present? && !non_challenge_files_dxids.empty?
+        api.call(project, "removeObjects", objects: non_challenge_files_dxids)
+      end
+
+    end
+    # rubocop:enable Metrics/BlockLength
+
+    count
+  end
+
   # rubocop:enable Metrics/MethodLength
 
   private

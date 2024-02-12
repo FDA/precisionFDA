@@ -1,33 +1,34 @@
 import { http, HttpResponse } from 'msw'
 import { indexBy } from 'ramda'
-import { FetchFilesQuery } from './files.api'
+import { FetchFileQuery, FetchFilesQuery } from './files.api'
+import { IFile, IFolder } from './files.types'
 
 const meta = {
   'user_licenses': [
-      {
-          'id': 122,
-          'uid': 'license-122',
-          'title': 'Minch Yoda License (2022-10-03 11:36:55)',
-          'created_at_date_time': '2022-10-03 13:36:55 CEST',
-      },
-      {
-          'id': 124,
-          'uid': 'license-124',
-          'title': 'Minch Yoda License (2022-11-04 10:30:42)',
-          'created_at_date_time': '2022-11-04 11:30:42 CET',
-      },
-      {
-          'id': 125,
-          'uid': 'license-125',
-          'title': 'Minch Yoda License requiring approval',
-          'created_at_date_time': '2022-12-20 15:56:34 CET',
-      },
-      {
-          'id': 126,
-          'uid': 'license-126',
-          'title': 'Minch Yoda License not requiring approval',
-          'created_at_date_time': '2022-12-20 15:57:24 CET',
-      },
+    {
+      'id': 122,
+      'uid': 'license-122',
+      'title': 'Minch Yoda License (2022-10-03 11:36:55)',
+      'created_at_date_time': '2022-10-03 13:36:55 CEST',
+    },
+    {
+      'id': 124,
+      'uid': 'license-124',
+      'title': 'Minch Yoda License (2022-11-04 10:30:42)',
+      'created_at_date_time': '2022-11-04 11:30:42 CET',
+    },
+    {
+      'id': 125,
+      'uid': 'license-125',
+      'title': 'Minch Yoda License requiring approval',
+      'created_at_date_time': '2022-12-20 15:56:34 CET',
+    },
+    {
+      'id': 126,
+      'uid': 'license-126',
+      'title': 'Minch Yoda License not requiring approval',
+      'created_at_date_time': '2022-12-20 15:57:24 CET',
+    },
   ],
   'object_license': {},
   'comments': [],
@@ -36,10 +37,53 @@ const meta = {
   'notes': [],
   'comparisons': [],
   'links': {
-      'comments': '/files/file-Gf023q80JqyZ083yPYZ54qpJ-1/comments',
-      'edit_tags': '/api/set_tags',
+    'comments': '/files/file-Gf023q80JqyZ083yPYZ54qpJ-1/comments',
+    'edit_tags': '/api/set_tags',
   },
 }
+
+const folders = [
+  {
+    'id': 11,
+    'name': 'Most Important',
+    'type': 'Folder',
+    'state': null,
+    'location': 'Private',
+    'added_by': 'Randall Ebert',
+    'created_at': '01/23/2024',
+    'featured': false,
+    'scope': 'private',
+    'space_id': null,
+    'locked': false,
+    'tags': [],
+    'properties': {},
+    'path': [
+      {
+        'id': 14,
+        'name': 'Most Important',
+      },
+      {
+        'id': null,
+        'name': '/',
+      },
+    ],
+    'created_at_date_time': '2024-01-23 13:51:19 CET',
+    'links': {
+      'origin_object': {
+        'origin_type': 'User',
+        'origin_uid': 'user-7',
+      },
+      'rename_folder': '/api/folders/rename_folder',
+      'organize': '/api/files/move',
+      'remove': '/api/files/remove',
+      'user': '/users/randall.ebert',
+      'copy': '/api/files/copy',
+      'children': '/api/folders/children',
+      'publish': '/api/folders/publish_folders',
+      'feature': '/api/files/feature',
+    },
+  },
+] satisfies IFolder[]
 
 const files = [
   {
@@ -257,15 +301,15 @@ const files = [
     'file_license': {},
     'show_license_pending': false,
   },
-]
+] satisfies IFile[]
 
 export const filesByUid = indexBy(s => s.uid, files)
 
 export const filesMocks = [
-  http.get('/api/files/:uid', ({ params: { uid }}) => HttpResponse.json({ files: filesByUid[uid], meta }, { status: 200 },
+  http.get('/api/files/:uid', ({ params: { uid } }) => HttpResponse.json<FetchFileQuery>({ files: filesByUid[uid], meta }, { status: 200 },
   )),
   http.get('/api/files*', () => HttpResponse.json<FetchFilesQuery>({
-    'files': files,
+    'files': [...folders, ...files],
     'meta': {
       'count': 5,
       'pagination': {

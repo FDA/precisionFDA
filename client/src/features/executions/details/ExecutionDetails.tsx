@@ -3,7 +3,6 @@ import React, { useEffect } from 'react'
 import { Link, useLocation, useParams } from 'react-router-dom'
 import useWebSocket from 'react-use-websocket'
 import { HomeLabel } from '../../../components/HomeLabel'
-import { ITab, TabsSwitch } from '../../../components/TabsSwitch'
 import {
   StyledTagItem,
   StyledTags,
@@ -33,13 +32,10 @@ import { getBasePath } from '../../home/utils'
 import { ExecutionActionsRow } from '../ExecutionActionsRow'
 import { InputsAndOutputs } from '../InputsAndOutputs'
 import { fetchExecution } from '../executions.api'
-import { JobState } from '../executions.types'
-import { FailureMessage, StyledExecutionState } from './styles'
+import { FailureMessage, StyledExecutionState, TitleLeft } from './styles'
 import { CogsIcon } from '../../../components/icons/Cogs'
-
-const ExecutionState = ({ state }: { state: JobState }) => (
-  <StyledExecutionState state={state}>{state}</StyledExecutionState>
-)
+import { StyledTab, StyledTabList, StyledTabPanel } from '../../../components/Tabs'
+import { StateCell } from '../StateCell'
 
 export const ExecutionDetails = ({
   emitScope,
@@ -100,19 +96,6 @@ export const ExecutionDetails = ({
       </NotFound>
     )
 
-  const tabsConfig = [
-    {
-      header: 'Inputs and Outputs',
-      hide: false,
-      tab: (
-        <InputsAndOutputs
-          runInputData={execution.run_input_data}
-          runOutputData={execution.run_output_data}
-        />
-      ),
-    },
-  ] satisfies ITab[]
-
   const scopeParamLink = `?scope=${homeScope?.toLowerCase()}`
 
   return (
@@ -123,18 +106,18 @@ export const ExecutionDetails = ({
       <Topbox>
         <Header>
           <HeaderLeft>
-            <div>
+            <TitleLeft>
               <Title>
-                <CogsIcon height={24}/>
-                <ExecutionState state={execution.state}/>
+                <CogsIcon height={18}/>
                 {execution.name}
               </Title>
+              <StyledExecutionState><StateCell state={execution.state} /></StyledExecutionState>
               {execution?.failure_message && (
                 <FailureMessage>
                   {execution?.failure_reason}: {execution.failure_message}
                 </FailureMessage>
               )}
-            </div>
+            </TitleLeft>
             {execution.showLicensePending && (
               <HomeLabel
                 value="License Pending Approval"
@@ -262,7 +245,18 @@ export const ExecutionDetails = ({
       </Topbox>
 
       <div className="pfda-padded-t40"/>
-      <TabsSwitch tabsConfig={tabsConfig}/>
+
+      <StyledTabList>
+        <StyledTab activeClassName="active" end>
+          Inputs & Outputs
+        </StyledTab>
+      </StyledTabList>
+      <StyledTabPanel>
+        <InputsAndOutputs
+          runInputData={execution.run_input_data}
+          runOutputData={execution.run_output_data}
+        />
+      </StyledTabPanel>
     </>
   )
 }

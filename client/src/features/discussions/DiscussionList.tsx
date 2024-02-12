@@ -2,7 +2,6 @@ import { useQuery } from '@tanstack/react-query'
 import React from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import styled from 'styled-components'
-import { ButtonSolidBlue } from '../../components/Button'
 import { Loader } from '../../components/Loader'
 import { PlusIcon } from '../../components/icons/PlusIcon'
 import { ErrorBoundary } from '../../utils/ErrorBoundry'
@@ -12,6 +11,7 @@ import { fetchDiscussionsRequest } from './api'
 import { formatDiscussionDate } from './helpers'
 import { UsernameLink } from './styles'
 import { pluralize } from '../../utils/formatting'
+import { Button } from '../../components/Button'
 
 const DiscussionsActionRow = styled.div`
   display: flex;
@@ -79,14 +79,15 @@ export const DiscussionList = ({
           <SpaceTitle>Space Discussions</SpaceTitle>
           <QuickActions>
             {canCreateDiscussion && (
-              <ButtonSolidBlue
+              <Button
+                variant="primary"
                 data-turbolinks="false"
                 data-testid="space-discussion-create-link"
                 as={Link}
                 to={`${location.pathname}/create`}
               >
                 <PlusIcon height={12} /> Start a Discussion
-              </ButtonSolidBlue>
+              </Button>
             )}
           </QuickActions>
         </DiscussionsActionRow>

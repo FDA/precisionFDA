@@ -1,7 +1,6 @@
 import React, { useMemo } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { Column, SortingRule, UseResizeColumnsState } from 'react-table'
-import { ButtonSolidBlue } from '../../components/Button'
 import Dropdown from '../../components/Dropdown'
 import { ContentFooter } from '../../components/Page/ContentFooter'
 import { Pagination } from '../../components/Pagination'
@@ -27,6 +26,7 @@ import { useWorkflowListActions } from './useWorkflowListActions'
 import { useWorkflowSelectActions } from './useWorkflowSelectActions'
 import { fetchWorkflowList } from './workflows.api'
 import { IWorkflow } from './workflows.types'
+import { Button } from '../../components/Button'
 
 type ListType = { workflows: IWorkflow[]; meta: IMeta }
 
@@ -93,25 +93,27 @@ export const WorkflowList = ({
         <ActionsRow>
           <QuickActions>
             {homeScope === 'me' && (
-              <ButtonSolidBlue
+              <Button
+                variant='primary'
                 data-testid="home-workflows-create-link"
                 as="a"
                 data-turbolinks="false"
                 href="/workflows/new"
               >
                 <PlusIcon height={12} /> Create Workflow
-              </ButtonSolidBlue>
+              </Button>
             )}
 
             {spaceId && (
-              <ButtonSolidBlue
+              <Button
+                variant='primary'
                 data-testid="spaces-workflows-add-button"
                 onClick={() =>
                   listActions['Add Workflow']?.func({ showModal: true })
                 }
               >
                 <PlusIcon height={12} /> Add Workflow
-              </ButtonSolidBlue>
+              </Button>
             )}
           </QuickActions>
           <Dropdown

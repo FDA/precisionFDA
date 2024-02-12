@@ -1,17 +1,12 @@
-import {
-  Entity,
-  Ref,
-  ManyToOne,
-  Property,
-} from '@mikro-orm/core'
+import { Entity, Ref, ManyToOne, Property, EntityRepositoryType } from '@mikro-orm/core'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { BaseEntity } from '../../database/base-entity'
 import { WorkaroundJsonType } from '../../database/custom-json-type'
 import { Challenge } from './challenge.entity'
+import { ChallengeResourceRepository } from '@shared/domain/challenge/challenge-resource.repository'
 
-
-@Entity({ tableName: 'challenge_resources' })
+@Entity({ tableName: 'challenge_resources', customRepository: () => ChallengeResourceRepository })
 class ChallengeResource extends BaseEntity {
   @Property({ fieldName: 'challenge_id' })
   challengeId: number
@@ -35,7 +30,9 @@ class ChallengeResource extends BaseEntity {
   userFile: Ref<UserFile>
 
   @ManyToOne({ entity: () => User })
-  user!: Ref<User>
+  user!: Ref<User>;
+
+  [EntityRepositoryType]?: ChallengeResourceRepository
 
   @Property({ persist: false })
   get name(): string {
@@ -53,6 +50,4 @@ class ChallengeResource extends BaseEntity {
   }
 }
 
-export {
-  ChallengeResource,
-}
+export { ChallengeResource }

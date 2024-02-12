@@ -1,13 +1,13 @@
 import { useMutation } from '@tanstack/react-query'
 import React, { useMemo } from 'react'
 import { toast } from 'react-toastify'
-import { Button, ButtonSolidBlue } from '../../components/Button'
 import { Loader } from '../../components/Loader'
 import { ResourceTable } from '../../components/ResourceTable'
 import { itemsCountString } from '../../utils/formatting'
 import { ModalHeaderTop, ModalNext } from '../modal/ModalNext'
 import { ButtonRow, Footer, ModalScroll } from '../modal/styles'
 import { useModal } from '../modal/useModal'
+import { Button } from '../../components/Button'
 
 export function useDeleteModal<
   T extends { id: string; name: string; location: string },
@@ -74,9 +74,9 @@ export function useDeleteModal<
         <ButtonRow>
           {mutation.isLoading && <Loader />}
           <Button onClick={() => setShowModal(false)}>Cancel</Button>
-          <ButtonSolidBlue onClick={handleSubmit} disabled={mutation.isLoading}>
+          <Button variant="warning" onClick={handleSubmit} disabled={mutation.isLoading}>
             Delete
-          </ButtonSolidBlue>
+          </Button>
         </ButtonRow>
       </Footer>
     </ModalNext>

@@ -3,7 +3,7 @@ import httpStatusCodes from 'http-status-codes'
 import React from 'react'
 import { toast } from 'react-toastify'
 import styled from 'styled-components'
-import { ButtonSolidBlue } from '../../../components/Button'
+import { useNavigate } from 'react-router'
 import { EXPERT_STATE } from '../../../constants'
 import { IUser } from '../../../types/user'
 import { ToC } from '../../markdown/Toc'
@@ -12,7 +12,7 @@ import { askQuestion } from '../api'
 import { ExpertDetails } from '../types'
 import { ExpertAskQuestionModal } from './ExpertAskQuestionModal'
 import { StyledPageRightColumn } from './styles'
-import { useNavigate } from 'react-router'
+import { Button } from '../../../components/Button'
 
 const ActionRow = styled.div`
   margin-top: 64px;
@@ -74,20 +74,21 @@ export const ExpertColumnRight = ({
       <ActionRow>
         {expertIsOpened && (
           <div>
-            <ButtonSolidBlue onClick={() => modal.setShowModal(true)}>
+            <Button variant="primary" onClick={() => modal.setShowModal(true)}>
               Ask this expert
-            </ButtonSolidBlue>
+            </Button>
           </div>
         )}
         {editPermitted && (
           <div>
-            <ButtonSolidBlue
+            <Button
+              variant="primary"
               as="a"
               data-turbolinks="false"
               href={`/experts/${expert?.id}/edit`}
             >
               Edit Expert Info
-            </ButtonSolidBlue>
+            </Button>
           </div>
         )}
       </ActionRow>

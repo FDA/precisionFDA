@@ -1,13 +1,14 @@
 import styled, { css } from 'styled-components'
-import { Button, IButton } from '.'
-import { theme } from '../../styles/theme'
+import { Button } from '.'
 
-export const BoolButton = styled(Button)<IButton>`
+export const BoolButton = styled(Button)`
   --color: #d9d9d9;
   --darkText: #757575;
-  background-color: ${theme.colors.textWhite};
+  background-color: var(--color);
   border-color: var(--color);
+  border: none;
   color: var(--darkText);
+  height: 30px;
 
   &:hover {
     color: var(--darkText);
@@ -20,24 +21,24 @@ export const BoolButton = styled(Button)<IButton>`
     ${({ disabled }) =>
       disabled &&
       css`
-        color: ${theme.colors.textMediumGrey};
+        color: var(--darkText);
         cursor: not-allowed;
       `}
     ${({ active }) =>
       active &&
       css`
-        color: ${theme.colors.textWhite};
-        background-color: ${theme.colors.primaryBlue};
-        border-color: ${theme.colors.primaryBlue};
+        color: white;
+        background-color: var(--primary-500);
+        border-color: var(--primary-500);
       `}
   }
 
   ${({ active }) =>
     active &&
     css`
-      color: ${theme.colors.textWhite};
-      background-color: ${theme.colors.primaryBlue};
-      border-color: ${theme.colors.primaryBlue};
+      color: white;
+      background-color: var(--primary-500);
+      border-color: var(--primary-500);
     `}
 `
 

@@ -24,7 +24,10 @@ const uploadChunk = (url: string, chunk: ArrayBuffer, headers: any) => (
   })
 )
 
-const closeFile = (id: string) => axios.post('/api/close_file', { id, forceWaitForClose: true })
+const closeFile = (uid: string, followUpAction?: string) => axios.post('/api/close_file', {
+  uid,
+  followUpAction,
+})
 
 function getNumChunks(file: File) {
   return Math.ceil(file.size / CHUNK_SIZE)

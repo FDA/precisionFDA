@@ -31,8 +31,8 @@ export const uploadChunk = (url, chunk, headers) => (
   })
 )
 
-export const closeFile = (id) =>
-  backendCall('/api/close_file', 'POST', { id })
+export const closeFile = (uid) =>
+  backendCall('/api/close_file', 'POST', { uid })
 
 export {
   getApiCall,

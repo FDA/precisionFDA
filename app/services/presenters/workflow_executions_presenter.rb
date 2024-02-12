@@ -126,10 +126,18 @@ module Presenters
       filters[:name] = filters.delete :workflow_title if filters.key?(:workflow_title)
       # For filtering launched_by via 'username' to normalize execution filter keys with JobsFilter
       filters[:launched_by] = filters.delete :username if filters.key?(:username)
-      @response = response.each do |record|
+
+      # Workflows matching the filter
+      matching_workflow_executions = response.filter { |f| matcher.call(f) }
+      # Workflows NOT matching the filter
+      non_matching_workflow_executions = response.filter { |f| !matcher.call(f) }
+      # Filter the jobs (stages) of the workflows that do NOT match the filters
+      non_matching_workflow_executions = non_matching_workflow_executions.each do |record|
         record[:jobs] = record.fetch(:jobs, []).select(&matcher)
       end
-      @response = response.filter { |f| f[:jobs].present? }
+      # Merge the workflows matching the filters with workflows with jobs (stages) matching the filters
+      @response = matching_workflow_executions.concat(non_matching_workflow_executions.filter { |f| f[:jobs].present? })
+
       @size = @response.size
     end
 

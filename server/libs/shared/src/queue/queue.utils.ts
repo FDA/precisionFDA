@@ -1,8 +1,7 @@
 import { Logger } from '@nestjs/common'
-import Bull, { Job, JobInformation, Queue } from 'bull'
+import { Job, JobInformation, Queue } from 'bull'
 import { removeRepeatableJob } from '.'
 import { formatDuration } from '../utils/format'
-
 
 const getJobStatusMessage = async (job: Job, jobLabel?: string): Promise<string> => {
   const prefix = jobLabel ?? 'Job'

@@ -2,7 +2,6 @@ import React, { ReactElement, useState } from 'react'
 import { useMutation } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
 import styled from 'styled-components'
-import { Button, ButtonSolidBlue } from '../../components/Button'
 import { Checkbox } from '../../components/Checkbox'
 import { SideTabs } from '../../components/SideTab/SideTabs'
 import { colors, fontSize } from '../../styles/theme'
@@ -12,6 +11,7 @@ import { acceptLicensesRequest } from './api'
 import { License } from './types'
 import { ChevronRightIcon } from '../../components/icons/ChevronRightIcon'
 import { AcceptedLicense } from '../apps/apps.types'
+import { Button } from '../../components/Button'
 
 const StyledLicenceTitle = styled.div``
 
@@ -167,12 +167,13 @@ export const useAcceptLicensesModal = () => {
           >
             Cancel
           </Button>
-          <ButtonSolidBlue
+          <Button
+            variant="primary"
             disabled={selectedLicenses.length === 0}
             onClick={() => handleSubmit()}
           >
             Accept Selected Licenses
-          </ButtonSolidBlue>
+          </Button>
         </>
       }
     >

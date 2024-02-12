@@ -30,16 +30,20 @@ module SpaceEventService
 
     class << self
       def call(event, nodejs_api_client)
-        notification_class(event).try(:send, event, nodejs_api_client)
+        begin
+          notification_class(event).try(:send, event, nodejs_api_client)
+        rescue StandardError => e
+          Rails.logger.error("Error encountered while sending an email: #{e.message}")
+        end
       end
 
       private
 
       def notification_class(event)
         case event.activity_type
-        when *CONTENT_TYPES    then SpaceEventService::ContentNotifications
-        when *COMMENT_TYPES    then SpaceEventService::CommentNotifications
-        when *SPACE_TYPES      then SpaceEventService::SpaceNotifications
+        when *CONTENT_TYPES then SpaceEventService::ContentNotifications
+        when *COMMENT_TYPES then SpaceEventService::CommentNotifications
+        when *SPACE_TYPES then SpaceEventService::SpaceNotifications
         when *MEMBERSHIP_TYPES then SpaceEventService::MembershipNotifications
         end
       end

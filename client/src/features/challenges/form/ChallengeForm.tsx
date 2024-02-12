@@ -4,8 +4,8 @@ import { yupResolver } from '@hookform/resolvers/yup'
 import React, { useEffect } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import styled from 'styled-components'
+import { unstable_usePrompt } from 'react-router-dom'
 
-import { ButtonSolidBlue } from '../../../components/Button'
 import { FieldGroup, FieldLabel, InputError } from '../../../components/form/styles'
 import { InputDateTime, InputFile, InputText } from '../../../components/InputText'
 import { Loader } from '../../../components/Loader'
@@ -19,7 +19,7 @@ import { HostLeadUserSelect } from './HostLeadUserSelect'
 import { ScopeFieldSelect } from './ScopeFieldSelect'
 import { ScoringAppUserSelect } from './ScoringAppUserSelect'
 import { StatusSelect } from './StatusSelect'
-import { unstable_usePrompt } from 'react-router-dom'
+import { Button } from '../../../components/Button'
 
 const StyledDateInput = styled(InputDateTime)`
   width: fit-content;
@@ -362,12 +362,13 @@ export const ChallengeForm = ({
             />
           </FieldGroup>
           <Row>
-            <ButtonSolidBlue
+            <Button
+              variant='primary'
               disabled={Object.keys(errors).length > 0 || isSubmitting || isSaving}
               type="submit"
             >
               Submit
-            </ButtonSolidBlue>
+            </Button>
             {isSubmitting && <Loader />}
           </Row>
         </StyledForm>

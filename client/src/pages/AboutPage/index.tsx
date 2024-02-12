@@ -6,9 +6,9 @@ import { useAuthUser } from '../../features/auth/useAuthUser'
 import { usePageMeta } from '../../hooks/usePageMeta'
 import NavigationBar from '../../components/NavigationBar/NavigationBar'
 import PublicLayout from '../../layouts/PublicLayout'
-import { ButtonSolidBlue } from '../../components/Button/index'
 import { colors } from '../../styles/theme'
 import { PfTab, PfTabContent, PfTabRow, PfTabTitle } from '../../components/Tabs/PfTab'
+import { Button } from '../../components/Button'
 
 
 const Row = styled.div`
@@ -230,10 +230,10 @@ const AboutPage = () => {
                   </p>
                 </div>
                 <div className="panel-body">
-                  <ButtonSolidBlue as="a" href="/request_access">
+                  <Button variant="primary" as="a" href="/request_access">
                     <span className="fa fa-user-plus" aria-hidden="true" />{' '}
                     Request Access
-                  </ButtonSolidBlue>
+                  </Button>
                 </div>
               </div>
             </div>

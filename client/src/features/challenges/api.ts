@@ -91,8 +91,7 @@ export async function updateChallengeRequest(payload: ChallengePayloadRequest, i
 export async function editChallengeRequest({ image, ...payload }: ChallengePayload, id: number) {
   const body = payload
   if (image) {
-    const fileId = await createChallengeImage(image)
-    body.card_image_id = fileId
+    body.card_image_id = await createChallengeImage(image)
   }
   return updateChallengeRequest(body, id)
 }

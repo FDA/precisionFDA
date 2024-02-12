@@ -1,7 +1,6 @@
 /* eslint-disable react/no-array-index-key */
 import React, { useMemo } from 'react'
 import styled from 'styled-components'
-import { Button } from '../../../components/Button'
 import { DownloadIcon } from '../../../components/icons/DownloadIcon'
 import { FileIcon } from '../../../components/icons/FileIcon'
 import { VerticalCenter } from '../../../components/Page/styles'
@@ -15,6 +14,7 @@ import { itemsCountString } from '../../../utils/formatting'
 import { IFile } from '../files.types'
 import { ModalHeaderTop, ModalNext } from '../../modal/ModalNext'
 import { ButtonRow, Footer, ModalScroll } from '../../modal/styles'
+import { Button } from '../../../components/Button'
 
 const StyledResourceTable = styled(ResourceTable)`
   padding-left: 12px;

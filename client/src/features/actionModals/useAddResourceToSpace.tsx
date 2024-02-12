@@ -4,7 +4,6 @@ import { UseMutationResult, useQuery } from '@tanstack/react-query'
 import { Column } from 'react-table'
 import { toast } from 'react-toastify'
 import styled from 'styled-components'
-import { Button, ButtonSolidBlue } from '../../components/Button'
 import { Loader } from '../../components/Loader'
 import { EmptyTable } from '../../components/Table/styles'
 import Table from '../../components/Table/Table'
@@ -13,6 +12,7 @@ import { ButtonRow, Footer, ModalScroll } from '../modal/styles'
 import { useModal } from '../modal/useModal'
 import { IApp } from '../apps/apps.types'
 import { ModalHeaderTop, ModalNext } from '../modal/ModalNext'
+import { Button } from '../../components/Button'
 
 const StyledName = styled.div`
   white-space: nowrap;
@@ -146,13 +146,14 @@ export function useAddResourceToModal({
           >
             Cancel
           </Button>
-          <ButtonSolidBlue
+          <Button
+            variant="primary"
             type="submit"
             onClick={handleSubmit}
             disabled={!selectedUids.length || mutation?.isLoading}
           >
             Add to Space
-          </ButtonSolidBlue>
+          </Button>
         </ButtonRow>
       </Footer>
     </ModalNext>

@@ -1,21 +1,4 @@
-import { colors } from '../../styles/theme'
-import { IExecution, jobExecutionPrefix, JobState, workflowExecutionPrefix } from './executions.types'
-
-export function getStateBgColorFromState(state: JobState): string | 'none' {
-  switch (state) {
-    case 'done':
-      return colors.stateDoneBackground
-    case 'terminated':
-      return colors.stateFailedBackground
-    case 'failed':
-      return colors.stateFailedBackground
-    case 'running':
-      return colors.stateRunningBackground
-    default:
-      break
-  }
-  return 'none'
-}
+import { IExecution, jobExecutionPrefix, workflowExecutionPrefix } from './executions.types'
 
 export const isJobExecution = (execution: IExecution) => {
   return execution.uid.startsWith(jobExecutionPrefix)

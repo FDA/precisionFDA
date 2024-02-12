@@ -1,12 +1,10 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
-import { Process, Processor } from '@nestjs/bull'
+import { Processor } from '@nestjs/bull'
 import { Inject } from '@nestjs/common'
 import { config } from '@shared/config'
 import { DEPRECATED_SQL_ENTITY_MANAGER } from '@shared/database/provider/deprecated-sql-entity-manager.provider'
 import { testHeapMemoryAllocationError } from '@shared/debug/memory-tests'
-import {
-  AdminDataConsistencyReportOperation
-} from '@shared/debug/ops/admin-data-consistency-report'
+import { AdminDataConsistencyReportOperation } from '@shared/debug/ops/admin-data-consistency-report'
 import { JobService } from '@shared/domain/job/job.service'
 import { UserCheckupOperation } from '@shared/domain/user/ops/user-checkup'
 import { PlatformClient } from '@shared/platform-client'
@@ -22,6 +20,7 @@ import { checkNonTerminatedDbClustersHandler } from '../../jobs/check-nontermina
 import { checkStaleJobsHandler } from '../../jobs/check-stale-jobs.handler'
 import { checkUserJobsHandler } from '../../jobs/check-user-jobs.handler'
 import { syncSpacesPermissionsHandler } from '../../jobs/sync-spaces-permissions.handler'
+import { ProcessWithContext } from '../decorator/process-with-context'
 import { BaseQueueProcessor } from './base-queue.processor'
 
 @Processor(config.workerJobs.queues.maintenance.name)
@@ -30,7 +29,7 @@ export class MaintenanceQueueProcessor extends BaseQueueProcessor {
     super()
   }
 
-  @Process(TASK_TYPE.CHECK_CHALLENGE_JOBS)
+  @ProcessWithContext(TASK_TYPE.CHECK_CHALLENGE_JOBS)
   async checkChallengeJobs(job: Job) {
     // TODO following will be DI refactored
     const platformClient = new PlatformClient(config.platform.challengeBotAccessToken)
@@ -40,23 +39,23 @@ export class MaintenanceQueueProcessor extends BaseQueueProcessor {
     await handler.handle(job)
   }
 
-  @Process(TASK_TYPE.CHECK_STALE_JOBS)
+  @ProcessWithContext(TASK_TYPE.CHECK_STALE_JOBS)
   async checkStaleJobs(job: Job<CheckStaleJobsJob>) {
     // not used at the moment -> the job is never put to queue
     await checkStaleJobsHandler(job)
   }
 
-  @Process(TASK_TYPE.CHECK_NON_TERMINATED_DBCLUSTERS)
+  @ProcessWithContext(TASK_TYPE.CHECK_NON_TERMINATED_DBCLUSTERS)
   async checkNonTerminatedDbClusters(job: Job<CheckNonTerminatedDbClustersJob>) {
     await checkNonTerminatedDbClustersHandler(job)
   }
 
-  @Process(TASK_TYPE.SYNC_SPACES_PERMISSIONS)
+  @ProcessWithContext(TASK_TYPE.SYNC_SPACES_PERMISSIONS)
   async syncSpacesPermissions(job: Job<SyncSpacesPermissionsJob>) {
     await syncSpacesPermissionsHandler(job)
   }
 
-  @Process(TASK_TYPE.USER_CHECKUP)
+  @ProcessWithContext(TASK_TYPE.USER_CHECKUP)
   async userCheckup(job: Job) {
     // This is a composite job, consisting of various checks that we can do
     // to a user's account. This should be triggered when user logs in with means
@@ -66,19 +65,19 @@ export class MaintenanceQueueProcessor extends BaseQueueProcessor {
     })
   }
 
-  @Process(TASK_TYPE.CHECK_USER_JOBS)
+  @ProcessWithContext(TASK_TYPE.CHECK_USER_JOBS)
   async checkUserJobs(job: Job) {
     await checkUserJobsHandler(job)
   }
 
-  @Process(TASK_TYPE.ADMIN_DATA_CONSISTENCY_REPORT)
+  @ProcessWithContext(TASK_TYPE.ADMIN_DATA_CONSISTENCY_REPORT)
   async reportAdminDataConsistency(job: Job) {
     return await this.handleUserTask(job, async (ctx) => {
       return await new AdminDataConsistencyReportOperation(ctx).execute()
     })
   }
 
-  @Process(TASK_TYPE.DEBUG_MAX_MEMORY)
+  @ProcessWithContext(TASK_TYPE.DEBUG_MAX_MEMORY)
   debugMaxMemory() {
     testHeapMemoryAllocationError()
   }

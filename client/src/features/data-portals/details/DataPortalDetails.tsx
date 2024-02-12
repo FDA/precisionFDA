@@ -5,7 +5,6 @@ import { Button } from '../../../components/Button'
 import {
   ListItem,
   NoContent,
-  PageMainBody,
   RightList,
   RightSideItem,
   RightSideScroll,
@@ -17,6 +16,7 @@ import { AlertText } from './DataPortalNotFound'
 import { AddIdsToHeaders } from '../../../components/Markdown/AddIdsToHeaders'
 import '../../lexi/themes/PlaygroundEditorTheme.css'
 import { ToC, useMarkdownToc } from '../../markdown/TocNext'
+import { compactScrollBarV2 } from '../../../components/Page/styles'
 
 const Row = styled.div`
   display: flex;
@@ -25,12 +25,28 @@ const Row = styled.div`
   flex-direction: row;
   height: 0;
 `
+const PageWrap = styled.div`
+  display: grid;
+  justify-content: center;
+  flex: 1;
+  margin-inline: auto;
+${compactScrollBarV2}
+overflow-y: scroll;
+`
+const DataPortalPageMainBody = styled.div`
+  padding: 32px;
+
+`
 const StyledInnerHTML = styled.div`
   max-width: 900px;
   font-size: 15px;
   color: var(--c-text-700);
   line-height: 1.7;
   font-weight: 400;
+
+  img, picture, svg, video {
+    display: inline-block;
+  }
 
   details {
     background: var(--tertiary-50);
@@ -116,20 +132,21 @@ export const DataPortalDetails = ({
           </RightList>
         </RightSideItem>
       </RightSideScroll>
-
-      <PageMainBody ref={docRef}>
-        {!portal.content && (
-          <NoContent>
-            <AlertText>This Data Portal has no content</AlertText>
-            {canEditContent && (
-              <Button as={Link} type="button" to={`/data-portals/${portal.id}/content`}>
-                Add some here
-              </Button>
-            )}
-          </NoContent>
-        )}
-        <AddIdsToHeaders as={StyledInnerHTML} docRef={docRef} content={portal.content ?? ''} />,
-      </PageMainBody>
+      <PageWrap>
+        <DataPortalPageMainBody ref={docRef}>
+          {!portal.content && (
+            <NoContent>
+              <AlertText>This Data Portal has no content</AlertText>
+              {canEditContent && (
+                <Button as={Link} type="button" to={`/data-portals/${portal.id}/content`}>
+                  Add some here
+                </Button>
+              )}
+            </NoContent>
+          )}
+          <AddIdsToHeaders as={StyledInnerHTML} docRef={docRef} content={portal.content ?? ''} />
+        </DataPortalPageMainBody>
+      </PageWrap>
     </Row>
   )
 }

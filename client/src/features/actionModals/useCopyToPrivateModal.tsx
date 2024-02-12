@@ -2,7 +2,6 @@ import React, { useMemo } from 'react'
 import { useMutation } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
 import styled from 'styled-components'
-import { Button, ButtonSolidBlue } from '../../components/Button'
 import { Loader } from '../../components/Loader'
 import { ResourceTable } from '../../components/ResourceTable'
 import { ButtonRow, Footer, ModalScroll } from '../modal/styles'
@@ -10,6 +9,7 @@ import { useModal } from '../modal/useModal'
 import { APIResource, HomeScope } from '../home/types'
 import { resourceCountString } from '../../utils/formatting'
 import { ModalHeaderTop, ModalNext } from '../modal/ModalNext'
+import { Button } from '../../components/Button'
 
 const StyledResourceTable = styled(ResourceTable)`
   padding: 0.5rem;
@@ -85,9 +85,9 @@ export function useCopyToPrivateModal<T extends { id: number; name: string }>({
         <ButtonRow>
           {mutation.isLoading && <Loader />}
           <Button onClick={() => setShowModal(false)}>Cancel</Button>
-          <ButtonSolidBlue onClick={handleSubmit} disabled={mutation.isLoading}>
+          <Button variant="primary" onClick={handleSubmit} disabled={mutation.isLoading}>
             Copy
-          </ButtonSolidBlue>
+          </Button>
         </ButtonRow>
       </Footer>
     </ModalNext>

@@ -14,7 +14,6 @@ import {
   fetchAttachmentsRequest,
 } from '../api'
 
-import { Button, ButtonSolidBlue } from '../../../components/Button'
 import { MarkdownEditor } from '../../../components/Markdown/MarkdownEditor'
 import { InputError } from '../../../components/form/styles'
 import { ButtonRow } from '../../modal/styles'
@@ -22,6 +21,7 @@ import { AttachmentsList } from '../AttachmentsList'
 import { Note, NoteForm } from '../discussions.types'
 import { groupByAttachmentType, pickIdsFromFormAttachments } from '../helpers'
 import { Attachments } from './Attachments'
+import { Button } from '../../../components/Button'
 
 const StyledForm = styled.div`
   display: flex;
@@ -117,14 +117,15 @@ export const EditNoteForm = ({
         <Button onClick={() => onCancel && onCancel(getValues())}>
           Cancel
         </Button>
-        <ButtonSolidBlue
+        <Button
+          variant="primary"
           type="button"
           form="commentForm"
           disabled={isSubmitting || Object.keys(errors).length > 0}
           onClick={handleSubmit(onSubmitForm)}
         >
           {isSubmitting ? 'Saving' : 'Edit'}
-        </ButtonSolidBlue>
+        </Button>
       </ButtonRow>
     </StyledForm>
   )

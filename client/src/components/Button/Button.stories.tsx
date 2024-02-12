@@ -1,14 +1,6 @@
 import React from 'react'
 import { StoryFn, Meta } from '@storybook/react'
-
-// import { Button } from './Button';
-import {
-  Button,
-  ButtonSolidBlue,
-  ButtonSolidGreen,
-  ButtonSolidRed,
-  ButtonText,
-} from '.'
+import { Button } from '.'
 
 // More on default export: https://storybook.js.org/docs/react/writing-stories/introduction#default-export
 export default {
@@ -22,16 +14,13 @@ export default {
 
 // More on component templates: https://storybook.js.org/docs/react/writing-stories/introduction#using-args
 const ButtonSolidBlueTemplate: StoryFn<typeof Button> = args => (
-  <ButtonSolidBlue {...args}>Submit</ButtonSolidBlue>
+  <Button variant="primary" {...args}>Submit</Button>
 )
 const ButtonSolidRedTemplate: StoryFn<typeof Button> = args => (
-  <ButtonSolidRed {...args}>Stop</ButtonSolidRed>
-)
-const ButtonSolidGreenTemplate: StoryFn<typeof Button> = args => (
-  <ButtonSolidGreen {...args}>All Good</ButtonSolidGreen>
+  <Button variant="warning" {...args}>Stop</Button>
 )
 const ButtonTextTemplate: StoryFn<typeof Button> = args => (
-  <ButtonText {...args}>Add a property</ButtonText>
+  <Button {...args}>Add a property</Button>
 )
 
 export const Blue = ButtonSolidBlueTemplate.bind({})
@@ -42,11 +31,6 @@ Blue.args = {
 
 export const Red = ButtonSolidRedTemplate.bind({})
 Red.args = {
-  disabled: false,
-}
-
-export const Green = ButtonSolidGreenTemplate.bind({})
-Green.args = {
   disabled: false,
 }
 

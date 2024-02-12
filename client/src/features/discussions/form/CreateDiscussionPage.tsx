@@ -3,7 +3,6 @@ import React from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import { PageTitle } from '../../../components/Page/styles'
-import { UserLayout } from '../../../layouts/UserLayout'
 import { getSpaceIdFromScope } from '../../../utils'
 import { StyledBackLink } from '../../home/home.styles'
 import { FormPageContainer } from '../../news/form/styles'
@@ -52,12 +51,10 @@ export const CreateDiscussionPage = ({ scope }: { scope: NoteScope }) => {
   const backPath = location.pathname.replace('/create', '')
 
   return (
-    <UserLayout>
-      <FormPageContainer>
-        <StyledBackLink linkTo={backPath}>Back to Discussions</StyledBackLink>
-        <PageTitle>Create a discussion</PageTitle>
-        <DiscussionForm onSubmit={handleSubmit} scope={scope} />
-      </FormPageContainer>
-    </UserLayout>
+    <FormPageContainer>
+      <StyledBackLink linkTo={backPath}>Back to Discussions</StyledBackLink>
+      <PageTitle>Create a discussion</PageTitle>
+      <DiscussionForm onSubmit={handleSubmit} scope={scope} />
+    </FormPageContainer>
   )
 }
