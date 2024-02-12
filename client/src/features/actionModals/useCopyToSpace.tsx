@@ -3,7 +3,6 @@ import { useMutation, useQuery } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
 import styled from 'styled-components'
 import { AxiosError } from 'axios'
-import { Button, ButtonSolidBlue } from '../../components/Button'
 import { CircleCheckIcon } from '../../components/icons/CircleCheckIcon'
 import { Loader } from '../../components/Loader'
 import { breakPoints } from '../../styles/theme'
@@ -24,6 +23,7 @@ import { APIResource } from '../home/types'
 import { ProtectedIcon } from '../spaces/ProtectedIcon'
 import { ModalHeaderTop, ModalNext } from '../modal/ModalNext'
 import { FdaRestrictedIcon } from '../spaces/FdaRestrictedIcon'
+import { Button } from '../../components/Button'
 
 const SpacesList = ({
   selected,
@@ -169,13 +169,14 @@ const CopyToSpaceForm = ({
           >
             Cancel
           </Button>
-          <ButtonSolidBlue
+          <Button
+            variant="primary"
             type="submit"
             form="copy-to-space-form"
             disabled={!selectedTarget || mutation.isLoading}
           >
             Copy
-          </ButtonSolidBlue>
+          </Button>
         </ButtonRow>
       </Footer>
     </>

@@ -4,7 +4,6 @@ import { Controller, useForm } from 'react-hook-form'
 import styled from 'styled-components'
 import * as Yup from 'yup'
 import ReactTooltip from 'react-tooltip'
-import { Button, ButtonSolidBlue } from '../../../components/Button'
 import { Checkbox } from '../../../components/Checkbox'
 import { MarkdownEditor } from '../../../components/Markdown/MarkdownEditor'
 import { CheckboxLabel } from '../../../components/form/styles'
@@ -12,6 +11,7 @@ import { NoteScope } from '../api'
 import { Attachments } from './Attachments'
 import { AttachmentsList } from '../AttachmentsList'
 import { NoteForm } from '../discussions.types'
+import { Button } from '../../../components/Button'
 
 const StyledForm = styled.form`
   display: flex;
@@ -159,14 +159,15 @@ export const MarkdownForm = ({
             Cancel
           </Button>
         )}
-        <ButtonSolidBlue
+        <Button
+          variant="primary"
           type="button"
           form="commentForm"
           disabled={!isDirty || isSubmitting || Object.keys(errors).length > 0}
           onClick={handleSubmit(onSubmitForm)}
         >
           {isSubmitting ? 'Saving' : submitText}
-        </ButtonSolidBlue>
+        </Button>
       </ButtonRow>
     </StyledForm>
   )

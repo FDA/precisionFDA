@@ -5,8 +5,8 @@ import classNames from 'classnames/bind'
 import { PFDALogoLight, PFDALogoDark } from '../PFDALogo'
 import { theme } from '../../../styles/theme'
 import { PageContainerMargin } from '../../Page/styles'
-import { Button, ButtonSolidBlue } from '../../Button/index'
 import { onLogInWithSSO, useSiteSettingsQuery } from '../../../features/auth/useSiteSettingsQuery'
+import { Button } from '../../Button'
 
 type StyledPublicNavbarProps = {
   $isSticky?: boolean
@@ -135,6 +135,10 @@ const PublicNavbarCenterButtons = styled.div<StyledPublicNavbarProps>`
   }
 `
 
+const AccessButton = styled(Button)`
+  background: transparent;
+`
+
 const PublicNavbarRightButtons = styled.div<StyledPublicNavbarProps>`
   display: flex;
   flex: 0 1 auto;
@@ -151,6 +155,9 @@ const PublicNavbarRightButtons = styled.div<StyledPublicNavbarProps>`
     $isSticky &&
     css`
       margin-right: 32px;
+      ${AccessButton} {
+        color: var(--base);
+      }
     `}
 `
 
@@ -252,12 +259,12 @@ const PublicNavbar = ({ shouldShowLogo = false }: Props) => {
         </a>
       </PublicNavbarCenterButtons>
       <PublicNavbarRightButtons $isSticky={sticky}>
-        <Button onClick={onRequestAccess}>Request Access</Button>
-        <ButtonSolidBlue onClick={onLogIn}>Log In</ButtonSolidBlue>
+        <AccessButton onClick={onRequestAccess}>Request Access</AccessButton>
+        <Button variant="primary" onClick={onLogIn}>Log In</Button>
         {data?.ssoButton.isEnabled && (
-          <ButtonSolidBlue onClick={() => onLogInWithSSO(data.ssoButton.data.fdaSsoUrl)}>
+          <Button variant="primary" onClick={() => onLogInWithSSO(data.ssoButton.data.fdaSsoUrl)}>
             Log In with SSO
-          </ButtonSolidBlue>
+          </Button>
         )}
       </PublicNavbarRightButtons>
     </StyledPublicNavbar>

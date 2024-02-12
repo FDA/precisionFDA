@@ -3,7 +3,6 @@ import React, { useMemo } from 'react'
 import { useForm } from 'react-hook-form'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
-import { Button, ButtonSolidBlue } from '../../components/Button'
 import { FieldGroup, InputError } from '../../components/form/styles'
 import { InputText } from '../../components/InputText'
 import { ButtonRow, Footer, ModalScroll, StyledForm } from '../modal/styles'
@@ -11,6 +10,7 @@ import { useModal } from '../modal/useModal'
 import { editDatabaseRequest } from './databases.api'
 import { IDatabase } from './databases.types'
 import { ModalHeaderTop, ModalNext } from '../modal/ModalNext'
+import { Button } from '../../components/Button'
 
 const EditDatabaseInfoForm = ({
   db,
@@ -94,13 +94,14 @@ const EditDatabaseInfoForm = ({
           <Button type="button" onClick={handleClose} disabled={isSubmitting}>
             Cancel
           </Button>
-          <ButtonSolidBlue
+          <Button
+            variant="primary"
             type="submit"
             form="edit-database-form"
             disabled={isSubmitting}
           >
             Edit
-          </ButtonSolidBlue>
+          </Button>
         </ButtonRow>
       </Footer>
     </>

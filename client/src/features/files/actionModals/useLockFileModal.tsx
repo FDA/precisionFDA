@@ -2,7 +2,6 @@ import React, { useMemo, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
 import styled from 'styled-components'
-import { Button, ButtonSolidRed } from '../../../components/Button'
 import { FileIcon } from '../../../components/icons/FileIcon'
 import { FolderIcon } from '../../../components/icons/FolderIcon'
 import { Loader } from '../../../components/Loader'
@@ -14,6 +13,7 @@ import { itemsCountString, pluralize } from '../../../utils/formatting'
 import { lockFilesRequest, fetchFilesDownloadList } from '../files.api'
 import { IFile } from '../files.types'
 import { DownloadListResponse } from '../../home/types'
+import { Button } from '../../../components/Button'
 
 const StyledPath = styled.div`
   min-width: 150px;
@@ -108,9 +108,9 @@ export const useLockFileModal = ({ selected, onSuccess, scope }: { selected: IFi
           <Button onClick={() => setShowModal(false)} disabled={mutation.isLoading}>
             Cancel
           </Button>
-          <ButtonSolidRed onClick={handleSubmit} disabled={mutation.isLoading}>
+          <Button variant="warning" onClick={handleSubmit} disabled={mutation.isLoading}>
             Lock
-          </ButtonSolidRed>
+          </Button>
         </>
       }
     >

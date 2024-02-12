@@ -14,13 +14,6 @@ export class AssetRepository extends EntityRepository<Asset> {
     )
   }
 
-  async findAssetWithDxid(dxid: string): Promise<Asset | null> {
-    return await this.findOne(
-      { dxid },
-      { filters: ['asset'], populate: ['user', 'taggings.tag'] },
-    )
-  }
-
   async findAllAssetsWithDxid(dxid: string): Promise<Asset[]> {
     return await this.find(
       { dxid },

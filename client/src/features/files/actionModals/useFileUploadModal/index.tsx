@@ -6,7 +6,6 @@ import { useDropzone } from 'react-dropzone'
 import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
 import { useImmer } from 'use-immer'
-import { Button, ButtonSolidBlue, TransparentButton } from '../../../../components/Button'
 import { InputError } from '../../../../components/form/styles'
 import { TrashIcon } from '../../../../components/icons/TrashIcon'
 import { createSequenceGenerator } from '../../../../utils'
@@ -29,6 +28,7 @@ import {
   UploadFilesTable,
 } from './styles'
 import { ModalHeaderTop, ModalNext } from '../../../modal/ModalNext'
+import { Button, TransparentButton } from '../../../../components/Button'
 
 const idGenerator = createSequenceGenerator()
 
@@ -169,9 +169,9 @@ export const useFileUploadModal = ({
       <StyledDropSection>
         <div {...getRootProps()}>
           <input {...getInputProps()} />
-          <ButtonSolidBlue disabled={uploadInProgress}>
+          <Button variant="primary" disabled={uploadInProgress}>
             Browse files for upload...
-          </ButtonSolidBlue>
+          </Button>
         </div>
         <SubTitle>You can upload up to 20 files at a time</SubTitle>
       </StyledDropSection>
@@ -219,15 +219,16 @@ export const useFileUploadModal = ({
             Remove all
           </Button>
           {uploadFinished ? (
-            <ButtonSolidBlue onClick={handleClose}>Close</ButtonSolidBlue>
+            <Button variant="primary" onClick={handleClose}>Close</Button>
           ) : (
-            <ButtonSolidBlue
+            <Button
+              variant="primary"
               type="submit"
               onClick={handleUpload}
               disabled={exceedsMax || uploadInProgress || noneSelected}
             >
               Upload
-            </ButtonSolidBlue>
+            </Button>
           )}
         </ButtonRow>
       </Footer>

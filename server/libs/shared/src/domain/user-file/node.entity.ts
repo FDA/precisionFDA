@@ -9,6 +9,7 @@ import {
   Collection,
 } from '@mikro-orm/core'
 import { NodeProperty } from '@shared/domain/property/node-property.entity'
+import { NodeRepository } from '@shared/domain/user-file/node.repository'
 import { User } from '@shared/domain/user/user.entity'
 import { BaseEntity } from '../../database/base-entity'
 import { formatDuration } from '../../utils/format'
@@ -20,6 +21,7 @@ import { SCOPE } from '../../types/common'
   discriminatorColumn: 'stiType',
   discriminatorMap: { UserFile: 'UserFile', Folder: 'Folder', Asset: 'Asset' },
   tableName: 'nodes',
+  customRepository: () => NodeRepository,
 })
 export class Node extends BaseEntity {
   @PrimaryKey()
@@ -43,6 +45,9 @@ export class Node extends BaseEntity {
 
   @Property()
   userId: number
+
+  @Property({ type: 'numeric' })
+  fileSize?: number
 
   @Property()
   scope: SCOPE
@@ -106,5 +111,4 @@ export class Node extends BaseEntity {
   elapsedTimeSinceCreationString(): string {
     return formatDuration(this.elapsedTimeSinceCreation())
   }
-
 }

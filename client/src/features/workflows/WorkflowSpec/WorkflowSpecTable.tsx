@@ -1,6 +1,5 @@
 import React from 'react'
 import classNames from 'classnames'
-import PropTypes from 'prop-types'
 
 
 export const WorkflowSpecTable = ({ title, config }: { title: string, config: any[] }) => {

@@ -59,8 +59,8 @@ window.Precision.uploader =
             else
               @uploadChunks id, fileModel, index + 1, offset, chunk_size, cb
 
-  closeFile: (id, cb) ->
-    Precision.api '/api/close_file', { 'id': id }, (res) ->
+  closeFile: (uid, cb) ->
+    Precision.api '/api/close_file', { 'uid': uid }, (res) ->
       cb()
 
   getChunkSize: (fileModel, max_size) ->

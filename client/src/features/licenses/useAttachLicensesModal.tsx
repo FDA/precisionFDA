@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
 import styled from 'styled-components'
-import { Button, ButtonSolidBlue } from '../../components/Button'
 import { CircleCheckIcon } from '../../components/icons/CircleCheckIcon'
 import { ResourceTable, StyledName } from '../../components/ResourceTable'
 import { theme } from '../../styles/theme'
@@ -14,6 +13,7 @@ import { attachLicenseRequest, fetchLicensesList } from './api'
 import { License } from './types'
 import { ModalHeaderTop, ModalNext } from '../modal/ModalNext'
 import { ButtonRow, Footer, ModalScroll } from '../modal/styles'
+import { Button } from '../../components/Button'
 
 const HiddenElement = styled.div`
   width: 16px;
@@ -139,14 +139,15 @@ export function useAttachLicensesModal<
       <Footer>
         <ButtonRow>
           <Button onClick={handleClose}>Cancel</Button>
-          <ButtonSolidBlue
+          <Button
+            variant="primary"
             onClick={() => handleSubmit(selectedLicense)}
             disabled={
               !selectedLicense || selectedLicense === selected?.file_license?.id
             }
           >
             Attach
-          </ButtonSolidBlue>
+          </Button>
         </ButtonRow>
       </Footer>
     </ModalNext>

@@ -2,7 +2,6 @@ import React, { useLayoutEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { SortingRule, UseResizeColumnsState } from 'react-table'
 import styled from 'styled-components'
-import { ButtonSolidBlue } from '../../components/Button'
 import { HoverDNAnexusLogo } from '../../components/icons/DNAnexusLogo'
 import { ContentFooter } from '../../components/Page/ContentFooter'
 import { compactScrollBarV2, Filler, PageTitle } from '../../components/Page/styles'
@@ -22,6 +21,7 @@ import { useSpacesColumns } from './useSpacesColumns'
 import { useHiddenColumnLocalStorage } from '../../hooks/useHiddenColumnLocalStorage'
 import { ScrollableInnerGlobalStyles } from '../../styles/global'
 import { UserLayout } from '../../layouts/UserLayout'
+import { Button } from '../../components/Button'
 
 const SpacesHeader = styled.div`
   display: flex;
@@ -95,9 +95,9 @@ const SpacesList = () => {
     <UserLayout>
       <SpacesHeader>
         <PageTitle>Spaces</PageTitle>
-        <ButtonSolidBlue as={Link} to="/spaces/new">
+        <Button variant='primary' as={Link} to="/spaces/new">
           Create new space
-        </ButtonSolidBlue>
+        </Button>
       </SpacesHeader>
 
       <TableTable

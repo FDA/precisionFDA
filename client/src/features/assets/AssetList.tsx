@@ -1,7 +1,6 @@
 import React, { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Column, SortingRule, UseResizeColumnsState } from 'react-table'
-import { ButtonSolidBlue } from '../../components/Button'
 import Dropdown from '../../components/Dropdown'
 import { ContentFooter } from '../../components/Page/ContentFooter'
 import { Pagination } from '../../components/Pagination'
@@ -23,6 +22,7 @@ import { fetchAssets } from './assets.api'
 import { IAsset } from './assets.types'
 import { useAssetColumns } from './useAssetColumns'
 import { useAssetActions } from './useAssetSelectActions'
+import { Button } from '../../components/Button'
 
 type ListType = { assets: IAsset[]; meta: IMeta }
 
@@ -73,17 +73,19 @@ export const AssetList = ({ homeScope, spaceId }: { homeScope?: HomeScope, space
       <div>
         <ActionsRow>
           <QuickActions>
-            <ButtonSolidBlue
+            <Button
+              variant='primary'
               as="a"
               data-turbolinks="false"
               href="/docs/assets"
               data-testid="home-assets-create-link"
             >
               <QuestionIcon height={13} /> How to create assets
-            </ButtonSolidBlue>
-            <ButtonSolidBlue onClick={() => generateCLIKeyAction.setShowModal(true)}>
+            </Button>
+            <Button
+              variant='primary' onClick={() => generateCLIKeyAction.setShowModal(true)}>
               <KeyIcon height={13} />Generate CLI Key
-            </ButtonSolidBlue>
+            </Button>
           </QuickActions>
           <Dropdown
             trigger="click"

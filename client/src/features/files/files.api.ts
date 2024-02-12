@@ -148,10 +148,10 @@ export const moveFilesRequest = async (nodeIds: number[], targetFolderId: number
   return res.json()
 }
 
-export async function createFile(name: string, homeScope: string, folder_id: string | null) {
+export async function createFile(name: string, scope: string, folder_id: string | null) {
   const res = await fetch('/api/create_file', {
     ...getApiRequestOpts('POST'),
-    body: JSON.stringify({ name, scope: homeScope === 'everybody' ? 'public' : null, folder_id }),
+    body: JSON.stringify({ name, scope, folder_id }),
   }).then(checkStatus)
 
   return res.json()
@@ -183,10 +183,10 @@ export async function uploadChunk(url: string, chunk: ArrayBuffer, headers: any)
   })
 }
 
-export async function closeFile(id: string) {
+export async function closeFile(uid: string) {
   const res = await fetch('/api/close_file', {
     ...getApiRequestOpts('POST'),
-    body: JSON.stringify({ id }),
+    body: JSON.stringify({ uid }),
   }).then(checkStatus)
   return res.json()
 }

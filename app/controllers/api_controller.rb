@@ -991,14 +991,16 @@ class ApiController < ApplicationController
 
   # Inputs:
   #
-  # id (string, required)
+  # uid or id (string, required)
+  # Both uid or id mean UID of the file
+  # id support is present just for backwards compatibility of older clients (such as CLI)
   #
   # Outputs: nothing (empty hash)
   #
   def close_file
-    id = unsafe_params[:id]
-    result = https_apps_client.file_close(id, unsafe_params)
-    render json: result
+    uid = unsafe_params[:uid] || unsafe_params[:id]
+    https_apps_client.file_close(uid, unsafe_params)
+    render json: {}
   end
 
   # Inputs:
@@ -1008,11 +1010,11 @@ class ApiController < ApplicationController
   # Outputs: nothing (empty hash)
   #
   def close_asset
-    #TODO: Deprecate this when moving to node, use classic close_file route instead.
+    # TODO: Deprecate this when moving to node, use classic close_file route instead.
     # This API is still used by the CLI
     id = unsafe_params[:id]
-    result = https_apps_client.file_close(id, unsafe_params)
-    render json: result
+    https_apps_client.file_close(id, unsafe_params)
+    render json: {}
   end
 
   # Inputs

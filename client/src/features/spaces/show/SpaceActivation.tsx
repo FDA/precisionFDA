@@ -2,7 +2,6 @@ import React from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
 import styled from 'styled-components'
-import { ButtonSolidGreen } from '../../../components/Button'
 import { Loader } from '../../../components/Loader'
 import { PageContainer } from '../../../components/Page/styles'
 import {
@@ -18,6 +17,7 @@ import { ISpace } from '../spaces.types'
 import { SpaceHeaderDescrip, SpaceHeaderTitle, SpaceMainInfo } from './styles'
 import { ProtectedIcon } from '../ProtectedIcon'
 import { FdaRestrictedIcon } from '../FdaRestrictedIcon'
+import { Button } from '../../../components/Button'
 
 const Row = styled.div`
   display: flex;
@@ -168,12 +168,13 @@ export function Activation({ space }: { space: ISpace }) {
             <ActionText>{activationMessage}</ActionText>
           </div>
           {!!currentUser && (
-            <ButtonSolidGreen
+            <Button
+              variant="success"
               disabled={isAcceptedByUser || acceptSpaceMutation.isLoading}
               onClick={() => acceptClickHandler()}
             >
               {isAcceptedByUser ? 'Already accepted' : 'Accept Space'}
-            </ButtonSolidGreen>
+            </Button>
           )}
         </AcceptSpaceWarning>
         {acceptSpaceMutation.isLoading && <Loader />}

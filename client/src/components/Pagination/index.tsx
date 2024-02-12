@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import styled from 'styled-components'
-import { ButtonSolidBlue } from '../Button'
 import { inputFocus, InputSelect } from '../form/styles'
+import { Button } from '../Button'
 
 export const StyledInputJumpTo = styled.input`
   display: inline-block;
@@ -94,8 +94,8 @@ export const Pagination = ({
   if (isHidden) {
     return null
   }
-  const [localTotal, setLocalTotal] = useState<number>(totalPages || 0)
-  const [localPage, setLocalPage] = useState<number>(page || 0)
+  const [localTotal, setLocalTotal] = useState<number>(totalPages || 1)
+  const [localPage, setLocalPage] = useState<number>(page || 1)
   const pageLowerBound = (page - 1) * perPage + 1
   const pageUpperBound = page * perPage
 
@@ -151,22 +151,24 @@ export const Pagination = ({
           Per Page of {totalCount} Total Items
         </PerPage>
       )}
-      <ButtonSolidBlue
+      <Button
+        variant='primary'
         data-testid="pagination-previous-page-button"
         type="button"
         onClick={() => handleSetPage(Math.max(localPage - 1, 1))}
         disabled={localPage === 1}
       >
         Previous Page
-      </ButtonSolidBlue>{' '}
-      <ButtonSolidBlue
+      </Button>{' '}
+      <Button
+        variant='primary'
         data-testid="pagination-next-page-button"
         type="button"
         onClick={() => handleSetPage(localPage + 1)}
         disabled={localPage === localTotal}
       >
         Next Page
-      </ButtonSolidBlue>
+      </Button>
       {showPageOf && (
         <StyledPageOf data-testid="pagination-page-of">
           Page {localPage || '...'} of {localTotal || '...'}
@@ -184,12 +186,14 @@ export const Pagination = ({
             max={localTotal}
             min={1}
           />
-          <ButtonSolidBlue
+          <Button
+            variant='primary'
             data-testid="pagination-submit-jumpto-button"
             type="submit"
+            disabled={localTotal <= 1}
           >
             Jump
-          </ButtonSolidBlue>
+          </Button>
         </JumpToForm>
       )}
     </StyledPagination>

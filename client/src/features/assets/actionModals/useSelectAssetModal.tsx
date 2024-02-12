@@ -1,6 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
 import React, { useState } from 'react'
-import { Button, ButtonSolidBlue } from '../../../components/Button'
 import { Checkbox } from '../../../components/Checkbox'
 import { InputText } from '../../../components/InputText'
 import { Loader } from '../../../components/Loader'
@@ -32,6 +31,7 @@ import {
 import { DialogType } from '../../home/types'
 import { fetchFilteredAssets } from '../assets.api'
 import { IAsset } from '../assets.types'
+import { Button } from '../../../components/Button'
 
 const Row = ({
   asset,
@@ -251,12 +251,13 @@ export const useSelectAssetModal = (
           >
             Cancel
           </Button>
-          <ButtonSolidBlue
+          <Button
+            variant="primary"
             onClick={handleSubmit}
             disabled={selectedAssets?.length === 0}
           >
             Select &nbsp;<ButtonBadge>{selectedAssets?.length}</ButtonBadge>
-          </ButtonSolidBlue>
+          </Button>
         </ButtonRow>
       </Footer>
     </ModalNext>

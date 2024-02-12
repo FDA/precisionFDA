@@ -1,4 +1,3 @@
-import { SqlEntityManager } from '@mikro-orm/mysql'
 import {
   Body,
   Controller,
@@ -6,8 +5,6 @@ import {
   Delete,
   Get,
   HttpCode,
-  Inject,
-  Logger,
   Param,
   ParseBoolPipe,
   ParseIntPipe,
@@ -16,13 +13,8 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common'
-import { DEPRECATED_SQL_ENTITY_MANAGER } from '@shared/database/provider/deprecated-sql-entity-manager.provider'
 import { DataPortalService } from '@shared/domain/data-portal/service/data-portal.service'
 import { DataPortalParam, FileParam } from '@shared/domain/data-portal/service/data-portal.types'
-import { UserContext } from '@shared/domain/user-context/model/user-context'
-import { FileRemoveOperation } from '@shared/domain/user-file/ops/file-remove'
-import { PlatformClient } from '@shared/platform-client'
-import { UserOpsCtx } from '@shared/types'
 import { UserContextGuard } from '../user-context/guard/user-context.guard'
 import { JsonSchemaPipe } from '../validation/pipes/json-schema.pipe'
 import { dataPortalCreate, dataPortalUpdate, file } from './data-portals.schemas'
@@ -30,11 +22,7 @@ import { dataPortalCreate, dataPortalUpdate, file } from './data-portals.schemas
 @UseGuards(UserContextGuard)
 @Controller('/data-portals')
 export class DataPortalsController {
-  constructor(
-    private readonly user: UserContext,
-    private readonly log: Logger,
-    @Inject(DEPRECATED_SQL_ENTITY_MANAGER) private readonly em: SqlEntityManager,
-  ) {}
+  constructor(private readonly dataPortalService: DataPortalService) {}
 
   /**
    * Creates new resource (just the metadata).
@@ -45,10 +33,7 @@ export class DataPortalsController {
     @Param('id', ParseIntPipe) id: number,
     @Body(new JsonSchemaPipe(file)) body: FileParam,
   ) {
-    const userClient = new PlatformClient(this.user?.accessToken, this.log)
-    const dataPortalService = new DataPortalService(this.em, userClient)
-
-    return await dataPortalService.createResource(body, id, this.user.id)
+    return await this.dataPortalService.createResource(body, id)
   }
 
   /**
@@ -56,17 +41,7 @@ export class DataPortalsController {
    */
   @Delete('/:portalId/resources/:resourceId')
   async removeResource(@Param('resourceId', ParseIntPipe) resourceId: number) {
-    const opsCtx: UserOpsCtx = {
-      log: this.log,
-      user: this.user,
-      em: this.em,
-    }
-
-    const userClient = new PlatformClient(this.user?.accessToken, this.log)
-    const fileRemoveOperation = new FileRemoveOperation(opsCtx)
-    const dataPortalService = new DataPortalService(this.em, userClient, fileRemoveOperation)
-
-    return await dataPortalService.removeResource(resourceId, this.user.id)
+    return await this.dataPortalService.removeResource(resourceId)
   }
 
   /**
@@ -75,10 +50,7 @@ export class DataPortalsController {
   @HttpCode(201)
   @Post('/:portalId/resources/:resourceId')
   async createResourceLink(@Param('resourceId', ParseIntPipe) resourceId: number) {
-    const userClient = new PlatformClient(this.user?.accessToken, this.log)
-    const dataPortalService = new DataPortalService(this.em, userClient)
-
-    return await dataPortalService.createResourceLink(resourceId)
+    return await this.dataPortalService.createResourceLink(resourceId)
   }
 
   /**
@@ -90,10 +62,7 @@ export class DataPortalsController {
     @Param('id', ParseIntPipe) id: number,
     @Body(new JsonSchemaPipe(file)) body: FileParam,
   ) {
-    const userClient = new PlatformClient(this.user?.accessToken, this.log)
-    const dataPortalService = new DataPortalService(this.em, userClient)
-
-    return await dataPortalService.createCardImage(body, id, this.user.id)
+    return await this.dataPortalService.createCardImage(body, id)
   }
 
   /**
@@ -102,10 +71,7 @@ export class DataPortalsController {
   @HttpCode(201)
   @Post()
   async createDataPortal(@Body(new JsonSchemaPipe(dataPortalCreate)) body: DataPortalParam) {
-    const userClient = new PlatformClient(this.user?.accessToken, this.log)
-    const dataPortalService = new DataPortalService(this.em, userClient)
-
-    return await dataPortalService.create(body, this.user.id)
+    return await this.dataPortalService.create(body)
   }
 
   /**
@@ -113,10 +79,7 @@ export class DataPortalsController {
    */
   @Patch('/:id')
   async updateDataPortal(@Body(new JsonSchemaPipe(dataPortalUpdate)) body: DataPortalParam) {
-    const userClient = new PlatformClient(this.user?.accessToken, this.log)
-    const dataPortalService = new DataPortalService(this.em, userClient)
-
-    return await dataPortalService.update(body, this.user!.id)
+    return await this.dataPortalService.update(body)
   }
 
   /**
@@ -126,10 +89,7 @@ export class DataPortalsController {
   async listDataPortals(
     @Query('default', new DefaultValuePipe(false), ParseBoolPipe) defaultParam: boolean,
   ) {
-    const userClient = new PlatformClient(this.user?.accessToken, this.log)
-    const dataPortalService = new DataPortalService(this.em, userClient)
-
-    return await dataPortalService.list(this.user!.id, defaultParam)
+    return await this.dataPortalService.list(defaultParam)
   }
 
   /**
@@ -138,10 +98,7 @@ export class DataPortalsController {
   // TODO add tests for displaying default data portal to user
   @Get('/default')
   async getDefaultDataPortal() {
-    const userClient = new PlatformClient(this.user?.accessToken, this.log)
-    const dataPortalService = new DataPortalService(this.em, userClient)
-
-    return await dataPortalService.getDefault(this.user.id)
+    return await this.dataPortalService.getDefault()
   }
 
   /**
@@ -149,10 +106,7 @@ export class DataPortalsController {
    */
   @Get('/custom')
   async listAccessibleDataPortals() {
-    const userClient = new PlatformClient(this.user.accessToken, this.log)
-    const dataPortalService = new DataPortalService(this.em, userClient)
-
-    return await dataPortalService.listAccessibleCustomPortals(this.user.id)
+    return await this.dataPortalService.listAccessibleCustomPortals()
   }
 
   /**
@@ -160,10 +114,7 @@ export class DataPortalsController {
    */
   @Get('/:id')
   async getDataPortal(@Param('id', ParseIntPipe) id: number) {
-    const userClient = new PlatformClient(this.user?.accessToken, this.log)
-    const dataPortalService = new DataPortalService(this.em, userClient)
-
-    return await dataPortalService.get(id, this.user.id)
+    return await this.dataPortalService.get(id)
   }
 
   /**
@@ -171,9 +122,6 @@ export class DataPortalsController {
    */
   @Get('/:id/resources')
   async listResources(@Param('id', ParseIntPipe) id: number) {
-    const userClient = new PlatformClient(this.user?.accessToken, this.log)
-    const dataPortalService = new DataPortalService(this.em, userClient)
-
-    return await dataPortalService.listResources(id, this.user.id)
+    return await this.dataPortalService.listResources(id)
   }
 }

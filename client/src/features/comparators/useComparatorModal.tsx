@@ -1,12 +1,12 @@
 import React from 'react'
 import { useMutation } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
-import { Button, ButtonSolidBlue, ButtonSolidRed } from '../../components/Button'
 import { checkStatus, getApiRequestOpts } from '../../utils/api'
 import { Modal } from '../modal'
 import { StyledModalContent } from '../modal/styles'
 import { useModal } from '../modal/useModal'
 import { FileLicense } from '../assets/assets.types'
+import { Button } from '../../components/Button'
 
 
 type ComparatorActionTypes = 'remove_from_comparators' | 'add_to_comparators' | 'set_app'
@@ -134,28 +134,26 @@ export function useComparatorModal<
         return (
           <>
             <Button onClick={handleClose} disabled={mutation.isLoading}>Cancel</Button>
-            <ButtonSolidRed onClick={() => handleComparatorSubmit({ actionType: 'remove_from_comparators', dxid: selected.dxid })} disabled={mutation.isLoading}>Remove from Comparators</ButtonSolidRed>
+            <Button variant="warning" onClick={() => handleComparatorSubmit({ actionType: 'remove_from_comparators', dxid: selected.dxid })} disabled={mutation.isLoading}>Remove from Comparators</Button>
           </>
         )
       case 'add_to_comparators':
         return (
           <>
             <Button onClick={handleClose} disabled={mutation.isLoading}>Cancel</Button>
-            <ButtonSolidBlue onClick={() => handleComparatorSubmit({ actionType: 'add_to_comparators', dxid: selected.dxid })} disabled={mutation.isLoading}>Add to Comparators</ButtonSolidBlue>
+            <Button variant="primary" onClick={() => handleComparatorSubmit({ actionType: 'add_to_comparators', dxid: selected.dxid })} disabled={mutation.isLoading}>Add to Comparators</Button>
           </>
         )
       case 'set_app':
         return (
           <>
             <Button onClick={handleClose} disabled={mutation.isLoading}>No</Button>
-            <ButtonSolidBlue onClick={() => handleComparatorSubmit({ actionType: 'set_app', dxid: selected.dxid })} disabled={mutation.isLoading}>Yes</ButtonSolidBlue>
+            <Button variant="primary" onClick={() => handleComparatorSubmit({ actionType: 'set_app', dxid: selected.dxid })} disabled={mutation.isLoading}>Yes</Button>
           </>
         )
       default:
         return (
-          <>
-            <ButtonSolidBlue onClick={handleClose}>Cancel</ButtonSolidBlue>
-          </>
+          <Button onClick={handleClose}>Cancel</Button>
         )
     }
   }

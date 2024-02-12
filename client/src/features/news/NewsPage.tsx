@@ -1,9 +1,8 @@
 import { format } from 'date-fns'
 import React from 'react'
-import { NumberParam, StringParam, useQueryParams } from 'use-query-params'
+import { StringParam, useQueryParams } from 'use-query-params'
 import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
-import { ButtonSolidBlue } from '../../components/Button'
 import { Loader } from '../../components/Loader'
 import { PageContainerMargin } from '../../components/Page/styles'
 import { hidePagination, Pagination } from '../../components/Pagination'
@@ -35,6 +34,7 @@ import {
   NewsListItem,
 } from './styles'
 import { useNewsListQuery } from './useNewsListQuery'
+import { Button } from '../../components/Button'
 
 const NewsPage = () => {
   usePageMeta({ title: 'News - precisionFDA' })
@@ -126,9 +126,9 @@ const NewsPage = () => {
             {userCanCreateNews && (
               <RightSideItem>
                 <ButtonRow>
-                  <ButtonSolidBlue as={Link} to="/admin/news">
+                  <Button variant='primary' as={Link} to="/admin/news">
                     Administer News
-                  </ButtonSolidBlue>
+                  </Button>
                 </ButtonRow>
               </RightSideItem>
             )}

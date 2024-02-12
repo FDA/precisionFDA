@@ -471,6 +471,40 @@ class HttpsAppsClient # rubocop:disable Metrics/ClassLength
     )
   end
 
+  # Alerts
+  def create_alert(alert_params)
+    request(
+      "/alerts",
+      alert_params,
+      Net::HTTP::Post::METHOD,
+    )
+  end
+
+  def update_alert(id, alert_params)
+    request(
+      "/alerts/#{id}",
+      alert_params,
+      Net::HTTP::Put::METHOD,
+    )
+  end
+
+  def delete_alert(id)
+    request(
+      "/alerts/#{id}",
+      {},
+      Net::HTTP::Delete::METHOD,
+    )
+  end
+
+  def get_all_alerts(active = nil)
+    query_string = active.nil? ? "" : "?active=#{active}"
+    request(
+      "/alerts#{query_string}",
+      {},
+      Net::HTTP::Get::METHOD,
+    )
+  end
+
   # News
 
   def news_list(params)
@@ -567,7 +601,7 @@ class HttpsAppsClient # rubocop:disable Metrics/ClassLength
       "/properties/#{type}/scope/#{scope}/keys",
       {},
       Net::HTTP::Get::METHOD,
-      )
+    )
 
   end
 
@@ -998,14 +1032,20 @@ class HttpsAppsClient # rubocop:disable Metrics/ClassLength
   # @param response [String] Response string.
   # @return [Hash] Response from server converted to hash.
   def handle_response(response)
-    response.value
-    parsed = JSON.parse(response.body || "")
-    parsed.is_a?(Hash) ? parsed.with_indifferent_access : parsed
+    if response.is_a?(Net::HTTPSuccess)
+      response.value
+      parsed = JSON.parse(response.body || "")
+      parsed.is_a?(Hash) ? parsed.with_indifferent_access : parsed
+    else
+      error_details = JSON.parse(response.body)
+      error_message = error_details.dig("error", "message")
+      raise StandardError, error_message
+    end
   rescue JSON::ParserError
     response.body
   rescue Net::HTTPClientException => e
     raise e
-  rescue StandardError
-    raise Error, "Something went wrong"
+  rescue StandardError => e
+    raise Error, e.message
   end
 end

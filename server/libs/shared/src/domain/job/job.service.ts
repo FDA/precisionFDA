@@ -9,7 +9,7 @@ import { getLogger } from '../../logger'
 import { PlatformClient } from '../../platform-client'
 import { EntityManager } from '@mikro-orm/core'
 import { FILE_STATE_DX, PARENT_TYPE } from '../user-file/user-file.types'
-import { NOTIFICATION_ACTION, SEVERITY, STATIC_SCOPE } from '../../enums'
+import { NOTIFICATION_ACTION, SEVERITY } from '../../enums'
 import { createFileEvent, EVENT_TYPES } from '../event/event.helper'
 import {
   DnanexusLink,

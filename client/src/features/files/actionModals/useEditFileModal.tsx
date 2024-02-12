@@ -3,7 +3,6 @@ import { useForm } from 'react-hook-form'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
 import { ErrorMessage } from '@hookform/error-message'
-import { Button, ButtonSolidBlue } from '../../../components/Button'
 import { FieldGroup, InputError } from '../../../components/form/styles'
 import { InputText } from '../../../components/InputText'
 import {
@@ -16,6 +15,7 @@ import { useModal } from '../../modal/useModal'
 import { editFileRequest } from '../files.api'
 import { IFile } from '../files.types'
 import { ModalHeaderTop, ModalNext } from '../../modal/ModalNext'
+import { Button } from '../../../components/Button'
 
 const EditFileInfoForm = ({
   file,
@@ -107,9 +107,9 @@ const EditFileInfoForm = ({
           <Button type="button" onClick={handleClose} disabled={isSubmitting}>
             Cancel
           </Button>
-          <ButtonSolidBlue type="submit" form="edit-file-form" disabled={isSubmitting}>
+          <Button variant="primary" type="submit" form="edit-file-form" disabled={isSubmitting}>
             Edit
-          </ButtonSolidBlue>
+          </Button>
         </ButtonRow>
       </Footer>
     </>

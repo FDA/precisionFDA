@@ -3,7 +3,7 @@ import React from 'react'
 import { useForm } from 'react-hook-form'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
-import { Button } from '../../../components/Button/ButtonNext'
+import { Button } from '../../../components/Button'
 import { FieldGroup, InputError } from '../../../components/form/styles'
 import { InputText } from '../../../components/InputText'
 import { ButtonRow, Footer, ModalScroll, StyledForm } from '../../modal/styles'
@@ -101,7 +101,7 @@ export const useAddFolderModal = ({
             Cancel
           </Button>
           <Button
-            data-variant="primary"
+            variant="primary"
             type="submit"
             form="add-folder-form"
           >

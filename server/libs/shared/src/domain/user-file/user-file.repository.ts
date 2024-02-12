@@ -1,7 +1,9 @@
 import { EntityRepository } from '@mikro-orm/mysql'
 import { Asset } from '@shared/domain/user-file/asset.entity'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
+import { User } from '@shared/domain/user/user.entity'
 import { FILE_STATE_DX, FILE_STI_TYPE, FILE_ORIGIN_TYPE } from './user-file.types'
+import { STATIC_SCOPE } from '@shared/enums'
 
 export class UserFileRepository extends EntityRepository<UserFile> {
   async findProjectFilesInSubfolder(input: {
@@ -19,6 +21,31 @@ export class UserFileRepository extends EntityRepository<UserFile> {
         entityType: FILE_ORIGIN_TYPE.HTTPS,
       },
       { populate: ['taggings.tag'], orderBy: { id: 'ASC' } },
+    )
+  }
+
+  /**
+   * Loads userfile identified by uids and verifies if they are accessible by user.
+   * @param userId
+   * @param uids
+   */
+  async findAccessibleByUser(userId: number, uids: string[]): Promise<UserFile[]> {
+    const userRepository = this._em.getRepository(User)
+    const user: User = await userRepository.findOneOrFail(
+      { id: userId },
+      { populate: ['spaceMemberships', 'spaceMemberships.spaces'] },
+    )
+    return await this.find(
+      {
+        $or: [
+          { scope: STATIC_SCOPE.PUBLIC },
+          { user, scope: STATIC_SCOPE.PRIVATE },
+          { scope: { $in: (user.spaceUids as `space-${string}`[]) ?? [] } },
+        ],
+        state: FILE_STATE_DX.CLOSED,
+        uid: { $in: uids },
+      },
+      { filters: ['asset'], populate: ['user', 'taggings.tag'] },
     )
   }
 

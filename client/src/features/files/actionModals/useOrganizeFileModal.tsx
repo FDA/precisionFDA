@@ -2,7 +2,7 @@ import { Key } from 'rc-tree/lib/interface'
 import React, { useState } from 'react'
 import styled from 'styled-components'
 import { useImmer } from 'use-immer'
-import { Button, ButtonSolidBlue } from '../../../components/Button'
+import { Button } from '../../../components/Button'
 import { ModalHeaderTop, ModalNext } from '../../modal/ModalNext'
 import { ButtonRow, Footer, ModalScroll } from '../../modal/styles'
 import { useModal } from '../../modal/useModal'
@@ -137,13 +137,14 @@ export const useOrganizeFileModal = ({
           >
             Cancel
           </Button>
-          <ButtonSolidBlue
+          <Button
+            variant="primary"
             type="submit"
             onClick={handleSubmit}
             disabled={!submitEnabled}
           >
             {submitCaption}
-          </ButtonSolidBlue>
+          </Button>
         </ButtonRow>
       </Footer>
     </ModalNext>

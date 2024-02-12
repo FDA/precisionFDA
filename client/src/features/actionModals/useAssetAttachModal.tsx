@@ -1,9 +1,7 @@
 import classNames from 'classnames'
 import React, { useEffect, useState } from 'react'
 import {
-  Button,
-  ButtonSolidBlue,
-  TransparentButton,
+  TransparentButton, Button,
 } from '../../components/Button'
 import { InputText } from '../../components/InputText'
 import { Loader } from '../../components/Loader'
@@ -191,12 +189,13 @@ export const AssetAttachModal = ({
           <Footer>
             <ButtonRow>
               <Button onClick={hideAction}>Cancel</Button>
-              <ButtonSolidBlue
+              <Button
+                variant="primary"
                 onClick={() => onClickAttachAction()}
                 disabled={!checkedItem.size}
               >
                 Attach
-              </ButtonSolidBlue>
+              </Button>
             </ButtonRow>
           </Footer>
         </>

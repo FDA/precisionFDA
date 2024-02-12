@@ -1,6 +1,5 @@
 /* eslint-disable react/no-unescaped-entities */
 import React from 'react'
-import { ButtonSolidBlue } from '../../../components/Button'
 import {
   ButtonRow,
   DocBody,
@@ -11,6 +10,7 @@ import {
 } from '../styles'
 import { DownloadIcon } from '../../../components/icons/DownloadIcon'
 import { useScrollToHash } from '../../../hooks/useScrollToHash'
+import { Button } from '../../../components/Button'
 
 export const CLI_old = () => {
   useScrollToHash()
@@ -45,27 +45,27 @@ export const CLI_old = () => {
             target="_blank"
             rel="noreferrer"
           >
-            <ButtonSolidBlue>
+            <Button variant="primary">
               <DownloadIcon /> Linux
-            </ButtonSolidBlue>
+            </Button>
           </a>
           <a
             href="https://pfda-production-static-files.s3.amazonaws.com/cli/pfda-darwin-2.4.1.tar.gz"
             target="_blank"
             rel="noreferrer"
           >
-            <ButtonSolidBlue>
+            <Button variant="primary">
               <DownloadIcon /> Mac OS X
-            </ButtonSolidBlue>
+            </Button>
           </a>
           <a
             href="https://pfda-production-static-files.s3.amazonaws.com/cli/pfda-windows-2.4.1.zip"
             target="_blank"
             rel="noreferrer"
           >
-            <ButtonSolidBlue>
+            <Button variant="primary">
               <DownloadIcon /> Windows
-            </ButtonSolidBlue>
+            </Button>
           </a>
         </ButtonRow>
 
@@ -363,7 +363,7 @@ export const CLI_old = () => {
           <strong>NOTE:</strong>Removing files using filename also supports <strong>wildcards</strong>. <code>?</code> - 1 character, <code>*</code> - 0 or many characters.<br />
           If you wish to use wildcard remove, put the argument in simple quotes to prevent shell character expansion.
           You will be prompted to confirm the action.
-          {/*You can force the prompt using -force flag.*/}
+          {/* You can force the prompt using -force flag. */}
         </DocsTip>
 
         <p>

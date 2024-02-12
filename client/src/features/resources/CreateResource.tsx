@@ -1,12 +1,12 @@
 import { useQueryClient } from '@tanstack/react-query'
 import React from 'react'
 import styled from 'styled-components'
-import { Button, ButtonSolidBlue } from '../../components/Button'
 import { ModalHeaderTop, ModalNext } from '../modal/ModalNext'
 import { Footer, ModalScroll } from '../modal/styles'
 import { useModal } from '../modal/useModal'
 import { Item, useUploadResource } from './useUploadResource'
 import { Loader } from '../../components/Loader'
+import { Button } from '../../components/Button'
 
 const FormModalHeader = styled.label`
   display: flex;
@@ -93,9 +93,9 @@ export const ResourceForm = ({
       </ModalScroll>
       <Footer>
         {isLoading && <Loader />}
-        <ButtonSolidBlue disabled={selectedFiles.length === 0 || isLoading} type="submit">
+        <Button variant="primary" disabled={selectedFiles.length === 0 || isLoading} type="submit">
           Upload
-        </ButtonSolidBlue>
+        </Button>
       </Footer>
     </form>
   )
@@ -112,9 +112,9 @@ export const CreateResource = ({
 
   return (
     <div>
-      <ButtonSolidBlue type="button" onClick={() => setShowModal(true)}>
+      <Button variant="primary" type="button" onClick={() => setShowModal(true)}>
         Upload Resources
-      </ButtonSolidBlue>
+      </Button>
       {isShown && (
         <ModalNext
           id="add-resource-to-space"

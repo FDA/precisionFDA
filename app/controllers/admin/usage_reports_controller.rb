@@ -46,13 +46,12 @@ module Admin
 
       @storage_date = UsageMetric.where.not(storage_usage: nil).
         order(:created_at).limit(1).pluck(:created_at).first
-
       @compute_date = (@storage_date - 1.day).end_of_day if @storage_date
     end
 
     def usage_metric
       metric = UsageMetric.joins(:user).where(users: { user_state: UsageMetric::USER_STATES })
-      metric = metric.where.not(range_dependent_query, nil, nil) if @selected_range != "custom"
+      metric = metric.where.not(range_dependent_query, 0, 0) if @selected_range != "custom"
       metric
     end
 

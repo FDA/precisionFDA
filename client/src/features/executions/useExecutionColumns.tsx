@@ -18,6 +18,7 @@ import { StyledLinkCell } from '../home/home.styles'
 import { KeyVal } from '../home/types'
 import { getBasePath } from '../home/utils'
 import { IExecution } from './executions.types'
+import { StateCell } from './StateCell'
 
 export const useExecutionColumns = ({
   colWidths,
@@ -35,24 +36,7 @@ export const useExecutionColumns = ({
   const queryClient = useQueryClient()
   return [
     {
-      Header: 'State',
-      id: 'state',
-      accessor: 'state',
-      width: colWidths?.state || 100,
-      Filter: DefaultColumnFilter,
-      disableSortBy: true,
-      Cell: (props: any) => {
-        const { jobs } = props.row.original
-        if (jobs) {
-          return <div>{jobs[jobs.length - 1].state}</div>
-        }
-          return <div>{props.row.original.state}</div>
-
-      },
-      ...(filterDataTestIdPrefix ? { filterDataTestId: `${filterDataTestIdPrefix}-state` } : {}),
-    },
-    {
-      Header: 'Execution Name',
+      Header: 'Name',
       accessor: 'name',
       Filter: DefaultColumnFilter,
       width: colWidths?.name || 300,
@@ -61,9 +45,9 @@ export const useExecutionColumns = ({
         const spaceId = getSpaceIdFromScope(row.original.scope)
         const pathname = `${getBasePath(spaceId)}/${rowType}/${cell.row.original.uid}`
 
-        return row.original.jobs ? (
+        return rowType === 'workflows' ? (
             <StyledLinkCell to={pathname} state={{ from: location.pathname, fromSearch: location.search }}>
-              <BoltIcon height={14} />
+              <BoltIcon width={14} height={14} />
               {value}
             </StyledLinkCell>
           ) : (
@@ -74,6 +58,22 @@ export const useExecutionColumns = ({
           )
         },
         ...(filterDataTestIdPrefix ? { filterDataTestId: `${filterDataTestIdPrefix}-execution-name` } : {}),
+      },
+      {
+        Header: 'State',
+        id: 'state',
+        accessor: 'state',
+        width: colWidths?.state || 100,
+        Filter: DefaultColumnFilter,
+        disableSortBy: true,
+        Cell: (props: any) => {
+          const { jobs } = props.row.original
+          if (jobs) {
+            return <StateCell state={jobs[jobs.length - 1].state} />
+          }
+          return <StateCell state={props.row.original.state} />
+        },
+        ...(filterDataTestIdPrefix ? { filterDataTestId: `${filterDataTestIdPrefix}-state` } : {}),
       },
     {
       Header: 'Workflow',

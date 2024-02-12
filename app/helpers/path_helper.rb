@@ -59,6 +59,8 @@ module PathHelper
       "/spaces/#{space_id}/workflows/#{item.uid}"
     when "job"
       "/spaces/#{space_id}/executions/#{item.uid}"
+    when "comparison" # it is in space, but we don't show comparisons in spaces
+      "/comparisons/#{item.id}"
     else
       "Unknown class #{item.klass}"
     end

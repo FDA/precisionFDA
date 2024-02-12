@@ -3,7 +3,6 @@ import React, { useMemo } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'react-toastify'
 import styled from 'styled-components'
-import { Button, ButtonSolidBlue } from '../../components/Button'
 import { FieldGroup } from '../../components/form/styles'
 import { InputText } from '../../components/InputText'
 import { checkStatus, getApiRequestOpts } from '../../utils/api'
@@ -12,6 +11,7 @@ import { ButtonRow, Footer } from '../modal/styles'
 import { useModal } from '../modal/useModal'
 import { APIResource } from '../home/types'
 import { RequestResponse } from './useFeatureMutation'
+import { Button } from '../../components/Button'
 
 const StyledForm = styled.form`
   display: flex;
@@ -103,13 +103,14 @@ const EditTagsForm = ({
           >
             Cancel
           </Button>
-          <ButtonSolidBlue
+          <Button
+            variant="primary"
             type="submit"
             form="edit-tag-form"
             disabled={mutation.isLoading}
           >
             Edit Tags
-          </ButtonSolidBlue>
+          </Button>
         </ButtonRow>
       </Footer>
     </>

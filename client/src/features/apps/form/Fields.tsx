@@ -42,6 +42,8 @@ const DefaultBooleanTd = styled.td`
   display: flex;
   align-items: center;
   flex-wrap: wrap;
+  height: 32px;
+
   label {
     display: flex;
     align-items: center;

@@ -18,6 +18,11 @@ import { database } from '../database'
 import { InvalidStateError } from '../errors'
 import { SpaceReportErrorFacade } from '../facade/space-report-error/space-report-error.facade'
 import { defaultLogger as log } from '../logger'
+import {
+  UidAndFollowUpInput,
+  SyncFileJobInput,
+  FileUidInput,
+} from '../domain/user-file/user-file.input'
 import { UserCtx } from '../types'
 import { formatDuration } from '../utils/format'
 import { getJobStatusMessage, getJobStatusMessageWithElapsedTime } from './queue.utils'
@@ -384,6 +389,49 @@ const createRemoveNodesJobTask = async (ids: number[], user: UserCtx) => {
   }
   return await addToQueue(wrapped, fileSyncQueue, options)
 }
+
+const createRunFollowUpActionJobTask = async (payload: UidAndFollowUpInput, user?: UserCtx) => {
+  const wrapped = {
+    type: TASK_TYPE.FOLLOW_UP_ACTION as const,
+    payload,
+    user,
+  }
+  const options: JobOptions = {
+    jobId: `${wrapped.type}.${payload.uid}.${new Date().getTime()}`,
+  }
+  await addToQueue(wrapped, mainQueue, options)
+}
+
+const createFileSynchronizeJobTask = async (
+  payload: SyncFileJobInput,
+  user?: UserCtx,
+  delayInMs?: number,
+) => {
+  const wrapped = {
+    type: TASK_TYPE.SYNC_FILE_STATE as const,
+    payload,
+    user,
+  }
+  const options: JobOptions = {
+    jobId: `${wrapped.type}.${payload.fileUid}.${new Date().getTime()}`,
+    delay: delayInMs ?? 0,
+  }
+  await addToQueue(wrapped, mainQueue, options)
+}
+
+const createCloseFileJobTask = async (payload: FileUidInput, user?: UserCtx) => {
+  const wrapped = {
+    type: TASK_TYPE.CLOSE_FILE as const,
+    payload,
+    user,
+  }
+
+  const options: JobOptions = {
+    jobId: `${wrapped.type}.${payload.fileUid}`,
+  }
+  await addToQueue(wrapped, mainQueue, options)
+}
+
 const createLockNodesJobTask = async (ids: number[], user: UserCtx) => {
   const wrapped = {
     type: TASK_TYPE.LOCK_NODES as const,
@@ -463,7 +511,7 @@ const createCheckUserJobsTask = async (data: BasicUserJob) => {
 }
 
 const createTestMaxMemoryTask = async (): Promise<any> => {
-  maintenanceQueue.removeJobs(TASK_TYPE.DEBUG_MAX_MEMORY)
+  await maintenanceQueue.removeJobs(TASK_TYPE.DEBUG_MAX_MEMORY)
 
   const data = {
     type: TASK_TYPE.DEBUG_MAX_MEMORY as const,
@@ -492,7 +540,7 @@ const addToQueueEnsureUnique = async <T extends Task>(
     // Do not allow a second job to be added to the queue
     const existingJob = await q.getJob(jobId)
     if (existingJob) {
-      let errorMessage = existingJob.hasOwnProperty('getState')
+      const errorMessage = existingJob.hasOwnProperty('getState')
         ? await getJobStatusMessageWithElapsedTime(existingJob, task.type)
         : `Job with id ${jobId} already exists in queue`
       throw new InvalidStateError(errorMessage)
@@ -518,6 +566,7 @@ export {
   createCheckStaleJobsTask,
   createSyncSpacesPermissionsTask,
   createDbClusterSyncTask,
+  createFileSynchronizeJobTask,
   createSyncOutputsTask,
   createUserCheckupTask,
   createCheckUserJobsTask,
@@ -534,6 +583,8 @@ export {
   findRepeatable,
   addToQueue,
   addToQueueEnsureUnique,
+  createRunFollowUpActionJobTask,
+  createCloseFileJobTask,
   clearOrphanedRepeatableJobs,
   createLockNodesJobTask,
   createUnlockNodesJobTask,

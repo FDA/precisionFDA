@@ -1,11 +1,11 @@
 import styled from 'styled-components'
-import { ButtonSolidBlue } from '../../../components/Button'
 import { PageContainer, PageLeftColumn, PageRightColumn, pagePadding, PageContainerMargin } from '../../../components/Page/styles'
 import { breakPoints } from '../../../styles/theme'
 import { StyledToC } from '../../markdown/Toc'
+import { Button } from '../../../components/Button'
 
 
-export const CallToActionButton = styled(ButtonSolidBlue)`
+export const CallToActionButton = styled(Button).attrs({ variant: 'primary' })`
   display: block;
   margin-bottom: 0px;
 `

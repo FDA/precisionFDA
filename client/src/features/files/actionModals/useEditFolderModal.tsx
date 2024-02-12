@@ -3,7 +3,6 @@ import React, { useMemo } from 'react'
 import { useForm } from 'react-hook-form'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
-import { Button, ButtonSolidBlue } from '../../../components/Button'
 import { FieldGroup, InputError } from '../../../components/form/styles'
 import { InputText } from '../../../components/InputText'
 import { Modal } from '../../modal'
@@ -11,6 +10,7 @@ import { ButtonRow, StyledForm } from '../../modal/styles'
 import { useModal } from '../../modal/useModal'
 import { editFolderRequest } from '../files.api'
 import { IFile } from '../files.types'
+import { Button } from '../../../components/Button'
 
 const EditFolderInfoForm = ({
   folder,
@@ -26,7 +26,7 @@ const EditFolderInfoForm = ({
     handleSubmit,
     formState: { errors, isSubmitting },
     reset,
-    setError
+    setError,
   } = useForm({
     defaultValues: {
       name: folder?.name,
@@ -73,7 +73,7 @@ const EditFolderInfoForm = ({
       </FieldGroup>
       <ButtonRow>
         <Button type="button" onClick={handleClose} disabled={isSubmitting}>Cancel</Button>
-        <ButtonSolidBlue type="submit" disabled={isSubmitting}>Edit</ButtonSolidBlue>
+        <Button variant="primary" type="submit" disabled={isSubmitting}>Edit</Button>
       </ButtonRow>
     </StyledForm>
   )

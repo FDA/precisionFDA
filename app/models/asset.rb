@@ -51,6 +51,11 @@ class Asset < UserFile
     )
   end
 
+  def self.publish(assets, context, scope)
+    file_publisher = FilePublisher.by_context(context)
+    file_publisher.publish_assets(assets, scope)
+  end
+
   def file_paths
     archive_entries.map(&:path).reject { |p| p.end_with?("/") }
   end

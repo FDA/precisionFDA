@@ -3,7 +3,6 @@ import { AxiosError } from 'axios'
 import React, { useEffect, useMemo, useState } from 'react'
 import { toast } from 'react-toastify'
 import styled from 'styled-components'
-import { Button, ButtonSolidBlue } from '../../../components/Button'
 import { FileIcon } from '../../../components/icons/FileIcon'
 import { FolderIcon } from '../../../components/icons/FolderIcon'
 import { Loader } from '../../../components/Loader'
@@ -16,6 +15,7 @@ import { useModal } from '../../modal/useModal'
 import { DownloadListResponse, ServerScope } from '../../home/types'
 import { fetchFilesListLockingRequest, LockUnlockActionType, lockUnlockFilesRequest } from '../files.api'
 import { IFile } from '../files.types'
+import { Button } from '../../../components/Button'
 
 const StyledResourceTable = styled(ResourceTable)`
   padding-left: 12px;
@@ -164,9 +164,9 @@ export const useLockUnlockFileModal = ({
         <Button onClick={() => setShowModal(false)} disabled={mutation.isLoading}>
           Cancel
         </Button>
-        <ButtonSolidBlue onClick={handleSubmit} disabled={isSubmitDisabled()}>
+        <Button variant="primary" onClick={handleSubmit} disabled={isSubmitDisabled()}>
           {ActionTypeName[type]}
-        </ButtonSolidBlue>
+        </Button>
       </Footer>
     </ModalNext>
   )

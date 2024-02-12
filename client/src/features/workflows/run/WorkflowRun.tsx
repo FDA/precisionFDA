@@ -18,7 +18,6 @@ import { InputNumber, InputText } from '../../../components/InputText'
 import { InputError } from '../../../components/form/styles'
 import { HomeLoader, NotFound, Title } from '../../home/show.styles'
 import { CubeIcon } from '../../../components/icons/CubeIcon'
-import { ButtonSolidBlue } from '../../../components/Button'
 import { FieldGroup } from '../../../components/form/FieldGroup'
 import { JobRunInput } from '../../apps/run/JobRunInput'
 import { AcceptedLicense, InputSpec, SelectType } from '../../apps/apps.types'
@@ -49,6 +48,7 @@ import { BackLink } from '../../../components/Page/PageBackLink'
 import { getValue } from '../../apps/run/utils'
 import { getDefaultValueFromServer } from '../../apps/form/common'
 import { Select } from '../../../components/Select'
+import { Button } from '../../../components/Button'
 
 interface WorkflowRunData {
   analysisName: string;
@@ -394,11 +394,12 @@ const WorkflowRun = (
             </SectionBody>
           </Section>
         </WorkflowConfiguration>
-        <ButtonSolidBlue
+        <Button
+          variant="primary"
           disabled={isSubmitting}
           type="submit" form="submitJobForm" onClick={handleSubmit(onSubmit)}>
           {isSubmitting ? 'Running' : 'Run Workflow'}
-        </ButtonSolidBlue>
+        </Button>
       </StyledForm>
     </>
   )

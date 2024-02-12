@@ -23,11 +23,13 @@ class DataPortalParam {
   id: number
   name: string
   description: string
+  cardImageFileName: string
   content: string
   editorState: string
   hostLeadDxuser: string
   guestLeadDxuser: string
   lastUpdated: string
+  cardImageId: number
   cardImageUid: string
   cardImageUrl: string
   spaceId: number

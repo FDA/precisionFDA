@@ -2,7 +2,6 @@ import { useMutation } from '@tanstack/react-query'
 import React, { useMemo } from 'react'
 import { toast } from 'react-toastify'
 import styled from 'styled-components'
-import { Button, ButtonSolidBlue } from '../../components/Button'
 import { Loader } from '../../components/Loader'
 import { StyledTable, StyledTD } from '../../components/ResourceTable'
 import { formatDate, itemsCountString } from '../../utils/formatting'
@@ -12,6 +11,7 @@ import { useModal } from '../modal/useModal'
 import { ISpaceReport } from './space-report.types'
 import { deleteReports } from './space-reports.api'
 import { reportStateToTextMap } from './useSpaceReportColumns'
+import { Button } from '../../components/Button'
 
 
 const StyledReportTable = styled(StyledTable)`
@@ -85,9 +85,9 @@ export function useDeleteSpaceReportModal({
         <ButtonRow>
           {mutation.isLoading && <Loader />}
           <Button onClick={() => close()}>Cancel</Button>
-          <ButtonSolidBlue onClick={handleSubmit} disabled={mutation.isLoading}>
+          <Button variant="warning" onClick={handleSubmit} disabled={mutation.isLoading}>
             Delete
-          </ButtonSolidBlue>
+          </Button>
         </ButtonRow>
       </Footer>
     </ModalNext>

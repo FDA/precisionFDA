@@ -2,16 +2,14 @@ import React, { useMemo } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
 import styled from 'styled-components'
-import { Button, ButtonSolidRed } from '../../components/Button'
 import { Loader } from '../../components/Loader'
-import {
-  ResourceTable
-} from '../../components/ResourceTable'
+import { ResourceTable } from '../../components/ResourceTable'
 import { Modal } from '../modal'
 import { ButtonRow, ModalScroll } from '../modal/styles'
 import { useModal } from '../modal/useModal'
 import { terminateJobsRequest } from './executions.api'
 import { IExecution } from './executions.types'
+import { Button } from '../../components/Button'
 
 const StyledResourceTable = styled(ResourceTable)`
   padding: 0.5rem;
@@ -58,9 +56,9 @@ export function useTerminateModal<T extends { ids: string[]; name: string }>({
         <ButtonRow>
           {mutation.isLoading && <Loader />}
           <Button onClick={() => setShowModal(false)}>Cancel</Button>
-          <ButtonSolidRed onClick={handleSubmit} disabled={mutation.isLoading}>
+          <Button variant="warning" onClick={handleSubmit} disabled={mutation.isLoading}>
             Terminate
-          </ButtonSolidRed>
+          </Button>
         </ButtonRow>
       }
     >

@@ -3,7 +3,6 @@ import React, { ChangeEvent, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import styled from 'styled-components'
-import { Button, ButtonSolidBlue } from '../../components/Button'
 import { Loader } from '../../components/Loader'
 import { ModalHeaderTop, ModalNext } from '../modal/ModalNext'
 import { Footer } from '../modal/styles'
@@ -11,6 +10,7 @@ import { useModal } from '../modal/useModal'
 import { uploadAppConfigFileRequest } from './apps.api'
 import { FileType } from './apps.types'
 import MonacoEditor from '../../components/MonacoEditor/MonacoEditor'
+import { Button } from '../../components/Button'
 
 const StyledFileUpload = styled.div`
   padding-bottom: 0;
@@ -124,13 +124,14 @@ const FileUpload = ({
           <Button type="button" onClick={() => setShowModal(false)}>
             Close
           </Button>
-          <ButtonSolidBlue
+          <Button
+            variant="primary"
             disabled={text === undefined || mutation.isLoading}
             type="button"
             onClick={handleImportAndCreate}
           >
             Create App
-          </ButtonSolidBlue>
+          </Button>
         </Footer>
       </StyledFileUpload>
     </>
