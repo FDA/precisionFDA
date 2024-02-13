@@ -122,7 +122,18 @@ export const SpaceForm = ({
     if (vals.space_type === 'government') {
       vals.host_lead_dxuser = user ? user.dxuser : null
     }
-    mutation.mutateAsync(vals)
+    const createSpaceRequest: CreateSpacePayload = {
+      name: vals.name,
+      description: vals.description,
+      space_type: vals.space_type,
+      source_space_id: vals.source_space_id,
+      guest_lead_dxuser: vals.guest_lead_dxuser,
+      host_lead_dxuser: vals.host_lead_dxuser,
+      sponsor_lead_dxuser: vals.sponsor_lead_dxuser,
+      cts: vals.cts,
+    }
+
+    mutation.mutateAsync(createSpaceRequest)
   }
 
   const handleProtectedSelection = (event: React.ChangeEvent<Element>) => {
