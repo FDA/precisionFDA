@@ -7,5 +7,5 @@ GRAPH
   aws (9.1.4)
   pfda (0.1.0)
     aws (~> 9.0)
-    tomcat (~> 5.0)
+    tomcat (~> 5.0.16)
   tomcat (5.0.16)
