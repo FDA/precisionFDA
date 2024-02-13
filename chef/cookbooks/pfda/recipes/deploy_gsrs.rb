@@ -9,6 +9,7 @@ tomcat_install "gsrs" do
   version node[:gsrs][:tomcat_version]
   tomcat_user node[:gsrs][:tomcat_user]
   tomcat_group node[:gsrs][:tomcat_group]
+  tarball_uri 'https://archive.apache.org/dist/tomcat/tomcat-10/v10.1.18/bin/apache-tomcat-10.1.18.tar.gz.sha512' # By default it goes to http and this is causing build issues
   verify_checksum false
   exclude_docs true
   exclude_examples true
