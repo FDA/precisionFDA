@@ -9,6 +9,7 @@ tomcat_install "gsrs" do
   version node[:gsrs][:tomcat_version]
   tomcat_user node[:gsrs][:tomcat_user]
   tomcat_group node[:gsrs][:tomcat_group]
+  verify_checksum false
   exclude_docs true
   exclude_examples true
   exclude_manager true
