@@ -7,9 +7,11 @@ default[:app][:shortname] = "precision_fda"
 
 default[:gsrs][:packages] = ["openjdk-11-jdk"]
 default[:gsrs][:tomcat_path] = "/opt/gsrs"
-default[:gsrs][:tomcat_version] = "10.0.8"
+default[:gsrs][:tomcat_version] = "10.1.18"
 default[:gsrs][:tomcat_user] = "gsrs"
 default[:gsrs][:tomcat_group] = "gsrs"
+default[:gsrs][:tarball_base_uri] = "https://archive.apache.org/dist/tomcat/" # By default it goes to http and this is causing build issues
+default[:gsrs][:checksum_base_uri] = "https://archive.apache.org/dist/tomcat/" # By default it goes to http and this is causing build issues
 default[:gsrs][:index_path] = "s3://gsrs-indexes-#{node.environment}/ginas.ix/"
 default[:gsrs][:repo_url] = "https://github.com/dnanexus/gsrs-play-dist.git"
 default[:gsrs][:revision] = "gsrs_PROD"
