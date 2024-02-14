@@ -144,7 +144,7 @@ export const SpaceForm = ({
     setValue('restricted_reviewer', event.target.checked)
   }
 
-  const isSubmitting = mutation.isLoading
+  const isSubmitting = mutation.isPending
 
   const options = getSpaceTypeOptions({
     isAdmin,

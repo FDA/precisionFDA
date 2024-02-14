@@ -50,7 +50,7 @@ export const useAssetActions = ({ homeScope, selectedItems, resourceKeys, resetS
   const featureMutation = useFeatureMutation({
     resource: 'assets',
     onSuccess: () => {
-      queryClient.invalidateQueries(resourceKeys)
+      queryClient.invalidateQueries({ queryKey: resourceKeys })
     },
   })
 
@@ -73,7 +73,9 @@ export const useAssetActions = ({ homeScope, selectedItems, resourceKeys, resetS
     selected: selected.map(s => ({ id: s.uid, name: s.name, location: s.location })),
     request: deleteAssetsRequest,
     onSuccess: () => {
-      queryClient.invalidateQueries(['assets'])
+      queryClient.invalidateQueries({
+        queryKey: ['assets'],
+      })
       navigate('/home/assets')
       if(resetSelected) resetSelected()
     },
@@ -92,7 +94,7 @@ export const useAssetActions = ({ homeScope, selectedItems, resourceKeys, resetS
     resource: 'assets',
     selected: selected[0],
     onSuccess: () => {
-      queryClient.invalidateQueries(resourceKeys)
+      queryClient.invalidateQueries({ queryKey: resourceKeys })
     },
   })
 
@@ -104,7 +106,7 @@ export const useAssetActions = ({ homeScope, selectedItems, resourceKeys, resetS
     type: 'node',
     selected: selected[0],
     onSuccess: () => {
-      queryClient.invalidateQueries(resourceKeys)
+      queryClient.invalidateQueries({ queryKey: resourceKeys })
     },
   })
 
@@ -116,7 +118,7 @@ export const useAssetActions = ({ homeScope, selectedItems, resourceKeys, resetS
     resource: 'assets',
     selected: selected[0],
     onSuccess: () => {
-      queryClient.invalidateQueries(resourceKeys)
+      queryClient.invalidateQueries({ queryKey: resourceKeys })
     },
   })
 
@@ -128,7 +130,7 @@ export const useAssetActions = ({ homeScope, selectedItems, resourceKeys, resetS
     selected: selected[0],
     resource: 'assets',
     onSuccess: () => {
-      queryClient.invalidateQueries(resourceKeys)
+      queryClient.invalidateQueries({ queryKey: resourceKeys })
     },
   })
 
@@ -140,7 +142,7 @@ export const useAssetActions = ({ homeScope, selectedItems, resourceKeys, resetS
     resource: 'assets',
     selected: selected[0],
     onSuccess: () => {
-      queryClient.invalidateQueries(resourceKeys)
+      queryClient.invalidateQueries({ queryKey: resourceKeys })
     },
   })
 

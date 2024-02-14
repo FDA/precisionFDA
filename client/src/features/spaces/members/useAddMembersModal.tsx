@@ -57,7 +57,9 @@ export const useAddMembersModal = ({ spaceId }: { spaceId: string }) => {
       }),
     onSuccess: res => {
       reset()
-      queryClient.invalidateQueries(['space-members'])
+      queryClient.invalidateQueries({
+        queryKey: ['space-members'],
+      })
       setShowModal(false)
       toast.success('Success: Adding members')
     },
@@ -94,7 +96,7 @@ export const useAddMembersModal = ({ spaceId }: { spaceId: string }) => {
             {...register('invitees')}
             placeholder=""
             autoFocus
-            disabled={mutation.isLoading}
+            disabled={mutation.isPending}
           />
           <Hint>
             Enter usernames or emails seperated by commas. For example:
@@ -119,10 +121,10 @@ export const useAddMembersModal = ({ spaceId }: { spaceId: string }) => {
                   { value: 'viewer', label: 'Viewer' },
                 ]}
                 onChange={onChange}
-                isLoading={mutation.isLoading}
+                isLoading={mutation.isPending}
                 onBlur={onBlur}
                 value={value}
-                isDisabled={mutation.isLoading}
+                isDisabled={mutation.isPending}
               />
             )}
           />
@@ -142,7 +144,7 @@ export const useAddMembersModal = ({ spaceId }: { spaceId: string }) => {
                 reset()
                 setShowModal(false)
               }}
-              disabled={mutation.isLoading}
+              disabled={mutation.isPending}
               aria-label="Close modal"
             >
               Cancel
@@ -150,7 +152,7 @@ export const useAddMembersModal = ({ spaceId }: { spaceId: string }) => {
             <Button
               variant="primary"
               type="submit"
-              disabled={Object.keys(errors).length > 0 || mutation.isLoading}
+              disabled={Object.keys(errors).length > 0 || mutation.isPending}
               aria-label="Submit add members"
             >
               Add Members

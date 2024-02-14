@@ -41,8 +41,12 @@ export const EditCommentEntity = ({
     onSuccess: (result) => {
       if(onSuccess) onSuccess()
       toast.success(`${answerId ? 'Answer': 'Comment'} has been updated`)
-      queryClient.invalidateQueries(['discussion'])
-      queryClient.invalidateQueries(['attachments'])
+      queryClient.invalidateQueries({
+        queryKey: ['discussion'],
+      })
+      queryClient.invalidateQueries({
+        queryKey: ['attachments'],
+      })
     },
     onError: error => {
       toast.error(`Error while editing ${error}`)

@@ -115,7 +115,7 @@ export const useSelectJobModal = (
   const [showOnlyMyJobs, setShowOnlyMyJobs] = useState(false)
   const searchText = useDebounce(filter, 250)
 
-  const { data: jobsData, status: loadingJobsStatus } = useQuery({
+  const { data: jobsData, isLoading: isLoadingJobs, status: loadingJobsStatus } = useQuery({
     queryKey: ['list_jobs', searchText],
     queryFn: () => fetchFilteredJobs(searchText, scopes ?? ([] as any)), // scopes: [] mean all scopes.
     enabled: isShown,
@@ -208,7 +208,7 @@ export const useSelectJobModal = (
               Only mine
             </StyledOnlyMine>
           </StyledFilterSection>
-          {loadingJobsStatus === 'loading' && <Loader />}
+          {isLoadingJobs && <Loader />}
           {loadingJobsStatus === 'success' && (
             <ModalScroll>
               <SelectableTable>

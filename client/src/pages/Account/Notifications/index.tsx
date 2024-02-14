@@ -200,17 +200,21 @@ const NotificationForm = ({ preferences, onSave }: { preferences: NotificationPr
 const NotificationsPage = () => {
   usePageMeta({ title: 'Notifications - precisionFDA' })
   const user = useAuthUser()
-  const { data, status, error } = useQuery(['notifications'], fetchNotificationsPreferences)
+  const { data, isLoading } = useQuery({
+    queryKey: ['notifications'],
+    queryFn: fetchNotificationsPreferences,
+  })
 
   const queryCache = useQueryClient()
   const { mutateAsync: notificationsMutation } = useMutation({
     mutationKey: ['save-notifications-pref'],
     mutationFn: saveNotificationsPreferences,
     onSuccess: () => {
-      queryCache.invalidateQueries(['notifications'])
+      queryCache.invalidateQueries({
+        queryKey: ['notifications'],
+      })
       toast.success('Saved notification preferences')
     },
-    onError: () => {},
   })
 
   const handleOnsSubmit = async (variables: NotificationPreferences) => {
@@ -246,7 +250,7 @@ const NotificationsPage = () => {
         <PageHeader>
           <PageTitle>Notification Preferences</PageTitle>
         </PageHeader>
-        {status === 'loading' ? <Loader /> : <NotificationForm onSave={handleOnsSubmit} preferences={data!.preference} />}
+        {isLoading ? <Loader /> : <NotificationForm onSave={handleOnsSubmit} preferences={data!.preference} />}
       </StyledPageContainer>
     </UserLayout>
   )

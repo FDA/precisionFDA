@@ -6,12 +6,14 @@ import { SiteSettingsResponse } from './useSiteSettingsQuery'
 import { CustomPortal } from './useCustomPortalsQuery'
 
 export function useAuthUserQuery() {
-  return useQuery(['auth-user'], {
+  return useQuery({
+    queryKey: ['auth-user'],
+
     queryFn: () => axios.get('/api/user').then(r => {
       return r.data as { user: IUser, meta: any }
     }),
     staleTime: Infinity,
-    cacheTime: Infinity,
+    gcTime: Infinity,
     retry: 1,
   })
 }

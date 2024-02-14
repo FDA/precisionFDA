@@ -17,7 +17,7 @@ import { theme } from '../../../styles/theme'
 import { useMainDataPortal } from '../queries'
 import { Button } from '../../../components/Button'
 import { Notification, NOTIFICATION_ACTION } from '../../home/types'
-import { DEFAULT_RECONNECT_ATTEMPTS, DEFAULT_RECONNECT_INTERVAL, getNodeWsUrl } from '../../../utils/config'
+import { DEFAULT_RECONNECT_ATTEMPTS, DEFAULT_RECONNECT_INTERVAL, SHOULD_RECONNECT, getNodeWsUrl } from '../../../utils/config'
 
 const List = styled.div`
   display: flex;
@@ -71,7 +71,7 @@ const DataPortalsListPage = () => {
     share: true,
     reconnectInterval: DEFAULT_RECONNECT_INTERVAL,
     reconnectAttempts: DEFAULT_RECONNECT_ATTEMPTS,
-    shouldReconnect: () => true,
+    shouldReconnect: () => SHOULD_RECONNECT,
   })
 
   useEffect(() => {
@@ -79,7 +79,7 @@ const DataPortalsListPage = () => {
       return
     }
     if (NOTIFICATION_ACTION.DATA_PORTAL_CARD_IMAGE_URL_UPDATED === notification.action) {
-      queryClient.invalidateQueries(['data-portals-list'])
+      queryClient.invalidateQueries({ queryKey: ['data-portals-list']})
     }
   }, [notification])
 

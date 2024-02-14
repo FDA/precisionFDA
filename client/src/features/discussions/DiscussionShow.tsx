@@ -34,10 +34,10 @@ export const DiscussionShow = ({ space }: { space: ISpace }) => {
   const location = useLocation()
   const user = useAuthUser()
 
-  const { data: discussion, status } = useQuery(
-    ['discussion', { id: discussionId }],
-    () => fetchDiscussionRequest(discussionId),
-  )
+  const { data: discussion, isLoading } = useQuery({
+    queryKey: ['discussion', { id: discussionId }],
+    queryFn: () => fetchDiscussionRequest(discussionId),
+  })
 
   const handleSuccess = () => {
     if (markdownInputRef.current) {
@@ -45,12 +45,16 @@ export const DiscussionShow = ({ space }: { space: ISpace }) => {
     }
   }
   const handleDeleteDiscussion = () => {
-    queryClient.invalidateQueries(['space'])
-    queryClient.invalidateQueries(['discussions'])
+    queryClient.invalidateQueries({
+      queryKey: ['space'],
+    })
+    queryClient.invalidateQueries({
+      queryKey: ['discussions'],
+    })
     navigate(`/spaces/${space.id}/discussions/`)
   }
 
-  if (status === 'loading') {
+  if (isLoading) {
     return <HomeLoader />
   }
 

@@ -49,8 +49,12 @@ const EditFileInfoForm = ({
       if (res?.message?.type === 'error') {
         toast.error(`API Error: ${res.message.text}`)
       } else {
-        queryClient.invalidateQueries(['files'])
-        queryClient.invalidateQueries(['file', file.uid])
+        queryClient.invalidateQueries({
+          queryKey: ['files'],
+        })
+        queryClient.invalidateQueries({
+          queryKey: ['file', file.uid],
+        })
         handleClose()
         toast.success('Success: Editing file info')
       }

@@ -94,18 +94,17 @@ export const useLockUnlockFileModal = ({
     if (!isShown) mutation.reset()
   }, [isShown])
 
-  const { data, status: downloadStatus, error } = useQuery({
+  const { data, status: downloadStatus, isLoading, error } = useQuery({
     queryKey: [ 'download_list', type, selected ],
     queryFn: () =>
       fetchFilesListLockingRequest(
         selected.map(s => s.id),
         scope,
         type,
-      ),
-    keepPreviousData: false,
-    onSuccess: res => {
-      setNumberOfFiles(res.length)
-    },
+      ).then((d) => {
+        setNumberOfFiles(d.length)
+        return d
+      }),
     enabled: isShown,
     retry: (failureCount, retryError: AxiosError) => {
       if (retryError?.response?.status === 403) {
@@ -121,7 +120,7 @@ export const useLockUnlockFileModal = ({
   }
 
   const getStatusText = () => {
-    if (downloadStatus === 'loading') {
+    if (isLoading) {
       return 'Loading...'
     }
 
@@ -160,8 +159,8 @@ export const useLockUnlockFileModal = ({
         <LockUnlockFiles files={data} statusText={getStatusText()}/>
       </ModalScroll>
       <Footer>
-        {mutation.isLoading && <Loader/>}
-        <Button onClick={() => setShowModal(false)} disabled={mutation.isLoading}>
+        {mutation.isPending && <Loader/>}
+        <Button onClick={() => setShowModal(false)} disabled={mutation.isPending}>
           Cancel
         </Button>
         <Button variant="primary" onClick={handleSubmit} disabled={isSubmitDisabled()}>

@@ -25,7 +25,9 @@ export const EditAppPage = ({ spaceId }: { spaceId?: string }) => {
     onSuccess: res => {
       if (res?.id) {
         navigate(`${getBasePath(spaceId)}/apps/${res?.id}`)
-        queryClient.invalidateQueries(['apps', 'app'])
+        queryClient.invalidateQueries({
+          queryKey: ['apps', 'app'],
+        })
         toast.success('New revision created')
       } else if (res?.error) {
         toast.error(`${res.error.type}: ${res.error.message}`)

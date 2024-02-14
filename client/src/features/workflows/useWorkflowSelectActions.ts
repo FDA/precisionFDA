@@ -21,7 +21,7 @@ export const useWorkflowSelectActions = ({ homeScope, spaceId, selectedItems, re
   const isAdmin = user ? user.admin : false
 
   const featureMutation = useFeatureMutation({ resource: 'workflows', onSuccess: () => {
-    queryClient.invalidateQueries(resourceKeys)
+    queryClient.invalidateQueries({ queryKey: resourceKeys })
   } })
 
   const {
@@ -31,7 +31,7 @@ export const useWorkflowSelectActions = ({ homeScope, spaceId, selectedItems, re
   } = useCopyToSpaceModal<IWorkflow>({ resource: 'workflows', selected, updateFunction: copyWorkflowsRequest, 
   onSuccess: (res: any) => {
     toast.success('The workflow has been published successfully!')
-    queryClient.invalidateQueries(resourceKeys).then(() => {
+    queryClient.invalidateQueries({ queryKey: resourceKeys }).then(() => {
       if (Array.isArray(res.workflows)) {
         navigate(`/home/workflows/${res.workflows[0].uid}`)
       }
@@ -47,7 +47,7 @@ export const useWorkflowSelectActions = ({ homeScope, spaceId, selectedItems, re
     resource: 'workflows',
     selected: { uid: `workflow-series-${selected[0]?.workflow_series_id}`, name: selected[0]?.name, tags: selected[0]?.tags },
     onSuccess: () => {
-      queryClient.invalidateQueries(resourceKeys)
+      queryClient.invalidateQueries({ queryKey: resourceKeys })
     },
   })
 
@@ -65,7 +65,7 @@ export const useWorkflowSelectActions = ({ homeScope, spaceId, selectedItems, re
       featured: selected[0]?.featured,
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(resourceKeys)
+      queryClient.invalidateQueries({ queryKey: resourceKeys })
     },
   })
 
@@ -78,7 +78,9 @@ export const useWorkflowSelectActions = ({ homeScope, spaceId, selectedItems, re
     selected: selected.map(s => ({ name: s.name, id: s.uid, location: s.location })),
     request: deleteWorkflowRequest,
     onSuccess: () => {
-      queryClient.invalidateQueries(['workflows'])
+      queryClient.invalidateQueries({
+        queryKey: ['workflows'],
+      })
       if(spaceId) {
         navigate(`/spaces/${spaceId}/workflows`)
       } else {

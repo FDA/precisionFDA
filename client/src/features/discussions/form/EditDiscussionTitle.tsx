@@ -37,7 +37,9 @@ export function EditDiscussionTitle({
       return editDiscussionRequest(discussionId, payload)
     },
     async onMutate({ title }) {
-      await queryClient.cancelQueries(['discussion', { id: discussionId }])
+      await queryClient.cancelQueries({
+        queryKey: ['discussion', { id: discussionId }],
+      })
       const prevDiscu = await queryClient.getQueryData<Discussion>([
         'discussion',
         { id: discussionId },
@@ -61,7 +63,9 @@ export function EditDiscussionTitle({
       }
     },
     onSettled() {
-      queryClient.invalidateQueries(['discussion', { id: discussionId }])
+      queryClient.invalidateQueries({
+        queryKey: ['discussion', { id: discussionId }],
+      })
     },
   })
   return (
@@ -70,10 +74,10 @@ export function EditDiscussionTitle({
         ref={inputRef}
         type="text"
         defaultValue={defaultValue}
-        disabled={editTitleMutation.isLoading}
+        disabled={editTitleMutation.isPending}
       />
       <Button
-        disabled={editTitleMutation.isLoading}
+        disabled={editTitleMutation.isPending}
         type="button"
         onClick={() => setIsEditing(false)}
       >
@@ -92,7 +96,7 @@ export function EditDiscussionTitle({
                 : discussionId,
           })
         }
-        disabled={editTitleMutation.isLoading}
+        disabled={editTitleMutation.isPending}
       >
         Save
       </Button>

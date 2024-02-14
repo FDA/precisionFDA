@@ -44,7 +44,7 @@ export const useDatabaseSelectActions = (selectedItems: IDatabase[], resourceKey
     setShowModal: setCopyToSpaceModal,
     isShown: isShownCopyToSpaceModal,
   } = useCopyToSpaceModal({ resource: 'dbclusters', selected, updateFunction: copyDatabasesRequest, onSuccess: () => {
-    queryClient.invalidateQueries(resourceKeys)
+    queryClient.invalidateQueries({ queryKey: resourceKeys })
   } })
 
   const {
@@ -52,7 +52,7 @@ export const useDatabaseSelectActions = (selectedItems: IDatabase[], resourceKey
     setShowModal: setAttachLicensesModal,
     isShown: isShownAttachLicensesModal,
   } = useAttachLicensesModal({ selected: selected[0], resource: 'dbclusters', onSuccess: () => {
-    queryClient.invalidateQueries(resourceKeys)
+    queryClient.invalidateQueries({ queryKey: resourceKeys })
   } })
 
   const {
@@ -60,7 +60,7 @@ export const useDatabaseSelectActions = (selectedItems: IDatabase[], resourceKey
     setShowModal: setDetachLicenseModal,
     isShown: isShownDetachLicenseModal,
   } = useDetachLicenseModal({ selected: selected[0], resource: 'dbclusters', onSuccess: () => {
-    queryClient.invalidateQueries(resourceKeys)
+    queryClient.invalidateQueries({ queryKey: resourceKeys })
   } })
 
   const {
@@ -91,7 +91,7 @@ export const useDatabaseSelectActions = (selectedItems: IDatabase[], resourceKey
     isShown: isShownTagsModal,
   } = useEditTagsModal<IDatabase>({
     resource: 'dbclusters', selected: selected[0], onSuccess: () => {
-      queryClient.invalidateQueries(resourceKeys)
+      queryClient.invalidateQueries({ queryKey: resourceKeys })
     },
   })
 
@@ -103,7 +103,7 @@ export const useDatabaseSelectActions = (selectedItems: IDatabase[], resourceKey
     type: 'dbCluster',
     selected: selected[0],
     onSuccess: () => {
-      queryClient.invalidateQueries(resourceKeys)
+      queryClient.invalidateQueries({ queryKey: resourceKeys })
     },
   })
 

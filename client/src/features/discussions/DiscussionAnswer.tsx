@@ -22,7 +22,9 @@ export const DiscussionAnswer = ({
   const queryClient = useQueryClient()
 
   const handleDelete = () => {
-    queryClient.invalidateQueries(['discussion'])
+    queryClient.invalidateQueries({
+      queryKey: ['discussion'],
+    })
   }
 
   const inputRef = useRef<HTMLInputElement | null>(null)

@@ -35,8 +35,12 @@ export function useTerminateModal<T extends { ids: string[]; name: string }>({
         toast.error(`Server error: ${res?.meta?.messages[0].message}`)
         return
       }
-      queryClient.invalidateQueries(['jobs'])
-      queryClient.invalidateQueries(['execution', selected[0].uid])
+      queryClient.invalidateQueries({
+        queryKey: ['jobs'],
+      })
+      queryClient.invalidateQueries({
+        queryKey: ['execution', selected[0].uid],
+      })
       setShowModal(false)
       toast.success(`Success: ${res?.message?.text}`)
     },
@@ -54,9 +58,9 @@ export function useTerminateModal<T extends { ids: string[]; name: string }>({
       hide={() => setShowModal(false)}
       footer={
         <ButtonRow>
-          {mutation.isLoading && <Loader />}
+          {mutation.isPending && <Loader />}
           <Button onClick={() => setShowModal(false)}>Cancel</Button>
-          <Button variant="warning" onClick={handleSubmit} disabled={mutation.isLoading}>
+          <Button variant="warning" onClick={handleSubmit} disabled={mutation.isPending}>
             Terminate
           </Button>
         </ButtonRow>

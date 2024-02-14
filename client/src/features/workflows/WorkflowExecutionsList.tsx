@@ -51,7 +51,7 @@ export const WorkflowExecutionsList = ({ uid }: { uid: string }) => {
   const setPerPage = (perPage: number) => {
     setPerPageParam(perPage, 'pushIn')
   }
-  const { status, data, error } = query
+  const { isLoading, data, error } = query
 
   const { lastJsonMessage: notification } = useWebSocket<Notification>(getNodeWsUrl(), {
     share: true,
@@ -69,11 +69,13 @@ export const WorkflowExecutionsList = ({ uid }: { uid: string }) => {
       NOTIFICATION_ACTION.JOB_DONE,
       NOTIFICATION_ACTION.JOB_FAILED,
       NOTIFICATION_ACTION.JOB_OUTPUTS_SYNCED].includes(notification.action)) {
-      queryCache.invalidateQueries([resource])
+      queryCache.invalidateQueries({
+        queryKey: [resource],
+      })
     }
   }, [notification])
 
-  if (status === 'error') return <div>Error! {JSON.stringify(error)}</div>
+  if (error) return <div>Error! {JSON.stringify(error)}</div>
 
   return (
     <ErrorBoundary>
@@ -82,7 +84,7 @@ export const WorkflowExecutionsList = ({ uid }: { uid: string }) => {
         // TODO(samuel) fix by validating url query
         filters={toArrayFromObject(filterQuery as any)}
         jobs={data?.jobs}
-        isLoading={status === 'loading'}
+        isLoading={isLoading}
         setSortBy={setSortBy}
         sortBy={sortBy}
         saveColumnResizeWidth={saveColumnResizeWidth}

@@ -25,7 +25,9 @@ const CreateChallengePage = () => {
     mutationFn: (payload: ChallengePayload) => createChallengeRequest(payload),
     onSuccess: res => {
       if (res?.challenge) {
-        queryClient.invalidateQueries(['challenges'])
+        queryClient.invalidateQueries({
+          queryKey: ['challenges'],
+        })
         navigate('/challenges')
         toast.success('Challenge has been created')
       } else if (res?.error) {
@@ -62,7 +64,7 @@ const CreateChallengePage = () => {
               <PageTitle>Create a new challenge</PageTitle>
               <ChallengeForm
                 onSubmit={handleSubmit}
-                isSaving={mutation.isLoading}
+                isSaving={mutation.isPending}
                 mutationErrors={mutationErrors}
               />
             </>

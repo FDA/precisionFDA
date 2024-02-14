@@ -18,7 +18,9 @@ export const CreateSpace = () => {
     onSuccess: res => {
       if (res?.space) {
         navigate(`/spaces/${res?.space?.id}`)
-        queryClient.invalidateQueries(['spaces'])
+        queryClient.invalidateQueries({
+          queryKey: ['spaces'],
+        })
         toast.success('Success: creating space')
       } else if (res?.errors) {
         toast.error(`${res.errors[0]}`)
