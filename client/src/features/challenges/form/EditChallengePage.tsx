@@ -30,8 +30,12 @@ const EditChallengePage = () => {
     mutationFn: (payload: ChallengePayload) =>
       editChallengeRequest(payload, parseInt(challengeId, 10)),
     onSuccess: () => {
-      queryClient.invalidateQueries(['challenge-custom', challengeId])
-      queryClient.invalidateQueries(['challenge', challengeId])
+      queryClient.invalidateQueries({
+        queryKey: ['challenge-custom', challengeId],
+      })
+      queryClient.invalidateQueries({
+        queryKey: ['challenge', challengeId],
+      })
       navigate('/challenges')
       toast.success('Challenge successfully edited')
     },
@@ -101,7 +105,7 @@ const EditChallengePage = () => {
                 challenge={data}
                 onSubmit={handleSubmit}
                 mutationErrors={mutationErrors}
-                isSaving={mutation.isLoading}
+                isSaving={mutation.isPending}
               />
             </>
           ) : (

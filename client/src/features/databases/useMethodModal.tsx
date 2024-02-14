@@ -27,11 +27,15 @@ export function useMethodModal<T extends { dxid: string; name: string }>({
     mutationKey: ['database-method'],
     mutationFn: (ids: string[]) => databaseMethodRequest(method, ids),
     onError: () => {
-      queryClient.invalidateQueries(['dbclusters'])
+      queryClient.invalidateQueries({
+        queryKey: ['dbclusters'],
+      })
       toast.error(`Error: ${method} database`)
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['dbclusters'])
+      queryClient.invalidateQueries({
+        queryKey: ['dbclusters'],
+      })
       if(onSuccess) onSuccess()
       setShowModal(false)
       toast.success(`Success: ${method} database`)
@@ -50,9 +54,9 @@ export function useMethodModal<T extends { dxid: string; name: string }>({
       hide={() => setShowModal(false)}
       footer={
         <ButtonRow>
-          {mutation.isLoading && <Loader />}
-          <Button onClick={() => setShowModal(false)} disabled={mutation.isLoading}>Cancel</Button>
-          <Button variant="primary" onClick={handleSubmit} disabled={mutation.isLoading}>
+          {mutation.isPending && <Loader />}
+          <Button onClick={() => setShowModal(false)} disabled={mutation.isPending}>Cancel</Button>
+          <Button variant="primary" onClick={handleSubmit} disabled={mutation.isPending}>
             {method}
           </Button>
         </ButtonRow>

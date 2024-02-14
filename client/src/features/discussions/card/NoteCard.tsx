@@ -31,7 +31,7 @@ export function NoteCard({
   const [editMode, setEditMode] = useState(false)
   const queryClient = useQueryClient()
 
-  const { data: attachments, status: attachmentStatus } = useQuery({
+  const { data: attachments } = useQuery({
     queryKey: ['attachments', note.id],
     queryFn: () => fetchAttachmentsRequest(note.id),
     select: groupByAttachmentType,
@@ -41,7 +41,9 @@ export function NoteCard({
   const deleteMutation = useMutation({
     mutationKey: ['delete-answer-discussion'],
     mutationFn: () => {
-      queryClient.invalidateQueries(['space'])
+      queryClient.invalidateQueries({
+        queryKey: ['space'],
+      })
       if(answerId) {
         return deleteAnswerRequest(discussionId, answerId)
       }

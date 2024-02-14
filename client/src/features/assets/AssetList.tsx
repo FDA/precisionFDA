@@ -56,7 +56,7 @@ export const AssetList = ({ homeScope, spaceId }: { homeScope?: HomeScope, space
       scope: homeScope || undefined,
     },
   })
-  const { status, data, error } = query
+  const { isLoading, data, error } = query
   const { data: propertiesData } = usePropertiesQuery('asset', homeScope, spaceId)
 
   const selectedFileObjects = getSelectedObjectsFromIndexes(
@@ -66,7 +66,7 @@ export const AssetList = ({ homeScope, spaceId }: { homeScope?: HomeScope, space
   const actions = useAssetActions({ homeScope, selectedItems: selectedFileObjects, resourceKeys: ['assets'], resetSelected })
   const generateCLIKeyAction = useGenerateKeyModal()
 
-  if (status === 'error') return <div>Error! {JSON.stringify(error)}</div>
+  if (error) return <div>Error! {JSON.stringify(error)}</div>
 
   return (
     <>
@@ -118,7 +118,7 @@ export const AssetList = ({ homeScope, spaceId }: { homeScope?: HomeScope, space
         filters={toArrayFromObject(filterQuery as any)}
         apps={data?.assets}
         properties={propertiesData?.keys}
-        isLoading={status === 'loading'}
+        isLoading={isLoading}
         handleRowClick={onRowClick}
         selectedRows={selectedIndexes}
         setSelectedRows={setSelectedIndexes}
@@ -200,7 +200,7 @@ export const AssetsListTable = ({
     // Check if any of the conditions is true, then hide the column
     return !(
       // If the homeScope is 'me', hide 'added_by' regardless of other conditions.
-      (homeScope === 'me' && c.accessor === 'added_by') ||
+            (homeScope === 'me' && c.accessor === 'added_by') ||
       
       // Hide 'location' for all homeScopes except 'spaces'.
       (homeScope !== 'spaces' && c.accessor === 'location') ||

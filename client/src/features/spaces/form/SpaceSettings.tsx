@@ -30,7 +30,9 @@ const EditTags = ({ spaceId, tags = [] }: { spaceId: string; tags?: string[] }) 
     resource: 'spaces',
     selected: { uid: `space-${spaceId}`, name: 'space', tags },
     onSuccess: () => {
-      queryClient.invalidateQueries(['space', spaceId.toString()])
+      queryClient.invalidateQueries({
+        queryKey: ['space', spaceId.toString()],
+      })
     },
   })
 
@@ -100,7 +102,9 @@ export const SpaceSettingsForm = ({ space }: ISpaceSettingsForm) => {
     onSuccess: res => {
       if (res?.space) {
         navigate(`/spaces/${res?.space?.id}`)
-        queryClient.invalidateQueries(['spaces'])
+        queryClient.invalidateQueries({
+          queryKey: ['spaces'],
+        })
         toast.success('Success: editing space settings')
       } else if (res?.errors) {
         toast.error(`Error: ${res.errors.messages.join('\r\n')}`)
@@ -133,7 +137,7 @@ export const SpaceSettingsForm = ({ space }: ISpaceSettingsForm) => {
     mutation.mutateAsync(vals)
   }
 
-  const isSubmitting = mutation.isLoading
+  const isSubmitting = mutation.isPending
 
   return (
     <StyledForm onSubmit={handleSubmit(onSubmit)}>
@@ -220,7 +224,10 @@ export const SpaceSettingsForm = ({ space }: ISpaceSettingsForm) => {
 
 export const SpaceSettings = () => {
   const { spaceId } = useParams<{ spaceId: string }>()
-  const { data } = useQuery(['space', spaceId], () => spaceRequest({ id: spaceId }))
+  const { data } = useQuery({
+    queryKey: ['space', spaceId],
+    queryFn: () => spaceRequest({ id: spaceId }),
+  })
 
   if (!data?.space) {
     return <Loader />

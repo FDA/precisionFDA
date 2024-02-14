@@ -39,7 +39,9 @@ const TopBar = ({ portalId, data }: { portalId: number, data: DataPortal }) => {
     mutationKey: ['update-data-portal'],
     mutationFn: (payload: UpdateDataPortalRequest) => updateDataPortalRequest(payload),
     onSuccess: async () => {
-      await queryClient.invalidateQueries(['data-portals', portalId.toString()])
+      await queryClient.invalidateQueries({
+        queryKey: ['data-portals', portalId.toString()],
+      })
       navigate(`/data-portals/${portalId}`)
       toast.success('Data Portal content updated')
     },
@@ -65,8 +67,8 @@ const TopBar = ({ portalId, data }: { portalId: number, data: DataPortal }) => {
     <ContentEditButtonRow>
       <BackLink linkTo={`/data-portals/${portalId}`}>Back to Portal</BackLink>
       <SubmitRow>
-        {mutation.isLoading && <Loader />}
-        <Button variant="primary" disabled={mutation.isLoading} onClick={() => handleSave()}>Save</Button>
+        {mutation.isPending && <Loader />}
+        <Button variant="primary" disabled={mutation.isPending} onClick={() => handleSave()}>Save</Button>
       </SubmitRow>
     </ContentEditButtonRow>
   )

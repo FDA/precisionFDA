@@ -49,7 +49,9 @@ export const useAddFolderModal = ({
         return
       }
       reset()
-      queryClient.invalidateQueries(['files'])
+      queryClient.invalidateQueries({
+        queryKey: ['files'],
+      })
       setShowModal(false)
       toast.success('Folder has been created')
     },
@@ -81,7 +83,7 @@ export const useAddFolderModal = ({
               {...register('name')}
               placeholder="Enter Name..."
               autoFocus
-              disabled={mutation.isLoading}
+              disabled={mutation.isPending}
             />
             <ErrorMessage
               errors={errors}
@@ -96,7 +98,7 @@ export const useAddFolderModal = ({
           <Button
             type="button"
             onClick={() => setShowModal(false)}
-            disabled={mutation.isLoading}
+            disabled={mutation.isPending}
           >
             Cancel
           </Button>
@@ -104,6 +106,7 @@ export const useAddFolderModal = ({
             variant="primary"
             type="submit"
             form="add-folder-form"
+            disabled={mutation.isPending}
           >
             Add
           </Button>

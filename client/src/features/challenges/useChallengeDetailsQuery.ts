@@ -3,9 +3,10 @@ import { toast } from 'react-toastify'
 import { challengeDetailsRequest } from './api'
 
 export const useChallengeDetailsQuery = (id: string, custom?: boolean) =>
-  useQuery([`challenge${custom ? '-custom': ''}`, id], () => challengeDetailsRequest(id, custom), {
-    onError: (err: any) => {
+  useQuery({
+    queryKey: [`challenge${custom ? '-custom': ''}`, id],
+    queryFn: () => challengeDetailsRequest(id, custom).catch((err) => {
       if (err && err.message) toast.error(err.message)
-    },
+    }),
   })
 

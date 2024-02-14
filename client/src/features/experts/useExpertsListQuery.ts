@@ -7,14 +7,16 @@ interface IParams {
   year?: number,
 }
 
-export const useExpertsListQuery = (params: IParams) => useQuery(['experts', params?.page, params.year], () => expertsListRequest(params), {
-  onError: (err: any) => {
+export const useExpertsListQuery = (params: IParams) => useQuery({
+  queryKey: ['experts', params?.page, params.year],
+  queryFn: () => expertsListRequest(params).catch(err => {
     if (err && err.message) toast.error(err.message)
-  },
+  }),
 })
 
-export const useExpertsListCondensedQuery = (params: IParams) => useQuery(['experts-condensed', params?.page, params.year], () => expertsListRequest(params), {
-  onError: (err: any) => {
+export const useExpertsListCondensedQuery = (params: IParams) => useQuery({
+  queryKey: ['experts-condensed', params?.page, params.year],
+  queryFn: () => expertsListRequest(params).catch(err => {
     if (err && err.message) toast.error(err.message)
-  },
+  }),
 })

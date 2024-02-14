@@ -4,7 +4,9 @@ import Select from 'react-select'
 import { fetchScoringAppUsers } from './api'
 
 const useFetchScoringAppUsersQuery = () =>
-  useQuery(['scoring-app-users'], fetchScoringAppUsers, {
+  useQuery({
+    queryKey: ['scoring-app-users'],
+    queryFn: fetchScoringAppUsers,
     select(data) {
       return data?.map(s => ({
         label: s[0],

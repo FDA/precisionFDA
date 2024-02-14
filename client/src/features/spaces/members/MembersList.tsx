@@ -42,9 +42,10 @@ const AddButton = styled(Button)`
 
 export const MembersList = ({ space }: { space: ISpace }) => {
   const [sideRole, setSideRole] = useState<SideRole | undefined>()
-  const { data, status } = useQuery(['space-members', space.id, sideRole], () =>
-    spacesMembersListRequest({ spaceId: space.id, sideRole }),
-  )
+  const { data, isLoading } = useQuery({
+    queryKey: ['space-members', space.id, sideRole],
+    queryFn: () => spacesMembersListRequest({ spaceId: space.id, sideRole }),
+  })
   const { modalComp, setShowModal } = useAddMembersModal({ spaceId: space.id })
   const members = data?.space_memberships
   const canAddMember =
@@ -75,7 +76,7 @@ export const MembersList = ({ space }: { space: ISpace }) => {
           )}
         </StyledButtonGroup>
 
-        {status === 'loading' && (
+        {isLoading && (
           <div>
             <div>Loading members...</div>
             <Loader />

@@ -7,7 +7,6 @@ import React, {
   ReactElement,
   ReactNode,
   useMemo,
-  useState,
 } from 'react'
 import {
   Cell,
@@ -34,6 +33,7 @@ import {
 } from 'react-table'
 import 'regenerator-runtime'
 import styled from 'styled-components'
+import classNames from 'classnames'
 import { ActionsDropdownGroupContent } from '../../features/home/ActionDropdownContent'
 import { ActionFunctionsType, ActionGroupType } from '../../features/home/types'
 import { TransparentButton } from '../Button'
@@ -44,7 +44,6 @@ import { DefaultColumnFilter } from './helpers'
 import { ReactTableStyles, StyledTable } from './styles'
 import { expandHook, selectionHook } from './tableHooks'
 import { useComponentWidth } from './useComponentWidth'
-import classNames from 'classnames'
 
 const StyledColumnSelect = styled.div`
   position: sticky;
@@ -395,10 +394,10 @@ export default function Table<T extends object>(
                 {visibleColumns.map((column, i) => {
                   const classes = classNames('th', { 'row-expander': column.id === 'row-expander' })
                   return (
-                  // eslint-disable-next-line react/jsx-key
-                  <div {...column.getHeaderProps()} className={classes}>
-                    {column.canFilter ? column.render('Filter') : null}
-                  </div>
+                    // eslint-disable-next-line react/jsx-key
+                    <div {...column.getHeaderProps()} className={classes}>
+                      {column.canFilter ? column.render('Filter') : null}
+                    </div>
                 )})}
               </div>
             )}
@@ -427,14 +426,14 @@ export default function Table<T extends object>(
                       {r.cells.map(cell => {
                         const classes = classNames('td', { 'row-expander': cell.column.id === 'row-expander' })
                         return (
-                        // eslint-disable-next-line react/jsx-key
-                        <div
-                          {...cell.getCellProps(cellProps && cellProps(cell))}
-                          className={classes}
-                          data-testid={`table-col-${cell.column.id}`}
-                        >
-                          {cell.render('Cell')}
-                        </div>
+                          // eslint-disable-next-line react/jsx-key
+                          <div
+                            {...cell.getCellProps(cellProps && cellProps(cell))}
+                            className={classes}
+                            data-testid={`table-col-${cell.column.id}`}
+                          >
+                            {cell.render('Cell')}
+                          </div>
                       )})}
                     </div>
                     {isExpandable && r.isExpanded

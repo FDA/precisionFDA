@@ -1,5 +1,6 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
+import { pick } from 'ramda'
 import { IChallenge } from '../../types/challenge'
 import { useAuthUser } from '../auth/useAuthUser'
 import { useAttachToModal } from '../actionModals/useAttachToModal'
@@ -16,7 +17,6 @@ import { IApp } from './apps.types'
 import { useAttachToChallengeModal } from './useAttachToChallengeModal'
 import { useExportToModal } from './useExportToModal'
 import { getBaseLink } from './run/utils'
-import { pick } from 'ramda'
 
 export enum AppActions {
   'Run' = 'Run',
@@ -65,7 +65,7 @@ export const useAppSelectionActions = ({
   const isAdmin = user?.admin
 
   const featureMutation = useFeatureMutation({ resource: 'apps', onSuccess: () => {
-    queryClient.invalidateQueries(resourceKeys)
+    queryClient.invalidateQueries({ queryKey: resourceKeys })
   } })
 
   const {
@@ -73,21 +73,21 @@ export const useAppSelectionActions = ({
     setShowModal: setShowComparatorAddModal,
     isShown: isShownComparatorAddModal,
   } = useComparatorModal({ actionType: 'add_to_comparators', selected: selected[0], onSuccess: () => {
-    queryClient.invalidateQueries(resourceKeys)
+    queryClient.invalidateQueries({ queryKey: resourceKeys })
   } })
   const {
     modalComp: comparatorSetModal,
     setShowModal: setShowComparatorSetModal,
     isShown: isShownComparatorSetModal,
   } = useComparatorModal({ actionType: 'set_app', selected: selected[0], onSuccess: () => {
-    queryClient.invalidateQueries(resourceKeys)
+    queryClient.invalidateQueries({ queryKey: resourceKeys })
   } })
   const {
     modalComp: comparatorRemoveModal,
     setShowModal: setShowComparatorRemoveModal,
     isShown: isShownComparatorRemoveModal,
   } = useComparatorModal({ actionType: 'remove_from_comparators', selected: selected[0], onSuccess: () => {
-    queryClient.invalidateQueries(resourceKeys)
+    queryClient.invalidateQueries({ queryKey: resourceKeys })
   } })
 
   const {
@@ -101,7 +101,7 @@ export const useAppSelectionActions = ({
     setShowModal: setCopyToSpaceModal,
     isShown: isShownCopyToSpaceModal,
   } = useCopyToSpaceModal<IApp>({ resource: 'apps', selected, updateFunction: copyAppsRequest, onSuccess: () => {
-    queryClient.invalidateQueries(resourceKeys)
+    queryClient.invalidateQueries({ queryKey: resourceKeys })
   } })
 
   const {
@@ -113,7 +113,7 @@ export const useAppSelectionActions = ({
     selected,
     request: copyAppsToPrivate,
     onSuccess: () => {
-      queryClient.invalidateQueries(resourceKeys)
+      queryClient.invalidateQueries({ queryKey: resourceKeys })
     },
   })
 
@@ -122,7 +122,7 @@ export const useAppSelectionActions = ({
     setShowModal: setAttachToChallengeModal,
     isShown: isShownAttachToChallengeModal,
   } = useAttachToChallengeModal<IApp>({ resource: 'apps', selected: selected[0], onSuccess: () => {
-    queryClient.invalidateQueries(resourceKeys)
+    queryClient.invalidateQueries({ queryKey: resourceKeys })
   } })
 
   const {
@@ -134,7 +134,9 @@ export const useAppSelectionActions = ({
     selected: selected.map(s => ({ name: s.name, location: s.location, id: s.uid })),
     request: deleteAppsRequest,
     onSuccess: () => {
-      queryClient.invalidateQueries(['apps'])
+      queryClient.invalidateQueries({
+        queryKey: ['apps'],
+      })
       if(spaceId) {
         navigate(`/spaces/${spaceId}/apps`)
       } else {
@@ -152,7 +154,7 @@ export const useAppSelectionActions = ({
     resource: 'apps',
     selected: { uid: `app-series-${selected[0]?.app_series_id}`, name: selected[0]?.name, tags: selected[0]?.tags },
     onSuccess: () => {
-      queryClient.invalidateQueries(resourceKeys)
+      queryClient.invalidateQueries({ queryKey: resourceKeys })
     },
   })
 
@@ -170,7 +172,7 @@ export const useAppSelectionActions = ({
       featured: selected[0]?.featured,
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(resourceKeys)
+      queryClient.invalidateQueries({ queryKey: resourceKeys })
     },
   })
 

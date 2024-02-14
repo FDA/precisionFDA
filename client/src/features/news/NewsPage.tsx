@@ -49,10 +49,9 @@ const NewsPage = () => {
     page: pagination.pageParam,
     perPage: pagination.perPageParam,
   })
-  const { data: yearsListData, isLoading: isLoadingYearsList } = useQuery(['news-years'], () => newsYearsListRequest(), {
-    onError: err => {
-      console.log(err)
-    },
+  const { data: yearsListData, isLoading: isLoadingYearsList } = useQuery({
+    queryKey: ['news-years'],
+    queryFn: () => newsYearsListRequest(),
   })
 
   return (

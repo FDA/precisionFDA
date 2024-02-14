@@ -97,7 +97,9 @@ export function Activation({ space }: { space: ISpace }) {
       if (res.error) {
         toast.error('Error: Service is unavailable. Please try again later')
       } else {
-        queryCache.invalidateQueries(['space', space.id.toString()])
+        queryCache.invalidateQueries({
+          queryKey: ['space', space.id.toString()],
+        })
         toast.success('Successfully activated space')
       }
     },
@@ -170,14 +172,14 @@ export function Activation({ space }: { space: ISpace }) {
           {!!currentUser && (
             <Button
               variant="success"
-              disabled={isAcceptedByUser || acceptSpaceMutation.isLoading}
+              disabled={isAcceptedByUser || acceptSpaceMutation.isPending}
               onClick={() => acceptClickHandler()}
             >
               {isAcceptedByUser ? 'Already accepted' : 'Accept Space'}
             </Button>
           )}
         </AcceptSpaceWarning>
-        {acceptSpaceMutation.isLoading && <Loader />}
+        {acceptSpaceMutation.isPending && <Loader />}
       </Col>
     </PageContainer>
   )

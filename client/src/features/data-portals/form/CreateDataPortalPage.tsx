@@ -12,12 +12,7 @@ import { CreateDataPortalRequest, createDataPortalRequest } from '../api'
 import { DataPortal, CreateDataPortalData } from '../types'
 import { DataPortalForm } from './DataPortalForm'
 import { ScrollableMainGlobalStyles } from '../../../styles/global'
-import styled from 'styled-components'
 
-const Scrollable = styled.div`
-  overflow-y: auto;
-
-`
 
 const CreateDataPortalPage = () => {
   const navigate = useNavigate()
@@ -28,7 +23,9 @@ const CreateDataPortalPage = () => {
     mutationFn: (payload: CreateDataPortalData) => createDataPortalRequest(payload),
     onSuccess: res => {
       if (!res?.error) {
-        queryClient.invalidateQueries(['data-portal-list'])
+        queryClient.invalidateQueries({
+          queryKey: ['data-portal-list'],
+        })
         navigate(`/data-portals/${res.id}`)
         toast.success('Data Portal created')
       } else if (res?.error) {

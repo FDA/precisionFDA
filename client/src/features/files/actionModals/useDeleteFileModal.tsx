@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { AxiosError } from 'axios'
-import React, { useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { toast } from 'react-toastify'
 import styled from 'styled-components'
 import { Button } from '../../../components/Button'
@@ -34,9 +34,9 @@ const DeleteFiles = ({
   selected: IFile[]
   setNodesToBeDeleted: (nodes: DownloadListResponse[]) => void
 }) => {
-  const { data, status } = useQuery(
-    ['download_list', selected],
-    () => {
+  const { data, isLoading } = useQuery({
+    queryKey: ['download_list', selected],
+    queryFn: () => {
       // Group files by scope name
       const filesByScopes = new Map<string, IFile[]>()
       for (const file of selected) {
@@ -55,16 +55,12 @@ const DeleteFiles = ({
       }
       return Promise.all(promises).then(fileArrays => Promise.resolve(fileArrays.flat()));
     },
-    {
-      onSuccess: (res) => {
-        setNodesToBeDeleted(res)
-      },
-      onError: () => {
-        toast.error('Error: Fetching download list')
-      },
-    },
-  )
-  if (status === 'loading') return <StyledLoader>Loading...</StyledLoader>
+  })
+
+  useEffect(() => {
+    if(data) setNodesToBeDeleted(data)
+  }, [data])
+  if (isLoading) return <StyledLoader>Loading...</StyledLoader>
   return (
     data ? (
       <StyledResourceTable
@@ -137,9 +133,13 @@ export const useDeleteFileModal = ({
       toast.error(`Deleting of ${getMessage(nodesToBeDeleted)} has failed`)
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['files'])
+      queryClient.invalidateQueries({
+        queryKey: ['files'],
+      })
       // TODO counters are only for My Home, spaces have counters in request for space
-      queryClient.invalidateQueries(['counters'])
+      queryClient.invalidateQueries({
+        queryKey: ['counters'],
+      })
       setShowModal(false)
       toast.success(`Deleting of ${getMessage(nodesToBeDeleted)} has been started`)
       onSuccess()
@@ -167,14 +167,14 @@ export const useDeleteFileModal = ({
       </ModalScroll>
       <Footer>
         <ButtonRow>
-          {mutation.isLoading && <Loader />}
+          {mutation.isPending && <Loader />}
           <Button
             onClick={() => setShowModal(false)}
-            disabled={mutation.isLoading}
+            disabled={mutation.isPending}
           >
             Cancel
           </Button>
-          <Button variant="warning" onClick={handleSubmit} disabled={!nodesToBeDeleted.length || mutation.isLoading}>
+          <Button variant="warning" onClick={handleSubmit} disabled={!nodesToBeDeleted.length || mutation.isPending}>
             Delete
           </Button>
         </ButtonRow>

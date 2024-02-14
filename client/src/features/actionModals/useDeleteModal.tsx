@@ -72,9 +72,9 @@ export function useDeleteModal<
       </ModalScroll>
       <Footer>
         <ButtonRow>
-          {mutation.isLoading && <Loader />}
+          {mutation.isPending && <Loader />}
           <Button onClick={() => setShowModal(false)}>Cancel</Button>
-          <Button variant="warning" onClick={handleSubmit} disabled={mutation.isLoading}>
+          <Button variant="warning" onClick={handleSubmit} disabled={mutation.isPending}>
             Delete
           </Button>
         </ButtonRow>

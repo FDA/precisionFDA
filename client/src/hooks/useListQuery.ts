@@ -30,14 +30,12 @@ export function useListQuery<T>({
     order?.orderDir,
     Object.entries(additionalParams).map(([_, v]) => v),
   ]
-  const query = useQuery<T>(
-    cacheKey,
-    () => fetchList(toArrayFromObject(filter), pagination, order),
-    {
-      refetchOnWindowFocus: false,
-      ...queryOptions,
-    },
-  )
+  const query = useQuery({
+    queryKey: cacheKey,
+    queryFn: () => fetchList(toArrayFromObject(filter), pagination, order),
+    refetchOnWindowFocus: false,
+    ...queryOptions,
+  })
   return {
     query,
     cacheKey,

@@ -36,7 +36,10 @@ const Docs = () => {
   usePageMeta({ title: 'Docs - precisionFDA' })
   const user = useAuthUser()
   const { pathname } = useLocation()
-  const { data } = useQuery(['user'], () => fetchCurrentUser())
+  const { data } = useQuery({
+    queryKey: ['user'],
+    queryFn: () => fetchCurrentUser(),
+  })
   const isAdmin = data?.admin
 
   useLayoutEffect(() => {

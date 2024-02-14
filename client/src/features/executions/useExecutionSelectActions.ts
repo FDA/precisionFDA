@@ -38,7 +38,7 @@ export const useExecutionActions = ({ homeScope, selectedItems, resourceKeys }: 
   const isJobOwner = user?.dxuser === selected[0]?.launched_by_dxuser
 
   const featureMutation = useFeatureMutation({ resource: 'jobs', onSuccess: () => {
-    queryClient.invalidateQueries(resourceKeys)
+    queryClient.invalidateQueries({ queryKey: resourceKeys })
   } })
 
   // An IExecution can be either a job (app) or workflow, in the case of the workflow
@@ -53,7 +53,7 @@ export const useExecutionActions = ({ homeScope, selectedItems, resourceKeys }: 
     selected: selectedJobs.map(jobUid => ({ id: jobUid })),
     updateFunction: copyJobsRequest,
     onSuccess: () => {
-      queryClient.invalidateQueries(resourceKeys)
+      queryClient.invalidateQueries({ queryKey: resourceKeys })
     },
   })
 
@@ -63,7 +63,7 @@ export const useExecutionActions = ({ homeScope, selectedItems, resourceKeys }: 
     isShown: isShownTagsModal,
   } = useEditTagsModal<IExecution>({
     resource: 'jobs', selected: selected[0], onSuccess: () => {
-      queryClient.invalidateQueries(resourceKeys)
+      queryClient.invalidateQueries({ queryKey: resourceKeys })
     },
   })
 
@@ -75,7 +75,7 @@ export const useExecutionActions = ({ homeScope, selectedItems, resourceKeys }: 
     type: 'job',
     selected: selected[0],
     onSuccess: () => {
-      queryClient.invalidateQueries(resourceKeys)
+      queryClient.invalidateQueries({ queryKey: resourceKeys })
     },
   })
 // "Items need to be an array of objects with id and type (one of App, Comparison, Job, or UserFile)"

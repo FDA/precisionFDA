@@ -11,7 +11,8 @@ export async function challengeSubmissionListRequest(challengeId: string) {
 }
 
 export const useChallengeSubmissionQuery = (challengeId: string) => {
-  return useQuery(['challenge-submission', challengeId], {
+  return useQuery({
+    queryKey: ['challenge-submission', challengeId],
     queryFn: () => challengeSubmissionListRequest(challengeId),
   })
 }
