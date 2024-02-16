@@ -15,7 +15,7 @@
 
 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer eleifend augue nunc, et cursus eros tempus et. Sed ullamcorper leo sed congue rutrum. Proin cursus blandit pharetra. In nec lacus mattis, euismod metus ac, congue lorem.
 
-## 📐 Types of changes
+## 📐 Types of changes:
 
 <!--- What types of changes does your code introduce? Put an `x` in all the boxes that apply: -->
 
@@ -28,7 +28,7 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer eleifend augue 
 <!--- Add a quick note of the risk & impact analysis conducted for this change. -->
 <!--- Any database schema mutations or API changes should be noted in more detail here. -->
 
-There is no risk associated with this change.
+There is very low risk associated with this change.
 
 ## 💎 Testing:
 

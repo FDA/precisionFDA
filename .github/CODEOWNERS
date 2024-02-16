@@ -4,3 +4,9 @@
 /.github @johnymachine @gitbisect
 /chef @johnymachine @gitbisect
 /userdata @johnymachine @gitbisect
+
+# Frontend responsibility
+/client @ddcech
+
+# CLI responsibility
+/go @jirkalagan
