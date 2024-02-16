@@ -12,9 +12,10 @@ Rails.application.routes.draw do
   scope(format: false) do
     get "/admin/news" => "main#news"
     get "/admin/news/:id/edit" => "main#news"
-
+    
     namespace(:admin) do
       root "dashboard#index"
+      get "/alerts" => "base#alerts"
 
       resources :activity_reports, only: [:index] do
         collection do
