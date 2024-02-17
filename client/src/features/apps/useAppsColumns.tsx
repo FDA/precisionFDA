@@ -69,7 +69,7 @@ export const useAppsColumns = ({
       width: colWidths?.featured || 93,
       Cell: props => (
         <div style={{ paddingLeft: 20 }}>
-          <FeaturedToggle resource="apps" disabled={!isAdmin} featured={props.cell.row.original.featured} uids={[props.cell.row.original.uid]} onSuccess={() => queryClient.invalidateQueries(['apps'])} />
+          <FeaturedToggle resource="apps" disabled={!isAdmin} featured={props.cell.row.original.featured} uids={[props.cell.row.original.uid]} onSuccess={() => queryClient.invalidateQueries({ queryKey: ['apps']})} />
         </div>
       ),
     },

@@ -58,7 +58,9 @@ export const ExpertColumnRight = ({
       .mutateAsync({ userName, question, captchaValue })
       .then(response => {
         if (response.status === httpStatusCodes.OK) {
-          queryClient.invalidateQueries(['queryExpertDetails'])
+          queryClient.invalidateQueries({
+            queryKey: ['queryExpertDetails'],
+          })
           toast.success('Your question was submitted successfully')
           modal.setShowModal(false)
           navigate(`/experts/${expert.id}`)

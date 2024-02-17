@@ -69,18 +69,18 @@ const AssetActions = ({
 export const AssetShow = ({ emitScope, homeScope }: { homeScope?: HomeScope, emitScope?: EmmitScope }) => {
   const { assetUid } = useParams<{ assetUid: string }>()
 
-  const { data, status } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ['asset', assetUid],
-    queryFn: () => fetchAsset(assetUid),
-    onSuccess: (d) => {
+    queryFn: () => fetchAsset(assetUid).then(d => {
       if(emitScope) emitScope(d.asset.scope, d.asset.featured)
-    },
+      return d
+    }),
   })
 
   const asset = data?.asset
   const meta = data?.meta
 
-  if (status === 'loading') {
+  if (isLoading) {
     return <HomeLoader />
   }
 

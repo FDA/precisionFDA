@@ -133,22 +133,22 @@ export function useComparatorModal<
       case 'remove_from_comparators':
         return (
           <>
-            <Button onClick={handleClose} disabled={mutation.isLoading}>Cancel</Button>
-            <Button variant="warning" onClick={() => handleComparatorSubmit({ actionType: 'remove_from_comparators', dxid: selected.dxid })} disabled={mutation.isLoading}>Remove from Comparators</Button>
+            <Button onClick={handleClose} disabled={mutation.isPending}>Cancel</Button>
+            <Button variant="warning" onClick={() => handleComparatorSubmit({ actionType: 'remove_from_comparators', dxid: selected.dxid })} disabled={mutation.isPending}>Remove from Comparators</Button>
           </>
         )
       case 'add_to_comparators':
         return (
           <>
-            <Button onClick={handleClose} disabled={mutation.isLoading}>Cancel</Button>
-            <Button variant="primary" onClick={() => handleComparatorSubmit({ actionType: 'add_to_comparators', dxid: selected.dxid })} disabled={mutation.isLoading}>Add to Comparators</Button>
+            <Button onClick={handleClose} disabled={mutation.isPending}>Cancel</Button>
+            <Button variant="primary" onClick={() => handleComparatorSubmit({ actionType: 'add_to_comparators', dxid: selected.dxid })} disabled={mutation.isPending}>Add to Comparators</Button>
           </>
         )
       case 'set_app':
         return (
           <>
-            <Button onClick={handleClose} disabled={mutation.isLoading}>No</Button>
-            <Button variant="primary" onClick={() => handleComparatorSubmit({ actionType: 'set_app', dxid: selected.dxid })} disabled={mutation.isLoading}>Yes</Button>
+            <Button onClick={handleClose} disabled={mutation.isPending}>No</Button>
+            <Button variant="primary" onClick={() => handleComparatorSubmit({ actionType: 'set_app', dxid: selected.dxid })} disabled={mutation.isPending}>Yes</Button>
           </>
         )
       default:

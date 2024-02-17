@@ -100,7 +100,7 @@ export const useFilesSelectActions = ({
   const featureMutation = useFeatureMutation({
     resource: 'files',
     onSuccess: () => {
-      queryClient.invalidateQueries(resourceKeys)
+      queryClient.invalidateQueries({ queryKey: resourceKeys })
     },
   })
   const moveFilesMutation = useMutation({
@@ -111,7 +111,9 @@ export const useFilesSelectActions = ({
       return result
     },
     onSuccess: res => {
-      queryClient.invalidateQueries(['files'])
+      queryClient.invalidateQueries({
+        queryKey: ['files'],
+      })
       displayPayloadMessage(res)
       if (resetSelected) resetSelected()
     },
@@ -134,7 +136,7 @@ export const useFilesSelectActions = ({
     selected: selected[0],
     resource: 'files',
     onSuccess: () => {
-      queryClient.invalidateQueries(resourceKeys)
+      queryClient.invalidateQueries({ queryKey: resourceKeys })
     },
   })
   const {
@@ -145,7 +147,7 @@ export const useFilesSelectActions = ({
     selected: selected[0],
     resource: 'files',
     onSuccess: () => {
-      queryClient.invalidateQueries(resourceKeys)
+      queryClient.invalidateQueries({ queryKey: resourceKeys })
     },
   })
   const {
@@ -156,7 +158,7 @@ export const useFilesSelectActions = ({
     selected: selected[0],
     resource: 'files',
     onSuccess: () => {
-      queryClient.invalidateQueries(resourceKeys)
+      queryClient.invalidateQueries({ queryKey: resourceKeys })
     },
   })
   const {
@@ -181,19 +183,27 @@ export const useFilesSelectActions = ({
       if (space) {
         if (folderId) {
           navigate(`/spaces/${space.id}/files?folder_id=${folderId}`)
-          queryClient.invalidateQueries(['files', folderId])
+          queryClient.invalidateQueries({
+            queryKey: ['files', folderId],
+          })
         } else {
           navigate(`/spaces/${space.id}/files`)
-          queryClient.invalidateQueries(['files'])
+          queryClient.invalidateQueries({
+            queryKey: ['files'],
+          })
         }
       } else {
         // eslint-disable-next-line no-lonely-if
         if (folderId) {
           navigate(`/home/files?folder_id=${folderId}`)
-          queryClient.invalidateQueries(['files', folderId])
+          queryClient.invalidateQueries({
+            queryKey: ['files', folderId],
+          })
         } else {
           navigate('/home/files')
-          queryClient.invalidateQueries(['files'])
+          queryClient.invalidateQueries({
+            queryKey: ['files'],
+          })
         }
       }
       if (resetSelected) resetSelected()
@@ -252,7 +262,7 @@ export const useFilesSelectActions = ({
     selected,
     updateFunction: copyFilesRequest,
     onSuccess: () => {
-      queryClient.invalidateQueries(resourceKeys)
+      queryClient.invalidateQueries({ queryKey: resourceKeys })
     },
   })
   const {
@@ -264,7 +274,7 @@ export const useFilesSelectActions = ({
     selected,
     request: copyFilesToPrivate,
     onSuccess: () => {
-      queryClient.invalidateQueries(resourceKeys)
+      queryClient.invalidateQueries({ queryKey: resourceKeys })
     },
   })
   const {
@@ -283,7 +293,7 @@ export const useFilesSelectActions = ({
     resource: 'files',
     selected: selected[0],
     onSuccess: () => {
-      queryClient.invalidateQueries(resourceKeys)
+      queryClient.invalidateQueries({ queryKey: resourceKeys })
     },
   })
   const {
@@ -294,7 +304,7 @@ export const useFilesSelectActions = ({
     type: 'node',
     selected: selected[0],
     onSuccess: () => {
-      queryClient.invalidateQueries(resourceKeys)
+      queryClient.invalidateQueries({ queryKey: resourceKeys })
     },
   })
 

@@ -21,21 +21,20 @@ const PublishFolder = ({
 }) => {
   const {
     data = [],
-    status,
-    refetch,
-  } = useQuery(['download_list', selectedFiles], () =>
-    fetchFilesDownloadList(
-      selectedFiles.map(s => s.id),
-      scope,
-    ), {
-      onError: () => {toast.error('Error: Fetching download list')},
-    },
-  )
-  if (status === 'loading') return <div>Loading...</div>
+    isLoading,
+  } = useQuery({
+    queryKey: ['download_list', selectedFiles],
+    queryFn: () =>
+      fetchFilesDownloadList(
+        selectedFiles.map(s => s.id),
+        scope,
+      ).catch(() => toast.error('Error: Fetching download list')),
+  })
+  if (isLoading) return <div>Loading...</div>
 
   return (
     <ResourceTable
-      rows={data.map(s => {
+      rows={data?.map(s => {
         return {
           name: (
             <StyledName data-turbolinks="false" href={s.viewURL} target="_blank">
@@ -64,7 +63,9 @@ export const usePublishFolderModal = (
     mutationKey: ['publish-files'],
     mutationFn: (ids: string[]) => deleteFilesRequest(ids),
     onSuccess: () => {
-      queryClient.invalidateQueries(['files'])
+      queryClient.invalidateQueries({
+        queryKey: ['files'],
+      })
       resetSelected()
       setShowModal(false)
       toast.success('File successfully published')
@@ -86,9 +87,9 @@ export const usePublishFolderModal = (
       hide={() => setShowModal(false)}
       footer={
         <>
-          {mutation.isLoading && <Loader />}
-          <Button onClick={() => setShowModal(false)} disabled={mutation.isLoading}>Cancel</Button>
-          <Button variant="primary" onClick={handleSubmit} disabled={mutation.isLoading}>
+          {mutation.isPending && <Loader />}
+          <Button onClick={() => setShowModal(false)} disabled={mutation.isPending}>Cancel</Button>
+          <Button variant="primary" onClick={handleSubmit} disabled={mutation.isPending}>
             Publish
           </Button>
         </>

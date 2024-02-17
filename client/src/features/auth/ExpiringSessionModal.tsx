@@ -1,7 +1,8 @@
-import { differenceInSeconds, fromUnixTime, subSeconds } from 'date-fns/esm'
+import { differenceInSeconds, subSeconds } from 'date-fns/esm'
 import React, { useEffect, useState } from 'react'
+import { Button } from '../../components/Button'
 import { useInterval } from '../../hooks/useInterval'
-import { getCookie } from '../../utils/cookies'
+import { getSessionExpiredAt } from '../../utils/cookies'
 import { pluralize } from '../../utils/formatting'
 import { ModalHeaderTop, ModalNext } from '../modal/ModalNext'
 import { Content, Footer } from '../modal/styles'
@@ -10,13 +11,6 @@ import { useAuthUserQuery } from './api'
 import {
   onLogInWithSSO, useSiteSettingsQuery,
 } from './useSiteSettingsQuery'
-import { Button } from '../../components/Button'
-
-const getSessionExpiredAt = () => {
-  const cookie = getCookie('sessionExpiredAt')
-  if (!cookie) return 0
-  return fromUnixTime(parseInt(cookie || '0', 10))
-}
 
 export const ExpiringSessionModal: React.FC<{ modal: UseModal }> = ({
   modal,

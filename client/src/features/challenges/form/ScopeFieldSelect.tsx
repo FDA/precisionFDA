@@ -4,7 +4,9 @@ import Select from 'react-select'
 import { fetchChallengeScopes } from './api'
 
 const useFetchChallengeScopesQuery = () =>
-  useQuery(['challenge-scopes'], () => fetchChallengeScopes(), {
+  useQuery({
+    queryKey: ['challenge-scopes'],
+    queryFn: () => fetchChallengeScopes(),
     select(data) {
       return data?.map(s => ({
         label: s[0],

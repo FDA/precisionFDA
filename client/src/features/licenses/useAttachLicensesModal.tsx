@@ -47,9 +47,10 @@ export function useAttachLicensesModal<
   useEffect(() => {
     setSelectedLicenses(selected?.file_license?.id)
   }, [selected])
-  const { data, status, refetch } = useQuery(['licenses'], () =>
-    fetchLicensesList(),
-  )
+  const { data } = useQuery({
+    queryKey: ['licenses'],
+    queryFn: fetchLicensesList,
+  })
 
   const resetSelected = () => {
     setSelectedLicenses(undefined)
@@ -74,7 +75,9 @@ export function useAttachLicensesModal<
       toast.error('Error: Attaching licenses')
     },
     onSuccess: (res: any) => {
-      queryClient.invalidateQueries(['licenses'])
+      queryClient.invalidateQueries({
+        queryKey: ['licenses'],
+      })
       if (onSuccess) onSuccess(res)
       resetSelected()
       setShowModal(false)

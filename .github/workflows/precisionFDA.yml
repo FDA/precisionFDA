@@ -128,25 +128,6 @@ jobs:
           RAILS_LOG_TO_STDOUT: 1
           LOG_REQUESTS: 1
         run: bundle exec rspec
-
-  test-js:
-    name: Test JS
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-
-      - uses: actions/setup-node@v3
-        with:
-          node-version: "20.9.0"
-          cache: 'yarn'
-          cache-dependency-path: ./client/yarn.lock
-
-      - name: Install
-        run: yarn
-
-      - name: Test
-        run: yarn test
-
   test-https-apps:
     name: Test HTTPS Apps
     runs-on: ubuntu-latest

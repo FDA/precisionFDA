@@ -76,6 +76,19 @@ const StyledInnerHTML = styled.div`
   .PlaygroundEditorTheme__layoutItem {
     border: 0px;
   }
+
+  h1, h2, h3, h4 {
+    font-weight: bold;
+  }
+  h1 {
+    font-size: 24px;
+  }
+  h2 {
+    font-size: 20px;
+  }
+  h3 {
+    font-size: 18px;
+  }
 `
 
 export const DataPortalDetails = ({

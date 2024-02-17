@@ -128,8 +128,12 @@ export function useSnapshotModal<T extends { ids: string[]; name: string }>({
         toast.error(`Error creating snapshot: ${res?.meta?.messages[0].message}`)
         return
       }
-      queryClient.invalidateQueries(['jobs'])
-      queryClient.invalidateQueries(['execution', selected.uid])
+      queryClient.invalidateQueries({
+        queryKey: ['jobs'],
+      })
+      queryClient.invalidateQueries({
+        queryKey: ['execution', selected.uid],
+      })
       setShowModal(false)
       const isSpaceScope = selected.scope.startsWith('space')
       const scopeString = isSpaceScope ? 'the Space' : 'My Home'
@@ -156,13 +160,13 @@ export function useSnapshotModal<T extends { ids: string[]; name: string }>({
       </ModalScroll>
       <Footer>
         <ButtonRow>
-          {mutation.isLoading && <Loader />}
+          {mutation.isPending && <Loader />}
           <Button onClick={() => setShowModal(false)}>Cancel</Button>
           <Button
             variant="primary"
             type="submit"
             form="create-snapshot-form"
-            disabled={mutation.isLoading}
+            disabled={mutation.isPending}
           >
             Create Snapshot
           </Button>

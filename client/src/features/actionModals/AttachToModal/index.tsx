@@ -182,12 +182,12 @@ export const AttachToModal = ({
       </StyledAttachToModal>
       <Footer>
         <ButtonRow>
-          {mutation.isLoading && <Loader />}
+          {mutation.isPending && <Loader />}
           <Button onClick={hideAction}>Cancel</Button>
           <Button
             variant="primary"
             onClick={() => onClickAttachAction()}
-            disabled={!checkedItemIds.size || mutation.isLoading}
+            disabled={!checkedItemIds.size || mutation.isPending}
           >
             Attach
           </Button>

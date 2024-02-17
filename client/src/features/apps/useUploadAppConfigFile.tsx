@@ -70,7 +70,9 @@ const FileUpload = ({
     onSuccess: res => {
       if (res.id) {
         setShowModal(false)
-        queryClient.invalidateQueries(['apps'])
+        queryClient.invalidateQueries({
+          queryKey: ['apps'],
+        })
         navigate(`/home/apps/${res.id}`)
         toast.success(
           `Created app by importing ${filetypeName[filetype]} file`,
@@ -120,13 +122,13 @@ const FileUpload = ({
           value={text}
         />
         <Footer>
-          {mutation.status === 'loading' && <StyledLoader />}
+          {mutation.isPending && <StyledLoader />}
           <Button type="button" onClick={() => setShowModal(false)}>
             Close
           </Button>
           <Button
             variant="primary"
-            disabled={text === undefined || mutation.isLoading}
+            disabled={text === undefined || mutation.isPending}
             type="button"
             onClick={handleImportAndCreate}
           >

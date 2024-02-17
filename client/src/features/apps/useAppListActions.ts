@@ -31,7 +31,9 @@ export const useAppListActions = ({
     resource: 'apps',
     onSuccess: () => {
       toast.success('Successfully added app resource(s) to space.')
-      queryClient.invalidateQueries(['apps'])
+      queryClient.invalidateQueries({
+        queryKey: ['apps'],
+      })
       setShowAddAppModal(false)
     },
     mutation,

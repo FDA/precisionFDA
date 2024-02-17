@@ -163,7 +163,9 @@ const EditPropertiesForm = ({
       if (setShowModal) setShowModal(false)
       toast.success(`${name} properties updated`)
       // users can only edit properties for a space's item inside that space
-      queryClient.invalidateQueries(['edit-resource-properties', type, scope])
+      queryClient.invalidateQueries({
+        queryKey: ['edit-resource-properties', type, scope],
+      })
     },
     onError: () => {
       toast.error(`An error occurred while editing ${name} properties`)
@@ -219,7 +221,7 @@ const EditPropertiesForm = ({
                     {...register(`props.${index}.key`)}
                     data-tip
                     data-for={`props.${index}.key`}
-                    disabled={mutation.isLoading}
+                    disabled={mutation.isPending}
                     $isError={isError}
                   />
                   {isError && (
@@ -235,7 +237,7 @@ const EditPropertiesForm = ({
                   <InputTextS
                     autoComplete="off"
                     {...register(`props.${index}.value`)}
-                    disabled={mutation.isLoading}
+                    disabled={mutation.isPending}
                   />
                   <Remove onClick={() => remove(index)}>
                     <CrossIcon />
@@ -258,7 +260,7 @@ const EditPropertiesForm = ({
           <Button
             type="button"
             onClick={() => setShowModal(false)}
-            disabled={mutation.isLoading}
+            disabled={mutation.isPending}
           >
             Cancel
           </Button>
@@ -266,7 +268,7 @@ const EditPropertiesForm = ({
             variant="primary"
             type="submit"
             form="edit-properties-form"
-            disabled={mutation.isLoading || Object.keys(errors).length > 0}
+            disabled={mutation.isPending || Object.keys(errors).length > 0}
           >
             Edit Properties
           </Button>

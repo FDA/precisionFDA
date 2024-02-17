@@ -61,8 +61,12 @@ export const CreateCommentEntity = ({
         })
       }
       if (onSuccess) onSuccess()
-      queryClient.invalidateQueries(['discussion'])
-      queryClient.invalidateQueries(['attachments'])
+      queryClient.invalidateQueries({
+        queryKey: ['discussion'],
+      })
+      queryClient.invalidateQueries({
+        queryKey: ['attachments'],
+      })
       toast.success(`${vars.isAnswer ? 'Answer' : 'Comment'} has been published`)
     },
     onError: error => {

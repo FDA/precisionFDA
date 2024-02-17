@@ -19,7 +19,10 @@ export const fetchCloudResources = async () => {
   return axios.get<CloudResourcesResponse>('/api/user/cloud_resources').then(r => r.data)
 }
 
-export const useCloudResourcesQuery = () => useQuery<CloudResourcesResponse>(['cloud_resources'], fetchCloudResources)
+export const useCloudResourcesQuery = () => useQuery({
+  queryKey: ['cloud_resources'],
+  queryFn: fetchCloudResources,
+})
 
 // TODO(samuel) find a better place where to define this
 export const TOTAL_LIMIT_EXCEEDED_TEXT = 'This precisionFDA account has reached its cloud platform resource \

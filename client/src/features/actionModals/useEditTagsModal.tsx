@@ -91,7 +91,7 @@ const EditTagsForm = ({
         <StyledSubtext>Tags are public to the community</StyledSubtext>
         <FieldGroup>
           <label>Tags (comma-separated)</label>
-          <InputText {...register('tags')} disabled={mutation.isLoading} />
+          <InputText {...register('tags')} disabled={mutation.isPending} />
         </FieldGroup>
       </StyledForm>
       <Footer>
@@ -99,7 +99,7 @@ const EditTagsForm = ({
           <Button
             type="button"
             onClick={() => setShowModal && setShowModal(false)}
-            disabled={mutation.isLoading}
+            disabled={mutation.isPending}
           >
             Cancel
           </Button>
@@ -107,7 +107,7 @@ const EditTagsForm = ({
             variant="primary"
             type="submit"
             form="edit-tag-form"
-            disabled={mutation.isLoading}
+            disabled={mutation.isPending}
           >
             Edit Tags
           </Button>

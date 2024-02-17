@@ -186,16 +186,30 @@ export const HeaderRight = styled.div`
   }
 `
 
+export const headerPaddings = css`
+  padding-left: 8px;
+  padding-right: 8px;
+
+  ${bpSmall} {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  ${bpMedium} {
+    padding-left: 32px;
+    padding-right: 32px;
+  }
+`
+
 export const StyledHeader = styled.header`
   box-sizing: border-box;
   background-color: var(--c-app-header-bg);
   border-bottom: 1px solid var(--c-app-header-border, transparent);
   color: var(--c-app-header-menu-base);
-  padding: 0 8px;
+
+  ${headerPaddings}
 
   ${bpSmall} {
-    padding: 0 16px;
-
     ${HeaderItem} {
       padding: 8px 6px;
     }
@@ -204,10 +218,6 @@ export const StyledHeader = styled.header`
       display: flex;
       padding-left: 5px;
     }
-  }
-
-  ${bpMedium} {
-    padding: 0 ${theme.padding.mainContentHorizontal};
   }
 
   ${bpLarge} {

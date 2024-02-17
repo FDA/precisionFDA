@@ -84,10 +84,10 @@ const SpacesList = () => {
     filter: filterQuery,
   })
 
-  const { status, data, error } = query
+  const { isLoading, data, error } = query
   const meta = data?.meta
 
-  if (status === 'error') return <div>Error! {JSON.stringify(error)}</div>
+  if (error) return <div>Error! {JSON.stringify(error)}</div>
 
   return (
     <>
@@ -104,7 +104,7 @@ const SpacesList = () => {
         setFilters={setSearchFilter}
         filters={toArrayFromObject(filterQuery)}
         data={data?.spaces}
-        isLoading={status === 'loading'}
+        isLoading={isLoading}
         setSortBy={setSortBy}
         sortBy={sortBy}
         selectedRows={selectedIndexes}
