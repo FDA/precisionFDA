@@ -71,10 +71,9 @@ const ProposeChallengePage = () => {
   const [submissionSuccess, setSubmissionSuccess] = useState(false)
   const [values, setValues] = useState()
 
-  const { data: yearsListData, isLoading: isLoadingYearsList } = useQuery(['challenges-years'], () => challengesYearsListRequest(), {
-    onError: err => {
-      console.log(err)
-    },
+  const { data: yearsListData, isLoading: isLoadingYearsList } = useQuery({
+    queryKey: ['challenges-years'],
+    queryFn: () => challengesYearsListRequest(),
   })
 
   const queryClient = useQueryClient()
@@ -82,7 +81,9 @@ const ProposeChallengePage = () => {
     mutationKey: ['propose-challenge'],
     mutationFn: (payload: any) => proposeChallengeRequest(payload),
     onSuccess: () => {
-      queryClient.invalidateQueries(['challenges'])
+      queryClient.invalidateQueries({
+        queryKey: ['challenges'],
+      })
       setSubmissionSuccess(true)
       toast.success('Your challenge proposal has been received')
     },

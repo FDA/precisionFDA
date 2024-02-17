@@ -17,10 +17,10 @@ export const useCreateWorkflowModal = () => {
   const modalComp = isShown && (
     <Modal headerText="Create an workflow" isShown={isShown} hide={() => setShowModal(false)} >
       <StyledForm onSubmit={(e) => mutation.mutateAsync(e.currentTarget.name)}>
-        <InputText label="Workflow Name" name="name" placeholder="Enter Name..." autoFocus disabled={mutation.isLoading} />
-        <Button variant="primary" type="submit" disabled={mutation.isLoading}>Create</Button>
+        <InputText label="Workflow Name" name="name" placeholder="Enter Name..." autoFocus disabled={mutation.isPending} />
+        <Button variant="primary" type="submit" disabled={mutation.isPending}>Create</Button>
       </StyledForm>
-      <Button onClick={() => setShowModal(false)} disabled={mutation.isLoading}>Cancel</Button>
+      <Button onClick={() => setShowModal(false)} disabled={mutation.isPending}>Cancel</Button>
     </Modal>
   )
   return {

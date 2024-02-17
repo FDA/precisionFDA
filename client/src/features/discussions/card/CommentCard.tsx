@@ -31,7 +31,9 @@ export function CommentCard({
       return deleteDiscussionCommentRequest(discussionId, comment.id)
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['discussion'])
+      queryClient.invalidateQueries({
+        queryKey: ['discussion'],
+      })
     },
   })
 

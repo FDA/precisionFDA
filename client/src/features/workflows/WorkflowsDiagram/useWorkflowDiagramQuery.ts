@@ -26,6 +26,7 @@ async function workflowDigramRequest(workflowId: string) {
   return axios.get(`/api/workflows/${workflowId}/diagram`).then(d => d.data.data as WorkflowDigramRespons)
 }
 
-export const useWorkflowDiagramQuery = (workflowId: string) => useQuery(['workflow-digram', workflowId], {
+export const useWorkflowDiagramQuery = (workflowId: string) => useQuery({
+  queryKey: ['workflow-digram', workflowId],
   queryFn: () => workflowDigramRequest(workflowId),
 })

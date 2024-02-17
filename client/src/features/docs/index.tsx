@@ -1,11 +1,9 @@
-import { useQuery } from '@tanstack/react-query'
 import React, { useLayoutEffect } from 'react'
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { isActiveLink } from '../../helpers'
 import { usePageMeta } from '../../hooks/usePageMeta'
 import { DocsLayout } from '../../layouts/PublicLayout'
 import { ScrollableInnerGlobalStyles } from '../../styles/global'
-import { fetchCurrentUser } from '../auth/api'
 import { useAuthUser } from '../auth/useAuthUser'
 import { Apps } from './pages/Apps'
 import { Assets } from './pages/Assets'
@@ -36,8 +34,7 @@ const Docs = () => {
   usePageMeta({ title: 'Docs - precisionFDA' })
   const user = useAuthUser()
   const { pathname } = useLocation()
-  const { data } = useQuery(['user'], () => fetchCurrentUser())
-  const isAdmin = data?.admin
+  const isAdmin = user?.isAdmin ?? false
 
   useLayoutEffect(() => {
     window.scrollTo(0, 0)

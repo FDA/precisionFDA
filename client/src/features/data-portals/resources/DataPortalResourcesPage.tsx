@@ -19,7 +19,7 @@ import { BookIcon } from '../../../components/icons/BookIcon'
 import { CrossIcon } from '../../../components/icons/PlusIcon'
 import { UserLayout } from '../../../layouts/UserLayout'
 import { theme } from '../../../styles/theme'
-import { DEFAULT_RECONNECT_ATTEMPTS, DEFAULT_RECONNECT_INTERVAL, getNodeWsUrl } from '../../../utils/config'
+import { DEFAULT_RECONNECT_ATTEMPTS, DEFAULT_RECONNECT_INTERVAL, SHOULD_RECONNECT, getNodeWsUrl } from '../../../utils/config'
 import { useAuthUser } from '../../auth/useAuthUser'
 import { Notification, NOTIFICATION_ACTION } from '../../home/types'
 import { CreateResource } from '../../resources/CreateResource'
@@ -120,7 +120,7 @@ const useListDataPortalResourcesQuery = (id: string) =>
   useQuery({
     queryKey: ['resources-list-portal'],
     queryFn: () => listDataPortalResourcesRequest(id),
-    select: (d) => d.resources
+    select: (d) => d.resources,
   })
 
 const useResourceRemoveMutation = (
@@ -141,13 +141,15 @@ const DataPortalResourcesPage = () => {
   const { portalId } = useParams<{
     portalId: string
   }>()
-  const { data: portal, status: portalStatus } =
+  const { data: portal, isLoading: portalIsLoading } =
     useDataPortalByIdQuery(portalId)
-  const { data, status } = useListDataPortalResourcesQuery(portalId)
+  const { data, isLoading } = useListDataPortalResourcesQuery(portalId)
 
   const mutation = useResourceRemoveMutation({
     onSuccess: () => {
-      queryClient.invalidateQueries(['resources-list-portal'])
+      queryClient.invalidateQueries({
+        queryKey: ['resources-list-portal'],
+      })
     },
   })
 
@@ -155,7 +157,7 @@ const DataPortalResourcesPage = () => {
     share: true,
     reconnectInterval: DEFAULT_RECONNECT_INTERVAL,
     reconnectAttempts: DEFAULT_RECONNECT_ATTEMPTS,
-    shouldReconnect: () => true,
+    shouldReconnect: () => SHOULD_RECONNECT,
   })
 
   useEffect(() => {
@@ -163,7 +165,7 @@ const DataPortalResourcesPage = () => {
       return
     }
     if (NOTIFICATION_ACTION.RESOURCE_URL_UPDATED === notification.action) {
-      queryClient.invalidateQueries(['resources-list-portal'])
+      queryClient.invalidateQueries({ queryKey: ['resources-list-portal']})
     }
   }, [notification])
 
@@ -186,10 +188,12 @@ const DataPortalResourcesPage = () => {
   }
 
   const handleSuccess = () => {
-    queryClient.invalidateQueries(['resources-list-portal'])
+    queryClient.invalidateQueries({
+      queryKey: ['resources-list-portal'],
+    })
   }
 
-  if (status === 'loading' || portalStatus === 'loading') return <Loader />
+  if (isLoading || portalIsLoading) return <Loader />
   const canEdit = canEditResources(user?.dxuser, portal?.members)
   return (
     <UserLayout>

@@ -159,8 +159,12 @@ export const EditNoteEntity = ({
       if (onSuccess) onSuccess()
     },
     onSettled: async () => {
-      await queryClient.invalidateQueries(['discussion'])
-      await queryClient.invalidateQueries(['attachments'])
+      await queryClient.invalidateQueries({
+        queryKey: ['discussion'],
+      })
+      await queryClient.invalidateQueries({
+        queryKey: ['attachments'],
+      })
     },
     onError: () => {
       // todo investigate- can we show something less generic?

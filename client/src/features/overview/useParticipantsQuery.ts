@@ -7,5 +7,8 @@ export async function getParticipantsQuery() {
 }
 
 export const useParticipantsQuery = () => {
-  return useQuery(['participants'], getParticipantsQuery)
+  return useQuery({
+    queryKey: ['participants'],
+    queryFn: getParticipantsQuery,
+  })
 }

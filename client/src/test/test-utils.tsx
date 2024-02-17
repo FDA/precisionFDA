@@ -13,6 +13,7 @@ import {
   QueryCache,
 } from '@tanstack/react-query'
 import { server } from '../mocks/server'
+import { AlertDismissedProvider } from '../features/admin/alerts/useAlertDismissedLocalStorage'
 
 const queryCache = new QueryCache()
 const queryClient = new QueryClient({
@@ -30,7 +31,9 @@ export const AllTheProviders: FC<{ children: React.ReactNode }> = ({
   <BrowserRouter>
     <QueryClientProvider client={queryClient}>
       <QueryParamProvider adapter={ReactRouter6Adapter}>
-        {children}
+        <AlertDismissedProvider>
+          {children}
+        </AlertDismissedProvider>
       </QueryParamProvider>
     </QueryClientProvider>
   </BrowserRouter>

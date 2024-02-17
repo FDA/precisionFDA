@@ -95,7 +95,7 @@ export const useSelectAppModal = (
   const [showOnlyMyApps, setShowOnlyMyApps] = useState(false)
   const searchText = useDebounce(filter, 250)
 
-  const { data: appsData, status: loadingAppsStatus } = useQuery({
+  const { data: appsData, isLoading: isLoadingApps, status: loadingAppsStatus } = useQuery({
     queryKey: ['list_apps', searchText],
     queryFn: () => fetchFilteredApps(searchText, scopes ?? ([] as any)), // scopes: [] mean all scopes.
     enabled: isShown,
@@ -189,7 +189,7 @@ export const useSelectAppModal = (
               Only mine
             </StyledOnlyMine>
           </StyledFilterSection>
-          {loadingAppsStatus === 'loading' && <Loader />}
+          {isLoadingApps && <Loader />}
           {loadingAppsStatus === 'success' && (
             <ModalScroll>
               <SelectableTable>

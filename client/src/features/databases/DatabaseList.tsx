@@ -76,7 +76,7 @@ export const DatabaseList = ({ homeScope }: { homeScope?: HomeScope }) => {
       scope: homeScope || undefined,
     },
   })
-  const { status, data } = query
+  const { isLoading, data, error } = query
   const { data: propertiesData } = usePropertiesQuery('dbCluster', homeScope)
 
   const selectedObjects = getSelectedObjectsFromIndexes(
@@ -85,7 +85,7 @@ export const DatabaseList = ({ homeScope }: { homeScope?: HomeScope }) => {
   )
   const actions = useDatabaseSelectActions(selectedObjects, ['dbclusters'])
 
-  if (status === 'error')
+  if (error)
     return (
       <ActionsRow>
         Error! Something broke, or this resource type does not exist.
@@ -133,7 +133,7 @@ export const DatabaseList = ({ homeScope }: { homeScope?: HomeScope }) => {
         filters={toArrayFromObject(filterQuery as any)}
         data={data?.dbclusters}
         properties={propertiesData?.keys}
-        isLoading={status === 'loading'}
+        isLoading={isLoading}
         handleRowClick={onRowClick}
         selectedRows={selectedIndexes}
         setSelectedRows={setSelectedIndexes}

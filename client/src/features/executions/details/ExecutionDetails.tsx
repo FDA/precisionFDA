@@ -49,12 +49,12 @@ export const ExecutionDetails = ({
   const location = useLocation<any>()
   const { executionUid } = useParams<{ executionUid: string }>()
 
-  const { data, status, refetch, isFetching } = useQuery({
+  const { data, isLoading, refetch, isFetching } = useQuery({
     queryKey: ['execution', executionUid],
-    queryFn: () => fetchExecution(executionUid),
-    onSuccess: (d) => {
+    queryFn: () => fetchExecution(executionUid).then(d => {
       if(emitScope) emitScope(d.job.scope, d.job.featured)
-    },
+      return d
+    }),
   })
   const queryCache = useQueryClient()
 
@@ -76,13 +76,15 @@ export const ExecutionDetails = ({
          NOTIFICATION_ACTION.JOB_FAILED,
          NOTIFICATION_ACTION.JOB_OUTPUTS_SYNCED,
          NOTIFICATION_ACTION.JOB_TERMINATED].includes(notification.action)) {
-      queryCache.invalidateQueries(['execution'])
+      queryCache.invalidateQueries({
+        queryKey: ['execution'],
+      })
     }
   }, [notification])
 
   const execution = data?.job
 
-  if (status === 'loading') {
+  if (isLoading) {
     return <HomeLoader/>
   }
 

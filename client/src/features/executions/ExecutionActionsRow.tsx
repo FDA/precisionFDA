@@ -61,7 +61,9 @@ export const ExecutionActionsRow = ({
       execution.links.sync_files &&
         syncFiles
           .mutateAsync(execution.links.sync_files)
-          .then(() => queryCache.invalidateQueries(['execution', execution.uid]))
+          .then(() => queryCache.invalidateQueries({
+          queryKey: ['execution', execution.uid],
+        }))
     } else {
       alert(`Cannot sync files as workstation is ${execution.state}`)
     }

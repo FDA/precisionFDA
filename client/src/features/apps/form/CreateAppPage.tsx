@@ -20,8 +20,12 @@ export const CreateAppPage = () => {
     onSuccess: res => {
       if (res?.id) {
         navigate(`/home/apps/${res?.id}`)
-        queryClient.invalidateQueries(['apps'])
-        queryClient.invalidateQueries(['counters'])
+        queryClient.invalidateQueries({
+          queryKey: ['apps'],
+        })
+        queryClient.invalidateQueries({
+          queryKey: ['counters'],
+        })
         toast.success('Your app was created successfully')
       } else if (res?.error) {
         toast.error(`${res.error.type}: ${res.error.message}`)

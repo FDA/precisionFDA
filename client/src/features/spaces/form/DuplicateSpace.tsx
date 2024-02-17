@@ -14,9 +14,10 @@ import { ScrollableInnerGlobalStyles } from '../../../styles/global'
 export const DuplicateSpace = () => {
   const navigate = useNavigate()
   const { spaceId } = useParams<{ spaceId: string }>()
-  const { data } = useQuery(['space', spaceId], () =>
-    spaceRequest({ id: spaceId }),
-  )
+  const { data } = useQuery({
+    queryKey: ['space', spaceId],
+    queryFn: () => spaceRequest({ id: spaceId }),
+  })
 
   const queryClient = useQueryClient()
   const mutation = useMutation({
@@ -25,7 +26,9 @@ export const DuplicateSpace = () => {
     onSuccess: res => {
       if (res?.space) {
         navigate(`/spaces/${res?.space?.id}`)
-        queryClient.invalidateQueries(['spaces'])
+        queryClient.invalidateQueries({
+          queryKey: ['spaces'],
+        })
         toast.success('Success: duplicating space')
       } else if (res?.error) {
         toast.error(`${res.error.type}: ${res.error.message}`)

@@ -1,6 +1,6 @@
 /* eslint-disable no-nested-ternary */
 import { omit, pick } from 'ramda'
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Link, Route, Routes, useLocation, useParams, Navigate } from 'react-router-dom'
 import { CloudResourcesHeaderButton } from '../../components/CloudResourcesHeaderButton'
 import Dropdown from '../../components/Dropdown'
@@ -177,11 +177,13 @@ const DetailActionsDropdown = (
 export const AppsShow = ({ spaceId, emitScope, homeScope }: { homeScope?: HomeScope, spaceId?: string, emitScope?: EmmitScope }) => {
   const location = useLocation()
   const { appUid } = useParams<{ appUid: string }>()
-  const { data, isLoading } = useFetchAppQuery(appUid, {
-    onSuccess: (d) => {
-      if(emitScope) emitScope(d.app.scope, d.app.featured)
-    },
-  })
+  const { data, isLoading } = useFetchAppQuery(appUid)
+
+  useEffect(() => {
+    if(data) {
+      if(emitScope) emitScope(data.app.scope, data.app.featured)
+    }
+  }, [data])
 
   const app = data?.app
   const meta = data?.meta

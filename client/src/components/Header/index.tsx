@@ -2,18 +2,23 @@
 import React, { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { SUPPORT_EMAIL } from '../../constants'
+import { useAlertDismissed } from '../../features/admin/alerts/useAlertDismissedLocalStorage'
 import { CDMHKey, logout } from '../../features/auth/api'
 import { useAuthUser } from '../../features/auth/useAuthUser'
 import { useCustomPortalsQuery } from '../../features/auth/useCustomPortalsQuery'
 import { useGenerateKeyModal } from '../../features/auth/useGenerateKeyModal'
+import { CDMHNames, useSiteSettingsQuery } from '../../features/auth/useSiteSettingsQuery'
+import { useMainDataPortal } from '../../features/data-portals/queries'
 import { IUser } from '../../types/user'
+import { AlertBanner } from '../AlertBanner'
 import { CloudResourceModal } from '../CloudResourcesModal'
 import Dropdown from '../Dropdown'
 import { BullsEyeIcon } from '../icons/BullsEyeIcon'
-import { CaretIcon } from '../icons/CaretIcon'
 import { CDMHIcon } from '../icons/CDMHIcon'
-import { DiscussionIcon } from '../icons/DiscussionIcon'
+import { CaretIcon } from '../icons/CaretIcon'
 import { CommentingIcon } from '../icons/CommentingIcon'
+import { DataPortalIcon } from '../icons/DataPortalIcon'
+import { DiscussionIcon } from '../icons/DiscussionIcon'
 import { FortIcon } from '../icons/FortIcon'
 import { GSRSIcon } from '../icons/GSRSIcon'
 import { HomeIcon } from '../icons/HomeIcon'
@@ -23,6 +28,7 @@ import { ProfileIcon } from '../icons/ProfileIcon'
 import { QuestionIcon } from '../icons/QuestionIcon'
 import { StarIcon } from '../icons/StarIcon'
 import { StickyNoteIcon } from '../icons/StickyNote'
+import { ToolsIcon } from '../icons/ToolsIcon'
 import { TrophyIcon } from '../icons/TrophyIcon'
 import {
   DropdownMenuItem,
@@ -41,10 +47,6 @@ import {
   StyledLink,
   StyledOnClickModalDiv,
 } from './styles'
-import { DataPortalIcon } from '../icons/DataPortalIcon'
-import { useMainDataPortal } from '../../features/data-portals/queries'
-import { CDMHNames, useSiteSettingsQuery } from '../../features/auth/useSiteSettingsQuery'
-import { ToolsIcon } from '../icons/ToolsIcon'
 
 type UserMenuProps = {
   user: IUser | null | undefined
@@ -164,8 +166,8 @@ const Header: React.FC = () => {
   const user = useAuthUser()
   const siteSettings = useSiteSettingsQuery()
   const customPortals = useCustomPortalsQuery()
-  const [isCloudResourcesModalShown, setCloudResourcesModalShown] =
-    useState(false)
+  const [isCloudResourcesModalShown, setCloudResourcesModalShown] = useState(false)
+  const { isAlertDismissed, setIsAlertDismissed } = useAlertDismissed()
 
   const userCanAdministerSite = user?.can_administer_site
   const userIsGuest = user?.is_guest
@@ -173,6 +175,7 @@ const Header: React.FC = () => {
   const isDataPortalsPath = pathname.startsWith('/data-portals')
 
   const handleLogout = async () => {
+    setIsAlertDismissed(false)
     await logout().then(() => {
       window.location.replace('/')
     })
@@ -195,9 +198,11 @@ const Header: React.FC = () => {
   const customPortalIds = customPortals.data?.filter((p) => p.name === 'Tools' || p.name === 'PRISM')?.map((p) => p.id)
   const showGSRSLink = !isSpacesPath && !isDataPortalsPath && !userIsGuest
   const showCDMHLink = !isSpacesPath && !isDataPortalsPath && !!siteSettings?.data?.cdmh.isEnabled
+  const showAlertBanner = !isAlertDismissed && siteSettings.data?.alerts?.[0]
 
   return (
     <>
+      {showAlertBanner && <AlertBanner variant={siteSettings.data?.alerts[0].type} dismissAlert={() => setIsAlertDismissed(true)} alertText={siteSettings.data?.alerts[0].content} />}
       <StyledHeader data-testid="main-header">
         <Nav>
           <LogoWrap as={Link} to="/" data-turbolinks="false">

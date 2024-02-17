@@ -36,17 +36,15 @@ const SpacesList = ({
 }) => {
   const {
     data = [],
-    status,
-    refetch,
-  } = useQuery(['editable_spaces_list'], fetchEditableSpacesList, {
-    onError: () => {
-      toast.error('Error: Fetching editable spaces')
-    },
+    isLoading,
+  } = useQuery({
+    queryKey: ['editable_spaces_list'],
+    queryFn: fetchEditableSpacesList,
   })
 
   const spacesList = data.filter(space => !space.scope.endsWith(`-${spaceId}`))
 
-  if (status === 'loading') {
+  if (isLoading) {
     return <div>Loading...</div>
   }
   if (spacesList.length === 0) {
@@ -162,10 +160,10 @@ const CopyToSpaceForm = ({
       </ModalScroll>
       <Footer>
         <ButtonRow>
-          {mutation.isLoading && <Loader height={14} />}
+          {mutation.isPending && <Loader height={14} />}
           <Button
             onClick={() => setShowModal(false)}
-            disabled={mutation.isLoading}
+            disabled={mutation.isPending}
           >
             Cancel
           </Button>
@@ -173,7 +171,7 @@ const CopyToSpaceForm = ({
             variant="primary"
             type="submit"
             form="copy-to-space-form"
-            disabled={!selectedTarget || mutation.isLoading}
+            disabled={!selectedTarget || mutation.isPending}
           >
             Copy
           </Button>

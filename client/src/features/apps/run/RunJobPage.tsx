@@ -18,15 +18,15 @@ import { getBaseLink } from './utils'
 export const RunJobPage = ({ spaceId }: { spaceId?: string }) => {
   const { appUid } = useParams<{ appUid: string }>()
   const user = useAuthUser()
-  const { data: appData, status: loadingAppStatus } = useQuery(
-    ['app', appUid],
-    () => fetchApp(appUid),
-  )
+  const { data: appData, isLoading } = useQuery({
+    queryKey: ['app', appUid],
+    queryFn: () => fetchApp(appUid),
+  })
 
   const app = appData?.app
   const spec = appData?.meta.spec
 
-  if (loadingAppStatus === 'loading' || user === undefined ) {
+  if (isLoading || user === undefined ) {
     return <HomeLoader />
   }
 

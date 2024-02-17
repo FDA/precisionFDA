@@ -50,6 +50,9 @@ module.exports = {
     'object-curly-spacing': [
       'error', 'always', { 'objectsInObjects': false, 'arraysInObjects': false },
     ],
+    'no-param-reassign': [2, { 
+      'props': false,
+    }],
     'quotes': [ 'error', 'single', { 'avoidEscape': true } ],
     'semi': ['error', 'never'],
   },

@@ -66,7 +66,7 @@ export const WorkflowList = ({
       scope: homeScope || undefined,
     },
   })
-  const { status, data, error } = query
+  const { isLoading, data, error } = query
   const { data: propetiesData } = usePropertiesQuery('workflowSeries', homeScope, spaceId)
 
   const selectedObjects = getSelectedObjectsFromIndexes(
@@ -85,7 +85,7 @@ export const WorkflowList = ({
     homeScope === 'spaces' &&
     'To perform other actions on this workflow, access it from the Space'
 
-  if (status === 'error') return <div>Error! {JSON.stringify(error)}</div>
+  if (error) return <div>Error! {JSON.stringify(error)}</div>
 
   return (
     <ErrorBoundary>
@@ -141,7 +141,7 @@ export const WorkflowList = ({
         filters={toArrayFromObject(filterQuery as any)}
         workflows={data?.workflows}
         properties={propetiesData?.keys}
-        isLoading={status === 'loading'}
+        isLoading={isLoading}
         handleRowClick={onRowClick}
         selectedRows={selectedIndexes}
         setSelectedRows={setSelectedIndexes}

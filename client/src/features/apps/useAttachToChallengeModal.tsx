@@ -43,11 +43,12 @@ const ChallengesList = ({
   appUid: string
   onSelect: (scope: string) => void
 }) => {
-  const { data, status, isLoading } = useQuery(['app', appUid], () =>
-    fetchApp(appUid),
-  )
+  const { data, isLoading } = useQuery({
+    queryKey: ['app', appUid],
+    queryFn: () => fetchApp(appUid),
+  })
   const meta = data?.meta
-  if (status === 'loading') return <div>Loading...</div>
+  if (isLoading) return <div>Loading...</div>
   if (meta.challenges.length === 0) return <div>No challenges yet.</div>
 
   return (
@@ -170,10 +171,10 @@ const ChallengeAppForm = ({
       </ModalScroll>
       <Footer>
         <ButtonRow>
-          {mutation.isLoading && <Loader height={14} />}
+          {mutation.isPending && <Loader height={14} />}
           <Button
             onClick={() => setShowModal(false)}
-            disabled={mutation.isLoading}
+            disabled={mutation.isPending}
           >
             Cancel
           </Button>
@@ -181,7 +182,7 @@ const ChallengeAppForm = ({
             variant="primary"
             type="submit"
             form="attach-to-challenge-form"
-            disabled={!selectedId || mutation.isLoading}
+            disabled={!selectedId || mutation.isPending}
           >
             Assign
           </Button>

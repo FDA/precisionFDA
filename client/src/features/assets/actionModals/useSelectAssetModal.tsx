@@ -116,7 +116,7 @@ export const useSelectAssetModal = (
   const [showOnlyMyAssets, setShowOnlyMyAssets] = useState(false)
   const searchText = useDebounce(filter, 250)
 
-  const { data: assetsData, status: loadingAssetsStatus } = useQuery({
+  const { data: assetsData, isLoading: isLoadingAssets, status: loadingAssetsStatus } = useQuery({
     queryKey: ['list_assets', searchText],
     queryFn: () => fetchFilteredAssets(searchText, scopes ?? ([] as any)), // scopes: [] mean all scopes.
     enabled: isShown,
@@ -212,7 +212,7 @@ export const useSelectAssetModal = (
               Only mine
             </StyledOnlyMine>
           </StyledFilterSection>
-          {loadingAssetsStatus === 'loading' && <Loader />}
+          {isLoadingAssets && <Loader />}
           {loadingAssetsStatus === 'success' && (
             <ModalScroll>
               <SelectableTable>

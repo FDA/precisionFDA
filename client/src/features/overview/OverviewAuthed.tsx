@@ -191,14 +191,13 @@ const TopAppItem = ({ app }: { app: IApp }) => {
 }
 
 export const TopApps = () => {
-  const { data: recentAppsData, isLoading: isLoadingRecentAppsData } = useQuery(
-    ['recent-apps-everybody'],
-    {
-      queryFn: () => fetchApps([], { scope: 'everybody' }),
-    },
-  )
+  const { data: recentAppsData, isLoading: isLoadingRecentAppsData } = useQuery({
+    queryKey: ['recent-apps-everybody'],
+    queryFn: () => fetchApps([], { scope: 'everybody' }),
+  })
   const { data: featuredAppsData, isLoading: isLoadingFeaturedAppsData } =
-    useQuery(['featured-apps'], {
+    useQuery({
+      queryKey: ['featured-apps'],
       queryFn: () => fetchApps([], { scope: 'featured' }),
     })
   return (

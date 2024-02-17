@@ -30,7 +30,9 @@ export const CreateDiscussionPage = ({ scope }: { scope: NoteScope }) => {
         isAnswer: false,
         toPublish: variables.attachments,
       })
-      queryClient.invalidateQueries(['space'])
+      queryClient.invalidateQueries({
+        queryKey: ['space'],
+      })
       navigate(
         `/spaces/${getSpaceIdFromScope(scope)}/discussions/${data.id}`,
       )

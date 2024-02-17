@@ -45,7 +45,9 @@ export const ResourceForm = ({
   } = useUploadResource({
     id: pid,
     onSuccess() {
-      queryClient.invalidateQueries(['resources-list-portal'])
+      queryClient.invalidateQueries({
+        queryKey: ['resources-list-portal'],
+      })
       setShowModal(false)
     },
   })

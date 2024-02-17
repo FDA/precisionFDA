@@ -132,10 +132,10 @@ export const DatabaseShow = ({ emitScope, homeScope }: { homeScope?: HomeScope, 
   const { dxid } = useParams<{ dxid: string }>()
   const { data, status, isLoading, refetch, isFetching } = useQuery({
     queryKey: ['dbclusters', dxid],
-    queryFn: () => fetchDatabaseRequest(dxid),
-    onSuccess: (d) => {
+    queryFn: () => fetchDatabaseRequest(dxid).then((d) => {
       if(emitScope) emitScope(d.db_cluster.scope, d.db_cluster.featured)
-    },
+      return d
+    }),
   })
 
   const db = data?.db_cluster

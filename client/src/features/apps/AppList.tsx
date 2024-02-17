@@ -57,7 +57,7 @@ export const AppList = ({ homeScope, spaceId }: { homeScope?: HomeScope, spaceId
   })
   const { data: propertiesData } = usePropertiesQuery('appSeries', homeScope, spaceId) 
 
-  const { status, data, error } = query
+  const { isLoading, data, error } = query
 
   const selectedAppObjects = getSelectedObjectsFromIndexes(
     selectedIndexes,
@@ -85,7 +85,7 @@ export const AppList = ({ homeScope, spaceId }: { homeScope?: HomeScope, spaceId
     delete actions['Make public']
   }
 
-  if (status === 'error') return <div>Error! {JSON.stringify(error)}</div>
+  if (error) return <div>Error! {JSON.stringify(error)}</div>
 
   return (
     <>
@@ -146,7 +146,7 @@ export const AppList = ({ homeScope, spaceId }: { homeScope?: HomeScope, spaceId
         filters={toArrayFromObject(filterQuery as any)}
         apps={data?.apps}
         properties={propertiesData?.keys}
-        isLoading={status === 'loading'}
+        isLoading={isLoading}
         sortBy={sortBy}
         setSortBy={setSortBy}
         handleRowClick={onRowClick}

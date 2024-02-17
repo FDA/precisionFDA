@@ -24,37 +24,31 @@ const getTitle = (space: ISpace): string => {
   return space.name
 }
 
-export const fetchAndConvertSelectableContexts = (scope: IApp['scope'], entityType: IApp['entity_type']) => useQuery(
-  ['selectable-context', scope],
-  () => fetchEditableSpacesList(),
-  {
-    onSuccess(spaces) {
-      if (entityType === 'https') {
-        const options = spaces.map(s => ({
-          label: `${s.title} - ${s.scope}`,
-          value: s.scope,
-        }))
+export const fetchAndConvertSelectableContexts = (scope: IApp['scope'], entityType: IApp['entity_type']) => useQuery({
+  queryKey: ['selectable-context', scope],
+  queryFn: () => fetchEditableSpacesList().catch(() => toast.error('Error loading contexts')),
+  select: (data) => {
+    if (entityType === 'https') {
+      const options = data.map(s => ({
+        label: `${s.title} - ${s.scope}`,
+        value: s.scope,
+      }))
 
-        return [{ label: 'Private', value: 'private' }, ...options]
-      }
-      return []
-    },
-    onError: () => {
-      toast.error('Error loading contexts')
-    },
+      return [{ label: 'Private', value: 'private' }, ...options]
+    }
+    return []
   },
-)
+})
 
 export const fetchAndConvertSelectableSpaces = (scope: IApp['scope']) => {
   const spaceId = getSpaceIdFromScope(scope)
-  return useQuery(
-  ['selecteable-space', scope],
-  () => fetchSelectableSpaces(spaceId),
-  {
-    onSuccess(spaces) {
+  return useQuery({
+    queryKey: ['selecteable-space', scope],
+    queryFn: () => fetchSelectableSpaces(spaceId, scope).catch(() => toast.error('Error loading spaces')),
+    select: (data) => {
       if (scope.includes('space')) {
         
-        return spaces.map(space => ({
+        return data.map(space => ({
           isDisabled: false,
           label: getTitle(space),
           value: `space-${space.id}`,
@@ -62,8 +56,4 @@ export const fetchAndConvertSelectableSpaces = (scope: IApp['scope']) => {
       }
       return []
     },
-    onError: () => {
-      toast.error('Error loading spaces')
-    },
-  },
-)}
+  })}
