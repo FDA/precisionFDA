@@ -9,6 +9,8 @@ tomcat_install "gsrs" do
   version node[:gsrs][:tomcat_version]
   tomcat_user node[:gsrs][:tomcat_user]
   tomcat_group node[:gsrs][:tomcat_group]
+  tarball_base_uri node[:gsrs][:tarball_base_uri]
+  checksum_base_uri node[:gsrs][:checksum_base_uri]
   exclude_docs true
   exclude_examples true
   exclude_manager true

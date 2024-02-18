@@ -42,8 +42,12 @@ const EditAssetInfoForm = ({
       if (res?.message.type === 'error') {
         toast.error(`API Error: ${res?.message.text}`)
       } else {
-        queryClient.invalidateQueries(['assets'])
-        queryClient.invalidateQueries(['asset', asset.uid])
+        queryClient.invalidateQueries({
+          queryKey: ['assets'],
+        })
+        queryClient.invalidateQueries({
+          queryKey: ['asset', asset.uid],
+        })
         handleClose()
         toast.success('Asset info has been updated')
       }
@@ -66,7 +70,7 @@ const EditAssetInfoForm = ({
             label="Asset Name"
             {...register('name', { required: 'Name is required.' })}
             placeholder="Edit name..."
-            disabled={editMutation.isLoading}
+            disabled={editMutation.isPending}
           />
           <ErrorMessage
             errors={errors}
@@ -80,7 +84,7 @@ const EditAssetInfoForm = ({
           <Button
             type="button"
             onClick={handleClose}
-            disabled={editMutation.isLoading}
+            disabled={editMutation.isPending}
           >
             Cancel
           </Button>
@@ -88,7 +92,7 @@ const EditAssetInfoForm = ({
             variant="primary"
             type="submit"
             form="edit-asset-form"
-            disabled={editMutation.isLoading}
+            disabled={editMutation.isPending}
           >
             Edit
           </Button>

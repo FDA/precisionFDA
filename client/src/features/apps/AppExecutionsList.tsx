@@ -67,13 +67,15 @@ export const AppExecutionsList = ({ appUid }: { appUid: string }) => {
       NOTIFICATION_ACTION.JOB_DONE,
       NOTIFICATION_ACTION.JOB_FAILED,
       NOTIFICATION_ACTION.JOB_OUTPUTS_SYNCED].includes(notification.action)) {
-        queryCache.invalidateQueries([resource])
+        queryCache.invalidateQueries({
+          queryKey: [resource],
+        })
     }
   }, [notification])
 
-  const { status, data, error } = query
+  const { isLoading, data, error } = query
 
-  if (status === 'error') return <div>Error! {JSON.stringify(error)}</div>
+  if (error) return <div>Error! {JSON.stringify(error)}</div>
 
   return (
     <ErrorBoundary>
@@ -82,7 +84,7 @@ export const AppExecutionsList = ({ appUid }: { appUid: string }) => {
         // TODO(samuel) fix possibly undefined values from querystring
         filters={toArrayFromObject(filterQuery as any)}
         jobs={data?.jobs}
-        isLoading={status === 'loading'}
+        isLoading={isLoading}
         setSortBy={setSortBy}
         sortBy={sortBy}
         saveColumnResizeWidth={saveColumnResizeWidth}

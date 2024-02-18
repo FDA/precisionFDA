@@ -145,7 +145,9 @@ export const useFilesColumns = ({
               resource="files"
               featured={cell.row.original.featured}
               uids={[id]}
-              onSuccess={() => queryClient.invalidateQueries(['files'])}
+              onSuccess={() => queryClient.invalidateQueries({
+                queryKey: ['files'],
+              })}
             />
           </div>
         )

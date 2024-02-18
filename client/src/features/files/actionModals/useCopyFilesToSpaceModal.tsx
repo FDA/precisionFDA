@@ -37,7 +37,7 @@ export const useCopyFilesToSpaceModal = ({ spaceId }: { spaceId?: string }) => {
   const [treeData, setTreeData] = useImmer<CustomDataNode[]>([
     { key: 'ROOT', title: '/', checkable: false, children: []},
   ])
-  const { mutateAsync, isLoading } = useMutation({
+  const { mutateAsync, isPending } = useMutation({
     mutationKey: ['copy-files-to-space-add'],
     mutationFn: () =>
       addData({
@@ -46,7 +46,9 @@ export const useCopyFilesToSpaceModal = ({ spaceId }: { spaceId?: string }) => {
         uids: selectedFiles,
       }),
     onSuccess: () => {
-      queryClient.invalidateQueries(['files'])
+      queryClient.invalidateQueries({
+        queryKey: ['files'],
+      })
       setShowModal(false)
     },
   })
@@ -108,7 +110,7 @@ export const useCopyFilesToSpaceModal = ({ spaceId }: { spaceId?: string }) => {
           <Button
             type="button"
             onClick={() => setShowModal(false)}
-            disabled={isLoading}
+            disabled={isPending}
           >
             Cancel
           </Button>
@@ -116,7 +118,7 @@ export const useCopyFilesToSpaceModal = ({ spaceId }: { spaceId?: string }) => {
             variant="primary"
             type="submit"
             onClick={() => mutateAsync()}
-            disabled={isLoading}
+            disabled={isPending}
           >
             Add
           </Button>

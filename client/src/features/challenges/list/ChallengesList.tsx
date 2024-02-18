@@ -25,7 +25,7 @@ import { usePaginationParams } from '../../../hooks/usePaginationState'
 import NavigationBar from '../../../components/NavigationBar/NavigationBar'
 import { useToastWSHandler } from '../../../hooks/useToastWSHandler'
 import PublicLayout from '../../../layouts/PublicLayout'
-import { DEFAULT_RECONNECT_ATTEMPTS, DEFAULT_RECONNECT_INTERVAL, getNodeWsUrl } from '../../../utils/config'
+import { DEFAULT_RECONNECT_ATTEMPTS, DEFAULT_RECONNECT_INTERVAL, SHOULD_RECONNECT, getNodeWsUrl } from '../../../utils/config'
 import { useAuthUser } from '../../auth/useAuthUser'
 import { Notification, NOTIFICATION_ACTION } from '../../home/types'
 import { challengesYearsListRequest } from '../api'
@@ -51,10 +51,9 @@ const ChallengesList = () => {
     page: pagination.pageParam,
     perPage: pagination.perPageParam,
   })
-  const { data: yearsListData, isLoading: isLoadingYearsList } = useQuery(['challenges-years'], () => challengesYearsListRequest(), {
-    onError: err => {
-      console.log(err)
-    },
+  const { data: yearsListData, isLoading: isLoadingYearsList } = useQuery({
+    queryKey: ['challenges-years'],
+    queryFn: () => challengesYearsListRequest(),
   })
 
   useToastWSHandler(user)
@@ -63,7 +62,7 @@ const ChallengesList = () => {
     share: true,
     reconnectInterval: DEFAULT_RECONNECT_INTERVAL,
     reconnectAttempts: DEFAULT_RECONNECT_ATTEMPTS,
-    shouldReconnect: () => true,
+    shouldReconnect: () => SHOULD_RECONNECT,
   })
 
   useEffect(() => {
@@ -71,7 +70,9 @@ const ChallengesList = () => {
       return
     }
     if (NOTIFICATION_ACTION.CHALLENGE_CARD_IMAGE_URL_UPDATED === notification.action) {
-      queryClient.invalidateQueries(['challengesList'])
+      queryClient.invalidateQueries({
+        queryKey: ['challengesList'],
+      })
     }
   }, [notification])
 

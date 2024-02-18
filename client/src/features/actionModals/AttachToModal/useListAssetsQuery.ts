@@ -32,6 +32,7 @@ export async function listAssetsRequest() {
   return axios.post('/api/list_assets').then(r => r.data as ListAssetsResponse)
 }
 
-export const useListAssetsQuery = () => useQuery(['list-assets'], {
+export const useListAssetsQuery = () => useQuery({
+  queryKey: ['list-assets'],
   queryFn: () => listAssetsRequest(),
 })

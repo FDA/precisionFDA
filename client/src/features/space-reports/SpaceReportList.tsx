@@ -125,7 +125,7 @@ export const SpaceReportList =({ spaceId }: { spaceId: number }) => {
       })
   }
 
-  if (query.status === 'error') return <div>Error! {JSON.stringify(query.error)}</div>
+  if (query.error) return <div>Error! {JSON.stringify(query.error)}</div>
 
   return (
     <>
@@ -134,7 +134,7 @@ export const SpaceReportList =({ spaceId }: { spaceId: number }) => {
           <QuickActions>
             <Button
               variant="primary"
-              disabled={query.status === 'loading' || generate.status === 'loading'}
+              disabled={query.isLoading || generate.isPending}
               onClick={generateReport}
             >
               <PlusIcon height={12}/> Generate report
@@ -160,7 +160,7 @@ export const SpaceReportList =({ spaceId }: { spaceId: number }) => {
 
       <SpaceReportListTable
         reports={query.data?.reports ?? []}
-        isLoading={query.status === 'loading'}
+        isLoading={query.isLoading}
         selectedRows={selectedIndexes}
         setSelectedRows={setSelectedIndexes}
         saveColumnResizeWidth={saveColumnResizeWidth}

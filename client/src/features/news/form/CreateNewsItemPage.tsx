@@ -18,7 +18,9 @@ const CreateNewsItemPage = () => {
     mutationFn: (payload: any) => createNewsItemRequest(payload),
     onSuccess: res => {
       navigate('/admin/news')
-      queryClient.invalidateQueries(['news'])
+      queryClient.invalidateQueries({
+        queryKey: ['news'],
+      })
       toast.success('Created news item')
     },
     onError: () => {

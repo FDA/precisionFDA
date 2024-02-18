@@ -93,12 +93,16 @@ export const FileList = ({ homeScope, space, showFolderActions = false }: { home
       return
     }
     if (['NODES_REMOVED', 'NODES_COPIED', 'FILE_CLOSED'].includes(notification.action)) {
-      queryCache.invalidateQueries(['files'])
-      queryCache.invalidateQueries(['counters'])
+      queryCache.invalidateQueries({
+        queryKey: ['files'],
+      })
+      queryCache.invalidateQueries({
+        queryKey: ['counters'],
+      })
     }
   }, [notification])
   const { data: propertiesData } = usePropertiesQuery('node', homeScope, space?.id)
-  const { status, data, error } = query
+  const { isLoading, data, error } = query
 
   const onFolderClick = (folderId: string) => {
     resetSelected()
@@ -142,7 +146,7 @@ export const FileList = ({ homeScope, space, showFolderActions = false }: { home
 
   const listActions = useFolderActions(homeScope, folderIdParam!, space?.id)
 
-  if (status === 'error') return <div>Error! {JSON.stringify(error)}</div>
+  if (error) return <div>Error! {JSON.stringify(error)}</div>
 
   return (
     <ErrorBoundary>
@@ -201,7 +205,7 @@ export const FileList = ({ homeScope, space, showFolderActions = false }: { home
       <FilesListTable
         isAdmin={isAdmin}
         homeScope={homeScope}
-        isLoading={status === 'loading'}
+        isLoading={isLoading}
         setFilters={setSearchFilter}
         filters={toArrayFromObject(filterQuery)}
         files={files}

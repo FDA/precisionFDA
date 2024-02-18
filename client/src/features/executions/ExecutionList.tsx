@@ -60,7 +60,7 @@ export const ExecutionList = ({ homeScope, spaceId }: { homeScope?: HomeScope, s
     },
   })
   const queryCache = useQueryClient()
-  const { status, data, error } = query
+  const { isLoading, data, error } = query
   const { data: propertiesData } = usePropertiesQuery('job', homeScope, spaceId)
 
   const { lastJsonMessage: notification } = useWebSocket<Notification>(getNodeWsUrl(), {
@@ -79,7 +79,9 @@ export const ExecutionList = ({ homeScope, spaceId }: { homeScope?: HomeScope, s
       NOTIFICATION_ACTION.JOB_DONE,
       NOTIFICATION_ACTION.JOB_FAILED,
       NOTIFICATION_ACTION.JOB_OUTPUTS_SYNCED].includes(notification.action)) {
-      queryCache.invalidateQueries(['jobs'])
+      queryCache.invalidateQueries({
+        queryKey: ['jobs'],
+      })
     }
   }, [notification])
 
@@ -89,7 +91,7 @@ export const ExecutionList = ({ homeScope, spaceId }: { homeScope?: HomeScope, s
   )
   const actions = useExecutionActions({ homeScope, selectedItems: selectedFileObjects, resourceKeys: ['jobs']})
 
-  if (status === 'error') return <div>Error! {JSON.stringify(error)}</div>
+  if (error) return <div>Error! {JSON.stringify(error)}</div>
 
   return (
     <ErrorBoundary>
@@ -127,7 +129,7 @@ export const ExecutionList = ({ homeScope, spaceId }: { homeScope?: HomeScope, s
         filters={toArrayFromObject(filterQuery as any)}
         jobs={data?.jobs}
         properties={propertiesData?.keys}
-        isLoading={status === 'loading'}
+        isLoading={isLoading}
         selectedRows={selectedIndexes}
         setSelectedRows={setSelectedIndexes}
         setSortBy={setSortBy}

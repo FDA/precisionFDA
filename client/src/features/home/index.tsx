@@ -99,9 +99,10 @@ const Home2 = () => {
   >('scope')
   const [persistedHomeScope, setPersistedHomeScope] =
     useState<HomeScope>(homeScopeQuery)
-  const { data: counterData } = useQuery(['counters', persistedHomeScope], () =>
-    counterRequest(persistedHomeScope),
-  )
+  const { data: counterData } = useQuery({
+    queryKey: ['counters', persistedHomeScope],
+    queryFn: () => counterRequest(persistedHomeScope),
+  })
   const [activeResource] = useActiveResourceFromUrl('myhome')
   const [isPushed, setIsPushed] = useState<boolean>(false)
 

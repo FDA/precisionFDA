@@ -1,6 +1,7 @@
 import { createGlobalStyle } from 'styled-components'
 import { colors, theme } from './theme'
 import { colorvars, themes } from './variables'
+import { compactScrollBarV2 } from '../components/Page/styles'
 
 
 const GlobalStyle = createGlobalStyle`
@@ -106,6 +107,7 @@ export const ScrollableInnerGlobalStyles = createGlobalStyle`
     height: 100%;
     overflow: hidden;
   }
+  ${compactScrollBarV2}
 `
  
 export default GlobalStyle

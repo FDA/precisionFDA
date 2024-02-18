@@ -43,15 +43,10 @@ const ResourceTable = ({
   const [selected, setSelected] = useState<Record<string, boolean> | undefined>(
     {},
   )
-  const { data, isLoading } = useQuery<{ id: string; uid: string }[]>(
-    ['resource_list', resource],
-    () => fetchResourceListRequest(resource),
-    {
-      onError: () => {
-        toast.error('Error: Fetching resource data list')
-      },
-    },
-  )
+  const { data, isLoading } = useQuery({
+    queryKey: ['resource_list', resource],
+    queryFn: () => fetchResourceListRequest(resource).catch(() => toast.error('Error: Fetching resource data list')),
+  })
   const col: Column[] = [
     {
       Header: 'Name',
@@ -139,10 +134,10 @@ export function useAddResourceToModal({
       </ModalScroll>
       <Footer>
         <ButtonRow>
-          {mutation?.isLoading && <Loader height={14} />}
+          {mutation?.isPending && <Loader height={14} />}
           <Button
             onClick={() => setShowModal(false)}
-            disabled={mutation?.isLoading}
+            disabled={mutation?.isPending}
           >
             Cancel
           </Button>
@@ -150,7 +145,7 @@ export function useAddResourceToModal({
             variant="primary"
             type="submit"
             onClick={handleSubmit}
-            disabled={!selectedUids.length || mutation?.isLoading}
+            disabled={!selectedUids.length || mutation?.isPending}
           >
             Add to Space
           </Button>

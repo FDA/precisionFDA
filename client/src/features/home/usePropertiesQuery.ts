@@ -20,8 +20,8 @@ export const usePropertiesQuery = (type: PropertiesResource, homeScope?: HomeSco
     'featured': 'public',
   }
   const mappingScope: PropertiesScope = spaceId ? `space-${spaceId}` : map[homeScope ?? 'me'] as 'private' | 'public' | 'spaces'
-  return useQuery(
-    ['edit-resource-properties', type, mappingScope],
-    () => fetchProperties(type, mappingScope),
-  )
+  return useQuery({
+    queryKey: ['edit-resource-properties', type, mappingScope],
+    queryFn: () => fetchProperties(type, mappingScope),
+  })
 }

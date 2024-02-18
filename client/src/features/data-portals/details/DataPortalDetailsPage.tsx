@@ -5,7 +5,7 @@ import useWebSocket from 'react-use-websocket'
 import { Loader } from '../../../components/Loader'
 import { PageContainerMargin } from '../../../components/Page/styles'
 import { UserLayout } from '../../../layouts/UserLayout'
-import { DEFAULT_RECONNECT_ATTEMPTS, DEFAULT_RECONNECT_INTERVAL, getNodeWsUrl } from '../../../utils/config'
+import { DEFAULT_RECONNECT_ATTEMPTS, DEFAULT_RECONNECT_INTERVAL, SHOULD_RECONNECT, getNodeWsUrl } from '../../../utils/config'
 import { useAuthUser } from '../../auth/useAuthUser'
 import { Notification, NOTIFICATION_ACTION } from '../../home/types'
 import { useDataPortalByIdQuery } from '../queries'
@@ -30,7 +30,7 @@ const DataPortalDetailsPage = () => {
     share: true,
     reconnectInterval: DEFAULT_RECONNECT_INTERVAL,
     reconnectAttempts: DEFAULT_RECONNECT_ATTEMPTS,
-    shouldReconnect: () => true,
+    shouldReconnect: () => SHOULD_RECONNECT,
   })
 
   useEffect(() => {
@@ -38,7 +38,7 @@ const DataPortalDetailsPage = () => {
       return
     }
     if (NOTIFICATION_ACTION.DATA_PORTAL_CARD_IMAGE_URL_UPDATED === notification.action) {
-      queryClient.invalidateQueries(['data-portals', portalId])
+      queryClient.invalidateQueries({ queryKey: ['data-portals', portalId]})
     }
   }, [notification])
 

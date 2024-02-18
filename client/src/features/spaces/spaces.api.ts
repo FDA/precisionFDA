@@ -25,7 +25,7 @@ export async function spaceRequest({ id }: { id: string }): Promise<FetchSpaceDe
   return axios.get(`/api/spaces/${id}`).then(res => res.data)
 }
 
-export async function fixGuestPermissions({id}:{id: string}): Promise<unknown> {
+export async function fixGuestPermissions({ id }:{id: string}): Promise<unknown> {
   return axios.patch(`/api/spaces/${id}/fix_guest_permissions`).then(res => res.data)
 }
 
@@ -38,11 +38,10 @@ export async function unlockSpaceRequest({ link = '' }: { id: string, op: 'lock'
 }
 
 export async function addData({ spaceId, folderId, uids }: { spaceId: string, folderId: string, uids: string[] }): Promise<unknown> {
-  const res = await fetch(`/api/spaces/${spaceId}/add_data/`, {
+  return fetch(`/api/spaces/${spaceId}/add_data/`, {
     ...getApiRequestOpts('POST'),
     body: JSON.stringify({ uids, folder_id: folderId }),
   })
-  return res
 }
 
 export async function acceptSpaceRequest({ id }: { id: string }): Promise<unknown> {
@@ -61,17 +60,12 @@ export async function addDataRequest({ spaceId, uids }: { spaceId: string, uids:
 export interface CreateSpacePayload {
   name: string
   description: string
+  space_type: ISpace['type']
   source_space_id?: string | null
   guest_lead_dxuser?: string | null
   host_lead_dxuser?: string | null
   sponsor_lead_dxuser?: string | null
-  review_lead_dxuser?: string | null
   cts?: string | null
-}
-export interface EditSpacePayload {
-  name: string
-  description: string
-  cts?: string
 }
 
 export interface CreateSpaceResponse {
@@ -90,9 +84,8 @@ export interface EditableSpace {
 export type EditableSpacesResponse = EditableSpace[]
 
 export async function fetchEditableSpacesList(): Promise<EditableSpacesResponse> {
-    const res = await (await fetch('/api/spaces/editable_spaces')).json()
-    return res
-  }
+  return axios.get('/api/spaces/editable_spaces').then(res => res.data)
+}
 
 export async function createSpaceRequest(payload: CreateSpacePayload): Promise<CreateSpaceResponse> {
   const res = await fetch('/api/spaces', {
