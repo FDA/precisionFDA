@@ -67,7 +67,7 @@ export const useWorkflowColumns = ({
       options: [{ label: 'Yes', value: 'true' }, { label: 'No', value: 'false'}],
       width: colWidths?.featured || 93,
       Cell: props => (
-        <div style={{ paddingLeft: 20 }}><FeaturedToggle disabled={!isAdmin} resource="workflows" featured={props.cell.row.original.featured} uids={[props.cell.row.original.uid]} onSuccess={() => queryClient.invalidateQueries(['workflows'])} /></div>
+        <div style={{ paddingLeft: 20 }}><FeaturedToggle disabled={!isAdmin} resource="workflows" featured={props.cell.row.original.featured} uids={[props.cell.row.original.uid]} onSuccess={() => queryClient.invalidateQueries({ queryKey: ['workflows']})} /></div>
       ),
     },
     {

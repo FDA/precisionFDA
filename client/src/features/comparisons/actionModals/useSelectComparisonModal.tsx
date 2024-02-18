@@ -116,7 +116,7 @@ export const useSelectComparisonModal = (
   const [showOnlyMyComparisons, setShowOnlyMyComparisons] = useState(false)
   const searchText = useDebounce(filter, 250)
 
-  const { data: comparisonsData, status: loadingComparisonsStatus } = useQuery({
+  const { data: comparisonsData, isLoading: isLoadingComparisons, status: loadingComparisonsStatus } = useQuery({
     queryKey: ['list_comparisons', searchText],
     queryFn: () => fetchFilteredComparisons(searchText, scopes ?? ([] as any)), // scopes: [] mean all scopes.
     enabled: isShown,
@@ -214,7 +214,7 @@ export const useSelectComparisonModal = (
               Only mine
             </StyledOnlyMine>
           </StyledFilterSection>
-          {loadingComparisonsStatus === 'loading' && <Loader />}
+          {isLoadingComparisons && <Loader />}
           {loadingComparisonsStatus === 'success' && (
             <ModalScroll>
               <SelectableTable>

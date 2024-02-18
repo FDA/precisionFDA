@@ -64,9 +64,10 @@ export const DiscussionList = ({
   space: ISpace
   scope: string
 }) => {
-  const { data, status } = useQuery(['discussions', scope], () =>
-    fetchDiscussionsRequest(scope),
-  )
+  const { data, isLoading } = useQuery({
+    queryKey: ['discussions', scope],
+    queryFn: () => fetchDiscussionsRequest(scope),
+  })
   const location = useLocation()
 
   const membershipType = space.current_user_membership
@@ -91,7 +92,7 @@ export const DiscussionList = ({
             )}
           </QuickActions>
         </DiscussionsActionRow>
-        {status === 'loading' && (
+        {isLoading && (
           <div>
             <Loader />
           </div>

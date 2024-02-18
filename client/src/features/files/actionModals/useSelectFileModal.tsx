@@ -175,20 +175,19 @@ const FileSelectTabs = ({
     queryFn: () => fetchAccessibleFilesByUID({ uid: uids ?? [] }),
     queryKey: ['user-list-files', uids],
     enabled: !!uids && uids.length > 0,
-    onSuccess(data) {
+    select(data) {
       setSelectedFiles(data)
+      return data
     },
   })
 
-  const { data: filesData, status: loadingFilesStatus } = useQuery(
-    ['list_files', searchText],
-    () => {
-      return fetchFilteredFiles({
-        searchString: searchText,
-        scopes: scopes ?? [],
-      }) // scopes: [] mean all scopes.
-    },
-  )
+  const { data: filesData, isLoading, status: loadingFilesStatus } = useQuery({
+    queryKey: ['list_files', searchText],
+    queryFn: () => fetchFilteredFiles({
+      searchString: searchText,
+      scopes: scopes ?? [],
+    }),
+  })
 
   const radioCallback = (file: IAccessibleFile) => {
     setSelectedFiles([file])
@@ -284,7 +283,7 @@ const FileSelectTabs = ({
             </StyledFieldInfoWrapper>
           </StyledFilterFileSection>
 
-          {loadingFilesStatus === 'loading' && <Loader />}
+          {isLoading && <Loader />}
           {loadingFilesStatus === 'success' && (
             <ModalScroll>
               <SelectableTable>

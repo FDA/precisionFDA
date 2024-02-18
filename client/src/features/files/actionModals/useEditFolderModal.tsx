@@ -42,7 +42,9 @@ const EditFolderInfoForm = ({
         setError('name', {message: res.error.message.replace(/[\[\]"]+/g, ''), type: 'validate'})
         return
       }
-      queryClient.invalidateQueries(['files'])
+      queryClient.invalidateQueries({
+        queryKey: ['files'],
+      })
       handleClose()
       toast.success('Folder info changed')
     },

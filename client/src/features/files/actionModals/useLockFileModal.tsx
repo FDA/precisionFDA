@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
 import styled from 'styled-components'
@@ -28,23 +28,20 @@ const LockFiles = ({
   scope: string
   setNumberOfFilesToLock: (n: DownloadListResponse[]) => void
 }) => {
-  const { data, status } = useQuery(
-    ['download_list', selected],
-    () =>
+  const { data, isLoading } = useQuery({
+    queryKey: ['download_list', selected],
+    queryFn: () =>
       fetchFilesDownloadList(
         selected.map(s => s.id),
         scope,
-      ),
-    {
-      onSuccess: res => {
-        setNumberOfFilesToLock(res)
-      },
-      onError: () => {
-        toast.error('Error: Fetching download list')
-      },
-    },
-  )
-  if (status === 'loading') return <div>Loading...</div>
+      ).catch(() => toast.error('Error: Fetching download list')),
+  })
+
+  useEffect(() => {
+      if(data) setNumberOfFilesToLock(data)
+  }, [data])
+
+  if (isLoading) return <div>Loading...</div>
   return (
     <ResourceTable
       rows={data!.map(s => ({
@@ -78,8 +75,12 @@ export const useLockFileModal = ({ selected, onSuccess, scope }: { selected: IFi
       )
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['files'])
-      queryClient.invalidateQueries(['counters'])
+      queryClient.invalidateQueries({
+        queryKey: ['files'],
+      })
+      queryClient.invalidateQueries({
+        queryKey: ['counters'],
+      })
       setShowModal(false)
       toast.success(
         `Locked ${numberOfFilesToLock} ${pluralize('file', numberOfFilesToLock ?? 1)} or ${pluralize(
@@ -104,11 +105,11 @@ export const useLockFileModal = ({ selected, onSuccess, scope }: { selected: IFi
       hide={() => setShowModal(false)}
       footer={
         <>
-          {mutation.isLoading && <Loader />}
-          <Button onClick={() => setShowModal(false)} disabled={mutation.isLoading}>
+          {mutation.isPending && <Loader />}
+          <Button onClick={() => setShowModal(false)} disabled={mutation.isPending}>
             Cancel
           </Button>
-          <Button variant="warning" onClick={handleSubmit} disabled={mutation.isLoading}>
+          <Button variant="warning" onClick={handleSubmit} disabled={mutation.isPending}>
             Lock
           </Button>
         </>

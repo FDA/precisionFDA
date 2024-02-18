@@ -15,7 +15,9 @@ export const ChallengeOrderSelect = ({
   isSubmitting: boolean
   onChange: (v: any) => void
 }) => {
-  const { data: ordersOptions, isLoading } = useQuery(['challenge-scopes'], () => fetchChallengeOrders(), {
+  const { data: ordersOptions, isLoading } = useQuery({
+    queryKey: ['challenge-scopes'],
+    queryFn: () => fetchChallengeOrders(),
     select(data) {
       return data?.map(s => ({
         label: s[0],

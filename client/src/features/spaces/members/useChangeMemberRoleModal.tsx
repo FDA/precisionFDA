@@ -72,7 +72,9 @@ export const useChangeMemberRoleModal = ({
         toast.success('Disabled yourself from the space')
       } else {
         reset()
-        queryClient.invalidateQueries(['space-members'])
+        queryClient.invalidateQueries({
+          queryKey: ['space-members'],
+        })
         setShowModal(false)
         if (['enable', 'disable'].includes(res.role)) {
           toast.success(
@@ -136,10 +138,10 @@ export const useChangeMemberRoleModal = ({
                 <Select
                   options={roleOptions}
                   onChange={onChange}
-                  isLoading={mutation.isLoading}
+                  isLoading={mutation.isPending}
                   onBlur={onBlur}
                   value={value}
-                  isDisabled={mutation.isLoading}
+                  isDisabled={mutation.isPending}
                   defaultInputValue={undefined}
                 />
               )}
@@ -159,7 +161,7 @@ export const useChangeMemberRoleModal = ({
               reset()
               setShowModal(false)
             }}
-            disabled={mutation.isLoading}
+            disabled={mutation.isPending}
             aria-label="Close modal"
           >
             Cancel
@@ -167,7 +169,7 @@ export const useChangeMemberRoleModal = ({
           <Button
             variant="primary"
             type="submit"
-            disabled={Object.keys(errors).length > 0 || mutation.isLoading}
+            disabled={Object.keys(errors).length > 0 || mutation.isPending}
             aria-label="Change member role"
           >
             Change Role

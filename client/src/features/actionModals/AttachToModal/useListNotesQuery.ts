@@ -34,6 +34,7 @@ export async function listNotesRequest() {
   }).then(r => r.data as ListNotesResponse)
 }
 
-export const useListNotesQuery = () => useQuery(['list-notes'], {
+export const useListNotesQuery = () => useQuery({
+  queryKey: ['list-notes'],
   queryFn: () => listNotesRequest(),
 })

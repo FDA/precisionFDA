@@ -253,15 +253,10 @@ const WorkflowRun = (
   const defaultValues = prepareDefaultValues(workflow, user, stages, defaultFiles)
   const validationSchema = prepareValidations(user, stages, workflow.scope)
 
-  const { data: selectableSpaces } = useQuery(
-    ['selectable-spaces', workflow.scope],
-    () => fetchAndConvertSelectableSpaces(workflow.scope),
-    {
-      onError: () => {
-        toast.error('Error loading spaces')
-      },
-    },
-  )
+  const { data: selectableSpaces } = useQuery({
+    queryKey: ['selectable-spaces', workflow.scope],
+    queryFn: () => fetchAndConvertSelectableSpaces(workflow.scope).catch(() => toast.error('Error loading spaces')),
+  })
 
   const { modalComp: licensesModal, setLicensesAndShow } = useAcceptLicensesModal()
 
@@ -422,22 +417,20 @@ const fetchDefaultFiles = (meta: any): Promise<{ files: IFile, meta: any }[]> =>
 
 const WorkflowRunPage = () => {
   const { workflowUid } = useParams<{ workflowUid: string }>()
-  const { data: workflowData, status: loadingWorkflowStatus } = useQuery(['workflow', workflowUid], () =>
-    fetchWorkflow(workflowUid),
-  )
+  const { data: workflowData, isLoading: loadingWorkflowIsLoading, isSuccess: loadingWorkflowIsSuccess } = useQuery({
+    queryKey: ['workflow', workflowUid],
+    queryFn: () => fetchWorkflow(workflowUid),
+  })
 
-  const { data: defaultFilesData, status: defaultFilesLoading } = useQuery(['default-files'], () =>
-    fetchDefaultFiles(workflowData?.meta),
-    {
-      enabled: loadingWorkflowStatus === 'success', onError: () => {
-        toast.error('Error loading default files')
-      },
-    },
-  )
+  const { data: defaultFilesData, isLoading: defaultFilesIsLoading } = useQuery({
+    queryKey: ['default-files'],
+    queryFn: () => fetchDefaultFiles(workflowData?.meta).catch(() => toast.error('Error loading default files')),
+    enabled: loadingWorkflowIsSuccess,
+  })
 
   const user = useAuthUser()
 
-  if (loadingWorkflowStatus === 'loading' || defaultFilesLoading === 'loading' || !user) {
+  if (loadingWorkflowIsLoading || defaultFilesIsLoading || !user) {
     return <HomeLoader />
   }
 

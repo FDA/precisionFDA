@@ -38,8 +38,12 @@ const EditDatabaseInfoForm = ({
     mutationFn: (payload: { name: string; description: string }) =>
       editDatabaseRequest(payload, db.dxid),
     onSuccess: res => {
-      queryClient.invalidateQueries(['dbcluster', db.dxid])
-      queryClient.invalidateQueries(['dbclusters'])
+      queryClient.invalidateQueries({
+        queryKey: ['dbcluster', db.dxid],
+      })
+      queryClient.invalidateQueries({
+        queryKey: ['dbclusters'],
+      })
       handleClose()
       toast.success('Success: Editing database info')
     },

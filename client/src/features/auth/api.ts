@@ -1,34 +1,30 @@
 import axios from 'axios'
 import { useQuery } from '@tanstack/react-query'
 import { IUser } from '../../types/user'
-import { backendCall } from '../../utils/api'
 import { SiteSettingsResponse } from './useSiteSettingsQuery'
 import { CustomPortal } from './useCustomPortalsQuery'
 
 export function useAuthUserQuery() {
-  return useQuery(['auth-user'], {
+  return useQuery({
+    queryKey: ['auth-user'],
+
     queryFn: () => axios.get('/api/user').then(r => {
       return r.data as { user: IUser, meta: any }
     }),
     staleTime: Infinity,
-    cacheTime: Infinity,
+    gcTime: Infinity,
     retry: 1,
   })
 }
 
-export const fetchCurrentUser = async (): Promise<IUser> => {
-  const res = await backendCall('/api/user', 'GET')
-  return res?.payload.user
-}
-
-export const logout = async (): Promise<any> => {
-  await backendCall('/logout', 'DELETE')
+export function logout() {
+  return axios.delete('/logout')
 }
 
 export type CDMHKey = 'cdmhPortal' | 'cdrBrowser' | 'cdrAdmin' | 'connectPortal'
 
 export async function siteSettingsRequest() {
-  return axios.get('/api/site_settings').then(r => r.data as SiteSettingsResponse)
+  return axios.get<SiteSettingsResponse>('/api/site_settings').then(r => r.data)
 }
 
 export async function customPortalsRequest() {

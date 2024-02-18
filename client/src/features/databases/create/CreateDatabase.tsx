@@ -21,12 +21,10 @@ import { DatabaseEngineType, versionsOptions } from './options'
 import { Select } from '../../../components/Select'
 import { Button } from '../../../components/Button'
 
-const useAccessibleFiles = (inputValue: string) => useQuery(['accessible-files', inputValue],
-  () => fetchAccessibleFiles({ search_string: inputValue, limit: 100, offset: 0 }).then(v => v?.objects), {
-    onError: (e: Error) => {
-      toast.error(`Error: fetching files '${e.message}'`)
-    },
-  })
+const useAccessibleFiles = (inputValue: string) => useQuery({
+  queryKey: ['accessible-files', inputValue],
+  queryFn: () => fetchAccessibleFiles({ search_string: inputValue, limit: 100, offset: 0 }).then(v => v?.objects).catch(() => toast.error(`Error: fetching files '${e.message}'`)),
+})
 
 const StyledForm = styled.form`
   margin: 16px;
@@ -83,15 +81,9 @@ export const CreateDatabase = () => {
   const navigate = useNavigate()
   const [inputValue, setInputValue] = useState('')
   const { data, isLoading } = useAccessibleFiles(inputValue)
-  const allowedInstancesQuery = useQuery<{
-    payload: {
-      label: string
-      value: string
-    }[] | null
-  }>(['dbclusters','allowedInstances'], () => getDatabaseAllowedInstances(), {
-    onError: (e: any) => {
-      toast.error(`Error: fetching allowed Db instance types '${e?.message}'`)
-    },
+  const allowedInstancesQuery = useQuery({
+    queryKey: ['dbclusters','allowedInstances'],
+    queryFn: () => getDatabaseAllowedInstances().catch(() => toast.error(`Error: fetching allowed Db instance types '${e?.message}'`)),
   })
   const debouncedSqlFileInputSearch = debounce(v => {
     setInputValue(v)
@@ -130,7 +122,9 @@ export const CreateDatabase = () => {
     onSuccess: (res) => {
       if (res?.db_cluster) {
         navigate(`/home/databases/${res?.db_cluster?.dxid}`)
-        queryClient.invalidateQueries(['dbclusters'])
+        queryClient.invalidateQueries({
+          queryKey: ['dbclusters'],
+        })
         toast.success('Database created')
       } else if (res?.error) {
           toast.error(`${res.error.type}: ${res.error.message}`)
@@ -167,7 +161,7 @@ export const CreateDatabase = () => {
       value: file.uid,
     }))
 
-  const isSubmitting = createDatabaseMutation.isLoading
+  const isSubmitting = createDatabaseMutation.isPending
 
   if (allowedInstancesQuery.error) {
     return (

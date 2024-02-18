@@ -28,8 +28,12 @@ const EditNewsItemMutation = ({ data }: { data: NewsItem }) => {
     mutationFn: (payload: any) => editNewsItemRequest(data.id, payload),
     onSuccess: res => {
       navigate('/admin/news')
-      queryClient.invalidateQueries(['news'])
-      queryClient.invalidateQueries(['news-item'])
+      queryClient.invalidateQueries({
+        queryKey: ['news'],
+      })
+      queryClient.invalidateQueries({
+        queryKey: ['news-item'],
+      })
       toast.success('Edited news item')
     },
     onError: () => {
@@ -42,8 +46,12 @@ const EditNewsItemMutation = ({ data }: { data: NewsItem }) => {
     mutationFn: () => deleteNewsItemRequest(data.id),
     onSuccess: res => {
       navigate('/admin/news')
-      queryClient.invalidateQueries(['news-item'])
-      queryClient.invalidateQueries(['news'])
+      queryClient.invalidateQueries({
+        queryKey: ['news-item'],
+      })
+      queryClient.invalidateQueries({
+        queryKey: ['news'],
+      })
       toast.success('Deleted news item')
     },
     onError: () => {

@@ -166,10 +166,10 @@ export const WorkflowShow = ({ spaceId, emitScope, homeScope }: { spaceId?: numb
   const { workflowUid } = useParams<{ workflowUid: string }>()
   const { data, isLoading } = useQuery({
     queryKey: ['workflow', workflowUid],
-    queryFn: () => fetchWorkflow(workflowUid),
-    onSuccess: (d) => {
+    queryFn: () => fetchWorkflow(workflowUid).then(d => {
       if(emitScope) emitScope(d.workflow.scope, d.workflow.featured)
-    },
+      return d
+    }),
   })
 
   const workflow = data?.workflow as IWorkflow

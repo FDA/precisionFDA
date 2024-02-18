@@ -109,10 +109,9 @@ const ExpertsList = () => {
     year,
     page: pagination.pageParam,
   })
-  const { data: yearsListData, isLoading: isLoadingYearsList } = useQuery(['experts-years'], expertsYearsListRequest, {
-    onError: err => {
-      console.log(err)
-    },
+  const { data: yearsListData, isLoading: isLoadingYearsList } = useQuery({
+    queryKey: ['experts-years'],
+    queryFn: expertsYearsListRequest,
   })
 
   return (

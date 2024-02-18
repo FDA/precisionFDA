@@ -1,4 +1,4 @@
-import { QueryOptions, UseBaseQueryOptions, useQuery } from '@tanstack/react-query'
+import { UseBaseQueryOptions, useQuery } from '@tanstack/react-query'
 import { AppFetchResponse, fetchApp } from './apps.api'
 
 export const useFetchAppQuery = (appUid: string, options?: Partial<UseBaseQueryOptions<AppFetchResponse>>) => useQuery({

@@ -28,7 +28,9 @@ const EditDataPortalPage = () => {
     mutationFn: (payload: UpdateDataPortalData) => editDataPortalRequest(payload),
     onSuccess: res => {
       if (!res?.error) {
-        queryClient.invalidateQueries(['data-portal-list'])
+        queryClient.invalidateQueries({
+          queryKey: ['data-portal-list'],
+        })
         navigate('/data-portals')
         toast.success('Data Portal updated')
       } else if (res?.error) {

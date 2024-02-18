@@ -106,7 +106,9 @@ export const useExecutionColumns = ({
       width: colWidths?.featured || 93,
       Cell: props => (
         <div style={{ paddingLeft: 20 }}>
-          <FeaturedToggle disabled={!isAdmin} resource="jobs" featured={props.cell.row.original.featured} uids={[props.cell.row.original.uid]} onSuccess={() => queryClient.invalidateQueries(['jobs'])} />
+          <FeaturedToggle disabled={!isAdmin} resource="jobs" featured={props.cell.row.original.featured} uids={[props.cell.row.original.uid]} onSuccess={() => queryClient.invalidateQueries({
+            queryKey: ['jobs'],
+          })} />
         </div>
       ),
       ...(filterDataTestIdPrefix ? { filterDataTestId: `${filterDataTestIdPrefix}-featured` } : {}),
@@ -233,5 +235,5 @@ export const useExecutionColumns = ({
       disableFilters: true,
       width: colWidths?.[property] || 200,
     })),
-  ] as Column<IExecution>[]
+  ] as Column<IExecution>[];
 }

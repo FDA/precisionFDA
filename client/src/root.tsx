@@ -23,6 +23,8 @@ import DataPortalRoutes from './features/data-portals/routes'
 import { LayoutLoader } from './layouts/UserLayout'
 import { ThemeProvider } from './utils/ThemeContext'
 import Header from './components/Header'
+import { AlertsPage } from './features/admin/alerts/AlertsPage'
+import { AlertDismissedProvider } from './features/admin/alerts/useAlertDismissedLocalStorage'
 
 const Home2 = React.lazy(() => import('./features/home'))
 const Docs = React.lazy(() => import('./features/docs'))
@@ -75,20 +77,22 @@ const RootComponent = () => {
             onAuthFailure: () => authModal.setShowModal(true),
           })}
         >
-          <Header />
-          <QueryParamProvider adapter={ReactRouter6Adapter}>
-            <React.Suspense fallback={<LayoutLoader />}>
-              <Outlet />
-            </React.Suspense>
-          </QueryParamProvider>
-          <StyledToastContainer
-            position="top-right"
-            transition={Slide}
-            hideProgressBar
-            pauseOnHover
-          />
-          <AuthModal {...authModal} />
-          <ExpiringSessionModal modal={expiringSessionModal} />
+          <AlertDismissedProvider>
+            <Header />
+            <QueryParamProvider adapter={ReactRouter6Adapter}>
+              <React.Suspense fallback={<LayoutLoader />}>
+                <Outlet />
+              </React.Suspense>
+            </QueryParamProvider>
+            <StyledToastContainer
+              position="top-right"
+              transition={Slide}
+              hideProgressBar
+              pauseOnHover
+              />
+            <AuthModal {...authModal} />
+            <ExpiringSessionModal modal={expiringSessionModal} />
+          </AlertDismissedProvider>
         </QueryClientProvider>
       </React.Fragment>
     </ThemeProvider>
@@ -119,6 +123,7 @@ const router = createBrowserRouter([
       { path: 'experts', element: <ExpertsListPage /> },
       { path: 'terms', element: <ToS /> },
       { path: 'security', element: <Security /> },
+      { path: 'admin/alerts', element: <AlertsPage /> },
       { path: 'admin/users', element: <UsersList /> },
       { path: 'admin/news', element: <ListAdminNews /> },
       { path: 'admin/news/create', element: <CreateNewsItemPage /> },

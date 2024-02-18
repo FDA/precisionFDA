@@ -209,7 +209,9 @@ const Spaces2 = ({ space, isLoading }: { space: ISpace; isLoading: boolean }) =>
 export const SpaceShow = () => {
   const { spaceId } = useParams<{ spaceId: string }>()
   const [isNotAllowed, setIsNotAllowed] = useState<boolean>(false)
-  const { data, isLoading } = useQuery<any>(['space', spaceId], () => spaceId && spaceRequest({ id: spaceId }), {
+  const { data, isLoading } = useQuery({
+    queryKey: ['space', spaceId],
+    queryFn: () => spaceId && spaceRequest({ id: spaceId }),
     retry: (failureCount, error: any) => {
       if (error.response.status === 403) {
         setIsNotAllowed(true)

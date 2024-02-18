@@ -94,19 +94,19 @@ const FileActions = ({
 export const FileShow = ({ emitScope, space, homeScope }: { homeScope?: HomeScope, emitScope?: EmmitScope, space?: ISpace }) => {
   const location = useLocation()
   const { fileId } = useParams<{ fileId: string }>()
-  const { data, status } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ['file', fileId],
-    queryFn: () => fetchFile(fileId),
-    onSuccess: (d) => {
+    queryFn: () => fetchFile(fileId).then(d => {
       if(emitScope) emitScope(d.files.scope, d.files.featured)
-    },
+      return d
+    }),
   })
   const file = data?.files
   const meta = data?.meta
   const params = parse(location?.state?.fromSearch)
   const folderId = params?.folder_id as string | undefined
 
-  if (status === 'loading') {
+  if (isLoading) {
     return  <HomeLoader />
   }
 

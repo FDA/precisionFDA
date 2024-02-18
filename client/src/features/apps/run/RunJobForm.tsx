@@ -75,31 +75,20 @@ export const RunJobForm = ({
   userJobLimit: IUser['job_limit']
 }) => {
   const { data: computeInstances, isLoading: computeInstancesLoading } =
-    useQuery(['user-compute-instances'], () => fetchUserComputeInstances(), {
-      onError: () => {
-        toast.error('Error loading compute instances')
-      },
+    useQuery({
+      queryKey: ['user-compute-instances'],
+      queryFn: () => fetchUserComputeInstances().catch(() => toast.error('Error loading compute instances')),
     })
 
-  const { data: selectableContexts } = useQuery(
-    ['selectable-contexts', app.scope],
-    () => fetchAndConvertSelectableContexts(app.entity_type),
-    {
-      onError: () => {
-        toast.error('Error loading contexts')
-      },
-    },
-  )
+  const { data: selectableContexts } = useQuery({
+    queryKey: ['selectable-contexts', app.scope],
+    queryFn: () => fetchAndConvertSelectableContexts(app.entity_type).catch(() => toast.error('Error loading contexts')),
+  })
 
-  const { data: selectableSpaces } = useQuery(
-    ['selectable-spaces', app.scope],
-    () => fetchAndConvertSelectableSpaces(app.scope),
-    {
-      onError: () => {
-        toast.error('Error loading spaces')
-      },
-    },
-  )
+  const { data: selectableSpaces } = useQuery({
+    queryKey: ['selectable-spaces', app.scope],
+    queryFn: () => fetchAndConvertSelectableSpaces(app.scope).catch(() => toast.error('Error loading spaces')),
+  })
 
   const defaultValues = {
     jobName: app.name,

@@ -30,7 +30,9 @@ export const userReportSelectActions = ({
   } = useDeleteSpaceReportModal({
     selected,
     onClose: () => {
-      queryClient.invalidateQueries(['space-reports'])
+      queryClient.invalidateQueries({
+        queryKey: ['space-reports'],
+      })
       navigate(`/spaces/${spaceId}/reports`)
       if(resetSelected) resetSelected()
     },

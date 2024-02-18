@@ -19,7 +19,9 @@ export const useSpaceActions = ({ space }: { space: ISpace }) => {
   const modal = useUnlockSpaceModal({
     space,
     onSuccess: () => {
-      queryClient.invalidateQueries(['space', `${space.id}`])
+      queryClient.invalidateQueries({
+        queryKey: ['space', `${space.id}`],
+      })
     },
   })
 
