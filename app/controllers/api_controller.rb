@@ -333,7 +333,7 @@ class ApiController < ApplicationController
 
     query = query.where.not("users.dxuser = ?", CHALLENGE_BOT_DX_USER) if unsafe_params[:ignore_challenge_bot]
 
-    result = query.order(id: :desc).map do |file|
+    result = query.order(Arel.sql("CASE WHEN nodes.scope = 'private' THEN 0 ELSE 1 END, nodes.id DESC")).map do |file|
       describe_for_api(file, unsafe_params[:describe])
     end.compact
 
