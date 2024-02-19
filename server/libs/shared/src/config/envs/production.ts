@@ -16,6 +16,7 @@ export const config: ConfigOverride = () => ({
     pretty: false,
     level: 'info',
     maskSensitive: true,
+    enableStackLogging: false,
   },
   workerJobs: {
     syncJob: {
