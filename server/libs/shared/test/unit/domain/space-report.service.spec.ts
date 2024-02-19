@@ -6,7 +6,8 @@ import { NotificationService } from '@shared/domain/notification/services/notifi
 import { SpaceReportPart } from '@shared/domain/space-report/entity/space-report-part.entity'
 import { SpaceReport } from '@shared/domain/space-report/entity/space-report.entity'
 import { BatchComplete } from '@shared/domain/space-report/model/batch-complete'
-import { SpaceReportPartSourceType } from '@shared/domain/space-report/model/space-report-part-source.type'
+import { SpaceReportPartService } from '@shared/domain/space-report/service/part/space-report-part.service'
+import { SpaceReportResultService } from '@shared/domain/space-report/service/result/space-report-result.service'
 import { SpaceReportService } from '@shared/domain/space-report/service/space-report.service'
 import { Space } from '@shared/domain/space/space.entity'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
@@ -18,9 +19,6 @@ import { NOTIFICATION_ACTION, SEVERITY } from '@shared/enums'
 import { InvalidStateError, NotFoundError } from '@shared/errors'
 import { expect } from 'chai'
 import { restore, stub } from 'sinon'
-import { SpaceReportPartSourceEntity } from '@shared/domain/space-report/model/space-report-part-source-entity'
-import { SpaceReportPartService } from '@shared/domain/space-report/service/part/space-report-part.service'
-import { SpaceReportResultService } from '@shared/domain/space-report/service/space-report-result.service'
 
 describe('SpaceReportService', () => {
   describe('#createReport', () => {
@@ -105,6 +103,9 @@ describe('SpaceReportService', () => {
       findStub.withArgs(Job, { scope: SPACE_SCOPE }).resolves([])
       findStub.withArgs(Asset, { scope: SPACE_SCOPE }).resolves([])
       findStub.withArgs(Workflow, { scope: SPACE_SCOPE }).resolves([])
+      findStub
+        .withArgs(User, { spaceMemberships: { spaces: { id: SPACE_ID }, active: true } })
+        .resolves([])
 
       createPartsStub.reset()
       createPartsStub.throws()
@@ -887,55 +888,6 @@ describe('SpaceReportService', () => {
       )
     }
   })
-  describe('#getSpaceReportPartMetaData', () => {
-    const FILE_ID = 0
-    const FILE = { id: FILE_ID } as unknown as UserFile
-    const SOURCE: SpaceReportPartSourceEntity<SpaceReportPartSourceType> = {
-      type: 'file',
-      entity: FILE,
-    }
-    const RESULT = 'RESULT'
-
-    const getSpaceReportPartMetaDataStub = stub()
-
-    beforeEach(() => {
-      getSpaceReportPartMetaDataStub.reset()
-      getSpaceReportPartMetaDataStub.throws()
-      getSpaceReportPartMetaDataStub.withArgs(SOURCE).returns(RESULT)
-    })
-
-    it('should not catch error from getSpaceReportPartMetaData', () => {
-      const error = new Error('my error')
-      getSpaceReportPartMetaDataStub.reset()
-      getSpaceReportPartMetaDataStub.throws(error)
-
-      expect(() => getInstance().getSpaceReportPartMetaData(SOURCE)).to.throw(error)
-    })
-
-    it('should return the result of getSpaceReportPartMetaData', () => {
-      const res = getInstance().getSpaceReportPartMetaData(SOURCE)
-
-      expect(res).to.eq(RESULT)
-    })
-
-    function getInstance() {
-      const em = {} as unknown as SqlEntityManager
-      const spaceReportPartService = {
-        getSpaceReportPartMetaData: getSpaceReportPartMetaDataStub,
-      } as unknown as SpaceReportPartService
-      const spaceReportResultService = {} as unknown as SpaceReportResultService
-      const notificationService = {} as unknown as NotificationService
-
-      return new SpaceReportService(
-        em,
-        spaceReportPartService,
-        spaceReportResultService,
-        null,
-        notificationService,
-      )
-    }
-  })
-
   describe('#completeReportForResultFile', () => {
     const FILE_UID = 'file-uid-1'
 
