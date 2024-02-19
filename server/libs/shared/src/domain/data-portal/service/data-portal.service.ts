@@ -77,15 +77,17 @@ export class DataPortalService {
   }
 
   /**
-   * Returns PRISM portal and Tools portal if the user has access to them.
+   * Returns PRISM, Tools and Getting started portal if the user has access to them.
    */
   async listAccessibleCustomPortals(): Promise<CustomPortal[]> {
     const PRISM_PORTAL_ID = parseIntFromProcess(process.env.PRISM_PORTAL_ID) ?? undefined
     const PRISM_SPACE_ID = parseIntFromProcess(process.env.PRISM_SPACE_ID) ?? undefined
     const TOOLS_PORTAL_ID = parseIntFromProcess(process.env.TOOLS_PORTAL_ID) ?? undefined
     const TOOLS_SPACE_ID = parseIntFromProcess(process.env.TOOLS_SPACE_ID) ?? undefined
+    const GETTING_STARTED_PORTAL_ID = parseIntFromProcess(process.env.GETTING_STARTED_PORTAL_ID) ?? undefined
+    const GETTING_STARTED_SPACE_ID = parseIntFromProcess(process.env.GETTING_STARTED_SPACE_ID) ?? undefined
 
-    if (!(PRISM_PORTAL_ID && PRISM_SPACE_ID && TOOLS_PORTAL_ID && TOOLS_SPACE_ID)) {
+    if (!(PRISM_PORTAL_ID && PRISM_SPACE_ID && TOOLS_PORTAL_ID && TOOLS_SPACE_ID && GETTING_STARTED_PORTAL_ID && GETTING_STARTED_SPACE_ID)) {
       logger.verbose('DataPortalService: listAccessibleCustomPortals: missing env vars')
       return []
     }
@@ -100,6 +102,11 @@ export class DataPortalService {
       id: TOOLS_PORTAL_ID,
       spaceId: TOOLS_SPACE_ID,
     }
+    const gettingStartedPortal: CustomPortal = {
+      name: 'Getting Started and Next Steps',
+      id: GETTING_STARTED_PORTAL_ID,
+      spaceId: GETTING_STARTED_SPACE_ID,
+    }
 
     const accessiblePortals: CustomPortal[] = []
     if (await this.hasAccessToSpace(prismPortal.spaceId)) {
@@ -107,6 +114,9 @@ export class DataPortalService {
     }
     if (await this.hasAccessToSpace(toolsPortal.spaceId)) {
       accessiblePortals.push(toolsPortal)
+    }
+    if (await this.hasAccessToSpace(gettingStartedPortal.spaceId)) {
+      accessiblePortals.push(gettingStartedPortal)
     }
     return accessiblePortals
   }
