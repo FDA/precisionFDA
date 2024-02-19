@@ -1,58 +1,16 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
-import { App } from '@shared/domain/app/app.entity'
-import { Comparison } from '@shared/domain/comparison/comparison.entity'
-import { Job } from '@shared/domain/job/job.entity'
 import { SpaceReportPart } from '@shared/domain/space-report/entity/space-report-part.entity'
 import { BatchComplete } from '@shared/domain/space-report/model/batch-complete'
 import { SpaceReportPartSource } from '@shared/domain/space-report/model/space-report-part-source'
-import { SpaceReportPartSourceType } from '@shared/domain/space-report/model/space-report-part-source.type'
-import { SpaceReportPartResultMetaProvider } from '@shared/domain/space-report/service/part/space-report-part-result-meta.provider'
 import { SpaceReportPartService } from '@shared/domain/space-report/service/part/space-report-part.service'
-import { Asset } from '@shared/domain/user-file/asset.entity'
-import { Workflow } from '@shared/domain/workflow/entity/workflow.entity'
 import { expect } from 'chai'
 import { stub } from 'sinon'
 
 describe('SpaceReportPartService', () => {
-  const APP_ID = 0
-  const APP = { id: APP_ID } as unknown as App
-
-  const ASSET_ID = 1
-  const ASSET = { id: ASSET_ID } as unknown as Asset
-
-  const FILE_ID = 2
-  const FILE = { id: FILE_ID } as unknown as Comparison
-
-  const JOB_ID = 3
-  const JOB = { id: JOB_ID } as unknown as Job
-
-  const WORKFLOW_ID = 4
-  const WORKFLOW = { id: WORKFLOW_ID } as unknown as Workflow
-
-  const appGetResultMetaStub = stub()
-  const assetGetResultMetaStub = stub()
-  const fileGetResultMetaStub = stub()
-  const jobGetResultMetaStub = stub()
-  const workflowGetResultMetaStub = stub()
   const transactionalStub = stub()
   const findStub = stub()
 
   beforeEach(() => {
-    appGetResultMetaStub.reset()
-    appGetResultMetaStub.throws()
-
-    assetGetResultMetaStub.reset()
-    assetGetResultMetaStub.throws()
-
-    fileGetResultMetaStub.reset()
-    fileGetResultMetaStub.throws()
-
-    jobGetResultMetaStub.reset()
-    jobGetResultMetaStub.throws()
-
-    workflowGetResultMetaStub.reset()
-    workflowGetResultMetaStub.throws()
-
     transactionalStub.reset()
     transactionalStub.throws()
 
@@ -101,38 +59,6 @@ describe('SpaceReportPartService', () => {
       const part3 = res[2]
       expect(part3.sourceId).to.equal(PART_3_SOURCE_ID)
       expect(part3.sourceType).to.equal(PART_3_SOURCE_TYPE)
-    })
-  })
-
-  describe('#getSpaceReportPartMetaData', () => {
-    it('should not catch error from meta provider', async () => {
-      const error = new Error('my error')
-      appGetResultMetaStub.reset()
-      appGetResultMetaStub.throws(error)
-
-      expect(() => getInstance().getSpaceReportPartMetaData({ type: 'app', entity: APP })).to.throw(
-        error,
-      )
-    })
-    ;[
-      { type: 'app', entity: APP, resultMetaStub: appGetResultMetaStub },
-      { type: 'asset', entity: ASSET, resultMetaStub: assetGetResultMetaStub },
-      { type: 'file', entity: FILE, resultMetaStub: fileGetResultMetaStub },
-      { type: 'job', entity: JOB, resultMetaStub: jobGetResultMetaStub },
-      { type: 'workflow', entity: WORKFLOW, resultMetaStub: workflowGetResultMetaStub },
-    ].forEach((prop) => {
-      it(`should use the correct result meta provider for source type ${prop.type}`, async () => {
-        const META = 'META'
-
-        prop.resultMetaStub.withArgs(prop.entity).returns(META)
-
-        const res = getInstance().getSpaceReportPartMetaData({
-          type: prop.type,
-          entity: prop.entity,
-        })
-
-        expect(res).to.equal(META)
-      })
     })
   })
 
@@ -223,26 +149,6 @@ describe('SpaceReportPartService', () => {
       find: findStub,
     } as unknown as SqlEntityManager
 
-    const SOURCE_TYPE_TO_META_PROVIDER: {
-      [T in SpaceReportPartSourceType]: SpaceReportPartResultMetaProvider<T>
-    } = {
-      app: {
-        getResultMeta: appGetResultMetaStub,
-      },
-      asset: {
-        getResultMeta: assetGetResultMetaStub,
-      },
-      file: {
-        getResultMeta: fileGetResultMetaStub,
-      },
-      job: {
-        getResultMeta: jobGetResultMetaStub,
-      },
-      workflow: {
-        getResultMeta: workflowGetResultMetaStub,
-      },
-    }
-
-    return new SpaceReportPartService(em, SOURCE_TYPE_TO_META_PROVIDER)
+    return new SpaceReportPartService(em)
   }
 })

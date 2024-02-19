@@ -3,7 +3,6 @@ import { ConfigOverride, parseIntFromProcess } from '..'
 export const config: ConfigOverride = () => ({
   appName: 'https-apps-worker-dev',
   api: {
-    railsHost: process.env.HOST,
     certPath: process.env.NODE_PATH_CERT ?? '../cert.pem',
     keyCertPath: process.env.NODE_PATH_KEY_CERT ?? '../key.pem',
   },

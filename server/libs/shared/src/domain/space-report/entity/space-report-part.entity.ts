@@ -1,12 +1,14 @@
 import { Entity, JsonType, ManyToOne, Property, Ref } from '@mikro-orm/core'
+import { SpaceReportPartResult } from '@shared/domain/space-report/model/space-report-part-result'
 import { BaseEntity } from '../../../database/base-entity'
-import { SpaceReportPartResult } from '../model/space-report-part-result'
 import { SpaceReportPartSourceType } from '../model/space-report-part-source.type'
 import { SpaceReportPartState } from '../model/space-report-part-state.type'
 import { SpaceReport } from './space-report.entity'
 
 @Entity({ tableName: 'space_report_parts' })
-export class SpaceReportPart extends BaseEntity {
+export class SpaceReportPart<
+  T extends SpaceReportPartSourceType = SpaceReportPartSourceType,
+> extends BaseEntity {
   @ManyToOne({ entity: () => SpaceReport, fieldName: 'space_report_id' })
   spaceReport: Ref<SpaceReport>
 
@@ -14,11 +16,11 @@ export class SpaceReportPart extends BaseEntity {
   sourceId: number
 
   @Property()
-  sourceType: SpaceReportPartSourceType
+  sourceType: T
 
   @Property()
   state: SpaceReportPartState = 'CREATED'
 
   @Property({ type: JsonType })
-  result: SpaceReportPartResult
+  result: SpaceReportPartResult<T>
 }

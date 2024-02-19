@@ -1,16 +1,21 @@
-import { Injectable } from '@nestjs/common'
+import { Inject, Injectable } from '@nestjs/common'
+import { spaceMembershipSideToNameMap } from '@shared/domain/space-membership/space-membership-side-to-name.map'
+import { SPACE_MEMBERSHIP_SIDE } from '@shared/domain/space-membership/space-membership.enum'
+import { SpaceReportPart } from '@shared/domain/space-report/entity/space-report-part.entity'
+import { SpaceReport } from '@shared/domain/space-report/entity/space-report.entity'
+import { SpaceReportPartSourceType } from '@shared/domain/space-report/model/space-report-part-source.type'
+import { SOURCE_TYPE_TO_PART_CONTENT_PROVIDER_MAP } from '@shared/domain/space-report/providers/source-type-to-part-content-provider.provider'
+import { SpaceReportResultPartContentProvider } from '@shared/domain/space-report/service/result/space-report-result-part-content.provider'
+import { Space } from '@shared/domain/space/space.entity'
 import { ArrayUtils } from '@shared/utils/array.utils'
 import fs from 'fs/promises'
-import path from 'path'
 import { JSDOM } from 'jsdom'
-import { SpaceReportPart } from '../entity/space-report-part.entity'
-import { SpaceReport } from '../entity/space-report.entity'
-import { SpaceReportPartSourceType } from '../model/space-report-part-source.type'
+import path from 'path'
 
 // TODO(PFDA-4835) - use import after introducing bundler with nestjs
 const assetsPath = path.join(
   __dirname,
-  '../../../../../../../../../libs/shared/src/domain/space-report/assets',
+  '../../../../../../../../../../libs/shared/src/domain/space-report/assets',
 )
 const triangleIcon = fs.readFile(path.join(assetsPath, 'triangle-icon.svg'), 'utf8').catch(() => '')
 const logoImage = fs.readFile(path.join(assetsPath, 'logo.svg'), 'utf8').catch(() => '')
@@ -18,12 +23,20 @@ const html = fs.readFile(path.join(assetsPath, 'result-wrapper.html'), 'utf8').c
 
 @Injectable()
 export class SpaceReportResultService {
+  private readonly USERS_HEADER_ID = 'header-users'
   private readonly FILES_HEADER_ID = 'header-files'
   private readonly APPS_HEADER_ID = 'header-apps'
   private readonly JOBS_HEADER_ID = 'header-jobs'
   private readonly ASSETS_HEADER_ID = 'header-assets'
   private readonly WORKFLOWS_HEADER_ID = 'header-workflows'
   private readonly REPORT_PART_ID_PREFIX = 'report-part-'
+
+  constructor(
+    @Inject(SOURCE_TYPE_TO_PART_CONTENT_PROVIDER_MAP)
+    private readonly sourceTypeToPartContentProviderMap: {
+      [T in SpaceReportPartSourceType]: SpaceReportResultPartContentProvider<T>
+    },
+  ) {}
 
   async generateResult(spaceReport: SpaceReport, styles?: string) {
     const domContainer = new JSDOM(await html)
@@ -43,12 +56,15 @@ export class SpaceReportResultService {
 
     const reportPartsMap = spaceReport.reportParts
       .getItems()
-      .reduce<Record<SpaceReportPartSourceType, SpaceReportPart[]>>(
-        (acc, rp) => {
+      .reduce<{ [K in SpaceReportPartSourceType]: SpaceReportPart<K>[] }>(
+        <T extends SpaceReportPartSourceType>(
+          acc: { [K in SpaceReportPartSourceType]: SpaceReportPart<K>[] },
+          rp: SpaceReportPart<T>,
+        ) => {
           acc[rp.sourceType].push(rp)
           return acc
         },
-        { app: [], file: [], job: [], asset: [], workflow: [] },
+        { app: [], file: [], job: [], asset: [], workflow: [], user: [] },
       )
 
     const sidebar = await this.getSidebar(reportPartsMap, document)
@@ -65,6 +81,7 @@ export class SpaceReportResultService {
     const report = document.createElement('div')
     report.id = 'report'
     report.appendChild(await this.getHeader(spaceReport, document))
+    report.appendChild(this.getReportSegmentForMembers(reportPartsMap.user, document))
     report.appendChild(
       this.getReportSegment('Files', this.FILES_HEADER_ID, reportPartsMap.file, document),
     )
@@ -97,6 +114,24 @@ export class SpaceReportResultService {
     document: Document,
   ) {
     const container = document.createElement('div')
+    container.appendChild(this.getReportSegmentHeader(title, id, document))
+
+    if (ArrayUtils.isEmpty(reportParts)) {
+      const emptyText = document.createElement('p')
+      emptyText.classList.add('empty-text')
+      emptyText.innerHTML = `There are no ${title.toLowerCase()} in this space.`
+      container.appendChild(emptyText)
+
+      return container
+    }
+
+    container.appendChild(this.getReportPartItemList(reportParts, document))
+
+    return container
+  }
+
+  private getReportSegmentHeader(title: string, id: string, document: Document) {
+    const container = document.createElement('div')
 
     const spacer = document.createElement('div')
     spacer.classList.add('spacer')
@@ -111,46 +146,70 @@ export class SpaceReportResultService {
     sectionTitle.id = id
     sectionHeading.appendChild(sectionTitle)
 
-    if (ArrayUtils.isEmpty(reportParts)) {
-      const emptyText = document.createElement('p')
-      emptyText.classList.add('empty-text')
-      emptyText.innerHTML = `There are no ${title.toLowerCase()} in this space.`
-      container.appendChild(emptyText)
+    return container
+  }
 
-      return container
-    }
-
-    const itemList = document.createElement('div')
-    itemList.classList.add('item-list')
-    reportParts.forEach((rp) => itemList.appendChild(this.getReportPartContent(rp, document)))
-    container.appendChild(itemList)
+  private getReportPartItemList(reportParts: SpaceReportPart[], document: Document) {
+    const container = document.createElement('div')
+    container.classList.add('item-list')
+    reportParts.forEach((rp) => container.appendChild(this.getReportPartContent(rp, document)))
 
     return container
   }
 
-  private getReportPartContent(reportPart: SpaceReportPart, document: Document) {
+  private getReportPartContent<T extends SpaceReportPartSourceType>(
+    reportPart: SpaceReportPart<T>,
+    document: Document,
+  ) {
     const wrapper = document.createElement('div')
     wrapper.classList.add('item-wrapper')
 
-    const container = document.createElement('div')
-    container.classList.add('item')
-    wrapper.appendChild(container)
+    const titleId = `${this.REPORT_PART_ID_PREFIX}${reportPart.id}`
+    const content = this.sourceTypeToPartContentProviderMap[reportPart.sourceType].provide(
+      reportPart,
+      titleId,
+    )
 
-    const title = document.createElement('h3')
-    title.innerHTML = reportPart.result.title
-    title.id = `${this.REPORT_PART_ID_PREFIX}${reportPart.id}`
-    container.appendChild(title)
-
-    const created = document.createElement('p')
-    created.innerHTML = new Date(reportPart.result.created).toLocaleString()
-    container.appendChild(created)
-
-    const diagram = document.createElement('div')
-    diagram.classList.add('canvas-wrapper')
-    diagram.innerHTML = reportPart.result.svg
-    container.appendChild(diagram)
+    wrapper.appendChild(content)
 
     return wrapper
+  }
+
+  private getReportSegmentForMembers(reportParts: SpaceReportPart<'user'>[], document: Document) {
+    const title = 'Members'
+    const id = this.USERS_HEADER_ID
+
+    const sideToResultsMap = reportParts.reduce((acc, rp) => {
+      const side = rp.result.side
+
+      if (!acc.has(side)) {
+        acc.set(side, [])
+      }
+
+      acc.get(side).push(rp)
+
+      return acc
+    }, new Map<SPACE_MEMBERSHIP_SIDE, SpaceReportPart<'user'>[]>())
+
+    if (sideToResultsMap.size < 2) {
+      return this.getReportSegment(title, id, reportParts, document)
+    }
+
+    const container = document.createElement('div')
+    container.appendChild(this.getReportSegmentHeader(title, id, document))
+
+    sideToResultsMap.forEach((reportParts, side) => {
+      const sideContainer = document.createElement('div')
+
+      const sideHeader = document.createElement('h3')
+      sideHeader.innerHTML = `${spaceMembershipSideToNameMap[side]} side`
+      sideContainer.appendChild(sideHeader)
+
+      sideContainer.appendChild(this.getReportPartItemList(reportParts, document))
+      container.appendChild(sideContainer)
+    })
+
+    return container
   }
 
   private async getSidebar(
@@ -163,6 +222,9 @@ export class SpaceReportResultService {
 
     const sidenav = document.createElement('div')
     sidenav.classList.add('sidenav')
+    sidenav.appendChild(
+      await this.getResourceItem('Members', this.USERS_HEADER_ID, items.user, document),
+    )
     sidenav.appendChild(
       await this.getResourceItem('Files', this.FILES_HEADER_ID, items.file, document),
     )
@@ -243,7 +305,7 @@ export class SpaceReportResultService {
     logo.appendChild(name)
 
     const reportType = document.createElement('span')
-    reportType.innerHTML = 'Provenance Tracking'
+    reportType.innerHTML = 'Space Report and Provenance Tracking'
     reportType.classList.add('report-type')
     title.appendChild(reportType)
 
@@ -253,18 +315,21 @@ export class SpaceReportResultService {
 
     const description = document.createElement('p')
     description.innerHTML = `
-      The Provenance Tracking Report provides a comprehensive documentation
-      of the lineage and history of Files, Apps, Executions, Assets, and
-      Workflows within the precisionFDA system. Through this report, users
-      can gain insights into the origin, movement, and life-cycle of each
-      item, ensuring transparency, traceability, and accountability.
+      The Space Report provides a snapshot of the membership, Files, Apps, Executions, Assets,
+      and Workflows within a Space.Provenance tracking provides comprehensive
+      documentation of the lineage and history of Files, Apps, Executions, Assets, and Workflows
+      within the precisionFDA system. Through this report, users can gain insights into the origin,
+      movement, and life-cycle of each item, ensuring transparency, traceability, and accountability.
+      The report also documents all members with access to the Space at the time of report generation.
     `
     description.classList.add('report-description')
     container.appendChild(description)
 
     const infoRow1 = document.createElement('div')
     infoRow1.classList.add('info-area')
-    infoRow1.appendChild(this.getHeaderInfoPart('Space Name', report.space.name, document))
+    infoRow1.appendChild(
+      this.getHeaderInfoPart('Space Name', this.getSpaceTitleText(report.space), document),
+    )
     infoRow1.appendChild(
       this.getHeaderInfoPart(
         'Report Generated On',
@@ -283,6 +348,18 @@ export class SpaceReportResultService {
     container.appendChild(infoRow2)
 
     return container
+  }
+
+  private getSpaceTitleText(space: Space) {
+    if (space.isConfidentialReviewerSpace()) {
+      return `${space.name} (Reviewer side)`
+    }
+
+    if (space.isConfidentialSponsorSpace()) {
+      return `${space.name} (Sponsor side)`
+    }
+
+    return space.name
   }
 
   private getHeaderInfoPart(

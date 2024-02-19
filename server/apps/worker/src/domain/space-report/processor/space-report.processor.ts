@@ -1,10 +1,10 @@
 import { Processor } from '@nestjs/bull'
 import { config } from '@shared/config'
+import { SpaceReportBatchResultGenerateFacade } from '@shared/facade/space-report-batch/space-report-batch-result-generate.facade'
+import { SpaceReportResultGenerateFacade } from '@shared/facade/space-report-result/space-report-result-generate.facade'
 import * as types from '@shared/queue/task.input'
 import { GenerateSpaceReportBatchJob, GenerateSpaceReportResultJob } from '@shared/queue/task.input'
 import { Job } from 'bull'
-import { SpaceReportBatchResultGenerateFacade } from '../../../facade/space-report/space-report-batch-result-generate.facade'
-import { SpaceReportResultGenerateFacade } from '../../../facade/space-report/space-report-result-generate.facade'
 import { ProcessWithContext } from '../../../queues/decorator/process-with-context'
 
 @Processor(config.workerJobs.queues.spaceReport.name)

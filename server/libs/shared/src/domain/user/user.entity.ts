@@ -3,12 +3,12 @@ import {
   Entity,
   EntityRepositoryType,
   Enum,
-  Ref,
   ManyToOne,
   OneToMany,
   OneToOne,
   PrimaryKey,
   Property,
+  Ref,
   Reference,
 } from '@mikro-orm/core'
 import { ADMIN_GROUP_ROLES } from '@shared/domain/admin-group/admin-group.entity'
@@ -21,15 +21,15 @@ import { Organization } from '@shared/domain/org/org.entity'
 import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
 import { config } from '../../config'
 import { BaseEntity } from '../../database/base-entity'
-import { AdminMembership } from '../admin-membership/admin-membership.entity'
 import { WorkaroundJsonType } from '../../database/custom-json-type'
+import { AdminMembership } from '../admin-membership/admin-membership.entity'
 import { SPACE_MEMBERSHIP_ROLE } from '../space-membership/space-membership.enum'
 import { UserRepository } from './user.repository'
 
 export enum USER_STATE {
   ENABLED = 0,
   LOCKED = 1,
-  DEACTIVATED = 2
+  DEACTIVATED = 2,
 }
 
 export const RESOURCE_TYPES = [
@@ -115,7 +115,8 @@ export class User extends BaseEntity {
   @Property({ nullable: true })
   lastDataCheckup?: Date
 
-  @Enum({ type: () => USER_STATE,
+  @Enum({
+    type: () => USER_STATE,
     serializer: (value: USER_STATE) => {
       switch (value) {
         case USER_STATE.ENABLED:
@@ -127,13 +128,14 @@ export class User extends BaseEntity {
         default:
           return 'n/a'
       }
-    } })
+    },
+  })
   userState: USER_STATE
 
   @Property({
     type: WorkaroundJsonType,
     columnType: 'text',
-    })
+  })
   cloudResourceSettings?: CloudResourceSettings
 
   @OneToMany({ entity: () => Job, mappedBy: 'user' })
@@ -149,8 +151,8 @@ export class User extends BaseEntity {
     entity: () => NotificationPreference,
     mappedBy: 'user',
     nullable: true,
-    })
-  notificationPreference: Ref<NotificationPreference>;
+  })
+  notificationPreference: Ref<NotificationPreference>
 
   [EntityRepositoryType]?: UserRepository
 
@@ -158,26 +160,26 @@ export class User extends BaseEntity {
     entity: () => Expert,
     mappedBy: 'user',
     orphanRemoval: true,
-    })
+  })
   expert: Ref<Expert>
 
   @OneToMany({
     entity: () => ExpertQuestion,
     mappedBy: 'user',
     orphanRemoval: true,
-    })
+  })
   expertQuestions = new Collection<ExpertQuestion>(this)
 
   @OneToMany({
     entity: () => AdminMembership,
     mappedBy: 'user',
-    })
+  })
   adminMemberships = new Collection<AdminMembership>(this)
 
   @OneToMany({
     entity: () => NewsItem,
     mappedBy: 'user',
-    })
+  })
   newsItems = new Collection<NewsItem>(this)
 
   constructor(org: Organization, notificationPreference?: NotificationPreference, expert?: Expert) {
