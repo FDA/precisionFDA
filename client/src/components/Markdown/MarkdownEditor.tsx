@@ -1,6 +1,7 @@
 /* eslint-disable react/jsx-no-useless-fragment */
 import React from 'react'
 import styled from 'styled-components'
+import { ControllerRenderProps } from 'react-hook-form'
 import { Markdown } from '.'
 
 import { ITab, TabsSwitch } from '../TabsSwitch'
@@ -72,7 +73,7 @@ export const MarkdownEditor = ({
   field,
 }: {
   disabled: boolean
-  field: any
+  field: ControllerRenderProps
 }) => {
   return (
     <TabsSwitch
