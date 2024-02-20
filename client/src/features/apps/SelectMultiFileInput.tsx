@@ -34,7 +34,7 @@ interface Props {
   onChange: (file?: IAccessibleFile[] | null) => void
   dialogTitle: string
   dialogSubtitle?: string
-  scope?: string
+  scopes?: string[]
   disabled?: boolean
   isError?: boolean
 }
@@ -45,7 +45,7 @@ export const SelectMultiFileInput = ({
   dialogType = 'radio',
   dialogTitle,
   dialogSubtitle,
-  scope,
+  scopes,
   disabled,
   isError,
 }: Props) => {
@@ -63,7 +63,7 @@ export const SelectMultiFileInput = ({
     dialogType,
     handleSelect,
     dialogSubtitle,
-    scope ? [scope] : [],
+    scopes,
     value,
   )
 

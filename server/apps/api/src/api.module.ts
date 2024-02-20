@@ -23,7 +23,7 @@ import { NewsApiModule } from './news/news.api.module'
 import { NodesApiModule } from './nodes/nodes.api.module'
 import { NotificationsApiModule } from './notifications/notifications.api.module'
 import { PropertiesApiModule } from './properties/properties.api.module'
-import { BaseErrorFilter } from './server/filter/base-error.filter'
+import { BaseErrorExceptionFilter } from './server/filter/base-error-exception.filter'
 import { DefaultExceptionFilter } from './server/filter/default-exception.filter'
 import { SiteSettingsApiModule } from './site-settings/site-settings.api.module'
 import { SpacesApiModule } from './spaces/spaces.api.module'
@@ -73,7 +73,7 @@ import { WorkflowApiModule } from './workflows/workflow.api.module'
     },
     {
       provide: APP_FILTER,
-      useClass: BaseErrorFilter,
+      useClass: BaseErrorExceptionFilter,
     },
   ],
 })

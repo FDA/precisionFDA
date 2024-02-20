@@ -18,6 +18,7 @@ import GuestRestrictedLink from '../../components/Controls/GuestRestrictedLink'
 import NavigationBar from '../../components/NavigationBar/NavigationBar'
 import PublicLayout from '../../layouts/PublicLayout'
 import { useAuthUser } from '../auth/useAuthUser'
+import { useSiteSettingsQuery } from '../auth/useSiteSettingsQuery'
 import { ExpertListItem } from '../experts/list/ExpertListItem'
 import { useExpertsListQuery } from '../experts/useExpertsListQuery'
 import { fetchApps } from '../apps/apps.api'
@@ -38,62 +39,49 @@ import {
 import { AppTypeIconBlue } from '../../components/icons/AppTypeIconBlue'
 import { AppTypeIconYellow } from '../../components/icons/AppTypeIconYellow'
 import { Button } from '../../components/Button'
+import { ToolsIcon } from '../../components/icons/ToolsIcon'
+import { RocketIcon } from '../../components/icons/RocketIcon'
+import { AppMarketIcon } from '../../components/icons/AppMarketIcon'
 
 const StyledGetStarted = styled.div`
-  background-color: var(--tertiary-100);
+  background-color: var(--tertiary-70);
   padding: 16px;
   margin-bottom: 32px;
-`
-
-const GettingStartedHr = styled.hr`
-  margin: 12px 0;
-  border-top: 1px solid var(--c-layout-border);
-`
-
-const Row = styled.div`
   font-size: 13px;
   line-height: 26px;
 `
 
+const IconLink = styled(Link)`
+  display: flex;
+  gap: 8px;
+  align-items: center;
+`
+
 const GetStarted = ({ user }: { user?: IUser }) => {
-  return (
-    <StyledGetStarted>
-      <SectionTitle>Getting Started</SectionTitle>
-      <Row>
-        <Link data-turbolinks="false" to="/docs">
-          For New Users
-        </Link>
-      </Row>
-      {user?.can_see_spaces && (
-        <Row>
-          <Link data-turbolinks="false" to="/docs/spaces">
-            For Reviewers
-          </Link>
-        </Row>
-      )}
-      <GettingStartedHr />
-      <Row>
-        <Link data-turbolinks="false" to="/docs">
-          Introduction to precisionFDA
-        </Link>
-      </Row>
-      <Row>
-        <Link data-turbolinks="false" to="/docs/files">
-          Uploading Files &amp; Data
-        </Link>
-      </Row>
-      <Row>
-        <Link data-turbolinks="false" to="/docs/apps">
-          Running Apps
-        </Link>
-      </Row>
-      {user?.can_see_spaces && (
-        <Row>
-          <Link to="/docs/spaces">Review Spaces: Step by Step</Link>
-        </Row>
-      )}
-      <GettingStartedHr />
-      <Row>
+  const siteSettings = useSiteSettingsQuery()
+  const gettingStartedPortal = siteSettings.data?.dataPortals?.customPortals?.find((p) => p.name === 'Getting Started and Next Steps')
+
+  // for FDA users
+  if (gettingStartedPortal) {
+    return (
+      <StyledGetStarted>
+        <SectionTitle>Getting Started</SectionTitle>
+        <Hr/>
+        <IconLink data-turbolinks="false" to="/data-portals/19">
+          <RocketIcon height={17} />
+          Introduction and Next Steps
+        </IconLink>
+
+        <IconLink data-turbolinks="false" to="/data-portals/17">
+          <ToolsIcon height={17} />
+          Use Case Toolbox
+        </IconLink>
+
+        <IconLink data-turbolinks="false" to="/data-portals/20">
+          <AppMarketIcon height={17} />
+          Multi-omics App Library
+        </IconLink>
+        <Hr />
         <a
           href="https://public.govdelivery.com/accounts/USFDA/subscriber/new?topic_id=USFDA_564"
           target="_blank"
@@ -101,7 +89,40 @@ const GetStarted = ({ user }: { user?: IUser }) => {
         >
           precisionFDA Mailing List
         </a>
-      </Row>
+      </StyledGetStarted>
+    )
+  }
+
+  // for General users
+  return (
+    <StyledGetStarted>
+      <SectionTitle>Getting Started</SectionTitle>
+      <Hr/>
+      <div>
+        <Link data-turbolinks="false" to="/docs/introduction">Introduction to precisionFDA</Link>
+      </div>
+      <div>
+        <Link data-turbolinks="false" to="/docs/files">Uploading Files &amp; Data</Link>
+      </div>
+      <div>
+        <Link data-turbolinks="false" to="/docs/apps">Running Apps</Link>
+      </div>
+      <div>
+        <Link to="/docs/spaces">Collaborating with Spaces</Link>
+      </div>
+      <div>
+        <Link to="/home/files/file-GfkBx1j0Kj2Yj04FJVV0xXzF-2">Multi-omics App Library</Link>
+      </div>
+      <Hr/>
+      <div>
+        <a
+          href="https://public.govdelivery.com/accounts/USFDA/subscriber/new?topic_id=USFDA_564"
+          target="_blank"
+          rel="noreferrer"
+        >
+          precisionFDA Mailing List
+        </a>
+      </div>
     </StyledGetStarted>
   )
 }
@@ -112,7 +133,7 @@ const TopAppsContainer = styled.div`
   margin-bottom: 64px;
   gap: 32px;
 
-  @media(min-width: 660px) {
+  @media (min-width: 660px) {
     flex-direction: row;
   }
 `
@@ -134,7 +155,7 @@ const StyledTopAppItem = styled.div`
   gap: 12px;
 
   a {
-    cursor: pointer;
+      cursor: pointer;
   }
 `
 
@@ -145,6 +166,7 @@ const Title = styled.div`
     line-height: 20px;
     font-size: 14px;
   }
+
   a:hover {
     color: var(--primary-500);
   }
@@ -171,9 +193,9 @@ const TopAppItem = ({ app }: { app: IApp }) => {
       <div>
         <GuestRestrictedLink to={linkToApp} aria-label={ariaLabel}>
           {isRegular ? (
-            <AppTypeIconBlue width={56} height={56} />
+            <AppTypeIconBlue width={56} height={56}/>
           ) : (
-            <AppTypeIconYellow width={56} height={56} />
+            <AppTypeIconYellow width={56} height={56}/>
           )}
         </GuestRestrictedLink>
       </div>
@@ -206,9 +228,9 @@ export const TopApps = () => {
         <SectionTitle>Most Recent Apps</SectionTitle>
         <TopAppsList>
           {isLoadingRecentAppsData ? (
-            <Loader className="inline" />
+            <Loader className="inline"/>
           ) : (
-            recentAppsData?.apps?.slice(0, 4).map(a => <TopAppItem key={a.id} app={a} />)
+            recentAppsData?.apps?.slice(0, 4).map(a => <TopAppItem key={a.id} app={a}/>)
           )}
         </TopAppsList>
       </TopAppsColumn>
@@ -216,10 +238,10 @@ export const TopApps = () => {
         <SectionTitle>Top Featured Apps</SectionTitle>
         <TopAppsList>
           {isLoadingFeaturedAppsData ? (
-            <Loader className="inline" />
+            <Loader className="inline"/>
           ) : (
             featuredAppsData?.apps?.slice(0, 4)
-              .map(a => <TopAppItem key={a.id} app={a} />)
+              .map(a => <TopAppItem key={a.id} app={a}/>)
           )}
         </TopAppsList>
       </TopAppsColumn>
@@ -235,30 +257,30 @@ export const OverviewAuthed = () => {
 
   return (
     <PublicLayout>
-      <NavigationBar user={user} title="Overview" />
+      <NavigationBar user={user} title="Overview"/>
       <PageContainerMargin>
         <PageRow>
           <PageOverviewMainBody>
-            <TopApps />
-            <ChallengesBanner />
-            <ChallengesOverviewList />
+            <TopApps/>
+            <ChallengesBanner/>
+            <ChallengesOverviewList/>
             <ExpertSection>
               <SectionTitle>Expert Highlight</SectionTitle>
               {expertsData?.experts[0] && (expertsIsLoading ? (
-                <Loader className="inline" />
+                <Loader className="inline"/>
               ) : (
-                <ExpertListItem expert={expertsData.experts[0]} />
+                <ExpertListItem expert={expertsData.experts[0]}/>
               ))}
             </ExpertSection>
           </PageOverviewMainBody>
           <RightSide>
-            <GetStarted user={user} />
+            <GetStarted user={user}/>
             <RightSideItem>
               <SectionTitle>Latest News</SectionTitle>
-              <OverviewNewsList pick={3} />
-              <Hr />
+              <OverviewNewsList pick={3}/>
+              <Hr/>
               <Link to="/news">View All News</Link>
-              <Hr />
+              <Hr/>
               <Link to="/news?type=publication">View All Publications</Link>
             </RightSideItem>
           </RightSide>
@@ -266,7 +288,7 @@ export const OverviewAuthed = () => {
       </PageContainerMargin>
       <CommunityParticipants>
         <SectionTitle>COMMUNITY PARTICIPANTS</SectionTitle>
-        <ParticipantOrgsList />
+        <ParticipantOrgsList/>
       </CommunityParticipants>
 
       <PageMainBody>
@@ -281,7 +303,7 @@ export const OverviewAuthed = () => {
       <PFDATeamSection>
         <SectionTitle>PRECISIONFDA TEAM</SectionTitle>
         <div>
-          <ParticipantPersonsList />
+          <ParticipantPersonsList/>
         </div>
       </PFDATeamSection>
     </PublicLayout>
