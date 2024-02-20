@@ -37,6 +37,34 @@ import { useFilesColumns } from './useFilesColumns'
 import { useFilesSelectActions } from './useFilesSelectActions'
 import { useFolderActions } from './useFolderActions'
 
+
+const createSearchParam = (params: Record<string, unknown>) => {
+  const query = cleanObject(params)
+  const paramQ = `?${new URLSearchParams(query).toString()}`
+  return paramQ
+}
+
+const breadcrumbs = (basePath: string, scope?: HomeScope, metaPath: MetaPath[] = []) => (
+  <StyledBreadcrumbs>
+    <BreadcrumbLabel>You are here:</BreadcrumbLabel>
+    {[{ id: 0, name: 'Files', href: `${basePath}${createSearchParam({ scope })}` }]
+      .concat(
+        metaPath.map(folder => ({
+          id: folder.id,
+          name: folder.name,
+          href: `${createSearchParam({ scope, folder_id: folder.id })}`,
+        })),
+      )
+      .map(folder => (
+        <Link key={`folder-${folder.id}`} to={folder.href || ''}>
+          {folder.name}
+        </Link>
+      ))
+      // @ts-ignore
+      .reduce((prev, curr) => [prev,<BreadcrumbDivider key={`divider-${prev.id}`}>/</BreadcrumbDivider>,curr])}
+  </StyledBreadcrumbs>
+)
+
 type ListType = { files: IFile[]; meta: IMeta }
 
 export const FileList = ({ homeScope, space, showFolderActions = false }: { homeScope?: HomeScope, space?: ISpace, showFolderActions?: boolean }) => {
@@ -47,7 +75,7 @@ export const FileList = ({ homeScope, space, showFolderActions = false }: { home
     'folder_id',
   )
   const user = useAuthUser()
-  const isAdmin = user?.isAdmin
+  const isAdmin = user?.isAdmin ?? false
 
   const navigate = useNavigate()
 
@@ -198,7 +226,7 @@ export const FileList = ({ homeScope, space, showFolderActions = false }: { home
           </Dropdown>
         </ActionsRow>
         <ActionsRow>
-          {breadcrumbs(location.pathname, data?.meta?.path, homeScope)}
+          {breadcrumbs(location.pathname, homeScope, data?.meta?.path)}
         </ActionsRow>
       </div>
 
@@ -261,33 +289,6 @@ export const FileList = ({ homeScope, space, showFolderActions = false }: { home
     </ErrorBoundary>
   )
 }
-
-const createSearchParam = (params: Record<string, any>) => {
-  const query = cleanObject(params)
-  const paramQ = `?${  new URLSearchParams(query as any).toString()}`
-  return paramQ
-}
-
-const breadcrumbs = (basePath: string, metaPath: MetaPath[] = [], scope?: HomeScope) => (
-  <StyledBreadcrumbs>
-    <BreadcrumbLabel>You are here:</BreadcrumbLabel>
-    {[{ id: 0, name: 'Files', href: `${basePath}${createSearchParam({ scope })}` }]
-      .concat(
-        metaPath.map(folder => ({
-          id: folder.id,
-          name: folder.name,
-          href: `files${createSearchParam({ scope, folder_id: folder.id })}`,
-        })),
-      )
-      .map(folder => (
-        <Link key={`folder-${folder.id}`} to={folder.href || ''}>
-          {folder.name}
-        </Link>
-      ))
-      // @ts-ignore
-      .reduce((prev, curr) => [prev,<BreadcrumbDivider key={`divider-${prev.id}`}>/</BreadcrumbDivider>,curr])}
-  </StyledBreadcrumbs>
-)
 
 export const FilesListTable = ({
   isAdmin,
