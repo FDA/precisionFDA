@@ -136,7 +136,7 @@ make run
 Once the application is correctly installed & configured, you should be able to access the portal at `https://localhost:3000/`.
 In order to log in to the system, ask for shared DEV credentials (ask some1 from the team)
 
-### Running application with external services
+### Running application with external services (GSRS)
 
 To run PFDA with external integration part of local stack, set up the following env variable in your `.rc` file
 
@@ -150,6 +150,25 @@ Run in the same way with
 ```bash
 make run
 ```
+
+Once you have the _gsrs_ container running, you can use it for GSRS frontend development:
+1. Clone [GSRSFrontend repo](https://github.com/ncats/GSRSFrontend/tree/precision_new), branch _precision_new_.
+2. Create env _GSRS_FRONTEND_PATH_ (eg. in your `~/.zshrc`) with an absolute path to the repo (eg. _/Users/pbarta@dnanexus.com/ncats/GSRSFrontend_)
+3. Restart _gsrs_ container
+4. Edit several config files in the cloned repo (these changes are not supposed to be committed):
+ - `angular.json` - add line `"baseHref": "/ginas/app/beta/",` under `projects.gsrs-client.architect.options`
+ - `src/app/fda/config/config.json` - add line `"customToolbarComponent": "precisionFDA",`
+ - `src/environments/environment.fda.local.ts` - set following variables:
+    ```bash
+    environment.apiBaseUrl = 'https://localhost:3000/ginas/app/';
+    environment.baseHref = '/ginas/app/beta/';
+    ```
+5. Connect to the running _gsrs_ container, run script `switch-frontend.sh` (located in root) and follow the instructions.
+    ```bash
+    docker exec -it <GSRS_CONTAINER_ID> bash
+    cd /
+    ./switch-frontend.sh
+    ```
 
 ## (Optional) Setup for impatient personalities
 
