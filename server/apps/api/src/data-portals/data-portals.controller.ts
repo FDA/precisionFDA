@@ -102,14 +102,6 @@ export class DataPortalsController {
   }
 
   /**
-   * Get list of custom Data Portals
-   */
-  @Get('/custom')
-  async listAccessibleDataPortals() {
-    return await this.dataPortalService.listAccessibleCustomPortals()
-  }
-
-  /**
    * Returns details of the portal (including content).
    */
   @Get('/:id')

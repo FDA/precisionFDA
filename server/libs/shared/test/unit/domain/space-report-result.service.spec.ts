@@ -1,10 +1,12 @@
 import { SpaceReportPart } from '@shared/domain/space-report/entity/space-report-part.entity'
 import { SpaceReport } from '@shared/domain/space-report/entity/space-report.entity'
+import { SpaceReportPartSourceType } from '@shared/domain/space-report/model/space-report-part-source.type'
+import { SpaceReportResultPartContentProvider } from '@shared/domain/space-report/service/result/space-report-result-part-content.provider'
+import { SpaceReportResultService } from '@shared/domain/space-report/service/result/space-report-result.service'
 import { Space } from '@shared/domain/space/space.entity'
 import { expect } from 'chai'
 import { JSDOM } from 'jsdom'
 import { stub } from 'sinon'
-import { SpaceReportResultService } from '../../../src/domain/space-report/service/space-report-result.service'
 
 describe('SpaceReportResultService', () => {
   const REPORT_ID = 0
@@ -12,13 +14,16 @@ describe('SpaceReportResultService', () => {
 
   const SPACE_NAME = 'space name'
   const SPACE_DESCRIPTION = 'space description'
-  const SPACE = { name: SPACE_NAME, description: SPACE_DESCRIPTION } as unknown as Space
+  const SPACE = {
+    name: SPACE_NAME,
+    description: SPACE_DESCRIPTION,
+    isConfidentialReviewerSpace: () => false,
+    isConfidentialSponsorSpace: () => false,
+  } as unknown as Space
 
   const REPORT_PART_1_ID = 10
   const REPORT_PART_1_TITLE = 'title 1'
-  const REPORT_PART_1_CREATED = new Date('2023-10-11T14:58:08.000Z')
-  const REPORT_PART_1_SVG = 'svg 1'
-  const REPORT_PART_1_RESULT = { title: REPORT_PART_1_TITLE, created: REPORT_PART_1_CREATED, svg: REPORT_PART_1_SVG }
+  const REPORT_PART_1_RESULT = { title: REPORT_PART_1_TITLE }
   const REPORT_PART_1_SOURCE_TYPE = 'file'
   const REPORT_PART_1 = {
     id: REPORT_PART_1_ID,
@@ -28,9 +33,7 @@ describe('SpaceReportResultService', () => {
 
   const REPORT_PART_2_ID = 20
   const REPORT_PART_2_TITLE = 'title 2'
-  const REPORT_PART_2_CREATED = new Date('2023-10-12T14:58:08.000Z')
-  const REPORT_PART_2_SVG = 'svg 2'
-  const REPORT_PART_2_RESULT = { title: REPORT_PART_2_TITLE, created: REPORT_PART_2_CREATED, svg: REPORT_PART_2_SVG }
+  const REPORT_PART_2_RESULT = { title: REPORT_PART_2_TITLE }
   const REPORT_PART_2_SOURCE_TYPE = 'file'
   const REPORT_PART_2 = {
     id: REPORT_PART_2_ID,
@@ -40,9 +43,7 @@ describe('SpaceReportResultService', () => {
 
   const REPORT_PART_3_ID = 30
   const REPORT_PART_3_TITLE = 'title 2'
-  const REPORT_PART_3_CREATED = new Date('2023-10-12T14:58:08.000Z')
-  const REPORT_PART_3_SVG = 'svg 2'
-  const REPORT_PART_3_RESULT = { title: REPORT_PART_3_TITLE, created: REPORT_PART_3_CREATED, svg: REPORT_PART_3_SVG }
+  const REPORT_PART_3_RESULT = { title: REPORT_PART_3_TITLE }
   const REPORT_PART_3_SOURCE_TYPE = 'app'
   const REPORT_PART_3 = {
     id: REPORT_PART_3_ID,
@@ -60,9 +61,43 @@ describe('SpaceReportResultService', () => {
     createdAt: REPORT_CREATED,
   } as unknown as SpaceReport
 
+  const fileContentProvideStub = stub()
+  const appContentProvideStub = stub()
+  const jobContentProvideStub = stub()
+  const assetContentProvideStub = stub()
+  const workflowContentProvideStub = stub()
+  const userContentProvideStub = stub()
+
   beforeEach(() => {
     getPartsStub.reset()
     getPartsStub.returns(REPORT_PARTS)
+
+    fileContentProvideStub.reset()
+    fileContentProvideStub.throws()
+    fileContentProvideStub
+      .withArgs(REPORT_PART_1, 'report-part-10')
+      .returns(getContentFake('report-part-10', REPORT_PART_1_TITLE))
+    fileContentProvideStub
+      .withArgs(REPORT_PART_2, 'report-part-20')
+      .returns(getContentFake('report-part-20', REPORT_PART_2_TITLE))
+
+    appContentProvideStub.reset()
+    appContentProvideStub.throws()
+    appContentProvideStub
+      .withArgs(REPORT_PART_3, 'report-part-30')
+      .returns(getContentFake('report-part-30', REPORT_PART_3_TITLE))
+
+    jobContentProvideStub.reset()
+    jobContentProvideStub.throws()
+
+    assetContentProvideStub.reset()
+    assetContentProvideStub.throws()
+
+    workflowContentProvideStub.reset()
+    workflowContentProvideStub.throws()
+
+    userContentProvideStub.reset()
+    userContentProvideStub.throws()
   })
 
   it('should create a valid HTML', async () => {
@@ -95,52 +130,16 @@ describe('SpaceReportResultService', () => {
     expect(res.body.textContent).to.include(REPORT_PART_1_TITLE)
   })
 
-  it('should contain the report part 1 svg', async () => {
-    const res = await getResultDocument()
-
-    expect(res.body.textContent).to.include(REPORT_PART_1_SVG)
-  })
-
-  it('should contain the report part 1 created', async () => {
-    const res = await getResultDocument()
-
-    expect(res.body.textContent).to.include(REPORT_PART_1_CREATED.toLocaleString())
-  })
-
   it('should contain the report part 2 title', async () => {
     const res = await getResultDocument()
 
     expect(res.body.textContent).to.include(REPORT_PART_2_TITLE)
   })
 
-  it('should contain the report part 2 svg', async () => {
-    const res = await getResultDocument()
-
-    expect(res.body.textContent).to.include(REPORT_PART_2_SVG)
-  })
-
-  it('should contain the report part 2 created', async () => {
-    const res = await getResultDocument()
-
-    expect(res.body.textContent).to.include(REPORT_PART_2_CREATED.toLocaleString())
-  })
-
   it('should contain the report part 3 title', async () => {
     const res = await getResultDocument()
 
-    expect(res.body.textContent).to.include(REPORT_PART_2_TITLE)
-  })
-
-  it('should contain the report part 3 svg', async () => {
-    const res = await getResultDocument()
-
-    expect(res.body.textContent).to.include(REPORT_PART_2_SVG)
-  })
-
-  it('should contain the report part 3 created', async () => {
-    const res = await getResultDocument()
-
-    expect(res.body.textContent).to.include(REPORT_PART_2_CREATED.toLocaleString())
+    expect(res.body.textContent).to.include(REPORT_PART_3_TITLE)
   })
 
   it('should not contain empty text for files', async () => {
@@ -173,18 +172,24 @@ describe('SpaceReportResultService', () => {
     expect(res.body.textContent).to.include('There are no workflows in this space')
   })
 
+  it('should contain empty text for users', async () => {
+    const res = await getResultDocument()
+
+    expect(res.body.textContent).to.include('There are no members in this space')
+  })
+
   it('should contain 8 links', async () => {
     const res = await getResultDocument()
     const links = res.getElementsByTagName('a')
 
-    expect(links).to.have.length(8)
+    expect(links).to.have.length(9)
   })
 
   it('should contain links pointing to the correct elements', async () => {
     const res = await getResultDocument()
     const links = res.getElementsByTagName('a')
 
-    Array.from(links).forEach(link => {
+    Array.from(links).forEach((link) => {
       const href = link.getAttribute('href')
       expect(href).not.to.be.null()
 
@@ -194,7 +199,6 @@ describe('SpaceReportResultService', () => {
 
       expect(link.textContent).to.eq(targetElement.textContent)
     })
-    expect(links).to.have.length(8)
   })
 
   it('should contain styles, if provided', async () => {
@@ -202,9 +206,48 @@ describe('SpaceReportResultService', () => {
 
     const res = await getResultDocument(STYLES)
     const styles = res.getElementsByTagName('style')
-    const providedStyles = Array.from(styles).find(s => s.textContent === STYLES)
+    const providedStyles = Array.from(styles).find((s) => s.textContent === STYLES)
 
     expect(providedStyles).not.to.be.null()
+  })
+
+  it('should not catch error from content provider', async () => {
+    const error = new Error('my error')
+
+    getPartsStub.returns([REPORT_PART_1])
+
+    fileContentProvideStub.reset()
+    fileContentProvideStub.throws(error)
+
+    await expect(getInstance().generateResult(REPORT)).to.be.rejectedWith(error)
+  })
+  ;[
+    { type: 'app', contentStub: appContentProvideStub },
+    { type: 'asset', contentStub: assetContentProvideStub },
+    { type: 'file', contentStub: fileContentProvideStub },
+    { type: 'job', contentStub: jobContentProvideStub },
+    { type: 'workflow', contentStub: workflowContentProvideStub },
+    { type: 'user', contentStub: userContentProvideStub },
+  ].forEach((prop) => {
+    it(`should use the correct result content provider and repo for source type ${prop.type}`, async () => {
+      const TITLE = 'TITLE'
+      const REPORT_PART_WITH_TYPE = { id: 5, sourceType: prop.type, result: { title: TITLE } }
+      const TITLE_ID = 'report-part-5'
+
+      getPartsStub.returns([REPORT_PART_WITH_TYPE])
+
+      prop.contentStub.reset()
+      prop.contentStub.throws()
+      prop.contentStub
+        .withArgs(REPORT_PART_WITH_TYPE, TITLE_ID)
+        .returns(getContentFake(TITLE_ID, TITLE))
+
+      const res = await getResultDocument()
+      const titleElem = res.getElementById(TITLE_ID)
+
+      expect(titleElem).to.exist()
+      expect(titleElem.textContent).to.eq(TITLE)
+    })
   })
 
   async function getResultDocument(styles?: string) {
@@ -212,6 +255,33 @@ describe('SpaceReportResultService', () => {
   }
 
   function getInstance() {
-    return new SpaceReportResultService()
+    const ENTITY_PARENT_RESOLVER_MAP = {
+      app: {
+        provide: appContentProvideStub,
+      },
+      asset: {
+        provide: assetContentProvideStub,
+      },
+      file: {
+        provide: fileContentProvideStub,
+      },
+      job: {
+        provide: jobContentProvideStub,
+      },
+      user: {
+        provide: userContentProvideStub,
+      },
+      workflow: {
+        provide: workflowContentProvideStub,
+      },
+    } as unknown as {
+      [T in SpaceReportPartSourceType]: SpaceReportResultPartContentProvider<T>
+    }
+
+    return new SpaceReportResultService(ENTITY_PARENT_RESOLVER_MAP)
+  }
+
+  function getContentFake(id: string, title: string) {
+    return new JSDOM(`<div><h3 id="${id}">${title}</h3></div>`).window.document.querySelector('div')
   }
 })

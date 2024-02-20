@@ -1,4 +1,4 @@
-import { isArray, isSafeInteger } from 'lodash'
+import { isSafeInteger } from 'lodash'
 import React from 'react'
 import {
   ControllerRenderProps,
@@ -25,31 +25,6 @@ const getDefaultValue = (val) => {
   return Array.isArray(val)
     ? val.map(value => ({ value, label: value }))
     : { value: val, label: val }
-}
-
-/**
- * Only with file select component we need to show field value that we
- * might get as inputs[field_name]. In this case exctract the field name.
- *
- * In case hash is also present we extract what is after the hash
- *
- * @param fieldName
- */
-const extractFieldName = (fieldName: string) => {
-  if (fieldName.includes('[')) {
-    const removedSquares = fieldName.substring(
-      fieldName.indexOf('[') + 1,
-      fieldName.lastIndexOf(']'),
-    )
-    if (removedSquares.includes('#')) {
-      return removedSquares.substring(
-        removedSquares.indexOf('#') + 1,
-        removedSquares.length,
-      )
-    }
-    return removedSquares
-  }
-  return fieldName
 }
 
 const StyledMenuMessage = styled.div`
@@ -141,7 +116,7 @@ export const JobRunInput = ({
             }}
             dialogType="radio"
             value={field.value && [field.value]}
-            scope={scope}
+            scopes={scope === 'public' ? ['private', 'public'] : [scope]}
           />
 
           <FieldInfo text={inputSpec.help} />
@@ -161,7 +136,7 @@ export const JobRunInput = ({
               field.onBlur()
             }}
             value={field?.value ?? null}
-            scope={scope}
+            scopes={scope === 'public' ? ['private', 'public'] : [scope]}
           />
 
           <FieldInfo text={inputSpec.help} />

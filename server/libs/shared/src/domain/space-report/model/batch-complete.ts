@@ -1,6 +1,6 @@
-import { SpaceReportPartResult } from './space-report-part-result'
+import { SpaceReportPartResultUnion } from '@shared/domain/space-report/model/space-report-part-result.union'
 
 export interface BatchComplete {
   id: number
-  result: SpaceReportPartResult
+  result: SpaceReportPartResultUnion
 }

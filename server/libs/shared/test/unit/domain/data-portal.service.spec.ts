@@ -796,17 +796,30 @@ describe('data portal service tests', () => {
     prismSpaceId?: number,
     toolsPortalId?: number,
     toolsSpaceId?: number,
+    gettingStartedPortalId?: number,
+    gettingStartedSpaceId?: number,
   ) => {
     const PRISM_PORTAL_ID = prismPortalId ?? 1
     const PRISM_SPACE_ID = prismSpaceId ?? 1
     const TOOLS_PORTAL_ID = toolsPortalId ?? 2
     const TOOLS_SPACE_ID = toolsSpaceId ?? 2
+    const GETTING_STARTED_PORTAL_ID = gettingStartedPortalId ?? 3
+    const GETTING_STARTED_SPACE_ID = gettingStartedSpaceId ?? 3
 
     process.env.PRISM_PORTAL_ID = PRISM_PORTAL_ID.toString()
     process.env.PRISM_SPACE_ID = PRISM_SPACE_ID.toString()
     process.env.TOOLS_PORTAL_ID = TOOLS_PORTAL_ID.toString()
     process.env.TOOLS_SPACE_ID = TOOLS_SPACE_ID.toString()
-    return { PRISM_PORTAL_ID, PRISM_SPACE_ID, TOOLS_PORTAL_ID, TOOLS_SPACE_ID }
+    process.env.GETTING_STARTED_PORTAL_ID = GETTING_STARTED_PORTAL_ID.toString()
+    process.env.GETTING_STARTED_SPACE_ID = GETTING_STARTED_SPACE_ID.toString()
+    return {
+      PRISM_PORTAL_ID,
+      PRISM_SPACE_ID,
+      TOOLS_PORTAL_ID,
+      TOOLS_SPACE_ID,
+      GETTING_STARTED_PORTAL_ID,
+      GETTING_STARTED_SPACE_ID,
+    }
   }
 
   const testPortalsForAdmin = async (userId: number) => {
@@ -868,9 +881,36 @@ describe('data portal service tests', () => {
     expect(result[0].spaceId).eq(TOOLS_SPACE_ID)
   })
 
+  it('list custom portals - accessible Getting Started portal', async () => {
+    const gettingStartedSpace = create.spacesHelper.create(em, { name: 'Getting Started and Next Steps' })
+    await em.flush()
+    create.spacesHelper.addMember(
+      em,
+      { user, space: gettingStartedSpace },
+      { role: SPACE_MEMBERSHIP_ROLE.LEAD },
+    )
+    const gettingStartedPortal = create.dataPortalsHelper.create(
+      em,
+      { space: gettingStartedSpace },
+      { name: 'Getting Started and Next Steps' },
+    )
+    await em.flush()
+    const {
+      GETTING_STARTED_SPACE_ID,
+      GETTING_STARTED_PORTAL_ID,
+    } = customDPIds(11, 11, 22, 22, gettingStartedPortal.id, gettingStartedSpace.id)
+
+    const result = await dataPortalService.listAccessibleCustomPortals()
+    expect(result.length).eq(1)
+    expect(result[0].name).eq('Getting Started and Next Steps')
+    expect(result[0].id).eq(GETTING_STARTED_PORTAL_ID)
+    expect(result[0].spaceId).eq(GETTING_STARTED_SPACE_ID)
+  })
+
   it('list custom portals - envs set, but not accessible', async () => {
     const prismSpace = create.spacesHelper.create(em, { name: 'PRISM' })
     const toolsSpace = create.spacesHelper.create(em, { name: 'TOOLS' })
+    const gettingStartedSpace = create.spacesHelper.create(em, { name: 'Getting Started and Next Steps' })
     await em.flush()
     const prismPortal = create.dataPortalsHelper.create(
       em,
@@ -882,9 +922,15 @@ describe('data portal service tests', () => {
       { space: toolsSpace },
       { name: 'Tools_PORTAL' },
     )
+    const gettingStartedPortal = create.dataPortalsHelper.create(
+      em,
+      { space: gettingStartedSpace },
+      { name: 'Getting Started and Next Steps' },
+    )
+
     await em.flush()
 
-    customDPIds(prismPortal.id, prismSpace.id, toolsPortal.id, toolsSpace.id)
+    customDPIds(prismPortal.id, prismSpace.id, toolsPortal.id, toolsSpace.id, gettingStartedPortal.id, gettingStartedSpace.id)
 
     const result = await dataPortalService.listAccessibleCustomPortals()
     expect(result.length).eq(0)
