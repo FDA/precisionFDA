@@ -5,7 +5,6 @@ import { SUPPORT_EMAIL } from '../../constants'
 import { useAlertDismissed } from '../../features/admin/alerts/useAlertDismissedLocalStorage'
 import { CDMHKey, logout } from '../../features/auth/api'
 import { useAuthUser } from '../../features/auth/useAuthUser'
-import { useCustomPortalsQuery } from '../../features/auth/useCustomPortalsQuery'
 import { useGenerateKeyModal } from '../../features/auth/useGenerateKeyModal'
 import { CDMHNames, useSiteSettingsQuery } from '../../features/auth/useSiteSettingsQuery'
 import { useMainDataPortal } from '../../features/data-portals/queries'
@@ -165,7 +164,7 @@ const Header: React.FC = () => {
   const { pathname } = useLocation()
   const user = useAuthUser()
   const siteSettings = useSiteSettingsQuery()
-  const customPortals = useCustomPortalsQuery()
+  const customPortals = siteSettings.data?.dataPortals?.customPortals
   const [isCloudResourcesModalShown, setCloudResourcesModalShown] = useState(false)
   const { isAlertDismissed, setIsAlertDismissed } = useAlertDismissed()
 
@@ -193,9 +192,9 @@ const Header: React.FC = () => {
 
   if (!user) return null
 
-  const prismDataPortal = customPortals.data?.find((p) => p.name === 'PRISM')
-  const toolsDataPortal = customPortals.data?.find((p) => p.name === 'Tools')
-  const customPortalIds = customPortals.data?.filter((p) => p.name === 'Tools' || p.name === 'PRISM')?.map((p) => p.id)
+  const prismDataPortal = customPortals?.find((p) => p.name === 'PRISM')
+  const toolsDataPortal = customPortals?.find((p) => p.name === 'Tools')
+  const customPortalIds = customPortals?.filter((p) => p.name === 'Tools' || p.name === 'PRISM')?.map((p) => p.id)
   const showGSRSLink = !isSpacesPath && !isDataPortalsPath && !userIsGuest
   const showCDMHLink = !isSpacesPath && !isDataPortalsPath && !!siteSettings?.data?.cdmh.isEnabled
   const showAlertBanner = !isAlertDismissed && siteSettings.data?.alerts?.[0]

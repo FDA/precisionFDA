@@ -78,13 +78,6 @@ module Api
       render status: e.response.code, json: e.response.body
     end
 
-    def custom
-      response = https_apps_client.custom_data_portals_list
-      render json: response
-    rescue Net::HTTPClientException => e
-      render status: e.response.code, json: e.response.body
-    end
-
     def update
       portal_data = {
         id: data_portal_params[:id],

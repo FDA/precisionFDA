@@ -4,6 +4,7 @@ import { Injectable } from '@nestjs/common'
 import { App } from '@shared/domain/app/app.entity'
 import { Job } from '@shared/domain/job/job.entity'
 import { NotificationService } from '@shared/domain/notification/services/notification.service'
+import { SpaceReportResultService } from '@shared/domain/space-report/service/result/space-report-result.service'
 import { Space } from '@shared/domain/space/space.entity'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { Asset } from '@shared/domain/user-file/asset.entity'
@@ -13,16 +14,12 @@ import { Workflow } from '@shared/domain/workflow/entity/workflow.entity'
 import { NOTIFICATION_ACTION, SEVERITY } from '@shared/enums'
 import { InvalidStateError, NotFoundError } from '@shared/errors'
 import { UID } from '@shared/services/entity-fetcher.service'
-import { SCOPE } from '@shared/types/common'
 import { ArrayUtils } from '@shared/utils/array.utils'
 import { SpaceReportPart } from '../entity/space-report-part.entity'
 import { SpaceReport } from '../entity/space-report.entity'
 import { BatchComplete } from '../model/batch-complete'
 import { SpaceReportPartSource } from '../model/space-report-part-source'
-import { SpaceReportPartSourceEntity } from '../model/space-report-part-source-entity'
-import { SpaceReportPartSourceType } from '../model/space-report-part-source.type'
 import { SpaceReportPartService } from './part/space-report-part.service'
-import { SpaceReportResultService } from './space-report-result.service'
 
 @Injectable()
 export class SpaceReportService {
@@ -43,7 +40,7 @@ export class SpaceReportService {
       const space = await this.getSpaceForUserValidated(spaceId)
       const spaceReport = new SpaceReport(this.em.getReference(User, this.user.id))
       spaceReport.space = space
-      spaceReport.reportParts.add(await this.createSpaceReportParts(space.scope))
+      spaceReport.reportParts.add(await this.createSpaceReportParts(space))
 
       if (ArrayUtils.isEmpty(spaceReport.reportParts.getItems())) {
         throw new InvalidStateError('Report not generated: No entities to report on in this space')
@@ -151,24 +148,23 @@ export class SpaceReportService {
       .getResult()
   }
 
-  getSpaceReportPartMetaData<T extends SpaceReportPartSourceType>(
-    source: SpaceReportPartSourceEntity<T>,
-  ) {
-    return this.spaceReportPartService.getSpaceReportPartMetaData(source)
-  }
-
-  private async createSpaceReportParts(scope: SCOPE): Promise<SpaceReportPart[]> {
+  private async createSpaceReportParts(space: Space): Promise<SpaceReportPart[]> {
+    const scope = space.scope
     const spaceFiles = await this.em.find(UserFile, { scope })
     const spaceApps = await this.em.find(App, { scope })
     const spaceJobs = await this.em.find(Job, { scope })
     const spaceAssets = await this.em.find(Asset, { scope })
     const spaceWorkflows = await this.em.find(Workflow, { scope })
+    const spaceMembers = await this.em.find(User, {
+      spaceMemberships: { spaces: { id: space.id }, active: true },
+    })
     const reportPartSources: SpaceReportPartSource[] = [
       ...spaceFiles.map((f) => ({ type: 'file' as const, id: f.id })),
       ...spaceApps.map((a) => ({ type: 'app' as const, id: a.id })),
       ...spaceJobs.map((j) => ({ type: 'job' as const, id: j.id })),
       ...spaceAssets.map((a) => ({ type: 'asset' as const, id: a.id })),
       ...spaceWorkflows.map((w) => ({ type: 'workflow' as const, id: w.id })),
+      ...spaceMembers.map((u) => ({ type: 'user' as const, id: u.id })),
     ]
 
     return this.spaceReportPartService.createReportParts(reportPartSources)

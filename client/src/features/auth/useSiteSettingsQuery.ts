@@ -9,18 +9,25 @@ export const CDMHNames: Record<CDMHKey, string> = {
   connectPortal: 'Connect Portal',
 }
 
+export interface CustomPortal {
+  name: string
+  id: number
+  spaceId: number
+}
+
 export interface SiteSettingsResponse {
   cdmh: {
-    isEnabled: boolean,
-    data?: Record<CDMHKey, string> },
+      isEnabled: boolean,
+      data?: Record<CDMHKey, string> },
   ssoButton: {
-    isEnabled: boolean
-    data?: {
-      fdaSsoUrl: string
-    },
+      isEnabled: boolean
+      data?: {
+          fdaSsoUrl: string
+      },
   },
   dataPortals: {
-    isEnabled: boolean,
+      isEnabled: boolean,
+      customPortals: CustomPortal[],
   },
   alerts: Alert[]
 }
