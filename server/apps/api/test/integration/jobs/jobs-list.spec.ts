@@ -13,7 +13,7 @@ import { create, db } from '@shared/test'
 import { mocksReset } from '@shared/test/mocks'
 import { expect } from 'chai'
 import supertest from 'supertest'
-import { getServer } from '../../../src/server'
+import { testedApp } from '../../index'
 import { getDefaultHeaderData } from '../../utils/expect-helper'
 
 
@@ -88,7 +88,7 @@ describe.skip('GET /jobs', () => {
   })
 
   it('returns jobs list', async () => {
-    const { body } = await supertest(getServer())
+    const { body } = await supertest(testedApp.getHttpServer())
       .get('/jobs')
       .set(getDefaultHeaderData(user1))
       .expect(200)
@@ -105,7 +105,7 @@ describe.skip('GET /jobs', () => {
   })
 
   it('returns second page of jobs list', async () => {
-    const { body } = await supertest(getServer())
+    const { body } = await supertest(testedApp.getHttpServer())
       .get('/jobs')
       .set(getDefaultHeaderData(user1))
       .query({ page: 2 })
@@ -123,7 +123,7 @@ describe.skip('GET /jobs', () => {
   })
 
   it('returns jobs list for user2', async () => {
-    const { body } = await supertest(getServer())
+    const { body } = await supertest(testedApp.getHttpServer())
       .get('/jobs')
       .set(getDefaultHeaderData(user2))
       .query({ page: 2 })
@@ -140,7 +140,7 @@ describe.skip('GET /jobs', () => {
 
   // TODO
   it.skip('returns jobs list for different scopes', async () => {
-    const { body } = await supertest(getServer()).get('/jobs')
+    const { body } = await supertest(testedApp.getHttpServer()).get('/jobs')
       .set(getDefaultHeaderData(user1))
       .query({ scope: HOME_SCOPE.EVERYBODY })
       .expect(200)
@@ -148,7 +148,7 @@ describe.skip('GET /jobs', () => {
 
   // TODO
   it.skip('returns jobs list for a space', async () => {
-    const { body } = await supertest(getServer())
+    const { body } = await supertest(testedApp.getHttpServer())
       .get('/jobs')
       .set(getDefaultHeaderData(user1))
       .query({ scope: getScopeFromSpaceId(space.id) })
@@ -158,7 +158,7 @@ describe.skip('GET /jobs', () => {
   context('error states', () => {
     it('returns 400 when scope is invalid', async () => {
       const badScope = 'foobar'
-      const { body } = await supertest(getServer())
+      const { body } = await supertest(testedApp.getHttpServer())
         .get('/jobs')
         .set(getDefaultHeaderData(user1))
         .query({ scope: badScope })
@@ -169,7 +169,7 @@ describe.skip('GET /jobs', () => {
 
     it('returns 400 when spaceId is invalid', async () => {
       const badSpaceId = 'notASpaceId'
-      const { body } = await supertest(getServer())
+      const { body } = await supertest(testedApp.getHttpServer())
         .get('/jobs')
         .set(getDefaultHeaderData(user1))
         .query({ spaceId: badSpaceId })

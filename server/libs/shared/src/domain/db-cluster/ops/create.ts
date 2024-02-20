@@ -19,7 +19,10 @@ export class CreateDbClusterOperation extends BaseOperation<UserOpsCtx, CreateDb
     this.input = input
     this.em = this.ctx.em
 
-    const platformClient = new PlatformClient(this.ctx.user.accessToken, this.ctx.log)
+    const platformClient = new PlatformClient(
+      { accessToken: this.ctx.user.accessToken },
+      this.ctx.log,
+    )
 
     const user = await this.em.findOne(User, { id: this.ctx.user.id })
 

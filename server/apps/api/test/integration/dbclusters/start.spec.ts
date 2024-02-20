@@ -12,7 +12,7 @@ import {
   STATUSES,
 } from '@shared/domain/db-cluster/db-cluster.enum'
 import { fakes, mocksReset } from '@shared/test/mocks'
-import { getServer } from '../../../src/server'
+import { testedApp } from '../../index'
 import { getDefaultHeaderData } from '../../utils/expect-helper'
 
 describe('POST /dbclusters/start', () => {
@@ -36,7 +36,7 @@ describe('POST /dbclusters/start', () => {
   })
 
   it('responds with success', async () => {
-    const { body } = await supertest(getServer())
+    const { body } = await supertest(testedApp.getHttpServer())
       .post(`/dbclusters/start`)
       .set(getDefaultHeaderData(user))
       .send({ dxids: dxids })
@@ -56,7 +56,7 @@ describe('POST /dbclusters/start', () => {
     const describeCallRes = { status: STATUSES.STARTING, id: dxid }
     fakes.client.dbClusterDescribeFake.onCall(0).returns(describeCallRes)
 
-    const { body } = await supertest(getServer())
+    const { body } = await supertest(testedApp.getHttpServer())
       .post(`/dbclusters/start`)
       .set(getDefaultHeaderData(user))
       .send({ dxids: [dxid] })
@@ -72,7 +72,7 @@ describe('POST /dbclusters/start', () => {
 
   context('error states', () => {
     it('throws error when the dbcluster does not exist', async () => {
-      const { body } = await supertest(getServer())
+      const { body } = await supertest(testedApp.getHttpServer())
         .post(`/dbclusters/start`)
         .set(getDefaultHeaderData(user))
         .send({ dxids: [dxids[0], `dbcluster-${generate.random.dxstr()}`] })
@@ -85,7 +85,7 @@ describe('POST /dbclusters/start', () => {
       dbClusters[0].status = DB_CLUSTER_STATUS.AVAILABLE
       await em.flush()
 
-      const { body } = await supertest(getServer())
+      const { body } = await supertest(testedApp.getHttpServer())
         .post(`/dbclusters/start`)
         .set(getDefaultHeaderData(user))
         .send({ dxids: dxids })
