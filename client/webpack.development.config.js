@@ -63,95 +63,113 @@ module.exports = merge(base({ urlLoaderOptions }), swc({ swcLoaderOptions }), {
         cert: fs.readFileSync(path.resolve('../cert.pem')),
       },
     },
-    proxy: {
-      '/logout': {
+    proxy: [
+      {
+        context: ['/logout'],
         target: TARGET,
         secure: false,
       },
-      '/return_from_login': {
+      {
+        context: ['/return_from_login'],
         target: TARGET,
         secure: false,
       },
-      '/login': {
+      {
+        context: ['/login'],
         target: TARGET,
         secure: false,
       },
-      '/api': {
+      {
+        context: ['/api'],
         target: TARGET,
         secure: false,
       },
-      '/pdfs': {
+      {
+        context: ['/pdfs'],
         target: TARGET,
         secure: false,
       },
-      '/assets': {
+      {
+        context: ['/assets'],
         target: TARGET,
         secure: false,
       },
-      // '/admin': {
-      //   target: TARGET,
-      //   secure: false,
-      // },
-      '/discussions': {
+
+      {
+        context: ['/discussions'],
         target: TARGET,
         secure: false,
       },
-      '/apps': {
+      {
+        context: ['/apps'],
         target: TARGET,
         secure: false,
       },
-      '/workflows/new': {
+      {
+        context: ['/workflows/new'],
         target: TARGET,
         secure: false,
       },
-      '/workflows/*/edit': {
+      {
+        context: ['/workflows/*/edit'],
         target: TARGET,
         secure: false,
       },
-      '/notes': {
+      {
+        context: ['/notes'],
         target: TARGET,
         secure: false,
       },
-      '/comparisons': {
+      {
+        context: ['/comparisons'],
         target: TARGET,
         secure: false,
       },
-      '/licenses': {
+      {
+        context: ['/licenses'],
         target: TARGET,
         secure: false,
       },
-      '/users': {
+      {
+        context: ['/users'],
         target: TARGET,
         secure: false,
       },
-      '/profile': {
+      {
+        context: ['/profile'],
         target: TARGET,
         secure: false,
       },
-      '/guidelines': {
+      {
+        context: ['/guidelines'],
         target: TARGET,
         secure: false,
       },
-      '/publish': {
+      {
+        context: ['/publish'],
         target: TARGET,
         secure: false,
       },
-      '/experts/*/edit': {
+      {
+        context: ['/experts/*/edit'],
         target: TARGET,
         secure: false,
       },
-      '/experts/*/qa': {
+      {
+        context: ['/experts/*/qa'],
         target: TARGET,
         secure: false,
       },
-      '/challenges/*/editor/*': {
+      {
+        context: ['/challenges/*/editor/*'],
         target: TARGET,
         secure: false,
       },
-      '/jobs': {
+      {
+        context: ['/jobs'],
         target: TARGET,
         secure: false,
       },
-    },
+    ],
   },
 })

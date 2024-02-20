@@ -1,4 +1,5 @@
 import React, { Ref } from 'react'
+import DOMPurify from 'dompurify'
 import { ReactMarkdown } from 'react-markdown/lib/react-markdown'
 import rehypeHighlight from 'rehype-highlight/lib'
 import rehypeRaw from 'rehype-raw'
@@ -70,7 +71,7 @@ export const Markdown = ({ docRef, data = '' }: { docRef?: Ref<any>, data?: stri
         remarkPlugins={[remarkGfm]}
         rehypePlugins={[rehypeSlug, rehypeHighlight, rehypeRaw]}
         >
-        {data}
+        {DOMPurify.sanitize(data)}
       </ReactMarkdown>
     </div>
   )

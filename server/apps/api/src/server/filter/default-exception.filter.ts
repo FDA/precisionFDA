@@ -1,29 +1,32 @@
-import { ArgumentsHost, Catch, ExceptionFilter } from '@nestjs/common'
+import { Catch } from '@nestjs/common'
 import { config } from '@shared/config'
-import { ENVS } from '@shared/enums'
-import { BaseError } from '@shared/errors'
-import { Response } from 'express'
+import { ErrorCodes } from '@shared/errors'
+import { AbstractExceptionFilter, ErrorPayload } from './abstract-exception.filter'
 
+
+/**
+ * At the moment, this will catch all errors (can be anything) except for BaseError
+  */
 @Catch()
-export class DefaultExceptionFilter implements ExceptionFilter {
-  catch(exception: BaseError, host: ArgumentsHost) {
-    const response = host.switchToHttp().getResponse<Response>()
+export class DefaultExceptionFilter extends AbstractExceptionFilter<Error> {
 
-    response.status(500).json(this.formatError(exception))
+  protected getStatusCode(exception: Error): number {
+    return 500
   }
 
-  private formatError(err: Error) {
-    const payload: Record<string, any> = {
+  protected formatError(err: Error): ErrorPayload {
+    const payload: ErrorPayload = {
       error: {
-        message: err.message,
-        name: err.name,
-        code: 'GENERIC',
+        code: ErrorCodes.GENERIC,
+        message: err?.message ?? 'Internal server error',
+        statusCode: this.getStatusCode(err),
       },
     }
-    if (config.env !== ENVS.PRODUCTION) {
+
+    if (config.logs.enableStackLogging) {
       payload.stack = err.stack
     }
-    console.error(err)
+
     return payload
   }
 }

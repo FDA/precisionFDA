@@ -43,7 +43,7 @@ export class Space extends BaseEntity {
   @Property({ fieldName: 'space_type' })
   type: SPACE_TYPE
 
-  @Property({fieldName: 'space_id', nullable: true })
+  @Property({ fieldName: 'space_id', nullable: true })
   spaceId: number
 
   @Property()
@@ -79,18 +79,22 @@ export class Space extends BaseEntity {
   }
 
   isConfidentialReviewerSpace() {
-    return this.isConfidential() && this.hostDxOrg !== null
+    return this.isConfidentialNonPrivateSpace() && this.hostDxOrg !== null
   }
 
   isConfidentialSponsorSpace() {
-    return this.isConfidential() && this.guestDxOrg !== null
+    return this.isConfidentialNonPrivateSpace() && this.guestDxOrg !== null
+  }
+
+  private isConfidentialNonPrivateSpace() {
+    return this.isConfidential() && this.type !== SPACE_TYPE.PRIVATE_TYPE
   }
 
   [EntityRepositoryType]?: SpaceRepository
 
   async findLeadBySide(side: SPACE_MEMBERSHIP_SIDE): Promise<User | undefined> {
     await this.spaceMemberships.init()
-    const result = this.spaceMemberships.getItems().find(x => {
+    const result = this.spaceMemberships.getItems().find((x) => {
       return x.isLead() && x.side === side
     })
     await result?.user.load()

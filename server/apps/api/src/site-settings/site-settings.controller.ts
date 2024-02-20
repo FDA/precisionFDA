@@ -7,6 +7,12 @@ import { NotFoundError, PermissionError, ServiceError } from '@shared/errors'
 import { isRequestFromAuthenticatedUser, isRequestFromFdaSubnet } from '../server/utils'
 import { SqlEntityManager } from '@mikro-orm/mysql'
 
+
+/**
+ * Controller for site settings. Site settings are used to control the visibility of features in the UI.
+ * At the moment, the following features are supported:
+ * CDMH, SSO button, Data Portals, Alerts.
+ */
 @Controller('/site-settings')
 export class SiteSettingsController {
   constructor(
@@ -46,13 +52,14 @@ export class SiteSettingsController {
     if (!isRequestFromAuthenticatedUser(headers)) {
       return body
     }
+    const customPortals = await this.dataPortalService.listAccessibleCustomPortals()
     try {
       await this.dataPortalService.getDefault()
-      body.dataPortals = { isEnabled: true }
+      body.dataPortals = { isEnabled: true, customPortals }
       return body
     } catch (error) {
       if (error instanceof PermissionError || error instanceof NotFoundError) {
-        body.dataPortals = { isEnabled: false }
+        body.dataPortals = { isEnabled: false, customPortals }
         return body
       } else {
         throw new ServiceError(`Unexpected error while checking Data Portals feature: ${error}`)
