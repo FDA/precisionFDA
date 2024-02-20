@@ -13,7 +13,7 @@ import { create, db, generate } from '@shared/test'
 import { fakes, mocksReset } from '@shared/test/mocks'
 import { expect } from 'chai'
 import supertest from 'supertest'
-import { getServer } from '../../../src/server'
+import { testedApp } from '../../index'
 import { getDefaultHeaderData } from '../../utils/expect-helper'
 
 describe('PATCH /spaces/:id/lock', () => {
@@ -62,7 +62,7 @@ describe('PATCH /spaces/:id/lock', () => {
 
 
   it('locks space', async () => {
-    await supertest(getServer())
+    await supertest(testedApp.getHttpServer())
       .patch(`/spaces/${space.id}/lock`)
       .set(getDefaultHeaderData(user))
       .expect(204)
@@ -75,7 +75,7 @@ describe('PATCH /spaces/:id/lock', () => {
 
   context('error states', () => {
     it('throws 404 when the space does not exist', async () => {
-      const { body } = await supertest(getServer())
+      const { body } = await supertest(testedApp.getHttpServer())
         .patch('/spaces/4848/lock')
         .set(getDefaultHeaderData(user))
         .expect(404)
@@ -83,7 +83,7 @@ describe('PATCH /spaces/:id/lock', () => {
     })
 
     it('does not allow to lock space (user is not RSA) and returns 403', async () => {
-      const { body } = await supertest(getServer())
+      const { body } = await supertest(testedApp.getHttpServer())
         .patch(`/spaces/${space.id}/lock`)
         .set(getDefaultHeaderData(hostLead))
         .expect(403)
@@ -95,7 +95,7 @@ describe('PATCH /spaces/:id/lock', () => {
       create.spacesHelper.addMember(em, { user, space: alreadyLockedSpace })
       await em.flush()
 
-      const { body } = await supertest(getServer())
+      const { body } = await supertest(testedApp.getHttpServer())
         .patch(`/spaces/${alreadyLockedSpace.id}/lock`)
         .set(getDefaultHeaderData(user))
         .expect(403)
@@ -107,7 +107,7 @@ describe('PATCH /spaces/:id/lock', () => {
       create.spacesHelper.addMember(em, { user, space: groupSpace })
       await em.flush()
 
-      const { body } = await supertest(getServer())
+      const { body } = await supertest(testedApp.getHttpServer())
         .patch(`/spaces/${groupSpace.id}/lock`)
         .set(getDefaultHeaderData(user)) // different user has to do this in order to fail? i guess.
         .send({})

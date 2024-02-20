@@ -1,6 +1,6 @@
 import { App } from '@shared/domain/app/app.entity'
 import { EntityProvenanceService } from '@shared/domain/provenance/service/entity-provenance.service'
-import { SpaceReportPartAppResultProvider } from '@shared/facade/space-report-batch/service/space-report-part-app-result-provider.service'
+import { SpaceReportPartAppResultProvider } from '@shared/facade/space-report/service/space-report-part-app-result-provider.service'
 import { expect } from 'chai'
 import { stub } from 'sinon'
 

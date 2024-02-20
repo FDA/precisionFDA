@@ -44,7 +44,7 @@ export class WorkflowController {
   async describeWorkflow(@Param('uid') uid: string) {
     const workflow = await this.em.findOneOrFail(Workflow, { uid }, { populate: ['user'] })
 
-    const platformClient = new PlatformClient(this.user.accessToken, this.log)
+    const platformClient = new PlatformClient({ accessToken: this.user.accessToken }, this.log)
 
     const platformWorkflowData = await platformClient.workflowDescribe({
       dxid: workflow.dxid,

@@ -1,4 +1,4 @@
-import * as queue from '@shared/queue'
+import { SpaceReportQueueJobProducer } from '@shared/domain/space-report/producer/space-report-queue-job.producer'
 import { SpaceReportService } from '@shared/domain/space-report/service/space-report.service'
 import { expect } from 'chai'
 import { SinonStub, stub } from 'sinon'
@@ -9,20 +9,13 @@ describe('SpaceReportCreateFacade', () => {
   const SPACE_ID = 2
 
   let createReportStub: SinonStub
-  let createGenerateSpaceReportBatchTasksStub: SinonStub
+  let createBatchTasksStub: SinonStub
 
   beforeEach(() => {
     createReportStub = stub().throws()
-    createGenerateSpaceReportBatchTasksStub = stub(
-      queue,
-      'createGenerateSpaceReportBatchTasks',
-    ).resolves()
+    createBatchTasksStub = stub().resolves()
 
     setCreateReportStub([])
-  })
-
-  afterEach(() => {
-    createGenerateSpaceReportBatchTasksStub.restore()
   })
 
   it('should not catch error from createReport', async () => {
@@ -34,8 +27,8 @@ describe('SpaceReportCreateFacade', () => {
 
   it('should not catch error from createGenerateSpaceReportBatchTasks', async () => {
     const error = new Error('my error')
-    createGenerateSpaceReportBatchTasksStub.reset()
-    createGenerateSpaceReportBatchTasksStub.throws(error)
+    createBatchTasksStub.reset()
+    createBatchTasksStub.throws(error)
 
     await expect(getInstance().createSpaceReport(SPACE_ID)).to.be.rejectedWith(error)
   })
@@ -48,24 +41,24 @@ describe('SpaceReportCreateFacade', () => {
 
   it('should create task with 1 batch for 1 report part', async () => {
     setCreateReportStub([{ id: 1 }])
-    createGenerateSpaceReportBatchTasksStub.reset()
-    createGenerateSpaceReportBatchTasksStub.throws()
-    createGenerateSpaceReportBatchTasksStub.withArgs([[1]]).returns(null)
+    createBatchTasksStub.reset()
+    createBatchTasksStub.throws()
+    createBatchTasksStub.withArgs([[1]]).returns(null)
 
     await getInstance().createSpaceReport(SPACE_ID)
 
-    expect(createGenerateSpaceReportBatchTasksStub.calledOnce).to.be.true()
+    expect(createBatchTasksStub.calledOnce).to.be.true()
   })
 
   it('should create task with 1 batch for 3 report parts with batch size 3', async () => {
     setCreateReportStub([{ id: 1 }, { id: 2 }, { id: 3 }])
-    createGenerateSpaceReportBatchTasksStub.reset()
-    createGenerateSpaceReportBatchTasksStub.throws()
-    createGenerateSpaceReportBatchTasksStub.withArgs([[1, 2, 3]]).returns(null)
+    createBatchTasksStub.reset()
+    createBatchTasksStub.throws()
+    createBatchTasksStub.withArgs([[1, 2, 3]]).returns(null)
 
     await getInstance().createSpaceReport(SPACE_ID)
 
-    expect(createGenerateSpaceReportBatchTasksStub.calledOnce).to.be.true()
+    expect(createBatchTasksStub.calledOnce).to.be.true()
   })
 
   it('should create task with 3 batches for 8 report parts with batch size 3', async () => {
@@ -79,9 +72,9 @@ describe('SpaceReportCreateFacade', () => {
       { id: 7 },
       { id: 8 },
     ])
-    createGenerateSpaceReportBatchTasksStub.reset()
-    createGenerateSpaceReportBatchTasksStub.throws()
-    createGenerateSpaceReportBatchTasksStub
+    createBatchTasksStub.reset()
+    createBatchTasksStub.throws()
+    createBatchTasksStub
       .withArgs([
         [1, 2, 3],
         [4, 5, 6],
@@ -91,7 +84,7 @@ describe('SpaceReportCreateFacade', () => {
 
     await getInstance().createSpaceReport(SPACE_ID)
 
-    expect(createGenerateSpaceReportBatchTasksStub.calledOnce).to.be.true()
+    expect(createBatchTasksStub.calledOnce).to.be.true()
   })
 
   function setCreateReportStub(reportParts: unknown[]) {
@@ -115,6 +108,10 @@ describe('SpaceReportCreateFacade', () => {
       createReport: createReportStub,
     } as unknown as SpaceReportService
 
-    return new SpaceReportCreateFacade(user, spaceReportService)
+    const spaceReportQueueJobProducer = {
+      createBatchTasks: createBatchTasksStub,
+    } as unknown as SpaceReportQueueJobProducer
+
+    return new SpaceReportCreateFacade(user, spaceReportService, spaceReportQueueJobProducer)
   }
 })

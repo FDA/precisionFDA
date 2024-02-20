@@ -6,7 +6,7 @@ import { EntityManager } from '@mikro-orm/mysql'
 import supertest from 'supertest'
 import { create, generate, db } from '@shared/test'
 import { fakes, mocksReset } from '@shared/test/mocks'
-import { getServer } from '../../../src/server'
+import { testedApp } from '../../index'
 import { getDefaultHeaderData } from '../../utils/expect-helper'
 
 describe('/news', () => {
@@ -66,7 +66,7 @@ describe('/news', () => {
   })
 
   it('GET /news public access', async () => {
-    const { body } = await supertest(getServer())
+    const { body } = await supertest(testedApp.getHttpServer())
       .get(`/news`)
       .expect(200)
 
@@ -87,7 +87,7 @@ describe('/news', () => {
   })
 
   it('GET /news public access with pagination', async () => {
-    const { body } = await supertest(getServer())
+    const { body } = await supertest(testedApp.getHttpServer())
       .get(`/news`)
       .query({ page: 2 })
       .expect(200)
@@ -99,7 +99,7 @@ describe('/news', () => {
   })
 
   it('GET /news public access with publication filter', async () => {
-    const { body } = await supertest(getServer())
+    const { body } = await supertest(testedApp.getHttpServer())
       .get(`/news`)
       .query({ type: 'publication' })
       .expect(200)
@@ -116,7 +116,7 @@ describe('/news', () => {
   })
 
   it('GET /news public access with year filter', async () => {
-    let response = await supertest(getServer())
+    let response = await supertest(testedApp.getHttpServer())
       .get(`/news`)
       .query({ year: 2022 })
       .expect(200)
@@ -126,7 +126,7 @@ describe('/news', () => {
     })
     expect(response.body.news_items).to.have.length(expectedResults.length)
 
-    response = await supertest(getServer())
+    response = await supertest(testedApp.getHttpServer())
       .get(`/news`)
       .query({ year: 2020 })
       .expect(200)
@@ -140,7 +140,7 @@ describe('/news', () => {
   // TODO: Complete this test, but first need to define what htis API does
   //       when user1 is logged in (will depend on which page accesses this)
   it('GET /news accessed by user1', async () => {
-    const { body } = await supertest(getServer())
+    const { body } = await supertest(testedApp.getHttpServer())
       .get(`/news`)
       .set(getDefaultHeaderData(user1))
       .expect(200)
@@ -163,7 +163,7 @@ describe('/news', () => {
   })
 
   it('GET /news/all accessed by site admin', async () => {
-    const { body } = await supertest(getServer())
+    const { body } = await supertest(testedApp.getHttpServer())
       .get(`/news/all`)
       .set(getDefaultHeaderData(siteAdmin))
       .expect(200)
@@ -176,7 +176,7 @@ describe('/news', () => {
 
   it('POST /news works', async () => {
     const data = generate.news.create()
-    const { body } = await supertest(getServer())
+    const { body } = await supertest(testedApp.getHttpServer())
       .post(`/news`)
       .set(getDefaultHeaderData(siteAdmin))
       .send(data)
@@ -190,7 +190,7 @@ describe('/news', () => {
 
   it('POST /news doesn\'t work if not site admin', async () => {
     const data = generate.news.create()
-    const { body } = await supertest(getServer())
+    const { body } = await supertest(testedApp.getHttpServer())
       .post(`/news`)
       .set(getDefaultHeaderData(user1))
       .send(data)

@@ -51,6 +51,7 @@ const defaultConfig = {
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     port: parseIntFromProcess(process.env.NODE_PORT) ?? 3001,
     appKit: 'project-GVg2Zg80fQb20gg39J507VYx:/appKit-1.2.tgz',
+    enableSsl: parseBooleanFromProcess(process.env.NODE_ENABLE_SSL, true),
     certPath: process.env.NODE_PATH_CERT ?? path.join(__dirname, '../../../../cert.pem'),
     keyCertPath: process.env.NODE_PATH_KEY_CERT ?? path.join(__dirname, '../../../../key.pem'),
     url: process.env.NODE_URL ?? 'https://nodejs-api',
@@ -199,6 +200,7 @@ const defaultConfig = {
     },
   },
   bullBoardEnabled: parseBooleanFromProcess(process.env.NODE_BULL_BOARD_ENABLED) ?? false,
+  nestjsDevtoolsEnabled: parseBooleanFromProcess(process.env.NODE_BULL_BOARD_ENABLED) ?? false,
 }
 
 // lazily plug-in the overrides that are based on the NODE_ENV

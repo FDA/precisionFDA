@@ -235,7 +235,7 @@ export class DiscussionsController {
     const publisherService = new PublisherService(
       this.em,
       this.user,
-      new PlatformClient(this.user.accessToken),
+      new PlatformClient({ accessToken: this.user.accessToken }),
     )
     const fetcherService = new EntityFetcherService(this.em, this.user)
 

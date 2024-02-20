@@ -21,7 +21,7 @@ export class SyncSpacesPermissionsOperation extends WorkerBaseOperation<
   protected membership: SpaceMembership
 
   async run(input: SyncSpacesPermissionsInput): Promise<void> {
-    this.client = new PlatformClient(this.ctx.user.accessToken, this.ctx.log)
+    this.client = new PlatformClient({ accessToken: this.ctx.user.accessToken }, this.ctx.log)
     const userId = this.ctx.user.id
     const em = this.ctx.em
     const spaceRepo = em.getRepository(Space)

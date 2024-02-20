@@ -6,9 +6,8 @@ import { EntityManager } from '@mikro-orm/mysql'
 import supertest from 'supertest'
 import { create, db } from '@shared/test'
 import { fakes, mocksReset } from '@shared/test/mocks'
-import { getServer } from '../../../src/server'
+import { testedApp } from '../../index'
 import { getDefaultHeaderData } from '../../utils/expect-helper'
-
 
 describe('POST /account/checkSpacesPermissions', () => {
   let em: EntityManager
@@ -26,14 +25,19 @@ describe('POST /account/checkSpacesPermissions', () => {
   it('adds createSyncSpacesPermissionsTask to the queue', async () => {
     const userHeaderData = getDefaultHeaderData(user)
 
-    await supertest(getServer())
+    const args = []
+    fakes.queue.createSyncSpacesPermissionsTask.callsFake((...a) => {
+      a[0] = a[0].toJSON()
+      args.push(a)
+    })
+
+    await supertest(testedApp.getHttpServer())
       .post('/account/checkSpacesPermissions')
       .set(userHeaderData)
       .expect(204)
 
-
     expect(fakes.queue.createSyncSpacesPermissionsTask.calledOnce).to.be.true()
-    const fakeCreateSyncSpacesPermissionsArgs = fakes.queue.createSyncSpacesPermissionsTask.getCall(0).args
+    const fakeCreateSyncSpacesPermissionsArgs = args[0]
     expect(fakeCreateSyncSpacesPermissionsArgs).to.deep.equal([
       {
         id: user.id,
