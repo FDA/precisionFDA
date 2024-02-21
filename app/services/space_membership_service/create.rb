@@ -9,6 +9,7 @@ module SpaceMembershipService
         new_user = membership.user
         invitee = new_user.dxid
         org_dxid = space.org_dxid(membership)
+        reverse_org_dxid = space.opposite_org_dxid(membership)
 
         if ADMIN_USER != invitee || !admin_user_member?(api, org_dxid)
           attrs = {
@@ -29,6 +30,8 @@ module SpaceMembershipService
           # space is created and active already
           unless new_user.review_space_admin? && new_user.id == admin_member.id && space.state == Space::STATE_ACTIVE
             api.org_invite(org_dxid, invitee, attrs)
+            # members in group space need to be invited to both lead's groups
+            api.org_invite(reverse_org_dxid, invitee, attrs) if space.groups?
           end
         end
 
