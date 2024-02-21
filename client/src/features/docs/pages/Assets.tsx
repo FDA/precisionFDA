@@ -22,14 +22,14 @@ export const Assets = () => {
                     runs.
                     Therefore, create a fake root folder and assemble your files underneath it.
                     For additional details, see {' '}
-                    <Link to="creating-apps#app-own-assets">
+                    <Link to="/docs/creating-apps#app-own-assets">
                         Your own assets
                     </Link>{' '} in the precisionFDA documentation guide.
                 </p>
 
                 <p>
                     In order to upload the asset to precisionFDA you will need to download {' '}
-                    <Link to="cli#download">
+                    <Link to="/docs/cli#download">
                         pFDA CLI
                     </Link> first.
                 </p>
@@ -95,7 +95,7 @@ export const Assets = () => {
 
                 <p>
                     If you need help with CLI itself, please check our dedicated {' '}
-                    <Link to="cli">
+                    <Link to="/docs/cli">
                         CLI docs
                     </Link>{' '} page.
                 </p>
