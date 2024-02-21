@@ -3,6 +3,8 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
   include Recaptcha::Adapters::ControllerMethods
   include RecaptchaHelper
 
+  class Error < StandardError; end
+
   GSRS_DEFAULT_URL = "http://localhost:8080".freeze
   GSRS_URL = ENV.fetch("GSRS_URL", GSRS_DEFAULT_URL)
   GSRS_ENABLED = ActiveRecord::Type::Boolean.new.cast(ENV["GSRS_ENABLED"])
@@ -148,34 +150,41 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
     end
 
     if GSRS_ENABLED
-      session_key = http_request(
-        "#{GSRS_URL}/api/v1/whoami",
-        {},
-        Net::HTTP::Get::METHOD,
-        {},
-        {
-          GSRS_HEADER_USER_NAME => current_user.username,
-          GSRS_HEADER_USER_EMAIL => current_user.email,
-        },
-        true,
-      )
+      begin
+        session_key = http_request(
+          "#{GSRS_URL}/api/v1/whoami",
+          {},
+          Net::HTTP::Get::METHOD,
+          {},
+          {
+            GSRS_HEADER_USER_NAME => current_user.username,
+            GSRS_HEADER_USER_EMAIL => current_user.email,
+          },
+          true,
+        )
 
-      request_headers = {}
-      request_headers["Cookie"] = "ix.session=#{session_key.flatten.first}"
-      http_request(
-        "#{GSRS_URL}/ginas/app/logout",
-        {},
-        Net::HTTP::Get::METHOD,
-        {},
-        request_headers,
-      )
+        request_headers = {}
+        request_headers["Cookie"] = "ix.session=#{session_key.flatten.first}"
+        http_request(
+          "#{GSRS_URL}/ginas/app/logout",
+          {},
+          Net::HTTP::Get::METHOD,
+          {},
+          request_headers,
+        )
+      rescue StandardError => e
+        # No reaction to unsuccessful GSRS logout, because raising an Error would stop the pFDA logout process.
+        logger.warn("Error while logging out from GSRS: #{e.message}")
+      end
     end
 
     Session.where(key: session_id).delete_all
     DIContainer.shutdown
     reset_session
     flash[:success] = "You were successfully logged out of precisionFDA"
-    redirect_to root_url
+
+    # The logout is called by DELETE HTTP method, therefore response status 303 (See Other) to make browser load root_url with GET method
+    redirect_to root_url, status: :see_other
   end
 
   def about; end
