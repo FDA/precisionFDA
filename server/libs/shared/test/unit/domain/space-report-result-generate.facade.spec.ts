@@ -1,10 +1,12 @@
-import { LockMode, Reference } from '@mikro-orm/core'
+import { LockMode, Ref, Reference } from '@mikro-orm/core'
 import type { SqlEntityManager } from '@mikro-orm/mysql'
 import { EntityProvenanceService } from '@shared/domain/provenance/service/entity-provenance.service'
 import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
 import { SpaceReport } from '@shared/domain/space-report/entity/space-report.entity'
 import { SpaceReportService } from '@shared/domain/space-report/service/space-report.service'
 import { UserFileService } from '@shared/domain/user-file/service/user-file.service'
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
+import { InvalidStateError } from '@shared/errors'
 import { UserFileCreateFacade } from '@shared/facade/file-create/user-file-create.facade'
 import { SpaceReportResultGenerateFacade } from '@shared/facade/space-report/space-report-result-generate.facade'
 import { expect } from 'chai'
@@ -45,7 +47,7 @@ describe('SpaceReportResultGenerateFacade', () => {
 
   const FILE_ID = 1000
   const FILE_UID = 'file-uid-1'
-  const FILE = { id: FILE_ID, uid: FILE_UID }
+  const FILE = { id: FILE_ID, uid: FILE_UID, state: 'open' }
 
   const transactionalStub = stub()
   const findOneStub = stub()
@@ -58,21 +60,19 @@ describe('SpaceReportResultGenerateFacade', () => {
   before(() => {
     stub(Reference, 'create')
       .withArgs(FILE)
-      .returns({ getEntity: () => FILE } as unknown as Reference<object>)
+      .returns({ load: () => Promise.resolve(FILE) } as unknown as Ref<object>)
   })
 
   beforeEach(() => {
+    REPORT.state = 'CREATED'
+
     transactionalStub.reset()
     transactionalStub.callsArg(0)
 
     findOneStub.reset()
     findOneStub.throws()
     findOneStub
-      .withArgs(
-        SpaceReport,
-        { id: REPORT_ID, state: { $in: ['CREATED', 'ERROR'] } },
-        { lockMode: LockMode.PESSIMISTIC_WRITE },
-      )
+      .withArgs(SpaceReport, REPORT_ID, { lockMode: LockMode.PESSIMISTIC_WRITE })
       .resolves(REPORT)
       .withArgs(SpaceMembership, {
         spaces: SPACE_ID,
@@ -181,7 +181,7 @@ describe('SpaceReportResultGenerateFacade', () => {
     expect(REPORT.createdBy).to.deep.eq(CREATOR)
     expect(REPORT.space).to.deep.eq(SPACE)
     expect(REPORT.createdAt).to.eq(REPORT_CREATED_AT)
-    expect(REPORT.resultFile.getEntity()).to.deep.eq(FILE)
+    expect(await REPORT.resultFile.load()).to.deep.eq(FILE)
     expect(REPORT.state).to.eq('CLOSING_RESULT_FILE')
   })
 
@@ -215,6 +215,25 @@ describe('SpaceReportResultGenerateFacade', () => {
     await getInstance().generate(REPORT_ID)
 
     expect(createFileWithContentStub.calledOnce).to.be.true()
+  })
+
+  it('should attempt to close a file even if it has already been generated for that report', async () => {
+    REPORT.state = 'CLOSING_RESULT_FILE'
+    REPORT.resultFile = { load: () => Promise.resolve(FILE) } as unknown as Ref<UserFile>
+
+    await getInstance().generate(REPORT_ID)
+
+    expect(closeFileStub.calledOnce).to.be.true()
+  })
+
+  it('should throw an error if the report has result file created and in open state, but the report is not in CLOSING_RESULT_FILE state', async () => {
+    REPORT.state = 'DONE'
+    REPORT.resultFile = { load: () => Promise.resolve(FILE) } as unknown as Ref<UserFile>
+
+    await expect(getInstance().generate(REPORT_ID)).to.be.rejectedWith(
+      InvalidStateError,
+      'Failed to generate a space report. Report result file is in an open state, but report is in an unexpected state. Current report state: "DONE"',
+    )
   })
 
   function getInstance() {
