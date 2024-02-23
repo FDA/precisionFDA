@@ -17,10 +17,12 @@ require "rails_helper"
 RSpec.describe SpaceForm, type: :model do
   subject { SpaceForm.new(params) }
 
+  let(:review_space_admin) { create(:user, :review_admin) }
+
   let(:host_lead) { create(:user, dxuser: "user_host") }
   let(:name) { FFaker::Lorem.word }
   let(:description) { FFaker::Lorem.word }
-  let(:params) { { name: name, description: description } }
+  let(:params) { { name:, description:, current_user: review_space_admin } }
 
   describe "common validations" do
     context "when name is empty" do

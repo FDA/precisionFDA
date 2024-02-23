@@ -15,13 +15,17 @@ class SpaceForm
     :restrict_to_template,
     :protected,
     :restricted_reviewer,
+    :current_user,
   )
 
   TYPE_GROUPS = "groups".freeze
+  TYPE_GOVERNMENT = "government".freeze
   TYPE_REVIEW = "review".freeze
+  TYPE_ADMIN = "administrator".freeze
   TYPE_PRIVATE = "private_type".freeze
 
   validates :name, :description, :space_type, presence: true
+  validate :validate_permissions
   validate :validate_host_lead_dxuser
   validate :validate_fda_associated, if: -> { space_type == TYPE_REVIEW }
   validate :validate_leads_orgs, if: -> { space_type == TYPE_REVIEW }
@@ -74,6 +78,14 @@ class SpaceForm
     return unless guest_lead_in_groups
 
     errors.add(:guest_lead_dxuser, "'#{guest_lead_dxuser}' not found")
+  end
+
+  def validate_permissions
+    raise "Only government users can create government space" if space_type == TYPE_GOVERNMENT && !current_user.government_user?
+
+    raise "Review space can be created only by review space admins" if space_type == TYPE_REVIEW && !current_user.review_space_admin?
+
+    raise "Group and Admin spaces can be created only by site admins" if (space_type == TYPE_GROUPS || space_type == TYPE_ADMIN) && !current_user.can_administer_site?
   end
 
   # Check guest lead in space of "groups" type
