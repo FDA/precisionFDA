@@ -34,7 +34,10 @@ void
       throw new NotFoundError(`ChallengeUpdateCardImageUrlOperation: Cannot find card image id ${challenge.cardImageId} for challenge ${challengeId}`)
     }
 
-    const platformClient = new PlatformClient(config.platform.challengeBotAccessToken, this.ctx.log)
+    const platformClient = new PlatformClient(
+      { accessToken: config.platform.challengeBotAccessToken },
+      this.ctx.log,
+    )
     const link = await platformClient.fileDownloadLink({
       fileDxid: cardImage.dxid,
       filename: cardImage.name,

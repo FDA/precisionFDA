@@ -88,11 +88,11 @@ export enum PlatformErrors {
 const defaultLog = getLogger('platform-client-logger')
 
 export class PlatformClient {
-  accessToken: string
+  user: { accessToken: string }
   log: Logger
 
-  constructor(accessToken: string, logger?: Logger) {
-    this.accessToken = accessToken
+  constructor(user: { accessToken: string }, logger?: Logger) {
+    this.user = user
     this.log = logger ?? defaultLog
   }
 
@@ -346,7 +346,9 @@ export class PlatformClient {
    * the /system/findDataObjects call is very inefficient and can take a long time
    */
   async fileStates(params: FileStatesParams): Promise<FileStateResult[]> {
-    return await this.sendAndAggregatePaginatedRequest<FileStateResult, FileStatesResponse>((nextMapping) => this.fileStatesPaginated(params, nextMapping))
+    return await this.sendAndAggregatePaginatedRequest<FileStateResult, FileStatesResponse>(
+      (nextMapping) => this.fileStatesPaginated(params, nextMapping),
+    )
   }
 
   private async filesListPaginated(
@@ -390,7 +392,9 @@ export class PlatformClient {
   }
 
   async filesList(params: ListFilesParams): Promise<ListFilesResult[]> {
-    return await this.sendAndAggregatePaginatedRequest<ListFilesResult, ListFilesResponse>((nextMapping) => this.filesListPaginated(params, nextMapping))
+    return await this.sendAndAggregatePaginatedRequest<ListFilesResult, ListFilesResponse>(
+      (nextMapping) => this.filesListPaginated(params, nextMapping),
+    )
   }
 
   /**
@@ -561,7 +565,9 @@ export class PlatformClient {
    * Removes user from provided organization. Also revokes access to projects & apps associated with org.
    * @see https://documentation.dnanexus.com/developer/api/organizations#api-method-org-xxxx-invite
    */
-  async removeUserFromOrganization(params: UserRemoveFromOrgParams): Promise<UserRemoveFromOrgResponse> {
+  async removeUserFromOrganization(
+    params: UserRemoveFromOrgParams,
+  ): Promise<UserRemoveFromOrgResponse> {
     const url = `${config.platform.apiUrl}/${params.orgDxId}/removeMember`
     const options: AxiosRequestConfig = {
       method: 'POST',
@@ -648,12 +654,15 @@ export class PlatformClient {
    * @param {string[]} objects - IDs to be removed from the container
    * @return [id string ID of the manipulated data container]
    */
-  async containerRemoveObjects(containerDxid: string, params: ObjectsParams): Promise<ClassIdResponse> {
+  async containerRemoveObjects(
+    containerDxid: string,
+    params: ObjectsParams,
+  ): Promise<ClassIdResponse> {
     const url = `${config.platform.apiUrl}/${containerDxid}/removeObjects`
     const options: AxiosRequestConfig = {
       method: 'POST',
       data: {
-        objects: params.objects
+        objects: params.objects,
       },
       url,
     }
@@ -661,19 +670,21 @@ export class PlatformClient {
   }
 
   /**
- * Creates a new project
- * @see https://documentation.dnanexus.com/developer/api/data-containers/projects#api-method-project-new
- * @param {string} name - OPTIONAL - overrides new project name.
- * @param {string} billTo - OPTIONAL - overrides new project billTo.
- * @param {Space} space - used for project name, can be overriden by name param.
- * @param {SpaceMembership} admin - used for project's billTo and project name (name can be overriden by name param)
- */
+   * Creates a new project
+   * @see https://documentation.dnanexus.com/developer/api/data-containers/projects#api-method-project-new
+   * @param {string} name - OPTIONAL - overrides new project name.
+   * @param {string} billTo - OPTIONAL - overrides new project billTo.
+   * @param {Space} space - used for project name, can be overriden by name param.
+   * @param {SpaceMembership} admin - used for project's billTo and project name (name can be overriden by name param)
+   */
   async projectCreate(params: any): Promise<ClassIdResponse> {
     const url = `${config.platform.apiUrl}/project/new`
     const options: AxiosRequestConfig = {
       method: 'POST',
       data: {
-        name: params.name ?? `precisionfda-${params.space.uid}-${SPACE_MEMBERSHIP_SIDE[params.admin.side]}`,
+        name:
+          params.name ??
+          `precisionfda-${params.space.uid}-${SPACE_MEMBERSHIP_SIDE[params.admin.side]}`,
         billTo: params.billTo ?? params.admin.user.getEntity().organization.getEntity().getDxOrg(),
       },
       url,
@@ -687,8 +698,8 @@ export class PlatformClient {
    *  @param {string} invitee - OrgDxID, UserID or user's email.
    *  @param {string} level - Permission level.
    *  @return [don't know yet]
-  */
-  async projectInvite(params: any): Promise<{ id: string, state: string }> {
+   */
+  async projectInvite(params: any): Promise<{ id: string; state: string }> {
     const url = `${config.platform.apiUrl}/${params.projectDxid}/invite`
     const options: AxiosRequestConfig = {
       method: 'POST',
@@ -710,7 +721,7 @@ export class PlatformClient {
    * @param {string} projectDxid - ProjectDxID.
    * @param {object} body - OPTIONAL - Inputs.
    * @return {any}
-  */
+   */
   async projectDescribe(params: any): Promise<any> {
     const url = `${config.platform.apiUrl}/${params.projectDxid}/describe`
     const options: AxiosRequestConfig = {
@@ -726,7 +737,7 @@ export class PlatformClient {
    * @see https://documentation.dnanexus.com/developer/api/data-containers/project-permissions-and-sharing#api-method-project-xxxx-accepttransfer
    * @param {string} billTo - billing account (user or org ID).
    * @return {any}
-  */
+   */
   async projectAcceptTransfer(params: any): Promise<any> {
     const url = `${config.platform.apiUrl}/${params.projectDxid}/acceptTransfer`
     const options: AxiosRequestConfig = {
@@ -763,7 +774,7 @@ export class PlatformClient {
     return await this.sendRequest(options)
   }
 
-  async updateBillingInformation(orgDxid:string, billingInfo: any): Promise<any> {
+  async updateBillingInformation(orgDxid: string, billingInfo: any): Promise<any> {
     const billingConfirmation = process.env['BILLING_CONFIRMATION']
     if (billingConfirmation) {
       billingInfo['autoConfirm'] = billingConfirmation
@@ -828,7 +839,6 @@ export class PlatformClient {
     return await this.sendRequest(options)
   }
 
-
   // -----------------
   //    S Y S T E M
   // -----------------
@@ -840,7 +850,9 @@ export class PlatformClient {
    * @param {any} classDescribeOptions
    * For param details look at platform API page
    */
-  async describeDataObjects(params: DescribeDataObjectsParams): Promise<DescribeDataObjectsResponse> {
+  async describeDataObjects(
+    params: DescribeDataObjectsParams,
+  ): Promise<DescribeDataObjectsResponse> {
     const url = `${config.platform.apiUrl}/system/describeDataObjects`
     const options: AxiosRequestConfig = {
       method: 'POST',
@@ -848,7 +860,6 @@ export class PlatformClient {
     }
     return await this.sendRequest(options)
   }
-
 
   // ---------------
   //    U T I L S
@@ -860,7 +871,9 @@ export class PlatformClient {
    *                    starting params to the reqeust
    * @returns Results of the aggregated request
    */
-  private async sendAndAggregatePaginatedRequest<T, TResponse extends IPaginatedResponse<T>>(requestFunc: (starting: Starting | undefined) => Promise<TResponse>): Promise<T[]> {
+  private async sendAndAggregatePaginatedRequest<T, TResponse extends IPaginatedResponse<T>>(
+    requestFunc: (starting: Starting | undefined) => Promise<TResponse>,
+  ): Promise<T[]> {
     let nextMapping: Starting | undefined
     const results: T[] = []
     const paginateSeq = async (): Promise<void> => {
@@ -910,7 +923,7 @@ export class PlatformClient {
   }
 
   private setupHeaders(): AnyObject {
-    return { authorization: `Bearer ${this.accessToken}` }
+    return { authorization: `Bearer ${this.user.accessToken}` }
   }
 
   private handleFailed(
@@ -943,13 +956,10 @@ export class PlatformClient {
       if (customErrorThrower) {
         customErrorThrower(statusCode, errorType, errorMessage)
       }
-      throw new ClientRequestError(
-        `${errorType} (${statusCode}): ${errorMessage}`,
-        {
-          clientResponse: err.response.data,
-          clientStatusCode: statusCode,
-        },
-      )
+      throw new ClientRequestError(`${errorType} (${statusCode}): ${errorMessage}`, {
+        clientResponse: err.response.data,
+        clientStatusCode: statusCode,
+      })
     } else if (err.request) {
       // the request was made but no response was received
       this.log.error({ err }, 'Error: Failed platform request - no response received')
@@ -960,12 +970,9 @@ export class PlatformClient {
     // TODO(2): Need to consider other error types and handle them with a descriptive message
     // e.g. See ETIMEOUT error in platform-client.mock.ts
     const errorMessage = err.stack || err.message || 'Unknown error - no platform response received'
-    throw new ClientRequestError(
-      errorMessage,
-      {
-        clientResponse: err.response?.data || 'No platform response',
-        clientStatusCode: err.response?.status || 408,
-      },
-    )
+    throw new ClientRequestError(errorMessage, {
+      clientResponse: err.response?.data || 'No platform response',
+      clientStatusCode: err.response?.status || 408,
+    })
   }
 }

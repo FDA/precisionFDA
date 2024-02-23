@@ -111,7 +111,7 @@ describe('DiscussionService tests', () => {
 
   it('create discussion with non existing user', async () => {
     userCtx = { id: 10, dxuser: 'non-existing', accessToken: 'foo' }
-    const publisherService = new PublisherService(em, userCtx, new PlatformClient('foo'))
+    const publisherService = new PublisherService(em, userCtx, new PlatformClient({ accessToken: 'foo' }))
     const fetcher = new EntityFetcherService(em, userCtx)
     discussionService = new DiscussionService(em, userCtx, publisherService, fetcher)
 
@@ -256,7 +256,7 @@ describe('DiscussionService tests', () => {
 
   it('publish discussion with non existing user', async () => {
     userCtx = { id: 10, dxuser: 'non-existing', accessToken: 'foo' }
-    const publisherService = new PublisherService(em, userCtx, new PlatformClient('foo'))
+    const publisherService = new PublisherService(em, userCtx, new PlatformClient({ accessToken: 'foo' }))
     const fetcher = new EntityFetcherService(em, userCtx)
     discussionService = new DiscussionService(em, userCtx, publisherService, fetcher)
 

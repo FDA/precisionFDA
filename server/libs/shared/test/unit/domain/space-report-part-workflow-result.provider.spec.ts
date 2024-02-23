@@ -1,6 +1,6 @@
 import { EntityProvenanceService } from '@shared/domain/provenance/service/entity-provenance.service'
 import { Workflow } from '@shared/domain/workflow/entity/workflow.entity'
-import { SpaceReportPartWorkflowResultProvider } from '@shared/facade/space-report-batch/service/space-report-part-workflow-result-provider.service'
+import { SpaceReportPartWorkflowResultProvider } from '@shared/facade/space-report/service/space-report-part-workflow-result-provider.service'
 import { expect } from 'chai'
 import { stub } from 'sinon'
 

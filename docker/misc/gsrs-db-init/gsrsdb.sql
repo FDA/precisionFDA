@@ -2922,3 +2922,22 @@ CREATE TABLE `polymer_classification` (
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
 -- Dump completed on 2023-10-24  2:53:09
+
+
+-- Migration to GSRS 3.1, January 2024
+ALTER TABLE ix_core_db_gsrs_version MODIFY COLUMN `id` bigint not null auto_increment;
+
+ALTER TABLE ix_core_key_user_list MODIFY COLUMN `id` bigint not null auto_increment;
+ALTER TABLE ix_core_key_user_list ADD COLUMN `kind` varchar(255);
+ALTER TABLE ix_core_key_user_list DROP INDEX ukbomijjxdp2cmjttgrnqtoucvo;
+alter table ix_core_key_user_list add constraint ukbomijjxdp2cmjttgrnqtoucvo unique (entity_key, list_name, user_id, kind);
+
+ALTER TABLE ix_core_user_saved_list MODIFY COLUMN `id` bigint not null auto_increment;
+ALTER TABLE ix_core_user_saved_list ADD COLUMN `kind` varchar(255);
+ALTER TABLE ix_core_user_saved_list DROP INDEX uknftwibs7mebodwpavq6ub0lqh;
+alter table ix_core_user_saved_list add constraint uknftwibs7mebodwpavq6ub0lqh unique (name, user_id, kind);
+
+
+ALTER TABLE ix_import_metadata ADD COLUMN `imported_by_id` bigint;
+alter table ix_import_metadata add constraint fkn75dm5x09m6wvk7uq5q74do9c foreign key (imported_by_id) references ix_core_principal (id);
+alter table ix_ginas_vocabulary_term change column value term_value varchar(3000);

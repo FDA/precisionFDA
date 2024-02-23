@@ -1,10 +1,11 @@
-import { BullModule } from '@nestjs/bull'
 import { Module } from '@nestjs/common'
 import { config } from '@shared/config'
+import { EmailQueueJobProducer } from '@shared/domain/email/producer/email-queue-job.producer'
+import { BullQueueModule } from '@shared/queue/module/bull-queue-module'
 
 @Module({
   imports: [
-    BullModule.registerQueue({
+    BullQueueModule.registerQueue({
       name: config.workerJobs.queues.emails.name,
       defaultJobOptions: {
         removeOnComplete: true,
@@ -15,6 +16,7 @@ import { config } from '@shared/config'
       },
     }),
   ],
-  exports: [BullModule],
+  providers: [EmailQueueJobProducer],
+  exports: [BullQueueModule, EmailQueueJobProducer],
 })
 export class EmailModule {}

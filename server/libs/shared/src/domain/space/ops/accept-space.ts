@@ -23,7 +23,10 @@ void
   private em: EntityManager
 
   async run(input: SpaceAcceptInput): Promise<void> {
-    this.platformClient = new PlatformClient(this.ctx.user.accessToken, this.ctx.log)
+    this.platformClient = new PlatformClient(
+      { accessToken: this.ctx.user.accessToken },
+      this.ctx.log,
+    )
     this.em = this.ctx.em
 
     const userId = this.ctx.user.id

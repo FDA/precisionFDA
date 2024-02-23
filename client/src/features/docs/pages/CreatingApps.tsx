@@ -1179,7 +1179,8 @@ export const CreatingApps = () => {
           On precisionFDA, there are two methods for building apps. You may
           create apps on precisionFDA using the UI, as is described in{' '}
           <Link
-            to="/docs/creating-apps#dev"
+            to="/pdfs/Tutorial_-_Apps_and_Workflows_-_20221130.pdf"
+            target={'_blank'}
             aria-label="Navigation to creating apps module"
           >
             Creating Apps

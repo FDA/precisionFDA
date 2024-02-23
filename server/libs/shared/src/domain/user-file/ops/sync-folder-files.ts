@@ -25,7 +25,10 @@ SyncFolderFilesOutput
   async run(input: SyncFilesInFolderInput): Promise<SyncFolderFilesOutput> {
     this.ctx.log.debug({ input }, 'SyncFilesInFolderOperation input params')
     const em = this.ctx.em
-    const platformClient = new PlatformClient(this.ctx.user.accessToken, this.ctx.log)
+    const platformClient = new PlatformClient(
+      { accessToken: this.ctx.user.accessToken },
+      this.ctx.log,
+    )
 
     const folderRepo = em.getRepository(Folder)
     const fileRepo = em.getRepository(UserFile)

@@ -28,7 +28,7 @@ export class WorkstationSyncFilesOperation extends WorkerBaseOperation<
     const em = this.ctx.em
     const jobRepo = em.getRepository(Job)
     const job = await jobRepo.findOne({ dxid: input.dxid })
-    const client = new PlatformClient(this.ctx.user.accessToken, this.ctx.log)
+    const client = new PlatformClient({ accessToken: this.ctx.user.accessToken }, this.ctx.log)
     if (!job) {
       this.ctx.log.warn({ input }, 'Job does not exist')
       await removeRepeatable(this.ctx.job)

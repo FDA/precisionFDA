@@ -6,8 +6,8 @@ import { EntityManager } from '@mikro-orm/core'
 import supertest from 'supertest'
 import { APP_HTTPS_SUBTYPE, APP_TYPE } from '@shared/domain/app/app.enum'
 import { create, db } from '@shared/test'
-import { getServer } from '../../../src/server'
 import { mocksReset } from '@shared/test/mocks'
+import { testedApp } from '../../index'
 import { getDefaultHeaderData, stripEntityDates } from '../../utils/expect-helper'
 
 describe.skip('GET /apps', () => {
@@ -28,7 +28,7 @@ describe.skip('GET /apps', () => {
   })
 
   it('response shape', async () => {
-    const { body } = await supertest(getServer())
+    const { body } = await supertest(testedApp.getHttpServer())
       .get('/apps')
       .set(getDefaultHeaderData(user))
       .expect(200)
@@ -58,7 +58,7 @@ describe.skip('GET /apps', () => {
     const anotherApp = create.appHelper.createHTTPS(em, { user: anotherUser })
     await em.flush()
 
-    const { body } = await supertest(getServer())
+    const { body } = await supertest(testedApp.getHttpServer())
       .get('/apps')
       .set(getDefaultHeaderData(anotherUser))
       .expect(200)
