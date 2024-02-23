@@ -76,9 +76,9 @@ RSpec.describe Api::SpacesController, type: :controller do
     end
   end
 
-  describe "POST create" do
+  describe "POST create group" do
     before do
-      authenticate!(review_space_admin)
+      authenticate!(admin)
       sponsor_lead.org.update(admin_id: sponsor_lead.id)
     end
 
@@ -166,6 +166,13 @@ RSpec.describe Api::SpacesController, type: :controller do
         expect(last_space.space_memberships.lead.host.count).to eq(1)
         expect(last_space.space_memberships.lead.guest.count).to eq(1)
       end
+    end
+  end
+
+  describe "POST create review" do
+    before do
+      authenticate!(review_space_admin)
+      sponsor_lead.org.update(admin_id: sponsor_lead.id)
     end
 
     context "when type is review" do
