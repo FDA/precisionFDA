@@ -12,7 +12,7 @@ import { JOB_STATE } from '@shared/domain/job/job.enum'
 import { ENTITY_TYPE } from '@shared/domain/app/app.enum'
 import { create, generate, db } from '@shared/test'
 import { fakes, mocksReset } from '@shared/test/mocks'
-import { getServer } from '../../../src/server'
+import { testedApp } from '../../index'
 import { getDefaultHeaderData } from '../../utils/expect-helper'
 import { TASK_TYPE } from '@shared/queue/task.input'
 
@@ -54,7 +54,7 @@ describe('PATCH /jobs/:id/setAPIKey', () => {
   })
 
   it('works for v1.0.0', async () => {
-    const response = await supertest(getServer())
+    const response = await supertest(testedApp.getHttpServer())
       .patch(`/jobs/${job_v1_0.dxid}/setAPIKey`)
       .set(getDefaultHeaderData(user))
       .send({ key: 'hello world', code: 'code from auth server' })
@@ -69,7 +69,7 @@ describe('PATCH /jobs/:id/setAPIKey', () => {
   })
 
   it('works for v1.1.0 without space', async () => {
-    const response = await supertest(getServer())
+    const response = await supertest(testedApp.getHttpServer())
       .patch(`/jobs/${job_v1_1.dxid}/setAPIKey`)
       .set(getDefaultHeaderData(user))
       .send({ key: 'hello world', code: 'code from auth server' })
@@ -87,7 +87,7 @@ describe('PATCH /jobs/:id/setAPIKey', () => {
   })
 
   it('works with space job', async () => {
-    const response = await supertest(getServer())
+    const response = await supertest(testedApp.getHttpServer())
       .patch(`/jobs/${job_in_space.dxid}/setAPIKey`)
       .set(getDefaultHeaderData(user))
       .send({ key: 'hello world', code: 'code from auth server' })
@@ -106,7 +106,7 @@ describe('PATCH /jobs/:id/setAPIKey', () => {
   })
 
   it('doesnt call the platform API if api key is empty', async () => {
-    const response = await supertest(getServer())
+    const response = await supertest(testedApp.getHttpServer())
       .patch(`/jobs/${job_v1_1.dxid}/setAPIKey`)
       .set(getDefaultHeaderData(user))
       .send({})
@@ -118,7 +118,7 @@ describe('PATCH /jobs/:id/setAPIKey', () => {
   it('does not call workstation API if the job is already finished', async () => {
     job_v1_1.state = JOB_STATE.TERMINATED
     await em.flush()
-    const response = await supertest(getServer())
+    const response = await supertest(testedApp.getHttpServer())
       .patch(`/jobs/${job_v1_1.dxid}/setAPIKey`)
       .set(getDefaultHeaderData(user))
       .send({ key: 'hello world', code: 'code from auth server' })
@@ -129,7 +129,7 @@ describe('PATCH /jobs/:id/setAPIKey', () => {
   })
 
   it('throws 404 when the job does not exist', async () => {
-    const response = await supertest(getServer())
+    const response = await supertest(testedApp.getHttpServer())
       .patch(`/jobs/${generate.random.dxstr()}/setAPIKey`)
       .set(getDefaultHeaderData(user))
       .send({ key: 'hello world', code: 'code from auth server' })
@@ -141,7 +141,7 @@ describe('PATCH /jobs/:id/setAPIKey', () => {
   it('throws error when the job type is NOT HTTPS', async () => {
     job_v1_1.entityType = ENTITY_TYPE.NORMAL
     await em.flush()
-    const response = await supertest(getServer())
+    const response = await supertest(testedApp.getHttpServer())
       .patch(`/jobs/${job_v1_1.dxid}/setAPIKey`)
       .set(getDefaultHeaderData(user))
       .send({ key: 'hello world', code: 'code from auth server' })
@@ -180,7 +180,7 @@ describe('PATCH /jobs/:id/snapshot', () => {
       code: 'code from auth server',
       name: 'MySnapshot',
     }
-    let response = await supertest(getServer())
+    let response = await supertest(testedApp.getHttpServer())
       .patch(`/jobs/${job.dxid}/snapshot`)
       .set(getDefaultHeaderData(user))
       .send(params)
@@ -205,7 +205,7 @@ describe('PATCH /jobs/:id/snapshot', () => {
       name: 'MySnapshot',
       terminate: true,
     }
-    const response = await supertest(getServer())
+    const response = await supertest(testedApp.getHttpServer())
       .patch(`/jobs/${job.dxid}/snapshot`)
       .set(getDefaultHeaderData(user))
       .send(params)
@@ -237,7 +237,7 @@ describe('PATCH /jobs/:id/snapshot', () => {
       name: 'MySnapshot',
       terminate: true,
     }
-    const response = await supertest(getServer())
+    const response = await supertest(testedApp.getHttpServer())
       .patch(`/jobs/${job.dxid}/snapshot`)
       .set(getDefaultHeaderData(user))
       .send(params)
@@ -249,7 +249,7 @@ describe('PATCH /jobs/:id/snapshot', () => {
   })
 
   it('doesnt call the platform API if api key is empty', async () => {
-    const response = await supertest(getServer())
+    const response = await supertest(testedApp.getHttpServer())
       .patch(`/jobs/${job.dxid}/snapshot`)
       .set(getDefaultHeaderData(user))
       .send({})
@@ -263,7 +263,7 @@ describe('PATCH /jobs/:id/snapshot', () => {
     for (const state of nonRunningStates) {
       job.state = state
       await em.flush()
-      const response = await supertest(getServer())
+      const response = await supertest(testedApp.getHttpServer())
         .patch(`/jobs/${job.dxid}/snapshot`)
         .set(getDefaultHeaderData(user))
         .send({
@@ -278,7 +278,7 @@ describe('PATCH /jobs/:id/snapshot', () => {
   })
 
   it('throws 404 when the job does not exist', async () => {
-    const response = await supertest(getServer())
+    const response = await supertest(testedApp.getHttpServer())
       .patch(`/jobs/${generate.random.dxstr()}/snapshot`)
       .set(getDefaultHeaderData(user))
       .send({
@@ -295,7 +295,7 @@ describe('PATCH /jobs/:id/snapshot', () => {
   it('throws error when the job type is not HTTPS', async () => {
     job.entityType = ENTITY_TYPE.NORMAL
     await em.flush()
-    const response = await supertest(getServer())
+    const response = await supertest(testedApp.getHttpServer())
       .patch(`/jobs/${job.dxid}/snapshot`)
       .set(getDefaultHeaderData(user))
       .send({

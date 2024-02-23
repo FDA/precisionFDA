@@ -14,7 +14,7 @@ import { Job } from 'bull'
 import { findUnclosedFilesOrAssets, getNodePath } from '../../user-file/user-file.helper'
 import { SPACE_MEMBERSHIP_SIDE } from '../../space-membership/space-membership.enum'
 import { EMAIL_TYPES, EmailSendInput } from '../../email/email.config'
-import { addToQueueEnsureUnique, createSendEmailTask, getFileSyncQueue } from '../../../queue'
+import { addToFileSyncQueueEnsureUnique, createSendEmailTask, getFileSyncQueue } from '../../../queue'
 import { userDataConsistencyReportTemplate } from '../../email/templates/mjml/user-data-consistency-report.template'
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { wrap } from '@mikro-orm/core'
@@ -77,7 +77,7 @@ UserDataConsistencyReportOutput
       user: userCtx,
     }
     const jobId = UserDataConsistencyReportOperation.getBullJobId(userCtx.dxuser)
-    return await addToQueueEnsureUnique(getFileSyncQueue(), queueData, jobId)
+    return await addToFileSyncQueueEnsureUnique(queueData, jobId)
   }
 
   async run(): Promise<any> {
@@ -116,7 +116,7 @@ UserDataConsistencyReportOutput
 
       // Check if user's email on pFDA matches that on platform
       //
-      const client = new PlatformClient(userCtx.accessToken, log)
+      const client = new PlatformClient({ accessToken: userCtx.accessToken }, log)
       const userDescribe = await client.userDescribe({
         dxid: user.dxid,
         defaultFields: true,

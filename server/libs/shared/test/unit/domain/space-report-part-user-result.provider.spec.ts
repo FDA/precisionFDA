@@ -1,6 +1,6 @@
 import { Space } from '@shared/domain/space/space.entity'
 import { User } from '@shared/domain/user/user.entity'
-import { SpaceReportPartUserResultProvider } from '@shared/facade/space-report-batch/service/space-report-part-user-result-provider.service'
+import { SpaceReportPartUserResultProvider } from '@shared/facade/space-report/service/space-report-part-user-result-provider.service'
 import { expect } from 'chai'
 
 describe('SpaceReportPartUserResultProvider', () => {

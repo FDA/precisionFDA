@@ -77,17 +77,26 @@ export const RunJobForm = ({
   const { data: computeInstances, isLoading: computeInstancesLoading } =
     useQuery({
       queryKey: ['user-compute-instances'],
-      queryFn: () => fetchUserComputeInstances().catch(() => toast.error('Error loading compute instances')),
+      queryFn: () => fetchUserComputeInstances().catch((e) => {
+        toast.error('Error loading compute instances')
+        throw e
+      }),
     })
 
   const { data: selectableContexts } = useQuery({
     queryKey: ['selectable-contexts', app.scope],
-    queryFn: () => fetchAndConvertSelectableContexts(app.entity_type).catch(() => toast.error('Error loading contexts')),
+    queryFn: () => fetchAndConvertSelectableContexts(app.entity_type).catch((e) => {
+      toast.error('Error loading contexts')
+      throw e
+    }),
   })
 
   const { data: selectableSpaces } = useQuery({
     queryKey: ['selectable-spaces', app.scope],
-    queryFn: () => fetchAndConvertSelectableSpaces(app.scope).catch(() => toast.error('Error loading spaces')),
+    queryFn: () => fetchAndConvertSelectableSpaces(app.scope).catch((e) => {
+      toast.error('Error loading spaces')
+      throw e
+    }),
   })
 
   const defaultValues = {
@@ -95,7 +104,7 @@ export const RunJobForm = ({
     jobLimit: userJobLimit,
     instanceType: undefined,
     output_folder_path: '',
-    scope: { label: 'Private', value: 'private' },
+    scope: { label: 'Private', value: 'private' }, //fixme: this should not be hardcoded, doesnt make sense for space apps
     inputs: Object.fromEntries(
       spec.input_spec.map(item => [
         item.name,
@@ -144,14 +153,14 @@ export const RunJobForm = ({
 
   const [maxRuntime, setMaxRuntime] = useState<string>("")
 
-  // Update the instanceType field when computeInstanecs list loads
+  // Update the instanceType field when computeInstances list loads
   useEffect(() => {
     if (computeInstances) {
       setValue(
         'instanceType',
         computeInstances.find(
           instance => instance.value === spec.instance_type,
-        ),
+        ) ?? computeInstances[0],
       )
     }
   }, [computeInstances])
@@ -172,9 +181,7 @@ export const RunJobForm = ({
     }
   }, [watch().instanceType, watch().jobLimit])
 
-
-
-  const runJobMutation = useRunJobMutation(getValues().scope.value as ServerScope)
+  const runJobMutation = useRunJobMutation(getValues().scope?.value as ServerScope)
 
   const onSubmit = async () => {
     const vals = getValues()

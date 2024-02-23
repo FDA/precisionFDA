@@ -41,7 +41,8 @@ export const useToastWSHandler = (user?: IUser) => {
 
   useEffect(() => {
     if (user?.session_id && readyState === 1) {
-      sendMessage(`{"action":"login", "session_id": "${user?.session_id}"}`)
+      const message = { event: 'login', data: { sessionId: user?.session_id }}
+      sendMessage(JSON.stringify(message))
     }
   }, [readyState, user?.session_id])
 

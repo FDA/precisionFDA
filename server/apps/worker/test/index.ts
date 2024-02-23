@@ -1,10 +1,11 @@
+import { INestApplicationContext } from '@nestjs/common'
 import { database } from '@shared/database'
 import { db } from '@shared/test'
 import { mocksRestore, mocksSetup } from '@shared/test/mocks'
 import chai from 'chai'
 import chaiAsPromised from 'chai-as-promised'
 import dirtyChai from 'dirty-chai'
-import { startWorker } from '../src'
+import { bootstrap } from '../src/bootstrap'
 import { mocksRestore as localMocksRestore, mocksSetup as localMocksSetup } from './utils/mocks'
 
 // Handle exception being thrown inside an async test
@@ -24,15 +25,18 @@ process.on('unhandledRejection', err => {
 chai.use(chaiAsPromised)
 chai.use(dirtyChai)
 
+let testedApp: INestApplicationContext
+
 before(async () => {
   mocksSetup()
   localMocksSetup()
 
-  await startWorker()
+  testedApp = await bootstrap()
   await db.initDeleteProcedure(database.connection())
 })
 
 after(async () => {
+  await testedApp?.close()
   localMocksRestore()
   mocksRestore()
 })

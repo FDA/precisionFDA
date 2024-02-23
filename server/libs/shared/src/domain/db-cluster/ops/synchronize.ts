@@ -37,7 +37,7 @@ Maybe<DbCluster>
       return
     }
 
-    const client = new PlatformClient(this.ctx.user.accessToken, this.ctx.log)
+    const client = new PlatformClient({ accessToken: this.ctx.user.accessToken }, this.ctx.log)
     this.ctx.log.verbose({ dbClusterId: dbCluster.id }, 'SyncDbClusterOperation: Processing job')
 
     if (dbCluster.status === STATUS.TERMINATED) {

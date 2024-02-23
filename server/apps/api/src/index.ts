@@ -1,5 +1,5 @@
 import { writeHeapSnapshot } from 'v8'
-import { createEntrypoint } from './entrypoint'
+import { bootstrap } from './bootstrap'
 import { log } from './logger'
 
 process.on('SIGUSR2', () => {
@@ -7,4 +7,4 @@ process.on('SIGUSR2', () => {
   log.verbose(`Created heap dump file: ${fileName}`)
 })
 
-createEntrypoint()()
+bootstrap()

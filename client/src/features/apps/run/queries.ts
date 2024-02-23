@@ -26,7 +26,7 @@ const getTitle = (space: ISpace): string => {
 
 export const fetchAndConvertSelectableContexts = (scope: IApp['scope'], entityType: IApp['entity_type']) => useQuery({
   queryKey: ['selectable-context', scope],
-  queryFn: () => fetchEditableSpacesList().catch(() => toast.error('Error loading contexts')),
+  queryFn: () => fetchEditableSpacesList(),
   select: (data) => {
     if (entityType === 'https') {
       const options = data.map(s => ({
@@ -43,11 +43,10 @@ export const fetchAndConvertSelectableContexts = (scope: IApp['scope'], entityTy
 export const fetchAndConvertSelectableSpaces = (scope: IApp['scope']) => {
   const spaceId = getSpaceIdFromScope(scope)
   return useQuery({
-    queryKey: ['selecteable-space', scope],
-    queryFn: () => fetchSelectableSpaces(spaceId, scope).catch(() => toast.error('Error loading spaces')),
+    queryKey: ['selectable-space', scope],
+    queryFn: () => fetchSelectableSpaces(spaceId),
     select: (data) => {
       if (scope.includes('space')) {
-        
         return data.map(space => ({
           isDisabled: false,
           label: getTitle(space),
@@ -56,4 +55,5 @@ export const fetchAndConvertSelectableSpaces = (scope: IApp['scope']) => {
       }
       return []
     },
-  })}
+  })
+}

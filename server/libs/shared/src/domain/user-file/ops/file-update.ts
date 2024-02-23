@@ -25,7 +25,7 @@ IFileOrAsset
     }
 
     log.verbose('FileUpdateOperation: Calling platform fileDescribe')
-    const platformClient = new PlatformClient(this.ctx.user.accessToken, log)
+    const platformClient = new PlatformClient({ accessToken: this.ctx.user.accessToken }, log)
     const fileDescribe = await platformClient.fileDescribe({
       fileDxid: fileOrAsset.dxid,
       projectDxid: fileOrAsset.project,

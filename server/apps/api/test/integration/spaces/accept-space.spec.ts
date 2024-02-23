@@ -13,7 +13,7 @@ import { PROJECT_DESCRIBE_RES } from '@shared/test/mock-responses'
 import { fakes, mocksReset } from '@shared/test/mocks'
 import { expect } from 'chai'
 import supertest from 'supertest'
-import { getServer } from '../../../src/server'
+import { testedApp } from '../../index'
 import { getDefaultHeaderData } from '../../utils/expect-helper'
 
 describe('PATCH /spaces/:id/accept', () => {
@@ -76,7 +76,7 @@ describe('PATCH /spaces/:id/accept', () => {
 
   context('with host_lead', () => {
     it('creates a dnanexus project and invites both hosts', async () => {
-      const { body } = await supertest(getServer())
+      const { body } = await supertest(testedApp.getHttpServer())
         .patch(`/spaces/${groupSpace.id}/accept`)
         .set(getDefaultHeaderData(hostLead))
         .expect(204)
@@ -85,7 +85,7 @@ describe('PATCH /spaces/:id/accept', () => {
     })
 
     it('invites both hosts', async () => {
-      const { body } = await supertest(getServer())
+      const { body } = await supertest(testedApp.getHttpServer())
         .patch(`/spaces/${groupSpace.id}/accept`)
         .set(getDefaultHeaderData(hostLead))
         .expect(204)
@@ -99,7 +99,7 @@ describe('PATCH /spaces/:id/accept', () => {
       create.spacesHelper.create(em, { spaceId: reviewSpace.id, type: SPACE_TYPE.REVIEW, hostDxOrg: `org-pfda..space_host_${random.dxstr()}` })
       await em.flush()
 
-      const { body } = await supertest(getServer())
+      const { body } = await supertest(testedApp.getHttpServer())
         .patch(`/spaces/${reviewSpace.id}/accept`)
         .set(getDefaultHeaderData(hostLead))
         .expect(204)
@@ -125,7 +125,7 @@ describe('PATCH /spaces/:id/accept', () => {
       create.spacesHelper.create(em, { spaceId: reviewSpace.id, type: SPACE_TYPE.REVIEW, hostDxOrg: `org-pfda..space_host_${random.dxstr()}` })
       await em.flush()
 
-      const { body } = await supertest(getServer())
+      const { body } = await supertest(testedApp.getHttpServer())
         .patch(`/spaces/${reviewSpace.id}/accept`)
         .set(getDefaultHeaderData(hostLead))
         .expect(204)
@@ -148,7 +148,7 @@ describe('PATCH /spaces/:id/accept', () => {
 
   context('with guest_lead', () => {
     it('creates a dnanexus project and invites both hosts', async () => {
-      const { body } = await supertest(getServer())
+      const { body } = await supertest(testedApp.getHttpServer())
         .patch(`/spaces/${groupSpace.id}/accept`)
         .set(getDefaultHeaderData(guestLead))
         .expect(204)
@@ -157,7 +157,7 @@ describe('PATCH /spaces/:id/accept', () => {
     })
 
     it('invites both hosts', async () => {
-      const { body } = await supertest(getServer())
+      const { body } = await supertest(testedApp.getHttpServer())
         .patch(`/spaces/${groupSpace.id}/accept`)
         .set(getDefaultHeaderData(guestLead))
         .expect(204)
@@ -169,7 +169,7 @@ describe('PATCH /spaces/:id/accept', () => {
       create.spacesHelper.create(em, { spaceId: reviewSpace.id, type: SPACE_TYPE.REVIEW, hostDxOrg: `org-pfda..space_host_${random.dxstr()}` })
       await em.flush()
 
-      const { body } = await supertest(getServer())
+      const { body } = await supertest(testedApp.getHttpServer())
         .patch(`/spaces/${reviewSpace.id}/accept`)
         .set(getDefaultHeaderData(guestLead))
         .expect(204)

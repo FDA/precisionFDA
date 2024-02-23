@@ -75,7 +75,7 @@ class SpaceMembershipPolicy
     def can_change_role?(space, admin, member, to_role)
       case to_role
       when SpaceMembership::ROLE_VIEWER
-        can_viewer?(@pace, admin, member)
+        can_viewer?(space, admin, member)
       when SpaceMembership::ROLE_CONTRIBUTOR
         can_contributor?(space, admin, member)
       when SpaceMembership::ROLE_ADMIN
@@ -112,6 +112,9 @@ class SpaceMembershipPolicy
       end
 
       return false if member.lead?
+
+      # skip side filtering for groups, we want true for both sides
+      return true if _space&.groups?
 
       admin.side == member.side
     end

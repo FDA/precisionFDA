@@ -20,7 +20,10 @@ number
 > {
   async run(input: IdInput): Promise<number> {
     const em = this.ctx.em.fork()
-    const platformClient = new PlatformClient(this.ctx.user.accessToken, this.ctx.log)
+    const platformClient = new PlatformClient(
+      { accessToken: this.ctx.user.accessToken },
+      this.ctx.log,
+    )
 
     try {
       await em.begin()

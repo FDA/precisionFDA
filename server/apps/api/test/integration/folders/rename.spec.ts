@@ -13,7 +13,7 @@ import {
   FILE_STI_TYPE,
   FILE_ORIGIN_TYPE,
 } from '@shared/domain/user-file/user-file.types'
-import { getServer } from '../../../src/server'
+import { testedApp } from '../../index'
 import { getDefaultHeaderData } from '../../utils/expect-helper'
 
 describe('PATCH /folders/:id/rename', () => {
@@ -42,7 +42,7 @@ describe('PATCH /folders/:id/rename', () => {
   })
 
   it('response shape', async () => {
-    const { body } = await supertest(getServer())
+    const { body } = await supertest(testedApp.getHttpServer())
       .patch(`/folders/${folder.id}/rename`)
       .set(getDefaultHeaderData(user))
       .send({
@@ -79,7 +79,7 @@ describe('PATCH /folders/:id/rename', () => {
       { project: folder.project, name: 'c', locked: false },
     )
     await em.flush()
-    const { body } = await supertest(getServer())
+    const { body } = await supertest(testedApp.getHttpServer())
       .patch(`/folders/${subfolder.id}/rename`)
       .set(getDefaultHeaderData(user))
       .send({
@@ -94,7 +94,7 @@ describe('PATCH /folders/:id/rename', () => {
   context('error states', () => {
     it('if API call fails, name is not updated', async () => {
       fakes.client.folderRenameFake.throws()
-      await supertest(getServer())
+      await supertest(testedApp.getHttpServer())
         .patch(`/folders/${folder.id}/rename`)
         .set(getDefaultHeaderData(user))
         .send({

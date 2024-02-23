@@ -9,7 +9,10 @@ import { DxIdInput, UserOpsCtx } from '../../../types'
 export class StartDbClusterOperation extends BaseOperation<UserOpsCtx, DxIdInput, DbCluster> {
   async run(input: DxIdInput): Promise<DbCluster> {
     const em = this.ctx.em
-    const platformClient = new client.PlatformClient(this.ctx.user.accessToken, this.ctx.log)
+    const platformClient = new client.PlatformClient(
+      { accessToken: this.ctx.user.accessToken },
+      this.ctx.log,
+    )
     const dbCluster = await em.findOne(DbCluster, { dxid: input.dxid })
 
     if (!dbCluster) {
