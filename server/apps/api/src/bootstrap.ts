@@ -1,6 +1,7 @@
 import { ValidationPipe } from '@nestjs/common'
 import { NestApplicationOptions } from '@nestjs/common/interfaces/nest-application-options.interface'
 import { NestFactory } from '@nestjs/core'
+import { NestExpressApplication } from '@nestjs/platform-express'
 import { setupNestApp } from '@shared/app-initialization'
 import { config } from '@shared/config'
 import fs from 'fs'
@@ -21,9 +22,9 @@ export async function bootstrap() {
     }
   }
 
-  const app = await NestFactory.create(ApiModule, options)
+  const app = await NestFactory.create<NestExpressApplication>(ApiModule, options)
   app.useWebSocketAdapter(new WebsocketAdapter(app))
-
+  app.useBodyParser('json', { limit: '16mb' })
   await setupNestApp(app)
 
   app.useGlobalPipes(new ValidationPipe({ transform: true }))
