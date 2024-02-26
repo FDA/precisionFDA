@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2024_02_06_104430) do
+ActiveRecord::Schema.define(version: 2024_02_23_133645) do
 
   create_table "accepted_licenses", id: :integer, charset: "utf8mb3", collation: "utf8mb3_unicode_ci", force: :cascade do |t|
     t.integer "license_id"
@@ -256,8 +256,8 @@ ActiveRecord::Schema.define(version: 2024_02_06_104430) do
   create_table "data_portals", charset: "utf8mb3", collation: "utf8mb3_unicode_ci", force: :cascade do |t|
     t.string "name"
     t.text "description"
-    t.text "content"
-    t.text "editor_state"
+    t.text "content", size: :medium
+    t.text "editor_state", size: :medium
     t.string "card_image_url"
     t.integer "card_image_id"
     t.integer "sort_order"
