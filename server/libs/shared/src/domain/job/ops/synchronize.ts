@@ -119,7 +119,7 @@ export class SyncJobOperation extends WorkerBaseOperation<
     // todo: check user's ownership -> we should have a helper for it
     this.job = job
     this.user = user
-    this.client = new PlatformClient(this.ctx.user.accessToken, this.ctx.log)
+    this.client = new PlatformClient({ accessToken: this.ctx.user.accessToken }, this.ctx.log)
     this.ctx.log.verbose({ jobId: job.id }, 'SyncJobOperation: Processing job')
 
     if (!shouldSyncStatus(job)) {

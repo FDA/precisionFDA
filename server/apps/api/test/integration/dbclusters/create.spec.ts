@@ -13,7 +13,7 @@ import {
   ENGINES,
 } from '@shared/domain/db-cluster/db-cluster.enum'
 import { fakes, mocksReset } from '@shared/test/mocks'
-import { getServer } from '../../../src/server'
+import { testedApp } from '../../index'
 import { getDefaultHeaderData } from '../../utils/expect-helper'
 
 describe('POST /dbclusters/create', () => {
@@ -42,7 +42,7 @@ describe('POST /dbclusters/create', () => {
     fakes.client.dbClusterCreateFake.onCall(0).returns({ id: dxid })
     fakes.client.dbClusterDescribeFake.onCall(0).returns(describeCallRes)
 
-    const { body } = await supertest(getServer())
+    const { body } = await supertest(testedApp.getHttpServer())
       .post(`/dbclusters/create`)
       .set(getDefaultHeaderData(user))
       .send(createInput)
@@ -73,7 +73,7 @@ describe('POST /dbclusters/create', () => {
     fakes.client.dbClusterCreateFake.onCall(0).returns({ id: dxid })
     const userHeaderData = getDefaultHeaderData(user)
 
-    await supertest(getServer())
+    await supertest(testedApp.getHttpServer())
       .post('/dbclusters/create')
       .set(userHeaderData)
       .send(createInput)
@@ -106,14 +106,20 @@ describe('POST /dbclusters/create', () => {
     const describeCallRes = { ...mockResponses.DBCLUSTER_DESC_RES, id: dxid }
     fakes.client.dbClusterDescribeFake.onCall(0).returns(describeCallRes)
 
-    await supertest(getServer())
+    const args = []
+    fakes.queue.createDbClusterSyncTaskFake.callsFake((...a) => {
+      a[1] = a[1].toJSON()
+      args.push(a)
+    })
+
+    await supertest(testedApp.getHttpServer())
       .post('/dbclusters/create')
       .set(userHeaderData)
       .send(generate.dbCluster.createInput())
       .expect(201)
 
     expect(fakes.queue.createDbClusterSyncTaskFake.calledOnce).to.be.true()
-    const fakeCreateStatusSyncArgs = fakes.queue.createDbClusterSyncTaskFake.getCall(0).args
+    const fakeCreateStatusSyncArgs = args[0]
 
     expect(fakeCreateStatusSyncArgs).to.deep.equal([
       { dxid: dxid },

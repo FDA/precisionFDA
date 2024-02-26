@@ -58,7 +58,7 @@ number
     const userFileRepo = em.getRepository(UserFile)
     const userRepo = em.getRepository(User)
     const user = await userRepo.findOneOrFail(this.ctx.user.id)
-    this.client = new PlatformClient(this.ctx.user.accessToken, this.ctx.log)
+    this.client = new PlatformClient({ accessToken: this.ctx.user.accessToken }, this.ctx.log)
     const fileToRemove = await userFileRepo.findOneOrFail(input.id)
 
     return await em.transactional(async tm => {

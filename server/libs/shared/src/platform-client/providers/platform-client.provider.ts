@@ -7,11 +7,11 @@ export const CHALLENGE_BOT_PLATFORM_CLIENT = 'CHALLENGE_BOT_PLATFORM_CLIENT'
 
 export const platformClientProvider: Provider = {
   provide: PlatformClient,
-  useFactory: (user: UserContext) => new PlatformClient(user.accessToken),
+  useFactory: (user: UserContext) => new PlatformClient(user),
   inject: [UserContext],
 }
 
 export const challengeBotClientProvider: Provider = {
   provide: CHALLENGE_BOT_PLATFORM_CLIENT,
-  useFactory: () => new PlatformClient(config.platform.challengeBotAccessToken),
+  useFactory: () => new PlatformClient({ accessToken: config.platform.challengeBotAccessToken }),
 }

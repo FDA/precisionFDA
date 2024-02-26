@@ -5,6 +5,7 @@ import { config } from '@shared/config'
 import { DEPRECATED_SQL_ENTITY_MANAGER } from '@shared/database/provider/deprecated-sql-entity-manager.provider'
 import { JobService } from '@shared/domain/job/job.service'
 import { WorkstationSnapshotOperation } from '@shared/domain/job/ops/workstation-snapshot'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { UserDataConsistencyReportOperation } from '@shared/domain/user/ops/user-data-consistency-report'
 import { PlatformClient } from '@shared/platform-client'
 import { CheckStatusJob, TASK_TYPE } from '@shared/queue/task.input'
@@ -19,14 +20,14 @@ import { BaseQueueProcessor } from '../../../queues/processor/base-queue.process
 
 @Processor(config.workerJobs.queues.fileSync.name)
 export class FileSyncQueueProcessor extends BaseQueueProcessor {
-  constructor(@Inject(DEPRECATED_SQL_ENTITY_MANAGER) private readonly em: SqlEntityManager) {
+  constructor(@Inject(DEPRECATED_SQL_ENTITY_MANAGER) private readonly em: SqlEntityManager, private readonly user: UserContext) {
     super()
   }
 
   @ProcessWithContext(TASK_TYPE.SYNC_JOB_OUTPUTS)
   async syncJobOutputs(job: Job<CheckStatusJob>) {
     // TODO following will be DI refactored
-    const platformClient = new PlatformClient(job.data.user.accessToken)
+    const platformClient = new PlatformClient({ accessToken: job.data.user.accessToken })
     const jobService = new JobService(this.em, platformClient)
     const handler = new SyncOutputsHandler(this.em, jobService)
 

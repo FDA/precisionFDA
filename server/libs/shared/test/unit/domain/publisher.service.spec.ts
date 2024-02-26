@@ -25,7 +25,7 @@ describe('PublisherService tests', () => {
     user = create.userHelper.create(em)
     await em.flush()
     userCtx = { ...user, accessToken: 'foo' }
-    publisherService = new PublisherService(em, userCtx, new PlatformClient('foo'))
+    publisherService = new PublisherService(em, userCtx, new PlatformClient({ accessToken: 'foo' }))
     // using mocked platform client to avoid actual calls to platform
     mocksReset()
   })

@@ -11,7 +11,7 @@ import { JOB_DB_ENTITY_TYPE, JOB_STATE } from '@shared/domain/job/job.enum'
 import supertest from 'supertest'
 import { create, db } from '@shared/test'
 import { fakes, mocksReset } from '@shared/test/mocks'
-import { getServer } from '../../../src/server'
+import { testedApp } from '../../index'
 import { getDefaultHeaderData, stripEntityDates } from '../../utils/expect-helper'
 
 describe.skip('GET /jobs/:id', () => {
@@ -34,7 +34,7 @@ describe.skip('GET /jobs/:id', () => {
   })
 
   it('response shape', async () => {
-    const { body } = await supertest(getServer())
+    const { body } = await supertest(testedApp.getHttpServer())
       .get(`/jobs/${job.dxid}`)
       .set(getDefaultHeaderData(user))
       .expect(200)
@@ -70,7 +70,7 @@ describe.skip('GET /jobs/:id', () => {
 
   it('will not call the platform client if the job is in terminated state', async () => {
     const jobDescribeFake = fakes.client.jobDescribeFake
-    const { body } = await supertest(getServer())
+    const { body } = await supertest(testedApp.getHttpServer())
       .get(`/jobs/${job.dxid}`)
       .set(getDefaultHeaderData(user))
       .expect(200)
@@ -83,7 +83,7 @@ describe.skip('GET /jobs/:id', () => {
     const activeJob = create.jobHelper.create(em, { user, app }, { state: JOB_STATE.IDLE })
     await em.flush()
 
-    const { body } = await supertest(getServer())
+    const { body } = await supertest(testedApp.getHttpServer())
       .get(`/jobs/${activeJob.dxid}`)
       .set(getDefaultHeaderData(user))
       .expect(200)
@@ -102,7 +102,7 @@ describe.skip('GET /jobs/:id', () => {
     }
     jobDescribeFake.returns(platformResponse)
 
-    const { body } = await supertest(getServer())
+    const { body } = await supertest(testedApp.getHttpServer())
       .get(`/jobs/${anotherJob.dxid}`)
       .set(getDefaultHeaderData(user))
       .expect(200)
@@ -119,14 +119,14 @@ describe.skip('GET /jobs/:id', () => {
 
   context('error states', () => {
     it('returns 400 when query data is not provided', async () => {
-      const { body } = await supertest(getServer()).get(`/jobs/${job.dxid}`).expect(400)
+      const { body } = await supertest(testedApp.getHttpServer()).get(`/jobs/${job.dxid}`).expect(400)
       expect(body.error).to.have.property('code', ErrorCodes.USER_CONTEXT_QUERY_INVALID)
       expect(body.props).to.have.property('validationErrors')
     })
 
     it('returns 400 when jobId is invalid', async () => {
       const longString = repeat('a', 65).join('')
-      const { body } = await supertest(getServer())
+      const { body } = await supertest(testedApp.getHttpServer())
         .get(`/jobs/${longString}`)
         .set(getDefaultHeaderData(user))
         .expect(400)
@@ -135,7 +135,7 @@ describe.skip('GET /jobs/:id', () => {
     })
 
     it('returns 404 when job does not belong to the given user', async () => {
-      const { body } = await supertest(getServer())
+      const { body } = await supertest(testedApp.getHttpServer())
         .get(`/jobs/${job.dxid}`)
         .set(getDefaultHeaderData(user))
         .query({ id: user.id + 1 })
@@ -144,7 +144,7 @@ describe.skip('GET /jobs/:id', () => {
     })
 
     it.skip('returns 404 when job does not belong to the given app', async () => {
-      const { body } = await supertest(getServer())
+      const { body } = await supertest(testedApp.getHttpServer())
         .get(`/apps/${(app.id + 1).toString()}/jobs/${job.dxid}`)
         .set(getDefaultHeaderData(user))
         .expect(404)

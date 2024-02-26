@@ -5,7 +5,7 @@ import { EntityManager } from '@mikro-orm/mysql'
 import supertest from 'supertest'
 import { create, db } from '@shared/test'
 import { mocksReset } from '@shared/test/mocks'
-import { getServer } from '../../../src/server'
+import { testedApp } from '../../index'
 import { getDefaultHeaderData } from '../../utils/expect-helper'
 import { Expert, ExpertScope, ExpertState } from '@shared/domain/expert/expert.entity'
 
@@ -43,7 +43,7 @@ describe('/experts', () => {
   })
 
   it('GET /experts has valid response', async () => {
-    const { body } = await supertest(getServer())
+    const { body } = await supertest(testedApp.getHttpServer())
       .get(`/experts`)
       .set(getDefaultHeaderData(user))
       .expect(200)
@@ -73,7 +73,7 @@ describe('/experts', () => {
   })
 
   it('GET /experts/years has valid response', async () => {
-    const { body } = await supertest(getServer())
+    const { body } = await supertest(testedApp.getHttpServer())
       .get(`/experts/years`)
       .set(getDefaultHeaderData(user))
       .expect(200)

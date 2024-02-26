@@ -3,7 +3,7 @@ import { NotificationService } from '@shared/domain/notification/services/notifi
 import { SpaceReportPart } from '@shared/domain/space-report/entity/space-report-part.entity'
 import { SpaceReport } from '@shared/domain/space-report/entity/space-report.entity'
 import { NOTIFICATION_ACTION, SEVERITY } from '@shared/enums'
-import { SpaceReportErrorFacade } from '@shared/facade/space-report-error/space-report-error.facade'
+import { SpaceReportErrorFacade } from '@shared/facade/space-report/space-report-error.facade'
 import { expect } from 'chai'
 import { stub } from 'sinon'
 

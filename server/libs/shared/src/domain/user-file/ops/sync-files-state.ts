@@ -152,7 +152,10 @@ void> {
       return
     }
 
-    this.platformClient = new PlatformClient(this.ctx.user.accessToken, this.ctx.log)
+    this.platformClient = new PlatformClient(
+      { accessToken: this.ctx.user.accessToken },
+      this.ctx.log,
+    )
     let openFiles = await findUnclosedFilesOrAssets(em, user.id)
 
     this.log.verbose({

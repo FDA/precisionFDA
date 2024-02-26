@@ -58,19 +58,19 @@ const fakes = {
     removeRepeatableFake: sinon.fake(),
     removeRepeatableJobsFake: sinon.fake(),
     createCheckUserJobsTask: sinon.fake(),
-    createDbClusterSyncTaskFake: sinon.fake(),
+    createDbClusterSyncTaskFake: sinon.stub(),
     createEmailSendTaskFake: sinon.fake(),
     createSyncFilesStateTask: sinon.fake(),
-    createSyncJobStatusTaskFake: sinon.fake(),
+    createSyncJobStatusTaskFake: sinon.stub(),
     createSyncWorkstationFilesTask: sinon.fake(),
     createUserCheckupTask: sinon.fake(),
-    createSyncSpacesPermissionsTask: sinon.fake(),
+    createSyncSpacesPermissionsTask: sinon.stub(),
     clearOrphanedRepeatableJobs: sinon.fake(),
   },
   bull: {
     // process cannot be blocking in tests
     processFake: sinon.fake(),
-    isReadyFake: sinon.fake(),
+    isReadyFake: sinon.stub(),
     addFake: sinon.stub(),
     getJobFake: sinon.stub(),
   },
@@ -116,6 +116,7 @@ const mocksSetDefaultBehaviour = () => {
 
   fakes.bull.addFake.callsFake(() => { })
   fakes.bull.getJobFake.callsFake(() => undefined)
+  fakes.bull.isReadyFake.callsFake(() => Promise.resolve(true))
 
 
   mockServiceFactory.reset()
@@ -186,7 +187,9 @@ const mocksSetup = () => {
   sandbox.replace(queue, 'createSyncSpacesPermissionsTask', fakes.queue.createSyncSpacesPermissionsTask)
   sandbox.replace(queue, 'clearOrphanedRepeatableJobs', fakes.queue.clearOrphanedRepeatableJobs)
   sandbox.stub(redis, 'createRedisClient').returns({
-    publish(channel: string, value: string) { }
+    publish(channel: string, value: string) { },
+    subscribe() { },
+    quit() { },
   } as RedisClient)
 }
 

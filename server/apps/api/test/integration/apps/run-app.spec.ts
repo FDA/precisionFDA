@@ -16,7 +16,7 @@ import {
 } from '@shared/domain/job/job.enum'
 import { create, generate, db } from '@shared/test'
 import { fakes, mocksReset } from '@shared/test/mocks'
-import { getServer } from '../../../src/server'
+import { testedApp } from '../../index'
 import { getDefaultHeaderData, stripEntityDates } from '../../utils/expect-helper'
 
 describe('POST /apps/:id/run', () => {
@@ -37,7 +37,7 @@ describe('POST /apps/:id/run', () => {
   })
 
   it('response shape', async () => {
-    const { body } = await supertest(getServer())
+    const { body } = await supertest(testedApp.getHttpServer())
       .post(`/apps/${app.dxid}/run`)
       .set(getDefaultHeaderData(user))
       .send(generate.app.runAppInput())
@@ -62,7 +62,7 @@ describe('POST /apps/:id/run', () => {
   })
 
   it('builds json fields in the db', async () => {
-    const { body } = await supertest(getServer())
+    const { body } = await supertest(testedApp.getHttpServer())
       .post(`/apps/${app.dxid}/run`)
       .set(getDefaultHeaderData(user))
       .send(generate.app.runAppInput())
@@ -83,7 +83,7 @@ describe('POST /apps/:id/run', () => {
   })
 
   it('response shape - ttyd app (still user.private project)', async () => {
-    const { body } = await supertest(getServer())
+    const { body } = await supertest(testedApp.getHttpServer())
       .post(`/apps/${app.dxid}/run`)
       .set(getDefaultHeaderData(user))
       .send(generate.app.runTtydAppInput())
@@ -117,7 +117,7 @@ describe('POST /apps/:id/run', () => {
         snapshot: snapshotFile.uid,
       },
     }
-    const { body } = await supertest(getServer())
+    const { body } = await supertest(testedApp.getHttpServer())
       .post(`/apps/${app.dxid}/run`)
       .set(getDefaultHeaderData(user))
       .send(input)
@@ -158,7 +158,7 @@ describe('POST /apps/:id/run', () => {
         cmd: 'my-command-override',
       },
     }
-    await supertest(getServer())
+    await supertest(testedApp.getHttpServer())
       .post(`/apps/${app.dxid}/run`)
       .set(getDefaultHeaderData(user))
       .send(inputComplete)
@@ -192,7 +192,7 @@ describe('POST /apps/:id/run', () => {
         port: 8081,
       },
     }
-    const { body } = await supertest(getServer())
+    const { body } = await supertest(testedApp.getHttpServer())
       .post(`/apps/${ttydApp.dxid}/run`)
       .set(getDefaultHeaderData(user))
       .send(ttydAppInput)
@@ -221,7 +221,7 @@ describe('POST /apps/:id/run', () => {
         app_gz: gzipFile.uid,
       },
     }
-    const { body } = await supertest(getServer())
+    const { body } = await supertest(testedApp.getHttpServer())
       .post(`/apps/${rshinyApp.dxid}/run`)
       .set(getDefaultHeaderData(user))
       .send(input)
@@ -253,7 +253,7 @@ describe('POST /apps/:id/run', () => {
       jobLimit: 50,
       input: {},
     }
-    await supertest(getServer())
+    await supertest(testedApp.getHttpServer())
       .post(`/apps/${app.dxid}/run`)
       .set(getDefaultHeaderData(user))
       .send(inputComplete)
@@ -270,7 +270,7 @@ describe('POST /apps/:id/run', () => {
   })
 
   it('calls the platform API', async () => {
-    await supertest(getServer())
+    await supertest(testedApp.getHttpServer())
       .post(`/apps/${app.dxid}/run`)
       .set(getDefaultHeaderData(user))
       .send(generate.app.runAppInput())
@@ -279,13 +279,19 @@ describe('POST /apps/:id/run', () => {
   })
 
   it('calls queue helper', async () => {
-    const { body } = await supertest(getServer())
+    const args = []
+    fakes.queue.createSyncJobStatusTaskFake.callsFake((...a) => {
+      a[1] = a[1].toJSON()
+      args.push(a)
+    })
+
+    const { body } = await supertest(testedApp.getHttpServer())
       .post(`/apps/${app.dxid}/run`)
       .set(getDefaultHeaderData(user))
       .send(generate.app.runAppInput())
       .expect(201)
     expect(fakes.queue.createSyncJobStatusTaskFake.calledOnce).to.be.true()
-    const fakeCallArgs = fakes.queue.createSyncJobStatusTaskFake.getCall(0).args
+    const fakeCallArgs = args[0]
     expect(fakeCallArgs[0]).to.deep.equal({
       dxid: body.dxid,
     })
@@ -300,7 +306,7 @@ describe('POST /apps/:id/run', () => {
 
   context('error states', () => {
     it('throws 404 when user does not exist', async () => {
-      const { body } = await supertest(getServer())
+      const { body } = await supertest(testedApp.getHttpServer())
         .post(`/apps/${app.dxid}/run`)
         .set({
           ...getDefaultHeaderData(user),
@@ -314,7 +320,7 @@ describe('POST /apps/:id/run', () => {
     it('throws 404 when user does not have the project set', async () => {
       user.privateFilesProject = null
       await em.flush()
-      const { body } = await supertest(getServer())
+      const { body } = await supertest(testedApp.getHttpServer())
         .post(`/apps/${app.dxid}/run`)
         .set(getDefaultHeaderData(user))
         .query({ id: user.id })
@@ -328,7 +334,7 @@ describe('POST /apps/:id/run', () => {
       const anotherUser = create.userHelper.create(em)
       const anotherApp = create.appHelper.createHTTPS(em, { user: anotherUser })
       await em.flush()
-      const { body } = await supertest(getServer())
+      const { body } = await supertest(testedApp.getHttpServer())
         .post(`/apps/${anotherApp.dxid}/run`)
        .set(getDefaultHeaderData(user))
         .send(generate.app.runAppInput())
@@ -338,7 +344,7 @@ describe('POST /apps/:id/run', () => {
     it('throws 404 if requested app does not follow the requirements', async () => {
       const anotherApp = create.appHelper.createHTTPS(em, { user }, { scope: 'private' })
       await em.flush()
-      const { body } = await supertest(getServer())
+      const { body } = await supertest(testedApp.getHttpServer())
         .post(`/apps/${anotherApp.dxid}/run`)
        .set(getDefaultHeaderData(user))
         .send(generate.app.runAppInput())
@@ -347,7 +353,7 @@ describe('POST /apps/:id/run', () => {
     })
 
     it('throws 404 when snapshot is provided but file does not exist', async () => {
-      const { body } = await supertest(getServer())
+      const { body } = await supertest(testedApp.getHttpServer())
         .post(`/apps/${app.dxid}/run`)
        .set(getDefaultHeaderData(user))
         .send({ ...generate.app.runAppInput(), input: { snapshot: generate.random.dxstr() } })

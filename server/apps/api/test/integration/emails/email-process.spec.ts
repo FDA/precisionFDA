@@ -10,7 +10,7 @@ import { JOB_STATE } from '@shared/domain/job/job.enum'
 import { create, generate, db } from '@shared/test'
 import { fakes, mocksReset } from '@shared/test/mocks'
 import { EMAIL_CONFIG } from '@shared/domain/email/email.config'
-import { getServer } from '../../../src/server'
+import { testedApp } from '../../index'
 import { getDefaultHeaderData } from '../../utils/expect-helper'
 
 describe('POST /emails/:id/send', () => {
@@ -45,7 +45,7 @@ describe('POST /emails/:id/send', () => {
   })
 
   it('response shape & mocks call shape (JOB_FINISHED email) - is now deprecated', async () => {
-    const { text } = await supertest(getServer())
+    const { text } = await supertest(testedApp.getHttpServer())
       .post(`/emails/${EMAIL_ID_JOB_FINISHED}/send`)
       .set(getDefaultHeaderData(user))
       .send({ input: { jobId: job.id } })
@@ -72,7 +72,7 @@ describe('POST /emails/:id/send', () => {
     }
     await em.flush()
 
-    const { text } = await supertest(getServer())
+    const { text } = await supertest(testedApp.getHttpServer())
       .post(`/emails/${emailId}/send`)
       .set(getDefaultHeaderData(user))
       .send({ input: { jobId: job.id } })
@@ -87,7 +87,7 @@ describe('POST /emails/:id/send', () => {
   })
 
   it('mocks call shape (SPACE_CONTENT_CHANGE email)', async () => {
-    const { text } = await supertest(getServer())
+    const { text } = await supertest(testedApp.getHttpServer())
       .post(`/emails/${EMAIL_ID_SPACE_CONTENT}/send`)
       .set(getDefaultHeaderData(user))
       .send({ input: { spaceEventId: spaceEventJobAdded.id } })
@@ -103,7 +103,7 @@ describe('POST /emails/:id/send', () => {
 
   context('errors', () => {
     it('requires default input field', async () => {
-      await supertest(getServer())
+      await supertest(testedApp.getHttpServer())
         .post(`/emails/${EMAIL_ID_JOB_FINISHED}/send`)
         .set(getDefaultHeaderData(user))
         .send({ payload: { jobId: job.id } })
@@ -111,7 +111,7 @@ describe('POST /emails/:id/send', () => {
     })
 
     it('requires input content based on email type (JOB_FINISHED)', async () => {
-      await supertest(getServer())
+      await supertest(testedApp.getHttpServer())
         .post(`/emails/${EMAIL_ID_JOB_FINISHED}/send`)
         .set(getDefaultHeaderData(user))
         .send({ input: { jobIdFoo: job.id } })
@@ -119,7 +119,7 @@ describe('POST /emails/:id/send', () => {
     })
 
     it('requires input content based on email type (SPACE_CONTENT_CHANGE)', async () => {
-      await supertest(getServer())
+      await supertest(testedApp.getHttpServer())
         .post(`/emails/${EMAIL_ID_SPACE_CONTENT}/send`)
         .set(getDefaultHeaderData(user))
         .send({ input: { spaceEventIdFoo: job.id } })

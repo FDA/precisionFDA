@@ -4,17 +4,17 @@ import { Job } from '@shared/domain/job/job.entity'
 import { SpaceReportPart } from '@shared/domain/space-report/entity/space-report-part.entity'
 import { SpaceReport } from '@shared/domain/space-report/entity/space-report.entity'
 import { SpaceReportPartSourceType } from '@shared/domain/space-report/model/space-report-part-source.type'
+import { SpaceReportQueueJobProducer } from '@shared/domain/space-report/producer/space-report-queue-job.producer'
 import { SpaceReportService } from '@shared/domain/space-report/service/space-report.service'
 import { Asset } from '@shared/domain/user-file/asset.entity'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { Workflow } from '@shared/domain/workflow/entity/workflow.entity'
-import { SpaceReportPartResultProvider } from '@shared/facade/space-report-batch/service/space-report-part-result.provider'
-import { SpaceReportBatchResultGenerateFacade } from '@shared/facade/space-report-batch/space-report-batch-result-generate.facade'
-import * as queue from '@shared/queue'
+import { SpaceReportPartResultProvider } from '@shared/facade/space-report/service/space-report-part-result.provider'
+import { SpaceReportBatchResultGenerateFacade } from '@shared/facade/space-report/space-report-batch-result-generate.facade'
 import { UserCtx } from '@shared/types'
 import { expect } from 'chai'
-import { restore, SinonStub, stub } from 'sinon'
+import { restore, stub } from 'sinon'
 
 describe('SpaceReportBatchResultGenerateFacade', () => {
   const REPORT_ID = 0
@@ -90,10 +90,7 @@ describe('SpaceReportBatchResultGenerateFacade', () => {
   const workflowGetResultStub = stub()
   const userGetResultStub = stub()
 
-  let createGenerateSpaceReportResultTaskStub: SinonStub
-  before(() => {
-    createGenerateSpaceReportResultTaskStub = stub(queue, 'createGenerateSpaceReportResultTask')
-  })
+  const createResultTaskStub = stub()
 
   beforeEach(() => {
     transactionalStub.reset()
@@ -187,9 +184,9 @@ describe('SpaceReportBatchResultGenerateFacade', () => {
     userGetResultStub.reset()
     userGetResultStub.throws()
 
-    createGenerateSpaceReportResultTaskStub.reset()
-    createGenerateSpaceReportResultTaskStub.throws()
-    createGenerateSpaceReportResultTaskStub.withArgs(REPORT_ID, USER_CTX).resolves()
+    createResultTaskStub.reset()
+    createResultTaskStub.throws()
+    createResultTaskStub.withArgs(REPORT_ID, USER_CTX).resolves()
   })
 
   after(() => {
@@ -260,8 +257,8 @@ describe('SpaceReportBatchResultGenerateFacade', () => {
 
   it('should not catch an error from createGenerateSpaceReportResultTask', async () => {
     const error = new Error('my error')
-    createGenerateSpaceReportResultTaskStub.reset()
-    createGenerateSpaceReportResultTaskStub.throws(error)
+    createResultTaskStub.reset()
+    createResultTaskStub.throws(error)
 
     await expect(getInstance().generate(PART_IDS)).to.be.rejectedWith(error)
   })
@@ -354,13 +351,13 @@ describe('SpaceReportBatchResultGenerateFacade', () => {
 
     await getInstance().generate(PART_IDS)
 
-    expect(createGenerateSpaceReportResultTaskStub.called).to.be.false()
+    expect(createResultTaskStub.called).to.be.false()
   })
 
   it('should create space report result task if no pending parts', async () => {
     await getInstance().generate(PART_IDS)
 
-    expect(createGenerateSpaceReportResultTaskStub.calledOnce).to.be.true()
+    expect(createResultTaskStub.calledOnce).to.be.true()
   })
 
   function getInstance() {
@@ -400,10 +397,15 @@ describe('SpaceReportBatchResultGenerateFacade', () => {
       },
     }
 
+    const spaceReportQueueJobProducer = {
+      createResultTask: createResultTaskStub,
+    } as unknown as SpaceReportQueueJobProducer
+
     return new SpaceReportBatchResultGenerateFacade(
       em,
       USER_CTX,
       spaceReportService,
+      spaceReportQueueJobProducer,
       SOURCE_TYPE_TO_RESULT_PROVIDER,
     )
   }

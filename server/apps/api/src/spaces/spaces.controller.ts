@@ -128,7 +128,7 @@ export class SpacesController {
     ) {
       throw new PermissionError('Operation not permitted.')
     }
-    const platformClient = new PlatformClient(this.user.accessToken, this.log)
+    const platformClient = new PlatformClient({ accessToken: this.user.accessToken }, this.log)
     if (membership.side === SPACE_MEMBERSHIP_SIDE.GUEST) {
       try {
         // try to get some data from host project - should fail.

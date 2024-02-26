@@ -18,7 +18,7 @@ void
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async run(input: RecreateFolderInput): Promise<void> {
     const em = this.ctx.em
-    const client = new PlatformClient(this.ctx.user.accessToken, this.ctx.log)
+    const client = new PlatformClient({ accessToken: this.ctx.user.accessToken }, this.ctx.log)
     const userId = this.ctx.user.id
     const user = await em.findOne(User, { id: userId })
     if (!user) {

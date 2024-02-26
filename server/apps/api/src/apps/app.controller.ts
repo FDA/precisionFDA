@@ -38,7 +38,7 @@ export class AppController {
   @HttpCode(200)
   @Post()
   async createApp(@Body(new JsonSchemaPipe(saveAppSchema)) body: AppInput) {
-    const platformClient = new PlatformClient(this.user.accessToken)
+    const platformClient = new PlatformClient({ accessToken: this.user.accessToken })
     const appService = new AppService(this.em, platformClient)
 
     return await appService.create(body, this.user.id)
@@ -86,7 +86,7 @@ export class AppController {
   async describeApp(@Param('uid') uid: string) {
     const app = await this.em.findOneOrFail(App, { uid }, { populate: ['user'] })
 
-    const platformClient = new PlatformClient(this.user.accessToken, this.log)
+    const platformClient = new PlatformClient({ accessToken: this.user.accessToken }, this.log)
     const platformAppData = await platformClient.appDescribe({
       dxid: app.dxid,
       data: {},

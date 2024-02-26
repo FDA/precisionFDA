@@ -32,7 +32,9 @@ export class MaintenanceQueueProcessor extends BaseQueueProcessor {
   @ProcessWithContext(TASK_TYPE.CHECK_CHALLENGE_JOBS)
   async checkChallengeJobs(job: Job) {
     // TODO following will be DI refactored
-    const platformClient = new PlatformClient(config.platform.challengeBotAccessToken)
+    const platformClient = new PlatformClient({
+      accessToken: config.platform.challengeBotAccessToken,
+    })
     const jobService = new JobService(this.em, platformClient)
     const handler = new CheckChallengeJobsHandler(this.em, jobService)
 
