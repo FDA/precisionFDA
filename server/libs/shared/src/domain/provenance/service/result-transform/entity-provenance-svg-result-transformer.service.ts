@@ -7,6 +7,7 @@ import path from 'path'
 import { EntityProvenance } from '../../model/entity-provenance'
 import { EntityProvenanceSvgOptions } from '../../model/entity-provenance-svg-options'
 import { EntityProvenanceResultTransformerService } from './entity-provenance-result-transformer.service'
+import DOMPurify from 'isomorphic-dompurify'
 
 // TODO(PFDA-4835) - use import after introducing bundler with nestjs
 const assetsPath = path.join(
@@ -121,11 +122,12 @@ export class EntityProvenanceSvgResultTransformerService
       .text((d) => `${d.data.data.title}`)
 
     if (options?.pixelated) {
-      g.selectAll('foreignObject.node')
-        .classed('pixelated', true)
+      g.selectAll('foreignObject.node').classed('pixelated', true)
     }
 
-    return dom.window.document.querySelector('svg.canvas')!.outerHTML
+    return DOMPurify.sanitize(dom.window.document.querySelector('svg.canvas')!.outerHTML, {
+      ADD_TAGS: ['foreignObject'],
+    })
   }
 
   async getStyles() {
