@@ -23,7 +23,10 @@ number
 > {
   async run(input: IdInput): Promise<number> {
     const em = this.ctx.em
-    const platformClient = new PlatformClient(this.ctx.user.accessToken, this.ctx.log)
+    const platformClient = new PlatformClient(
+      { accessToken: this.ctx.user.accessToken },
+      this.ctx.log,
+    )
 
     try {
       const repo = em.getRepository(Folder)

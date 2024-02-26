@@ -36,7 +36,10 @@ export class CreateJobOperation extends BaseOperation<UserOpsCtx, RunAppInput, J
     this.input = input
     this.jobInput = input.input ?? {}
     const em = this.ctx.em
-    const platformClient = new PlatformClient(this.ctx.user.accessToken, this.ctx.log)
+    const platformClient = new PlatformClient(
+      { accessToken: this.ctx.user.accessToken },
+      this.ctx.log,
+    )
 
     const user = await em.findOne(User, { id: this.ctx.user.id })
     // whitelist https public apps

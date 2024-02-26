@@ -12,7 +12,7 @@ import supertest from 'supertest'
 import { JOB_STATE } from '@shared/domain/job/job.enum'
 import { create, generate, db } from '@shared/test'
 import { fakes, mocksReset } from '@shared/test/mocks'
-import { getServer } from '../../../src/server'
+import { testedApp } from '../../index'
 import { getDefaultHeaderData } from '../../utils/expect-helper'
 
 describe('DELETE /folders/:id', () => {
@@ -41,7 +41,7 @@ describe('DELETE /folders/:id', () => {
   })
 
   it('response shape & mocks call', async () => {
-    await supertest(getServer())
+    await supertest(testedApp.getHttpServer())
       .delete(`/folders/${folder.id}`)
       .set(getDefaultHeaderData(user))
       .expect(200)
@@ -52,7 +52,7 @@ describe('DELETE /folders/:id', () => {
   })
 
   it('removes the folder from database', async () => {
-    await supertest(getServer())
+    await supertest(testedApp.getHttpServer())
       .delete(`/folders/${folder.id}`)
       .set(getDefaultHeaderData(user))
       .expect(200)
@@ -68,7 +68,7 @@ describe('DELETE /folders/:id', () => {
       { project: folder.project, name: 'b', locked: false },
     )
     await em.flush()
-    await supertest(getServer())
+    await supertest(testedApp.getHttpServer())
       .delete(`/folders/${subfolder.id}`)
       .set(getDefaultHeaderData(user))
       .expect(200)
@@ -121,7 +121,7 @@ describe('DELETE /folders/:id', () => {
       },
     )
     await em.flush()
-    await supertest(getServer())
+    await supertest(testedApp.getHttpServer())
       .delete(`/folders/${subfolder.id}`)
       .set(getDefaultHeaderData(user))
       .expect(200)
@@ -180,7 +180,7 @@ describe('DELETE /folders/:id', () => {
       },
     )
     await em.flush()
-    await supertest(getServer())
+    await supertest(testedApp.getHttpServer())
       .delete(`/folders/${folder.id}`)
       .set(getDefaultHeaderData(user))
       .expect(200)
@@ -201,7 +201,7 @@ describe('DELETE /folders/:id', () => {
     it('returns 404 when folder does not exist or does not have projectId assigned', async () => {
       folder.project = null
       await em.flush()
-      const { body } = await supertest(getServer())
+      const { body } = await supertest(testedApp.getHttpServer())
         .delete(`/folders/${folder.id}`)
         .set(getDefaultHeaderData(user))
         .expect(404)

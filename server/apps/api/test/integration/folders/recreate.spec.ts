@@ -6,7 +6,7 @@ import supertest from 'supertest'
 import { PARENT_TYPE } from '@shared/domain/user-file/user-file.types'
 import { create, generate, db } from '@shared/test'
 import { fakes, mocksReset } from '@shared/test/mocks'
-import { getServer } from '../../../src/server'
+import { testedApp } from '../../index'
 import { getDefaultHeaderData } from '../../utils/expect-helper'
 
 describe('POST /folders/recreate', () => {
@@ -35,7 +35,7 @@ describe('POST /folders/recreate', () => {
   })
 
   it('response shape & mocks default call', async () => {
-    await supertest(getServer())
+    await supertest(testedApp.getHttpServer())
       .post('/folders/recreate')
       .set(getDefaultHeaderData(user))
       .expect(204)
@@ -51,7 +51,7 @@ describe('POST /folders/recreate', () => {
       { parentId: user.id },
     )
     await em.flush()
-    await supertest(getServer())
+    await supertest(testedApp.getHttpServer())
       .post('/folders/recreate')
       .set(getDefaultHeaderData(user))
       .expect(204)
@@ -81,7 +81,7 @@ describe('POST /folders/recreate', () => {
       },
     )
     await em.flush()
-    await supertest(getServer())
+    await supertest(testedApp.getHttpServer())
       .post('/folders/recreate')
       .set(getDefaultHeaderData(user))
       .expect(204)

@@ -6,7 +6,7 @@ import { SpaceReport } from '@shared/domain/space-report/entity/space-report.ent
 import { SpaceReportService } from '@shared/domain/space-report/service/space-report.service'
 import { UserFileService } from '@shared/domain/user-file/service/user-file.service'
 import { UserFileCreateFacade } from '@shared/facade/file-create/user-file-create.facade'
-import { SpaceReportResultGenerateFacade } from '@shared/facade/space-report-result/space-report-result-generate.facade'
+import { SpaceReportResultGenerateFacade } from '@shared/facade/space-report/space-report-result-generate.facade'
 import { expect } from 'chai'
 import { restore, stub } from 'sinon'
 

@@ -7,6 +7,10 @@ services:
       - 8080:8080
     depends_on:
       - gsrsdb
+    volumes:
+      - type: bind
+        source: ${GSRS_FRONTEND_PATH:-/dev/null}
+        target: /usr/local/GSRSFrontend
 
   gsrsdb:
     image: "mariadb:10.6.15"

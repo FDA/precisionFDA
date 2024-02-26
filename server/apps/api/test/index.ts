@@ -1,25 +1,24 @@
+import { INestApplication } from '@nestjs/common'
 import { database } from '@shared/database'
 import { db, mocks } from '@shared/test'
 import chai from 'chai'
 import chaiAsPromised from 'chai-as-promised'
 import dirtyChai from 'dirty-chai'
-import { createServer } from '../src/server'
+import { bootstrap } from '../src/bootstrap'
 
 chai.use(chaiAsPromised)
 chai.use(dirtyChai)
 
-const server = createServer()
+export let testedApp: INestApplication
 
 before(async () => {
   mocks.mocksSetup()
-
-  await server.startHttpServer()
+  testedApp = await bootstrap()
 
   await db.initDeleteProcedure(database.connection())
 })
 
 after(async () => {
+  await testedApp?.close()
   mocks.mocksRestore()
-
-  await server.stopServer()
 })

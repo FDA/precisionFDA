@@ -8,7 +8,7 @@ import { EntityManager } from '@mikro-orm/mysql'
 import supertest from 'supertest'
 import { create, generate, db } from '@shared/test'
 import { mocksReset, fakes } from '@shared/test/mocks'
-import { getServer } from '../../../src/server'
+import { testedApp } from '../../index'
 import { getDefaultHeaderData } from '../../utils/expect-helper'
 import { SPACE_MEMBERSHIP_ROLE, SPACE_MEMBERSHIP_SIDE } from '@shared/domain/space-membership/space-membership.enum'
 import { SPACE_STATE } from '@shared/domain/space/space.enum'
@@ -58,7 +58,7 @@ describe('PATCH /spaces/:id/unlock', () => {
 
 
   it('unlocks space', async () => {
-    await supertest(getServer())
+    await supertest(testedApp.getHttpServer())
       .patch(`/spaces/${space.id}/unlock`)
       .set(getDefaultHeaderData(user))
       .expect(204)
@@ -71,7 +71,7 @@ describe('PATCH /spaces/:id/unlock', () => {
 
   context('error states', () => {
     it('throws 404 when the space does not exist', async () => {
-      const { body } = await supertest(getServer())
+      const { body } = await supertest(testedApp.getHttpServer())
         .patch(`/spaces/4848/unlock`)
         .set(getDefaultHeaderData(user))
         .expect(404)
@@ -79,7 +79,7 @@ describe('PATCH /spaces/:id/unlock', () => {
     })
 
     it('does not allow to unlock space (user is not RSA) and returns 403', async () => {
-      const { body } = await supertest(getServer())
+      const { body } = await supertest(testedApp.getHttpServer())
         .patch(`/spaces/${space.id}/unlock`)
         .set(getDefaultHeaderData(hostLead))
         .expect(403)
@@ -91,7 +91,7 @@ describe('PATCH /spaces/:id/unlock', () => {
       create.spacesHelper.addMember(em, { user, space: alreadyUnlockedSpace })
       await em.flush()
 
-      const { body } = await supertest(getServer())
+      const { body } = await supertest(testedApp.getHttpServer())
         .patch(`/spaces/${alreadyUnlockedSpace.id}/unlock`)
         .set(getDefaultHeaderData(user))
         .expect(403)

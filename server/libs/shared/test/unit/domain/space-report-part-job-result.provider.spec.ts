@@ -1,7 +1,8 @@
 import { Job } from '@shared/domain/job/job.entity'
-
 import { EntityProvenanceService } from '@shared/domain/provenance/service/entity-provenance.service'
-import { SpaceReportPartJobResultProvider } from '@shared/facade/space-report-batch/service/space-report-part-job-result-provider.service'
+import {
+  SpaceReportPartJobResultProvider
+} from '@shared/facade/space-report/service/space-report-part-job-result-provider.service'
 import { expect } from 'chai'
 import { stub } from 'sinon'
 

@@ -56,4 +56,5 @@ export const config: ConfigOverride = () => ({
     },
   },
   bullBoardEnabled: true,
+  nestjsDevtoolsEnabled: true,
 })

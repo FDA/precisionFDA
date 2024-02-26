@@ -10,6 +10,11 @@ module SpaceMembershipService
 
       api.call(org_dxid, "setMemberAccess", membership.user.dxid => api_update_params(membership))
 
+      if space.groups?
+        reverse_org_dxid = space.opposite_org_dxid(membership)
+        api.call(reverse_org_dxid, "setMemberAccess", membership.user.dxid => api_update_params(membership))
+      end
+
       membership.save!
       membership
     end

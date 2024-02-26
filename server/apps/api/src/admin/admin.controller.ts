@@ -147,7 +147,7 @@ export class AdminController {
   async resetUsers2fa(@Body(getAdminBodyValidationPipe()) body: IIdListParams) {
     const { ids } = body
     const adminUserClient = new PlatformClient(
-      config.platform.adminUserAccessToken,
+      { accessToken: config.platform.adminUserAccessToken },
       this.log,
     )
     const results = await this.em
@@ -162,7 +162,7 @@ export class AdminController {
   async unlockUsers(@Body(getAdminBodyValidationPipe()) body: IIdListParams) {
     const { ids } = body
     const adminUserClient = new PlatformClient(
-      config.platform.adminUserAccessToken,
+      { accessToken: config.platform.adminUserAccessToken },
       this.log,
     )
     const results = await this.em

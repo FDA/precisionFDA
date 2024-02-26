@@ -10,7 +10,7 @@ import { JOB_STATE } from '@shared/domain/job/job.enum'
 import { ENTITY_TYPE } from '@shared/domain/app/app.enum'
 import { create, generate, db } from '@shared/test'
 import { fakes, mocksReset } from '@shared/test/mocks'
-import { getServer } from '../../../src/server'
+import { testedApp } from '../../index'
 import { getDefaultHeaderData } from '../../utils/expect-helper'
 
 describe('PATCH /jobs/:id/terminate', () => {
@@ -32,7 +32,7 @@ describe('PATCH /jobs/:id/terminate', () => {
   })
 
   it('response shape', async () => {
-    const { body } = await supertest(getServer())
+    const { body } = await supertest(testedApp.getHttpServer())
       .patch(`/jobs/${job.dxid}/terminate`)
       .set(getDefaultHeaderData(user))
       .send({})
@@ -57,7 +57,7 @@ describe('PATCH /jobs/:id/terminate', () => {
   })
 
   it('calls the platform API', async () => {
-    await supertest(getServer())
+    await supertest(testedApp.getHttpServer())
       .patch(`/jobs/${job.dxid}/terminate`)
       .set(getDefaultHeaderData(user))
       .expect(200)
@@ -67,7 +67,7 @@ describe('PATCH /jobs/:id/terminate', () => {
   it('does not call platform API if the job is already finished', async () => {
     job.state = JOB_STATE.TERMINATED
     await em.flush()
-    const { body } = await supertest(getServer())
+    const { body } = await supertest(testedApp.getHttpServer())
       .patch(`/jobs/${job.dxid}/terminate`)
       .set(getDefaultHeaderData(user))
       .expect(422)
@@ -77,7 +77,7 @@ describe('PATCH /jobs/:id/terminate', () => {
 
   context('error states', () => {
     it('throws 404 when the job does not exist', async () => {
-      const { body } = await supertest(getServer())
+      const { body } = await supertest(testedApp.getHttpServer())
         .patch(`/jobs/${generate.random.dxstr()}/terminate`)
         .set(getDefaultHeaderData(user))
         .expect(404)
@@ -87,7 +87,7 @@ describe('PATCH /jobs/:id/terminate', () => {
     it('throws 404 when the job type is NOT HTTPS', async () => {
       job.entityType = ENTITY_TYPE.NORMAL
       await em.flush()
-      const { body } = await supertest(getServer())
+      const { body } = await supertest(testedApp.getHttpServer())
         .patch(`/jobs/${generate.random.dxstr()}/terminate`)
         .set(getDefaultHeaderData(user))
         .expect(404)
