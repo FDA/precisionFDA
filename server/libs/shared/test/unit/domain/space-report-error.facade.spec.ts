@@ -90,6 +90,15 @@ describe('SpaceReportErrorFacade', () => {
       expect(ERROR_REPORT).to.have.property('state', 'ERROR')
     })
 
+    it('should not change the state, if it is already DONE', async () => {
+      const DONE_REPORT = { ...SPACE_REPORT, state: 'DONE' }
+      findOneOrFailStub.withArgs(SpaceReport, SPACE_REPORT_ID).resolves(DONE_REPORT)
+
+      await getInstance().setSpaceReportError(SPACE_REPORT_ID)
+
+      expect(DONE_REPORT).to.have.property('state', 'DONE')
+    })
+
     it('should update the space report state to ERROR', async () => {
       await getInstance().setSpaceReportError(SPACE_REPORT_ID)
 

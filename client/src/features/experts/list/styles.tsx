@@ -14,9 +14,9 @@ export const StyledExpertListItem = styled.div`
 
 export const ItemImage = styled.div`
   img {
-    width: 96px;
+    min-width: 96px;
     height: 96px;
-    border-radius: 50%;
+    border-radius: 10%;
   }
 `
 

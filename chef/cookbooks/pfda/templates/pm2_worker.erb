@@ -2,8 +2,7 @@
   "apps": [
     {
       name: "https_apps_worker",
-      script: "npm",
-      args: "run start:prod:worker",
+      script: "dist/apps/worker/apps/worker/src/index.js",
       node_args: "--max_old_space_size=6144",
       instances: <%= @instances %>,
       exec_mode: "cluster",

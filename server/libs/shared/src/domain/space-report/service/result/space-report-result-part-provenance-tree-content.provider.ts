@@ -13,7 +13,7 @@ export class SpaceReportResultPartProvenanceTreeContentProvider extends SpaceRep
     container: HTMLDivElement,
   ): void {
     const created = document.createElement('p')
-    created.innerHTML = new Date(result.created).toLocaleString()
+    created.textContent = new Date(result.created).toLocaleString()
     container.appendChild(created)
 
     const diagram = document.createElement('div')

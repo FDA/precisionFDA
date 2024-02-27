@@ -10,7 +10,7 @@
   <div class="pfda-toolbar text-center">
     <div class="btn-group">
       <% if is_dashboard %>
-        <%= link_to expert_path(@expert), class: "btn btn-default" do %>
+        <%= link_to qa_expert_path(@expert), class: "btn btn-default" do %>
           <span class="fa fa-fw fa-globe" aria-hidden="true"></span> View Public Q&A
         <% end %>
         <%= link_to edit_expert_path(@expert), class:"btn btn-default" do %>

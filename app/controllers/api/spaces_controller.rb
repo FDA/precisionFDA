@@ -40,7 +40,7 @@ module Api
     # POST /api/spaces
     # Creates a new space.
     def create
-      space_form = SpaceForm.new(create_space_params)
+      space_form = SpaceForm.new(create_space_params.merge(current_user: @context.user))
 
       unless space_form.valid?
         # TODO: This format of errors is used to fit the client code.

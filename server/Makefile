@@ -66,9 +66,6 @@ build:
 run-prettier:
 	$(bin)prettier --write ./apps/**/src/**/*.ts
 
-run-worker-repl:
-	$(bin)bull-repl
-
 test-shared:
 	$(bin)mocha --config ./libs/shared/.mocharc.js \
 	--recursive "./libs/shared/test/**/*.spec.ts"
@@ -93,4 +90,4 @@ pristine:
 	pnpm run uninstall
 	rm -rf ./temp
 
-.PHONY: node_modules install clean pristine compile run-dist run-dev run-worker-dev build watch test-api test-worker run-worker-repl test run-dev-dist run-worker-dev-dist
+.PHONY: node_modules install clean pristine compile run-dist run-dev run-worker-dev build watch test-api test-worker test run-dev-dist run-worker-dev-dist

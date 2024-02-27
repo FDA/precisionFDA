@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import React from 'react'
-import { Link, Route, Routes, useParams } from 'react-router-dom'
+import { Link, Navigate, Route, Routes, useParams } from 'react-router-dom'
 import 'react-toastify/dist/ReactToastify.css'
 import styled from 'styled-components'
 import { Loader } from '../../../components/Loader'
@@ -80,7 +80,7 @@ const ExpertsSingleDetails = ({ expert }: { expert: ExpertDetails }) => {
             <StyledTabList>
               <StyledTab
                 as={NavLink}
-                to={`/experts/${expert?.id}`}
+                to={`/experts/${expert?.id}/about`}
                 activeClassName="selected"
               >
                 About This Expert
@@ -104,8 +104,9 @@ const ExpertsSingleDetails = ({ expert }: { expert: ExpertDetails }) => {
             </StyledTabList>
 
             <Routes>
-              <Route path={`${expert?.id}/blog`} element={<ExpertBlog user={user} expert={expert} />} />
-              <Route index path={`${expert?.id}`} element={<ExpertAbout expert={expert} />} />
+              <Route path="about" element={<ExpertAbout expert={expert} />} />
+              <Route path="blog" element={<ExpertBlog user={user} expert={expert} />} />
+              <Route path="/" element={<Navigate to="about" replace />} />
             </Routes>
           </ExpertContentRow>
         </ExpertRow>
@@ -121,7 +122,8 @@ const ExpertsSingleDetailsPage = () => {
     queryFn: () => expertDetailsRequest(expertId)
   })
   if (isLoading) return <Loader />
-  return <ExpertsSingleDetails expert={data!.expert} />
+  if(!data?.expert) return <div>No expert found</div>
+  return <ExpertsSingleDetails expert={data.expert} />
 }
 
 export default ExpertsSingleDetailsPage
