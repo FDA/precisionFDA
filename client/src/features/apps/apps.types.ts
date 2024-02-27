@@ -106,7 +106,7 @@ export interface IApp {
   /** @deprecated create links from client side */
   links: Links | any;
   tags: string[];
-  properties?: {
+  properties: {
     [key: string]: string;
   };
   scope: ServerScope;

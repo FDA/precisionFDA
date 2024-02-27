@@ -8,9 +8,10 @@ export type FetchProperties = {
 
 type PropertiesScope = ServerScope | 'spaces'
 
-function fetchProperties(type: PropertiesResource, scope: PropertiesScope) {
+async function fetchProperties(type: PropertiesResource, scope: PropertiesScope) {
   const url = `/api/properties/${type}/scope/${scope}/keys`
-  return axios.get<FetchProperties>(url).then(r => r.data)
+  const r = await axios.get<FetchProperties>(url)
+  return r.data
 }
 export const usePropertiesQuery = (type: PropertiesResource, homeScope?: HomeScope, spaceId?: string) => {
   const map = {

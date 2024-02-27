@@ -69,7 +69,6 @@ export const useLockUnlockFileModal = ({
   selected: IFile[]
   onSuccess?: () => void
   scope?: ServerScope
-  spaceId?: string
   type: LockUnlockActionType
 }) => {
   const { isShown, setShowModal } = useModal()

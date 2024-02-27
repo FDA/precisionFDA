@@ -57,15 +57,10 @@ export const useWorkflowSelectActions = ({ homeScope, spaceId, selectedItems, re
     isShown: isShownPropertiesModal,
   } = useEditPropertiesModal({
     type: 'workflowSeries',
-    selected: {
-      id: selected[0]?.workflow_series_id,
-      name: selected[0]?.name,
-      properties: selected[0]?.properties,
-      scope: selected[0]?.scope,
-      featured: selected[0]?.featured,
-    },
+    selected: selected.map(wrkflw => ({ ...wrkflw, id: wrkflw.workflow_series_id  })),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: resourceKeys })
+      queryClient.invalidateQueries({ queryKey: ['edit-resource-properties', 'workflowSeries'] })
     },
   })
 
@@ -185,7 +180,7 @@ export const useWorkflowSelectActions = ({ homeScope, spaceId, selectedItems, re
       isDisabled: false,
       modal: propertiesModal,
       showModal: isShownPropertiesModal,
-      shouldHide: (!isAdmin && selected[0]?.added_by !== user.full_name) || (selected.length !== 1),
+      shouldHide: (!isAdmin && selected[0]?.added_by !== user.full_name),
     },
   }
 
