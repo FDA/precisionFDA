@@ -8,9 +8,9 @@ export const StyledCondensedList = styled.div`
 `
 
 export const ExpertImageCircleSmall = styled.img`
-  width: 56px;
+  min-width: 56px;
   height: 56px;
-  border-radius: 50%;
+  border-radius: 10%;
 `
 
 export const ExpertRow = styled.div`
