@@ -15,7 +15,6 @@ import { StyledPageRightColumn } from './styles'
 import { Button } from '../../../components/Button'
 
 const ActionRow = styled.div`
-  margin-top: 64px;
   display: flex;
   gap: 8px;
 `

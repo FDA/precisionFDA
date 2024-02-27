@@ -57,6 +57,7 @@ export const ExpertData = styled.div`
     
     display: flex;
     flex-direction: column;
+    gap: 12px;
     font-size: 15px;
     h1 {
       font-size: 25px;
@@ -65,9 +66,9 @@ export const ExpertData = styled.div`
     }
 `
 export const ExpertImage = styled.img`
-  width: 148px;
+  min-width: 148px;
   height: 148px;
-  border-radius: 50%;
+  border-radius: 10%;
 `
 export const Filler = styled.div`
   width: 148px;

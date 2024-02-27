@@ -156,6 +156,11 @@ module.exports = merge(base({ urlLoaderOptions }), swc({ swcLoaderOptions }), {
         secure: false,
       },
       {
+        context: ['/experts/new'],
+        target: TARGET,
+        secure: false,
+      },
+      {
         context: ['/experts/*/qa'],
         target: TARGET,
         secure: false,
