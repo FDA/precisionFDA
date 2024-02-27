@@ -700,6 +700,8 @@ Rails.application.routes.draw do
 
     get "/spaces/*all", to: "spaces#index"
     get "/spaces-old/*all", to: "spaces#index"
+    
+    get "/experts/:id/about", to: "experts#show"
 
     # to debug
     # resources :notification_preferences, only: [:index] do

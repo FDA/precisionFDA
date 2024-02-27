@@ -214,7 +214,6 @@ export class SyncJobOperation extends WorkerBaseOperation<
             failureReason: platformJobData.failureReason,
             failureMessage: platformJobData.failureMessage,
           }, 'SyncJobOperation: Detected failed job')
-          await sendJobFailedEmails(job.id.toString(), this.ctx)
         }
       }
 

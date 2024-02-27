@@ -17,7 +17,7 @@ export abstract class SpaceReportResultPartContentProvider<T extends SpaceReport
     container.classList.add('item')
 
     const title = document.createElement('h3')
-    title.innerHTML = reportPart.result.title
+    title.textContent = reportPart.result.title
     title.id = titleId
     container.appendChild(title)
 

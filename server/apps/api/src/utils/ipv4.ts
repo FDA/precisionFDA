@@ -1,5 +1,5 @@
 import { config } from '@shared/config'
-import { InvalidIpHeaderError, ValidationError } from '@shared/errors'
+import { InvalidIpHeaderError } from '@shared/errors'
 import { parseIpv4Address } from '@shared/validation/parsers'
 
 // Predicate - all IP range numbers expected to be in range 0-255

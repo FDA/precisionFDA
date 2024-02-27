@@ -1,12 +1,18 @@
 import { Injectable } from '@nestjs/common'
 import { EntityType } from '@shared/domain/entity/domain/entity.type'
-import { hierarchy, linkVertical, select, tree } from 'd3'
 import fs from 'fs/promises'
 import { JSDOM } from 'jsdom'
 import path from 'path'
 import { EntityProvenance } from '../../model/entity-provenance'
 import { EntityProvenanceSvgOptions } from '../../model/entity-provenance-svg-options'
 import { EntityProvenanceResultTransformerService } from './entity-provenance-result-transformer.service'
+import DOMPurify from 'isomorphic-dompurify'
+
+// D3 dropped CJS support in version 7. We cannot switch to ESM, as nestjs is not compatible.
+// Because of that, it is not possible to compile and successfully start the app with a static import statement
+// To get around this issue, we keep CJS during the compilation step and use dynamic import for D3 to have the
+// dependency resolved by nodejs as ESM at runtime
+const d3 = import('d3')
 
 // TODO(PFDA-4835) - use import after introducing bundler with nestjs
 const assetsPath = path.join(
@@ -37,6 +43,8 @@ export class EntityProvenanceSvgResultTransformerService
   ): Promise<string> {
     const [css, fileIcon, userIcon, appIcon, assetIcon, comparisonIcon, jobIcon, workflowIcon] =
       await Promise.all(assetPromises)
+
+    const { hierarchy, linkVertical, select, tree } = await d3
 
     const nodeTypeToIconMap = {
       file: fileIcon,
@@ -121,11 +129,12 @@ export class EntityProvenanceSvgResultTransformerService
       .text((d) => `${d.data.data.title}`)
 
     if (options?.pixelated) {
-      g.selectAll('foreignObject.node')
-        .classed('pixelated', true)
+      g.selectAll('foreignObject.node').classed('pixelated', true)
     }
 
-    return dom.window.document.querySelector('svg.canvas')!.outerHTML
+    return DOMPurify.sanitize(dom.window.document.querySelector('svg.canvas')!.outerHTML, {
+      ADD_TAGS: ['foreignObject'],
+    })
   }
 
   async getStyles() {

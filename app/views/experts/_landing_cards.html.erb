@@ -36,7 +36,7 @@
                 <%= link_to(content_tag(:span, "", class: "fa fa-star-o") + " Visit Expert Q/A", expert_path(e), class: 'btn btn-default') %>
               </div>
               <div class="btn-group">
-                <%= link_to(content_tag(:span, "", class: "fa fa-newspaper-o") + " Read Expert Blog Post", blog_expert_path(e), class: 'btn btn-default') %>
+                <%= link_to(content_tag(:span, "", class: "fa fa-newspaper-o") + " Read Expert Blog Post", blog_expert_path(e), class: 'btn btn-default', data: { turbolinks: false }) %>
               </div>
             </div>
           </div>

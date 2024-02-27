@@ -17,7 +17,7 @@ export class SpaceReportErrorFacade {
     const report = await this.em.transactional(async () => {
       const spaceReport = await this.em.findOneOrFail(SpaceReport, id)
 
-      if (spaceReport.state === 'ERROR') {
+      if (['ERROR', 'DONE'].includes(spaceReport.state)) {
         return null
       }
 

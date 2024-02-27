@@ -104,9 +104,10 @@ export const useAssetActions = ({ homeScope, selectedItems, resourceKeys, resetS
     isShown: isShownPropertiesModal,
   } = useEditPropertiesModal<IAsset>({
     type: 'node',
-    selected: selected[0],
+    selected: selected,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: resourceKeys })
+      queryClient.invalidateQueries({ queryKey: ['edit-resource-properties', 'node'] })
     },
   })
 
@@ -248,7 +249,7 @@ export const useAssetActions = ({ homeScope, selectedItems, resourceKeys, resetS
       isDisabled: false,
       modal: propertiesModal,
       showModal: isShownPropertiesModal,
-      shouldHide: (!isAdmin && selected[0]?.added_by !== user?.full_name) || (selected.length !== 1),
+      shouldHide: (!isAdmin && selected[0]?.added_by !== user?.full_name),
     },
     'Comments': {
       type: 'link',

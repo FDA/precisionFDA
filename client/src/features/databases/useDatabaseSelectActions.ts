@@ -101,9 +101,10 @@ export const useDatabaseSelectActions = (selectedItems: IDatabase[], resourceKey
     isShown: isShownPropertiesModal,
   } = useEditPropertiesModal<IDatabase>({
     type: 'dbCluster',
-    selected: selected[0],
+    selected: selected,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: resourceKeys })
+      queryClient.invalidateQueries({ queryKey: ['edit-resource-properties', 'dbCluster'] })
     },
   })
 
@@ -193,7 +194,7 @@ export const useDatabaseSelectActions = (selectedItems: IDatabase[], resourceKey
     },
     'Edit properties': {
       func: () => setPropertiesModal(true),
-      isDisabled: selected.length !== 1,
+      isDisabled: false,
       modal: propertiesModal,
       showModal: isShownPropertiesModal,
     },

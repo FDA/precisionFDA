@@ -11,7 +11,7 @@ export class SpaceReportResultPartUserContentProvider extends SpaceReportResultP
     container: HTMLDivElement,
   ): void {
     const role = document.createElement('strong')
-    role.innerHTML = spaceMembershipTypeToNameMap[result.role]
+    role.textContent = spaceMembershipTypeToNameMap[result.role]
     container.appendChild(role)
 
     container.appendChild(document.createElement('br'))
@@ -19,17 +19,17 @@ export class SpaceReportResultPartUserContentProvider extends SpaceReportResultP
 
     const userName = document.createElement('p')
     const userNameLabel = document.createElement('span')
-    userNameLabel.innerHTML = 'Username: '
+    userNameLabel.textContent = 'Username: '
     userName.appendChild(userNameLabel)
     const userNameLink = document.createElement('a')
     userNameLink.href = result.link
     userNameLink.setAttribute('target', '_blank')
-    userNameLink.innerHTML = result.dxuser
+    userNameLink.textContent = result.dxuser
     userName.appendChild(userNameLink)
     container.appendChild(userName)
 
     const memberSince = document.createElement('p')
-    memberSince.innerHTML = `Member since: ${new Date(result.memberSince).toLocaleString()}`
+    memberSince.textContent = `Member since: ${new Date(result.memberSince).toLocaleString()}`
     container.appendChild(memberSince)
   }
 }
