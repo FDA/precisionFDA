@@ -11,8 +11,14 @@ module SpaceMembershipService
       api.call(org_dxid, "setMemberAccess", membership.user.dxid => api_update_params(membership))
 
       if space.groups?
-        reverse_org_dxid = space.opposite_org_dxid(membership)
-        api.call(reverse_org_dxid, "setMemberAccess", membership.user.dxid => api_update_params(membership))
+        begin
+          reverse_org_dxid = space.opposite_org_dxid(membership)
+          api.call(reverse_org_dxid, "setMemberAccess", membership.user.dxid => api_update_params(membership))
+        rescue StandardError => e
+          # Log the error and continue
+          Rails.logger.error "Failed to invite to reverse_org_dxid: #{e.message}"
+          Rails.logger.error "This happens for legacy orgs where the leads were not invited to the reverse org when the org was created"
+        end
       end
 
       membership.save!
