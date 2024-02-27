@@ -118,7 +118,6 @@ const router = createBrowserRouter([
       { path: 'challenges/:challengeId/:page', element: <ChallengeDetailsPage /> },
       { path: 'challenges/:challengeId', element: <ChallengeDetailsPage /> },
       { path: 'news', element: <NewsListPage /> },
-      { path: 'experts/:expertId/:page', element: <ExpertsSinglePage /> },
       { path: 'experts/:expertId/*', element: <ExpertsSinglePage /> },
       { path: 'experts', element: <ExpertsListPage /> },
       { path: 'terms', element: <ToS /> },

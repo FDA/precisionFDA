@@ -42,9 +42,9 @@ export const ExpertListItem = styled.div`
 
 export const ItemImage = styled.div`
   img {
-    width: 156px;
+    min-width: 156px;
     height: 156px;
-    border-radius: 50%;
+    border-radius: 10%;
   }
 `
 export const ExpertImageCircleSmall = styled.img`
@@ -76,6 +76,7 @@ export const ExpertButtonRowWrap = styled.div`
   display: flex;
   justify-content: space-between;
   flex-wrap: wrap;
+  gap: 8px;
 `
 export const ExpertButtonRow = styled.div`
   display: flex;
@@ -128,7 +129,7 @@ const ExpertsList = () => {
               <Loader />
             </PageLoaderWrapper>
           ) : (
-            <PageMainBody>
+            <div>
               <PageFilterTitle>Expert Highlights</PageFilterTitle>
               {year && <PageFilterTitle>{year}</PageFilterTitle>}
               <PageList>
@@ -216,7 +217,7 @@ const ExpertsList = () => {
                   }
                 />
               </PageList>
-            </PageMainBody>
+            </div>
           )}
           <RightSide>
             {userCanCreateExpert && (

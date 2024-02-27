@@ -50,6 +50,7 @@ describe('UserFileService', () => {
   const getReferenceStub = stub()
   const persistAndFlushStub = stub()
   const flushStub = stub()
+  const transactionalStub = stub()
 
   const userRepoFindOneOrFailStub = stub()
   const fileRepoFindOneOrFailStub = stub()
@@ -157,6 +158,9 @@ describe('UserFileService', () => {
     isChallengeAdminStub.returns(false)
 
     persistAndFlushStub.reset()
+
+    transactionalStub.reset()
+    transactionalStub.callsArg(0)
   })
 
   after(() => {
@@ -236,7 +240,7 @@ describe('UserFileService', () => {
         expect.fail('should have thrown error')
       } catch (error) {
         expect(error.name).to.eq('ValidationError')
-        expect(error.message).to.eq(`File ${UID} is not in open state`)
+        expect(error.message).to.eq(`File ${UID} is not in open state. Current state: "closing"`)
       }
     })
 
@@ -352,6 +356,7 @@ describe('UserFileService', () => {
       persistAndFlush: persistAndFlushStub,
       getReference: getReferenceStub,
       flush: flushStub,
+      transactional: transactionalStub,
     } as unknown as SqlEntityManager
 
     return new UserFileService(

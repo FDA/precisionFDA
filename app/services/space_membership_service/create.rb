@@ -30,8 +30,8 @@ module SpaceMembershipService
           # space is created and active already
           unless new_user.review_space_admin? && new_user.id == admin_member.id && space.state == Space::STATE_ACTIVE
             api.org_invite(org_dxid, invitee, attrs)
-            # members in group space need to be invited to both lead's groups
-            api.org_invite(reverse_org_dxid, invitee, attrs) if space.groups?
+            # Members in group space need to be invited to both lead's groups
+            invite_to_reverse_org(api, reverse_org_dxid, invitee, attrs) if space.groups?
           end
         end
 
@@ -53,6 +53,14 @@ module SpaceMembershipService
         end
 
         membership
+      end
+
+      def invite_to_reverse_org(api, reverse_org_dxid, invitee, attrs)
+        api.org_invite(reverse_org_dxid, invitee, attrs)
+      rescue StandardError => e
+        # Log the error and continue
+        Rails.logger.error "Failed to invite to reverse_org_dxid: #{e.message}"
+        Rails.logger.error "This happens for legacy orgs where the leads were not invited to the reverse org when the org was created"
       end
 
       def admin_user_member?(api, org_dxid)

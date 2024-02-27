@@ -25,14 +25,18 @@ import { SPACE_MEMBERSHIP_ROLE } from '../../space-membership/space-membership.e
 import { CAN_EDIT_ROLES } from '../../space-membership/space-membership.helper'
 import { DATA_PORTAL_MEMBER_ROLE } from '../data-portal.enum'
 import { SCOPE } from '@shared/types/common'
-import { Injectable } from '@nestjs/common'
+import { Injectable, Logger } from '@nestjs/common'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { DataPortalRepository } from '@shared/domain/data-portal/data-portal.repository'
+import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 
 const logger = getLogger('data-portal.service')
 
 @Injectable()
 export class DataPortalService {
+  @ServiceLogger()
+  private readonly log: Logger
+
   private editRolesText = ['ADMIN', 'LEAD', 'CONTRIBUTOR']
   private viewRoles = [
     SPACE_MEMBERSHIP_ROLE.ADMIN,
@@ -571,7 +575,13 @@ export class DataPortalService {
 
     if (deepMapping) {
       param.content = portal.content
-      param.editorState = portal.editorState
+      try {
+        JSON.parse(portal.editorState)
+        param.editorState = portal.editorState
+      } catch (error) {
+        this.log.error(`Error parsing editorState for portal ${portal.id} ${error}`)
+        param.editorState = null
+      }
 
       param.members = []
       portal.space

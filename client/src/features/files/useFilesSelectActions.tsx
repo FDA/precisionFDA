@@ -218,7 +218,6 @@ export const useFilesSelectActions = ({
     selected: selected.filter(e => e.locked),
     scope: getFileScope(homeScope, space),
     type: 'unlock',
-    spaceId: space?.id,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: resourceKeys })
       if (resetSelected) resetSelected()
@@ -232,7 +231,6 @@ export const useFilesSelectActions = ({
     selected: selected.filter(e => !e.locked),
     scope: getFileScope(homeScope, space),
     type: 'lock',
-    spaceId: space?.id,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: resourceKeys })
       if (resetSelected) resetSelected()
@@ -302,9 +300,10 @@ export const useFilesSelectActions = ({
     isShown: isShownPropertiesModal,
   } = useEditPropertiesModal<IFile>({
     type: 'node',
-    selected: selected[0],
+    selected: selected,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: resourceKeys })
+      queryClient.invalidateQueries({ queryKey: ['edit-resource-properties', 'node'] })
     },
   })
 
@@ -500,7 +499,7 @@ export const useFilesSelectActions = ({
       isDisabled: openSelected || selected.some(e => e.locked),
       modal: propertiesModal,
       showModal: isShownPropertiesModal,
-      shouldHide: (!isAdmin && selected[0]?.added_by !== user?.full_name) || selected.length !== 1 || homeScope === 'spaces',
+      shouldHide: (!isAdmin && selected[0]?.added_by !== user?.full_name) || homeScope === 'spaces',
     },
     Comments: {
       type: 'link',

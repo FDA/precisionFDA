@@ -7,6 +7,7 @@ import { SpaceReportPartSourceType } from '@shared/domain/space-report/model/spa
 import { SOURCE_TYPE_TO_PART_CONTENT_PROVIDER_MAP } from '@shared/domain/space-report/providers/source-type-to-part-content-provider.provider'
 import { SpaceReportResultPartContentProvider } from '@shared/domain/space-report/service/result/space-report-result-part-content.provider'
 import { Space } from '@shared/domain/space/space.entity'
+import DOMPurify from 'isomorphic-dompurify'
 import { ArrayUtils } from '@shared/utils/array.utils'
 import fs from 'fs/promises'
 import { JSDOM } from 'jsdom'
@@ -20,6 +21,7 @@ const assetsPath = path.join(
 const triangleIcon = fs.readFile(path.join(assetsPath, 'triangle-icon.svg'), 'utf8').catch(() => '')
 const logoImage = fs.readFile(path.join(assetsPath, 'logo.svg'), 'utf8').catch(() => '')
 const html = fs.readFile(path.join(assetsPath, 'result-wrapper.html'), 'utf8').catch(() => '')
+const script = fs.readFile(path.join(assetsPath, 'wrapper-script.js'), 'utf8').catch(() => '')
 
 @Injectable()
 export class SpaceReportResultService {
@@ -104,6 +106,14 @@ export class SpaceReportResultService {
     )
     main.appendChild(report)
 
+    document.body.innerHTML = DOMPurify.sanitize(document.body.innerHTML, {
+      ADD_TAGS: ['foreignObject'],
+    })
+
+    const scriptElement = document.createElement('script')
+    scriptElement.innerHTML = await script
+    document.body.insertBefore(scriptElement, document.body.firstChild)
+
     return domContainer.serialize()
   }
 
@@ -119,7 +129,7 @@ export class SpaceReportResultService {
     if (ArrayUtils.isEmpty(reportParts)) {
       const emptyText = document.createElement('p')
       emptyText.classList.add('empty-text')
-      emptyText.innerHTML = `There are no ${title.toLowerCase()} in this space.`
+      emptyText.textContent = `There are no ${title.toLowerCase()} in this space.`
       container.appendChild(emptyText)
 
       return container
@@ -142,7 +152,7 @@ export class SpaceReportResultService {
     container.appendChild(sectionHeading)
 
     const sectionTitle = document.createElement('h2')
-    sectionTitle.innerHTML = title
+    sectionTitle.textContent = title
     sectionTitle.id = id
     sectionHeading.appendChild(sectionTitle)
 
@@ -202,7 +212,7 @@ export class SpaceReportResultService {
       const sideContainer = document.createElement('div')
 
       const sideHeader = document.createElement('h3')
-      sideHeader.innerHTML = `${spaceMembershipSideToNameMap[side]} side`
+      sideHeader.textContent = `${spaceMembershipSideToNameMap[side]} side`
       sideContainer.appendChild(sideHeader)
 
       sideContainer.appendChild(this.getReportPartItemList(reportParts, document))
@@ -263,7 +273,7 @@ export class SpaceReportResultService {
     const link = document.createElement('a')
     link.classList.add('section-name')
     link.href = `#${anchor}`
-    link.innerHTML = title
+    link.textContent = title
     section.appendChild(link)
 
     if (ArrayUtils.isEmpty(reportParts)) {
@@ -281,7 +291,7 @@ export class SpaceReportResultService {
   private getResourceLink(reportPart: SpaceReportPart, document: Document) {
     const container = document.createElement('a')
     container.href = `#${this.REPORT_PART_ID_PREFIX}${reportPart.id}`
-    container.innerHTML = reportPart.result.title
+    container.textContent = reportPart.result.title
 
     return container
   }
@@ -300,12 +310,12 @@ export class SpaceReportResultService {
     title.appendChild(logo)
 
     const name = document.createElement('span')
-    name.innerHTML = 'Space Report'
+    name.textContent = 'Space Report'
     name.classList.add('report-title')
     logo.appendChild(name)
 
     const reportType = document.createElement('span')
-    reportType.innerHTML = 'Space Report and Provenance Tracking'
+    reportType.textContent = 'Space Report and Provenance Tracking'
     reportType.classList.add('report-type')
     title.appendChild(reportType)
 
@@ -314,7 +324,7 @@ export class SpaceReportResultService {
     container.appendChild(spacer)
 
     const description = document.createElement('p')
-    description.innerHTML = `
+    description.textContent = `
       The Space Report provides a snapshot of the membership, Files, Apps, Executions, Assets,
       and Workflows within a Space.Provenance tracking provides comprehensive
       documentation of the lineage and history of Files, Apps, Executions, Assets, and Workflows
@@ -373,12 +383,12 @@ export class SpaceReportResultService {
 
     const title = document.createElement('div')
     title.classList.add('key')
-    title.innerHTML = titleText
+    title.textContent = titleText
     container.appendChild(title)
 
     const description = document.createElement('div')
     description.classList.add('value')
-    description.innerHTML = descriptionText
+    description.textContent = descriptionText
     container.appendChild(description)
 
     return container

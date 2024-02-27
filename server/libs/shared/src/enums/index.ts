@@ -17,6 +17,7 @@ enum HOME_SCOPE {
   ME = 'me',
   FEATURED = 'featured',
   EVERYBODY = 'everybody',
+  SPACES = 'spaces',
 }
 
 enum NOTIFICATION_ACTION {
