@@ -103,6 +103,16 @@ async function editPropertiesRequest({
     .then(d => d.data)
 }
 
+const mergeAndUpdateProperties = (itemProperties: Properties, newPropertiesObject: Properties, commonPropertiesKeys: string[]): Properties => {
+  const mergedProperties = { ...itemProperties, ...newPropertiesObject }
+  commonPropertiesKeys.forEach(key => {
+    if (!newPropertiesObject.hasOwnProperty(key) && commonPropertiesKeys.includes(key)) {
+      delete mergedProperties[key]
+    }
+  })
+  return mergedProperties
+}
+
 function getError(errors: FieldErrors<FormInputs>, key: string) {
   let message = ''
   let isError = false
@@ -116,26 +126,38 @@ function getError(errors: FieldErrors<FormInputs>, key: string) {
 
 const EditPropertiesForm = ({
   type,
-  onSuccess,
-  id,
-  name,
-  scope,
+  selected,
   setShowModal,
-  properties,
+  onSuccess,
 }: {
   type: PropertiesResource
-  id: number
-  name: string
-  scope: ServerScope
-  properties: Properties
-  onSuccess?: (res: any) => void
+  selected: {
+    id: number
+    name: string
+    properties: Properties
+  }[]
   setShowModal: (show: boolean) => void
+  onSuccess?: (res: any) => void
+
 }) => {
-  const queryClient = useQueryClient()
-  const propertiesArr = Object.entries(properties).map(([key, value]) => ({
-    key,
-    value,
-  }))
+  const commonProperties: Properties = selected.reduce<Properties>((acc, obj, idx) => {
+    if (idx === 0) return { ...obj.properties }
+    // For subsequent objects, retain only those properties that are common and have the same value
+    Object.keys(acc).forEach(key => {
+      if (acc[key] !== obj.properties[key]) {
+        delete acc[key]
+      }
+    })
+    return acc
+  }, {})
+
+  const propertiesArr = Object
+    .entries(selected.length == 1 ? selected[0].properties : commonProperties)
+    .map(([key, value]) => ({
+      key,
+      value,
+    }))
+
   const {
     register,
     handleSubmit,
@@ -156,33 +178,32 @@ const EditPropertiesForm = ({
 
   const mutation = useMutation({
     mutationKey: ['edit-resource-properties', type],
-    mutationFn: (newProperties: Properties) =>
-      editPropertiesRequest({ id, type, properties: newProperties }),
-    onSuccess: res => {
-      if (onSuccess) onSuccess(res)
-      if (setShowModal) setShowModal(false)
-      toast.success(`${name} properties updated`)
-      // users can only edit properties for a space's item inside that space
-      queryClient.invalidateQueries({
-        queryKey: ['edit-resource-properties', type, scope],
-      })
-    },
-    onError: () => {
-      toast.error(`An error occurred while editing ${name} properties`)
-    },
+    mutationFn: (payload: { id: number, properties: Properties }) => editPropertiesRequest({
+      id: payload.id,
+      type,
+      properties: payload.properties,
+    }),
   })
 
   const onSubmit = async (d: FormInputs) => {
-    const newProperties = d.props.filter(prop => prop.key.length)
-    await mutation.mutateAsync(
-      newProperties.reduce(
-        (acc, curr: { key: string; value: string }) => ({
-          ...acc,
-          [curr.key]: curr.value,
-        }),
-        {},
-      ),
-    )
+    const newProperties = d.props.reduce((acc, { key, value }) => {
+      if (key.length) acc[key] = value.trimEnd() // Only add properties with a non-empty key
+      return acc
+    }, {} as Properties)
+
+    for (const item of selected) {
+      const propertiesToUse = selected.length === 1 ? newProperties :
+        mergeAndUpdateProperties(item.properties, newProperties, Object.keys(commonProperties))
+
+      await mutation.mutateAsync({
+        id: item.id,
+        properties: propertiesToUse,
+      })
+    }
+
+    onSuccess && onSuccess(mutation.data)
+    setShowModal && setShowModal(false)
+    toast.success('Properties updated')
   }
 
   const handleAppendProperty = (e: any) => {
@@ -240,7 +261,7 @@ const EditPropertiesForm = ({
                     disabled={mutation.isPending}
                   />
                   <Remove onClick={() => remove(index)}>
-                    <CrossIcon />
+                    <CrossIcon/>
                   </Remove>
                 </FieldWrapper>
               )
@@ -254,7 +275,7 @@ const EditPropertiesForm = ({
             Add another property
           </StyledButtonText>
         ) : (
-          <div />
+          <div/>
         )}
         <ButtonRow>
           <Button
@@ -292,7 +313,7 @@ export function useEditPropertiesModal<
   onSuccess,
 }: {
   type: PropertiesResource
-  selected: T
+  selected: T[]
   onSuccess?: (res: any) => void
 }) {
   const { isShown, setShowModal } = useModal()
@@ -307,20 +328,16 @@ export function useEditPropertiesModal<
     >
       <ModalHeaderTop
         disableClose={false}
-        headerText={`Edit properties for ${mSelected?.name}`}
+        headerText={`Edit ${mSelected.length > 1 ? `common properties for ${mSelected.length} items` : `properties for ${mSelected[0].name}`}`}
         hide={() => setShowModal(false)}
       />
-      {selected?.properties && (
-        <EditPropertiesForm
-          type={type}
-          name={selected.name}
-          onSuccess={onSuccess}
-          id={selected.id}
-          scope={selected.scope}
-          setShowModal={setShowModal}
-          properties={selected.properties}
-        />
-      )}
+
+      <EditPropertiesForm
+        type={type}
+        onSuccess={onSuccess}
+        setShowModal={setShowModal}
+        selected={mSelected}
+      />
     </ModalNext>
   )
   return {

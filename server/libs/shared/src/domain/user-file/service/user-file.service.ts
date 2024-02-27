@@ -1,24 +1,24 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
+import { Inject, Injectable, Logger } from '@nestjs/common'
 import { NotificationService } from '@shared/domain/notification/services/notification.service'
+import { ResourceRepository } from '@shared/domain/resource/resource.repository'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { Node } from '@shared/domain/user-file/node.entity'
+import { NodeRepository } from '@shared/domain/user-file/node.repository'
+import { UserFileRepository } from '@shared/domain/user-file/user-file.repository'
+import { User } from '@shared/domain/user/user.entity'
+import { UserRepository } from '@shared/domain/user/user.repository'
 import { NOTIFICATION_ACTION, SEVERITY } from '@shared/enums'
-import { FileNotFoundError, NotFoundError, PermissionError, ValidationError } from '@shared/errors'
+import { NotFoundError, PermissionError, ValidationError } from '@shared/errors'
 import { PlatformClient } from '@shared/platform-client'
 import { FileDescribeResponse } from '@shared/platform-client/platform-client.responses'
 import { CHALLENGE_BOT_PLATFORM_CLIENT } from '@shared/platform-client/providers/platform-client.provider'
-import { UserCtx } from '@shared/types'
-import { FOLLOW_UP_ACTION } from '../user-file.input'
-import { FILE_STATE, FILE_STATE_DX } from '../user-file.types'
 import { createFileSynchronizeJobTask } from '@shared/queue'
-import { Injectable, Inject, Logger } from '@nestjs/common'
-import { User } from '@shared/domain/user/user.entity'
-import { Node } from '@shared/domain/user-file/node.entity'
+import { UserCtx } from '@shared/types'
 import { UserFileCreate } from '../domain/user-file-create'
 import { UserFile } from '../user-file.entity'
-import { UserContext } from '@shared/domain/user-context/model/user-context'
-import { NodeRepository } from '@shared/domain/user-file/node.repository'
-import { UserFileRepository } from '@shared/domain/user-file/user-file.repository'
-import { UserRepository } from '@shared/domain/user/user.repository'
-import { ResourceRepository } from '@shared/domain/resource/resource.repository'
+import { FOLLOW_UP_ACTION } from '../user-file.input'
+import { FILE_STATE, FILE_STATE_DX } from '../user-file.types'
 
 @Injectable()
 export class UserFileService {
@@ -109,20 +109,27 @@ export class UserFileService {
   async closeFile(fileUid: string, followUpAction?: FOLLOW_UP_ACTION) {
     this.logger.verbose(`UserFileService: closing file ${fileUid}`)
 
-    const user = await this.userRepo.findOneOrFail(this.user.id, {
-      populate: ['spaceMemberships', 'spaceMemberships.spaces'],
-    })
-    const [file, isChallengeBotFile] = await this.getFile(user, fileUid)
-    if (file.state !== FILE_STATE_DX.OPEN) {
-      throw new ValidationError(`File ${fileUid} is not in open state`)
-    }
-    if (file.dxid) {
-      await this.closeFileOnPlatform(file.dxid, isChallengeBotFile)
-    }
-    file.state = FILE_STATE_DX.CLOSING
-    await this.em.flush()
+    await this.em.transactional(async () => {
+      const user = await this.userRepo.findOneOrFail(this.user.id, {
+        populate: ['spaceMemberships', 'spaceMemberships.spaces'],
+      })
 
-    await this.startFileSynchronization(fileUid, isChallengeBotFile, this.user, followUpAction)
+      const [file, isChallengeBotFile] = await this.getFile(user, fileUid)
+
+      if (file.state !== FILE_STATE_DX.OPEN) {
+        throw new ValidationError(
+          `File ${fileUid} is not in open state. Current state: "${file.state}"`,
+        )
+      }
+
+      if (file.dxid) {
+        await this.closeFileOnPlatform(file.dxid, isChallengeBotFile)
+      }
+
+      file.state = FILE_STATE_DX.CLOSING
+
+      await this.startFileSynchronization(fileUid, isChallengeBotFile, this.user, followUpAction)
+    })
   }
 
   /**

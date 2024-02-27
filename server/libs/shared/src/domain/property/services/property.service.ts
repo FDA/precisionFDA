@@ -1,99 +1,71 @@
-import { FilterQuery } from '@mikro-orm/core'
+import { EntityName, FilterQuery } from '@mikro-orm/core'
+import { SqlEntityManager } from '@mikro-orm/mysql'
+import { Injectable } from '@nestjs/common'
 import { AppSeries } from '@shared/domain/app-series/app-series.entity'
 import { DbCluster } from '@shared/domain/db-cluster/db-cluster.entity'
 import { Job } from '@shared/domain/job/job.entity'
+import { CreatePropertyDTO } from '@shared/domain/property/dto/CreatePropertyDTO'
 import { Space } from '@shared/domain/space/space.entity'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { User } from '@shared/domain/user/user.entity'
 import { WorkflowSeries } from '@shared/domain/workflow-series/workflow-series.entity'
-import { GetValidKeysInput, SetPropertiesInput } from '../property.input'
-import { SqlEntityManager } from '@mikro-orm/mysql'
-import { GeneralProperty, PropertyType } from '../property.entity'
+import { HOME_SCOPE, Scope, STATIC_SCOPE } from '@shared/enums'
+import { PermissionError } from '@shared/errors'
 import * as errors from '../../../errors'
-import { PermissionError } from '../../../errors'
-import { Node } from '../../user-file/node.entity'
-import { getIdFromScopeName, scopeContainsId } from '../../space/space.helper'
-import { SPACE_STATE } from '../../space/space.enum'
 import { CAN_EDIT_ROLES } from '../../space-membership/space-membership.helper'
-import { UserCtx } from '../../../types'
+import { SPACE_STATE } from '../../space/space.enum'
+import { getIdFromScopeName, scopeContainsId } from '../../space/space.helper'
+import { Node } from '../../user-file/node.entity'
 import { FILE_STI_TYPE } from '../../user-file/user-file.types'
+import { GeneralProperty, PropertyType } from '../property.entity'
 
-type SetPropertiesResponse = {
-  message: string,
-}
 
 export interface IPropertyService {
-  setProperty: (input: SetPropertiesInput) => Promise<SetPropertiesResponse>
-  getValidKeys: (input: GetValidKeysInput) => Promise<string[]>
+  setProperty: (input: CreatePropertyDTO) => Promise<void>
+  getValidKeys: (scope: Scope, targetType: PropertyType) => Promise<string[]>
 }
 
+@Injectable()
 export class PropertyService implements IPropertyService {
 
-  private readonly em: SqlEntityManager
-  private readonly userCtx: UserCtx
+  constructor(
+    private readonly em: SqlEntityManager,
+    private readonly user: UserContext,
+  ) {}
 
-  constructor(em: SqlEntityManager, ctx: UserCtx) {
-    this.em = em
-    this.userCtx = ctx
-  }
-
-  async setProperty(input: SetPropertiesInput): Promise<SetPropertiesResponse> {
+  async setProperty(input: CreatePropertyDTO): Promise<void> {
     const targetType = input.targetType
     const targetId = input.targetId
     await this.checkTypeAndPermissions(targetType, targetId)
 
-    try {
-      await this.em.begin()
+    await this.em.transactional(async () => {
       const currentProperties: GeneralProperty[] = await this.em.find(GeneralProperty,
         {
           targetType,
           targetId,
         })
 
-      this.em.remove(currentProperties)
-
+      await this.em.removeAndFlush(currentProperties)
       for (let key in input.properties) {
         const newProperty = new GeneralProperty()
         newProperty.targetId = targetId
         newProperty.targetType = targetType
         newProperty.propertyName = key
-        // @ts-ignore
         newProperty.propertyValue = input.properties[key]
         this.em.persist(newProperty)
       }
       await this.em.flush()
-      await this.em.commit()
-    } catch (e) {
-      await this.em.rollback()
-      throw e
-    }
-    return Promise.resolve({ message: 'success' })
+    })
   }
 
-  async getValidKeys(input: GetValidKeysInput): Promise<string[]> {
+  async getValidKeys(scope: string, targetType: PropertyType): Promise<string[]> {
 
-    // if space-scope supplied, check permissions
-    if (scopeContainsId(input.scope)) {
-      const space = await this.em.findOneOrFail(
-        Space,
-        {
-          id: getIdFromScopeName(input.scope),
-          state: SPACE_STATE.ACTIVE,
-          spaceMemberships: {
-            user: {
-              id: this.userCtx.id,
-            },
-          },
-        })
-    }
-
-    // tried using qb and distinct - couldn't make it work.
     const results: GeneralProperty[] = await this.em.find(
-      this.getEntityByType(input.targetType),
-      this.getConditionByType(input, this.userCtx),
+      this.getEntityByType(targetType),
+      await this.getConditionByType(scope, targetType),
     )
 
-    const res = new Set(results.map(p => p.propertyName))
-    return Promise.resolve([...res])
+    return Promise.resolve([...new Set(results.map(p => p.propertyName))])
   }
 
   private getEntityByType(targetType: PropertyType) {
@@ -114,19 +86,46 @@ export class PropertyService implements IPropertyService {
     }
   }
 
-  private getConditionByType(input: { scope: string, targetType: PropertyType }, user: UserCtx) {
+  private async getConditionByType(scope: string, targetType: PropertyType) {
     const condition: FilterQuery<any> = {}
-    if (input.scope === 'spaces') input.scope = 'space-%'
-    switch (input.targetType) {
+    let scopes: string[] = []
+
+    if (scope === HOME_SCOPE.SPACES) {
+      scopes = await this.em.find(Space, {
+        spaceMemberships: {
+          user: {
+            id: this.user.id,
+          },
+        },
+      }).then(spaces => spaces.map(s => `space-${s.id}`))
+    } else if (scopeContainsId(scope)) {
+      await this.em.findOneOrFail(
+        Space,
+        {
+          id: getIdFromScopeName(scope),
+          state: SPACE_STATE.ACTIVE,
+          spaceMemberships: {
+            user: {
+              id: this.user.id,
+            },
+          },
+        })
+      scopes = [scope]
+    }
+    if (scope == STATIC_SCOPE.PRIVATE || scope == STATIC_SCOPE.PUBLIC) {
+      scopes = [scope]
+    }
+
+    switch (targetType) {
       case 'node':
         condition['node'] = {
-          scope: { $like: input.scope },
+          scope:  { $in: scopes},
           stiType: [FILE_STI_TYPE.FOLDER, FILE_STI_TYPE.USERFILE],
         }
         break
       case 'asset':
         condition['node'] = {
-          scope: { $like: input.scope },
+          scope: { $in: scopes},
           stiType: [FILE_STI_TYPE.ASSET],
         }
         break
@@ -134,27 +133,26 @@ export class PropertyService implements IPropertyService {
       case 'appSeries':
       case 'job':
       case 'dbCluster':
-        condition[input.targetType] = {
-          scope: { $like: input.scope },
+        condition[targetType] = {
+          scope: { $in: scopes },
         }
         break
       default:
         throw new errors.ValidationError('Unsupported type!')
     }
 
-    if (input.scope == 'private') {
-      if (input.targetType == 'asset') {
-        condition['node'] = { ...condition['node'], user: user.id }
+    if (scope == STATIC_SCOPE.PRIVATE) {
+      if (targetType == 'asset') {
+        condition['node'] = { ...condition['node'], user: this.user.id }
       } else {
-        condition[input.targetType] = { ...condition[input.targetType], user: user.id }
+        condition[targetType] = { ...condition[targetType], user: this.user.id }
       }
     }
-
     return condition
   }
 
   private async checkTypeAndPermissions(targetType: PropertyType, targetId: number): Promise<void> {
-    let targetEntity
+    let targetEntity: EntityName<Job | Node | WorkflowSeries | AppSeries | DbCluster>
     switch (targetType) {
       case 'node':
       case 'asset':
@@ -170,10 +168,10 @@ export class PropertyService implements IPropertyService {
       default:
         throw new errors.ValidationError('Unsupported type!')
     }
-    const user = this.userCtx
+    const user = this.user
     const target: Node | WorkflowSeries | Job | AppSeries | DbCluster = await this.em.findOneOrFail(targetEntity, { id: targetId })
 
-    if (target.scope == 'private' && target.user?.id !== user.id) {
+    if (target.scope == STATIC_SCOPE.PRIVATE && target.user?.id !== user.id) {
       throw new PermissionError()
     }
     // space scope

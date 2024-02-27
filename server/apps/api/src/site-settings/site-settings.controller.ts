@@ -1,11 +1,9 @@
-import { Controller, Get, Headers, Inject, Logger } from '@nestjs/common'
+import { Controller, Get, Headers, Logger } from '@nestjs/common'
 import { config } from '@shared/config'
-import { DEPRECATED_SQL_ENTITY_MANAGER } from '@shared/database/provider/deprecated-sql-entity-manager.provider'
-import { AlertService } from '@shared/domain/alert/service/alert.service'
+import { AlertService } from '@shared/domain/alert/services/alert.service'
 import { DataPortalService } from '@shared/domain/data-portal/service/data-portal.service'
 import { NotFoundError, PermissionError, ServiceError } from '@shared/errors'
 import { isRequestFromAuthenticatedUser, isRequestFromFdaSubnet } from '../server/utils'
-import { SqlEntityManager } from '@mikro-orm/mysql'
 
 
 /**
@@ -19,7 +17,6 @@ export class SiteSettingsController {
     private readonly log: Logger,
     private readonly dataPortalService: DataPortalService,
     private readonly alertService: AlertService,
-    @Inject(DEPRECATED_SQL_ENTITY_MANAGER) private readonly em: SqlEntityManager,
   ) {}
 
   @Get()

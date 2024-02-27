@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common'
-import { AlertService } from '@shared/domain/alert/service/alert.service'
+import { AlertService } from '@shared/domain/alert/services/alert.service'
 
 @Module({
   providers: [AlertService],

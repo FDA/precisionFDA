@@ -164,15 +164,10 @@ export const useAppSelectionActions = ({
     isShown: isShownPropertiesModal,
   } = useEditPropertiesModal({
     type: 'appSeries',
-    selected: {
-      id: selected[0]?.app_series_id,
-      name: selected[0]?.name,
-      properties: selected[0]?.properties,
-      scope: selected[0]?.scope,
-      featured: selected[0]?.featured,
-    },
+    selected: selected.map(app => ({ ...app, id: app.app_series_id  })),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: resourceKeys })
+      queryClient.invalidateQueries({ queryKey: ['edit-resource-properties', 'appSeries'] })
     },
   })
 
@@ -298,10 +293,10 @@ export const useAppSelectionActions = ({
     'Edit properties': {
       type: 'modal',
       func: () => setPropertiesModal(true),
-      isDisabled: selected.length !== 1,
       modal: propertiesModal,
+      isDisabled: false,
       showModal: isShownPropertiesModal,
-      shouldHide: (!isAdmin && selected[0]?.added_by !== user?.dxuser) || (selected.length !== 1),
+      shouldHide: (!isAdmin && selected[0]?.added_by !== user?.dxuser),
     },
     'Add to Comparators': {
       type: 'modal',

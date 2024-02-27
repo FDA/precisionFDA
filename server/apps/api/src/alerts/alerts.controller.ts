@@ -12,7 +12,7 @@ import {
 } from '@nestjs/common'
 import { AlertDTO } from '@shared/domain/alert/dto/AlertDTO'
 import { CreateAlertDTO } from '@shared/domain/alert/dto/CreateAlertDTO'
-import { AlertService } from '@shared/domain/alert/service/alert.service'
+import { AlertService } from '@shared/domain/alert/services/alert.service'
 import { SiteAdminGuard } from '../admin/guards/site-admin.guard'
 
 @UseGuards(SiteAdminGuard)

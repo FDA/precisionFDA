@@ -52,7 +52,7 @@ export const useSpaceReportColumns = ({
           disableSortBy: true,
           width: colWidths?.location || 250,
           Cell({ value }) {
-            if (!value) {
+            if (value?.state !== 'closed') {
               return ''
             }
 
