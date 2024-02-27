@@ -2,10 +2,10 @@
 import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
 import { database } from '@shared/database'
 import { Alert } from '@shared/domain/alert/entity/alert.entity'
-import { AlertService } from '@shared/domain/alert/service/alert.service'
+import { AlertService } from '@shared/domain/alert/services/alert.service'
 import { User } from '@shared/domain/user/user.entity'
 import { create, db } from '../../../src/test'
-import { expect, assert } from 'chai'
+import { expect } from 'chai'
 
 describe('AlertService tests', () => {
   let em: EntityManager<MySqlDriver>

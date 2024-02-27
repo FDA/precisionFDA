@@ -32,7 +32,7 @@ export interface Links {
 export type DBStatus = 'available' | 'stopped' | 'stopping' | 'starting' | 'terminating' | 'terminated'
 
 export interface IDatabase {
-  id: string;
+  id: number;
   dxid: string;
   uid: string;
   name: string;

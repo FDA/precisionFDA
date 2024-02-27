@@ -4,7 +4,10 @@ import {
     Property
 } from '@mikro-orm/core'
 
-export type PropertyType = 'node' | 'asset' | 'workflowSeries' | 'appSeries' | 'job' | 'dbCluster'
+
+export const propertyTypes = ['node', 'asset' , 'workflowSeries' , 'appSeries' , 'job' , 'dbCluster'] as const
+export type PropertyType = (typeof propertyTypes)[number]
+
 
 @Entity({
     abstract: true,
