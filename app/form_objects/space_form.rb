@@ -81,11 +81,10 @@ class SpaceForm
   end
 
   def validate_permissions
-    raise "Only government users can create government space" if space_type == TYPE_GOVERNMENT && !current_user.government_user?
-
-    raise "Review space can be created only by review space admins" if space_type == TYPE_REVIEW && !current_user.review_space_admin?
-
-    raise "Group and Admin spaces can be created only by site admins" if (space_type == TYPE_GROUPS || space_type == TYPE_ADMIN) && !current_user.can_administer_site?
+    validate_government_space_creation
+    validate_review_space_creation
+    validate_group_and_admin_space_creation
+    validate_private_space_creation
   end
 
   # Check guest lead in space of "groups" type
@@ -110,5 +109,29 @@ class SpaceForm
     return unless space_sponsor.org_id == host_admin.org_id
 
     errors.add(:sponsor_lead_dxuser, "can't belong to the same Org as Reviewer lead")
+  end
+
+  def validate_government_space_creation
+    return unless space_type == TYPE_GOVERNMENT && !current_user.government_user?
+
+    raise "Only government users can create government space"
+  end
+
+  def validate_review_space_creation
+    return unless space_type == TYPE_REVIEW && !current_user.review_space_admin?
+
+    raise "Review space can be created only by review space admins"
+  end
+
+  def validate_group_and_admin_space_creation
+    return unless (space_type == TYPE_GROUPS || space_type == TYPE_ADMIN) && !current_user.can_administer_site?
+
+    raise "Group and Admin spaces can be created only by site admins"
+  end
+
+  def validate_private_space_creation
+    return unless space_type == TYPE_PRIVATE && current_user.dxuser != host_lead_dxuser
+
+    raise "Private space cannot be created for other users (creator of the space must match the target owner)"
   end
 end
