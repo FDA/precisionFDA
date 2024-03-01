@@ -13,7 +13,7 @@ import { AppApiModule } from './apps/app.api.module'
 import { ChallengeApiModule } from './challenges/challenge.api.module'
 import { CliApiModule } from './cli/cli.api.module'
 import { DataPortalsApiModule } from './data-portals/data-portals.api.module'
-import { DbclusterApiModule } from './dbclusters/dbcluster.api.module'
+import { DbClusterApiModule } from './dbclusters/dbcluster.api.module'
 import { DebugApiModule } from './debug/debug.api.module'
 import { DiscussionsApiModule } from './discussions/discussions.api.module'
 import { EmailApiModule } from './emails/email.api.module'
@@ -53,7 +53,7 @@ import { WorkflowApiModule } from './workflows/workflow.api.module'
     ChallengeApiModule,
     CliApiModule,
     DataPortalsApiModule,
-    DbclusterApiModule,
+    DbClusterApiModule,
     DebugApiModule,
     DiscussionsApiModule,
     EmailApiModule,

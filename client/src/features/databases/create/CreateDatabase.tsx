@@ -1,4 +1,5 @@
 /* eslint-disable react/jsx-props-no-spreading */
+import { AxiosError } from 'axios'
 /* eslint-disable jsx-a11y/label-has-associated-control */
 import React, { useEffect, useState } from 'react'
 import { ErrorMessage } from '@hookform/error-message'
@@ -10,20 +11,26 @@ import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import styled from 'styled-components'
 import * as Yup from 'yup'
-import { getDatabaseAllowedInstances } from '../../../api/home'
-import { FieldGroup, FieldLabelRow, Hint, InputError } from '../../../components/form/styles'
+import { BackendError } from '../../../api/errors'
+import { FieldLabelRow, Hint, InputError } from '../../../components/form/styles'
 import { InputText } from '../../../components/InputText'
 import { Loader } from '../../../components/Loader'
 import { StyledBackLink } from '../../home/home.styles'
 import { NotFound } from '../../home/show.styles'
-import { createDatabaseRequest, fetchAccessibleFiles, IAccessibleFile } from '../databases.api'
+import {
+  createDatabaseRequest,
+  fetchAccessibleFiles,
+  getDatabaseAllowedInstances,
+  IAccessibleFile,
+} from '../databases.api'
 import { DatabaseEngineType, versionsOptions } from './options'
 import { Select } from '../../../components/Select'
 import { Button } from '../../../components/Button'
+import { FieldGroup } from '../../../components/form/FieldGroup'
 
 const useAccessibleFiles = (inputValue: string) => useQuery({
   queryKey: ['accessible-files', inputValue],
-  queryFn: () => fetchAccessibleFiles({ search_string: inputValue, limit: 100, offset: 0 }).then(v => v?.objects).catch(() => toast.error(`Error: fetching files '${e.message}'`)),
+  queryFn: () => fetchAccessibleFiles({ search_string: inputValue, limit: 100, offset: 0 }).then(v => v?.objects),
 })
 
 const StyledForm = styled.form`
@@ -64,7 +71,7 @@ const validationSchema = Yup.object().shape({
   confirmPassword: Yup.string()
     .required('Confirm Password is required')
     .oneOf([Yup.ref('adminPassword')], 'Passwords must match'),
-  engine: Yup.string().required('Engine required'),
+  engine: Yup.string().required('Engine required').nullable().required('Required'),
   dxInstanceClass: Yup.object()
     .shape({
       value: Yup.string().required('Required'),
@@ -81,9 +88,9 @@ export const CreateDatabase = () => {
   const navigate = useNavigate()
   const [inputValue, setInputValue] = useState('')
   const { data, isLoading } = useAccessibleFiles(inputValue)
-  const allowedInstancesQuery = useQuery({
+  const allowedInstances = useQuery({
     queryKey: ['dbclusters','allowedInstances'],
-    queryFn: () => getDatabaseAllowedInstances().catch(() => toast.error(`Error: fetching allowed Db instance types '${e?.message}'`)),
+    queryFn: () => getDatabaseAllowedInstances(),
   })
   const debouncedSqlFileInputSearch = debounce(v => {
     setInputValue(v)
@@ -121,19 +128,18 @@ export const CreateDatabase = () => {
     mutationFn: (payload: any) => createDatabaseRequest(payload),
     onSuccess: (res) => {
       if (res?.db_cluster) {
-        navigate(`/home/databases/${res?.db_cluster?.dxid}`)
+        navigate(`/home/databases/${res.db_cluster?.dxid}`)
         queryClient.invalidateQueries({
           queryKey: ['dbclusters'],
         })
         toast.success('Database created')
-      } else if (res?.error) {
-          toast.error(`${res.error.type}: ${res.error.message}`)
-        } else {
-          toast.error('Something went wrong')
-        }
+      }
     },
-    onError: () => {
-      toast.error('Error while creating the database')
+    onError: (e: AxiosError<BackendError>) => {
+      if (e.response?.data?.error?.message) {
+        toast.error(`Error: ${e.response.data.error.message}`)
+      }
+      toast.error('Error while creating the database!')
     },
   })
 
@@ -155,7 +161,7 @@ export const CreateDatabase = () => {
     })
   }
 
-  const filesOptions = accessibleFiles.filter((file: IAccessibleFile) => file.scope !== 'public')
+  const filesOptions = accessibleFiles?.filter((file: IAccessibleFile) => file.scope !== 'public')
     .map(file => ({
       label: file.title,
       value: file.uid,
@@ -163,17 +169,7 @@ export const CreateDatabase = () => {
 
   const isSubmitting = createDatabaseMutation.isPending
 
-  if (allowedInstancesQuery.error) {
-    return (
-      <div>
-        {JSON.stringify(allowedInstancesQuery.error)}
-      </div>
-    )
-  }
-  if (allowedInstancesQuery.isLoading) {
-    return <Loader />
-  }
-  if (Array.isArray(allowedInstancesQuery.data?.payload) && allowedInstancesQuery.data?.payload.length === 0) {
+  if (allowedInstances.data?.length === 0) {
     return (
       <>
         <StyledBackLink linkTo="/home/databases">
@@ -185,7 +181,7 @@ export const CreateDatabase = () => {
       </>
     )
   }
-  const dbInstanceOptions = allowedInstancesQuery.data?.payload?.map((option) => ({
+  const dbInstanceOptions = allowedInstances.data?.map((option) => ({
     ...option,
     label: replaceNbspSubstring(option.label, 4),
   })) ?? []
@@ -195,10 +191,8 @@ export const CreateDatabase = () => {
         Back to Databases
       </StyledBackLink>
       <StyledForm onSubmit={handleSubmit(onSubmit)} autoComplete="off">
-        <FieldGroup>
-          <label>Name (required)</label>
+        <FieldGroup label="Name" required>
           <InputText
-            label="File Name"
             {...register('name', { required: 'Name is required.' })}
             disabled={isSubmitting}
           />
@@ -208,24 +202,22 @@ export const CreateDatabase = () => {
             render={({ message }) => <InputError>{message}</InputError>}
           />
         </FieldGroup>
-        <FieldGroup>
-          <label>Description</label>
-          <InputText label="Description" {...register('description')} disabled={isSubmitting} />
+        <FieldGroup label="Description">
+          <InputText {...register('description')} disabled={isSubmitting} />
           <ErrorMessage
             errors={errors}
             name="description"
             render={({ message }) => <InputError>{message}</InputError>}
           />
         </FieldGroup>
-        <FieldGroup>
-          <label>DB SQL file</label>
+        <FieldGroup label="DB SQL File" required>
           <Controller
             name="ddl_file_uid"
             control={control}
             render={({ field: { value, onChange, onBlur }}) => (
               <Select
                 options={filesOptions}
-                placeholder="Choose..."
+                placeholder="Choose DDL File..."
                 onChange={onChange}
                 onInputChange={debouncedSqlFileInputSearch}
                 isLoading={isLoading}
@@ -241,12 +233,10 @@ export const CreateDatabase = () => {
             )}
           />
         </FieldGroup>
-        <FieldGroup>
-          <label>DB admin password (required):</label>
-          <InputText label="password" type="password" {...register('adminPassword')} autoComplete="new-password" disabled={isSubmitting} />
+        <FieldGroup label="DB admin password" required>
+          <InputText type="password" {...register('adminPassword')} autoComplete="new-password" disabled={isSubmitting} />
           <Hint>
-            This password must be at least 8 characters in length and is not
-            changeable once set
+            This password must be at least 8 characters in length and is not changeable once set
           </Hint>
           <ErrorMessage
             errors={errors}
@@ -254,17 +244,15 @@ export const CreateDatabase = () => {
             render={({ message }) => <InputError>{message}</InputError>}
           />
         </FieldGroup>
-        <FieldGroup>
-          <label>Retype DB admin password (required):</label>
-          <InputText label="Retype password" type="password" {...register('confirmPassword')} autoComplete="new-password" disabled={isSubmitting} />
+        <FieldGroup label="Retype DB admin password" required>
+          <InputText type="password" {...register('confirmPassword')} autoComplete="new-password" disabled={isSubmitting} />
           <ErrorMessage
             errors={errors}
             name="confirmPassword"
             render={({ message }) => <InputError>{message}</InputError>}
           />
         </FieldGroup>
-        <FieldGroup>
-          <label>Database type (required):</label>
+        <FieldGroup label="Database type" required>
           <FieldLabelRow htmlFor="field-aurora-mysql">
             <input
               {...register('engine')}
@@ -293,8 +281,7 @@ export const CreateDatabase = () => {
             render={({ message }) => <InputError>{message}</InputError>}
           />
         </FieldGroup>
-        <FieldGroup>
-          <label>Instance (required):</label>
+        <FieldGroup label="Instance" required>
           <Controller
             name="dxInstanceClass"
             control={control}
@@ -318,8 +305,7 @@ export const CreateDatabase = () => {
             render={({ message }) => <InputError>{message}</InputError>}
           />
         </FieldGroup>
-        <FieldGroup>
-          <label>Version (required):</label>
+        <FieldGroup label="Version" required>
           <Controller
             name="engineVersion"
             control={control}

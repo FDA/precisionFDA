@@ -1,14 +1,11 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Body, Controller, HttpCode, Inject, Logger, Post, UseGuards } from '@nestjs/common'
 import { DEPRECATED_SQL_ENTITY_MANAGER } from '@shared/database/provider/deprecated-sql-entity-manager.provider'
-import {
-  CreateDbClusterInput,
-  createDbClusterSchema,
-} from '@shared/domain/db-cluster/db-cluster.input'
-import { CreateDbClusterOperation } from '@shared/domain/db-cluster/ops/create'
+import { CreateDbClusterDTO } from '@shared/domain/db-cluster/dto/CreateDbClusterDTO'
 import { StartDbClusterOperation } from '@shared/domain/db-cluster/ops/start'
 import { StopDbClusterOperation } from '@shared/domain/db-cluster/ops/stop'
 import { TerminateDbClusterOperation } from '@shared/domain/db-cluster/ops/terminate'
+import { DbClusterService } from '@shared/domain/db-cluster/service/db-cluster.service'
 import { UserOpsCtx } from '@shared/types'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { schemas } from '@shared/utils/base-schemas'
@@ -26,6 +23,7 @@ export class DbClusterController {
     private readonly user: UserContext,
     @Inject(DEPRECATED_SQL_ENTITY_MANAGER) private readonly em: SqlEntityManager,
     private readonly log: Logger,
+    private readonly dbClusterService: DbClusterService,
   ) {}
 
   @HttpCode(204)
@@ -90,16 +88,7 @@ export class DbClusterController {
 
   @HttpCode(201)
   @Post('/create')
-  async createDbCluster(
-    @Body(new JsonSchemaPipe(createDbClusterSchema))
-    body: CreateDbClusterInput,
-  ) {
-    const opsCtx: UserOpsCtx = {
-      log: this.log,
-      user: this.user,
-      em: this.em,
-    }
-
-    return await new CreateDbClusterOperation(opsCtx).execute(body)
+  async createDbCluster(@Body() body: CreateDbClusterDTO) {
+    return await this.dbClusterService.create(body)
   }
 }
