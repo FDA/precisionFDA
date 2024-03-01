@@ -22,6 +22,14 @@ export async function fetchDatabaseList(
   return res.json()
 }
 
+ interface AllowedInstance {
+  value: string,
+  label: string
+}
+export async function getDatabaseAllowedInstances() {
+  return axios.get<AllowedInstance[]>('/api/dbclusters/allowed_instances').then(r => r.data)
+}
+
 interface FetchDatabaseRequest {
   db_cluster: IDatabase
 }
@@ -88,11 +96,7 @@ export interface CreateDatabaseResponse {
 }
 
 export async function createDatabaseRequest(payload: CreateDatabasePayload): Promise<CreateDatabaseResponse> {
-  const res = await fetch('/api/dbclusters/', {
-    ...getApiRequestOpts('POST'),
-    body: JSON.stringify({ db_cluster: payload }),
-  })
-  return res.json()
+  return axios.post('/api/dbclusters/', { db_cluster: payload }).then(r => r.data)
 }
 
 export interface EditDatabasePayload {

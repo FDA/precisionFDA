@@ -3,6 +3,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
 import { Loader } from '../../components/Loader'
 import { ResourceTable } from '../../components/ResourceTable'
+import { pluralize } from '../../utils/formatting'
 import { Modal } from '../modal'
 import { ButtonRow } from '../modal/styles'
 import { useModal } from '../modal/useModal'
@@ -49,7 +50,7 @@ export function useMethodModal<T extends { dxid: string; name: string }>({
   const modalComp = isShown && (
     <Modal
       data-testid="modal-dbcluster-delete"
-      headerText={`${method} ${momoSelected.length} items(s)`}
+      headerText={`${method} ${momoSelected.length} ${pluralize('item', momoSelected.length)}`}
       isShown={isShown}
       hide={() => setShowModal(false)}
       footer={
