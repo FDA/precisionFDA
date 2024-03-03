@@ -4,6 +4,10 @@ import { ajv } from '@shared/utils/validator'
 import type { JSONSchema7 } from 'json-schema'
 import { isEmpty } from 'ramda'
 
+/**
+ * @Deprecated - use class-validator and class-transformer in combination with DTOs instead.
+ * Visit https://confluence.internal.dnanexus.com/display/XVGEN/Backend+development+guide to learn more.
+ */
 export class JsonSchemaPipe implements PipeTransform {
   constructor(private readonly schema: JSONSchema7) {
     if (isEmpty(schema)) {

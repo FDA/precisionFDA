@@ -28,6 +28,7 @@ import { NotificationsApiModule } from './notifications/notifications.api.module
 import { PropertiesApiModule } from './properties/properties.api.module'
 import { BaseErrorExceptionFilter } from './server/filter/base-error-exception.filter'
 import { DefaultExceptionFilter } from './server/filter/default-exception.filter'
+import { HttpExceptionFilter } from './server/filter/http-exception.filter'
 import { SiteSettingsApiModule } from './site-settings/site-settings.api.module'
 import { SpacesApiModule } from './spaces/spaces.api.module'
 import { TracksApiModule } from './tracks/tracks.api.module'
@@ -81,6 +82,10 @@ import { WorkflowApiModule } from './workflows/workflow.api.module'
     {
       provide: APP_FILTER,
       useClass: BaseErrorExceptionFilter,
+    },
+    {
+      provide: APP_FILTER,
+      useClass: HttpExceptionFilter,
     },
   ],
 })
