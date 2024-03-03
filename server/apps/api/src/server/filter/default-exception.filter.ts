@@ -1,4 +1,4 @@
-import { Catch } from '@nestjs/common'
+import { Catch, HttpStatus } from '@nestjs/common'
 import { config } from '@shared/config'
 import { ErrorCodes } from '@shared/errors'
 import { AbstractExceptionFilter, ErrorPayload } from './abstract-exception.filter'
@@ -11,7 +11,7 @@ import { AbstractExceptionFilter, ErrorPayload } from './abstract-exception.filt
 export class DefaultExceptionFilter extends AbstractExceptionFilter<Error> {
 
   protected getStatusCode(exception: Error): number {
-    return 500
+    return HttpStatus.INTERNAL_SERVER_ERROR
   }
 
   protected formatError(err: Error): ErrorPayload {
