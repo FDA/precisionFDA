@@ -16,10 +16,10 @@ install-test-prod:
 
 # a demonstration on how to run built API
 run-dist:
-	pnpm run start:prod:api
+	pnpm run start:prod:api $(ARGS)
 
 run-worker-dist:
-	pnpm run start:prod:worker
+	pnpm run start:prod:worker $(ARGS)
 
 run-dev-dist:
 	pnpm run start:prod:api > ../log/https-api.log

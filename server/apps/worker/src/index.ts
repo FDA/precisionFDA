@@ -7,4 +7,9 @@ process.on('SIGUSR2', () => {
   log.verbose(`Created heap dump file: ${fileName}`)
 })
 
-bootstrap()
+bootstrap().then(async (app) => {
+  if (process.argv.includes('--shutdown')) {
+    await app.close()
+    process.exit(0)
+  }
+})
