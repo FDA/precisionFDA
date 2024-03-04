@@ -200,7 +200,7 @@ const defaultConfig = {
     },
   },
   bullBoardEnabled: parseBooleanFromProcess(process.env.NODE_BULL_BOARD_ENABLED) ?? false,
-  nestjsDevtoolsEnabled: parseBooleanFromProcess(process.env.NODE_BULL_BOARD_ENABLED) ?? false,
+  nestjsDevtoolsEnabled: parseBooleanFromProcess(process.env.NODE_NEST_DEV_TOOLS_ENABLED) ?? false,
 }
 
 // lazily plug-in the overrides that are based on the NODE_ENV
