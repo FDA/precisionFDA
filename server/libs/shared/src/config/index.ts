@@ -67,8 +67,8 @@ const defaultConfig = {
     },
   },
   logs: {
-    pretty: true,
-    level: 'debug',
+    pretty: false,
+    level: 'trace',
     maskSensitive: true,
     enableStackLogging: true,
   },
