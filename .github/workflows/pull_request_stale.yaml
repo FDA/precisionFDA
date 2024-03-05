@@ -1,4 +1,4 @@
-name: "Label and Close Stale PRs & Issues"
+name: "Label Stale PRs & Issues"
 on:
   schedule:
   - cron: "0 7 * * *"
