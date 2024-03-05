@@ -1,8 +1,6 @@
-## 📋 Brief Description: <!--- make sure PR tile is descriptive and matches with JIRA -->
+## 🗒️ Description <!--- Make sure PR tile is descriptive and matches with JIRA -->
 
-<!--- link your JIRA ticket here just by ticket number or full link -->
-
-🔗 PFDA-XXXX
+🔗 PFDA-XXXX <!--- Link your JIRA ticket here just by ticket key or full link -->
 
 <!--- Describe implementation in more detail: -->
 <!---  - If the solution is non-trivial, describe how the problem was solved -->
@@ -13,9 +11,9 @@
 <!---  - Link any additional reading materials -->
 <!---  - Provide description in plain English for Release Notes (if appropriate) -->
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer eleifend augue nunc, et cursus eros tempus et. Sed ullamcorper leo sed congue rutrum. Proin cursus blandit pharetra. In nec lacus mattis, euismod metus ac, congue lorem.
+There is no additional description yet, please read the JIRA ticket for more details.
 
-## 📐 Types of changes:
+## 📐 Types of changes
 
 <!--- What types of changes does your code introduce? Put an `x` in all the boxes that apply: -->
 
@@ -23,14 +21,16 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer eleifend augue 
 - [ ] New feature (non-breaking change which adds functionality)
 - [ ] Breaking change (fix or feature that may cause existing functionality to not work as expected)
 
-## 🔮 Risk & Impact:
+## 🔮 Risk & Impact
 
 <!--- Add a quick note of the risk & impact analysis conducted for this change. -->
 <!--- Any database schema mutations or API changes should be noted in more detail here. -->
 
-There is very low risk associated with this change.
+Risk analysis was not conducted yet.
 
-## 💎 Testing:
+<!--- Uncomment for convenience: There is very low risk associated with this change. -->
+
+## 💎 Testing
 
 <!--- Please describe in detail how you tested your changes -->
 <!--- Include details of your testing environment, test data, tests ran to see how -->
@@ -40,7 +40,9 @@ There is very low risk associated with this change.
 
 Not tested yet.
 
-## 📎 Checklist:
+<!--- Uncomment for convenience: ✅ Branch deploys to DEV and it seems to work as expected. -->
+
+## 📋 Checklist
 
 <!--- Go over all the following points, and put an `x` in all the boxes that apply. -->
 <!--- If you're unsure about any of these, don't hesitate to ask. We're here to help! -->
@@ -51,16 +53,14 @@ Not tested yet.
 - [ ] My change requires a change to the documentation.
 - [ ] I have updated the documentation accordingly.
 
-## 📦 Deployment notes:
+## 📦 Deployment notes
 
 <!--- Add any additional notes about deployment here: -->
 <!---  - AWS Parameter Store changes -->
-<!---  - infrastructure reconfigurations -->
-<!---  - additional DB migrations or changes -->
-<!---  - network security group rule adjustments -->
+<!---  - Infrastructure reconfigurations -->
+<!---  - Additional DB migrations or changes -->
+<!---  - Network security group rule adjustments -->
 
 No action required.
 
-<!---
-If you're not ready to merge your pull request, you can mark it as a draft instead of labels like Work in progress or Do not merge. For more information, see "About pull requests": https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/about-pull-requests#draft-pull-requests
--->
+<!--- If you're not ready to merge your pull request, you can open it as a "draft". This is better than just labeling it "Work in progress" or "Do not merge" because it prevents the pull request from being merged until it's marked as ready. -->
