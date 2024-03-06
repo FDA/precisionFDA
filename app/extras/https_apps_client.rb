@@ -197,6 +197,22 @@ class HttpsAppsClient # rubocop:disable Metrics/ClassLength
     )
   end
 
+  def bulk_download(id, folder_id = nil, &block)
+    params = { id: }
+    params[:folder_id] = folder_id unless folder_id.nil?
+
+    request(
+      "/files/bulk_download",
+      {},
+      Net::HTTP::Get::METHOD,
+      params,
+      {},
+      true,
+    ) do |chunk|
+      block.call(chunk)
+    end
+  end
+
   # Start nodes removal job in a synchronous way. Used exclusively by CLI
   # @param ids [Array of Integers] id's of nodes to be removed
   def cli_remove_nodes(ids)
@@ -594,7 +610,6 @@ class HttpsAppsClient # rubocop:disable Metrics/ClassLength
       {},
       Net::HTTP::Get::METHOD,
     )
-
   end
 
   # Update notification's delivered date time
@@ -960,8 +975,16 @@ class HttpsAppsClient # rubocop:disable Metrics/ClassLength
 
   private
 
+  def prepare_request(uri, body, headers, method_name)
+    request = Net::HTTP.const_get(method_name.capitalize).new(uri)
+    request["Content-Type"] = "application/json"
+    request.body = body.to_json
+    headers.each { |key, value| request[key] = value }
+    request
+  end
+
   # rubocop:disable Metrics/ParameterLists
-  def request(path, body = {}, method_name = Net::HTTP::Post::METHOD, query = {}, additional_headers = {})
+  def request(path, body = {}, method_name = Net::HTTP::Post::METHOD, query = {}, additional_headers = {}, streaming = false)
     # Rails to_query method adds a suffix "[]" to keys of query parameters with array values.
     #
     # Rails approach - { id: [0,1,2]} => ?id[]=1&id[]=2&id[]=3
@@ -984,9 +1007,18 @@ class HttpsAppsClient # rubocop:disable Metrics/ClassLength
 
     conn_opts = connection_opts.merge(use_ssl: use_ssl)
     conn_opts.merge!(verify_mode: OpenSSL::SSL::VERIFY_NONE) if use_ssl
-
     Net::HTTP.start(uri.host, uri.port, conn_opts) do |http|
-      handle_response(http.send_request(method_name, uri.request_uri, body.to_json, headers.merge(additional_headers)))
+      request = prepare_request(uri, body, headers.merge(additional_headers), method_name)
+
+      if streaming
+        http.request(request) do |response|
+          response.read_body do |chunk|
+            yield chunk
+          end
+        end
+      else
+        handle_response(http.request(request))
+      end
     end
   rescue Errno::ECONNREFUSED
     raise Error, "Can't connect to nodejs-api service"

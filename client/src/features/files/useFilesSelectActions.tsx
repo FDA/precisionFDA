@@ -107,8 +107,7 @@ export const useFilesSelectActions = ({
     mutationKey: ['move-files'],
     mutationFn: (folderIdParam: number) => {
       const selectedIds = selected.map(f => f.id)
-      const result = moveFilesRequest(selectedIds, folderIdParam, homeScope, space?.id)
-      return result
+      return moveFilesRequest(selectedIds, folderIdParam, homeScope, space?.id)
     },
     onSuccess: res => {
       queryClient.invalidateQueries({
@@ -127,7 +126,7 @@ export const useFilesSelectActions = ({
     modalComp: downloadModal,
     setShowModal: setDownloadModal,
     isShown: isShownDownloadModal,
-  } = useDownloadFileModal(selected)
+  } = useDownloadFileModal(selected, getFileScope(homeScope, space))
   const {
     modalComp: attachLicensesModal,
     setShowModal: setAttachLicensesModal,
@@ -335,7 +334,7 @@ export const useFilesSelectActions = ({
         selected.length === 0 ||
         selected.some(e => e.locked) ||
         isActionDisabledBasedOnProtected(user?.id as number, space) ||
-        selected.some(e => e.type === 'Folder' || (e.type === 'UserFile' && !e.links.download) || e.show_license_pending) ||
+        selected.some(e => (e.type === 'UserFile' && !e.links.download) || e.show_license_pending) ||
         openSelected,
       modal: downloadModal,
       showModal: isShownDownloadModal,

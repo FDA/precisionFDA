@@ -194,8 +194,7 @@ const removeRepeatableJob = async (job: JobInformation, queue: Queue) => {
 
 const findRepeatable = async (bullJobId: string) => {
   const repeatableJobs = await mainQueue.getRepeatableJobs()
-  const result = repeatableJobs.find((j) => j.id === bullJobId)
-  return result
+  return repeatableJobs.find((j) => j.id === bullJobId)
 }
 
 // TASK PRODUCERS
