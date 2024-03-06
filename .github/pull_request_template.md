@@ -1,6 +1,6 @@
-## 🗒️ Description <!--- Make sure PR tile is descriptive and matches with JIRA -->
+## 🗒️ Description <!--- Make sure PR tile is descriptive and matches with Jira -->
 
-🔗 PFDA-XXXX <!--- Link your JIRA ticket here just by ticket key or full link -->
+🔗 PFDA-XXXX <!--- Link your Jira ticket here just by ticket key or full link -->
 
 <!--- Describe implementation in more detail: -->
 <!---  - If the solution is non-trivial, describe how the problem was solved -->
@@ -11,7 +11,7 @@
 <!---  - Link any additional reading materials -->
 <!---  - Provide description in plain English for Release Notes (if appropriate) -->
 
-There is no additional description yet, please read the JIRA ticket for more details.
+There is no additional description yet, please read the Jira ticket for more details.
 
 ## 📐 Types of changes
 
