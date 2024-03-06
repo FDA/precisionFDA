@@ -1,7 +1,7 @@
 name: "Label Stale PRs & Issues"
 on:
   schedule:
-  - cron: "0 7 * * *"
+  - cron: "0 6 * * *"
 
 permissions:
   issues: write
