@@ -16,6 +16,7 @@ import { useModal } from '../../modal/useModal'
 import { DownloadListResponse } from '../../home/types'
 import { deleteFilesRequest, fetchFilesDownloadList } from '../files.api'
 import { IFile } from '../files.types'
+import { getMessage } from './modal-utils'
 
 const StyledResourceTable = styled(ResourceTable)`
   padding: 12px;
@@ -47,13 +48,14 @@ const DeleteFiles = ({
       }
 
       const promises: Promise<DownloadListResponse[]>[] = []
-      for (let [scope, files] of filesByScopes) {
+      for (const [scope, files] of filesByScopes) {
         promises.push(fetchFilesDownloadList(
             files.map(s => s.id),
+            'delete',
             scope,
         ))
       }
-      return Promise.all(promises).then(fileArrays => Promise.resolve(fileArrays.flat()));
+      return Promise.all(promises).then(fileArrays => Promise.resolve(fileArrays.flat()))
     },
   })
 
@@ -78,35 +80,6 @@ const DeleteFiles = ({
       />
     ) : <div />
   )
-}
-
-const getPluralizedTerm = (itemCount: number, itemName: string): string => {
-  if (itemCount === 1) {
-    return `${itemCount.toString()} ${itemName}`
-  }
-  return `${itemCount.toString()} ${itemName}s`
-}
-
-const getMessage = (nodes?: DownloadListResponse[]) => {
-  let filesCount = 0
-  let foldersCount = 0
-
-  nodes?.forEach(node => {
-    if (node.type === 'file') {
-      filesCount += 1
-    } else {
-      foldersCount += 1
-    }
-  })
-
-  if (foldersCount > 0 && filesCount === 0) {
-    return `${getPluralizedTerm(foldersCount, 'folder')}`
-  }
-  if (filesCount > 0 && foldersCount === 0) {
-    return `${getPluralizedTerm(filesCount, 'file')}`
-  }
-  return `${getPluralizedTerm(filesCount, 'file')} and `
-    + `${getPluralizedTerm(foldersCount, 'folder')}`
 }
 
 export const useDeleteFileModal = ({

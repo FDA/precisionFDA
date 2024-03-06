@@ -4,7 +4,6 @@ import { IWorkstationClient } from '@shared/workstation-client/workstation-clien
 import { AxiosInstance } from 'axios'
 import { Logger } from '@nestjs/common'
 import sinon from 'sinon'
-import { INotificationService } from '../domain/notification/services/notification.service'
 import { ServiceFactory, setServiceFactory } from '../services/service-factory'
 import { IEmailService } from '../services/smtp.service'
 
@@ -59,10 +58,6 @@ class MockServiceFactory extends ServiceFactory {
 
   getEmailService(): IEmailService {
     return this.emailService
-  }
-
-  getNotificationService(): INotificationService {
-    return this.notificationService
   }
 
   getPlatformAuthClient(accessToken: string, logger?: Logger, axiosInstance?: AxiosInstance): IPlatformAuthClient {

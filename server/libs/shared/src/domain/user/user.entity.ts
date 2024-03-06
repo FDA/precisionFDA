@@ -67,7 +67,6 @@ type CloudResourceSettings = {
   resources: Array<(typeof RESOURCE_TYPES)[number]>
 }
 
-
 // contains the bare minimum to work with the user instance
 // might need to add more fields in the time
 @Entity({ tableName: 'users', customRepository: () => UserRepository })
@@ -152,7 +151,7 @@ export class User extends BaseEntity {
     mappedBy: 'user',
     nullable: true,
   })
-  notificationPreference: Ref<NotificationPreference>
+  notificationPreference: Ref<NotificationPreference>;
 
   [EntityRepositoryType]?: UserRepository
 
@@ -206,9 +205,11 @@ export class User extends BaseEntity {
   @Property({ persist: false })
   get spaceUids(): string[] {
     const spaceUids: string[] = []
-    Array.from(this.spaceMemberships).filter(m => m.active && m.role != SPACE_MEMBERSHIP_ROLE.VIEWER).forEach(spaceMembership => {
-      Array.from(spaceMembership.spaces).forEach(space => spaceUids.push(`space-${space.id}`))
-    })
+    Array.from(this.spaceMemberships)
+      .filter((m) => m.active)
+      .forEach((spaceMembership) => {
+        Array.from(spaceMembership.spaces).forEach((space) => spaceUids.push(`space-${space.id}`))
+      })
     return spaceUids
   }
 

@@ -6,7 +6,6 @@ import { FILE_STATE_DX } from './user-file.types'
 import { STATIC_SCOPE } from '../../enums'
 
 export class AssetRepository extends EntityRepository<Asset> {
-
   async findAssetWithUid(uid: string): Promise<Asset | null> {
     return await this.findOne(
       { uid },
@@ -15,10 +14,7 @@ export class AssetRepository extends EntityRepository<Asset> {
   }
 
   async findAllAssetsWithDxid(dxid: string): Promise<Asset[]> {
-    return await this.find(
-      { dxid },
-      { filters: ['asset'], populate: ['user', 'taggings.tag'] },
-    )
+    return await this.find({ dxid }, { filters: ['asset'], populate: ['user', 'taggings.tag'] })
   }
 
   // Find assets uploaded or owned by a user that are pending
@@ -41,17 +37,18 @@ export class AssetRepository extends EntityRepository<Asset> {
   async findAccessibleByUser(userId: number, uids: string[]): Promise<Asset[]> {
     const userRepository = this._em.getRepository(User)
     const user: User = await userRepository.findOneOrFail(
-      {id: userId}, {populate: ['spaceMemberships', 'spaceMemberships.spaces']}
+      { id: userId },
+      { populate: ['spaceMemberships', 'spaceMemberships.spaces'] },
     )
     return await this.find(
       {
         $or: [
-          {scope: STATIC_SCOPE.PUBLIC},
-          {user, scope: STATIC_SCOPE.PRIVATE},
-          {scope: {$in: (user.spaceUids as SCOPE[]) ?? []}}
+          { scope: STATIC_SCOPE.PUBLIC },
+          { user, scope: STATIC_SCOPE.PRIVATE },
+          { scope: { $in: (user.spaceUids as SCOPE[]) ?? [] } },
         ],
         state: FILE_STATE_DX.CLOSED,
-        uid: {$in: uids},
+        uid: { $in: uids },
       },
       { filters: ['asset'], populate: ['user', 'taggings.tag'] },
     )

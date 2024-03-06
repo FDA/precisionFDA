@@ -31,10 +31,10 @@ export async function fetchTrack(fileId: number) {
   return res.json()
 }
 
-export async function fetchFilesDownloadList(ids: string[], scope?: string) {
+export async function fetchFilesDownloadList(ids: number[], task: string, scope?: string) {
   return axios
     .post('/api/files/download_list', {
-      task: 'delete',
+      task,
       ids,
       scope,
     })
@@ -96,7 +96,7 @@ export async function copyFilesRequest(scope: string, ids: string[]) {
 export async function editFileRequest({ name, description, fileId }: { name: string; description: string; fileId: string }) {
   const res = await fetch(`/api/files/${fileId}`, {
     ...getApiRequestOpts('PUT'),
-    body: JSON.stringify({ file: { name, description } }),
+    body: JSON.stringify({ file: { name, description }}),
   }).then(checkStatus)
   return res.json()
 }
