@@ -141,7 +141,7 @@ describe('POST /apps/:id/run', () => {
     expect(platformCall.input)
       .to.have.property('snapshot')
       .that.deep.equals({
-        $dnanexus_link: { id: snapshotFile.dxid, project: user.privateFilesProject },
+        $dnanexus_link: { id: snapshotFile.dxid, project: snapshotFile.project },
       })
   })
 
@@ -230,7 +230,7 @@ describe('POST /apps/:id/run', () => {
     expect(platformCall)
       .to.have.property('input')
       .that.deep.equals({
-        app_gz: { $dnanexus_link: { id: gzipFile.dxid, project: user.privateFilesProject } },
+        app_gz: { $dnanexus_link: { id: gzipFile.dxid, project: gzipFile.project } },
       })
     const jobInDb = await em.findOneOrFail(Job, { id: body.id })
     expect(jobInDb).to.have.property('provenance')
