@@ -5,7 +5,6 @@ export const InputText = styled.input.attrs({ type: 'text' })`
     font-family: ${theme.fontFamily};
     box-sizing: border-box;
     margin: 0;
-    padding: 0;
     font-variant: tabular-nums;
     list-style: none;
     font-feature-settings: 'tnum';
@@ -24,18 +23,19 @@ export const InputText = styled.input.attrs({ type: 'text' })`
     transition: all 0.3s;
 
     &:focus {
-      border-color: var(--primary-600);
-      border-right-width: 1px !important;
-      outline: 0;
-      box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+        border-color: var(--primary-600);
+        border-right-width: 1px !important;
+        outline: 0;
+        box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
     }
 
     &:-webkit-autofill,
     &:-webkit-autofill:focus {
-      transition: background-color 600000s 0s, color 600000s 0s;
+        transition: background-color 600000s 0s, color 600000s 0s;
     }
+
     &[data-autocompleted] {
-      background-color: transparent !important;
+        background-color: transparent !important;
     }
 
     ${({ disabled }) => disabled && css`

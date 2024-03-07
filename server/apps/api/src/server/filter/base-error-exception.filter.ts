@@ -10,16 +10,16 @@ export class BaseErrorExceptionFilter extends AbstractExceptionFilter<BaseError>
     return exception.props.statusCode ?? 500
   }
 
-  protected formatError(err: BaseError): ErrorPayload {
+  protected formatError(exception: BaseError): ErrorPayload {
     const payload: ErrorPayload = {
       error: {
-        code: err.props.code,
-        message: err.message,
-        statusCode: this.getStatusCode(err),
+        code: exception.props.code,
+        message: exception.message,
+        statusCode: this.getStatusCode(exception),
       },
     }
     if (config.logs.enableStackLogging) {
-      payload.stack = err.stack
+      payload.stack = exception.stack
     }
 
     return payload

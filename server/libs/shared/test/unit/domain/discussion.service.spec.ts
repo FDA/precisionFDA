@@ -9,7 +9,7 @@ import { Follow } from '@shared/domain/follow/follow.entity'
 import { Job } from '@shared/domain/job/job.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { PlatformClient } from '@shared/platform-client'
-import { EntityFetcherService } from '@shared/services/entity-fetcher.service'
+import { EntityFetcherService } from '@shared/domain/entity/entity-fetcher.service'
 import { expect } from 'chai'
 import {
   BaseInput,

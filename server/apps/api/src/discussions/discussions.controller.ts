@@ -20,7 +20,7 @@ import { DiscussionService } from '@shared/domain/discussion/services/discussion
 import { PublisherService } from '@shared/domain/discussion/services/publisher.service'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { PlatformClient } from '@shared/platform-client'
-import { EntityFetcherService } from '@shared/services/entity-fetcher.service'
+import { EntityFetcherService } from '@shared/domain/entity/entity-fetcher.service'
 import { UserContextGuard } from '../user-context/guard/user-context.guard'
 import { ZodPipe } from '../validation/pipes/zod.pipe'
 import type {
