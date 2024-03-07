@@ -73,7 +73,7 @@ export const Assets = () => {
                         Use the Markdown syntax to format your readme.
                         For inspiration on how to write useful readme files, see some of the existing assets published
                         by the precisionFDA team, and consult {' '}
-                        <Link to="creating-apps#app-own-assets">
+                        <Link to="/docs/creating-apps#app-own-assets">
                             Your own assets
                         </Link>{' '} in the precisionFDA documentation guide for a markdown template.
                     </DocsTip>
