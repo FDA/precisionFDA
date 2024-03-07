@@ -42,33 +42,38 @@ cat <<EOF > /tmp/config.json
                          "log_stream_name": "{instance_id}"
                      },
                      {
-                         "file_path": "/srv/www/precision_fda/current/log/puma.log",
-                         "log_group_name": "staging/backend/production.log",
+                         "file_path": "/srv/www/precision_fda/current/log/backend.log",
+                         "log_group_name": "staging/ruby/backend",
                          "log_stream_name": "{instance_id}"
                      },
                      {
-                         "file_path": "/srv/www/precision_fda/current/log/https-api-0.log",
-                         "log_group_name": "staging/node/https-api-0.log",
+                         "file_path": "/srv/www/precision_fda/current/log/backend_errors.log",
+                         "log_group_name": "staging/ruby/backend-errors",
                          "log_stream_name": "{instance_id}"
                      },
                      {
-                         "file_path": "/srv/www/precision_fda/current/log/https-worker-1.log",
-                         "log_group_name": "staging/node/https-workers",
+                         "file_path": "/srv/www/precision_fda/current/log/node-api-0.log",
+                         "log_group_name": "staging/node/api-0.log",
+                         "log_stream_name": "{instance_id}"
+                     },
+                     {
+                         "file_path": "/srv/www/precision_fda/current/log/node-worker-1.log",
+                         "log_group_name": "staging/node/worker",
                          "log_stream_name": "{instance_id}-worker-1"
                      },
                      {
-                         "file_path": "/srv/www/precision_fda/current/log/https-worker-2.log",
-                         "log_group_name": "staging/node/https-workers",
+                         "file_path": "/srv/www/precision_fda/current/log/node-worker-2.log",
+                         "log_group_name": "staging/node/workers",
                          "log_stream_name": "{instance_id}-worker-2"
                      },
                      {
-                         "file_path": "/srv/www/precision_fda/current/log/https-worker-3.log",
-                         "log_group_name": "staging/node/https-workers",
+                         "file_path": "/srv/www/precision_fda/current/log/node-worker-3.log",
+                         "log_group_name": "staging/node/workers",
                          "log_stream_name": "{instance_id}-worker-3"
                      },
                      {
-                         "file_path": "/srv/www/precision_fda/current/log/https-worker-4.log",
-                         "log_group_name": "staging/node/https-workers",
+                         "file_path": "/srv/www/precision_fda/current/log/node-worker-4.log",
+                         "log_group_name": "staging/node/workers",
                          "log_stream_name": "{instance_id}-worker-4"
                      },
                      {
@@ -77,29 +82,29 @@ cat <<EOF > /tmp/config.json
                          "log_stream_name": "{instance_id}-pm2"
                      },
                      {
-                         "file_path": "/home/deploy/.pm2/logs/https-apps-api-error-0.log",
-                         "log_group_name": "staging/node/https-apps-api-errors",
+                         "file_path": "/srv/www/precision_fda/current/log/node-api-error-0.log",
+                         "log_group_name": "staging/node/api-errors",
                          "log_stream_name": "{instance_id}"
                      },
                      {
-                         "file_path": "/home/deploy/.pm2/logs/https-apps-worker-error-1.log",
-                         "log_group_name": "staging/node/https-worker-errors",
-                         "log_stream_name": "{instance_id}-https-worker-error-1"
+                         "file_path": "/srv/www/precision_fda/current/log/node-worker-error-1.log",
+                         "log_group_name": "staging/node/worker-errors",
+                         "log_stream_name": "{instance_id}-node-worker-error-1"
                      },
                      {
-                         "file_path": "/home/deploy/.pm2/logs/https-apps-worker-error-2.log",
-                         "log_group_name": "staging/node/https-worker-errors",
-                         "log_stream_name": "{instance_id}-https-worker-error-2"
+                         "file_path": "/srv/www/precision_fda/current/log/node-worker-error-2.log",
+                         "log_group_name": "staging/node/worker-errors",
+                         "log_stream_name": "{instance_id}-node-worker-error-2"
                      },
                      {
-                         "file_path": "/home/deploy/.pm2/logs/https-apps-worker-error-3.log",
-                         "log_group_name": "staging/node/https-worker-errors",
-                         "log_stream_name": "{instance_id}-https-worker-error-3"
+                         "file_path": "/srv/www/precision_fda/current/log/node-worker-error-3.log",
+                         "log_group_name": "staging/node/worker-errors",
+                         "log_stream_name": "{instance_id}-node-worker-error-3"
                      },
                      {
-                         "file_path": "/home/deploy/.pm2/logs/https-apps-worker-error-4.log",
-                         "log_group_name": "staging/node/https-worker-errors",
-                         "log_stream_name": "{instance_id}-https-worker-error-4"
+                         "file_path": "/srv/www/precision_fda/current/log/node-worker-error-4.log",
+                         "log_group_name": "staging/node/worker-errors",
+                         "log_stream_name": "{instance_id}-node-worker-error-4"
                      },
                      {
                          "file_path": "/srv/www/precision_fda/current/log/cron.log",
