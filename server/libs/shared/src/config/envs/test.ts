@@ -2,6 +2,7 @@ import { ConfigOverride } from '..'
 
 export const config: ConfigOverride = () => ({
   logs: {
+    pretty: true,
     level: process.env.LOG_LEVEL ?? 'error',
   },
   database: {

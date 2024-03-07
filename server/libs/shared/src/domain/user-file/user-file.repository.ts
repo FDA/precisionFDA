@@ -76,16 +76,13 @@ export class UserFileRepository extends EntityRepository<UserFile> {
       { uid },
       {
         filters: ['userfile'],
-        populate: populate as never[] || ['user', 'taggings.tag'] as never[],
+        populate: (populate as never[]) || (['user', 'taggings.tag'] as never[]),
       },
     )
   }
 
   async findFilesWithDxid(dxid: string): Promise<UserFile[]> {
-    return await this.find(
-      { dxid },
-      { filters: ['userfile'], populate: ['user', 'taggings.tag'] },
-    )
+    return await this.find({ dxid }, { filters: ['userfile'], populate: ['user', 'taggings.tag'] })
   }
 
   // Find files uploaded or owned by a user that are pending
@@ -105,7 +102,7 @@ export class UserFileRepository extends EntityRepository<UserFile> {
 
   async findAllHTTPSFiles(): Promise<UserFile[]> {
     return await this.find(
-      { },
+      {},
       {
         filters: ['userfile', 'https'],
         populate: ['taggings.tag', 'user'],
@@ -124,9 +121,9 @@ export class UserFileRepository extends EntityRepository<UserFile> {
   }
 
   removeFilesWithTags(files: UserFile[]): UserFile[] {
-    return files.map(file => {
+    return files.map((file) => {
       this.remove(file)
-      file.taggings.getItems().forEach(tagging => tagging.tag.taggingCount--)
+      file.taggings.getItems().forEach((tagging) => tagging.tag.taggingCount--)
       file.taggings.removeAll()
       return file
     })
@@ -134,7 +131,7 @@ export class UserFileRepository extends EntityRepository<UserFile> {
 
   createUserFileJobRefs(fileIds: number[], jobId: number) {
     const qb = this.em.createQueryBuilder('job_inputs')
-    qb.insert(fileIds.map(fileId => ({ user_file_id: fileId, job_id: jobId })))
+    qb.insert(fileIds.map((fileId) => ({ user_file_id: fileId, job_id: jobId })))
     return qb
   }
 }

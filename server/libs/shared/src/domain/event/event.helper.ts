@@ -16,6 +16,7 @@ const EVENT_TYPES = {
   FOLDER_UNLOCKED: 'Event::FolderUnlocked',
   FILE_ABANDONED: 'Event::FileAbandoned',
   FILE_DELETED: 'Event::FileDeleted',
+  FILE_BULK_DOWNLOAD: 'Event::FileBulkDownload',
   FILE_LOCKED: 'Event::FileLocked',
   FILE_UNLOCKED: 'Event::FileUnlocked',
   APP_CREATED: 'Event::AppCreated',
@@ -120,4 +121,11 @@ const createFileEvent = async (
   return event
 }
 
-export { EVENT_TYPES, createJobClosed, createFolderEvent, createFileEvent, createAppCreated, createAppPublished }
+export {
+  EVENT_TYPES,
+  createJobClosed,
+  createFolderEvent,
+  createFileEvent,
+  createAppCreated,
+  createAppPublished,
+}

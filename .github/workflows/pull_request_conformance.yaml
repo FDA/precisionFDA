@@ -1,0 +1,22 @@
+name: Check PR Conformance
+
+on:
+  pull_request:
+    types: [opened, edited, reopened, synchronize]
+
+permissions:
+  pull-requests: read
+
+jobs:
+  jira:
+    name: Title Includes Jira Ticket Key
+    runs-on: ubuntu-latest
+    steps:
+      - uses: morrisoncole/pr-lint-action@v1.7.0
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          title-regex: '^[A-Z]+-[0-9]+|^Bump|^Fix|^Test'
+          on-failed-regex-fail-action: true
+          on-failed-regex-request-changes: false
+          on-failed-regex-create-review: false
+          on-failed-regex-comment: "PR title must start with Jira ticket key, Bump, Test or Fix. Failed regex: `%regex%`!"

@@ -17,6 +17,7 @@ import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { BaseEntity } from '../../database/base-entity'
 import { DATA_PORTAL_STATUS } from './data-portal.enum'
 import { DataPortalRepository } from '@shared/domain/data-portal/data-portal.repository'
+import { ResourceRepository } from '@shared/domain/resource/resource.repository'
 
 @Entity({ tableName: 'data_portals', customRepository: () => DataPortalRepository })
 class DataPortal extends BaseEntity {

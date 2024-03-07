@@ -6,10 +6,6 @@ export const config: ConfigOverride = () => ({
   api: {
     railsHost: process.env.HOST,
   },
-  logs: {
-    pretty: false,
-    level: 'debug',
-  },
   database: {
     debug: true,
   },

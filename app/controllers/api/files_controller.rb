@@ -2,6 +2,7 @@ module Api
   # Files API controller.
   # rubocop:disable Metrics/ClassLength
   class FilesController < ApiController
+    include ActionController::Live
     include SpaceConcern
     include CommonConcern
     include Paginationable
@@ -556,6 +557,26 @@ module Api
     def remove
       response = https_apps_client.remove_nodes(unsafe_params[:ids])
       render json: response
+    end
+
+    # GET /api/files/bulk_download
+    # Returns a zip stream containing all files specified by the IDs.
+    # If the ID of a folder is provided, all its contents, including
+    # nested folders, are included.
+    def bulk_download_content
+      id = params[:id] # actual array
+      scope = Node.find(id[0]).scope # just temporary solution until we switch to Node
+
+      timestamp = Time.zone.now.strftime("%Y%m%d%H%M%S")
+      response.headers["Content-Type"] = "application/octet-stream"
+      response.headers["Content-Disposition"] = "attachment; filename=\"pfda_archive_#{scope}_#{timestamp}.zip\""
+      response.headers["ETag"] = "0"
+
+      https_apps_client.bulk_download(id) do |chunk|
+        response.stream.write(chunk)
+      end
+    ensure
+      response.stream.close
     end
 
     def cli_remove

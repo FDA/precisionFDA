@@ -32,13 +32,13 @@ import { EmailSendInput, EMAIL_TYPES } from '../../email/email.config'
 import { JOB_STATE } from '../job.enum'
 import { NOTIFICATION_ACTION, SEVERITY } from '../../../enums'
 import { SqlEntityManager } from '@mikro-orm/mysql'
-import { getServiceFactory } from '../../../services/service-factory'
+import { NotificationService } from '@shared/domain/notification/services/notification.service'
 
 /**
  * Checks job status if notifications should be triggered.
  */
 const checkJobStatusForNotifications = async (em: SqlEntityManager, userId: number, job: Job, remoteJob: JobDescribeResponse) => {
-  const notificationService = getServiceFactory().getNotificationService(em)
+  const notificationService = new NotificationService(em)
   const meta = {
     linkTitle: 'View Execution',
     linkUrl: `/home/executions/${job.uid}`,

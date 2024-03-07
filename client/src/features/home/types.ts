@@ -45,6 +45,7 @@ export interface DownloadListResponse {
   type: 'folder' | 'file'
   fsPath: string
   viewURL: string
+  downloadURL: string
   locked: boolean
 }
 
