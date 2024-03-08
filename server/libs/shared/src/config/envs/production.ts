@@ -13,9 +13,6 @@ export const config: ConfigOverride = () => ({
     appKit: 'project-GYP09280XPx4p0gJ8XPY27b0:/appKit-1.2.tgz',
   },
   logs: {
-    pretty: false,
-    level: 'info',
-    maskSensitive: true,
     enableStackLogging: false,
   },
   workerJobs: {

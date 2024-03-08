@@ -33,6 +33,7 @@ const LockFiles = ({
     queryFn: () =>
       fetchFilesDownloadList(
         selected.map(s => s.id),
+        'delete',
         scope,
       ).catch(() => toast.error('Error: Fetching download list')),
   })

@@ -287,7 +287,7 @@ export class CreateJobOperation extends BaseOperation<UserOpsCtx, RunAppInput, J
         }
         newField = {
           // fixme: no default value applied here
-          [key]: { $dnanexus_link: { id: inputFile.dxid, project: this.projectId } },
+          [key]: { $dnanexus_link: { id: inputFile.dxid, project: inputFile.project } },
         }
       } else {
         newField = {

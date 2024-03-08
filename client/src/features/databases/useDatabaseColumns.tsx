@@ -4,6 +4,7 @@ import {
 } from '../../components/Table/filters'
 import { StyledTagItem, StyledTags } from '../../components/Tags'
 import { DatabaseIcon } from '../../components/icons/DatabaseIcon'
+import { RESOURCE_LABELS } from '../../types/user'
 import { StyledLinkCell } from '../home/home.styles'
 import { KeyVal } from '../home/types'
 
@@ -51,6 +52,11 @@ export const useDatabaseColumns = ({
     accessor: 'dx_instance_class',
     Filter: DefaultColumnFilter,
     width: colWidths?.dx_instance_class || 130,
+    Cell: props => (
+      <>
+        {RESOURCE_LABELS[props.row.original.dx_instance_class] ?? props.row.original.dx_instance_class}
+      </>
+    )
   },
   {
     Header: 'Created',

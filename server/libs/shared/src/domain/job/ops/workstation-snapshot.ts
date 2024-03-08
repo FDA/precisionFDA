@@ -5,11 +5,10 @@ import { UserOpsCtx } from '../../../types'
 import { omit } from 'ramda'
 import { WorkstationBaseOperation } from './workstation-base-operation'
 import { TASK_TYPE } from '../../../queue/task.input'
-import { addToFileSyncQueueEnsureUnique, createSyncWorkstationFilesTask, getFileSyncQueue } from '../../../queue'
+import { addToFileSyncQueueEnsureUnique, createSyncWorkstationFilesTask } from '../../../queue'
 import { JOB_STATE } from '../job.enum'
-import { getServiceFactory } from '../../../services/service-factory'
 import { compareVersions } from 'compare-versions'
-
+import { NotificationService } from '@shared/domain/notification/services/notification.service'
 
 export interface WorkstationSnapshotOperationParams {
   jobDxid: string
@@ -62,7 +61,7 @@ any
       throw new errors.InvalidStateError(`WorkstationSnapshotOperation Error: job ${job.dxid} is not in running state`)
     }
 
-    const notificationService = getServiceFactory().getNotificationService(this.ctx.em)
+    const notificationService = new NotificationService(this.ctx.em)
 
     try {
       const workstationService = await new WorkstationService(this.ctx, input.code).initWithJob(input.jobDxid)
@@ -94,7 +93,7 @@ any
         const message = input.terminate
           ? `Snapshot created for ${job.name}. The workstation will now terminate`
           : `Snapshot created for ${job.name}`
-        notificationService.createNotification({
+        await notificationService.createNotification({
           message,
           meta: {
             linkTitle: 'View Execution',
@@ -105,7 +104,7 @@ any
           userId: this.ctx.user.id,
         })
       } else {
-        notificationService.createNotification({
+        await notificationService.createNotification({
           message: `Error creating snapshot for ${job.name}: ${res.error?.message}`,
           meta: {
             linkTitle: 'View Execution',
@@ -119,7 +118,7 @@ any
       return res
     } catch (err) {
       const message = `Error creating snapshot for ${job.name}: ${err}`
-      notificationService.createNotification({
+      await notificationService.createNotification({
         message,
         meta: {
           linkTitle: 'View Execution',

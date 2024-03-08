@@ -1,11 +1,5 @@
 import { AxiosInstance } from 'axios'
-import { SqlEntityManager } from '@mikro-orm/mysql'
 import type { Logger } from '@nestjs/common'
-import {
-  INotificationService,
-  NotificationService,
-  RedisClientType,
-} from '../domain/notification/services/notification.service'
 import { IPlatformAuthClient, PlatformAuthClient } from '../platform-client/platform-auth-client'
 import { IWorkstationClient, WorkstationClient } from '../workstation-client/workstation-client'
 import { emailClient, IEmailService, saveEmailToFileClient } from './smtp.service'
@@ -21,10 +15,6 @@ import { config } from '../config'
  */
 interface IServiceFactory {
   getEmailService: () => IEmailService
-  getNotificationService: (
-    em: SqlEntityManager,
-    redisClient?: RedisClientType,
-  ) => NotificationService
   getPlatformAuthClient(
     accessToken: string,
     logger?: Logger,
@@ -43,10 +33,6 @@ export class ServiceFactory implements IServiceFactory {
       return saveEmailToFileClient
     }
     return emailClient
-  }
-
-  getNotificationService(em: SqlEntityManager, redisClient?: RedisClientType): NotificationService {
-    return new NotificationService(em, redisClient)
   }
 
   getPlatformAuthClient(

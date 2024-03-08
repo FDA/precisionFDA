@@ -1,0 +1,22 @@
+name: "Label Stale PRs & Issues"
+on:
+  schedule:
+  - cron: "0 6 * * *"
+
+permissions:
+  issues: write
+  pull-requests: write
+
+jobs:
+  stale:
+    name: "Label PRs & Issues older than 60 days as Stale"
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/stale@v9.0.0
+      with:
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
+        stale-issue-message: 'This issue is stale because it has been open 60 days with no activity.'
+        stale-pr-message: 'This PR is stale because it has been open 60 days with no activity.'
+        days-before-stale: 60
+        days-before-close: -1
+        operations-per-run: 450

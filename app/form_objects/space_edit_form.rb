@@ -15,6 +15,36 @@ class SpaceEditForm < SpaceForm
 
   alias_method :reviewer_lead_dxuser, :host_lead_dxuser
 
+  # methods for validating permissions are overriding those from space_form
+  def validate_government_space
+    return unless space_type == TYPE_GOVERNMENT && host_lead_dxuser != current_user.dxuser
+
+    raise "Government space can be updated only by its owner"
+  end
+
+  def validate_review_space
+    return unless space_type == TYPE_REVIEW &&
+                  (host_lead_dxuser == current_user.dxuser ||
+                   sponsor_lead_dxuser == current_user.dxuser)
+
+    raise "Review space can be updated only by Reviewer or Sponsor leads"
+  end
+
+  def validate_group_and_admin_space
+    return if (space_type != TYPE_GROUPS && space_type != TYPE_ADMIN) ||
+              (host_lead_dxuser == current_user.dxuser ||
+               guest_lead_dxuser == current_user.dxuser ||
+               current_user.site_admin?)
+
+    raise "Group and Admin spaces can be updated only by Host or Guest leads"
+  end
+
+  def validate_private_space
+    return unless space_type == TYPE_PRIVATE && current_user.dxuser != host_lead_dxuser
+
+    raise "Private space can be updated only by its owner"
+  end
+
   private
 
   # A host lead user validation

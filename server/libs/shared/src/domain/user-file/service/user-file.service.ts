@@ -13,12 +13,23 @@ import { NotFoundError, PermissionError, ValidationError } from '@shared/errors'
 import { PlatformClient } from '@shared/platform-client'
 import { FileDescribeResponse } from '@shared/platform-client/platform-client.responses'
 import { CHALLENGE_BOT_PLATFORM_CLIENT } from '@shared/platform-client/providers/platform-client.provider'
-import { createFileSynchronizeJobTask } from '@shared/queue'
 import { UserCtx } from '@shared/types'
+import { FOLLOW_UP_ACTION } from '../user-file.input'
+import {
+  BulkDownloadFiles,
+  FILE_STATE,
+  FILE_STATE_DX,
+  FILE_STI_TYPE,
+  IFileOrAsset,
+} from '../user-file.types'
+import { createFileSynchronizeJobTask } from '@shared/queue'
 import { UserFileCreate } from '../domain/user-file-create'
 import { UserFile } from '../user-file.entity'
-import { FOLLOW_UP_ACTION } from '../user-file.input'
-import { FILE_STATE, FILE_STATE_DX } from '../user-file.types'
+import * as userFileHelper from '@shared/domain/user-file/user-file.helper'
+import * as eventHelper from '@shared/domain/event/event.helper'
+import { EntityFetcherService } from '@shared/domain/entity/entity-fetcher.service'
+import { TimeUtils } from '@shared/utils/time.utils'
+import { NodeHelper } from '@shared/domain/user-file/node.helper'
 
 @Injectable()
 export class UserFileService {
@@ -33,6 +44,8 @@ export class UserFileService {
     private readonly fileRepo: UserFileRepository,
     private readonly userRepo: UserRepository,
     private readonly resourceRepo: ResourceRepository,
+    private readonly entityFetcherService: EntityFetcherService,
+    private readonly nodeHelper: NodeHelper,
   ) {}
 
   /**
@@ -104,6 +117,97 @@ export class UserFileService {
     } catch (error) {
       this.logger.error(`Error creating notification ${error}`)
     }
+  }
+
+  private async getEnclosingFolderPath(tm: SqlEntityManager, folderId?: number) {
+    if (!folderId) {
+      return null
+    }
+    const enclosingFolder = await this.nodeRepo.findOneOrFail({ id: folderId })
+    return await userFileHelper.getNodePath(tm, enclosingFolder)
+  }
+
+  /**
+   * Returns an array of file paths and urls for bulk download.
+   * @param fileIDs
+   * @param folderId
+   */
+  async composeFilesForBulkDownload(
+    fileIDs: number[],
+    folderId?: number,
+  ): Promise<BulkDownloadFiles> {
+    const loadedUser: User = await this.userRepo.findOneOrFail(
+      { id: this.user.id },
+      { populate: ['spaceMemberships', 'spaceMemberships.spaces'] },
+    )
+    let nodes = await this.getAccessibleNodes(fileIDs)
+
+    const warnings = this.nodeHelper.getWarningsForUnclosedFiles(nodes)
+    if (warnings) {
+      await this.notificationService.createNotification({
+        message: warnings,
+        severity: SEVERITY.WARN,
+        action: NOTIFICATION_ACTION.DOWNLOAD_FILES_WARNING,
+        userId: this.user.id,
+      })
+    }
+    nodes = nodes.filter((node) => node.state === 'closed')
+    nodes = this.nodeHelper.sanitizeNodeNames(nodes)
+    nodes = this.nodeHelper.renameDuplicateFiles(nodes)
+    const enclosingFolderPath = await this.getEnclosingFolderPath(this.em, folderId)
+
+    return {
+      files: await this.em.transactional(async (tm) => {
+        const filePromises = nodes
+          .filter((node) => node.stiType === FILE_STI_TYPE.USERFILE)
+          .map(async (node) => {
+            return await this.processFile(tm, node, loadedUser, enclosingFolderPath)
+          })
+        return Promise.all(filePromises)
+      }),
+      scope: nodes[0].scope,
+    }
+  }
+
+  private async processFile(
+    tm: SqlEntityManager,
+    node: Node,
+    loadedUser: User,
+    enclosingFolderPath: string,
+  ) {
+    const filePath = await userFileHelper.getNodePath(tm, node)
+    const fileDownloadLinkResponse = await this.userClient.fileDownloadLink({
+      fileDxid: node.dxid,
+      filename: node.name,
+      project: node.project,
+      duration: TimeUtils.daysToSeconds(1),
+    })
+    const fileEvent = await eventHelper.createFileEvent(
+      eventHelper.EVENT_TYPES.FILE_BULK_DOWNLOAD,
+      node as unknown as IFileOrAsset,
+      filePath,
+      loadedUser,
+    )
+    tm.persist(fileEvent)
+    return {
+      url: fileDownloadLinkResponse.url,
+      path:
+        enclosingFolderPath && filePath.startsWith(enclosingFolderPath)
+          ? filePath.slice(enclosingFolderPath.length)
+          : filePath,
+    }
+  }
+
+  private async getAccessibleNodes(fileIDs: number[]) {
+    const nodes: Node[] = await userFileHelper.loadNodes(this.em, { ids: fileIDs }, {})
+    const idsToCheck = nodes
+      .filter((node) => node.stiType === FILE_STI_TYPE.USERFILE)
+      .map((node) => node.id)
+    const accessibleNodes = await this.entityFetcherService.getAccessibleByIds(Node, idsToCheck)
+    if (idsToCheck.length != accessibleNodes.length) {
+      throw new PermissionError('You do not have permission to download all of these files')
+    }
+    return nodes
   }
 
   async closeFile(fileUid: string, followUpAction?: FOLLOW_UP_ACTION) {
@@ -182,12 +286,11 @@ export class UserFileService {
     await this.em.flush()
 
     try {
-      const userId = this.user.id
       await this.notificationService.createNotification({
         message: `Resource ${resource.id} updated with url ${response.url}`,
         severity: SEVERITY.INFO,
         action: NOTIFICATION_ACTION.RESOURCE_URL_UPDATED,
-        userId,
+        userId: this.user.id,
       })
     } catch (error) {
       this.logger.error(`Error creating notification ${error}`)

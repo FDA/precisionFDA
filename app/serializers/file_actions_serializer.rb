@@ -11,6 +11,7 @@ class FileActionsSerializer < ApplicationSerializer
   attribute :klass, key: :type
   attribute :fs_path, key: :fsPath
   attribute :view_url, key: :viewURL
+  attribute :download_url, key: :downloadURL
   attribute :locked, key: :locked
   attribute :download_url, key: :downloadURL,
                            if: -> { object.is_a?(UserFile) && download_or_open_action? }
