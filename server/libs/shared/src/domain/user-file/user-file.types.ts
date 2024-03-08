@@ -62,6 +62,16 @@ interface IFileOrAsset {
   isCreatedByChallengeBot: () => boolean
 }
 
+interface BulkDownloadFile {
+  url: string
+  path: string
+}
+
+interface BulkDownloadFiles {
+  files: BulkDownloadFile[]
+  scope: string
+}
+
 // ITrackable represents an object whose provenance can be tracked
 // This is applicable to UserFile, Folder and Assets
 interface ITrackable {
@@ -80,4 +90,6 @@ export {
   FILE_STI_TYPE,
   IFileOrAsset,
   ITrackable,
+  BulkDownloadFile,
+  BulkDownloadFiles,
 }

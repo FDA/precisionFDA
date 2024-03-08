@@ -7,17 +7,15 @@ import { defaultLogger as logger } from '../../../logger'
 import { createRedisClient, NOTIFICATIONS_QUEUE } from '@shared/services/redis.service'
 import { Notification } from '@shared/domain/notification/notification.entity'
 import { NotificationInput } from '../notification.input'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
 
 export type RedisClientType = ReturnType<typeof createClient>
 
-export interface INotificationService {
-  createNotification: (notificationInput: NotificationInput) => Promise<void>
-}
-
 @Injectable()
-export class NotificationService implements INotificationService {
+export class NotificationService {
   constructor(
     private readonly em: SqlEntityManager,
+    private readonly user?: UserContext,
     @Optional() private redisClient?: RedisClientType,
   ) {
     logger.debug('NotificationService initialized')
@@ -59,26 +57,21 @@ export class NotificationService implements INotificationService {
    */
   async getUnreadNotifications(userId: number): Promise<Notification[]> {
     logger.verbose(`NotificationService: getting unread notifications for user id: ${userId}`)
-    const unread = await this.em.find(Notification, { user: userId, deliveredAt: null })
-    return unread
+    return await this.em.find(Notification, { user: userId, deliveredAt: null })
   }
 
   /**
    * Updates updatedAt flag and deliveredAt date.
    *
-   * @param notificationInput
-   * @param userCtx
+   * @param notificationId
+   * @param deliveredAt
    */
-  async updateDeliveredAt(
-    notificationId: number,
-    deliveredAt?: Date,
-    userId?: number, // TODO take this from automatically injected context
-  ): Promise<Notification> {
+  async updateDeliveredAt(notificationId: number, deliveredAt?: Date): Promise<Notification> {
     if (notificationId) {
       const loadedFromDb = await this.em.findOneOrFail(Notification, notificationId, {
         populate: ['user'],
       })
-      if (loadedFromDb.user?.id !== userId) {
+      if (loadedFromDb.user?.id !== this.user?.id) {
         throw new PermissionError()
       }
 

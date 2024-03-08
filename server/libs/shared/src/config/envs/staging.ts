@@ -9,10 +9,6 @@ export const config: ConfigOverride = () => ({
       allowedIpCidrBlock: parseIpv4Cidr(process.env.NODE_FDA_SUBNET_CIDR_BLOCK),
     },
   },
-  logs: {
-    pretty: false,
-    level: 'debug',
-  },
   workerJobs: {
     syncJob: {
       repeatPattern: '*/2 * * * *', // Every 2 minutes

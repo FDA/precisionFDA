@@ -15,6 +15,8 @@ import { User } from '@shared/domain/user/user.entity'
 import { PlatformClientModule } from '@shared/platform-client/platform-client.module'
 import { BullQueueModule } from '@shared/queue/module/bull-queue-module'
 import { Node } from './node.entity'
+import { EntityModule } from '@shared/domain/entity/entity.module'
+import { NodeHelper } from '@shared/domain/user-file/node.helper'
 
 @Module({
   imports: [
@@ -29,11 +31,13 @@ import { Node } from './node.entity'
     }),
     PlatformClientModule,
     NotificationModule,
+    EntityModule,
     ResourceModule,
     MikroOrmModule.forFeature([Node, UserFile, User, Resource]),
   ],
   providers: [
     UserFileService,
+    NodeHelper,
     nodesRemoveOperationProvider,
     fileRemoveOperationProvider,
     FileSyncQueueJobProducer,

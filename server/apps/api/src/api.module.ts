@@ -13,7 +13,7 @@ import { AppApiModule } from './apps/app.api.module'
 import { ChallengeApiModule } from './challenges/challenge.api.module'
 import { CliApiModule } from './cli/cli.api.module'
 import { DataPortalsApiModule } from './data-portals/data-portals.api.module'
-import { DbclusterApiModule } from './dbclusters/dbcluster.api.module'
+import { DbClusterApiModule } from './dbclusters/dbcluster.api.module'
 import { DebugApiModule } from './debug/debug.api.module'
 import { DiscussionsApiModule } from './discussions/discussions.api.module'
 import { EmailApiModule } from './emails/email.api.module'
@@ -28,6 +28,7 @@ import { NotificationsApiModule } from './notifications/notifications.api.module
 import { PropertiesApiModule } from './properties/properties.api.module'
 import { BaseErrorExceptionFilter } from './server/filter/base-error-exception.filter'
 import { DefaultExceptionFilter } from './server/filter/default-exception.filter'
+import { HttpExceptionFilter } from './server/filter/http-exception.filter'
 import { SiteSettingsApiModule } from './site-settings/site-settings.api.module'
 import { SpacesApiModule } from './spaces/spaces.api.module'
 import { TracksApiModule } from './tracks/tracks.api.module'
@@ -53,7 +54,7 @@ import { WorkflowApiModule } from './workflows/workflow.api.module'
     ChallengeApiModule,
     CliApiModule,
     DataPortalsApiModule,
-    DbclusterApiModule,
+    DbClusterApiModule,
     DebugApiModule,
     DiscussionsApiModule,
     EmailApiModule,
@@ -81,6 +82,10 @@ import { WorkflowApiModule } from './workflows/workflow.api.module'
     {
       provide: APP_FILTER,
       useClass: BaseErrorExceptionFilter,
+    },
+    {
+      provide: APP_FILTER,
+      useClass: HttpExceptionFilter,
     },
   ],
 })

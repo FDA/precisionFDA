@@ -22,23 +22,31 @@ export class QueueEventListener {
   private init() {
     this.queues.forEach((queue) => {
       queue.on('failed', (job: Job, error: Error) => {
-        this.log.error({ job: this.getJobInfo(job), error }, 'Job failed')
+        try {
+          this.log.error({ job: this.getJobInfo(job), error }, 'Job failed')
+        } catch (error) {
+          console.error('error during queue failed handling', { error })
+        }
       })
 
       queue.on('waiting', async (jobId: number) => {
-        const job = await queue.getJob(jobId)
+        try {
+          const job = await queue.getJob(jobId)
 
-        this.log.debug(this.getJobInfo(job), 'Job waiting in queue')
+          this.log.debug(this.getJobInfo(job), 'Job waiting in queue')
+        } catch (error) {
+          console.error('error during queue waiting handling', { error })
+        }
       })
     })
   }
 
   private getJobInfo(job: Job<TaskWithAuth>) {
     return {
-      type: job.data?.type,
-      payload: job.data?.payload,
-      userId: job.data?.user?.id,
-      jobId: job.id,
+      type: job?.data?.type,
+      payload: job?.data?.payload,
+      userId: job?.data?.user?.id,
+      jobId: job?.id,
     }
   }
 }

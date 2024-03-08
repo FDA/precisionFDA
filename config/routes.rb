@@ -391,6 +391,8 @@ Rails.application.routes.draw do
           get :everybody
           get :spaces
           get :cli
+          get :bulk_download, to: "files#bulk_download_content"
+          get :test_streaming
 
           post :copy
           post :bulk_download

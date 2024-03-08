@@ -17,7 +17,7 @@ import { Vote } from '@shared/domain/vote/vote.entity'
 import { STATIC_SCOPE } from '../../../enums'
 import * as errors from '../../../errors'
 import { getLogger } from '../../../logger'
-import { EntityFetcherService } from '../../../services/entity-fetcher.service'
+import { EntityFetcherService } from '../../entity/entity-fetcher.service'
 import type { UserCtx } from '../../../types'
 import type { SCOPE } from '../../../types/common'
 import { CommentableType } from '../../comment/comment.entity'
@@ -124,7 +124,7 @@ export class DiscussionService implements IDiscussionService {
     logger.verbose(`DiscussionService: creating discussion: ${JSON.stringify(discussionInput)}`)
     const user = await this.fetcher.getById(User, this.userCtx.id)
     if (!user) {
-      throw new errors.NotFoundError('User not found.')
+      throw new errors.NotFoundError(`User not found ({ id: ${this.userCtx.id} })`)
     }
 
     return await this.em.transactional(async (tem) => {

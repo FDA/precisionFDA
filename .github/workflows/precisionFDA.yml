@@ -132,6 +132,7 @@ jobs:
     name: Test HTTPS Apps
     runs-on: ubuntu-latest
     env:
+      NODE_ENV: test
       DATABASE_TEST_URL: mysql://root:password@127.0.0.1:3306/test_db
       DATABASE_TEST_NAME: test_db
       MAKE: "make --jobs 4"
@@ -143,6 +144,10 @@ jobs:
           - 3306:3306
         env:
           MYSQL_ROOT_PASSWORD: password
+      redis:
+        image: redis
+        ports:
+          - 6379:6379
     needs: [ruby-setup]
     steps:
       - uses: actions/checkout@v2
@@ -186,10 +191,17 @@ jobs:
           make test-worker
           make test-api
         working-directory: ./server
-
       - name: Test production build
         run: pnpm run build
         working-directory: ./server
+      - name: Test API production start
+        run: make run-dist ARGS="-- --shutdown"
+        working-directory: ./server
+        timeout-minutes: 1
+      - name: Test worker production start
+        run: make run-dist ARGS="-- --shutdown"
+        working-directory: ./server
+        timeout-minutes: 1
 
   test-react-app:
     name: Test React app
