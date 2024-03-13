@@ -83,7 +83,7 @@ export const RunJobForm = ({
       }),
     })
 
-  const { data: selectableContexts } = useQuery({
+  const { data: selectableContexts, isLoading: isLoadingSelectableContexts } = useQuery({
     queryKey: ['selectable-contexts', app.scope],
     queryFn: () => fetchAndConvertSelectableContexts(app.entity_type).catch((e) => {
       toast.error('Error loading contexts')
@@ -91,7 +91,7 @@ export const RunJobForm = ({
     }),
   })
 
-  const { data: selectableSpaces } = useQuery({
+  const { data: selectableSpaces, isLoading: isLoadingSelectableScope } = useQuery({
     queryKey: ['selectable-spaces', app.scope],
     queryFn: () => fetchAndConvertSelectableSpaces(app.scope).catch((e) => {
       toast.error('Error loading spaces')
@@ -104,7 +104,7 @@ export const RunJobForm = ({
     jobLimit: userJobLimit,
     instanceType: undefined,
     output_folder_path: '',
-    scope: { label: 'Private', value: 'private' }, //fixme: this should not be hardcoded, doesnt make sense for space apps
+    scope: { label: 'Private', value: 'private' },
     inputs: Object.fromEntries(
       spec.input_spec.map(item => [
         item.name,
@@ -164,18 +164,29 @@ export const RunJobForm = ({
       )
     }
   }, [computeInstances])
+  
+  // Update the selectable scope field when list loads
+  useEffect(() => {
+    if (selectableSpaces) {
+      const defaultSelectedScope = selectableSpaces.find(s => s.value === app.scope) ?? { label: 'Private', value: 'private' }
+      setValue(
+        'scope',
+        defaultSelectedScope,
+      )
+    }
+  }, [selectableSpaces])
 
 
   // Calculate maxRuntime for user info when instanceType or jobLimit changes
   useEffect(() => {
     const selectedInstance = getValues().instanceType?.value
     if (selectedInstance) {
-      const costPerHour = PricingMap[selectedInstance as keyof typeof PricingMap] as number;
-      let hoursRuntime = getValues().jobLimit / costPerHour;
-      let remainingMinutes = Math.round((hoursRuntime % 1) * 60);
+      const costPerHour = PricingMap[selectedInstance as keyof typeof PricingMap] as number
+      let hoursRuntime = getValues().jobLimit / costPerHour
+      let remainingMinutes = Math.round((hoursRuntime % 1) * 60)
       if (remainingMinutes === 60) {
-        hoursRuntime++;
-        remainingMinutes = 0;
+        hoursRuntime++
+        remainingMinutes = 0
       }
       setMaxRuntime(`Maximum estimated runtime: ${Math.floor(hoursRuntime)}h${remainingMinutes ? ` ${remainingMinutes}m` : ''}`)
     }
@@ -264,7 +275,8 @@ export const RunJobForm = ({
                           onBlur={field.onBlur}
                           value={field.value}
                           isDisabled={isSubmitting}
-                        />
+                          isLoading={isLoadingSelectableContexts}
+                          />
                       )}
                     />
                     <ErrorMessageForField errors={errors} fieldName="scope" />
@@ -290,6 +302,7 @@ export const RunJobForm = ({
                           onBlur={field.onBlur}
                           value={field.value}
                           isDisabled={isSubmitting}
+                          isLoading={isLoadingSelectableScope}
                         />
                       )}
                     />

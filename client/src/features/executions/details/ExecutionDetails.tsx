@@ -11,7 +11,7 @@ import {
 } from '../../../components/Tags'
 import { RESOURCE_LABELS } from '../../../types/user'
 import { DEFAULT_RECONNECT_ATTEMPTS, DEFAULT_RECONNECT_INTERVAL, SHOULD_RECONNECT, getNodeWsUrl } from '../../../utils/config'
-import { getBackPath } from '../../../utils/getBackPath'
+import { getBackPathNext } from '../../../utils/getBackPath'
 import { ActionsRow, StyledBackLink } from '../../home/home.styles'
 import {
   Header,
@@ -102,7 +102,7 @@ export const ExecutionDetails = ({
 
   return (
     <>
-      <StyledBackLink linkTo={getBackPath(location, 'executions', homeScope)}>
+      <StyledBackLink linkTo={getBackPathNext({ spaceId, location, resourceLocation: 'executions', homeScope })}>
         Back to Executions
       </StyledBackLink>
       <Topbox>
