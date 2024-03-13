@@ -1,13 +1,12 @@
-import { database } from '@shared/database'
-import { sendJobFailedEmails } from '@shared/domain/job/job.helper'
-import { NodesRemoveOperation } from '@shared/domain/user-file/ops/nodes-remove'
-import { Job } from 'bull'
 import { SqlEntityManager } from '@mikro-orm/mysql'
+import { database } from '@shared/database'
+import { NodesRemoveOperation } from '@shared/domain/user-file/ops/nodes-remove'
 import { UserOpsCtx, WorkerOpsCtx } from '@shared/types'
+import { Job } from 'bull'
 import { getChildLogger } from '../utils/logger'
 
 export const removeNodesHandler = async (bullJob: Job) => {
-  const ids: number[] = bullJob.data.payload as number []
+  const ids: number[] = bullJob.data.payload as number[]
 
   const requestId = String(bullJob.id)
   const log = getChildLogger(requestId)
@@ -22,6 +21,6 @@ export const removeNodesHandler = async (bullJob: Job) => {
   try {
     await new NodesRemoveOperation(ctx).execute({ ids, async: true })
   } catch (error) {
-    await sendJobFailedEmails(bullJob.id.toString(), ctx)
+    log.error('Remove nodes handler failed', error)
   }
 }
