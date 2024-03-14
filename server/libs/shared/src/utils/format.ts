@@ -17,3 +17,7 @@ export const formatDuration = (duration: number): string => {
   }
   return result
 }
+
+export const getPluralizedTerm = (itemCount: number, itemName: string): string => {
+  return `${itemCount.toString()} ${itemName}${itemCount > 1 ? 's' : ''}`
+}

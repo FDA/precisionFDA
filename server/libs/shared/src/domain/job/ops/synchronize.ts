@@ -7,6 +7,8 @@ import { JobDescribeResponse } from '@shared/platform-client/platform-client.res
 import { CheckStatusJob, TASK_TYPE } from '../../../queue/task.input'
 import { WorkerBaseOperation } from '../../../utils/base-operation'
 import { Job } from '../job.entity'
+import { Tagging } from '@shared/domain/tagging/tagging.entity'
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import {
   buildIsOverMaxDuration,
   isStateActive,
@@ -33,6 +35,7 @@ import { JOB_STATE } from '../job.enum'
 import { NOTIFICATION_ACTION, SEVERITY } from '../../../enums'
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { NotificationService } from '@shared/domain/notification/services/notification.service'
+import { SCOPE } from '@shared/types/common'
 
 /**
  * Checks job status if notifications should be triggered.
@@ -51,7 +54,7 @@ const checkJobStatusForNotifications = async (em: SqlEntityManager, userId: numb
   const isJobRunning = job.state !== JOB_STATE.RUNNING && remoteState === JOB_STATE.RUNNING
   const httpsAppRunning = remoteState === JOB_STATE.RUNNING && remoteJob?.properties?.httpsAppState === JOB_STATE.RUNNING
 
-  if (isJobRunning && job.hasHttpsAppState()) {
+  if (isJobRunning && job.hasHttpsAppState() && !httpsAppRunning) {
     await sendNotification(`Initializing ${job.name}`, SEVERITY.INFO, NOTIFICATION_ACTION.JOB_INITIALIZING)
   }
 
@@ -218,7 +221,12 @@ export class SyncJobOperation extends WorkerBaseOperation<
       }
 
       if (job.isHTTPS()) {
+        // https app like JupyterLab also supports run non-interactively
+        if (remoteState === JOB_STATE.DONE) {
+          await createSyncOutputsTask({ dxid: job.dxid }, this.ctx.user)  
+        }
         await createSyncWorkstationFilesTask({ dxid: job.dxid }, this.ctx.user)
+        await this.releaseFilesLockedByJob(em, job.dxid, job.scope)
       } else {
         await createSyncOutputsTask({ dxid: job.dxid }, this.ctx.user)
       }
@@ -285,5 +293,25 @@ export class SyncJobOperation extends WorkerBaseOperation<
   private removeTerminationEmailJob() {
     const jobId = EmailSendOperation.getBullJobId(EMAIL_TYPES.jobTerminationWarning, this.job.dxid)
     removeFromEmailQueue(jobId)
+  }
+
+  private async releaseFilesLockedByJob(em: SqlEntityManager, jobDxid: string, scope: SCOPE) {
+    // release files if they are locked by this job
+    // e.g locked by jupyterlab
+    const lockedKey = `notebook-locked-by-${jobDxid}`
+    const fileRepo = em.getRepository(UserFile)
+    await em.transactional(async tem => {
+      const files = await fileRepo.find(
+        { scope, taggings: { tag: { name: lockedKey } } },
+        { filters: ['userfile'], populate: ['taggings.tag'], },
+      )
+
+      files.forEach(file => {
+        const tagging = <Tagging>file.taggings.getItems().find(t => t.tag.name === lockedKey)
+        file.taggings.remove(tagging)
+      })
+
+      await tem.persist(files)
+    })
   }
 }

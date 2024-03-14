@@ -600,7 +600,6 @@ class HttpsAppsClient # rubocop:disable Metrics/ClassLength
         targetType: target_type,
         properties: properties,
       },
-      Net::HTTP::Post::METHOD,
     )
   end
 
@@ -609,6 +608,15 @@ class HttpsAppsClient # rubocop:disable Metrics/ClassLength
       "/properties/#{type}/scope/#{scope}/keys",
       {},
       Net::HTTP::Get::METHOD,
+    )
+  end
+
+  def resolve_path(path, scope, type)
+    request(
+      "/files/path-resolver",
+      {},
+      Net::HTTP::Get::METHOD,
+      { path: path, scope: scope, type: type }
     )
   end
 

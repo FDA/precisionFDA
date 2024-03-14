@@ -24,6 +24,7 @@ type RunAppInput = {
     port?: number // ttyd
   }
   appDxId: string
+  output_folder_path?: string
 }
 
 type Provenance = {
@@ -90,8 +91,11 @@ const runAppSchema: JSONSchema7 = {
         port: { type: 'integer' },
         // Apache Guacamole
         max_session_length: { type: 'string', maxLength: config.validation.maxStrLen },
+        // JupyterLab
+        in: {type: 'array', default: []},
       },
     },
+    output_folder_path: { type: 'string' },
   },
   required: ['scope', 'jobLimit'],
   additionalProperties: false,
