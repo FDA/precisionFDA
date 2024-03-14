@@ -4,6 +4,8 @@ import { Job } from '@shared/domain/job/job.entity'
 import { Asset } from '@shared/domain/user-file/asset.entity'
 import { User } from '../user/user.entity'
 import { SCOPE } from '../../types/common'
+import { Folder } from './folder.entity'
+import { UserFile } from './user-file.entity'
 
 // File state from the platform
 enum FILE_STATE_DX {
@@ -79,6 +81,26 @@ interface ITrackable {
   parentType: PARENT_TYPE
 }
 
+interface NodeResponse {
+  id: number
+  name: string
+  type: 'Folder' | 'UserFile'
+  uid?: string
+  dxid?: string
+  state: string | null
+  file_size: number | undefined
+  created_at: Date
+  locked: boolean
+  tags?: string[]
+  parent_folder_id: number | null
+}
+
+interface ResolvePath {
+  path: string,
+  scope: SCOPE,
+  nodes: NodeResponse[],
+}
+
 export {
   FILE_STATE,
   FOLDER_STATE,
@@ -92,4 +114,6 @@ export {
   ITrackable,
   BulkDownloadFile,
   BulkDownloadFiles,
+  NodeResponse,
+  ResolvePath,
 }

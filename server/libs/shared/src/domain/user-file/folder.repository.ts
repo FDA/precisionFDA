@@ -1,5 +1,7 @@
 import { EntityRepository } from '@mikro-orm/mysql'
 import { Folder } from './folder.entity'
+import { SCOPE } from '@shared/types/common'
+import { STATIC_SCOPE } from '@shared/enums'
 
 type FindForUser = {
   userId: number
@@ -11,6 +13,13 @@ type FindForSynchronization = FindForUser & {
 
 type FindRemote = {
   parentFolderId?: number
+}
+
+type FindByName = {
+  scope: SCOPE
+  userId: number
+  name: string
+  parentId: number
 }
 
 export class FolderRepository extends EntityRepository<Folder> {
@@ -69,6 +78,15 @@ export class FolderRepository extends EntityRepository<Folder> {
       { userId },
       { filters: ['folder', 'pfdaonly'], populate: ['taggings.tag'] },
     )
+  }
+
+  async findByName({ name, parentId, userId, scope }: FindByName, tagEnable: boolean = false): Promise<Folder | null> {
+    const addTaggings = tagEnable ? { populate: ['taggings.tag'] } : {} as { populate: string[] } | {}
+    const parentKey = scope.startsWith('space') ? 'scopedParentFolderId' : 'parentFolderId'
+
+    return scope === STATIC_SCOPE.PRIVATE ?
+      this.findOne({ name, [parentKey]: parentId, userId, scope: STATIC_SCOPE.PRIVATE }, addTaggings) :
+      this.findOne({ name, [parentKey]: parentId, scope }, addTaggings)
   }
 
   removeWithTags(folder: Folder): Folder {

@@ -13,7 +13,7 @@ type AppSpec = AnyObject & {
 type AppInputSpecItem = {
   name: string
   // todo: from the docs this is not accurate
-  class: 'int' | 'string' | 'file'
+  class: 'int' | 'string' | 'file' | 'array:file'
   default: number | string
   label: string
   help: string

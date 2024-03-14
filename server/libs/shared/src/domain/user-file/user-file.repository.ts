@@ -3,7 +3,15 @@ import { Asset } from '@shared/domain/user-file/asset.entity'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { FILE_STATE_DX, FILE_STI_TYPE, FILE_ORIGIN_TYPE } from './user-file.types'
+import { SCOPE } from '@shared/types/common'
 import { STATIC_SCOPE } from '@shared/enums'
+
+type FindByName = {
+  scope: SCOPE
+  userId: number
+  name: string
+  parentId: number
+}
 
 export class UserFileRepository extends EntityRepository<UserFile> {
   async findProjectFilesInSubfolder(input: {
@@ -118,6 +126,20 @@ export class UserFileRepository extends EntityRepository<UserFile> {
         populate: ['taggings.tag', 'user'],
       },
     )
+  }
+
+  async findAllFilesByName({name, parentId, userId, scope}: FindByName): Promise<UserFile[]> {
+    const parentKey = scope.startsWith('space') ? 'scopedParentFolderId' : 'parentFolderId'
+
+    return scope === STATIC_SCOPE.PRIVATE ?
+      this.find(
+        { name, [parentKey]: parentId, userId, scope },
+        { populate: ['taggings.tag'], orderBy: { createdAt: 'ASC' } },
+      ) :
+      this.find(
+        { name, [parentKey]: parentId, scope },
+        { populate: ['taggings.tag'], orderBy: { createdAt: 'ASC' } },
+      )
   }
 
   removeFilesWithTags(files: UserFile[]): UserFile[] {
