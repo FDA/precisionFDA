@@ -58,7 +58,7 @@ cat <<EOF > /tmp/config.json
                      },
                      {
                          "file_path": "/srv/www/precision_fda/current/log/node-worker-1.log",
-                         "log_group_name": "staging/node/worker",
+                         "log_group_name": "staging/node/workers",
                          "log_stream_name": "{instance_id}-worker-1"
                      },
                      {
