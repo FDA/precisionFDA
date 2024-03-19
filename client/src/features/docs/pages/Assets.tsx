@@ -86,9 +86,22 @@ export const Assets = () => {
                     desired asset name (must end in .tar or .tar.gz)
                 </p>
                 <p>
+                    In a Linux or Unix environment:
+                </p>
+                <p>
                     <code>
                         {
-                            './pfda upload-asset -name NAME{.tar or .tar.gz} -root /PATH/TO/ROOT/FOLDER -readme README{.txt or .md}> -key KEY'
+                            './pfda upload-asset -name NAME{.tar or .tar.gz} -root /PATH/TO/ROOT/FOLDER -readme README{.txt or .md} -key KEY'
+                        }
+                    </code>
+                </p>
+                <p>
+                    In a Windows environment:
+                </p>
+                <p>
+                    <code>
+                        {
+                            '"C:\\path\\to\\pfda\\executable\\pfda.exe" upload-asset -name my-asset.tar.gz -root "C:\\path\\to\\fake_root" -readme my-asset.txt -key KEY'
                         }
                     </code>
                 </p>
