@@ -1,19 +1,11 @@
 import { Injectable } from '@nestjs/common'
-import { config } from '@shared/config'
 import { Job } from '@shared/domain/job/job.entity'
-import { EntityProvenanceData } from '../../model/entity-provenance-data'
 import { EntityProvenanceSourceUnion } from '../../model/entity-provenance-source-union'
 import { EntityProvenanceDataService } from './entity-provenance-data.service'
 
 @Injectable()
-export class JobProvenanceDataService implements EntityProvenanceDataService<'job'> {
-  getData(job: Job): EntityProvenanceData<'job'> {
-    return {
-      type: 'job',
-      url: `${config.api.railsHost}/home/executions/${job.uid}`,
-      title: job.name,
-    }
-  }
+export class JobProvenanceDataService extends EntityProvenanceDataService<'job'> {
+  protected type = 'job' as const
 
   async getParents(job: Job): Promise<EntityProvenanceSourceUnion[]> {
     const parents: EntityProvenanceSourceUnion[] = []

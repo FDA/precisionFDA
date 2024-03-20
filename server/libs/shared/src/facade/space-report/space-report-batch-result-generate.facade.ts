@@ -1,6 +1,7 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Inject, Injectable } from '@nestjs/common'
 import { App } from '@shared/domain/app/app.entity'
+import { Discussion } from '@shared/domain/discussion/discussion.entity'
 import { EntityType } from '@shared/domain/entity/domain/entity.type'
 import { Job } from '@shared/domain/job/job.entity'
 import { SpaceReportPart } from '@shared/domain/space-report/entity/space-report-part.entity'
@@ -43,6 +44,7 @@ export class SpaceReportBatchResultGenerateFacade {
       asset: em.getRepository(Asset),
       workflow: em.getRepository(Workflow),
       user: em.getRepository(User),
+      discussion: em.getRepository(Discussion),
     } satisfies Record<SpaceReportPartSourceType, object>
   }
 
@@ -74,7 +76,7 @@ export class SpaceReportBatchResultGenerateFacade {
             acc[rp.sourceType].push(rp)
             return acc
           },
-          { file: [], app: [], job: [], workflow: [], asset: [], user: [] },
+          { file: [], app: [], job: [], workflow: [], asset: [], user: [], discussion: [] },
         )
 
       const types = Object.keys(reportPartSources) as SpaceReportPartSourceType[]

@@ -2,6 +2,8 @@ import { QueryOrder } from '@mikro-orm/core'
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Injectable } from '@nestjs/common'
 import { App } from '@shared/domain/app/app.entity'
+import { Discussion } from '@shared/domain/discussion/discussion.entity'
+import { UID } from '@shared/domain/entity/entity-fetcher.service'
 import { Job } from '@shared/domain/job/job.entity'
 import { NotificationService } from '@shared/domain/notification/services/notification.service'
 import { SpaceReportResultService } from '@shared/domain/space-report/service/result/space-report-result.service'
@@ -13,8 +15,6 @@ import { User } from '@shared/domain/user/user.entity'
 import { Workflow } from '@shared/domain/workflow/entity/workflow.entity'
 import { NOTIFICATION_ACTION, SEVERITY } from '@shared/enums'
 import { InvalidStateError, NotFoundError } from '@shared/errors'
-import { UID } from '@shared/domain/entity/entity-fetcher.service'
-import { SCOPE } from '@shared/types/common'
 import { ArrayUtils } from '@shared/utils/array.utils'
 import { SpaceReportPart } from '../entity/space-report-part.entity'
 import { SpaceReport } from '../entity/space-report.entity'
@@ -159,6 +159,8 @@ export class SpaceReportService {
     const spaceMembers = await this.em.find(User, {
       spaceMemberships: { spaces: { id: space.id }, active: true },
     })
+    const spaceDiscussions = await this.em.find(Discussion, { note: { scope } })
+
     const reportPartSources: SpaceReportPartSource[] = [
       ...spaceFiles.map((f) => ({ type: 'file' as const, id: f.id })),
       ...spaceApps.map((a) => ({ type: 'app' as const, id: a.id })),
@@ -166,6 +168,7 @@ export class SpaceReportService {
       ...spaceAssets.map((a) => ({ type: 'asset' as const, id: a.id })),
       ...spaceWorkflows.map((w) => ({ type: 'workflow' as const, id: w.id })),
       ...spaceMembers.map((u) => ({ type: 'user' as const, id: u.id })),
+      ...spaceDiscussions.map((d) => ({ type: 'discussion' as const, id: d.id })),
     ]
 
     return this.spaceReportPartService.createReportParts(reportPartSources)

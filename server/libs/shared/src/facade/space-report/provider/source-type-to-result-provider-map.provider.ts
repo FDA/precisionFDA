@@ -2,6 +2,7 @@ import { Provider } from '@nestjs/common'
 import { SpaceReportPartSourceType } from '@shared/domain/space-report/model/space-report-part-source.type'
 import { SpaceReportPartAppResultProvider } from '@shared/facade/space-report/service/space-report-part-app-result-provider.service'
 import { SpaceReportPartAssetResultProvider } from '@shared/facade/space-report/service/space-report-part-asset-result-provider.service'
+import { SpaceReportPartDiscussionResultProviderService } from '@shared/facade/space-report/service/space-report-part-discussion-result-provider.service'
 import { SpaceReportPartFileResultProvider } from '@shared/facade/space-report/service/space-report-part-file-result-provider.service'
 import { SpaceReportPartJobResultProvider } from '@shared/facade/space-report/service/space-report-part-job-result-provider.service'
 import { SpaceReportPartResultProvider } from '@shared/facade/space-report/service/space-report-part-result.provider'
@@ -19,9 +20,10 @@ export const sourceTypeToResultProviderMapProvider: Provider = {
     SpaceReportPartJobResultProvider,
     SpaceReportPartWorkflowResultProvider,
     SpaceReportPartUserResultProvider,
+    SpaceReportPartDiscussionResultProviderService,
   ],
-  useFactory: (app, asset, file, job, workflow, user) =>
-    ({ app, asset, file, job, workflow, user }) satisfies {
+  useFactory: (app, asset, file, job, workflow, user, discussion) =>
+    ({ app, asset, file, job, workflow, user, discussion }) satisfies {
       [T in SpaceReportPartSourceType]: SpaceReportPartResultProvider<T>
     },
 }

@@ -8,9 +8,9 @@ export abstract class SpaceReportResultPartContentProvider<T extends SpaceReport
     result: SpaceReportPartResult<T>,
     document: Document,
     container: HTMLDivElement,
-  ): void
+  ): Promise<void>
 
-  provide(reportPart: SpaceReportPart<T>, titleId: string): HTMLDivElement {
+  async provide(reportPart: SpaceReportPart<T>, titleId: string): Promise<HTMLDivElement> {
     const domContainer = new JSDOM()
     const document = domContainer.window.document
     const container = document.createElement('div')
@@ -21,7 +21,7 @@ export abstract class SpaceReportResultPartContentProvider<T extends SpaceReport
     title.id = titleId
     container.appendChild(title)
 
-    this.addContent(reportPart.result, document, container)
+    await this.addContent(reportPart.result, document, container)
 
     return container
   }

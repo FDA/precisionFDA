@@ -1,5 +1,5 @@
 import { Provider } from '@nestjs/common'
-import { EntityType } from '@shared/domain/entity/domain/entity.type'
+import { EntityWithProvenanceType } from '@shared/domain/provenance/model/entity-with-provenance.type'
 import { AppProvenanceDataService } from '@shared/domain/provenance/service/entity-data/app-provenance-data.service'
 import { AssetProvenanceDataService } from '@shared/domain/provenance/service/entity-data/asset-provenance-data.service'
 import { ComparisonProvenanceDataService } from '@shared/domain/provenance/service/entity-data/comparison-provenance-data.service'
@@ -24,6 +24,6 @@ export const entityTypeToParentResolverMapProvider: Provider = {
   ],
   useFactory: (app, asset, comparison, file, job, user, workflow) =>
     ({ file, job, user, comparison, asset, app, workflow }) satisfies {
-      [T in EntityType]: EntityProvenanceDataService<T>
+      [T in EntityWithProvenanceType]: EntityProvenanceDataService<T>
     },
 }

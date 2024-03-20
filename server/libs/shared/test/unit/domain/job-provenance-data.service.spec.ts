@@ -1,13 +1,13 @@
+import { EntityService } from '@shared/domain/entity/entity.service'
 import { Job } from '@shared/domain/job/job.entity'
+import { JobProvenanceDataService } from '@shared/domain/provenance/service/entity-data/job-provenance-data.service'
+import { EntityUtils } from '@shared/utils/entity.utils'
 import { expect } from 'chai'
-import { stub } from 'sinon'
-import {
-  JobProvenanceDataService,
-} from '../../../src/domain/provenance/service/entity-data/job-provenance-data.service'
+import { SinonStub, stub } from 'sinon'
 
 describe('JobProvenanceDataService', () => {
   const NAME = 'name'
-  const UID = 'uid'
+  const LINK = 'LINK'
 
   const FILE_1_ID = 10
   const FILE_2_ID = 11
@@ -21,13 +21,15 @@ describe('JobProvenanceDataService', () => {
 
   const loadFilesStub = stub()
   const loadAppStub = stub()
+  const getEntityLinkStub = stub()
 
   const JOB = {
-    uid: UID,
     name: NAME,
     inputFiles: { loadItems: loadFilesStub },
     app: { load: loadAppStub },
   } as unknown as Job
+
+  let getEntityTypeForEntityStub: SinonStub
 
   beforeEach(() => {
     loadFilesStub.reset()
@@ -35,13 +37,28 @@ describe('JobProvenanceDataService', () => {
 
     loadAppStub.reset()
     loadAppStub.resolves(APP)
+
+    getEntityLinkStub.reset()
+    getEntityLinkStub.throws()
+    getEntityLinkStub.withArgs(JOB).resolves(LINK)
+
+    getEntityTypeForEntityStub = stub(EntityUtils, 'getEntityTypeForEntity').throws()
+    getEntityTypeForEntityStub.withArgs(JOB).returns('job')
+  })
+
+  afterEach(() => {
+    getEntityTypeForEntityStub.restore()
   })
 
   describe('#getData', () => {
-    it('should provide correct data about the job', () => {
-      const res = getInstance().getData(JOB)
+    it('should provide correct data about the job', async () => {
+      const res = await getInstance().getData(JOB)
 
-      expect(res).to.deep.equal({ type: 'job', url: `https://rails-host:1234/home/executions/${UID}`, title: NAME })
+      expect(res).to.deep.equal({
+        type: 'job',
+        url: LINK,
+        title: NAME,
+      })
     })
   })
 
@@ -90,6 +107,8 @@ describe('JobProvenanceDataService', () => {
   })
 
   function getInstance() {
-    return new JobProvenanceDataService()
+    const entityService = { getEntityLink: getEntityLinkStub } as unknown as EntityService
+
+    return new JobProvenanceDataService(entityService)
   }
 })

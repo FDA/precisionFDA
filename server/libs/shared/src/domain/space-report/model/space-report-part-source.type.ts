@@ -7,5 +7,6 @@ export const spaceReportPartSourceTypes = [
   'asset',
   'workflow',
   'user',
+  'discussion',
 ] satisfies EntityType[]
 export type SpaceReportPartSourceType = (typeof spaceReportPartSourceTypes)[number]

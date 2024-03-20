@@ -7,11 +7,11 @@ import { SpaceReportResultPartContentProvider } from '@shared/domain/space-repor
 export class SpaceReportResultPartProvenanceTreeContentProvider extends SpaceReportResultPartContentProvider<
   SpaceReportPartTypeForResult<SpaceReportPartProvenanceTreeResult>
 > {
-  protected addContent(
+  protected async addContent(
     result: SpaceReportPartProvenanceTreeResult,
     document: Document,
     container: HTMLDivElement,
-  ): void {
+  ): Promise<void> {
     const created = document.createElement('p')
     created.textContent = new Date(result.created).toLocaleString()
     container.appendChild(created)
