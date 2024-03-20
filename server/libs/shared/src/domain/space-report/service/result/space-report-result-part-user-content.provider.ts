@@ -5,11 +5,11 @@ import { SpaceReportResultPartContentProvider } from '@shared/domain/space-repor
 
 @Injectable()
 export class SpaceReportResultPartUserContentProvider extends SpaceReportResultPartContentProvider<'user'> {
-  protected addContent(
+  protected async addContent(
     result: SpaceReportPartUserTileResult,
     document: Document,
     container: HTMLDivElement,
-  ): void {
+  ): Promise<void> {
     const role = document.createElement('strong')
     role.textContent = spaceMembershipTypeToNameMap[result.role]
     container.appendChild(role)
