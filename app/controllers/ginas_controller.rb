@@ -40,8 +40,15 @@ class GinasController < ApplicationController
     /ginas/app/myDownloads/.+
   ).freeze
 
-  skip_before_action :verify_authenticity_token
   before_action :beta_redirect, if: -> { beta_redirectable? }
+
+  # Add pfda CSRF token to HTML response
+  after_action :add_ruby_csrf_token
+  def add_ruby_csrf_token
+    return unless media_type == "text/html" && @_response_body[0].exclude?("csrf-token")
+
+    @_response_body[0] = @_response_body[0].sub("<head>", "<head><meta name=\"csrf-token\" content=\"#{form_authenticity_token}\">")
+  end
 
   def index
     reverse_proxy GSRS_URL,
