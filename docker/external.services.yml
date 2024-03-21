@@ -5,8 +5,6 @@ services:
       dockerfile: docker/images/gsrs.Dockerfile
     ports:
       - 8080:8080
-    depends_on:
-      - gsrsdb
     volumes:
       - type: bind
         source: ${GSRS_FRONTEND_PATH:-/dev/null}
