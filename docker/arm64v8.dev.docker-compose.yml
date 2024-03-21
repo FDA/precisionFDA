@@ -14,6 +14,10 @@ volumes:
 
 services:
   web:
+    depends_on:
+      - db
+      - redis
+      - sidekiq
     extends:
       file: ./base.services.yml
       service: web
@@ -56,6 +60,9 @@ services:
       context: ../
       dockerfile: ./server/docker/images/node.isolated-dev.Dockerfile
     command: ['make', 'watch']
+    depends_on:
+      - db
+      - redis
     environment:
       - NODE_ENV=development
       - NODE_DATABASE_NAME=precision-fda
@@ -70,6 +77,9 @@ services:
       - yarn-deps-cache-nodejs-api:/app/node_modules
 
   nodejs-worker:
+    depends_on:
+      - db
+      - redis
     extends:
       file: ./base.services.yml
       service: nodejs-worker
@@ -101,6 +111,8 @@ services:
       file: ./base.services.yml
       service: redis
   sidekiq:
+    depends_on:
+      - redis
     extends:
       file: ./base.services.yml
       service: sidekiq
