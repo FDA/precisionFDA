@@ -125,6 +125,9 @@ export const FileList = ({ homeScope, space, showFolderActions = false }: { home
         queryKey: ['files'],
       })
       queryCache.invalidateQueries({
+        queryKey: ['space', String(space?.id)],
+      })
+      queryCache.invalidateQueries({
         queryKey: ['counters'],
       })
     }

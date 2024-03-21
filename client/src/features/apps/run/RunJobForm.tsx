@@ -36,7 +36,7 @@ import {
   StyledScopeName,
   TipsRow,
 } from './styles'
-import { useRunJobMutation } from './useRunJubMutation'
+import { useRunJobMutation } from './useRunJobMutation'
 import {
   createRequestObject,
   fetchLicensesOnFiles,

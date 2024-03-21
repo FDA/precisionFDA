@@ -2,6 +2,7 @@ import React, { useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { Column } from 'react-table'
 import styled, { css } from 'styled-components'
+import { DiscussionIcon } from '../../components/icons/DiscussionIcon'
 import {
   DefaultColumnFilter,
   SelectColumnFilter,
@@ -89,13 +90,13 @@ export const SpaceTableTypeCell = styled.div`
 `
 export const SpaceTableCounterCell = styled.div`
   display: flex;
-  gap: 16px;
+  gap: 14px;
 `
 export const SpaceTableCounterItem = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 4px;
+  gap: 3px;
 `
 const findSpaceTypeIcon = (type: string) => {
   switch (type) {
@@ -273,6 +274,9 @@ export const useSpacesColumns = ({
               </SpaceTableCounterItem>
               <SpaceTableCounterItem>
                 <UsersIcon /> {row.original?.counters.members}
+              </SpaceTableCounterItem>
+              <SpaceTableCounterItem>
+                <DiscussionIcon /> {row.original?.counters.discussions}
               </SpaceTableCounterItem>
             </SpaceTableCounterCell>
           ),

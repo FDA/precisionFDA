@@ -25,6 +25,9 @@ export const useWorkflowListActions = ({ spaceId }: { spaceId: string }) => {
     onSuccess: () => {
       toast.success('Successfully added workflow resource(s) to space')
       queryClient.invalidateQueries({
+        queryKey: ['space', spaceId.toString()]
+      })
+      queryClient.invalidateQueries({
         queryKey: ['workflows'],
       })
       setShowAddWorkflowModal(false)
