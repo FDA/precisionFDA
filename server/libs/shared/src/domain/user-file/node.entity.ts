@@ -76,7 +76,7 @@ export class Node extends BaseEntity {
   @OneToMany({
     entity: () => NodeProperty,
     mappedBy: 'node',
-    orphanRemoval: true
+    orphanRemoval: true,
   })
   properties = new Collection<NodeProperty>(this)
 

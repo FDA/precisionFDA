@@ -139,7 +139,6 @@ export const RunJobForm = ({
   const {
     modalComp: organizeFileModal,
     setShowModal: setOrganizeFileModal,
-    isShown: isShownOrganizeFileModal,
   } = useOrganizeFileModal({
     headerText: 'Select output folder',
     submitCaption: 'Select folder',

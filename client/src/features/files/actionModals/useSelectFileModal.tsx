@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import styled from 'styled-components'
 import { Button } from '../../../components/Button'
 import { Checkbox } from '../../../components/Checkbox'
@@ -171,14 +171,10 @@ const FileSelectTabs = ({
   const [showOnlyMyFiles, setShowOnlyMyFiles] = useState(false)
   const searchText = useDebounce(filter, 250)
 
-  const { isFetching } = useQuery({
-    queryFn: () => fetchAccessibleFilesByUID({ uid: uids ?? [] }),
+  const { data: fetchAccessibleData, status: fetchAccessibleStatus, isFetching } = useQuery({
+    queryFn: () => fetchAccessibleFilesByUID({ uid: uids ?? []}),
     queryKey: ['user-list-files', uids],
     enabled: !!uids && uids.length > 0,
-    select(data) {
-      setSelectedFiles(data)
-      return data
-    },
   })
 
   const { data: filesData, isLoading, status: loadingFilesStatus } = useQuery({
@@ -188,6 +184,12 @@ const FileSelectTabs = ({
       scopes: scopes ?? [],
     }),
   })
+
+  useEffect(() => {
+    if (fetchAccessibleStatus === 'success' && fetchAccessibleData) {
+      setSelectedFiles(fetchAccessibleData)
+    }
+  }, [fetchAccessibleStatus, fetchAccessibleData])
 
   const radioCallback = (file: IAccessibleFile) => {
     setSelectedFiles([file])
@@ -240,7 +242,7 @@ const FileSelectTabs = ({
             </StyledLoader>
           )}
           {(selectedFiles?.length === 0 || uids?.length === 0) &&
-            !isFetching && <StyledRow>No selected files</StyledRow>}
+            !isFetching && <div>No selected files</div>}
           <ModalScroll>
             <SelectableTable>
               <tbody>

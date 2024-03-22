@@ -178,12 +178,13 @@ class HttpsAppsClient # rubocop:disable Metrics/ClassLength
   end
 
   # List licenses for a file
-  # @param ids list of file ids
-  def list_licenses_for_files(ids)
+  # @param uids list of file uids
+  def list_licenses_for_files(uids)
     request(
       "/licenses/files",
-      { ids: ids },
-      Net::HTTP::Post::METHOD,
+      {},
+      Net::HTTP::Get::METHOD,
+      { uids: },
     )
   end
 
