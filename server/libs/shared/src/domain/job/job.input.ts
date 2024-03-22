@@ -74,25 +74,27 @@ const runAppSchema: JSONSchema7 = {
       type: 'object',
       additionalProperties: false,
       required: [],
+      //TODO: at the moment only HTTPS apps are run by nodejs. Once we support the regular apps as well, we will have to refactor input validation into something more dynamic and readable
       properties: {
-        // these inputs are for jupyter app only (except of a 'port' input, that is for ttyd)
+        // JupyterLab app
         duration: { type: 'integer', minimum: 30, maximum: config.validation.maxJobDurationMinutes },
-        snapshot: { type: 'string', maxLength: config.validation.maxStrLen },
-        feature: {
-          type: 'string',
-          enum: Object.keys(allowedFeatures),
-          default: allowedFeatures.PYTHON_R,
-        },
+        feature: { type: 'string', enum: Object.keys(allowedFeatures), default: allowedFeatures.PYTHON_R },
         imagename: { type: 'string', maxLength: config.validation.maxStrLen },
         cmd: { type: 'string', maxLength: config.validation.maxStrLen },
+        in: { type: 'array', default: [] },
+
         // rshiny app
         app_gz: { type: 'string', maxLength: config.validation.maxStrLen },
-        // ttyd
-        port: { type: 'integer' },
+
         // Apache Guacamole
         max_session_length: { type: 'string', maxLength: config.validation.maxStrLen },
-        // JupyterLab
-        in: {type: 'array', default: []},
+
+        // ttyd
+        path_to_executable: { type: 'string' },
+        port: { type: 'integer' },
+
+        // common
+        snapshot: { type: 'string', maxLength: config.validation.maxStrLen },
       },
     },
     output_folder_path: { type: 'string' },
