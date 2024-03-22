@@ -248,7 +248,7 @@ export const VmEnvTab = ({ control }: { control: Control<CreateAppForm>}) => {
             </SelectFieldLabel>
           )}
         />
-        <LearnMoreLink to="/docs/creating-apps#dev-instance-types" target='_blank'>
+        <LearnMoreLink to="/docs/creating-apps#app-instance-types" target='_blank'>
           See full list
         </LearnMoreLink>
       </FieldGroup>
