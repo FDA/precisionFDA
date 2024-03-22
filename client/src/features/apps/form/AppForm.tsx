@@ -61,12 +61,14 @@ export const AppForm = ({
   isFork = false,
   onSubmit,
   defaultVals,
+  isSubmitting,
   app,
 }: {
   isEdit?: boolean
   isFork?: boolean
-  onSubmit: (vals: CreateAppPayload) => void
+  onSubmit: (vals: CreateAppPayload) => Promise<void>
   defaultVals?: CreateAppForm
+  isSubmitting: boolean
   app?: IApp
 }) => {
   const spaceId = getSpaceIdFromScope(app?.scope)
@@ -82,7 +84,7 @@ export const AppForm = ({
     trigger,
     setValue,
     getValues,
-    formState: { errors, isSubmitting },
+    formState: { errors },
   } = useForm<CreateAppForm>({
     resolver: yupResolver(validationSchema),
     mode: 'onBlur',
@@ -129,15 +131,18 @@ export const AppForm = ({
         return spec
       }),
     }
-    return onSubmit(formatted)
+    await onSubmit(formatted)
   }
+
+  const backLink = isEdit || isFork ? `/${getBaseLink(spaceId)}/apps/${app?.uid}` : `/${getBaseLink(spaceId)}/apps`
+  const backLabel = isEdit || isFork ? 'Back to App' : 'Back to Apps'
 
   return (
     <>
       <StyledBackLink
-        linkTo={`/${getBaseLink(spaceId)}/apps/${app?.uid}`}
+        linkTo={backLink}
       >
-        Back to app
+        {backLabel}
       </StyledBackLink>
 
       <StyledForm onSubmit={handleSubmit(submitHandler)} autoComplete="off">
@@ -217,6 +222,7 @@ export const AppForm = ({
                   <Select
                     {...field}
                     options={ubuntuReleasesOptions}
+                    isDisabled={isSubmitting}
                     onChange={(option) => field.onChange(option?.value)}
                     value={ubuntuReleasesOptions.find(option => option.value === field.value)}
                   />
