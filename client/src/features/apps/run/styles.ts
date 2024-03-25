@@ -20,7 +20,11 @@ export const StyledLabel = styled.div`
 `
 
 export const SectionHeader = styled.div`
-  padding: 20px 15px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 40px;
+  padding: 0 15px;
   border-bottom: 1px solid transparent;
   background-color: var(--c-layout-border-200);
   border-color: var(--c-layout-border-200);
