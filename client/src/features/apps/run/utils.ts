@@ -1,4 +1,4 @@
-import { isSafeInteger } from 'lodash'
+import { isSafeInteger, uniq } from 'lodash'
 import * as Yup from 'yup'
 import { IUser } from '../../../types/user'
 import { promiseAllMap } from '../../../utils/promiseAllMap'
@@ -134,20 +134,41 @@ export const getValue = (
   return value as string | boolean
 }
 
+export function mapInputKeyVals(inputVals: JobRunForm['inputs'], inputSpecs: InputSpec[]) {
+  let inputs: { [key: string]: string | string[] | number | boolean | undefined | null } = {}
+  
+  Object.keys(inputVals).forEach(key => {
+    const value = inputVals[key]
+    inputs[key] = getValue(key, value, inputSpecs)
+  })
+
+  inputs = cleanObject(inputs)
+
+  return inputs
+}
+
+export function getFileUIDsFromAppRun(inputVals: JobRunForm['inputs'], inputSpecs: InputSpec[]) {
+  const filearr = inputSpecs.filter(s => s.class === 'array:file' || s.class === 'file')
+  const uids: string[] | string[][] = []
+  
+  Object.keys(inputVals).forEach(key => {
+    const f = filearr.find(s => s.name === key)
+    const value = inputVals[key]
+    if(f) { 
+      uids.push(value)
+    }
+  })
+
+  return uniq(uids.flat().filter(i => !!i))
+}
+
 
 export const createRequestObject = (
   vals: JobRunForm,
   app: IApp,
   inputSpecs: InputSpec[],
 ): RunJobRequest => {
-  let inputs: { [key: string]: string | string[] | number | boolean | undefined | null } = {}
-  
-  Object.keys(vals.inputs).forEach(key => {
-    const value = vals.inputs[key]
-    inputs[key] = getValue(key, value, inputSpecs)
-  })
-
-  inputs = cleanObject(inputs)
+  const inputs = mapInputKeyVals(vals.inputs, inputSpecs)
 
   return {
     id: app.uid,

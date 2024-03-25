@@ -31,6 +31,7 @@ export const StyledCell = styled.td`
 
 export const StyledOnlyMine = styled.label`
   display: flex;
+  gap: 4px;
   flex-shrink: 0;
   align-items: center;
 `
@@ -53,6 +54,7 @@ export const ButtonBadge = styled.div`
 `
 
 export const StyledFileDetail = styled.div`
+  display: flex;
   margin-left: 28px;
   color: ${colors.textMediumGrey};
   font-size: 85%;
