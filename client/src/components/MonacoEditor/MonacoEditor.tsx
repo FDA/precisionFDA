@@ -9,10 +9,16 @@ if(!ENABLE_DEV_MSW) {
   })
 }
 
-const MonacoEditor = (props: Partial<EditorProps>) => {
+const MonacoEditor = (props: Partial<EditorProps & { formatDocument: boolean}>) => {
   const editorDidMountHook = (editor: any, monaco: Monaco) => {
     const model = editor.getModel()
     model.setEOL(monaco.editor.EndOfLineSequence.LF)
+
+    if(props?.formatDocument) {
+      setTimeout(() => {
+        editor.getAction('editor.action.formatDocument').run()
+      }, 300)
+    }
   }
 
   const onCodeChange = (newCodes?: string) => {

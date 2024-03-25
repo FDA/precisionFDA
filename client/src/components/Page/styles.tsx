@@ -79,6 +79,10 @@ export const PageTitle = styled.h1`
   margin: 0;
 `
 
+export const Small = styled.div`
+  font-size: 13px;
+`
+
 export const PageHeader = styled.div`
   display: flex;
   justify-content: space-between;
