@@ -36,9 +36,9 @@ import {
 import { fetchFilteredFiles } from '../../apps/apps.api'
 import {
   IAccessibleFile,
-  fetchAccessibleFilesByUID,
 } from '../../databases/databases.api'
 import { DialogType } from '../../home/types'
+import { useFetchFilesByUIDQuery } from '../query/useFetchFilesByUIDQuery'
 
 const StyledLoader = styled.div`
   padding: 12px;
@@ -46,6 +46,7 @@ const StyledLoader = styled.div`
 
 const SyledFilterWrapper = styled.div`
   display: flex;
+  gap: 4px;
 `
 
 const StyledFilterFileSection = styled(StyledFilterSection)`
@@ -143,7 +144,7 @@ const Row = ({
       </StyledFileDetail>
     </StyledCell>
     <StyledCell>
-      <StyledAction href={file.path}>
+      <StyledAction href={file.path} target='_blank'>
         <ArrowUpRightFromSquareIcon />
       </StyledAction>
     </StyledCell>
@@ -171,11 +172,7 @@ const FileSelectTabs = ({
   const [showOnlyMyFiles, setShowOnlyMyFiles] = useState(false)
   const searchText = useDebounce(filter, 250)
 
-  const { data: fetchAccessibleData, status: fetchAccessibleStatus, isFetching } = useQuery({
-    queryFn: () => fetchAccessibleFilesByUID({ uid: uids ?? []}),
-    queryKey: ['user-list-files', uids],
-    enabled: !!uids && uids.length > 0,
-  })
+  const { data: fetchAccessibleData, status: fetchAccessibleStatus, isFetching } = useFetchFilesByUIDQuery(uids || [])
 
   const { data: filesData, isLoading, status: loadingFilesStatus } = useQuery({
     queryKey: ['list_files', searchText],
