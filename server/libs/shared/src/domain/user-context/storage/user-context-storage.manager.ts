@@ -1,38 +1,28 @@
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { AsyncLocalStorage } from 'async_hooks'
 
-export class UserContextStorageManager implements UserContext {
-  constructor(private readonly storage: AsyncLocalStorage<UserContext>) {}
+export function createUserContextManager(storage: AsyncLocalStorage<UserContext>): UserContext {
+  const getCurrentContext = () => {
+    const store = storage.getStore()
 
-  get id() {
-    return this.getCurrentContext()?.id
-  }
-
-  get dxuser() {
-    return this.getCurrentContext()?.dxuser
-  }
-
-  get accessToken() {
-    return this.getCurrentContext()?.accessToken
-  }
-
-  private getCurrentContext(): UserContext {
-    const storage = this.storage.getStore()
-
-    if (!storage) {
+    if (!store) {
       throw new Error(
         'User context storage not initialized! Run the executed async workflow in the storage context',
       )
     }
 
-    return storage
+    return store
   }
 
-  private toJSON(): UserContext {
-    return {
-      id: this.id,
-      accessToken: this.accessToken,
-      dxuser: this.dxuser,
-    }
+  return {
+    get id() {
+      return getCurrentContext()?.id
+    },
+    get dxuser() {
+      return getCurrentContext()?.dxuser
+    },
+    get accessToken() {
+      return getCurrentContext()?.accessToken
+    },
   }
 }

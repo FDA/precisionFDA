@@ -94,7 +94,7 @@ export const ExecutionActionsRow = ({
   return (
     <>
       {terminalStates.includes(execution.state) ? null : (
-        <StyledRefresh spin title="Page will automatically refresh when the job has launched" onClick={() => refetch()}>
+        <StyledRefresh title="Page will automatically refresh when the job has launched" onClick={() => refetch()}>
             {getStatusText()}
           <SyncIcon />
         </StyledRefresh>

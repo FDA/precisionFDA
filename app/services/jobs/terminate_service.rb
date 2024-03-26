@@ -3,6 +3,8 @@ module Jobs
   # https://documentation.dnanexus.com/developer/api/running-analyses
   # /applets-and-entry-points#api-method-job-xxxx-terminate
   class TerminateService < ::BaseTransportService
+    include UidFindable
+
     SUCCESS_MESSAGE = "Request(s) to terminate executions has been successfully sent. ".freeze
 
     def call

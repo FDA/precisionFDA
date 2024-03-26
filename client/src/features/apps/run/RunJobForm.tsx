@@ -2,7 +2,7 @@ import { yupResolver } from '@hookform/resolvers/yup'
 import { useQuery } from '@tanstack/react-query'
 import React, { useEffect, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
-import { Link } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import { InputNumber, InputText } from '../../../components/InputText'
 import { EmptyTable } from '../../../components/Table/styles'
@@ -36,16 +36,20 @@ import {
   StyledScopeName,
   TipsRow,
 } from './styles'
-import { useRunJobMutation } from './useRunJubMutation'
+import { useRunJobMutation } from './useRunJobMutation'
 import {
   createRequestObject,
   fetchLicensesOnFiles,
+  getFileUIDsFromAppRun,
   getLabel,
   getLicensesToAccept,
+  mapInputKeyVals,
   prepareValidations,
 } from './utils'
 import { Select } from '../../../components/Select'
-import { Button } from '../../../components/Button'
+import { Button, TransparentButton } from '../../../components/Button'
+import { useExportInputsModal } from './useExportInputsModal'
+import { Small } from '../../../components/Page/styles'
 
 const buildPath = (node: FileTreeNode): string => {
   if (!node || node.title === '/') {
@@ -74,6 +78,9 @@ export const RunJobForm = ({
   spec: AppSpec
   userJobLimit: IUser['job_limit']
 }) => {
+  const { hash, pathname } = useLocation()
+  const navigate = useNavigate()
+
   const { data: computeInstances, isLoading: computeInstancesLoading } =
     useQuery({
       queryKey: ['user-compute-instances'],
@@ -83,7 +90,7 @@ export const RunJobForm = ({
       }),
     })
 
-  const { data: selectableContexts } = useQuery({
+  const { data: selectableContexts, isLoading: isLoadingSelectableContexts } = useQuery({
     queryKey: ['selectable-contexts', app.scope],
     queryFn: () => fetchAndConvertSelectableContexts(app.entity_type).catch((e) => {
       toast.error('Error loading contexts')
@@ -91,7 +98,7 @@ export const RunJobForm = ({
     }),
   })
 
-  const { data: selectableSpaces } = useQuery({
+  const { data: selectableSpaces, isLoading: isLoadingSelectableScope } = useQuery({
     queryKey: ['selectable-spaces', app.scope],
     queryFn: () => fetchAndConvertSelectableSpaces(app.scope).catch((e) => {
       toast.error('Error loading spaces')
@@ -99,12 +106,12 @@ export const RunJobForm = ({
     }),
   })
 
-  const defaultValues = {
+  let defaultValues = {
     jobName: app.name,
     jobLimit: userJobLimit,
     instanceType: undefined,
     output_folder_path: '',
-    scope: { label: 'Private', value: 'private' }, //fixme: this should not be hardcoded, doesnt make sense for space apps
+    scope: { label: 'Private', value: 'private' },
     inputs: Object.fromEntries(
       spec.input_spec.map(item => [
         item.name,
@@ -112,6 +119,14 @@ export const RunJobForm = ({
       ]),
     ),
   } satisfies JobRunForm
+
+  if(hash.startsWith('#')) {
+    const base64Encoded = hash.split('#')[1]
+    const decoded = atob(base64Encoded)
+    const inputs = JSON.parse(decoded)
+    defaultValues = { ...defaultValues, inputs }
+    navigate(pathname, { replace: true })
+  }
 
   const validationSchema = prepareValidations(
     spec.input_spec,
@@ -139,7 +154,6 @@ export const RunJobForm = ({
   const {
     modalComp: organizeFileModal,
     setShowModal: setOrganizeFileModal,
-    isShown: isShownOrganizeFileModal,
   } = useOrganizeFileModal({
     headerText: 'Select output folder',
     submitCaption: 'Select folder',
@@ -151,7 +165,7 @@ export const RunJobForm = ({
     },
   })
 
-  const [maxRuntime, setMaxRuntime] = useState<string>("")
+  const [maxRuntime, setMaxRuntime] = useState<string>('')
 
   // Update the instanceType field when computeInstances list loads
   useEffect(() => {
@@ -164,24 +178,36 @@ export const RunJobForm = ({
       )
     }
   }, [computeInstances])
+  
+  // Update the selectable scope field when list loads
+  useEffect(() => {
+    if (selectableSpaces) {
+      const defaultSelectedScope = selectableSpaces.find(s => s.value === app.scope) ?? { label: 'Private', value: 'private' }
+      setValue(
+        'scope',
+        defaultSelectedScope,
+      )
+    }
+  }, [selectableSpaces])
 
 
   // Calculate maxRuntime for user info when instanceType or jobLimit changes
   useEffect(() => {
     const selectedInstance = getValues().instanceType?.value
     if (selectedInstance) {
-      const costPerHour = PricingMap[selectedInstance as keyof typeof PricingMap] as number;
-      let hoursRuntime = getValues().jobLimit / costPerHour;
-      let remainingMinutes = Math.round((hoursRuntime % 1) * 60);
+      const costPerHour = PricingMap[selectedInstance as keyof typeof PricingMap] as number
+      let hoursRuntime = getValues().jobLimit / costPerHour
+      let remainingMinutes = Math.round((hoursRuntime % 1) * 60)
       if (remainingMinutes === 60) {
-        hoursRuntime++;
-        remainingMinutes = 0;
+        hoursRuntime++
+        remainingMinutes = 0
       }
       setMaxRuntime(`Maximum estimated runtime: ${Math.floor(hoursRuntime)}h${remainingMinutes ? ` ${remainingMinutes}m` : ''}`)
     }
   }, [watch().instanceType, watch().jobLimit])
 
   const runJobMutation = useRunJobMutation(getValues().scope?.value as ServerScope)
+  const exportModal = useExportInputsModal({ showCopyButton: app.scope === 'public' })
 
   const onSubmit = async () => {
     const vals = getValues()
@@ -212,8 +238,17 @@ export const RunJobForm = ({
     }
   }
 
+  const handleExportInputClick = () => {
+    const vals = getValues()
+    const fmtVals = mapInputKeyVals(vals.inputs, spec.input_spec)
+    const fileUids = getFileUIDsFromAppRun(vals.inputs, spec.input_spec)
+
+    exportModal.openModal(fmtVals, fileUids)
+  }
+
   return (
     <StyledForm id="submitJobForm" autoComplete="off">
+      {exportModal?.modalComp}
       <AppsConfiguration>
         <TipsRow>
           <QuestionIcon height={14} />
@@ -264,7 +299,8 @@ export const RunJobForm = ({
                           onBlur={field.onBlur}
                           value={field.value}
                           isDisabled={isSubmitting}
-                        />
+                          isLoading={isLoadingSelectableContexts}
+                          />
                       )}
                     />
                     <ErrorMessageForField errors={errors} fieldName="scope" />
@@ -290,6 +326,7 @@ export const RunJobForm = ({
                           onBlur={field.onBlur}
                           value={field.value}
                           isDisabled={isSubmitting}
+                          isLoading={isLoadingSelectableScope}
                         />
                       )}
                     />
@@ -320,7 +357,7 @@ export const RunJobForm = ({
                       value={field.value}
                       isDisabled={isSubmitting}
                     />
-                  {<small>{maxRuntime}</small>}
+                    <Small>{maxRuntime}</Small>
                    </>
                   )}
                 />
@@ -333,7 +370,7 @@ export const RunJobForm = ({
           </SectionBody>
         </Section>
         <Section>
-          <SectionHeader>INPUTS</SectionHeader>
+          <SectionHeader><div>INPUTS</div><TransparentButton type='button' onClick={() => handleExportInputClick()}>Export Values</TransparentButton></SectionHeader>
           <SectionBody>
             {spec.input_spec.length > 0 ? (
               spec.input_spec.map(i => (

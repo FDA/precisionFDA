@@ -20,7 +20,7 @@ jobs:
     name: Setup Ruby
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
@@ -35,7 +35,7 @@ jobs:
       MAKE: "make --jobs 4"
     needs: [ruby-setup]
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
@@ -62,7 +62,7 @@ jobs:
       statuses: write
     needs: [ruby-setup]
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Fetch Git branches
         run: git fetch --no-tags --prune origin +refs/heads/*:refs/remotes/origin/*
@@ -102,7 +102,7 @@ jobs:
           MYSQL_ROOT_PASSWORD: password
     needs: [ruby-setup]
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
@@ -150,23 +150,23 @@ jobs:
           - 6379:6379
     needs: [ruby-setup]
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
           bundler-cache: true
           cache-version: 1
-      - uses: pnpm/action-setup@v2
+      - uses: pnpm/action-setup@v3
         with:
           version: 8
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
           node-version: '20.9.0'
       # TODO(samuel) - yarn cache from setup-node@3 github actions still is quite slow and results in install time of 1 minute
       # My guess: issue might be related to the use of workspaces
       # Workaround: node_modules directly stored in the package
       # Removal requires more investingation
-      - uses: actions/cache@v3
+      - uses: actions/cache@v4
         with:
           path: |
             ./server/node_modules
@@ -207,14 +207,13 @@ jobs:
     name: Test React app
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
-      - uses: pnpm/action-setup@v2
+      - uses: pnpm/action-setup@v3
         with:
           version: 8
-          node-version: '20.9.0'
 
-      - uses: actions/cache@v3
+      - uses: actions/cache@v4
         name: Setup pnpm cache
         with:
           path: ./client/node_modules
@@ -234,13 +233,13 @@ jobs:
     env:
       NODE_ENV: production
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       
-      - uses: pnpm/action-setup@v2
+      - uses: pnpm/action-setup@v3
         with:
           version: 8
 
-      - uses: actions/cache@v3
+      - uses: actions/cache@v4
         name: Setup pnpm cache
         with:
           path: ./client/node_modules

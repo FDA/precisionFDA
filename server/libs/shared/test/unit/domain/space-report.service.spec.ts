@@ -1,6 +1,7 @@
 import { QueryOrder, Reference } from '@mikro-orm/core'
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { App } from '@shared/domain/app/app.entity'
+import { Discussion } from '@shared/domain/discussion/discussion.entity'
 import { Job } from '@shared/domain/job/job.entity'
 import { NotificationService } from '@shared/domain/notification/services/notification.service'
 import { SpaceReportPart } from '@shared/domain/space-report/entity/space-report-part.entity'
@@ -103,6 +104,7 @@ describe('SpaceReportService', () => {
       findStub.withArgs(Job, { scope: SPACE_SCOPE }).resolves([])
       findStub.withArgs(Asset, { scope: SPACE_SCOPE }).resolves([])
       findStub.withArgs(Workflow, { scope: SPACE_SCOPE }).resolves([])
+      findStub.withArgs(Discussion, { note: { scope: SPACE_SCOPE } }).resolves([])
       findStub
         .withArgs(User, { spaceMemberships: { spaces: { id: SPACE_ID }, active: true } })
         .resolves([])

@@ -1,19 +1,19 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Comparison } from '@shared/domain/comparison/comparison.entity'
+import { EntityService } from '@shared/domain/entity/entity.service'
 import { Job } from '@shared/domain/job/job.entity'
+import { FileProvenanceDataService } from '@shared/domain/provenance/service/entity-data/file-provenance-data.service'
 import { Asset } from '@shared/domain/user-file/asset.entity'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
+import { PARENT_TYPE } from '@shared/domain/user-file/user-file.types'
 import { User } from '@shared/domain/user/user.entity'
+import { EntityUtils } from '@shared/utils/entity.utils'
 import { expect } from 'chai'
-import { stub } from 'sinon'
-import {
-  FileProvenanceDataService,
-} from '../../../src/domain/provenance/service/entity-data/file-provenance-data.service'
-import { PARENT_TYPE } from '../../../src/domain/user-file/user-file.types'
+import { SinonStub, stub } from 'sinon'
 
 describe('FileProvenanceDataService', () => {
   const NAME = 'name'
-  const UID = 'uid'
+  const LINK = 'LINK'
 
   const USER_ID = 1
   const USER = { id: USER_ID }
@@ -36,6 +36,9 @@ describe('FileProvenanceDataService', () => {
   const assetFindOneStub = stub()
   const nodeFindOneStub = stub()
   const getRepositoryStub = stub()
+  const getEntityLinkStub = stub()
+
+  let getEntityTypeForEntityStub: SinonStub
 
   beforeEach(() => {
     userFindOneStub.reset()
@@ -65,13 +68,26 @@ describe('FileProvenanceDataService', () => {
     getRepositoryStub.withArgs(Comparison).returns({ findOne: comparisonFindOneStub })
     getRepositoryStub.withArgs(Asset).returns({ findOne: assetFindOneStub })
     getRepositoryStub.withArgs(UserFile).returns({ findOne: nodeFindOneStub })
+
+    getEntityLinkStub.reset()
+    getEntityLinkStub.throws()
+
+    getEntityTypeForEntityStub = stub(EntityUtils, 'getEntityTypeForEntity').throws()
+  })
+
+  afterEach(() => {
+    getEntityTypeForEntityStub.restore()
   })
 
   describe('#getData', () => {
-    it('should provide correct data about the file', () => {
-      const res = getInstance().getData(getFile())
+    it('should provide correct data about the file', async () => {
+      const res = await getInstance().getData(getFile())
 
-      expect(res).to.deep.equal({ type: 'file', url: `https://rails-host:1234/home/files/${UID}`, title: NAME })
+      expect(res).to.deep.equal({
+        type: 'file',
+        url: LINK,
+        title: NAME,
+      })
     })
   })
 
@@ -134,12 +150,16 @@ describe('FileProvenanceDataService', () => {
   })
 
   function getFile(parentId?: number, parentType?: PARENT_TYPE) {
-    return {
-      uid: UID,
+    const file = {
       name: NAME,
       parentId,
       parentType,
     } as unknown as UserFile
+
+    getEntityLinkStub.withArgs(file).resolves(LINK)
+    getEntityTypeForEntityStub.withArgs(file).returns('file')
+
+    return file
   }
 
   function getInstance() {
@@ -147,6 +167,8 @@ describe('FileProvenanceDataService', () => {
       getRepository: getRepositoryStub,
     } as unknown as SqlEntityManager
 
-    return new FileProvenanceDataService(em)
+    const entityService = { getEntityLink: getEntityLinkStub } as unknown as EntityService
+
+    return new FileProvenanceDataService(em, entityService)
   }
 })

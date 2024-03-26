@@ -19,6 +19,7 @@ template "/etc/nginx/nginx.conf" do
               {
                 app_domain: node.run_state["ssm_params"]["app"]["domains"].split(",")[0],
                 unii_host: node.run_state["ssm_params"]["app"]["environment"]["UNII_HOST"],
+                gsrs_host: node.run_state["ssm_params"]["app"]["environment"]["GSRS_URL"],
               }
             end)
 end

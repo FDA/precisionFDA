@@ -7,6 +7,10 @@ volumes:
 
 services:
   web:
+    depends_on:
+      - db
+      - redis
+      - sidekiq
     extends:
       file: ./base.services.yml
       service: web
@@ -27,10 +31,16 @@ services:
         target: /precision-fda/.build_cache/
     command: pnpm run watch:docker
   nodejs-api:
+    depends_on:
+      - db
+      - redis
     extends:
       file: ./base.services.yml
       service: nodejs-api
   nodejs-worker:
+    depends_on:
+      - db
+      - redis
     extends:
       file: ./base.services.yml
       service: nodejs-worker
@@ -45,6 +55,8 @@ services:
       file: ./base.services.yml
       service: redis
   sidekiq:
+    depends_on:
+      - redis
     extends:
       file: ./base.services.yml
       service: sidekiq

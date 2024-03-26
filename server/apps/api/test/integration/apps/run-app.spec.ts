@@ -281,7 +281,7 @@ describe('POST /apps/:id/run', () => {
   it('calls queue helper', async () => {
     const args = []
     fakes.queue.createSyncJobStatusTaskFake.callsFake((...a) => {
-      a[1] = a[1].toJSON()
+      a[1] = { ...a[1] }
       args.push(a)
     })
 

@@ -1,23 +1,38 @@
+import { EntityService } from '@shared/domain/entity/entity.service'
 import { Asset } from '@shared/domain/user-file/asset.entity'
+import { EntityUtils } from '@shared/utils/entity.utils'
 import { expect } from 'chai'
-import {
-  AssetProvenanceDataService,
-} from '../../../src/domain/provenance/service/entity-data/asset-provenance-data.service'
+import { SinonStub, stub } from 'sinon'
+import { AssetProvenanceDataService } from '@shared/domain/provenance/service/entity-data/asset-provenance-data.service'
 
 describe('AssetProvenanceDataService', () => {
   const NAME = 'name'
-  const UID = 'uid'
+  const LINK = 'LINK'
 
-  const ASSET = {
-    name: NAME,
-    uid: UID,
-  } as unknown as Asset
+  const ASSET = { name: NAME } as unknown as Asset
+
+  const getEntityLinkStub = stub()
+
+  let getEntityTypeForEntityStub: SinonStub
+
+  beforeEach(() => {
+    getEntityLinkStub.reset()
+    getEntityLinkStub.throws()
+    getEntityLinkStub.withArgs(ASSET).resolves(LINK)
+
+    getEntityTypeForEntityStub = stub(EntityUtils, 'getEntityTypeForEntity').throws()
+    getEntityTypeForEntityStub.withArgs(ASSET).returns('asset')
+  })
+
+  afterEach(() => {
+    getEntityTypeForEntityStub.restore()
+  })
 
   describe('#getData', () => {
-    it('should provide correct data about the asset', () => {
-      const res = getInstance().getData(ASSET)
+    it('should provide correct data about the asset', async () => {
+      const res = await getInstance().getData(ASSET)
 
-      expect(res).to.deep.equal({ type: 'asset', url: `https://rails-host:1234/home/assets/${UID}`, title: NAME })
+      expect(res).to.deep.equal({ type: 'asset', url: LINK, title: NAME })
     })
   })
 
@@ -30,6 +45,8 @@ describe('AssetProvenanceDataService', () => {
   })
 
   function getInstance() {
-    return new AssetProvenanceDataService()
+    const entityService = { getEntityLink: getEntityLinkStub } as unknown as EntityService
+
+    return new AssetProvenanceDataService(entityService)
   }
 })

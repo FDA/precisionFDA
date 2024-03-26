@@ -2,6 +2,7 @@ import axios from 'axios'
 import { checkStatus, getApiRequestOpts, requestOpts } from '../../utils/api'
 import { AcceptedLicense } from '../apps/apps.types'
 import { License } from './types'
+import { FileUid } from '../files/files.types'
 
 export async function fetchLicense(id: string): Promise<any> {
   const res = await fetch(`/api/licenses/${id}`, {
@@ -19,8 +20,8 @@ export async function fetchAcceptedLicenses(): Promise<AcceptedLicense[]> {
   return res.json()
 }
 
-export async function fetchLicensesForFiles(ids: number[]) {
-  return axios.post<License[]>('/api/list_licenses_for_files', { ids }).then(r => r.data )
+export async function fetchLicensesForFiles(uids: FileUid[]) {
+  return axios.get<License[]>('/api/list_licenses_for_files', { params: { uids }}).then(r => r.data )
 }
 
 export async function fetchLicensesList(): Promise<{ licenses: License[]}> {

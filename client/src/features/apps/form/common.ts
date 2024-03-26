@@ -57,7 +57,7 @@ const defaultCreateDefs: { [CLASS_TYPE in IOSpec['class']]: (t: DefaultCreateTyp
   'array:string': v => v,
   'float': v => parseFloat(v) ?? null,
   'int': v => parseInt(v, 10) ?? null,
-  'string': v => v || null,
+  'string': v => String(v) || null,
 }
 
 const runDefs: { [CLASS_TYPE in IOSpec['class']]: (t: ServerType[CLASS_TYPE]) => RunType[CLASS_TYPE] | null } = {
