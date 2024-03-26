@@ -304,9 +304,6 @@ devDependencies:
   '@types/react-tabs':
     specifier: ^2.3.4
     version: 2.3.4
-  '@types/remarkable':
-    specifier: ^2.0.3
-    version: 2.0.8
   '@types/spark-md5':
     specifier: ^3.0.2
     version: 3.0.4
@@ -4957,10 +4954,6 @@ packages:
       '@types/prop-types': 15.7.11
       '@types/scheduler': 0.16.8
       csstype: 3.1.2
-
-  /@types/remarkable@2.0.8:
-    resolution: {integrity: sha512-eKXqPZfpQl1kOADjdKchHrp2gwn9qMnGXhH/AtZe0UrklzhGJkawJo/Y/D0AlWcdWoWamFNIum8+/nkAISQVGg==}
-    dev: true
 
   /@types/resolve@1.20.6:
     resolution: {integrity: sha512-A4STmOXPhMUtHH+S6ymgE2GiBSMqf4oTvcQZMcHzokuTLVYzXTB8ttjcgxOVaAp2lGwEdzZ0J+cRbbeevQj1UQ==}
