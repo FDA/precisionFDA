@@ -40,7 +40,7 @@ namespace :apps do
       if latest_revision > 0
         puts "Found already existing '#{app_name}' app with the last revision #{latest_revision}"
 
-        if app_info["version"] == latest_revision_app.version && !latest_revision_app.deleted
+        if app_info["version"] == latest_revision_app.version
           abort "The app on the platform has the same version as the existing one. " +
                 "Nothing to transfer"
         end
@@ -52,16 +52,8 @@ namespace :apps do
       internet_access = app_info.dig("access", "network").first == "*"
       release = app_info.dig("runSpec", "release")
 
-      input_spec = app_info["inputSpec"].select do |spec|
-        is_supported = %w(string file int boolean float).include?(spec["class"])
-        puts "Unhandled class #{spec['class']}" unless is_supported
-        is_supported
-      end
-
-      output_spec = app_info["outputSpec"].select do |spec|
-        spec["class"] = spec["class"].sub(/^array:/, "")
-        %w(string file int boolean float).include?(spec["class"])
-      end
+      input_spec = app_info["inputSpec"]
+      output_spec = app_info["outputSpec"]
 
       packages = []
       if (exec_depends = app_info.dig("runSpec", "execDepends"))

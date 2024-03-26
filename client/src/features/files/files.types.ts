@@ -28,6 +28,7 @@ export type FileLocation = 'Public' | 'Private'
 export type FileType = 'UserFile' | 'Folder' | 'File'
 export type FileOrigin = 'UserFile'
 export type FileScope = 'public' | 'private' | string
+export type FileUid = `file-${string}-${number}`
 
 export type OriginType = 'User' | 'Job' | 'Comparison' | 'UserFile'
 export interface FileLinks {

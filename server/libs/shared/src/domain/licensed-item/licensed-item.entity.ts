@@ -1,9 +1,17 @@
-import { Entity, EntityRepositoryType, Ref, ManyToOne, PrimaryKey, Property, Reference } from '@mikro-orm/core'
+import {
+  Entity,
+  EntityRepositoryType,
+  Ref,
+  ManyToOne,
+  PrimaryKey,
+  Property,
+  Reference,
+} from '@mikro-orm/core'
 import { License } from '@shared/domain/license/license.entity'
 import { BaseEntity } from '../../database/base-entity'
 import { LicensedItemRepository } from './licensed-item.repository'
 
-@Entity({ tableName: 'licensed_items', customRepository: () => LicensedItemRepository})
+@Entity({ tableName: 'licensed_items', customRepository: () => LicensedItemRepository })
 export class LicensedItem extends BaseEntity {
   @PrimaryKey()
   id: number
@@ -15,7 +23,7 @@ export class LicensedItem extends BaseEntity {
   licenseableId: number // Node
 
   @Property()
-  licenseableType: string
+  licenseableType: string;
 
   [EntityRepositoryType]?: LicensedItemRepository
 

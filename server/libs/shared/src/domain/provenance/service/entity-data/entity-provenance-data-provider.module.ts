@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common'
+import { EntityModule } from '@shared/domain/entity/entity.module'
 import { entityTypeToParentResolverMapProvider } from '@shared/domain/provenance/providers/entity-type-to-parent-resolver-map.provider'
 import { AppProvenanceDataService } from '@shared/domain/provenance/service/entity-data/app-provenance-data.service'
 import { AssetProvenanceDataService } from '@shared/domain/provenance/service/entity-data/asset-provenance-data.service'
@@ -11,7 +12,7 @@ import { WorkflowProvenanceDataService } from '@shared/domain/provenance/service
 import { WorkflowModule } from '@shared/domain/workflow/workflow.module'
 
 @Module({
-  imports: [WorkflowModule],
+  imports: [WorkflowModule, EntityModule],
   providers: [
     AppProvenanceDataService,
     AssetProvenanceDataService,

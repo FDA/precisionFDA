@@ -1,4 +1,4 @@
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { AxiosError } from 'axios'
 import React, { useEffect, useMemo } from 'react'
 import { UseResizeColumnsState } from 'react-table'
@@ -10,7 +10,12 @@ import { PlusIcon } from '../../components/icons/PlusIcon'
 import { ContentFooter } from '../../components/Page/ContentFooter'
 import { EmptyTable } from '../../components/Table/styles'
 import Table from '../../components/Table/Table'
-import { DEFAULT_RECONNECT_ATTEMPTS, DEFAULT_RECONNECT_INTERVAL, SHOULD_RECONNECT, getNodeWsUrl } from '../../utils/config'
+import {
+  DEFAULT_RECONNECT_ATTEMPTS,
+  DEFAULT_RECONNECT_INTERVAL,
+  SHOULD_RECONNECT,
+  getNodeWsUrl,
+} from '../../utils/config'
 import { getSelectedObjectsFromIndexes } from '../../utils/object'
 import { ActionsDropdownContent } from '../home/ActionDropdownContent'
 import { ActionsRow, QuickActions, StyledHomeTable } from '../home/home.styles'
@@ -65,7 +70,7 @@ const SpaceReportListTable = ({
   )
 }
 
-export const SpaceReportList =({ spaceId }: { spaceId: number }) => {
+export const SpaceReportList = ({ spaceId }: { spaceId: number }) => {
   const {
     query,
     selectedIndexes,
@@ -94,6 +99,8 @@ export const SpaceReportList =({ spaceId }: { spaceId: number }) => {
     },
   })
 
+  const client = useQueryClient()
+
   const { lastJsonMessage: notification } = useWebSocket<Notification>(getNodeWsUrl(), {
     share: true,
     reconnectInterval: DEFAULT_RECONNECT_INTERVAL,
@@ -105,6 +112,7 @@ export const SpaceReportList =({ spaceId }: { spaceId: number }) => {
     if ([NOTIFICATION_ACTION.SPACE_REPORT_DONE, NOTIFICATION_ACTION.SPACE_REPORT_ERROR].includes(notification?.action)) {
       query.refetch()
     }
+    client.invalidateQueries({ queryKey: ['space', String(spaceId)] })
   }, [notification])
 
   const selectedItems = getSelectedObjectsFromIndexes<number, ISpaceReport>(

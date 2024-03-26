@@ -60,6 +60,9 @@ export const useAddMembersModal = ({ spaceId }: { spaceId: string }) => {
       queryClient.invalidateQueries({
         queryKey: ['space-members'],
       })
+      queryClient.invalidateQueries({
+        queryKey: ['space', spaceId.toString()],
+      })
       setShowModal(false)
       toast.success('Success: Adding members')
     },

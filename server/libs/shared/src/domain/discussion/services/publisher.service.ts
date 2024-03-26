@@ -1,14 +1,16 @@
-import type { SqlEntityManager } from '@mikro-orm/mysql'
+import { SqlEntityManager } from '@mikro-orm/mysql'
+import { Injectable } from '@nestjs/common'
 import { config } from '@shared/config'
 import { AppSeries } from '@shared/domain/app-series/app-series.entity'
 import { App } from '@shared/domain/app/app.entity'
 import { Job } from '@shared/domain/job/job.entity'
 import { Space } from '@shared/domain/space/space.entity'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { Node } from '@shared/domain/user-file/node.entity'
 import { User } from '@shared/domain/user/user.entity'
 import * as errors from '../../../errors'
 import { defaultLogger as logger } from '../../../logger'
-import type { PlatformClient } from '../../../platform-client'
+import { PlatformClient } from '../../../platform-client'
 import type { UserCtx } from '../../../types'
 import { SCOPE } from '../../../types/common'
 import { Comparison, COMPARISON_STATE } from '../../comparison/comparison.entity'
@@ -36,11 +38,12 @@ export interface IPublisherService {
 // At the moment the service is only prepared to publishing to public scope.
 // Publishing to spaces is not needed because we have a limitation in place where only items
 // already existing in the particular space can be added to space discussions (there is no need to publish them in the space).
+@Injectable()
 export class PublisherService implements IPublisherService {
   private readonly em: SqlEntityManager
   private readonly userCtx: UserCtx
   private readonly platformClient: PlatformClient
-  constructor(em: SqlEntityManager, userCtx: UserCtx, client: PlatformClient) {
+  constructor(em: SqlEntityManager, userCtx: UserContext, client: PlatformClient) {
     this.em = em
     this.userCtx = userCtx
     this.platformClient = client

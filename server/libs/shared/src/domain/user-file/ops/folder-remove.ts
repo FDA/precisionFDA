@@ -19,18 +19,17 @@ IdInput,
 number
 > {
   async run(input: IdInput): Promise<number> {
-    const em = this.ctx.em.fork()
+    const em = this.ctx.em
     const platformClient = new PlatformClient(
       { accessToken: this.ctx.user.accessToken },
       this.ctx.log,
     )
 
-    try {
-      await em.begin()
-      const repo = em.getRepository(Folder)
+    return em.transactional(async (tem) => {
+      const repo = tem.getRepository(Folder)
       const folderToRemove = await repo.findOne(input.id)
 
-      folderToRemove && await validateProtectedSpaces(em, 'remove', this.ctx.user.id, folderToRemove)
+      folderToRemove && await validateProtectedSpaces(tem, 'remove', this.ctx.user.id, folderToRemove)
 
       if (!folderToRemove) {
         throw new FolderNotFoundError()
@@ -41,15 +40,15 @@ number
         throw new Error(`Cannot remove folder ${folderToRemove.name}`
           + 'with children. Remove children first.')
       }
-      const userRepo = em.getRepository(User)
+      const userRepo = tem.getRepository(User)
       const user = await userRepo.findOneOrFail(this.ctx.user.id)
 
-      await validateEditableBy(em, folderToRemove, user)
-      await validateVerificationSpace(em, folderToRemove)
+      await validateEditableBy(tem, folderToRemove, user)
+      await validateVerificationSpace(tem, folderToRemove)
 
-      const folderPath = await getNodePath(em, folderToRemove)
+      const folderPath = await getNodePath(tem, folderToRemove)
 
-      const op = new RemoveTaggingsOperation({ em, log: this.ctx.log, user: this.ctx.user })
+      const op = new RemoveTaggingsOperation({ em: tem, log: this.ctx.log, user: this.ctx.user })
       await op.execute(folderToRemove.id)
 
       if (folderToRemove.entityType === FILE_ORIGIN_TYPE.HTTPS
@@ -67,15 +66,11 @@ number
         user,
       )
 
-      em.persist(folderEvent)
-      em.remove(folderToRemove)
-      await em.commit()
+      tem.persist(folderEvent)
+      tem.remove(folderToRemove)
       this.ctx.log.verbose({ folderName: folderToRemove.name }, 'Removed folder')
       return 1
-    } catch (err) {
-      await em.rollback()
-      throw err
-    }
+    })
   }
 }
 

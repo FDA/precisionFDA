@@ -24,6 +24,7 @@ import { AnyObject, UserOpsCtx } from '../../../types'
 import { config } from '../../../config'
 import { getIdFromScopeName, getProjectDxid } from '../../space/space.helper'
 import { MAX_PLATFORM_ALLOWED_TIMEOUT_SECONDS } from '../../../config/constants'
+import { getPluralizedTerm } from '@shared/utils/format'
 
 export class CreateJobOperation extends BaseOperation<UserOpsCtx, RunAppInput, Job> {
   private input: RunAppInput
@@ -55,29 +56,30 @@ export class CreateJobOperation extends BaseOperation<UserOpsCtx, RunAppInput, J
       })
     }
 
-    // check snapshot file
-    if (prop('snapshot', this.jobInput)) {
-      // fixme: kind of weak condition, user might not own this file etc..
-      const file = await em.findOne(UserFile, { uid: this.jobInput.snapshot })
-      if (!file) {
-        throw new errors.NotFoundError(`User file dxid: ${this.jobInput.snapshot} not found`, {
-          code: errors.ErrorCodes.USER_FILE_NOT_FOUND,
-        })
+    const inputSpec = this.getAppInputSpec(app)
+    const mappingClass: AnyObject = {}
+    for (const spec of inputSpec) {
+      if (spec.name in this.jobInput) {
+        let files: any[] = []
+        if (spec.class === 'file') {
+          mappingClass[spec.name] = 'file'
+          files = [this.jobInput[spec.name]]
+        } else if (spec.class === 'array:file') {
+          mappingClass[spec.name] = 'array:file'
+          files = this.jobInput[spec.name]
+        }
+        if (files.length) {
+          const inputFiles = await em.find(UserFile, { uid: { $in: files } })
+          if (inputFiles.length !== files.length) {
+            const foundFiles = inputFiles.map(f => f.uid)
+            throw new errors.NotFoundError(`${getPluralizedTerm(files.length, 'file')} in input but found ${inputFiles.length}: ${foundFiles}`, {
+              code: errors.ErrorCodes.USER_FILE_NOT_FOUND,
+            })
+          }
+          this.inputFiles.push(...inputFiles)
+        }
       }
-      // inputFiles should be used as a "cache" for all file links from app inputs in future
-      this.inputFiles.push(file)
     }
-
-    if (prop('app_gz', this.jobInput)) {
-      const file = await em.findOne(UserFile, { uid: this.jobInput.app_gz })
-      if (!file) {
-        throw new errors.NotFoundError(`User file dxid: ${this.jobInput.app_gz} not found`, {
-          code: errors.ErrorCodes.USER_FILE_NOT_FOUND,
-        })
-      }
-      this.inputFiles.push(file)
-    }
-
 
     if (input.scope === 'private') {
       this.projectId = getProjectToRunApp(user)
@@ -95,7 +97,7 @@ export class CreateJobOperation extends BaseOperation<UserOpsCtx, RunAppInput, J
     // @ts-ignore
     this.instance = allowedInstanceTypes[this.input.instanceType] ?? DEFAULT_INSTANCE_TYPE
     const runInputDb = this.buildJobInput(app)
-    const runDxInput = this.buildClientApiCall(app)
+    const runDxInput = this.buildClientApiCall(app, runInputDb, mappingClass)
     const jobName = input.name ?? app.title
     // todo: more conditions, user can use the file -> could be the spaces again etc
 
@@ -108,6 +110,9 @@ export class CreateJobOperation extends BaseOperation<UserOpsCtx, RunAppInput, J
       run_instance_type: this.input.instanceType,
       run_inputs: runInputDb,
       run_outputs: {},
+    }
+    if (this.input.output_folder_path?.length) {
+      runData.output_folder_path = this.input.output_folder_path
     }
     try {
       // @ts-ignore
@@ -250,7 +255,7 @@ export class CreateJobOperation extends BaseOperation<UserOpsCtx, RunAppInput, J
     return Math.min(platformTimeoutInMinutes, maxPlatformAllowedTimeoutInMinutes)
   }
 
-  private buildClientApiCall(app: App): JobCreateParams {
+  private buildClientApiCall(app: App, jobInput: AnyObject, mappingClass: AnyObject): JobCreateParams {
     // shared payload here
     const payload: JobCreateParams = {
       project: this.projectId,
@@ -269,38 +274,23 @@ export class CreateJobOperation extends BaseOperation<UserOpsCtx, RunAppInput, J
       },
       costLimit: this.input.jobLimit,
       name: this.input.name,
-      input: {},
+      input: {...jobInput},
     }
-    const inputSpec = this.getAppInputSpec(app)
-    const inputFieldNames = this.getInputFieldNames(app)
-    payload.input = inputFieldNames.reduce((obj, key) => {
-      const specItem = inputSpec.find(spec => spec.name === key)
-      let newField: AnyObject
-      if (specItem?.class === 'file') {
-        // the input provided are actually uids, not dxids
-        const fileUid: string = this.jobInput[key]
-        const inputFile = this.inputFiles.find(f => f.uid === fileUid)
-        if (!inputFile) {
-          throw new errors.NotFoundError(`User file uid: ${fileUid} not found`, {
-            code: errors.ErrorCodes.USER_FILE_NOT_FOUND,
-          })
-        }
-        newField = {
-          // fixme: no default value applied here
-          [key]: { $dnanexus_link: { id: inputFile.dxid, project: inputFile.project } },
+    for (const field in mappingClass) {
+      if (mappingClass[field] === 'file') {
+        const inputFile = this.inputFiles.find(f => f.uid === this.jobInput[field])
+        payload.input[field] = {
+          $dnanexus_link: { id: inputFile.dxid, project: inputFile.project }
         }
       } else {
-        newField = {
-          [key]: !isNil(this.jobInput[key])
-            ? this.jobInput[key]
-            : this.getDefaultSpecValue(app, key),
-        }
+        payload.input[field] = this.jobInput[field].map((fileUid: string) => {
+          const inputFile = this.inputFiles.find(f => f.uid === fileUid)
+          return {
+            $dnanexus_link: { id: inputFile.dxid, project: inputFile.project }
+          }
+        })
       }
-      return {
-        ...obj,
-        ...newField,
-      }
-    }, {})
+    }
     return payload
   }
 }

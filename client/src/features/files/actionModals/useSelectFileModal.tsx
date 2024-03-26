@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import styled from 'styled-components'
 import { Button } from '../../../components/Button'
 import { Checkbox } from '../../../components/Checkbox'
@@ -36,9 +36,9 @@ import {
 import { fetchFilteredFiles } from '../../apps/apps.api'
 import {
   IAccessibleFile,
-  fetchAccessibleFilesByUID,
 } from '../../databases/databases.api'
 import { DialogType } from '../../home/types'
+import { useFetchFilesByUIDQuery } from '../query/useFetchFilesByUIDQuery'
 
 const StyledLoader = styled.div`
   padding: 12px;
@@ -46,6 +46,7 @@ const StyledLoader = styled.div`
 
 const SyledFilterWrapper = styled.div`
   display: flex;
+  gap: 4px;
 `
 
 const StyledFilterFileSection = styled(StyledFilterSection)`
@@ -143,7 +144,7 @@ const Row = ({
       </StyledFileDetail>
     </StyledCell>
     <StyledCell>
-      <StyledAction href={file.path}>
+      <StyledAction href={file.path} target='_blank'>
         <ArrowUpRightFromSquareIcon />
       </StyledAction>
     </StyledCell>
@@ -171,15 +172,7 @@ const FileSelectTabs = ({
   const [showOnlyMyFiles, setShowOnlyMyFiles] = useState(false)
   const searchText = useDebounce(filter, 250)
 
-  const { isFetching } = useQuery({
-    queryFn: () => fetchAccessibleFilesByUID({ uid: uids ?? [] }),
-    queryKey: ['user-list-files', uids],
-    enabled: !!uids && uids.length > 0,
-    select(data) {
-      setSelectedFiles(data)
-      return data
-    },
-  })
+  const { data: fetchAccessibleData, status: fetchAccessibleStatus, isFetching } = useFetchFilesByUIDQuery(uids || [])
 
   const { data: filesData, isLoading, status: loadingFilesStatus } = useQuery({
     queryKey: ['list_files', searchText],
@@ -188,6 +181,12 @@ const FileSelectTabs = ({
       scopes: scopes ?? [],
     }),
   })
+
+  useEffect(() => {
+    if (fetchAccessibleStatus === 'success' && fetchAccessibleData) {
+      setSelectedFiles(fetchAccessibleData)
+    }
+  }, [fetchAccessibleStatus, fetchAccessibleData])
 
   const radioCallback = (file: IAccessibleFile) => {
     setSelectedFiles([file])
@@ -240,7 +239,7 @@ const FileSelectTabs = ({
             </StyledLoader>
           )}
           {(selectedFiles?.length === 0 || uids?.length === 0) &&
-            !isFetching && <StyledRow>No selected files</StyledRow>}
+            !isFetching && <div>No selected files</div>}
           <ModalScroll>
             <SelectableTable>
               <tbody>

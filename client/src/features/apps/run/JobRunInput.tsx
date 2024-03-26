@@ -297,7 +297,7 @@ export const JobRunInput = ({
       )
     }
     case 'boolean': {
-      const val = field.value
+      const val = field.value?.toString()
       return (
         <>
           <BoolButtonGroup>

@@ -1,5 +1,6 @@
 import { App } from '@shared/domain/app/app.entity'
 import { Comparison } from '@shared/domain/comparison/comparison.entity'
+import { Discussion } from '@shared/domain/discussion/discussion.entity'
 import { EntityType } from '@shared/domain/entity/domain/entity.type'
 import { Job } from '@shared/domain/job/job.entity'
 import { EntityProvenanceDataProviderService } from '@shared/domain/provenance/service/entity-data/entity-provenance-data-provider.service'
@@ -34,6 +35,9 @@ describe('EntityProvenanceDataProviderService', () => {
   const WORKFLOW_ID = 7
   const WORKFLOW = { id: WORKFLOW_ID } as unknown as Workflow
 
+  const DISCUSSION_ID = 8
+  const DISCUSSION = { id: DISCUSSION_ID } as unknown as Discussion
+
   const appGetDataStub = stub()
   const appGetParentsStub = stub()
 
@@ -54,6 +58,9 @@ describe('EntityProvenanceDataProviderService', () => {
 
   const workflowGetDataStub = stub()
   const workflowGetParentsStub = stub()
+
+  const discussionGetDataStub = stub()
+  const discussionGetParentsStub = stub()
 
   beforeEach(() => {
     appGetDataStub.reset()
@@ -97,6 +104,12 @@ describe('EntityProvenanceDataProviderService', () => {
 
     workflowGetParentsStub.reset()
     workflowGetParentsStub.throws()
+
+    discussionGetDataStub.reset()
+    discussionGetDataStub.throws()
+
+    discussionGetParentsStub.reset()
+    discussionGetParentsStub.throws()
   })
   ;[
     { type: 'app', entity: APP, dataStub: appGetDataStub, parentsStub: appGetParentsStub },
@@ -120,6 +133,12 @@ describe('EntityProvenanceDataProviderService', () => {
       entity: WORKFLOW,
       dataStub: workflowGetDataStub,
       parentsStub: workflowGetParentsStub,
+    },
+    {
+      type: 'discussion',
+      entity: DISCUSSION,
+      dataStub: discussionGetDataStub,
+      parentsStub: discussionGetParentsStub,
     },
   ].forEach((prop) => {
     it(`should use the correct data provider for source type ${prop.type}`, async () => {
@@ -277,6 +296,10 @@ describe('EntityProvenanceDataProviderService', () => {
       workflow: {
         getData: workflowGetDataStub,
         getParents: workflowGetParentsStub,
+      },
+      discussion: {
+        getData: discussionGetDataStub,
+        getParents: discussionGetParentsStub,
       },
     }
     return new EntityProvenanceDataProviderService(ENTITY_PARENT_RESOLVER_MAP)

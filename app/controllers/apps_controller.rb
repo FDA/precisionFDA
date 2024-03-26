@@ -335,6 +335,7 @@ class AppsController < ApplicationController
             jobLimit: job_limit,
             scope: scope,
             input: input_info.run_inputs,
+            output_folder_path: output_folder_path,
           )
         rescue HttpsAppsClient::Error => e
           fail e.message

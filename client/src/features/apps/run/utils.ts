@@ -1,4 +1,4 @@
-import { isSafeInteger } from 'lodash'
+import { isSafeInteger, uniq } from 'lodash'
 import * as Yup from 'yup'
 import { IUser } from '../../../types/user'
 import { promiseAllMap } from '../../../utils/promiseAllMap'
@@ -15,6 +15,7 @@ import {
 } from '../apps.types'
 import { isFloatValid, isStrictlyInteger } from '../form/common'
 import { cleanObject } from '../../../utils/object'
+import { FileUid } from '../../files/files.types'
 
 export const getLabel = (inputSpec: InputSpec) =>
   inputSpec.label ? inputSpec.label : inputSpec.name
@@ -128,9 +129,37 @@ export const getValue = (
     return (value as string[]).map((v) => parseInt(v as string, 10))
   }
   if (inputClass === 'boolean') {
-    return value === 'false' ? false : true
+    return value !== 'false'
   }
   return value as string | boolean
+}
+
+export function mapInputKeyVals(inputVals: JobRunForm['inputs'], inputSpecs: InputSpec[]) {
+  let inputs: { [key: string]: string | string[] | number | boolean | undefined | null } = {}
+  
+  Object.keys(inputVals).forEach(key => {
+    const value = inputVals[key]
+    inputs[key] = getValue(key, value, inputSpecs)
+  })
+
+  inputs = cleanObject(inputs)
+
+  return inputs
+}
+
+export function getFileUIDsFromAppRun(inputVals: JobRunForm['inputs'], inputSpecs: InputSpec[]) {
+  const filearr = inputSpecs.filter(s => s.class === 'array:file' || s.class === 'file')
+  const uids: string[] | string[][] = []
+  
+  Object.keys(inputVals).forEach(key => {
+    const f = filearr.find(s => s.name === key)
+    const value = inputVals[key]
+    if(f) { 
+      uids.push(value)
+    }
+  })
+
+  return uniq(uids.flat().filter(i => !!i))
 }
 
 
@@ -139,14 +168,7 @@ export const createRequestObject = (
   app: IApp,
   inputSpecs: InputSpec[],
 ): RunJobRequest => {
-  let inputs: { [key: string]: string | string[] | number | boolean | undefined | null } = {}
-  
-  Object.keys(vals.inputs).forEach(key => {
-    const value = vals.inputs[key]
-    inputs[key] = getValue(key, value, inputSpecs)
-  })
-
-  inputs = cleanObject(inputs)
+  const inputs = mapInputKeyVals(vals.inputs, inputSpecs)
 
   return {
     id: app.uid,
@@ -172,48 +194,41 @@ export const getLicensesToAccept = (
   return remainingLicenses
 }
 
-function getAllIOSpecFiles(inputs: JobRunForm['inputs']) {
-  let ids: IAccessibleFile[] = []
+export const extractFileUids = (inputs: { [key: string]: FormInput }): FileUid[] => {
+  const fileUidsSet = new Set<FileUid>()
 
-  Object.keys(inputs).forEach(key => {
-    const i = inputs[key]
-    if (!i) return
-    if (Array.isArray(i) && typeof i[0] === 'object') {
-      i.forEach(k => {
-        ids.push(k as IAccessibleFile)
+  const isFileUid = (input: string): input is FileUid => {
+    const parts = input.split('-')
+    return parts.length === 3 && parts[0] === 'file' && !Number.isNaN(Number(parts[2]))
+  }
+
+  const extractUid = (inputString: string) => {
+    if (isFileUid(inputString)) {
+      fileUidsSet.add(inputString)
+    }
+  }
+
+  Object.entries(inputs).forEach(([, value]) => {
+    if (typeof value === 'string') {
+      extractUid(value)
+    } else if (Array.isArray(value)) {
+      value.forEach(item => {
+        if (typeof item === 'string') {
+          extractUid(item)
+        }
       })
     }
-    if (typeof i === 'object') {
-      ids.push(i as IAccessibleFile)
-    }
   })
 
-  ids = ids.filter(k => !!k)
-  return ids
+  return [...fileUidsSet]
 }
 
-export const fetchLicensesOnFiles = (inputs: JobRunForm['inputs']): Promise<License[]> => {
-  const ids = getAllIOSpecFiles(inputs).map(i => i.id)
-  if (ids.length > 0) {
-    return fetchLicensesForFiles(ids)
+export const fetchLicensesOnFiles = (inputs: { [key: string]: FormInput }): Promise<License[]> => {
+  const uids = extractFileUids(inputs)
+  if (uids.length > 0) {
+    return fetchLicensesForFiles(uids)
   }
   return Promise.resolve([])
-}
-
-export async function fetchDefaultFiles(
-  input_spec: InputSpec[],
-) {
-  const promiseMap: Record<string, Promise<IAccessibleFile | IAccessibleFile[]>> = {}
-
-  input_spec.forEach((input, index) => {
-    if (input.class === 'file' && input?.default) {
-      promiseMap[index] = fetchAccessibleFilesByUID({ uid: input.default }).then(f => f[0])
-    }
-    if (input.class === 'array:file' && input?.default) {
-      promiseMap[index] = fetchAccessibleFilesByUID({ uid: input.default })
-    }
-  })
-  return promiseAllMap(promiseMap)
 }
 
 export const getBaseLink = (spaceId?: string) => spaceId ? `spaces/${spaceId}` : 'home'

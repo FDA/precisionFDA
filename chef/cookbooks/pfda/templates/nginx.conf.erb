@@ -59,6 +59,13 @@ http {
       resolver 8.8.8.8;
     }
 
+    # Reverse proxy for GSRS js, images, and CSS files
+    # This is because of actions made by request_forgery_protection.rb; check method verify_same_origin_request for more details
+    # The non js file extensions are added just to offload serving static content via ruby
+    location ~ ^/ginas/.*\.(js|css|png|jpg|jpeg|gif)$ {
+      proxy_pass <%= @gsrs_host %>;
+    }
+
     root /srv/pfda/public;
 
     try_files $uri/index.html $uri @pfda;
