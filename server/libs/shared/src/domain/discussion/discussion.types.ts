@@ -60,6 +60,7 @@ type DiscussionAttachment = {
   uid: string
   type: 'App' | 'UserFile' | 'Asset' | 'Job' | 'Comparison'
   name: string
+  link: string
 }
 
 // this should be unified somewhere in the api root types.

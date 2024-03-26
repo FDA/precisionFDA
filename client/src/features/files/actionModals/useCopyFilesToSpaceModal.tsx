@@ -46,9 +46,6 @@ export const useCopyFilesToSpaceModal = ({ spaceId }: { spaceId?: string }) => {
         uids: selectedFiles,
       }),
     onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ['files'],
-      })
       setShowModal(false)
     },
   })

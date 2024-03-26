@@ -1,23 +1,38 @@
+import { EntityService } from '@shared/domain/entity/entity.service'
+import { UserProvenanceDataService } from '@shared/domain/provenance/service/entity-data/user-provenance-data.service'
 import { User } from '@shared/domain/user/user.entity'
+import { EntityUtils } from '@shared/utils/entity.utils'
 import { expect } from 'chai'
-import {
-  UserProvenanceDataService,
-} from '../../../src/domain/provenance/service/entity-data/user-provenance-data.service'
+import { SinonStub, stub } from 'sinon'
 
 describe('UserProvenanceDataService', () => {
   const FULL_NAME = 'full name'
-  const DX_USER = 'dxuser'
+  const LINK = 'LINK'
 
-  const USER = {
-    fullName: FULL_NAME,
-    dxuser: DX_USER,
-  } as unknown as User
+  const USER = { fullName: FULL_NAME } as unknown as User
+
+  const getEntityLinkStub = stub()
+
+  let getEntityTypeForEntityStub: SinonStub
+
+  beforeEach(() => {
+    getEntityLinkStub.reset()
+    getEntityLinkStub.throws()
+    getEntityLinkStub.withArgs(USER).resolves(LINK)
+
+    getEntityTypeForEntityStub = stub(EntityUtils, 'getEntityTypeForEntity').throws()
+    getEntityTypeForEntityStub.withArgs(USER).returns('user')
+  })
+
+  afterEach(() => {
+    getEntityTypeForEntityStub.restore()
+  })
 
   describe('#getData', () => {
-    it('should provide correct data about the user', () => {
-      const res = getInstance().getData(USER)
+    it('should provide correct data about the user', async () => {
+      const res = await getInstance().getData(USER)
 
-      expect(res).to.deep.equal({ type: 'user', url: `https://rails-host:1234/users/${DX_USER}`, title: FULL_NAME })
+      expect(res).to.deep.equal({ type: 'user', url: LINK, title: FULL_NAME })
     })
   })
 
@@ -30,6 +45,8 @@ describe('UserProvenanceDataService', () => {
   })
 
   function getInstance() {
-    return new UserProvenanceDataService()
+    const entityService = { getEntityLink: getEntityLinkStub } as unknown as EntityService
+
+    return new UserProvenanceDataService(entityService)
   }
 })

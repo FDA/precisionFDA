@@ -27,7 +27,7 @@ describe('POST /account/checkSpacesPermissions', () => {
 
     const args = []
     fakes.queue.createSyncSpacesPermissionsTask.callsFake((...a) => {
-      a[0] = a[0].toJSON()
+      a[0] = { ...a[0] }
       args.push(a)
     })
 

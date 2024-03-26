@@ -35,10 +35,6 @@ services:
     working_dir: /precision-fda
     ports:
       - 3000:3000
-    depends_on:
-      - db
-      - redis
-      - sidekiq
     entrypoint: ./docker/entrypoint/isolation.docker-entrypoint.sh
 
   frontend:
@@ -63,16 +59,10 @@ services:
     command: ['make', 'run-dist']
     ports:
       - 3001:3001
-    depends_on:
-      - db
-      - redis
   nodejs-worker:
     extends:
       service: base_nodejs
     command: ['make', 'run-worker-dist']
-    depends_on:
-      - db
-      - redis
   sidekiq:
     extends:
       service: base_ruby
@@ -81,8 +71,6 @@ services:
         source: ../
         target: /precision-fda
     entrypoint: docker/entrypoint/sidekiq.entrypoint.sh
-    depends_on:
-      - redis
   db:
     image: mysql:8.0
     environment:

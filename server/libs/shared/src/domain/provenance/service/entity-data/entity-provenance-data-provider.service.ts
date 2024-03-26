@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common'
-import { EntityType } from '@shared/domain/entity/domain/entity.type'
+import { EntityWithProvenanceType } from '@shared/domain/provenance/model/entity-with-provenance.type'
 import { ENTITY_TYPE_TO_PARENT_RESOLVER_MAP } from '@shared/domain/provenance/providers/entity-type-to-parent-resolver-map.provider'
 import { ArrayUtils } from '@shared/utils/array.utils'
 import { EntityProvenance } from '../../model/entity-provenance'
@@ -11,7 +11,7 @@ export class EntityProvenanceDataProviderService {
   constructor(
     @Inject(ENTITY_TYPE_TO_PARENT_RESOLVER_MAP)
     private readonly ENTITY_PARENT_RESOLVER_MAP: {
-      [T in EntityType]: EntityProvenanceDataService<T>
+      [T in EntityWithProvenanceType]: EntityProvenanceDataService<T>
     },
   ) {}
 
@@ -20,7 +20,7 @@ export class EntityProvenanceDataProviderService {
       this.ENTITY_PARENT_RESOLVER_MAP[source.type]
 
     const result: EntityProvenance = {
-      data: dataService.getData(source.entity),
+      data: await dataService.getData(source.entity),
     }
 
     const parents = await dataService.getParents(source.entity)

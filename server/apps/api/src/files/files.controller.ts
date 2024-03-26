@@ -18,6 +18,9 @@ import archiver from 'archiver'
 import axios from 'axios'
 import { UserFileService } from '@shared/domain/user-file/service/user-file.service'
 import { OptionalParseIntPipe } from '../validation/pipes/optional-int.pipe'
+import { CustomValidationPipe } from '../validation/pipes/validation.pipe'
+import { ResolvePathDTO } from '@shared/domain/user-file/dto/user-file.dto'
+import { UserFileResolverFacade } from '../facade/user-file/user-file-resolver.facade'
 
 @UseGuards(UserContextGuard)
 @Controller('/files')
@@ -26,6 +29,7 @@ export class FilesController {
     private readonly user: UserContext,
     private readonly log: Logger,
     private readonly userFileService: UserFileService,
+    private readonly userFileResolverFacade: UserFileResolverFacade,
   ) {}
 
   // Triggers job that closes file
@@ -96,5 +100,10 @@ export class FilesController {
     const pad = (number: number) => (number < 10 ? '0' : '') + number
     const now = new Date()
     return `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
+  }
+  
+  @Get('/path-resolver')
+  async resolvePath(@Query(new CustomValidationPipe({ transform: true })) query: ResolvePathDTO) {
+    return await this.userFileResolverFacade.resolvePath(query)
   }
 }

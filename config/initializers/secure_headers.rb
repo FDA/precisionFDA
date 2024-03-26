@@ -1,6 +1,11 @@
 # rubocop:disable Lint/PercentStringArray
 SecureHeaders::Configuration.default do |config|
-  config.hsts = "max-age=#{20.years.to_i}; includeSubDomains; preload"
+  # This header says "From now on, for max-age seconds enforce https protocol on this domain"
+  # Causing problems with other apps (that do not support https) running on our development devices
+  hsts_max_age = 20.years.to_i
+  hsts_max_age = 0 if Rails.env.development? && ActiveRecord::Type::Boolean.new.cast(ENV.fetch("DISABLE_HSTS", false))
+  config.hsts = "max-age=#{hsts_max_age}; includeSubDomains; preload"
+
   config.x_frame_options = "DENY"
   config.x_content_type_options = "nosniff"
   config.x_xss_protection = "1; mode=block"
@@ -71,7 +76,7 @@ SecureHeaders::Configuration.default do |config|
       https://dnanexus.github.io
       https://cdnjs.cloudflare.com
     ),
-    report_only: false
+    report_only: false,
   }
 end
 # rubocop:enable Lint/PercentStringArray

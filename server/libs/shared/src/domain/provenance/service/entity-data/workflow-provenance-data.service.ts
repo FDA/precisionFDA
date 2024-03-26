@@ -1,21 +1,18 @@
 import { Injectable } from '@nestjs/common'
-import { config } from '@shared/config'
+import { EntityService } from '@shared/domain/entity/entity.service'
 import { Workflow } from '@shared/domain/workflow/entity/workflow.entity'
 import { WorkflowService } from '../../../workflow/service/workflow.service'
-import { EntityProvenanceData } from '../../model/entity-provenance-data'
 import { EntityProvenanceSourceUnion } from '../../model/entity-provenance-source-union'
 import { EntityProvenanceDataService } from './entity-provenance-data.service'
 
 @Injectable()
-export class WorkflowProvenanceDataService implements EntityProvenanceDataService<'workflow'> {
-  constructor(private readonly workflowService: WorkflowService) {}
-
-  getData(workflow: Workflow): EntityProvenanceData<'workflow'> {
-    return {
-      type: 'workflow',
-      url: `${config.api.railsHost}/home/workflows/${workflow.uid}`,
-      title: workflow.title,
-    }
+export class WorkflowProvenanceDataService extends EntityProvenanceDataService<'workflow'> {
+  protected type = 'workflow' as const
+  constructor(
+    private readonly workflowService: WorkflowService,
+    entityService: EntityService,
+  ) {
+    super(entityService)
   }
 
   async getParents(workflow: Workflow): Promise<EntityProvenanceSourceUnion[]> {

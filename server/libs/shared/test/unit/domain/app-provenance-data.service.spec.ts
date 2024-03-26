@@ -1,14 +1,14 @@
 import { App } from '@shared/domain/app/app.entity'
+import { EntityService } from '@shared/domain/entity/entity.service'
+import { AppProvenanceDataService } from '@shared/domain/provenance/service/entity-data/app-provenance-data.service'
+import { EntityUtils } from '@shared/utils/entity.utils'
 import { expect } from 'chai'
-import { stub } from 'sinon'
-import {
-  AppProvenanceDataService,
-} from '../../../src/domain/provenance/service/entity-data/app-provenance-data.service'
+import { SinonStub, stub } from 'sinon'
 
 describe('AppProvenanceDataService', () => {
   const TITLE = 'title'
   const REVISION = 'revision'
-  const UID = 'uid'
+  const LINK = 'LINK'
 
   const ASSET_1_ID = 0
   const ASSET_2_ID = 1
@@ -18,28 +18,50 @@ describe('AppProvenanceDataService', () => {
   const ASSETS = [ASSET_1, ASSET_2]
 
   const loadAssetsStub = stub()
+  const getEntityLinkStub = stub()
 
   const APP = {
     title: TITLE,
     revision: REVISION,
-    uid: UID,
     assets: { loadItems: loadAssetsStub },
   } as unknown as App
+
+  let getEntityTypeForEntityStub: SinonStub
 
   beforeEach(() => {
     loadAssetsStub.reset()
     loadAssetsStub.resolves(ASSETS)
+
+    getEntityLinkStub.reset()
+    getEntityLinkStub.throws()
+    getEntityLinkStub.withArgs(APP).resolves(LINK)
+
+    getEntityTypeForEntityStub = stub(EntityUtils, 'getEntityTypeForEntity').throws()
+    getEntityTypeForEntityStub.withArgs(APP).returns('app')
+  })
+
+  afterEach(() => {
+    getEntityTypeForEntityStub.restore()
   })
 
   describe('#getData', () => {
-    it('should provide correct data about the app', () => {
-      const res = getInstance().getData(APP)
+    it('should provide correct data about the app', async () => {
+      const res = await getInstance().getData(APP)
 
-      expect(res).to.deep.equal({ type: 'app', url: `https://rails-host:1234/home/apps/${UID}`, title: `${TITLE} (revision ${REVISION})` })
+      expect(res).to.deep.equal({
+        type: 'app',
+        url: LINK,
+        title: `${TITLE} (revision ${REVISION})`,
+      })
     })
 
-    it('should provide app title as title if no revision', () => {
-      const res = getInstance().getData({ ...APP, revision: null })
+    it('should provide app title as title if no revision', async () => {
+      const NO_REVISION_APP = { ...APP, revision: null } as unknown as App
+
+      getEntityTypeForEntityStub.withArgs(NO_REVISION_APP).returns('app')
+      getEntityLinkStub.withArgs(NO_REVISION_APP).resolves(LINK)
+
+      const res = await getInstance().getData(NO_REVISION_APP)
 
       expect(res.title).to.eq(TITLE)
     })
@@ -65,6 +87,7 @@ describe('AppProvenanceDataService', () => {
   })
 
   function getInstance() {
-    return new AppProvenanceDataService()
+    const entityService = { getEntityLink: getEntityLinkStub } as unknown as EntityService
+    return new AppProvenanceDataService(entityService)
   }
 })

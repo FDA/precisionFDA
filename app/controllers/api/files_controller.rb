@@ -167,6 +167,11 @@ module Api
       fail e.message
     end
 
+    def path_resolver
+      result = https_apps_client.resolve_path(params[:path], params[:scope], params[:type])
+      render json: result
+    end
+
     # GET /api/files/featured
     # A fetch method for files, accessible by public and with user taggings.
     # @param created_at [String] Param for ordering.
@@ -816,6 +821,7 @@ module Api
         Folder.editable_by(@context).
           where(scoped_parent_folder_id: params[:parent_folder_id]).
           where(name: params[:name]).
+          where(scope: scope).
           first.id
       end
     end

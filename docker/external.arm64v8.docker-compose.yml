@@ -9,6 +9,8 @@ services:
       - GSRS_URL=http://gsrs:8080
       - GSRS_ENABLED=true
   gsrs:
+    depends_on:
+      - gsrsdb
     extends:
       file: ./external.services.yml
       service: gsrs

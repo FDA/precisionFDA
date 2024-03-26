@@ -8,7 +8,7 @@ import { FileScope } from '../files/files.types'
 import { License } from '../licenses/types'
 import { IFilter, IMeta, ServerScope } from '../home/types'
 import { Params, formatScopeQ, prepareListFetch } from '../home/utils'
-import { AppSpec, ComputeInstance, FileType, IApp, IOSpec, InputSpec } from './apps.types'
+import { AppSpec, ComputeInstance, IApp, IOSpec, InputSpec } from './apps.types'
 
 export interface FetchAppsQuery {
   apps: IApp[]
@@ -152,8 +152,7 @@ export interface CreateAppPayload {
 
 
 export interface CreateAppResponse {
-  id: IApp
-  error?: Error
+  id: string
 }
 
 export interface AppFetchResponse {
@@ -170,25 +169,21 @@ export interface AppFetchResponse {
   }
 }
 
-export async function createEditAppRequest(payload: CreateAppPayload) {
+export async function createEditAppRequest(payload: CreateAppPayload): Promise<CreateAppResponse> {
   return axios.post<CreateAppResponse>('/api/apps', payload).then(r => r.data)
 }
 
-export async function fetchApp(uid: string) {
+export async function fetchApp(uid: string): Promise<AppFetchResponse> {
   return axios.get(`/api/apps/${uid}`).then(r => r.data as AppFetchResponse)
 }
 
-export interface UploadAppConfigFilePayload {
-  format: FileType
-  file: string
-}
 export interface UploadAppConfigFileResponse {
   id: string
   asset_uid: null | string
 }
 
-export async function uploadAppConfigFileRequest(payload: FormData) {
+export async function uploadAppConfigFileRequest(payload: FormData): Promise<UploadAppConfigFileResponse> {
   return axios.post('/api/apps/import', payload, {
-    headers: { 'Content-Type': 'multipart/form-data' }, 
+    headers: { 'Content-Type': 'multipart/form-data' },
   }).then(r => r.data as UploadAppConfigFileResponse)
 }
