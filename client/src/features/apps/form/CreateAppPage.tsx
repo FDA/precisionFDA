@@ -5,43 +5,38 @@ import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import { cleanObject } from '../../../utils/object'
-import { createEditAppRequest } from '../apps.api'
-import { CreateAppForm } from '../apps.types'
+import { CreateAppPayload, CreateAppResponse, createEditAppRequest } from '../apps.api'
 import { AppForm } from './AppForm'
-
 
 export const CreateAppPage = () => {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
 
-  const createAppMutation = useMutation({
-    mutationKey: ['create-app'],
-    mutationFn: (payload: any) => createEditAppRequest(payload),
-    onSuccess: res => {
-      if (res?.id) {
-        navigate(`/home/apps/${res?.id}`)
-        queryClient.invalidateQueries({
-          queryKey: ['apps'],
-        })
-        queryClient.invalidateQueries({
-          queryKey: ['counters'],
-        })
-        toast.success('Your app was created successfully')
-      } else if (res?.error) {
-        toast.error(`${res.error.type}: ${res.error.message}`)
-      } else {
-        toast.error('Something went wrong!')
-      }
-    },
-    onError: () => {
-      toast.error('There was an error creating your app')
-    },
-  })
+  // There used to be an approach to write error handling logic into useMutation onError callback, but the problem is
+  // the onError callback won't stop Error propagation, therefore there has to be a catch clause anyway (as can be seen few lines bellow)
+  const appMutation = useMutation({ mutationFn: createEditAppRequest })
 
-  const onSubmit = (d: CreateAppForm) => {
+  const onSubmit = async (d: CreateAppPayload) => {
     const vals = { ...d, input_spec: d.input_spec.map(i => cleanObject(i)) }
-    return createAppMutation.mutateAsync(vals)
+
+    try {
+      const res: CreateAppResponse = await appMutation.mutateAsync(vals)
+      navigate(`/home/apps/${res.id}`)
+      queryClient.invalidateQueries({
+        queryKey: ['apps'],
+      })
+      queryClient.invalidateQueries({
+        queryKey: ['counters'],
+      })
+      toast.success('Your app was created successfully')
+    } catch (err) {
+      // The default error message choice is an error we "intentionally" send from the backend
+      // The second choice is a standard Error object message
+      // The 'Unknown error' is a fallback in case the previous options provide nothing better than - for example - an empty string
+      const message = err.response?.data?.error?.message || err.message || 'Unknown error'
+      toast.error(`Error while creating app: ${message}`)
+    }
   }
 
-  return <AppForm onSubmit={onSubmit} />
+  return <AppForm onSubmit={onSubmit} isSubmitting={appMutation.isPending}/>
 }

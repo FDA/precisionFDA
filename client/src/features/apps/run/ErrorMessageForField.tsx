@@ -4,7 +4,7 @@ import { FieldErrors } from 'react-hook-form'
 import { InputError } from '../../../components/form/styles'
 
 export const ErrorMessageForField = ({ errors, fieldName }:
-  { errors: FieldErrors<Record<string, unknown>>, fieldName: string }) =>
+  { errors: FieldErrors, fieldName: string }) =>
 (
   <ErrorMessage
     errors={errors}

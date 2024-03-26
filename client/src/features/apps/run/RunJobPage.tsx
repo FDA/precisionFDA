@@ -20,7 +20,8 @@ export const RunJobPage = ({ spaceId }: { spaceId?: string }) => {
   const user = useAuthUser()
   const { data: appData, isLoading } = useQuery({
     queryKey: ['app', appUid],
-    queryFn: () => fetchApp(appUid),
+    enabled: !!appUid,
+    queryFn: () => fetchApp(appUid!),
   })
 
   const app = appData?.app

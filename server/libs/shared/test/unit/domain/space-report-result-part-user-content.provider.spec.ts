@@ -15,32 +15,32 @@ describe('SpaceReportResultPartUserContentProvider', () => {
 
   const TITLE_ID = 'TITLE_ID'
 
-  it('should add title', () => {
-    const res = getInstance().provide(REPORT_PART, TITLE_ID)
+  it('should add title', async () => {
+    const res = await getInstance().provide(REPORT_PART, TITLE_ID)
 
     expect(res.textContent).to.include(TITLE)
   })
 
-  it('should include element with the provided ID', () => {
-    const res = getInstance().provide(REPORT_PART, TITLE_ID)
+  it('should include element with the provided ID', async () => {
+    const res = await getInstance().provide(REPORT_PART, TITLE_ID)
 
     expect(res.querySelector(`#${TITLE_ID}`)).to.exist()
   })
 
-  it('should add member since', () => {
-    const res = getInstance().provide(REPORT_PART, TITLE_ID)
+  it('should add member since', async () => {
+    const res = await getInstance().provide(REPORT_PART, TITLE_ID)
 
     expect(res.textContent).to.include(MEMBER_SINCE.toLocaleString())
   })
 
-  it('should add role', () => {
-    const res = getInstance().provide(REPORT_PART, TITLE_ID)
+  it('should add role', async () => {
+    const res = await getInstance().provide(REPORT_PART, TITLE_ID)
 
     expect(res.textContent).to.include('Lead')
   })
 
-  it('should add link to dxuser', () => {
-    const res = getInstance().provide(REPORT_PART, TITLE_ID)
+  it('should add link to dxuser', async () => {
+    const res = await getInstance().provide(REPORT_PART, TITLE_ID)
 
     const link = res.querySelector(`[href="${LINK}"]`)
     expect(link).to.exist()

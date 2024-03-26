@@ -1,24 +1,20 @@
 import { Injectable } from '@nestjs/common'
-import { config } from '@shared/config'
 import { App } from '@shared/domain/app/app.entity'
-import { EntityProvenanceData } from '../../model/entity-provenance-data'
 import { EntityProvenanceSourceUnion } from '../../model/entity-provenance-source-union'
 import { EntityProvenanceDataService } from './entity-provenance-data.service'
 
 @Injectable()
-export class AppProvenanceDataService implements EntityProvenanceDataService<'app'> {
-  getData(app: App): EntityProvenanceData<'app'> {
-    let title = app.title
+export class AppProvenanceDataService extends EntityProvenanceDataService<'app'> {
+  protected type = 'app' as const
 
-    if (app.revision != null) {
-      title += ` (revision ${app.revision})`
+  protected getTitle(app: App): string {
+    const title = super.getTitle(app)
+
+    if (app.revision == null) {
+      return title
     }
 
-    return {
-      type: 'app',
-      url: `${config.api.railsHost}/home/apps/${app.uid}`,
-      title,
-    }
+    return `${title} (revision ${app.revision})`
   }
 
   async getParents(app: App): Promise<EntityProvenanceSourceUnion[]> {

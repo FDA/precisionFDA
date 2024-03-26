@@ -5,7 +5,7 @@ import { toast } from 'react-toastify'
 import { Loader } from '../../../components/Loader'
 import { NotAllowedPage } from '../../../components/NotAllowed'
 import { cleanObject } from '../../../utils/object'
-import { CreateAppPayload, createEditAppRequest } from '../apps.api'
+import { CreateAppPayload, CreateAppResponse, createEditAppRequest } from '../apps.api'
 import { useFetchAppQuery } from '../useFetchAppQuery'
 import { AppForm } from './AppForm'
 import { mapFromServerToForm } from './common'
@@ -19,31 +19,24 @@ export const EditAppPage = ({ spaceId }: { spaceId?: string }) => {
 
   const { data, isError, isLoading } = useFetchAppQuery(appUid)
 
-  const createAppMutation = useMutation({
-    mutationKey: ['edit-app'],
-    mutationFn: createEditAppRequest,
-    onSuccess: res => {
-      if (res?.id) {
-        navigate(`${getBasePath(spaceId)}/apps/${res?.id}`)
-        queryClient.invalidateQueries({
-          queryKey: ['apps', 'app'],
-        })
-        toast.success('New revision created')
-      } else if (res?.error) {
-        toast.error(`${res.error.type}: ${res.error.message}`)
-      } else {
-        toast.error('Something went wrong!')
-      }
-    },
-    onError: () => {
-      toast.error('There was a problem creating a new revision')
-    },
-  })
+  const appMutation = useMutation({ mutationFn: createEditAppRequest })
 
   const onSubmit = async (d: CreateAppPayload) => {
     const vals = { ...d, input_spec: d.input_spec.map(i => cleanObject(i)) }
-    return createAppMutation.mutateAsync(vals)
+
+    try {
+      const res: CreateAppResponse = await appMutation.mutateAsync(vals)
+      navigate(`${getBasePath(spaceId)}/apps/${res?.id}`)
+      queryClient.invalidateQueries({
+        queryKey: ['apps', 'app'],
+      })
+      toast.success('New revision created')
+    } catch (err) {
+      const message = err.response?.data?.error?.message || err.message || 'Unknown error'
+      toast.error(`Error while editing app: ${message}`)
+    }
   }
+
 
   if (isLoading) return <Loader className="pageloader" />
   if (isError && !data) return <NotAllowedPage />
@@ -53,6 +46,7 @@ export const EditAppPage = ({ spaceId }: { spaceId?: string }) => {
       isEdit
       onSubmit={onSubmit}
       app={data.app}
+      isSubmitting={appMutation.isPending}
       defaultVals={{
         is_new: false,
         name: data.app.name,

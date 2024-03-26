@@ -73,7 +73,7 @@ export const Assets = () => {
                         Use the Markdown syntax to format your readme.
                         For inspiration on how to write useful readme files, see some of the existing assets published
                         by the precisionFDA team, and consult {' '}
-                        <Link to="creating-apps#app-own-assets">
+                        <Link to="/docs/creating-apps#app-own-assets">
                             Your own assets
                         </Link>{' '} in the precisionFDA documentation guide for a markdown template.
                     </DocsTip>
@@ -86,9 +86,22 @@ export const Assets = () => {
                     desired asset name (must end in .tar or .tar.gz)
                 </p>
                 <p>
+                    In a Linux or Unix environment:
+                </p>
+                <p>
                     <code>
                         {
-                            './pfda upload-asset -name NAME{.tar or .tar.gz} -root /PATH/TO/ROOT/FOLDER -readme README{.txt or .md}> -key KEY'
+                            './pfda upload-asset -name NAME{.tar or .tar.gz} -root /PATH/TO/ROOT/FOLDER -readme README{.txt or .md} -key KEY'
+                        }
+                    </code>
+                </p>
+                <p>
+                    In a Windows environment:
+                </p>
+                <p>
+                    <code>
+                        {
+                            '"C:\\path\\to\\pfda\\executable\\pfda.exe" upload-asset -name my-asset.tar.gz -root "C:\\path\\to\\fake_root" -readme my-asset.txt -key KEY'
                         }
                     </code>
                 </p>

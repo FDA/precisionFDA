@@ -1239,12 +1239,12 @@ class ApiController < ApplicationController
   end
 
   # Inputs
-  # ids: array of file ids for which we want to get licenses
+  # uids: array of file uids for which we want to get licenses
   #
   # Outputs
   # list of license objects
   def list_licenses_for_files
-    result = https_apps_client.list_licenses_for_files unsafe_params[:ids]
+    result = https_apps_client.list_licenses_for_files unsafe_params[:uids]
     render json: result
   end
 

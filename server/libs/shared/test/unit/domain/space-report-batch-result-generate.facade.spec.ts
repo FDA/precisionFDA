@@ -1,5 +1,6 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { App } from '@shared/domain/app/app.entity'
+import { Discussion } from '@shared/domain/discussion/discussion.entity'
 import { Job } from '@shared/domain/job/job.entity'
 import { SpaceReportPart } from '@shared/domain/space-report/entity/space-report-part.entity'
 import { SpaceReport } from '@shared/domain/space-report/entity/space-report.entity'
@@ -79,6 +80,7 @@ describe('SpaceReportBatchResultGenerateFacade', () => {
   const assetFindStub = stub()
   const fileFindStub = stub()
   const userFindStub = stub()
+  const discussionFindStub = stub()
 
   const hasAllBatchesDoneStub = stub()
   const completePartsBatchStub = stub()
@@ -89,6 +91,7 @@ describe('SpaceReportBatchResultGenerateFacade', () => {
   const jobGetResultStub = stub()
   const workflowGetResultStub = stub()
   const userGetResultStub = stub()
+  const discussionGetResultStub = stub()
 
   const createResultTaskStub = stub()
 
@@ -131,6 +134,9 @@ describe('SpaceReportBatchResultGenerateFacade', () => {
     userFindStub.reset()
     userFindStub.throws()
 
+    discussionFindStub.reset()
+    discussionFindStub.throws()
+
     getRepositoryStub.reset()
     getRepositoryStub.throws()
     getRepositoryStub.withArgs(App).returns({ find: appFindStub })
@@ -139,6 +145,7 @@ describe('SpaceReportBatchResultGenerateFacade', () => {
     getRepositoryStub.withArgs(Asset).returns({ find: assetFindStub })
     getRepositoryStub.withArgs(UserFile).returns({ find: fileFindStub })
     getRepositoryStub.withArgs(User).returns({ find: userFindStub })
+    getRepositoryStub.withArgs(Discussion).returns({ find: discussionFindStub })
 
     hasAllBatchesDoneStub.reset()
     hasAllBatchesDoneStub.throws()
@@ -183,6 +190,9 @@ describe('SpaceReportBatchResultGenerateFacade', () => {
 
     userGetResultStub.reset()
     userGetResultStub.throws()
+
+    discussionGetResultStub.reset()
+    discussionGetResultStub.throws()
 
     createResultTaskStub.reset()
     createResultTaskStub.throws()
@@ -282,6 +292,7 @@ describe('SpaceReportBatchResultGenerateFacade', () => {
     { type: 'job', repoFindStub: jobFindStub, resultStub: jobGetResultStub },
     { type: 'workflow', repoFindStub: workflowFindStub, resultStub: workflowGetResultStub },
     { type: 'user', repoFindStub: userFindStub, resultStub: userGetResultStub },
+    { type: 'discussion', repoFindStub: discussionFindStub, resultStub: discussionGetResultStub },
   ].forEach((prop) => {
     it(`should use the correct result meta provider and repo for source type ${prop.type}`, async () => {
       const ENTITY_ID = 1
@@ -394,6 +405,9 @@ describe('SpaceReportBatchResultGenerateFacade', () => {
       },
       user: {
         getResult: userGetResultStub,
+      },
+      discussion: {
+        getResult: discussionGetResultStub,
       },
     }
 

@@ -145,7 +145,7 @@ export const Apps = () => {
           default instance type would cause the app to run out of hard disk
           space), then select a different instance type from the dropdown. See
           the{' '}
-          <Link to="creating-apps#app-instance-types">
+         <Link to="/docs/creating-apps#app-instance-types">
             available instance types
           </Link>{' '}
           for more info.

@@ -1,3 +1,4 @@
+import { SpaceReportPartDiscussionResult } from '@shared/domain/space-report/model/space-report-part-discussion-result'
 import { SpaceReportPartProvenanceTreeResult } from '@shared/domain/space-report/model/space-report-part-provenance-tree-result'
 import { SpaceReportPartUserTileResult } from '@shared/domain/space-report/model/space-report-part-user-tile-result'
 
@@ -8,4 +9,5 @@ export interface SpaceReportPartTypeToResultMap {
   asset: SpaceReportPartProvenanceTreeResult
   workflow: SpaceReportPartProvenanceTreeResult
   user: SpaceReportPartUserTileResult
+  discussion: SpaceReportPartDiscussionResult
 }

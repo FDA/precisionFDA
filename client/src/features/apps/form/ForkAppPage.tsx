@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import React from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { toast } from 'react-toastify'
-import { CreateAppPayload, createEditAppRequest } from '../apps.api'
+import { CreateAppPayload, CreateAppResponse, createEditAppRequest } from '../apps.api'
 import { AppForm } from './AppForm'
 import { Loader } from '../../../components/Loader'
 import { NotAllowedPage } from '../../../components/NotAllowed'
@@ -18,30 +18,22 @@ export const ForkAppPage = ({ spaceId }: { spaceId?: number }) => {
 
   const { data, isLoading, isError } = useFetchAppQuery(appUid)
 
-  const createAppMutation = useMutation({
-    mutationKey: ['edit-app'],
-    mutationFn: (payload: any) => createEditAppRequest(payload),
-    onSuccess: res => {
-      if (res?.id) {
-        navigate(`${getBasePath(spaceId)}/apps/${res?.id}`)
-        queryClient.invalidateQueries({
-          queryKey: ['apps', 'app'],
-        })
-        toast.success('Forked app')
-      } else if (res?.error) {
-        toast.error(`${res.error.type}: ${res.error.message}`)
-      } else {
-        toast.error('Something went wrong!')
-      }
-    },
-    onError: () => {
-      toast.error('There was a problem forking app.')
-    },
-  })
+  const appMutation = useMutation({ mutationFn: createEditAppRequest })
 
-  const onSubmit = (d: CreateAppPayload) => {
+  const onSubmit = async (d: CreateAppPayload) => {
     const vals = { ...d, input_spec: d.input_spec.map(i => cleanObject(i)) }
-    return createAppMutation.mutateAsync(vals)
+
+    try {
+      const res: CreateAppResponse = await appMutation.mutateAsync(vals)
+      navigate(`${getBasePath(spaceId)}/apps/${res?.id}`)
+      queryClient.invalidateQueries({
+        queryKey: ['apps', 'app'],
+      })
+      toast.success('App forked successfully')
+    } catch (err) {
+      const message = err.response?.data?.error?.message || err.message || 'Unknown error'
+      toast.error(`Error while forking app: ${message}`)
+    }
   }
 
   if (isLoading) return <Loader className="pageloader" />
@@ -52,6 +44,7 @@ export const ForkAppPage = ({ spaceId }: { spaceId?: number }) => {
       isFork
       onSubmit={onSubmit}
       app={data.app}
+      isSubmitting={appMutation.isPending}
       defaultVals={{
         is_new: true,
         name: data.app.name,

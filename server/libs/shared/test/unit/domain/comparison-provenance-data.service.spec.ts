@@ -1,13 +1,13 @@
 import { Comparison } from '@shared/domain/comparison/comparison.entity'
+import { EntityService } from '@shared/domain/entity/entity.service'
+import { ComparisonProvenanceDataService } from '@shared/domain/provenance/service/entity-data/comparison-provenance-data.service'
+import { EntityUtils } from '@shared/utils/entity.utils'
 import { expect } from 'chai'
-import { stub } from 'sinon'
-import {
-  ComparisonProvenanceDataService,
-} from '../../../src/domain/provenance/service/entity-data/comparison-provenance-data.service'
+import { SinonStub, stub } from 'sinon'
 
 describe('ComparisonProvenanceDataService', () => {
   const NAME = 'name'
-  const ID = 0
+  const LINK = 'LINK'
 
   const FILE_1_ID = 10
   const FILE_2_ID = 11
@@ -17,23 +17,40 @@ describe('ComparisonProvenanceDataService', () => {
   const FILES = [FILE_1, FILE_2]
 
   const loadFilesStub = stub()
+  const getEntityLinkStub = stub()
 
   const COMPARISON = {
-    id: ID,
     name: NAME,
     inputFiles: { loadItems: loadFilesStub },
   } as unknown as Comparison
 
+  let getEntityTypeForEntityStub: SinonStub
+
   beforeEach(() => {
     loadFilesStub.reset()
     loadFilesStub.resolves(FILES)
+
+    getEntityLinkStub.reset()
+    getEntityLinkStub.throws()
+    getEntityLinkStub.withArgs(COMPARISON).resolves(LINK)
+
+    getEntityTypeForEntityStub = stub(EntityUtils, 'getEntityTypeForEntity').throws()
+    getEntityTypeForEntityStub.withArgs(COMPARISON).returns('comparison')
+  })
+
+  afterEach(() => {
+    getEntityTypeForEntityStub.restore()
   })
 
   describe('#getData', () => {
-    it('should provide correct data about the comparison', () => {
-      const res = getInstance().getData(COMPARISON)
+    it('should provide correct data about the comparison', async () => {
+      const res = await getInstance().getData(COMPARISON)
 
-      expect(res).to.deep.equal({ type: 'comparison', url: `https://rails-host:1234/comparisons/${ID}`, title: NAME })
+      expect(res).to.deep.equal({
+        type: 'comparison',
+        url: LINK,
+        title: NAME,
+      })
     })
   })
 
@@ -57,6 +74,8 @@ describe('ComparisonProvenanceDataService', () => {
   })
 
   function getInstance() {
-    return new ComparisonProvenanceDataService()
+    const entityService = { getEntityLink: getEntityLinkStub } as unknown as EntityService
+
+    return new ComparisonProvenanceDataService(entityService)
   }
 })

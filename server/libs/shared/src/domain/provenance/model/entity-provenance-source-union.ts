@@ -1,6 +1,6 @@
-import { EntityType } from '@shared/domain/entity/domain/entity.type'
+import { EntityWithProvenanceType } from '@shared/domain/provenance/model/entity-with-provenance.type'
 import { EntityProvenanceSource } from './entity-provenance-source'
 
 export type EntityProvenanceSourceUnion = {
-  [K in EntityType]: EntityProvenanceSource<K>
-}[EntityType]
+  [K in EntityWithProvenanceType]: EntityProvenanceSource<K>
+}[EntityWithProvenanceType]

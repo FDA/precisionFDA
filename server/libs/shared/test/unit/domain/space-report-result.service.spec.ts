@@ -178,11 +178,11 @@ describe('SpaceReportResultService', () => {
     expect(res.body.textContent).to.include('There are no members in this space')
   })
 
-  it('should contain 8 links', async () => {
+  it('should contain 10 links', async () => {
     const res = await getResultDocument()
     const links = res.getElementsByTagName('a')
 
-    expect(links).to.have.length(9)
+    expect(links).to.have.length(10)
   })
 
   it('should contain links pointing to the correct elements', async () => {

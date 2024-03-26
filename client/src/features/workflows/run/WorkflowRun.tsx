@@ -3,7 +3,6 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
 import * as Yup from 'yup'
-import { ErrorMessage } from '@hookform/error-message'
 import { Control, Controller, useForm, UseFormRegister } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import {
@@ -15,7 +14,6 @@ import {
 } from '../workflows.api'
 import { InputOutput, IWorkflow, Stage } from '../workflows.types'
 import { InputNumber, InputText } from '../../../components/InputText'
-import { InputError } from '../../../components/form/styles'
 import { HomeLoader, NotFound, Title } from '../../home/show.styles'
 import { CubeIcon } from '../../../components/icons/CubeIcon'
 import { FieldGroup } from '../../../components/form/FieldGroup'
@@ -36,59 +34,33 @@ import { GearIcon } from '../../../components/icons/GearIcon'
 import { fetchAcceptedLicenses, fetchLicensesForFiles } from '../../licenses/api'
 import { License } from '../../licenses/types'
 import { useAcceptLicensesModal } from '../../licenses/useAcceptLicensesModal'
-import { fetchFile } from '../../files/files.api'
 import { useAuthUser } from '../../auth/useAuthUser'
 import { getSpaceIdFromScope } from '../../../utils'
 import { IUser } from '../../../types/user'
 import { fetchAndConvertSelectableSpaces } from '../../apps/run/job-run-helper'
 import { IAccessibleFile } from '../../databases/databases.api'
-import { IFile } from '../../files/files.types'
+import { FileUid } from '../../files/files.types'
 import { FormPageContainer } from '../../../components/Page/styles'
 import { BackLink } from '../../../components/Page/PageBackLink'
-import { getValue } from '../../apps/run/utils'
+import { extractFileUids, getValue } from '../../apps/run/utils'
 import { getDefaultValueFromServer } from '../../apps/form/common'
 import { Select } from '../../../components/Select'
 import { Button } from '../../../components/Button'
+import { ErrorMessageForField } from '../../apps/run/ErrorMessageForField'
 
-interface WorkflowRunData {
+export interface WorkflowRunData {
   analysisName: string;
   jobLimit: number;
   spaceScope?: SelectType | null;
-  inputs: {
-    [key: string]: string | boolean | IAccessibleFile | undefined,
+  inputs: { // TODO add support for arrays, PFDA-5136
+    [key: string]: string | boolean | FileUid | undefined,
   };
-}
-
-const ErrorMessageForField = ({ errors, fieldName }:
-  { errors: any, fieldName: string }) => {
-  return (<ErrorMessage
-    errors={errors}
-    name={fieldName}
-    render={({ message }) => <InputError>{message}</InputError>} />)
 }
 
 const getLabel = (input: InputOutput) =>
   input.label ? input.label : input.name
 
-const convertToAccessibleFile = (file: IFile): IAccessibleFile => {
-  return {
-    id: file.id,
-    uid: file.uid,
-    title: file.name,
-  } as IAccessibleFile
-}
-
-const getDefaultValue = (input: InputOutput, defaultFiles?: IFile[]): string | boolean | IAccessibleFile | undefined => {
-  const defaultValue = (input.default_workflow_value === null) ? undefined : input.default_workflow_value
-  if (input.class === 'file') {
-    const defaultFile = defaultFiles?.find(file => file.uid === defaultValue)
-    return (defaultFile) ? convertToAccessibleFile(defaultFile) : undefined
-  }
-
-  return defaultValue
-}
-
-const prepareDefaultValues = (workflow: IWorkflow, user?: IUser, stages?: Stage[], defaultFiles?: IFile[]): WorkflowRunData => {
+const prepareDefaultValues = (workflow: IWorkflow, user?: IUser, stages?: Stage[]): WorkflowRunData => {
   const defaultValues: WorkflowRunData = {
     analysisName: workflow ? workflow.name : '',
     jobLimit: user ? user.job_limit: 0,
@@ -100,26 +72,16 @@ const prepareDefaultValues = (workflow: IWorkflow, user?: IUser, stages?: Stage[
 
     const defaultValue = (input.default_workflow_value === null) ? undefined : input.default_workflow_value
     if (defaultValue !== undefined) {
-      if (input.class === 'file') {
-        defaultValues.inputs[fieldName] = getDefaultValue(input, defaultFiles)
-      } else {
         defaultValues.inputs[fieldName] = getDefaultValueFromServer(input.class, defaultValue)
-      }
     }
   })
   return defaultValues
 }
 
 const fetchLicensesOnFiles = (jobData: WorkflowRunData): Promise<License[]> => {
-  const ids: number[] = []
-  const { inputs } = jobData
-  Object.keys(inputs).forEach(key => {
-    if (typeof inputs[key] === 'object') {
-      ids.push((inputs[key] as IAccessibleFile).id)
-    }
-  })
-  if (ids.length > 0) {
-    return fetchLicensesForFiles(ids)
+  const uids = extractFileUids(jobData.inputs)
+  if (uids.length > 0) {
+    return fetchLicensesForFiles(uids)
   }
   return Promise.resolve([])
 }
@@ -141,8 +103,6 @@ const prepareValidations = (user?: IUser, stages?: Stage[], scope?: string) => {
     const fieldName = `${input.parent_slot}#${input.name}`
     if (input.class === 'boolean') {
       inputs[fieldName] = Yup.boolean().nullable().required(`${getLabel(input)} is required`)
-    } else if (input.class === 'file') {
-      inputs[fieldName] = Yup.object().nullable().required(`${getLabel(input)} is required`)
     } else {
       inputs[fieldName] = Yup.string().nullable().required(`${getLabel(input)} is required`)
     }
@@ -177,15 +137,15 @@ const getLicensesToAccept = (
   )
 }
 
-const WorkflowStage = ({ app, stage, errors, isSubmitting, control, register, defaultFiles }:
+const WorkflowStage = ({ app, stage, errors, isSubmitting, control, register }:
   { app: any, stage: Stage, errors: any, isSubmitting: boolean,
-    control: Control<any>, register: UseFormRegister<any>, defaultFiles?: IFile[]}) => {
+    control: Control<any>, register: UseFormRegister<any>}) => {
 
   return (<> {hasUnfilledInputs(stage) &&
     <>
       <StyledStageHeader key={stage.app_uid}><GearIcon height={14} />&nbsp;{stage.name}</StyledStageHeader>
       {stage.inputs.map(input => {
-        const inputSpec: InputSpec = app.spec.input_spec.find(input_spec  => input_spec.name === input.name)
+        const inputSpec: InputSpec = app.spec.input_spec.find(input_spec => input_spec.name === input.name)
         return (
           <Controller
             key={inputSpec.name}
@@ -226,7 +186,7 @@ const createRequestObject = (workflowId: string, vals: WorkflowRunData, stages?:
       const inputSpec: InputSpec = { default: null, choices: null, class: inputOutput.class, help: '', name: inputOutput.name }
       const input: RunWorkflowInput = {
         input_name: key.replace('#', '.'),
-        input_value: (typeof value === 'object') ? (value as IAccessibleFile).uid : getValue(inputName, value, [inputSpec]),
+        input_value: getValue(inputName, value, [inputSpec]),
         class: classes.get(key) ?? '',
       }
 
@@ -244,13 +204,13 @@ const createRequestObject = (workflowId: string, vals: WorkflowRunData, stages?:
 }
 
 const WorkflowRun = (
-  { workflow, meta, defaultFiles, user }:
-    { workflow: IWorkflow, meta: any, defaultFiles?: IFile[], user: IUser },
+  { workflow, meta, user }:
+    { workflow: IWorkflow, meta: any, user: IUser },
 ) => {
   const { stages }: { stages: Stage[] } = meta.spec.input_spec
   const { apps }: { apps: [] } = meta
   const navigate = useNavigate()
-  const defaultValues = prepareDefaultValues(workflow, user, stages, defaultFiles)
+  const defaultValues = prepareDefaultValues(workflow, user, stages)
   const validationSchema = prepareValidations(user, stages, workflow.scope)
 
   const { data: selectableSpaces } = useQuery({
@@ -297,6 +257,7 @@ const WorkflowRun = (
 
   const onSubmit = async () => {
     const valid = await trigger()
+
     if (valid) {
       try {
         const r = await Promise.all([
@@ -332,7 +293,7 @@ const WorkflowRun = (
               <StyledLine>
                 <StyledAnalysisName>
                   <FieldGroup label="Analysis Name" required >
-                    <InputText label="analysisName"
+                    <InputText
                       {...register('analysisName')}
                       disabled={isSubmitting}
                     />
@@ -384,8 +345,7 @@ const WorkflowRun = (
             </SectionHeader>
             <SectionBody>
               {stages?.map(stage => <WorkflowStage key={stage.stageIndex} stage={stage} errors={errors}
-                app={apps.find(app => app.dxid === stage.app_dxid)} control={control} register={register} isSubmitting={isSubmitting}
-                defaultFiles={defaultFiles} />)}
+                app={apps.find(app => app.dxid === stage.app_dxid)} control={control} register={register} isSubmitting={isSubmitting} />)}
             </SectionBody>
           </Section>
         </WorkflowConfiguration>
@@ -400,48 +360,26 @@ const WorkflowRun = (
   )
 }
 
-const fetchDefaultFiles = (meta: any): Promise<{ files: IFile, meta: any }[]> => {
-  const promises: Promise<{ files: IFile, meta: any }>[] = []
-  meta.spec.input_spec.stages.forEach((stage: Stage) => {
-    if (hasUnfilledInputs(stage)) {
-      stage.inputs.forEach(input => {
-        if (input.class === 'file' && input.default_workflow_value) {
-          const promise = fetchFile(input.default_workflow_value as string)
-          promises.push(promise)
-        }
-      })
-    }
-  })
-  return Promise.all(promises)
-}
-
 const WorkflowRunPage = () => {
   const { workflowUid } = useParams<{ workflowUid: string }>()
   const { data: workflowData, isLoading: loadingWorkflowIsLoading, isSuccess: loadingWorkflowIsSuccess } = useQuery({
     queryKey: ['workflow', workflowUid],
-    queryFn: () => fetchWorkflow(workflowUid),
-  })
-
-  const { data: defaultFilesData, isLoading: defaultFilesIsLoading } = useQuery({
-    queryKey: ['default-files'],
-    queryFn: () => fetchDefaultFiles(workflowData?.meta).catch(() => toast.error('Error loading default files')),
-    enabled: loadingWorkflowIsSuccess,
+    enabled: !!workflowUid,
+    queryFn: () => fetchWorkflow(workflowUid!),
   })
 
   const user = useAuthUser()
 
-  if (loadingWorkflowIsLoading || defaultFilesIsLoading || !user) {
+  if (loadingWorkflowIsLoading || !user) {
     return <HomeLoader />
   }
 
   const workflow = workflowData?.workflow
   const meta = workflowData?.meta
-  const defaultFiles: IFile[] | undefined = defaultFilesData?.map(data => data.files)
 
   const workflowTitle = workflow.title ? workflow.title : workflow.name
   const spaceId = getSpaceIdFromScope(workflow.scope)
   const baseLink = spaceId ? `spaces/${spaceId}` : 'home'
-
 
   if (!workflow)
   return (
@@ -465,7 +403,7 @@ const WorkflowRunPage = () => {
         </Title>
       </TopboxItem>
     </Topbox>
-    <WorkflowRun workflow={workflow} meta={meta} defaultFiles={defaultFiles} user={user} />
+    <WorkflowRun workflow={workflow} meta={meta} user={user} />
   </FormPageContainer>
   )
 }

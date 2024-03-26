@@ -1,5 +1,6 @@
 import { Reference } from '@mikro-orm/core'
-import type { SqlEntityManager } from '@mikro-orm/mysql'
+import { SqlEntityManager } from '@mikro-orm/mysql'
+import { Injectable } from '@nestjs/common'
 import { Answer } from '@shared/domain/answer/answer.entity'
 import { App } from '@shared/domain/app/app.entity'
 import { Attachment } from '@shared/domain/attachment/attachment.entity'
@@ -7,23 +8,26 @@ import { AnswerComment } from '@shared/domain/comment/answer-comment.entity'
 import { DiscussionComment } from '@shared/domain/comment/discussion-comment.entity'
 import { Comparison } from '@shared/domain/comparison/comparison.entity'
 import { Discussion } from '@shared/domain/discussion/discussion.entity'
+import { EntityService } from '@shared/domain/entity/entity.service'
 import { Follow } from '@shared/domain/follow/follow.entity'
 import { Job } from '@shared/domain/job/job.entity'
 import { Note } from '@shared/domain/note/note.entity'
-import { Node } from '@shared/domain/user-file/node.entity'
 import { Space } from '@shared/domain/space/space.entity'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { Asset } from '@shared/domain/user-file/asset.entity'
+import { Node } from '@shared/domain/user-file/node.entity'
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { Vote } from '@shared/domain/vote/vote.entity'
 import { STATIC_SCOPE } from '../../../enums'
 import * as errors from '../../../errors'
 import { getLogger } from '../../../logger'
-import { EntityFetcherService } from '../../entity/entity-fetcher.service'
 import type { UserCtx } from '../../../types'
 import type { SCOPE } from '../../../types/common'
 import { CommentableType } from '../../comment/comment.entity'
+import { EntityFetcherService } from '../../entity/entity-fetcher.service'
 import { SPACE_MEMBERSHIP_ROLE } from '../../space-membership/space-membership.enum'
 import { getIdFromScopeName } from '../../space/space.helper'
-import { AnswerDTO, CommentDTO, DiscussionDTO, NoteDTO, UserDTO } from '../discussion.types'
 import type {
   BaseInput,
   CreateAnswerInput,
@@ -35,7 +39,8 @@ import type {
   UpdateAnswerInput,
   UpdateDiscussionInput,
 } from '../discussion.types'
-import type { PublisherService } from './publisher.service'
+import { AnswerDTO, CommentDTO, DiscussionDTO, NoteDTO, UserDTO } from '../discussion.types'
+import { PublisherService } from './publisher.service'
 
 const logger = getLogger('discussion.service')
 
@@ -78,17 +83,20 @@ export interface IDiscussionService {
   getAttachments(noteId: number): Promise<Array<{ id: number, uid: string, type: string, name: string }>>
 }
 
+@Injectable()
 export class DiscussionService implements IDiscussionService {
   private readonly em: SqlEntityManager
   private readonly userCtx: UserCtx
   private readonly publisher: PublisherService
   private readonly fetcher: EntityFetcherService
+  private readonly entityService: EntityService
 
-  constructor(em: SqlEntityManager, userCtx: UserCtx, publisherService: PublisherService, fetcher: EntityFetcherService) {
+  constructor(em: SqlEntityManager, userCtx: UserContext, publisherService: PublisherService, fetcher: EntityFetcherService, entityService: EntityService) {
     this.em = em
     this.userCtx = userCtx
     this.publisher = publisherService
     this.fetcher = fetcher
+    this.entityService = entityService
     logger.debug('DiscussionService initialized')
   }
 
@@ -713,12 +721,7 @@ export class DiscussionService implements IDiscussionService {
     throw new errors.PermissionError('Unable to delete comment: insufficient permissions.')
   }
 
-  async getAttachments(noteId: number): Promise<Array<{
-    id: number
-    uid: string
-    type: string
-    name: string
-  }>> {
+  async getAttachments(noteId: number): Promise<DiscussionAttachment[]> {
     logger.verbose(`DiscussionService: getting attachments for note id: ${noteId}`)
     const note = await this.fetcher.getAccessibleById(Note, noteId, {}, { populate: ['attachments'] })
     if (!note) {
@@ -737,6 +740,7 @@ export class DiscussionService implements IDiscussionService {
           uid: attachmentEntity.uid,
           type: attachmentEntity.stiType,
           name: attachmentEntity.name,
+          link: await this.entityService.getEntityLink(attachmentEntity as UserFile | Asset),
         })
       } else if (attachment.itemType === 'Job') {
         const attachmentEntity: Job | null = await this.fetcher.getById(attachment.itemType, attachment.itemId)
@@ -748,6 +752,7 @@ export class DiscussionService implements IDiscussionService {
           uid: attachmentEntity.uid,
           type: attachment.itemType,
           name: attachmentEntity.name,
+          link: await this.entityService.getEntityLink(attachmentEntity),
         })
       } else if (attachment.itemType === 'Comparison') {
         const attachmentEntity: Comparison | null = await this.fetcher.getById(attachment.itemType, attachment.itemId)
@@ -759,6 +764,7 @@ export class DiscussionService implements IDiscussionService {
           uid: attachmentEntity.id.toString(),
           type: attachment.itemType,
           name: attachmentEntity.name,
+          link: await this.entityService.getEntityLink(attachmentEntity),
         })
       } else if (attachment.itemType === 'App') {
         const appAttachment: App | null = await this.fetcher.getById(attachment.itemType, attachment.itemId)
@@ -770,6 +776,7 @@ export class DiscussionService implements IDiscussionService {
           uid: appAttachment.uid,
           type: attachment.itemType,
           name: appAttachment.title,
+          link: await this.entityService.getEntityLink(appAttachment),
         })
       }
     }

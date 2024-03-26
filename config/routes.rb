@@ -393,6 +393,7 @@ Rails.application.routes.draw do
           get :cli
           get :bulk_download, to: "files#bulk_download_content"
           get :test_streaming
+          get :path_resolver
 
           post :copy
           post :bulk_download
@@ -522,7 +523,7 @@ Rails.application.routes.draw do
       post "assign_app"
       get "list_licenses"
       get "cli_latest_version"
-      post "list_licenses_for_files"
+      get "list_licenses_for_files"
       get "tracks/provenance", action: :track_provenance, as: "track_provenance"
     end
     # end API

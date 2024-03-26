@@ -1,9 +1,11 @@
+import { EntityService } from '@shared/domain/entity/entity.service'
 import { EntityProvenance } from '@shared/domain/provenance/model/entity-provenance'
 import { EntityProvenanceSvgOptions } from '@shared/domain/provenance/model/entity-provenance-svg-options'
 import { EntityProvenanceSvgResultTransformerService } from '@shared/domain/provenance/service/result-transform/entity-provenance-svg-result-transformer.service'
 import { ArrayUtils } from '@shared/utils/array.utils'
 import { expect } from 'chai'
 import { JSDOM } from 'jsdom'
+import { stub } from 'sinon'
 
 describe('EntityProvenanceSvgResultTransformerService', () => {
   const APP_TITLE = 'app title'
@@ -26,6 +28,16 @@ describe('EntityProvenanceSvgResultTransformerService', () => {
 
   const COMPARISON_TITLE = 'comparison title'
   const COMPARISON_URL = 'comparison url'
+
+  const icons = {
+    app: 'app icon',
+    workflow: 'workflow icon',
+    asset: 'asset icon',
+    file: 'file icon',
+    job: 'job icon',
+    user: 'user icon',
+    comparison: 'comparison icon',
+  }
 
   const PROVENANCE: EntityProvenance = {
     data: {
@@ -88,6 +100,16 @@ describe('EntityProvenanceSvgResultTransformerService', () => {
     ],
   }
 
+  const getEntityIconStub = stub()
+
+  beforeEach(() => {
+    getEntityIconStub.reset()
+    getEntityIconStub.throws()
+    Object.entries(icons).forEach(([type, icon]) => {
+      getEntityIconStub.withArgs(type).resolves(icon)
+    })
+  })
+
   it('should render a svg', async () => {
     const svg = await getResultSvg()
 
@@ -139,12 +161,12 @@ describe('EntityProvenanceSvgResultTransformerService', () => {
     // there is exactly one link with the provided url
     expect(nodeElements).to.have.length(1)
 
-    const textElement = nodeElements[0].querySelector('span')
-    // the link contains a span with exactly the provided title
-    expect(textElement).not.to.be.null()
-    expect(textElement.textContent).to.eq(node.data.title)
+    const nodeElement = nodeElements[0]
 
-    const positionedParent = textElement.closest('foreignObject')
+    // the link contains a span with icon and the provided title
+    expect(nodeElement.textContent).to.eq(icons[node.data.type] + node.data.title)
+
+    const positionedParent = nodeElement.closest('foreignObject')
     // the link is wrapped in a foreignObject
     expect(positionedParent).not.to.be.null()
 
@@ -173,6 +195,8 @@ describe('EntityProvenanceSvgResultTransformerService', () => {
   }
 
   function getInstance() {
-    return new EntityProvenanceSvgResultTransformerService()
+    const entityService = { getEntityIcon: getEntityIconStub } as unknown as EntityService
+
+    return new EntityProvenanceSvgResultTransformerService(entityService)
   }
 })

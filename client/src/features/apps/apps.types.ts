@@ -1,7 +1,7 @@
 import { Asset } from '../actionModals/AttachToModal/useListAssetsQuery'
 import { HomeScope, ServerScope } from '../home/types'
 import { CreateAppPayload } from './apps.api'
-import { IFile } from '../files/files.types'
+import { FileUid, IFile } from '../files/files.types'
 import { IAccessibleFile } from '../databases/databases.api'
 
 export enum AppActions {
@@ -177,7 +177,7 @@ export interface SelectType {
   value: string,
 }
 
-export type FormInput = string | string[] | boolean | number | number[] | IAccessibleFile | IAccessibleFile[] | undefined
+export type FormInput = string | string[] | boolean | number | number[] | FileUid | FileUid[] | undefined
 
 export interface JobRunForm {
   output_folder_path: string | null;

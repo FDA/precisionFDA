@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common'
-import { EntityType } from '@shared/domain/entity/domain/entity.type'
+import { EntityService } from '@shared/domain/entity/entity.service'
 import fs from 'fs/promises'
+import DOMPurify from 'isomorphic-dompurify'
 import { JSDOM } from 'jsdom'
 import path from 'path'
 import { EntityProvenance } from '../../model/entity-provenance'
 import { EntityProvenanceSvgOptions } from '../../model/entity-provenance-svg-options'
 import { EntityProvenanceResultTransformerService } from './entity-provenance-result-transformer.service'
-import DOMPurify from 'isomorphic-dompurify'
 
 // D3 dropped CJS support in version 7. We cannot switch to ESM, as nestjs is not compatible.
 // Because of that, it is not possible to compile and successfully start the app with a static import statement
@@ -19,42 +19,19 @@ const assetsPath = path.join(
   __dirname,
   '../../../../../../../../../../libs/shared/src/domain/provenance/assets',
 )
-const assetNames = [
-  'main.css',
-  'file-icon.svg',
-  'user-icon.svg',
-  'app-icon.svg',
-  'asset-icon.svg',
-  'comparison-icon.svg',
-  'job-icon.svg',
-  'workflow-icon.svg',
-]
-const assetPromises = assetNames.map((i) =>
-  fs.readFile(path.join(assetsPath, i), 'utf8').catch(() => ''),
-)
+const css = fs.readFile(path.join(assetsPath, 'main.css'), 'utf8').catch(() => '')
 
 @Injectable()
 export class EntityProvenanceSvgResultTransformerService
   implements EntityProvenanceResultTransformerService<'svg'>
 {
+  constructor(private readonly entityService: EntityService) {}
+
   async transform(
     provenance: EntityProvenance,
     options?: EntityProvenanceSvgOptions,
   ): Promise<string> {
-    const [css, fileIcon, userIcon, appIcon, assetIcon, comparisonIcon, jobIcon, workflowIcon] =
-      await Promise.all(assetPromises)
-
     const { hierarchy, linkVertical, select, tree } = await d3
-
-    const nodeTypeToIconMap = {
-      file: fileIcon,
-      user: userIcon,
-      app: appIcon,
-      asset: assetIcon,
-      comparison: comparisonIcon,
-      job: jobIcon,
-      workflow: workflowIcon,
-    } satisfies Record<EntityType, string>
 
     const nodeSize = {
       width: 200,
@@ -70,7 +47,12 @@ export class EntityProvenanceSvgResultTransformerService
     const root = hierarchy(provenance, (d) => d.parents)
     const links = treeLayout(root).links()
 
-    const nodes = root.descendants()
+    const nodes = await Promise.all(
+      root.descendants().map(async (node) => ({
+        ...node,
+        icon: await this.entityService.getEntityIcon(node.data.data.type),
+      })),
+    )
 
     const { maxX, maxY, minX, minY } = this.getBoundaries(
       nodes as unknown as Array<{
@@ -88,7 +70,7 @@ export class EntityProvenanceSvgResultTransformerService
     const svg = select(dom.window.document.querySelector('.canvas'))
 
     if (!options?.omitStyles) {
-      svg.append('style').html(css)
+      svg.append('style').html(await css)
     }
 
     const g = svg
@@ -124,7 +106,7 @@ export class EntityProvenanceSvgResultTransformerService
       .append('a')
       .attr('href', (d) => d.data.data.url)
       .attr('target', '_blank')
-      .html((d) => nodeTypeToIconMap[d.data.data.type])
+      .html((d) => d.icon)
       .append('span')
       .text((d) => `${d.data.data.title}`)
 
@@ -134,11 +116,12 @@ export class EntityProvenanceSvgResultTransformerService
 
     return DOMPurify.sanitize(dom.window.document.querySelector('svg.canvas')!.outerHTML, {
       ADD_TAGS: ['foreignObject'],
+      ADD_ATTR: ['target'],
     })
   }
 
   async getStyles() {
-    return await assetPromises[0]
+    return await css
   }
 
   private getBoundaries(nodes: Array<{ x: number; y: number }>): {
