@@ -243,12 +243,10 @@ type UserUnlockParams = {
 
 type AppDescribeParams = {
   dxid: string
-  data: {}
 }
 
 type WorkflowDescribeParams = {
   dxid: string
-  data: {}
 }
 
 type CloneObjectsParams = {

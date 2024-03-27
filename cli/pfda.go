@@ -1,5 +1,5 @@
 // PrecisionFDA CLI
-// Version 2.5.0
+// Version 2.6.0
 package main
 
 import (
@@ -26,7 +26,7 @@ const defaultChunkSize = 1 << 26 // default 64MB (min. 16MB)
 const defaultSkipVerify = "false"
 const usageString = `
 ****************************
-PFDA COMMAND LINE TOOL v2.5.0
+PFDA COMMAND LINE TOOL v2.6.0
 ****************************
 
 To upload a file:
@@ -45,13 +45,28 @@ To list files:
    pfda ls [-key <KEY>]
 
 To list available spaces:
-   pfda list-spaces [-key <KEY>]
+   pfda ls-spaces [-key <KEY>]
 
-To describe an app:
-   pfda describe-app <APP_ID> [-key <KEY>]
+To list space members:
+   pfda ls-members -space-id <SPACE_ID> [-key <KEY>]
 
-To describe a workflow:
-   pfda describe-workflow <WORKFLOW_ID> [-key <KEY>] 
+To list space discussions:
+   pfda ls-discussions -space-id <SPACE_ID> [-key <KEY>]
+
+To list apps:
+   pfda ls-apps [-key <KEY>]
+
+To list assets:
+   pfda ls-assets [-key <KEY>]
+
+To list workflows:
+   pfda ls-workflows [-key <KEY>]
+
+To list executions:
+   pfda ls-executions [-key <KEY>]
+
+To describe an entity:
+   pfda describe <ENTITY_ID> [-key <KEY>]
 
 To create a new folder:
    pfda mkdir <NAME> [-key <KEY>]
@@ -76,13 +91,18 @@ To print version info and exit :
 
 All available commands:
    pfda cat
-   pfda describe-app
-   pfda describe-workflow
+   pfda describe
    pfda download
    pfda get-space-id
    pfda head
-   pfda list-spaces
    pfda ls
+   pfda ls-apps
+   pfda ls-assets
+   pfda ls-discussions
+   pfda ls-executions
+   pfda ls-members
+   pfda ls-spaces
+   pfda ls-workflows
    pfda mkdir
    pfda rm
    pfda rmdir
@@ -119,8 +139,6 @@ var (
 	BuildTime string
 	OsArch    string
 )
-
-var pfdaclient *precisionfda.PFDAClient
 
 // ACTION FUNCTIONS
 // Wrapping calls to pfdaclient allow us to replace these functions in pfda_test.go with mocks
@@ -163,16 +181,44 @@ var invokeFileViewLink = func(client precisionfda.IPFDAClient, fileID *string) e
 	return client.FileViewLink(*fileID)
 }
 
+var invokeUploadResources = func(client precisionfda.IPFDAClient, args *[]string, portalID *string) error {
+	return client.UploadResources(*args, *portalID)
+}
+
 var invokeDescribe = func(client precisionfda.IPFDAClient, entityID *string, entityType string) error {
 	return client.DescribeEntity(*entityID, entityType)
 }
 
-var invokeListSpaces = func(client precisionfda.IPFDAClient, flags map[string]bool) error {
-	return client.ListSpaces(flags)
+var invokeLsSpaces = func(client precisionfda.IPFDAClient, flags map[string]bool) error {
+	return client.LsSpaces(flags)
 }
 
 var invokeListing = func(client precisionfda.IPFDAClient, folderID *string, spaceID *string, flags map[string]bool) error {
 	return client.Ls(*folderID, *spaceID, flags)
+}
+
+var invokeLsApps = func(client precisionfda.IPFDAClient, spaceID *string, flags map[string]bool) error {
+	return client.LsApps(*spaceID, flags)
+}
+
+var invokeLsAssets = func(client precisionfda.IPFDAClient, spaceID *string, flags map[string]bool) error {
+	return client.LsAssets(*spaceID, flags)
+}
+
+var invokeLsWorkflows = func(client precisionfda.IPFDAClient, spaceID *string, flags map[string]bool) error {
+	return client.LsWorkflows(*spaceID, flags)
+}
+
+var invokeLsExecutions = func(client precisionfda.IPFDAClient, spaceID *string, flags map[string]bool) error {
+	return client.LsExecutions(*spaceID, flags)
+}
+
+var invokeLsMembers = func(client precisionfda.IPFDAClient, spaceID *string) error {
+	return client.LsMembers(*spaceID)
+}
+
+var invokeLsDiscussions = func(client precisionfda.IPFDAClient, spaceID *string) error {
+	return client.LsDiscussions(*spaceID)
 }
 
 var invokeMkdir = func(client precisionfda.IPFDAClient, names *[]string, folderID *string, spaceID *string, parents bool) error {
@@ -227,6 +273,7 @@ func mainInternal() int {
 	workflowID := flag.String("workflow-id", "", "Workflow ID of the workflow to be described")
 	folderID := flag.String("folder-id", "", "Folder ID of the target folder")
 	spaceID := flag.String("space-id", "", "Space ID of the target space")
+	portalID := flag.String("portal-id", "", "Portal ID of the target portal")
 	outputFilePath := flag.String("output", "", "[optional] File path to write api call response data. Defaults to stdout.")
 	inputChunkSize := flag.Int("chunksize", defaultChunkSize, "[optional] Size of each upload chunk in bytes (Min 5MB,/Max 2GB).")
 	inputNumRoutines := flag.Int("threads", defaultNumRoutines, "[optional] Maximum number of upload threads to spawn (Max 100).")
@@ -503,6 +550,9 @@ func mainInternal() int {
 		}
 
 	case "describe-app":
+
+		fmt.Println("\nWARNING! THIS COMMAND IS BEING DEPRECATED. PLEASE USE THE FOLLOWING SYNTAX INSTEAD: ./pfda describe <APP_ID>")
+
 		if help {
 			return helpers.PrintDescribeAppHelp()
 		}
@@ -520,7 +570,50 @@ func mainInternal() int {
 			return helpers.ErrorFromError(err, *flagJson)
 		}
 
+	case "describe":
+
+		if help {
+			return helpers.PrintDescribeHelp()
+		}
+
+		if len(args) == 0 {
+			return helpers.ErrorFromString("Entity ID is required", *flagJson)
+		}
+
+		entityType, entityId := helpers.ParseEntityType(args[0])
+		if entityType == "" {
+			return helpers.ErrorFromString(fmt.Sprintf("Invalid entity type '%s' - must be one of: app, job, file, worklfow, discussion.", args[0]), *flagJson)
+		}
+		if entityType == "discussion" {
+			args[0] = entityId
+		}
+		err := invokeDescribe(pfdaclient, &args[0], entityType)
+		if err != nil {
+			return helpers.ErrorFromError(err, *flagJson)
+		}
+
+	case "upload-resource":
+		if help {
+			return helpers.PrintUploadResourceHelp()
+		}
+
+		if len(args) == 0 {
+			return helpers.ErrorFromString("Path to the resource(s) is required", *flagJson)
+		}
+
+		if *portalID == "" {
+			return helpers.ErrorFromString("Portal ID is required", *flagJson)
+		}
+
+		err := invokeUploadResources(pfdaclient, &args, portalID)
+		if err != nil {
+			return helpers.ErrorFromError(err, *flagJson)
+		}
+
 	case "describe-workflow":
+
+		fmt.Println("\nWARNING! THIS COMMAND IS BEING DEPRECATED. PLEASE USE THE FOLLOWING SYNTAX INSTEAD: ./pfda describe <WORKFLOW_ID>")
+
 		if help {
 			return helpers.PrintDescribeWorkflowHelp()
 		}
@@ -538,9 +631,70 @@ func mainInternal() int {
 			return helpers.ErrorFromError(err, *flagJson)
 		}
 
-	case "list-spaces":
+	case "ls-apps":
 		if help {
-			return helpers.PrintListSpacesHelp()
+			return helpers.PrintLsAppsHelp()
+		}
+
+		flags := map[string]bool{}
+
+		if *flagPublic {
+			flags["public_scope"] = true
+		}
+
+		err := invokeLsApps(pfdaclient, spaceID, flags)
+		if err != nil {
+			return helpers.ErrorFromError(err, *flagJson)
+		}
+
+	case "ls-assets":
+		if help {
+			return helpers.PrintLsAssetsHelp()
+		}
+
+		flags := map[string]bool{}
+		if *flagPublic {
+			flags["public_scope"] = true
+		}
+
+		err := invokeLsAssets(pfdaclient, spaceID, flags)
+		if err != nil {
+			return helpers.ErrorFromError(err, *flagJson)
+		}
+	case "ls-workflows":
+		if help {
+			return helpers.PrintLsWorkflowsHelp()
+		}
+
+		flags := map[string]bool{}
+		if *flagPublic {
+			flags["public_scope"] = true
+		}
+
+		err := invokeLsWorkflows(pfdaclient, spaceID, flags)
+		if err != nil {
+			return helpers.ErrorFromError(err, *flagJson)
+		}
+
+	case "ls-executions":
+		if help {
+			return helpers.PrintLsExecutionsHelp()
+		}
+
+		flags := map[string]bool{}
+		if *flagPublic {
+			flags["public_scope"] = true
+		}
+
+		err := invokeLsExecutions(pfdaclient, spaceID, flags)
+		if err != nil {
+			return helpers.ErrorFromError(err, *flagJson)
+
+		}
+
+	case "ls-spaces", "list-spaces":
+		if help {
+			return helpers.PrintLsSpacesHelp()
 		}
 
 		flags := map[string]bool{
@@ -557,9 +711,49 @@ func mainInternal() int {
 			// present as JSON / pretty print
 			"json": *flagJson,
 		}
-		err := invokeListSpaces(pfdaclient, flags)
+		err := invokeLsSpaces(pfdaclient, flags)
 		if err != nil {
 			return helpers.ErrorFromError(err, *flagJson)
+		}
+
+	case "ls-members":
+		if help {
+			return helpers.PrintLsMembersHelp()
+		}
+
+		if *spaceID != "" {
+			args = []string{*spaceID}
+		}
+		if len(args) == 0 {
+			return helpers.ErrorFromString("Space ID is required", *flagJson)
+		}
+
+		err := invokeLsMembers(pfdaclient, &args[0])
+		if err != nil {
+			return helpers.ErrorFromError(err, *flagJson)
+		}
+
+	case "ls-discussions":
+		if help {
+			return helpers.PrintLsDiscussionsHelp()
+		}
+
+		if *spaceID != "" {
+			args = []string{*spaceID}
+		}
+
+		if len(args) == 0 {
+			return helpers.ErrorFromString("Space ID is required", *flagJson)
+		}
+
+		if len(args) != 1 {
+			return helpers.ErrorFromString("Only one space ID is allowed", *flagJson)
+		}
+
+		err := invokeLsDiscussions(pfdaclient, &args[0])
+		if err != nil {
+			return helpers.ErrorFromError(err, *flagJson)
+
 		}
 
 	case "ls":
@@ -580,7 +774,7 @@ func mainInternal() int {
 		}
 
 		if *flagPublic {
-			flags["public_scope"] = *flagPublic
+			flags["public_scope"] = true
 		}
 
 		err := invokeListing(pfdaclient, folderID, spaceID, flags)
@@ -665,7 +859,6 @@ func mainInternal() int {
 		}
 
 		if *jsonInput != "" && !isValidJSON(*jsonInput) {
-			//TODO check this - not passing anything into the function's %s
 			return helpers.ErrorFromString(fmt.Sprintf("Provided JSON '%s' is not valid - provide the input in valid JSON format.", *jsonInput), *flagJson)
 		}
 
@@ -682,7 +875,8 @@ func mainInternal() int {
 
 	default:
 		// Invalid, non-empty command
-		return helpers.ErrorFromString(fmt.Sprintf("Command '%s' not found. Must be one of \n'cat' \n'describe-app' \n'describe-workflow' \n'download' \n'get-space-id' \n'head \n'list-spaces' \n'ls' \n'mkdir' \n'rm' \n'rmdir' \n'upload-asset' \n'upload-file' \n", *command), *flagJson)
+		// both 'upload-resource' and 'refresh-key' are intentionally omitted.
+		return helpers.ErrorFromString(fmt.Sprintf("Command '%s' not found. Must be one of: \n'cat' \n'describe' \n'download' \n'get-space-id' \n'head' \n'ls' \n'ls-apps' \n'ls-assets' \n'ls-executions' \n'ls-members' \n'ls-discussions' \n'ls-spaces' \n'ls-workflows' \n'mkdir' \n'rm' \n'rmdir' \n'upload-asset' \n'upload-file'\n", *command), *flagJson)
 	}
 
 	// Write configuration and save key

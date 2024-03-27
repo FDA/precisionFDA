@@ -31,14 +31,14 @@ import (
 	"github.com/manifoldco/promptui"
 )
 
-const userAgent = "precisionFDA CLI/2.5.0"
+const userAgent = "precisionFDA CLI/2.6.0 "
 const defaultNumRoutines = 10
 const defaultChunkSize = 1 << 26 // default 64MB (min. 16MB)
 const minRoutines = 1
 const maxRoutines = 100
-const minChunkSize = 1 << 24 // min. 16MB
-const maxChunkSize = 1 << 32     // max. 4GB
-const maxFileSize = 5 * 1 << 41  // max. 5TB
+const minChunkSize = 1 << 24    // min. 16MB
+const maxChunkSize = 1 << 32    // max. 4GB
+const maxFileSize = 5 * 1 << 40 // max. 5TB
 
 // retryablehttp defaults
 const maxRetryCount = 5
@@ -58,9 +58,16 @@ type IPFDAClient interface {
 	DownloadFile(arg string, outputFilePath string, overwrite string) error
 	Download(args []string, folderID string, spaceID string, public bool, recursive bool, outputFilePath string, overwrite string) error
 	FileViewLink(arg string) error
+	UploadResources(args []string, portalID string) error
 	DescribeEntity(entityID string, entityType string) error
-	ListSpaces(flags map[string]bool) error
+	LsSpaces(flags map[string]bool) error
+	LsApps(spaceID string, flags map[string]bool) error
+	LsAssets(spaceID string, flags map[string]bool) error
+	LsWorkflows(spaceID string, flags map[string]bool) error
+	LsExecutions(spaceID string, flags map[string]bool) error
 	Ls(folderID string, spaceID string, flags map[string]bool) error
+	LsMembers(spaceID string) error
+	LsDiscussions(spaceID string) error // might refactor to be able present public discussions as well.
 	Mkdir(names []string, folderID string, spaceID string, parents bool) error
 	Rmdir(args []string) error
 	Rm(args []string, folderID string, spaceID string) error
@@ -176,6 +183,16 @@ type jsonSpaceResponse struct {
 	Protected bool   `json:"protected"`
 }
 
+type jsonMembersResponse struct {
+	Id        int    `json:"id"`
+	Active    bool   `json:"active"`
+	CreatedAt string `json:"createdAt"`
+	Role      string `json:"role"`
+	Side      string `json:"side"`
+	Name      string `json:"name"`
+	Username  string `json:"username"`
+}
+
 // better name needed
 type jsonFileResponse struct {
 	Id        int    `json:"id"`
@@ -186,7 +203,7 @@ type jsonFileResponse struct {
 	State     string `json:"state"`
 	AddedBy   string `json:"added_by"`
 	CreatedAt string `json:"created_at"`
-	Size      int64    `json:"file_size"`
+	Size      int64  `json:"file_size"`
 	// populated for Folders only
 	Children int `json:"children,omitempty"`
 }
@@ -207,6 +224,16 @@ type jsonCreateFolderResponse struct {
 	Message struct {
 		Type string `json:"type"`
 	} `json:"message"`
+}
+
+type JsonResourcesResponse struct {
+	Resources []Resource `json:"resources"`
+}
+
+type Resource struct {
+	ID  int    `json:"id"`
+	URL string `json:"url"`
+	// there is more but we don't care.
 }
 
 // Below were migrated from pfda.go:
@@ -349,7 +376,7 @@ func (c *PFDAClient) UploadAsset(rootFolderPath string, name string, readmeFileP
 	c.makeRequestFail("POST", closeURL, jsonData)
 	assetURL := c.BaseURL + "/home/assets/" + fileID
 	if c.JsonResponse {
-		helpers.PrintResultAsJSON(struct {
+		helpers.PrettyPrint(struct {
 			Url string `json:"url"`
 		}{Url: assetURL})
 	} else {
@@ -387,8 +414,6 @@ func (c *PFDAClient) UploadFile(path string, folderID string, spaceID string, wi
 
 	return nil
 }
-
-
 
 func (c *PFDAClient) UploadStdin(fileName string, folderID string, spaceID string, withProgressBar bool) error {
 	// we do not know the size, stdin is buffered stream of data
@@ -467,7 +492,9 @@ func (c *PFDAClient) Upload(file io.ReadCloser, path string, folderID string, sp
 	}
 
 	if c.JsonResponse {
-		helpers.PrintResultAsJSON(struct {Url string `json:"url"`}{Url: finalUrl})
+		helpers.PrettyPrint(struct {
+			Url string `json:"url"`
+		}{Url: finalUrl})
 	} else {
 		fmt.Println(">> Uploaded: ", path)
 	}
@@ -536,7 +563,7 @@ func (c *PFDAClient) UploadFolder(folderPath string, folderID string, spaceID st
 	}
 
 	if c.JsonResponse {
-		helpers.PrintResultAsJSON(struct {
+		helpers.PrettyPrint(struct {
 			Url string `json:"url"`
 		}{Url: finalUrl})
 	} else {
@@ -771,10 +798,120 @@ func (c *PFDAClient) FileViewLink(arg string) error {
 	resultUrl := resultJSON["file_url"].(string) + "?inline"
 
 	if c.JsonResponse {
-		helpers.PrintResultAsJSON(struct {Url string `json:"url"`}{Url: resultUrl})
+		helpers.PrettyPrint(struct {
+			Url string `json:"url"`
+		}{Url: resultUrl})
 	} else {
 		fmt.Println("Url to view file:", resultUrl)
 	}
+	return nil
+}
+
+func (c *PFDAClient) UploadResources(args []string, portalID string) error {
+
+	var wg sync.WaitGroup
+	semaphore := make(chan struct{}, 3) // Limit to 3 concurrent goroutines
+
+	results := make(chan error, len(args))
+	for _, path := range args {
+		wg.Add(1)
+		go func(path string) {
+			defer wg.Done()
+			semaphore <- struct{}{} // Acquire
+			err := c.UploadResource(path, portalID, !c.JsonResponse)
+			<-semaphore // Release
+			results <- err
+		}(path)
+	}
+
+	wg.Wait()
+	close(results)
+
+	if !c.JsonResponse {
+		fmt.Println(">> Waiting for all resources links to be generated...")
+	}
+	// nasty, I know
+	time.Sleep(3 * time.Second)
+
+	// Call to getResourceApiURL once here, after all goroutines are done
+	getResourceApiURL := fmt.Sprintf("%s/api/data_portals/%s/resources", c.BaseURL, portalID)
+	_, body, err := c.makeRequestFail("GET", getResourceApiURL, nil)
+	if err != nil {
+		return err
+	}
+
+	var response JsonResourcesResponse
+	if err := json.Unmarshal(body, &response); err != nil {
+		return err
+	}
+
+	if c.JsonResponse {
+		helpers.PrettyPrint(response)
+	} else {
+		for _, resource := range response.Resources {
+			fmt.Printf(">> Resource URL: %s\n", resource.URL)
+		}
+	}
+	return nil
+}
+
+func (c *PFDAClient) UploadResource(path string, portalID string, withProgressBar bool) error {
+	createURL := fmt.Sprintf("%s/api/data_portals/%s/resources", c.BaseURL, portalID)
+	closeURL := c.BaseURL + "/api/close_file"
+
+	file, err := os.Open(path)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	info, err := file.Stat()
+	if err != nil {
+		return err
+	}
+	size := info.Size()
+	if size > maxFileSize {
+		return fmt.Errorf("size of file '%s' (%d) exceeds maximum allowed file size(%d)", path, size, maxFileSize)
+	}
+	if size == 0 {
+		return fmt.Errorf("size of file '%s' is 0 - uploading an empty resource is not allowed", path)
+	}
+
+	jsonData, err := json.Marshal(map[string]interface{}{
+		"name":        filepath.Base(path),
+		"description": "Resource created by precisionFDA CLI",
+	})
+	if err != nil {
+		return err
+	}
+
+	_, body, err := c.makeRequestFail("POST", createURL, jsonData)
+	if err != nil {
+		return err
+	}
+
+	var result map[string]interface{}
+	err = json.Unmarshal(body, &result)
+	if err != nil {
+		return err
+	}
+
+	fileUid := result["fileUid"].(string)
+	chunkPool := make(chan uploadChunk, c.NumRoutines)
+	wg := c.initWaitGroup(fileUid, chunkPool, &size, withProgressBar)
+	c.readAndChunk(file, chunkPool, &size)
+	close(chunkPool)
+	wg.Wait()
+
+	jsonData, err = json.Marshal(map[string]interface{}{
+		"uid": fileUid,
+	})
+	if err != nil {
+		return err
+	}
+
+	// This is async; we cannot wait for close, but some delay is called in the main function
+	c.makeRequestFail("POST", closeURL, jsonData)
 	return nil
 }
 
@@ -796,17 +933,13 @@ func (c *PFDAClient) DescribeEntity(entityID string, entityType string) error {
 		return err
 	}
 
-	if resultJSON == nil {
-		return fmt.Errorf("No response!\n\nResponse: %s", string(body))
-	}
-
 	prettyJSON, _ := json.MarshalIndent(resultJSON, "", "    ")
 	fmt.Printf("%s\n", string(prettyJSON))
 
 	return nil
 }
 
-func (c *PFDAClient) ListSpaces(flags map[string]bool) error {
+func (c *PFDAClient) LsSpaces(flags map[string]bool) error {
 	apiURL := fmt.Sprintf("%s/api/spaces/cli", c.BaseURL)
 
 	params := url.Values{}
@@ -832,6 +965,147 @@ func (c *PFDAClient) ListSpaces(flags map[string]bool) error {
 
 	printListSpacesResponse(spaces, flags["json"])
 	return nil
+}
+
+func (c *PFDAClient) LsApps(spaceID string, flags map[string]bool) error {
+	apiURL := fmt.Sprintf("%s/api/apps/cli_apps", c.BaseURL)
+
+	params := url.Values{}
+
+	if err := helpers.ValidateID(spaceID, "space_id", params); err != nil {
+		return err
+	}
+
+	for flag, value := range flags {
+		if value {
+			params.Add(flag, strconv.FormatBool(value))
+		}
+	}
+
+	fullURL := fmt.Sprintf("%s?%s", apiURL, params.Encode())
+	status, body, err := c.makeRequestFail("GET", fullURL, nil)
+	if err != nil {
+		if status == "404 Not Found" {
+			return fmt.Errorf("Target location not found or inaccessible")
+		}
+		return err
+	}
+
+	var result []map[string]interface{}
+	if err := json.Unmarshal(body, &result); err != nil {
+		return err
+	}
+
+	prettyJSON, _ := json.MarshalIndent(result, "", "    ")
+	fmt.Printf("%s\n", string(prettyJSON))
+
+	return nil
+}
+
+func (c *PFDAClient) LsAssets(spaceID string, flags map[string]bool) error {
+	apiURL := fmt.Sprintf("%s/api/assets/cli_assets", c.BaseURL)
+
+	params := url.Values{}
+
+	if err := helpers.ValidateID(spaceID, "space_id", params); err != nil {
+		return err
+	}
+
+	for flag, value := range flags {
+		if value {
+			params.Add(flag, strconv.FormatBool(value))
+		}
+	}
+
+	fullURL := fmt.Sprintf("%s?%s", apiURL, params.Encode())
+	status, body, err := c.makeRequestFail("GET", fullURL, nil)
+	if err != nil {
+		if status == "404 Not Found" {
+			return fmt.Errorf("Target location not found or inaccessible")
+		}
+		return err
+	}
+
+	var result []map[string]interface{}
+	if err := json.Unmarshal(body, &result); err != nil {
+		return err
+	}
+
+	prettyJSON, _ := json.MarshalIndent(result, "", "    ")
+	fmt.Printf("%s\n", string(prettyJSON))
+
+	return nil
+}
+
+func (c *PFDAClient) LsWorkflows(spaceID string, flags map[string]bool) error {
+	apiURL := fmt.Sprintf("%s/api/workflows/cli_workflows", c.BaseURL)
+
+	params := url.Values{}
+
+	if err := helpers.ValidateID(spaceID, "space_id", params); err != nil {
+		return err
+	}
+
+	for flag, value := range flags {
+		if value {
+			params.Add(flag, strconv.FormatBool(value))
+		}
+	}
+
+	fullURL := fmt.Sprintf("%s?%s", apiURL, params.Encode())
+	status, body, err := c.makeRequestFail("GET", fullURL, nil)
+	if err != nil {
+		if status == "404 Not Found" {
+			return fmt.Errorf("Target location not found or inaccessible")
+		}
+		return err
+	}
+
+	var result []map[string]interface{}
+	if err := json.Unmarshal(body, &result); err != nil {
+		return err
+	}
+
+	prettyJSON, _ := json.MarshalIndent(result, "", "    ")
+	fmt.Printf("%s\n", string(prettyJSON))
+
+	return nil
+}
+
+func (c *PFDAClient) LsExecutions(spaceID string, flags map[string]bool) error {
+	apiURL := fmt.Sprintf("%s/api/jobs/cli_jobs", c.BaseURL)
+
+	params := url.Values{}
+
+	if err := helpers.ValidateID(spaceID, "space_id", params); err != nil {
+		return err
+	}
+
+	for flag, value := range flags {
+		if value {
+			params.Add(flag, strconv.FormatBool(value))
+		}
+	}
+
+	fullURL := fmt.Sprintf("%s?%s", apiURL, params.Encode())
+	status, body, err := c.makeRequestFail("GET", fullURL, nil)
+	if err != nil {
+		if status == "404 Not Found" {
+			return fmt.Errorf("Target location not found or inaccessible")
+		}
+		return err
+	}
+
+	var result []map[string]interface{}
+	if err := json.Unmarshal(body, &result); err != nil {
+		return err
+	}
+
+	prettyJSON, _ := json.MarshalIndent(result, "", "    ")
+	fmt.Printf("%s\n", string(prettyJSON))
+
+	return nil
+
 }
 
 func (c *PFDAClient) Ls(folderID string, spaceID string, flags map[string]bool) error {
@@ -871,6 +1145,47 @@ func (c *PFDAClient) Ls(folderID string, spaceID string, flags map[string]bool) 
 	return nil
 }
 
+func (c *PFDAClient) LsMembers(spaceID string) error {
+	apiURL := fmt.Sprintf("%s/api/spaces/%s/cli_members", c.BaseURL, spaceID)
+
+	status, body, err := c.makeRequestFail("GET", apiURL, nil)
+	if err != nil {
+		if status == "404 Not Found" {
+			return fmt.Errorf("Space not found or inaccessible")
+		}
+		return err
+	}
+
+	var members []jsonMembersResponse
+	if err := json.Unmarshal(body, &members); err != nil {
+		return err
+	}
+
+	printSpaceMembersResponse(members, c.JsonResponse)
+	return nil
+}
+
+func (c *PFDAClient) LsDiscussions(spaceID string) error {
+	apiURL := fmt.Sprintf("%s/api/spaces/%s/cli_discussions", c.BaseURL, spaceID)
+
+	status, body, err := c.makeRequestFail("GET", apiURL, nil)
+	if err != nil {
+		if status == "404 Not Found" {
+			return fmt.Errorf("Space not found or inaccessible")
+		}
+		return err
+	}
+
+	var result []map[string]interface{}
+	if err := json.Unmarshal(body, &result); err != nil {
+		return err
+	}
+	prettyJSON, _ := json.MarshalIndent(result, "", "    ")
+	fmt.Printf("%s\n", string(prettyJSON))
+
+	return nil
+}
+
 func (c *PFDAClient) Mkdir(dirs []string, folderID string, spaceID string, parents bool) error {
 
 	c.ContinueOnError = len(dirs) > 1
@@ -885,7 +1200,7 @@ func (c *PFDAClient) Mkdir(dirs []string, folderID string, spaceID string, paren
 				if err == nil {
 					if c.JsonResponse {
 						folderId, _ := strconv.Atoi(id)
-						helpers.PrintResultAsJSON(struct {
+						helpers.PrettyPrint(struct {
 							Name string `json:"name"`
 							ID   int    `json:"id"`
 						}{Name: folder, ID: folderId})
@@ -906,7 +1221,7 @@ func (c *PFDAClient) Mkdir(dirs []string, folderID string, spaceID string, paren
 		if err == nil {
 			if c.JsonResponse {
 				folderId, _ := strconv.Atoi(id)
-				helpers.PrintResultAsJSON(struct {
+				helpers.PrettyPrint(struct {
 					Name string `json:"name"`
 					ID   int    `json:"id"`
 				}{Name: dir, ID: folderId})
@@ -1406,7 +1721,7 @@ func pickFile(files []jsonFileResponse, label string) string {
 	ids := make([]string, 0)
 	for _, file := range files {
 		if file.Type == "UserFile" {
-			options = append(options, "created "+file.CreatedAt+" - " +helpers.HumanReadableSize(file.Size)+ " - "+file.Name+" ("+file.Uid+")")
+			options = append(options, "created "+file.CreatedAt+" - "+helpers.HumanReadableSize(file.Size)+" - "+file.Name+" ("+file.Uid+")")
 			ids = append(ids, file.Uid)
 		}
 	}
@@ -1425,7 +1740,7 @@ func pickFile(files []jsonFileResponse, label string) string {
 // pass all flags, so we can optimize the table header - if in 'private' do not show added-by
 func printListingResponse(response jsonListingResponse, asJSON bool, brief bool) {
 	if asJSON {
-		prettyJSON, _ := json.MarshalIndent(response, "", "    ")
+		prettyJSON, _ := json.MarshalIndent(response, "", "  ")
 		fmt.Println(string(prettyJSON))
 	} else if brief {
 		printListingSimple(response.Files)
@@ -1479,6 +1794,29 @@ func printListSpacesResponse(spaces []jsonSpaceResponse, asJSON bool) {
 
 		for _, space := range spaces {
 			columns := []string{strconv.Itoa(space.Id), space.Type, helpers.FormatValue(space.Protected, "Protected"), space.Role, space.Side, space.Title}
+			printLine(columns)
+		}
+		writer.Flush()
+	}
+}
+
+func printSpaceMembersResponse(members []jsonMembersResponse, asJSON bool) {
+	if asJSON {
+		prettyJSON, _ := json.MarshalIndent(members, "", "    ")
+		fmt.Println(string(prettyJSON))
+	} else if len(members) > 0 {
+		writer := tabwriter.NewWriter(os.Stdout, 0, 8, 1, '\t', tabwriter.AlignRight)
+
+		// Function to join and print a line
+		printLine := func(columns []string) {
+			fmt.Fprintln(writer, strings.Join(columns, "\t")+"\t")
+		}
+
+		headers := []string{"ID", "Name", "Role", "Side", "Added at"}
+		printLine(headers)
+
+		for _, member := range members {
+			columns := []string{strconv.Itoa(member.Id), member.Name, member.Role, member.Side, member.CreatedAt}
 			printLine(columns)
 		}
 		writer.Flush()

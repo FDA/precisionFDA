@@ -65,6 +65,12 @@ module Api
       render json: { attachments: response }, adapter: :json
     end
 
+    # GET /api/discussions/:id/describe
+    # used by CLI.
+    def describe
+      response = https_apps_client.cli_discussion_describe(params[:id])
+      render json: response, adapter: :json
+    end
     # GET /api/discussions/:id/answers/:answer_id
     def answer_show
       response = https_apps_client.answer_show(params[:discussion_id], params[:answer_id])

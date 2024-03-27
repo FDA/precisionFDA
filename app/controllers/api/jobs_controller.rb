@@ -324,6 +324,44 @@ module Api
       render json: { message: { type: service.status, text: service.message } }
     end
 
+    def cli_jobs
+      # Fetches space jobs.
+      if params[:space_id]
+        jobs = []
+        if find_user_space
+          jobs = @space.jobs.
+            eager_load(:app, user: :org, analysis: :workflow).
+            includes(:taggings).
+            search_by_tags(params.dig(:filters, :tags)).
+            order(order_params).page(page_from_params).per(page_size)
+          jobs.each { |job| job.current_user = @context.user }
+
+          jobs = JobService::JobsFilter.call(jobs, params[:filters])
+        end
+        render json: jobs, each_serializer: CliJobSerializer
+      elsif params[:public_scope] == "true"
+        # Fetches all 'public' jobs.
+        jobs = Job.
+          accessible_by_public.
+          eager_load(:app, user: :org, analysis: :workflow).
+          includes(:taggings).
+          search_by_tags(params.dig(:filters, :tags))
+        jobs = JobService::JobsFilter.call(jobs, params[:filters])
+        render json: jobs, each_serializer: CliJobSerializer
+      else
+        # Fetches all user 'private' jobs.
+        jobs = Job.
+          editable_by(@context).
+          accessible_by_private.
+          eager_load(:app, user: :org, analysis: :workflow).
+          includes(:taggings).
+          search_by_tags(params.dig(:filters, :tags))
+
+        jobs = JobService::JobsFilter.call(jobs, params[:filters])
+        render json: jobs, each_serializer: CliJobSerializer
+      end
+    end
+
     private
 
     # Default to reverse chronological order unless overriden by params

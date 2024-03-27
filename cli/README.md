@@ -139,6 +139,16 @@ To test for FIPS compliance we can inspect the symbols using `go tool nm ./pfda`
 
 # Version History
 
+### 2.6.0 (2024-04-02)
+- New feature - ls-assets; listing private or public assets
+- New feature - ls-members; listing given space members
+- New feature - ls-discussions; listing given space discussions
+- New feature - ls-apps; listing private, space or public apps
+- New feature - ls-workflows; listing private, space or public workflows
+- New feature - ls-executions; listing private, space or public executions
+- New feature - ls-assets; listing private or public assets
+- New feature - describe; describe given entity by id - one of file, asset, job, app, workflow, discussion
+
 ### 2.5.0 (2023-12-14) 
 - fixed uploading complex folder structure on windows
 - fixed uploading large files 
