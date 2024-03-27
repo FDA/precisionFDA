@@ -70,7 +70,7 @@ func GetChunkSize(filesCount int) int {
 // ensuring the number of chunks does not exceed 10 000.
 func CalculateChunkSize(fileSize int64, minChunkSize int) int {
 	const maxChunks = 10_000
-	idealChunkSize := int(math.Ceil(float64(fileSize) / float64(maxChunks - 1)))
+	idealChunkSize := int(math.Ceil(float64(fileSize) / float64(maxChunks-1)))
 	return Max(idealChunkSize, minChunkSize)
 }
 
@@ -113,7 +113,9 @@ func ErrorFromString(msg string, asJSON bool) int {
 
 func PrintResult(result string, asJSON bool) {
 	if asJSON {
-		jsonData, _ := json.Marshal(struct {Result string `json:"result"`}{Result: result})
+		jsonData, _ := json.MarshalIndent(struct {
+			Result string `json:"result"`
+		}{Result: result}, "", "")
 		fmt.Println(string(jsonData))
 	} else {
 		// Default to plain text
@@ -121,7 +123,21 @@ func PrintResult(result string, asJSON bool) {
 	}
 }
 
-func PrintResultAsJSON(data interface{}) {
-	jsonData, _ := json.Marshal(data)
+// PrettyPrint takes an empty interface as input, which can be either a byte slice of raw JSON
+// or any Go data structure. It then pretty-prints the JSON representation of the input.
+func PrettyPrint(data interface{}) {
+	var jsonData []byte
+
+	switch v := data.(type) {
+	case []byte:
+		// Attempt to unmarshal and marshal to pretty-print, ignore errors.
+		var tmp interface{}
+		if err := json.Unmarshal(v, &tmp); err == nil {
+			jsonData, _ = json.MarshalIndent(tmp, "", "  ")
+		}
+	default:
+		// Attempt to marshal directly to pretty-printed JSON, ignore errors.
+		jsonData, _ = json.MarshalIndent(data, "", "  ")
+	}
 	fmt.Println(string(jsonData))
 }

@@ -207,7 +207,7 @@ export class DataPortalService {
       fileDxid: userFile.dxid,
       filename: userFile.name,
       project: userFile.project,
-      duration: 9999999999,
+      duration: 9_999_999_999,
     })
 
     return link.url

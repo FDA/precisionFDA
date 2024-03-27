@@ -42,8 +42,8 @@ type Writer struct {
 
 type Printer struct {
 	LinesToPrint int // max lines to print.
-	Lines int
-	Writer *uilive.Writer
+	Lines        int
+	Writer       *uilive.Writer
 }
 
 func NewWriter(totalBytes int64, writer *uilive.Writer) *Writer {
@@ -142,18 +142,18 @@ func DownloadDirectly(downloadUrl string, outputFilePath string, overwrite strin
 	}
 
 	if asJSON {
-		helpers.PrintResultAsJSON(struct {
+		helpers.PrettyPrint(struct {
 			FileName string `json:"file_name"`
-			Path  string `json:"path"`}{FileName: fileName, Path: outputFilePath})
+			Path     string `json:"path"`
+		}{FileName: fileName, Path: outputFilePath})
 	} else {
 		fmt.Printf("Downloaded %s to %s", fileName, outputFilePath)
 	}
 	return nil
 }
 
-
 func Head(fileURL string, lines int) error {
-	tmp, err := os.CreateTemp("","head") // Create temp fake data destination
+	tmp, err := os.CreateTemp("", "head") // Create temp fake data destination
 	if err != nil {
 		return err
 	}

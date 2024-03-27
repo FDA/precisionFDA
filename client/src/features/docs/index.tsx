@@ -8,7 +8,6 @@ import { useAuthUser } from '../auth/useAuthUser'
 import { Apps } from './pages/Apps'
 import { Assets } from './pages/Assets'
 import { CLI } from './pages/CLI'
-import { CLI_old } from './pages/CLI_old'
 import { ChallengeWorkbench } from './pages/ChallengeWorkbench'
 import { Comparisons } from './pages/Comparisons'
 import { CreatingApps } from './pages/CreatingApps'
@@ -262,7 +261,6 @@ const Docs = () => {
                 <Route path="/licenses" element={<Licenses />} />
                 <Route path="/spaces" element={<ReviewSpaces />} />
                 <Route path="/cli" element={<CLI />} />
-                <Route path="/cli-old" element={<CLI_old />} />
                 <Route path="/challenge-workbench" element={<ChallengeWorkbench />} />
                 <Route path="/site-activity-reporting" element={<SiteActivityReporting />} />
                 <Route path="/site-customization" element={<SiteCustomization />} />

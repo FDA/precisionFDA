@@ -161,6 +161,16 @@ module Api
       render json: members, adapter: :json
     end
 
+    def cli_members
+      response = https_apps_client.cli_space_members(params[:id])
+      render json: response
+    end
+
+    def cli_discussions
+      response = https_apps_client.cli_space_discussions(params[:id])
+      render json: response
+    end
+
     # POST /api/spaces/:id/tags
     # Updates tags.
     def tags

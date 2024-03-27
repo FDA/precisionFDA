@@ -287,9 +287,9 @@ export class PlatformClient {
    * API: /file-xxxx/describe
    * @see https://documentation.dnanexus.com/developer/api/introduction-to-data-object-classes/files#api-method-file-xxxx-describe
    */
-  async fileDescribe(params: FileDescribeParams): Promise<FileDescribeResponse> {
+  async fileDescribe(params: FileDescribeParams, data?: AnyObject): Promise<FileDescribeResponse> {
     const url = `${config.platform.apiUrl}/${params.fileDxid}/describe`
-    const data: AnyObject = {
+    const defaultData: AnyObject = {
       project: params.projectDxid,
       fields: {
         id: true,
@@ -299,7 +299,7 @@ export class PlatformClient {
     }
     const options: AxiosRequestConfig = {
       method: 'POST',
-      data,
+      data: data ?? defaultData,
       url,
     }
     return await this.sendRequest(options)

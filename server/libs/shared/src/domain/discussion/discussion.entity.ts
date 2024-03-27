@@ -6,7 +6,8 @@ import {
   OneToOne,
   OneToMany,
   Collection,
-  Property, Cascade, Formula,
+  Property,
+  Cascade,
 } from '@mikro-orm/core'
 import { Answer } from '@shared/domain/answer/answer.entity'
 import { DiscussionComment } from '@shared/domain/comment/discussion-comment.entity'

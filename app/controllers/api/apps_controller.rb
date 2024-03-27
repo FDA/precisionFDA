@@ -336,9 +336,47 @@ module Api
 
     def describe
       find_app # check if app accesible by current user first
-      response = https_apps_client.describe(params[:id], "apps")
+      response = https_apps_client.describe(params[:id])
       render json: { app: response }
     end
+
+    # GET /api/apps/cli_apps
+    # Used by CLI exclusively.
+    # Used old ruby logic to fetch apps to avoid full refactoring of the logic into node. Not part of CLI update.
+    def cli_apps
+      apps = []
+      filters = params[:filters]
+
+      if params[:space_id]
+        if find_user_space
+          apps = @space.latest_revision_apps.unremoved.eager_load(:app_series, :user).includes(:taggings)
+          apps = filter_apps(apps, filters)
+        end
+      elsif params[:public_scope] == "true"
+        apps_series = AppSeries.unremoved.accessible_by_public.eager_load(latest_revision_app: [user: :org], latest_version_app: [user: :org])
+        apps = apps_series.map do |series|
+          latest = series.latest_accessible(@context)
+          if (latest&.scope == "public") && AppSeriesService::AppSeriesFilter.
+            match(latest, filters)
+            latest
+          end
+        end.compact
+      else
+        apps_series = AppSeries.accessible_by(@context).unremoved.eager_load(latest_revision_app: [user: :org], latest_version_app: [user: :org])
+        apps = apps_series.map do |series|
+          latest = series.latest_accessible(@context)
+          if (latest&.scope == "private") && AppSeriesService::AppSeriesFilter.
+            match(latest, filters)
+            latest
+          end
+        end.compact
+      end
+
+      apps = sort_array_by_fields(apps)
+
+      render json: apps, each_serializer: CliAppSerializer
+    end
+
 
     private
 

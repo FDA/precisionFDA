@@ -17,16 +17,15 @@ func newLineWriter(writer *tabwriter.Writer) lineWriterFunc {
 	}
 }
 
-
-func PrintListSpacesHelp() int {
+func PrintLsSpacesHelp() int {
 	writer := tabwriter.NewWriter(os.Stdout, 0, 8, 1, '\t', tabwriter.AlignRight)
 	writeLine := newLineWriter(writer)
 
 	writeLine("  ", "  ")
 	writeLine("  For:", "Listing active spaces you have access to.\n")
-	writeLine("  Usage:", "list-spaces [FLAG...]\n")
-	writeLine("  Examples:", "list-spaces -groups -private [Shows all active spaces of type groups or private]")
-	writeLine("  ", "list-spaces -unactivated -json [Shows only unactivated spaces and present result as JSON]\n")
+	writeLine("  Usage:", "ls-spaces [FLAG...] | list-spaces [FLAG...]\n")
+	writeLine("  Examples:", "ls-spaces -groups -private [Shows all active spaces of type groups or private]")
+	writeLine("  ", "ls-spaces -unactivated -json [Shows only unactivated spaces and present result as JSON]\n")
 	writeLine("  Flags:", "All flags listed below are OPTIONAL")
 	writeLine("   -h, -help", "Displays this help message and exit")
 	writeLine("   -locked", "Shows only locked spaces")
@@ -43,12 +42,43 @@ func PrintListSpacesHelp() int {
 	return 0
 }
 
+func PrintLsMembersHelp() int {
+	writer := tabwriter.NewWriter(os.Stdout, 0, 8, 1, '\t', tabwriter.AlignRight)
+	writeLine := newLineWriter(writer)
+
+	writeLine("  ", "  ")
+	writeLine("  For:", "Listing members of a specified space.\n")
+	writeLine("  Usage:", "ls-members -space-id <SPACE_ID> \n")
+	writeLine("  Example:", "ls-members -space-id 27 [Lists all members of the specified space]\n")
+	writeLine("  Flags:", "The following flags are OPTIONAL")
+	writeLine("   -h, -help", "Displays this help message and exits")
+	writeLine("   -space-id <ID>", "Lists executions in the specified space")
+
+	writer.Flush()
+	return 0
+}
+
+func PrintLsDiscussionsHelp() int {
+	writer := tabwriter.NewWriter(os.Stdout, 0, 8, 1, '\t', tabwriter.AlignRight)
+	writeLine := newLineWriter(writer)
+	writeLine("  ", "  ")
+	writeLine("  For:", "Listing discussions in a given space. Always responds in JSON format.\n")
+	writeLine("  Usage:", "ls-discussions [FLAG...]\n")
+	writeLine("  Example:", "ls-discussions -space-id 27 [Lists all discussions in the specified space]\n")
+	writeLine("  Flags: ", "The following flags are OPTIONAL")
+	writeLine("   -h, -help", "Displays this help message and exits")
+	writeLine("   -space-id <ID>", "Lists discussions in the specified space")
+
+	writer.Flush()
+	return 0
+}
+
 func PrintLsHelp() int {
 	writer := tabwriter.NewWriter(os.Stdout, 0, 8, 1, '\t', tabwriter.AlignRight)
 	writeLine := newLineWriter(writer)
 
 	writeLine("  ", "  ")
-	writeLine("  For:", "Listing files in given location. If no location provided, the root of My Home is used.")
+	writeLine("  For:", "Listing files in a given location. If no location provided, the root of My Home is used.")
 	writeLine("      ", "Public files are not listed by default.\n")
 	writeLine("  Usage:", "ls [FLAG...]\n")
 	writeLine("  Examples:", "ls -files -folder-id 55 [Show only files from private folder with id 55]")
@@ -63,6 +93,84 @@ func PrintLsHelp() int {
 	writeLine("   -space-id <ID>", "Executes in the specified space")
 	writeLine("   -folder-id <ID>", "Executes in the specified folder")
 	writeLine("   -json", "Displays response as JSON array")
+
+	writer.Flush()
+	return 0
+}
+
+func PrintLsAssetsHelp() int {
+	writer := tabwriter.NewWriter(os.Stdout, 0, 8, 1, '\t', tabwriter.AlignRight)
+	writeLine := newLineWriter(writer)
+
+	writeLine("  ", "  ")
+	writeLine("  For:", "Listing assets in a given location. If no location provided, My Home is used. Always responds in JSON format.")
+	writeLine("      ", "Public assets are not listed by default.\n")
+	writeLine("  Usage:", "ls-assets [FLAG...]\n")
+	writeLine("  Examples:", "ls-assets -space-id 24 [Lists all assets from the space with id 24]")
+	writeLine("  Examples:", "ls-assets [Lists all assets in your My Home]")
+	writeLine("  ", "ls-assets -public [Lists all public assets accessible to the user]\n")
+	writeLine("  Flags:", "The following flags are OPTIONAL")
+	writeLine("   -h, -help", "Displays this help message and exits")
+	writeLine("   -public", "Lists public assets")
+	writeLine("   -space-id <ID>", "Lists assets in the specified space")
+
+	writer.Flush()
+	return 0
+}
+
+func PrintLsAppsHelp() int {
+	writer := tabwriter.NewWriter(os.Stdout, 0, 8, 1, '\t', tabwriter.AlignRight)
+	writeLine := newLineWriter(writer)
+
+	writeLine("  ", "  ")
+	writeLine("  For:", "Listing applications in a given location. If no location provided, My Home is used. Always responds in JSON format.")
+	writeLine("      ", "Public applications are not listed by default.\n")
+	writeLine("  Usage:", "ls-apps [FLAG...]\n")
+	writeLine("  Examples:", "ls-apps -space-id 24 [Lists all applications from the space with id 24]")
+	writeLine("  Examples:", "ls-apps [Lists all applications in your My Home]")
+	writeLine("  ", "ls-apps -public [Lists all public applications accessible to the user]\n")
+	writeLine("  Flags:", "The following flags are OPTIONAL")
+	writeLine("   -h, -help", "Displays this help message and exits")
+	writeLine("   -public", "Lists public applications")
+	writeLine("   -space-id <ID>", "Lists applications in the specified space")
+
+	writer.Flush()
+	return 0
+}
+
+func PrintLsWorkflowsHelp() int {
+	writer := tabwriter.NewWriter(os.Stdout, 0, 8, 1, '\t', tabwriter.AlignRight)
+	writeLine := newLineWriter(writer)
+
+	writeLine("  ", "  ")
+	writeLine("  For:", "Listing workflows in a given location. If no location provided, My Home is used. Always responds in JSON format.")
+	writeLine("      ", "Public workflows are not listed by default.\n")
+	writeLine("  Usage:", "ls-workflows [FLAG...]\n")
+	writeLine("  Examples:", "ls-workflows -space-id 24 [Lists all workflows from the space with id 24]")
+	writeLine("  ", "ls-workflows -public [Lists all public workflows accessible to the user]\n")
+	writeLine("  Flags:", "The following flags are OPTIONAL")
+	writeLine("   -h, -help", "Displays this help message and exits")
+	writeLine("   -public", "Lists public workflows")
+	writeLine("   -space-id <ID>", "Lists workflows in the specified space")
+
+	writer.Flush()
+	return 0
+}
+
+func PrintLsExecutionsHelp() int {
+	writer := tabwriter.NewWriter(os.Stdout, 0, 8, 1, '\t', tabwriter.AlignRight)
+	writeLine := newLineWriter(writer)
+
+	writeLine("  ", "  ")
+	writeLine("  For:", "Listing executions in a given location. If no location provided, My Home is used. Always responds in JSON format.")
+	writeLine("      ", "Public executions are not listed by default.\n")
+	writeLine("  Usage:", "ls-executions [FLAG...]\n")
+	writeLine("  Examples:", "ls-executions -space-id 24 [Lists all executions from the space with id 24]")
+	writeLine("  ", "ls-executions -public [Lists all public executions accessible to the user]\n")
+	writeLine("  Flags:", "The following flags are OPTIONAL")
+	writeLine("   -h, -help", "Displays this help message and exits")
+	writeLine("   -public", "Lists public executions")
+	writeLine("   -space-id <ID>", "Lists executions in the specified space")
 
 	writer.Flush()
 	return 0
@@ -136,7 +244,7 @@ func PrintDescribeAppHelp() int {
 	writeLine := newLineWriter(writer)
 
 	writeLine("  ", "  ")
-	writeLine("  For:", "Getting details about given app. Always responds in JSON format.\n")
+	writeLine("  For:", "Getting details about a given app. Always responds in JSON format.\n")
 	writeLine("  Usage:", "describe-app <APP_ID>\n")
 	writeLine("  Examples:", "describe-app app-GJk3k5v85a4ZfgQ8bP5911Xg0-1 [Describes the app]")
 
@@ -149,9 +257,42 @@ func PrintDescribeWorkflowHelp() int {
 	writeLine := newLineWriter(writer)
 
 	writeLine("  ", "  ")
-	writeLine("  For:", "Getting details about given workflow. Always responds in JSON format.\n")
+	writeLine("  For:", "Getting details about a given workflow. Always responds in JSON format.\n")
 	writeLine("  Usage:", "describe-workflow <WORKFLOW_ID>\n")
 	writeLine("  Examples:", "describe-workflow workflow-GJkk5v005xggB4JcB4Zf9326V-1 [Describes the workflow]")
+
+	writer.Flush()
+	return 0
+}
+
+func PrintUploadResourceHelp() int {
+	writer := tabwriter.NewWriter(os.Stdout, 0, 8, 1, '\t', tabwriter.AlignRight)
+	writeLine := newLineWriter(writer)
+
+	writeLine("  ", "  ")
+	writeLine("  For:", "Uploading a new portal resource. Responds with sharable pre-authenticated non-expiring link to the created resource.\n")
+	writeLine("  ", "Supports uploading multiple resources - simply pass them as positional args before any flags (check examples).")
+	writeLine("  Usage:", "upload-resource <PATH/TO/FILE> -portal-id <PORTAL_ID> [FLAG...]\n")
+	writeLine("  Examples:", "upload-resource script01.py -portal-id 12 [Creates a new resource in the specified portal]")
+	writeLine("  ", "upload-resource script01.py processed_data.py results.pdf -portal-id 12  [Creates new resources in the specified portal]")
+
+	writer.Flush()
+	return 0
+}
+
+func PrintDescribeHelp() int {
+	writer := tabwriter.NewWriter(os.Stdout, 0, 8, 1, '\t', tabwriter.AlignRight)
+	writeLine := newLineWriter(writer)
+
+	writeLine("  ", "  ")
+	writeLine("  For:", "Getting details about a given entity. Entity can be one of: app, job, file, workflow, discussion. Always responds in JSON format.\n")
+	writeLine("  Usage:", "describe <ENTITY_ID>\n")
+	writeLine("  Examples:", "describe file-GJk3k5v85a4ZfgQ8bP5911Xg0-1 [Describes the file]")
+	writeLine("  ", "describe file-GJk1kpQ05xgQd8bP54kJFjzkz-1 [Describes the asset]")
+	writeLine("  ", "describe app-YZm95v85a4ZfgQB4JcAB4g0-3 [Describes the app]")
+	writeLine("  ", "describe job-YZm9QpQ0b69Qd8bP454kmcf76-2 [Describes the execution]")
+	writeLine("  ", "describe workflow-GJkk5v005xggB4JcB4Zf9326V-1 [Describes the workflow]")
+	writeLine("  ", "describe discussion-15 [Describes the discussion]")
 
 	writer.Flush()
 	return 0
@@ -226,7 +367,7 @@ func PrintRmdirHelp() int {
 	writeLine("  Flags:", "All flags listed below are OPTIONAL")
 	writeLine("   -h, -help", "Displays the help message and exit")
 	writeLine("   -json", "Displays response in JSON format")
-	
+
 	writer.Flush()
 	return 0
 }
@@ -294,4 +435,3 @@ func PrintViewLinkHelp() int {
 	writer.Flush()
 	return 0
 }
-

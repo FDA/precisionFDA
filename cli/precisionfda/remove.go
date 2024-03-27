@@ -7,7 +7,7 @@ import (
 	"strconv"
 )
 
-// Remove single file by uid.
+// RemoveFile Remove files by uid.
 func (c *PFDAClient) RemoveFile(uids []string) error {
 	deleteFileURL := c.BaseURL + "/api/files/cli_remove"
 	data := map[string]interface{}{"uids": uids}
@@ -32,7 +32,9 @@ func (c *PFDAClient) RemoveFile(uids []string) error {
 
 	for _, uid := range uids {
 		if c.JsonResponse {
-			helpers.PrintResultAsJSON(struct {Uid string `json:"uid"`}{Uid: uid})
+			helpers.PrettyPrint(struct {
+				Uid string `json:"uid"`
+			}{Uid: uid})
 		} else {
 			fmt.Printf("Removed %s \n", uid)
 		}
@@ -61,12 +63,12 @@ func (c *PFDAClient) RemoveDir(uid string) error {
 	}
 
 	if resultJSON["count"].(float64) == 0 {
-		return fmt.Errorf("folder with id: %s not found or inaccessible", uid)
+		return fmt.Errorf("Folder with id: %s not found or inaccessible", uid)
 	}
 
 	if c.JsonResponse {
 		folderId, _ := strconv.Atoi(uid)
-		helpers.PrintResultAsJSON(struct {
+		helpers.PrettyPrint(struct {
 			ID int `json:"id"`
 		}{ID: folderId})
 	} else {
