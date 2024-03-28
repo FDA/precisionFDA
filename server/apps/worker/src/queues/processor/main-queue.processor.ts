@@ -8,7 +8,7 @@ import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { SyncFilesStateOperation } from '@shared/domain/user-file/ops/sync-files-state'
 import { UserFileService } from '@shared/domain/user-file/service/user-file.service'
 import { FOLLOW_UP_ACTION } from '@shared/domain/user-file/user-file.input'
-import { createFileSynchronizeJobTask, createRunFollowUpActionJobTask } from '@shared/queue'
+import { createRunFollowUpActionJobTask } from '@shared/queue'
 import { TASK_TYPE } from '@shared/queue/task.input'
 import { Job } from 'bull'
 import { FollowUpDecider } from '../../domain/user-file/follow-up-decider'
@@ -59,8 +59,9 @@ export class MainQueueProcessor extends BaseQueueProcessor {
     this.logger.verbose(`synchronizeFile result: ${result}`)
 
     if (!result) {
-      this.logger.verbose(`repeating file sync for ${input.fileUid}`)
-      await createFileSynchronizeJobTask(input, this.user, 500)
+      throw new Error(
+        `File ${input.fileUid} not ready for synchronizing, trigger repeat of the job by throwing error`,
+      )
     } else {
       const followUpAction = await this.followUpDecider.decideNextAction(input.fileUid)
       if (followUpAction) {

@@ -88,7 +88,7 @@ export class MainQueueJobProducer extends QueueJobProducer {
     }
 
     const options: JobOptions = {
-      jobId: `${wrapped.type}.${payload.fileUid}.${new Date().getTime()}`,
+      jobId: `${wrapped.type}.${payload.fileUid}`,
       delay: delayInMs ?? 0,
     }
 
