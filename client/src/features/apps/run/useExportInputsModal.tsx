@@ -20,7 +20,9 @@ export const useExportInputsModal = ({ showCopyButton }: { showCopyButton: boole
   const [fileUids, setFileUids] = useState<string[]>([])
 
   const { isFetching, data: userListFiles } = useFetchFilesByUIDQuery(fileUids || [])
-  const areAllFilePublic = userListFiles?.every(f => f.scope === 'public')
+  // const areAllFilePublic = userListFiles?.every(f => f.scope === 'public')
+  // Temporarily disabling public files check
+  const areAllFilePublic = true
   const areFiles = userListFiles ? userListFiles?.length > 0 : false
 
   const openModal = async (data: unknown, fuids: string[]) => {
