@@ -76,7 +76,7 @@ export const SpaceForm = ({
       review_lead_dxuser: '',
       sponsor_lead_dxuser: '',
       cts: null,
-      protected: null,
+      protected: false,
       restricted_reviewer: null,
       ...defaultValues,
     },
@@ -131,16 +131,18 @@ export const SpaceForm = ({
       host_lead_dxuser: vals.host_lead_dxuser,
       sponsor_lead_dxuser: vals.sponsor_lead_dxuser,
       cts: vals.cts,
+      protected: vals.protected,
+      restricted_reviewer: vals.restricted_reviewer,
     }
 
     mutation.mutateAsync(createSpaceRequest)
   }
 
-  const handleProtectedSelection = (event: React.ChangeEvent<Element>) => {
+  const handleProtectedSelection = (event: React.ChangeEvent<HTMLInputElement>) => {
     setValue('protected', event.target.checked)
   }
 
-  const handleRestrictedReviewer = (event: React.ChangeEvent<Element>) => {
+  const handleRestrictedReviewer = (event: React.ChangeEvent<HTMLInputElement>) => {
     setValue('restricted_reviewer', event.target.checked)
   }
 

@@ -304,9 +304,6 @@ devDependencies:
   '@types/react-tabs':
     specifier: ^2.3.4
     version: 2.3.4
-  '@types/remarkable':
-    specifier: ^2.0.3
-    version: 2.0.8
   '@types/spark-md5':
     specifier: ^3.0.2
     version: 3.0.4
@@ -4949,10 +4946,6 @@ packages:
       '@types/prop-types': 15.7.11
       '@types/scheduler': 0.16.8
       csstype: 3.1.2
-
-  /@types/remarkable@2.0.8:
-    resolution: {integrity: sha512-eKXqPZfpQl1kOADjdKchHrp2gwn9qMnGXhH/AtZe0UrklzhGJkawJo/Y/D0AlWcdWoWamFNIum8+/nkAISQVGg==}
-    dev: true
 
   /@types/resolve@1.20.6:
     resolution: {integrity: sha512-A4STmOXPhMUtHH+S6ymgE2GiBSMqf4oTvcQZMcHzokuTLVYzXTB8ttjcgxOVaAp2lGwEdzZ0J+cRbbeevQj1UQ==}
@@ -13903,8 +13896,8 @@ packages:
       webpack-merge: 5.10.0
     dev: true
 
-  /webpack-dev-middleware@5.3.3(webpack@5.90.1):
-    resolution: {integrity: sha512-hj5CYrY0bZLB+eTO+x/j67Pkrquiy7kWepMHmUMoPsmcUaeEnQJqFzHJOyxgWlq746/wUuA64p9ta34Kyb01pA==}
+  /webpack-dev-middleware@5.3.4(webpack@5.90.1):
+    resolution: {integrity: sha512-BVdTqhhs+0IfoeAf7EoH5WE+exCmqGerHfDM0IL096Px60Tq2Mn9MAbnaGUe6HiMa41KMCYF19gyzZmBcq/o4Q==}
     engines: {node: '>= 12.13.0'}
     peerDependencies:
       webpack: ^4.0.0 || ^5.0.0
@@ -13977,7 +13970,7 @@ packages:
       spdy: 4.0.2
       webpack: 5.90.1(@swc/core@1.4.1)(esbuild@0.18.20)(webpack-cli@5.1.4)
       webpack-cli: 5.1.4(webpack-bundle-analyzer@4.10.1)(webpack-dev-server@4.15.1)(webpack@5.90.1)
-      webpack-dev-middleware: 5.3.3(webpack@5.90.1)
+      webpack-dev-middleware: 5.3.4(webpack@5.90.1)
       ws: 8.16.0
     transitivePeerDependencies:
       - bufferutil

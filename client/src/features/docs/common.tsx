@@ -13,11 +13,11 @@ const StyledOutdatedDocs = styled.div`
 
 export const OutdatedDocsApps = () => {
   return <StyledOutdatedDocs>
-    The content on this page may be outdated. Please refer to the new <a target='_blank' href="/pdfs/Tutorial_-_Apps_and_Workflows_-_20221130.pdf">tutorials</a>.
+      The content on this page may be outdated. Please refer to the new <Link to="/docs/tutorials/apps-workflows">tutorials</Link>.
   </StyledOutdatedDocs>
 }
 export const OutdatedDocsWorkstations = () => {
   return <StyledOutdatedDocs>
-    The content on this page may be outdated. Please refer to the new <a target='_blank' href="/pdfs/Tutorial_-_Workstations_and_Databases_-_20231122.pdf">tutorials</a>.
+        The content on this page may be outdated. Please refer to the new <Link to="/docs/tutorials/workstations-databases">tutorials</Link>.
   </StyledOutdatedDocs>
 }

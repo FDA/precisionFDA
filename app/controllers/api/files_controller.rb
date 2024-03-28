@@ -91,6 +91,13 @@ module Api
                merge({ pagination: page_dict })
     end
 
+    # USED EXCLUSIVELY BY CLI
+    def describe
+      # the param is actually uid, this is because default ruby behavior. Not worth it to change.
+      res = https_apps_client.describe(params[:uid])
+      render json: res
+    end
+
     # GET /api/files/cli
     # Used by CLI. Get all nodes accessible by current user.
     # Allows filtering by space_id and/or folder_id.

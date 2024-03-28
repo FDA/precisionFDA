@@ -69,6 +69,7 @@ module Api
 
       render_workflows_list workflows
     end
+
     # rubocop:enable Metrics/MethodLength
 
     # GET /api/workflows/featured
@@ -250,8 +251,37 @@ module Api
 
     def describe
       find_workflow # check if workflow accesible by current user first
-      response = https_apps_client.describe(params[:id], "workflows")
+      response = https_apps_client.describe(params[:id])
       render json: { workflow: response }
+    end
+
+    def cli_workflows
+      workflows = []
+
+      # use find_space instead? try behavior of CLI of non-existing or non-accessible space..
+      if params[:space_id]
+        if find_user_space
+          workflows = @space.latest_revision_workflows.unremoved.
+            eager_load(:workflow_series, :user).includes(:taggings)
+        end
+      elsif params[:public_scope] == "true"
+        workflows = WorkflowSeries.unremoved.
+          accessible_by_public.
+          eager_load(latest_revision_workflow: [user: :org]).includes(:taggings)
+      else
+        workflows = WorkflowSeries.accessible_by(@context).
+          eager_load(latest_revision_workflow: [user: :org]).
+          accessible_by_private.unremoved.
+          includes(latest_revision_workflow: [user: :org]).
+          includes(:taggings)
+      end
+      workflows.order(created_at: :desc)
+      workflows = workflows.
+        map do |series|
+        series.latest_accessible(@context)
+      end.compact
+
+      render json: workflows, each_serializer: CliWorkflowSerializer
     end
 
     private

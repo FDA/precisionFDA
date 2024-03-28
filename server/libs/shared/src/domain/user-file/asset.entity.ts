@@ -12,6 +12,7 @@ import {
 } from '@mikro-orm/core'
 import { App } from '@shared/domain/app/app.entity'
 import { Tagging } from '@shared/domain/tagging/tagging.entity'
+import { ArchiveEntry } from '@shared/domain/user-file/archive-entry.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { AssetRepository } from './asset.repository'
 import { Node } from './node.entity'
@@ -34,8 +35,6 @@ class Asset extends Node implements IFileOrAsset, ITrackable {
   @Property()
   project: string
 
-  @Property()
-  name: string
 
   @Property()
   description?: string
@@ -46,12 +45,6 @@ class Asset extends Node implements IFileOrAsset, ITrackable {
 
   @Property()
   entityType: FILE_ORIGIN_TYPE
-
-  @Property()
-  uid: string
-
-  @Property()
-  scope: SCOPE
 
   @Property({ type: 'numeric' })
   fileSize?: number
@@ -67,6 +60,9 @@ class Asset extends Node implements IFileOrAsset, ITrackable {
 
   @OneToMany(() => Tagging, tagging => tagging.asset, { orphanRemoval: true })
   taggings = new Collection<Tagging>(this)
+
+  @OneToMany(() => ArchiveEntry, archiveEntry => archiveEntry.asset, { orphanRemoval: true })
+  archiveEntries = new Collection<ArchiveEntry>(this)
 
   @ManyToMany(() => App, app => app.assets)
   apps = new Collection<App>(this)

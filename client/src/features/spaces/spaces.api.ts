@@ -66,6 +66,8 @@ export interface CreateSpacePayload {
   host_lead_dxuser?: string | null
   sponsor_lead_dxuser?: string | null
   cts?: string | null
+  protected: boolean | null
+  restricted_reviewer?: boolean | null
 }
 
 export interface CreateSpaceResponse {
