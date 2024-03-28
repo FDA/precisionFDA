@@ -228,7 +228,7 @@ export const FileShow = ({ emitScope, space, homeScope }: { homeScope?: HomeScop
 
             <MetadataItem>
               <MetadataKey>File Size</MetadataKey>
-              <MetadataVal data-testid="file-size">{file.file_size}</MetadataVal>
+              <MetadataVal data-testid="file-size">{file.file_size ?? 'N/A'}</MetadataVal>
             </MetadataItem>
 
             <MetadataItem>

@@ -124,9 +124,9 @@ export const Files = () => {
           <strong>KEY</strong>. For your security, the key is valid for 24h.
         </p>
         <p>
-          Run <code className="inline">./pfda upload-file --key KEY --file /path/to/file</code>
+          Run <code className="inline">./pfda upload-file -key KEY -file /path/to/file</code>
           in a Unix/Linux environment, or <code className="inline">"C:\path\to\pfda\executable\pfda.exe"
-          upload-file --key KEY --file "C:\path\to\filename"</code> for a Windows environment.
+          upload-file -key KEY -file "C:\path\to\filename"</code> for a Windows environment.
           This command will upload the file to precisionFDA.
         </p>
         <DocsTip>

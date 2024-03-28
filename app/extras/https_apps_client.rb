@@ -4,7 +4,6 @@ class HttpsAppsClient # rubocop:disable Metrics/ClassLength
   # initializes the instance
   def initialize; end
 
-
   # Start sync job
   # @param job_dxid [String] Job dxid to sync.
   def job_sync(job_dxid)
@@ -212,16 +211,6 @@ class HttpsAppsClient # rubocop:disable Metrics/ClassLength
     ) do |chunk|
       block.call(chunk)
     end
-  end
-
-  # Start nodes removal job in a synchronous way. Used exclusively by CLI
-  # @param ids [Array of Integers] id's of nodes to be removed
-  def cli_remove_nodes(ids)
-    request(
-      "/nodes/remove",
-      { ids: ids, async: false },
-      Net::HTTP::Delete::METHOD,
-    )
   end
 
   # Sync files for a running HTTPS app job.
@@ -917,15 +906,49 @@ class HttpsAppsClient # rubocop:disable Metrics/ClassLength
 
   # ┌─────────────────────────┐
   # │                         │
-  # │   TODO: category name   │
+  # │ EXCLUSIVE CLI endpoints │
   # │                         │
   # └─────────────────────────┘
 
   # uid in pFDA, not dxid !
-  def describe(uid, entity_type, options = nil)
+  def describe(uid, options = nil)
     request(
-      "/#{entity_type}/#{uid}/describe",
+      "/cli/#{uid}/describe",
       { options: options },
+      Net::HTTP::Get::METHOD,
+    )
+  end
+
+  # Start nodes removal job in a synchronous way. Used exclusively by CLI
+  # @param ids [Array of Integers] id's of nodes to be removed
+  def cli_remove_nodes(ids)
+    request(
+      "/nodes/remove",
+      { ids: ids, async: false },
+      Net::HTTP::Delete::METHOD,
+    )
+  end
+
+  def cli_space_members(space_id)
+    request(
+      "/cli/spaces/#{space_id}/members",
+      {},
+      Net::HTTP::Get::METHOD,
+    )
+  end
+
+  def cli_space_discussions(space_id)
+    request(
+      "/cli/spaces/#{space_id}/discussions",
+      {},
+      Net::HTTP::Get::METHOD,
+    )
+  end
+
+  def cli_discussion_describe(discussion_id)
+    request(
+      "/cli/discussions/#{discussion_id}/describe",
+      {},
       Net::HTTP::Get::METHOD,
     )
   end

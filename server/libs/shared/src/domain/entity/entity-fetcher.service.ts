@@ -21,7 +21,7 @@ interface IdEntity {
   id: number
 }
 
-interface UidEntity {
+export interface UidEntity {
   uid: UID<string>
 }
 

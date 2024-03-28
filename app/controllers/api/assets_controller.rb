@@ -210,6 +210,28 @@ module Api
       render json: { path: path, message: { type: type, text: text } }, adapter: :json
     end
 
+    # GET /api/assets/cli_assets
+    # Used by CLI exclusively.
+    # Used old ruby logic to fetch apps to avoid full refactoring of the logic into node. Not part of CLI update.
+    def cli_assets
+      if params[:public_scope] == "true"
+        assets = Asset.unscoped.
+          accessible_by_public.
+          eager_load(user: :org).
+          includes(:taggings).
+          search_by_tags(params.dig(:filters, :tags))
+      else
+        assets = Asset.unscoped.
+          editable_by(@context).
+          accessible_by_private.
+          eager_load(user: :org).
+          includes(:taggings).
+          search_by_tags(params.dig(:filters, :tags))
+      end
+      sorted_assets = assets.order(created_at: :desc)
+      render json: sorted_assets, each_serializer: CliAssetSerializer
+    end
+
     private
 
     # A common method for assets list json rendering.

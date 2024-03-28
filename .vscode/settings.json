@@ -3,5 +3,6 @@
   "eslint.packageManager": "pnpm",
   "eslint.workingDirectories": [
   "./server"
-  ]
+  ],
+  "markdown.preview.scrollPreviewWithEditor": false
 }

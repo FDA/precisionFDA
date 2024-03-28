@@ -52,26 +52,26 @@ const HelpTipText = styled.p`
 `
 
 const ExampleBlock = styled.div`
-  margin-bottom: 10px;
-  font-family: 'Courier New', Courier, monospace;
+    margin-bottom: 10px;
+    font-family: 'Courier New', Courier, monospace;
 
-  .description {
-    font-style: italic;
-  }
+    .description {
+        font-style: italic;
+    }
 
-  .command {
-    background-color: #f4f4f4;
-    color: #007bff;
-    padding: 5px 10px;
-    margin-top: 5px;
-  }
+    .command {
+        background-color: #f4f4f4;
+        color: #007bff;
+        padding: 5px 10px;
+        margin-top: 5px;
+    }
 `
 
 const StyledCode = styled.code`
-  background-color: #f4f4f4;
-  color: #007bff;
-  padding: 2px 4px;
-  margin-top: 5px;
+    background-color: #f4f4f4;
+    color: #007bff;
+    padding: 2px 4px;
+    margin-top: 5px;
 `
 
 export const CLI = () => {
@@ -93,7 +93,7 @@ export const CLI = () => {
         <h2 id="download">Download the CLI</h2>
         <ButtonRow>
           <a
-            href="https://pfda-production-static-files.s3.amazonaws.com/cli/pfda-linux-2.5.0.tar.gz"
+            href="https://pfda-production-static-files.s3.amazonaws.com/cli/pfda-linux-2.6.0.tar.gz"
             target="_blank"
             rel="noreferrer"
           >
@@ -102,7 +102,7 @@ export const CLI = () => {
             </Button>
           </a>
           <a
-            href="https://pfda-production-static-files.s3.amazonaws.com/cli/pfda-darwin-2.5.0.tar.gz"
+            href="https://pfda-production-static-files.s3.amazonaws.com/cli/pfda-darwin-2.6.0.tar.gz"
             target="_blank"
             rel="noreferrer"
           >
@@ -111,7 +111,7 @@ export const CLI = () => {
             </Button>
           </a>
           <a
-            href="https://pfda-production-static-files.s3.amazonaws.com/cli/pfda-windows-2.5.0.zip"
+            href="https://pfda-production-static-files.s3.amazonaws.com/cli/pfda-windows-2.6.0.zip"
             target="_blank"
             rel="noreferrer"
           >
@@ -122,13 +122,23 @@ export const CLI = () => {
         </ButtonRow>
 
         <h2 id="authorization-key">Authorization Key</h2>
-        Visit the{' '}
+
+        To generate a key necessary for using the CLI, follow these steps in the application:
+        <ul>
+          <li>Click on your name in the top right corner of the app.</li>
+          <li>From the submenu options, select 'Generate CLI Key' and copy the presented key.</li>
+        </ul>
+
+        Alternatively, visit the{' '}
         <a data-turbolinks="false" href="/home/assets">
           <strong>Assets</strong>
         </a>{' '}
-        page and click on Generate CLI Key button to generate a key
-        that you will need when using the CLI.
-        <div className={'text-danger'}>This does not apply to CLI usage on workstations, the key is already pre-generated for you in workstation's config.</div>
+        page and click on 'Generate CLI Key' button and copy the presented key.
+        <br/>
+        <div className={'text-danger'}><strong>Note:</strong> This does not apply to CLI usage on workstations, the key
+          is already
+          pre-generated for you in workstation's config.
+        </div>
         <br/>
         <br/>
 
@@ -150,8 +160,10 @@ export const CLI = () => {
           <HelpTip><strong>Wildcards:</strong></HelpTip>
           <HelpTipText>
             Some of the CLI commands support wildcards in their arguments. <br/>
-            <StyledCode>?</StyledCode> - represents 1 character, <StyledCode>*</StyledCode> - represents 0 or many characters,
-            example <StyledCode>pfda download '*.csv'</StyledCode> Check individual commands below to see more examples and learn more.<br/>
+            <StyledCode>?</StyledCode> - represents 1 character, <StyledCode>*</StyledCode> - represents 0 or many
+            characters,
+            example <StyledCode>pfda download '*.csv'</StyledCode> Check individual commands below to see more examples
+            and learn more.<br/>
           </HelpTipText>
           <HelpTip><strong>Result Code:</strong></HelpTip>
           <HelpTipText>
@@ -190,10 +202,15 @@ export const CLI = () => {
           <li><StyledCode>-h, -help</StyledCode>: Displays the help message and exit.</li>
           <li><StyledCode>-space-id &lt;ID&gt;</StyledCode>: Uploads the file to the specified space.</li>
           <li><StyledCode>-folder-id &lt;ID&gt;</StyledCode>: Uploads the file to the specified folder.</li>
-          <li><StyledCode>-name &lt;NAME&gt;</StyledCode>: Specifies the name of a stdin file. Required for stdin input.</li>
+          <li><StyledCode>-name &lt;NAME&gt;</StyledCode>: Specifies the name of a stdin file. Required for stdin input.
+          </li>
           <li><StyledCode>-json</StyledCode>: Responds the command result in JSON format.</li>
-          <li><StyledCode>-threads</StyledCode>: Changes number of upload threads to spawn per file (Max 100). Consider memory usage.</li>
-          <li><StyledCode>-chunksize</StyledCode>: Changes size of each upload chunk in bytes (Min 16MB, Max 4GB). Consider memory usage.</li>
+          <li><StyledCode>-threads</StyledCode>: Changes number of upload threads to spawn per file (Max 100). Consider
+            memory usage.
+          </li>
+          <li><StyledCode>-chunksize</StyledCode>: Changes size of each upload chunk in bytes (Min 16MB, Max 4GB).
+            Consider memory usage.
+          </li>
         </ul>
 
         <h3>Examples</h3>
@@ -268,7 +285,8 @@ export const CLI = () => {
         </ExampleBlock>
         <ExampleBlock>
           <div className="description">
-            # Uploads large file 'data.sql' to the root folder of My Home with manually set chunksize and upload threads.
+            # Uploads large file 'data.sql' to the root folder of My Home with manually set chunksize and upload
+            threads.
           </div>
           <code className="command">
             ./pfda upload-file script01.py -threads 20 -chunksize 134217728
@@ -295,10 +313,13 @@ export const CLI = () => {
           </HelpTipText>
           <HelpTip><strong>Optimizing uploads:</strong></HelpTip>
           <HelpTipText>
-            The <StyledCode>{'-threads'}</StyledCode> and <StyledCode>{'-chunksize'}</StyledCode> flags are useful for optimizing uploads.
+            The <StyledCode>{'-threads'}</StyledCode> and <StyledCode>{'-chunksize'}</StyledCode> flags are useful for
+            optimizing uploads.
             Increasing the number of threads can speed up the process, but be mindful of memory usage.
-            Similarly, increasing the chunk size can reduce the number of API calls, though this also impacts memory usage.
-            These values are not controlled and if you decide to use them, you might run into <strong>OutOfMemory errors</strong> on the host machine.
+            Similarly, increasing the chunk size can reduce the number of API calls, though this also impacts memory
+            usage.
+            These values are not controlled and if you decide to use them, you might run into <strong>OutOfMemory
+            errors</strong> on the host machine.
             The default values are 10 threads and 16MB chunk size.
           </HelpTipText>
         </HelpSection>
@@ -499,7 +520,8 @@ export const CLI = () => {
             is <strong>1995</strong>. <br/>
             For example, in the URL <strong>"https://precision.fda.gov/home/files?folder_id=2704"</strong>, the Folder
             ID is <strong>2704</strong>.<br/>
-            You can also use the precisionFDA CLI command <StyledCode>ls -folders</StyledCode> to list folders in a specified location.
+            You can also use the precisionFDA CLI command <StyledCode>ls -folders</StyledCode> to list folders in a
+            specified location.
             You can also use the precisionFDA CLI command <StyledCode>list-spaces</StyledCode> to list available spaces
             you can upload the file to.
           </HelpTipText>
@@ -779,7 +801,7 @@ export const CLI = () => {
 
         <h2 id="ls">Listing Files</h2>
         <p>
-          The CLI command <StyledCode>pfda ls</StyledCode> is designed to list all files in the desired location.
+          The CLI command <StyledCode>pfda ls</StyledCode> is designed for listing files in a given location.
           If no location is provided, the root of My Home will be listed.
           By default, public files are not listed. To display public files, use <StyledCode>-public</StyledCode> flag.
           If you are interested in a specific Space or folder, provide the location via corresponding flag.
@@ -859,16 +881,176 @@ export const CLI = () => {
           <HelpTipText>You can also use <StyledCode>-brief</StyledCode> flag to list only ID and name.</HelpTipText>
         </HelpSection>
 
-        <h2 id="list-spaces">Listing Spaces</h2>
+        <h2 id="ls-assets">Listing Assets</h2>
         <p>
-          The CLI command <StyledCode>pfda list-spaces</StyledCode> is designed to list all spaces available to you. By
+          The CLI command <StyledCode>pfda ls-assets</StyledCode> is designed for listing assets in a given location.
+          If no location is provided, 'My Home' is used by default.
+          By default, public assets are not listed. To display them, use <StyledCode>-public</StyledCode> flag.
+          The command always responds in JSON format.
+        </p>
+
+        <h3>Usage</h3>
+        <StyledCode>ls-assets [FLAG...]</StyledCode>
+
+        <h3>Available Flags</h3>
+        <p>All flags are optional and can be used to specify the assets to list.</p>
+        <ul>
+          <li><StyledCode>-h, -help</StyledCode>: Displays the help message and exits.</li>
+          <li><StyledCode>-public</StyledCode>: Lists public assets.</li>
+        </ul>
+
+        <h3>Examples</h3>
+        <p>The following examples demonstrate various use cases for the <StyledCode>ls-assets</StyledCode> command:</p>
+        <ExampleBlock>
+          <div className="description">
+            # Lists all assets in your 'My Home'
+          </div>
+          <code className="command">
+            ./pfda ls-assets
+          </code>
+        </ExampleBlock>
+        <ExampleBlock>
+          <div className="description">
+            # Lists all public assets accessible to the user
+          </div>
+          <code className="command">
+            ./pfda ls-assets -public
+          </code>
+        </ExampleBlock>
+
+        <h2 id="ls-apps">Listing Applications</h2>
+        <p>
+          The CLI command <StyledCode>pfda ls-apps</StyledCode> is designed for listing applications in a given
+          location.
+          If no location is provided, 'My Home' is used by default.
+          By default, public applications are not listed. To display them, use <StyledCode>-public</StyledCode> flag.
+          The command always responds in JSON format.
+        </p>
+
+        <h3>Usage</h3>
+        <StyledCode>ls-apps [FLAG...]</StyledCode>
+
+        <h3>Available Flags</h3>
+        <p>All flags are optional and can be used to specify the applications to list.</p>
+        <ul>
+          <li><StyledCode>-h, -help</StyledCode>: Displays the help message and exits.</li>
+          <li><StyledCode>-public</StyledCode>: Lists public applications.</li>
+          <li><StyledCode>-space-id &lt;ID&gt;</StyledCode>: Lists applications in the specified space.</li>
+        </ul>
+
+        <h3>Examples</h3>
+        <p>The following examples demonstrate various use cases for the <StyledCode>ls-apps</StyledCode> command:</p>
+        <ExampleBlock>
+          <div className="description">
+            # Lists all applications from the space with id 24
+          </div>
+          <code className="command">
+            ./pfda ls-apps -space-id 24
+          </code>
+        </ExampleBlock>
+        <ExampleBlock>
+          <div className="description">
+            # Lists all applications in your 'My Home'
+          </div>
+          <code className="command">
+            ./pfda ls-apps
+          </code>
+        </ExampleBlock>
+        <ExampleBlock>
+          <div className="description">
+            # Lists all public applications accessible to the user
+          </div>
+          <code className="command">
+            ./pfda ls-apps -public
+          </code>
+        </ExampleBlock>
+
+        <h2 id="ls-discussions">Listing Discussions</h2>
+        <p>
+          The CLI command <StyledCode>pfda ls-discussions</StyledCode> is designed for listing discussions in a given
+          location. The command always responds in JSON format.
+        </p>
+
+        <h3>Usage</h3>
+        <StyledCode>ls-discussions [FLAG...]</StyledCode>
+
+        <h3>Available Flags</h3>
+        <p>All flags are optional and can be used to specify the discussions to list.</p>
+        <ul>
+          <li><StyledCode>-h, -help</StyledCode>: Displays the help message and exits.</li>
+          <li><StyledCode>-space-id &lt;ID&gt;</StyledCode>: Lists discussions in the specified space.</li>
+        </ul>
+
+        <h3>Examples</h3>
+        <p>The following example demonstrate use case for the <StyledCode>ls-discussions</StyledCode> command:</p>
+        <ExampleBlock>
+          <div className="description">
+            # Lists all discussions from the space with id 24
+          </div>
+          <code className="command">
+            ./pfda ls-discussions -space-id 24
+          </code>
+        </ExampleBlock>
+
+
+        <h2 id="ls-executions">Listing Executions</h2>
+        <p>
+          The CLI command <StyledCode>pfda ls-executions</StyledCode> is designed for listing executions in a given
+          location.
+          If no location is provided, 'My Home' is used by default.
+          By default, public executions are not listed. To display them, use <StyledCode>-public</StyledCode> flag.
+          The command always responds in JSON format.
+        </p>
+
+        <h3>Usage</h3>
+        <StyledCode>ls-executions [FLAG...]</StyledCode>
+
+        <h3>Available Flags</h3>
+        <p>All flags are optional and can be used to specify the executions to list.</p>
+        <ul>
+          <li><StyledCode>-h, -help</StyledCode>: Displays the help message and exits.</li>
+          <li><StyledCode>-public</StyledCode>: Lists public executions.</li>
+          <li><StyledCode>-space-id &lt;ID&gt;</StyledCode>: Lists executions in the specified space.</li>
+        </ul>
+
+        <h3>Examples</h3>
+        <p>The following examples demonstrate various use cases for the <StyledCode>ls-executions</StyledCode> command:
+        </p>
+        <ExampleBlock>
+          <div className="description">
+            # Lists all executions in your 'My Home'
+          </div>
+          <code className="command">
+            ./pfda ls-executions
+          </code>
+        </ExampleBlock>
+        <ExampleBlock>
+          <div className="description">
+            # Lists all executions from the space with id 24
+          </div>
+          <code className="command">
+            ./pfda ls-executions -space-id 24
+          </code>
+        </ExampleBlock>
+        <ExampleBlock>
+          <div className="description">
+            # Lists all public executions accessible to the user
+          </div>
+          <code className="command">
+            ./pfda ls-executions -public
+          </code>
+        </ExampleBlock>
+
+        <h2 id="ls-spaces">Listing Spaces</h2>
+        <p>
+          The CLI command <StyledCode>pfda ls-spaces</StyledCode> is designed to list all spaces available to you. By
           default only activated non-locked spaces are presented.
           There are also options to filter only certain types of spaces or spaces that are not activated yet.
         </p>
 
 
         <h3>Usage</h3>
-        <StyledCode>{' ./pfda list-spaces [...FLAG] '}</StyledCode>
+        <StyledCode>{' ./pfda ls-spaces [...FLAG] '}</StyledCode>
 
         <h3>Available Flags</h3>
         <p>
@@ -895,7 +1077,7 @@ export const CLI = () => {
             # Lists all available spaces
           </div>
           <code className="command">
-            ./pfda list-spaces
+            ./pfda ls-spaces
           </code>
         </ExampleBlock>
         <ExampleBlock>
@@ -903,7 +1085,7 @@ export const CLI = () => {
             # Lists only spaces of type private or groups
           </div>
           <code className="command">
-            ./pfda list-spaces -groups -private
+            ./pfda ls-spaces -groups -private
           </code>
         </ExampleBlock>
         <ExampleBlock>
@@ -911,14 +1093,116 @@ export const CLI = () => {
             # Lists only unactivated spaces and present the result as JSON
           </div>
           <code className="command">
-            ./pfda list-spaces -unactivated -json
+            ./pfda ls-spaces -unactivated -json
           </code>
         </ExampleBlock>
 
-        <h2 id="get-space-id">Getting current Space ID</h2>
+        <h2 id="ls-members">Listing Space Members</h2>
+        <p>
+          The CLI command <StyledCode>pfda ls-members</StyledCode> is designed for listing members in a given space.
+          The command always responds in JSON format.
+        </p>
+
+        <h3>Usage</h3>
+        <StyledCode>ls-members [FLAG...]</StyledCode>
+
+        <h3>Available Flags</h3>
+        <p>All flags are optional and can be used to specify the members to list.</p>
+        <ul>
+          <li><StyledCode>-h, -help</StyledCode>: Displays the help message and exits.</li>
+          <li><StyledCode>-space-id &lt;ID&gt;</StyledCode>: Lists members in the specified space.</li>
+        </ul>
+
+        <h3>Examples</h3>
+        <p>The following examples demonstrate various use cases for the <StyledCode>ls-members</StyledCode> command:</p>
+        <ExampleBlock>
+          <div className="description">
+            # Lists all members from the space with id 24
+          </div>
+          <code className="command">
+            ./pfda ls-members -space-id 24
+          </code>
+        </ExampleBlock>
+        <ExampleBlock>
+          <div className="description">
+            # Lists all members from the space with id 24 in JSON format
+          </div>
+          <code className="command">
+            ./pfda ls-members -space-id 24 -json
+          </code>
+        </ExampleBlock>
+
+        <h2 id="describe">Describing Entities</h2>
+        <p>
+          The CLI command <StyledCode>pfda describe</StyledCode> is designed to display details about any entity.<br/>
+          All you need is the unique entity ID. It is of the
+          form <StyledCode>{'{entity}-ABCDEF1234567890-{number}'}</StyledCode>. <br/>
+          Supported types are: app, asset, discussion, file and workflow.
+          The response is always in JSON format.
+        </p>
+
+        <h3>Usage</h3>
+        <StyledCode>{' ./pfda describe <ENTITY_ID> '}</StyledCode>
+
+        <h3>Available Flags</h3>
+        <p>
+          All flags are optional.
+        </p>
+        <ul>
+          <li><StyledCode>-h, -help</StyledCode>: Displays the help message and exit.</li>
+        </ul>
+
+        <h3>Example</h3>
+        <p>
+          The following examples demonstrate use cases for the <StyledCode>describe</StyledCode> command:
+        </p>
+
+        <ExampleBlock>
+          <div className="description">
+            # Describes an app
+          </div>
+          <code className="command">
+            ./pfda describe app-GZfKXJ80GGYZKxQQGpz7KX2p-1
+          </code>
+        </ExampleBlock>
+        <ExampleBlock>
+          <div className="description">
+            # Describes a workflow
+          </div>
+          <code className="command">
+            ./pfda describe worfklow-GZq2qY80Z0gjx7qJQ9GJyF8v-1
+          </code>
+        </ExampleBlock>
+        <ExampleBlock>
+          <div className="description">
+            # Describes a file
+          </div>
+          <code className="command">
+            ./pfda describe file-GJk1kpQ05xgQd8bP54kJFjzkz-4
+          </code>
+        </ExampleBlock>
+        <ExampleBlock>
+          <div className="description">
+            # Describes an asset
+          </div>
+          <code className="command">
+            ./pfda describe file-GZYY1pQ05xgQd8bP54kJFFX7a-1
+          </code>
+        </ExampleBlock>
+        <ExampleBlock>
+          <div className="description">
+            # Describes a discussion
+          </div>
+          <code className="command">
+            ./pfda describe discussion-17
+          </code>
+        </ExampleBlock>
+
+        <h2 id="get-space-id">Getting Space ID</h2>
         <p>
           The CLI command <StyledCode>pfda get-space-id</StyledCode> is designed to print the current Space ID.<br/>
-          Note this is only available when you are on a Workstation launched in a Space. Only the integer Space ID is printed to the console.
+          Note this is only available when you are on a Workstation launched in a Space. Only the integer Space ID
+          is printed to the console.
         </p>
 
         <h3>Usage</h3>
@@ -946,9 +1230,7 @@ export const CLI = () => {
           </code>
         </ExampleBlock>
 
-
         <h2 id="print-content">Printing Content</h2>
-
         <p>
           The CLI commands <StyledCode>pfda cat</StyledCode> and <StyledCode>pfda head</StyledCode> are designed to
           print the content of a file.
@@ -967,7 +1249,8 @@ export const CLI = () => {
 
         <h3>Examples</h3>
         <p>
-          The following examples demonstrate use cases for the <StyledCode>cat</StyledCode> and <StyledCode>head</StyledCode> command:
+          The following examples demonstrate use cases for
+          the <StyledCode>cat</StyledCode> and <StyledCode>head</StyledCode> command:
         </p>
 
         <ExampleBlock>
@@ -995,76 +1278,13 @@ export const CLI = () => {
           </code>
         </ExampleBlock>
 
-        <h2 id="describe-app">Describing App</h2>
-        <p>
-          The CLI command <StyledCode>pfda describe-app</StyledCode> is designed to display details about an app. <br/>
-          All you need is the unique app ID. It is of the form <StyledCode>app-ABCDEF1234567890-1</StyledCode>. <br/>
-          The response is always in JSON format.
-        </p>
-
-        <h3>Usage</h3>
-        <StyledCode>{' ./pfda describe-app <APP_ID> '}</StyledCode>
-
-        <h3>Available Flags</h3>
-        <p>
-          All flags are optional.
-        </p>
-        <ul>
-          <li><StyledCode>-h, -help</StyledCode>: Displays the help message and exit.</li>
-        </ul>
-
-        <h3>Example</h3>
-        <p>
-          The following example demonstrates use case for the <StyledCode>describe-app</StyledCode> command:
-        </p>
-
-        <ExampleBlock>
-          <div className="description">
-            # Describes the app
-          </div>
-          <code className="command">
-            ./pfda describe-app app-GZfKXJ80GGYZKxQQGpz7KX2p-1
-          </code>
-        </ExampleBlock>
-
-
-        <h2 id="describe-workflow">Describing Workflow</h2>
-        <p>
-          The CLI command <StyledCode>pfda describe-workflow</StyledCode> is designed to display details about a
-          workflow. <br/>
-          All you need is the unique workflow ID. It is of the form <StyledCode>workflow-ABCDEF1234567890-1</StyledCode>.<br/>
-          The response is always in JSON format.
-        </p>
-
-        <h3>Usage</h3>
-        <StyledCode>{' ./pfda describe-workflow <WORKFLOW_ID> '}</StyledCode>
-
-        <h3>Available Flags</h3>
-        <p>
-          All flags are optional.
-        </p>
-        <ul>
-          <li><StyledCode>-h, -help</StyledCode>: Displays the help message and exit.</li>
-        </ul>
-
-        <h3>Example</h3>
-        <p>
-          The following example demonstrates use case for the <StyledCode>describe-workflow</StyledCode> command:
-        </p>
-
-        <ExampleBlock>
-          <div className="description">
-            # Describes the workflow
-          </div>
-          <code className="command">
-            ./pfda describe-workflow workflow-GZq2qY80Z0gjx7qJQ9GJyF8v-1
-          </code>
-        </ExampleBlock>
-
 
         <hr/>
         <h2 id="changelog">pFDA CLI Changelog</h2>
         <br/>
+
+        <p>Version 2.6.0 (04/02/2024): New features: describe, ls-assets, ls-apps, ls-executions, ls-workflows,
+          ls-discussions </p>
         <p>Version 2.5.0 (12/14/2023): Support of JSON responses, upload-file bug fixes.</p>
         <p>Version 2.4.1 (07/20/2023): Fixed folder id manipulation.</p>
         <p>Version 2.4 (05/25/2023): New features: get-space-id, upload-file stdin input.</p>
@@ -1084,51 +1304,26 @@ export const CLI = () => {
       </DocBody>
       <RightSide>
         <PageMap>
-          <li>
-            <a href="#download" data-turbolinks="false">Download the CLI</a>
-          </li>
-          <li>
-            <a href="#authorization-key" data-turbolinks="false">Authorization Key</a>
-          </li>
-          <li>
-            <a href="#uploading-files" data-turbolinks="false">Uploading Files</a>
-          </li>
-          <li>
-            <a href="#uploading-assets" data-turbolinks="false">Uploading Assets</a>
-          </li>
-          <li>
-            <a href="#downloading-files" data-turbolinks="false">Downloading Files</a>
-          </li>
-          <li>
-            <a href="#creating-folders" data-turbolinks="false">Creating Folders</a>
-          </li>
-          <li>
-            <a href="#removing-folders" data-turbolinks="false">Removing Folders</a>
-          </li>
-          <li>
-            <a href="#removing-files" data-turbolinks="false">Removing Files</a>
-          </li>
-          <li>
-            <a href="#ls" data-turbolinks="false">Listing Files</a>
-          </li>
-          <li>
-            <a href="#list-spaces" data-turbolinks="false">Listing Spaces</a>
-          </li>
-          <li>
-            <a href="#get-space-id" data-turbolinks="false">Getting current Space ID</a>
-          </li>
-          <li>
-            <a href="#print-content" data-turbolinks="false">Printing Content</a>
-          </li>
-          <li>
-            <a href="#describe-app" data-turbolinks="false">Describing App</a>
-          </li>
-          <li>
-            <a href="#describe-workflow" data-turbolinks="false">Describing Workflow</a>
-          </li>
-          <li>
-            <a href="#changelog" data-turbolinks="false">Changelog</a>
-          </li>
+          <li><a href="#download" data-turbolinks="false">Download the CLI</a></li>
+          <li><a href="#authorization-key" data-turbolinks="false">Authorization Key</a></li>
+          <li><a href="#uploading-files" data-turbolinks="false">Uploading Files</a></li>
+          <li><a href="#uploading-assets" data-turbolinks="false">Uploading Assets</a></li>
+          <li><a href="#downloading-files" data-turbolinks="false">Downloading Files</a></li>
+          <li><a href="#creating-folders" data-turbolinks="false">Creating Folders</a></li>
+          <li><a href="#removing-folders" data-turbolinks="false">Removing Folders</a></li>
+          <li><a href="#removing-files" data-turbolinks="false">Removing Files</a></li>
+          <li><a href="#ls" data-turbolinks="false">Listing Files</a></li>
+          <li><a href="#ls-apps" data-turbolinks="false">Listing Apps</a></li>
+          <li><a href="#ls-assets" data-turbolinks="false">Listing Assets</a></li>
+          <li><a href="#ls-discussions" data-turbolinks="false">Listing Discussions</a></li>
+          <li><a href="#ls-executions" data-turbolinks="false">Listing Executions</a></li>
+          <li><a href="#ls-spaces" data-turbolinks="false">Listing Spaces</a></li>
+          <li><a href="#ls-members" data-turbolinks="false">Listing Space Members</a></li>
+          <li><a href="#ls-workflows" data-turbolinks="false">Listing Workflows</a></li>
+          <li><a href="#describe" data-turbolinks="false">Describing Entities</a></li>
+          <li><a href="#get-space-id" data-turbolinks="false">Getting Space ID</a></li>
+          <li><a href="#print-content" data-turbolinks="false">Printing Content</a></li>
+          <li><a href="#changelog" data-turbolinks="false">Changelog</a></li>
         </PageMap>
       </RightSide>
     </DocRow>
