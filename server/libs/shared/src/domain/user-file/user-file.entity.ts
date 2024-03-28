@@ -63,14 +63,6 @@ class UserFile extends Node implements IFileOrAsset, ITrackable {
   @Property({ type: 'numeric' })
   fileSize?: number
 
-  // unused FK references
-  // resolves into User/Job/Asset and other entities in PFDA
-  @Property()
-  parentId: number
-
-  @Property()
-  parentType: PARENT_TYPE
-
   @Property()
   parentFolderId?: number
 
@@ -78,10 +70,6 @@ class UserFile extends Node implements IFileOrAsset, ITrackable {
   scopedParentFolderId?: number
 
   // todo: micro-orm can do single table inheritance
-
-  @ManyToOne(() => User)
-  user!: Ref<User>
-
   @OneToMany(() => Tagging, tagging => tagging.userFile, { orphanRemoval: true })
   taggings = new Collection<Tagging>(this)
 

@@ -207,7 +207,7 @@ export const RunJobForm = ({
   }, [watch().instanceType, watch().jobLimit])
 
   const runJobMutation = useRunJobMutation(getValues().scope?.value as ServerScope)
-  const exportModal = useExportInputsModal({ showCopyButton: app.scope === 'public' })
+  const exportModal = useExportInputsModal({ showCopyButton: true })
 
   const onSubmit = async () => {
     const vals = getValues()

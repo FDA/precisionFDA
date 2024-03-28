@@ -79,6 +79,7 @@ module Api
       params[:order_by] = "space_type" if params[:order_by] == "type"
       order = order_query(params[:order_by], params[:order_dir], allowed_orderings)
       filter_tags = params.dig(:filters, :tags)
+      order = { created_at: :desc } if order.empty?
 
       spaces = SpaceService::SpacesFilter.
         call(@context.user, unsafe_params[:filters]).
@@ -158,6 +159,16 @@ module Api
       members = members.where(side: side) if side
 
       render json: members, adapter: :json
+    end
+
+    def cli_members
+      response = https_apps_client.cli_space_members(params[:id])
+      render json: response
+    end
+
+    def cli_discussions
+      response = https_apps_client.cli_space_discussions(params[:id])
+      render json: response
     end
 
     # POST /api/spaces/:id/tags
