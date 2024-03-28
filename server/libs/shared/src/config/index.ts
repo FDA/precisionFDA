@@ -199,6 +199,13 @@ const defaultConfig = {
       skipFdaSubnetIpCheck: false,
     },
   },
+  defaultJobOptions: {
+    attempts: 15, // 9 hours and 7 minutes
+    backoff: {
+      type: 'exponential',
+      delay: 1000,
+    },
+  },
   bullBoardEnabled: parseBooleanFromProcess(process.env.NODE_BULL_BOARD_ENABLED) ?? false,
   nestjsDevtoolsEnabled: parseBooleanFromProcess(process.env.NODE_NEST_DEV_TOOLS_ENABLED) ?? false,
 }

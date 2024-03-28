@@ -52,7 +52,9 @@ export class MaintenanceQueueJobProducer extends QueueJobProducer {
       type: TASK_TYPE.CHECK_USER_JOBS as const,
       user: data.user,
     }
-    const options: JobOptions = { jobId: `${wrapped.type}.${data.user.dxuser}` }
+    const options: JobOptions = {
+      jobId: `${wrapped.type}.${data.user.dxuser}`,
+    }
     return await this.addToQueue(wrapped, options)
   }
 
