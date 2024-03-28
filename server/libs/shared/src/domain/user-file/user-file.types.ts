@@ -1,6 +1,8 @@
-import { Ref } from '@mikro-orm/core'
+import { Collection, Ref } from '@mikro-orm/core'
 import { Comparison } from '@shared/domain/comparison/comparison.entity'
 import { Job } from '@shared/domain/job/job.entity'
+import { NodeProperty } from '@shared/domain/property/node-property.entity'
+import { Tagging } from '@shared/domain/tagging/tagging.entity'
 import { Asset } from '@shared/domain/user-file/asset.entity'
 import { User } from '../user/user.entity'
 import { SCOPE } from '../../types/common'
@@ -46,7 +48,7 @@ enum PARENT_TYPE {
 type ParentEntity = User | Job | Asset | Comparison
 
 // IFileOrAsset is for methods that operate on UserFiles and Assets
-// but not all nodes (e.g. not Folders)
+// but not all nodes (not Folders)
 interface IFileOrAsset {
   id: number
   dxid: string
@@ -59,6 +61,9 @@ interface IFileOrAsset {
   user: Ref<User>
   entityType: FILE_ORIGIN_TYPE
   createdAt: Date
+  updatedAt: Date
+  taggings: Collection<Tagging>
+  properties: Collection<NodeProperty>
   isFile: boolean
   isAsset: boolean
   isCreatedByChallengeBot: () => boolean

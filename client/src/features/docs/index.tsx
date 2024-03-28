@@ -1,4 +1,4 @@
-import React, { useLayoutEffect } from 'react'
+import React, { useLayoutEffect, useRef } from 'react'
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { isActiveLink } from '../../helpers'
 import { usePageMeta } from '../../hooks/usePageMeta'
@@ -8,7 +8,6 @@ import { useAuthUser } from '../auth/useAuthUser'
 import { Apps } from './pages/Apps'
 import { Assets } from './pages/Assets'
 import { CLI } from './pages/CLI'
-import { CLI_old } from './pages/CLI_old'
 import { ChallengeWorkbench } from './pages/ChallengeWorkbench'
 import { Comparisons } from './pages/Comparisons'
 import { CreatingApps } from './pages/CreatingApps'
@@ -26,43 +25,53 @@ import { SiteCustomization } from './pages/SiteCustomization'
 import { Tracking } from './pages/Tracking'
 import { Workflows } from './pages/Workflows'
 import { Workstations } from './pages/Workstations'
-import { DocsContent, DocsMainContainer, DocsMainForFooter, DocsNav, DocsPageContainer, DocsTitle, NavItem } from './styles'
+import { DocsContent, DocsMainContainer, DocsNav, DocsPageContainer, DocsTitle, NavItem } from './styles'
 import PFDAFooter from '../../components/Footer'
 import NavigationBar from '../../components/NavigationBar/NavigationBar'
+import { TutorialMarkdown } from './tutorials/TutorialMarkdown'
 
 const Docs = () => {
   usePageMeta({ title: 'Docs - precisionFDA' })
   const user = useAuthUser()
   const { pathname } = useLocation()
+  const scrollContentRef = useRef()
   const isAdmin = user?.isAdmin ?? false
 
   useLayoutEffect(() => {
-    window.scrollTo(0, 0)
+    if(scrollContentRef?.current) {
+      scrollContentRef.current.scrollTo(0, 0)
+    }
   }, [pathname])
 
   return (
     <>
       <ScrollableInnerGlobalStyles />
-        <NavigationBar
-          title="Documentation"
-          subtitle=""
-          user={user}
-        />
+      <NavigationBar title="Documentation" subtitle="" user={user} />
       <DocsLayout>
         <DocsPageContainer>
           <DocsNav>
             <DocsTitle>Tutorials</DocsTitle>
 
-            <NavItem as="a" href="/pdfs/Tutorial_-_Apps_and_Workflows_-_20221130.pdf" target='_blank'>
+            <NavItem
+              activeClassName="active"
+              $active={isActiveLink('/docs/tutorials/apps-workflows', pathname)}
+              to="/docs/tutorials/apps-workflows"
+              data-turbolinks="false"
+            >
               Design Patterns for Apps and Workflows
             </NavItem>
-            <NavItem as="a" href="/pdfs/Tutorial_-_Workstations_and_Databases_-_20231122.pdf" target='_blank'>
+            <NavItem
+              activeClassName="active"
+              $active={isActiveLink('/docs/tutorials/workstations-databases', pathname)}
+              to="/docs/tutorials/workstations-databases"
+              data-turbolinks="false"
+            >
               Collaborative Data Science with Interactive Workstations and Databases
             </NavItem>
 
             <DocsTitle>Guides</DocsTitle>
             <NavItem
-              activeClassName='active'
+              activeClassName="active"
               $active={isActiveLink('/docs/introduction', pathname)}
               to="/docs/introduction"
               data-turbolinks="false"
@@ -70,7 +79,7 @@ const Docs = () => {
               Introduction
             </NavItem>
             <NavItem
-              activeClassName='active'
+              activeClassName="active"
               $active={isActiveLink('/docs/discussions', pathname)}
               to="/docs/discussions"
               data-turbolinks="false"
@@ -78,7 +87,7 @@ const Docs = () => {
               Discussions
             </NavItem>
             <NavItem
-              activeClassName='active'
+              activeClassName="active"
               $active={isActiveLink('/docs/notes', pathname)}
               to="/docs/notes"
               data-turbolinks="false"
@@ -86,7 +95,7 @@ const Docs = () => {
               Notes
             </NavItem>
             <NavItem
-              activeClassName='active'
+              activeClassName="active"
               $active={isActiveLink('/docs/files', pathname)}
               to="/docs/files"
               data-turbolinks="false"
@@ -94,7 +103,7 @@ const Docs = () => {
               Files
             </NavItem>
             <NavItem
-              activeClassName='active'
+              activeClassName="active"
               $active={isActiveLink('/docs/comparisons', pathname)}
               to="/docs/comparisons"
               data-turbolinks="false"
@@ -102,7 +111,7 @@ const Docs = () => {
               Comparisons
             </NavItem>
             <NavItem
-              activeClassName='active'
+              activeClassName="active"
               $active={isActiveLink('/docs/apps', pathname)}
               to="/docs/apps"
               data-turbolinks="false"
@@ -110,7 +119,7 @@ const Docs = () => {
               Apps
             </NavItem>
             <NavItem
-              activeClassName='active'
+              activeClassName="active"
               $active={isActiveLink('/docs/creating-apps', pathname)}
               to="/docs/creating-apps"
               data-turbolinks="false"
@@ -118,15 +127,15 @@ const Docs = () => {
               Creating Apps
             </NavItem>
             <NavItem
-                activeClassName='active'
-                $active={isActiveLink('/docs/assets', pathname)}
-                to="/docs/assets"
-                data-turbolinks="false"
+              activeClassName="active"
+              $active={isActiveLink('/docs/assets', pathname)}
+              to="/docs/assets"
+              data-turbolinks="false"
             >
               Assets
             </NavItem>
             <NavItem
-              activeClassName='active'
+              activeClassName="active"
               $active={isActiveLink('/docs/workstations', pathname)}
               to="/docs/workstations"
               data-turbolinks="false"
@@ -134,7 +143,7 @@ const Docs = () => {
               Workstations
             </NavItem>
             <NavItem
-              activeClassName='active'
+              activeClassName="active"
               $active={isActiveLink('/docs/workflows', pathname)}
               to="/docs/workflows"
               data-turbolinks="false"
@@ -142,7 +151,7 @@ const Docs = () => {
               Workflows
             </NavItem>
             <NavItem
-              activeClassName='active'
+              activeClassName="active"
               $active={isActiveLink('/docs/tracking', pathname)}
               to="/docs/tracking"
               data-turbolinks="false"
@@ -150,7 +159,7 @@ const Docs = () => {
               Tracking
             </NavItem>
             <NavItem
-              activeClassName='active'
+              activeClassName="active"
               $active={isActiveLink('/docs/publishing', pathname)}
               to="/docs/publishing"
               data-turbolinks="false"
@@ -158,7 +167,7 @@ const Docs = () => {
               Publishing
             </NavItem>
             <NavItem
-              activeClassName='active'
+              activeClassName="active"
               $active={isActiveLink('/docs/licenses', pathname)}
               to="/docs/licenses"
               data-turbolinks="false"
@@ -166,14 +175,15 @@ const Docs = () => {
               Licenses
             </NavItem>
             <NavItem
-              activeClassName='active'
-              $active={isActiveLink('/docs/cli', pathname)} to="/docs/cli"
+              activeClassName="active"
+              $active={isActiveLink('/docs/cli', pathname)}
+              to="/docs/cli"
               data-turbolinks="false"
             >
               Command Line Interface
             </NavItem>
             <NavItem
-              activeClassName='active'
+              activeClassName="active"
               $active={isActiveLink('/docs/spaces', pathname)}
               to="/docs/spaces"
               data-turbolinks="false"
@@ -184,7 +194,7 @@ const Docs = () => {
               <>
                 <DocsTitle>Administrator Features</DocsTitle>
                 <NavItem
-                  activeClassName='active'
+                  activeClassName="active"
                   $active={isActiveLink('/docs/challenge-workbench', pathname)}
                   to="/docs/challenge-workbench"
                   data-turbolinks="false"
@@ -192,7 +202,7 @@ const Docs = () => {
                   Challenge Workbench
                 </NavItem>
                 <NavItem
-                  activeClassName='active'
+                  activeClassName="active"
                   $active={isActiveLink('/docs/site-activity-reporting', pathname)}
                   to="/docs/site-activity-reporting"
                   data-turbolinks="false"
@@ -200,7 +210,7 @@ const Docs = () => {
                   Site Activity Reporting
                 </NavItem>
                 <NavItem
-                  activeClassName='active'
+                  activeClassName="active"
                   $active={isActiveLink('/docs/site-customization', pathname)}
                   to="/docs/site-customization"
                   data-turbolinks="false"
@@ -208,7 +218,7 @@ const Docs = () => {
                   Site Customization
                 </NavItem>
                 <NavItem
-                  activeClassName='active'
+                  activeClassName="active"
                   $active={isActiveLink('/docs/site-administration', pathname)}
                   to="/docs/site-administration"
                   data-turbolinks="false"
@@ -217,11 +227,8 @@ const Docs = () => {
                 </NavItem>
                 <DocsTitle>Deprecated Features</DocsTitle>
                 <NavItem
-                  activeClassName='active'
-                  $active={isActiveLink(
-                    '/docs/organizations-deprecation',
-                    pathname,
-                  )}
+                  activeClassName="active"
+                  $active={isActiveLink('/docs/organizations-deprecation', pathname)}
                   to="/docs/organizations-deprecation"
                   data-turbolinks="false"
                 >
@@ -230,54 +237,41 @@ const Docs = () => {
               </>
             )}
           </DocsNav>
-          <DocsMainContainer>
-            <DocsMainForFooter>
-          <DocsContent>
-            <Routes>
-              <Route path="/" element={<Navigate to="/docs/introduction" replace />} />
-              <Route path="/introduction" element={<Intro />} />
-              <Route path="/discussions" element={<Discussions />} />
-              <Route path="/notes" element={<Notes />} />
-              <Route path="/files" element={<Files />} />
-              <Route path="/comparisons" element={<Comparisons />} />
-              <Route path="/apps" element={<Apps />} />
-              <Route path="/creating-apps" element={<CreatingApps />} />
-              <Route path="/assets" element={<Assets />} />
-              <Route path="/workstations" element={<Workstations />} />
-              <Route path="/workflows" element={<Workflows />} />
-              <Route path="/tracking" element={<Tracking />} />
-              <Route path="/publishing" element={<Publishing />} />
-              <Route path="/licenses" element={<Licenses />} />
-              <Route path="/spaces" element={<ReviewSpaces />} />
-              <Route path="/cli" element={<CLI />} />
-              <Route path="/cli-old" element={<CLI_old />} />
-              <Route
-                path="/challenge-workbench"
-                element={<ChallengeWorkbench />}
-              />
-              <Route
-                path="/site-activity-reporting"
-                element={<SiteActivityReporting />}
-              />
-              <Route
-                path="/site-customization"
-                element={<SiteCustomization />}
-              />
-              <Route
-                path="/site-administration"
-                element={<SiteAdministration />}
-              />
-              <Route
-                path="/organizations-deprecation"
-                element={<OrganizationsDeprecation />}
-              />
-            </Routes>
-          </DocsContent>
-          <PFDAFooter />
-          </DocsMainForFooter>
+          <DocsMainContainer ref={scrollContentRef}>
+            <DocsContent>
+              <Routes>
+                <Route path="/" element={<Navigate to="/docs/introduction" replace />} />
+                <Route path="/introduction" element={<Intro />} />
+                <Route path="/tutorials/apps-workflows" element={<TutorialMarkdown fileName="apps.md" />} />
+                <Route
+                  path="/tutorials/workstations-databases"
+                  element={<TutorialMarkdown fileName="workstations-databases.md" />}
+                />
+                <Route path="/discussions" element={<Discussions />} />
+                <Route path="/notes" element={<Notes />} />
+                <Route path="/files" element={<Files />} />
+                <Route path="/comparisons" element={<Comparisons />} />
+                <Route path="/apps" element={<Apps />} />
+                <Route path="/creating-apps" element={<CreatingApps />} />
+                <Route path="/assets" element={<Assets />} />
+                <Route path="/workstations" element={<Workstations />} />
+                <Route path="/workflows" element={<Workflows />} />
+                <Route path="/tracking" element={<Tracking />} />
+                <Route path="/publishing" element={<Publishing />} />
+                <Route path="/licenses" element={<Licenses />} />
+                <Route path="/spaces" element={<ReviewSpaces />} />
+                <Route path="/cli" element={<CLI />} />
+                <Route path="/challenge-workbench" element={<ChallengeWorkbench />} />
+                <Route path="/site-activity-reporting" element={<SiteActivityReporting />} />
+                <Route path="/site-customization" element={<SiteCustomization />} />
+                <Route path="/site-administration" element={<SiteAdministration />} />
+                <Route path="/organizations-deprecation" element={<OrganizationsDeprecation />} />
+              </Routes>
+            </DocsContent>
+            <PFDAFooter />
           </DocsMainContainer>
-          </DocsPageContainer>
-        </DocsLayout>
+        </DocsPageContainer>
+      </DocsLayout>
     </>
   )
 }

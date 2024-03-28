@@ -215,6 +215,7 @@ Rails.application.routes.draw do
       resources :discussions, only: %i(index show create update attachments publish destroy
                                        answer_create answer_publish answers) do
         get :attachments, on: :member
+        get :describe, on: :member # for CLI
         post :publish, on: :member
         post :answers, to: "discussions#answer_create"
         patch :answers, to: "discussions#answer_publish"
@@ -288,6 +289,7 @@ Rails.application.routes.draw do
           get :featured
           get :everybody
           get :spaces
+          get :cli_apps
           get :user_compute_resources
           get :licenses_to_accept
 
@@ -313,6 +315,8 @@ Rails.application.routes.draw do
         member do
           get :jobs
           get :members
+          get :cli_members
+          get :cli_discussions
           get :selectable_spaces
           put :tags
           post :accept
@@ -385,6 +389,7 @@ Rails.application.routes.draw do
 
       resources :files, param: :uid, only: %i(index update show) do
         get :download, on: :member
+        get :describe, on: :member # for CLI
 
         collection do
           get :featured
@@ -418,6 +423,7 @@ Rails.application.routes.draw do
           get :featured
           get :everybody
           get :spaces
+          get :cli_jobs
           get :log
           post :copy
           post :terminate
@@ -435,6 +441,7 @@ Rails.application.routes.draw do
           get :featured
           get :everybody
           get :spaces
+          get :cli_workflows
 
           post :copy
 
@@ -448,6 +455,7 @@ Rails.application.routes.draw do
           get :featured
           get :everybody
           get :spaces
+          get :cli_assets
 
           post :rename
           put :feature, to: "assets#invert_feature"
