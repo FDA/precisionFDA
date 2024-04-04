@@ -84,7 +84,6 @@ export const useTutorialFileQuery = (fileName: string) =>
 
 const Markdown = ({ data, setToc }: any) => {
   const docRef = useRef(null)
-  useScrollToHash()
   useEffect(() => {
     setTocFromRef(docRef, setToc)
   }, [data])
@@ -104,8 +103,10 @@ const Markdown = ({ data, setToc }: any) => {
 
 
 export const TutorialMarkdown = ({ fileName }: { fileName: string }) => {
-  const { data, isLoading } = useTutorialFileQuery(fileName)
+  const { data, isLoading, isFetched } = useTutorialFileQuery(fileName)
   const [toc, setToc] = useState<IToCItem[]>()
+
+  useScrollToHash(isFetched)
 
   // Detect if we are scrolled to bottom
   // const [showFade, setShowFade] = useState(true)
