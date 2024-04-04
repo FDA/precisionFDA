@@ -15,7 +15,7 @@ import {
 import { getBaseLink } from './utils'
 
 
-export const RunJobPage = ({ spaceId }: { spaceId?: string }) => {
+export const RunJobPage = ({ spaceId }: { spaceId?: number }) => {
   const { appUid } = useParams<{ appUid: string }>()
   const user = useAuthUser()
   const { data: appData, isLoading } = useQuery({
