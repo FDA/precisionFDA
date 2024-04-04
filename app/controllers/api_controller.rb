@@ -11,7 +11,6 @@ class ApiController < ApplicationController
     render status: :service_unavailable, json: { error: { message: exception.message, statusCode: 503 } }
   end
 
-
   skip_before_action :require_login
   skip_before_action :verify_authenticity_token, unless: lambda {
     @context.present? && @context.key?(:cli_client) && @context[:cli_client] == true
@@ -665,11 +664,11 @@ class ApiController < ApplicationController
     render json: result
   end
 
-
   def get_valid_property_keys
     result = https_apps_client.get_valid_property_keys(params[:type], params[:scope])
     render json: result, adapter: :json
   end
+
   # Inputs
   #
   # uid (string, required): the uid of the item to describe
@@ -739,7 +738,7 @@ class ApiController < ApplicationController
   def license_items
     license_id = unsafe_params["license_id"]
     unless license_id.is_a?(Numeric) && (license_id.to_i == license_id) ||
-           license_id.is_a?(String) && license_id.to_i.positive?
+      license_id.is_a?(String) && license_id.to_i.positive?
       raise "License license_id needs to be an Integer"
     end
 
@@ -1536,6 +1535,22 @@ class ApiController < ApplicationController
     !space.leads.where(user_id: @context.user.id).empty?
   end
 
+  # Verifies if any nodes in the collection are locked and ensures that the current user
+  # has a lead role in the associated space. If a node is locked and the user is not a lead,
+  # it raises an error specifying the action attempted (e.g., delete, update).
+  #
+  # @param nodes [Array] array of nodes to be checked
+  # @param action [String] the action the user is attempting to perform, used in the error message
+  def verify_nodes_for_locked(nodes, action)
+    nodes.each do |node|
+      next unless node.scope.start_with?("space-") && node.locked
+      space = Space.from_scope(node.scope)
+      user_is_lead = space.leads.exists?(user_id: @context.user.id)
+      # Raise error if the node is locked and the current user is not a lead in the space
+      raise ApiError, "Only leads can #{action} locked files." unless user_is_lead
+    end
+  end
+
   def check_scope!
     scopes = params[:scopes]
 
@@ -1588,7 +1603,7 @@ class ApiController < ApplicationController
       fail "Asset paths needs to be a non-empty Array less than 100000 size"
     end
 
-    if paths.any?{ |path| !path.is_a?(String) || path.empty? || path.size >= 4096 }
+    if paths.any? { |path| !path.is_a?(String) || path.empty? || path.size >= 4096 }
       fail "Asset path should be a non-empty String of size less than 4096"
     end
   end

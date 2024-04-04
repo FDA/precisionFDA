@@ -108,7 +108,7 @@ const CopyToSpaceForm = ({
 }: {
   resource: APIResource
   selected: string[]
-  spaceId?: string
+  spaceId?: number
   setShowModal: (show: boolean) => void
   updateFunction: (space: string, ids: string[]) => Promise<any>
   onSuccess: (res: any) => void
@@ -190,7 +190,7 @@ export function useCopyToSpaceModal<T extends { id: string | number }>({
 }: {
   resource: APIResource
   selected: T[]
-  spaceId?: string
+  spaceId?: number
   updateFunction: (space: string, ids: string[]) => Promise<any>
   onSuccess: (res: any) => void
 }) {
