@@ -8,7 +8,6 @@ import { CubeIcon } from '../../components/icons/CubeIcon'
 import { FileIcon } from '../../components/icons/FileIcon'
 import { FileZipIcon } from '../../components/icons/FileZipIcon'
 import { TrashIcon } from '../../components/icons/TrashIcon'
-import { getSpaceIdFromScope } from '../../utils'
 import {
   Attachment,
   AttachmentType,
@@ -49,14 +48,11 @@ const IconRight = styled.div`
 `
 
 const StyledAttachmentsList = styled.div`
-  margin-top: 8px;
-  margin-bottom: 16px;
-  font-size: 14px;
-  margin-left: 16px;
-  margin-right: 8px;
-  max-width: 100%;
-  overflow: hidden;
-  `
+    font-size: 14px;
+    margin: 8px 8px 16px 16px;
+    max-width: 100%;
+    overflow: hidden;
+`
 const TypeLabel = styled.div`
   padding-left: 8px;
   font-weight: 600;
@@ -79,15 +75,6 @@ export const AttachmentsList = ({
     comparisons = [],
   } = attachments
 
-  const getTargetUrl = (uid: string, type: AttachmentType): string => {
-    if (scope === 'public') {
-      return `/home/${typeAttachmentKey[type]}/${uid}`
-    }
-    return `/spaces/${getSpaceIdFromScope(scope)}/${
-      typeAttachmentKey[type]
-    }/${uid}`
-  }
-
   const typeIcon = {
     UserFile: <FileIcon height={14} />,
     Asset: <FileZipIcon height={14} />,
@@ -109,14 +96,13 @@ export const AttachmentsList = ({
             <TableCell>
               <Link
                 target="_blank"
-                to={getTargetUrl(item.uid, item.type)}
+                to={item.link}
                 rel="noopener noreferrer"
               >
                 {typeIcon[item.type]}
                 {`  ${item.name}`}
               </Link>
             </TableCell>
-
             {onRemoveAttachment && (
               <TableCell>
                 <IconRight>
