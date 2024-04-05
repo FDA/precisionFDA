@@ -1,5 +1,5 @@
-import { EntityManager } from '@mikro-orm/mysql'
 import { Reference, wrap } from '@mikro-orm/core'
+import { EntityManager } from '@mikro-orm/mysql'
 import { AcceptedLicense } from '@shared/domain/accepted-license/accepted-license.entity'
 import { ADMIN_GROUP_ROLES, AdminGroup } from '@shared/domain/admin-group/admin-group.entity'
 import { AdminMembership } from '@shared/domain/admin-membership/admin-membership.entity'
@@ -36,9 +36,9 @@ import { WorkflowSeries } from '@shared/domain/workflow-series/workflow-series.e
 import { Workflow } from '@shared/domain/workflow/entity/workflow.entity'
 import { STATIC_SCOPE } from '@shared/enums'
 import { config } from '../config'
-import * as generate from './generate'
 import { getScopeFromSpaceId } from '../domain/space/space.helper'
 import { PARENT_TYPE } from '../domain/user-file/user-file.types'
+import * as generate from './generate'
 
 const attachmentHelper = {
   create: (
@@ -64,7 +64,7 @@ const discussionHelper = {
     const note = wrap(new Note(references.user)).assign({
       title: generate.random.word(),
       content: generate.random.chance.paragraph(),
-      scope: 'private',
+      scope: STATIC_SCOPE.PRIVATE,
       noteType: 'Discussion',
     })
     em.persist(note)
