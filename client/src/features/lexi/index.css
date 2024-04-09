@@ -1,10 +1,13 @@
 /**
- * Copyright (c) Meta Platforms, Inc. and affiliates.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- *
- */
+* Copyright (c) Meta Platforms, Inc. and affiliates.
+*
+* This source code is licensed under the MIT license found in the
+* LICENSE file in the root directory of this source tree.
+*
+*/
+.h1, .h2, .h3, .table {
+  margin: 0;
+}
 
 .editor-shell {
   margin: 20px auto; /* NOTE: Change from main */
@@ -681,12 +684,15 @@ i.page-break,
 .dropdown {
   z-index: 100;
   display: block;
-  position: fixed;
+  position: absolute;
   box-shadow: 0 12px 28px 0 rgba(0, 0, 0, 0.2), 0 2px 4px 0 rgba(0, 0, 0, 0.1),
     inset 0 0 0 1px rgba(255, 255, 255, 0.5);
   border-radius: 8px;
   min-height: 40px;
   background-color: #fff;
+}
+.dropdown-header {
+  position:fixed; 
 }
 
 .dropdown .item {
@@ -761,6 +767,10 @@ i.page-break,
 @media screen and (max-width: 1100px) {
   .dropdown-button-text {
     display: none !important;
+  }
+
+  .dialog-dropdown > .dropdown-button-text {
+    display: flex !important;
   }
 
   .font-size .dropdown-button-text {
@@ -1258,6 +1268,7 @@ i.page-break,
   color: #222;
   display: inline-block;
   cursor: pointer;
+  padding: 1px;
 }
 
 i.chevron-down {
