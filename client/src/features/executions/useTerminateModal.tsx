@@ -4,8 +4,8 @@ import { toast } from 'react-toastify'
 import styled from 'styled-components'
 import { Loader } from '../../components/Loader'
 import { ResourceTable } from '../../components/ResourceTable'
-import { Modal } from '../modal'
-import { ButtonRow, ModalScroll } from '../modal/styles'
+import { ModalNext } from '../modal/ModalNext'
+import { ButtonRow, Footer, ModalScroll } from '../modal/styles'
 import { useModal } from '../modal/useModal'
 import { terminateJobsRequest } from './executions.api'
 import { IExecution } from './executions.types'
@@ -51,12 +51,24 @@ export function useTerminateModal<T extends { ids: string[]; name: string }>({
   }
 
   const modalComp = isShown && (
-    <Modal
+    <ModalNext
+      id={'terminate-executions-modal'}
       data-testid={`modal-execution-terminate`}
       headerText={`Terminate selected execution?`}
       isShown={isShown}
       hide={() => setShowModal(false)}
-      footer={
+    >
+      <ModalScroll>
+        <StyledResourceTable
+          rows={selected.map(s => {
+            return {
+              name: <div>{s.name}</div>,
+              location: <div>{s.scope}</div>,
+            }
+          })}
+        />
+      </ModalScroll>
+      <Footer>
         <ButtonRow>
           {mutation.isPending && <Loader />}
           <Button onClick={() => setShowModal(false)}>Cancel</Button>
@@ -64,18 +76,8 @@ export function useTerminateModal<T extends { ids: string[]; name: string }>({
             Terminate
           </Button>
         </ButtonRow>
-      }
-    >
-      <ModalScroll>
-        <StyledResourceTable
-          rows={selected.map(s => {
-            return {
-              name: <div>{s.name}</div>,
-            }
-          })}
-        />
-      </ModalScroll>
-    </Modal>
+      </Footer>
+    </ModalNext>
   )
   return {
     modalComp,

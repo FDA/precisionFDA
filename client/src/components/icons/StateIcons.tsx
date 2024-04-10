@@ -13,6 +13,12 @@ export const Done = () => (
     />
   </Svg>
 )
+export const Idle = () => (
+  <Svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 23 23" width="23" height="23" fill="none">
+    <circle cx="11.5" cy="11.5" r="11.5" fill="#D6A72F" />
+    <path fill="#fff" fillRule="evenodd" d="M16.56 10.38V7H6.44v3.38h10.12Zm0 5.62v-3.38H6.44V16h10.12Z" clipRule="evenodd" />
+  </Svg>
+)
 export const Runnable = () => (
   <Svg viewBox="0 0 23 23" width="23" height="23" fill="none" xmlns="http://www.w3.org/2000/svg">
     <circle cx="11.5" cy="11.5" r="11.5" fill="#24739F" />
