@@ -1,6 +1,6 @@
 import React from 'react'
 import styled from 'styled-components'
-import { Done, Failed, Runnable, Running, Terminated } from '../../components/icons/StateIcons'
+import { Done, Failed, Idle, Runnable, Running, Terminated } from '../../components/icons/StateIcons'
 import { Svg } from '../../components/icons/Svg'
 import { JobState } from './executions.types'
 
@@ -25,6 +25,12 @@ export const StateCell = ({ state }: { state: JobState }) => {
           {state}
         </StateLabel>
       )}
+      {state === 'idle' && (
+        <StateLabel>
+          <Idle />
+          {state}
+        </StateLabel>
+      )}
       {state === 'runnable' && (
         <StateLabel>
           <Runnable />
@@ -34,6 +40,12 @@ export const StateCell = ({ state }: { state: JobState }) => {
       {state === 'running' && (
         <StateLabel>
           <Running />
+          {state}
+        </StateLabel>
+      )}
+      {state === 'terminating' && (
+        <StateLabel>
+          <Terminated />
           {state}
         </StateLabel>
       )}

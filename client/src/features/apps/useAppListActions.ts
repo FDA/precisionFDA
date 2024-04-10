@@ -3,7 +3,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
 import { addDataRequest } from '../spaces/spaces.api'
 import { useAddResourceToModal } from '../actionModals/useAddResourceToSpace'
-import { ActionFunctionsType, HomeScope } from '../home/types'
+import { ActionFunctionsType } from '../home/types'
 
 export enum AppListActions {
   'Add App' = 'Add App',
