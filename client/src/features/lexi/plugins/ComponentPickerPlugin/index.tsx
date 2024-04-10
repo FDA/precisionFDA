@@ -41,7 +41,7 @@ import {INSERT_COLLAPSIBLE_COMMAND} from '../CollapsiblePlugin';
 import {INSERT_IMAGE_COMMAND, InsertImageDialog} from '../ImagesPlugin';
 import InsertLayoutDialog from '../LayoutPlugin/InsertLayoutDialog';
 import {INSERT_PAGE_BREAK} from '../PageBreakPlugin';
-import {InsertNewTableDialog, InsertTableDialog} from '../TablePlugin';
+import {InsertTableDialog} from '../TablePlugin';
 
 class ComponentPickerOption extends MenuOption {
   // What shows up in the editor
@@ -173,14 +173,6 @@ function getBaseOptions(editor: LexicalEditor, showModal: ShowModal) {
       onSelect: () =>
         showModal('Insert Table', (onClose) => (
           <InsertTableDialog activeEditor={editor} onClose={onClose} />
-        )),
-    }),
-    new ComponentPickerOption('Table (Experimental)', {
-      icon: <i className="icon table" />,
-      keywords: ['table', 'grid', 'spreadsheet', 'rows', 'columns'],
-      onSelect: () =>
-        showModal('Insert Table', (onClose) => (
-          <InsertNewTableDialog activeEditor={editor} onClose={onClose} />
         )),
     }),
     new ComponentPickerOption('Numbered List', {

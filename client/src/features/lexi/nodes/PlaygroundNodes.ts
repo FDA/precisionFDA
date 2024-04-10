@@ -28,7 +28,6 @@ import {LayoutContainerNode} from './LayoutContainerNode';
 import {LayoutItemNode} from './LayoutItemNode';
 import {MentionNode} from './MentionNode';
 import {PageBreakNode} from './PageBreakNode';
-import {TableNode as NewTableNode} from './TableNode';
 import {YouTubeNode} from './YouTubeNode';
 
 const PlaygroundNodes: Array<Klass<LexicalNode>> = [
@@ -37,7 +36,6 @@ const PlaygroundNodes: Array<Klass<LexicalNode>> = [
   ListItemNode,
   QuoteNode,
   CodeNode,
-  NewTableNode,
   TableNode,
   TableCellNode,
   TableRowNode,

@@ -1,4 +1,5 @@
 import { IUser } from '../../types/user'
+import { ServerScope } from '../home/types'
 import { NoteScope } from './api'
 
 export interface Note {
@@ -55,6 +56,8 @@ export interface Attachment {
   uid: string
   name: string
   type: AttachmentType
+  scope: ServerScope
+  link: string
 }
 
 export type FormAttachments = Record<AttachmentKey, Attachment[]>

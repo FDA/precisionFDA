@@ -60,7 +60,7 @@ const EntityIcon = ({ entityType }: { entityType: EntityType }) => {
   }
 }
 
-export const TrackProvenancePage = ({ entityType, spaceId }: { entityType: EntityType, spaceId?: string }) => {
+export const TrackProvenancePage = ({ entityType, spaceId }: { entityType: EntityType, spaceId?: number }) => {
   const params = useParams<ProvenancePageParams>()
   const keyMap: Record<EntityType, EntityUidKey> = {
     file: 'fileUid',

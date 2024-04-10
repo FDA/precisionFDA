@@ -6,7 +6,7 @@
 import { useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
 
-export const useScrollToHash = () => {
+export const useScrollToHash = (dep?: unknown) => {
   const location = useLocation()
 
   useEffect(() => {
@@ -14,5 +14,5 @@ export const useScrollToHash = () => {
       const el = document.getElementById(location.hash.slice(1))
       el?.scrollIntoView()
     }
-  }, [])
+  }, [dep])
 }

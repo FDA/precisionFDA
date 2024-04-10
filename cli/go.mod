@@ -1,6 +1,6 @@
 module dnanexus.com/precision-fda-cli
 
-go 1.22
+go 1.22.1
 
 require (
 	github.com/docker/go-units v0.5.0

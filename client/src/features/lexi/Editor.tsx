@@ -25,7 +25,6 @@ import {CAN_USE_DOM} from './environment';
 
 import {useSettings} from './context/SettingsContext';
 import {useSharedHistoryContext} from './context/SharedHistoryContext';
-import TableCellNodes from './nodes/TableCellNodes';
 import AutoEmbedPlugin from './plugins/AutoEmbedPlugin';
 import AutoLinkPlugin from './plugins/AutoLinkPlugin';
 import CodeActionMenuPlugin from './plugins/CodeActionMenuPlugin';
@@ -49,16 +48,14 @@ import TabFocusPlugin from './plugins/TabFocusPlugin';
 import TableCellActionMenuPlugin from './plugins/TableActionMenuPlugin';
 import TableCellResizer from './plugins/TableCellResizer';
 import TableOfContentsPlugin from './plugins/TableOfContentsPlugin';
-import {TablePlugin as NewTablePlugin} from './plugins/TablePlugin';
 import ToolbarPlugin from './plugins/ToolbarPlugin';
 import TreeViewPlugin from './plugins/TreeViewPlugin';
 import YouTubePlugin from './plugins/YouTubePlugin';
-import PlaygroundEditorTheme from './themes/PlaygroundEditorTheme';
 import ContentEditable from './ui/ContentEditable';
 import Placeholder from './ui/Placeholder';
 
 const skipCollaborationInit =
-  // @ts-ignore
+  // @ts-expect-error
   window.parent != null && window.parent.frames.right === window;
 
 export default function Editor(): JSX.Element {
@@ -95,15 +92,6 @@ export default function Editor(): JSX.Element {
     if (_floatingAnchorElem !== null) {
       setFloatingAnchorElem(_floatingAnchorElem);
     }
-  };
-
-  const cellEditorConfig = {
-    namespace: 'Playground',
-    nodes: [...TableCellNodes],
-    onError: (error: Error) => {
-      throw error;
-    },
-    theme: PlaygroundEditorTheme,
   };
 
   useEffect(() => {
@@ -160,26 +148,11 @@ export default function Editor(): JSX.Element {
               hasCellBackgroundColor={tableCellBackgroundColor}
             />
             <TableCellResizer />
-            <NewTablePlugin cellEditorConfig={cellEditorConfig}>
-              <AutoFocusPlugin />
-              <RichTextPlugin
-                contentEditable={
-                  <ContentEditable className="TableNode__contentEditable" />
-                }
-                placeholder={null}
-                ErrorBoundary={LexicalErrorBoundary}
-              />
-              <HistoryPlugin />
-              <ImagesPlugin captionsEnabled={false} />
-              <LinkPlugin />
-              <LexicalClickableLinkPlugin />
-              <FloatingTextFormatToolbarPlugin />
-            </NewTablePlugin>
             <ImagesPlugin />
             <InlineImagePlugin />
             <LinkPlugin />
             <YouTubePlugin />
-            {!isEditable && <LexicalClickableLinkPlugin />}
+            <LexicalClickableLinkPlugin disabled={isEditable} />
             <HorizontalRulePlugin />
             <TabFocusPlugin />
             <TabIndentationPlugin />
@@ -201,6 +174,7 @@ export default function Editor(): JSX.Element {
                 />
                 <FloatingTextFormatToolbarPlugin
                   anchorElem={floatingAnchorElem}
+                  setIsLinkEditMode={setIsLinkEditMode}
                 />
               </>
             )}
