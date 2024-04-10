@@ -12,33 +12,40 @@ import { IComparison } from '../../comparisons/comparisons.types'
 import { IAccessibleFile } from '../../databases/databases.api'
 import { IJob } from '../../executions/executions.types'
 import { useSelectFileModal } from '../../files/actionModals/useSelectFileModal'
-import { Attachment, AttachmentType, NoteForm } from '../discussions.types'
+import { Attachment, AttachmentType, FormAttachments, NoteForm } from '../discussions.types'
 import { typeAttachmentKey } from '../helpers'
 import { useSelectJobModal } from '../../executions/actionModals/useSelectJobModal'
 
 export function Attachments({
   setValue,
   scope,
+  attachments,
 }: {
   setValue: UseFormSetValue<NoteForm>
   scope: string
+  attachments: FormAttachments
 }) {
   const onChangeHandler = (
     type: AttachmentType,
-    v?: IAccessibleFile[] | IAsset[] | IApp[] | IJob[] | IComparison[],
+    selected: IAccessibleFile[] | IAsset[] | IApp[] | IJob[] | IComparison[],
   ) => {
+
     if (visualViewport) {
-      const newFileAttachments: Attachment[] = []
-      v.forEach(f => {
-        newFileAttachments.push({
-          id: f.id,
-          uid: f.uid,
-          type,
-          name: f.title,
-        })
-      })
       const k = typeAttachmentKey[type]
-      setValue(`attachments.${k}`, newFileAttachments)
+      const newAttachments: Attachment[] = attachments[k] || []
+      selected.forEach(attachment => {
+        const isNew = newAttachments.every(newAtt => newAtt.id !== attachment.id)
+        if (isNew) {
+          newAttachments.push({
+            id: attachment.id,
+            uid: attachment.uid,
+            type,
+            name: attachment.title,
+            scope: attachment.scope,
+          })
+        }
+      })
+      setValue(`attachments.${k}`, newAttachments)
     }
   }
 
@@ -109,16 +116,16 @@ export function Attachments({
                 func: () => setAppsShowModal(true),
                 isDisabled: false,
               },
+              Jobs: {
+                func: () => setJobShowModal(true),
+                isDisabled: false,
+              },
               Assets: {
                 func: () => setAssetsShowModal(true),
                 isDisabled: false,
               },
               Comparisons: {
                 func: () => setComparisonsShowModal(true),
-                isDisabled: false,
-              },
-              Jobs: {
-                func: () => setJobShowModal(true),
                 isDisabled: false,
               },
             }}

@@ -12,7 +12,7 @@ import {
   StyledPropertyItem,
   StyledPropertyKey,
 } from '../../../components/Tags'
-import { getBackPath } from '../../../utils/getBackPath'
+import { getBackPathNext } from '../../../utils/getBackPath'
 import { ISpace } from '../../spaces/spaces.types'
 import { ActionsDropdownContent } from '../../home/ActionDropdownContent'
 import { StyledBackLink } from '../../home/home.styles'
@@ -64,10 +64,10 @@ const FileActions = ({
     <>
       <Dropdown
         trigger="click"
-        content={<ActionsDropdownContent actions={actions} />}
+        content={<ActionsDropdownContent actions={actions}/>}
       >
         {dropdownProps => (
-          <ActionsButton {...dropdownProps} active={dropdownProps.isActive} />
+          <ActionsButton {...dropdownProps} active={dropdownProps.isActive}/>
         )}
       </Dropdown>
       {actions['Open']?.modal}
@@ -91,13 +91,17 @@ const FileActions = ({
 }
 
 
-export const FileShow = ({ emitScope, space, homeScope }: { homeScope?: HomeScope, emitScope?: EmmitScope, space?: ISpace }) => {
+export const FileShow = ({ emitScope, space, homeScope }: {
+  homeScope?: HomeScope,
+  emitScope?: EmmitScope,
+  space?: ISpace
+}) => {
   const location = useLocation()
   const { fileId } = useParams<{ fileId: string }>()
   const { data, isLoading } = useQuery({
     queryKey: ['file', fileId],
     queryFn: () => fetchFile(fileId).then(d => {
-      if(emitScope) emitScope(d.files.scope, d.files.featured)
+      if (emitScope) emitScope(d.files.scope, d.files.featured)
       return d
     }),
   })
@@ -107,7 +111,7 @@ export const FileShow = ({ emitScope, space, homeScope }: { homeScope?: HomeScop
   const folderId = params?.folder_id as string | undefined
 
   if (isLoading) {
-    return  <HomeLoader />
+    return <HomeLoader/>
   }
 
   if (!file || !file.id)
@@ -122,18 +126,14 @@ export const FileShow = ({ emitScope, space, homeScope }: { homeScope?: HomeScop
     {
       header: `License: ${meta.object_license && meta.object_license.title}`,
       tab: (
-        <License license={meta.object_license} link={file.links.show_license} />
+        <License license={meta.object_license} link={file.links.show_license}/>
       ),
       hide: !meta.object_license || !meta.object_license.uid,
     },
   ] as ITab[]
 
   const scopeParamLink = `?scope=${homeScope?.toLowerCase()}`
-  const backPath = getBackPath(location, 'files', homeScope)
-
-  // const tab = currentTab && currentTab !== HOME_TABS.PRIVATE ? `/${currentTab.toLowerCase()}` : ''
-  // const selectedScopeParam = currentTab && currentTab !== HOME_TABS.EVERYBODY ? currentTab.toLowerCase() : 'public'
-  // const spaceId = file.space_id?.split('-')[1]
+  const backPath = getBackPathNext({ spaceId: space?.id, location, resourceLocation: 'files', homeScope })
 
   return (
     <>
@@ -144,7 +144,7 @@ export const FileShow = ({ emitScope, space, homeScope }: { homeScope?: HomeScop
         <Header>
           <HeaderLeft>
             <Title>
-              <FileIcon height={22} />
+              <FileIcon height={22}/>
               &nbsp;{file.name}
               {file.show_license_pending && (
                 <HomeLabel
@@ -158,14 +158,14 @@ export const FileShow = ({ emitScope, space, homeScope }: { homeScope?: HomeScop
             </Title>
           </HeaderLeft>
           <div>
-            <FileActions homeScope={homeScope} space={space} file={file} folderId={folderId} />
+            <FileActions homeScope={homeScope} space={space} file={file} folderId={folderId}/>
           </div>
         </Header>
 
         <FileDescription>
           {file.locked && <LockedRow>
-            <LockIcon height={14} color={theme.colors.darkYellow} />
-            File is locked
+              <LockIcon height={14} color={theme.colors.darkYellow}/>
+              File is locked
           </LockedRow>
           }
           {file.description
@@ -241,12 +241,12 @@ export const FileShow = ({ emitScope, space, homeScope }: { homeScope?: HomeScop
           <MetadataSection>
             <MetadataRow>
               <MetadataItem>
-              <MetadataKey>Tags</MetadataKey>
-                  <StyledTags>
-                    {file.tags.map(tag => (
-                      <StyledTagItem data-testid="file-tag-item" key={tag}>{tag}</StyledTagItem>
-                    ))}
-                  </StyledTags>
+                <MetadataKey>Tags</MetadataKey>
+                <StyledTags>
+                  {file.tags.map(tag => (
+                    <StyledTagItem data-testid="file-tag-item" key={tag}>{tag}</StyledTagItem>
+                  ))}
+                </StyledTags>
               </MetadataItem>
             </MetadataRow>
           </MetadataSection>
@@ -255,23 +255,23 @@ export const FileShow = ({ emitScope, space, homeScope }: { homeScope?: HomeScop
           <MetadataSection>
             <MetadataRow>
               <MetadataItem>
-                  <MetadataKey>Properties</MetadataKey>
-                    <StyledTags>
-                      {Object.entries(file.properties).map(([key, value]) => (
-                        <StyledPropertyItem key={key}>
-                          <StyledPropertyKey>{key}</StyledPropertyKey>
-                          <span>{value}</span>
-                        </StyledPropertyItem>
-                      ))}
-                    </StyledTags>
-                </MetadataItem>
+                <MetadataKey>Properties</MetadataKey>
+                <StyledTags>
+                  {Object.entries(file.properties).map(([key, value]) => (
+                    <StyledPropertyItem key={key}>
+                      <StyledPropertyKey>{key}</StyledPropertyKey>
+                      <span>{value}</span>
+                    </StyledPropertyItem>
+                  ))}
+                </StyledTags>
+              </MetadataItem>
             </MetadataRow>
           </MetadataSection>
         )}
       </Topbox>
 
-      <Filler $size={40} />
-      <TabsSwitch tabsConfig={tabsConfig} />
+      <Filler $size={40}/>
+      <TabsSwitch tabsConfig={tabsConfig}/>
     </>
   )
 }

@@ -1,7 +1,7 @@
 import { ErrorMessage } from '@hookform/error-message'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { toast } from 'react-toastify'
 import styled from 'styled-components'
@@ -54,7 +54,6 @@ export const EditNoteForm = ({
   noteId: number
 }) => {
   const {
-    register,
     control,
     handleSubmit,
     formState: { errors, isSubmitting },
@@ -71,15 +70,15 @@ export const EditNoteForm = ({
     },
   })
 
-  const { isLoading } = useQuery({
+  const { isLoading, data: attachmentsData } = useQuery({
     queryKey: ['attachments', noteId],
     queryFn: () => fetchAttachmentsRequest(noteId),
-    select: groupByAttachmentType,
-    onSuccess(data) {
-      setValue('attachments', data)
-    },
     enabled: !!noteId,
   })
+
+  useEffect(() => {
+    setValue('attachments', groupByAttachmentType(attachmentsData ?? []))
+  }, [attachmentsData])
 
   const onSubmitForm = async () => {
     await onSubmit(getValues())
@@ -113,7 +112,7 @@ export const EditNoteForm = ({
         />
       )}
       <ButtonRow>
-        <Attachments setValue={setValue} scope={scope} />
+        <Attachments setValue={setValue} attachments={watch().attachments} scope={scope} />
         <Button onClick={() => onCancel && onCancel(getValues())}>
           Cancel
         </Button>
@@ -154,7 +153,7 @@ export const EditNoteEntity = ({
       }
       return editDiscussionRequest(discussionId, payload)
     },
-    onSuccess: result => {
+    onSuccess: () => {
       toast.success(`${answerId ? 'Answer': 'Discussion'} has been updated`)
       if (onSuccess) onSuccess()
     },

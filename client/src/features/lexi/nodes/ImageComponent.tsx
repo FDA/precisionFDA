@@ -7,12 +7,10 @@
  */
 
 import type {
-  GridSelection,
+  BaseSelection,
   LexicalCommand,
   LexicalEditor,
   NodeKey,
-  NodeSelection,
-  RangeSelection,
 } from 'lexical';
 
 import './ImageNode.css';
@@ -135,9 +133,7 @@ export default function ImageComponent({
     useLexicalNodeSelection(nodeKey);
   const [isResizing, setIsResizing] = useState<boolean>(false);
   const [editor] = useLexicalComposerContext();
-  const [selection, setSelection] = useState<
-    RangeSelection | NodeSelection | GridSelection | null
-  >(null);
+  const [selection, setSelection] = useState<BaseSelection | null>(null);
   const activeEditorRef = useRef<LexicalEditor | null>(null);
 
   const onDelete = useCallback(
@@ -148,6 +144,7 @@ export default function ImageComponent({
         const node = $getNodeByKey(nodeKey);
         if ($isImageNode(node)) {
           node.remove();
+          return true;
         }
       }
       return false;

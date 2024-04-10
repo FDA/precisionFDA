@@ -133,7 +133,7 @@ export const DiscussionForm = ({
           </StyledAttachments>
         )}
         <ButtonRow>
-          <Attachments scope={scope} value={attachments} setValue={setValue} />
+          <Attachments scope={scope} attachments={attachments} setValue={setValue} />
           {onDelete && (
             <Button variant="warning" type="button" onClick={deleteDiscussion}>
               Delete

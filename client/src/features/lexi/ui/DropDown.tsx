@@ -85,7 +85,9 @@ function DropDownItems({
   );
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
-    if (!items) return;
+    if (!items) {
+      return;
+    }
 
     const key = event.key;
 
@@ -97,13 +99,17 @@ function DropDownItems({
       onClose();
     } else if (key === 'ArrowUp') {
       setHighlightedItem((prev) => {
-        if (!prev) return items[0];
+        if (!prev) {
+          return items[0];
+        }
         const index = items.indexOf(prev) - 1;
         return items[index === -1 ? items.length - 1 : index];
       });
     } else if (key === 'ArrowDown') {
       setHighlightedItem((prev) => {
-        if (!prev) return items[0];
+        if (!prev) {
+          return items[0];
+        }
         return items[items.indexOf(prev) + 1];
       });
     }
@@ -128,7 +134,7 @@ function DropDownItems({
 
   return (
     <DropDownContext.Provider value={contextValue}>
-      <div className="dropdown" ref={dropDownRef} onKeyDown={handleKeyDown}>
+      <div className="dropdown dropdown-header" ref={dropDownRef} onKeyDown={handleKeyDown}>
         {children}
       </div>
     </DropDownContext.Provider>
@@ -189,8 +195,9 @@ export default function DropDown({
           if (
             dropDownRef.current &&
             dropDownRef.current.contains(target as Node)
-          )
+          ) {
             return;
+          }
         }
         if (!button.contains(target as Node)) {
           setShowDropDown(false);

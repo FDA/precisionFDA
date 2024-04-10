@@ -345,6 +345,7 @@ module Api
       nodes = Node.accessible_by(@context).where(id: params[:item_ids])
 
       verify_nodes_for_protection(nodes, "copy")
+      verify_nodes_for_locked(nodes, "copy")
       verify_target_scope_for_protection(nodes, params[:scope])
 
       NodeCopyWorker.perform_async(
