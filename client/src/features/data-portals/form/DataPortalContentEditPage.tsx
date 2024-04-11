@@ -32,7 +32,7 @@ const SubmitRow = styled.div`
   align-items: center;
 `
 
-const TopBar = ({ portalId, data }: { portalId: number, data: DataPortal }) => {
+const TopBar = ({ data }: { data: DataPortal }) => {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const mutation = useMutation({
@@ -40,9 +40,9 @@ const TopBar = ({ portalId, data }: { portalId: number, data: DataPortal }) => {
     mutationFn: (payload: UpdateDataPortalRequest) => updateDataPortalRequest(payload),
     onSuccess: async () => {
       await queryClient.invalidateQueries({
-        queryKey: ['data-portals', portalId.toString()],
+        queryKey: ['data-portals', data.urlSlug],
       })
-      navigate(`/data-portals/${portalId}`)
+      navigate(`/data-portals/${data.urlSlug}`)
       toast.success('Data Portal content updated')
     },
   })
@@ -54,10 +54,7 @@ const TopBar = ({ portalId, data }: { portalId: number, data: DataPortal }) => {
       const htmlString = $generateHtmlFromNodes(editor, null)
       mutation.mutateAsync(
           {
-          id: portalId,
-          card_image_uid: data.cardImageUid,
-          description: data.description,
-          space_id: data.spaceId,
+          id: data.id,
           content: htmlString,
           editor_state: jsonString,
         })
@@ -65,7 +62,7 @@ const TopBar = ({ portalId, data }: { portalId: number, data: DataPortal }) => {
   }
   return (
     <ContentEditButtonRow>
-      <BackLink linkTo={`/data-portals/${portalId}`}>Back to Portal</BackLink>
+      <BackLink linkTo={`/data-portals/${data.urlSlug}`}>Back to Portal</BackLink>
       <SubmitRow>
         {mutation.isPending && <Loader />}
         <Button variant="primary" disabled={mutation.isPending} onClick={() => handleSave()}>Save</Button>
@@ -95,7 +92,7 @@ export default function DataPortalContentEditPage(): JSX.Element {
     <LexiContext editorState={data?.editorState}>
       {portalId && data &&
         <div className="editor-shell">
-          <TopBar portalId={parseInt(portalId, 10)} data={data}/>
+          <TopBar data={data}/>
             <Editor/>
         </div>
       }

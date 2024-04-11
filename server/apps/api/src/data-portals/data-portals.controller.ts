@@ -14,10 +14,10 @@ import {
   UseGuards,
 } from '@nestjs/common'
 import { DataPortalService } from '@shared/domain/data-portal/service/data-portal.service'
-import { DataPortalParam, FileParam } from '@shared/domain/data-portal/service/data-portal.types'
 import { UserContextGuard } from '../user-context/guard/user-context.guard'
-import { JsonSchemaPipe } from '../validation/pipes/json-schema.pipe'
-import { dataPortalCreate, dataPortalUpdate, file } from './data-portals.schemas'
+import { CreateFileParamDTO } from '@shared/domain/data-portal/dto/CreateFileParamDTO'
+import { CreateDataPortalDTO } from '@shared/domain/data-portal/dto/CreateDataPortalDTO'
+import { UpdateDataPortalDTO } from '@shared/domain/data-portal/dto/UpdateDataPortalDTO'
 
 @UseGuards(UserContextGuard)
 @Controller('/data-portals')
@@ -28,12 +28,9 @@ export class DataPortalsController {
    * Creates new resource (just the metadata).
    */
   @HttpCode(201)
-  @Post('/:id/resources')
-  async createResource(
-    @Param('id', ParseIntPipe) id: number,
-    @Body(new JsonSchemaPipe(file)) body: FileParam,
-  ) {
-    return await this.dataPortalService.createResource(body, id)
+  @Post('/:identifier/resources')
+  async createResource(@Param('identifier') identifier: string, @Body() body: CreateFileParamDTO) {
+    return await this.dataPortalService.createResource(body, identifier)
   }
 
   /**
@@ -58,10 +55,7 @@ export class DataPortalsController {
    */
   @HttpCode(201)
   @Post('/:id/card-image')
-  async createCardImage(
-    @Param('id', ParseIntPipe) id: number,
-    @Body(new JsonSchemaPipe(file)) body: FileParam,
-  ) {
+  async createCardImage(@Param('id', ParseIntPipe) id: number, @Body() body: CreateFileParamDTO) {
     return await this.dataPortalService.createCardImage(body, id)
   }
 
@@ -70,15 +64,15 @@ export class DataPortalsController {
    */
   @HttpCode(201)
   @Post()
-  async createDataPortal(@Body(new JsonSchemaPipe(dataPortalCreate)) body: DataPortalParam) {
+  async createDataPortal(@Body() body: CreateDataPortalDTO) {
     return await this.dataPortalService.create(body)
   }
 
   /**
    * Updates data portal.
    */
-  @Patch('/:id')
-  async updateDataPortal(@Body(new JsonSchemaPipe(dataPortalUpdate)) body: DataPortalParam) {
+  @Patch('/:identifier')
+  async updateDataPortal(@Body() body: UpdateDataPortalDTO) {
     return await this.dataPortalService.update(body)
   }
 
@@ -96,24 +90,24 @@ export class DataPortalsController {
    * Get the default Data Portal
    */
   // TODO add tests for displaying default data portal to user
-  @Get('/default')
+  @Get('/main')
   async getDefaultDataPortal() {
     return await this.dataPortalService.getDefault()
   }
 
   /**
-   * Returns details of the portal (including content).
+   * Returns details of the portal (including content) by its url slug or id
    */
-  @Get('/:id')
-  async getDataPortal(@Param('id', ParseIntPipe) id: number) {
-    return await this.dataPortalService.get(id)
+  @Get('/:identifier')
+  async getDataPortal(@Param('identifier') identifier: string) {
+    return await this.dataPortalService.getByUrlSlugOrId(identifier)
   }
 
   /**
    * Returns list of resources that belong to given portal
    */
-  @Get('/:id/resources')
-  async listResources(@Param('id', ParseIntPipe) id: number) {
-    return await this.dataPortalService.listResources(id)
+  @Get('/:identifier/resources')
+  async listResources(@Param('identifier') identifier: string) {
+    return await this.dataPortalService.listResources(identifier)
   }
 }

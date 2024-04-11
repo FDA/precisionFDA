@@ -266,8 +266,10 @@ ActiveRecord::Schema.define(version: 2024_02_29_111250) do
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.boolean "default", default: false
+    t.string "url_slug", null: false
     t.index ["card_image_id"], name: "fk_rails_807efcbd20"
     t.index ["space_id"], name: "fk_rails_59bf9507a5"
+    t.index ["url_slug"], name: "index_data_portals_on_url_slug", unique: true
   end
 
   create_table "dbclusters", charset: "utf8mb3", collation: "utf8mb3_unicode_ci", force: :cascade do |t|
