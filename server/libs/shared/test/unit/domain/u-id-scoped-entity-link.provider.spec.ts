@@ -96,9 +96,9 @@ describe('UIdScopedEntityLinkProvider', () => {
     return [
       { entity: APP, urlSegment: 'apps' },
       { entity: ASSET, urlSegment: 'assets' },
-      { entity: JOB, urlSegment: 'jobs' },
+      { entity: JOB, urlSegment: 'executions' },
       { entity: FILE, urlSegment: 'files' },
-      { entity: WORKFLOW, urlSegment: 'workflow' },
+      { entity: WORKFLOW, urlSegment: 'workflows' },
     ]
   }
 

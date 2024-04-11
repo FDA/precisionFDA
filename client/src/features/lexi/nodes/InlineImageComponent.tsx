@@ -6,13 +6,7 @@
  *
  */
 import type {Position} from './InlineImageNode';
-import type {
-  GridSelection,
-  LexicalEditor,
-  NodeKey,
-  NodeSelection,
-  RangeSelection,
-} from 'lexical';
+import type {BaseSelection, LexicalEditor, NodeKey} from 'lexical';
 
 import './InlineImageNode.css';
 
@@ -41,8 +35,6 @@ import * as React from 'react';
 import {Suspense, useCallback, useEffect, useRef, useState} from 'react';
 
 import useModal from '../hooks/useModal';
-import FloatingLinkEditorPlugin from '../plugins/FloatingLinkEditorPlugin/index';
-import FloatingTextFormatToolbarPlugin from '../plugins/FloatingTextFormatToolbarPlugin/index';
 import LinkPlugin from '../plugins/LinkPlugin';
 import Button from '../ui/Button';
 import ContentEditable from '../ui/ContentEditable';
@@ -208,9 +200,7 @@ export default function InlineImageComponent({
   const [isSelected, setSelected, clearSelection] =
     useLexicalNodeSelection(nodeKey);
   const [editor] = useLexicalComposerContext();
-  const [selection, setSelection] = useState<
-    RangeSelection | NodeSelection | GridSelection | null
-  >(null);
+  const [selection, setSelection] = useState<BaseSelection | null>(null);
   const activeEditorRef = useRef<LexicalEditor | null>(null);
 
   const onDelete = useCallback(
@@ -221,6 +211,7 @@ export default function InlineImageComponent({
         const node = $getNodeByKey(nodeKey);
         if ($isInlineImageNode(node)) {
           node.remove();
+          return true;
         }
       }
       return false;
@@ -396,11 +387,6 @@ export default function InlineImageComponent({
             <LexicalNestedComposer initialEditor={caption}>
               <AutoFocusPlugin />
               <LinkPlugin />
-              <FloatingLinkEditorPlugin
-                isLinkEditMode={false}
-                setIsLinkEditMode={() => {}}
-              />
-              <FloatingTextFormatToolbarPlugin />
               <RichTextPlugin
                 contentEditable={
                   <ContentEditable className="InlineImageNode__contentEditable" />

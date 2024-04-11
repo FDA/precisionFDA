@@ -30,14 +30,19 @@ module Sortable
   end
 
   def order_query(candidates_by, candidate_dir, allowed_orderings)
-    Hash[pick_values(candidates_by).collect do |candidate_by|
-      [order_by(candidate_by, allowed_orderings), order_direction(candidate_dir)]
-    end]
+    sanitized_candidate_dir = %w(ASC DESC).include?(candidate_dir.to_s.upcase) ? candidate_dir.upcase : "ASC"
+
+    ordering = {}
+
+    Array(candidates_by).each do |candidate_by|
+      ordering[candidate_by] = sanitized_candidate_dir if allowed_orderings.include?(candidate_by)
+    end
+
+    ordering
   end
 
   # Manually sort array in direct/reverse order by sort_fields.
   # @param array input arrays of objects for sort.
-  # @param sort_fields list of lambdas.
   # @return sorted array.
   def sort_array_by_fields(array, default_order = "launched_on")
     sort_by = self.class::SORT_FIELDS[params[:order_by] || default_order]

@@ -231,4 +231,4 @@ export const fetchLicensesOnFiles = (inputs: { [key: string]: FormInput }): Prom
   return Promise.resolve([])
 }
 
-export const getBaseLink = (spaceId?: string) => spaceId ? `spaces/${spaceId}` : 'home'
+export const getBaseLink = (spaceId?: number) => spaceId ? `spaces/${spaceId}` : 'home'

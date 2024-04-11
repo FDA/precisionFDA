@@ -22,6 +22,7 @@ export class BullQueueModule {
       BullModule.forRoot({
         url: config.redis.url,
         redis: redisOptions,
+        ...config.defaultJobOptions,
       }),
     ]
 
@@ -47,7 +48,16 @@ export class BullQueueModule {
   }
 
   static registerQueue(opts: BullModuleOptions): DynamicModule {
-    const imports = [BullModule.registerQueue(opts)]
+
+    const imports = [
+      BullModule.registerQueue({
+        ...opts,
+        defaultJobOptions: {
+          ...config.defaultJobOptions,
+          ...opts.defaultJobOptions,
+        },
+      }),
+    ]
 
     if (config.bullBoardEnabled) {
       imports.push(

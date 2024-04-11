@@ -43,8 +43,8 @@ export class UIdScopedEntityLinkProvider extends EntityLinkProvider<UIdScopedLin
   private readonly entityTypeToUrlSegmentMap: Record<UIdScopedLinkEntityType, string> = {
     app: 'apps',
     asset: 'assets',
-    job: 'jobs',
+    job: 'executions',
     file: 'files',
-    workflow: 'workflow',
+    workflow: 'workflows',
   }
 }

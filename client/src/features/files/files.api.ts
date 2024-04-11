@@ -158,12 +158,7 @@ export async function createFile(name: string, scope: string, folder_id: string 
 }
 
 export async function copyFilesToPrivate(ids: number[]) {
-  const res = await fetch('/api/files/copy', {
-    ...getApiRequestOpts('POST'),
-    body: JSON.stringify({ item_ids: ids, scope: 'private' }),
-  }).then(checkStatus)
-
-  return res.json()
+  return axios.post('/api/files/copy', { item_ids: ids, scope: 'private' }).then(r => r.data)
 }
 
 export async function getUploadURL(id: string, index: number, size: number, md5: string) {

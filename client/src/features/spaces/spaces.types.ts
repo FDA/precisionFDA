@@ -93,7 +93,7 @@ export interface ISpace {
   updatable: boolean;
   tags: any[];
   spaceId?: number;
-  current_user_membership: SpaceMembership | null;
+  current_user_membership: SpaceMembership
   host_lead: HostLead;
   guest_lead?: GuestLead;
   private_space_id?: string;
