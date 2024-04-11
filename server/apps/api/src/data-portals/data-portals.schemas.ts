@@ -16,6 +16,7 @@ const dataPortalCreate: JSONSchema7 = {
   type: 'object',
   properties: {
     name: { type: 'string' },
+    urlSlug: { type: 'string' },
     description: { type: 'string' },
     cardImageFileName: { type: 'string' },
     default: { type: 'boolean', default: false },

@@ -25,6 +25,9 @@ class DataPortal extends BaseEntity {
   name: string
 
   @Property()
+  urlSlug: string
+
+  @Property()
   description: string
 
   @Property()

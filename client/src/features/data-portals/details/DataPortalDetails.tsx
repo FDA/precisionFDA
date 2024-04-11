@@ -119,11 +119,11 @@ export const DataPortalDetails = ({
         {canEditSettings && (
           <RightSideItem>
             <RightList>
-              <ListItem as={Link} to={`/data-portals/${portal.id}/edit`}>
+              <ListItem as={Link} to={`/data-portals/${portal.urlSlug}/edit`}>
                 <span className="fa fa-cog fa-fw" /> Portal Settings
               </ListItem>
               {canEditContent && (
-                <ListItem to={`/data-portals/${portal.id}/content`}>
+                <ListItem to={`/data-portals/${portal.urlSlug}/content`}>
                   <span className="fa fa-file-code-o fa-fw" /> Edit Content
                 </ListItem>
               )}
@@ -133,7 +133,7 @@ export const DataPortalDetails = ({
         <RightSideItem>
           <RightList>
             {canViewResources && (
-              <ListItem as={Link} to={`/data-portals/${portal.id}/resources`}>
+              <ListItem as={Link} to={`/data-portals/${portal.urlSlug}/resources`}>
                 <span className="fa fa-file-code-o fa-fw" /> Resources
               </ListItem>
             )}
@@ -151,7 +151,7 @@ export const DataPortalDetails = ({
             <NoContent>
               <AlertText>This Data Portal has no content</AlertText>
               {canEditContent && (
-                <Button as={Link} type="button" to={`/data-portals/${portal.id}/content`}>
+                <Button as={Link} type="button" to={`/data-portals/${portal.urlSlug}/content`}>
                   Add some here
                 </Button>
               )}

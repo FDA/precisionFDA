@@ -11,10 +11,11 @@ module Api
       data_portal = {
         name: data_portal_params[:name],
         description: data_portal_params[:description],
+        urlSlug: data_portal_params[:url_slug],
         cardImageFileName: data_portal_params[:card_image_file_name],
         status: data_portal_params[:status],
         spaceId: space.id,
-        sortOrder: data_portal_params[:sort_order],
+        sortOrder: data_portal_params[:sort_order].to_i,
         hostLeadDxUser: data_portal_params[:host_lead_dxuser],
         guestLeadDxUser: data_portal_params[:guest_lead_dxuser],
         default: data_portal_params[:default],
@@ -36,6 +37,7 @@ module Api
 
     def show
       portal = https_apps_client.data_portals_get(params[:id])
+
       render json: portal,
              adapter: :json
     rescue Net::HTTPClientException => e
@@ -55,7 +57,10 @@ module Api
     end
 
     def create_resource
-      resource = https_apps_client.data_portal_create_resource(params[:id], file_params)
+      # We don't want the data portal ID (or slug) param. It's just confusing
+      resource_params = file_params
+      resource_params.delete(:id)
+      resource = https_apps_client.data_portal_create_resource(params[:id], resource_params)
       render json: resource,
              adapter: :json
     rescue Net::HTTPClientException => e
@@ -80,19 +85,15 @@ module Api
 
     def update
       portal_data = {
-        id: data_portal_params[:id],
+        id: data_portal_params[:id].to_i,
       }
       portal_data[:name] = data_portal_params[:name] unless data_portal_params[:name].nil?
       portal_data[:description] = data_portal_params[:description] unless data_portal_params[:description].nil?
       portal_data[:status] = data_portal_params[:status] unless data_portal_params[:status].nil?
       portal_data[:cardImageUid] = data_portal_params[:card_image_uid] unless data_portal_params[:card_image_uid].nil?
-      portal_data[:sortOrder] = data_portal_params[:sort_order] unless data_portal_params[:sort_order].nil?
-      unless data_portal_params[:host_lead_dxuser].nil?
-        portal_data[:hostLeadDxUser] = data_portal_params[:host_lead_dxuser]
-      end
-      unless data_portal_params[:guest_lead_dxuser].nil?
-        portal_data[:guestLeadDxUser] = data_portal_params[:guest_lead_dxuser]
-      end
+      portal_data[:sortOrder] = data_portal_params[:sort_order].to_i unless data_portal_params[:sort_order].nil?
+      portal_data[:hostLeadDxUser] = data_portal_params[:host_lead_dxuser] unless data_portal_params[:host_lead_dxuser].nil?
+      portal_data[:guestLeadDxUser] = data_portal_params[:guest_lead_dxuser] unless data_portal_params[:guest_lead_dxuser].nil?
       portal_data[:content] = data_portal_params[:content] unless data_portal_params[:content].nil?
       portal_data[:editorState] = data_portal_params[:editor_state] unless data_portal_params[:editor_state].nil?
       portal_data[:default] = data_portal_params[:default] unless data_portal_params[:default].nil?
@@ -126,6 +127,7 @@ module Api
           :id,
           :name,
           :description,
+          :url_slug,
           :card_image_file_name,
           :status,
           :default,

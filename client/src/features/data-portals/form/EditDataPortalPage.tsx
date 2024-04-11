@@ -1,5 +1,4 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { parseInt } from 'lodash'
 import React from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { toast } from 'react-toastify'
@@ -23,40 +22,37 @@ const EditDataPortalPage = () => {
   const navigate = useNavigate()
   const user = useAuthUser()
   const queryClient = useQueryClient()
-  const mutation = useMutation({
-    mutationKey: ['update-data-portal'],
-    mutationFn: (payload: UpdateDataPortalData) => editDataPortalRequest(payload),
-    onSuccess: res => {
-      if (!res?.error) {
-        queryClient.invalidateQueries({
-          queryKey: ['data-portal-list'],
-        })
-        navigate('/data-portals')
-        toast.success('Data Portal updated')
-      } else if (res?.error) {
-        toast.error(`${res.error.type}: ${res.error.message}`)
-      } else {
-        toast.error('Something went wrong')
-      }
-    },
-    onError: () => {
-      toast.error('There was an issue updating the data portal')
-    },
-  })
 
-  const handleSubmit = async (v: CreateDataPortalForm) => {
+
+  const dataPortalMutation = useMutation({ mutationFn: editDataPortalRequest })
+
+  const onSubmit = async (v: CreateDataPortalForm) => {
     const payload: UpdateDataPortalData = {
       dataPortal: {
-        id: parseInt(portalId, 10),
+        id: portal?.id,
         name: v.name,
         description: v.description,
-        default: v.default,
         sort_order: v.sort_order,
-        ...portal && { space_id: portal.spaceId },
+        status: v.status?.value,
       } as UpdateDataPortalRequest,
-      image: v.card_image_file ? v.card_image_file[0] : null,
+      spaceId: v.card_image_file ? portal?.spaceId : undefined,
+      image: v.card_image_file ? v.card_image_file[0] : undefined,
     }
-    return mutation.mutateAsync(payload).catch(() => {})
+
+    try {
+      await dataPortalMutation.mutateAsync(payload)
+      queryClient.invalidateQueries({
+        queryKey: ['data-portal-list'],
+      })
+
+      const navigateToUrl: string = portal !== undefined ? `/data-portals/${portal.urlSlug}` : '/data-portals/'
+      navigate(navigateToUrl)
+
+      toast.success('Data Portal updated')
+    } catch (err) {
+      const message = err.response?.data?.error?.message || err.message || 'Unknown error'
+      toast.error(`Error while editing data portal: ${message}`)
+    }
   }
 
   if (isLoading || !portal) {
@@ -70,7 +66,7 @@ const EditDataPortalPage = () => {
       <StyledPageCenter>
       <StyledPageContent>
 
-        <BackLinkMargin linkTo={`/data-portals/${portal.id}`}>
+        <BackLinkMargin linkTo={`/data-portals/${portal.urlSlug}`}>
           Back to Data Portal
         </BackLinkMargin>
       </StyledPageContent>
@@ -81,13 +77,14 @@ const EditDataPortalPage = () => {
             <PageTitle>Edit Data Portal</PageTitle>
             <DataPortalForm
               isEditMode
-              mutationErrors={mutation.error as any}
+              mutationErrors={dataPortalMutation.error as any}
               canEditMainDataPortal={user?.admin && isUserInMemberRole(user?.dxuser, portal?.members, ['lead'])}
-              onSubmit={handleSubmit}
+              onSubmit={onSubmit}
+              isSubmitting={dataPortalMutation.isPending}
               defaultValues={{
                 name: portal.name,
+                url_slug: portal.urlSlug,
                 description: portal.description,
-                default: portal.default,
                 card_image_uid: portal.cardImageUid,
                 card_image_url: portal.cardImageUrl,
                 card_image_file: null,

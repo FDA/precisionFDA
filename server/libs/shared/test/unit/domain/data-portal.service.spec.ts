@@ -36,7 +36,8 @@ import * as generate from '../../../src/test/generate'
 import type { IdInput } from '@shared/types'
 import { DataPortalRepository } from '@shared/domain/data-portal/data-portal.repository'
 import { stub } from 'sinon'
-import { NotFoundError } from '@shared/errors'
+import { DataPortalUrlSlugFormatError, NotFoundError } from '@shared/errors'
+import { UniqueConstraintViolationException } from '@mikro-orm/core'
 
 describe('data portal service tests', () => {
   const FILE_DXID = 'file-dxid'
@@ -115,13 +116,18 @@ describe('data portal service tests', () => {
 
   const createPortalAndAddMember = async (
     portalName: string,
+    urlSlug: string,
     role: SPACE_MEMBERSHIP_ROLE,
   ): Promise<any> => {
     const space = create.spacesHelper.create(em, { name: portalName })
     const internalUser = create.userHelper.create(em, { dxuser: generate.random.chance.name() })
     await em.flush()
 
-    const portal = create.dataPortalsHelper.create(em, { space }, { name: portalName })
+    const portal = create.dataPortalsHelper.create(
+      em,
+      { space },
+      { name: portalName, urlSlug: urlSlug },
+    )
     await em.flush()
     create.spacesHelper.addMember(
       em,
@@ -139,6 +145,7 @@ describe('data portal service tests', () => {
     hostLeadDxUser: string,
     guestLeadDxUser: string,
     portalName: string,
+    urlSlug: string,
     description: string,
     status: DATA_PORTAL_STATUS,
     sortOrder: number,
@@ -179,6 +186,7 @@ describe('data portal service tests', () => {
       { space },
       {
         name: portalName,
+        urlSlug,
         description,
         status,
         sortOrder,
@@ -194,6 +202,7 @@ describe('data portal service tests', () => {
 
     const input = {
       name: 'test-data-portal',
+      urlSlug: 'test-data-portal',
       description: 'description',
       sortOrder: 1,
       status: DATA_PORTAL_STATUS.OPEN,
@@ -267,6 +276,7 @@ describe('data portal service tests', () => {
       { space },
       {
         name: 'test-data-portal',
+        urlSlug: 'test-data-portal',
         description: 'description',
         status: DATA_PORTAL_STATUS.OPEN,
         sortOrder: 1,
@@ -313,7 +323,11 @@ describe('data portal service tests', () => {
   it('test update data portal settings - fail without space lead privileges', async () => {
     const space = create.spacesHelper.create(em, { name: 'space-name' })
     await em.flush()
-    const portal = create.dataPortalsHelper.create(em, { space }, { name: 'test-data-portal' })
+    const portal = create.dataPortalsHelper.create(
+      em,
+      { space },
+      { name: 'test-data-portal', urlSlug: 'test-data-portal' },
+    )
     create.spacesHelper.addMember(
       em,
       { user, space },
@@ -342,7 +356,11 @@ describe('data portal service tests', () => {
     const ordinary = create.userHelper.create(em)
     const space = create.spacesHelper.create(em, { name: 'space-name' })
     await em.flush()
-    const portal = create.dataPortalsHelper.create(em, { space }, { name: 'test-data-portal' })
+    const portal = create.dataPortalsHelper.create(
+      em,
+      { space },
+      { name: 'test-data-portal', urlSlug: 'test-data-portal' },
+    )
     create.spacesHelper.addMember(
       em,
       { user: admin, space },
@@ -400,6 +418,7 @@ describe('data portal service tests', () => {
       'host-lead',
       'guest-lead',
       'test-data-portal',
+      'test-data-portal',
       'description',
       DATA_PORTAL_STATUS.OPEN,
       1,
@@ -437,10 +456,18 @@ describe('data portal service tests', () => {
   })
 
   it('test get data portal - fail with lack of privileges', async () => {
-    const viewer = await createPortalAndAddMember('portal1', SPACE_MEMBERSHIP_ROLE.VIEWER)
-    const contributor = await createPortalAndAddMember('portal2', SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR)
-    const admin = await createPortalAndAddMember('portal3', SPACE_MEMBERSHIP_ROLE.ADMIN)
-    const lead = await createPortalAndAddMember('portal4', SPACE_MEMBERSHIP_ROLE.LEAD)
+    const viewer = await createPortalAndAddMember(
+      'portal1',
+      'portal1',
+      SPACE_MEMBERSHIP_ROLE.VIEWER,
+    )
+    const contributor = await createPortalAndAddMember(
+      'portal2',
+      'portal2',
+      SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR,
+    )
+    const admin = await createPortalAndAddMember('portal3', 'portal3', SPACE_MEMBERSHIP_ROLE.ADMIN)
+    const lead = await createPortalAndAddMember('portal4', 'portal4', SPACE_MEMBERSHIP_ROLE.LEAD)
 
     // following should be fine
     dataPortalService = createDataPortalService(viewer.userId)
@@ -468,6 +495,7 @@ describe('data portal service tests', () => {
       'host-lead_1',
       'guest-lead_1',
       'test-data-portal_1',
+      'test-data-portal_1',
       'description_1',
       DATA_PORTAL_STATUS.OPEN,
       2,
@@ -477,6 +505,7 @@ describe('data portal service tests', () => {
       'space-name_2',
       'host-lead_2',
       'guest-lead_2',
+      'test-data-portal_2',
       'test-data-portal_2',
       'description_2',
       DATA_PORTAL_STATUS.CLOSED,
@@ -505,10 +534,18 @@ describe('data portal service tests', () => {
   })
 
   it('test list data portal - filter by user roles', async () => {
-    const viewer = await createPortalAndAddMember('portal1', SPACE_MEMBERSHIP_ROLE.VIEWER)
-    const contributor = await createPortalAndAddMember('portal2', SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR)
-    const admin = await createPortalAndAddMember('portal3', SPACE_MEMBERSHIP_ROLE.ADMIN)
-    const lead = await createPortalAndAddMember('portal4', SPACE_MEMBERSHIP_ROLE.LEAD)
+    const viewer = await createPortalAndAddMember(
+      'portal1',
+      'portal1',
+      SPACE_MEMBERSHIP_ROLE.VIEWER,
+    )
+    const contributor = await createPortalAndAddMember(
+      'portal2',
+      'portal2',
+      SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR,
+    )
+    const admin = await createPortalAndAddMember('portal3', 'portal3', SPACE_MEMBERSHIP_ROLE.ADMIN)
+    const lead = await createPortalAndAddMember('portal4', 'portal4', SPACE_MEMBERSHIP_ROLE.LEAD)
     const nocoiner = create.userHelper.create(em, { dxuser: 'has nothing' })
 
     dataPortalService = createDataPortalService(viewer.userId)
@@ -540,12 +577,12 @@ describe('data portal service tests', () => {
     create.dataPortalsHelper.create(
       em,
       { space },
-      { name: 'test-data-portal-default', default: true },
+      { name: 'test-data-portal-default', default: true, urlSlug: 'testdataportaldefault' },
     )
     create.dataPortalsHelper.create(
       em,
       { space },
-      { name: 'test-data-portal-non-default', default: false },
+      { name: 'test-data-portal-non-default', default: false, urlSlug: 'testdataportalnondefault' },
     )
     await em.flush()
 
@@ -568,12 +605,12 @@ describe('data portal service tests', () => {
     await create.dataPortalsHelper.create(
       em,
       { space },
-      { name: 'test-data-portal-default', default: true },
+      { name: 'test-data-portal-default', default: true, urlSlug: 'testdataportaldefault' },
     )
     const dataPortal2 = create.dataPortalsHelper.create(
       em,
       { space },
-      { name: 'test-data-portal-non-default', default: false },
+      { name: 'test-data-portal-non-default', default: false, urlSlug: 'testdataportalnondefault' },
     )
     await em.flush()
 
@@ -587,7 +624,11 @@ describe('data portal service tests', () => {
   it('test create data portal card image', async () => {
     const challengeUser = create.userHelper.createChallengeBot(em)
     const space = create.spacesHelper.create(em, { name: 'space-name', hostProject: 'hostProject' })
-    const dataPortal = create.dataPortalsHelper.create(em, { space }, { name: 'test-data-portal' })
+    const dataPortal = create.dataPortalsHelper.create(
+      em,
+      { space },
+      { name: 'test-data-portal', urlSlug: 'testdataportal' },
+    )
     await em.flush()
 
     dataPortalService = createDataPortalService(challengeUser.id)
@@ -631,7 +672,11 @@ describe('data portal service tests', () => {
     const space = create.spacesHelper.create(em, { name: 'space-name' })
     await em.flush()
     create.spacesHelper.addMember(em, { user, space }, { role: SPACE_MEMBERSHIP_ROLE.LEAD })
-    const dataPortal = create.dataPortalsHelper.create(em, { space }, { name: 'portal-name' })
+    const dataPortal = create.dataPortalsHelper.create(
+      em,
+      { space },
+      { name: 'portal-name', urlSlug: 'portalname' },
+    )
     await em.flush()
 
     await dataPortalService.createResource(
@@ -639,7 +684,7 @@ describe('data portal service tests', () => {
         name: 'test-resource.jpg',
         description: 'description',
       },
-      dataPortal.id,
+      dataPortal.id.toString(),
     )
     em.clear()
     return await em.findOneOrFail(
@@ -661,11 +706,18 @@ describe('data portal service tests', () => {
   it('test create data portal resource - fail with lack of privileges', async () => {
     const space = create.spacesHelper.create(em, { name: 'space-name' })
     await em.flush()
-    const dataPortal = create.dataPortalsHelper.create(em, { space }, { name: 'portal-name' })
+    const dataPortal = create.dataPortalsHelper.create(
+      em,
+      { space },
+      { name: 'portal-name', urlSlug: 'portalname' },
+    )
     await em.flush()
 
     try {
-      await dataPortalService.createResource({ name: 'test' } as FileParam, dataPortal.id)
+      await dataPortalService.createResource(
+        { name: 'test' } as FileParam,
+        dataPortal.id.toString(),
+      )
       expect.fail('Operation is expected to fail')
     } catch (error: any) {
       expect(error.name).to.equal('PermissionError')
@@ -744,13 +796,17 @@ describe('data portal service tests', () => {
     const space = create.spacesHelper.create(em, { name: 'space-name' })
     await em.flush()
     create.spacesHelper.addMember(em, { user, space }, { role: SPACE_MEMBERSHIP_ROLE.LEAD })
-    const dataPortal = create.dataPortalsHelper.create(em, { space }, { name: 'portal-name' })
+    const dataPortal = create.dataPortalsHelper.create(
+      em,
+      { space },
+      { name: 'portal-name', urlSlug: 'portalname' },
+    )
     await em.flush()
     create.dataPortalsHelper.addResource(em, { user, dataPortal }, 'name1', 'dxid1')
     create.dataPortalsHelper.addResource(em, { user, dataPortal }, 'name2', 'dxid2')
     await em.flush()
 
-    const result = await dataPortalService.listResources(dataPortal.id)
+    const result = await dataPortalService.listResources(dataPortal.id.toString())
     expect(result.resources.length).eq(2)
   })
 
@@ -760,7 +816,7 @@ describe('data portal service tests', () => {
     await em.flush()
 
     dataPortalService = createDataPortalService(unprivilegedUser.id)
-    const result = await dataPortalService.listResources(loadedDataPortal.id)
+    const result = await dataPortalService.listResources(loadedDataPortal.id.toString())
     expect(result.resources.length).eq(0)
   })
 
@@ -768,7 +824,11 @@ describe('data portal service tests', () => {
     create.userHelper.createChallengeBot(em)
     const space = create.spacesHelper.create(em, { name: 'space-name' })
     await em.flush()
-    const dataPortal = create.dataPortalsHelper.create(em, { space }, { name: 'portal-name' })
+    const dataPortal = create.dataPortalsHelper.create(
+      em,
+      { space },
+      { name: 'portal-name', urlSlug: 'portalname' },
+    )
     await em.flush()
     const resource = create.dataPortalsHelper.addResource(
       em,
@@ -785,154 +845,86 @@ describe('data portal service tests', () => {
     expect(loadedResource.url).eq('testingURL')
   })
 
-  it('list custom portals - no env variables set', async () => {
-    const result = await dataPortalService.listAccessibleCustomPortals()
+  it('wrong url slug format check', async () => {
+    const siteAdmin = create.userHelper.createSiteAdmin(em)
+    const space = create.spacesHelper.create(em, { name: 'space-name' })
+    await em.flush()
 
-    expect(result.length).eq(0)
+    dataPortalService = createDataPortalService(siteAdmin.id)
+
+    const input = {
+      name: 'test-data-portal',
+      urlSlug: null,
+      description: 'description',
+      sortOrder: 1,
+      status: DATA_PORTAL_STATUS.OPEN,
+      spaceId: space.id,
+    } as DataPortalParam
+
+    // Null url slug
+    await expect(dataPortalService.create(input)).to.be.rejectedWith(DataPortalUrlSlugFormatError)
+
+    // Digits only url slug
+    input.urlSlug = '42'
+    await expect(dataPortalService.create(input)).to.be.rejectedWith(DataPortalUrlSlugFormatError)
+
+    // Special chars in url slug
+    input.urlSlug = 'abc$'
+    await expect(dataPortalService.create(input)).to.be.rejectedWith(DataPortalUrlSlugFormatError)
+
+    // Uppercase chars in url slug
+    input.urlSlug = 'abc-D'
+    await expect(dataPortalService.create(input)).to.be.rejectedWith(DataPortalUrlSlugFormatError)
   })
 
-  const customDPIds = (
-    prismPortalId?: number,
-    prismSpaceId?: number,
-    toolsPortalId?: number,
-    toolsSpaceId?: number,
-    gettingStartedPortalId?: number,
-    gettingStartedSpaceId?: number,
-  ) => {
-    const PRISM_PORTAL_ID = prismPortalId ?? 1
-    const PRISM_SPACE_ID = prismSpaceId ?? 1
-    const TOOLS_PORTAL_ID = toolsPortalId ?? 2
-    const TOOLS_SPACE_ID = toolsSpaceId ?? 2
-    const GETTING_STARTED_PORTAL_ID = gettingStartedPortalId ?? 3
-    const GETTING_STARTED_SPACE_ID = gettingStartedSpaceId ?? 3
+  it('duplicate url slug', async () => {
+    const spaceA = create.spacesHelper.create(em, { name: 'SpaceA' })
+    const spaceB = create.spacesHelper.create(em, { name: 'SpaceB' })
+    create.dataPortalsHelper.create(
+      em,
+      { space: spaceA },
+      { name: 'Portal A', urlSlug: 'same_url_slug' },
+    )
+    create.dataPortalsHelper.create(
+      em,
+      { space: spaceB },
+      { name: 'Portal B', urlSlug: 'same_url_slug' },
+    )
+    await expect(em.flush()).to.be.rejectedWith(UniqueConstraintViolationException)
+  })
 
-    process.env.PRISM_PORTAL_ID = PRISM_PORTAL_ID.toString()
-    process.env.PRISM_SPACE_ID = PRISM_SPACE_ID.toString()
-    process.env.TOOLS_PORTAL_ID = TOOLS_PORTAL_ID.toString()
-    process.env.TOOLS_SPACE_ID = TOOLS_SPACE_ID.toString()
-    process.env.GETTING_STARTED_PORTAL_ID = GETTING_STARTED_PORTAL_ID.toString()
-    process.env.GETTING_STARTED_SPACE_ID = GETTING_STARTED_SPACE_ID.toString()
-    return {
-      PRISM_PORTAL_ID,
-      PRISM_SPACE_ID,
-      TOOLS_PORTAL_ID,
-      TOOLS_SPACE_ID,
-      GETTING_STARTED_PORTAL_ID,
-      GETTING_STARTED_SPACE_ID,
+  it('both id and url slug works to retrieve data portal', async () => {
+    const portalName = `Portal ${new Date().toLocaleString()}`
+    const urlSlug = 'portal-url-slug'
+
+    // THE portal
+    const { userId, portalId } = await createPortalAndAddMember(
+      portalName,
+      urlSlug,
+      SPACE_MEMBERSHIP_ROLE.VIEWER,
+    )
+
+    // Some random portals to fill the DB
+    for (let i = 0; i < 10; i++) {
+      await createPortalAndAddMember(
+        new Date().toLocaleString(),
+        `slug_${i}`,
+        SPACE_MEMBERSHIP_ROLE.VIEWER,
+      )
     }
-  }
 
-  const testPortalsForAdmin = async (userId: number) => {
-    const result = await dataPortalService.listAccessibleCustomPortals()
+    dataPortalService = createDataPortalService(userId)
 
-    expect(result.length).eq(0)
-  }
+    const portalFromGetMethod = await dataPortalService.get(portalId)
+    const portalBySlug = await dataPortalService.getByUrlSlugOrId(urlSlug)
+    const portalById = await dataPortalService.getByUrlSlugOrId(portalId.toString())
 
-  it('list custom portals - site admin role is irrelevant', async () => {
-    create.userHelper.addSiteAdminRole(em, user)
-    await em.flush()
+    expect(portalBySlug.id).eq(portalId)
+    expect(portalById.id).eq(portalId)
+    expect(portalFromGetMethod.id).eq(portalId)
 
-    await testPortalsForAdmin(user.id)
-  })
-
-  it('list custom portals - accessible PRISM portal', async () => {
-    const prismSpace = create.spacesHelper.create(em, { name: 'PRISM' })
-    await em.flush()
-    create.spacesHelper.addMember(
-      em,
-      { user, space: prismSpace },
-      { role: SPACE_MEMBERSHIP_ROLE.LEAD },
-    )
-    const prismPortal = create.dataPortalsHelper.create(
-      em,
-      { space: prismSpace },
-      { name: 'PRISM_PORTAL' },
-    )
-    await em.flush()
-    const { PRISM_PORTAL_ID, PRISM_SPACE_ID } = customDPIds(prismPortal.id, prismSpace.id)
-
-    const result = await dataPortalService.listAccessibleCustomPortals()
-    expect(result.length).eq(1)
-    expect(result[0].name).eq('PRISM')
-    expect(result[0].id).eq(PRISM_PORTAL_ID)
-    expect(result[0].spaceId).eq(PRISM_SPACE_ID)
-  })
-
-  it('list custom portals - accessible Tools portal', async () => {
-    const toolsSpace = create.spacesHelper.create(em, { name: 'TOOLS' })
-    await em.flush()
-    create.spacesHelper.addMember(
-      em,
-      { user, space: toolsSpace },
-      { role: SPACE_MEMBERSHIP_ROLE.LEAD },
-    )
-    const toolsPortal = create.dataPortalsHelper.create(
-      em,
-      { space: toolsSpace },
-      { name: 'Tools_PORTAL' },
-    )
-    await em.flush()
-    const { TOOLS_PORTAL_ID, TOOLS_SPACE_ID } = customDPIds(100, 100, toolsPortal.id, toolsSpace.id)
-
-    const result = await dataPortalService.listAccessibleCustomPortals()
-    expect(result.length).eq(1)
-    expect(result[0].name).eq('Tools')
-    expect(result[0].id).eq(TOOLS_PORTAL_ID)
-    expect(result[0].spaceId).eq(TOOLS_SPACE_ID)
-  })
-
-  it('list custom portals - accessible Getting Started portal', async () => {
-    const gettingStartedSpace = create.spacesHelper.create(em, { name: 'Getting Started and Next Steps' })
-    await em.flush()
-    create.spacesHelper.addMember(
-      em,
-      { user, space: gettingStartedSpace },
-      { role: SPACE_MEMBERSHIP_ROLE.LEAD },
-    )
-    const gettingStartedPortal = create.dataPortalsHelper.create(
-      em,
-      { space: gettingStartedSpace },
-      { name: 'Getting Started and Next Steps' },
-    )
-    await em.flush()
-    const {
-      GETTING_STARTED_SPACE_ID,
-      GETTING_STARTED_PORTAL_ID,
-    } = customDPIds(11, 11, 22, 22, gettingStartedPortal.id, gettingStartedSpace.id)
-
-    const result = await dataPortalService.listAccessibleCustomPortals()
-    expect(result.length).eq(1)
-    expect(result[0].name).eq('Getting Started and Next Steps')
-    expect(result[0].id).eq(GETTING_STARTED_PORTAL_ID)
-    expect(result[0].spaceId).eq(GETTING_STARTED_SPACE_ID)
-  })
-
-  it('list custom portals - envs set, but not accessible', async () => {
-    const prismSpace = create.spacesHelper.create(em, { name: 'PRISM' })
-    const toolsSpace = create.spacesHelper.create(em, { name: 'TOOLS' })
-    const gettingStartedSpace = create.spacesHelper.create(em, { name: 'Getting Started and Next Steps' })
-    await em.flush()
-    const prismPortal = create.dataPortalsHelper.create(
-      em,
-      { space: prismSpace },
-      { name: 'Prism_PORTAL' },
-    )
-    const toolsPortal = create.dataPortalsHelper.create(
-      em,
-      { space: toolsSpace },
-      { name: 'Tools_PORTAL' },
-    )
-    const gettingStartedPortal = create.dataPortalsHelper.create(
-      em,
-      { space: gettingStartedSpace },
-      { name: 'Getting Started and Next Steps' },
-    )
-
-    await em.flush()
-
-    customDPIds(prismPortal.id, prismSpace.id, toolsPortal.id, toolsSpace.id, gettingStartedPortal.id, gettingStartedSpace.id)
-
-    const result = await dataPortalService.listAccessibleCustomPortals()
-    expect(result.length).eq(0)
+    expect(portalBySlug.urlSlug).eq(urlSlug)
+    expect(portalById.urlSlug).eq(urlSlug)
+    expect(portalFromGetMethod.urlSlug).eq(urlSlug)
   })
 })
