@@ -12,8 +12,7 @@ export const typeAttachmentKey = {
 
 export function formatDiscussionDate(timestamp: string) {
   const date = parseISO(timestamp)
-  const formattedDate = format(date, "MMM d 'at' HH:mm")
-  return formattedDate
+  return format(date, "MMM d 'at' HH:mm")
 }
 
 export function areAttachmentsEmpty(attachments?: FormAttachments): boolean {

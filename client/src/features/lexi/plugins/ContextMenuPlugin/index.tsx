@@ -6,6 +6,7 @@
  *
  */
 
+import {$isLinkNode, TOGGLE_LINK_COMMAND} from '@lexical/link';
 import {useLexicalComposerContext} from '@lexical/react/LexicalComposerContext';
 import {
   LexicalContextMenuPlugin,
@@ -13,6 +14,7 @@ import {
 } from '@lexical/react/LexicalContextMenuPlugin';
 import {
   type LexicalNode,
+  $getNearestNodeFromDOMNode,
   $getSelection,
   $isRangeSelection,
   COPY_COMMAND,
@@ -103,7 +105,7 @@ export class ContextMenuOption extends MenuOption {
 export default function ContextMenuPlugin(): JSX.Element {
   const [editor] = useLexicalComposerContext();
 
-  const options = useMemo(() => {
+  const defaultOptions = useMemo(() => {
     return [
       new ContextMenuOption(`Copy`, {
         onSelect: (_node) => {
@@ -124,7 +126,7 @@ export default function ContextMenuPlugin(): JSX.Element {
             const item = items[0];
 
             const permission = await navigator.permissions.query({
-              // @ts-ignore These types are incorrect.
+              // @ts-expect-error These types are incorrect.
               name: 'clipboard-read',
             });
             if (permission.state === 'denied') {
@@ -149,7 +151,7 @@ export default function ContextMenuPlugin(): JSX.Element {
         onSelect: (_node) => {
           navigator.clipboard.read().then(async (...args) => {
             const permission = await navigator.permissions.query({
-              // @ts-ignore These types are incorrect.
+              // @ts-expect-error These types are incorrect.
               name: 'clipboard-read',
             });
 
@@ -185,6 +187,8 @@ export default function ContextMenuPlugin(): JSX.Element {
     ];
   }, [editor]);
 
+  const [options, setOptions] = React.useState(defaultOptions);
+
   const onSelectOption = useCallback(
     (
       selectedOption: ContextMenuOption,
@@ -199,10 +203,32 @@ export default function ContextMenuPlugin(): JSX.Element {
     [editor],
   );
 
+  const onWillOpen = (event: MouseEvent) => {
+    let newOptions = defaultOptions;
+    editor.update(() => {
+      const node = $getNearestNodeFromDOMNode(event.target as Element);
+      if (node) {
+        const parent = node.getParent();
+        if ($isLinkNode(parent)) {
+          newOptions = [
+            new ContextMenuOption(`Remove Link`, {
+              onSelect: (_node) => {
+                editor.dispatchCommand(TOGGLE_LINK_COMMAND, null);
+              },
+            }),
+            ...defaultOptions,
+          ];
+        }
+      }
+    });
+    setOptions(newOptions);
+  };
+
   return (
     <LexicalContextMenuPlugin
       options={options}
       onSelectOption={onSelectOption}
+      onWillOpen={onWillOpen}
       menuRenderFn={(
         anchorElementRef,
         {

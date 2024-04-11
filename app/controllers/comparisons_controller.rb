@@ -79,23 +79,13 @@ class ComparisonsController < ApplicationController
 
     # no unallowed params
     if user_params == query_params
-      filtered_params = {}
-      query_params.keys.each do |key|
-        val = nil
-        case key.downcase
-        when "page"
-          page_number = query_params[:page].to_i if query_params[:page].to_i >= 1
-        when "name"
-          val = query_params[:name].to_s
-        when "id"
-          val = query_params[:id].to_s
-        when "_format"
-          format = query_params[:_format].to_s
-        else
-          next
-        end
-        filtered_params[key] = val if val
-      end
+      # Initialize filtered_params
+      filtered_params = query_params.slice(:id, :name, :_format)
+
+      # Handle 'page' separately to ensure it's an integer
+      page_number = query_params[:page].to_i
+      page_number = nil if page_number < 1
+
       # find what range to display
       results = Comparison.accessible_by_public.where(filtered_params)
       list = results.page(page_number).per(page_size)

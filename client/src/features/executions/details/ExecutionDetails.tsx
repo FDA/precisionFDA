@@ -43,7 +43,7 @@ export const ExecutionDetails = ({
   homeScope,
 }: {
   emitScope?: EmmitScope
-  spaceId?: string
+  spaceId?: number
   homeScope?: HomeScope
 }) => {
   const location = useLocation<any>()

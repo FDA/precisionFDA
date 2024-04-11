@@ -23,6 +23,7 @@ import { useOrganizeFileModal } from './actionModals/useOrganizeFileModal'
 import { copyFilesRequest, copyFilesToPrivate, moveFilesRequest } from './files.api'
 import { IFile } from './files.types'
 import {
+  isActionDisabledBasedOnLocked,
   isActionDisabledBasedOnProtected,
   isActionDisabledBasedOnRole,
 } from '../spaces/common'
@@ -245,7 +246,7 @@ export const useFilesSelectActions = ({
     scope: getFileScope(homeScope, space),
     onHandleSubmit: (selectedFolderId) => {
       moveFilesMutation.mutateAsync(selectedFolderId).then(() => {
-          setOrganizeFileModal(false)
+        setOrganizeFileModal(false)
       })
     },
   })
@@ -401,7 +402,7 @@ export const useFilesSelectActions = ({
       isDisabled:
         selected.length === 0 ||
         selected.some(e => !e.links.remove) ||
-        isActionDisabledBasedOnProtected(user?.id as number, space) ||
+        isActionDisabledBasedOnProtected(user?.id, space) ||
         selected.every(e => e.locked),
       shouldHide: isViewer,
       modal: deleteFileModal,
@@ -411,7 +412,7 @@ export const useFilesSelectActions = ({
       type: 'modal',
       func: () => setLockFileModal(true),
       isDisabled: false,
-      shouldHide: isActionDisabledBasedOnRole(user?.id as number, space) || selected.every(e => e.locked),
+      shouldHide: isActionDisabledBasedOnRole(user?.id, space) || selected.every(e => e.locked),
       modal: lockFileModal,
       showModal: isShownLockFileModal,
     },
@@ -419,7 +420,7 @@ export const useFilesSelectActions = ({
       type: 'modal',
       func: () => setUnlockFileModal(true),
       isDisabled: false,
-      shouldHide: isActionDisabledBasedOnRole(user?.id as number, space) || selected.every(e => !e.locked),
+      shouldHide: isActionDisabledBasedOnRole(user?.id, space) || selected.every(e => !e.locked),
       modal: unlockFileModal,
       showModal: isShownUnlockFileModal,
     },
@@ -434,7 +435,7 @@ export const useFilesSelectActions = ({
     'Copy to space': {
       type: 'modal',
       func: () => setCopyToSpaceModal(true),
-      isDisabled: selected.length === 0 || selected.some(e => !e.links.copy) || openSelected,
+      isDisabled: selected.length === 0 || selected.some(e => !e.links.copy) || openSelected ||  isActionDisabledBasedOnLocked(selected, user?.id, space),
       modal: copyToSpaceModal,
       showModal: isShownCopyToSpaceModal,
       shouldHide: isViewer,
@@ -442,7 +443,7 @@ export const useFilesSelectActions = ({
     'Copy to My Home (private)': {
       type: 'modal',
       func: () => setCopyToPrivateModal(true),
-      isDisabled: selected.length === 0 || isActionDisabledBasedOnProtected(user?.id as number, space),
+      isDisabled: selected.length === 0 || isActionDisabledBasedOnProtected(user?.id, space) || isActionDisabledBasedOnLocked(selected, user?.id, space),
       modal: copyToPrivateModal,
       showModal: isShownCopyToPrivateModal,
       shouldHide: !isInSpace(homeScope),
@@ -451,7 +452,7 @@ export const useFilesSelectActions = ({
       type: 'modal',
       func: () => setAttachToModal(true),
       // TODO: filesAttachTo is missing
-      isDisabled: selected.length === 0 || selected.some(e => !e.links.attach_to) || openSelected,
+      isDisabled: selected.length === 0 || selected.some(e => !e.links.attach_to) || openSelected || isActionDisabledBasedOnLocked(selected, user?.id, space),
       modal: attachToModal,
       showModal: isShownAttachToModal,
     },
