@@ -300,6 +300,7 @@ export const RunJobForm = ({
                           value={field.value}
                           isDisabled={isSubmitting}
                           isLoading={isLoadingSelectableContexts}
+                          inputId="select_context"
                           />
                       )}
                     />
@@ -327,6 +328,7 @@ export const RunJobForm = ({
                           value={field.value}
                           isDisabled={isSubmitting}
                           isLoading={isLoadingSelectableScope}
+                          inputId="select_space_scope"
                         />
                       )}
                     />
@@ -356,6 +358,7 @@ export const RunJobForm = ({
                       onBlur={field.onBlur}
                       value={field.value}
                       isDisabled={isSubmitting}
+                      inputId="select_instance_type"
                     />
                     <Small>{maxRuntime}</Small>
                    </>
@@ -411,6 +414,7 @@ export const RunJobForm = ({
                       onChange={field.onChange}
                       onBlur={field.onBlur}
                       disabled={isSubmitting}
+                      data-testid="output_folder"
                     />
                     <Button
                       type="button"
