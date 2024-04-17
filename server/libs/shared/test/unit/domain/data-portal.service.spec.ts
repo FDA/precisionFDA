@@ -38,7 +38,7 @@ import * as generate from '../../../src/test/generate'
 import type { IdInput } from '@shared/types'
 import { DataPortalRepository } from '@shared/domain/data-portal/data-portal.repository'
 import { stub } from 'sinon'
-import { DataPortalUrlSlugFormatError, NotFoundError } from '@shared/errors'
+import { DataPortalUrlSlugFormatError, NotFoundError, PermissionError } from '@shared/errors'
 import { UniqueConstraintViolationException } from '@mikro-orm/core'
 
 describe('data portal service tests', () => {
@@ -466,6 +466,31 @@ describe('data portal service tests', () => {
     expect(result.members[2].role).eq(DATA_PORTAL_MEMBER_ROLE.CONTRIBUTOR)
     expect(result.members[3].dxuser.startsWith('user-')).eq(true)
     expect(result.members[3].role).eq(DATA_PORTAL_MEMBER_ROLE.VIEWER)
+  })
+
+  it('test get data portal - fail with non active membership', async () => {
+    const portal = await createPortal(
+      'space-name',
+      'host-lead',
+      'guest-lead',
+      'test-data-portal',
+      'urlSlug',
+      'description',
+      DATA_PORTAL_STATUS.OPEN,
+      1,
+      'testUrl',
+    )
+    portal.space
+      .getEntity()
+      .spaceMemberships.getItems()
+      .filter((membership) => membership.user.id == user.id)
+      .forEach((membership) => (membership.active = false))
+    await em.flush()
+
+    await expect(dataPortalService.get(portal.id)).to.be.rejectedWith(
+      PermissionError,
+      'Only members of the corresponding space can access this portal',
+    )
   })
 
   it('test get data portal - fail with lack of privileges', async () => {
