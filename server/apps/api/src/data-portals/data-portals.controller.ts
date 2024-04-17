@@ -80,19 +80,8 @@ export class DataPortalsController {
    * List is not returning content of the portal.
    */
   @Get()
-  async listDataPortals(
-    @Query('default', new DefaultValuePipe(false), ParseBoolPipe) defaultParam: boolean,
-  ) {
-    return await this.dataPortalService.list(defaultParam)
-  }
-
-  /**
-   * Get the default Data Portal
-   */
-  // TODO add tests for displaying default data portal to user
-  @Get('/main')
-  async getDefaultDataPortal() {
-    return await this.dataPortalService.getDefault()
+  async listDataPortals() {
+    return await this.dataPortalService.list()
   }
 
   /**

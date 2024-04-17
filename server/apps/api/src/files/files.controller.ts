@@ -101,7 +101,7 @@ export class FilesController {
     const now = new Date()
     return `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
   }
-  
+
   @Get('/path-resolver')
   async resolvePath(@Query(new CustomValidationPipe({ transform: true })) query: ResolvePathDTO) {
     return await this.userFileResolverFacade.resolvePath(query)

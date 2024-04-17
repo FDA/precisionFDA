@@ -1,3 +1,4 @@
+import { EntityService } from '@shared/domain/entity/entity.service'
 import { NotificationService } from '@shared/domain/notification/services/notification.service'
 import { Resource } from '@shared/domain/resource/resource.entity'
 import { Space } from '@shared/domain/space/space.entity'
@@ -62,6 +63,7 @@ export class DataPortalService {
     private readonly dataPortalRepo: DataPortalRepository,
     private readonly platformClient: PlatformClient,
     private readonly notificationService: NotificationService,
+    private readonly entityService: EntityService,
     private readonly fileRemoveOperation?: FileRemoveOperation,
   ) {}
 
@@ -81,11 +83,19 @@ export class DataPortalService {
     logger.verbose(`Listing resources for portal identifier: ${dataPortalIdentifier}`)
 
     const dataPortal = await this.findPortalBySlugOrId(dataPortalIdentifier, {
-      populate: ['resources', 'space.spaceMemberships'],
+      populate: ['resources.userFile', 'space.spaceMemberships'],
     })
 
     if (await this.hasRoles(dataPortal, this.viewRoles, this.user.id)) {
-      return { resources: dataPortal.resources.getItems() }
+      const resources = await Promise.all(dataPortal.resources.getItems().map(async (r) => {
+        return {
+          id: r.id,
+          name: r.userFile.getEntity().name,
+          url: await this.entityService.getEntityLink(r),
+        }
+      }))
+
+      return { resources }
     } else {
       return { resources: [] } // Ruby needs the root key
     }
@@ -308,8 +318,6 @@ export class DataPortalService {
       { populate: ['spaceMemberships.user'] },
     )
 
-    input.default = await this.processDefault(input.default)
-
     const dataPortal = new DataPortal(space)
     dataPortal.name = input.name
     dataPortal.description = input.description
@@ -317,7 +325,6 @@ export class DataPortalService {
     dataPortal.sortOrder = input.sortOrder
     dataPortal.status = input.status
     dataPortal.content = input.content
-    dataPortal.default = input.default
 
     await this.validateUrlSlug(dataPortal.urlSlug)
     await this.em.persistAndFlush(dataPortal)
@@ -343,27 +350,6 @@ export class DataPortalService {
     return this.map(dataPortal)
   }
 
-  /**
-   * Check the default parameter of the currently processed data portal in order to make sure there will be one and only one default data portal
-   * If the input param is True, un-default all the existing data portals; If there is no default data portal in the system,
-   * the current one will become default
-   * @param defaultParam Preferred default param settings
-   * @return True if processed data portal should be set as default, False otherwise
-   * @private
-   */
-  private async processDefault(defaultParam: boolean) {
-    const portals = await this.em.find(DataPortal, { default: true })
-    if (defaultParam) {
-      // Make sure we un-default all others
-      for (const p of portals) {
-        p.default = false
-      }
-      return true
-    } else {
-      // Check whether there is at least one default data portal, otherwise the processed one should become default
-      return portals.length <= 0
-    }
-  }
 
   private async urlSlugExists(urlSlug: string): Promise<boolean> {
     const portal = await this.em.findOne(DataPortal, { urlSlug })
@@ -412,7 +398,6 @@ export class DataPortalService {
       }
     }
 
-    input.default = await this.processDefault(input.default)
 
     const propertiesToUpdate = [
       'name',
@@ -458,7 +443,7 @@ export class DataPortalService {
       fileDxid: cardImage.dxid,
       filename: cardImage.name,
       project: cardImage.project,
-      duration: 9999999999,
+      duration: 9_999_999_999,
     })
 
     dataPortal.cardImageUrl = link.url
@@ -479,14 +464,14 @@ export class DataPortalService {
     }
   }
 
-  list = async (defaultParam?: boolean): Promise<any> => {
+  async list() {
     logger.verbose('Getting data portals for user', this.user.id)
     let portals: DataPortal[]
 
     if (await this.hasSiteAdminRole(this.user.id)) {
       portals = await this.em.find(
         DataPortal,
-        { ...(defaultParam && { default: defaultParam }) },
+        {},
         {
           populate: ['space.spaceMemberships.user', 'cardImage'],
           orderBy: { sortOrder: QueryOrder.ASC },
@@ -502,7 +487,6 @@ export class DataPortalService {
                 spaceMemberships: { user: this.user.id },
               },
             },
-            { ...(defaultParam && { default: defaultParam }) },
           ],
         },
         {
@@ -551,31 +535,6 @@ export class DataPortalService {
     throw new NotFoundError(`DataPortal with identifier ${identifier} was not found`)
   }
 
-  // TODO this is called frequently for site-settings, consider caching
-  getDefault = async (): Promise<DataPortalParam> => {
-    const userFromDb = await this.em.findOneOrFail(User, { id: this.user.id })
-    const isSiteAdmin = await userFromDb.isSiteAdmin()
-
-    logger.verbose('Get default data portal detail')
-    const portal = await this.em.findOne(
-      DataPortal,
-      { default: true },
-      { populate: ['space.spaceMemberships.user', 'cardImage'] },
-    )
-    if (portal) {
-      if (isSiteAdmin) {
-        return this.map(portal, true)
-      }
-      const canView = await this.checkUserHasDataPortal()
-      if (canView) {
-        return this.map(portal, true)
-      }
-      throw new PermissionError('Only users with Data Portal access can view this portal')
-    }
-
-    throw new NotFoundError('Default DataPortal was not found')
-  }
-
   private getRole(role: SPACE_MEMBERSHIP_ROLE): DATA_PORTAL_MEMBER_ROLE {
     switch (role) {
       case SPACE_MEMBERSHIP_ROLE.ADMIN:
@@ -602,7 +561,6 @@ export class DataPortalService {
     param.cardImageUrl = portal.cardImageUrl
     param.status = portal.status
     param.spaceId = portal.space?.getEntity().id
-    param.default = portal.default
     param.lastUpdated = portal.updatedAt.toString()
 
     if (deepMapping) {

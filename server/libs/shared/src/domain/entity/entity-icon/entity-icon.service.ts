@@ -26,6 +26,7 @@ export class EntityIconService {
       user: this.getFile('user-icon.svg'),
       workflow: this.getFile('workflow-icon.svg'),
       discussion: Promise.resolve(''),
+      resource: Promise.resolve(''),
     }
   }
 
