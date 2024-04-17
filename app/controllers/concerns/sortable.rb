@@ -22,7 +22,7 @@ module Sortable
   }.freeze
 
   def order_direction(candidate)
-    [DIRECTION_ASC, DIRECTION_DESC].include?(candidate&.upcase) ? candidate : DIRECTION_DESC
+    candidate&.upcase == DIRECTION_DESC ? DIRECTION_DESC : DIRECTION_ASC
   end
 
   def order_by(candidate, allowed_orderings)
@@ -30,7 +30,7 @@ module Sortable
   end
 
   def order_query(candidates_by, candidate_dir, allowed_orderings)
-    sanitized_candidate_dir = %w(ASC DESC).include?(candidate_dir.to_s.upcase) ? candidate_dir.upcase : "ASC"
+    sanitized_candidate_dir = candidate_dir&.upcase == DIRECTION_DESC ? DIRECTION_DESC : DIRECTION_ASC
 
     ordering = {}
 
@@ -55,9 +55,11 @@ module Sortable
   # @return { order => order_dir }, { :launched_on => 'DESC' }
   #   if no param values provided.
   def order_from_params(default_order = "launched_on")
-    order_field_values = self.class::ORDER_FIELDS.values.flatten
-    order_query(self.class::ORDER_FIELDS[params[:order_by] || default_order],
-                params[:order_dir], order_field_values)
+    order_by = params[:order_by].presence_in(ORDER_FIELDS.keys) || default_order
+
+    order_dir = order_direction(params[:order_dir])
+
+    order_query([order_by], order_dir, ORDER_FIELD_VALUES)
   end
 
   # Convert input value to array.

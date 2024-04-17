@@ -76,7 +76,6 @@ module Api
     def index
       allowed_orderings = %w(created_at name state space_type updated_at).freeze
 
-      params[:order_by] = "space_type" if params[:order_by] == "type"
       order = order_query(params[:order_by], params[:order_dir], allowed_orderings)
       filter_tags = params.dig(:filters, :tags)
       order = { created_at: :desc } if order.empty?
