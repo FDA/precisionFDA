@@ -233,39 +233,6 @@ export class DataPortalService {
     return user.isSiteAdmin()
   }
 
-  // TODO: Refactor as method in DataPortal entity object
-  private isPortalLead = async (dataPortal: DataPortal, userId: number): Promise<boolean> => {
-    logger.verbose(`Verifying portal leads role id ${userId}`)
-    for (const membership of dataPortal.space.getEntity().spaceMemberships.getItems()) {
-      if (membership.isLead() && membership.user.id === userId) {
-        return true
-      }
-    }
-    return false
-  }
-
-  // TODO: Refactor as method in DataPortal entity object
-  private isPortalAdmin = async (dataPortal: DataPortal, userId: number): Promise<boolean> => {
-    logger.verbose(`Verifying portal admin role id ${userId}`)
-    for (const membership of dataPortal.space.getEntity().spaceMemberships.getItems()) {
-      if (membership.isAdmin() && membership.user.id === userId) {
-        return true
-      }
-    }
-    return false
-  }
-
-  // TODO: Refactor as method in DataPortal entity object
-  private isPortalMember = async (dataPortal: DataPortal, userId: number): Promise<boolean> => {
-    logger.verbose(`Verifying portal member role id ${userId}`)
-    for (const membership of dataPortal.space.getEntity().spaceMemberships.getItems()) {
-      if (membership.user.id === userId) {
-        return true
-      }
-    }
-    return false
-  }
-
   private hasRoles = async (
     dataPortal: DataPortal,
     roles: SPACE_MEMBERSHIP_ROLE[],
@@ -384,15 +351,12 @@ export class DataPortalService {
     if (!(await this.hasSiteAdminRole(this.user.id))) {
       if (input.content) {
         if (
-          !(
-            (await this.isPortalAdmin(portal, this.user.id)) ||
-            (await this.isPortalLead(portal, this.user.id))
-          )
+          !((await portal.isPortalAdmin(this.user.id)) || (await portal.isPortalLead(this.user.id)))
         ) {
           throw new PermissionError('Only portal admins and leads can update portal content')
         }
       } else {
-        if (!(await this.isPortalLead(portal, this.user.id))) {
+        if (!(await portal.isPortalLead(this.user.id))) {
           throw new PermissionError('Only portal leads can update portal settings')
         }
       }
@@ -510,7 +474,7 @@ export class DataPortalService {
       { populate: ['space.spaceMemberships.user', 'cardImage'] },
     )
     if (portal) {
-      if (!(await this.isPortalMember(portal, this.user.id))) {
+      if (!(await portal.isPortalMember(this.user.id))) {
         throw new PermissionError('Only members of the corresponding space can access this portal')
       }
       return this.map(portal, true)
@@ -526,7 +490,7 @@ export class DataPortalService {
     const portal = await this.findPortalBySlugOrId(identifier)
 
     if (portal) {
-      if (!(await this.isPortalMember(portal, this.user.id))) {
+      if (!(await portal.isPortalMember(this.user.id))) {
         throw new PermissionError('Only members of the corresponding space can access this portal')
       }
       return this.map(portal, true)
