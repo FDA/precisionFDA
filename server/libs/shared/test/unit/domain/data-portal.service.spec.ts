@@ -1,8 +1,10 @@
 import type { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
 import { database } from '@shared/database'
 import { DataPortal } from '@shared/domain/data-portal/data-portal.entity'
+import { CreateDataPortalDTO } from '@shared/domain/data-portal/dto/CreateDataPortalDTO'
 import { DataPortalService } from '@shared/domain/data-portal/service/data-portal.service'
 import { DataPortalParam, FileParam } from '@shared/domain/data-portal/service/data-portal.types'
+import { EntityService } from '@shared/domain/entity/entity.service'
 import { NotificationInput } from '@shared/domain/notification/notification.input'
 import { NotificationService } from '@shared/domain/notification/services/notification.service'
 import { Resource } from '@shared/domain/resource/resource.entity'
@@ -54,7 +56,9 @@ describe('data portal service tests', () => {
   let dataPortalService: DataPortalService
   let notificationService: NotificationService
   let dataPortalRepository: DataPortalRepository
+  let entityService: EntityService
   const findDataPortalsStub = stub()
+  const getEntityLinkStub = stub()
 
   const createDataPortalService = (userId: number, fileRemoveOperation?: FileRemoveOperation) => {
     const userCtx: UserCtx = {
@@ -66,12 +70,18 @@ describe('data portal service tests', () => {
       findDataPortalsByCardImageUid: findDataPortalsStub,
     } as unknown as DataPortalRepository
 
+    entityService = {
+      getEntityLink: getEntityLinkStub,
+    } as unknown as EntityService
+
+
     return new DataPortalService(
       em,
       userCtx,
       dataPortalRepository,
       userClient,
       notificationService,
+      entityService,
       fileRemoveOperation,
     )
   }
@@ -110,6 +120,9 @@ describe('data portal service tests', () => {
         },
       },
     ])
+
+    getEntityLinkStub.reset()
+    getEntityLinkStub.resolves('link')
 
     dataPortalService = createDataPortalService(user.id)
   })
@@ -207,7 +220,7 @@ describe('data portal service tests', () => {
       sortOrder: 1,
       status: DATA_PORTAL_STATUS.OPEN,
       spaceId: space.id,
-    } as DataPortalParam
+    } as CreateDataPortalDTO
 
     dataPortalService = createDataPortalService(siteAdmin.id)
     const portal = await dataPortalService.create(input)
@@ -237,7 +250,7 @@ describe('data portal service tests', () => {
       sortOrder: 1,
       status: DATA_PORTAL_STATUS.OPEN,
       spaceId: space.id,
-    } as DataPortalParam
+    } as CreateDataPortalDTO
 
     try {
       await dataPortalService.create(input)
@@ -569,58 +582,6 @@ describe('data portal service tests', () => {
     expect(result.data_portals.length).eq(0)
   })
 
-  it('test list data portal - filter by default', async () => {
-    const siteAdmin = create.userHelper.createSiteAdmin(em)
-    const space = create.spacesHelper.create(em, { name: 'space-name', hostProject: 'hostProject' })
-    await em.flush()
-    create.spacesHelper.addMember(em, { space, user }, { role: SPACE_MEMBERSHIP_ROLE.VIEWER })
-    create.dataPortalsHelper.create(
-      em,
-      { space },
-      { name: 'test-data-portal-default', default: true, urlSlug: 'testdataportaldefault' },
-    )
-    create.dataPortalsHelper.create(
-      em,
-      { space },
-      { name: 'test-data-portal-non-default', default: false, urlSlug: 'testdataportalnondefault' },
-    )
-    await em.flush()
-
-    let result = await dataPortalService.list()
-    expect(result.data_portals.length).eq(2)
-
-    dataPortalService = createDataPortalService(siteAdmin.id)
-    result = await dataPortalService.list(true)
-    expect(result.data_portals.length).eq(1)
-
-    dataPortalService = createDataPortalService(user.id)
-    result = await dataPortalService.list(true)
-    expect(result.data_portals.length).eq(1)
-  })
-
-  it('test update data portal and make sure only one is default', async () => {
-    const siteAdmin = create.userHelper.createSiteAdmin(em)
-    const space = create.spacesHelper.create(em, { name: 'space-name', hostProject: 'hostProject' })
-    await em.flush()
-    await create.dataPortalsHelper.create(
-      em,
-      { space },
-      { name: 'test-data-portal-default', default: true, urlSlug: 'testdataportaldefault' },
-    )
-    const dataPortal2 = create.dataPortalsHelper.create(
-      em,
-      { space },
-      { name: 'test-data-portal-non-default', default: false, urlSlug: 'testdataportalnondefault' },
-    )
-    await em.flush()
-
-    dataPortalService = createDataPortalService(siteAdmin.id)
-    await dataPortalService.update({ id: dataPortal2.id, default: true } as DataPortalParam)
-
-    const result = await dataPortalService.list(true)
-    expect(result.data_portals.length).eq(1)
-  })
-
   it('test create data portal card image', async () => {
     const challengeUser = create.userHelper.createChallengeBot(em)
     const space = create.spacesHelper.create(em, { name: 'space-name', hostProject: 'hostProject' })
@@ -859,7 +820,7 @@ describe('data portal service tests', () => {
       sortOrder: 1,
       status: DATA_PORTAL_STATUS.OPEN,
       spaceId: space.id,
-    } as DataPortalParam
+    } as CreateDataPortalDTO
 
     // Null url slug
     await expect(dataPortalService.create(input)).to.be.rejectedWith(DataPortalUrlSlugFormatError)

@@ -564,7 +564,7 @@ const dataPortalsHelper = {
     },
     data?: Partial<InstanceType<typeof DataPortal>>,
   ) => {
-    const dataPortal = wrap(new DataPortal(references.space)).assign(data ?? {}, { em })
+    const dataPortal = wrap(new DataPortal(references.space)).assign(data ?? {urlSlug: `default-${references.space.id}`}, { em })
     em.persist(dataPortal)
     return dataPortal
   },

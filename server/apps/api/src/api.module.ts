@@ -26,6 +26,7 @@ import { NewsApiModule } from './news/news.api.module'
 import { NodesApiModule } from './nodes/nodes.api.module'
 import { NotificationsApiModule } from './notifications/notifications.api.module'
 import { PropertiesApiModule } from './properties/properties.api.module'
+import { ResourcesApiModule } from './resources/resources.api.module'
 import { BaseErrorExceptionFilter } from './server/filter/base-error-exception.filter'
 import { DefaultExceptionFilter } from './server/filter/default-exception.filter'
 import { HttpExceptionFilter } from './server/filter/http-exception.filter'
@@ -67,6 +68,7 @@ import { WorkflowApiModule } from './workflows/workflow.api.module'
     NodesApiModule,
     NotificationsApiModule,
     PropertiesApiModule,
+    ResourcesApiModule,
     SiteSettingsApiModule,
     SpacesApiModule,
     TracksApiModule,

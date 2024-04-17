@@ -300,7 +300,7 @@ const Header: React.FC = () => {
             )}
 
             <Link to="/data-portals/daaas" title="Data Portals">
-              <MenuItem $active={isActiveLink('/data-portals/daaas')}>
+              <MenuItem $active={isActiveLink('/data-portals/DAaaS') || isActiveLink('/data-portals/daaas')}>
                 <IconWrap>
                   <DataPortalIcon height={18} />
                 </IconWrap>
