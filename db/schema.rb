@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2024_04_14_070707) do
+ActiveRecord::Schema.define(version: 2024_04_15_173545) do
 
   create_table "accepted_licenses", id: :integer, charset: "utf8mb3", collation: "utf8mb3_unicode_ci", force: :cascade do |t|
     t.integer "license_id"
@@ -416,11 +416,6 @@ ActiveRecord::Schema.define(version: 2024_04_14_070707) do
     t.index ["user_file_id"], name: "index_job_inputs_on_user_file_id"
   end
 
-  create_table "job_logs", charset: "utf8mb3", collation: "utf8mb3_unicode_ci", force: :cascade do |t|
-    t.string "dxid", null: false
-    t.text "log_data", size: :medium
-  end
-
   create_table "jobs", id: :integer, charset: "utf8mb3", collation: "utf8mb3_unicode_ci", force: :cascade do |t|
     t.string "dxid", collation: "utf8mb3_bin"
     t.integer "app_id"
@@ -441,12 +436,10 @@ ActiveRecord::Schema.define(version: 2024_04_14_070707) do
     t.integer "entity_type", default: 0, null: false
     t.boolean "featured", default: false
     t.boolean "termination_email_sent", default: false
-    t.bigint "job_log_id"
     t.index ["analysis_id"], name: "fk_rails_0a95efec7a"
     t.index ["app_id"], name: "index_jobs_on_app_id"
     t.index ["app_series_id"], name: "index_jobs_on_app_series_id"
     t.index ["dxid"], name: "index_jobs_on_dxid"
-    t.index ["job_log_id"], name: "fk_rails_8d46df314b"
     t.index ["scope"], name: "index_jobs_on_scope"
     t.index ["state"], name: "index_jobs_on_state"
     t.index ["uid"], name: "index_jobs_on_uid", unique: true
@@ -739,6 +732,8 @@ ActiveRecord::Schema.define(version: 2024_04_14_070707) do
     t.integer "created_by"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.string "format", default: "HTML"
+    t.json "options"
     t.index ["created_at"], name: "index_space_reports_on_created_at"
     t.index ["created_by"], name: "fk_rails_85038bae31"
     t.index ["result_file_id"], name: "fk_rails_80499f7a14"
@@ -1031,7 +1026,6 @@ ActiveRecord::Schema.define(version: 2024_04_14_070707) do
   add_foreign_key "jobs", "analyses"
   add_foreign_key "jobs", "app_series"
   add_foreign_key "jobs", "apps"
-  add_foreign_key "jobs", "job_logs"
   add_foreign_key "jobs", "users"
   add_foreign_key "licensed_items", "licenses"
   add_foreign_key "licenses", "users"
@@ -1057,7 +1051,6 @@ ActiveRecord::Schema.define(version: 2024_04_14_070707) do
   add_foreign_key "space_memberships", "users"
   add_foreign_key "space_report_parts", "space_reports", on_delete: :cascade
   add_foreign_key "space_reports", "nodes", column: "result_file_id"
-  add_foreign_key "space_reports", "spaces"
   add_foreign_key "space_reports", "users", column: "created_by"
   add_foreign_key "submissions", "challenges"
   add_foreign_key "submissions", "jobs"

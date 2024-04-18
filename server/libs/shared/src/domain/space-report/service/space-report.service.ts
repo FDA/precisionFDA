@@ -6,6 +6,9 @@ import { Discussion } from '@shared/domain/discussion/discussion.entity'
 import { UID } from '@shared/domain/entity/entity-fetcher.service'
 import { Job } from '@shared/domain/job/job.entity'
 import { NotificationService } from '@shared/domain/notification/services/notification.service'
+import { SpaceReportCreateDto } from '@shared/domain/space-report/model/space-report-create.dto'
+import { SpaceReportFormat } from '@shared/domain/space-report/model/space-report-format'
+import { SpaceReportFormatToResultOptionsMap } from '@shared/domain/space-report/model/space-report-format-to-result-options.map'
 import { SpaceReportResultService } from '@shared/domain/space-report/service/result/space-report-result.service'
 import { Space } from '@shared/domain/space/space.entity'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
@@ -32,7 +35,7 @@ export class SpaceReportService {
     private readonly notificationService: NotificationService,
   ) {}
 
-  async createReport(spaceId: number) {
+  async createReport(spaceId: number, { format, options }: SpaceReportCreateDto) {
     if (spaceId == null) {
       throw new InvalidStateError('Space id is required for creating a report')
     }
@@ -41,6 +44,8 @@ export class SpaceReportService {
       const space = await this.getSpaceForUserValidated(spaceId)
       const spaceReport = new SpaceReport(this.em.getReference(User, this.user.id))
       spaceReport.space = space
+      spaceReport.format = format
+      spaceReport.options = options
       spaceReport.reportParts.add(await this.createSpaceReportParts(space))
 
       if (ArrayUtils.isEmpty(spaceReport.reportParts.getItems())) {
@@ -74,6 +79,7 @@ export class SpaceReportService {
         createdAt: r.createdAt,
         state: r.state,
         resultFile: r.resultFile,
+        format: r.format,
       }))
     })
   }
@@ -92,8 +98,11 @@ export class SpaceReportService {
     return this.spaceReportPartService.completeBatch(batches)
   }
 
-  async generateResult(report: SpaceReport, styles?: string) {
-    return await this.spaceReportResultService.generateResult(report, styles)
+  async generateResult<T extends SpaceReportFormat>(
+    report: SpaceReport<T>,
+    opts?: SpaceReportFormatToResultOptionsMap[T],
+  ) {
+    return await this.spaceReportResultService.generateResult(report, opts)
   }
 
   async hasAllBatchesDone(reportId: number) {

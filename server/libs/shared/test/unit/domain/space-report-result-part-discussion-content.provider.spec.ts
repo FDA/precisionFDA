@@ -1,10 +1,10 @@
 import { EntityService } from '@shared/domain/entity/entity.service'
 import { SpaceReportPart } from '@shared/domain/space-report/entity/space-report-part.entity'
-import { SpaceReportResultPartDiscussionContentProvider } from '@shared/domain/space-report/service/result/space-report-result-part-discussion-content.provider'
+import { SpaceReportResultPartDiscussionHtmlContentProvider } from '@shared/domain/space-report/service/result/space-report-result-part-discussion-html-content.provider'
 import { expect } from 'chai'
 import { stub } from 'sinon'
 
-describe('SpaceReportResultPartDiscussionContentProvider', () => {
+describe('SpaceReportResultPartDiscussionHtmlContentProvider', () => {
   const TITLE_ID = 'TITLE_ID'
 
   const TITLE = 'TITLE'
@@ -43,7 +43,7 @@ describe('SpaceReportResultPartDiscussionContentProvider', () => {
   const ANSWER_COMMENT_CREATED_AT = new Date('2023-09-03T14:58:08.000Z')
   const ANSWER_COMMENT = {
     content: ANSWER_COMMENT_CONTENT,
-    createdBy: ANSWER_COMMENT_CREATED_BY,
+    createdBy: { fullName: ANSWER_COMMENT_CREATED_BY },
     createdAt: ANSWER_COMMENT_CREATED_AT,
   }
   const ANSWER_ATTACHMENT_NAME = 'ANSWER_ATTACHMENT_NAME'
@@ -57,7 +57,7 @@ describe('SpaceReportResultPartDiscussionContentProvider', () => {
 
   const ANSWER = {
     content: ANSWER_CONTENT,
-    createdBy: ANSWER_CREATED_BY,
+    createdBy: { fullName: ANSWER_CREATED_BY },
     createdAt: ANSWER_CREATED_AT,
     comments: [ANSWER_COMMENT],
     attachments: [ANSWER_ATTACHMENT],
@@ -68,7 +68,7 @@ describe('SpaceReportResultPartDiscussionContentProvider', () => {
   const COMMENT_1_CREATED_AT = new Date('2023-09-04T14:58:08.000Z')
   const COMMENT_1 = {
     content: COMMENT_1_CONTENT,
-    createdBy: COMMENT_1_CREATED_BY,
+    createdBy: { fullName: COMMENT_1_CREATED_BY },
     createdAt: COMMENT_1_CREATED_AT,
   }
 
@@ -77,21 +77,21 @@ describe('SpaceReportResultPartDiscussionContentProvider', () => {
   const COMMENT_2_CREATED_AT = new Date('2023-09-05T14:58:08.000Z')
   const COMMENT_2 = {
     content: COMMENT_2_CONTENT,
-    createdBy: COMMENT_2_CREATED_BY,
+    createdBy: { fullName: COMMENT_2_CREATED_BY },
     createdAt: COMMENT_2_CREATED_AT,
   }
 
   const RESULT = {
     title: TITLE,
     content: CONTENT,
-    createdBy: CREATED_BY,
+    createdBy: { fullName: CREATED_BY },
     createdAt: CREATED_AT,
     answers: [ANSWER],
     comments: [COMMENT_1, COMMENT_2],
     attachments: [ATTACHMENT_1, ATTACHMENT_2],
   }
 
-  const REPORT_PART = { result: RESULT } as unknown as SpaceReportPart<'discussion'>
+  const REPORT_PART = { result: RESULT } as unknown as SpaceReportPart<'discussion', 'HTML'>
 
   const getEntityIconStub = stub()
 
@@ -215,6 +215,6 @@ describe('SpaceReportResultPartDiscussionContentProvider', () => {
   function getInstance() {
     const entityService = { getEntityIcon: getEntityIconStub } as unknown as EntityService
 
-    return new SpaceReportResultPartDiscussionContentProvider(entityService)
+    return new SpaceReportResultPartDiscussionHtmlContentProvider(entityService)
   }
 })

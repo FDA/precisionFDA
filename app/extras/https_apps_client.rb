@@ -983,10 +983,10 @@ class HttpsAppsClient # rubocop:disable Metrics/ClassLength
     )
   end
 
-  def create_space_report(id)
+  def create_space_report(id, format, options)
     request(
       "/spaces/#{id}/report",
-      {},
+      { format:, options: },
       Net::HTTP::Post::METHOD,
     )
   end

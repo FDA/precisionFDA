@@ -15,6 +15,7 @@ import { restore, stub } from 'sinon'
 describe('SpaceReportResultGenerateFacade', () => {
   const REPORT_ID = 0
   const REPORT_CREATED_AT = new Date('2023-09-01T14:58:08.000Z')
+  const REPORT_FORMAT = 'HTML'
 
   const CREATOR_ID = 10
   const CREATOR = { id: CREATOR_ID }
@@ -37,6 +38,7 @@ describe('SpaceReportResultGenerateFacade', () => {
     createdBy: CREATOR,
     space: SPACE,
     createdAt: REPORT_CREATED_AT,
+    format: REPORT_FORMAT,
   } as SpaceReport
 
   const SPACE_MEMBERSHIP_IS_HOST = true
@@ -89,7 +91,7 @@ describe('SpaceReportResultGenerateFacade', () => {
 
     generateResultStub.reset()
     generateResultStub.throws()
-    generateResultStub.withArgs(REPORT, STYLES).resolves(RESULT)
+    generateResultStub.withArgs(REPORT, { styles: STYLES }).resolves(RESULT)
 
     createFileWithContentStub.reset()
     createFileWithContentStub.throws()

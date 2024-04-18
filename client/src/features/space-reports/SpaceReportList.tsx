@@ -1,21 +1,15 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { AxiosError } from 'axios'
+import { useQueryClient } from '@tanstack/react-query'
 import React, { useEffect, useMemo } from 'react'
 import { UseResizeColumnsState } from 'react-table'
-import { toast } from 'react-toastify'
 import useWebSocket from 'react-use-websocket'
+import { Button } from '../../components/Button'
 import Dropdown from '../../components/Dropdown'
 import { HoverDNAnexusLogo } from '../../components/icons/DNAnexusLogo'
 import { PlusIcon } from '../../components/icons/PlusIcon'
 import { ContentFooter } from '../../components/Page/ContentFooter'
 import { EmptyTable } from '../../components/Table/styles'
 import Table from '../../components/Table/Table'
-import {
-  DEFAULT_RECONNECT_ATTEMPTS,
-  DEFAULT_RECONNECT_INTERVAL,
-  SHOULD_RECONNECT,
-  getNodeWsUrl,
-} from '../../utils/config'
+import { DEFAULT_RECONNECT_ATTEMPTS, DEFAULT_RECONNECT_INTERVAL, getNodeWsUrl, SHOULD_RECONNECT } from '../../utils/config'
 import { getSelectedObjectsFromIndexes } from '../../utils/object'
 import { ActionsDropdownContent } from '../home/ActionDropdownContent'
 import { ActionsRow, QuickActions, StyledHomeTable } from '../home/home.styles'
@@ -23,10 +17,10 @@ import { ActionsButton } from '../home/show.styles'
 import { IFilter, IMeta, KeyVal, Notification, NOTIFICATION_ACTION } from '../home/types'
 import { useList } from '../home/useList'
 import { ISpaceReport } from './space-report.types'
-import { createReport, fetchReports } from './space-reports.api'
+import { fetchReports } from './space-reports.api'
+import { useGenerateSpaceReportModal } from './useGenerateSpaceReportModal'
 import { useSpaceReportColumns } from './useSpaceReportColumns'
 import { userReportSelectActions } from './useSpaceReportSelectActions'
-import { Button } from '../../components/Button'
 
 type ListType = { reports: ISpaceReport[]; meta: IMeta }
 
@@ -91,14 +85,6 @@ export const SpaceReportList = ({ spaceId }: { spaceId: number }) => {
     params: { spaceId: String(spaceId) },
   })
 
-  const generate = useMutation({
-    mutationKey: ['generate-space-report'],
-    mutationFn: createReport,
-    onSuccess: async () => {
-      await query.refetch()
-    },
-  })
-
   const client = useQueryClient()
 
   const { lastJsonMessage: notification } = useWebSocket<Notification>(getNodeWsUrl(), {
@@ -126,12 +112,15 @@ export const SpaceReportList = ({ spaceId }: { spaceId: number }) => {
     resetSelected,
   })
 
-  const generateReport = async () => {
-    await generate.mutateAsync(spaceId)
-      .catch((e: AxiosError<{ error: { message: string } }>) => {
-        toast.error(e?.response?.data?.error?.message ?? 'Error creating space reports')
-      })
-  }
+  const {
+    modalComp: generateModal,
+    setShowModal: setGenerateModal,
+  } = useGenerateSpaceReportModal({
+    spaceId,
+    onClose: () => {
+      query.refetch()
+    },
+  })
 
   if (query.error) return <div>Error! {JSON.stringify(query.error)}</div>
 
@@ -142,8 +131,8 @@ export const SpaceReportList = ({ spaceId }: { spaceId: number }) => {
           <QuickActions>
             <Button
               variant="primary"
-              disabled={query.isLoading || generate.isPending}
-              onClick={generateReport}
+              disabled={query.isLoading}
+              onClick={() => setGenerateModal(true)}
             >
               <PlusIcon height={12}/> Generate report
             </Button>
@@ -180,6 +169,7 @@ export const SpaceReportList = ({ spaceId }: { spaceId: number }) => {
       </ContentFooter>
 
       {actions['Delete']?.modal}
+      {generateModal}
     </>
   )
 }

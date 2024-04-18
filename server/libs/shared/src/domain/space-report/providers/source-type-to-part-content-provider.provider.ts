@@ -1,25 +1,25 @@
 import { Provider } from '@nestjs/common'
 import { SpaceReportPartSourceType } from '@shared/domain/space-report/model/space-report-part-source.type'
-import { SpaceReportResultPartContentProvider } from '@shared/domain/space-report/service/result/space-report-result-part-content.provider'
+import { SpaceReportResultPartHtmlContentProvider } from '@shared/domain/space-report/service/result/space-report-result-part-html-content.provider'
 import {
-  SpaceReportResultPartDiscussionContentProvider
-} from '@shared/domain/space-report/service/result/space-report-result-part-discussion-content.provider'
-import { SpaceReportResultPartProvenanceTreeContentProvider } from '@shared/domain/space-report/service/result/space-report-result-part-provenance-tree-content.provider'
-import { SpaceReportResultPartUserContentProvider } from '@shared/domain/space-report/service/result/space-report-result-part-user-content.provider'
+  SpaceReportResultPartDiscussionHtmlContentProvider
+} from '@shared/domain/space-report/service/result/space-report-result-part-discussion-html-content.provider'
+import { SpaceReportResultPartProvenanceTreeHtmlContentProvider } from '@shared/domain/space-report/service/result/space-report-result-part-provenance-tree-html-content.provider'
+import { SpaceReportResultPartUserHtmlContentProvider } from '@shared/domain/space-report/service/result/space-report-result-part-user-html-content.provider'
 
 export const SOURCE_TYPE_TO_PART_CONTENT_PROVIDER_MAP = 'SOURCE_TYPE_TO_PART_CONTENT_PROVIDER_MAP'
 
 export const sourceTypeToPartContentProviderProvider: Provider = {
   provide: SOURCE_TYPE_TO_PART_CONTENT_PROVIDER_MAP,
   inject: [
-    SpaceReportResultPartProvenanceTreeContentProvider,
-    SpaceReportResultPartUserContentProvider,
-    SpaceReportResultPartDiscussionContentProvider,
+    SpaceReportResultPartProvenanceTreeHtmlContentProvider,
+    SpaceReportResultPartUserHtmlContentProvider,
+    SpaceReportResultPartDiscussionHtmlContentProvider,
   ],
   useFactory: (
-    provenance: SpaceReportResultPartProvenanceTreeContentProvider,
-    user: SpaceReportResultPartUserContentProvider,
-    discussion: SpaceReportResultPartDiscussionContentProvider,
+    provenance: SpaceReportResultPartProvenanceTreeHtmlContentProvider,
+    user: SpaceReportResultPartUserHtmlContentProvider,
+    discussion: SpaceReportResultPartDiscussionHtmlContentProvider,
   ) =>
     ({
       app: provenance,
@@ -29,5 +29,5 @@ export const sourceTypeToPartContentProviderProvider: Provider = {
       workflow: provenance,
       user,
       discussion,
-    }) satisfies { [T in SpaceReportPartSourceType]: SpaceReportResultPartContentProvider<T> },
+    }) satisfies { [T in SpaceReportPartSourceType]: SpaceReportResultPartHtmlContentProvider<T> },
 }
