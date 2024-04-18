@@ -14,6 +14,7 @@ describe('SpaceReportPartFileResultProvider', () => {
   } as unknown as UserFile
 
   const PROVENANCE_SVG = 'provenance svg'
+  const PROVENANCE_RAW = 'provenance raw'
 
   const getEntityProvenanceStub = stub()
 
@@ -30,12 +31,26 @@ describe('SpaceReportPartFileResultProvider', () => {
         { omitStyles: true },
       )
       .resolves(PROVENANCE_SVG)
+      .withArgs(
+        {
+          type: 'file',
+          entity: FILE,
+        },
+        'raw',
+      )
+      .resolves(PROVENANCE_RAW)
   })
 
-  it('should provide correct result', async () => {
-    const res = await getInstance().getResult(FILE)
+  it('should provide correct HTML result', async () => {
+    const res = await getInstance().getResult(FILE, null, 'HTML')
 
     expect(res).to.deep.equal({ title: NAME, created: CREATED, svg: PROVENANCE_SVG })
+  })
+
+  it('should provide correct JSON result', async () => {
+    const res = await getInstance().getResult(FILE, null, 'JSON')
+
+    expect(res).to.deep.equal({ title: NAME, created: CREATED, provenance: PROVENANCE_RAW })
   })
 
   function getInstance() {

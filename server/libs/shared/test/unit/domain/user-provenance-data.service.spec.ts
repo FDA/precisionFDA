@@ -8,8 +8,9 @@ import { SinonStub, stub } from 'sinon'
 describe('UserProvenanceDataService', () => {
   const FULL_NAME = 'full name'
   const LINK = 'LINK'
+  const DXUSER = 'DXUSER'
 
-  const USER = { fullName: FULL_NAME } as unknown as User
+  const USER = { fullName: FULL_NAME, dxuser: DXUSER } as unknown as User
 
   const getEntityLinkStub = stub()
 
@@ -32,7 +33,7 @@ describe('UserProvenanceDataService', () => {
     it('should provide correct data about the user', async () => {
       const res = await getInstance().getData(USER)
 
-      expect(res).to.deep.equal({ type: 'user', url: LINK, title: FULL_NAME })
+      expect(res).to.deep.equal({ type: 'user', url: LINK, title: FULL_NAME, identifier: DXUSER })
     })
   })
 

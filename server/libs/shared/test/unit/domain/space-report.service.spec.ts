@@ -58,7 +58,9 @@ describe('SpaceReportService', () => {
     const getReferenceStub = stub()
 
     before(() => {
-      stub(Reference, 'create').withArgs(USER).returns(USER)
+      stub(Reference, 'create')
+        .withArgs(USER)
+        .returns(USER as unknown as Reference<object>)
     })
 
     beforeEach(() => {
@@ -127,14 +129,14 @@ describe('SpaceReportService', () => {
     })
 
     it('should reject if no space id provided', async () => {
-      await expect(getInstance().createReport(null)).to.be.rejectedWith(
+      await expect(getInstance().createReport(null, { format: 'HTML' })).to.be.rejectedWith(
         InvalidStateError,
         'Space id is required for creating a report',
       )
     })
 
     it('should run under transaction', async () => {
-      await getInstance().createReport(SPACE_ID)
+      await getInstance().createReport(SPACE_ID, { format: 'HTML' })
 
       expect(transactionalStub.calledOnce).to.be.true()
     })
@@ -143,7 +145,7 @@ describe('SpaceReportService', () => {
       getResultStub.reset()
       getResultStub.resolves([])
 
-      await expect(getInstance().createReport(SPACE_ID)).to.be.rejectedWith(
+      await expect(getInstance().createReport(SPACE_ID, { format: 'HTML' })).to.be.rejectedWith(
         NotFoundError,
         'Space not found',
       )
@@ -153,7 +155,7 @@ describe('SpaceReportService', () => {
       createPartsStub.reset()
       createPartsStub.resolves([])
 
-      await expect(getInstance().createReport(SPACE_ID)).to.be.rejectedWith(
+      await expect(getInstance().createReport(SPACE_ID, { format: 'HTML' })).to.be.rejectedWith(
         InvalidStateError,
         'Report not generated: No entities to report on in this space',
       )
@@ -164,7 +166,9 @@ describe('SpaceReportService', () => {
       createQueryBuilderStub.reset()
       createQueryBuilderStub.throws(error)
 
-      await expect(getInstance().createReport(SPACE_ID)).to.be.rejectedWith(error)
+      await expect(getInstance().createReport(SPACE_ID, { format: 'HTML' })).to.be.rejectedWith(
+        error,
+      )
     })
 
     it('should not catch error from transactional', async () => {
@@ -172,7 +176,9 @@ describe('SpaceReportService', () => {
       transactionalStub.reset()
       transactionalStub.throws(error)
 
-      await expect(getInstance().createReport(SPACE_ID)).to.be.rejectedWith(error)
+      await expect(getInstance().createReport(SPACE_ID, { format: 'HTML' })).to.be.rejectedWith(
+        error,
+      )
     })
 
     it('should not catch error from joinAndSelectedMembership', async () => {
@@ -180,7 +186,9 @@ describe('SpaceReportService', () => {
       joinAndSelectedMembershipStub.reset()
       joinAndSelectedMembershipStub.throws(error)
 
-      await expect(getInstance().createReport(SPACE_ID)).to.be.rejectedWith(error)
+      await expect(getInstance().createReport(SPACE_ID, { format: 'HTML' })).to.be.rejectedWith(
+        error,
+      )
     })
 
     it('should not catch error from joinAndSelectUser', async () => {
@@ -188,7 +196,9 @@ describe('SpaceReportService', () => {
       joinAndSelectUserStub.reset()
       joinAndSelectUserStub.throws(error)
 
-      await expect(getInstance().createReport(SPACE_ID)).to.be.rejectedWith(error)
+      await expect(getInstance().createReport(SPACE_ID, { format: 'HTML' })).to.be.rejectedWith(
+        error,
+      )
     })
 
     it('should not catch error from where', async () => {
@@ -196,7 +206,9 @@ describe('SpaceReportService', () => {
       whereStub.reset()
       whereStub.throws(error)
 
-      await expect(getInstance().createReport(SPACE_ID)).to.be.rejectedWith(error)
+      await expect(getInstance().createReport(SPACE_ID, { format: 'HTML' })).to.be.rejectedWith(
+        error,
+      )
     })
 
     it('should not catch error from getResult', async () => {
@@ -204,7 +216,9 @@ describe('SpaceReportService', () => {
       getResultStub.reset()
       getResultStub.throws(error)
 
-      await expect(getInstance().createReport(SPACE_ID)).to.be.rejectedWith(error)
+      await expect(getInstance().createReport(SPACE_ID, { format: 'HTML' })).to.be.rejectedWith(
+        error,
+      )
     })
 
     it('should not catch error from find', async () => {
@@ -212,7 +226,9 @@ describe('SpaceReportService', () => {
       findStub.reset()
       findStub.throws(error)
 
-      await expect(getInstance().createReport(SPACE_ID)).to.be.rejectedWith(error)
+      await expect(getInstance().createReport(SPACE_ID, { format: 'HTML' })).to.be.rejectedWith(
+        error,
+      )
     })
 
     it('should not catch error from createParts', async () => {
@@ -220,7 +236,9 @@ describe('SpaceReportService', () => {
       createPartsStub.reset()
       createPartsStub.throws(error)
 
-      await expect(getInstance().createReport(SPACE_ID)).to.be.rejectedWith(error)
+      await expect(getInstance().createReport(SPACE_ID, { format: 'HTML' })).to.be.rejectedWith(
+        error,
+      )
     })
 
     it('should not catch error from persist', async () => {
@@ -228,11 +246,13 @@ describe('SpaceReportService', () => {
       persistStub.reset()
       persistStub.throws(error)
 
-      await expect(getInstance().createReport(SPACE_ID)).to.be.rejectedWith(error)
+      await expect(getInstance().createReport(SPACE_ID, { format: 'HTML' })).to.be.rejectedWith(
+        error,
+      )
     })
 
     it('should persist new space report', async () => {
-      await getInstance().createReport(SPACE_ID)
+      await getInstance().createReport(SPACE_ID, { format: 'HTML' })
 
       expect(persistStub.calledOnce).to.be.true()
 
@@ -241,7 +261,7 @@ describe('SpaceReportService', () => {
     })
 
     it('should return new space report', async () => {
-      const res = await getInstance().createReport(SPACE_ID)
+      const res = await getInstance().createReport(SPACE_ID, { format: 'HTML' })
 
       assertReport(res)
     })
@@ -345,22 +365,26 @@ describe('SpaceReportService', () => {
     const REPORT_1_CREATED = 'report 1 created'
     const REPORT_1_STATE = 'report 1 state'
     const REPORT_1_RESULT_FILE = 'report 1 resultFile'
+    const REPORT_1_FORMAT = 'report 1 format'
     const REPORT_1 = {
       id: REPORT_1_ID,
       createdAt: REPORT_1_CREATED,
       state: REPORT_1_STATE,
       resultFile: REPORT_1_RESULT_FILE,
+      format: REPORT_1_FORMAT,
     }
 
     const REPORT_2_ID = 200
     const REPORT_2_CREATED = 'report 2 created'
     const REPORT_2_STATE = 'report 2 state'
     const REPORT_2_RESULT_FILE = 'report 2 resultFile'
+    const REPORT_2_FORMAT = 'report 1 format'
     const REPORT_2 = {
       id: REPORT_2_ID,
       createdAt: REPORT_2_CREATED,
       state: REPORT_2_STATE,
       resultFile: REPORT_2_RESULT_FILE,
+      format: REPORT_2_FORMAT,
     }
 
     const REPORTS = [REPORT_1, REPORT_2]
@@ -500,12 +524,14 @@ describe('SpaceReportService', () => {
           createdAt: REPORT_1_CREATED,
           state: REPORT_1_STATE,
           resultFile: REPORT_1_RESULT_FILE,
+          format: REPORT_1_FORMAT,
         },
         {
           id: REPORT_2_ID,
           createdAt: REPORT_2_CREATED,
           state: REPORT_2_STATE,
           resultFile: REPORT_2_RESULT_FILE,
+          format: REPORT_2_FORMAT,
         },
       ])
     })
@@ -693,12 +719,12 @@ describe('SpaceReportService', () => {
     })
 
     it('should proxy styles when provided', async () => {
-      const STYLES = 'styles'
+      const OPTS = { styles: 'styles' }
       const RESULT_WITH_STYLES = 'result with styles'
 
-      generateResultStub.withArgs(REPORT, STYLES).resolves(RESULT_WITH_STYLES)
+      generateResultStub.withArgs(REPORT, OPTS).resolves(RESULT_WITH_STYLES)
 
-      const res = await getInstance().generateResult(REPORT, STYLES)
+      const res = await getInstance().generateResult(REPORT, OPTS)
 
       expect(res).to.be.eq(RESULT_WITH_STYLES)
     })

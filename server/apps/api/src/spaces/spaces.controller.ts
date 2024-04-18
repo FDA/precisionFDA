@@ -1,5 +1,6 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import {
+  Body,
   Controller,
   Delete,
   Get,
@@ -23,6 +24,7 @@ import {
   SPACE_MEMBERSHIP_ROLE,
   SPACE_MEMBERSHIP_SIDE,
 } from '@shared/domain/space-membership/space-membership.enum'
+import { SpaceReportCreateDto } from '@shared/domain/space-report/model/space-report-create.dto'
 import { SpaceReportService } from '@shared/domain/space-report/service/space-report.service'
 import { SpaceAcceptOperation } from '@shared/domain/space/ops/accept-space'
 import { SpaceLockOperation } from '@shared/domain/space/ops/lock-space'
@@ -180,8 +182,8 @@ export class SpacesController {
 
   // TODO(PFDA-4831) - cover reports with integration tests after setting up full test env
   @Post('/:id/report')
-  async createReport(@Param('id', ParseIntPipe) id: number) {
-    const report = await this.spaceReportCreateFacade.createSpaceReport(id)
+  async createReport(@Param('id', ParseIntPipe) id: number, @Body() body: SpaceReportCreateDto) {
+    const report = await this.spaceReportCreateFacade.createSpaceReport(id, body)
 
     return report?.id
   }

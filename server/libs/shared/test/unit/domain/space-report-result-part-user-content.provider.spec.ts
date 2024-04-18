@@ -1,6 +1,6 @@
 import { SPACE_MEMBERSHIP_ROLE } from '@shared/domain/space-membership/space-membership.enum'
 import { SpaceReportPart } from '@shared/domain/space-report/entity/space-report-part.entity'
-import { SpaceReportResultPartUserContentProvider } from '@shared/domain/space-report/service/result/space-report-result-part-user-content.provider'
+import { SpaceReportResultPartUserHtmlContentProvider } from '@shared/domain/space-report/service/result/space-report-result-part-user-html-content.provider'
 import { expect } from 'chai'
 
 describe('SpaceReportResultPartUserContentProvider', () => {
@@ -48,6 +48,6 @@ describe('SpaceReportResultPartUserContentProvider', () => {
   })
 
   function getInstance() {
-    return new SpaceReportResultPartUserContentProvider()
+    return new SpaceReportResultPartUserHtmlContentProvider()
   }
 })

@@ -16,6 +16,7 @@ describe('SpaceReportPartAppResultProvider', () => {
   } as unknown as App
 
   const PROVENANCE_SVG = 'provenance svg'
+  const PROVENANCE_RAW = 'provenance raw'
 
   const getEntityProvenanceStub = stub()
 
@@ -32,42 +33,80 @@ describe('SpaceReportPartAppResultProvider', () => {
         { omitStyles: true },
       )
       .resolves(PROVENANCE_SVG)
+      .withArgs(
+        {
+          type: 'app',
+          entity: APP,
+        },
+        'raw',
+      )
+      .resolves(PROVENANCE_RAW)
   })
 
-  it('should provide correct result', async () => {
-    const res = await getInstance().getResult(APP)
+  describe('provide HTML', () => {
+    it('should provide correct result', async () => {
+      const res = await getInstance().getResult(APP, null, 'HTML')
 
-    expect(res).to.deep.equal({
-      title: `${TITLE} (revision ${REVISION})`,
-      created: CREATED,
-      svg: PROVENANCE_SVG,
+      assertCorrectResult(res, { svg: PROVENANCE_SVG })
+    })
+
+    it('should provide app title as title if no revision', async () => {
+      await assertNoRevisionTitle('HTML', 'svg', { omitStyles: true }, PROVENANCE_SVG)
     })
   })
 
-  it('should provide app title as title if no revision', async () => {
+  describe('provide JSON', () => {
+    it('should provide correct result', async () => {
+      const res = await getInstance().getResult(APP, null, 'JSON')
+
+      assertCorrectResult(res, { provenance: PROVENANCE_RAW })
+    })
+
+    it('should provide app title as title if no revision', async () => {
+      await assertNoRevisionTitle('JSON', 'raw', undefined, PROVENANCE_RAW)
+    })
+  })
+
+  function assertCorrectResult(actual, expected) {
+    expect(actual).to.deep.equal({
+      title: `${TITLE} (revision ${REVISION})`,
+      created: CREATED,
+      ...expected,
+    })
+  }
+
+  async function assertNoRevisionTitle(
+    reportFormat,
+    provenanceFormat,
+    provenanceOptions,
+    provenanceResult,
+  ) {
     const APP_NO_REVISION = {
       title: TITLE,
       revision: null,
       createdAt: CREATED,
     } as unknown as App
 
+    const provenanceArgs = [
+      {
+        type: 'app',
+        entity: APP_NO_REVISION,
+      },
+      provenanceFormat,
+    ]
+
+    if (provenanceOptions) {
+      provenanceArgs.push(provenanceOptions)
+    }
+
     getEntityProvenanceStub.reset()
     getEntityProvenanceStub.throws()
-    getEntityProvenanceStub
-      .withArgs(
-        {
-          type: 'app',
-          entity: APP_NO_REVISION,
-        },
-        'svg',
-        { omitStyles: true },
-      )
-      .resolves(PROVENANCE_SVG)
+    getEntityProvenanceStub.withArgs(...provenanceArgs).resolves(provenanceResult)
 
-    const res = await getInstance().getResult(APP_NO_REVISION)
+    const res = await getInstance().getResult(APP_NO_REVISION, null, reportFormat)
 
     expect(res.title).to.eq(TITLE)
-  })
+  }
 
   function getInstance() {
     const entityProvenanceService = {
