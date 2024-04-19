@@ -13,10 +13,6 @@ export class UpdateDataPortalDTO {
   @IsOptional()
   description?: string
 
-  @IsBoolean()
-  @IsOptional()
-  default?: boolean
-
   @IsNumber()
   @IsOptional()
   sortOrder?: number

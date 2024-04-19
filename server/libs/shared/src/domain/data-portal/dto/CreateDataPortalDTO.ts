@@ -1,4 +1,4 @@
-import { IsBoolean, IsEnum, IsNumber, IsOptional, IsString } from 'class-validator'
+import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator'
 import { DATA_PORTAL_STATUS } from '@shared/domain/data-portal/data-portal.enum'
 
 export class CreateDataPortalDTO {
@@ -17,9 +17,6 @@ export class CreateDataPortalDTO {
 
   @IsString()
   cardImageFileName: string
-
-  @IsBoolean()
-  default: boolean = false
 
   @IsString()
   hostLeadDxUser: string
