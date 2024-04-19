@@ -58,7 +58,7 @@ class DataPortal extends BaseEntity {
     this.space = Reference.create(space)
   }
 
-  isPortalAdmin = async (userId: number): Promise<boolean> => {
+  async isPortalAdmin(userId: number): Promise<boolean> {
     for (const membership of this.space.getEntity().spaceMemberships.getItems()) {
       if (membership.active && membership.isAdmin() && membership.user.id === userId) {
         return true
@@ -67,7 +67,7 @@ class DataPortal extends BaseEntity {
     return false
   }
 
-  isPortalMember = async (userId: number): Promise<boolean> => {
+  async isPortalMember(userId: number): Promise<boolean> {
     for (const membership of this.space.getEntity().spaceMemberships.getItems()) {
       if (membership.active && membership.user.id === userId) {
         return true
@@ -76,7 +76,7 @@ class DataPortal extends BaseEntity {
     return false
   }
 
-  isPortalLead = async (userId: number): Promise<boolean> => {
+  async isPortalLead(userId: number): Promise<boolean> {
     for (const membership of this.space.getEntity().spaceMemberships.getItems()) {
       if (membership.active && membership.isLead() && membership.user.id === userId) {
         return true
