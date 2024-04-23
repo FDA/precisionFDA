@@ -1,5 +1,5 @@
 import React from 'react'
-import { Route, Routes, useLocation } from 'react-router-dom'
+import { Route, Routes } from 'react-router-dom'
 import NavigationBar, {
   NavigationBarBanner,
   NavigationBarPublicLandingTitle,
@@ -21,9 +21,6 @@ const CreateDataPortalPage = React.lazy(
 const DataPortalDetailsPage = React.lazy(
   () => import('./details/DataPortalDetailsPage'),
 )
-const MainDataPortalDetailsPage = React.lazy(
-  () => import('./details/MainDataPortalDetailsPage'),
-)
 const DataPortalContentEditPage = React.lazy(
   () => import('./form/DataPortalContentEditPage'),
 )
@@ -33,7 +30,6 @@ const DataPortalResourcesPage = React.lazy(
 
 const DataPortalRoutes = () => {
   usePageMeta({ title: 'DAaaS - precisionFDA' })
-  const location = useLocation()
   const { loading, user } = useAuthUser(true)
 
   useToastWSHandler(user)
@@ -61,7 +57,6 @@ const DataPortalRoutes = () => {
     <Routes>
       <Route path={``} element={<DataPortalsListPage />} />
       <Route path={`create`} element={<CreateDataPortalPage />} />
-      <Route index path={`main`} element={<MainDataPortalDetailsPage />} />
       <Route path={`:portalId`} element={<DataPortalDetailsPage />} />
       <Route path={`:portalId/resources`} element={<DataPortalResourcesPage />} />
       <Route path={`:portalId/content`} element={<DataPortalContentEditPage />} />

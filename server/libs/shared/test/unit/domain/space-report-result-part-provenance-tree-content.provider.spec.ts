@@ -1,5 +1,5 @@
 import { SpaceReportPart } from '@shared/domain/space-report/entity/space-report-part.entity'
-import { SpaceReportResultPartProvenanceTreeContentProvider } from '@shared/domain/space-report/service/result/space-report-result-part-provenance-tree-content.provider'
+import { SpaceReportResultPartProvenanceTreeHtmlContentProvider } from '@shared/domain/space-report/service/result/space-report-result-part-provenance-tree-html-content.provider'
 import { expect } from 'chai'
 
 describe('SpaceReportResultPartProvenanceTreeContentProvider', () => {
@@ -37,6 +37,6 @@ describe('SpaceReportResultPartProvenanceTreeContentProvider', () => {
   })
 
   function getInstance() {
-    return new SpaceReportResultPartProvenanceTreeContentProvider()
+    return new SpaceReportResultPartProvenanceTreeHtmlContentProvider()
   }
 })

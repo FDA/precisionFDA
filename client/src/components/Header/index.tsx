@@ -7,7 +7,6 @@ import { CDMHKey, logout } from '../../features/auth/api'
 import { useAuthUser } from '../../features/auth/useAuthUser'
 import { useGenerateKeyModal } from '../../features/auth/useGenerateKeyModal'
 import { CDMHNames, useSiteSettingsQuery } from '../../features/auth/useSiteSettingsQuery'
-import { useMainDataPortal } from '../../features/data-portals/queries'
 import { IUser } from '../../types/user'
 import { AlertBanner } from '../AlertBanner'
 import { CloudResourceModal } from '../CloudResourcesModal'
@@ -54,42 +53,6 @@ type UserMenuProps = {
   handleLogout: () => void
   showCloudResourcesModal: () => void
   generateCLIKey: () => void
-}
-
-const DataPortalsLink = ({
-  isActiveLink,
-  isSiteAdmin = false,
-  excludePortalIds,
-}: {
-  isActiveLink: (l: string) => boolean,
-  isSiteAdmin?: boolean,
-  excludePortalIds?: number[] // do not hightlight if in this list
-}) => {
-  const { data } = useMainDataPortal()
-  let link = '/data-portals/main'
-
-  let excludedUrls: string[] = []
-  if (excludePortalIds) {
-    excludedUrls = excludePortalIds.map(id => `/data-portals/${id}`)
-  }
-
-  const comp = (to: string) => (
-    <Link to={to} title="Data Portals">
-      <MenuItem $active={isActiveLink('/data-portals') && !(excludedUrls.some(url => isActiveLink(url)))}>
-        <IconWrap>
-          <DataPortalIcon height={18} />
-        </IconWrap>
-        <HeaderItemText>DAaaS</HeaderItemText>
-      </MenuItem>
-    </Link>
-  )
-
-  if(!data && isSiteAdmin) {
-    link = '/data-portals'
-    return comp(link)
-  }
-  if(!data) return null
-  return comp(link)
 }
 
 export const UserMenu = ({
@@ -150,7 +113,7 @@ export const UserMenu = ({
   </StyledDropMenuLinks>
 )
 
-const getUsername = (user: any) => {
+const getUsername = (user: IUser) => {
   if (user) {
     if (user.full_name === ' ') {
       return user.dxuser
@@ -164,7 +127,6 @@ const Header: React.FC = () => {
   const { pathname } = useLocation()
   const user = useAuthUser()
   const siteSettings = useSiteSettingsQuery()
-  const customPortals = siteSettings.data?.dataPortals?.customPortals
   const [isCloudResourcesModalShown, setCloudResourcesModalShown] = useState(false)
   const { isAlertDismissed, setIsAlertDismissed } = useAlertDismissed()
 
@@ -192,9 +154,6 @@ const Header: React.FC = () => {
 
   if (!user) return null
 
-  const prismDataPortal = customPortals?.find((p) => p.name === 'PRISM')
-  const toolsDataPortal = customPortals?.find((p) => p.name === 'Tools')
-  const customPortalIds = customPortals?.filter((p) => p.name === 'Tools' || p.name === 'PRISM')?.map((p) => p.id)
   const showGSRSLink = !isSpacesPath && !isDataPortalsPath && !userIsGuest
   const showCDMHLink = !isSpacesPath && !isDataPortalsPath && !!siteSettings?.data?.cdmh.isEnabled
   const showAlertBanner = !isAlertDismissed && siteSettings.data?.alerts?.[0]
@@ -340,35 +299,36 @@ const Header: React.FC = () => {
               </Dropdown>
             )}
 
-            {siteSettings?.data?.dataPortals?.isEnabled && 
-                <DataPortalsLink isSiteAdmin={user.admin} isActiveLink={isActiveLink} excludePortalIds={customPortalIds} />}
-
-            {prismDataPortal && (
-              <Link
-                to={`/data-portals/${prismDataPortal.id}`}
-                title="PRISM"
+            <Link to="/data-portals/daaas" title="Data Portals">
+              <MenuItem $active={isActiveLink('/data-portals/DAaaS') || isActiveLink('/data-portals/daaas')}>
+                <IconWrap>
+                  <DataPortalIcon height={18} />
+                </IconWrap>
+                <HeaderItemText>DAaaS</HeaderItemText>
+              </MenuItem>
+            </Link>
+            <Link
+              to="/data-portals/prism"
+              title="PRISM"
               >
-                <MenuItem $active={isActiveLink(`/data-portals/${prismDataPortal.id}`)}>
-                  <IconWrap>
-                    <PrismIcon height={17} />
-                  </IconWrap>
-                  <HeaderItemText>PRISM</HeaderItemText>
-                </MenuItem>
-              </Link>
-            )}
-            {toolsDataPortal && (
-              <Link
-                to={`/data-portals/${toolsDataPortal.id}`}
-                title="Tools"
+              <MenuItem $active={isActiveLink('/data-portals/prism')}>
+                <IconWrap>
+                  <PrismIcon height={17} />
+                </IconWrap>
+                <HeaderItemText>PRISM</HeaderItemText>
+              </MenuItem>
+            </Link>
+            <Link
+              to="/data-portals/tools"
+              title="Tools"
               >
-                <MenuItem $active={isActiveLink(`/data-portals/${toolsDataPortal.id}`)}>
-                  <IconWrap>
-                    <ToolsIcon height={16} />
-                  </IconWrap>
-                  <HeaderItemText>Tools</HeaderItemText>
-                </MenuItem>
-              </Link>
-            )}
+              <MenuItem $active={isActiveLink('/data-portals/tools')}>
+                <IconWrap>
+                  <ToolsIcon height={16} />
+                </IconWrap>
+                <HeaderItemText>Tools</HeaderItemText>
+              </MenuItem>
+            </Link>
           </HeaderLeft>
           <HeaderRight>
             <a
@@ -376,7 +336,7 @@ const Header: React.FC = () => {
               target="_blank"
               title="Support"
               rel="noreferrer"
-            >
+              >
               <MenuItem>
                 <IconWrap>
                   <CommentingIcon height={16} />

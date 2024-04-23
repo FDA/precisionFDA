@@ -200,7 +200,7 @@ const DataPortalResourcesPage = () => {
       <StyledPageCenter>
         <StyledPageContent>
           <TopRow>
-            <BackLink linkTo={`/data-portals/${portalId}`}>
+            <BackLink linkTo={`/data-portals/${portal?.urlSlug}`}>
               Back to Data Portal
             </BackLink>
 

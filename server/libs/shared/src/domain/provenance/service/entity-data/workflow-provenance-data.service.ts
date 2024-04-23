@@ -15,6 +15,10 @@ export class WorkflowProvenanceDataService extends EntityProvenanceDataService<'
     super(entityService)
   }
 
+  protected getIdentifier(workflow: Workflow): string {
+    return workflow.uid
+  }
+
   async getParents(workflow: Workflow): Promise<EntityProvenanceSourceUnion[]> {
     const apps = await this.workflowService.getApps(workflow)
 

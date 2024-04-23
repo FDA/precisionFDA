@@ -14,6 +14,7 @@ describe('SpaceReportPartWorkflowResultProvider', () => {
   } as unknown as Workflow
 
   const PROVENANCE_SVG = 'provenance svg'
+  const PROVENANCE_RAW = 'provenance raw'
 
   const getEntityProvenanceStub = stub()
 
@@ -30,12 +31,26 @@ describe('SpaceReportPartWorkflowResultProvider', () => {
         { omitStyles: true },
       )
       .resolves(PROVENANCE_SVG)
+      .withArgs(
+        {
+          type: 'workflow',
+          entity: WORKFLOW,
+        },
+        'raw',
+      )
+      .resolves(PROVENANCE_RAW)
   })
 
-  it('should provide correct meta', async () => {
-    const res = await getInstance().getResult(WORKFLOW)
+  it('should provide correct HTML result', async () => {
+    const res = await getInstance().getResult(WORKFLOW, null, 'HTML')
 
     expect(res).to.deep.equal({ title: NAME, created: CREATED, svg: PROVENANCE_SVG })
+  })
+
+  it('should provide correct JSON result', async () => {
+    const res = await getInstance().getResult(WORKFLOW, null, 'JSON')
+
+    expect(res).to.deep.equal({ title: NAME, created: CREATED, provenance: PROVENANCE_RAW })
   })
 
   function getInstance() {

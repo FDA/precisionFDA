@@ -7,6 +7,10 @@ import { EntityProvenanceDataService } from './entity-provenance-data.service'
 export class JobProvenanceDataService extends EntityProvenanceDataService<'job'> {
   protected type = 'job' as const
 
+  protected getIdentifier(job: Job): string {
+    return job.uid
+  }
+
   async getParents(job: Job): Promise<EntityProvenanceSourceUnion[]> {
     const parents: EntityProvenanceSourceUnion[] = []
 

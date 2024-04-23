@@ -5,7 +5,7 @@ import { PropertyKeysOfType } from '@shared/utils/types/property-keys-of-type'
 
 type NamedEntityType = Extends<
   EntityType,
-  'app' | 'asset' | 'comparison' | 'file' | 'job' | 'user' | 'workflow'
+  'app' | 'asset' | 'comparison' | 'file' | 'job' | 'user' | 'workflow' | 'resource'
 >
 type NamedEntity = InstanceType<(typeof entityTypeToEntityMap)[NamedEntityType]>
 
@@ -37,6 +37,7 @@ export class EntityUtils {
     job: 'name',
     user: 'fullName',
     workflow: 'title',
+    resource: 'name',
   }
 
   static getEntityName(entity: NamedEntity): string {

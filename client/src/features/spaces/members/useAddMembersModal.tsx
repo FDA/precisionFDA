@@ -43,7 +43,7 @@ export const useAddMembersModal = ({ spaceId }: { spaceId: string }) => {
     mode: 'onBlur',
     defaultValues: {
       invitees: '',
-      invitees_role: { value: 'admin', label: 'Admin' },
+      invitees_role: { value: 'viewer', label: 'Viewer' },
     },
     resolver: yupResolver(validationSchema),
   })

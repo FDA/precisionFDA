@@ -2,7 +2,6 @@ import {
   ArgumentMetadata,
   BadRequestException,
   Injectable,
-  PipeTransform,
   ValidationPipe,
 } from '@nestjs/common'
 import { ValidationError } from '@shared/errors'

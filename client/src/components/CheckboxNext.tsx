@@ -73,8 +73,9 @@ const StyledCheckbox = styled.div<{ checked?: boolean; $indeterminate?: boolean,
 `
 
 export type CheckboxProps = {
+  id?: string
   disabled?: boolean
-  onChange?: (e: ChangeEvent) => void
+  onChange?: (e: ChangeEvent<HTMLInputElement>) => void
   checked: boolean
   indeterminate?: boolean
 }
@@ -86,7 +87,7 @@ export const Checkbox = React.forwardRef((props: CheckboxProps, ref) => {
   const isChecked = props.checked ? props.checked : false
   return (
     <>
-      <HiddenCheckbox ref={ref} checked={isChecked} onChange={props.onChange} />
+      <HiddenCheckbox id={props.id} ref={ref} checked={isChecked} onChange={props.onChange} />
       <StyledCheckbox checked={isChecked} $indeterminate={props.indeterminate} disabled={props.disabled}>
         {props.indeterminate ? <IndeterminateIcon /> : <CheckIcon />}
       </StyledCheckbox>

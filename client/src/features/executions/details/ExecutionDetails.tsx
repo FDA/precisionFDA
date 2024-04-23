@@ -109,7 +109,7 @@ export const ExecutionDetails = ({
         <Header>
           <HeaderLeft>
             <TitleLeft>
-              <Title>
+              <Title data-testid="execution-name">
                 <CogsIcon height={18}/>
                 {execution.name}
               </Title>
@@ -144,7 +144,7 @@ export const ExecutionDetails = ({
           <MetadataRow>
             <MetadataItem>
               <MetadataKey>Location</MetadataKey>
-              <MetadataVal>
+              <MetadataVal data-testid="execution-location">
                 {execution.scope.includes('space-') ? (
                   <a
                     target="_blank"
@@ -168,7 +168,7 @@ export const ExecutionDetails = ({
             <MetadataItem>
               <MetadataKey>APP</MetadataKey>
               {/* TODO: do not rely on link to get app id */}
-              <MetadataVal>
+              <MetadataVal data-testid="execution-app">
                 <Link
                   to={`${getBasePath(
                     spaceId,
@@ -181,7 +181,7 @@ export const ExecutionDetails = ({
 
             <MetadataItem>
               <MetadataKey>Launched By</MetadataKey>
-              <MetadataVal>
+              <MetadataVal data-testid="execution-launched-by">
                 <Link target="_blank" to={execution.links.user!}>
                   {execution.launched_by}
                 </Link>
@@ -190,31 +190,31 @@ export const ExecutionDetails = ({
 
             <MetadataItem>
               <MetadataKey>Created On</MetadataKey>
-              <MetadataVal>{execution.created_at_date_time}</MetadataVal>
+              <MetadataVal data-testid="execution-created">{execution.created_at_date_time}</MetadataVal>
             </MetadataItem>
 
             <MetadataItem>
               <MetadataKey>Instance Type</MetadataKey>
-              <MetadataVal>{RESOURCE_LABELS[execution.instance_type] ?? execution.instance_type}</MetadataVal>
+              <MetadataVal data-testid="execution-instance-type">{RESOURCE_LABELS[execution.instance_type] ?? execution.instance_type}</MetadataVal>
             </MetadataItem>
           </MetadataRow>
           <MetadataRow>
             <MetadataItem>
               <MetadataKey>Duration</MetadataKey>
-              <MetadataVal>{execution.duration}</MetadataVal>
+              <MetadataVal data-testid="execution-duration">{execution.duration}</MetadataVal>
             </MetadataItem>
             <MetadataItem>
               <MetadataKey>Cost</MetadataKey>
-              <MetadataVal>{execution.energy_consumption}</MetadataVal>
+              <MetadataVal data-testid="execution-cost">{execution.energy_consumption}</MetadataVal>
             </MetadataItem>
             <MetadataItem>
               <MetadataKey>App Revision</MetadataKey>
-              <MetadataVal>{execution.app_revision}</MetadataVal>
+              <MetadataVal data-testid="execution-app-revision">{execution.app_revision}</MetadataVal>
             </MetadataItem>
           </MetadataRow>
         </MetadataSection>
         {execution.tags.length > 0 && (
-          <MetadataSection>
+          <MetadataSection data-testid="execution-tags">
             <MetadataRow>
               <MetadataItem>
                 <MetadataKey>Tags</MetadataKey>
@@ -228,7 +228,7 @@ export const ExecutionDetails = ({
           </MetadataSection>
         )}
         {Object.entries(execution.properties).length > 0 && (
-          <MetadataSection>
+          <MetadataSection data-testid="execution-properties">
             <MetadataRow>
               <MetadataItem>
                   <MetadataKey>Properties</MetadataKey>

@@ -13,6 +13,8 @@ export const Warning = styled.div`
 export const AlertText = styled.div`
   font-size: 18px;
   font-weight: bold;
+  text-align: center;
+  text-wrap: pretty;
 `
 export const ActionText = styled.div`
   font-size: 14px;
@@ -33,17 +35,16 @@ export const Content = styled.div`
   height: 100%;
 `
 
-export function DataPortalNotFound({ message }: { message: string }) {
+export function DataPortalError({ message }: { message: string }) {
   return (
     <PageContainerMargin>
       <Content>
         <Col>
           <Warning>
             <div>
-              <AlertText>Data Portal Not Found</AlertText>
+              <AlertText>{message}</AlertText>
             </div>
           </Warning>
-          {message}
         </Col>
       </Content>
     </PageContainerMargin>

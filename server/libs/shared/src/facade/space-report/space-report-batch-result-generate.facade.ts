@@ -124,7 +124,11 @@ export class SpaceReportBatchResultGenerateFacade {
 
         return {
           id: reportPart.id,
-          result: await this.SOURCE_TYPE_TO_RESULT_PROVIDER[type].getResult(entity, report.space),
+          result: await this.SOURCE_TYPE_TO_RESULT_PROVIDER[type].getResult(
+            entity,
+            report.space,
+            report.format,
+          ),
         }
       }),
     )

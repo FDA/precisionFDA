@@ -1,7 +1,6 @@
 import {
   Entity,
   EntityRepositoryType,
-  IdentifiedReference,
   ManyToOne,
   OneToOne,
   Property,
@@ -23,13 +22,18 @@ class Resource extends BaseEntity {
   meta: string
 
   @ManyToOne(() => User)
-  user!: IdentifiedReference<User>
+  user!: Ref<User>
 
   @OneToOne(() => UserFile)
   userFile!: Ref<UserFile>
 
   @ManyToOne(() => DataPortal, { joinColumn: 'parent_id' })
-  dataPortal: DataPortal;
+  dataPortal: DataPortal
+
+  @Property({ persist: false })
+  get name(): string {
+    return `${this.userFile.getProperty('name')}`
+  }
 
   [EntityRepositoryType]?: ResourceRepository
 

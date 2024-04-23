@@ -8,6 +8,10 @@ export const LWrap = styled.div`
   height: 100%;
 `
 
+export const LoaderMargin = styled.div`
+  margin: 24px;
+`
+
 const LoaderWrapper = styled.div`
   display: flex;
   justify-content: center;

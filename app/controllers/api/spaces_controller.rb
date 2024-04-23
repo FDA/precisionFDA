@@ -76,7 +76,6 @@ module Api
     def index
       allowed_orderings = %w(created_at name state space_type updated_at).freeze
 
-      params[:order_by] = "space_type" if params[:order_by] == "type"
       order = order_query(params[:order_by], params[:order_dir], allowed_orderings)
       filter_tags = params.dig(:filters, :tags)
       order = { created_at: :desc } if order.empty?
@@ -230,7 +229,7 @@ module Api
 
     # POST /api/spaces/:id/report
     def create_report
-      response = https_apps_client.create_space_report(params[:id])
+      response = https_apps_client.create_space_report(params[:id], params[:format], params[:options])
       render json: response, adapter: :json
     rescue Net::HTTPClientException => e
       render status: e.response.code, json: e.response.body

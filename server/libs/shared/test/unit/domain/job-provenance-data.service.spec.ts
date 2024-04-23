@@ -8,6 +8,7 @@ import { SinonStub, stub } from 'sinon'
 describe('JobProvenanceDataService', () => {
   const NAME = 'name'
   const LINK = 'LINK'
+  const UID = 'UID'
 
   const FILE_1_ID = 10
   const FILE_2_ID = 11
@@ -27,6 +28,7 @@ describe('JobProvenanceDataService', () => {
     name: NAME,
     inputFiles: { loadItems: loadFilesStub },
     app: { load: loadAppStub },
+    uid: UID,
   } as unknown as Job
 
   let getEntityTypeForEntityStub: SinonStub
@@ -58,6 +60,7 @@ describe('JobProvenanceDataService', () => {
         type: 'job',
         url: LINK,
         title: NAME,
+        identifier: UID,
       })
     })
   })
