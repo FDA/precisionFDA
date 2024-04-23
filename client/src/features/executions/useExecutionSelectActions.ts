@@ -86,7 +86,7 @@ export const useExecutionActions = ({ homeScope, selectedItems, resourceKeys }: 
   } = useAttachToModal(selected.map(s => s.id), 'JOB')
 
   const {
-    modalComp: terminateoModal,
+    modalComp: terminateModal,
     setShowModal: setTerminateModal,
     isShown: isShownTerminateModal,
   } = useTerminateModal({ selected })
@@ -115,8 +115,8 @@ export const useExecutionActions = ({ homeScope, selectedItems, resourceKeys }: 
     'Terminate': {
       type: 'modal',
       func: () => setTerminateModal(true),
-      isDisabled: selected.length !== 1 || ['terminated', 'failed', 'done'].includes(selected[0]?.state),
-      modal: terminateoModal,
+      isDisabled: selected.length === 0 || selected.some(item => ['terminated', 'failed', 'done', undefined].includes(item?.state)),
+      modal: terminateModal,
       showModal: isShownTerminateModal,
     },
     'Track': {

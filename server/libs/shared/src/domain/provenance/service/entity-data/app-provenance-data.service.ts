@@ -7,6 +7,10 @@ import { EntityProvenanceDataService } from './entity-provenance-data.service'
 export class AppProvenanceDataService extends EntityProvenanceDataService<'app'> {
   protected type = 'app' as const
 
+  protected getIdentifier(app: App): string {
+    return app.uid
+  }
+
   protected getTitle(app: App): string {
     const title = super.getTitle(app)
 

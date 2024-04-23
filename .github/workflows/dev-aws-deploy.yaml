@@ -41,10 +41,10 @@ jobs:
 
       - name: Set SSM Parameters
         run: |
-          aws ssm put-parameter --name /pfda/${{ vars.ENVIRONMENT }}/chef/source_branch --value ${{ github.ref_name }} --type String --overwrite >/dev/null
-          aws ssm put-parameter --name /pfda/${{ vars.ENVIRONMENT }}/app/app_source/revision --value ${{ github.ref_name }} --type String --overwrite >/dev/null
+          aws ssm put-parameter --name /pfda/${{ vars.ENVIRONMENT }}/chef/source_branch --value '${{ github.ref_name }}' --type String --overwrite >/dev/null
+          aws ssm put-parameter --name /pfda/${{ vars.ENVIRONMENT }}/app/app_source/revision --value '${{ github.ref_name }}' --type String --overwrite >/dev/null
           aws ssm put-parameter --name /pfda/${{ vars.ENVIRONMENT }}/app/environment/GSRS_ENABLED --value "$([[ "${{ inputs.GSRS_ENABLED }}" == "true" ]] && echo 1 || echo 0)" --type String --overwrite >/dev/null
-          aws ssm put-parameter --name /pfda/${{ vars.ENVIRONMENT }}/gsrs/revision --value ${{ inputs.GSRS_BRANCH }} --overwrite >/dev/null
+          aws ssm put-parameter --name /pfda/${{ vars.ENVIRONMENT }}/gsrs/revision --value '${{ inputs.GSRS_BRANCH }}' --overwrite >/dev/null
 
       - name: Run deploy.sh script
         env:

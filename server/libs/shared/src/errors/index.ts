@@ -47,7 +47,8 @@ export enum ErrorCodes {
   INVALID_IP_HEADER_ERROR = 'E_INVALID_IP_HEADER_ERROR',
   INCOMPATIBLE_VERSION_ERROR = 'E_INCOMPATIBLE_VERSION',
   WORKSTATION_API_ERROR = 'E_WORKSTATION_API_ERROR',
-  DELETE_RELATION_ERROR = 'E_DELETE_RELATION_ERROR'
+  DELETE_RELATION_ERROR = 'E_DELETE_RELATION_ERROR',
+  DATA_PORTAL_CREATE_ERROR = 'E_DATA_PORTAL_CREATE_ERROR',
 }
 
 export class BaseError extends Error {
@@ -274,10 +275,31 @@ export class InvalidIpHeaderError extends BaseError {
 
 export class DeleteRelationError extends BaseError {
   constructor(entityName: string, relatedEntityName: string) {
+    super(`Cannot delete a ${entityName}, as it is related to a ${relatedEntityName}`, {
+      code: ErrorCodes.DELETE_RELATION_ERROR,
+      statusCode: 400,
+    })
+  }
+}
+
+export class DataPortalUrlSlugFormatError extends BaseError {
+  constructor(urlSlug: string, regexp: string, minLength: number, maxLength: number) {
     super(
-      `Cannot delete a ${entityName}, as it is related to a ${relatedEntityName}`,
+      `Cannot create Data portal. URL slug '${urlSlug}' doesn't match the requirements: regexp ${regexp}, length ${minLength} - ${maxLength} characters`,
       {
-        code: ErrorCodes.DELETE_RELATION_ERROR,
+        code: ErrorCodes.DATA_PORTAL_CREATE_ERROR,
+        statusCode: 400,
+      },
+    )
+  }
+}
+
+export class DataPortalUrlSlugNotUniqueError extends BaseError {
+  constructor(urlSlug: string) {
+    super(
+      `Cannot create Data portal. Another data portal with URL slug '${urlSlug}' already exists`,
+      {
+        code: ErrorCodes.DATA_PORTAL_CREATE_ERROR,
         statusCode: 400,
       },
     )

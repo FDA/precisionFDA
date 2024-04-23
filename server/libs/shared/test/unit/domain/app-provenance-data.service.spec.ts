@@ -9,6 +9,7 @@ describe('AppProvenanceDataService', () => {
   const TITLE = 'title'
   const REVISION = 'revision'
   const LINK = 'LINK'
+  const UID = 'UID'
 
   const ASSET_1_ID = 0
   const ASSET_2_ID = 1
@@ -24,6 +25,7 @@ describe('AppProvenanceDataService', () => {
     title: TITLE,
     revision: REVISION,
     assets: { loadItems: loadAssetsStub },
+    uid: UID,
   } as unknown as App
 
   let getEntityTypeForEntityStub: SinonStub
@@ -52,6 +54,7 @@ describe('AppProvenanceDataService', () => {
         type: 'app',
         url: LINK,
         title: `${TITLE} (revision ${REVISION})`,
+        identifier: UID,
       })
     })
 

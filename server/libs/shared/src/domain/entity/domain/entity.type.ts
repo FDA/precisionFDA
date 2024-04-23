@@ -7,3 +7,4 @@ export type EntityType =
   | 'app'
   | 'workflow'
   | 'discussion'
+  | 'resource'

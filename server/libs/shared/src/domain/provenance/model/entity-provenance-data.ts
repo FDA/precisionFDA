@@ -4,4 +4,5 @@ export interface EntityProvenanceData<T extends EntityType> {
   type: T
   title: string
   url: string
+  identifier: string
 }

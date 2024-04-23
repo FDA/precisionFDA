@@ -14,7 +14,6 @@ import { AlertText } from '../details/DataPortalNotFound'
 import { DataPortalListItem } from './DataPortalListItem'
 import { useAuthUser } from '../../auth/useAuthUser'
 import { theme } from '../../../styles/theme'
-import { useMainDataPortal } from '../queries'
 import { Button } from '../../../components/Button'
 import { Notification, NOTIFICATION_ACTION } from '../../home/types'
 import { DEFAULT_RECONNECT_ATTEMPTS, DEFAULT_RECONNECT_INTERVAL, SHOULD_RECONNECT, getNodeWsUrl } from '../../../utils/config'
@@ -50,13 +49,6 @@ export const ListSectionTitle = styled.div`
 export const ListSection = styled.div`
   margin-bottom: 32px;
 `
-
-const MainDataPortalItem = () => {
-  const { data, isLoading } = useMainDataPortal()
-
-  if (isLoading || !data) return <Loader />
-  return <DataPortalListItem dataPortal={data} isMain />
-}
 
 const DataPortalsListPage = () => {
   const user = useAuthUser()
@@ -102,10 +94,6 @@ const DataPortalsListPage = () => {
               )}
             </TopRow>
 
-            <ListSection>
-              <ListSectionTitle>Main</ListSectionTitle>
-              <MainDataPortalItem />
-            </ListSection>
             {isLoading ? (
               <PageLoaderWrapper>
                 <Loader />

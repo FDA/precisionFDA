@@ -58,11 +58,8 @@ const IconLink = styled(Link)`
 `
 
 const GetStarted = ({ user }: { user?: IUser }) => {
-  const siteSettings = useSiteSettingsQuery()
-  const gettingStartedPortal = siteSettings.data?.dataPortals?.customPortals?.find((p) => p.name === 'Getting Started and Next Steps')
-
   // for FDA users
-  if (gettingStartedPortal) {
+  if (user && user.isGovUser) {
     return (
       <StyledGetStarted>
         <SectionTitle>Getting Started</SectionTitle>

@@ -12,6 +12,8 @@ export abstract class EntityProvenanceDataService<T extends EntityWithProvenance
 
   protected abstract type: T
 
+  protected abstract getIdentifier(source: EntityProvenanceSource<T>['entity']): string
+
   protected getTitle(source: EntityProvenanceSource<T>['entity']): string {
     return EntityUtils.getEntityName(source)
   }
@@ -25,6 +27,7 @@ export abstract class EntityProvenanceDataService<T extends EntityWithProvenance
       type: this.type,
       title: this.getTitle(source),
       url: await this.entityService.getEntityLink(source),
+      identifier: this.getIdentifier(source),
     }
   }
 }

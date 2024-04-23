@@ -4,6 +4,7 @@
 /.github @johnymachine @gitbisect
 /chef @johnymachine @gitbisect
 /userdata @johnymachine @gitbisect
+/infra @johnymachine @gitbisect
 
 # Frontend
 /client @ddcech

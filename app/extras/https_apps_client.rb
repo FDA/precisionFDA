@@ -105,12 +105,11 @@ class HttpsAppsClient # rubocop:disable Metrics/ClassLength
   end
 
   # Gets list of available data portals
-  def data_portals_list(default)
+  def data_portals_list
     request(
       "/data-portals",
       {},
       Net::HTTP::Get::METHOD,
-      default ? { default: } : {},
     )
   end
 
@@ -206,6 +205,19 @@ class HttpsAppsClient # rubocop:disable Metrics/ClassLength
       {},
       Net::HTTP::Get::METHOD,
       params,
+      {},
+      true,
+    ) do |chunk|
+      block.call(chunk)
+    end
+  end
+
+  def protected_download(uid, &block)
+    request(
+      "/resources/#{uid}/download",
+      {},
+      Net::HTTP::Get::METHOD,
+      {},
       {},
       true,
     ) do |chunk|
@@ -971,10 +983,10 @@ class HttpsAppsClient # rubocop:disable Metrics/ClassLength
     )
   end
 
-  def create_space_report(id)
+  def create_space_report(id, format, options)
     request(
       "/spaces/#{id}/report",
-      {},
+      { format:, options: },
       Net::HTTP::Post::METHOD,
     )
   end

@@ -3,14 +3,16 @@ import { SpaceReportPartResult } from '@shared/domain/space-report/model/space-r
 import { SpaceReportPartSourceType } from '@shared/domain/space-report/model/space-report-part-source.type'
 import { JSDOM } from 'jsdom'
 
-export abstract class SpaceReportResultPartContentProvider<T extends SpaceReportPartSourceType> {
+export abstract class SpaceReportResultPartHtmlContentProvider<
+  T extends SpaceReportPartSourceType,
+> {
   protected abstract addContent(
-    result: SpaceReportPartResult<T>,
+    result: SpaceReportPartResult<T, 'HTML'>,
     document: Document,
     container: HTMLDivElement,
   ): Promise<void>
 
-  async provide(reportPart: SpaceReportPart<T>, titleId: string): Promise<HTMLDivElement> {
+  async provide(reportPart: SpaceReportPart<T, 'HTML'>, titleId: string): Promise<HTMLDivElement> {
     const domContainer = new JSDOM()
     const document = domContainer.window.document
     const container = document.createElement('div')

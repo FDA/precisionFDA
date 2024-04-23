@@ -5,14 +5,15 @@ import {
   SpaceReportPartDiscussionResultAnswer,
   SpaceReportPartDiscussionResultAttachment,
   SpaceReportPartDiscussionResultComment,
+  SpaceReportPartDiscussionResultCommentCreatedBy,
 } from '@shared/domain/space-report/model/space-report-part-discussion-result'
-import { SpaceReportResultPartContentProvider } from '@shared/domain/space-report/service/result/space-report-result-part-content.provider'
+import { SpaceReportResultPartHtmlContentProvider } from '@shared/domain/space-report/service/result/space-report-result-part-html-content.provider'
 import { ArrayUtils } from '@shared/utils/array.utils'
 import DOMPurify from 'isomorphic-dompurify'
 import { marked } from 'marked'
 
 @Injectable()
-export class SpaceReportResultPartDiscussionContentProvider extends SpaceReportResultPartContentProvider<'discussion'> {
+export class SpaceReportResultPartDiscussionHtmlContentProvider extends SpaceReportResultPartHtmlContentProvider<'discussion'> {
   constructor(private readonly entityService: EntityService) {
     super()
   }
@@ -56,7 +57,7 @@ export class SpaceReportResultPartDiscussionContentProvider extends SpaceReportR
   private async getItemContainer(
     data: {
       content: string
-      createdBy: string
+      createdBy: SpaceReportPartDiscussionResultCommentCreatedBy
       createdAt: Date
       attachments?: SpaceReportPartDiscussionResultAttachment[]
     },
@@ -70,7 +71,7 @@ export class SpaceReportResultPartDiscussionContentProvider extends SpaceReportR
     header.classList.add('discussion-header')
 
     const createdBy = document.createElement('span')
-    createdBy.textContent = data.createdBy
+    createdBy.textContent = data.createdBy.fullName
     header.appendChild(createdBy)
 
     const createdSeparator = document.createElement('span')

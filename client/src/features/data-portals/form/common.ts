@@ -5,6 +5,7 @@ export const subtitle = 'Customized presentation of instructions, tools, data, r
 
 export const createValidationSchema = Yup.object().shape({
   name: Yup.string().required('Name is required').min(2).max(256),
+  url_slug: Yup.string().required('Url slug is required').min(3, 'Url slug must be at least 3 characters long').max(50, 'Url slug must be at most 50 characters long').matches(/^(?=.*[a-z])[a-z0-9-]+$/, 'Lowercase alphabetic characters, digits and dashes allowed only; At least one alphabetic character required.'),
   description: Yup.string().min(2).max(256),
   scope: Yup.object()
     .shape({

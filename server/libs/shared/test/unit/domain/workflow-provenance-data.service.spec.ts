@@ -18,7 +18,9 @@ describe('WorkflowProvenanceDataService', () => {
 
   const APPS = [APP_1, APP_2]
 
-  const WORKFLOW = { title: TITLE } as unknown as Workflow
+  const UID = 'UID'
+
+  const WORKFLOW = { title: TITLE, uid: UID } as unknown as Workflow
 
   const getAppsStub = stub()
   const getEntityLinkStub = stub()
@@ -50,6 +52,7 @@ describe('WorkflowProvenanceDataService', () => {
         type: 'workflow',
         url: LINK,
         title: TITLE,
+        identifier: UID,
       })
     })
   })

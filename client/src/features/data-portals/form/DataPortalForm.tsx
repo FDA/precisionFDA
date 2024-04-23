@@ -5,23 +5,23 @@ import React, { useEffect } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { unstable_usePrompt } from 'react-router-dom'
 import styled from 'styled-components'
-import { Checkbox } from '../../../components/CheckboxNext'
+import { Button } from '../../../components/Button'
 import { InputFile, InputNumber, InputText } from '../../../components/InputText'
 import { Loader } from '../../../components/Loader'
 import { FieldGroup } from '../../../components/form/FieldGroup'
-import { CheckboxTip, FieldLabelRow, InputError } from '../../../components/form/styles'
+import { FieldInfo } from '../../../components/form/FieldInfo'
+import { InputError } from '../../../components/form/styles'
 import { SavingModal } from './SavingModal'
 import { StatusSelect } from './StatusSelect'
 import { UsersSelect } from './UsersSelect'
 import { createValidationSchema, editValidationSchema } from './common'
-import { Button } from '../../../components/Button'
 
 type SelectItem = { label: string; value: string }
 
 export interface CreateDataPortalForm {
   name: string
   description: string
-  default: boolean
+  url_slug: string
   host_lead_dxuser: SelectItem | null
   guest_lead_dxuser: SelectItem | null
   status: SelectItem | null
@@ -70,21 +70,23 @@ function getBase64(file?: File, callback?: (a: string | null) => void) {
 export const DataPortalForm = ({
   defaultValues,
   onSubmit,
-  onImageSelection,
   isSaving = false,
   isEditMode = false,
   canEditMainDataPortal = false,
+  isSubmitting,
   mutationErrors,
 }: {
   defaultValues?: CreateDataPortalForm
   onSubmit: (a: any) => Promise<any>
-  onImageSelection?: (img: File) => Promise<any>
   isSaving?: boolean
   isEditMode?: boolean
   canEditMainDataPortal?: boolean
+  isSubmitting: boolean,
   mutationErrors?: { response: { data: { error: any }} }
 }) => {
   const [base64Image, setBase64Image] = React.useState<string | null>(null)
+
+  const [slugEdited, setSlugEdited] = React.useState<boolean>(false)
 
   const {
     control,
@@ -92,17 +94,17 @@ export const DataPortalForm = ({
     handleSubmit,
     setError,
     watch,
+    getValues,
     setValue,
-    formState: { errors, isSubmitting, dirtyFields },
+    formState: { errors, dirtyFields },
   } = useForm<CreateDataPortalForm>({
-    mode: 'onBlur',
     resolver: yupResolver(
       isEditMode ? editValidationSchema : createValidationSchema,
     ),
     defaultValues: defaultValues || {
       name: '',
       description: '',
-      default: false,
+      url_slug: '',
       host_lead_dxuser: null,
       guest_lead_dxuser: null,
       sort_order: 0,
@@ -112,12 +114,36 @@ export const DataPortalForm = ({
     },
   })
 
+  const URL_SLUG_MAX_LENGTH = 50
+
+  const slugify = (input: string) => {
+    let slug = input.toLowerCase()
+    // Leave alphanumeric characters and whitespaces only
+    slug = slug.replace(/[^a-z0-9\- ]/g, '')
+    // Replace whitespaces with dashes
+    slug = slug.replace(/\s+/g, '-')
+    // Replace clusters of dashes with just one dash; limit the max length
+    return slug.replace(/-+/g, '-').substring(0, URL_SLUG_MAX_LENGTH)
+  }
+
   useEffect(() => {
     const img = watch().card_image_file
     if (img?.[0] != null) {
       getBase64(img?.[0], setBase64Image)
     }
   }, [watch().card_image_file])
+
+  useEffect(() => {
+    // Do not automatically update the slug field in case the user changed the value manually or in edit mode
+    if (!slugEdited && !isEditMode) {
+      setValue('url_slug', slugify(getValues('name')))
+      delete errors.url_slug
+    }
+  }, [watch().name])
+
+  useEffect(() => {
+    setValue('url_slug', slugify(getValues('url_slug')))
+  }, [watch().url_slug])
 
   useEffect(() => {
     if (mutationErrors?.response?.data?.error) {
@@ -153,17 +179,31 @@ export const DataPortalForm = ({
               render={({ message }) => <InputError>{message}</InputError>}
             />
           </FieldGroup>
+          <FieldGroup label="URL slug" required>
+            <InputText
+                placeholder="URL slug"
+                {...register('url_slug')}
+                disabled={isSubmitting || isEditMode}
+                onBlur={() => setSlugEdited(true)}
+            />
+            <FieldInfo text="Once Data portal is created, the URL slug cannot be edited" />
+            <ErrorMessage
+                errors={errors}
+                name="url_slug"
+                render={({ message }) => <InputError>{message}</InputError>}
+            />
+          </FieldGroup>
           <FieldGroup label="Description">
             <InputText
-              type="textarea"
-              placeholder="What is this portal about?"
-              {...register('description')}
-              disabled={isSubmitting}
+                type="textarea"
+                placeholder="What is this portal about?"
+                {...register('description')}
+                disabled={isSubmitting}
             />
             <ErrorMessage
-              errors={errors}
-              name="description"
-              render={({ message }) => <InputError>{message}</InputError>}
+                errors={errors}
+                name="description"
+                render={({ message }) => <InputError>{message}</InputError>}
             />
           </FieldGroup>
           <FieldGroup label="Portal image" required>
@@ -266,36 +306,13 @@ export const DataPortalForm = ({
                   min="0"
                   placeholder="What is the portal's sort order?"
                   {...register('sort_order')}
-                  disabled={isSubmitting || watch().default === true}
+                  disabled={isSubmitting}
                 />
                 <ErrorMessage
                   errors={errors}
                   name="sort_order"
                   render={({ message }) => <InputError>{message}</InputError>}
                 />
-              </FieldGroup>
-              <FieldGroup>
-                <Controller
-                  data-tip
-                  data-for="default"
-                  name="default"
-                  control={control}
-                  render={({ field }) => {
-                    return (
-                      <FieldLabelRow>
-                        <Checkbox
-                          checked={field.value}
-                          disabled={isSubmitting}
-                          onChange={e => setValue(field.name, e.target.checked)}
-                        />
-                        Default
-                      </FieldLabelRow>
-                    )
-                  }}
-                />
-                <CheckboxTip>
-                  Enabling will make this Data Portal the default for users
-                </CheckboxTip>
               </FieldGroup>
             </Row>
           )}

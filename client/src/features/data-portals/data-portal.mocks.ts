@@ -38,6 +38,6 @@ const dataPortals = [
 export const dataPortalsById = indexBy(s => s.id, dataPortals)
 
 export const dataPortalsMocks = [
-  http.get('/api/data_portals/default', () => HttpResponse.json<DataPortal>(dataPortals[0], { status: 200 })),
+  http.get('/api/data_portals/main', () => HttpResponse.json<DataPortal>(dataPortals[0], { status: 200 })),
 ]
 

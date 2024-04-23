@@ -53,8 +53,6 @@ const Content = styled.p`
   color: #7f8c9b;
   line-height: 150%;
   margin: 6px 0;
-  min-height: 42px;
-
   width: 100%;
   overflow: hidden;
   display: -webkit-box;
@@ -64,12 +62,10 @@ const Content = styled.p`
 
 export const DataPortalListItem = ({
   dataPortal,
-  isMain = false,
 }: {
   dataPortal: DataPortal
-  isMain?: boolean
 }) => (
-  <StyledDataPortalListItem as={Link} to={`/data-portals/${isMain ? 'main' : dataPortal.id}`}>
+  <StyledDataPortalListItem as={Link} to={`/data-portals/${dataPortal.urlSlug}`}>
     <PortalImage>
       <img
         width="100%"
@@ -80,14 +76,7 @@ export const DataPortalListItem = ({
     <PortalItemBody>
       <Title>{dataPortal.name}</Title>
       <Content>{dataPortal.description}</Content>
-      <div>
-        {/* <ViewDetailsButton
-          as={Link}
-          to={`/spaces/${dataPortal.space_id}`}
-        >
-          Go to Space &rarr;
-        </ViewDetailsButton> */}
-      </div>
+      <Content>/{dataPortal.urlSlug}</Content>
     </PortalItemBody>
   </StyledDataPortalListItem>
 )

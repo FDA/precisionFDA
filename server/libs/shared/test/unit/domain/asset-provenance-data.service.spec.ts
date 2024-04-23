@@ -8,8 +8,9 @@ import { AssetProvenanceDataService } from '@shared/domain/provenance/service/en
 describe('AssetProvenanceDataService', () => {
   const NAME = 'name'
   const LINK = 'LINK'
+  const UID = 'UID'
 
-  const ASSET = { name: NAME } as unknown as Asset
+  const ASSET = { name: NAME, uid: UID } as unknown as Asset
 
   const getEntityLinkStub = stub()
 
@@ -32,7 +33,7 @@ describe('AssetProvenanceDataService', () => {
     it('should provide correct data about the asset', async () => {
       const res = await getInstance().getData(ASSET)
 
-      expect(res).to.deep.equal({ type: 'asset', url: LINK, title: NAME })
+      expect(res).to.deep.equal({ type: 'asset', url: LINK, title: NAME, identifier: UID })
     })
   })
 

@@ -1,14 +1,14 @@
 import { SpaceReportPart } from '@shared/domain/space-report/entity/space-report-part.entity'
 import { SpaceReport } from '@shared/domain/space-report/entity/space-report.entity'
 import { SpaceReportPartSourceType } from '@shared/domain/space-report/model/space-report-part-source.type'
-import { SpaceReportResultPartContentProvider } from '@shared/domain/space-report/service/result/space-report-result-part-content.provider'
-import { SpaceReportResultService } from '@shared/domain/space-report/service/result/space-report-result.service'
+import { SpaceReportResultHtmlProvider } from '@shared/domain/space-report/service/result/space-report-result-html.provider'
+import { SpaceReportResultPartHtmlContentProvider } from '@shared/domain/space-report/service/result/space-report-result-part-html-content.provider'
 import { Space } from '@shared/domain/space/space.entity'
 import { expect } from 'chai'
 import { JSDOM } from 'jsdom'
 import { stub } from 'sinon'
 
-describe('SpaceReportResultService', () => {
+describe('SpaceReportResultHtmlProvider', () => {
   const REPORT_ID = 0
   const REPORT_CREATED = new Date('2023-09-01T14:58:08.000Z')
 
@@ -59,7 +59,7 @@ describe('SpaceReportResultService', () => {
     reportParts: { getItems: getPartsStub },
     space: SPACE,
     createdAt: REPORT_CREATED,
-  } as unknown as SpaceReport
+  } as unknown as SpaceReport<'HTML'>
 
   const fileContentProvideStub = stub()
   const appContentProvideStub = stub()
@@ -219,7 +219,7 @@ describe('SpaceReportResultService', () => {
     fileContentProvideStub.reset()
     fileContentProvideStub.throws(error)
 
-    await expect(getInstance().generateResult(REPORT)).to.be.rejectedWith(error)
+    await expect(getInstance().provide(REPORT, { styles: '' })).to.be.rejectedWith(error)
   })
   ;[
     { type: 'app', contentStub: appContentProvideStub },
@@ -251,7 +251,7 @@ describe('SpaceReportResultService', () => {
   })
 
   async function getResultDocument(styles?: string) {
-    return new JSDOM(await getInstance().generateResult(REPORT, styles)).window.document
+    return new JSDOM(await getInstance().provide(REPORT, { styles })).window.document
   }
 
   function getInstance() {
@@ -275,10 +275,10 @@ describe('SpaceReportResultService', () => {
         provide: workflowContentProvideStub,
       },
     } as unknown as {
-      [T in SpaceReportPartSourceType]: SpaceReportResultPartContentProvider<T>
+      [T in SpaceReportPartSourceType]: SpaceReportResultPartHtmlContentProvider<T>
     }
 
-    return new SpaceReportResultService(ENTITY_PARENT_RESOLVER_MAP)
+    return new SpaceReportResultHtmlProvider(ENTITY_PARENT_RESOLVER_MAP)
   }
 
   function getContentFake(id: string, title: string) {
