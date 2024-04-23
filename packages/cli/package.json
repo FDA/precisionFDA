@@ -1,0 +1,14 @@
+{
+  "name": "cli",
+  "version": "1.0.0",
+  "description": "Precision FDA",
+  "dependencies": {},
+  "devDependencies": {},
+  "scripts": {
+    "build": "make build-docker && make dist",
+    "test": "make test"
+  },
+  "repository": {},
+  "author": "",
+  "license": "ISC"
+}

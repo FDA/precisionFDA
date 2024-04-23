@@ -4,18 +4,27 @@
 repo-env-files-init:
 	echo Setting up .env files
 	cp -n docker/.env.example docker/.env || echo Skipping docker .env
-	cp -n server/.env.example server/.env || echo Skipping server .env
+	cp -n packages/server/.env.example packages/server/.env || echo Skipping server .env
 	cp -n .env.example .env || echo Skipping root directory .env
+
+repo-key-files-init:
+	echo Setting up key/cert files
+	cp key.pem packages/server || echo Skipping docker server/key.pem
+	cp cert.pem packages/server || echo Skipping docker server/cert.pem
+	cp key.pem packages/rails || echo Skipping docker rails/key.pem
+	cp cert.pem packages/rails || echo Skipping docker rails/cert.pem
+	cp key.pem packages/client || echo Skipping docker client/key.pem
+	cp cert.pem packages/client || echo Skipping docker client/cert.pem
 
 repo-db-config-init:
 	echo Setting up db config
-	cp config/database.sample.yml config/database.yml
+	cp packages/rails/config/database.sample.yml packages/rails/config/database.yml
 
 repo-githooks-init:
 	chmod +x utils/githooks/*
 	ln -f utils/githooks/* .git/hooks
 
-repo-init: repo-db-config-init repo-env-files-init repo-githooks-init
+repo-init: repo-db-config-init repo-key-files-init repo-env-files-init repo-githooks-init
 	echo Repo setup complete
 
 
@@ -28,12 +37,12 @@ repo-init: repo-db-config-init repo-env-files-init repo-githooks-init
 check-missing-env-variables:
 	./utils/scripts/check-missing-env-variables.sh .env .env.example
 	./utils/scripts/check-missing-env-variables.sh docker/.env docker/.env.example
-	./utils/scripts/check-missing-env-variables.sh server/.env server/.env.example
+	./utils/scripts/check-missing-env-variables.sh packages/server/.env packages/server/.env.example
 
 check-unpublished-env-variables:
 	./utils/scripts/check-unpublished-env-variables.sh .env .env.example
 	./utils/scripts/check-unpublished-env-variables.sh docker/.env docker/.env.example
-	./utils/scripts/check-unpublished-env-variables.sh server/.env server/.env.example
+	./utils/scripts/check-unpublished-env-variables.sh packages/server/.env packages/server/.env.example
 
 
 # ┌───────────────────────┐

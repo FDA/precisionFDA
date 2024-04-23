@@ -1,0 +1,16 @@
+{
+  "name": "precision-fda",
+  "version": "1.0.0",
+  "description": "Precision FDA",
+  "main": "index.js",
+  "dependencies": {},
+  "devDependencies": {},
+  "packageManager": "pnpm@8.15.1",
+  "scripts": {
+    "build": "turbo run build",
+    "test": "turbo run test"
+  },
+  "repository": {},
+  "author": "",
+  "license": "ISC"
+}

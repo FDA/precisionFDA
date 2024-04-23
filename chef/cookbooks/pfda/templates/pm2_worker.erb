@@ -1,14 +1,14 @@
 {
   "apps": [
     {
-      name: "https_apps_worker",
+      name: "server_worker",
       script: "dist/apps/worker/apps/worker/src/index.js",
       node_args: "--max_old_space_size=6144",
       instances: <%= @instances %>,
       exec_mode: "cluster",
       watch: false,
-      log_file: "../log/node-worker.log",
-      error_file: "../log/node-worker-error.log",
+      log_file: "../../log/node-worker.log",
+      error_file: "../../log/node-worker-error.log",
       time: true
     }
   ]
