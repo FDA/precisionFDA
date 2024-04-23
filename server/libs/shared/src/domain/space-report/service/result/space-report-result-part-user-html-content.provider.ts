@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common'
 import { spaceMembershipTypeToNameMap } from '@shared/domain/space-membership/space-membership-type-to-name.map'
-import { SpaceReportPartUserTileResult } from '@shared/domain/space-report/model/space-report-part-user-tile-result'
-import { SpaceReportResultPartContentProvider } from '@shared/domain/space-report/service/result/space-report-result-part-content.provider'
+import { SpaceReportPartUserTileHtmlResult } from '@shared/domain/space-report/model/space-report-part-user-tile-result'
+import { SpaceReportResultPartHtmlContentProvider } from '@shared/domain/space-report/service/result/space-report-result-part-html-content.provider'
 
 @Injectable()
-export class SpaceReportResultPartUserContentProvider extends SpaceReportResultPartContentProvider<'user'> {
+export class SpaceReportResultPartUserHtmlContentProvider extends SpaceReportResultPartHtmlContentProvider<'user'> {
   protected async addContent(
-    result: SpaceReportPartUserTileResult,
+    result: SpaceReportPartUserTileHtmlResult,
     document: Document,
     container: HTMLDivElement,
   ): Promise<void> {

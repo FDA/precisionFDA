@@ -6,6 +6,8 @@ import { expect } from 'chai'
 import { SinonStub, stub } from 'sinon'
 
 describe('ComparisonProvenanceDataService', () => {
+  const ID = 1
+
   const NAME = 'name'
   const LINK = 'LINK'
 
@@ -20,6 +22,7 @@ describe('ComparisonProvenanceDataService', () => {
   const getEntityLinkStub = stub()
 
   const COMPARISON = {
+    id: ID,
     name: NAME,
     inputFiles: { loadItems: loadFilesStub },
   } as unknown as Comparison
@@ -50,6 +53,7 @@ describe('ComparisonProvenanceDataService', () => {
         type: 'comparison',
         url: LINK,
         title: NAME,
+        identifier: String(ID),
       })
     })
   })

@@ -1,6 +1,11 @@
 import { EntityType } from '@shared/domain/entity/domain/entity.type'
 import { SpaceReportPartResultBase } from '@shared/domain/space-report/model/space-report-part-result-base'
 
+export interface SpaceReportPartDiscussionResultCommentCreatedBy {
+  fullName: string
+  dxuser: string
+}
+
 export interface SpaceReportPartDiscussionResultAttachment {
   name: string
   link: string
@@ -9,7 +14,7 @@ export interface SpaceReportPartDiscussionResultAttachment {
 
 export interface SpaceReportPartDiscussionResultComment {
   content: string
-  createdBy: string
+  createdBy: SpaceReportPartDiscussionResultCommentCreatedBy
   createdAt: Date
 }
 

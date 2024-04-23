@@ -3,6 +3,7 @@ import { Comparison } from '@shared/domain/comparison/comparison.entity'
 import { Discussion } from '@shared/domain/discussion/discussion.entity'
 import { EntityType } from '@shared/domain/entity/domain/entity.type'
 import { Job } from '@shared/domain/job/job.entity'
+import { Resource } from '@shared/domain/resource/resource.entity'
 import { Asset } from '@shared/domain/user-file/asset.entity'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { User } from '@shared/domain/user/user.entity'
@@ -17,4 +18,5 @@ export const entityTypeToEntityMap = {
   app: App,
   workflow: Workflow,
   discussion: Discussion,
+  resource: Resource,
 } satisfies Record<EntityType, object>

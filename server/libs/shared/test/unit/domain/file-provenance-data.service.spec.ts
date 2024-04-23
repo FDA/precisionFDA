@@ -14,6 +14,7 @@ import { SinonStub, stub } from 'sinon'
 describe('FileProvenanceDataService', () => {
   const NAME = 'name'
   const LINK = 'LINK'
+  const UID = 'UID'
 
   const USER_ID = 1
   const USER = { id: USER_ID }
@@ -87,6 +88,7 @@ describe('FileProvenanceDataService', () => {
         type: 'file',
         url: LINK,
         title: NAME,
+        identifier: UID,
       })
     })
   })
@@ -152,6 +154,7 @@ describe('FileProvenanceDataService', () => {
   function getFile(parentId?: number, parentType?: PARENT_TYPE) {
     const file = {
       name: NAME,
+      uid: UID,
       parentId,
       parentType,
     } as unknown as UserFile

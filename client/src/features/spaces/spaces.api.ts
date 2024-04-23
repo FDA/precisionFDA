@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { getApiRequestOpts, requestOpts } from '../../utils/api'
+import { getApiRequestOpts } from '../../utils/api'
 import { IFilter } from '../home/types'
 import { Params, prepareListFetch } from '../home/utils'
 import { ISpace } from './spaces.types'
@@ -7,17 +7,9 @@ import { ISpace } from './spaces.types'
 export type FetchSpacesListResponse = {meta: unknown, spaces: ISpace[]}
 export type FetchSpaceDetailsResponse = {meta: unknown, space: ISpace}
 
-
-export async function fetchSpaces(filters: IFilter[], params: Params): Promise<FetchSpacesListResponse> {
-  const query = prepareListFetch(filters, params)
-  const paramQ = `?${  new URLSearchParams(query as Record<string, string>).toString()}`
-  const res = await fetch(`/api/spaces${paramQ}`, requestOpts)
-  return res.json()
-}
-
 export async function spacesListRequest(filters: IFilter[], params: Params): Promise<{meta: any, spaces: ISpace[]}> {
   const query = prepareListFetch(filters, params)
-  const paramQ = `?${  new URLSearchParams(query as {}).toString()}`
+  const paramQ = `?${  new URLSearchParams(query as { }).toString()}`
   return axios.get(`/api/spaces/${paramQ}`).then(res => res.data)
 }
 

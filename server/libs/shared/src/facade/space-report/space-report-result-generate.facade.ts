@@ -44,8 +44,7 @@ export class SpaceReportResultGenerateFacade {
 
       await this.em.populate(report, ['reportParts', 'space', 'createdBy'])
 
-      const provenanceStyles = await this.entityProvenanceService.getSvgStyles()
-      const reportResult = await this.spaceReportService.generateResult(report, provenanceStyles)
+      const reportResult = await this.getReportResult(report)
 
       const membership = await this.em.findOne(SpaceMembership, {
         spaces: report.space.id,
@@ -92,11 +91,24 @@ export class SpaceReportResultGenerateFacade {
   }
 
   private getName(report: SpaceReport) {
-    return `PFDA - Space ${report.space.id} report - ${report.createdAt.toLocaleDateString()}.html`
+    const createdAt = report.createdAt.toLocaleDateString()
+    const extension = report.format.toLowerCase()
+
+    return `PFDA - Space ${report.space.id} report - ${createdAt}.${extension}`
   }
 
   private getDescription(report: SpaceReport) {
     const generated = new Date(report.createdAt).toLocaleString()
     return `Report of a precisionFDA space ${report.space.name}, generatad on ${generated}`
+  }
+
+  private async getReportResult(report: SpaceReport): Promise<string> {
+    if (report.format === 'HTML') {
+      const styles = await this.entityProvenanceService.getSvgStyles()
+
+      return this.spaceReportService.generateResult(report as SpaceReport<'HTML'>, { styles })
+    }
+
+    return await this.spaceReportService.generateResult(report as SpaceReport<'JSON'>)
   }
 }

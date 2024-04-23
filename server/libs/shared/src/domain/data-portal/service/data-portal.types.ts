@@ -9,12 +9,6 @@ class FileParam {
   description: string
 }
 
-class CustomPortal {
-  name: string
-  id: number
-  spaceId: number
-}
-
 class DataPortalMemberParam {
   dxuser: string
   role: DATA_PORTAL_MEMBER_ROLE
@@ -23,6 +17,7 @@ class DataPortalParam {
   id: number
   name: string
   description: string
+  urlSlug: string
   cardImageFileName: string
   content: string
   editorState: string
@@ -39,4 +34,4 @@ class DataPortalParam {
   members: DataPortalMemberParam[]
 }
 
-export { DataPortalParam, FileParam, DataPortalMemberParam, CreateResourceResponse, CustomPortal }
+export { DataPortalParam, FileParam, DataPortalMemberParam, CreateResourceResponse }
