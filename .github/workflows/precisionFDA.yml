@@ -6,6 +6,9 @@ on:
   pull_request:
     branches:
       - '*'
+    paths-ignore:
+      - 'chef/**'
+      - 'infra/**'
 
 jobs:
   # Prepopulates ruby cache
