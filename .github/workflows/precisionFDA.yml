@@ -27,6 +27,7 @@ jobs:
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
+          working-directory: ./packages/rails
           bundler-cache: true
           cache-version: 1
 
@@ -43,6 +44,7 @@ jobs:
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
+          working-directory: ./packages/rails
           bundler-cache: true
           cache-version: 1
 
@@ -51,6 +53,7 @@ jobs:
       #   run: bundle exec rubocop
 
       - name: Brakeman
+        working-directory: ./packages/rails
         run: bundle exec brakeman -A -w2 --parser-timeout 30
 
   static-analysis-pr:
@@ -73,10 +76,12 @@ jobs:
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
+          working-directory: ./packages/rails
           bundler-cache: true
           cache-version: 1
 
       - name: Rubocop
+        working-directory: ./packages/rails
         run: bundle exec pronto run -f github_status github_pr -c origin/${{ github.base_ref }}
         env:
           PRONTO_PULL_REQUEST_ID: ${{ github.event.pull_request.number }}
@@ -84,6 +89,7 @@ jobs:
           BUNDLE_PATH: "vendor/bundle"
 
       - name: Brakeman
+        working-directory: ./packages/rails
         run: bundle exec pronto run -f github_status github_pr -c origin/${{ github.base_ref }} -r brakeman
         env:
           PRONTO_PULL_REQUEST_ID: ${{ github.event.pull_request.number }}
@@ -109,10 +115,12 @@ jobs:
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
+          working-directory: ./packages/rails
           bundler-cache: true
           cache-version: 1
 
       - name: Install & Build
+        working-directory: ./packages/rails
         env:
           NO_FIPS: 1
         run: |
@@ -126,11 +134,13 @@ jobs:
           touch app/assets/packs/bundle.css
 
       - name: Test
+        working-directory: ./packages/rails
         env:
           NO_FIPS: 1
           RAILS_LOG_TO_STDOUT: 1
           LOG_REQUESTS: 1
         run: bundle exec rspec
+
   test-https-apps:
     name: Test HTTPS Apps
     runs-on: ubuntu-latest
@@ -157,6 +167,7 @@ jobs:
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
+          working-directory: ./packages/rails
           bundler-cache: true
           cache-version: 1
       - uses: pnpm/action-setup@v3
@@ -172,10 +183,11 @@ jobs:
       - uses: actions/cache@v4
         with:
           path: |
-            ./server/node_modules
-          key: ${{ runner.os }}-modules-${{ hashFiles('./server/pnpm-lock.yaml') }}
+            ./packages/server/node_modules
+          key: ${{ runner.os }}-modules-${{ hashFiles('./packages/server/pnpm-lock.yaml') }}
 
       - name: Prepare env & db
+        working-directory: ./packages/rails
         env:
           NO_FIPS: 1
         run: |
@@ -187,23 +199,23 @@ jobs:
           bundle exec rake user:generate_test_users
       - name: Install Deps
         run: make install
-        working-directory: ./server
+        working-directory: ./packages/server
       - name: Test
         run: |
           make test-shared
           make test-worker
           make test-api
-        working-directory: ./server
+        working-directory: ./packages/server
       - name: Test production build
         run: pnpm run build
-        working-directory: ./server
+        working-directory: ./packages/server
       - name: Test API production start
         run: make run-dist ARGS="-- --shutdown"
-        working-directory: ./server
+        working-directory: ./packages/server
         timeout-minutes: 1
       - name: Test worker production start
         run: make run-dist ARGS="-- --shutdown"
-        working-directory: ./server
+        working-directory: ./packages/server
         timeout-minutes: 1
 
   test-react-app:
@@ -219,15 +231,15 @@ jobs:
       - uses: actions/cache@v4
         name: Setup pnpm cache
         with:
-          path: ./client/node_modules
-          key: ${{ runner.os }}-fe-modules-${{ hashFiles('./client/pnpm-lock.yaml') }}
+          path: ./packages/client/node_modules
+          key: ${{ runner.os }}-fe-modules-${{ hashFiles('./packages/client/pnpm-lock.yaml') }}
 
       - name: Install dependencies
-        working-directory: ./client
-        run: pnpm install --prod=false
+        working-directory: ./packages/client
+        run: pnpm install --frozen-lockfile --prod=false
 
       - name: Test
-        working-directory: ./client
+        working-directory: ./packages/client
         run: pnpm test
 
   test-react-app-production:
@@ -245,13 +257,13 @@ jobs:
       - uses: actions/cache@v4
         name: Setup pnpm cache
         with:
-          path: ./client/node_modules
-          key: ${{ runner.os }}-fe-modules-${{ hashFiles('./client/pnpm-lock.yaml') }}
+          path: ./packages/client/node_modules
+          key: ${{ runner.os }}-fe-modules-${{ hashFiles('./packages/client/pnpm-lock.yaml') }}
 
       - name: Install dependencies
-        working-directory: ./client
-        run: pnpm install --prod=false
+        working-directory: ./packages/client
+        run: pnpm install --frozen-lockfile --prod=false
 
       - name: Build production
-        working-directory: ./client
-        run: pnpm run build:production
+        working-directory: ./packages/client
+        run: pnpm run build

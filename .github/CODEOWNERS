@@ -7,7 +7,7 @@
 /infra @johnymachine @gitbisect
 
 # Frontend
-/client @ddcech
+/packages/client @ddcech
 
 # CLI
-/go @jirkalagan
+/packages/go @jirkalagan
