@@ -77,17 +77,17 @@ class ComparisonsController < ApplicationController
     format = "JSON"
     results = []
 
+    query_params = params.permit(:id, :name, :page, :_format)
     # no unallowed params
     if user_params == query_params
-      # Initialize filtered_params
-      filtered_params = query_params.slice(:id, :name, :_format)
+      id = user_params[:id].to_i if user_params[:id].present?
+      page_number = user_params[:page].to_i.positive? ? user_params[:page].to_i : 1
 
-      # Handle 'page' separately to ensure it's an integer
-      page_number = query_params[:page].to_i
-      page_number = nil if page_number < 1
+      results = Comparison.accessible_by_public
 
-      # find what range to display
-      results = Comparison.accessible_by_public.where(filtered_params)
+      results = results.where(id:) if id.present?
+      results = results.where("name LIKE ?", "%#{sanitize_sql_like(user_params[:name])}%") if user_params[:name].present?
+
       list = results.page(page_number).per(page_size)
     end
 
@@ -506,10 +506,6 @@ class ComparisonsController < ApplicationController
 
   def comparison_params
     params.require(:comparison).permit(:name, :description)
-  end
-
-  def query_params
-    params.permit(:id, :name, :page, :_format)
   end
 
   # Returns hash containing ids of comparisons that have description.

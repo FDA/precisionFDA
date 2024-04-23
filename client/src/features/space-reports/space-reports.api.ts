@@ -1,8 +1,8 @@
 import axios from 'axios'
-import { ISpaceReport } from './space-report.types'
+import { ISpaceReport, SpaceReportFormat, SpaceReportFormatToOptionsMap } from './space-report.types'
 
-export async function createReport(spaceId: number) {
-  return axios.post<number>(`/api/spaces/${spaceId}/report`).then(res => res.data)
+export async function createReport<T extends SpaceReportFormat>(spaceId: number, format: T, options?: SpaceReportFormatToOptionsMap[T]) {
+  return axios.post<number>(`/api/spaces/${spaceId}/report`, { format, options }).then(res => res.data)
 }
 
 export async function fetchReports(spaceId: string) {

@@ -10,7 +10,7 @@ export interface DataPortal {
   id: number
   name: string
   description: string
-  default: boolean
+  urlSlug: string
   sortOrder: number
   cardImageUid: string
   cardImageUrl: string
@@ -31,5 +31,7 @@ export interface CreateDataPortalData {
 
 export interface UpdateDataPortalData {
   dataPortal: UpdateDataPortalRequest
-  image: File
+  // Space ID in which the image will be uploaded
+  spaceId?: number
+  image?: File
 }

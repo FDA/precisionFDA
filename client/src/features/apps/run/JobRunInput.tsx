@@ -84,6 +84,16 @@ const Menu = ({ children, ...props }: SingleValueProps) => {
   )
 }
 
+/**
+ * Private apps need to be able to run with public files and public apps
+ * need to be able to run with private files.
+ *
+ * @param scope
+ */
+const enhanceScope = (scope: string) => {
+  return ['public', 'private'].includes(scope) ? ['private', 'public'] : [scope, 'public']
+}
+
 export const JobRunInput = ({
   inputSpec,
   field,
@@ -116,7 +126,7 @@ export const JobRunInput = ({
             }}
             dialogType="radio"
             value={field.value && [field.value]}
-            scopes={scope === 'public' ? ['private', 'public'] : [scope]}
+            scopes={enhanceScope(scope)}
           />
 
           <FieldInfo text={inputSpec.help} />
@@ -136,7 +146,7 @@ export const JobRunInput = ({
               field.onBlur()
             }}
             value={field?.value ?? null}
-            scopes={scope === 'public' ? ['private', 'public'] : [scope]}
+            scopes={enhanceScope(scope)}
           />
 
           <FieldInfo text={inputSpec.help} />

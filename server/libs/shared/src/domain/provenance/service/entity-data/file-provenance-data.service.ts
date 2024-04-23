@@ -36,6 +36,10 @@ export class FileProvenanceDataService extends EntityProvenanceDataService<'file
     } satisfies Record<PARENT_TYPE, object>
   }
 
+  protected getIdentifier(file: UserFile): string {
+    return file.uid
+  }
+
   async getParents(file: UserFile): Promise<EntityProvenanceSourceUnion[]> {
     if (file.parentId == null || !file.parentType) {
       return []

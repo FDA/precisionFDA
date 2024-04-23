@@ -8,8 +8,8 @@ import { PageTitle } from '../../../components/Page/styles'
 import { UserLayout } from '../../../layouts/UserLayout'
 import { useAuthUser } from '../../auth/useAuthUser'
 import { StyledPageCenter, StyledPageContent } from '../../spaces/form/styles'
-import { CreateDataPortalRequest, createDataPortalRequest } from '../api'
-import { DataPortal, CreateDataPortalData } from '../types'
+import { createDataPortalRequest } from '../api'
+import { CreateDataPortalData } from '../types'
 import { DataPortalForm } from './DataPortalForm'
 import { ScrollableMainGlobalStyles } from '../../../styles/global'
 
@@ -18,41 +18,36 @@ const CreateDataPortalPage = () => {
   const navigate = useNavigate()
   const user = useAuthUser()
   const queryClient = useQueryClient()
-  const mutation = useMutation({
-    mutationKey: ['create-data-portal'],
-    mutationFn: (payload: CreateDataPortalData) => createDataPortalRequest(payload),
-    onSuccess: res => {
-      if (!res?.error) {
-        queryClient.invalidateQueries({
-          queryKey: ['data-portal-list'],
-        })
-        navigate(`/data-portals/${res.id}`)
-        toast.success('Data Portal created')
-      } else if (res?.error) {
-        toast.error(`${res.error.type}: ${res.error.message}`)
-      } else {
-        toast.error('Something went wrong')
-      }
-    },
-    onError: () => {
-      toast.error('There was an issue creating the data portal')
-    },
-  })
 
-  const handleSubmit = async (v: any) => {
-    return mutation.mutateAsync(
-      {
-        dataPortal: {
-          name: v.name,
-          description: v.description,
-          card_image_file_name: v.card_image_file[0]?.name,
-          default: v.default,
-          status: v.status?.value,
-          host_lead_dxuser: v.host_lead_dxuser?.value,
-          guest_lead_dxuser: v.guest_lead_dxuser?.value,
-        },
+
+  const dataPortalMutation = useMutation({ mutationFn: createDataPortalRequest })
+
+  const onSubmit = async (v: any) => {
+    const payload = {
+      dataPortal: {
+        name: v.name,
+        description: v.description,
+        url_slug: v.url_slug,
+        card_image_file_name: v.card_image_file[0]?.name,
+        status: v.status?.value,
+        host_lead_dxuser: v.host_lead_dxuser?.value,
+        guest_lead_dxuser: v.guest_lead_dxuser?.value,
+        sort_order: v.sort_order,
+      },
       image: v.card_image_file[0],
-    })
+    } as CreateDataPortalData
+
+    try {
+      const res = await dataPortalMutation.mutateAsync(payload)
+      navigate(`/data-portals/${res.urlSlug}`)
+      queryClient.invalidateQueries({
+        queryKey: ['data-portal-list'],
+      })
+      toast.success('Data Portal created')
+    } catch (err) {
+      const message = err.response?.data?.error?.message || err.message || 'Unknown error'
+      toast.error(`Error while creating data portal: ${message}`)
+    }
   }
 
   return (
@@ -72,7 +67,7 @@ const CreateDataPortalPage = () => {
           <StyledPageCenter>
             <StyledPageContent>
               <PageTitle>Create a Data Portal</PageTitle>
-              <DataPortalForm onSubmit={handleSubmit} canEditMainDataPortal />
+              <DataPortalForm onSubmit={onSubmit} canEditMainDataPortal isSubmitting={dataPortalMutation.isPending} />
             </StyledPageContent>
           </StyledPageCenter>
         ) : (

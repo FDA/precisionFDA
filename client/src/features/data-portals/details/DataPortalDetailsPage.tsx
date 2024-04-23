@@ -1,15 +1,15 @@
 import { useQueryClient } from '@tanstack/react-query'
 import React, { useEffect } from 'react'
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import useWebSocket from 'react-use-websocket'
-import { Loader } from '../../../components/Loader'
+import { Loader, LoaderMargin } from '../../../components/Loader'
 import { PageContainerMargin } from '../../../components/Page/styles'
 import { UserLayout } from '../../../layouts/UserLayout'
 import { DEFAULT_RECONNECT_ATTEMPTS, DEFAULT_RECONNECT_INTERVAL, SHOULD_RECONNECT, getNodeWsUrl } from '../../../utils/config'
 import { useAuthUser } from '../../auth/useAuthUser'
 import { Notification, NOTIFICATION_ACTION } from '../../home/types'
 import { useDataPortalByIdQuery } from '../queries'
-import { DataPortalNotFound } from './DataPortalNotFound'
+import { DataPortalError } from './DataPortalNotFound'
 
 import '../../lexi/themes/PlaygroundEditorTheme.css'
 import { canEditContent as canEditContentCheck, canEditSettings as canEditSettingsCheck } from '../utils'
@@ -23,8 +23,10 @@ const DataPortalDetailsPage = () => {
     portalId: string
     page?: string
   }>()
+
   const queryClient = useQueryClient()
-  const { data, isLoading, error } = useDataPortalByIdQuery(portalId)
+  const { data, isLoading, error } = useDataPortalByIdQuery(portalId === undefined ? 'main' : portalId)
+  const navigate = useNavigate()
 
   const { lastJsonMessage: notification } = useWebSocket<Notification>(getNodeWsUrl(), {
     share: true,
@@ -42,34 +44,48 @@ const DataPortalDetailsPage = () => {
     }
   }, [notification])
 
-  if (!isLoading && !data && error) {
+
+  // URLs /data-portals/main and /data-portals/{id} are redirected to /data-portals/{slug}
+  useEffect(() => {
+    if (data !== undefined && data.urlSlug !== undefined && data.urlSlug !== portalId) {
+      navigate(`/data-portals/${data.urlSlug}`, { replace: true })
+    }
+  }, [portalId, data, navigate])
+  
+  if (error?.response?.status === 503) {
     return (
       <UserLayout>
-        <DataPortalNotFound message={error?.response?.data?.error?.message} />
+        <DataPortalError message={error?.response?.data?.error.message} />
       </UserLayout>
     )
   }
 
-  return (
-    <>
-      <ScrollableInnerGlobalStyles />
+  if (!isLoading && !data) {
+    return (
       <UserLayout>
-        {isLoading || !data ? (
-          <PageContainerMargin>
-            <Loader />
-          </PageContainerMargin>
-        ) : (
-          <DataPortalDetails
-            portal={data}
-            canViewResources={canEditContentCheck(user?.dxuser, data.members)}
-            canEditContent={canEditContentCheck(user?.dxuser, data.members)}
-            canEditSettings={canEditSettingsCheck(user?.dxuser, data.members)}
-            canListPortals={user?.isAdmin}
-          />
-        )}
+        <DataPortalError message="Data Portal Not Found" />
       </UserLayout>
-    </>
-  )
+    )
+  }
+
+  return <>
+    <ScrollableInnerGlobalStyles/>
+    <UserLayout>
+      {isLoading || !data ? (
+          <PageContainerMargin>
+            <LoaderMargin><Loader/></LoaderMargin>
+          </PageContainerMargin>
+      ) : (
+          <DataPortalDetails
+              portal={data}
+              canViewResources={canEditContentCheck(user?.dxuser, data.members)}
+              canEditContent={canEditContentCheck(user?.dxuser, data.members)}
+              canEditSettings={canEditSettingsCheck(user?.dxuser, data.members)}
+              canListPortals={user?.isAdmin}
+          />
+      )}
+    </UserLayout>
+  </>
 }
 
 export default DataPortalDetailsPage

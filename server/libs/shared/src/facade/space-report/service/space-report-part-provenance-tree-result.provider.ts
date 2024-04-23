@@ -1,18 +1,25 @@
 import { Injectable } from '@nestjs/common'
 import { entityTypeToEntityMap } from '@shared/domain/entity/domain/entity-type-to-entity.map'
+import { EntityProvenanceFormatType } from '@shared/domain/provenance/model/entity-provenance-format.type'
+import { EntityProvenanceResultType } from '@shared/domain/provenance/model/entity-provenance-result.type'
 import { EntityProvenanceSourceUnion } from '@shared/domain/provenance/model/entity-provenance-source-union'
 import { EntityProvenanceService } from '@shared/domain/provenance/service/entity-provenance.service'
-import { SpaceReportPartProvenanceTreeResult } from '@shared/domain/space-report/model/space-report-part-provenance-tree-result'
+import {
+  SpaceReportPartProvenanceTreeHtmlResult,
+  SpaceReportPartProvenanceTreeJsonResult,
+} from '@shared/domain/space-report/model/space-report-part-provenance-tree-result'
 import { SpaceReportPartProvenanceTreeResultMeta } from '@shared/domain/space-report/model/space-report-part-provenance-tree-result-meta'
 import { SpaceReportPartTypeForResult } from '@shared/domain/space-report/model/space-report-part-type-for-result'
+import { SpaceReportPartProvenanceTreeResult } from '@shared/domain/space-report/model/space-report-part-type-to-result.map'
 import { SpaceReportPartResultProvider } from './space-report-part-result.provider'
 
 @Injectable()
 export abstract class SpaceReportPartProvenanceTreeResultProvider<
   T extends SpaceReportPartTypeForResult<SpaceReportPartProvenanceTreeResult>,
-> implements SpaceReportPartResultProvider<T>
-{
-  constructor(private readonly entityProvenanceService: EntityProvenanceService) {}
+> extends SpaceReportPartResultProvider<T> {
+  constructor(private readonly entityProvenanceService: EntityProvenanceService) {
+    super()
+  }
 
   protected abstract type: T
 
@@ -20,19 +27,33 @@ export abstract class SpaceReportPartProvenanceTreeResultProvider<
     entity: InstanceType<(typeof entityTypeToEntityMap)[T]>,
   ): SpaceReportPartProvenanceTreeResultMeta
 
-  async getResult(
+  protected async getJsonResult(
     entity: InstanceType<(typeof entityTypeToEntityMap)[T]>,
-  ): Promise<SpaceReportPartProvenanceTreeResult> {
-    const entityProvenanceSource = { type: this.type, entity } as EntityProvenanceSourceUnion
-    const entityProvenance = await this.entityProvenanceService.getEntityProvenance(
-      entityProvenanceSource,
-      'svg',
-      { omitStyles: true },
-    )
-
+  ): Promise<SpaceReportPartProvenanceTreeJsonResult> {
     return {
       ...this.getMeta(entity),
-      svg: entityProvenance,
+      provenance: await this.getProvenance(entity, 'raw'),
     }
+  }
+
+  protected async getHtmlResult(
+    entity: InstanceType<(typeof entityTypeToEntityMap)[T]>,
+  ): Promise<SpaceReportPartProvenanceTreeHtmlResult> {
+    return {
+      ...this.getMeta(entity),
+      svg: await this.getProvenance(entity, 'svg'),
+    }
+  }
+
+  private async getProvenance<F extends EntityProvenanceFormatType>(
+    entity: InstanceType<(typeof entityTypeToEntityMap)[T]>,
+    provenanceFormat: F,
+  ): Promise<EntityProvenanceResultType<F>> {
+    const entityProvenanceSource = { type: this.type, entity } as EntityProvenanceSourceUnion
+    return await this.entityProvenanceService.getEntityProvenance(
+      entityProvenanceSource,
+      provenanceFormat,
+      { omitStyles: true },
+    )
   }
 }

@@ -7,6 +7,10 @@ import { EntityProvenanceDataService } from './entity-provenance-data.service'
 export class ComparisonProvenanceDataService extends EntityProvenanceDataService<'comparison'> {
   protected type = 'comparison' as const
 
+  protected getIdentifier(comparison: Comparison): string {
+    return String(comparison.id)
+  }
+
   async getParents(comparison: Comparison): Promise<EntityProvenanceSourceUnion[]> {
     const files = await comparison.inputFiles.loadItems()
 

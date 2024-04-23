@@ -40,17 +40,24 @@ export const useSpaceReportColumns = ({
           accessor: 'state',
           disableFilters: true,
           disableSortBy: true,
-          width: colWidths?.state || 300,
+          width: colWidths?.state || 100,
           Cell({ value }) {
             return reportStateToTextMap[value]
           },
+        },
+        {
+          Header: 'Format',
+          accessor: 'format',
+          disableFilters: true,
+          disableSortBy: true,
+          width: colWidths?.format || 100,
         },
         {
           Header: 'File',
           accessor: 'resultFile',
           disableFilters: true,
           disableSortBy: true,
-          width: colWidths?.location || 250,
+          width: colWidths?.location || 150,
           Cell({ value }) {
             if (value?.state !== 'closed') {
               return ''
