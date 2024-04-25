@@ -1,37 +1,38 @@
 import { isSafeInteger, uniq } from 'lodash'
 import * as Yup from 'yup'
-import { IUser } from '../../../types/user'
-import { promiseAllMap } from '../../../utils/promiseAllMap'
-import { IAccessibleFile, fetchAccessibleFilesByUID } from '../../databases/databases.api'
-import { fetchLicensesForFiles } from '../../licenses/api'
+import React, { useEffect } from 'react'
+import { UseFormReset, UseFormSetValue, UseFormWatch } from 'react-hook-form'
+import { useQuery } from '@tanstack/react-query'
+import { toast } from 'react-toastify'
 import { License } from '../../licenses/types'
-import { RunJobRequest } from '../apps.api'
+import { fetchUserComputeInstances, RunJobRequest } from '../apps.api'
 import {
-  AcceptedLicense,
+  AcceptedLicense, BatchInput,
+  ComputeInstance,
   FormInput,
   IApp,
   InputSpec,
-  JobRunForm,
+  RunJobFormType,
+  SelectableSpace,
 } from '../apps.types'
 import { isFloatValid, isStrictlyInteger } from '../form/common'
 import { cleanObject } from '../../../utils/object'
-import { FileUid } from '../../files/files.types'
+import { fetchAndConvertSelectableContexts, fetchAndConvertSelectableSpaces } from './job-run-helper'
+import { ServerScope } from '../../home/types'
+import { fetchLicensesForFiles } from '../../licenses/api'
+import { FileTreeNode, FileUid } from '../../files/files.types'
+import { IUser } from '../../../types/user'
 
-export const getLabel = (inputSpec: InputSpec) =>
-  inputSpec.label ? inputSpec.label : inputSpec.name
+export const getLabel = (inputSpec: InputSpec) => (inputSpec.label ? inputSpec.label : inputSpec.name)
 
-const getSchema = (schema: Yup.BaseSchema, input: InputSpec) => {
+export const getSchema = (schema: Yup.BaseSchema, input: InputSpec) => {
   if (input.optional) {
     return schema.optional().nullable()
   }
   return schema.required(`${getLabel(input)} is required`)
 }
 
-export const prepareValidations = (
-  inputSpec: InputSpec[],
-  userJobLimit: IUser['job_limit'],
-  scope?: IApp['scope'],
-) => {
+export const prepareValidationsForInputs = (inputSpec: InputSpec[]) => {
   const inputs: Record<string, Yup.BaseSchema> = {}
   inputSpec.forEach(i => {
     if (i.class === 'boolean') {
@@ -56,37 +57,47 @@ export const prepareValidations = (
       inputs[i.name] = getSchema(Yup.array(Yup.number()), i)
     }
     if (i.class === 'float') {
-      inputs[i.name] = getSchema(Yup.string().test(
-        'is-float',
-        'The field must contain a float',
-        value => {
+      inputs[i.name] = getSchema(
+        Yup.string().test('is-float', 'The field must contain a float', value => {
           if (value == null || value === '') return true
           return isFloatValid(value)
-        },
-      ), i).nullable()
+        }),
+        i,
+      ).nullable()
     }
     if (i.class === 'int') {
-      inputs[i.name] = getSchema(Yup.string().test(
-        'is-int',
-        'The field must contain an integer',
-        value => {
-          if (value == null || value === '') return true
-          return isStrictlyInteger(value)
-        },
-      ).test(
-        'is-safe',
-        'The field must contain valid safe integer',
-        value => {
-          if (value == null || value === '') return true
-          return isSafeInteger(parseInt(value, 10))
-        }), i).nullable()
+      inputs[i.name] = getSchema(
+        Yup.string()
+          .test('is-int', 'The field must contain an integer', value => {
+            if (value == null || value === '') return true
+            return isStrictlyInteger(value)
+          })
+          .test('is-safe', 'The field must contain valid safe integer', value => {
+            if (value == null || value === '') return true
+            return isSafeInteger(parseInt(value, 10))
+          }),
+        i,
+      ).nullable()
     }
   })
+  return inputs
+}
 
-  const spaceValidations =
-    scope && ['private', 'public'].includes(scope)
-      ? Yup.object().nullable()
-      : Yup.object().nullable().required('Scope is required')
+export const prepareSpaceValidations = (scope?: IApp['scope']) => {
+  return scope && ['private', 'public'].includes(scope)
+    ? Yup.object().nullable()
+    : Yup.object().nullable().required('Scope is required')
+}
+
+export const prepareValidations = (inputSpec: InputSpec[], userJobLimit: IUser['job_limit'], scope?: IApp['scope']) => {
+  const inputs = prepareValidationsForInputs(inputSpec)
+  const spaceValidations = prepareSpaceValidations(scope)
+
+  const batchInputSchema = Yup.object().shape({
+    id: Yup.number().optional(),
+    instanceType: Yup.object().nullable().required('Instance type is required'),
+    fields: Yup.object().shape(inputs),
+  })
 
   const validationObject = {
     output_folder_path: Yup.string(),
@@ -95,16 +106,25 @@ export const prepareValidations = (
       .required('Execution cost limit required')
       .positive('Limit must be positive')
       .typeError('You must specify a number')
-      .max(
-        userJobLimit,
-        `Maximum job limit for current user is $${userJobLimit}`,
-      ),
-    instanceType: Yup.object().nullable().required('Instance type is required'),
-    inputs: Yup.object().shape(inputs),
+      .max(userJobLimit, `Maximum job limit for current user is $${userJobLimit}`),
+    inputs: Yup.array().of(batchInputSchema).nullable(),
     scope: spaceValidations,
   }
 
   return Yup.object().shape(validationObject)
+}
+
+export const buildPath = (node: FileTreeNode): string => {
+  if (!node || node.title === '/') {
+    return ''
+  }
+
+  if (!node.parent) {
+    return node.title
+  }
+
+  const parentPath = buildPath(node.parent)
+  return `${parentPath}/${node.title}`
 }
 
 export const getValue = (
@@ -134,7 +154,7 @@ export const getValue = (
   return value as string | boolean
 }
 
-export function mapInputKeyVals(inputVals: JobRunForm['inputs'], inputSpecs: InputSpec[]) {
+export function mapInputKeyVals(inputVals: RunJobFormType['inputs'], inputSpecs: InputSpec[]) {
   let inputs: { [key: string]: string | string[] | number | boolean | undefined | null } = {}
   
   Object.keys(inputVals).forEach(key => {
@@ -147,7 +167,7 @@ export function mapInputKeyVals(inputVals: JobRunForm['inputs'], inputSpecs: Inp
   return inputs
 }
 
-export function getFileUIDsFromAppRun(inputVals: JobRunForm['inputs'], inputSpecs: InputSpec[]) {
+export function getFileUIDsFromAppRun(inputVals: RunJobFormType['inputs'], inputSpecs: InputSpec[]) {
   const filearr = inputSpecs.filter(s => s.class === 'array:file' || s.class === 'file')
   const uids: string[] | string[][] = []
   
@@ -162,21 +182,32 @@ export function getFileUIDsFromAppRun(inputVals: JobRunForm['inputs'], inputSpec
   return uniq(uids.flat().filter(i => !!i))
 }
 
-
 export const createRequestObject = (
-  vals: JobRunForm,
+  jobName: string,
+  jobLimit: number,
+  outputFolderPath: string | null,
+  instanceType: string | undefined,
+  scope: ServerScope,
+  inputsParam: { [key: string]: FormInput },
   app: IApp,
   inputSpecs: InputSpec[],
 ): RunJobRequest => {
-  const inputs = mapInputKeyVals(vals.inputs, inputSpecs)
+  let inputs: { [key: string]: string | string[] | number | number [] | boolean | undefined | null } = {}
+  
+  Object.keys(inputsParam).forEach(key => {
+    const value = inputsParam[key]
+    inputs[key] = getValue(key, value, inputSpecs)
+  })
+
+  inputs = cleanObject(inputs)
 
   return {
     id: app.uid,
-    name: vals.jobName,
-    job_limit: vals.jobLimit,
-    output_folder_path: vals.output_folder_path ?? '',
-    instance_type: vals.instanceType?.value,
-    scope: vals.scope.value,
+    name: jobName,
+    job_limit: jobLimit,
+    output_folder_path: outputFolderPath ?? '',
+    instance_type: instanceType ?? '',
+    scope,
     inputs,
   } satisfies RunJobRequest
 }
@@ -188,10 +219,7 @@ export const getLicensesToAccept = (
   const acceptedIds = acceptedLicenses
     .filter(item => item.state === 'active' || item.state === null)
     .map(item => item.license.toString())
-  const remainingLicenses = licensesToAccept.filter(
-    license => !acceptedIds.includes(license.id.toString()),
-  )
-  return remainingLicenses
+  return licensesToAccept.filter(license => !acceptedIds.includes(license.id.toString()))
 }
 
 export const extractFileUids = (inputs: { [key: string]: FormInput }): FileUid[] => {
@@ -223,12 +251,155 @@ export const extractFileUids = (inputs: { [key: string]: FormInput }): FileUid[]
   return [...fileUidsSet]
 }
 
-export const fetchLicensesOnFiles = (inputs: { [key: string]: FormInput }): Promise<License[]> => {
-  const uids = extractFileUids(inputs)
+export const fetchLicensesOnFiles = (uids: FileUid[]): Promise<License[]> => {
   if (uids.length > 0) {
     return fetchLicensesForFiles(uids)
   }
   return Promise.resolve([])
 }
 
+export const useSelectableContexts = (appScope: ServerScope, entityType: string) => {
+  return useQuery({
+    queryKey: ['selectable-contexts', appScope],
+    queryFn: () =>
+      fetchAndConvertSelectableContexts(entityType).catch(e => {
+        toast.error('Error loading contexts')
+        throw e
+      }),
+  })
+}
+
+export const useUserComputeInstances = () => {
+  return useQuery({
+    queryKey: ['user-compute-instances'],
+    queryFn: () =>
+      fetchUserComputeInstances().catch(e => {
+        toast.error('Error loading compute instances')
+        throw e
+      }),
+  })
+}
+
+export const useSelectableSpaces = (appScope: ServerScope) => {
+  return useQuery({
+    queryKey: ['selectable-spaces', appScope],
+    queryFn: () =>
+      fetchAndConvertSelectableSpaces(appScope).catch(e => {
+        toast.error('Error loading spaces')
+        throw e
+      }),
+  })
+}
+
+export const useDefaultInstanceType = (
+  computeInstances: ComputeInstance[] | undefined,
+  instanceType: string,
+  setValue: UseFormSetValue<RunJobFormType>,
+) => {
+  useEffect(() => {
+    if (computeInstances) {
+      setValue('inputs.0.instanceType', computeInstances.find(instance => instance.value === instanceType) ?? computeInstances[0])
+    }
+  }, [computeInstances, instanceType, setValue])
+}
+
+
+export const useDefaultScopeSelection = (
+  selectableSpaces: SelectableSpace[] | undefined,
+  currentScope: ServerScope,
+  setValue: UseFormSetValue<RunJobFormType>,
+) => {
+  useEffect(() => {
+    if (selectableSpaces) {
+      const defaultSelectedScope = selectableSpaces.find(space => space.value === currentScope) ?? {
+        label: 'Private',
+        value: 'private',
+      }
+      setValue('scope', defaultSelectedScope)
+    }
+  }, [selectableSpaces, currentScope, setValue])
+}
+
+export const exportFormData = (event: React.MouseEvent<HTMLButtonElement>, formData: RunJobFormType) => {
+  event.preventDefault()
+  event.stopPropagation()
+  const dataToExport = JSON.parse(JSON.stringify(formData))
+  if (dataToExport.inputs && Array.isArray(dataToExport.inputs)) {
+    dataToExport.inputs.forEach((item: BatchInput) => delete item.id)
+  }
+  const dataStr = `data:text/json;charset=utf-8,${encodeURIComponent(JSON.stringify(dataToExport))}`
+  const downloadAnchorNode = document.createElement('a')
+  downloadAnchorNode.setAttribute('href', dataStr)
+  downloadAnchorNode.setAttribute('download', 'form_data.json')
+  document.body.appendChild(downloadAnchorNode)
+  downloadAnchorNode.click()
+  downloadAnchorNode.remove()
+}
+
+export const importFormData = (event: React.ChangeEvent<HTMLInputElement>, setVals: (val: RunJobFormType) => void) => {
+  event.preventDefault()
+  const fileReader = new FileReader()
+
+  if (event.target.files && event.target.files.length > 0) {
+    const file = event.target.files[0]
+
+    fileReader.readAsText(file, 'UTF-8')
+    fileReader.onload = e => {
+      const content = e.target?.result
+
+      if (typeof content === 'string') {
+        try {
+          const importedData = JSON.parse(content)
+
+          if (importedData.inputs && Array.isArray(importedData.inputs)) {
+            importedData.inputs = importedData.inputs.map((item: BatchInput, index: number) => ({
+              ...item,
+              id: index + 1,
+            }))
+          }
+
+          setVals(importedData)
+        } catch (error) {
+          console.log(error)
+          toast.error('Invalid file format')
+        }
+      }
+    }
+  }
+}
+
+export const collectFileUidsFromBatchInput = (batchInput: BatchInput): FileUid[] => {
+  const fileUids: FileUid[] = []
+
+  const traverse = (value: FormInput) => {
+    if (typeof value === 'string' && value.startsWith('file-')) {
+      fileUids.push(value as FileUid)
+    } else if (Array.isArray(value)) {
+      value.forEach(item => traverse(item))
+    } else if (typeof value === 'object' && value !== null) {
+      if (!Array.isArray(value) && !(value instanceof Date) && !(value instanceof File)) {
+        Object.values(value).forEach(subValue => traverse(subValue as FormInput))
+      }
+    }
+  }
+
+  if (batchInput.fields) {
+    Object.values(batchInput.fields).forEach(value => traverse(value))
+  }
+
+  return fileUids
+}
+
+export const extractFileUidsFromBatchInputs = (batchInputs: BatchInput[]): FileUid[] => {
+  let allFileUids: FileUid[] = []
+
+  batchInputs.forEach(batchInput => {
+    const fileUids = collectFileUidsFromBatchInput(batchInput)
+    allFileUids = [...allFileUids, ...fileUids]
+  })
+
+  return allFileUids
+}
+
 export const getBaseLink = (spaceId?: number) => spaceId ? `spaces/${spaceId}` : 'home'
+

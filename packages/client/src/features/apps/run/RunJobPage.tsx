@@ -1,27 +1,23 @@
-import { useQuery } from '@tanstack/react-query'
 import React from 'react'
 import { useParams } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
 import { BackLink } from '../../../components/Page/PageBackLink'
 import { FormPageContainer } from '../../../components/Page/styles'
-import { CubeIcon } from '../../../components/icons/CubeIcon'
+import { Topbox, TopboxItem } from './styles'
 import { useAuthUser } from '../../auth/useAuthUser'
-import { HomeLoader, NotFound, Title } from '../../home/show.styles'
 import { fetchApp } from '../apps.api'
-import { RunJobForm } from './RunJobForm'
-import {
-  Topbox,
-  TopboxItem,
-} from './styles'
+import { HomeLoader, NotFound, Title } from '../../home/show.styles'
 import { getBaseLink } from './utils'
-
+import { CubeIcon } from '../../../components/icons/CubeIcon'
+import { RunJobForm } from './RunJobForm'
 
 export const RunJobPage = ({ spaceId }: { spaceId?: number }) => {
   const { appUid } = useParams<{ appUid: string }>()
   const user = useAuthUser()
   const { data: appData, isLoading } = useQuery({
     queryKey: ['app', appUid],
+    queryFn: () => fetchApp(appUid as string),
     enabled: !!appUid,
-    queryFn: () => fetchApp(appUid!),
   })
 
   const app = appData?.app
@@ -57,11 +53,7 @@ export const RunJobPage = ({ spaceId }: { spaceId?: number }) => {
         </TopboxItem>
       </Topbox>
 
-      <RunJobForm
-        app={app}
-        spec={spec}
-        userJobLimit={user.job_limit}
-      />
+      <RunJobForm app={app} spec={spec} userJobLimit={user.job_limit} />
     </FormPageContainer>
   )
 }

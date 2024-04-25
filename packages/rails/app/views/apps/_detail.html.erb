@@ -219,9 +219,6 @@
     <%= link_to new_app_job_path(app), class: "btn btn-primary" do %>
       <span class="fa fa-bolt"></span> Run App&nbsp;&nbsp;<span class="badge"><%= app.version ? "v#{app.version}" : "rev#{app.revision}" %></span>
     <% end %>
-    <%= link_to batch_app_app_path(app), class: "btn btn-primary" do %>
-        <span class="fa fa-bolt"></span> Run Batch App&nbsp;&nbsp;<span class="badge"><%= app.version ? "v#{app.version}" : "rev#{app.revision}" %></span>
-    <% end %>
     <%= render "_partials/btn_copy", item: app %>
 
     <% if app.in_space? && app.space_object.editable_by?(context.user) %>

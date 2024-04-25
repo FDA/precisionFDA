@@ -562,7 +562,6 @@ Rails.application.routes.draw do
         post "export"
         get "cwl_export"
         get "wdl_export"
-        get "batch_app"
       end
       get "featured", on: :collection, as: "featured"
       get "explore", on: :collection, as: "explore"

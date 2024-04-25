@@ -1,6 +1,10 @@
 import styled, { css } from 'styled-components'
 
-export const Button = styled.button.attrs(({ disabled }) => ({ 'aria-disabled': disabled ? true : undefined }))<{ variant?: 'primary' | 'green' | 'warning', disabled?: boolean }>`
+export const Button = styled.button.attrs(({ disabled }) => ({ 'aria-disabled': disabled ? true : undefined }))<{
+  variant?: 'primary' | 'success' | 'warning'
+  disabled?: boolean
+  active?: boolean
+}>`
   position: relative;
   display: flex;
   width: fit-content;
@@ -27,12 +31,12 @@ export const Button = styled.button.attrs(({ disabled }) => ({ 'aria-disabled': 
   &:hover {
     filter: brightness(97%);
   }
-  
+
   &:focus {
     outline: 0;
   }
 
-  &[variant="primary"] {
+  &[variant='primary'] {
     border-color: var(--primary-600);
     background: var(--primary-500);
     color: hsl(0, 0%, 97%);
@@ -46,7 +50,7 @@ export const Button = styled.button.attrs(({ disabled }) => ({ 'aria-disabled': 
     }
   }
 
-  &[variant="warning"] {
+  &[variant='warning'] {
     border-color: var(--warning-600);
     background: var(--warning-500);
     color: hsl(0, 0%, 97%);
@@ -60,7 +64,7 @@ export const Button = styled.button.attrs(({ disabled }) => ({ 'aria-disabled': 
     }
   }
 
-  &[variant="success"] {
+  &[variant='success'] {
     border-color: var(--success-700);
     background: var(--success-600);
     color: hsl(0, 0%, 97%);
