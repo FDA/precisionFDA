@@ -1,126 +1,81 @@
-import { yupResolver } from '@hookform/resolvers/yup'
-import { useQuery } from '@tanstack/react-query'
-import React, { useEffect, useState } from 'react'
-import { Controller, useForm } from 'react-hook-form'
+import React from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { Controller, FieldErrors, useFieldArray, useForm } from 'react-hook-form'
+import { yupResolver } from '@hookform/resolvers/yup'
 import { toast } from 'react-toastify'
-import { InputNumber, InputText } from '../../../components/InputText'
-import { EmptyTable } from '../../../components/Table/styles'
-import { FieldGroup } from '../../../components/form/FieldGroup'
-import { QuestionIcon } from '../../../components/icons/QuestionIcon'
+import { AppSpec, BatchInput, RunJobFormType, IApp } from '../apps.types'
 import { IUser } from '../../../types/user'
-import { useOrganizeFileModal } from '../../files/actionModals/useOrganizeFileModal'
-import { FileTreeNode, TreeOnSelectInfo } from '../../files/files.types'
-import { fetchAcceptedLicenses } from '../../licenses/api'
-import { useAcceptLicensesModal } from '../../licenses/useAcceptLicensesModal'
-import { ServerScope } from '../../home/types'
-import { fetchLicensesOnApp, fetchUserComputeInstances } from '../apps.api'
-import { AppSpec, IApp, JobRunForm, PricingMap } from '../apps.types'
-import { getDefaultValueFromServer } from '../form/common'
+import { QuestionIcon } from '../../../components/icons/QuestionIcon'
+import { FieldGroup } from '../../../components/form/FieldGroup'
+import { InputNumber, InputText } from '../../../components/InputText'
 import { ErrorMessageForField } from './ErrorMessageForField'
-import { JobRunInput } from './JobRunInput'
-import {
-  fetchAndConvertSelectableContexts,
-  fetchAndConvertSelectableSpaces,
-} from './job-run-helper'
 import {
   AppsConfiguration,
-  InputTextRightMargin,
+  RightGroup,
   Section,
   SectionBody,
   SectionHeader,
+  StyledActionsContainer,
   StyledForm,
   StyledJobName,
-  StyledLabel,
   StyledRow,
-  StyledScopeName,
   TipsRow,
+  RemoveButton,
 } from './styles'
-import { useRunJobMutation } from './useRunJobMutation'
 import {
-  createRequestObject,
+  buildPath,
+  createRequestObject, exportFormData, extractFileUidsFromBatchInputs,
   fetchLicensesOnFiles,
   getFileUIDsFromAppRun,
   getLabel,
-  getLicensesToAccept,
-  mapInputKeyVals,
-  prepareValidations,
+  getLicensesToAccept, importFormData,
+  mapInputKeyVals, prepareValidations,
+  useDefaultInstanceType, useDefaultScopeSelection,
+  useSelectableContexts,
+  useSelectableSpaces,
+  useUserComputeInstances,
 } from './utils'
-import { Select } from '../../../components/Select'
+import { fetchLicensesOnApp } from '../apps.api'
+import { JobRunInput } from './JobRunInput'
+import { EmptyTable } from '../../../components/Table/styles'
+import { fetchAcceptedLicenses } from '../../licenses/api'
+import { useAcceptLicensesModal } from '../../licenses/useAcceptLicensesModal'
+import { TreeOnSelectInfo } from '../../files/files.types'
+import { ServerScope } from '../../home/types'
+import { getDefaultValueFromServer } from '../form/common'
+import { useOrganizeFileModal } from '../../files/actionModals/useOrganizeFileModal'
+import { useRunJobMutation } from './useRunJobMutation'
 import { Button, TransparentButton } from '../../../components/Button'
 import { useExportInputsModal } from './useExportInputsModal'
-import { Small } from '../../../components/Page/styles'
+import { SetOutputFolder } from './SetOutputFolder'
+import { SelectContext } from './SelectContext'
+import { SelectSpaceScope } from './SelectSpaceScope'
+import { SelectInstanceType } from './SelectInstanceType'
+import { CrossIcon } from '../../../components/icons/PlusIcon'
 
-const buildPath = (node: FileTreeNode): string => {
-  if (!node || node.title === '/') {
-    return ''
-  }
-
-  if (!node.parent) {
-    return node.title
-  }
-
-  const parentPath = buildPath(node.parent)
-  return `${parentPath}/${node.title}`
-}
-
-const filesOutputClasses = ['file', 'array:file']
-const hasAppFileOutputs = (outputSpec: AppSpec['output_spec']): boolean => {
-  return outputSpec.some(item => filesOutputClasses.includes(item.class))
-}
-
-export const RunJobForm = ({
-  app,
-  userJobLimit,
-  spec,
-}: {
-  app: IApp
-  spec: AppSpec
-  userJobLimit: IUser['job_limit']
-}) => {
+export const RunJobForm = ({ app, userJobLimit, spec }: { app: IApp; spec: AppSpec; userJobLimit: IUser['job_limit'] }) => {
+  const { data: computeInstances, isLoading: computeInstancesLoading } = useUserComputeInstances()
+  const { data: selectableContexts } = useSelectableContexts(app.scope, app.entity_type)
+  const { data: selectableSpaces } = useSelectableSpaces(app.scope)
   const { hash, pathname } = useLocation()
   const navigate = useNavigate()
 
-  const { data: computeInstances, isLoading: computeInstancesLoading } =
-    useQuery({
-      queryKey: ['user-compute-instances'],
-      queryFn: () => fetchUserComputeInstances().catch((e) => {
-        toast.error('Error loading compute instances')
-        throw e
-      }),
-    })
-
-  const { data: selectableContexts, isLoading: isLoadingSelectableContexts } = useQuery({
-    queryKey: ['selectable-contexts', app.scope],
-    queryFn: () => fetchAndConvertSelectableContexts(app.entity_type).catch((e) => {
-      toast.error('Error loading contexts')
-      throw e
-    }),
-  })
-
-  const { data: selectableSpaces, isLoading: isLoadingSelectableScope } = useQuery({
-    queryKey: ['selectable-spaces', app.scope],
-    queryFn: () => fetchAndConvertSelectableSpaces(app.scope).catch((e) => {
-      toast.error('Error loading spaces')
-      throw e
-    }),
-  })
+  const { modalComp: licensesModal, setLicensesAndShow } = useAcceptLicensesModal()
 
   let defaultValues = {
     jobName: app.name,
     jobLimit: userJobLimit,
-    instanceType: undefined,
     output_folder_path: '',
     scope: { label: 'Private', value: 'private' },
-    inputs: Object.fromEntries(
-      spec.input_spec.map(item => [
-        item.name,
-        getDefaultValueFromServer(item.class, item.default),
-      ]),
-    ),
-  } satisfies JobRunForm
+    inputs: [
+      {
+        id: 1,
+        fields: Object.fromEntries(spec.input_spec.map(item => [item.name, getDefaultValueFromServer(item.class, item.default)])),
+      } as BatchInput,
+    ],
+  } satisfies RunJobFormType
 
-  if(hash.startsWith('#')) {
+  if (hash.startsWith('#')) {
     const base64Encoded = hash.split('#')[1]
     const decoded = atob(base64Encoded)
     const inputs = JSON.parse(decoded)
@@ -128,13 +83,7 @@ export const RunJobForm = ({
     navigate(pathname, { replace: true })
   }
 
-  const validationSchema = prepareValidations(
-    spec.input_spec,
-    userJobLimit,
-    app.scope,
-  )
-  const { modalComp: licensesModal, setLicensesAndShow } =
-    useAcceptLicensesModal()
+  const validationSchema = prepareValidations(spec.input_spec, userJobLimit, app.scope)
 
   const {
     control,
@@ -145,16 +94,14 @@ export const RunJobForm = ({
     trigger,
     setValue,
     watch,
-  } = useForm<JobRunForm>({
+    reset,
+  } = useForm<RunJobFormType>({
     mode: 'onBlur',
     resolver: yupResolver(validationSchema),
     defaultValues,
   })
 
-  const {
-    modalComp: organizeFileModal,
-    setShowModal: setOrganizeFileModal,
-  } = useOrganizeFileModal({
+  const { modalComp: organizeFileModal, setShowModal: setOrganizeFileModal } = useOrganizeFileModal({
     headerText: 'Select output folder',
     submitCaption: 'Select folder',
     scope: app.scope === 'public' ? 'private' : app.scope, // show private folders for public apps
@@ -164,47 +111,31 @@ export const RunJobForm = ({
       setOrganizeFileModal(false)
     },
   })
-
-  const [maxRuntime, setMaxRuntime] = useState<string>('')
-
-  // Update the instanceType field when computeInstances list loads
-  useEffect(() => {
-    if (computeInstances) {
-      setValue(
-        'instanceType',
-        computeInstances.find(
-          instance => instance.value === spec.instance_type,
-        ) ?? computeInstances[0],
-      )
-    }
-  }, [computeInstances])
   
-  // Update the selectable scope field when list loads
-  useEffect(() => {
-    if (selectableSpaces) {
-      const defaultSelectedScope = selectableSpaces.find(s => s.value === app.scope) ?? { label: 'Private', value: 'private' }
-      setValue(
-        'scope',
-        defaultSelectedScope,
-      )
-    }
-  }, [selectableSpaces])
+  useDefaultInstanceType(computeInstances, spec.instance_type, setValue)
+  useDefaultScopeSelection(selectableSpaces, app.scope, setValue)
 
+  const inputs = useFieldArray({
+    control,
+    name: 'inputs',
+  })
+  const isBatchRun = inputs.fields.length > 1
+  const runButtonText = isBatchRun ? 'Run Batch App' : 'Run App'
 
-  // Calculate maxRuntime for user info when instanceType or jobLimit changes
-  useEffect(() => {
-    const selectedInstance = getValues().instanceType?.value
-    if (selectedInstance) {
-      const costPerHour = PricingMap[selectedInstance as keyof typeof PricingMap] as number
-      let hoursRuntime = getValues().jobLimit / costPerHour
-      let remainingMinutes = Math.round((hoursRuntime % 1) * 60)
-      if (remainingMinutes === 60) {
-        hoursRuntime++
-        remainingMinutes = 0
-      }
-      setMaxRuntime(`Maximum estimated runtime: ${Math.floor(hoursRuntime)}h${remainingMinutes ? ` ${remainingMinutes}m` : ''}`)
+  const addInput = () => {
+    if (computeInstances) {
+      const lastId = getValues().inputs[getValues().inputs.length - 1].id ?? 0
+      inputs.append({
+        instanceType: computeInstances[0],
+        id: lastId + 1,
+        fields: Object.fromEntries(spec.input_spec.map(item => [item.name, getDefaultValueFromServer(item.class, item.default)])),
+      }, { shouldFocus: false })
     }
-  }, [watch().instanceType, watch().jobLimit])
+  }
+
+  const removeInput = (index: number) => {
+    inputs.remove(index)
+  }
 
   const runJobMutation = useRunJobMutation(getValues().scope?.value as ServerScope)
   const exportModal = useExportInputsModal({ showCopyButton: true })
@@ -214,28 +145,58 @@ export const RunJobForm = ({
     const valid = await trigger()
 
     if (valid) {
-      try {
-        const r = await Promise.all([
-          fetchLicensesOnApp(app.uid),
-          fetchLicensesOnFiles(vals.inputs),
-        ])
+      const r = await Promise.all([
+        fetchLicensesOnApp(app.uid),
+        fetchLicensesOnFiles(extractFileUidsFromBatchInputs(vals.inputs)),
+      ])
 
-        const acceptedLicenses = await fetchAcceptedLicenses()
-        const licensesToAccept = getLicensesToAccept(r.flat(), acceptedLicenses)
-        if (licensesToAccept.length > 0) {
-          setLicensesAndShow(licensesToAccept, acceptedLicenses)
-        } else {
-          const req = createRequestObject(vals, app, spec.input_spec)
-          await runJobMutation.mutateAsync(req)
-        }
-      } catch (e) {
-        if (e?.response?.data?.error?.message) {
-          toast.error(e?.response?.data?.error?.message)
-        } else {
-          toast.error('Failed to run app')
-        }
+      const acceptedLicenses = await fetchAcceptedLicenses()
+      const licensesToAccept = getLicensesToAccept(r.flat(), acceptedLicenses)
+      if (licensesToAccept.length > 0) {
+        setLicensesAndShow(licensesToAccept, acceptedLicenses)
+      } else {
+        const mutations = vals.inputs.map((batchInput, index) => {
+          const req = createRequestObject(
+            isBatchRun ? `${vals.jobName} (${index + 1} of ${vals.inputs.length})` : vals.jobName,
+            vals.jobLimit,
+            vals.output_folder_path,
+            batchInput.instanceType.value,
+            vals.scope.value as ServerScope,
+            batchInput.fields,
+            app,
+            spec.input_spec,
+          )
+          return runJobMutation.mutateAsync(req)
+        })
+        await Promise.all(mutations).then(data => {
+          if (data[0].id) {
+            if (vals.scope.value === 'private') {
+              if (isBatchRun) {
+                navigate(`/home/apps/${app.uid}/jobs`)
+              } else {
+                navigate(`/home/executions/${data[0].id}`)
+              }
+            } else {
+              const spaceId = vals.scope.value.replace('space-', '')
+              if (isBatchRun) {
+                navigate(`/spaces/${spaceId}/apps/${app.uid}/jobs`)
+              } else {
+                navigate(`/spaces/${spaceId}/executions/${data[0].id}`)
+              }
+            }
+          } else if (res?.error) {
+            toast.error(res.error.message)
+          } else {
+            toast.error('Something went wrong!')
+          }
+        })
       }
     }
+  }
+
+  const handleImportClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault()
+    document.getElementById('fileInput')?.click()
   }
 
   const handleExportInputClick = () => {
@@ -263,187 +224,144 @@ export const RunJobForm = ({
             <StyledRow>
               <StyledJobName>
                 <FieldGroup label="Job Name" required>
-                  <InputText
-                    {...register('jobName')}
-                    disabled={isSubmitting}
-                  />
-                  <ErrorMessageForField errors={errors} fieldName="jobName" />
+                  <InputText {...register('jobName')} disabled={isSubmitting} />
+                  <ErrorMessageForField errors={errors as FieldErrors<Record<string, unknown>>} fieldName="jobName" />
                 </FieldGroup>
               </StyledJobName>
               <FieldGroup label="Execution Cost Limit ($)" required>
-                <InputNumber
-                  min="0"
-                  step="10"
-                  {...register('jobLimit')}
-                  disabled={isSubmitting}
-                />
-                <ErrorMessageForField errors={errors} fieldName="jobLimit" />
+                <InputNumber min="0" step="10" {...register('jobLimit')} disabled={isSubmitting} />
+                <ErrorMessageForField errors={errors as FieldErrors<Record<string, unknown>>} fieldName="jobLimit" />
               </FieldGroup>
             </StyledRow>
             <StyledRow>
               {app.entity_type === 'https' && (
-                <StyledScopeName>
-                  <FieldGroup label="Context" required>
-                    <Controller
-                      name="scope"
-                      control={control}
-                      render={({ field }) => (
-                        <Select
-                          options={selectableContexts}
-                          placeholder="Choose..."
-                          onChange={value => {
-                            field.onChange(value)
-                            field.onBlur()
-                          }}
-                          isSearchable
-                          onBlur={field.onBlur}
-                          value={field.value}
-                          isDisabled={isSubmitting}
-                          isLoading={isLoadingSelectableContexts}
-                          inputId="select_context"
-                          />
-                      )}
-                    />
-                    <ErrorMessageForField errors={errors} fieldName="scope" />
-                  </FieldGroup>
-                </StyledScopeName>
+                <SelectContext
+                  control={control}
+                  isSubmitting={isSubmitting}
+                  selectableContexts={selectableContexts}
+                  errors={errors}
+                />
               )}
               {app.scope.startsWith('space-') && (
-                <StyledScopeName>
-                  <FieldGroup label="Space scope" required>
-                    <Controller
-                      name="scope"
-                      control={control}
-                      render={({ field }) => (
-                        <Select
-                          options={selectableSpaces}
-                          placeholder="Choose..."
-                          onChange={value => {
-                            field.onChange(value)
-                            field.onBlur()
-                          }}
-                          isClearable
-                          isSearchable
-                          onBlur={field.onBlur}
-                          value={field.value}
-                          isDisabled={isSubmitting}
-                          isLoading={isLoadingSelectableScope}
-                          inputId="select_space_scope"
-                        />
-                      )}
-                    />
-                    <ErrorMessageForField
-                      errors={errors}
-                      fieldName="scope"
-                    />
-                  </FieldGroup>
-                </StyledScopeName>
-              )}
-              <FieldGroup label="Instance Type" required>
-                <Controller
-                  name="instanceType"
+                <SelectSpaceScope
                   control={control}
-                  render={({ field }) => (
-                   <>
-                    <Select
-                      defaultValue={field.value}
-                      options={computeInstances}
-                      placeholder="Choose..."
-                      onChange={value => {
-                        field.onChange(value)
-                        field.onBlur()
-                      }}
-                      isLoading={computeInstancesLoading}
-                      isSearchable
-                      onBlur={field.onBlur}
-                      value={field.value}
-                      isDisabled={isSubmitting}
-                      inputId="select_instance_type"
-                    />
-                    <Small>{maxRuntime}</Small>
-                   </>
-                  )}
-                />
-                <ErrorMessageForField
+                  isSubmitting={isSubmitting}
+                  selectableSpaces={selectableSpaces}
                   errors={errors}
-                  fieldName="instanceType"
                 />
-              </FieldGroup>
+              )}
+              {!isBatchRun && (
+                <SelectInstanceType
+                  control={control}
+                  selectedInstance={watch().inputs[0].instanceType}
+                  name={'inputs.0.instanceType' as keyof RunJobFormType}
+                  jobLimit={userJobLimit}
+                  isSubmitting={isSubmitting}
+                  computeInstances={computeInstances}
+                  isComputeInstancesLoading={computeInstancesLoading}
+                  errors={errors}
+                  inputId="select_instance_type"
+                />
+              )}
             </StyledRow>
           </SectionBody>
         </Section>
-        <Section>
-          <SectionHeader><div>INPUTS</div><TransparentButton type='button' onClick={() => handleExportInputClick()}>Export Values</TransparentButton></SectionHeader>
-          <SectionBody>
-            {spec.input_spec.length > 0 ? (
-              spec.input_spec.map(i => (
-                <Controller
-                  key={i.name}
-                  control={control}
-                  name={`inputs.${i.name}`}
-                  render={({ field }) => (
-                    <FieldGroup label={getLabel(i)} required={!i.optional}>
-                      <JobRunInput
-                        field={field}
-                        inputSpec={i}
-                        errors={errors}
-                        disabled={isSubmitting}
-                        register={register}
-                        scope={app.entity_type === 'https' ? watch().scope?.value : app.scope }
-                      />
-                    </FieldGroup>
-                  )}
-                />
-              ))
-            ) : (
-              <EmptyTable>App has no inputs.</EmptyTable>
-            )}
-          </SectionBody>
-        </Section>
-        {hasAppFileOutputs(spec.output_spec) && (
-          <Controller
-            name="output_folder_path"
-            control={control}
-            render={({ field }) => (
-              <Section>
-                <SectionHeader>OUTPUT FOLDER</SectionHeader>
-                <SectionBody>
-                  <FieldGroup label="Store outputs in">
-                    <InputTextRightMargin
-                      value={field.value ?? ''}
-                      onChange={field.onChange}
-                      onBlur={field.onBlur}
-                      disabled={isSubmitting}
-                      data-testid="output_folder"
-                    />
-                    <Button
-                      type="button"
-                      disabled={isSubmitting}
-                      onClick={evt => {
-                        setOrganizeFileModal(true)
-                      }}
-                    >
-                      Choose folder
-                    </Button>
-                  </FieldGroup>
-                  <StyledLabel>
-                    Note: Non existing folders will be created
-                  </StyledLabel>
-                </SectionBody>
-              </Section>
-            )}
-          />
-        )}
       </AppsConfiguration>
-      <Button
-        variant="primary"
-        disabled={isSubmitting}
-        type="button"
-        form="submitJobForm"
-        onClick={handleSubmit(onSubmit)}
-      >
-        {isSubmitting ? 'Running' : 'Run App'}
-      </Button>
+      <AppsConfiguration>
+        {inputs.fields.map((batchInput, batchIndex) => (
+          <Section key={batchInput.id} data-testid={`batch_group_${batchIndex}`}>
+            <SectionHeader>
+              {isBatchRun ? (
+                <>
+                  <div>
+                    BATCH INPUT {batchIndex + 1} of {inputs.fields.length}
+                  </div>
+                  <RemoveButton disabled={isSubmitting} type="button" onClick={() => removeInput(batchIndex)}>
+                    <CrossIcon height={14} />
+                  </RemoveButton>
+                </>
+              ) : (
+                <>
+                  <div>INPUTS</div>
+                  <TransparentButton type="button" onClick={() => handleExportInputClick()}>
+                    Export Values
+                  </TransparentButton>
+                </>
+              )}
+            </SectionHeader>
+            <SectionBody>
+              {isBatchRun && (
+                <SelectInstanceType
+                  control={control}
+                  selectedInstance={watch().inputs[batchIndex].instanceType}
+                  name={`inputs.${batchIndex}.instanceType` as keyof RunJobFormType}
+                  jobLimit={userJobLimit}
+                  isSubmitting={isSubmitting}
+                  computeInstances={computeInstances}
+                  isComputeInstancesLoading={computeInstancesLoading}
+                  errors={errors}
+                  inputId={`select_instance_type_${batchIndex}`}
+                />
+              )}
+              {spec.input_spec.length > 0 ? (
+                spec.input_spec.map(inputSpec => {
+                  return (
+                    <Controller
+                      key={`${inputSpec.name}-${batchInput.id}`}
+                      control={control}
+                      name={`inputs.${batchIndex}.fields.${inputSpec.name}`}
+                      render={({ field }) => (
+                        <FieldGroup
+                          label={getLabel(inputSpec)}
+                          required={!inputSpec.optional}
+                          key={inputSpec.name + inputSpec}
+                        >
+                          <JobRunInput
+                            key={inputSpec.name + inputSpec}
+                            field={field}
+                            inputSpec={inputSpec}
+                            errors={errors as FieldErrors<Record<string, unknown>>}
+                            disabled={isSubmitting}
+                            register={register}
+                            scope={app.entity_type === 'https' ? watch().scope?.value : app.scope}
+                          />
+                        </FieldGroup>
+                      )}
+                    />
+                  )
+                })
+              ) : (
+                <EmptyTable>App has no inputs.</EmptyTable>
+              )}
+            </SectionBody>
+          </Section>
+        ))}
+        <SetOutputFolder control={control} isSubmitting={isSubmitting} spec={spec} setShowModal={setOrganizeFileModal} />
+      </AppsConfiguration>
+      <StyledActionsContainer>
+        <RightGroup>
+          {computeInstances && (
+            <Button variant="primary" disabled={isSubmitting} type="button" onClick={addInput}>
+              Add batch
+            </Button>
+          )}
+          {isBatchRun && (
+            <>
+              <Button variant="success" disabled={isSubmitting}  type="button" onClick={event => exportFormData(event, getValues())}>
+                Export Inputs
+              </Button>
+
+              <input type="file" style={{ display: 'none' }} id="fileInput" onChange={event => importFormData(event, (vals) => reset(vals))} />
+              <Button variant="success" disabled={isSubmitting}  type="button" onClick={handleImportClick}>
+                Import Inputs
+              </Button>
+            </>
+          )}
+        </RightGroup>
+        <Button variant="primary" disabled={isSubmitting} type="button" form="submitJobForm" onClick={handleSubmit(onSubmit)}>
+          {isSubmitting ? 'Running' : runButtonText}
+        </Button>
+      </StyledActionsContainer>
       {licensesModal}
       {organizeFileModal}
     </StyledForm>

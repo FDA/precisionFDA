@@ -327,6 +327,7 @@ const WorkflowRun = (
                           onBlur={field.onBlur}
                           value={field.value}
                           isDisabled={isSubmitting}
+                          inputId="select_context"
                         />
                       )}
                     />

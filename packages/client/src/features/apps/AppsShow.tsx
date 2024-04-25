@@ -125,7 +125,7 @@ const DetailActionsDropdown = (
     actions = pick(['Copy to space', 'Attach to...'], actions)
   }
 
-  actions = omit(['Run', 'Run batch'], actions)
+  actions = omit(['Run'], actions)
 
   return (
     <>
@@ -137,17 +137,6 @@ const DetailActionsDropdown = (
       >
         <>
           Run App&nbsp;
-          <Pill>rev{app.revision}</Pill>
-        </>
-      </CloudResourcesHeaderButton>
-      <CloudResourcesHeaderButton
-        href={`/apps/${app.uid}/batch_app`}
-        data-turbolinks="false"
-        isLinkDisabled={!app.links.batch_run}
-        conditionType='all'
-      >
-        <>
-          Run Batch&nbsp;
           <Pill>rev{app.revision}</Pill>
         </>
       </CloudResourcesHeaderButton>

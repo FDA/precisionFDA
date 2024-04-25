@@ -158,13 +158,9 @@ export const Apps = () => {
         <h2 id="apps-batch-run">Batch running an app</h2>
 
         <p>
-          For batch running, using the "Run Batch App" button, you are allowed
-          to vary one input across a batch. Select the input you would like to
-          vary from the dropdown menu. For file inputs when you click "Select
-          Files", you can filter for the files you would like and select them
-          with the checkbox on the left. Once you have selected all of your
-          files, click "Select". For varying non file inputs (string, integer,
-          float, boolean), enter comma-separated values.
+          Apps can be run in batch. This feature allows you to run the same app
+          multiple times, with different inputs each time. Adding batches can be
+          done by clicking the "Add batch" button on the app launch page.
         </p>
         <p>
           The system will launch separate jobs for each of the varying input

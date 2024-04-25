@@ -64,6 +64,7 @@ import { getHomeScopeFromServerScope } from './getHomeScopeFromServerScope'
 import NavigateWithParams from '../../utils/NavigateWithParams'
 import { TrackProvenancePage } from '../tracks/TrackProvenancePage'
 import { ScrollableInnerGlobalStyles } from '../../styles/global'
+import { RunBatchJobPage } from '../apps/run/RunBatchJobPage'
 
 interface CounterRequest {
   apps: string

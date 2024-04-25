@@ -15,7 +15,7 @@ import {
 import { InputText } from '../../../components/InputText'
 import { FieldInfo } from '../../../components/form/FieldInfo'
 import { SelectMultiFileInput } from '../SelectMultiFileInput'
-import { IOSpec, InputSpec, JobRunForm } from '../apps.types'
+import { IOSpec, InputSpec, RunJobForm } from '../apps.types'
 import { isFloatValid, isStrictlyInteger } from '../form/common'
 import { ErrorMessageForField } from './ErrorMessageForField'
 
@@ -103,10 +103,10 @@ export const JobRunInput = ({
   scope,
 }: {
   inputSpec: InputSpec
-  field: ControllerRenderProps<JobRunForm, `inputs.${string}`>
+  field: ControllerRenderProps<RunJobForm, any>
   errors: FieldErrors<Record<string, unknown>>
   disabled: boolean
-  register: UseFormRegister<JobRunForm>
+  register: UseFormRegister<RunJobForm>
   scope: string
 }) => {
   const choices = Array.isArray(inputSpec?.choices) ? inputSpec.choices : null
@@ -166,7 +166,7 @@ export const JobRunInput = ({
               options={choices?.map(value => ({ value, label: value }))}
               onChange={val => {
                 field.onBlur()
-                field.onChange(val.value)
+                field.onChange(val?.value)
               }}
             />
           ) : (
@@ -214,7 +214,7 @@ export const JobRunInput = ({
               options={choices?.map(value => ({ value, label: value }))}
               onChange={val => {
                 field.onBlur()
-                field.onChange(val.value)
+                field.onChange(val?.value)
               }}
             />
           ) : (
@@ -266,7 +266,7 @@ export const JobRunInput = ({
               options={choices?.map(value => ({ value, label: value }))}
               onChange={val => {
                 field.onBlur()
-                field.onChange(val.value)
+                field.onChange(val?.value)
               }}
             />
           ) : (

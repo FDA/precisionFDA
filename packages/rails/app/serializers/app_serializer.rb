@@ -146,15 +146,10 @@ class AppSerializer < ApplicationSerializer # rubocop:disable Metrics/ClassLengt
       if can_run? && !object.in_locked_space?
         # app single run
         links[:run_job] = new_app_job_path(object.uid) if user_role != "viewer"
-        # links[:run_job] = null
-        # GET app batch run
-        links[:batch_run] = batch_app_app_path(object.uid) if user_role != "viewer"
       end
       unless object.in_space?
         # app single run
         links[:run_job] = new_app_job_path(object.uid)
-        # GET app batch run
-        links[:batch_run] = batch_app_app_path(object.uid)
       end
       if current_user.can_administer_site?
         # PUT /api/apps/feature

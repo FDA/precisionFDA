@@ -18,15 +18,16 @@ export interface FetchAppsQuery {
 export interface RunJobRequest {
   id: string // application id
   name: string // name of the job
+  job_limit: number,
   instance_type: string
   scope: ServerScope
   output_folder_path: string
   inputs: {
-    [key: string]: string | number | boolean,
+    [key: string]: string | number | boolean | string[] | number[] | null | undefined,
   };
 }
 
-interface RunJobResponse {
+export interface RunJobResponse {
   id: string // id of started job
   error?: Error
 }
@@ -39,7 +40,7 @@ export async function fetchApps(filters: IFilter[], params: Params): Promise<Fet
   const query = prepareListFetch(filters, params)
   const paramQ = `?${new URLSearchParams(query as {}).toString()}`
   const scopeQ = formatScopeQ(params.scope)
-  return axios.get<FetchAppsQuery>(`/api/apps${scopeQ}${paramQ}`).then(r => r.data)
+  return axios.get<FetchAppsQuery>(`/api/apps/${scopeQ}${paramQ}`).then(r => r.data)
 }
 
 export async function fetchSelectableSpaces(id: string): Promise<ISpace[]> {

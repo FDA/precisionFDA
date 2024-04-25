@@ -2,7 +2,7 @@ import { getSpaceIdFromScope } from '../../../utils'
 import { EditableSpace, fetchEditableSpacesList } from '../../spaces/spaces.api'
 import { ISpace, SPACE_TYPES } from '../../spaces/spaces.types'
 import { fetchSelectableSpaces } from '../apps.api'
-import { IApp, SelectType } from '../apps.types'
+import { IApp, SelectableSpace, SelectType } from '../apps.types'
 
 const getTitle = (space: ISpace): string => {
   if (space.type === SPACE_TYPES.REVIEW) {
@@ -22,15 +22,7 @@ const getTitle = (space: ISpace): string => {
   return space.name
 }
 
-const fetchAndConvertSelectableSpaces = async (
-  scope: string,
-): Promise<
-  {
-    isDisabled: boolean
-    label: string
-    value: string
-  }[]
-> => {
+const fetchAndConvertSelectableSpaces = async (scope: string): Promise<SelectableSpace[]> => {
   if (scope.includes('space')) {
     const spaceId = getSpaceIdFromScope(scope)
     const spaces: ISpace[] = await fetchSelectableSpaces(spaceId)
