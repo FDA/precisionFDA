@@ -10,4 +10,9 @@
 /packages/client @ddcech
 
 # CLI
-/packages/go @jirkalagan
+/packages/cli @jirkalagan
+
+# Backend (Node & Ruby)
+/packages/server @jirkalagan @pavelkubal @lbobek-dnanexus @bartapes
+/packages/app @jirkalagan @pavelkubal @lbobek-dnanexus @bartapes
+

@@ -6,21 +6,24 @@ import {
 
 export class CliSpaceMemberDTO {
   id: number
-  name: string
-  username: string
+  active: boolean
+  createdAt: Date
   role: keyof typeof SPACE_MEMBERSHIP_ROLE
   side: keyof typeof SPACE_MEMBERSHIP_SIDE
-  createdAt: Date
+  name: string
+  username: string
 
   static async mapToDTO(membership: SpaceMembership): Promise<CliSpaceMemberDTO> {
     await membership.user.load()
     return {
       id: membership.id,
-      name: membership.user.getEntity().fullName,
-      username: membership.user.getEntity().dxuser,
+      active: membership.active,
+      createdAt: membership.createdAt,
       role: SPACE_MEMBERSHIP_ROLE[membership.role] as keyof typeof SPACE_MEMBERSHIP_ROLE,
       side: SPACE_MEMBERSHIP_SIDE[membership.side] as keyof typeof SPACE_MEMBERSHIP_SIDE,
-      createdAt: membership.createdAt,
+      name: membership.user.getEntity().fullName,
+      username: membership.user.getEntity().dxuser,
+
     }
 
   }

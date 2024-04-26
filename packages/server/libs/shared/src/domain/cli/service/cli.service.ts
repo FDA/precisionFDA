@@ -35,7 +35,6 @@ export class CliService {
   ) {
   }
 
-
   /**
    * entity can be one of: file, asset - also file, app, workflow, job.
    * Consolidating both pFDA and platform data for the response.
@@ -77,7 +76,6 @@ export class CliService {
     return CliFileDescribeDTO.mapToDTO(describeFile, file as IFileOrAsset)
   }
 
-
   private async describeWorkflow(uid: UID<'workflow'>) {
     const workflow: any = await this.entityFetcherService.getAccessibleByUid('Workflow', uid)
     if (!workflow) {
@@ -102,7 +100,6 @@ export class CliService {
     return CliAppDescribeDTO.mapToDTO(platformAppData, app)
   }
 
-
   private async describeExecution(entityId: UID<'job'>) {
     const execution: any = await this.entityFetcherService.getAccessibleByUid('Job', entityId)
     if (!execution) {
@@ -112,7 +109,6 @@ export class CliService {
     const platformExecutionData = await this.platformClient.jobDescribe({ jobId: execution.dxid })
     return CliExecutionDescribeDTO.mapToDTO(platformExecutionData, execution)
   }
-
 
   async listSpaceMembers(spaceId: number) {
     const space = await this.em.findOne(Space, {

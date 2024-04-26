@@ -31,7 +31,7 @@ import (
 	"github.com/manifoldco/promptui"
 )
 
-const userAgent = "precisionFDA CLI/2.6.0 "
+const userAgent = "precisionFDA CLI/2.6.1 "
 const defaultNumRoutines = 10
 const defaultChunkSize = 1 << 26 // default 64MB (min. 16MB)
 const minRoutines = 1
@@ -67,7 +67,7 @@ type IPFDAClient interface {
 	LsExecutions(spaceID string, flags map[string]bool) error
 	Ls(folderID string, spaceID string, flags map[string]bool) error
 	LsMembers(spaceID string) error
-	LsDiscussions(spaceID string) error // might refactor to be able present public discussions as well.
+	LsDiscussions(spaceID string, flags map[string]bool) error // might refactor to be able present public discussions as well.
 	Mkdir(names []string, folderID string, spaceID string, parents bool) error
 	Rmdir(args []string) error
 	Rm(args []string, folderID string, spaceID string) error
@@ -470,6 +470,7 @@ func (c *PFDAClient) Upload(file io.ReadCloser, path string, folderID string, sp
 	c.readAndChunk(file, chunkPool, &size)
 
 	close(chunkPool)
+	c.TagCliFile(fileID)
 	wg.Wait()
 
 	if withProgressBar && !c.JsonResponse {
@@ -807,114 +808,6 @@ func (c *PFDAClient) FileViewLink(arg string) error {
 	return nil
 }
 
-func (c *PFDAClient) UploadResources(args []string, portalID string) error {
-
-	var wg sync.WaitGroup
-	semaphore := make(chan struct{}, 3) // Limit to 3 concurrent goroutines
-
-	results := make(chan error, len(args))
-	for _, path := range args {
-		wg.Add(1)
-		go func(path string) {
-			defer wg.Done()
-			semaphore <- struct{}{} // Acquire
-			err := c.UploadResource(path, portalID, !c.JsonResponse)
-			<-semaphore // Release
-			results <- err
-		}(path)
-	}
-
-	wg.Wait()
-	close(results)
-
-	if !c.JsonResponse {
-		fmt.Println(">> Waiting for all resources links to be generated...")
-	}
-	// nasty, I know
-	time.Sleep(3 * time.Second)
-
-	// Call to getResourceApiURL once here, after all goroutines are done
-	getResourceApiURL := fmt.Sprintf("%s/api/data_portals/%s/resources", c.BaseURL, portalID)
-	_, body, err := c.makeRequestFail("GET", getResourceApiURL, nil)
-	if err != nil {
-		return err
-	}
-
-	var response JsonResourcesResponse
-	if err := json.Unmarshal(body, &response); err != nil {
-		return err
-	}
-
-	if c.JsonResponse {
-		helpers.PrettyPrint(response)
-	} else {
-		for _, resource := range response.Resources {
-			fmt.Printf(">> Resource URL: %s\n", resource.URL)
-		}
-	}
-	return nil
-}
-
-func (c *PFDAClient) UploadResource(path string, portalID string, withProgressBar bool) error {
-	createURL := fmt.Sprintf("%s/api/data_portals/%s/resources", c.BaseURL, portalID)
-	closeURL := c.BaseURL + "/api/close_file"
-
-	file, err := os.Open(path)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-
-	info, err := file.Stat()
-	if err != nil {
-		return err
-	}
-	size := info.Size()
-	if size > maxFileSize {
-		return fmt.Errorf("size of file '%s' (%d) exceeds maximum allowed file size(%d)", path, size, maxFileSize)
-	}
-	if size == 0 {
-		return fmt.Errorf("size of file '%s' is 0 - uploading an empty resource is not allowed", path)
-	}
-
-	jsonData, err := json.Marshal(map[string]interface{}{
-		"name":        filepath.Base(path),
-		"description": "Resource created by precisionFDA CLI",
-	})
-	if err != nil {
-		return err
-	}
-
-	_, body, err := c.makeRequestFail("POST", createURL, jsonData)
-	if err != nil {
-		return err
-	}
-
-	var result map[string]interface{}
-	err = json.Unmarshal(body, &result)
-	if err != nil {
-		return err
-	}
-
-	fileUid := result["fileUid"].(string)
-	chunkPool := make(chan uploadChunk, c.NumRoutines)
-	wg := c.initWaitGroup(fileUid, chunkPool, &size, withProgressBar)
-	c.readAndChunk(file, chunkPool, &size)
-	close(chunkPool)
-	wg.Wait()
-
-	jsonData, err = json.Marshal(map[string]interface{}{
-		"uid": fileUid,
-	})
-	if err != nil {
-		return err
-	}
-
-	// This is async; we cannot wait for close, but some delay is called in the main function
-	c.makeRequestFail("POST", closeURL, jsonData)
-	return nil
-}
-
 func (c *PFDAClient) DescribeEntity(entityID string, entityType string) error {
 	apiURL := fmt.Sprintf("%s/api/%ss/%s/describe", c.BaseURL, entityType, entityID)
 
@@ -937,175 +830,6 @@ func (c *PFDAClient) DescribeEntity(entityID string, entityType string) error {
 	fmt.Printf("%s\n", string(prettyJSON))
 
 	return nil
-}
-
-func (c *PFDAClient) LsSpaces(flags map[string]bool) error {
-	apiURL := fmt.Sprintf("%s/api/spaces/cli", c.BaseURL)
-
-	params := url.Values{}
-	for flag, value := range flags {
-		if value {
-			params.Add(flag, strconv.FormatBool(value))
-		}
-	}
-	fullURL := fmt.Sprintf("%s?%s", apiURL, params.Encode())
-	status, body, err := c.makeRequestFail("GET", fullURL, nil)
-	if err != nil {
-		if status == "404 Not Found" {
-			return fmt.Errorf("Something went wrong")
-		} else {
-			return err
-		}
-	}
-
-	var spaces []jsonSpaceResponse
-	if err := json.Unmarshal(body, &spaces); err != nil {
-		return err
-	}
-
-	printListSpacesResponse(spaces, flags["json"])
-	return nil
-}
-
-func (c *PFDAClient) LsApps(spaceID string, flags map[string]bool) error {
-	apiURL := fmt.Sprintf("%s/api/apps/cli_apps", c.BaseURL)
-
-	params := url.Values{}
-
-	if err := helpers.ValidateID(spaceID, "space_id", params); err != nil {
-		return err
-	}
-
-	for flag, value := range flags {
-		if value {
-			params.Add(flag, strconv.FormatBool(value))
-		}
-	}
-
-	fullURL := fmt.Sprintf("%s?%s", apiURL, params.Encode())
-	status, body, err := c.makeRequestFail("GET", fullURL, nil)
-	if err != nil {
-		if status == "404 Not Found" {
-			return fmt.Errorf("Target location not found or inaccessible")
-		}
-		return err
-	}
-
-	var result []map[string]interface{}
-	if err := json.Unmarshal(body, &result); err != nil {
-		return err
-	}
-
-	prettyJSON, _ := json.MarshalIndent(result, "", "    ")
-	fmt.Printf("%s\n", string(prettyJSON))
-
-	return nil
-}
-
-func (c *PFDAClient) LsAssets(spaceID string, flags map[string]bool) error {
-	apiURL := fmt.Sprintf("%s/api/assets/cli_assets", c.BaseURL)
-
-	params := url.Values{}
-
-	if err := helpers.ValidateID(spaceID, "space_id", params); err != nil {
-		return err
-	}
-
-	for flag, value := range flags {
-		if value {
-			params.Add(flag, strconv.FormatBool(value))
-		}
-	}
-
-	fullURL := fmt.Sprintf("%s?%s", apiURL, params.Encode())
-	status, body, err := c.makeRequestFail("GET", fullURL, nil)
-	if err != nil {
-		if status == "404 Not Found" {
-			return fmt.Errorf("Target location not found or inaccessible")
-		}
-		return err
-	}
-
-	var result []map[string]interface{}
-	if err := json.Unmarshal(body, &result); err != nil {
-		return err
-	}
-
-	prettyJSON, _ := json.MarshalIndent(result, "", "    ")
-	fmt.Printf("%s\n", string(prettyJSON))
-
-	return nil
-}
-
-func (c *PFDAClient) LsWorkflows(spaceID string, flags map[string]bool) error {
-	apiURL := fmt.Sprintf("%s/api/workflows/cli_workflows", c.BaseURL)
-
-	params := url.Values{}
-
-	if err := helpers.ValidateID(spaceID, "space_id", params); err != nil {
-		return err
-	}
-
-	for flag, value := range flags {
-		if value {
-			params.Add(flag, strconv.FormatBool(value))
-		}
-	}
-
-	fullURL := fmt.Sprintf("%s?%s", apiURL, params.Encode())
-	status, body, err := c.makeRequestFail("GET", fullURL, nil)
-	if err != nil {
-		if status == "404 Not Found" {
-			return fmt.Errorf("Target location not found or inaccessible")
-		}
-		return err
-	}
-
-	var result []map[string]interface{}
-	if err := json.Unmarshal(body, &result); err != nil {
-		return err
-	}
-
-	prettyJSON, _ := json.MarshalIndent(result, "", "    ")
-	fmt.Printf("%s\n", string(prettyJSON))
-
-	return nil
-}
-
-func (c *PFDAClient) LsExecutions(spaceID string, flags map[string]bool) error {
-	apiURL := fmt.Sprintf("%s/api/jobs/cli_jobs", c.BaseURL)
-
-	params := url.Values{}
-
-	if err := helpers.ValidateID(spaceID, "space_id", params); err != nil {
-		return err
-	}
-
-	for flag, value := range flags {
-		if value {
-			params.Add(flag, strconv.FormatBool(value))
-		}
-	}
-
-	fullURL := fmt.Sprintf("%s?%s", apiURL, params.Encode())
-	status, body, err := c.makeRequestFail("GET", fullURL, nil)
-	if err != nil {
-		if status == "404 Not Found" {
-			return fmt.Errorf("Target location not found or inaccessible")
-		}
-		return err
-	}
-
-	var result []map[string]interface{}
-	if err := json.Unmarshal(body, &result); err != nil {
-		return err
-	}
-
-	prettyJSON, _ := json.MarshalIndent(result, "", "    ")
-	fmt.Printf("%s\n", string(prettyJSON))
-
-	return nil
-
 }
 
 func (c *PFDAClient) Ls(folderID string, spaceID string, flags map[string]bool) error {
@@ -1142,47 +866,6 @@ func (c *PFDAClient) Ls(folderID string, spaceID string, flags map[string]bool) 
 	}
 
 	printListingResponse(response, flags["json"], flags["brief"])
-	return nil
-}
-
-func (c *PFDAClient) LsMembers(spaceID string) error {
-	apiURL := fmt.Sprintf("%s/api/spaces/%s/cli_members", c.BaseURL, spaceID)
-
-	status, body, err := c.makeRequestFail("GET", apiURL, nil)
-	if err != nil {
-		if status == "404 Not Found" {
-			return fmt.Errorf("Space not found or inaccessible")
-		}
-		return err
-	}
-
-	var members []jsonMembersResponse
-	if err := json.Unmarshal(body, &members); err != nil {
-		return err
-	}
-
-	printSpaceMembersResponse(members, c.JsonResponse)
-	return nil
-}
-
-func (c *PFDAClient) LsDiscussions(spaceID string) error {
-	apiURL := fmt.Sprintf("%s/api/spaces/%s/cli_discussions", c.BaseURL, spaceID)
-
-	status, body, err := c.makeRequestFail("GET", apiURL, nil)
-	if err != nil {
-		if status == "404 Not Found" {
-			return fmt.Errorf("Space not found or inaccessible")
-		}
-		return err
-	}
-
-	var result []map[string]interface{}
-	if err := json.Unmarshal(body, &result); err != nil {
-		return err
-	}
-	prettyJSON, _ := json.MarshalIndent(result, "", "    ")
-	fmt.Printf("%s\n", string(prettyJSON))
-
 	return nil
 }
 
@@ -1449,6 +1132,7 @@ func (c *PFDAClient) createNewFolder(name string, parentFolderID string, spaceID
 		return newFolderID, fmt.Errorf("unable to create folder: %s - already exists in target location", name)
 	}
 
+	c.TagCliFolder(newFolderID)
 	return newFolderID, nil
 }
 
@@ -1580,7 +1264,8 @@ func (c *PFDAClient) initWaitGroup(fileID string, chunkPool <-chan uploadChunk, 
 		g.Add(1)
 		go func() {
 			for chunk := range chunkPool {
-				c.sendToStore(fileID, chunk)
+				err := c.sendToStore(fileID, chunk)
+				c.HandleError(err)
 				atomic.AddUint64(&totalSent, uint64(len(chunk.data)))
 				currentSize := atomic.LoadUint64(&totalSent)
 				totalSize := atomic.LoadInt64(size)
@@ -1697,11 +1382,6 @@ func (c *PFDAClient) setPostHeaders(req *retryablehttp.Request) {
 	req.Header.Set("Content-Type", "application/json")
 }
 
-func inputError(msg string) {
-	fmt.Println(fmt.Errorf(msg))
-	os.Exit(1)
-}
-
 func yesNo(label string) bool {
 	prompt := promptui.Select{
 		Label: label + " [Yes/No]",
@@ -1812,11 +1492,11 @@ func printSpaceMembersResponse(members []jsonMembersResponse, asJSON bool) {
 			fmt.Fprintln(writer, strings.Join(columns, "\t")+"\t")
 		}
 
-		headers := []string{"ID", "Name", "Role", "Side", "Added at"}
+		headers := []string{"ID", "Name", "Role", "Side", "Active", "Added at"}
 		printLine(headers)
 
 		for _, member := range members {
-			columns := []string{strconv.Itoa(member.Id), member.Name, member.Role, member.Side, member.CreatedAt}
+			columns := []string{strconv.Itoa(member.Id), member.Name, member.Role, member.Side, strconv.FormatBool(member.Active), member.CreatedAt}
 			printLine(columns)
 		}
 		writer.Flush()
@@ -1859,14 +1539,4 @@ func printListingVerbose(files []jsonFileResponse, meta jsonMetaResponse) {
 		printLine(columns)
 	}
 	writer.Flush()
-}
-
-// HandleError Check for error, if found behave accordingly
-func (c *PFDAClient) HandleError(err error) {
-	if err != nil {
-		helpers.ErrorFromError(err, c.JsonResponse)
-		if !c.ContinueOnError {
-			os.Exit(1)
-		}
-	}
 }

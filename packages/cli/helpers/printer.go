@@ -270,11 +270,11 @@ func PrintUploadResourceHelp() int {
 	writeLine := newLineWriter(writer)
 
 	writeLine("  ", "  ")
-	writeLine("  For:", "Uploading a new portal resource. Responds with sharable pre-authenticated non-expiring link to the created resource.\n")
+	writeLine("  For:", "Uploading a new portal resource. Responds with sharable non-expiring link to the created resource.\n")
 	writeLine("  ", "Supports uploading multiple resources - simply pass them as positional args before any flags (check examples).")
-	writeLine("  Usage:", "upload-resource <PATH/TO/FILE> -portal-id <PORTAL_ID> [FLAG...]\n")
+	writeLine("  Usage:", "upload-resource <PATH/TO/FILE> -portal-id <PORTAL_ID | PORTAL_SLUG> [FLAG...]\n")
 	writeLine("  Examples:", "upload-resource script01.py -portal-id 12 [Creates a new resource in the specified portal]")
-	writeLine("  ", "upload-resource script01.py processed_data.py results.pdf -portal-id 12  [Creates new resources in the specified portal]")
+	writeLine("  ", "upload-resource script01.py processed_data.py results.pdf -portal-id dna-sequences-101  [Creates new resources in the specified portal defined by slug]")
 
 	writer.Flush()
 	return 0
