@@ -1,5 +1,5 @@
 // PrecisionFDA CLI
-// Version 2.6.0
+// Version 2.6.1
 package main
 
 import (
@@ -26,7 +26,7 @@ const defaultChunkSize = 1 << 26 // default 64MB (min. 16MB)
 const defaultSkipVerify = "false"
 const usageString = `
 ****************************
-PFDA COMMAND LINE TOOL v2.6.0
+PFDA COMMAND LINE TOOL v2.6.1
 ****************************
 
 To upload a file:
@@ -218,7 +218,7 @@ var invokeLsMembers = func(client precisionfda.IPFDAClient, spaceID *string) err
 }
 
 var invokeLsDiscussions = func(client precisionfda.IPFDAClient, spaceID *string) error {
-	return client.LsDiscussions(*spaceID)
+	return client.LsDiscussions(*spaceID, map[string]bool{})
 }
 
 var invokeMkdir = func(client precisionfda.IPFDAClient, names *[]string, folderID *string, spaceID *string, parents bool) error {
@@ -273,7 +273,7 @@ func mainInternal() int {
 	workflowID := flag.String("workflow-id", "", "Workflow ID of the workflow to be described")
 	folderID := flag.String("folder-id", "", "Folder ID of the target folder")
 	spaceID := flag.String("space-id", "", "Space ID of the target space")
-	portalID := flag.String("portal-id", "", "Portal ID of the target portal")
+	portalID := flag.String("portal-id", "", "Slug or ID of the target portal")
 	outputFilePath := flag.String("output", "", "[optional] File path to write api call response data. Defaults to stdout.")
 	inputChunkSize := flag.Int("chunksize", defaultChunkSize, "[optional] Size of each upload chunk in bytes (Min 5MB,/Max 2GB).")
 	inputNumRoutines := flag.Int("threads", defaultNumRoutines, "[optional] Maximum number of upload threads to spawn (Max 100).")

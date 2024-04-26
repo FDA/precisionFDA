@@ -93,7 +93,7 @@ export const CLI = () => {
         <h2 id="download">Download the CLI</h2>
         <ButtonRow>
           <a
-            href="https://pfda-production-static-files.s3.amazonaws.com/cli/pfda-linux-2.6.0.tar.gz"
+            href="https://pfda-production-static-files.s3.amazonaws.com/cli/pfda-linux-2.6.1.tar.gz"
             target="_blank"
             rel="noreferrer"
           >
@@ -102,7 +102,7 @@ export const CLI = () => {
             </Button>
           </a>
           <a
-            href="https://pfda-production-static-files.s3.amazonaws.com/cli/pfda-darwin-2.6.0.tar.gz"
+            href="https://pfda-production-static-files.s3.amazonaws.com/cli/pfda-darwin-2.6.1.tar.gz"
             target="_blank"
             rel="noreferrer"
           >
@@ -111,7 +111,7 @@ export const CLI = () => {
             </Button>
           </a>
           <a
-            href="https://pfda-production-static-files.s3.amazonaws.com/cli/pfda-windows-2.6.0.zip"
+            href="https://pfda-production-static-files.s3.amazonaws.com/cli/pfda-windows-2.6.1.zip"
             target="_blank"
             rel="noreferrer"
           >
@@ -320,7 +320,7 @@ export const CLI = () => {
             usage.
             These values are not controlled and if you decide to use them, you might run into <strong>OutOfMemory
             errors</strong> on the host machine.
-            The default values are 10 threads and 16MB chunk size.
+            The default values are 10 threads and 64MB chunk size.
           </HelpTipText>
         </HelpSection>
 
@@ -890,7 +890,7 @@ export const CLI = () => {
         </p>
 
         <h3>Usage</h3>
-        <StyledCode>ls-assets [FLAG...]</StyledCode>
+        <StyledCode>{' ./pfda ls-assets [FLAG...]'}</StyledCode>
 
         <h3>Available Flags</h3>
         <p>All flags are optional and can be used to specify the assets to list.</p>
@@ -928,7 +928,7 @@ export const CLI = () => {
         </p>
 
         <h3>Usage</h3>
-        <StyledCode>ls-apps [FLAG...]</StyledCode>
+        <StyledCode>{' ./pfda ls-apps [FLAG...]'}</StyledCode>
 
         <h3>Available Flags</h3>
         <p>All flags are optional and can be used to specify the applications to list.</p>
@@ -972,7 +972,7 @@ export const CLI = () => {
         </p>
 
         <h3>Usage</h3>
-        <StyledCode>ls-discussions [FLAG...]</StyledCode>
+        <StyledCode>{ './pfda ls-discussions [FLAG...]'}</StyledCode>
 
         <h3>Available Flags</h3>
         <p>All flags are optional and can be used to specify the discussions to list.</p>
@@ -1003,7 +1003,7 @@ export const CLI = () => {
         </p>
 
         <h3>Usage</h3>
-        <StyledCode>ls-executions [FLAG...]</StyledCode>
+        <StyledCode>{' ./pfda ls-executions [FLAG...]'}</StyledCode>
 
         <h3>Available Flags</h3>
         <p>All flags are optional and can be used to specify the executions to list.</p>
@@ -1100,17 +1100,17 @@ export const CLI = () => {
         <h2 id="ls-members">Listing Space Members</h2>
         <p>
           The CLI command <StyledCode>pfda ls-members</StyledCode> is designed for listing members in a given space.
-          The command always responds in JSON format.
         </p>
 
         <h3>Usage</h3>
-        <StyledCode>ls-members [FLAG...]</StyledCode>
+        <StyledCode>{' ./pfda ls-members [FLAG...]'}</StyledCode>
 
         <h3>Available Flags</h3>
         <p>All flags are optional and can be used to specify the members to list.</p>
         <ul>
           <li><StyledCode>-h, -help</StyledCode>: Displays the help message and exits.</li>
           <li><StyledCode>-space-id &lt;ID&gt;</StyledCode>: Lists members in the specified space.</li>
+          <li><StyledCode>-json</StyledCode>: Responds the command result in JSON format.</li>
         </ul>
 
         <h3>Examples</h3>
@@ -1283,8 +1283,8 @@ export const CLI = () => {
         <h2 id="changelog">pFDA CLI Changelog</h2>
         <br/>
 
-        <p>Version 2.6.0 (04/02/2024): New features: describe, ls-assets, ls-apps, ls-executions, ls-workflows,
-          ls-discussions </p>
+        <p>Version 2.6.1 (04/22/2024): Fixed file-upload bug, various improvements </p>
+        <p>Version 2.6.0 (04/02/2024): New features: describe, ls-assets, ls-apps, ls-executions, ls-workflows, ls-discussions </p>
         <p>Version 2.5.0 (12/14/2023): Support of JSON responses, upload-file bug fixes.</p>
         <p>Version 2.4.1 (07/20/2023): Fixed folder id manipulation.</p>
         <p>Version 2.4 (05/25/2023): New features: get-space-id, upload-file stdin input.</p>
