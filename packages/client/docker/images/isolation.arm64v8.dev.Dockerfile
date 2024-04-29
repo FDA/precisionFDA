@@ -4,7 +4,7 @@ ARG FRONTEND_IMAGE_TAG
 FROM amd64/node:${FRONTEND_IMAGE_TAG}
 
 WORKDIR /precision-fda
-RUN npm i -g pnpm
+RUN npm i -g pnpm@9.0.6
 COPY package.json \
     pnpm-lock.yaml \
     webpack.fragment.base.js \

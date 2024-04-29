@@ -5,28 +5,7 @@ repo-env-files-init:
 	echo Setting up .env files
 	cp -n docker/.env.example docker/.env || echo Skipping docker .env
 	cp -n packages/server/.env.example packages/server/.env || echo Skipping server .env
-	cp -n .env.example .env || echo Skipping root directory .env
-
-repo-key-files-init:
-	echo Setting up key/cert files
-	cp key.pem packages/server || echo Skipping docker server/key.pem
-	cp cert.pem packages/server || echo Skipping docker server/cert.pem
-	cp key.pem packages/rails || echo Skipping docker rails/key.pem
-	cp cert.pem packages/rails || echo Skipping docker rails/cert.pem
-	cp key.pem packages/client || echo Skipping docker client/key.pem
-	cp cert.pem packages/client || echo Skipping docker client/cert.pem
-
-repo-db-config-init:
-	echo Setting up db config
-	cp packages/rails/config/database.sample.yml packages/rails/config/database.yml
-
-repo-githooks-init:
-	chmod +x utils/githooks/*
-	ln -f utils/githooks/* .git/hooks
-
-repo-init: repo-db-config-init repo-key-files-init repo-env-files-init repo-githooks-init
-	echo Repo setup complete
-
+	cp -n packages/rails/.env.example packages/rails/.env || echo Skipping root directory .env
 
 # ┌─────────────────┐
 # │                 │

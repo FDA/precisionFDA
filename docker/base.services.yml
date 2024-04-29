@@ -1,7 +1,7 @@
 services:
   base_ruby:
     platform: linux/x86_64
-    env_file: ../.env
+    env_file: ../packages/rails/.env
     build:
       context: ../packages/rails
       dockerfile: ./docker/images/isolation.Dockerfile
@@ -18,7 +18,7 @@ services:
       context: ../packages/server
       dockerfile: ./docker/images/node.isolated-qa.Dockerfile
       args:
-        - NODEJS_IMAGE_TAG=20.9.0-slim
+        - NODEJS_IMAGE_TAG=20.12.2-slim
     environment:
       - NODEJS_DB_POLLING_INTERVAL=${NODEJS_DB_POLLING_INTERVAL:-5}
       - NODE_REDIS_URL=redis://redis:6379/0
@@ -30,6 +30,8 @@ services:
       - type: bind
         source: ../packages/rails
         target: /precision-fda
+      - ../cert.pem:/cert.pem
+      - ../key.pem:/key.pem
     working_dir: /precision-fda
     ports:
       - 3000:3000
@@ -40,7 +42,7 @@ services:
       context: ../packages/client
       dockerfile: ./docker/images/isolation.Dockerfile
       args:
-        - FRONTEND_IMAGE_TAG=20.9.0-slim
+        - FRONTEND_IMAGE_TAG=20.12.2-slim
     volumes:
       - type: bind
         source: ../packages/rails/app/assets/packs
@@ -55,6 +57,9 @@ services:
     extends:
       service: base_nodejs
     command: ['make', 'run-dist']
+    volumes:
+      - ../cert.pem:/keys/cert.pem
+      - ../key.pem:/keys/key.pem
     ports:
       - 3001:3001
   nodejs-worker:
