@@ -59,8 +59,8 @@ module.exports = merge(base({ urlLoaderOptions }), swc({ swcLoaderOptions }), {
     server: {
       type: 'https',
       options: {
-        key: fs.readFileSync(path.resolve('./key.pem')),
-        cert: fs.readFileSync(path.resolve('./cert.pem')),
+        key: fs.readFileSync(path.resolve('./../../key.pem')),
+        cert: fs.readFileSync(path.resolve('./../../cert.pem')),
       },
     },
     proxy: [

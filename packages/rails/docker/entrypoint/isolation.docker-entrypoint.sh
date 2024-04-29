@@ -26,8 +26,8 @@ if [[ ! $SKIP_DB_SETUP || $SKIP_DB_SETUP = 0 ]]; then
   bundle exec rake user:generate_test_users
 fi
 
-if [[ -f ./key.pem && -f ./cert.pem ]]; then
-  bundle exec thin --debug start --ssl --ssl-key-file ./key.pem --ssl-cert-file ./cert.pem
+if [[ -f /key.pem && -f /cert.pem ]]; then
+  bundle exec thin --debug start --ssl --ssl-key-file /key.pem --ssl-cert-file /cert.pem
 else
   bundle exec thin --ssl --debug start
 fi

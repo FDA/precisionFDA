@@ -2,8 +2,7 @@ import { PlatformFileService } from '@shared/domain/platform/service/platform-fi
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { PlatformClient } from '@shared/platform-client'
 import { expect } from 'chai'
-import type { SinonStub } from 'sinon'
-import { stub, match } from 'sinon'
+import { match, SinonStub, stub } from 'sinon'
 
 describe('PlatformFileService', () => {
   describe('#createFile', () => {
@@ -61,8 +60,11 @@ describe('PlatformFileService', () => {
 
     const UPLOAD_URL_RESULT_1 = { url: UPLOAD_URL_1, headers: UPLOAD_HEADERS_1 }
     const UPLOAD_URL_RESULT_2 = { url: UPLOAD_URL_2, headers: UPLOAD_HEADERS_2 }
-
     let clientGetFileUploadUrlStub: SinonStub
+
+    // It seems newer versions of nodejs initialize the fetch property on the global object lazily.
+    // The stub does not work unless the fetch function has been accessed at least once before the stub.
+    void fetch
     const fetchStub: SinonStub = stub(global, 'fetch')
 
     beforeEach(() => {

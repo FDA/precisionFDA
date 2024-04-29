@@ -7,7 +7,7 @@ RUN apt-get update && \
 
 WORKDIR /app
 
-RUN npm i -g pnpm
+RUN npm i -g pnpm@9.0.6
 
 COPY package.json \
     pnpm-lock.yaml \
@@ -17,8 +17,6 @@ COPY package.json \
     .env \
     /app/
 
-# copy root-level shared stuff
-COPY key.pem cert.pem /keys/
 COPY ./docker/entrypoint/dev.entrypoint.sh /usr/local/bin
 
 ENTRYPOINT ["/usr/local/bin/dev.entrypoint.sh"]

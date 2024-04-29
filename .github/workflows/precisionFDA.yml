@@ -172,20 +172,11 @@ jobs:
           cache-version: 1
       - uses: pnpm/action-setup@v3
         with:
-          version: 8
+          version: 9.0.6
       - uses: actions/setup-node@v4
         with:
-          node-version: '20.9.0'
-      # TODO(samuel) - yarn cache from setup-node@3 github actions still is quite slow and results in install time of 1 minute
-      # My guess: issue might be related to the use of workspaces
-      # Workaround: node_modules directly stored in the package
-      # Removal requires more investingation
-      - uses: actions/cache@v4
-        with:
-          path: |
-            ./packages/server/node_modules
-          key: ${{ runner.os }}-modules-${{ hashFiles('./packages/server/pnpm-lock.yaml') }}
-
+          node-version: '20.12.2'
+          cache: 'pnpm'
       - name: Prepare env & db
         working-directory: ./packages/rails
         env:
@@ -223,17 +214,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - uses: pnpm/action-setup@v3
         with:
-          version: 8
-
-      - uses: actions/cache@v4
-        name: Setup pnpm cache
+          version: 9.0.6
+      - uses: actions/setup-node@v4
         with:
-          path: ./packages/client/node_modules
-          key: ${{ runner.os }}-fe-modules-${{ hashFiles('./packages/client/pnpm-lock.yaml') }}
-
+          node-version: '20.12.2'
+          cache: 'pnpm'
       - name: Install dependencies
         working-directory: ./packages/client
         run: pnpm install --frozen-lockfile --prod=false
@@ -249,17 +236,13 @@ jobs:
       NODE_ENV: production
     steps:
       - uses: actions/checkout@v4
-      
       - uses: pnpm/action-setup@v3
         with:
-          version: 8
-
-      - uses: actions/cache@v4
-        name: Setup pnpm cache
+          version: 9.0.6
+      - uses: actions/setup-node@v4
         with:
-          path: ./packages/client/node_modules
-          key: ${{ runner.os }}-fe-modules-${{ hashFiles('./packages/client/pnpm-lock.yaml') }}
-
+          node-version: '20.12.2'
+          cache: 'pnpm'
       - name: Install dependencies
         working-directory: ./packages/client
         run: pnpm install --frozen-lockfile --prod=false
