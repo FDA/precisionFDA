@@ -180,6 +180,14 @@ module Api
         "image/png"
       when ".html"
         "text/html"
+      when ".mp4"
+        "video/mp4"
+      when ".avi"
+        "video/x-msvideo"
+      when ".mov"
+        "video/quicktime"
+      when ".wmv"
+        "video/x-ms-wmv"
       else
         "application/octet-stream"
       end

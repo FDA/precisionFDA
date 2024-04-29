@@ -6,6 +6,6 @@ import { Resource } from '@shared/domain/resource/resource.entity'
 export class ResourceEntityLinkProvider extends EntityLinkProvider<'resource'> {
   protected async getRelativeLink(entity: Resource) {
     const f = entity.userFile.getEntity()
-    return `/api/resources/${f.uid}/${f.name}` as const
+    return `/api/resources/${f.uid}/${encodeURIComponent(f.name)}` as const
   }
 }
