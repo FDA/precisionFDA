@@ -14,5 +14,5 @@
 
 # Backend (Node & Ruby)
 /packages/server @jirkalagan @pavelkubal @lbobek-dnanexus @bartapes
-/packages/app @jirkalagan @pavelkubal @lbobek-dnanexus @bartapes
+/packages/rails @jirkalagan @pavelkubal @lbobek-dnanexus @bartapes
 
