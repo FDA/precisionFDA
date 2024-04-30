@@ -60,15 +60,28 @@ module Api
     # GET /api/resources/:uid/:filename
     def download_resource
       file = UserFile.accessible_found_by(@context, params[:uid])
+      # if the file is not accessible, it will raise an exception
+      resource = Resource.find_by!(user_file_id: file.id)
 
-      content_type = determine_content_type(file.name)
-      response.headers["Content-Type"] = content_type
+      uri = URI(resource.url)
+      http = Net::HTTP.new(uri.host, uri.port)
+      http.use_ssl = true
 
-      https_apps_client.protected_download(file.uid) do |chunk|
-        response.stream.write(chunk)
+      range = request.headers["Range"]
+      req = Net::HTTP::Get.new(uri)
+      # !!! DON'T FORGET TO HANDLE RANGE REQUESTS IN NODE WHEN MIGRATING !!!
+      req["Range"] = range if range.present?
+
+      response.headers["Accept-Ranges"] = "bytes"
+
+      begin
+        http.request(req) do |resp|
+          # !!! DON'T FORGET TO HANDLE RANGE REQUESTS IN NODE WHEN MIGRATING !!!
+          send_data_response(resp, range)
+        end
+      ensure
+        response.stream.close if response.stream.respond_to?(:close)
       end
-    ensure
-      response.stream.close
     end
 
     def create_resource
@@ -170,26 +183,17 @@ module Api
       )
     end
 
-    def determine_content_type(filename)
-      case File.extname(filename).downcase
-      when ".pdf"
-        "application/pdf"
-      when ".jpg", ".jpeg"
-        "image/jpeg"
-      when ".png"
-        "image/png"
-      when ".html"
-        "text/html"
-      when ".mp4"
-        "video/mp4"
-      when ".avi"
-        "video/x-msvideo"
-      when ".mov"
-        "video/quicktime"
-      when ".wmv"
-        "video/x-ms-wmv"
-      else
-        "application/octet-stream"
+    def send_data_response(resp, range)
+      if range.present? && resp.code == "206" # Partial content
+        response.status = 206
+        response.headers["Content-Range"] = resp["Content-Range"]
+        response.headers["Content-Length"] = resp["Content-Length"]
+      end
+
+      response.headers["Content-Type"] = resp["Content-Type"]
+
+      resp.read_body do |chunk|
+        response.stream.write chunk
       end
     end
   end

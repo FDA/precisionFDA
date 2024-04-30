@@ -7,7 +7,12 @@
 /infra @johnymachine @gitbisect
 
 # Frontend
-/client @ddcech
+/packages/client @ddcech
 
 # CLI
 /go @jirkalagan
+/packages/cli @jirkalagan
+
+# Backend (Node & Ruby)
+/packages/server @jirkalagan @pavelkubal @lbobek-dnanexus @bartapes
+/packages/rails @jirkalagan @pavelkubal @lbobek-dnanexus @bartapes
