@@ -10,7 +10,8 @@ export class ResourcesController {
     private readonly resourceService: ResourceService,
   ) {}
 
-
+// This is not used at the moment. We are handling everything in rails.
+// TODO: Once rails middleware is removed, add range requests handling and stream it directly to the client.
 @Get(':uid/download')
 @Header('Content-Type', 'application/octet-stream')
   async downloadResource(@Param('uid') fileUid: string) {
