@@ -314,16 +314,6 @@ module Api
       raise ApiError, e.message
     end
 
-    # PATCH /api/jobs/:id/sync_files
-    # Trigger files sync from a running workstation
-    # The :id used should be the job's dxid
-    def sync_files
-      service = Jobs::SyncFilesService.call(params[:id], @context)
-      raise ApiError, service.message unless service.success?
-
-      render json: { message: { type: service.status, text: service.message } }
-    end
-
     def cli_jobs
       # Fetches space jobs.
       if params[:space_id]

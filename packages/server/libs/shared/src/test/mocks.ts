@@ -17,7 +17,6 @@ import { FileCloseParams } from '../platform-client/platform-client.params'
 import { createMockServiceFactory } from './mock-service-factory'
 import { RedisClient } from 'redis'
 
-
 const mockServiceFactory = createMockServiceFactory()
 
 const sandbox = sinon.createSandbox()
@@ -62,7 +61,6 @@ const fakes = {
     createEmailSendTaskFake: sinon.fake(),
     createSyncFilesStateTask: sinon.fake(),
     createSyncJobStatusTaskFake: sinon.stub(),
-    createSyncWorkstationFilesTask: sinon.fake(),
     createUserCheckupTask: sinon.fake(),
     createSyncSpacesPermissionsTask: sinon.stub(),
     clearOrphanedRepeatableJobs: sinon.fake(),
@@ -84,9 +82,10 @@ const mocksSetDefaultBehaviour = () => {
   fakes.client.jobDescribeFake.callsFake(() => ({ result: 'yep' }))
   fakes.client.jobCreateFake.callsFake(() => ({ id: generate.job.jobId() }))
   fakes.client.jobTerminateFake.callsFake(() => ({ id: generate.job.jobId() }))
-  fakes.client.fileDescribeFake.callsFake((input: { fileDxid: string, projectDxid: string }) => (
-    { id: input.fileDxid, project: input.projectDxid }
-  ))
+  fakes.client.fileDescribeFake.callsFake((input: { fileDxid: string; projectDxid: string }) => ({
+    id: input.fileDxid,
+    project: input.projectDxid,
+  }))
   fakes.client.fileCloseFake.callsFake((params: FileCloseParams) => ({ id: params.fileDxid }))
   fakes.client.folderRenameFake.callsFake(() => ({ id: generate.job.jobId() }))
   fakes.client.folderRemoveFake.callsFake(() => ({ id: generate.job.jobId() }))
@@ -110,14 +109,16 @@ const mocksSetDefaultBehaviour = () => {
   fakes.client.projectInviteFake.callsFake(() => ({ id: 'huh', state: 'accepted' })) //fix id
   fakes.client.userDescribeFake.callsFake(() => ({}))
   fakes.client.projectAcceptTransferFake.callsFake(() => ({ id: 'project-abc' }))
-  fakes.client.cloneObjectFake.callsFake(() => ({ id: generate.space.projectId(), project: 'project-abc' }))
+  fakes.client.cloneObjectFake.callsFake(() => ({
+    id: generate.space.projectId(),
+    project: 'project-abc',
+  }))
   fakes.client.appAddAuthorizedUsersFake.callsFake(() => ({ id: generate.app.appId() }))
-  fakes.client.appPublishFake.callsFake(() => ({ id: generate.app.appId()}))
+  fakes.client.appPublishFake.callsFake(() => ({ id: generate.app.appId() }))
 
-  fakes.bull.addFake.callsFake(() => { })
+  fakes.bull.addFake.callsFake(() => {})
   fakes.bull.getJobFake.callsFake(() => undefined)
   fakes.bull.isReadyFake.callsFake(() => Promise.resolve(true))
-
 
   mockServiceFactory.reset()
 }
@@ -141,31 +142,35 @@ const mocksSetup = () => {
   sandbox.replace(PlatformClient.prototype, 'projectDescribe', fakes.client.projectDescribeFake)
   sandbox.replace(PlatformClient.prototype, 'projectCreate', fakes.client.projectCreateFake)
   sandbox.replace(PlatformClient.prototype, 'orgFindMembers', fakes.client.orgFindMembersFake)
-  sandbox.replace(PlatformClient.prototype, 'projectAcceptTransfer', fakes.client.projectAcceptTransferFake)
-  sandbox.replace(PlatformClient.prototype, 'inviteUserToOrganization', fakes.client.inviteUserToOrganizationFake)
-  sandbox.replace(PlatformClient.prototype, 'removeUserFromOrganization', fakes.client.removeUserFromOrganizationFake)
+  sandbox.replace(
+    PlatformClient.prototype,
+    'projectAcceptTransfer',
+    fakes.client.projectAcceptTransferFake,
+  )
+  sandbox.replace(
+    PlatformClient.prototype,
+    'inviteUserToOrganization',
+    fakes.client.inviteUserToOrganizationFake,
+  )
+  sandbox.replace(
+    PlatformClient.prototype,
+    'removeUserFromOrganization',
+    fakes.client.removeUserFromOrganizationFake,
+  )
   sandbox.replace(PlatformClient.prototype, 'folderRemove', fakes.client.folderRemoveFake)
   sandbox.replace(PlatformClient.prototype, 'fileRemove', fakes.client.fileRemoveFake)
   sandbox.replace(PlatformClient.prototype, 'userDescribe', fakes.client.userDescribeFake)
   sandbox.replace(PlatformClient.prototype, 'cloneObjects', fakes.client.cloneObjectFake)
-  sandbox.replace(PlatformClient.prototype, 'appAddAuthorizedUsers', fakes.client.appAddAuthorizedUsersFake)
+  sandbox.replace(
+    PlatformClient.prototype,
+    'appAddAuthorizedUsers',
+    fakes.client.appAddAuthorizedUsersFake,
+  )
   sandbox.replace(PlatformClient.prototype, 'appPublish', fakes.client.appPublishFake)
 
-  sandbox.replace(
-    PlatformClient.prototype,
-    'dbClusterAction',
-    fakes.client.dbClusterActionFake,
-  )
-  sandbox.replace(
-    PlatformClient.prototype,
-    'dbClusterCreate',
-    fakes.client.dbClusterCreateFake,
-  )
-  sandbox.replace(
-    PlatformClient.prototype,
-    'dbClusterDescribe',
-    fakes.client.dbClusterDescribeFake,
-  )
+  sandbox.replace(PlatformClient.prototype, 'dbClusterAction', fakes.client.dbClusterActionFake)
+  sandbox.replace(PlatformClient.prototype, 'dbClusterCreate', fakes.client.dbClusterCreateFake)
+  sandbox.replace(PlatformClient.prototype, 'dbClusterDescribe', fakes.client.dbClusterDescribeFake)
 
   // stub Bull
   sandbox.replace(Bull.prototype, 'process', fakes.bull.processFake)
@@ -182,14 +187,17 @@ const mocksSetup = () => {
   sandbox.replace(queue, 'createSendEmailTask', fakes.queue.createEmailSendTaskFake)
   sandbox.replace(queue, 'createSyncFilesStateTask', fakes.queue.createSyncFilesStateTask)
   sandbox.replace(queue, 'createSyncJobStatusTask', fakes.queue.createSyncJobStatusTaskFake)
-  sandbox.replace(queue, 'createSyncWorkstationFilesTask', fakes.queue.createSyncWorkstationFilesTask)
   sandbox.replace(queue, 'createUserCheckupTask', fakes.queue.createUserCheckupTask)
-  sandbox.replace(queue, 'createSyncSpacesPermissionsTask', fakes.queue.createSyncSpacesPermissionsTask)
+  sandbox.replace(
+    queue,
+    'createSyncSpacesPermissionsTask',
+    fakes.queue.createSyncSpacesPermissionsTask,
+  )
   sandbox.replace(queue, 'clearOrphanedRepeatableJobs', fakes.queue.clearOrphanedRepeatableJobs)
   sandbox.stub(redis, 'createRedisClient').returns({
-    publish(channel: string, value: string) { },
-    subscribe() { },
-    quit() { },
+    publish(channel: string, value: string) {},
+    subscribe() {},
+    quit() {},
   } as RedisClient)
 }
 
@@ -229,7 +237,6 @@ const mocksReset = () => {
   fakes.queue.createEmailSendTaskFake.resetHistory()
   fakes.queue.createSyncFilesStateTask.resetHistory()
   fakes.queue.createSyncJobStatusTaskFake.resetHistory()
-  fakes.queue.createSyncWorkstationFilesTask.resetHistory()
   fakes.queue.createUserCheckupTask.resetHistory()
   fakes.queue.createSyncSpacesPermissionsTask.resetHistory()
   fakes.queue.clearOrphanedRepeatableJobs.resetHistory()

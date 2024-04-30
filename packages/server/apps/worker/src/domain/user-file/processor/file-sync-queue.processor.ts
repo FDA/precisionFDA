@@ -14,13 +14,15 @@ import { lockNodesHandler } from '../../../jobs/lock-nodes.handler'
 import { removeNodesHandler } from '../../../jobs/remove-nodes.handler'
 import { SyncOutputsHandler } from '../../../jobs/sync-outputs.handler'
 import { unlockNodesHandler } from '../../../jobs/unlock-nodes.handler'
-import { workstationSyncFilesHandler } from '../../../jobs/workstation-sync-files.handler'
 import { ProcessWithContext } from '../../../queues/decorator/process-with-context'
 import { BaseQueueProcessor } from '../../../queues/processor/base-queue.processor'
 
 @Processor(config.workerJobs.queues.fileSync.name)
 export class FileSyncQueueProcessor extends BaseQueueProcessor {
-  constructor(@Inject(DEPRECATED_SQL_ENTITY_MANAGER) private readonly em: SqlEntityManager, private readonly user: UserContext) {
+  constructor(
+    @Inject(DEPRECATED_SQL_ENTITY_MANAGER) private readonly em: SqlEntityManager,
+    private readonly user: UserContext,
+  ) {
     super()
   }
 
@@ -32,11 +34,6 @@ export class FileSyncQueueProcessor extends BaseQueueProcessor {
     const handler = new SyncOutputsHandler(this.em, jobService)
 
     await handler.handle(job as Job<CheckStatusJob>)
-  }
-
-  @ProcessWithContext(TASK_TYPE.SYNC_WORKSTATION_FILES)
-  async syncWorkstationFiles(job: Job) {
-    await workstationSyncFilesHandler(job)
   }
 
   @ProcessWithContext(TASK_TYPE.REMOVE_NODES)

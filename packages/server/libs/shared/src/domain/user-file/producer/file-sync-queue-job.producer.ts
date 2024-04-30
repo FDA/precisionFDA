@@ -4,7 +4,7 @@ import { config } from '@shared/config'
 import { InvalidStateError } from '@shared/errors'
 import { QueueJobProducer } from '@shared/queue/queue-job.producer'
 import { getJobStatusMessage } from '@shared/queue/queue.utils'
-import { CheckStatusJob, SyncWorkstationFiles, Task, TASK_TYPE } from '@shared/queue/task.input'
+import { CheckStatusJob, Task, TASK_TYPE } from '@shared/queue/task.input'
 import { UserCtx } from '@shared/types'
 import { formatDuration } from '@shared/utils/format'
 import { JobOptions, Queue } from 'bull'
@@ -21,15 +21,6 @@ export class FileSyncQueueJobProducer extends QueueJobProducer {
   async createSyncOutputsTask(data: CheckStatusJob['payload'], user: UserCtx) {
     const wrapped: CheckStatusJob = {
       type: TASK_TYPE.SYNC_JOB_OUTPUTS,
-      payload: data,
-      user,
-    }
-    await this.createSyncTask(wrapped, data.dxid)
-  }
-
-  async createSyncWorkstationFilesTask(data: CheckStatusJob['payload'], user: UserCtx) {
-    const wrapped: SyncWorkstationFiles = {
-      type: TASK_TYPE.SYNC_WORKSTATION_FILES,
       payload: data,
       user,
     }

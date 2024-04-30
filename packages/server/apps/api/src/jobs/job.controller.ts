@@ -2,12 +2,10 @@ import { SqlEntityManager } from '@mikro-orm/mysql'
 import {
   Body,
   Controller,
-  DefaultValuePipe,
   Get,
   Inject,
   Logger,
   Param,
-  ParseBoolPipe,
   Patch,
   Query,
   UseGuards,
@@ -17,9 +15,6 @@ import { DxId } from '@shared/domain/entity/domain/dxid'
 import { ListJobsInput } from '@shared/domain/job/job.input'
 import { DescribeJobOperation } from '@shared/domain/job/ops/describe'
 import { ListJobsOperation } from '@shared/domain/job/ops/list'
-import {
-  RequestWorkstationSyncFilesOperation
-} from '@shared/domain/job/ops/request-workstation-files-sync'
 import { RequestTerminateJobOperation } from '@shared/domain/job/ops/terminate'
 import { WorkstationSnapshotOperation } from '@shared/domain/job/ops/workstation-snapshot'
 import { WorkstationService } from '@shared/domain/job/workstation.service'
@@ -97,20 +92,6 @@ export class JobController {
     return { message: 'Job sync task created' }
   }
 
-  @Patch('/:jobDxId/syncFiles')
-  async syncWorkstationFiles(
-    @Param('jobDxId', new JsonSchemaPipe(schemas.dxidProp)) dxid: DxId<'job'>,
-    @Query('force', new DefaultValuePipe(false), ParseBoolPipe) force: boolean,
-  ) {
-    const opsCtx: UserOpsCtx = {
-      log: this.log,
-      user: this.user,
-      em: this.em,
-    }
-
-    return await new RequestWorkstationSyncFilesOperation(opsCtx).execute({ dxid, force })
-  }
-
   @Patch('/:jobDxId/checkAlive')
   async checkAlive(
     @Param('jobDxId', new JsonSchemaPipe(schemas.dxidProp)) dxid: DxId<'job'>,
@@ -122,10 +103,7 @@ export class JobController {
       em: this.em,
     }
 
-    const workstationService = await new WorkstationService(
-      opsCtx,
-      body.code,
-    ).initWithJob(dxid)
+    const workstationService = await new WorkstationService(opsCtx, body.code).initWithJob(dxid)
 
     return await workstationService.alive()
   }
@@ -141,10 +119,7 @@ export class JobController {
       em: this.em,
     }
 
-    const workstationService = await new WorkstationService(
-      opsCtx,
-      body.code,
-    ).initWithJob(dxid)
+    const workstationService = await new WorkstationService(opsCtx, body.code).initWithJob(dxid)
 
     return await workstationService.setAPIKey(body.key)
   }

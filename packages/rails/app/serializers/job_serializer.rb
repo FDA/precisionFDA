@@ -233,8 +233,6 @@ class JobSerializer < ApplicationSerializer # rubocop:disable Metrics/ClassLengt
       if object.https? && object.running? && object.https_app_ready?
         # GET /api/jobs/:id/open_external
         links[:open_external] = open_external_api_job_path(object)
-        # GET /api/jobs/:id/sync_files
-        links[:sync_files] = sync_files_api_job_path(object.dxid)
       end
 
       # this job's app single run

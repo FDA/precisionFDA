@@ -419,7 +419,6 @@ Rails.application.routes.draw do
         get :open_external, on: :member
         patch :refresh_api_key, on: :member
         patch :snapshot, on: :member
-        patch :sync_files, on: :member
 
         collection do
           get :featured

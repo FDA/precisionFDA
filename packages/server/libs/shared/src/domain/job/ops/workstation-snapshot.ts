@@ -5,9 +5,8 @@ import { UserOpsCtx } from '../../../types'
 import { omit } from 'ramda'
 import { WorkstationBaseOperation } from './workstation-base-operation'
 import { TASK_TYPE } from '../../../queue/task.input'
-import { addToFileSyncQueueEnsureUnique, createSyncWorkstationFilesTask } from '../../../queue'
+import { addToFileSyncQueueEnsureUnique } from '../../../queue'
 import { JOB_STATE } from '../job.enum'
-import { compareVersions } from 'compare-versions'
 import { NotificationService } from '@shared/domain/notification/services/notification.service'
 
 export interface WorkstationSnapshotOperationParams {
@@ -19,9 +18,9 @@ export interface WorkstationSnapshotOperationParams {
 }
 
 export class WorkstationSnapshotOperation extends WorkstationBaseOperation<
-UserOpsCtx,
-WorkstationSnapshotOperationParams,
-any
+  UserOpsCtx,
+  WorkstationSnapshotOperationParams,
+  any
 > {
   static getTaskType(): TASK_TYPE.WORKSTATION_SNAPSHOT {
     return TASK_TYPE.WORKSTATION_SNAPSHOT
@@ -38,7 +37,9 @@ any
   async enqueue(input: WorkstationSnapshotOperationParams) {
     const job = await this.validatedJobWithWorkstationAPI(input.jobDxid)
     if (job.state !== JOB_STATE.RUNNING) {
-      throw new errors.InvalidStateError(`WorkstationSnapshotOperation Error: job ${job.dxid} is not in running state`)
+      throw new errors.InvalidStateError(
+        `WorkstationSnapshotOperation Error: job ${job.dxid} is not in running state`,
+      )
     }
 
     const queueData = {
@@ -52,44 +53,27 @@ any
 
   async run(input: WorkstationSnapshotOperationParams): Promise<any> {
     const log = this.ctx.log
-    log.verbose({ ...omit(['code', 'key'], input) },
-      'WorkstationSnapshotOperation: Start',
-    )
+    log.verbose({ ...omit(['code', 'key'], input) }, 'WorkstationSnapshotOperation: Start')
 
     const job = await this.validatedJobWithWorkstationAPI(input.jobDxid)
     if (job.state !== JOB_STATE.RUNNING) {
-      throw new errors.InvalidStateError(`WorkstationSnapshotOperation Error: job ${job.dxid} is not in running state`)
+      throw new errors.InvalidStateError(
+        `WorkstationSnapshotOperation Error: job ${job.dxid} is not in running state`,
+      )
     }
 
     const notificationService = new NotificationService(this.ctx.em)
 
     try {
-      const workstationService = await new WorkstationService(this.ctx, input.code).initWithJob(input.jobDxid)
+      const workstationService = await new WorkstationService(this.ctx, input.code).initWithJob(
+        input.jobDxid,
+      )
       const terminate = input.terminate ?? false
       const res = await workstationService.snapshot(input.key, input.name, terminate)
 
-      log.verbose({ res },
-        'WorkstationSnapshotOperation: Received snapshot response',
-      )
+      log.verbose({ res }, 'WorkstationSnapshotOperation: Received snapshot response')
 
-      const apiVersion = job.app?.getEntity().workstationAPIVersion
       if (res.result === 'success') {
-        // For workstations running API prior to v1.1, the snapshot tool still relies on dx CLI
-        // and so we need to sync the snapshot over
-        const usesDXSnapshotTool = apiVersion ? compareVersions(apiVersion, '1.1') < 0 : false
-        if (usesDXSnapshotTool) {
-          try {
-            // Snapshot is created, now we should invoke workstation sync for the file to appear in My Home
-            await createSyncWorkstationFilesTask({ dxid: job.dxid }, this.ctx.user)
-          } catch (err) {
-            log.verbose({ err },
-              // Most likely a sync file operation already queued up or processing,
-              // either because user invoked Snapshot twice quickly or they had clicked Sync Files
-              'WorkstationSnapshotOperation: Unable to queue SyncWorkstationFiles',
-            )
-          }
-        }
-
         const message = input.terminate
           ? `Snapshot created for ${job.name}. The workstation will now terminate`
           : `Snapshot created for ${job.name}`
@@ -132,7 +116,7 @@ any
         error: {
           code: errors.ErrorCodes.WORKSTATION_API_ERROR,
           message,
-        }
+        },
       }
     }
   }
