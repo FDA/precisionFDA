@@ -1,11 +1,7 @@
 /* eslint-disable no-warning-comments */
-import {
-  AdminDataConsistencyReportOperation,
-} from '@shared/debug/ops/admin-data-consistency-report'
+import { AdminDataConsistencyReportOperation } from '@shared/debug/ops/admin-data-consistency-report'
 import { EmailQueueJobProducer } from '@shared/domain/email/producer/email-queue-job.producer'
-import {
-  FileSyncQueueJobProducer,
-} from '@shared/domain/user-file/producer/file-sync-queue-job.producer'
+import { FileSyncQueueJobProducer } from '@shared/domain/user-file/producer/file-sync-queue-job.producer'
 import { MainQueueJobProducer } from '@shared/queue/producer/main-queue-job.producer'
 import { MaintenanceQueueJobProducer } from '@shared/queue/producer/maintenance-queue-job.producer'
 import { QueueProxy } from '@shared/queue/queue.proxy'
@@ -216,12 +212,6 @@ const createSyncJobStatusTask = async (data: CheckStatusJob['payload'], user: Us
 const createSyncOutputsTask = async (data: CheckStatusJob['payload'], user: UserCtx) =>
   fileSyncJobProducer.createSyncOutputsTask(data, user)
 
-/**
- * @deprecated Use the job producer directly within the DI
- */
-const createSyncWorkstationFilesTask = async (data: CheckStatusJob['payload'], user: UserCtx) =>
-  fileSyncJobProducer.createSyncWorkstationFilesTask(data, user)
-
 // Specifying a taskId will prevent multiple emails of that
 // type and id to be sent
 /**
@@ -328,7 +318,6 @@ export { CleanupWorkerQueueOperation } from './ops/cleanup-worker-queue'
 export {
   createSyncFilesStateTask,
   createSyncJobStatusTask,
-  createSyncWorkstationFilesTask,
   createSendEmailTask,
   removeFromEmailQueue,
   createCheckStaleJobsTask,

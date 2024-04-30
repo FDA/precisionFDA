@@ -113,7 +113,6 @@ describe('TASK: sync_job_status', () => {
     )
     expect(fakes.client.jobDescribeFake.notCalled).to.be.true()
     expect(fakes.queue.removeRepeatableFake.calledOnce).to.be.true()
-    expect(fakes.queue.createSyncWorkstationFilesTask.notCalled).to.be.true()
 
     // Check no notification
     expect(fakes.notificationService.createNotification.callCount).to.equal(0)
@@ -132,11 +131,6 @@ describe('TASK: sync_job_status', () => {
       { id: user.id, dxuser: user.dxuser, accessToken: 'foo' },
     )
     expect(fakes.client.jobDescribeFake.calledOnce).to.be.true()
-    expect(fakes.queue.createSyncWorkstationFilesTask.notCalled).to.be.true()
-    // const afterEm = em.fork()
-    // const maybeUpdatedJob = await afterEm.findOne(Job, job.id)
-    // console.log(job, maybeUpdatedJob, '!')
-    // expect(maybeUpdatedJob).to.have.property('updatedAt').that.is.equal(job.updatedAt)
   })
 
   it('updates our DB, local state is IDLE, remote is TERMINATED', async () => {
@@ -179,9 +173,6 @@ describe('TASK: sync_job_status', () => {
       param4: null,
       data: null,
     })
-
-    // Check workstation sync job is queued
-    expect(fakes.queue.createSyncWorkstationFilesTask.calledOnce).to.be.true()
 
     // TODO currently not unit testable, needs a rework of passing the params
     // Check notification
@@ -240,7 +231,6 @@ describe('TASK: sync_job_status', () => {
       expect(fakes.client.jobTerminateFake.calledOnce).to.be.true()
       // assuming email notif. was already sent
       expect(fakes.queue.createEmailSendTaskFake.notCalled).to.be.true()
-      expect(fakes.queue.createSyncWorkstationFilesTask.notCalled).to.be.true()
     })
 
     it('sends email to job owner when job is running for too long', async () => {

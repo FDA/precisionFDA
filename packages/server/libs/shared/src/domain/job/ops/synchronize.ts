@@ -18,8 +18,9 @@ import {
 } from '../job.helper'
 import { PlatformClient } from '../../../platform-client'
 import {
-  createSendEmailTask, createSyncOutputsTask,
-  createSyncWorkstationFilesTask, getMainQueue,
+  createSendEmailTask,
+  createSyncOutputsTask,
+  getMainQueue,
   removeFromEmailQueue,
   removeRepeatable,
 } from '../../../queue'
@@ -40,42 +41,72 @@ import { SCOPE } from '@shared/types/common'
 /**
  * Checks job status if notifications should be triggered.
  */
-const checkJobStatusForNotifications = async (em: SqlEntityManager, userId: number, job: Job, remoteJob: JobDescribeResponse) => {
+const checkJobStatusForNotifications = async (
+  em: SqlEntityManager,
+  userId: number,
+  job: Job,
+  remoteJob: JobDescribeResponse,
+) => {
   const notificationService = new NotificationService(em)
   const meta = {
     linkTitle: 'View Execution',
     linkUrl: `/home/executions/${job.uid}`,
   }
-  const sendNotification = async (message: string, severity: SEVERITY, action: NOTIFICATION_ACTION) => {
-    await notificationService.createNotification({message, severity, action, userId, meta})
+  const sendNotification = async (
+    message: string,
+    severity: SEVERITY,
+    action: NOTIFICATION_ACTION,
+  ) => {
+    await notificationService.createNotification({ message, severity, action, userId, meta })
   }
 
   const remoteState = remoteJob.state
   const isJobRunning = job.state !== JOB_STATE.RUNNING && remoteState === JOB_STATE.RUNNING
-  const httpsAppRunning = remoteState === JOB_STATE.RUNNING && remoteJob?.properties?.httpsAppState === JOB_STATE.RUNNING
+  const httpsAppRunning =
+    remoteState === JOB_STATE.RUNNING && remoteJob?.properties?.httpsAppState === JOB_STATE.RUNNING
 
   if (isJobRunning && job.hasHttpsAppState() && !httpsAppRunning) {
-    await sendNotification(`Initializing ${job.name}`, SEVERITY.INFO, NOTIFICATION_ACTION.JOB_INITIALIZING)
+    await sendNotification(
+      `Initializing ${job.name}`,
+      SEVERITY.INFO,
+      NOTIFICATION_ACTION.JOB_INITIALIZING,
+    )
   }
 
-  if (isJobRunning && !job.hasHttpsAppState() || httpsAppRunning) {
+  if ((isJobRunning && !job.hasHttpsAppState()) || httpsAppRunning) {
     await sendNotification(`${job.name} is running`, SEVERITY.INFO, NOTIFICATION_ACTION.JOB_RUNNING)
   }
 
   if (job.state !== JOB_STATE.RUNNABLE && remoteState === JOB_STATE.RUNNABLE) {
-    await sendNotification(`Job ${job.name} is runnable`, SEVERITY.INFO, NOTIFICATION_ACTION.JOB_RUNNABLE)
+    await sendNotification(
+      `Job ${job.name} is runnable`,
+      SEVERITY.INFO,
+      NOTIFICATION_ACTION.JOB_RUNNABLE,
+    )
   }
 
   if (job.state !== JOB_STATE.DONE && remoteState === JOB_STATE.DONE) {
-    await sendNotification(`Job ${job.name} has finished`, SEVERITY.INFO, NOTIFICATION_ACTION.JOB_DONE)
+    await sendNotification(
+      `Job ${job.name} has finished`,
+      SEVERITY.INFO,
+      NOTIFICATION_ACTION.JOB_DONE,
+    )
   }
 
   if (job.state !== JOB_STATE.TERMINATED && remoteState === JOB_STATE.TERMINATED) {
-    await sendNotification(`Job ${job.name} has terminated`, SEVERITY.INFO, NOTIFICATION_ACTION.JOB_TERMINATED)
+    await sendNotification(
+      `Job ${job.name} has terminated`,
+      SEVERITY.INFO,
+      NOTIFICATION_ACTION.JOB_TERMINATED,
+    )
   }
 
   if (remoteState === JOB_STATE.FAILED) {
-    await sendNotification(`Job ${job.name} has failed`, SEVERITY.ERROR, NOTIFICATION_ACTION.JOB_FAILED)
+    await sendNotification(
+      `Job ${job.name} has failed`,
+      SEVERITY.ERROR,
+      NOTIFICATION_ACTION.JOB_FAILED,
+    )
   }
 }
 
@@ -126,7 +157,10 @@ export class SyncJobOperation extends WorkerBaseOperation<
     this.ctx.log.verbose({ jobId: job.id }, 'SyncJobOperation: Processing job')
 
     if (!shouldSyncStatus(job)) {
-      this.ctx.log.verbose({ input, job }, 'SyncJobOperation: Job is already finished. Removing task from main queue')
+      this.ctx.log.verbose(
+        { input, job },
+        'SyncJobOperation: Job is already finished. Removing task from main queue',
+      )
       await removeRepeatable(this.ctx.job, getMainQueue())
       this.removeTerminationEmailJob()
       return
@@ -143,21 +177,27 @@ export class SyncJobOperation extends WorkerBaseOperation<
           // Unauthorized. Expected scenario is that the user token has expired
           // Removing the sync task will allow a new sync task to be recreated
           // when user next logs in via UserCheckupTask
-          this.ctx.log.verbose({ error: err.props },
-            'SyncJobOperation: Received 401 from platform, removing sync task')
+          this.ctx.log.verbose(
+            { error: err.props },
+            'SyncJobOperation: Received 401 from platform, removing sync task',
+          )
           await removeRepeatable(this.ctx.job)
         }
-      }
-      else {
-        this.ctx.log.verbose({ error: err },
-          'SyncJobOperation: Unhandled error from job/describe, will retry later')
+      } else {
+        this.ctx.log.verbose(
+          { error: err },
+          'SyncJobOperation: Unhandled error from job/describe, will retry later',
+        )
       }
       return
     }
 
     // TODO(samuel) this shoudl be part of platform client
-    delete platformJobData["sshHostKey"]
-    this.ctx.log.verbose({ platformJobData: platformJobData }, 'SyncJobOperation: Received job/describe from platform')
+    delete platformJobData['sshHostKey']
+    this.ctx.log.verbose(
+      { platformJobData: platformJobData },
+      'SyncJobOperation: Received job/describe from platform',
+    )
 
     const isOverNotifyMaxDuration = buildIsOverMaxDuration('notify')
     const isOverTerminateMaxDuration = buildIsOverMaxDuration('terminate')
@@ -172,7 +212,10 @@ export class SyncJobOperation extends WorkerBaseOperation<
       em.persist(job)
     }
     if (isStateActive(job.state) && isOverTerminateMaxDuration(job)) {
-      this.ctx.log.verbose({ jobId: job.id, jobUid: job.uid }, 'SyncJobOperation: Job marked as stale, trying to terminate')
+      this.ctx.log.verbose(
+        { jobId: job.id, jobUid: job.uid },
+        'SyncJobOperation: Job marked as stale, trying to terminate',
+      )
       const terminateOp = new RequestTerminateJobOperation({
         log: this.ctx.log,
         em: this.ctx.em,
@@ -189,43 +232,53 @@ export class SyncJobOperation extends WorkerBaseOperation<
     // remoteState !== job.state => job's state changed
     // remoteState === JOB_STATE.RUNNING && job.hasHttpsAppState() && !job.isHttpsAppRunning()
     // => https app has not run yet
-    if ((remoteState === job.state) &&
-        (remoteState !== JOB_STATE.RUNNING || !job.hasHttpsAppState() || job.isHttpsAppRunning())) {
+    if (
+      remoteState === job.state &&
+      (remoteState !== JOB_STATE.RUNNING || !job.hasHttpsAppState() || job.isHttpsAppRunning())
+    ) {
       this.ctx.log.verbose({ remoteState }, 'SyncJobOperation: State has not changed, no updates')
       return
     }
 
     if (isStateTerminal(remoteState)) {
-      this.ctx.log.debug({ remoteState }, 'SyncJobOperation: Remote job state is terminal, will sync folders and files')
+      this.ctx.log.debug(
+        { remoteState },
+        'SyncJobOperation: Remote job state is terminal, will sync folders and files',
+      )
       // create jobClosed event
       // TODO: this is worth refactoring, because job.describe (that is used for event) is updated
-      // with data from platformJobData later in createSyncWorkstationFilesTask and createSyncOutputsTask
+      // with data from platformJobData later in createSyncOutputsTask
       const eventEntity = await createJobClosed(user, job, platformJobData)
       em.persist(eventEntity)
 
       if (remoteState === JOB_STATE.FAILED) {
         if (job.state === JOB_STATE.RUNNING) {
-        // if latest known state was 'running' then platform terminated the job
-          this.ctx.log.verbose({
-            jobId: input.dxid,
-            failureReason: platformJobData.failureReason,
-            failureMessage: platformJobData.failureMessage,
-          }, 'SyncJobOperation: Detected job termination by platform')
+          // if latest known state was 'running' then platform terminated the job
+          this.ctx.log.verbose(
+            {
+              jobId: input.dxid,
+              failureReason: platformJobData.failureReason,
+              failureMessage: platformJobData.failureMessage,
+            },
+            'SyncJobOperation: Detected job termination by platform',
+          )
         } else {
-          this.ctx.log.verbose({
-            failureCounts: platformJobData.failureCounts,
-            failureReason: platformJobData.failureReason,
-            failureMessage: platformJobData.failureMessage,
-          }, 'SyncJobOperation: Detected failed job')
+          this.ctx.log.verbose(
+            {
+              failureCounts: platformJobData.failureCounts,
+              failureReason: platformJobData.failureReason,
+              failureMessage: platformJobData.failureMessage,
+            },
+            'SyncJobOperation: Detected failed job',
+          )
         }
       }
 
       if (job.isHTTPS()) {
         // https app like JupyterLab also supports run non-interactively
         if (remoteState === JOB_STATE.DONE) {
-          await createSyncOutputsTask({ dxid: job.dxid }, this.ctx.user)  
+          await createSyncOutputsTask({ dxid: job.dxid }, this.ctx.user)
         }
-        await createSyncWorkstationFilesTask({ dxid: job.dxid }, this.ctx.user)
         await this.releaseFilesLockedByJob(em, job.dxid, job.scope)
       } else {
         await createSyncOutputsTask({ dxid: job.dxid }, this.ctx.user)
@@ -234,11 +287,14 @@ export class SyncJobOperation extends WorkerBaseOperation<
 
     await checkJobStatusForNotifications(em, this.ctx.user.id, job, platformJobData)
 
-    this.ctx.log.verbose({
-      jobId: input.dxid,
-      fromState: job.state,
-      toState: remoteState,
-    }, 'SyncJobOperation: Updating job state and metadata from platform')
+    this.ctx.log.verbose(
+      {
+        jobId: input.dxid,
+        fromState: job.state,
+        toState: remoteState,
+      },
+      'SyncJobOperation: Updating job state and metadata from platform',
+    )
     const updatedJob = wrap(job).assign(
       {
         describe: platformJobData,
@@ -251,11 +307,14 @@ export class SyncJobOperation extends WorkerBaseOperation<
     // Note(samuel) email has to be sent after em. flush, otherwise failureReason won't be propagated in database
     // Alternative - pass failure reason and other
     if (remoteState === JOB_STATE.FAILED) {
-      this.ctx.log.verbose({
-        failureCounts: platformJobData.failureCounts,
-        failureReason: platformJobData.failureReason,
-        failureMessage: platformJobData.failureMessage,
-      }, 'SyncJobOperation: Detected failed job')
+      this.ctx.log.verbose(
+        {
+          failureCounts: platformJobData.failureCounts,
+          failureReason: platformJobData.failureReason,
+          failureMessage: platformJobData.failureMessage,
+        },
+        'SyncJobOperation: Detected failed job',
+      )
 
       try {
         await sendJobFailedEmails(this.job.id.toString(), this.ctx)
@@ -280,13 +339,16 @@ export class SyncJobOperation extends WorkerBaseOperation<
       body,
     }
     const jobId = EmailSendOperation.getBullJobId(EMAIL_TYPES.jobTerminationWarning, this.job.dxid)
-    this.ctx.log.verbose({
-      jobId: this.job.id,
-      jobDxid: this.job.dxid,
-      user: this.user.dxuser,
-      recipient: this.user.email,
-      bullJobId: jobId,
-    }, 'SyncJobOperation: Sending termination warning email to user')
+    this.ctx.log.verbose(
+      {
+        jobId: this.job.id,
+        jobDxid: this.job.dxid,
+        user: this.user.dxuser,
+        recipient: this.user.email,
+        bullJobId: jobId,
+      },
+      'SyncJobOperation: Sending termination warning email to user',
+    )
     await createSendEmailTask(email, this.ctx.user, jobId)
   }
 
@@ -300,14 +362,14 @@ export class SyncJobOperation extends WorkerBaseOperation<
     // e.g locked by jupyterlab
     const lockedKey = `notebook-locked-by-${jobDxid}`
     const fileRepo = em.getRepository(UserFile)
-    await em.transactional(async tem => {
+    await em.transactional(async (tem) => {
       const files = await fileRepo.find(
         { scope, taggings: { tag: { name: lockedKey } } },
-        { filters: ['userfile'], populate: ['taggings.tag'], },
+        { filters: ['userfile'], populate: ['taggings.tag'] },
       )
 
-      files.forEach(file => {
-        const tagging = <Tagging>file.taggings.getItems().find(t => t.tag.name === lockedKey)
+      files.forEach((file) => {
+        const tagging = <Tagging>file.taggings.getItems().find((t) => t.tag.name === lockedKey)
         file.taggings.remove(tagging)
       })
 

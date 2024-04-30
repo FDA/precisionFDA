@@ -16,114 +16,110 @@ export enum ExecutionActions {
   'Attach to...' = 'Attach to...',
 }
 
-
 export interface Links {
-  app?: string;
-  show?: string;
-  user?: string;
-  attach_to?: string;
-  publish?: string;
-  copy?: string;
-  run_workflow?: string;
-  run_job?: string;
-  batch_run_workflow?: string;
-  edit?: string;
-  fork?: string;
-  log?: string;
-  track?: string;
-  feature?: string;
-  license?: string;
-  cwl_export?: string;
-  wdl_export?: string;
-  set_tags?: string;
-  set_tags_target?: string;
-  delete?: string;
-  space?: string;
-  terminate?: string;
-  sync_files?: string;
-  open_external?: string;
-  workflow?: string;
+  app?: string
+  show?: string
+  user?: string
+  attach_to?: string
+  publish?: string
+  copy?: string
+  run_workflow?: string
+  run_job?: string
+  batch_run_workflow?: string
+  edit?: string
+  fork?: string
+  log?: string
+  track?: string
+  feature?: string
+  license?: string
+  cwl_export?: string
+  wdl_export?: string
+  set_tags?: string
+  set_tags_target?: string
+  delete?: string
+  space?: string
+  terminate?: string
+  open_external?: string
+  workflow?: string
 }
 
-export interface RunInputs {
-}
+export interface RunInputs {}
 
-export interface RunOutputs {
-}
+export interface RunOutputs {}
 
 export interface RunDataUpdates {
-  output_folder_path: string,
-  run_instance_type: typeof RESOURCE_TYPES[number],
-  run_inputs: RunInputs;
-  run_outputs: RunOutputs | null;
+  output_folder_path: string
+  run_instance_type: (typeof RESOURCE_TYPES)[number]
+  run_inputs: RunInputs
+  run_outputs: RunOutputs | null
 }
 
 export interface Links2 {
-  show: string;
-  user: string;
-  app?: string;
-  workflow: string;
-  publish: string;
-  log: string;
-  track: string;
-  attach_to: string;
-  copy: string;
-  run_job: string;
+  show: string
+  user: string
+  app?: string
+  workflow: string
+  publish: string
+  log: string
+  track: string
+  attach_to: string
+  copy: string
+  run_job: string
 }
 
 export type JobState = 'done' | 'failed' | 'idle' | 'running' | 'runnable' | 'terminated' | 'terminating'
 
 export interface Job {
-  id: number;
-  uid: string;
-  state: JobState;
-  name: string;
-  app_title: string;
-  app_revision: number;
-  app_active: boolean;
-  workflow_title: string;
-  workflow_uid: string;
-  run_input_data: any[];
-  run_output_data: any[];
-  run_data_updates: RunDataUpdates;
-  instance_type: string;
-  duration: string;
-  duration_in_seconds: number;
-  energy_consumption: string;
-  failure_reason: string;
-  failure_message: string;
-  created_at: string;
-  created_at_date_time: string;
-  scope: string;
-  location: string;
-  launched_by: string;
-  launched_on: string;
-  featured: boolean;
+  id: number
+  uid: string
+  state: JobState
+  name: string
+  app_title: string
+  app_revision: number
+  app_active: boolean
+  workflow_title: string
+  workflow_uid: string
+  run_input_data: any[]
+  run_output_data: any[]
+  run_data_updates: RunDataUpdates
+  instance_type: string
+  duration: string
+  duration_in_seconds: number
+  energy_consumption: string
+  failure_reason: string
+  failure_message: string
+  created_at: string
+  created_at_date_time: string
+  scope: string
+  location: string
+  launched_by: string
+  launched_on: string
+  featured: boolean
   /** @deprecated create links from client side */
-  links: Links2;
-  entity_type: string;
-  logged_dxuser: string;
-  tags: any[];
+  links: Links2
+  entity_type: string
+  logged_dxuser: string
+  tags: any[]
 }
 
 export interface IJob {
-  id: number;
-  uid: string;
-  className: string;
-  fa_class: string;
-  scope: ServerScope;
-  path: string;
-  owned: boolean;
-  editable: boolean;
-  accessible: boolean;
-  file_path: null | string;
-  parent_folder_name: null | string;
-  public: boolean;
-  private: boolean;
-  in_space: boolean;
-  space_private: boolean;
-  space_public: boolean;
-  title: string;
+  id: number
+  uid: string
+  className: string
+  fa_class: string
+  scope: ServerScope
+  path: string
+  owned: boolean
+  editable: boolean
+  accessible: boolean
+  file_path: null | string
+  parent_folder_name: null | string
+  public: boolean
+  private: boolean
+  in_space: boolean
+  space_private: boolean
+  space_public: boolean
+  title: string
   user: FileUser
   org: FileOrg
 }
@@ -143,7 +139,7 @@ export interface IExecution {
   workstation_api_version: string | null
   run_input_data: Array<any>
   run_output_data: Array<any>
-  run_data_updates?: RunDataUpdates,
+  run_data_updates?: RunDataUpdates
   failure_message?: string
   failure_reason?: string
   created_at: string
@@ -180,20 +176,19 @@ export const jobExecutionPrefix = 'job-'
 export const workflowExecutionPrefix = 'workflow-'
 
 export interface Pagination {
-  current_page: number;
-  next_page?: number | null;
-  prev_page?: number | null;
-  total_pages: number;
-  total_count: number;
+  current_page: number
+  next_page?: number | null
+  prev_page?: number | null
+  total_pages: number
+  total_count: number
 }
 
 export interface Meta {
-  count: number;
-  pagination: Pagination;
+  count: number
+  pagination: Pagination
 }
 
 export interface RootObject {
-  jobs: Job[];
-  meta: Meta;
+  jobs: Job[]
+  meta: Meta
 }
-

@@ -22,7 +22,6 @@ export enum TASK_TYPE {
   SYNC_FILE_STATE = 'sync_file_state',
   SYNC_JOB_STATUS = 'sync_job_status',
   SYNC_JOB_OUTPUTS = 'sync_job_outputs',
-  SYNC_WORKSTATION_FILES = 'sync_workstation_files',
   SEND_EMAIL = 'send_email',
   CLOSE_FILE = 'close_file',
   CHECK_CHALLENGE_JOBS = 'check_challenge_jobs',
@@ -83,10 +82,6 @@ export type SyncDbClusterJob = TaskWithAuth & {
 
 export type SyncFileStatesJob = TaskWithAuth & {
   type: TASK_TYPE.SYNC_FILES_STATE
-}
-
-export type SyncWorkstationFiles = TaskWithAuth & {
-  type: TASK_TYPE.SYNC_WORKSTATION_FILES
 }
 
 export type SyncOutputFiles = TaskWithAuth & {

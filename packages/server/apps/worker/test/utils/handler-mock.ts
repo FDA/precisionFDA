@@ -13,26 +13,19 @@ const processor = {
   EMAIL: () => new EmailQueueProcessor(),
 }
 
-const jobToProcessorMap: Partial<
-  Record<TASK_TYPE, (job: Job) => Promise<void> | void>
-> = {
+const jobToProcessorMap: Partial<Record<TASK_TYPE, (job: Job) => Promise<void> | void>> = {
   [TASK_TYPE.SYNC_FILES_STATE]: (job) => processor.MAIN().syncFilesState(job),
-  [TASK_TYPE.CHECK_CHALLENGE_JOBS]: (job) =>
-    processor.MAINTENANCE().checkChallengeJobs(job),
+  [TASK_TYPE.CHECK_CHALLENGE_JOBS]: (job) => processor.MAINTENANCE().checkChallengeJobs(job),
   [TASK_TYPE.SYNC_JOB_OUTPUTS]: (job) => processor.FILE().syncJobOutputs(job),
   [TASK_TYPE.SYNC_JOB_STATUS]: (job) => processor.MAIN().syncJobStatus(job),
-  [TASK_TYPE.SYNC_WORKSTATION_FILES]: (job) =>
-    processor.FILE().syncWorkstationFiles(job),
-  [TASK_TYPE.WORKSTATION_SNAPSHOT]: (job) =>
-    processor.FILE().createWorkstationSnapshot(job),
+  [TASK_TYPE.WORKSTATION_SNAPSHOT]: (job) => processor.FILE().createWorkstationSnapshot(job),
   [TASK_TYPE.SEND_EMAIL]: (job) => processor.EMAIL().sendEmail(job),
   [TASK_TYPE.CHECK_STALE_JOBS]: (job) => processor.MAINTENANCE().checkStaleJobs(job),
   [TASK_TYPE.REMOVE_NODES]: (job) => processor.FILE().removeNodes(job),
   [TASK_TYPE.CHECK_NON_TERMINATED_DBCLUSTERS]: (job) =>
     processor.MAINTENANCE().checkNonTerminatedDbClusters(job),
   [TASK_TYPE.SYNC_DBCLUSTER_STATUS]: (job) => processor.MAIN().syncDbClusterStatus(job),
-  [TASK_TYPE.SYNC_SPACES_PERMISSIONS]: (job) =>
-    processor.MAINTENANCE().syncSpacesPermissions(job),
+  [TASK_TYPE.SYNC_SPACES_PERMISSIONS]: (job) => processor.MAINTENANCE().syncSpacesPermissions(job),
   [TASK_TYPE.USER_CHECKUP]: (job) => processor.MAINTENANCE().userCheckup(job),
   [TASK_TYPE.USER_DATA_CONSISTENCY_REPORT]: (job) =>
     processor.FILE().reportUserDataConsistency(job),
