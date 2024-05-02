@@ -207,13 +207,20 @@ class App < ApplicationRecord
   def update_series_deleted_status(app)
     apps = app_series.apps.where(deleted: false).order(revision: :desc)
     if apps.length > 1
-      second = apps[1]
-      app_series.update(latest_revision_app: second) if app.id == apps.first.id
-      app_series.update(latest_version_app: second) if app.id == app_series.latest_version_app_id
-      app_series.update(featured: false) if app.featured && !second.featured
+      latest_app = apps.find { |a| a.id != app.id }
+      app_series.update(latest_revision_app: latest_app) if app.id == app_series.latest_revision_app_id
+      app_series.update(featured: false) if !latest_app.featured && app_series.featured
+      app_series.update(scope: latest_app.scope) if latest_app.scope != app_series.scope
+      if app.id == app_series.latest_version_app_id && app.scope != SCOPE_PRIVATE
+        latest_app_by_scope = apps.find { |a| a.id != app.id && a.scope == app.scope }
+        app_series.update(latest_version_app: latest_app_by_scope)
+      end
     elsif apps.length == 1
       app_series.update(featured: false)
       app_series.update(deleted:)
+      app_series.update(latest_revision_app: nil)
+      app_series.update(latest_version_app: nil)
+      app_series.update(scope: nil)
     end
   end
 
