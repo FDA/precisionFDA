@@ -12,7 +12,6 @@ import { FileThumb } from './styles'
 import { FileWithPreview } from './types'
 import { Button } from '../../components/Button'
 
-
 // Convert file to base64
 const toBase64 = (file: File) =>
   new Promise<string>((resolve, reject) => {
@@ -161,7 +160,6 @@ export const Item = ({
           disabled={disabled}
           type="text"
           value={file.customName}
-          placeHolder="Add a file name"
           onChange={event => handleNameChange(event, index)}
         />
         {!disabled && (

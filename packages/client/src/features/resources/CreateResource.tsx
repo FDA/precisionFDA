@@ -30,11 +30,12 @@ const List = styled.div`
 export const ResourceForm = ({
   pid,
   setShowModal,
+  onSuccess,
 }: {
   pid: string
   setShowModal: (show: boolean) => void
+  onSuccess: () => void
 }) => {
-  const queryClient = useQueryClient()
   const {
     isLoading,
     selectedFiles,
@@ -45,9 +46,7 @@ export const ResourceForm = ({
   } = useUploadResource({
     id: pid,
     onSuccess() {
-      queryClient.invalidateQueries({
-        queryKey: ['resources-list-portal'],
-      })
+      onSuccess()
       setShowModal(false)
     },
   })
@@ -103,28 +102,20 @@ export const ResourceForm = ({
   )
 }
 
-export const CreateResource = ({
-  pid,
-  onSuccess,
-}: {
-  pid: string
-  onSuccess: () => void
-}) => {
+export const CreateResource = ({ pid, onSuccess }: { pid: string; onSuccess: () => void }) => {
   const { isShown, setShowModal } = useModal()
 
   return (
     <div>
-      <Button variant="primary" type="button" onClick={() => setShowModal(true)}>
+      <Button variant="primary" type="button" onClick={() => {
+        setShowModal(true)
+
+      }}>
         Upload Resources
       </Button>
       {isShown && (
-        <ModalNext
-          id="add-resource-to-space"
-          data-testid="modal-add-resource"
-          isShown={isShown}
-          hide={() => setShowModal(false)}
-        >
-          <ResourceForm pid={pid} setShowModal={setShowModal} />
+        <ModalNext id="add-resource-to-space" data-testid="modal-add-resource" isShown={isShown} hide={() => setShowModal(false)}>
+          <ResourceForm pid={pid} setShowModal={setShowModal} onSuccess={() => onSuccess()} />
         </ModalNext>
       )}
     </div>

@@ -13,11 +13,7 @@ import {
   PermissionError,
 } from '@shared/errors'
 import { NOTIFICATION_ACTION, SEVERITY } from '@shared/enums'
-import {
-  CreateResourceResponse,
-  DataPortalMemberParam,
-  DataPortalParam,
-} from './data-portal.types'
+import { CreateResourceResponse, DataPortalMemberParam, DataPortalParam } from './data-portal.types'
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { DataPortal } from '../data-portal.entity'
 import { PlatformClient } from '@shared/platform-client'
@@ -79,7 +75,9 @@ export class DataPortalService {
     }
   }
 
-  listResources = async (dataPortalIdentifier: string): Promise<any> => {
+  listResources = async (
+    dataPortalIdentifier: string,
+  ): Promise<{ id: number; name: string; url: string }[]> => {
     logger.verbose(`Listing resources for portal identifier: ${dataPortalIdentifier}`)
 
     const dataPortal = await this.findPortalBySlugOrId(dataPortalIdentifier, {
@@ -87,17 +85,17 @@ export class DataPortalService {
     })
 
     if (await this.hasRoles(dataPortal, this.viewRoles, this.user.id)) {
-      const resources = await Promise.all(dataPortal.resources.getItems().map(async (r) => {
-        return {
-          id: r.id,
-          name: r.userFile.getEntity().name,
-          url: await this.entityService.getEntityLink(r),
-        }
-      }))
-
-      return { resources }
+      return await Promise.all(
+        dataPortal.resources.getItems().map(async (r) => {
+          return {
+            id: r.id,
+            name: r.userFile.getEntity().name,
+            url: await this.entityService.getEntityLink(r),
+          }
+        }),
+      )
     } else {
-      return { resources: [] } // Ruby needs the root key
+      return []
     }
   }
 
@@ -317,7 +315,6 @@ export class DataPortalService {
     return this.map(dataPortal)
   }
 
-
   private async urlSlugExists(urlSlug: string): Promise<boolean> {
     const portal = await this.em.findOne(DataPortal, { urlSlug })
     return portal !== null
@@ -361,7 +358,6 @@ export class DataPortalService {
         }
       }
     }
-
 
     const propertiesToUpdate = [
       'name',

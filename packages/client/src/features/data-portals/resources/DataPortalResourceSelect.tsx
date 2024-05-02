@@ -1,5 +1,4 @@
 import { useQuery } from '@tanstack/react-query'
-import axios from 'axios'
 import React from 'react'
 import { useParams, Link } from 'react-router-dom'
 import styled from 'styled-components'
@@ -9,6 +8,7 @@ import { theme } from '../../../styles/theme'
 import ResourcesSelect from './ResourcesSelect'
 import { ModalScroll } from '../../modal/styles'
 import { Button, TransparentButton } from '../../../components/Button'
+import { listDataPortalResourcesRequest } from './resources.api'
 
 const StyledRefresh = styled.span`
   color: ${theme.colors.primaryBlue};
@@ -18,25 +18,11 @@ const StyledRefresh = styled.span`
   }
 `
 
-interface DataPortalResource {
-  dataPortals: number
-  id: number
-  meta: null | any
-  url: null | any
-  user: number
-  userFile: number
-}
-
-// TODO: Extract API calls to api.ts
-const listDataPortalResourcesRequest = (id: string) =>
-  axios
-    .get(`/api/data_portals/${id}/resources`)
-    .then(r => r.data.resources as DataPortalResource[])
-
-const useListDataPortalResourcesQuery = (id: string) =>
+const useListDataPortalResourcesQuery = (id?: string) =>
   useQuery({
     queryKey: ['resources-list-portal'],
     queryFn: () => listDataPortalResourcesRequest(id),
+    enabled: !!id,
   })
 
 const DataPortalResourceSelect = ({
