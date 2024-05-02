@@ -17,7 +17,6 @@ import {
 import { codeRemap } from '../../../utils/app'
 import { createAppCreated } from '../../event/event.helper'
 import { allowedInstanceTypes } from '../../job/job.enum'
-import { scopeContainsId } from '../../space/space.helper'
 import { AssetRepository } from '../../user-file/asset.repository'
 import { App, AppSpec, Internal } from '../app.entity'
 import { ENTITY_TYPE } from '../app.enum'
@@ -47,8 +46,10 @@ export class AppService implements IAppService {
     }
 
     if (!/^[a-zA-Z0-9._-]+$/.test(spec.name)) {
-      this.throwValidationError(`The ${type} name \'${spec.name}\' can only contain the characters A-Z, a-z, 0-9, ` +
-        '\'.\' (period), \'_\' (underscore) and \'-\' (dash).')
+      this.throwValidationError(
+        `The ${type} name \'${spec.name}\' can only contain the characters A-Z, a-z, 0-9, ` +
+          "'.' (period), '_' (underscore) and '-' (dash).",
+      )
     }
 
     if (alreadySeenSpec.includes(spec.name)) {
@@ -78,15 +79,19 @@ export class AppService implements IAppService {
     }
 
     if (!/^[a-zA-Z0-9._-]+$/.test(appInput.name)) {
-      this.throwValidationError('The app \'name\' can only contain the characters A-Z, a-z, 0-9, ' +
-        '\'.\' (period), \'_\' (underscore) and \'-\' (dash).')
+      this.throwValidationError(
+        "The app 'name' can only contain the characters A-Z, a-z, 0-9, " +
+          "'.' (period), '_' (underscore) and '-' (dash).",
+      )
     }
 
     if (!Object.keys(allowedInstanceTypes).includes(appInput.instance_type)) {
-      this.throwValidationError(`The app 'instance type' must be one of: ${Object.keys(allowedInstanceTypes)}`)
+      this.throwValidationError(
+        `The app 'instance type' must be one of: ${Object.keys(allowedInstanceTypes)}`,
+      )
     }
 
-    appInput.packages.forEach(packageName => {
+    appInput.packages.forEach((packageName) => {
       if (!validUbuntuPackages.includes(packageName)) {
         this.throwValidationError(`The package '${packageName}' is not a valid Ubuntu package.`)
       }
@@ -95,24 +100,28 @@ export class AppService implements IAppService {
     if (appInput.ordered_assets) {
       let inaccessible = [...appInput.ordered_assets]
       const assets = await this.getAssets(userId, appInput.ordered_assets)
-      assets.forEach(asset => inaccessible = inaccessible.filter(item => item !== asset.uid))
+      assets.forEach((asset) => (inaccessible = inaccessible.filter((item) => item !== asset.uid)))
       if (inaccessible.length > 0) {
-        this.throwValidationError(`The app assets with uids '${JSON.stringify(inaccessible)}' do ` +
-          'not exist or are not accessible by you.')
+        this.throwValidationError(
+          `The app assets with uids '${JSON.stringify(inaccessible)}' do ` +
+            'not exist or are not accessible by you.',
+        )
       }
     }
 
     const alreadySeenInputs: string[] = []
-    appInput.input_spec.forEach(spec => this.validateSpec(spec, 'input', alreadySeenInputs))
+    appInput.input_spec.forEach((spec) => this.validateSpec(spec, 'input', alreadySeenInputs))
     const alreadySeenOutputs: string[] = []
-    appInput.output_spec.forEach(spec => this.validateSpec(spec, 'output', alreadySeenOutputs))
+    appInput.output_spec.forEach((spec) => this.validateSpec(spec, 'output', alreadySeenOutputs))
 
     logger.verbose('app validations finished successfully')
   }
 
   private getScope = (scope?: string) => {
-    if (scope && [STATIC_SCOPE.PUBLIC.toString(), STATIC_SCOPE.PRIVATE.toString(), null]
-      .includes(scope)) {
+    if (
+      scope &&
+      [STATIC_SCOPE.PUBLIC.toString(), STATIC_SCOPE.PRIVATE.toString(), null].includes(scope)
+    ) {
       return STATIC_SCOPE.PRIVATE.toString()
     } else {
       return scope
@@ -123,7 +132,7 @@ export class AppService implements IAppService {
     if (assets.length === 1) {
       return [assets[0].dxid]
     } else {
-      return assets.map(asset => asset.dxid)
+      return assets.map((asset) => asset.dxid)
     }
   }
 
@@ -143,9 +152,13 @@ export class AppService implements IAppService {
     }
   }
 
-  private createOrGetAppSeries = async (user: User, appName: string, scope?: string): Promise<AppSeries> => {
+  private createOrGetAppSeries = async (
+    user: User,
+    appName: string,
+    scope?: string,
+  ): Promise<AppSeries> => {
     const appSeriesDxid = constructDxid(user.dxuser, appName, scope)
-    let appSeries: AppSeries | null = await this.em.findOne(AppSeries, {dxid: appSeriesDxid})
+    let appSeries: AppSeries | null = await this.em.findOne(AppSeries, { dxid: appSeriesDxid })
     if (!appSeries) {
       appSeries = new AppSeries(user)
       appSeries.name = appName
@@ -157,8 +170,8 @@ export class AppService implements IAppService {
     return appSeries
   }
 
-  private getAppRevision = async (isNew: boolean, latestRevisionAppId?: number) => {
-    const latestRevisionApp = await this.em.findOne(App, {id: latestRevisionAppId})
+  private getAppRevision = async (latestRevisionAppId?: number) => {
+    const latestRevisionApp = await this.em.findOne(App, { id: latestRevisionAppId })
     if (latestRevisionApp) {
       return latestRevisionApp.revision + 1
     }
@@ -171,7 +184,7 @@ export class AppService implements IAppService {
    * @private
    */
   private remapPfdaSpecToPlatformSpec(pfdaSpecs: Spec[]): PlatformSpec[] {
-    return pfdaSpecs.map(pfdaSpec => {
+    return pfdaSpecs.map((pfdaSpec) => {
       return {
         class: pfdaSpec.class,
         help: pfdaSpec.help,
@@ -188,7 +201,11 @@ export class AppService implements IAppService {
    * @param appInput
    * @param release
    */
-  private createApplet = async (user: User, appInput: AppInput, release: string): Promise<string> => {
+  private createApplet = async (
+    user: User,
+    appInput: AppInput,
+    release: string,
+  ): Promise<string> => {
     logger.verbose('AppService: creating applet in platform', user, appInput, release)
     const appletCreateParams: AppletCreateParams = {
       project: user.privateFilesProject,
@@ -199,35 +216,47 @@ export class AppService implements IAppService {
         interpreter: 'bash',
         systemRequirements: {
           // @ts-ignore
-          '*': { instanceType: allowedInstanceTypes[appInput.instance_type] }
+          '*': { instanceType: allowedInstanceTypes[appInput.instance_type] },
         },
         distribution: 'Ubuntu',
-        version: "0",
+        version: '0',
         release,
-        execDepends: appInput.packages.map(pckg => {
-          return {name: pckg} as PackageMapping
+        execDepends: appInput.packages.map((pckg) => {
+          return { name: pckg } as PackageMapping
         }),
       },
       dxapi: '1.0.0',
-      access: appInput.internet_access ? {network: ['*']} : {},
+      access: appInput.internet_access ? { network: ['*'] } : {},
     }
     const appletCreateResponse = await this.platformClient.appletCreate(appletCreateParams)
     return appletCreateResponse.id
   }
 
-  private createAppInPlatform = async (appletId: string, appInput: AppInput, revision: number, user: User,
-                               assets: Asset[]): Promise<string> => {
-    logger.verbose('AppService: creating app in platform', appletId, appInput, revision, user, assets)
+  private createAppInPlatform = async (
+    appletId: string,
+    appInput: AppInput,
+    revision: number,
+    user: User,
+    assets: Asset[],
+  ): Promise<string> => {
+    logger.verbose(
+      'AppService: creating app in platform',
+      appletId,
+      appInput,
+      revision,
+      user,
+      assets,
+    )
     const assetDxids = this.getAssetDxids(assets)
     const appCreateParams: AppCreateParams = {
       applet: appletId,
       name: constructDxname(user.dxuser, appInput.name, appInput.scope),
       title: appInput.title,
       summary: ' ',
-      description: (appInput.readme && appInput.readme.length > 1) ? appInput.readme : ' ',
+      description: appInput.readme && appInput.readme.length > 1 ? appInput.readme : ' ',
       version: `r${revision}-${crypto.randomBytes(3).toString('hex')}`,
       resources: assetDxids,
-      details: {ordered_assets: assetDxids},
+      details: { ordered_assets: assetDxids },
       openSource: false,
       billTo: user.organization.getEntity().getDxOrg(),
       access: appInput.internet_access ? { network: ['*'] } : {},
@@ -245,13 +274,19 @@ export class AppService implements IAppService {
   private updateAppSeries = async (appSeries: AppSeries, appInput: AppInput, app: App) => {
     logger.verbose('AppService: updating app series', appSeries, appInput, app)
     appSeries.latestRevisionAppId = app.id
-    if (appInput.scope && scopeContainsId(appInput.scope)) {
+    if (appInput.scope && appInput.scope !== STATIC_SCOPE.PRIVATE) {
       appSeries.latestVersionAppId = app.id
+    }
+    if (appSeries.deleted) {
+      appSeries.deleted = false
+    }
+    if (!appSeries.scope) {
+      appSeries.scope = appInput.scope
     }
   }
 
   private stripChoices = (spec: Spec[]): Spec[] => {
-    return spec.map(s => {
+    return spec.map((s) => {
       if (s.choices && s.choices.length === 0) {
         delete s.choices
       }
@@ -259,8 +294,15 @@ export class AppService implements IAppService {
     })
   }
 
-  private saveAppInDB = async (user: User, platformAppId: string, revision: number, release: string,
-                       assets: Asset[], appInput: AppInput, appSeriesId: number) => {
+  private saveAppInDB = async (
+    user: User,
+    platformAppId: string,
+    revision: number,
+    release: string,
+    assets: Asset[],
+    appInput: AppInput,
+    appSeriesId: number,
+  ) => {
     logger.verbose('AppService: saving app in DB', platformAppId, appInput, revision, user, assets)
     const app = new App(user)
     app.dxid = platformAppId
@@ -279,12 +321,12 @@ export class AppService implements IAppService {
       instance_type: appInput.instance_type,
     } as AppSpec
     app.internal = {
-      ...(assets.length > 0 && {ordered_assets: assets.map(asset => asset.uid)}),
+      ...(assets.length > 0 && { ordered_assets: assets.map((asset) => asset.uid) }),
       packages: appInput.packages,
       code: appInput.code,
     } as Internal
 
-    assets.forEach(asset => app.assets.add(asset))
+    assets.forEach((asset) => app.assets.add(asset))
     app.release = release
     await this.em.persistAndFlush(app)
     return app
@@ -301,9 +343,12 @@ export class AppService implements IAppService {
     await this.validateAppInput(appInput, userId)
     await this.em.begin()
     try {
-      const user = await this.em.findOneOrFail(User, {id: userId}, {populate: ['organization']})
+      const user = await this.em.findOneOrFail(User, { id: userId }, { populate: ['organization'] })
       const scope = this.getScope(appInput.scope)
-      let assets = await this.getAssets(userId, appInput.ordered_assets ? appInput.ordered_assets : [])
+      let assets = await this.getAssets(
+        userId,
+        appInput.ordered_assets ? appInput.ordered_assets : [],
+      )
 
       // - create app series
       let appSeries = await this.createOrGetAppSeries(user, appInput.name, scope)
@@ -312,20 +357,36 @@ export class AppService implements IAppService {
       const release = appInput.release ? appInput.release : UBUNTU_16
 
       // - find the latest revision and increase it by one
-      const revision = await this.getAppRevision(appInput.is_new, appSeries.latestRevisionAppId)
+      const revision = await this.getAppRevision(appSeries.latestRevisionAppId)
 
       // - create new applet in platform
       const appletId = await this.createApplet(user, appInput, release)
 
       // - create new app in platform
-      const platformAppId = await this.createAppInPlatform(appletId, appInput, revision, user, assets)
+      const platformAppId = await this.createAppInPlatform(
+        appletId,
+        appInput,
+        revision,
+        user,
+        assets,
+      )
 
       // - remove project objects (what the hell does this do???)
       if (user.privateFilesProject) {
-        await this.platformClient.containerRemoveObjects(user.privateFilesProject, {objects: [appletId]})
+        await this.platformClient.containerRemoveObjects(user.privateFilesProject, {
+          objects: [appletId],
+        })
       }
       // - store app in a database
-      const app = await this.saveAppInDB(user, platformAppId, revision, release, assets, appInput, appSeries.id)
+      const app = await this.saveAppInDB(
+        user,
+        platformAppId,
+        revision,
+        release,
+        assets,
+        appInput,
+        appSeries.id,
+      )
 
       // - update app series (version, revision, deleted - why?)
       await this.updateAppSeries(appSeries, appInput, app)
