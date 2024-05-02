@@ -59,7 +59,7 @@ export class CliService {
     // why isn't the type Node ??
     // populate has to be here, I wasn't able to make it work otherwise.
     //@ts-ignore
-    const file: any = await this.entityFetcherService.getAccessibleByUid('Node', entityId, {}, { populate: ['taggings.tag'] })
+    const file: any = await this.entityFetcherService.getAccessibleByUid('Node', entityId, {}, { populate: ['taggings.tag', 'user'] })
     if (!file) {
       throw new NotFoundError('File not found or not accessible')
     }
