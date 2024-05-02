@@ -793,7 +793,7 @@ describe('data portal service tests', () => {
     await em.flush()
 
     const result = await dataPortalService.listResources(dataPortal.id.toString())
-    expect(result.resources.length).eq(2)
+    expect(result.length).eq(2)
   })
 
   it('test list resources - unprivileged receives no resources', async () => {
@@ -803,7 +803,7 @@ describe('data portal service tests', () => {
 
     dataPortalService = createDataPortalService(unprivilegedUser.id)
     const result = await dataPortalService.listResources(loadedDataPortal.id.toString())
-    expect(result.resources.length).eq(0)
+    expect(result.length).eq(0)
   })
 
   it('test create resource link', async () => {

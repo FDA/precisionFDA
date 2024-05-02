@@ -46,11 +46,11 @@ module Api
     def list_resources
       response = https_apps_client.data_portal_list_resources(params[:id])
       converted_resources = []
-      response[:resources].each do |resource|
+      response.each do |resource|
         converted_resources << convert_json_keys_to_snake_case(resource)
       end
 
-      render json: { resources: converted_resources }
+      render json: converted_resources
     rescue Net::HTTPClientException => e
       render status: e.response.code, json: e.response.body
     end

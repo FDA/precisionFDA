@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import {
   UseMutationOptions,
   useMutation,
@@ -29,6 +29,8 @@ import { AlertText } from '../details/DataPortalNotFound'
 import { useDataPortalByIdQuery } from '../queries'
 import { canEditResources } from '../utils'
 import { getFileNameFromUrl } from '../../resources/util'
+import { listDataPortalResourcesRequest, removeResourceByIdRequest } from './resources.api'
+import { RemovePayload } from './resources.types'
 
 const StyledPageContent = styled.div`
   margin-top: 32px;
@@ -88,39 +90,11 @@ const Copy = styled.div`
   border-radius: 10px;
 `
 
-interface DataPortalResource {
-  dataPortals: number
-  id: number
-  meta: null | any
-  url: null | string
-  user: number
-  user_file: number
-}
-
-interface RemovePayload {
-  portalId: string
-  resourceId: number
-}
-
-export type DataPortalResourceResponse = {
-  resources: DataPortalResource[]
-}
-
-// TODO: Extract API calls to api.ts
-const listDataPortalResourcesRequest = (id: string) =>
-  axios.get<DataPortalResourceResponse>(`/api/data_portals/${id}/resources`)
-    .then(r => r.data)
-
-const removeResourceByIdRequest = ({ portalId, resourceId }: RemovePayload) =>
-  axios
-    .delete(`/api/data_portals/${portalId}/resources/${resourceId}`)
-    .then(r => r.data)
-
 const useListDataPortalResourcesQuery = (id: string) =>
   useQuery({
     queryKey: ['resources-list-portal'],
     queryFn: () => listDataPortalResourcesRequest(id),
-    select: (d) => d.resources,
+    select: (d) => d,
   })
 
 const useResourceRemoveMutation = (
@@ -144,6 +118,7 @@ const DataPortalResourcesPage = () => {
   const { data: portal, isLoading: portalIsLoading } =
     useDataPortalByIdQuery(portalId)
   const { data, isLoading } = useListDataPortalResourcesQuery(portalId)
+  const [ isFinishingUpload, setIsFinishingUpload ] = useState(false)
 
   const mutation = useResourceRemoveMutation({
     onSuccess: () => {
@@ -166,6 +141,7 @@ const DataPortalResourcesPage = () => {
     }
     if (NOTIFICATION_ACTION.RESOURCE_URL_UPDATED === notification.action) {
       queryClient.invalidateQueries({ queryKey: ['resources-list-portal']})
+      setIsFinishingUpload(false)
     }
   }, [notification])
 
@@ -187,12 +163,6 @@ const DataPortalResourcesPage = () => {
     }
   }
 
-  const handleSuccess = () => {
-    queryClient.invalidateQueries({
-      queryKey: ['resources-list-portal'],
-    })
-  }
-
   if (isLoading || portalIsLoading) return <Loader />
   const canEdit = canEditResources(user?.dxuser, portal?.members)
   return (
@@ -205,7 +175,9 @@ const DataPortalResourcesPage = () => {
             </BackLink>
 
             {canEdit && (
-              <CreateResource pid={portalId} onSuccess={handleSuccess} />
+              <CreateResource pid={portalId} onSuccess={() => {
+                setIsFinishingUpload(true)
+              }} />
             )}
           </TopRow>
           {portal ? (
@@ -244,6 +216,7 @@ const DataPortalResourcesPage = () => {
                     </StyledResourceItem>
                   )
                 })}
+                {isFinishingUpload && <Loader />}
               </ResourceList>
             </>
           ) : (
