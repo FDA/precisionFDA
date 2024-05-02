@@ -147,7 +147,7 @@ func DownloadDirectly(downloadUrl string, outputFilePath string, overwrite strin
 			Path     string `json:"path"`
 		}{FileName: fileName, Path: outputFilePath})
 	} else {
-		fmt.Printf("Downloaded %s to %s", fileName, outputFilePath)
+		fmt.Printf("Downloaded %s to %s\n", fileName, outputFilePath)
 	}
 	return nil
 }
