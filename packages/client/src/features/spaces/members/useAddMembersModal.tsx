@@ -52,7 +52,7 @@ export const useAddMembersModal = ({ spaceId }: { spaceId: string }) => {
     mutationFn: ({ invitees, invitees_role }: FormValues) =>
       addMembersToSpaceRequest({
         spaceId,
-        invitees,
+        invitees: invitees.toLowerCase(),
         invitees_role: invitees_role.value,
       }),
     onSuccess: res => {
