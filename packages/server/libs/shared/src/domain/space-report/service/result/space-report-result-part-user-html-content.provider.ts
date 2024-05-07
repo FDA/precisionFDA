@@ -28,8 +28,10 @@ export class SpaceReportResultPartUserHtmlContentProvider extends SpaceReportRes
     userName.appendChild(userNameLink)
     container.appendChild(userName)
 
-    const memberSince = document.createElement('p')
-    memberSince.textContent = `Member since: ${new Date(result.memberSince).toLocaleString()}`
-    container.appendChild(memberSince)
+    if (result.memberSince) {
+      const memberSince = document.createElement('p')
+      memberSince.textContent = `Member since: ${new Date(result.memberSince).toLocaleString()}`
+      container.appendChild(memberSince)
+    }
   }
 }

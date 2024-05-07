@@ -192,7 +192,7 @@ const Spaces2 = ({ space, isLoading }: { space: ISpace; isLoading: boolean }) =>
                 element={<TrackProvenancePage entityType="execution" spaceId={space.id} />}
               />
               <Route path="members" element={<MembersList space={space} />} />
-              <Route path="reports" element={<SpaceReportList spaceId={Number(space.id)} />} />
+              <Route path="reports" element={<SpaceReportList scope={`space-${space.id}`} />} />
               <Route path="discussions" element={<DiscussionList space={space} scope={`space-${space.id}`} />} />
               <Route path="discussions/create" element={<CreateDiscussionPage scope={`space-${space.id}`} />} />
               <Route path="discussions/:discussionId" element={<DiscussionShow space={space} />} />

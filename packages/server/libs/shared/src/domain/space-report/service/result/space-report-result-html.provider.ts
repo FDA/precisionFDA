@@ -1,3 +1,4 @@
+import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Inject, Injectable } from '@nestjs/common'
 import { spaceMembershipSideToNameMap } from '@shared/domain/space-membership/space-membership-side-to-name.map'
 import { SPACE_MEMBERSHIP_SIDE } from '@shared/domain/space-membership/space-membership.enum'
@@ -8,7 +9,9 @@ import { SpaceReportPartSourceType } from '@shared/domain/space-report/model/spa
 import { SOURCE_TYPE_TO_PART_CONTENT_PROVIDER_MAP } from '@shared/domain/space-report/providers/source-type-to-part-content-provider.provider'
 import { SpaceReportResultPartHtmlContentProvider } from '@shared/domain/space-report/service/result/space-report-result-part-html-content.provider'
 import { SpaceReportResultProvider } from '@shared/domain/space-report/service/result/space-report-result.provider'
+import { Space } from '@shared/domain/space/space.entity'
 import { ArrayUtils } from '@shared/utils/array.utils'
+import { EntityScopeUtils } from '@shared/utils/entity-scope.utils'
 import fs from 'fs/promises'
 import DOMPurify from 'isomorphic-dompurify'
 import { JSDOM } from 'jsdom'
@@ -40,6 +43,7 @@ export class SpaceReportResultHtmlProvider extends SpaceReportResultProvider<'HT
     private readonly sourceTypeToPartContentProviderMap: {
       [T in SpaceReportPartSourceType]: SpaceReportResultPartHtmlContentProvider<T>
     },
+    private readonly em: SqlEntityManager,
   ) {
     super()
   }
@@ -358,10 +362,18 @@ export class SpaceReportResultHtmlProvider extends SpaceReportResultProvider<'HT
     description.classList.add('report-description')
     container.appendChild(description)
 
+    const space = EntityScopeUtils.isSpaceScope(report.scope)
+      ? await this.em.findOneOrFail(Space, EntityScopeUtils.getSpaceIdFromScope(report.scope))
+      : null
+
     const infoRow1 = document.createElement('div')
     infoRow1.classList.add('info-area')
     infoRow1.appendChild(
-      this.getHeaderInfoPart('Space Name', this.getSpaceTitleText(report.space), document),
+      this.getHeaderInfoPart(
+        'Space Name',
+        this.getTitleText(report.createdBy.getEntity(), space),
+        document,
+      ),
     )
     infoRow1.appendChild(
       this.getHeaderInfoPart(
@@ -373,12 +385,12 @@ export class SpaceReportResultHtmlProvider extends SpaceReportResultProvider<'HT
     )
     container.appendChild(infoRow1)
 
-    const infoRow2 = document.createElement('div')
-    infoRow2.classList.add('info-area')
-    infoRow2.appendChild(
-      this.getHeaderInfoPart('Space Description', report.space.description, document),
-    )
-    container.appendChild(infoRow2)
+    if (space) {
+      const infoRow2 = document.createElement('div')
+      infoRow2.classList.add('info-area')
+      infoRow2.appendChild(this.getHeaderInfoPart('Space Description', space.description, document))
+      container.appendChild(infoRow2)
+    }
 
     return container
   }

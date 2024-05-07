@@ -607,7 +607,7 @@ class HttpsAppsClient # rubocop:disable Metrics/ClassLength
       "/files/path-resolver",
       {},
       Net::HTTP::Get::METHOD,
-      { path: path, scope: scope, type: type }
+      { path:, scope:, type: },
     )
   end
 
@@ -972,25 +972,26 @@ class HttpsAppsClient # rubocop:disable Metrics/ClassLength
     )
   end
 
-  def create_space_report(id, format, options)
+  def create_space_report(scope, format, options)
     request(
-      "/spaces/#{id}/report",
-      { format:, options: },
+      "/reports",
+      { format:, options:, scope: },
       Net::HTTP::Post::METHOD,
     )
   end
 
-  def get_space_reports(id)
+  def get_space_reports(scope)
     request(
-      "/spaces/#{id}/report",
+      "/reports",
       {},
       Net::HTTP::Get::METHOD,
+      { scope: },
     )
   end
 
   def delete_space_reports(ids)
     request(
-      "/spaces/report",
+      "/reports",
       {},
       Net::HTTP::Delete::METHOD,
       { id: ids },

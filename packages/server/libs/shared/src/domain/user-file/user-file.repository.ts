@@ -48,7 +48,7 @@ export class UserFileRepository extends EntityRepository<UserFile> {
         $or: [
           { scope: STATIC_SCOPE.PUBLIC },
           { user, scope: STATIC_SCOPE.PRIVATE },
-          { scope: { $in: (user.spaceUids as `space-${string}`[]) ?? [] } },
+          { scope: { $in: (user.spaceUids as `space-${number}`[]) ?? [] } },
         ],
         state: FILE_STATE_DX.CLOSED,
         uid: { $in: uids },

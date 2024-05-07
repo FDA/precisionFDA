@@ -2,17 +2,13 @@ import { SqlEntityManager } from '@mikro-orm/mysql'
 import {
   Body,
   Controller,
-  Delete,
   Get,
   HttpCode,
   Inject,
   Logger,
   Param,
-  ParseArrayPipe,
   ParseIntPipe,
   Patch,
-  Post,
-  Query,
   UseGuards,
 } from '@nestjs/common'
 import { DEPRECATED_SQL_ENTITY_MANAGER } from '@shared/database/provider/deprecated-sql-entity-manager.provider'
@@ -36,8 +32,6 @@ import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { PermissionError } from '@shared/errors'
 import { PlatformClient } from '@shared/platform-client'
 import { UserOpsCtx } from '@shared/types'
-import { SpaceReportCreateFacade } from '../facade/space-report/space-report-create.facade'
-import { SpaceReportDeleteFacade } from '../facade/space-report/space-report-delete.facade'
 import { UserContextGuard } from '../user-context/guard/user-context.guard'
 
 // TODO most of the ops can be patch instead of post (currently used by ruby), might refactor
@@ -48,9 +42,6 @@ export class SpacesController {
     @Inject(DEPRECATED_SQL_ENTITY_MANAGER) private readonly oldEm: SqlEntityManager,
     private readonly log: Logger,
     private readonly user: UserContext,
-    private readonly spaceReportCreateFacade: SpaceReportCreateFacade,
-    private readonly spaceReportService: SpaceReportService,
-    private readonly spaceReportDeleteFacade: SpaceReportDeleteFacade,
   ) {}
 
   @HttpCode(204)
@@ -178,23 +169,5 @@ export class SpacesController {
     }
 
     return await new SelectableSpacesOperation(opsCtx).execute(id)
-  }
-
-  // TODO(PFDA-4831) - cover reports with integration tests after setting up full test env
-  @Post('/:id/report')
-  async createReport(@Param('id', ParseIntPipe) id: number, @Body() body: SpaceReportCreateDto) {
-    const report = await this.spaceReportCreateFacade.createSpaceReport(id, body)
-
-    return report?.id
-  }
-
-  @Get('/:id/report')
-  async getReports(@Param('id', ParseIntPipe) id: number) {
-    return await this.spaceReportService.getReportsForSpace(id)
-  }
-
-  @Delete('/report')
-  async deleteReports(@Query('id', new ParseArrayPipe({ items: Number })) ids: number[]) {
-    return await this.spaceReportDeleteFacade.deleteSpaceReports(ids)
   }
 }

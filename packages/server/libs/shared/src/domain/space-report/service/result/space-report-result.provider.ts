@@ -4,6 +4,7 @@ import { SpaceReportFormat } from '@shared/domain/space-report/model/space-repor
 import { SpaceReportFormatToResultOptionsMap } from '@shared/domain/space-report/model/space-report-format-to-result-options.map'
 import { SpaceReportPartSourceType } from '@shared/domain/space-report/model/space-report-part-source.type'
 import { Space } from '@shared/domain/space/space.entity'
+import { User } from '@shared/domain/user/user.entity'
 
 type SpaceReportPartSourceMap<F extends SpaceReportFormat> = {
   [K in SpaceReportPartSourceType]: SpaceReportPart<K, F>[]
@@ -28,7 +29,11 @@ export abstract class SpaceReportResultProvider<F extends SpaceReportFormat> {
     )
   }
 
-  protected getSpaceTitleText(space: Space) {
+  protected getTitleText(user: User, space?: Space) {
+    if (!space) {
+      return `Private area of user ${user.fullName}`
+    }
+
     if (space.isConfidentialReviewerSpace()) {
       return `${space.name} (Reviewer side)`
     }

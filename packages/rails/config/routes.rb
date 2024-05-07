@@ -306,12 +306,18 @@ Rails.application.routes.draw do
         end
       end
 
+      resources :reports, only: [:create] do
+        collection do
+          get :list, path: "/", action: :list
+          delete :delete, path: "/", action: :delete, constraints: ->(request) { request.query_parameters.key?("id") }
+        end
+      end
+
       resources :spaces, only: %i(index show create update) do
         collection do
           get :cli
           get :editable_spaces
           get :info
-          delete "report", to: "spaces#delete_reports", constraints: ->(request) { request.query_parameters.key?("id") }
         end
 
         member do
@@ -324,8 +330,6 @@ Rails.application.routes.draw do
           post :accept
           post :add_data
           patch :fix_guest_permissions
-          post "report", to: "spaces#create_report"
-          get "report", to: "spaces#report"
 
           post :lock, controller: :space_requests
           post :unlock, controller: :space_requests

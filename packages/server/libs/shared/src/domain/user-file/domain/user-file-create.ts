@@ -1,4 +1,4 @@
-import { SCOPE } from '../../../types/common'
+import { EntityScope } from '../../../types/common'
 import type { FILE_STATE, PARENT_TYPE } from '../user-file.types'
 
 export interface UserFileCreate {
@@ -10,7 +10,7 @@ export interface UserFileCreate {
   userId: number
   parentType: PARENT_TYPE
   parentId: number
-  scope: SCOPE
+  scope: EntityScope
   parentFolderId?: number
   scopedParentFolderId?: number
 }

@@ -1,3 +1,4 @@
+import { SqlEntityManager } from '@mikro-orm/mysql'
 import { SpaceReportPart } from '@shared/domain/space-report/entity/space-report-part.entity'
 import { SpaceReport } from '@shared/domain/space-report/entity/space-report.entity'
 import { SpaceReportPartSourceType } from '@shared/domain/space-report/model/space-report-part-source.type'
@@ -12,14 +13,18 @@ describe('SpaceReportResultHtmlProvider', () => {
   const REPORT_ID = 0
   const REPORT_CREATED = new Date('2023-09-01T14:58:08.000Z')
 
+  const SPACE_ID = 100
   const SPACE_NAME = 'space name'
   const SPACE_DESCRIPTION = 'space description'
   const SPACE = {
+    id: SPACE_ID,
     name: SPACE_NAME,
     description: SPACE_DESCRIPTION,
     isConfidentialReviewerSpace: () => false,
     isConfidentialSponsorSpace: () => false,
   } as unknown as Space
+
+  const REPORT_SCOPE = `space-${SPACE_ID}`
 
   const REPORT_PART_1_ID = 10
   const REPORT_PART_1_TITLE = 'title 1'
@@ -54,11 +59,17 @@ describe('SpaceReportResultHtmlProvider', () => {
   const REPORT_PARTS = [REPORT_PART_1, REPORT_PART_2, REPORT_PART_3]
   const getPartsStub = stub()
 
+  const REPORT_CREATED_BY_FULLNAME = 'REPORT_CREATED_BY_FULLNAME'
+  const REPORT_CREATED_BY = {
+    fullName: REPORT_CREATED_BY_FULLNAME,
+  }
+
   const REPORT = {
     id: REPORT_ID,
     reportParts: { getItems: getPartsStub },
-    space: SPACE,
+    scope: REPORT_SCOPE,
     createdAt: REPORT_CREATED,
+    createdBy: { getEntity: () => REPORT_CREATED_BY },
   } as unknown as SpaceReport<'HTML'>
 
   const fileContentProvideStub = stub()
@@ -67,6 +78,7 @@ describe('SpaceReportResultHtmlProvider', () => {
   const assetContentProvideStub = stub()
   const workflowContentProvideStub = stub()
   const userContentProvideStub = stub()
+  const findOneOrFailStub = stub()
 
   beforeEach(() => {
     getPartsStub.reset()
@@ -98,6 +110,10 @@ describe('SpaceReportResultHtmlProvider', () => {
 
     userContentProvideStub.reset()
     userContentProvideStub.throws()
+
+    findOneOrFailStub.reset()
+    findOneOrFailStub.throws()
+    findOneOrFailStub.withArgs(Space, SPACE_ID).resolves(SPACE)
   })
 
   it('should create a valid HTML', async () => {
@@ -278,7 +294,11 @@ describe('SpaceReportResultHtmlProvider', () => {
       [T in SpaceReportPartSourceType]: SpaceReportResultPartHtmlContentProvider<T>
     }
 
-    return new SpaceReportResultHtmlProvider(ENTITY_PARENT_RESOLVER_MAP)
+    const em = {
+      findOneOrFail: findOneOrFailStub,
+    } as unknown as SqlEntityManager
+
+    return new SpaceReportResultHtmlProvider(ENTITY_PARENT_RESOLVER_MAP, em)
   }
 
   function getContentFake(id: string, title: string) {

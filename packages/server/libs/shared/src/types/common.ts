@@ -5,7 +5,11 @@ export interface PaginationParams {
   limit: number
 }
 
-export type SCOPE = STATIC_SCOPE | `space-${string}`
+export type SpaceScope = `space-${number}`
+export type StaticScope = 'private' | 'public'
+export type EntityScope = StaticScope | SpaceScope
+
+export type SCOPE = STATIC_SCOPE | SpaceScope
 
 export type DnanexusLink = {
   $dnanexus_link: string

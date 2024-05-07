@@ -14,12 +14,12 @@ repo-env-files-init:
 # └─────────────────┘
 
 check-missing-env-variables:
-	./utils/scripts/check-missing-env-variables.sh .env .env.example
+	./utils/scripts/check-missing-env-variables.sh packages/rails/.env packages/rails/.env.example
 	./utils/scripts/check-missing-env-variables.sh docker/.env docker/.env.example
 	./utils/scripts/check-missing-env-variables.sh packages/server/.env packages/server/.env.example
 
 check-unpublished-env-variables:
-	./utils/scripts/check-unpublished-env-variables.sh .env .env.example
+	./utils/scripts/check-unpublished-env-variables.sh packages/rails/.env packages/rails/.env.example
 	./utils/scripts/check-unpublished-env-variables.sh docker/.env docker/.env.example
 	./utils/scripts/check-unpublished-env-variables.sh packages/server/.env packages/server/.env.example
 

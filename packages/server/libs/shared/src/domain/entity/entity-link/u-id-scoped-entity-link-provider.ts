@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common'
-import { entityTypeToEntityMap } from '@shared/domain/entity/domain/entity-type-to-entity.map'
+import { EntityInstance } from '@shared/domain/entity/domain/entity-instance'
 import { EntityType } from '@shared/domain/entity/domain/entity.type'
 import { EntityLinkProvider } from '@shared/domain/entity/entity-link/entity-link.provider'
 import { getIdFromScopeName } from '@shared/domain/space/space.helper'
@@ -8,7 +8,7 @@ import { EntityUtils } from '@shared/utils/entity.utils'
 import { Extends } from '@shared/utils/types/extends'
 
 type UIdScopedLinkEntityType = Extends<EntityType, 'job' | 'asset' | 'file' | 'app' | 'workflow'>
-type UIdScopedLinkEntity = InstanceType<(typeof entityTypeToEntityMap)[UIdScopedLinkEntityType]>
+type UIdScopedLinkEntity = EntityInstance<UIdScopedLinkEntityType>
 
 @Injectable()
 export class UIdScopedEntityLinkProvider extends EntityLinkProvider<UIdScopedLinkEntityType> {

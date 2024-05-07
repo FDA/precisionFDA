@@ -22,7 +22,7 @@ const StyledRadio = styled(Radio)`
   margin-top: 0 !important;
 `
 
-export function useGenerateSpaceReportModal({ spaceId, onClose }: { spaceId: number; onClose?: () => void }) {
+export function useGenerateSpaceReportModal({ scope, onClose }: { scope: string; onClose?: () => void }) {
   const { isShown, setShowModal } = useModal()
 
   const [reportFormat, setReportFormat] = useState<SpaceReportFormat>('HTML')
@@ -35,7 +35,7 @@ export function useGenerateSpaceReportModal({ spaceId, onClose }: { spaceId: num
 
   const mutation = useMutation({
     mutationKey: ['generate-space-report'],
-    mutationFn: () => createReport(spaceId, reportFormat, options),
+    mutationFn: () => createReport(scope, reportFormat, options),
     onSuccess: async () => {
       close()
     },

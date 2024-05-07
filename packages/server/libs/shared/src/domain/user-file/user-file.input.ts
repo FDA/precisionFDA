@@ -2,7 +2,7 @@ import { UidInput } from '@shared/types'
 import type { JSONSchema7 } from 'json-schema'
 import { config } from '../../config'
 import { FILE_ORIGIN_TYPE, PARENT_TYPE } from './user-file.types'
-import { SCOPE } from '../../types/common'
+import { EntityScope, SCOPE } from '../../types/common'
 
 type SyncFoldersInput = {
   remoteFolderPaths: string[]
@@ -44,7 +44,7 @@ type PathResolverInput = {
 type SyncFilesInFolderInput = {
   folderId: number | null
   projectDxid: string
-  scope: SCOPE
+  scope: EntityScope
   parentId: number
   parentType: PARENT_TYPE
   entityType: FILE_ORIGIN_TYPE

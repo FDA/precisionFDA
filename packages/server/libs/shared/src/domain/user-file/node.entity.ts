@@ -1,20 +1,20 @@
 import {
+  Collection,
   Entity,
   Enum,
-  Ref,
   ManyToOne,
+  OneToMany,
   PrimaryKey,
   Property,
-  OneToMany,
-  Collection,
+  Ref,
 } from '@mikro-orm/core'
 import { NodeProperty } from '@shared/domain/property/node-property.entity'
 import { NodeRepository } from '@shared/domain/user-file/node.repository'
 import { User } from '@shared/domain/user/user.entity'
 import { BaseEntity } from '../../database/base-entity'
+import { EntityScope } from '../../types/common'
 import { formatDuration } from '../../utils/format'
 import { FILE_STATE, FILE_STI_TYPE, FOLDER_STATE, PARENT_TYPE } from './user-file.types'
-import { SCOPE } from '../../types/common'
 
 @Entity({
   abstract: true,
@@ -50,7 +50,7 @@ export class Node extends BaseEntity {
   fileSize?: number
 
   @Property()
-  scope: SCOPE
+  scope: EntityScope
 
   @Property()
   createdAt: Date

@@ -13,6 +13,7 @@ import {
 } from '@shared/domain/space-report/model/space-report-part-source.type'
 import { SpaceReportQueueJobProducer } from '@shared/domain/space-report/producer/space-report-queue-job.producer'
 import { SpaceReportService } from '@shared/domain/space-report/service/space-report.service'
+import { Space } from '@shared/domain/space/space.entity'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { Asset } from '@shared/domain/user-file/asset.entity'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
@@ -22,6 +23,7 @@ import { InvalidStateError } from '@shared/errors'
 import { SOURCE_TYPE_TO_RESULT_PROVIDER_MAP } from '@shared/facade/space-report/provider/source-type-to-result-provider-map.provider'
 import { SpaceReportPartResultProvider } from '@shared/facade/space-report/service/space-report-part-result.provider'
 import { ArrayUtils } from '@shared/utils/array.utils'
+import { EntityScopeUtils } from '@shared/utils/entity-scope.utils'
 
 @Injectable()
 export class SpaceReportBatchResultGenerateFacade {
@@ -64,7 +66,7 @@ export class SpaceReportBatchResultGenerateFacade {
 
   private async generateAndSaveResults(ids: number[]) {
     return await this.em.transactional(async () => {
-      const reportParts = await this.em.find(SpaceReportPart, ids)
+      const reportParts = await this.em.find(SpaceReportPart, ids, { populate: ['spaceReport'] })
 
       if (ArrayUtils.isEmpty(reportParts)) {
         return
@@ -114,9 +116,13 @@ export class SpaceReportBatchResultGenerateFacade {
       reportParts,
     )
 
-    const report = await this.em.findOneOrFail(SpaceReport, reportParts[0].spaceReport.id, {
-      populate: ['space.spaceMemberships'],
-    })
+    const report = reportParts[0].spaceReport.getEntity()
+
+    const space = EntityScopeUtils.isSpaceScope(report.scope)
+      ? await this.em.findOneOrFail(Space, EntityScopeUtils.getSpaceIdFromScope(report.scope), {
+          populate: ['spaceMemberships'],
+        })
+      : null
 
     return await Promise.all(
       entities.map(async (entity) => {
@@ -126,7 +132,7 @@ export class SpaceReportBatchResultGenerateFacade {
           id: reportPart.id,
           result: await this.SOURCE_TYPE_TO_RESULT_PROVIDER[type].getResult(
             entity,
-            report.space,
+            space,
             report.format,
           ),
         }

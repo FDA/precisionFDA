@@ -40,18 +40,18 @@ export class SpaceReportPartUserResultProvider extends SpaceReportPartResultProv
     return result
   }
 
-  protected getHtmlResult(entity: User, space: Space): Promise<SpaceReportPartUserTileHtmlResult> {
-    const membership = space.spaceMemberships.find((sm) => sm.user.id === entity.id && sm.active)
+  protected getHtmlResult(entity: User, space?: Space): Promise<SpaceReportPartUserTileHtmlResult> {
+    const membership = space?.spaceMemberships?.find((sm) => sm.user.id === entity.id && sm.active)
 
     const result: SpaceReportPartUserTileHtmlResult = {
       role: membership?.role,
       title: entity.fullName,
-      memberSince: membership?.createdAt,
+      ...(membership && { memberSince: membership.createdAt }),
       dxuser: entity.dxuser,
       link: `${config.api.railsHost}/users/${entity.dxuser}`,
     }
 
-    if (space.type === SPACE_TYPE.REVIEW) {
+    if (space?.type === SPACE_TYPE.REVIEW) {
       result.side = membership?.side
     }
 

@@ -1,7 +1,8 @@
 import type { SqlEntityManager } from '@mikro-orm/mysql'
 import { SpaceReportService } from '@shared/domain/space-report/service/space-report.service'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { NodesRemoveOperation } from '@shared/domain/user-file/ops/nodes-remove'
-import { InvalidStateError, NotFoundError } from '@shared/errors'
+import { InvalidStateError, NotFoundError, PermissionError } from '@shared/errors'
 import { expect } from 'chai'
 import type { SinonStub } from 'sinon'
 import { stub } from 'sinon'
@@ -16,12 +17,7 @@ describe('SpaceReportDeleteFacade', () => {
   const SPACE_REPORT_2_STATE = 'ERROR'
 
   const SPACE_1_ID = 10
-  const SPACE_2_ID = 20
-  const SPACE_IDS = [SPACE_1_ID, SPACE_2_ID]
-
   const SPACE_1 = { id: SPACE_1_ID }
-  const SPACE_2 = { id: SPACE_2_ID }
-  const SPACES = [SPACE_1, SPACE_2]
 
   const FILE_1_ID = 100
   const FILE_2_ID = 200
@@ -30,17 +26,24 @@ describe('SpaceReportDeleteFacade', () => {
   const FILE_1 = { id: FILE_1_ID }
   const FILE_2 = { id: FILE_2_ID }
 
+  const SPACE_REPORT_1_SCOPE = 'private'
+  const SPACE_REPORT_2_SCOPE = `space-${SPACE_1_ID}`
+
+  const USER_1_ID = 1000
+  const USER_1 = { id: USER_1_ID }
+
   const SPACE_REPORT_1 = {
     id: SPACE_REPORT_1_ID,
-    space: SPACE_1,
     resultFile: FILE_1,
     state: SPACE_REPORT_1_STATE,
+    scope: SPACE_REPORT_1_SCOPE,
+    createdBy: { getEntity: () => USER_1 },
   }
   const SPACE_REPORT_2 = {
     id: SPACE_REPORT_2_ID,
-    space: SPACE_2,
     resultFile: FILE_2,
     state: SPACE_REPORT_2_STATE,
+    scope: SPACE_REPORT_2_SCOPE,
   }
 
   const SPACE_REPORTS = [SPACE_REPORT_1, SPACE_REPORT_2]
@@ -58,7 +61,7 @@ describe('SpaceReportDeleteFacade', () => {
     getReportsStub.withArgs(SPACE_REPORT_IDS).returns(SPACE_REPORTS)
 
     getSpacesForUserStub = stub().throws()
-    getSpacesForUserStub.withArgs(SPACE_IDS).returns(SPACES)
+    getSpacesForUserStub.withArgs([SPACE_1_ID]).returns([SPACE_1])
 
     deleteReportsStub = stub().throws()
     deleteReportsStub.withArgs(SPACE_REPORTS).returns(SPACE_REPORT_IDS)
@@ -104,13 +107,13 @@ describe('SpaceReportDeleteFacade', () => {
   it('should throw an error if no reports found and rollback transaction', async () => {
     getReportsStub.withArgs(SPACE_REPORT_IDS).returns([])
 
-    await expectReject(NotFoundError, 'Space report not found')
+    await expectReject(NotFoundError, 'Some space reports not found')
   })
 
   it('should throw an error if some reports not found and rollback transaction', async () => {
     getReportsStub.withArgs(SPACE_REPORT_IDS).returns([SPACE_REPORT_1])
 
-    await expectReject(NotFoundError, 'Space report not found')
+    await expectReject(NotFoundError, 'Some space reports not found')
   })
 
   it('should throw an error if some reports not in a terminal state and rollback transaction', async () => {
@@ -121,15 +124,13 @@ describe('SpaceReportDeleteFacade', () => {
   })
 
   it('should throw an error if no spaces found and rollback transaction', async () => {
-    getSpacesForUserStub.withArgs(SPACE_IDS).returns([])
+    getSpacesForUserStub.withArgs([SPACE_1_ID]).returns([])
 
     await expectReject(NotFoundError, 'Space not found')
   })
 
-  it('should throw an error if some spaces not found and rollback transaction', async () => {
-    getSpacesForUserStub.withArgs(SPACE_IDS).returns([SPACE_2])
-
-    await expectReject(NotFoundError, 'Space not found')
+  it('should throw an error if current user is not the creator of the report and rollback transaction', async () => {
+    await expectReject(PermissionError, 'User does not have access to the report', { id: 9 })
   })
 
   it('should call nodesRemoveOperation with all file ids', async () => {
@@ -144,14 +145,14 @@ describe('SpaceReportDeleteFacade', () => {
     expect(await result).to.be.eq(SPACE_REPORT_IDS)
   })
 
-  async function expectReject(error: Error | Function, message?: string) {
-    const result = getInstance().deleteSpaceReports(SPACE_REPORT_IDS)
+  async function expectReject(error: Error | Function, message?: string, user?) {
+    const result = getInstance(user).deleteSpaceReports(SPACE_REPORT_IDS)
 
     await expect(result).to.be.rejectedWith(error, message)
     await expect(transactionalStub.getCall(0).returnValue).to.be.rejected()
   }
 
-  function getInstance() {
+  function getInstance(user = { id: USER_1_ID }) {
     const em = { transactional: transactionalStub } as unknown as SqlEntityManager
 
     const spaceReportService = {
@@ -164,6 +165,11 @@ describe('SpaceReportDeleteFacade', () => {
       execute: nodesRemoveExecuteStub,
     } as unknown as NodesRemoveOperation
 
-    return new SpaceReportDeleteFacade(em, spaceReportService, nodesRemoveOperation)
+    return new SpaceReportDeleteFacade(
+      em,
+      spaceReportService,
+      nodesRemoveOperation,
+      user as UserContext,
+    )
   }
 })

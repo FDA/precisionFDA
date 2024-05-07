@@ -10,7 +10,7 @@ import {
   JobDescribeResponse,
   WorkflowDescribeResponse,
 } from '@shared/platform-client/platform-client.responses'
-import { SCOPE } from '@shared/types/common'
+import { EntityScope } from '@shared/types/common'
 
 export class CliFileDescribeDTO {
   types: string[]
@@ -26,20 +26,23 @@ export class CliFileDescribeDTO {
   size: number
   name: string
   modified: number
-  location: SCOPE
+  location: EntityScope
   id: string
   state: string
   class: string
   properties: {}
   content?: string[]
 
-  static async mapToDTO(describeFile: FileDescribeResponse, file: IFileOrAsset): Promise<CliFileDescribeDTO> {
+  static async mapToDTO(
+    describeFile: FileDescribeResponse,
+    file: IFileOrAsset,
+  ): Promise<CliFileDescribeDTO> {
     let response: CliFileDescribeDTO = {
       ...describeFile,
       id: file.uid,
       title: file.name,
       size: file.fileSize,
-      tags: file.taggings.map(t => t.tag.name),
+      tags: file.taggings.map((t) => t.tag.name),
       properties: file.properties.reduce((acc, p) => {
         acc[p.propertyName] = p.propertyValue
         return acc
@@ -54,7 +57,7 @@ export class CliFileDescribeDTO {
       let assetFile = file as Asset
       response = {
         ...response,
-        content: assetFile.archiveEntries.getItems().map(e => e.path),
+        content: assetFile.archiveEntries.getItems().map((e) => e.path),
       }
     }
 

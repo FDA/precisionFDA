@@ -11,11 +11,11 @@ export enum AppActions {
 const DELETABLE_STATES: SpaceReportState[] = ['DONE', 'ERROR']
 
 export const userReportSelectActions = ({
-  spaceId,
+  scope,
   selectedItems,
   resetSelected,
 }: {
-  spaceId?: number,
+  scope?: string,
   selectedItems: ISpaceReport[],
   resetSelected?: () => void,
 }) => {
@@ -33,7 +33,12 @@ export const userReportSelectActions = ({
       queryClient.invalidateQueries({
         queryKey: ['space-reports'],
       })
-      navigate(`/spaces/${spaceId}/reports`)
+      if (scope?.startsWith('space-')) {
+        navigate(`/spaces/${scope.split('-')[1]}/reports`)
+      } else {
+        navigate('/home/reports')
+      }
+
       if(resetSelected) resetSelected()
     },
   })

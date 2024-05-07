@@ -1,5 +1,5 @@
 import { config } from '@shared/config'
-import { entityTypeToEntityMap } from '@shared/domain/entity/domain/entity-type-to-entity.map'
+import { EntityInstance } from '@shared/domain/entity/domain/entity-instance'
 import { EntityType } from '@shared/domain/entity/domain/entity.type'
 
 interface GetLinkOptions {
@@ -7,12 +7,10 @@ interface GetLinkOptions {
 }
 
 export abstract class EntityLinkProvider<T extends EntityType> {
-  protected abstract getRelativeLink(
-    entity: InstanceType<(typeof entityTypeToEntityMap)[T]>,
-  ): Promise<`/${string}`>
+  protected abstract getRelativeLink(entity: EntityInstance<T>): Promise<`/${string}`>
 
   async getLink(
-    entity: InstanceType<(typeof entityTypeToEntityMap)[T]>,
+    entity: EntityInstance<T>,
     { absolute = true }: GetLinkOptions = {},
   ): Promise<string> {
     const relativeLink = await this.getRelativeLink(entity)

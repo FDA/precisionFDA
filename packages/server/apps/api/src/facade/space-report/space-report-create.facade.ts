@@ -18,8 +18,8 @@ export class SpaceReportCreateFacade {
     this.spaceReportService = spaceReportService
   }
 
-  async createSpaceReport(spaceId: number, createDto: SpaceReportCreateDto) {
-    const report = await this.spaceReportService.createReport(spaceId, createDto)
+  async createSpaceReport(createDto: SpaceReportCreateDto) {
+    const report = await this.spaceReportService.createReport(createDto)
     const partIds: number[] = report.reportParts.getItems().map((p) => p.id)
     const reportBatches = ArrayUtils.batchArray(partIds, this.REPORT_PART_BATCH_SIZE)
 
