@@ -4,6 +4,8 @@ module Admin
     include ErrorProcessable
     include Naming
 
+    layout "application"
+
     ERROR_KEYS = %i(first_name last_name email org org_handle username).freeze
     WARNING_KEYS = %i(org org_handle username).freeze
 

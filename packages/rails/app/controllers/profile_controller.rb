@@ -224,42 +224,6 @@ class ProfileController < ApplicationController
     https_apps_client.check_spaces_permissions
   end
 
-  def run_report
-    @user = User.includes(:org).find(@context.user_id)
-    raise unless @user.can_administer_site?
-
-    Axlsx::Package.new do |p|
-      p.use_autowidth = true
-      Time.use_zone ActiveSupport::TimeZone.new('America/New_York') do
-        p.workbook.add_worksheet(name: "Users") do |sheet|
-          sheet.add_row ["", "", "username", "first name", "last name", "email", "provisioned at", "last login", "bytes stored", "apps count", "jobs count"]
-          Org.reports(sheet)
-        end
-        p.workbook.add_worksheet(name: "Requests") do |sheet|
-          sheet.add_row ["time", "in_system?", "first name", "last name", "email", "organization", "self-represent?", "country", "city", "state", "postal code", "address1", "address2", "phone", "duns", "consistency challenge?", "truth challenge?", "research?", "clinical?", "has data?", "has software?", "reason"]
-          Invitation.includes(:user).find_each do |inv|
-            row = []
-            row << inv.created_at.strftime("%Y-%m-%d %H:%M")
-            if inv.user.present?
-              row << inv.user.dxuser
-            else
-              u = User.where(first_name: inv.first_name, last_name: inv.last_name).
-                or(User.where({normalized_email: inv.email.downcase.strip})).take
-
-              row << (u ? "maybe #{u.dxuser}" : "")
-            end
-            row += [inv.first_name, inv.last_name, inv.email, inv.org, inv.singular, inv.country.try(:name), inv.city, inv.us_state, inv.postal_code, inv.address1, inv.address2, inv.full_phone, inv.duns, inv.participate_intent, inv.organize_intent, inv.research_intent, inv.clinical_intent, inv.req_data, inv.req_software, inv.req_reason]
-            sheet.add_row row
-          end
-        end
-        filename = Time.current.strftime("precisionfda-report-%Y-%m-%d.xlsx")
-
-        send_data p.to_stream.read, filename: filename, type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-        return
-      end
-    end
-  end
-
   private
 
   def find_admin

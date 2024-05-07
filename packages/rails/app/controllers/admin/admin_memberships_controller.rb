@@ -1,6 +1,7 @@
 module Admin
   # Responsible for maintaining admin membership actions.
   class AdminMembershipsController < BaseController
+    layout "application"
     before_action :init_role, only: %i(index)
 
     def index

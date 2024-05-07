@@ -1,5 +1,6 @@
 module Admin
   class ParticipantsController < BaseController
+    layout "application"
     before_action :set_participant, only: [:edit, :update, :destroy]
 
     def index

@@ -14,6 +14,7 @@ import { SiteAdminGuard } from './guards/site-admin.guard'
 import { getAdminBodyValidationPipe } from './pipes/admin-body-validation.pipe'
 import { AdminUsersPaginationPipe } from './pipes/admin-users-pagination.pipe'
 import { enumValidator, numericBodyValidator } from './possibly-reusable-things'
+import { Organization } from '@shared/domain/org/org.entity'
 
 interface ISetTotalLimitParams {
   ids: number[]
@@ -44,6 +45,13 @@ export class AdminController {
     private readonly log: Logger,
     @Inject(DEPRECATED_SQL_ENTITY_MANAGER) private readonly em: SqlEntityManager,
   ) {}
+
+  @Get('/stats')
+  async getStats() {
+    const usersCount = await this.em.getRepository(User).count()
+    const orgsCount = await this.em.getRepository(Organization).count();
+    return { usersCount, orgsCount }
+  }
 
   @Get('/checkStaleJobs')
   async checkStaleJobs() {

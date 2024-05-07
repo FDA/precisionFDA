@@ -1,6 +1,7 @@
 module Admin
   # Comparator settings
   class ComparatorSettingsController < BaseController
+    layout "application"
     def index
       @global_default_comparator = App.find_by(dxid: DEFAULT_COMPARISON_APP) ||
                                    App.new(
