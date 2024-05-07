@@ -26,7 +26,7 @@ import { STATIC_SCOPE } from '@shared/enums'
 import { Provenance } from './job.input'
 import { getIdFromScopeName, scopeContainsId } from '../space/space.helper'
 import { formatDuration } from '../../utils/format'
-import { SCOPE } from '../../types/common'
+import { EntityScope } from '../../types/common'
 
 @Entity({ tableName: 'jobs', customRepository: () => JobRepository })
 @Filter({ name: 'ownedBy', cond: args => ({ user: { id: args.userId } }) })
@@ -70,7 +70,7 @@ export class Job extends BaseEntity {
   name: string
 
   @Property()
-  scope: SCOPE
+  scope: EntityScope
 
   @Property()
   entityType: number

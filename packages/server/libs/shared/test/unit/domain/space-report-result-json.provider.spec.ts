@@ -1,3 +1,4 @@
+import { SqlEntityManager } from '@mikro-orm/mysql'
 import { SpaceReportPart } from '@shared/domain/space-report/entity/space-report-part.entity'
 import { SpaceReport } from '@shared/domain/space-report/entity/space-report.entity'
 import { SpaceReportResultJsonProvider } from '@shared/domain/space-report/service/result/space-report-result-json.provider'
@@ -9,9 +10,13 @@ describe('SpaceReportResultJsonProvider', () => {
   const REPORT_ID = 0
   const REPORT_CREATED = new Date('2023-09-01T14:58:08.000Z')
 
+  const SPACE_ID = 10
   const SPACE_NAME = 'space name'
   const SPACE_DESCRIPTION = 'space description'
+  const SPACE_SCOPE = `space-${SPACE_ID}`
   const SPACE = {
+    id: SPACE_ID,
+    scope: SPACE_SCOPE,
     name: SPACE_NAME,
     description: SPACE_DESCRIPTION,
     isConfidentialReviewerSpace: () => false,
@@ -75,19 +80,24 @@ describe('SpaceReportResultJsonProvider', () => {
   const REPORT = {
     id: REPORT_ID,
     reportParts: { getItems: getPartsStub },
-    space: SPACE,
+    scope: SPACE_SCOPE,
     createdAt: REPORT_CREATED,
     createdBy: CREATED_BY,
     options: OPTIONS,
   } as unknown as SpaceReport<'JSON'>
 
   let stringifySpy: SinonSpy
+  const findOneOrFailStub = stub()
 
   beforeEach(() => {
     getPartsStub.reset()
     getPartsStub.returns(REPORT_PARTS)
 
     stringifySpy = spy(JSON, 'stringify')
+
+    findOneOrFailStub.reset()
+    findOneOrFailStub.throws()
+    findOneOrFailStub.withArgs(Space, SPACE_ID).resolves(SPACE)
   })
 
   afterEach(() => {
@@ -109,6 +119,7 @@ describe('SpaceReportResultJsonProvider', () => {
       createdAt: REPORT_CREATED.toJSON(),
       createdBy: CREATED_BY_FULL_NAME,
       space: {
+        id: SPACE_ID,
         title: SPACE_NAME,
         description: SPACE_DESCRIPTION,
         entities: {
@@ -134,6 +145,10 @@ describe('SpaceReportResultJsonProvider', () => {
   })
 
   function getInstance() {
-    return new SpaceReportResultJsonProvider()
+    const em = {
+      findOneOrFail: findOneOrFailStub,
+    } as unknown as SqlEntityManager
+
+    return new SpaceReportResultJsonProvider(em)
   }
 })

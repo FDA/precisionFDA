@@ -726,7 +726,6 @@ ActiveRecord::Schema.define(version: 2024_04_15_173545) do
   end
 
   create_table "space_reports", charset: "utf8mb3", collation: "utf8mb3_unicode_ci", force: :cascade do |t|
-    t.integer "space_id"
     t.integer "result_file_id"
     t.string "state", default: "CREATED"
     t.integer "created_by"
@@ -734,10 +733,10 @@ ActiveRecord::Schema.define(version: 2024_04_15_173545) do
     t.datetime "updated_at", precision: 6, null: false
     t.string "format", default: "HTML"
     t.json "options"
+    t.string "scope", null: false
     t.index ["created_at"], name: "index_space_reports_on_created_at"
     t.index ["created_by"], name: "fk_rails_85038bae31"
     t.index ["result_file_id"], name: "fk_rails_80499f7a14"
-    t.index ["space_id"], name: "fk_rails_b52dcac8ed"
   end
 
   create_table "spaces", id: :integer, charset: "utf8mb3", collation: "utf8mb3_unicode_ci", force: :cascade do |t|

@@ -7,6 +7,7 @@ import { SpaceReport } from '@shared/domain/space-report/entity/space-report.ent
 import { SpaceReportPartSourceType } from '@shared/domain/space-report/model/space-report-part-source.type'
 import { SpaceReportQueueJobProducer } from '@shared/domain/space-report/producer/space-report-queue-job.producer'
 import { SpaceReportService } from '@shared/domain/space-report/service/space-report.service'
+import { Space } from '@shared/domain/space/space.entity'
 import { Asset } from '@shared/domain/user-file/asset.entity'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { User } from '@shared/domain/user/user.entity'
@@ -18,8 +19,12 @@ import { expect } from 'chai'
 import { restore, stub } from 'sinon'
 
 describe('SpaceReportBatchResultGenerateFacade', () => {
+  const SPACE_ID = 1000
+  const SPACE = { id: SPACE_ID }
+
   const REPORT_ID = 0
-  const REPORT = { id: REPORT_ID }
+  const REPORT_SCOPE = `space-${SPACE_ID}`
+  const REPORT = { id: REPORT_ID, scope: REPORT_SCOPE }
 
   const APP_1_ID = 10
   const APP_1 = { id: APP_1_ID }
@@ -41,7 +46,7 @@ describe('SpaceReportBatchResultGenerateFacade', () => {
     id: PART_1_ID,
     sourceType: PART_1_TYPE,
     sourceId: APP_1_ID,
-    spaceReport: { id: REPORT_ID },
+    spaceReport: { id: REPORT_ID, getEntity: () => REPORT },
   }
 
   const PART_2_ID = 200
@@ -50,7 +55,7 @@ describe('SpaceReportBatchResultGenerateFacade', () => {
     id: PART_2_ID,
     sourceType: PART_2_TYPE,
     sourceId: APP_2_ID,
-    spaceReport: { id: REPORT_ID },
+    spaceReport: { id: REPORT_ID, getEntity: () => REPORT },
   }
 
   const PART_3_ID = 300
@@ -59,7 +64,7 @@ describe('SpaceReportBatchResultGenerateFacade', () => {
     id: PART_3_ID,
     sourceType: PART_3_TYPE,
     sourceId: WORKFLOW_1_ID,
-    spaceReport: { id: REPORT_ID },
+    spaceReport: { id: REPORT_ID, getEntity: () => REPORT },
   }
 
   const PARTS = [PART_1, PART_2, PART_3]
@@ -105,11 +110,8 @@ describe('SpaceReportBatchResultGenerateFacade', () => {
 
     findOneOrFailStub.reset()
     findOneOrFailStub.throws()
-    findOneOrFailStub
-      .withArgs(SpaceReport, REPORT_ID, {
-        populate: ['space.spaceMemberships'],
-      })
-      .resolves(REPORT)
+    findOneOrFailStub.withArgs(SpaceReport, REPORT_ID).resolves(REPORT)
+    findOneOrFailStub.withArgs(Space, SPACE_ID, { populate: ['spaceMemberships'] }).resolves(SPACE)
 
     removeStub.reset()
     removeStub.throws()
@@ -303,7 +305,7 @@ describe('SpaceReportBatchResultGenerateFacade', () => {
         sourceType: prop.type,
         sourceId: ENTITY_ID,
         id: REPORT_PART_ID,
-        spaceReport: { id: REPORT_ID },
+        spaceReport: { id: REPORT_ID, getEntity: () => REPORT },
       }
 
       const RESULT = 'RESULT'
@@ -367,6 +369,52 @@ describe('SpaceReportBatchResultGenerateFacade', () => {
 
   it('should create space report result task if no pending parts', async () => {
     await getInstance().generate(PART_IDS)
+
+    expect(createResultTaskStub.calledOnce).to.be.true()
+  })
+
+  it('should create space report result task for private', async () => {
+    findOneOrFailStub.reset()
+    findOneOrFailStub.throws()
+    findOneOrFailStub.withArgs(SpaceReport, REPORT_ID).resolves(REPORT)
+
+    findStub.reset()
+    findStub.throws()
+    findStub.withArgs(SpaceReportPart, [11]).resolves([
+      {
+        id: PART_1_ID,
+        sourceType: PART_1_TYPE,
+        sourceId: APP_1_ID,
+        spaceReport: { id: REPORT_ID, getEntity: () => ({ id: REPORT_ID, scope: 'private' }) },
+      },
+    ])
+
+    appGetResultStub.reset()
+    appGetResultStub.throws()
+    appGetResultStub.withArgs(APP_1).resolves(APP_1_RESULT)
+
+    workflowGetResultStub.reset()
+    workflowGetResultStub.throws()
+
+    appFindStub.reset()
+    appFindStub.throws()
+    appFindStub.withArgs([APP_1_ID]).resolves([APP_1])
+
+    workflowFindStub.reset()
+    workflowFindStub.throws()
+
+    completePartsBatchStub.reset()
+    completePartsBatchStub.throws()
+    completePartsBatchStub
+      .withArgs([
+        {
+          id: PART_1_ID,
+          result: APP_1_RESULT,
+        },
+      ])
+      .resolves()
+
+    await getInstance().generate([11])
 
     expect(createResultTaskStub.calledOnce).to.be.true()
   })

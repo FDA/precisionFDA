@@ -9,8 +9,17 @@
 #  created_at :datetime         not null
 #  updated_at :datetime         not null
 #
-
-# Space Invitations
 class SpaceReport < ApplicationRecord
-  belongs_to :space
+  include Permissions
+
+  # Class methods
+  module ClassMethods
+    def editable_by?(context)
+      return false if context.guest? || in_locked_verification_space?
+
+      return created_by == context.user_id unless in_space?
+
+      space_object.editable_by?(context.user)
+    end
+  end
 end

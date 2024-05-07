@@ -6,7 +6,7 @@ import { SqlEntityManager } from '@mikro-orm/mysql'
 import { createFolderEvent, EVENT_TYPES } from '../event/event.helper'
 import { getNodePath } from './user-file.helper'
 import { scopeContainsId } from '../space/space.helper'
-import { SCOPE } from '../../types/common'
+import { EntityScope, SCOPE } from '../../types/common'
 import { PARENT_TYPE } from './user-file.types'
 import { getEntityType, InputEntityUnion } from '../../utils/object-utils'
 
@@ -31,7 +31,7 @@ export class FolderService implements IFolderService {
   /**
    * Creates folders on a path. If the folder already exists, it is not created and only returned.
    */
-  async createFoldersOnPath(path: string, scope: SCOPE, userId: number, parent?: InputEntityUnion,): Promise<Folder[]> {
+  async createFoldersOnPath(path: string, scope: EntityScope, userId: number, parent?: InputEntityUnion,): Promise<Folder[]> {
     logger.verbose(`FolderService: creating folders ${path} with scope ${scope}`)
     if (!path) {
       throw new ValidationError('Path must not be empty')
@@ -78,7 +78,7 @@ export class FolderService implements IFolderService {
 
   private async createFolderInternal(
     name: string,
-    scope: SCOPE,
+    scope: EntityScope,
     user: User,
     parent?: InputEntityUnion,
     parentFolderId?: number,
@@ -110,7 +110,7 @@ export class FolderService implements IFolderService {
     return folder
   }
 
-  private async findFolder(name: string, scope: SCOPE, parentFolderId?: number) {
+  private async findFolder(name: string, scope: EntityScope, parentFolderId?: number) {
     if (scopeContainsId(scope)) {
       return await this.em.getRepository(Folder).findOne({
         name,

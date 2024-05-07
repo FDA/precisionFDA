@@ -1,9 +1,12 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Injectable } from '@nestjs/common'
+import { SpaceReport } from '@shared/domain/space-report/entity/space-report.entity'
 import { SpaceReportState } from '@shared/domain/space-report/model/space-report-state.type'
 import { SpaceReportService } from '@shared/domain/space-report/service/space-report.service'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { NodesRemoveOperation } from '@shared/domain/user-file/ops/nodes-remove'
-import { InvalidStateError, NotFoundError } from '@shared/errors'
+import { InvalidStateError, NotFoundError, PermissionError } from '@shared/errors'
+import { EntityScopeUtils } from '@shared/utils/entity-scope.utils'
 
 @Injectable()
 export class SpaceReportDeleteFacade {
@@ -13,6 +16,7 @@ export class SpaceReportDeleteFacade {
     private readonly em: SqlEntityManager,
     private readonly spaceReportService: SpaceReportService,
     private readonly nodesRemoveOperation: NodesRemoveOperation,
+    private readonly user: UserContext,
   ) {}
 
   async deleteSpaceReports(ids: number[]) {
@@ -20,19 +24,14 @@ export class SpaceReportDeleteFacade {
       const reports = await this.spaceReportService.getReports(ids)
 
       if (reports.length !== ids.length) {
-        throw new NotFoundError('Space report not found')
+        throw new NotFoundError('Some space reports not found')
       }
 
       if (reports.some((r) => !this.DELETABLE_STATES.includes(r.state))) {
         throw new InvalidStateError('Cannot delete a report in non terminal state')
       }
 
-      const spaceIds = new Set(reports.map((r) => r.space.id))
-      const spaces = await this.spaceReportService.getSpacesForUser(Array.from(spaceIds))
-
-      if (spaces.length !== spaceIds.size) {
-        throw new NotFoundError('Space not found')
-      }
+      await this.validateReportsAccess(reports)
 
       const removedIds = await this.spaceReportService.deleteReports(reports)
 
@@ -42,5 +41,26 @@ export class SpaceReportDeleteFacade {
 
       return removedIds
     })
+  }
+
+  private async validateReportsAccess(reports: SpaceReport[]) {
+    const spaceIds = new Set<number>()
+
+    reports.forEach((report) => {
+      if (EntityScopeUtils.isSpaceScope(report.scope)) {
+        spaceIds.add(EntityScopeUtils.getSpaceIdFromScope(report.scope))
+        return
+      }
+
+      if (report.createdBy.getEntity().id !== this.user.id) {
+        throw new PermissionError('User does not have access to the report')
+      }
+    })
+
+    const spaces = await this.spaceReportService.getSpacesForUser(Array.from(spaceIds))
+
+    if (spaces.length !== spaceIds.size) {
+      throw new NotFoundError('Space not found')
+    }
   }
 }

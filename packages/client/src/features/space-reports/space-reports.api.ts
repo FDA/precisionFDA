@@ -1,16 +1,16 @@
 import axios from 'axios'
 import { ISpaceReport, SpaceReportFormat, SpaceReportFormatToOptionsMap } from './space-report.types'
 
-export async function createReport<T extends SpaceReportFormat>(spaceId: number, format: T, options?: SpaceReportFormatToOptionsMap[T]) {
-  return axios.post<number>(`/api/spaces/${spaceId}/report`, { format, options }).then(res => res.data)
+export async function createReport<T extends SpaceReportFormat>(scope: string, format: T, options?: SpaceReportFormatToOptionsMap[T]) {
+  return axios.post<number>('/api/reports', { scope, format, options }).then(res => res.data)
 }
 
-export async function fetchReports(spaceId: string) {
-  return axios.get<ISpaceReport[]>(`/api/spaces/${spaceId}/report`).then(res => res.data)
+export async function fetchReports(scope: string) {
+  return axios.get<ISpaceReport[]>('/api/reports', { params: { scope }}).then(res => res.data)
 }
 
 export async function deleteReports(ids: number[]): Promise<number[]> {
-  const query = new URLSearchParams(ids.map(s=>['id', String(s)]))
+  const query = new URLSearchParams(ids.map(s => ['id', String(s)]))
 
-  return axios.delete<number[]>(`/api/spaces/report?${query.toString()}`).then(res => res.data)
+  return axios.delete<number[]>(`/api/reports?${query.toString()}`).then(res => res.data)
 }

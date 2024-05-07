@@ -1,8 +1,8 @@
-import { SCOPE } from '../../../types/common'
+import { EntityScope } from '@shared/types/common'
 
 export interface FileCreate {
   project: string
   name: string
-  scope: SCOPE
+  scope: EntityScope
   description: string
 }

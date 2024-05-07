@@ -35,6 +35,8 @@ module Api
         end
       end
 
+      counters[:reports] = SpaceReport.accessible_by_private.where(created_by: @context.user.id).count
+
       render json: counters
     end
 

@@ -4,6 +4,7 @@ import { EntityProvenanceService } from '@shared/domain/provenance/service/entit
 import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
 import { SpaceReport } from '@shared/domain/space-report/entity/space-report.entity'
 import { SpaceReportService } from '@shared/domain/space-report/service/space-report.service'
+import { Space } from '@shared/domain/space/space.entity'
 import { UserFileService } from '@shared/domain/user-file/service/user-file.service'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { InvalidStateError } from '@shared/errors'
@@ -18,11 +19,17 @@ describe('SpaceReportResultGenerateFacade', () => {
   const REPORT_FORMAT = 'HTML'
 
   const CREATOR_ID = 10
-  const CREATOR = { id: CREATOR_ID }
+  const CREATOR_PRIVATE_PROJECT = 'CREATOR_PRIVATE_PROJECT'
+  const CREATOR_FULL_NAME = 'CREATOR_FULL_NAME'
+  const CREATOR = {
+    id: CREATOR_ID,
+    privateFilesProject: CREATOR_PRIVATE_PROJECT,
+    fullName: CREATOR_FULL_NAME,
+  }
 
   const SPACE_ID = 100
   const SPACE_NAME = 'space name'
-  const SPACE_SCOPE = 'space scope'
+  const SPACE_SCOPE = `space-${SPACE_ID}`
   const SPACE_HOST_PROJECT = 'space host project'
   const SPACE_GUEST_PROJECT = 'space guest project'
   const SPACE = {
@@ -35,11 +42,11 @@ describe('SpaceReportResultGenerateFacade', () => {
 
   const REPORT = {
     id: REPORT_ID,
-    createdBy: CREATOR,
-    space: SPACE,
+    createdBy: { id: CREATOR_ID, getEntity: () => CREATOR },
+    scope: SPACE_SCOPE,
     createdAt: REPORT_CREATED_AT,
     format: REPORT_FORMAT,
-  } as SpaceReport
+  } as unknown as SpaceReport
 
   const SPACE_MEMBERSHIP_IS_HOST = true
   const SPACE_MEMBERSHIP = { isHost: () => SPACE_MEMBERSHIP_IS_HOST }
@@ -58,6 +65,7 @@ describe('SpaceReportResultGenerateFacade', () => {
   const createFileWithContentStub = stub()
   const getSvgStylesStub = stub()
   const closeFileStub = stub()
+  const findOneOrFailStub = stub()
 
   before(() => {
     stub(Reference, 'create')
@@ -68,14 +76,12 @@ describe('SpaceReportResultGenerateFacade', () => {
   beforeEach(() => {
     REPORT.state = 'CREATED'
 
+    stubForReport(REPORT)
+
     transactionalStub.reset()
     transactionalStub.callsArg(0)
 
-    findOneStub.reset()
-    findOneStub.throws()
     findOneStub
-      .withArgs(SpaceReport, REPORT_ID, { lockMode: LockMode.PESSIMISTIC_WRITE })
-      .resolves(REPORT)
       .withArgs(SpaceMembership, {
         spaces: SPACE_ID,
         user: CREATOR_ID,
@@ -83,15 +89,7 @@ describe('SpaceReportResultGenerateFacade', () => {
       })
       .resolves(SPACE_MEMBERSHIP)
 
-    populateStub.reset()
-    populateStub.throws()
-    populateStub.withArgs(REPORT, ['reportParts', 'space', 'createdBy']).returnsArg(0)
-
     getSvgStylesStub.resolves(STYLES)
-
-    generateResultStub.reset()
-    generateResultStub.throws()
-    generateResultStub.withArgs(REPORT, { styles: STYLES }).resolves(RESULT)
 
     createFileWithContentStub.reset()
     createFileWithContentStub.throws()
@@ -101,13 +99,17 @@ describe('SpaceReportResultGenerateFacade', () => {
         project: SPACE_HOST_PROJECT,
         name: `PFDA - Space 100 report - ${REPORT_CREATED_AT.toLocaleDateString()}.html`,
         content: RESULT,
-        description: `Report of a precisionFDA space space name, generatad on ${REPORT_CREATED_AT.toLocaleString()}`,
+        description: `Report of a precisionFDA space space name, generated on ${REPORT_CREATED_AT.toLocaleString()}`,
       })
       .resolves(FILE)
 
     closeFileStub.reset()
     closeFileStub.throws()
     closeFileStub.withArgs(FILE_UID).resolves()
+
+    findOneOrFailStub.reset()
+    findOneOrFailStub.throws()
+    findOneOrFailStub.withArgs(Space, SPACE_ID).resolves(SPACE)
   })
 
   after(() => {
@@ -180,8 +182,8 @@ describe('SpaceReportResultGenerateFacade', () => {
     await getInstance().generate(REPORT_ID)
 
     expect(REPORT.id).to.eq(REPORT_ID)
-    expect(REPORT.createdBy).to.deep.eq(CREATOR)
-    expect(REPORT.space).to.deep.eq(SPACE)
+    expect(REPORT.createdBy.id).to.eq(CREATOR_ID)
+    expect(REPORT.scope).to.deep.eq(SPACE_SCOPE)
     expect(REPORT.createdAt).to.eq(REPORT_CREATED_AT)
     expect(await REPORT.resultFile.load()).to.deep.eq(FILE)
     expect(REPORT.state).to.eq('CLOSING_RESULT_FILE')
@@ -210,7 +212,7 @@ describe('SpaceReportResultGenerateFacade', () => {
         project: SPACE_GUEST_PROJECT,
         name: `PFDA - Space 100 report - ${REPORT_CREATED_AT.toLocaleDateString()}.html`,
         content: RESULT,
-        description: `Report of a precisionFDA space space name, generatad on ${REPORT_CREATED_AT.toLocaleString()}`,
+        description: `Report of a precisionFDA space space name, generated on ${REPORT_CREATED_AT.toLocaleString()}`,
       })
       .resolves(FILE)
 
@@ -238,11 +240,51 @@ describe('SpaceReportResultGenerateFacade', () => {
     )
   })
 
+  it('should call create file with correct params for a private scope report', async () => {
+    stubForReport({
+      ...REPORT,
+      scope: 'private',
+    })
+
+    createFileWithContentStub.reset()
+    createFileWithContentStub.throws()
+    createFileWithContentStub
+      .withArgs({
+        scope: 'private',
+        project: CREATOR_PRIVATE_PROJECT,
+        name: `PFDA - Private area (CREATOR_FULL_NAME) report - ${REPORT_CREATED_AT.toLocaleDateString()}.html`, //PFDA - Space 100 report - ${REPORT_CREATED_AT.toLocaleDateString()}.html`,
+        content: RESULT,
+        description: `Report of precisionFDA private area of user CREATOR_FULL_NAME, generated on ${REPORT_CREATED_AT.toLocaleString()}`,
+      })
+      .resolves(FILE)
+
+    await getInstance().generate(REPORT_ID)
+
+    expect(createFileWithContentStub.calledOnce).to.be.true()
+  })
+
+  function stubForReport(report) {
+    findOneStub.reset()
+    findOneStub.throws()
+    findOneStub
+      .withArgs(SpaceReport, REPORT_ID, { lockMode: LockMode.PESSIMISTIC_WRITE })
+      .resolves(report)
+
+    populateStub.reset()
+    populateStub.throws()
+    populateStub.withArgs(report, ['reportParts', 'createdBy']).returnsArg(0)
+
+    generateResultStub.reset()
+    generateResultStub.throws()
+    generateResultStub.withArgs(report, { styles: STYLES }).resolves(RESULT)
+  }
+
   function getInstance() {
     const em = {
       transactional: transactionalStub,
       findOne: findOneStub,
       populate: populateStub,
+      findOneOrFail: findOneOrFailStub,
     } as unknown as SqlEntityManager
 
     const spaceReportService = {

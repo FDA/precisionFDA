@@ -4,8 +4,8 @@ import { Job } from '@shared/domain/job/job.entity'
 import { NodeProperty } from '@shared/domain/property/node-property.entity'
 import { Tagging } from '@shared/domain/tagging/tagging.entity'
 import { Asset } from '@shared/domain/user-file/asset.entity'
+import { EntityScope, SCOPE } from '../../types/common'
 import { User } from '../user/user.entity'
-import { SCOPE } from '../../types/common'
 import { Folder } from './folder.entity'
 import { UserFile } from './user-file.entity'
 
@@ -55,7 +55,7 @@ interface IFileOrAsset {
   uid: string
   project: string
   name: string
-  scope: SCOPE
+  scope: EntityScope
   state: string
   fileSize?: number
   user: Ref<User>

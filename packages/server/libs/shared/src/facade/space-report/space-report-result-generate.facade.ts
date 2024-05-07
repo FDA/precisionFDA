@@ -5,11 +5,13 @@ import { EntityProvenanceService } from '@shared/domain/provenance/service/entit
 import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
 import { SpaceReport } from '@shared/domain/space-report/entity/space-report.entity'
 import { SpaceReportService } from '@shared/domain/space-report/service/space-report.service'
+import { Space } from '@shared/domain/space/space.entity'
 import { getProjectDxid } from '@shared/domain/space/space.helper'
 import { UserFileService } from '@shared/domain/user-file/service/user-file.service'
 import { InvalidStateError, NotFoundError } from '@shared/errors'
 import { UserFileCreateFacade } from '@shared/facade/file-create/user-file-create.facade'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
+import { EntityScopeUtils } from '@shared/utils/entity-scope.utils'
 
 @Injectable()
 export class SpaceReportResultGenerateFacade {
@@ -42,29 +44,19 @@ export class SpaceReportResultGenerateFacade {
         return report
       }
 
-      await this.em.populate(report, ['reportParts', 'space', 'createdBy'])
+      await this.em.populate(report, ['reportParts', 'createdBy'])
 
-      const reportResult = await this.getReportResult(report)
-
-      const membership = await this.em.findOne(SpaceMembership, {
-        spaces: report.space.id,
-        user: report.createdBy.id,
-        active: true,
-      })
-
-      if (membership == null) {
-        throw new NotFoundError(
-          `The report creator with id "${report.createdBy.id}" no longer has an active membership in space id "${report.space.id}"`,
-        )
-      }
+      const space = EntityScopeUtils.isSpaceScope(report.scope)
+        ? await this.em.findOneOrFail(Space, EntityScopeUtils.getSpaceIdFromScope(report.scope))
+        : null
 
       const file = await this.userFileCreateFacade.createFileWithContent(
         {
-          scope: report.space.scope,
-          project: getProjectDxid(report.space, membership),
-          name: this.getName(report),
-          content: reportResult,
-          description: this.getDescription(report),
+          scope: report.scope,
+          project: await this.getProjectDxid(report, space),
+          name: this.getName(report, space),
+          content: await this.getReportResult(report),
+          description: await this.getDescription(report, space),
         },
         false,
       )
@@ -90,16 +82,46 @@ export class SpaceReportResultGenerateFacade {
     return report
   }
 
-  private getName(report: SpaceReport) {
-    const createdAt = report.createdAt.toLocaleDateString()
-    const extension = report.format.toLowerCase()
+  private async getProjectDxid(report: SpaceReport, space?: Space) {
+    if (!space) {
+      return report.createdBy.getEntity().privateFilesProject
+    }
 
-    return `PFDA - Space ${report.space.id} report - ${createdAt}.${extension}`
+    const membership = await this.em.findOne(SpaceMembership, {
+      spaces: space.id,
+      user: report.createdBy.id,
+      active: true,
+    })
+
+    if (membership == null) {
+      throw new NotFoundError(
+        `The report creator with id "${report.createdBy.id}" no longer has an active membership in space id "${space.id}"`,
+      )
+    }
+
+    return getProjectDxid(space, membership)
   }
 
-  private getDescription(report: SpaceReport) {
+  private getName(report: SpaceReport, space?: Space) {
+    const createdAt = report.createdAt.toLocaleDateString()
+    const extension = report.format.toLowerCase()
+    const spaceTitle = space
+      ? `Space ${space.id}`
+      : `Private area (${report.createdBy.getEntity().fullName})`
+
+    return `PFDA - ${spaceTitle} report - ${createdAt}.${extension}`
+  }
+
+  private async getDescription(report: SpaceReport, space?: Space) {
     const generated = new Date(report.createdAt).toLocaleString()
-    return `Report of a precisionFDA space ${report.space.name}, generatad on ${generated}`
+
+    if (space) {
+      return `Report of a precisionFDA space ${space.name}, generated on ${generated}`
+    }
+
+    return `Report of precisionFDA private area of user ${
+      report.createdBy.getEntity().fullName
+    }, generated on ${generated}`
   }
 
   private async getReportResult(report: SpaceReport): Promise<string> {

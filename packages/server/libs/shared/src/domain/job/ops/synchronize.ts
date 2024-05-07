@@ -1,21 +1,15 @@
 import { wrap } from '@mikro-orm/core'
+import { SqlEntityManager } from '@mikro-orm/mysql'
 import { EmailSendOperation } from '@shared/domain/email/ops/email-send'
 import { RequestTerminateJobOperation } from '@shared/domain/job/ops/terminate'
+import { NotificationService } from '@shared/domain/notification/services/notification.service'
+import { Tagging } from '@shared/domain/tagging/tagging.entity'
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { ClientRequestError } from '@shared/errors'
 import { JobDescribeResponse } from '@shared/platform-client/platform-client.responses'
-import { CheckStatusJob, TASK_TYPE } from '../../../queue/task.input'
-import { WorkerBaseOperation } from '../../../utils/base-operation'
-import { Job } from '../job.entity'
-import { Tagging } from '@shared/domain/tagging/tagging.entity'
-import { UserFile } from '@shared/domain/user-file/user-file.entity'
-import {
-  buildIsOverMaxDuration,
-  isStateActive,
-  isStateTerminal,
-  sendJobFailedEmails,
-  shouldSyncStatus,
-} from '../job.helper'
+import { EntityScope } from '@shared/types/common'
+import { NOTIFICATION_ACTION, SEVERITY } from '../../../enums'
 import { PlatformClient } from '../../../platform-client'
 import {
   createSendEmailTask,
@@ -24,19 +18,25 @@ import {
   removeFromEmailQueue,
   removeRepeatable,
 } from '../../../queue'
+import { CheckStatusJob, TASK_TYPE } from '../../../queue/task.input'
 import type { Maybe, UserOpsCtx } from '../../../types'
-import { createJobClosed } from '../../event/event.helper'
+import { WorkerBaseOperation } from '../../../utils/base-operation'
+import { EMAIL_TYPES, EmailSendInput } from '../../email/email.config'
+import { buildEmailTemplate } from '../../email/email.helper'
 import {
   JobStaleInputTemplate,
   jobStaleTemplate,
 } from '../../email/templates/mjml/job-stale.handler'
-import { buildEmailTemplate } from '../../email/email.helper'
-import { EmailSendInput, EMAIL_TYPES } from '../../email/email.config'
+import { createJobClosed } from '../../event/event.helper'
+import { Job } from '../job.entity'
 import { JOB_STATE } from '../job.enum'
-import { NOTIFICATION_ACTION, SEVERITY } from '../../../enums'
-import { SqlEntityManager } from '@mikro-orm/mysql'
-import { NotificationService } from '@shared/domain/notification/services/notification.service'
-import { SCOPE } from '@shared/types/common'
+import {
+  buildIsOverMaxDuration,
+  isStateActive,
+  isStateTerminal,
+  sendJobFailedEmails,
+  shouldSyncStatus,
+} from '../job.helper'
 
 /**
  * Checks job status if notifications should be triggered.
@@ -357,7 +357,7 @@ export class SyncJobOperation extends WorkerBaseOperation<
     removeFromEmailQueue(jobId)
   }
 
-  private async releaseFilesLockedByJob(em: SqlEntityManager, jobDxid: string, scope: SCOPE) {
+  private async releaseFilesLockedByJob(em: SqlEntityManager, jobDxid: string, scope: EntityScope) {
     // release files if they are locked by this job
     // e.g locked by jupyterlab
     const lockedKey = `notebook-locked-by-${jobDxid}`

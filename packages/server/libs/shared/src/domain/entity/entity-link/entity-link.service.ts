@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common'
-import { entityTypeToEntityMap } from '@shared/domain/entity/domain/entity-type-to-entity.map'
+import { EntityInstance } from '@shared/domain/entity/domain/entity-instance'
 import { EntityType } from '@shared/domain/entity/domain/entity.type'
 import { EntityLinkProvider } from '@shared/domain/entity/entity-link/entity-link.provider'
 import { ENTITY_TYPE_TO_LINK_PROVIDER_MAP } from '@shared/domain/entity/entity-link/provider/entity-type-to-link-provider-map.provider'
@@ -12,7 +12,7 @@ export class EntityLinkService {
     private readonly entityTypeToLinkProviderMap: { [T in EntityType]: EntityLinkProvider<T> },
   ) {}
 
-  getLink<T extends EntityType>(entity: InstanceType<(typeof entityTypeToEntityMap)[T]>) {
+  getLink<T extends EntityType>(entity: EntityInstance<T>) {
     const entityType = EntityUtils.getEntityTypeForEntity(entity)
     const linkProvider = this.entityTypeToLinkProviderMap[entityType]
 

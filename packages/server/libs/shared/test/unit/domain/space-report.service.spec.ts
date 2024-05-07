@@ -27,7 +27,7 @@ describe('SpaceReportService', () => {
     const USER = { id: USER_ID } as unknown as UserContext
 
     const SPACE_ID = 10
-    const SPACE_SCOPE = 'space scope'
+    const SPACE_SCOPE = `space-${SPACE_ID}`
     const SPACE = { id: SPACE_ID, scope: SPACE_SCOPE }
 
     const FILE_1_ID = 100
@@ -128,15 +128,15 @@ describe('SpaceReportService', () => {
       restore()
     })
 
-    it('should reject if no space id provided', async () => {
-      await expect(getInstance().createReport(null, { format: 'HTML' })).to.be.rejectedWith(
+    it('should reject if no scope id provided', async () => {
+      await expect(getInstance().createReport({ format: 'HTML' })).to.be.rejectedWith(
         InvalidStateError,
-        'Space id is required for creating a report',
+        'Scope is required for creating a report',
       )
     })
 
     it('should run under transaction', async () => {
-      await getInstance().createReport(SPACE_ID, { format: 'HTML' })
+      await getInstance().createReport({ format: 'HTML', scope: SPACE_SCOPE })
 
       expect(transactionalStub.calledOnce).to.be.true()
     })
@@ -145,17 +145,24 @@ describe('SpaceReportService', () => {
       getResultStub.reset()
       getResultStub.resolves([])
 
-      await expect(getInstance().createReport(SPACE_ID, { format: 'HTML' })).to.be.rejectedWith(
-        NotFoundError,
-        'Space not found',
-      )
+      await expect(
+        getInstance().createReport({
+          format: 'HTML',
+          scope: SPACE_SCOPE,
+        }),
+      ).to.be.rejectedWith(NotFoundError, 'Space not found')
     })
 
     it('should reject if no report parts', async () => {
       createPartsStub.reset()
       createPartsStub.resolves([])
 
-      await expect(getInstance().createReport(SPACE_ID, { format: 'HTML' })).to.be.rejectedWith(
+      await expect(
+        getInstance().createReport({
+          format: 'HTML',
+          scope: SPACE_SCOPE,
+        }),
+      ).to.be.rejectedWith(
         InvalidStateError,
         'Report not generated: No entities to report on in this space',
       )
@@ -166,9 +173,12 @@ describe('SpaceReportService', () => {
       createQueryBuilderStub.reset()
       createQueryBuilderStub.throws(error)
 
-      await expect(getInstance().createReport(SPACE_ID, { format: 'HTML' })).to.be.rejectedWith(
-        error,
-      )
+      await expect(
+        getInstance().createReport({
+          format: 'HTML',
+          scope: SPACE_SCOPE,
+        }),
+      ).to.be.rejectedWith(error)
     })
 
     it('should not catch error from transactional', async () => {
@@ -176,9 +186,12 @@ describe('SpaceReportService', () => {
       transactionalStub.reset()
       transactionalStub.throws(error)
 
-      await expect(getInstance().createReport(SPACE_ID, { format: 'HTML' })).to.be.rejectedWith(
-        error,
-      )
+      await expect(
+        getInstance().createReport({
+          format: 'HTML',
+          scope: SPACE_SCOPE,
+        }),
+      ).to.be.rejectedWith(error)
     })
 
     it('should not catch error from joinAndSelectedMembership', async () => {
@@ -186,9 +199,12 @@ describe('SpaceReportService', () => {
       joinAndSelectedMembershipStub.reset()
       joinAndSelectedMembershipStub.throws(error)
 
-      await expect(getInstance().createReport(SPACE_ID, { format: 'HTML' })).to.be.rejectedWith(
-        error,
-      )
+      await expect(
+        getInstance().createReport({
+          format: 'HTML',
+          scope: SPACE_SCOPE,
+        }),
+      ).to.be.rejectedWith(error)
     })
 
     it('should not catch error from joinAndSelectUser', async () => {
@@ -196,9 +212,12 @@ describe('SpaceReportService', () => {
       joinAndSelectUserStub.reset()
       joinAndSelectUserStub.throws(error)
 
-      await expect(getInstance().createReport(SPACE_ID, { format: 'HTML' })).to.be.rejectedWith(
-        error,
-      )
+      await expect(
+        getInstance().createReport({
+          format: 'HTML',
+          scope: SPACE_SCOPE,
+        }),
+      ).to.be.rejectedWith(error)
     })
 
     it('should not catch error from where', async () => {
@@ -206,9 +225,12 @@ describe('SpaceReportService', () => {
       whereStub.reset()
       whereStub.throws(error)
 
-      await expect(getInstance().createReport(SPACE_ID, { format: 'HTML' })).to.be.rejectedWith(
-        error,
-      )
+      await expect(
+        getInstance().createReport({
+          format: 'HTML',
+          scope: SPACE_SCOPE,
+        }),
+      ).to.be.rejectedWith(error)
     })
 
     it('should not catch error from getResult', async () => {
@@ -216,9 +238,12 @@ describe('SpaceReportService', () => {
       getResultStub.reset()
       getResultStub.throws(error)
 
-      await expect(getInstance().createReport(SPACE_ID, { format: 'HTML' })).to.be.rejectedWith(
-        error,
-      )
+      await expect(
+        getInstance().createReport({
+          format: 'HTML',
+          scope: SPACE_SCOPE,
+        }),
+      ).to.be.rejectedWith(error)
     })
 
     it('should not catch error from find', async () => {
@@ -226,9 +251,12 @@ describe('SpaceReportService', () => {
       findStub.reset()
       findStub.throws(error)
 
-      await expect(getInstance().createReport(SPACE_ID, { format: 'HTML' })).to.be.rejectedWith(
-        error,
-      )
+      await expect(
+        getInstance().createReport({
+          format: 'HTML',
+          scope: SPACE_SCOPE,
+        }),
+      ).to.be.rejectedWith(error)
     })
 
     it('should not catch error from createParts', async () => {
@@ -236,9 +264,12 @@ describe('SpaceReportService', () => {
       createPartsStub.reset()
       createPartsStub.throws(error)
 
-      await expect(getInstance().createReport(SPACE_ID, { format: 'HTML' })).to.be.rejectedWith(
-        error,
-      )
+      await expect(
+        getInstance().createReport({
+          format: 'HTML',
+          scope: SPACE_SCOPE,
+        }),
+      ).to.be.rejectedWith(error)
     })
 
     it('should not catch error from persist', async () => {
@@ -246,28 +277,50 @@ describe('SpaceReportService', () => {
       persistStub.reset()
       persistStub.throws(error)
 
-      await expect(getInstance().createReport(SPACE_ID, { format: 'HTML' })).to.be.rejectedWith(
-        error,
-      )
+      await expect(
+        getInstance().createReport({
+          format: 'HTML',
+          scope: SPACE_SCOPE,
+        }),
+      ).to.be.rejectedWith(error)
     })
 
     it('should persist new space report', async () => {
-      await getInstance().createReport(SPACE_ID, { format: 'HTML' })
+      await getInstance().createReport({ format: 'HTML', scope: SPACE_SCOPE })
 
       expect(persistStub.calledOnce).to.be.true()
 
       const persistedReport = persistStub.getCall(0).args[0]
-      assertReport(persistedReport)
+      assertReport(persistedReport, SPACE_SCOPE)
     })
 
     it('should return new space report', async () => {
-      const res = await getInstance().createReport(SPACE_ID, { format: 'HTML' })
+      const res = await getInstance().createReport({ format: 'HTML', scope: SPACE_SCOPE })
 
-      assertReport(res)
+      assertReport(res, SPACE_SCOPE)
     })
 
-    function assertReport(report: SpaceReport) {
-      expect(report.space).to.eq(SPACE)
+    it('should return new space report for private', async () => {
+      createQueryBuilderStub.reset()
+      createQueryBuilderStub.throws()
+
+      findStub.reset()
+      findStub.throws()
+      findStub.withArgs(UserFile, { scope: 'private', user: USER_ID }).resolves(FILES)
+      findStub.withArgs(App, { scope: 'private', user: USER_ID }).resolves([APP])
+      findStub.withArgs(Job, { scope: 'private', user: USER_ID }).resolves([])
+      findStub.withArgs(Asset, { scope: 'private', user: USER_ID }).resolves([])
+      findStub.withArgs(Workflow, { scope: 'private', user: USER_ID }).resolves([])
+      findStub.withArgs(Discussion, { note: { scope: 'private', user: USER_ID } }).resolves([])
+      findStub.withArgs(User, USER_ID).resolves([])
+
+      const res = await getInstance().createReport({ format: 'HTML', scope: 'private' })
+
+      assertReport(res, 'private')
+    })
+
+    function assertReport(report: SpaceReport, scope: string) {
+      expect(report.scope).to.eq(scope)
       expect(report.state).to.eq('CREATED')
       expect(report.resultFile).to.be.undefined()
       expect(report.createdBy).to.eq(USER)
@@ -354,12 +407,13 @@ describe('SpaceReportService', () => {
       )
     }
   })
-  describe('#getReportsForSpace', () => {
+  describe('#getReportsForScope', () => {
     const USER_ID = 0
     const USER = { id: USER_ID } as unknown as UserContext
 
     const SPACE_ID = 10
-    const SPACE = { id: SPACE_ID }
+    const SPACE_SCOPE = `space-${SPACE_ID}`
+    const SPACE = { id: SPACE_ID, scope: SPACE_SCOPE }
 
     const REPORT_1_ID = 100
     const REPORT_1_CREATED = 'report 1 created'
@@ -434,7 +488,7 @@ describe('SpaceReportService', () => {
       findStub
         .withArgs(
           SpaceReport,
-          { space: SPACE },
+          { scope: SPACE_SCOPE },
           {
             orderBy: { createdAt: QueryOrder.desc },
             populate: ['resultFile'],
@@ -444,7 +498,7 @@ describe('SpaceReportService', () => {
     })
 
     it('should run under transaction', async () => {
-      await getInstance().getReportsForSpace(SPACE_ID)
+      await getInstance().getReportsForScope(SPACE_SCOPE)
 
       expect(transactionalStub.calledOnce).to.be.true()
     })
@@ -453,7 +507,7 @@ describe('SpaceReportService', () => {
       getResultStub.reset()
       getResultStub.resolves([])
 
-      await expect(getInstance().getReportsForSpace(SPACE_ID)).to.be.rejectedWith(
+      await expect(getInstance().getReportsForScope(SPACE_SCOPE)).to.be.rejectedWith(
         NotFoundError,
         'Space not found',
       )
@@ -464,7 +518,7 @@ describe('SpaceReportService', () => {
       createQueryBuilderStub.reset()
       createQueryBuilderStub.throws(error)
 
-      await expect(getInstance().getReportsForSpace(SPACE_ID)).to.be.rejectedWith(error)
+      await expect(getInstance().getReportsForScope(SPACE_SCOPE)).to.be.rejectedWith(error)
     })
 
     it('should not catch error from transactional', async () => {
@@ -472,7 +526,7 @@ describe('SpaceReportService', () => {
       transactionalStub.reset()
       transactionalStub.throws(error)
 
-      await expect(getInstance().getReportsForSpace(SPACE_ID)).to.be.rejectedWith(error)
+      await expect(getInstance().getReportsForScope(SPACE_SCOPE)).to.be.rejectedWith(error)
     })
 
     it('should not catch error from joinAndSelectedMembership', async () => {
@@ -480,7 +534,7 @@ describe('SpaceReportService', () => {
       joinAndSelectedMembershipStub.reset()
       joinAndSelectedMembershipStub.throws(error)
 
-      await expect(getInstance().getReportsForSpace(SPACE_ID)).to.be.rejectedWith(error)
+      await expect(getInstance().getReportsForScope(SPACE_SCOPE)).to.be.rejectedWith(error)
     })
 
     it('should not catch error from joinAndSelectUser', async () => {
@@ -488,7 +542,7 @@ describe('SpaceReportService', () => {
       joinAndSelectUserStub.reset()
       joinAndSelectUserStub.throws(error)
 
-      await expect(getInstance().getReportsForSpace(SPACE_ID)).to.be.rejectedWith(error)
+      await expect(getInstance().getReportsForScope(SPACE_SCOPE)).to.be.rejectedWith(error)
     })
 
     it('should not catch error from where', async () => {
@@ -496,7 +550,7 @@ describe('SpaceReportService', () => {
       whereStub.reset()
       whereStub.throws(error)
 
-      await expect(getInstance().getReportsForSpace(SPACE_ID)).to.be.rejectedWith(error)
+      await expect(getInstance().getReportsForScope(SPACE_SCOPE)).to.be.rejectedWith(error)
     })
 
     it('should not catch error from getResult', async () => {
@@ -504,7 +558,7 @@ describe('SpaceReportService', () => {
       getResultStub.reset()
       getResultStub.throws(error)
 
-      await expect(getInstance().getReportsForSpace(SPACE_ID)).to.be.rejectedWith(error)
+      await expect(getInstance().getReportsForScope(SPACE_SCOPE)).to.be.rejectedWith(error)
     })
 
     it('should not catch error from find', async () => {
@@ -512,11 +566,11 @@ describe('SpaceReportService', () => {
       findStub.reset()
       findStub.throws(error)
 
-      await expect(getInstance().getReportsForSpace(SPACE_ID)).to.be.rejectedWith(error)
+      await expect(getInstance().getReportsForScope(SPACE_SCOPE)).to.be.rejectedWith(error)
     })
 
     it('should return correct data', async () => {
-      const res = await getInstance().getReportsForSpace(SPACE_ID)
+      const res = await getInstance().getReportsForScope(SPACE_SCOPE)
 
       expect(res).to.deep.eq([
         {
@@ -532,6 +586,36 @@ describe('SpaceReportService', () => {
           state: REPORT_2_STATE,
           resultFile: REPORT_2_RESULT_FILE,
           format: REPORT_2_FORMAT,
+        },
+      ])
+    })
+
+    it('should return correct data for private', async () => {
+      createQueryBuilderStub.reset()
+      createQueryBuilderStub.throws()
+
+      findStub.reset()
+      findStub.throws()
+      findStub
+        .withArgs(
+          SpaceReport,
+          { scope: 'private', createdBy: USER_ID },
+          {
+            orderBy: { createdAt: QueryOrder.desc },
+            populate: ['resultFile'],
+          },
+        )
+        .resolves([REPORT_1])
+
+      const res = await getInstance().getReportsForScope('private')
+
+      expect(res).to.deep.eq([
+        {
+          id: REPORT_1_ID,
+          createdAt: REPORT_1_CREATED,
+          state: REPORT_1_STATE,
+          resultFile: REPORT_1_RESULT_FILE,
+          format: REPORT_1_FORMAT,
         },
       ])
     })
@@ -935,9 +1019,7 @@ describe('SpaceReportService', () => {
     beforeEach(() => {
       findOneOrFailStub.reset()
       findOneOrFailStub.throws()
-      findOneOrFailStub
-        .withArgs(SpaceReport, { resultFile: { uid: FILE_UID } }, { populate: ['space'] })
-        .returns(REPORT)
+      findOneOrFailStub.withArgs(SpaceReport, { resultFile: { uid: FILE_UID } }).returns(REPORT)
 
       transactionalStub.reset()
       transactionalStub.callsArg(0)
@@ -948,11 +1030,11 @@ describe('SpaceReportService', () => {
         .withArgs({
           severity: SEVERITY.INFO,
           userId: CREATOR_ID,
-          message: `Report of space "space name" successfully generated`,
+          message: 'Report of your private area has been successfully generated',
           action: NOTIFICATION_ACTION.SPACE_REPORT_DONE,
           meta: {
             linkTitle: 'Go to Reports',
-            linkUrl: `/spaces/0/reports`,
+            linkUrl: '/home/reports',
           },
         })
         .resolves()

@@ -1,3 +1,4 @@
+import { EntityInstance } from '@shared/domain/entity/domain/entity-instance'
 import { entityTypeToEntityMap } from '@shared/domain/entity/domain/entity-type-to-entity.map'
 import { EntityType } from '@shared/domain/entity/domain/entity.type'
 import { Extends } from '@shared/utils/types/extends'
@@ -7,12 +8,10 @@ type NamedEntityType = Extends<
   EntityType,
   'app' | 'asset' | 'comparison' | 'file' | 'job' | 'user' | 'workflow' | 'resource'
 >
-type NamedEntity = InstanceType<(typeof entityTypeToEntityMap)[NamedEntityType]>
+type NamedEntity = EntityInstance<NamedEntityType>
 
 export class EntityUtils {
-  static getEntityTypeForEntity<T extends EntityType>(
-    entity: InstanceType<(typeof entityTypeToEntityMap)[T]>,
-  ): T {
+  static getEntityTypeForEntity<T extends EntityType>(entity: EntityInstance<T>): T {
     const entityType: T = Object.keys(entityTypeToEntityMap).find(
       (entityType) => entity instanceof entityTypeToEntityMap[entityType],
     ) as T
@@ -25,10 +24,7 @@ export class EntityUtils {
   }
 
   private static entityTypeToNameKeyMap: {
-    [T in NamedEntityType]: PropertyKeysOfType<
-      InstanceType<(typeof entityTypeToEntityMap)[T]>,
-      string
-    >
+    [T in NamedEntityType]: PropertyKeysOfType<EntityInstance<T>, string>
   } = {
     app: 'title',
     asset: 'name',

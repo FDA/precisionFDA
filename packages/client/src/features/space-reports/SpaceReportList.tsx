@@ -64,7 +64,7 @@ const SpaceReportListTable = ({
   )
 }
 
-export const SpaceReportList = ({ spaceId }: { spaceId: number }) => {
+export const SpaceReportList = ({ scope }: { scope: string }) => {
   const {
     query,
     selectedIndexes,
@@ -73,8 +73,8 @@ export const SpaceReportList = ({ spaceId }: { spaceId: number }) => {
     colWidths,
     resetSelected,
   } = useList<ListType>({
-    fetchList: async (filters: IFilter[], params: { spaceId: string }) => {
-      const reports = await fetchReports(params.spaceId)
+    fetchList: async (filters: IFilter[], params: { scope: string }) => {
+      const reports = await fetchReports(params.scope)
 
       return {
         reports,
@@ -82,7 +82,7 @@ export const SpaceReportList = ({ spaceId }: { spaceId: number }) => {
       }
     },
     resource: 'space-reports',
-    params: { spaceId: String(spaceId) },
+    params: { scope },
   })
 
   const client = useQueryClient()
@@ -98,7 +98,7 @@ export const SpaceReportList = ({ spaceId }: { spaceId: number }) => {
     if ([NOTIFICATION_ACTION.SPACE_REPORT_DONE, NOTIFICATION_ACTION.SPACE_REPORT_ERROR].includes(notification?.action)) {
       query.refetch()
     }
-    client.invalidateQueries({ queryKey: ['space', String(spaceId)] })
+    client.invalidateQueries({ queryKey: ['space', scope]})
   }, [notification])
 
   const selectedItems = getSelectedObjectsFromIndexes<number, ISpaceReport>(
@@ -107,7 +107,7 @@ export const SpaceReportList = ({ spaceId }: { spaceId: number }) => {
   )
 
   const actions = userReportSelectActions({
-    spaceId,
+    scope,
     selectedItems,
     resetSelected,
   })
@@ -116,7 +116,7 @@ export const SpaceReportList = ({ spaceId }: { spaceId: number }) => {
     modalComp: generateModal,
     setShowModal: setGenerateModal,
   } = useGenerateSpaceReportModal({
-    spaceId,
+    scope,
     onClose: () => {
       query.refetch()
     },
