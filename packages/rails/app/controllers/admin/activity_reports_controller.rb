@@ -1,5 +1,6 @@
 module Admin
   class ActivityReportsController < BaseController
+    layout "application"
 
     def index
       js other_data: other_data

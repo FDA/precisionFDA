@@ -748,6 +748,14 @@ class HttpsAppsClient # rubocop:disable Metrics/ClassLength
   # │                          │
   # └──────────────────────────┘
 
+  def admin_stats
+    request(
+      "/admin/stats",
+      {},
+      Net::HTTP::Get::METHOD,
+    )
+  end
+
   def users_list(page, per_page, order_by, order_dir, filters)
     pagination_args = {}
     pagination_args[:page] = page if page

@@ -1,6 +1,7 @@
 module Admin
   # Responsible for organization-related requests actions.
   class OrgRequestsController < BaseController
+    layout "application"
     before_action :find_request, only: %i(approve)
 
     # List of action requests.

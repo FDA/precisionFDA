@@ -12,9 +12,9 @@ Rails.application.routes.draw do
   scope(format: false) do
     get "/admin/news" => "main#news"
     get "/admin/news/:id/edit" => "main#news"
-    
+
     namespace(:admin) do
-      root "dashboard#index"
+      root "base#index"
       get "/alerts" => "base#alerts"
 
       resources :activity_reports, only: [:index] do
@@ -40,6 +40,7 @@ Rails.application.routes.draw do
         post :update_custom_range, on: :collection
       end
 
+      get "stats", to: "base#stats"
       get "users", to: "users#index"
       get "users_list", to: "users#list"
       get "all_users", to: "users#all_users"
@@ -554,7 +555,6 @@ Rails.application.routes.draw do
     post "profile/provision_user", to: "profile#provision_user", as: "provision_user"
     get "profile/provision_org", to: "profile#provision_org"
     post "profile/provision_org", to: "profile#provision_org", as: "provision_org"
-    post "profile/run_report", to: "profile#run_report", as: "run_report"
     post "profile/check_spaces_permissions", to: "profile#check_spaces_permissions", as: "check_spaces_permissions"
 
     resources :apps do

@@ -101,7 +101,7 @@ export const UserMenu = ({
     <StyledDivider />
     {userCanAdministerSite && (
       <>
-        <StyledLink data-turbolinks="false" href="/admin">
+        <StyledLink as={Link} to="/admin" data-turbolinks="false">
           Admin Dashboard
         </StyledLink>
         <StyledDivider />

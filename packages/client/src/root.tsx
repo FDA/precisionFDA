@@ -23,9 +23,9 @@ import DataPortalRoutes from './features/data-portals/routes'
 import { LayoutLoader } from './layouts/UserLayout'
 import { ThemeProvider } from './utils/ThemeContext'
 import Header from './components/Header'
-import { AlertsPage } from './features/admin/alerts/AlertsPage'
 import { AlertDismissedProvider } from './features/admin/alerts/useAlertDismissedLocalStorage'
 
+const Admin = React.lazy(() => import('./features/admin'))
 const Home2 = React.lazy(() => import('./features/home'))
 const Docs = React.lazy(() => import('./features/docs'))
 const ChallengesList = React.lazy(
@@ -57,7 +57,6 @@ const ChallengeDetailsPage = React.lazy(
 const WorkflowRunPage = React.lazy(
   () => import('./features/workflows/run/WorkflowRun'),
 )
-const UsersList = React.lazy(() => import('./features/admin/users'))
 const EditNewsItemPage = React.lazy(() => import('./features/news/form/EditNewsItemPage'))
 const ListAdminNews = React.lazy(() => import('./features/news/ListAdminNews'))
 const ToS = React.lazy(() => import('./pages/ToS'))
@@ -106,6 +105,7 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <LandingPage /> },
       { path: 'about', element: <AboutPage /> },
+      { path: 'admin/*', element: <Admin /> },
       { path: 'docs/*', element: <Docs /> },
       { path: 'home/*', element: <Home2 /> },
       { path: 'account/notifications', element: <NotificationsPage /> },
@@ -122,8 +122,6 @@ const router = createBrowserRouter([
       { path: 'experts', element: <ExpertsListPage /> },
       { path: 'terms', element: <ToS /> },
       { path: 'security', element: <Security /> },
-      { path: 'admin/alerts', element: <AlertsPage /> },
-      { path: 'admin/users', element: <UsersList /> },
       { path: 'admin/news', element: <ListAdminNews /> },
       { path: 'admin/news/create', element: <CreateNewsItemPage /> },
       { path: 'admin/news/:id/edit', element: <EditNewsItemPage /> },
