@@ -18,7 +18,6 @@ class DataPortalParam {
   name: string
   description: string
   urlSlug: string
-  cardImageFileName: string
   content: string
   editorState: string
   hostLeadDxuser: string

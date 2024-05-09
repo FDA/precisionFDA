@@ -42,4 +42,3 @@ export const answerPutRequestSchema = discussionsPutRequestSchema.partial()
 export type AnswerPutReqBody = z.infer<typeof answerPutRequestSchema>
 
 export const answersPublishRequestSchema = discussionsPublishRequestSchema
-export type AnswersPublishReqBody = z.infer<typeof answersPublishRequestSchema>

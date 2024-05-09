@@ -48,7 +48,7 @@ void
     if (link.url) {
       log.verbose({ link }, 'ChallengeUpdateCardImageUrlOperation: Updating cardImageUrl')
       challenge.cardImageUrl = link.url
-      em.flush()
+      await em.flush()
     }
   }
 }

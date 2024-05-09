@@ -68,10 +68,6 @@ declare global {
         filters: Partial<MapValuesToReturnType<MapValuesToReturnType<MapValueObjectByKey<'parser', ConfigT['pagination']['filterSchema']>>>>
       }
     } : {})
-
-    export type Mdw = (...args: readonly any[]) => (ctx: Ctx, next: () => any) => Promise<any>
-
-    export type SyncMdw = (...args: readonly any[]) => (ctx: Ctx, next: () => any) => any
   }
 
   // TODO(samuel) remove unnecessary type

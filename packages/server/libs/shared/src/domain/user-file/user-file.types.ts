@@ -1,13 +1,8 @@
 import { Collection, Ref } from '@mikro-orm/core'
-import { Comparison } from '@shared/domain/comparison/comparison.entity'
-import { Job } from '@shared/domain/job/job.entity'
 import { NodeProperty } from '@shared/domain/property/node-property.entity'
 import { Tagging } from '@shared/domain/tagging/tagging.entity'
-import { Asset } from '@shared/domain/user-file/asset.entity'
 import { EntityScope, SCOPE } from '../../types/common'
 import { User } from '../user/user.entity'
-import { Folder } from './folder.entity'
-import { UserFile } from './user-file.entity'
 
 // File state from the platform
 enum FILE_STATE_DX {
@@ -44,8 +39,6 @@ enum PARENT_TYPE {
   COMPARISON = 'Comparison',
   NODE = 'Node',
 }
-
-type ParentEntity = User | Job | Asset | Comparison
 
 // IFileOrAsset is for methods that operate on UserFiles and Assets
 // but not all nodes (not Folders)
@@ -113,7 +106,6 @@ export {
   FILE_STATE_DX,
   FILE_ORIGIN_TYPE,
   PARENT_TYPE,
-  ParentEntity,
   FILE_STI_TYPE,
   IFileOrAsset,
   ITrackable,

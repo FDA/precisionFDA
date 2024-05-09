@@ -15,12 +15,6 @@ const queryRegistry = {
   scopeSpace: (spaceId: number) => {
     return { scope: getScopeFromSpaceId(spaceId) }
   },
-  scopeAccessibleByUser: (user: User) => {
-    return {
-      scope: { $or: [STATIC_SCOPE.PRIVATE, STATIC_SCOPE.PUBLIC, { $in: user.spaceUids }] },
-      user: user,
-    }
-  },
 }
 
 export const buildEntityQueryAndFilter = (input: FilterableQueryInput): [{}, {}] => {

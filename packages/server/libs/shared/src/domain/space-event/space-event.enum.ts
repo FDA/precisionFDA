@@ -68,20 +68,9 @@ enum SPACE_EVENT_ACTIVITY_TYPE {
   space_activated = 28,
 }
 
-enum EVENTS_MAPPING {
-  'app' = 'app_added',
-  'comparison' = 'comparison_added',
-  'file' = 'file_added',
-  'asset' = 'asset_added',
-  'job' = 'job_added',
-  'note' = 'note_added',
-  'workflow' = 'workflow_added',
-}
-
 export {
   PARENT_TYPE,
   ENTITY_TYPE,
   SPACE_EVENT_ACTIVITY_TYPE,
   SPACE_EVENT_OBJECT_TYPE,
-  EVENTS_MAPPING,
 }

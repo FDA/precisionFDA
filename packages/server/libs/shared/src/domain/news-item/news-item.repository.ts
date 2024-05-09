@@ -8,14 +8,6 @@ interface NewsFindPaginatedParams extends PaginationParams {
   type?: 'article' | 'publication'
 }
 
-// todo(samuel) find a way to unify
-// Duplicate from API package
-interface UserCtx {
-  id: number
-  accessToken: string
-  dxuser: string
-}
-
 export class NewsRepository extends EntityRepository<NewsItem> {
   async findPaginated(input: NewsFindPaginatedParams, orderBy: QBQueryOrderMap<NewsItem> = {}) {
     const qb = this.em.createQueryBuilder(NewsItem, 'e')
@@ -54,13 +46,5 @@ export class NewsRepository extends EntityRepository<NewsItem> {
         total_count: count
       }
     }
-  }
-
-  async findYears() {
-    const qb = this.em.createQueryBuilder(NewsItem, 'e');
-    const yearFragment = 'YEAR(`e`.created_at)'
-    return qb.select(yearFragment, true).orderBy({
-      [yearFragment]: -1
-    }).execute<{ year: number }[]>().then((newsList) => newsList.map((n) => n.year));
   }
 }

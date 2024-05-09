@@ -150,10 +150,4 @@ export class UserFileRepository extends EntityRepository<UserFile> {
       return file
     })
   }
-
-  createUserFileJobRefs(fileIds: number[], jobId: number) {
-    const qb = this.em.createQueryBuilder('job_inputs')
-    qb.insert(fileIds.map((fileId) => ({ user_file_id: fileId, job_id: jobId })))
-    return qb
-  }
 }

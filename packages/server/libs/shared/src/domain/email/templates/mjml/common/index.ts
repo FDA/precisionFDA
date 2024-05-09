@@ -51,10 +51,6 @@ const footer = `
 
 type IDType = string | number
 
-// entity involved, space route does not work
-const generateCommentLink = (commentId: IDType, spaceId: IDType): string =>
-  `${config.api.railsHost}/spaces/${spaceId.toString()}/discuss`
-
 const generateObjectCommentsLink = (tableName: IDType, objectUid: IDType): string =>
   `${config.api.railsHost}/${tableName}/${objectUid}/comments`
 
@@ -100,7 +96,6 @@ const getMiddleSpacer = (): string => '<mj-spacer height="10px" />'
 export {
   header,
   footer,
-  generateCommentLink,
   generateObjectCommentsLink,
   generateSpaceLink,
   generateJobDetailLink,

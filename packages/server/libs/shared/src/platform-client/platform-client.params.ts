@@ -135,10 +135,6 @@ type FileStatesParams = {
   projectDxid: string
 }
 
-type DescribeFilesParams = {
-  fileIds: string[]
-}
-
 type DescribeFoldersParams = {
   projectId: string
 }
@@ -282,7 +278,6 @@ export {
   DbClusterActionParams,
   DbClusterDescribeParams,
   DbClusterCreateParams,
-  DescribeFilesParams,
   OrgFindMembersParams,
   UserInviteToOrgParams,
   UserRemoveFromOrgParams,

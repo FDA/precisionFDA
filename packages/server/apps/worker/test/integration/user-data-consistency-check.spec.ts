@@ -79,21 +79,21 @@ describe('TASK: UserDataConsistencyReportOperation', () => {
 
   it('doesUserNeedFullCheckup returns true if it has not been run before', async () => {
     user1.lastDataCheckup = null
-    em.flush()
+    await em.flush()
     expect(UserDataConsistencyReportOperation.doesUserNeedFullCheckup(user1)).to.equal(true)
   })
 
   it('doesUserNeedFullCheckup returns true if checkup is overdue', async () => {
     const repeatMilliseconds = config.workerJobs.userDataConsistencyReport.repeatSeconds * 1000
     user1.lastDataCheckup = new Date(new Date().getTime() - repeatMilliseconds - 100)
-    em.flush()
+    await em.flush()
     expect(UserDataConsistencyReportOperation.doesUserNeedFullCheckup(user1)).to.equal(true)
   })
 
   it('doesUserNeedFullCheckup returns true if checkup is before due date', async () => {
     const repeatMilliseconds = config.workerJobs.userDataConsistencyReport.repeatSeconds * 1000
     user1.lastDataCheckup = new Date(new Date().getTime() - repeatMilliseconds + 100)
-    em.flush()
+    await em.flush()
     expect(UserDataConsistencyReportOperation.doesUserNeedFullCheckup(user1)).to.equal(false)
   })
 

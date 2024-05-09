@@ -123,11 +123,6 @@ const clearJobs = async (q: any, state: any, log: any): Promise<any> => {
   return jobs
 }
 
-const clearCompletedJobs = async (q: any, log: any): Promise<any> => {
-  return clearJobs(q, 'completed', log)
-}
-
-
 // For use in the worker
 // TODO - insert this into the maintanence queue on startup just like
 //        checking db clusters status

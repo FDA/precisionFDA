@@ -31,7 +31,6 @@ export enum ErrorCodes {
   PROJECT_NOT_FOUND = 'E_PROJECT_NOT_FOUND',
   FOLDER_NOT_FOUND = 'E_FOLDER_NOT_FOUND',
   USER_NOT_FOUND = 'E_USER_NOT_FOUND',
-  USER_INVALID_PERMISSIONS = 'E_USER_INVALID_PERMISSIONS',
   USER_FILE_NOT_FOUND = 'E_USER_FILE_NOT_FOUND',
   SPACE_NOT_FOUND = 'E_SPACE_NOT_FOUND',
   NEXUS_REQUEST_FAILED = 'E_DNANEXUS_PLATFORM_REQUEST_FAILED',
@@ -60,15 +59,6 @@ export class BaseError extends Error {
     Error.captureStackTrace(this, this.constructor)
     this.name = this.constructor.name
     this.props = props
-  }
-}
-
-export class WorkerError extends BaseError {
-  constructor(message = 'Error: Worker processing failed', props: MaybeBaseErrorProps = {}) {
-    super(message, {
-      code: ErrorCodes.WORKER,
-      ...props,
-    })
   }
 }
 

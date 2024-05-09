@@ -99,21 +99,6 @@ export type MapValueObjectByKey<
 // type TestMapValueObjectByKey1 = MapValueObjectByKey<'type', typeof mapValueObjectByKeySample1, 'DEFAULT'>
 // type TestMapValueObjectByKey2 = MapValueObjectByKey<'type', typeof mapValueObjectByKeySample2, 'DEFAULT'>
 
-export type MapTupleToReturnTypes<
-  T,
-  Result = T extends []
-    ? []
-    : T extends readonly [infer Head, ...infer Tail]
-      ? Head extends (...args: any[]) => any
-        ? [ReturnType<Head>, ...MapTupleToReturnTypes<Tail>]
-        : never
-      : T extends Array<infer ArrayElementT>
-        ? ArrayElementT extends (...args: any[]) => any
-          ? Array<ReturnType<ArrayElementT>>
-          : never
-        : never
-> = Result
-
 // ┌─────────────────────────────────────┐
 // │                                     │
 // │  Unit test "MapTupleToReturnTypes"  │
@@ -152,7 +137,7 @@ export type ResolveSchemaReturnTypes<
         ? {
           [key in keyof T]: ResolveSchemaReturnTypes<T[key]>
         }
-        : T 
+        : T
 > = Result
 
 // ┌────────────────────────────────────────┐

@@ -5,7 +5,7 @@ import { expect } from 'chai'
 import { EntityManager } from '@mikro-orm/mysql'
 import supertest from 'supertest'
 import { create, generate, db } from '@shared/test'
-import { fakes, mocksReset } from '@shared/test/mocks'
+import { mocksReset } from '@shared/test/mocks'
 import { testedApp } from '../../index'
 import { getDefaultHeaderData } from '../../utils/expect-helper'
 

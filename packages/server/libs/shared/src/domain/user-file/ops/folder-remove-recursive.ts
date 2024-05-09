@@ -41,7 +41,7 @@ number
       await validateProtectedSpaces(em, 'remove', this.ctx.user.id, existingFolder)
 
       // subfolders include "existingFolder"
-      const foldersInProject = await repo.findForSynchronization({
+      await repo.findForSynchronization({
         userId: this.ctx.user.id,
         projectDxid: existingFolder.project!,
       })

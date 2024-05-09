@@ -66,7 +66,7 @@ describe('AlertService tests', () => {
   })
 
   it('delete alert', async () => {
-    const alert = create.alertHelper.createFuture(em)
+    create.alertHelper.createFuture(em)
     const alert2 = create.alertHelper.createExpired(em)
     await em.flush()
     await alertService.delete(alert2.id)
