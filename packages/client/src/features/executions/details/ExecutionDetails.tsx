@@ -3,16 +3,13 @@ import React, { useEffect } from 'react'
 import { Link, useLocation, useParams } from 'react-router-dom'
 import useWebSocket from 'react-use-websocket'
 import { HomeLabel } from '../../../components/HomeLabel'
-import {
-  StyledTagItem,
-  StyledTags,
-  StyledPropertyItem,
-  StyledPropertyKey,
-} from '../../../components/Tags'
+import { StyledTab, StyledTabList, StyledTabPanel } from '../../../components/Tabs'
+import { StyledPropertyItem, StyledPropertyKey, StyledTagItem, StyledTags } from '../../../components/Tags'
+import { CogsIcon } from '../../../components/icons/Cogs'
 import { RESOURCE_LABELS } from '../../../types/user'
 import { DEFAULT_RECONNECT_ATTEMPTS, DEFAULT_RECONNECT_INTERVAL, SHOULD_RECONNECT, getNodeWsUrl } from '../../../utils/config'
 import { getBackPathNext } from '../../../utils/getBackPath'
-import { ActionsRow, StyledBackLink } from '../../home/home.styles'
+import { ActionsRow, StyledBackLink, StyledLink } from '../../home/home.styles'
 import {
   Header,
   HeaderLeft,
@@ -27,15 +24,13 @@ import {
   Title,
   Topbox,
 } from '../../home/show.styles'
-import { EmmitScope, NOTIFICATION_ACTION, Notification, HomeScope } from '../../home/types'
+import { EmmitScope, HomeScope, NOTIFICATION_ACTION, Notification } from '../../home/types'
 import { getBasePath } from '../../home/utils'
 import { ExecutionActionsRow } from '../ExecutionActionsRow'
 import { InputsAndOutputs } from '../InputsAndOutputs'
+import { StateCell } from '../StateCell'
 import { fetchExecution } from '../executions.api'
 import { FailureMessage, StyledExecutionState, TitleLeft } from './styles'
-import { CogsIcon } from '../../../components/icons/Cogs'
-import { StyledTab, StyledTabList, StyledTabPanel } from '../../../components/Tabs'
-import { StateCell } from '../StateCell'
 
 export const ExecutionDetails = ({
   emitScope,
@@ -51,10 +46,11 @@ export const ExecutionDetails = ({
 
   const { data, isLoading, refetch, isFetching } = useQuery({
     queryKey: ['execution', executionUid],
-    queryFn: () => fetchExecution(executionUid).then(d => {
-      if(emitScope) emitScope(d.job.scope, d.job.featured)
-      return d
-    }),
+    queryFn: () =>
+      fetchExecution(executionUid).then(d => {
+        if (emitScope) emitScope(d.job.scope, d.job.featured)
+        return d
+      }),
   })
   const queryCache = useQueryClient()
 
@@ -69,13 +65,17 @@ export const ExecutionDetails = ({
     if (notification == null) {
       return
     }
-    if ([NOTIFICATION_ACTION.JOB_RUNNABLE,
-         NOTIFICATION_ACTION.JOB_RUNNING,
-         NOTIFICATION_ACTION.JOB_INITIALIZING,
-         NOTIFICATION_ACTION.JOB_DONE,
-         NOTIFICATION_ACTION.JOB_FAILED,
-         NOTIFICATION_ACTION.JOB_OUTPUTS_SYNCED,
-         NOTIFICATION_ACTION.JOB_TERMINATED].includes(notification.action)) {
+    if (
+      [
+        NOTIFICATION_ACTION.JOB_RUNNABLE,
+        NOTIFICATION_ACTION.JOB_RUNNING,
+        NOTIFICATION_ACTION.JOB_INITIALIZING,
+        NOTIFICATION_ACTION.JOB_DONE,
+        NOTIFICATION_ACTION.JOB_FAILED,
+        NOTIFICATION_ACTION.JOB_OUTPUTS_SYNCED,
+        NOTIFICATION_ACTION.JOB_TERMINATED,
+      ].includes(notification.action)
+    ) {
       queryCache.invalidateQueries({
         queryKey: ['execution'],
       })
@@ -85,16 +85,14 @@ export const ExecutionDetails = ({
   const execution = data?.job
 
   if (isLoading) {
-    return <HomeLoader/>
+    return <HomeLoader />
   }
 
   if (!execution || !execution.id)
     return (
       <NotFound>
         <h1>Execution not found</h1>
-        <div>
-          Sorry, this execution does not exist or is not accessible by you.
-        </div>
+        <div>Sorry, this execution does not exist or is not accessible by you.</div>
       </NotFound>
     )
 
@@ -110,32 +108,23 @@ export const ExecutionDetails = ({
           <HeaderLeft>
             <TitleLeft>
               <Title data-testid="execution-name">
-                <CogsIcon height={18}/>
+                <CogsIcon height={18} />
                 {execution.name}
               </Title>
-              <StyledExecutionState><StateCell state={execution.state} /></StyledExecutionState>
+              <StyledExecutionState>
+                <StateCell state={execution.state} />
+              </StyledExecutionState>
               {execution?.failure_message && (
                 <FailureMessage>
                   {execution?.failure_reason}: {execution.failure_message}
                 </FailureMessage>
               )}
             </TitleLeft>
-            {execution.showLicensePending && (
-              <HomeLabel
-                value="License Pending Approval"
-                icon="fa-clock-o"
-                type="warning"
-              />
-            )}
+            {execution.showLicensePending && <HomeLabel value="License Pending Approval" icon="fa-clock-o" type="warning" />}
           </HeaderLeft>
           <HeaderRight>
             <ActionsRow>
-              <ExecutionActionsRow
-                homeScope={homeScope}
-                execution={execution}
-                refetch={refetch}
-                isFetching={isFetching}
-              />
+              <ExecutionActionsRow homeScope={homeScope} execution={execution} refetch={refetch} isFetching={isFetching} />
             </ActionsRow>
           </HeaderRight>
         </Header>
@@ -149,10 +138,7 @@ export const ExecutionDetails = ({
                   <a
                     target="_blank"
                     data-turbolinks="false"
-                    href={`/spaces/${execution.scope.replace(
-                      'space-',
-                      '',
-                    )}/executions`}
+                    href={`/spaces/${execution.scope.replace('space-', '')}/executions`}
                     rel="noreferrer"
                   >
                     {execution.location}
@@ -166,16 +152,17 @@ export const ExecutionDetails = ({
             </MetadataItem>
 
             <MetadataItem>
+              <MetadataKey>ID</MetadataKey>
+              <MetadataVal data-testid="execution-uid">{execution.uid}</MetadataVal>
+            </MetadataItem>
+
+            <MetadataItem>
               <MetadataKey>APP</MetadataKey>
               {/* TODO: do not rely on link to get app id */}
               <MetadataVal data-testid="execution-app">
-                <Link
-                  to={`${getBasePath(
-                    spaceId,
-                  )}/apps/${execution.links.app?.replace('/apps/', '')}`}
-                >
+                <StyledLink to={`${getBasePath(spaceId)}/apps/${execution.app_uid}`} disable={!execution.app_active}>
                   {execution.app_title}
-                </Link>
+                </StyledLink>
               </MetadataVal>
             </MetadataItem>
 
@@ -195,7 +182,9 @@ export const ExecutionDetails = ({
 
             <MetadataItem>
               <MetadataKey>Instance Type</MetadataKey>
-              <MetadataVal data-testid="execution-instance-type">{RESOURCE_LABELS[execution.instance_type] ?? execution.instance_type}</MetadataVal>
+              <MetadataVal data-testid="execution-instance-type">
+                {RESOURCE_LABELS[execution.instance_type] ?? execution.instance_type}
+              </MetadataVal>
             </MetadataItem>
           </MetadataRow>
           <MetadataRow>
@@ -231,22 +220,22 @@ export const ExecutionDetails = ({
           <MetadataSection data-testid="execution-properties">
             <MetadataRow>
               <MetadataItem>
-                  <MetadataKey>Properties</MetadataKey>
-                    <StyledTags>
-                      {Object.entries(execution.properties).map(([key, value]) => (
-                        <StyledPropertyItem key={key}>
-                          <StyledPropertyKey>{key}</StyledPropertyKey>
-                          <span>{value}</span>
-                        </StyledPropertyItem>
-                      ))}
-                    </StyledTags>
-                </MetadataItem>
+                <MetadataKey>Properties</MetadataKey>
+                <StyledTags>
+                  {Object.entries(execution.properties).map(([key, value]) => (
+                    <StyledPropertyItem key={key}>
+                      <StyledPropertyKey>{key}</StyledPropertyKey>
+                      <span>{value}</span>
+                    </StyledPropertyItem>
+                  ))}
+                </StyledTags>
+              </MetadataItem>
             </MetadataRow>
           </MetadataSection>
         )}
       </Topbox>
 
-      <div className="pfda-padded-t40"/>
+      <div className="pfda-padded-t40" />
 
       <StyledTabList>
         <StyledTab activeClassName="active" end>
@@ -254,10 +243,7 @@ export const ExecutionDetails = ({
         </StyledTab>
       </StyledTabList>
       <StyledTabPanel>
-        <InputsAndOutputs
-          runInputData={execution.run_input_data}
-          runOutputData={execution.run_output_data}
-        />
+        <InputsAndOutputs runInputData={execution.run_input_data} runOutputData={execution.run_output_data} />
       </StyledTabPanel>
     </>
   )

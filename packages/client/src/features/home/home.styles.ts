@@ -6,7 +6,6 @@ import { compactScrollBarV2 } from '../../components/Page/styles'
 import { Svg } from '../../components/icons/Svg'
 import { fontWeight } from '../../styles/theme'
 
-
 export const StyledBackLink = styled(BackLink)`
   margin: 16px 16px;
 `
@@ -70,31 +69,31 @@ export const StyledMenu = styled.div<{ $expanded: boolean }>`
   flex-direction: column;
   overflow: hidden;
 
-  ${({ $expanded }) => $expanded
-    ? css`
-      min-width: 228px;
-      max-width: 228px;
-      width: 228px;
-    `
-    : css`
-      width: 70px;
-      min-width: 70px;
-      max-width: 70px;
-    
-      ${MenuText} {
-        display: none;
-      }
-      
-      ${MenuItem} {
-        padding: 0;
-        justify-content: center;
-      }
-      ${Expand} {
-        justify-content: center;
-        padding: 18px 0;
-      }
-    `
-  }
+  ${({ $expanded }) =>
+    $expanded
+      ? css`
+          min-width: 228px;
+          max-width: 228px;
+          width: 228px;
+        `
+      : css`
+          width: 70px;
+          min-width: 70px;
+          max-width: 70px;
+
+          ${MenuText} {
+            display: none;
+          }
+
+          ${MenuItem} {
+            padding: 0;
+            justify-content: center;
+          }
+          ${Expand} {
+            justify-content: center;
+            padding: 18px 0;
+          }
+        `}
   border-right: solid 1px var(--c-layout-border);
   overflow: none;
 `
@@ -143,12 +142,12 @@ export const StyledNameCell = styled.div<{ color?: string }>`
   align-items: center;
   cursor: pointer;
   color: var(--c-link);
-  
+
   ${({ color }) =>
-    color && css`
+    color &&
+    css`
       color: ${color};
-    `
-  }
+    `}
 
   ${Svg} {
     margin-right: 7px;
@@ -157,7 +156,16 @@ export const StyledNameCell = styled.div<{ color?: string }>`
   min-width: max-content;
 `
 
-export const StyledLinkCell = styled(Link)`
+export const StyledLink = styled(Link)<{ disable?: boolean }>`
+  ${({ disable }) =>
+    disable &&
+    css`
+      pointer-events: none;
+      color: var(--c-text-400);
+    `}
+`
+
+export const StyledLinkCell = styled(StyledLink)`
   width: min-content;
   display: flex;
   align-items: center;
@@ -178,6 +186,4 @@ export const StyledRunByYouLink = styled.a`
   font-size: 12px;
 `
 
-export const StyledForm = styled.form`
-
-`
+export const StyledForm = styled.form``

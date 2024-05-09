@@ -210,8 +210,6 @@ class JobSerializer < ApplicationSerializer # rubocop:disable Metrics/ClassLengt
       # link to user who run a job - api_job_path
       links[:user] = user_path(object.user.dxuser)
       # TODO: (samuel) - fix properly by adding NOT NULL constraint on db column
-      # show job's app details page - api_app_path
-      links[:app] = app_path(object.app) if object.app
       # show job's workflow details page
       links[:workflow] =
         object.try(:analysis).try(:workflow) ? workflow_path(object.analysis.workflow) : "N/A"
@@ -233,22 +231,6 @@ class JobSerializer < ApplicationSerializer # rubocop:disable Metrics/ClassLengt
       if object.https? && object.running? && object.https_app_ready?
         # GET /api/jobs/:id/open_external
         links[:open_external] = open_external_api_job_path(object)
-      end
-
-      # this job's app single run
-      if object.in_space?
-        unless member_viewer? && !object.app.nil?
-          links[:run_job] = new_app_job_path(
-            # TODO: (samuel) - fix properly by adding NOT NULL constraint on db column
-            object.app&.app_series&.latest_version_app || object.app&.app_series&.latest_revision_app,
-          )
-          links[:space] = space_path
-        end
-      elsif !object.app.nil?
-        links[:run_job] = new_app_job_path(
-          # TODO: (samuel) - fix properly by adding NOT NULL constraint on db column
-          object.app&.app_series&.latest_version_app || object.app&.app_series&.latest_revision_app,
-        )
       end
 
       if logged_user.can_administer_site?
