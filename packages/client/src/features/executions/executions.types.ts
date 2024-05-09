@@ -1,7 +1,7 @@
 import { RESOURCE_LABELS } from '../../types/user'
-import { ServerScope } from '../home/types'
-import { FileOrg, FileUser } from '../apps/apps.types'
 import { RESOURCE_TYPES } from '../admin/users/types'
+import { FileOrg, FileUser } from '../apps/apps.types'
+import { ServerScope } from '../home/types'
 
 export enum ExecutionActions {
   'Run' = 'Run',
@@ -57,14 +57,12 @@ export interface RunDataUpdates {
 export interface Links2 {
   show: string
   user: string
-  app?: string
   workflow: string
   publish: string
   log: string
   track: string
   attach_to: string
   copy: string
-  run_job: string
 }
 
 export type JobState = 'done' | 'failed' | 'idle' | 'running' | 'runnable' | 'terminated' | 'terminating'

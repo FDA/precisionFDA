@@ -6,9 +6,9 @@ import { Button } from '../../components/Button'
 import Dropdown from '../../components/Dropdown'
 import { SyncIcon } from '../../components/icons/SyncIcon'
 import { getSpaceIdFromScope } from '../../utils'
+import { getBaseLink } from '../apps/run/utils'
 import { useAuthUser } from '../auth/useAuthUser'
 import { ActionsDropdownContent } from '../home/ActionDropdownContent'
-import { getBaseLink } from '../apps/run/utils'
 import { ActionsButton } from '../home/show.styles'
 import { HomeScope } from '../home/types'
 import { StyledRefresh, StyledStatusText } from './details/styles'
@@ -79,11 +79,11 @@ export const ExecutionActionsRow = ({
           Snapshot
         </Button>
       )}
-      <Link
-        to={`/${getBaseLink(getSpaceIdFromScope(execution.scope))}/apps/${execution.links.app?.replace('/apps/', '')}/jobs/new`}
-      >
-        <Button variant="primary">Re-Run Execution</Button>
-      </Link>
+      {execution.app_active && (
+        <Link to={`/${getBaseLink(getSpaceIdFromScope(execution.scope))}/apps/${execution.app_uid}/jobs/new`}>
+          <Button variant="primary">Re-Run Execution</Button>
+        </Link>
+      )}
       <Dropdown
         trigger="click"
         content={

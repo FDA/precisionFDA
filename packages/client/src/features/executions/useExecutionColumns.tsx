@@ -3,10 +3,7 @@ import React from 'react'
 import { useLocation } from 'react-router-dom'
 import { Column } from 'react-table'
 import { FeaturedToggle } from '../../components/FeaturedToggle'
-import {
-  DefaultColumnFilter,
-  SelectColumnFilter,
-} from '../../components/Table/filters'
+import { DefaultColumnFilter, SelectColumnFilter } from '../../components/Table/filters'
 import { StyledTagItem, StyledTags } from '../../components/Tags'
 import { BoltIcon } from '../../components/icons/BoltIcon'
 import { CogsIcon } from '../../components/icons/Cogs'
@@ -17,8 +14,8 @@ import { getSpaceIdFromScope } from '../../utils'
 import { StyledLinkCell } from '../home/home.styles'
 import { KeyVal } from '../home/types'
 import { getBasePath } from '../home/utils'
-import { IExecution } from './executions.types'
 import { StateCell } from './StateCell'
+import { IExecution } from './executions.types'
 
 export const useExecutionColumns = ({
   colWidths,
@@ -26,8 +23,8 @@ export const useExecutionColumns = ({
   filterDataTestIdPrefix,
   properties = [],
 }: {
-  colWidths?: KeyVal,
-  isAdmin?: boolean,
+  colWidths?: KeyVal
+  isAdmin?: boolean
   // TODO(samuel) add this into .d.ts to properly solve declaration merging
   filterDataTestIdPrefix?: string | undefined
   properties?: string[]
@@ -46,35 +43,35 @@ export const useExecutionColumns = ({
         const pathname = `${getBasePath(spaceId)}/${rowType}/${cell.row.original.uid}`
 
         return rowType === 'workflows' ? (
-            <StyledLinkCell to={pathname} state={{ from: location.pathname, fromSearch: location.search }}>
-              <BoltIcon width={14} height={14} />
-              {value}
-            </StyledLinkCell>
-          ) : (
-            <StyledLinkCell to={pathname} state={{ from: location.pathname, fromSearch: location.search }}>
-              <CogsIcon height={14} />
-              {value}
-            </StyledLinkCell>
-          )
-        },
-        ...(filterDataTestIdPrefix ? { filterDataTestId: `${filterDataTestIdPrefix}-execution-name` } : {}),
+          <StyledLinkCell to={pathname} state={{ from: location.pathname, fromSearch: location.search }}>
+            <BoltIcon width={14} height={14} />
+            {value}
+          </StyledLinkCell>
+        ) : (
+          <StyledLinkCell to={pathname} state={{ from: location.pathname, fromSearch: location.search }}>
+            <CogsIcon height={14} />
+            {value}
+          </StyledLinkCell>
+        )
       },
-      {
-        Header: 'State',
-        id: 'state',
-        accessor: 'state',
-        width: colWidths?.state || 100,
-        Filter: DefaultColumnFilter,
-        disableSortBy: true,
-        Cell: (props: any) => {
-          const { jobs } = props.row.original
-          if (jobs) {
-            return <StateCell state={jobs[jobs.length - 1].state} />
-          }
-          return <StateCell state={props.row.original.state} />
-        },
-        ...(filterDataTestIdPrefix ? { filterDataTestId: `${filterDataTestIdPrefix}-state` } : {}),
+      ...(filterDataTestIdPrefix ? { filterDataTestId: `${filterDataTestIdPrefix}-execution-name` } : {}),
+    },
+    {
+      Header: 'State',
+      id: 'state',
+      accessor: 'state',
+      width: colWidths?.state || 100,
+      Filter: DefaultColumnFilter,
+      disableSortBy: true,
+      Cell: (props: any) => {
+        const { jobs } = props.row.original
+        if (jobs) {
+          return <StateCell state={jobs[jobs.length - 1].state} />
+        }
+        return <StateCell state={props.row.original.state} />
       },
+      ...(filterDataTestIdPrefix ? { filterDataTestId: `${filterDataTestIdPrefix}-state` } : {}),
+    },
     {
       Header: 'Workflow',
       id: 'workflow_title',
@@ -106,9 +103,17 @@ export const useExecutionColumns = ({
       width: colWidths?.featured || 93,
       Cell: props => (
         <div style={{ paddingLeft: 20 }}>
-          <FeaturedToggle disabled={!isAdmin} resource="jobs" featured={props.cell.row.original.featured} uids={[props.cell.row.original.uid]} onSuccess={() => queryClient.invalidateQueries({
-            queryKey: ['jobs'],
-          })} />
+          <FeaturedToggle
+            disabled={!isAdmin}
+            resource="jobs"
+            featured={props.cell.row.original.featured}
+            uids={[props.cell.row.original.uid]}
+            onSuccess={() =>
+              queryClient.invalidateQueries({
+                queryKey: ['jobs'],
+              })
+            }
+          />
         </div>
       ),
       ...(filterDataTestIdPrefix ? { filterDataTestId: `${filterDataTestIdPrefix}-featured` } : {}),
@@ -125,7 +130,7 @@ export const useExecutionColumns = ({
         }
 
         return (
-          <StyledLinkCell to={`${getBasePath(spaceId)}/apps/${row.original.app_uid}`}>
+          <StyledLinkCell to={`${getBasePath(spaceId)}/apps/${row.original.app_uid}`} disable={!row.original.app_active}>
             <CubeIcon height={14} />
             {value}
           </StyledLinkCell>
@@ -139,7 +144,9 @@ export const useExecutionColumns = ({
       Filter: DefaultColumnFilter,
       width: colWidths?.launched_by || 200,
       Cell: props => (
-        <a data-turbolinks="false" href={props.row.original.links.user ?? '#'}>{props.value}</a>
+        <a data-turbolinks="false" href={props.row.original.links.user ?? '#'}>
+          {props.value}
+        </a>
       ),
       ...(filterDataTestIdPrefix ? { filterDataTestId: `${filterDataTestIdPrefix}-launched-by` } : {}),
     },
@@ -149,7 +156,9 @@ export const useExecutionColumns = ({
       Filter: DefaultColumnFilter,
       width: colWidths?.location || 200,
       Cell: props => (
-        <StyledLinkCell to={`${props.row.original.links && props.row.original.links.space}/${props.row.original.workflow_uid === 'N/A' ? 'jobs' : 'workflows'}`}>
+        <StyledLinkCell
+          to={`${props.row.original.links && props.row.original.links.space}/${props.row.original.workflow_uid === 'N/A' ? 'jobs' : 'workflows'}`}
+        >
           <ObjectGroupIcon height={14} />
           {props.value}
         </StyledLinkCell>
@@ -201,7 +210,6 @@ export const useExecutionColumns = ({
           return <>{jobs[jobs.length - 1].energy_consumption}</>
         }
         return <>{props.row.original.energy_consumption}</>
-
       },
       ...(filterDataTestIdPrefix ? { filterDataTestId: `${filterDataTestIdPrefix}-energy` } : {}),
     },
@@ -210,7 +218,8 @@ export const useExecutionColumns = ({
       accessor: 'launched_on',
       disableFilters: true,
       width: colWidths?.launched_on || 198,
-      Cell: props => props.row.original.launched_on === null ? props.row.original.created_at_date_time : props.row.original.launched_on,
+      Cell: props =>
+        props.row.original.launched_on === null ? props.row.original.created_at_date_time : props.row.original.launched_on,
       ...(filterDataTestIdPrefix ? { filterDataTestId: `${filterDataTestIdPrefix}-launched-on` } : {}),
     },
     {
@@ -219,13 +228,7 @@ export const useExecutionColumns = ({
       Filter: DefaultColumnFilter,
       disableSortBy: true,
       width: colWidths?.tags || 500,
-      Cell: props => (
-          <StyledTags>
-            {props.value?.map(tag => (
-              <StyledTagItem key={tag}>{tag}</StyledTagItem>
-            ))}
-          </StyledTags>
-        ),
+      Cell: props => <StyledTags>{props.value?.map(tag => <StyledTagItem key={tag}>{tag}</StyledTagItem>)}</StyledTags>,
       ...(filterDataTestIdPrefix ? { filterDataTestId: `${filterDataTestIdPrefix}-tags` } : {}),
     },
     ...properties.map(property => ({
@@ -235,5 +238,5 @@ export const useExecutionColumns = ({
       disableFilters: true,
       width: colWidths?.[property] || 200,
     })),
-  ] as Column<IExecution>[];
+  ] as Column<IExecution>[]
 }
