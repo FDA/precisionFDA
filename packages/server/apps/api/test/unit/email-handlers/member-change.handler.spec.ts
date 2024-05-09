@@ -6,7 +6,7 @@ import { SpaceMembership } from '@shared/domain/space-membership/space-membershi
 import { Space } from '@shared/domain/space/space.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { expect } from 'chai'
-import { EntityManager, Reference } from '@mikro-orm/core'
+import { EntityManager } from '@mikro-orm/core'
 import { JOB_STATE } from '@shared/domain/job/job.enum'
 import { create, generate, db } from '@shared/test'
 import { EMAIL_CONFIG } from '@shared/domain/email/email.config'

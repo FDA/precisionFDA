@@ -1,4 +1,4 @@
-import { wrap, EntityManager } from '@mikro-orm/core'
+import { EntityManager } from '@mikro-orm/core'
 import { database } from '@shared/database'
 import { App } from '@shared/domain/app/app.entity'
 import { User } from '@shared/domain/user/user.entity'

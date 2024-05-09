@@ -1,7 +1,5 @@
 import type { EmailSendInput } from '../domain/email/email.config'
-import type { WorkstationSnapshotOperationParams } from '../domain/job/ops/workstation-snapshot'
 import type { UserCtx } from '../types'
-import { FileUidInput } from '@shared/domain/user-file/user-file.input'
 
 export type Task = {
   type: TASK_TYPE
@@ -60,16 +58,6 @@ export type SendEmailJob = TaskWithMaybeAuth & {
   payload: EmailSendInput
 }
 
-export type CloseFileJob = TaskWithAuth & {
-  type: TASK_TYPE.CLOSE_FILE
-  payload: FileUidInput
-}
-
-export type RemoveNodesJob = TaskWithAuth & {
-  type: TASK_TYPE.REMOVE_NODES
-  payload: number[]
-}
-
 export type CheckStaleJobsJob = TaskWithAuth & {
   payload: undefined
   type: TASK_TYPE.CHECK_STALE_JOBS
@@ -80,14 +68,6 @@ export type SyncDbClusterJob = TaskWithAuth & {
   payload: { dxid: string }
 }
 
-export type SyncFileStatesJob = TaskWithAuth & {
-  type: TASK_TYPE.SYNC_FILES_STATE
-}
-
-export type SyncOutputFiles = TaskWithAuth & {
-  type: TASK_TYPE.SYNC_JOB_OUTPUTS
-}
-
 // NOTE(samuel) - task running without user context
 export type CheckNonTerminatedDbClustersJob = Task & {
   type: TASK_TYPE.CHECK_NON_TERMINATED_DBCLUSTERS
@@ -95,22 +75,6 @@ export type CheckNonTerminatedDbClustersJob = Task & {
 
 export type SyncSpacesPermissionsJob = TaskWithAuth & {
   type: TASK_TYPE.SYNC_SPACES_PERMISSIONS
-}
-
-// TODO - Consider renaming *Jobs to *Task, because Job already conflates with platform job and bull job
-export type WorkstationSnapshotTask = TaskWithAuth & {
-  type: TASK_TYPE.WORKSTATION_SNAPSHOT
-  payload: WorkstationSnapshotOperationParams
-}
-
-export type LockNodesJob = TaskWithAuth & {
-  type: TASK_TYPE.LOCK_NODES
-  payload: number[]
-}
-
-export type UnlockNodesJob = TaskWithAuth & {
-  type: TASK_TYPE.UNLOCK_NODES
-  payload: number[]
 }
 
 export type GenerateSpaceReportBatchJob = TaskWithAuth & {
@@ -128,12 +92,4 @@ export type GenerateSpaceReportResultJob = TaskWithAuth & {
 
 export type AdminDataConsistencyReportTask = Task & {
   type: TASK_TYPE.ADMIN_DATA_CONSISTENCY_REPORT
-}
-
-export type UserDataConsistencyReportTask = Task & {
-  type: TASK_TYPE.USER_DATA_CONSISTENCY_REPORT
-}
-
-export type DebugMaxMemory = Task & {
-  type: TASK_TYPE.DEBUG_MAX_MEMORY
 }

@@ -17,15 +17,6 @@ export class UserRepository extends PaginatedEntityRepository<User> {
     return 'users'
   }
 
-  findWithEmailSettings(userIds: number[]) {
-    return this.find(
-      {
-        id: { $in: userIds },
-      },
-      { populate: ['notificationPreference'] },
-    )
-  }
-
   findActive(findOptions?: FindOptions<User>) {
     return this.find({ lastLogin: { $ne: null }, privateFilesProject: { $ne: null } }, findOptions)
   }
@@ -36,10 +27,6 @@ export class UserRepository extends PaginatedEntityRepository<User> {
 
   findAdminUser(): Promise<User> {
     return this.findDxuser(config.platform.adminUser)
-  }
-
-  findChallengeBotUser(): Promise<User> {
-    return this.findDxuser(config.platform.challengeBotUser)
   }
 
   bulkUpdateSetTotalLimit(ids: number[], totalLimit: number) {

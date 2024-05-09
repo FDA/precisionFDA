@@ -26,14 +26,6 @@ export class TaggingRepository extends EntityRepository<Tagging> {
     return await this.find({ taggableId }, { populate: ['tag'] })
   }
 
-  async findForFile(input: FindInput): Promise<Tagging | null> {
-    return await this.findOne({
-      userFile: this.em.getReference(UserFile, input.fileId),
-      tagId: input.tagId,
-      taggerId: input.userId,
-    })
-  }
-
   async findForFiles(input: FindMultipleInput): Promise<Tagging[]> {
     return await this.find(
       {

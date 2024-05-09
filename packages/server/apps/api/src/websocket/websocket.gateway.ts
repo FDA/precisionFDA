@@ -89,7 +89,7 @@ export class WebsocketGateway implements OnGatewayDisconnect, OnGatewayInit {
   }
 
   private async setupRedisSubscriber() {
-    const client = await createRedisClient('worker')
+    const client = await createRedisClient()
 
     client.subscribe(NOTIFICATIONS_QUEUE, (notificationJson: string) => {
       const notification: { user: UserContext } = JSON.parse(notificationJson)

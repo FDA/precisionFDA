@@ -21,7 +21,6 @@ import { SqlEntityManager } from '@mikro-orm/mysql'
 import { fakes as localFakes, mocksReset as localMocksReset } from '../utils/mocks'
 import { stripEntityDates } from '../utils/expect-helper'
 import { errorsFactory } from '../utils/errors-factory'
-import { NOTIFICATION_ACTION, SEVERITY } from '@shared/enums'
 
 describe('SyncJobOperation BullJobId', () => {
   it('creates correct bullJob ids', async () => {

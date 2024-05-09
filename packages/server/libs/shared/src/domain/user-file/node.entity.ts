@@ -13,7 +13,6 @@ import { NodeRepository } from '@shared/domain/user-file/node.repository'
 import { User } from '@shared/domain/user/user.entity'
 import { BaseEntity } from '../../database/base-entity'
 import { EntityScope } from '../../types/common'
-import { formatDuration } from '../../utils/format'
 import { FILE_STATE, FILE_STI_TYPE, FOLDER_STATE, PARENT_TYPE } from './user-file.types'
 
 @Entity({
@@ -103,12 +102,4 @@ export class Node extends BaseEntity {
 
   @ManyToOne(() => User)
   user!: Ref<User>
-
-  elapsedTimeSinceCreation(): number {
-    return new Date().getTime() - this.createdAt.getTime()
-  }
-
-  elapsedTimeSinceCreationString(): string {
-    return formatDuration(this.elapsedTimeSinceCreation())
-  }
 }

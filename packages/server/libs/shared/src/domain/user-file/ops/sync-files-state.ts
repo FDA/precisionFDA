@@ -119,7 +119,7 @@ void> {
               `SyncFilesStateOperation: File associated with challenge ${fileInfo.describe.state} for file ${fileOrAsset.name}`,
             )
             try {
-              new ChallengeUpdateCardImageUrlOperation(this.ctx).execute(challenge.id)
+              await new ChallengeUpdateCardImageUrlOperation(this.ctx).execute(challenge.id)
             } catch (error) {
               this.log.error({ fileUid: fileOrAsset.uid, error },
                 'SyncFilesStateOperation: Error invoking ChallengeUpdateCardImageUrlOperation',

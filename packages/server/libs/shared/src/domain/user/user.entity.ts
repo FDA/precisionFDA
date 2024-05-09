@@ -217,16 +217,8 @@ export class User extends BaseEntity {
     return this.dxuser
   }
 
-  isMemberOfSpace(spaceUid: string): boolean {
-    return Object.values(this.spaceUids).includes(spaceUid)
-  }
-
   isChallengeBot(): boolean {
     return this.dxuser === config.platform.challengeBotUser
-  }
-
-  static getChallengeBotToken(): string {
-    return config.platform.challengeBotAccessToken
   }
 
   isGuest(): boolean {

@@ -24,22 +24,6 @@ export const createPermissionsDeniedError = () => {
   )
 }
 
-// From time to time we get this error from platform's nginx
-export const createServiceUnavailableError = () => {
-  return {
-    response: {
-      status: 503,
-      headers: [],
-      data: {
-        error: {
-          type: 'ServiceUnavailable',
-          message: 'Some resource was temporarily unavailable; please try again later',
-        }
-      }
-    }
-  }
-}
-
 // A 504 error we sometimes encounter
 export const createGatewayError = () => {
   return {

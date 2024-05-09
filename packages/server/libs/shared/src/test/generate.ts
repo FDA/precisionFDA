@@ -671,12 +671,6 @@ const bullQueue = {
       user: userContext,
     },
   }),
-  syncFilesState: (userContext: UserCtx) => ({
-    data: {
-      type: TASK_TYPE.SYNC_FILES_STATE,
-      user: userContext,
-    },
-  }),
   syncJobStatus: (jobDxid: string, userContext: UserCtx) => ({
     data: {
       payload: {
@@ -689,16 +683,6 @@ const bullQueue = {
 }
 
 const bullQueueRepeatable = {
-  syncDbClusterStatus: (dbClusterDxid: string) => ({
-    key: `__default__:${SyncDbClusterOperation.getBullJobId(dbClusterDxid)}:::*/2 * * * *`,
-    name: '__default__',
-    id: SyncDbClusterOperation.getBullJobId(dbClusterDxid),
-    endDate: null,
-    tz: null,
-    cron: '*/2 * * * *',
-    every: null,
-    next: Date.now() + (60 * 1000),
-  }),
   syncFilesState: (dxuser: string) => ({
     key: `__default__:${SyncFilesStateOperation.getBullJobId(dxuser)}:::*/2 * * * *`,
     name: '__default__',

@@ -12,12 +12,11 @@ import { getLogger } from '@shared/logger'
 /* eslint-disable no-inline-comments */
 /* eslint-disable no-undefined */
 import { expect } from 'chai'
-import { UserCtx } from '@shared/types'
 import { create, db, generate } from '@shared/test'
-import { fakes, mocksReset } from '@shared/test/mocks'
+import { mocksReset } from '@shared/test/mocks'
 import { fakes as queueFakes, mocksReset as queueMocksReset } from '../utils/mocks'
 import { EntityManager } from '@mikro-orm/mysql'
-import { FILE_ORIGIN_TYPE, FILE_STATE, FILE_STATE_DX, PARENT_TYPE } from '@shared/domain/user-file/user-file.types'
+import { FILE_STATE_DX, PARENT_TYPE } from '@shared/domain/user-file/user-file.types'
 import { JOB_STATE } from '@shared/domain/job/job.enum'
 import { SPACE_MEMBERSHIP_ROLE, SPACE_MEMBERSHIP_SIDE } from '@shared/domain/space-membership/space-membership.enum'
 

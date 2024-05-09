@@ -276,7 +276,7 @@ describe('TASK: workstation-snapshot', () => {
 
   it('fails if job is a workstation not in running state', async () => {
     httpsJobWithAPI.state = JOB_STATE.TERMINATED
-    em.flush()
+    await em.flush()
 
     const input = {
       jobDxid: httpsJobWithAPI.dxid,

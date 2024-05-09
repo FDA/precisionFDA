@@ -1,13 +1,6 @@
-import { AnyObject } from '../../types'
-
 enum ENTITY_TYPE {
   NORMAL = 0,
   HTTPS = 1,
-}
-
-type AppSpec = AnyObject & {
-  input_spec: AppInputSpecItem[]
-  output_spec: any[]
 }
 
 type AppInputSpecItem = {
@@ -20,4 +13,4 @@ type AppInputSpecItem = {
   optional: boolean
 }
 
-export { ENTITY_TYPE, AppSpec, AppInputSpecItem }
+export { ENTITY_TYPE, AppInputSpecItem }

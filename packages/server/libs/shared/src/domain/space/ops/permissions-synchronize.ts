@@ -178,29 +178,6 @@ export class SyncSpacesPermissionsOperation extends WorkerBaseOperation<
     }
   }
 
-  /**
-   * TO BE REFACTORED
-   * ----
-   * TODO(Jiri) refactor outside of ops into a platform permission service.
-   * TODO(Jiri) refactor to return the platform response - to be able to react to failed requests.
-   */
-  async removePlatformPermissions(platformMember: PlatformMember, space: Space): Promise<void> {
-    const params: UserRemoveFromOrgParams = {
-      orgDxId: this.membership.side === SPACE_MEMBERSHIP_SIDE.GUEST ? space.guestDxOrg : space.hostDxOrg,
-      data: {
-        user: platformMember.id,
-      },
-    }
-    const response = await this.client.removeUserFromOrganization(params)
-    if (response.id !== null) {
-      this.ctx.log.warn(
-        {},
-        'SyncSpacesPermissionsOperation: Successfully removed platform member %s from organization %s on the platform.',
-        platformMember.id, params.orgDxId,
-      )
-    }
-  }
-
   async validateUserRole(pfdaMembership: SpaceMembership, platformMembers: PlatformMember[], space: Space): Promise<void> {
     const pfdaUserHandle = pfdaMembership.user.getEntity().dxuser
     const platformMember = platformMembers.find(m => m.id === `user-${pfdaUserHandle}`)

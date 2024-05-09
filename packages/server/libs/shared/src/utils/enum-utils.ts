@@ -1,8 +1,3 @@
-const numValues = (myEnum: any): number[] =>
-  Object.values(myEnum)
-    .map((value: any) => parseInt(value))
-    .filter(value => !isNaN(value))
-
 const stringValues = (myEnum: any): string[] =>
   (Object.values(myEnum).filter(
     (value) => typeof value === 'string',
@@ -13,4 +8,4 @@ const stringValuesDowncased = (myEnum: any): string[] =>
     .filter((value) => typeof value === 'string')
     .map((strValue: any) => strValue.toLowerCase())
 
-export { numValues, stringValues, stringValuesDowncased }
+export { stringValues, stringValuesDowncased }

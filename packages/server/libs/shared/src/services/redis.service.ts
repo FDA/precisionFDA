@@ -3,13 +3,11 @@ import { config } from '../config'
 import { getLogger } from '../logger'
 
 /**
- * Creates named redis client.
- *
- * @param name named ident of the client (api, worker etc.)
+ * Creates redis client.
  *
  * @returns
  */
-export const createRedisClient = async (name?: string): Promise<any> => {
+export const createRedisClient = async (): Promise<any> => {
   const url = new URL(config.redis.url)
 
   try {
@@ -28,7 +26,7 @@ export const createRedisClient = async (name?: string): Promise<any> => {
     await client.connect()
     if (config.redis.isSecure) {
       //@ts-ignore doesn't compile, but needs to be here
-      client.auth({ password: config.redis.authPassword })
+      await client.auth({ password: config.redis.authPassword })
     }
     getLogger().verbose('connected to redis')
     return client

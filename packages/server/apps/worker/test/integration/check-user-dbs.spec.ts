@@ -13,7 +13,7 @@ import { fakes, mocksReset } from '@shared/test/mocks'
 import type { BasicUserJob } from '@shared/queue/task.input'
 import { JobOptions } from 'bull'
 import { STATUS as DB_CLUSTER_STATUS } from '@shared/domain/db-cluster/db-cluster.enum'
-import { fakes as queueFakes, mocksReset as queueMocksReset } from '../utils/mocks'
+import { mocksReset as queueMocksReset } from '../utils/mocks'
 
 const createUserCheckupTask = async (user: BasicUserJob['user']) => {
   const options: JobOptions = { jobId: `${TASK_TYPE.USER_CHECKUP}` }

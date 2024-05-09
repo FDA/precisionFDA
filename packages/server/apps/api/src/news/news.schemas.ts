@@ -1,9 +1,5 @@
 import * as z from 'zod'
 
-export const HasId = z.object({
-  id: z.string(),
-})
-
 export const Paginated = z.object({
   page: z.string().optional(),
   limit: z.string().optional(),
@@ -39,5 +35,4 @@ export const newsPostRequestSchema = z.object({
 export type NewsPostReqBody = z.infer<typeof newsPostRequestSchema>
 
 export const newsPositionRequestSchema = z.record(z.string(), z.number()).optional();
-export type NewsPositionReqBody = z.infer<typeof newsPositionRequestSchema>
 

@@ -16,17 +16,6 @@ class PlatformClientBase {
     return { authorization: `Bearer ${accessToken}` }
   }
 
-  protected async sendRequest(options: AxiosRequestConfig, url: string) {
-    try {
-      this.logClientRequest(options, url)
-      const res = await axios.request(options)
-      return res.data
-    } catch (err) {
-      this.logClientFailed(options)
-      return this.handleFailed(err)
-    }
-  }
-
   protected logClientRequest(options: AxiosRequestConfig, url: string): void {
     const sanitized = maskAuthHeader(options.headers)
     this.log.verbose(

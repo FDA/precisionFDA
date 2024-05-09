@@ -30,10 +30,6 @@ export class WorkstationSnapshotOperation extends WorkstationBaseOperation<
     return `${this.getTaskType()}.${jobDxid}`
   }
 
-  static getJobDxidFromBullJobId(bullJobId: string): string {
-    return bullJobId.replace(`${this.getTaskType()}.`, '')
-  }
-
   async enqueue(input: WorkstationSnapshotOperationParams) {
     const job = await this.validatedJobWithWorkstationAPI(input.jobDxid)
     if (job.state !== JOB_STATE.RUNNING) {

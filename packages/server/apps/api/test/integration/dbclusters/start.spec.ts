@@ -5,10 +5,9 @@ import { ErrorCodes } from '@shared/errors'
 import { expect } from 'chai'
 import { EntityManager } from '@mikro-orm/mysql'
 import supertest from 'supertest'
-import { create, generate, db, mockResponses } from '@shared/test'
+import { create, generate, db } from '@shared/test'
 import {
   STATUS as DB_CLUSTER_STATUS,
-  ENGINE as DB_CLUSTER_ENGINE,
   STATUSES,
 } from '@shared/domain/db-cluster/db-cluster.enum'
 import { fakes, mocksReset } from '@shared/test/mocks'

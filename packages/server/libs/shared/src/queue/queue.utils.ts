@@ -69,10 +69,6 @@ const clearFailedJobs = async (q: Queue, log: Logger): Promise<any> => {
   return await clearJobs(q, 'failed', log)
 }
 
-const clearCompletedJobs = async (q: Queue, log: Logger): Promise<any> => {
-  return await clearJobs(q, 'completed', log)
-}
-
 export {
   getJobStatusMessage,
   getJobStatusMessageWithElapsedTime,
@@ -80,5 +76,4 @@ export {
   clearOrphanedRepeatableJobs,
   clearJobs,
   clearFailedJobs,
-  clearCompletedJobs,
 }

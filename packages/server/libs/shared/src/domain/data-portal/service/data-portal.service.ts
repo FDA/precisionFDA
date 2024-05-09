@@ -63,18 +63,6 @@ export class DataPortalService {
     private readonly fileRemoveOperation?: FileRemoveOperation,
   ) {}
 
-  checkUserHasDataPortal = async () => {
-    try {
-      // check whether there is a membership in at least one portal
-      const count = await this.em.count(DataPortal, {
-        space: { spaceMemberships: { user: this.user.id } },
-      })
-      return count > 0
-    } catch (error) {
-      return false
-    }
-  }
-
   listResources = async (
     dataPortalIdentifier: string,
   ): Promise<{ id: number; name: string; url: string }[]> => {

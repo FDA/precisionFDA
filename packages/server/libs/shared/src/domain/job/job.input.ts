@@ -3,8 +3,6 @@ import { config } from '../../config'
 import { Job } from './job.entity'
 import { allowedFeatures, allowedInstanceTypes } from './job.enum'
 import { SCOPE } from '../../types/common'
-import { schemas } from '@shared/utils/base-schemas'
-
 
 type DxIdInput = {
   dxid: string
@@ -56,11 +54,6 @@ type PageJobs = {
   }
 }
 
-type WorkstationSyncFilesInput = {
-  dxid: string
-  force: boolean
-}
-
 const runAppSchema: JSONSchema7 = {
   type: 'object',
   properties: {
@@ -103,24 +96,12 @@ const runAppSchema: JSONSchema7 = {
   additionalProperties: false,
 }
 
-const jobIdAppIdSchema: JSONSchema7 = {
-  type: 'object',
-  properties: {
-    dxid: schemas.dxidProp,
-    appDxId: schemas.dxidProp,
-  },
-  required: ['dxid', 'appDxId'],
-  additionalProperties: false,
-}
-
 export {
   runAppSchema,
   RunAppInput,
   Provenance,
-  jobIdAppIdSchema,
   DxIdInput,
   DescribeJobInput,
   ListJobsInput,
   PageJobs,
-  WorkstationSyncFilesInput,
 }

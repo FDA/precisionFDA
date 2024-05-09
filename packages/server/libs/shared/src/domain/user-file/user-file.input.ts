@@ -35,12 +35,6 @@ export type SyncFileJobInput = FileUidInput &
 
 export type UidAndFollowUpInput = UidInput & FollowUpInput
 
-type PathResolverInput = {
-  path: string,
-  scope: SCOPE,
-  type: 'folder' | 'file' | null,
-}
-
 type SyncFilesInFolderInput = {
   folderId: number | null
   projectDxid: string
@@ -113,7 +107,6 @@ export {
   SyncFilesInFolderInput,
   RenameFolderInput,
   NodesInput,
-  PathResolverInput,
   renameFolderSchema,
   IdsInput,
   nodesSchema,

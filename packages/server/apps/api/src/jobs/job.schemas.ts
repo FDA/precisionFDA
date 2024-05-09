@@ -13,16 +13,6 @@ export const jobListQuerySchema: JSONSchema7 = {
   additionalProperties: true,
 }
 
-export const jobSyncFilesQuerySchema: JSONSchema7 = {
-  type: 'object',
-  properties: {
-    force: { type: 'boolean', default: false },
-  },
-  required: [],
-  additionalProperties: true,
-}
-
-
 export type WorkstationAliveParams = {
   code: string
 }

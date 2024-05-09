@@ -285,7 +285,7 @@ describe('TASK: sync-files-states (SyncFilesStateOperation)', () => {
     )
     for (const dxid of nonAbandonedFileDxids) {
       const filesInDb = await fileRepo.findFilesWithDxid(dxid)
-      expect(await filesInDb.map((x) => x.dxid)).to.deep.equal([dxid])
+      expect(filesInDb.map((x) => x.dxid)).to.deep.equal([dxid])
     }
   })
 
