@@ -16,6 +16,7 @@ import {
 } from '@shared/domain/discussion/discussion.types'
 import { DiscussionService } from '@shared/domain/discussion/services/discussion.service'
 import { EntityFetcherService, UID } from '@shared/domain/entity/entity-fetcher.service'
+import { Job } from '@shared/domain/job/job.entity'
 import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
 import { Space } from '@shared/domain/space/space.entity'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
@@ -175,4 +176,11 @@ export class CliService {
     return result
   }
 
+  async getJobScope(jobDxid: string) {
+    const jobs: Job[] = await this.entityFetcherService.getAccessible('Job', { dxid: jobDxid})
+    if (jobs.length !== 1) {
+      throw new NotFoundError('Job not found or not accessible')
+    }
+    return { scope: jobs[0].scope }
+  }
 }

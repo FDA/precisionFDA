@@ -423,6 +423,7 @@ Rails.application.routes.draw do
       resources :jobs, only: %i(index show create) do
         get :open_external, on: :member
         patch :refresh_api_key, on: :member
+        get :scope, on: :member, to: "jobs#get_job_scope" # used by CLI, id is actually dxid
         patch :snapshot, on: :member
 
         collection do

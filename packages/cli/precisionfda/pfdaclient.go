@@ -16,6 +16,7 @@ import (
 	"os/exec"
 	"path"
 	"path/filepath"
+	"regexp"
 	"runtime"
 	"strconv"
 	"strings"
@@ -72,7 +73,7 @@ type IPFDAClient interface {
 	Rmdir(args []string) error
 	Rm(args []string, folderID string, spaceID string) error
 	Head(arg string, lines int) error
-
+	GetScope() error
 	RefreshToken(autoRefresh bool) (string, error)
 	GetLatestVersion() (string, error)
 	SetChunkSize(chunkSize int)
@@ -832,6 +833,49 @@ func (c *PFDAClient) DescribeEntity(entityID string, entityType string) error {
 	return nil
 }
 
+func (c *PFDAClient) GetScope() error {
+
+	dxJobId, isPresent := os.LookupEnv("DX_JOB_ID")
+	if !isPresent {
+		return fmt.Errorf("No space detected")
+	}
+
+	apiURL := fmt.Sprintf("%s/api/jobs/%s/scope", c.BaseURL, dxJobId)
+
+	_, body, err := c.makeRequestFail("GET", apiURL, nil)
+	if err != nil {
+		return err
+	}
+
+	var resultJSON map[string]interface{}
+	err = json.Unmarshal(body, &resultJSON)
+	if err != nil {
+		return err
+	}
+
+	scope, ok := resultJSON["scope"].(string)
+	if !ok {
+		return fmt.Errorf("scope is not a string")
+	}
+
+	// Check if the scope is 'private'.
+	if scope == "private" {
+		helpers.PrintResult("private", c.JsonResponse)
+		return nil
+	}
+
+	// Use regex to find the number after 'space-'.
+	re := regexp.MustCompile(`^space-(\d+)$`)
+	matches := re.FindStringSubmatch(scope)
+	if len(matches) != 2 {
+		return fmt.Errorf("scope format is incorrect")
+	}
+
+	// Print only the number part if the scope is in the format 'space-{number}'.
+	helpers.PrintResult(matches[1], c.JsonResponse)
+	return nil
+}
+
 func (c *PFDAClient) Ls(folderID string, spaceID string, flags map[string]bool) error {
 	apiURL := fmt.Sprintf("%s/api/files/cli", c.BaseURL)
 
@@ -1183,8 +1227,11 @@ func (c *PFDAClient) downloadByChunks(uidsChunk []string, outputFilePath string,
 	jsonData, _ := json.Marshal(bulkIDsPayload{
 		IDs: uidsChunk,
 	})
-	_, body, _ := c.makeRequestFail("POST", apiURL, jsonData)
-
+	_, body, err := c.makeRequestFail("POST", apiURL, jsonData)
+	if err != nil {
+		helpers.PrintError(fmt.Errorf("unable to download: %s", strings.Join(uidsChunk, ",")), c.JsonResponse)
+		return
+	}
 	var resultJSON []map[string]interface{}
 	_ = json.Unmarshal(body, &resultJSON)
 

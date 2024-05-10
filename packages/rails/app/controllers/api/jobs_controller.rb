@@ -314,6 +314,12 @@ module Api
       raise ApiError, e.message
     end
 
+    # GET /api/jobs/:id/scope (id is actually dxid, wont fix in ruby.)
+    def get_job_scope
+      res = https_apps_client.cli_job_scope(params[:id])
+      render json: res, adapter: :json
+    end
+
     def cli_jobs
       # Fetches space jobs.
       if params[:space_id]
