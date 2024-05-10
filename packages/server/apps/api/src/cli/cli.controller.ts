@@ -60,6 +60,11 @@ export class CliController {
     return this.cliService.describeEntity(uid)
   }
 
+  @Get('/job/:dxid/scope')
+  async getJobScope(@Param('dxid') jobDxid: string) {
+    return this.cliService.getJobScope(jobDxid)
+  }
+
 
   @Get('/spaces/:id/members')
   async listMembers(@Param('id') spaceId: number) {

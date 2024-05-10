@@ -404,14 +404,14 @@ func PrintHeadHelp() int {
 	return 0
 }
 
-func PrintGetSpaceIdHelp() int {
+func PrintGetScopeHelp() int {
 	writer := tabwriter.NewWriter(os.Stdout, 0, 8, 1, '\t', tabwriter.AlignRight)
 	writeLine := newLineWriter(writer)
 
 	writeLine("  ", "  ")
-	writeLine("  For:", "Display the space ID of the current workstation's context.\n")
-	writeLine("  Usage:", "get-space-id\n")
-	writeLine("  Examples:", "get-space-id [Prints integer representing id of current space]\n")
+	writeLine("  For:", "Displays the scope of the current context. If you are running it in a private scope, 'private' is printed to the console.\n In case you are in a space, only the integer Space ID is printed to the console.\n")
+	writeLine("  Usage:", "get-scope\n")
+	writeLine("  Examples:", "get-scope [Prints current scope]\n")
 	writeLine("  Flags:", "All flags listed below are OPTIONAL")
 	writeLine("   -h, -help", "Displays the help message and exit")
 	writeLine("   -json", "Displays response in JSON format")

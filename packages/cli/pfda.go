@@ -242,6 +242,10 @@ var invokeCat = func(client precisionfda.IPFDAClient, arg *string) error {
 	return client.Head(*arg, -1)
 }
 
+var invokeGetScope = func(client precisionfda.IPFDAClient) error {
+	return client.GetScope()
+}
+
 var invokeRefreshToken = func(client precisionfda.IPFDAClient, autoRefresh bool) (string, error) {
 	return client.RefreshToken(autoRefresh)
 }
@@ -827,16 +831,15 @@ func mainInternal() int {
 			return helpers.ErrorFromError(err, *flagJson)
 		}
 
-	case "get-space-id":
+	case "get-scope":
 		if help {
-			return helpers.PrintGetSpaceIdHelp()
+			return helpers.PrintGetScopeHelp()
 		}
 
-		if config == nil || config.GetSpaceId() == "" {
-			// error while getting config or spaceID not set
-			return helpers.ErrorFromString("No space detected", *flagJson)
+		err := invokeGetScope(pfdaclient)
+		if err != nil {
+			return helpers.ErrorFromError(err, *flagJson)
 		}
-		helpers.PrintResult(config.GetSpaceId(), *flagJson)
 
 	case "refresh-key":
 		// add option for auto-refresh later

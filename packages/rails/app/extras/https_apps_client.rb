@@ -675,6 +675,14 @@ class HttpsAppsClient # rubocop:disable Metrics/ClassLength
     )
   end
 
+  def cli_job_scope(dxid)
+    request(
+      "/cli/job/#{dxid}/scope",
+      {},
+      Net::HTTP::Get::METHOD,
+    )
+  end
+
   # Rename a folder.
   # @param folder_id [Integer] Folder ID.
   # @param new_name [String] New folder name.

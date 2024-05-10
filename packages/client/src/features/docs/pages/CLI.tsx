@@ -1198,11 +1198,11 @@ export const CLI = () => {
           </code>
         </ExampleBlock>
 
-        <h2 id="get-space-id">Getting Space ID</h2>
+        <h2 id="get-scope">Getting Scope</h2>
         <p>
-          The CLI command <StyledCode>pfda get-space-id</StyledCode> is designed to print the current Space ID.<br/>
-          Note this is only available when you are on a Workstation launched in a Space. Only the integer Space ID
-          is printed to the console.
+          The CLI command <StyledCode>pfda get-scope</StyledCode> is designed to print the current scope.<br/>
+          If you are running it in a private scope, 'private' is printed to the console.
+          In case you are in a space, only the integer Space ID is printed to the console.
         </p>
 
         <h3>Usage</h3>
