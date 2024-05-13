@@ -8,26 +8,22 @@ import { AdminDataConsistencyReportService } from '@shared/debug/admin-data-cons
 import { JobService } from '@shared/domain/job/job.service'
 import { UserCheckupOperation } from '@shared/domain/user/ops/user-checkup'
 import { PlatformClient } from '@shared/platform-client'
-import {
-  CheckNonTerminatedDbClustersJob,
-  CheckStaleJobsJob,
-  SyncSpacesPermissionsJob,
-  TASK_TYPE,
-} from '@shared/queue/task.input'
+import { CheckStaleJobsJob, SyncSpacesPermissionsJob, TASK_TYPE } from '@shared/queue/task.input'
 import { Job } from 'bull'
 import { CheckChallengeJobsHandler } from '../../jobs/check-challenge-jobs.handler'
-import { checkNonTerminatedDbClustersHandler } from '../../jobs/check-nonterminated-dbclusters.handler'
 import { checkStaleJobsHandler } from '../../jobs/check-stale-jobs.handler'
 import { checkUserJobsHandler } from '../../jobs/check-user-jobs.handler'
 import { syncSpacesPermissionsHandler } from '../../jobs/sync-spaces-permissions.handler'
 import { ProcessWithContext } from '../decorator/process-with-context'
 import { BaseQueueProcessor } from './base-queue.processor'
+import { DbClusterService } from '@shared/domain/db-cluster/service/db-cluster.service'
 
 @Processor(config.workerJobs.queues.maintenance.name)
 export class MaintenanceQueueProcessor extends BaseQueueProcessor {
   constructor(
     @Inject(DEPRECATED_SQL_ENTITY_MANAGER) private readonly em: SqlEntityManager,
     private readonly adminDataConsistencyReportService: AdminDataConsistencyReportService,
+    private readonly dbClusterService: DbClusterService,
   ) {
     super()
   }
@@ -51,8 +47,8 @@ export class MaintenanceQueueProcessor extends BaseQueueProcessor {
   }
 
   @ProcessWithContext(TASK_TYPE.CHECK_NON_TERMINATED_DBCLUSTERS)
-  async checkNonTerminatedDbClusters(job: Job<CheckNonTerminatedDbClustersJob>) {
-    await checkNonTerminatedDbClustersHandler(job)
+  async checkNonTerminatedDbClusters() {
+    await this.dbClusterService.checkNonTerminatedDbClusters()
   }
 
   @ProcessWithContext(TASK_TYPE.SYNC_SPACES_PERMISSIONS)

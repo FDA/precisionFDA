@@ -9,21 +9,38 @@ import { MainQueueJobProducer } from '@shared/queue/producer/main-queue-job.prod
 import { expect } from 'chai'
 import { stub } from 'sinon'
 import { create, db } from '../../../src/test'
+import {
+  STATUS as DB_CLUSTER_STATUS,
+} from '@shared/domain/db-cluster/db-cluster.enum'
+import { EmailQueueJobProducer } from '@shared/domain/email/producer/email-queue-job.producer'
+import { DbCluster } from '@shared/domain/db-cluster/db-cluster.entity'
+import { EMAIL_TYPES } from '@shared/domain/email/email.config'
+import * as queue from '@shared/queue'
+import { config } from '@shared/config'
 
 describe('DbClusterService tests', () => {
   let em: EntityManager<MySqlDriver>
   let user: User
+  let user1: User
+  let user2: User
+  let dbClusters: DbCluster[]
   let userCtx: UserCtx
   let dbClusterService: DbClusterService
+  let getJobStub = stub(queue, 'getMainQueue')
   const createStub = stub()
   const describeStub = stub()
   const createSyncTaskStub = stub()
+  const createSendEmailTask = stub()
 
   beforeEach(async () => {
     await db.dropData(database.connection())
     em = database.orm().em.fork() as EntityManager<MySqlDriver>
     user = create.userHelper.create(em)
+    user1 = create.userHelper.create(em)
+    user2 = create.userHelper.create(em)
+    create.userHelper.createAdmin(em)
     await em.flush()
+
     userCtx = { ...user, accessToken: 'foo' }
 
     createStub.returns({ id: 'dbcluster-GZxk9Z80Z0gvz8ky0F1yzF82' })
@@ -49,7 +66,14 @@ describe('DbClusterService tests', () => {
       createDbClusterSyncTask: createSyncTaskStub,
     } as unknown as MainQueueJobProducer
 
-    dbClusterService = new DbClusterService(em, userCtx, client, mainJobProducer)
+    const emailsJobProducer = {
+      createSendEmailTask: createSendEmailTask,
+    } as unknown as EmailQueueJobProducer
+
+    dbClusterService = new DbClusterService(em, userCtx, client, mainJobProducer, emailsJobProducer)
+
+    getJobStub.reset()
+    getJobStub.throws()
   })
 
   it('creates db-cluster', async () => {
@@ -77,7 +101,6 @@ describe('DbClusterService tests', () => {
   })
 
   it('creates sync operation for db-cluster', async () => {
-
     createSyncTaskStub.reset()
 
     await dbClusterService.create({
@@ -92,9 +115,47 @@ describe('DbClusterService tests', () => {
     })
 
     expect(createSyncTaskStub.calledOnce).to.be.true()
-
   })
 
+  context('checkNonTerminatedDbClusters()', async () => {
+    it('check four cluster', async () => {
+      dbClusters = [
+        create.dbClusterHelper.create(em, { user: user1 }, { status: DB_CLUSTER_STATUS.STARTING }),
+        create.dbClusterHelper.create(em, { user: user1 }, { status: DB_CLUSTER_STATUS.STOPPED }),
+        create.dbClusterHelper.create(em, { user: user1 }, { status: DB_CLUSTER_STATUS.TERMINATED }),
+        create.dbClusterHelper.create(em, { user: user2 }, { status: DB_CLUSTER_STATUS.AVAILABLE }),
+        create.dbClusterHelper.create(em, { user: user2 }, { status: DB_CLUSTER_STATUS.STOPPING }),
+        create.dbClusterHelper.create(em, { user: user2 }, { status: DB_CLUSTER_STATUS.TERMINATED }),
+      ]
+
+      getJobStub.returns({
+        getJob: stub().returns({ }),
+      })
+
+      const result = await dbClusterService.checkNonTerminatedDbClusters()
+
+      expect(result.length).to.eq(4)
+      expect(createSendEmailTask.callCount).to.equal(2)
+      expect(createSendEmailTask.getCall(0).args[0].emailType).to.equal(EMAIL_TYPES.nonTerminatedDbClusters)
+      expect(createSendEmailTask.getCall(1).args[0].emailType).to.equal(EMAIL_TYPES.nonTerminatedDbClusters)
+      expect(createSendEmailTask.getCall(0).args[0].to).to.equal(`${config.platform.adminUser}@dnanexus.com`)
+      expect(createSendEmailTask.getCall(1).args[0].to).to.equal(`precisionfda-no-reply@dnanexus.com`)
+      expect(createSendEmailTask.getCall(0).args[0].subject).to.equal('Non-terminated dbclusters')
+      expect(createSendEmailTask.getCall(1).args[0].subject).to.equal('Non-terminated dbclusters')
 
 
+      const nonTerminatedIndexes = [0, 1, 3, 4]
+      nonTerminatedIndexes.forEach((index) => {
+        expect(result.find((r) => r.dxid === dbClusters[index].dxid)).to.not.be.undefined()
+      })
+
+      // check first and second call to createSendEmailTask
+      nonTerminatedIndexes.forEach((index) => {
+        expect(createSendEmailTask.getCall(0).args[0].body).to.contain(dbClusters[index].dxid)
+      })
+      nonTerminatedIndexes.forEach((index) => {
+        expect(createSendEmailTask.getCall(1).args[0].body).to.contain(dbClusters[index].dxid)
+      })
+    })
+  })
 })

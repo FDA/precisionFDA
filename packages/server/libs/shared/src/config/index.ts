@@ -132,7 +132,7 @@ const defaultConfig = {
       maintenance: {
         name: 'https-apps-worker-maintenance-queue',
         onInit: {
-          checkNonterminatedClusters: false,
+          checkNonterminatedClusters: true,
           adminDataConsistencyReport: false,
         },
       },
@@ -147,8 +147,11 @@ const defaultConfig = {
       // every two minutes
       // repeatPattern: '*/2 * * * *',
       repeatPattern: '*/15 * * * * *', // Every 15 seconds
-      staleJobsEmailAfter: parseIntFromProcess(process.env.NODE_STALE_JOBS_EMAIL_AFTER) ?? 60 * 60 * 24 * 29, // 29 days
-      staleJobsTerminateAfter: parseIntFromProcess(process.env.NODE_STALE_JOBS_TERMINATE_AFTER) ?? MAX_JOB_DURATION_SECONDS,
+      staleJobsEmailAfter:
+        parseIntFromProcess(process.env.NODE_STALE_JOBS_EMAIL_AFTER) ?? 60 * 60 * 24 * 29, // 29 days
+      staleJobsTerminateAfter:
+        parseIntFromProcess(process.env.NODE_STALE_JOBS_TERMINATE_AFTER) ??
+        MAX_JOB_DURATION_SECONDS,
     },
     nonTerminatedDbClusters: {
       repeatPattern: '0 6 * * *', // Once a day at 6am

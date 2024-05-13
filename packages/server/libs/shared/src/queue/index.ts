@@ -1,15 +1,9 @@
-/* eslint-disable no-warning-comments */
-import { AdminDataConsistencyReportService } from '@shared/debug/admin-data-consistency-report.service'
 import { EmailQueueJobProducer } from '@shared/domain/email/producer/email-queue-job.producer'
 import { FileSyncQueueJobProducer } from '@shared/domain/user-file/producer/file-sync-queue-job.producer'
 import { MainQueueJobProducer } from '@shared/queue/producer/main-queue-job.producer'
 import { MaintenanceQueueJobProducer } from '@shared/queue/producer/maintenance-queue-job.producer'
 import { QueueProxy } from '@shared/queue/queue.proxy'
-/* eslint-disable @typescript-eslint/no-floating-promises */
-/* eslint-disable require-await */
-/* eslint-disable multiline-ternary */
-/* eslint-disable @typescript-eslint/explicit-function-return-type */
-import Bull, { Job, JobInformation, JobOptions, Queue } from 'bull'
+import Bull, { Job, JobInformation, Queue } from 'bull'
 import { config } from '../config'
 import {
   FileUidInput,
@@ -20,13 +14,11 @@ import { defaultLogger as log } from '../logger'
 import { UserCtx } from '../types'
 import { clearOrphanedRepeatableJobs as utilsClearOrphanedRepeatableJobs } from './queue.utils'
 import {
-  AdminDataConsistencyReportTask,
   BasicUserJob,
   CheckStatusJob,
   SendEmailJob,
   SyncDbClusterJob,
   Task,
-  TASK_TYPE,
 } from './task.input'
 
 let mainQueue: Bull.Queue
@@ -98,81 +90,16 @@ const logQueueStatus = async () => {
   )
 }
 
-const getTaskInfo = (task: Task, payloadFn?: (payload: any) => any) => {
-  const whitelistPayloadFn = payloadFn ?? ((payload) => payload)
-
-  return {
-    type: task.type,
-    // TODO(samuel) fix
-    payload: whitelistPayloadFn((task as any).payload),
-    userId: (task as any)?.user?.id,
-  }
-}
-
-const validateQueue = (queue: Bull.Queue) => {
-  if (typeof queue === 'undefined') {
-    throw new Error('The queue was not started')
-  }
-}
-
-const addToQueue = async <T extends Task>(
-  task: T,
-  queue: Bull.Queue<T>,
-  options?: JobOptions,
-  payloadFn?: (payload: any) => any,
-): Promise<Job<T>> => {
-  validateQueue(queue)
-
-  log.verbose(
-    {
-      task: getTaskInfo(task, payloadFn),
-      job: {
-        id: options?.jobId,
-      },
-    },
-    'adding a task to queue',
-  )
-
-  return await queue.add(task.type, task, options)
-}
-
 const initMaintenanceQueue = async () => {
   log.verbose({}, 'Initializing maintenance queue')
   if (config.workerJobs.queues.maintenance.onInit.checkNonterminatedClusters) {
-    await maintenanceQueue.add(
-      TASK_TYPE.CHECK_NON_TERMINATED_DBCLUSTERS,
-      { type: TASK_TYPE.CHECK_NON_TERMINATED_DBCLUSTERS },
-      {
-        repeat: {
-          cron: config.workerJobs.nonTerminatedDbClusters.repeatPattern,
-        },
-        jobId: TASK_TYPE.CHECK_NON_TERMINATED_DBCLUSTERS,
-      },
-    )
+    await maintenanceJobProducer.createCheckNonTerminatedDbClustersTask()
   }
 
-  await maintenanceQueue.add(
-    TASK_TYPE.CHECK_CHALLENGE_JOBS,
-    { type: TASK_TYPE.CHECK_CHALLENGE_JOBS },
-    {
-      repeat: {
-        cron: config.workerJobs.checkChallengeJobs.repeatPattern,
-      },
-      jobId: TASK_TYPE.CHECK_CHALLENGE_JOBS,
-    },
-  )
+  await maintenanceJobProducer.createCheckChallengeJobsTask()
 
   if (config.workerJobs.queues.maintenance.onInit.adminDataConsistencyReport) {
-    await maintenanceQueue.add(
-      TASK_TYPE.ADMIN_DATA_CONSISTENCY_REPORT,
-      { type: TASK_TYPE.ADMIN_DATA_CONSISTENCY_REPORT },
-      {
-        repeat: {
-          cron: config.workerJobs.adminDataConsistencyReport.repeatPattern,
-        },
-        jobId: TASK_TYPE.ADMIN_DATA_CONSISTENCY_REPORT,
-      },
-    )
+    await maintenanceJobProducer.createCheckAdminDataConsistencyReportTask()
   }
 }
 
@@ -352,7 +279,6 @@ export {
   removeRepeatable,
   removeRepeatableJob,
   findRepeatable,
-  addToQueue,
   addToFileSyncQueueEnsureUnique,
   createRunFollowUpActionJobTask,
   createCloseFileJobTask,
