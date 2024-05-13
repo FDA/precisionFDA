@@ -1,5 +1,5 @@
 /* eslint-disable no-warning-comments */
-import { AdminDataConsistencyReportOperation } from '@shared/debug/ops/admin-data-consistency-report'
+import { AdminDataConsistencyReportService } from '@shared/debug/admin-data-consistency-report.service'
 import { EmailQueueJobProducer } from '@shared/domain/email/producer/email-queue-job.producer'
 import { FileSyncQueueJobProducer } from '@shared/domain/user-file/producer/file-sync-queue-job.producer'
 import { MainQueueJobProducer } from '@shared/queue/producer/main-queue-job.producer'
@@ -20,6 +20,7 @@ import { defaultLogger as log } from '../logger'
 import { UserCtx } from '../types'
 import { clearOrphanedRepeatableJobs as utilsClearOrphanedRepeatableJobs } from './queue.utils'
 import {
+  AdminDataConsistencyReportTask,
   BasicUserJob,
   CheckStatusJob,
   SendEmailJob,
@@ -138,9 +139,9 @@ const addToQueue = async <T extends Task>(
 const initMaintenanceQueue = async () => {
   log.verbose({}, 'Initializing maintenance queue')
   if (config.workerJobs.queues.maintenance.onInit.checkNonterminatedClusters) {
-    await addToQueue(
-      { type: TASK_TYPE.CHECK_NON_TERMINATED_DBCLUSTERS as const },
-      maintenanceQueue,
+    await maintenanceQueue.add(
+      TASK_TYPE.CHECK_NON_TERMINATED_DBCLUSTERS,
+      { type: TASK_TYPE.CHECK_NON_TERMINATED_DBCLUSTERS },
       {
         repeat: {
           cron: config.workerJobs.nonTerminatedDbClusters.repeatPattern,
@@ -150,22 +151,35 @@ const initMaintenanceQueue = async () => {
     )
   }
 
-  await addToQueue({ type: TASK_TYPE.CHECK_CHALLENGE_JOBS as const }, maintenanceQueue, {
-    repeat: {
-      cron: config.workerJobs.checkChallengeJobs.repeatPattern,
+  await maintenanceQueue.add(
+    TASK_TYPE.CHECK_CHALLENGE_JOBS,
+    { type: TASK_TYPE.CHECK_CHALLENGE_JOBS },
+    {
+      repeat: {
+        cron: config.workerJobs.checkChallengeJobs.repeatPattern,
+      },
+      jobId: TASK_TYPE.CHECK_CHALLENGE_JOBS,
     },
-    jobId: TASK_TYPE.CHECK_CHALLENGE_JOBS,
-  })
+  )
 
   if (config.workerJobs.queues.maintenance.onInit.adminDataConsistencyReport) {
-    await AdminDataConsistencyReportOperation.enqueue()
+    await maintenanceQueue.add(
+      TASK_TYPE.ADMIN_DATA_CONSISTENCY_REPORT,
+      { type: TASK_TYPE.ADMIN_DATA_CONSISTENCY_REPORT },
+      {
+        repeat: {
+          cron: config.workerJobs.adminDataConsistencyReport.repeatPattern,
+        },
+        jobId: TASK_TYPE.ADMIN_DATA_CONSISTENCY_REPORT,
+      },
+    )
   }
 }
 
 // removeRepeatable and removeRepeatableJob explanation:
 //     removeRepeatable calls calls queue.removeJobs, removing the job task
 //     removeRepeatableJob calls queue.removeRepeatable, removing the entity with 'cron'
-// Hypothesis: if we remove the repetableJob (the entity with 'cron') alongside the job as is currently done
+// Hypothesis: if we remove the repeatableJob (the entity with 'cron') alongside the job as is currently done
 //             when a sync task such as SyncJobOperation finishes, it may be the most correct way of cleaning
 //             up repeatable jobs
 // TODO: dig deeper into bull queue's implementation to verify the above

@@ -1,6 +1,3 @@
-/* eslint-disable @typescript-eslint/no-floating-promises */
-import { config } from '@shared/config'
-import { database } from '@shared/database'
 import { EmailSendOperation } from '@shared/domain/email/ops/email-send'
 import { Job } from '@shared/domain/job/job.entity'
 import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
@@ -9,17 +6,16 @@ import { Folder } from '@shared/domain/user-file/folder.entity'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { Node } from '@shared/domain/user-file/node.entity'
 import { User } from '@shared/domain/user/user.entity'
-import { JobRepository } from '../../domain/job/job.repository'
-import { BaseOperation } from '@shared/utils/base-operation'
-import { OpsCtx, UserCtx } from '../../types'
-import { AdminDataConsistencyReportTask, TASK_TYPE } from '../../queue/task.input'
-import { SPACE_MEMBERSHIP_SIDE } from '../../domain/space-membership/space-membership.enum'
-import { adminDataConsistencyReportTemplate } from '../../domain/email/templates/mjml/admin-data-consistency-report.template'
-import { EMAIL_TYPES, EmailSendInput } from '../../domain/email/email.config'
-import { addToQueue, createSendEmailTask, getMaintenanceQueue } from '../../queue'
-import { EntityManager } from '@mikro-orm/mysql'
-import { SPACE_TYPE } from '../../domain/space/space.enum'
-
+import { JobRepository } from '../domain/job/job.repository'
+import { UserCtx } from '../types'
+import { SPACE_MEMBERSHIP_SIDE } from '../domain/space-membership/space-membership.enum'
+import { adminDataConsistencyReportTemplate } from '../domain/email/templates/mjml/admin-data-consistency-report.template'
+import { EMAIL_TYPES, EmailSendInput } from '../domain/email/email.config'
+import { SqlEntityManager } from '@mikro-orm/mysql'
+import { SPACE_TYPE } from '../domain/space/space.enum'
+import { Injectable, Logger } from '@nestjs/common'
+import { ServiceLogger } from '@shared/logger/decorator/service-logger'
+import { EmailQueueJobProducer } from '@shared/domain/email/producer/email-queue-job.producer'
 
 export type AdminDataConsistencyReportOutput = {
   httpsFilesCount?: number
@@ -38,10 +34,10 @@ export type AdminDataConsistencyReportOutput = {
   spacesWithErrorsCount?: number
 }
 
-// AdminDataConsistencyReportOperation is to be run by an admin to check on the overall
+// AdminDataConsistencyReportService is to be run by an admin to check on the overall
 // health and consistency of our database records
 //
-// Anything that requires the user token will be handle by UserDataConsistencyReportOperation instead
+// Anything that requires the user token will be handled by UserDataConsistencyReportOperation instead
 //
 // Current checks
 //  - Unclosed files and how long they've been
@@ -50,37 +46,20 @@ export type AdminDataConsistencyReportOutput = {
 //  - Summary of PFDA Only (local) folders
 //  - Find any dxids that have multiple entries in nodes table
 //  - Find any spaces that have multiple leads per side
-//
-export class AdminDataConsistencyReportOperation extends BaseOperation<
-OpsCtx,
-never,
-AdminDataConsistencyReportOutput
-> {
-  private em: EntityManager = this.ctx.em
+@Injectable()
+export class AdminDataConsistencyReportService {
+  @ServiceLogger()
+  private readonly log: Logger
 
-  static async enqueue(): Promise<void> {
-    const task: AdminDataConsistencyReportTask = {
-      type: TASK_TYPE.ADMIN_DATA_CONSISTENCY_REPORT,
-    }
-    await addToQueue<AdminDataConsistencyReportTask>(task, getMaintenanceQueue(), {
-      repeat: {
-        cron: config.workerJobs.adminDataConsistencyReport.repeatPattern,
-      },
-      jobId: TASK_TYPE.ADMIN_DATA_CONSISTENCY_REPORT,
-    })
-  }
+  constructor(
+    private readonly em: SqlEntityManager,
+    private readonly emailsJobProducer: EmailQueueJobProducer,
+  ) {}
 
-  async run(): Promise<AdminDataConsistencyReportOutput> {
-    const log = this.ctx.log
-    try {
-      this.em = await database.getReadOnlyEM()
-    } catch (error) {
-      log.warn('Not connected to the readonly replica db, using main db')
-    }
-
+  async createReport(): Promise<AdminDataConsistencyReportOutput> {
     let output: AdminDataConsistencyReportOutput = {}
 
-    log.verbose('AdminDataConsistencyReportOperation: Starting operation')
+    this.log.verbose('AdminDataConsistencyReportService: Starting createReport')
 
     try {
       const infoMapping = (f: any): any => {
@@ -95,30 +74,30 @@ AdminDataConsistencyReportOutput
       }
 
       // Check for HTTPS files and folders
-      //
       const userFileRepo = this.em.getRepository(UserFile)
-      output.httpsFilesCount = await userFileRepo.count({ }, { filters: ['userfile', 'https'] })
+      output.httpsFilesCount = await userFileRepo.count({}, { filters: ['userfile', 'https'] })
 
       const folderRepo = this.em.getRepository(Folder)
-      output.httpsFoldersCount = await folderRepo.count({ }, { filters: ['folder', 'https'] })
-
+      output.httpsFoldersCount = await folderRepo.count({}, { filters: ['folder', 'https'] })
 
       // Check for PFDA-only folders
-      //
       const pfdaOnlyFolders = await folderRepo.findAllPFDAOnlyFolders()
       output.pfdaOnlyFoldersCount = pfdaOnlyFolders.length
       output.pfdaOnlyFolders = pfdaOnlyFolders.map(infoMapping)
-
 
       const nodesWithParents: any[] = await this.checkInconsistentNodes()
       output.foldersWithParent = nodesWithParents
       output.foldersWithParentCount = nodesWithParents.length
 
-
       // Check for files that are in open, abandoned or removing state and
       // note the elapsed time since creation
-      //
-      const unclosedFiles = await userFileRepo.find({ }, { filters: ['unclosed'], populate: ['user'] })
+      const unclosedFiles = await userFileRepo.find(
+        {},
+        {
+          filters: ['unclosed'],
+          populate: ['user'],
+        },
+      )
       output.unclosedFilesCount = unclosedFiles.length
       output.unclosedFiles = unclosedFiles.map(infoMapping)
 
@@ -126,16 +105,15 @@ AdminDataConsistencyReportOutput
       output.runningJobs = runningJobsInfo
       output.runningJobsCount = runningJobsInfo.length
 
-
       const spacesInfo: any[] = await this.checkInconsistentSpaces()
       output.spaces = spacesInfo
       output.spacesWithErrorsCount = spacesInfo.length
 
-      log.verbose({ output }, 'AdminDataConsistencyReportOperation: Completed')
+      this.log.verbose({ output }, 'AdminDataConsistencyReportService: Completed')
 
       await this.sendReportEmail(output)
     } catch (error) {
-      log.error({ error, output }, 'AdminDataConsistencyReportOperation: Error')
+      this.log.error({ error, output }, 'AdminDataConsistencyReportService: Error')
     }
 
     return output
@@ -143,14 +121,13 @@ AdminDataConsistencyReportOutput
 
   async checkInconsistentSpaces(): Promise<any[]> {
     // Check Spaces for leads inconsistency
-    // Billing inconsistencies can only be checked using the lead's token and is done in UserDataConsistencyReportOperation
-    //
+    // Billing inconsistencies can only be checked using the lead's token and is done in AdminDataConsistencyReportService
     const spacesInfo: any[] = []
     const spaceRepo = this.em.getRepository(Space)
     const spaces = await spaceRepo.findAll({
-      populate: ['spaceMemberships', 'spaceMemberships.user']
+      populate: ['spaceMemberships', 'spaceMemberships.user'],
     })
-    const leadMapping = ((lead: SpaceMembership) => {
+    const leadMapping = (lead: SpaceMembership) => {
       const user = lead.user.getEntity()
       return {
         id: lead.id,
@@ -167,23 +144,28 @@ AdminDataConsistencyReportOutput
         privateComparisonsProject: user.privateComparisonsProject,
         publicComparisonsProject: user.publicComparisonsProject,
       }
-    });
+    }
+
     for (const space of spaces) {
       const errors: string[] = []
 
       // There should not be more than one lead on either side
-      const allHostLeads = await space.spaceMemberships.getItems().filter(x => {
+      const allHostLeads = space.spaceMemberships.getItems().filter((x) => {
         return x.isLead() && x.side === SPACE_MEMBERSHIP_SIDE.HOST
       })
       if (allHostLeads.length > 1) {
-        errors.push(`Error: more than one host lead - ${JSON.stringify(allHostLeads.map(leadMapping))}`)
+        errors.push(
+          `Error: more than one host lead - ${JSON.stringify(allHostLeads.map(leadMapping))}`,
+        )
       }
 
-      const allGuestLeads = await space.spaceMemberships.getItems().filter(x => {
+      const allGuestLeads = space.spaceMemberships.getItems().filter((x) => {
         return x.isLead() && x.side === SPACE_MEMBERSHIP_SIDE.GUEST
       })
       if (allGuestLeads.length > 1) {
-        errors.push(`Error: more than one guest lead - ${JSON.stringify(allGuestLeads.map(leadMapping))}`)
+        errors.push(
+          `Error: more than one guest lead - ${JSON.stringify(allGuestLeads.map(leadMapping))}`,
+        )
       }
 
       if (errors.length > 0) {
@@ -199,7 +181,7 @@ AdminDataConsistencyReportOutput
           hostLead: hostLead?.dxuser,
           guestDxtOrg: space.guestDxOrg,
           guestLead: guestLead?.dxuser,
-          status: errors.join('\n')
+          status: errors.join('\n'),
         })
       }
     }
@@ -229,7 +211,6 @@ AdminDataConsistencyReportOutput
 
   async checkInconsistentNodes(): Promise<any[]> {
     // Check for files/folders/assets with inconsistent parents
-    //
     const allNodes = await this.em.getRepository(Node).find({
       parentFolderId: { $ne: null },
       scopedParentFolderId: { $ne: null },
@@ -253,7 +234,7 @@ AdminDataConsistencyReportOutput
   }
 
   private async sendReportEmail(output: AdminDataConsistencyReportOutput): Promise<void> {
-    const adminUser = await this.ctx.em.getRepository(User).findAdminUser()
+    const adminUser = await this.em.getRepository(User).findAdminUser()
     const body = adminDataConsistencyReportTemplate({
       receiver: adminUser,
       content: output,
@@ -266,8 +247,12 @@ AdminDataConsistencyReportOutput
     }
 
     const jobId = EmailSendOperation.getBullJobId(EMAIL_TYPES.adminDataConsistencyReport)
-    this.ctx.log.verbose('AdminDataConsistencyReportOperation: Sending report email to admin')
-    const tempUserCtx: UserCtx = { id: adminUser.id, dxuser: adminUser.dxuser, accessToken: 'notUsed' }
-    await createSendEmailTask(email, tempUserCtx, jobId)
+    this.log.verbose('AdminDataConsistencyReportService: Sending report email to admin')
+    const tempUserCtx: UserCtx = {
+      id: adminUser.id,
+      dxuser: adminUser.dxuser,
+      accessToken: 'notUsed',
+    }
+    await this.emailsJobProducer.createSendEmailTask(email, tempUserCtx, jobId)
   }
 }

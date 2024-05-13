@@ -4,7 +4,7 @@ import { Inject } from '@nestjs/common'
 import { config } from '@shared/config'
 import { DEPRECATED_SQL_ENTITY_MANAGER } from '@shared/database/provider/deprecated-sql-entity-manager.provider'
 import { testHeapMemoryAllocationError } from '@shared/debug/memory-tests'
-import { AdminDataConsistencyReportOperation } from '@shared/debug/ops/admin-data-consistency-report'
+import { AdminDataConsistencyReportService } from '@shared/debug/admin-data-consistency-report.service'
 import { JobService } from '@shared/domain/job/job.service'
 import { UserCheckupOperation } from '@shared/domain/user/ops/user-checkup'
 import { PlatformClient } from '@shared/platform-client'
@@ -25,7 +25,10 @@ import { BaseQueueProcessor } from './base-queue.processor'
 
 @Processor(config.workerJobs.queues.maintenance.name)
 export class MaintenanceQueueProcessor extends BaseQueueProcessor {
-  constructor(@Inject(DEPRECATED_SQL_ENTITY_MANAGER) private readonly em: SqlEntityManager) {
+  constructor(
+    @Inject(DEPRECATED_SQL_ENTITY_MANAGER) private readonly em: SqlEntityManager,
+    private readonly adminDataConsistencyReportService: AdminDataConsistencyReportService,
+  ) {
     super()
   }
 
@@ -73,10 +76,8 @@ export class MaintenanceQueueProcessor extends BaseQueueProcessor {
   }
 
   @ProcessWithContext(TASK_TYPE.ADMIN_DATA_CONSISTENCY_REPORT)
-  async reportAdminDataConsistency(job: Job) {
-    return await this.handleUserTask(job, async (ctx) => {
-      return await new AdminDataConsistencyReportOperation(ctx).execute()
-    })
+  async reportAdminDataConsistency() {
+    await this.adminDataConsistencyReportService.createReport()
   }
 
   @ProcessWithContext(TASK_TYPE.DEBUG_MAX_MEMORY)
