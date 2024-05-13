@@ -8,7 +8,7 @@ import { DataPortalModule } from '@shared/domain/data-portal/data-portal.module'
 import { ChallengeModule } from '@shared/domain/challenge/challenge.module'
 import { UserFileWorkerModule } from '../domain/user-file/user-file.worker.module'
 import { DebugModule } from '@shared/debug/debug.module'
-
+import { DbClusterModule } from '@shared/domain/db-cluster/db-cluster.module'
 @Module({
   imports: [
     QueueModule,
@@ -17,6 +17,7 @@ import { DebugModule } from '@shared/debug/debug.module'
     ChallengeModule,
     UserFileWorkerModule,
     SpaceReportModule,
+    DbClusterModule,
     DebugModule,
   ],
   providers: [MainQueueProcessor, MaintenanceQueueProcessor],

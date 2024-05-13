@@ -22,16 +22,16 @@ const jobToProcessorMap: Partial<Record<TASK_TYPE, (job: Job) => Promise<void> |
   [TASK_TYPE.SEND_EMAIL]: (job) => processor.EMAIL().sendEmail(job),
   [TASK_TYPE.CHECK_STALE_JOBS]: (job) => processor.MAINTENANCE().checkStaleJobs(job),
   [TASK_TYPE.REMOVE_NODES]: (job) => processor.FILE().removeNodes(job),
-  [TASK_TYPE.CHECK_NON_TERMINATED_DBCLUSTERS]: (job) =>
-    processor.MAINTENANCE().checkNonTerminatedDbClusters(job),
+  [TASK_TYPE.CHECK_NON_TERMINATED_DBCLUSTERS]: () =>
+    processor.MAINTENANCE().checkNonTerminatedDbClusters(),
   [TASK_TYPE.SYNC_DBCLUSTER_STATUS]: (job) => processor.MAIN().syncDbClusterStatus(job),
   [TASK_TYPE.SYNC_SPACES_PERMISSIONS]: (job) => processor.MAINTENANCE().syncSpacesPermissions(job),
   [TASK_TYPE.USER_CHECKUP]: (job) => processor.MAINTENANCE().userCheckup(job),
   [TASK_TYPE.USER_DATA_CONSISTENCY_REPORT]: (job) =>
     processor.FILE().reportUserDataConsistency(job),
   [TASK_TYPE.CHECK_USER_JOBS]: (job) => processor.MAINTENANCE().checkUserJobs(job),
-  [TASK_TYPE.ADMIN_DATA_CONSISTENCY_REPORT]: (job) =>
-    processor.MAINTENANCE().reportAdminDataConsistency(job),
+  [TASK_TYPE.ADMIN_DATA_CONSISTENCY_REPORT]: () =>
+    processor.MAINTENANCE().reportAdminDataConsistency(),
   [TASK_TYPE.DEBUG_MAX_MEMORY]: () => processor.MAINTENANCE().debugMaxMemory(),
   [TASK_TYPE.LOCK_NODES]: (job) => processor.FILE().lockNodes(job),
   [TASK_TYPE.UNLOCK_NODES]: (job) => processor.FILE().unlockNodes(job),

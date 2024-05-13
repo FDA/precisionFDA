@@ -16,6 +16,51 @@ export class MaintenanceQueueJobProducer extends QueueJobProducer {
     super()
   }
 
+  async createCheckAdminDataConsistencyReportTask() {
+    const wrapped = {
+      type: TASK_TYPE.ADMIN_DATA_CONSISTENCY_REPORT as const,
+      payload: undefined as any,
+    }
+
+    const options: JobOptions = {
+      jobId: TASK_TYPE.ADMIN_DATA_CONSISTENCY_REPORT,
+      repeat: {
+        cron: config.workerJobs.adminDataConsistencyReport.repeatPattern,
+      },
+    }
+    return await this.addToQueue(wrapped, options)
+  }
+
+  async createCheckChallengeJobsTask() {
+    const wrapped = {
+      type: TASK_TYPE.CHECK_CHALLENGE_JOBS as const,
+      payload: undefined as any,
+    }
+
+    const options: JobOptions = {
+      jobId: TASK_TYPE.CHECK_CHALLENGE_JOBS,
+      repeat: {
+        cron: config.workerJobs.checkChallengeJobs.repeatPattern,
+      },
+    }
+    return await this.addToQueue(wrapped, options)
+  }
+
+  async createCheckNonTerminatedDbClustersTask() {
+    const wrapped = {
+      type: TASK_TYPE.CHECK_NON_TERMINATED_DBCLUSTERS as const,
+      payload: undefined as any,
+    }
+
+    const options: JobOptions = {
+      jobId: TASK_TYPE.CHECK_NON_TERMINATED_DBCLUSTERS,
+      repeat: {
+        cron: config.workerJobs.nonTerminatedDbClusters.repeatPattern,
+      },
+    }
+    return await this.addToQueue(wrapped, options)
+  }
+
   async createCheckStaleJobsTask(user: UserCtx) {
     const wrapped = {
       type: TASK_TYPE.CHECK_STALE_JOBS as const,
