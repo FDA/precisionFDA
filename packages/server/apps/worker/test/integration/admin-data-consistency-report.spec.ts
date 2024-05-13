@@ -1,36 +1,26 @@
-/* eslint-disable max-len */
 import { database } from '@shared/database'
-import {
-  AdminDataConsistencyReportOperation
-} from '@shared/debug/ops/admin-data-consistency-report'
 import { App } from '@shared/domain/app/app.entity'
-import { Job } from '@shared/domain/job/job.entity'
 import { Space } from '@shared/domain/space/space.entity'
 import { User } from '@shared/domain/user/user.entity'
-import { Node } from '@shared/domain/user-file/node.entity'
-import { getLogger } from '@shared/logger'
-/* eslint-disable no-inline-comments */
-/* eslint-disable no-undefined */
 import { expect } from 'chai'
 import { create, db, generate } from '@shared/test'
 import { mocksReset } from '@shared/test/mocks'
-import { fakes as queueFakes, mocksReset as queueMocksReset } from '../utils/mocks'
+import { mocksReset as queueMocksReset } from '../utils/mocks'
 import { EntityManager } from '@mikro-orm/mysql'
 import { FILE_STATE_DX, PARENT_TYPE } from '@shared/domain/user-file/user-file.types'
 import { JOB_STATE } from '@shared/domain/job/job.enum'
 import { SPACE_MEMBERSHIP_ROLE, SPACE_MEMBERSHIP_SIDE } from '@shared/domain/space-membership/space-membership.enum'
-
-
-const log = getLogger()
+import { EmailQueueJobProducer } from '@shared/domain/email/producer/email-queue-job.producer'
+import {
+  AdminDataConsistencyReportService
+} from '@shared/debug/admin-data-consistency-report.service'
 
 // Very basic tests for now to make sure this queues and runs
 describe('TASK: AdminDataConsistencyReportOperation', () => {
   let em: EntityManager
-  let adminUser: User
+  let eqjp: EmailQueueJobProducer
   let user: User
   let app: App
-  let fakeNodes: Node[]
-  let fakeJobs: Job[]
   let exceedingHostSpace: Space
   let exceedingGuestSpace: Space
   let normalSpace: Space
@@ -39,7 +29,7 @@ describe('TASK: AdminDataConsistencyReportOperation', () => {
     await db.dropData(database.connection())
     em = <EntityManager>database.orm().em.fork()
     em.clear()
-    adminUser = create.userHelper.createAdmin(em)
+    create.userHelper.createAdmin(em)
     user = create.userHelper.create(em)
     await em.flush()
 
@@ -49,18 +39,14 @@ describe('TASK: AdminDataConsistencyReportOperation', () => {
       state: FILE_STATE_DX.CLOSED
     }
 
-    fakeNodes = [
-      create.filesHelper.create(em, { user }, { ...filesParams, parentFolderId: 1 }),
-      create.filesHelper.create(em, { user }, { ...filesParams, scopedParentFolderId: 1 }),
-      create.filesHelper.create(em, { user }, { ...filesParams, parentFolderId: 1, scopedParentFolderId: 0 }),
-      create.filesHelper.create(em, { user }, { ...filesParams, parentFolderId: 2, scopedParentFolderId: 1 }),
-    ]
+    create.filesHelper.create(em, { user }, { ...filesParams, parentFolderId: 1 })
+    create.filesHelper.create(em, { user }, { ...filesParams, scopedParentFolderId: 1 })
+    create.filesHelper.create(em, { user }, { ...filesParams, parentFolderId: 1, scopedParentFolderId: 0 })
+    create.filesHelper.create(em, { user }, { ...filesParams, parentFolderId: 2, scopedParentFolderId: 1 })
 
-    fakeJobs = [
-      create.jobHelper.create(em, { user, app }, { state: JOB_STATE.RUNNING }),
-      create.jobHelper.create(em, { user, app }, { state: JOB_STATE.DONE }),
-      create.jobHelper.create(em, { user, app }, { state: JOB_STATE.RUNNING })
-    ]
+    create.jobHelper.create(em, { user, app }, { state: JOB_STATE.RUNNING })
+    create.jobHelper.create(em, { user, app }, { state: JOB_STATE.DONE })
+    create.jobHelper.create(em, { user, app }, { state: JOB_STATE.RUNNING })
 
     const host = create.userHelper.create(em)
     const user1 = create.userHelper.create(em)
@@ -80,33 +66,30 @@ describe('TASK: AdminDataConsistencyReportOperation', () => {
     create.spacesHelper.addMember(em, {user: host, space: normalSpace}, {role: SPACE_MEMBERSHIP_ROLE.LEAD, side: SPACE_MEMBERSHIP_SIDE.HOST})
     create.spacesHelper.addMember(em, {user: guest, space: normalSpace}, {role: SPACE_MEMBERSHIP_ROLE.LEAD, side: SPACE_MEMBERSHIP_SIDE.GUEST})
 
+    eqjp = {} as EmailQueueJobProducer
+
     await em.flush()
     mocksReset()
     queueMocksReset()
   })
 
-  it('enqueues correctly', async () => {
-    await AdminDataConsistencyReportOperation.enqueue()
-    expect(queueFakes.addToQueueStub.callCount).to.equal(1)
-  })
-
   it('checkInconsistentSpaces', async () => {
-    const op = new AdminDataConsistencyReportOperation({ em, log })
-    const output = await op.checkInconsistentSpaces()
+    const service = new AdminDataConsistencyReportService(em, eqjp)
+    const output = await service.checkInconsistentSpaces()
     expect(output).to.have.length(2)
   })
 
   it('checkRunningJobs returns user info', async () => {
-    const op = new AdminDataConsistencyReportOperation({ em, log })
-    const output = await op.checkRunningJobs()
+    const service = new AdminDataConsistencyReportService(em, eqjp)
+    const output = await service.checkRunningJobs()
     expect(output).to.have.length(2)
     expect(output[0].userDxid).to.be.equal(user.dxid)
     expect(output[1].userDxid).to.be.equal(user.dxid)
   })
 
   it('checkInconsistentNodes', async () => {
-    const op = new AdminDataConsistencyReportOperation({ em, log })
-    const output = await op.checkInconsistentNodes()
+    const service = new AdminDataConsistencyReportService(em, eqjp)
+    const output = await service.checkInconsistentNodes()
     expect(output).to.have.length(2)
     expect(output[0].parentFolderId).to.not.be.null()
     expect(output[0].scopedParentFolderId).to.not.be.null()
@@ -115,8 +98,8 @@ describe('TASK: AdminDataConsistencyReportOperation', () => {
   })
 
   it('runs', async () => {
-    const op = new AdminDataConsistencyReportOperation({ em, log })
-    const output = await op.run()
+    const service = new AdminDataConsistencyReportService(em, eqjp)
+    const output = await service.createReport()
     expect(output).to.not.be.null()
   })
 })

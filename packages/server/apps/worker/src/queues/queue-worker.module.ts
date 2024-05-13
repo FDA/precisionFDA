@@ -7,6 +7,7 @@ import { UserFileModule } from '@shared/domain/user-file/user-file.module'
 import { DataPortalModule } from '@shared/domain/data-portal/data-portal.module'
 import { ChallengeModule } from '@shared/domain/challenge/challenge.module'
 import { UserFileWorkerModule } from '../domain/user-file/user-file.worker.module'
+import { DebugModule } from '@shared/debug/debug.module'
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { UserFileWorkerModule } from '../domain/user-file/user-file.worker.modul
     ChallengeModule,
     UserFileWorkerModule,
     SpaceReportModule,
+    DebugModule,
   ],
   providers: [MainQueueProcessor, MaintenanceQueueProcessor],
 })

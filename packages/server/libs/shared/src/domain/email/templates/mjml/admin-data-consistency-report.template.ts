@@ -1,4 +1,4 @@
-import { AdminDataConsistencyReportOutput } from '@shared/debug/ops/admin-data-consistency-report'
+import { AdminDataConsistencyReportOutput } from '@shared/debug/admin-data-consistency-report.service'
 import { EmailTemplateInput } from '@shared/domain/email/email.config'
 import { header, footer } from './common'
 
