@@ -53,7 +53,7 @@ export const ForkAppPage = ({ spaceId }: { spaceId?: number }) => {
         forked_from: data.app.uid,
         instance_type: data.meta.spec.instance_type,
         internet_access: data.meta.spec.internet_access,
-        release: data.meta.release || '16.04',
+        release: data.meta.release || '20.04',
         scope: 'private',
         ordered_assets: data?.meta?.assets || [],
         code: data.meta?.internal?.code || '',
