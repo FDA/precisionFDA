@@ -4,7 +4,7 @@ import { Asset } from '@shared/domain/user-file/asset.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { ValidationError } from '@shared/errors'
 import * as crypto from 'crypto'
-import { UBUNTU_16, UBUNTU_RELEASES, VALID_IO_CLASSES } from '../../../config/consts'
+import { UBUNTU_20, UBUNTU_RELEASES, VALID_IO_CLASSES } from '../../../config/consts'
 import { validUbuntuPackages } from '../../../config/ubuntu_packages'
 import { STATIC_SCOPE } from '../../../enums'
 import { getLogger } from '../../../logger'
@@ -354,7 +354,7 @@ export class AppService implements IAppService {
       let appSeries = await this.createOrGetAppSeries(user, appInput.name, scope)
 
       // - get release
-      const release = appInput.release ? appInput.release : UBUNTU_16
+      const release = appInput.release ? appInput.release : UBUNTU_20
 
       // - find the latest revision and increase it by one
       const revision = await this.getAppRevision(appSeries.latestRevisionAppId)

@@ -42,7 +42,7 @@ import { useFetchAppQuery } from './useFetchAppQuery'
 import { getBasePath } from '../home/utils'
 import { getSpaceIdFromScope } from '../../utils'
 
-const renderOptions = (app: IApp, homeScope?: HomeScope) => {
+const renderOptions = (app: IApp, meta: { release: string }, homeScope?: HomeScope) => {
   const spaceId = getSpaceIdFromScope(app.scope)
   const columns = [
     {
@@ -105,7 +105,17 @@ const renderOptions = (app: IApp, homeScope?: HomeScope) => {
     </MetadataItem>
   ))
 
-  return <MetadataSection><MetadataRow>{list}</MetadataRow></MetadataSection>
+  return (
+    <MetadataSection>
+      <MetadataRow>
+        {list}
+        <MetadataItem>
+          <MetadataKey>Ubuntu Release</MetadataKey>
+          <MetadataVal>{meta.release}</MetadataVal>
+        </MetadataItem>
+      </MetadataRow>
+    </MetadataSection>
+  )
 }
 
 const DetailActionsDropdown = (
@@ -251,7 +261,7 @@ export const AppsShow = ({ spaceId, emitScope, homeScope }: { homeScope?: HomeSc
           </div>
         </Header>
 
-        {renderOptions(app, homeScope)}
+        {renderOptions(app, meta, homeScope)}
         {app.tags.length > 0 && (
           <MetadataSection>
             <MetadataRow>

@@ -55,7 +55,7 @@ export const EditAppPage = ({ spaceId }: { spaceId?: string }) => {
         forked_from: data.app.forked_from,
         instance_type: data.meta.spec.instance_type,
         internet_access: data.meta.spec.internet_access,
-        release: data.meta.release || '16.04',
+        release: data.meta.release || '20.04',
         scope: data.app.scope,
         ordered_assets: data?.meta?.assets || [],
         code: data.meta?.internal?.code || '',

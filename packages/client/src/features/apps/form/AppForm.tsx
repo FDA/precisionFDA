@@ -52,7 +52,7 @@ import MonacoEditor from '../../../components/MonacoEditor/MonacoEditor'
 type SelectedSection = 'io' | 'vm' | 'script' | 'readme'
 
 const ubuntuReleasesOptions = [
-  { value: '16.04', label: '16.04' },
+  { value: '16.04', label: '16.04', disabled: true },
   { value: '20.04', label: '20.04' },
 ]
 
@@ -100,7 +100,7 @@ export const AppForm = ({
           internet_access: false,
           ordered_assets: [],
           packages: [],
-          release: '16.04',
+          release: '20.04',
           scope: 'private',
         }
       : defaultVals,
@@ -225,6 +225,7 @@ export const AppForm = ({
                     isDisabled={isSubmitting}
                     onChange={(option) => field.onChange(option?.value)}
                     value={ubuntuReleasesOptions.find(option => option.value === field.value)}
+                    isOptionDisabled={(option) => option.disabled}
                   />
                   <ErrorMessage
                     errors={errors}
