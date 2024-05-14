@@ -190,6 +190,14 @@ const Docs = () => {
             >
               Spaces
             </NavItem>
+            <NavItem
+              activeClassName="active"
+              $active={false}
+              to="https://www.fda.gov/media/169513/download?attachment"
+              data-turbolinks="false"
+            >
+              GSRS Substance Submission
+            </NavItem>
             {isAdmin && (
               <>
                 <DocsTitle>Administrator Features</DocsTitle>

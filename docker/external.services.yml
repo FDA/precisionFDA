@@ -1,7 +1,7 @@
 services:
   gsrs:
     build:
-      context: ../
+      context: ../packages/rails
       dockerfile: docker/images/gsrs.Dockerfile
     ports:
       - 8080:8080
