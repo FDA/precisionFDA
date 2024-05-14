@@ -824,6 +824,7 @@ module Api
         Folder.editable_by(@context).
           where(parent_folder_id: params[:parent_folder_id]).
           where(name: params[:name]).
+          where(scope: scope).
           first.id
       else
         Folder.editable_by(@context).
