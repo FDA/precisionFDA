@@ -6,7 +6,7 @@ SecureHeaders::Configuration.default do |config|
   hsts_max_age = 0 if Rails.env.development? && ActiveRecord::Type::Boolean.new.cast(ENV.fetch("DISABLE_HSTS", false))
   config.hsts = "max-age=#{hsts_max_age}; includeSubDomains; preload"
 
-  config.x_frame_options = "DENY"
+  config.x_frame_options = "SAMEORIGIN"
   config.x_content_type_options = "nosniff"
   config.x_xss_protection = "1; mode=block"
   config.x_download_options = "noopen"
@@ -17,6 +17,7 @@ SecureHeaders::Configuration.default do |config|
     base_uri: %w('self'),
     block_all_mixed_content: true, # see [http://www.w3.org/TR/mixed-content/](http://www.w3.org/TR/mixed-content/)
     child_src: %w('self' https://www.youtube.com blob:),
+    # "data:" is necessary because of the Ketcher in GSRS
     connect_src: %w(
       'self'
       wss://localhost:*
@@ -32,11 +33,12 @@ SecureHeaders::Configuration.default do |config|
       https://stagingdl.dnanex.us
       https://dl.dnanex.us
       https://api.dnanexus.com
+      data:
     ),
     default_src: %w(https: 'self'),
     font_src: %w('self' https://fonts.gstatic.com https://cdnjs.cloudflare.com),
     form_action: %w('self' https://stagingdl.dnanex.us https://dl.dnanex.us),
-    frame_ancestors: %w('none'),
+    frame_ancestors: %w('self'),
     frame_src: %w(
       'self'
       https://www.youtube.com
