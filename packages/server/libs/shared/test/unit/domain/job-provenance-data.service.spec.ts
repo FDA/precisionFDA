@@ -22,7 +22,7 @@ describe('JobProvenanceDataService', () => {
 
   const loadFilesStub = stub()
   const loadAppStub = stub()
-  const getEntityLinkStub = stub()
+  const getEntityUiLinkStub = stub()
 
   const JOB = {
     name: NAME,
@@ -40,9 +40,9 @@ describe('JobProvenanceDataService', () => {
     loadAppStub.reset()
     loadAppStub.resolves(APP)
 
-    getEntityLinkStub.reset()
-    getEntityLinkStub.throws()
-    getEntityLinkStub.withArgs(JOB).resolves(LINK)
+    getEntityUiLinkStub.reset()
+    getEntityUiLinkStub.throws()
+    getEntityUiLinkStub.withArgs(JOB).resolves(LINK)
 
     getEntityTypeForEntityStub = stub(EntityUtils, 'getEntityTypeForEntity').throws()
     getEntityTypeForEntityStub.withArgs(JOB).returns('job')
@@ -110,7 +110,7 @@ describe('JobProvenanceDataService', () => {
   })
 
   function getInstance() {
-    const entityService = { getEntityLink: getEntityLinkStub } as unknown as EntityService
+    const entityService = { getEntityUiLink: getEntityUiLinkStub } as unknown as EntityService
 
     return new JobProvenanceDataService(entityService)
   }

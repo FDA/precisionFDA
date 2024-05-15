@@ -39,15 +39,6 @@ export class DataPortalsController {
   }
 
   /**
-   * Creates resource link.
-   */
-  @HttpCode(201)
-  @Post('/:portalId/resources/:resourceId')
-  async createResourceLink(@Param('resourceId', ParseIntPipe) resourceId: number) {
-    return await this.dataPortalService.createResourceLink(resourceId)
-  }
-
-  /**
    * Creates new card image (just the metadata).
    */
   @HttpCode(201)

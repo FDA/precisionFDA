@@ -8,6 +8,7 @@ import {
   Property,
   Ref,
 } from '@mikro-orm/core'
+import { UId } from '@shared/domain/entity/domain/uid'
 import { NodeProperty } from '@shared/domain/property/node-property.entity'
 import { NodeRepository } from '@shared/domain/user-file/node.repository'
 import { User } from '@shared/domain/user/user.entity'
@@ -31,7 +32,7 @@ export class Node extends BaseEntity {
   dxid?: string
 
   @Property({ unique: true })
-  uid: string
+  uid: UId
 
   @Property()
   name: string

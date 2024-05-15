@@ -12,14 +12,14 @@ describe('UserProvenanceDataService', () => {
 
   const USER = { fullName: FULL_NAME, dxuser: DXUSER } as unknown as User
 
-  const getEntityLinkStub = stub()
+  const getEntityUiLinkStub = stub()
 
   let getEntityTypeForEntityStub: SinonStub
 
   beforeEach(() => {
-    getEntityLinkStub.reset()
-    getEntityLinkStub.throws()
-    getEntityLinkStub.withArgs(USER).resolves(LINK)
+    getEntityUiLinkStub.reset()
+    getEntityUiLinkStub.throws()
+    getEntityUiLinkStub.withArgs(USER).resolves(LINK)
 
     getEntityTypeForEntityStub = stub(EntityUtils, 'getEntityTypeForEntity').throws()
     getEntityTypeForEntityStub.withArgs(USER).returns('user')
@@ -46,7 +46,7 @@ describe('UserProvenanceDataService', () => {
   })
 
   function getInstance() {
-    const entityService = { getEntityLink: getEntityLinkStub } as unknown as EntityService
+    const entityService = { getEntityUiLink: getEntityUiLinkStub } as unknown as EntityService
 
     return new UserProvenanceDataService(entityService)
   }

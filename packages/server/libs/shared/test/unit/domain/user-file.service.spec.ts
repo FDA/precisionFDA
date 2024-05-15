@@ -1,5 +1,6 @@
 import { Reference } from '@mikro-orm/core'
 import { SqlEntityManager } from '@mikro-orm/mysql'
+import { EntityService } from '@shared/domain/entity/entity.service'
 import { NotificationService } from '@shared/domain/notification/services/notification.service'
 import { UserFileCreate } from '@shared/domain/user-file/domain/user-file-create'
 import { UserFileService } from '@shared/domain/user-file/service/user-file.service'
@@ -17,7 +18,6 @@ import { Logger } from '@nestjs/common'
 import { UserFileRepository } from '@shared/domain/user-file/user-file.repository'
 import { UserRepository } from '@shared/domain/user/user.repository'
 import { NodeRepository } from '@shared/domain/user-file/node.repository'
-import { ResourceRepository } from '@shared/domain/resource/resource.repository'
 import * as userFileHelper from '@shared/domain/user-file/user-file.helper'
 import * as eventHelper from '@shared/domain/event/event.helper'
 import { EntityFetcherService } from '@shared/domain/entity/entity-fetcher.service'
@@ -65,7 +65,6 @@ describe('UserFileService', () => {
   const fileLoadIfAccessibleByUserStub = stub()
   const nodeRepoFindOneOrFailStub = stub()
   const nodeLoadIfAccessibleByUserStub = stub()
-  const resourceFindResourcesByFileUidStub = stub()
 
   const isSiteAdminStub = stub()
   const isChallengeAdminStub = stub()
@@ -73,6 +72,8 @@ describe('UserFileService', () => {
   const getWarningsForUnclosedFilesStub = stub()
   const sanitizeNodeNamesStub = stub()
   const renameDuplicateFilesStub = stub()
+
+  const getEntityDownloadLinkStub = stub()
 
   const fileDownloadLinkStub = stub()
   const fileDescribeStub = stub()
@@ -92,8 +93,10 @@ describe('UserFileService', () => {
   } as unknown as NotificationService
 
   const getAccessibleByIdsStub = stub()
+  const getAccessibleByUidStub = stub()
   const entityFetcherService = {
     getAccessibleByIds: getAccessibleByIdsStub,
+    getAccessibleByUid: getAccessibleByUidStub,
   } as unknown as EntityFetcherService
 
   const USER = {
@@ -115,9 +118,6 @@ describe('UserFileService', () => {
     findOneOrFail: nodeRepoFindOneOrFailStub,
     loadIfAccessibleByUser: nodeLoadIfAccessibleByUserStub,
   } as unknown as NodeRepository
-  const resourceRepository = {
-    findResourcesByFileUid: resourceFindResourcesByFileUidStub,
-  } as unknown as ResourceRepository
 
   const verboseStub = stub()
   const errorStub = stub()
@@ -140,6 +140,10 @@ describe('UserFileService', () => {
     sanitizeNodeNames: sanitizeNodeNamesStub,
     renameDuplicateFiles: renameDuplicateFilesStub,
   } as unknown as NodeHelper
+
+  const entityService = {
+    getEntityDownloadLink: getEntityDownloadLinkStub,
+  } as unknown as EntityService
 
   let createFileSynchronizeJobTaskStub: SinonStub
   let loadNodesStub: SinonStub
@@ -218,6 +222,12 @@ describe('UserFileService', () => {
     transactionalStub.callsFake(async (callback) => {
       return callback(em)
     })
+
+    getEntityDownloadLinkStub.reset()
+    getEntityDownloadLinkStub.throws()
+
+    getAccessibleByUidStub.reset()
+    getAccessibleByUidStub.throws()
   })
 
   after(() => {
@@ -319,39 +329,6 @@ describe('UserFileService', () => {
         fileUid: 'dxid-1',
         isChallengeBotFile: true,
         followUpAction: 'UPDATE_DATA_PORTAL_IMAGE_URL',
-      })
-    })
-  })
-
-  describe('#updateResourceUrl', () => {
-    it('should update resource url', async () => {
-      const userFile = {
-        dxid: DXID,
-        name: NAME,
-        project: PROJECT,
-      } as unknown as UserFile
-      const userFileEntity = {
-        getEntity: () => userFile,
-      }
-      const resource = {
-        id: 111,
-        userFile: userFileEntity,
-      }
-      const response = {
-        url: 'http://example.com',
-      }
-      fileDownloadLinkStub.returns(response)
-      resourceFindResourcesByFileUidStub.returns([resource])
-
-      await getInstance().updateResourceUrl(UID)
-
-      expect(fileDownloadLinkStub.calledOnce).to.be.true
-      expect(createNotificationStub.calledOnce).to.be.true
-      expect(createNotificationStub.firstCall.args[0]).deep.eq({
-        message: `Resource ${resource.id} updated with url ${response.url}`,
-        severity: SEVERITY.INFO,
-        action: NOTIFICATION_ACTION.RESOURCE_URL_UPDATED,
-        userId: USER.id,
       })
     })
   })
@@ -489,6 +466,61 @@ describe('UserFileService', () => {
     })
   })
 
+  describe('#getDownloadLink', () => {
+    it('should not catch error from entity service', async () => {
+      const error = new Error('my error')
+      getEntityDownloadLinkStub.throws(error)
+
+      const file = { id: 0 } as unknown as UserFile
+
+      await expect(getInstance().getDownloadLink(file)).to.be.rejectedWith(error)
+    })
+
+    it('should return the result from entity service', async () => {
+      const file = { id: 0, name: 'NAME' } as unknown as UserFile
+      const options = { preauthenticated: true }
+      getEntityDownloadLinkStub.withArgs(file, file.name, options).resolves('LINK')
+
+      const res = await getInstance().getDownloadLink(file, options)
+
+      expect(res).to.eq('LINK')
+    })
+  })
+
+  describe('#getDownloadLinkForUid', () => {
+    const FILE_UID = 'file-uid-1'
+    const FILE_NAME = 'FILE_NAME'
+    const FILE = { name: FILE_NAME, uid: FILE_UID } as unknown as UserFile
+    const OPTIONS = { preauthenticated: true }
+
+    beforeEach(() => {
+      getEntityDownloadLinkStub.withArgs(FILE, FILE.name, OPTIONS).resolves('LINK')
+      getAccessibleByUidStub.withArgs(UserFile, FILE_UID).resolves(FILE)
+    })
+
+    it('should not catch error from entity service', async () => {
+      const error = new Error('my error')
+      getEntityDownloadLinkStub.reset()
+      getEntityDownloadLinkStub.throws(error)
+
+      await expect(getInstance().getDownloadLinkForUid(FILE_UID, OPTIONS)).to.be.rejectedWith(error)
+    })
+
+    it('should not catch error from entity fetcher', async () => {
+      const error = new Error('my error')
+      getAccessibleByUidStub.reset()
+      getAccessibleByUidStub.throws(error)
+
+      await expect(getInstance().getDownloadLinkForUid(FILE_UID, OPTIONS)).to.be.rejectedWith(error)
+    })
+
+    it('should return result from entity service', async () => {
+      const res = await getInstance().getDownloadLinkForUid(FILE_UID, OPTIONS)
+
+      expect(res).to.eq('LINK')
+    })
+  })
+
   function getInstance() {
     return new UserFileService(
       em,
@@ -500,9 +532,9 @@ describe('UserFileService', () => {
       nodeRepository,
       fileRepository,
       userRepository,
-      resourceRepository,
       entityFetcherService,
       nodesHelper,
+      entityService,
     )
   }
 })

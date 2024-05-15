@@ -55,35 +55,6 @@ module Api
       render status: e.response.code, json: e.response.body
     end
 
-    # This endpoint is used for downloading resources from portals thought the platform.
-    # Pfda backend acts as a proxy to not expose the public file link to anyone.
-    # GET /api/resources/:uid/:filename
-    def download_resource
-      file = UserFile.accessible_found_by(@context, params[:uid])
-      # if the file is not accessible, it will raise an exception
-      resource = Resource.find_by!(user_file_id: file.id)
-
-      uri = URI(resource.url)
-      http = Net::HTTP.new(uri.host, uri.port)
-      http.use_ssl = true
-
-      range = request.headers["Range"]
-      req = Net::HTTP::Get.new(uri)
-      # !!! DON'T FORGET TO HANDLE RANGE REQUESTS IN NODE WHEN MIGRATING !!!
-      req["Range"] = range if range.present?
-
-      response.headers["Accept-Ranges"] = "bytes"
-
-      begin
-        http.request(req) do |resp|
-          # !!! DON'T FORGET TO HANDLE RANGE REQUESTS IN NODE WHEN MIGRATING !!!
-          send_data_response(resp, range)
-        end
-      ensure
-        response.stream.close if response.stream.respond_to?(:close)
-      end
-    end
-
     def create_resource
       # We don't want the data portal ID (or slug) param. It's just confusing
       resource_params = file_params
@@ -181,20 +152,6 @@ module Api
         user: @context.user,
         for_challenge: false,
       )
-    end
-
-    def send_data_response(resp, range)
-      if range.present? && resp.code == "206" # Partial content
-        response.status = 206
-        response.headers["Content-Range"] = resp["Content-Range"]
-        response.headers["Content-Length"] = resp["Content-Length"]
-      end
-
-      response.headers["Content-Type"] = resp["Content-Type"]
-
-      resp.read_body do |chunk|
-        response.stream.write chunk
-      end
     end
   end
 end

@@ -1,4 +1,5 @@
 import { EntityRepository } from '@mikro-orm/mysql'
+import { UId } from '@shared/domain/entity/domain/uid'
 import { Challenge } from './challenge.entity'
 
 class ChallengeRepository extends EntityRepository<Challenge> {
@@ -13,7 +14,7 @@ class ChallengeRepository extends EntityRepository<Challenge> {
   }
 
   // Find a challenge using card image
-  async findOneWithCardImageUid(cardImageUid: string): Promise<Challenge | null> {
+  async findOneWithCardImageUid(cardImageUid: UId): Promise<Challenge | null> {
     return await this.findOne({ cardImageId: cardImageUid })
   }
 }

@@ -88,7 +88,6 @@ export class MainQueueProcessor extends BaseQueueProcessor {
     const input = job.data.payload
     const actionsMap: Record<FOLLOW_UP_ACTION, () => Promise<void>> = {
       UPDATE_DATA_PORTAL_IMAGE_URL: () => this.dataPortalService.updateCardImageUrl(input.uid),
-      UPDATE_DATA_PORTAL_RESOURCE_URL: () => this.userFileService.updateResourceUrl(input.uid),
       UPDATE_CHALLENGE_IMAGE_URL: () => this.challengeService.updateCardImageUrl(input.uid),
       UPDATE_CHALLENGE_RESOURCE_URL: () => this.challengeService.updateResourceUrl(input.uid),
       COMPLETE_SPACE_REPORT: () => this.spaceReportService.completeReportForResultFile(input.uid),

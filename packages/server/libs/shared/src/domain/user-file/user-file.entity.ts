@@ -7,6 +7,7 @@ import {
   Property,
   Reference,
 } from '@mikro-orm/core'
+import { DxId } from '@shared/domain/entity/domain/dxid'
 import { Tagging } from '@shared/domain/tagging/tagging.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { STATIC_SCOPE } from '@shared/enums'
@@ -51,7 +52,7 @@ import {
 })
 class UserFile extends Node implements IFileOrAsset, ITrackable {
   @Property()
-  dxid: string
+  dxid: DxId
 
   @Property()
   project: string

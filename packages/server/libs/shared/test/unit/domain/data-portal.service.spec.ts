@@ -9,6 +9,7 @@ import { NotificationInput } from '@shared/domain/notification/notification.inpu
 import { NotificationService } from '@shared/domain/notification/services/notification.service'
 import { Resource } from '@shared/domain/resource/resource.entity'
 import { FileRemoveOperation } from '@shared/domain/user-file/ops/file-remove'
+import { UserFileService } from '@shared/domain/user-file/service/user-file.service'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { Event } from '@shared/domain/event/event.entity'
@@ -56,9 +57,9 @@ describe('data portal service tests', () => {
   let dataPortalService: DataPortalService
   let notificationService: NotificationService
   let dataPortalRepository: DataPortalRepository
-  let entityService: EntityService
+  let userFileService: UserFileService
   const findDataPortalsStub = stub()
-  const getEntityLinkStub = stub()
+  const getDownloadLinkStub = stub()
 
   const createDataPortalService = (userId: number, fileRemoveOperation?: FileRemoveOperation) => {
     const userCtx: UserCtx = {
@@ -70,9 +71,9 @@ describe('data portal service tests', () => {
       findDataPortalsByCardImageUid: findDataPortalsStub,
     } as unknown as DataPortalRepository
 
-    entityService = {
-      getEntityLink: getEntityLinkStub,
-    } as unknown as EntityService
+    userFileService = {
+      getDownloadLink: getDownloadLinkStub,
+    } as unknown as UserFileService
 
     return new DataPortalService(
       em,
@@ -80,7 +81,7 @@ describe('data portal service tests', () => {
       dataPortalRepository,
       userClient,
       notificationService,
-      entityService,
+      userFileService,
       fileRemoveOperation,
     )
   }
@@ -120,8 +121,8 @@ describe('data portal service tests', () => {
       },
     ])
 
-    getEntityLinkStub.reset()
-    getEntityLinkStub.resolves('link')
+    getDownloadLinkStub.reset()
+    getDownloadLinkStub.resolves('link')
 
     dataPortalService = createDataPortalService(user.id)
   })
@@ -808,31 +809,6 @@ describe('data portal service tests', () => {
     dataPortalService = createDataPortalService(unprivilegedUser.id)
     const result = await dataPortalService.listResources(loadedDataPortal.id.toString())
     expect(result.length).eq(0)
-  })
-
-  it('test create resource link', async () => {
-    create.userHelper.createChallengeBot(em)
-    const space = create.spacesHelper.create(em, { name: 'space-name' })
-    await em.flush()
-    const dataPortal = create.dataPortalsHelper.create(
-      em,
-      { space },
-      { name: 'portal-name', urlSlug: 'portalname' },
-    )
-    await em.flush()
-    const resource = create.dataPortalsHelper.addResource(
-      em,
-      { user, dataPortal },
-      'name1',
-      'dxid1',
-    )
-    await em.flush()
-    em.clear()
-
-    const result = await dataPortalService.createResourceLink(resource.id)
-    expect(result).eq('testingURL')
-    const loadedResource = await em.findOneOrFail(Resource, { id: resource.id })
-    expect(loadedResource.url).eq('testingURL')
   })
 
   it('wrong url slug format check', async () => {

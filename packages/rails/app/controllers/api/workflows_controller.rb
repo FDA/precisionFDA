@@ -252,7 +252,7 @@ module Api
     def describe
       find_workflow # check if workflow accesible by current user first
       response = https_apps_client.describe(params[:id])
-      render json: { workflow: response }
+      render json: response
     end
 
     def cli_workflows

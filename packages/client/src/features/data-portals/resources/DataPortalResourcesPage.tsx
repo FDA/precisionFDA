@@ -139,7 +139,7 @@ const DataPortalResourcesPage = () => {
     if (notification == null) {
       return
     }
-    if (NOTIFICATION_ACTION.RESOURCE_URL_UPDATED === notification.action) {
+    if (NOTIFICATION_ACTION.FILE_CLOSED === notification.action) {
       queryClient.invalidateQueries({ queryKey: ['resources-list-portal']})
       setIsFinishingUpload(false)
     }

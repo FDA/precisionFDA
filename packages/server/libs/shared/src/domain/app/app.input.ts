@@ -1,3 +1,4 @@
+import { UId } from '@shared/domain/entity/domain/uid'
 import { JSONSchema7 } from 'json-schema'
 
 class PlatformSpec {
@@ -25,7 +26,7 @@ type AppInput = {
   instance_type: string
   packages: string[]
   code: string
-  ordered_assets?: string[] // file uids
+  ordered_assets?: UId[] // file uids
   entity_type: string
   input_spec: Spec[]
   output_spec: Spec[]

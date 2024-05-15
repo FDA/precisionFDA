@@ -1,4 +1,6 @@
 import { EntityManager, SqlEntityManager } from '@mikro-orm/mysql'
+import { DxId } from '@shared/domain/entity/domain/dxid'
+import { UId } from '@shared/domain/entity/domain/uid'
 import { Space } from '@shared/domain/space/space.entity'
 import { Folder } from '@shared/domain/user-file/folder.entity'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
@@ -400,7 +402,7 @@ const filterNodesByUser = async (em: SqlEntityManager, nodes: Node[], currentUse
 }
 const findFileOrAssetWithUid = async (
   em: EntityManager,
-  uid: string,
+  uid: UId,
 ): Promise<IFileOrAsset | null> => {
   const userFileRepo = em.getRepository(UserFile) as UserFileRepository
   const file = await userFileRepo.findFileWithUid(uid, ['user', 'challengeResources'])
@@ -414,7 +416,7 @@ const findFileOrAssetWithUid = async (
 
 const findFileOrAssetsWithDxid = async (
   em: EntityManager,
-  dxid: string,
+  dxid: DxId,
 ): Promise<IFileOrAsset[]> => {
   const userFileRepo = em.getRepository(UserFile) as UserFileRepository
   const res = await userFileRepo.findFilesWithDxid(dxid)

@@ -381,6 +381,7 @@ module Api
 
       files
     end
+
     # POST /api/files/download_list
     # Responds with the files list.
     # This only works for Spaces now.
@@ -420,10 +421,17 @@ module Api
              scope_name: params[:scope] || SCOPE_PRIVATE,
              action_name: task
     end
+
     # rubocop:enable Metrics/MethodLength
     # GET /api/files/download
     # Responds with a link to download a file.
     def download
+
+      if called_by_cli
+        cli_download
+        return
+      end
+
       file = UserFile.accessible_found_by(@context, params[:uid])
       verify_nodes_for_protection([file], "download")
 
@@ -435,7 +443,7 @@ module Api
         raise ApiError, "You must accept the license before you can download this"
       end
 
-      file_url = file.file_url(@context, params[:inline])
+      file_url = https_apps_client.get_file_download_link(params[:uid])
 
       respond_to do |format|
         format.html do
@@ -448,6 +456,72 @@ module Api
             file_size: file.file_size,
           }, adapter: :json
         end
+      end
+    end
+
+    def cli_download
+      options = {
+        duration: unsafe_params.fetch(:duration, 86_400),
+        preauthenticated: unsafe_params.fetch(:preauthenticated, false),
+        inline: unsafe_params.fetch(:inline, false),
+      }
+
+      match = request.headers["User-Agent"].match(/precisionFDA CLI\/([\d\.]+)/)
+      version = match[1]
+      # parse the version and if it's 2.6.0 or older, provide direct link
+      if Gem::Version.new(version) <= Gem::Version.new("2.6.0")
+        # if cli is 2.6.0 or older, provide direct link. Otherwise, provide proxy link.
+        options[:preauthenticated] = true
+      end
+
+      file = UserFile.accessible_found_by(@context, params[:uid])
+      url = https_apps_client.get_file_download_link(params[:uid], options)
+
+      render json: {
+        file_url: url,
+        file_size: file.file_size,
+      }, adapter: :json
+    end
+
+    # GET /api/files/:uid/:filename
+    def download_file
+      file = UserFile.accessible_by(@context).find_by_uid!(params[:uid])
+      file_link = file.file_link(@context, params[:inline], true, false)
+
+      uri = URI(file_link[:url])
+      http = Net::HTTP.new(uri.host, uri.port)
+      http.use_ssl = true
+
+      range = request.headers["Range"]
+      req = Net::HTTP::Get.new(uri)
+      # !!! DON'T FORGET TO HANDLE RANGE REQUESTS IN NODE WHEN MIGRATING !!!
+      req["Range"] = range if range.present?
+      file_link[:headers].each { |k, v| req[k] = v }
+
+      response.headers["Accept-Ranges"] = "bytes"
+
+      begin
+        http.request(req) do |resp|
+          # !!! DON'T FORGET TO HANDLE RANGE REQUESTS IN NODE WHEN MIGRATING !!!
+          send_data_response(resp, range)
+        end
+      ensure
+        response.stream.close if response.stream.respond_to?(:close)
+      end
+    end
+
+    def send_data_response(resp, range)
+      if range.present? && resp.code == "206" # Partial content
+        response.status = 206
+        response.headers["Content-Range"] = resp["Content-Range"]
+        response.headers["Content-Length"] = resp["Content-Length"]
+      end
+
+      response.headers["Content-Type"] = resp["Content-Type"]
+      response.headers["Content-Disposition"] = resp["Content-Disposition"]
+
+      resp.read_body do |chunk|
+        response.stream.write chunk
       end
     end
 
@@ -617,6 +691,11 @@ module Api
     end
 
     private
+
+    def called_by_cli
+      user_agent = request.headers['User-Agent']
+      user_agent&.include?('precisionFDA CLI')
+    end
 
     # Verifies if at least one node is in Protected space
     # the target scope must be Protected space as wel and current

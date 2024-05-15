@@ -93,7 +93,7 @@ export const CLI = () => {
         <h2 id="download">Download the CLI</h2>
         <ButtonRow>
           <a
-            href="https://pfda-production-static-files.s3.amazonaws.com/cli/pfda-linux-2.6.1.tar.gz"
+            href="https://pfda-production-static-files.s3.amazonaws.com/cli/pfda-linux-2.7.0.tar.gz"
             target="_blank"
             rel="noreferrer"
           >
@@ -102,7 +102,7 @@ export const CLI = () => {
             </Button>
           </a>
           <a
-            href="https://pfda-production-static-files.s3.amazonaws.com/cli/pfda-darwin-2.6.1.tar.gz"
+            href="https://pfda-production-static-files.s3.amazonaws.com/cli/pfda-darwin-2.7.0.tar.gz"
             target="_blank"
             rel="noreferrer"
           >
@@ -111,7 +111,7 @@ export const CLI = () => {
             </Button>
           </a>
           <a
-            href="https://pfda-production-static-files.s3.amazonaws.com/cli/pfda-windows-2.6.1.zip"
+            href="https://pfda-production-static-files.s3.amazonaws.com/cli/pfda-windows-2.7.0.zip"
             target="_blank"
             rel="noreferrer"
           >
@@ -1283,7 +1283,7 @@ export const CLI = () => {
         <h2 id="changelog">pFDA CLI Changelog</h2>
         <br/>
 
-        <p>Version 2.6.1 (04/22/2024): Fixed file-upload bug, various improvements </p>
+        <p>Version 2.7.0 (05/16/2024): Fixed file-upload bug, various improvements </p>
         <p>Version 2.6.0 (04/02/2024): New features: describe, ls-assets, ls-apps, ls-executions, ls-workflows, ls-discussions </p>
         <p>Version 2.5.0 (12/14/2023): Support of JSON responses, upload-file bug fixes.</p>
         <p>Version 2.4.1 (07/20/2023): Fixed folder id manipulation.</p>
@@ -1321,7 +1321,7 @@ export const CLI = () => {
           <li><a href="#ls-members" data-turbolinks="false">Listing Space Members</a></li>
           <li><a href="#ls-workflows" data-turbolinks="false">Listing Workflows</a></li>
           <li><a href="#describe" data-turbolinks="false">Describing Entities</a></li>
-          <li><a href="#get-space-id" data-turbolinks="false">Getting Space ID</a></li>
+          <li><a href="#get-scope" data-turbolinks="false">Getting Scope</a></li>
           <li><a href="#print-content" data-turbolinks="false">Printing Content</a></li>
           <li><a href="#changelog" data-turbolinks="false">Changelog</a></li>
         </PageMap>

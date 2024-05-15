@@ -10,17 +10,19 @@ import {
   Res,
   UseGuards,
 } from '@nestjs/common'
+import { DownloadLinkOptionsDto } from '@shared/domain/entity/domain/download-link-options.dto'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { ResolvePathDTO } from '@shared/domain/user-file/dto/user-file.dto'
+import { UserFileService } from '@shared/domain/user-file/service/user-file.service'
 import { createCloseFileJobTask } from '@shared/queue'
-import { UserContextGuard } from '../user-context/guard/user-context.guard'
-import { Response } from 'express'
 import archiver from 'archiver'
 import axios from 'axios'
-import { UserFileService } from '@shared/domain/user-file/service/user-file.service'
+import { Response } from 'express'
+import { UserFileResolverFacade } from '../facade/user-file/user-file-resolver.facade'
+import { UserContextGuard } from '../user-context/guard/user-context.guard'
 import { OptionalParseIntPipe } from '../validation/pipes/optional-int.pipe'
 import { CustomValidationPipe } from '../validation/pipes/validation.pipe'
-import { ResolvePathDTO } from '@shared/domain/user-file/dto/user-file.dto'
-import { UserFileResolverFacade } from '../facade/user-file/user-file-resolver.facade'
+import { DownloadLinkParamDto } from './model/download-link-param.dto'
 
 @UseGuards(UserContextGuard)
 @Controller('/files')
@@ -99,11 +101,16 @@ export class FilesController {
   private getTimestamp() {
     const pad = (number: number) => (number < 10 ? '0' : '') + number
     const now = new Date()
-    return `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
+    return `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`
   }
 
   @Get('/path-resolver')
   async resolvePath(@Query(new CustomValidationPipe({ transform: true })) query: ResolvePathDTO) {
     return await this.userFileResolverFacade.resolvePath(query)
+  }
+
+  @Get('/:uid/download-link')
+  getDownloadLink(@Param() params: DownloadLinkParamDto, @Query() query: DownloadLinkOptionsDto) {
+    return this.userFileService.getDownloadLinkForUid(params.uid, query)
   }
 }

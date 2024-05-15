@@ -51,7 +51,7 @@ export class CliController {
 
   @Get('/version/latest')
   getLatestVersion() {
-    return { version: '2.6.1' }
+    return { version: '2.7.0' }
   }
 
 

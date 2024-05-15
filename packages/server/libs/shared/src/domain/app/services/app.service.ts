@@ -1,5 +1,6 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { AppSeries } from '@shared/domain/app-series/app-series.entity'
+import { UId } from '@shared/domain/entity/domain/uid'
 import { Asset } from '@shared/domain/user-file/asset.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { ValidationError } from '@shared/errors'
@@ -144,7 +145,7 @@ export class AppService implements IAppService {
     }
   }
 
-  private getAssets = async (userId: number, orderedAssets: string[]): Promise<Asset[]> => {
+  private getAssets = async (userId: number, orderedAssets: UId[]): Promise<Asset[]> => {
     if (orderedAssets) {
       return await this.assetRepository.findAccessibleByUser(userId, orderedAssets)
     } else {

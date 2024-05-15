@@ -1,3 +1,4 @@
+import { DxId } from '@shared/domain/entity/domain/dxid'
 import { JOB_STATE } from '../domain/job/job.enum'
 import { FILE_STATE_DX } from '../domain/user-file/user-file.types'
 import { AnyObject } from '../types'
@@ -46,7 +47,7 @@ interface GetUploadURLResponse {
 }
 
 type ListFilesResult = {
-  id: string
+  id: DxId
   project: string
   describe?: {
     id: string
@@ -59,7 +60,7 @@ type ListFilesResult = {
 type ListFilesResponse = IPaginatedResponse<ListFilesResult>
 
 type FileStateResult = {
-  id: string
+  id: DxId
   project: string
   describe?: {
     name: string
@@ -169,7 +170,7 @@ type FindJobsResponse = {
 type JobTerminateResponse = JobCreateResponse
 
 type ClassIdResponse = {
-  id: string
+  id: DxId
 }
 
 class AppDescribeResponse {
