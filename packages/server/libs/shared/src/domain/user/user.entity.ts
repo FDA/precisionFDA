@@ -23,7 +23,6 @@ import { config } from '../../config'
 import { BaseEntity } from '../../database/base-entity'
 import { WorkaroundJsonType } from '../../database/custom-json-type'
 import { AdminMembership } from '../admin-membership/admin-membership.entity'
-import { SPACE_MEMBERSHIP_ROLE } from '../space-membership/space-membership.enum'
 import { UserRepository } from './user.repository'
 
 export enum USER_STATE {
@@ -69,7 +68,7 @@ type CloudResourceSettings = {
 
 // contains the bare minimum to work with the user instance
 // might need to add more fields in the time
-@Entity({ tableName: 'users', customRepository: () => UserRepository })
+@Entity({ tableName: 'users', repository: () => UserRepository })
 export class User extends BaseEntity {
   @PrimaryKey()
   id: number
@@ -205,11 +204,15 @@ export class User extends BaseEntity {
   @Property({ persist: false })
   get spaceUids(): string[] {
     const spaceUids: string[] = []
-    Array.from(this.spaceMemberships)
-      .filter((m) => m.active)
-      .forEach((spaceMembership) => {
-        Array.from(spaceMembership.spaces).forEach((space) => spaceUids.push(`space-${space.id}`))
-      })
+    this.spaceMemberships.isInitialized()
+      ? Array.from(this.spaceMemberships)
+          .filter((m) => m.active)
+          .forEach((spaceMembership) => {
+            Array.from(spaceMembership.spaces).forEach((space) =>
+              spaceUids.push(`space-${space.id}`),
+            )
+          })
+      : []
     return spaceUids
   }
 

@@ -19,7 +19,6 @@ import { Node } from '../../user-file/node.entity'
 import { FILE_STI_TYPE } from '../../user-file/user-file.types'
 import { GeneralProperty, PropertyType } from '../property.entity'
 
-
 export interface IPropertyService {
   setProperty: (input: CreatePropertyDTO) => Promise<void>
   getValidKeys: (scope: Scope, targetType: PropertyType) => Promise<string[]>
@@ -27,7 +26,6 @@ export interface IPropertyService {
 
 @Injectable()
 export class PropertyService implements IPropertyService {
-
   constructor(
     private readonly em: SqlEntityManager,
     private readonly user: UserContext,
@@ -39,14 +37,13 @@ export class PropertyService implements IPropertyService {
     await this.checkTypeAndPermissions(targetType, targetId)
 
     await this.em.transactional(async () => {
-      const currentProperties: GeneralProperty[] = await this.em.find(GeneralProperty,
-        {
-          targetType,
-          targetId,
-        })
+      const currentProperties: GeneralProperty[] = await this.em.find(GeneralProperty, {
+        targetType,
+        targetId,
+      })
 
       await this.em.removeAndFlush(currentProperties)
-      for (let key in input.properties) {
+      for (const key in input.properties) {
         const newProperty = new GeneralProperty()
         newProperty.targetId = targetId
         newProperty.targetType = targetType
@@ -59,7 +56,6 @@ export class PropertyService implements IPropertyService {
   }
 
   async getValidKeys(scope: string, targetType: PropertyType): Promise<string[]> {
-
     const results: GeneralProperty[] = await this.em.find(
       this.getEntityByType(targetType),
       await this.getConditionByType(scope, targetType),
@@ -91,25 +87,25 @@ export class PropertyService implements IPropertyService {
     let scopes: string[] = []
 
     if (scope === HOME_SCOPE.SPACES) {
-      scopes = await this.em.find(Space, {
-        spaceMemberships: {
-          user: {
-            id: this.user.id,
-          },
-        },
-      }).then(spaces => spaces.map(s => `space-${s.id}`))
-    } else if (scopeContainsId(scope)) {
-      await this.em.findOneOrFail(
-        Space,
-        {
-          id: getIdFromScopeName(scope),
-          state: SPACE_STATE.ACTIVE,
+      scopes = await this.em
+        .find(Space, {
           spaceMemberships: {
             user: {
               id: this.user.id,
             },
           },
         })
+        .then((spaces) => spaces.map((s) => `space-${s.id}`))
+    } else if (scopeContainsId(scope)) {
+      await this.em.findOneOrFail(Space, {
+        id: getIdFromScopeName(scope),
+        state: SPACE_STATE.ACTIVE,
+        spaceMemberships: {
+          user: {
+            id: this.user.id,
+          },
+        },
+      })
       scopes = [scope]
     }
     if (scope == STATIC_SCOPE.PRIVATE || scope == STATIC_SCOPE.PUBLIC) {
@@ -169,25 +165,26 @@ export class PropertyService implements IPropertyService {
         throw new errors.ValidationError('Unsupported type!')
     }
     const user = this.user
-    const target: Node | WorkflowSeries | Job | AppSeries | DbCluster = await this.em.findOneOrFail(targetEntity, { id: targetId })
+    const target: Node | WorkflowSeries | Job | AppSeries | DbCluster = await this.em.findOneOrFail(
+      targetEntity,
+      { id: targetId },
+    )
 
     if (target.scope == STATIC_SCOPE.PRIVATE && target.user?.id !== user.id) {
       throw new PermissionError()
     }
     // space scope
     else if (target.scope && scopeContainsId(target.scope)) {
-      const space = await this.em.findOne(
-        Space,
-        {
-          id: getIdFromScopeName(target.scope),
-          state: SPACE_STATE.ACTIVE,
-          spaceMemberships: {
-            user: {
-              id: user.id,
-            },
-            role: CAN_EDIT_ROLES,
+      const space = await this.em.findOne(Space, {
+        id: getIdFromScopeName(target.scope),
+        state: SPACE_STATE.ACTIVE,
+        spaceMemberships: {
+          user: {
+            id: user.id,
           },
-        })
+          role: CAN_EDIT_ROLES,
+        },
+      })
       if (!space) {
         throw new PermissionError()
       }
@@ -203,5 +200,4 @@ export class PropertyService implements IPropertyService {
       }
     }
   }
-
 }

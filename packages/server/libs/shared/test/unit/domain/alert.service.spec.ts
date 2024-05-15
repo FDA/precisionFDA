@@ -15,7 +15,7 @@ describe('AlertService tests', () => {
 
   beforeEach(async () => {
     await db.dropData(database.connection())
-    em = database.orm().em.fork() as EntityManager<MySqlDriver>
+    em = database.orm().em.fork({ useContext: true }) as EntityManager<MySqlDriver>
     user = create.userHelper.createAdmin(em)
     await em.flush()
     userCtx = { ...user, accessToken: 'foo' }
@@ -23,11 +23,11 @@ describe('AlertService tests', () => {
   })
 
   it('create alert', async () => {
-    const now = new Date();
-    const startTime = new Date(now.getTime());
-    const endTime = new Date(now.getTime());
-    startTime.setDate(now.getDate() + 1);
-    endTime.setDate(now.getDate() + 3);
+    const now = new Date()
+    const startTime = new Date(now.getTime())
+    const endTime = new Date(now.getTime())
+    startTime.setDate(now.getDate() + 1)
+    endTime.setDate(now.getDate() + 3)
 
     const alert = await alertService.create({
       title: 'system alert',
@@ -95,7 +95,4 @@ describe('AlertService tests', () => {
     const nonActiveAlerts = await alertService.getAll(false)
     expect(nonActiveAlerts.length).eq(2)
   })
-
-
-
 })

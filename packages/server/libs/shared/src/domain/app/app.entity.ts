@@ -39,7 +39,7 @@ export interface Internal {
   platform_tags?: string[]
 }
 
-@Entity({ tableName: 'apps', customRepository: () => AppRepository })
+@Entity({ tableName: 'apps', repository: () => AppRepository })
 @Filter({
   name: 'accessibleBy', cond: args => ({
     $or: [

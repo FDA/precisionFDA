@@ -22,7 +22,7 @@ export class AssetRepository extends EntityRepository<Asset> {
   async findUnclosedAssets(userId: number): Promise<Asset[]> {
     return await this.find(
       {
-        userId,
+        user: userId,
         state: { $in: [FILE_STATE_DX.OPEN, FILE_STATE_DX.CLOSING] },
       },
       { filters: ['asset'], populate: ['user', 'taggings.tag'] },
@@ -35,7 +35,7 @@ export class AssetRepository extends EntityRepository<Asset> {
    * @param uids
    */
   async findAccessibleByUser(userId: number, uids: string[]): Promise<Asset[]> {
-    const userRepository = this._em.getRepository(User)
+    const userRepository = this.em.getRepository(User)
     const user: User = await userRepository.findOneOrFail(
       { id: userId },
       { populate: ['spaceMemberships', 'spaceMemberships.spaces'] },

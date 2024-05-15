@@ -6,12 +6,12 @@ import { Folder } from '@shared/domain/user-file/folder.entity'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { Node } from '@shared/domain/user-file/node.entity'
 import { User } from '@shared/domain/user/user.entity'
+import { SqlEntityManager } from '@mikro-orm/mysql'
 import { JobRepository } from '../domain/job/job.repository'
 import { UserCtx } from '../types'
 import { SPACE_MEMBERSHIP_SIDE } from '../domain/space-membership/space-membership.enum'
 import { adminDataConsistencyReportTemplate } from '../domain/email/templates/mjml/admin-data-consistency-report.template'
 import { EMAIL_TYPES, EmailSendInput } from '../domain/email/email.config'
-import { SqlEntityManager } from '@mikro-orm/mysql'
 import { SPACE_TYPE } from '../domain/space/space.enum'
 import { Injectable, Logger } from '@nestjs/common'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
@@ -57,7 +57,7 @@ export class AdminDataConsistencyReportService {
   ) {}
 
   async createReport(): Promise<AdminDataConsistencyReportOutput> {
-    let output: AdminDataConsistencyReportOutput = {}
+    const output: AdminDataConsistencyReportOutput = {}
 
     this.log.verbose('AdminDataConsistencyReportService: Starting createReport')
 
@@ -212,8 +212,8 @@ export class AdminDataConsistencyReportService {
   async checkInconsistentNodes(): Promise<any[]> {
     // Check for files/folders/assets with inconsistent parents
     const allNodes = await this.em.getRepository(Node).find({
-      parentFolderId: { $ne: null },
-      scopedParentFolderId: { $ne: null },
+      parentFolder: { $ne: null },
+      scopedParentFolder: { $ne: null },
     })
 
     const nodesWithParents: any[] = []
@@ -221,8 +221,8 @@ export class AdminDataConsistencyReportService {
       const nodeInfo = {
         id: node.id,
         name: node.name,
-        parentFolderId: node.parentFolderId,
-        scopedParentFolderId: node.scopedParentFolderId,
+        parentFolderId: node.parentFolder?.id,
+        scopedParentFolderId: node.scopedParentFolder?.id,
         scope: node.scope,
         state: node.state,
         stiType: node.stiType,

@@ -3,8 +3,6 @@ import {
   Entity,
   EntityRepositoryType,
   Filter,
-  Ref,
-  ManyToOne,
   OneToMany,
   Property,
   Reference,
@@ -17,7 +15,6 @@ import { STATIC_SCOPE } from '@shared/enums'
 import {
   FILE_STATE,
   FILE_ORIGIN_TYPE,
-  PARENT_TYPE,
   FILE_STI_TYPE,
   ITrackable,
   IFileOrAsset,
@@ -26,22 +23,34 @@ import {
 } from './user-file.types'
 import { UserFileRepository } from './user-file.repository'
 
-@Entity({ tableName: 'nodes', customRepository: () => UserFileRepository })
+@Entity({
+  tableName: 'nodes',
+  repository: () => UserFileRepository,
+  discriminatorColumn: 'stiType',
+  discriminatorValue: FILE_STI_TYPE.USERFILE,
+})
 @Filter({ name: 'userfile', cond: { stiType: FILE_STI_TYPE.USERFILE } })
 @Filter({ name: 'https', cond: { entityType: FILE_ORIGIN_TYPE.HTTPS } })
 @Filter({ name: 'local', cond: { entityType: FILE_ORIGIN_TYPE.REGULAR } })
-@Filter({ name: 'unclosed', cond: { $or: [
-  { 'state': FILE_STATE_DX.OPEN },
-  { 'state': FILE_STATE_DX.CLOSING },
-  { 'state': FILE_STATE_DX.ABANDONED },
-  { 'state': FILE_STATE_PFDA.REMOVING },
-]}})
 @Filter({
-  name: 'accessibleBy', cond: args => ({
+  name: 'unclosed',
+  cond: {
     $or: [
-      {user: {id: args.userId}, scope: STATIC_SCOPE.PRIVATE},
-      {scope: {$in: args.spaceScopes}}]
-  })
+      { state: FILE_STATE_DX.OPEN },
+      { state: FILE_STATE_DX.CLOSING },
+      { state: FILE_STATE_DX.ABANDONED },
+      { state: FILE_STATE_PFDA.REMOVING },
+    ],
+  },
+})
+@Filter({
+  name: 'accessibleBy',
+  cond: (args) => ({
+    $or: [
+      { user: { id: args.userId }, scope: STATIC_SCOPE.PRIVATE },
+      { scope: { $in: args.spaceScopes } },
+    ],
+  }),
 })
 class UserFile extends Node implements IFileOrAsset, ITrackable {
   @Property()
@@ -54,7 +63,6 @@ class UserFile extends Node implements IFileOrAsset, ITrackable {
   description?: string
 
   @Property()
-  //@ts-ignore IFileOrAsset introduced state as string
   state: FILE_STATE
 
   @Property()
@@ -70,7 +78,7 @@ class UserFile extends Node implements IFileOrAsset, ITrackable {
   scopedParentFolderId?: number
 
   // todo: micro-orm can do single table inheritance
-  @OneToMany(() => Tagging, tagging => tagging.userFile, { orphanRemoval: true })
+  @OneToMany(() => Tagging, (tagging) => tagging.userFile, { orphanRemoval: true })
   taggings = new Collection<Tagging>(this)
 
   @OneToMany({ entity: () => ChallengeResource, mappedBy: 'userFile', orphanRemoval: true })
@@ -94,6 +102,4 @@ class UserFile extends Node implements IFileOrAsset, ITrackable {
   }
 }
 
-export {
-  UserFile,
-}
+export { UserFile }

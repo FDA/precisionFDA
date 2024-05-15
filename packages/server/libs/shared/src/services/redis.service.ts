@@ -13,19 +13,16 @@ export const createRedisClient = async (): Promise<any> => {
   try {
     getLogger().verbose('connecting to redis')
     const client = createClient({
-      //@ts-ignore doesn't compile, but needs to be here
       socket: {
         port: parseInt(url.port),
         host: url.hostname,
         tls: config.redis.isSecure,
       },
-      ...config.redis.isSecure && { password: config.redis.authPassword },
+      ...(config.redis.isSecure && { password: config.redis.authPassword }),
     })
 
-    //@ts-ignore doesn't compile, but needs to be here
     await client.connect()
     if (config.redis.isSecure) {
-      //@ts-ignore doesn't compile, but needs to be here
       await client.auth({ password: config.redis.authPassword })
     }
     getLogger().verbose('connected to redis')

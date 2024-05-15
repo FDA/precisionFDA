@@ -470,7 +470,7 @@ const loadNodes = async (em: SqlEntityManager, input: IdsInput, filters: nodeQue
         ...filters,
       },
       {
-        scopedParentFolderId: { $in: input.ids },
+        scopedParentFolder: { $in: input.ids },
         ...filters,
       },
     ],

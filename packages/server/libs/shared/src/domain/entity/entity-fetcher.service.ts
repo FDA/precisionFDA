@@ -287,11 +287,11 @@ export class EntityFetcherService {
     )
   }
 
-  async getAccessibleByUid<E extends UidEntity, H extends string = never>(
+  async getAccessibleByUid<E extends UidEntity, H extends string = never, F extends string = '*', EX extends string = never>(
     type: EntityName<E>,
     uid: E['uid'],
     where?: ObjectQuery<E>,
-    options?: FindOptions<E, H>,
+    options?: FindOptions<E, H, F, EX>,
   ) {
     return this.em.findOne(
       type,
@@ -300,11 +300,11 @@ export class EntityFetcherService {
     )
   }
 
-  async getEditableByUid<E extends UidEntity, H extends string = never>(
+  async getEditableByUid<E extends UidEntity, H extends string = never, F extends string = '*', EX extends string = never>(
     type: EntityName<E>,
     uid: E['uid'],
     where?: ObjectQuery<E>,
-    options?: FindOptions<E, H>,
+    options?: FindOptions<E, H, F, EX>,
   ) {
     return this.em.findOne(
       type,
@@ -317,10 +317,10 @@ export class EntityFetcherService {
     return this.em.findOne(type, { uid } as FilterQuery<E>)
   }
 
-  async getById<E extends IdEntity, H extends string = never>(
+  async getById<E extends IdEntity, H extends string = never, F extends string = '*', EX extends string = never>(
     type: EntityName<E>,
     id: E['id'],
-    options?: FindOptions<E, H>,
+    options?: FindOptions<E, H, F, EX>,
   ) {
     return this.em.findOne(type, { id } as FilterQuery<E>, options)
   }

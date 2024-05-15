@@ -3,7 +3,12 @@ import { Folder } from '@shared/domain/user-file/folder.entity'
 import { FolderNotFoundError } from '@shared/errors'
 import { PlatformClient } from '@shared/platform-client'
 import { BaseOperation } from '@shared/utils/base-operation'
-import { getNodePath, validateEditableBy, validateProtectedSpaces, validateVerificationSpace } from '../user-file.helper'
+import {
+  getNodePath,
+  validateEditableBy,
+  validateProtectedSpaces,
+  validateVerificationSpace,
+} from '../user-file.helper'
 import { IdInput, UserOpsCtx } from '../../../types'
 import { createFolderEvent, EVENT_TYPES } from '../../event/event.helper'
 import { User } from '../../user/user.entity'
@@ -29,7 +34,8 @@ number
       const repo = tem.getRepository(Folder)
       const folderToRemove = await repo.findOne(input.id)
 
-      folderToRemove && await validateProtectedSpaces(tem, 'remove', this.ctx.user.id, folderToRemove)
+      folderToRemove &&
+        (await validateProtectedSpaces(tem, 'remove', this.ctx.user.id, folderToRemove))
 
       if (!folderToRemove) {
         throw new FolderNotFoundError()
@@ -37,8 +43,9 @@ number
 
       await folderToRemove.children.init()
       if (folderToRemove.children.length > 0) {
-        throw new Error(`Cannot remove folder ${folderToRemove.name}`
-          + 'with children. Remove children first.')
+        throw new Error(
+          `Cannot remove folder ${folderToRemove.name}` + ' with children. Remove children first.',
+        )
       }
       const userRepo = tem.getRepository(User)
       const user = await userRepo.findOneOrFail(this.ctx.user.id)
@@ -51,8 +58,8 @@ number
       const op = new RemoveTaggingsOperation({ em: tem, log: this.ctx.log, user: this.ctx.user })
       await op.execute(folderToRemove.id)
 
-      if (folderToRemove.entityType === FILE_ORIGIN_TYPE.HTTPS
-        && folderToRemove.project) { // https folder
+      if (folderToRemove.entityType === FILE_ORIGIN_TYPE.HTTPS && folderToRemove.project) {
+        // https folder
         await platformClient.folderRemove({
           projectId: folderToRemove.project,
           folderPath,

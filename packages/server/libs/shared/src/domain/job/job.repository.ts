@@ -32,7 +32,7 @@ export class JobRepository extends EntityRepository<Job> {
         ],
       },
     )
-    return [jobs, count]
+    return [jobs as Job[], count]
   }
 
   async findAllRunningJobs(): Promise<Job[]> {

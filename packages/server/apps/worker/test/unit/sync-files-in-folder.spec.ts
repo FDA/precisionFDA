@@ -9,18 +9,10 @@ import { User } from '@shared/domain/user/user.entity'
 import { getLogger } from '@shared/logger'
 import { expect } from 'chai'
 import { create, db } from '@shared/test'
-import type {
-  SyncFilesInFolderInput,
-} from '@shared/domain/user-file/user-file.input'
-import {
-  FILE_ORIGIN_TYPE,
-  PARENT_TYPE,
-} from '@shared/domain/user-file/user-file.types'
+import type { SyncFilesInFolderInput } from '@shared/domain/user-file/user-file.input'
+import { FILE_ORIGIN_TYPE, PARENT_TYPE } from '@shared/domain/user-file/user-file.types'
 import { fakes, mocksReset } from '@shared/test/mocks'
-import {
-  FILES_DESC_RES,
-  FILES_LIST_RES_ROOT,
-} from '@shared/test/mock-responses'
+import { FILES_DESC_RES, FILES_LIST_RES_ROOT } from '@shared/test/mock-responses'
 
 describe('syncFilesInFolder operation', () => {
   let em: EntityManager<MySqlDriver>
@@ -34,7 +26,7 @@ describe('syncFilesInFolder operation', () => {
 
   beforeEach(async () => {
     await db.dropData(database.connection())
-    em = database.orm().em.fork()
+    em = database.orm().em.fork({ useContext: true })
     user = create.userHelper.create(em)
     job = create.jobHelper.create(em, { user })
     await em.flush()
@@ -441,11 +433,9 @@ describe('syncFilesInFolder operation', () => {
       },
     )
     await em.flush()
-    fakes.client.filesListFake
-      .onCall(0)
-      .returns(FILES_LIST_RES_ROOT.slice(0, 2))
+    fakes.client.filesListFake.onCall(0).returns(FILES_LIST_RES_ROOT.slice(0, 2))
     const op = new SyncFilesInFolderOperation({
-      em: database.orm().em.fork(),
+      em: database.orm().em.fork({ useContext: true }),
       log,
       user: userCtx,
     })
@@ -453,14 +443,14 @@ describe('syncFilesInFolder operation', () => {
     const res = await op.execute(input)
     // no additions and deletions should happen
     // op only returns HTTPS files
-    expect(res.files.map(f => f.dxid)).to.have.members([secondFileDxid])
-    expect(res.files.map(f => f.id)).to.have.members([remoteFile.id])
+    expect(res.files.map((f) => f.dxid)).to.have.members([secondFileDxid])
+    expect(res.files.map((f) => f.id)).to.have.members([remoteFile.id])
     const filesInDb = await em.find(UserFile, { user })
     const assetsInDb = await em.find(Asset, { user })
     // op did not operate with local files, did not recreate or delete it
     // even though the file was returned from the api call
-    expect(filesInDb.map(f => f.id)).to.have.members([remoteFile.id])
-    expect(assetsInDb.map(f => f.id)).to.have.members([file.id])
+    expect(filesInDb.map((f) => f.id)).to.have.members([remoteFile.id])
+    expect(assetsInDb.map((f) => f.id)).to.have.members([file.id])
   })
 
   it('does nothing when it finds file with given dxid regardless of project', async () => {

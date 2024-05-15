@@ -212,7 +212,7 @@ export class PublisherService implements IPublisherService {
       for (const file of files) {
         file.scope = scope
         file.project = destinationProject
-        file.scopedParentFolderId = undefined
+        file.scopedParentFolder = undefined
         count++
       }
       await this.em.persistAndFlush(files)

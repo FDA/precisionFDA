@@ -35,7 +35,11 @@ describe('PublisherService tests', () => {
     const node2 = create.filesHelper.createUploadedAsset(em, { user }, {})
     const node3 = create.filesHelper.createUploaded(em, { user }, {})
     await em.flush()
-    const count = await publisherService.publishNodes([node1, node2, node3], user, STATIC_SCOPE.PUBLIC)
+    const count = await publisherService.publishNodes(
+      [node1, node2, node3],
+      user,
+      STATIC_SCOPE.PUBLIC,
+    )
     em.clear()
     const loadedNode1 = await em.findOneOrFail(Node, { id: node1.id })
     const loadedNode2 = await em.findOneOrFail(Node, { id: node2.id })
@@ -49,24 +53,30 @@ describe('PublisherService tests', () => {
   it('publish apps to public', async () => {
     const app1 = create.appHelper.createRegular(em, { user }, { scope: STATIC_SCOPE.PRIVATE })
     await em.flush()
-    const appSeries1 = create.appSeriesHelper.create(em, {
-      user,
-      appId: app1.id,
-    }, { scope: STATIC_SCOPE.PRIVATE })
+    const appSeries1 = create.appSeriesHelper.create(
+      em,
+      {
+        user,
+        appId: app1.id,
+      },
+      { scope: STATIC_SCOPE.PRIVATE },
+    )
     await em.flush()
     app1.appSeriesId = appSeries1.id
-    // appSeries1.latestRevisionAppId = app1.id
     await em.flush()
 
     const app2 = create.appHelper.createHTTPS(em, { user }, { scope: STATIC_SCOPE.PRIVATE })
     await em.flush()
-    const appSeries2 = create.appSeriesHelper.create(em, {
-      user,
-      appId: app2.id,
-    }, { scope: STATIC_SCOPE.PRIVATE })
+    const appSeries2 = create.appSeriesHelper.create(
+      em,
+      {
+        user,
+        appId: app2.id,
+      },
+      { scope: STATIC_SCOPE.PRIVATE },
+    )
     await em.flush()
     app2.appSeriesId = appSeries2.id
-    // appSeries1.latestRevisionAppId = app1.id
     await em.flush()
 
     const count = await publisherService.publishApps([app1, app2], user, STATIC_SCOPE.PUBLIC)
@@ -93,29 +103,49 @@ describe('PublisherService tests', () => {
 
   it('publish comparisons to public', async () => {
     const app = create.appHelper.createRegular(em, { user }, { scope: STATIC_SCOPE.PRIVATE })
-    const comparison1 = create.comparisonHelper.create(em, {
-      user,
-      app,
-    }, { scope: STATIC_SCOPE.PRIVATE })
-    const comparison2 = create.comparisonHelper.create(em, {
-      user,
-      app,
-    }, { scope: STATIC_SCOPE.PRIVATE })
+    const comparison1 = create.comparisonHelper.create(
+      em,
+      {
+        user,
+        app,
+      },
+      { scope: STATIC_SCOPE.PRIVATE },
+    )
+    const comparison2 = create.comparisonHelper.create(
+      em,
+      {
+        user,
+        app,
+      },
+      { scope: STATIC_SCOPE.PRIVATE },
+    )
     await em.flush()
-    const compFile1 = create.filesHelper.create(em, { user }, {
-      scope: STATIC_SCOPE.PRIVATE,
-      parentType: PARENT_TYPE.COMPARISON,
-      parentId: comparison1.id,
-      project: user.privateComparisonsProject
-    })
-    const compFile2 = create.filesHelper.create(em, { user }, {
-      scope: STATIC_SCOPE.PUBLIC,
-      parentType: PARENT_TYPE.COMPARISON,
-      parentId: comparison2.id,
-      project: user.publicFilesProject
-    })
+    const compFile1 = create.filesHelper.create(
+      em,
+      { user },
+      {
+        scope: STATIC_SCOPE.PRIVATE,
+        parentType: PARENT_TYPE.COMPARISON,
+        parentId: comparison1.id,
+        project: user.privateComparisonsProject,
+      },
+    )
+    const compFile2 = create.filesHelper.create(
+      em,
+      { user },
+      {
+        scope: STATIC_SCOPE.PUBLIC,
+        parentType: PARENT_TYPE.COMPARISON,
+        parentId: comparison2.id,
+        project: user.publicFilesProject,
+      },
+    )
     await em.flush()
-    const count = await publisherService.publishComparisons([comparison1, comparison2], user, STATIC_SCOPE.PUBLIC)
+    const count = await publisherService.publishComparisons(
+      [comparison1, comparison2],
+      user,
+      STATIC_SCOPE.PUBLIC,
+    )
     expect(count).eq(2)
     em.clear()
     const loadedComparison1 = await em.findOneOrFail(Comparison, { id: comparison1.id })
@@ -142,5 +172,4 @@ describe('PublisherService tests', () => {
     expect(loadedFolder.scope).eq(STATIC_SCOPE.PRIVATE)
     expect(loadedNode.scope).eq(STATIC_SCOPE.PRIVATE)
   })
-
 })

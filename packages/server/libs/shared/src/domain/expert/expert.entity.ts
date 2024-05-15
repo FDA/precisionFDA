@@ -1,4 +1,14 @@
-import { Collection, Entity, EntityRepositoryType, Enum, Ref, OneToMany, OneToOne, Property, Reference } from '@mikro-orm/core'
+import {
+  Collection,
+  Entity,
+  EntityRepositoryType,
+  Enum,
+  Ref,
+  OneToMany,
+  OneToOne,
+  Property,
+  Reference,
+} from '@mikro-orm/core'
 import { User } from '@shared/domain/user/user.entity'
 import { BaseEntity } from '../../database/base-entity'
 import { ExpertQuestion, ExpertQuestionState } from '../expert-question/expert-question.entity'
@@ -11,10 +21,10 @@ export enum ExpertState {
 }
 
 export enum ExpertScope {
-  PUBLIC = 'public'
+  PUBLIC = 'public',
 }
 
-@Entity({ tableName: 'experts', customRepository: () => ExpertRepository })
+@Entity({ tableName: 'experts', repository: () => ExpertRepository })
 export class Expert extends BaseEntity {
   @Property()
   createdAt = new Date()
@@ -42,17 +52,13 @@ export class Expert extends BaseEntity {
   meta?: ExpertMeta
 
   @Property({ type: 'varchar' })
-  image?: string
+  image?: string;
 
   [EntityRepositoryType]?: ExpertRepository
 
   constructor(user: User) {
     super()
     this.user = Reference.create(user)
-  }
-
-  getYear(): number {
-    return this.createdAt?.getFullYear()
   }
 
   async getAnsweredQuestionsCount() {

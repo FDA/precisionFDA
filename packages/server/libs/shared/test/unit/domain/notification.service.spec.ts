@@ -10,6 +10,7 @@ import sinon from 'sinon'
 import { createClient } from 'redis'
 import { NOTIFICATIONS_QUEUE } from '@shared/services/redis.service'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { Reference } from '@mikro-orm/core'
 
 describe('Notification service tests', () => {
   let em: EntityManager<MySqlDriver>
@@ -41,6 +42,7 @@ describe('Notification service tests', () => {
       NOTIFICATIONS_QUEUE,
       JSON.stringify({
         id: 1,
+        user: 1,
         action: NOTIFICATION_ACTION.NODES_REMOVED,
         message: 'msg',
         severity: SEVERITY.WARN,
@@ -48,6 +50,7 @@ describe('Notification service tests', () => {
     )
     notificationService = new NotificationService(em, userCtx, redisClient)
     await notificationService.createNotification({
+      userId: 1,
       action: NOTIFICATION_ACTION.NODES_REMOVED,
       message: 'msg',
       severity: SEVERITY.WARN,
@@ -105,14 +108,19 @@ describe('Notification service tests', () => {
 
   it('Test get unread Notifications', async () => {
     const savedNotification = new Notification(
-      user1,
+      Reference.createFromPK(User, user1.id),
       NOTIFICATION_ACTION.NODES_REMOVED,
       'test',
       SEVERITY.ERROR,
     )
     await em.persistAndFlush(savedNotification)
     await em.persistAndFlush(
-      new Notification(user2, NOTIFICATION_ACTION.NODES_REMOVED, 'test', SEVERITY.ERROR),
+      new Notification(
+        Reference.createFromPK(User, user2.id),
+        NOTIFICATION_ACTION.NODES_REMOVED,
+        'test',
+        SEVERITY.ERROR,
+      ),
     )
 
     const unread = await notificationService.getUnreadNotifications(userId)
@@ -122,7 +130,7 @@ describe('Notification service tests', () => {
 
   it('Test update Notification', async () => {
     const savedNotification = new Notification(
-      user1,
+      Reference.createFromPK(User, user1.id),
       NOTIFICATION_ACTION.NODES_REMOVED,
       'test',
       SEVERITY.ERROR,
@@ -142,7 +150,7 @@ describe('Notification service tests', () => {
     notificationService = new NotificationService(em, userCtx)
 
     const savedNotification = new Notification(
-      user1,
+      Reference.createFromPK(User, user1.id),
       NOTIFICATION_ACTION.NODES_REMOVED,
       'test',
       SEVERITY.ERROR,

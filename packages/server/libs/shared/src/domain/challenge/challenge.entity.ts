@@ -16,7 +16,7 @@ import { ChallengeResource } from './challenge-resource.entity'
 import { CHALLENGE_STATUS } from './challenge.enum'
 import { ChallengeRepository } from './challenge.repository'
 
-@Entity({ tableName: 'challenges', customRepository: () => ChallengeRepository })
+@Entity({ tableName: 'challenges', repository: () => ChallengeRepository })
 export class Challenge extends BaseEntity {
   @PrimaryKey()
   id: number

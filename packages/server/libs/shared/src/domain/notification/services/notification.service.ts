@@ -8,6 +8,7 @@ import { createRedisClient, NOTIFICATIONS_QUEUE } from '@shared/services/redis.s
 import { Notification } from '@shared/domain/notification/notification.entity'
 import { NotificationInput } from '../notification.input'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { Reference } from '@mikro-orm/core'
 
 export type RedisClientType = ReturnType<typeof createClient>
 
@@ -32,12 +33,8 @@ export class NotificationService {
       this.redisClient = await createRedisClient()
     }
 
-    let user: User | null = null
-    if (notificationInput.userId) {
-      user = await this.em.findOneOrFail(User, notificationInput.userId)
-    }
     const notification = new Notification(
-      user,
+      notificationInput.userId ? Reference.createFromPK(User, notificationInput.userId) : null,
       notificationInput.action,
       notificationInput.message,
       notificationInput.severity,
@@ -45,10 +42,19 @@ export class NotificationService {
       new Date(),
       notificationInput.meta,
     )
-
     await this.em.persistAndFlush(notification)
 
-    this.redisClient?.publish(NOTIFICATIONS_QUEUE, JSON.stringify(notification))
+    const notificationMessage = {
+      id: notification.id,
+      user: notificationInput.userId,
+      action: notification.action,
+      message: notification.message,
+      severity: notification.severity,
+      meta: notificationInput.meta,
+    }
+
+    this.redisClient?.publish(NOTIFICATIONS_QUEUE, JSON.stringify(notificationMessage))
+
     logger.debug('NotificationService: notification published')
   }
 

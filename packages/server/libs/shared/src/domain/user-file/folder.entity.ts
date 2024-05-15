@@ -13,9 +13,20 @@ import { Tagging } from '@shared/domain/tagging/tagging.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { FolderRepository } from './folder.repository'
 import { Node } from './node.entity'
-import { FOLDER_STATE, FILE_STI_TYPE, FILE_ORIGIN_TYPE, PARENT_TYPE, ITrackable } from './user-file.types'
+import {
+  FOLDER_STATE,
+  FILE_STI_TYPE,
+  FILE_ORIGIN_TYPE,
+  PARENT_TYPE,
+  ITrackable,
+} from './user-file.types'
 
-@Entity({ tableName: 'nodes', customRepository: () => FolderRepository })
+@Entity({
+  tableName: 'nodes',
+  repository: () => FolderRepository,
+  discriminatorColumn: 'stiType',
+  discriminatorValue: FILE_STI_TYPE.FOLDER,
+})
 @Filter({ name: 'folder', cond: { stiType: FILE_STI_TYPE.FOLDER } })
 @Filter({ name: 'https', cond: { entityType: FILE_ORIGIN_TYPE.HTTPS } })
 @Filter({ name: 'pfdaonly', cond: { project: null } })
@@ -41,7 +52,7 @@ export class Folder extends Node implements ITrackable {
    */
   @OneToMany({
     entity: () => Node,
-    mappedBy: n => n.parentFolder,
+    mappedBy: (n) => n.parentFolder,
     hidden: true,
   })
   nonScopedChildren = new Collection<Node>(this)
@@ -52,7 +63,7 @@ export class Folder extends Node implements ITrackable {
    */
   @OneToMany({
     entity: () => Node,
-    mappedBy: n => n.scopedParentFolder,
+    mappedBy: (n) => n.scopedParentFolder,
     hidden: true,
   })
   scopedChildren = new Collection<Node>(this)
@@ -80,19 +91,18 @@ export class Folder extends Node implements ITrackable {
   userId: number
 
   @ManyToOne(() => User)
-  user!: Ref<User>;
+  user!: Ref<User>
 
   /**
    * Children collection always has to be initialized by caller using 'init()'
    */
-  @Property({persist: false})
   get children(): Collection<Node> {
-    if (this.scope.startsWith("space-")) {
+    if (this.scope.startsWith('space-')) {
       // intended usage of deprecated property
-      return this.scopedChildren;
+      return this.scopedChildren
     } else {
       // intended usage of deprecated property
-      return this.nonScopedChildren;
+      return this.nonScopedChildren
     }
   }
 
@@ -110,5 +120,4 @@ export class Folder extends Node implements ITrackable {
     super()
     this.user = Reference.create(user)
   }
-
 }

@@ -90,7 +90,7 @@ export class FolderRepository extends EntityRepository<Folder> {
   }
 
   removeWithTags(folder: Folder): Folder {
-    this.remove(folder)
+    this.em.remove(folder)
     folder.taggings.getItems().forEach(tagging => tagging.tag.taggingCount--)
     folder.taggings.removeAll()
     return folder

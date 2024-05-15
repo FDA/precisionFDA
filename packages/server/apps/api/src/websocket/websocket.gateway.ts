@@ -9,7 +9,6 @@ import {
 } from '@nestjs/websockets'
 import { AuthSessionOperation } from '@shared/domain/auth/auth.session'
 import { NotificationService } from '@shared/domain/notification/services/notification.service'
-import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { createRedisClient, NOTIFICATIONS_QUEUE } from '@shared/services/redis.service'
 import { Server, WebSocket } from 'ws'
 import { log } from '../logger'
@@ -92,9 +91,8 @@ export class WebsocketGateway implements OnGatewayDisconnect, OnGatewayInit {
     const client = await createRedisClient()
 
     client.subscribe(NOTIFICATIONS_QUEUE, (notificationJson: string) => {
-      const notification: { user: UserContext } = JSON.parse(notificationJson)
-
-      const userId = notification.user.id
+      const notification: { user: number } = JSON.parse(notificationJson)
+      const userId = notification.user
 
       delete notification.user // not sending user info to client
 

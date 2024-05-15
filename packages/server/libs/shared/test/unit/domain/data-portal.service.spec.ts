@@ -74,7 +74,6 @@ describe('data portal service tests', () => {
       getEntityLink: getEntityLinkStub,
     } as unknown as EntityService
 
-
     return new DataPortalService(
       em,
       userCtx,
@@ -88,7 +87,7 @@ describe('data portal service tests', () => {
 
   beforeEach(async () => {
     await db.dropData(database.connection())
-    em = database.orm().em.fork()
+    em = database.orm().em.fork({ useContext: true })
     user = create.userHelper.create(em)
     await em.flush()
 
@@ -148,8 +147,10 @@ describe('data portal service tests', () => {
       {
         role,
         side: SPACE_MEMBERSHIP_SIDE.HOST,
+        active: true,
       },
     )
+    await em.flush()
     return { userId: internalUser.id, portalId: portal.id }
   }
 
@@ -175,6 +176,7 @@ describe('data portal service tests', () => {
       {
         role: SPACE_MEMBERSHIP_ROLE.LEAD,
         side: SPACE_MEMBERSHIP_SIDE.HOST,
+        active: true,
       },
     )
     create.spacesHelper.addMember(
@@ -183,6 +185,7 @@ describe('data portal service tests', () => {
       {
         role: SPACE_MEMBERSHIP_ROLE.LEAD,
         side: SPACE_MEMBERSHIP_SIDE.GUEST,
+        active: true,
       },
     )
     create.spacesHelper.addMember(
@@ -191,6 +194,7 @@ describe('data portal service tests', () => {
       {
         role: SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR,
         side: SPACE_MEMBERSHIP_SIDE.GUEST,
+        active: true,
       },
     )
 
@@ -627,7 +631,7 @@ describe('data portal service tests', () => {
     expect(file.uid).eq('file-dxid-1')
     expect(file.project).eq('hostProject')
     expect(file.description).eq('description')
-    expect(file.userId).eq(2) // challenge bot
+    expect(file.user.id).eq(2) // challenge bot
     expect(file.parentId).eq(2) // challenge bot
     expect(file.state).eq(FILE_STATE_DX.OPEN)
     expect(file.scope).eq('space-1')

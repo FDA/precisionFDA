@@ -51,23 +51,23 @@ describe('NodeHelper', () => {
   describe('renameDuplicateFiles', () => {
     it('should rename duplicate files in the same folder', () => {
       const nodes: Node[] = [
-        { name: 'file.txt', stiType: FILE_STI_TYPE.USERFILE, parentFolderId: null } as Node,
-        { name: 'file.txt', stiType: FILE_STI_TYPE.USERFILE, parentFolderId: null } as Node,
-        { name: 'file.txt', stiType: FILE_STI_TYPE.USERFILE, parentFolderId: null } as Node,
-        { name: 'folder', stiType: FILE_STI_TYPE.FOLDER, parentFolderId: null, id: 1 } as Node,
-        { name: 'file.txt', stiType: FILE_STI_TYPE.USERFILE, parentFolderId: 1 } as Node,
-        { name: 'file.txt', stiType: FILE_STI_TYPE.USERFILE, parentFolderId: 1 } as Node,
-        { name: 'file.txt', stiType: FILE_STI_TYPE.USERFILE, parentFolderId: 1 } as Node,
+        { name: 'file.txt', stiType: FILE_STI_TYPE.USERFILE, parentFolder: null } as Node,
+        { name: 'file.txt', stiType: FILE_STI_TYPE.USERFILE, parentFolder: null } as Node,
+        { name: 'file.txt', stiType: FILE_STI_TYPE.USERFILE, parentFolder: null } as Node,
+        { name: 'folder', stiType: FILE_STI_TYPE.FOLDER, parentFolder: null, id: 1 } as Node,
+        { name: 'file.txt', stiType: FILE_STI_TYPE.USERFILE, parentFolder: { id: 1 } } as Node,
+        { name: 'file.txt', stiType: FILE_STI_TYPE.USERFILE, parentFolder: { id: 1 } } as Node,
+        { name: 'file.txt', stiType: FILE_STI_TYPE.USERFILE, parentFolder: { id: 1 } } as Node,
       ]
       const result = nodeHelper.renameDuplicateFiles(nodes)
       expect(result).to.deep.eq([
-        { name: 'file.txt', stiType: FILE_STI_TYPE.USERFILE, parentFolderId: null } as Node,
-        { name: 'file 1.txt', stiType: FILE_STI_TYPE.USERFILE, parentFolderId: null } as Node,
-        { name: 'file 2.txt', stiType: FILE_STI_TYPE.USERFILE, parentFolderId: null } as Node,
-        { name: 'folder', stiType: FILE_STI_TYPE.FOLDER, parentFolderId: null, id: 1 } as Node,
-        { name: 'file.txt', stiType: FILE_STI_TYPE.USERFILE, parentFolderId: 1 } as Node,
-        { name: 'file 1.txt', stiType: FILE_STI_TYPE.USERFILE, parentFolderId: 1 } as Node,
-        { name: 'file 2.txt', stiType: FILE_STI_TYPE.USERFILE, parentFolderId: 1 } as Node,
+        { name: 'file.txt', stiType: FILE_STI_TYPE.USERFILE, parentFolder: null } as Node,
+        { name: 'file 1.txt', stiType: FILE_STI_TYPE.USERFILE, parentFolder: null } as Node,
+        { name: 'file 2.txt', stiType: FILE_STI_TYPE.USERFILE, parentFolder: null } as Node,
+        { name: 'folder', stiType: FILE_STI_TYPE.FOLDER, parentFolder: null, id: 1 } as Node,
+        { name: 'file.txt', stiType: FILE_STI_TYPE.USERFILE, parentFolder: { id: 1 } } as Node,
+        { name: 'file 1.txt', stiType: FILE_STI_TYPE.USERFILE, parentFolder: { id: 1 } } as Node,
+        { name: 'file 2.txt', stiType: FILE_STI_TYPE.USERFILE, parentFolder: { id: 1 } } as Node,
       ])
     })
   })

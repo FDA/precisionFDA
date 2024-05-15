@@ -1,23 +1,16 @@
 /* eslint-disable no-warning-comments */
 import { parseEnumValueFromString } from '@shared/validation/parsers'
 /* eslint-disable max-len */
-// eslint-disable-next-line import/no-named-default
 import { default as dotenv } from 'dotenv'
-// eslint-disable-next-line import/order
 import path from 'path'
 
 // load process.env values
 dotenv.config()
 
-// eslint-disable-next-line import/first
 import { mergeDeepRight } from 'ramda'
-// eslint-disable-next-line import/first
 import { ENVS } from '../enums'
-// eslint-disable-next-line import/first
 import { DeepPartial } from '../types'
-// eslint-disable-next-line import/first
 import { MAX_JOB_DURATION_SECONDS } from './constants'
-// eslint-disable-next-line import/first
 import * as overrides from './envs'
 
 type Maybe<T> = T | null
@@ -48,7 +41,6 @@ const defaultConfig = {
   appName: 'https-apps-worker',
   env,
   api: {
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     port: parseIntFromProcess(process.env.NODE_PORT) ?? 3001,
     appKit: 'project-GVg2Zg80fQb20gg39J507VYx:/appKit-1.2.tgz',
     enableSsl: parseBooleanFromProcess(process.env.NODE_ENABLE_SSL, true),
@@ -57,7 +49,10 @@ const defaultConfig = {
     url: process.env.NODE_URL ?? 'https://nodejs-api',
     railsHost: process.env.HOST ?? 'https://localhost:3000',
     // TODO - refactor to boolean
-    allowErrorTestingRoutes: parseBooleanFromProcess(process.env.NODE_ALLOW_ERROR_TESTING_ROUTES, true),
+    allowErrorTestingRoutes: parseBooleanFromProcess(
+      process.env.NODE_ALLOW_ERROR_TESTING_ROUTES,
+      true,
+    ),
     fdaSubnet: {
       allowedIpCidrBlock: {
         ipv4Quadruple: [127, 0, 0, 1],
@@ -73,15 +68,9 @@ const defaultConfig = {
     enableStackLogging: true,
   },
   database: {
-    // it is used for testing, not for default DB connection
     dbName: process.env.NODE_DATABASE_NAME ?? 'precisionfda-test',
     clientUrl:
       process.env.NODE_DATABASE_URL ?? 'mysql://root:password@localhost:32800/precisionfda-test',
-    debug: parseBooleanFromProcess(process.env.NODE_DATABASE_DEBUG) ?? false,
-  },
-  databaseReplica: {
-    dbName: process.env.NODE_DATABASE_NAME ?? 'precision-fda',
-    clientUrl: process.env.NODE_DATABASE_REPLICA_URL ?? 'mysql://root:password@localhost:3306/precision-fda',
     debug: parseBooleanFromProcess(process.env.NODE_DATABASE_DEBUG) ?? false,
   },
   validation: {

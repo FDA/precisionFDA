@@ -123,7 +123,7 @@ export class NewsController {
     @Body(new ZodPipe(newsPostRequestSchema)) body: NewsPostReqBody,
   ) {
     const existing = await this.em.findOneOrFail(NewsItem, id)
-    const to_save = wrap(existing).assign(body, { mergeObjects: true })
+    const to_save = wrap(existing).assign(body, { mergeObjectProperties: true })
     await this.em.persistAndFlush(to_save)
   }
 

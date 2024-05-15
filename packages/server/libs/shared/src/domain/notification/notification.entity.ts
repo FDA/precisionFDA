@@ -4,8 +4,8 @@ import { BaseEntity } from '../../database/base-entity'
 import { NOTIFICATION_ACTION, SEVERITY } from '../../enums'
 
 export type NotificationMeta = {
-  linkTitle?: string,
-  linkUrl?: string,
+  linkTitle?: string
+  linkUrl?: string
 }
 
 @Entity({ tableName: 'notifications' })
@@ -34,17 +34,18 @@ export class Notification extends BaseEntity {
   @ManyToOne(() => User)
   user?: Ref<User>
 
-  constructor(user: User | null,
-              action?: NOTIFICATION_ACTION,
-              message?: string,
-              severity?: SEVERITY,
-              createdAt?: Date,
-              updatedAt?: Date,
-              meta?: NotificationMeta,
+  constructor(
+    user: Ref<User> | null,
+    action?: NOTIFICATION_ACTION,
+    message?: string,
+    severity?: SEVERITY,
+    createdAt?: Date,
+    updatedAt?: Date,
+    meta?: NotificationMeta,
   ) {
     super()
     if (user !== null) {
-      this.user = Reference.create(user)
+      this.user = user
     }
     if (action) this.action = action
     if (message) this.message = message
@@ -53,5 +54,4 @@ export class Notification extends BaseEntity {
     if (updatedAt) this.updatedAt = updatedAt
     if (meta) this.meta = meta
   }
-
 }

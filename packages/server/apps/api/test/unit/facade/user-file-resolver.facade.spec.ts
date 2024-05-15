@@ -24,7 +24,7 @@ describe('UserFileResolverFacade', () => {
 
   beforeEach(async () => {
     await db.dropData(database.connection())
-    em = database.orm().em.fork() as SqlEntityManager
+    em = database.orm().em.fork({ useContext: true }) as SqlEntityManager
     user1 = create.userHelper.create(em)
     user2 = create.userHelper.create(em)
     publicUser = create.userHelper.create(em)
@@ -46,81 +46,201 @@ describe('UserFileResolverFacade', () => {
   })
 
   it('test root path', async () => {
-    const rootInput = await getInstance(user1).resolvePath({ path: '/', scope: STATIC_SCOPE.PRIVATE, type: undefined })
+    const rootInput = await getInstance(user1).resolvePath({
+      path: '/',
+      scope: STATIC_SCOPE.PRIVATE,
+      type: undefined,
+    })
     expect(rootInput).deep.equal({ path: '/', scope: STATIC_SCOPE.PRIVATE, nodes: [] })
 
-    const rootInput2 = await getInstance(user1).resolvePath({ path: '/', scope: STATIC_SCOPE.PRIVATE, type: undefined })
+    const rootInput2 = await getInstance(user1).resolvePath({
+      path: '/',
+      scope: STATIC_SCOPE.PRIVATE,
+      type: undefined,
+    })
     expect(rootInput2).deep.equal({ path: '/', scope: STATIC_SCOPE.PRIVATE, nodes: [] })
   })
 
   it('test invalid path', async () => {
-    const folder = await create.filesHelper.createFolder(em, { user: user1 }, { name: 'invalid_folder' })
-    const file = await create.filesHelper.create(em, { user: user1, parentFolder: folder  }, { name: 'invalid_file' })
+    const folder = await create.filesHelper.createFolder(
+      em,
+      { user: user1 },
+      { name: 'invalid_folder' },
+    )
+    const file = await create.filesHelper.create(
+      em,
+      { user: user1, parentFolder: folder },
+      { name: 'invalid_file' },
+    )
     await em.flush()
 
-    const res = await getInstance(user1).resolvePath({ path: '/invaliddddd_folder/invalid_file', scope: STATIC_SCOPE.PRIVATE, type: undefined })
+    const res = await getInstance(user1).resolvePath({
+      path: '/invaliddddd_folder/invalid_file',
+      scope: STATIC_SCOPE.PRIVATE,
+      type: undefined,
+    })
     expect(res.nodes.length).to.equal(0)
 
-    const valid = await getInstance(user1).resolvePath({ path: '/invalid_folder/invalid_file', scope: STATIC_SCOPE.PRIVATE, type: undefined })
+    const valid = await getInstance(user1).resolvePath({
+      path: '/invalid_folder/invalid_file',
+      scope: STATIC_SCOPE.PRIVATE,
+      type: undefined,
+    })
     expect(valid.nodes.length).to.equal(1)
     expect(valid.nodes[0]).to.have.property('id', file.id)
   })
 
   context('in private scope', () => {
     it('test querying file(s) and folder(s)', async () => {
-      const folder1 = await create.filesHelper.createFolder(em, { user: user1 }, { name: 'folder1' })
-      const folder2 = await create.filesHelper.createFolder(em, { user: user1, parentFolder: folder1 }, { name: 'folder2' })
+      const folder1 = await create.filesHelper.createFolder(
+        em,
+        { user: user1 },
+        { name: 'folder1' },
+      )
+      const folder2 = await create.filesHelper.createFolder(
+        em,
+        { user: user1, parentFolder: folder1 },
+        { name: 'folder2' },
+      )
       const rootFile = await create.filesHelper.create(em, { user: user1 }, { name: 'rootFile' })
-      const file1 = await create.filesHelper.create(em, { user: user1, parentFolder: folder1 }, { name: 'file1' })
-      const file2 = await create.filesHelper.create(em, { user: user1, parentFolder: folder2 }, { name: 'file2' })
-      const folder1User2 = await create.filesHelper.createFolder(em, { user: user2 }, { name: 'folder1' })
-      const folder2User2 = await create.filesHelper.createFolder(em, { user: user2, parentFolder: folder1User2 }, { name: 'folder2' })
-      const file1User2 = await create.filesHelper.create(em, { user: user2, parentFolder: folder1User2 }, { name: 'file1' })
+      const file1 = await create.filesHelper.create(
+        em,
+        { user: user1, parentFolder: folder1 },
+        { name: 'file1' },
+      )
+      const file2 = await create.filesHelper.create(
+        em,
+        { user: user1, parentFolder: folder2 },
+        { name: 'file2' },
+      )
+      const folder1User2 = await create.filesHelper.createFolder(
+        em,
+        { user: user2 },
+        { name: 'folder1' },
+      )
+      const folder2User2 = await create.filesHelper.createFolder(
+        em,
+        { user: user2, parentFolder: folder1User2 },
+        { name: 'folder2' },
+      )
+      const file1User2 = await create.filesHelper.create(
+        em,
+        { user: user2, parentFolder: folder1User2 },
+        { name: 'file1' },
+      )
       const fileUser2 = await create.filesHelper.create(em, { user: user2 }, { name: 'fileeeeee' })
       await em.flush()
 
-      const folder1Res = await getInstance(user1).resolvePath({ path: '/folder1', scope: STATIC_SCOPE.PRIVATE, type: null })
+      const folder1Res = await getInstance(user1).resolvePath({
+        path: '/folder1',
+        scope: STATIC_SCOPE.PRIVATE,
+        type: null,
+      })
       expect(folder1Res.nodes[0]).to.have.property('id', folder1.id)
-      const folder2Res = await getInstance(user1).resolvePath({ path: '/folder1/folder2', scope: STATIC_SCOPE.PRIVATE, type: null })
+      const folder2Res = await getInstance(user1).resolvePath({
+        path: '/folder1/folder2',
+        scope: STATIC_SCOPE.PRIVATE,
+        type: null,
+      })
       expect(folder2Res.nodes[0]).to.have.property('id', folder2.id)
-      const file1Res = await getInstance(user1).resolvePath({ path: '/folder1/file1', scope: STATIC_SCOPE.PRIVATE, type: null })
+      const file1Res = await getInstance(user1).resolvePath({
+        path: '/folder1/file1',
+        scope: STATIC_SCOPE.PRIVATE,
+        type: null,
+      })
       expect(file1Res.nodes[0]).to.have.property('id', file1.id)
-      const file2Res = await getInstance(user1).resolvePath({ path: '/folder1/folder2/file2', scope: STATIC_SCOPE.PRIVATE, type: null })
+      const file2Res = await getInstance(user1).resolvePath({
+        path: '/folder1/folder2/file2',
+        scope: STATIC_SCOPE.PRIVATE,
+        type: null,
+      })
       expect(file2Res.nodes[0]).to.have.property('id', file2.id)
-      const rootFileRes = await getInstance(user1).resolvePath({ path: '/rootFile', scope: STATIC_SCOPE.PRIVATE, type: null })
+      const rootFileRes = await getInstance(user1).resolvePath({
+        path: '/rootFile',
+        scope: STATIC_SCOPE.PRIVATE,
+        type: null,
+      })
       expect(rootFileRes.nodes[0]).to.have.property('id', rootFile.id)
 
-      const folder1User2Res = await getInstance(user2).resolvePath({ path: '/folder1', scope: STATIC_SCOPE.PRIVATE, type: null })
+      const folder1User2Res = await getInstance(user2).resolvePath({
+        path: '/folder1',
+        scope: STATIC_SCOPE.PRIVATE,
+        type: null,
+      })
       expect(folder1User2Res.nodes[0]).to.have.property('id', folder1User2.id)
-      const folder2User2Res = await getInstance(user2).resolvePath({ path: '/folder1/folder2', scope: STATIC_SCOPE.PRIVATE, type: null })
+      const folder2User2Res = await getInstance(user2).resolvePath({
+        path: '/folder1/folder2',
+        scope: STATIC_SCOPE.PRIVATE,
+        type: null,
+      })
       expect(folder2User2Res.nodes[0]).to.have.property('id', folder2User2.id)
-      const file1User2Res = await getInstance(user2).resolvePath({ path: '/folder1/file1', scope: STATIC_SCOPE.PRIVATE, type: null })
+      const file1User2Res = await getInstance(user2).resolvePath({
+        path: '/folder1/file1',
+        scope: STATIC_SCOPE.PRIVATE,
+        type: null,
+      })
       expect(file1User2Res.nodes[0]).to.have.property('id', file1User2.id)
-      const fileUser2Res = await getInstance(user2).resolvePath({ path: '/fileeeeee', scope: STATIC_SCOPE.PRIVATE, type: null })
+      const fileUser2Res = await getInstance(user2).resolvePath({
+        path: '/fileeeeee',
+        scope: STATIC_SCOPE.PRIVATE,
+        type: null,
+      })
       expect(fileUser2Res.nodes[0]).to.have.property('id', fileUser2.id)
 
-      const nonExistingFileRes = await getInstance(user1).resolvePath({ path: '/fileeeeee', scope: STATIC_SCOPE.PRIVATE, type: null })
+      const nonExistingFileRes = await getInstance(user1).resolvePath({
+        path: '/fileeeeee',
+        scope: STATIC_SCOPE.PRIVATE,
+        type: null,
+      })
       expect(nonExistingFileRes.nodes.length).to.equal(0)
     })
 
     it('test querying file(s) and folder(s) in the same path', async () => {
-      const folder = await create.filesHelper.createFolder(em, { user: user1 }, { name: 'test_conflicting_path' })
-      const file = await create.filesHelper.create(em, { user: user1 }, { name: 'test_conflicting_path' })
+      const folder = await create.filesHelper.createFolder(
+        em,
+        { user: user1 },
+        { name: 'test_conflicting_path' },
+      )
+      const file = await create.filesHelper.create(
+        em,
+        { user: user1 },
+        { name: 'test_conflicting_path' },
+      )
       await em.flush()
 
-      const res = await getInstance(user1).resolvePath({ path: '/test_conflicting_path', scope: STATIC_SCOPE.PRIVATE, type: null })
+      const res = await getInstance(user1).resolvePath({
+        path: '/test_conflicting_path',
+        scope: STATIC_SCOPE.PRIVATE,
+        type: null,
+      })
       expect(res.nodes.length).to.equal(2)
-      const folderRes = await getInstance(user1).resolvePath({ path: '/test_conflicting_path', scope: STATIC_SCOPE.PRIVATE, type: 'folder' })
+      const folderRes = await getInstance(user1).resolvePath({
+        path: '/test_conflicting_path',
+        scope: STATIC_SCOPE.PRIVATE,
+        type: 'folder',
+      })
       expect(folderRes.nodes[0]).to.have.property('id', folder.id)
-      const fileRes = await getInstance(user1).resolvePath({ path: '/test_conflicting_path', scope: STATIC_SCOPE.PRIVATE, type: 'file' })
+      const fileRes = await getInstance(user1).resolvePath({
+        path: '/test_conflicting_path',
+        scope: STATIC_SCOPE.PRIVATE,
+        type: 'file',
+      })
       expect(fileRes.nodes[0]).to.have.property('id', file.id)
     })
 
     it('test path contains space', async () => {
-      const folder = await create.filesHelper.createFolder(em, { user: user1 }, { name: 'test space' })
+      const folder = await create.filesHelper.createFolder(
+        em,
+        { user: user1 },
+        { name: 'test space' },
+      )
       await em.flush()
 
-      const res = await getInstance(user1).resolvePath({ path: '/test space', scope: STATIC_SCOPE.PRIVATE, type: null })
+      const res = await getInstance(user1).resolvePath({
+        path: '/test space',
+        scope: STATIC_SCOPE.PRIVATE,
+        type: null,
+      })
       expect(res.nodes.length).to.equal(1)
     })
 
@@ -128,11 +248,23 @@ describe('UserFileResolverFacade', () => {
       const folder = create.filesHelper.createFolder(em, { user: user1 }, { name: 'slash' })
       await em.flush()
 
-      const res = await getInstance(user1).resolvePath({ path: '/slash/', scope: STATIC_SCOPE.PRIVATE, type: null })
+      const res = await getInstance(user1).resolvePath({
+        path: '/slash/',
+        scope: STATIC_SCOPE.PRIVATE,
+        type: null,
+      })
       expect(res.nodes[0]).to.have.property('id', folder.id)
-      const res2 = await getInstance(user1).resolvePath({ path: '//slash//', scope: STATIC_SCOPE.PRIVATE, type: null })
+      const res2 = await getInstance(user1).resolvePath({
+        path: '//slash//',
+        scope: STATIC_SCOPE.PRIVATE,
+        type: null,
+      })
       expect(res2.nodes[0]).to.have.property('id', folder.id)
-      const res3 = await getInstance(user1).resolvePath({ path: 'slash', scope: STATIC_SCOPE.PRIVATE, type: null })
+      const res3 = await getInstance(user1).resolvePath({
+        path: 'slash',
+        scope: STATIC_SCOPE.PRIVATE,
+        type: null,
+      })
       expect(res3.nodes[0]).to.have.property('id', folder.id)
     })
   })
@@ -145,7 +277,11 @@ describe('UserFileResolverFacade', () => {
         { name: 'user1_space_folder', scope: `space-${spaceUser1.id}` },
       )
 
-      const res = getInstance(user2).resolvePath({ path: '/user1_space_folder', scope: `space-${spaceUser1.id}`, type: null })
+      const res = getInstance(user2).resolvePath({
+        path: '/user1_space_folder',
+        scope: `space-${spaceUser1.id}`,
+        type: null,
+      })
       expect(res).to.be.rejectedWith('User is not a member of the scope')
     })
 
@@ -162,7 +298,7 @@ describe('UserFileResolverFacade', () => {
       )
       const spaceFolderUser2 = await create.filesHelper.createFolder(
         em,
-        { user: user2, },
+        { user: user2 },
         { name: 'space_folder1', scope: `space-${spaceUser2.id}` },
       )
       const spaceFileUser2 = await create.filesHelper.create(
@@ -172,7 +308,11 @@ describe('UserFileResolverFacade', () => {
       )
       await em.flush()
 
-      const user1Res = await getInstance(user1).resolvePath({ path: '/space_folder1', scope: `space-${spaceUser1.id}`, type: null })
+      const user1Res = await getInstance(user1).resolvePath({
+        path: '/space_folder1',
+        scope: `space-${spaceUser1.id}`,
+        type: null,
+      })
       expect(user1Res.nodes[0]).to.have.property('id', spaceFolderUser1.id)
       const user1FileRes = await getInstance(user1).resolvePath({
         path: '/space_folder1/space_file1',
@@ -180,7 +320,11 @@ describe('UserFileResolverFacade', () => {
         type: null,
       })
       expect(user1FileRes.nodes[0]).to.have.property('id', spaceFileUser1.id)
-      const user2Res = await getInstance(user2).resolvePath({ path: '/space_folder1', scope: `space-${spaceUser2.id}`, type: null })
+      const user2Res = await getInstance(user2).resolvePath({
+        path: '/space_folder1',
+        scope: `space-${spaceUser2.id}`,
+        type: null,
+      })
       expect(user2Res.nodes[0]).to.have.property('id', spaceFolderUser2.id)
       const user2FileRes = await getInstance(user2).resolvePath({
         path: '/space_folder1/space_file1',
@@ -204,27 +348,49 @@ describe('UserFileResolverFacade', () => {
         { name: 'shared_file2', scope: `space-${sharedSpace.id}` },
       )
 
-      const res1 = await getInstance(user1).resolvePath({ path: '/shared_file2', scope: `space-${sharedSpace.id}`, type: null })
+      const res1 = await getInstance(user1).resolvePath({
+        path: '/shared_file2',
+        scope: `space-${sharedSpace.id}`,
+        type: null,
+      })
       expect(res1.nodes[0]).to.have.property('id', sharedFile2.id)
-      const res2 = await getInstance(user2).resolvePath({ path: '/shared_file1', scope: `space-${sharedSpace.id}`, type: null })
+      const res2 = await getInstance(user2).resolvePath({
+        path: '/shared_file1',
+        scope: `space-${sharedSpace.id}`,
+        type: null,
+      })
       expect(res2.nodes[0]).to.have.property('id', sharedFile1.id)
-      const resUser1 = await getInstance(user1).resolvePath({ path: '/shared_file1', scope: `space-${sharedSpace.id}`, type: null })
+      const resUser1 = await getInstance(user1).resolvePath({
+        path: '/shared_file1',
+        scope: `space-${sharedSpace.id}`,
+        type: null,
+      })
       expect(resUser1.nodes[0]).to.have.property('id', sharedFile1.id)
     })
 
     it('test viewer', async () => {
       const user3 = create.userHelper.create(em)
       await em.flush()
-      create.spacesHelper.addMember(em, { user: user3, space: sharedSpace }, {
-        ...spaceMembership.simple(),
-        role: SPACE_MEMBERSHIP_ROLE.VIEWER,
-      })
+      create.spacesHelper.addMember(
+        em,
+        { user: user3, space: sharedSpace },
+        {
+          ...spaceMembership.simple(),
+          role: SPACE_MEMBERSHIP_ROLE.VIEWER,
+          active: true,
+        },
+      )
       const sharedFile = await create.filesHelper.create(
         em,
         { user: user1 },
         { name: 'shared_file', scope: `space-${sharedSpace.id}` },
       )
-      const res = await getInstance(user3).resolvePath({ path: '/shared_file', scope: `space-${sharedSpace.id}`, type: null })
+      await em.flush()
+      const res = await getInstance(user3).resolvePath({
+        path: '/shared_file',
+        scope: `space-${sharedSpace.id}`,
+        type: null,
+      })
       expect(res.nodes[0]).to.have.property('id', sharedFile.id)
     })
   })
@@ -253,9 +419,17 @@ describe('UserFileResolverFacade', () => {
       )
       await em.flush()
 
-      const resFolder = await getInstance(user1).resolvePath({ path: '/public_folder', scope: STATIC_SCOPE.PUBLIC, type: null })
+      const resFolder = await getInstance(user1).resolvePath({
+        path: '/public_folder',
+        scope: STATIC_SCOPE.PUBLIC,
+        type: null,
+      })
       expect(resFolder.nodes[0]).to.have.property('id', publicFolder.id)
-      const resFile = await getInstance(user1).resolvePath({ path: '/public_file', scope: STATIC_SCOPE.PUBLIC, type: null })
+      const resFile = await getInstance(user1).resolvePath({
+        path: '/public_file',
+        scope: STATIC_SCOPE.PUBLIC,
+        type: null,
+      })
       expect(resFile.nodes[0]).to.have.property('id', publicFile.id)
       const resChildFolder = await getInstance(user1).resolvePath({
         path: '/public_folder/public_child_folder',
