@@ -3,23 +3,17 @@ import {
   Entity,
   EntityRepositoryType,
   Filter,
-  Ref,
   ManyToOne,
   OneToMany,
   Property,
+  Ref,
   Reference,
 } from '@mikro-orm/core'
 import { Tagging } from '@shared/domain/tagging/tagging.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { FolderRepository } from './folder.repository'
 import { Node } from './node.entity'
-import {
-  FOLDER_STATE,
-  FILE_STI_TYPE,
-  FILE_ORIGIN_TYPE,
-  PARENT_TYPE,
-  ITrackable,
-} from './user-file.types'
+import { FILE_STI_TYPE, FOLDER_STATE, ITrackable, PARENT_TYPE } from './user-file.types'
 
 @Entity({
   tableName: 'nodes',
@@ -28,7 +22,6 @@ import {
   discriminatorValue: FILE_STI_TYPE.FOLDER,
 })
 @Filter({ name: 'folder', cond: { stiType: FILE_STI_TYPE.FOLDER } })
-@Filter({ name: 'https', cond: { entityType: FILE_ORIGIN_TYPE.HTTPS } })
 @Filter({ name: 'pfdaonly', cond: { project: null } })
 export class Folder extends Node implements ITrackable {
   @Property({ nullable: true })
@@ -39,9 +32,6 @@ export class Folder extends Node implements ITrackable {
 
   @Property()
   state: FOLDER_STATE
-
-  @Property()
-  entityType: FILE_ORIGIN_TYPE
 
   @Property({ type: 'bigint', hidden: true })
   fileSize?: number
@@ -84,7 +74,7 @@ export class Folder extends Node implements ITrackable {
 
   // todo: micro-orm can do single table inheritance
 
-  @OneToMany(() => Tagging, tagging => tagging.folder, { orphanRemoval: true })
+  @OneToMany(() => Tagging, (tagging) => tagging.folder, { orphanRemoval: true })
   taggings = new Collection<Tagging>(this)
 
   @Property()

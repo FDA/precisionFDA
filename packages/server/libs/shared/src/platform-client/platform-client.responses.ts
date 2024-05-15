@@ -1,6 +1,6 @@
-import { AnyObject } from '../types'
-import { FILE_STATE_DX } from '../domain/user-file/user-file.types'
 import { JOB_STATE } from '../domain/job/job.enum'
+import { FILE_STATE_DX } from '../domain/user-file/user-file.types'
+import { AnyObject } from '../types'
 import { DnanexusLink, IOType } from '../types/common'
 
 type DbClusterDescribeResponse = {
@@ -265,8 +265,8 @@ class WorkflowDescribeResponse {
   description: string
   outputFolder: string | null
   temporary: boolean
-  inputs: any  // don't know what this could be
-  outputs: any  // don't know what this could be
+  inputs: any // don't know what this could be
+  outputs: any // don't know what this could be
   stages: Stage[]
   inputSpec: SpecItem[]
   outputSpec: SpecItem[]
@@ -295,8 +295,8 @@ interface SpecItem {
 }
 
 type CloneObjectsResponse = {
-  id: string,
-  project: string,
+  id: string
+  project: string
 }
 
 type JobOutput = {
@@ -321,7 +321,7 @@ type JobDescribeResponse = {
       url?: string
     }
   }
-  describe: {
+  describe?: {
     output: JobOutput
   }
   failureCount?: number
@@ -334,32 +334,32 @@ type JobDescribeResponse = {
 
 //TODO: this will start to grow significantly, consider splitting into multiple files/modules.
 export {
-  IPaginatedResponse,
-  FileCloseResponse,
-  FileDownloadLinkResponse,
-  FileStateResult,
-  FileStatesResponse,
-  ListFilesResult,
-  ListFilesResponse,
-  JobCreateResponse,
-  JobDescribeResponse,
-  JobTerminateResponse,
+  AppDescribeResponse,
   ClassIdResponse,
-  FileDescribeResponse,
-  DescribeFoldersResponse,
+  CloneObjectsResponse,
   DbClusterDescribeResponse,
   DescribeDataObjectsResponse,
+  DescribeFoldersResponse,
+  DnanexusLink,
+  FileCloseResponse,
+  FileDescribeResponse,
+  FileDownloadLinkResponse,
+  FileRemoveResponse,
+  FileStateResult,
+  FileStatesResponse,
+  FindJobsResponse,
+  GetUploadURLResponse,
+  IPaginatedResponse,
+  JobCreateResponse,
+  JobDescribeResponse,
+  JobOutput,
+  JobTerminateResponse,
+  ListFilesResponse,
+  ListFilesResult,
   OrgFindMembersReponse,
   PlatformMember,
   UserDescribeResponse,
   UserInviteToOrgResponse,
-  FindJobsResponse,
-  FileRemoveResponse,
   UserRemoveFromOrgResponse,
-  AppDescribeResponse,
   WorkflowDescribeResponse,
-  CloneObjectsResponse,
-  DnanexusLink,
-  JobOutput,
-  GetUploadURLResponse,
 }

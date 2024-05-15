@@ -1,17 +1,14 @@
 import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
 import { database } from '@shared/database'
-import {
-  FolderRemoveRecursiveOperation
-} from '@shared/domain/user-file/ops/folder-remove-recursive'
-import { SyncFoldersOperation } from '@shared/domain/user-file/ops/sync-folders'
-import { User } from '@shared/domain/user/user.entity'
 import { Event } from '@shared/domain/event/event.entity'
-import { getLogger } from '@shared/logger'
-import { create, db } from '@shared/test'
 import { EVENT_TYPES } from '@shared/domain/event/event.helper'
-import { expect } from 'chai'
+import { FolderRemoveRecursiveOperation } from '@shared/domain/user-file/ops/folder-remove-recursive'
 import { SyncFoldersInput } from '@shared/domain/user-file/user-file.input'
 import { PARENT_TYPE } from '@shared/domain/user-file/user-file.types'
+import { User } from '@shared/domain/user/user.entity'
+import { getLogger } from '@shared/logger'
+import { create, db } from '@shared/test'
+import { expect } from 'chai'
 
 describe('folder events tests', () => {
   let em: EntityManager<MySqlDriver>
@@ -61,50 +58,24 @@ describe('folder events tests', () => {
     deleteFolderInput = { id: parentFolder.id }
     await deleteOp.execute(deleteFolderInput)
 
-    const deleteChildEvent = await em.findOneOrFail(
-      Event,
-      { param1: '/foo/boo', type: EVENT_TYPES.FOLDER_DELETED },
-    )
+    const deleteChildEvent = await em.findOneOrFail(Event, {
+      param1: '/foo/boo',
+      type: EVENT_TYPES.FOLDER_DELETED,
+    })
     const deleteChildData = JSON.parse(deleteChildEvent.data)
     expect(deleteChildData.path).to.equals('/foo/boo')
     expect(deleteChildData.id).to.equals(2)
     expect(deleteChildData.scope).to.equals('private')
     expect(deleteChildData.name).to.equals('boo')
 
-    const deleteParentEvent = await em.findOneOrFail(
-      Event,
-      { param1: '/foo', type: EVENT_TYPES.FOLDER_DELETED },
-    )
+    const deleteParentEvent = await em.findOneOrFail(Event, {
+      param1: '/foo',
+      type: EVENT_TYPES.FOLDER_DELETED,
+    })
     const deleteParentData = JSON.parse(deleteParentEvent.data)
     expect(deleteParentData.path).to.equals('/foo')
     expect(deleteParentData.id).to.equals(1)
     expect(deleteParentData.scope).to.equals('private')
     expect(deleteParentData.name).to.equals('foo')
-  })
-
-  it('test SyncFoldersOperation to create CreateFolder and DeleteFolder events', async () => {
-    // create three folders
-    const op = new SyncFoldersOperation({
-      em: database.orm().em.fork() as EntityManager<MySqlDriver>,
-      log,
-      user: userCtx,
-    })
-    const input1 = { ...defaultInput, remoteFolderPaths: ['/a', '/a/b', '/a/b/a'] }
-    const res1 = await op.execute(input1)
-    expect(res1).to.be.an('array').with.lengthOf(3)
-    await em.findOneOrFail(Event, { param1: '/a', type: EVENT_TYPES.FOLDER_CREATED })
-    await em.findOneOrFail(Event, { param1: '/a/b', type: EVENT_TYPES.FOLDER_CREATED })
-    await em.findOneOrFail(Event, { param1: '/a/b/a', type: EVENT_TYPES.FOLDER_CREATED })
-
-    // create folder and delete one folder
-    const folder = create.filesHelper.createFolder(em, { user }, { name: 'foo', project })
-    await em.flush()
-    const input2 = { ...defaultInput, remoteFolderPaths: ['/bar'] }
-    const res2 = await op.execute(input2)
-    expect(res2).to.be.an('array').with.lengthOf(1)
-    expect(res2[0]).to.have.property('id').that.is.not.equal(folder.id)
-    expect(res2[0]).to.have.property('name', 'bar')
-    await em.findOneOrFail(Event, { param1: '/foo', type: EVENT_TYPES.FOLDER_DELETED })
-    await em.findOneOrFail(Event, { param1: '/bar', type: EVENT_TYPES.FOLDER_CREATED })
   })
 })

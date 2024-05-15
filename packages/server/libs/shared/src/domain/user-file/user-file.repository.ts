@@ -1,11 +1,11 @@
 import { EntityRepository } from '@mikro-orm/mysql'
 import { Asset } from '@shared/domain/user-file/asset.entity'
+import { Node } from '@shared/domain/user-file/node.entity'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { User } from '@shared/domain/user/user.entity'
-import { FILE_STATE_DX, FILE_STI_TYPE, FILE_ORIGIN_TYPE } from './user-file.types'
-import { SCOPE } from '@shared/types/common'
 import { STATIC_SCOPE } from '@shared/enums'
-import { Node } from '@shared/domain/user-file/node.entity'
+import { SCOPE } from '@shared/types/common'
+import { FILE_STATE_DX, FILE_STI_TYPE } from './user-file.types'
 
 type FindByName = {
   scope: SCOPE
@@ -23,7 +23,6 @@ export class UserFileRepository extends EntityRepository<UserFile> {
       {
         project: input.project,
         parentFolder: input.folderId,
-        entityType: FILE_ORIGIN_TYPE.HTTPS,
       },
       { populate: ['taggings.tag'], orderBy: { id: 'ASC' } },
     )
@@ -104,27 +103,7 @@ export class UserFileRepository extends EntityRepository<UserFile> {
     )
   }
 
-  async findAllHTTPSFiles(): Promise<UserFile[]> {
-    return await this.find(
-      {},
-      {
-        filters: ['userfile', 'https'],
-        populate: ['taggings.tag', 'user'],
-      },
-    )
-  }
-
-  async findHTTPSFilesForUser(userId: number): Promise<UserFile[]> {
-    return await this.find(
-      { user: userId },
-      {
-        filters: ['userfile', 'https'],
-        populate: ['taggings.tag', 'user'],
-      },
-    )
-  }
-
-  async findAllFilesByName({name, parentId, userId, scope}: FindByName): Promise<UserFile[]> {
+  async findAllFilesByName({ name, parentId, userId, scope }: FindByName): Promise<UserFile[]> {
     const parentKey = scope.startsWith('space') ? 'scopedParentFolderId' : 'parentFolderId'
 
     return scope === STATIC_SCOPE.PRIVATE

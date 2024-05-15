@@ -19,7 +19,6 @@
 #  sti_type                :string(255)
 #  scoped_parent_folder_id :integer
 #  uid                     :string(255)
-#  entity_type             :integer          default("regular"), not null
 #  featured                :boolean          default(FALSE)
 #
 

@@ -1,18 +1,17 @@
+import { EntityManager } from '@mikro-orm/mysql'
 import { database } from '@shared/database'
 import { App } from '@shared/domain/app/app.entity'
 import { Job } from '@shared/domain/job/job.entity'
-import { Folder } from '@shared/domain/user-file/folder.entity'
-import { User } from '@shared/domain/user/user.entity'
-import { expect } from 'chai'
-import { EntityManager } from '@mikro-orm/mysql'
-import supertest from 'supertest'
 import { JOB_STATE } from '@shared/domain/job/job.enum'
-import { create, generate, db } from '@shared/test'
+import { Folder } from '@shared/domain/user-file/folder.entity'
+import { FILE_STI_TYPE } from '@shared/domain/user-file/user-file.types'
+import { User } from '@shared/domain/user/user.entity'
+import { STATIC_SCOPE } from '@shared/enums'
+import { create, db, generate } from '@shared/test'
 import { fakes, mocksReset } from '@shared/test/mocks'
-import {
-  FILE_STI_TYPE,
-  FILE_ORIGIN_TYPE,
-} from '@shared/domain/user-file/user-file.types'
+import { expect } from 'chai'
+import { IncomingHttpHeaders } from 'http2'
+import supertest from 'supertest'
 import { testedApp } from '../../index'
 import { getDefaultHeaderData } from '../../utils/expect-helper'
 
@@ -30,7 +29,11 @@ describe('PATCH /folders/:id/rename', () => {
     em.clear()
     user = create.userHelper.create(em)
     app = create.appHelper.createHTTPS(em, { user }, { spec: generate.app.jupyterAppSpecData() })
-    job = create.jobHelper.create(em, { user, app }, { scope: 'private', state: JOB_STATE.IDLE })
+    job = create.jobHelper.create(
+      em,
+      { user, app },
+      { scope: STATIC_SCOPE.PRIVATE, state: JOB_STATE.IDLE },
+    )
     await em.flush()
     folder = create.filesHelper.createFolder(
       em,
@@ -44,7 +47,7 @@ describe('PATCH /folders/:id/rename', () => {
   it('response shape', async () => {
     const { body } = await supertest(testedApp.getHttpServer())
       .patch(`/folders/${folder.id}/rename`)
-      .set(getDefaultHeaderData(user))
+      .set(getDefaultHeaderData(user) as unknown as IncomingHttpHeaders)
       .send({
         newName: 'b',
       })
@@ -55,7 +58,6 @@ describe('PATCH /folders/:id/rename', () => {
       project: folder.project,
       name: 'b',
       user: user.id,
-      entityType: FILE_ORIGIN_TYPE.HTTPS,
       stiType: FILE_STI_TYPE.FOLDER,
       taggings: [],
       scope: 'private',
@@ -75,13 +77,13 @@ describe('PATCH /folders/:id/rename', () => {
   it('handles subfolders too', async () => {
     const subfolder = create.filesHelper.createFolder(
       em,
-      { user,  parentFolder: folder, },
+      { user, parentFolder: folder },
       { project: folder.project, name: 'c', locked: false },
     )
     await em.flush()
     const { body } = await supertest(testedApp.getHttpServer())
       .patch(`/folders/${subfolder.id}/rename`)
-      .set(getDefaultHeaderData(user))
+      .set(getDefaultHeaderData(user) as unknown as IncomingHttpHeaders)
       .send({
         newName: 'd',
       })
@@ -96,7 +98,7 @@ describe('PATCH /folders/:id/rename', () => {
       fakes.client.folderRenameFake.throws()
       await supertest(testedApp.getHttpServer())
         .patch(`/folders/${folder.id}/rename`)
-        .set(getDefaultHeaderData(user))
+        .set(getDefaultHeaderData(user) as unknown as IncomingHttpHeaders)
         .send({
           newName: 'b',
         })

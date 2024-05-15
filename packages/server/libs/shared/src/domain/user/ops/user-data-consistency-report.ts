@@ -1,24 +1,23 @@
 /* eslint-disable @typescript-eslint/no-floating-promises */
+import { wrap } from '@mikro-orm/core'
+import { SqlEntityManager } from '@mikro-orm/mysql'
 import { config } from '@shared/config'
-import { database } from '@shared/database'
 import { EmailSendOperation } from '@shared/domain/email/ops/email-send'
 import { Folder } from '@shared/domain/user-file/folder.entity'
+import { Node } from '@shared/domain/user-file/node.entity'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { User } from '@shared/domain/user/user.entity'
-import { Node } from '@shared/domain/user-file/node.entity'
-import { BaseOperation } from '@shared/utils/base-operation'
-import { UserCtx, UserOpsCtx } from '@shared/types'
 import { PlatformClient } from '@shared/platform-client'
-import { Task, TASK_TYPE } from '@shared/queue/task.input'
+import { TASK_TYPE, Task } from '@shared/queue/task.input'
+import { UserCtx, UserOpsCtx } from '@shared/types'
+import { BaseOperation } from '@shared/utils/base-operation'
 import { Job } from 'bull'
-import { findUnclosedFilesOrAssets, getNodePath } from '../../user-file/user-file.helper'
-import { SPACE_MEMBERSHIP_SIDE } from '../../space-membership/space-membership.enum'
+import { addToFileSyncQueueEnsureUnique, createSendEmailTask } from '../../../queue'
 import { EMAIL_TYPES, EmailSendInput } from '../../email/email.config'
-import { addToFileSyncQueueEnsureUnique, createSendEmailTask } from '@shared/queue'
 import { userDataConsistencyReportTemplate } from '../../email/templates/mjml/user-data-consistency-report.template'
-import { SqlEntityManager } from '@mikro-orm/mysql'
-import { wrap } from '@mikro-orm/core'
+import { SPACE_MEMBERSHIP_SIDE } from '../../space-membership/space-membership.enum'
 import { SPACE_TYPE } from '../../space/space.enum'
+import { findUnclosedFilesOrAssets, getNodePath } from '../../user-file/user-file.helper'
 
 export type UserDataConsistencyReportOutput = {
   user?: {
@@ -31,8 +30,6 @@ export type UserDataConsistencyReportOutput = {
   privateProjects?: any
   filesAndFoldersStatus?: any
   filesAndFoldersErrorsCount?: number
-  httpsFilesCount?: number
-  httpsFoldersCount?: number
   unclosedFilesCount?: number
   unclosedFiles?: any
   spaces?: any
@@ -256,10 +253,6 @@ export class UserDataConsistencyReportOperation extends BaseOperation<
       }
       output.filesAndFoldersStatus = filesAndFoldersStatus
       output.filesAndFoldersErrorsCount = filesAndFoldersErrorsCount
-
-      // Check if user has any local files and folders
-      output.httpsFilesCount = await userFilesRepo.count({ user: user.id }, { filters: ['https'] })
-      output.httpsFoldersCount = await folderRepo.count({ userId: user.id }, { filters: ['https'] })
 
       // Check the billTo of any Spaces to which the user is a lead
       // Review spaces for the fix on billTo

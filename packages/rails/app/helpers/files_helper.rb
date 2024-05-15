@@ -45,7 +45,7 @@ module FilesHelper
   # @param node [Node] Node to get origin for.
   # @return [String] - file link object node of type "UserFile"
   def node_origin(node, current_user)
-    if node.klass == "folder" && !node.https?
+    if node.klass == "folder" && node.parent_type != "Job"
       nil
     elsif node.parent_type == "Node" && node.parent.blank?
       "Copied"
