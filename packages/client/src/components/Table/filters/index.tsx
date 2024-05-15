@@ -1,6 +1,7 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { InputSelect } from '../../form/styles'
-import { InputNumber, InputText } from '../../InputText'
+import { InputId, InputNumber, InputText } from '../../InputText'
+
 export * from './numericFilter'
 
 const sanitizeRangeFilterValue = (rawValue: string | [number | null | undefined, number | null | undefined]) => {
@@ -16,7 +17,7 @@ const sanitizeRangeFilterValue = (rawValue: string | [number | null | undefined,
 }
 
 export function NumberRangeColumnFilter({
-  column: { filterValue = [null,null], preFilteredRows, setFilter, id, filterDataTestId, filterPlaceholderFrom, filterPlaceholderTo },
+  column: { filterValue = [null,null], setFilter, filterDataTestId, filterPlaceholderFrom, filterPlaceholderTo },
 }: any) {
   const parsedFilterValue = sanitizeRangeFilterValue(filterValue)
   return (
@@ -63,7 +64,7 @@ export function NumberRangeColumnFilter({
 }
 
 export function SelectColumnFilter({
-  column: { filterValue, setFilter, preFilteredRows, id, options, filterDataTestId, title },
+  column: { filterValue, setFilter, options, filterDataTestId, title },
 }: any) {
   return (
     <InputSelect
@@ -83,20 +84,41 @@ export function SelectColumnFilter({
 }
 
 export function DefaultColumnFilter({
-  column: { filterValue, preFilteredRows, accessor, onFilterChange, setFilter, filterDataTestId },
-  filterKey,
+  column: { filterValue, setFilter, filterDataTestId },
 }: {
   column: any
-  filterKey: string
-  dataTestId?: string
 }) {
   return (
     <InputText
       value={filterValue || ''}
       onChange={e => setFilter(e.target.value)}
-      placeholder={`--`}
-      style={{lineHeight: '1.1rem'}}
+      placeholder='--'
+      style={{ lineHeight: '1.1rem' }}
       data-testid={filterDataTestId}
+    />
+  )
+}
+
+export function IdColumnFilter({
+  column: { filterValue, setFilter, filterDataTestId },
+}: {
+  column: any
+}) {
+  const [value, setValue] = useState(filterValue || '')
+  const handleChange = (e) => {
+    const inputValue = e.target.value
+    const filteredValue = inputValue.replace(/\D/g, '') // Remove non-digit characters
+    setValue(filteredValue)
+    setFilter(filteredValue)
+  }
+
+  return (
+    <InputId
+      value={ value }
+      onChange={ handleChange }
+      placeholder='--'
+      style={{ lineHeight: '1.1rem' }}
+      data-testid={ filterDataTestId }
     />
   )
 }

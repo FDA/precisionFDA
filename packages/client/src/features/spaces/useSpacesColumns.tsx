@@ -5,6 +5,7 @@ import styled, { css } from 'styled-components'
 import { DiscussionIcon } from '../../components/icons/DiscussionIcon'
 import {
   DefaultColumnFilter,
+  IdColumnFilter,
   SelectColumnFilter,
 } from '../../components/Table/filters'
 import { StyledTagItem, StyledTags } from '../../components/Tags'
@@ -187,6 +188,13 @@ export const useSpacesColumns = ({
               <p>{original.description}</p>
             </SpaceTableNameCell>
           ),
+        },
+        {
+          Header: 'ID',
+          accessor: 'id',
+          disableSortBy: true,
+          Filter: IdColumnFilter,
+          width: colWidths?.id || 100,
         },
         {
           Header: 'State',

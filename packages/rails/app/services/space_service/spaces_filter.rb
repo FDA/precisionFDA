@@ -62,6 +62,7 @@ module SpaceService
       conditions << space_arel[:space_type].eq(space_type) if space_type
       conditions << space_arel[:state].eq(space_state) if space_state
       conditions << space_arel[:name].matches(wildcard(filters[:name])) if filters[:name]
+      conditions << Arel::Nodes::SqlLiteral.new("CAST(spaces.id AS CHAR)").matches(wildcard(filters[:id])) if filters[:id]
       conditions << space_arel[:created_at].matches(wildcard(filters[:created_at])) if filters[:created_at]
       conditions << space_arel[:updated_at].matches(wildcard(filters[:updated_at])) if filters[:updated_at]
       conditions << space_arel[:description].matches(wildcard(filters[:description])) if filters[:description]

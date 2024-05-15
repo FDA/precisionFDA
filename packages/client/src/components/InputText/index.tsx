@@ -49,3 +49,13 @@ export const InputNumber = styled(InputText).attrs({ type: 'number' })``
 export const InputTextArea = styled(InputText).attrs({ as: 'textarea' })`
   transition: none;
 `
+
+export const InputId = styled(InputText).attrs({ type: 'text' })`
+  // Hide input arrows
+  -moz-appearance: textfield;
+  &::-webkit-outer-spin-button,
+  &::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+`
