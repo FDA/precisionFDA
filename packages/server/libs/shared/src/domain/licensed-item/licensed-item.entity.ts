@@ -11,7 +11,7 @@ import { License } from '@shared/domain/license/license.entity'
 import { BaseEntity } from '../../database/base-entity'
 import { LicensedItemRepository } from './licensed-item.repository'
 
-@Entity({ tableName: 'licensed_items', customRepository: () => LicensedItemRepository })
+@Entity({ tableName: 'licensed_items', repository: () => LicensedItemRepository })
 export class LicensedItem extends BaseEntity {
   @PrimaryKey()
   id: number

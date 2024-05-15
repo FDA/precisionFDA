@@ -6,7 +6,7 @@ import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { TaggingRepository } from './tagging.repository'
 
-@Entity({ tableName: 'taggings', customRepository: () => TaggingRepository })
+@Entity({ tableName: 'taggings', repository: () => TaggingRepository })
 export class Tagging {
   @PrimaryKey()
   id: number

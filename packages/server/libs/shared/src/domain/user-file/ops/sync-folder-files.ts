@@ -9,7 +9,7 @@ import { BaseOperation } from '@shared/utils/base-operation'
 import { SyncFilesInFolderInput } from '../user-file.input'
 import { getFolderPath } from '../user-file.helper'
 import { FILE_STATE_DX, FILE_STI_TYPE, FILE_ORIGIN_TYPE, PARENT_TYPE } from '../user-file.types'
-import { UserOpsCtx } from '../../../types'
+import { UserOpsCtx } from '@shared/types'
 
 export type SyncFolderFilesOutput = {
   folderPath: string
@@ -18,9 +18,9 @@ export type SyncFolderFilesOutput = {
 }
 
 export class SyncFilesInFolderOperation extends BaseOperation<
-UserOpsCtx,
-SyncFilesInFolderInput,
-SyncFolderFilesOutput
+  UserOpsCtx,
+  SyncFilesInFolderInput,
+  SyncFolderFilesOutput
 > {
   async run(input: SyncFilesInFolderInput): Promise<SyncFolderFilesOutput> {
     this.ctx.log.debug({ input }, 'SyncFilesInFolderOperation input params')
@@ -40,10 +40,11 @@ SyncFolderFilesOutput
     let current: Folder | null | undefined
     // sanitize operation inputs
     if (input.folderId) {
-      current = foldersInProject.find(f => f.id === input.folderId)
+      current = foldersInProject.find((f) => f.id === input.folderId)
       if (!current) {
-        throw new NotFoundError(`Folder id ${input.folderId.toString()} `
-          + 'does not exist under given project')
+        throw new NotFoundError(
+          `Folder id ${input.folderId.toString()} ` + 'does not exist under given project',
+        )
       }
       // transfer folderId into API path string
       folderPath = getFolderPath(foldersInProject, current)
@@ -52,6 +53,7 @@ SyncFolderFilesOutput
       current = null
       folderPath = '/'
     }
+
     // also should not be touched by other transactions
     // get local files in a given (sub)folder
     const localFiles = await fileRepo.findProjectFilesInSubfolder({
@@ -110,11 +112,11 @@ SyncFolderFilesOutput
     )
 
     // update existing files
-    localFiles.forEach(userfile => {
+    localFiles.forEach((userfile) => {
       if (toRemove.includes(userfile.dxid)) {
         return
       }
-      const remoteState = remoteFiles.find(r => r.id === userfile.dxid)
+      const remoteState = remoteFiles.find((r) => r.id === userfile.dxid)
       if (!remoteState) {
         throw new NotFoundError('Remote state for local file was not found', {
           details: { fileId: userfile.id },
@@ -125,41 +127,37 @@ SyncFolderFilesOutput
         'SyncFilesInFolderOperation: Updating file metadata',
       )
 
-
-        // we test name and size fields
-        if (userfile.name !== remoteState?.describe?.name) {
-          // console.log('updating file name')
-          userfile.name = remoteState.describe?.name || ''
-        }
-        if (userfile.fileSize !== remoteState?.describe?.size) {
-          userfile.fileSize = remoteState.describe?.size
-        }
-        if (userfile.state !== remoteState?.describe?.state) {
-          // @ts-ignore
-          userfile.state = remoteState.describe?.state
-        }
-
+      // we test name and size fields
+      if (userfile.name !== remoteState?.describe?.name) {
+        userfile.name = remoteState.describe?.name || ''
+      }
+      if (userfile.fileSize !== remoteState?.describe?.size) {
+        userfile.fileSize = remoteState.describe?.size
+      }
+      if (userfile.state !== remoteState?.describe?.state) {
+        userfile.state = remoteState.describe?.state
+      }
     })
 
     // remove
     if (input.runRemove) {
-      const filesToRemove = localFiles.filter(file => toRemove.includes(file.dxid))
+      const filesToRemove = localFiles.filter((file) => toRemove.includes(file.dxid))
       fileRepo.removeFilesWithTags(filesToRemove)
       await em.flush()
     }
 
     // add new files
     if (input.runAdd) {
-      toAdd.forEach(dxid => {
+      toAdd.forEach((dxid) => {
         if (locallyCreatedFileDxids.includes(dxid)) {
           this.ctx.log.warn(
             { dxid },
-            'SyncFilesInFolderOperation: File already exists in local database, '
-            + 'but it is not HTTPS file. Recreating would crash the op.',
+            'SyncFilesInFolderOperation: File already exists in local database, ' +
+              'but it is not HTTPS file. Recreating would crash the op.',
           )
           return
         }
-        const remoteDetails = remoteFiles.find(remoteFile => remoteFile.id === dxid)
+        const remoteDetails = remoteFiles.find((remoteFile) => remoteFile.id === dxid)
         if (!remoteDetails) {
           throw new Error('remote details not found for file dxid')
         }
@@ -180,7 +178,7 @@ SyncFolderFilesOutput
             // userId: user?.id,
             parentType: PARENT_TYPE.JOB,
             parentId: input.parentId,
-            ...current && { parentFolder: current },
+            ...(current && { parentFolder: current }),
             state: remoteDetails?.describe?.state ?? FILE_STATE_DX.CLOSED,
             stiType: FILE_STI_TYPE.USERFILE,
             entityType: FILE_ORIGIN_TYPE.HTTPS,

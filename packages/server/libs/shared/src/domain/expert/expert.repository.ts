@@ -77,14 +77,4 @@ export class ExpertRepository extends EntityRepository<Expert> {
       }
     }
   }
-
-  findYears() {
-    const qb = this.em.createQueryBuilder(Expert,'e');
-    const yearFragment = 'YEAR(`e`.created_at)'
-    return qb.select(yearFragment, true).orderBy({
-      [yearFragment]: -1
-    }).execute<{[yearFragment]: number}[]>().then((experts) => {
-      return experts.map((expert) => expert[yearFragment])
-    })
-  }
 }

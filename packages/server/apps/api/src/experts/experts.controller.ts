@@ -51,6 +51,10 @@ export class ExpertsController {
 
   @Get('/years')
   async getYears() {
-    return await this.em.getRepository(Expert).findYears()
+    const result = await this.em.execute(
+      'SELECT distinct YEAR(created_at) as year FROM experts order by year desc',
+    )
+
+    return result.map((y) => y.year)
   }
 }

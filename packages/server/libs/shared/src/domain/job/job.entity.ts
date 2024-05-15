@@ -28,7 +28,7 @@ import { getIdFromScopeName, scopeContainsId } from '../space/space.helper'
 import { formatDuration } from '../../utils/format'
 import { EntityScope } from '../../types/common'
 
-@Entity({ tableName: 'jobs', customRepository: () => JobRepository })
+@Entity({ tableName: 'jobs', repository: () => JobRepository })
 @Filter({ name: 'ownedBy', cond: args => ({ user: { id: args.userId } }) })
 // Tried the following but didn't work
 // @Filter({ name: 'isActive', cond: { $or: [ ACTIVE_STATES.map(x => { return { 'state': x } }) ]}})

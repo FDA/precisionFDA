@@ -20,7 +20,7 @@ import { FILE_STATE, FILE_STI_TYPE, FOLDER_STATE, PARENT_TYPE } from './user-fil
   discriminatorColumn: 'stiType',
   discriminatorMap: { UserFile: 'UserFile', Folder: 'Folder', Asset: 'Asset' },
   tableName: 'nodes',
-  customRepository: () => NodeRepository,
+  repository: () => NodeRepository,
 })
 export class Node extends BaseEntity {
   @PrimaryKey()
@@ -42,9 +42,6 @@ export class Node extends BaseEntity {
   @Property()
   locked: boolean
 
-  @Property()
-  userId: number
-
   @Property({ type: 'numeric' })
   fileSize?: number
 
@@ -57,14 +54,8 @@ export class Node extends BaseEntity {
   @Property()
   project?: string
 
-  @Property()
-  parentFolderId?: number
-
   @ManyToOne(() => Node)
   parentFolder: Node
-
-  @Property()
-  scopedParentFolderId?: number
 
   @ManyToOne(() => Node)
   scopedParentFolder?: Node

@@ -1,14 +1,12 @@
 import {
   Collection,
+  Entity,
+  EntityRepositoryType,
   Filter,
-  Ref,
-  ManyToOne,
-  OneToMany,
   ManyToMany,
+  OneToMany,
   Property,
   Reference,
-  EntityRepositoryType,
-  Entity,
 } from '@mikro-orm/core'
 import { App } from '@shared/domain/app/app.entity'
 import { Tagging } from '@shared/domain/tagging/tagging.entity'
@@ -16,18 +14,22 @@ import { ArchiveEntry } from '@shared/domain/user-file/archive-entry.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { AssetRepository } from './asset.repository'
 import { Node } from './node.entity'
-import { FILE_ORIGIN_TYPE, FILE_STATE, PARENT_TYPE, IFileOrAsset, FILE_STI_TYPE, ITrackable } from './user-file.types'
-import { SCOPE } from '../../types/common'
+import {
+  FILE_ORIGIN_TYPE,
+  FILE_STATE,
+  FILE_STI_TYPE,
+  IFileOrAsset,
+  ITrackable,
+} from './user-file.types'
 
 @Filter({ name: 'asset', cond: { stiType: FILE_STI_TYPE.ASSET } })
 @Filter({
-  name: 'accessibleBy', cond: args => ({
-    $or: [
-      {user: {id: args.userId}, scope: 'private'},
-      {scope: {$in: args.spaceScopes}}]
-  })
+  name: 'accessibleBy',
+  cond: (args) => ({
+    $or: [{ user: { id: args.userId }, scope: 'private' }, { scope: { $in: args.spaceScopes } }],
+  }),
 })
-@Entity({ tableName: 'nodes', customRepository: () => AssetRepository })
+@Entity({ tableName: 'nodes', repository: () => AssetRepository })
 class Asset extends Node implements IFileOrAsset, ITrackable {
   @Property()
   dxid: string
@@ -35,12 +37,10 @@ class Asset extends Node implements IFileOrAsset, ITrackable {
   @Property()
   project: string
 
-
   @Property()
   description?: string
 
   @Property()
-  //@ts-ignore IFileOrAsset introduced state as string
   state: FILE_STATE
 
   @Property()
@@ -49,22 +49,13 @@ class Asset extends Node implements IFileOrAsset, ITrackable {
   @Property({ type: 'numeric' })
   fileSize?: number
 
-  @Property({ fieldName: 'parent_folder_id' })
-  parentFolderId?: number
-
-  @Property()
-  scopedParentFolderId?: number
-
-  @ManyToOne(() => User)
-  user!: Ref<User>
-
-  @OneToMany(() => Tagging, tagging => tagging.asset, { orphanRemoval: true })
+  @OneToMany(() => Tagging, (tagging) => tagging.asset, { orphanRemoval: true })
   taggings = new Collection<Tagging>(this)
 
-  @OneToMany(() => ArchiveEntry, archiveEntry => archiveEntry.asset, { orphanRemoval: true })
+  @OneToMany(() => ArchiveEntry, (archiveEntry) => archiveEntry.asset, { orphanRemoval: true })
   archiveEntries = new Collection<ArchiveEntry>(this)
 
-  @ManyToMany(() => App, app => app.assets)
+  @ManyToMany(() => App, (app) => app.assets)
   apps = new Collection<App>(this)
 
   constructor(user: User) {

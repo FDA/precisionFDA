@@ -31,7 +31,7 @@ describe('DiscussionService tests', () => {
 
   beforeEach(async () => {
     await db.dropData(database.connection())
-    em = database.orm().em.fork() as EntityManager<MySqlDriver>
+    em = database.orm().em.fork({ useContext: true }) as EntityManager<MySqlDriver>
     user = create.userHelper.create(em)
     await em.flush()
     userCtx = { ...user, accessToken: 'foo' }

@@ -72,7 +72,9 @@ class NodesRemoveOperation extends BaseOperation<UserOpsCtx, NodesInput, number>
     } catch (err) {
       if (input.async) {
         await notificationService.createNotification({
-          message: TypeUtils.getPropertyValueFromUnknownObject<string>(err, 'message') ?? 'Error deleting files and folders.',
+          message:
+            TypeUtils.getPropertyValueFromUnknownObject<string>(err, 'message') ??
+            'Error deleting files and folders.',
           severity: SEVERITY.ERROR,
           action: NOTIFICATION_ACTION.NODES_REMOVED,
           userId: this.ctx.user.id,

@@ -5,6 +5,7 @@ import { User } from '@shared/domain/user/user.entity'
 import { FILE_STATE_DX, FILE_STI_TYPE, FILE_ORIGIN_TYPE } from './user-file.types'
 import { SCOPE } from '@shared/types/common'
 import { STATIC_SCOPE } from '@shared/enums'
+import { Node } from '@shared/domain/user-file/node.entity'
 
 type FindByName = {
   scope: SCOPE
@@ -21,10 +22,6 @@ export class UserFileRepository extends EntityRepository<UserFile> {
     return await this.find(
       {
         project: input.project,
-        // there is implicit condition sti_type = 'UserFile'
-        // stiType: { $ne: FILE_STI_TYPE.FOLDER },
-        // since we merged old projects (with uploaded files) this condition no longer makes sense
-        // parentType: PARENT_TYPE.JOB,
         parentFolder: input.folderId,
         entityType: FILE_ORIGIN_TYPE.HTTPS,
       },
@@ -38,7 +35,7 @@ export class UserFileRepository extends EntityRepository<UserFile> {
    * @param uids
    */
   async findAccessibleByUser(userId: number, uids: string[]): Promise<UserFile[]> {
-    const userRepository = this._em.getRepository(User)
+    const userRepository = this.em.getRepository(User)
     const user: User = await userRepository.findOneOrFail(
       { id: userId },
       { populate: ['spaceMemberships', 'spaceMemberships.spaces'] },
@@ -63,11 +60,10 @@ export class UserFileRepository extends EntityRepository<UserFile> {
      * that is introduced thanks to STI mikro-orm feature.
      * We want to make sure this query returns sti_type = 'UserFile', 'Asset'
      */
-    const qb = this.createQueryBuilder()
+    const qb = this.em.createQueryBuilder(Node)
     qb.where({
       project: input.project,
-      stiType: { $ne: FILE_STI_TYPE.FOLDER },
-      entityType: FILE_ORIGIN_TYPE.REGULAR,
+      stiType: { $in: [FILE_STI_TYPE.ASSET, FILE_STI_TYPE.USERFILE] },
     })
     return await qb.execute()
   }
@@ -98,7 +94,7 @@ export class UserFileRepository extends EntityRepository<UserFile> {
   async findUnclosedFiles(userId: number): Promise<UserFile[]> {
     return await this.find(
       {
-        userId,
+        user: userId,
         state: { $in: [FILE_STATE_DX.OPEN, FILE_STATE_DX.CLOSING] },
       },
       {
@@ -120,7 +116,7 @@ export class UserFileRepository extends EntityRepository<UserFile> {
 
   async findHTTPSFilesForUser(userId: number): Promise<UserFile[]> {
     return await this.find(
-      { userId },
+      { user: userId },
       {
         filters: ['userfile', 'https'],
         populate: ['taggings.tag', 'user'],
@@ -131,20 +127,20 @@ export class UserFileRepository extends EntityRepository<UserFile> {
   async findAllFilesByName({name, parentId, userId, scope}: FindByName): Promise<UserFile[]> {
     const parentKey = scope.startsWith('space') ? 'scopedParentFolderId' : 'parentFolderId'
 
-    return scope === STATIC_SCOPE.PRIVATE ?
-      this.find(
-        { name, [parentKey]: parentId, userId, scope },
-        { populate: ['taggings.tag'], orderBy: { createdAt: 'ASC' } },
-      ) :
-      this.find(
-        { name, [parentKey]: parentId, scope },
-        { populate: ['taggings.tag'], orderBy: { createdAt: 'ASC' } },
-      )
+    return scope === STATIC_SCOPE.PRIVATE
+      ? this.find(
+          { name, [parentKey]: parentId, user: userId, scope },
+          { populate: ['taggings.tag'], orderBy: { createdAt: 'ASC' } },
+        )
+      : this.find(
+          { name, [parentKey]: parentId, scope },
+          { populate: ['taggings.tag'], orderBy: { createdAt: 'ASC' } },
+        )
   }
 
   removeFilesWithTags(files: UserFile[]): UserFile[] {
     return files.map((file) => {
-      this.remove(file)
+      this.em.remove(file)
       file.taggings.getItems().forEach((tagging) => tagging.tag.taggingCount--)
       file.taggings.removeAll()
       return file

@@ -166,7 +166,7 @@ describe('EntityProvenanceSvgResultTransformerService', () => {
     // the link contains a span with icon and the provided title
     expect(nodeElement.textContent).to.eq(icons[node.data.type] + node.data.title)
 
-    const positionedParent = nodeElement.closest('foreignObject')
+    const positionedParent = findClosest(nodeElement, 'foreignObject')
     // the link is wrapped in a foreignObject
     expect(positionedParent).not.to.be.null()
 
@@ -186,6 +186,20 @@ describe('EntityProvenanceSvgResultTransformerService', () => {
     }
 
     parents.forEach((p) => assertNodeRecursive(svg, p, YCoord))
+  }
+
+  function findClosest(el: Element, tagName: string): Element {
+    let currentElement = el
+
+    while (currentElement?.parentNode != null) {
+      if (currentElement.tagName === tagName) {
+        return currentElement
+      }
+
+      currentElement = currentElement.parentElement
+    }
+
+    return null
   }
 
   async function getResultSvg(options?: EntityProvenanceSvgOptions) {

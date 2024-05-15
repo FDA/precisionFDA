@@ -11,7 +11,7 @@ export const config: ConfigOverride = () => ({
     clientUrl:
       process.env.DATABASE_TEST_URL ?? 'mysql://root:password@localhost:32800/precisionfda-test',
     // Enable debug mode to inspect SQL queries
-    // debug: true,
+    debug: true,
   },
   api: {
     fdaSubnet: {

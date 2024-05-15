@@ -6,7 +6,7 @@ import { WorkaroundJsonType } from '../../database/custom-json-type'
 import { Challenge } from './challenge.entity'
 import { ChallengeResourceRepository } from '@shared/domain/challenge/challenge-resource.repository'
 
-@Entity({ tableName: 'challenge_resources', customRepository: () => ChallengeResourceRepository })
+@Entity({ tableName: 'challenge_resources', repository: () => ChallengeResourceRepository })
 class ChallengeResource extends BaseEntity {
   @Property({ fieldName: 'challenge_id' })
   challengeId: number

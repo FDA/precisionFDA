@@ -3,7 +3,7 @@ import { User } from '@shared/domain/user/user.entity'
 import { BaseEntity } from '../../database/base-entity'
 import { NewsRepository } from './news-item.repository'
 
-@Entity({ tableName: 'news_items', customRepository: () => NewsRepository })
+@Entity({ tableName: 'news_items', repository: () => NewsRepository })
 class NewsItem extends BaseEntity {
   @Property()
   title?: string
@@ -35,7 +35,6 @@ class NewsItem extends BaseEntity {
   @ManyToOne(() => User)
   user!: Ref<User>
 
-  @Property({ persist: false })
   get year() {
     return this.createdAt.getFullYear()
   }

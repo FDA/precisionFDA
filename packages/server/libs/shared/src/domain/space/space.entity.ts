@@ -14,7 +14,7 @@ import { SPACE_STATE, SPACE_TYPE } from './space.enum'
 import { getScopeFromSpaceId } from './space.helper'
 import { SpaceRepository } from './space.repository'
 
-@Entity({ tableName: 'spaces', customRepository: () => SpaceRepository })
+@Entity({ tableName: 'spaces', repository: () => SpaceRepository })
 export class Space extends BaseEntity {
   @PrimaryKey()
   id: number

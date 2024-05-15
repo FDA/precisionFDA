@@ -1,10 +1,8 @@
 import { MikroORM } from '@mikro-orm/core'
 import { MySqlDriver } from '@mikro-orm/mysql'
-import { getMikroORMToken } from '@mikro-orm/nestjs'
 import { INestApplicationContext } from '@nestjs/common'
 import { database } from '@shared/database'
 import { DatabaseModule } from '@shared/database/database.module'
-import { DatabaseConnectionType } from '@shared/database/domain/database-connection.type'
 import { createQueues } from '@shared/queue'
 import { QueueModule } from '@shared/queue/queue.module'
 import { QueueProxy } from '@shared/queue/queue.proxy'
@@ -29,8 +27,7 @@ async function exposeModules(app: INestApplicationContext) {
 
 export function exposeOrm(app: INestApplicationContext) {
   const mainORM: MikroORM<MySqlDriver> = app.get(MikroORM)
-  const roORM = app.get(getMikroORMToken(DatabaseConnectionType.READ_ONLY))
-  database.init(mainORM, roORM)
+  database.init(mainORM)
 }
 
 async function exposeBull(app: INestApplicationContext) {

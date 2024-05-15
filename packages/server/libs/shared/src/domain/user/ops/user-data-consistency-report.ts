@@ -7,14 +7,14 @@ import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { Node } from '@shared/domain/user-file/node.entity'
 import { BaseOperation } from '@shared/utils/base-operation'
-import { UserCtx, UserOpsCtx } from '../../../types'
-import { PlatformClient } from '../../../platform-client'
-import { Task, TASK_TYPE } from '../../../queue/task.input'
+import { UserCtx, UserOpsCtx } from '@shared/types'
+import { PlatformClient } from '@shared/platform-client'
+import { Task, TASK_TYPE } from '@shared/queue/task.input'
 import { Job } from 'bull'
 import { findUnclosedFilesOrAssets, getNodePath } from '../../user-file/user-file.helper'
 import { SPACE_MEMBERSHIP_SIDE } from '../../space-membership/space-membership.enum'
 import { EMAIL_TYPES, EmailSendInput } from '../../email/email.config'
-import { addToFileSyncQueueEnsureUnique, createSendEmailTask, getFileSyncQueue } from '../../../queue'
+import { addToFileSyncQueueEnsureUnique, createSendEmailTask } from '@shared/queue'
 import { userDataConsistencyReportTemplate } from '../../email/templates/mjml/user-data-consistency-report.template'
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { wrap } from '@mikro-orm/core'
@@ -39,7 +39,6 @@ export type UserDataConsistencyReportOutput = {
   spacesWithErrorsCount?: number
 }
 
-
 // UserDataConsistencyReportOperation uses a user token to inspect the user's
 // data integrity in the database and detects inconsistencies between pFDA and platform
 //
@@ -50,11 +49,10 @@ export type UserDataConsistencyReportOutput = {
 // - Check if user has any folders that has both parent_folder_id and scoped_parent_folder_id
 // - Check if user has any local files and folders (outside of platform folders)
 // - Check the billTo of any Spaces to which the user is a lead
-//
 export class UserDataConsistencyReportOperation extends BaseOperation<
-UserOpsCtx,
-never,
-UserDataConsistencyReportOutput
+  UserOpsCtx,
+  never,
+  UserDataConsistencyReportOutput
 > {
   static getTaskType(): TASK_TYPE.USER_DATA_CONSISTENCY_REPORT {
     return TASK_TYPE.USER_DATA_CONSISTENCY_REPORT
@@ -68,7 +66,7 @@ UserDataConsistencyReportOutput
     const lastCheckupTime = user.lastDataCheckup ? user.lastDataCheckup.getTime() : 0
     const now = new Date().getTime()
     // N.B. getTime return milliseconds, config settings are in seconds
-    return (now - lastCheckupTime) > config.workerJobs.userDataConsistencyReport.repeatSeconds * 1000
+    return now - lastCheckupTime > config.workerJobs.userDataConsistencyReport.repeatSeconds * 1000
   }
 
   static async enqueue(userCtx: UserCtx): Promise<Job<Task>> {
@@ -83,29 +81,30 @@ UserDataConsistencyReportOutput
   async run(): Promise<any> {
     const userCtx = this.ctx.user
     const log = this.ctx.log
-    let em: SqlEntityManager = this.ctx.em
-    try {
-      em = await database.getReadOnlyEM()
-    } catch (error) {
-      log.warn('Not connected to the readonly replica db, using main db')
-    }
+    const em: SqlEntityManager = this.ctx.em
 
-    let output: UserDataConsistencyReportOutput = {}
+    const output: UserDataConsistencyReportOutput = {}
 
-    log.verbose({
-      id: userCtx.id,
-      dxuser: userCtx.dxuser,
-    }, 'UserDataConsistencyReportOperation: Starting')
+    log.verbose(
+      {
+        id: userCtx.id,
+        dxuser: userCtx.dxuser,
+      },
+      'UserDataConsistencyReportOperation: Starting',
+    )
 
     const userRepo = em.getRepository(User)
     const user = await userRepo.findDxuser(userCtx.dxuser)
     if (!user) {
-      log.error({
-        id: userCtx.id,
-        dxuser: userCtx.dxuser,
-      }, 'UserDataConsistencyReportOperation: Error user not found')
+      log.error(
+        {
+          id: userCtx.id,
+          dxuser: userCtx.dxuser,
+        },
+        'UserDataConsistencyReportOperation: Error user not found',
+      )
 
-      return { 'error': `User ${userCtx.id} (${userCtx.dxuser}) not found` }
+      return { error: `User ${userCtx.id} (${userCtx.dxuser}) not found` }
     }
 
     try {
@@ -129,16 +128,15 @@ UserDataConsistencyReportOutput
         output.user = {
           ...output.user,
           dxid: user.dxid,
-          email: `Error: email on pFDA (${user.email}) does not match platform (${userDescribe.email})`
+          email: `Error: email on pFDA (${user.email}) does not match platform (${userDescribe.email})`,
         }
       } else {
         output.user = {
           ...output.user,
           dxid: user.dxid,
-          email: `email (${user.email}) on pFDA matches platform`
+          email: `email (${user.email}) on pFDA matches platform`,
         }
       }
-
 
       // Check user's private projects' billTo
       //
@@ -152,20 +150,28 @@ UserDataConsistencyReportOutput
           projectDxid,
           body: {},
         })
-        const correctBillTo = (projectDescribe.billTo === user.billTo())
+        const correctBillTo = projectDescribe.billTo === user.billTo()
         return {
-          status: correctBillTo ? `billTo is correct (${projectDescribe.billTo})`
-                   : `Error: Project billTo (${projectDescribe.billTo}) does not match user's org (${user.billTo()})`,
+          status: correctBillTo
+            ? `billTo is correct (${projectDescribe.billTo})`
+            : `Error: Project billTo (${projectDescribe.billTo}) does not match user's org (${user.billTo()})`,
           projectDescribe,
         }
       }
-      privateProjects['user.privateFilesProject'] = await generateProjectInfo(user.privateFilesProject)
-      privateProjects['user.publicFilesProject'] = await generateProjectInfo(user.publicFilesProject)
-      privateProjects['user.privateComparisonsProject'] = await generateProjectInfo(user.privateComparisonsProject)
-      privateProjects['user.publicComparisonsProject'] = await generateProjectInfo(user.publicComparisonsProject)
+      privateProjects['user.privateFilesProject'] = await generateProjectInfo(
+        user.privateFilesProject,
+      )
+      privateProjects['user.publicFilesProject'] = await generateProjectInfo(
+        user.publicFilesProject,
+      )
+      privateProjects['user.privateComparisonsProject'] = await generateProjectInfo(
+        user.privateComparisonsProject,
+      )
+      privateProjects['user.publicComparisonsProject'] = await generateProjectInfo(
+        user.publicComparisonsProject,
+      )
       output.privateProjects = privateProjects
       output.privateProjectsCount = privateProjects.length
-
 
       // Check if users have any unclosed files or assets remaining
       //
@@ -184,28 +190,33 @@ UserDataConsistencyReportOutput
       output.unclosedFiles = unclosedFiles.map(fileInfoMapping)
       output.unclosedFilesCount = unclosedFiles.length
 
-
       const userFilesRepo = em.getRepository(UserFile)
       const folderRepo = em.getRepository(Folder)
 
       // Check if user has any folders that has both parent_folder_id and scoped_parent_folder_id
       //
-      const userNodes = await em.getRepository(Node).find({ userId: user.id })
+      const userNodes = await em.getRepository(Node).find({ user: user.id })
       let filesAndFoldersErrorsCount = 0
       const filesAndFoldersStatus: any[] = []
       for (const node of userNodes) {
         let errors: string[] = []
 
-        const hasInvalidFolderState = (node.parentFolderId && node.scopedParentFolderId)
+        const hasInvalidFolderState = node.parentFolder?.id && node.scopedParentFolder?.id
         if (hasInvalidFolderState) {
           errors.push('Error: parent_folder_id and scoped_parent_folder_id are both set')
         }
         if (node.isFolder && node.project) {
           // If node.project is set for a folder, it is https folder
           // Check if files in https folder are missing on pFDA
-          const parentKey = node.scope.startsWith('space') ? 'scopedParentFolderId' : 'parentFolderId'
+          const parentKey = node.scope.startsWith('space')
+            ? 'scopedParentFolderId'
+            : 'parentFolderId'
           const nodePath = await getNodePath(em, node)
-          const httpsFiles = await client.filesList({ project: node.project, folder: nodePath, includeDescProps: false })
+          const httpsFiles = await client.filesList({
+            project: node.project,
+            folder: nodePath,
+            includeDescProps: false,
+          })
           for (const file of httpsFiles) {
             const fileNode = await userFilesRepo.findOne({ dxid: file.id, [parentKey]: node.id })
             if (!fileNode) {
@@ -215,13 +226,16 @@ UserDataConsistencyReportOutput
         } else if (node.isFile || node.isAsset) {
           if (node.project && node.dxid) {
             // Some files have enough data, but they might not exist on the platform
-            const response = await client.fileDescribe({ fileDxid: node.dxid, projectDxid: node.project })
+            const response = await client
+              .fileDescribe({ fileDxid: node.dxid, projectDxid: node.project })
               .catch((error) => error.props.clientResponse)
             if (response.error) {
               errors.push(`Error: ${response.error.message}`)
             }
           } else {
-            errors.push(`Error: node does not exist on platform or is missing project (${node.project}) / dxid (${node.dxid})`)
+            errors.push(
+              `Error: node does not exist on platform or is missing project (${node.project}) / dxid (${node.dxid})`,
+            )
           }
         }
 
@@ -229,8 +243,8 @@ UserDataConsistencyReportOutput
           const nodeInfo = {
             id: node.id,
             name: node.name,
-            parentFolderId: node.parentFolderId,
-            scopedParentFolderId: node.scopedParentFolderId,
+            parentFolderId: node.parentFolder?.id,
+            scopedParentFolderId: node.scopedParentFolder?.id,
             scope: node.scope,
             state: node.state,
             stiType: node.stiType,
@@ -243,12 +257,9 @@ UserDataConsistencyReportOutput
       output.filesAndFoldersStatus = filesAndFoldersStatus
       output.filesAndFoldersErrorsCount = filesAndFoldersErrorsCount
 
-
       // Check if user has any local files and folders
-      //
-      output.httpsFilesCount = await userFilesRepo.count({ userId: user.id }, { filters: ['https'] })
+      output.httpsFilesCount = await userFilesRepo.count({ user: user.id }, { filters: ['https'] })
       output.httpsFoldersCount = await folderRepo.count({ userId: user.id }, { filters: ['https'] })
-
 
       // Check the billTo of any Spaces to which the user is a lead
       // Review spaces for the fix on billTo
@@ -274,13 +285,17 @@ UserDataConsistencyReportOutput
             if (projectDxid) {
               projectInfo = await client.projectDescribe({ projectDxid, body: {} })
               if (projectInfo.billTo !== user.billTo()) {
-                errors.push(`Error: [space-${space.id} (type: ${spaceType})] Project billTo (${projectInfo.billTo}) does not match ${membershipSide} lead's org (${user.billTo()})`)
+                errors.push(
+                  `Error: [space-${space.id} (type: ${spaceType})] Project billTo (${projectInfo.billTo}) does not match ${membershipSide} lead's org (${user.billTo()})`,
+                )
               }
             } else {
               // Host project is always required
               // Guest project maybe missing when guest lead has not activated yet
               if (isHostSide) {
-                errors.push(`Error: [space-${space.id} (type: ${spaceType})] Host Project is missing`)
+                errors.push(
+                  `Error: [space-${space.id} (type: ${spaceType})] Host Project is missing`,
+                )
               }
             }
 
@@ -298,7 +313,7 @@ UserDataConsistencyReportOutput
                 guestLead: guestLead?.dxuser,
                 side: membership.side ? 'Guest' : 'Host',
                 projectInfo,
-                status: errors.join('\n')
+                status: errors.join('\n'),
               })
             }
           }
@@ -313,11 +328,14 @@ UserDataConsistencyReportOutput
 
       await this.sendReportEmail(output)
 
-      log.verbose({
-        id: userCtx.id,
-        dxuser: userCtx.dxuser,
-        output,
-      }, 'UserDataConsistencyReportOperation: Completed')
+      log.verbose(
+        {
+          id: userCtx.id,
+          dxuser: userCtx.dxuser,
+          output,
+        },
+        'UserDataConsistencyReportOperation: Completed',
+      )
     } catch (error) {
       log.error({ error, output }, 'UserDataConsistencyReportOperation: Error')
     }
@@ -340,7 +358,11 @@ UserDataConsistencyReportOutput
 
     const jobId = EmailSendOperation.getBullJobId(EMAIL_TYPES.userDataConsistencyReport)
     this.ctx.log.verbose('UserDataConsistencyReportOperation: Sending report email to admin')
-    const tempUserCtx: UserCtx = { id: adminUser.id, dxuser: adminUser.dxuser, accessToken: 'notUsed' }
+    const tempUserCtx: UserCtx = {
+      id: adminUser.id,
+      dxuser: adminUser.dxuser,
+      accessToken: 'notUsed',
+    }
     await createSendEmailTask(email, tempUserCtx, jobId)
   }
 }

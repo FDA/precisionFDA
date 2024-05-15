@@ -20,12 +20,17 @@ export class UserFileResolverFacade {
     const userId = this.user.id
 
     // TODO(Julie): Move this to a decorator (37-46)
-    const user = await this.em.getRepository(User).findOneOrFail(
-      {id: userId}, {populate: ['spaceMemberships', 'spaceMemberships.spaces']}
-    )
+    const user = await this.em
+      .getRepository(User)
+      .findOneOrFail({ id: userId }, { populate: ['spaceMemberships', 'spaceMemberships.spaces'] })
     const viewableSpaces = []
-    user.spaceMemberships.getItems().filter(m => m.active).forEach(spaceMembership => {
-      spaceMembership.spaces.getItems().forEach(space => viewableSpaces.push(`space-${space.id}`))
+    user.spaceMemberships
+      .getItems()
+      .filter((m) => m.active)
+      .forEach((spaceMembership) => {
+        spaceMembership.spaces
+          .getItems()
+          .forEach((space) => viewableSpaces.push(`space-${space.id}`))
     })
     if (scope.startsWith('space') && !viewableSpaces.includes(scope)) {
       throw new PermissionError('User is not a member of the scope')

@@ -66,7 +66,7 @@ export class NodeHelper {
       if (node.stiType === FILE_STI_TYPE.FOLDER) {
         return acc
       }
-      const folderId = node.parentFolderId === null ? 'root' : node.parentFolderId.toString()
+      const folderId = node.parentFolder === null ? 'root' : node.parentFolder.id.toString()
       if (!acc[folderId]) {
         acc[folderId] = []
       }

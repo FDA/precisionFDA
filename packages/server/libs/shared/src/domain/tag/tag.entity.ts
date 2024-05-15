@@ -9,7 +9,7 @@ import {
 import { Tagging } from '@shared/domain/tagging/tagging.entity'
 import { TagRepository } from './tag.repository'
 
-@Entity({ tableName: 'tags', customRepository: () => TagRepository })
+@Entity({ tableName: 'tags', repository: () => TagRepository })
 export class Tag {
   @PrimaryKey()
   id: number

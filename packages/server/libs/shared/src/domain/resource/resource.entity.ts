@@ -13,7 +13,7 @@ import { User } from '@shared/domain/user/user.entity'
 import { BaseEntity } from '../../database/base-entity'
 import { ResourceRepository } from '@shared/domain/resource/resource.repository'
 
-@Entity({ tableName: 'resources', customRepository: () => ResourceRepository })
+@Entity({ tableName: 'resources', repository: () => ResourceRepository })
 class Resource extends BaseEntity {
   @Property()
   url: string
