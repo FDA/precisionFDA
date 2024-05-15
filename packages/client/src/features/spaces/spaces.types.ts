@@ -105,6 +105,7 @@ export interface ISpace {
 
 export const columnFilters = {
   name: 'string',
+  id: 'number',
   description: 'string',
   state: 'string',
   tags: 'string',
