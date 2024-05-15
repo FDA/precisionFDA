@@ -3,26 +3,21 @@ import { Folder } from '@shared/domain/user-file/folder.entity'
 import { FolderNotFoundError } from '@shared/errors'
 import { PlatformClient } from '@shared/platform-client'
 import { BaseOperation } from '@shared/utils/base-operation'
+import { IdInput, UserOpsCtx } from '../../../types'
+import { EVENT_TYPES, createFolderEvent } from '../../event/event.helper'
+import { User } from '../../user/user.entity'
 import {
   getNodePath,
   validateEditableBy,
   validateProtectedSpaces,
   validateVerificationSpace,
 } from '../user-file.helper'
-import { IdInput, UserOpsCtx } from '../../../types'
-import { createFolderEvent, EVENT_TYPES } from '../../event/event.helper'
-import { User } from '../../user/user.entity'
-import { FILE_ORIGIN_TYPE } from '../user-file.types'
 
 /**
  * This operation removes single folder if it's empty.
  * Throws exception if it's not empty.
  */
-class FolderRemoveOperation extends BaseOperation<
-UserOpsCtx,
-IdInput,
-number
-> {
+class FolderRemoveOperation extends BaseOperation<UserOpsCtx, IdInput, number> {
   async run(input: IdInput): Promise<number> {
     const em = this.ctx.em
     const platformClient = new PlatformClient(
@@ -58,7 +53,7 @@ number
       const op = new RemoveTaggingsOperation({ em: tem, log: this.ctx.log, user: this.ctx.user })
       await op.execute(folderToRemove.id)
 
-      if (folderToRemove.entityType === FILE_ORIGIN_TYPE.HTTPS && folderToRemove.project) {
+      if (folderToRemove.project) {
         // https folder
         await platformClient.folderRemove({
           projectId: folderToRemove.project,

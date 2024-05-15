@@ -20,7 +20,7 @@ class NodeSerializer < ApplicationSerializer
   )
 
   attribute :sti_type, key: :type
-  attribute :origin, if: -> { object.is_a?(UserFile) || (object.is_a?(Folder) && object.https?) }
+  attribute :origin
   attribute :all_tags_list, key: :tags
   attribute :scope_id, key: :scope
   attribute :properties_object, key: :properties

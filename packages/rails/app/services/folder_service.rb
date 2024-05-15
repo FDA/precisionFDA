@@ -23,8 +23,6 @@ class FolderService # rubocop:disable Metrics/ClassLength
       return Rats.failure(
         message: "You have no permissions to add objects to #{parent_folder.name}.",
       )
-    elsif parent_folder&.https?
-      return Rats.failure(message: "You're not allowed to add objects to an HTTPS folder.")
     end
 
     computed_scope = parent_folder&.scope || scope
@@ -55,8 +53,6 @@ class FolderService # rubocop:disable Metrics/ClassLength
                  "as it is part of Locked Verification space.",
       )
     end
-
-    return rename_https_folder(folder, new_name) if folder.https?
 
     folder.name = new_name
     folder.save ? Rats.success(folder) : Rats.failure(message: folder.errors.messages.first)
@@ -132,7 +128,6 @@ class FolderService # rubocop:disable Metrics/ClassLength
   # @param nodes [ActiveRecord::Relation<Node>] Nodes to move.
   def validate_nodes_to_move!(nodes, target_folder, target_scope)
     nodes.each do |node|
-      raise Error, "You're not allowed to move an HTTPS #{node.klass}." if node.https?
 
       if (node.public? && !context.can_administer_site?) || !node.accessible_by?(context)
         raise Error, "You have no permissions to move node with id '#{node.id}'."
@@ -159,8 +154,6 @@ class FolderService # rubocop:disable Metrics/ClassLength
   def validate_target_folder!(target_folder)
     return unless target_folder
 
-    raise Error, "You're not allowed to move to an HTTPS folder." if target_folder.https?
-
     return if target_folder.editable_by?(context)
 
     raise Error, "You have no permissions to add objects to '#{target_folder.name}'."
@@ -172,7 +165,7 @@ class FolderService # rubocop:disable Metrics/ClassLength
     end
     raise ApiError, "Unable to remove #{folder.name} because it is locked." if folder.locked?
 
-    folder.https? ? remove_https_folder(folder) : remove_regular_folder(folder)
+    remove_regular_folder(folder)
   end
 
   def remove_regular_folder(folder)
@@ -198,24 +191,6 @@ class FolderService # rubocop:disable Metrics/ClassLength
     else
       Rats.failure(message: "#{folder.name}: folder removal error.")
     end
-  end
-
-  # Removes https folder and all its childs via Https Apps service.
-  # @param folder [Folder] A folder.
-  def remove_https_folder(folder)
-    nodejs_api_client.folder_remove(folder.id)
-
-    Rats.success(folder)
-  rescue HttpsAppsClient::Error => e
-    Rats.failure(message: e.message)
-  end
-
-  def rename_https_folder(folder, new_name)
-    nodejs_api_client.folder_rename(folder.id, new_name)
-
-    Rats.success(folder)
-  rescue HttpsAppsClient::Error => e
-    Rats.failure(message: e.message)
   end
 
   def remove_file(file) # rubocop:disable Metrics/MethodLength

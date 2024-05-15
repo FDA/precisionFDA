@@ -52,7 +52,6 @@ interface IFileOrAsset {
   state: string
   fileSize?: number
   user: Ref<User>
-  entityType: FILE_ORIGIN_TYPE
   createdAt: Date
   updatedAt: Date
   taggings: Collection<Tagging>
@@ -94,23 +93,23 @@ interface NodeResponse {
 }
 
 interface ResolvePath {
-  path: string,
-  scope: SCOPE,
-  nodes: NodeResponse[],
+  path: string
+  scope: SCOPE
+  nodes: NodeResponse[]
 }
 
 export {
-  FILE_STATE,
-  FOLDER_STATE,
-  FILE_STATE_PFDA,
-  FILE_STATE_DX,
-  FILE_ORIGIN_TYPE,
-  PARENT_TYPE,
-  FILE_STI_TYPE,
-  IFileOrAsset,
-  ITrackable,
   BulkDownloadFile,
   BulkDownloadFiles,
+  FILE_ORIGIN_TYPE,
+  FILE_STATE,
+  FILE_STATE_DX,
+  FILE_STATE_PFDA,
+  FILE_STI_TYPE,
+  FOLDER_STATE,
+  IFileOrAsset,
+  ITrackable,
   NodeResponse,
+  PARENT_TYPE,
   ResolvePath,
 }

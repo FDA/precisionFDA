@@ -1,25 +1,23 @@
+import { SqlEntityManager } from '@mikro-orm/mysql'
+import { Injectable, Logger } from '@nestjs/common'
 import { EmailSendOperation } from '@shared/domain/email/ops/email-send'
+import { EmailQueueJobProducer } from '@shared/domain/email/producer/email-queue-job.producer'
 import { Job } from '@shared/domain/job/job.entity'
 import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
 import { Space } from '@shared/domain/space/space.entity'
 import { Folder } from '@shared/domain/user-file/folder.entity'
-import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { Node } from '@shared/domain/user-file/node.entity'
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { User } from '@shared/domain/user/user.entity'
-import { SqlEntityManager } from '@mikro-orm/mysql'
-import { JobRepository } from '../domain/job/job.repository'
-import { UserCtx } from '../types'
-import { SPACE_MEMBERSHIP_SIDE } from '../domain/space-membership/space-membership.enum'
-import { adminDataConsistencyReportTemplate } from '../domain/email/templates/mjml/admin-data-consistency-report.template'
-import { EMAIL_TYPES, EmailSendInput } from '../domain/email/email.config'
-import { SPACE_TYPE } from '../domain/space/space.enum'
-import { Injectable, Logger } from '@nestjs/common'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
-import { EmailQueueJobProducer } from '@shared/domain/email/producer/email-queue-job.producer'
+import { EMAIL_TYPES, EmailSendInput } from '../domain/email/email.config'
+import { adminDataConsistencyReportTemplate } from '../domain/email/templates/mjml/admin-data-consistency-report.template'
+import { JobRepository } from '../domain/job/job.repository'
+import { SPACE_MEMBERSHIP_SIDE } from '../domain/space-membership/space-membership.enum'
+import { SPACE_TYPE } from '../domain/space/space.enum'
+import { UserCtx } from '../types'
 
 export type AdminDataConsistencyReportOutput = {
-  httpsFilesCount?: number
-  httpsFoldersCount?: number
   pfdaOnlyFoldersCount?: number
   pfdaOnlyFolders?: any
   foldersWithParentCount?: number
@@ -42,7 +40,6 @@ export type AdminDataConsistencyReportOutput = {
 // Current checks
 //  - Unclosed files and how long they've been
 //  - Unterminated jobs and how long they've been running
-//  - Summary of HTTPS folders
 //  - Summary of PFDA Only (local) folders
 //  - Find any dxids that have multiple entries in nodes table
 //  - Find any spaces that have multiple leads per side
@@ -75,10 +72,7 @@ export class AdminDataConsistencyReportService {
 
       // Check for HTTPS files and folders
       const userFileRepo = this.em.getRepository(UserFile)
-      output.httpsFilesCount = await userFileRepo.count({}, { filters: ['userfile', 'https'] })
-
       const folderRepo = this.em.getRepository(Folder)
-      output.httpsFoldersCount = await folderRepo.count({}, { filters: ['folder', 'https'] })
 
       // Check for PFDA-only folders
       const pfdaOnlyFolders = await folderRepo.findAllPFDAOnlyFolders()
@@ -145,7 +139,6 @@ export class AdminDataConsistencyReportService {
         publicComparisonsProject: user.publicComparisonsProject,
       }
     }
-
     for (const space of spaces) {
       const errors: string[] = []
 

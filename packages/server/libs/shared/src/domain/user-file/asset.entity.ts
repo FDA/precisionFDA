@@ -14,13 +14,7 @@ import { ArchiveEntry } from '@shared/domain/user-file/archive-entry.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { AssetRepository } from './asset.repository'
 import { Node } from './node.entity'
-import {
-  FILE_ORIGIN_TYPE,
-  FILE_STATE,
-  FILE_STI_TYPE,
-  IFileOrAsset,
-  ITrackable,
-} from './user-file.types'
+import { FILE_STATE, FILE_STI_TYPE, IFileOrAsset, ITrackable } from './user-file.types'
 
 @Filter({ name: 'asset', cond: { stiType: FILE_STI_TYPE.ASSET } })
 @Filter({
@@ -42,9 +36,6 @@ class Asset extends Node implements IFileOrAsset, ITrackable {
 
   @Property()
   state: FILE_STATE
-
-  @Property()
-  entityType: FILE_ORIGIN_TYPE
 
   @Property({ type: 'numeric' })
   fileSize?: number
@@ -71,6 +62,4 @@ class Asset extends Node implements IFileOrAsset, ITrackable {
   [EntityRepositoryType]?: AssetRepository
 }
 
-export {
-  Asset,
-}
+export { Asset }

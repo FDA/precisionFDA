@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2024_04_15_173545) do
+ActiveRecord::Schema.define(version: 2024_05_07_122424) do
 
   create_table "accepted_licenses", id: :integer, charset: "utf8mb3", collation: "utf8mb3_unicode_ci", force: :cascade do |t|
     t.integer "license_id"
@@ -513,7 +513,6 @@ ActiveRecord::Schema.define(version: 2024_04_15_173545) do
     t.string "sti_type"
     t.integer "scoped_parent_folder_id"
     t.string "uid", collation: "utf8mb3_bin"
-    t.integer "entity_type", default: 0, null: false
     t.boolean "featured", default: false
     t.boolean "locked", default: false
     t.index ["dxid", "sti_type"], name: "index_nodes_on_dxid_and_sti_type"

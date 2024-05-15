@@ -19,7 +19,6 @@
 #  sti_type                :string(255)
 #  scoped_parent_folder_id :integer
 #  uid                     :string(255)
-#  entity_type             :integer          default("regular"), not null
 #  featured                :boolean          default(FALSE)
 #
 
@@ -39,9 +38,6 @@ class Node < ApplicationRecord
   # pFDA internal state, used for files that are being removing by a worker.
   STATE_REMOVING = "removing".freeze
 
-  TYPE_REGULAR = "regular".freeze
-  TYPE_HTTPS = "https".freeze
-
   belongs_to :user, required: true
   belongs_to :parent, polymorphic: true
   belongs_to :scoped_parent_folder, class_name: "Folder"
@@ -52,11 +48,6 @@ class Node < ApplicationRecord
   scope :files_folders_assets, -> { where(sti_type: %w(Folder UserFile Asset)) } # used only in spaces
   scope :files, -> { where(sti_type: %w(UserFile)) }
   scope :folders, -> { where(sti_type: %w(Folder)) }
-
-  enum entity_type: {
-    TYPE_REGULAR => 0,
-    TYPE_HTTPS => 1,
-  }
 
   acts_as_taggable
 

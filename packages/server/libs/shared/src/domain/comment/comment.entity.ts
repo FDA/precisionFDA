@@ -1,10 +1,4 @@
-import {
-  Entity,
-  ManyToOne,
-  Property,
-  Ref,
-  Reference,
-} from '@mikro-orm/core'
+import { Entity, ManyToOne, Property, Ref, Reference } from '@mikro-orm/core'
 import { User } from '@shared/domain/user/user.entity'
 import { BaseEntity } from '../../database/base-entity'
 
@@ -15,30 +9,29 @@ export type CommentableType = 'Discussion' | 'Answer' | 'Space' | 'Note'
   discriminatorColumn: 'commentableType',
 })
 export class Comment extends BaseEntity {
-
   @Property({ fieldName: 'commentable_type' })
   commentableType: CommentableType
 
   @Property()
-    body: string
+  body: string
 
   @Property()
-    contentObjectId: number
+  contentObjectId: number
 
   @Property()
-    contentObjectType: string
+  contentObjectType: string
 
   @Property()
-    title: string
+  title: string
 
   @Property()
-    parentId: number
+  parentId: number
 
   @Property()
-    state: number
+  state: number
 
   @Property()
-    subject: string
+  subject: string
 
   @ManyToOne({ entity: () => User, fieldName: 'user_id' })
   user!: Ref<User>
@@ -48,7 +41,6 @@ export class Comment extends BaseEntity {
 
   @Property({ onUpdate: () => new Date(), hidden: false })
   updatedAt = new Date()
-
 
   constructor(user: User) {
     super()

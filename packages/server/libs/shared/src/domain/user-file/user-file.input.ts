@@ -1,8 +1,8 @@
 import { UidInput } from '@shared/types'
 import type { JSONSchema7 } from 'json-schema'
 import { config } from '../../config'
-import { FILE_ORIGIN_TYPE, PARENT_TYPE } from './user-file.types'
-import { EntityScope, SCOPE } from '../../types/common'
+import { EntityScope } from '../../types/common'
+import { PARENT_TYPE } from './user-file.types'
 
 type SyncFoldersInput = {
   remoteFolderPaths: string[]
@@ -41,7 +41,6 @@ type SyncFilesInFolderInput = {
   scope: EntityScope
   parentId: number
   parentType: PARENT_TYPE
-  entityType: FILE_ORIGIN_TYPE
   runAdd: boolean
   runRemove: boolean
 }
@@ -103,14 +102,14 @@ type CLINodeSearchInput = {
 }
 
 export {
-  SyncFoldersInput,
-  SyncFilesInFolderInput,
-  RenameFolderInput,
-  NodesInput,
-  renameFolderSchema,
-  IdsInput,
-  nodesSchema,
-  nodeQueryFilter,
-  CLINodeSearchSchema,
   CLINodeSearchInput,
+  CLINodeSearchSchema,
+  IdsInput,
+  NodesInput,
+  RenameFolderInput,
+  SyncFilesInFolderInput,
+  SyncFoldersInput,
+  nodeQueryFilter,
+  nodesSchema,
+  renameFolderSchema,
 }

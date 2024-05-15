@@ -9,19 +9,18 @@ import {
 } from '@mikro-orm/core'
 import { Tagging } from '@shared/domain/tagging/tagging.entity'
 import { User } from '@shared/domain/user/user.entity'
+import { STATIC_SCOPE } from '@shared/enums'
 import { ChallengeResource } from '../challenge/challenge-resource.entity'
 import { Node } from './node.entity'
-import { STATIC_SCOPE } from '@shared/enums'
+import { UserFileRepository } from './user-file.repository'
 import {
   FILE_STATE,
-  FILE_ORIGIN_TYPE,
-  FILE_STI_TYPE,
-  ITrackable,
-  IFileOrAsset,
   FILE_STATE_DX,
   FILE_STATE_PFDA,
+  FILE_STI_TYPE,
+  IFileOrAsset,
+  ITrackable,
 } from './user-file.types'
-import { UserFileRepository } from './user-file.repository'
 
 @Entity({
   tableName: 'nodes',
@@ -30,8 +29,6 @@ import { UserFileRepository } from './user-file.repository'
   discriminatorValue: FILE_STI_TYPE.USERFILE,
 })
 @Filter({ name: 'userfile', cond: { stiType: FILE_STI_TYPE.USERFILE } })
-@Filter({ name: 'https', cond: { entityType: FILE_ORIGIN_TYPE.HTTPS } })
-@Filter({ name: 'local', cond: { entityType: FILE_ORIGIN_TYPE.REGULAR } })
 @Filter({
   name: 'unclosed',
   cond: {
@@ -64,9 +61,6 @@ class UserFile extends Node implements IFileOrAsset, ITrackable {
 
   @Property()
   state: FILE_STATE
-
-  @Property()
-  entityType: FILE_ORIGIN_TYPE
 
   @Property({ type: 'numeric' })
   fileSize?: number
