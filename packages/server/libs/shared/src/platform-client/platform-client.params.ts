@@ -121,6 +121,7 @@ type FileDownloadLinkParams = {
   filename: string
   project: string
   duration: number // in seconds
+  preauthenticated?: boolean
 }
 
 type FileGetUploadUrlParams = {

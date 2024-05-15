@@ -1,4 +1,6 @@
 import { Collection, Ref } from '@mikro-orm/core'
+import { DxId } from '@shared/domain/entity/domain/dxid'
+import { UId } from '@shared/domain/entity/domain/uid'
 import { NodeProperty } from '@shared/domain/property/node-property.entity'
 import { Tagging } from '@shared/domain/tagging/tagging.entity'
 import { EntityScope, SCOPE } from '../../types/common'
@@ -44,8 +46,8 @@ enum PARENT_TYPE {
 // but not all nodes (not Folders)
 interface IFileOrAsset {
   id: number
-  dxid: string
-  uid: string
+  dxid: DxId
+  uid: UId
   project: string
   name: string
   scope: EntityScope

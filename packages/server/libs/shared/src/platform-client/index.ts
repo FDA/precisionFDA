@@ -406,7 +406,7 @@ export class PlatformClient {
     const url = `${config.platform.apiUrl}/${params.fileDxid}/download`
     const data = {
       ...omit(['fileDxid'], params),
-      preauthenticated: true,
+      preauthenticated: params.preauthenticated ?? true,
     }
 
     const options: AxiosRequestConfig = {

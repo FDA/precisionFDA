@@ -257,6 +257,10 @@ class UserFile < Node
   # @param generate_event [true, false] Either to generate Event::FileDownloaded or not.
   # @return [url] a file url.
   def file_url(context, inline, generate_event = true)
+    file_link(context, inline, generate_event, true)[:url]
+  end
+
+  def file_link(context, inline, generate_event = true, preauthenticated = false)
     if challenge_file?
       token = CHALLENGE_BOT_TOKEN
       result = DNAnexusAPI.new(CHALLENGE_BOT_TOKEN).call(
@@ -271,18 +275,19 @@ class UserFile < Node
     end
 
     opts = {
-      project: project,
-      preauthenticated: true,
+      project:,
+      preauthenticated:,
       filename: name,
       duration: 86_400,
     }
     inline_attribute = inline.present? ? "?inline" : ""
 
     api = DNAnexusAPI.new(token)
-    url = api.file_download(dxid, opts)["url"] + inline_attribute
+    res = api.file_download(dxid, opts)
+    res[:url] = res[:url] + inline_attribute
     Event::FileDownloaded.create_for(self, context.user) if generate_event
 
-    url
+    res
   end
 
   # Check if the current file is one of challenge usage.

@@ -1,4 +1,6 @@
 import { EntityRepository } from '@mikro-orm/mysql'
+import { DxId } from '@shared/domain/entity/domain/dxid'
+import { UId } from '@shared/domain/entity/domain/uid'
 import { Asset } from '@shared/domain/user-file/asset.entity'
 import { Node } from '@shared/domain/user-file/node.entity'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
@@ -33,7 +35,7 @@ export class UserFileRepository extends EntityRepository<UserFile> {
    * @param userId
    * @param uids
    */
-  async findAccessibleByUser(userId: number, uids: string[]): Promise<UserFile[]> {
+  async findAccessibleByUser(userId: number, uids: UId[]): Promise<UserFile[]> {
     const userRepository = this.em.getRepository(User)
     const user: User = await userRepository.findOneOrFail(
       { id: userId },
@@ -74,7 +76,7 @@ export class UserFileRepository extends EntityRepository<UserFile> {
     )
   }
 
-  async findFileWithUid(uid: string, populate?: string[]): Promise<UserFile | null> {
+  async findFileWithUid(uid: UId, populate?: string[]): Promise<UserFile | null> {
     return await this.findOne(
       { uid },
       {
@@ -84,7 +86,7 @@ export class UserFileRepository extends EntityRepository<UserFile> {
     )
   }
 
-  async findFilesWithDxid(dxid: string): Promise<UserFile[]> {
+  async findFilesWithDxid(dxid: DxId): Promise<UserFile[]> {
     return await this.find({ dxid }, { filters: ['userfile'], populate: ['user', 'taggings.tag'] })
   }
 

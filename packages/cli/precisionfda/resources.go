@@ -49,13 +49,13 @@ func (c *PFDAClient) UploadResources(args []string, portalID string) error {
 			return err
 		}
 
-		var response JsonResourcesResponse
+		var response []JsonResource
 		if err := json.Unmarshal(body, &response); err != nil {
 			return err
 		}
 
 		allURLsPresent := true
-		for _, resource := range response.Resources {
+		for _, resource := range response {
 			if resource.URL == "" {
 				allURLsPresent = false
 				break
@@ -66,7 +66,7 @@ func (c *PFDAClient) UploadResources(args []string, portalID string) error {
 			if c.JsonResponse {
 				helpers.PrettyPrint(response)
 			} else {
-				for _, resource := range response.Resources {
+				for _, resource := range response {
 					fmt.Printf(">> Resource URL: %s\n", resource.URL)
 				}
 			}

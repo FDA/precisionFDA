@@ -1,10 +1,16 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Inject, Injectable, Logger } from '@nestjs/common'
+import { DownloadLinkOptionsDto } from '@shared/domain/entity/domain/download-link-options.dto'
+import { UId } from '@shared/domain/entity/domain/uid'
+import { EntityFetcherService } from '@shared/domain/entity/entity-fetcher.service'
+import { EntityService } from '@shared/domain/entity/entity.service'
+import * as eventHelper from '@shared/domain/event/event.helper'
 import { NotificationService } from '@shared/domain/notification/services/notification.service'
-import { ResourceRepository } from '@shared/domain/resource/resource.repository'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { Node } from '@shared/domain/user-file/node.entity'
+import { NodeHelper } from '@shared/domain/user-file/node.helper'
 import { NodeRepository } from '@shared/domain/user-file/node.repository'
+import * as userFileHelper from '@shared/domain/user-file/user-file.helper'
 import { UserFileRepository } from '@shared/domain/user-file/user-file.repository'
 import { User } from '@shared/domain/user/user.entity'
 import { UserRepository } from '@shared/domain/user/user.repository'
@@ -13,7 +19,11 @@ import { NotFoundError, PermissionError, ValidationError } from '@shared/errors'
 import { PlatformClient } from '@shared/platform-client'
 import { FileDescribeResponse } from '@shared/platform-client/platform-client.responses'
 import { CHALLENGE_BOT_PLATFORM_CLIENT } from '@shared/platform-client/providers/platform-client.provider'
+import { createFileSynchronizeJobTask } from '@shared/queue'
 import { UserCtx } from '@shared/types'
+import { TimeUtils } from '@shared/utils/time.utils'
+import { UserFileCreate } from '../domain/user-file-create'
+import { UserFile } from '../user-file.entity'
 import { FOLLOW_UP_ACTION } from '../user-file.input'
 import {
   BulkDownloadFiles,
@@ -22,14 +32,6 @@ import {
   FILE_STI_TYPE,
   IFileOrAsset,
 } from '../user-file.types'
-import { createFileSynchronizeJobTask } from '@shared/queue'
-import { UserFileCreate } from '../domain/user-file-create'
-import { UserFile } from '../user-file.entity'
-import * as userFileHelper from '@shared/domain/user-file/user-file.helper'
-import * as eventHelper from '@shared/domain/event/event.helper'
-import { EntityFetcherService } from '@shared/domain/entity/entity-fetcher.service'
-import { TimeUtils } from '@shared/utils/time.utils'
-import { NodeHelper } from '@shared/domain/user-file/node.helper'
 
 @Injectable()
 export class UserFileService {
@@ -43,9 +45,9 @@ export class UserFileService {
     private readonly nodeRepo: NodeRepository,
     private readonly fileRepo: UserFileRepository,
     private readonly userRepo: UserRepository,
-    private readonly resourceRepo: ResourceRepository,
     private readonly entityFetcherService: EntityFetcherService,
     private readonly nodeHelper: NodeHelper,
+    private readonly entityService: EntityService,
   ) {}
 
   /**
@@ -57,7 +59,7 @@ export class UserFileService {
    * @param fileUid
    * @private
    */
-  private async getFile(user: User, fileUid: string): Promise<[Node, boolean]> {
+  private async getFile(user: User, fileUid: UId): Promise<[Node, boolean]> {
     const userIsAdmin = (await user.isSiteAdmin()) || (await user.isChallengeAdmin())
     if (userIsAdmin) {
       // first read file to find out if it's a challenge file
@@ -210,7 +212,7 @@ export class UserFileService {
     return nodes
   }
 
-  async closeFile(fileUid: string, followUpAction?: FOLLOW_UP_ACTION) {
+  async closeFile(fileUid: UId, followUpAction?: FOLLOW_UP_ACTION) {
     this.logger.verbose(`UserFileService: closing file ${fileUid}`)
 
     await this.em.transactional(async () => {
@@ -241,7 +243,7 @@ export class UserFileService {
    * @param fileUid
    * @param isChallengeBotFile
    */
-  async synchronizeFile(fileUid: string, isChallengeBotFile: boolean): Promise<boolean> {
+  async synchronizeFile(fileUid: UId, isChallengeBotFile: boolean): Promise<boolean> {
     this.logger.verbose(`UserFileService: synchronize file: ${fileUid}`)
     const node = await this.nodeRepo.findOneOrFail({ uid: fileUid })
     const platformClient = isChallengeBotFile ? this.challengeBotClient : this.userClient
@@ -263,40 +265,6 @@ export class UserFileService {
     return false
   }
 
-  async updateResourceUrl(fileUid: string) {
-    this.logger.verbose(`UserFileService: updating url for fileUid ${fileUid}`)
-
-    const resources = await this.resourceRepo.findResourcesByFileUid(fileUid)
-    if (resources.length === 0) {
-      throw new NotFoundError(`Resource for fileUid ${fileUid} was not found`)
-    }
-    const resource = resources[0]
-    const userFile = resource.userFile.getEntity()
-
-    const response = await this.userClient.fileDownloadLink({
-      fileDxid: userFile.dxid,
-      filename: userFile.name,
-      project: userFile.project,
-      duration: 9999999999,
-    })
-    resource.url = response.url
-    this.logger.verbose(
-      `UserFileService: resource with id ${resource.id} updated with url ${response.url}`,
-    )
-    await this.em.flush()
-
-    try {
-      await this.notificationService.createNotification({
-        message: `Resource ${resource.id} updated with url ${response.url}`,
-        severity: SEVERITY.INFO,
-        action: NOTIFICATION_ACTION.RESOURCE_URL_UPDATED,
-        userId: this.user.id,
-      })
-    } catch (error) {
-      this.logger.error(`Error creating notification ${error}`)
-    }
-  }
-
   async createFile(fileCreate: UserFileCreate) {
     const file = new UserFile(this.em.getReference(User, fileCreate.userId))
     file.dxid = fileCreate.dxid
@@ -314,5 +282,19 @@ export class UserFileService {
     await this.em.persistAndFlush(file)
 
     return file
+  }
+
+  async getDownloadLink(file: UserFile, options?: DownloadLinkOptionsDto) {
+    return this.entityService.getEntityDownloadLink(file, file.name, options)
+  }
+
+  async getDownloadLinkForUid(uid: UId, options?: DownloadLinkOptionsDto) {
+    const file = await this.entityFetcherService.getAccessibleByUid(UserFile, uid)
+
+    if (!file) {
+      throw new NotFoundError('File not found')
+    }
+
+    return this.getDownloadLink(file, options)
   }
 }

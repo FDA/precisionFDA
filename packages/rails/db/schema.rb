@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2024_05_07_122424) do
+ActiveRecord::Schema.define(version: 2024_05_07_152233) do
 
   create_table "accepted_licenses", id: :integer, charset: "utf8mb3", collation: "utf8mb3_unicode_ci", force: :cascade do |t|
     t.integer "license_id"
@@ -634,7 +634,6 @@ ActiveRecord::Schema.define(version: 2024_05_07_122424) do
     t.integer "user_file_id"
     t.integer "parent_id"
     t.string "parent_type"
-    t.string "url"
     t.text "meta"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false

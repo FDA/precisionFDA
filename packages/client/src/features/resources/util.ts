@@ -9,9 +9,16 @@ export const getExt = (url: Resource['url']) => {
   if (!url) {
     return ''
   }
-  const extensionRegex = /\.([a-zA-Z0-9]+)$/
-  const matches = url.match(extensionRegex)
-  return matches ? matches[0] : ''
+
+  try {
+    const path = new URL(url).pathname
+
+    const extensionRegex = /\.([a-zA-Z0-9]+)$/
+    const matches = path.match(extensionRegex)
+    return matches ? matches[0] : ''
+  } catch {
+    return ''
+  }
 }
 
 export const getFileNameFromUrl = (url: Resource['url']) => {

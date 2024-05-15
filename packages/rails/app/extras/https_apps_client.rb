@@ -51,17 +51,6 @@ class HttpsAppsClient # rubocop:disable Metrics/ClassLength
     )
   end
 
-  # Create resource link for resource
-  # @param portal_id id of the portal
-  # @param resource_id id of the resource
-  def data_portal_create_resource_link(portal_id, resource_id)
-    request(
-      "/data-portals/#{portal_id}/resources/#{resource_id}",
-      {},
-      Net::HTTP::Post::METHOD,
-    )
-  end
-
   # Remove resource from data portal
   # @param portal_id id of the portal
   # @param resource_id id of the resource
@@ -205,19 +194,6 @@ class HttpsAppsClient # rubocop:disable Metrics/ClassLength
       {},
       Net::HTTP::Get::METHOD,
       params,
-      {},
-      true,
-    ) do |chunk|
-      block.call(chunk)
-    end
-  end
-
-  def protected_download(uid, &block)
-    request(
-      "/resources/#{uid}/download",
-      {},
-      Net::HTTP::Get::METHOD,
-      {},
       {},
       true,
     ) do |chunk|
@@ -1020,6 +996,15 @@ class HttpsAppsClient # rubocop:disable Metrics/ClassLength
       {},
       Net::HTTP::Get::METHOD,
       { uid: uid },
+    )
+  end
+
+  def get_file_download_link(uid, options = {})
+    request(
+      "/files/#{uid}/download-link",
+      {},
+      Net::HTTP::Get::METHOD,
+      options,
     )
   end
 

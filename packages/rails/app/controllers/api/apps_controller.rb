@@ -337,7 +337,7 @@ module Api
     def describe
       find_app # check if app accesible by current user first
       response = https_apps_client.describe(params[:id])
-      render json: { app: response }
+      render json: response
     end
 
     # GET /api/apps/cli_apps

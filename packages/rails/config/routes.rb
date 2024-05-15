@@ -263,8 +263,6 @@ Rails.application.routes.draw do
         get :custom, on: :collection, to: "data_portals#custom"
       end
 
-      get "/resources/:uid/:file_name", to: "data_portals#download_resource", as: :download_resource, constraints: { file_name: %r{[^/]+} }
-
       resources :submissions, only: %i(index) do
         get :my_entries, on: :collection
       end
@@ -397,6 +395,7 @@ Rails.application.routes.draw do
       resources :files, param: :uid, only: %i(index update show) do
         get :download, on: :member
         get :describe, on: :member # for CLI
+        get ":file_name", on: :member, action: :download_file, constraints: { file_name: %r{[^/]+} }
 
         collection do
           get :featured

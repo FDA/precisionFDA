@@ -12,14 +12,14 @@ describe('AssetProvenanceDataService', () => {
 
   const ASSET = { name: NAME, uid: UID } as unknown as Asset
 
-  const getEntityLinkStub = stub()
+  const getEntityUiLinkStub = stub()
 
   let getEntityTypeForEntityStub: SinonStub
 
   beforeEach(() => {
-    getEntityLinkStub.reset()
-    getEntityLinkStub.throws()
-    getEntityLinkStub.withArgs(ASSET).resolves(LINK)
+    getEntityUiLinkStub.reset()
+    getEntityUiLinkStub.throws()
+    getEntityUiLinkStub.withArgs(ASSET).resolves(LINK)
 
     getEntityTypeForEntityStub = stub(EntityUtils, 'getEntityTypeForEntity').throws()
     getEntityTypeForEntityStub.withArgs(ASSET).returns('asset')
@@ -46,7 +46,7 @@ describe('AssetProvenanceDataService', () => {
   })
 
   function getInstance() {
-    const entityService = { getEntityLink: getEntityLinkStub } as unknown as EntityService
+    const entityService = { getEntityUiLink: getEntityUiLinkStub } as unknown as EntityService
 
     return new AssetProvenanceDataService(entityService)
   }

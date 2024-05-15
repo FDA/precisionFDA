@@ -305,7 +305,7 @@ RSpec.describe UserFile, type: :model do
 
       before do
         allow_any_instance_of(DNAnexusAPI).to receive(:call).
-          with(file_private_one.dxid, "download", params).and_return("url")
+          with(file_private_one.dxid, "download", params).and_return({ url: "url" })
         allow(Event::FileDownloaded).to receive(:create_for).
           with(file_private_one, context.user)
       end
@@ -361,7 +361,7 @@ RSpec.describe UserFile, type: :model do
           with("system", "describeDataObjects", objects: [file_public.dxid]).
           and_return(describe_response)
         allow_any_instance_of(DNAnexusAPI).to receive(:call).
-          with(file_public.dxid, "download", params).and_return("url")
+          with(file_public.dxid, "download", params).and_return({ url: "url" })
         allow(Event::FileDownloaded).to receive(:create_for).
           with(file_public, context.user)
       end

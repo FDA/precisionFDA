@@ -32,7 +32,7 @@ import (
 	"github.com/manifoldco/promptui"
 )
 
-const userAgent = "precisionFDA CLI/2.6.1 "
+const userAgent = "precisionFDA CLI/2.7.0 "
 const defaultNumRoutines = 10
 const defaultChunkSize = 1 << 26 // default 64MB (min. 16MB)
 const minRoutines = 1
@@ -58,7 +58,7 @@ type IPFDAClient interface {
 	UploadMultipleFiles(paths []string, folderID string, spaceID string) error
 	DownloadFile(arg string, outputFilePath string, overwrite string) error
 	Download(args []string, folderID string, spaceID string, public bool, recursive bool, outputFilePath string, overwrite string) error
-	FileViewLink(arg string) error
+	FileViewLink(arg string, preauthenticated bool, ttl int64) error
 	UploadResources(args []string, portalID string) error
 	DescribeEntity(entityID string, entityType string) error
 	LsSpaces(flags map[string]bool) error
@@ -227,14 +227,10 @@ type jsonCreateFolderResponse struct {
 	} `json:"message"`
 }
 
-type JsonResourcesResponse struct {
-	Resources []Resource `json:"resources"`
-}
-
-type Resource struct {
-	ID  int    `json:"id"`
-	URL string `json:"url"`
-	// there is more but we don't care.
+type JsonResource struct {
+	ID   int    `json:"id"`
+	Name string `json:"name"`
+	URL  string `json:"url"`
 }
 
 // Below were migrated from pfda.go:
@@ -680,7 +676,7 @@ func (c *PFDAClient) DownloadFile(arg string, outputFilePath string, overwrite s
 		fmt.Printf(">> Output File :  %s\n", outputFilePath)
 	}
 	withProgressBar := !c.JsonResponse
-	err = Download(fileURL, outputFilePath, int64(fileSize), withProgressBar)
+	err = c.DownloadFromUrl(fileURL, outputFilePath, int64(fileSize), withProgressBar)
 	if err != nil {
 		return err
 	}
@@ -775,8 +771,21 @@ func (c *PFDAClient) Download(args []string, folderID string, spaceID string, pu
 	return nil
 }
 
-func (c *PFDAClient) FileViewLink(arg string) error {
-	apiURL := fmt.Sprintf("%s/api/files/%s/download?format=json", c.BaseURL, arg)
+func (c *PFDAClient) FileViewLink(arg string, preauthenticated bool, duration int64) error {
+
+	baseURL, _ := url.Parse(fmt.Sprintf("%s/api/files/%s/download", c.BaseURL, arg))
+
+	// Prepare query parameters
+	params := url.Values{}
+	params.Add("format", "json")
+	params.Add("preauthenticated", fmt.Sprintf("%t", preauthenticated))
+	params.Add("duration", fmt.Sprintf("%d", duration))
+	params.Add("inline", "true")
+
+	// Encode query parameters and append to the base URL
+	baseURL.RawQuery = params.Encode()
+
+	apiURL := baseURL.String()
 
 	status, body, err := c.makeRequestFail("GET", apiURL, nil)
 	if err != nil {
@@ -797,7 +806,7 @@ func (c *PFDAClient) FileViewLink(arg string) error {
 		return fmt.Errorf("Error while getting the url")
 	}
 
-	resultUrl := resultJSON["file_url"].(string) + "?inline"
+	resultUrl := resultJSON["file_url"].(string)
 
 	if c.JsonResponse {
 		helpers.PrettyPrint(struct {
@@ -1237,7 +1246,7 @@ func (c *PFDAClient) downloadByChunks(uidsChunk []string, outputFilePath string,
 
 	downloaded := make(map[string]string)
 	for _, file := range resultJSON {
-		DownloadDirectly(file["url"].(string), outputFilePath, overwrite, c.JsonResponse)
+		c.DownloadDirectly(file["url"].(string), outputFilePath, overwrite)
 		downloaded[file["uid"].(string)] = ""
 	}
 

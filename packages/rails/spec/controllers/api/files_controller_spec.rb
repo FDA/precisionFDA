@@ -21,6 +21,7 @@ RSpec.describe Api::FilesController, type: :controller do
     ) }
   let(:admin) { create(:user, :admin) }
   let(:file) { create(:user_file, :private, user: user) }
+  let(:node_client) { instance_double(HttpsAppsClient) }
 
   describe "PUT update" do
     context "when user is authenticated" do
@@ -72,12 +73,15 @@ RSpec.describe Api::FilesController, type: :controller do
         authenticate!(user)
 
         allow(UserFile).to receive(:accessible_found_by).and_return(file)
-        allow(file).to receive(:file_url).and_return(redirect_url)
-
+        allow(HttpsAppsClient).to receive(:new).and_return(node_client)
+        allow(node_client).to receive(:get_file_download_link).and_return(redirect_url)
         allow(Users::ChargesFetcher).to receive(:exceeded_charges_limit?).and_return(false)
       end
 
       it "redirects to a file download url" do
+        stub_request(:get, %r{\Ahttps://localhost:3001/files/.+/download-link\z}).
+          to_return(status: 200, body: "", headers: {})
+
         get :download, params: { uid: file.uid }
 
         expect(response).to redirect_to(redirect_url)

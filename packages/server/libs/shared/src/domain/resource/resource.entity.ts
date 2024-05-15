@@ -1,6 +1,5 @@
 import {
   Entity,
-  EntityRepositoryType,
   ManyToOne,
   OneToOne,
   Property,
@@ -11,13 +10,9 @@ import { DataPortal } from '@shared/domain/data-portal/data-portal.entity'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { BaseEntity } from '../../database/base-entity'
-import { ResourceRepository } from '@shared/domain/resource/resource.repository'
 
-@Entity({ tableName: 'resources', repository: () => ResourceRepository })
+@Entity({ tableName: 'resources' })
 class Resource extends BaseEntity {
-  @Property()
-  url: string
-
   @Property()
   meta: string
 
@@ -34,8 +29,6 @@ class Resource extends BaseEntity {
   get name(): string {
     return `${this.userFile.getProperty('name')}`
   }
-
-  [EntityRepositoryType]?: ResourceRepository
 
   constructor(user: User, userFile: UserFile) {
     super()

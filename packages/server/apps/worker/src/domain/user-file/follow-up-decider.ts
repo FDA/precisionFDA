@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common'
 import { ChallengeResourceRepository } from '@shared/domain/challenge/challenge-resource.repository'
 import { ChallengeRepository } from '@shared/domain/challenge/challenge.repository'
 import { DataPortalRepository } from '@shared/domain/data-portal/data-portal.repository'
-import { ResourceRepository } from '@shared/domain/resource/resource.repository'
+import { UId } from '@shared/domain/entity/domain/uid'
 import { SpaceReportRepository } from '@shared/domain/space-report/repository/space-report.repository'
 
 /**
@@ -13,19 +13,15 @@ import { SpaceReportRepository } from '@shared/domain/space-report/repository/sp
 export class FollowUpDecider {
   constructor(
     private readonly logger: Logger,
-    private readonly resourceRepo: ResourceRepository,
     private readonly dataPortalRepo: DataPortalRepository,
     private readonly challengeResourceRepo: ChallengeResourceRepository,
     private readonly challengeRepo: ChallengeRepository,
     private readonly spaceReportRepo: SpaceReportRepository,
   ) {}
 
-  async decideNextAction(fileUid: string) {
+  async decideNextAction(fileUid: UId) {
     this.logger.verbose(`Deciding about follow up action after a close of file with uid ${fileUid}`)
     try {
-      if (await this.isDataPortalResource(fileUid)) {
-        return 'UPDATE_DATA_PORTAL_RESOURCE_URL'
-      }
       if (await this.isDataPortalCardImage(fileUid)) {
         return 'UPDATE_DATA_PORTAL_IMAGE_URL'
       }
@@ -44,12 +40,6 @@ export class FollowUpDecider {
       console.error(error)
     }
     return null
-  }
-
-  private async isDataPortalResource(fileUid: string) {
-    this.logger.verbose(`Is file with uid ${fileUid} a data portal resource`)
-    const resources = await this.resourceRepo.findResourcesByFileUid(fileUid)
-    return resources.length > 0
   }
 
   private async isDataPortalCardImage(fileUid: string) {
@@ -71,7 +61,7 @@ export class FollowUpDecider {
     return challenges.length > 0
   }
 
-  private async isSpaceReportResult(fileUid: string) {
+  private async isSpaceReportResult(fileUid: UId) {
     this.logger.verbose(`Is file with uid ${fileUid} a space report result`)
     const spaceReports = await this.spaceReportRepo.findByResultFileUid(fileUid)
     return spaceReports != null

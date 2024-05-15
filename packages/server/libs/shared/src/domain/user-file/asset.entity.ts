@@ -9,6 +9,7 @@ import {
   Reference,
 } from '@mikro-orm/core'
 import { App } from '@shared/domain/app/app.entity'
+import { DxId } from '@shared/domain/entity/domain/dxid'
 import { Tagging } from '@shared/domain/tagging/tagging.entity'
 import { ArchiveEntry } from '@shared/domain/user-file/archive-entry.entity'
 import { User } from '@shared/domain/user/user.entity'
@@ -26,7 +27,7 @@ import { FILE_STATE, FILE_STI_TYPE, IFileOrAsset, ITrackable } from './user-file
 @Entity({ tableName: 'nodes', repository: () => AssetRepository })
 class Asset extends Node implements IFileOrAsset, ITrackable {
   @Property()
-  dxid: string
+  dxid: DxId
 
   @Property()
   project: string

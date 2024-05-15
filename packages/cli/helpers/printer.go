@@ -410,7 +410,7 @@ func PrintGetScopeHelp() int {
 
 	writeLine("  ", "  ")
 	writeLine("  For:", "Displays the scope of the current context. If you are running it in a private scope, 'private' is printed to the console.\n In case you are in a space, only the integer Space ID is printed to the console.\n")
-	writeLine("  Usage:", "get-scope\n")
+	writeLine("  Usage:", "get-scope [FLAG...]\n")
 	writeLine("  Examples:", "get-scope [Prints current scope]\n")
 	writeLine("  Flags:", "All flags listed below are OPTIONAL")
 	writeLine("   -h, -help", "Displays the help message and exit")
@@ -425,10 +425,14 @@ func PrintViewLinkHelp() int {
 	writeLine := newLineWriter(writer)
 
 	writeLine("  ", "  ")
-	writeLine("  For:", "Get view link of file.\n")
-	writeLine("  Usage:", "view-link <FILE_ID>\n")
+	writeLine("  For:", "Get view link of the file. You can choose between protected and pre-authenticated links.\nPre-authenticated links are valid for 24 hours by default, unless -duration flag is specified.\n")
+	writeLine("  Usage:", "view-link <FILE_ID> [FLAG...]\n")
 	writeLine("  Examples:", "view-link file-GbKF3qQ0Z0gqk80j1QF47K8j-1 [Prints view link for specified file.]\n")
+	writeLine(" ", "view-link file-GbKF3qQ0Z0gqk80j1QF47K8j-1 -auth [Prints pre-authenticated view link for specified file.]\n")
+	writeLine(" ", "view-link file-GbKF3qQ0Z0gqk80j1QF47K8j-1 -auth -duration 172800 [Prints pre-authenticated view link for specified file - valid for 48 hours.]\n")
 	writeLine("  Flags:", "All flags listed below are OPTIONAL")
+	writeLine("   -auth", "Generate pre-authenticated link instead of protected link")
+	writeLine("   -duration", "Set duration of pre-authenticated link in seconds (default 86400)")
 	writeLine("   -h, -help", "Displays the help message and exit")
 	writeLine("   -json", "Displays response in JSON format")
 

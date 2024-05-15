@@ -37,7 +37,7 @@ describe('FileProvenanceDataService', () => {
   const assetFindOneStub = stub()
   const nodeFindOneStub = stub()
   const getRepositoryStub = stub()
-  const getEntityLinkStub = stub()
+  const getEntityUiLinkStub = stub()
 
   let getEntityTypeForEntityStub: SinonStub
 
@@ -70,8 +70,8 @@ describe('FileProvenanceDataService', () => {
     getRepositoryStub.withArgs(Asset).returns({ findOne: assetFindOneStub })
     getRepositoryStub.withArgs(UserFile).returns({ findOne: nodeFindOneStub })
 
-    getEntityLinkStub.reset()
-    getEntityLinkStub.throws()
+    getEntityUiLinkStub.reset()
+    getEntityUiLinkStub.throws()
 
     getEntityTypeForEntityStub = stub(EntityUtils, 'getEntityTypeForEntity').throws()
   })
@@ -159,7 +159,7 @@ describe('FileProvenanceDataService', () => {
       parentType,
     } as unknown as UserFile
 
-    getEntityLinkStub.withArgs(file).resolves(LINK)
+    getEntityUiLinkStub.withArgs(file).resolves(LINK)
     getEntityTypeForEntityStub.withArgs(file).returns('file')
 
     return file
@@ -170,7 +170,7 @@ describe('FileProvenanceDataService', () => {
       getRepository: getRepositoryStub,
     } as unknown as SqlEntityManager
 
-    const entityService = { getEntityLink: getEntityLinkStub } as unknown as EntityService
+    const entityService = { getEntityUiLink: getEntityUiLinkStub } as unknown as EntityService
 
     return new FileProvenanceDataService(em, entityService)
   }

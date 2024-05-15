@@ -1,5 +1,5 @@
 // PrecisionFDA CLI
-// Version 2.6.1
+// Version 2.7.0
 package main
 
 import (
@@ -26,7 +26,7 @@ const defaultChunkSize = 1 << 26 // default 64MB (min. 16MB)
 const defaultSkipVerify = "false"
 const usageString = `
 ****************************
-PFDA COMMAND LINE TOOL v2.6.1
+PFDA COMMAND LINE TOOL v2.7.0
 ****************************
 
 To upload a file:
@@ -83,8 +83,8 @@ To print content of a file:
 To print first 10 lines of a file:
    pfda head <FILE_ID> [-key <KEY>]
 
-To get current space id (on workstation):
-   pfda get-space-id [-key <KEY>]
+To get current scope:
+   pfda get-scope [-key <KEY>]
 
 To print version info and exit :
    pfda -version
@@ -93,7 +93,7 @@ All available commands:
    pfda cat
    pfda describe
    pfda download
-   pfda get-space-id
+   pfda get-scope
    pfda head
    pfda ls
    pfda ls-apps
@@ -108,6 +108,7 @@ All available commands:
    pfda rmdir
    pfda upload-asset
    pfda upload-file
+   pfda view-link
 
 Command specific help section with description, examples and available flags:
    pfda <COMMAND> -help
@@ -177,8 +178,8 @@ var invokeDownload = func(client precisionfda.IPFDAClient, args *[]string, folde
 	return client.Download(*args, *folderID, *spaceID, public, recursive, *outputFilePath, *overwriteFile)
 }
 
-var invokeFileViewLink = func(client precisionfda.IPFDAClient, fileID *string) error {
-	return client.FileViewLink(*fileID)
+var invokeFileViewLink = func(client precisionfda.IPFDAClient, fileID *string, preauthenticated bool, duration int64) error {
+	return client.FileViewLink(*fileID, preauthenticated, duration)
 }
 
 var invokeUploadResources = func(client precisionfda.IPFDAClient, args *[]string, portalID *string) error {
@@ -310,6 +311,8 @@ func mainInternal() int {
 	flagParents := flag.Bool("parents", false, "[optional] No error if existing, make parent directories as needed")
 	flagParentsShort := flag.Bool("p", false, "[optional] No error if existing, make parent directories as needed")
 	flagLines := flag.Int("lines", 10, "[optional] Number of lines to print, default 10")
+	flagPreauthenticated := flag.Bool("auth", false, "[optional] Use preauthenticated URL for viewing file")
+	flagDuration := flag.Int64("duration", 86_400, "[optional] Time to live for preauthenticated URL in seconds")
 
 	// Support for ./pfda upload-file option of specifying a command, making -cmd optional
 	var positionalCmd string
@@ -548,7 +551,7 @@ func mainInternal() int {
 			return helpers.ErrorFromString(fmt.Sprintf("File ID '%s' is invalid", args[0]), *flagJson)
 		}
 
-		err := invokeFileViewLink(pfdaclient, &args[0])
+		err := invokeFileViewLink(pfdaclient, &args[0], *flagPreauthenticated, *flagDuration)
 		if err != nil {
 			return helpers.ErrorFromError(err, *flagJson)
 		}
@@ -879,7 +882,7 @@ func mainInternal() int {
 	default:
 		// Invalid, non-empty command
 		// both 'upload-resource' and 'refresh-key' are intentionally omitted.
-		return helpers.ErrorFromString(fmt.Sprintf("Command '%s' not found. Must be one of: \n'cat' \n'describe' \n'download' \n'get-space-id' \n'head' \n'ls' \n'ls-apps' \n'ls-assets' \n'ls-executions' \n'ls-members' \n'ls-discussions' \n'ls-spaces' \n'ls-workflows' \n'mkdir' \n'rm' \n'rmdir' \n'upload-asset' \n'upload-file'\n", *command), *flagJson)
+		return helpers.ErrorFromString(fmt.Sprintf("Command '%s' not found. Must be one of: \n'cat' \n'describe' \n'download' \n'get-scope' \n'head' \n'ls' \n'ls-apps' \n'ls-assets' \n'ls-executions' \n'ls-members' \n'ls-discussions' \n'ls-spaces' \n'ls-workflows' \n'mkdir' \n'rm' \n'rmdir' \n'upload-asset' \n'upload-file'\n 'view-link'\n", *command), *flagJson)
 	}
 
 	// Write configuration and save key

@@ -1,10 +1,20 @@
-import { EntityService } from '@shared/domain/entity/entity.service'
+import { FindOneOptions, QueryOrder, Reference, wrap } from '@mikro-orm/core'
+import { SqlEntityManager } from '@mikro-orm/mysql'
+import { Injectable, Logger } from '@nestjs/common'
+import { DataPortalRepository } from '@shared/domain/data-portal/data-portal.repository'
+import { CreateDataPortalDTO } from '@shared/domain/data-portal/dto/CreateDataPortalDTO'
+import { CreateFileParamDTO } from '@shared/domain/data-portal/dto/CreateFileParamDTO'
+import { UpdateDataPortalDTO } from '@shared/domain/data-portal/dto/UpdateDataPortalDTO'
+import { UId } from '@shared/domain/entity/domain/uid'
 import { NotificationService } from '@shared/domain/notification/services/notification.service'
 import { Resource } from '@shared/domain/resource/resource.entity'
 import { Space } from '@shared/domain/space/space.entity'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { FileRemoveOperation } from '@shared/domain/user-file/ops/file-remove'
+import { UserFileService } from '@shared/domain/user-file/service/user-file.service'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { User } from '@shared/domain/user/user.entity'
+import { NOTIFICATION_ACTION, SEVERITY } from '@shared/enums'
 import {
   DataPortalUrlSlugFormatError,
   DataPortalUrlSlugNotUniqueError,
@@ -12,26 +22,17 @@ import {
   NotFoundError,
   PermissionError,
 } from '@shared/errors'
-import { NOTIFICATION_ACTION, SEVERITY } from '@shared/enums'
-import { CreateResourceResponse, DataPortalMemberParam, DataPortalParam } from './data-portal.types'
-import { SqlEntityManager } from '@mikro-orm/mysql'
-import { DataPortal } from '../data-portal.entity'
-import { PlatformClient } from '@shared/platform-client'
-import { UserFileRepository } from '../../user-file/user-file.repository'
-import { FindOneOptions, QueryOrder, Reference, wrap } from '@mikro-orm/core'
-import { FILE_STATE_DX } from '../../user-file/user-file.types'
 import { getLogger } from '@shared/logger'
+import { ServiceLogger } from '@shared/logger/decorator/service-logger'
+import { PlatformClient } from '@shared/platform-client'
+import { SCOPE } from '@shared/types/common'
 import { SPACE_MEMBERSHIP_ROLE } from '../../space-membership/space-membership.enum'
 import { CAN_EDIT_ROLES } from '../../space-membership/space-membership.helper'
+import { UserFileRepository } from '../../user-file/user-file.repository'
+import { FILE_STATE_DX } from '../../user-file/user-file.types'
+import { DataPortal } from '../data-portal.entity'
 import { DATA_PORTAL_MEMBER_ROLE } from '../data-portal.enum'
-import { SCOPE } from '@shared/types/common'
-import { Injectable, Logger } from '@nestjs/common'
-import { UserContext } from '@shared/domain/user-context/model/user-context'
-import { DataPortalRepository } from '@shared/domain/data-portal/data-portal.repository'
-import { ServiceLogger } from '@shared/logger/decorator/service-logger'
-import { CreateFileParamDTO } from '@shared/domain/data-portal/dto/CreateFileParamDTO'
-import { UpdateDataPortalDTO } from '@shared/domain/data-portal/dto/UpdateDataPortalDTO'
-import { CreateDataPortalDTO } from '@shared/domain/data-portal/dto/CreateDataPortalDTO'
+import { CreateResourceResponse, DataPortalMemberParam, DataPortalParam } from './data-portal.types'
 
 const logger = getLogger('data-portal.service')
 
@@ -59,7 +60,7 @@ export class DataPortalService {
     private readonly dataPortalRepo: DataPortalRepository,
     private readonly platformClient: PlatformClient,
     private readonly notificationService: NotificationService,
-    private readonly entityService: EntityService,
+    private readonly userFileService: UserFileService,
     private readonly fileRemoveOperation?: FileRemoveOperation,
   ) {}
 
@@ -78,21 +79,15 @@ export class DataPortalService {
           return {
             id: r.id,
             name: r.userFile.getEntity().name,
-            url: await this.entityService.getEntityLink(r),
+            url: await this.userFileService.getDownloadLink(r.userFile.getEntity(), {
+              inline: true,
+            }),
           }
         }),
       )
     } else {
       return []
     }
-  }
-
-  createResourceLink = async (id: number): Promise<string> => {
-    logger.verbose(`Creating resource link for resource id: ${id}`)
-    const resource = await this.em.findOneOrFail(Resource, { id: id }, { populate: ['userFile'] })
-    resource.url = await this.getUserFileUrl(resource.userFile.getEntity().uid)
-    await this.em.flush()
-    return resource.url
   }
 
   createResource = async (
@@ -142,7 +137,7 @@ export class DataPortalService {
     await this.fileRemoveOperation?.run({ id: resource.userFile.id })
   }
 
-  private getUserFileUrl = async (uid: string): Promise<string> => {
+  private getUserFileUrl = async (uid: UId): Promise<string> => {
     logger.verbose(`Getting url for id: ${uid}`)
     const fileRepo = this.em.getRepository(UserFile) as UserFileRepository
     const userFile = await fileRepo.findFileWithUid(uid)

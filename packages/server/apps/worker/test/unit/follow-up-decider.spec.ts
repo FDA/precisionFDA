@@ -1,22 +1,20 @@
-import { FollowUpDecider } from '../../src/domain/user-file/follow-up-decider'
 import { Logger } from '@nestjs/common'
-import { ResourceRepository } from '@shared/domain/resource/resource.repository'
-import { DataPortalRepository } from '@shared/domain/data-portal/data-portal.repository'
 import { ChallengeResourceRepository } from '@shared/domain/challenge/challenge-resource.repository'
 import { ChallengeRepository } from '@shared/domain/challenge/challenge.repository'
-import { stub } from 'sinon'
+import { DataPortalRepository } from '@shared/domain/data-portal/data-portal.repository'
+import { SpaceReportRepository } from '@shared/domain/space-report/repository/space-report.repository'
 import { expect } from 'chai'
+import { stub } from 'sinon'
+import { FollowUpDecider } from '../../src/domain/user-file/follow-up-decider'
 
 describe('FollowUpDecider', () => {
   const findResourcesStub = stub()
   const findDataPortalsStub = stub()
   const findChallengeResourcesStub = stub()
   const findChallengesStub = stub()
+  const findReportByResultFileUidStub = stub()
   const verboseLoggerStub = stub()
 
-  const resourceRepo = {
-    findResourcesByFileUid: findResourcesStub,
-  } as unknown as ResourceRepository
   const dataPortalRepo = {
     findDataPortalsByCardImageUid: findDataPortalsStub,
   } as unknown as DataPortalRepository
@@ -29,13 +27,15 @@ describe('FollowUpDecider', () => {
   const logger = {
     verbose: verboseLoggerStub,
   } as unknown as Logger
-
+  const spaceReportRepo = {
+    findByResultFileUid: findReportByResultFileUidStub,
+  } as unknown as SpaceReportRepository
   const decider = new FollowUpDecider(
     logger,
-    resourceRepo,
     dataPortalRepo,
     challengeResourceRepo,
     challengeRepo,
+    spaceReportRepo,
   )
 
   beforeEach(() => {
@@ -43,25 +43,18 @@ describe('FollowUpDecider', () => {
     findDataPortalsStub.reset()
     findChallengeResourcesStub.reset()
     findChallengesStub.reset()
+    findReportByResultFileUidStub.reset()
   })
 
   describe('#decideNextAction', async () => {
-    it('should return UPDATE_DATA_PORTAL_RESOURCE_URL', async () => {
-      findResourcesStub.resolves([{}])
-      findDataPortalsStub.resolves([])
-      findChallengeResourcesStub.resolves([])
-      findChallengesStub.resolves([])
-
-      const result = await decider.decideNextAction('fileUid')
-      expect(result).to.eq('UPDATE_DATA_PORTAL_RESOURCE_URL')
-    })
     it('should return UPDATE_DATA_PORTAL_IMAGE_URL', async () => {
       findResourcesStub.resolves([])
       findDataPortalsStub.resolves([{}])
       findChallengeResourcesStub.resolves([])
       findChallengesStub.resolves([])
+      findReportByResultFileUidStub.resolves(null)
 
-      const result = await decider.decideNextAction('fileUid')
+      const result = await decider.decideNextAction('file-Uid-1')
       expect(result).to.eq('UPDATE_DATA_PORTAL_IMAGE_URL')
     })
     it('should return UPDATE_CHALLENGE_RESOURCE_URL', async () => {
@@ -69,8 +62,9 @@ describe('FollowUpDecider', () => {
       findDataPortalsStub.resolves([])
       findChallengeResourcesStub.resolves([{}])
       findChallengesStub.resolves([])
+      findReportByResultFileUidStub.resolves(null)
 
-      const result = await decider.decideNextAction('fileUid')
+      const result = await decider.decideNextAction('file-Uid-1')
       expect(result).to.eq('UPDATE_CHALLENGE_RESOURCE_URL')
     })
     it('should return UPDATE_CHALLENGE_IMAGE_URL', async () => {
@@ -78,9 +72,20 @@ describe('FollowUpDecider', () => {
       findDataPortalsStub.resolves([])
       findChallengeResourcesStub.resolves([])
       findChallengesStub.resolves([{}])
+      findReportByResultFileUidStub.resolves(null)
 
-      const result = await decider.decideNextAction('fileUid')
+      const result = await decider.decideNextAction('file-Uid-1')
       expect(result).to.eq('UPDATE_CHALLENGE_IMAGE_URL')
+    })
+    it('should return COMPLETE_SPACE_REPORT', async () => {
+      findResourcesStub.resolves([])
+      findDataPortalsStub.resolves([])
+      findChallengeResourcesStub.resolves([])
+      findChallengesStub.resolves([])
+      findReportByResultFileUidStub.resolves({})
+
+      const result = await decider.decideNextAction('file-Uid-1')
+      expect(result).to.eq('COMPLETE_SPACE_REPORT')
     })
   })
 })

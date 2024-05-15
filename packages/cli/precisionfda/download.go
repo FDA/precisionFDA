@@ -3,15 +3,15 @@ package precisionfda
 import (
 	"dnanexus.com/precision-fda-cli/helpers"
 	"fmt"
+	"github.com/docker/go-units"
+	"github.com/gosuri/uilive"
+	"github.com/hashicorp/go-retryablehttp"
 	"io"
 	"net/http"
 	"net/url"
 	"os"
 	"path"
 	"strings"
-
-	"github.com/docker/go-units"
-	"github.com/gosuri/uilive"
 )
 
 // ProgressWriter counts the number of bytes written to it.
@@ -74,22 +74,20 @@ func (wc *Writer) Write(p []byte) (int, error) {
 	return len(p), nil
 }
 
-func Download(fileURL string, outputFilePath string, fileSize int64, withProgressBar bool) error {
+func (c *PFDAClient) DownloadFromUrl(fileURL string, outputFilePath string, fileSize int64, withProgressBar bool) error {
 	out, err := os.Create(outputFilePath) // Create the file
 	if err != nil {
 		return err
 	}
 	defer out.Close()
 
-	resp, err := http.Get(fileURL)
+	req, err := retryablehttp.NewRequest("GET", fileURL, nil)
+	c.setPostHeaders(req)
+	resp, err := c.Client.Do(req)
 	if err != nil {
 		return err
 	}
 	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("Error while downloading file: %s", resp.Status)
-	}
 
 	writer := uilive.New()
 	writer.Start()
@@ -107,7 +105,7 @@ func Download(fileURL string, outputFilePath string, fileSize int64, withProgres
 	}
 }
 
-func DownloadDirectly(downloadUrl string, outputFilePath string, overwrite string, asJSON bool) error {
+func (c *PFDAClient) DownloadDirectly(downloadUrl string, outputFilePath string, overwrite string) error {
 	fileURL := downloadUrl
 	originalName := path.Base(fileURL)
 	fileName, err := url.PathUnescape(originalName)
@@ -130,18 +128,17 @@ func DownloadDirectly(downloadUrl string, outputFilePath string, overwrite strin
 	}
 
 	if _, err := os.Stat(outputFilePath); err == nil && (overwrite == "false" || overwrite == "") {
-		helpers.PrintError(fmt.Errorf("Path %s already exists but -overwrite flag not set to true - skipping download", outputFilePath), asJSON)
+		helpers.PrintError(fmt.Errorf("Path %s already exists but -overwrite flag not set to true - skipping download", outputFilePath), c.JsonResponse)
 		return nil
 	}
 
-	withProgressBar := false
-	err = Download(fileURL, outputFilePath, 0, withProgressBar)
+	err = c.DownloadFromUrl(fileURL, outputFilePath, 0, false)
 	if err != nil {
-		helpers.PrintError(fmt.Errorf("Download of %s failed - %s.\n", fileName, err), asJSON)
+		helpers.PrintError(fmt.Errorf("Download of %s failed - %s.\n", fileName, err), c.JsonResponse)
 		return nil
 	}
 
-	if asJSON {
+	if c.JsonResponse {
 		helpers.PrettyPrint(struct {
 			FileName string `json:"file_name"`
 			Path     string `json:"path"`
@@ -177,4 +174,25 @@ func Head(fileURL string, lines int) error {
 
 	defer os.Remove(tmp.Name())
 	return nil
+}
+
+func (c *PFDAClient) processDownloadArgs(args []string) ([]string, []string) {
+	c.ContinueOnError = len(args) > 1
+
+	fileIDs := make([]string, 0)
+	fileNames := make([]string, 0)
+
+	if len(args) == 0 {
+		args = append(args, "")
+	}
+
+	for _, arg := range args {
+		arg = strings.TrimSpace(arg)
+		if helpers.IsFileId(arg) {
+			fileIDs = append(fileIDs, arg)
+		} else {
+			fileNames = append(fileNames, arg)
+		}
+	}
+	return fileIDs, fileNames
 }

@@ -19,7 +19,7 @@ describe('ComparisonProvenanceDataService', () => {
   const FILES = [FILE_1, FILE_2]
 
   const loadFilesStub = stub()
-  const getEntityLinkStub = stub()
+  const getEntityUiLinkStub = stub()
 
   const COMPARISON = {
     id: ID,
@@ -33,9 +33,9 @@ describe('ComparisonProvenanceDataService', () => {
     loadFilesStub.reset()
     loadFilesStub.resolves(FILES)
 
-    getEntityLinkStub.reset()
-    getEntityLinkStub.throws()
-    getEntityLinkStub.withArgs(COMPARISON).resolves(LINK)
+    getEntityUiLinkStub.reset()
+    getEntityUiLinkStub.throws()
+    getEntityUiLinkStub.withArgs(COMPARISON).resolves(LINK)
 
     getEntityTypeForEntityStub = stub(EntityUtils, 'getEntityTypeForEntity').throws()
     getEntityTypeForEntityStub.withArgs(COMPARISON).returns('comparison')
@@ -78,7 +78,7 @@ describe('ComparisonProvenanceDataService', () => {
   })
 
   function getInstance() {
-    const entityService = { getEntityLink: getEntityLinkStub } as unknown as EntityService
+    const entityService = { getEntityUiLink: getEntityUiLinkStub } as unknown as EntityService
 
     return new ComparisonProvenanceDataService(entityService)
   }

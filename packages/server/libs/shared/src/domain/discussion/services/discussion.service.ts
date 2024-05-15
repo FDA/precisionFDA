@@ -740,7 +740,7 @@ export class DiscussionService implements IDiscussionService {
           uid: attachmentEntity.uid,
           type: attachmentEntity.stiType,
           name: attachmentEntity.name,
-          link: await this.entityService.getEntityLink(attachmentEntity as UserFile | Asset),
+          link: await this.entityService.getEntityUiLink(attachmentEntity as UserFile | Asset),
         })
       } else if (attachment.itemType === 'Job') {
         const attachmentEntity: Job | null = await this.fetcher.getById(attachment.itemType, attachment.itemId)
@@ -752,7 +752,7 @@ export class DiscussionService implements IDiscussionService {
           uid: attachmentEntity.uid,
           type: attachment.itemType,
           name: attachmentEntity.name,
-          link: await this.entityService.getEntityLink(attachmentEntity),
+          link: await this.entityService.getEntityUiLink(attachmentEntity),
         })
       } else if (attachment.itemType === 'Comparison') {
         const attachmentEntity: Comparison | null = await this.fetcher.getById(attachment.itemType, attachment.itemId)
@@ -764,7 +764,7 @@ export class DiscussionService implements IDiscussionService {
           uid: attachmentEntity.id.toString(),
           type: attachment.itemType,
           name: attachmentEntity.name,
-          link: await this.entityService.getEntityLink(attachmentEntity),
+          link: await this.entityService.getEntityUiLink(attachmentEntity),
         })
       } else if (attachment.itemType === 'App') {
         const appAttachment: App | null = await this.fetcher.getById(attachment.itemType, attachment.itemId)
@@ -776,7 +776,7 @@ export class DiscussionService implements IDiscussionService {
           uid: appAttachment.uid,
           type: attachment.itemType,
           name: appAttachment.title,
-          link: await this.entityService.getEntityLink(appAttachment),
+          link: await this.entityService.getEntityUiLink(appAttachment),
         })
       }
     }

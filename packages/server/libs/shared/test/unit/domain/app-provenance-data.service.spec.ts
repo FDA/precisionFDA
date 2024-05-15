@@ -19,7 +19,7 @@ describe('AppProvenanceDataService', () => {
   const ASSETS = [ASSET_1, ASSET_2]
 
   const loadAssetsStub = stub()
-  const getEntityLinkStub = stub()
+  const getEntityUiLinkStub = stub()
 
   const APP = {
     title: TITLE,
@@ -34,9 +34,9 @@ describe('AppProvenanceDataService', () => {
     loadAssetsStub.reset()
     loadAssetsStub.resolves(ASSETS)
 
-    getEntityLinkStub.reset()
-    getEntityLinkStub.throws()
-    getEntityLinkStub.withArgs(APP).resolves(LINK)
+    getEntityUiLinkStub.reset()
+    getEntityUiLinkStub.throws()
+    getEntityUiLinkStub.withArgs(APP).resolves(LINK)
 
     getEntityTypeForEntityStub = stub(EntityUtils, 'getEntityTypeForEntity').throws()
     getEntityTypeForEntityStub.withArgs(APP).returns('app')
@@ -62,7 +62,7 @@ describe('AppProvenanceDataService', () => {
       const NO_REVISION_APP = { ...APP, revision: null } as unknown as App
 
       getEntityTypeForEntityStub.withArgs(NO_REVISION_APP).returns('app')
-      getEntityLinkStub.withArgs(NO_REVISION_APP).resolves(LINK)
+      getEntityUiLinkStub.withArgs(NO_REVISION_APP).resolves(LINK)
 
       const res = await getInstance().getData(NO_REVISION_APP)
 
@@ -90,7 +90,7 @@ describe('AppProvenanceDataService', () => {
   })
 
   function getInstance() {
-    const entityService = { getEntityLink: getEntityLinkStub } as unknown as EntityService
+    const entityService = { getEntityUiLink: getEntityUiLinkStub } as unknown as EntityService
     return new AppProvenanceDataService(entityService)
   }
 })

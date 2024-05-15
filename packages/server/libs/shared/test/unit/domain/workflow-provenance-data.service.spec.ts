@@ -23,7 +23,7 @@ describe('WorkflowProvenanceDataService', () => {
   const WORKFLOW = { title: TITLE, uid: UID } as unknown as Workflow
 
   const getAppsStub = stub()
-  const getEntityLinkStub = stub()
+  const getEntityUiLinkStub = stub()
 
   let getEntityTypeForEntityStub: SinonStub
 
@@ -32,9 +32,9 @@ describe('WorkflowProvenanceDataService', () => {
     getAppsStub.throws()
     getAppsStub.withArgs(WORKFLOW).resolves(APPS)
 
-    getEntityLinkStub.reset()
-    getEntityLinkStub.throws()
-    getEntityLinkStub.withArgs(WORKFLOW).resolves(LINK)
+    getEntityUiLinkStub.reset()
+    getEntityUiLinkStub.throws()
+    getEntityUiLinkStub.withArgs(WORKFLOW).resolves(LINK)
 
     getEntityTypeForEntityStub = stub(EntityUtils, 'getEntityTypeForEntity').throws()
     getEntityTypeForEntityStub.withArgs(WORKFLOW).returns('workflow')
@@ -78,7 +78,7 @@ describe('WorkflowProvenanceDataService', () => {
 
   function getInstance() {
     const workflowService = { getApps: getAppsStub } as unknown as WorkflowService
-    const entityService = { getEntityLink: getEntityLinkStub } as unknown as EntityService
+    const entityService = { getEntityUiLink: getEntityUiLinkStub } as unknown as EntityService
 
     return new WorkflowProvenanceDataService(workflowService, entityService)
   }

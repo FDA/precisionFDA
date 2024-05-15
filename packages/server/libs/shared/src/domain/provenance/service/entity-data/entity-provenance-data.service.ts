@@ -26,7 +26,7 @@ export abstract class EntityProvenanceDataService<T extends EntityWithProvenance
     return {
       type: this.type,
       title: this.getTitle(source),
-      url: await this.entityService.getEntityLink(source),
+      url: await this.entityService.getEntityUiLink(source),
       identifier: this.getIdentifier(source),
     }
   }

@@ -2,7 +2,7 @@
 #
 # N.B. run from precision-fda/go
 
-VERSION=2.6.1
+VERSION=2.7.0
 COMMITID=`git rev-parse HEAD`
 
 BuildAndPackage() {
