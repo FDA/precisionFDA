@@ -96,6 +96,11 @@ export class Folder extends Node implements ITrackable {
     }
   }
 
+  @Property({ persist: false, serializedName: 'children'})
+  get childrenArray() {
+    return this.children.toArray();
+  }
+
   // PFDA-only folder, which is sometimes referred to as 'local' folder or 'core' folder by Omar
   // are the initial implementation of folder on pFDA that does not have a counterpart on platform.
   // All of its children are stored at the root of the dx project instead of inside the correct

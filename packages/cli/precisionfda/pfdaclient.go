@@ -1223,7 +1223,7 @@ func (c *PFDAClient) Head(arg string, lines int) error {
 		}
 	}
 
-	err = Head(fileURL, lines)
+	err = c.HeadFile(fileURL, lines)
 	if err != nil {
 		return err
 	}
