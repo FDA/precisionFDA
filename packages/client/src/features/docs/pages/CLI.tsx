@@ -1206,7 +1206,7 @@ export const CLI = () => {
         </p>
 
         <h3>Usage</h3>
-        <StyledCode>{' ./pfda get-space-id [...FLAG] '}</StyledCode>
+        <StyledCode>{' ./pfda get-scope [...FLAG] '}</StyledCode>
 
         <h3>Available Flags</h3>
         <p>
@@ -1219,14 +1219,14 @@ export const CLI = () => {
 
         <h3>Example</h3>
         <p>
-          The following example demonstrates use case for the <StyledCode>get-space-id</StyledCode> command:
+          The following example demonstrates use case for the <StyledCode>get-scope</StyledCode> command:
         </p>
         <ExampleBlock>
           <div className="description">
-            # Get the Space ID of the current workstation's context
+            # Get scope of the current workstation's context
           </div>
           <code className="command">
-            ./pfda get-space-id
+            ./pfda get-scope
           </code>
         </ExampleBlock>
 

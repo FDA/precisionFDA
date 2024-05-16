@@ -149,13 +149,15 @@ func (c *PFDAClient) DownloadDirectly(downloadUrl string, outputFilePath string,
 	return nil
 }
 
-func Head(fileURL string, lines int) error {
+func (c *PFDAClient) HeadFile(fileURL string, lines int) error {
 	tmp, err := os.CreateTemp("", "head") // Create temp fake data destination
 	if err != nil {
 		return err
 	}
 
-	resp, err := http.Get(fileURL)
+	req, err := retryablehttp.NewRequest("GET", fileURL, nil)
+	c.setPostHeaders(req)
+	resp, err := c.Client.Do(req)
 	if err != nil {
 		return err
 	}
