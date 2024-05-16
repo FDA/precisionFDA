@@ -10,7 +10,7 @@ on:
       GSRS_BRANCH:
         description: GSRS revision
         type: string
-        default: gsrs_240322
+        default: gsrs_240514
       LT_VERSION:
         description: Version of Launch Template
         type: string
