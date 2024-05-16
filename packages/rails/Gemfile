@@ -77,7 +77,7 @@ gem "kaminari", "~> 1.2"
 gem "local_time"
 
 # Add comments on any model
-gem "acts-as-taggable-on", "~> 9.0", github: "mbleigh/acts-as-taggable-on"
+gem "acts-as-taggable-on", "~> 9.0", github: "mbleigh/acts-as-taggable-on", tag: "v9.0.1"
 gem "acts_as_commentable_with_threading", ">= 2.0.1"
 gem "awesome_nested_set", github: "collectiveidea/awesome_nested_set"
 
