@@ -4,17 +4,17 @@ import { FileRemoveOperation } from '@shared/domain/user-file/ops/file-remove'
 import { FolderRemoveOperation } from '@shared/domain/user-file/ops/folder-remove'
 import { BaseOperation } from '@shared/utils/base-operation'
 import { TypeUtils } from '@shared/utils/type-utils'
-import { UserOpsCtx } from '../../../types'
+import { NOTIFICATION_ACTION, SEVERITY } from '@shared/enums'
+import { getLogger } from '@shared/logger'
+import { UserOpsCtx } from '@shared/types'
 import { Node } from '../node.entity'
+import { getSuccessMessage, loadNodes } from '../user-file.helper'
 import { NodesInput } from '../user-file.input'
 import { FILE_STATE_DX, FILE_STI_TYPE } from '../user-file.types'
-import { NOTIFICATION_ACTION, SEVERITY } from '../../../enums'
-import { getLogger } from '../../../logger'
-import { getSuccessMessage, loadNodes } from '../user-file.helper'
 
 const rollbackRemovingState = async (em: SqlEntityManager, nodes: Node[]): Promise<void> => {
   getLogger().error(`Rolling back removing state for nodes ${nodes.length}`)
-  nodes.forEach(node => {
+  nodes.forEach((node) => {
     if (node.stiType === FILE_STI_TYPE.FOLDER) {
       node.state = null
     } else {
@@ -41,6 +41,11 @@ class NodesRemoveOperation extends BaseOperation<UserOpsCtx, NodesInput, number>
     try {
       const fileRemoveOp = new FileRemoveOperation(this.ctx)
       const folderRemoveOp = new FolderRemoveOperation(this.ctx)
+
+      // required because of a bug in the orm, where an entity fetched as part of a related collection to a different entity gets inserted back into the database in case it is deleted in very specific situations.
+      // this might get fixed in the future in the ORM and therefore the clear might not be needed anymore
+      // see JIRA PFDA-5169 for reproduction steps
+      em.clear()
 
       for (const node of nodes) {
         if (node.stiType === FILE_STI_TYPE.USERFILE) {
