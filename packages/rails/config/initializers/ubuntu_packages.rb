@@ -68,6 +68,32 @@ PRE_INSTALLED_OS_PACKAGES = {
     wget
     xz-utils
   ),
+
+  UBUNTU_20 => %w(
+    aria2
+    byobu
+    cmake
+    cpanminus
+    curl
+    dstat
+    g++
+    git
+    htop
+    libboost-all-dev
+    libcurl4-openssl-dev
+    libncurses5-dev
+    make
+    perl
+    pypy
+    python2-dev
+    python2-pip
+    python3-dev
+    python3-pip
+    r-base
+    ruby2.7
+    wget
+    xz-utils
+  ),
 }.freeze
 
 UBUNTU_PACKAGES = {
