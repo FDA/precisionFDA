@@ -6,12 +6,12 @@ import { Folder } from '@shared/domain/user-file/folder.entity'
 import { FolderRemoveOperation } from '@shared/domain/user-file/ops/folder-remove'
 import { User } from '@shared/domain/user/user.entity'
 import { getLogger } from '@shared/logger'
+import { fakes } from '@shared/test/mocks'
 import { expect } from 'chai'
 import pino from 'pino'
 import { SPACE_MEMBERSHIP_ROLE } from '../../../src/domain/space-membership/space-membership.enum'
 import { SPACE_STATE, SPACE_TYPE } from '../../../src/domain/space/space.enum'
 import { create, db } from '../../../src/test'
-import { fakes } from '../../../src/test/mocks'
 
 describe('remove folder tests', () => {
   let em: EntityManager<MySqlDriver>
@@ -84,18 +84,14 @@ describe('remove folder tests', () => {
     await op.execute({ id: folder1.id })
     em.clear()
 
-    expect(fakes.client.folderRemoveFake.calledOnce).to.be.true()
+    expect(fakes.client.folderRemoveFake.callCount).to.be.equal(0)
 
     const loadedFolder1 = await em.findOne(Folder, { id: folder1.id })
     expect(loadedFolder1).to.equal(null)
   })
 
   it('test fail remove folder with children', async () => {
-    const folder1 = create.filesHelper.createFolder(
-      em,
-      { user },
-      { name: 'folder1', project: 'test' },
-    )
+    const folder1 = create.filesHelper.createFolder(em, { user }, { name: 'folder1' })
     await em.flush()
     create.filesHelper.create(em, { user }, { name: 'file1', parentFolder: folder1 })
     await em.flush()
@@ -111,7 +107,7 @@ describe('remove folder tests', () => {
       expect.fail('Operation is expected to fail.')
     } catch (error: any) {
       expect(error.message).to.equal(
-        `Cannot remove folder ${folder1.name}` + 'with children. Remove children first.',
+        `Cannot remove folder ${folder1.name} with children. Remove children first.`,
       )
     }
   })

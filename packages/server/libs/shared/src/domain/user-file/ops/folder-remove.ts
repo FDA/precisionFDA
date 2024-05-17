@@ -39,7 +39,7 @@ class FolderRemoveOperation extends BaseOperation<UserOpsCtx, IdInput, number> {
       await folderToRemove.children.init()
       if (folderToRemove.children.length > 0) {
         throw new Error(
-          `Cannot remove folder ${folderToRemove.name}` + ' with children. Remove children first.',
+          `Cannot remove folder ${folderToRemove.name} with children. Remove children first.`,
         )
       }
       const userRepo = tem.getRepository(User)
@@ -52,14 +52,6 @@ class FolderRemoveOperation extends BaseOperation<UserOpsCtx, IdInput, number> {
 
       const op = new RemoveTaggingsOperation({ em: tem, log: this.ctx.log, user: this.ctx.user })
       await op.execute(folderToRemove.id)
-
-      if (folderToRemove.project) {
-        // https folder
-        await platformClient.folderRemove({
-          projectId: folderToRemove.project,
-          folderPath,
-        })
-      }
 
       const folderEvent = await createFolderEvent(
         EVENT_TYPES.FOLDER_DELETED,
