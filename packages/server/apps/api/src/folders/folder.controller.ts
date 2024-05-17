@@ -2,7 +2,6 @@ import { SqlEntityManager } from '@mikro-orm/mysql'
 import {
   Body,
   Controller,
-  Delete,
   HttpCode,
   Inject,
   Logger,
@@ -15,7 +14,6 @@ import {
 import { DEPRECATED_SQL_ENTITY_MANAGER } from '@shared/database/provider/deprecated-sql-entity-manager.provider'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { FolderRecreateOperation } from '@shared/domain/user-file/ops/folder-recreate'
-import { FolderRemoveRecursiveOperation } from '@shared/domain/user-file/ops/folder-remove-recursive'
 import { FolderRenameOperation } from '@shared/domain/user-file/ops/folder-rename'
 import { RenameFolderInput, renameFolderSchema } from '@shared/domain/user-file/user-file.input'
 import { UserOpsCtx } from '@shared/types'
@@ -47,17 +45,6 @@ export class FolderController {
       newName: body.newName,
       id,
     })
-  }
-
-  @Delete('/:id')
-  async removeFolder(@Param('id', ParseIntPipe) id: number) {
-    const opsCtx: UserOpsCtx = {
-      log: this.log,
-      user: this.user,
-      em: this.em,
-    }
-
-    return await new FolderRemoveRecursiveOperation(opsCtx).execute({ id })
   }
 
   @HttpCode(204)

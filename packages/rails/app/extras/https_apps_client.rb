@@ -670,16 +670,6 @@ class HttpsAppsClient # rubocop:disable Metrics/ClassLength
     )
   end
 
-  # Delete a folder.
-  # @param folder_id [Integer] Folder ID.
-  def folder_remove(folder_id)
-    request(
-      "/folders/#{folder_id}",
-      {},
-      Net::HTTP::Delete::METHOD,
-    )
-  end
-
   # Send notification email
   def email_send(email_type_id, opts)
     request(
