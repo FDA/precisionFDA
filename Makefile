@@ -4,20 +4,8 @@
 repo-env-files-init:
 	echo Setting up .env files
 	cp -n docker/.env.example docker/.env || echo Skipping docker .env
-	cp -n server/.env.example server/.env || echo Skipping server .env
-	cp -n .env.example .env || echo Skipping root directory .env
-
-repo-db-config-init:
-	echo Setting up db config
-	cp config/database.sample.yml config/database.yml
-
-repo-githooks-init:
-	chmod +x utils/githooks/*
-	ln -f utils/githooks/* .git/hooks
-
-repo-init: repo-db-config-init repo-env-files-init repo-githooks-init
-	echo Repo setup complete
-
+	cp -n packages/server/.env.example packages/server/.env || echo Skipping server .env
+	cp -n packages/rails/.env.example packages/rails/.env || echo Skipping root directory .env
 
 # ┌─────────────────┐
 # │                 │
@@ -26,14 +14,14 @@ repo-init: repo-db-config-init repo-env-files-init repo-githooks-init
 # └─────────────────┘
 
 check-missing-env-variables:
-	./utils/scripts/check-missing-env-variables.sh .env .env.example
+	./utils/scripts/check-missing-env-variables.sh packages/rails/.env packages/rails/.env.example
 	./utils/scripts/check-missing-env-variables.sh docker/.env docker/.env.example
-	./utils/scripts/check-missing-env-variables.sh server/.env server/.env.example
+	./utils/scripts/check-missing-env-variables.sh packages/server/.env packages/server/.env.example
 
 check-unpublished-env-variables:
-	./utils/scripts/check-unpublished-env-variables.sh .env .env.example
+	./utils/scripts/check-unpublished-env-variables.sh packages/rails/.env packages/rails/.env.example
 	./utils/scripts/check-unpublished-env-variables.sh docker/.env docker/.env.example
-	./utils/scripts/check-unpublished-env-variables.sh server/.env server/.env.example
+	./utils/scripts/check-unpublished-env-variables.sh packages/server/.env packages/server/.env.example
 
 
 # ┌───────────────────────┐

@@ -59,34 +59,17 @@ export PFDA_ROLE=qa
 
 ## Setup before running
 
-Run
+Environment files are needed. You can either copy `.env.example` files to `.env` in directories `./docker`, `./packages/rails` and `./packages./server` to tweak the values or to keep the defaults, simply run
 
 ```bash
-make repo-init
+make repo-env-files-init
 ```
-
-to do most of the required setup at once
-
-This does multiple things
-
-* Sets up .env files in `.`, `./docker`, `./server` directories
-* Creates default database config in `config/database.sample.yml` 
-* Creates custom pre-push githooks that validate `.env.example` files
 
 What remains to be done, is ask a colleague for secrets to fill missing `.env` variables. Migration to [AWS Secrets Manager](https://docs.aws.amazon.com/secretsmanager/latest/userguide/getting-started.html) is in progress
 
 
 To get summary of all [Makefile](../Makefile) commands, take a look at [this doc](./SUMMARY_OF_MAKEFILE_COMMANDS.md)
 
-## Configuration differences for arm64v8.dev
-
-
-If you're running `make run` with `arm64v8.dev` configuration (i.e. `arm64v8` architecture and `PFDA_ROLE=dev`), it uses different key paths for `nodejs-api`. Edit `server/.env` with following values
-
-```
-NODE_PATH_CERT=/keys/cert.pem
-NODE_PATH_KEY_CERT=/keys/key.pem
-```
 
 ### Githooks - use cases and troubleshooting
 
