@@ -24,7 +24,7 @@ default[:deploy_user_group] = deploy_user
 default[:ssh_key_path] = "/home/#{deploy_user}/.ssh/id_rsa"
 default[:ssh_wrapper_path] = "/tmp/wrap-ssh4git.sh"
 
-default[:rails_app_dir] = "/srv/www/precision_fda/current"
+default[:app_root_dir] = "/srv/www/precision_fda/current"
 default[:mysql_rds_sslca_path] = "/etc/ssl/certs/global-bundle.pem"
 default[:nginx][:log_dir] = "/var/log/nginx"
 

@@ -1,10 +1,11 @@
-app_dir = node[:rails_app_dir]
-ruby_environment_file = "/etc/systemd/system/pfda-environment.conf"
+app_dir = node[:app_root_dir]
+rails_dir = File.join(app_dir, 'packages', 'rails')
+ruby_environment_file = '/etc/systemd/system/pfda-environment.conf'
 
 # Run databaes migration
 
-execute "/usr/local/bin/bundle exec rake db:migrate" do
-  cwd  app_dir
+execute '/usr/local/bin/bundle exec rake db:migrate' do
+  cwd  rails_dir
   user node[:deploy_user]
   # environment lazy { ENV.to_hash }
   # To recover from ActiveRecord::ConcurrentMigrationError when
@@ -15,65 +16,65 @@ end
 
 # Setting up puma service
 
-systemd_unit "pfda-puma.service" do
+systemd_unit 'pfda-puma.service' do
   content(lazy do
             {
               Unit: {
-                Description: "pFDA puma server",
+                Description: 'pFDA puma server'
               },
               Service: {
                 EnvironmentFile: ruby_environment_file,
-                ExecStart: "/usr/local/bin/bundle exec puma " \
+                ExecStart: '/usr/local/bin/bundle exec puma ' \
                            "-b 'ssl://127.0.0.1:3000?key=/etc/nginx/ssl/pfda.key&cert=/etc/nginx/ssl/pfda.crt' " \
                            "-e #{ENV['RAILS_ENV']}",
                 ExecStop: "ps -ef | grep puma | grep -v grep | awk '{print $2}' | xargs /bin/kill -TERM",
-                Restart: "always",
+                Restart: 'always',
                 # User: node[:deploy_user],
-                WorkingDirectory: app_dir,
+                WorkingDirectory: rails_dir
               },
               Install: {
-                WantedBy: "multi-user.target",
-              },
+                WantedBy: 'multi-user.target'
+              }
             }
           end)
   # user node[:deploy_user]
-  action %i(create)
+  action %i[create]
 end
 
-service "pfda-puma" do
+service 'pfda-puma' do
   # user node[:deploy_user]
-  action %i(enable start)
+  action %i[enable start]
 end
 
 # Setting up sidekiq service
 
-systemd_unit "pfda-sidekiq.service" do
+systemd_unit 'pfda-sidekiq.service' do
   content(lazy do
             {
               Unit: {
-                Description: "pFDA sidekiq service",
+                Description: 'pFDA sidekiq service'
               },
               Service: {
                 EnvironmentFile: ruby_environment_file,
                 ExecStartPre: "/bin/bash -c 'rm /srv/www/precision_fda/current/log/sidekiq.log'",
-                ExecStart: "/usr/local/bin/bundle exec sidekiq -e #{ENV['RAILS_ENV']} -C #{app_dir}/config/sidekiq.yml",
+                ExecStart: "/usr/local/bin/bundle exec sidekiq -e #{ENV['RAILS_ENV']} -C #{rails_dir}/config/sidekiq.yml",
                 ExecStop: "ps -ef | grep sidekiq | grep -v grep | awk '{print $2}' | xargs kill -TERM",
-                Restart: "always",
-                StandardOutput: "file:/srv/www/precision_fda/current/log/sidekiq.log",
-                StandardError: "file:/srv/www/precision_fda/current/log/sidekiq.log",
-                SyslogIdentifier: "sidekiq",
-                WorkingDirectory: app_dir,
+                Restart: 'always',
+                StandardOutput: 'file:/srv/www/precision_fda/current/log/sidekiq.log',
+                StandardError: 'file:/srv/www/precision_fda/current/log/sidekiq.log',
+                SyslogIdentifier: 'sidekiq',
+                WorkingDirectory: rails_dir
                 # User: node[:deploy_user]
               },
               Install: {
-                WantedBy: "multi-user.target",
-              },
+                WantedBy: 'multi-user.target'
+              }
             }
           end)
-  action %i(create)
+  action %i[create]
 end
 
-service "pfda-sidekiq" do
+service 'pfda-sidekiq' do
   # user node[:deploy_user]
-  action %i(enable start)
+  action %i[enable start]
 end
