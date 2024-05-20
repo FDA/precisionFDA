@@ -1,37 +1,37 @@
 services:
   base_ruby:
     platform: linux/x86_64
-    env_file: ../.env
+    env_file: ../packages/rails/.env
     build:
-      context: ../
-      dockerfile: docker/images/isolation.Dockerfile
+      context: ../packages/rails
+      dockerfile: ./docker/images/isolation.Dockerfile
       args:
         - RUBY_IMAGE_TAG=3.2.2
         - COFFEE_MAJOR_NODE_VERSION=19
     environment:
       - BUNDLER_VERSION=2.4.10
-      - RAILS_LOG_TO_STDOUT=1
       - LOG_REQUESTS=1
       - NO_FIPS=1
       - REDIS_WORKER_URL=redis://redis:6379/0
   base_nodejs:
     build:
-      context: ../
-      dockerfile: ./server/docker/images/node.isolated-qa.Dockerfile
+      context: ../packages/server
+      dockerfile: ./docker/images/node.isolated-qa.Dockerfile
       args:
-        - NODEJS_IMAGE_TAG=20.9.0-slim
+        - NODEJS_IMAGE_TAG=20.12.2-slim
     environment:
       - NODEJS_DB_POLLING_INTERVAL=${NODEJS_DB_POLLING_INTERVAL:-5}
       - NODE_REDIS_URL=redis://redis:6379/0
-      
 
   web:
     extends:
       service: base_ruby
     volumes:
       - type: bind
-        source: ../
+        source: ../packages/rails
         target: /precision-fda
+      - ../cert.pem:/cert.pem
+      - ../key.pem:/key.pem
     working_dir: /precision-fda
     ports:
       - 3000:3000
@@ -39,13 +39,13 @@ services:
 
   frontend:
     build:
-      context: ../client
+      context: ../packages/client
       dockerfile: ./docker/images/isolation.Dockerfile
       args:
-        - FRONTEND_IMAGE_TAG=20.9.0-slim
+        - FRONTEND_IMAGE_TAG=20.12.2-slim
     volumes:
       - type: bind
-        source: ../app/assets/packs
+        source: ../packages/rails/app/assets/packs
         target: /precision-fda/dist
     working_dir: /precision-fda
     command: pnpm run watch:docker
@@ -57,6 +57,9 @@ services:
     extends:
       service: base_nodejs
     command: ['make', 'run-dist']
+    volumes:
+      - ../cert.pem:/keys/cert.pem
+      - ../key.pem:/keys/key.pem
     ports:
       - 3001:3001
   nodejs-worker:
@@ -68,9 +71,9 @@ services:
       service: base_ruby
     volumes:
       - type: bind
-        source: ../
+        source: ../packages/rails
         target: /precision-fda
-    entrypoint: docker/entrypoint/sidekiq.entrypoint.sh
+    entrypoint: ./docker/entrypoint/sidekiq.entrypoint.sh
   db:
     image: mysql:8.0
     environment:
