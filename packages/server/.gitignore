@@ -1,0 +1,15 @@
+dist/
+# mikro-orm metadata provider helper
+temp/
+/test-emails/*
+!/test-emails/.gitkeep
+/.pnpm-store
+
+*.tsbuildinfo
+node_modules/
+package-lock.json
+
+lerna-debug.log
+
+cert.pem
+key.pem

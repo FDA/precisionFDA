@@ -1,12 +1,4 @@
-# This is a functional eqivalent of the following file from the opscode rep:
-#   cookbooks/dnanexus/recipes/qualys_agent.rb
-#
-# Prerequisites
-#
-# 1.  Copy qualys-keys.csv to s3://dnanexus-assets/qualys/keys/
-# 2.  Copy QualysCloudAgent.deb to s3://dnanexus-assets/qualys/{version}/
-
-bash "copy_qualys_cloud_agent" do
+bash 'copy_qualys_cloud_agent' do
   code(lazy do
     <<~BASH
       export AWS_ACCESS_KEY_ID=#{node.run_state['ssm_params']['qualys']['aws_access_key_id']}
@@ -18,13 +10,19 @@ bash "copy_qualys_cloud_agent" do
       aws s3 cp s3://dnanexus-assets/qualys/${QUALYS_VERSION}/QualysCloudAgent.deb ${DESTINATION_DIR}
     BASH
   end)
-  creates(lazy { "#{Chef::Config[:file_cache_path]}/qualys/#{node.run_state.dig('ssm_params', 'qualys', 'version') || node.default[:qualys][:version]}/QualysCloudAgent.deb" })
-  only_if { node.run_state["ssm_params"]["qualys"] }
+  creates(lazy do
+            "#{Chef::Config[:file_cache_path]}/qualys/#{node.run_state.dig('ssm_params', 'qualys', 'version') ||
+            node.default[:qualys][:version]}/QualysCloudAgent.deb"
+          end)
+  only_if { node.run_state['ssm_params']['qualys'] }
 end
 
-dpkg_package "install_qualys_cloud_agent" do
-  source(lazy { "#{Chef::Config[:file_cache_path]}/qualys/#{node.run_state.dig('ssm_params', 'qualys', 'version') || node.default[:qualys][:version]}/QualysCloudAgent.deb" })
-  options "--force-downgrade"
+dpkg_package 'install_qualys_cloud_agent' do
+  source(lazy do
+           "#{Chef::Config[:file_cache_path]}/qualys/#{node.run_state.dig('ssm_params', 'qualys', 'version') ||
+            node.default[:qualys][:version]}/QualysCloudAgent.deb"
+         end)
+  options '--force-downgrade'
   action :install
-  only_if { node.run_state["ssm_params"]["qualys"] }
+  only_if { node.run_state['ssm_params']['qualys'] }
 end

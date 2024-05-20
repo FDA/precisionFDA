@@ -10,7 +10,7 @@ on:
       GSRS_BRANCH:
         description: GSRS revision
         type: string
-        default: gsrs_240322
+        default: gsrs_240514
       CHEF_RUNLIST:
         description: Chef Runlist
         type: string
@@ -23,6 +23,10 @@ on:
         description: Version of Launch Template
         type: string
         default: $Default
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
 
 permissions:
   id-token: write
@@ -68,8 +72,7 @@ jobs:
           ENV_TG: ${{ vars.ENV_TG }}
           ENV_LT_NAME: ${{ vars.ENV_LT_NAME }}
           ENV_LT_VERSION: ${{ inputs.LT_VERSION }}
-          ENV_MIN_SIZE: ${{ vars.ENV_MIN_SIZE || 1 }}
-          ENV_MAX_SIZE: ${{ vars.ENV_MAX_SIZE || 1 }}
-          ENV_DESIRED_CAP: ${{ vars.ENV_DESIRED_CAP || 1 }}
-          ASG_DESTROY_DELAY: 30
+          ENV_MIN_SIZE: ${{ vars.ENV_MIN_SIZE }}
+          ENV_MAX_SIZE: ${{ vars.ENV_MAX_SIZE }}
+          ENV_DESIRED_CAP: ${{ vars.ENV_DESIRED_CAP }}
         run: ./infra/deploy.sh

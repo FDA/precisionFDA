@@ -22,8 +22,8 @@ services:
       file: ./base.services.yml
       service: web
     build:
-      context: ../
-      dockerfile: docker/images/isolation.arm64v8.Dockerfile
+      context: ../packages/rails
+      dockerfile: ./docker/images/isolation.arm64v8.Dockerfile
     environment:
       - ARM64V8_DEVELOPMENT_PATCH=1
       - RAILS_ENV=development
@@ -39,7 +39,7 @@ services:
       file: ./base.services.yml
       service: frontend
     build:
-      context: ../client
+      context: ../packages/client
       dockerfile: ./docker/images/isolation.arm64v8.dev.Dockerfile
     environment:
       - SKIP_FRONTEND_DEPS_SETUP=${SKIP_FRONTEND_DEPS_SETUP}
@@ -48,7 +48,7 @@ services:
         source: webpack-cache-client
         target: /precision-fda/.build_cache/
       - type: bind
-        source: ../client/src
+        source: ../packages/client/src
         target: /precision-fda/src
       - yarn-network-cache-client:${YARNV1_CACHE_DIR}
       - yarn-deps-cache-client:/precision-fda/node_modules
@@ -57,8 +57,8 @@ services:
       file: ./base.services.yml
       service: nodejs-api
     build:
-      context: ../
-      dockerfile: ./server/docker/images/node.isolated-dev.Dockerfile
+      context: ../packages/server
+      dockerfile: ./docker/images/node.isolated-dev.Dockerfile
     command: ['make', 'watch']
     depends_on:
       - db
@@ -71,7 +71,7 @@ services:
       - SKIP_NODEJS_DB_WAITING=${SKIP_NODEJS_DB_WAITING}
     volumes:
       - type: bind
-        source: ../server
+        source: ../packages/server
         target: /app
       - yarn-network-cache-nodejs-api:${YARNV1_CACHE_DIR}
       - yarn-deps-cache-nodejs-api:/app/node_modules
@@ -84,8 +84,8 @@ services:
       file: ./base.services.yml
       service: nodejs-worker
     build:
-      context: ../
-      dockerfile: ./server/docker/images/node.isolated-dev.Dockerfile
+      context: ../packages/server
+      dockerfile: ./docker/images/node.isolated-dev.Dockerfile
     command: ['make', 'watch-worker']
     environment:
       - NODE_ENV=development
@@ -95,7 +95,7 @@ services:
       - SKIP_NODEJS_DB_WAITING=${SKIP_NODEJS_DB_WAITING}
     volumes:
       - type: bind
-        source: ../server
+        source: ../packages/server
         target: /app
       - yarn-network-cache-nodejs-worker:${YARNV1_CACHE_DIR}
       - yarn-deps-cache-nodejs-worker:/app/node_modules
@@ -117,8 +117,8 @@ services:
       file: ./base.services.yml
       service: sidekiq
     build:
-      context: ../
-      dockerfile: docker/images/isolation.arm64v8.Dockerfile
+      context: ../packages/rails
+      dockerfile: ./docker/images/isolation.arm64v8.Dockerfile
     environment:
       - ARM64V8_DEVELOPMENT_PATCH=1
       - RAILS_ENV=development
