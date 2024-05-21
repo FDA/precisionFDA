@@ -1,11 +1,7 @@
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { userContextStorage } from '@shared/domain/user-context/storage/user-context.storage'
 
-export function ProcessInUserContext(
-  target: unknown,
-  propertyName: string | symbol,
-  descriptor: PropertyDescriptor,
-) {
+export function ProcessInUserContext(descriptor: PropertyDescriptor) {
   const originalMethod = descriptor.value
 
   descriptor.value = function (job: { data: { user?: UserContext } }, ...args: unknown[]) {
