@@ -51,7 +51,7 @@ end
 
 execute 'Server install deps' do
   cwd app_dir
-  command 'pnpm i --frozen-lockfile --filter=\!pfda-frontend'
+  command 'pnpm install --frozen-lockfile --filter=\!pfda-frontend --production=false'
 
   user node[:deploy_user]
   environment(lazy { ENV.to_hash })
