@@ -7,6 +7,7 @@ type BaseInput = {
   content?: string
   attachments?: {
     files?: number[]
+    folders?: number[]
     assets?: number[]
     apps?: number[]
     jobs?: number[]
@@ -23,6 +24,7 @@ type PublishDiscussionInput = {
   scope: SCOPE
   toPublish: {
     files?: number[]
+    folders?: number[]
     assets?: number[]
     apps?: number[]
     jobs?: number[]
@@ -58,7 +60,7 @@ type EditCommentInput = {
 type DiscussionAttachment = {
   id: number
   uid: string
-  type: 'App' | 'UserFile' | 'Asset' | 'Job' | 'Comparison'
+  type: 'App' | 'UserFile' | 'Folder' | 'Asset' | 'Job' | 'Comparison'
   name: string
   link: string
 }

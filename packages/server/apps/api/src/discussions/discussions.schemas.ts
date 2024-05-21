@@ -9,6 +9,7 @@ export const discussionsPostRequestSchema = z.object({
   content: z.string().min(1).max(100000),
   attachments: z.object({
     files: z.array(z.number()),
+    folders: z.array(z.number()),
     assets: z.array(z.number()),
     apps: z.array(z.number()),
     jobs: z.array(z.number()),
@@ -26,6 +27,7 @@ export const discussionsPublishRequestSchema = z.object({
   scope: z.enum(['public', 'private']).or(z.string().refine(value => value.startsWith('space-'))),
   toPublish: z.object({
     files: z.array(z.number()),
+    folders: z.array(z.number()),
     assets: z.array(z.number()),
     apps: z.array(z.number()),
     jobs: z.array(z.number()),
