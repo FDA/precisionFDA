@@ -1,6 +1,6 @@
 import { EmailTemplateInput } from '@shared/domain/email/email.config'
-import { UserDataConsistencyReportOutput } from '../../../user/ops/user-data-consistency-report'
-import { footer, header } from './common'
+import { header, footer } from './common'
+import { UserDataConsistencyReportOutput } from '@shared/domain/user/user-data-consistency-report.service'
 
 export type UserDataConsistencyReportTemplateInput = EmailTemplateInput & {
   content: UserDataConsistencyReportOutput

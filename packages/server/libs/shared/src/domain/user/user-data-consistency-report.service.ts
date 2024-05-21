@@ -1,23 +1,22 @@
-/* eslint-disable @typescript-eslint/no-floating-promises */
 import { wrap } from '@mikro-orm/core'
 import { SqlEntityManager } from '@mikro-orm/mysql'
-import { config } from '@shared/config'
 import { EmailSendOperation } from '@shared/domain/email/ops/email-send'
 import { Folder } from '@shared/domain/user-file/folder.entity'
 import { Node } from '@shared/domain/user-file/node.entity'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { PlatformClient } from '@shared/platform-client'
-import { TASK_TYPE, Task } from '@shared/queue/task.input'
-import { UserCtx, UserOpsCtx } from '@shared/types'
-import { BaseOperation } from '@shared/utils/base-operation'
-import { Job } from 'bull'
-import { addToFileSyncQueueEnsureUnique, createSendEmailTask } from '../../../queue'
-import { EMAIL_TYPES, EmailSendInput } from '../../email/email.config'
-import { userDataConsistencyReportTemplate } from '../../email/templates/mjml/user-data-consistency-report.template'
-import { SPACE_MEMBERSHIP_SIDE } from '../../space-membership/space-membership.enum'
-import { SPACE_TYPE } from '../../space/space.enum'
-import { findUnclosedFilesOrAssets, getNodePath } from '../../user-file/user-file.helper'
+import { UserCtx } from '@shared/types'
+import { NotFoundError } from '@shared/errors'
+import { Injectable, Logger } from '@nestjs/common'
+import { ServiceLogger } from '@shared/logger/decorator/service-logger'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { EmailQueueJobProducer } from '@shared/domain/email/producer/email-queue-job.producer'
+import { findUnclosedFilesOrAssets, getNodePath } from '@shared/domain/user-file/user-file.helper'
+import { SPACE_TYPE } from '@shared/domain/space/space.enum'
+import { SPACE_MEMBERSHIP_SIDE } from '@shared/domain/space-membership/space-membership.enum'
+import { userDataConsistencyReportTemplate } from '@shared/domain/email/templates/mjml/user-data-consistency-report.template'
+import { EMAIL_TYPES, EmailSendInput } from '@shared/domain/email/email.config'
 
 export type UserDataConsistencyReportOutput = {
   user?: {
@@ -46,51 +45,31 @@ export type UserDataConsistencyReportOutput = {
 // - Check if user has any folders that has both parent_folder_id and scoped_parent_folder_id
 // - Check if user has any local files and folders (outside of platform folders)
 // - Check the billTo of any Spaces to which the user is a lead
-export class UserDataConsistencyReportOperation extends BaseOperation<
-  UserOpsCtx,
-  never,
-  UserDataConsistencyReportOutput
-> {
-  static getTaskType(): TASK_TYPE.USER_DATA_CONSISTENCY_REPORT {
-    return TASK_TYPE.USER_DATA_CONSISTENCY_REPORT
-  }
+@Injectable()
+export class UserDataConsistencyReportService {
+  @ServiceLogger()
+  private readonly log: Logger
 
-  static getBullJobId(dxuser: string): string {
-    return `${this.getTaskType()}.${dxuser}`
-  }
+  constructor(
+    private readonly em: SqlEntityManager,
+    private readonly user: UserContext,
+    private readonly emailsJobProducer: EmailQueueJobProducer,
+  ) {}
 
-  static doesUserNeedFullCheckup(user: User): boolean {
-    const lastCheckupTime = user.lastDataCheckup ? user.lastDataCheckup.getTime() : 0
-    const now = new Date().getTime()
-    // N.B. getTime return milliseconds, config settings are in seconds
-    return now - lastCheckupTime > config.workerJobs.userDataConsistencyReport.repeatSeconds * 1000
-  }
-
-  static async enqueue(userCtx: UserCtx): Promise<Job<Task>> {
-    const queueData = {
-      type: UserDataConsistencyReportOperation.getTaskType(),
-      user: userCtx,
-    }
-    const jobId = UserDataConsistencyReportOperation.getBullJobId(userCtx.dxuser)
-    return await addToFileSyncQueueEnsureUnique(queueData, jobId)
-  }
-
-  async run(): Promise<any> {
-    const userCtx = this.ctx.user
-    const log = this.ctx.log
-    const em: SqlEntityManager = this.ctx.em
+  async createReport(): Promise<UserDataConsistencyReportOutput> {
+    const userCtx = this.user
+    const log = this.log
 
     const output: UserDataConsistencyReportOutput = {}
-
     log.verbose(
       {
         id: userCtx.id,
         dxuser: userCtx.dxuser,
       },
-      'UserDataConsistencyReportOperation: Starting',
+      'UserDataConsistencyReportService: Starting createReport()',
     )
 
-    const userRepo = em.getRepository(User)
+    const userRepo = this.em.getRepository(User)
     const user = await userRepo.findDxuser(userCtx.dxuser)
     if (!user) {
       log.error(
@@ -101,7 +80,7 @@ export class UserDataConsistencyReportOperation extends BaseOperation<
         'UserDataConsistencyReportOperation: Error user not found',
       )
 
-      return { error: `User ${userCtx.id} (${userCtx.dxuser}) not found` }
+      throw new NotFoundError(`User ${userCtx.id} (${userCtx.dxuser}) not found`)
     }
 
     try {
@@ -111,7 +90,6 @@ export class UserDataConsistencyReportOperation extends BaseOperation<
       }
 
       // Check if user's email on pFDA matches that on platform
-      //
       const client = new PlatformClient({ accessToken: userCtx.accessToken }, log)
       const userDescribe = await client.userDescribe({
         dxid: user.dxid,
@@ -136,7 +114,6 @@ export class UserDataConsistencyReportOperation extends BaseOperation<
       }
 
       // Check user's private projects' billTo
-      //
       const privateProjects: any = {}
       const generateProjectInfo = async (projectDxid: string | undefined) => {
         if (!projectDxid) {
@@ -171,7 +148,6 @@ export class UserDataConsistencyReportOperation extends BaseOperation<
       output.privateProjectsCount = privateProjects.length
 
       // Check if users have any unclosed files or assets remaining
-      //
       const now = new Date()
       const fileInfoMapping = (f: any): any => {
         return {
@@ -183,20 +159,19 @@ export class UserDataConsistencyReportOperation extends BaseOperation<
           elapsedMillisSinceCreation: now.getTime() - f.createdAt.getTime(),
         }
       }
-      const unclosedFiles = await findUnclosedFilesOrAssets(em, user.id)
+      const unclosedFiles = await findUnclosedFilesOrAssets(this.em, user.id)
       output.unclosedFiles = unclosedFiles.map(fileInfoMapping)
       output.unclosedFilesCount = unclosedFiles.length
 
-      const userFilesRepo = em.getRepository(UserFile)
-      const folderRepo = em.getRepository(Folder)
+      const userFilesRepo = this.em.getRepository(UserFile)
+      const folderRepo = this.em.getRepository(Folder)
 
       // Check if user has any folders that has both parent_folder_id and scoped_parent_folder_id
-      //
-      const userNodes = await em.getRepository(Node).find({ user: user.id })
+      const userNodes = await this.em.getRepository(Node).find({ user: user.id })
       let filesAndFoldersErrorsCount = 0
       const filesAndFoldersStatus: any[] = []
       for (const node of userNodes) {
-        let errors: string[] = []
+        const errors: string[] = []
 
         const hasInvalidFolderState = node.parentFolder?.id && node.scopedParentFolder?.id
         if (hasInvalidFolderState) {
@@ -208,7 +183,7 @@ export class UserDataConsistencyReportOperation extends BaseOperation<
           const parentKey = node.scope.startsWith('space')
             ? 'scopedParentFolderId'
             : 'parentFolderId'
-          const nodePath = await getNodePath(em, node)
+          const nodePath = await getNodePath(this.em, node)
           const httpsFiles = await client.filesList({
             project: node.project,
             folder: nodePath,
@@ -316,8 +291,8 @@ export class UserDataConsistencyReportOperation extends BaseOperation<
       output.spacesWithErrorsCount = spacesInfo.length
 
       // Update lastDataCheckup for user
-      const updated = wrap(user).assign({ lastDataCheckup: new Date() }, { em })
-      em.persist(updated)
+      const updated = wrap(user).assign({ lastDataCheckup: new Date() }, { em: this.em })
+      this.em.persist(updated)
 
       await this.sendReportEmail(output)
 
@@ -337,7 +312,7 @@ export class UserDataConsistencyReportOperation extends BaseOperation<
   }
 
   private async sendReportEmail(output: UserDataConsistencyReportOutput): Promise<void> {
-    const adminUser = await this.ctx.em.getRepository(User).findAdminUser()
+    const adminUser = await this.em.getRepository(User).findAdminUser()
     const body = userDataConsistencyReportTemplate({
       receiver: adminUser,
       content: output,
@@ -345,17 +320,18 @@ export class UserDataConsistencyReportOperation extends BaseOperation<
     const email: EmailSendInput = {
       emailType: EMAIL_TYPES.userDataConsistencyReport,
       to: adminUser.email,
-      subject: `User Data Consistency Report for ${this.ctx.user.dxuser}`,
+      subject: `User Data Consistency Report for ${this.user.dxuser}`,
       body,
     }
 
     const jobId = EmailSendOperation.getBullJobId(EMAIL_TYPES.userDataConsistencyReport)
-    this.ctx.log.verbose('UserDataConsistencyReportOperation: Sending report email to admin')
+    this.log.verbose('UserDataConsistencyReportService: Sending report email to admin')
     const tempUserCtx: UserCtx = {
       id: adminUser.id,
       dxuser: adminUser.dxuser,
       accessToken: 'notUsed',
     }
-    await createSendEmailTask(email, tempUserCtx, jobId)
+
+    await this.emailsJobProducer.createSendEmailTask(email, tempUserCtx, jobId)
   }
 }

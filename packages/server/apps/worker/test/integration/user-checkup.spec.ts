@@ -1,4 +1,3 @@
-/* eslint-disable no-undefined */
 import type { EntityManager } from '@mikro-orm/mysql'
 import { config } from '@shared/config'
 import { database } from '@shared/database'
@@ -13,6 +12,7 @@ import { JOB_STATE } from '@shared/domain/job/job.enum'
 import type { UserCtx } from '@shared/types'
 import { FILE_STATE_DX, PARENT_TYPE } from '@shared/domain/user-file/user-file.types'
 import { fakes as queueFakes, mocksReset as queueMocksReset } from '../utils/mocks'
+import { doesUserNeedFullCheckup } from '@shared/domain/user/ops/user-checkup'
 
 const createUserCheckupTask = async (user: UserCtx) => {
   const defaultTestQueue = getMainQueue()
@@ -25,6 +25,7 @@ const createUserCheckupTask = async (user: UserCtx) => {
 describe('TASK: user-checkup', () => {
   let em: EntityManager
   let user: User
+  let user2: User
   let userContext: UserCtx
   let regularApp: App
   let httpsApp: App
@@ -34,6 +35,7 @@ describe('TASK: user-checkup', () => {
     em = database.orm().em.fork() as EntityManager
     em.clear()
     user = create.userHelper.create(em)
+    user2 = create.userHelper.create(em, { email: generate.random.email() })
     create.userHelper.createAdmin(em)
     regularApp = create.appHelper.createRegular(em, { user })
     httpsApp = create.appHelper.createHTTPS(em, { user })
@@ -265,5 +267,25 @@ describe('TASK: user-checkup', () => {
 
     await createUserCheckupTask(userContext)
     expect(queueFakes.addToQueueStub.callCount).to.equal(1)
+  })
+
+  it('doesUserNeedFullCheckup returns true if it has not been run before', async () => {
+    user2.lastDataCheckup = null
+    await em.flush()
+    expect(doesUserNeedFullCheckup(user2)).to.equal(true)
+  })
+
+  it('doesUserNeedFullCheckup returns true if checkup is overdue', async () => {
+    const repeatMilliseconds = config.workerJobs.userDataConsistencyReport.repeatSeconds * 1000
+    user2.lastDataCheckup = new Date(new Date().getTime() - repeatMilliseconds - 100)
+    await em.flush()
+    expect(doesUserNeedFullCheckup(user2)).to.equal(true)
+  })
+
+  it('doesUserNeedFullCheckup returns true if checkup is before due date', async () => {
+    const repeatMilliseconds = config.workerJobs.userDataConsistencyReport.repeatSeconds * 1000
+    user2.lastDataCheckup = new Date(new Date().getTime() - repeatMilliseconds + 100)
+    await em.flush()
+    expect(doesUserNeedFullCheckup(user2)).to.equal(false)
   })
 })
