@@ -5,7 +5,7 @@ import { ProcessInUserContext } from '@shared/domain/user-context/decorator/proc
 
 export function ProcessWithContext(jobName: string): MethodDecorator {
   return function (target: unknown, propertyKey: string | symbol, descriptor: PropertyDescriptor) {
-    ProcessInUserContext(target)
+    ProcessInUserContext(descriptor)
     CreateRequestContext(() => database.orm())(target, propertyKey, descriptor)
     Process(jobName)(target, propertyKey, descriptor)
   }
