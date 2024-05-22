@@ -53,6 +53,29 @@ import { SelectSpaceScope } from './SelectSpaceScope'
 import { SelectInstanceType } from './SelectInstanceType'
 import { CrossIcon } from '../../../components/icons/PlusIcon'
 
+/**
+ * If params are specified in the URL, decode them and set them as default values. 
+ * Otherwise, use defaults on spec.
+ *
+ * @param hash
+ * @param spec
+ */
+const getDefaults = (hash: string, spec: AppSpec): BatchInput[] => {
+  if (hash.startsWith('#')) {
+    // app params are in the link
+    const base64Encoded = hash.split('#')[1]
+    const decoded = atob(base64Encoded)
+    const inputs = JSON.parse(decoded)
+    return [inputs['0']]
+  }
+  return [
+    {
+      id: 1,
+      fields: Object.fromEntries(spec.input_spec.map(item => [item.name, getDefaultValueFromServer(item.class, item.default)])),
+    } as BatchInput,
+  ]
+}
+
 export const RunJobForm = ({ app, userJobLimit, spec }: { app: IApp; spec: AppSpec; userJobLimit: IUser['job_limit'] }) => {
   const { data: computeInstances, isLoading: computeInstancesLoading } = useUserComputeInstances()
   const { data: selectableContexts } = useSelectableContexts(app.scope, app.entity_type)
@@ -62,24 +85,15 @@ export const RunJobForm = ({ app, userJobLimit, spec }: { app: IApp; spec: AppSp
 
   const { modalComp: licensesModal, setLicensesAndShow } = useAcceptLicensesModal()
 
-  let defaultValues = {
+  const defaultValues = {
     jobName: app.name,
     jobLimit: userJobLimit,
     output_folder_path: '',
     scope: { label: 'Private', value: 'private' },
-    inputs: [
-      {
-        id: 1,
-        fields: Object.fromEntries(spec.input_spec.map(item => [item.name, getDefaultValueFromServer(item.class, item.default)])),
-      } as BatchInput,
-    ],
+    inputs: getDefaults(hash, spec),
   } satisfies RunJobFormType
 
   if (hash.startsWith('#')) {
-    const base64Encoded = hash.split('#')[1]
-    const decoded = atob(base64Encoded)
-    const inputs = JSON.parse(decoded)
-    defaultValues = { ...defaultValues, inputs }
     navigate(pathname, { replace: true })
   }
 
