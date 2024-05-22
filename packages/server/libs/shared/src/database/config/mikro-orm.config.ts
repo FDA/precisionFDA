@@ -22,6 +22,6 @@ export const mikroOrmConfig: MikroOrmModuleSyncOptions = {
   // in case this is ever enabled, make sure to first generate the cache manually via the mikro orm cli (mikro-orm cache:generate)
   // failing to do so often leads to problems while multiple apps boot at the same time and attempt to write the same cache
   metadataCache: { enabled: false },
-  // TODO - enable
+  // https://jira.internal.dnanexus.com/browse/PFDA-5349
   discovery: { checkDuplicateFieldNames: false },
 }
