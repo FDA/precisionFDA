@@ -80,13 +80,10 @@ export class NewsController {
 
   @Get('/years')
   async listYears() {
-    const allYears: { year: number }[] = await this.em
-      .getRepository(NewsItem)
-      .createQueryBuilder()
-      .select('YEAR(created_at) as year', true)
-      .orderBy({ year: 'desc' })
-      .execute()
-
+    //TODO: refactor logic into service
+    const allYears: { year: number }[] = await this.em.execute(
+      'SELECT DISTINCT YEAR(created_at) as year FROM news_items ORDER BY year DESC',
+    )
     return allYears.map((y) => y.year)
   }
 
