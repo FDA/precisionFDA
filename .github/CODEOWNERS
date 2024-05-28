@@ -14,5 +14,5 @@
 /packages/cli @jirkalagan
 
 # Backend (Node & Ruby)
-/packages/server @jirkalagan @pavelkubal @lbobek-dnanexus @bartapes
-/packages/rails @jirkalagan @pavelkubal @lbobek-dnanexus @bartapes
+/packages/server @jirkalagan @pavelkubal @lbobek-dnanexus @bartapes @nganphtgit
+/packages/rails @jirkalagan @pavelkubal @lbobek-dnanexus @bartapes @nganphtgit

@@ -2,11 +2,12 @@ import { format, parseISO } from 'date-fns/esm'
 import { Attachment, AttachmentKey, AttachmentType, FormAttachments, PostAttachments } from './discussions.types'
 
 export const typeAttachmentKey = {
-  'App': 'apps',
+  App: 'apps',
   Asset: 'assets',
   Comparison: 'comparisons',
   Job: 'jobs',
   UserFile: 'files',
+  Folder: 'folders',
   Workflow: 'workflow',
 } as Record<AttachmentType, AttachmentKey>
 
@@ -23,6 +24,7 @@ export function areAttachmentsEmpty(attachments?: FormAttachments): boolean {
 export function pickIdsFromFormAttachments(attachments: FormAttachments): PostAttachments {
   const newAttachments: PostAttachments = {
     files: [],
+    folders: [],
     apps: [],
     comparisons: [],
     assets: [],
@@ -37,6 +39,7 @@ export function pickIdsFromFormAttachments(attachments: FormAttachments): PostAt
 export function groupByAttachmentType(attachments: Attachment[]): FormAttachments {
   const grouped: FormAttachments = {
     files: [],
+    folders: [],
     apps: [],
     comparisons: [],
     assets: [],

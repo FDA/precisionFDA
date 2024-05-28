@@ -7,6 +7,7 @@ import { CogsIcon } from '../../components/icons/Cogs'
 import { CubeIcon } from '../../components/icons/CubeIcon'
 import { FileIcon } from '../../components/icons/FileIcon'
 import { FileZipIcon } from '../../components/icons/FileZipIcon'
+import { FolderIcon } from '../../components/icons/FolderIcon'
 import { TrashIcon } from '../../components/icons/TrashIcon'
 import {
   Attachment,
@@ -69,6 +70,7 @@ export const AttachmentsList = ({
 }) => {
   const {
     files = [],
+    folders = [],
     assets = [],
     apps = [],
     jobs = [],
@@ -77,6 +79,7 @@ export const AttachmentsList = ({
 
   const typeIcon = {
     UserFile: <FileIcon height={14} />,
+    Folder: <FolderIcon height={14} />,
     Asset: <FileZipIcon height={14} />,
     Job: <CogsIcon height={14} />,
     Comparison: <BullsEyeIcon height={14} />,
@@ -129,6 +132,7 @@ export const AttachmentsList = ({
   return (
     <>
       {renderList(files, 'Files')}
+      {renderList(folders, 'Folders')}
       {renderList(assets, 'Assets')}
       {renderList(apps, 'Apps')}
       {renderList(jobs, 'Jobs')}

@@ -5,11 +5,30 @@ import { EmailQueueProcessor } from '../../src/domain/email/processor/email-queu
 import { FileSyncQueueProcessor } from '../../src/domain/user-file/processor/file-sync-queue.processor'
 import { MainQueueProcessor } from '../../src/queues/processor/main-queue.processor'
 import { MaintenanceQueueProcessor } from '../../src/queues/processor/maintenance-queue.processor'
+import { UserDataConsistencyReportService } from '@shared/domain/user/user-data-consistency-report.service'
+import { AdminDataConsistencyReportService } from '@shared/debug/admin-data-consistency-report.service'
+import { DbClusterService } from '@shared/domain/db-cluster/service/db-cluster.service'
+
+const dbClusterService = {} as DbClusterService
+
+const adminDataConsistencyReportService = {
+  createReport: () => {},
+} as AdminDataConsistencyReportService
+
+const userDataConsistencyReportService = {
+  createReport: () => {},
+} as UserDataConsistencyReportService
 
 const processor = {
   MAIN: () => new MainQueueProcessor(),
-  MAINTENANCE: () => new MaintenanceQueueProcessor(database.orm().em.fork()),
-  FILE: () => new FileSyncQueueProcessor(database.orm().em.fork()),
+  MAINTENANCE: () =>
+    new MaintenanceQueueProcessor(
+      database.orm().em.fork(),
+      adminDataConsistencyReportService,
+      dbClusterService,
+    ),
+  FILE: () =>
+    new FileSyncQueueProcessor(database.orm().em.fork(), userDataConsistencyReportService),
   EMAIL: () => new EmailQueueProcessor(),
 }
 
@@ -27,8 +46,7 @@ const jobToProcessorMap: Partial<Record<TASK_TYPE, (job: Job) => Promise<void> |
   [TASK_TYPE.SYNC_DBCLUSTER_STATUS]: (job) => processor.MAIN().syncDbClusterStatus(job),
   [TASK_TYPE.SYNC_SPACES_PERMISSIONS]: (job) => processor.MAINTENANCE().syncSpacesPermissions(job),
   [TASK_TYPE.USER_CHECKUP]: (job) => processor.MAINTENANCE().userCheckup(job),
-  [TASK_TYPE.USER_DATA_CONSISTENCY_REPORT]: (job) =>
-    processor.FILE().reportUserDataConsistency(job),
+  [TASK_TYPE.USER_DATA_CONSISTENCY_REPORT]: () => processor.FILE().reportUserDataConsistency(),
   [TASK_TYPE.CHECK_USER_JOBS]: (job) => processor.MAINTENANCE().checkUserJobs(job),
   [TASK_TYPE.ADMIN_DATA_CONSISTENCY_REPORT]: () =>
     processor.MAINTENANCE().reportAdminDataConsistency(),
