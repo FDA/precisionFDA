@@ -5,9 +5,10 @@ import { FollowUpDecider } from './follow-up-decider'
 import { ResourceModule } from '@shared/domain/resource/resource.module'
 import { DataPortalModule } from '@shared/domain/data-portal/data-portal.module'
 import { ChallengeModule } from '@shared/domain/challenge/challenge.module'
+import { UserModule } from '@shared/domain/user/user.module'
 
 @Module({
-  imports: [ResourceModule, DataPortalModule, ChallengeModule, SpaceReportModule],
+  imports: [ResourceModule, DataPortalModule, ChallengeModule, SpaceReportModule, UserModule],
   providers: [FileSyncQueueProcessor, FollowUpDecider],
   exports: [FollowUpDecider],
 })

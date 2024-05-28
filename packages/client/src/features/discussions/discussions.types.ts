@@ -47,13 +47,12 @@ export interface Discussion {
 }
 
 
-export type AttachmentType = 'UserFile' | 'Asset' | 'Job' | 'App' | 'Comparison'
-export type AttachmentKey = 'files' | 'apps' | 'comparisons' | 'assets' | 'jobs' 
+export type AttachmentType = 'UserFile' | 'Folder' | 'Asset' | 'Job' | 'App' | 'Comparison'
+export type AttachmentKey = 'files' | 'folders' | 'apps' | 'comparisons' | 'assets' | 'jobs'
 export type CardType = 'comment' | 'answer' | 'discussion'
 
 export interface Attachment {
   id: number
-  uid: string
   name: string
   type: AttachmentType
   scope: ServerScope
@@ -70,6 +69,7 @@ export type NoteForm = {
 
 export type PostAttachments = {
   files: number[],
+  folders: number[],
   apps: number[],
   comparisons: number[],
   assets: number[],

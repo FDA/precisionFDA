@@ -3,8 +3,14 @@ import { database } from '@shared/database'
 import { App } from '@shared/domain/app/app.entity'
 import { Comparison } from '@shared/domain/comparison/comparison.entity'
 import { Discussion } from '@shared/domain/discussion/discussion.entity'
+import {
+  PublishDiscussionInput,
+  UpdateDiscussionInput,
+  BaseInput,
+} from '@shared/domain/discussion/discussion.types'
 import { DiscussionService } from '@shared/domain/discussion/services/discussion.service'
 import { PublisherService } from '@shared/domain/discussion/services/publisher.service'
+import { EntityService } from '@shared/domain/entity/entity.service'
 import { Follow } from '@shared/domain/follow/follow.entity'
 import { Job } from '@shared/domain/job/job.entity'
 import { User } from '@shared/domain/user/user.entity'
@@ -12,15 +18,11 @@ import { PlatformClient } from '@shared/platform-client'
 import { EntityFetcherService } from '@shared/domain/entity/entity-fetcher.service'
 import { expect } from 'chai'
 import {
-  BaseInput,
-  PublishDiscussionInput,
-  UpdateDiscussionInput,
-} from '@shared/domain/discussion/discussion.types'
-import {
   SPACE_MEMBERSHIP_ROLE,
   SPACE_MEMBERSHIP_SIDE,
 } from '@shared/domain/space-membership/space-membership.enum'
 import { STATIC_SCOPE } from '@shared/enums'
+import { stub } from 'sinon'
 import { create, db, generate } from '../../../src/test'
 
 describe('DiscussionService tests', () => {
@@ -28,6 +30,8 @@ describe('DiscussionService tests', () => {
   let user: User
   let userCtx: UserCtx
   let discussionService: DiscussionService
+  let entityService: EntityService
+  const getEntityLinkStub = stub()
 
   beforeEach(async () => {
     await db.dropData(database.connection())
@@ -48,13 +52,17 @@ describe('DiscussionService tests', () => {
       async publishJobs(jobs: Job[], user: User, scope: string): Promise<number> {
         return jobs.length
       },
-    } as discussionDomain.PublisherService
+    } as unknown as PublisherService
+    entityService = {
+      getEntityLink: getEntityLinkStub,
+    } as unknown as EntityService
     const fetcher = new EntityFetcherService(em, userCtx)
-    discussionService = new DiscussionService(em, userCtx, mockedPublisherService, fetcher)
+    discussionService = new DiscussionService(em, userCtx, mockedPublisherService, fetcher, entityService)
   })
 
   it('create discussion', async () => {
     const file = create.filesHelper.create(em, { user }, { name: 'file' })
+    const folder = create.filesHelper.createFolder(em, { user }, { name: 'folder-1' })
     const asset = create.filesHelper.create(em, { user }, { name: 'asset-file' })
     const app = create.appHelper.createRegular(em, { user }, { title: 'app-file' })
     const job = create.jobHelper.create(em, { user }, { name: 'job' })
@@ -69,6 +77,7 @@ describe('DiscussionService tests', () => {
       content: 'test-content',
       attachments: {
         files: [file.id],
+        folders: [folder.id],
         assets: [asset.id],
         apps: [app.id],
         jobs: [job.id],
@@ -96,30 +105,33 @@ describe('DiscussionService tests', () => {
     expect(follow.blocked).eq(false)
 
     const attachments = loadedDiscussion.note.getEntity().attachments.getItems()
-    expect(attachments.length).eq(5)
+    expect(attachments.length).eq(6)
     expect(attachments[0].itemId).eq(file.id)
     expect(attachments[0].itemType).eq('Node')
-    expect(attachments[1].itemId).eq(asset.id)
+    expect(attachments[1].itemId).eq(folder.id)
     expect(attachments[1].itemType).eq('Node')
-    expect(attachments[2].itemId).eq(app.id)
-    expect(attachments[2].itemType).eq('App')
-    expect(attachments[3].itemId).eq(job.id)
-    expect(attachments[3].itemType).eq('Job')
-    expect(attachments[4].itemId).eq(comparison.id)
-    expect(attachments[4].itemType).eq('Comparison')
+    expect(attachments[2].itemId).eq(asset.id)
+    expect(attachments[2].itemType).eq('Node')
+    expect(attachments[3].itemId).eq(app.id)
+    expect(attachments[3].itemType).eq('App')
+    expect(attachments[4].itemId).eq(job.id)
+    expect(attachments[4].itemType).eq('Job')
+    expect(attachments[5].itemId).eq(comparison.id)
+    expect(attachments[5].itemType).eq('Comparison')
   })
 
   it('create discussion with non existing user', async () => {
     userCtx = { id: 10, dxuser: 'non-existing', accessToken: 'foo' }
     const publisherService = new PublisherService(em, userCtx, new PlatformClient({ accessToken: 'foo' }))
     const fetcher = new EntityFetcherService(em, userCtx)
-    discussionService = new DiscussionService(em, userCtx, publisherService, fetcher)
+    discussionService = new DiscussionService(em, userCtx, publisherService, fetcher, entityService)
 
     const createDiscussionInput: BaseInput = {
       title: 'test-discussion',
       content: 'test-content',
       attachments: {
         files: [],
+        folders: [],
         assets: [],
         apps: [],
         jobs: [],
@@ -141,6 +153,7 @@ describe('DiscussionService tests', () => {
     const discussion = create.discussionHelper.create(em, { user }, {})
     await em.flush()
     const file = create.filesHelper.create(em, { user }, { name: 'file' })
+    const folder = create.filesHelper.createFolder(em, { user }, { name: 'folder' })
     const asset = create.filesHelper.create(em, { user }, { name: 'asset-file' })
     const app = create.appHelper.createRegular(em, { user }, { title: 'app' })
     const job = create.jobHelper.create(em, { user }, { name: 'job' })
@@ -152,6 +165,10 @@ describe('DiscussionService tests', () => {
 
     create.attachmentHelper.create(em, { note: discussion.note.getEntity() }, {
       itemId: file.id,
+      itemType: 'Node',
+    })
+    create.attachmentHelper.create(em, { note: discussion.note.getEntity() }, {
+      itemId: folder.id,
       itemType: 'Node',
     })
     create.attachmentHelper.create(em, { note: discussion.note.getEntity() }, {
@@ -177,6 +194,7 @@ describe('DiscussionService tests', () => {
       title: 'updated-title',
       content: 'updated-content',
       attachments: {
+        folders: [],
         files: [],
         assets: [],
         apps: [],
@@ -200,17 +218,18 @@ describe('DiscussionService tests', () => {
     expect(note.noteType).eq('Discussion')
     expect(note.attachments.getItems().length).eq(0)
 
-    // then add attachments back to discussion
+    // then add old attachments back to discussion, except one
     updateDiscussionInput = {
       id: discussion.id,
       title: 'updated-title',
       content: 'updated-content',
       attachments: {
         files: [file.id],
+        folders: [folder.id],
         assets: [asset.id],
         apps: [app.id],
         jobs: [job.id],
-        comparisons: [comparison.id],
+        comparisons: [],
       },
     }
     await discussionService.updateDiscussion(updateDiscussionInput)
@@ -228,21 +247,21 @@ describe('DiscussionService tests', () => {
     expect(note.attachments.getItems().length).eq(5)
     expect(note.attachments.getItems()[0].itemId).eq(file.id)
     expect(note.attachments.getItems()[0].itemType).eq('Node')
-    expect(note.attachments.getItems()[1].itemId).eq(asset.id)
+    expect(note.attachments.getItems()[1].itemId).eq(folder.id)
     expect(note.attachments.getItems()[1].itemType).eq('Node')
-    expect(note.attachments.getItems()[2].itemId).eq(app.id)
-    expect(note.attachments.getItems()[2].itemType).eq('App')
-    expect(note.attachments.getItems()[3].itemId).eq(job.id)
-    expect(note.attachments.getItems()[3].itemType).eq('Job')
-    expect(note.attachments.getItems()[4].itemId).eq(comparison.id)
-    expect(note.attachments.getItems()[4].itemType).eq('Comparison')
+    expect(note.attachments.getItems()[2].itemId).eq(asset.id)
+    expect(note.attachments.getItems()[2].itemType).eq('Node')
+    expect(note.attachments.getItems()[3].itemId).eq(app.id)
+    expect(note.attachments.getItems()[3].itemType).eq('App')
+    expect(note.attachments.getItems()[4].itemId).eq(job.id)
+    expect(note.attachments.getItems()[4].itemType).eq('Job')
   })
 
   it('publish discussion with non existing discussion id', async () => {
     const publishDiscussionInput: PublishDiscussionInput = {
       id: 10,
       scope: STATIC_SCOPE.PUBLIC,
-      toPublish: { apps: [], assets: [], comparisons: [], files: [], jobs: [] },
+      toPublish: { apps: [], folders: [], assets: [], comparisons: [], files: [], jobs: [] },
     }
 
     try {
@@ -258,12 +277,12 @@ describe('DiscussionService tests', () => {
     userCtx = { id: 10, dxuser: 'non-existing', accessToken: 'foo' }
     const publisherService = new PublisherService(em, userCtx, new PlatformClient({ accessToken: 'foo' }))
     const fetcher = new EntityFetcherService(em, userCtx)
-    discussionService = new DiscussionService(em, userCtx, publisherService, fetcher)
+    discussionService = new DiscussionService(em, userCtx, publisherService, fetcher, entityService)
 
     const publishDiscussionInput: PublishDiscussionInput = {
       id: 10,
       scope: STATIC_SCOPE.PUBLIC,
-      toPublish: { apps: [], assets: [], comparisons: [], files: [], jobs: [] },
+      toPublish: { apps: [], folders: [], assets: [], comparisons: [], files: [], jobs: [] },
     }
 
     try {
@@ -293,6 +312,7 @@ describe('DiscussionService tests', () => {
       scope: STATIC_SCOPE.PUBLIC,
       toPublish: {
         files: [file.id],
+        folders: [],
         assets: [asset.id],
         apps: [app.id],
         jobs: [job.id],
@@ -328,6 +348,7 @@ describe('DiscussionService tests', () => {
     const scope = space.scope as any
 
     const file = create.filesHelper.create(em, { user }, { name: 'file', scope })
+    const folder = create.filesHelper.createFolder(em, { user }, { name: 'folder', scope })
     const asset = create.filesHelper.createUploadedAsset(em, { user }, {
       name: 'asset-file',
       scope,
@@ -345,6 +366,7 @@ describe('DiscussionService tests', () => {
       scope: scope,
       toPublish: {
         files: [file.id],
+        folders: [folder.id],
         assets: [asset.id],
         apps: [app.id],
         jobs: [job.id],
@@ -381,6 +403,7 @@ describe('DiscussionService tests', () => {
     const scope = space.scope as any
 
     const file = create.filesHelper.create(em, { user }, { name: 'file', scope })
+    const folder = create.filesHelper.createFolder(em, { user }, { name: 'folder', scope })
     const asset = create.filesHelper.createUploadedAsset(em, { user }, {
       name: 'asset-file',
       scope,
@@ -398,6 +421,7 @@ describe('DiscussionService tests', () => {
       scope: scope,
       toPublish: {
         files: [file.id],
+        folders: [folder.id],
         assets: [asset.id],
         apps: [app.id],
         jobs: [job.id],
@@ -440,6 +464,7 @@ describe('DiscussionService tests', () => {
     const scope = space.scope as any
 
     const file = create.filesHelper.create(em, { user }, { name: 'file', scope })
+    const folder = create.filesHelper.createFolder(em, { user }, { name: 'folder-1', scope })
     const asset = create.filesHelper.createUploadedAsset(em, { user }, {
       name: 'asset-file',
       scope,
@@ -457,6 +482,7 @@ describe('DiscussionService tests', () => {
       scope: scope,
       toPublish: {
         files: [file.id],
+        folders: [folder.id],
         assets: [asset.id],
         apps: [app.id],
         jobs: [job.id],

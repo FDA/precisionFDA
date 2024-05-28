@@ -25,6 +25,7 @@ export class SpaceReportPartDiscussionResultProviderService extends SpaceReportP
   > = {
     App: 'app',
     UserFile: 'file',
+    Folder: 'folder',
     Asset: 'asset',
     Job: 'job',
     Comparison: 'comparison',

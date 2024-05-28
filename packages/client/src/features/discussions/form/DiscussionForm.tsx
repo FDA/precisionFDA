@@ -41,6 +41,7 @@ const validationSchema = Yup.object().shape({
     apps: Yup.array().of(Yup.object()).required(),
     jobs: Yup.array().of(Yup.object()).required(),
     comparisons: Yup.array().of(Yup.object()).required(),
+    folders: Yup.array().of(Yup.object()).required(),
   }),
 })
 
@@ -72,6 +73,7 @@ export const DiscussionForm = ({
       content: '',
       attachments: {
         files: [],
+        folders: [],
         apps: [],
         comparisons: [],
         assets: [],

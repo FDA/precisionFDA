@@ -22,6 +22,7 @@ export class EntityIconService {
       asset: this.getFile('asset-icon.svg'),
       comparison: this.getFile('comparison-icon.svg'),
       file: this.getFile('file-icon.svg'),
+      folder: this.getFile('folder-icon.svg'),
       job: this.getFile('job-icon.svg'),
       user: this.getFile('user-icon.svg'),
       workflow: this.getFile('workflow-icon.svg'),
