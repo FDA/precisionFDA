@@ -30,6 +30,7 @@ type PublishDiscussionInput = {
     jobs?: number[]
     comparisons?: number[]
   }
+  notifyAll?: boolean
 }
 
 type CreateAnswerInput = BaseInput & {
@@ -47,6 +48,7 @@ type PublishAnswerInput = PublishDiscussionInput & {
 
 type CreateCommentInput = {
   comment: string
+  notifyAll?: boolean
   targetId: number
   targetType: CommentableType
 }
@@ -118,18 +120,18 @@ class DiscussionDTO {
 }
 
 export {
+  AnswerDTO,
   BaseInput,
-  UpdateDiscussionInput,
-  PublishDiscussionInput,
+  CommentDTO,
   CreateAnswerInput,
-  UpdateAnswerInput,
-  PublishAnswerInput,
   CreateCommentInput,
-  EditCommentInput,
   DiscussionAttachment,
   DiscussionDTO,
-  AnswerDTO,
-  CommentDTO,
+  EditCommentInput,
   NoteDTO,
+  PublishAnswerInput,
+  PublishDiscussionInput,
+  UpdateAnswerInput,
+  UpdateDiscussionInput,
   UserDTO,
 }

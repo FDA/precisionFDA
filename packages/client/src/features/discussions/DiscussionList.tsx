@@ -2,16 +2,16 @@ import { useQuery } from '@tanstack/react-query'
 import React from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import styled from 'styled-components'
+import { Button } from '../../components/Button'
 import { Loader } from '../../components/Loader'
 import { PlusIcon } from '../../components/icons/PlusIcon'
 import { ErrorBoundary } from '../../utils/ErrorBoundry'
+import { pluralize } from '../../utils/formatting'
 import { QuickActions, SpaceTitle } from '../home/home.styles'
 import { ISpace } from '../spaces/spaces.types'
 import { fetchDiscussionsRequest } from './api'
 import { formatDiscussionDate } from './helpers'
 import { UsernameLink } from './styles'
-import { pluralize } from '../../utils/formatting'
-import { Button } from '../../components/Button'
 
 const DiscussionsActionRow = styled.div`
   display: flex;
@@ -57,13 +57,7 @@ const Right = styled.div`
   align-self: flex-end;
 `
 
-export const DiscussionList = ({
-  space,
-  scope,
-}: {
-  space: ISpace
-  scope: string
-}) => {
+export const DiscussionList = ({ space, scope }: { space: ISpace; scope: string }) => {
   const { data, isLoading } = useQuery({
     queryKey: ['discussions', scope],
     queryFn: () => fetchDiscussionsRequest(scope),
@@ -99,28 +93,26 @@ export const DiscussionList = ({
         )}
         <DiscussionTable>
           {data &&
-            data.reverse().map(discussion => (
-              <DiscussionListItem key={discussion.id}>
-                <Left>
-                  <StyledDiscussionLink to={`${location.pathname}/${discussion.id}`}>
-                    {discussion.note.title}
-                  </StyledDiscussionLink>
-                  <Info>
-                    Started by{' '}
-                    <UsernameLink href={`/users/${discussion.user.dxuser}`}>
-                      {discussion.user.fullName}
-                    </UsernameLink>{' '}
-                    on {formatDiscussionDate(discussion.createdAt)}
-                  </Info>
-                </Left>
-                <Right>
-                  {discussion.commentsCount}{' '}
-                  {pluralize('Comment', discussion.commentsCount)} and{' '}
-                  {discussion.answersCount}{' '}
-                  {pluralize('Answer', discussion.answersCount)}
-                </Right>
-              </DiscussionListItem>
-            ))}
+            data
+              .slice()
+              .reverse()
+              .map(discussion => (
+                <DiscussionListItem key={discussion.id}>
+                  <Left>
+                    <StyledDiscussionLink to={`${location.pathname}/${discussion.id}`}>
+                      {discussion.note.title}
+                    </StyledDiscussionLink>
+                    <Info>
+                      Started by <UsernameLink href={`/users/${discussion.user.dxuser}`}>{discussion.user.fullName}</UsernameLink>{' '}
+                      on {formatDiscussionDate(discussion.createdAt)}
+                    </Info>
+                  </Left>
+                  <Right>
+                    {discussion.commentsCount} {pluralize('Comment', discussion.commentsCount)} and {discussion.answersCount}{' '}
+                    {pluralize('Answer', discussion.answersCount)}
+                  </Right>
+                </DiscussionListItem>
+              ))}
           {data?.length === 0 && 'No one has started a discussion yet.'}
         </DiscussionTable>
       </StyledListPage>
