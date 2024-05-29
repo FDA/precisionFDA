@@ -4,10 +4,12 @@ import React from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import styled from 'styled-components'
 import * as Yup from 'yup'
+import { Button } from '../../../components/Button'
+import { Checkbox } from '../../../components/Checkbox'
 import { InputText } from '../../../components/InputText'
 import { MarkdownEditor } from '../../../components/Markdown/MarkdownEditor'
 import { FieldGroup } from '../../../components/form/FieldGroup'
-import { InputError } from '../../../components/form/styles'
+import { CheckboxLabel, InputError } from '../../../components/form/styles'
 import { ButtonRow } from '../../modal/styles'
 import { AttachmentsList } from '../AttachmentsList'
 import { NoteScope } from '../api'
@@ -15,7 +17,6 @@ import { DiscussionForm as DiscussionFormType } from '../discussions.types'
 import { areAttachmentsEmpty } from '../helpers'
 import { Attachments } from './Attachments'
 import { StyledPage } from './styles'
-import { Button } from '../../../components/Button'
 
 const StyledAttachments = styled.div`
   display: flex;
@@ -35,6 +36,7 @@ export const StyledForm = styled.form`
 const validationSchema = Yup.object().shape({
   title: Yup.string().min(1).max(255).required('Title required'),
   content: Yup.string().max(100000).required(),
+  notifyAll: Yup.boolean().default(false),
   attachments: Yup.object().shape({
     files: Yup.array().of(Yup.object()).required(),
     assets: Yup.array().of(Yup.object()).required(),
@@ -79,6 +81,7 @@ export const DiscussionForm = ({
         assets: [],
         jobs: [],
       },
+      notifyAll: false,
       ...defaultValues,
     },
   })
@@ -105,36 +108,30 @@ export const DiscussionForm = ({
     <StyledPage>
       <StyledForm id="discussionForm" autoComplete="off">
         <FieldGroup label="Title" required>
-          <InputText
-            label="Title"
-            {...register('title', { required: 'title is required.' })}
-            disabled={isSubmitting}
-          />
-          <ErrorMessage
-            errors={errors}
-            name="title"
-            render={({ message }) => <InputError>{message}</InputError>}
-          />
+          <InputText label="Title" {...register('title', { required: 'title is required.' })} disabled={isSubmitting} />
+          <ErrorMessage errors={errors} name="title" render={({ message }) => <InputError>{message}</InputError>} />
         </FieldGroup>
         <FieldGroup label="Content" required>
           <Controller
             control={control}
             name="content"
-            render={({ field }) => (
-              <MarkdownEditor field={field} disabled={isSubmitting} />
-            )}
+            render={({ field }) => <MarkdownEditor field={field} disabled={isSubmitting} />}
           />
         </FieldGroup>
         {!areAttachmentsEmpty(attachments) && (
           <StyledAttachments>
-            <AttachmentsList
-              attachments={attachments}
-              scope={scope}
-              onRemoveAttachment={deleteAttachment}
-            />
+            <AttachmentsList attachments={attachments} scope={scope} onRemoveAttachment={deleteAttachment} />
           </StyledAttachments>
         )}
         <ButtonRow>
+          <CheckboxLabel data-tip data-for="notify-checkbox">
+            <Checkbox
+              {...register('notifyAll')}
+              disabled={isSubmitting}
+              onChange={(event: React.ChangeEvent<HTMLInputElement>) => setValue('notifyAll', event.target.checked)}
+            />
+            Notify All Members
+          </CheckboxLabel>
           <Attachments scope={scope} attachments={attachments} setValue={setValue} />
           {onDelete && (
             <Button variant="warning" type="button" onClick={deleteDiscussion}>

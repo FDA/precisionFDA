@@ -1,14 +1,15 @@
 import axios from 'axios'
-import { Answer, Attachment, Discussion, Comment, PostAttachments } from './discussions.types'
+import { Answer, Attachment, Comment, Discussion, PostAttachments } from './discussions.types'
 
 export type BasePayload = {
   content: string
   // attachments are referred by ID
-  attachments: PostAttachments,
+  attachments: PostAttachments
 }
 
 export type CommentPayload = BasePayload & {
   isAnswer: boolean
+  notifyAll: boolean
 }
 
 export type NotePayload = BasePayload & {
@@ -17,10 +18,12 @@ export type NotePayload = BasePayload & {
 
 export type DiscussionPayload = BasePayload & {
   title: string
+  notifyAll: boolean
 }
 
 export type CreateAnswerPayload = BasePayload & {
   title: string
+  notifyAll: boolean
 }
 
 export type IdResponse = {
@@ -40,6 +43,7 @@ export type PublishPayload = {
     jobs: number[]
     comparisons: number[]
   }
+  notifyAll: boolean
 }
 
 type IdWithCountResponse = IdResponse & {
@@ -59,7 +63,9 @@ export async function createDiscussionCommentRequest(discussionId: number, paylo
 }
 
 export async function createAnswerCommentRequest(discussionId: number, answerId: number, payload: CommentPayload) {
-  return axios.post<IdResponse>(`/api/discussions/${discussionId}/answers/${answerId}/comments`, { comment: payload }).then(r => r.data)
+  return axios
+    .post<IdResponse>(`/api/discussions/${discussionId}/answers/${answerId}/comments`, { comment: payload })
+    .then(r => r.data)
 }
 
 export async function editDiscussionRequest(discussionId: number, payload: EditDiscussionPayload) {
@@ -74,8 +80,15 @@ export async function editDiscussionCommentRequest(discussionId: number, comment
   return axios.put<IdResponse>(`/api/discussions/${discussionId}/comments/${commentId}`, { comment: payload }).then(r => r.data)
 }
 
-export async function editAnswerCommentRequest(discussionId: number, answerId: number, commentId: number, payload: CommentPayload) {
-  return axios.put<IdResponse>(`/api/discussions/${discussionId}/answers/${answerId}/comments/${commentId}`, { comment: payload }).then(r => r.data)
+export async function editAnswerCommentRequest(
+  discussionId: number,
+  answerId: number,
+  commentId: number,
+  payload: CommentPayload,
+) {
+  return axios
+    .put<IdResponse>(`/api/discussions/${discussionId}/answers/${answerId}/comments/${commentId}`, { comment: payload })
+    .then(r => r.data)
 }
 
 export async function publishDiscussionRequest(payload: PublishPayload) {
@@ -128,7 +141,3 @@ export async function deleteDiscussionCommentRequest(discussionId: number, comme
 export async function deleteAnswerCommentRequest(discussionId: number, answerId: number, commentId: number) {
   return axios.delete(`/api/discussions/${discussionId}/answers/${answerId}/comments/${commentId}`).then(r => r.data) // no response except http code
 }
-
-
-
-

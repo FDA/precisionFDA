@@ -4,6 +4,7 @@ import { AcceptedLicense } from '@shared/domain/accepted-license/accepted-licens
 import { ADMIN_GROUP_ROLES, AdminGroup } from '@shared/domain/admin-group/admin-group.entity'
 import { AdminMembership } from '@shared/domain/admin-membership/admin-membership.entity'
 import { Alert } from '@shared/domain/alert/entity/alert.entity'
+import { Answer } from '@shared/domain/answer/answer.entity'
 import { AppSeries } from '@shared/domain/app-series/app-series.entity'
 import { App } from '@shared/domain/app/app.entity'
 import { Attachment } from '@shared/domain/attachment/attachment.entity'
@@ -71,6 +72,28 @@ const discussionHelper = {
     const discussion = wrap(new Discussion(note, references.user)).assign(data ?? {}, { em })
     em.persist(discussion)
     return discussion
+  },
+  createAnswer: (
+    em: EntityManager,
+    references: {
+      user: InstanceType<typeof User>
+      discussion: InstanceType<typeof Discussion>
+    },
+    data?: Partial<InstanceType<typeof Answer>>,
+  ) => {
+    const note = wrap(new Note(references.user)).assign({
+      title: generate.random.word(),
+      content: generate.random.chance.paragraph(),
+      scope: STATIC_SCOPE.PRIVATE,
+      noteType: 'Answer',
+    })
+    em.persist(note)
+    const answer = wrap(new Answer(note, references.discussion, references.user)).assign(
+      data ?? {},
+      { em },
+    )
+    em.persist(answer)
+    return answer
   },
 }
 

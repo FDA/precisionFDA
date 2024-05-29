@@ -2,6 +2,7 @@ import * as z from 'zod'
 
 export const commentsPostRequestSchema = z.object({
   content: z.string().min(1).max(100000),
+  notifyAll: z.boolean(),
 })
 export type CommentReqBody = z.infer<typeof commentsPostRequestSchema>
 export const discussionsPostRequestSchema = z.object({
@@ -14,7 +15,7 @@ export const discussionsPostRequestSchema = z.object({
     apps: z.array(z.number()),
     jobs: z.array(z.number()),
     comparisons: z.array(z.number()),
-  })
+  }),
 })
 export type DiscussionsPostReqBody = z.infer<typeof discussionsPostRequestSchema>
 export const discussionsPutRequestSchema = discussionsPostRequestSchema.partial().extend({
@@ -24,7 +25,7 @@ export type DiscussionsPutReqBody = z.infer<typeof discussionsPutRequestSchema>
 
 export const discussionsPublishRequestSchema = z.object({
   id: z.number(),
-  scope: z.enum(['public', 'private']).or(z.string().refine(value => value.startsWith('space-'))),
+  scope: z.enum(['public', 'private']).or(z.string().refine((value) => value.startsWith('space-'))),
   toPublish: z.object({
     files: z.array(z.number()),
     folders: z.array(z.number()),
@@ -33,6 +34,7 @@ export const discussionsPublishRequestSchema = z.object({
     jobs: z.array(z.number()),
     comparisons: z.array(z.number()),
   }),
+  notifyAll: z.boolean(),
 })
 
 export type DiscussionsPublishReqBody = z.infer<typeof discussionsPublishRequestSchema>

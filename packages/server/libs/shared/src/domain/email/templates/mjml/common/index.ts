@@ -66,9 +66,7 @@ const generateChallengeDetailLink = (challengeId: IDType): string =>
 const generateChallengePreregPageLink = (challengeId: IDType): string =>
   `${config.api.railsHost}/challenges/${challengeId.toString()}`
 
-const ctoButton = (text: string, generateLinkFn: (spaceId: IDType) => string) => (
-  id: IDType,
-) => `
+const ctoButton = (text: string, generateLinkFn: (spaceId: IDType) => string) => (id: IDType) => `
   <mj-button
     background-color="#1F70B5"
     line-weight="30px"
@@ -94,15 +92,15 @@ const getBottomSpacer = (): string => '<mj-spacer height="16px" />'
 const getMiddleSpacer = (): string => '<mj-spacer height="10px" />'
 
 export {
-  header,
   footer,
+  generateJobDetailLink,
   generateObjectCommentsLink,
   generateSpaceLink,
-  generateJobDetailLink,
-  getViewSpaceButton,
+  getBottomSpacer,
   getChallengeCtoButton,
   getExecutionDetailButton,
-  viewChallengePreregPageCtoButton,
-  getBottomSpacer,
   getMiddleSpacer,
+  getViewSpaceButton,
+  header,
+  viewChallengePreregPageCtoButton,
 }

@@ -120,6 +120,7 @@ export class DiscussionsController {
     const result = await this.discussionService.publishDiscussion({
       id: discussionId,
       toPublish: body.toPublish,
+      notifyAll: body.notifyAll,
       // TODO fix
       // @ts-ignore
       scope: body.scope,
@@ -157,6 +158,7 @@ export class DiscussionsController {
       discussionId,
       id,
       toPublish: body.toPublish,
+      notifyAll: body.notifyAll,
       // TODO fix
       // @ts-ignore
       scope: body.scope,
@@ -180,6 +182,7 @@ export class DiscussionsController {
       targetId: discussionId,
       targetType: 'Discussion',
       comment: body.content,
+      notifyAll: body.notifyAll,
     }
     const result = await this.discussionService.createComment(input)
 
@@ -206,6 +209,7 @@ export class DiscussionsController {
       targetId: answerId,
       targetType: 'Answer',
       comment: body.content,
+      notifyAll: body.notifyAll,
     }
     const result = await this.discussionService.createComment(input)
 
