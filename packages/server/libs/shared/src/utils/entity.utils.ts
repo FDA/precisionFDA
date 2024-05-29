@@ -6,7 +6,7 @@ import { PropertyKeysOfType } from '@shared/utils/types/property-keys-of-type'
 
 type NamedEntityType = Extends<
   EntityType,
-  'app' | 'asset' | 'comparison' | 'file' | 'job' | 'user' | 'workflow' | 'resource'
+  'app' | 'asset' | 'comparison' | 'file' | 'folder' | 'job' | 'user' | 'workflow' | 'resource'
 >
 type NamedEntity = EntityInstance<NamedEntityType>
 
@@ -30,6 +30,7 @@ export class EntityUtils {
     asset: 'name',
     comparison: 'name',
     file: 'name',
+    folder: 'name',
     job: 'name',
     user: 'fullName',
     workflow: 'title',

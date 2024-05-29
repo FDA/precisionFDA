@@ -19,11 +19,11 @@ import { Node } from '@shared/domain/user-file/node.entity'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { Vote } from '@shared/domain/vote/vote.entity'
-import { STATIC_SCOPE } from '../../../enums'
+import { STATIC_SCOPE } from '@shared/enums'
 import * as errors from '../../../errors'
-import { getLogger } from '../../../logger'
-import type { UserCtx } from '../../../types'
-import type { SCOPE } from '../../../types/common'
+import { getLogger } from '@shared/logger'
+import type { UserCtx } from '@shared/types'
+import type { SCOPE } from '@shared/types/common'
 import { CommentableType } from '../../comment/comment.entity'
 import { EntityFetcherService } from '../../entity/entity-fetcher.service'
 import { SPACE_MEMBERSHIP_ROLE } from '../../space-membership/space-membership.enum'
@@ -162,7 +162,7 @@ export class DiscussionService implements IDiscussionService {
   async updateDiscussion(discussionInput: UpdateDiscussionInput): Promise<void> {
     logger.verbose(`DiscussionService: updating discussion: ${JSON.stringify(discussionInput)}`)
 
-    return await this.em.transactional(async (tem) => {
+    return await this.em.transactional(async () => {
 
       const discussion = await this.fetcher.getEditableById(Discussion, discussionInput.id, {}, { populate: ['note'] })
       if (!discussion) {
@@ -175,12 +175,11 @@ export class DiscussionService implements IDiscussionService {
       if (discussionInput.content) {
         note.content = discussionInput.content
       }
-      tem.persist(note)
+      this.em.persist(note)
 
       if (discussionInput.attachments) {
         await this.updateAttachments(note, discussionInput.attachments)
       }
-
     })
   }
 
@@ -496,6 +495,7 @@ export class DiscussionService implements IDiscussionService {
 
   private async createAttachments(note: Note, attachmentsToSave: {
     files?: number[]
+    folders?: number[]
     assets?: number[]
     apps?: number[]
     jobs?: number[]
@@ -506,6 +506,16 @@ export class DiscussionService implements IDiscussionService {
       const res = await this.fetcher.getAccessibleById(Node, id)
       if (!res) {
         throw new errors.NotFoundError(`Unable to attach file ${id}: file not found or inaccessible.`)
+      }
+      const attachment = new Attachment(note)
+      attachment.itemId = id
+      attachment.itemType = 'Node'
+      this.em.persist(attachment)
+    }
+    for (const id of attachmentsToSave.folders) {
+      const res = await this.fetcher.getAccessibleById(Node, id)
+      if (!res) {
+        throw new errors.NotFoundError(`Unable to attach folder ${id}: folder not found or inaccessible.`)
       }
       const attachment = new Attachment(note)
       attachment.itemId = id
@@ -558,6 +568,7 @@ export class DiscussionService implements IDiscussionService {
 
   private async updateAttachments(note: Note, attachments: {
     files?: number[]
+    folders?: number[]
     assets?: number[]
     apps?: number[]
     jobs?: number[]
@@ -576,6 +587,7 @@ export class DiscussionService implements IDiscussionService {
    */
   private async checkValidScope(toPublish: {
     files?: number[]
+    folders?: number[]
     assets?: number[]
     apps?: number[]
     jobs?: number[]
@@ -732,7 +744,7 @@ export class DiscussionService implements IDiscussionService {
     for (const attachment of note.attachments) {
       if (attachment.itemType === 'Node') {
         const attachmentEntity: Node | null = await this.fetcher.getById(attachment.itemType, attachment.itemId)
-        if (!attachmentEntity || attachmentEntity.stiType == 'Folder') {
+        if (!attachmentEntity) {
           throw new errors.NotFoundError('Unable to get attachments: attachment not found.')
         }
         response.push({

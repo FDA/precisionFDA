@@ -70,9 +70,10 @@ class NodeCopyWorker < ApplicationWorker
   def notify_user(copies, scope)
     return if copies.all?(&:copied)
 
+    copy_ids = copies.instance_variable_get(:@copies).map { |copy| copy.object.id }
     WorkerMailer.node_copy_email(
       @context.user.email,
-      copies,
+      copy_ids,
       scope,
     ).deliver_later
   end

@@ -2,6 +2,8 @@ import React from 'react'
 import { UseFormSetValue } from 'react-hook-form'
 import { Button } from '../../../components/Button'
 import Dropdown from '../../../components/Dropdown'
+import { useSelectFolderModal } from '../../files/actionModals/useSelectFolderModal'
+import { IFolder } from '../../files/files.types'
 import { ActionsDropdownContent } from '../../home/ActionDropdownContent'
 import { useSelectAppModal } from '../../apps/actionsModals/useSelectAppModal'
 import { IApp } from '../../apps/apps.types'
@@ -27,7 +29,7 @@ export function Attachments({
 }) {
   const onChangeHandler = (
     type: AttachmentType,
-    selected: IAccessibleFile[] | IAsset[] | IApp[] | IJob[] | IComparison[],
+    selected: IAccessibleFile[] | IFolder[] | IAsset[] | IApp[] | IJob[] | IComparison[],
   ) => {
 
     if (visualViewport) {
@@ -38,10 +40,10 @@ export function Attachments({
         if (isNew) {
           newAttachments.push({
             id: attachment.id,
-            uid: attachment.uid,
             type,
             name: attachment.title,
             scope: attachment.scope,
+            link: ''
           })
         }
       })
@@ -57,6 +59,15 @@ export function Attachments({
       '',
       [scope, 'public'],
     )
+
+  const { modalComp: foldersModalComp, setShowModal: setFoldersShowModal } =
+    useSelectFolderModal(
+      'Select Folders',
+      v => onChangeHandler('Folder', v),
+      '',
+      [scope],
+    )
+
 
   const { modalComp: appsModalComp, setShowModal: setAppsShowModal } =
     useSelectAppModal(
@@ -99,6 +110,7 @@ export function Attachments({
   return (
     <>
       {filesModalComp}
+      {foldersModalComp}
       {appsModalComp}
       {assetsModalComp}
       {comparisonsModalComp}
@@ -110,6 +122,10 @@ export function Attachments({
             actions={{
               Files: {
                 func: () => setFilesShowModal(true),
+                isDisabled: false,
+              },
+              Folders: {
+                func: () => setFoldersShowModal(true),
                 isDisabled: false,
               },
               Apps: {

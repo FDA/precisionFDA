@@ -58,7 +58,7 @@ const OrganizeFiles = ({
             key: d.id.toString(),
             title: d.name,
             children: [],
-            parent: node,
+            parent: d.path[d.path.length-1],
           }))
 
         setTreeData((draft: any) => {

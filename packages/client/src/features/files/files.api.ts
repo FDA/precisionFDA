@@ -123,7 +123,7 @@ export interface FetchFolderChildrenResponse {
   nodes: IFile[]
 }
 
-export const fetchFolderChildren = async (scope?: 'private' | 'public', spaceId?: string, folderId?: string) => {
+export const fetchFolderChildren = async (scope?: 'private' | 'public', spaceId?: string | number, folderId?: string) => {
   const queryParams = cleanObject({
     folder_id: folderId === 'ROOT' ? undefined : folderId,
     scope,
