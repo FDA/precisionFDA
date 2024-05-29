@@ -4,6 +4,7 @@ export const entityTypes = [
   'asset',
   'comparison',
   'file',
+  'folder',
   'app',
   'workflow',
   'discussion',

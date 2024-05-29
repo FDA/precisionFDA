@@ -35,6 +35,7 @@ import {
 } from './styles'
 import { useNewsListQuery } from './useNewsListQuery'
 import { Button } from '../../components/Button'
+import { InlineError } from '../../components/Error'
 
 const NewsPage = () => {
   usePageMeta({ title: 'News - precisionFDA' })
@@ -49,7 +50,7 @@ const NewsPage = () => {
     page: pagination.pageParam,
     perPage: pagination.perPageParam,
   })
-  const { data: yearsListData, isLoading: isLoadingYearsList } = useQuery({
+  const { data: yearsListData, isLoading: isLoadingYearsList, error: yearsListError } = useQuery({
     queryKey: ['news-years'],
     queryFn: () => newsYearsListRequest(),
   })
@@ -148,13 +149,13 @@ const NewsPage = () => {
 
             <RightSideItem>
               <SectionTitle>By Year</SectionTitle>
-              <RightList>
+              {yearsListError ? <InlineError /> : <RightList>
                 <ItemButton selected={!query.year}  onClick={() => setQuery({ year: null }, 'replaceIn')}>
                   All
                 </ItemButton>
                 {!isLoadingYearsList &&
                   yearsListData
-                    .map(y => (
+                    ?.map(y => (
                       <ItemButton
                         key={y}
                         onClick={() => setQuery({ year: y }, 'replaceIn')}
@@ -163,7 +164,7 @@ const NewsPage = () => {
                         {y}
                       </ItemButton>
                     ))}
-              </RightList>
+              </RightList>}
             </RightSideItem>
             <RightSideItem>
               <SectionTitle>Community News</SectionTitle>

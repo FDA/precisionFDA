@@ -10,7 +10,7 @@ on:
       GSRS_BRANCH:
         description: GSRS revision
         type: string
-        default: gsrs_240322
+        default: gsrs_240514
       LT_VERSION:
         description: Version of Launch Template
         type: string
@@ -24,6 +24,7 @@ permissions:
   id-token: write
   contents: read
 
+run-name: ${{ github.event_name == 'workflow_dispatch' && format('{0} | GSRS_ENABLED={1}, GSRS_BRANCH={2}, LT_VERSION={3}', github.workflow, inputs.GSRS_ENABLED, inputs.GSRS_BRANCH, inputs.LT_VERSION) || '' }}
 jobs:
   deploy:
     name: deploy to AWS
@@ -34,6 +35,9 @@ jobs:
       url: https://precision.fda.gov
 
     steps:
+      - name: Output Inputs
+        run: echo "${{ toJSON(github.event.inputs) }}"
+
       - name: Checkout code
         uses: actions/checkout@v4
 

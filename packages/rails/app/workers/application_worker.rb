@@ -21,6 +21,7 @@ class ApplicationWorker
       userId: context.user_id,
     }
     h_a_client = HttpsAppsClient.new
+    RequestContext.begin_request(context.user_id, context.username, context.token)
     h_a_client.send_notification(notification)
     RequestContext.end_request
 

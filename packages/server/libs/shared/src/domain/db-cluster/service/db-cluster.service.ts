@@ -75,6 +75,7 @@ export class DbClusterService {
         },
       },
     )
+
     const email: EmailSendInput = {
       emailType: EMAIL_TYPES.nonTerminatedDbClusters,
       to: adminUser.email,

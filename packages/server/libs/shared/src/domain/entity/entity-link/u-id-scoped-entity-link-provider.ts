@@ -12,8 +12,6 @@ type UIdScopedLinkEntity = EntityInstance<UIdScopedLinkEntityType>
 
 @Injectable()
 export class UIdScopedEntityLinkProvider extends EntityLinkProvider<UIdScopedLinkEntityType> {
-  private readonly MY_HOME_SCOPES: string[] = [STATIC_SCOPE.PRIVATE, STATIC_SCOPE.PUBLIC]
-
   protected async getRelativeLink(entity: UIdScopedLinkEntity) {
     const scope = entity.scope
 

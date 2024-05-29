@@ -5,6 +5,7 @@ import { EntityType } from '@shared/domain/entity/domain/entity.type'
 import { Job } from '@shared/domain/job/job.entity'
 import { Resource } from '@shared/domain/resource/resource.entity'
 import { Asset } from '@shared/domain/user-file/asset.entity'
+import { Folder } from '@shared/domain/user-file/folder.entity'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { Workflow } from '@shared/domain/workflow/entity/workflow.entity'
@@ -14,6 +15,7 @@ export const entityTypeToEntityMap = {
   comparison: Comparison,
   job: Job,
   file: UserFile,
+  folder: Folder,
   user: User,
   app: App,
   workflow: Workflow,
