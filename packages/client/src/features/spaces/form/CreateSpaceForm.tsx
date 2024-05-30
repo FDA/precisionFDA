@@ -172,7 +172,8 @@ export const SpaceForm = ({
     Confirm: ConfirmSubmit,
   } = useConfirm({
     onOk: handleSubmit(onSubmit),
-    body: <div><b>{getConfirmMessage()}</b><p>Are you sure you would like to continue?</p></div>,
+    headerText: getConfirmMessage(),
+    body: <p>Are you sure you would like to continue?</p>,
   })
 
   return (
@@ -307,7 +308,7 @@ export const SpaceForm = ({
                 {...register('protected')}
                 disabled={isSubmitting}
                 onChange={handleProtectedSelection}
-                checked={watch().protected || undefined}
+                checked={watch().protected || false}
               />
               Space Protection
             </FieldLabelRow>
