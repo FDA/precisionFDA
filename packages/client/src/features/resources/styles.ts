@@ -8,7 +8,7 @@ export const FileThumb = styled.div`
   svg {
     grid-area: 1 / 1;
   }
-
+  // it is used, even though IDE says it is not !!!
   .ext {
     grid-area: 1 / 1;
     text-align: center;

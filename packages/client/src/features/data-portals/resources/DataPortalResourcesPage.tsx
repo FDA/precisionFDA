@@ -5,89 +5,72 @@ import {
   useQuery,
   useQueryClient,
 } from '@tanstack/react-query'
-import axios from 'axios'
 import { useParams } from 'react-router-dom'
 import { toast } from 'react-toastify'
-import ReactTooltip from 'react-tooltip'
 import useWebSocket from 'react-use-websocket'
 import styled from 'styled-components'
+import { Button } from '../../../components/Button'
+import { InputText } from '../../../components/InputText'
 import { Loader } from '../../../components/Loader'
 import { NotAllowedPage } from '../../../components/NotAllowed'
 import { BackLink } from '../../../components/Page/PageBackLink'
 import { NoContent } from '../../../components/Public/styles'
-import { BookIcon } from '../../../components/icons/BookIcon'
-import { CrossIcon } from '../../../components/icons/PlusIcon'
 import { UserLayout } from '../../../layouts/UserLayout'
-import { theme } from '../../../styles/theme'
-import { DEFAULT_RECONNECT_ATTEMPTS, DEFAULT_RECONNECT_INTERVAL, SHOULD_RECONNECT, getNodeWsUrl } from '../../../utils/config'
+import {
+  DEFAULT_RECONNECT_ATTEMPTS,
+  DEFAULT_RECONNECT_INTERVAL,
+  SHOULD_RECONNECT,
+  getNodeWsUrl,
+} from '../../../utils/config'
 import { useAuthUser } from '../../auth/useAuthUser'
 import { Notification, NOTIFICATION_ACTION } from '../../home/types'
 import { CreateResource } from '../../resources/CreateResource'
-import { ResourceThumb } from '../../resources/ResourceThumb'
+import ResourceItem from '../../resources/ResourceItem'
 import { StyledPageCenter } from '../../spaces/form/styles'
 import { AlertText } from '../details/DataPortalNotFound'
 import { useDataPortalByIdQuery } from '../queries'
 import { canEditResources } from '../utils'
-import { getFileNameFromUrl } from '../../resources/util'
 import { listDataPortalResourcesRequest, removeResourceByIdRequest } from './resources.api'
 import { RemovePayload } from './resources.types'
 
 const StyledPageContent = styled.div`
-  margin-top: 32px;
-  display: flex;
-  flex-direction: column;
-  gap: 32px;
+    margin-top: 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    min-width: 400px;
 `
 const TopRow = styled.div`
   display: flex;
   gap: 16px;
   justify-content: space-between;
 `
-const StyledResourceItem = styled.div`
+
+const SearchBarWrapper = styled.div`
+  margin-bottom: 8px;
   display: flex;
   justify-content: center;
-  max-width: 100px;
+`
 
-  img {
-    width: 100%;
+const SearchBar = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 4px; // Space between input and button
+
+  & > input {
+      width: 330px;
   }
 `
+
 const ResourceList = styled.div`
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  grid-gap: 12px;
-  max-width: 500px;
-`
-const ImageContainer = styled.div`
-  position: relative;
-`
-const Remove = styled.div`
-  position: absolute;
-  top: -10px;
-  right: -10px;
-  color: white;
-  background: ${theme.colors.darkRed};
-  width: 20px;
-  height: 20px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  cursor: pointer;
-  border-radius: 10px;
-`
-const Copy = styled.div`
-  position: absolute;
-  top: -10px;
-  right: 15px;
-  color: white;
-  background: ${theme.colors.darkGreen};
-  width: 20px;
-  height: 20px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  cursor: pointer;
-  border-radius: 10px;
+  grid-template-columns: 1fr;
+  gap: 4px;
+  width: 100%;
+
+  @media (min-width: 768px) {
+    grid-template-columns: 1fr 1fr; // Two columns for larger screens
+  }
 `
 
 const useListDataPortalResourcesQuery = (id: string) =>
@@ -112,13 +95,14 @@ const useResourceRemoveMutation = (
 const DataPortalResourcesPage = () => {
   const user = useAuthUser()
   const queryClient = useQueryClient()
-  const { portalId } = useParams<{
-    portalId: string
-  }>()
-  const { data: portal, isLoading: portalIsLoading } =
-    useDataPortalByIdQuery(portalId)
+  const { portalId } = useParams<{ portalId: string }>()
+
+  if (!portalId || !user) return <NotAllowedPage/>
+
+  const { data: portal, isLoading: portalIsLoading } = useDataPortalByIdQuery(portalId)
   const { data, isLoading } = useListDataPortalResourcesQuery(portalId)
-  const [ isFinishingUpload, setIsFinishingUpload ] = useState(false)
+  const [isFinishingUpload, setIsFinishingUpload] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
 
   const mutation = useResourceRemoveMutation({
     onSuccess: () => {
@@ -140,17 +124,13 @@ const DataPortalResourcesPage = () => {
       return
     }
     if (NOTIFICATION_ACTION.FILE_CLOSED === notification.action) {
-      queryClient.invalidateQueries({ queryKey: ['resources-list-portal']})
+      queryClient.invalidateQueries({ queryKey: ['resources-list-portal'] })
       setIsFinishingUpload(false)
     }
   }, [notification])
 
   const handleRemove = async (id: number) => {
-    if (
-      confirm(
-        'Are you sure you want to delete this resource item? Pages where this file is referenced will break.',
-      ) === true
-    ) {
+    if (confirm('Are you sure you want to delete this resource item? Pages where this file is referenced will break.')) {
       return mutation.mutateAsync({ portalId, resourceId: id })
     }
     return undefined
@@ -163,64 +143,59 @@ const DataPortalResourcesPage = () => {
     }
   }
 
-  if (isLoading || portalIsLoading) return <Loader />
-  const canEdit = canEditResources(user?.dxuser, portal?.members)
+  const filteredData = data?.filter((resource) =>
+    resource.name.toLowerCase().includes(searchQuery.toLowerCase())) ?? []
+
+  if (isLoading || portalIsLoading) return <Loader/>
+  if (!portal) return <NotAllowedPage/>
+
+  const canEdit = canEditResources(user.dxuser, portal.members)
+
   return (
     <UserLayout>
       <StyledPageCenter>
         <StyledPageContent>
           <TopRow>
-            <BackLink linkTo={`/data-portals/${portal?.urlSlug}`}>
+            <BackLink linkTo={`/data-portals/${portal.urlSlug}`}>
               Back to Data Portal
             </BackLink>
 
             {canEdit && (
               <CreateResource pid={portalId} onSuccess={() => {
                 setIsFinishingUpload(true)
-              }} />
+              }}/>
             )}
           </TopRow>
-          {portal ? (
-            <>
-              {data?.length === 0 && (
-                <NoContent>
-                  <AlertText>This Data Portal has no resources</AlertText>
-                </NoContent>
-              )}
-              <ResourceList>
-                {data?.map(re => {
-                  return (
-                    <StyledResourceItem key={re.id}>
-                      <ImageContainer data-tip data-for={`tip-${re.id}`}>
-                        <ResourceThumb url={re.url} />
-                        {canEdit && (
-                          <Remove onClick={() => handleRemove(re.id)}>
-                            <CrossIcon height={12} />
-                          </Remove>
-                        )}
-                        {re.url && (
-                          <Copy onClick={() => handleCopy(re.url)}>
-                            <BookIcon height={12} />
-                          </Copy>
-                        )}
-                      </ImageContainer>
-                      {re.url && (
-                        <ReactTooltip
-                          id={`tip-${re.id}`}
-                          place="top"
-                          effect="solid"
-                        >
-                          {getFileNameFromUrl(re.url)}
-                        </ReactTooltip>
-                      )}
-                    </StyledResourceItem>
-                  )
-                })}
-                {isFinishingUpload && <Loader />}
-              </ResourceList>
-            </>
+
+          <SearchBarWrapper>
+            <SearchBar>
+              <InputText
+                placeholder="Search resources..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+              <Button type="button" variant="primary" onClick={() => setSearchQuery('')}>
+                Clear
+              </Button>
+            </SearchBar>
+          </SearchBarWrapper>
+          {filteredData.length === 0 ? (
+            <NoContent>
+              <AlertText>No resources found</AlertText>
+            </NoContent>
           ) : (
-            <NotAllowedPage />
+            <ResourceList>
+              {filteredData.map(re => (
+                <ResourceItem
+                  key={re.id}
+                  resource={re}
+                  canEdit={canEdit}
+                  onRemove={handleRemove}
+                  onCopy={handleCopy}
+                />
+              ))}
+              {isFinishingUpload && <Loader/>}
+            </ResourceList>
           )}
         </StyledPageContent>
       </StyledPageCenter>
