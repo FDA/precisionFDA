@@ -198,6 +198,17 @@ cat > patients.txt
 ctrl-D
 ```
 
+Create file `observations.txt` with the following content:
+```bash
+cat > observations.txt
+9870|12345|Annual check up|66678-4|2022-11-01
+9871|12345|Emergency|LG32756-5|2022-11-02
+9872|12346|Clinic visit|66678-4|2022-11-03
+9873|12347|Lab results|74418-5|2022-11-04
+9874|12347|Post-op checkup|65375-8|2022-11-05
+ctrl-D
+```
+
 ## Copy the data into the cluster DB tables
 
 ```bash
