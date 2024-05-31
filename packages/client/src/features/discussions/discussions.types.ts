@@ -40,12 +40,11 @@ export interface Discussion {
   user: IUser
   createdAt: string
   updatedAt: string
-  answers: Answer[],
+  answers: Answer[]
   comments: Comment[]
   commentsCount: number
   answersCount: number
 }
-
 
 export type AttachmentType = 'UserFile' | 'Folder' | 'Asset' | 'Job' | 'App' | 'Comparison'
 export type AttachmentKey = 'files' | 'folders' | 'apps' | 'comparisons' | 'assets' | 'jobs'
@@ -65,22 +64,23 @@ export type NoteForm = {
   attachments: FormAttachments
   content: string
   isAnswer: boolean
+  notifyAll: boolean
 }
 
 export type PostAttachments = {
-  files: number[],
-  folders: number[],
-  apps: number[],
-  comparisons: number[],
-  assets: number[],
-  jobs: number[],
+  files: number[]
+  folders: number[]
+  apps: number[]
+  comparisons: number[]
+  assets: number[]
+  jobs: number[]
 }
-
 
 export interface DiscussionForm {
   title: string
   content: string
   attachments: FormAttachments
+  notifyAll: boolean
 }
 
 export interface CommentForm {

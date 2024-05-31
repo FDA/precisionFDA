@@ -198,7 +198,7 @@ export const useAppSelectionActions = ({
     'Edit': {
       type: 'route',
       to: `/${getBaseLink(spaceId)}/apps/${selected[0]?.uid}/edit`,
-      isDisabled: selected.length !== 1 || !selected[0].latest_revision,
+      isDisabled: selected.length !== 1 || !selected[0].latest_revision || selected[0].added_by !== user?.dxuser,
     },
     'Fork': {
       type: 'route',

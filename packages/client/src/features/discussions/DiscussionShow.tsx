@@ -14,14 +14,7 @@ import { CommentCard } from './card/CommentCard'
 import { NoteCard } from './card/NoteCard'
 import { CreateCommentEntity } from './form/CreateCommentEntity'
 import { EditDiscussionTitle } from './form/EditDiscussionTitle'
-import {
-  CommentCount,
-  DiscussionTitle,
-  PageContent,
-  StyledCardList,
-  StyledTitle,
-  UsernameLink,
-} from './styles'
+import { CommentCount, DiscussionTitle, PageContent, StyledCardList, StyledTitle, UsernameLink } from './styles'
 
 export const DiscussionShow = ({ space }: { space: ISpace }) => {
   const navigate = useNavigate()
@@ -30,7 +23,7 @@ export const DiscussionShow = ({ space }: { space: ISpace }) => {
   const markdownInputRef = useRef<HTMLInputElement | null>(null)
   const { discussionId: discussionIdParam } = useParams<{ discussionId: string }>()
   const discussionId = parseInt(discussionIdParam, 10)
-  
+
   const location = useLocation()
   const user = useAuthUser()
 
@@ -51,7 +44,7 @@ export const DiscussionShow = ({ space }: { space: ISpace }) => {
     queryClient.invalidateQueries({
       queryKey: ['discussions'],
     })
-    navigate(`/spaces/${space.id}/discussions/`)
+    navigate(`/spaces/${space.id}/discussions`)
   }
 
   if (isLoading) {
@@ -62,9 +55,7 @@ export const DiscussionShow = ({ space }: { space: ISpace }) => {
     return (
       <NotFound>
         <h1>Discussion not found</h1>
-        <div>
-          Sorry, this discussion does not exist or is not accessible by you.
-        </div>
+        <div>Sorry, this discussion does not exist or is not accessible by you.</div>
       </NotFound>
     )
 
@@ -72,20 +63,14 @@ export const DiscussionShow = ({ space }: { space: ISpace }) => {
   const canReply = space.current_user_membership.role !== 'viewer'
   const isLead = space.current_user_membership.role === 'lead'
   const canUserEdit = (noteUserId: number) => user?.id === noteUserId || isLead
-  const canUserAnswer = !discussion.answers
-    .map(a => a.note.user.id)
-    .includes(user!.id)
+  const canUserAnswer = !discussion.answers.map(a => a.note.user.id).includes(user!.id)
 
   return (
     <PageContent>
       <BackLink linkTo={backPath}>Back to Discussions</BackLink>
       <DiscussionTitle>
         {isEditing ? (
-          <EditDiscussionTitle
-            discussionId={discussionId}
-            defaultValue={discussion.note.title}
-            setIsEditing={setIsEditing}
-          />
+          <EditDiscussionTitle discussionId={discussionId} defaultValue={discussion.note.title} setIsEditing={setIsEditing} />
         ) : (
           <StyledTitle>
             {discussion.note.title}
@@ -98,10 +83,7 @@ export const DiscussionShow = ({ space }: { space: ISpace }) => {
         )}
       </DiscussionTitle>
       <div>
-        <UsernameLink href={`/users/${discussion.user.dxuser}`}>
-          {discussion.user.fullName}
-        </UsernameLink>{' '}
-        started this discussion
+        <UsernameLink href={`/users/${discussion.user.dxuser}`}>{discussion.user.fullName}</UsernameLink> started this discussion
       </div>
       <NoteCard
         canEdit={canUserEdit(discussion.note.user.id)}
@@ -113,9 +95,7 @@ export const DiscussionShow = ({ space }: { space: ISpace }) => {
       />
       <StyledCardList>
         <CommentCount>
-          {discussion.comments.length}{' '}
-          {pluralize('Comment', discussion.comments.length)} and{' '}
-          {discussion.answers.length}{' '}
+          {discussion.comments.length} {pluralize('Comment', discussion.comments.length)} and {discussion.answers.length}{' '}
           {pluralize('Answer', discussion.answers.length)}
         </CommentCount>
         {discussion.answers.length > 0 && (
