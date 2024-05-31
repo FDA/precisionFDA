@@ -5,8 +5,12 @@ import { PublishPayload, publishAnswerRequest, publishDiscussionRequest } from '
 export function usePublishNoteMutation() {
   const publishMutation = useMutation({
     mutationKey: ['publish-discussion'],
-    mutationFn: ({ isAnswer, discussionId, ...payload }: PublishPayload & { isAnswer?: boolean, discussionId: number, id: number }) => {
-      if(isAnswer) {
+    mutationFn: ({
+      isAnswer,
+      discussionId,
+      ...payload
+    }: PublishPayload & { isAnswer?: boolean; discussionId: number; id: number }) => {
+      if (isAnswer) {
         return publishAnswerRequest(discussionId, payload)
       }
       return publishDiscussionRequest(payload)

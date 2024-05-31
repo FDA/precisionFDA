@@ -2,9 +2,6 @@ import React from 'react'
 import { UseFormSetValue } from 'react-hook-form'
 import { Button } from '../../../components/Button'
 import Dropdown from '../../../components/Dropdown'
-import { useSelectFolderModal } from '../../files/actionModals/useSelectFolderModal'
-import { IFolder } from '../../files/files.types'
-import { ActionsDropdownContent } from '../../home/ActionDropdownContent'
 import { useSelectAppModal } from '../../apps/actionsModals/useSelectAppModal'
 import { IApp } from '../../apps/apps.types'
 import { useSelectAssetModal } from '../../assets/actionModals/useSelectAssetModal'
@@ -12,11 +9,14 @@ import { IAsset } from '../../assets/assets.types'
 import { useSelectComparisonModal } from '../../comparisons/actionModals/useSelectComparisonModal'
 import { IComparison } from '../../comparisons/comparisons.types'
 import { IAccessibleFile } from '../../databases/databases.api'
+import { useSelectJobModal } from '../../executions/actionModals/useSelectJobModal'
 import { IJob } from '../../executions/executions.types'
 import { useSelectFileModal } from '../../files/actionModals/useSelectFileModal'
+import { useSelectFolderModal } from '../../files/actionModals/useSelectFolderModal'
+import { IFolder } from '../../files/files.types'
+import { ActionsDropdownContent } from '../../home/ActionDropdownContent'
 import { Attachment, AttachmentType, FormAttachments, NoteForm } from '../discussions.types'
 import { typeAttachmentKey } from '../helpers'
-import { useSelectJobModal } from '../../executions/actionModals/useSelectJobModal'
 
 export function Attachments({
   setValue,
@@ -31,7 +31,6 @@ export function Attachments({
     type: AttachmentType,
     selected: IAccessibleFile[] | IFolder[] | IAsset[] | IApp[] | IJob[] | IComparison[],
   ) => {
-
     if (visualViewport) {
       const k = typeAttachmentKey[type]
       const newAttachments: Attachment[] = attachments[k] || []
@@ -43,7 +42,7 @@ export function Attachments({
             type,
             name: attachment.title,
             scope: attachment.scope,
-            link: ''
+            link: '',
           })
         }
       })
@@ -51,46 +50,38 @@ export function Attachments({
     }
   }
 
-  const { modalComp: filesModalComp, setShowModal: setFilesShowModal } =
-    useSelectFileModal(
-      'Select Files',
-      'checkbox',
-      v => onChangeHandler('UserFile', v),
-      '',
-      [scope, 'public'],
-    )
+  const { modalComp: filesModalComp, setShowModal: setFilesShowModal } = useSelectFileModal(
+    'Select Files',
+    'checkbox',
+    v => onChangeHandler('UserFile', v),
+    '',
+    [scope, 'public'],
+  )
 
-  const { modalComp: foldersModalComp, setShowModal: setFoldersShowModal } =
-    useSelectFolderModal(
-      'Select Folders',
-      v => onChangeHandler('Folder', v),
-      '',
-      [scope],
-    )
+  const { modalComp: foldersModalComp, setShowModal: setFoldersShowModal } = useSelectFolderModal(
+    'Select Folders',
+    v => onChangeHandler('Folder', v),
+    '',
+    [scope],
+  )
 
+  const { modalComp: appsModalComp, setShowModal: setAppsShowModal } = useSelectAppModal(
+    'Select Apps',
+    'checkbox',
+    v => onChangeHandler('App', v),
+    '',
+    [scope, 'public'],
+  )
 
-  const { modalComp: appsModalComp, setShowModal: setAppsShowModal } =
-    useSelectAppModal(
-      'Select Apps',
-      'checkbox',
-      v => onChangeHandler('App', v),
-      '',
-      [scope, 'public'],
-    )
+  const { modalComp: assetsModalComp, setShowModal: setAssetsShowModal } = useSelectAssetModal(
+    'Select Assets',
+    'checkbox',
+    v => onChangeHandler('Asset', v),
+    '',
+    [scope, 'public'],
+  )
 
-  const { modalComp: assetsModalComp, setShowModal: setAssetsShowModal } =
-    useSelectAssetModal(
-      'Select Assets',
-      'checkbox',
-      v => onChangeHandler('Asset', v),
-      '',
-      [scope, 'public'],
-    )
-
-  const {
-    modalComp: comparisonsModalComp,
-    setShowModal: setComparisonsShowModal,
-  } = useSelectComparisonModal(
+  const { modalComp: comparisonsModalComp, setShowModal: setComparisonsShowModal } = useSelectComparisonModal(
     'Select Comparisons',
     'checkbox',
     v => onChangeHandler('Comparison', v),
@@ -98,14 +89,13 @@ export function Attachments({
     [scope, 'public'],
   )
 
-  const { modalComp: jobModalComp, setShowModal: setJobShowModal } =
-    useSelectJobModal(
-      'Select Jobs',
-      'checkbox',
-      v => onChangeHandler('Job', v),
-      '',
-      [scope, 'public'],
-    )
+  const { modalComp: jobModalComp, setShowModal: setJobShowModal } = useSelectJobModal(
+    'Select Jobs',
+    'checkbox',
+    v => onChangeHandler('Job', v),
+    '',
+    [scope, 'public'],
+  )
 
   return (
     <>
@@ -149,12 +139,7 @@ export function Attachments({
         }
       >
         {dropdownProps => (
-          <Button
-            type="button"
-            {...dropdownProps}
-            data-testid="admin-users-resource-button"
-            active={dropdownProps.isActive}
-          >
+          <Button type="button" {...dropdownProps} data-testid="admin-users-resource-button" active={dropdownProps.isActive}>
             Select Attachment
           </Button>
         )}
