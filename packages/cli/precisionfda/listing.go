@@ -5,7 +5,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/url"
+	"os"
 	"strconv"
+	"strings"
+	"text/tabwriter"
 )
 
 // apiConfig holds configuration for making API calls.
@@ -14,6 +17,31 @@ type apiConfig struct {
 	Endpoint string
 	SpaceID  string
 	Flags    map[string]bool
+}
+
+// better name needed
+type jsonFileResponse struct {
+	Id        int    `json:"id"`
+	Uid       string `json:"uid"`
+	Name      string `json:"name"`
+	Type      string `json:"type"`
+	Locked    bool   `json:"locked"`
+	State     string `json:"state"`
+	AddedBy   string `json:"added_by"`
+	CreatedAt string `json:"created_at"`
+	Size      int64  `json:"file_size"`
+	// populated for Folders only
+	Children int `json:"children,omitempty"`
+}
+
+type jsonMetaResponse struct {
+	Scope string `json:"scope"`
+	Path  string `json:"path"`
+}
+
+type jsonListingResponse struct {
+	Meta  jsonMetaResponse   `json:"meta"`
+	Files []jsonFileResponse `json:"files"`
 }
 
 // lsResource generic function to list various resources.
@@ -117,4 +145,92 @@ func (c *PFDAClient) LsMembers(spaceID string) error {
 
 	printSpaceMembersResponse(members, c.JsonResponse)
 	return nil
+}
+
+func printListingVerbose(files []jsonFileResponse, meta jsonMetaResponse) {
+	if len(files) == 0 {
+		return
+	}
+	fmt.Printf("Scope: %s\nPath: %s\n\n", meta.Scope, meta.Path)
+
+	isSpaceOrPublicContext := strings.Contains(meta.Scope, "space") || strings.Contains(meta.Scope, "Public")
+	writer := tabwriter.NewWriter(os.Stdout, 0, 8, 2, '\t', tabwriter.AlignRight)
+
+	// Function to join and print a line
+	printLine := func(columns ...string) {
+		fmt.Fprintln(writer, strings.Join(columns, "\t")+"\t")
+	}
+
+	// Determine the headers based on the context
+	headers := []string{"File/Folder ID", "State", "Type", "Status", "Size", "Created"}
+	if isSpaceOrPublicContext {
+		headers = append(headers, "Added By")
+	}
+	headers = append(headers, "Name")
+	printLine(headers...)
+
+	for _, file := range files {
+		columns := []string{
+			getFileID(file),
+			file.State,
+			file.Type,
+			helpers.FormatValue(file.Locked, "Locked"),
+			getFileSize(file),
+			file.CreatedAt,
+		}
+		if isSpaceOrPublicContext {
+			columns = append(columns, file.AddedBy)
+		}
+		columns = append(columns, file.Name)
+		printLine(columns...)
+	}
+	writer.Flush()
+}
+
+// pass all flags, so we can optimize the table header - if in 'private' do not show added-by
+func printListingResponse(response jsonListingResponse, asJSON bool, brief bool) {
+	if asJSON {
+		prettyJSON, _ := json.MarshalIndent(response, "", "  ")
+		fmt.Println(string(prettyJSON))
+	} else if brief {
+		printListingSimple(response.Files)
+	} else {
+		printListingVerbose(response.Files, response.Meta)
+	}
+}
+
+func printListingSimple(files []jsonFileResponse) {
+	if len(files) == 0 {
+		return
+	}
+
+	writer := tabwriter.NewWriter(os.Stdout, 0, 8, 1, '\t', tabwriter.AlignRight)
+
+	// Function to join and print a line
+	printLine := func(columns []string) {
+		fmt.Fprintln(writer, strings.Join(columns, "\t")+"\t")
+	}
+
+	// Print header
+	printLine([]string{"File/Folder ID", "Name"})
+
+	for _, file := range files {
+		printLine([]string{getFileID(file), file.Name})
+	}
+
+	writer.Flush()
+}
+
+func getFileID(file jsonFileResponse) string {
+	if file.Type == "UserFile" {
+		return file.Uid
+	}
+	return strconv.Itoa(file.Id)
+}
+
+func getFileSize(file jsonFileResponse) string {
+	if file.Type == "UserFile" {
+		return helpers.HumanReadableSize(file.Size)
+	}
+	return ""
 }
