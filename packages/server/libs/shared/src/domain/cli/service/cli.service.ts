@@ -8,6 +8,7 @@ import {
   CliWorkflowDescribeDTO,
 } from '@shared/domain/cli/dto/CliDescribeDTO'
 import { CliDiscussionDTO } from '@shared/domain/cli/dto/CliDiscussionDTO'
+import { CliNodeSearchDTO } from '@shared/domain/cli/dto/CliNodeSearchDTO'
 import { CliSpaceMemberDTO } from '@shared/domain/cli/dto/CliSpaceMemberDTO'
 import {
   AnswerDTO,
@@ -18,11 +19,17 @@ import { DiscussionService } from '@shared/domain/discussion/services/discussion
 import { EntityFetcherService, UID } from '@shared/domain/entity/entity-fetcher.service'
 import { Job } from '@shared/domain/job/job.entity'
 import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
+import { SPACE_MEMBERSHIP_ROLE } from '@shared/domain/space-membership/space-membership.enum'
 import { Space } from '@shared/domain/space/space.entity'
+import { getScopeFromSpaceId } from '@shared/domain/space/space.helper'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
-import { IFileOrAsset } from '@shared/domain/user-file/user-file.types'
-import { NotFoundError } from '@shared/errors'
+import { Folder } from '@shared/domain/user-file/folder.entity'
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
+import { FILE_STI_TYPE, IFileOrAsset } from '@shared/domain/user-file/user-file.types'
+import { STATIC_SCOPE } from '@shared/enums'
+import { NotFoundError, PermissionError } from '@shared/errors'
 import { PlatformClient } from '@shared/platform-client'
+import { SCOPE } from '@shared/types/common'
 
 @Injectable()
 export class CliService {
@@ -182,5 +189,62 @@ export class CliService {
       throw new NotFoundError('Job not found or not accessible')
     }
     return { scope: jobs[0].scope }
+  }
+
+  async findNodes(input: CliNodeSearchDTO) {
+
+    const { folderId, spaceId, arg, type } = input
+
+    const parentFolder = !spaceId ? folderId : null
+    const scope = spaceId ? getScopeFromSpaceId(spaceId) : STATIC_SCOPE.PRIVATE
+    const scopedParentFolderId = spaceId ? folderId : null
+
+    const spaces = await this.em.find(Space, {
+      spaceMemberships: {
+        user: { id: this.user.id },
+        role: {
+          $in: [
+            SPACE_MEMBERSHIP_ROLE.ADMIN,
+            SPACE_MEMBERSHIP_ROLE.LEAD,
+            SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR,
+          ],
+        },
+      },
+    })
+
+    const spaceScopes = spaces.map((s) => `space-${s.id}`)
+    if (spaceId && !spaceScopes.includes(scope)) {
+      throw new PermissionError("You don't have permission to access this space or remove files in it!")
+    }
+
+    let result: UserFile[] | Folder[]
+
+    if (type === 'Folder') {
+      result = await this.em.find(Folder, {
+        $or: [
+          { userId: this.user.id, scope: STATIC_SCOPE.PRIVATE },
+          { scope: { $in: spaceScopes as SCOPE[] } },
+        ],
+        $and: [{ id: arg as any }, { stiType: FILE_STI_TYPE.FOLDER }],
+      });
+
+      for (const folder of result) {
+        await folder.children.init()
+      }
+    } else {
+      result = await this.em.find(UserFile, {
+        $or: [
+          { user: this.user.id, scope: STATIC_SCOPE.PRIVATE, parentFolder },
+          { scope: { $in: spaceScopes as SCOPE[] }, scopedParentFolder: scopedParentFolderId },
+        ],
+        $and: [
+          { name: { $like: arg } },
+          { stiType: FILE_STI_TYPE.USERFILE },
+          { scope: scope as SCOPE },
+        ],
+      })
+    }
+
+    return result
   }
 }
