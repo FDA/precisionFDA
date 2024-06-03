@@ -25,7 +25,6 @@ const EditFolderInfoForm = ({
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-    reset,
     setError,
   } = useForm({
     defaultValues: {
@@ -35,11 +34,11 @@ const EditFolderInfoForm = ({
 
   const mutation = useMutation({
     mutationKey: ['edit-folder'],
-    mutationFn: async (payload: { name: string; folderId: string }) => editFolderRequest(payload),
+    mutationFn: async (payload: { name: string; folderId: number }) => editFolderRequest(payload),
     onSuccess: (res) => {
       if(res?.error?.type) {
         // parsing the error from backend to human-readable message
-        setError('name', {message: res.error.message.replace(/[\[\]"]+/g, ''), type: 'validate'})
+        setError('name', { message: res.error.message.replace(/[\[\]"]+/g, ''), type: 'validate' })
         return
       }
       queryClient.invalidateQueries({
@@ -53,7 +52,7 @@ const EditFolderInfoForm = ({
     },
   })
 
-  const onSubmit = async (vals: any) => {
+  const onSubmit = async (vals: {name: string}) => {
     await mutation.mutateAsync({ name: vals.name, folderId: folder.id })
   }
 
@@ -62,7 +61,6 @@ const EditFolderInfoForm = ({
       <FieldGroup>
         <label>Folder Name</label>
         <InputText
-          label="Folder Name"
           {...register('name', { required: 'Name is required.' })}
           placeholder="Edit name..."
           disabled={isSubmitting}
@@ -88,6 +86,7 @@ export const useEditFolderModal = (selectedItem: IFile) => {
 
   const modalComp = isShown && (
     <Modal
+      id="modal-folder-edit"
       data-testid="modal-folder-edit"
       headerText="Edit folder info"
       isShown={isShown}

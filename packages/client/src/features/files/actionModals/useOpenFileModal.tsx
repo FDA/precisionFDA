@@ -11,7 +11,6 @@ import { ButtonRow, Footer, ModalScroll } from '../../modal/styles'
 import { useModal } from '../../modal/useModal'
 import { IFile } from '../files.types'
 
-
 const StyledResourceTable = styled(ResourceTable)`
   padding: 8px;
   min-width: 400px;
@@ -32,6 +31,7 @@ export const useOpenFileModal = (selectedFiles: IFile[]) => {
   const momoSelected = useMemo(() => selectedFiles, [isShown])
   const modalComp = isShown && (
     <ModalNext
+      id="modal-files-organize"
       data-testid="modal-files-organize"
       headerText={`Open ${momoSelected.length} ${pluralize('item', momoSelected.length)}`}
       isShown={isShown}

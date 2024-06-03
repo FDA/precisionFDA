@@ -101,7 +101,7 @@ export async function editFileRequest({ name, description, fileId }: { name: str
   return res.json()
 }
 
-export async function editFolderRequest({ name, folderId }: { name: string; folderId?: string }) {
+export async function editFolderRequest({ name, folderId }: { name: string; folderId?: number }) {
   const res = await (
     await fetch('/api/folders/rename_folder', {
       ...getApiRequestOpts('POST'),
