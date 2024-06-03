@@ -81,28 +81,7 @@ type nodeQueryFilter = {
   locked?: boolean
 }
 
-const CLINodeSearchSchema: JSONSchema7 = {
-  type: 'object',
-  properties: {
-    arg: { type: 'string' },
-    spaceId: { type: ['number', 'null'] },
-    folderId: { type: ['number', 'null'] },
-    type: { type: 'string' },
-  },
-  required: ['arg', 'type'],
-  additionalProperties: false,
-}
-
-type CLINodeSearchInput = {
-  arg: string
-  type: string
-  spaceId?: number
-  folderId?: number
-}
-
 export {
-  CLINodeSearchInput,
-  CLINodeSearchSchema,
   IdsInput,
   NodesInput,
   RenameFolderInput,
