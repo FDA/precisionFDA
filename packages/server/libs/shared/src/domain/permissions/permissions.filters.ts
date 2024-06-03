@@ -1,5 +1,4 @@
 import { STATIC_SCOPE } from "../../enums"
-import { User } from "../user/user.entity"
 import { getScopeFromSpaceId } from "../space/space.helper"
 
 

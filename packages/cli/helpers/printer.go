@@ -193,7 +193,7 @@ func PrintDownloadHelp() int {
 	writeLine("  ", "download outputs_334_1.csv -output \"data/results_final.csv\" [Downloads the file to existing folder named \"data\" with new name \"results_final.csv\"]")
 	writeLine("  ", "download 'data*.csv' -folder-id 1222 -overwrite true [Downloads only CSV files with 'data' in their name from folder (id:1222) and overwrites already existing files if exist]")
 	writeLine("  ", "download file-GJk1kpQ05xgQd8bP54kJFjzkz-1 file-YZm9QpQ0b69Qd8bP454kmcf76-2 [Downloads multiple files to the current working directory]")
-	writeLine("  ", "download results.csv results_final.csv -folder-id 2221 [Downloads multiple files by name from folder (id:2221) to the current working directory]\n")
+	writeLine("  ", "download results.csv results_final.csv -folder-id 2221 [Downloads multiple files by name from folder (id:2221) to the current working directory]")
 	writeLine("  ", "download -space-id 27 -folder-id root -recursive [Downloads recursively from the root folder of the Space]\n")
 	writeLine("  Flags:", "All flags listed below are OPTIONAL")
 	writeLine("   -h, -help", "Displays this help message and exit")
@@ -425,7 +425,7 @@ func PrintViewLinkHelp() int {
 	writeLine := newLineWriter(writer)
 
 	writeLine("  ", "  ")
-	writeLine("  For:", "Get view link of the file. You can choose between protected and pre-authenticated links.\nPre-authenticated links are valid for 24 hours by default, unless -duration flag is specified.\n")
+	writeLine("  For:", "Get view link of the file. You can choose between protected and pre-authenticated links.\n\tPre-authenticated links are valid for 24 hours by default, unless -duration flag is specified.\n")
 	writeLine("  Usage:", "view-link <FILE_ID> [FLAG...]\n")
 	writeLine("  Examples:", "view-link file-GbKF3qQ0Z0gqk80j1QF47K8j-1 [Prints view link for specified file.]\n")
 	writeLine(" ", "view-link file-GbKF3qQ0Z0gqk80j1QF47K8j-1 -auth [Prints pre-authenticated view link for specified file.]\n")

@@ -93,7 +93,7 @@ export const CLI = () => {
         <h2 id="download">Download the CLI</h2>
         <ButtonRow>
           <a
-            href="https://pfda-production-static-files.s3.amazonaws.com/cli/pfda-linux-2.7.0.tar.gz"
+            href="https://pfda-production-static-files.s3.amazonaws.com/cli/pfda-linux-2.7.1.tar.gz"
             target="_blank"
             rel="noreferrer"
           >
@@ -102,7 +102,7 @@ export const CLI = () => {
             </Button>
           </a>
           <a
-            href="https://pfda-production-static-files.s3.amazonaws.com/cli/pfda-darwin-2.7.0.tar.gz"
+            href="https://pfda-production-static-files.s3.amazonaws.com/cli/pfda-darwin-2.7.1.tar.gz"
             target="_blank"
             rel="noreferrer"
           >
@@ -111,7 +111,7 @@ export const CLI = () => {
             </Button>
           </a>
           <a
-            href="https://pfda-production-static-files.s3.amazonaws.com/cli/pfda-windows-2.7.0.zip"
+            href="https://pfda-production-static-files.s3.amazonaws.com/cli/pfda-windows-2.7.1.zip"
             target="_blank"
             rel="noreferrer"
           >
@@ -1283,6 +1283,7 @@ export const CLI = () => {
         <h2 id="changelog">pFDA CLI Changelog</h2>
         <br/>
 
+        <p>Version 2.7.1 (05/31/2024): ls shows files and folders in all states </p>
         <p>Version 2.7.0 (05/16/2024): Fixed file-upload bug, various improvements </p>
         <p>Version 2.6.0 (04/02/2024): New features: describe, ls-assets, ls-apps, ls-executions, ls-workflows, ls-discussions </p>
         <p>Version 2.5.0 (12/14/2023): Support of JSON responses, upload-file bug fixes.</p>

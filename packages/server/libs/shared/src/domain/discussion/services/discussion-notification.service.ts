@@ -8,7 +8,6 @@ import { EntityService } from '@shared/domain/entity/entity.service'
 import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
 import { Space } from '@shared/domain/space/space.entity'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
-import { User } from '@shared/domain/user/user.entity'
 import {
   DiscussionEmailInput,
   spaceDiscussionTemplate,
@@ -30,12 +29,6 @@ export class DiscussionNotificationService {
       { spaces: space.id, active: true },
       { populate: ['user'] },
     )
-    const adminUser = await this.em.getRepository(User).findAdminUser()
-    const sender: UserContext = {
-      id: adminUser.id,
-      dxuser: adminUser.dxuser,
-      accessToken: 'notUsed',
-    }
     for (const member of spaceMemberships) {
       if (member.user.id === this.userCtx.id) {
         // ignore the user who is posting the discussion
@@ -48,7 +41,7 @@ export class DiscussionNotificationService {
         subject: `[precisionFDA] Discussion update notification: ${space.name}`,
         body: emailBody,
       } as EmailSendInput
-      await this.emailQueueJobProducer.createSendEmailTask(emailTask, sender)
+      await this.emailQueueJobProducer.createSendEmailTask(emailTask, this.userCtx)
     }
   }
 
