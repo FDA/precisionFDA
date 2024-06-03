@@ -99,7 +99,7 @@ module Api
     end
 
     # GET /api/files/cli
-    # Used by CLI. Get all nodes accessible by current user.
+    # Used by CLI. Get all nodes accessible by current user, including those currently being removed.
     # Allows filtering by space_id and/or folder_id.
     # Allows filtering files/folders only.
     def cli
@@ -109,7 +109,7 @@ module Api
       folders = []
       unless params[:folders_only] == "true"
         # rubocop:disable Layout/LineLength
-        files = params[:public_scope] ? UserFile.real_files.not_removing.accessible_by_public : UserFile.real_files.not_removing.accessible_by_private.where(user: @context.user)
+        files = params[:public_scope] ? UserFile.real_files.accessible_by_public : UserFile.real_files.accessible_by_private.where(user: @context.user)
         # rubocop:enable Layout/LineLength
         files = files.where(parent_folder_id: @parent_folder_id).
           where.not(parent_type: ["Comparison", nil]).
@@ -148,19 +148,17 @@ module Api
     # Used by CLI exclusively with a custom response mapping.
     def cli_node_search
       res = https_apps_client.cli_node_search(params[:name], params[:type], params[:space_id], params[:parent_folder_id])
+      user_files = res.map do |node|
 
-      # temporary custom CLI mapping - can be removed once CLI is communication with node backend without a middle man.
-      merged = res[:files] + res[:folders]
-      user_files = merged.map do |node|
         n = {
-          id: node[:id],
-          uid: node[:uid],
-          type: node[:stiType],
-          name: node[:name],
-          file_size: node[:fileSize],
-          created_at: node[:createdAt].to_datetime.strftime("%Y-%m-%d %H:%M:%S"),
+          id: node["id"],
+          uid: node["uid"],
+          type: node["stiType"],
+          name: node["name"],
+          file_size: node["fileSize"],
+          created_at: node["createdAt"].to_datetime.strftime("%Y-%m-%d %H:%M:%S"),
         }
-        n.merge!({ children: node[:children].length }) if node[:stiType] == "Folder"
+        n.merge!({ children: node["children"].length }) if node["stiType"] == "Folder"
         n
       end
       if user_files.blank?

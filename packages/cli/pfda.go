@@ -1,5 +1,5 @@
 // PrecisionFDA CLI
-// Version 2.7.0
+// Version 2.7.1
 package main
 
 import (
@@ -26,7 +26,7 @@ const defaultChunkSize = 1 << 26 // default 64MB (min. 16MB)
 const defaultSkipVerify = "false"
 const usageString = `
 ****************************
-PFDA COMMAND LINE TOOL v2.7.0
+PFDA COMMAND LINE TOOL v2.7.1
 ****************************
 
 To upload a file:
@@ -882,7 +882,7 @@ func mainInternal() int {
 	default:
 		// Invalid, non-empty command
 		// both 'upload-resource' and 'refresh-key' are intentionally omitted.
-		return helpers.ErrorFromString(fmt.Sprintf("Command '%s' not found. Must be one of: \n'cat' \n'describe' \n'download' \n'get-scope' \n'head' \n'ls' \n'ls-apps' \n'ls-assets' \n'ls-executions' \n'ls-members' \n'ls-discussions' \n'ls-spaces' \n'ls-workflows' \n'mkdir' \n'rm' \n'rmdir' \n'upload-asset' \n'upload-file'\n 'view-link'\n", *command), *flagJson)
+		return helpers.ErrorFromString(fmt.Sprintf("Command '%s' not found. Must be one of: \n'cat' \n'describe' \n'download' \n'get-scope' \n'head' \n'ls' \n'ls-apps' \n'ls-assets' \n'ls-executions' \n'ls-members' \n'ls-discussions' \n'ls-spaces' \n'ls-workflows' \n'mkdir' \n'rm' \n'rmdir' \n'upload-asset' \n'upload-file' \n'view-link'\n", *command), *flagJson)
 	}
 
 	// Write configuration and save key
