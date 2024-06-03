@@ -12,17 +12,13 @@ import {
 import { ServerScope } from '../../home/types'
 import { fetchFolderChildren } from '../files.api'
 import { FileTree } from '../FileTree'
+import { CustomDataNode, SelectionDetails } from '../files.types'
+import { findById } from '../file.utils'
 
 interface SelectorProps {
   scopes: string[]
   setShowModal: (show: boolean) => void
-  handleSelect: (folders: Selected[]) => void
-}
-
-type Selected = {
-  title: string,
-  id: number,
-  scope: ServerScope,
+  handleSelect: (folders: CustomDataNode[]) => void
 }
 
 const FolderSelector = ({
@@ -30,22 +26,11 @@ const FolderSelector = ({
   setShowModal,
   handleSelect,
 }: SelectorProps) => {
-  const [selectedFolders, setSelectedFolders] = useState<Selected[]>([])
+  const [selectedFolders, setSelectedFolders] = useState<CustomDataNode[]>([])
 
   const spaceId = getSpaceIdFromScope(scopes[0] as ServerScope)
 
-  function findById(tree: any[], nodeId: number): any {
-    for (const node of tree) {
-      if (node.key === nodeId) return node
-      if (node.children) {
-        const desiredNode = findById(node.children, nodeId)
-        if (desiredNode) return desiredNode
-      }
-    }
-    return false
-  }
-
-  const addFolder = (folders: Selected[]) => {
+  const addFolder = (folders: CustomDataNode[]) => {
     setSelectedFolders(folders)
   }
 
@@ -54,23 +39,24 @@ const FolderSelector = ({
     setShowModal(false)
   }
 
-
-  const [treeData, setTreeData] = useImmer<any>([
-    { key: 'ROOT', title: '/', children: [] },
+  const [treeData, setTreeData] = useImmer<CustomDataNode[]>([
+    { key: 'ROOT', title: '/', children: []} as unknown as CustomDataNode,
   ])
 
-  const onSelect = (_:never, details: any) => {
-    const folders = details.selectedNodes.filter(n => n.key !== 'ROOT').map((node: any) => {
-      return {
-        title: node.title,
-        id: node.key,
-        scope: scopes[0],
-      }
-    })
+  const onSelect = (_: never, details: SelectionDetails) => {
+    const folders = details.selectedNodes
+      .filter(n => n.key !== 'ROOT')
+      .map(node => {
+        return {
+          title: node.title,
+          id: node.key,
+          scope: scopes[0],
+        } as unknown as CustomDataNode
+      })
     addFolder(folders)
   }
 
-  const loadData = async (node:any) => {
+  const loadData = async (node: CustomDataNode) => {
     const { nodes } = await fetchFolderChildren(
       'public',
       spaceId,
@@ -78,14 +64,14 @@ const FolderSelector = ({
     )
 
     const children = nodes
-      .filter((e: any) => e.type === 'Folder')
-      .map((d: any) => ({
+      .filter((e) => e.type === 'Folder')
+      .map((d) => ({
         key: d.id,
         title: d.name,
         children: [],
-        parent: node,
-      }))
-    setTreeData((draft: any) => {
+        parent: d.path[d.path.length-1],
+      } as CustomDataNode))
+    setTreeData((draft: CustomDataNode[]) => {
       const folder = findById(draft, node.key)
       if (folder) {
         folder.children = children
@@ -102,7 +88,7 @@ const FolderSelector = ({
           loadData={loadData}
           treeData={treeData}
           onSelect={onSelect}
-          multiple={true}
+          multiple
         />
       </ModalScroll>
       <Footer>
@@ -134,7 +120,7 @@ const FolderSelector = ({
  */
 export const useSelectFolderModal = (
   title: string,
-  handleSelect: (folders: Selected[]) => void,
+  handleSelect: (folders: CustomDataNode[]) => void,
   subtitle?: string,
   scopes?: string[],
 ) => {

@@ -37,24 +37,28 @@ const DeleteFiles = ({
 }) => {
   const { data, isLoading } = useQuery({
     queryKey: ['download_list', selected],
-    queryFn: () => {
+    queryFn: async () => {
       // Group files by scope name
       const filesByScopes = new Map<string, IFile[]>()
-      for (const file of selected) {
+      selected.forEach(file => {
         if (!filesByScopes.has(file.scope)) {
           filesByScopes.set(file.scope, [])
         }
-        filesByScopes.get(file.scope).push(file)
-      }
+        const files = filesByScopes.get(file.scope)
+        if (files) {
+          files.push(file)
+        }
+      })
 
       const promises: Promise<DownloadListResponse[]>[] = []
-      for (const [scope, files] of filesByScopes) {
+      filesByScopes.forEach((files, scope) => {
         promises.push(fetchFilesDownloadList(
-            files.map(s => s.id),
-            'delete',
-            scope,
+          files.map(s => s.id),
+          'delete',
+          scope,
         ))
-      }
+      })
+
       return Promise.all(promises).then(fileArrays => Promise.resolve(fileArrays.flat()))
     },
   })
