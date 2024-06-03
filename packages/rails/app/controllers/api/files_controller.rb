@@ -519,6 +519,9 @@ module Api
 
       response.headers["Content-Type"] = resp["Content-Type"]
       response.headers["Content-Disposition"] = resp["Content-Disposition"]
+      response.headers['Cache-Control'] = 'public, max-age=86400' # 24 hours in seconds
+      response.headers['Expires'] = 24.hours.from_now.httpdate
+      response.headers["ETag"] = "0"
 
       resp.read_body do |chunk|
         response.stream.write chunk

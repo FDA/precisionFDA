@@ -1,17 +1,17 @@
 import { yupResolver } from '@hookform/resolvers/yup'
 import React, { useEffect } from 'react'
 import { Controller, useForm } from 'react-hook-form'
+import ReactTooltip from 'react-tooltip'
 import styled from 'styled-components'
 import * as Yup from 'yup'
-import ReactTooltip from 'react-tooltip'
+import { Button } from '../../../components/Button'
 import { Checkbox } from '../../../components/Checkbox'
 import { MarkdownEditor } from '../../../components/Markdown/MarkdownEditor'
 import { CheckboxLabel } from '../../../components/form/styles'
-import { NoteScope } from '../api'
-import { Attachments } from './Attachments'
 import { AttachmentsList } from '../AttachmentsList'
+import { NoteScope } from '../api'
 import { NoteForm } from '../discussions.types'
-import { Button } from '../../../components/Button'
+import { Attachments } from './Attachments'
 
 const StyledForm = styled.form`
   display: flex;
@@ -75,6 +75,7 @@ export const MarkdownForm = ({
     defaultValues: {
       content: '',
       isAnswer: false,
+      notifyAll: false,
       attachments: {
         files: [],
         apps: [],
@@ -102,16 +103,15 @@ export const MarkdownForm = ({
     setValue(key, newAttachments)
   }
 
+  const { attachments } = watch()
+
   return (
     <StyledForm id="commentForm" autoComplete="off">
       <Controller
         control={control}
         name="content"
         render={({ field }) => (
-          <MarkdownEditor
-            field={{ ...field, ref: markdownInputRef || field.ref }}
-            disabled={isSubmitting}
-          />
+          <MarkdownEditor field={{ ...field, ref: markdownInputRef || field.ref }} disabled={isSubmitting} />
         )}
       />
 
@@ -120,45 +120,39 @@ export const MarkdownForm = ({
           name="attachments"
           control={control}
           render={({ field }) => (
-            <AttachmentsList
-              scope={scope}
-              attachments={field.value}
-              onRemoveAttachment={deleteAttachment}
-            />
+            <AttachmentsList scope={scope} attachments={field.value} onRemoveAttachment={deleteAttachment} />
           )}
         />
       )}
 
       <ButtonRow>
-        {watch().isAnswer && <Attachments scope={scope} setValue={setValue} />}
+        {watch().isAnswer && <Attachments scope={scope} setValue={setValue} attachments={attachments} />}
         {!isEdit && !isAnswerComment && isComment && (
           <>
             <CheckboxLabel data-tip data-for="answer-checkbox">
               <Checkbox
                 {...register('isAnswer')}
                 disabled={isSubmitting || !canUserAnswer}
-                onChange={(event: any) =>
-                  setValue('isAnswer', event.target.checked)
-                }
+                onChange={(event: any) => setValue('isAnswer', event.target.checked)}
               />
               Mark as Answer
             </CheckboxLabel>
-            <ReactTooltip
-              id="answer-checkbox"
-              delayShow={1000}
-              type="dark"
-              effect="solid"
-              disable={canUserAnswer}
-            >
+            <ReactTooltip id="answer-checkbox" delayShow={1000} type="dark" effect="solid" disable={canUserAnswer}>
               You have already submitted an answer on this discussion.
             </ReactTooltip>
           </>
         )}
-        {isComment && (isEdit || isAnswerComment) && (
-          <Button onClick={() => onCancel && onCancel(getValues())}>
-            Cancel
-          </Button>
+        {!isEdit && (isComment || isAnswerComment) && (
+          <CheckboxLabel data-tip data-for="notify-checkbox">
+            <Checkbox
+              {...register('notifyAll')}
+              disabled={isSubmitting}
+              onChange={(event: React.ChangeEvent<HTMLInputElement>) => setValue('notifyAll', event.target.checked)}
+            />
+            Notify All Members
+          </CheckboxLabel>
         )}
+        {isComment && (isEdit || isAnswerComment) && <Button onClick={() => onCancel && onCancel(getValues())}>Cancel</Button>}
         <Button
           variant="primary"
           type="button"
