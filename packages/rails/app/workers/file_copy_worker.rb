@@ -67,6 +67,12 @@ class FileCopyWorker < ApplicationWorker
     }
 
     https_apps_client.send_notification(notification)
+  rescue => e
+    logger.error "An error occurred: #{e.message}"
+    logger.error e.backtrace.join("\n")
+    raise
+  ensure
+    RequestContext.end_request
   end
 
   private

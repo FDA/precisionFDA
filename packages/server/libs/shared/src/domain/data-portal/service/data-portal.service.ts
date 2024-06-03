@@ -75,15 +75,17 @@ export class DataPortalService {
 
     if (await this.hasRoles(dataPortal, this.viewRoles, this.user.id)) {
       return await Promise.all(
-        dataPortal.resources.getItems().map(async (r) => {
-          return {
-            id: r.id,
-            name: r.userFile.getEntity().name,
-            url: await this.userFileService.getDownloadLink(r.userFile.getEntity(), {
-              inline: true,
-            }),
-          }
-        }),
+        dataPortal.resources.getItems()
+          .sort((a, b) => a.name.localeCompare(b.name))
+          .map(async (r) => {
+            return {
+              id: r.id,
+              name: r.userFile.getEntity().name,
+              url: await this.userFileService.getDownloadLink(r.userFile.getEntity(), {
+                inline: true,
+              }),
+            }
+          }),
       )
     } else {
       return []

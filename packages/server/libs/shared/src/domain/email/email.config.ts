@@ -1,32 +1,18 @@
 import { config } from '@shared/config'
-import {
-  ChallengeOpenedEmailHandler
-} from '@shared/domain/email/templates/handlers/challenge-opened.handler'
-import {
-  ChallengePreregEmailHandler
-} from '@shared/domain/email/templates/handlers/challenge-prereg.handler'
-import {
-  CommentAddedEmailHandler
-} from '@shared/domain/email/templates/handlers/comment-added.handler'
-import {
-  ContentChangedEmailHandler
-} from '@shared/domain/email/templates/handlers/content-change.handler'
+import { ChallengeOpenedEmailHandler } from '@shared/domain/email/templates/handlers/challenge-opened.handler'
+import { ChallengePreregEmailHandler } from '@shared/domain/email/templates/handlers/challenge-prereg.handler'
+import { CommentAddedEmailHandler } from '@shared/domain/email/templates/handlers/comment-added.handler'
+import { ContentChangedEmailHandler } from '@shared/domain/email/templates/handlers/content-change.handler'
 import { JobFailedEmailHandler } from '@shared/domain/email/templates/handlers/job-failed.handler'
-import {
-  JobFinishedEmailHandler
-} from '@shared/domain/email/templates/handlers/job-finished.handler'
-import {
-  MemberChangedEmailHandler
-} from '@shared/domain/email/templates/handlers/member-change.handler'
-import {
-  SpaceChangedEmailHandler
-} from '@shared/domain/email/templates/handlers/space-change.handler'
+import { JobFinishedEmailHandler } from '@shared/domain/email/templates/handlers/job-finished.handler'
+import { MemberChangedEmailHandler } from '@shared/domain/email/templates/handlers/member-change.handler'
+import { SpaceChangedEmailHandler } from '@shared/domain/email/templates/handlers/space-change.handler'
 import { SpaceEvent } from '@shared/domain/space-event/space-event.entity'
 import { User } from '@shared/domain/user/user.entity'
-import { stringValues, stringValuesDowncased } from '@shared/utils/enum-utils'
 import { schemas } from '@shared/utils/base-schemas'
-import { groupBy, map, mergeAll, pipe, prop } from 'ramda'
+import { stringValues, stringValuesDowncased } from '@shared/utils/enum-utils'
 import type { JSONSchema7 } from 'json-schema'
+import { groupBy, map, mergeAll, pipe, prop } from 'ramda'
 import { AnyObject, OpsCtx } from '../../types'
 import { SPACE_EVENT_ACTIVITY_TYPE } from '../space-event/space-event.enum'
 import { SPACE_MEMBERSHIP_ROLE } from '../space-membership/space-membership.enum'
@@ -123,7 +109,7 @@ const NOTIFICATION_PRIVATE = {
 }
 
 // we use as any here to overwrite mergeAll type declaration
-export const NOTIFICATION_TYPES:   Partial<typeof NOTIFICATION_TYPES_ADMIN> &
+export const NOTIFICATION_TYPES: Partial<typeof NOTIFICATION_TYPES_ADMIN> &
   Partial<typeof NOTIFICATION_TYPES_REVIEWER> &
   Partial<typeof NOTIFICATION_TYPES_SPONSOR> &
   Partial<typeof NOTIFICATION_TYPES_REVIEWER_LEAD> &
@@ -255,7 +241,7 @@ export type EmailProcessInput = {
 }
 
 export type EmailSendInput = {
-  emailType: EMAIL_TYPES,
+  emailType: EMAIL_TYPES
   to: string
   subject: string
   body: string
@@ -300,6 +286,7 @@ export enum EMAIL_TYPES {
   jobFailed = 11,
   adminDataConsistencyReport = 12,
   userDataConsistencyReport = 13,
+  spaceDiscussion = 14,
 }
 
 export type EmailConfigItem = {

@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import React from 'react'
-import { useNavigate, useLocation } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import { PageTitle } from '../../../components/Page/styles'
 import { getSpaceIdFromScope } from '../../../utils'
@@ -29,13 +29,12 @@ export const CreateDiscussionPage = ({ scope }: { scope: NoteScope }) => {
         discussionId: data.id,
         isAnswer: false,
         toPublish: variables.attachments,
+        notifyAll: variables.notifyAll,
       })
       queryClient.invalidateQueries({
         queryKey: ['space'],
       })
-      navigate(
-        `/spaces/${getSpaceIdFromScope(scope)}/discussions/${data.id}`,
-      )
+      navigate(`/spaces/${getSpaceIdFromScope(scope)}/discussions/${data.id}`)
     },
     onError: () => {
       toast.error('Error while creating discussion.')
@@ -46,6 +45,7 @@ export const CreateDiscussionPage = ({ scope }: { scope: NoteScope }) => {
     return createDiscussionMutation.mutateAsync({
       title: vals.title,
       content: vals.content,
+      notifyAll: vals.notifyAll,
       attachments: pickIdsFromFormAttachments(vals.attachments),
     })
   }
