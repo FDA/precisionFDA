@@ -1,20 +1,15 @@
-import { Controller, UseGuards, Query, Get } from '@nestjs/common'
+import { Controller, Get, Query, UseGuards } from '@nestjs/common'
+import { TrackApiFacade } from '../facade/track/track-api.facade'
 import { UserContextGuard } from '../user-context/guard/user-context.guard'
-import { TrackApiFacade } from './facade/track-api.facade'
-import { ZodPipe } from '../validation/pipes/zod.pipe'
-import { TrackProvenanceUidSchema } from './tracks.schema'
+import { TrackEntityIdentifierQueryDto } from './model/identifier-param.dto'
 
 @UseGuards(UserContextGuard)
 @Controller('/tracks')
 export class TracksController {
-  constructor(
-    private readonly trackApiFacade: TrackApiFacade,
-  ) {}
+  constructor(private readonly trackApiFacade: TrackApiFacade) {}
 
   @Get('/provenance')
-  async getTrackProvenance(
-    @Query('uid', new ZodPipe(TrackProvenanceUidSchema)) uid: string,
-  ) {
-    return await this.trackApiFacade.getProvenance(uid)
+  async getTrackProvenance(@Query() query: TrackEntityIdentifierQueryDto) {
+    return await this.trackApiFacade.getProvenance(query.identifier)
   }
 }

@@ -43,25 +43,38 @@ export const useDatabaseSelectActions = (selectedItems: IDatabase[], resourceKey
     modalComp: copyToSpaceModal,
     setShowModal: setCopyToSpaceModal,
     isShown: isShownCopyToSpaceModal,
-  } = useCopyToSpaceModal({ resource: 'dbclusters', selected, updateFunction: copyDatabasesRequest, onSuccess: () => {
-    queryClient.invalidateQueries({ queryKey: resourceKeys })
-  } })
+  } = useCopyToSpaceModal({
+    resource: 'dbclusters',
+    selected,
+    updateFunction: copyDatabasesRequest,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: resourceKeys })
+    },
+  })
 
   const {
     modalComp: attachLicensesModal,
     setShowModal: setAttachLicensesModal,
     isShown: isShownAttachLicensesModal,
-  } = useAttachLicensesModal({ selected: selected[0], resource: 'dbclusters', onSuccess: () => {
-    queryClient.invalidateQueries({ queryKey: resourceKeys })
-  } })
+  } = useAttachLicensesModal({
+    selected: selected[0],
+    resource: 'dbclusters',
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: resourceKeys })
+    },
+  })
 
   const {
     modalComp: detachLicenseModal,
     setShowModal: setDetachLicenseModal,
     isShown: isShownDetachLicenseModal,
-  } = useDetachLicenseModal({ selected: selected[0], resource: 'dbclusters', onSuccess: () => {
-    queryClient.invalidateQueries({ queryKey: resourceKeys })
-  } })
+  } = useDetachLicenseModal({
+    selected: selected[0],
+    resource: 'dbclusters',
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: resourceKeys })
+    },
+  })
 
   const {
     modalComp: methodStartModal,
@@ -79,18 +92,16 @@ export const useDatabaseSelectActions = (selectedItems: IDatabase[], resourceKey
     isShown: isShownMethodTerminateModal,
   } = useMethodModal<IDatabase>({ method: 'terminate', selected })
 
-  const {
-    modalComp: editDBModal,
-    setShowModal: setEditDBModal,
-    isShown: isShownEditDBModal,
-  } = useEditDatabaseModal(selected[0])
+  const { modalComp: editDBModal, setShowModal: setEditDBModal, isShown: isShownEditDBModal } = useEditDatabaseModal(selected[0])
 
   const {
     modalComp: tagsModal,
     setShowModal: setTagsModal,
     isShown: isShownTagsModal,
   } = useEditTagsModal<IDatabase>({
-    resource: 'dbclusters', selected: selected[0], onSuccess: () => {
+    resource: 'dbclusters',
+    selected: selected[0],
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: resourceKeys })
     },
   })
@@ -132,40 +143,39 @@ export const useDatabaseSelectActions = (selectedItems: IDatabase[], resourceKey
   }
 
   const actionFunctions: ActionFunctionsType<DatabaseActions> = {
-    'Start': {
+    Start: {
       isDisabled: selected.length !== 1 || !selected[0]?.links.start || isDisabledByStatus(selected[0].status).start,
       func: () => setMethodStartModal(true),
       modal: methodStartModal,
       showModal: isShownMethodStartModal,
     },
-    'Stop': {
+    Stop: {
       isDisabled: selected.length !== 1 || !selected[0]?.links.stop || isDisabledByStatus(selected[0].status).stop,
       func: () => setMethodStopModal(true),
       modal: methodStopModal,
       showModal: isShownMethodStopModal,
     },
-    'Terminate': {
+    Terminate: {
       isDisabled: selected.length !== 1 || !selected[0]?.links.terminate || isDisabledByStatus(selected[0].status).terminate,
       func: () => setMethodTerminateModal(true),
       modal: methodTerminateModal,
       showModal: isShownMethodTerminateModal,
     },
-    'Track': {
-      func: () => { },
-      isDisabled: selected.length !== 1 || !selected[0]?.links.track,
-      link: selected[0]?.links?.track,
+    Track: {
+      type: 'route',
+      to: `/home/databases/${selected[0]?.uid}/track`,
+      isDisabled: selected.length !== 1,
     },
     'Copy to space': {
       func: () => setCopyToSpaceModal(true),
-      isDisabled:
-        selected.length === 0 || selected.some(e => !e.links.copy),
+      isDisabled: selected.length === 0 || selected.some(e => !e.links.copy),
       modal: copyToSpaceModal,
       showModal: isShownCopyToSpaceModal,
     },
     'Move to Archive': {
       shouldHide: true,
       isDisabled: true, // databases.length !== 1,
-      func: () => { },
+      func: () => {},
     },
     'Attach License': {
       isDisabled: selected.length !== 1 || !selected[0]?.links.license || !availableLicenses,

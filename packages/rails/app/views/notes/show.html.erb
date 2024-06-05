@@ -43,7 +43,7 @@
 
 <div class="pfda-toolbar clearfix">
     <div class="btn-group pull-left">
-      <%= link_to track_path(id: @note.uid), class: "btn btn-default", data: {no_turbolink: true} do %>
+      <%= link_to "#{@note.uid}/track", target: "_blank", class: "btn btn-default", data: {no_turbolink: true} do %>
         <span class="fa fa-flip-vertical fa-sitemap"></span> Track
       <% end %>
     </div>

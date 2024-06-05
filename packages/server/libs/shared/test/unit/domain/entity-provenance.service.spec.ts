@@ -1,5 +1,6 @@
 import { App } from '@shared/domain/app/app.entity'
 import { EntityProvenance } from '@shared/domain/provenance/model/entity-provenance'
+import { EntityProvenanceData } from '@shared/domain/provenance/model/entity-provenance-data'
 import { EntityProvenanceSourceUnion } from '@shared/domain/provenance/model/entity-provenance-source-union'
 import { EntityProvenanceSvgOptions } from '@shared/domain/provenance/model/entity-provenance-svg-options'
 import { EntityProvenanceDataProviderService } from '@shared/domain/provenance/service/entity-data/entity-provenance-data-provider.service'
@@ -21,20 +22,20 @@ describe('EntityProvenanceService', () => {
       title: TITLE,
       url: URL,
       type: ENTITY_TYPE,
-    },
+    } as unknown as EntityProvenanceData<'app'>,
   }
 
   const SVG = 'svg'
   const STYLES = 'styles'
 
-  const getEntityProvenanceDataStub = stub()
+  const getDataStub = stub()
   const svgTransformStub = stub()
   const getStylesStub = stub()
 
   beforeEach(() => {
-    getEntityProvenanceDataStub.reset()
-    getEntityProvenanceDataStub.throws()
-    getEntityProvenanceDataStub.withArgs(ENTITY_PROVENANCE_SOURCE).resolves(ENTITY_PROVENANCE)
+    getDataStub.reset()
+    getDataStub.throws()
+    getDataStub.withArgs(ENTITY_PROVENANCE_SOURCE).resolves(ENTITY_PROVENANCE)
 
     svgTransformStub.reset()
     svgTransformStub.throws()
@@ -47,8 +48,8 @@ describe('EntityProvenanceService', () => {
   describe('#getEntityProvenance', () => {
     it('should not catch error from getEntityProvenanceData', async () => {
       const error = new Error('my error')
-      getEntityProvenanceDataStub.reset()
-      getEntityProvenanceDataStub.throws(error)
+      getDataStub.reset()
+      getDataStub.throws(error)
 
       await expect(
         getInstance().getEntityProvenance(ENTITY_PROVENANCE_SOURCE, 'raw'),
@@ -106,7 +107,7 @@ describe('EntityProvenanceService', () => {
 
   function getInstance() {
     const entityProvenanceDataProviderService = {
-      getEntityProvenanceData: getEntityProvenanceDataStub,
+      getData: getDataStub,
     } as unknown as EntityProvenanceDataProviderService
 
     const entityProvenanceSvgResultTransformerService = {

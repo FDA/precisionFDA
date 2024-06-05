@@ -9,6 +9,8 @@ export const entityTypes = [
   'workflow',
   'discussion',
   'resource',
+  'note',
+  'dbcluster',
 ] as const
 
 export type EntityType = (typeof entityTypes)[number]

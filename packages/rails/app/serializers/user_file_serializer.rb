@@ -53,7 +53,6 @@ class UserFileSerializer < NodeSerializer
     super.tap do |links|
       links[:show] = "/files/#{object.uid}"
       links[:user] = user_path(object.user.dxuser)
-      links[:track] = track_path(id: object.uid)
       links[:space] = space_path if object.in_space?
 
       # POST download_list files
