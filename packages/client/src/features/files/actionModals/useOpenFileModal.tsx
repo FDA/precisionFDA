@@ -22,10 +22,8 @@ const StyledResourceTable = styled(ResourceTable)`
 export const useOpenFileModal = (selectedFiles: IFile[]) => {
   const { isShown, setShowModal } = useModal()
   const handleOpenClick = (item: IFile) => {
-    if (item.links.download) {
-      const win = window.open(`${item.links.download}?inline=true`, '_blank')
+      const win = window.open(`/api/files/${item.uid}/${item.name}?inline=true`, '_blank')
       win?.focus()
-    }
   }
 
   const momoSelected = useMemo(() => selectedFiles, [isShown])
@@ -43,7 +41,7 @@ export const useOpenFileModal = (selectedFiles: IFile[]) => {
           rows={momoSelected.map(s => {
             return {
               name: (
-                <StyledName data-turbolinks="false" href={`/home/files/${s.uid}`} target="_blank">
+                <StyledName data-turbolinks="false" onClick={() => handleOpenClick(s)}>
                   <VerticalCenter>
                     <FileIcon />
                   </VerticalCenter>
