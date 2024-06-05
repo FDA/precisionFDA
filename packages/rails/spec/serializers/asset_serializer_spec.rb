@@ -42,9 +42,8 @@ describe AssetSerializer do
         expect(asset_serialized["links"]["add_folder"]).to eq(create_folder_api_files_path)
       end
 
-      it "links[user, track, download_list] exist" do
+      it "links[user, download_list] exist" do
         expect(asset_serialized["links"]["user"]).to eq(user_path(user.dxuser))
-        expect(asset_serialized["links"]["track"]).to eq("/track?id=#{asset.uid}")
         expect(asset_serialized["links"]["download_list"]).to eq(download_list_api_files_path)
       end
 

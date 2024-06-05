@@ -72,7 +72,7 @@
     <% if @comparison.state == 'done' %>
       <button class="btn btn-default" data-bind="click: noteAttachModel.open"><span class="fa fa-paperclip"></span> Attach to...</button>
     <% end %>
-    <%= link_to track_path(id: @comparison.uid), class: "btn btn-default", data: {no_turbolink: true} do %>
+    <%= link_to "#{@comparison.uid}/track", target: "_blank", class: "btn btn-default", data: {no_turbolink: true} do %>
       <span class="fa fa-flip-vertical fa-sitemap"></span> Track
     <% end %>
   </div>

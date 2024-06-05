@@ -22,11 +22,7 @@ import { useOpenFileModal } from './actionModals/useOpenFileModal'
 import { useOrganizeFileModal } from './actionModals/useOrganizeFileModal'
 import { copyFilesRequest, copyFilesToPrivate, moveFilesRequest } from './files.api'
 import { IFile } from './files.types'
-import {
-  isActionDisabledBasedOnLocked,
-  isActionDisabledBasedOnProtected,
-  isActionDisabledBasedOnRole,
-} from '../spaces/common'
+import { isActionDisabledBasedOnLocked, isActionDisabledBasedOnProtected, isActionDisabledBasedOnRole } from '../spaces/common'
 import { useLockUnlockFileModal } from './actionModals/useLockUnlockFileModal'
 import { displayPayloadMessage } from '../../utils/api'
 import { getBaseLink } from '../apps/run/utils'
@@ -73,7 +69,8 @@ const getFileScope = (scope: HomeScope | undefined, space: ISpace | undefined): 
   return `space-${space?.id}`
 }
 
-const isInSpace = (homeScope?: HomeScope) => !(homeScope && (homeScope === 'me' || homeScope === 'everybody' || homeScope === 'featured'))
+const isInSpace = (homeScope?: HomeScope) =>
+  !(homeScope && (homeScope === 'me' || homeScope === 'everybody' || homeScope === 'featured'))
 
 export const useFilesSelectActions = ({
   homeScope,
@@ -244,7 +241,7 @@ export const useFilesSelectActions = ({
     headerText: `Move ${selected.length} item${selected.length === 1 ? '' : 's'}`,
     submitCaption: 'Move',
     scope: getFileScope(homeScope, space),
-    onHandleSubmit: (selectedFolderId) => {
+    onHandleSubmit: selectedFolderId => {
       moveFilesMutation.mutateAsync(selectedFolderId).then(() => {
         setOrganizeFileModal(false)
       })
@@ -314,7 +311,7 @@ export const useFilesSelectActions = ({
     Track: {
       type: 'route',
       to: `/${getBaseLink(space?.id)}/files/${selected[0]?.uid}/track`,
-      isDisabled: selected.length !== 1 || !selected[0].links.track || openSelected,
+      isDisabled: selected.length !== 1 || openSelected,
     },
     Open: {
       type: 'modal',
@@ -363,7 +360,8 @@ export const useFilesSelectActions = ({
         url: `${selected[0]?.links?.publish}&scope=public`,
       },
       isDisabled: selected.length !== 1 || selected[0].location === 'Public',
-      shouldHide: isFolder || selected.length !== 1 || homeScope !== 'me' || selected[0].links?.publish === undefined || openSelected,
+      shouldHide:
+        isFolder || selected.length !== 1 || homeScope !== 'me' || selected[0].links?.publish === undefined || openSelected,
     },
     // 'Make folder public': {
     //   func: () => {},
@@ -435,7 +433,11 @@ export const useFilesSelectActions = ({
     'Copy to space': {
       type: 'modal',
       func: () => setCopyToSpaceModal(true),
-      isDisabled: selected.length === 0 || selected.some(e => !e.links.copy) || openSelected ||  isActionDisabledBasedOnLocked(selected, user?.id, space),
+      isDisabled:
+        selected.length === 0 ||
+        selected.some(e => !e.links.copy) ||
+        openSelected ||
+        isActionDisabledBasedOnLocked(selected, user?.id, space),
       modal: copyToSpaceModal,
       showModal: isShownCopyToSpaceModal,
       shouldHide: isViewer,
@@ -443,7 +445,10 @@ export const useFilesSelectActions = ({
     'Copy to My Home (private)': {
       type: 'modal',
       func: () => setCopyToPrivateModal(true),
-      isDisabled: selected.length === 0 || isActionDisabledBasedOnProtected(user?.id, space) || isActionDisabledBasedOnLocked(selected, user?.id, space),
+      isDisabled:
+        selected.length === 0 ||
+        isActionDisabledBasedOnProtected(user?.id, space) ||
+        isActionDisabledBasedOnLocked(selected, user?.id, space),
       modal: copyToPrivateModal,
       showModal: isShownCopyToPrivateModal,
       shouldHide: !isInSpace(homeScope),
@@ -452,7 +457,11 @@ export const useFilesSelectActions = ({
       type: 'modal',
       func: () => setAttachToModal(true),
       // TODO: filesAttachTo is missing
-      isDisabled: selected.length === 0 || selected.some(e => !e.links.attach_to) || openSelected || isActionDisabledBasedOnLocked(selected, user?.id, space),
+      isDisabled:
+        selected.length === 0 ||
+        selected.some(e => !e.links.attach_to) ||
+        openSelected ||
+        isActionDisabledBasedOnLocked(selected, user?.id, space),
       modal: attachToModal,
       showModal: isShownAttachToModal,
     },

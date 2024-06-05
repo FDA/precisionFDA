@@ -116,7 +116,6 @@ Rails.application.routes.draw do
     get "return_from_login" => "main#return_from_login"
     get "check_webapp" => "main#check_webapp"
     post "publish" => "main#publish"
-    get "track" => "main#track"
     get "request_access" => "main#request_access"
     post "request_access" => "main#create_request_access"
     get "browse_access" => "main#browse_access"
@@ -602,6 +601,7 @@ Rails.application.routes.draw do
       get "visualize", on: :member
       get "featured", on: :collection, as: "featured"
       get "explore", on: :collection, as: "explore"
+      get "track", on: :member, as: "track"
       resources :comments
     end
 
@@ -619,6 +619,7 @@ Rails.application.routes.draw do
       post "rename", on: :member
       get "featured", on: :collection, as: "featured"
       get "explore", on: :collection, as: "explore"
+      get "track", on: :member, as: "track"
       resources :comments
     end
 
