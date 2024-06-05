@@ -1,6 +1,4 @@
-import {
-  AdminDataConsistencyReportService
-} from '@shared/debug/admin-data-consistency-report.service'
+import { AdminDataConsistencyReportService } from '@shared/debug/admin-data-consistency-report.service'
 import { Module } from '@nestjs/common'
 import { EmailModule } from '@shared/domain/email/email.module'
 
@@ -9,5 +7,4 @@ import { EmailModule } from '@shared/domain/email/email.module'
   providers: [AdminDataConsistencyReportService],
   exports: [AdminDataConsistencyReportService],
 })
-
 export class DebugModule {}
