@@ -7,11 +7,8 @@ import { testHeapMemoryAllocationError } from '@shared/debug/memory-tests'
 import { AdminDataConsistencyReportService } from '@shared/debug/admin-data-consistency-report.service'
 import { JobService } from '@shared/domain/job/job.service'
 import { UserCheckupOperation } from '@shared/domain/user/ops/user-checkup'
-import { PlatformClient } from '@shared/platform-client'
-import { CheckStaleJobsJob, SyncSpacesPermissionsJob, TASK_TYPE } from '@shared/queue/task.input'
+import { SyncSpacesPermissionsJob, TASK_TYPE } from '@shared/queue/task.input'
 import { Job } from 'bull'
-import { CheckChallengeJobsHandler } from '../../jobs/check-challenge-jobs.handler'
-import { checkStaleJobsHandler } from '../../jobs/check-stale-jobs.handler'
 import { checkUserJobsHandler } from '../../jobs/check-user-jobs.handler'
 import { syncSpacesPermissionsHandler } from '../../jobs/sync-spaces-permissions.handler'
 import { ProcessWithContext } from '../decorator/process-with-context'
@@ -24,26 +21,21 @@ export class MaintenanceQueueProcessor extends BaseQueueProcessor {
     @Inject(DEPRECATED_SQL_ENTITY_MANAGER) private readonly em: SqlEntityManager,
     private readonly adminDataConsistencyReportService: AdminDataConsistencyReportService,
     private readonly dbClusterService: DbClusterService,
+    private readonly jobServiceWithPlatformClient: JobService,
+    @Inject('JOB_SERVICE_WITH_CHALLENGE_BOT_CLIENT')
+    private readonly jobServiceWithChallengeBotClient: JobService,
   ) {
     super()
   }
 
   @ProcessWithContext(TASK_TYPE.CHECK_CHALLENGE_JOBS)
-  async checkChallengeJobs(job: Job) {
-    // TODO following will be DI refactored
-    const platformClient = new PlatformClient({
-      accessToken: config.platform.challengeBotAccessToken,
-    })
-    const jobService = new JobService(this.em, platformClient)
-    const handler = new CheckChallengeJobsHandler(this.em, jobService)
-
-    await handler.handle(job)
+  async checkChallengeJobs() {
+    await this.jobServiceWithChallengeBotClient.checkChallengeJobs()
   }
 
   @ProcessWithContext(TASK_TYPE.CHECK_STALE_JOBS)
-  async checkStaleJobs(job: Job<CheckStaleJobsJob>) {
-    // not used at the moment -> the job is never put to queue
-    await checkStaleJobsHandler(job)
+  async checkStaleJobs() {
+    await this.jobServiceWithPlatformClient.checkStaleJobs()
   }
 
   @ProcessWithContext(TASK_TYPE.CHECK_NON_TERMINATED_DBCLUSTERS)

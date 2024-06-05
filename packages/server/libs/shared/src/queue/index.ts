@@ -13,13 +13,7 @@ import {
 import { defaultLogger as log } from '../logger'
 import { UserCtx } from '../types'
 import { clearOrphanedRepeatableJobs as utilsClearOrphanedRepeatableJobs } from './queue.utils'
-import {
-  BasicUserJob,
-  CheckStatusJob,
-  SendEmailJob,
-  SyncDbClusterJob,
-  Task,
-} from './task.input'
+import { BasicUserJob, CheckStatusJob, SendEmailJob, SyncDbClusterJob, Task } from './task.input'
 
 let mainQueue: Bull.Queue
 let fileSyncQueue: Bull.Queue
@@ -135,7 +129,6 @@ const findRepeatable = async (bullJobId: string) => {
 }
 
 // TASK PRODUCERS
-
 /**
  * @deprecated Use the job producer directly within the DI
  */
@@ -168,12 +161,6 @@ const createSendEmailTask = async (
  * @deprecated Use the job producer directly within the DI
  */
 const removeFromEmailQueue = (jobId: string) => emailsJobProducer.removeJobs(jobId)
-
-/**
- * @deprecated Use the job producer directly within the DI
- */
-const createCheckStaleJobsTask = async (user: UserCtx) =>
-  maintenanceJobProducer.createCheckStaleJobsTask(user)
 
 /**
  * @deprecated Use the job producer directly within the DI
@@ -245,7 +232,6 @@ const createTestMaxMemoryTask = async (): Promise<any> =>
   maintenanceJobProducer.createTestMaxMemoryTask()
 
 // Queue adding helpers
-//
 /**
  * @deprecated Use the job producer directly within the DI
  */
@@ -261,7 +247,6 @@ export {
   createSyncJobStatusTask,
   createSendEmailTask,
   removeFromEmailQueue,
-  createCheckStaleJobsTask,
   createSyncSpacesPermissionsTask,
   createDbClusterSyncTask,
   createFileSynchronizeJobTask,

@@ -9,29 +9,28 @@ import { scopeContainsId } from '../space/space.helper'
 import { EntityScope, SCOPE } from '../../types/common'
 import { PARENT_TYPE } from './user-file.types'
 import { getEntityType, InputEntityUnion } from '../../utils/object-utils'
+import { Injectable } from '@nestjs/common'
 
 const logger = getLogger('folder.service')
 
-export interface IFolderService {
-  createFolder(name: string, scope: SCOPE, userId: number, parent?: InputEntityUnion, parentFolderId?: number): Promise<Folder>
-  createFoldersOnPath(path: string, scope: SCOPE, userId: number, parent?: InputEntityUnion): Promise<Folder[]>
-}
-
+@Injectable()
 /**
  * Service for activities on folders
  */
-export class FolderService implements IFolderService {
-
-  private readonly em: SqlEntityManager
-
-  constructor(em: SqlEntityManager) {
+export class FolderService {
+  constructor(private readonly em: SqlEntityManager) {
     this.em = em
   }
 
   /**
    * Creates folders on a path. If the folder already exists, it is not created and only returned.
    */
-  async createFoldersOnPath(path: string, scope: EntityScope, userId: number, parent?: InputEntityUnion,): Promise<Folder[]> {
+  async createFoldersOnPath(
+    path: string,
+    scope: EntityScope,
+    userId: number,
+    parent?: InputEntityUnion,
+  ): Promise<Folder[]> {
     logger.verbose(`FolderService: creating folders ${path} with scope ${scope}`)
     if (!path) {
       throw new ValidationError('Path must not be empty')
@@ -42,7 +41,13 @@ export class FolderService implements IFolderService {
     const createdFolders: Folder[] = []
     let parentFolder: Folder | undefined
     for (const folderName of folderNames) {
-      const folder: Folder = await this.createFolderInternal(folderName, scope, user, parent, parentFolder?.id)
+      const folder: Folder = await this.createFolderInternal(
+        folderName,
+        scope,
+        user,
+        parent,
+        parentFolder?.id,
+      )
       createdFolders.push(folder)
       parentFolder = folder
     }
