@@ -424,7 +424,6 @@ module Api
     # GET /api/files/download
     # Responds with a link to download a file.
     def download
-
       if called_by_cli
         cli_download
         return
@@ -530,27 +529,36 @@ module Api
     # Responds with an array of links to platform for download requested files - filters out only accessible files.
     # Used by CLI to reduce number of back-and-forth calls needed to download larger number of files
     def bulk_download
-      # try refactor to node.js for speed improvement.
+      options = {
+        duration: unsafe_params.fetch(:duration, 86_400),
+        preauthenticated: unsafe_params.fetch(:preauthenticated, false),
+        inline: unsafe_params.fetch(:inline, false),
+      }
+
+      match = request.headers["User-Agent"].match(/precisionFDA CLI\/([\d\.]+)/)
+      version = match[1]
+      if Gem::Version.new(version) <= Gem::Version.new("2.6.0")
+        # if cli is 2.6.0 or older, provide direct link. Otherwise, provide proxy link.
+        options[:preauthenticated] = true
+      end
+
       nodes = UserFile.accessible_by(@context).where(uid: params[:ids])
 
-      # rubocop:disable Layout/LineLength
-      nodes = nodes.reject { |node| node.state != UserFile::STATE_CLOSED || (node.license.present? && !file.licensed_by?(@context)) }
-      # rubocop:enable Layout/LineLength
-
-      files = []
-      nodes.each_slice(4) do |group|
-        group.map do |item|
-          # executed 4x in parallel to speed-up platform calls
-          Thread.new do
-            if verify_scope_for_protection(item.scope)
-              files << {
-                uid: item[:uid],
-                url: item.file_url(@context, false),
-              }
-            end
-          end
-        end.each(&:join)
+      nodes = nodes.reject do |node|
+        # Reject nodes that are not in the closed state
+        node.state != UserFile::STATE_CLOSED ||
+          # Reject nodes that have a license but are not licensed by the current user context
+          (node.license.present? && !file.licensed_by?(@context)) ||
+          # Reject nodes from protected spaces if not admin
+          !verify_scope_for_protection(node.scope)
       end
+
+      files = nodes.map do |item|
+        {
+          uid: item[:uid],
+          url: https_apps_client.get_file_download_link(item[:uid], options)
+        }
+      end.compact
 
       render json: files
     end
