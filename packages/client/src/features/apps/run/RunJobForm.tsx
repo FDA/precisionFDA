@@ -23,7 +23,6 @@ import {
   RemoveButton,
 } from './styles'
 import {
-  buildPath,
   createRequestObject, exportFormData, extractFileUidsFromBatchInputs,
   fetchLicensesOnFiles,
   getFileUIDsFromAppRun,
@@ -120,8 +119,7 @@ export const RunJobForm = ({ app, userJobLimit, spec }: { app: IApp; spec: AppSp
     submitCaption: 'Select folder',
     scope: app.scope === 'public' ? 'private' : app.scope, // show private folders for public apps
     onHandleSubmit: (folderId, info: TreeOnSelectInfo) => {
-      const outputFolderPath = buildPath(info.node)
-      setValue('output_folder_path', outputFolderPath)
+      setValue('output_folder_path', info.node.path)
       setOrganizeFileModal(false)
     },
   })

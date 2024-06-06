@@ -13,6 +13,10 @@ import { SPACE_PREFIX } from '../../../constants'
 import { TreeOnSelectInfo } from '../files.types'
 import { findById } from '../file.utils'
 
+type EnhancedDataNode = DataNode &{
+  path: string
+}
+
 const getSpaceId = (scope?: ServerScope): string | undefined => {
   if (scope?.startsWith(SPACE_PREFIX)) {
     return scope.substring(SPACE_PREFIX.length)
@@ -35,7 +39,7 @@ const OrganizeFiles = ({
   return (
     <FileTree
       onExpand={d => {}}
-      loadData={async (node: DataNode) => {
+      loadData={async (node: EnhancedDataNode) => {
         const { nodes } = await fetchFolderChildren(
           scope === 'private' ? 'private' : 'public', // TODO fix this in fetchFolderChildren
           spaceId,
@@ -48,6 +52,7 @@ const OrganizeFiles = ({
             title: d.name,
             children: [],
             parent: d.path[d.path.length-1],
+            path: (node.path) ? `${node.path}/${d.name}`: `/${d.name}`,
           }))
 
         setTreeData((draft: DataNode[]) => {
