@@ -27,4 +27,8 @@ export class WorkflowProvenanceDataService extends EntityProvenanceDataService<'
       entity: a,
     }))
   }
+
+  async getChildren(): Promise<EntityProvenanceSourceUnion[]> {
+    return []
+  }
 }

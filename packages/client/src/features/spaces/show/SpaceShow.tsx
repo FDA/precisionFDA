@@ -1,33 +1,46 @@
-import React, { useMemo, useState } from 'react'
 import { useMutation, useQuery } from '@tanstack/react-query'
+import React, { useMemo, useState } from 'react'
+import { Navigate, Route, Routes, useNavigate, useParams } from 'react-router-dom'
 import { toast } from 'react-toastify'
-import { Route, Routes, useNavigate, useParams, Navigate } from 'react-router-dom'
 import { GuestNotAllowed } from '../../../components/GuestNotAllowed'
+import { Loader } from '../../../components/Loader'
+import { MenuCounter } from '../../../components/MenuCounter'
 import { BoltIcon } from '../../../components/icons/BoltIcon'
 import { CogsIcon } from '../../../components/icons/Cogs'
 import { CubeIcon } from '../../../components/icons/CubeIcon'
+import { DiscussionIcon } from '../../../components/icons/DiscussionIcon'
 import { FileIcon } from '../../../components/icons/FileIcon'
 import { FlapIcon } from '../../../components/icons/FlapIcon'
 import { SpaceReportIcon } from '../../../components/icons/SpaceReportIcon'
 import { UsersIcon } from '../../../components/icons/UsersIcon'
-import { Loader } from '../../../components/Loader'
-import { MenuCounter } from '../../../components/MenuCounter'
 import { useLocalStorage } from '../../../hooks/useLocalStorage'
 import { usePrevious } from '../../../hooks/usePrevious'
-import { useAuthUser } from '../../auth/useAuthUser'
+import { useToastWSHandler } from '../../../hooks/useToastWSHandler'
+import { UserLayout } from '../../../layouts/UserLayout'
+import { ScrollableInnerGlobalStyles } from '../../../styles/global'
 import { AppList } from '../../apps/AppList'
 import { AppsShow } from '../../apps/AppsShow'
+import { EditAppPage } from '../../apps/form/EditAppPage'
+import { ForkAppPage } from '../../apps/form/ForkAppPage'
+import { RunJobPage } from '../../apps/run/RunJobPage'
+import { useAuthUser } from '../../auth/useAuthUser'
+import { DiscussionList } from '../../discussions/DiscussionList'
+import { DiscussionShow } from '../../discussions/DiscussionShow'
+import { CreateDiscussionPage } from '../../discussions/form/CreateDiscussionPage'
 import { ExecutionList } from '../../executions/ExecutionList'
 import { ExecutionDetails } from '../../executions/details/ExecutionDetails'
 import { FileList } from '../../files/FileList'
 import { FileShow } from '../../files/show/FileShow'
 import { Expand, Fill, Main, MenuItem, MenuText, Row, StyledMenu } from '../../home/home.styles'
-import { SpaceReportList } from '../../space-reports/SpaceReportList'
 import { useActiveResourceFromUrl } from '../../home/useActiveResourceFromUrl'
+import { SpaceReportList } from '../../space-reports/SpaceReportList'
+import { TrackInHome } from '../../tracks/TrackInHome'
 import { WorkflowList } from '../../workflows/WorkflowList'
 import { WorkflowShow } from '../../workflows/WorkflowShow'
+import { FdaRestrictedIcon } from '../FdaRestrictedIcon'
+import { ProtectedIcon } from '../ProtectedIcon'
 import { MembersList } from '../members/MembersList'
-import { spaceRequest, fixGuestPermissions } from '../spaces.api'
+import { fixGuestPermissions, spaceRequest } from '../spaces.api'
 import { ISpace } from '../spaces.types'
 import { useSpaceActions } from '../useSpaceActions'
 import { Activation } from './SpaceActivation'
@@ -43,19 +56,6 @@ import {
   SpaceTypeHeader,
   TopSpaceHeader,
 } from './styles'
-import { ProtectedIcon } from '../ProtectedIcon'
-import { useToastWSHandler } from '../../../hooks/useToastWSHandler'
-import { DiscussionIcon } from '../../../components/icons/DiscussionIcon'
-import { DiscussionList } from '../../discussions/DiscussionList'
-import { DiscussionShow } from '../../discussions/DiscussionShow'
-import { CreateDiscussionPage } from '../../discussions/form/CreateDiscussionPage'
-import { RunJobPage } from '../../apps/run/RunJobPage'
-import { EditAppPage } from '../../apps/form/EditAppPage'
-import { FdaRestrictedIcon } from '../FdaRestrictedIcon'
-import { ForkAppPage } from '../../apps/form/ForkAppPage'
-import { TrackProvenancePage } from '../../tracks/TrackProvenancePage'
-import { UserLayout } from '../../../layouts/UserLayout'
-import { ScrollableInnerGlobalStyles } from '../../../styles/global'
 
 const Spaces2 = ({ space, isLoading }: { space: ISpace; isLoading: boolean }) => {
   const navigate = useNavigate()
@@ -176,21 +176,18 @@ const Spaces2 = ({ space, isLoading }: { space: ISpace; isLoading: boolean }) =>
             <Routes>
               <Route path="files" element={<FileList space={space} showFolderActions={!!space.links.add_data} />} />
               <Route path="files/:fileId" element={<FileShow space={space} />} />
-              <Route path="files/:fileUid/track" element={<TrackProvenancePage entityType="file" spaceId={space.id} />} />
+              <Route path="files/:identifier/track" element={<TrackInHome spaceId={space.id} />} />
               <Route path="apps" element={<AppList spaceId={space.id} />} />
               <Route path="apps/:appUid/jobs/new" element={<RunJobPage spaceId={space.id} />} />
               <Route path="apps/:appUid/edit" element={<EditAppPage spaceId={space.id} />} />
               <Route path="apps/:appUid/fork" element={<ForkAppPage spaceId={space.id} />} />
               <Route path="apps/:appUid/*" element={<AppsShow spaceId={space.id} />} />
-              <Route path="apps/:appUid/track" element={<TrackProvenancePage entityType="app" spaceId={space.id} />} />
+              <Route path="apps/:identifier/track" element={<TrackInHome spaceId={space.id} />} />
               <Route path="workflows" element={<WorkflowList spaceId={space.id} />} />
               <Route path="workflows/:workflowUid/*" element={<WorkflowShow spaceId={space.id} />} />
               <Route path="executions" element={<ExecutionList spaceId={space.id} />} />
               <Route path="executions/:executionUid" element={<ExecutionDetails spaceId={space.id} />} />
-              <Route
-                path="executions/:executionUid/track"
-                element={<TrackProvenancePage entityType="execution" spaceId={space.id} />}
-              />
+              <Route path="executions/:identifier/track" element={<TrackInHome entityType="execution" spaceId={space.id} />} />
               <Route path="members" element={<MembersList space={space} />} />
               <Route path="reports" element={<SpaceReportList scope={`space-${space.id}`} />} />
               <Route path="discussions" element={<DiscussionList space={space} scope={`space-${space.id}`} />} />

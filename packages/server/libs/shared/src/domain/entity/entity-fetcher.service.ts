@@ -1,23 +1,28 @@
+import type {
+  EntityName,
+  FilterQuery,
+  FindOneOptions,
+  FindOptions,
+  ObjectQuery,
+} from '@mikro-orm/core'
 import { SqlEntityManager } from '@mikro-orm/mysql'
-import type { EntityName, FilterQuery, ObjectQuery } from '@mikro-orm/core'
-import type { FindOneOptions, FindOptions } from '@mikro-orm/core'
+import { Injectable } from '@nestjs/common'
 import { Answer } from '@shared/domain/answer/answer.entity'
 import { AnswerComment } from '@shared/domain/comment/answer-comment.entity'
 import { DiscussionComment } from '@shared/domain/comment/discussion-comment.entity'
 import { Discussion } from '@shared/domain/discussion/discussion.entity'
 import { Space } from '@shared/domain/space/space.entity'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { ServiceError } from '@shared/errors'
 import { STATIC_SCOPE } from '../../enums'
 import { CAN_EDIT_ROLES } from '../space-membership/space-membership.helper'
 import { getIdFromScopeName } from '../space/space.helper'
-import { Injectable } from '@nestjs/common'
-import { UserContext } from '@shared/domain/user-context/model/user-context'
 
 export type UID<PREFIX extends string> = `${PREFIX}-${string}-${number}`
 
-interface IdEntity {
+export interface IdEntity {
   id: number
 }
 

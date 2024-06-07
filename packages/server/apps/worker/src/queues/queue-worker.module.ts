@@ -9,6 +9,7 @@ import { ChallengeModule } from '@shared/domain/challenge/challenge.module'
 import { UserFileWorkerModule } from '../domain/user-file/user-file.worker.module'
 import { DebugModule } from '@shared/debug/debug.module'
 import { DbClusterModule } from '@shared/domain/db-cluster/db-cluster.module'
+import { JobModule } from '@shared/domain/job/job.module'
 @Module({
   imports: [
     QueueModule,
@@ -19,6 +20,7 @@ import { DbClusterModule } from '@shared/domain/db-cluster/db-cluster.module'
     SpaceReportModule,
     DbClusterModule,
     DebugModule,
+    JobModule,
   ],
   providers: [MainQueueProcessor, MaintenanceQueueProcessor],
 })

@@ -1,6 +1,8 @@
 class NotesController < ApplicationController
-  skip_before_action :require_login,     only: [:index, :featured, :explore, :show]
-  before_action :require_login_or_guest, only: [:index, :featured, :explore, :show]
+  skip_before_action :require_login,     only: %i(index featured explore show track)
+  before_action :require_login_or_guest, only: %i(index featured explore show track)
+
+  layout "react", only: [:track]
 
   def index
     if @context.guest?
@@ -107,6 +109,8 @@ class NotesController < ApplicationController
     end
     redirect_to :notes
   end
+
+  def track; end
 
   private
     def note_params

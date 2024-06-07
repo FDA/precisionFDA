@@ -9,9 +9,7 @@ import { MainQueueJobProducer } from '@shared/queue/producer/main-queue-job.prod
 import { expect } from 'chai'
 import { stub } from 'sinon'
 import { create, db } from '../../../src/test'
-import {
-  STATUS as DB_CLUSTER_STATUS,
-} from '@shared/domain/db-cluster/db-cluster.enum'
+import { STATUS as DB_CLUSTER_STATUS } from '@shared/domain/db-cluster/db-cluster.enum'
 import { EmailQueueJobProducer } from '@shared/domain/email/producer/email-queue-job.producer'
 import { DbCluster } from '@shared/domain/db-cluster/db-cluster.entity'
 import { EMAIL_TYPES } from '@shared/domain/email/email.config'
@@ -26,7 +24,7 @@ describe('DbClusterService tests', () => {
   let dbClusters: DbCluster[]
   let userCtx: UserCtx
   let dbClusterService: DbClusterService
-  let getJobStub = stub(queue, 'getMainQueue')
+  let getJobStub
   const createStub = stub()
   const describeStub = stub()
   const createSyncTaskStub = stub()
@@ -42,6 +40,8 @@ describe('DbClusterService tests', () => {
     await em.flush()
 
     userCtx = { ...user, accessToken: 'foo' }
+
+    getJobStub = stub(queue, 'getMainQueue')
 
     createStub.returns({ id: 'dbcluster-GZxk9Z80Z0gvz8ky0F1yzF82' })
     describeStub.returns({
@@ -74,6 +74,10 @@ describe('DbClusterService tests', () => {
 
     getJobStub.reset()
     getJobStub.throws()
+  })
+
+  afterEach(() => {
+    getJobStub.restore()
   })
 
   it('creates db-cluster', async () => {

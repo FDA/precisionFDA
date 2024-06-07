@@ -41,7 +41,6 @@ const allowedInstanceTypes = [
 ]
 
 const allowedEngineVersions = [
-  '5.7.mysql_aurora.2.07.10',
   '8.0.mysql_aurora.3.04.1',
   '11.9',
   '12.9',

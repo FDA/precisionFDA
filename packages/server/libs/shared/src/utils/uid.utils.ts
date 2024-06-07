@@ -1,10 +1,10 @@
-import { EntityType } from '@shared/domain/entity/domain/entity.type'
+import { DXEnityType } from '@shared/domain/entity/domain/dxid'
 import { UId } from '@shared/domain/entity/domain/uid'
 import { DxIdUtils } from '@shared/utils/dxid.utils'
 import { StringUtils } from '@shared/utils/string.utils'
 
 export class UidUtils {
-  static isValidUId<T extends EntityType = EntityType>(
+  static isValidUId<T extends DXEnityType = DXEnityType>(
     value: string,
     entityType?: T,
   ): value is UId<T> {

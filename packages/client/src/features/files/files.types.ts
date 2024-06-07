@@ -1,20 +1,8 @@
 import { TreeProps } from 'rc-tree'
 import { BasicDataNode } from 'rc-tree/es/interface'
+import { DataNode } from 'rc-tree/lib/interface'
 import { ServerScope } from '../home/types'
 import { FileOrg, FileUser } from '../apps/apps.types'
-
-export enum FilesListActions {
-  'Track' = 'Track',
-  'Open' = 'Open',
-  'Download' = 'Download',
-  'Edit info' = 'Edit info',
-  'Make public' = 'Make public',
-  'Delete' = 'Delete',
-  'Organize' = 'Organize',
-  'Copy to space' = 'Copy to space',
-  'Attach to...' = 'Attach to...',
-  'Attach License' = 'Attach License',
-}
 
 export enum FolderActions {
   'Add Folder' = 'Add Folder',
@@ -100,6 +88,7 @@ export interface IFile {
   'public'?: boolean,
   'user'?: FileUser,
   'org'?: FileOrg,
+  path: IFile[],
 }
 
 export interface IFolder {
@@ -142,31 +131,18 @@ export interface Org {
   name: string
 }
 
-export interface INode {
-  id: number
-  uid: string
-  className: string
-  fa_class: string
-  scope: string
-  path: string
-  owned: boolean
-  editable: boolean
-  accessible: boolean
-  file_path: string
-  parent_folder_name: string
-  public: boolean
-  private: boolean
-  in_space: boolean
-  space_private: boolean
-  space_public: boolean
-  title: string
-  description: any
-  state: string
-  file_size: number
-  user: User
-  org: Org
+export interface CustomDataNode extends DataNode {
+  uid?: string
 }
+
+/**
+ * Data structure of FileTree.onSelect
+ */
+export interface SelectionDetails {
+  selectedNodes: DataNode[]
+}
+
 // this is the type of the "node". The BasicDataNode is what the library requires and the two properties before it are the ones we are using - parent (added by you) and title (already existed, but the "any" types hidden the fact, that it does not exist on the default node type).
-export type FileTreeNode = { parent: FileTreeNode, title: string } & BasicDataNode
+export type FileTreeNode = { parent: FileTreeNode, title: string, path: string } & BasicDataNode
 // Retrieves the second parameter of the onSelect method from the TreeProps interface with the node type generic. The Required type is needed, because the onSelect property on the TreeProps is defined as optional, but the Parameters type requires simply a function (not function | undefined).
 export type TreeOnSelectInfo = Parameters<Required<TreeProps<FileTreeNode>>['onSelect']>[1]

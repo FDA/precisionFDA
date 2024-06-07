@@ -23,7 +23,6 @@ import {
   RemoveButton,
 } from './styles'
 import {
-  buildPath,
   createRequestObject, exportFormData, extractFileUidsFromBatchInputs,
   fetchLicensesOnFiles,
   getFileUIDsFromAppRun,
@@ -120,8 +119,7 @@ export const RunJobForm = ({ app, userJobLimit, spec }: { app: IApp; spec: AppSp
     submitCaption: 'Select folder',
     scope: app.scope === 'public' ? 'private' : app.scope, // show private folders for public apps
     onHandleSubmit: (folderId, info: TreeOnSelectInfo) => {
-      const outputFolderPath = buildPath(info.node)
-      setValue('output_folder_path', outputFolderPath)
+      setValue('output_folder_path', info.node.path)
       setOrganizeFileModal(false)
     },
   })
@@ -353,12 +351,10 @@ export const RunJobForm = ({ app, userJobLimit, spec }: { app: IApp; spec: AppSp
         <SetOutputFolder control={control} isSubmitting={isSubmitting} spec={spec} setShowModal={setOrganizeFileModal} />
       </AppsConfiguration>
       <StyledActionsContainer>
+        <Button variant="primary" disabled={isSubmitting} type="button" form="submitJobForm" onClick={handleSubmit(onSubmit)}>
+          {isSubmitting ? 'Running' : runButtonText}
+        </Button>
         <RightGroup>
-          {computeInstances && (
-            <Button variant="primary" disabled={isSubmitting} type="button" onClick={addInput}>
-              Add batch
-            </Button>
-          )}
           {isBatchRun && (
             <>
               <Button variant="success" disabled={isSubmitting}  type="button" onClick={event => exportFormData(event, getValues())}>
@@ -371,10 +367,12 @@ export const RunJobForm = ({ app, userJobLimit, spec }: { app: IApp; spec: AppSp
               </Button>
             </>
           )}
+          {computeInstances && (
+            <Button variant="success" disabled={isSubmitting} type="button" onClick={addInput}>
+              Add batch
+            </Button>
+          )}
         </RightGroup>
-        <Button variant="primary" disabled={isSubmitting} type="button" form="submitJobForm" onClick={handleSubmit(onSubmit)}>
-          {isSubmitting ? 'Running' : runButtonText}
-        </Button>
       </StyledActionsContainer>
       {licensesModal}
       {organizeFileModal}

@@ -13,4 +13,8 @@ export class AssetProvenanceDataService extends EntityProvenanceDataService<'ass
   async getParents(): Promise<EntityProvenanceSourceUnion[]> {
     return []
   }
+
+  async getChildren(): Promise<EntityProvenanceSourceUnion[]> {
+    return []
+  }
 }

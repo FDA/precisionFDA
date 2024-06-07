@@ -193,7 +193,7 @@ export const useAppSelectionActions = ({
     'Track': {
       type: 'route',
       to: `/${getBaseLink(spaceId)}/apps/${selected[0]?.uid}/track`,
-      isDisabled: selected.length !== 1 || !selected[0].links.track,
+      isDisabled: selected.length !== 1,
     },
     'Edit': {
       type: 'route',

@@ -7,11 +7,12 @@ import {
   ValidatorConstraint,
   ValidatorConstraintInterface,
 } from 'class-validator'
+import { DXEnityType } from '../domain/dxid'
 
 @ValidatorConstraint({ async: true })
 class IsUidValidConstraint implements ValidatorConstraintInterface {
   async validate(value: any, args: ValidationArguments) {
-    const [entityType] = args.constraints as [EntityType]
+    const [entityType] = args.constraints as [DXEnityType]
 
     return UidUtils.isValidUId(value, entityType)
   }
@@ -31,7 +32,7 @@ class IsUidValidConstraint implements ValidatorConstraintInterface {
 export function IsValidUid(options?: EntityType, validationOptions?: ValidationOptions) {
   return function (object: object, propertyName: string) {
     registerDecorator({
-      name: 'isValidScope',
+      name: 'isValidUid',
       target: object.constructor,
       propertyName: propertyName,
       constraints: [options],

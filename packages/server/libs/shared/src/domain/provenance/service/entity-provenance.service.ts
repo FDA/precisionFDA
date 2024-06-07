@@ -19,8 +19,7 @@ export class EntityProvenanceService {
     format: T,
     options?: EntityProvenanceOptionsType<T>,
   ): Promise<EntityProvenanceResultType<T>> {
-    const provenanceData =
-      await this.entityProvenanceDataProviderService.getEntityProvenanceData(source)
+    const provenanceData = await this.entityProvenanceDataProviderService.getData(source)
 
     if (format === 'raw') {
       return provenanceData as EntityProvenanceResultType<T>

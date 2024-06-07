@@ -44,6 +44,9 @@ module Admin
           results[invitation_id] = provision_user(invitation, opts)
         rescue DXClient::Errors::TooManyRequestsError => e
           render(json: { error: e.message }, status: :bad_request) && return
+        rescue DXClient::Errors::DXClientError => e
+          error_message = e.message == "InvalidAutoConfirmCode" ? "The user could not be added. Invalid Billing confirmation code." : e.message
+          render(json: { error: error_message }, status: :bad_request) && return
         end
       end
       # rubocop:enable Lint/NonLocalExitFromIterator

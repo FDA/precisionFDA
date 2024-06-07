@@ -32,11 +32,10 @@ export const useAddFolderModal = ({
   const {
     register,
     handleSubmit,
-    watch,
     formState: { errors },
     reset,
     setError,
-  } = useForm({ defaultValues: { name: '' } })
+  } = useForm({ defaultValues: { name: '' }})
   const mutation = useMutation({
     mutationKey: ['add-folder'],
     mutationFn: (payload: { name: string }) =>
@@ -60,9 +59,9 @@ export const useAddFolderModal = ({
     },
   })
 
-  const onSubmit = (vals: any) => {
+  const onSubmit = ((vals: { name: string }) => {
     mutation.mutateAsync({ name: vals.name })
-  }
+  })
 
   const modalComp = isShown && (
     <ModalNext

@@ -30,16 +30,27 @@ export enum ExecutionAction {
   'Edit properties' = 'Edit properties',
 }
 
-export const useExecutionActions = ({ homeScope, selectedItems, resourceKeys }: { homeScope?: HomeScope, selectedItems: IExecution[], resourceKeys: string[]}) => {
+export const useExecutionActions = ({
+  homeScope,
+  selectedItems,
+  resourceKeys,
+}: {
+  homeScope?: HomeScope
+  selectedItems: IExecution[]
+  resourceKeys: string[]
+}) => {
   const queryClient = useQueryClient()
   const selected = selectedItems.filter(x => x !== undefined)
   const user = useAuthUser()
   const isAdmin = user ? user.admin : false
   const isJobOwner = user?.dxuser === selected[0]?.launched_by_dxuser
 
-  const featureMutation = useFeatureMutation({ resource: 'jobs', onSuccess: () => {
-    queryClient.invalidateQueries({ queryKey: resourceKeys })
-  } })
+  const featureMutation = useFeatureMutation({
+    resource: 'jobs',
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: resourceKeys })
+    },
+  })
 
   // An IExecution can be either a job (app) or workflow, in the case of the workflow
   const selectedJobs = getExecutionJobsList(selected)
@@ -62,7 +73,9 @@ export const useExecutionActions = ({ homeScope, selectedItems, resourceKeys }: 
     setShowModal: setTagsModal,
     isShown: isShownTagsModal,
   } = useEditTagsModal<IExecution>({
-    resource: 'jobs', selected: selected[0], onSuccess: () => {
+    resource: 'jobs',
+    selected: selected[0],
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: resourceKeys })
     },
   })
@@ -78,12 +91,15 @@ export const useExecutionActions = ({ homeScope, selectedItems, resourceKeys }: 
       queryClient.invalidateQueries({ queryKey: resourceKeys })
     },
   })
-// "Items need to be an array of objects with id and type (one of App, Comparison, Job, or UserFile)"
+  // "Items need to be an array of objects with id and type (one of App, Comparison, Job, or UserFile)"
   const {
     modalComp: attachToModal,
     setShowModal: setAttachToModal,
     isShown: isShownAttachToModal,
-  } = useAttachToModal(selected.map(s => s.id), 'JOB')
+  } = useAttachToModal(
+    selected.map(s => s.id),
+    'JOB',
+  )
 
   const {
     modalComp: terminateModal,
@@ -99,7 +115,7 @@ export const useExecutionActions = ({ homeScope, selectedItems, resourceKeys }: 
 
   const attachLicenseMutation = useMutation({
     mutationKey: ['attach-license'],
-    mutationFn: async (id: string) => { }
+    mutationFn: async (id: string) => {},
   })
 
   const availableLicenses = user?.links?.licenses ? user.links.licenses : false
@@ -112,37 +128,36 @@ export const useExecutionActions = ({ homeScope, selectedItems, resourceKeys }: 
       link: links?.log,
       isDisabled: selected.length !== 1 || !links.log,
     },
-    'Terminate': {
+    Terminate: {
       type: 'modal',
       func: () => setTerminateModal(true),
       isDisabled: selected.length === 0 || selected.some(item => ['terminated', 'failed', 'done', undefined].includes(item?.state)),
       modal: terminateModal,
       showModal: isShownTerminateModal,
     },
-    'Track': {
+    Track: {
       type: 'route',
       to: `/${getBaseLink(spaceId)}/executions/${selected[0]?.uid}/track`,
-      isDisabled: selected.length !== 1 || !links.track,
+      isDisabled: selected.length !== 1,
     },
     'Copy to space': {
       type: 'modal',
       func: () => setCopyToSpaceModal(true),
-      isDisabled:
-        selected.length === 0 || selected.some(e => !e.links?.copy),
+      isDisabled: selected.length === 0 || selected.some(e => !e.links?.copy),
       modal: copyToSpaceModal,
       showModal: isShownCopyToSpaceModal,
     },
-    'Feature': {
+    Feature: {
       type: 'modal',
       func: () => featureMutation.mutateAsync({ featured: true, uids: selected.map(f => f.uid) }),
       isDisabled: selected.length === 0 || !selected.every(e => !e.featured || !e.links.feature),
       shouldHide: !isAdmin || homeScope !== 'everybody',
     },
-    'Unfeature': {
+    Unfeature: {
       type: 'modal',
       func: () => featureMutation.mutateAsync({ featured: false, uids: selected.map(f => f.uid) }),
       isDisabled: selected.length === 0 || !selected.every(e => e.featured || !e.links.feature),
-      shouldHide: !isAdmin || homeScope !== 'everybody' && homeScope !== 'featured',
+      shouldHide: !isAdmin || (homeScope !== 'everybody' && homeScope !== 'featured'),
     },
     'Make Public': {
       type: 'link',
@@ -159,7 +174,7 @@ export const useExecutionActions = ({ homeScope, selectedItems, resourceKeys }: 
       modal: attachToModal,
       showModal: isShownAttachToModal,
     },
-    'Snapshot': {
+    Snapshot: {
       type: 'modal',
       func: () => setSnapshotModal(true),
       isDisabled: selected.length !== 1 || selected.some(e => !e.links?.open_external),
@@ -167,7 +182,7 @@ export const useExecutionActions = ({ homeScope, selectedItems, resourceKeys }: 
       modal: snapshotModal,
       showModal: isSnapshotModal,
     },
-    'Comments': {
+    Comments: {
       type: 'link',
       isDisabled: selected.length !== 1,
       link: `/jobs/${selected[0]?.uid}/comments`,
@@ -178,7 +193,7 @@ export const useExecutionActions = ({ homeScope, selectedItems, resourceKeys }: 
       isDisabled: false,
       modal: tagsModal,
       showModal: isShownTagsModal,
-      shouldHide: (!isAdmin && !isJobOwner) || (selected.length !== 1),
+      shouldHide: (!isAdmin && !isJobOwner) || selected.length !== 1,
     },
     'Edit properties': {
       type: 'modal',
@@ -186,29 +201,17 @@ export const useExecutionActions = ({ homeScope, selectedItems, resourceKeys }: 
       isDisabled: false,
       modal: propertiesModal,
       showModal: isShownPropertiesModal,
-      shouldHide: (!isAdmin && !isJobOwner) || (selected.length !== 1),
+      shouldHide: (!isAdmin && !isJobOwner) || selected.length !== 1,
     },
   }
 
-  if(homeScope === 'spaces') {
+  if (homeScope === 'spaces') {
     if (isJobOwner) {
-      actions = omit([
-        'Make Public',
-        'Feature',
-        'Unfeature',
-      ], actions)
+      actions = omit(['Make Public', 'Feature', 'Unfeature'], actions)
     } else {
       // If the user is not the owner of the job in a space, they cannot connect
       // to the workstation or perform other actions where ownership is needed
-      actions = pick([
-        'View Logs',
-        'Track',
-        'Copy to space',
-        'Attach to...',
-        'Comments',
-        'Edit tags',
-        'Edit properties',
-      ], actions)
+      actions = pick(['View Logs', 'Track', 'Copy to space', 'Attach to...', 'Comments', 'Edit tags', 'Edit properties'], actions)
     }
   }
 

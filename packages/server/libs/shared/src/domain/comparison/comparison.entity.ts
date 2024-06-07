@@ -7,12 +7,14 @@ import {
   PrimaryKey,
   Property,
   Reference,
+  Filter,
 } from '@mikro-orm/core'
 import { App } from '@shared/domain/app/app.entity'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { SCOPE } from '@shared/types/common'
 import { BaseEntity } from '../../database/base-entity'
+import { STATIC_SCOPE } from '@shared/enums'
 
 enum COMPARISON_STATE {
   DONE = 'done',
@@ -21,11 +23,20 @@ enum COMPARISON_STATE {
 }
 
 @Entity({ tableName: 'comparisons' })
+@Filter({
+  name: 'accessibleBy',
+  cond: (args) => ({
+    $or: [
+      { user: { id: args.userId }, scope: STATIC_SCOPE.PRIVATE },
+      { scope: { $in: args.spaceScopes } },
+    ],
+  }),
+})
 class Comparison extends BaseEntity {
   @PrimaryKey()
   id: number
 
-  @Property({nullable: false})
+  @Property({ nullable: false })
   name: string
 
   @Property()
@@ -72,7 +83,4 @@ class Comparison extends BaseEntity {
   }
 }
 
-export {
-  COMPARISON_STATE,
-  Comparison,
-}
+export { COMPARISON_STATE, Comparison }

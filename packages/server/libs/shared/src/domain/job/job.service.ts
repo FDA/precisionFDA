@@ -23,38 +23,168 @@ import { SPACE_EVENT_ACTIVITY_TYPE } from '../space-event/space-event.enum'
 import { JobRepository } from './job.repository'
 import { UserRepository } from '../user/user.repository'
 import { FolderService } from '../user-file/folder.service'
+import { createSyncJobStatusTask, getMainQueue } from '@shared/queue'
+import { SyncJobOperation } from '@shared/domain/job/ops/synchronize'
+import { buildIsOverMaxDuration } from '@shared/domain/job/job.helper'
+import { difference } from 'ramda'
+import {
+  reportStaleJobsTemplate,
+  ReportStaleJobsTemplateInput,
+} from '@shared/domain/email/templates/mjml/report-stale-jobs.template'
+import { buildEmailTemplate } from '@shared/domain/email/email.helper'
+import { config } from '@shared/config'
+import { EMAIL_TYPES, EmailSendInput } from '@shared/domain/email/email.config'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { ServiceLogger } from '@shared/logger/decorator/service-logger'
+import { Injectable, Logger } from '@nestjs/common'
+import { EmailQueueJobProducer } from '@shared/domain/email/producer/email-queue-job.producer'
 
 const logger = getLogger('job.service')
 
-export interface IJobService {
-  syncOutputs(jobDxId: string, userId: number): Promise<void>
-}
-export class JobService implements IJobService {
-  private readonly em: EntityManager
-  private readonly platformClient: PlatformClient
-  private readonly notificationService: NotificationService
-  private readonly folderService: FolderService
+@Injectable()
+export class JobService {
+  @ServiceLogger()
+  private readonly log: Logger
+
   private jobRepo: JobRepository
   private userRepo: UserRepository
 
-  constructor(em: EntityManager, platformClient: PlatformClient) {
-    this.em = em
-    this.platformClient = platformClient
-    this.notificationService = new NotificationService(em as SqlEntityManager)
-    this.folderService = new FolderService(em as SqlEntityManager)
-    this.jobRepo = this.em.getRepository(Job)
-    this.userRepo = this.em.getRepository(User)
+  constructor(
+    private readonly em: EntityManager,
+    private readonly user: UserContext,
+    private readonly platformClient: PlatformClient,
+    private readonly notificationService: NotificationService,
+    private readonly folderService: FolderService,
+    private readonly emailsJobProducer: EmailQueueJobProducer,
+  ) {
+    this.jobRepo = em.getRepository(Job)
+    this.userRepo = em.getRepository(User)
+  }
+
+  async checkChallengeJobs() {
+    logger.verbose(`JobService: checkChallengeJobs`)
+    const challengeBotUser = await this.userRepo.findOneOrFail({
+      dxuser: config.platform.challengeBotUser,
+    })
+    const jobs = await this.getNonTerminalJobs(challengeBotUser.id)
+    if (jobs.length > 0) {
+      logger.verbose('JobService: Found non-terminal users for challenge bot user, syncing outputs')
+      for (const job of jobs) {
+        await this.syncOutputs(job.dxid, challengeBotUser.id)
+      }
+    } else {
+      this.log.verbose('JobService: No non-terminal jobs found for challenge bot user')
+    }
+  }
+
+  /**
+   * Asynchronously checks for stale jobs and performs necessary actions.
+   *
+   * The method performs the following steps:
+   * 1. Retrieves all running jobs that are close to their "deadline" (30 days in production).
+   * 2. Checks if there are any missing SyncJobOperations for the retrieved jobs and recreates them if necessary.
+   * 3. Logs and returns an empty array if no running jobs are found.
+   * 4. Filters out the stale jobs based on a maximum duration threshold and logs the result.
+   * 5. Calculates the non-stale jobs by finding the difference between running jobs and stale jobs.
+   * 6. Logs information about both stale and non-stale jobs for administrative purposes.
+   * 7. Generates and sends an email report to the admin user and a predefined email address, containing details of stale and non-stale jobs.
+   *
+   * @returns {Promise<Job[]>} A promise that resolves to an array of stale jobs.
+   */
+  async checkStaleJobs(): Promise<Job[]> {
+    // TODO cut into smaller methods
+    // find running jobs that are close to "deadline" -> 30days in production
+    const jobRepo = this.em.getRepository(Job)
+    const runningJobs = await jobRepo.find(
+      {},
+      {
+        filters: ['isNonTerminal'],
+        orderBy: { createdAt: 'DESC' },
+        populate: ['app', 'user'],
+      },
+    )
+
+    runningJobs.map(async (job) => {
+      const runningJob = await getMainQueue().getJob(SyncJobOperation.getBullJobId(job.dxid))
+      if (!runningJob) {
+        await createSyncJobStatusTask(job, this.user)
+        this.log.verbose(
+          {},
+          `CheckStaleJobsOperation: Recreated missing SyncJobOperation for ${job.dxid}`,
+        )
+      }
+    })
+    if (runningJobs.length === 0) {
+      this.log.verbose({}, 'CheckStaleJobsOperation: No running jobs found')
+      return []
+    }
+
+    const isOverMaxDuration = buildIsOverMaxDuration('notify')
+    const staleJobs: Job[] = runningJobs.filter((job) => isOverMaxDuration(job))
+    if (staleJobs.length === 0) {
+      this.log.verbose({}, 'CheckStaleJobsOperation: No stale jobs found')
+    }
+
+    // TODO(samuel) use Set instead - reduce bundle size
+    // TODO(samuel) refactor into repository method instead
+    const nonStaleJobs = difference(runningJobs, staleJobs)
+
+    const createJobInfo = (job: Job) => ({
+      uid: job.uid,
+      name: job.name,
+      state: job.state,
+      dxuser: job.user.getEntity().dxuser,
+      duration: job.elapsedTimeSinceCreationString(),
+    })
+    const nonStaleJobsInfo = nonStaleJobs.map(createJobInfo)
+    const staleJobsInfo = staleJobs.map(createJobInfo)
+
+    this.log.verbose(
+      { nonStaleJobsInfo: nonStaleJobsInfo },
+      'CheckStaleJobsOperation: Non stale jobs - for admin to note the times',
+    )
+    this.log.verbose(
+      { staleJobs: staleJobsInfo },
+      'CheckStaleJobsOperation: Stale jobs - should be terminated',
+    )
+
+    // generate email for admin with list of jobs
+    const adminUser = await this.em.getRepository(User).findAdminUser()
+    const body = buildEmailTemplate<ReportStaleJobsTemplateInput>(reportStaleJobsTemplate, {
+      receiver: adminUser,
+      content: {
+        staleJobsInfo: staleJobsInfo,
+        nonStaleJobsInfo: nonStaleJobsInfo,
+        maxDuration: config.workerJobs.syncJob.staleJobsEmailAfter.toString() ?? '-1',
+      },
+    })
+    const email: EmailSendInput = {
+      emailType: EMAIL_TYPES.staleJobsReport,
+      to: adminUser.email,
+      body,
+      subject: 'Stale jobs report',
+    }
+    const emailToPfda: EmailSendInput = {
+      emailType: EMAIL_TYPES.staleJobsReport,
+      to: 'precisionfda-no-reply@dnanexus.com',
+      body,
+      subject: 'Stale jobs report',
+    }
+
+    await this.emailsJobProducer.createSendEmailTask(email, { dxuser: adminUser.dxuser } as UserCtx)
+    await this.emailsJobProducer.createSendEmailTask(emailToPfda, {
+      dxuser: adminUser.dxuser,
+    } as UserCtx)
+
+    return staleJobs
   }
 
   /**
    * Gets non-terminal jobs for the challenge user.
    */
-  async getNonTerminalJobs(userId: number): Promise<Job[]> {
+  private async getNonTerminalJobs(userId: number): Promise<Job[]> {
     const user = this.userRepo.getReference(userId)
-    return await this.jobRepo.find(
-      { user },
-      { filters: ['isNonTerminal'] },
-    )
+    return await this.jobRepo.find({ user }, { filters: ['isNonTerminal'] })
   }
 
   /**
@@ -134,7 +264,12 @@ export class JobService implements IJobService {
     })
   }
 
-  private async getOutputFiles(fileDxids: string[], projectDxid: string, user: User, job: Job): Promise<UserFile[]> {
+  private async getOutputFiles(
+    fileDxids: string[],
+    projectDxid: string,
+    user: User,
+    job: Job,
+  ): Promise<UserFile[]> {
     const outputFiles: UserFile[] = []
     if (fileDxids.length > 0) {
       const fileStateResults = await this.platformClient.fileStates({
@@ -162,7 +297,7 @@ export class JobService implements IJobService {
   }
 
   private async persistFiles(outputFiles: any[], user: User) {
-    const filePromises = outputFiles.map(async outputFile => {
+    const filePromises = outputFiles.map(async (outputFile) => {
       await this.em.persistAndFlush(outputFile) // flush for id
 
       const fileEvent = await createFileEvent(
@@ -191,9 +326,17 @@ export class JobService implements IJobService {
     return result
   }
 
-  private createFile(user: User, projectDxId: string, fileStateResult: FileStateResult, job: Job, parentFolder: Folder | null) {
+  private createFile(
+    user: User,
+    projectDxId: string,
+    fileStateResult: FileStateResult,
+    job: Job,
+    parentFolder: Folder | null,
+  ) {
     if (!fileStateResult.describe) {
-      throw new errors.InvalidStateError(`Platform didn't give describe for file id ${fileStateResult.id}`)
+      throw new errors.InvalidStateError(
+        `Platform didn't give describe for file id ${fileStateResult.id}`,
+      )
     }
     const file = new UserFile(user)
     file.dxid = fileStateResult.id
@@ -263,7 +406,7 @@ export class JobService implements IJobService {
 
   private remapArrayOfFiles(value: DnanexusLink[], output: JobOutput, key: string) {
     const linkArray: string[] = []
-    value.forEach(item => {
+    value.forEach((item) => {
       if (this.isDnaNexusLink(item)) {
         linkArray.push(item.$dnanexus_link)
       }
@@ -273,13 +416,22 @@ export class JobService implements IJobService {
     }
   }
 
+  /**
+   * Collects unique DNA Nexus file IDs from the given job output.
+   *
+   * This method iterates over the properties of the provided job output and extracts unique DNA Nexus file IDs.
+   * The extracted IDs are gathered into a set to ensure uniqueness and then converted to an array for the final result.
+   *
+   * @param {JobOutput} output - The job output containing potential DNA Nexus links.
+   * @returns {string[]} An array of unique DNA Nexus file IDs.
+   */
   private collectIds(output: JobOutput) {
     const uniqueFileDxIds = new Set<string>()
     for (const key in output) {
       if (output.hasOwnProperty(key)) {
         const value = output[key]
         if (Array.isArray(value)) {
-          value.forEach(item => {
+          value.forEach((item) => {
             if (this.isDnaNexusLink(item)) {
               uniqueFileDxIds.add(item.$dnanexus_link)
             }

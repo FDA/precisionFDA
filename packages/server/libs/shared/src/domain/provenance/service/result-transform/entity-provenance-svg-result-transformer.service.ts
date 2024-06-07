@@ -39,13 +39,19 @@ export class EntityProvenanceSvgResultTransformerService
     }
 
     const verticalSpacing = 50
+    const nodeHeightWithSpacing = nodeSize.height + verticalSpacing
 
     const treeLayout = tree()
-      .nodeSize([nodeSize.width, nodeSize.height + verticalSpacing])
+      .nodeSize([nodeSize.width, nodeHeightWithSpacing])
+      .separation((a, b) => (a.parent === b.parent ? 1.1 : 1.3))
+
+    const childTreeLayout = tree()
+      .nodeSize([nodeSize.width, -nodeHeightWithSpacing])
       .separation((a, b) => (a.parent === b.parent ? 1.1 : 1.3))
 
     const root = hierarchy(provenance, (d) => d.parents)
-    const links = treeLayout(root).links()
+    const childRoot = hierarchy(provenance, (d) => d.children)
+    const links = [...treeLayout(root).links(), ...childTreeLayout(childRoot).links()]
 
     const nodes = await Promise.all(
       root.descendants().map(async (node) => ({
@@ -53,6 +59,18 @@ export class EntityProvenanceSvgResultTransformerService
         icon: await this.entityService.getEntityIcon(node.data.data.type),
       })),
     )
+
+    const outputNodes = await Promise.all(
+      childRoot
+        .descendants()
+        .filter((node) => node.depth !== 0)
+        .map(async (node) => ({
+          ...node,
+          icon: await this.entityService.getEntityIcon(node.data.data.type),
+        })),
+    )
+
+    nodes.push(...outputNodes)
 
     const { maxX, maxY, minX, minY } = this.getBoundaries(
       nodes as unknown as Array<{
@@ -104,6 +122,7 @@ export class EntityProvenanceSvgResultTransformerService
       .append('div')
       .classed('content', true)
       .append('a')
+      .attr('data-depth', (d) => d.depth)
       .attr('href', (d) => d.data.data.url)
       .attr('target', '_blank')
       .html((d) => d.icon)

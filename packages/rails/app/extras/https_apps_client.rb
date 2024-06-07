@@ -980,12 +980,12 @@ class HttpsAppsClient # rubocop:disable Metrics/ClassLength
     )
   end
 
-  def track_provenance(uid)
+  def track_provenance(identifier)
     request(
       "/tracks/provenance",
       {},
       Net::HTTP::Get::METHOD,
-      { uid: uid },
+      { identifier: },
     )
   end
 
