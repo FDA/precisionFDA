@@ -1,6 +1,10 @@
+import { SqlEntityManager } from '@mikro-orm/mysql'
 import { EntityService } from '@shared/domain/entity/entity.service'
 import { Job } from '@shared/domain/job/job.entity'
+import { JOB_STATE } from '@shared/domain/job/job.enum'
 import { JobProvenanceDataService } from '@shared/domain/provenance/service/entity-data/job-provenance-data.service'
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
+import { PARENT_TYPE } from '@shared/domain/user-file/user-file.types'
 import { EntityUtils } from '@shared/utils/entity.utils'
 import { expect } from 'chai'
 import { SinonStub, stub } from 'sinon'
@@ -20,9 +24,15 @@ describe('JobProvenanceDataService', () => {
   const APP_ID = 100
   const APP = { id: APP_ID }
 
+  const OUTPUT_FILE_ID = 1000
+  const OUTPUT_FILE = { id: OUTPUT_FILE_ID }
+
   const loadFilesStub = stub()
   const loadAppStub = stub()
   const getEntityUiLinkStub = stub()
+  const getRepositoryStub = stub()
+
+  const nodeFindStub = stub()
 
   const JOB = {
     name: NAME,
@@ -43,6 +53,13 @@ describe('JobProvenanceDataService', () => {
     getEntityUiLinkStub.reset()
     getEntityUiLinkStub.throws()
     getEntityUiLinkStub.withArgs(JOB).resolves(LINK)
+    nodeFindStub.reset()
+    nodeFindStub.throws()
+    nodeFindStub.withArgs({ parentType: PARENT_TYPE.JOB, parentId: JOB.id }).resolves([OUTPUT_FILE])
+
+    getRepositoryStub.reset()
+    getRepositoryStub.throws()
+    getRepositoryStub.withArgs(UserFile).returns({ find: nodeFindStub })
 
     getEntityTypeForEntityStub = stub(EntityUtils, 'getEntityTypeForEntity').throws()
     getEntityTypeForEntityStub.withArgs(JOB).returns('job')
@@ -109,9 +126,33 @@ describe('JobProvenanceDataService', () => {
     })
   })
 
+  describe('#getChildren', () => {
+    it('should return no children if comparison is not done', async () => {
+      const res = await getInstance().getChildren({
+        id: JOB.id,
+        state: JOB_STATE.FAILED,
+      } as unknown as Job)
+
+      expect(res).to.be.an('array').and.to.be.empty()
+    })
+
+    it('should return output files as children', async () => {
+      const res = await getInstance().getChildren({
+        id: JOB.id,
+        state: JOB_STATE.DONE,
+      } as unknown as Job)
+
+      expect(res).to.be.an('array').with.length(1)
+      expect(res).to.deep.include({ type: 'file', entity: OUTPUT_FILE })
+    })
+  })
+
   function getInstance() {
+    const em = {
+      getRepository: getRepositoryStub,
+    } as unknown as SqlEntityManager
     const entityService = { getEntityUiLink: getEntityUiLinkStub } as unknown as EntityService
 
-    return new JobProvenanceDataService(entityService)
+    return new JobProvenanceDataService(em, entityService)
   }
 })

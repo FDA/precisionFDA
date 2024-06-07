@@ -1503,7 +1503,7 @@ class ApiController < ApplicationController
   end
 
   def track_provenance
-    res = https_apps_client.track_provenance(params[:uid])
+    res = https_apps_client.track_provenance(params[:identifier])
     render json: res, adapter: :json
   end
 

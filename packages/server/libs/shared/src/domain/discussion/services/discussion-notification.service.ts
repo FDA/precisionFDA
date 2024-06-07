@@ -30,10 +30,6 @@ export class DiscussionNotificationService {
       { populate: ['user'] },
     )
     for (const member of spaceMemberships) {
-      if (member.user.id === this.userCtx.id) {
-        // ignore the user who is posting the discussion
-        continue
-      }
       const email = member.user.getEntity().email
       const emailTask = {
         emailType: EMAIL_TYPES.spaceDiscussion,
