@@ -645,7 +645,8 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
       redirect_to(path_item) && return
     end
 
-    js space: space.nil? ? nil : space.slice(:uid, :title),
+    js graph: GraphDecorator.for_publisher(@context, item, scope),
+       space: space.nil? ? nil : space.slice(:uid, :title),
        scope_to_publish_to: scope, message: t("main.publish.apps_notification")
   end
 
