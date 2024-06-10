@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { checkStatus, getApiRequestOpts, requestOpts } from '../../utils/api'
+import { checkStatus, getApiRequestOpts } from '../../utils/api'
 import { FileScope, FileState, IFile } from '../files/files.types'
 import { IFilter, IMeta } from '../home/types'
 import { formatScopeQ, Params, prepareListFetch } from '../home/utils'
@@ -17,9 +17,7 @@ export async function fetchDatabaseList(
   const query = prepareListFetch(filters, params)
   const paramQ = '?' + new URLSearchParams(query as {}).toString()
   const scopeQ = formatScopeQ(params.scope)
-
-  const res = await fetch(`/api/dbclusters/${scopeQ}${paramQ}`)
-  return res.json()
+  return await axios.get(`/api/dbclusters/${scopeQ}${paramQ}`).then(r => r.data)
 }
 
  interface AllowedInstance {
@@ -34,12 +32,8 @@ interface FetchDatabaseRequest {
   db_cluster: IDatabase
 }
 
-export async function fetchDatabaseRequest(dxid: string): Promise<FetchDatabaseRequest> {
-  const res = await fetch(`/api/dbclusters/${dxid}`, {
-    ...requestOpts,
-  })
-
-  return res.json()
+export async function fetchDatabaseRequest(uid: string): Promise<IDatabase> {
+  return axios.get<FetchDatabaseRequest>(`/api/dbclusters/${uid}`).then(r => r.data.db_cluster)
 }
 
 export interface IAccessibleFile extends IFile {
@@ -104,20 +98,12 @@ export interface EditDatabasePayload {
   description: string
 }
 
-export async function editDatabaseRequest(payload: EditDatabasePayload, dxid: string) {
-  const res = await (await fetch(`/api/dbclusters/${dxid}`, {
-    ...getApiRequestOpts('PUT'),
-    body: JSON.stringify({ ...payload }),
-  })).json()
-  return res
+export async function editDatabaseRequest(payload: EditDatabasePayload, uid: string) {
+  return await axios.put(`/api/dbclusters/${uid}`, payload).then(r => r.data)
 }
 
 export async function copyDatabasesRequest(scope: string, ids: string[]) {
-  const res = await fetch('/api/dbclusters/copy', {
-    ...getApiRequestOpts('POST'),
-    body: JSON.stringify({ item_ids: ids, scope }),
-  }).then(checkStatus)
-  return res.json()
+  return await axios.post('/api/dbclusters/copy', { item_ids: ids, scope }).then(r => r.data)
 }
 
 export async function databaseMethodRequest(method: MethodType, dxids: string[]) {

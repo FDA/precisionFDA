@@ -50,12 +50,11 @@ class DbCluster < ApplicationRecord
   STATUS_TERMINATED = "terminated".freeze
 
   ALLOWED_ENGINE_VERSIONS = %w(
-    5.7.12
-    9.6.16
-    9.6.17
-    9.6.18
-    9.6.19
-    10.14
+    8.0.mysql_aurora.3.04.1
+    11.9
+    12.9
+    13.9
+    14.6
   ).freeze
 
   # TODO(samuel) validate that I'm not starting db_std1_x1, db_mem1_x96 instance

@@ -691,9 +691,17 @@ class HttpsAppsClient # rubocop:disable Metrics/ClassLength
 
   def dbcluster_create(opts)
     request(
-      "/dbclusters/create",
+      "/dbclusters",
       opts,
       Net::HTTP::Post::METHOD,
+    )
+  end
+
+  def dbcluster_update(uid, opts)
+    request(
+      "/dbclusters/#{uid}",
+      opts,
+      Net::HTTP::Put::METHOD,
     )
   end
 
