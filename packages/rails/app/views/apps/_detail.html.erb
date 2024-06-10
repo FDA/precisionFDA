@@ -130,13 +130,6 @@
     </div>
   </div>
 
-  <div class="btn-group">
-    <button class="btn btn-default" data-bind="click: noteAttachModel.open"><span class="fa fa-paperclip"></span> Attach to...</button>
-    <%= link_to track_path(id: app.uid), class: "btn btn-default", data: {no_turbolink: true} do %>
-      <span class="fa fa-flip-vertical fa-sitemap"></span> Track
-    <% end %>
-  </div>
-
   <% if app.verified? %>
     <span>
       <span class="fa fa-check-circle" style="padding-left: 30px; color: #1F70B5"></span>

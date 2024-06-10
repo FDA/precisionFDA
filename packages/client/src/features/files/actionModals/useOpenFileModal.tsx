@@ -11,7 +11,6 @@ import { ButtonRow, Footer, ModalScroll } from '../../modal/styles'
 import { useModal } from '../../modal/useModal'
 import { IFile } from '../files.types'
 
-
 const StyledResourceTable = styled(ResourceTable)`
   padding: 8px;
   min-width: 400px;
@@ -23,15 +22,14 @@ const StyledResourceTable = styled(ResourceTable)`
 export const useOpenFileModal = (selectedFiles: IFile[]) => {
   const { isShown, setShowModal } = useModal()
   const handleOpenClick = (item: IFile) => {
-    if (item.links.download) {
-      const win = window.open(`${item.links.download}?inline=true`, '_blank')
+      const win = window.open(`/api/files/${item.uid}/${item.name}?inline=true`, '_blank')
       win?.focus()
-    }
   }
 
   const momoSelected = useMemo(() => selectedFiles, [isShown])
   const modalComp = isShown && (
     <ModalNext
+      id="modal-files-organize"
       data-testid="modal-files-organize"
       headerText={`Open ${momoSelected.length} ${pluralize('item', momoSelected.length)}`}
       isShown={isShown}
@@ -43,7 +41,7 @@ export const useOpenFileModal = (selectedFiles: IFile[]) => {
           rows={momoSelected.map(s => {
             return {
               name: (
-                <StyledName data-turbolinks="false" href={`/home/files/${s.uid}`} target="_blank">
+                <StyledName data-turbolinks="false" onClick={() => handleOpenClick(s)}>
                   <VerticalCenter>
                     <FileIcon />
                   </VerticalCenter>

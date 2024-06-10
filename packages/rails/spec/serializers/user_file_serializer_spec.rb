@@ -28,10 +28,9 @@ describe UserFileSerializer do
     end
 
     context "when user is not authenticated" do
-      it "links[show, user, track] exist" do
+      it "links[show, user] exist" do
         expect(user_file_serialized["links"]["show"]).to eq("/files/#{user_file.uid}")
         expect(user_file_serialized["links"]["user"]).to eq(user_path(user.dxuser))
-        expect(user_file_serialized["links"]["track"]).to eq("/track?id=#{user_file.uid}")
       end
 
       it "links[download_list, attach_to] exist" do

@@ -156,7 +156,7 @@ interface FileSelectTabsProps {
   scopes?: string[]
   setShowModal: (show: boolean) => void
   handleSelect: (files: IAccessibleFile[]) => void
-  uids: string[] | null
+  uids: string[]
 }
 
 const FileSelectTabs = ({
@@ -222,7 +222,7 @@ const FileSelectTabs = ({
   }
 
   const isMyFile = (file: IAccessibleFile): boolean =>
-    file.user.dxuser === user?.dxuser
+    file.user?.dxuser === user?.dxuser
 
   const files = filesData?.objects ?? []
 
@@ -230,7 +230,7 @@ const FileSelectTabs = ({
     <>
       <Tabs>
         <Tab
-          title={`Selected ${selectedFiles?.length || uids?.length || '0'}`}
+          title={`Selected ${selectedFiles?.length || uids.length || '0'}`}
           key="selected"
         >
           {isFetching && (
@@ -238,7 +238,7 @@ const FileSelectTabs = ({
               <Loader className="inline" />
             </StyledLoader>
           )}
-          {(selectedFiles?.length === 0 || uids?.length === 0) &&
+          {(selectedFiles?.length === 0 || uids.length === 0) &&
             !isFetching && <div>No selected files</div>}
           <ModalScroll>
             <SelectableTable>
@@ -373,7 +373,7 @@ export const useSelectFileModal = (
         scopes={scopes}
         setShowModal={setShowModal}
         handleSelect={handleSelect}
-        uids={uids}
+        uids={uids ?? []}
       />
     </ModalNext>
   )

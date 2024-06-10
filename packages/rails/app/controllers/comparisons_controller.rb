@@ -11,10 +11,13 @@ class ComparisonsController < ApplicationController
     fhir_export
     fhir_index
     fhir_cap
+    track
   )
 
-  before_action :require_login_or_guest, only: %i(index featured explore show)
+  before_action :require_login_or_guest, only: %i(index featured explore show track)
   before_action :redirect_guest, only: %i(index)
+
+  layout "react", only: [:track]
 
   def index
     synchronizer.sync_comparisons!(@context.user)
@@ -465,6 +468,8 @@ class ComparisonsController < ApplicationController
     flash[:success] = "Comparison \"#{@comparison.name}\" has been successfully deleted"
     redirect_to :comparisons
   end
+
+  def track; end
 
   private
 

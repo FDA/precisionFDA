@@ -73,14 +73,6 @@
       <% end %>
     <% end %>
   </div>
-  <div class="btn-group">
-    <button class="btn btn-default" data-bind="click: noteAttachModel.open"><span class="fa fa-paperclip"></span> Attach to...</button>
-    <% if @job.accessible_by?(@context) %>
-      <%= link_to track_path(id: @job.uid), class: "btn btn-default", data: {no_turbolink: true} do %>
-        <span class="fa fa-flip-vertical fa-sitemap"></span> Track
-      <% end %>
-    <% end %>
-  </div>
 
   <div class="btn-group pull-right">
     <% if @job.app.accessible_by?(@context) %>

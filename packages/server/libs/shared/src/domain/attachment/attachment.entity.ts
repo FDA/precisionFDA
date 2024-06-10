@@ -1,7 +1,7 @@
 import { Entity, ManyToOne, PrimaryKey, Property, Ref, Reference } from '@mikro-orm/core'
 import { Note } from '@shared/domain/note/note.entity'
 
-export type ItemType = 'Node' | 'Job' | 'App' | 'Workflow' | 'Comparison'
+export type ItemType = 'Node' | 'Job' | 'App' | 'Workflow' | 'Comparison' | 'Asset' | 'UserFile'
 
 @Entity({ tableName: 'attachments' })
 export class Attachment {
@@ -14,7 +14,7 @@ export class Attachment {
   @Property()
   itemId: number
 
-  @Property({nullable: false})
+  @Property({ nullable: false })
   itemType: ItemType
 
   constructor(note: Note) {

@@ -72,7 +72,6 @@ class DbClusterSerializer < ApplicationSerializer
       links[:create] = api_dbcluster_path(dxid: object.dxid)
       links[:update] = api_dbcluster_path(dxid: object.dxid)
       links[:attach_to] = api_attach_to_notes_path
-      links[:track] = track_path(id: object.uid)
 
       licenses_links!(links)
     end

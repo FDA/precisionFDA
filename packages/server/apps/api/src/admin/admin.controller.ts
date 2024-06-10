@@ -1,12 +1,21 @@
-/* eslint-disable multiline-ternary */
 import { SqlEntityManager } from '@mikro-orm/mysql'
-import { Body, Controller, Get, HttpCode, Inject, Logger, Post, Put, Query, UseGuards } from '@nestjs/common'
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  Inject,
+  Logger,
+  Post,
+  Put,
+  Query,
+  UseGuards,
+} from '@nestjs/common'
 import { config } from '@shared/config'
 import { DEPRECATED_SQL_ENTITY_MANAGER } from '@shared/database/provider/deprecated-sql-entity-manager.provider'
 import { RESOURCE_TYPES, User } from '@shared/domain/user/user.entity'
 import { ValidationError } from '@shared/errors'
 import { PlatformClient } from '@shared/platform-client'
-import { createCheckStaleJobsTask } from '@shared/queue'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { buildFiltersWithColumnNodes } from '@shared/utils/filters'
 import { UserContextGuard } from '../user-context/guard/user-context.guard'
@@ -15,6 +24,7 @@ import { getAdminBodyValidationPipe } from './pipes/admin-body-validation.pipe'
 import { AdminUsersPaginationPipe } from './pipes/admin-users-pagination.pipe'
 import { enumValidator, numericBodyValidator } from './possibly-reusable-things'
 import { Organization } from '@shared/domain/org/org.entity'
+import { MaintenanceQueueJobProducer } from '@shared/queue/producer/maintenance-queue-job.producer'
 
 interface ISetTotalLimitParams {
   ids: number[]
@@ -44,23 +54,28 @@ export class AdminController {
     private readonly user: UserContext,
     private readonly log: Logger,
     @Inject(DEPRECATED_SQL_ENTITY_MANAGER) private readonly em: SqlEntityManager,
+    private readonly maintenanceJobProducer: MaintenanceQueueJobProducer,
   ) {}
 
   @Get('/stats')
   async getStats() {
     const usersCount = await this.em.getRepository(User).count()
-    const orgsCount = await this.em.getRepository(Organization).count();
+    const orgsCount = await this.em.getRepository(Organization).count()
     return { usersCount, orgsCount }
   }
 
+  /**
+   * Currently unused in app. Needs to be invoked by outside HTTP request.
+   */
   @Get('/checkStaleJobs')
   async checkStaleJobs() {
-    return await createCheckStaleJobsTask(this.user)
+    return await this.maintenanceJobProducer.createCheckStaleJobsTask(this.user)
   }
 
   @Get('/users')
   async getUsers(@Query(AdminUsersPaginationPipe) pagination: any) {
     const { orderBy, filters } = pagination
+    // TODO simplify this craziness
     const res =
       orderBy === 'totalLimit' ||
       orderBy === 'jobLimit' ||
@@ -189,8 +204,7 @@ export class AdminController {
     @Body(
       getAdminBodyValidationPipe({
         ids: (value: number[], _: string, user: UserContext) => {
-          const currentUserId = user.id
-          if (value.includes(currentUserId)) {
+          if (value.includes(user.id)) {
             throw new ValidationError('Cannot activate self')
           }
         },
@@ -209,8 +223,7 @@ export class AdminController {
     @Body(
       getAdminBodyValidationPipe({
         ids: (value: number[], _: string, user: UserContext) => {
-          const currentUserId = user.id
-          if (value.includes(currentUserId)) {
+          if (value.includes(user.id)) {
             throw new ValidationError('Cannot deactivate self')
           }
         },

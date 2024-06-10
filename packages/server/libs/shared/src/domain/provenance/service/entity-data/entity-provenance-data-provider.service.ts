@@ -15,7 +15,9 @@ export class EntityProvenanceDataProviderService {
     },
   ) {}
 
-  async getEntityProvenanceData(source: EntityProvenanceSourceUnion): Promise<EntityProvenance> {
+  private async getEntityProvenanceData(
+    source: EntityProvenanceSourceUnion,
+  ): Promise<EntityProvenance> {
     const dataService: EntityProvenanceDataService<typeof source.type> =
       this.ENTITY_PARENT_RESOLVER_MAP[source.type]
 
@@ -27,6 +29,32 @@ export class EntityProvenanceDataProviderService {
     if (!ArrayUtils.isEmpty(parents)) {
       result.parents = await Promise.all(parents.map((p) => this.getEntityProvenanceData(p)))
     }
+
+    return result
+  }
+
+  private async getEntityOutputData(
+    source: EntityProvenanceSourceUnion,
+  ): Promise<EntityProvenance[]> {
+    const dataService: EntityProvenanceDataService<typeof source.type> =
+      this.ENTITY_PARENT_RESOLVER_MAP[source.type]
+
+    const children = await dataService.getChildren(source.entity)
+    if (!ArrayUtils.isEmpty(children)) {
+      return await Promise.all(
+        children.map(async (c) => {
+          const childDataService: EntityProvenanceDataService<typeof c.type> =
+            this.ENTITY_PARENT_RESOLVER_MAP[c.type]
+          return { data: await childDataService.getData(c.entity) }
+        }),
+      )
+    }
+    return []
+  }
+
+  async getData(source: EntityProvenanceSourceUnion): Promise<EntityProvenance> {
+    const result = await this.getEntityProvenanceData(source)
+    result.children = await this.getEntityOutputData(source)
 
     return result
   }

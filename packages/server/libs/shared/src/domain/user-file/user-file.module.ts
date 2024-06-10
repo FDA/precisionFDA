@@ -17,6 +17,7 @@ import { BullQueueModule } from '@shared/queue/module/bull-queue-module'
 import { Node } from './node.entity'
 import { EntityModule } from '@shared/domain/entity/entity.module'
 import { NodeHelper } from '@shared/domain/user-file/node.helper'
+import { FolderService } from '@shared/domain/user-file/folder.service'
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { NodeHelper } from '@shared/domain/user-file/node.helper'
   ],
   providers: [
     UserFileService,
+    FolderService,
     NodeHelper,
     nodesRemoveOperationProvider,
     fileRemoveOperationProvider,
@@ -44,6 +46,7 @@ import { NodeHelper } from '@shared/domain/user-file/node.helper'
   ],
   exports: [
     UserFileService,
+    FolderService,
     BullQueueModule,
     FileSyncQueueJobProducer,
     nodesRemoveOperationProvider,

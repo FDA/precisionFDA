@@ -30,7 +30,6 @@ const EditFileInfoForm = ({
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-    setValue,
   } = useForm({
     defaultValues: {
       name: file?.name,
@@ -64,10 +63,10 @@ const EditFileInfoForm = ({
     },
   })
 
-  const onSubmit = (vals: any) => {
+  const onSubmit = (vals: {name: string, description: string | null}) => {
     return editFileMutation.mutateAsync({
       name: vals.name,
-      description: vals.description,
+      description: vals.description ?? '',
       fileId: file.uid,
     })
   }
@@ -79,7 +78,6 @@ const EditFileInfoForm = ({
           <FieldGroup>
             <label>File Name</label>
             <InputText
-              label="File Name"
               {...register('name', { required: 'Name is required.' })}
               placeholder="Enter name..."
               disabled={isSubmitting}
@@ -93,7 +91,6 @@ const EditFileInfoForm = ({
           <FieldGroup>
             <label>Description</label>
             <InputText
-              label="Description"
               {...register('description')}
               placeholder="Enter description..."
               disabled={isSubmitting}
@@ -128,6 +125,7 @@ export const useEditFileModal = (selectedItem: IFile) => {
   }
   const modalComp = isShown && (
     <ModalNext
+      id="modal-files-edit"
       data-testid="modal-files-edit"
       headerText="Edit file info"
       isShown={isShown}
