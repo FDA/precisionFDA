@@ -1,16 +1,29 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
-import { Body, Controller, HttpCode, Inject, Logger, Post, UseGuards } from '@nestjs/common'
+import {
+  Body,
+  Controller,
+  HttpCode,
+  Inject,
+  Logger,
+  Param,
+  Post,
+  Put,
+  UseGuards,
+} from '@nestjs/common'
 import { DEPRECATED_SQL_ENTITY_MANAGER } from '@shared/database/provider/deprecated-sql-entity-manager.provider'
 import { CreateDbClusterDTO } from '@shared/domain/db-cluster/dto/CreateDbClusterDTO'
+import { UpdateDbClusterDTO } from '@shared/domain/db-cluster/dto/UpdateDbClusterDTO'
 import { StartDbClusterOperation } from '@shared/domain/db-cluster/ops/start'
 import { StopDbClusterOperation } from '@shared/domain/db-cluster/ops/stop'
 import { TerminateDbClusterOperation } from '@shared/domain/db-cluster/ops/terminate'
 import { DbClusterService } from '@shared/domain/db-cluster/service/db-cluster.service'
+import { UId } from '@shared/domain/entity/domain/uid'
 import { UserOpsCtx } from '@shared/types'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { schemas } from '@shared/utils/base-schemas'
 import { UserContextGuard } from '../user-context/guard/user-context.guard'
 import { JsonSchemaPipe } from '../validation/pipes/json-schema.pipe'
+import { UidValidationPipe } from '../validation/pipes/uid.pipe'
 
 interface IDxidListParams {
   dxids: string[]
@@ -87,8 +100,14 @@ export class DbClusterController {
   }
 
   @HttpCode(201)
-  @Post('/create')
+  @Post()
   async createDbCluster(@Body() body: CreateDbClusterDTO) {
     return await this.dbClusterService.create(body)
+  }
+
+  @HttpCode(200)
+  @Put(':uid')
+  async updateDbCluster(@Param('uid', UidValidationPipe) uid: UId, @Body() body: UpdateDbClusterDTO) {
+    return await this.dbClusterService.update(uid, body);
   }
 }

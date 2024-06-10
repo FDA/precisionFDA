@@ -1,11 +1,7 @@
+import { RESOURCE_LABELS } from '../../types/user'
 import { ServerScope } from "../home/types";
 
-export enum DatabaseListActions {
-  'Create Database' = 'Create Database',
-}
-
 export interface Links {
-  show: string;
   user: string;
   attach_to: string;
   publish: string;
@@ -47,7 +43,7 @@ export interface IDatabase {
   created_at_date_time: string;
   engine: string;
   engine_version: string;
-  dx_instance_class: string;
+  dx_instance_class: keyof typeof RESOURCE_LABELS;
   status_as_of: Date;
   status_updated_date_time: string;
   host: string;

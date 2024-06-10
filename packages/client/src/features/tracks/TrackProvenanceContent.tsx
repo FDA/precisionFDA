@@ -95,9 +95,6 @@ export const convertEntityLink = (entityType: EntityType, uid: string) => {
   let entityIdentifier = uid
   const splittedUid = uid.split('-')
   switch (entityType) {
-    case 'database':
-      entityIdentifier = `${splittedUid[0]}-${splittedUid[1]}`
-      break
     case 'comparison':
     case 'note':
       entityIdentifier = splittedUid[1]

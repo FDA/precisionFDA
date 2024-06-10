@@ -61,14 +61,15 @@ module Api
       opts[:name]&.strip!
 
       response = https_apps_client.dbcluster_create(opts)
-      dbcluster = DbCluster.find_by!(dxid: response[:dxid])
+      dbcluster = DbCluster.find_by!(uid: response[:uid])
 
       render json: dbcluster, adapter: :json
     end
 
     def update
-      @dbcluster.assign_attributes(dbcluster_update_params)
-      @dbcluster.save!
+      # permission check is done in the @dbcluster initialization.
+      https_apps_client.dbcluster_update(@dbcluster.uid, dbcluster_update_params)
+      @dbcluster.reload
 
       render json: @dbcluster, adapter: :json
     end
@@ -87,9 +88,9 @@ module Api
     private
 
     def find_db_cluster
-      @dbcluster = DbCluster.accessible_by_user(current_user).find_by(dxid: params[:dxid])
+      @dbcluster = DbCluster.accessible_by_user(current_user).find_by(uid: params[:uid])
 
-      raise ApiError, "#{params[:dxid]} is not found" unless @dbcluster
+      raise ApiError, "#{params[:uid]} is not found" unless @dbcluster
     end
 
     def dbcluster_create_params
@@ -111,7 +112,7 @@ module Api
         return Arel.sql(query)
       end
 
-      super(default_order)
+      { created_at: Sortable::DIRECTION_DESC }
     end
 
     def create_property_order
