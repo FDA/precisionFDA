@@ -42,7 +42,10 @@ const Option = styled.div`
 export const useOptionAddFileModal = ({
   setShowFileUploadModal,
   setShowCopyFilesModal,
-}: any) => {
+}: {
+  setShowFileUploadModal(b: boolean): void,
+  setShowCopyFilesModal(b: boolean): void
+}) => {
   const { isShown, setShowModal } = useModal()
   const modalComp = isShown && (
     <ModalNext

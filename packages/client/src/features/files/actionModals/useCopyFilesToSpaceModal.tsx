@@ -1,4 +1,4 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation } from '@tanstack/react-query'
 import { DataNode } from 'rc-tree/lib/interface'
 import React, { useState } from 'react'
 import { useImmer } from 'use-immer'
@@ -10,27 +10,10 @@ import { useModal } from '../../modal/useModal'
 import { addData } from '../../spaces/spaces.api'
 import { fetchFolderChildren } from '../files.api'
 import { FileTree } from '../FileTree'
-
-
-interface CustomDataNode extends DataNode {
-  uid?: string
-}
-
-function findById<T extends DataNode>(tree: T[], nodeId: string): T {
-  // eslint-disable-next-line no-restricted-syntax
-  for (const node of tree) {
-    if (node.key === nodeId) return node
-    if (node.children) {
-      const desiredNode = findById(node.children, nodeId)
-      if (desiredNode) return desiredNode as T
-    }
-  }
-  // @ts-ignore
-  return false
-}
+import { findById } from '../file.utils'
+import { CustomDataNode } from '../files.types'
 
 export const useCopyFilesToSpaceModal = ({ spaceId }: { spaceId?: string }) => {
-  const queryClient = useQueryClient()
   const [folderId] = useQueryParam<string | undefined>('folder_id')
   const { isShown, setShowModal } = useModal()
   const [selectedFiles, setSelectedFiles] = useState<string[]>([])
@@ -52,12 +35,15 @@ export const useCopyFilesToSpaceModal = ({ spaceId }: { spaceId?: string }) => {
 
   const onFileCheck = (checkedKeys: string[]) => {
     const uids = checkedKeys
-      .map(c => findById(treeData, c).uid)
+      .map(c => {
+        const node: CustomDataNode = findById(treeData, c)
+        return node?.uid
+      })
       .filter(i => typeof i === 'string') as string[]
     setSelectedFiles(uids)
   }
 
-  const loadData = async (node: any) => {
+  const loadData = async (node: DataNode) => {
     const { nodes } = await fetchFolderChildren(
       undefined,
       undefined,
@@ -83,6 +69,7 @@ export const useCopyFilesToSpaceModal = ({ spaceId }: { spaceId?: string }) => {
 
   const modalComp = isShown && (
     <ModalNext
+      id="modal-files-add-to-space"
       data-testid="modal-files-add-to-space"
       headerText="Add Files To Space"
       isShown={isShown}
@@ -99,7 +86,7 @@ export const useCopyFilesToSpaceModal = ({ spaceId }: { spaceId?: string }) => {
           checkable
           selectable={false}
           treeData={treeData}
-          onCheck={onFileCheck as any}
+          onCheck={onFileCheck}
         />
       </StyledModalScroll>
       <Footer>

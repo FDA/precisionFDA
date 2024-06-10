@@ -14,4 +14,8 @@ export class UserProvenanceDataService extends EntityProvenanceDataService<'user
   async getParents(): Promise<EntityProvenanceSourceUnion[]> {
     return []
   }
+
+  async getChildren(): Promise<EntityProvenanceSourceUnion[]> {
+    return []
+  }
 }

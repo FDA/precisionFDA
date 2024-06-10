@@ -1,62 +1,42 @@
 /* eslint-disable react/jsx-fragments */
-import React from 'react'
 import { QueryClientProvider } from '@tanstack/react-query'
-import {
-  Navigate,
-  Outlet,
-  RouterProvider,
-  createBrowserRouter,
-} from 'react-router-dom'
+import React from 'react'
+import { Navigate, Outlet, RouterProvider, createBrowserRouter } from 'react-router-dom'
 import { Slide, toast } from 'react-toastify'
-import { ReactRouter6Adapter } from 'use-query-params/adapters/react-router-6'
 import 'react-toastify/dist/ReactToastify.css'
 import { QueryParamProvider } from 'use-query-params'
-import { AuthModal } from './features/auth/AuthModal'
-import { useModal } from './features/modal/useModal'
-import GlobalStyle from './styles/global'
-import { StyledToastContainer } from './styles/toast.styles'
-import ExpertsSinglePage from './features/experts/details/index'
-import NoFoundPage from './pages/NoFoundPage'
-import { ExpiringSessionModal } from './features/auth/ExpiringSessionModal'
-import queryClient from './utils/queryClient'
-import DataPortalRoutes from './features/data-portals/routes'
-import { LayoutLoader } from './layouts/UserLayout'
-import { ThemeProvider } from './utils/ThemeContext'
+import { ReactRouter6Adapter } from 'use-query-params/adapters/react-router-6'
 import Header from './components/Header'
 import { AlertDismissedProvider } from './features/admin/alerts/useAlertDismissedLocalStorage'
+import { AuthModal } from './features/auth/AuthModal'
+import { ExpiringSessionModal } from './features/auth/ExpiringSessionModal'
+import DataPortalRoutes from './features/data-portals/routes'
+import ExpertsSinglePage from './features/experts/details/index'
+import { useModal } from './features/modal/useModal'
+import { TrackPage } from './features/tracks/TrackPage'
+import { LayoutLoader } from './layouts/UserLayout'
+import NoFoundPage from './pages/NoFoundPage'
+import GlobalStyle from './styles/global'
+import { StyledToastContainer } from './styles/toast.styles'
+import { ThemeProvider } from './utils/ThemeContext'
+import queryClient from './utils/queryClient'
 
 const Admin = React.lazy(() => import('./features/admin'))
 const Home2 = React.lazy(() => import('./features/home'))
 const Docs = React.lazy(() => import('./features/docs'))
-const ChallengesList = React.lazy(
-  () => import('./features/challenges/list/ChallengesList'),
-)
+const ChallengesList = React.lazy(() => import('./features/challenges/list/ChallengesList'))
 const Spaces = React.lazy(() => import('./features/spaces'))
-const CreateChallengePage = React.lazy(
-  () => import('./features/challenges/form/CreateChallengePage'),
-)
-const EditChallengePage = React.lazy(
-  () => import('./features/challenges/form/EditChallengePage'),
-)
-const ProposeChallengePage = React.lazy(
-  () => import('./features/challenges/form/ProposeChallengePage'),
-)
+const CreateChallengePage = React.lazy(() => import('./features/challenges/form/CreateChallengePage'))
+const EditChallengePage = React.lazy(() => import('./features/challenges/form/EditChallengePage'))
+const ProposeChallengePage = React.lazy(() => import('./features/challenges/form/ProposeChallengePage'))
 const NewsListPage = React.lazy(() => import('./features/news/NewsPage'))
 const CreateNewsItemPage = React.lazy(() => import('./features/news/form/CreateNewsItemPage'))
 const LandingPage = React.lazy(() => import('./features/overview/OverviewPage'))
 const AboutPage = React.lazy(() => import('./pages/AboutPage'))
-const NotificationsPage = React.lazy(
-  () => import('./pages/Account/Notifications'),
-)
-const ExpertsListPage = React.lazy(
-  () => import('./features/experts/ExpertsList'),
-)
-const ChallengeDetailsPage = React.lazy(
-  () => import('./features/challenges/details/ChallengeDetails'),
-)
-const WorkflowRunPage = React.lazy(
-  () => import('./features/workflows/run/WorkflowRun'),
-)
+const NotificationsPage = React.lazy(() => import('./pages/Account/Notifications'))
+const ExpertsListPage = React.lazy(() => import('./features/experts/ExpertsList'))
+const ChallengeDetailsPage = React.lazy(() => import('./features/challenges/details/ChallengeDetails'))
+const WorkflowRunPage = React.lazy(() => import('./features/workflows/run/WorkflowRun'))
 const EditNewsItemPage = React.lazy(() => import('./features/news/form/EditNewsItemPage'))
 const ListAdminNews = React.lazy(() => import('./features/news/ListAdminNews'))
 const ToS = React.lazy(() => import('./pages/ToS'))
@@ -83,12 +63,7 @@ const RootComponent = () => {
                 <Outlet />
               </React.Suspense>
             </QueryParamProvider>
-            <StyledToastContainer
-              position="top-right"
-              transition={Slide}
-              hideProgressBar
-              pauseOnHover
-              />
+            <StyledToastContainer position="top-right" transition={Slide} hideProgressBar pauseOnHover />
             <AuthModal {...authModal} />
             <ExpiringSessionModal modal={expiringSessionModal} />
           </AlertDismissedProvider>
@@ -125,6 +100,8 @@ const router = createBrowserRouter([
       { path: 'admin/news', element: <ListAdminNews /> },
       { path: 'admin/news/create', element: <CreateNewsItemPage /> },
       { path: 'admin/news/:id/edit', element: <EditNewsItemPage /> },
+      { path: 'comparisons/:identifier/track', element: <TrackPage /> },
+      { path: 'notes/:identifier/track', element: <TrackPage /> },
       { path: 'data-portals/*', element: <DataPortalRoutes /> },
       { path: 'daaas', element: <Navigate to="/data-portals/main" replace /> },
       { path: '*', element: <NoFoundPage /> },

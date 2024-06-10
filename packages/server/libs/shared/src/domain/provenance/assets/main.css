@@ -27,6 +27,27 @@
   border-width: 1px;
 }
 
+.node a[data-depth='0'] {
+  font-weight: bold;
+  background-color: var(--link-color);
+  border-color: var(--link-color);
+  color: white;
+}
+
+.node a[data-depth='0']:hover {
+  color: white;
+  background-color: var(--link-color-hover);
+  border-color: var(--link-color-hover);
+}
+
+.node a[data-depth='0'] path {
+  fill: white;
+}
+
+.node a[data-depth='0']:hover path {
+  fill: white;
+}
+
 .node svg path {
   fill: var(--link-color);
 }

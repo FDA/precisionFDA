@@ -114,19 +114,6 @@ export const prepareValidations = (inputSpec: InputSpec[], userJobLimit: IUser['
   return Yup.object().shape(validationObject)
 }
 
-export const buildPath = (node: FileTreeNode): string => {
-  if (!node || node.title === '/') {
-    return ''
-  }
-
-  if (!node.parent) {
-    return node.title
-  }
-
-  const parentPath = buildPath(node.parent)
-  return `${parentPath}/${node.title}`
-}
-
 export const getValue = (
   inputKey: string,
   value: FormInput,

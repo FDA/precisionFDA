@@ -3,7 +3,7 @@ import {
   Entity,
   EntityRepositoryType,
   Filter,
-  OneToMany,
+  OneToMany, OneToOne,
   Property,
   Reference,
 } from '@mikro-orm/core'
@@ -22,6 +22,7 @@ import {
   IFileOrAsset,
   ITrackable,
 } from './user-file.types'
+import { Resource } from '@shared/domain/resource/resource.entity'
 
 @Entity({
   tableName: 'nodes',
@@ -77,7 +78,10 @@ class UserFile extends Node implements IFileOrAsset, ITrackable {
   taggings = new Collection<Tagging>(this)
 
   @OneToMany({ entity: () => ChallengeResource, mappedBy: 'userFile', orphanRemoval: true })
-  challengeResources = new Collection<ChallengeResource>(this);
+  challengeResources = new Collection<ChallengeResource>(this)
+
+  @OneToOne(() => Resource, (resource) => resource.userFile, { orphanRemoval: true })
+  resource!: Resource;
 
   [EntityRepositoryType]?: UserFileRepository
   constructor(user: User) {

@@ -1,7 +1,6 @@
 import type { JSONSchema7, JSONSchema7Definition } from 'json-schema'
 import { config } from '../config'
 import { USER_CONTEXT_HTTP_HEADERS } from '../config/consts'
-import * as z from 'zod'
 
 // generic schemas
 
@@ -43,7 +42,7 @@ const getDxidsInputSchema: (paramName: string) => JSONSchema7 = (paramName = 'id
       uniqueItems: true,
       items: dxidProp,
       minItems: 1,
-    }
+    },
   },
   required: [paramName],
   additionalProperties: false,
@@ -62,7 +61,11 @@ const userContextSchema: JSONSchema7 = {
   type: 'object',
   properties: {
     [USER_CONTEXT_HTTP_HEADERS.id]: idProp,
-    [USER_CONTEXT_HTTP_HEADERS.accessToken]: { type: 'string', minLength: 1, maxLength: config.validation.maxStrLen },
+    [USER_CONTEXT_HTTP_HEADERS.accessToken]: {
+      type: 'string',
+      minLength: 1,
+      maxLength: config.validation.maxStrLen,
+    },
     [USER_CONTEXT_HTTP_HEADERS.dxUser]: dxidProp,
   },
   required: Object.values(USER_CONTEXT_HTTP_HEADERS),
@@ -79,8 +82,6 @@ const paginationSchema: JSONSchema7 = {
   additionalProperties: true,
 }
 
-const uidSchema = z.string().regex(/^(job|file|app)-[0123456789BFGJKPQVXYZbfgjkpqvxyz]{24}-\d+$/)
-
 const schemas = {
   userContextSchema,
   getDxidInputSchema,
@@ -90,7 +91,6 @@ const schemas = {
   dxidProp,
   paginationSchema,
   uidInputSchema,
-  uidSchema,
 }
 
 export { schemas }

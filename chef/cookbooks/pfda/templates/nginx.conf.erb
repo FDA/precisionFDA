@@ -16,8 +16,9 @@ http {
   gzip_proxied no-cache no-store private expired auth;
   server_tokens off;
   client_max_body_size 50M;
-  keepalive_timeout 65;
   keepalive_requests 100000;
+  keepalive_timeout 120;
+  send_timeout 120;
   sendfile on;
   tcp_nopush on;
   tcp_nodelay on;
@@ -85,8 +86,6 @@ http {
 
     error_page 500 502 503 504 /500.html;
     client_max_body_size 4G;
-    keepalive_timeout 10;
-
     client_body_timeout 5s;
     client_header_timeout 5s;
 

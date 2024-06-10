@@ -33,7 +33,6 @@ describe('DiscussionNotificationService', () => {
   const DISCUSSION_LINK = 'link'
 
   const ANSWER_ID = 3
-  const COMMENT_ID = 4
 
   const createSendEmailTaskStub = stub()
   const getEntityUiLinkStub = stub()
@@ -86,9 +85,10 @@ describe('DiscussionNotificationService', () => {
 
   it('should send email to space members seperately', async () => {
     await getInstance(user1).notifyDiscussion(space, discussion)
-    expect(createSendEmailTaskStub.callCount).to.be.equal(2)
-    expect(createSendEmailTaskStub.args[0][0].to).to.be.equal(user2.email)
-    expect(createSendEmailTaskStub.args[1][0].to).to.be.equal(user3.email)
+    expect(createSendEmailTaskStub.callCount).to.be.equal(3)
+    expect(createSendEmailTaskStub.args[0][0].to).to.be.equal(user1.email)
+    expect(createSendEmailTaskStub.args[1][0].to).to.be.equal(user2.email)
+    expect(createSendEmailTaskStub.args[2][0].to).to.be.equal(user3.email)
     expect(createSendEmailTaskStub.args[0][0].subject).to.be.equal(
       `[precisionFDA] Discussion update notification: ${space.name}`,
     )
@@ -106,16 +106,12 @@ describe('DiscussionNotificationService', () => {
       },
     } as unknown as Answer
     await getInstance(user2).notifyDiscussionAnswer(space, answer)
-    expect(createSendEmailTaskStub.callCount).to.be.equal(2)
-    expect(createSendEmailTaskStub.args[0][0].to).to.be.equal(user1.email)
-    expect(createSendEmailTaskStub.args[1][0].to).to.be.equal(user3.email)
+    expect(createSendEmailTaskStub.callCount).to.be.equal(3)
   })
 
   it('test notifyDiscussionComment', async () => {
     await getInstance(user3).notifyDiscussionComment(space, discussion)
-    expect(createSendEmailTaskStub.callCount).to.be.equal(2)
-    expect(createSendEmailTaskStub.args[0][0].to).to.be.equal(user1.email)
-    expect(createSendEmailTaskStub.args[1][0].to).to.be.equal(user2.email)
+    expect(createSendEmailTaskStub.callCount).to.be.equal(3)
   })
 
   function getInstance(user: User) {

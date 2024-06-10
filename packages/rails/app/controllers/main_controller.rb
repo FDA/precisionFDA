@@ -28,11 +28,9 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
                                                presskit
                                                news
                                                mislabeling
-                                               data_portals
-                                               track)
+                                               data_portals)
   # rubocop:enable Rails/LexicallyScopedActionFilter
 
-  before_action :require_login_or_guest, only: %i(track)
   before_action :init_countries, only: %i(request_access create_request_access)
 
   layout "react", only: %i(about index news terms security data_portals)
@@ -650,19 +648,6 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
     js graph: GraphDecorator.for_publisher(@context, item, scope),
        space: space.nil? ? nil : space.slice(:uid, :title),
        scope_to_publish_to: scope, message: t("main.publish.apps_notification")
-  end
-
-  def track
-    id = unsafe_params[:id]
-    raise "Missing id in track route" unless id.is_a?(String) && id.present?
-
-    @item = item_from_uid(id)
-    unless @item.accessible_by?(@context)
-      flash[:error] = "This item is not accessible by you"
-      redirect_to :root
-      return
-    end
-    @graph = GraphDecorator.build(@context, @item)
   end
 
   def tokify

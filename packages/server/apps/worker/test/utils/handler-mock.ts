@@ -8,6 +8,7 @@ import { MaintenanceQueueProcessor } from '../../src/queues/processor/maintenanc
 import { UserDataConsistencyReportService } from '@shared/domain/user/user-data-consistency-report.service'
 import { AdminDataConsistencyReportService } from '@shared/debug/admin-data-consistency-report.service'
 import { DbClusterService } from '@shared/domain/db-cluster/service/db-cluster.service'
+import { JobService } from '@shared/domain/job/job.service'
 
 const dbClusterService = {} as DbClusterService
 
@@ -19,6 +20,13 @@ const userDataConsistencyReportService = {
   createReport: () => {},
 } as UserDataConsistencyReportService
 
+const jobServiceUserClient = {
+  checkStaleJobs: () => {},
+} as JobService
+const jobServiceChallengeBotClient = {
+  checkChallengeJobs: () => {},
+} as JobService
+
 const processor = {
   MAIN: () => new MainQueueProcessor(),
   MAINTENANCE: () =>
@@ -26,20 +34,21 @@ const processor = {
       database.orm().em.fork(),
       adminDataConsistencyReportService,
       dbClusterService,
+      jobServiceUserClient,
+      jobServiceChallengeBotClient,
     ),
-  FILE: () =>
-    new FileSyncQueueProcessor(database.orm().em.fork(), userDataConsistencyReportService),
+  FILE: () => new FileSyncQueueProcessor(userDataConsistencyReportService, jobServiceUserClient),
   EMAIL: () => new EmailQueueProcessor(),
 }
 
 const jobToProcessorMap: Partial<Record<TASK_TYPE, (job: Job) => Promise<void> | void>> = {
   [TASK_TYPE.SYNC_FILES_STATE]: (job) => processor.MAIN().syncFilesState(job),
-  [TASK_TYPE.CHECK_CHALLENGE_JOBS]: (job) => processor.MAINTENANCE().checkChallengeJobs(job),
+  [TASK_TYPE.CHECK_CHALLENGE_JOBS]: () => processor.MAINTENANCE().checkChallengeJobs(),
   [TASK_TYPE.SYNC_JOB_OUTPUTS]: (job) => processor.FILE().syncJobOutputs(job),
   [TASK_TYPE.SYNC_JOB_STATUS]: (job) => processor.MAIN().syncJobStatus(job),
   [TASK_TYPE.WORKSTATION_SNAPSHOT]: (job) => processor.FILE().createWorkstationSnapshot(job),
   [TASK_TYPE.SEND_EMAIL]: (job) => processor.EMAIL().sendEmail(job),
-  [TASK_TYPE.CHECK_STALE_JOBS]: (job) => processor.MAINTENANCE().checkStaleJobs(job),
+  [TASK_TYPE.CHECK_STALE_JOBS]: () => processor.MAINTENANCE().checkStaleJobs(),
   [TASK_TYPE.REMOVE_NODES]: (job) => processor.FILE().removeNodes(job),
   [TASK_TYPE.CHECK_NON_TERMINATED_DBCLUSTERS]: () =>
     processor.MAINTENANCE().checkNonTerminatedDbClusters(),

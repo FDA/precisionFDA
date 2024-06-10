@@ -22,6 +22,10 @@ export abstract class EntityProvenanceDataService<T extends EntityWithProvenance
     source: EntityProvenanceSource<T>['entity'],
   ): Promise<EntityProvenanceSourceUnion[]>
 
+  abstract getChildren(
+    source: EntityProvenanceSource<T>['entity'],
+  ): Promise<EntityProvenanceSourceUnion[]>
+
   async getData(source: EntityProvenanceSource<T>['entity']): Promise<EntityProvenanceData<T>> {
     return {
       type: this.type,

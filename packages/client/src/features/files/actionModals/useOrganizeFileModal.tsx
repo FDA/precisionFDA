@@ -1,4 +1,4 @@
-import { Key } from 'rc-tree/lib/interface'
+import { DataNode, Key } from 'rc-tree/lib/interface'
 import React, { useState } from 'react'
 import styled from 'styled-components'
 import { useImmer } from 'use-immer'
@@ -11,17 +11,10 @@ import { fetchFolderChildren } from '../files.api'
 import { FileTree } from '../FileTree'
 import { SPACE_PREFIX } from '../../../constants'
 import { TreeOnSelectInfo } from '../files.types'
+import { findById } from '../file.utils'
 
-function findById(tree: any[], nodeId: string): any {
-  // eslint-disable-next-line no-restricted-syntax
-  for (const node of tree) {
-    if (node.key === nodeId) return node
-    if (node.children) {
-      const desiredNode = findById(node.children, nodeId)
-      if (desiredNode) return desiredNode
-    }
-  }
-  return false
+type EnhancedDataNode = DataNode &{
+  path: string
 }
 
 const getSpaceId = (scope?: ServerScope): string | undefined => {
@@ -39,29 +32,30 @@ const OrganizeFiles = ({
   onSelect: (selectedKeys: Key[], info: TreeOnSelectInfo) => void,
 }) => {
   const spaceId = getSpaceId(scope)
-  const [treeData, setTreeData] = useImmer<any>([
-    { key: 'ROOT', title: '/', children: []},
+  const [treeData, setTreeData] = useImmer<DataNode[]>([
+    { key: 'ROOT', title: '/', children: []} as unknown as DataNode,
   ])
 
   return (
     <FileTree
       onExpand={d => {}}
-      loadData={async node => {
+      loadData={async (node: EnhancedDataNode) => {
         const { nodes } = await fetchFolderChildren(
           scope === 'private' ? 'private' : 'public', // TODO fix this in fetchFolderChildren
           spaceId,
           node.key.toString(),
         )
         const children = nodes
-          .filter((e: any) => e.type === 'Folder')
-          .map((d: any) => ({
+          .filter((e) => e.type === 'Folder')
+          .map((d) => ({
             key: d.id.toString(),
             title: d.name,
             children: [],
             parent: d.path[d.path.length-1],
+            path: (node.path) ? `${node.path}/${d.name}`: `/${d.name}`,
           }))
 
-        setTreeData((draft: any) => {
+        setTreeData((draft: DataNode[]) => {
           const folder = findById(draft, node.key.toString())
           if (folder) {
             folder.children = children
@@ -109,6 +103,7 @@ export const useOrganizeFileModal = ({
 
   const modalComp = isShown && (
     <ModalNext
+      id="modal-files-organize"
       hide={() => setShowModal(false)}
       isShown={isShown}
       disableClose={false}
