@@ -359,7 +359,7 @@ export const useFilesSelectActions = ({
         method: 'POST',
         url: `${selected[0]?.links?.publish}&scope=public`,
       },
-      isDisabled: selected.length !== 1 || selected[0].location === 'Public',
+      isDisabled: selected.length !== 1 || selected[0].location === 'Public' || !user?.allowed_to_publish,
       shouldHide:
         isFolder || selected.length !== 1 || homeScope !== 'me' || selected[0].links?.publish === undefined || openSelected,
     },
