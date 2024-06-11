@@ -1,7 +1,7 @@
 import { createRemoveNodesJobTask } from '@shared/queue'
 import { FILE_STATE_PFDA } from '../user-file.types'
 import { Node } from '../node.entity'
-import { IdsInput, UserOpsCtx } from '../../../types'
+import { IdsInput, UserOpsCtx } from '@shared/types'
 import { BaseOperation } from '@shared/utils/base-operation'
 
 class StartRemoveNodesJob extends BaseOperation<UserOpsCtx, IdsInput, void> {

@@ -5,10 +5,6 @@ import { NotificationModule } from '@shared/domain/notification/notification.mod
 import { Resource } from '@shared/domain/resource/resource.entity'
 import { ResourceModule } from '@shared/domain/resource/resource.module'
 import { FileSyncQueueJobProducer } from '@shared/domain/user-file/producer/file-sync-queue-job.producer'
-import {
-  fileRemoveOperationProvider,
-  nodesRemoveOperationProvider,
-} from '@shared/domain/user-file/providers/user-file.provider'
 import { UserFileService } from '@shared/domain/user-file/service/user-file.service'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { User } from '@shared/domain/user/user.entity'
@@ -17,6 +13,9 @@ import { BullQueueModule } from '@shared/queue/module/bull-queue-module'
 import { Node } from './node.entity'
 import { EntityModule } from '@shared/domain/entity/entity.module'
 import { NodeHelper } from '@shared/domain/user-file/node.helper'
+import { TaggingModule } from '@shared/domain/tagging/tagging.module'
+import { SpaceEventModule } from '@shared/domain/space-event/space-event.module'
+import { Folder } from '@shared/domain/user-file/folder.entity'
 import { FolderService } from '@shared/domain/user-file/folder.service'
 
 @Module({
@@ -34,23 +33,11 @@ import { FolderService } from '@shared/domain/user-file/folder.service'
     NotificationModule,
     EntityModule,
     ResourceModule,
-    MikroOrmModule.forFeature([Node, UserFile, User, Resource]),
+    TaggingModule,
+    SpaceEventModule,
+    MikroOrmModule.forFeature([Node, UserFile, Folder, User, Resource]),
   ],
-  providers: [
-    UserFileService,
-    FolderService,
-    NodeHelper,
-    nodesRemoveOperationProvider,
-    fileRemoveOperationProvider,
-    FileSyncQueueJobProducer,
-  ],
-  exports: [
-    UserFileService,
-    FolderService,
-    BullQueueModule,
-    FileSyncQueueJobProducer,
-    nodesRemoveOperationProvider,
-    fileRemoveOperationProvider,
-  ],
+  providers: [UserFileService, FolderService, NodeHelper, FileSyncQueueJobProducer],
+  exports: [UserFileService, FolderService, BullQueueModule, FileSyncQueueJobProducer],
 })
 export class UserFileModule {}

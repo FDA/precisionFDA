@@ -10,7 +10,6 @@ import { NotificationService } from '@shared/domain/notification/services/notifi
 import { Resource } from '@shared/domain/resource/resource.entity'
 import { Space } from '@shared/domain/space/space.entity'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
-import { FileRemoveOperation } from '@shared/domain/user-file/ops/file-remove'
 import { UserFileService } from '@shared/domain/user-file/service/user-file.service'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { User } from '@shared/domain/user/user.entity'
@@ -61,7 +60,6 @@ export class DataPortalService {
     private readonly platformClient: PlatformClient,
     private readonly notificationService: NotificationService,
     private readonly userFileService: UserFileService,
-    private readonly fileRemoveOperation?: FileRemoveOperation,
   ) {}
 
   listResources = async (
@@ -75,7 +73,8 @@ export class DataPortalService {
 
     if (await this.hasRoles(dataPortal, this.viewRoles, this.user.id)) {
       return await Promise.all(
-        dataPortal.resources.getItems()
+        dataPortal.resources
+          .getItems()
           .sort((a, b) => a.name.localeCompare(b.name))
           .map(async (r) => {
             return {
@@ -136,7 +135,7 @@ export class DataPortalService {
 
     // TODO fix transaction work
     await this.em.removeAndFlush(resource)
-    await this.fileRemoveOperation?.run({ id: resource.userFile.id })
+    await this.userFileService.removeFile(resource.userFile.id)
   }
 
   private getUserFileUrl = async (uid: UId): Promise<string> => {
