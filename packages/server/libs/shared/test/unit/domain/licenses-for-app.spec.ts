@@ -11,7 +11,7 @@ import P from 'pino'
 import { PARENT_TYPE } from '../../../src/domain/user-file/user-file.types'
 import { UidInput } from '../../../src/types'
 
-describe('licenses for app\'s assets tests', () => {
+describe("licenses for app's assets tests", () => {
   let em: EntityManager<MySqlDriver>
   let user: User
   let log: P.Logger
@@ -19,7 +19,7 @@ describe('licenses for app\'s assets tests', () => {
 
   beforeEach(async () => {
     await db.dropData(database.connection())
-    em = database.orm().em as EntityManager<MySqlDriver>
+    em = database.orm().em.fork() as EntityManager<MySqlDriver>
     user = create.userHelper.create(em)
     log = getLogger()
     await em.flush()
