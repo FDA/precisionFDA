@@ -1,7 +1,6 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Job } from '@shared/domain/job/job.entity'
 import { NotificationService } from '@shared/domain/notification/services/notification.service'
-import { CreateSpaceEventOperation } from '@shared/domain/space-event/ops/create-space-event'
 import { Folder } from '@shared/domain/user-file/folder.entity'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { User } from '@shared/domain/user/user.entity'
@@ -23,6 +22,7 @@ import { SPACE_EVENT_ACTIVITY_TYPE } from '../space-event/space-event.enum'
 import { JobRepository } from './job.repository'
 import { UserRepository } from '../user/user.repository'
 import { FolderService } from '../user-file/folder.service'
+import { SpaceEventService } from '@shared/domain/space-event/space-event.service'
 import { createSyncJobStatusTask, getMainQueue } from '@shared/queue'
 import { SyncJobOperation } from '@shared/domain/job/ops/synchronize'
 import { buildIsOverMaxDuration } from '@shared/domain/job/job.helper'
@@ -217,7 +217,17 @@ export class JobService {
       this.updateJobRunData(job, remappedOutput)
 
       if (scopeContainsId(job.scope)) {
-        await this.createSpaceEvent(job, userId)
+        // TODO temporarily before we move to Service model
+        const spaceService = new SpaceEventService(
+          this.em as SqlEntityManager,
+          { id: userId } as UserCtx,
+        )
+        await spaceService.createSpaceEvent({
+          entity: { type: 'job', value: job },
+          spaceId: getIdFromScopeName(job.scope),
+          userId,
+          activityType: SPACE_EVENT_ACTIVITY_TYPE.job_completed,
+        })
       }
 
       await this.createNotification(jobDxId, userId)
@@ -247,21 +257,6 @@ export class JobService {
     job.runData.run_outputs = output
     // describe is updated by job's synchronize.ts
     this.em.persist(job)
-  }
-
-  private async createSpaceEvent(job: Job, userId: number) {
-    const spaceId = getIdFromScopeName(job.scope)
-    const eventOp = new CreateSpaceEventOperation({
-      user: { id: userId } as UserCtx,
-      em: this.em as SqlEntityManager,
-      log: logger,
-    })
-    await eventOp.execute({
-      entity: { type: 'job', value: job },
-      spaceId,
-      userId,
-      activityType: SPACE_EVENT_ACTIVITY_TYPE.job_completed,
-    })
   }
 
   private async getOutputFiles(
@@ -386,7 +381,7 @@ export class JobService {
    *   "file-GY6b6Qj0x979Vpz3vp2yxK0g"
    * ]
    *
-   * @param output
+   * @param outputParam
    * @private
    */
   private remapFiles(outputParam: JobOutput): JobOutput {

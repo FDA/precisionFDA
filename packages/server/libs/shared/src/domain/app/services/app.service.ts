@@ -346,13 +346,13 @@ export class AppService implements IAppService {
     try {
       const user = await this.em.findOneOrFail(User, { id: userId }, { populate: ['organization'] })
       const scope = this.getScope(appInput.scope)
-      let assets = await this.getAssets(
+      const assets = await this.getAssets(
         userId,
         appInput.ordered_assets ? appInput.ordered_assets : [],
       )
 
       // - create app series
-      let appSeries = await this.createOrGetAppSeries(user, appInput.name, scope)
+      const appSeries = await this.createOrGetAppSeries(user, appInput.name, scope)
 
       // - get release
       const release = appInput.release ? appInput.release : UBUNTU_20
