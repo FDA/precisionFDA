@@ -267,6 +267,8 @@ export class DataPortalService {
       { populate: ['spaceMemberships.user'] },
     )
 
+    await this.validateUrlSlug(input.urlSlug)
+
     const dataPortal = new DataPortal(space)
     dataPortal.name = input.name
     dataPortal.description = input.description
@@ -275,7 +277,6 @@ export class DataPortalService {
     dataPortal.status = input.status
     dataPortal.content = input.content
 
-    await this.validateUrlSlug(dataPortal.urlSlug)
     await this.em.persistAndFlush(dataPortal)
 
     logger.verbose('Creating card image', input)
