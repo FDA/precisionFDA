@@ -22,7 +22,7 @@ import {CollapsibleContainerNode} from '../plugins/CollapsiblePlugin/Collapsible
 import {CollapsibleContentNode} from '../plugins/CollapsiblePlugin/CollapsibleContentNode';
 import {CollapsibleTitleNode} from '../plugins/CollapsiblePlugin/CollapsibleTitleNode';
 import {ImageNode} from './ImageNode';
-import {InlineImageNode} from './InlineImageNode';
+import {InlineImageNode} from './InlineImageNode/InlineImageNode';
 import {KeywordNode} from './KeywordNode';
 import {LayoutContainerNode} from './LayoutContainerNode';
 import {LayoutItemNode} from './LayoutItemNode';

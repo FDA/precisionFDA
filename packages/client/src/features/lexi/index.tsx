@@ -1,13 +1,14 @@
 import { InitialConfigType, LexicalComposer } from '@lexical/react/LexicalComposer'
 import * as React from 'react'
 
+import { FlashMessageContext } from './context/FlashMessageContext'
 import { SettingsContext } from './context/SettingsContext'
 import PlaygroundNodes from './nodes/PlaygroundNodes'
 import { TableContext } from './plugins/TablePlugin'
 import PlaygroundEditorTheme from './themes/PlaygroundEditorTheme'
 
-import './index.css'
 import './setupEnv'
+import './index.css'
 
 export function LexiContext({ children, editorState }: any): JSX.Element {
   const initialConfig = {
@@ -24,9 +25,11 @@ export function LexiContext({ children, editorState }: any): JSX.Element {
 
   return (
     <SettingsContext>
-      <LexicalComposer initialConfig={initialConfig}>
-        <TableContext>{children}</TableContext>
-      </LexicalComposer>
+      <FlashMessageContext>
+        <LexicalComposer initialConfig={initialConfig}>
+          <TableContext>{children}</TableContext>
+        </LexicalComposer>
+      </FlashMessageContext>
     </SettingsContext>
   )
 }
