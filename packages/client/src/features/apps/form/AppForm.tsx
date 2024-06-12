@@ -42,6 +42,7 @@ import {
   TabRow,
   TabTitle,
   TopFieldGroup,
+  TopFieldGroupUbuntu,
 } from './styles'
 import { getBaseLink } from '../run/utils'
 import { getSpaceIdFromScope } from '../../../utils'
@@ -217,8 +218,8 @@ export const AppForm = ({
               name="release"
               control={control}
               render={({ field }) => (
-                <SelectFieldLabel>
-                  Ubuntu Release
+                <TopFieldGroupUbuntu>
+                  <label>Ubuntu Release</label>
                   <Select
                     {...field}
                     options={ubuntuReleasesOptions}
@@ -232,7 +233,7 @@ export const AppForm = ({
                     name="release"
                     render={({ message }) => <InputError>{message}</InputError>}
                   />
-                </SelectFieldLabel>
+                </TopFieldGroupUbuntu>
               )}
             />
           </FieldGroup>

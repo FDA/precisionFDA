@@ -72,6 +72,9 @@ const StyledItem = styled.div`
 const StyledIsArray = styled.td`
   width: 50px;
 `
+const CheckboxWrapLabel = styled.label`
+  position: relative;
+`
 
 export interface SpecProps {
   base: 'input_spec' | 'output_spec'
@@ -384,14 +387,14 @@ export const Optional = ({ base, index, control, errors }: SpecProps) => {
         control={control}
         render={({ field }) => {
           return (
-            <label id={id}>
+            <CheckboxWrapLabel id={id}>
               <Checkbox
                 data-testid={id+'-checkbox'}
                 checked={field.value}
                 onChange={field.onChange}
                 onBlur={field.onBlur}
               />
-            </label>
+            </CheckboxWrapLabel>
           )
         }}
       />
@@ -420,14 +423,14 @@ export const IsArray = ({ base, index, control, errors }: SpecProps) => {
         control={control}
         render={({ field }) => {
           return (
-            <label id={id}>
+            <CheckboxWrapLabel id={id}>
               <Checkbox
                 data-testid={id+'-checkbox'}
                 checked={field.value}
                 onChange={field.onChange}
                 onBlur={field.onBlur}
               />
-            </label>
+            </CheckboxWrapLabel>
           )
         }}
       />
