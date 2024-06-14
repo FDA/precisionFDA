@@ -3,8 +3,11 @@ import { Injectable, Logger } from '@nestjs/common'
 import { DbCluster } from '@shared/domain/db-cluster/db-cluster.entity'
 import { ENGINE, ENGINES, STATUS, STATUSES } from '@shared/domain/db-cluster/db-cluster.enum'
 import { CreateDbClusterDTO } from '@shared/domain/db-cluster/dto/CreateDbClusterDTO'
+import { UpdateDbClusterDTO } from '@shared/domain/db-cluster/dto/UpdateDbClusterDTO'
+import { UId } from '@shared/domain/entity/domain/uid'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { User } from '@shared/domain/user/user.entity'
+import { NotFoundError } from '@shared/errors'
 import { PlatformClient } from '@shared/platform-client'
 import { DbClusterDescribeResponse } from '@shared/platform-client/platform-client.responses'
 import { MainQueueJobProducer } from '@shared/queue/producer/main-queue-job.producer'
@@ -118,7 +121,7 @@ export class DbClusterService {
     const dbCluster = this.em.create(DbCluster, {
       user: this.em.getReference(User, this.user.id),
       dxid: describeDbClusterRes.id,
-      uid: `${describeDbClusterRes.id}-1`,
+      uid: `${describeDbClusterRes.id}-1` as UId,
       name: describeDbClusterRes.name,
       status: STATUS[invertObj(STATUSES)[describeDbClusterRes.status]],
       project: describeDbClusterRes.project,
@@ -137,5 +140,18 @@ export class DbClusterService {
     await this.em.persistAndFlush(dbCluster)
 
     return dbCluster
+  }
+
+  async update(uid: UId, body: UpdateDbClusterDTO) {
+    const dbCluster = await this.em.findOne(DbCluster, { uid, user: this.user.id })
+    if (!dbCluster) {
+      throw new NotFoundError(`DbCluster ${uid} not found`)
+    }
+
+    return await this.em.transactional(async () => {
+      dbCluster.name = body.name
+      dbCluster.description = body.description
+      // await this.em.persistAndFlush(dbCluster)
+    })
   }
 }

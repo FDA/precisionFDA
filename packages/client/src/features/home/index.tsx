@@ -309,10 +309,7 @@ const Home2 = () => {
               <Route path="/apps/:identifier/track" element={<TrackInHome />} />
               <Route path="databases" element={<DatabaseList homeScope={persistedHomeScope} />} />
               <Route path="databases/create" element={<CreateDatabase />} />
-              <Route
-                path="databases/:dxid"
-                element={<DatabaseShow homeScope={persistedHomeScope} emitScope={handleSetPersistedHomeScope} />}
-              />
+              <Route path="databases/:uid" element={<DatabaseShow homeScope={persistedHomeScope} emitScope={handleSetPersistedHomeScope} />}/>
               <Route path="databases/:identifier/track" element={<TrackInHome entityType="database" />} />
               <Route path="assets" element={<AssetList homeScope={persistedHomeScope} />} />
               <Route

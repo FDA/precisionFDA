@@ -35,4 +35,19 @@ describe('space entity tests', () => {
     const lead = await space.findGuestLead()
     expect(lead?.dxuser).to.equal(guestLead.dxuser)
   })
+
+  it('data portals are present', async () => {
+    expect(space.dataPortal).to.undefined
+
+    const portal = create.dataPortalsHelper.create(em, { space }, { name: 'portal1', urlSlug: 'portal1' })
+    await em.flush()
+
+    const loadedSpace = await em.findOneOrFail(
+      Space,
+      { id: space.id },
+      { populate: ['dataPortal'] },
+    )
+
+    expect(loadedSpace.dataPortal.id).to.equal(portal.id)
+  })
 })

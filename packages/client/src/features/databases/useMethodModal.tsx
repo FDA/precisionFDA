@@ -46,11 +46,12 @@ export function useMethodModal<T extends { dxid: string; name: string }>({
   const handleSubmit = () => {
     mutation.mutateAsync(dxids)
   }
+  const methodText = method.charAt(0).toUpperCase() + method.slice(1)
 
   const modalComp = isShown && (
     <Modal
       data-testid="modal-dbcluster-delete"
-      headerText={`${method} ${momoSelected.length} ${pluralize('item', momoSelected.length)}`}
+      headerText={`${methodText} ${momoSelected.length} ${pluralize('item', momoSelected.length)}`}
       isShown={isShown}
       hide={() => setShowModal(false)}
       footer={
@@ -58,7 +59,7 @@ export function useMethodModal<T extends { dxid: string; name: string }>({
           {mutation.isPending && <Loader />}
           <Button onClick={() => setShowModal(false)} disabled={mutation.isPending}>Cancel</Button>
           <Button variant="primary" onClick={handleSubmit} disabled={mutation.isPending}>
-            {method}
+            {methodText}
           </Button>
         </ButtonRow>
       }
@@ -67,6 +68,7 @@ export function useMethodModal<T extends { dxid: string; name: string }>({
         rows={selected.map(s => {
           return {
             name: <div>{s.name}</div>,
+            location: <div>{s.location}</div>,
           }
         })}
       />

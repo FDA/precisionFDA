@@ -24,6 +24,7 @@ class UserSerializer < ApplicationSerializer
   attribute :can_see_spaces?, key: :can_see_spaces
   attribute :review_space_admin?, key: :review_space_admin
   attribute :can_access_notification_preference?, key: :can_access_notification_preference
+  attribute :allowed_to_publish?, key: :allowed_to_publish
 
   has_one :org
 
@@ -65,6 +66,7 @@ class UserSerializer < ApplicationSerializer
   delegate :can_see_spaces?, to: :object
   delegate :can_access_notification_preference?, to: :object
   delegate :review_space_admin?, to: :object
+  delegate :allowed_to_publish?, to: :object
 
   delegate :full_name, to: :object
   delegate :gravatar_url, to: :object

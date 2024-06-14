@@ -60,6 +60,8 @@ class Space < ActiveRecord::Base
 
   has_many :comments, as: :commentable
 
+  has_many :data_portals
+
   acts_as_commentable
 
   store :meta, accessors: %i(cts restricted_reviewer), coder: JSON

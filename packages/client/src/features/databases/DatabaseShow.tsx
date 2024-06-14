@@ -7,6 +7,7 @@ import { DatabaseIcon } from '../../components/icons/DatabaseIcon'
 import { SyncIcon } from '../../components/icons/SyncIcon'
 import { Refresh } from '../../components/Page/styles'
 import { StyledTagItem, StyledTags, StyledPropertyItem, StyledPropertyKey } from '../../components/Tags'
+import { RESOURCE_LABELS } from '../../types/user'
 import { ActionsDropdownContent } from '../home/ActionDropdownContent'
 import { StyledBackLink, StyledRight } from '../home/home.styles'
 import {
@@ -35,22 +36,20 @@ const renderOptions = (db: IDatabase, homeScope?: HomeScope) => (
       <MetadataItem>
         <MetadataKey>Location</MetadataKey>
         <MetadataVal>
-          {db.location && (
-            <Link target="_blank" to={`/home/databases?scope=${homeScope?.toLowerCase()}`}>
-              {homeScope === 'featured' ? 'Featured' : db.location}
-            </Link>
-          )}
+          <Link target="_blank" to={`/home/databases?scope=${homeScope?.toLowerCase()}`}>
+            {homeScope === 'featured' ? 'Featured' : db.location}
+          </Link>
         </MetadataVal>
       </MetadataItem>
       <MetadataItem>
         <MetadataKey>ID</MetadataKey>
-        <MetadataVal>{db.dxid}</MetadataVal>
+        <MetadataVal>{db.uid}</MetadataVal>
       </MetadataItem>
       <MetadataItem>
         <MetadataKey>Added By</MetadataKey>
         <MetadataVal>
           {' '}
-          <Link target="_blank" to={db.links.user!}>
+          <Link target="_blank" to={db.links.user}>
             {db.added_by_fullname}
           </Link>
         </MetadataVal>
@@ -79,7 +78,7 @@ const renderOptions = (db: IDatabase, homeScope?: HomeScope) => (
       </MetadataItem>
       <MetadataItem>
         <MetadataKey>Instance</MetadataKey>
-        <MetadataVal>{db.dx_instance_class}</MetadataVal>
+        <MetadataVal>{RESOURCE_LABELS[db.dx_instance_class] ?? db.dx_instance_class}</MetadataVal>
       </MetadataItem>
     </MetadataRow>
     <MetadataRow>
@@ -102,16 +101,16 @@ const DetailActionsDropdown = ({
   db: IDatabase
   refetch: () => void
 }) => {
-  const actions = useDatabaseSelectActions([db], ['dbclusters', db.dxid])
+  const actions = useDatabaseSelectActions([db], ['dbclusters', db.uid])
 
   return (
     <>
       <Dropdown
         trigger="click"
-        content={<ActionsDropdownContent actions={actions} />}
+        content={<ActionsDropdownContent actions={actions}/>}
       >
         {dropdownProps => (
-          <ActionsButton {...dropdownProps} active={dropdownProps.isActive} />
+          <ActionsButton {...dropdownProps} active={dropdownProps.isActive}/>
         )}
       </Dropdown>
 
@@ -129,20 +128,19 @@ const DetailActionsDropdown = ({
 }
 
 export const DatabaseShow = ({ emitScope, homeScope }: { homeScope?: HomeScope, emitScope?: EmmitScope }) => {
-  const { dxid } = useParams<{ dxid: string }>()
+  const { uid } = useParams<{ uid: string }>()
   const { data, status, isLoading, refetch, isFetching } = useQuery({
-    queryKey: ['dbclusters', dxid],
-    queryFn: () => fetchDatabaseRequest(dxid).then((d) => {
-      if(emitScope) emitScope(d.db_cluster.scope, d.db_cluster.featured)
-      return d
+    queryKey: ['dbclusters', uid],
+    queryFn: () => fetchDatabaseRequest(uid!).then((dbCluster) => {
+      if (emitScope) emitScope(dbCluster.scope, dbCluster.featured)
+      return dbCluster
     }),
   })
 
-  const db = data?.db_cluster
 
-  if (isLoading) return <HomeLoader />
+  if (isLoading) return <HomeLoader/>
 
-  if (!db)
+  if (!data)
     return (
       <NotFound>
         <h1>Database not found</h1>
@@ -161,45 +159,44 @@ export const DatabaseShow = ({ emitScope, homeScope }: { homeScope?: HomeScope, 
         <Header>
           <HeaderLeft>
             <Title>
-              <DatabaseIcon height={20} />
-              &nbsp;{db?.name}
-              {(db.status === 'starting' ||
-                db.status === 'stopping' ||
-                db.status === 'terminating') && <Loader />}
+              <DatabaseIcon height={20}/>
+              &nbsp;{data.name}
+              {['starting', 'stopping', 'terminating'].includes(data.status) && <Loader/>}
             </Title>
-            <Description>{db.description}</Description>
+            <Description>{data.description}</Description>
           </HeaderLeft>
           <div>
             <StyledRight>
-              <Refresh $spin={isFetching} onClick={() => refetch()}>
-                <SyncIcon />
-              </Refresh>
-              {db && <DetailActionsDropdown db={db} refetch={refetch} />}
+              {data.status !== 'terminated' && <Refresh $spin={isFetching} onClick={() => refetch()}>
+                <SyncIcon/>
+              </Refresh>}
+              {<DetailActionsDropdown db={data} refetch={refetch}/>}
             </StyledRight>
           </div>
         </Header>
 
-        {renderOptions(db, homeScope)}
-        {db.tags.length > 0 && (<MetadataSection>
-            <StyledTags>
-              {db.tags.map(tag => (
-                <StyledTagItem key={tag}>{tag}</StyledTagItem>
-              ))}
-            </StyledTags>
+        {renderOptions(data, homeScope)}
+
+        {data.tags.length > 0 && (<MetadataSection>
+          <StyledTags>
+            {data.tags.map(tag => (
+              <StyledTagItem key={tag}>{tag}</StyledTagItem>
+            ))}
+          </StyledTags>
         </MetadataSection>)}
-        {Object.entries(db.properties).length > 0 && (<MetadataSection>
+        {Object.entries(data.properties).length > 0 && (<MetadataSection>
           <MetadataRow>
             <MetadataItem>
-                <MetadataKey>Properties</MetadataKey>
-                  <StyledTags>
-                    {Object.entries(db.properties).map(([key, value]) => (
-                      <StyledPropertyItem key={key}>
-                        <StyledPropertyKey>{key}</StyledPropertyKey>
-                        <span>{value}</span>
-                      </StyledPropertyItem>
-                    ))}
-                  </StyledTags>
-              </MetadataItem>
+              <MetadataKey>Properties</MetadataKey>
+              <StyledTags>
+                {Object.entries(data.properties).map(([key, value]) => (
+                  <StyledPropertyItem key={key}>
+                    <StyledPropertyKey>{key}</StyledPropertyKey>
+                    <span>{value}</span>
+                  </StyledPropertyItem>
+                ))}
+              </StyledTags>
+            </MetadataItem>
           </MetadataRow>
         </MetadataSection>)}
       </Topbox>

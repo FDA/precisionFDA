@@ -8,14 +8,14 @@ import { BaseOperation } from '@shared/utils/base-operation'
 import { Node } from '../node.entity'
 import { NodesInput } from '../user-file.input'
 import { FILE_STATE_DX, FILE_STI_TYPE } from '../user-file.types'
-import { UserOpsCtx } from '../../../types'
+import { UserOpsCtx } from '@shared/types'
 import { filterNodesByUser, getSuccessMessage, loadNodes } from '../user-file.helper'
-import { NOTIFICATION_ACTION, SEVERITY } from '../../../enums'
+import { NOTIFICATION_ACTION, SEVERITY } from '@shared/enums'
 import { SqlEntityManager } from '@mikro-orm/mysql'
 
 const rollbackUnlockingState = async (em: SqlEntityManager, nodes: Node[]): Promise<void> => {
   getLogger().error(`Rolling back unlocking state for ${nodes.length} nodes`)
-  nodes.forEach(node => {
+  nodes.forEach((node) => {
     node.locked = true
     node.state = FILE_STATE_DX.CLOSED
   })
@@ -39,6 +39,7 @@ class NodesUnlockOperation extends BaseOperation<UserOpsCtx, NodesInput, void> {
 
         for (const node of filteredNodes) {
           if (node.stiType === FILE_STI_TYPE.ASSET) {
+            // TODO What? unlocking asset is not allowed?
             this.ctx.log.error(
               `NodesUnlockOperation: Unlocking of asset  ${node.uid} is not allowed`,
             )
