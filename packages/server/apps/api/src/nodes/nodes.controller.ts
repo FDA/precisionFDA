@@ -72,7 +72,7 @@ export class NodesController {
     if (async) {
       await new StartRemoveNodesJob(opsCtx).execute({ ids })
     } else {
-      await this.userFileService.removeNodes(ids, async)
+      return await this.userFileService.removeNodes(ids, async)
     }
   }
 }
