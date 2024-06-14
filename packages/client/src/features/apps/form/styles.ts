@@ -1,6 +1,5 @@
 import styled, { css } from 'styled-components'
 import { FieldGroup } from '../../../components/form/styles'
-import { theme } from '../../../styles/theme'
 import { PfTab } from '../../../components/Tabs/PfTab'
 
 
@@ -8,6 +7,11 @@ export const TopFieldGroup = styled(FieldGroup)`
   flex: 1;
   max-width: 400px;
   min-width: 270px;
+` 
+
+export const TopFieldGroupUbuntu = styled(TopFieldGroup)`
+  max-width: 200px;
+  min-width: 100px;
 ` 
 
 export const StyledForm = styled.form`

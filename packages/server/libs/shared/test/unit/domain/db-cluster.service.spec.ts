@@ -104,6 +104,24 @@ describe('DbClusterService tests', () => {
     expect(dbCluster.dxInstanceClass).eq('db_std1_x2')
   })
 
+  it('updates db-cluster', async () => {
+    const dbCluster = create.dbClusterHelper.create(em, { user }, { name: 'db-cluster-1' })
+    const dbCluster2 = create.dbClusterHelper.create(em, { user }, { name: 'db-cluster-2' })
+
+    const dbCluster2name = dbCluster2.name
+    const dbCluster2desc = dbCluster2.description
+
+    await dbClusterService.update(dbCluster.uid, {
+      name: 'db-cluster-updated',
+      description: 'db-cluster-description-updated',
+    })
+
+    expect(dbCluster.name).eq('db-cluster-updated')
+    expect(dbCluster.description).eq('db-cluster-description-updated')
+    expect(dbCluster2.name).eq(dbCluster2name)
+    expect(dbCluster2.description).eq(dbCluster2desc)
+  })
+
   it('creates sync operation for db-cluster', async () => {
     createSyncTaskStub.reset()
 

@@ -161,7 +161,7 @@ export const useExecutionActions = ({
     },
     'Make Public': {
       type: 'link',
-      isDisabled: selected.length !== 1 || !selected[0]?.links?.publish || (selected[0].jobs && selected[0].scope === 'private'),
+      isDisabled: selected.length !== 1 || !selected[0]?.links?.publish || (selected[0].jobs && selected[0].scope === 'private') || !user?.allowed_to_publish,
       link: {
         method: 'POST',
         url: `${selected[0]?.links?.publish}&scope=public`,

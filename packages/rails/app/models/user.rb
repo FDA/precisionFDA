@@ -62,6 +62,7 @@ class User < ApplicationRecord
   has_many :admin_groups, through: :admin_memberships
   has_many :space_memberships
   has_many :spaces, -> { where("space_memberships.active = ?", true) }, through: :space_memberships
+  has_many :data_portals, through: :spaces
   has_one :appathon
   has_many :meta_appathons
   has_one :expert, dependent: :destroy
@@ -331,6 +332,10 @@ class User < ApplicationRecord
 
   def can_run_jobs?
     job_limit.positive?
+  end
+
+  def allowed_to_publish?
+    admin_groups.any?
   end
 
   alias_method :site_admin?, :can_administer_site?

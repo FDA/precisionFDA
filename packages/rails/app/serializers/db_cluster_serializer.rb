@@ -66,11 +66,10 @@ class DbClusterSerializer < ApplicationSerializer
   # @return [Hash] Links.
   def links
     {}.tap do |links|
-      links[:show] = api_dbcluster_path(dxid: object.dxid)
       links[:user] = user_path(added_by_dxuser)
       links[:space] = space_path if object.in_space?
-      links[:create] = api_dbcluster_path(dxid: object.dxid)
-      links[:update] = api_dbcluster_path(dxid: object.dxid)
+      links[:create] = api_dbcluster_path(uid: object.uid)
+      links[:update] = api_dbcluster_path(uid: object.uid)
       links[:attach_to] = api_attach_to_notes_path
 
       licenses_links!(links)
