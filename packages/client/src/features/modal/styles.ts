@@ -56,7 +56,7 @@ export const HeaderTop = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.3rem; 
+  padding: 0.3rem;
   border-bottom: 1px solid var(--c-layout-border);
   padding: var(--modal-padding-TB) var(--modal-padding-LR);
 `
