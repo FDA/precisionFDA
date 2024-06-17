@@ -17,17 +17,18 @@ class SpaceEditForm < SpaceForm
 
   # methods for validating permissions are overriding those from space_form
   def validate_government_space
-    return unless space_type == TYPE_GOVERNMENT && host_lead_dxuser != current_user.dxuser
-
-    raise "Government space can be updated only by its owner"
+    if space_type == TYPE_GOVERNMENT && host_lead_dxuser != current_user.dxuser
+      raise "Government space can be updated only by its owner"
+    end
   end
 
   def validate_review_space
-    return unless space_type == TYPE_REVIEW &&
-                  (host_lead_dxuser == current_user.dxuser ||
-                   sponsor_lead_dxuser == current_user.dxuser)
+    if space_type == TYPE_REVIEW &&
+       host_lead_dxuser != current_user.dxuser &&
+       sponsor_lead_dxuser != current_user.dxuser
 
-    raise "Review space can be updated only by Reviewer or Sponsor leads"
+      raise "Review space can be updated only by Reviewer or Sponsor leads"
+    end
   end
 
   def validate_group_and_admin_space
