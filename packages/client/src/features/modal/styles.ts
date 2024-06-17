@@ -15,7 +15,7 @@ export const Wrapper = styled.div`
   min-width: 400px;
   max-height: max(100% - 232px, 90%);
 `
-export const Backdrop = styled.div<{ $blur: boolean }>`
+export const Backdrop = styled.div<{ $blur: boolean, $backdropZIndex?: number }>`
   ${({ $blur }) => $blur && css`
     backdrop-filter: blur(8px);
   `}
@@ -26,6 +26,9 @@ export const Backdrop = styled.div<{ $blur: boolean }>`
   left: 0;
   background: rgba(0, 0, 0, 0.3);
   z-index: 500;
+  ${({ $backdropZIndex }) => $backdropZIndex && css`
+    z-index: ${$backdropZIndex};
+  `}
 `
 export const StyledModal = styled.div`
   --modal-padding-LR: 1.5rem;
@@ -123,5 +126,12 @@ export const StyledModalScroll = styled(ModalScroll)`
 export const StyledModalContent = styled.div`
   padding: 1rem;
   max-width: 600px;
+`
+
+export const ModalLoaderWrapper = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
 `
 
