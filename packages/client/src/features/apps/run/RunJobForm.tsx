@@ -180,28 +180,32 @@ export const RunJobForm = ({ app, userJobLimit, spec }: { app: IApp; spec: AppSp
           )
           return runJobMutation.mutateAsync(req)
         })
-        await Promise.all(mutations).then(data => {
-          if (data[0].id) {
-            if (vals.scope.value === 'private') {
-              if (isBatchRun) {
-                navigate(`/home/apps/${app.uid}/jobs`)
+        try {
+          await Promise.all(mutations).then(data => {
+            if (data[0]?.id) {
+              if (vals.scope.value === 'private') {
+                if (isBatchRun) {
+                  navigate(`/home/apps/${app.uid}/jobs`)
+                } else {
+                  navigate(`/home/executions/${data[0].id}`)
+                }
               } else {
-                navigate(`/home/executions/${data[0].id}`)
+                const spaceId = vals.scope.value.replace('space-', '')
+                if (isBatchRun) {
+                  navigate(`/spaces/${spaceId}/apps/${app.uid}/jobs`)
+                } else {
+                  navigate(`/spaces/${spaceId}/executions/${data[0].id}`)
+                }
               }
+            } else if (res?.error) {
+              toast.error(res.error.message)
             } else {
-              const spaceId = vals.scope.value.replace('space-', '')
-              if (isBatchRun) {
-                navigate(`/spaces/${spaceId}/apps/${app.uid}/jobs`)
-              } else {
-                navigate(`/spaces/${spaceId}/executions/${data[0].id}`)
-              }
+              toast.error('Something went wrong!')
             }
-          } else if (res?.error) {
-            toast.error(res.error.message)
-          } else {
-            toast.error('Something went wrong!')
-          }
-        })
+          })
+        } catch (error) {
+          console.error(error)
+        }
       }
     }
   }
