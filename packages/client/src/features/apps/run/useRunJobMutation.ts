@@ -1,4 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { toast } from 'react-toastify'
 import { ServerScope } from '../../home/types'
 import { RunJobRequest, runJob } from '../apps.api'
 
@@ -15,7 +16,8 @@ export const useRunJobMutation = (scope: ServerScope) => {
         queryClient.invalidateQueries({ queryKey: ['counters']})
       }
     },
-    onError: () => {
+    onError: (error) => {
+      toast.error(`Error running app: ${error?.response?.data?.error?.message}`)
     },
   })
 }
