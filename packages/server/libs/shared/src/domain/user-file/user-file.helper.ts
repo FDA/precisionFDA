@@ -6,7 +6,7 @@ import { Folder } from '@shared/domain/user-file/folder.entity'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { Node } from '@shared/domain/user-file/node.entity'
 import { User } from '@shared/domain/user/user.entity'
-import { difference, intersection, isNil, uniqBy } from 'ramda'
+import { difference, isNil } from 'ramda'
 import { SPACE_MEMBERSHIP_ROLE } from '../space-membership/space-membership.enum'
 import { SPACE_STATE, SPACE_TYPE } from '../space/space.enum'
 import { getIdFromScopeName, scopeContainsId } from '../space/space.helper'
@@ -20,26 +20,11 @@ import { PermissionError } from '../../errors'
 import { CAN_EDIT_ROLES } from '../space-membership/space-membership.helper'
 import { Asset } from './asset.entity'
 
-const getStiEnumTypeFromInstance = (node: Node): FILE_STI_TYPE => {
-  if (node instanceof Folder) {
-    return FILE_STI_TYPE.FOLDER
-  }
-  if (node instanceof UserFile) {
-    return FILE_STI_TYPE.USERFILE
-  }
-  throw new Error('Unsupported entity instance')
-}
-
 // Split folder path into a list of folder names
 const splitFolderPath = (pathStr: string) => pathStr.split('/').slice(1)
 
 // Find the set of paths on dx platform that is not on local
 const getPathsToBuild = (remote: string[], local: string[]): string[] => difference(remote, local)
-
-// Find the set of paths that exists on both dx platform and pFDA db
-const getPathsToKeep = (remote: string[], local: string[]): string[] => intersection(local, remote)
-
-const filterDuplicities = uniqBy((fol: Folder) => fol.id)
 
 /**
  * Prepares folder paths that are fetched from the API.
@@ -60,32 +45,6 @@ const childrenTraverse = async (
   const subfolders = await repo.findChildren({ parentFolderId: folder.id })
   await Promise.all(subfolders.map(sf => childrenTraverse(sf, repo, acc)))
   return acc
-}
-
-/**
- * Traverses up in the hierarchy and returns all folders up to the root.
- *
- * @param folder Folder whose parents we need
- * @returns all folders above given folder
- */
-const getParentFolders = async (folder: Folder): Promise<Folder[]> => {
-  const folderTree: Folder[] = []
-  if (folder.parentFolder) {
-    let currentFolder: Folder | null = folder
-    while (currentFolder?.parentFolder) {
-      try {
-        currentFolder = currentFolder.parentFolder as Folder
-        // currentFolder = await repo.findOne(currentFolder.parentFolder.id)
-        if (currentFolder !== null) {
-          folderTree.push(currentFolder)
-        }
-      } catch (error) {
-        throw error
-      }
-    }
-    return folderTree
-  }
-  return folderTree
 }
 
 /**
@@ -302,7 +261,6 @@ const getNodePath = async (
   return getNodePath(em, parentFolder as Node, folders)
 }
 
-
 const validateVerificationSpace = async (em: SqlEntityManager, node: Node): Promise<void> => {
   if (node.scope && node.scope.startsWith('space')) {
     const spaceId = getIdFromScopeName(node.scope)
@@ -368,10 +326,9 @@ const validateEditableBy = async (em: SqlEntityManager, node: Node, currentUser:
         role: CAN_EDIT_ROLES,
       },
     })
-    if (!space) {
-      throw new PermissionError(`You have no permissions to remove '${node.name}'.`)
-    }
+    if (space) return
   }
+  throw new PermissionError(`You have no permissions to remove '${node.name}'.`)
 }
 
 const filterNodesByUser = async (em: SqlEntityManager, nodes: Node[], currentUser: User) => {
@@ -519,14 +476,10 @@ export {
   createFoldersTraverse,
   detectIntersectedTraverse,
   getPathsToBuild,
-  getPathsToKeep,
-  filterDuplicities,
   collectChildren,
   getFolderPath,
   childrenTraverse,
   getNodePath,
-  getParentFolders,
-  getStiEnumTypeFromInstance,
   filterLeafPaths,
   findFolderForPath,
   findFileOrAssetWithUid,

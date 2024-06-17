@@ -3,6 +3,7 @@ import {
   Entity,
   EntityRepositoryType,
   ManyToMany,
+  OneToOne,
   PrimaryKey,
   Property,
 } from '@mikro-orm/core'
@@ -13,6 +14,7 @@ import { SPACE_MEMBERSHIP_SIDE } from '../space-membership/space-membership.enum
 import { SPACE_STATE, SPACE_TYPE } from './space.enum'
 import { getScopeFromSpaceId } from './space.helper'
 import { SpaceRepository } from './space.repository'
+import { DataPortal } from '@shared/domain/data-portal/data-portal.entity'
 
 @Entity({ tableName: 'spaces', repository: () => SpaceRepository })
 export class Space extends BaseEntity {
@@ -63,6 +65,9 @@ export class Space extends BaseEntity {
     owner: true,
   })
   spaceMemberships = new Collection<SpaceMembership>(this)
+
+  @OneToOne(() => DataPortal, (dataPortal: DataPortal) => dataPortal.space)
+  dataPortal?: DataPortal
 
   @Property({ persist: false })
   get uid(): string {

@@ -183,7 +183,7 @@ export const useAssetActions = ({ homeScope, selectedItems, resourceKeys, resetS
     },
     'Make Public': {
       type: 'link',
-      isDisabled: selected.length !== 1 || !selected[0]?.links?.publish,
+      isDisabled: selected.length !== 1 || !selected[0]?.links?.publish || !user?.allowed_to_publish,
       link: {
         method: 'POST',
         url: `${selected[0]?.links?.publish}&scope=public`,

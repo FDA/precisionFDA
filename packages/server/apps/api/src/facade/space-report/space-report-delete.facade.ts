@@ -4,9 +4,9 @@ import { SpaceReport } from '@shared/domain/space-report/entity/space-report.ent
 import { SpaceReportState } from '@shared/domain/space-report/model/space-report-state.type'
 import { SpaceReportService } from '@shared/domain/space-report/service/space-report.service'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
-import { NodesRemoveOperation } from '@shared/domain/user-file/ops/nodes-remove'
 import { InvalidStateError, NotFoundError, PermissionError } from '@shared/errors'
 import { EntityScopeUtils } from '@shared/utils/entity-scope.utils'
+import { UserFileService } from '@shared/domain/user-file/service/user-file.service'
 
 @Injectable()
 export class SpaceReportDeleteFacade {
@@ -15,7 +15,7 @@ export class SpaceReportDeleteFacade {
   constructor(
     private readonly em: SqlEntityManager,
     private readonly spaceReportService: SpaceReportService,
-    private readonly nodesRemoveOperation: NodesRemoveOperation,
+    private readonly userFileService: UserFileService,
     private readonly user: UserContext,
   ) {}
 
@@ -37,7 +37,7 @@ export class SpaceReportDeleteFacade {
 
       const resultFilesIds = reports.map((r) => r.resultFile?.id).filter((id) => id != null)
 
-      await this.nodesRemoveOperation.execute({ ids: resultFilesIds, async: false })
+      await this.userFileService.removeNodes(resultFilesIds, false)
 
       return removedIds
     })

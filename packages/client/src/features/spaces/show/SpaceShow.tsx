@@ -155,7 +155,7 @@ const Spaces2 = ({ space, isLoading }: { space: ISpace; isLoading: boolean }) =>
             <MenuText>Reports</MenuText>
             {expandedSidebar && <MenuCounter count={space.counters.reports.toString()} active={activeResource === 'reports'} />}
           </MenuItem>
-          {space.type !== 'private_type' && (space.type !== 'review' || space.private_space_id == null) && (
+          {space.type !== 'private_type' && (
             <MenuItem data-testid="discussions-link" to={`/spaces/${space.id}/discussions`} activeClassName="active">
               <DiscussionIcon height={14} />
               <MenuText>Discussions</MenuText>
@@ -191,7 +191,7 @@ const Spaces2 = ({ space, isLoading }: { space: ISpace; isLoading: boolean }) =>
               <Route path="members" element={<MembersList space={space} />} />
               <Route path="reports" element={<SpaceReportList scope={`space-${space.id}`} />} />
               <Route path="discussions" element={<DiscussionList space={space} scope={`space-${space.id}`} />} />
-              <Route path="discussions/create" element={<CreateDiscussionPage scope={`space-${space.id}`} />} />
+              <Route path="discussions/create" element={<CreateDiscussionPage displayWarning={space.type === 'review' && space.private_space_id} scope={`space-${space.id}`} />} />
               <Route path="discussions/:discussionId" element={<DiscussionShow space={space} />} />
 
               <Route path="/" element={<Navigate to="files" replace />} />

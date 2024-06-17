@@ -33,13 +33,13 @@ const EditDatabaseInfoForm = ({
     },
   })
 
-  const editFileMutation = useMutation({
+  const editDbClusterMutation = useMutation({
     mutationKey: ['edit-database'],
     mutationFn: (payload: { name: string; description: string }) =>
-      editDatabaseRequest(payload, db.dxid),
+      editDatabaseRequest(payload, db.uid),
     onSuccess: res => {
       queryClient.invalidateQueries({
-        queryKey: ['dbcluster', db.dxid],
+        queryKey: ['dbcluster', db.uid],
       })
       queryClient.invalidateQueries({
         queryKey: ['dbclusters'],
@@ -53,7 +53,7 @@ const EditDatabaseInfoForm = ({
   })
 
   const onSubmit = (vals: any) => {
-    editFileMutation.mutateAsync({
+    editDbClusterMutation.mutateAsync({
       name: vals.name,
       description: vals.description,
     })
@@ -80,7 +80,6 @@ const EditDatabaseInfoForm = ({
           <FieldGroup>
             <label>Description</label>
             <InputText
-              label="Description"
               {...register('description')}
               placeholder="Enter description..."
               disabled={isSubmitting}
@@ -120,6 +119,7 @@ export const useEditDatabaseModal = (selectedItem: IDatabase) => {
   }
   const modalComp = isShown && (
     <ModalNext
+      id={'modal-dbclusters-edit'}
       data-testid="modal-dbclusters-edit"
       isShown={isShown}
       hide={handleClose}

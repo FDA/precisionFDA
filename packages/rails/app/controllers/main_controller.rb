@@ -535,6 +535,8 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
     id = unsafe_params[:id]
     raise "Missing id in publish route" unless id.is_a?(String) && id.present?
 
+    raise "User is not allowed to publish any data objects" unless @context.user.allowed_to_publish?
+
     service = SpaceService::Publishing.new(@context)
 
     check_result = service.scope_check(unsafe_params[:scope])

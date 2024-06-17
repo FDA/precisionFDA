@@ -46,7 +46,7 @@ class DataPortal extends BaseEntity {
   @Enum()
   status: DATA_PORTAL_STATUS
 
-  @ManyToOne(() => Space)
+  @OneToOne(() => Space, (space: Space) => space.dataPortal, { owner: true })
   space!: Ref<Space>
 
   @OneToMany(() => Resource, (resource) => resource.dataPortal)
