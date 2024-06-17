@@ -13,6 +13,7 @@ export const StyledToastContainer = styled(ToastContainer)`
     font-weight: 400;
     margin: auto 12px !important;
     min-width: 400px !important;
+    max-width: 600px !important;
     
     > div {
       display: flex;
