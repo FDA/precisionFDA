@@ -5,11 +5,11 @@ import { InputText } from '../../components/InputText'
 import { processFile } from './uploadImage'
 import {
   useCreateResourceMutation,
-} from './useCreateResource'
+} from './useCreateResourceMutation'
 import { getExt, isImageFromExt } from './util'
 import { FileIcon } from '../../components/icons/FileIcon'
 import { FileThumb } from './styles'
-import { FileWithPreview } from './types'
+import { FileWithPreview } from './resources.types'
 import { Button } from '../../components/Button'
 
 // Convert file to base64

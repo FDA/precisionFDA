@@ -24,9 +24,6 @@ const DataPortalDetailsPage = React.lazy(
 const DataPortalContentEditPage = React.lazy(
   () => import('./form/DataPortalContentEditPage'),
 )
-const DataPortalResourcesPage = React.lazy(
-  () => import('./resources/DataPortalResourcesPage'),
-)
 
 const DataPortalRoutes = () => {
   usePageMeta({ title: 'DAaaS - precisionFDA' })
@@ -49,18 +46,17 @@ const DataPortalRoutes = () => {
           </NavigationBarBanner>
         </PageContainerMargin>
       </NavigationBar>
-      <div style={{height: '100%'}}></div>
+      <div style={{ height: '100%' }} />
     </PublicLayout>
   }
 
   return (
     <Routes>
-      <Route path={``} element={<DataPortalsListPage />} />
-      <Route path={`create`} element={<CreateDataPortalPage />} />
-      <Route path={`:portalId`} element={<DataPortalDetailsPage />} />
-      <Route path={`:portalId/resources`} element={<DataPortalResourcesPage />} />
-      <Route path={`:portalId/content`} element={<DataPortalContentEditPage />} />
-      <Route path={`:portalId/edit`} element={<EditDataPortalPage />} />
+      <Route path="" element={<DataPortalsListPage />} />
+      <Route path="create" element={<CreateDataPortalPage />} />
+      <Route path=":portalId" element={<DataPortalDetailsPage />} />
+      <Route path=":portalId/content" element={<DataPortalContentEditPage />} />
+      <Route path=":portalId/edit" element={<EditDataPortalPage />} />
     </Routes>
   )
 }

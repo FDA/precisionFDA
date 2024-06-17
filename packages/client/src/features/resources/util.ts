@@ -1,4 +1,4 @@
-import { Resource } from './types'
+import { Resource } from './resources.types'
 
 export const imageTypes = ['.png', '.jpg', '.jpeg', '.gif']
 export function isImageFromExt(ext: string) {
