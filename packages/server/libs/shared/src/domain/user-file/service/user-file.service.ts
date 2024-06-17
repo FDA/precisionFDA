@@ -15,7 +15,13 @@ import { UserFileRepository } from '@shared/domain/user-file/user-file.repositor
 import { User } from '@shared/domain/user/user.entity'
 import { UserRepository } from '@shared/domain/user/user.repository'
 import { NOTIFICATION_ACTION, SEVERITY } from '@shared/enums'
-import { NotFoundError, PermissionError, ValidationError } from '@shared/errors'
+import {
+  DeleteRelationError,
+  FolderNotFoundError,
+  NotFoundError,
+  PermissionError,
+  ValidationError,
+} from '@shared/errors'
 import { PlatformClient } from '@shared/platform-client'
 import { FileDescribeResponse } from '@shared/platform-client/platform-client.responses'
 import { CHALLENGE_BOT_PLATFORM_CLIENT } from '@shared/platform-client/providers/platform-client.provider'
@@ -32,23 +38,203 @@ import {
   FILE_STI_TYPE,
   IFileOrAsset,
 } from '../user-file.types'
+import {
+  getNodePath,
+  getSuccessMessage,
+  loadNodes,
+  validateEditableBy,
+  validateProtectedSpaces,
+  validateVerificationSpace,
+} from '@shared/domain/user-file/user-file.helper'
+import { TypeUtils } from '@shared/utils/type-utils'
+import { ServiceLogger } from '@shared/logger/decorator/service-logger'
+import { createFileEvent, createFolderEvent, EVENT_TYPES } from '@shared/domain/event/event.helper'
+import { getIdFromScopeName } from '@shared/domain/space/space.helper'
+import { SPACE_EVENT_ACTIVITY_TYPE } from '@shared/domain/space-event/space-event.enum'
+import { ComparisonInput } from '@shared/domain/comparison-input/comparison-input.entity'
+import { SpaceReport } from '@shared/domain/space-report/entity/space-report.entity'
+import { TaggingService } from '@shared/domain/tagging/tagging.service'
+import { SpaceEventService } from '@shared/domain/space-event/space-event.service'
+import { FolderRepository } from '@shared/domain/user-file/folder.repository'
 
 @Injectable()
 export class UserFileService {
+  @ServiceLogger()
+  private readonly log: Logger
+
   constructor(
     private readonly em: SqlEntityManager,
     private readonly user: UserContext,
-    private readonly logger: Logger,
     private readonly userClient: PlatformClient,
     @Inject(CHALLENGE_BOT_PLATFORM_CLIENT) private readonly challengeBotClient: PlatformClient,
     private readonly notificationService: NotificationService,
     private readonly nodeRepo: NodeRepository,
     private readonly fileRepo: UserFileRepository,
+    private readonly folderRepo: FolderRepository,
     private readonly userRepo: UserRepository,
     private readonly entityFetcherService: EntityFetcherService,
     private readonly nodeHelper: NodeHelper,
     private readonly entityService: EntityService,
+    private readonly taggingService: TaggingService,
+    private readonly spaceEventService: SpaceEventService,
   ) {}
+
+  /**
+   * Removes all files and folders specified by id in input. Operation traverses
+   * also through children.
+   * @param ids
+   * @param async
+   */
+  async removeNodes(ids: number[], async: boolean) {
+    this.log.verbose(ids, 'Removing ids')
+    const nodes: Node[] = await loadNodes(this.em, { ids }, {})
+
+    let removedFilesCount = 0
+    let removedFoldersCount = 0
+
+    try {
+      // required because of a bug in the orm, where an entity fetched as part of a related collection to a different entity gets inserted back into the database in case it is deleted in very specific situations.
+      // this might get fixed in the future in the ORM and therefore the clear might not be needed anymore
+      // see JIRA PFDA-5169 for reproduction steps
+      this.em.clear()
+
+      for (const node of nodes) {
+        if (node.stiType === FILE_STI_TYPE.USERFILE) {
+          await this.removeFile(node.id)
+          removedFilesCount++
+        } else {
+          await this.removeFolder(node.id)
+          removedFoldersCount++
+        }
+      }
+
+      if (async) {
+        await this.notificationService.createNotification({
+          message: getSuccessMessage(
+            removedFilesCount,
+            removedFoldersCount,
+            'Successfully deleted',
+          ),
+          severity: SEVERITY.INFO,
+          action: NOTIFICATION_ACTION.NODES_REMOVED,
+          userId: this.user.id,
+        })
+      }
+
+      this.log.verbose(
+        { foldersCount: removedFoldersCount, filesCount: removedFilesCount },
+        'Removed total objects',
+      )
+    } catch (err) {
+      if (async) {
+        await this.notificationService.createNotification({
+          message:
+            TypeUtils.getPropertyValueFromUnknownObject<string>(err, 'message') ??
+            'Error deleting files and folders.',
+          severity: SEVERITY.ERROR,
+          action: NOTIFICATION_ACTION.NODES_REMOVED,
+          userId: this.user.id,
+        })
+
+        await this.rollbackRemovingState(nodes)
+      }
+
+      if (err.message !== 'Locked items cannot be removed.') {
+        throw new Error('Failed to remove nodes')
+      }
+    }
+    return removedFilesCount + removedFoldersCount
+  }
+
+  async removeFolder(id: number) {
+    const folderToRemove = await this.folderRepo.findOne(id)
+
+    folderToRemove &&
+      (await validateProtectedSpaces(this.em, 'remove', this.user.id, folderToRemove))
+
+    if (!folderToRemove) {
+      throw new FolderNotFoundError()
+    }
+
+    await folderToRemove.children.init()
+    if (folderToRemove.children.length > 0) {
+      throw new Error(
+        `Cannot remove folder ${folderToRemove.name} with children. Remove children first.`,
+      )
+    }
+    const user = await this.userRepo.findOneOrFail(this.user.id)
+
+    await validateEditableBy(this.em, folderToRemove, user)
+    await validateVerificationSpace(this.em, folderToRemove)
+
+    const folderPath = await getNodePath(this.em, folderToRemove)
+
+    return await this.em.transactional(async () => {
+      await this.taggingService.removeTaggings(folderToRemove.id)
+
+      const folderEvent = await createFolderEvent(
+        EVENT_TYPES.FOLDER_DELETED,
+        folderToRemove,
+        folderPath,
+        user,
+      )
+
+      this.em.persist(folderEvent)
+      this.em.remove(folderToRemove)
+      this.log.verbose(`Removed folder ${folderToRemove.name}`)
+      return 1
+    })
+  }
+
+  async removeFile(id: number) {
+    this.log.verbose(`Removing file with id: ${id}`)
+
+    const user = await this.userRepo.findOneOrFail(this.user.id)
+    const fileToRemove = await this.fileRepo.findOneOrFail(id)
+
+    await this.validateComparisons(fileToRemove)
+    await validateEditableBy(this.em, fileToRemove, user)
+    await validateVerificationSpace(this.em, fileToRemove)
+    await validateProtectedSpaces(this.em, 'remove', this.user.id, fileToRemove)
+    await this.validateSpaceReports(fileToRemove)
+
+    const lastNode = (await this.fileRepo.count({ dxid: fileToRemove.dxid })) === 1
+    const filePath = await getNodePath(this.em, fileToRemove)
+
+    return await this.em.transactional(async () => {
+      await this.taggingService.removeTaggings(fileToRemove.id)
+
+      const fileEvent = await createFileEvent(
+        EVENT_TYPES.FILE_DELETED,
+        fileToRemove,
+        filePath,
+        user,
+      )
+      this.em.persist(fileEvent)
+
+      if (lastNode) {
+        // we're deleting from platform only if it's the last with given dxid
+        await this.userClient.fileRemove({
+          projectId: fileToRemove.project,
+          ids: [fileToRemove.dxid],
+        })
+      }
+
+      if (fileToRemove.scope && fileToRemove.scope.startsWith('space')) {
+        const spaceId = getIdFromScopeName(fileToRemove.scope)
+        await this.spaceEventService.createSpaceEvent({
+          entity: { type: 'userFile', value: fileToRemove },
+          spaceId,
+          userId: this.user.id,
+          activityType: SPACE_EVENT_ACTIVITY_TYPE.file_deleted,
+        })
+      }
+
+      this.em.remove(fileToRemove)
+      this.log.verbose(`UserFileService: Removed file ${fileToRemove.name}`)
+      return 1
+    })
+  }
 
   /**
    * Loads file and returns it if the user is allowed to close it.
@@ -81,12 +267,12 @@ export class UserFileService {
   }
 
   private async closeFileOnPlatform(fileDxid: string, challengeBotFile: boolean) {
-    this.logger.verbose({ fileDxid }, 'UserFileService: Calling close file on platform')
+    this.log.verbose({ fileDxid }, 'UserFileService: Calling close file on platform')
     const platformClient = challengeBotFile ? this.challengeBotClient : this.userClient
     const response = await platformClient.fileClose({
       fileDxid,
     })
-    this.logger.verbose({ response }, 'UserFileService: File close response')
+    this.log.verbose({ response }, 'UserFileService: File close response')
   }
 
   private async startFileSynchronization(
@@ -104,7 +290,7 @@ export class UserFileService {
     fileDescribe: FileDescribeResponse,
     node: Node,
   ) {
-    this.logger.verbose(`UserFileService: file ${fileUid} is closed`)
+    this.log.verbose(`UserFileService: file ${fileUid} is closed`)
     node.state = fileDescribe.state as FILE_STATE
     node.fileSize = fileDescribe.size
     await this.em.flush()
@@ -117,7 +303,7 @@ export class UserFileService {
         userId,
       })
     } catch (error) {
-      this.logger.error(`Error creating notification ${error}`)
+      this.log.error(`Error creating notification ${error}`)
     }
   }
 
@@ -213,7 +399,7 @@ export class UserFileService {
   }
 
   async closeFile(fileUid: UId, followUpAction?: FOLLOW_UP_ACTION) {
-    this.logger.verbose(`UserFileService: closing file ${fileUid}`)
+    this.log.verbose(`UserFileService: closing file ${fileUid}`)
 
     await this.em.transactional(async () => {
       const user = await this.userRepo.findOneOrFail(this.user.id, {
@@ -244,7 +430,7 @@ export class UserFileService {
    * @param isChallengeBotFile
    */
   async synchronizeFile(fileUid: UId, isChallengeBotFile: boolean): Promise<boolean> {
-    this.logger.verbose(`UserFileService: synchronize file: ${fileUid}`)
+    this.log.verbose(`UserFileService: synchronize file: ${fileUid}`)
     const node = await this.nodeRepo.findOneOrFail({ uid: fileUid })
     const platformClient = isChallengeBotFile ? this.challengeBotClient : this.userClient
 
@@ -253,14 +439,14 @@ export class UserFileService {
         fileDxid: node.dxid,
         projectDxid: node.project,
       })
-      this.logger.verbose(`UserFileService: fileDescribe: ${JSON.stringify(fileDescribe)}`)
+      this.log.verbose(`UserFileService: fileDescribe: ${JSON.stringify(fileDescribe)}`)
       if (fileDescribe.state === FILE_STATE_DX.CLOSED) {
         await this.handleFileClose(fileUid, this.user.id, fileDescribe, node)
         return true
       }
-      this.logger.verbose(`UserFileService: file ${fileUid} is not closed yet`)
+      this.log.verbose(`UserFileService: file ${fileUid} is not closed yet`)
     } catch (error) {
-      this.logger.error(`Error calling platform ${error}`)
+      this.log.error(`Error calling platform ${error}`)
     }
     return false
   }
@@ -296,5 +482,35 @@ export class UserFileService {
     }
 
     return this.getDownloadLink(file, options)
+  }
+
+  private async rollbackRemovingState(nodes: Node[]) {
+    this.log.error(`Rolling back removing state for nodes ${nodes.length}`)
+    nodes.forEach((node) => {
+      if (node.stiType === FILE_STI_TYPE.FOLDER) {
+        node.state = null
+      } else {
+        node.state = FILE_STATE_DX.CLOSED
+      }
+    })
+    await this.em.persistAndFlush(nodes)
+  }
+
+  private async validateComparisons(fileToRemove: UserFile) {
+    const result = await this.em.find(ComparisonInput, { userFile: fileToRemove })
+    if (result && result.length > 0) {
+      throw new Error(
+        `File ${fileToRemove.name} cannot be deleted because it participates` +
+          ' in one or more comparisons. Please delete all the comparisons first.',
+      )
+    }
+  }
+
+  private async validateSpaceReports(fileToRemove: UserFile) {
+    const count = await this.em.count(SpaceReport, { resultFile: fileToRemove })
+
+    if (count > 0) {
+      throw new DeleteRelationError('file', 'space report')
+    }
   }
 }

@@ -1,12 +1,12 @@
 import type { SqlEntityManager } from '@mikro-orm/mysql'
 import { SpaceReportService } from '@shared/domain/space-report/service/space-report.service'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
-import { NodesRemoveOperation } from '@shared/domain/user-file/ops/nodes-remove'
 import { InvalidStateError, NotFoundError, PermissionError } from '@shared/errors'
 import { expect } from 'chai'
 import type { SinonStub } from 'sinon'
 import { stub } from 'sinon'
 import { SpaceReportDeleteFacade } from '../../../src/facade/space-report/space-report-delete.facade'
+import { UserFileService } from '@shared/domain/user-file/service/user-file.service'
 
 describe('SpaceReportDeleteFacade', () => {
   const SPACE_REPORT_1_ID = 0
@@ -52,7 +52,7 @@ describe('SpaceReportDeleteFacade', () => {
   let getReportsStub: SinonStub
   let getSpacesForUserStub: SinonStub
   let deleteReportsStub: SinonStub
-  let nodesRemoveExecuteStub: SinonStub
+  let nodesRemoveStub: SinonStub
 
   beforeEach(() => {
     transactionalStub = stub().callsArg(0)
@@ -66,8 +66,8 @@ describe('SpaceReportDeleteFacade', () => {
     deleteReportsStub = stub().throws()
     deleteReportsStub.withArgs(SPACE_REPORTS).returns(SPACE_REPORT_IDS)
 
-    nodesRemoveExecuteStub = stub().throws()
-    nodesRemoveExecuteStub.withArgs({ ids: FILE_IDS, async: false }).returns(undefined)
+    nodesRemoveStub = stub().throws()
+    nodesRemoveStub.withArgs(FILE_IDS, false).returns(undefined)
   })
 
   it('should run under transaction', async () => {
@@ -99,7 +99,7 @@ describe('SpaceReportDeleteFacade', () => {
 
   it('should not catch error from nodesRemoveOperation and rollback transaction', async () => {
     const error = new Error('my error')
-    nodesRemoveExecuteStub = stub().throws(error)
+    nodesRemoveStub = stub().throws(error)
 
     await expectReject(error)
   })
@@ -136,7 +136,7 @@ describe('SpaceReportDeleteFacade', () => {
   it('should call nodesRemoveOperation with all file ids', async () => {
     await getInstance().deleteSpaceReports(SPACE_REPORT_IDS)
 
-    expect(nodesRemoveExecuteStub.calledOnce).to.be.true()
+    expect(nodesRemoveStub.calledOnce).to.be.true()
   })
 
   it('should return the result of deleteReports', async () => {
@@ -161,15 +161,10 @@ describe('SpaceReportDeleteFacade', () => {
       deleteReports: deleteReportsStub,
     } as unknown as SpaceReportService
 
-    const nodesRemoveOperation = {
-      execute: nodesRemoveExecuteStub,
-    } as unknown as NodesRemoveOperation
+    const userFileService = {
+      removeNodes: nodesRemoveStub,
+    } as unknown as UserFileService
 
-    return new SpaceReportDeleteFacade(
-      em,
-      spaceReportService,
-      nodesRemoveOperation,
-      user as UserContext,
-    )
+    return new SpaceReportDeleteFacade(em, spaceReportService, userFileService, user as UserContext)
   }
 })

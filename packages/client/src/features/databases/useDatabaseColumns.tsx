@@ -29,7 +29,7 @@ export const useDatabaseColumns = ({
     Filter: DefaultColumnFilter,
     width: colWidths?.name || 220,
     Cell: props => (
-      <StyledLinkCell to={`/home/databases/${props.row.original.dxid}`}>
+      <StyledLinkCell to={`/home/databases/${props.row.original.uid}`}>
         <DatabaseIcon height={14} />
         {props.value}
       </StyledLinkCell>

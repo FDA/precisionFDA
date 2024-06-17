@@ -5,16 +5,17 @@ import { WorkstationSnapshotOperation } from '@shared/domain/job/ops/workstation
 import { CheckStatusJob, TASK_TYPE } from '@shared/queue/task.input'
 import { Job } from 'bull'
 import { lockNodesHandler } from '../../../jobs/lock-nodes.handler'
-import { removeNodesHandler } from '../../../jobs/remove-nodes.handler'
 import { unlockNodesHandler } from '../../../jobs/unlock-nodes.handler'
 import { ProcessWithContext } from '../../../queues/decorator/process-with-context'
 import { BaseQueueProcessor } from '../../../queues/processor/base-queue.processor'
 import { UserDataConsistencyReportService } from '@shared/domain/user/user-data-consistency-report.service'
+import { UserFileService } from '@shared/domain/user-file/service/user-file.service'
 
 @Processor(config.workerJobs.queues.fileSync.name)
 export class FileSyncQueueProcessor extends BaseQueueProcessor {
   constructor(
     private readonly userDataConsistencyReportService: UserDataConsistencyReportService,
+    private readonly userFileService: UserFileService,
     private readonly jobServiceWithPlatformClient: JobService,
   ) {
     super()
@@ -27,7 +28,8 @@ export class FileSyncQueueProcessor extends BaseQueueProcessor {
 
   @ProcessWithContext(TASK_TYPE.REMOVE_NODES)
   async removeNodes(job: Job) {
-    await removeNodesHandler(job)
+    const ids: number[] = job.data.payload as number[]
+    await this.userFileService.removeNodes(ids, true)
   }
 
   @ProcessWithContext(TASK_TYPE.LOCK_NODES)

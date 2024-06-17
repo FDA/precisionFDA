@@ -26,8 +26,12 @@ zuul:
   #this sets sensitiveHeaders to empty list so cookies and auth headers are passed through both ways
   sensitiveHeaders:
   routes:
-    ui:
+    beta-ui:
       path: /ginas/app/beta/**
+      url: http://localhost:8080/frontend/ginas/app/beta
+      serviceId: frontend
+    ui:
+      path: /ginas/app/ui/**
       url: http://localhost:8080/frontend/ginas/app/beta
       serviceId: frontend
     ginas_app:

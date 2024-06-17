@@ -1,13 +1,11 @@
 import { EntityRepository } from '@mikro-orm/mysql'
 import { DxId } from '@shared/domain/entity/domain/dxid'
 import { UId } from '@shared/domain/entity/domain/uid'
-import { Asset } from '@shared/domain/user-file/asset.entity'
-import { Node } from '@shared/domain/user-file/node.entity'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { STATIC_SCOPE } from '@shared/enums'
 import { SCOPE } from '@shared/types/common'
-import { FILE_STATE_DX, FILE_STI_TYPE } from './user-file.types'
+import { FILE_STATE_DX } from './user-file.types'
 
 type FindByName = {
   scope: SCOPE
@@ -17,19 +15,6 @@ type FindByName = {
 }
 
 export class UserFileRepository extends EntityRepository<UserFile> {
-  async findProjectFilesInSubfolder(input: {
-    project: string
-    folderId: number | null
-  }): Promise<UserFile[]> {
-    return await this.find(
-      {
-        project: input.project,
-        parentFolder: input.folderId,
-      },
-      { populate: ['taggings.tag'], orderBy: { id: 'ASC' } },
-    )
-  }
-
   /**
    * Loads userfile identified by uids and verifies if they are accessible by user.
    * @param userId
@@ -52,27 +37,6 @@ export class UserFileRepository extends EntityRepository<UserFile> {
         uid: { $in: uids },
       },
       { filters: ['asset'], populate: ['user', 'taggings.tag'] },
-    )
-  }
-
-  async findLocalFilesInProject(input: { project: string }): Promise<Array<UserFile | Asset>> {
-    /**
-     * workaround with querybuilder to avoid implicit sti_type = 'UserFile'
-     * that is introduced thanks to STI mikro-orm feature.
-     * We want to make sure this query returns sti_type = 'UserFile', 'Asset'
-     */
-    const qb = this.em.createQueryBuilder(Node)
-    qb.where({
-      project: input.project,
-      stiType: { $in: [FILE_STI_TYPE.ASSET, FILE_STI_TYPE.USERFILE] },
-    })
-    return await qb.execute()
-  }
-
-  async findFilesInFolders(input: { folderIds: number[] }): Promise<UserFile[]> {
-    return await this.find(
-      { parentFolder: { $in: input.folderIds } },
-      { filters: ['userfile'], populate: ['taggings.tag'] },
     )
   }
 
@@ -119,12 +83,4 @@ export class UserFileRepository extends EntityRepository<UserFile> {
         )
   }
 
-  removeFilesWithTags(files: UserFile[]): UserFile[] {
-    return files.map((file) => {
-      this.em.remove(file)
-      file.taggings.getItems().forEach((tagging) => tagging.tag.taggingCount--)
-      file.taggings.removeAll()
-      return file
-    })
-  }
 }

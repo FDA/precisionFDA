@@ -128,7 +128,7 @@ export const CreateDatabase = () => {
     mutationFn: (payload: any) => createDatabaseRequest(payload),
     onSuccess: (res) => {
       if (res?.db_cluster) {
-        navigate(`/home/databases/${res.db_cluster?.dxid}`)
+        navigate(`/home/databases/${res.db_cluster?.uid}`)
         queryClient.invalidateQueries({
           queryKey: ['dbclusters'],
         })

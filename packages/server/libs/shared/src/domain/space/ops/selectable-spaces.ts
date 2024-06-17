@@ -1,5 +1,5 @@
 import { Space } from '@shared/domain/space/space.entity'
-import { UserOpsCtx } from '../../../types'
+import { UserOpsCtx } from '@shared/types'
 import { BaseOperation } from '@shared/utils/base-operation'
 import { SPACE_TYPE } from '../../space/space.enum'
 
@@ -17,10 +17,11 @@ Space[]
 
     const space = await em.findOneOrFail(Space, { id })
 
-    // is the space in correct state?
+    // is the space of correct type?
     if (!(space.type === SPACE_TYPE.REVIEW
       || space.type === SPACE_TYPE.VERIFICATION
       || space.type === SPACE_TYPE.GROUPS
+      || space.type === SPACE_TYPE.GOVERNMENT
       || space.type === SPACE_TYPE.PRIVATE_TYPE)) {
       return []
     }
@@ -31,8 +32,6 @@ Space[]
     spaceIds.push(space.id)
 
     const spaceRepo = em.getRepository(Space)
-    const spaces = await spaceRepo.findSpacesByIdAndUser(spaceIds, this.ctx.user.id)
-
-    return spaces
+    return await spaceRepo.findSpacesByIdAndUser(spaceIds, this.ctx.user.id)
   }
 }

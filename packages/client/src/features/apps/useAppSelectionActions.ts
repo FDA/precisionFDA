@@ -218,7 +218,7 @@ export const useAppSelectionActions = ({
         method: 'POST',
         url: `${selected[0]?.links?.publish}&scope=public`,
       },
-      isDisabled: selected.length !== 1 || !selected[0].links.publish,
+      isDisabled: selected.length !== 1 || !selected[0].links.publish || !user?.allowed_to_publish,
       shouldHide: selected[0]?.location !== 'Private',
     },
     'Feature': {

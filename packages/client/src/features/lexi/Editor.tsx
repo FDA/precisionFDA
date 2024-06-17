@@ -9,8 +9,8 @@
 import {AutoFocusPlugin} from '@lexical/react/LexicalAutoFocusPlugin';
 import {CharacterLimitPlugin} from '@lexical/react/LexicalCharacterLimitPlugin';
 import {ClearEditorPlugin} from '@lexical/react/LexicalClearEditorPlugin';
-import LexicalClickableLinkPlugin from '@lexical/react/LexicalClickableLinkPlugin';
-import LexicalErrorBoundary from '@lexical/react/LexicalErrorBoundary';
+import {ClickableLinkPlugin} from '@lexical/react/LexicalClickableLinkPlugin';
+import {LexicalErrorBoundary} from '@lexical/react/LexicalErrorBoundary';
 import {HistoryPlugin} from '@lexical/react/LexicalHistoryPlugin';
 import {HorizontalRulePlugin} from '@lexical/react/LexicalHorizontalRulePlugin';
 import {ListPlugin} from '@lexical/react/LexicalListPlugin';
@@ -18,7 +18,7 @@ import {PlainTextPlugin} from '@lexical/react/LexicalPlainTextPlugin';
 import {RichTextPlugin} from '@lexical/react/LexicalRichTextPlugin';
 import {TabIndentationPlugin} from '@lexical/react/LexicalTabIndentationPlugin';
 import {TablePlugin} from '@lexical/react/LexicalTablePlugin';
-import useLexicalEditable from '@lexical/react/useLexicalEditable';
+import {useLexicalEditable} from '@lexical/react/useLexicalEditable';
 import * as React from 'react';
 import {useEffect, useState} from 'react';
 import {CAN_USE_DOM} from './environment';
@@ -71,6 +71,7 @@ export default function Editor(): JSX.Element {
       showTreeView,
       showTableOfContents,
       shouldUseLexicalContextMenu,
+      shouldPreserveNewLinesInMarkdown,
       tableCellMerge,
       tableCellBackgroundColor,
     },
@@ -152,7 +153,7 @@ export default function Editor(): JSX.Element {
             <InlineImagePlugin />
             <LinkPlugin />
             <YouTubePlugin />
-            <LexicalClickableLinkPlugin disabled={isEditable} />
+            <ClickableLinkPlugin disabled={isEditable} />
             <HorizontalRulePlugin />
             <TabFocusPlugin />
             <TabIndentationPlugin />

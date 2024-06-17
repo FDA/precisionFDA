@@ -66,8 +66,9 @@ describe('licenses for workflow tests', () => {
 
     await em.flush()
 
-    const spec = '{"input_spec": {"stages": [{"app_uid": "'
-      + `${app1.uid}"},{"app_uid": "${app2.uid}"}]}}`
+    const spec = {
+      input_spec: { stages: [{ app_uid: app1.uid }, { app_uid: app2.uid }] },
+    }
 
     const workflow = create.workflowHelper.create(em, { user }, { spec })
     em.persist(workflow)

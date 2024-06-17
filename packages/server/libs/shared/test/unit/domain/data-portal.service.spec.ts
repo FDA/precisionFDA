@@ -4,15 +4,11 @@ import { DataPortal } from '@shared/domain/data-portal/data-portal.entity'
 import { CreateDataPortalDTO } from '@shared/domain/data-portal/dto/CreateDataPortalDTO'
 import { DataPortalService } from '@shared/domain/data-portal/service/data-portal.service'
 import { DataPortalParam, FileParam } from '@shared/domain/data-portal/service/data-portal.types'
-import { EntityService } from '@shared/domain/entity/entity.service'
 import { NotificationInput } from '@shared/domain/notification/notification.input'
 import { NotificationService } from '@shared/domain/notification/services/notification.service'
-import { Resource } from '@shared/domain/resource/resource.entity'
-import { FileRemoveOperation } from '@shared/domain/user-file/ops/file-remove'
 import { UserFileService } from '@shared/domain/user-file/service/user-file.service'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { User } from '@shared/domain/user/user.entity'
-import { Event } from '@shared/domain/event/event.entity'
 import { NOTIFICATION_ACTION, SEVERITY } from '@shared/enums'
 import { expect } from 'chai'
 import { create, db } from '../../../src/test'
@@ -34,9 +30,7 @@ import {
   SPACE_MEMBERSHIP_SIDE,
 } from '@shared/domain/space-membership/space-membership.enum'
 import { FILE_STATE_DX } from '@shared/domain/user-file/user-file.types'
-import { EVENT_TYPES } from '@shared/domain/event/event.helper'
 import * as generate from '../../../src/test/generate'
-import type { IdInput } from '@shared/types'
 import { DataPortalRepository } from '@shared/domain/data-portal/data-portal.repository'
 import { stub } from 'sinon'
 import { DataPortalUrlSlugFormatError, NotFoundError, PermissionError } from '@shared/errors'
@@ -60,8 +54,9 @@ describe('data portal service tests', () => {
   let userFileService: UserFileService
   const findDataPortalsStub = stub()
   const getDownloadLinkStub = stub()
+  const removeFileStub = stub()
 
-  const createDataPortalService = (userId: number, fileRemoveOperation?: FileRemoveOperation) => {
+  const createDataPortalService = (userId: number) => {
     const userCtx: UserCtx = {
       id: userId,
       accessToken: 'accessToken',
@@ -73,6 +68,7 @@ describe('data portal service tests', () => {
 
     userFileService = {
       getDownloadLink: getDownloadLinkStub,
+      removeFile: removeFileStub,
     } as unknown as UserFileService
 
     return new DataPortalService(
@@ -82,7 +78,6 @@ describe('data portal service tests', () => {
       userClient,
       notificationService,
       userFileService,
-      fileRemoveOperation,
     )
   }
 
@@ -717,26 +712,7 @@ describe('data portal service tests', () => {
   })
 
   it('test remove data portal resource', async () => {
-    let fileRemoveOperationParam: IdInput = { id: 0 }
-    const fileRemoveOperation = {
-      async run(input): Promise<number> {
-        const fileToDelete = await em.findOne(UserFile, { id: input.id })
-        if (fileToDelete) {
-          const fileDeleteEvent = new Event()
-          fileDeleteEvent.type = EVENT_TYPES.FILE_DELETED
-          fileDeleteEvent.dxuser = user.dxuser
-          fileDeleteEvent.param1 = '10'
-          fileDeleteEvent.param2 = fileToDelete.dxid
-
-          await em.persistAndFlush(fileDeleteEvent)
-          await em.removeAndFlush(fileToDelete)
-        }
-
-        fileRemoveOperationParam = input
-        return input.id
-      },
-    } as FileRemoveOperation
-    dataPortalService = createDataPortalService(user.id, fileRemoveOperation)
+    dataPortalService = createDataPortalService(user.id)
 
     const loadedDataPortal = await createAndLoadPortal()
     await dataPortalService.removeResource(loadedDataPortal.resources.getItems()[0].id)
@@ -751,21 +727,7 @@ describe('data portal service tests', () => {
     expect(loadedDataPortalAfterRemoval.resources.getItems().length).eq(0)
 
     // verify that resource was removed from database
-    const userFile = await em.findOne(UserFile, { name: 'test-resource.jpg' })
-    expect(userFile).eq(null)
-    const resource = await em.find(Resource, {})
-    expect(resource.length).eq(0)
-
-    // verify that event was created
-    const events = await em.find(Event, {})
-    expect(events.length).eq(1)
-
-    expect(events[0].type).eq(EVENT_TYPES.FILE_DELETED)
-    expect(events[0].dxuser).eq(user.dxuser)
-    expect(events[0].param1).eq('10')
-    expect(events[0].param2).eq('file-dxid')
-
-    expect(fileRemoveOperationParam?.id).eq(1)
+    expect(removeFileStub.callCount).eq(1)
   })
 
   it('test remove data portal resource - fail with lack of privileges', async () => {

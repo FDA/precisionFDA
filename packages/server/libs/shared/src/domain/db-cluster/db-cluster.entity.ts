@@ -8,7 +8,9 @@ import {
   Enum,
   Filter, OneToMany, Collection,
 } from '@mikro-orm/core'
+import { UId } from '@shared/domain/entity/domain/uid'
 import { DbClusterProperty } from "@shared/domain/property/db-cluster-property.entity";
+import { SCOPE } from '@shared/types/common'
 import { BaseEntity } from '../../database/base-entity'
 import { formatDuration } from '../../utils/format'
 import { User } from '../user/user.entity'
@@ -29,13 +31,13 @@ export class DbCluster extends BaseEntity {
 
   @Property()
   @Unique()
-  uid!: string
+  uid!: UId
 
   @Property()
   name!: string
 
   @Property()
-  scope!: string
+  scope!: SCOPE
 
   @Property()
   project!: string
