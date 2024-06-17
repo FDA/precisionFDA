@@ -16,7 +16,8 @@ import { AlertText } from './DataPortalNotFound'
 import { AddIdsToHeaders } from '../../../components/Markdown/AddIdsToHeaders'
 import '../../lexi/themes/PlaygroundEditorTheme.css'
 import { ToC, useMarkdownToc } from '../../markdown/TocNext'
-import { compactScrollBarV2 } from '../../../components/Page/styles'
+import { Filler, compactScrollBarV2 } from '../../../components/Page/styles'
+import { useDataPortalResourceModal } from '../../resources/useDataPortalResourceModal'
 
 const Row = styled.div`
   display: flex;
@@ -26,16 +27,18 @@ const Row = styled.div`
   height: 0;
 `
 const PageWrap = styled.div`
-  display: grid;
+  display: flex;
   justify-content: center;
-  flex: 1;
+  flex: 1 1 auto;
   margin-inline: auto;
 ${compactScrollBarV2}
 overflow-y: scroll;
 `
 const DataPortalPageMainBody = styled.div`
   padding: 32px;
-
+  justify-content: center;
+  display: grid;
+  flex-grow: 1;
 `
 const StyledInnerHTML = styled.div`
   max-width: 900px;
@@ -106,6 +109,7 @@ export const DataPortalDetails = ({
 }) => {
   const docRef = useRef(null)
   const toc = useMarkdownToc(docRef, portal.content ?? '')
+  const { modalComp, setShowModal } = useDataPortalResourceModal()
 
   return (
     <Row>
@@ -131,9 +135,10 @@ export const DataPortalDetails = ({
           </RightSideItem>
         )}
         <RightSideItem>
+          {modalComp}
           <RightList>
             {canViewResources && (
-              <ListItem as={Link} to={`/data-portals/${portal.urlSlug}/resources`}>
+              <ListItem as="a" onClick={() => setShowModal(true)}>
                 <span className="fa fa-file-code-o fa-fw" /> Resources
               </ListItem>
             )}
@@ -158,6 +163,7 @@ export const DataPortalDetails = ({
             </NoContent>
           )}
           <AddIdsToHeaders as={StyledInnerHTML} docRef={docRef} content={portal.content ?? ''} />
+          <Filler $size={40} />
         </DataPortalPageMainBody>
       </PageWrap>
     </Row>

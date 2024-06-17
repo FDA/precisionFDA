@@ -12,6 +12,7 @@ import { executionsMocks } from '../features/executions/executions.mock'
 import { dataPortalsMocks } from '../features/data-portals/data-portal.mocks'
 import { appsMocks } from '../features/apps/apps.mocks'
 import { Resource } from '../features/data-portals/resources/resources.types'
+import { resourcesMocks } from '../features/resources/resources.mocks'
 
 export const handlers = [
     http.get('https://localhost:3001/', () => HttpResponse.json({}, { status: 200 })),
@@ -81,4 +82,5 @@ export const handlers = [
     ...executionsMocks,
     ...dataPortalsMocks,
     ...appsMocks,
+    ...resourcesMocks,
 ]
