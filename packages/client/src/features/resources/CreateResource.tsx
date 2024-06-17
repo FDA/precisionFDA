@@ -1,19 +1,18 @@
-import { useQueryClient } from '@tanstack/react-query'
 import React from 'react'
 import styled from 'styled-components'
+import { Button } from '../../components/Button'
+import { Loader } from '../../components/Loader'
 import { ModalHeaderTop, ModalNext } from '../modal/ModalNext'
 import { Footer, ModalScroll } from '../modal/styles'
 import { useModal } from '../modal/useModal'
 import { Item, useUploadResource } from './useUploadResource'
-import { Loader } from '../../components/Loader'
-import { Button } from '../../components/Button'
 
 const FormModalHeader = styled.label`
   display: flex;
   align-items: center;
   gap: 8px;
 
-  input[type="file"] {
+  input[type='file'] {
     display: none;
   }
 `
@@ -36,14 +35,7 @@ export const ResourceForm = ({
   setShowModal: (show: boolean) => void
   onSuccess: () => void
 }) => {
-  const {
-    isLoading,
-    selectedFiles,
-    removeItemByIndex,
-    handleSubmit,
-    handleNameChange,
-    handleFileChange,
-  } = useUploadResource({
+  const { isLoading, selectedFiles, removeItemByIndex, handleSubmit, handleNameChange, handleFileChange } = useUploadResource({
     id: pid,
     onSuccess() {
       onSuccess()
@@ -59,17 +51,12 @@ export const ResourceForm = ({
         headerText={
           <FormModalHeader>
             {isLoading ? 'Uploading' : 'Upload'} Resources
-            {!isLoading &&
-            <Button as="label">
-              <input
-                hidden
-                type="file"
-                multiple
-                onChange={handleFileChange}
-                />
-              Choose Files
-            </Button>
-              }
+            {!isLoading && (
+              <Button as="label">
+                <input hidden type="file" multiple onChange={handleFileChange} />
+                Choose Files
+              </Button>
+            )}
           </FormModalHeader>
         }
       />
@@ -107,14 +94,23 @@ export const CreateResource = ({ pid, onSuccess }: { pid: string; onSuccess: () 
 
   return (
     <div>
-      <Button variant="primary" type="button" onClick={() => {
-        setShowModal(true)
-
-      }}>
+      <Button
+        variant="primary"
+        type="button"
+        onClick={() => {
+          setShowModal(true)
+        }}
+      >
         Upload Resources
       </Button>
       {isShown && (
-        <ModalNext id="add-resource-to-space" data-testid="modal-add-resource" isShown={isShown} hide={() => setShowModal(false)}>
+        <ModalNext
+          id="add-resource-to-space"
+          data-testid="modal-add-resource"
+          backdropZIndex={700}
+          isShown={isShown}
+          hide={() => setShowModal(false)}
+        >
           <ResourceForm pid={pid} setShowModal={setShowModal} onSuccess={() => onSuccess()} />
         </ModalNext>
       )}

@@ -1,7 +1,7 @@
 import React from 'react'
 
 import { LexiContext } from '..'
-import { fireEvent, render, screen, act, userEvent, waitFor } from '../../../test/test-utils'
+import { render, screen, userEvent } from '../../../test/test-utils'
 import Editor from '../Editor'
 
 describe('Lexical Editor', () => {
@@ -17,21 +17,16 @@ describe('Lexical Editor', () => {
       <LexiContext>
         <Editor />
       </LexiContext>,
-    )
-    await act(async () => {
-      const insertButton = await screen.getByText('Insert')
-      await userEvent.click(insertButton)
-    })
+    { route: '/data-portals/my-portal/content' })
 
-    await act(async () => {
-      const imageItem = await screen.getByText('Image')
-      await userEvent.click(imageItem)
-    })
+    const insertButton = screen.getByText('Insert')
+    await userEvent.click(insertButton)
 
-    await act(async () => {
-      const resourceSelect = await screen.getByTestId('lexi-resource-select')
-      expect(resourceSelect).toBeInTheDocument()
-    })
+    const imageItem = screen.getByText('Image')
+    await userEvent.click(imageItem)
+
+    const resourceSelect = screen.getByTestId('lexi-resource-select')
+    expect(resourceSelect).toBeInTheDocument()
   })
 
   it('should have default font of Lato', async () => {
@@ -40,9 +35,7 @@ describe('Lexical Editor', () => {
         <Editor />
       </LexiContext>,
     )
-    await act(async () => {
-      const fontFamilyDropdown = await screen.getByTestId('font-family-dropdown')
-      expect(fontFamilyDropdown).toHaveTextContent('Lato')
-    })
+    const fontFamilyDropdown = screen.getByTestId('font-family-dropdown')
+    expect(fontFamilyDropdown).toHaveTextContent('Lato')
   })
 })

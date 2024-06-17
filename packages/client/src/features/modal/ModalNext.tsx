@@ -43,6 +43,7 @@ export interface ModalNextProps {
   isShown: boolean
   headerText?: string
   blur?: boolean
+  backdropZIndex?: number
   disableClose?: boolean
   id: string
 }
@@ -52,13 +53,14 @@ const ModalComponent = (props: PropsWithChildren<Omit<ModalNextProps, 'isShown'>
     hide,
     children,
     blur = false,
+    backdropZIndex,
     disableClose = false,
     ...rest
   } = props
   useKeyPress('Escape', () => hide())
   return (
     <>
-      <Backdrop onClick={disableClose ? undefined : hide} $blur={blur} />
+      <Backdrop onClick={disableClose ? undefined : hide} $blur={blur} $backdropZIndex={backdropZIndex} />
       <Wrapper
         aria-modal
         aria-label={headerText}
