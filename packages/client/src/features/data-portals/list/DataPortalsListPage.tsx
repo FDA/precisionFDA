@@ -76,7 +76,7 @@ const DataPortalsListPage = () => {
   }, [notification])
 
   return (
-    <UserLayout>
+    <UserLayout mainScroll>
       <PageContainerMargin>
         <StyledPageCenter>
           <PageMainBody>

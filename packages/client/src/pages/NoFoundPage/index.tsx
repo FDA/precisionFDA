@@ -9,7 +9,7 @@ const Text = styled.div`
 `
 
 const NoFoundPage = () =>
-  <UserLayout>
+  <UserLayout mainScroll>
     <PageContainerMargin><Text>Page not found</Text></PageContainerMargin>
   </UserLayout>
 

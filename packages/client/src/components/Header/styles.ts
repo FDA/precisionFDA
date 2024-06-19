@@ -2,6 +2,9 @@ import styled, { css } from 'styled-components'
 import { theme } from '../../styles/theme'
 import { PFDALogoLight } from '../NavigationBar/PFDALogo'
 import { Svg } from '../icons/Svg'
+import { compactScrollBarV2 } from '../Page/styles'
+import { TransparentButton } from '../Button'
+import { StyledDropdown } from '../Dropdown'
 
 const bpSmall = '@media(min-width: 850px)'
 const bpMedium = '@media(min-width: 1045px)'
@@ -15,21 +18,34 @@ export const StyledHeaderLogo = styled(PFDALogoLight)`
 `
 
 export const LogoWrap = styled.div`
-  margin-right: 10px;
 `
 
-export const Nav = styled.nav`
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  font-size: 12px;
-  font-weight: ${theme.fontWeight.regular};
-  white-space: nowrap;
-  transition: all 0.18s ease-in-out;
 
-  a {
-    color: inherit;
-    text-decoration: none;
+export const SiteItem = styled.div<{ $active?: boolean }>`
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  cursor: pointer;
+  color: var(--c-app-header-menu-base);
+  box-sizing: border-box;
+  
+  ${({ $active = false }) => {
+    if ($active) {
+      return css`
+        background-color: var(--c-app-header-menu-active-bg);
+        color: var(--c-app-header-menu-hover);
+        `
+    } 
+    return css`
+    `
+  }}
+  &:hover {
+    color: var(--c-app-header-menu-hover);
+  }
+  
+  ${bpMedium} {
+    height: ${theme.sizing.navigationBarHeight};
   }
 `
 
@@ -41,13 +57,13 @@ export const HeaderItem = styled.div<{ $active?: boolean }>`
   cursor: pointer;
   color: var(--c-app-header-menu-base);
   box-sizing: border-box;
-
+  
   ${({ $active = false }) => {
     if ($active) {
       return css`
         background-color: var(--c-app-header-menu-active-bg);
         color: var(--c-app-header-menu-hover);
-      `
+        `
     } 
     return css`
     `
@@ -55,7 +71,7 @@ export const HeaderItem = styled.div<{ $active?: boolean }>`
   &:hover {
     color: var(--c-app-header-menu-hover);
   }
-
+  
   ${bpMedium} {
     height: ${theme.sizing.navigationBarHeight};
   }
@@ -67,48 +83,116 @@ export const MenuItem = styled(HeaderItem)`
   justify-content: center;
   padding: 12px;
 `
+export const SiteNavTop= styled.div`
+  position: absolute;
+  right: 16px;
+  top: 8px;
+  display: flex;
+  justify-content: space-between;
+  
+  
+  ${TransparentButton} {
+    padding: 8px;
+  }
+`
+export const SiteMenuItem = styled.div<{$active: boolean}>`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 6px;
+  svg {
+    flex-shrink: 0
+  }
+  &:hover {
+    background-color: var(--tertiary-70);
+  }
+
+  &.noHover {
+    &:hover {
+      background-color: initial;
+    }
+  }
+  ${({ $active }) => $active && css`
+    background-color:  var(--c-app-header-menu-hover);
+  `}
+`
+export const HeaderMenuItem = styled.div<{ $active: boolean }>`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  flex-shrink: 0;
+  color: #BFBFBF;
+
+  &:hover {
+    background-color: var(--c-app-header-bg-hover);
+    color: white;
+  }
+
+  &.noHover {
+    &:hover {
+      background-color: initial;
+    }
+  }
+  ${({ $active }) => $active && css`
+    background-color:  var(--c-app-header-bg-hover);
+    color: white;
+  `}
+
+`
+export const SiteMenuText = styled.div`
+  font-size: 13px;
+`
 
 export const HeaderItemText = styled.div`
-  margin-top: 4px;
-  display: none;
   align-items: center;
+  font-size: 13px;
 `
 
 export const StyledHeaderDropItem = styled(HeaderItem)`
   display: none;
-
+  
   &:hover {
     background-color: var(--c-app-header-menu-active-bg);
   }
-
+  
   ${Svg} {
     margin-left: 5px;
     margin-right: 5px;
   }
-`
+  `
 
-export const IconWrap = styled.div`
+export const IconWrap = styled.div<{marginBottom?: number}>`
   height: 16px;
-  margin-top: 3px;
   display: flex;
   align-items: center;
-`
+  
+  ${({ marginBottom }) => marginBottom && css`
+  svg {
+    margin-bottom: ${marginBottom}px;
+  }
+  `}
+  `
 
-export const DropdownMenuItem = styled(MenuItem)`
+export const DropdownMenuItem = styled(HeaderMenuItem)`
   ${HeaderItemText} {
     ${Svg} {
       margin-left: 5px;
       margin-bottom: 1px;
     }
   }
-`
+  `
 
 export const HeaderSpacer = styled.div`
-  border-right: 1px solid var(--c-layout-border);
   opacity: 0.6;
   margin: 0 4px;
-  height: 38px;
-`
+  height: 20px;
+  `
+export const SiteNavBody = styled.div`
+  padding: 0 16px;
+  overflow-y: auto;
+  ${compactScrollBarV2}
+  `
 
 export const StyledDropMenuLinks = styled.div`
   padding-top: 0;
@@ -119,13 +203,14 @@ export const StyledDropMenuLinks = styled.div`
   border: 1px solid rgba(0,0,0,0.15);
   border-radius: 3px;
   box-shadow: 0 6px 12px rgba(0,0,0,0.175);
-`
+  font-size: 14px;
+  `
 
 export const StyledDivider = styled.div`
   border-bottom: 1px solid var(--c-layout-border);
   padding-top: 6px;
   margin-bottom: 6px;
-`
+  `
 
 const linkCss = css`
   background-color: var(--c-dropdown-bg);
@@ -136,103 +221,206 @@ const linkCss = css`
   &:hover {
     background-color: var(--c-dropdown-hover-bg);
   }
-`
+  `
 
 export const StyledLink = styled.a`
   ${linkCss}
   cursor: pointer;
-`
+  `
 
 export const StyledOnClickModalDiv = styled.div`
   ${linkCss}
   cursor: pointer;
-`
+  `
 
 export const HeaderLeft = styled.div`
-  display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   justify-self: flex-start;
   align-items: center;
+  overflow-x: hidden;
 
+  & > * {
+    margin-right: 12px;
+    flex: 0 0 auto;
+  }
+  
+  display:none;
+  ${bpSmall} {
+    display: flex;
+  }
+
+  a {
+    display: flex;
+    max-width: max-content;
+  }
+
+  ${HeaderMenuItem} {
+    border-radius: 3px;
+  }
+  
   &::after {
     content: '';
     width: 12px;
   }
-
-  ${bpSmall} {
-    ${HeaderItemText} {
-      display: flex;
-    }
-    ${IconWrap} {
-      align-items: flex-end;
-    }
-  }
 `
 
 export const HeaderRight = styled.div`
+  justify-self: flex-end;
   display: flex;
+  position: static;
+  right: 0;
   align-items: center;
   justify-self: flex-end;
   margin-left: auto;
+  min-width: fit-content;
 
-  ${bpMedium} {
-    ${HeaderItemText} {
-      display: flex;
-    }
-
-    ${IconWrap} {
-      align-items: flex-end;
-    }
+  ${HeaderMenuItem}, ${StyledDropdown} {
+    flex-shrink: 0;
   }
-`
+  
+  ${HeaderItemText} {
+    display: flex;
+  }
+  
+  `
 
 export const headerPaddings = css`
-  padding-left: 8px;
-  padding-right: 8px;
-
-  ${bpSmall} {
-    padding-left: 16px;
-    padding-right: 16px;
-  }
-
-  ${bpMedium} {
     padding-left: 32px;
     padding-right: 32px;
+  `
+
+export const Nav = styled.nav`
+  gap: 16px;
+  width: 100%;
+  display: flex;
+  flex-wrap: nowrap;
+  flex: 1;
+  align-items: center;
+  font-size: 12px;
+  font-weight: ${theme.fontWeight.regular};
+  white-space: nowrap;
+  transition: all 0.18s ease-in-out;
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  ${TransparentButton} {
+    flex-shrink: 0;
   }
 `
 
 export const StyledHeader = styled.header`
+  display: flex;
+  z-index: 3;
   box-sizing: border-box;
   background-color: var(--c-app-header-bg);
   border-bottom: 1px solid var(--c-app-header-border, transparent);
   color: var(--c-app-header-menu-base);
-
+  min-height: var(--site-header-height);
+  
   ${headerPaddings}
 
-  ${bpSmall} {
-    ${HeaderItem} {
-      padding: 8px 6px;
-    }
-
-    ${StyledHeaderDropItem} {
-      display: flex;
-      padding-left: 5px;
-    }
-  }
-
-  ${bpLarge} {
-    ${Nav} {
-      font-size: 14px;
-    }
-
-    ${MenuItem} {
-      padding: 10px 6px;
-    }
-  }
-
-  ${bpSuper} {
-    ${MenuItem} {
+  ${MenuItem} {
       padding: 13px 10px;
     }
+  `
+  
+export const StyledSiteNav = styled.div<{ isSiteAlertVisible: boolean }>`
+  ${({ isSiteAlertVisible }) => isSiteAlertVisible ? css`
+    top: calc(var(--site-header-height) + var(--site-alert-height));
+  `: css`
+    top: var(--site-header-height);
+  `}
+  bottom: 0;
+  left: 0;
+  position: absolute;
+  height: calc(100% - var(--site-header-height));
+  width: 400px;
+  background-color: var(--background-shaded);
+  z-index: 3;
+  box-shadow: 6px 0px 24px 0px rgba(0, 0, 0, 0);
+  display: flex;
+  flex-direction: column;
+  
+  ${SiteMenuItem} {
+    color: var(--base);
+    min-height: 24px;
+    border-radius: 3px;
+    padding-left: 10px;
+    padding-right: 4px;
   }
+
+  ${SiteMenuItem} .noHover {
+    &:hover {
+      background-color: initial;
+    }
+  }
+
+  &.enter {
+    transform: translateX(0);
+    transition: transform 0.1s ease-in-out;
+    box-shadow: 0px 0px 48px 0px rgba(0,0,0,0.45);
+  }
+  &.exit {
+    transform: translateX(-100%);
+    transition: transform 0.1s ease-in-out;
+    box-shadow: 6px 0px 24px 0px rgba(0, 0, 0, 0);
+  }
+`
+
+export const Row = styled.div`
+  display: flex;
+  gap: 32px;
+  padding: 32px 0;
+
+  & > div {
+    min-width: 148px;
+  } 
+`
+
+export const MenuSectionTitle = styled.div`
+  font-size: 13px;
+  line-height: 14px;
+  min-height: 14px;
+  font-weight: 900;
+  padding-bottom: 4px;
+`
+
+export const SubLink = styled(SiteMenuItem)`
+  cursor: pointer;
+  padding: 4px 6px;
+  min-height: 14px;
+  font-size: 14px;
+  font-weight: bold;
+  justify-content: space-between;
+  margin-left: 12px;
+  svg {
+    transform: rotate(180deg);
+    opacity: 0.3;
+    margin-right: 4px;
+  }
+`
+export const EditMenuWrap = styled.div`
+  cursor: pointer;
+  position: sticky;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  align-self: stretch;
+  background-color: var(--c-app-header-bg);
+  padding: 0 12px;
+  
+  flex-shrink: 0;
+  
+  svg {
+    opacity: 0.3;
+
+    &:hover {
+      opacity: 1;
+    }
+  }
+
 `

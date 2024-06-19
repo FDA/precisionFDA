@@ -156,7 +156,7 @@ function ListAdminNews() {
   const { data, isLoading } = useNewsAdminAllRequest({ type: typeParam })
 
   return (
-    <UserLayout>
+    <UserLayout mainScroll>
       <NewsPageContainerMargin>
         <PageHeader>
           <BackLink linkTo="/news">Back to news list</BackLink>

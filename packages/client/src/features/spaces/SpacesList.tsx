@@ -19,7 +19,6 @@ import { spacesListRequest } from './spaces.api'
 import { columnFilters, ISpace } from './spaces.types'
 import { useSpacesColumns } from './useSpacesColumns'
 import { useHiddenColumnLocalStorage } from '../../hooks/useHiddenColumnLocalStorage'
-import { ScrollableInnerGlobalStyles } from '../../styles/global'
 import { UserLayout } from '../../layouts/UserLayout'
 import { Button } from '../../components/Button'
 
@@ -90,9 +89,7 @@ const SpacesList = () => {
   if (error) return <div>Error! {JSON.stringify(error)}</div>
 
   return (
-    <>
-    <ScrollableInnerGlobalStyles />
-    <UserLayout>
+    <UserLayout innerScroll>
       <SpacesHeader>
         <PageTitle>Spaces</PageTitle>
         <Button variant='primary' as={Link} to="/spaces/new">
@@ -130,7 +127,6 @@ const SpacesList = () => {
         <HoverDNAnexusLogo opacity height={14} />
       </ContentFooter>
     </UserLayout>
-    </>
   )
 }
 

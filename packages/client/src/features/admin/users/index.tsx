@@ -264,7 +264,7 @@ const UsersList = () => {
   }
   const filters = toArrayFromObject(filterQuery)
   return (
-    <UserLayout>
+    <UserLayout innerScroll>
       <Topbox>
         <TopLeft>
           <UsersIcon height={20} />

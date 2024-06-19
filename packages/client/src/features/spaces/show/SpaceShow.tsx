@@ -17,7 +17,6 @@ import { useLocalStorage } from '../../../hooks/useLocalStorage'
 import { usePrevious } from '../../../hooks/usePrevious'
 import { useToastWSHandler } from '../../../hooks/useToastWSHandler'
 import { UserLayout } from '../../../layouts/UserLayout'
-import { ScrollableInnerGlobalStyles } from '../../../styles/global'
 import { AppList } from '../../apps/AppList'
 import { AppsShow } from '../../apps/AppsShow'
 import { EditAppPage } from '../../apps/form/EditAppPage'
@@ -231,12 +230,9 @@ export const SpaceShow = () => {
   if (isNotAllowed) return <SpaceNotAllowed />
 
   return (
-    <>
-      <ScrollableInnerGlobalStyles />
-      <UserLayout>
-        <Spaces2 space={s} isLoading={isLoading} />
-      </UserLayout>
-    </>
+    <UserLayout innerScroll>
+      <Spaces2 space={s} isLoading={isLoading} />
+    </UserLayout>
   )
 }
 

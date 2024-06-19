@@ -3,7 +3,6 @@ import React, { useEffect } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link, useLocation } from 'react-router-dom'
 import useWebSocket from 'react-use-websocket'
-import { ButtonSolidBlue } from '../../../components/Button'
 import { Loader } from '../../../components/Loader'
 import { PageContainerMargin } from '../../../components/Page/styles'
 import { hidePagination, Pagination } from '../../../components/Pagination'
@@ -77,7 +76,7 @@ const ChallengesList = () => {
   }, [notification])
 
   return (
-    <PublicLayout>
+    <PublicLayout mainScroll>
       <NavigationBar
         title="Challenges"
         subtitle="Advancing regulatory standards for bioinformatics, RWD, and AI, through community-sourced science."

@@ -18,7 +18,6 @@ import GuestRestrictedLink from '../../components/Controls/GuestRestrictedLink'
 import NavigationBar from '../../components/NavigationBar/NavigationBar'
 import PublicLayout from '../../layouts/PublicLayout'
 import { useAuthUser } from '../auth/useAuthUser'
-import { useSiteSettingsQuery } from '../auth/useSiteSettingsQuery'
 import { ExpertListItem } from '../experts/list/ExpertListItem'
 import { useExpertsListQuery } from '../experts/useExpertsListQuery'
 import { fetchApps } from '../apps/apps.api'
@@ -253,7 +252,7 @@ export const OverviewAuthed = () => {
     useExpertsListQuery({})
 
   return (
-    <PublicLayout>
+    <PublicLayout mainScroll>
       <NavigationBar user={user} title="Overview"/>
       <PageContainerMargin>
         <PageRow>
