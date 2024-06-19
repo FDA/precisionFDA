@@ -77,7 +77,14 @@ export const HeaderText = styled.div`
   font-size: ${fontSize.h2};
   font-weight: ${fontWeight.bold};
 `
+export const HeaderTextDetails = styled.div`
+  font-size: 13px;
+  font-weight: 400;
+  margin-top: 8px;
+`
+
 export const CloseButton = styled(TransparentButton)`
+  align-self: flex-start;
   justify-content: center;
   align-items: center;
   font-size: 0.8rem;

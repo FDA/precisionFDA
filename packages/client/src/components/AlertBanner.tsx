@@ -27,6 +27,8 @@ export const StyledAlertBanner = styled.div<{ 'data-variant': AlertType }>`
   --c-warning: #e73a3a;
 
   background-color: var(--c-info);
+  box-sizing: border-box;
+
   &[data-variant="warning"] {
     background-color: var(--c-warning);
     color: white;
@@ -41,7 +43,7 @@ export const StyledAlertBanner = styled.div<{ 'data-variant': AlertType }>`
   gap: 16px;
   padding-top: 2px;
   padding-bottom: 2px;
-  border-bottom: 1px solid var(--c-app-header-bg);
+  height: var(--site-alert-height);
   ${headerPaddings}
 `
 

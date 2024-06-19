@@ -6,20 +6,22 @@ import { Slide, toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import { QueryParamProvider } from 'use-query-params'
 import { ReactRouter6Adapter } from 'use-query-params/adapters/react-router-6'
-import Header from './components/Header'
+import Header from './components/Header/HeaderNext'
+import { NavFavoritesProvider } from './components/Header/useNavFavoritesLocalStorage'
+import { NavOrderProvider } from './components/Header/useNavOrderLocalStorage'
 import { AlertDismissedProvider } from './features/admin/alerts/useAlertDismissedLocalStorage'
 import { AuthModal } from './features/auth/AuthModal'
 import { ExpiringSessionModal } from './features/auth/ExpiringSessionModal'
 import DataPortalRoutes from './features/data-portals/routes'
 import ExpertsSinglePage from './features/experts/details/index'
 import { useModal } from './features/modal/useModal'
-import { TrackPage } from './features/tracks/TrackPage'
 import { LayoutLoader } from './layouts/UserLayout'
 import NoFoundPage from './pages/NoFoundPage'
 import GlobalStyle from './styles/global'
 import { StyledToastContainer } from './styles/toast.styles'
 import { ThemeProvider } from './utils/ThemeContext'
 import queryClient from './utils/queryClient'
+import { TrackPage } from './features/tracks/TrackPage'
 
 const Admin = React.lazy(() => import('./features/admin'))
 const Home2 = React.lazy(() => import('./features/home'))
@@ -57,15 +59,24 @@ const RootComponent = () => {
           })}
         >
           <AlertDismissedProvider>
-            <Header />
-            <QueryParamProvider adapter={ReactRouter6Adapter}>
-              <React.Suspense fallback={<LayoutLoader />}>
-                <Outlet />
-              </React.Suspense>
-            </QueryParamProvider>
-            <StyledToastContainer position="top-right" transition={Slide} hideProgressBar pauseOnHover />
-            <AuthModal {...authModal} />
-            <ExpiringSessionModal modal={expiringSessionModal} />
+            <NavOrderProvider>
+              <NavFavoritesProvider>
+                <Header />
+                <QueryParamProvider adapter={ReactRouter6Adapter}>
+                  <React.Suspense fallback={<LayoutLoader />}>
+                    <Outlet />
+                  </React.Suspense>
+                </QueryParamProvider>
+                <StyledToastContainer
+                  position="top-right"
+                  transition={Slide}
+                  hideProgressBar
+                  pauseOnHover
+                  />
+                <AuthModal {...authModal} />
+                <ExpiringSessionModal modal={expiringSessionModal} />
+              </NavFavoritesProvider>
+            </NavOrderProvider>
           </AlertDismissedProvider>
         </QueryClientProvider>
       </React.Fragment>

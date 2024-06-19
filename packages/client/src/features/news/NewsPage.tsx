@@ -56,7 +56,7 @@ const NewsPage = () => {
   })
 
   return (
-    <PublicLayout>
+    <PublicLayout mainScroll>
       <NavigationBar
         title="News"
         subtitle="Announcements and press for precisionFDA."

@@ -14,7 +14,6 @@ import { DataPortalError } from './DataPortalNotFound'
 import '../../lexi/themes/PlaygroundEditorTheme.css'
 import { canEditContent as canEditContentCheck, canEditSettings as canEditSettingsCheck } from '../utils'
 import { DataPortalDetails } from './DataPortalDetails'
-import { ScrollableInnerGlobalStyles } from '../../../styles/global'
 
 
 const DataPortalDetailsPage = () => {
@@ -54,7 +53,7 @@ const DataPortalDetailsPage = () => {
   
   if (error?.response?.status === 503) {
     return (
-      <UserLayout>
+      <UserLayout mainScroll>
         <DataPortalError message={error?.response?.data?.error.message} />
       </UserLayout>
     )
@@ -62,15 +61,14 @@ const DataPortalDetailsPage = () => {
 
   if (!isLoading && !data) {
     return (
-      <UserLayout>
+      <UserLayout mainScroll>
         <DataPortalError message="Data Portal Not Found" />
       </UserLayout>
     )
   }
 
-  return <>
-    <ScrollableInnerGlobalStyles/>
-    <UserLayout>
+  return (
+    <UserLayout innerScroll>
       {isLoading || !data ? (
           <PageContainerMargin>
             <LoaderMargin><Loader/></LoaderMargin>
@@ -85,7 +83,7 @@ const DataPortalDetailsPage = () => {
           />
       )}
     </UserLayout>
-  </>
+  )
 }
 
 export default DataPortalDetailsPage

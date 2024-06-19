@@ -153,6 +153,9 @@ export const colorvars = css`
 
 export const themes = css`
 &:root {
+  --site-alert-height: 20px;
+  --site-header-height: 50px;
+
   --c-property-item: hsl(35, 79%, 83%);
   --c-brand-dnanexus: #28AAE1;
 }
@@ -188,8 +191,10 @@ export const themes = css`
   --c-textarea-bg: var(--tertiary-100);
 
   --c-app-header-bg: #343E4D;
+  --c-app-header-bg-active: #424c5a;
+  --c-app-header-bg-hover: #4F5C6E;
   --c-app-header-menu-base: var(--tertiary-200);
-  --c-app-header-menu-hover: #ffffff;
+  --c-app-header-menu-hover:var(--tertiary-50);
   --c-app-header-menu-active-bg: #2f5373;
 
   --c-discussion-answer-bg: #fdfcf2;
@@ -232,9 +237,11 @@ html[data-theme="dark"] {
     --c-textarea-bg: var(--tertiary-50);
     
     --c-app-header-bg: var(--background);
+    --c-app-header-bg-active: var(--tertiary-100);
+    --c-app-header-bg-hover:var(--tertiary-100);
     --c-app-header-border: var(--c-layout-border);
     --c-app-header-menu-base: var(--base);
-    --c-app-header-menu-hover: #ffffff;
+    --c-app-header-menu-hover: var(--tertiary-200);
     --c-app-header-menu-active-bg: var(--primary-500);
 
     --c-discussion-answer-bg: #32312d;

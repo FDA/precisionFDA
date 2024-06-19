@@ -16,7 +16,7 @@ const StyledSecurity = styled.div`
 const Security = () => {
     const user = useAuthUser()
     return (
-        <PublicLayout>
+        <PublicLayout mainScroll>
             <NavigationBar
                 title="Security of precisionFDA"
                 subtitle=""
