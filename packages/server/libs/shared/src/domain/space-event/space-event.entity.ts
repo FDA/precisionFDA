@@ -1,11 +1,4 @@
-import {
-  Entity,
-  Ref,
-  ManyToOne,
-  PrimaryKey,
-  Property,
-  Reference,
-} from '@mikro-orm/core'
+import { Entity, Ref, ManyToOne, PrimaryKey, Property, Reference } from '@mikro-orm/core'
 import { Space } from '@shared/domain/space/space.entity'
 import { User } from '@shared/domain/user/user.entity'
 import {
@@ -13,8 +6,9 @@ import {
   SPACE_MEMBERSHIP_SIDE,
 } from '../space-membership/space-membership.enum'
 import { ENTITY_TYPE, SPACE_EVENT_ACTIVITY_TYPE, SPACE_EVENT_OBJECT_TYPE } from './space-event.enum'
+import { SpaceEventRepository } from '@shared/domain/space-event/space-event.repository'
 
-@Entity({ tableName: 'space_events' })
+@Entity({ tableName: 'space_events', repository: () => SpaceEventRepository })
 export class SpaceEvent {
   @PrimaryKey()
   id: number
