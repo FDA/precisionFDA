@@ -82,5 +82,4 @@ export class UserFileRepository extends EntityRepository<UserFile> {
           { populate: ['taggings.tag'], orderBy: { createdAt: 'ASC' } },
         )
   }
-
 }
