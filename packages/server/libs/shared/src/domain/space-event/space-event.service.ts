@@ -1,31 +1,64 @@
 import { Injectable, Logger } from '@nestjs/common'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
-import { Space } from '@shared/domain/space/space.entity'
-import { User } from '@shared/domain/user/user.entity'
 import { SpaceEvent } from '@shared/domain/space-event/space-event.entity'
 import { getEntityType, getObjectType, getSpaceEventJsonData } from '@shared/utils/object-utils'
-import { NotificationSendOperation } from '@shared/domain/email/ops/notification-send'
 import { SpaceEventInput } from '@shared/domain/space-event/space-event.input'
 import { SqlEntityManager } from '@mikro-orm/mysql'
-import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { SpaceRepository } from '@shared/domain/space/space.repository'
+import { UserRepository } from '@shared/domain/user/user.repository'
+import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
+import { EmailProcessOperation } from '@shared/domain/email/ops/email-process'
+import { EMAIL_TYPES, EmailProcessInput } from '@shared/domain/email/email.config'
+import { SPACE_EVENT_ACTIVITY_TYPE } from '@shared/domain/space-event/space-event.enum'
 
-// TODO create test cases https://jira.internal.dnanexus.com/browse/PFDA-5403
+const CONTENT_TYPES = [
+  SPACE_EVENT_ACTIVITY_TYPE.file_added,
+  SPACE_EVENT_ACTIVITY_TYPE.note_added,
+  SPACE_EVENT_ACTIVITY_TYPE.app_added,
+  SPACE_EVENT_ACTIVITY_TYPE.job_added,
+  SPACE_EVENT_ACTIVITY_TYPE.asset_added,
+  SPACE_EVENT_ACTIVITY_TYPE.comparison_added,
+  SPACE_EVENT_ACTIVITY_TYPE.workflow_added,
+  SPACE_EVENT_ACTIVITY_TYPE.file_deleted,
+  SPACE_EVENT_ACTIVITY_TYPE.asset_deleted,
+]
+const COMMENT_TYPES = [SPACE_EVENT_ACTIVITY_TYPE.comment_added]
+const MEMBERSHIP_TYPES = [
+  SPACE_EVENT_ACTIVITY_TYPE.membership_added,
+  SPACE_EVENT_ACTIVITY_TYPE.membership_disabled,
+  SPACE_EVENT_ACTIVITY_TYPE.membership_changed,
+  SPACE_EVENT_ACTIVITY_TYPE.membership_enabled,
+]
+const SPACE_TYPES = [
+  SPACE_EVENT_ACTIVITY_TYPE.space_locked,
+  SPACE_EVENT_ACTIVITY_TYPE.space_unlocked,
+  SPACE_EVENT_ACTIVITY_TYPE.space_deleted,
+]
+
 @Injectable()
 export class SpaceEventService {
   @ServiceLogger()
   private readonly log: Logger
 
   constructor(
-    private readonly em: SqlEntityManager,
     private readonly user: UserContext,
+    private readonly em: SqlEntityManager,
+    private readonly spaceRepo: SpaceRepository,
+    private readonly userRepo: UserRepository,
+    private readonly spaceMembershipRepo: SpaceMembershipRepository,
+    private readonly emailProcessOperation: EmailProcessOperation,
   ) {}
 
   async createSpaceEvent(input: SpaceEventInput): Promise<SpaceEvent | undefined> {
-    const membership = await this.getMembership(input)
+    this.log.verbose('Creating space event', input)
+    const membership = input.membership
+      ? input.membership
+      : await this.spaceMembershipRepo.getMembership(input.spaceId, input.userId)
 
-    const space = await this.em.findOne(Space, input.spaceId)
-    const user = await this.em.findOne(User, this.user.id)
+    const space = await this.spaceRepo.findOne(input.spaceId)
+    const user = await this.userRepo.findOne(this.user.id)
+
     if (space !== null && user !== null) {
       const spaceEvent = new SpaceEvent(user, space)
       spaceEvent.activityType = input.activityType
@@ -40,27 +73,50 @@ export class SpaceEventService {
 
       await this.em.persistAndFlush(spaceEvent)
 
-      // TODO move this to Service model
-      await new NotificationSendOperation({ em: this.em, log: this.log, user: this.user }).execute(
-        spaceEvent,
-      )
-
       return spaceEvent
     }
   }
-  private async getMembership(input: SpaceEventInput): Promise<SpaceMembership> {
-    if (!input.membership) {
-      const qb = this.em.createQueryBuilder(SpaceMembership)
-      qb.select('*')
-        .where({ spaces: { id: input.spaceId } })
-        .where({ user: { id: input.userId } })
-        .where({ active: true })
-      const memberships = await qb.execute()
-      if (memberships.length > 0) {
-        return memberships[0]
+
+  async sendNotificationForEvent(event: SpaceEvent) {
+    this.log.verbose('Sending notification for space event', event)
+    if (CONTENT_TYPES.includes(event.activityType)) {
+      const input: EmailProcessInput = {
+        emailTypeId: EMAIL_TYPES.newContentAdded,
+        input: { spaceEventId: event.id },
+        receiverUserIds: [],
       }
-      throw new Error(`Couldn't find membership for user ${input.userId.toString()}`)
+      await this.emailProcessOperation.execute(input)
+    } else if (COMMENT_TYPES.includes(event.activityType)) {
+      const input: EmailProcessInput = {
+        emailTypeId: EMAIL_TYPES.commentAdded,
+        input: { spaceEventId: event.id },
+        receiverUserIds: [],
+      }
+      await this.emailProcessOperation.execute(input)
+    } else if (SPACE_TYPES.includes(event.activityType)) {
+      const input: EmailProcessInput = {
+        emailTypeId: EMAIL_TYPES.spaceChanged,
+        input: {
+          initUserId: event.user.id,
+          spaceId: event.space.id,
+          activityType: event.activityType,
+        },
+        receiverUserIds: [],
+      }
+      await this.emailProcessOperation.execute(input)
+    } else if (MEMBERSHIP_TYPES.includes(event.activityType)) {
+      const input: EmailProcessInput = {
+        emailTypeId: EMAIL_TYPES.memberChangedAddedRemoved,
+        input: {
+          initUserId: event.user.id,
+          spaceId: event.space.id,
+          updatedMembershipId: event.entityId,
+          activityType: event.activityType,
+          newMembershipRole: event.role,
+        },
+        receiverUserIds: [],
+      }
+      await this.emailProcessOperation.execute(input)
     }
-    return input.membership
   }
 }
