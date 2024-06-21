@@ -13,7 +13,7 @@ export async function spacesListRequest(filters: IFilter[], params: Params): Pro
   return axios.get(`/api/spaces/${paramQ}`).then(res => res.data)
 }
 
-export async function spaceRequest({ id }: { id: string }): Promise<FetchSpaceDetailsResponse> {
+export async function spaceRequest({ id }: { id: number }): Promise<FetchSpaceDetailsResponse> {
   return axios.get(`/api/spaces/${id}`).then(res => res.data)
 }
 
@@ -89,10 +89,6 @@ export async function createSpaceRequest(payload: CreateSpacePayload): Promise<C
   return res.json()
 }
 
-export async function editSpaceRequest(spaceId: string, payload: CreateSpacePayload): Promise<CreateSpaceResponse> {
-  const res = await fetch(`/api/spaces/${spaceId}`, {
-    ...getApiRequestOpts('PUT'),
-    body: JSON.stringify({ space: payload }),
-  })
-  return res.json()
+export async function editSpaceRequest(spaceId: number, payload: CreateSpacePayload): Promise<CreateSpaceResponse> {
+  return axios.put(`/api/spaces/${spaceId}`, { space: payload }).then(res => res.data)
 }
