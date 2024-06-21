@@ -2,6 +2,7 @@ import React from 'react'
 import { StyledSpecTab } from '../../apps/SpecTab/styles'
 import { MetadataKey, MetadataVal } from '../../home/show.styles'
 import { WorkflowSpecTable } from './WorkflowSpecTable'
+import { RESOURCE_LABELS } from '../../../types/user'
 
 
 const renderEmptySpec = (type: string) => {
@@ -31,16 +32,16 @@ const renderSpecs = (stages: any[]) => {
             </div>
             <div className='__header_item'>
               <MetadataKey>name</MetadataKey>
-              <MetadataVal>{stage.name}</MetadataVal>
+              <MetadataVal data-testid={`workflow-stage-${stage.stageIndex +1 }-app-name`}>{stage.name}</MetadataVal>
             </div>
             <div className='__header_item'>
               <MetadataKey>default instance type</MetadataKey>
-              <MetadataVal>{stage.instanceType}</MetadataVal>
+              <MetadataVal data-testid={`workflow-stage-${stage.stageIndex +1 }-app-default-instance-type`}>{RESOURCE_LABELS[stage.instanceType] ?? stage.instanceType}</MetadataVal>
             </div>
           </div>
           <div className='__table-block'>
-            <WorkflowSpecTable title="inputs" config={stage.inputs} />
-            <WorkflowSpecTable title="outputs" config={stage.outputs} />
+            <WorkflowSpecTable title="inputs" config={stage.inputs} dataTestId="workflow-inputs" />
+            <WorkflowSpecTable title="outputs" config={stage.outputs} dataTestId="workflow-outputs" />
           </div>
         </React.Fragment>
       )
