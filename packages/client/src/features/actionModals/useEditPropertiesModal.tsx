@@ -236,7 +236,7 @@ const EditPropertiesForm = ({
                 `props.${index}.key`,
               )
               return (
-                <FieldWrapper key={field.id}>
+                <FieldWrapper key={field.id} data-testid={`property-${index}`}>
                   <InputTextS
                     autoComplete="off"
                     {...register(`props.${index}.key`)}
@@ -260,7 +260,7 @@ const EditPropertiesForm = ({
                     {...register(`props.${index}.value`)}
                     disabled={mutation.isPending}
                   />
-                  <Remove onClick={() => remove(index)}>
+                  <Remove data-testid="property-remove" onClick={() => remove(index)}>
                     <CrossIcon/>
                   </Remove>
                 </FieldWrapper>
