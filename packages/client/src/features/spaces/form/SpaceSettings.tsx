@@ -12,18 +12,17 @@ import { Loader } from '../../../components/Loader'
 import { BackLinkMargin } from '../../../components/Page/PageBackLink'
 import { PageTitle } from '../../../components/Page/styles'
 import { StyledTagItem, StyledTags } from '../../../components/Tags'
-import { useAuthUser } from '../../auth/useAuthUser'
 import { useEditTagsModal } from '../../actionModals/useEditTagsModal'
 import { SpaceTypeName } from '../common'
 import { CreateSpacePayload, editSpaceRequest, spaceRequest } from '../spaces.api'
 import { ISpace } from '../spaces.types'
 import { useSpaceActions } from '../useSpaceActions'
-import { validationSchema } from './helpers'
+import { editValidationSchema } from './helpers'
 import { HintText, Row, StyledButton, StyledForm, StyledPageCenter, StyledPageContent } from './styles'
 import { UserLayout } from '../../../layouts/UserLayout'
 import { Button } from '../../../components/Button'
 
-const EditTags = ({ spaceId, tags = [] }: { spaceId: string; tags?: string[] }) => {
+const EditTags = ({ spaceId, tags = [] }: { spaceId: number, tags?: string[] }) => {
   const queryClient = useQueryClient()
   const { modalComp: tagsModal, setShowModal: setTagsModal } = useEditTagsModal({
     resource: 'spaces',
@@ -58,6 +57,7 @@ interface SpaceSettingsVals {
   sponsor_lead_dxuser: string | null
   review_lead_dxuser: string | null
   cts: string | null
+  protected: boolean | null
 }
 
 export interface ISpaceSettingsForm {
@@ -67,7 +67,6 @@ export interface ISpaceSettingsForm {
 }
 
 export const SpaceSettingsForm = ({ space }: ISpaceSettingsForm) => {
-  const user = useAuthUser()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const spaceActions = useSpaceActions({ space })
@@ -79,10 +78,9 @@ export const SpaceSettingsForm = ({ space }: ISpaceSettingsForm) => {
     formState: { errors },
     watch,
     getValues,
-    setError,
   } = useForm<SpaceSettingsVals>({
     mode: 'onBlur',
-    resolver: yupResolver(validationSchema),
+    resolver: yupResolver(editValidationSchema),
     defaultValues: {
       space_type: space.type,
       name: space.name,
@@ -92,6 +90,7 @@ export const SpaceSettingsForm = ({ space }: ISpaceSettingsForm) => {
       review_lead_dxuser: space.host_lead?.dxuser,
       sponsor_lead_dxuser: space.guest_lead?.dxuser,
       cts: space.cts,
+      protected: space.protected,
     },
   })
 
@@ -120,22 +119,8 @@ export const SpaceSettingsForm = ({ space }: ISpaceSettingsForm) => {
   const onSubmit = () => {
     setFormError(undefined)
     const vals = getValues()
-    if (vals.space_type === 'private_type') {
-      vals.host_lead_dxuser = user.dxuser
-      vals.sponsor_lead_dxuser = ''
-      vals.guest_lead_dxuser = ''
-    }
-
-    // TODO: weird naming in the form label but the backend expects host_lead to be the review_lead
-    if (vals.space_type === 'review') {
-      vals.host_lead_dxuser = vals.review_lead_dxuser
-      vals.review_lead_dxuser = ''
-      vals.guest_lead_dxuser = ''
-    }
-    vals.source_space_id = space.id
     mutation.mutateAsync(vals)
   }
-
   const isSubmitting = mutation.isPending
 
   return (
@@ -163,39 +148,8 @@ export const SpaceSettingsForm = ({ space }: ISpaceSettingsForm) => {
 
       <EditTags spaceId={space.id} tags={space.tags} />
 
-      {watch().space_type === 'groups' && (
-        <>
-          <FieldGroup label="Host Lead">
-            <InputText disabled {...register('host_lead_dxuser')} />
-            <ErrorMessage errors={errors} name="host_lead_dxuser" render={({ message }) => <InputError>{message}</InputError>} />
-          </FieldGroup>
-          <FieldGroup label="Guest Lead">
-            <InputText disabled {...register('guest_lead_dxuser')} />
-            <ErrorMessage errors={errors} name="guest_lead_dxuser" render={({ message }) => <InputError>{message}</InputError>} />
-          </FieldGroup>
-        </>
-      )}
-
       {watch().space_type === 'review' && (
         <>
-          <FieldGroup label="Reviewer Lead">
-            <InputText disabled={isSubmitting} {...register('review_lead_dxuser')} />
-            <ErrorMessage
-              errors={errors}
-              name="review_lead_dxuser"
-              render={({ message }) => <InputError>{message}</InputError>}
-            />
-          </FieldGroup>
-
-          <FieldGroup label="Sponsor Lead">
-            <InputText disabled {...register('sponsor_lead_dxuser')} />
-            <ErrorMessage
-              errors={errors}
-              name="sponsor_lead_dxuser"
-              render={({ message }) => <InputError>{message}</InputError>}
-            />
-          </FieldGroup>
-
           <FieldGroup label="Center Tracking System #">
             <InputText {...register('cts')} disabled={isSubmitting} />
             <HintText>
@@ -225,7 +179,7 @@ export const SpaceSettings = () => {
   const { spaceId } = useParams<{ spaceId: string }>()
   const { data } = useQuery({
     queryKey: ['space', spaceId],
-    queryFn: () => spaceRequest({ id: spaceId }),
+    queryFn: () => spaceRequest({ id: spaceId as unknown as number }),
   })
 
   if (!data?.space) {
