@@ -2,10 +2,10 @@ import React from 'react'
 import classNames from 'classnames'
 
 
-export const WorkflowSpecTable = ({ title, config }: { title: string, config: any[] }) => {
+export const WorkflowSpecTable = ({ title, config, dataTestId }: { title: string, config: any[], dataTestId: string }) => {
   if (!config.length) {
     return (
-      <div className='__table'>
+      <div className='__table' data-testid={dataTestId}>
         <div className='__table_title'>{title}</div>
         <div className='__table_row'>
           <div className='__table_row_type'>No fields specified</div>
@@ -47,7 +47,7 @@ export const WorkflowSpecTable = ({ title, config }: { title: string, config: an
   })
 
   return (
-    <div className='__table'>
+    <div className='__table' data-testid={dataTestId}>
       <div className='__table_title'>{title}</div>
       {data}
     </div>

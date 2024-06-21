@@ -137,7 +137,7 @@ export const FileShow = ({ emitScope, space, homeScope }: {
 
   return (
     <>
-      <StyledBackLink linkTo={backPath}>
+      <StyledBackLink linkTo={backPath} data-testid="file-back-link">
         Back to Files
       </StyledBackLink>
       <Topbox>
@@ -145,7 +145,7 @@ export const FileShow = ({ emitScope, space, homeScope }: {
           <HeaderLeft>
             <Title>
               <FileIcon height={22}/>
-              &nbsp;{file.name}
+              &nbsp;<span data-testid="file-name">{file.name}</span>
               {file.show_license_pending && (
                 <HomeLabel
                   value="License Pending Approval"
@@ -162,8 +162,8 @@ export const FileShow = ({ emitScope, space, homeScope }: {
           </div>
         </Header>
 
-        <FileDescription>
-          {file.locked && <LockedRow>
+        <FileDescription data-testid="file-description">
+          {file.locked && <LockedRow data-testid="file-locked">
               <LockIcon height={14} color={theme.colors.darkYellow}/>
               File is locked
           </LockedRow>
@@ -197,7 +197,7 @@ export const FileShow = ({ emitScope, space, homeScope }: {
 
             <MetadataItem>
               <MetadataKey>Added By</MetadataKey>
-              <MetadataVal>
+              <MetadataVal data-testid="file-added-by">
                 <Link target="_blank" to={file.links.user!}>
                   {file.added_by}
                 </Link>
@@ -233,7 +233,7 @@ export const FileShow = ({ emitScope, space, homeScope }: {
 
             <MetadataItem>
               <MetadataKey>Created On</MetadataKey>
-              <MetadataVal>{file.created_at_date_time}</MetadataVal>
+              <MetadataVal data-testid="file-created-on">{file.created_at_date_time}</MetadataVal>
             </MetadataItem>
           </MetadataRow>
         </MetadataSection>
@@ -242,7 +242,7 @@ export const FileShow = ({ emitScope, space, homeScope }: {
             <MetadataRow>
               <MetadataItem>
                 <MetadataKey>Tags</MetadataKey>
-                <StyledTags>
+                <StyledTags data-testid="tags-container">
                   {file.tags.map(tag => (
                     <StyledTagItem data-testid="file-tag-item" key={tag}>{tag}</StyledTagItem>
                   ))}
@@ -256,11 +256,11 @@ export const FileShow = ({ emitScope, space, homeScope }: {
             <MetadataRow>
               <MetadataItem>
                 <MetadataKey>Properties</MetadataKey>
-                <StyledTags>
+                <StyledTags data-testid="properties-container">
                   {Object.entries(file.properties).map(([key, value]) => (
                     <StyledPropertyItem key={key}>
-                      <StyledPropertyKey>{key}</StyledPropertyKey>
-                      <span>{value}</span>
+                      <StyledPropertyKey data-testid="file-property-key">{key}</StyledPropertyKey>
+                      <span data-testid={`file-property-value-${key}`}>{value}</span>
                     </StyledPropertyItem>
                   ))}
                 </StyledTags>

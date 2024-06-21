@@ -289,7 +289,7 @@ const Header: React.FC = () => {
           <LogoWrap as={Link} to="/" data-turbolinks="false">
             <StyledHeaderLogo height={20} />
           </LogoWrap>
-          <TransparentButton ref={buttonRef} onClick={() => setSidebar(!showSiteNav)}>
+          <TransparentButton data-testid="button-open-menu" ref={buttonRef} onClick={() => setSidebar(!showSiteNav)}>
             <SiteMenuIcon height={20} />
           </TransparentButton>
           <HeaderLeft>
@@ -307,7 +307,7 @@ const Header: React.FC = () => {
               )
             })}
             <EditMenuWrap>
-              <TransparentButton onClick={() => setShowModal(!isShown)} title="Edit Favorites">
+              <TransparentButton data-testid="button-edit-menu-favorites" onClick={() => setShowModal(!isShown)} title="Edit Favorites">
                 <StarIcon height={14} />
               </TransparentButton>
             </EditMenuWrap>

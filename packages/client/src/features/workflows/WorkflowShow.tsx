@@ -198,9 +198,9 @@ export const WorkflowShow = ({ spaceId, emitScope, homeScope }: { spaceId?: numb
       <Topbox>
         <Header>
           <HeaderLeft>
-            <Title data-testid="workflow-show-title">
+            <Title>
               <BoltIcon height={20} />
-              &nbsp;{workflowTitle}
+              &nbsp;<span data-testid="workflow-show-title">{workflowTitle}</span>
             </Title>
             <RevisionDropdown
               revisions={meta.revisions}
@@ -221,10 +221,10 @@ export const WorkflowShow = ({ spaceId, emitScope, homeScope }: { spaceId?: numb
             <MetadataRow>
               <MetadataItem>
                   <MetadataKey>Tags</MetadataKey>
-                  <StyledTags>
+                  <StyledTags data-testid="tags-container">
                     {/* TODO(samuel) validate that tag is non-null string */}
                     {workflow.tags.map(tag => (
-                      <StyledTagItem key={tag}>{tag}</StyledTagItem>
+                      <StyledTagItem data-testid="workflow-tag-item" key={tag}>{tag}</StyledTagItem>
                       ))}
                   </StyledTags>
               </MetadataItem>
@@ -236,11 +236,11 @@ export const WorkflowShow = ({ spaceId, emitScope, homeScope }: { spaceId?: numb
             <MetadataRow>
               <MetadataItem>
                   <MetadataKey>Properties</MetadataKey>
-                    <StyledTags>
+                    <StyledTags data-testid="properties-container">
                       {Object.entries(workflow.properties).map(([key, value]) => (
                         <StyledPropertyItem key={key}>
-                          <StyledPropertyKey>{key}</StyledPropertyKey>
-                          <span>{value}</span>
+                          <StyledPropertyKey data-testid="workflow-property-key">{key}</StyledPropertyKey>
+                          <span data-testid={`workflow-property-value-${key}`}>{value}</span>
                         </StyledPropertyItem>
                       ))}
                     </StyledTags>

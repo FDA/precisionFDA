@@ -100,16 +100,16 @@ export const ExecutionDetails = ({
 
   return (
     <>
-      <StyledBackLink linkTo={getBackPathNext({ spaceId, location, resourceLocation: 'executions', homeScope })}>
+      <StyledBackLink linkTo={getBackPathNext({ spaceId, location, resourceLocation: 'executions', homeScope })} data-testid="execution-back-link">
         Back to Executions
       </StyledBackLink>
       <Topbox>
         <Header>
           <HeaderLeft>
             <TitleLeft>
-              <Title data-testid="execution-name">
-                <CogsIcon height={18} />
-                {execution.name}
+              <Title>
+                <CogsIcon height={20} />
+                &nbsp;<span data-testid="execution-name">{execution.name}</span>
               </Title>
               <StyledExecutionState>
                 <StateCell state={execution.state} />
@@ -159,7 +159,7 @@ export const ExecutionDetails = ({
             <MetadataItem>
               <MetadataKey>APP</MetadataKey>
               {/* TODO: do not rely on link to get app id */}
-              <MetadataVal data-testid="execution-app">
+              <MetadataVal data-testid="execution-app-title">
                 <StyledLink to={`${getBasePath(spaceId)}/apps/${execution.app_uid}`} disable={!execution.app_active}>
                   {execution.app_title}
                 </StyledLink>
@@ -203,13 +203,13 @@ export const ExecutionDetails = ({
           </MetadataRow>
         </MetadataSection>
         {execution.tags.length > 0 && (
-          <MetadataSection data-testid="execution-tags">
+          <MetadataSection>
             <MetadataRow>
               <MetadataItem>
                 <MetadataKey>Tags</MetadataKey>
-                <StyledTags>
+                <StyledTags data-testid="tags-container">
                   {execution.tags.map(tag => (
-                    <StyledTagItem key={tag}>{tag}</StyledTagItem>
+                    <StyledTagItem data-testid="execution-tag-item" key={tag}>{tag}</StyledTagItem>
                   ))}
                 </StyledTags>
               </MetadataItem>
@@ -217,15 +217,15 @@ export const ExecutionDetails = ({
           </MetadataSection>
         )}
         {Object.entries(execution.properties).length > 0 && (
-          <MetadataSection data-testid="execution-properties">
+          <MetadataSection>
             <MetadataRow>
               <MetadataItem>
                 <MetadataKey>Properties</MetadataKey>
-                <StyledTags>
+                <StyledTags data-testid="properties-container">
                   {Object.entries(execution.properties).map(([key, value]) => (
                     <StyledPropertyItem key={key}>
-                      <StyledPropertyKey>{key}</StyledPropertyKey>
-                      <span>{value}</span>
+                      <StyledPropertyKey data-testid="execution-property-key">{key}</StyledPropertyKey>
+                      <span data-testid={`execution-property-value-${key}`}>{value}</span>
                     </StyledPropertyItem>
                   ))}
                 </StyledTags>
