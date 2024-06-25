@@ -153,7 +153,6 @@ export const colorvars = css`
 
 export const themes = css`
 &:root {
-  --site-alert-height: 20px;
   --site-header-height: 50px;
 
   --c-property-item: hsl(35, 79%, 83%);

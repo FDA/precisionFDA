@@ -61,7 +61,7 @@ export const AlertBanner = ({ variant, alertText, dismissAlert }: { variant: Ale
   }
 
   return (
-    <StyledAlertBanner data-variant={variant}>
+    <StyledAlertBanner className='site-alert-banner' data-variant={variant}>
       <Message>
         <Variant>{alertTypesText[variant]}:</Variant> {alertText}
       </Message>

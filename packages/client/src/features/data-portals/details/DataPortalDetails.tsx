@@ -1,98 +1,19 @@
 import React, { useRef } from 'react'
-import { Link } from 'react-router-dom'
-import styled from 'styled-components'
+import { Link, Route, Routes } from 'react-router-dom'
 import { Button } from '../../../components/Button'
-import {
-  ListItem,
-  NoContent,
-  RightList,
-  RightSideItem,
-  RightSideScroll,
-} from '../../../components/Public/styles'
+import { ListItem, NoContent, RightList } from '../../../components/Public/styles'
 import { DataPortalCard } from '../DataPortalCard'
 import { DataPortal } from '../types'
 import { AlertText } from './DataPortalNotFound'
 
 import { AddIdsToHeaders } from '../../../components/Markdown/AddIdsToHeaders'
+import { Filler } from '../../../components/Page/styles'
 import '../../lexi/themes/PlaygroundEditorTheme.css'
 import { ToC, useMarkdownToc } from '../../markdown/TocNext'
-import { Filler, compactScrollBarV2 } from '../../../components/Page/styles'
 import { useDataPortalResourceModal } from '../../resources/useDataPortalResourceModal'
+import DataPortalContentEditPage from '../form/DataPortalContentEditPage'
+import { DataPortalPageMainBody, PageWrap, RightSideItem, RightSideScroll, Row, StyledInnerHTML } from './styles'
 
-const Row = styled.div`
-  display: flex;
-  align-items: stretch;
-  flex: 1 1 auto;
-  flex-direction: row;
-  height: 0;
-`
-const PageWrap = styled.div`
-  display: flex;
-  justify-content: center;
-  flex: 1 1 auto;
-  margin-inline: auto;
-${compactScrollBarV2}
-overflow-y: scroll;
-`
-const DataPortalPageMainBody = styled.div`
-  padding: 32px;
-  justify-content: center;
-  display: grid;
-  flex-grow: 1;
-`
-const StyledInnerHTML = styled.div`
-  max-width: 900px;
-  font-size: 15px;
-  color: var(--c-text-700);
-  line-height: 1.7;
-  font-weight: 400;
-
-  img, picture, svg, video {
-    display: inline-block;
-  }
-
-  details {
-    background: var(--tertiary-50);
-    border: 1px solid var(--tertiary-100);
-    border-radius: 10px;
-    margin-bottom: 8px;
-  }
-  summary {
-    cursor: pointer;
-    padding: 5px 5px 5px 20px;
-    position: relative;
-    font-weight: bold;
-    outline: none;
-  }
-  [data-lexical-collapsible-content] {
-    padding: 0 5px 5px 20px;
-  }
-
-  table,
-  tbody,
-  tr,
-  td,
-  th {
-    border: 1px solid var(--c-layout-border) !important;
-  }
-
-  .PlaygroundEditorTheme__layoutItem {
-    border: 0px;
-  }
-
-  h1, h2, h3, h4 {
-    font-weight: bold;
-  }
-  h1 {
-    font-size: 24px;
-  }
-  h2 {
-    font-size: 20px;
-  }
-  h3 {
-    font-size: 18px;
-  }
-`
 
 export const DataPortalDetails = ({
   portal,
@@ -150,21 +71,32 @@ export const DataPortalDetails = ({
           </RightList>
         </RightSideItem>
       </RightSideScroll>
+
       <PageWrap>
-        <DataPortalPageMainBody ref={docRef}>
-          {!portal.content && (
-            <NoContent>
-              <AlertText>This Data Portal has no content</AlertText>
-              {canEditContent && (
-                <Button as={Link} type="button" to={`/data-portals/${portal.urlSlug}/content`}>
-                  Add some here
-                </Button>
-              )}
-            </NoContent>
-          )}
-          <AddIdsToHeaders as={StyledInnerHTML} docRef={docRef} content={portal.content ?? ''} />
-          <Filler $size={40} />
-        </DataPortalPageMainBody>
+        <Routes>
+          <Route
+            path="/"
+            element={
+              <DataPortalPageMainBody ref={docRef}>
+                <div>
+                  {!portal.content && (
+                    <NoContent>
+                      <AlertText>This Data Portal has no content</AlertText>
+                      {canEditContent && (
+                        <Button as={Link} type="button" to={`/data-portals/${portal.urlSlug}/content`}>
+                          Add some here
+                        </Button>
+                      )}
+                    </NoContent>
+                  )}
+                  <AddIdsToHeaders as={StyledInnerHTML} docRef={docRef} content={portal.content ?? ''} />
+                  <Filler $size={40} />
+                </div>
+              </DataPortalPageMainBody>
+            }
+          />
+          <Route path="content" element={<DataPortalContentEditPage />} />
+        </Routes>
       </PageWrap>
     </Row>
   )
