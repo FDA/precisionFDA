@@ -1,6 +1,6 @@
 /* eslint-disable react/jsx-fragments */
 import { QueryClientProvider } from '@tanstack/react-query'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { Navigate, Outlet, RouterProvider, createBrowserRouter } from 'react-router-dom'
 import { Slide, toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
@@ -47,12 +47,21 @@ const Security = React.lazy(() => import('./pages/Security'))
 const RootComponent = () => {
   const authModal = useModal()
   const expiringSessionModal = useModal()
+  const [railsAlertHeight, setRailsAlertHeight] = useState(0)
   toast.configure({ limit: 5 })
+
+  useEffect(() => {
+    // Calculate the height of the rails-alert element
+    const alertElement = document.querySelector('.rails-alert')
+    if (alertElement) {
+        setRailsAlertHeight(alertElement.clientHeight as number)
+    }
+  }, [])
 
   return (
     <ThemeProvider>
       <React.Fragment>
-        <GlobalStyle />
+        <GlobalStyle railsAlertHeight={railsAlertHeight} />
         <QueryClientProvider
           client={queryClient({
             onAuthFailure: () => authModal.setShowModal(true),

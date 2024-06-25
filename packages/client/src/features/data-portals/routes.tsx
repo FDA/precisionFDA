@@ -54,8 +54,7 @@ const DataPortalRoutes = () => {
     <Routes>
       <Route path="" element={<DataPortalsListPage />} />
       <Route path="create" element={<CreateDataPortalPage />} />
-      <Route path=":portalId" element={<DataPortalDetailsPage />} />
-      <Route path=":portalId/content" element={<DataPortalContentEditPage />} />
+      <Route path=":portalId/*" element={<DataPortalDetailsPage />} />
       <Route path=":portalId/edit" element={<EditDataPortalPage />} />
     </Routes>
   )

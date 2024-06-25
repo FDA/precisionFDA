@@ -11,6 +11,20 @@ const bpMedium = '@media(min-width: 1045px)'
 const bpLarge = '@media(min-width: 1200px)'
 const bpSuper = '@media(min-width: 1340px)'
 
+export const MenuButton = styled(TransparentButton)<{$active: boolean}>`
+  padding: 8px;
+  transition: 0.1s ease-in-out;
+  transition-property: background-color, color;
+  &:hover {
+    background-color: var(--c-app-header-bg-hover);
+    color: var(--c-app-header-menu-hover);
+  }
+  ${({ $active }) => $active && css`
+    background-color: var(--c-app-header-bg-hover);
+    color: var(--c-app-header-menu-hover);
+  `}
+`
+
 export const StyledHeaderLogo = styled(PFDALogoLight)`
   box-sizing: border-box;
   padding: 4px 0;
@@ -57,17 +71,13 @@ export const HeaderItem = styled.div<{ $active?: boolean }>`
   cursor: pointer;
   color: var(--c-app-header-menu-base);
   box-sizing: border-box;
+  transition: background-color 0.3s ease-in-out;
   
-  ${({ $active = false }) => {
-    if ($active) {
-      return css`
-        background-color: var(--c-app-header-menu-active-bg);
-        color: var(--c-app-header-menu-hover);
-        `
-    } 
-    return css`
-    `
-  }}
+  &[active] {
+    background-color: var(--c-app-header-menu-active-bg);
+    color: var(--c-app-header-menu-hover);
+  }
+  
   &:hover {
     color: var(--c-app-header-menu-hover);
   }
@@ -138,7 +148,8 @@ export const HeaderMenuItem = styled.div<{ $active: boolean }>`
     background-color:  var(--c-app-header-bg-hover);
     color: white;
   `}
-
+  transition: 0.1s ease-in-out;
+  transition-property: background-color, color;
 `
 export const SiteMenuText = styled.div`
   font-size: 13px;
@@ -175,7 +186,9 @@ export const IconWrap = styled.div<{marginBottom?: number}>`
   `
 
 export const DropdownMenuItem = styled(HeaderMenuItem)`
+  border-radius: 3px;
   ${HeaderItemText} {
+    user-select: none;
     ${Svg} {
       margin-left: 5px;
       margin-bottom: 1px;
@@ -240,7 +253,7 @@ export const HeaderLeft = styled.div`
   overflow-x: hidden;
 
   & > * {
-    margin-right: 12px;
+    margin-right: 9px;
     flex: 0 0 auto;
   }
   
@@ -327,16 +340,12 @@ export const StyledHeader = styled.header`
     }
   `
   
-export const StyledSiteNav = styled.div<{ isSiteAlertVisible: boolean }>`
-  ${({ isSiteAlertVisible }) => isSiteAlertVisible ? css`
-    top: calc(var(--site-header-height) + var(--site-alert-height));
-  `: css`
-    top: var(--site-header-height);
-  `}
+export const StyledSiteNav = styled.div`
+  top: calc(var(--site-header-height) + var(--rails-alert-height, 0px) + var(--site-alert-height, 0px));
   bottom: 0;
   left: 0;
   position: absolute;
-  height: calc(100% - var(--site-header-height));
+  height: auto;
   width: 400px;
   background-color: var(--background-shaded);
   z-index: 3;
@@ -416,6 +425,7 @@ export const EditMenuWrap = styled.div`
   flex-shrink: 0;
   
   svg {
+    transition: opacity 0.1s ease;
     opacity: 0.3;
 
     &:hover {

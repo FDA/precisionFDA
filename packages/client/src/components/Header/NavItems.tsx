@@ -101,7 +101,7 @@ export const siteNavItems: SiteNavItemType[] = [
     icon: BookIcon,
     iconHeight: 17,
     text: 'Documentation',
-    link: '/docs/introduction',
+    link: '/docs',
     external: false,
   },
   {
