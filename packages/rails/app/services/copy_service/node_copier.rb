@@ -11,7 +11,7 @@ class CopyService
     # @param nodes [Node::ActiveRecord_Relation, Array<Node>] Nodes.
     # @param scope [String] A destination scope.
     # @return [CopyService::Copies] An object that contains copied files and/or folders.
-    def copy(nodes, scope)
+    def copy(nodes, scope, folder_id)
       copies = Copies.new
 
       return copies if nodes.empty?
@@ -19,7 +19,7 @@ class CopyService
       @parent_folder_col = Node.scope_column_name(scope)
       @opposite_parent_folder_col = Node.opposite_scope_column_name(scope)
 
-      parent_folder = nil
+      parent_folder = Node.find_by(id: folder_id)
 
       Node.transaction do
         nodes.each do |node|
@@ -58,7 +58,7 @@ class CopyService
       Rails.logger.info("NodeCopier::copy_folder id #{folder.id} name #{folder.name} to scope #{scope}")
       copies = Copies.new
 
-      existing_folder = if scope == Scopes::SCOPE_PRIVATE
+      copied_folder = if scope == Scopes::SCOPE_PRIVATE
         Folder.find_by(
           scope: scope,
           name: folder.name,
@@ -73,20 +73,7 @@ class CopyService
         )
       end
 
-      if existing_folder
-        Rails.logger.info("NodeCopier::copy_folder found existing folder id #{existing_folder.id} " \
-                          "name #{existing_folder.name}")
-
-        copies.push(
-          object: existing_folder,
-          source: folder,
-          copied: false,
-        )
-
-        return copies
-      end
-
-      copied_folder = folder.dup.tap do |new_folder|
+      copied_folder ||= folder.dup.tap do |new_folder|
         new_folder.scope = scope
         new_folder.user = user
         new_folder.project = nil if Space.valid_scope?(scope)
@@ -110,6 +97,10 @@ class CopyService
         if child_node.is_a?(Folder)
           copies.concat(copy_folder(child_node, scope, copied_folder))
         else
+          copied_file = UserFile.find_by(dxid: child_node.dxid, scope:, @parent_folder_col => copied_folder&.id)
+
+          next if copied_file
+
           copies.concat(copy_file(child_node, scope, copied_folder))
         end
       end

@@ -100,7 +100,7 @@ export const ModalPageCol = styled.div`
   width: 40vw;
   height: 100%;
   border-right: 1px solid var(--c-layout-border-200);
-  &:last-child{
+  &:last-child {
     border: 0;
   }
 `
@@ -155,4 +155,3 @@ export const Card = styled.div`
   border-radius: 8px;
   background-color: var(--warning-100);
 `
-
