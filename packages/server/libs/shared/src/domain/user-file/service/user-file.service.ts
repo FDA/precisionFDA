@@ -1,16 +1,33 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Inject, Injectable, Logger } from '@nestjs/common'
+import { ComparisonInput } from '@shared/domain/comparison-input/comparison-input.entity'
 import { DownloadLinkOptionsDto } from '@shared/domain/entity/domain/download-link-options.dto'
+import { DxId } from '@shared/domain/entity/domain/dxid'
 import { UId } from '@shared/domain/entity/domain/uid'
 import { EntityFetcherService } from '@shared/domain/entity/entity-fetcher.service'
 import { EntityService } from '@shared/domain/entity/entity.service'
 import * as eventHelper from '@shared/domain/event/event.helper'
+import { EVENT_TYPES, createFileEvent, createFolderEvent } from '@shared/domain/event/event.helper'
 import { NotificationService } from '@shared/domain/notification/services/notification.service'
+import { SPACE_EVENT_ACTIVITY_TYPE } from '@shared/domain/space-event/space-event.enum'
+import { SpaceEventService } from '@shared/domain/space-event/space-event.service'
+import { SpaceReport } from '@shared/domain/space-report/entity/space-report.entity'
+import { getIdFromScopeName } from '@shared/domain/space/space.helper'
+import { TaggingService } from '@shared/domain/tagging/tagging.service'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { FolderRepository } from '@shared/domain/user-file/folder.repository'
 import { Node } from '@shared/domain/user-file/node.entity'
 import { NodeHelper } from '@shared/domain/user-file/node.helper'
 import { NodeRepository } from '@shared/domain/user-file/node.repository'
 import * as userFileHelper from '@shared/domain/user-file/user-file.helper'
+import {
+  getNodePath,
+  getSuccessMessage,
+  loadNodes,
+  validateEditableBy,
+  validateProtectedSpaces,
+  validateVerificationSpace,
+} from '@shared/domain/user-file/user-file.helper'
 import { UserFileRepository } from '@shared/domain/user-file/user-file.repository'
 import { User } from '@shared/domain/user/user.entity'
 import { UserRepository } from '@shared/domain/user/user.repository'
@@ -22,40 +39,30 @@ import {
   PermissionError,
   ValidationError,
 } from '@shared/errors'
+import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { PlatformClient } from '@shared/platform-client'
 import { FileDescribeResponse } from '@shared/platform-client/platform-client.responses'
 import { CHALLENGE_BOT_PLATFORM_CLIENT } from '@shared/platform-client/providers/platform-client.provider'
 import { createFileSynchronizeJobTask } from '@shared/queue'
 import { UserCtx } from '@shared/types'
+import { EntityScope } from '@shared/types/common'
 import { TimeUtils } from '@shared/utils/time.utils'
+import { TypeUtils } from '@shared/utils/type-utils'
 import { UserFileCreate } from '../domain/user-file-create'
+import { Folder } from '../folder.entity'
 import { UserFile } from '../user-file.entity'
 import { FOLLOW_UP_ACTION } from '../user-file.input'
 import {
   BulkDownloadFiles,
+  ExistingFileSet,
   FILE_STATE,
   FILE_STATE_DX,
   FILE_STI_TYPE,
   IFileOrAsset,
+  SelectedFile,
+  SelectedFolder,
+  SelectedNode,
 } from '../user-file.types'
-import {
-  getNodePath,
-  getSuccessMessage,
-  loadNodes,
-  validateEditableBy,
-  validateProtectedSpaces,
-  validateVerificationSpace,
-} from '@shared/domain/user-file/user-file.helper'
-import { TypeUtils } from '@shared/utils/type-utils'
-import { ServiceLogger } from '@shared/logger/decorator/service-logger'
-import { createFileEvent, createFolderEvent, EVENT_TYPES } from '@shared/domain/event/event.helper'
-import { getIdFromScopeName } from '@shared/domain/space/space.helper'
-import { SPACE_EVENT_ACTIVITY_TYPE } from '@shared/domain/space-event/space-event.enum'
-import { ComparisonInput } from '@shared/domain/comparison-input/comparison-input.entity'
-import { SpaceReport } from '@shared/domain/space-report/entity/space-report.entity'
-import { TaggingService } from '@shared/domain/tagging/tagging.service'
-import { SpaceEventService } from '@shared/domain/space-event/space-event.service'
-import { FolderRepository } from '@shared/domain/user-file/folder.repository'
 
 @Injectable()
 export class UserFileService {
@@ -512,5 +519,104 @@ export class UserFileService {
     if (count > 0) {
       throw new DeleteRelationError('file', 'space report')
     }
+  }
+
+  private async mapFileInformation(file: UserFile, folderId: number): Promise<SelectedFile> {
+    return {
+      id: file.id,
+      name: file.name,
+      type: FILE_STI_TYPE.USERFILE,
+      state: file.state as FILE_STATE,
+      uid: file.uid,
+      sourceScope: file.scope,
+      sourceFolderId: folderId,
+      sourceScopePath: file.folderPath,
+    }
+  }
+
+  /**
+   * List files and files in folders by selected node ids.
+   * @param ids selected node ids
+   * @returns
+   */
+  async listSelectedFiles(ids: number[]): Promise<SelectedNode[]> {
+    const selectedNodes = await this.entityFetcherService.getAccessibleByIds(
+      Node,
+      ids,
+      {
+        stiType: { $in: [FILE_STI_TYPE.USERFILE, FILE_STI_TYPE.FOLDER] },
+      },
+      {
+        populate: ['parentFolder', 'scopedParentFolder'],
+      },
+    )
+    if (!selectedNodes.length) return []
+
+    const fileList = [] as SelectedNode[]
+    for (const node of selectedNodes) {
+      let nodePath = ''
+      const parentFolder = await userFileHelper.getParentFolder(node as UserFile)
+      if (parentFolder) {
+        nodePath = await userFileHelper.getNodePath(this.em, parentFolder)
+      }
+      node.folderPath = `${nodePath}/`
+      if (node.isFile) {
+        fileList.push(await this.mapFileInformation(node as UserFile, parentFolder?.id))
+        continue
+      }
+      const children = [] as UserFile[]
+      await userFileHelper.collectChildren(node as Folder, children, this.em)
+      const folder = {
+        id: node.id,
+        name: node.name,
+        sourceScope: node.scope,
+        sourceFolderId: parentFolder?.id,
+        sourceScopePath: node.folderPath,
+        type: FILE_STI_TYPE.FOLDER,
+        children: [],
+      } as SelectedFolder
+      for (const child of children) {
+        if (child.isFile) {
+          const folderId = child.scope.startsWith('space')
+            ? child.scopedParentFolderId
+            : child.parentFolderId
+          folder.children.push(await this.mapFileInformation(child, folderId))
+        }
+      }
+      fileList.push(folder)
+    }
+    return fileList
+  }
+
+  /**
+   * Validate copying of selected files to target scope.
+   * A file can only exist once in scope, so we need to check if the file is already there.
+   * @param uids selected file uids
+   * @param targetScope target scope
+   * @returns
+   */
+  async validateCopyFiles(uids: UId[], targetScope: EntityScope): Promise<ExistingFileSet> {
+    const existingFiles = {} as ExistingFileSet
+
+    const editableSpaces = await this.entityFetcherService.getEditableSpaces()
+    if (targetScope !== 'private' && editableSpaces.indexOf(targetScope) === -1) {
+      throw new PermissionError('You do not have permission to copy files to this scope')
+    }
+    for (const uid of uids) {
+      const lastDashIndex = uid.lastIndexOf('-')
+      const dxid = uid.substring(0, lastDashIndex)
+      const checkedFile = await this.entityFetcherService.getEditable(UserFile, {
+        dxid: dxid as DxId,
+        scope: targetScope,
+      })
+      if (checkedFile.length === 1) {
+        const copiedFile = checkedFile[0]
+        existingFiles[uid] = {
+          uid: copiedFile.uid,
+          targetScopePath: await userFileHelper.getNodePath(this.em, copiedFile),
+        }
+      }
+    }
+    return { ...existingFiles }
   }
 }
