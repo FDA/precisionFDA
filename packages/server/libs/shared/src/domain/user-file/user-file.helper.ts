@@ -3,22 +3,22 @@ import { DxId } from '@shared/domain/entity/domain/dxid'
 import { UId } from '@shared/domain/entity/domain/uid'
 import { Space } from '@shared/domain/space/space.entity'
 import { Folder } from '@shared/domain/user-file/folder.entity'
-import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { Node } from '@shared/domain/user-file/node.entity'
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { difference, isNil } from 'ramda'
+import { STATIC_SCOPE } from '../../enums'
+import { PermissionError } from '../../errors'
 import { SPACE_MEMBERSHIP_ROLE } from '../space-membership/space-membership.enum'
+import { CAN_EDIT_ROLES } from '../space-membership/space-membership.helper'
 import { SPACE_STATE, SPACE_TYPE } from '../space/space.enum'
 import { getIdFromScopeName, scopeContainsId } from '../space/space.helper'
-import { STATIC_SCOPE } from '../../enums'
+import { Asset } from './asset.entity'
 import { AssetRepository } from './asset.repository'
 import { FolderRepository } from './folder.repository'
 import { IdsInput, nodeQueryFilter } from './user-file.input'
 import { UserFileRepository } from './user-file.repository'
 import { FILE_STI_TYPE, IFileOrAsset } from './user-file.types'
-import { PermissionError } from '../../errors'
-import { CAN_EDIT_ROLES } from '../space-membership/space-membership.helper'
-import { Asset } from './asset.entity'
 
 // Split folder path into a list of folder names
 const splitFolderPath = (pathStr: string) => pathStr.split('/').slice(1)
@@ -43,7 +43,7 @@ const childrenTraverse = async (
   // could be easily prevented -> return if id already exists in acc
   acc.push(folder)
   const subfolders = await repo.findChildren({ parentFolderId: folder.id })
-  await Promise.all(subfolders.map(sf => childrenTraverse(sf, repo, acc)))
+  await Promise.all(subfolders.map((sf) => childrenTraverse(sf, repo, acc)))
   return acc
 }
 
@@ -63,7 +63,7 @@ const folderTraverse = (folders: Folder[], current: Folder, acc: string[]): stri
     return acc
   }
   // fixme: be careful if parent is properly initialized -> so it has the id
-  const parent = folders.find(folder => folder.id === current.parentFolder.id)
+  const parent = folders.find((folder) => folder.id === current.parentFolder.id)
   if (parent && parent.id === current.id) {
     throw new Error('parent folder equals current, error in data')
   }
@@ -83,7 +83,7 @@ const folderTraverse = (folders: Folder[], current: Folder, acc: string[]): stri
 const folderPathsFromFolders = (folders: Folder[]): string[] => {
   // todo: back to array for easier comparison?
   return folders
-    .map(folder => {
+    .map((folder) => {
       const chain = folderTraverse(folders, folder, [])
       return `/${chain.join('/')}`
     })
@@ -92,7 +92,7 @@ const folderPathsFromFolders = (folders: Folder[]): string[] => {
 
 const filterLeafPaths = (folderPaths: string[]): string[] => {
   // slice to remove the first "/"
-  const folderPathNames = folderPaths.map(folderPath => folderPath.split('/').slice(1))
+  const folderPathNames = folderPaths.map((folderPath) => folderPath.split('/').slice(1))
   return folderPathNames
     .filter((fp, idx) => {
       const isIncluded = folderPathNames.some((tp, innerIdx) => {
@@ -109,7 +109,7 @@ const filterLeafPaths = (folderPaths: string[]): string[] => {
       })
       return !isIncluded
     })
-    .map(fp => `/${fp.join('/')}`)
+    .map((fp) => `/${fp.join('/')}`)
 }
 
 const getFolderPath = (folders: Folder[], current: Folder): string => {
@@ -283,7 +283,12 @@ const validateVerificationSpace = async (em: SqlEntityManager, node: Node): Prom
  * @param userId current user
  * @param node node that is being verified
  */
-const validateProtectedSpaces = async (em: SqlEntityManager, action: string, userId: number, node: Node) => {
+const validateProtectedSpaces = async (
+  em: SqlEntityManager,
+  action: string,
+  userId: number,
+  node: Node,
+) => {
   if (scopeContainsId(node.scope)) {
     const spaceId = getIdFromScopeName(node.scope)
     const space = await em.findOneOrFail(Space, spaceId, {
@@ -293,7 +298,7 @@ const validateProtectedSpaces = async (em: SqlEntityManager, action: string, use
       const leadMemberships = space.spaceMemberships
         .getItems()
         .find(
-          membership =>
+          (membership) =>
             membership.role === SPACE_MEMBERSHIP_ROLE.LEAD && membership.user.id === userId,
         )
       if (!leadMemberships) {
@@ -341,7 +346,7 @@ const filterNodesByUser = async (em: SqlEntityManager, nodes: Node[], currentUse
       const leadMemberships = space.spaceMemberships
         .getItems()
         .find(
-          membership =>
+          (membership) =>
             membership.role === SPACE_MEMBERSHIP_ROLE.LEAD && membership.user.id === currentUser.id,
         )
       if (leadMemberships) {
@@ -351,7 +356,7 @@ const filterNodesByUser = async (em: SqlEntityManager, nodes: Node[], currentUse
         throw new Error(`You have no permissions to lock or unlock '${node.name}'.`)
       }
     } else {
-      return nodes.filter(innerNode => innerNode.user.id === currentUser.id)
+      return nodes.filter((innerNode) => innerNode.user.id === currentUser.id)
     }
   }
 
@@ -371,10 +376,7 @@ const findFileOrAssetWithUid = async (
   return (await assetRepo.findAssetWithUid(uid)) as IFileOrAsset
 }
 
-const findFileOrAssetsWithDxid = async (
-  em: EntityManager,
-  dxid: DxId,
-): Promise<IFileOrAsset[]> => {
+const findFileOrAssetsWithDxid = async (em: EntityManager, dxid: DxId): Promise<IFileOrAsset[]> => {
   const userFileRepo = em.getRepository(UserFile) as UserFileRepository
   const res = await userFileRepo.findFilesWithDxid(dxid)
   if (res.length > 0) {
@@ -402,13 +404,20 @@ const findUnclosedFilesOrAssets = async (
  */
 const collectChildren = async (parentFolder: Folder, wholeTree: Node[], em: SqlEntityManager) => {
   await parentFolder.children.init()
+  if (!parentFolder?.folderPath?.length) {
+    // only called for root folder
+    const parentNode = getParentFolder(parentFolder)
+    parentFolder.folderPath = parentNode ? `${await getNodePath(em, parentNode)}/` : '/'
+  }
   for (const childrenNode of parentFolder.children) {
+    childrenNode.folderPath = `${parentFolder.folderPath}${parentFolder.name}/`
     if (childrenNode.stiType === FILE_STI_TYPE.FOLDER) {
       await collectChildren(childrenNode as Folder, wholeTree, em)
     } else {
       wholeTree.push(childrenNode)
     }
   }
+  // TODO(PFDA-5325): remove this line to avoid adding folder items
   wholeTree.push(parentFolder)
 }
 
@@ -444,7 +453,7 @@ const loadNodes = async (em: SqlEntityManager, input: IdsInput, filters: nodeQue
     }
   }
   // ensure uniqueness
-  const unique = [...new Map(wholeTree.map(item => [item.id, item])).values()]
+  const unique = [...new Map(wholeTree.map((item) => [item.id, item])).values()]
   // sort all nodes, folders last
   unique.sort((a, b) => (a.isFolder && b.isFolder ? 0 : b.isFolder ? -1 : 1))
   return unique
@@ -470,25 +479,25 @@ const getSuccessMessage = (filesCount: number, foldersCount: number, message: st
 }
 
 export {
-  parseFoldersFromClient,
-  folderPathsFromFolders,
-  splitFolderPath,
+  childrenTraverse,
+  collectChildren,
   createFoldersTraverse,
   detectIntersectedTraverse,
-  getPathsToBuild,
-  collectChildren,
-  getFolderPath,
-  childrenTraverse,
-  getNodePath,
   filterLeafPaths,
-  findFolderForPath,
+  filterNodesByUser,
   findFileOrAssetWithUid,
   findFileOrAssetsWithDxid,
+  findFolderForPath,
   findUnclosedFilesOrAssets,
+  folderPathsFromFolders,
+  getFolderPath,
+  getNodePath,
+  getPathsToBuild,
+  getSuccessMessage,
   loadNodes,
+  parseFoldersFromClient,
+  splitFolderPath,
   validateEditableBy,
   validateProtectedSpaces,
   validateVerificationSpace,
-  filterNodesByUser,
-  getSuccessMessage,
 }

@@ -100,9 +100,41 @@ interface ResolvePath {
   nodes: NodeResponse[]
 }
 
+interface ExistingFile {
+  uid: UId
+  targetScopePath: string
+}
+
+interface ExistingFileSet {
+  [key: UId]: ExistingFile
+}
+
+interface ISelectedNode {
+  id: number
+  name: string
+  sourceScope: EntityScope
+  sourceScopePath: string
+  type: FILE_STI_TYPE.FOLDER | FILE_STI_TYPE.USERFILE
+  sourceFolderId: number
+}
+
+interface SelectedFile extends ISelectedNode {
+  type: FILE_STI_TYPE.USERFILE
+  state: FILE_STATE
+  uid: UId
+}
+
+interface SelectedFolder extends ISelectedNode {
+  type: FILE_STI_TYPE.FOLDER
+  children: SelectedFile[]
+}
+
+type SelectedNode = SelectedFile | SelectedFolder
+
 export {
   BulkDownloadFile,
   BulkDownloadFiles,
+  ExistingFileSet,
   FILE_ORIGIN_TYPE,
   FILE_STATE,
   FILE_STATE_DX,
@@ -114,4 +146,7 @@ export {
   NodeResponse,
   PARENT_TYPE,
   ResolvePath,
+  SelectedFile,
+  SelectedFolder,
+  SelectedNode,
 }

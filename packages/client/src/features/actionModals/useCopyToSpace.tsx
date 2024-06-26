@@ -1,29 +1,21 @@
-import React, { useMemo, useState } from 'react'
 import { useMutation, useQuery } from '@tanstack/react-query'
+import { AxiosError } from 'axios'
+import React, { useMemo, useState } from 'react'
 import { toast } from 'react-toastify'
 import styled from 'styled-components'
-import { AxiosError } from 'axios'
-import { CircleCheckIcon } from '../../components/icons/CircleCheckIcon'
+import { Button } from '../../components/Button'
 import { Loader } from '../../components/Loader'
+import { CircleCheckIcon } from '../../components/icons/CircleCheckIcon'
 import { breakPoints } from '../../styles/theme'
 import { displayPayloadMessage } from '../../utils/api'
-import {
-  CheckCol,
-  Col,
-  ColBody,
-  HeaderRow,
-  Table,
-  TableRow,
-  TitleCol,
-} from '../modal/ModalCheckList'
+import { APIResource } from '../home/types'
+import { CheckCol, Col, ColBody, HeaderRow, Table, TableRow, TitleCol } from '../modal/ModalCheckList'
+import { ModalHeaderTop, ModalNext } from '../modal/ModalNext'
 import { ButtonRow, Footer, ModalScroll } from '../modal/styles'
 import { useModal } from '../modal/useModal'
-import { fetchEditableSpacesList } from '../spaces/spaces.api'
-import { APIResource } from '../home/types'
-import { ProtectedIcon } from '../spaces/ProtectedIcon'
-import { ModalHeaderTop, ModalNext } from '../modal/ModalNext'
 import { FdaRestrictedIcon } from '../spaces/FdaRestrictedIcon'
-import { Button } from '../../components/Button'
+import { ProtectedIcon } from '../spaces/ProtectedIcon'
+import { fetchEditableSpacesList } from '../spaces/spaces.api'
 
 const SpacesList = ({
   selected,
@@ -34,10 +26,7 @@ const SpacesList = ({
   spaceId?: string
   onSelect: (scope: string) => void
 }) => {
-  const {
-    data = [],
-    isLoading,
-  } = useQuery({
+  const { data = [], isLoading } = useQuery({
     queryKey: ['editable_spaces_list'],
     queryFn: fetchEditableSpacesList,
   })
@@ -61,11 +50,7 @@ const SpacesList = ({
           <CheckCol />
         </HeaderRow>
         {spacesList.map(s => (
-          <TableRow
-            $isSelected={selected === s.scope}
-            key={s.scope}
-            onClick={() => onSelect(s.scope)}
-          >
+          <TableRow $isSelected={selected === s.scope} key={s.scope} onClick={() => onSelect(s.scope)}>
             <Col>
               {s.protected && <ProtectedIcon />}
               {s.restricted_reviewer && <FdaRestrictedIcon />}
@@ -77,9 +62,7 @@ const SpacesList = ({
               <ColBody>{s.scope}</ColBody>
             </Col>
             <CheckCol>
-              <ColBody>
-                {selected === s.scope && <CircleCheckIcon height={16} />}
-              </ColBody>
+              <ColBody>{selected === s.scope && <CircleCheckIcon height={16} />}</ColBody>
             </CheckCol>
           </TableRow>
         ))}
@@ -151,28 +134,16 @@ const CopyToSpaceForm = ({
     <>
       <ModalScroll>
         <StyledForm id="copy-to-space-form" onSubmit={handleSubmit}>
-          <SpacesList
-            selected={selectedTarget}
-            spaceId={spaceId}
-            onSelect={handleSelect}
-          />
+          <SpacesList selected={selectedTarget} spaceId={spaceId} onSelect={handleSelect} />
         </StyledForm>
       </ModalScroll>
       <Footer>
         <ButtonRow>
           {mutation.isPending && <Loader height={14} />}
-          <Button
-            onClick={() => setShowModal(false)}
-            disabled={mutation.isPending}
-          >
+          <Button onClick={() => setShowModal(false)} disabled={mutation.isPending}>
             Cancel
           </Button>
-          <Button
-            variant="primary"
-            type="submit"
-            form="copy-to-space-form"
-            disabled={!selectedTarget || mutation.isPending}
-          >
+          <Button variant="primary" type="submit" form="copy-to-space-form" disabled={!selectedTarget || mutation.isPending}>
             Copy
           </Button>
         </ButtonRow>
@@ -199,15 +170,14 @@ export function useCopyToSpaceModal<T extends { id: string | number }>({
 
   const modalComp = isShown && (
     <ModalNext
+      id={`modal-${resource}-copytospace`}
       data-testid={`modal-${resource}-copytospace`}
       isShown={isShown}
       hide={() => setShowModal(false)}
     >
       <ModalHeaderTop
         disableClose={false}
-        headerText={`Copy to space: ${momoSelected.length} item${
-          momoSelected.length > 1 ? 's' : ''
-        }`}
+        headerText={`Copy to space: ${momoSelected.length} item${momoSelected.length > 1 ? 's' : ''}`}
         hide={() => setShowModal(false)}
       />
       <CopyToSpaceForm

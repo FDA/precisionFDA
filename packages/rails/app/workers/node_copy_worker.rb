@@ -35,12 +35,12 @@ class NodeCopyWorker < ApplicationWorker
   # @param scope [String] A destination scope (private, space-xxx).
   # @param nodes_ids [Array<Integer>] Files or folders IDs to copy.
   # @param session_auth_params [Hash] User session auth params.
-  def perform(scope, nodes_ids, session_auth_params)
+  def perform(scope, nodes_ids, folder_id, session_auth_params)
     @context = Context.build(session_auth_params)
     RequestContext.begin_request(@context.user_id, @context.username, @context.token)
 
     nodes = Node.where(id: nodes_ids)
-    copies = copy_service.copy(nodes, scope)
+    copies = copy_service.copy(nodes, scope, folder_id)
 
     message = if copies.all?(&:copied)
       "File#{nodes.length == 1 ? ' was' : 's were'} successfully copied to the space"

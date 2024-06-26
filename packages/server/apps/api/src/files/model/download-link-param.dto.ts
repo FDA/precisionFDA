@@ -2,6 +2,6 @@ import { IsValidUid } from '@shared/domain/entity/constraint/is-uid-valid.constr
 import { UId } from '@shared/domain/entity/domain/uid'
 
 export class DownloadLinkParamDto {
-  @IsValidUid('file')
+  @IsValidUid({ entityType: 'file' })
   uid: UId<'file'>
 }
