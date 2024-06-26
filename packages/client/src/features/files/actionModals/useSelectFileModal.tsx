@@ -1,96 +1,81 @@
 import { useQuery } from '@tanstack/react-query'
 import React, { useEffect, useState } from 'react'
-import styled from 'styled-components'
 import { Button } from '../../../components/Button'
-import { Checkbox } from '../../../components/Checkbox'
-import { FieldInfo } from '../../../components/form/FieldInfo'
+import { Checkbox } from '../../../components/CheckboxNext'
 import { InputText } from '../../../components/InputText'
 import { Loader } from '../../../components/Loader'
 import { Radio } from '../../../components/Radio'
-import { StyledName } from '../../../components/ResourceTable'
+import { ItemTitle, StyledName } from '../../../components/ResourceTable'
 import { useDebounce } from '../../../components/Table/useDebounce'
-import { Tabs } from '../../../components/Tabs/Tabs'
+import { FieldInfo } from '../../../components/form/FieldInfo'
 import { ArrowUpRightFromSquareIcon } from '../../../components/icons/ArrowUpRightFromSquareIcon'
 import { FileIcon } from '../../../components/icons/FileIcon'
 import { GlobeIcon } from '../../../components/icons/GlobeIcon'
 import { LockIcon } from '../../../components/icons/LockIcon'
 import { ObjectGroupIcon } from '../../../components/icons/ObjectGroupIcon'
-import { useAuthUser } from '../../auth/useAuthUser'
-import { ModalHeaderTop, ModalNext } from '../../modal/ModalNext'
-import { ButtonRow, Footer, ModalScroll } from '../../modal/styles'
-import { useModal } from '../../modal/useModal'
 import {
   ButtonBadge,
+  Card,
+  LabelWrap,
+  ModalPageCol,
+  ModalPageRow,
+  ScrollPlace,
   SelectableTable,
+  Sticky,
   StyledAction,
   StyledCell,
-  StyledContainer,
+  StyledCellNoShrink,
+  StyledFieldInfoWrapper,
   StyledFileDetail,
   StyledFileDetailItem,
-  StyledFilterSection,
+  StyledFilterFileSection,
+  StyledHeading,
+  StyledLoader,
   StyledOnlyMine,
   StyledRow,
   StyledSubtitle,
-  Tab,
+  SyledFilterWrapper,
+  SyledUid,
+  TabContent,
 } from '../../actionModals/styles'
 import { fetchFilteredFiles } from '../../apps/apps.api'
-import {
-  IAccessibleFile,
-} from '../../databases/databases.api'
+import { useAuthUser } from '../../auth/useAuthUser'
+import { IAccessibleFile } from '../../databases/databases.api'
 import { DialogType } from '../../home/types'
+import { ModalHeaderTop, ModalNext } from '../../modal/ModalNext'
+import { ButtonRow, Footer } from '../../modal/styles'
+import { useModal } from '../../modal/useModal'
 import { useFetchFilesByUIDQuery } from '../query/useFetchFilesByUIDQuery'
-
-const StyledLoader = styled.div`
-  padding: 12px;
-`
-
-const SyledFilterWrapper = styled.div`
-  display: flex;
-  gap: 4px;
-`
-
-const StyledFilterFileSection = styled(StyledFilterSection)`
-  display: block;
-`
-
-const StyledFieldInfoWrapper = styled.div`
-  margin-top: 5px;
-`
+import { noAccessText } from '../file.utils'
 
 const FileIconAndLabel = ({ file }: { file: IAccessibleFile }) => {
   let icon = null
   let label = 'N/A'
 
-  const {
-    private: isPrivate,
-    public: isPublic,
-    space_private,
-    space_public,
-    in_space,
-  } = file
+  const { private: isPrivate, public: isPublic, space_private, space_public, in_space } = file
 
   if (isPrivate) {
-    icon = <LockIcon />
+    icon = <LockIcon height={13} />
     label = 'Private'
   } else if (isPublic) {
-    icon = <GlobeIcon />
+    icon = <GlobeIcon height={13} />
     label = 'Public'
   } else if (space_private) {
-    icon = <ObjectGroupIcon />
+    icon = <ObjectGroupIcon height={13} />
     label = 'Shared in Space (Confidential)'
   } else if (space_public) {
-    icon = <ObjectGroupIcon />
+    icon = <ObjectGroupIcon height={13} />
     label = 'Shared in Space (Cooperative)'
   } else if (in_space) {
-    icon = <ObjectGroupIcon />
+    icon = <ObjectGroupIcon height={13} />
     label = 'Shared in Space'
   }
 
   return (
-    <>
+    <LabelWrap>
       {icon}
       {label}
-    </>
+    </LabelWrap>
   )
 }
 
@@ -122,18 +107,10 @@ const Row = ({
   >
     <StyledCell>
       <StyledName>
-        {type === 'radio' && !viewOnly && (
-          <StyledContainer>
-            <Radio checked={checked} onChange={() => {}} />
-          </StyledContainer>
-        )}
-        {type === 'checkbox' && !viewOnly && (
-          <StyledContainer>
-            <Checkbox onChange={() => {}} checked={checked} />
-          </StyledContainer>
-        )}
-        <FileIcon />
-        {file.title}
+        {type === 'radio' && !viewOnly && <Radio checked={checked} onChange={() => {}} />}
+        {type === 'checkbox' && !viewOnly && <Checkbox onChange={() => {}} checked={checked ?? false} />}
+        <FileIcon height={16} />
+        <ItemTitle>{file.title}</ItemTitle>
       </StyledName>
 
       <StyledFileDetail>
@@ -143,11 +120,11 @@ const Row = ({
         <StyledFileDetailItem>{file?.org?.name}</StyledFileDetailItem>
       </StyledFileDetail>
     </StyledCell>
-    <StyledCell>
-      <StyledAction href={file.path} target='_blank'>
-        <ArrowUpRightFromSquareIcon />
+    <StyledCellNoShrink>
+      <StyledAction href={file.path} target="_blank">
+        <ArrowUpRightFromSquareIcon height={18} />
       </StyledAction>
-    </StyledCell>
+    </StyledCellNoShrink>
   </StyledRow>
 )
 
@@ -159,13 +136,7 @@ interface FileSelectTabsProps {
   uids: string[]
 }
 
-const FileSelectTabs = ({
-  type,
-  scopes,
-  setShowModal,
-  handleSelect,
-  uids,
-}: FileSelectTabsProps) => {
+const FileSelectTabs = ({ type, scopes, setShowModal, handleSelect, uids }: FileSelectTabsProps) => {
   const user = useAuthUser()
   const [selectedFiles, setSelectedFiles] = useState<IAccessibleFile[]>([])
   const [filter, setFilter] = useState('')
@@ -173,13 +144,21 @@ const FileSelectTabs = ({
   const searchText = useDebounce(filter, 250)
 
   const { data: fetchAccessibleData, status: fetchAccessibleStatus, isFetching } = useFetchFilesByUIDQuery(uids || [])
+  const accessError = uids && fetchAccessibleData && uids?.length !== fetchAccessibleData?.length
+  const accessibleUids = fetchAccessibleData?.map(i => i.uid)
+  const noneSelected = (uids && uids.length === 0) || (selectedFiles && selectedFiles.length === 0)
 
-  const { data: filesData, isLoading, status: loadingFilesStatus } = useQuery({
+  const {
+    data: filesData,
+    isLoading,
+    status: loadingFilesStatus,
+  } = useQuery({
     queryKey: ['list_files', searchText],
-    queryFn: () => fetchFilteredFiles({
-      searchString: searchText,
-      scopes: scopes ?? [],
-    }),
+    queryFn: () =>
+      fetchFilteredFiles({
+        searchString: searchText,
+        scopes: scopes ?? [],
+      }),
   })
 
   useEffect(() => {
@@ -221,78 +200,39 @@ const FileSelectTabs = ({
     setShowModal(false)
   }
 
-  const isMyFile = (file: IAccessibleFile): boolean =>
-    file.user?.dxuser === user?.dxuser
+  const isMyFile = (file: IAccessibleFile): boolean => file.user.dxuser === user?.dxuser
 
   const files = filesData?.objects ?? []
 
   return (
     <>
-      <Tabs>
-        <Tab
-          title={`Selected ${selectedFiles?.length || uids.length || '0'}`}
-          key="selected"
-        >
-          {isFetching && (
-            <StyledLoader>
-              <Loader className="inline" />
-            </StyledLoader>
-          )}
-          {(selectedFiles?.length === 0 || uids.length === 0) &&
-            !isFetching && <div>No selected files</div>}
-          <ModalScroll>
-            <SelectableTable>
-              <tbody>
-                {selectedFiles?.map(file => (
-                  <Row
-                    file={file}
-                    type={type}
-                    viewOnly
-                    key={file.uid}
-                    radioCallback={radioCallback}
-                    checkboxCallback={checkboxCallback}
-                  />
-                ))}
-              </tbody>
-            </SelectableTable>
-          </ModalScroll>
-        </Tab>
-        <Tab
-          title={`Files ${
-            loadingFilesStatus === 'success' ? files.length : ''
-          }`}
-          key="files"
-        >
-          <StyledFilterFileSection>
-            <SyledFilterWrapper>
-              <InputText
-                placeholder="Filter..."
-                onChange={evt => setFilter(evt.target.value)}
-              />
-              <StyledOnlyMine>
-                <input
-                  type="checkbox"
-                  onClick={e => toggleOnlyMine(e.target.checked)}
-                />
-                Only mine
-              </StyledOnlyMine>
-            </SyledFilterWrapper>
-            <StyledFieldInfoWrapper>
-              <FieldInfo text="Use % for wildcard searches" />
-            </StyledFieldInfoWrapper>
-          </StyledFilterFileSection>
+      <ModalPageRow>
+        <ModalPageCol>
+          <ScrollPlace>
+            <Sticky>
+              <StyledHeading>
+                All Files
+                <StyledOnlyMine>
+                  <Checkbox onChange={e => toggleOnlyMine(e.target.checked)} checked={showOnlyMyFiles} />
+                  Only mine
+                </StyledOnlyMine>
+              </StyledHeading>
+              <StyledFilterFileSection>
+                <SyledFilterWrapper>
+                  <InputText placeholder="Filter..." onChange={evt => setFilter(evt.target.value)} />
+                </SyledFilterWrapper>
+                <StyledFieldInfoWrapper>
+                  <FieldInfo text="Use % for wildcard searches" />
+                </StyledFieldInfoWrapper>
+              </StyledFilterFileSection>
 
-          {isLoading && <Loader />}
-          {loadingFilesStatus === 'success' && (
-            <ModalScroll>
+              {isLoading && <Loader />}
+            </Sticky>
+            {loadingFilesStatus === 'success' && (
               <SelectableTable>
                 <tbody>
                   {files
-                    .filter((file: IAccessibleFile) =>
-                      showOnlyMyFiles
-                        ? isMyFile(file) && showOnlyMyFiles
-                        : true,
-                    )
+                    .filter((file: IAccessibleFile) => (showOnlyMyFiles ? isMyFile(file) && showOnlyMyFiles : true))
                     .map((file: IAccessibleFile) => (
                       <Row
                         file={file}
@@ -306,10 +246,45 @@ const FileSelectTabs = ({
                     ))}
                 </tbody>
               </SelectableTable>
-            </ModalScroll>
-          )}
-        </Tab>
-      </Tabs>
+            )}
+          </ScrollPlace>
+        </ModalPageCol>
+        <ModalPageCol>
+          <ScrollPlace>
+            <Sticky>
+              {accessError && (
+                <TabContent>
+                  <Card>
+                    <div>{uids.length === 1 ? noAccessText.single : noAccessText.multi}</div>
+                    <div>{uids?.filter(i => !accessibleUids?.includes(i)).map(i => <SyledUid key={i}>{i}</SyledUid>)}</div>
+                  </Card>
+                </TabContent>
+              )}
+              {noneSelected ? <StyledHeading>No selected files</StyledHeading> : <StyledHeading>Selected Files</StyledHeading>}
+
+              {isFetching && (
+                <StyledLoader>
+                  <Loader className="inline" />
+                </StyledLoader>
+              )}
+            </Sticky>
+            <SelectableTable>
+              <tbody>
+                {selectedFiles?.map(file => (
+                  <Row
+                    file={file}
+                    type={type}
+                    key={file.uid}
+                    radioCallback={radioCallback}
+                    checkboxCallback={checkboxCallback}
+                    checked={selectedFiles?.some(s => file.uid === s.uid)}
+                  />
+                ))}
+              </tbody>
+            </SelectableTable>
+          </ScrollPlace>
+        </ModalPageCol>
+      </ModalPageRow>
       <Footer>
         <ButtonRow>
           <Button
@@ -319,11 +294,7 @@ const FileSelectTabs = ({
           >
             Cancel
           </Button>
-          <Button
-            variant='primary'
-            onClick={handleSubmit}
-            disabled={selectedFiles?.length === 0}
-          >
+          <Button variant="primary" onClick={handleSubmit} disabled={selectedFiles?.length === 0}>
             Select &nbsp;<ButtonBadge>{selectedFiles?.length}</ButtonBadge>
           </Button>
         </ButtonRow>
@@ -354,27 +325,11 @@ export const useSelectFileModal = (
   }
 
   const modalComp = isShown && (
-    <ModalNext
-      id="select-file-modal"
-      disableClose={false}
-      headerText={title}
-      hide={() => setShowModal(false)}
-      isShown={isShown}
-    >
-      <ModalHeaderTop
-        disableClose={false}
-        headerText={title}
-        hide={() => setShowModal(false)}
-      />
+    <ModalNext id="select-file-modal" disableClose={false} headerText={title} hide={() => setShowModal(false)} isShown={isShown}>
+      <ModalHeaderTop disableClose={false} headerText={title} hide={() => setShowModal(false)} />
 
       {subtitle && <StyledSubtitle>{subtitle}</StyledSubtitle>}
-      <FileSelectTabs
-        type={type}
-        scopes={scopes}
-        setShowModal={setShowModal}
-        handleSelect={handleSelect}
-        uids={uids ?? []}
-      />
+      <FileSelectTabs type={type} scopes={scopes} setShowModal={setShowModal} handleSelect={handleSelect} uids={uids} />
     </ModalNext>
   )
   return {
