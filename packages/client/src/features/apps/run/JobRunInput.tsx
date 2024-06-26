@@ -7,12 +7,12 @@ import styled from 'styled-components'
 import { BoolButton, BoolButtonGroup } from '../../../components/Button/BoolButtons'
 import { InputText } from '../../../components/InputText'
 import { FieldInfo } from '../../../components/form/FieldInfo'
+import { noAccessText } from '../../files/file.utils'
+import { useFetchFilesByUIDQuery } from '../../files/query/useFetchFilesByUIDQuery'
 import { SelectMultiFileInput } from '../SelectMultiFileInput'
 import { IOSpec, InputSpec, RunJobFormType } from '../apps.types'
 import { isFloatValid, isStrictlyInteger } from '../form/common'
 import { ErrorMessageForField } from './ErrorMessageForField'
-import { useFetchFilesByUIDQuery } from '../../files/query/useFetchFilesByUIDQuery'
-import { noAccessText } from '../../files/file.utils'
 
 const getDefaultValue = val => {
   if (val === null || val === undefined || val.length === 0) return undefined
@@ -102,9 +102,9 @@ const ArrayFileInput = ({
   scope: string
 }) => {
   const fileListQuery = useFetchFilesByUIDQuery(field?.value || [])
-  
+
   useEffect(() => {
-    if(!field.value?.length || !fileListQuery?.data?.length) return
+    if (!field.value?.length || !fileListQuery?.data?.length) return
 
     if (field.value.length !== fileListQuery.data.length) {
       setError(field.name, { type: 'custom', message: noAccessText.multi })
