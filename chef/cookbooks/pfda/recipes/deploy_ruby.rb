@@ -35,6 +35,7 @@ ruby_block 'create .env file and set env vars' do
         ENV[name] = val
         f << "#{name}=#{val}\n"
       end
+      f << "ADMIN_TOKEN=#{node.run_state.dig('ssm_params', 'app', 'secrets')&.fetch('ADMIN_TOKEN', nil)}\n"
     end
 
     FileUtils.chown node[:deploy_user], node[:deploy_user], env_file
