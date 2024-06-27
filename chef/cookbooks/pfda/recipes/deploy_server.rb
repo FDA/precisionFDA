@@ -42,11 +42,21 @@ end
 template File.join(server_dir, 'pm2-worker.json') do
   source 'pm2_worker.erb'
   variables(lazy do
-              {
-                instances: node.run_state.dig('ssm_params', 'app', 'environment',
-                                              'NODE_WORKER_INSTANCES') || node['nodejs']['worker']['instances']
-              }
-            end)
+    {
+      instances: node.run_state.dig('ssm_params', 'app', 'environment',
+                                    'NODE_WORKER_INSTANCES') || node['nodejs']['worker']['instances']
+    }
+  end)
+end
+
+template File.join(server_dir, 'pm2-admin-platform-client.json') do
+  source 'pm2_admin_platform_client.erb'
+  variables(lazy do
+    {
+      instances: node.run_state.dig('ssm_params', 'app', 'environment',
+                                    'NODE_ADMIN_PLATFORM_CLIENT_INSTANCES') || node['nodejs']['admin-platform-client']['instances']
+    }
+  end)
 end
 
 execute 'Server install deps' do

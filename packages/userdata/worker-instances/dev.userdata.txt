@@ -77,6 +77,26 @@ cat <<EOF > /tmp/config.json
                          "log_stream_name": "{instance_id}-worker-4"
                      },
                      {
+                         "file_path": "/srv/www/precision_fda/current/log/node-admin-platform-client-1.log",
+                         "log_group_name": "dev/node/admin-platform-client",
+                         "log_stream_name": "{instance_id}-admin-platform-client-1"
+                     },
+                     {
+                         "file_path": "/srv/www/precision_fda/current/log/node-admin-platform-client-2.log",
+                         "log_group_name": "dev/node/admin-platform-client",
+                         "log_stream_name": "{instance_id}-admin-platform-client-2"
+                     },
+                     {
+                         "file_path": "/srv/www/precision_fda/current/log/node-admin-platform-client-3.log",
+                         "log_group_name": "dev/node/admin-platform-client",
+                         "log_stream_name": "{instance_id}-admin-platform-client-3"
+                     },
+                     {
+                         "file_path": "/srv/www/precision_fda/current/log/node-admin-platform-client-4.log",
+                         "log_group_name": "dev/node/admin-platform-client",
+                         "log_stream_name": "{instance_id}-admin-platform-client-4"
+                     },
+                     {
                          "file_path": "/home/deploy/.pm2/pm2.log",
                          "log_group_name": "dev/node/pm2",
                          "log_stream_name": "{instance_id}-pm2"
@@ -105,6 +125,26 @@ cat <<EOF > /tmp/config.json
                          "file_path": "/srv/www/precision_fda/current/log/node-worker-error-4.log",
                          "log_group_name": "dev/node/worker-errors",
                          "log_stream_name": "{instance_id}-worker-error-4"
+                     },
+                     {
+                         "file_path": "/srv/www/precision_fda/current/log/node-admin-platform-client-error-1.log",
+                         "log_group_name": "dev/node/admin-platform-client-errors",
+                         "log_stream_name": "{instance_id}-admin-platform-client-error-1"
+                     },
+                     {
+                         "file_path": "/srv/www/precision_fda/current/log/node-admin-platform-client-error-2.log",
+                         "log_group_name": "dev/node/admin-platform-client-errors",
+                         "log_stream_name": "{instance_id}-admin-platform-client-error-2"
+                     },
+                     {
+                         "file_path": "/srv/www/precision_fda/current/log/node-admin-platform-client-error-3.log",
+                         "log_group_name": "dev/node/admin-platform-client-errors",
+                         "log_stream_name": "{instance_id}-admin-platform-client-error-3"
+                     },
+                     {
+                         "file_path": "/srv/www/precision_fda/current/log/node-admin-platform-client-error-4.log",
+                         "log_group_name": "dev/node/admin-platform-client-errors",
+                         "log_stream_name": "{instance_id}-admin-platform-client-error-4"
                      },
                      {
                          "file_path": "/srv/www/precision_fda/current/log/cron.log",
