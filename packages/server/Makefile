@@ -21,11 +21,17 @@ run-dist:
 run-worker-dist:
 	pnpm run start:prod:worker $(ARGS)
 
+run-admin-platform-client-dist:
+	pnpm run start:prod:admin-platform-client $(ARGS)
+
 run-dev-dist:
 	pnpm run start:prod:api > ../log/https-api.log
 
 run-worker-dev-dist:
 	pnpm run start:prod:worker > ../log/https-worker.log
+
+run-admin-platform-client-dev-dist:
+	pnpm run start:prod:admin-platform-client > ../log/https-admin-platform-client.log
 
 # run app locally starting from worker API
 run-dev:
@@ -59,6 +65,9 @@ watch:
 watch-worker:
 	pnpm run start:dev:worker
 
+watch-admin-platform-client:
+	pnpm run start:dev:admin-platform-client
+
 # maps to npm script build commands in every package
 build:
 	pnpm run build
@@ -77,6 +86,11 @@ test-api:
 test-worker:
 	$(bin)mocha --config ./apps/worker/.mocharc.js \
 	--recursive "./apps/worker/test/**/*.spec.ts"
+
+test-admin-platform-client:
+	$(bin)mocha --config ./apps/admin-platform-client/.mocharc.js \
+	--recursive "./apps/admin-platform-client/test/**/*.spec.ts"
+
 
 test: test-api
 	make test-worker
