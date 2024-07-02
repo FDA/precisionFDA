@@ -7,7 +7,6 @@ import { useUnlockSpaceModal } from './useUnlockSpaceModal'
 export enum SpaceActions {
   'Lock/Unlock' = 'Lock/Unlock',
   'Edit Space' = 'Edit Space',
-  'Duplicate Space' = 'Duplicate Space',
   'Delete' = 'Delete',
   'Fix Permissions' = 'Fix Permissions'
 }
@@ -40,12 +39,6 @@ export const useSpaceActions = ({ space }: { space: ISpace }) => {
       func: () => {},
       isDisabled: false,
       shouldHide: !space.links.update,
-    },
-    'Duplicate Space': {
-      type: 'modal',
-      func: () => {},
-      isDisabled: false,
-      shouldHide: !space.can_duplicate,
     },
     Delete: {
       type: 'modal',
