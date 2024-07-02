@@ -27,7 +27,6 @@ class SpaceSerializer < ApplicationSerializer
   attribute :private_space_id, if: -> { object.shared? && confidential_space }
   attribute :all_tags_list, key: :tags
 
-  attribute :can_duplicate, if: -> { object.review? }
   attribute :current_user_membership, key: :current_user_membership
   attribute :exclusive?, key: :private_exclusive, if: -> { object.private_type? }
 
@@ -111,10 +110,6 @@ class SpaceSerializer < ApplicationSerializer
   # @return [SpaceMembership]
   def current_user_membership
     space_membership
-  end
-
-  def can_duplicate
-    SpaceMembershipPolicy.can_duplicate?(object, space_membership)
   end
 
   # Checks if current user is able to update a space.
