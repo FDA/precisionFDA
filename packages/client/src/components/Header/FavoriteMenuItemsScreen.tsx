@@ -160,7 +160,7 @@ export const FavoriteMenuItemsScreen = () => {
                   </IconWrap>
                   <HeaderItemText>{text}</HeaderItemText>
                 </Name>
-                <FavIconWrap $selected={selFavorites.includes(i.id)} data-testid={id}>
+                <FavIconWrap $selected={selFavorites.includes(i.id)} data-testid={'favorite-menu-star-'+id}>
                   <StarIcon height={15} />
                 </FavIconWrap>
               </SiteNavItem>
