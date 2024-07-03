@@ -1,9 +1,9 @@
 import { Meta, StoryObj } from '@storybook/react'
 import React, { useEffect } from 'react'
-import { WithListData } from '../../stories/helpers'
 import { StorybookProviders } from '../../stories/StorybookProviders'
+import { WithListData } from '../../stories/helpers'
 import { copyAppsToPrivate, fetchApps } from '../apps/apps.api'
-import { copyFilesToPrivate, fetchFiles } from '../files/files.api'
+import { fetchFiles } from '../files/files.api'
 import { APIResource } from '../home/types'
 import { useCopyToPrivateModal } from './useCopyToPrivateModal'
 
@@ -40,11 +40,7 @@ const CopyToPrivateModalWrapper = (props: Props) => {
 export const CopyToPrivateModal: Story = {
   render: ({ type = 'files' }) => {
     let fetchFunc: unknown
-    let request = copyFilesToPrivate
-    if (type === 'files') {
-      fetchFunc = fetchFiles
-      request = copyFilesToPrivate
-    }
+    let request = copyAppsToPrivate
     if (type === 'apps') {
       fetchFunc = fetchApps
       request = copyAppsToPrivate

@@ -1,33 +1,39 @@
 import { Reference } from '@mikro-orm/core'
 import { SqlEntityManager } from '@mikro-orm/mysql'
+import { UId } from '@shared/domain/entity/domain/uid'
+import { EntityFetcherService } from '@shared/domain/entity/entity-fetcher.service'
 import { EntityService } from '@shared/domain/entity/entity.service'
+import { Event } from '@shared/domain/event/event.entity'
+import * as eventHelper from '@shared/domain/event/event.helper'
+import { EVENT_TYPES } from '@shared/domain/event/event.helper'
 import { NotificationService } from '@shared/domain/notification/services/notification.service'
+import { SpaceEventService } from '@shared/domain/space-event/space-event.service'
+import { SPACE_STATE, SPACE_TYPE } from '@shared/domain/space/space.enum'
+import { TaggingService } from '@shared/domain/tagging/tagging.service'
 import { UserFileCreate } from '@shared/domain/user-file/domain/user-file-create'
+import { Folder } from '@shared/domain/user-file/folder.entity'
+import { FolderRepository } from '@shared/domain/user-file/folder.repository'
+import { Node } from '@shared/domain/user-file/node.entity'
+import { NodeHelper } from '@shared/domain/user-file/node.helper'
+import { NodeRepository } from '@shared/domain/user-file/node.repository'
 import { UserFileService } from '@shared/domain/user-file/service/user-file.service'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
-import { User } from '@shared/domain/user/user.entity'
-import { Node } from '@shared/domain/user-file/node.entity'
-import { Event } from '@shared/domain/event/event.entity'
-import { PlatformClient } from '@shared/platform-client'
-import { expect } from 'chai'
-import * as queue from '@shared/queue'
-import sinon, { match, restore, SinonStub, stub } from 'sinon'
-import { FILE_STATE_DX, FILE_STI_TYPE, PARENT_TYPE } from '@shared/domain/user-file/user-file.types'
-import { NOTIFICATION_ACTION, SEVERITY, STATIC_SCOPE } from '@shared/enums'
-import { UserFileRepository } from '@shared/domain/user-file/user-file.repository'
-import { UserRepository } from '@shared/domain/user/user.repository'
-import { NodeRepository } from '@shared/domain/user-file/node.repository'
 import * as userFileHelper from '@shared/domain/user-file/user-file.helper'
-import * as eventHelper from '@shared/domain/event/event.helper'
-import { EntityFetcherService } from '@shared/domain/entity/entity-fetcher.service'
-import { EVENT_TYPES } from '@shared/domain/event/event.helper'
+import { UserFileRepository } from '@shared/domain/user-file/user-file.repository'
+import {
+  FILE_STATE_DX,
+  FILE_STI_TYPE,
+  PARENT_TYPE,
+  SelectedFile,
+} from '@shared/domain/user-file/user-file.types'
+import { User } from '@shared/domain/user/user.entity'
+import { UserRepository } from '@shared/domain/user/user.repository'
+import { NOTIFICATION_ACTION, SEVERITY, STATIC_SCOPE } from '@shared/enums'
 import { DeleteRelationError, PermissionError } from '@shared/errors'
-import { NodeHelper } from '@shared/domain/user-file/node.helper'
-import { TaggingService } from '@shared/domain/tagging/tagging.service'
-import { SpaceEventService } from '@shared/domain/space-event/space-event.service'
-import { FolderRepository } from '@shared/domain/user-file/folder.repository'
-import { Folder } from '@shared/domain/user-file/folder.entity'
-import { SPACE_STATE, SPACE_TYPE } from '@shared/domain/space/space.enum'
+import { PlatformClient } from '@shared/platform-client'
+import * as queue from '@shared/queue'
+import { expect } from 'chai'
+import sinon, { SinonStub, match, restore, stub } from 'sinon'
 
 describe('UserFileService', () => {
   const USER_ID = 0
@@ -113,9 +119,15 @@ describe('UserFileService', () => {
 
   const getAccessibleByIdsStub = stub()
   const getAccessibleByUidStub = stub()
+  const getAccessibleByIdStub = stub()
+  const getEditableSpacesStub = stub()
+  const getEditableStub = stub()
   const entityFetcherService = {
     getAccessibleByIds: getAccessibleByIdsStub,
     getAccessibleByUid: getAccessibleByUidStub,
+    getAccessibleById: getAccessibleByIdStub,
+    getEditableSpaces: getEditableSpacesStub,
+    getEditable: getEditableStub,
   } as unknown as EntityFetcherService
 
   const USER = {
@@ -180,6 +192,7 @@ describe('UserFileService', () => {
   let getNodePathStub: SinonStub
   let createFileEventStub: SinonStub
   let createFolderEventStub: SinonStub
+  let collectChildrenStub: SinonStub
 
   before(() => {
     stub(Reference, 'create').withArgs(USER).returns(USER)
@@ -188,6 +201,7 @@ describe('UserFileService', () => {
     loadNodesStub = stub(userFileHelper, 'loadNodes')
     createFileEventStub = stub(eventHelper, 'createFileEvent')
     createFolderEventStub = stub(eventHelper, 'createFolderEvent')
+    collectChildrenStub = stub(userFileHelper, 'collectChildren')
   })
 
   beforeEach(() => {
@@ -278,6 +292,15 @@ describe('UserFileService', () => {
     getAccessibleByUidStub.reset()
     getAccessibleByUidStub.throws()
 
+    getAccessibleByIdStub.reset()
+    getAccessibleByIdStub.throws()
+
+    getEditableSpacesStub.reset()
+    getEditableSpacesStub.throws()
+
+    getEditableStub.reset()
+    getEditableStub.throws()
+
     removeTaggingsStub.reset()
     removeTaggingsStub.throws()
 
@@ -286,6 +309,9 @@ describe('UserFileService', () => {
 
     createFolderEventStub.reset()
     createFolderEventStub.throws()
+
+    collectChildrenStub.reset()
+    collectChildrenStub.throws()
 
     emFindOneStub.reset()
     emFindOneStub.throws()
@@ -982,6 +1008,98 @@ describe('UserFileService', () => {
       await expect(getInstance().removeNodes([1], false)).to.be.rejectedWith(Error, '')
 
       expect(createNotificationStub.notCalled).to.be.true
+    })
+  })
+
+  describe('#listSelectedFiles', async () => {
+    const file1 = {
+      id: 5,
+      name: 'file1',
+      type: FILE_STI_TYPE.USERFILE,
+      state: FILE_STATE_DX.CLOSED,
+      uid: 'file-uid-1',
+      scope: STATIC_SCOPE.PRIVATE,
+      folderPath: '/',
+      isFile: true,
+    } as unknown as UserFile
+
+    const folder2 = {
+      id: 6,
+      name: 'folder2',
+      type: FILE_STI_TYPE.FOLDER,
+      scope: STATIC_SCOPE.PRIVATE,
+      isFile: false,
+    } as unknown as Folder
+
+    it('should return empty array if nodes are not accessible', async () => {
+      getAccessibleByIdsStub.returns([])
+
+      const res = await getInstance().listSelectedFiles([1, 2])
+      expect(res).to.deep.eq([])
+    })
+
+    it('should return accessible files', async () => {
+      getAccessibleByIdsStub
+        .withArgs(Node, [file1.id, folder2.id], {
+          stiType: { $in: [FILE_STI_TYPE.USERFILE, FILE_STI_TYPE.FOLDER] },
+        })
+        .returns([file1, folder2])
+      collectChildrenStub.resolves()
+
+      const res = await getInstance().listSelectedFiles([file1.id, folder2.id])
+      expect(res.length).to.eq(2)
+      expect((res[0] as SelectedFile).sourceFolderId).to.eq(undefined)
+      expect(collectChildrenStub.calledOnce).to.be.true
+    })
+  })
+
+  describe('#validateCopyFiles', async () => {
+    const SPACE = 'space-1'
+    const FILE_UID1 = 'file-uid1-1'
+    const FILE_DXID1 = 'file-uid1'
+    const FILE_UID2 = 'file-uid2-2'
+    const FILE_DXID2 = 'file-uid2'
+    const FILE_UID3 = 'file-uid3-3'
+    const FILE_DXID3 = 'file-uid3'
+    const existingFile1 = {
+      id: 1,
+      uid: FILE_UID1,
+      scope: SPACE,
+    } as unknown as UserFile
+    const existingFile2 = {
+      id: 2,
+      uid: FILE_UID2,
+      scope: SPACE,
+    } as unknown as UserFile
+
+    it('should throw error if user does not have access to target space', async () => {
+      getEditableSpacesStub.returns([])
+      const uid = 'file-uid-1' as UId
+      await expect(getInstance().validateCopyFiles([uid], `space-1`)).to.be.rejectedWith(
+        PermissionError,
+        'You do not have permission to copy files to this scope',
+      )
+    })
+
+    it('should return editable files which exist in the target space', async () => {
+      getEditableSpacesStub.returns(['space-1'])
+      getEditableStub
+        .withArgs(UserFile, {
+          dxid: FILE_DXID1,
+          scope: SPACE,
+        })
+        .returns([existingFile1])
+      getEditableStub
+        .withArgs(UserFile, {
+          dxid: FILE_DXID2,
+          scope: SPACE,
+        })
+        .returns([existingFile2])
+      getEditableStub.withArgs(UserFile, { dxid: FILE_DXID3, scope: SPACE }).returns([])
+      getNodePathStub.returns('path')
+
+      const res = await getInstance().validateCopyFiles([FILE_UID1, FILE_UID2, FILE_UID3], SPACE)
+      expect(Object.keys(res).length).to.eq(2)
     })
   })
 

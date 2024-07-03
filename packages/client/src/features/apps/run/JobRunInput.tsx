@@ -1,30 +1,22 @@
 import { isSafeInteger } from 'lodash'
-import React from 'react'
-import {
-  ControllerRenderProps,
-  FieldErrors,
-  UseFormRegister,
-} from 'react-hook-form'
+import React, { useEffect } from 'react'
+import { ControllerRenderProps, FieldErrors, UseFormRegister, UseFormSetError } from 'react-hook-form'
 import Select, { SingleValueProps, components } from 'react-select'
 import CreatableSelect from 'react-select/creatable'
 import styled from 'styled-components'
-import {
-  BoolButton,
-  BoolButtonGroup,
-} from '../../../components/Button/BoolButtons'
+import { BoolButton, BoolButtonGroup } from '../../../components/Button/BoolButtons'
 import { InputText } from '../../../components/InputText'
 import { FieldInfo } from '../../../components/form/FieldInfo'
+import { noAccessText } from '../../files/file.utils'
+import { useFetchFilesByUIDQuery } from '../../files/query/useFetchFilesByUIDQuery'
 import { SelectMultiFileInput } from '../SelectMultiFileInput'
-import { IOSpec, InputSpec, RunJobForm } from '../apps.types'
+import { IOSpec, InputSpec, RunJobFormType } from '../apps.types'
 import { isFloatValid, isStrictlyInteger } from '../form/common'
 import { ErrorMessageForField } from './ErrorMessageForField'
 
-const getDefaultValue = (val) => {
+const getDefaultValue = val => {
   if (val === null || val === undefined || val.length === 0) return undefined
-
-  return Array.isArray(val)
-    ? val.map(value => ({ value, label: value }))
-    : { value: val, label: val }
+  return Array.isArray(val) ? val.map(value => ({ value, label: value })) : { value: val, label: val }
 }
 
 const StyledMenuMessage = styled.div`
@@ -94,6 +86,95 @@ const enhanceScope = (scope: string) => {
   return ['public', 'private'].includes(scope) ? ['private', 'public'] : [scope, 'public']
 }
 
+const ArrayFileInput = ({
+  disabled,
+  field,
+  scope,
+  inputSpec,
+  errors,
+  setError,
+}: {
+  inputSpec: InputSpec
+  field: ControllerRenderProps<RunJobFormType, any>
+  errors: FieldErrors<Record<string, unknown>>
+  setError: UseFormSetError<RunJobFormType>
+  disabled: boolean
+  scope: string
+}) => {
+  const fileListQuery = useFetchFilesByUIDQuery(field?.value || [])
+
+  useEffect(() => {
+    if (!field.value?.length || !fileListQuery?.data?.length) return
+
+    if (field.value.length !== fileListQuery.data.length) {
+      setError(field.name, { type: 'custom', message: noAccessText.multi })
+    }
+  }, [field?.value, fileListQuery?.data])
+
+  return (
+    <>
+      <SelectMultiFileInput
+        dialogType="checkbox"
+        dialogTitle="Select input files"
+        disabled={disabled}
+        onChange={value => {
+          field.onChange(value?.map(v => v.uid) ?? null)
+          field.onBlur()
+        }}
+        value={field?.value ?? null}
+        scopes={enhanceScope(scope)}
+      />
+
+      <FieldInfo text={inputSpec.help} />
+      <ErrorMessageForField errors={errors} fieldName={field.name} />
+    </>
+  )
+}
+
+const SingleFileInput = ({
+  disabled,
+  field,
+  scope,
+  inputSpec,
+  errors,
+  setError,
+}: {
+  inputSpec: InputSpec
+  field: ControllerRenderProps<RunJobFormType, any>
+  errors: FieldErrors<Record<string, unknown>>
+  setError: UseFormSetError<RunJobFormType>
+  disabled: boolean
+  scope: string
+}) => {
+  const fileListQuery = useFetchFilesByUIDQuery([field?.value] || [])
+  const error = fileListQuery?.data?.length === 0
+
+  useEffect(() => {
+    if (error) {
+      setError(field.name, { type: 'custom', message: noAccessText.single })
+    }
+  }, [error])
+
+  return (
+    <>
+      <SelectMultiFileInput
+        dialogTitle="Select input file"
+        disabled={disabled}
+        onChange={value => {
+          field.onChange(value?.[0].uid ?? null)
+          field.onBlur()
+        }}
+        dialogType="radio"
+        value={field.value && [field.value]}
+        scopes={enhanceScope(scope)}
+      />
+
+      <FieldInfo text={inputSpec.help} />
+      <ErrorMessageForField errors={errors} fieldName={field.name} />
+    </>
+  )
+}
+
 export const JobRunInput = ({
   inputSpec,
   field,
@@ -101,12 +182,14 @@ export const JobRunInput = ({
   disabled,
   register,
   scope,
+  setError,
 }: {
   inputSpec: InputSpec
-  field: ControllerRenderProps<RunJobForm, any>
+  field: ControllerRenderProps<RunJobFormType, any>
   errors: FieldErrors<Record<string, unknown>>
   disabled: boolean
-  register: UseFormRegister<RunJobForm>
+  register: UseFormRegister<RunJobFormType>
+  setError: UseFormSetError<RunJobFormType>
   scope: string
 }) => {
   const choices = Array.isArray(inputSpec?.choices) ? inputSpec.choices : null
@@ -116,42 +199,26 @@ export const JobRunInput = ({
   switch (inputSpec.class) {
     case 'file': {
       return (
-        <>
-          <SelectMultiFileInput
-            dialogTitle="Select input file"
-            disabled={disabled}
-            onChange={value => {
-              field.onChange(value?.[0].uid ?? null)
-              field.onBlur()
-            }}
-            dialogType="radio"
-            value={field.value && [field.value]}
-            scopes={enhanceScope(scope)}
-          />
-
-          <FieldInfo text={inputSpec.help} />
-          <ErrorMessageForField errors={errors} fieldName={field.name} />
-        </>
+        <SingleFileInput
+          setError={setError}
+          disabled={disabled}
+          errors={errors}
+          field={field}
+          inputSpec={inputSpec}
+          scope={scope}
+        />
       )
     }
     case 'array:file': {
       return (
-        <>
-          <SelectMultiFileInput
-            dialogType="checkbox"
-            dialogTitle="Select input files"
-            disabled={disabled}
-            onChange={value => {
-              field.onChange(value?.map(v => v.uid) ?? null)
-              field.onBlur()
-            }}
-            value={field?.value ?? null}
-            scopes={enhanceScope(scope)}
-          />
-
-          <FieldInfo text={inputSpec.help} />
-          <ErrorMessageForField errors={errors} fieldName={field.name} />
-        </>
+        <ArrayFileInput
+          setError={setError}
+          disabled={disabled}
+          errors={errors}
+          field={field}
+          inputSpec={inputSpec}
+          scope={scope}
+        />
       )
     }
     case 'string': {
@@ -170,11 +237,7 @@ export const JobRunInput = ({
               }}
             />
           ) : (
-            <InputText
-              type="text"
-              disabled={disabled}
-              {...register(field.name)}
-            />
+            <InputText type="text" disabled={disabled} {...register(field.name)} />
           )}
           <FieldInfo text={inputSpec.help} />
           <ErrorMessageForField errors={errors} fieldName={field.name} />
@@ -218,11 +281,7 @@ export const JobRunInput = ({
               }}
             />
           ) : (
-            <InputText
-              type="text"
-              disabled={disabled}
-              {...register(field.name)}
-            />
+            <InputText type="text" disabled={disabled} {...register(field.name)} />
           )}
           <FieldInfo text={inputSpec.help} />
           <ErrorMessageForField errors={errors} fieldName={field.name} />
@@ -270,11 +329,7 @@ export const JobRunInput = ({
               }}
             />
           ) : (
-            <InputText
-              type="text"
-              disabled={disabled}
-              {...register(field.name)}
-            />
+            <InputText type="text" disabled={disabled} {...register(field.name)} />
           )}
           <FieldInfo text={inputSpec.help} />
           <ErrorMessageForField errors={errors} fieldName={field.name} />

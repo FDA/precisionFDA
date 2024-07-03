@@ -1,0 +1,15 @@
+{
+  "apps": [
+    {
+      name: "server_admin_platform_client",
+      script: "dist/apps/admin-platform-client/apps/admin-platform-client/src/index.js",
+      node_args: "--max_old_space_size=6144",
+      instances: <%= @instances %>,
+      exec_mode: "cluster",
+      watch: false,
+      log_file: "../../log/node-admin-platform-client.log",
+      error_file: "../../log/node-admin-platform-client-error.log",
+      time: true
+    }
+  ]
+}

@@ -1,6 +1,5 @@
 import React from 'react'
-import styled, { css } from 'styled-components'
-import { theme } from '../../styles/theme'
+import styled from 'styled-components'
 import { Button } from '../Button'
 import { Svg } from '../icons/Svg'
 
@@ -19,13 +18,26 @@ export const StyledAction = styled(Button)`
     padding-right: 0.4rem;
   }
 `
+
+export const ItemTitle = styled.div``
+
 export const StyledName = styled.a<{ isCurrent?: boolean }>`
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   cursor: pointer;
-  ${({ isCurrent }) => isCurrent && css`color:${theme.colors.primaryBlue};`}
-  ${Svg} {
-    padding-right: 0.8rem;
+  flex-shrink: 0;
+  white-space:normal;
+  word-break:break-all;
+  gap: 8px;
+
+  & > * {
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  ${ItemTitle} {
+    margin-top: 0;
+    flex-shrink: 1;
   }
 `
 

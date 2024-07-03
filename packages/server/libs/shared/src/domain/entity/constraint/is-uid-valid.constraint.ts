@@ -1,4 +1,3 @@
-import { EntityType } from '@shared/domain/entity/domain/entity.type'
 import { UidUtils } from '@shared/utils/uid.utils'
 import {
   registerDecorator,
@@ -9,16 +8,25 @@ import {
 } from 'class-validator'
 import { DXEnityType } from '../domain/dxid'
 
+type ConstraintOptions = {
+  entityType: DXEnityType
+  each?: boolean
+}
+
 @ValidatorConstraint({ async: true })
 class IsUidValidConstraint implements ValidatorConstraintInterface {
   async validate(value: any, args: ValidationArguments) {
-    const [entityType] = args.constraints as [DXEnityType]
+    const [options] = args.constraints as [ConstraintOptions]
 
-    return UidUtils.isValidUId(value, entityType)
+    if (options.each) {
+      return value.every((v: any) => UidUtils.isValidUId(v, options.entityType))
+    }
+    return UidUtils.isValidUId(value, options.entityType)
   }
 
   defaultMessage(args: ValidationArguments) {
-    const [entityType] = args.constraints as [EntityType]
+    const [options] = args.constraints as [ConstraintOptions]
+    const entityType = options?.entityType
     const message = 'Provided value is not a valid uid'
 
     if (entityType == null) {
@@ -29,7 +37,7 @@ class IsUidValidConstraint implements ValidatorConstraintInterface {
   }
 }
 
-export function IsValidUid(options?: EntityType, validationOptions?: ValidationOptions) {
+export function IsValidUid(options?: ConstraintOptions, validationOptions?: ValidationOptions) {
   return function (object: object, propertyName: string) {
     registerDecorator({
       name: 'isValidUid',
