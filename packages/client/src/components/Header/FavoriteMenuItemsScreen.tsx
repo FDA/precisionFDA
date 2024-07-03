@@ -65,7 +65,7 @@ const SiteNavItem = props => {
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: props.item.id })
 
   return (
-    
+
     <Item
       ref={setNodeRef}
       {...attributes}
@@ -111,7 +111,7 @@ export const FavoriteMenuItemsScreen = () => {
       setOrder(userSiteNavItemsIds)
     }
   }, [])
-  
+
   const li = getObjectsByIds(order, userSiteNavItems)
 
   const sensors = useSensors(
@@ -160,7 +160,7 @@ export const FavoriteMenuItemsScreen = () => {
                   </IconWrap>
                   <HeaderItemText>{text}</HeaderItemText>
                 </Name>
-                <FavIconWrap $selected={selFavorites.includes(i.id)}>
+                <FavIconWrap $selected={selFavorites.includes(i.id)} data-testid={'favorite-menu-star-'+id}>
                   <StarIcon height={15} />
                 </FavIconWrap>
               </SiteNavItem>
