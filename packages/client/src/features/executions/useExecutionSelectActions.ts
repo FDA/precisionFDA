@@ -86,7 +86,7 @@ export const useExecutionActions = ({
     isShown: isShownPropertiesModal,
   } = useEditPropertiesModal<IExecution>({
     type: 'job',
-    selected: selected[0],
+    selected: selected,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: resourceKeys })
     },

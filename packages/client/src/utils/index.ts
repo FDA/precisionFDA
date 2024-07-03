@@ -1,14 +1,14 @@
-import { APIResource, ServerScope } from '../features/home/types'
+import { APIResource } from '../features/home/types'
 
-export function getSpaceIdFromScope(scope?: ServerScope) {
-  if(!scope) return undefined
+export function getSpaceIdFromScope(scope?: string) {
+  if (!scope) return undefined
   const [resource, id] = scope.split('-')
-  if(resource !== 'space') return undefined
+  if (resource !== 'space') return undefined
   return parseInt(id, 10) || undefined
 }
 
 export function createSequenceGenerator() {
-  function *generator() {
+  function* generator() {
     let index = 0
     while (true) {
       yield index++

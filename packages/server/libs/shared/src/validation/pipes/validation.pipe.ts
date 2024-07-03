@@ -1,11 +1,5 @@
-import {
-  ArgumentMetadata,
-  BadRequestException,
-  Injectable,
-  ValidationPipe,
-} from '@nestjs/common'
+import { ArgumentMetadata, BadRequestException, Injectable, ValidationPipe } from '@nestjs/common'
 import { ValidationError } from '@shared/errors'
-
 
 /**
  * Custom pipe designed for use within NestJS backend.
@@ -20,7 +14,7 @@ import { ValidationError } from '@shared/errors'
  * data is validated and transformed according to the specified DTOs.
  *
  **/
- @Injectable()
+@Injectable()
 export class CustomValidationPipe extends ValidationPipe {
   async transform(value: any, metadata: ArgumentMetadata) {
     try {
@@ -31,7 +25,9 @@ export class CustomValidationPipe extends ValidationPipe {
         const response = error.getResponse()
         let message = 'Validation failed'
         if (typeof response === 'object' && 'message' in response) {
-          message = Array.isArray(response['message']) ? response['message'].join(', ') : response['message'].toString()
+          message = Array.isArray(response['message'])
+            ? response['message'].join(', ')
+            : response['message'].toString()
         }
         throw new ValidationError(message)
       }

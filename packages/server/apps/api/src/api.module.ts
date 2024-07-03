@@ -1,9 +1,9 @@
 import { MiddlewareConsumer, Module } from '@nestjs/common'
-import { APP_FILTER } from '@nestjs/core'
 import { DevtoolsModule } from '@nestjs/devtools-integration'
 import { config } from '@shared/config'
 import { DatabaseModule } from '@shared/database/database.module'
 import { UserContextModule } from '@shared/domain/user-context/user-context.module'
+import { apiExceptionFilterProviders } from '@shared/errors/filter/api-exception-filter.providers'
 import { LoggerModule } from '@shared/logger/logger.module'
 import { QueueModule } from '@shared/queue/queue.module'
 import { AccountApiModule } from './account/account.api.module'
@@ -27,9 +27,6 @@ import { NodesApiModule } from './nodes/nodes.api.module'
 import { NotificationsApiModule } from './notifications/notifications.api.module'
 import { PropertiesApiModule } from './properties/properties.api.module'
 import { ReportsApiModule } from './reports/reports.api.module'
-import { BaseErrorExceptionFilter } from './server/filter/base-error-exception.filter'
-import { DefaultExceptionFilter } from './server/filter/default-exception.filter'
-import { HttpExceptionFilter } from './server/filter/http-exception.filter'
 import { SiteSettingsApiModule } from './site-settings/site-settings.api.module'
 import { SpacesApiModule } from './spaces/spaces.api.module'
 import { TracksApiModule } from './tracks/tracks.api.module'
@@ -76,20 +73,7 @@ import { WorkflowApiModule } from './workflows/workflow.api.module'
     WorkflowApiModule,
     ReportsApiModule,
   ],
-  providers: [
-    {
-      provide: APP_FILTER,
-      useClass: DefaultExceptionFilter,
-    },
-    {
-      provide: APP_FILTER,
-      useClass: BaseErrorExceptionFilter,
-    },
-    {
-      provide: APP_FILTER,
-      useClass: HttpExceptionFilter,
-    },
-  ],
+  providers: [...apiExceptionFilterProviders],
 })
 export class ApiModule {
   configure(consumer: MiddlewareConsumer) {

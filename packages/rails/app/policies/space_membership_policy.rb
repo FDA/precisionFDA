@@ -45,16 +45,6 @@ class SpaceMembershipPolicy
       true
     end
 
-    # Checks if a user can duplicate a space.
-    # @param space [Space] A space.
-    # @param membership [SpaceMembership] User membership in a space.
-    # @return [Boolean] Returns true if user can duplicate a space, false otherwise.
-    def can_duplicate?(space, membership)
-      space.active? &&
-        membership.present? &&
-        membership.persisted? &&
-        membership.review_space_admin?
-    end
 
     # Checks if a user can accept a space.
     # @param space [Space] A space.

@@ -3,10 +3,10 @@ import { NestFactory } from '@nestjs/core'
 import { NestExpressApplication } from '@nestjs/platform-express'
 import { setupNestApp } from '@shared/app-initialization'
 import { config } from '@shared/config'
+import { CustomValidationPipe } from '@shared/validation/pipes/validation.pipe'
 import fs from 'fs'
 import { ApiModule } from './api.module'
 import { log } from './logger'
-import { CustomValidationPipe } from './validation/pipes/validation.pipe'
 import { WebsocketAdapter } from './websocket/adapter/websocket.adapter'
 
 export async function bootstrap() {
@@ -27,7 +27,7 @@ export async function bootstrap() {
   app.useBodyParser('json', { limit: '16mb' })
   await setupNestApp(app)
 
-  app.useGlobalPipes(new CustomValidationPipe({transform: true}))
+  app.useGlobalPipes(new CustomValidationPipe({ transform: true }))
   await app.listen(config.api.port)
 
   log.log(`${enableSsl ? 'HTTPS' : 'HTTP'} Server: started (port: ${config.api.port.toString()})`)

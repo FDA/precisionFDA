@@ -1,7 +1,7 @@
 import styled, { css } from 'styled-components'
 
 export const Button = styled.button.attrs(({ disabled }) => ({ 'aria-disabled': disabled ? true : undefined }))<{
-  variant?: 'primary' | 'success' | 'warning'
+  variant?: 'primary' | 'success' | 'warning' | 'link'
   disabled?: boolean
   active?: boolean
 }>`
@@ -75,6 +75,19 @@ export const Button = styled.button.attrs(({ disabled }) => ({ 'aria-disabled': 
       box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.26);
       filter: brightness(93%);
       border-color: var(--success-600);
+    }
+  }
+
+  &[variant='link'] {
+    background: none;
+    border: none;
+    box-shadow: none;
+    color: var(--c-link);
+    &:hover {
+      color: var(--c-link-hover);
+    }
+    &:active {
+      color: var(--c-link-hover);
     }
   }
 
