@@ -404,6 +404,7 @@ Rails.application.routes.draw do
           get :bulk_download, to: "files#bulk_download_content"
           get :test_streaming
           get :path_resolver
+          get :selected, to: "files#list_selected_files"
 
           post :copy
           post :bulk_download
@@ -413,7 +414,7 @@ Rails.application.routes.draw do
           post :remove
           post :cli_remove
           post :move
-
+          post "/copy/validate", to: "files#validate_copy", as: "validate_copy"
           put :feature, to: "files#invert_feature"
         end
       end

@@ -2,26 +2,22 @@ import React, { useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { Column } from 'react-table'
 import styled, { css } from 'styled-components'
-import { DiscussionIcon } from '../../components/icons/DiscussionIcon'
-import {
-  DefaultColumnFilter,
-  IdColumnFilter,
-  SelectColumnFilter,
-} from '../../components/Table/filters'
+import { DefaultColumnFilter, IdColumnFilter, SelectColumnFilter } from '../../components/Table/filters'
 import { StyledTagItem, StyledTags } from '../../components/Tags'
-import { ISpace } from './spaces.types'
-import { SpaceTypeName } from './common'
-import { UsersIcon } from '../../components/icons/UsersIcon'
-import { PrivateIcon } from '../../components/icons/PrivateIcon'
-import { CogsIcon } from '../../components/icons/Cogs'
-import { GovernmentIcon } from '../../components/icons/GovernmentIcon'
 import { AdminIcon } from '../../components/icons/AdminIcon'
-import { ProfileIcon } from '../../components/icons/ProfileIcon'
-import { FileIcon } from '../../components/icons/FileIcon'
-import { CubeIcon } from '../../components/icons/CubeIcon'
 import { BoltIcon } from '../../components/icons/BoltIcon'
-import { ProtectedIcon } from './ProtectedIcon'
+import { CogsIcon } from '../../components/icons/Cogs'
+import { CubeIcon } from '../../components/icons/CubeIcon'
+import { DiscussionIcon } from '../../components/icons/DiscussionIcon'
+import { FileIcon } from '../../components/icons/FileIcon'
+import { GovernmentIcon } from '../../components/icons/GovernmentIcon'
+import { PrivateIcon } from '../../components/icons/PrivateIcon'
+import { ProfileIcon } from '../../components/icons/ProfileIcon'
+import { UsersIcon } from '../../components/icons/UsersIcon'
 import { FdaRestrictedIcon } from './FdaRestrictedIcon'
+import { ProtectedIcon } from './ProtectedIcon'
+import { SpaceTypeName } from './common'
+import { ISpace } from './spaces.types'
 
 export const SpaceTableNameCell = styled.div`
   display: flex;
@@ -99,7 +95,7 @@ export const SpaceTableCounterItem = styled.div`
   justify-content: center;
   gap: 3px;
 `
-const findSpaceTypeIcon = (type: string) => {
+export const findSpaceTypeIcon = (type: string) => {
   switch (type) {
     case 'groups':
       return <UsersIcon />
@@ -116,13 +112,7 @@ const findSpaceTypeIcon = (type: string) => {
   }
 }
 
-export const useSpacesColumns = ({
-  colWidths,
-  isAdmin = false,
-}: {
-  colWidths?: any
-  isAdmin?: boolean
-}) =>
+export const useSpacesColumns = ({ colWidths, isAdmin = false }: { colWidths?: any; isAdmin?: boolean }) =>
   useMemo<Column<ISpace>[]>(
     () =>
       [
@@ -152,33 +142,17 @@ export const useSpacesColumns = ({
           accessor: 'name',
           width: colWidths?.name || 368,
           Filter: DefaultColumnFilter,
-          Cell: ({ row: { original }}) => (
+          Cell: ({ row: { original } }) => (
             <SpaceTableNameCell>
               <NameRow>
                 {original.protected && (
-                  <ProtectedIcon
-                    color={
-                      original.current_user_membership
-                        ? undefined
-                        : 'var(--c-text-400)'
-                    }
-                  />
+                  <ProtectedIcon color={original.current_user_membership ? undefined : 'var(--c-text-400)'} />
                 )}
                 {original.restricted_reviewer && (
-                  <FdaRestrictedIcon
-                          color={
-                              original.current_user_membership
-                                  ? undefined
-                                  : 'var(--c-text-400)'
-                          }
-                  />
+                  <FdaRestrictedIcon color={original.current_user_membership ? undefined : 'var(--c-text-400)'} />
                 )}
                 {original.current_user_membership ? (
-                  <StyledName
-                    $isAccess
-                    as={Link}
-                    to={{ pathname: `/spaces/${original.id}` }}
-                  >
+                  <StyledName $isAccess as={Link} to={{ pathname: `/spaces/${original.id}` }}>
                     {original.name}
                   </StyledName>
                 ) : (

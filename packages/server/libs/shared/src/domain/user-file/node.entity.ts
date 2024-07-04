@@ -94,4 +94,7 @@ export class Node extends BaseEntity {
 
   @ManyToOne(() => User)
   user!: Ref<User>
+
+  @Property({ hidden: true, persist: false })
+  folderPath?: string
 }

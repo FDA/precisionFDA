@@ -44,7 +44,6 @@ import {DialogActions} from '../../ui/Dialog';
 import FileInput from '../../ui/FileInput';
 import Select from '../../ui/Select';
 import TextInput from '../../ui/TextInput';
-import DataPortalResourceSelect from '../../../data-portals/resources/DataPortalResourceSelect';
 
 export type InsertInlineImagePayload = Readonly<InlineImagePayload>;
 
@@ -110,9 +109,6 @@ export function InsertInlineImageDialog({
 
   return (
     <>
-      <div style={{marginBottom: '1em'}}>
-        <DataPortalResourceSelect onSelect={setSrc} />
-      </div>
       <div style={{marginBottom: '1em'}}>
         <TextInput
           label="Alt Text"

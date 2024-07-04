@@ -49,23 +49,28 @@ const renderOptions = (app: IApp, meta: { release: string }, homeScope?: HomeSco
       header: 'location',
       value: 'location',
       link: app.links.space && `${app.links.space}/apps`,
+      dataTestId: 'app-location',
     },
     {
       header: 'name',
       value: 'name',
+      dataTestId: 'app-name',
     },
     {
       header: 'id',
       value: 'uid',
+      dataTestId: 'app-uid',
     },
     {
       header: 'added by',
       value: 'added_by_fullname',
       link: app.links.user,
+      dataTestId: 'app-added-by',
     },
     {
       header: 'created on',
       value: 'created_at_date_time',
+      dataTestId: 'app-created-on',
     },
   ]
 
@@ -74,6 +79,7 @@ const renderOptions = (app: IApp, meta: { release: string }, homeScope?: HomeSco
       header: 'Forked from',
       value: 'forked_from',
       link: `${getBasePath(spaceId)}/apps/${app.forked_from}`,
+      dataTestId: 'app-forked-from',
     })
   }
 
@@ -84,7 +90,7 @@ const renderOptions = (app: IApp, meta: { release: string }, homeScope?: HomeSco
       <MetadataKey>{e.header}</MetadataKey>
       {e.header === 'location' && !e.link ? (
         // @ts-ignore
-        <MetadataVal>
+        <MetadataVal data-testid={e.dataTestId}>
           <Link to={`/home/apps${scopeParamLink}`}>
             {/* @ts-ignore */}
             {homeScope === 'featured' ? 'Featured' : app[e.value]}
@@ -92,7 +98,7 @@ const renderOptions = (app: IApp, meta: { release: string }, homeScope?: HomeSco
         </MetadataVal>
       ) : e.link ? (
         // @ts-ignore
-        <MetadataVal>
+        <MetadataVal data-testid={e.dataTestId}>
           <Link to={e.link} target="_blank">
             {/* @ts-ignore */}
             {app[e.value]}
@@ -100,7 +106,7 @@ const renderOptions = (app: IApp, meta: { release: string }, homeScope?: HomeSco
         </MetadataVal>
       ) : (
         // @ts-ignore
-        <MetadataVal>{app[e.value]}</MetadataVal>
+        <MetadataVal data-testid={e.dataTestId}>{app[e.value]}</MetadataVal>
       )}
     </MetadataItem>
   ))
@@ -111,7 +117,7 @@ const renderOptions = (app: IApp, meta: { release: string }, homeScope?: HomeSco
         {list}
         <MetadataItem>
           <MetadataKey>Ubuntu Release</MetadataKey>
-          <MetadataVal>{meta.release}</MetadataVal>
+          <MetadataVal data-testid="app-ubuntu-release">{meta.release}</MetadataVal>
         </MetadataItem>
       </MetadataRow>
     </MetadataSection>
@@ -209,16 +215,15 @@ export const AppsShow = ({ spaceId, emitScope, homeScope }: { homeScope?: HomeSc
 
   return (
     <>
-      <StyledBackLink linkTo={backPath}>
+      <StyledBackLink linkTo={backPath} data-testid="app-back-link">
         Back to Apps
       </StyledBackLink>
       <Topbox>
         <Header>
           <HeaderLeft>
-            <Title
-              data-testid="app-title">
+            <Title>
               <CubeIcon height={20} />
-              &nbsp;{appTitle}
+              &nbsp;<span data-testid="app-title">{appTitle}</span>
               {meta.comparator && (
                 <HomeLabel
                   value="Comparator"
@@ -267,9 +272,9 @@ export const AppsShow = ({ spaceId, emitScope, homeScope }: { homeScope?: HomeSc
             <MetadataRow>
               <MetadataItem>
                 <MetadataKey>Tags</MetadataKey>
-                <StyledTags>
+                <StyledTags data-testid="tags-container">
                   {app.tags.map(tag => (
-                    <StyledTagItem key={tag}>{tag}</StyledTagItem>
+                    <StyledTagItem data-testid="app-tag-item" key={tag}>{tag}</StyledTagItem>
                   ))}
                 </StyledTags>
               </MetadataItem>
@@ -281,11 +286,11 @@ export const AppsShow = ({ spaceId, emitScope, homeScope }: { homeScope?: HomeSc
             <MetadataRow>
               <MetadataItem>
                   <MetadataKey>Properties</MetadataKey>
-                    <StyledTags>
+                    <StyledTags data-testid="properties-container">
                       {Object.entries(app.properties).map(([key, value]) => (
                         <StyledPropertyItem key={key}>
-                          <StyledPropertyKey>{key}</StyledPropertyKey>
-                          <span>{value}</span>
+                          <StyledPropertyKey data-testid="app-property-key">{key}</StyledPropertyKey>
+                          <span data-testid={`app-property-value-${key}`}>{value}</span>
                         </StyledPropertyItem>
                       ))}
                     </StyledTags>
@@ -296,13 +301,13 @@ export const AppsShow = ({ spaceId, emitScope, homeScope }: { homeScope?: HomeSc
       </Topbox>
 
       <StyledTabList>
-        <StyledTab activeClassName="active" end to={{ pathname: `${basePath}/apps/${app.uid}`, state: location.state }}>
+        <StyledTab activeClassName="active" end to={{ pathname: `${basePath}/apps/${app.uid}`, state: location.state }} data-testid="app-show-tab-spec">
           Spec
         </StyledTab>
-        <StyledTab activeClassName="active" to={{ pathname: `${basePath}/apps/${app.uid}/jobs`, state: location.state }}>
+        <StyledTab activeClassName="active" to={{ pathname: `${basePath}/apps/${app.uid}/jobs`, state: location.state }} data-testid="app-show-tab-executions">
           Executions ({meta.accessible_jobs_count})
         </StyledTab>
-        <StyledTab activeClassName="active" to={{ pathname: `${basePath}/apps/${app.uid}/readme`, state: location.state }}>
+        <StyledTab activeClassName="active" to={{ pathname: `${basePath}/apps/${app.uid}/readme`, state: location.state }} data-testid="app-show-tab-readme">
           Readme
         </StyledTab>
       </StyledTabList>

@@ -196,6 +196,7 @@ jobs:
           make test-shared
           make test-worker
           make test-api
+          make test-admin-platform-client
         working-directory: ./packages/server
       - name: Test production build
         run: pnpm run build

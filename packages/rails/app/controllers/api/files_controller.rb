@@ -349,6 +349,7 @@ module Api
       NodeCopyWorker.perform_async(
         params[:scope],
         nodes.pluck(:id),
+        params[:folder_id] || nil,
         session_auth_params,
       )
 
@@ -685,6 +686,24 @@ module Api
       render json: { count: response }
     rescue HttpsAppsClient::Error => e
       raise ApiError, e.message
+    end
+
+    # GET /api/files/selected
+    # Returns a list of files and files in folders by selected node ids.
+    # @param ids [Array of Strings] - selected node ids
+    def list_selected_files
+      response = https_apps_client.list_selected_files(unsafe_params[:ids])
+      render json: response
+    end
+
+    # POST /api/files/copy/validate
+    # Validate copying of selected files to target scope.
+    # A file can only exist once in scope, so we need to check if the file is already there.
+    # @param uids [Array of Strings] - uids of files to be copied
+    # @param scope [String] - target scope
+    def validate_copy
+      response = https_apps_client.validate_copy(unsafe_params[:uids], unsafe_params[:scope])
+      render json: response
     end
 
     # Overridden version: it accepts not only file-uids, but also folder id.

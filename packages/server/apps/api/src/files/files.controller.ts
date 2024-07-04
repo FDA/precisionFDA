@@ -1,4 +1,5 @@
 import {
+  Body,
   Controller,
   Get,
   Header,
@@ -6,6 +7,7 @@ import {
   Param,
   ParseArrayPipe,
   Patch,
+  Post,
   Query,
   Res,
   UseGuards,
@@ -15,14 +17,15 @@ import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { ResolvePathDTO } from '@shared/domain/user-file/dto/user-file.dto'
 import { UserFileService } from '@shared/domain/user-file/service/user-file.service'
 import { createCloseFileJobTask } from '@shared/queue'
+import { CustomValidationPipe } from '@shared/validation/pipes/validation.pipe'
 import archiver from 'archiver'
 import axios from 'axios'
 import { Response } from 'express'
 import { UserFileResolverFacade } from '../facade/user-file/user-file-resolver.facade'
 import { UserContextGuard } from '../user-context/guard/user-context.guard'
 import { OptionalParseIntPipe } from '../validation/pipes/optional-int.pipe'
-import { CustomValidationPipe } from '../validation/pipes/validation.pipe'
 import { DownloadLinkParamDto } from './model/download-link-param.dto'
+import { FilesValidateCopyingBodyDto } from './model/file-validate-copying-body.dto'
 
 @UseGuards(UserContextGuard)
 @Controller('/files')
@@ -112,5 +115,17 @@ export class FilesController {
   @Get('/:uid/download-link')
   getDownloadLink(@Param() params: DownloadLinkParamDto, @Query() query: DownloadLinkOptionsDto) {
     return this.userFileService.getDownloadLinkForUid(params.uid, query)
+  }
+
+  @Get('/selected')
+  async getSelectedFiles(
+    @Query('ids', new ParseArrayPipe({ items: Number, separator: ',' })) ids: number[],
+  ) {
+    return this.userFileService.listSelectedFiles(ids)
+  }
+
+  @Post('/copy/validate')
+  async validateCopyFiles(@Body() body: FilesValidateCopyingBodyDto) {
+    return this.userFileService.validateCopyFiles(body.uids, body.scope)
   }
 }

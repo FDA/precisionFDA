@@ -15,7 +15,7 @@ import {
   FileStateResult,
   JobOutput,
 } from '../../platform-client/platform-client.responses'
-import type { UserCtx } from '../../types'
+import { UserCtx } from '../../types'
 import * as errors from '../../errors'
 import { getIdFromScopeName, scopeContainsId } from '../space/space.helper'
 import { SPACE_EVENT_ACTIVITY_TYPE } from '../space-event/space-event.enum'
@@ -23,6 +23,9 @@ import { JobRepository } from './job.repository'
 import { UserRepository } from '../user/user.repository'
 import { FolderService } from '../user-file/folder.service'
 import { SpaceEventService } from '@shared/domain/space-event/space-event.service'
+import { Space } from '@shared/domain/space/space.entity'
+import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
+import { EmailProcessOperation } from '@shared/domain/email/ops/email-process'
 import { createSyncJobStatusTask, getMainQueue } from '@shared/queue'
 import { SyncJobOperation } from '@shared/domain/job/ops/synchronize'
 import { buildIsOverMaxDuration } from '@shared/domain/job/job.helper'
@@ -218,16 +221,26 @@ export class JobService {
 
       if (scopeContainsId(job.scope)) {
         // TODO temporarily before we move to Service model
+        const emailProcessOperation = new EmailProcessOperation({
+          log: logger,
+          user: { id: userId } as UserCtx,
+          em: this.em as SqlEntityManager,
+        })
         const spaceService = new SpaceEventService(
-          this.em as SqlEntityManager,
           { id: userId } as UserCtx,
+          this.em as SqlEntityManager,
+          this.em.getRepository(Space),
+          this.em.getRepository(User),
+          this.em.getRepository(SpaceMembership),
+          emailProcessOperation,
         )
-        await spaceService.createSpaceEvent({
+        const spaceEvent = await spaceService.createSpaceEvent({
           entity: { type: 'job', value: job },
           spaceId: getIdFromScopeName(job.scope),
           userId,
           activityType: SPACE_EVENT_ACTIVITY_TYPE.job_completed,
         })
+        await spaceService.sendNotificationForEvent(spaceEvent)
       }
 
       await this.createNotification(jobDxId, userId)

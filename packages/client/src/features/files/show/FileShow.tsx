@@ -1,22 +1,18 @@
-import React from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { parse } from 'query-string'
+import React from 'react'
 import { Link, useLocation, useParams } from 'react-router-dom'
 import Dropdown from '../../../components/Dropdown'
 import { HomeLabel } from '../../../components/HomeLabel'
-import { FileIcon } from '../../../components/icons/FileIcon'
+import { Filler } from '../../../components/Page/styles'
 import { ITab, TabsSwitch } from '../../../components/TabsSwitch'
-import {
-  StyledTagItem,
-  StyledTags,
-  StyledPropertyItem,
-  StyledPropertyKey,
-} from '../../../components/Tags'
+import { StyledPropertyItem, StyledPropertyKey, StyledTagItem, StyledTags } from '../../../components/Tags'
+import { FileIcon } from '../../../components/icons/FileIcon'
+import { LockIcon } from '../../../components/icons/LockIcon'
+import { theme } from '../../../styles/theme'
 import { getBackPathNext } from '../../../utils/getBackPath'
-import { ISpace } from '../../spaces/spaces.types'
 import { ActionsDropdownContent } from '../../home/ActionDropdownContent'
 import { StyledBackLink } from '../../home/home.styles'
-import { License } from '../../licenses/License'
 import {
   ActionsButton,
   Header,
@@ -33,13 +29,12 @@ import {
   Topbox,
 } from '../../home/show.styles'
 import { EmmitScope, HomeScope } from '../../home/types'
+import { License } from '../../licenses/License'
+import { ISpace } from '../../spaces/spaces.types'
 import { fetchFile } from '../files.api'
 import { IFile } from '../files.types'
 import { useFilesSelectActions } from '../useFilesSelectActions'
 import { FileDescription } from './styles'
-import { Filler } from '../../../components/Page/styles'
-import { LockIcon } from '../../../components/icons/LockIcon'
-import { theme } from '../../../styles/theme'
 
 const FileActions = ({
   homeScope,
@@ -62,13 +57,8 @@ const FileActions = ({
 
   return (
     <>
-      <Dropdown
-        trigger="click"
-        content={<ActionsDropdownContent actions={actions}/>}
-      >
-        {dropdownProps => (
-          <ActionsButton {...dropdownProps} active={dropdownProps.isActive}/>
-        )}
+      <Dropdown trigger="click" content={<ActionsDropdownContent actions={actions} />}>
+        {dropdownProps => <ActionsButton {...dropdownProps} active={dropdownProps.isActive} />}
       </Dropdown>
       {actions['Open']?.modal}
       {actions['Download']?.modal}
@@ -76,8 +66,7 @@ const FileActions = ({
       {actions['Edit folder info']?.modal}
       {actions['Delete']?.modal}
       {actions['Organize']?.modal}
-      {actions['Copy to space']?.modal}
-      {actions['Copy to My Home (private)']?.modal}
+      {actions['Copy to...']?.modal}
       {actions['Attach to...']?.modal}
       {actions['Attach License']?.modal}
       {actions['Detach License']?.modal}
@@ -90,20 +79,16 @@ const FileActions = ({
   )
 }
 
-
-export const FileShow = ({ emitScope, space, homeScope }: {
-  homeScope?: HomeScope,
-  emitScope?: EmmitScope,
-  space?: ISpace
-}) => {
+export const FileShow = ({ emitScope, space, homeScope }: { homeScope?: HomeScope; emitScope?: EmmitScope; space?: ISpace }) => {
   const location = useLocation()
   const { fileId } = useParams<{ fileId: string }>()
   const { data, isLoading } = useQuery({
     queryKey: ['file', fileId],
-    queryFn: () => fetchFile(fileId).then(d => {
-      if (emitScope) emitScope(d.files.scope, d.files.featured)
-      return d
-    }),
+    queryFn: () =>
+      fetchFile(fileId).then(d => {
+        if (emitScope) emitScope(d.files.scope, d.files.featured)
+        return d
+      }),
   })
   const file = data?.files
   const meta = data?.meta
@@ -111,7 +96,7 @@ export const FileShow = ({ emitScope, space, homeScope }: {
   const folderId = params?.folder_id as string | undefined
 
   if (isLoading) {
-    return <HomeLoader/>
+    return <HomeLoader />
   }
 
   if (!file || !file.id)
@@ -125,9 +110,7 @@ export const FileShow = ({ emitScope, space, homeScope }: {
   const tabsConfig = [
     {
       header: `License: ${meta.object_license && meta.object_license.title}`,
-      tab: (
-        <License license={meta.object_license} link={file.links.show_license}/>
-      ),
+      tab: <License license={meta.object_license} link={file.links.show_license} />,
       hide: !meta.object_license || !meta.object_license.uid,
     },
   ] as ITab[]
@@ -137,40 +120,33 @@ export const FileShow = ({ emitScope, space, homeScope }: {
 
   return (
     <>
-      <StyledBackLink linkTo={backPath}>
+      <StyledBackLink linkTo={backPath} data-testid="file-back-link">
         Back to Files
       </StyledBackLink>
       <Topbox>
         <Header>
           <HeaderLeft>
             <Title>
-              <FileIcon height={22}/>
-              &nbsp;{file.name}
+              <FileIcon height={22} />
+              &nbsp;<span data-testid="file-name">{file.name}</span>
               {file.show_license_pending && (
-                <HomeLabel
-                  value="License Pending Approval"
-                  icon="fa-clock-o"
-                  type="warning"
-                  className=""
-                  state={file.state}
-                />
+                <HomeLabel value="License Pending Approval" icon="fa-clock-o" type="warning" className="" state={file.state} />
               )}
             </Title>
           </HeaderLeft>
           <div>
-            <FileActions homeScope={homeScope} space={space} file={file} folderId={folderId}/>
+            <FileActions homeScope={homeScope} space={space} file={file} folderId={folderId} />
           </div>
         </Header>
 
-        <FileDescription>
-          {file.locked && <LockedRow>
-              <LockIcon height={14} color={theme.colors.darkYellow}/>
+        <FileDescription data-testid="file-description">
+          {file.locked && (
+            <LockedRow data-testid="file-locked">
+              <LockIcon height={14} color={theme.colors.darkYellow} />
               File is locked
-          </LockedRow>
-          }
-          {file.description
-            ? file.description
-            : 'No description provided.'}
+            </LockedRow>
+          )}
+          {file.description ? file.description : 'No description provided.'}
         </FileDescription>
 
         <MetadataSection>
@@ -183,9 +159,7 @@ export const FileShow = ({ emitScope, space, homeScope }: {
                     {file.location}
                   </Link>
                 ) : (
-                  <Link to={`/home/files${scopeParamLink}`}>
-                    {homeScope === 'featured' ? 'Featured' : file.location}
-                  </Link>
+                  <Link to={`/home/files${scopeParamLink}`}>{homeScope === 'featured' ? 'Featured' : file.location}</Link>
                 )}
               </MetadataVal>
             </MetadataItem>
@@ -197,7 +171,7 @@ export const FileShow = ({ emitScope, space, homeScope }: {
 
             <MetadataItem>
               <MetadataKey>Added By</MetadataKey>
-              <MetadataVal>
+              <MetadataVal data-testid="file-added-by">
                 <Link target="_blank" to={file.links.user!}>
                   {file.added_by}
                 </Link>
@@ -207,21 +181,13 @@ export const FileShow = ({ emitScope, space, homeScope }: {
             <MetadataItem>
               <MetadataKey>Origin</MetadataKey>
               <MetadataVal data-testid="file-origin">
-                {file.links?.origin_object?.origin_type === 'Job' ||
-                file.links?.origin_object?.origin_type === 'Comparison' ? (
-                  <Link
-                    target="_blank"
-                    to={`/home/executions/${file.links.origin_object.origin_uid}`}
-                  >
+                {file.links?.origin_object?.origin_type === 'Job' || file.links?.origin_object?.origin_type === 'Comparison' ? (
+                  <Link target="_blank" to={`/home/executions/${file.links.origin_object.origin_uid}`}>
                     {/* @ts-ignore */}
                     {file.origin?.text}
                   </Link>
                 ) : (
-                  <>
-                    {typeof file.origin === 'object'
-                      ? file.origin.text
-                      : file.origin}
-                  </>
+                  <>{typeof file.origin === 'object' ? file.origin.text : file.origin}</>
                 )}
               </MetadataVal>
             </MetadataItem>
@@ -233,7 +199,7 @@ export const FileShow = ({ emitScope, space, homeScope }: {
 
             <MetadataItem>
               <MetadataKey>Created On</MetadataKey>
-              <MetadataVal>{file.created_at_date_time}</MetadataVal>
+              <MetadataVal data-testid="file-created-on">{file.created_at_date_time}</MetadataVal>
             </MetadataItem>
           </MetadataRow>
         </MetadataSection>
@@ -242,9 +208,11 @@ export const FileShow = ({ emitScope, space, homeScope }: {
             <MetadataRow>
               <MetadataItem>
                 <MetadataKey>Tags</MetadataKey>
-                <StyledTags>
+                <StyledTags data-testid="tags-container">
                   {file.tags.map(tag => (
-                    <StyledTagItem data-testid="file-tag-item" key={tag}>{tag}</StyledTagItem>
+                    <StyledTagItem data-testid="file-tag-item" key={tag}>
+                      {tag}
+                    </StyledTagItem>
                   ))}
                 </StyledTags>
               </MetadataItem>
@@ -256,11 +224,11 @@ export const FileShow = ({ emitScope, space, homeScope }: {
             <MetadataRow>
               <MetadataItem>
                 <MetadataKey>Properties</MetadataKey>
-                <StyledTags>
+                <StyledTags data-testid="properties-container">
                   {Object.entries(file.properties).map(([key, value]) => (
                     <StyledPropertyItem key={key}>
-                      <StyledPropertyKey>{key}</StyledPropertyKey>
-                      <span>{value}</span>
+                      <StyledPropertyKey data-testid="file-property-key">{key}</StyledPropertyKey>
+                      <span data-testid={`file-property-value-${key}`}>{value}</span>
                     </StyledPropertyItem>
                   ))}
                 </StyledTags>
@@ -270,8 +238,8 @@ export const FileShow = ({ emitScope, space, homeScope }: {
         )}
       </Topbox>
 
-      <Filler $size={40}/>
-      <TabsSwitch tabsConfig={tabsConfig}/>
+      <Filler $size={40} />
+      <TabsSwitch tabsConfig={tabsConfig} />
     </>
   )
 }
