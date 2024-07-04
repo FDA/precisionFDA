@@ -66,6 +66,8 @@ export const RightSideScroll = styled.div`
   flex-direction: column;
   gap: 16px;
   border-right: 1px solid var(--c-layout-border-200);
+  flex: 1 0 auto;
+  max-width: 330px;
 
   ${RightSideItem}:last-child {
     border-bottom: 0;
@@ -137,14 +139,18 @@ export const PageRow = styled.div`
     }
   }
 `
+export const ListItem = styled(Link)``
 
 export const RightList = styled.div`
   display: flex;
   flex-wrap: wrap;
   gap: 16px;
   padding-left: 12px;
+
+  ${ListItem} {
+    cursor: pointer;
+  }
 `
-export const ListItem = styled(Link)``
 export const Container = styled.div`
   margin-inline: auto;
   width: min(100% - 32px, 1100px);

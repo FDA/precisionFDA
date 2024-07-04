@@ -35,6 +35,15 @@
       "compilerOptions": {
         "tsConfigPath": "libs/shared/tsconfig.lib.json"
       }
+    },
+    "admin-platform-client": {
+      "type": "application",
+      "root": "apps/admin-platform-client",
+      "entryFile": "index",
+      "sourceRoot": "apps/admin-platform-client/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/admin-platform-client/tsconfig.app.json"
+      }
     }
   }
 }

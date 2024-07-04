@@ -52,6 +52,10 @@ services:
     extends:
       file: ./base.services.yml
       service: nodejs-worker
+  nodejs-admin-platform-client:
+    extends:
+      file: ./base.services.yml
+      service: nodejs-admin-platform-client
   db:
     platform: linux/arm64
     extends:

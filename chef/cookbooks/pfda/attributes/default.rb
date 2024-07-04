@@ -29,6 +29,7 @@ default[:mysql_rds_sslca_path] = "/etc/ssl/certs/global-bundle.pem"
 default[:nginx][:log_dir] = "/var/log/nginx"
 
 default["nodejs"]["worker"]["instances"] = 2
+default["nodejs"]["admin-platform-client"]["instances"] = 2
 
 default[:logrotate][:period] = "daily"
 default[:logrotate][:retention] = 30

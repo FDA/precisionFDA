@@ -1,16 +1,18 @@
 import { Meta, StoryObj } from '@storybook/react'
 import React, { useEffect } from 'react'
+import { StorybookProviders } from '../../stories/StorybookProviders'
+import { WithListData } from '../../stories/helpers'
+import { ServerScope } from '../home/types'
+import { useAttachLicensesModal } from '../licenses/useAttachLicensesModal'
 import { useAddFolderModal } from './actionModals/useAddFolderModal'
+import { useCopyFilesModal } from './actionModals/useCopyFilesModal'
 import { useCopyFilesToSpaceModal } from './actionModals/useCopyFilesToSpaceModal'
 import { useDownloadFileModal } from './actionModals/useDownloadFileModal'
 import { useEditFileModal } from './actionModals/useEditFileModal'
 import { useFileUploadModal } from './actionModals/useFileUploadModal'
+import { useOpenFileModal } from './actionModals/useOpenFileModal'
 import { fetchFiles } from './files.api'
 import { IFile } from './files.types'
-import { useAttachLicensesModal } from '../licenses/useAttachLicensesModal'
-import { WithListData } from '../../stories/helpers'
-import { StorybookProviders } from '../../stories/StorybookProviders'
-import { useOpenFileModal } from './actionModals/useOpenFileModal'
 
 const meta: Meta = {
   title: 'Modals/Files',
@@ -74,7 +76,7 @@ export const CopyFilesModal: Story = {
 }
 
 const DownloadFileModalWrapper = ({ data }: any) => {
-  const { modalComp, setShowModal } = useDownloadFileModal(data?.files)
+  const { modalComp, setShowModal } = useDownloadFileModal(data?.files, 'private')
   useEffect(() => {
     setShowModal(true)
   }, [])
@@ -137,6 +139,18 @@ export const OpenFilesModal: Story = {
       {({ data }) => <OpenFilesModalWrapper data={data} />}
     </WithListData>
   ),
+}
+
+const ValidateCopiedFilesModalWrapper = ({ ignoreScope, ids }: { ignoreScope: ServerScope[]; ids: number[] }) => {
+  const { modalComp, setShowModal } = useCopyFilesModal({ ignoreScope, ids })
+  useEffect(() => {
+    setShowModal(true)
+  }, [])
+  return modalComp
+}
+
+export const ValidateCopiedFilesModal: Story = {
+  render: () => <ValidateCopiedFilesModalWrapper ignoreScope={[]} ids={[1, 2]} />,
 }
 
 export default meta

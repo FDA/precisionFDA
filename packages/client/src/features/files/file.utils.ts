@@ -16,3 +16,8 @@ export function findById(tree: DataNode[], nodeId: React.Key): DataNode | null {
   }
   return null
 }
+
+export const noAccessText = {
+  multi: 'One or more files are not accessible',
+  single: 'This file is not accessible',
+}

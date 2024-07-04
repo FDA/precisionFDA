@@ -49,7 +49,6 @@ export const SelectMultiFileInput = ({
   disabled,
   isError,
 }: Props) => {
-
   const handleSelect = (sF: IAccessibleFile[]) => {
     onChange(sF)
   }

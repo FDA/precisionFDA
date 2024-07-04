@@ -1,9 +1,9 @@
 import axios from 'axios'
 import { checkStatus, getApiRequestOpts } from '../../utils/api'
 import { cleanObject } from '../../utils/object'
-import { DownloadListResponse, IFilter, IMeta, HomeScope } from '../home/types'
-import { formatScopeQ, Params, prepareListFetch } from '../home/utils'
-import { IFile } from './files.types'
+import { DownloadListResponse, HomeScope, IFilter, IMeta, ServerScope } from '../home/types'
+import { Params, formatScopeQ, prepareListFetch } from '../home/utils'
+import { IExistingFileSet, IFile, IFolder, SelectedNode } from './files.types'
 
 export interface FetchFilesQuery {
   files: IFile[]
@@ -88,15 +88,14 @@ export async function featureFileRequest({ ids, uids, featured }: { ids: string[
   return res.json()
 }
 
-export async function copyFilesRequest(scope: string, ids: string[]) {
-  const item_ids = ids.map(id => parseInt(id, 10))
-  return axios.post('/api/files/copy', { item_ids, scope }).then(r => r.data)
+export async function copyFilesRequest(scope: string, ids: number[], folderId?: number) {
+  return axios.post('/api/files/copy', { item_ids: ids, scope, folder_id: folderId }).then(r => r.data)
 }
 
 export async function editFileRequest({ name, description, fileId }: { name: string; description: string; fileId: string }) {
   const res = await fetch(`/api/files/${fileId}`, {
     ...getApiRequestOpts('PUT'),
-    body: JSON.stringify({ file: { name, description }}),
+    body: JSON.stringify({ file: { name, description } }),
   }).then(checkStatus)
   return res.json()
 }
@@ -120,7 +119,7 @@ export async function uploadFilesRequest(blobs: any[]) {
 }
 
 export interface FetchFolderChildrenResponse {
-  nodes: IFile[]
+  nodes: IFile[] | IFolder[]
 }
 
 export const fetchFolderChildren = async (scope?: 'private' | 'public', spaceId?: string | number, folderId?: string) => {
@@ -157,10 +156,6 @@ export async function createFile(name: string, scope: string, folder_id: string 
   return res.json()
 }
 
-export async function copyFilesToPrivate(ids: number[]) {
-  return axios.post('/api/files/copy', { item_ids: ids, scope: 'private' }).then(r => r.data)
-}
-
 export async function getUploadURL(id: string, index: number, size: number, md5: string) {
   const res = await fetch('/api/get_upload_url', {
     ...getApiRequestOpts('POST'),
@@ -184,4 +179,17 @@ export async function closeFile(uid: string) {
     body: JSON.stringify({ uid }),
   }).then(checkStatus)
   return res.json()
+}
+
+export async function fetchSelectedFiles(ids: number[]): Promise<SelectedNode[]> {
+  return axios.get('/api/files/selected', { params: { ids: ids.join(',') } }).then(r => r.data)
+}
+
+export async function validateCopyingFiles(uids: string[], scope: ServerScope): Promise<IExistingFileSet> {
+  return axios
+    .post('/api/files/copy/validate', {
+      uids,
+      scope,
+    })
+    .then(r => r.data)
 }

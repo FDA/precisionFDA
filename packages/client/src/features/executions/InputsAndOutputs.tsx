@@ -45,7 +45,7 @@ const StyledTable = styled.div`
 `
 
 
-const Table = ({ title, config }: { title: string; config: any[] }) => {
+const Table = ({ title, config, dataTestId }: { title: string; config: any[], dataTestId: string }) => {
   const list = config.map((e, i) => {
     const classes = classNames({
       row: true,
@@ -76,7 +76,7 @@ const Table = ({ title, config }: { title: string; config: any[] }) => {
   })
 
   return (
-    <StyledTable>
+    <StyledTable data-testid={dataTestId}>
       <div className="title">{title}</div>
       <StyledGrid>{list}</StyledGrid>
     </StyledTable>
@@ -118,8 +118,8 @@ export const InputsAndOutputs = ({
 
   return (
     <StyledInputsAndOutputs>
-      <Table title="inputs" config={inputConfig} />
-      <Table title="outputs" config={outputConfig} />
+      <Table title="inputs" config={inputConfig} dataTestId="execution-inputs" />
+      <Table title="outputs" config={outputConfig} dataTestId="execution-outputs" />
     </StyledInputsAndOutputs>
   )
 }

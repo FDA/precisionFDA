@@ -49,11 +49,19 @@ module OrgService
 
       @auth_api.org_update_billing_info(dxorg, BILLING_INFO, autoConfirm: BILLING_CONFIRMATION)
 
-      @auth_api.user_new(username: username,
-                         email: email,
-                         first: first_name,
-                         last: last_name,
-                         billTo: ORG_EVERYONE)
+      params = {
+        username: username,
+        email: email,
+        first: first_name,
+        last: last_name,
+        billTo: ORG_EVERYONE
+      }
+
+      if User.government_email?(email)
+        params[:pfdasso] = true
+      end
+
+      @auth_api.user_new(params)
 
       @admin_api.org_invite(dxorg, dxuserid,
                             level: DNAnexusAPI::ORG_MEMBERSHIP_ADMIN,

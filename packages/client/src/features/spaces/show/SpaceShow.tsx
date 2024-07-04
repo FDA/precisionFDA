@@ -104,11 +104,6 @@ const Spaces2 = ({ space, isLoading }: { space: ISpace; isLoading: boolean }) =>
                 Space Settings
               </ActionButton>
             )}
-            {!spaceActions['Duplicate Space']?.shouldHide && (
-              <ActionButton data-testid="duplicate-space-button" onClick={() => navigate(`/spaces/${space.id}/duplicate`)}>
-                Duplicate Space
-              </ActionButton>
-            )}
             {!spaceActions['Fix Permissions']?.shouldHide && (
               <ActionButton data-testid="fix-space-button" onClick={() => fixSpaceMutation.mutate({ id: space.id })}>
                 Fix Guest Side Permissions

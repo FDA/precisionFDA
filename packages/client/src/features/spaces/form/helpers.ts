@@ -42,7 +42,7 @@ export const SPACE_TYPE_HINT: Record<ISpace['type'], string> = {
 }
 
 export const validationSchema = Yup.object().shape({
-  space_type: Yup.string().required('Engine required'),
+  space_type: Yup.string().required('Space type required'),
   name: Yup.string().required('Name required'),
   description: Yup.string().required('Description required'),
   guest_lead_dxuser: Yup.string()
@@ -76,4 +76,16 @@ export const validationSchema = Yup.object().shape({
       then: Yup.string().nullable(),
     }),
   protected: Yup.boolean().nullable(),
+})
+
+export const editValidationSchema = Yup.object().shape({
+  space_type: Yup.string().required('Space type required'),
+  name: Yup.string().required('Name required'),
+  description: Yup.string().required('Description required'),
+  cts: Yup.string()
+    .nullable()
+    .when('space_type', {
+      is: (space_type: string) => space_type === 'review',
+      then: Yup.string().nullable(),
+    }),
 })

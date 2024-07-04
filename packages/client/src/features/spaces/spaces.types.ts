@@ -98,7 +98,6 @@ export interface ISpace {
   guest_lead?: GuestLead;
   private_space_id?: string;
   shared_space_id?: string;
-  can_duplicate?: boolean;
   confidential_space?: ConfidentialSpace | null;
   restricted_reviewer?: boolean | null;
 }

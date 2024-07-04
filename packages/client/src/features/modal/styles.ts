@@ -1,8 +1,8 @@
 import styled, { css } from 'styled-components'
-import { compactScrollBar } from '../../components/Page/styles'
+import { TransparentButton } from '../../components/Button'
+import { compactScrollBar, compactScrollBarV2 } from '../../components/Page/styles'
 import { Svg } from '../../components/icons/Svg'
 import { fontSize, fontWeight, sizing } from '../../styles/theme'
-import { TransparentButton } from '../../components/Button'
 
 export const Wrapper = styled.div`
   position: fixed;
@@ -15,10 +15,12 @@ export const Wrapper = styled.div`
   min-width: 400px;
   max-height: max(100% - 232px, 90%);
 `
-export const Backdrop = styled.div<{ $blur: boolean }>`
-  ${({ $blur }) => $blur && css`
-    backdrop-filter: blur(8px);
-  `}
+export const Backdrop = styled.div<{ $blur: boolean; $backdropZIndex?: number }>`
+  ${({ $blur }) =>
+    $blur &&
+    css`
+      backdrop-filter: blur(8px);
+    `}
   position: fixed;
   width: 100%;
   height: 100%;
@@ -26,6 +28,11 @@ export const Backdrop = styled.div<{ $blur: boolean }>`
   left: 0;
   background: rgba(0, 0, 0, 0.3);
   z-index: 500;
+  ${({ $backdropZIndex }) =>
+    $backdropZIndex &&
+    css`
+      z-index: ${$backdropZIndex};
+    `}
 `
 export const StyledModal = styled.div`
   --modal-padding-LR: 1.5rem;
@@ -49,8 +56,7 @@ export const StyledModal = styled.div`
     border-color: grey;
   }
 `
-export const Header = styled.div`
-`
+export const Header = styled.div``
 export const HeaderTop = styled.div`
   border-radius: ${sizing.modalBorderRadius} ${sizing.modalBorderRadius} 0 0;
   display: flex;
@@ -104,6 +110,20 @@ export const Content = styled.div<{ $overflowContent?: boolean }>`
   margin: 24px;
 `
 
+export const StyledHeading = styled.div`
+  font-weight: bolder;
+  font-size: 16px;
+  padding: 8px 12px;
+  display: flex;
+  justify-content: space-between;
+`
+
+export const Sticky = styled.div`
+  position: sticky;
+  top: 0;
+  background-color: var(--background);
+`
+
 export const StyledForm = styled.form`
   display: flex;
   flex-direction: column;
@@ -125,3 +145,34 @@ export const StyledModalContent = styled.div`
   max-width: 600px;
 `
 
+export const ModalLoaderWrapper = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+`
+
+export const ScrollPlace = styled.div`
+  ${compactScrollBarV2}
+  overflow-y: auto;
+  max-height: 50vh;
+  min-height: 50vh;
+`
+
+export const ModalPageRow = styled.div`
+  display: grid;
+  grid-template-columns: auto auto;
+`
+
+export const ModalPageCol = styled.div`
+  flex-grow: 1;
+  flex-shrink: 0;
+  align-self: stretch;
+  min-width: 350px;
+  width: 40vw;
+  height: 100%;
+  border-right: 1px solid var(--c-layout-border-200);
+  &:last-child {
+    border: 0;
+  }
+`
