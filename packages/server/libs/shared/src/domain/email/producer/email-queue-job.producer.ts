@@ -1,12 +1,12 @@
 import { InjectQueue } from '@nestjs/bull'
 import { Injectable } from '@nestjs/common'
 import { config } from '@shared/config'
-import { EmailSendOperation } from '@shared/domain/email/ops/email-send'
 import { QueueJobProducer } from '@shared/queue/queue-job.producer'
 import { SendEmailJob, TASK_TYPE } from '@shared/queue/task.input'
 import { UserCtx } from '@shared/types'
 import { TimeUtils } from '@shared/utils/time.utils'
 import { JobOptions, Queue } from 'bull'
+import { getBullJobIdForEmailOperation } from '@shared/domain/email/email.helper'
 
 @Injectable()
 export class EmailQueueJobProducer extends QueueJobProducer {
@@ -37,7 +37,7 @@ export class EmailQueueJobProducer extends QueueJobProducer {
           removeOnFail: { age: TimeUtils.weeksToSeconds(1), count: 500 },
         }
       : {
-          jobId: EmailSendOperation.getBullJobId(data.emailType),
+          jobId: getBullJobIdForEmailOperation(data.emailType),
         }
     const handlePayloadFn = (payload: SendEmailJob['payload']): SendEmailJob['payload'] => ({
       ...payload,

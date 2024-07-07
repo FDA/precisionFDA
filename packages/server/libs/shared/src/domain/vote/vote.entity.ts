@@ -4,26 +4,26 @@ import { BaseEntity } from '../../database/base-entity'
 @Entity({ tableName: 'votes' })
 export class Vote extends BaseEntity {
   @PrimaryKey()
-    id: number
+  id: number
 
   @Property()
-    votableId: number
+  votableId: number
 
   @Property()
-    votableType: string
+  votableType: string
 
   @Property()
-    voterId: number
+  voterId: number
 
   @Property()
-    voterType: string
+  voterType: string
 
   @Property()
-    voteFlag: number
+  voteFlag: number
 
   @Property()
-    voteScope: string
+  voteScope: string
 
   @Property()
-    voteWeight: number
+  voteWeight: number
 }

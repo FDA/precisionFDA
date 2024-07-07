@@ -5,10 +5,14 @@ import { Space } from '@shared/domain/space/space.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { PermissionError, SpaceNotFoundError, UserNotFoundError } from '@shared/errors'
 import { BaseOperation } from '@shared/utils/base-operation'
-import { UserOpsCtx } from '../../../types'
+import { UserOpsCtx } from '@shared/types'
 import { spaceActionPolicy } from '../space.action-policy'
 import { SPACE_STATE } from '../space.enum'
-import { ENTITY_TYPE, PARENT_TYPE, SPACE_EVENT_ACTIVITY_TYPE, SPACE_EVENT_OBJECT_TYPE } from '../../space-event/space-event.enum'
+import {
+  ENTITY_TYPE,
+  SPACE_EVENT_ACTIVITY_TYPE,
+  SPACE_EVENT_OBJECT_TYPE,
+} from '../../space-event/space-event.enum'
 
 type SpaceLockInput = { spaceId: number }
 
@@ -65,9 +69,7 @@ void
           entityType: ENTITY_TYPE.SPACE,
           activityType: SPACE_EVENT_ACTIVITY_TYPE.space_locked,
           objectType: SPACE_EVENT_OBJECT_TYPE.SPACE,
-          //@ts-ignore
           side: membership?.side,
-          //@ts-ignore
           role: membership?.role,
           data: JSON.stringify({ name: space.name }),
         })

@@ -1,6 +1,5 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import {
-  Body,
   Controller,
   Get,
   HttpCode,
@@ -13,15 +12,12 @@ import {
 } from '@nestjs/common'
 import { DEPRECATED_SQL_ENTITY_MANAGER } from '@shared/database/provider/deprecated-sql-entity-manager.provider'
 import { EMAIL_TYPES } from '@shared/domain/email/email.config'
-import { EmailProcessOperation } from '@shared/domain/email/ops/email-process'
 import { SPACE_EVENT_ACTIVITY_TYPE } from '@shared/domain/space-event/space-event.enum'
 import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
 import {
   SPACE_MEMBERSHIP_ROLE,
   SPACE_MEMBERSHIP_SIDE,
 } from '@shared/domain/space-membership/space-membership.enum'
-import { SpaceReportCreateDto } from '@shared/domain/space-report/model/space-report-create.dto'
-import { SpaceReportService } from '@shared/domain/space-report/service/space-report.service'
 import { SpaceAcceptOperation } from '@shared/domain/space/ops/accept-space'
 import { SpaceLockOperation } from '@shared/domain/space/ops/lock-space'
 import { SelectableSpacesOperation } from '@shared/domain/space/ops/selectable-spaces'
@@ -33,6 +29,7 @@ import { PermissionError } from '@shared/errors'
 import { PlatformClient } from '@shared/platform-client'
 import { UserOpsCtx } from '@shared/types'
 import { UserContextGuard } from '../user-context/guard/user-context.guard'
+import { EmailFacade } from '@shared/domain/email/email.facade'
 
 // TODO most of the ops can be patch instead of post (currently used by ruby), might refactor
 @UseGuards(UserContextGuard)
@@ -42,6 +39,7 @@ export class SpacesController {
     @Inject(DEPRECATED_SQL_ENTITY_MANAGER) private readonly oldEm: SqlEntityManager,
     private readonly log: Logger,
     private readonly user: UserContext,
+    private readonly emailFacade: EmailFacade,
   ) {}
 
   @HttpCode(204)
@@ -66,7 +64,8 @@ export class SpacesController {
     }
 
     await new SpaceLockOperation(opsCtx).execute({ spaceId })
-    await new EmailProcessOperation(opsCtx).execute({
+
+    await this.emailFacade.sendEmail({
       input: {
         initUserId: this.user.id,
         spaceId,
@@ -88,7 +87,7 @@ export class SpacesController {
 
     await new SpaceUnlockOperation(opsCtx).execute({ spaceId })
 
-    await new EmailProcessOperation(opsCtx).execute({
+    await this.emailFacade.sendEmail({
       input: {
         initUserId: this.user.id,
         spaceId,

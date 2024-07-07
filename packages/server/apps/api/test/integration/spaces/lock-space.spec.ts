@@ -1,9 +1,8 @@
 import type { EntityManager } from '@mikro-orm/mysql'
 import { database } from '@shared/database'
-import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
 import {
-	SPACE_MEMBERSHIP_ROLE,
-	SPACE_MEMBERSHIP_SIDE,
+  SPACE_MEMBERSHIP_ROLE,
+  SPACE_MEMBERSHIP_SIDE,
 } from '@shared/domain/space-membership/space-membership.enum'
 import { Space } from '@shared/domain/space/space.entity'
 import { SPACE_STATE } from '@shared/domain/space/space.enum'
@@ -18,7 +17,6 @@ import { getDefaultHeaderData } from '../../utils/expect-helper'
 
 describe('PATCH /spaces/:id/lock', () => {
   let em: EntityManager
-  let notPermittedUser: User
   let user: User
   let space: Space
   let alreadyLockedSpace: Space
@@ -26,21 +24,19 @@ describe('PATCH /spaces/:id/lock', () => {
   let guestLead: User
   let hostLead: User
 
-  let spaceMembership: SpaceMembership
-
   beforeEach(async () => {
     await db.dropData(database.connection())
     // create DB mocks
     em = database.orm().em.fork() as EntityManager
     em.clear()
-    notPermittedUser = create.userHelper.create(em)
+    create.userHelper.create(em)
     user = create.userHelper.createRSA(em)
     space = create.spacesHelper.create(em)
     alreadyLockedSpace = create.spacesHelper.create(em, { state: SPACE_STATE.LOCKED })
     guestLead = create.userHelper.create(em, { email: generate.random.chance.email() })
     hostLead = create.userHelper.create(em, { email: generate.random.chance.email() })
 
-    spaceMembership = create.spacesHelper.addMember(em, { user, space })
+    create.spacesHelper.addMember(em, { user, space })
 
     create.spacesHelper.addMember(
       em,
@@ -60,16 +56,38 @@ describe('PATCH /spaces/:id/lock', () => {
     mocksReset()
   })
 
-
   it('locks space', async () => {
     await supertest(testedApp.getHttpServer())
       .patch(`/spaces/${space.id}/lock`)
       .set(getDefaultHeaderData(user))
       .expect(204)
 
-    expect(fakes.queue.createEmailSendTaskFake.calledTwice).to.be.true()
+    const sendEmailStub = fakes.emailService.sendEmail
+    expect(sendEmailStub.calledTwice).to.be.true()
+
+    const firstEmail = sendEmailStub.args[0][0]
+    expect(firstEmail).to.include({
+      emailType: 4,
+      to: guestLead.email,
+      subject: `[test] ${user.fullName} locked the space ${space.name}`,
+    })
+    expect(firstEmail.body).to.include('SPACE locked')
+    expect(firstEmail.body).to.include(`Hello ${guestLead.firstName}!`)
+    expect(firstEmail.body).to.include(`The space ${space.name} was locked`)
+
+    const secondEmail = sendEmailStub.args[1][0]
+    expect(secondEmail).to.include({
+      emailType: 4,
+      to: hostLead.email,
+      subject: `[test] ${user.fullName} locked the space ${space.name}`,
+    })
+    expect(secondEmail.body).to.include('SPACE locked')
+    expect(secondEmail.body).to.include(`Hello ${hostLead.firstName}!`)
+    expect(secondEmail.body).to.include(`The space ${space.name} was locked`)
+
     em.clear()
     const lockedSpace = await em.getRepository(Space).findOneOrFail({ id: space.id })
+
     expect(lockedSpace.state).to.be.equal(SPACE_STATE.LOCKED)
   })
 

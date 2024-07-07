@@ -60,9 +60,12 @@ void> {
     // in this case we remove the file record on our side
     const responseFileDxids = response.map(x => x.id)
     const abandonedFileDxids = difference(fileDxids, responseFileDxids)
-    this.log.verbose({ abandonedFileDxids },
-      'SyncFilesStateOperation: Deleting files removed by platform',
-    )
+    if (abandonedFileDxids.length > 0) {
+      this.log.verbose(
+        { abandonedFileDxids },
+        'SyncFilesStateOperation: Deleting files removed by platform',
+      )
+    }
     for (const dxid of abandonedFileDxids) {
       const fileOrAssets = await findFileOrAssetsWithDxid(this.ctx.em, dxid)
       if (!fileOrAssets) {

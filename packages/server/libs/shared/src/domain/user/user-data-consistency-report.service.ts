@@ -13,10 +13,10 @@ import { SPACE_MEMBERSHIP_SIDE } from '@shared/domain/space-membership/space-mem
 import { wrap } from '@mikro-orm/core'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { EMAIL_TYPES, EmailSendInput } from '@shared/domain/email/email.config'
-import { EmailSendOperation } from '@shared/domain/email/ops/email-send'
 import { UserCtx } from '@shared/types'
 import { userDataConsistencyReportTemplate } from '@shared/domain/email/templates/mjml/user-data-consistency-report.template'
 import { NotFoundError } from '@shared/errors'
+import { getBullJobIdForEmailOperation } from '@shared/domain/email/email.helper'
 
 export type UserDataConsistencyReportOutput = {
   user?: {
@@ -164,7 +164,6 @@ export class UserDataConsistencyReportService {
       output.unclosedFilesCount = unclosedFiles.length
 
       const userFilesRepo = this.em.getRepository(UserFile)
-      const folderRepo = this.em.getRepository(Folder)
 
       // Check if user has any folders that has both parent_folder_id and scoped_parent_folder_id
       const userNodes = await this.em.getRepository(Node).find({ user: user.id })
@@ -324,7 +323,7 @@ export class UserDataConsistencyReportService {
       body,
     }
 
-    const jobId = EmailSendOperation.getBullJobId(EMAIL_TYPES.userDataConsistencyReport)
+    const jobId = getBullJobIdForEmailOperation(EMAIL_TYPES.userDataConsistencyReport)
     this.log.verbose('UserDataConsistencyReportService: Sending report email to admin')
     const tempUserCtx: UserCtx = {
       id: adminUser.id,

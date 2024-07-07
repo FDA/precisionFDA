@@ -1,6 +1,6 @@
 import { Reference } from '@mikro-orm/core'
 import { SqlEntityManager } from '@mikro-orm/mysql'
-import { Injectable } from '@nestjs/common'
+import { Injectable, Logger } from '@nestjs/common'
 import { Answer } from '@shared/domain/answer/answer.entity'
 import { App } from '@shared/domain/app/app.entity'
 import { Attachment } from '@shared/domain/attachment/attachment.entity'
@@ -20,7 +20,6 @@ import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { Vote } from '@shared/domain/vote/vote.entity'
 import { STATIC_SCOPE } from '@shared/enums'
-import { getLogger } from '@shared/logger'
 import type { UserCtx } from '@shared/types'
 import type { SCOPE } from '@shared/types/common'
 import * as errors from '../../../errors'
@@ -42,8 +41,7 @@ import type {
 import { AnswerDTO, CommentDTO, DiscussionDTO, NoteDTO, UserDTO } from '../discussion.types'
 import { DiscussionNotificationService } from './discussion-notification.service'
 import { PublisherService } from './publisher.service'
-
-const logger = getLogger('discussion.service')
+import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 
 export interface IDiscussionService {
   createDiscussion(discussionInput: BaseInput): Promise<DiscussionDTO>
@@ -88,6 +86,9 @@ export interface IDiscussionService {
 
 @Injectable()
 export class DiscussionService implements IDiscussionService {
+  @ServiceLogger()
+  private readonly log: Logger
+
   private readonly em: SqlEntityManager
   private readonly userCtx: UserCtx
   private readonly publisher: PublisherService
@@ -109,11 +110,11 @@ export class DiscussionService implements IDiscussionService {
     this.fetcher = fetcher
     this.entityService = entityService
     this.discussionNotificationService = discussionNotificationService
-    logger.debug('DiscussionService initialized')
+    this.log.debug('DiscussionService initialized')
   }
 
   async getDiscussion(discussionId: number): Promise<DiscussionDTO> {
-    logger.verbose(`DiscussionService: getting discussion id: ${discussionId}`)
+    this.log.verbose(`Getting discussion id: ${discussionId}`)
     const res = await this.fetcher.getAccessibleById(
       Discussion,
       discussionId,
@@ -141,7 +142,7 @@ export class DiscussionService implements IDiscussionService {
   }
 
   async getAnswers(discussionId: number): Promise<AnswerDTO[]> {
-    logger.verbose(`DiscussionService: getting answers for discussion id: ${discussionId}`)
+    this.log.verbose(`Getting answers for discussion id: ${discussionId}`)
     const user = await this.fetcher.getById(User, this.userCtx.id)
     if (!user) {
       throw new errors.NotFoundError('User not found.')
@@ -168,7 +169,7 @@ export class DiscussionService implements IDiscussionService {
    * @param discussionInput
    */
   async createDiscussion(discussionInput: BaseInput) {
-    logger.verbose(`DiscussionService: creating discussion: ${JSON.stringify(discussionInput)}`)
+    this.log.verbose(`Creating discussion: ${JSON.stringify(discussionInput)}`)
     const user = await this.fetcher.getById(User, this.userCtx.id)
     if (!user) {
       throw new errors.NotFoundError(`User not found ({ id: ${this.userCtx.id} })`)
@@ -199,7 +200,7 @@ export class DiscussionService implements IDiscussionService {
   }
 
   async updateDiscussion(discussionInput: UpdateDiscussionInput): Promise<void> {
-    logger.verbose(`DiscussionService: updating discussion: ${JSON.stringify(discussionInput)}`)
+    this.log.verbose(`Updating discussion: ${JSON.stringify(discussionInput)}`)
 
     return await this.em.transactional(async () => {
       const discussion = await this.fetcher.getEditableById(
@@ -229,7 +230,7 @@ export class DiscussionService implements IDiscussionService {
   }
 
   async publishDiscussion(discussionInput: PublishDiscussionInput): Promise<number> {
-    logger.verbose(`DiscussionService: publishing discussion: ${JSON.stringify(discussionInput)}`)
+    this.log.verbose(`Publishing discussion: ${JSON.stringify(discussionInput)}`)
 
     const user = await this.fetcher.getById(User, this.userCtx.id)
     // this will probably never happen, maybe have a separate method for fetching 'myself' by context and avoid checking for null everytime.
@@ -279,7 +280,7 @@ export class DiscussionService implements IDiscussionService {
   }
 
   async deleteDiscussion(discussionId: number): Promise<void> {
-    logger.verbose(`DiscussionService: deleting discussion: ${discussionId}`)
+    this.log.verbose(`Deleting discussion: ${discussionId}`)
     const discussion = await this.fetcher.getEditableById(
       Discussion,
       discussionId,
@@ -326,16 +327,22 @@ export class DiscussionService implements IDiscussionService {
         followableId: discussionId,
         followableType: 'Discussion',
       })
+      this.log.verbose(
+        `Deleting discussion votes with ids: ${discussionVotes.map((vote) => vote.id)}`,
+      )
       tem.remove(discussionVotes)
+      this.log.verbose(`Deleting note votes with ids: ${noteVotes.map((vote) => vote.id)}`)
       tem.remove(noteVotes)
+      this.log.verbose(`Deleting follows with ids: ${follows.map((follow) => follow.id)}`)
       tem.remove(follows)
       // removal of discussion triggers cascade removal of answers,comments and attachments.
+      this.log.verbose(`Deleting discussion with id: ${discussion.id}`)
       await tem.removeAndFlush(discussion)
     })
   }
 
   async getDiscussions(scope: string): Promise<DiscussionDTO[]> {
-    logger.verbose(`DiscussionService: getting discussion with scope: ${scope}`)
+    this.log.verbose(`Getting discussions with scope: ${scope}`)
     if (scope === 'public') {
       const publishedDiscussions = await this.fetcher.getPublic(
         Discussion,
@@ -381,7 +388,7 @@ export class DiscussionService implements IDiscussionService {
   }
 
   async createAnswer(answerInput: CreateAnswerInput) {
-    logger.verbose(`DiscussionService: creating answer: ${JSON.stringify(answerInput)}`)
+    this.log.verbose(`Creating answer: ${JSON.stringify(answerInput)}`)
     const discussion = await this.fetcher.getAccessibleById(
       Discussion,
       answerInput.discussionId,
@@ -426,7 +433,7 @@ export class DiscussionService implements IDiscussionService {
   }
 
   async updateAnswer(input: UpdateAnswerInput) {
-    logger.verbose(`DiscussionService: updating answer: ${JSON.stringify(input)}`)
+    this.log.verbose(`Updating answer: ${JSON.stringify(input)}`)
     const answer = await this.fetcher.getEditableById(
       Answer,
       input.answerId,
@@ -456,7 +463,7 @@ export class DiscussionService implements IDiscussionService {
   }
 
   async publishAnswer(answerInput: PublishAnswerInput) {
-    logger.verbose(`DiscussionService: publishing answer: ${JSON.stringify(answerInput)}`)
+    this.log.verbose(`Publishing answer: ${JSON.stringify(answerInput)}`)
 
     const user = await this.fetcher.getById(User, this.userCtx.id)
     if (!user) {
@@ -505,7 +512,7 @@ export class DiscussionService implements IDiscussionService {
   }
 
   async deleteAnswer(answerId: number) {
-    logger.verbose(`DiscussionService: deleting answer with id: ${answerId}`)
+    this.log.verbose(`Deleting answer with id: ${answerId}`)
     const answer = await this.fetcher.getEditableById(
       Answer,
       answerId,
@@ -532,9 +539,13 @@ export class DiscussionService implements IDiscussionService {
         followableId: answerId,
         followableType: 'Answer',
       })
+      this.log.verbose(`Deleting answer votes with ids: ${answerVotes.map((vote) => vote.id)}`)
       tem.remove(answerVotes)
+      this.log.verbose(`Deleting note votes with ids: ${noteVotes.map((vote) => vote.id)}`)
       tem.remove(noteVotes)
+      this.log.verbose(`Deleting follows with ids: ${follows.map((follow) => follow.id)}`)
       tem.remove(follows)
+      this.log.verbose(`Deleting answer with id: ${answer.id}`)
       await tem.removeAndFlush(answer)
     })
   }
@@ -709,7 +720,9 @@ export class DiscussionService implements IDiscussionService {
     },
   ) {
     const oldAttachments = await this.em.find(Attachment, { note })
+    this.log.verbose(`Deleting old attachments: ${oldAttachments.map((a) => a.id)}`)
     await this.em.removeAndFlush(oldAttachments)
+    this.log.verbose(`Creating new attachments: ${JSON.stringify(attachments)}`)
     await this.createAttachments(note, attachments)
   }
 
@@ -794,7 +807,7 @@ export class DiscussionService implements IDiscussionService {
   }
 
   async createComment(commentInput: CreateCommentInput) {
-    logger.verbose(`DiscussionService: creating comment: ${JSON.stringify(commentInput)}`)
+    this.log.verbose(`Creating comment: ${JSON.stringify(commentInput)}`)
 
     const user = await this.fetcher.getById(User, this.userCtx.id)
     if (!user) {
@@ -841,7 +854,7 @@ export class DiscussionService implements IDiscussionService {
   }
 
   async updateComment(commentInput: EditCommentInput) {
-    logger.verbose(`DiscussionService: editing comment: ${JSON.stringify(commentInput)}`)
+    this.log.verbose(`Editing comment: ${JSON.stringify(commentInput)}`)
 
     if (commentInput.targetType === 'Discussion') {
       const comment = await this.fetcher.getEditableById(DiscussionComment, commentInput.id)
@@ -866,7 +879,7 @@ export class DiscussionService implements IDiscussionService {
   }
 
   async deleteComment(commentId: number, type: CommentableType) {
-    logger.verbose(`DiscussionService: deleting comment with id: ${commentId}`)
+    this.log.verbose(`Deleting comment with id: ${commentId}`)
 
     let comment: AnswerComment | DiscussionComment | null
     if (type == 'Discussion') {
@@ -891,6 +904,7 @@ export class DiscussionService implements IDiscussionService {
     }
 
     if (comment.user.id === this.userCtx.id) {
+      this.log.verbose(`Deleting comment with id: ${comment.id}`)
       await this.em.removeAndFlush(comment)
       return
     } else {
@@ -905,6 +919,7 @@ export class DiscussionService implements IDiscussionService {
         },
       })
       if (space) {
+        this.log.verbose(`Deleting comment with id: ${comment.id}`)
         await this.em.removeAndFlush(comment)
         return
       }
@@ -914,7 +929,7 @@ export class DiscussionService implements IDiscussionService {
   }
 
   async getAttachments(noteId: number): Promise<DiscussionAttachment[]> {
-    logger.verbose(`DiscussionService: getting attachments for note id: ${noteId}`)
+    this.log.verbose(`Getting attachments for note id: ${noteId}`)
     const note = await this.fetcher.getAccessibleById(
       Note,
       noteId,
@@ -995,7 +1010,7 @@ export class DiscussionService implements IDiscussionService {
   }
 
   async getAnswer(answerId: number): Promise<AnswerDTO> {
-    logger.verbose(`DiscussionService: getting answer with id: ${answerId}`)
+    this.log.verbose(`Getting answer with id: ${answerId}`)
     const res = await this.fetcher.getAccessibleById(
       Answer,
       answerId,
@@ -1011,7 +1026,7 @@ export class DiscussionService implements IDiscussionService {
   }
 
   async getComment(commentId: number, type: CommentableType): Promise<CommentDTO> {
-    logger.verbose(`DiscussionService: getting comment with id: ${commentId}`)
+    this.log.verbose(`Getting comment with id: ${commentId}`)
 
     if (type === 'Discussion') {
       const res = await this.em.findOne(
@@ -1054,7 +1069,7 @@ export class DiscussionService implements IDiscussionService {
     if (spaceId === null) {
       return
     }
-    const space = await this.em.findOneOrFail(Space, {
+    return await this.em.findOneOrFail(Space, {
       id: spaceId,
       spaceMemberships: {
         user: this.userCtx.id,
@@ -1067,7 +1082,6 @@ export class DiscussionService implements IDiscussionService {
         },
       },
     })
-    return space
   }
 
   private async mapDiscussionDTO(discussion: Discussion): Promise<DiscussionDTO> {
