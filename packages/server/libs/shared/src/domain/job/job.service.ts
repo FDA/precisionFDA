@@ -25,7 +25,6 @@ import { FolderService } from '../user-file/folder.service'
 import { SpaceEventService } from '@shared/domain/space-event/space-event.service'
 import { Space } from '@shared/domain/space/space.entity'
 import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
-import { EmailProcessOperation } from '@shared/domain/email/ops/email-process'
 import { createSyncJobStatusTask, getMainQueue } from '@shared/queue'
 import { SyncJobOperation } from '@shared/domain/job/ops/synchronize'
 import { buildIsOverMaxDuration } from '@shared/domain/job/job.helper'
@@ -41,6 +40,7 @@ import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { Injectable, Logger } from '@nestjs/common'
 import { EmailQueueJobProducer } from '@shared/domain/email/producer/email-queue-job.producer'
+import { EmailFacade } from '@shared/domain/email/email.facade'
 
 const logger = getLogger('job.service')
 
@@ -59,6 +59,7 @@ export class JobService {
     private readonly notificationService: NotificationService,
     private readonly folderService: FolderService,
     private readonly emailsJobProducer: EmailQueueJobProducer,
+    private readonly emailFacade: EmailFacade,
   ) {
     this.jobRepo = em.getRepository(Job)
     this.userRepo = em.getRepository(User)
@@ -221,18 +222,13 @@ export class JobService {
 
       if (scopeContainsId(job.scope)) {
         // TODO temporarily before we move to Service model
-        const emailProcessOperation = new EmailProcessOperation({
-          log: logger,
-          user: { id: userId } as UserCtx,
-          em: this.em as SqlEntityManager,
-        })
         const spaceService = new SpaceEventService(
           { id: userId } as UserCtx,
           this.em as SqlEntityManager,
           this.em.getRepository(Space),
           this.em.getRepository(User),
           this.em.getRepository(SpaceMembership),
-          emailProcessOperation,
+          this.emailFacade,
         )
         const spaceEvent = await spaceService.createSpaceEvent({
           entity: { type: 'job', value: job },

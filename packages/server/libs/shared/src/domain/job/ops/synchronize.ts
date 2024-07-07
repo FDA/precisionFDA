@@ -1,6 +1,5 @@
 import { wrap } from '@mikro-orm/core'
 import { SqlEntityManager } from '@mikro-orm/mysql'
-import { EmailSendOperation } from '@shared/domain/email/ops/email-send'
 import { RequestTerminateJobOperation } from '@shared/domain/job/ops/terminate'
 import { NotificationService } from '@shared/domain/notification/services/notification.service'
 import { Tagging } from '@shared/domain/tagging/tagging.entity'
@@ -9,20 +8,20 @@ import { User } from '@shared/domain/user/user.entity'
 import { ClientRequestError } from '@shared/errors'
 import { JobDescribeResponse } from '@shared/platform-client/platform-client.responses'
 import { EntityScope } from '@shared/types/common'
-import { NOTIFICATION_ACTION, SEVERITY } from '../../../enums'
-import { PlatformClient } from '../../../platform-client'
+import { NOTIFICATION_ACTION, SEVERITY } from '@shared/enums'
+import { PlatformClient } from '@shared/platform-client'
 import {
   createSendEmailTask,
   createSyncOutputsTask,
   getMainQueue,
   removeFromEmailQueue,
   removeRepeatable,
-} from '../../../queue'
-import { CheckStatusJob, TASK_TYPE } from '../../../queue/task.input'
-import type { Maybe, UserOpsCtx } from '../../../types'
-import { WorkerBaseOperation } from '../../../utils/base-operation'
+} from '@shared/queue'
+import { CheckStatusJob, TASK_TYPE } from '@shared/queue/task.input'
+import type { Maybe, UserOpsCtx } from '@shared/types'
+import { WorkerBaseOperation } from '@shared/utils/base-operation'
 import { EMAIL_TYPES, EmailSendInput } from '../../email/email.config'
-import { buildEmailTemplate } from '../../email/email.helper'
+import { buildEmailTemplate, getBullJobIdForEmailOperation } from '../../email/email.helper'
 import {
   JobStaleInputTemplate,
   jobStaleTemplate,
@@ -338,7 +337,7 @@ export class SyncJobOperation extends WorkerBaseOperation<
       subject: `Job ${this.job.name} will terminate in 24 hours`,
       body,
     }
-    const jobId = EmailSendOperation.getBullJobId(EMAIL_TYPES.jobTerminationWarning, this.job.dxid)
+    const jobId = getBullJobIdForEmailOperation(EMAIL_TYPES.jobTerminationWarning, this.job.dxid)
     this.ctx.log.verbose(
       {
         jobId: this.job.id,
@@ -353,7 +352,7 @@ export class SyncJobOperation extends WorkerBaseOperation<
   }
 
   private removeTerminationEmailJob() {
-    const jobId = EmailSendOperation.getBullJobId(EMAIL_TYPES.jobTerminationWarning, this.job.dxid)
+    const jobId = getBullJobIdForEmailOperation(EMAIL_TYPES.jobTerminationWarning, this.job.dxid)
     removeFromEmailQueue(jobId)
   }
 

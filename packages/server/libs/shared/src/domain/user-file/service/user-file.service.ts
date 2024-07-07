@@ -188,7 +188,7 @@ export class UserFileService {
 
       this.em.persist(folderEvent)
       this.em.remove(folderToRemove)
-      this.log.verbose(`Removed folder ${folderToRemove.name}`)
+      this.log.verbose(`Removed folder with id: ${folderToRemove.id}, name: ${folderToRemove.name}`)
       return 1
     })
   }
@@ -221,6 +221,7 @@ export class UserFileService {
 
       if (lastNode) {
         // we're deleting from platform only if it's the last with given dxid
+        this.log.verbose(`Removing file with dxid: ${fileToRemove.dxid} from platform`)
         await this.userClient.fileRemove({
           projectId: fileToRemove.project,
           ids: [fileToRemove.dxid],
@@ -238,7 +239,7 @@ export class UserFileService {
       }
 
       this.em.remove(fileToRemove)
-      this.log.verbose(`UserFileService: Removed file ${fileToRemove.name}`)
+      this.log.verbose(`Removed file with uid: ${fileToRemove.uid}, name: ${fileToRemove.name}`)
       return 1
     })
   }
@@ -274,12 +275,12 @@ export class UserFileService {
   }
 
   private async closeFileOnPlatform(fileDxid: string, challengeBotFile: boolean) {
-    this.log.verbose({ fileDxid }, 'UserFileService: Calling close file on platform')
+    this.log.verbose({ fileDxid }, 'Calling close file on platform')
     const platformClient = challengeBotFile ? this.challengeBotClient : this.userClient
     const response = await platformClient.fileClose({
       fileDxid,
     })
-    this.log.verbose({ response }, 'UserFileService: File close response')
+    this.log.verbose({ response }, 'File close response')
   }
 
   private async startFileSynchronization(
@@ -297,7 +298,7 @@ export class UserFileService {
     fileDescribe: FileDescribeResponse,
     node: Node,
   ) {
-    this.log.verbose(`UserFileService: file ${fileUid} is closed`)
+    this.log.verbose(`File with uid: ${fileUid} is closed`)
     node.state = fileDescribe.state as FILE_STATE
     node.fileSize = fileDescribe.size
     await this.em.flush()
@@ -406,7 +407,7 @@ export class UserFileService {
   }
 
   async closeFile(fileUid: UId, followUpAction?: FOLLOW_UP_ACTION) {
-    this.log.verbose(`UserFileService: closing file ${fileUid}`)
+    this.log.verbose(`Closing file ${fileUid}`)
 
     await this.em.transactional(async () => {
       const user = await this.userRepo.findOneOrFail(this.user.id, {
@@ -437,7 +438,7 @@ export class UserFileService {
    * @param isChallengeBotFile
    */
   async synchronizeFile(fileUid: UId, isChallengeBotFile: boolean): Promise<boolean> {
-    this.log.verbose(`UserFileService: synchronize file: ${fileUid}`)
+    this.log.verbose(`Synchronize file: ${fileUid}`)
     const node = await this.nodeRepo.findOneOrFail({ uid: fileUid })
     const platformClient = isChallengeBotFile ? this.challengeBotClient : this.userClient
 
@@ -446,12 +447,12 @@ export class UserFileService {
         fileDxid: node.dxid,
         projectDxid: node.project,
       })
-      this.log.verbose(`UserFileService: fileDescribe: ${JSON.stringify(fileDescribe)}`)
+      this.log.verbose(`FileDescribe: ${JSON.stringify(fileDescribe)}`)
       if (fileDescribe.state === FILE_STATE_DX.CLOSED) {
         await this.handleFileClose(fileUid, this.user.id, fileDescribe, node)
         return true
       }
-      this.log.verbose(`UserFileService: file ${fileUid} is not closed yet`)
+      this.log.verbose(`File ${fileUid} is not closed yet`)
     } catch (error) {
       this.log.error(`Error calling platform ${error}`)
     }
@@ -472,6 +473,7 @@ export class UserFileService {
     file.scopedParentFolderId = fileCreate.scopedParentFolderId
     file.uid = `${fileCreate.dxid}-1`
 
+    this.log.verbose(`Creating file ${JSON.stringify(fileCreate)}`)
     await this.em.persistAndFlush(file)
 
     return file
@@ -492,7 +494,7 @@ export class UserFileService {
   }
 
   private async rollbackRemovingState(nodes: Node[]) {
-    this.log.error(`Rolling back removing state for nodes ${nodes.length}`)
+    this.log.error(`Rolling back removing state for nodes ${nodes.map((node) => node.id)}`)
     nodes.forEach((node) => {
       if (node.stiType === FILE_STI_TYPE.FOLDER) {
         node.state = null

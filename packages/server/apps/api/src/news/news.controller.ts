@@ -6,7 +6,7 @@ import {
   Delete,
   Get,
   HttpCode,
-  Inject,
+  Inject, Logger,
   Param,
   ParseIntPipe,
   Post,
@@ -27,6 +27,7 @@ import {
   NewsPostReqBody,
   newsPostRequestSchema,
 } from './news.schemas'
+import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 
 interface NewsPositionReqBody {
   news_items: Record<number, number>
@@ -37,6 +38,8 @@ const DEFAULT_PAGE_SIZE = 10
 
 @Controller('/news')
 export class NewsController {
+  @ServiceLogger()
+  private readonly log: Logger
   constructor(
     private readonly user: UserContext,
     @Inject(DEPRECATED_SQL_ENTITY_MANAGER) private readonly em: SqlEntityManager,
@@ -97,6 +100,7 @@ export class NewsController {
   @Delete('/:id')
   async deleteNews(@Param('id', ParseIntPipe) id: number) {
     const newsItem = this.em.getReference(NewsItem, id)
+    this.log.verbose(`Deleting news item with id: ${id}, title: ${newsItem.title}`)
     await this.em.remove(newsItem).flush()
   }
 

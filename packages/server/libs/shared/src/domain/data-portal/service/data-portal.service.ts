@@ -5,7 +5,6 @@ import { DataPortalRepository } from '@shared/domain/data-portal/data-portal.rep
 import { CreateDataPortalDTO } from '@shared/domain/data-portal/dto/CreateDataPortalDTO'
 import { CreateFileParamDTO } from '@shared/domain/data-portal/dto/CreateFileParamDTO'
 import { UpdateDataPortalDTO } from '@shared/domain/data-portal/dto/UpdateDataPortalDTO'
-import { UId } from '@shared/domain/entity/domain/uid'
 import { NotificationService } from '@shared/domain/notification/services/notification.service'
 import { Resource } from '@shared/domain/resource/resource.entity'
 import { Space } from '@shared/domain/space/space.entity'
@@ -27,7 +26,6 @@ import { PlatformClient } from '@shared/platform-client'
 import { SCOPE } from '@shared/types/common'
 import { SPACE_MEMBERSHIP_ROLE } from '../../space-membership/space-membership.enum'
 import { CAN_EDIT_ROLES } from '../../space-membership/space-membership.helper'
-import { UserFileRepository } from '../../user-file/user-file.repository'
 import { FILE_STATE_DX } from '../../user-file/user-file.types'
 import { DataPortal } from '../data-portal.entity'
 import { DATA_PORTAL_MEMBER_ROLE } from '../data-portal.enum'
@@ -133,27 +131,13 @@ export class DataPortalService {
       throw new PermissionError(`Only roles ${this.editRolesText} can remove resources`)
     }
 
+    this.log.verbose(
+      `Deleting resource with id: ${resource.id}, userFile.uid: ${resource.userFile.getEntity().uid}`,
+    )
     // TODO fix transaction work
     await this.em.removeAndFlush(resource)
+    this.log.verbose(`Deleting user file with uid: ${resource.userFile.getEntity().uid}`)
     await this.userFileService.removeFile(resource.userFile.id)
-  }
-
-  private getUserFileUrl = async (uid: UId): Promise<string> => {
-    logger.verbose(`Getting url for id: ${uid}`)
-    const fileRepo = this.em.getRepository(UserFile) as UserFileRepository
-    const userFile = await fileRepo.findFileWithUid(uid)
-
-    if (!userFile) {
-      throw new NotFoundError(`Cannot find card image id ${uid}`)
-    }
-    const link = await this.platformClient.fileDownloadLink({
-      fileDxid: userFile.dxid,
-      filename: userFile.name,
-      project: userFile.project,
-      duration: 9_999_999_999,
-    })
-
-    return link.url
   }
 
   private createFile = async (

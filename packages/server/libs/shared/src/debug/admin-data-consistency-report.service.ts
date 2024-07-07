@@ -1,6 +1,5 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Injectable, Logger } from '@nestjs/common'
-import { EmailSendOperation } from '@shared/domain/email/ops/email-send'
 import { EmailQueueJobProducer } from '@shared/domain/email/producer/email-queue-job.producer'
 import { Job } from '@shared/domain/job/job.entity'
 import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
@@ -16,6 +15,7 @@ import { JobRepository } from '../domain/job/job.repository'
 import { SPACE_MEMBERSHIP_SIDE } from '../domain/space-membership/space-membership.enum'
 import { SPACE_TYPE } from '../domain/space/space.enum'
 import { UserCtx } from '../types'
+import { getBullJobIdForEmailOperation } from '@shared/domain/email/email.helper'
 
 export type AdminDataConsistencyReportOutput = {
   pfdaOnlyFoldersCount?: number
@@ -239,7 +239,7 @@ export class AdminDataConsistencyReportService {
       body,
     }
 
-    const jobId = EmailSendOperation.getBullJobId(EMAIL_TYPES.adminDataConsistencyReport)
+    const jobId = getBullJobIdForEmailOperation(EMAIL_TYPES.adminDataConsistencyReport)
     this.log.verbose('AdminDataConsistencyReportService: Sending report email to admin')
     const tempUserCtx: UserCtx = {
       id: adminUser.id,

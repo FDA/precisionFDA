@@ -1,6 +1,6 @@
 import { EntityName, FilterQuery } from '@mikro-orm/core'
 import { SqlEntityManager } from '@mikro-orm/mysql'
-import { Injectable } from '@nestjs/common'
+import { Injectable, Logger } from '@nestjs/common'
 import { AppSeries } from '@shared/domain/app-series/app-series.entity'
 import { DbCluster } from '@shared/domain/db-cluster/db-cluster.entity'
 import { Job } from '@shared/domain/job/job.entity'
@@ -18,6 +18,7 @@ import { getIdFromScopeName, scopeContainsId } from '../../space/space.helper'
 import { Node } from '../../user-file/node.entity'
 import { FILE_STI_TYPE } from '../../user-file/user-file.types'
 import { GeneralProperty, PropertyType } from '../property.entity'
+import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 
 export interface IPropertyService {
   setProperty: (input: CreatePropertyDTO) => Promise<void>
@@ -26,6 +27,8 @@ export interface IPropertyService {
 
 @Injectable()
 export class PropertyService implements IPropertyService {
+  @ServiceLogger()
+  private readonly log: Logger
   constructor(
     private readonly em: SqlEntityManager,
     private readonly user: UserContext,
@@ -42,6 +45,9 @@ export class PropertyService implements IPropertyService {
         targetId,
       })
 
+      this.log.verbose(
+        `Deleting properties with target ids: ${currentProperties.map((prop) => prop.targetId)}`,
+      )
       await this.em.removeAndFlush(currentProperties)
       for (const key in input.properties) {
         const newProperty = new GeneralProperty()
@@ -115,7 +121,7 @@ export class PropertyService implements IPropertyService {
     switch (targetType) {
       case 'node':
         condition['node'] = {
-          scope:  { $in: scopes},
+          scope: { $in: scopes},
           stiType: [FILE_STI_TYPE.FOLDER, FILE_STI_TYPE.USERFILE],
         }
         break
