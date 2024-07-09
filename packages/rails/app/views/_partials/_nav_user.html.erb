@@ -41,7 +41,7 @@
       <li><a href="<%= docs_path %>" data-turbolinks="false"><span class="fa fa-fw fa-book"></span> Docs</a></li>
       <li role="separator" class="divider"></li>
       <% if @context.logged_in? && @context.can_administer_site? %>
-        <li><%= link_to "Admin Dashboard", admin_root_path %></li>
+        <li><%= link_to "Admin Dashboard", admin_root_path, data: { turbolinks: false } %></li>
         <li role="separator" class="divider"></li>
       <% end %>
       <li><%= link_to "Log out", logout_path, method: :delete, data: { no_turbolink: true } %></li>

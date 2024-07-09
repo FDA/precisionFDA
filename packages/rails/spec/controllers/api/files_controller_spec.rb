@@ -148,7 +148,7 @@ RSpec.describe Api::FilesController, type: :controller do
         }, format: :json
 
         expect(NodeCopyWorker).to have_received(:perform_async).
-          with(space.scope, node_ids[0..-2], anything)
+          with(space.scope, node_ids[0..-2], nil, anything)
 
         expect(response).to be_successful
       end

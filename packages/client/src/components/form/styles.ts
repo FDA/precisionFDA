@@ -1,5 +1,4 @@
 import styled, { css } from 'styled-components'
-import { colors, theme } from '../../styles/theme'
 
 export const FieldLabel = styled.label`
   display: flex;
@@ -106,7 +105,7 @@ export const CheckboxLabel = styled.label`
   font-size: 14px;
   line-height: 32px;
   letter-spacing: 0;
-  color: ${colors.textDarkGrey};
+  color: var(--c-text-700);
 
   input[type='checkbox'] {
     margin: 0;
@@ -115,5 +114,5 @@ export const CheckboxLabel = styled.label`
 
 export const CheckboxTip = styled.span`
   font-size: 12px;
-  color: ${theme.colors.textMediumGrey};
+  color: var(--c-text-500);
 `

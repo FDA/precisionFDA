@@ -1,31 +1,30 @@
-import { pick } from 'ramda'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { pick } from 'ramda'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
-import { useAuthUser } from '../auth/useAuthUser'
-import { ISpace } from '../spaces/spaces.types'
+import { displayPayloadMessage } from '../../utils/api'
 import { useAttachToModal } from '../actionModals/useAttachToModal'
-import { useCopyToPrivateModal } from '../actionModals/useCopyToPrivateModal'
-import { useCopyToSpaceModal } from '../actionModals/useCopyToSpace'
-import { useEditTagsModal } from '../actionModals/useEditTagsModal'
 import { useEditPropertiesModal } from '../actionModals/useEditPropertiesModal'
+import { useEditTagsModal } from '../actionModals/useEditTagsModal'
 import { useFeatureMutation } from '../actionModals/useFeatureMutation'
+import { getBaseLink } from '../apps/run/utils'
+import { useAuthUser } from '../auth/useAuthUser'
+import { ActionFunctionsType, HomeScope, ServerScope } from '../home/types'
 import { useAcceptLicenseModal } from '../licenses/useAcceptLicenseModal'
 import { useAttachLicensesModal } from '../licenses/useAttachLicensesModal'
 import { useDetachLicenseModal } from '../licenses/useDetachLicenseModal'
-import { ActionFunctionsType, HomeScope, ServerScope } from '../home/types'
+import { isActionDisabledBasedOnLocked, isActionDisabledBasedOnProtected, isActionDisabledBasedOnRole } from '../spaces/common'
+import { ISpace } from '../spaces/spaces.types'
+import { useCopyFilesModal } from './actionModals/useCopyFilesModal'
 import { useDeleteFileModal } from './actionModals/useDeleteFileModal'
 import { useDownloadFileModal } from './actionModals/useDownloadFileModal'
 import { useEditFileModal } from './actionModals/useEditFileModal'
 import { useEditFolderModal } from './actionModals/useEditFolderModal'
+import { useLockUnlockFileModal } from './actionModals/useLockUnlockFileModal'
 import { useOpenFileModal } from './actionModals/useOpenFileModal'
 import { useOrganizeFileModal } from './actionModals/useOrganizeFileModal'
-import { copyFilesRequest, copyFilesToPrivate, moveFilesRequest } from './files.api'
+import { moveFilesRequest } from './files.api'
 import { IFile } from './files.types'
-import { isActionDisabledBasedOnLocked, isActionDisabledBasedOnProtected, isActionDisabledBasedOnRole } from '../spaces/common'
-import { useLockUnlockFileModal } from './actionModals/useLockUnlockFileModal'
-import { displayPayloadMessage } from '../../utils/api'
-import { getBaseLink } from '../apps/run/utils'
 
 export enum FileActions {
   'Track' = 'Track',
@@ -39,8 +38,7 @@ export enum FileActions {
   'Unfeature' = 'Unfeature',
   'Delete' = 'Delete',
   'Organize' = 'Organize',
-  'Copy to space' = 'Copy to space',
-  'Copy to My Home (private)' = 'Copy to My Home (private)',
+  'Copy to...' = 'Copy to...',
   'Attach to...' = 'Attach to...',
   'Attach License' = 'Attach License',
   'Detach License' = 'Detach License',
@@ -247,27 +245,18 @@ export const useFilesSelectActions = ({
       })
     },
   })
-  const {
-    modalComp: copyToSpaceModal,
-    setShowModal: setCopyToSpaceModal,
-    isShown: isShownCopyToSpaceModal,
-  } = useCopyToSpaceModal({
-    spaceId: space?.id,
-    resource: 'files',
-    selected,
-    updateFunction: copyFilesRequest,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: resourceKeys })
-    },
+  const sourceScopes = new Set()
+  const selectedIds = selected.map(f => {
+    sourceScopes.add(f.scope)
+    return f.id
   })
   const {
-    modalComp: copyToPrivateModal,
-    setShowModal: setCopyToPrivateModal,
-    isShown: isShownCopyToPrivateModal,
-  } = useCopyToPrivateModal({
-    resource: 'files',
-    selected,
-    request: copyFilesToPrivate,
+    modalComp: copyToModal,
+    setShowModal: setCopyToModal,
+    isShown: isShownCopyToModal,
+  } = useCopyFilesModal({
+    sourceScopes: Array.from(sourceScopes.values()) as ServerScope[],
+    selectedIds: selectedIds,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: resourceKeys })
     },
@@ -430,28 +419,16 @@ export const useFilesSelectActions = ({
       showModal: isShownOrganizeFileModal,
       shouldHide: !isAdmin && homeScope !== 'me' && isViewer,
     },
-    'Copy to space': {
+    'Copy to...': {
       type: 'modal',
-      func: () => setCopyToSpaceModal(true),
+      func: () => setCopyToModal(true),
       isDisabled:
         selected.length === 0 ||
         selected.some(e => !e.links.copy) ||
         openSelected ||
         isActionDisabledBasedOnLocked(selected, user?.id, space),
-      modal: copyToSpaceModal,
-      showModal: isShownCopyToSpaceModal,
-      shouldHide: isViewer,
-    },
-    'Copy to My Home (private)': {
-      type: 'modal',
-      func: () => setCopyToPrivateModal(true),
-      isDisabled:
-        selected.length === 0 ||
-        isActionDisabledBasedOnProtected(user?.id, space) ||
-        isActionDisabledBasedOnLocked(selected, user?.id, space),
-      modal: copyToPrivateModal,
-      showModal: isShownCopyToPrivateModal,
-      shouldHide: !isInSpace(homeScope),
+      modal: copyToModal,
+      showModal: isShownCopyToModal,
     },
     'Attach to...': {
       type: 'modal',
@@ -518,7 +495,7 @@ export const useFilesSelectActions = ({
   }
 
   if (homeScope === 'spaces') {
-    actions = pick(['Open', 'Download', 'Rename', 'Copy to space', 'Comments', 'Delete'], actions)
+    actions = pick(['Open', 'Download', 'Rename', 'Copy to...', 'Comments', 'Delete'], actions)
   }
 
   return actions

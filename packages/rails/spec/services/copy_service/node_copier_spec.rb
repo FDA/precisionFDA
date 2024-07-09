@@ -46,13 +46,47 @@ RSpec.describe CopyService::NodeCopier, type: :service do
       it "copies files and folders recursively" do
         nodes = Node.where(id: [file_one.id, folder_one.id])
 
-        expect { copier.copy(nodes, space.uid) }.to change(space.nodes, :size).from(0).to(4)
+        expect { copier.copy(nodes, space.uid, nil) }.to change(space.nodes, :size).from(0).to(4)
 
         nodes_root = space.nodes.where(scoped_parent_folder_id: nil).pluck(:name)
         nodes_in_folder = space.folders.where(name: "folder_one").first.children.pluck(:name)
 
         expect(nodes_root).to contain_exactly("file_one", "folder_one")
         expect(nodes_in_folder).to contain_exactly("file_two", "folder_two")
+      end
+
+      it "copies folders recursively and sync files and subfolders if folder already exists" do
+        nodes = Node.where(id: folder_one.id)
+        copier.copy(nodes, space.uid, nil)
+
+        create(:user_file, scope: source_scope, name: "added_file_one", user:, parent_folder_column => folder_one.id)
+        added_folder_one = create(:folder, scope: source_scope, name: "added_folder_one", user:, parent_folder_column => folder_one.id)
+        create(:user_file, scope: source_scope, name: "added_file_two", user:, parent_folder_column => added_folder_one.id)
+
+        expect { copier.copy(nodes, space.uid, nil) }.to change(space.nodes, :size).from(3).to(6)
+
+        copy_folder = space.folders.where(name: "folder_one").first
+        nodes_in_folder = copy_folder.children.pluck(:name)
+        nodes_in_copy_subfolder = copy_folder.children.where(name: "added_folder_one").first.children.pluck(:name)
+        expect(nodes_in_folder).to contain_exactly("file_two", "folder_two", "added_file_one", "added_folder_one")
+        expect(nodes_in_copy_subfolder).to contain_exactly("added_file_two")
+      end
+
+      it "copies folders recursively and copy files and folders to a subfolder" do
+        nodes = Node.where(id: folder_one.id)
+        copier.copy(nodes, space.uid, nil)
+
+        added_file_one = create(:user_file, scope: source_scope, name: "added_file_one", user:, parent_folder_column => nil)
+        added_folder_one = create(:folder, scope: source_scope, name: "added_folder_one", user:, parent_folder_column => nil)
+        create(:user_file, scope: source_scope, name: "added_file_two", user:, parent_folder_column => added_folder_one.id)
+
+        space_folder_two = space.folders.where(name: "folder_one").first.children.where(name: "folder_two").first
+        expect { copier.copy([added_file_one, added_folder_one], space.uid, space_folder_two.id) }.to change(space.nodes, :size).from(3).to(6)
+
+        nodes_in_copy_folder = space_folder_two.children.pluck(:name)
+        nodes_in_copy_subfolder = space_folder_two.children.where(name: "added_folder_one").first.children.pluck(:name)
+        expect(nodes_in_copy_folder).to contain_exactly("added_file_one", "added_folder_one")
+        expect(nodes_in_copy_subfolder).to contain_exactly("added_file_two")
       end
     end
 
@@ -66,7 +100,7 @@ RSpec.describe CopyService::NodeCopier, type: :service do
 
         result_nodes = Node.where(scope: "public")
 
-        expect { copier.copy(nodes, "public") }.to change(result_nodes, :size).from(0).to(4)
+        expect { copier.copy(nodes, "public", nil) }.to change(result_nodes, :size).from(0).to(4)
 
         nodes_root = result_nodes.where(parent_folder_id: nil).pluck(:name)
         nodes_in_folder = result_nodes.where(name: "folder_one").first.children.pluck(:name)
@@ -85,7 +119,7 @@ RSpec.describe CopyService::NodeCopier, type: :service do
 
         result_nodes = Node.where(scope: "public")
 
-        expect { copier.copy(nodes, "public") }.to change(result_nodes, :size).from(0).to(4)
+        expect { copier.copy(nodes, "public", nil) }.to change(result_nodes, :size).from(0).to(4)
 
         nodes_root = result_nodes.where(parent_folder_id: nil).pluck(:name)
         nodes_in_folder = result_nodes.where(name: "folder_one").first.children.pluck(:name)

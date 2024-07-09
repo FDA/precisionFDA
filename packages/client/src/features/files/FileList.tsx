@@ -1,14 +1,10 @@
 import { useQueryClient } from '@tanstack/react-query'
 import React, { useEffect, useMemo, useRef } from 'react'
-import { Link, useNavigate, useLocation } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { Column, SortingRule, UseResizeColumnsState } from 'react-table'
 import useWebSocket from 'react-use-websocket'
 import { useQueryParam } from 'use-query-params'
-import {
-  BreadcrumbDivider,
-  BreadcrumbLabel,
-  StyledBreadcrumbs,
-} from '../../components/Breadcrumb'
+import { BreadcrumbDivider, BreadcrumbLabel, StyledBreadcrumbs } from '../../components/Breadcrumb'
 import { Button } from '../../components/Button'
 import Dropdown from '../../components/Dropdown'
 import { ContentFooter } from '../../components/Page/ContentFooter'
@@ -21,22 +17,18 @@ import { ErrorBoundary } from '../../utils/ErrorBoundry'
 import { DEFAULT_RECONNECT_ATTEMPTS, DEFAULT_RECONNECT_INTERVAL, SHOULD_RECONNECT, getNodeWsUrl } from '../../utils/config'
 import { cleanObject, getSelectedObjectsFromIndexes, toArrayFromObject } from '../../utils/object'
 import { useAuthUser } from '../auth/useAuthUser'
-import { ISpace } from '../spaces/spaces.types'
 import { ActionsDropdownContent } from '../home/ActionDropdownContent'
-import {
-  ActionsRow, QuickActions,
-  StyledHomeTable,
-} from '../home/home.styles'
+import { ActionsRow, QuickActions, StyledHomeTable } from '../home/home.styles'
 import { ActionsButton } from '../home/show.styles'
-import { IFilter, IMeta, KeyVal, MetaPath, Notification, HomeScope } from '../home/types'
+import { HomeScope, IFilter, IMeta, KeyVal, MetaPath, Notification } from '../home/types'
 import { useList } from '../home/useList'
 import { usePropertiesQuery } from '../home/usePropertiesQuery'
+import { ISpace } from '../spaces/spaces.types'
 import { fetchFiles } from './files.api'
 import { IFile } from './files.types'
 import { useFilesColumns } from './useFilesColumns'
 import { useFilesSelectActions } from './useFilesSelectActions'
 import { useFolderActions } from './useFolderActions'
-
 
 const createSearchParam = (params: Record<string, unknown>) => {
   const query = cleanObject(params)
@@ -61,19 +53,25 @@ const breadcrumbs = (basePath: string, scope?: HomeScope, metaPath: MetaPath[] =
         </Link>
       ))
       // @ts-ignore
-      .reduce((prev, curr) => [prev,<BreadcrumbDivider key={`divider-${prev.id}`}>/</BreadcrumbDivider>,curr])}
+      .reduce((prev, curr) => [prev, <BreadcrumbDivider key={`divider-${prev.id}`}>/</BreadcrumbDivider>, curr])}
   </StyledBreadcrumbs>
 )
 
 type ListType = { files: IFile[]; meta: IMeta }
 
-export const FileList = ({ homeScope, space, showFolderActions = false }: { homeScope?: HomeScope, space?: ISpace, showFolderActions?: boolean }) => {
+export const FileList = ({
+  homeScope,
+  space,
+  showFolderActions = false,
+}: {
+  homeScope?: HomeScope
+  space?: ISpace
+  showFolderActions?: boolean
+}) => {
   const location = useLocation()
   const queryCache = useQueryClient()
 
-  const [folderIdParam, setFolderIdParam] = useQueryParam<string | undefined>(
-    'folder_id',
-  )
+  const [folderIdParam, setFolderIdParam] = useQueryParam<string | undefined>('folder_id')
   const user = useAuthUser()
   const isAdmin = user?.isAdmin ?? false
 
@@ -106,7 +104,7 @@ export const FileList = ({ homeScope, space, showFolderActions = false }: { home
   })
 
   const onRowClick = (id: string) => {
-    navigate(`${location.pathname}/${id}`, { state: { from: location.pathname, fromSearch: location.search }})
+    navigate(`${location.pathname}/${id}`, { state: { from: location.pathname, fromSearch: location.search } })
   }
 
   const { lastJsonMessage: notification } = useWebSocket<Notification>(getNodeWsUrl(), {
@@ -137,11 +135,13 @@ export const FileList = ({ homeScope, space, showFolderActions = false }: { home
 
   const onFolderClick = (folderId: string) => {
     resetSelected()
-    const search = new URLSearchParams(cleanObject({
-      folder_id: folderId,
-      scope: homeScope as string,
-      per_page: perPageParam.toString(),
-    })).toString()
+    const search = new URLSearchParams(
+      cleanObject({
+        folder_id: folderId,
+        scope: homeScope as string,
+        per_page: perPageParam.toString(),
+      }),
+    ).toString()
     navigate({ search })
   }
 
@@ -156,10 +156,7 @@ export const FileList = ({ homeScope, space, showFolderActions = false }: { home
   }, [homeScope])
 
   const files = data?.files || data?.entries
-  const selectedObjects = getSelectedObjectsFromIndexes(
-    selectedIndexes,
-    files,
-  )
+  const selectedObjects = getSelectedObjectsFromIndexes(selectedIndexes, files)
   const actions = useFilesSelectActions({
     homeScope,
     space,
@@ -171,9 +168,6 @@ export const FileList = ({ homeScope, space, showFolderActions = false }: { home
 
   delete actions['Comments']
   delete actions['Request license approval']
-  if(homeScope) {
-    delete actions['Copy to My Home (private)']
-  }
 
   const listActions = useFolderActions(homeScope, folderIdParam!, space?.id)
 
@@ -187,20 +181,16 @@ export const FileList = ({ homeScope, space, showFolderActions = false }: { home
             {showFolderActions && (
               <>
                 <Button
-                  variant='primary'
+                  variant="primary"
                   data-testid="home-files-add-folder-button"
-                  onClick={() =>
-                    listActions['Add Folder']?.func({ showModal: true })
-                  }
+                  onClick={() => listActions['Add Folder']?.func({ showModal: true })}
                 >
                   <PlusIcon height={12} /> Add Folder
                 </Button>
                 <Button
-                  variant='primary'
+                  variant="primary"
                   data-testid="home-files-add-files-button"
-                  onClick={() =>
-                    listActions[space?.id ? 'Choose Add Option' : 'Add Files']?.func({ showModal: true })
-                  }
+                  onClick={() => listActions[space?.id ? 'Choose Add Option' : 'Add Files']?.func({ showModal: true })}
                 >
                   <PlusIcon height={12} /> Add Files
                 </Button>
@@ -212,25 +202,16 @@ export const FileList = ({ homeScope, space, showFolderActions = false }: { home
             content={
               <ActionsDropdownContent
                 actions={actions}
-                message={
-                  homeScope === 'spaces' &&
-                  'To perform other actions on this file, access it from the Space'
-                }
+                message={homeScope === 'spaces' && 'To perform other actions on this file, access it from the Space'}
               />
             }
           >
             {dropdownProps => (
-              <ActionsButton
-                {...dropdownProps}
-                active={dropdownProps.isActive}
-                data-testid="home-files-actions-button"
-              />
+              <ActionsButton {...dropdownProps} active={dropdownProps.isActive} data-testid="home-files-actions-button" />
             )}
           </Dropdown>
         </ActionsRow>
-        <ActionsRow>
-          {breadcrumbs(location.pathname, homeScope, data?.meta?.path)}
-        </ActionsRow>
+        <ActionsRow>{breadcrumbs(location.pathname, homeScope, data?.meta?.path)}</ActionsRow>
       </div>
 
       <FilesListTable
@@ -253,7 +234,7 @@ export const FileList = ({ homeScope, space, showFolderActions = false }: { home
         hiddenColumns={hiddenColumns}
         saveHiddenColumns={saveHiddenColumns}
       />
-      
+
       <ContentFooter>
         <Pagination
           page={data?.meta?.pagination?.current_page}
@@ -279,8 +260,7 @@ export const FileList = ({ homeScope, space, showFolderActions = false }: { home
       {actions['Edit folder info']?.modal}
       {actions['Delete']?.modal}
       {actions['Organize']?.modal}
-      {actions['Copy to space']?.modal}
-      {actions['Copy to My Home (private)']?.modal}
+      {actions['Copy to...']?.modal}
       {actions['Attach to...']?.modal}
       {actions['Attach License']?.modal}
       {actions['Detach License']?.modal}
@@ -328,9 +308,7 @@ export const FilesListTable = ({
   setSortBy: (cols: SortingRule<string>[]) => void
   homeScope?: HomeScope
   colWidths: KeyVal
-  saveColumnResizeWidth: (
-    columnResizing: UseResizeColumnsState<any>['columnResizing'],
-  ) => void
+  saveColumnResizeWidth: (columnResizing: UseResizeColumnsState<any>['columnResizing']) => void
   hiddenColumns: string[]
   saveHiddenColumns: (cols: string[]) => void
 }) => {
@@ -339,16 +317,15 @@ export const FilesListTable = ({
   function filterColsByScope(c: Column<IFile>): boolean {
     return !(
       // If the homeScope is 'me', hide 'added_by' regardless of other conditions.
-      (homeScope === 'me' && c.accessor === 'added_by') ||
-      
-      // Hide 'location' for all homeScopes except 'spaces'.
-      (homeScope !== 'spaces' && c.accessor === 'location') ||
-      
-      // Hide 'featured' for all homeScopes except 'everybody'.
-      (homeScope !== 'everybody' && c.accessor === 'featured') ||
-      
-      // Hide 'state' if homeScope is defined to something specific.
-      (homeScope !== undefined && c.accessor === 'state')
+      (
+        (homeScope === 'me' && c.accessor === 'added_by') ||
+        // Hide 'location' for all homeScopes except 'spaces'.
+        (homeScope !== 'spaces' && c.accessor === 'location') ||
+        // Hide 'featured' for all homeScopes except 'everybody'.
+        (homeScope !== 'everybody' && c.accessor === 'featured') ||
+        // Hide 'state' if homeScope is defined to something specific.
+        (homeScope !== undefined && c.accessor === 'state')
+      )
     )
   }
 
@@ -359,7 +336,7 @@ export const FilesListTable = ({
     isAdmin,
     properties,
   }).filter(filterColsByScope)
-  
+
   const columns = useMemo(() => col, [col, location.search, properties])
   const data = useMemo(() => files || [], [files])
   return (

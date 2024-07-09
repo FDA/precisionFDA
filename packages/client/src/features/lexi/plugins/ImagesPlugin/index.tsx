@@ -41,7 +41,7 @@ import Button from '../../ui/Button';
 import {DialogActions, DialogButtonsList} from '../../ui/Dialog';
 import FileInput from '../../ui/FileInput';
 import TextInput from '../../ui/TextInput';
-import DataPortalResourceSelect from '../../../data-portals/resources/DataPortalResourceSelect';
+import { DataPortalResources } from '../../../resources/useDataPortalResourceModal';
 
 export type InsertImagePayload = Readonly<ImagePayload>;
 
@@ -57,23 +57,8 @@ export function InsertResourceImageDialogBody({
 }: {
   onClick: (payload: InsertImagePayload) => void;
 }) {
-  const [src, setSrc] = useState('');
-  const [altText, setAltText] = useState('');
-
-  const isDisabled = src === '';
-
   return (
-    <>
-      <DataPortalResourceSelect onSelect={setSrc} />
-      <DialogActions>
-        <Button
-          data-testid="image-modal-confirm-btn"
-          disabled={isDisabled}
-          onClick={() => onClick({altText, src})}>
-          Confirm
-        </Button>
-      </DialogActions>
-    </>
+    <DataPortalResources onlyImg onInsert={onClick} />
   );
 }
 

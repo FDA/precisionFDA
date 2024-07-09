@@ -22,6 +22,7 @@ services:
     environment:
       - NODEJS_DB_POLLING_INTERVAL=${NODEJS_DB_POLLING_INTERVAL:-5}
       - NODE_REDIS_URL=redis://redis:6379/0
+      - NODE_ADMIN_PLATFORM_CLIENT_URL=http://nodejs-admin-platform-client:3002
 
   web:
     extends:
@@ -66,6 +67,12 @@ services:
     extends:
       service: base_nodejs
     command: ['make', 'run-worker-dist']
+  nodejs-admin-platform-client:
+    extends:
+      service: base_nodejs
+    command: [ 'make', 'run-admin-platform-client-dist' ]
+    ports:
+      - 3002:3002
   sidekiq:
     extends:
       service: base_ruby

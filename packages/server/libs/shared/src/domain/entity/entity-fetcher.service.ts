@@ -184,6 +184,11 @@ export class EntityFetcherService {
     return classType === Space
   }
 
+  async getEditableSpaces() {
+    const { editableSpaces } = await this.loadUserAndMemberships()
+    return editableSpaces
+  }
+
   // eslint-disable-next-line max-len
   async getAccessible<E extends UidEntity | IdEntity, H extends string = never>(
     type: EntityName<E>,
@@ -292,7 +297,12 @@ export class EntityFetcherService {
     )
   }
 
-  async getAccessibleByUid<E extends UidEntity, H extends string = never, F extends string = '*', EX extends string = never>(
+  async getAccessibleByUid<
+    E extends UidEntity,
+    H extends string = never,
+    F extends string = '*',
+    EX extends string = never,
+  >(
     type: EntityName<E>,
     uid: E['uid'],
     where?: ObjectQuery<E>,
@@ -305,7 +315,12 @@ export class EntityFetcherService {
     )
   }
 
-  async getEditableByUid<E extends UidEntity, H extends string = never, F extends string = '*', EX extends string = never>(
+  async getEditableByUid<
+    E extends UidEntity,
+    H extends string = never,
+    F extends string = '*',
+    EX extends string = never,
+  >(
     type: EntityName<E>,
     uid: E['uid'],
     where?: ObjectQuery<E>,
@@ -322,11 +337,12 @@ export class EntityFetcherService {
     return this.em.findOne(type, { uid } as FilterQuery<E>)
   }
 
-  async getById<E extends IdEntity, H extends string = never, F extends string = '*', EX extends string = never>(
-    type: EntityName<E>,
-    id: E['id'],
-    options?: FindOptions<E, H, F, EX>,
-  ) {
+  async getById<
+    E extends IdEntity,
+    H extends string = never,
+    F extends string = '*',
+    EX extends string = never,
+  >(type: EntityName<E>, id: E['id'], options?: FindOptions<E, H, F, EX>) {
     return this.em.findOne(type, { id } as FilterQuery<E>, options)
   }
 
