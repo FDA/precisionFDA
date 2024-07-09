@@ -46,11 +46,21 @@ const TrackCanvas = styled.div`
   border: 1px solid var(--c-layout-border);
   border-radius: 3px;
   * {
+    font-size: 12px;
     font-family: 'Lato', 'Helvetica Neue', Helvetica, Arial, sans-serif !important;
   }
   svg {
     display: unset;
     max-width: unset;
+  }
+
+  .node .content svg {
+    height: 13px;
+  }
+  .node a {
+    height: 36px;
+    padding: 8px;
+    font-size: 12px;
   }
 `
 
