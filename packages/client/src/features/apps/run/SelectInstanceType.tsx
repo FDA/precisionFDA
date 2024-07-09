@@ -4,6 +4,7 @@ import { Select } from '../../../components/Select'
 import { ErrorMessageForField } from './ErrorMessageForField'
 import { FieldGroup } from '../../../components/form/FieldGroup'
 import { ComputeInstance, PricingMap, RunJobFormType } from '../apps.types'
+import { StyledMaxRuntime } from './styles'
 
 export const SelectInstanceType = ({
   control,
@@ -61,7 +62,7 @@ export const SelectInstanceType = ({
               isDisabled={isSubmitting}
               inputId={inputId}
             />
-            <small>{maxRuntime}</small>
+            <StyledMaxRuntime>{maxRuntime}</StyledMaxRuntime>
           </>
         )}
       />

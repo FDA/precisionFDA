@@ -25,18 +25,16 @@ export const ConditionalAnchor = ({ isAllowed, onViolation, children, href, data
 type CloudResourcesConditionalAnchorProps = {
   children?: React.ReactNode
   href: string
-  dataMethod?: 'GET' | 'POST'
   conditionType: CloudResourcesConditionType
 }
 
-export const CloudResourcesConditionalAnchor = ({ children, href, dataMethod, conditionType }: CloudResourcesConditionalAnchorProps) => {
+export const CloudResourcesConditionalAnchor = ({ children, href, conditionType }: CloudResourcesConditionalAnchorProps) => {
   const { isAllowed, onViolation } = useCloudResourcesCondition(conditionType)
   return (
     <ConditionalAnchor
       href={href}
       isAllowed={isAllowed}
       onViolation={onViolation}
-      dataMethod={dataMethod}
     >
       {children}
     </ConditionalAnchor>

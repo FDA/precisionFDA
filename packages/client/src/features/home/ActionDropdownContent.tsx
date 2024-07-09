@@ -6,6 +6,7 @@ import { colors } from '../../styles/theme'
 import { ActionFunctionsType, ActionGroupType, Link as LinkType } from './types'
 import { CheckIcon } from '../../components/icons/CheckIcon'
 import { NavLink } from '../../components/NavLink'
+import MagicLink from './MagicPostLink'
 
 // Updated disbaled text color for remediation using textMediumGrey
 export const StyledActionItem = styled.li<{ disabled?: boolean, selected?: boolean }>`
@@ -32,8 +33,8 @@ export const StyledActionItem = styled.li<{ disabled?: boolean, selected?: boole
       }
     `}
   ${({ selected }) => selected && css`
-    font-weight: 600;
-  `}
+      font-weight: 600;
+    `}
   &:hover {
     background: var(--tertiary-100);
   }
@@ -132,28 +133,23 @@ const LinkAction = ({
     return children
   }
   const url = typeof link === 'string' ? link : link.url
-  const method = typeof link === 'string' ? 'GET' : link.method
-  return cloudResourcesConditionType ? (
-    <CloudResourcesConditionalAnchor
-      href={url}
-      data-turbolinks="false"
-      dataMethod={method}
-      conditionType={cloudResourcesConditionType}
-    >
+
+  if (link?.method === 'POST') {
+    return <MagicLink link={link}>{children}</MagicLink>
+  }
+  if (cloudResourcesConditionType) {
+    <CloudResourcesConditionalAnchor href={url} conditionType={cloudResourcesConditionType}>
       {children}
     </CloudResourcesConditionalAnchor>
-  ) : (
-    <a data-turbolinks="false" href={url} data-method={method}>
+  }
+  return (
+    <a href={url}>
       {children}
     </a>
   )
 }
 
-const ActionItem = ({
-  action,
-}: {
-  action: ActionFunctionsType<any>[number]
-}) => {
+const ActionItem = ({ action }: { action: ActionFunctionsType<any>[number] }) => {
   const isDisabled = action?.isDisabled ?? true
   switch (action?.type) {
     case 'route':
@@ -246,17 +242,17 @@ export function ActionsDropdownGroupContent({
     <GroupActionMenu>
       {content.map((item, index) => {
         const visibleActions = Object.keys(item.actions)
-        .filter(a => !item.actions[a]?.shouldHide ?? true)
-        .map(v => ({ key: v, ...item.actions[v] }))
-          return (
-            <div key={item.title.toLowerCase().replace(/ /g, '-')}>
-              {item?.title && <StyleGroupActionTitle>{item.title}</StyleGroupActionTitle>}
-              {visibleActions.map(a => (
-                <ActionItem key={a.key} action={a as any} />
-              ))}
-              {index !== content.length - 1 && <GroupHorizontalSeparator />}
-            </div>
-          )
+          .filter(a => !item.actions[a]?.shouldHide ?? true)
+          .map(v => ({ key: v, ...item.actions[v] }))
+        return (
+          <div key={item.title.toLowerCase().replace(/ /g, '-')}>
+            {item?.title && <StyleGroupActionTitle>{item.title}</StyleGroupActionTitle>}
+            {visibleActions.map(a => (
+              <ActionItem key={a.key} action={a as any} />
+            ))}
+            {index !== content.length - 1 && <GroupHorizontalSeparator />}
+          </div>
+        )
       })}
     </GroupActionMenu>
   )

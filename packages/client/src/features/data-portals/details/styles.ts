@@ -47,6 +47,10 @@ export const DataPortalPageMainBody = styled.div`
   display: flex;
   flex-grow: 1;
 `
+export const BodyContent = styled.div`
+  max-width: 1000px;
+  flex: 1;
+`
 export const StyledInnerHTML = styled.div`
   flex: 1;
   max-width: 900px;
