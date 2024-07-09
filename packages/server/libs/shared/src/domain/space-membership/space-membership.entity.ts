@@ -13,8 +13,9 @@ import { User } from '@shared/domain/user/user.entity'
 import { isNil } from 'ramda'
 import { BaseEntity } from '../../database/base-entity'
 import { SPACE_MEMBERSHIP_ROLE, SPACE_MEMBERSHIP_SIDE } from './space-membership.enum'
+import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
 
-@Entity({ tableName: 'space_memberships' })
+@Entity({ tableName: 'space_memberships', repository: () => SpaceMembershipRepository })
 export class SpaceMembership extends BaseEntity {
   @PrimaryKey()
   id: number
@@ -31,7 +32,7 @@ export class SpaceMembership extends BaseEntity {
   @ManyToOne(() => User)
   user!: Ref<User>
 
-  @ManyToMany(() => Space, space => space.spaceMemberships)
+  @ManyToMany(() => Space, (space) => space.spaceMemberships)
   spaces = new Collection<Space>(this)
 
   constructor(user: User, space?: Space) {

@@ -97,7 +97,6 @@ export const createMockWorkflowExecution = (id: string, uid: string, numberOfJob
 
 export const createMockSpace = (): ISpace => {
   return {
-    can_duplicate: false,
     confidential_space: {} as ConfidentialSpace,
     protected: true,
     host_lead: {
@@ -133,7 +132,7 @@ export const createMockSpace = (): ISpace => {
       active: true,
       created_at: '2022-03-12T12:00:00.000Z',
       id: 1,
-      meta: { can_duplicate: '' },
+      meta: { },
       role: 'admin',
       side: 'host',
       updated_at: '2022-03-12T12:00:00.000Z',

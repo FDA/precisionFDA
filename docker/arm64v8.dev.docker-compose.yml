@@ -99,6 +99,21 @@ services:
         target: /app
       - yarn-network-cache-nodejs-worker:${YARNV1_CACHE_DIR}
       - yarn-deps-cache-nodejs-worker:/app/node_modules
+  nodejs-admin-platform-client:
+    extends:
+      file: ./base.services.yml
+      service: nodejs-admin-platform-client
+    build:
+      context: ../packages/server
+      dockerfile: ./docker/images/node.isolated-dev.Dockerfile
+    command: [ 'make', 'watch-admin-platform-client' ]
+    environment:
+      - NODE_ENV=development
+      - SKIP_NODEJS_DB_WAITING=1
+    volumes:
+      - type: bind
+        source: ../packages/server
+        target: /app
   db:
     platform: linux/arm64
     extends:

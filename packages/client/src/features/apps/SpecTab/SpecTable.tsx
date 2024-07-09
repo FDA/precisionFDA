@@ -77,14 +77,16 @@ export const SpecTable = ({
   spaceId,
   title,
   config,
+  dataTestId,
 }: {
   spaceId?: string,
   title: string
   config: InputSpec[] | IOSpec[]
+  dataTestId: string
 }) => {
   if (!config.length) {
     return (
-      <div className="__table">
+      <div className="__table" data-testid={dataTestId}>
         <div className="__table_title">{title}</div>
         <div className="__table_row">
           <div className="__table_row_none">No {title} specified</div>
@@ -154,7 +156,7 @@ export const SpecTable = ({
   })
 
   return (
-    <div className="__table">
+    <div className="__table" data-testid={dataTestId}>
       <div className="__table_title">{title}</div>
       {data}
     </div>

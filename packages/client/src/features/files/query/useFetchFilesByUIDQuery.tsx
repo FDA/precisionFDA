@@ -7,4 +7,4 @@ export function useFetchFilesByUIDQuery(uids: string[]) {
     queryKey: ['user-list-files', uids],
     enabled: !!uids && uids.length > 0,
   })
-} 
+}

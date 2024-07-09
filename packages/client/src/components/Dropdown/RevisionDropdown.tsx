@@ -99,10 +99,10 @@ export const RevisionDropdown = ({
     0,
   )
   const renderRevisionsList = () => (
-    <Ol>
+    <Ol data-testid="dropdown-revisions">
       <LiTitle>Revisions</LiTitle>
       {revisions.map(r => (
-        !r.deleted && <Li key={r.id} $active={r.revision === selectedValue}><StyledLink to={linkToRevision(r)}>{r.revision}{r.revision === lastRevision && <TagPill>Latest</TagPill>}</StyledLink></Li>
+        !r.deleted && <Li data-testid={`dropdown-revision-${r.revision}`} key={r.id} $active={r.revision === selectedValue}><StyledLink to={linkToRevision(r)}>{r.revision}{r.revision === lastRevision && <TagPill>Latest</TagPill>}</StyledLink></Li>
       ))}
     </Ol>
   )

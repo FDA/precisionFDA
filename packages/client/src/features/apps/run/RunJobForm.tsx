@@ -106,6 +106,7 @@ export const RunJobForm = ({ app, userJobLimit, spec }: { app: IApp; spec: AppSp
     getValues,
     trigger,
     setValue,
+    setError,
     watch,
     reset,
   } = useForm<RunJobFormType>({
@@ -339,6 +340,7 @@ export const RunJobForm = ({ app, userJobLimit, spec }: { app: IApp; spec: AppSp
                             errors={errors as FieldErrors<Record<string, unknown>>}
                             disabled={isSubmitting}
                             register={register}
+                            setError={setError}
                             scope={app.entity_type === 'https' ? watch().scope?.value : app.scope}
                           />
                         </FieldGroup>
@@ -355,7 +357,7 @@ export const RunJobForm = ({ app, userJobLimit, spec }: { app: IApp; spec: AppSp
         <SetOutputFolder control={control} isSubmitting={isSubmitting} spec={spec} setShowModal={setOrganizeFileModal} />
       </AppsConfiguration>
       <StyledActionsContainer>
-        <Button variant="primary" disabled={isSubmitting} type="button" form="submitJobForm" onClick={handleSubmit(onSubmit)}>
+        <Button variant="primary" disabled={isSubmitting || Object.keys(errors).length > 0} type="button" form="submitJobForm" onClick={handleSubmit(onSubmit)}>
           {isSubmitting ? 'Running' : runButtonText}
         </Button>
         <RightGroup>

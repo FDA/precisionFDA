@@ -56,6 +56,7 @@ const InputSpecRow = ({
   // trigger validations on 'default' if 'isArray' changes
   useEffect(() => {
     trigger(`input_spec.${index}.default`)
+    setValue(`input_spec.${index}.default`, null)
     setValue(`input_spec.${index}.class`, setClassVal(sClass, isArray))
   }, [isArray])
 
