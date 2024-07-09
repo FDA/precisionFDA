@@ -12,6 +12,18 @@
       "cache": false,
       "persistent": true
     },
+    "start:dev:api": {
+      "cache": false,
+      "persistent": true
+    },
+    "start:dev:worker": {
+      "cache": false,
+      "persistent": true
+    },
+    "start:dev:admin-platform-client": {
+      "cache": false,
+      "persistent": true
+    },
     "lint": {},
     "test": {}
   }
