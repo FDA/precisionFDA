@@ -25,14 +25,12 @@ import { IApp } from '../apps/apps.types'
 import { ChallengesBanner } from './ChallengesBanner'
 import ChallengesOverviewList from './ChallengesOverviewList'
 import { OverviewNewsList } from './OverviewNewsList'
-import { ParticipantPersonsList } from './ParticipantPersonsList'
 import { ParticipantOrgsList } from './ParticipantsOrgsList'
 import {
   CommunityParticipants,
   ExpertSection,
   Hr,
   InfoRow,
-  PFDATeamSection,
   PageOverviewMainBody,
 } from './styles'
 import { AppTypeIconBlue } from '../../components/icons/AppTypeIconBlue'
@@ -295,13 +293,6 @@ export const OverviewAuthed = () => {
           <a href="mailto:precisionfda@fda.hhs.gov">Feedback</a>
         </InfoRow>
       </PageMainBody>
-
-      <PFDATeamSection>
-        <SectionTitle>PRECISIONFDA TEAM</SectionTitle>
-        <div>
-          <ParticipantPersonsList/>
-        </div>
-      </PFDATeamSection>
     </PublicLayout>
   )
 }
