@@ -18,20 +18,20 @@ import { ListJobsOperation } from '@shared/domain/job/ops/list'
 import { RequestTerminateJobOperation } from '@shared/domain/job/ops/terminate'
 import { WorkstationSnapshotOperation } from '@shared/domain/job/ops/workstation-snapshot'
 import { WorkstationService } from '@shared/domain/job/workstation.service'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { createSyncJobStatusTask } from '@shared/queue'
 import { UserOpsCtx } from '@shared/types'
-import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { schemas } from '@shared/utils/base-schemas'
 import { UserContextGuard } from '../user-context/guard/user-context.guard'
 import { JsonSchemaPipe } from '../validation/pipes/json-schema.pipe'
 import {
+  JobSetAPIKeyParams,
+  JobSnapshotParams,
+  WorkstationAliveParams,
   jobListQuerySchema,
   jobSetAPIKeyBodySchema,
-  JobSetAPIKeyParams,
   jobSnapshotBodySchema,
-  JobSnapshotParams,
   workstationAliveBodySchema,
-  WorkstationAliveParams,
 } from './job.schemas'
 
 @UseGuards(UserContextGuard)

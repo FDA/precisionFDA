@@ -1,25 +1,38 @@
-import { Logger } from '@nestjs/common'
+import { CreateRequestContext, SqlEntityManager } from '@mikro-orm/mysql'
+import { Logger, UseInterceptors } from '@nestjs/common'
 import {
   ConnectedSocket,
   MessageBody,
+  OnGatewayConnection,
   OnGatewayDisconnect,
   OnGatewayInit,
+  SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets'
-import { AuthSessionOperation } from '@shared/domain/auth/auth.session'
+import { config } from '@shared/config'
+import { OrmContextInterceptor } from '@shared/database/interceptor/orm-context.interceptor'
+import { UId } from '@shared/domain/entity/domain/uid'
+import { EntityFetcherService } from '@shared/domain/entity/entity-fetcher.service'
+import { Job } from '@shared/domain/job/job.entity'
+import { JobLogService } from '@shared/domain/job/services/job-log.service'
 import { NotificationService } from '@shared/domain/notification/services/notification.service'
-import { createRedisClient, NOTIFICATIONS_QUEUE } from '@shared/services/redis.service'
-import { Server, WebSocket } from 'ws'
+import { Session } from '@shared/domain/session/session.entity'
+import { PermissionError } from '@shared/errors'
+import { NOTIFICATIONS_QUEUE, createRedisClient } from '@shared/services/redis.service'
+import { CookieUtils } from '@shared/utils/cookie-utils'
+import { Encryptor } from '@shared/utils/encryptor'
+import { HashUtils } from '@shared/utils/hash-utils'
+import { TimeUtils } from '@shared/utils/time.utils'
+import { PfdaWebSocket, WEBSOCKET_EVENTS } from '@shared/websocket/model/pfda-web-socket'
+import { IncomingMessage } from 'http'
+import { Server } from 'ws'
 import { log } from '../logger'
-import { SubscribeMessageWithContext } from './decorator/subscribe-message-with-context'
+import { UserContextTokenInterceptor } from '../user-context/interceptor/user-context-token.interceptor'
 
-interface PfdaWebSocket extends WebSocket {
-  PFDA_USER_ID: number
-}
-
+@UseInterceptors(UserContextTokenInterceptor, OrmContextInterceptor)
 @WebSocketGateway()
-export class WebsocketGateway implements OnGatewayDisconnect, OnGatewayInit {
+export class WebsocketGateway implements OnGatewayDisconnect, OnGatewayInit, OnGatewayConnection {
   @WebSocketServer()
   server: Server
 
@@ -28,7 +41,9 @@ export class WebsocketGateway implements OnGatewayDisconnect, OnGatewayInit {
 
   constructor(
     private readonly notificationService: NotificationService,
-    private readonly authSessionOperation: AuthSessionOperation,
+    private readonly entityFetcherService: EntityFetcherService,
+    private readonly jobLogService: JobLogService,
+    private readonly em: SqlEntityManager,
   ) {}
 
   afterInit() {
@@ -37,53 +52,93 @@ export class WebsocketGateway implements OnGatewayDisconnect, OnGatewayInit {
     )
   }
 
-  handleDisconnect(client: PfdaWebSocket) {
-    this.logger.verbose(`Websocket client disconnected: ${client}`)
-
-    const userId = client.PFDA_USER_ID
-
-    if (userId == null) {
-      return
-    }
-
-    const connections = this.clientConnections.get(userId)
-
-    if (!connections) {
-      return
-    }
-
-    connections.delete(client)
-
-    if (connections.size === 0) {
-      this.clientConnections.delete(userId)
-    }
-  }
-
-  @SubscribeMessageWithContext('login')
-  async handleLogin(
-    @ConnectedSocket() client: PfdaWebSocket,
-    @MessageBody('sessionId') sessionId: string,
-  ) {
+  @CreateRequestContext()
+  async handleConnection(client: PfdaWebSocket, message: IncomingMessage) {
     try {
-      const user = await this.authSessionOperation.execute(sessionId)
+      this.logger.verbose(`Websocket client connected: ${client}`)
 
-      if (!this.clientConnections.has(user.id)) {
-        this.clientConnections.set(user.id, new Set())
+      const token = CookieUtils.getCookie('_precision-fda_session', message.headers.cookie)
+      client.PFDA_AUTH_TOKEN = token
+
+      const decrypted = Encryptor.decrypt(token)
+      const sessionId = decrypted.session_id
+      const session = await this.em.findOneOrFail(Session, {
+        key: HashUtils.hashSessionId(sessionId),
+      })
+      // ref: app/models/session.rb#expired?
+      if (
+        session.updatedAt.getTime() < TimeUtils.minutesAgoInMiliseconds(config.maxTimeInactivity)
+      ) {
+        throw new Error('Session expired')
       }
 
-      this.clientConnections.get(user.id).add(client)
-      client.PFDA_USER_ID = user.id
+      const userId = decrypted.user_id
+      const dxuser = decrypted.username
+
+      if (!this.clientConnections.has(userId)) {
+        this.clientConnections.set(userId, new Set())
+      }
+
+      this.clientConnections.get(userId).add(client)
 
       this.logger.verbose(
-        `User ${user.dxuser} successfully authenticated for receiving WebSocket notifications`,
+        `User ${dxuser} successfully authenticated for receiving WebSocket notifications`,
       )
 
-      const unreadNotifications = await this.notificationService.getUnreadNotifications(user.id)
+      const unreadNotifications = await this.notificationService.getUnreadNotifications(userId)
       unreadNotifications.forEach((notification) => {
         client.send(JSON.stringify(notification))
       })
+    } catch (e) {
+      this.logger.error(`WebSocket connection error: ${e}`)
+
+      client.close(4001, e?.message)
+    }
+  }
+
+  handleDisconnect(client: PfdaWebSocket) {
+    try {
+      this.logger.verbose(`Websocket client disconnected: ${client}`)
+
+      const token = client.PFDA_AUTH_TOKEN
+
+      const decrypted = Encryptor.decrypt(token)
+      const userId = decrypted.user_id
+      if (userId == null) {
+        return
+      }
+
+      const connections = this.clientConnections.get(userId)
+
+      if (!connections) {
+        return
+      }
+
+      client.close()
+      connections.delete(client)
+
+      if (connections.size === 0) {
+        this.clientConnections.delete(userId)
+      }
+    } catch (e) {
+      this.logger.error(`Websocket disconnection error: ${e}`)
+    }
+  }
+
+  @SubscribeMessage(WEBSOCKET_EVENTS.JOB_LOG)
+  async fetchJobLog(
+    @ConnectedSocket() client: PfdaWebSocket,
+    @MessageBody() data: { jobUid: UId },
+  ) {
+    try {
+      const jobUid = data.jobUid
+      const job = (await this.entityFetcherService.getAccessibleByUid(Job, jobUid)) as Job
+      if (!job) {
+        throw new PermissionError('User is not the owner of this job')
+      }
+      await this.jobLogService.streamJobLogs(job, client)
     } catch (error) {
-      this.logger.error(`WebSocket connection authentication failed. ${error}`)
+      this.logger.error(`Failed to fetch job log. ${error}`)
     }
   }
 
@@ -96,7 +151,13 @@ export class WebsocketGateway implements OnGatewayDisconnect, OnGatewayInit {
 
       delete notification.user // not sending user info to client
 
-      this.sendNotification(userId, JSON.stringify(notification))
+      this.sendNotification(
+        userId,
+        JSON.stringify({
+          type: WEBSOCKET_EVENTS.NOTIFICATION,
+          data: notification,
+        }),
+      )
     })
 
     this.server.on('close', () => {

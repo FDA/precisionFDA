@@ -2,56 +2,63 @@ import {
   Collection,
   Entity,
   Filter,
-  Ref,
   JsonType,
   ManyToMany,
   ManyToOne,
+  OneToMany,
   PrimaryKey,
   Property,
+  Ref,
   Reference,
-  OneToMany,
 } from '@mikro-orm/core'
 import { App } from '@shared/domain/app/app.entity'
 import { JobRunData } from '@shared/domain/job/job.types'
 import { JobProperty } from '@shared/domain/property/job-property.entity'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { User } from '@shared/domain/user/user.entity'
+import { STATIC_SCOPE } from '@shared/enums'
 import { JobDescribeResponse } from '@shared/platform-client/platform-client.responses'
 import { BaseEntity } from '../../database/base-entity'
 import { WorkaroundJsonType } from '../../database/custom-json-type'
-import { JobRepository } from './job.repository'
-import { isStateActive, isStateTerminal } from './job.helper'
-import { JOB_DB_ENTITY_TYPE, JOB_STATE } from './job.enum'
-import { STATIC_SCOPE } from '@shared/enums'
-import { Provenance } from './job.input'
-import { getIdFromScopeName, scopeContainsId } from '../space/space.helper'
-import { formatDuration } from '../../utils/format'
 import { EntityScope } from '../../types/common'
+import { formatDuration } from '../../utils/format'
+import { getIdFromScopeName, scopeContainsId } from '../space/space.helper'
+import { JOB_DB_ENTITY_TYPE, JOB_STATE } from './job.enum'
+import { isStateActive, isStateTerminal } from './job.helper'
+import { Provenance } from './job.input'
+import { JobRepository } from './job.repository'
 
 @Entity({ tableName: 'jobs', repository: () => JobRepository })
-@Filter({ name: 'ownedBy', cond: args => ({ user: { id: args.userId } }) })
+@Filter({ name: 'ownedBy', cond: (args) => ({ user: { id: args.userId } }) })
 // Tried the following but didn't work
 // @Filter({ name: 'isActive', cond: { $or: [ ACTIVE_STATES.map(x => { return { 'state': x } }) ]}})
 // @Filter({ name: 'isTerminal', cond: { $or: [ TERMINAL_STATES.map(x => { return { 'state': x } }) ]}})
-@Filter({ name: 'isActive', cond: { $or: [
-  { state: JOB_STATE.IDLE },
-  { state: JOB_STATE.RUNNING },
-]}})
-@Filter({ name: 'isNonTerminal', cond: { $or: [
-  { state: JOB_STATE.IDLE },
-  { state: JOB_STATE.RUNNING },
-  { state: JOB_STATE.TERMINATING },
-]}})
-@Filter({ name: 'isTerminal', cond: { $or: [
-  { state: JOB_STATE.DONE },
-  { state: JOB_STATE.TERMINATED },
-]}})
 @Filter({
-  name: 'accessibleBy', cond: args => ({
+  name: 'isActive',
+  cond: { $or: [{ state: JOB_STATE.IDLE }, { state: JOB_STATE.RUNNING }] },
+})
+@Filter({
+  name: 'isNonTerminal',
+  cond: {
     $or: [
-      {user: {id: args.userId}, scope: STATIC_SCOPE.PRIVATE},
-      {scope: {$in: args.spaceScopes}}]
-  })
+      { state: JOB_STATE.IDLE },
+      { state: JOB_STATE.RUNNING },
+      { state: JOB_STATE.TERMINATING },
+    ],
+  },
+})
+@Filter({
+  name: 'isTerminal',
+  cond: { $or: [{ state: JOB_STATE.DONE }, { state: JOB_STATE.TERMINATED }] },
+})
+@Filter({
+  name: 'accessibleBy',
+  cond: (args) => ({
+    $or: [
+      { user: { id: args.userId }, scope: STATIC_SCOPE.PRIVATE },
+      { scope: { $in: args.spaceScopes } },
+    ],
+  }),
 })
 export class Job extends BaseEntity {
   @PrimaryKey()
@@ -81,9 +88,9 @@ export class Job extends BaseEntity {
   @OneToMany({
     entity: () => JobProperty,
     mappedBy: 'job',
-    orphanRemoval: true
+    orphanRemoval: true,
   })
-  properties = new Collection<JobProperty>(this);
+  properties = new Collection<JobProperty>(this)
 
   @Property({ type: WorkaroundJsonType })
   runData: JobRunData
@@ -141,7 +148,7 @@ export class Job extends BaseEntity {
   }
 
   hasHttpsAppState(): boolean {
-    return this.isHTTPS() && this.app?.getEntity().hasHttpsAppState || false
+    return (this.isHTTPS() && this.app?.getEntity().hasHttpsAppState) || false
   }
 
   isActive(): boolean {

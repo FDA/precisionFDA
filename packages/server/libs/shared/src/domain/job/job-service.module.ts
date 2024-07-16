@@ -7,13 +7,14 @@ import { UserFileModule } from '@shared/domain/user-file/user-file.module'
 import { UserModule } from '@shared/domain/user/user.module'
 import { PlatformClient } from '@shared/platform-client'
 import { PlatformClientModule } from '@shared/platform-client/platform-client.module'
+import { JobLogService } from './services/job-log.service'
 
 const imports = [UserModule, PlatformClientModule, NotificationModule, UserFileModule, EmailModule]
 
 @Module({
   imports,
-  providers: [JobService],
-  exports: [JobService],
+  providers: [JobService, JobLogService],
+  exports: [JobService, JobLogService],
 })
 export class JobServiceModule {
   static registerWithCustomPlatformClient(

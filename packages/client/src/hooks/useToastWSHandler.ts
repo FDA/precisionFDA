@@ -2,8 +2,8 @@ import { useEffect } from 'react'
 import { toast } from 'react-toastify'
 import useWebSocket from 'react-use-websocket'
 import { BasicToast, ToastWithLink } from '../components/Toast'
+import { NOTIFICATION_ACTION, Notification, SEVERITY, WEBSOCKET_MESSSAGE_TYPE, WebSocketMessage } from '../features/home/types'
 import { confirmNotification } from '../features/notifications/notifications.api'
-import { Notification, NOTIFICATION_ACTION, SEVERITY } from '../features/home/types'
 import { IUser } from '../types/user'
 import {
   DEFAULT_RECONNECT_ATTEMPTS,
@@ -31,32 +31,37 @@ const toastHandlers = {
 }
 
 export const useToastWSHandler = (user?: IUser) => {
-  const { sendMessage, lastJsonMessage: notification, readyState } = useWebSocket<Notification>(getNodeWsUrl(), {
+  const { lastJsonMessage } = useWebSocket<WebSocketMessage>(getNodeWsUrl(), {
     share: true,
     reconnectInterval: DEFAULT_RECONNECT_INTERVAL,
     reconnectAttempts: DEFAULT_RECONNECT_ATTEMPTS,
     shouldReconnect: () => SHOULD_RECONNECT,
+    filter: message => {
+      try {
+        const data = JSON.parse(message.data)
+        return data.type === WEBSOCKET_MESSSAGE_TYPE.NOTIFICATION
+      } catch (e) {
+        return false
+      }
+    },
   })
 
   useEffect(() => {
-    if (user?.session_id && readyState === 1) {
-      const message = { event: 'login', data: { sessionId: user?.session_id }}
-      sendMessage(JSON.stringify(message))
+    if (lastJsonMessage == null) {
+      return
     }
-  }, [readyState, user?.session_id])
-
-  useEffect(() => {
-    if (notification == null) {
-        return
-    }
+    const notification = lastJsonMessage.data as Notification
 
     console.log(`Received notification ${JSON.stringify(notification)}`)
     if (!NO_TOAST_NOTIFICATIONS.includes(notification.action)) {
-      const toastContent = (notification.meta?.linkTitle && notification.meta?.linkUrl) ? ToastWithLink({
-        message: notification.message,
-        linkTitle: notification.meta?.linkTitle,
-        linkUrl: notification.meta?.linkUrl,
-      }) : BasicToast(notification.message)
+      const toastContent =
+        notification.meta?.linkTitle && notification.meta?.linkUrl
+          ? ToastWithLink({
+              message: notification.message,
+              linkTitle: notification.meta?.linkTitle,
+              linkUrl: notification.meta?.linkUrl,
+            })
+          : BasicToast(notification.message)
 
       try {
         toastHandlers[notification.severity](toastContent, notificationsConfig)
@@ -64,7 +69,6 @@ export const useToastWSHandler = (user?: IUser) => {
         toast.error(toastContent, notificationsConfig)
       }
     }
-    confirmNotification(notification.id)
-        .then(() => console.log(`Notification with id: ${notification.id} has been confirmed`))
-  }, [notification])
+    confirmNotification(notification.id).then(() => console.log(`Notification with id: ${notification.id} has been confirmed`))
+  }, [lastJsonMessage])
 }

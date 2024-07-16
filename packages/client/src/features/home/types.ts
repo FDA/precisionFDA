@@ -3,7 +3,6 @@ import { JsonValue } from 'react-use-websocket/src/lib/types'
 import { CloudResourcesConditionType } from '../../hooks/useCloudResourcesCondition'
 import { IChallenge } from '../../types/challenge'
 
-
 export interface TableSelected<T> {
   selectedItems: T[]
   resetSelected: () => void
@@ -18,7 +17,17 @@ export interface BaseError {
     type: 'error'
   }
 }
-export type ResourceTypeUrlNames = 'files' | 'apps' | 'workflows' | 'assets' | 'databases' | 'jobs' | 'members' | 'executions' | 'reports' | 'discussions'
+export type ResourceTypeUrlNames =
+  | 'files'
+  | 'apps'
+  | 'workflows'
+  | 'assets'
+  | 'databases'
+  | 'jobs'
+  | 'members'
+  | 'executions'
+  | 'reports'
+  | 'discussions'
 export type APIResource =
   | 'files'
   | 'folders'
@@ -68,25 +77,27 @@ export type ActionType = {
   key?: string
   shouldHide?: boolean
 } & (
-  {
-    type: 'route'
-    to: string
-  } | 
-  {
-    type: 'link'
-    link: Link
-    cloudResourcesConditionType?: CloudResourcesConditionType
-  } | ({
-    type: 'modal'
-    func: (arg?: IModal) => void
-    modal?: ReactNode | null
-    showModal?: boolean
-  }) | {
-    type: 'selection'
-    title: string
-    isSelected: boolean
-    func: (isSelected: boolean) => void
-  }
+  | {
+      type: 'route'
+      to: string
+    }
+  | {
+      type: 'link'
+      link: Link
+      cloudResourcesConditionType?: CloudResourcesConditionType
+    }
+  | {
+      type: 'modal'
+      func: (arg?: IModal) => void
+      modal?: ReactNode | null
+      showModal?: boolean
+    }
+  | {
+      type: 'selection'
+      title: string
+      isSelected: boolean
+      func: (isSelected: boolean) => void
+    }
 )
 
 export type ActionFunctionsType<KeyT extends string> = {
@@ -141,26 +152,26 @@ export enum SEVERITY {
 
 // TODO share the enum with backend
 export enum NOTIFICATION_ACTION {
-    JOB_INITIALIZING = 'JOB_INITIALIZING',
-    JOB_RUNNING = 'JOB_RUNNING',
-    JOB_RUNNABLE = 'JOB_RUNNABLE',
-    JOB_DONE = 'JOB_DONE',
-    JOB_TERMINATED = 'JOB_TERMINATED',
-    JOB_OUTPUTS_SYNCED = 'JOB_OUTPUTS_SYNCED',
-    DATA_PORTAL_CARD_IMAGE_URL_UPDATED = 'DATA_PORTAL_CARD_IMAGE_URL_UPDATED',
-    CHALLENGE_RESOURCE_URL_UPDATED = 'CHALLENGE_RESOURCE_URL_UPDATED',
-    CHALLENGE_CARD_IMAGE_URL_UPDATED = 'CHALLENGE_CARD_IMAGE_URL_UPDATED',
-    JOB_FAILED = 'JOB_FAILED',
-    FILE_CLOSED = 'FILE_CLOSED',
-    NODES_REMOVED = 'NODES_REMOVED',
-    NODES_COPIED = 'NODES_COPIED',
-    NODES_LOCKED = 'NODES_LOCKED',
-    NODES_UNLOCKED = 'NODES_UNLOCKED',
-    SPACE_ACTIVATED = 'SPACE_ACTIVATED',
-    WORKSTATION_SNAPSHOT_COMPLETED = 'WORKSTATION_SNAPSHOT_COMPLETED',
-    WORKSTATION_SNAPSHOT_ERROR = 'WORKSTATION_SNAPSHOT_ERROR',
-    SPACE_REPORT_ERROR = 'SPACE_REPORT_ERROR',
-    SPACE_REPORT_DONE = 'SPACE_REPORT_DONE',
+  JOB_INITIALIZING = 'JOB_INITIALIZING',
+  JOB_RUNNING = 'JOB_RUNNING',
+  JOB_RUNNABLE = 'JOB_RUNNABLE',
+  JOB_DONE = 'JOB_DONE',
+  JOB_TERMINATED = 'JOB_TERMINATED',
+  JOB_OUTPUTS_SYNCED = 'JOB_OUTPUTS_SYNCED',
+  DATA_PORTAL_CARD_IMAGE_URL_UPDATED = 'DATA_PORTAL_CARD_IMAGE_URL_UPDATED',
+  CHALLENGE_RESOURCE_URL_UPDATED = 'CHALLENGE_RESOURCE_URL_UPDATED',
+  CHALLENGE_CARD_IMAGE_URL_UPDATED = 'CHALLENGE_CARD_IMAGE_URL_UPDATED',
+  JOB_FAILED = 'JOB_FAILED',
+  FILE_CLOSED = 'FILE_CLOSED',
+  NODES_REMOVED = 'NODES_REMOVED',
+  NODES_COPIED = 'NODES_COPIED',
+  NODES_LOCKED = 'NODES_LOCKED',
+  NODES_UNLOCKED = 'NODES_UNLOCKED',
+  SPACE_ACTIVATED = 'SPACE_ACTIVATED',
+  WORKSTATION_SNAPSHOT_COMPLETED = 'WORKSTATION_SNAPSHOT_COMPLETED',
+  WORKSTATION_SNAPSHOT_ERROR = 'WORKSTATION_SNAPSHOT_ERROR',
+  SPACE_REPORT_ERROR = 'SPACE_REPORT_ERROR',
+  SPACE_REPORT_DONE = 'SPACE_REPORT_DONE',
 }
 
 export type NotificationMeta = {
@@ -178,6 +189,26 @@ export type Notification = JsonValue & {
   // createdAt: Date
   // updatedAt: Date
   // deliveredAt: Date
+}
+
+export type JobLogItem = {
+  timestamp: number
+  source: string
+  level: 'INFO' | 'STDOUT' | 'STDERR'
+  job: `job-${string}`
+  jobTry: number
+  line: number
+  msg: string
+}
+
+export enum WEBSOCKET_MESSSAGE_TYPE {
+  NOTIFICATION = 'notification',
+  JOB_LOG = 'jobLog',
+}
+
+export type WebSocketMessage = {
+  type: WEBSOCKET_MESSSAGE_TYPE
+  data: Notification | JobLogItem
 }
 
 export type KeyVal = { [key: string]: number | string | boolean }
