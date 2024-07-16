@@ -37,63 +37,6 @@ class JobsController < ApplicationController
     js id: @job.id, desc: @job.from_submission? ? @job.submission.desc : ""
   end
 
-  def log
-    @job = Job.accessible_by(@context).find_by(uid: params[:id])
-
-    if @job.nil? || @job.log_unaccessible?(@context)
-      flash[:error] = "Sorry, this job does not exist or its log is not accessible by you"
-      return
-    end
-
-    uri = URI(DNANEXUS_APISERVER_URI)
-    raw_socket = TCPSocket.new(uri.host, uri.port)
-    socket = OpenSSL::SSL::SSLSocket.new(raw_socket)
-    socket.connect
-    handshake = WebSocket::Handshake::Client.new(url: "wss://#{uri.host}:#{uri.port}/#{@job.dxid}/getLog/websocket")
-    socket.write(handshake.to_s)
-    handshake << socket.readline until handshake.finished?
-    raise unless handshake.valid?
-
-    frame = WebSocket::Frame::Outgoing::Client.new(
-      version: handshake.version,
-      data: {
-        access_token: @job.from_submission? ? CHALLENGE_BOT_TOKEN : @context.token,
-        token_type: "Bearer", tail: false
-      }.to_json,
-      type: :text,
-    ).to_s
-
-    socket.write(frame)
-
-    client = WebSocket::Frame::Incoming::Client.new(version: handshake.version)
-
-    @log_times = []
-    @log_levels = []
-    @log_contents = []
-
-    loop do
-      data = socket.getc
-      break if data.nil? || data.empty?
-
-      client << data
-      while (msg = client.next)
-        json = JSON.parse(msg.to_s)
-        # source, msg, timestamp, level, job, line|
-        # source=SYSTEM, msg=END_LOG
-        if json["code"]
-          flash[:error] = "Sorry, something went wrong. Please, try later"
-          return
-        end
-
-        return if json["source"] == "SYSTEM" && json["msg"] == "END_LOG"
-
-        @log_times << json["timestamp"]
-        @log_levels << json["level"]
-        @log_contents << json["msg"]
-      end
-    end
-  end
-
   def new
     # rendered by react
   end

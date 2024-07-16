@@ -3,6 +3,7 @@ import type { Logger } from '@nestjs/common'
 // just a bunch of api calls that will be easy to mock
 import axios, { AxiosRequestConfig } from 'axios'
 import { isNil, omit } from 'ramda'
+import { WebSocket } from 'ws'
 import { config } from '../config'
 import { SPACE_MEMBERSHIP_SIDE } from '../domain/space-membership/space-membership.enum'
 import { ClientRequestError, MfaAlreadyResetError, OrgMembershipError } from '../errors'
@@ -38,6 +39,7 @@ import {
   ObjectsParams,
   OrgDescribeParams,
   OrgFindMembersParams,
+  ProjectLeaveParams,
   RemoveFolderParams,
   RenameFolderParams,
   Starting,
@@ -227,6 +229,24 @@ export class PlatformClient {
       url,
     }
     return await this.sendRequest(options)
+  }
+
+  streamJobLogs(jobDxId: string): WebSocket {
+    const host = new URL(config.platform.apiUrl).host
+    const ws = new WebSocket(`wss://${host}/${jobDxId}/getLog/websocket`)
+    ws.on('open', () => {
+      ws.send(
+        JSON.stringify({
+          access_token: this.user.accessToken,
+          token_type: 'Bearer',
+        }),
+      )
+    })
+    ws.on('error', (error) => {
+      ws.terminate()
+      this.log.error(`Error streaming job logs: ${error}`)
+    })
+    return ws
   }
 
   // ----------------------
@@ -745,6 +765,16 @@ export class PlatformClient {
       data: {
         billTo: params.billTo,
       },
+      url,
+    }
+    return await this.sendRequest(options)
+  }
+
+  async projectLeave(params: ProjectLeaveParams): Promise<ClassIdResponse> {
+    const url = `${config.platform.apiUrl}/${params.projectDxid}/leave`
+    const options: AxiosRequestConfig = {
+      method: 'POST',
+      data: {},
       url,
     }
     return await this.sendRequest(options)

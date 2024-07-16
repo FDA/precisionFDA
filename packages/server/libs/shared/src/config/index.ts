@@ -205,6 +205,8 @@ const defaultConfig = {
       url: process.env.NODE_ADMIN_PLATFORM_CLIENT_URL || 'http://localhost:3002',
     },
   },
+  secretKeyBase: process.env.SECRET_KEY_BASE,
+  maxTimeInactivity: parseIntFromProcess(process.env.MAX_TIME_INACTIVITY) ?? 30,
 }
 
 // lazily plug-in the overrides that are based on the NODE_ENV

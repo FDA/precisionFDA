@@ -430,7 +430,6 @@ Rails.application.routes.draw do
           get :everybody
           get :spaces
           get :cli_jobs
-          get :log
           post :copy
           post :terminate
           put :feature, to: "jobs#invert_feature"

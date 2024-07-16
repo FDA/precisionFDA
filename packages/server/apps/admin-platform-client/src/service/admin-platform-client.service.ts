@@ -4,7 +4,13 @@ import { PlatformClientFunctionKeyType } from '../model/platform-client-function
 
 @Injectable()
 export class AdminPlatformClientService {
-  private readonly ALLOWED_METHODS: PlatformClientFunctionKeyType[] = ['createOrg']
+  private readonly ALLOWED_METHODS: PlatformClientFunctionKeyType[] = [
+    'createOrg',
+    'jobDescribe',
+    'projectDescribe',
+    'projectInvite',
+    'projectLeave',
+  ]
 
   constructor(private readonly platformClient: PlatformClient) {}
 

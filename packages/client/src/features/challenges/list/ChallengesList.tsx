@@ -1,9 +1,11 @@
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import queryString from 'query-string'
 import React, { useEffect } from 'react'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link, useLocation } from 'react-router-dom'
 import useWebSocket from 'react-use-websocket'
+import { Button } from '../../../components/Button'
 import { Loader } from '../../../components/Loader'
+import NavigationBar from '../../../components/NavigationBar/NavigationBar'
 import { PageContainerMargin } from '../../../components/Page/styles'
 import { hidePagination, Pagination } from '../../../components/Pagination'
 import {
@@ -21,18 +23,15 @@ import {
 } from '../../../components/Public/styles'
 import { usePageMeta } from '../../../hooks/usePageMeta'
 import { usePaginationParams } from '../../../hooks/usePaginationState'
-import NavigationBar from '../../../components/NavigationBar/NavigationBar'
 import { useToastWSHandler } from '../../../hooks/useToastWSHandler'
 import PublicLayout from '../../../layouts/PublicLayout'
-import { DEFAULT_RECONNECT_ATTEMPTS, DEFAULT_RECONNECT_INTERVAL, SHOULD_RECONNECT, getNodeWsUrl } from '../../../utils/config'
+import { DEFAULT_RECONNECT_ATTEMPTS, DEFAULT_RECONNECT_INTERVAL, getNodeWsUrl, SHOULD_RECONNECT } from '../../../utils/config'
 import { useAuthUser } from '../../auth/useAuthUser'
-import { Notification, NOTIFICATION_ACTION } from '../../home/types'
+import { Notification, NOTIFICATION_ACTION, WEBSOCKET_MESSSAGE_TYPE, WebSocketMessage } from '../../home/types'
 import { challengesYearsListRequest } from '../api'
 import { getTimeStatusName, renderEmpty } from '../util'
 import { ChallengeListItem } from './ChallengeListItem'
 import { useChallengesListQuery } from './useChallengesListQuery'
-import { Button } from '../../../components/Button'
-
 
 const ChallengesList = () => {
   usePageMeta({ title: 'Challenges - precisionFDA' })
@@ -57,23 +56,33 @@ const ChallengesList = () => {
 
   useToastWSHandler(user)
 
-  const { lastJsonMessage: notification } = useWebSocket<Notification>(getNodeWsUrl(), {
+  const { lastJsonMessage } = useWebSocket<WebSocketMessage>(getNodeWsUrl(), {
     share: true,
     reconnectInterval: DEFAULT_RECONNECT_INTERVAL,
     reconnectAttempts: DEFAULT_RECONNECT_ATTEMPTS,
     shouldReconnect: () => SHOULD_RECONNECT,
+    filter: message => {
+      try {
+        const messageData = JSON.parse(message.data)
+        const notification = messageData.data as Notification
+        return (
+          messageData.type === WEBSOCKET_MESSSAGE_TYPE.NOTIFICATION &&
+          NOTIFICATION_ACTION.CHALLENGE_CARD_IMAGE_URL_UPDATED === notification.action
+        )
+      } catch (e) {
+        return false
+      }
+    },
   })
 
   useEffect(() => {
-    if (notification == null) {
+    if (lastJsonMessage == null) {
       return
     }
-    if (NOTIFICATION_ACTION.CHALLENGE_CARD_IMAGE_URL_UPDATED === notification.action) {
-      queryClient.invalidateQueries({
-        queryKey: ['challengesList'],
-      })
-    }
-  }, [notification])
+    queryClient.invalidateQueries({
+      queryKey: ['challengesList'],
+    })
+  }, [lastJsonMessage])
 
   return (
     <PublicLayout mainScroll>
@@ -90,27 +99,17 @@ const ChallengesList = () => {
             </PageLoaderWrapper>
           ) : (
             <PageMainBody>
-              {time_status && (
-                <PageFilterTitle>
-                  {getTimeStatusName(time_status)}
-                </PageFilterTitle>
-              )}
+              {time_status && <PageFilterTitle>{getTimeStatusName(time_status)}</PageFilterTitle>}
               {year && <PageFilterTitle>{year}</PageFilterTitle>}
               <PageList>
                 {data?.challenges.length === 0 && renderEmpty(time_status)}
-                {data?.challenges?.map(n => (
-                  <ChallengeListItem key={n.id} challenge={n} />
-                ))}
+                {data?.challenges?.map(n => <ChallengeListItem key={n.id} challenge={n} />)}
                 <Pagination
                   showPerPage={false}
                   page={data?.meta?.current_page}
                   totalCount={data?.meta?.total_count}
                   totalPages={data?.meta?.total_pages}
-                  isHidden={hidePagination(
-                    isFetched,
-                    data?.challenges?.length,
-                    data?.meta?.total_pages,
-                  )}
+                  isHidden={hidePagination(isFetched, data?.challenges?.length, data?.meta?.total_pages)}
                   isPreviousData={data?.meta?.prev_page !== null}
                   isNextData={data?.meta?.next_page !== null}
                   setPage={pagination.setPageParam}
@@ -123,7 +122,7 @@ const ChallengesList = () => {
             {userCanCreateChallenge && (
               <RightSideItem>
                 <ButtonRow>
-                  <Button variant='primary' as={Link} to="/challenges/create" data-turbolinks="false">
+                  <Button variant="primary" as={Link} to="/challenges/create" data-turbolinks="false">
                     Create a new challenge
                   </Button>
                 </ButtonRow>
@@ -193,11 +192,12 @@ const ChallengesList = () => {
             <RightSideItem>
               <SectionTitle>Propose a Challenge</SectionTitle>
               <div>
-                If you have an idea, an objective, a dataset, an algorithm, or
-                any combination of the above that you would like to put in front
-                of the precisionFDA expert community.
+                If you have an idea, an objective, a dataset, an algorithm, or any combination of the above that you would like to
+                put in front of the precisionFDA expert community.
               </div>
-              <Link data-turbolinks="false" to="/challenges/propose">Propose a Challenge &rarr;</Link>
+              <Link data-turbolinks="false" to="/challenges/propose">
+                Propose a Challenge &rarr;
+              </Link>
             </RightSideItem>
           </RightSide>
         </PageRow>

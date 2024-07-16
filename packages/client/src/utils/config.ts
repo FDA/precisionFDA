@@ -1,14 +1,13 @@
 import { ToastOptions } from 'react-toastify'
 
-
 /**
  * Returns localhost:3001 for development on local machine and
  * corresponding hostname for everything else (no need for port).
- * 
+ *
  * @returns WebSocket url
  */
 export const getNodeWsUrl = () => {
-  if(window?.location) {
+  if (window?.location) {
     const { host } = window.location
     if (host.includes('0.0.0.0')) {
       return 'wss://0.0.0.0:3001'
