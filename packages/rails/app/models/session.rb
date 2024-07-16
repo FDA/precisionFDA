@@ -19,7 +19,13 @@ class Session < ApplicationRecord
   end
 
   def self.limit_reached?(user)
-    where(user_id: user.id).count >= SESSIONS_LIMIT
+    session_count = where(user_id: user.id).count
+
+    if !Rails.env.production? && user.dxuser == ENV["PFDA_TEST_USER"]
+      session_count >= 100
+    else
+      session_count >= SESSIONS_LIMIT
+    end
   end
 
   def expired?
