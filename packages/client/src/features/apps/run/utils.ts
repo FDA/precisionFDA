@@ -279,31 +279,37 @@ export const useSelectableSpaces = (appScope: ServerScope) => {
 }
 
 export const useDefaultInstanceType = (
+  formValues: RunJobFormType,
   computeInstances: ComputeInstance[] | undefined,
   instanceType: string,
   setValue: UseFormSetValue<RunJobFormType>,
 ) => {
   useEffect(() => {
-    if (computeInstances) {
-      setValue('inputs.0.instanceType', computeInstances.find(instance => instance.value === instanceType) ?? computeInstances[0])
+    if (formValues?.inputs?.[0]?.instanceType || !computeInstances) {
+      return
     }
+
+    setValue('inputs.0.instanceType', computeInstances.find(instance => instance.value === instanceType) ?? computeInstances[0])
   }, [computeInstances, instanceType, setValue])
 }
 
 
 export const useDefaultScopeSelection = (
+  formValues: RunJobFormType,
   selectableSpaces: SelectableSpace[] | undefined,
   currentScope: ServerScope,
   setValue: UseFormSetValue<RunJobFormType>,
 ) => {
   useEffect(() => {
-    if (selectableSpaces) {
-      const defaultSelectedScope = selectableSpaces.find(space => space.value === currentScope) ?? {
-        label: 'Private',
-        value: 'private',
-      }
-      setValue('scope', defaultSelectedScope)
+    if (formValues.scope || !selectableSpaces) {
+      return
     }
+
+    const defaultSelectedScope = selectableSpaces.find(space => space.value === currentScope) ?? {
+      label: 'Private',
+      value: 'private',
+    }
+    setValue('scope', defaultSelectedScope)
   }, [selectableSpaces, currentScope, setValue])
 }
 
