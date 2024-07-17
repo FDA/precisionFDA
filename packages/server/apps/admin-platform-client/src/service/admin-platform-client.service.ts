@@ -6,10 +6,13 @@ import { PlatformClientFunctionKeyType } from '../model/platform-client-function
 export class AdminPlatformClientService {
   private readonly ALLOWED_METHODS: PlatformClientFunctionKeyType[] = [
     'createOrg',
-    'jobDescribe',
-    'projectDescribe',
+    'projectCreate',
     'projectInvite',
+    'projectDescribe',
     'projectLeave',
+    'removeUserFromOrganization',
+    'inviteUserToOrganization',
+    'jobDescribe',
   ]
 
   constructor(private readonly platformClient: PlatformClient) {}
