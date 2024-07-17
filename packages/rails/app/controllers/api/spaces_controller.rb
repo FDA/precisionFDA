@@ -172,6 +172,9 @@ module Api
       members = @space.space_memberships
       members = members.where(side: side) if side
 
+      # preload entities needed for serialization
+      members = members.includes(:user, :spaces)
+
       render json: members, adapter: :json
     end
 
