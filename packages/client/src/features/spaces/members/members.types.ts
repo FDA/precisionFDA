@@ -1,6 +1,5 @@
 
 export interface Links {
-  gravatar: string;
   user: string;
 }
 
