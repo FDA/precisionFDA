@@ -17,7 +17,7 @@ export async function spaceRequest({ id }: { id: number }): Promise<FetchSpaceDe
   return axios.get(`/api/spaces/${id}`).then(res => res.data)
 }
 
-export async function fixGuestPermissions({ id }: { id: string }): Promise<unknown> {
+export async function fixGuestPermissions({ id }:{id: string}): Promise<unknown> {
   return axios.patch(`/api/spaces/${id}/fix_guest_permissions`).then(res => res.data)
 }
 
@@ -62,14 +62,14 @@ export async function addDataRequest({ spaceId, uids }: { spaceId: string; uids:
 export interface CreateSpacePayload {
   name: string
   description: string
-  space_type: ISpace['type']
-  source_space_id?: string | null
-  guest_lead_dxuser?: string | null
-  host_lead_dxuser?: string | null
-  sponsor_lead_dxuser?: string | null
+  spaceType: ISpace['type']
+  sourceSpaceId?: string | null
+  guestLeadDxuser?: string | null
+  hostLeadDxuser?: string | null
+  sponsorLeadDxuser?: string | null
   cts?: string | null
   protected: boolean | null
-  restricted_reviewer?: boolean | null
+  restrictedReviewer?: boolean | null
 }
 
 export interface CreateSpaceResponse {

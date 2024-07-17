@@ -236,8 +236,15 @@ const userHelper = {
   create: (em: EntityManager, data?: Partial<InstanceType<typeof User>>) => {
     let org = orgHelper.create(em)
     em.persist(org)
-    // console.log("ORG !!!!", org)
-    // org.id = 1
+    return userHelper.createUsingOrg(em, org, data)
+  },
+
+  createGov: (em: EntityManager, data?: Partial<InstanceType<typeof User>>) => {
+    let org = orgHelper.create(em)
+    em.persist(org)
+    data = data ?? {}
+    data.email = `${generate.random.dxstr()}@fda.gov`
+    data.normalizedEmail = data.email.toLowerCase()
     return userHelper.createUsingOrg(em, org, data)
   },
 
@@ -271,9 +278,9 @@ const userHelper = {
     return user
   },
 
-  createSiteAdmin: (em: EntityManager) => {
+  createSiteAdmin: (em: EntityManager, group?: AdminGroup) => {
     const user = userHelper.create(em)
-    const adminGroup = adminGroupHelper.createSiteAdminGroup(em)
+    const adminGroup = group ?? adminGroupHelper.createSiteAdminGroup(em)
     const adminMembership = wrap(new AdminMembership(user, adminGroup)).assign({}, { em })
     em.persist(adminMembership)
     return user
@@ -673,7 +680,7 @@ const spacesHelper = {
       ...defaults,
       ...data,
     }
-    const membership = wrap(new SpaceMembership(references.user, references.space)).assign(input)
+    const membership = wrap(new SpaceMembership(references.user, references.space, input.side, input.role)).assign(input)
     em.persist(membership)
     return membership
   },
