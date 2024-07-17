@@ -32,7 +32,8 @@ export const useExportInputsModal = ({ showCopyButton }: { showCopyButton: boole
   }
 
   const handleCopy = () => {
-    const base64Encoded = btoa(displayData)
+    const data = { inputs: JSON.parse(displayData) }
+    const base64Encoded = btoa(JSON.stringify(data))
     const { href } = window.location
 
     if (displayData) {

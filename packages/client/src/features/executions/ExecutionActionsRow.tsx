@@ -1,12 +1,12 @@
 import { omit } from 'ramda'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import { Button } from '../../components/Button'
 import Dropdown from '../../components/Dropdown'
 import { SyncIcon } from '../../components/icons/SyncIcon'
 import { getSpaceIdFromScope } from '../../utils'
-import { getBaseLink } from '../apps/run/utils'
+import { getBaseLink, useSelectableSpaces, useUserComputeInstances } from '../apps/run/utils'
 import { useAuthUser } from '../auth/useAuthUser'
 import { ActionsDropdownContent } from '../home/ActionDropdownContent'
 import { ActionsButton } from '../home/show.styles'
@@ -61,6 +61,45 @@ export const ExecutionActionsRow = ({
     }
   }
 
+  const [ rerunDisabled, setRerunDisabled ] = useState(false)
+  const { data: computeInstances } = useUserComputeInstances()
+  const { data: selectableSpaces } = useSelectableSpaces(execution.scope)
+
+  useEffect(() => {
+    setRerunDisabled(execution.state === 'idle' || !computeInstances || !selectableSpaces)
+  }, [ execution, computeInstances, selectableSpaces ])
+
+  const getScope = () => {
+    if (execution.scope === 'private') {
+      return {
+        label: 'Private',
+        value: 'private',
+      }
+    }
+
+    return selectableSpaces?.find(s => s.value === execution.scope)
+  }
+
+  const getRerunExecutionLink = () => {
+    const link = `/${getBaseLink(getSpaceIdFromScope(execution.scope))}/apps/${execution.app_uid}/jobs/new`
+    const formValues = {
+      jobName: execution.name,
+      jobLimit: execution.cost_limit,
+      scope: getScope(),
+      output_folder_path: execution.run_data_updates?.output_folder_path,
+      inputs: [
+        {
+          id: 1,
+          fields: execution.run_data_updates?.run_inputs,
+          instanceType: computeInstances?.find(i => i.value === execution.run_data_updates?.run_instance_type),
+        },
+      ],
+    }
+    const hash = btoa(JSON.stringify(formValues))
+
+    return `${link}#${hash}`
+  }
+
   return (
     <>
       {terminalStates.includes(execution.state) ? null : (
@@ -80,8 +119,8 @@ export const ExecutionActionsRow = ({
         </Button>
       )}
       {execution.app_active && (
-        <Link to={`/${getBaseLink(getSpaceIdFromScope(execution.scope))}/apps/${execution.app_uid}/jobs/new`}>
-          <Button variant="primary">Re-Run Execution</Button>
+        <Link to={getRerunExecutionLink()}>
+          <Button disabled={rerunDisabled} variant="primary">Re-Run Execution</Button>
         </Link>
       )}
       <Dropdown

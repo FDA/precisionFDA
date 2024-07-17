@@ -1,16 +1,32 @@
-import React from 'react'
-import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { Controller, FieldErrors, useFieldArray, useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
+import React from 'react'
+import { Controller, FieldErrors, useFieldArray, useForm } from 'react-hook-form'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
-import { AppSpec, BatchInput, RunJobFormType, IApp } from '../apps.types'
-import { IUser } from '../../../types/user'
-import { QuestionIcon } from '../../../components/icons/QuestionIcon'
+import { Button, TransparentButton } from '../../../components/Button'
 import { FieldGroup } from '../../../components/form/FieldGroup'
+import { CrossIcon } from '../../../components/icons/PlusIcon'
+import { QuestionIcon } from '../../../components/icons/QuestionIcon'
 import { InputNumber, InputText } from '../../../components/InputText'
+import { EmptyTable } from '../../../components/Table/styles'
+import { IUser } from '../../../types/user'
+import { useOrganizeFileModal } from '../../files/actionModals/useOrganizeFileModal'
+import { TreeOnSelectInfo } from '../../files/files.types'
+import { ServerScope } from '../../home/types'
+import { fetchAcceptedLicenses } from '../../licenses/api'
+import { useAcceptLicensesModal } from '../../licenses/useAcceptLicensesModal'
+import { fetchLicensesOnApp } from '../apps.api'
+import { AppSpec, BatchInput, IApp, RunJobFormType } from '../apps.types'
+import { getDefaultValueFromServer } from '../form/common'
 import { ErrorMessageForField } from './ErrorMessageForField'
+import { JobRunInput } from './JobRunInput'
+import { SelectContext } from './SelectContext'
+import { SelectInstanceType } from './SelectInstanceType'
+import { SelectSpaceScope } from './SelectSpaceScope'
+import { SetOutputFolder } from './SetOutputFolder'
 import {
   AppsConfiguration,
+  RemoveButton,
   RightGroup,
   Section,
   SectionBody,
@@ -20,59 +36,53 @@ import {
   StyledJobName,
   StyledRow,
   TipsRow,
-  RemoveButton,
 } from './styles'
+import { useExportInputsModal } from './useExportInputsModal'
+import { useRunJobMutation } from './useRunJobMutation'
 import {
-  createRequestObject, exportFormData, extractFileUidsFromBatchInputs,
+  createRequestObject,
+  exportFormData,
+  extractFileUidsFromBatchInputs,
   fetchLicensesOnFiles,
   getFileUIDsFromAppRun,
   getLabel,
-  getLicensesToAccept, importFormData,
-  mapInputKeyVals, prepareValidations,
-  useDefaultInstanceType, useDefaultScopeSelection,
+  getLicensesToAccept,
+  importFormData,
+  mapInputKeyVals,
+  prepareValidations,
+  useDefaultInstanceType,
+  useDefaultScopeSelection,
   useSelectableContexts,
   useSelectableSpaces,
   useUserComputeInstances,
 } from './utils'
-import { fetchLicensesOnApp } from '../apps.api'
-import { JobRunInput } from './JobRunInput'
-import { EmptyTable } from '../../../components/Table/styles'
-import { fetchAcceptedLicenses } from '../../licenses/api'
-import { useAcceptLicensesModal } from '../../licenses/useAcceptLicensesModal'
-import { TreeOnSelectInfo } from '../../files/files.types'
-import { ServerScope } from '../../home/types'
-import { getDefaultValueFromServer } from '../form/common'
-import { useOrganizeFileModal } from '../../files/actionModals/useOrganizeFileModal'
-import { useRunJobMutation } from './useRunJobMutation'
-import { Button, TransparentButton } from '../../../components/Button'
-import { useExportInputsModal } from './useExportInputsModal'
-import { SetOutputFolder } from './SetOutputFolder'
-import { SelectContext } from './SelectContext'
-import { SelectSpaceScope } from './SelectSpaceScope'
-import { SelectInstanceType } from './SelectInstanceType'
-import { CrossIcon } from '../../../components/icons/PlusIcon'
 
 /**
- * If params are specified in the URL, decode them and set them as default values. 
+ * If params are specified in the URL, decode them and set them as default values.
  * Otherwise, use defaults on spec.
  *
  * @param hash
- * @param spec
+ * @param opts
  */
-const getDefaults = (hash: string, spec: AppSpec): BatchInput[] => {
-  if (hash.startsWith('#')) {
-    // app params are in the link
-    const base64Encoded = hash.split('#')[1]
-    const decoded = atob(base64Encoded)
-    const inputs = JSON.parse(decoded)
-    return [inputs['0']]
+const getDefaults = (hash: string, opts: { app: IApp; spec: AppSpec; userJobLimit: IUser['job_limit'] }): RunJobFormType => {
+  const base64Encoded = hash.split('#')[1]
+  const decoded = base64Encoded ? atob(base64Encoded) : '{}'
+  const values = JSON.parse(decoded)
+
+  return {
+    jobName: values.jobName ?? opts.app.name,
+    jobLimit: values.jobLimit ?? opts.userJobLimit,
+    output_folder_path: values.output_folder_path ?? '',
+    scope: values.scope,
+    inputs: values.inputs ? [values.inputs['0']] : [
+      {
+        id: 1,
+        fields: Object.fromEntries(
+          opts.spec.input_spec.map(item => [item.name, getDefaultValueFromServer(item.class, item.default)]),
+        ),
+      } as BatchInput,
+    ],
   }
-  return [
-    {
-      id: 1,
-      fields: Object.fromEntries(spec.input_spec.map(item => [item.name, getDefaultValueFromServer(item.class, item.default)])),
-    } as BatchInput,
-  ]
 }
 
 export const RunJobForm = ({ app, userJobLimit, spec }: { app: IApp; spec: AppSpec; userJobLimit: IUser['job_limit'] }) => {
@@ -84,13 +94,7 @@ export const RunJobForm = ({ app, userJobLimit, spec }: { app: IApp; spec: AppSp
 
   const { modalComp: licensesModal, setLicensesAndShow } = useAcceptLicensesModal()
 
-  const defaultValues = {
-    jobName: app.name,
-    jobLimit: userJobLimit,
-    output_folder_path: '',
-    scope: { label: 'Private', value: 'private' },
-    inputs: getDefaults(hash, spec),
-  } satisfies RunJobFormType
+  const defaultValues = getDefaults(hash, { app, userJobLimit, spec })
 
   if (hash.startsWith('#')) {
     navigate(pathname, { replace: true })
@@ -125,8 +129,8 @@ export const RunJobForm = ({ app, userJobLimit, spec }: { app: IApp; spec: AppSp
     },
   })
   
-  useDefaultInstanceType(computeInstances, spec.instance_type, setValue)
-  useDefaultScopeSelection(selectableSpaces, app.scope, setValue)
+  useDefaultInstanceType(getValues(), computeInstances, spec.instance_type, setValue)
+  useDefaultScopeSelection(getValues(), selectableSpaces, app.scope, setValue)
 
   const inputs = useFieldArray({
     control,
@@ -138,11 +142,16 @@ export const RunJobForm = ({ app, userJobLimit, spec }: { app: IApp; spec: AppSp
   const addInput = () => {
     if (computeInstances) {
       const lastId = getValues().inputs[getValues().inputs.length - 1].id ?? 0
-      inputs.append({
-        instanceType: computeInstances[0],
-        id: lastId + 1,
-        fields: Object.fromEntries(spec.input_spec.map(item => [item.name, getDefaultValueFromServer(item.class, item.default)])),
-      }, { shouldFocus: false })
+      inputs.append(
+        {
+          instanceType: computeInstances[0],
+          id: lastId + 1,
+          fields: Object.fromEntries(
+            spec.input_spec.map(item => [item.name, getDefaultValueFromServer(item.class, item.default)]),
+          ),
+        },
+        { shouldFocus: false },
+      )
     }
   }
 
@@ -328,11 +337,7 @@ export const RunJobForm = ({ app, userJobLimit, spec }: { app: IApp; spec: AppSp
                       control={control}
                       name={`inputs.${batchIndex}.fields.${inputSpec.name}`}
                       render={({ field }) => (
-                        <FieldGroup
-                          label={getLabel(inputSpec)}
-                          required={!inputSpec.optional}
-                          key={inputSpec.name + inputSpec}
-                        >
+                        <FieldGroup label={getLabel(inputSpec)} required={!inputSpec.optional} key={inputSpec.name + inputSpec}>
                           <JobRunInput
                             key={inputSpec.name + inputSpec}
                             field={field}
@@ -357,18 +362,34 @@ export const RunJobForm = ({ app, userJobLimit, spec }: { app: IApp; spec: AppSp
         <SetOutputFolder control={control} isSubmitting={isSubmitting} spec={spec} setShowModal={setOrganizeFileModal} />
       </AppsConfiguration>
       <StyledActionsContainer>
-        <Button variant="primary" disabled={isSubmitting || Object.keys(errors).length > 0} type="button" form="submitJobForm" onClick={handleSubmit(onSubmit)}>
+        <Button
+          variant="primary"
+          disabled={isSubmitting || Object.keys(errors).length > 0}
+          type="button"
+          form="submitJobForm"
+          onClick={handleSubmit(onSubmit)}
+        >
           {isSubmitting ? 'Running' : runButtonText}
         </Button>
         <RightGroup>
           {isBatchRun && (
             <>
-              <Button variant="success" disabled={isSubmitting}  type="button" onClick={event => exportFormData(event, getValues())}>
+              <Button
+                variant="success"
+                disabled={isSubmitting}
+                type="button"
+                onClick={event => exportFormData(event, getValues())}
+              >
                 Export Inputs
               </Button>
 
-              <input type="file" style={{ display: 'none' }} id="fileInput" onChange={event => importFormData(event, (vals) => reset(vals))} />
-              <Button variant="success" disabled={isSubmitting}  type="button" onClick={handleImportClick}>
+              <input
+                type="file"
+                style={{ display: 'none' }}
+                id="fileInput"
+                onChange={event => importFormData(event, vals => reset(vals))}
+              />
+              <Button variant="success" disabled={isSubmitting} type="button" onClick={handleImportClick}>
                 Import Inputs
               </Button>
             </>
