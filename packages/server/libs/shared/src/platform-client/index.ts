@@ -791,7 +791,7 @@ export class PlatformClient {
    * @param {string} name - A descriptive name for the organization.
    * @return ID of the newly created organization ("org-" + handle)
    */
-  async createOrg(handle: string, name: string): Promise<any> {
+  async createOrg(handle: string, name: string): Promise<ClassIdResponse> {
     const url = `${config.platform.apiUrl}/org/new`
     const options: AxiosRequestConfig = {
       method: 'POST',

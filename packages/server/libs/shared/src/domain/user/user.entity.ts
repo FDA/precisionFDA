@@ -228,6 +228,11 @@ export class User extends BaseEntity {
     return this.dxuser.startsWith('Guest-')
   }
 
+  isGovUser(): boolean {
+    const emailDomain = this.email.split('@').pop()
+    return ['fda.hhs.gov','fda.gov'].includes(emailDomain)
+  }
+
   async isMemberOfAdminGroup(adminGroup: ADMIN_GROUP_ROLES): Promise<boolean> {
     const siteAdminGroupMemberships = await this.adminMemberships.matching({
       where: {
