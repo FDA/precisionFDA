@@ -29,8 +29,8 @@ const Security = () => {
                     <hr />
                     <p>
                         This Portal and Platform have a FISMA "Moderate" authorization to operate as granted by the FDA.
-                        This FISMA moderate authorization is dependent on the FedRAMP "Moderate" authorization
-                        to operate under the sponsorship of HHS as documented <a href="https://marketplace.fedramp.gov/#!/product/dnanexus-platform?sort=productName&productNameSearch=dnanexus" target="_blank">here</a>.
+                        This FISMA moderate authorization is dependent on DNAnexus' FedRAMP "Moderate" authorization
+                        to operate under the sponsorship of HHS as documented <a href="https://marketplace.fedramp.gov/products/FR1814557199" target="_blank">here</a>.
                         The FISMA Moderate authorization enables you and your collaborators to securely manage data
                         containing sensitive information such as PHI and PII within the constraints of any data use agreements.
                         <br/>
