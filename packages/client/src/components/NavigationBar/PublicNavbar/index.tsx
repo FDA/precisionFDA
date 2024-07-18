@@ -1,12 +1,13 @@
-import React, { useEffect, useState } from 'react'
-import { useLocation, Link } from 'react-router-dom'
-import styled, { css } from 'styled-components'
 import classNames from 'classnames/bind'
-import { PFDALogoLight, PFDALogoDark } from '../PFDALogo'
+import React, { useEffect, useState } from 'react'
+import { Link, useLocation } from 'react-router-dom'
+import styled, { css } from 'styled-components'
+import { useSiteSettingsQuery } from '../../../features/auth/useSiteSettingsQuery'
 import { theme } from '../../../styles/theme'
-import { PageContainerMargin } from '../../Page/styles'
-import { onLogInWithSSO, useSiteSettingsQuery } from '../../../features/auth/useSiteSettingsQuery'
 import { Button } from '../../Button'
+import { LoginButton } from '../../Button/LoginButton'
+import { PageContainerMargin } from '../../Page/styles'
+import { PFDALogoDark, PFDALogoLight } from '../PFDALogo'
 
 type StyledPublicNavbarProps = {
   $isSticky?: boolean
@@ -195,10 +196,6 @@ const PublicNavbar = ({ shouldShowLogo = false }: Props) => {
     window.location.assign('/request_access')
   }
 
-  const onLogIn = () => {
-    window.location.assign('/login')
-  }
-
   const { pathname } = useLocation()
   const getLinkClassName = (linkPath: string) => {
     if (linkPath === '/') {
@@ -217,41 +214,22 @@ const PublicNavbar = ({ shouldShowLogo = false }: Props) => {
       {sticky ? (
         <StyledPFDALogoDark className="pfda-navbar-logo" />
       ) : (
-        <StyledPFDALogoLight
-          className="pfda-navbar-logo"
-          hidden={!shouldShowLogo}
-        />
+        <StyledPFDALogoLight className="pfda-navbar-logo" hidden={!shouldShowLogo} />
       )}
       <PublicNavbarCenterButtons $isSticky={sticky}>
         <Link data-turbolinks="false" to="/" className={getLinkClassName('/')}>
           Overview
         </Link>
-        <Link
-          data-turbolinks="false"
-          to="/challenges"
-          className={getLinkClassName('/challenges')}
-        >
+        <Link data-turbolinks="false" to="/challenges" className={getLinkClassName('/challenges')}>
           Challenges
         </Link>
-        <Link
-          data-turbolinks="false"
-          to="/news"
-          className={getLinkClassName('/news')}
-        >
+        <Link data-turbolinks="false" to="/news" className={getLinkClassName('/news')}>
           News
         </Link>
-        <Link
-          data-turbolinks="false"
-          to="/experts"
-          className={getLinkClassName('/experts')}
-        >
+        <Link data-turbolinks="false" to="/experts" className={getLinkClassName('/experts')}>
           Experts
         </Link>
-        <Link
-          data-turbolinks="false"
-          to="/about"
-          className={getLinkClassName('/about')}
-        >
+        <Link data-turbolinks="false" to="/about" className={getLinkClassName('/about')}>
           About
         </Link>
         <a href="/uniisearch" target="_blank">
@@ -260,12 +238,7 @@ const PublicNavbar = ({ shouldShowLogo = false }: Props) => {
       </PublicNavbarCenterButtons>
       <PublicNavbarRightButtons $isSticky={sticky}>
         <AccessButton onClick={onRequestAccess}>Request Access</AccessButton>
-        <Button variant="primary" onClick={onLogIn}>Log In</Button>
-        {data?.ssoButton.isEnabled && (
-          <Button variant="primary" onClick={() => onLogInWithSSO(data.ssoButton.data.fdaSsoUrl)}>
-            Log In with SSO
-          </Button>
-        )}
+        <LoginButton siteSetting={data} />
       </PublicNavbarRightButtons>
     </StyledPublicNavbar>
   )
