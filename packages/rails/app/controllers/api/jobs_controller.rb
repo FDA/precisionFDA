@@ -358,6 +358,11 @@ module Api
       end
     end
 
+    def describe
+      response = https_apps_client.describe(params[:id])
+      render json: response, adapter: :json
+    end
+
     private
 
     # Default to reverse chronological order unless overriden by params
