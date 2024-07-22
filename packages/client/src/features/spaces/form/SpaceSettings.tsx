@@ -48,14 +48,14 @@ const EditTags = ({ spaceId, tags = [] }: { spaceId: number, tags?: string[] }) 
 }
 
 interface SpaceSettingsVals {
-  space_type: ISpace['type']
+  spaceType: ISpace['type']
   name: string
   description: string
-  source_space_id: string | null
-  guest_lead_dxuser: string | null
-  host_lead_dxuser: string | null
-  sponsor_lead_dxuser: string | null
-  review_lead_dxuser: string | null
+  sourceSpaceId: string | null
+  guestLeadDxuser: string | null
+  hostLeadDxuser: string | null
+  sponsorLeadDxuser: string | null
+  reviewLeadDxuser: string | null
   cts: string | null
   protected: boolean | null
 }
@@ -82,13 +82,12 @@ export const SpaceSettingsForm = ({ space }: ISpaceSettingsForm) => {
     mode: 'onBlur',
     resolver: yupResolver(editValidationSchema),
     defaultValues: {
-      space_type: space.type,
+      spaceType: space.type,
       name: space.name,
       description: space.description,
-      host_lead_dxuser: space.host_lead?.dxuser,
-      guest_lead_dxuser: space.guest_lead?.dxuser,
-      review_lead_dxuser: space.host_lead?.dxuser,
-      sponsor_lead_dxuser: space.guest_lead?.dxuser,
+      hostLeadDxuser: space.host_lead?.dxuser,
+      guestLeadDxuser: space.guest_lead?.dxuser,
+      sponsorLeadDxuser: space.guest_lead?.dxuser,
       cts: space.cts,
       protected: space.protected,
     },
@@ -148,7 +147,7 @@ export const SpaceSettingsForm = ({ space }: ISpaceSettingsForm) => {
 
       <EditTags spaceId={space.id} tags={space.tags} />
 
-      {watch().space_type === 'review' && (
+      {watch().spaceType === 'review' && (
         <>
           <FieldGroup label="Center Tracking System #">
             <InputText {...register('cts')} disabled={isSubmitting} />

@@ -133,7 +133,9 @@ module Api
         raise ApiError, "Parameter protected cannot be changed!"
       end
 
-      space_edit_params = update_space_params.merge(
+      space_params = update_space_params.transform_keys! { |key| key.to_s.underscore.to_sym }
+
+      space_edit_params = space_params.merge(
         current_user: current_user,
         space_host_lead: space.host_lead_dxuser,
         source_space_id: space.id,
@@ -411,8 +413,8 @@ module Api
     end
 
     def update_space_params
-      params.require(:space).permit(:name, :description, :cts, :space_type, :currentUser,
-                                    :hostLeadDxuser, :guestLeadDxuser, :sponsorLeadDxuser)
+      params.require(:space).permit(:name, :description, :cts, :spaceType, :currentUser,
+                                    :hostLeadDxuser, :guestLeadDxuser, :sponsorLeadDxuser, :protected)
     end
 
     def create_space_params
