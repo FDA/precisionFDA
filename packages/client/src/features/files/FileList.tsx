@@ -11,6 +11,8 @@ import { ContentFooter } from '../../components/Page/ContentFooter'
 import { Pagination } from '../../components/Pagination'
 import Table from '../../components/Table/Table'
 import { EmptyTable } from '../../components/Table/styles'
+import { ClipboardCheckIcon } from '../../components/icons/ClipboardCheckIcon'
+import { ClipboardIcon } from '../../components/icons/ClipboardIcon'
 import { HoverDNAnexusLogo } from '../../components/icons/DNAnexusLogo'
 import { PlusIcon } from '../../components/icons/PlusIcon'
 import { ErrorBoundary } from '../../utils/ErrorBoundry'
@@ -84,6 +86,8 @@ export const FileList = ({
   const [folderIdParam, setFolderIdParam] = useQueryParam<string | undefined>('folder_id')
   const user = useAuthUser()
   const isAdmin = user?.isAdmin ?? false
+
+  const [isCopiedIds, setIsCopiedIds] = React.useState<boolean>(false)
 
   const navigate = useNavigate()
 
@@ -179,6 +183,7 @@ export const FileList = ({
 
   const files = data?.files || data?.entries
   const selectedObjects = getSelectedObjectsFromIndexes(selectedIndexes, files)
+  const selectedFileIds = selectedObjects.map(o => o.uid).filter(Boolean)
   const actions = useFilesSelectActions({
     homeScope,
     space,
@@ -192,6 +197,14 @@ export const FileList = ({
   delete actions['Request license approval']
 
   const listActions = useFolderActions(homeScope, folderIdParam!, space?.id)
+
+  const handleCopyIds = () => {
+    navigator.clipboard.writeText(selectedFileIds.join(', '))
+    setIsCopiedIds(true)
+    setTimeout(() => {
+      setIsCopiedIds(false)
+    }, 5000)
+  }
 
   if (error) return <div>Error! {JSON.stringify(error)}</div>
 
@@ -219,19 +232,34 @@ export const FileList = ({
               </>
             )}
           </QuickActions>
-          <Dropdown
-            trigger="click"
-            content={
-              <ActionsDropdownContent
-                actions={actions}
-                message={homeScope === 'spaces' && 'To perform other actions on this file, access it from the Space'}
-              />
-            }
-          >
-            {dropdownProps => (
-              <ActionsButton {...dropdownProps} active={dropdownProps.isActive} data-testid="home-files-actions-button" />
+          <QuickActions>
+            {selectedFileIds.length > 0 && (
+              <Button variant="primary" onClick={handleCopyIds}>
+                {isCopiedIds ? (
+                  <>
+                    <ClipboardCheckIcon height={14} /> Copied IDs
+                  </>
+                ) : (
+                  <>
+                    <ClipboardIcon height={14} /> Copy IDs
+                  </>
+                )}
+              </Button>
             )}
-          </Dropdown>
+            <Dropdown
+              trigger="click"
+              content={
+                <ActionsDropdownContent
+                  actions={actions}
+                  message={homeScope === 'spaces' && 'To perform other actions on this file, access it from the Space'}
+                />
+              }
+            >
+              {dropdownProps => (
+                <ActionsButton {...dropdownProps} active={dropdownProps.isActive} data-testid="home-files-actions-button" />
+              )}
+            </Dropdown>
+          </QuickActions>
         </ActionsRow>
         <ActionsRow>{breadcrumbs(location.pathname, homeScope, data?.meta?.path)}</ActionsRow>
       </div>
