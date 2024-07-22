@@ -75,7 +75,7 @@ export const validationSchema = Yup.object().shape({
 })
 
 export const editValidationSchema = Yup.object().shape({
-  space_type: Yup.string().required('Space type required'),
+  spaceType: Yup.string().required('Space type required'),
   name: Yup.string().required('Name required'),
   description: Yup.string().required('Description required'),
   cts: Yup.string()
