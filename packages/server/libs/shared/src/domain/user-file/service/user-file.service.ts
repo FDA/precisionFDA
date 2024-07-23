@@ -133,6 +133,7 @@ export class UserFileService {
         'Removed total objects',
       )
     } catch (err) {
+      this.log.error(err)
       if (async) {
         await this.notificationService.createNotification({
           message:
@@ -144,10 +145,8 @@ export class UserFileService {
         })
 
         await this.rollbackRemovingState(nodes)
-      }
-
-      if (err.message !== 'Locked items cannot be removed.') {
-        throw new Error('Failed to remove nodes')
+      } else {
+        throw new Error(`Failed to remove nodes: ${err.message}`)
       }
     }
     return removedFilesCount + removedFoldersCount

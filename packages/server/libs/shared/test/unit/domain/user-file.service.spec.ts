@@ -981,16 +981,13 @@ describe('UserFileService', () => {
       expect(createNotificationStub.firstCall.args[0].userId).to.eq(USER_ID)
     })
 
-    it('test remove nodes - fail async true', async () => {
+    it('test remove nodes - fail async true - no error', async () => {
       loadNodesStub.returns([{}])
       userRepoFindOneOrFailStub.throws()
       createNotificationStub.returns({})
       clearStub.returns({})
 
-      await expect(getInstance().removeNodes([1], true)).to.be.rejectedWith(
-        Error,
-        'Failed to remove nodes',
-      )
+      await getInstance().removeNodes([1], true)
 
       expect(createNotificationStub.calledOnce).to.be.true
       expect(createNotificationStub.firstCall.args[0].message).to.eq('Error')
