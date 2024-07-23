@@ -61,7 +61,16 @@ export class GovernmentSpaceCreationProcess extends SpaceCreationProcess {
   }): Promise<SpaceMembership[]> {
     const hostLead = leads.host
 
-    // no need for platform user org invite - user created the org for themselves
+    await this.adminClient.inviteUserToOrganization({
+      orgDxId: space.hostDxOrg,
+      data: {
+        invitee: `user-${hostLead.dxuser}`,
+        level: 'ADMIN',
+        suppressEmailNotification: true,
+      },
+    })
+    this.logger.log(`invited host lead: ${hostLead.dxuser} to host org: ${space.hostDxOrg}`)
+
     const hostLeadMembership = new SpaceMembership(hostLead, space, SPACE_MEMBERSHIP_SIDE.HOST, SPACE_MEMBERSHIP_ROLE.LEAD)
     this.em.persist(hostLeadMembership)
 
