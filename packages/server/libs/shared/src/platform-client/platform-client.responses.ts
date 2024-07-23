@@ -173,6 +173,7 @@ type ClassIdResponse = {
   id: DxId
 }
 
+
 class AppDescribeResponse {
   id: string
   class: string

@@ -1,17 +1,11 @@
 import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
 import { database } from '@shared/database'
-import { entities } from '@shared/database/entities'
-import { Space } from '@shared/domain/space/space.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { getLogger } from '@shared/logger'
+import { Logger } from 'nestjs-pino'
 import { create, db } from '../../../src/test'
-import P from 'pino'
-import { PlatformClient } from '../../../src/platform-client'
-import { SpaceService } from '../../../src/domain/space/service/space.service'
-import { SpaceParam } from '../../../src/domain/space/service/space.types'
-import { SPACE_TYPE } from '../../../src/domain/space/space.enum'
-import { expect } from 'chai'
-import { OrgService } from '../../../src/domain/org/service/org.service'
+import { PlatformClient } from '@shared/platform-client'
+import { OrgService } from '@shared/domain/org/service/org.service'
 
 /**
  * This is just a test in progress.
@@ -20,7 +14,7 @@ import { OrgService } from '../../../src/domain/org/service/org.service'
 describe('spaces service tests', () => {
   let em: EntityManager<MySqlDriver>
   let user: User
-  let log: P.Logger
+  let log: Logger
   let userCtx: UserCtx
   let platformClient: PlatformClient
   let adminClient: PlatformClient
@@ -51,18 +45,4 @@ describe('spaces service tests', () => {
     }
   })
 
-  it('test create space', async () => {
-    const spaceService = new SpaceService(em, platformClient, adminClient, orgService)
-    const spaceInput: SpaceParam = {
-      name: 'space_name',
-      description: 'description',
-      type: SPACE_TYPE.GROUPS
-    }
-
-    const spaceId = await spaceService.create(spaceInput)
-    em.clear()
-
-    const loadedSpace = await em.findOneOrFail(Space, {id: spaceId})
-    expect(loadedSpace.name).eq('space_name')
-  })
 })

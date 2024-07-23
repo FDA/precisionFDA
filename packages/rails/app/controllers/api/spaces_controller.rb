@@ -40,23 +40,31 @@ module Api
     # POST /api/spaces
     # Creates a new space.
     def create
-      space_form = SpaceForm.new(create_space_params.merge(current_user: @context.user))
 
-      unless space_form.valid?
-        # TODO: This format of errors is used to fit the client code.
-        render json: { errors: [space_form.errors.full_messages.join(", ")] },
-               status: :unprocessable_entity
+      if ["groups", "private_type", "administrator", "government"].include?(create_space_params[:spaceType])
+        create_space_dto = create_space_params
+        id = https_apps_client.create_space(create_space_dto)
+        space = Space.undeleted.find(id)
+      else
+        # review space in this branch
+        space_params = create_space_params.transform_keys! { |key| key.to_s.underscore.to_sym }
+        space_form = SpaceForm.new(space_params.merge(current_user: @context.user))
 
-        return
+        unless space_form.valid?
+          # TODO: This format of errors is used to fit the client code.
+          render json: { errors: [space_form.errors.full_messages.join(", ")] },
+                 status: :unprocessable_entity
+          return
+        end
+
+        space = space_form.persist!(api, current_user)
+
+        space.tag_list.push("Protected") if create_space_params[:protected]
+
+        space.tag_list.push("FDA-restricted") if create_space_params[:restrictedReviewer]
+
+        space.save unless space.tag_list.empty?
       end
-
-      space = space_form.persist!(api, current_user)
-
-      space.tag_list.push("Protected") if create_space_params[:protected]
-
-      space.tag_list.push("FDA-restricted") if create_space_params[:restricted_reviewer]
-
-      space.save unless space.tag_list.empty?
 
       render json: space, adapter: :json
     end
@@ -125,7 +133,9 @@ module Api
         raise ApiError, "Parameter protected cannot be changed!"
       end
 
-      space_edit_params = update_space_params.merge(
+      space_params = update_space_params.transform_keys! { |key| key.to_s.underscore.to_sym }
+
+      space_edit_params = space_params.merge(
         current_user: current_user,
         space_host_lead: space.host_lead_dxuser,
         source_space_id: space.id,
@@ -343,7 +353,7 @@ module Api
       @space = Space.undeleted.find(params[:id])
 
       return if @space.accessible_by_user?(current_user) ||
-                (current_user.review_space_admin? && @space.review?)
+        (current_user.review_space_admin? && @space.review?)
 
       raise ApiError, "The space is locked." if @space.visible_by?(current_user) && @space.locked?
 
@@ -400,15 +410,16 @@ module Api
     end
 
     def update_space_params
-      params.require(:space).permit(:name, :description, :cts, :space_type, :current_user,
-                                    :host_lead_dxuser, :guest_lead_dxuser, :sponsor_lead_dxuser)
+      params.require(:space).permit(:name, :description, :cts, :spaceType, :currentUser,
+                                    :hostLeadDxuser, :guestLeadDxuser, :sponsorLeadDxuser, :protected)
     end
 
     def create_space_params
-      params.require(:space).permit(:name, :description, :host_lead_dxuser, :guest_lead_dxuser,
-                                    :space_type, :cts, :sponsor_org_handle, :source_space_id,
-                                    :sponsor_lead_dxuser, :restrict_to_template, :protected, :restricted_reviewer)
+      params.require(:space).permit(:name, :description, :hostLeadDxuser, :guestLeadDxuser,
+                                    :spaceType, :cts, :sponsorOrgHandle, :sourceSpaceId,
+                                    :sponsorLeadDxuser, :protected, :restrictedReviewer)
     end
   end
+
   # rubocop:enable Metrics/ClassLength
 end

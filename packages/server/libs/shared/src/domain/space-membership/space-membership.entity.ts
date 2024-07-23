@@ -7,10 +7,10 @@ import {
   PrimaryKey,
   Property,
   Reference,
+  Enum,
 } from '@mikro-orm/core'
 import { Space } from '@shared/domain/space/space.entity'
 import { User } from '@shared/domain/user/user.entity'
-import { isNil } from 'ramda'
 import { BaseEntity } from '../../database/base-entity'
 import { SPACE_MEMBERSHIP_ROLE, SPACE_MEMBERSHIP_SIDE } from './space-membership.enum'
 import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
@@ -23,10 +23,10 @@ export class SpaceMembership extends BaseEntity {
   @Property()
   active: boolean
 
-  @Property()
+  @Enum({ items: () => SPACE_MEMBERSHIP_SIDE, nullable: false })
   side: SPACE_MEMBERSHIP_SIDE
 
-  @Property()
+  @Enum({ items: () => SPACE_MEMBERSHIP_ROLE, nullable: false })
   role: SPACE_MEMBERSHIP_ROLE
 
   @ManyToOne(() => User)
@@ -35,12 +35,13 @@ export class SpaceMembership extends BaseEntity {
   @ManyToMany(() => Space, (space) => space.spaceMemberships)
   spaces = new Collection<Space>(this)
 
-  constructor(user: User, space?: Space) {
+  constructor(user: User, space: Space, side: SPACE_MEMBERSHIP_SIDE, role: SPACE_MEMBERSHIP_ROLE) {
     super()
     this.user = Reference.create(user)
-    if (!isNil(space)) {
-      this.spaces.add(space)
-    }
+    this.spaces.add(space)
+    this.active = true
+    this.side = side
+    this.role = role
   }
 
   isHost() {
@@ -66,4 +67,5 @@ export class SpaceMembership extends BaseEntity {
   isContributor() {
     return this.role === SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR
   }
+
 }

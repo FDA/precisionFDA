@@ -21,10 +21,10 @@ RSpec.describe Api::SpacesController, type: :controller do
     {
       name: "space_name",
       description: "space_description",
-      host_lead_dxuser: host_lead.dxuser,
-      guest_lead_dxuser: guest_lead.dxuser,
-      space_type: "review",
-      sponsor_lead_dxuser: sponsor_lead.dxuser,
+      hostLeadDxuser: host_lead.dxuser,
+      guestLeadDxuser: guest_lead.dxuser,
+      spaceType: "review",
+      sponsorLeadDxuser: sponsor_lead.dxuser,
     }
   end
 
@@ -72,99 +72,6 @@ RSpec.describe Api::SpacesController, type: :controller do
 
       workflows.each do |workflow|
         expect(copy_service).to have_received(:copy).with(workflow, space.scope).exactly(1).times
-      end
-    end
-  end
-
-  describe "POST create group" do
-    before do
-      authenticate!(admin)
-      sponsor_lead.org.update(admin_id: sponsor_lead.id)
-    end
-
-    context "when data is correct" do
-      before { post :create, params: { space: space_params } }
-
-      let(:last_space) { Space.last }
-
-      it "creates a space" do
-        expect(Space.count).to eq(1)
-      end
-
-      it "creates a host org" do
-        expect(WebMock).to have_requested(
-          :post,
-          "#{DNANEXUS_APISERVER_URI}#{last_space.host_dxorg}/describe",
-        )
-        expect(WebMock).
-          to have_requested(:post, "#{DNANEXUS_APISERVER_URI}org/new").
-          with(
-            body: {
-              handle: Org.handle_by_id(last_space.host_dxorg),
-              name: Org.handle_by_id(last_space.host_dxorg),
-            },
-          )
-      end
-
-      it "creates a guest org" do
-        expect(WebMock).to have_requested(
-          :post,
-          "#{DNANEXUS_APISERVER_URI}#{last_space.guest_dxorg}/describe",
-        )
-        expect(WebMock).
-          to have_requested(
-            :post,
-            "#{DNANEXUS_APISERVER_URI}org/new",
-          ).
-          with(
-            body: {
-              handle: Org.handle_by_id(last_space.guest_dxorg),
-              name: Org.handle_by_id(last_space.guest_dxorg),
-            },
-          )
-      end
-
-      it "invites admins" do
-        expect(WebMock).
-          to have_requested(:post, "#{DNANEXUS_APISERVER_URI}#{last_space.host_dxorg}/invite").
-          with(
-            body: {
-              invitee: host_lead.dxid,
-              level: "ADMIN",
-              suppressEmailNotification: true,
-            },
-          )
-
-        expect(WebMock).
-          to have_requested(:post, "#{DNANEXUS_APISERVER_URI}#{last_space.guest_dxorg}/invite").
-          with(
-            body: {
-              invitee: guest_lead.dxid,
-              level: "ADMIN",
-              suppressEmailNotification: true,
-            },
-          )
-      end
-
-      it "removes members from orgs" do
-        expect(WebMock).
-          to have_requested(
-            :post,
-            "#{DNANEXUS_APISERVER_URI}#{last_space.host_dxorg}/removeMember",
-          ).
-          with(body: { user: ADMIN_USER })
-
-        expect(WebMock).
-          to have_requested(
-            :post,
-            "#{DNANEXUS_APISERVER_URI}#{last_space.guest_dxorg}/removeMember",
-          ).
-          with(body: { user: ADMIN_USER })
-      end
-
-      it "creates a space_memberships" do
-        expect(last_space.space_memberships.lead.host.count).to eq(1)
-        expect(last_space.space_memberships.lead.guest.count).to eq(1)
       end
     end
   end

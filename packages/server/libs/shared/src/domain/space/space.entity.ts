@@ -2,6 +2,7 @@ import {
   Collection,
   Entity,
   EntityRepositoryType,
+  Enum,
   ManyToMany,
   OneToOne,
   PrimaryKey,
@@ -33,16 +34,17 @@ export class Space extends BaseEntity {
   @Property({ fieldName: 'guest_dxorg' })
   guestDxOrg: string
 
+  // this should never be null i think??
   @Property({ fieldName: 'host_project', nullable: true })
   hostProject: string
 
   @Property({ fieldName: 'guest_project', nullable: true })
   guestProject: string
 
-  @Property()
+  @Enum(() => SPACE_STATE)
   state: SPACE_STATE
 
-  @Property({ fieldName: 'space_type' })
+  @Enum({ items: () => SPACE_TYPE, fieldName: 'space_type' })
   type: SPACE_TYPE
 
   @Property({ fieldName: 'space_id', nullable: true })

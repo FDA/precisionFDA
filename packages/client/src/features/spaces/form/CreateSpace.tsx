@@ -21,7 +21,7 @@ export const CreateSpace = () => {
         queryClient.invalidateQueries({
           queryKey: ['spaces'],
         })
-        toast.success('Success: creating space')
+        toast.success('Space successfully created')
       } else if (res?.errors) {
         toast.error(`${res.errors[0]}`)
       } else {
