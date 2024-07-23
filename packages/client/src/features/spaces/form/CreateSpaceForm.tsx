@@ -43,13 +43,11 @@ export interface ISpaceForm {
     unknown
   >
   defaultValues?: Partial<SpaceCreateForm>
-  isDuplicate?: boolean
 }
 
 export const SpaceForm = ({
   mutation,
   defaultValues,
-  isDuplicate = false,
 }: ISpaceForm) => {
   const user = useAuthUser()
   const isGovUser = user?.isGovUser || false
@@ -125,14 +123,14 @@ export const SpaceForm = ({
     const createSpaceRequest: CreateSpacePayload = {
       name: vals.name,
       description: vals.description,
-      space_type: vals.space_type,
-      source_space_id: vals.source_space_id,
-      guest_lead_dxuser: vals.guest_lead_dxuser,
-      host_lead_dxuser: vals.host_lead_dxuser,
-      sponsor_lead_dxuser: vals.sponsor_lead_dxuser,
+      spaceType: vals.space_type,
+      sourceSpaceId: vals.source_space_id,
+      guestLeadDxuser: vals.guest_lead_dxuser,
+      hostLeadDxuser: vals.host_lead_dxuser,
+      sponsorLeadDxuser: vals.sponsor_lead_dxuser,
       cts: vals.cts,
       protected: vals.protected,
-      restricted_reviewer: vals.restricted_reviewer,
+      restrictedReviewer: vals.restricted_reviewer,
     }
 
     mutation.mutateAsync(createSpaceRequest)
@@ -152,7 +150,6 @@ export const SpaceForm = ({
     isAdmin,
     isGovUser,
     isReviewAdmin,
-    isDuplicate,
   })
 
   const getConfirmMessage = () => {
