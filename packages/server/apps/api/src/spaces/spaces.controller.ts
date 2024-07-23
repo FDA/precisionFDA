@@ -9,9 +9,12 @@ import {
   Param,
   ParseIntPipe,
   Patch,
+  Post,
   UseGuards,
 } from '@nestjs/common'
-import { DEPRECATED_SQL_ENTITY_MANAGER } from '@shared/database/provider/deprecated-sql-entity-manager.provider'
+import {
+  DEPRECATED_SQL_ENTITY_MANAGER,
+} from '@shared/database/provider/deprecated-sql-entity-manager.provider'
 import { EMAIL_TYPES } from '@shared/domain/email/email.config'
 import { EmailProcessOperation } from '@shared/domain/email/ops/email-process'
 import { SPACE_EVENT_ACTIVITY_TYPE } from '@shared/domain/space-event/space-event.enum'
@@ -20,12 +23,12 @@ import {
   SPACE_MEMBERSHIP_ROLE,
   SPACE_MEMBERSHIP_SIDE,
 } from '@shared/domain/space-membership/space-membership.enum'
-import { SpaceReportCreateDto } from '@shared/domain/space-report/model/space-report-create.dto'
-import { SpaceReportService } from '@shared/domain/space-report/service/space-report.service'
+import { CreateSpaceDto } from '@shared/domain/space/dto/create-space.dto'
 import { SpaceAcceptOperation } from '@shared/domain/space/ops/accept-space'
 import { SpaceLockOperation } from '@shared/domain/space/ops/lock-space'
 import { SelectableSpacesOperation } from '@shared/domain/space/ops/selectable-spaces'
 import { SpaceUnlockOperation } from '@shared/domain/space/ops/unlock-space'
+import { SpaceService } from '@shared/domain/space/service/space.service'
 import { Space } from '@shared/domain/space/space.entity'
 import { SPACE_TYPE } from '@shared/domain/space/space.enum'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
@@ -34,15 +37,20 @@ import { PlatformClient } from '@shared/platform-client'
 import { UserOpsCtx } from '@shared/types'
 import { UserContextGuard } from '../user-context/guard/user-context.guard'
 
-// TODO most of the ops can be patch instead of post (currently used by ruby), might refactor
 @UseGuards(UserContextGuard)
 @Controller('/spaces')
 export class SpacesController {
   constructor(
     @Inject(DEPRECATED_SQL_ENTITY_MANAGER) private readonly oldEm: SqlEntityManager,
+    private readonly spaceService: SpaceService,
     private readonly log: Logger,
     private readonly user: UserContext,
   ) {}
+
+  @Post()
+  async create(@Body() space: CreateSpaceDto) {
+    return await this.spaceService.create(space)
+  }
 
   @HttpCode(204)
   @Patch('/:id/accept')
