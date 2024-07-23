@@ -1,15 +1,11 @@
 import * as Yup from 'yup'
 import { ISpace } from '../spaces.types'
 
-export const getSpaceTypeOptions = ({ isGovUser, isAdmin, isReviewAdmin, isDuplicate }: {
+export const getSpaceTypeOptions = ({ isGovUser, isAdmin, isReviewAdmin }: {
   isGovUser: boolean,
   isAdmin: boolean,
   isReviewAdmin: boolean,
-  isDuplicate?: boolean
 }) => {
-  if (isDuplicate) {
-    return [{ value: 'review', label: 'Review' }]
-  }
 
   const options: { value: ISpace['type']; label: string }[] = [
     { value: 'private_type', label: 'Private' },
@@ -18,13 +14,13 @@ export const getSpaceTypeOptions = ({ isGovUser, isAdmin, isReviewAdmin, isDupli
     options.push({ value: 'government', label: 'Government' })
   }
   if (isAdmin) {
-    options.push(
-      { value: 'administrator', label: 'Administrator' },
-      { value: 'groups', label: 'Group' },
-    )
+    options.push({ value: 'administrator', label: 'Administrator' })
   }
   if (isReviewAdmin) {
     options.push({ value: 'review', label: 'Review' })
+  }
+  if (isReviewAdmin || isAdmin) {
+    options.push({ value: 'groups', label: 'Groups' })
   }
   return options
 }
@@ -79,7 +75,7 @@ export const validationSchema = Yup.object().shape({
 })
 
 export const editValidationSchema = Yup.object().shape({
-  space_type: Yup.string().required('Space type required'),
+  spaceType: Yup.string().required('Space type required'),
   name: Yup.string().required('Name required'),
   description: Yup.string().required('Description required'),
   cts: Yup.string()

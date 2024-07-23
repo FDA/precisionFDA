@@ -863,6 +863,14 @@ class HttpsAppsClient # rubocop:disable Metrics/ClassLength
   # │          │
   # └──────────┘
 
+  def create_space(params)
+    request(
+      "/spaces",
+      params,
+      Net::HTTP::Post::METHOD,
+      )
+  end
+
   def accept_space(id)
     request(
       "/spaces/#{id}/accept",

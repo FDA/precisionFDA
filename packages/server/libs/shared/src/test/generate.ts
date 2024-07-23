@@ -3,6 +3,7 @@ import { AppSeries } from '@shared/domain/app-series/app-series.entity'
 import { Challenge } from '@shared/domain/challenge/challenge.entity'
 import { Comment } from '@shared/domain/comment/comment.entity'
 import { DbCluster } from '@shared/domain/db-cluster/db-cluster.entity'
+import { UId } from '@shared/domain/entity/domain/uid'
 import { Job } from '@shared/domain/job/job.entity'
 import { JobRunData } from '@shared/domain/job/job.types'
 import { SyncJobOperation } from '@shared/domain/job/ops/synchronize'
@@ -399,10 +400,10 @@ const job = {
 
 const userFile = {
   simple: (customDxid?: string): Partial<InstanceType<typeof UserFile>> => {
-    const dxid = customDxid ?? `file-${random.dxstr()}`
+    const dxid = customDxid ?? `file-${random.dxstr()}` as any
     return {
       dxid,
-      uid: `${dxid}-1`,
+      uid: `${dxid}-1` as UId,
       project: `project-${random.dxstr()}`,
       name: chance.name(),
       scope: STATIC_SCOPE.PRIVATE,
@@ -413,10 +414,10 @@ const userFile = {
     }
   },
   simpleUploaded: (customDxid?: string): Partial<InstanceType<typeof UserFile>> => {
-    const dxid = customDxid ?? `file-${random.dxstr()}`
+    const dxid = customDxid ?? `file-${random.dxstr()}` as any
     return {
       dxid,
-      uid: `${dxid}-1`,
+      uid: `${dxid}-1` as UId,
       project: `project-${random.dxstr()}`,
       name: chance.name(),
       scope: STATIC_SCOPE.PRIVATE,
@@ -427,10 +428,10 @@ const userFile = {
     }
   },
   simpleJobOutput: (jobId: number, customDxid?: string): Partial<InstanceType<typeof UserFile>> => {
-    const dxid = customDxid ?? `file-${random.dxstr()}`
+    const dxid = customDxid ?? `file-${random.dxstr()}` as any
     return {
       dxid,
-      uid: `${dxid}-1`,
+      uid: `${dxid}-1` as UId,
       project: `project-${random.dxstr()}`,
       name: chance.name(),
       scope: STATIC_SCOPE.PRIVATE,
@@ -444,10 +445,10 @@ const userFile = {
     comparisonId: number,
     customDxid?: string,
   ): Partial<InstanceType<typeof UserFile>> => {
-    const dxid = customDxid ?? `file-${random.dxstr()}`
+    const dxid = customDxid ?? `file-${random.dxstr()}` as any
     return {
       dxid,
-      uid: `${dxid}-1`,
+      uid: `${dxid}-1` as UId,
       project: `project-${random.dxstr()}`,
       name: chance.name(),
       scope: STATIC_SCOPE.PRIVATE,
@@ -461,10 +462,10 @@ const userFile = {
 
 const asset = {
   simple: (customDxid?: string): Partial<InstanceType<typeof Asset>> => {
-    const dxid = customDxid ?? `file-${random.dxstr()}`
+    const dxid = customDxid ?? `file-${random.dxstr()}` as any
     return {
       dxid,
-      uid: `${dxid}-1`,
+      uid: `${dxid}-1` as UId,
       project: `project-${random.dxstr()}`,
       name: chance.name(),
       scope: STATIC_SCOPE.PRIVATE,
@@ -584,6 +585,7 @@ const comment = {
     body: chance.sentence(),
     commentableType: 'Space',
     contentObjectType: 'Job',
+    //@ts-ignore
     commentableId: 1,
     contentObjectId: 1,
   }),
@@ -603,7 +605,7 @@ const dbCluster = {
     const dxid = `dbcluster-${random.dxstr()}`
     return {
       dxid: dxid,
-      uid: `${dxid}-1`,
+      uid: `${dxid}-1` as UId,
       project: `project-${random.dxstr()}`,
       name: chance.name(),
       description: random.description(),
