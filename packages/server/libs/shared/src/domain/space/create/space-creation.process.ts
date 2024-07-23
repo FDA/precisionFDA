@@ -8,6 +8,7 @@ import {
 import { CreateSpaceDto } from '@shared/domain/space/dto/create-space.dto'
 import { SpaceNotificationService } from '@shared/domain/space/service/space-notification.service'
 import { Space } from '@shared/domain/space/space.entity'
+import { SPACE_TYPE } from '@shared/domain/space/space.enum'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { User, USER_STATE } from '@shared/domain/user/user.entity'
 import { NotFoundError } from '@shared/errors'
@@ -113,6 +114,9 @@ export abstract class SpaceCreationProcess {
   private async createDbRecord(input: CreateSpaceDto): Promise<Space> {
     const space = input.buildEntity()
     await this.em.persistAndFlush(space)
+    if (input.spaceType === SPACE_TYPE.PRIVATE_TYPE) {
+      space.spaceId = space.id
+    }
     return space
   }
 
