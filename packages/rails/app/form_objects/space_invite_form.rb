@@ -99,6 +99,7 @@ class SpaceInviteForm
     end
     invitees[:dxuser].each do |dxuser|
       user = User.find_by(dxuser: dxuser)
+      next if user.nil?
       next if User.government_email?(user.email)
 
       errors.add(

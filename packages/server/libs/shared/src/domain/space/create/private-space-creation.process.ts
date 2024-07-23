@@ -72,7 +72,6 @@ export class PrivateSpaceCreationProcess extends SpaceCreationProcess {
     })
     this.logger.log(`invited host lead: ${hostLead.dxuser} to host org: ${space.hostDxOrg}`)
 
-    // no need for platform user org invite - user created the org for themselves
     const hostLeadMembership = new SpaceMembership(hostLead, space, SPACE_MEMBERSHIP_SIDE.HOST, SPACE_MEMBERSHIP_ROLE.LEAD)
     this.em.persist(hostLeadMembership)
 
