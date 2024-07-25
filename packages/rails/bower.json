@@ -33,7 +33,7 @@
     "tablesort": "table.sort#^4.0.1",
     "eonasdan-bootstrap-datetimepicker": "^4.17.47",
     "datatables.net": "1.13.10",
-    "datatables.net-bs": "^2.1.1",
+    "datatables.net-bs": "2.1.1",
     "cookies-js": "^1.2.3",
     "highcharts": "^10.3.3",
     "jstree": "^3.3.15"
