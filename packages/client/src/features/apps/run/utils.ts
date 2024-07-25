@@ -1,13 +1,19 @@
-import { isSafeInteger, uniq } from 'lodash'
-import * as Yup from 'yup'
-import React, { useEffect } from 'react'
-import { UseFormReset, UseFormSetValue, UseFormWatch } from 'react-hook-form'
 import { useQuery } from '@tanstack/react-query'
+import { isSafeInteger, uniq } from 'lodash'
+import React, { useEffect } from 'react'
+import { UseFormSetValue } from 'react-hook-form'
 import { toast } from 'react-toastify'
+import * as Yup from 'yup'
+import { IUser } from '../../../types/user'
+import { cleanObject } from '../../../utils/object'
+import { FileUid } from '../../files/files.types'
+import { ServerScope } from '../../home/types'
+import { fetchLicensesForFiles } from '../../licenses/api'
 import { License } from '../../licenses/types'
 import { fetchUserComputeInstances, RunJobRequest } from '../apps.api'
 import {
-  AcceptedLicense, BatchInput,
+  AcceptedLicense,
+  BatchInput,
   ComputeInstance,
   FormInput,
   IApp,
@@ -16,12 +22,7 @@ import {
   SelectableSpace,
 } from '../apps.types'
 import { isFloatValid, isStrictlyInteger } from '../form/common'
-import { cleanObject } from '../../../utils/object'
 import { fetchAndConvertSelectableContexts, fetchAndConvertSelectableSpaces } from './job-run-helper'
-import { ServerScope } from '../../home/types'
-import { fetchLicensesForFiles } from '../../licenses/api'
-import { FileTreeNode, FileUid } from '../../files/files.types'
-import { IUser } from '../../../types/user'
 
 export const getLabel = (inputSpec: InputSpec) => (inputSpec.label ? inputSpec.label : inputSpec.name)
 
@@ -114,26 +115,20 @@ export const prepareValidations = (inputSpec: InputSpec[], userJobLimit: IUser['
   return Yup.object().shape(validationObject)
 }
 
-export const getValue = (
-  inputKey: string,
-  value: FormInput,
-  inputSpecs: InputSpec[],
-): string | string[] | number | number[] | boolean | undefined | null => {
-  if(value == null) return null
-  const inputClass = inputSpecs.find(
-    inputSpec => inputSpec.name === inputKey,
-  )?.class
+export const getValue = (inputKey: string, value: FormInput, inputSpecs: InputSpec[]): FormInput | null => {
+  if (value == null) return null
+  const inputClass = inputSpecs.find(inputSpec => inputSpec.name === inputKey)?.class
   if (inputClass === 'float') {
     return parseFloat(value as string)
   }
   if (inputClass === 'array:float') {
-    return (value as string[]).map((v) => parseFloat(v as string))
+    return (value as string[]).map(v => parseFloat(v as string))
   }
   if (inputClass === 'int') {
     return parseInt(value as string, 10)
   }
   if (inputClass === 'array:int') {
-    return (value as string[]).map((v) => parseInt(v as string, 10))
+    return (value as string[]).map(v => parseInt(v as string, 10))
   }
   if (inputClass === 'boolean') {
     return value !== 'false'
@@ -142,31 +137,37 @@ export const getValue = (
 }
 
 export function mapInputKeyVals(inputVals: RunJobFormType['inputs'], inputSpecs: InputSpec[]) {
-  let inputs: { [key: string]: string | string[] | number | boolean | undefined | null } = {}
-  
-  Object.keys(inputVals).forEach(key => {
-    const value = inputVals[key]
-    inputs[key] = getValue(key, value, inputSpecs)
-  })
+  for (const inputVal of inputVals) {
+    let inputs: { [key: string]: FormInput } = {}
+    Object.keys(inputVal.fields).forEach(key => {
+      const value = inputVal.fields[key]
+      inputs[key] = getValue(key, value, inputSpecs) as FormInput
+    })
+    inputs = cleanObject(inputs)
+    inputVal.fields = inputs
+  }
 
-  inputs = cleanObject(inputs)
-
-  return inputs
+  return inputVals
 }
 
 export function getFileUIDsFromAppRun(inputVals: RunJobFormType['inputs'], inputSpecs: InputSpec[]) {
   const filearr = inputSpecs.filter(s => s.class === 'array:file' || s.class === 'file')
-  const uids: string[] | string[][] = []
-  
-  Object.keys(inputVals).forEach(key => {
-    const f = filearr.find(s => s.name === key)
-    const value = inputVals[key]
-    if(f) { 
-      uids.push(value)
-    }
-  })
 
-  return uniq(uids.flat().filter(i => !!i))
+  const uids: string[] = []
+
+  for (const inputVal of inputVals) {
+    for (const fileField of filearr) {
+      const value = inputVal.fields[fileField.name] as string | string[] | undefined
+      if (!value) continue
+      if (Array.isArray(value)) {
+        uids.push(...value)
+      } else {
+        uids.push(value)
+      }
+    }
+  }
+
+  return uniq(uids)
 }
 
 export const createRequestObject = (
@@ -179,8 +180,8 @@ export const createRequestObject = (
   app: IApp,
   inputSpecs: InputSpec[],
 ): RunJobRequest => {
-  let inputs: { [key: string]: string | string[] | number | number [] | boolean | undefined | null } = {}
-  
+  let inputs: { [key: string]: string | string[] | number | number[] | boolean | undefined | null } = {}
+
   Object.keys(inputsParam).forEach(key => {
     const value = inputsParam[key]
     inputs[key] = getValue(key, value, inputSpecs)
@@ -199,10 +200,7 @@ export const createRequestObject = (
   } satisfies RunJobRequest
 }
 
-export const getLicensesToAccept = (
-  licensesToAccept: License[],
-  acceptedLicenses: AcceptedLicense[],
-): License[] => {
+export const getLicensesToAccept = (licensesToAccept: License[], acceptedLicenses: AcceptedLicense[]): License[] => {
   const acceptedIds = acceptedLicenses
     .filter(item => item.state === 'active' || item.state === null)
     .map(item => item.license.toString())
@@ -292,7 +290,6 @@ export const useDefaultInstanceType = (
     setValue('inputs.0.instanceType', computeInstances.find(instance => instance.value === instanceType) ?? computeInstances[0])
   }, [computeInstances, instanceType, setValue])
 }
-
 
 export const useDefaultScopeSelection = (
   formValues: RunJobFormType,
@@ -394,5 +391,4 @@ export const extractFileUidsFromBatchInputs = (batchInputs: BatchInput[]): FileU
   return allFileUids
 }
 
-export const getBaseLink = (spaceId?: number) => spaceId ? `spaces/${spaceId}` : 'home'
-
+export const getBaseLink = (spaceId?: number) => (spaceId ? `spaces/${spaceId}` : 'home')

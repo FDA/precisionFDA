@@ -74,14 +74,16 @@ const getDefaults = (hash: string, opts: { app: IApp; spec: AppSpec; userJobLimi
     jobLimit: values.jobLimit ?? opts.userJobLimit,
     output_folder_path: values.output_folder_path ?? '',
     scope: values.scope,
-    inputs: values.inputs ? [values.inputs['0']] : [
-      {
-        id: 1,
-        fields: Object.fromEntries(
-          opts.spec.input_spec.map(item => [item.name, getDefaultValueFromServer(item.class, item.default)]),
-        ),
-      } as BatchInput,
-    ],
+    inputs: values.inputs
+      ? [values.inputs['0']]
+      : [
+          {
+            id: 1,
+            fields: Object.fromEntries(
+              opts.spec.input_spec.map(item => [item.name, getDefaultValueFromServer(item.class, item.default)]),
+            ),
+          } as BatchInput,
+        ],
   }
 }
 
@@ -128,7 +130,7 @@ export const RunJobForm = ({ app, userJobLimit, spec }: { app: IApp; spec: AppSp
       setOrganizeFileModal(false)
     },
   })
-  
+
   useDefaultInstanceType(getValues(), computeInstances, spec.instance_type, setValue)
   useDefaultScopeSelection(getValues(), selectableSpaces, app.scope, setValue)
 
@@ -228,9 +230,10 @@ export const RunJobForm = ({ app, userJobLimit, spec }: { app: IApp; spec: AppSp
   const handleExportInputClick = () => {
     const vals = getValues()
     const fmtVals = mapInputKeyVals(vals.inputs, spec.input_spec)
+    vals.inputs = fmtVals
     const fileUids = getFileUIDsFromAppRun(vals.inputs, spec.input_spec)
 
-    exportModal.openModal(fmtVals, fileUids)
+    exportModal.openModal(vals, fileUids)
   }
 
   return (
