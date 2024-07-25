@@ -138,10 +138,12 @@ export class DataPortalService {
     this.log.verbose(
       `Deleting resource with id: ${resource.id}, userFile.uid: ${resource.userFile.getEntity().uid}`,
     )
-    // TODO fix transaction work
-    await this.em.removeAndFlush(resource)
-    this.log.verbose(`Deleting user file with uid: ${resource.userFile.getEntity().uid}`)
-    await this.userFileService.removeFile(resource.userFile.id)
+
+    await this.em.transactional(async () => {
+      await this.em.removeAndFlush(resource)
+      this.log.verbose(`Deleting user file with uid: ${resource.userFile.getEntity().uid}`)
+      await this.userFileService.removeFile(resource.userFile.id)
+    })
   }
 
   private createFile = async (
