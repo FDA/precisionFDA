@@ -28,7 +28,7 @@ export interface IPropertyService {
 @Injectable()
 export class PropertyService implements IPropertyService {
   @ServiceLogger()
-  private readonly log: Logger
+  private readonly logger: Logger
   constructor(
     private readonly em: SqlEntityManager,
     private readonly user: UserContext,
@@ -45,7 +45,7 @@ export class PropertyService implements IPropertyService {
         targetId,
       })
 
-      this.log.verbose(
+      this.logger.log(
         `Deleting properties with target ids: ${currentProperties.map((prop) => prop.targetId)}`,
       )
       await this.em.removeAndFlush(currentProperties)

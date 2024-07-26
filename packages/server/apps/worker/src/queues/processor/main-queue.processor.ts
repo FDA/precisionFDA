@@ -51,12 +51,12 @@ export class MainQueueProcessor extends BaseQueueProcessor {
   @ProcessWithContext(TASK_TYPE.SYNC_FILE_STATE)
   async syncFileState(job: Job) {
     const input = job.data.payload
-    this.logger.verbose('synchronizing file')
+    this.logger.log(`synchronizing file ${input.fileUid}`)
     const result = await this.userFileService.synchronizeFile(
       input.fileUid,
       input.isChallengeBotFile,
     )
-    this.logger.verbose(`synchronizeFile result: ${result}`)
+    this.logger.log(`synchronizeFile result: ${result}`)
 
     if (!result) {
       throw new Error(
@@ -65,7 +65,7 @@ export class MainQueueProcessor extends BaseQueueProcessor {
     } else {
       const followUpAction = await this.followUpDecider.decideNextAction(input.fileUid)
       if (followUpAction) {
-        this.logger.verbose(`creating follow up action`, input)
+        this.logger.log(`creating follow up action`, input)
         await createRunFollowUpActionJobTask(
           {
             uid: input.fileUid,

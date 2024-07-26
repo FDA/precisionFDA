@@ -30,23 +30,23 @@ const recreateFilesStateStatusSyncIfMissing = async (user: UserCtx, log: any): P
     )
     await createSyncFilesStateTask(user)
   } else if (isJobOrphaned(bullJob)) {
-    log.verbose(
+    log.log(
       {
         dxusd: user.dxuser,
         bullJob,
       },
-      'CheckUserJobsOperation: FilesStateSyncTask found, but it is orphaned. ' +
+      'FilesStateSyncTask found, but it is orphaned. ' +
         'Removing and recreating it',
     )
     await removeRepeatableJob(bullJob, getMainQueue())
     await createSyncFilesStateTask(user)
   } else {
-    log.verbose(
+    log.log(
       {
         dxusd: user.dxuser,
         bullJob,
       },
-      'CheckUserJobsOperation: FilesStateSyncTask found, everything is fine',
+      'FilesStateSyncTask found, everything is fine',
     )
   }
 }
@@ -83,25 +83,25 @@ export class UserCheckupOperation extends BaseOperation<UserOpsCtx, never, void>
           id: userCtx.id,
           dxuser: userCtx.dxuser,
         },
-        'UserCheckupOperation: User not found',
+        'User not found',
       )
       return
     }
 
-    log.verbose(
+    log.log(
       {
         id: userCtx.id,
         dxuser: userCtx.dxuser,
       },
-      'UserCheckupOperation: Starting user checkup',
+      'Starting user checkup',
     )
 
-    log.verbose(
+    log.log(
       {
         lastDataCheckup: user.lastDataCheckup,
         now: new Date(),
       },
-      'UserCheckupOperation: Checking if user needs a UserDataConsistencyReport',
+      'Checking if user needs a UserDataConsistencyReport',
     )
     const doFullCheckup = doesUserNeedFullCheckup(user)
     if (doFullCheckup) {
@@ -112,12 +112,12 @@ export class UserCheckupOperation extends BaseOperation<UserOpsCtx, never, void>
     // sync task is queued up
     const openFiles = await findUnclosedFilesOrAssets(em, userCtx.id)
     if (openFiles.length > 0) {
-      log.verbose(
+      log.log(
         {
           dxuser: userCtx.dxuser,
           openFiles,
         },
-        'UserCheckupOperation: User has open files',
+        'User has open files',
       )
 
       await recreateFilesStateStatusSyncIfMissing(this.ctx.user, log)
@@ -126,12 +126,12 @@ export class UserCheckupOperation extends BaseOperation<UserOpsCtx, never, void>
     await new CheckUserJobsOperation(this.ctx as any).execute()
     await new CheckUserDbClustersOperation(this.ctx as any).execute()
 
-    log.verbose(
+    log.log(
       {
         id: userCtx.id,
         dxuser: userCtx.dxuser,
       },
-      'UserCheckupOperation: Completed user checkup',
+      'Completed user checkup',
     )
   }
 }

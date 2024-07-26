@@ -39,7 +39,7 @@ export class OrgService implements IOrgService {
   }
 
   async create(dxid: string, billable: boolean | undefined): Promise<string> {
-    logger.verbose(`OrgService: creating new organization ${dxid}, billable: ${billable}`)
+    logger.log(`Creating new organization ${dxid}, billable: ${billable}`)
 
     if (await this.exists(dxid)) {
       throw new ServiceError(`Org with dxid ${dxid} already exists`, {} as ClientErrorProps)

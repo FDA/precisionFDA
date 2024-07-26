@@ -16,7 +16,7 @@ import { EntityScopeUtils } from '@shared/utils/entity-scope.utils'
 @Injectable()
 export class SpaceReportResultGenerateFacade {
   @ServiceLogger()
-  private readonly log: Logger
+  private readonly logger: Logger
 
   constructor(
     private readonly em: SqlEntityManager,
@@ -37,7 +37,7 @@ export class SpaceReportResultGenerateFacade {
       }
 
       if (!['CREATED', 'ERROR'].includes(report.state)) {
-        this.log.warn(
+        this.logger.warn(
           `Attempt to generate result for a report in invalid state. Current report state: "${report.state}"`,
         )
 

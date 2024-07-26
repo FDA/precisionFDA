@@ -19,7 +19,7 @@ export class NodesController {
   constructor(
     private readonly user: UserContext,
     @Inject(DEPRECATED_SQL_ENTITY_MANAGER) private readonly em: SqlEntityManager,
-    private readonly log: Logger,
+    private readonly logger: Logger,
     private readonly userFileService: UserFileService,
   ) {}
 
@@ -27,7 +27,7 @@ export class NodesController {
   @Post('/lock')
   async lockNodes(@Body(new JsonSchemaPipe(nodesSchema)) body: NodesInput) {
     const opsCtx: UserOpsCtx = {
-      log: this.log,
+      log: this.logger,
       user: this.user,
       em: this.em,
     }
@@ -45,7 +45,7 @@ export class NodesController {
   @Post('/unlock')
   async unlockNodes(@Body(new JsonSchemaPipe(nodesSchema)) body: NodesInput) {
     const opsCtx: UserOpsCtx = {
-      log: this.log,
+      log: this.logger,
       user: this.user,
       em: this.em,
     }
@@ -62,7 +62,7 @@ export class NodesController {
   @Delete('/remove')
   async removeNodes(@Body(new JsonSchemaPipe(nodesSchema)) body: NodesInput) {
     const opsCtx: UserOpsCtx = {
-      log: this.log,
+      log: this.logger,
       user: this.user,
       em: this.em,
     }

@@ -20,7 +20,7 @@ export class FollowUpDecider {
   ) {}
 
   async decideNextAction(fileUid: UId) {
-    this.logger.verbose(`Deciding about follow up action after a close of file with uid ${fileUid}`)
+    this.logger.log(`Deciding about follow up action after a close of file with uid ${fileUid}`)
     try {
       if (await this.isDataPortalCardImage(fileUid)) {
         return 'UPDATE_DATA_PORTAL_IMAGE_URL'
@@ -43,26 +43,26 @@ export class FollowUpDecider {
   }
 
   private async isDataPortalCardImage(fileUid: string) {
-    this.logger.verbose(`Is file with uid ${fileUid} a data portal card image`)
+    this.logger.log(`Is file with uid ${fileUid} a data portal card image`)
     const dataPortals = await this.dataPortalRepo.findDataPortalsByCardImageUid(fileUid)
     return dataPortals.length > 0
   }
 
   private async isChallengeResource(fileUid: string) {
-    this.logger.verbose(`Is file with uid ${fileUid} a challenge resource`)
+    this.logger.log(`Is file with uid ${fileUid} a challenge resource`)
     const challengeResources =
       await this.challengeResourceRepo.findChallengeResourcesByFileUid(fileUid)
     return challengeResources.length > 0
   }
 
   private async isChallengeCardImage(fileUid: string) {
-    this.logger.verbose(`Is file with uid ${fileUid} a challenge card image`)
+    this.logger.log(`Is file with uid ${fileUid} a challenge card image`)
     const challenges = await this.challengeRepo.findChallengesByCardImageFileUid(fileUid)
     return challenges.length > 0
   }
 
   private async isSpaceReportResult(fileUid: UId) {
-    this.logger.verbose(`Is file with uid ${fileUid} a space report result`)
+    this.logger.log(`Is file with uid ${fileUid} a space report result`)
     const spaceReports = await this.spaceReportRepo.findByResultFileUid(fileUid)
     return spaceReports != null
   }

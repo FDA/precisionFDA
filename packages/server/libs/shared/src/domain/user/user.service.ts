@@ -17,7 +17,6 @@ export class UserService {
 
   @ServiceLogger()
   private readonly logger: Logger
-
   private readonly userRepo: UserRepository
 
   constructor(

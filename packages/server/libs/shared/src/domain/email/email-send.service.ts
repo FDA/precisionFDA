@@ -9,7 +9,7 @@ import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 @Injectable()
 export class EmailSendService {
   @ServiceLogger()
-  private readonly log: Logger
+  private readonly logger: Logger
 
   constructor() {}
 
@@ -23,7 +23,7 @@ export class EmailSendService {
       await emailService.sendEmail(input)
       return true
     } catch (err) {
-      this.log.error({ err }, 'AWS SES client failed')
+      this.logger.error({ err }, 'AWS SES client failed')
       throw err
     }
   }

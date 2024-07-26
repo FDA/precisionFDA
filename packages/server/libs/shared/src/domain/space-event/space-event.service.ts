@@ -39,7 +39,7 @@ const SPACE_TYPES = [
 @Injectable()
 export class SpaceEventService {
   @ServiceLogger()
-  private readonly log: Logger
+  private readonly logger: Logger
 
   constructor(
     private readonly user: UserContext,
@@ -51,7 +51,7 @@ export class SpaceEventService {
   ) {}
 
   async createSpaceEvent(input: SpaceEventInput): Promise<SpaceEvent | undefined> {
-    this.log.verbose('Creating space event', input)
+    this.logger.log('Creating space event', input)
     const membership = input.membership
       ? input.membership
       : await this.spaceMembershipRepo.getMembership(input.spaceId, input.userId)
@@ -78,7 +78,9 @@ export class SpaceEventService {
   }
 
   async sendNotificationForEvent(event: SpaceEvent) {
-    this.log.verbose('Sending notification for space event', event)
+    this.logger.log(
+      `Sending notification for space event id: ${event.id} activityType: ${event.activityType}`,
+    )
     if (CONTENT_TYPES.includes(event.activityType)) {
       const input: EmailProcessInput = {
         emailTypeId: EMAIL_TYPES.newContentAdded,

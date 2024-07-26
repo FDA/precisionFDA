@@ -12,7 +12,7 @@ import { isRequestFromAuthenticatedUser, isRequestFromFdaSubnet } from '../serve
 @Controller('/site-settings')
 export class SiteSettingsController {
   constructor(
-    private readonly log: Logger,
+    private readonly logger: Logger,
     private readonly alertService: AlertService,
   ) {}
 
@@ -24,7 +24,7 @@ export class SiteSettingsController {
     let body
 
     // Request-specific logic
-    if (isRequestFromFdaSubnet(this.log, headers[config.api.fdaSubnet.nginxIpHeader])) {
+    if (isRequestFromFdaSubnet(this.logger, headers[config.api.fdaSubnet.nginxIpHeader])) {
       Object.entries(config.siteSettings).forEach(([featureName, featureConfig]) => {
         body = {
           ...body,

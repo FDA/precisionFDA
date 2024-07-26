@@ -62,7 +62,7 @@ export class NotificationService {
    * Returns notifications for current user that have empty deliveredAt flag.
    */
   async getUnreadNotifications(userId: number): Promise<Notification[]> {
-    logger.verbose(`NotificationService: getting unread notifications for user id: ${userId}`)
+    logger.log(`Getting unread notifications for user id: ${userId}`)
     return await this.em.find(Notification, { user: userId, deliveredAt: null })
   }
 

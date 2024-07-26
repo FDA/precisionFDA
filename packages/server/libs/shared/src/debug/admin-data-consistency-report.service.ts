@@ -46,7 +46,7 @@ export type AdminDataConsistencyReportOutput = {
 @Injectable()
 export class AdminDataConsistencyReportService {
   @ServiceLogger()
-  private readonly log: Logger
+  private readonly logger: Logger
 
   constructor(
     private readonly em: SqlEntityManager,
@@ -56,7 +56,7 @@ export class AdminDataConsistencyReportService {
   async createReport(): Promise<AdminDataConsistencyReportOutput> {
     const output: AdminDataConsistencyReportOutput = {}
 
-    this.log.verbose('AdminDataConsistencyReportService: Starting createReport')
+    this.logger.log('AdminDataConsistencyReportService: Starting createReport')
 
     try {
       const infoMapping = (f: any): any => {
@@ -103,11 +103,11 @@ export class AdminDataConsistencyReportService {
       output.spaces = spacesInfo
       output.spacesWithErrorsCount = spacesInfo.length
 
-      this.log.verbose({ output }, 'AdminDataConsistencyReportService: Completed')
+      this.logger.log({ output }, 'AdminDataConsistencyReportService: Completed')
 
       await this.sendReportEmail(output)
     } catch (error) {
-      this.log.error({ error, output }, 'AdminDataConsistencyReportService: Error')
+      this.logger.error({ error, output }, 'AdminDataConsistencyReportService: Error')
     }
 
     return output
@@ -240,7 +240,7 @@ export class AdminDataConsistencyReportService {
     }
 
     const jobId = getBullJobIdForEmailOperation(EMAIL_TYPES.adminDataConsistencyReport)
-    this.log.verbose('AdminDataConsistencyReportService: Sending report email to admin')
+    this.logger.log('Sending report email to admin')
     const tempUserCtx: UserCtx = {
       id: adminUser.id,
       dxuser: adminUser.dxuser,

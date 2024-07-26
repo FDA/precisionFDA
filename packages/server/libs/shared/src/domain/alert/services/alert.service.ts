@@ -10,7 +10,7 @@ import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 @Injectable()
 export class AlertService {
   @ServiceLogger()
-  private readonly log: Logger
+  private readonly logger: Logger
   constructor(private readonly em: SqlEntityManager) {
   }
 
@@ -40,7 +40,7 @@ export class AlertService {
       if (!alert) {
         throw new NotFoundError('Alert not found')
       }
-      this.log.verbose(`Deleting alert with id: ${alert.id}, title: ${alert.title}`)
+      this.logger.log(`Deleting alert with id: ${alert.id}, title: ${alert.title}`)
       this.em.remove(alert)
       return alert.id
     })

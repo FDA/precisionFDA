@@ -8,7 +8,6 @@ import { Challenge } from '../challenge.entity'
 import { PlatformClient } from '../../../platform-client'
 import { UserFileRepository } from '../../user-file/user-file.repository'
 
-
 export class ChallengeUpdateCardImageUrlOperation extends BaseOperation<
 OpsCtx,
 number,
@@ -16,7 +15,7 @@ void
 > {
   async run(challengeId: number): Promise<void> {
     const em = this.ctx.em
-    const log = this.ctx.log
+    const logger = this.ctx.log
     const repo = em.getRepository(Challenge) as ChallengeRepository
     const challenge = await repo.findOneWithId(challengeId)
     if (!challenge) {
@@ -29,7 +28,7 @@ void
 
     const fileRepo = em.getRepository(UserFile) as UserFileRepository
     const cardImage = await fileRepo.findFileWithUid(challenge.cardImageId)
-    log.verbose({ challengeId, cardImage }, `ChallengeUpdateCardImageUrlOperation: Updating ${challengeId} cardImage`)
+    logger.log({ challengeId, cardImage }, `ChallengeUpdateCardImageUrlOperation: Updating ${challengeId} cardImage`)
     if (!cardImage) {
       throw new NotFoundError(`ChallengeUpdateCardImageUrlOperation: Cannot find card image id ${challenge.cardImageId} for challenge ${challengeId}`)
     }
@@ -46,7 +45,7 @@ void
     })
 
     if (link.url) {
-      log.verbose({ link }, 'ChallengeUpdateCardImageUrlOperation: Updating cardImageUrl')
+      logger.log({ link }, 'Updating cardImageUrl')
       challenge.cardImageUrl = link.url
       await em.flush()
     }

@@ -43,7 +43,7 @@ export class SpacesController {
   constructor(
     @Inject(DEPRECATED_SQL_ENTITY_MANAGER) private readonly oldEm: SqlEntityManager,
     private readonly spaceService: SpaceService,
-    private readonly log: Logger,
+    private readonly logger: Logger,
     private readonly user: UserContext,
     private readonly emailFacade: EmailFacade,
   ) {}
@@ -57,7 +57,7 @@ export class SpacesController {
   @Patch('/:id/accept')
   async acceptSpace(@Param('id', ParseIntPipe) spaceId: number) {
     const opsCtx: UserOpsCtx = {
-      log: this.log,
+      log: this.logger,
       user: this.user,
       em: this.oldEm,
     }
@@ -69,7 +69,7 @@ export class SpacesController {
   @Patch('/:id/lock')
   async lockSpace(@Param('id', ParseIntPipe) spaceId: number) {
     const opsCtx: UserOpsCtx = {
-      log: this.log,
+      log: this.logger,
       user: this.user,
       em: this.oldEm,
     }
@@ -91,7 +91,7 @@ export class SpacesController {
   @Patch('/:id/unlock')
   async unlockSpace(@Param('id', ParseIntPipe) spaceId: number) {
     const opsCtx: UserOpsCtx = {
-      log: this.log,
+      log: this.logger,
       user: this.user,
       em: this.oldEm,
     }
@@ -131,7 +131,7 @@ export class SpacesController {
     ) {
       throw new PermissionError('Operation not permitted.')
     }
-    const platformClient = new PlatformClient({ accessToken: this.user.accessToken }, this.log)
+    const platformClient = new PlatformClient({ accessToken: this.user.accessToken }, this.logger)
     if (membership.side === SPACE_MEMBERSHIP_SIDE.GUEST) {
       try {
         // try to get some data from host project - should fail.
@@ -166,14 +166,14 @@ export class SpacesController {
         invitee: spaceToFix.guestDxOrg,
         level: 'CONTRIBUTE',
       })
-      this.log.verbose({ response }, 'Guest organization invited to host project.')
+      this.logger.log({ response }, 'Guest organization invited to host project.')
     }
   }
 
   @Get('/:id/selectable-spaces')
   async getSelectableSpaces(@Param('id', ParseIntPipe) id: number) {
     const opsCtx: UserOpsCtx = {
-      log: this.log,
+      log: this.logger,
       user: this.user,
       em: this.oldEm,
     }

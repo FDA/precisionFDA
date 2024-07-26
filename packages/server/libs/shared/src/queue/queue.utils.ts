@@ -55,12 +55,12 @@ const clearJobs = async (q: Queue, state: any, log: Logger): Promise<Job[]> => {
   const jobs = await q.getJobs([state])
   const count = jobs.length
   if (count > 0) {
-    log.verbose({ jobs }, `CleanupWorkerQueueOperation: Removing ${state} jobs from ${q.name}`)
+    log.log({ jobs }, `Removing ${state} jobs from ${q.name}`)
     q.clean(0, state)
-    log.verbose({ count }, `CleanupWorkerQueueOperation: Removed ${count} ${state} jobs from ${q.name}`)
+    log.log({ count }, `Removed ${count} ${state} jobs from ${q.name}`)
   }
   else {
-    log.verbose(`CleanupWorkerQueueOperation: No ${state} jobs in ${q.name}`)
+    log.log(`No ${state} jobs in ${q.name}`)
   }
   return jobs
 }

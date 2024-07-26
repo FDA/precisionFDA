@@ -98,7 +98,7 @@ describe('ChallengeService', () => {
     } as NotificationService
 
     const logger = {
-      verbose: () => {},
+      log: () => {},
     } as unknown as Logger
 
     challengeService = new ChallengeService(

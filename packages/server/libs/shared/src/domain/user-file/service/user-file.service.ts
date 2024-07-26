@@ -67,7 +67,7 @@ import {
 @Injectable()
 export class UserFileService {
   @ServiceLogger()
-  private readonly log: Logger
+  private readonly logger: Logger
 
   constructor(
     private readonly em: SqlEntityManager,
@@ -93,7 +93,7 @@ export class UserFileService {
    * @param async
    */
   async removeNodes(ids: number[], async: boolean) {
-    this.log.verbose(ids, 'Removing ids')
+    this.logger.log(ids, 'Removing ids')
     const nodes: Node[] = await loadNodes(this.em, { ids }, {})
 
     let removedFilesCount = 0
@@ -128,12 +128,12 @@ export class UserFileService {
         })
       }
 
-      this.log.verbose(
+      this.logger.log(
         { foldersCount: removedFoldersCount, filesCount: removedFilesCount },
         'Removed total objects',
       )
     } catch (err) {
-      this.log.error(err)
+      this.logger.error(err)
       if (async) {
         await this.notificationService.createNotification({
           message:
@@ -187,16 +187,17 @@ export class UserFileService {
 
       this.em.persist(folderEvent)
       this.em.remove(folderToRemove)
-      this.log.verbose(`Removed folder with id: ${folderToRemove.id}, name: ${folderToRemove.name}`)
+      this.logger.log(`Removed folder with id: ${folderToRemove.id}`)
       return 1
     })
   }
 
   async removeFile(id: number) {
-    this.log.verbose(`Removing file with id: ${id}`)
+    this.logger.log(`Removing file with id: ${id}`)
 
     const user = await this.userRepo.findOneOrFail(this.user.id)
     const fileToRemove = await this.fileRepo.findOneOrFail(id)
+    this.logger.log(`Removing file with uid: ${fileToRemove.uid}`)
 
     await this.validateComparisons(fileToRemove)
     await validateEditableBy(this.em, fileToRemove, user)
@@ -220,7 +221,7 @@ export class UserFileService {
 
       if (lastNode) {
         // we're deleting from platform only if it's the last with given dxid
-        this.log.verbose(`Removing file with dxid: ${fileToRemove.dxid} from platform`)
+        this.logger.log(`Removing file with dxid: ${fileToRemove.dxid} from platform`)
         await this.userClient.fileRemove({
           projectId: fileToRemove.project,
           ids: [fileToRemove.dxid],
@@ -238,7 +239,7 @@ export class UserFileService {
       }
 
       this.em.remove(fileToRemove)
-      this.log.verbose(`Removed file with uid: ${fileToRemove.uid}, name: ${fileToRemove.name}`)
+      this.logger.log(`Removed file with uid: ${fileToRemove.uid}`)
       return 1
     })
   }
@@ -274,12 +275,12 @@ export class UserFileService {
   }
 
   private async closeFileOnPlatform(fileDxid: string, challengeBotFile: boolean) {
-    this.log.verbose({ fileDxid }, 'Calling close file on platform')
+    this.logger.log({ fileDxid }, 'Calling close file on platform')
     const platformClient = challengeBotFile ? this.challengeBotClient : this.userClient
     const response = await platformClient.fileClose({
       fileDxid,
     })
-    this.log.verbose({ response }, 'File close response')
+    this.logger.log({ response }, 'File close response')
   }
 
   private async startFileSynchronization(
@@ -297,7 +298,7 @@ export class UserFileService {
     fileDescribe: FileDescribeResponse,
     node: Node,
   ) {
-    this.log.verbose(`File with uid: ${fileUid} is closed`)
+    this.logger.log(`File with uid: ${fileUid} is closed`)
     node.state = fileDescribe.state as FILE_STATE
     node.fileSize = fileDescribe.size
     await this.em.flush()
@@ -310,7 +311,7 @@ export class UserFileService {
         userId,
       })
     } catch (error) {
-      this.log.error(`Error creating notification ${error}`)
+      this.logger.error(`Error creating notification ${error}`)
     }
   }
 
@@ -406,7 +407,7 @@ export class UserFileService {
   }
 
   async closeFile(fileUid: UId, followUpAction?: FOLLOW_UP_ACTION) {
-    this.log.verbose(`Closing file ${fileUid}`)
+    this.logger.log(`Closing file ${fileUid}`)
 
     await this.em.transactional(async () => {
       const user = await this.userRepo.findOneOrFail(this.user.id, {
@@ -437,7 +438,7 @@ export class UserFileService {
    * @param isChallengeBotFile
    */
   async synchronizeFile(fileUid: UId, isChallengeBotFile: boolean): Promise<boolean> {
-    this.log.verbose(`Synchronize file: ${fileUid}`)
+    this.logger.log(`Synchronize file: ${fileUid}`)
     const node = await this.nodeRepo.findOneOrFail({ uid: fileUid })
     const platformClient = isChallengeBotFile ? this.challengeBotClient : this.userClient
 
@@ -446,14 +447,14 @@ export class UserFileService {
         fileDxid: node.dxid,
         projectDxid: node.project,
       })
-      this.log.verbose(`FileDescribe: ${JSON.stringify(fileDescribe)}`)
+      this.logger.log(`FileDescribe: ${JSON.stringify(fileDescribe)}`)
       if (fileDescribe.state === FILE_STATE_DX.CLOSED) {
         await this.handleFileClose(fileUid, this.user.id, fileDescribe, node)
         return true
       }
-      this.log.verbose(`File ${fileUid} is not closed yet`)
+      this.logger.log(`File ${fileUid} is not closed yet`)
     } catch (error) {
-      this.log.error(`Error calling platform ${error}`)
+      this.logger.error(`Error calling platform ${error}`)
     }
     return false
   }
@@ -472,7 +473,7 @@ export class UserFileService {
     file.scopedParentFolderId = fileCreate.scopedParentFolderId
     file.uid = `${fileCreate.dxid}-1`
 
-    this.log.verbose(`Creating file ${JSON.stringify(fileCreate)}`)
+    this.logger.log(`Creating file ${JSON.stringify(fileCreate)}`)
     await this.em.persistAndFlush(file)
 
     return file
@@ -493,7 +494,7 @@ export class UserFileService {
   }
 
   private async rollbackRemovingState(nodes: Node[]) {
-    this.log.error(`Rolling back removing state for nodes ${nodes.map((node) => node.id)}`)
+    this.logger.error(`Rolling back removing state for nodes ${nodes.map((node) => node.id)}`)
     nodes.forEach((node) => {
       if (node.stiType === FILE_STI_TYPE.FOLDER) {
         node.state = null
