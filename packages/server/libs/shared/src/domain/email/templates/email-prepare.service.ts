@@ -14,7 +14,7 @@ import { SqlEntityManager } from '@mikro-orm/mysql'
 @Injectable()
 export class EmailPrepareService {
   @ServiceLogger()
-  private readonly log: Logger
+  private readonly logger: Logger
 
   constructor(
     private readonly em: SqlEntityManager,
@@ -37,7 +37,7 @@ export class EmailPrepareService {
     const handler = emailConfig.handlerClass
     // this also runs input validation
     const opsCtx: UserOpsCtx = {
-      log: this.log,
+      log: this.logger,
       user: this.user,
       em: this.em,
     }

@@ -33,13 +33,13 @@ interface NewsPositionReqBody {
   news_items: Record<number, number>
 }
 
-// NOTE infered from "paginated_per" setting in app/models/experts.rb
+// NOTE inferred from "paginated_per" setting in app/models/experts.rb
 const DEFAULT_PAGE_SIZE = 10
 
 @Controller('/news')
 export class NewsController {
   @ServiceLogger()
-  private readonly log: Logger
+  private readonly logger: Logger
   constructor(
     private readonly user: UserContext,
     @Inject(DEPRECATED_SQL_ENTITY_MANAGER) private readonly em: SqlEntityManager,
@@ -100,7 +100,7 @@ export class NewsController {
   @Delete('/:id')
   async deleteNews(@Param('id', ParseIntPipe) id: number) {
     const newsItem = this.em.getReference(NewsItem, id)
-    this.log.verbose(`Deleting news item with id: ${id}, title: ${newsItem.title}`)
+    this.logger.log(`Deleting news item with id: ${id}, title: ${newsItem.title}`)
     await this.em.remove(newsItem).flush()
   }
 

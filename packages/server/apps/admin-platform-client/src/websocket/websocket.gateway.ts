@@ -21,7 +21,7 @@ export class WebsocketGateway implements OnGatewayDisconnect, OnGatewayConnectio
 
   async handleConnection(client: WebSocket) {
     try {
-      this.logger.verbose(`Client connected to admin-platform-client: ${client}`)
+      this.logger.log(`Client connected to admin-platform-client: ${client}`)
     } catch (e) {
       this.logger.error(`Connection error: ${e}`)
 
@@ -31,7 +31,7 @@ export class WebsocketGateway implements OnGatewayDisconnect, OnGatewayConnectio
 
   handleDisconnect(client: WebSocket) {
     try {
-      this.logger.verbose(`Client disconnected to admin-platform-client: ${client}`)
+      this.logger.log(`Client disconnected to admin-platform-client: ${client}`)
       client.close()
     } catch (e) {
       this.logger.error(`Websocket disconnection error: ${e}`)

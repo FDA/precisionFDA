@@ -33,7 +33,7 @@ import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 @Injectable()
 export class SpaceReportService {
   @ServiceLogger()
-  private readonly log: Logger
+  private readonly logger: Logger
 
   constructor(
     private readonly em: SqlEntityManager,
@@ -104,7 +104,7 @@ export class SpaceReportService {
     }
 
     await this.em.transactional(async () => {
-      this.log.verbose(`Deleting reports with ids: ${reports.map((report) => report.id)}`)
+      this.logger.log(`Deleting reports with ids: ${reports.map((report) => report.id)}`)
       this.em.remove(reports)
     })
 

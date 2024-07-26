@@ -7,14 +7,14 @@ import { EmailSendService } from '@shared/domain/email/email-send.service'
 @Injectable()
 export class EmailFacade {
   @ServiceLogger()
-  private readonly log: Logger
+  private readonly logger: Logger
   constructor(
     private readonly emailPrepareService: EmailPrepareService,
     private readonly emailSendService: EmailSendService,
   ) {}
 
   async sendEmail(input: EmailProcessInput) {
-    this.log.verbose(
+    this.logger.log(
       `Sending email type: ${input.emailTypeId} to user ids: ${input.receiverUserIds}`,
     )
     const emails = await this.emailPrepareService.prepareEmails(input)

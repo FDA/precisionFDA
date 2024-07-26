@@ -29,15 +29,17 @@ import { IncomingMessage } from 'http'
 import { Server } from 'ws'
 import { log } from '../logger'
 import { UserContextTokenInterceptor } from '../user-context/interceptor/user-context-token.interceptor'
+import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 
 @UseInterceptors(UserContextTokenInterceptor, OrmContextInterceptor)
 @WebSocketGateway()
 export class WebsocketGateway implements OnGatewayDisconnect, OnGatewayInit, OnGatewayConnection {
   @WebSocketServer()
   server: Server
+  @ServiceLogger()
+  private readonly logger: Logger
 
   private clientConnections = new Map<number, Set<PfdaWebSocket>>()
-  private logger = new Logger('WebsocketGateway')
 
   constructor(
     private readonly notificationService: NotificationService,
@@ -55,7 +57,7 @@ export class WebsocketGateway implements OnGatewayDisconnect, OnGatewayInit, OnG
   @CreateRequestContext()
   async handleConnection(client: PfdaWebSocket, message: IncomingMessage) {
     try {
-      this.logger.verbose(`Websocket client connected: ${client}`)
+      this.logger.log(`Websocket client connected: ${client}`)
 
       const token = CookieUtils.getCookie('_precision-fda_session', message.headers.cookie)
       client.PFDA_AUTH_TOKEN = token
@@ -81,7 +83,7 @@ export class WebsocketGateway implements OnGatewayDisconnect, OnGatewayInit, OnG
 
       this.clientConnections.get(userId).add(client)
 
-      this.logger.verbose(
+      this.logger.log(
         `User ${dxuser} successfully authenticated for receiving WebSocket notifications`,
       )
 
@@ -98,7 +100,7 @@ export class WebsocketGateway implements OnGatewayDisconnect, OnGatewayInit, OnG
 
   handleDisconnect(client: PfdaWebSocket) {
     try {
-      this.logger.verbose(`Websocket client disconnected: ${client}`)
+      this.logger.log(`Websocket client disconnected: ${client}`)
 
       const token = client.PFDA_AUTH_TOKEN
 
@@ -161,7 +163,7 @@ export class WebsocketGateway implements OnGatewayDisconnect, OnGatewayInit, OnG
     })
 
     this.server.on('close', () => {
-      this.logger.verbose('Closing Redis connection')
+      this.logger.log('Closing Redis connection')
       client.quit()
     })
   }
@@ -169,7 +171,7 @@ export class WebsocketGateway implements OnGatewayDisconnect, OnGatewayInit, OnG
   private sendNotification(userId: number, notification: string) {
     this.clientConnections.get(userId)?.forEach((connection) => {
       try {
-        log.verbose(
+        log.log(
           `Sending notification to client. UserId: ${userId}, notification: ${notification}`,
         )
         connection.send(notification)

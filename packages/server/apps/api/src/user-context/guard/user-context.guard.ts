@@ -8,7 +8,7 @@ import { ajv } from '@shared/utils/validator'
 @Injectable()
 export class UserContextGuard implements CanActivate {
   constructor(
-    private readonly log: Logger,
+    private readonly logger: Logger,
     private readonly user: UserContext,
   ) {}
 
@@ -21,7 +21,7 @@ export class UserContextGuard implements CanActivate {
       return true
     }
 
-    this.log.warn(
+    this.logger.warn(
       {
         url: request.url,
         input: maskAccessTokenUserCtx(this.user),

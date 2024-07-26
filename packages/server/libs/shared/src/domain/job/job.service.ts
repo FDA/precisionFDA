@@ -4,7 +4,6 @@ import { NotificationService } from '@shared/domain/notification/services/notifi
 import { Folder } from '@shared/domain/user-file/folder.entity'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { User } from '@shared/domain/user/user.entity'
-import { getLogger } from '../../logger'
 import { PlatformClient } from '../../platform-client'
 import { EntityManager } from '@mikro-orm/core'
 import { FILE_STATE_DX, PARENT_TYPE } from '../user-file/user-file.types'
@@ -42,12 +41,10 @@ import { Injectable, Logger } from '@nestjs/common'
 import { EmailQueueJobProducer } from '@shared/domain/email/producer/email-queue-job.producer'
 import { EmailFacade } from '@shared/domain/email/email.facade'
 
-const logger = getLogger('job.service')
-
 @Injectable()
 export class JobService {
   @ServiceLogger()
-  private readonly log: Logger
+  private readonly logger: Logger
 
   private jobRepo: JobRepository
   private userRepo: UserRepository
@@ -66,18 +63,18 @@ export class JobService {
   }
 
   async checkChallengeJobs() {
-    logger.verbose(`JobService: checkChallengeJobs`)
+    this.logger.log(`checkChallengeJobs`)
     const challengeBotUser = await this.userRepo.findOneOrFail({
       dxuser: config.platform.challengeBotUser,
     })
     const jobs = await this.getNonTerminalJobs(challengeBotUser.id)
     if (jobs.length > 0) {
-      logger.verbose('JobService: Found non-terminal users for challenge bot user, syncing outputs')
+      this.logger.log('Found non-terminal users for challenge bot user, syncing outputs')
       for (const job of jobs) {
         await this.syncOutputs(job.dxid, challengeBotUser.id)
       }
     } else {
-      this.log.verbose('JobService: No non-terminal jobs found for challenge bot user')
+      this.logger.log('No non-terminal jobs found for challenge bot user')
     }
   }
 
@@ -112,21 +109,21 @@ export class JobService {
       const runningJob = await getMainQueue().getJob(SyncJobOperation.getBullJobId(job.dxid))
       if (!runningJob) {
         await createSyncJobStatusTask(job, this.user)
-        this.log.verbose(
+        this.logger.log(
           {},
-          `CheckStaleJobsOperation: Recreated missing SyncJobOperation for ${job.dxid}`,
+          `Recreated missing SyncJobOperation for ${job.dxid}`,
         )
       }
     })
     if (runningJobs.length === 0) {
-      this.log.verbose({}, 'CheckStaleJobsOperation: No running jobs found')
+      this.logger.log({}, 'No running jobs found')
       return []
     }
 
     const isOverMaxDuration = buildIsOverMaxDuration('notify')
     const staleJobs: Job[] = runningJobs.filter((job) => isOverMaxDuration(job))
     if (staleJobs.length === 0) {
-      this.log.verbose({}, 'CheckStaleJobsOperation: No stale jobs found')
+      this.logger.log({}, 'No stale jobs found')
     }
 
     // TODO(samuel) use Set instead - reduce bundle size
@@ -143,13 +140,13 @@ export class JobService {
     const nonStaleJobsInfo = nonStaleJobs.map(createJobInfo)
     const staleJobsInfo = staleJobs.map(createJobInfo)
 
-    this.log.verbose(
+    this.logger.log(
       { nonStaleJobsInfo: nonStaleJobsInfo },
-      'CheckStaleJobsOperation: Non stale jobs - for admin to note the times',
+      'Non stale jobs - for admin to note the times',
     )
-    this.log.verbose(
+    this.logger.log(
       { staleJobs: staleJobsInfo },
-      'CheckStaleJobsOperation: Stale jobs - should be terminated',
+      'Stale jobs - should be terminated',
     )
 
     // generate email for admin with list of jobs
@@ -201,7 +198,7 @@ export class JobService {
    * @param userId
    */
   async syncOutputs(jobDxId: string, userId: number): Promise<void> {
-    logger.verbose(`JobService: syncing output files for job ${jobDxId}`)
+    this.logger.log(`Syncing output files for job ${jobDxId}`)
 
     const user = await this.userRepo.findOneOrFail({ id: userId })
     const job = await this.jobRepo.findOneOrFail({ dxid: jobDxId })
@@ -241,9 +238,9 @@ export class JobService {
 
       await this.createNotification(jobDxId, userId)
       await this.em.commit()
-      logger.verbose(`JobService: outputs for job ${jobDxId} have been synchronized`)
+      this.logger.log(`Outputs for job ${jobDxId} have been synchronized`)
     } catch (error) {
-      logger.error('JobService: error synchronizing outputs', error)
+      this.logger.error('Error synchronizing outputs', error)
       await this.em.rollback()
       throw error
     }

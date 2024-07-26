@@ -25,7 +25,7 @@ describe('FollowUpDecider', () => {
     findChallengeResourcesByFileUid: findChallengeResourcesStub,
   } as unknown as ChallengeResourceRepository
   const logger = {
-    verbose: verboseLoggerStub,
+    log: verboseLoggerStub,
   } as unknown as Logger
   const spaceReportRepo = {
     findByResultFileUid: findReportByResultFileUidStub,

@@ -26,24 +26,24 @@ Maybe<DbCluster>
     const user = await em.findOne(User, { id: this.ctx.user.id })
 
     if (!dbCluster) {
-      this.ctx.log.warn({ input }, 'Error: DB Cluster does not exist')
+      this.ctx.log.warn({ input }, 'DB Cluster does not exist')
       await removeRepeatable(this.ctx.job)
       return
     }
 
     if (!user) {
-      this.ctx.log.warn({ input }, 'Error: User does not exist')
+      this.ctx.log.warn({ input }, 'User does not exist')
       await removeRepeatable(this.ctx.job)
       return
     }
 
     const client = new PlatformClient({ accessToken: this.ctx.user.accessToken }, this.ctx.log)
-    this.ctx.log.verbose({ dbClusterId: dbCluster.id }, 'SyncDbClusterOperation: Processing job')
+    this.ctx.log.log({ dbClusterId: dbCluster.id, dbClusterDxid: dbCluster.dxid }, 'Processing job')
 
     if (dbCluster.status === STATUS.TERMINATED) {
-      this.ctx.log.verbose(
+      this.ctx.log.log(
         { input, dbCluster },
-        'SyncDbClusterOperation: DB Cluster already has terminated status. Removing task',
+        'DB Cluster already has terminated status. Removing task',
       )
       await removeRepeatable(this.ctx.job)
       return
@@ -61,21 +61,21 @@ Maybe<DbCluster>
           // Unauthorized. Expected scenario is that the user token has expired
           // Removing the sync task will allow a new sync task to be recreated
           // when user next logs in via UserCheckupTask
-          this.ctx.log.verbose({ error: err.props },
-            'SyncDbClusterOperation: Received 401 from platform, removing sync task')
+          this.ctx.log.log({ error: err.props },
+            'Received 401 from platform, removing sync task')
           await removeRepeatable(this.ctx.job)
         }
       }
       else {
-        this.ctx.log.verbose({ error: err },
-          'SyncDbClusterOperation: Unhandled error from dbcluster/describe, will retry later')
+        this.ctx.log.log({ error: err },
+          'Unhandled error from dbcluster/describe, will retry later')
       }
       return
     }
 
-    this.ctx.log.verbose(
+    this.ctx.log.log(
       { data: describeDbClusterRes },
-      'SyncDbClusterOperation: Received dbcluster describe response from platform',
+      'Received dbcluster describe response from platform',
     )
 
     // @ts-ignore
@@ -85,18 +85,18 @@ Maybe<DbCluster>
         // TODO(samuel) validate if there is some possible type mismatch - if you git blame properly I didn't code it, just ran eslint
         && dbCluster.host == describeDbClusterRes.endpoint
         && dbCluster.port == describeDbClusterRes.port?.toString()) {
-      this.ctx.log.verbose(
+      this.ctx.log.log(
         { dxid: dbCluster.dxid },
-        'SyncDbClusterOperation: Status, endpoint or port have not been changed, no updates',
+        'Status, endpoint or port have not been changed, no updates',
       )
       return
     }
 
-    this.ctx.log.verbose({
+    this.ctx.log.log({
       dxid: dbCluster.dxid,
       fromState: currentStatus,
       toState: describeDbClusterRes.status,
-    }, 'SyncDbClusterOperation: Updating dbcluster properties from the platform')
+    }, 'Updating dbcluster properties from the platform')
 
     const updatedDbCluster = wrap(dbCluster).assign(
       {
@@ -111,6 +111,6 @@ Maybe<DbCluster>
     )
     await em.flush()
 
-    this.ctx.log.debug({ dbCluster: updatedDbCluster }, 'SyncDbClusterOperation: Updated dbcluster')
+    this.ctx.log.debug({ dbCluster: updatedDbCluster }, 'Updated dbcluster')
   }
 }

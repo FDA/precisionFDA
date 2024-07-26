@@ -91,11 +91,11 @@ const defaultLog = getLogger('platform-client-logger')
 
 export class PlatformClient {
   user: { accessToken: string }
-  log: Logger
+  logger: Logger
 
   constructor(user: { accessToken: string }, logger?: Logger) {
     this.user = user
-    this.log = logger ?? defaultLog
+    this.logger = logger ?? defaultLog
   }
 
   // ---------------
@@ -244,7 +244,7 @@ export class PlatformClient {
     })
     ws.on('error', (error) => {
       ws.terminate()
-      this.log.error(`Error streaming job logs: ${error}`)
+      this.logger.error(`Error streaming job logs: ${error}`)
     })
     return ws
   }
@@ -938,15 +938,15 @@ export class PlatformClient {
 
   private logClientRequest(options: AxiosRequestConfig): void {
     const sanitized = maskAuthHeader(options.headers)
-    this.log.verbose(
+    this.logger.log(
       { requestOptions: { ...options, headers: sanitized }, url: options.url },
-      'PlatformClient: Running DNANexus API request',
+      'Running DNANexus API request',
     )
   }
 
   private logClientFailed(options: AxiosRequestConfig): void {
     const sanitized = {}
-    this.log.warn(
+    this.logger.warn(
       { requestOptions: { ...options, headers: sanitized } },
       'PlatformClient Error: Failed request options',
     )
@@ -962,7 +962,7 @@ export class PlatformClient {
   ): never {
     // response status code is NOT 2xx
     if (err.response) {
-      this.log.error(
+      this.logger.error(
         {
           response: err.response.data,
           statusCode: err.response.status,
@@ -992,9 +992,9 @@ export class PlatformClient {
       })
     } else if (err.request) {
       // the request was made but no response was received
-      this.log.error({ err }, 'Error: Failed platform request - no response received')
+      this.logger.error({ err }, 'Failed platform request - no response received')
     } else {
-      this.log.error({ err }, 'Error: Failed platform request - different error')
+      this.logger.error({ err }, 'Failed platform request - different error')
     }
     // todo: handle this does not result in 500 API error
     // TODO(2): Need to consider other error types and handle them with a descriptive message

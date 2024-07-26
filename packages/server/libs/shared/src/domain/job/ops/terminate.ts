@@ -27,14 +27,14 @@ export class RequestTerminateJobOperation extends BaseOperation<UserOpsCtx, DxId
     }
 
     if (isStateTerminal(job.state) || job.state === JOB_STATE.TERMINATING) {
-      this.ctx.log.verbose({ jobId: job.id }, 'Job is already terminating or terminated')
+      this.ctx.log.log({ jobId: job.id, jobDxid: job.dxid }, 'Job is already terminating or terminated')
       throw new errors.InvalidStateError('Job is already terminating or terminated')
     }
     // call the platform API
     const apiResult = await platformClient.jobTerminate({
       jobId: job.dxid,
     })
-    this.ctx.log.verbose({ jobId: job.id, jobDxId: job.dxid, apiResult }, 'Job set to terminate')
+    this.ctx.log.log({ jobId: job.id, jobDxId: job.dxid, apiResult }, 'Job set to terminate')
     // set to terminating
     job.state = JOB_STATE.TERMINATING
     await em.flush()

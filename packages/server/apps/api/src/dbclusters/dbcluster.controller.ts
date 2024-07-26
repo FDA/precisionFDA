@@ -35,7 +35,7 @@ export class DbClusterController {
   constructor(
     private readonly user: UserContext,
     @Inject(DEPRECATED_SQL_ENTITY_MANAGER) private readonly em: SqlEntityManager,
-    private readonly log: Logger,
+    private readonly logger: Logger,
     private readonly dbClusterService: DbClusterService,
   ) {}
 
@@ -45,7 +45,7 @@ export class DbClusterController {
     @Body(new JsonSchemaPipe(schemas.getDxidsInputSchema('dxids'))) body: IDxidListParams,
   ) {
     const opsCtx: UserOpsCtx = {
-      log: this.log,
+      log: this.logger,
       user: this.user,
       em: this.em,
     }
@@ -65,7 +65,7 @@ export class DbClusterController {
     @Body(new JsonSchemaPipe(schemas.getDxidsInputSchema('dxids'))) body: IDxidListParams,
   ) {
     const opsCtx: UserOpsCtx = {
-      log: this.log,
+      log: this.logger,
       user: this.user,
       em: this.em,
     }
@@ -85,7 +85,7 @@ export class DbClusterController {
     @Body(new JsonSchemaPipe(schemas.getDxidsInputSchema('dxids'))) body: IDxidListParams,
   ) {
     const opsCtx: UserOpsCtx = {
-      log: this.log,
+      log: this.logger,
       user: this.user,
       em: this.em,
     }

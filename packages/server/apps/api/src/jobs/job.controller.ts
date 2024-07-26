@@ -40,14 +40,14 @@ export class JobController {
   constructor(
     private readonly user: UserContext,
     @Inject(DEPRECATED_SQL_ENTITY_MANAGER) private readonly em: SqlEntityManager,
-    private readonly log: Logger,
+    private readonly logger: Logger,
   ) {}
 
   // not used at the moment
   @Get()
   async listJobs(@Query(new JsonSchemaPipe(jobListQuerySchema)) query: ListJobsInput) {
     const opsCtx: UserOpsCtx = {
-      log: this.log,
+      log: this.logger,
       user: this.user,
       em: this.em,
     }
@@ -64,7 +64,7 @@ export class JobController {
   @Get('/:jobDxId')
   async describeJob(@Param('jobDxId', new JsonSchemaPipe(schemas.dxidProp)) dxid: DxId<'job'>) {
     const opsCtx: UserOpsCtx = {
-      log: this.log,
+      log: this.logger,
       user: this.user,
       em: this.em,
     }
@@ -78,7 +78,7 @@ export class JobController {
   @Patch('/:jobDxId/terminate')
   async terminateJob(@Param('jobDxId', new JsonSchemaPipe(schemas.dxidProp)) dxid: DxId<'job'>) {
     const opsCtx: UserOpsCtx = {
-      log: this.log,
+      log: this.logger,
       user: this.user,
       em: this.em,
     }
@@ -98,7 +98,7 @@ export class JobController {
     @Body(new JsonSchemaPipe(workstationAliveBodySchema)) body: WorkstationAliveParams,
   ) {
     const opsCtx: UserOpsCtx = {
-      log: this.log,
+      log: this.logger,
       user: this.user,
       em: this.em,
     }
@@ -114,7 +114,7 @@ export class JobController {
     @Body(new JsonSchemaPipe(jobSetAPIKeyBodySchema)) body: JobSetAPIKeyParams,
   ) {
     const opsCtx: UserOpsCtx = {
-      log: this.log,
+      log: this.logger,
       user: this.user,
       em: this.em,
     }
@@ -130,7 +130,7 @@ export class JobController {
     @Body(new JsonSchemaPipe(jobSnapshotBodySchema)) body: JobSnapshotParams,
   ) {
     const opsCtx: UserOpsCtx = {
-      log: this.log,
+      log: this.logger,
       user: this.user,
       em: this.em,
     }

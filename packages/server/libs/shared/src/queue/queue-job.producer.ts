@@ -5,7 +5,7 @@ import { Task } from '@shared/queue/task.input'
 import { Job, JobOptions, Queue } from 'bull'
 
 export abstract class QueueJobProducer {
-  protected readonly log = new Logger('QueueJobProducer')
+  protected readonly logger = new Logger('QueueJobProducer')
 
   protected abstract queue: Queue
 
@@ -16,7 +16,7 @@ export abstract class QueueJobProducer {
   ): Promise<Job<T>> {
     this.validateQueue()
 
-    this.log.verbose(
+    this.logger.log(
       { task: this.getTaskInfo(task, payloadFn), job: { id: options?.jobId } },
       'adding a task to queue',
     )
@@ -27,7 +27,7 @@ export abstract class QueueJobProducer {
   protected async addBulkToQueue<T extends Task>(tasks: Parameters<Queue<T>['addBulk']>[0]) {
     this.validateQueue()
 
-    this.log.verbose(
+    this.logger.log(
       { tasks: tasks.map((t) => this.getTaskInfo(t.data)) },
       'adding a bulk of task to queue',
     )
