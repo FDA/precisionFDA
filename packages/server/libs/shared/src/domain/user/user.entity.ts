@@ -66,6 +66,11 @@ type CloudResourceSettings = {
   resources: Array<(typeof RESOURCE_TYPES)[number]>
 }
 
+type Extras = {
+  has_seen_guidelines: boolean,
+  inactivity_email_sent: boolean
+}
+
 // contains the bare minimum to work with the user instance
 // might need to add more fields in the time
 @Entity({ tableName: 'users', repository: () => UserRepository })
@@ -136,6 +141,12 @@ export class User extends BaseEntity {
   })
   cloudResourceSettings?: CloudResourceSettings
 
+  @Property({
+    type: WorkaroundJsonType,
+    columnType: 'text',
+  })
+  extras?: Extras
+
   @OneToMany({ entity: () => Job, mappedBy: 'user' })
   jobs = new Collection<Job>(this)
 
@@ -150,7 +161,7 @@ export class User extends BaseEntity {
     mappedBy: 'user',
     nullable: true,
   })
-  notificationPreference: Ref<NotificationPreference>;
+  notificationPreference: Ref<NotificationPreference>
 
   [EntityRepositoryType]?: UserRepository
 

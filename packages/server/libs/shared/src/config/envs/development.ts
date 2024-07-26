@@ -42,6 +42,7 @@ export const config: ConfigOverride = () => ({
           // Also override the repeatPattern to test locally
           adminDataConsistencyReport: true,
           checkNonterminatedClusters: true,
+          userInactivityAlert: true,
         },
       },
     },

@@ -90,11 +90,15 @@ const initMaintenanceQueue = async () => {
     await maintenanceJobProducer.createCheckNonTerminatedDbClustersTask()
   }
 
-  await maintenanceJobProducer.createCheckChallengeJobsTask()
+  if (config.workerJobs.queues.maintenance.onInit.userInactivityAlert) {
+    await maintenanceJobProducer.createUserInactivityAlertTask()
+  }
 
   if (config.workerJobs.queues.maintenance.onInit.adminDataConsistencyReport) {
     await maintenanceJobProducer.createCheckAdminDataConsistencyReportTask()
   }
+
+  await maintenanceJobProducer.createCheckChallengeJobsTask()
 }
 
 // removeRepeatable and removeRepeatableJob explanation:

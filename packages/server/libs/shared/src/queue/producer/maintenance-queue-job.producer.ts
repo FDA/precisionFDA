@@ -5,7 +5,6 @@ import { QueueJobProducer } from '@shared/queue/queue-job.producer'
 import { BasicUserJob, TASK_TYPE } from '@shared/queue/task.input'
 import { UserCtx } from '@shared/types'
 import { JobOptions, Queue } from 'bull'
-import { undefined } from 'zod'
 
 @Injectable()
 export class MaintenanceQueueJobProducer extends QueueJobProducer {
@@ -56,6 +55,21 @@ export class MaintenanceQueueJobProducer extends QueueJobProducer {
       jobId: TASK_TYPE.CHECK_NON_TERMINATED_DBCLUSTERS,
       repeat: {
         cron: config.workerJobs.nonTerminatedDbClusters.repeatPattern,
+      },
+    }
+    return await this.addToQueue(wrapped, options)
+  }
+
+  async createUserInactivityAlertTask() {
+    const wrapped = {
+      type: TASK_TYPE.USER_INACTIVITY_ALERT as const,
+      payload: undefined as any
+    }
+
+    const options: JobOptions = {
+      jobId: TASK_TYPE.USER_INACTIVITY_ALERT,
+      repeat: {
+        cron: config.workerJobs.userInactivityAlert.repeatPattern,
       },
     }
     return await this.addToQueue(wrapped, options)
