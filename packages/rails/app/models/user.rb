@@ -80,7 +80,7 @@ class User < ApplicationRecord
            foreign_key: :initiator_id,
            dependent: :destroy
 
-  store :extras, accessors: [:has_seen_guidelines], coder: JSON
+  store :extras, accessors: [:has_seen_guidelines, :inactivity_email_sent], coder: JSON
   store :cloud_resource_settings,
         accessors: %i(charges_baseline pricing_map job_limit total_limit resources),
         coder: JSON

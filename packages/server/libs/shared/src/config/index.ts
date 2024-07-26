@@ -122,6 +122,7 @@ const defaultConfig = {
         name: 'https-apps-worker-maintenance-queue',
         onInit: {
           checkNonterminatedClusters: true,
+          userInactivityAlert: false,
           adminDataConsistencyReport: false,
         },
       },
@@ -144,6 +145,10 @@ const defaultConfig = {
     },
     nonTerminatedDbClusters: {
       repeatPattern: '0 6 * * *', // Once a day at 6am
+    },
+    userInactivityAlert: {
+      inactiveDaysThreshold: 55, // alert users who haven't logged in for X days
+      repeatPattern: '30 14 * * 1-5', // workdays at 2:30 PM (UTC)
     },
     checkChallengeJobs: {
       repeatPattern: '*/5 * * * *', // Every 5 minutes
