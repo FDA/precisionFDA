@@ -18,17 +18,34 @@ import {
   FILE_STATUS,
   IUploadInfo,
   MAX_UPLOADABLE_FILES,
+  FileStatusTypes,
 } from './constants'
 import { multiFileUpload } from './multiFileUpload'
 import {
+  Name,
   Remove,
   Status,
   StyledDropSection,
+  StyledFileUploadStatus,
   SubTitle,
   UploadFilesTable,
 } from './styles'
 import { ModalHeaderTop, ModalNext } from '../../../modal/ModalNext'
 import { Button, TransparentButton } from '../../../../components/Button'
+import { Done, Running, Failed } from '../../../../components/icons/StateIcons'
+
+export const FileUploadStatus = ({ status }: { status: FileStatusTypes }) => {
+  if(status === 'uploaded') {
+    return <><Done />{status}</>
+  }
+  if(status === 'added') {
+    return null
+  }
+  if(status === 'failure') {
+    return <><Failed />{status}</>
+  }
+  return <><Running />{status}</>
+}
 
 const idGenerator = createSequenceGenerator()
 
@@ -77,6 +94,7 @@ export const useFileUploadModal = ({
     all(s => [FILE_STATUS['uploaded']].includes(s), statuses)
   const exceedsMax = filesMeta.length > MAX_UPLOADABLE_FILES
   const noneSelected = filesMeta.length === 0
+  const showRemove = !uploadFinished || !uploadInProgress
 
   const { getRootProps, getInputProps } = useDropzone({
     disabled: uploadInProgress,
@@ -164,6 +182,7 @@ export const useFileUploadModal = ({
 
   const modalComp = isShown && (
     <ModalNext
+      id="modal-files-upload"
       data-testid="modal-files-upload"
       isShown={Boolean(isShown)}
       hide={handleClose}
@@ -186,24 +205,26 @@ export const useFileUploadModal = ({
           <UploadFilesTable>
             <thead>
               <tr>
-                <th>Name</th>
+                <Name>Name</Name>
                 <Status>Status</Status>
-                <Remove>Remove</Remove>
+                {showRemove && <Remove>Remove</Remove>}
               </tr>
             </thead>
             <tbody>
               {filesMeta.map(f => (
                 <tr key={f.id}>
-                  <td>{f.name}</td>
-                  <Status>{f.status}</Status>
-                  <Remove>
-                    <TransparentButton
-                      disabled={uploadInProgress}
-                      onClick={() => handleRemoveFile(f.id)}
-                    >
-                      <TrashIcon height={16} />
-                    </TransparentButton>
-                  </Remove>
+                  <Name as="td">{f.name}</Name>
+                  <Status as="td"><StyledFileUploadStatus><FileUploadStatus status={f.status} /></StyledFileUploadStatus></Status>
+                  {showRemove && (
+                    <Remove as="td">
+                      <TransparentButton
+                        disabled={uploadInProgress}
+                        onClick={() => handleRemoveFile(f.id)}
+                      >
+                        <TrashIcon height={16} />
+                      </TransparentButton>
+                    </Remove>
+                  )}
                 </tr>
               ))}
             </tbody>
@@ -218,12 +239,14 @@ export const useFileUploadModal = ({
               You can only upload up to 20 files at a time
             </InputError>
           )}
-          <Button
-            disabled={uploadInProgress || noneSelected}
-            onClick={handleRemoveAll}
-          >
-            Remove all
-          </Button>
+          {showRemove && (
+            <Button
+              disabled={uploadInProgress || noneSelected}
+              onClick={handleRemoveAll}
+            >
+              Remove all
+            </Button>
+          )}
           {uploadFinished ? (
             <Button variant="primary" onClick={handleClose}>Close</Button>
           ) : (
