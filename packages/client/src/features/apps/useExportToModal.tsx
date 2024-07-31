@@ -4,7 +4,6 @@ import { Button } from '../../components/Button'
 import { ModalHeaderTop, ModalNext } from '../modal/ModalNext'
 import { ButtonRow, Footer, ModalScroll } from '../modal/styles'
 import { useModal } from '../modal/useModal'
-import MagicPostLink from '../home/MagicPostLink'
 
 const StyledExportTo = styled.div`
   min-width: 400px;
@@ -101,13 +100,15 @@ export function useExportToModal<
           <ul>
             {exportOptions.map(e => (
               <li key={e.label}>
-                {e.isPost ? (
-                  <MagicPostLink link={{ url: e.link ?? '', method: 'POST' }} confirm={getConfirmationMessage(e.value)}>{e.label}</MagicPostLink>
-                ) : (
-                  <a href={e.link} onClick={(ev) => handleClick(ev, e)} download>
-                    {e.label}
-                  </a>
-                )}
+                <a
+                  href={e.link}
+                  data-turbolinks="false"
+                  data-confirm={e.value && getConfirmationMessage(e.value)}
+                  data-method={e.isPost && 'post'}
+                  download
+                >
+                  {e.label}
+                </a>
               </li>
             ))}
           </ul>

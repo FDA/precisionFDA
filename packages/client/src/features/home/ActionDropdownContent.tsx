@@ -5,7 +5,6 @@ import { CheckIcon } from '../../components/icons/CheckIcon'
 import { NavLink } from '../../components/NavLink'
 import { CloudResourcesConditionType } from '../../hooks/useCloudResourcesCondition'
 import { colors } from '../../styles/theme'
-import MagicLink from './MagicPostLink'
 import { ActionFunctionsType, ActionGroupType, Link as LinkType } from './types'
 
 // Updated disbaled text color for remediation using textMediumGrey
@@ -135,16 +134,21 @@ const LinkAction = ({
     return children
   }
   const url = typeof link === 'string' ? link : link.url
-
-  if (link?.method === 'POST') {
-    return <MagicLink link={link}>{children}</MagicLink>
-  }
-  if (cloudResourcesConditionType) {
-    ;<CloudResourcesConditionalAnchor href={url} conditionType={cloudResourcesConditionType}>
+  const method = typeof link === 'string' ? 'GET' : link.method
+  return cloudResourcesConditionType ? (
+    <CloudResourcesConditionalAnchor
+      href={url}
+      data-turbolinks="false"
+      dataMethod={method}
+      conditionType={cloudResourcesConditionType}
+    >
       {children}
     </CloudResourcesConditionalAnchor>
-  }
-  return <a href={url}>{children}</a>
+  ) : (
+    <a data-turbolinks="false" href={url} data-method={method}>
+      {children}
+    </a>
+  )
 }
 
 const ActionItem = ({ action }: { action: ActionFunctionsType<any>[number] }) => {
