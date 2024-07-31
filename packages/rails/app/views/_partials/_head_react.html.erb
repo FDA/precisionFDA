@@ -9,6 +9,9 @@
   <meta name="robots" content="noindex">
 <% end %>
 
+<%= stylesheet_link_tag    "vendor",      media: "all", debug: false, 'data-turbolinks-track' => true  %>
+<%= stylesheet_link_tag    'application', media: 'all', 'data-turbolinks-track' => true %>
+<%= javascript_include_tag 'next_application' %>
 <%= csrf_meta_tags %>
 
 <link rel="stylesheet" href="/assets/bundle.css">
