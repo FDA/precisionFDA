@@ -30,12 +30,12 @@ export class JobFinishedEmailHandler
 
   async determineReceivers(): Promise<User[]> {
     if (isJobPublic(this.job)) {
-      this.ctx.log.verbose({ jobId: this.job.id }, 'Job is public, noone is notified')
+      this.ctx.log.log({ jobId: this.job.id }, 'Job is public, noone is notified')
       return []
     }
     // todo: other users if job runs in a space?
     if (isJobInSpace(this.job)) {
-      this.ctx.log.verbose({ jobId: this.job.id }, 'Job is in a space, todo')
+      this.ctx.log.log({ jobId: this.job.id }, 'Job is in a space, todo')
       return []
     }
     // JOB IS PRIVATE

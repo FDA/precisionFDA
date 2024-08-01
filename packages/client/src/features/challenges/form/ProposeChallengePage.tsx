@@ -222,7 +222,7 @@ const ProposeChallengePage = () => {
   }
 
   return (
-    <PublicLayout>
+    <PublicLayout mainScroll>
       <NavigationBar title={title} subtitle={subtitle} user={user} />
       {!isLoggedIn && PROD_OR_STAGE ? renderContentWithCaptcha() : renderContent()}
     </PublicLayout>

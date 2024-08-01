@@ -1623,6 +1623,10 @@ class ApiController < ApplicationController
       raise_api_error "You don't have permissions to add files to the folder."
     end
 
+    if @folder && @folder.state == "removing"
+      raise_api_error "The target folder is being removed."
+    end
+
     file_name = params[:name].presence
     if file_name.blank? || !file_name.is_a?(String)
       raise_api_error "File name needs to be a non-empty String"

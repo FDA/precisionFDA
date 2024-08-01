@@ -1,13 +1,8 @@
 /* eslint-disable react/require-default-props */
+import classNames from 'classnames'
 import 'core-js'
 import { range } from 'ramda'
-import React, {
-  MouseEventHandler,
-  PropsWithChildren,
-  ReactElement,
-  ReactNode,
-  useMemo,
-} from 'react'
+import React, { MouseEventHandler, PropsWithChildren, ReactElement, ReactNode, useMemo } from 'react'
 import {
   Cell,
   CellProps,
@@ -33,7 +28,6 @@ import {
 } from 'react-table'
 import 'regenerator-runtime'
 import styled from 'styled-components'
-import classNames from 'classnames'
 import { ActionsDropdownGroupContent } from '../../features/home/ActionDropdownContent'
 import { ActionFunctionsType, ActionGroupType } from '../../features/home/types'
 import { TransparentButton } from '../Button'
@@ -79,6 +73,12 @@ const Front = styled(Dropdown)`
   }
 `
 
+const ActionTitle = styled.p`
+  text-wrap: nowrap;
+  min-width: fit-content;
+  line-height: 16px;
+`
+
 type SelectColumn = {
   key: string
   title: string
@@ -86,18 +86,14 @@ type SelectColumn = {
   groupTitle: string
 }
 
-type FilterSelectColumn = {
-  [key: string]: SelectColumn
-}
-
 const ColumnSelect = ({
   columns,
   onChangeVisible,
 }: {
-  columns: SelectColumn[],
-  onChangeVisible: (hiddenCols: string, cols: boolean) => void,
+  columns: SelectColumn[]
+  onChangeVisible: (hiddenCols: string, cols: boolean) => void
 }) => {
-  const actions: {[key: string]: ActionFunctionsType<any>} = {}
+  const actions: { [key: string]: ActionFunctionsType<any> } = {}
   for (const col of columns) {
     if (!actions[col.groupTitle]) {
       actions[col.groupTitle] = {}
@@ -107,7 +103,7 @@ const ColumnSelect = ({
       isDisabled: false,
       isSelected: col.isVisible,
       key: col.key,
-      title: col.title,
+      content: <ActionTitle>{col.title}</ActionTitle>,
       func: (isVisible: boolean) => {
         onChangeVisible(col.key, isVisible)
       },
@@ -119,12 +115,7 @@ const ColumnSelect = ({
   }))
   return (
     <StyledColumnSelect>
-      <Front
-        trigger="click"
-        content={
-          <ActionsDropdownGroupContent content={content} />
-        }
-      >
+      <Front trigger="click" content={<ActionsDropdownGroupContent content={content} />}>
         {dropdownProps => (
           <TransparentButton {...dropdownProps} active={dropdownProps.isActive} title="Column Select">
             <ColumnsIcon height={14} />
@@ -171,18 +162,14 @@ export interface ITable<T extends object = {}> extends TableOptions<T> {
   cellProps?: (cell: Cell<T>) => any
   rowProps?: (row: Row<T>) => any
   updateRowState?: (row: Row<T>) => any
-  saveColumnResizeWidth?: (
-    columnResizing: UseResizeColumnsState<any>['columnResizing'],
-  ) => void
+  saveColumnResizeWidth?: (columnResizing: UseResizeColumnsState<any>['columnResizing']) => void
   getRowId?: Parameters<typeof useTable>[0]['getRowId']
   enableColumnSelect?: boolean
   shouldAllowScrollbar?: boolean
   saveHiddenColumns: (cols: string[]) => void
 }
 
-export default function Table<T extends object>(
-  props: PropsWithChildren<ITable<T>>,
-): ReactElement {
+export default function Table<T extends object>(props: PropsWithChildren<ITable<T>>): ReactElement {
   const {
     fillWidth = false,
     loading = true,
@@ -243,21 +230,21 @@ export default function Table<T extends object>(
     },
 
     useColumnOrder,
-    isFilterable ? useFilters : () => { },
-    isFilterable ? useGlobalFilter : () => { },
+    isFilterable ? useFilters : () => {},
+    isFilterable ? useGlobalFilter : () => {},
     useGroupBy,
-    isSortable ? useSortBy : () => { },
-    isExpandable ? useExpanded : () => { },
+    isSortable ? useSortBy : () => {},
+    isExpandable ? useExpanded : () => {},
     usePagination,
     useFlexLayout,
-    isExpandable ? expandHook : () => { },
-    isSelectable ? useRowSelect : () => { },
-    isSelectable ? selectionHook : () => { },
-    isColsResizable ? useResizeColumns : () => { },
-    )
-    
-    const {
-      getTableProps,
+    isExpandable ? expandHook : () => {},
+    isSelectable ? useRowSelect : () => {},
+    isSelectable ? selectionHook : () => {},
+    isColsResizable ? useResizeColumns : () => {},
+  )
+
+  const {
+    getTableProps,
     getTableBodyProps,
     prepareRow,
     visibleColumns,
@@ -268,14 +255,15 @@ export default function Table<T extends object>(
     toggleAllRowsSelected,
     setAllFilters,
   } = instance
-  
 
   // Fix empty space with column header with calculated width
   const { containerRef, containerWidth = 50 } = useComponentWidth()
   const spacerWidth = useMemo(() => {
-    const sum = visibleColumns.map(c => c.width as number).reduce((accumulator, value) => {
-      return accumulator + value
-    }, 0)
+    const sum = visibleColumns
+      .map(c => c.width as number)
+      .reduce((accumulator, value) => {
+        return accumulator + value
+      }, 0)
     return containerWidth > sum ? containerWidth - sum - 8 : 50
   }, [visibleColumns])
 
@@ -320,64 +308,63 @@ export default function Table<T extends object>(
   }, [columnResizing])
 
   const onChangeVisible = (col: string, isVisible: boolean) => {
-    const newHCols = [...hiddenColumns ?? []]
+    const newHCols = [...(hiddenColumns ?? [])]
     if (isVisible) {
       const index = hiddenColumns?.indexOf(col) ?? -1
       if (index > -1) {
         newHCols?.splice(index, 1)
-        saveHiddenColumns([...newHCols || []])
+        saveHiddenColumns([...(newHCols || [])])
       }
     } else {
       newHCols?.push(col)
-      saveHiddenColumns([...newHCols || []])
+      saveHiddenColumns([...(newHCols || [])])
     }
   }
 
   const getAvailableCols = () => {
-    const standardColumns = columns?.filter((c) => c?.id === typeof 'string' || true && !c.id?.includes('props.'))
-    .map(c => ({ key: c?.accessor, title: c.Header, groupTitle: 'Standard Columns', isVisible: !hiddenColumns?.includes(c.accessor) })) ?? []
-    const propColums = properties?.map(p => ({ key: `props.${p}`, title: p, groupTitle: 'Property Columns', isVisible: !hiddenColumns?.includes(`props.${p}`) })) ?? []
+    const standardColumns =
+      columns
+        ?.filter(c => c?.id === typeof 'string' || (true && !c.id?.includes('props.')))
+        .map(c => ({
+          key: c?.accessor,
+          title: c.Header,
+          groupTitle: 'Standard Columns',
+          isVisible: !hiddenColumns?.includes(c.accessor),
+        })) ?? []
+    const propColums =
+      properties?.map(p => ({
+        key: `props.${p}`,
+        title: p,
+        groupTitle: 'Property Columns',
+        isVisible: !hiddenColumns?.includes(`props.${p}`),
+      })) ?? []
 
     return [...standardColumns, ...propColums]
   }
 
   return (
     <StyledTable data-testid="pfda-table">
-      <ReactTableStyles
-        $shouldFillWidth={fillWidth}
-        $shouldAllowScrollbar={shouldAllowScrollbar}
-      >
+      <ReactTableStyles $shouldFillWidth={fillWidth} $shouldAllowScrollbar={shouldAllowScrollbar}>
         <div className="tableWrap" ref={containerRef}>
           <div {...getTableProps()} className="table sticky">
             <div className="thead" role="row">
-              {enableColumnSelect && <ColumnSelect
-                columns={getAvailableCols()}
-                hiddenColumns={hiddenColumns}
-                onChangeVisible={onChangeVisible}
-                />
-              }
-              {visibleColumns.map((column) => {
+              {enableColumnSelect && (
+                <ColumnSelect columns={getAvailableCols()} hiddenColumns={hiddenColumns} onChangeVisible={onChangeVisible} />
+              )}
+              {visibleColumns.map(column => {
                 const classes = classNames('th', { 'row-expander': column.id === 'row-expander' })
                 return (
                   // eslint-disable-next-line react/jsx-key
                   <div {...column.getHeaderProps()} className={classes}>
                     {isColsResizable && column.getResizerProps && (
-                      <div
-                        {...column.getResizerProps()}
-                        className={`resizer ${column.isResizing ? 'isResizing' : ''
-                          }`}
-                      />
+                      <div {...column.getResizerProps()} className={`resizer ${column.isResizing ? 'isResizing' : ''}`} />
                     )}
                     {isSortable && column.canSort ? (
                       <div {...column.getSortByToggleProps()} className="sort">
                         {column.render('Header')}
                         <span>
                           {/* eslint-disable-next-line no-nested-ternary */}
-                          {column.isSorted
-                            ? column.isSortedDesc
-                              ? ' ↓'
-                              : ' ↑'
-                            : ''}
+                          {column.isSorted ? (column.isSortedDesc ? ' ↓' : ' ↑') : ''}
                         </span>
                       </div>
                     ) : (
@@ -398,18 +385,14 @@ export default function Table<T extends object>(
                     <div {...column.getHeaderProps()} className={classes}>
                       {column.canFilter ? column.render('Filter') : null}
                     </div>
-                )})}
+                  )
+                })}
               </div>
             )}
 
             <div {...getTableBodyProps()} className="tbody">
               {range(0, 10).map(i => (
-                <LoadingRows<T>
-                  loading={loading}
-                  visibleColumns={visibleColumns}
-                  delay={i}
-                  key={i}
-                />
+                <LoadingRows<T> loading={loading} visibleColumns={visibleColumns} delay={i} key={i} />
               ))}
               {!loading && page.length === 0 && emptyComponent}
               {page.map((row, index) => {
@@ -417,12 +400,7 @@ export default function Table<T extends object>(
                 prepareRow(r)
                 return (
                   <React.Fragment key={r.id}>
-                    <div
-                      {...r.getRowProps(rowProps && rowProps(r))}
-                      className="tr"
-                      role="row"
-                      data-testid="data-row"
-                    >
+                    <div {...r.getRowProps(rowProps && rowProps(r))} className="tr" role="row" data-testid="data-row">
                       {r.cells.map(cell => {
                         const classes = classNames('td', { 'row-expander': cell.column.id === 'row-expander' })
                         return (
@@ -434,11 +412,10 @@ export default function Table<T extends object>(
                           >
                             {cell.render('Cell')}
                           </div>
-                      )})}
+                        )
+                      })}
                     </div>
-                    {isExpandable && r.isExpanded
-                      ? subcomponent && subcomponent(r)
-                      : null}
+                    {isExpandable && r.isExpanded ? subcomponent && subcomponent(r) : null}
                   </React.Fragment>
                 )
               })}

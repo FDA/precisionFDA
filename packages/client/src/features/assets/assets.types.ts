@@ -2,52 +2,7 @@ import { ServerScope } from '../home/types'
 import { FileState } from '../files/files.types'
 import { FileOrg, FileUser } from '../apps/apps.types'
 
-export enum AppActions {
-  'Run' = 'Run',
-  'Run batch' = 'Run batch',
-  'Track' = 'Track',
-  'Edit' = 'Edit',
-  'Fork' = 'Fork',
-  'Export to' = 'Export to',
-  'Make public' = 'Make public',
-  'Delete' = 'Delete',
-  'Copy to space' = 'Copy to space',
-  'Attach to...' = 'Attach to...',
-}
-
-export enum AppsListActions {
-  'Create App' = 'Create App',
-}
-
-export interface Links {
-  show?: string;
-  user?: string;
-  jobs?: string;
-  track?: string;
-  fork?: string;
-  export?: string;
-  cwl_export?: string;
-  wdl_export?: string;
-  copy?: string;
-  attach_to?: string;
-  delete?: string;
-  remove?: string;
-  edit?: string;
-  feature?: string;
-  download?: string;
-  edit_tags?: string;
-  assign_app?: string;
-  publish?: string;
-  run_job?: string;
-  batch_run?: string;
-  space?: string;
-  show_license?: string;
-  license?: string;
-  detach_license?: string;
-  request_approval_license?: string;
-  accept_license_action?: string;
-}
-
+type Links = Record<string, string>
 export interface FileLicense {
   id: string;
   title: string;

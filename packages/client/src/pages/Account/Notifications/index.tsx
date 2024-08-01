@@ -238,14 +238,14 @@ const NotificationsPage = () => {
 
   if (user?.is_guest) {
     return (
-      <UserLayout>
+      <UserLayout mainScroll>
         <GuestNotAllowed />
       </UserLayout>
     )
   }
 
   return (
-    <UserLayout>
+    <UserLayout mainScroll>
       <StyledPageContainer>
         <PageHeader>
           <PageTitle>Notification Preferences</PageTitle>

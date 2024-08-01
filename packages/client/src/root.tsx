@@ -1,25 +1,27 @@
 /* eslint-disable react/jsx-fragments */
 import { QueryClientProvider } from '@tanstack/react-query'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { Navigate, Outlet, RouterProvider, createBrowserRouter } from 'react-router-dom'
 import { Slide, toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import { QueryParamProvider } from 'use-query-params'
 import { ReactRouter6Adapter } from 'use-query-params/adapters/react-router-6'
-import Header from './components/Header'
+import Header from './components/Header/HeaderNext'
+import { NavFavoritesProvider } from './components/Header/useNavFavoritesLocalStorage'
+import { NavOrderProvider } from './components/Header/useNavOrderLocalStorage'
 import { AlertDismissedProvider } from './features/admin/alerts/useAlertDismissedLocalStorage'
 import { AuthModal } from './features/auth/AuthModal'
 import { ExpiringSessionModal } from './features/auth/ExpiringSessionModal'
 import DataPortalRoutes from './features/data-portals/routes'
 import ExpertsSinglePage from './features/experts/details/index'
 import { useModal } from './features/modal/useModal'
-import { TrackPage } from './features/tracks/TrackPage'
 import { LayoutLoader } from './layouts/UserLayout'
 import NoFoundPage from './pages/NoFoundPage'
 import GlobalStyle from './styles/global'
 import { StyledToastContainer } from './styles/toast.styles'
 import { ThemeProvider } from './utils/ThemeContext'
 import queryClient from './utils/queryClient'
+import { TrackPage } from './features/tracks/TrackPage'
 
 const Admin = React.lazy(() => import('./features/admin'))
 const Home2 = React.lazy(() => import('./features/home'))
@@ -45,27 +47,45 @@ const Security = React.lazy(() => import('./pages/Security'))
 const RootComponent = () => {
   const authModal = useModal()
   const expiringSessionModal = useModal()
+  const [railsAlertHeight, setRailsAlertHeight] = useState(0)
   toast.configure({ limit: 5 })
+
+  useEffect(() => {
+    // Calculate the height of the rails-alert element
+    const alertElement = document.querySelector('.rails-alert')
+    if (alertElement) {
+        setRailsAlertHeight(alertElement.clientHeight as number)
+    }
+  }, [])
 
   return (
     <ThemeProvider>
       <React.Fragment>
-        <GlobalStyle />
+        <GlobalStyle railsAlertHeight={railsAlertHeight} />
         <QueryClientProvider
           client={queryClient({
             onAuthFailure: () => authModal.setShowModal(true),
           })}
         >
           <AlertDismissedProvider>
-            <Header />
-            <QueryParamProvider adapter={ReactRouter6Adapter}>
-              <React.Suspense fallback={<LayoutLoader />}>
-                <Outlet />
-              </React.Suspense>
-            </QueryParamProvider>
-            <StyledToastContainer position="top-right" transition={Slide} hideProgressBar pauseOnHover />
-            <AuthModal {...authModal} />
-            <ExpiringSessionModal modal={expiringSessionModal} />
+            <NavOrderProvider>
+              <NavFavoritesProvider>
+                <Header />
+                <QueryParamProvider adapter={ReactRouter6Adapter}>
+                  <React.Suspense fallback={<LayoutLoader />}>
+                    <Outlet />
+                  </React.Suspense>
+                </QueryParamProvider>
+                <StyledToastContainer
+                  position="top-right"
+                  transition={Slide}
+                  hideProgressBar
+                  pauseOnHover
+                  />
+                <AuthModal {...authModal} />
+                <ExpiringSessionModal modal={expiringSessionModal} />
+              </NavFavoritesProvider>
+            </NavOrderProvider>
           </AlertDismissedProvider>
         </QueryClientProvider>
       </React.Fragment>

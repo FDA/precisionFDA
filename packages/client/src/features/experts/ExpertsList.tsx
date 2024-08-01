@@ -14,7 +14,6 @@ import {
   PageFilterTitle,
   PageList,
   PageLoaderWrapper,
-  PageMainBody,
   PageRow,
   RightList,
   RightSide,
@@ -116,7 +115,7 @@ const ExpertsList = () => {
   })
 
   return (
-    <PublicLayout>
+    <PublicLayout mainScroll>
       <NavigationBar
         title="Experts Blog"
         subtitle="Insights from academic, industry, and FDA experts from the precisionFDA Community."

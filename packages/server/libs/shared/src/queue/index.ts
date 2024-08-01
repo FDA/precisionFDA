@@ -44,7 +44,7 @@ const clearOrphanedRepeatableJobs = async (q: Queue): Promise<Bull.JobInformatio
 
 // set up the queues
 const createQueues = async (provider: QueueProxy): Promise<void> => {
-  log.verbose({}, 'Initializing queues')
+  log.log({}, 'Initializing queues')
 
   mainQueue = provider.mainQueue
   emailsQueue = provider.emailQueue
@@ -66,13 +66,13 @@ const createQueues = async (provider: QueueProxy): Promise<void> => {
   //        by exceeding timeout on GitHub but it works fine locally.
   //        Find a better solution at some point.
   const removedJobs = clearOrphanedRepeatableJobs(mainQueue)
-  log.verbose({ removedJobs }, 'createQueues: Removed orphaned repeatable jobs.')
+  log.log({ removedJobs }, 'createQueues: Removed orphaned repeatable jobs.')
 }
 
 const logQueueStatus = async () => {
   await Promise.all(
     getQueues().map(async (q) => {
-      log.verbose(
+      log.log(
         {
           queueStatus: q.client.status,
           currentJobCounts: await q.getJobCounts(),
@@ -85,16 +85,20 @@ const logQueueStatus = async () => {
 }
 
 const initMaintenanceQueue = async () => {
-  log.verbose({}, 'Initializing maintenance queue')
+  log.log({}, 'Initializing maintenance queue')
   if (config.workerJobs.queues.maintenance.onInit.checkNonterminatedClusters) {
     await maintenanceJobProducer.createCheckNonTerminatedDbClustersTask()
   }
 
-  await maintenanceJobProducer.createCheckChallengeJobsTask()
+  if (config.workerJobs.queues.maintenance.onInit.userInactivityAlert) {
+    await maintenanceJobProducer.createUserInactivityAlertTask()
+  }
 
   if (config.workerJobs.queues.maintenance.onInit.adminDataConsistencyReport) {
     await maintenanceJobProducer.createCheckAdminDataConsistencyReportTask()
   }
+
+  await maintenanceJobProducer.createCheckChallengeJobsTask()
 }
 
 // removeRepeatable and removeRepeatableJob explanation:
@@ -108,14 +112,14 @@ const removeRepeatable = async (job: Job, queue?: Queue) => {
   if (typeof mainQueue === 'undefined') {
     throw new Error('The queue was not started')
   }
-  log.verbose({ jobId: job.id }, 'trying to remove repeatable job id')
+  log.log({ jobId: job.id }, 'trying to remove repeatable job id')
   // this does not work because we need to remove the next scheduled job
   const [prefix, id] = job.id.toString().split(':')
   await (queue ?? mainQueue).removeJobs(`${prefix}:${id}:*`)
 }
 
 const removeRepeatableJob = async (job: JobInformation, queue: Queue) => {
-  log.verbose(
+  log.log(
     { jobId: job.id, cron: job.cron },
     'removeRepeatableJob: trying to remove repeatable job',
   )

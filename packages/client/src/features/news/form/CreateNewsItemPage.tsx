@@ -33,7 +33,7 @@ const CreateNewsItemPage = () => {
   }
 
   return (
-    <UserLayout>
+    <UserLayout mainScroll>
       <AdminWrapper>
         <FormPageContainer>
           <BackLink linkTo="/admin/news">Back to admin news list</BackLink>

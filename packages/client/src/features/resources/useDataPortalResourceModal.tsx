@@ -16,42 +16,52 @@ import { AlertText } from '../data-portals/details/DataPortalNotFound'
 import { useDataPortalByIdQuery } from '../data-portals/queries'
 import { RemovePayload, Resource } from '../data-portals/resources/resources.types'
 import { canEditResources } from '../data-portals/utils'
-import { NOTIFICATION_ACTION, Notification } from '../home/types'
+import { NOTIFICATION_ACTION, Notification, WEBSOCKET_MESSSAGE_TYPE, WebSocketMessage } from '../home/types'
 import { ModalHeaderTop, ModalNext } from '../modal/ModalNext'
 import { ModalLoaderWrapper } from '../modal/styles'
 import { useModal } from '../modal/useModal'
 import { CreateResource } from './CreateResource'
 import ResourceItem from './ResourceItem'
 import { listDataPortalResourcesRequest, removeResourceByIdRequest } from './resources.api'
-import { CopyUrl, FileThumb, PreviewBottom, PreviewMain, PreviewMainImg, PreviewTop, ResourceList, ResourcePageRow, SearchBar, SearchBarWrapper, StyledNothingSelected, StyledPageContent, StyledResourcePreview, StyledSide, TopCol, TopRow } from './styles'
+import {
+  CopyUrl,
+  FileThumb,
+  PreviewBottom,
+  PreviewMain,
+  PreviewMainImg,
+  PreviewTop,
+  ResourceList,
+  ResourcePageRow,
+  SearchBar,
+  SearchBarWrapper,
+  StyledNothingSelected,
+  StyledPageContent,
+  StyledResourcePreview,
+  StyledSide,
+  TopCol,
+  TopRow,
+} from './styles'
 import { getExt, isImageFromExt } from './util'
 
-
-const ResourcePreview = ({
-  resource,
-  onCopy,
-}: {
-  resource?: Resource
-  onCopy: (link: string) => void
-}) => {
+const ResourcePreview = ({ resource, onCopy }: { resource?: Resource; onCopy: (link: string) => void }) => {
   if (!resource) return <StyledResourcePreview />
   const ext = getExt(resource.url)
   const isImg = isImageFromExt(ext)
   return (
     <StyledResourcePreview>
       <PreviewTop>{resource.name}</PreviewTop>
-        {isImg ? (
-          <PreviewMainImg>
-            <img src={resource.url} loading='lazy' alt="resource item" />
-          </PreviewMainImg>
-        ) : (
-          <PreviewMain>
+      {isImg ? (
+        <PreviewMainImg>
+          <img src={resource.url} loading="lazy" alt="resource item" />
+        </PreviewMainImg>
+      ) : (
+        <PreviewMain>
           <FileThumb>
             <FileIcon height={70} />
             <div className="ext">{ext}</div>
           </FileThumb>
-      </PreviewMain>
-        )}
+        </PreviewMain>
+      )}
       <PreviewBottom>
         <CopyUrl onClick={() => onCopy(resource.url)}>
           <CopyIcon height={16} />
@@ -78,7 +88,13 @@ const useResourceRemoveMutation = (
     ...options,
   })
 
-export const DataPortalResources = ({ onInsert, onlyImg }: {onlyImg?: boolean, onInsert?: (i: {altText: string, src: string}) => void}) => {
+export const DataPortalResources = ({
+  onInsert,
+  onlyImg,
+}: {
+  onlyImg?: boolean
+  onInsert?: (i: { altText: string; src: string }) => void
+}) => {
   const user = useAuthUser()
   const queryClient = useQueryClient()
   const { portalId } = useParams<{ portalId: string }>()
@@ -95,33 +111,42 @@ export const DataPortalResources = ({ onInsert, onlyImg }: {onlyImg?: boolean, o
         queryKey: ['resources-list-portal'],
       })
     },
-    onMutate: async (r) => {
-      await queryClient.cancelQueries({ queryKey: ['resources-list-portal']})
+    onMutate: async r => {
+      await queryClient.cancelQueries({ queryKey: ['resources-list-portal'] })
       const previousTodos = queryClient.getQueryData(['resources-list-portal'])
 
-      queryClient.setQueryData<Resource[]>(['resources-list-portal'], old => 
-        old?.map(item => item.id === r.resourceId ? { ...item, isDeleting: true } : item),
+      queryClient.setQueryData<Resource[]>(['resources-list-portal'], old =>
+        old?.map(item => (item.id === r.resourceId ? { ...item, isDeleting: true } : item)),
       )
       return { previousTodos }
     },
   })
 
-  const { lastJsonMessage: notification } = useWebSocket<Notification>(getNodeWsUrl(), {
+  const { lastJsonMessage } = useWebSocket<WebSocketMessage>(getNodeWsUrl(), {
     share: true,
     reconnectInterval: DEFAULT_RECONNECT_INTERVAL,
     reconnectAttempts: DEFAULT_RECONNECT_ATTEMPTS,
     shouldReconnect: () => SHOULD_RECONNECT,
+    filter: message => {
+      try {
+        const messageData = JSON.parse(message.data)
+        const notification = messageData.data as Notification
+        return (
+          messageData.type === WEBSOCKET_MESSSAGE_TYPE.NOTIFICATION && NOTIFICATION_ACTION.FILE_CLOSED === notification.action
+        )
+      } catch (e) {
+        return false
+      }
+    },
   })
 
   useEffect(() => {
-    if (notification == null) {
+    if (lastJsonMessage == null) {
       return
     }
-    if (NOTIFICATION_ACTION.FILE_CLOSED === notification.action) {
-      queryClient.invalidateQueries({ queryKey: ['resources-list-portal'] })
-      setIsFinishingUpload(false)
-    }
-  }, [notification])
+    queryClient.invalidateQueries({ queryKey: ['resources-list-portal'] })
+    setIsFinishingUpload(false)
+  }, [lastJsonMessage])
 
   const handleRemove = async (id: number) => {
     if (confirm('Are you sure you want to delete this resource item? Pages where this file is referenced will break.')) {
@@ -137,22 +162,30 @@ export const DataPortalResources = ({ onInsert, onlyImg }: {onlyImg?: boolean, o
     }
   }
 
-  let filteredData = data?.filter(i => {
-    if(onlyImg) {
-      return isImageFromExt(getExt(i.url))
-    }
-    return true
-  }).filter(resource => resource.name.toLowerCase().includes(searchQuery.toLowerCase())) ?? []
+  let filteredData =
+    data
+      ?.filter(i => {
+        if (onlyImg) {
+          return isImageFromExt(getExt(i.url))
+        }
+        return true
+      })
+      .filter(resource => resource.name.toLowerCase().includes(searchQuery.toLowerCase())) ?? []
 
   const getSelected = () => data?.find(i => i.id === selected)
   const handleInsert = () => {
     const i = getSelected()
-    if(onInsert && i) {
+    if (onInsert && i) {
       onInsert({ altText: i.name, src: i.url })
     }
   }
 
-  if (isLoading || portalIsLoading) return <ModalLoaderWrapper><Loader /></ModalLoaderWrapper>
+  if (isLoading || portalIsLoading)
+    return (
+      <ModalLoaderWrapper>
+        <Loader />
+      </ModalLoaderWrapper>
+    )
   if (!portal || !user) return <NotAllowedPage />
 
   const canEdit = canEditResources(user.dxuser, portal.members)
@@ -204,21 +237,23 @@ export const DataPortalResources = ({ onInsert, onlyImg }: {onlyImg?: boolean, o
         )}
       </StyledPageContent>
       <StyledSide isDeleting={isDeletingSelected}>
-      {selected ? (
-        <>
-          <ResourcePreview onCopy={handleCopy} resource={getSelected()} />
-          <PreviewBottom>
-            <Button variant="warning" onClick={() => handleRemove(selected)} disabled={isDeletingSelected}>
-              Delete
-            </Button>
-            {onInsert && (
-              <Button variant="success" onClick={() => handleInsert()}>
-                Insert {onlyImg ? 'Image' : 'File'}
+        {selected ? (
+          <>
+            <ResourcePreview onCopy={handleCopy} resource={getSelected()} />
+            <PreviewBottom>
+              <Button variant="warning" onClick={() => handleRemove(selected)} disabled={isDeletingSelected}>
+                Delete
               </Button>
-            )}
-          </PreviewBottom>
-            </>
-      ): <StyledNothingSelected>Select a resource</StyledNothingSelected>}
+              {onInsert && (
+                <Button variant="success" onClick={() => handleInsert()}>
+                  Insert {onlyImg ? 'Image' : 'File'}
+                </Button>
+              )}
+            </PreviewBottom>
+          </>
+        ) : (
+          <StyledNothingSelected>Select a resource</StyledNothingSelected>
+        )}
       </StyledSide>
     </ResourcePageRow>
   )

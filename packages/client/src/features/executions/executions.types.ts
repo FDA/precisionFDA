@@ -1,6 +1,6 @@
 import { RESOURCE_LABELS } from '../../types/user'
 import { RESOURCE_TYPES } from '../admin/users/types'
-import { FileOrg, FileUser } from '../apps/apps.types'
+import { FileOrg, FileUser, FormInput } from '../apps/apps.types'
 import { ServerScope } from '../home/types'
 
 export enum ExecutionActions {
@@ -43,7 +43,7 @@ export interface Links {
   workflow?: string
 }
 
-export interface RunInputs {}
+export type RunInputs = { [key: string]: FormInput }
 
 export interface RunOutputs {}
 
@@ -143,6 +143,7 @@ export interface IExecution {
   created_at: string
   created_at_date_time: string
   energy_consumption: string
+  cost_limit: number
   duration: string
   instance_type: keyof typeof RESOURCE_LABELS
   launched_by: string

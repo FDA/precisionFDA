@@ -1,22 +1,21 @@
-import { omit, pick } from 'ramda'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { useAuthUser } from '../auth/useAuthUser'
+import { omit, pick } from 'ramda'
+import { getSpaceIdFromScope } from '../../utils'
 import { useAttachToModal } from '../actionModals/useAttachToModal'
 import { useCopyToSpaceModal } from '../actionModals/useCopyToSpace'
+import { useEditPropertiesModal } from '../actionModals/useEditPropertiesModal'
 import { useEditTagsModal } from '../actionModals/useEditTagsModal'
 import { useFeatureMutation } from '../actionModals/useFeatureMutation'
+import { getBaseLink } from '../apps/run/utils'
+import { useAuthUser } from '../auth/useAuthUser'
 import { ActionFunctionsType, HomeScope } from '../home/types'
 import { copyJobsRequest } from './executions.api'
 import { IExecution } from './executions.types'
 import { getExecutionJobsList } from './executions.util'
-import { useTerminateModal } from './useTerminateModal'
 import { useSnapshotModal } from './useSnapshotModal'
-import { useEditPropertiesModal } from '../actionModals/useEditPropertiesModal'
-import { getBaseLink } from '../apps/run/utils'
-import { getSpaceIdFromScope } from '../../utils'
+import { useTerminateModal } from './useTerminateModal'
 
 export enum ExecutionAction {
-  'View Logs' = 'View Logs',
   'Terminate' = 'Terminate',
   'Track' = 'Track',
   'Copy to space' = 'Copy to space',
@@ -123,15 +122,11 @@ export const useExecutionActions = ({
   const spaceId = getSpaceIdFromScope(selected[0]?.scope)?.toString()
 
   let actions: ActionFunctionsType<ExecutionAction> = {
-    'View Logs': {
-      type: 'link',
-      link: links?.log,
-      isDisabled: selected.length !== 1 || !links.log,
-    },
     Terminate: {
       type: 'modal',
       func: () => setTerminateModal(true),
-      isDisabled: selected.length === 0 || selected.some(item => ['terminated', 'failed', 'done', undefined].includes(item?.state)),
+      isDisabled:
+        selected.length === 0 || selected.some(item => ['terminated', 'failed', 'done', undefined].includes(item?.state)),
       modal: terminateModal,
       showModal: isShownTerminateModal,
     },
@@ -161,7 +156,11 @@ export const useExecutionActions = ({
     },
     'Make Public': {
       type: 'link',
-      isDisabled: selected.length !== 1 || !selected[0]?.links?.publish || (selected[0].jobs && selected[0].scope === 'private') || !user?.allowed_to_publish,
+      isDisabled:
+        selected.length !== 1 ||
+        !selected[0]?.links?.publish ||
+        (selected[0].jobs && selected[0].scope === 'private') ||
+        !user?.allowed_to_publish,
       link: {
         method: 'POST',
         url: `${selected[0]?.links?.publish}&scope=public`,
@@ -211,7 +210,7 @@ export const useExecutionActions = ({
     } else {
       // If the user is not the owner of the job in a space, they cannot connect
       // to the workstation or perform other actions where ownership is needed
-      actions = pick(['View Logs', 'Track', 'Copy to space', 'Attach to...', 'Comments', 'Edit tags', 'Edit properties'], actions)
+      actions = pick(['Track', 'Copy to space', 'Attach to...', 'Comments', 'Edit tags', 'Edit properties'], actions)
     }
   }
 

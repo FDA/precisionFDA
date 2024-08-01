@@ -10,3 +10,13 @@ export interface JobRunData {
     [key: string]: IOType
   }
 }
+
+export type JobLogItem = {
+  timestamp: number
+  source: string
+  level: 'INFO' | 'STDOUT' | 'STDERR'
+  job: `job-${string}`
+  jobTry: number
+  line: number
+  msg: string
+}

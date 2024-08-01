@@ -8,7 +8,6 @@ import { isJobOrphaned } from '../../../queue/queue.utils'
 import { JobRepository } from '../job.repository'
 import { SyncJobOperation } from './synchronize'
 
-
 const recreateJobStatusSyncIfMissing = async (job: Job, user: UserCtx, log: any): Promise<void> => {
   const bullJobId = SyncJobOperation.getBullJobId(job.dxid)
   const bullJob = await findRepeatable(bullJobId)
@@ -16,21 +15,21 @@ const recreateJobStatusSyncIfMissing = async (job: Job, user: UserCtx, log: any)
     log.warn({
       jobDxid: job.dxid,
       bullJobId,
-    }, 'CheckUserJobsOperation: Status sync task for job missing, recreating it')
+    }, 'Status sync task for job missing, recreating it')
     await createSyncJobStatusTask({ dxid: job.dxid }, user)
   } else if (isJobOrphaned(bullJob)) {
-    log.verbose({
+    log.log({
       jobDxid: job.dxid,
       bullJob,
-    }, 'CheckUserJobsOperation: Status sync task found, but it is orphaned. '
+    }, 'Status sync task found, but it is orphaned. '
        + 'Removing and recreating it')
     await removeRepeatableJob(bullJob, getMainQueue())
     await createSyncJobStatusTask({ dxid: job.dxid }, user)
   } else {
-    log.verbose({
+    log.log({
       jobDxid: job.dxid,
       bullJob,
-    }, 'CheckUserJobsOperation: Status sync task found, everything is fine')
+    }, 'Status sync task found, everything is fine')
   }
 }
 
@@ -46,17 +45,17 @@ export class CheckUserJobsOperation extends WorkerBaseOperation<
     const em = this.ctx.em
     const jobRepo: JobRepository = em.getRepository(Job)
     const runningJobs = await jobRepo.findRunningJobsByUser({ userId: this.ctx.user.id })
-    this.ctx.log.verbose({
+    this.ctx.log.log({
       runningJobsCount: runningJobs.length,
-    }, 'CheckUserJobsOperation: Checking for running jobs')
+    }, 'Checking for running jobs')
 
     // Find running jobs that are over the max duration
     const isOverMaxDuration = buildIsOverMaxDuration('terminate')
     const staleJobs: Job[] = runningJobs.filter(job => isOverMaxDuration(job))
     if (staleJobs.length === 0) {
-      this.ctx.log.verbose({}, 'CheckUserJobsOperation: No stale jobs found')
+      this.ctx.log.log({}, 'No stale jobs found')
     } else {
-      this.ctx.log.verbose(
+      this.ctx.log.log(
         {
           staleJobs: staleJobs.map(job => ({
             jobId: job.id,
@@ -64,7 +63,7 @@ export class CheckUserJobsOperation extends WorkerBaseOperation<
             jobState: job.state,
           })),
         },
-        'CheckUserJobsOperation: Stale jobs - should be terminated',
+        'Stale jobs - should be terminated',
       )
     }
 

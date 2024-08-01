@@ -7,7 +7,7 @@ import { User } from '@shared/domain/user/user.entity'
 import { Event } from '@shared/domain/event/event.entity'
 import { ClassIdResponse } from '@shared/platform-client/platform-client.responses'
 import { create, db } from '../../../src/test'
-import { PlatformClient } from '../../../src/platform-client'
+import { PlatformClient } from '@shared/platform-client'
 import {
   AppCreateParams,
   AppletCreateParams,
@@ -251,7 +251,7 @@ describe('app service tests', () => {
     expect(JSON.stringify(loadedApp.spec.output_spec[5])).to.equal(JSON.stringify(arraySpec))
   })
 
-  it('save app - don\'t send default and choices to createApplet' , async() => {
+  it("save app - don't send default and choices to createApplet", async () => {
     const appService = new AppService(em, platformClient)
     const appInput1: AppInput = getDefaultApp()
     const intSpec = getSpec('intName', 'int', 'intHelp', 'intLabel', false, 1, [1, 2, 3])

@@ -7,7 +7,6 @@ import { CookieJar } from 'tough-cookie'
 import { maskAuthHeader } from '../utils/logging'
 import { getLogger } from '../logger'
 
-
 export type SnapshotParams = {
   name?: string
   terminate: boolean
@@ -43,7 +42,7 @@ const USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/
 // as we may want to package it to be used by scripts or other clients
 //
 class WorkstationClient implements IWorkstationClient {
-  private readonly log: Logger
+  private readonly logger: Logger
   // Axios instance must be passed in, to inherit the same session and cookies from PlatformAuthClient
   private readonly axiosInstance: AxiosInstance
   // base URI to the workstation API service
@@ -61,7 +60,7 @@ class WorkstationClient implements IWorkstationClient {
     this.workstationUrl = url
     this.host = new URL(url).host
     this.baseUrl = `https://${this.host}:${API_PORT}/api`
-    this.log = logger ?? defaultLog
+    this.logger = logger ?? defaultLog
   }
 
   // OAuth access to the workstation
@@ -71,10 +70,10 @@ class WorkstationClient implements IWorkstationClient {
     // First get the Referer url
     const jobResponse = await this.axiosInstance.get(this.workstationUrl)
     const refrerUrl = jobResponse.config.url
-    this.log.verbose(`WorkstationClient obtained refrerUrl ${refrerUrl}`)
+    this.logger.log(`Obtained refrerUrl ${refrerUrl}`)
 
     const url = `${this.workstationUrl}/oauth2/access?code=${authToken}`
-    this.log.verbose(`WorkstationClient oauth calling url ${url}`)
+    this.logger.log(`Oauth calling url ${url}`)
 
     const options: AxiosRequestConfig = {
       method: 'GET',
@@ -97,26 +96,25 @@ class WorkstationClient implements IWorkstationClient {
       // Should not print cookie to logs, the following is for debugging
       // this.log.verbose(`WorkstationClient got cookie: ${this.cookie}`)
 
-      this.log.verbose({
+      this.logger.log({
         workstationUrl: this.workstationUrl,
         host: this.host,
         baseUrl: this.baseUrl,
       },'WorkstationClient oauth success')
       return response
     } catch (error) {
-      this.log.error(`WorkstationClient oauth request error: ${error}`)
+      this.logger.error(`Oauth request error: ${error}`)
       throw error
     }
   }
 
   private async extractWorkstationCookie(response: any): Promise<string | null> {
     const jar = response.config.jar as CookieJar
-    this.log.verbose({ jar }, 'extractWorkstationCookie jar')
+    this.logger.log({ jar }, 'extractWorkstationCookie jar')
 
     const cookies = await jar.getCookies(this.workstationUrl)
-    this.log.verbose({ cookies }, 'extractWorkstationCookie cookies')
+    this.logger.log({ cookies }, 'extractWorkstationCookie cookies')
     for (const cookie of cookies) {
-      // this.log.verbose({ cookie }, 'cookie')
       if (cookie.key.startsWith('job-')) {
         return `${cookie.key}=${cookie.value}`
       }
@@ -150,10 +148,10 @@ class WorkstationClient implements IWorkstationClient {
   }
 
   /**
-   * Create a wokrstation snapshot
+   * Create a workstation snapshot
    *
    * Available on workstation_api v1.0 or above
-  */
+   */
   async snapshot(params: SnapshotParams): Promise<any> {
     this.validateCookie()
 
@@ -192,8 +190,8 @@ class WorkstationClient implements IWorkstationClient {
    */
   async setPFDAConfig(params: CLIConfigParams): Promise<void> {
     if (this.apiVersion && compareVersions(this.apiVersion, '1.1') < 0) {
-      const message = `Error: Cannot use /api/setPFDAConfig because job's api version (${this.apiVersion}) is less than 1.1`
-      this.log.error(message)
+      const message = `Cannot use /api/setPFDAConfig because job's api version (${this.apiVersion}) is less than 1.1`
+      this.logger.error(message)
       throw new IncompatibleVersionError(message)
     }
 
@@ -214,7 +212,7 @@ class WorkstationClient implements IWorkstationClient {
     try {
       this.logClientRequest(options)
       const res = await this.axiosInstance.request(options)
-      this.log.verbose({ data: res.data }, 'WorkstationClient: sendRequest response')
+      this.logger.log({ data: res.data }, 'SendRequest response')
       return returnFullResponse ? res : res.data
     } catch (err) {
       this.logClientFailed(options)
@@ -242,24 +240,24 @@ class WorkstationClient implements IWorkstationClient {
   protected logClientRequest(options: AxiosRequestConfig): void {
     const sanitized = maskAuthHeader(options.headers)
     const data = this.maskRequestData(options.data)
-    this.log.verbose(
+    this.logger.log(
       {
         requestOptions: { ...options, headers: sanitized, data },
         url: options.url,
       },
-      'WorkstationClient: Running Workstation request',
+      'Running Workstation request',
     )
   }
 
   protected logClientFailed(options: AxiosRequestConfig): void {
     const sanitized = maskAuthHeader(options.headers)
     const data = this.maskRequestData(options.data)
-    this.log.warn(
+    this.logger.warn(
       {
         requestOptions: { ...options, headers: sanitized, data },
         url: options.url,
       },
-      'WorkstationClient: Error request failed',
+      'Request failed',
     )
   }
 
@@ -283,9 +281,9 @@ class WorkstationClient implements IWorkstationClient {
       )
     } else if (err.request) {
       // the request was made but no response was received
-      this.log.error({ err }, 'WorkstationClient: Error failed workstation request - no response received')
+      this.logger.error({ err }, 'Failed workstation request - no response received')
     } else {
-      this.log.error({ err }, 'WorkstationClient: Error failed workstation request - unhandled error')
+      this.logger.error({ err }, 'Failed workstation request - unhandled error')
     }
   }
 }

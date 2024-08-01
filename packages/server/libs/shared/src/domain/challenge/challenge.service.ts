@@ -26,7 +26,7 @@ export class ChallengeService {
    * @param fileUid
    */
   async updateCardImageUrl(fileUid: string) {
-    this.logger.verbose(`ChallengeService: updating card image url for fileUid ${fileUid}`)
+    this.logger.log(`Updating card image url for fileUid ${fileUid}`)
     const challenges = await this.challengeRepo.findChallengesByCardImageFileUid(fileUid)
 
     if (challenges.length === 0) {
@@ -45,9 +45,8 @@ export class ChallengeService {
     challenge.cardImageUrl = link.url
 
     await this.em.flush()
-    this.logger.verbose(`ChallengeService: card image url for fileUid ${fileUid} updated`)
+    this.logger.log(`Card image url for fileUid ${fileUid} updated`)
     try {
-      this.logger.verbose(`ChallengeService: notification service ${this.notificationService}`)
       const userId = this.user.id
       await this.notificationService.createNotification({
         message: `Card image url for ${challenge.name} has been updated`,
@@ -64,7 +63,7 @@ export class ChallengeService {
    * Updates the resource url for Challenge resource.
    */
   async updateResourceUrl(fileUid: string) {
-    this.logger.verbose(`ChallengeService: updating resource url for fileUid ${fileUid}`)
+    this.logger.log(`Updating resource url for fileUid ${fileUid}`)
     const challengeResources =
       await this.challengeResourceRepo.findChallengeResourcesByFileUid(fileUid)
 
@@ -84,7 +83,7 @@ export class ChallengeService {
     challengeResource.url = link.url
 
     await this.em.flush()
-    this.logger.verbose(`ChallengeService: resource url for fileUid ${fileUid} updated`)
+    this.logger.log(`Resource url for fileUid ${fileUid} updated`)
 
     try {
       const userId = this.user.id

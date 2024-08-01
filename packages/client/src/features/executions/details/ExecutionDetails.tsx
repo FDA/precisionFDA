@@ -1,6 +1,6 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import React, { useEffect } from 'react'
-import { Link, useLocation, useParams } from 'react-router-dom'
+import { Link, Route, Routes, useLocation, useParams } from 'react-router-dom'
 import useWebSocket from 'react-use-websocket'
 import { HomeLabel } from '../../../components/HomeLabel'
 import { StyledTab, StyledTabList, StyledTabPanel } from '../../../components/Tabs'
@@ -24,10 +24,18 @@ import {
   Title,
   Topbox,
 } from '../../home/show.styles'
-import { EmmitScope, HomeScope, NOTIFICATION_ACTION, Notification } from '../../home/types'
+import {
+  EmmitScope,
+  HomeScope,
+  NOTIFICATION_ACTION,
+  Notification,
+  WEBSOCKET_MESSSAGE_TYPE,
+  WebSocketMessage,
+} from '../../home/types'
 import { getBasePath } from '../../home/utils'
 import { ExecutionActionsRow } from '../ExecutionActionsRow'
 import { InputsAndOutputs } from '../InputsAndOutputs'
+import { Logs } from '../Log'
 import { StateCell } from '../StateCell'
 import { fetchExecution } from '../executions.api'
 import { FailureMessage, StyledExecutionState, TitleLeft } from './styles'
@@ -47,40 +55,48 @@ export const ExecutionDetails = ({
   const { data, isLoading, refetch, isFetching } = useQuery({
     queryKey: ['execution', executionUid],
     queryFn: () =>
-      fetchExecution(executionUid).then(d => {
+      fetchExecution(executionUid!).then(d => {
         if (emitScope) emitScope(d.job.scope, d.job.featured)
         return d
       }),
   })
   const queryCache = useQueryClient()
 
-  const { lastJsonMessage: notification } = useWebSocket<Notification>(getNodeWsUrl(), {
+  const { lastJsonMessage } = useWebSocket<WebSocketMessage>(getNodeWsUrl(), {
     share: true,
     reconnectInterval: DEFAULT_RECONNECT_INTERVAL,
     reconnectAttempts: DEFAULT_RECONNECT_ATTEMPTS,
     shouldReconnect: () => SHOULD_RECONNECT,
+    filter: message => {
+      try {
+        const messageData = JSON.parse(message.data)
+        const notification = messageData.data as Notification
+        return (
+          messageData.type === WEBSOCKET_MESSSAGE_TYPE.NOTIFICATION &&
+          [
+            NOTIFICATION_ACTION.JOB_RUNNABLE,
+            NOTIFICATION_ACTION.JOB_RUNNING,
+            NOTIFICATION_ACTION.JOB_INITIALIZING,
+            NOTIFICATION_ACTION.JOB_DONE,
+            NOTIFICATION_ACTION.JOB_FAILED,
+            NOTIFICATION_ACTION.JOB_OUTPUTS_SYNCED,
+            NOTIFICATION_ACTION.JOB_TERMINATED,
+          ].includes(notification.action)
+        )
+      } catch (e) {
+        return false
+      }
+    },
   })
 
   useEffect(() => {
-    if (notification == null) {
+    if (lastJsonMessage == null) {
       return
     }
-    if (
-      [
-        NOTIFICATION_ACTION.JOB_RUNNABLE,
-        NOTIFICATION_ACTION.JOB_RUNNING,
-        NOTIFICATION_ACTION.JOB_INITIALIZING,
-        NOTIFICATION_ACTION.JOB_DONE,
-        NOTIFICATION_ACTION.JOB_FAILED,
-        NOTIFICATION_ACTION.JOB_OUTPUTS_SYNCED,
-        NOTIFICATION_ACTION.JOB_TERMINATED,
-      ].includes(notification.action)
-    ) {
-      queryCache.invalidateQueries({
-        queryKey: ['execution'],
-      })
-    }
-  }, [notification])
+    queryCache.invalidateQueries({
+      queryKey: ['execution'],
+    })
+  }, [lastJsonMessage])
 
   const execution = data?.job
 
@@ -97,10 +113,14 @@ export const ExecutionDetails = ({
     )
 
   const scopeParamLink = `?scope=${homeScope?.toLowerCase()}`
+  const basePath = getBasePath(spaceId)
 
   return (
     <>
-      <StyledBackLink linkTo={getBackPathNext({ spaceId, location, resourceLocation: 'executions', homeScope })} data-testid="execution-back-link">
+      <StyledBackLink
+        linkTo={getBackPathNext({ spaceId, location, resourceLocation: 'executions', homeScope })}
+        data-testid="execution-back-link"
+      >
         Back to Executions
       </StyledBackLink>
       <Topbox>
@@ -209,7 +229,9 @@ export const ExecutionDetails = ({
                 <MetadataKey>Tags</MetadataKey>
                 <StyledTags data-testid="tags-container">
                   {execution.tags.map(tag => (
-                    <StyledTagItem data-testid="execution-tag-item" key={tag}>{tag}</StyledTagItem>
+                    <StyledTagItem data-testid="execution-tag-item" key={tag}>
+                      {tag}
+                    </StyledTagItem>
                   ))}
                 </StyledTags>
               </MetadataItem>
@@ -238,12 +260,28 @@ export const ExecutionDetails = ({
       <div className="pfda-padded-t40" />
 
       <StyledTabList>
-        <StyledTab activeClassName="active" end>
+        <StyledTab
+          activeClassName="active"
+          end
+          to={{ pathname: `${basePath}/executions/${execution.uid}`, state: location.state }}
+        >
           Inputs & Outputs
+        </StyledTab>
+        <StyledTab
+          activeClassName="active"
+          to={{ pathname: `${basePath}/executions/${execution.uid}/logs`, state: location.state }}
+        >
+          Logs
         </StyledTab>
       </StyledTabList>
       <StyledTabPanel>
-        <InputsAndOutputs runInputData={execution.run_input_data} runOutputData={execution.run_output_data} />
+        <Routes>
+          <Route
+            path="/"
+            element={<InputsAndOutputs runInputData={execution.run_input_data} runOutputData={execution.run_output_data} />}
+          />
+          <Route path="logs" element={<Logs jobUid={execution.uid} jobState={execution.state} />} />
+        </Routes>
       </StyledTabPanel>
     </>
   )

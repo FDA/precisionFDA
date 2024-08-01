@@ -89,7 +89,7 @@ export const useWorkflowSelectActions = ({ homeScope, spaceId, selectedItems, re
     modalComp: exportToModal,
     setShowModal: setExportToModal,
     isShown: isShownExportToModal,
-  } = useExportToModal({ selected: selected[0] })
+  } = useExportToModal({ selected: selected[0], resource: 'workflows' })
 
   const links = selected[0]?.links
 

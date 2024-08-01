@@ -11,15 +11,12 @@ import { StyledPageCenter, StyledPageContent } from '../../spaces/form/styles'
 import { createDataPortalRequest } from '../api'
 import { CreateDataPortalData } from '../types'
 import { DataPortalForm } from './DataPortalForm'
-import { ScrollableMainGlobalStyles } from '../../../styles/global'
 
 
 const CreateDataPortalPage = () => {
   const navigate = useNavigate()
   const user = useAuthUser()
   const queryClient = useQueryClient()
-
-
   const dataPortalMutation = useMutation({ mutationFn: createDataPortalRequest })
 
   const onSubmit = async (v: any) => {
@@ -51,31 +48,25 @@ const CreateDataPortalPage = () => {
   }
 
   return (
-    <>
-      <ScrollableMainGlobalStyles />
-      <UserLayout>
-
-
+    <UserLayout mainScroll>
+      <StyledPageCenter>
+        <StyledPageContent>
+          <BackLinkMargin linkTo="/data-portals">
+            Back to Data Portals
+          </BackLinkMargin>
+        </StyledPageContent>
+      </StyledPageCenter>
+      {user?.isAdmin ? (
         <StyledPageCenter>
           <StyledPageContent>
-            <BackLinkMargin linkTo="/data-portals">
-              Back to Data Portals
-            </BackLinkMargin>
+            <PageTitle>Create a Data Portal</PageTitle>
+            <DataPortalForm onSubmit={onSubmit} canEditMainDataPortal isSubmitting={dataPortalMutation.isPending} />
           </StyledPageContent>
         </StyledPageCenter>
-        {user?.isAdmin ? (
-          <StyledPageCenter>
-            <StyledPageContent>
-              <PageTitle>Create a Data Portal</PageTitle>
-              <DataPortalForm onSubmit={onSubmit} canEditMainDataPortal isSubmitting={dataPortalMutation.isPending} />
-            </StyledPageContent>
-          </StyledPageCenter>
-        ) : (
-          <NotAllowedPage />
-          )}
-
-      </UserLayout>
-      </>
+      ) : (
+        <NotAllowedPage />
+      )}
+    </UserLayout>
   )
 }
 

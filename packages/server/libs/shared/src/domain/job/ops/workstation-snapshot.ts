@@ -49,7 +49,7 @@ export class WorkstationSnapshotOperation extends WorkstationBaseOperation<
 
   async run(input: WorkstationSnapshotOperationParams): Promise<any> {
     const log = this.ctx.log
-    log.verbose({ ...omit(['code', 'key'], input) }, 'WorkstationSnapshotOperation: Start')
+    log.log({ ...omit(['code', 'key'], input) }, 'Start')
 
     const job = await this.validatedJobWithWorkstationAPI(input.jobDxid)
     if (job.state !== JOB_STATE.RUNNING) {
@@ -67,7 +67,7 @@ export class WorkstationSnapshotOperation extends WorkstationBaseOperation<
       const terminate = input.terminate ?? false
       const res = await workstationService.snapshot(input.key, input.name, terminate)
 
-      log.verbose({ res }, 'WorkstationSnapshotOperation: Received snapshot response')
+      log.log({ res }, 'Received snapshot response')
 
       if (res.result === 'success') {
         const message = input.terminate

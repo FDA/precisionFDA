@@ -72,7 +72,6 @@ const defaultConfig = {
     clientUrl:
       process.env.NODE_DATABASE_URL ?? 'mysql://root:password@localhost:32800/precisionfda-test',
     debug: parseBooleanFromProcess(process.env.NODE_DATABASE_DEBUG) ?? false,
-    ormCacheEnabled: parseBooleanFromProcess(process.env.NODE_ORM_CACHE_ENABLED, true),
   },
   validation: {
     maxStrLen: 255,
@@ -123,6 +122,7 @@ const defaultConfig = {
         name: 'https-apps-worker-maintenance-queue',
         onInit: {
           checkNonterminatedClusters: true,
+          userInactivityAlert: false,
           adminDataConsistencyReport: false,
         },
       },
@@ -145,6 +145,10 @@ const defaultConfig = {
     },
     nonTerminatedDbClusters: {
       repeatPattern: '0 6 * * *', // Once a day at 6am
+    },
+    userInactivityAlert: {
+      inactiveDaysThreshold: 55, // alert users who haven't logged in for X days
+      repeatPattern: '30 14 * * 1-5', // workdays at 2:30 PM (UTC)
     },
     checkChallengeJobs: {
       repeatPattern: '*/5 * * * *', // Every 5 minutes
@@ -206,6 +210,8 @@ const defaultConfig = {
       url: process.env.NODE_ADMIN_PLATFORM_CLIENT_URL || 'http://localhost:3002',
     },
   },
+  secretKeyBase: process.env.SECRET_KEY_BASE,
+  maxTimeInactivity: parseIntFromProcess(process.env.MAX_TIME_INACTIVITY) ?? 30,
 }
 
 // lazily plug-in the overrides that are based on the NODE_ENV

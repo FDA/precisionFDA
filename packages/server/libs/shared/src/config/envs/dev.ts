@@ -23,6 +23,7 @@ export const config: ConfigOverride = () => ({
         onInit: {
           adminDataConsistencyReport: true,
           checkNonterminatedClusters: false,
+          userInactivityAlert: true,
         },
       },
     },

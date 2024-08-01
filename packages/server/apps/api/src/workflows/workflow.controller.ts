@@ -17,7 +17,7 @@ export class WorkflowController {
   constructor(
     private readonly user: UserContext,
     @Inject(DEPRECATED_SQL_ENTITY_MANAGER) private readonly em: SqlEntityManager,
-    private readonly log: Logger,
+    private readonly logger: Logger,
   ) {
   }
 
@@ -27,7 +27,7 @@ export class WorkflowController {
     @Body() body: UidInput,
   ) {
     const opsCtx: UserOpsCtx = {
-      log: this.log,
+      log: this.logger,
       user: this.user,
       em: this.em,
     }

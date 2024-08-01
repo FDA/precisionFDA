@@ -47,7 +47,7 @@ const AboutPage = () => {
 
   const title = 'About precisionFDA'
   return (
-    <PublicLayout>
+    <PublicLayout mainScroll>
       <NavigationBar title={title} user={user} />
 
       <PageContainerMargin>

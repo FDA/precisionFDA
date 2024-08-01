@@ -359,6 +359,7 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
             log_session("User #{username} is logging in for the first time; account setup step 9 of 9 completed")
           end
           user.last_login = Time.zone.now
+          user.inactivity_email_sent = false
           user.save(validate: false)
           set_time_zone(user)
         end
@@ -366,6 +367,7 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
         User.transaction do
           user.reload
           user.last_login = Time.zone.now
+          user.inactivity_email_sent = false
           user.save(validate: false)
         end
 

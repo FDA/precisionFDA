@@ -29,6 +29,8 @@ import { stub } from 'sinon'
 import { config } from '@shared/config'
 import { Job } from '@shared/domain/job/job.entity'
 import { EMAIL_TYPES } from '@shared/domain/email/email.config'
+import { EmailPrepareService } from '@shared/domain/email/templates/email-prepare.service'
+import { EmailSendService } from '@shared/domain/email/email-send.service'
 
 describe('Job service tests', () => {
   let em: EntityManager<MySqlDriver>
@@ -38,11 +40,15 @@ describe('Job service tests', () => {
   let notificationService: NotificationService
   let folderService: FolderService
   let emailQueueJobProducer: EmailQueueJobProducer
+  let emailPrepareService: EmailPrepareService
+  let emailSendService: EmailSendService
   let getMainQueueStub
   const file1Dxid = 'file-GY5q9B00Q6xpbXG503kKgF68'
   const file2Dxid = 'file-GXPKG480q0jQPgXxFxKyyJ7q'
   const file3Dxid = 'file-GXgzZ7j00k4KVKfBzFyq8YXx'
   const userId = 100
+  const prepareEmailsStub = stub()
+  const sendEmailStub = stub()
 
   const queueAdd = stub()
   const queue = {
@@ -64,6 +70,12 @@ describe('Job service tests', () => {
     notificationService = new NotificationService(em, userCtx)
     folderService = new FolderService(em)
     emailQueueJobProducer = new EmailQueueJobProducer(queue)
+    emailPrepareService = {
+      prepareEmails: prepareEmailsStub,
+    } as unknown as EmailPrepareService
+    emailSendService = {
+      sendEmail: sendEmailStub,
+    } as unknown as EmailSendService
 
     queueAdd.reset()
     queueAdd.throws()
@@ -170,14 +182,7 @@ describe('Job service tests', () => {
 
   it('Test Job Outputs sync - error when incorrect number of results returned', async () => {
     const platformClient = getPlatformClientWithEmptyResults()
-    jobService = new JobService(
-      em,
-      userCtx,
-      platformClient,
-      notificationService,
-      folderService,
-      emailQueueJobProducer,
-    )
+    jobService = getJobServiceInstance(platformClient)
     const job = create.jobHelper.create(em, { user }, {})
     await em.flush()
 
@@ -188,14 +193,7 @@ describe('Job service tests', () => {
 
   it('Test Job Outputs sync - sync job with all types of outputs', async () => {
     const platformClient = getPlatformClientWithComplexResults()
-    jobService = new JobService(
-      em,
-      userCtx,
-      platformClient,
-      notificationService,
-      folderService,
-      emailQueueJobProducer,
-    )
+    jobService = getJobServiceInstance(platformClient)
     const job = create.jobHelper.create(em, { user }, { scope: STATIC_SCOPE.PRIVATE })
     await em.flush()
 
@@ -293,14 +291,7 @@ describe('Job service tests', () => {
     await em.flush()
 
     const platformClient = getPlatformClientWithComplexResults()
-    jobService = new JobService(
-      em,
-      userCtx,
-      platformClient,
-      notificationService,
-      folderService,
-      emailQueueJobProducer,
-    )
+    jobService = getJobServiceInstance(platformClient)
 
     await jobService.syncOutputs(job.dxid, user.id)
 
@@ -323,14 +314,7 @@ describe('Job service tests', () => {
     await em.flush()
 
     const platformClient = getPlatformClientWithComplexResults()
-    jobService = new JobService(
-      em,
-      userCtx,
-      platformClient,
-      notificationService,
-      folderService,
-      emailQueueJobProducer,
-    )
+    jobService = getJobServiceInstance(platformClient)
 
     await jobService.syncOutputs(job.dxid, user.id)
 
@@ -347,14 +331,7 @@ describe('Job service tests', () => {
   it('Test Job Outputs sync - create files in output folder specified by path', async () => {
     await em.flush()
     const platformClient = getPlatformClientWithComplexResults()
-    jobService = new JobService(
-      em,
-      userCtx,
-      platformClient,
-      notificationService,
-      folderService,
-      emailQueueJobProducer,
-    )
+    jobService = getJobServiceInstance(platformClient)
     const job = create.jobHelper.create(
       em,
       { user },
@@ -383,14 +360,7 @@ describe('Job service tests', () => {
   })
 
   it('Test Job Outputs sync - job dxid null -> error', async () => {
-    jobService = new JobService(
-      em,
-      userCtx,
-      getPlatformClientWithEmptyResults(),
-      notificationService,
-      folderService,
-      emailQueueJobProducer,
-    )
+    jobService = getJobServiceInstance(getPlatformClientWithEmptyResults())
 
     try {
       await jobService.syncOutputs(null, user.id)
@@ -402,14 +372,8 @@ describe('Job service tests', () => {
   })
 
   it('Test Job Outputs sync - user id null -> error', async () => {
-    jobService = new JobService(
-      em,
-      userCtx,
-      getPlatformClientWithEmptyResults(),
-      notificationService,
-      folderService,
-      emailQueueJobProducer,
-    )
+    jobService = getJobServiceInstance(getPlatformClientWithEmptyResults())
+
     const job = create.jobHelper.create(em, { user }, {})
     await em.flush()
 
@@ -423,14 +387,7 @@ describe('Job service tests', () => {
   })
 
   it('Test Job Outputs sync - job dxid and user id null -> error', async () => {
-    jobService = new JobService(
-      em,
-      userCtx,
-      getPlatformClientWithEmptyResults(),
-      notificationService,
-      folderService,
-      emailQueueJobProducer,
-    )
+    jobService = getJobServiceInstance(getPlatformClientWithEmptyResults())
 
     try {
       await jobService.syncOutputs(null, null)
@@ -442,14 +399,7 @@ describe('Job service tests', () => {
   })
 
   it('Test Job Outputs sync - non existing job dxid -> error', async () => {
-    jobService = new JobService(
-      em,
-      userCtx,
-      getPlatformClientWithEmptyResults(),
-      notificationService,
-      folderService,
-      emailQueueJobProducer,
-    )
+    jobService = getJobServiceInstance(getPlatformClientWithEmptyResults())
 
     try {
       await jobService.syncOutputs('non-existing', userId)
@@ -461,14 +411,7 @@ describe('Job service tests', () => {
   })
 
   it('Test Job Outputs sync - non existing user id -> error', async () => {
-    jobService = new JobService(
-      em,
-      userCtx,
-      getPlatformClientWithEmptyResults(),
-      notificationService,
-      folderService,
-      emailQueueJobProducer,
-    )
+    jobService = getJobServiceInstance(getPlatformClientWithEmptyResults())
     const job = create.jobHelper.create(em, { user }, {})
     await em.flush()
 
@@ -512,14 +455,7 @@ describe('Job service tests', () => {
         },
       } as PlatformClient
 
-      jobService = new JobService(
-        em,
-        userCtx,
-        platformClient,
-        notificationService,
-        folderService,
-        emailQueueJobProducer,
-      )
+      jobService = getJobServiceInstance(platformClient)
 
       await em.flush()
 
@@ -567,14 +503,7 @@ describe('Job service tests', () => {
         },
       } as PlatformClient
 
-      jobService = new JobService(
-        em,
-        userCtx,
-        platformClient,
-        notificationService,
-        folderService,
-        emailQueueJobProducer,
-      )
+      jobService = getJobServiceInstance(platformClient)
 
       await em.flush()
 
@@ -599,14 +528,7 @@ describe('Job service tests', () => {
 
   context('#checkChallengeJobs', async () => {
     it('Challenge bot not found', async () => {
-      jobService = new JobService(
-        em,
-        userCtx,
-        getPlatformClientWithEmptyResults(),
-        notificationService,
-        folderService,
-        emailQueueJobProducer,
-      )
+      jobService = getJobServiceInstance(getPlatformClientWithEmptyResults())
 
       // For some reason rejectedWith doesn't work
       // const error = new NotFoundError("User not found ({ dxuser: 'challenge-bot-test' })")
@@ -620,14 +542,7 @@ describe('Job service tests', () => {
 
     it('Sync outputs of jobs', async () => {
       const platformClient = getPlatformClientWithComplexResults()
-      jobService = new JobService(
-        em,
-        userCtx,
-        platformClient,
-        notificationService,
-        folderService,
-        emailQueueJobProducer,
-      )
+      jobService = getJobServiceInstance(platformClient)
       const challengeBotUser = create.userHelper.create(em, {
         dxuser: config.platform.challengeBotUser,
       })
@@ -658,4 +573,17 @@ describe('Job service tests', () => {
       )
     })
   })
+
+  const getJobServiceInstance = (platformClient: PlatformClient) => {
+    return new JobService(
+      em,
+      userCtx,
+      platformClient,
+      notificationService,
+      folderService,
+      emailQueueJobProducer,
+      emailPrepareService,
+      emailSendService,
+    )
+  }
 })
