@@ -24,7 +24,7 @@ export class SpaceService {
   }
 
   async create(space: CreateSpaceDto): Promise<number> {
-    this.logger.verbose(`SpaceService: creating new ${SPACE_TYPE[space.spaceType]} space`)
+    this.logger.log(`Creating new ${SPACE_TYPE[space.spaceType]} space`)
 
     // REVIEW spaces not supported yet
     if ([SPACE_TYPE.REVIEW].includes(space.spaceType)) {

@@ -4,9 +4,22 @@ import { config } from '@shared/config'
 import { ClientRequestError } from '@shared/errors'
 import { PlatformClient } from '@shared/platform-client'
 import { firstValueFrom } from 'rxjs'
+import { WebSocket } from 'ws'
 
 const ADMIN_PLATFORM_CLIENT_URL = config.service.adminPlatformClient.url + '/execute'
 const logger = new Logger('AdminPlatformClient')
+
+const streamJobLogs = (jobDxId: string) => {
+  const ws = new WebSocket(`ws://${new URL(config.service.adminPlatformClient.url).host}`)
+  ws.on('open', () => {
+    ws.send(JSON.stringify({ event: 'getLog', data: { jobDxId: jobDxId } }))
+  })
+  ws.on('error', (err) => {
+    logger.error(`Error in streamJobLogs: ${err}`)
+    ws.terminate()
+  })
+  return ws
+}
 
 export const ADMIN_PLATFORM_CLIENT = 'ADMIN_PLATFORM_CLIENT'
 
@@ -19,9 +32,13 @@ export const adminPlatformClientProvider = {
           return target[prop]
         }
 
+        if (prop === 'streamJobLogs') {
+          return streamJobLogs
+        }
+
         return async (...args: unknown[]) => {
           const stackTrace = new Error().stack
-          logger.verbose(
+          logger.log(
             { stackTrace },
             `Calling admin platform client method. Method: "${prop}", Args: ${JSON.stringify(args)}`,
           )

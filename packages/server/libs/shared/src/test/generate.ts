@@ -78,6 +78,11 @@ const user = {
     normalizedEmail: 'normalized@nexus-mail.com',
     userState: USER_STATE.ENABLED,
     lastDataCheckup: new Date(),
+    lastLogin: new Date(),
+    extras: {
+      has_seen_guidelines: false,
+      inactivity_email_sent: false,
+    },
     privateFilesProject: `project-${random.dxstr()}`,
     publicFilesProject: `project-${random.dxstr()}`,
     privateComparisonsProject: `project-${random.dxstr()}`,

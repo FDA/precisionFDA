@@ -41,14 +41,3 @@ export const CommunityParticipants = styled.div`
 export const PageOverviewMainBody = styled(PageMainBody)`
   flex-direction: column;
 `
-
-export const PFDATeamSection = styled.div`
-  background-color: var(--c-bg-300);
-  text-align: center;
-  margin: 64px 0;
-  padding: 32px 0;
-
-  ${SectionTitle} {
-    margin-bottom: 32px;
-  }
-`

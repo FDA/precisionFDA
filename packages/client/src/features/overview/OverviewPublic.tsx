@@ -24,14 +24,12 @@ import { ChallengesBanner } from './ChallengesBanner'
 import ChallengesOverviewList from './ChallengesOverviewList'
 import { OverviewExpertsCondensedList } from './OverviewExpertsListCondensed'
 import { OverviewNewsList } from './OverviewNewsList'
-import { ParticipantPersonsList } from './ParticipantPersonsList'
 import { ParticipantOrgsList } from './ParticipantsOrgsList'
 import {
   CommunityParticipants,
   ExpertSection,
   Hr,
   InfoRow,
-  PFDATeamSection,
   PageOverviewMainBody,
 } from './styles'
 import { Button } from '../../components/Button'
@@ -42,7 +40,7 @@ export const OverviewPublic = () => {
   const { data: expertsData, isLoading: expertsIsLoading } = useExpertsListQuery({})
 
   return (
-    <PublicLayout>
+    <PublicLayout mainScroll>
       <NavigationBar user={user}>
         <PageContainerMargin>
           <NavigationBarBanner>
@@ -97,13 +95,6 @@ export const OverviewPublic = () => {
           <a href="mailto:precisionfda@fda.hhs.gov">Feedback</a>
         </InfoRow>
       </PageMainBody>
-
-      <PFDATeamSection>
-        <SectionTitle>PRECISIONFDA TEAM</SectionTitle>
-        <div>
-          <ParticipantPersonsList />
-        </div>
-      </PFDATeamSection>
     </PublicLayout>
   )
 }

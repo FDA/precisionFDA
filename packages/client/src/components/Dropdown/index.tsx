@@ -1,9 +1,12 @@
 import React, { useState, useRef, FC } from 'react'
 import { usePopper } from 'react-popper'
+import styled from 'styled-components'
 import { Placement } from '@popperjs/core'
 import { PopperContainer, DropdownMenu } from './styles'
 import { useOnOutsideClickRef } from '../../hooks/useOnOutsideClick'
 import { useKeyPress } from '../../hooks/useKeyPress'
+
+export const StyledDropdown = styled.div``
 
 export const Dropdown: FC<{
   content: React.ReactNode
@@ -57,7 +60,7 @@ export const Dropdown: FC<{
   )
 
   return (
-    <div ref={clickRef} { ...rest }>
+    <StyledDropdown ref={clickRef} { ...rest }>
       {children({
         style: { cursor: 'pointer' },
         ref: buttonRef,
@@ -80,7 +83,7 @@ export const Dropdown: FC<{
           </DropdownMenu>
         </PopperContainer>
       )}
-    </div>
+    </StyledDropdown>
   )
 }
 

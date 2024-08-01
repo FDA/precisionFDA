@@ -35,7 +35,7 @@ const DataPortalRoutes = () => {
 
   if (!user && !loading ) {
     // if accessed as non-logged user, present modal with landing-page background
-    return <PublicLayout>
+    return <PublicLayout mainScroll>
       <DataPortalsAuthPickerModal modal={modal}/>
       <NavigationBar user={null}>
         <PageContainerMargin>
@@ -54,8 +54,7 @@ const DataPortalRoutes = () => {
     <Routes>
       <Route path="" element={<DataPortalsListPage />} />
       <Route path="create" element={<CreateDataPortalPage />} />
-      <Route path=":portalId" element={<DataPortalDetailsPage />} />
-      <Route path=":portalId/content" element={<DataPortalContentEditPage />} />
+      <Route path=":portalId/*" element={<DataPortalDetailsPage />} />
       <Route path=":portalId/edit" element={<EditDataPortalPage />} />
     </Routes>
   )

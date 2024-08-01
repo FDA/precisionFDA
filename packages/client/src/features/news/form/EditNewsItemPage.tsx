@@ -76,7 +76,7 @@ const EditNewsItemPage = () => {
   const { data, isLoading } = useNewsItemRequest(idParam)
 
   return (
-    <UserLayout>
+    <UserLayout mainScroll>
       <AdminWrapper>
         <FormPageContainer>
           <BackLinkMargin linkTo="/admin/news">Back to admin news list</BackLinkMargin>

@@ -11,6 +11,7 @@ export const StyledToastContainer = styled(ToastContainer)`
     padding: 0px;
     width: 100%;
     font-weight: 400;
+    font-size: 14px;
     margin: auto 12px !important;
     min-width: 400px !important;
     max-width: 600px !important;

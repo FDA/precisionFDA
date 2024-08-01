@@ -66,7 +66,7 @@ export const sendJobFailedEmails = async (jobId:string, ctx: WorkerOpsCtx<UserOp
   )
 
   return Promise.all(emails.map(async email => {
-    ctx.log.verbose({
+    ctx.log.log({
       jobId,
       user: ctx.user.dxuser,
       recipient: email.to,

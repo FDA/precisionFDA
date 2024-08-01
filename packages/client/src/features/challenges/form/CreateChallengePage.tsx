@@ -52,7 +52,7 @@ const CreateChallengePage = () => {
   }
 
   return (
-    <UserLayout>
+    <UserLayout mainScroll>
       <NavigationBar title={title} subtitle={subtitle} user={user} />
       <StyledPageCenter>
         <StyledPageContent>

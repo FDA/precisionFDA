@@ -215,4 +215,10 @@ class Job < ApplicationRecord
   def log_unaccessible?(context)
     scope == SCOPE_PUBLIC && user_id != context.user_id
   end
+
+  def cost_limit
+    return nil unless describe.key?("costLimit")
+
+    describe["costLimit"]
+  end
 end

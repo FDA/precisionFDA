@@ -11,7 +11,7 @@ import { IUser } from '../../types/user'
 import { AlertBanner } from '../AlertBanner'
 import { TransparentButton } from '../Button'
 import { CloudResourceModal } from '../CloudResourcesModal'
-import Dropdown from '../Dropdown'
+import { DropdownNext } from '../Dropdown/DropdownNext'
 import { ArrowLeftIcon } from '../icons/ArrowLeftIcon'
 import { CDMHIcon } from '../icons/CDMHIcon'
 import { CaretIcon } from '../icons/CaretIcon'
@@ -32,6 +32,7 @@ import {
   HeaderSpacer,
   IconWrap,
   LogoWrap,
+  MenuButton,
   Nav,
   Row,
   SiteMenuItem,
@@ -59,6 +60,7 @@ type UserMenuProps = {
   handleLogout: () => void
   showCloudResourcesModal: () => void
   generateCLIKey: () => void
+  hide: () => void
 }
 
 export const UserMenu = ({
@@ -68,50 +70,60 @@ export const UserMenu = ({
   handleLogout,
   showCloudResourcesModal,
   generateCLIKey,
+  hide,
 }: UserMenuProps) => (
   <StyledDropMenuLinks>
-    <StyledLink data-turbolinks="false" href="/profile">
+    <StyledLink data-turbolinks="false" href="/profile" onClick={() => hide()}>
       Profile
     </StyledLink>
     {user && !userIsGuest && (
       <>
-        <StyledLink data-turbolinks="false" href={`/users/${user?.dxuser}`}>
+        <StyledLink data-turbolinks="false" href={`/users/${user?.dxuser}`} onClick={() => hide()}>
           Public Profile
         </StyledLink>
-        <StyledOnClickModalDiv onClick={showCloudResourcesModal}>Cloud Resources</StyledOnClickModalDiv>
+        <StyledOnClickModalDiv onClick={() => {
+            showCloudResourcesModal()
+            hide()
+        }}>Cloud Resources</StyledOnClickModalDiv>
       </>
     )}
-    <StyledLink as="div" onClick={generateCLIKey}>
+    <StyledLink as="div" onClick={() => {
+      generateCLIKey()
+      hide()
+    }}>
       Generate CLI Key
     </StyledLink>
-    <StyledLink data-turbolinks="false" href="/licenses">
+    <StyledLink data-turbolinks="false" href="/licenses" onClick={() => hide()}>
       Manage Licenses
     </StyledLink>
     {!userIsGuest && (
-      <StyledLink as={Link} data-turbolinks="false" to="/account/notifications">
+      <StyledLink as={Link} data-turbolinks="false" to="/account/notifications" onClick={() => hide()}>
         Notification Settings
       </StyledLink>
     )}
     <StyledDivider />
-    <StyledLink as={Link} to="/about" data-turbolinks="false">
+    <StyledLink as={Link} to="/about" data-turbolinks="false" onClick={() => hide()}>
       About
     </StyledLink>
-    <StyledLink data-turbolinks="false" href="/guidelines">
+    <StyledLink data-turbolinks="false" href="/guidelines" onClick={() => hide()}>
       Guidelines
     </StyledLink>
-    <StyledLink as={Link} to="/docs" data-turbolinks="false">
+    <StyledLink as={Link} to="/docs" data-turbolinks="false" onClick={() => hide()}>
       Docs
     </StyledLink>
     <StyledDivider />
     {userCanAdministerSite && (
       <>
-        <StyledLink as={Link} to="/admin">
+        <StyledLink as={Link} to="/admin" onClick={() => hide()}>
           Admin Dashboard
         </StyledLink>
         <StyledDivider />
       </>
     )}
-    <StyledLink as="div" onClick={handleLogout}>
+    <StyledLink as="div" onClick={() => {
+      hide()
+      handleLogout()
+    }}>
       Log Out
     </StyledLink>
   </StyledDropMenuLinks>
@@ -172,7 +184,7 @@ const SiteNav = ({
 }: {
   isSiteAlertVisible: boolean
   className: string
-  setShowSiteNav: (v: boolean) => void
+  setShowSiteNav: (v: boolean, ms?: number) => void
   ignoredOutsideClickRef: HTMLDivElement | null
 }) => {
   const clickRef = useOnOutsideClickRef(true, setShowSiteNav, ignoredOutsideClickRef)
@@ -181,10 +193,10 @@ const SiteNav = ({
   const { userSiteNavItems, showCDMHLink, showGSRSLink } = useUserSiteNavItems()
 
   return (
-    <StyledSiteNav isSiteAlertVisible={isSiteAlertVisible} className={className} ref={clickRef}>
+    <StyledSiteNav className={className} ref={clickRef}>
       <SiteNavTop>
         <div />
-        <TransparentButton onClick={() => setShowSiteNav(false)}>
+        <TransparentButton onClick={() => setShowSiteNav(false, 100)}>
           <CrossIcon height={16} />
         </TransparentButton>
       </SiteNavTop>
@@ -260,10 +272,10 @@ const Header: React.FC = () => {
     })
   }
 
-  const setSidebar = (v: boolean) => {
+  const setSidebar = (v: boolean, ms?: number) => {
     setTimeout(() => {
       setShowSiteNav(() => v)
-    }, 100)
+    }, ms ?? 225)
   }
 
   const orderedFavorites = orderArrayByReference(selFavorites, order)
@@ -289,9 +301,9 @@ const Header: React.FC = () => {
           <LogoWrap as={Link} to="/" data-turbolinks="false">
             <StyledHeaderLogo height={20} />
           </LogoWrap>
-          <TransparentButton data-testid="button-open-menu" ref={buttonRef} onClick={() => setSidebar(!showSiteNav)}>
+          <MenuButton $active={showSiteNav} data-testid="button-open-menu" ref={buttonRef} onClick={() => setSidebar(!showSiteNav, 100)}>
             <SiteMenuIcon height={20} />
-          </TransparentButton>
+          </MenuButton>
           <HeaderLeft>
             {getObjectsByIds(orderedFavorites, userSiteNavItems).map(i => {
               const { id, iconHeight, text, icon: Icon } = i
@@ -313,9 +325,10 @@ const Header: React.FC = () => {
             </EditMenuWrap>
           </HeaderLeft>
           <HeaderRight>
-            <Dropdown
+            <DropdownNext
               trigger="click"
-              content={
+              // eslint-disable-next-line react/no-unstable-nested-components
+              content={({ hide }) => (
                 <UserMenu
                   user={user}
                   userCanAdministerSite={userCanAdministerSite}
@@ -323,11 +336,12 @@ const Header: React.FC = () => {
                   handleLogout={handleLogout}
                   showCloudResourcesModal={() => setCloudResourcesModalShown(true)}
                   generateCLIKey={() => generateCLIKeyAction.setShowModal(true)}
+                  hide={hide}
                 />
-              }
-            >
+              )}
+              >
               {dropdownProps => (
-                <DropdownMenuItem {...dropdownProps} $active={dropdownProps.isActive} data-testid="user-context-menu">
+                <DropdownMenuItem {...dropdownProps} $active={dropdownProps.$isActive} data-testid="user-context-menu">
                   <IconWrap>
                     <ProfileIcon height={16} />
                   </IconWrap>
@@ -337,7 +351,7 @@ const Header: React.FC = () => {
                   </HeaderItemText>
                 </DropdownMenuItem>
               )}
-            </Dropdown>
+            </DropdownNext>
           </HeaderRight>
         </Nav>
       </StyledHeader>

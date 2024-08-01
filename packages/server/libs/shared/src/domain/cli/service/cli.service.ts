@@ -33,15 +33,13 @@ import { SCOPE } from '@shared/types/common'
 
 @Injectable()
 export class CliService {
-
   constructor(
     private readonly em: SqlEntityManager,
     private readonly user: UserContext,
     private readonly entityFetcherService: EntityFetcherService,
     private readonly discussionService: DiscussionService,
     private readonly platformClient: PlatformClient,
-  ) {
-  }
+  ) {}
 
   /**
    * entity can be one of: file, asset - also file, app, workflow, job.
@@ -66,15 +64,23 @@ export class CliService {
   private async describeFile(entityId: UID<'file'>) {
     // why isn't the type Node ??
     // populate has to be here, I wasn't able to make it work otherwise.
-    //@ts-ignore
-    const file: any = await this.entityFetcherService.getAccessibleByUid('Node', entityId, {}, { populate: ['taggings.tag', 'user'] })
+    const file: any = await this.entityFetcherService.getAccessibleByUid(
+      'Node',
+      entityId,
+      {},
+      // @ts-ignore
+      { populate: ['taggings.tag', 'user'] },
+    )
     if (!file) {
       throw new NotFoundError('File not found or not accessible')
     }
-    const describeFile = await this.platformClient.fileDescribe({
-      fileDxid: file.dxid,
-      projectDxid: null, // not needed - dxid is unique.
-    }, {})
+    const describeFile = await this.platformClient.fileDescribe(
+      {
+        fileDxid: file.dxid,
+        projectDxid: null, // not needed - dxid is unique.
+      },
+      {},
+    )
 
     await file.properties.loadItems()
     if (file.isAsset) {
@@ -109,12 +115,26 @@ export class CliService {
   }
 
   private async describeExecution(entityId: UID<'job'>) {
-    const execution: any = await this.entityFetcherService.getAccessibleByUid('Job', entityId)
+    const execution = (await this.entityFetcherService.getAccessibleByUid(
+      Job,
+      entityId,
+      {},
+      // @ts-ignore :<
+      // needed when the job is described by non-owner
+      { populate: ['user'] },
+    )) as Job
     if (!execution) {
       throw new NotFoundError('Execution not found or not accessible')
     }
 
-    const platformExecutionData = await this.platformClient.jobDescribe({ jobId: execution.dxid })
+    const platformExecutionData = await this.platformClient
+      .jobDescribe({ jobId: execution.dxid })
+      .catch((err) => {
+        if (err.props.clientStatusCode === 401) {
+          return execution.describe
+        }
+        throw err
+      })
     return CliExecutionDescribeDTO.mapToDTO(platformExecutionData, execution)
   }
 
@@ -126,14 +146,20 @@ export class CliService {
     if (!space) {
       throw new NotFoundError('Space does not exist or is not accessible')
     }
-    const memberships = await this.em.find(SpaceMembership, { spaces: spaceId }, {
-      orderBy: {
-        side: 'ASC',
-        role: 'ASC',
+    const memberships = await this.em.find(
+      SpaceMembership,
+      { spaces: spaceId },
+      {
+        orderBy: {
+          side: 'ASC',
+          role: 'ASC',
+        },
       },
-    })
+    )
 
-    return await Promise.all(memberships.map(membership => CliSpaceMemberDTO.mapToDTO(membership)))
+    return await Promise.all(
+      memberships.map((membership) => CliSpaceMemberDTO.mapToDTO(membership)),
+    )
   }
 
   async listSpaceDiscussions(spaceId: number) {
@@ -156,20 +182,24 @@ export class CliService {
       commentsCount: discussion.commentsCount,
       createdAt: discussion.createdAt,
       updatedAt: discussion.updatedAt,
-      answers: await Promise.all(discussion.answers.map(async (answer: AnswerDTO) => {
-        return {
-          ...answer,
-          attachments: await this.discussionService.getAttachments(answer.note.id).then((attachments) => {
-            return attachments.map((attachment: DiscussionAttachment) => {
-              return {
-                uid: attachment.uid,
-                type: attachment.type,
-                name: attachment.name,
-              }
-            })
-          }),
-        }
-      })),
+      answers: await Promise.all(
+        discussion.answers.map(async (answer: AnswerDTO) => {
+          return {
+            ...answer,
+            attachments: await this.discussionService
+              .getAttachments(answer.note.id)
+              .then((attachments) => {
+                return attachments.map((attachment: DiscussionAttachment) => {
+                  return {
+                    uid: attachment.uid,
+                    type: attachment.type,
+                    name: attachment.name,
+                  }
+                })
+              }),
+          }
+        }),
+      ),
       answersCount: discussion.answersCount,
       attachments: attachments.map((attachment: DiscussionAttachment) => {
         return {
@@ -184,7 +214,7 @@ export class CliService {
   }
 
   async getJobScope(jobDxid: string) {
-    const jobs: Job[] = await this.entityFetcherService.getAccessible('Job', { dxid: jobDxid})
+    const jobs: Job[] = await this.entityFetcherService.getAccessible('Job', { dxid: jobDxid })
     if (jobs.length !== 1) {
       throw new NotFoundError('Job not found or not accessible')
     }
@@ -192,7 +222,6 @@ export class CliService {
   }
 
   async findNodes(input: CliNodeSearchDTO) {
-
     const { folderId, spaceId, arg, type } = input
 
     const parentFolder = !spaceId ? folderId : null
@@ -214,7 +243,9 @@ export class CliService {
 
     const spaceScopes = spaces.map((s) => `space-${s.id}`)
     if (spaceId && !spaceScopes.includes(scope)) {
-      throw new PermissionError("You don't have permission to access this space or remove files in it!")
+      throw new PermissionError(
+        "You don't have permission to access this space or remove files in it!",
+      )
     }
 
     let result: UserFile[] | Folder[]
@@ -226,7 +257,7 @@ export class CliService {
           { scope: { $in: spaceScopes as SCOPE[] } },
         ],
         $and: [{ id: arg as any }, { stiType: FILE_STI_TYPE.FOLDER }],
-      });
+      })
 
       for (const folder of result) {
         await folder.children.init()

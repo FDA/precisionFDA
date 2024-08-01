@@ -92,7 +92,7 @@ export class AdminUsersPaginationPipe<
   )
 
   constructor(
-    private readonly log: Logger,
+    private readonly logger: Logger,
     private readonly user: UserContext,
   ) {}
 
@@ -138,7 +138,7 @@ export class AdminUsersPaginationPipe<
       >
     >
 
-    this.log.debug({ userId: this.user.id }, 'Pagination params parsed')
+    this.logger.debug({ userId: this.user.id }, 'Pagination params parsed')
 
     return {
       page,

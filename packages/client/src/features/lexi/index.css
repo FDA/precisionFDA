@@ -5,22 +5,34 @@
 * LICENSE file in the root directory of this source tree.
 *
 */
+
 .h1, .h2, .h3, .table {
   margin: 0;
 }
 
+.editor-wrapper {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
 .editor-shell {
-  margin: 20px auto; /* NOTE: Change from main */
+  /* NOTE: change begin */
+  margin: 20px auto 0 auto; 
   border-radius: 2px;
-  /* NOTE: Change from main */
-  color: #000;
+  flex: 1 1 auto;
+  padding: 0 8px;
+  display: flex;
+  flex-direction: column;
+  /* NOTE: change end */
   position: relative;
   line-height: 1.7;
   font-weight: 400;
 }
 
 .editor-shell .editor-container {
-  background: #fff;
+  flex: 1 ;
+  max-width: 1000px;
   position: relative;
   display: block;
   border-bottom-left-radius: 10px;
@@ -48,10 +60,8 @@
 }
 
 .editor {
-  flex: auto;
-  position: relative;
-  resize: vertical;
-  z-index: -1;
+  display: flex;
+  justify-content: flex-start;
 }
 
 .test-recorder-output {
@@ -68,6 +78,10 @@ pre {
   font-size: 12px;
   overflow: auto;
   max-height: 400px;
+}
+
+img {
+  height: auto;
 }
 
 .tree-view-output {
@@ -104,7 +118,8 @@ pre::-webkit-scrollbar-thumb {
   outline: none;
   box-shadow: 0px 1px 10px rgba(0, 0, 0, 0.3);
   background-color: #444;
-}
+  }
+  .editor-dev-button:hover {}
 
 .editor-dev-button::after {
   content: '';
@@ -697,6 +712,7 @@ i.page-break,
 }
 .dropdown-header {
   position:fixed; 
+  padding: initial;
 }
 
 .dropdown .item {
@@ -768,7 +784,7 @@ i.page-break,
   height: 1px;
 }
 
-@media screen and (max-width: 1100px) {
+@media screen and (max-width: 1425px) {
   .dropdown-button-text {
     display: none !important;
   }
@@ -1404,6 +1420,7 @@ button.action-button:disabled {
 
 .toolbar {
   display: flex;
+  justify-content: center;
   margin-bottom: 1px;
   background: #fff;
   padding: 4px;
@@ -1413,8 +1430,16 @@ button.action-button:disabled {
   overflow: auto;
   height: 36px;
   position: sticky;
-  top: 0;
+  top: 20px;
   z-index: 2;
+  /* NOTE: change begin */
+  min-height: 36px;
+  border: 1px solid var(--c-layout-border-200);
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
+  filter: drop-shadow(0px -10px 6px #ffffff);
+  flex-wrap: wrap;
+  /* NOTE: change end */
 }
 
 button.toolbar-item {

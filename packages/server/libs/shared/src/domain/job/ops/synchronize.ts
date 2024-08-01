@@ -1,6 +1,5 @@
 import { wrap } from '@mikro-orm/core'
 import { SqlEntityManager } from '@mikro-orm/mysql'
-import { EmailSendOperation } from '@shared/domain/email/ops/email-send'
 import { RequestTerminateJobOperation } from '@shared/domain/job/ops/terminate'
 import { NotificationService } from '@shared/domain/notification/services/notification.service'
 import { Tagging } from '@shared/domain/tagging/tagging.entity'
@@ -9,20 +8,20 @@ import { User } from '@shared/domain/user/user.entity'
 import { ClientRequestError } from '@shared/errors'
 import { JobDescribeResponse } from '@shared/platform-client/platform-client.responses'
 import { EntityScope } from '@shared/types/common'
-import { NOTIFICATION_ACTION, SEVERITY } from '../../../enums'
-import { PlatformClient } from '../../../platform-client'
+import { NOTIFICATION_ACTION, SEVERITY } from '@shared/enums'
+import { PlatformClient } from '@shared/platform-client'
 import {
   createSendEmailTask,
   createSyncOutputsTask,
   getMainQueue,
   removeFromEmailQueue,
   removeRepeatable,
-} from '../../../queue'
-import { CheckStatusJob, TASK_TYPE } from '../../../queue/task.input'
-import type { Maybe, UserOpsCtx } from '../../../types'
-import { WorkerBaseOperation } from '../../../utils/base-operation'
+} from '@shared/queue'
+import { CheckStatusJob, TASK_TYPE } from '@shared/queue/task.input'
+import type { Maybe, UserOpsCtx } from '@shared/types'
+import { WorkerBaseOperation } from '@shared/utils/base-operation'
 import { EMAIL_TYPES, EmailSendInput } from '../../email/email.config'
-import { buildEmailTemplate } from '../../email/email.helper'
+import { buildEmailTemplate, getBullJobIdForEmailOperation } from '../../email/email.helper'
 import {
   JobStaleInputTemplate,
   jobStaleTemplate,
@@ -154,12 +153,12 @@ export class SyncJobOperation extends WorkerBaseOperation<
     this.job = job
     this.user = user
     this.client = new PlatformClient({ accessToken: this.ctx.user.accessToken }, this.ctx.log)
-    this.ctx.log.verbose({ jobId: job.id }, 'SyncJobOperation: Processing job')
+    this.ctx.log.log({ jobId: job.id }, 'Processing job')
 
     if (!shouldSyncStatus(job)) {
-      this.ctx.log.verbose(
+      this.ctx.log.log(
         { input, job },
-        'SyncJobOperation: Job is already finished. Removing task from main queue',
+        'Job is already finished. Removing task from main queue',
       )
       await removeRepeatable(this.ctx.job, getMainQueue())
       this.removeTerminationEmailJob()
@@ -177,16 +176,16 @@ export class SyncJobOperation extends WorkerBaseOperation<
           // Unauthorized. Expected scenario is that the user token has expired
           // Removing the sync task will allow a new sync task to be recreated
           // when user next logs in via UserCheckupTask
-          this.ctx.log.verbose(
+          this.ctx.log.log(
             { error: err.props },
-            'SyncJobOperation: Received 401 from platform, removing sync task',
+            'Received 401 from platform, removing sync task',
           )
           await removeRepeatable(this.ctx.job)
         }
       } else {
-        this.ctx.log.verbose(
+        this.ctx.log.log(
           { error: err },
-          'SyncJobOperation: Unhandled error from job/describe, will retry later',
+          'Unhandled error from job/describe, will retry later',
         )
       }
       return
@@ -194,9 +193,9 @@ export class SyncJobOperation extends WorkerBaseOperation<
 
     // TODO(samuel) this shoudl be part of platform client
     delete platformJobData['sshHostKey']
-    this.ctx.log.verbose(
+    this.ctx.log.log(
       { platformJobData: platformJobData },
-      'SyncJobOperation: Received job/describe from platform',
+      'Received job/describe from platform',
     )
 
     const isOverNotifyMaxDuration = buildIsOverMaxDuration('notify')
@@ -212,9 +211,9 @@ export class SyncJobOperation extends WorkerBaseOperation<
       em.persist(job)
     }
     if (isStateActive(job.state) && isOverTerminateMaxDuration(job)) {
-      this.ctx.log.verbose(
+      this.ctx.log.log(
         { jobId: job.id, jobUid: job.uid },
-        'SyncJobOperation: Job marked as stale, trying to terminate',
+        'Job marked as stale, trying to terminate',
       )
       const terminateOp = new RequestTerminateJobOperation({
         log: this.ctx.log,
@@ -236,14 +235,14 @@ export class SyncJobOperation extends WorkerBaseOperation<
       remoteState === job.state &&
       (remoteState !== JOB_STATE.RUNNING || !job.hasHttpsAppState() || job.isHttpsAppRunning())
     ) {
-      this.ctx.log.verbose({ remoteState }, 'SyncJobOperation: State has not changed, no updates')
+      this.ctx.log.log({ remoteState }, 'State has not changed, no updates')
       return
     }
 
     if (isStateTerminal(remoteState)) {
       this.ctx.log.debug(
         { remoteState },
-        'SyncJobOperation: Remote job state is terminal, will sync folders and files',
+        'Remote job state is terminal, will sync folders and files',
       )
       // create jobClosed event
       // TODO: this is worth refactoring, because job.describe (that is used for event) is updated
@@ -254,22 +253,22 @@ export class SyncJobOperation extends WorkerBaseOperation<
       if (remoteState === JOB_STATE.FAILED) {
         if (job.state === JOB_STATE.RUNNING) {
           // if latest known state was 'running' then platform terminated the job
-          this.ctx.log.verbose(
+          this.ctx.log.log(
             {
               jobId: input.dxid,
               failureReason: platformJobData.failureReason,
               failureMessage: platformJobData.failureMessage,
             },
-            'SyncJobOperation: Detected job termination by platform',
+            'Detected job termination by platform',
           )
         } else {
-          this.ctx.log.verbose(
+          this.ctx.log.log(
             {
               failureCounts: platformJobData.failureCounts,
               failureReason: platformJobData.failureReason,
               failureMessage: platformJobData.failureMessage,
             },
-            'SyncJobOperation: Detected failed job',
+            'Detected failed job',
           )
         }
       }
@@ -287,13 +286,13 @@ export class SyncJobOperation extends WorkerBaseOperation<
 
     await checkJobStatusForNotifications(em, this.ctx.user.id, job, platformJobData)
 
-    this.ctx.log.verbose(
+    this.ctx.log.log(
       {
         jobId: input.dxid,
         fromState: job.state,
         toState: remoteState,
       },
-      'SyncJobOperation: Updating job state and metadata from platform',
+      'Updating job state and metadata from platform',
     )
     const updatedJob = wrap(job).assign(
       {
@@ -307,19 +306,19 @@ export class SyncJobOperation extends WorkerBaseOperation<
     // Note(samuel) email has to be sent after em. flush, otherwise failureReason won't be propagated in database
     // Alternative - pass failure reason and other
     if (remoteState === JOB_STATE.FAILED) {
-      this.ctx.log.verbose(
+      this.ctx.log.log(
         {
           failureCounts: platformJobData.failureCounts,
           failureReason: platformJobData.failureReason,
           failureMessage: platformJobData.failureMessage,
         },
-        'SyncJobOperation: Detected failed job',
+        'Detected failed job',
       )
 
       try {
         await sendJobFailedEmails(this.job.id.toString(), this.ctx)
       } catch (e) {
-        this.ctx.log.error({ job: updatedJob }, 'SyncJobOperation: Failed to send emails')
+        this.ctx.log.error({ job: updatedJob }, 'Failed to send emails')
       }
     }
 
@@ -338,8 +337,8 @@ export class SyncJobOperation extends WorkerBaseOperation<
       subject: `Job ${this.job.name} will terminate in 24 hours`,
       body,
     }
-    const jobId = EmailSendOperation.getBullJobId(EMAIL_TYPES.jobTerminationWarning, this.job.dxid)
-    this.ctx.log.verbose(
+    const jobId = getBullJobIdForEmailOperation(EMAIL_TYPES.jobTerminationWarning, this.job.dxid)
+    this.ctx.log.log(
       {
         jobId: this.job.id,
         jobDxid: this.job.dxid,
@@ -347,13 +346,13 @@ export class SyncJobOperation extends WorkerBaseOperation<
         recipient: this.user.email,
         bullJobId: jobId,
       },
-      'SyncJobOperation: Sending termination warning email to user',
+      'Sending termination warning email to user',
     )
     await createSendEmailTask(email, this.ctx.user, jobId)
   }
 
   private removeTerminationEmailJob() {
-    const jobId = EmailSendOperation.getBullJobId(EMAIL_TYPES.jobTerminationWarning, this.job.dxid)
+    const jobId = getBullJobIdForEmailOperation(EMAIL_TYPES.jobTerminationWarning, this.job.dxid)
     removeFromEmailQueue(jobId)
   }
 

@@ -8,7 +8,7 @@ import { Logger } from '@nestjs/common'
  * @example
  * class MyClass {
  *   @ServiceLogger()
- *   private readonly log: Logger;
+ *   private readonly logger: Logger;
  * }
  */
 export function ServiceLogger() {

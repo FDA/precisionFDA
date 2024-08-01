@@ -1,6 +1,7 @@
-import { Controller, Get, Headers, Logger } from '@nestjs/common'
+import { Controller, Get, Headers, Logger, Query } from '@nestjs/common'
 import { config } from '@shared/config'
 import { AlertService } from '@shared/domain/alert/services/alert.service'
+import { URLUtils } from '@shared/utils/url.utils'
 import { isRequestFromAuthenticatedUser, isRequestFromFdaSubnet } from '../server/utils'
 
 /**
@@ -11,16 +12,19 @@ import { isRequestFromAuthenticatedUser, isRequestFromFdaSubnet } from '../serve
 @Controller('/site-settings')
 export class SiteSettingsController {
   constructor(
-    private readonly log: Logger,
+    private readonly logger: Logger,
     private readonly alertService: AlertService,
   ) {}
 
   @Get()
-  async getSiteSettings(@Headers() headers: Record<string, string>) {
+  async getSiteSettings(
+    @Headers() headers: Record<string, string>,
+    @Query('user_return_to') userReturnTo?: string,
+  ) {
     let body
 
     // Request-specific logic
-    if (isRequestFromFdaSubnet(this.log, headers[config.api.fdaSubnet.nginxIpHeader])) {
+    if (isRequestFromFdaSubnet(this.logger, headers[config.api.fdaSubnet.nginxIpHeader])) {
       Object.entries(config.siteSettings).forEach(([featureName, featureConfig]) => {
         body = {
           ...body,
@@ -29,6 +33,13 @@ export class SiteSettingsController {
       })
       if (!isRequestFromAuthenticatedUser(headers)) {
         body = { ...body, cdmh: { isEnabled: false } }
+      }
+      if (userReturnTo?.length > 0 && body['ssoButton'].isEnabled) {
+        const ssoUrl = body['ssoButton']['data']['fdaSsoUrl']
+        body['ssoButton']['data']['fdaSsoUrl'] = URLUtils.replaceReturnURLForSSO(
+          ssoUrl,
+          userReturnTo,
+        )
       }
     } else {
       Object.entries(config.siteSettings).forEach(([featureName]) => {
@@ -41,7 +52,6 @@ export class SiteSettingsController {
       ...body,
       alerts,
     }
-
     return body
   }
 }

@@ -43,7 +43,6 @@ class SpaceMembershipSerializer < ApplicationSerializer
     return unless current_user
 
     {}.tap do |links|
-      links[:gravatar] = object.user.gravatar_url
       links[:user] = user_path(object.user.dxuser)
     end
   end

@@ -16,7 +16,7 @@ const StyledTos = styled.div`
 const ToS = () => {
   const user = useAuthUser()
   return (
-    <PublicLayout>
+    <PublicLayout mainScroll>
       <NavigationBar
         title="Terms of Service"
         subtitle="Insights from academic, industry, and FDA experts from the precisionFDA Community."

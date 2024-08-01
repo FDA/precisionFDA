@@ -1,14 +1,16 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
-import { Injectable } from '@nestjs/common'
+import { Injectable, Logger } from '@nestjs/common'
 import { Alert } from '@shared/domain/alert/entity/alert.entity'
 import { AlertDTO } from '@shared/domain/alert/dto/AlertDTO'
 import { CreateAlertDTO } from '@shared/domain/alert/dto/CreateAlertDTO'
 import { NotFoundError } from '@shared/errors'
 import { plainToInstance } from 'class-transformer'
+import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 
 @Injectable()
 export class AlertService {
-
+  @ServiceLogger()
+  private readonly logger: Logger
   constructor(private readonly em: SqlEntityManager) {
   }
 
@@ -17,7 +19,6 @@ export class AlertService {
     this.mapToEntity(alertEntity, alert)
     await this.em.persistAndFlush(alertEntity)
     return plainToInstance(AlertDTO, alertEntity)
-
   }
 
   async update(id: number, alert: CreateAlertDTO): Promise<AlertDTO> {
@@ -31,7 +32,6 @@ export class AlertService {
       this.em.persist(alertEntity)
       return plainToInstance(AlertDTO, alertEntity)
     })
-
   }
 
   async delete(id: number) {
@@ -40,11 +40,11 @@ export class AlertService {
       if (!alert) {
         throw new NotFoundError('Alert not found')
       }
-      await this.em.remove(alert)
+      this.logger.log(`Deleting alert with id: ${alert.id}, title: ${alert.title}`)
+      this.em.remove(alert)
       return alert.id
     })
   }
-
 
   async getAll(active: boolean | undefined): Promise<AlertDTO[]> {
     let conditions = {}

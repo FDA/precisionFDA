@@ -36,6 +36,8 @@ services:
     working_dir: /precision-fda
     ports:
       - 3000:3000
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     entrypoint: ./docker/entrypoint/isolation.docker-entrypoint.sh
 
   frontend:

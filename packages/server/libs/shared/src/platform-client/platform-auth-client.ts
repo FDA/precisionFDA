@@ -43,7 +43,7 @@ class PlatformAuthClient extends PlatformClientBase implements IPlatformAuthClie
     this.accessToken = accessToken
     this.axiosInstance = axiosInstance || axios.create()
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    this.log = logger ?? defaultLog
+    this.logger = logger ?? defaultLog
   }
 
   // ---------------
@@ -77,13 +77,13 @@ class PlatformAuthClient extends PlatformClientBase implements IPlatformAuthClie
       headers,
     }
 
-    this.log.verbose({ options }, 'PlatformAuthClient sending newAuthToken request')
+    this.logger.log({ options }, 'Sending newAuthToken request')
     const res = await this.axiosInstance.request(options)
-    this.log.verbose({
+    this.logger.log({
       headers: res.headers,
       config: res.config,
       data: res.data,
-    }, 'PlatformAuthClient received newAuthToken response')
+    }, 'Received newAuthToken response')
     return res.data
   }
 

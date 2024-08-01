@@ -136,9 +136,16 @@ class ApplicationController < ActionController::Base
   end
 
   def return_to_login_url
+    user_return_to = request.original_fullpath
+    site_settings = https_apps_client.site_settings(request.headers["X-Forwarded-For"], user_return_to)
+    if !user_return_to.nil? && site_settings["ssoButton"]["isEnabled"]
+      sso_uri = site_settings["ssoButton"]["data"]["fdaSsoUrl"]
+      return sso_uri
+    end
+
     URI.join(
       login_url,
-      "?#{URI.encode_www_form(user_return_to: request.original_fullpath)}",
+      "?#{URI.encode_www_form(user_return_to:)}",
     ).to_s
   end
 

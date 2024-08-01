@@ -14,7 +14,15 @@ import { getSelectedObjectsFromIndexes } from '../../utils/object'
 import { ActionsDropdownContent } from '../home/ActionDropdownContent'
 import { ActionsRow, QuickActions, StyledHomeTable } from '../home/home.styles'
 import { ActionsButton } from '../home/show.styles'
-import { IFilter, IMeta, KeyVal, Notification, NOTIFICATION_ACTION } from '../home/types'
+import {
+  IFilter,
+  IMeta,
+  KeyVal,
+  Notification,
+  NOTIFICATION_ACTION,
+  WEBSOCKET_MESSSAGE_TYPE,
+  WebSocketMessage,
+} from '../home/types'
 import { useList } from '../home/useList'
 import { ISpaceReport } from './space-report.types'
 import { fetchReports } from './space-reports.api'
@@ -37,9 +45,7 @@ const SpaceReportListTable = ({
   setSelectedRows: (ids: Record<string, boolean>) => void
   isLoading: boolean
   colWidths: KeyVal
-  saveColumnResizeWidth: (
-    columnResizing: UseResizeColumnsState<ISpaceReport>['columnResizing'],
-  ) => void
+  saveColumnResizeWidth: (columnResizing: UseResizeColumnsState<ISpaceReport>['columnResizing']) => void
 }) => {
   const col = useSpaceReportColumns({ colWidths })
   const columns = useMemo(() => col, [col])
@@ -65,14 +71,7 @@ const SpaceReportListTable = ({
 }
 
 export const SpaceReportList = ({ scope }: { scope: string }) => {
-  const {
-    query,
-    selectedIndexes,
-    setSelectedIndexes,
-    saveColumnResizeWidth,
-    colWidths,
-    resetSelected,
-  } = useList<ListType>({
+  const { query, selectedIndexes, setSelectedIndexes, saveColumnResizeWidth, colWidths, resetSelected } = useList<ListType>({
     fetchList: async (filters: IFilter[], params: { scope: string }) => {
       const reports = await fetchReports(params.scope)
 
@@ -87,24 +86,30 @@ export const SpaceReportList = ({ scope }: { scope: string }) => {
 
   const client = useQueryClient()
 
-  const { lastJsonMessage: notification } = useWebSocket<Notification>(getNodeWsUrl(), {
+  const { lastJsonMessage } = useWebSocket<WebSocketMessage>(getNodeWsUrl(), {
     share: true,
     reconnectInterval: DEFAULT_RECONNECT_INTERVAL,
     reconnectAttempts: DEFAULT_RECONNECT_ATTEMPTS,
     shouldReconnect: () => SHOULD_RECONNECT,
+    filter: message => {
+      try {
+        const messageData = JSON.parse(message.data)
+        return messageData.type === WEBSOCKET_MESSSAGE_TYPE.NOTIFICATION
+      } catch (e) {
+        return false
+      }
+    },
   })
 
   useEffect(() => {
+    const notification = lastJsonMessage?.data as Notification
     if ([NOTIFICATION_ACTION.SPACE_REPORT_DONE, NOTIFICATION_ACTION.SPACE_REPORT_ERROR].includes(notification?.action)) {
       query.refetch()
     }
-    client.invalidateQueries({ queryKey: ['space', scope]})
-  }, [notification])
+    client.invalidateQueries({ queryKey: ['space', scope] })
+  }, [lastJsonMessage])
 
-  const selectedItems = getSelectedObjectsFromIndexes<number, ISpaceReport>(
-    selectedIndexes,
-    query.data?.reports,
-  )
+  const selectedItems = getSelectedObjectsFromIndexes<number, ISpaceReport>(selectedIndexes, query.data?.reports)
 
   const actions = userReportSelectActions({
     scope,
@@ -112,10 +117,7 @@ export const SpaceReportList = ({ scope }: { scope: string }) => {
     resetSelected,
   })
 
-  const {
-    modalComp: generateModal,
-    setShowModal: setGenerateModal,
-  } = useGenerateSpaceReportModal({
+  const { modalComp: generateModal, setShowModal: setGenerateModal } = useGenerateSpaceReportModal({
     scope,
     onClose: () => {
       query.refetch()
@@ -129,28 +131,12 @@ export const SpaceReportList = ({ scope }: { scope: string }) => {
       <div>
         <ActionsRow>
           <QuickActions>
-            <Button
-              variant="primary"
-              disabled={query.isLoading}
-              onClick={() => setGenerateModal(true)}
-            >
-              <PlusIcon height={12}/> Generate report
+            <Button variant="primary" disabled={query.isLoading} onClick={() => setGenerateModal(true)}>
+              <PlusIcon height={12} /> Generate report
             </Button>
           </QuickActions>
-          <Dropdown
-            trigger="click"
-            content={
-              <ActionsDropdownContent
-                actions={actions}
-              />
-            }
-          >
-            {dropdownProps => (
-              <ActionsButton
-                {...dropdownProps}
-                active={dropdownProps.isActive}
-              />
-            )}
+          <Dropdown trigger="click" content={<ActionsDropdownContent actions={actions} />}>
+            {dropdownProps => <ActionsButton {...dropdownProps} active={dropdownProps.isActive} />}
           </Dropdown>
         </ActionsRow>
       </div>
@@ -165,7 +151,7 @@ export const SpaceReportList = ({ scope }: { scope: string }) => {
       />
 
       <ContentFooter>
-        <HoverDNAnexusLogo opacity height={14}/>
+        <HoverDNAnexusLogo opacity height={14} />
       </ContentFooter>
 
       {actions['Delete']?.modal}

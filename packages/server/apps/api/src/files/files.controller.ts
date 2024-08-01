@@ -32,7 +32,7 @@ import { FilesValidateCopyingBodyDto } from './model/file-validate-copying-body.
 export class FilesController {
   constructor(
     private readonly user: UserContext,
-    private readonly log: Logger,
+    private readonly logger: Logger,
     private readonly userFileService: UserFileService,
     private readonly userFileResolverFacade: UserFileResolverFacade,
   ) {}
@@ -65,7 +65,7 @@ export class FilesController {
 
     let archiverError: Error | undefined
     zip.on('error', (err) => {
-      this.log.error('archiver error', err)
+      this.logger.error('archiver error', err)
       res.status(500).send(`Error creating zip: ${err?.message}`)
       archiverError = err
     })
@@ -75,7 +75,7 @@ export class FilesController {
       try {
         if (archiverError) break
 
-        this.log.verbose(`Processing ${file.path} for bulk download url ${file.url}`)
+        this.logger.log(`Processing file for bulk download url`)
         const response = await axios.get(file.url, { responseType: 'stream', timeout: 0 })
 
         // This is now awaited to ensure each stream is processed in turn

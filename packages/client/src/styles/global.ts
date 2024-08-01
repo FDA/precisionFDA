@@ -3,8 +3,7 @@ import { colors, theme } from './theme'
 import { colorvars, themes } from './variables'
 import { compactScrollBarV2 } from '../components/Page/styles'
 
-
-const GlobalStyle = createGlobalStyle`
+const GlobalStyle = createGlobalStyle<{railsAlertHeight: number}>`
   ${colorvars}
   ${themes}
 
@@ -28,7 +27,7 @@ const GlobalStyle = createGlobalStyle`
   html {
     scroll-padding-top: 70px;
   }
-  html, body, main, #app-root {
+  html, body, #app-root {
     height: 100%;
     min-height: 0;
   }
@@ -81,6 +80,14 @@ const GlobalStyle = createGlobalStyle`
   p {
     /* max-width: 72ch; */
     /* text-wrap: pretty; */
+  }
+
+
+  body:has(.rails-alert) {
+    --rails-alert-height: ${({ railsAlertHeight }) => railsAlertHeight }px;
+  }
+  #app-root:has(.site-alert-banner) {
+    --site-alert-height: 20px;
   }
 
   @media (prefers-reduced-motion: no-preference) {

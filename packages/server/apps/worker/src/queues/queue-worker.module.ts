@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common'
 import { SpaceReportModule } from '@shared/domain/space-report/space-report.module'
+import { UserModule } from '@shared/domain/user/user.module'
 import { QueueModule } from '@shared/queue/queue.module'
 import { MainQueueProcessor } from './processor/main-queue.processor'
 import { MaintenanceQueueProcessor } from './processor/maintenance-queue.processor'
@@ -19,6 +20,7 @@ import { JobModule } from '@shared/domain/job/job.module'
     UserFileWorkerModule,
     SpaceReportModule,
     DbClusterModule,
+    UserModule,
     DebugModule,
     JobModule,
   ],

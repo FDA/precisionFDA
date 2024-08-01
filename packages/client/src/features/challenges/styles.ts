@@ -39,6 +39,7 @@ const statusCss = css`
   font-size: 12px;
 `
 export const ItemImage = styled.div<{ $timeStatus: TimeStatus }>`
+  position: relative;
   min-width: 200px;
   max-width: 200px;
 

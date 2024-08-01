@@ -115,89 +115,89 @@ export default function Editor(): JSX.Element {
   return (
     <>
       {isRichText && <ToolbarPlugin setIsLinkEditMode={setIsLinkEditMode} />}
-      <div
-        className={`editor-container ${showTreeView ? 'tree-view' : ''} ${
-          !isRichText ? 'plain-text' : ''
-        }`}>
-        {isMaxLength && <MaxLengthPlugin maxLength={30} />}
-        <DragDropPaste />
-        <AutoFocusPlugin />
-        <ClearEditorPlugin />
-        <ComponentPickerPlugin />
-        <AutoEmbedPlugin />
-        <KeywordsPlugin />
-        <AutoLinkPlugin />
-        {isRichText ? (
-          <>
-            <HistoryPlugin externalHistoryState={historyState} />
-            <RichTextPlugin
-              contentEditable={
-                <div className="editor-scroller">
-                  <div className="editor" ref={onRef}>
-                    <ContentEditable />
-                  </div>
-                </div>
-              }
-              placeholder={placeholder}
-              ErrorBoundary={LexicalErrorBoundary}
+      <div className="editor-wrapper">
+        <div
+          className={`editor-container ${showTreeView ? 'tree-view' : ''} ${
+            !isRichText ? 'plain-text' : ''
+          }`}>
+          {isMaxLength && <MaxLengthPlugin maxLength={30} />}
+          <DragDropPaste />
+          <AutoFocusPlugin />
+          <ClearEditorPlugin />
+          <ComponentPickerPlugin />
+          <AutoEmbedPlugin />
+          <KeywordsPlugin />
+          <AutoLinkPlugin />
+          {isRichText ? (
+            <>
+              <HistoryPlugin externalHistoryState={historyState} />
+              <RichTextPlugin
+                contentEditable={
+                    <div className="editor" ref={onRef}>
+                      <ContentEditable />
+                    </div>
+                }
+                placeholder={placeholder}
+                ErrorBoundary={LexicalErrorBoundary}
+              />
+              <CodeHighlightPlugin />
+              <ListPlugin />
+              <ListMaxIndentLevelPlugin maxDepth={7} />
+              <TablePlugin
+                hasCellMerge={tableCellMerge}
+                hasCellBackgroundColor={tableCellBackgroundColor}
+              />
+              <TableCellResizer />
+              <ImagesPlugin />
+              <InlineImagePlugin />
+              <LinkPlugin />
+              <YouTubePlugin />
+              <ClickableLinkPlugin disabled={isEditable} />
+              <HorizontalRulePlugin />
+              <TabFocusPlugin />
+              <TabIndentationPlugin />
+              <CollapsiblePlugin />
+              <PageBreakPlugin />
+              <LayoutPlugin />
+              {floatingAnchorElem && !isSmallWidthViewport && (
+                <>
+                  <DraggableBlockPlugin anchorElem={floatingAnchorElem} />
+                  <CodeActionMenuPlugin anchorElem={floatingAnchorElem} />
+                  <FloatingLinkEditorPlugin
+                    anchorElem={floatingAnchorElem}
+                    isLinkEditMode={isLinkEditMode}
+                    setIsLinkEditMode={setIsLinkEditMode}
+                  />
+                  <TableCellActionMenuPlugin
+                    anchorElem={floatingAnchorElem}
+                    cellMerge={true}
+                  />
+                  <FloatingTextFormatToolbarPlugin
+                    anchorElem={floatingAnchorElem}
+                    setIsLinkEditMode={setIsLinkEditMode}
+                  />
+                </>
+              )}
+            </>
+          ) : (
+            <>
+              <PlainTextPlugin
+                contentEditable={<ContentEditable />}
+                placeholder={placeholder}
+                ErrorBoundary={LexicalErrorBoundary}
+              />
+              <HistoryPlugin externalHistoryState={historyState} />
+            </>
+          )}
+          {(isCharLimit || isCharLimitUtf8) && (
+            <CharacterLimitPlugin
+              charset={isCharLimit ? 'UTF-16' : 'UTF-8'}
+              maxLength={5}
             />
-            <CodeHighlightPlugin />
-            <ListPlugin />
-            <ListMaxIndentLevelPlugin maxDepth={7} />
-            <TablePlugin
-              hasCellMerge={tableCellMerge}
-              hasCellBackgroundColor={tableCellBackgroundColor}
-            />
-            <TableCellResizer />
-            <ImagesPlugin />
-            <InlineImagePlugin />
-            <LinkPlugin />
-            <YouTubePlugin />
-            <ClickableLinkPlugin disabled={isEditable} />
-            <HorizontalRulePlugin />
-            <TabFocusPlugin />
-            <TabIndentationPlugin />
-            <CollapsiblePlugin />
-            <PageBreakPlugin />
-            <LayoutPlugin />
-            {floatingAnchorElem && !isSmallWidthViewport && (
-              <>
-                <DraggableBlockPlugin anchorElem={floatingAnchorElem} />
-                <CodeActionMenuPlugin anchorElem={floatingAnchorElem} />
-                <FloatingLinkEditorPlugin
-                  anchorElem={floatingAnchorElem}
-                  isLinkEditMode={isLinkEditMode}
-                  setIsLinkEditMode={setIsLinkEditMode}
-                />
-                <TableCellActionMenuPlugin
-                  anchorElem={floatingAnchorElem}
-                  cellMerge={true}
-                />
-                <FloatingTextFormatToolbarPlugin
-                  anchorElem={floatingAnchorElem}
-                  setIsLinkEditMode={setIsLinkEditMode}
-                />
-              </>
-            )}
-          </>
-        ) : (
-          <>
-            <PlainTextPlugin
-              contentEditable={<ContentEditable />}
-              placeholder={placeholder}
-              ErrorBoundary={LexicalErrorBoundary}
-            />
-            <HistoryPlugin externalHistoryState={historyState} />
-          </>
-        )}
-        {(isCharLimit || isCharLimitUtf8) && (
-          <CharacterLimitPlugin
-            charset={isCharLimit ? 'UTF-16' : 'UTF-8'}
-            maxLength={5}
-          />
-        )}
-        <div>{showTableOfContents && <TableOfContentsPlugin />}</div>
-        {shouldUseLexicalContextMenu && <ContextMenuPlugin />}
+          )}
+          <div>{showTableOfContents && <TableOfContentsPlugin />}</div>
+          {shouldUseLexicalContextMenu && <ContextMenuPlugin />}
+        </div>
       </div>
       {/* Debug */}
       {/* {showTreeView && <TreeViewPlugin />} */}

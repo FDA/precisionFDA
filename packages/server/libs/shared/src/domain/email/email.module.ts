@@ -2,7 +2,9 @@ import { Module } from '@nestjs/common'
 import { config } from '@shared/config'
 import { EmailQueueJobProducer } from '@shared/domain/email/producer/email-queue-job.producer'
 import { BullQueueModule } from '@shared/queue/module/bull-queue-module'
-import { emailProcessProvider } from '@shared/domain/email/email-process.provider'
+import { EmailPrepareService } from '@shared/domain/email/templates/email-prepare.service'
+import { EmailSendService } from '@shared/domain/email/email-send.service'
+import { EmailFacade } from '@shared/domain/email/email.facade'
 
 @Module({
   imports: [
@@ -17,7 +19,13 @@ import { emailProcessProvider } from '@shared/domain/email/email-process.provide
       },
     }),
   ],
-  providers: [EmailQueueJobProducer, emailProcessProvider],
-  exports: [BullQueueModule, EmailQueueJobProducer, emailProcessProvider],
+  providers: [EmailQueueJobProducer, EmailPrepareService, EmailSendService, EmailFacade],
+  exports: [
+    BullQueueModule,
+    EmailQueueJobProducer,
+    EmailPrepareService,
+    EmailSendService,
+    EmailFacade,
+  ],
 })
 export class EmailModule {}

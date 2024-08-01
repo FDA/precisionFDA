@@ -8,9 +8,9 @@ import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { SpaceRepository } from '@shared/domain/space/space.repository'
 import { UserRepository } from '@shared/domain/user/user.repository'
 import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
-import { EmailProcessOperation } from '@shared/domain/email/ops/email-process'
 import { EMAIL_TYPES, EmailProcessInput } from '@shared/domain/email/email.config'
 import { SPACE_EVENT_ACTIVITY_TYPE } from '@shared/domain/space-event/space-event.enum'
+import { EmailFacade } from '@shared/domain/email/email.facade'
 
 const CONTENT_TYPES = [
   SPACE_EVENT_ACTIVITY_TYPE.file_added,
@@ -39,7 +39,7 @@ const SPACE_TYPES = [
 @Injectable()
 export class SpaceEventService {
   @ServiceLogger()
-  private readonly log: Logger
+  private readonly logger: Logger
 
   constructor(
     private readonly user: UserContext,
@@ -47,11 +47,11 @@ export class SpaceEventService {
     private readonly spaceRepo: SpaceRepository,
     private readonly userRepo: UserRepository,
     private readonly spaceMembershipRepo: SpaceMembershipRepository,
-    private readonly emailProcessOperation: EmailProcessOperation,
+    private readonly emailFacade: EmailFacade,
   ) {}
 
   async createSpaceEvent(input: SpaceEventInput): Promise<SpaceEvent | undefined> {
-    this.log.verbose('Creating space event', input)
+    this.logger.log('Creating space event', input)
     const membership = input.membership
       ? input.membership
       : await this.spaceMembershipRepo.getMembership(input.spaceId, input.userId)
@@ -78,21 +78,23 @@ export class SpaceEventService {
   }
 
   async sendNotificationForEvent(event: SpaceEvent) {
-    this.log.verbose('Sending notification for space event', event)
+    this.logger.log(
+      `Sending notification for space event id: ${event.id} activityType: ${event.activityType}`,
+    )
     if (CONTENT_TYPES.includes(event.activityType)) {
       const input: EmailProcessInput = {
         emailTypeId: EMAIL_TYPES.newContentAdded,
         input: { spaceEventId: event.id },
         receiverUserIds: [],
       }
-      await this.emailProcessOperation.execute(input)
+      await this.emailFacade.sendEmail(input)
     } else if (COMMENT_TYPES.includes(event.activityType)) {
       const input: EmailProcessInput = {
         emailTypeId: EMAIL_TYPES.commentAdded,
         input: { spaceEventId: event.id },
         receiverUserIds: [],
       }
-      await this.emailProcessOperation.execute(input)
+      await this.emailFacade.sendEmail(input)
     } else if (SPACE_TYPES.includes(event.activityType)) {
       const input: EmailProcessInput = {
         emailTypeId: EMAIL_TYPES.spaceChanged,
@@ -103,7 +105,7 @@ export class SpaceEventService {
         },
         receiverUserIds: [],
       }
-      await this.emailProcessOperation.execute(input)
+      await this.emailFacade.sendEmail(input)
     } else if (MEMBERSHIP_TYPES.includes(event.activityType)) {
       const input: EmailProcessInput = {
         emailTypeId: EMAIL_TYPES.memberChangedAddedRemoved,
@@ -116,7 +118,7 @@ export class SpaceEventService {
         },
         receiverUserIds: [],
       }
-      await this.emailProcessOperation.execute(input)
+      await this.emailFacade.sendEmail(input)
     }
   }
 }
