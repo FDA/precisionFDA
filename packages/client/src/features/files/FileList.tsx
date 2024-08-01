@@ -21,18 +21,8 @@ import { cleanObject, getSelectedObjectsFromIndexes, toArrayFromObject } from '.
 import { useAuthUser } from '../auth/useAuthUser'
 import { ActionsDropdownContent } from '../home/ActionDropdownContent'
 import { ActionsRow, QuickActions, StyledHomeTable } from '../home/home.styles'
-import { ActionsButton } from '../home/show.styles'
-import {
-  HomeScope,
-  IFilter,
-  IMeta,
-  KeyVal,
-  MetaPath,
-  Notification,
-  NOTIFICATION_ACTION,
-  WEBSOCKET_MESSSAGE_TYPE,
-  WebSocketMessage,
-} from '../home/types'
+import { ActionsButton, FilesListResourceHeader } from '../home/show.styles'
+import { HomeScope, IFilter, IMeta, KeyVal, MetaPath, Notification, NOTIFICATION_ACTION, WEBSOCKET_MESSSAGE_TYPE, WebSocketMessage } from '../home/types'
 import { useList } from '../home/useList'
 import { usePropertiesQuery } from '../home/usePropertiesQuery'
 import { ISpace } from '../spaces/spaces.types'
@@ -210,7 +200,7 @@ export const FileList = ({
 
   return (
     <ErrorBoundary>
-      <div>
+      <FilesListResourceHeader>
         <ActionsRow>
           <QuickActions>
             {showFolderActions && (
@@ -261,8 +251,8 @@ export const FileList = ({
             </Dropdown>
           </QuickActions>
         </ActionsRow>
-        <ActionsRow>{breadcrumbs(location.pathname, homeScope, data?.meta?.path)}</ActionsRow>
-      </div>
+        {breadcrumbs(location.pathname, homeScope, data?.meta?.path)}
+      </FilesListResourceHeader>
 
       <FilesListTable
         isAdmin={isAdmin}

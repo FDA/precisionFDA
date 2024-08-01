@@ -14,18 +14,11 @@ import { DEFAULT_RECONNECT_ATTEMPTS, DEFAULT_RECONNECT_INTERVAL, SHOULD_RECONNEC
 import { getSelectedObjectsFromIndexes, toArrayFromObject } from '../../utils/object'
 import { useAuthUser } from '../auth/useAuthUser'
 import { ActionsDropdownContent } from '../home/ActionDropdownContent'
-import { ActionsRow, StyledHomeTable } from '../home/home.styles'
-import { ActionsButton } from '../home/show.styles'
 import {
-  HomeScope,
-  IFilter,
-  IMeta,
-  KeyVal,
-  NOTIFICATION_ACTION,
-  Notification,
-  WEBSOCKET_MESSSAGE_TYPE,
-  WebSocketMessage,
-} from '../home/types'
+  ActionsRow, StyledHomeTable,
+} from '../home/home.styles'
+import { ActionsButton, ResourceHeader } from '../home/show.styles'
+import { HomeScope, IFilter, IMeta, KeyVal, NOTIFICATION_ACTION, Notification, WEBSOCKET_MESSSAGE_TYPE, WebSocketMessage } from '../home/types'
 import { useList } from '../home/useList'
 import { usePropertiesQuery } from '../home/usePropertiesQuery'
 import { ExecutionSubTable } from './ExecutionSubTable'
@@ -104,13 +97,13 @@ export const ExecutionList = ({ homeScope, spaceId }: { homeScope?: HomeScope; s
   }, [lastJsonMessage])
 
   const selectedFileObjects = getSelectedObjectsFromIndexes(selectedIndexes, data?.jobs)
-  const actions = useExecutionActions({ homeScope, selectedItems: selectedFileObjects, resourceKeys: ['jobs'] })
+  const actions = useExecutionActions({ homeScope, selectedItems: selectedFileObjects, resourceKeys: ['jobs']})
 
   if (error) return <div>Error! {JSON.stringify(error)}</div>
 
   return (
     <ErrorBoundary>
-      <div>
+      <ResourceHeader>
         <ActionsRow>
           <div />
           <Dropdown
@@ -127,7 +120,7 @@ export const ExecutionList = ({ homeScope, spaceId }: { homeScope?: HomeScope; s
             )}
           </Dropdown>
         </ActionsRow>
-      </div>
+      </ResourceHeader>
 
       <ExecutionsListTable
         isAdmin={isAdmin}

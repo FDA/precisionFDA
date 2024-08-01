@@ -12,7 +12,7 @@ import { getSelectedObjectsFromIndexes, toArrayFromObject } from '../../utils/ob
 import { useAuthUser } from '../auth/useAuthUser'
 import { ActionsDropdownContent } from '../home/ActionDropdownContent'
 import { ActionsRow, QuickActions, StyledHomeTable } from '../home/home.styles'
-import { ActionsButton } from '../home/show.styles'
+import { ActionsButton, ResourceHeader } from '../home/show.styles'
 import { IFilter, IMeta, KeyVal, HomeScope } from '../home/types'
 import { useList } from '../home/useList'
 import { usePropertiesQuery } from '../home/usePropertiesQuery'
@@ -89,7 +89,7 @@ export const AppList = ({ homeScope, spaceId }: { homeScope?: HomeScope, spaceId
 
   return (
     <>
-      <div>
+      <ResourceHeader>
         <ActionsRow>
           <QuickActions>
             {homeScope === 'me' && (
@@ -136,7 +136,7 @@ export const AppList = ({ homeScope, spaceId }: { homeScope?: HomeScope, spaceId
             )}
           </Dropdown>
         </ActionsRow>
-      </div>
+      </ResourceHeader>
 
       <AppsListTable
         isAdmin={isAdmin}

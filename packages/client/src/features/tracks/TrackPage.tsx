@@ -2,7 +2,7 @@ import React from 'react'
 import { useParams } from 'react-router-dom'
 import styled from 'styled-components'
 import { theme } from '../../styles/theme'
-import { Header, HomeLoader, Title } from '../home/show.styles'
+import { ResourceHeader, HomeLoader, Title } from '../home/show.styles'
 import {
   EntityIcon,
   NotFoundEntity,
@@ -16,7 +16,7 @@ import {
 } from './TrackProvenanceContent'
 import { useTrackProvenanceQuery } from './useTrackProvenanceQuery'
 
-const PageHeader = styled(Header)`
+const PageHeader = styled(ResourceHeader)`
   padding: 20px 16px;
   background-color: #f4f8fd;
   border-bottom: 1px solid #e3edfa;
