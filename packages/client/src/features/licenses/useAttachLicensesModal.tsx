@@ -93,6 +93,7 @@ export function useAttachLicensesModal<
 
   const modalComp = isShown && (
     <ModalNext
+      id="modal-licenses-attach"
       data-testid="modal-licenses-attach"
       headerText="Select a license"
       isShown={isShown}

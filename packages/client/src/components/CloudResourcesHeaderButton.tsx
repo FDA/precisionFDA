@@ -1,6 +1,6 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
-import { HeaderButton } from '../features/home/show.styles'
+import { StyledCloudResourcesHeaderButton } from '../features/home/show.styles'
 import { CloudResourcesConditionType, useCloudResourcesCondition } from '../hooks/useCloudResourcesCondition'
 
 /** TODO after moving all href targets to React switch to Link for everything */
@@ -15,21 +15,21 @@ type Props = {
 export const getAllowedButton = (children: React.ReactNode, href: string, isLinkDisabled?: boolean, asReactLink?: boolean) =>
   asReactLink ?
     (<Link to={href} >
-      <HeaderButton disabled={isLinkDisabled}>
+      <StyledCloudResourcesHeaderButton disabled={isLinkDisabled}>
         {children}
-      </HeaderButton>
+      </StyledCloudResourcesHeaderButton>
     </Link>) :
-    (<HeaderButton as="a" href={href} type="primary" disabled={isLinkDisabled}>
+    (<StyledCloudResourcesHeaderButton as="a" href={href} type="primary" disabled={isLinkDisabled}>
       {children}
-    </HeaderButton>)
+    </StyledCloudResourcesHeaderButton>)
 
 export const CloudResourcesHeaderButton = ({ children, href, isLinkDisabled, conditionType, asReactLink }: Props) => {
   const { isAllowed, onViolation } = useCloudResourcesCondition(conditionType)
   return (isAllowed ?
     getAllowedButton(children, href, isLinkDisabled, asReactLink)
     : (
-      <HeaderButton onClick={onViolation} >
+      <StyledCloudResourcesHeaderButton onClick={onViolation} >
         {children}
-      </HeaderButton>
+      </StyledCloudResourcesHeaderButton>
     ))
 }

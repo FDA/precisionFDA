@@ -17,7 +17,7 @@ import {
   QuickActions,
   StyledHomeTable,
 } from '../home/home.styles'
-import { ActionsButton } from '../home/show.styles'
+import { ActionsButton, ResourceHeader } from '../home/show.styles'
 import { IFilter, IMeta, KeyVal, HomeScope } from '../home/types'
 import { useList } from '../home/useList'
 import { usePropertiesQuery } from '../home/usePropertiesQuery'
@@ -89,7 +89,7 @@ export const WorkflowList = ({
 
   return (
     <ErrorBoundary>
-      <div>
+      <ResourceHeader>
         <ActionsRow>
           <QuickActions>
             {homeScope === 'me' && (
@@ -131,7 +131,7 @@ export const WorkflowList = ({
             )}
           </Dropdown>
         </ActionsRow>
-      </div>
+      </ResourceHeader>
 
       <WorkflowListTable
         isAdmin={isAdmin}

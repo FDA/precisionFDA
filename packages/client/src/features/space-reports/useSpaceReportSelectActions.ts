@@ -4,7 +4,7 @@ import { ActionFunctionsType } from '../home/types'
 import { ISpaceReport, SpaceReportState } from './space-report.types'
 import { useDeleteSpaceReportModal } from './useDeleteSpaceReportModal'
 
-export enum AppActions {
+export enum ReportActions {
   'Delete' = 'Delete',
 }
 
@@ -51,5 +51,5 @@ export const userReportSelectActions = ({
       modal: deleteModal,
       showModal: isShownDeleteModal,
     },
-  } satisfies ActionFunctionsType<AppActions>
+  } satisfies ActionFunctionsType<ReportActions>
 }

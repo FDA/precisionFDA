@@ -16,22 +16,21 @@ import { deleteAssetsRequest } from './assets.api'
 import { IAsset } from './assets.types'
 import { useEditPropertiesModal } from '../actionModals/useEditPropertiesModal'
 
-export enum AssetActions {
-  'Rename' = 'Rename',
-  'Download' = 'Download',
-  'Feature' = 'Feature',
-  'Unfeature' = 'Unfeature',
-  'Make Public' = 'Make Public',
-  'Attach to...' = 'Attach to...',
-  'Delete' = 'Delete',
-  'Attach License' = 'Attach License',
-  'Detach License' = 'Detach License',
-  'Request license approval' = 'Request license approval',
-  'Accept License' = 'Accept License',
-  'Edit tags' = 'Edit tags',
-  'Edit properties' = 'Edit properties',
-  'Comments' = 'Comments',
-}
+export type AssetActions =
+  'Rename' |
+  'Download' |
+  'Feature' |
+  'Unfeature' |
+  'Make Public' |
+  'Attach to...' |
+  'Delete' |
+  'Attach License' |
+  'Detach License' |
+  'Request license approval' |
+  'Accept License' |
+  'Edit tags' |
+  'Edit properties' |
+  'Comments'
 
 type AssetActionArgs = {
   homeScope?: HomeScope,

@@ -13,16 +13,8 @@ import { DEFAULT_RECONNECT_ATTEMPTS, DEFAULT_RECONNECT_INTERVAL, getNodeWsUrl, S
 import { getSelectedObjectsFromIndexes } from '../../utils/object'
 import { ActionsDropdownContent } from '../home/ActionDropdownContent'
 import { ActionsRow, QuickActions, StyledHomeTable } from '../home/home.styles'
-import { ActionsButton } from '../home/show.styles'
-import {
-  IFilter,
-  IMeta,
-  KeyVal,
-  Notification,
-  NOTIFICATION_ACTION,
-  WEBSOCKET_MESSSAGE_TYPE,
-  WebSocketMessage,
-} from '../home/types'
+import { ActionsButton, ResourceHeader } from '../home/show.styles'
+import { IFilter, IMeta, KeyVal, Notification, NOTIFICATION_ACTION, WEBSOCKET_MESSSAGE_TYPE, WebSocketMessage } from '../home/types'
 import { useList } from '../home/useList'
 import { ISpaceReport } from './space-report.types'
 import { fetchReports } from './space-reports.api'
@@ -128,7 +120,7 @@ export const SpaceReportList = ({ scope }: { scope: string }) => {
 
   return (
     <>
-      <div>
+      <ResourceHeader>
         <ActionsRow>
           <QuickActions>
             <Button variant="primary" disabled={query.isLoading} onClick={() => setGenerateModal(true)}>
@@ -139,7 +131,7 @@ export const SpaceReportList = ({ scope }: { scope: string }) => {
             {dropdownProps => <ActionsButton {...dropdownProps} active={dropdownProps.isActive} />}
           </Dropdown>
         </ActionsRow>
-      </div>
+      </ResourceHeader>
 
       <SpaceReportListTable
         reports={query.data?.reports ?? []}

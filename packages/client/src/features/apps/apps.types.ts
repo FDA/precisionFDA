@@ -4,19 +4,28 @@ import { CreateAppPayload } from './apps.api'
 import { FileUid } from '../files/files.types'
 import { IAccessibleFile } from '../databases/databases.api'
 
-export enum AppActions {
-  'Run' = 'Run',
-  'Track' = 'Track',
-  'Edit' = 'Edit',
-  'Fork' = 'Fork',
-  'Export to' = 'Export to',
-  'Make public' = 'Make public',
-  'Feature' = 'Feature',
-  'Unfeature' = 'Unfeature',
-  'Delete' = 'Delete',
-  'Copy to space' = 'Copy to space',
-  'Attach to...' = 'Attach to...',
-}
+export type AppActions = 
+  'Run' |
+  'Run batch' |
+  'Track' |
+  'Edit' |
+  'Fork' |
+  'Export to' |
+  'Make public' |
+  'Feature' |
+  'Unfeature' |
+  'Delete' |
+  'Copy to space' |
+  'Copy to My Home (private)' |
+  'Attach to...' |
+  'Comments' |
+  'Set as Challenge App' |
+  'Edit tags' |
+  'Edit properties' |
+  'Add to Comparators' |
+  'Set this app as comparison default' |
+  'Remove from Comparators'
+
 
 export enum PricingMap {
   'baseline-2' = 0.286,
@@ -51,29 +60,7 @@ export interface InputSpec extends IOSpec {
   choices: string[] | null
 }
 
-export interface Links {
-  show: string;
-  user: string;
-  jobs: string;
-  track: string;
-  fork: string;
-  forked_from: string;
-  export: string;
-  cwl_export: string;
-  wdl_export: string;
-  copy: string;
-  attach_to: string;
-  delete: string;
-  edit: string;
-  edit_tags: string;
-  assign_app: string;
-  publish: string;
-  run_job: string;
-  batch_run: string;
-  space?: string;
-  feature?: string;
-  comments?: string;
-}
+type Links = Record<string, string>
 
 export interface IApp {
   id: number;
@@ -99,7 +86,7 @@ export interface IApp {
   featured: boolean;
   active: boolean;
   /** @deprecated create links from client side */
-  links: Links | any;
+  links: Links;
   tags: string[];
   properties: {
     [key: string]: string;
@@ -108,13 +95,14 @@ export interface IApp {
   forked_from?: string;
 }
 
-export interface Revision {
+export interface AppRevision {
   id: number;
   revision: number;
   tag_list: [];
   title: string;
   uid: string;
   version: string;
+  deleted: boolean;
 }
 
 export interface OutputSpec extends IOSpec {
@@ -139,7 +127,7 @@ export interface AppMeta {
   jobs: [];
   links: Links;
   notes: []
-  revisions: Revision[];
+  revisions: AppRevision[];
   spec: AppSpec;
 }
 

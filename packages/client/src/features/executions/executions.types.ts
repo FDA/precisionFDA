@@ -3,58 +3,19 @@ import { RESOURCE_TYPES } from '../admin/users/types'
 import { FileOrg, FileUser, FormInput } from '../apps/apps.types'
 import { ServerScope } from '../home/types'
 
-export enum ExecutionActions {
-  'Run' = 'Run',
-  'Run batch' = 'Run batch',
-  'Track' = 'Track',
-  'Edit' = 'Edit',
-  'Fork' = 'Fork',
-  'Export to' = 'Export to',
-  'Make public' = 'Make public',
-  'Delete' = 'Delete',
-  'Copy to space' = 'Copy to space',
-  'Attach to...' = 'Attach to...',
-}
-
-export interface Links {
-  app?: string
-  show?: string
-  user?: string
-  attach_to?: string
-  publish?: string
-  copy?: string
-  run_workflow?: string
-  run_job?: string
-  batch_run_workflow?: string
-  edit?: string
-  fork?: string
-  log?: string
-  track?: string
-  feature?: string
-  license?: string
-  cwl_export?: string
-  wdl_export?: string
-  set_tags?: string
-  set_tags_target?: string
-  delete?: string
-  space?: string
-  terminate?: string
-  open_external?: string
-  workflow?: string
-}
+type Links = Record<string, string>
 
 export type RunInputs = { [key: string]: FormInput }
-
 export interface RunOutputs {}
 
-export interface RunDataUpdates {
+interface RunDataUpdates {
   output_folder_path: string
   run_instance_type: (typeof RESOURCE_TYPES)[number]
   run_inputs: RunInputs
   run_outputs: RunOutputs | null
 }
 
-export interface Links2 {
+interface Links2 {
   show: string
   user: string
   workflow: string

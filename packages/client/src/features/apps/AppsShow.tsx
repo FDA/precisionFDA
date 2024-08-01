@@ -20,7 +20,7 @@ import { ActionsDropdownContent } from '../home/ActionDropdownContent'
 import { StyledBackLink, StyledRight } from '../home/home.styles'
 import {
   ActionsButton,
-  Header,
+  ResourceHeader,
   HeaderLeft,
   HomeLoader,
   MetadataItem,
@@ -145,17 +145,6 @@ const DetailActionsDropdown = (
 
   return (
     <>
-      <CloudResourcesHeaderButton
-        href={`${getBasePath(spaceId)}/apps/${app.uid}/jobs/new`}
-        isLinkDisabled={!app.links.run_job}
-        conditionType='all'
-        asReactLink
-      >
-        <>
-          Run App&nbsp;
-          <Pill>rev{app.revision}</Pill>
-        </>
-      </CloudResourcesHeaderButton>
       <Dropdown
         trigger="click"
         content={<ActionsDropdownContent actions={actions} />}
@@ -219,11 +208,11 @@ export const AppsShow = ({ spaceId, emitScope, homeScope }: { homeScope?: HomeSc
         Back to Apps
       </StyledBackLink>
       <Topbox>
-        <Header>
+        <ResourceHeader>
           <HeaderLeft>
             <Title>
               <CubeIcon height={20} />
-              &nbsp;<span data-testid="app-title">{appTitle}</span>
+              <span data-testid="app-title">{appTitle}</span>
               {meta.comparator && (
                 <HomeLabel
                   value="Comparator"
@@ -254,17 +243,25 @@ export const AppsShow = ({ spaceId, emitScope, homeScope }: { homeScope?: HomeSc
           </HeaderLeft>
           <div>
             <StyledRight>
-              {app &&
-                <DetailActionsDropdown
-                  homeScope={homeScope}
-                  spaceId={spaceId}
-                  app={app}
-                  comparatorLinks={meta.links?.comparators ?? []}
-                  challenges={meta.challenges} />
-              }
+              <CloudResourcesHeaderButton
+                href={`${getBasePath(spaceId)}/apps/${app.uid}/jobs/new`}
+                isLinkDisabled={!app.links.run_job}
+                conditionType='all'
+                asReactLink
+              >
+                Run App
+                <Pill>rev{app.revision}</Pill>
+              </CloudResourcesHeaderButton>
+              <DetailActionsDropdown
+                homeScope={homeScope}
+                spaceId={spaceId}
+                app={app}
+                comparatorLinks={meta.links?.comparators ?? []}
+                challenges={meta.challenges}
+              />
             </StyledRight>
           </div>
-        </Header>
+        </ResourceHeader>
 
         {renderOptions(app, meta, homeScope)}
         {app.tags.length > 0 && (
