@@ -1,6 +1,6 @@
 import styled, { css } from 'styled-components'
 import { TransparentButton } from '../../components/Button'
-import { compactScrollBar, compactScrollBarV2 } from '../../components/Page/styles'
+import { compactScrollBarV2 } from '../../components/Page/styles'
 import { Svg } from '../../components/icons/Svg'
 import { fontSize, fontWeight, sizing } from '../../styles/theme'
 
@@ -139,9 +139,10 @@ export const StyledForm = styled.form`
   min-height: 120px;
 `
 export const ModalScroll = styled.div`
-  max-height: 50vh;
+  flex: 1;
   overflow-y: scroll;
-  ${compactScrollBar}
+  max-height: var(--modal-max-height, 50vh);
+  ${compactScrollBarV2}
 `
 
 export const StyledModalScroll = styled(ModalScroll)`
@@ -151,6 +152,9 @@ export const StyledModalScroll = styled(ModalScroll)`
 export const StyledModalContent = styled.div`
   padding: 1rem;
   max-width: 600px;
+`
+export const ModalContentPadding = styled.div`
+  padding: 12px;
 `
 
 export const ModalLoaderWrapper = styled.div`

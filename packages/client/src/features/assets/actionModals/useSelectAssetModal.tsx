@@ -165,7 +165,7 @@ export const useSelectAssetModal = (
 
   const assets = assetsData ?? []
 
-  const modalComp = isShown && (
+  const modalComp = (
     <ModalNext
       id="select-asset-modal"
       headerText={title}

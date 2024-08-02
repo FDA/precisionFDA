@@ -23,6 +23,7 @@ export const Button = styled.button.attrs(({ disabled }) => ({ 'aria-disabled': 
   border-radius: 3px;
   border-color: var(--tertiary-300);
   background: var(--tertiary-100);
+  transition: all 0.1s;
 
   &:active {
     box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.2);
@@ -98,6 +99,7 @@ export const Button = styled.button.attrs(({ disabled }) => ({ 'aria-disabled': 
     background-color: var(--tertiary-200);
     &:hover {
       filter: initial;
+      cursor: not-allowed;
     }
     &:active {
       box-shadow: initial;

@@ -52,7 +52,7 @@ export function useDeleteSpaceReportModal({
     mutation.mutateAsync(momoSelected.map(s => s.id))
   }
 
-  const modalComp = isShown && (
+  const modalComp = (
     <ModalNext
       id="space-report-delete-modal"
       isShown={isShown}

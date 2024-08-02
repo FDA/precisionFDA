@@ -1,5 +1,5 @@
 import { createGlobalStyle } from 'styled-components'
-import { colors, theme } from './theme'
+import { colors, sizing, theme } from './theme'
 import { colorvars, themes } from './variables'
 import { compactScrollBarV2 } from '../components/Page/styles'
 
@@ -98,6 +98,38 @@ const GlobalStyle = createGlobalStyle<{railsAlertHeight: number}>`
   }
 
   ::-webkit-scrollbar-corner { background: inherit; }
+
+  &&&.Toastify__toast-container {
+  }
+
+  .Toastify__toast-body {
+    padding: 0px;
+    width: 100%;
+    font-weight: 400;
+    font-size: 14px;
+    margin: auto 12px !important;
+    min-width: 400px !important;
+    max-width: 600px !important;
+    
+    > div {
+      display: flex;
+    }
+  }
+
+  .Toastify__toast--error {
+    border: 2px solid ${colors.primaryRed} !important;
+    border-radius: ${sizing.modalBorderRadius} !important;
+  }
+
+  .Toastify__toast--success {
+    border: 2px solid ${colors.highlightGreen} !important;
+    border-radius: ${sizing.modalBorderRadius} !important;
+  }
+
+  .Toastify__toast--warning {
+    border: 2px solid ${colors.primaryYellow}  !important;
+    border-radius: ${sizing.modalBorderRadius} !important;
+  }
 `
 
 export const ScrollableMainGlobalStyles = createGlobalStyle`

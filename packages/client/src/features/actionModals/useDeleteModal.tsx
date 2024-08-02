@@ -47,7 +47,7 @@ export function useDeleteModal<
     mutation.mutateAsync(momoSelected.map(s => s.id))
   }
 
-  const modalComp = isShown && (
+  const modalComp = (
     <ModalNext
       id="modal-resource-delete"
       data-test-id="modal-resource-delete"

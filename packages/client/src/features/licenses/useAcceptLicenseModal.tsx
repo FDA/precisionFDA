@@ -52,7 +52,7 @@ export function useAcceptLicenseModal<
     setShowModal(false)
   }
 
-  const modalComp = isShown && (
+  const modalComp = (
     <Modal
       data-testid="modal-accept-licenses"
       headerText={'Accept License'}

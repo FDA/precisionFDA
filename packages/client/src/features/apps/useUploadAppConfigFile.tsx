@@ -148,7 +148,7 @@ export function useUploadAppConfigFile({
   const { isShown, setShowModal } = useModal()
   const id = `modal-${filetype}-import`
 
-  const modalComp = isShown && (
+  const modalComp = (
     <ModalNext
       id={id}
       data-testid={id}

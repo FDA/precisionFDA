@@ -2,7 +2,7 @@
 import { QueryClientProvider } from '@tanstack/react-query'
 import React, { useEffect, useState } from 'react'
 import { Navigate, Outlet, RouterProvider, createBrowserRouter } from 'react-router-dom'
-import { Slide, toast } from 'react-toastify'
+import { Slide, ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import { QueryParamProvider } from 'use-query-params'
 import { ReactRouter6Adapter } from 'use-query-params/adapters/react-router-6'
@@ -18,7 +18,6 @@ import { useModal } from './features/modal/useModal'
 import { LayoutLoader } from './layouts/UserLayout'
 import NoFoundPage from './pages/NoFoundPage'
 import GlobalStyle from './styles/global'
-import { StyledToastContainer } from './styles/toast.styles'
 import { ThemeProvider } from './utils/ThemeContext'
 import queryClient from './utils/queryClient'
 import { TrackPage } from './features/tracks/TrackPage'
@@ -48,7 +47,6 @@ const RootComponent = () => {
   const authModal = useModal()
   const expiringSessionModal = useModal()
   const [railsAlertHeight, setRailsAlertHeight] = useState(0)
-  toast.configure({ limit: 5 })
 
   useEffect(() => {
     // Calculate the height of the rails-alert element
@@ -76,12 +74,13 @@ const RootComponent = () => {
                     <Outlet />
                   </React.Suspense>
                 </QueryParamProvider>
-                <StyledToastContainer
+                <ToastContainer
                   position="top-right"
                   transition={Slide}
                   hideProgressBar
                   pauseOnHover
-                  />
+                  limit={5}
+                />
                 <AuthModal {...authModal} />
                 <ExpiringSessionModal modal={expiringSessionModal} />
               </NavFavoritesProvider>

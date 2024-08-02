@@ -142,7 +142,7 @@ export const useLockUnlockFileModal = ({
     return downloadStatus !== 'success' || mutation.status !== 'idle' || !data?.length
   }
 
-  const modalComp = isShown && (
+  const modalComp = (
     <ModalNext
       id="modal-files-lock-unlock"
       data-testid="modal-files-lock-unlock"

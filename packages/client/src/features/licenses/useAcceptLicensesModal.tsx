@@ -153,7 +153,7 @@ export const useAcceptLicensesModal = () => {
     setSelectedLicenses([])
   }
 
-  const modalComp = isShown && (
+  const modalComp = (
     <Modal
       headerText="Accept Licenses"
       isShown={isShown}

@@ -92,9 +92,18 @@ export function useExportToModal<
     } as ExportType,
   ].filter(e => e.link !== undefined)
 
-  const modalComp = isShown && (
-    <ModalNext id="modal-export-to" data-testid="modal-export-to" isShown={isShown} hide={() => setShowModal(false)}>
-      <ModalHeaderTop disableClose={false} headerText="Export to" hide={() => setShowModal(false)} />
+  const modalComp = (
+    <ModalNext
+      id="modal-export-to"
+      data-testid="modal-export-to"
+      isShown={isShown}
+      hide={() => setShowModal(false)}
+    >
+      <ModalHeaderTop
+        disableClose={false}
+        headerText="Export to"
+        hide={() => setShowModal(false)}
+      />
       <ModalScroll>
         <StyledExportTo>
           <ul>

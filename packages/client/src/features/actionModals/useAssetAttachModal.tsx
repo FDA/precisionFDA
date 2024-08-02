@@ -210,7 +210,7 @@ export function useAssetAttachModal(
 ) {
   const { isShown, setShowModal } = useModal()
 
-  const modalComp = isShown && (
+  const modalComp = (
     <AssetAttachModal
       onChange={onChange}
       isShown={isShown}

@@ -48,7 +48,7 @@ export function useMethodModal<T extends { dxid: string; name: string }>({
   }
   const methodText = method.charAt(0).toUpperCase() + method.slice(1)
 
-  const modalComp = isShown && (
+  const modalComp = (
     <Modal
       data-testid="modal-dbcluster-delete"
       headerText={`${methodText} ${momoSelected.length} ${pluralize('item', momoSelected.length)}`}
