@@ -41,7 +41,7 @@ export const useExportInputsModal = ({ showCopyButton }: { showCopyButton: boole
     }
   }
 
-  const modalComp = isShown && (
+  const modalComp = (
     <ModalNext
       id="modal-files-add-folder"
       data-testid="modal-files-add-folder"

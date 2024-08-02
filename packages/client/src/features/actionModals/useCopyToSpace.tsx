@@ -168,7 +168,7 @@ export function useCopyToSpaceModal<T extends { id: string | number }>({
   const { isShown, setShowModal } = useModal()
   const momoSelected = useMemo(() => selected, [isShown])
 
-  const modalComp = isShown && (
+  const modalComp = (
     <ModalNext
       id={`modal-${resource}-copytospace`}
       data-testid={`modal-${resource}-copytospace`}

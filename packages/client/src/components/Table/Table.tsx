@@ -144,6 +144,7 @@ export interface ITable<T extends object = {}> extends TableOptions<T> {
   showTableTools?: boolean
   showPagination?: boolean
   isColsResizable?: boolean
+  displayColFiller?: boolean
   isSelectable?: boolean
   selectedRows?: Record<IdType<T>, boolean>
   setSelectedRows?: (rowIds: Record<IdType<T>, boolean>) => void
@@ -199,6 +200,7 @@ export default function Table<T extends object>(props: PropsWithChildren<ITable<
     shouldAllowScrollbar,
     enableColumnSelect = false,
     hiddenColumns,
+    displayColFiller = true,
     saveHiddenColumns = () => {},
   } = props
   const defaultColumn = {
@@ -342,6 +344,8 @@ export default function Table<T extends object>(props: PropsWithChildren<ITable<
     return [...standardColumns, ...propColums]
   }
 
+  const colFiller = displayColFiller && <div className="th" style={{ width: spacerWidth - 10, minWidth: 50 }} />
+ 
   return (
     <StyledTable data-testid="pfda-table">
       <ReactTableStyles $shouldFillWidth={fillWidth} $shouldAllowScrollbar={shouldAllowScrollbar}>
@@ -373,7 +377,7 @@ export default function Table<T extends object>(props: PropsWithChildren<ITable<
                   </div>
                 )
               })}
-              <div className="th" style={{ width: spacerWidth, minWidth: 50 }} />
+              {colFiller}
             </div>
 
             {isFilterable && (
@@ -385,8 +389,8 @@ export default function Table<T extends object>(props: PropsWithChildren<ITable<
                     <div {...column.getHeaderProps()} className={classes}>
                       {column.canFilter ? column.render('Filter') : null}
                     </div>
-                  )
-                })}
+                )})}
+                {colFiller}
               </div>
             )}
 
@@ -412,8 +416,8 @@ export default function Table<T extends object>(props: PropsWithChildren<ITable<
                           >
                             {cell.render('Cell')}
                           </div>
-                        )
-                      })}
+                      )})}
+                      {colFiller}
                     </div>
                     {isExpandable && r.isExpanded ? subcomponent && subcomponent(r) : null}
                   </React.Fragment>

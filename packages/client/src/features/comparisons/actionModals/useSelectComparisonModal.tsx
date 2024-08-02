@@ -167,7 +167,7 @@ export const useSelectComparisonModal = (
 
   const comparisons = comparisonsData ?? []
 
-  const modalComp = isShown && (
+  const modalComp = (
     <ModalNext
       id="select-comparison-modal"
       headerText={title}

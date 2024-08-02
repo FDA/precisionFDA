@@ -61,14 +61,15 @@ const Li = styled.li<{$active: boolean}>`
       background-color: var(--c-dropdown-active-bg);
     }
   `}
-  a {
-    color: var(--base);
-  }
 `
 export const StyledLink = styled(Link)`
   display: flex;
   justify-content: space-between;
   padding: 3px 20px;
+  color: var(--base);
+  &:hover {
+    color: var(--base);
+  }
 `
 
 const Ol = styled.ol`
@@ -84,7 +85,6 @@ const Ol = styled.ol`
   border: 1px solid rgba(0,0,0,0.15);
   border-radius: 3px;
   box-shadow: 0 6px 12px rgb(0 0 0 / 18%);
-  background-clip: padding-box;
 `
 
 export const RevisionDropdown = ({

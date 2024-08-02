@@ -53,7 +53,7 @@ export function useGenerateSpaceReportModal({ scope, onClose }: { scope: string;
     setOptions(undefined)
   }, [reportFormat])
 
-  const modalComp = isShown && (
+  const modalComp = (
     <ModalNext id="space-report-generate-modal" isShown={isShown} hide={() => close()}>
       <ModalHeaderTop disableClose={false} headerText="Generate space report" hide={() => setShowModal(false)} />
       <ModalScroll>

@@ -204,7 +204,7 @@ export function useAttachToChallengeModal<T extends { id: string | number }>({
   const { isShown, setShowModal } = useModal()
   const momoSelected = useMemo(() => selected, [isShown])
 
-  const modalComp = isShown && (
+  const modalComp = (
     <ModalNext
       data-testid={`modal-${resource}-attach-to-challenge`}
       isShown={isShown}

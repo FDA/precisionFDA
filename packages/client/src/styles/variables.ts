@@ -165,6 +165,8 @@ export const themes = css`
   --background-shaded: var(--tertiary-200); // shadedBG
   --c-layout-border: var(--tertiary-300); //borderDefault
   --c-layout-border-200: var(--tertiary-200);
+  --c-dropdown-menu-border: var(--c-layout-border-200);
+  --c-dropdown-menu-text-disabled: #939a9d;
 
   --c-text-700: var(--tertiary-700); //textDarkGrey
   --c-text-600: var(--tertiary-600);

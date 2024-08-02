@@ -180,12 +180,13 @@ export const useFileUploadModal = ({
     }
   }
 
-  const modalComp = isShown && (
+  const modalComp = (
     <ModalNext
       id="modal-files-upload"
       data-testid="modal-files-upload"
       isShown={Boolean(isShown)}
       hide={handleClose}
+      variant='medium'
     >
       <ModalHeaderTop
         headerText={`Upload files to ${folderId ? 'folder' : 'root'}`}

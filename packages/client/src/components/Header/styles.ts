@@ -173,14 +173,14 @@ export const StyledHeaderDropItem = styled(HeaderItem)`
   }
   `
 
-export const IconWrap = styled.div<{marginBottom?: number}>`
+export const IconWrap = styled.div<{ $marginBottom?: number}>`
   height: 16px;
   display: flex;
   align-items: center;
   
-  ${({ marginBottom }) => marginBottom && css`
+  ${({ $marginBottom }) => $marginBottom && css`
   svg {
-    margin-bottom: ${marginBottom}px;
+    margin-bottom: ${$marginBottom}px;
   }
   `}
   `
@@ -213,14 +213,12 @@ export const StyledDropMenuLinks = styled.div`
   display: flex;
   flex-direction: column;
   color: var(--c-text-700);
-  border: 1px solid rgba(0,0,0,0.15);
   border-radius: 3px;
-  box-shadow: 0 6px 12px rgba(0,0,0,0.175);
   font-size: 14px;
   `
 
 export const StyledDivider = styled.div`
-  border-bottom: 1px solid var(--c-layout-border);
+  border-bottom: 1px solid var(--c-layout-border-200);
   padding-top: 6px;
   margin-bottom: 6px;
   `
@@ -239,6 +237,9 @@ const linkCss = css`
 export const StyledLink = styled.a`
   ${linkCss}
   cursor: pointer;
+  &:hover {
+    color: inherit;
+  }
   `
 
 export const StyledOnClickModalDiv = styled.div`

@@ -159,7 +159,7 @@ export function useComparatorModal<
   }
 
 
-  const modalComp = isShown && (
+  const modalComp = (
     <Modal
       data-testid={`modal-comparator-${actionType}`}
       headerText={`Attention!`}

@@ -262,7 +262,7 @@ export const DataPortalResources = ({
 export const useDataPortalResourceModal = () => {
   const { isShown, setShowModal } = useModal()
 
-  const modalComp = isShown && (
+  const modalComp = (
     <ModalNext
       id="modal-files-add-folder"
       data-testid="modal-files-add-folder"
