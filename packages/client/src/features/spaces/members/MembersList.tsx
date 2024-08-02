@@ -2,8 +2,12 @@ import React, { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import styled from 'styled-components'
 import { RadioButtonGroup } from '../../../components/form/RadioButtonGroup'
+import { InputText } from '../../../components/InputText'
 import { Loader } from '../../../components/Loader'
+import { NoContent } from '../../../components/Public/styles'
 import { ErrorBoundary } from '../../../utils/ErrorBoundry'
+import { AlertText } from '../../data-portals/details/DataPortalNotFound'
+import { SearchBar } from '../../resources/styles'
 import { ISpace, SideRole } from '../spaces.types'
 import { MemberCard } from './MemberCard'
 import { spacesMembersListRequest } from './members.api'
@@ -17,8 +21,15 @@ const StyledMemberListPage = styled.div`
   padding: 32px;
   display: flex;
   flex-direction: column;
-  gap: 32px;
+  gap: 16px;
 `
+
+const SearchWrapper = styled.div`
+  display: flex;
+  align-items: flex-start;
+`
+
+
 const StyledMemberList = styled.div`
 display: flex;
 padding-left: 0px;
@@ -47,9 +58,20 @@ export const MembersList = ({ space }: { space: ISpace }) => {
     queryFn: () => spacesMembersListRequest({ spaceId: space.id, sideRole }),
   })
   const { modalComp, setShowModal } = useAddMembersModal({ spaceId: space.id })
-  const members = data?.space_memberships
+  const members = data?.space_memberships ?? []
   const canAddMember =
     space.type !== 'private_type' && space.type !== 'administrator'
+
+  const [searchQuery, setSearchQuery] = useState('')
+
+  // Filter members based on the search query
+  const filteredMembers = members.filter((member) =>
+    Object.entries(member)
+      .filter(([key, value]) => key !== 'to_roles' && value !== null && value !== undefined) // Exclude 'to_roles' and null/undefined values
+      .some(([key, value]) =>
+        value.toString().toLowerCase().includes(searchQuery.toLowerCase())
+      )
+  )
 
   return (
     <ErrorBoundary>
@@ -70,22 +92,33 @@ export const MembersList = ({ space }: { space: ISpace }) => {
 
           {space.updatable && canAddMember && (
             <AddButton variant='primary' type="button" onClick={() => setShowModal(true)}>
-              <PlusIcon height={12} />
+              <PlusIcon height={12}/>
               Add Members
             </AddButton>
           )}
+          <SearchWrapper>
+            <SearchBar>
+              <InputText placeholder="Search members..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
+              <Button type="button" onClick={() => setSearchQuery('')}>
+                Clear
+              </Button>
+            </SearchBar>
+          </SearchWrapper>
         </StyledButtonGroup>
 
         {isLoading && (
           <div>
             <div>Loading members...</div>
-            <Loader />
+            <Loader/>
           </div>
         )}
+
         <StyledMemberList>
-          {members &&
-            members.map(member => (
-              <MemberCard key={member.id} member={member} spaceId={space.id} />
+          { filteredMembers.length === 0 ?  <NoContent>
+            <AlertText>No members found</AlertText>
+          </NoContent> :
+            filteredMembers.map(member => (
+              <MemberCard key={member.id} member={member} spaceId={space.id}/>
             ))}
         </StyledMemberList>
       </StyledMemberListPage>
