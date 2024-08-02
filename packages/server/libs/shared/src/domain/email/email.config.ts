@@ -288,6 +288,7 @@ export enum EMAIL_TYPES {
   userDataConsistencyReport = 13,
   spaceDiscussion = 14,
   spaceCreated  = 15,
+  userInactivityAlert = 16,
 }
 
 export type EmailConfigItem = {

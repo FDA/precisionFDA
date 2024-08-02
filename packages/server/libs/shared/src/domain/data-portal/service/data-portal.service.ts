@@ -5,7 +5,6 @@ import { DataPortalRepository } from '@shared/domain/data-portal/data-portal.rep
 import { CreateDataPortalDTO } from '@shared/domain/data-portal/dto/CreateDataPortalDTO'
 import { CreateFileParamDTO } from '@shared/domain/data-portal/dto/CreateFileParamDTO'
 import { UpdateDataPortalDTO } from '@shared/domain/data-portal/dto/UpdateDataPortalDTO'
-import { UId } from '@shared/domain/entity/domain/uid'
 import { NotificationService } from '@shared/domain/notification/services/notification.service'
 import { Resource } from '@shared/domain/resource/resource.entity'
 import { Space } from '@shared/domain/space/space.entity'
@@ -21,24 +20,20 @@ import {
   NotFoundError,
   PermissionError,
 } from '@shared/errors'
-import { getLogger } from '@shared/logger'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { PlatformClient } from '@shared/platform-client'
 import { SCOPE } from '@shared/types/common'
 import { SPACE_MEMBERSHIP_ROLE } from '../../space-membership/space-membership.enum'
 import { CAN_EDIT_ROLES } from '../../space-membership/space-membership.helper'
-import { UserFileRepository } from '../../user-file/user-file.repository'
 import { FILE_STATE_DX } from '../../user-file/user-file.types'
 import { DataPortal } from '../data-portal.entity'
 import { DATA_PORTAL_MEMBER_ROLE } from '../data-portal.enum'
 import { CreateResourceResponse, DataPortalMemberParam, DataPortalParam } from './data-portal.types'
 
-const logger = getLogger('data-portal.service')
-
 @Injectable()
 export class DataPortalService {
   @ServiceLogger()
-  private readonly log: Logger
+  private readonly logger: Logger
 
   private URL_SLUG_MIN_LENGTH = 3
   private URL_SLUG_MAX_LENGTH = 50
@@ -65,7 +60,7 @@ export class DataPortalService {
   listResources = async (
     dataPortalIdentifier: string,
   ): Promise<{ id: number; name: string; url: string }[]> => {
-    logger.verbose(`Listing resources for portal identifier: ${dataPortalIdentifier}`)
+    this.logger.log(`Listing resources for portal identifier: ${dataPortalIdentifier}`)
 
     const dataPortal = await this.findPortalBySlugOrId(dataPortalIdentifier, {
       populate: ['resources.userFile', 'space.spaceMemberships'],
@@ -95,7 +90,7 @@ export class DataPortalService {
     input: CreateFileParamDTO,
     dataPortalIdentifier: string,
   ): Promise<CreateResourceResponse> => {
-    logger.verbose(`Creating resource for portal identifier: ${dataPortalIdentifier}`, input)
+    this.logger.log(`Creating resource for portal identifier: ${dataPortalIdentifier}`, input)
     const user = await this.em.findOneOrFail(
       User,
       { id: this.user.id },
@@ -122,8 +117,12 @@ export class DataPortalService {
   }
 
   removeResource = async (id: number) => {
-    logger.verbose(`Removing resource: ${id}`)
-    const resource = await this.em.findOneOrFail(Resource, { id: id })
+    this.logger.log(`Removing resource: ${id}`)
+    const resource = await this.em.findOneOrFail(
+      Resource,
+      { id: id },
+      { populate: ['userFile'] },
+    )
     const dataPortal = await this.em.findOneOrFail(
       DataPortal,
       { id: resource.dataPortal.id },
@@ -133,27 +132,15 @@ export class DataPortalService {
       throw new PermissionError(`Only roles ${this.editRolesText} can remove resources`)
     }
 
-    // TODO fix transaction work
-    await this.em.removeAndFlush(resource)
-    await this.userFileService.removeFile(resource.userFile.id)
-  }
+    this.logger.log(
+      `Deleting resource with id: ${resource.id}, userFile.uid: ${resource.userFile.getEntity().uid}`,
+    )
 
-  private getUserFileUrl = async (uid: UId): Promise<string> => {
-    logger.verbose(`Getting url for id: ${uid}`)
-    const fileRepo = this.em.getRepository(UserFile) as UserFileRepository
-    const userFile = await fileRepo.findFileWithUid(uid)
-
-    if (!userFile) {
-      throw new NotFoundError(`Cannot find card image id ${uid}`)
-    }
-    const link = await this.platformClient.fileDownloadLink({
-      fileDxid: userFile.dxid,
-      filename: userFile.name,
-      project: userFile.project,
-      duration: 9_999_999_999,
+    await this.em.transactional(async () => {
+      await this.em.removeAndFlush(resource)
+      this.logger.log(`Deleting user file with uid: ${resource.userFile.getEntity().uid}`)
+      await this.userFileService.removeFile(resource.userFile.id)
     })
-
-    return link.url
   }
 
   private createFile = async (
@@ -186,7 +173,7 @@ export class DataPortalService {
   }
 
   createCardImage = async (input: CreateFileParamDTO, dataPortalId: number): Promise<UserFile> => {
-    logger.verbose('Creating card image', input)
+    this.logger.log('Creating card image', input)
     const dataPortal = await this.em.findOneOrFail(
       DataPortal,
       { id: dataPortalId },
@@ -206,7 +193,7 @@ export class DataPortalService {
   }
 
   private hasSiteAdminRole = async (userId: number): Promise<boolean> => {
-    logger.verbose(`Verifying site admin role for id ${userId}`)
+    this.logger.log(`Verifying site admin role for id ${userId}`)
     const user = await this.em.findOneOrFail(
       User,
       { id: userId },
@@ -237,7 +224,7 @@ export class DataPortalService {
       urlSlug.length > this.URL_SLUG_MAX_LENGTH ||
       !urlSlug.match(this.URL_SLUG_REGEXP)
     ) {
-      logger.warn(
+      this.logger.warn(
         `Cannot create data portal with slug ${urlSlug} because it doesn't match the requirements: regexp ${this.URL_SLUG_REGEXP}, length ${this.URL_SLUG_MIN_LENGTH} - ${this.URL_SLUG_MAX_LENGTH}`,
       )
       throw new DataPortalUrlSlugFormatError(
@@ -250,14 +237,14 @@ export class DataPortalService {
 
     // Check url slug uniqueness
     if (await this.urlSlugExists(urlSlug)) {
-      logger.warn(`Cannot create data portal with slug '${urlSlug}' because it already exists`)
+      this.logger.warn(`Cannot create data portal with slug '${urlSlug}' because it already exists`)
       throw new DataPortalUrlSlugNotUniqueError(urlSlug)
     }
   }
 
   // TODO add creating spaces once we have them in Node.js
   create = async (input: CreateDataPortalDTO): Promise<DataPortalParam> => {
-    logger.verbose('Creating data portal', input, this.user.id)
+    this.logger.log('Creating data portal', input, this.user.id)
     if (!(await this.hasSiteAdminRole(this.user.id))) {
       throw new PermissionError('Only site admins can create Data Portals')
     }
@@ -279,7 +266,7 @@ export class DataPortalService {
 
     await this.em.persistAndFlush(dataPortal)
 
-    logger.verbose('Creating card image', input)
+    this.logger.log('Creating card image', input)
 
     const loadedUser = await this.em.findOneOrFail(
       User,
@@ -323,7 +310,7 @@ export class DataPortalService {
   }
 
   update = async (input: UpdateDataPortalDTO): Promise<DataPortalParam> => {
-    logger.verbose('Updating data portal', input, this.user.id)
+    this.logger.log('Updating data portal', input, this.user.id)
     const portal = await this.em.findOneOrFail(
       DataPortal,
       { id: input.id },
@@ -375,7 +362,7 @@ export class DataPortalService {
    * @param fileUid
    */
   async updateCardImageUrl(fileUid: string) {
-    logger.verbose(`Updating card image url for fileUid ${fileUid}`)
+    this.logger.log(`Updating card image url for fileUid ${fileUid}`)
     const dataPortals = await this.dataPortalRepo.findDataPortalsByCardImageUid(fileUid)
 
     if (dataPortals.length === 0) {
@@ -394,9 +381,8 @@ export class DataPortalService {
     dataPortal.cardImageUrl = link.url
 
     await this.em.flush()
-    logger.verbose(`Card image url for fileUid ${fileUid} updated`)
+    this.logger.log(`Card image url for fileUid ${fileUid} updated`)
     try {
-      logger.verbose(`Notification service ${this.notificationService}`)
       const userId = this.user.id
       await this.notificationService.createNotification({
         message: `Card image url for ${dataPortal.name} has been updated`,
@@ -405,12 +391,12 @@ export class DataPortalService {
         userId,
       })
     } catch (error) {
-      logger.error(`Error creating notification ${error}`)
+      this.logger.error(`Error creating notification ${error}`)
     }
   }
 
   async list() {
-    logger.verbose('Getting data portals for user', this.user.id)
+    this.logger.log('Getting data portals for user', this.user.id)
     let portals: DataPortal[]
 
     if (await this.hasSiteAdminRole(this.user.id)) {
@@ -447,7 +433,7 @@ export class DataPortalService {
   }
 
   get = async (id: number): Promise<DataPortalParam> => {
-    logger.verbose('Get data portal detail', id, this.user.id)
+    this.logger.log('Get data portal detail', id, this.user.id)
 
     const portal = await this.em.findOne(
       DataPortal,
@@ -465,7 +451,7 @@ export class DataPortalService {
   }
 
   getByUrlSlugOrId = async (identifier: string): Promise<DataPortalParam> => {
-    logger.verbose('Get data portal detail by url slug or id: ', identifier, this.user.id)
+    this.logger.log('Get data portal detail by url slug or id: ', identifier, this.user.id)
 
     // Try to load data portal by url slug
     const portal = await this.findPortalBySlugOrId(identifier)
@@ -514,7 +500,7 @@ export class DataPortalService {
         JSON.parse(portal.editorState)
         param.editorState = portal.editorState
       } catch (error) {
-        this.log.error(`Error parsing editorState for portal ${portal.id} ${error}`)
+        this.logger.error(`Error parsing editorState for portal ${portal.id} ${error}`)
         param.editorState = null
       }
 

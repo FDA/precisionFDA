@@ -76,6 +76,10 @@ const StyledMarkdown = styled.div`
   }
 `
 
+const LazyImage = (props: React.ImgHTMLAttributes<HTMLImageElement>) => {
+  return <img {...props} alt={props.alt} loading="lazy" />
+}
+
 export const useTutorialFileQuery = (fileName: string) =>
   useQuery({
     queryKey: ['markdown', fileName],
@@ -94,6 +98,9 @@ const Markdown = ({ data, setToc }: any) => {
         remarkPlugins={[remarkGfm]}
         rehypePlugins={[rehypeSlug, rehypeHighlight, rehypeRaw]}
         transformImageUri={i => i.replace('./', '/tuts/')}
+        components={{
+          img: LazyImage,
+        }}
       >
         {data || ''}
       </ReactMarkdown>

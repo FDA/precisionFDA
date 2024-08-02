@@ -18,11 +18,11 @@ const log = getLogger()
 //     https://github.com/modernweb-dev/web/issues/1730
 //     https://github.com/mochajs/mocha/issues/2640
 process.on('uncaughtException', err => {
-  log.verbose('nodejs worker test: uncaughtException', err.stack)
+  log.log('nodejs worker test: uncaughtException', err.stack)
   throw err
 })
 process.on('unhandledRejection', (err: Error) => {
-  log.verbose('nodejs worker test: unhandledRejection', err.stack)
+  log.log('nodejs worker test: unhandledRejection', err.stack)
   throw err
 })
 

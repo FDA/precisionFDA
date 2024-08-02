@@ -6,17 +6,16 @@ import { EmailQueueJobProducer } from '@shared/domain/email/producer/email-queue
 import { User } from '@shared/domain/user/user.entity'
 import { findUnclosedFilesOrAssets, getNodePath } from '@shared/domain/user-file/user-file.helper'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
-import { Folder } from '@shared/domain/user-file/folder.entity'
 import { Node } from '@shared/domain/user-file/node.entity'
 import { SPACE_TYPE } from '@shared/domain/space/space.enum'
 import { SPACE_MEMBERSHIP_SIDE } from '@shared/domain/space-membership/space-membership.enum'
 import { wrap } from '@mikro-orm/core'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { EMAIL_TYPES, EmailSendInput } from '@shared/domain/email/email.config'
-import { EmailSendOperation } from '@shared/domain/email/ops/email-send'
 import { UserCtx } from '@shared/types'
 import { userDataConsistencyReportTemplate } from '@shared/domain/email/templates/mjml/user-data-consistency-report.template'
 import { NotFoundError } from '@shared/errors'
+import { getBullJobIdForEmailOperation } from '@shared/domain/email/email.helper'
 
 export type UserDataConsistencyReportOutput = {
   user?: {
@@ -48,7 +47,7 @@ export type UserDataConsistencyReportOutput = {
 @Injectable()
 export class UserDataConsistencyReportService {
   @ServiceLogger()
-  private readonly log: Logger
+  private readonly logger: Logger
 
   constructor(
     private readonly em: SqlEntityManager,
@@ -58,10 +57,9 @@ export class UserDataConsistencyReportService {
 
   async createReport(): Promise<UserDataConsistencyReportOutput> {
     const userCtx = this.user
-    const log = this.log
 
     const output: UserDataConsistencyReportOutput = {}
-    log.verbose(
+    this.logger.log(
       {
         id: userCtx.id,
         dxuser: userCtx.dxuser,
@@ -72,7 +70,7 @@ export class UserDataConsistencyReportService {
     const userRepo = this.em.getRepository(User)
     const user = await userRepo.findDxuser(userCtx.dxuser)
     if (!user) {
-      log.error(
+      this.logger.error(
         {
           id: userCtx.id,
           dxuser: userCtx.dxuser,
@@ -90,7 +88,7 @@ export class UserDataConsistencyReportService {
       }
 
       // Check if user's email on pFDA matches that on platform
-      const client = new PlatformClient({ accessToken: userCtx.accessToken }, log)
+      const client = new PlatformClient({ accessToken: userCtx.accessToken }, this.logger)
       const userDescribe = await client.userDescribe({
         dxid: user.dxid,
         defaultFields: true,
@@ -164,7 +162,6 @@ export class UserDataConsistencyReportService {
       output.unclosedFilesCount = unclosedFiles.length
 
       const userFilesRepo = this.em.getRepository(UserFile)
-      const folderRepo = this.em.getRepository(Folder)
 
       // Check if user has any folders that has both parent_folder_id and scoped_parent_folder_id
       const userNodes = await this.em.getRepository(Node).find({ user: user.id })
@@ -296,7 +293,7 @@ export class UserDataConsistencyReportService {
 
       await this.sendReportEmail(output)
 
-      log.verbose(
+      this.logger.log(
         {
           id: userCtx.id,
           dxuser: userCtx.dxuser,
@@ -305,7 +302,7 @@ export class UserDataConsistencyReportService {
         'UserDataConsistencyReportOperation: Completed',
       )
     } catch (error) {
-      log.error({ error, output }, 'UserDataConsistencyReportOperation: Error')
+      this.logger.error({ error, output }, 'UserDataConsistencyReportOperation: Error')
     }
 
     return output
@@ -324,8 +321,8 @@ export class UserDataConsistencyReportService {
       body,
     }
 
-    const jobId = EmailSendOperation.getBullJobId(EMAIL_TYPES.userDataConsistencyReport)
-    this.log.verbose('UserDataConsistencyReportService: Sending report email to admin')
+    const jobId = getBullJobIdForEmailOperation(EMAIL_TYPES.userDataConsistencyReport)
+    this.logger.log('UserDataConsistencyReportService: Sending report email to admin')
     const tempUserCtx: UserCtx = {
       id: adminUser.id,
       dxuser: adminUser.dxuser,

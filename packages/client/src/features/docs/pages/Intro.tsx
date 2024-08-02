@@ -28,7 +28,7 @@ export const Intro = () => {
       The first step to unlocking the features of precisionFDA is creating an
       account. You can sign up for a precisionFDA account by clicking "Request
       Access" on the front page, or by{' '}
-      <a data-turbolinks="false" href="request_access_path" aria-label="Request access to precisionFDA">
+      <a data-turbolinks="false" href="/request_access" aria-label="Request access to precisionFDA">
         clicking here
       </a>
       . During the sign-up process, you will need a phone or other multi-factor

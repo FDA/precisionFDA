@@ -1,4 +1,4 @@
-import { database } from '@shared/database'
+import { UserService } from '@shared/domain/user/user.service'
 import { Task, TASK_TYPE } from '@shared/queue/task.input'
 import { Job } from 'bull'
 import { EmailQueueProcessor } from '../../src/domain/email/processor/email-queue.processor'
@@ -16,6 +16,11 @@ const adminDataConsistencyReportService = {
   createReport: () => {},
 } as AdminDataConsistencyReportService
 
+const userService = {
+  sendUserInactivityAlerts: () => {},
+} as UserService
+
+
 const userDataConsistencyReportService = {
   createReport: () => {},
 } as UserDataConsistencyReportService
@@ -31,9 +36,9 @@ const processor = {
   MAIN: () => new MainQueueProcessor(),
   MAINTENANCE: () =>
     new MaintenanceQueueProcessor(
-      database.orm().em.fork(),
       adminDataConsistencyReportService,
       dbClusterService,
+      userService,
       jobServiceUserClient,
       jobServiceChallengeBotClient,
     ),
@@ -55,6 +60,7 @@ const jobToProcessorMap: Partial<Record<TASK_TYPE, (job: Job) => Promise<void> |
   [TASK_TYPE.SYNC_DBCLUSTER_STATUS]: (job) => processor.MAIN().syncDbClusterStatus(job),
   [TASK_TYPE.SYNC_SPACES_PERMISSIONS]: (job) => processor.MAINTENANCE().syncSpacesPermissions(job),
   [TASK_TYPE.USER_CHECKUP]: (job) => processor.MAINTENANCE().userCheckup(job),
+  [TASK_TYPE.USER_INACTIVITY_ALERT]: (job) => processor.MAINTENANCE().userInactivityAlert(),
   [TASK_TYPE.USER_DATA_CONSISTENCY_REPORT]: () => processor.FILE().reportUserDataConsistency(),
   [TASK_TYPE.CHECK_USER_JOBS]: (job) => processor.MAINTENANCE().checkUserJobs(job),
   [TASK_TYPE.ADMIN_DATA_CONSISTENCY_REPORT]: () =>

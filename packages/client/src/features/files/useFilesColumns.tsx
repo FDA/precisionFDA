@@ -4,13 +4,11 @@ import { Column } from 'react-table'
 import ReactTooltip from 'react-tooltip'
 import styled from 'styled-components'
 import { FeaturedToggle } from '../../components/FeaturedToggle'
-import {
-  DefaultColumnFilter,
-  NumberRangeColumnFilter,
-  SelectColumnFilter,
-} from '../../components/Table/filters'
+import { DefaultColumnFilter, NumberRangeColumnFilter, SelectColumnFilter } from '../../components/Table/filters'
 import { StyledTagItem, StyledTags } from '../../components/Tags'
 import { AreaChartIcon } from '../../components/icons/AreaChartIcon'
+import { ClipboardCheckIcon } from '../../components/icons/ClipboardCheckIcon'
+import { ClipboardIcon } from '../../components/icons/ClipboardIcon'
 import { FileIcon } from '../../components/icons/FileIcon'
 import { FolderIcon } from '../../components/icons/FolderIcon'
 import { LockIcon } from '../../components/icons/LockIcon'
@@ -29,8 +27,7 @@ const StyledLocked = styled.div<{ $isLocked: boolean }>`
   border-radius: 3px;
 `
 
-const isIncompleteFile = (state: IFile['state']) =>
-  state === 'open' || state === 'closing' || state === 'removing'
+const isIncompleteFile = (state: IFile['state']) => state === 'open' || state === 'closing' || state === 'removing'
 
 export const useFilesColumns = ({
   isAdmin = false,
@@ -44,6 +41,7 @@ export const useFilesColumns = ({
   colWidths?: KeyVal
   isAdmin?: boolean
   properties?: string[]
+  selectedFileIds?: any
 }) => {
   const queryClient = useQueryClient()
 
@@ -67,9 +65,7 @@ export const useFilesColumns = ({
                     data-for={`fileNameTooltip${node.uid}`}
                     color={
                       // TODO: Use css className or data attr
-                      isIncompleteFile(node.state)
-                        ? 'var(--tertiary-600)'
-                        : 'var(--c-link)'
+                      isIncompleteFile(node.state) ? 'var(--tertiary-600)' : 'var(--c-link)'
                     }
                     onClick={() => onFileClick(node.uid)}
                   >
@@ -79,19 +75,13 @@ export const useFilesColumns = ({
                     {value}
                   </StyledNameCell>
                   {isIncompleteFile(node.state) && (
-                    <ReactTooltip
-                      id={`fileNameTooltip${node.uid}`}
-                      place="top"
-                      effect="solid"
-                    >
+                    <ReactTooltip id={`fileNameTooltip${node.uid}`} place="top" effect="solid">
                       File is in {node.state} state.
                     </ReactTooltip>
                   )}
                 </>
               ) : (
-                <StyledNameCell
-                  onClick={() => onFolderClick(node.id.toString())}
-                >
+                <StyledNameCell onClick={() => onFolderClick(node.id.toString())}>
                   <FolderIcon height={14} />
                   {node.locked && <LockIcon height={12} color={colors.darkYellow} />}
                   {value}
@@ -99,6 +89,33 @@ export const useFilesColumns = ({
               )}
             </StyledLocked>
           </>
+        )
+      },
+    },
+    {
+      Header: 'ID',
+      accessor: 'uid',
+      disableSortBy: true,
+      disableFilters: true,
+      width: colWidths?.uid || 280,
+      Cell: ({ cell }) => {
+        const [isCopiedId, setIsCopiedId] = React.useState<boolean>(false)
+        return (
+          <div style={{}}>
+            {cell.value?.length > 0 && (
+              <StyledNameCell
+                onClick={() => {
+                  navigator.clipboard.writeText(cell.value)
+                  setIsCopiedId(true)
+                  setTimeout(() => setIsCopiedId(false), 5000)
+                }}
+              >
+                {isCopiedId && <ClipboardCheckIcon height={14} />}
+                {!isCopiedId && <ClipboardIcon height={14} />}
+                <span>{cell.value}</span>
+              </StyledNameCell>
+            )}
+          </div>
         )
       },
     },
@@ -134,10 +151,7 @@ export const useFilesColumns = ({
       ],
       width: colWidths?.featured || 93,
       Cell: ({ cell }) => {
-        const id =
-          cell.row.original.type === 'Folder'
-            ? cell.row.original.id
-            : cell.row.original.uid
+        const id = cell.row.original.type === 'Folder' ? cell.row.original.id : cell.row.original.uid
         return (
           <div style={{ paddingLeft: 20 }}>
             <FeaturedToggle
@@ -145,9 +159,11 @@ export const useFilesColumns = ({
               resource="files"
               featured={cell.row.original.featured}
               uids={[id]}
-              onSuccess={() => queryClient.invalidateQueries({
-                queryKey: ['files'],
-              })}
+              onSuccess={() =>
+                queryClient.invalidateQueries({
+                  queryKey: ['files'],
+                })
+              }
             />
           </div>
         )
@@ -159,10 +175,7 @@ export const useFilesColumns = ({
       Filter: DefaultColumnFilter,
       width: colWidths?.added_by || 198,
       Cell: ({ cell, value }) => (
-        <a
-          data-turbolinks="false"
-          href={cell.row.original.links.user || ''}
-        >
+        <a data-turbolinks="false" href={cell.row.original.links.user || ''}>
           {value}
         </a>
       ),
@@ -190,39 +203,24 @@ export const useFilesColumns = ({
       width: colWidths?.origin || 240,
       Cell: ({ value, row }) => (
         <>
-          {typeof value === 'object' &&
-            row.original.links.origin_object?.origin_type === 'Job' && (
-              <StyledLinkCell
-                to={
-                  `/home/executions/${row.original.links.origin_object?.origin_uid}` ||
-                  '#'
-                }
-              >
-                <TaskIcon height={14} />
-                {value.text}
-              </StyledLinkCell>
-            )}
-          {typeof value === 'object' &&
-            row.original.links.origin_object?.origin_type ===
-              'Comparison' && (
-              <StyledLinkCell to={`/home${value.href}` || '#'}>
-                <AreaChartIcon height={16} />
-                {value.text}
-              </StyledLinkCell>
-            )}
-          {typeof value === 'object' &&
-            row.original.links.origin_object?.origin_type ===
-              'UserFile' && (
-              <StyledLinkCell
-                to={
-                  `/home/files/${row.original.links.origin_object?.origin_uid}` ||
-                  '#'
-                }
-              >
-                <FileIcon height={16} />
-                {value.text}
-              </StyledLinkCell>
-            )}
+          {typeof value === 'object' && row.original.links.origin_object?.origin_type === 'Job' && (
+            <StyledLinkCell to={`/home/executions/${row.original.links.origin_object?.origin_uid}` || '#'}>
+              <TaskIcon height={14} />
+              {value.text}
+            </StyledLinkCell>
+          )}
+          {typeof value === 'object' && row.original.links.origin_object?.origin_type === 'Comparison' && (
+            <StyledLinkCell to={`/home${value.href}` || '#'}>
+              <AreaChartIcon height={16} />
+              {value.text}
+            </StyledLinkCell>
+          )}
+          {typeof value === 'object' && row.original.links.origin_object?.origin_type === 'UserFile' && (
+            <StyledLinkCell to={`/home/files/${row.original.links.origin_object?.origin_uid}` || '#'}>
+              <FileIcon height={16} />
+              {value.text}
+            </StyledLinkCell>
+          )}
           {typeof value === 'string' && value}
         </>
       ),
@@ -249,7 +247,7 @@ export const useFilesColumns = ({
     },
     ...properties.map(property => ({
       Header: property,
-      accessor: row => row.properties[property],
+      accessor: (row: IFile) => row.properties[property],
       id: `props.${property}`,
       disableFilters: true,
       width: colWidths?.[property] || 200,

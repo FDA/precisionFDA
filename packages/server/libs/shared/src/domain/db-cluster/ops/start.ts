@@ -30,7 +30,7 @@ export class StartDbClusterOperation extends BaseOperation<UserOpsCtx, DxIdInput
       dxid: dbCluster.dxid,
     }, 'start')
 
-    this.ctx.log.verbose(
+    this.ctx.log.log(
       { id: dbCluster.id, dxid: dbCluster.dxid, apiResult },
       'Run start action for DB Cluster'
     )

@@ -26,7 +26,7 @@ const removeRepeatableSchema: JSONSchema7 = {
 export class DebugController {
   constructor(
     @Inject(DEPRECATED_SQL_ENTITY_MANAGER) private readonly em: SqlEntityManager,
-    private readonly log: Logger,
+    private readonly logger: Logger,
   ) {}
 
   // Debugging bull queue
@@ -38,7 +38,7 @@ export class DebugController {
   @Get('/queue/cleanup')
   async cleanupWorkerQueue() {
     const opsCtx: OpsCtx = {
-      log: this.log,
+      log: this.logger,
       em: this.em,
     }
 

@@ -48,10 +48,7 @@ export const useExportInputsModal = ({ showCopyButton }: { showCopyButton: boole
       isShown={Boolean(isShown)}
       hide={() => setShowModal(false)}
     >
-      <ModalHeaderTop
-        headerText="Export Input Values"
-        hide={() => setShowModal(false)}
-      />
+      <ModalHeaderTop headerText="Export Input Values" hide={() => setShowModal(false)} />
       <ModalScroll>
         <MonacoEditor
           options={{
@@ -70,27 +67,30 @@ export const useExportInputsModal = ({ showCopyButton }: { showCopyButton: boole
       </ModalScroll>
       <Footer>
         <StyledButtonRow>
-          {showCopyButton ?
+          {showCopyButton ? (
             <>
-              <Button disabled={isFetching || (areFiles && !areAllFilePublic)} type="button" onClick={() => handleCopy()} data-tip data-for="selected-private-file-error">
+              <Button
+                disabled={isFetching || (areFiles && !areAllFilePublic)}
+                type="button"
+                onClick={() => handleCopy()}
+                data-tip
+                data-for="selected-private-file-error"
+              >
                 Copy link to clipboard
               </Button>
               {areFiles && !areAllFilePublic && (
-                <ReactTooltip
-                  id="selected-private-file-error"
-                  data-id="selected-private-file-error"
-                  place="top"
-                  effect="solid"
-                >
+                <ReactTooltip id="selected-private-file-error" data-id="selected-private-file-error" place="top" effect="solid">
                   One or more files are private. Make sure to make those files public to share.
                 </ReactTooltip>
               )}
             </>
-          : <div />}
+          ) : (
+            <div />
+          )}
           <ButtonRow>
-          <Button type="button" onClick={() => setShowModal(false)}>
-            Close
-          </Button>
+            <Button type="button" onClick={() => setShowModal(false)}>
+              Close
+            </Button>
           </ButtonRow>
         </StyledButtonRow>
       </Footer>

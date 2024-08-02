@@ -17,7 +17,6 @@ import { useLocalStorage } from '../../../hooks/useLocalStorage'
 import { usePrevious } from '../../../hooks/usePrevious'
 import { useToastWSHandler } from '../../../hooks/useToastWSHandler'
 import { UserLayout } from '../../../layouts/UserLayout'
-import { ScrollableInnerGlobalStyles } from '../../../styles/global'
 import { AppList } from '../../apps/AppList'
 import { AppsShow } from '../../apps/AppsShow'
 import { EditAppPage } from '../../apps/form/EditAppPage'
@@ -181,12 +180,20 @@ const Spaces2 = ({ space, isLoading }: { space: ISpace; isLoading: boolean }) =>
               <Route path="workflows" element={<WorkflowList spaceId={space.id} />} />
               <Route path="workflows/:workflowUid/*" element={<WorkflowShow spaceId={space.id} />} />
               <Route path="executions" element={<ExecutionList spaceId={space.id} />} />
-              <Route path="executions/:executionUid" element={<ExecutionDetails spaceId={space.id} />} />
+              <Route path="executions/:executionUid/*" element={<ExecutionDetails spaceId={space.id} />} />
               <Route path="executions/:identifier/track" element={<TrackInHome entityType="execution" spaceId={space.id} />} />
               <Route path="members" element={<MembersList space={space} />} />
               <Route path="reports" element={<SpaceReportList scope={`space-${space.id}`} />} />
               <Route path="discussions" element={<DiscussionList space={space} scope={`space-${space.id}`} />} />
-              <Route path="discussions/create" element={<CreateDiscussionPage displayWarning={space.type === 'review' && space.private_space_id} scope={`space-${space.id}`} />} />
+              <Route
+                path="discussions/create"
+                element={
+                  <CreateDiscussionPage
+                    displayWarning={space.type === 'review' && space.private_space_id}
+                    scope={`space-${space.id}`}
+                  />
+                }
+              />
               <Route path="discussions/:discussionId" element={<DiscussionShow space={space} />} />
 
               <Route path="/" element={<Navigate to="files" replace />} />
@@ -226,12 +233,9 @@ export const SpaceShow = () => {
   if (isNotAllowed) return <SpaceNotAllowed />
 
   return (
-    <>
-      <ScrollableInnerGlobalStyles />
-      <UserLayout>
-        <Spaces2 space={s} isLoading={isLoading} />
-      </UserLayout>
-    </>
+    <UserLayout innerScroll>
+      <Spaces2 space={s} isLoading={isLoading} />
+    </UserLayout>
   )
 }
 

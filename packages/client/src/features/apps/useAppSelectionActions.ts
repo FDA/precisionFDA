@@ -20,7 +20,6 @@ import { getBaseLink } from './run/utils'
 
 export enum AppActions {
   'Run' = 'Run',
-  'Run batch' = 'Run batch',
   'Track' = 'Track',
   'Edit' = 'Edit',
   'Fork' = 'Fork',
@@ -175,19 +174,13 @@ export const useAppSelectionActions = ({
     modalComp: exportToModal,
     setShowModal: setExportToModal,
     isShown: isShownExportToModal,
-  } = useExportToModal({ selected: selected[0] })
+  } = useExportToModal({ selected: selected[0], resource: 'apps' })
 
   let actions: ActionFunctionsType<AppActions> = {
     'Run': {
       type: 'route',
       to: `/${getBaseLink(spaceId)}/apps/${selected[0]?.uid}/jobs/new`,
       isDisabled: selected.length !== 1 || !selected[0].links.run_job,
-      cloudResourcesConditionType: 'all',
-    },
-    'Run batch': {
-      type: 'link',
-      link: `/apps/${selected[0]?.uid}/batch_app`,
-      isDisabled: selected.length !== 1 || !selected[0].links.batch_run,
       cloudResourcesConditionType: 'all',
     },
     'Track': {

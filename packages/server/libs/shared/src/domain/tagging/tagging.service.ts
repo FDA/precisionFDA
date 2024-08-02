@@ -6,7 +6,7 @@ import { TaggingRepository } from '@shared/domain/tagging/tagging.repository'
 @Injectable()
 export class TaggingService {
   @ServiceLogger()
-  private readonly log: Logger
+  private readonly logger: Logger
 
   constructor(
     private readonly em: SqlEntityManager,
@@ -20,7 +20,7 @@ export class TaggingService {
    * Tag as well.
    */
   async removeTaggings(id: number): Promise<void> {
-    this.log.verbose(`Removing taggings for entity with id: ${id}`)
+    this.logger.log(`Removing taggings for entity with id: ${id}`)
     return this.em.transactional(async () => {
       const taggings = await this.taggingRepo.findForTaggableId(id)
       taggings.forEach((tagging) => {

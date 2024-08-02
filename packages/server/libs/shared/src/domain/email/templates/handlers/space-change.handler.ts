@@ -106,7 +106,7 @@ export class SpaceChangedEmailHandler extends BaseTemplate<SpaceChanged> impleme
         return membership
       }
     })
-    this.receiverMembershipSide = SPACE_MEMBERSHIP_SIDE[receiverMembership[0].side]
+    this.receiverMembershipSide = SPACE_MEMBERSHIP_SIDE[receiverMembership[0]?.side]
 
     return receivers
   }

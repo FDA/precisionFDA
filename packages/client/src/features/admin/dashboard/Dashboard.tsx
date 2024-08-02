@@ -79,14 +79,13 @@ const ButtonBar = styled.div`
 `
 
 export function AdminDashboard() {
-
   const { data, isLoading } = useQuery({
     queryKey: ['admin_stats'],
     queryFn: () => fetchAdminStats(),
   })
 
   return (
-    <UserLayout>
+    <UserLayout mainScroll>
       <PageHeader>
         <TopLeft>
           <ChartColumnIcon height={30} />Admin Dashboard

@@ -3,7 +3,6 @@ import React, { useState } from 'react'
 import { Button } from '../../../components/Button'
 import { Loader } from '../../../components/Loader'
 import { UserLayout } from '../../../layouts/UserLayout'
-import { ScrollableInnerGlobalStyles } from '../../../styles/global'
 import { Row } from '../../home/home.styles'
 import { ButtonRow } from '../../modal/styles'
 import { EditAlertForm } from './EditAlertForm'
@@ -55,61 +54,58 @@ export function AlertsPage() {
   })
 
   return (
-    <>
-      <ScrollableInnerGlobalStyles />
-      <UserLayout>
-        <PageTop>
-          <ButtonRow>
-            <Button
-              onClick={() => {
-                setCreateMode(true)
-                setSelected(undefined)
-              }}
-            >
-              Create New Alert
-            </Button>
-            <Button
-              onClick={() => {
-                setIsAlertDismissed(false)
-              }}
-            >
-              Reset dismissed alert for current user
-            </Button>
-          </ButtonRow>
-          {!selected ? (
-            <h1>Site Alert Editor</h1>
-          ) : (
-            <h1>
-              {createMode ? 'New' : 'Edit'} Alert {selected}
-            </h1>
-          )}
-        </PageTop>
-        <Row>
-          <AlertList
-            isLoading={isLoading}
-            list={alertsData}
-            selected={selected}
-            setSelected={(id: number) => {
-              setSelected(id)
-              setCreateMode(false)
+    <UserLayout innerScroll>
+      <PageTop>
+        <ButtonRow>
+          <Button
+            onClick={() => {
+              setCreateMode(true)
+              setSelected(undefined)
             }}
-          />
-          {isLoading ? (
-            <Loader />
-          ) : (
-            (selected || createMode) && (
-              <EditAlertForm
-                alertItem={alertsData?.find(i => i.id === selected)}
-                onSuccess={id => {
-                  setCreateMode(false)
-                  setSelected(id)
-                }}
-                isNew={createMode}
-              />
-            )
-          )}
-        </Row>
-      </UserLayout>
-    </>
+          >
+            Create New Alert
+          </Button>
+          <Button
+            onClick={() => {
+              setIsAlertDismissed(false)
+            }}
+          >
+            Reset dismissed alert for current user
+          </Button>
+        </ButtonRow>
+        {!selected ? (
+          <h1>Site Alert Editor</h1>
+        ) : (
+          <h1>
+            {createMode ? 'New' : 'Edit'} Alert {selected}
+          </h1>
+        )}
+      </PageTop>
+      <Row>
+        <AlertList
+          isLoading={isLoading}
+          list={alertsData}
+          selected={selected}
+          setSelected={(id: number) => {
+            setSelected(id)
+            setCreateMode(false)
+          }}
+        />
+        {isLoading ? (
+          <Loader />
+        ) : (
+          (selected || createMode) && (
+            <EditAlertForm
+              alertItem={alertsData?.find(i => i.id === selected)}
+              onSuccess={id => {
+                setCreateMode(false)
+                setSelected(id)
+              }}
+              isNew={createMode}
+            />
+          )
+        )}
+      </Row>
+    </UserLayout>
   )
 }

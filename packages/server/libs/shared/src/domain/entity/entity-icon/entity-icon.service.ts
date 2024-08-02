@@ -7,7 +7,7 @@ import path from 'path'
 @Injectable()
 export class EntityIconService {
   @ServiceLogger()
-  private readonly log: Logger
+  private readonly logger: Logger
   // TODO(PFDA-4835) - use imports after introducing bundler with nestjs
   private readonly ASSET_PATH = path.join(
     __dirname,
@@ -41,7 +41,7 @@ export class EntityIconService {
     try {
       return await fs.readFile(path.join(this.ASSET_PATH, fileName), 'utf8')
     } catch {
-      this.log.error(`Failed to load icon file: "${fileName}"`)
+      this.logger.error(`Failed to load icon file: "${fileName}"`)
       return ''
     }
   }

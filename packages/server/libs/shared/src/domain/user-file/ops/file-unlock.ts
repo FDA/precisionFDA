@@ -4,11 +4,11 @@ import { createFileEvent, EVENT_TYPES } from '../../event/event.helper'
 import { IdInput, UserOpsCtx } from '../../../types'
 import { BaseOperation } from '@shared/utils/base-operation'
 import { getNodePath } from '../user-file.helper'
-import { FILE_STATE_DX } from "../user-file.types";
+import { FILE_STATE_DX } from '../user-file.types'
 
 class FileUnlockOperation extends BaseOperation<UserOpsCtx, IdInput, void> {
   async run(input: IdInput): Promise<void> {
-    this.ctx.log.verbose(input, 'Locking file')
+    this.ctx.log.log(input, 'Locking file')
 
     const em = this.ctx.em
     const userFileRepo = em.getRepository(UserFile)
@@ -30,7 +30,7 @@ class FileUnlockOperation extends BaseOperation<UserOpsCtx, IdInput, void> {
       em.persist(fileEvent)
 
       await em.commit()
-      this.ctx.log.verbose({ fileName: fileToUnlock.name }, 'Unlocked file')
+      this.ctx.log.log({ fileUid: fileToUnlock.uid }, 'Unlocked file')
     } catch (err) {
       await em.rollback()
       throw err

@@ -4,10 +4,10 @@ import { NestExpressApplication } from '@nestjs/platform-express'
 import { setupNestApp } from '@shared/app-initialization'
 import { config } from '@shared/config'
 import { CustomValidationPipe } from '@shared/validation/pipes/validation.pipe'
+import { WebsocketAdapter } from '@shared/websocket/adapter/websocket.adapter'
 import fs from 'fs'
 import { ApiModule } from './api.module'
 import { log } from './logger'
-import { WebsocketAdapter } from './websocket/adapter/websocket.adapter'
 
 export async function bootstrap() {
   const enableSsl = config.api.enableSsl

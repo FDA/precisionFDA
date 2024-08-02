@@ -7,7 +7,6 @@ import { createSpaceRequest } from '../spaces.api'
 import { SpaceForm } from './CreateSpaceForm'
 import { StyledBack, StyledPageCenter, StyledPageContent } from './styles'
 import { UserLayout } from '../../../layouts/UserLayout'
-import { ScrollableMainGlobalStyles } from '../../../styles/global'
 
 export const CreateSpace = () => {
   const navigate = useNavigate()
@@ -34,17 +33,14 @@ export const CreateSpace = () => {
   })
 
   return (
-    <>
-      <ScrollableMainGlobalStyles />
-      <UserLayout>
-        <StyledPageCenter>
-          <StyledPageContent>
-            <StyledBack linkTo="/spaces">Back to Spaces</StyledBack>
-            <PageTitle>Create Space</PageTitle>
-            <SpaceForm mutation={mutation} />
-          </StyledPageContent>
-        </StyledPageCenter>
-      </UserLayout>
-    </>
+    <UserLayout mainScroll>
+      <StyledPageCenter>
+        <StyledPageContent>
+          <StyledBack linkTo="/spaces">Back to Spaces</StyledBack>
+          <PageTitle>Create Space</PageTitle>
+          <SpaceForm mutation={mutation} />
+        </StyledPageContent>
+      </StyledPageCenter>
+    </UserLayout>
   )
 }

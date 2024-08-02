@@ -1,4 +1,5 @@
 import React from 'react'
+import { hash } from 'spark-md5'
 import styled from 'styled-components'
 
 export const StyledIdenticon = styled.img`
@@ -10,5 +11,6 @@ export const StyledIdenticon = styled.img`
 `
 
 export const Identicon = ({ dxuser }: {dxuser: string}) => {
-  return <StyledIdenticon src={`https://www.gravatar.com/avatar/${dxuser}?s=32&d=identicon&r=PG`} />
+  const hashValue = hash(dxuser)
+  return <StyledIdenticon src={`https://www.gravatar.com/avatar/${hashValue}?s=32&d=identicon&r=PG`} />
 }

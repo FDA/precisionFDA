@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
-import { CDMHKey, siteSettingsRequest } from './api'
 import { Alert } from '../admin/alerts/alerts.types'
+import { CDMHKey, siteSettingsRequest } from './api'
 
 export const CDMHNames: Record<CDMHKey, string> = {
   cdmhPortal: 'CDMH Portal',
@@ -11,14 +11,15 @@ export const CDMHNames: Record<CDMHKey, string> = {
 
 export interface SiteSettingsResponse {
   cdmh: {
-      isEnabled: boolean,
-      data?: Record<CDMHKey, string> },
+    isEnabled: boolean
+    data?: Record<CDMHKey, string>
+  }
   ssoButton: {
-      isEnabled: boolean
-      data?: {
-          fdaSsoUrl: string
-      },
-  },
+    isEnabled: boolean
+    data: {
+      fdaSsoUrl: string
+    }
+  }
   alerts: Alert[]
 }
 
@@ -26,7 +27,8 @@ export const onLogInWithSSO = (fdaSsoUrl: string) => {
   window.location.assign(fdaSsoUrl)
 }
 
-export const useSiteSettingsQuery = () => useQuery({
-  queryKey: ['site-settings'],
-  queryFn: siteSettingsRequest,
-})
+export const useSiteSettingsQuery = () =>
+  useQuery({
+    queryKey: ['site-settings'],
+    queryFn: siteSettingsRequest,
+  })

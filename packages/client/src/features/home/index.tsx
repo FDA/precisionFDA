@@ -25,7 +25,6 @@ import { useLocalStorage } from '../../hooks/useLocalStorage'
 import { usePageMeta } from '../../hooks/usePageMeta'
 import { useToastWSHandler } from '../../hooks/useToastWSHandler'
 import { UserLayout } from '../../layouts/UserLayout'
-import { ScrollableInnerGlobalStyles } from '../../styles/global'
 import NavigateWithParams from '../../utils/NavigateWithParams'
 import { AppList } from '../apps/AppList'
 import { AppsShow } from '../apps/AppsShow'
@@ -223,7 +222,7 @@ const Home2 = () => {
 
   if (!user || user?.is_guest) {
     return (
-      <UserLayout>
+      <UserLayout mainScroll>
         <GuestNotAllowed />
       </UserLayout>
     )
@@ -239,56 +238,59 @@ const Home2 = () => {
   }
 
   return (
-    <>
-      <ScrollableInnerGlobalStyles />
-      <UserLayout>
-        <ResourceBanner data-testid="home-banner">
-          <BannerTitle>My Home</BannerTitle>
-          <BannerRight>
-            <BannerPicker>
-              <BannerPickerItem
-                data-testid="me-button"
-                onClick={() => handleScopeClick('me')}
-                $isActive={persistedHomeScope === 'me'}
-              >
-                Me
-              </BannerPickerItem>
-              <BannerPickerItem
-                data-testid="featured-button"
-                onClick={() => handleScopeClick('featured')}
-                $isActive={persistedHomeScope === 'featured'}
-              >
-                Featured
-              </BannerPickerItem>
-              <BannerPickerItem
-                data-testid="everyone-button"
-                onClick={() => handleScopeClick('everybody')}
-                $isActive={persistedHomeScope === 'everybody'}
-              >
-                Everyone
-              </BannerPickerItem>
-              <BannerPickerItem
-                data-testid="spaces-button"
-                onClick={() => handleScopeClick('spaces')}
-                $isActive={persistedHomeScope === 'spaces'}
-              >
-                Spaces
-              </BannerPickerItem>
-            </BannerPicker>
-            <BannerPickedInfo>{homeScopeDescriptions[persistedHomeScope]}</BannerPickedInfo>
-          </BannerRight>
-        </ResourceBanner>
-        <Row>
-          <StyledMenu $expanded={expandedSidebar}>
-            {homeScopeToResourceTypesMap[persistedHomeScope].map(t => menuItems[t])}
-            <Fill />
-            <Expand data-testid="expand-sidebar" onClick={() => setExpandedSidebar(!expandedSidebar)}>
-              <FlapIcon />
-            </Expand>
-          </StyledMenu>
-          <Main>
-            <Routes>
-              <Route
+    <UserLayout innerScroll>
+      <ResourceBanner data-testid="home-banner">
+        <BannerTitle>My Home</BannerTitle>
+        <BannerRight>
+          <BannerPicker>
+            <BannerPickerItem
+              data-testid="me-button"
+              onClick={() => handleScopeClick('me')}
+              $isActive={persistedHomeScope === 'me'}
+            >
+              Me
+            </BannerPickerItem>
+            <BannerPickerItem
+              data-testid="featured-button"
+              onClick={() => handleScopeClick('featured')}
+              $isActive={persistedHomeScope === 'featured'}
+            >
+              Featured
+            </BannerPickerItem>
+            <BannerPickerItem
+              data-testid="everyone-button"
+              onClick={() => handleScopeClick('everybody')}
+              $isActive={persistedHomeScope === 'everybody'}
+            >
+              Everyone
+            </BannerPickerItem>
+            <BannerPickerItem
+              data-testid="spaces-button"
+              onClick={() => handleScopeClick('spaces')}
+              $isActive={persistedHomeScope === 'spaces'}
+            >
+              Spaces
+            </BannerPickerItem>
+          </BannerPicker>
+          <BannerPickedInfo>
+            {homeScopeDescriptions[persistedHomeScope]}
+          </BannerPickedInfo>
+        </BannerRight>
+      </ResourceBanner>
+      <Row>
+        <StyledMenu $expanded={expandedSidebar}>
+          { homeScopeToResourceTypesMap[persistedHomeScope].map(t => menuItems[t]) }
+          <Fill />
+          <Expand
+            data-testid="expand-sidebar"
+            onClick={() => setExpandedSidebar(!expandedSidebar)}
+          >
+            <FlapIcon />
+          </Expand>
+        </StyledMenu>
+        <Main>
+          <Routes>
+          <Route
                 path="files"
                 element={
                   <FileList
@@ -337,11 +339,10 @@ const Home2 = () => {
               <Route path="jobs/:executionUid" element={<NavigateWithParams to="/home/executions/:executionUid" replace />} />
               <Route path="jobs" element={<Navigate to="/home/executions" replace />} />
               <Route path="*" element={<Navigate to="/home/files" replace />} />
-            </Routes>
-          </Main>
-        </Row>
-      </UserLayout>
-    </>
+          </Routes>
+        </Main>
+      </Row>
+    </UserLayout>
   )
 }
 

@@ -422,6 +422,7 @@ Rails.application.routes.draw do
       resources :jobs, only: %i(index show create) do
         get :open_external, on: :member
         patch :refresh_api_key, on: :member
+        get :describe, on: :member, to: "jobs#describe"
         get :scope, on: :member, to: "jobs#get_job_scope" # used by CLI, id is actually dxid
         patch :snapshot, on: :member
 
@@ -430,7 +431,6 @@ Rails.application.routes.draw do
           get :everybody
           get :spaces
           get :cli_jobs
-          get :log
           post :copy
           post :terminate
           put :feature, to: "jobs#invert_feature"

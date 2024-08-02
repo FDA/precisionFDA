@@ -11,6 +11,8 @@ import { CaretUpIcon } from './CaretUpIcon'
 import { CheckIcon } from './CheckIcon'
 import { ChevronRightIcon } from './ChevronRightIcon'
 import { CircleCheckIcon } from './CircleCheckIcon'
+import { ClipboardCheckIcon } from './ClipboardCheckIcon'
+import { ClipboardIcon } from './ClipboardIcon'
 import { CogsIcon } from './Cogs'
 import { CommentIcon } from './CommentIcon'
 import { CommentingIcon } from './CommentingIcon'
@@ -19,6 +21,7 @@ import { DatabaseIcon } from './DatabaseIcon'
 import { DownloadIcon } from './DownloadIcon'
 import { FileArchiveIcon } from './FileArchive'
 import { FileCheckIcon } from './FileCheckIcon'
+import { FileCopyIcon } from './FileCopyIcon'
 import { FileIcon } from './FileIcon'
 import { FileZipIcon } from './FileZipIcon'
 import { FolderIcon } from './FolderIcon'
@@ -60,6 +63,8 @@ export const IconNames = {
   CheckIcon: CheckIcon,
   CircleCheckIcon: CircleCheckIcon,
   ChevronRightIcon: ChevronRightIcon,
+  ClipboardIcon: ClipboardIcon,
+  ClipboardCheckIcon: ClipboardCheckIcon,
   CogsIcon: CogsIcon,
   CommentIcon: CommentIcon,
   CommentingIcon: CommentingIcon,
@@ -69,6 +74,7 @@ export const IconNames = {
   FileArchive: FileArchiveIcon,
   FileIcon: FileIcon,
   FileCheckIcon: FileCheckIcon,
+  FileCopyIcon: FileCopyIcon,
   FileZipIcon: FileZipIcon,
   FolderIcon: FolderIcon,
   FolderOpenIcon: FolderOpenIcon,

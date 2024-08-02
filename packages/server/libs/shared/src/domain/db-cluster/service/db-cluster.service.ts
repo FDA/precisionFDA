@@ -26,7 +26,7 @@ import { EmailQueueJobProducer } from '@shared/domain/email/producer/email-queue
 @Injectable()
 export class DbClusterService {
   @ServiceLogger()
-  private readonly log: Logger
+  private readonly logger: Logger
 
   constructor(
     private readonly em: SqlEntityManager,
@@ -51,7 +51,7 @@ export class DbClusterService {
         SyncDbClusterOperation.getBullJobId(nonTerminatedDbCluster.dxid),
       )
       if (!dbSyncOperation) {
-        this.log.warn(
+        this.logger.warn(
           {
             user: nonTerminatedDbCluster.user.getEntity().dxuser,
             dbCluster: nonTerminatedDbCluster,

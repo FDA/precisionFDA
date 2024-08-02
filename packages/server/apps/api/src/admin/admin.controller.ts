@@ -52,7 +52,7 @@ interface IResourceTypeParams {
 export class AdminController {
   constructor(
     private readonly user: UserContext,
-    private readonly log: Logger,
+    private readonly logger: Logger,
     @Inject(DEPRECATED_SQL_ENTITY_MANAGER) private readonly em: SqlEntityManager,
     private readonly maintenanceJobProducer: MaintenanceQueueJobProducer,
   ) {}
@@ -171,7 +171,7 @@ export class AdminController {
     const { ids } = body
     const adminUserClient = new PlatformClient(
       { accessToken: config.platform.adminUserAccessToken },
-      this.log,
+      this.logger,
     )
     const results = await this.em
       .getRepository(User)
@@ -186,7 +186,7 @@ export class AdminController {
     const { ids } = body
     const adminUserClient = new PlatformClient(
       { accessToken: config.platform.adminUserAccessToken },
-      this.log,
+      this.logger,
     )
     const results = await this.em
       .getRepository(User)

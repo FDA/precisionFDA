@@ -16,7 +16,6 @@ import {
   DEPRECATED_SQL_ENTITY_MANAGER,
 } from '@shared/database/provider/deprecated-sql-entity-manager.provider'
 import { EMAIL_TYPES } from '@shared/domain/email/email.config'
-import { EmailProcessOperation } from '@shared/domain/email/ops/email-process'
 import { SPACE_EVENT_ACTIVITY_TYPE } from '@shared/domain/space-event/space-event.enum'
 import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
 import {
@@ -36,6 +35,7 @@ import { PermissionError } from '@shared/errors'
 import { PlatformClient } from '@shared/platform-client'
 import { UserOpsCtx } from '@shared/types'
 import { UserContextGuard } from '../user-context/guard/user-context.guard'
+import { EmailFacade } from '@shared/domain/email/email.facade'
 
 @UseGuards(UserContextGuard)
 @Controller('/spaces')
@@ -43,8 +43,9 @@ export class SpacesController {
   constructor(
     @Inject(DEPRECATED_SQL_ENTITY_MANAGER) private readonly oldEm: SqlEntityManager,
     private readonly spaceService: SpaceService,
-    private readonly log: Logger,
+    private readonly logger: Logger,
     private readonly user: UserContext,
+    private readonly emailFacade: EmailFacade,
   ) {}
 
   @Post()
@@ -56,7 +57,7 @@ export class SpacesController {
   @Patch('/:id/accept')
   async acceptSpace(@Param('id', ParseIntPipe) spaceId: number) {
     const opsCtx: UserOpsCtx = {
-      log: this.log,
+      log: this.logger,
       user: this.user,
       em: this.oldEm,
     }
@@ -68,13 +69,14 @@ export class SpacesController {
   @Patch('/:id/lock')
   async lockSpace(@Param('id', ParseIntPipe) spaceId: number) {
     const opsCtx: UserOpsCtx = {
-      log: this.log,
+      log: this.logger,
       user: this.user,
       em: this.oldEm,
     }
 
     await new SpaceLockOperation(opsCtx).execute({ spaceId })
-    await new EmailProcessOperation(opsCtx).execute({
+
+    await this.emailFacade.sendEmail({
       input: {
         initUserId: this.user.id,
         spaceId,
@@ -89,14 +91,14 @@ export class SpacesController {
   @Patch('/:id/unlock')
   async unlockSpace(@Param('id', ParseIntPipe) spaceId: number) {
     const opsCtx: UserOpsCtx = {
-      log: this.log,
+      log: this.logger,
       user: this.user,
       em: this.oldEm,
     }
 
     await new SpaceUnlockOperation(opsCtx).execute({ spaceId })
 
-    await new EmailProcessOperation(opsCtx).execute({
+    await this.emailFacade.sendEmail({
       input: {
         initUserId: this.user.id,
         spaceId,
@@ -129,7 +131,7 @@ export class SpacesController {
     ) {
       throw new PermissionError('Operation not permitted.')
     }
-    const platformClient = new PlatformClient({ accessToken: this.user.accessToken }, this.log)
+    const platformClient = new PlatformClient({ accessToken: this.user.accessToken }, this.logger)
     if (membership.side === SPACE_MEMBERSHIP_SIDE.GUEST) {
       try {
         // try to get some data from host project - should fail.
@@ -164,14 +166,14 @@ export class SpacesController {
         invitee: spaceToFix.guestDxOrg,
         level: 'CONTRIBUTE',
       })
-      this.log.verbose({ response }, 'Guest organization invited to host project.')
+      this.logger.log({ response }, 'Guest organization invited to host project.')
     }
   }
 
   @Get('/:id/selectable-spaces')
   async getSelectableSpaces(@Param('id', ParseIntPipe) id: number) {
     const opsCtx: UserOpsCtx = {
-      log: this.log,
+      log: this.logger,
       user: this.user,
       em: this.oldEm,
     }

@@ -18,6 +18,9 @@ export const StyledLabel = styled.div`
   font-size: 14px;
   font-weight: 500;
 `
+export const StyledMaxRuntime = styled.div`
+  font-size: 12px;
+`
 
 export const SectionHeader = styled.div`
   display: flex;

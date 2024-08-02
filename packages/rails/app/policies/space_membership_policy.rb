@@ -87,15 +87,6 @@ class SpaceMembershipPolicy
       return false unless admin.lead_or_admin?
 
       if for_enable
-        space_invite_params = {
-          invitees: member.user.dxuser,
-          invitees_role: member.role,
-          space_id: _space.id,
-          side: member.side,
-          current_user: admin.user,
-        }
-        return false unless check_valid_invite_form?(space_invite_params, _space)
-
         return false if member.active?
       elsif member.inactive?
         return false

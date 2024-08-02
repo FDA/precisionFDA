@@ -18,7 +18,6 @@ import GuestRestrictedLink from '../../components/Controls/GuestRestrictedLink'
 import NavigationBar from '../../components/NavigationBar/NavigationBar'
 import PublicLayout from '../../layouts/PublicLayout'
 import { useAuthUser } from '../auth/useAuthUser'
-import { useSiteSettingsQuery } from '../auth/useSiteSettingsQuery'
 import { ExpertListItem } from '../experts/list/ExpertListItem'
 import { useExpertsListQuery } from '../experts/useExpertsListQuery'
 import { fetchApps } from '../apps/apps.api'
@@ -26,14 +25,12 @@ import { IApp } from '../apps/apps.types'
 import { ChallengesBanner } from './ChallengesBanner'
 import ChallengesOverviewList from './ChallengesOverviewList'
 import { OverviewNewsList } from './OverviewNewsList'
-import { ParticipantPersonsList } from './ParticipantPersonsList'
 import { ParticipantOrgsList } from './ParticipantsOrgsList'
 import {
   CommunityParticipants,
   ExpertSection,
   Hr,
   InfoRow,
-  PFDATeamSection,
   PageOverviewMainBody,
 } from './styles'
 import { AppTypeIconBlue } from '../../components/icons/AppTypeIconBlue'
@@ -253,7 +250,7 @@ export const OverviewAuthed = () => {
     useExpertsListQuery({})
 
   return (
-    <PublicLayout>
+    <PublicLayout mainScroll>
       <NavigationBar user={user} title="Overview"/>
       <PageContainerMargin>
         <PageRow>
@@ -296,13 +293,6 @@ export const OverviewAuthed = () => {
           <a href="mailto:precisionfda@fda.hhs.gov">Feedback</a>
         </InfoRow>
       </PageMainBody>
-
-      <PFDATeamSection>
-        <SectionTitle>PRECISIONFDA TEAM</SectionTitle>
-        <div>
-          <ParticipantPersonsList/>
-        </div>
-      </PFDATeamSection>
     </PublicLayout>
   )
 }

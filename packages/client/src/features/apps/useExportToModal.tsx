@@ -51,46 +51,50 @@ const getConfirmationMessage = (title: ValType) => {
   }
 }
 
+export type ExportToResource = 'apps' | 'workflows'
+
 export function useExportToModal<
   T extends {
     id: number
     name: string
+    uid: string
     links?: { export?: string; cwl_export?: string; wdl_export?: string }
   },
->({ selected }: { selected: T }) {
+>({ selected, resource }: { selected: T; resource: ExportToResource }) {
   const { isShown, setShowModal } = useModal()
   const momoSelected = useMemo(() => selected, [isShown])
+
+  const handleClick = (e, ex) => {
+    if (ex.value) {
+      const confirmationMessage = getConfirmationMessage(ex.value)
+      if (!window.confirm(confirmationMessage)) {
+        e.preventDefault()
+      }
+    }
+  }
 
   const exportOptions = [
     {
       label: 'Docker Container',
-      link: momoSelected?.links?.export,
+      link: `/${resource}/${momoSelected?.uid}/export`,
       isPost: true,
       value: 'docker',
     } as ExportType,
     {
       label: 'CWL Tool',
-      link: momoSelected?.links?.cwl_export,
+      link: `/${resource}/${momoSelected?.uid}/cwl_export`,
       value: 'cwl',
     } as ExportType,
     {
       label: 'WDL Task',
-      link: momoSelected?.links?.wdl_export,
+      link: `/${resource}/${momoSelected?.uid}/wdl_export`,
       value: 'wdl',
     } as ExportType,
   ].filter(e => e.link !== undefined)
 
   const modalComp = isShown && (
-    <ModalNext
-      data-testid="modal-export-to"
-      isShown={isShown}
-      hide={() => setShowModal(false)}
-    >
-      <ModalHeaderTop
-        disableClose={false}
-        headerText="Export to"
-        hide={() => setShowModal(false)}
-      />
+    <ModalNext id="modal-export-to" data-testid="modal-export-to" isShown={isShown} hide={() => setShowModal(false)}>
+      <ModalHeaderTop disableClose={false} headerText="Export to" hide={() => setShowModal(false)} />
       <ModalScroll>
         <StyledExportTo>
           <ul>

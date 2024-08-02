@@ -6,7 +6,6 @@ import { IAccessibleFile } from '../databases/databases.api'
 
 export enum AppActions {
   'Run' = 'Run',
-  'Run batch' = 'Run batch',
   'Track' = 'Track',
   'Edit' = 'Edit',
   'Fork' = 'Fork',

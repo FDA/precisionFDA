@@ -41,7 +41,7 @@ export class ChallengePreregEmailHandler
       id: this.validatedInput.challengeId,
     })
     if (!this.challenge) {
-      this.ctx.log.verbose(
+      this.ctx.log.log(
         { challengeId: this.validatedInput.challengeId },
         'Email handler runs, challenge not created yet',
       )

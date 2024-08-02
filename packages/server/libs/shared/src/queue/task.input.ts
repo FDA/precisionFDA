@@ -38,6 +38,7 @@ export enum TASK_TYPE {
   LOCK_NODES = 'lock_nodes',
   UNLOCK_NODES = 'unlock_nodes',
   ADMIN_DATA_CONSISTENCY_REPORT = 'admin_data_consistency_report',
+  USER_INACTIVITY_ALERT = 'user_inactivity_alert',
   USER_DATA_CONSISTENCY_REPORT = 'user_data_consistency_report',
   GENERATE_SPACE_REPORT_BATCH = 'generate_space_report_batch',
   GENERATE_SPACE_REPORT_RESULT = 'generate_space_report_result',

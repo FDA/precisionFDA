@@ -9,6 +9,7 @@ export class AdminPlatformClientService {
     'projectCreate',
     'projectInvite',
     'projectDescribe',
+    'projectLeave',
     'removeUserFromOrganization',
     'inviteUserToOrganization',
     'jobDescribe',
