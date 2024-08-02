@@ -32,7 +32,7 @@ export class AppController {
   constructor(
     private readonly user: UserContext,
     @Inject(DEPRECATED_SQL_ENTITY_MANAGER) private readonly em: SqlEntityManager,
-    private readonly log: Logger,
+    private readonly logger: Logger,
   ) {
   }
 
@@ -51,7 +51,7 @@ export class AppController {
     @Body() body: AnyObject,
   ) {
     const opsCtx: UserOpsCtx = {
-      log: this.log,
+      log: this.logger,
       user: this.user,
       em: this.em,
     }
@@ -68,7 +68,7 @@ export class AppController {
     @Body(new JsonSchemaPipe(runAppSchema)) body: Omit<RunAppInput, 'appDxid'>,
   ) {
     const opsCtx: UserOpsCtx = {
-      log: this.log,
+      log: this.logger,
       user: this.user,
       em: this.em,
     }

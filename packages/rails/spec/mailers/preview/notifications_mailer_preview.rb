@@ -7,13 +7,6 @@ class NotificationsMailerPreview < ActionMailer::Preview
     NotificationsMailer.invitation_email(Invitation.last)
   end
 
-  def license_request_email
-    license = License.last
-    user = User.last
-    message = "This is a test message"
-    NotificationsMailer.license_request_email(license, user, message)
-  end
-
   def license_approved_email
     license = License.last
     user = User.last

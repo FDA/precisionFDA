@@ -75,6 +75,7 @@ const fakes = {
   notificationService: mockServiceFactory.notificationService,
   platformAuthClient: mockServiceFactory.platformAuthClient,
   workstationClient: mockServiceFactory.workstationClient,
+  emailService: mockServiceFactory.emailService,
 }
 
 const mocksSetDefaultBehaviour = () => {

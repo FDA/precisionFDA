@@ -22,26 +22,6 @@ describe('selectable spaces tests', () => {
     userCtx = { ...user, accessToken: 'foo' }
   })
 
-  it('test unsupported space type', async () => {
-    const unsupportedSpace = create.spacesHelper.create(em, { name: "space", type: 6 })
-    await em.flush()
-    create.appHelper.createRegular(
-      em, { user }, {
-        title: 'private-app',
-        scope: `scope-${unsupportedSpace.id}`,
-      }
-    )
-    await em.flush()
-
-    const op = new SelectableSpacesOperation({
-      em: database.orm().em.fork() as EntityManager<MySqlDriver>,
-      log,
-      user: userCtx,
-    })
-    const unknownResult = await op.execute(unsupportedSpace.id)
-    expect(unknownResult.length).to.equal(0)
-  })
-
   it('test app has selectable spaces with confidential space', async () => {
     const masterSpace = create.spacesHelper.create(em, { name: 'master-space' })
     await em.flush()

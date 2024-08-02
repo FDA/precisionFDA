@@ -18,33 +18,25 @@ export const StyledMemberCard = styled.div<{ $isDeactivated: boolean }>`
   border-radius: 6px;
 `
 export const StyledCardHeader = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-bottom: 1px solid var(--c-border);
-  padding: 4px;
-  padding-right: 8px;
-
-  a {
     display: flex;
-    gap: 8px;
+    justify-content: space-between;
     align-items: center;
-    font-size: 14px;
-    display: flex;
-    line-height: 30px;
-    cursor: pointer;
-  }
+    border-bottom: 1px solid var(--c-border);
+    padding: 4px 8px 4px 4px;
+
+    a {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        font-size: 14px;
+        line-height: 30px;
+        cursor: pointer;
+    }
 `
 export const Key = styled.span`
   font-weight: bold;
 `
 export const Value = styled.span``
-export const Gravatar = styled.img`
-  border-radius: 80%;
-  vertical-align: middle;
-  height: 30px;
-  margin-right: 5px;
-`
 export const StyledDetails = styled.div<{ $isDeactivated: boolean }>`
   ${({ $isDeactivated }) =>
     $isDeactivated && css`color: var(--c-text-400);`}

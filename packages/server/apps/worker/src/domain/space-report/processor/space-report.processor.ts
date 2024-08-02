@@ -14,10 +14,12 @@ import { ArrayUtils } from '@shared/utils/array.utils'
 import { Job } from 'bull'
 import { OnQueueFailedWithContext } from '../../../queues/decorator/on-queue-failed-with-context'
 import { ProcessWithContext } from '../../../queues/decorator/process-with-context'
+import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 
 @Processor(config.workerJobs.queues.spaceReport.name)
 export class SpaceReportProcessor {
-  private readonly log = new Logger('SpaceReportProcessor')
+  @ServiceLogger()
+  private readonly logger: Logger
 
   constructor(
     private readonly spaceReportBatchResultGenerateFacade: SpaceReportBatchResultGenerateFacade,
@@ -41,7 +43,7 @@ export class SpaceReportProcessor {
 
   @OnQueueFailedWithContext()
   async onQueueFailed(job: Job, error: Error) {
-    this.log.error({ job, error }, 'Space report queue error')
+    this.logger.error({ job, error }, 'Space report queue error')
 
     try {
       if (job.attemptsMade !== job.opts.attempts) {
@@ -72,7 +74,7 @@ export class SpaceReportProcessor {
 
       await this.spaceReportErrorFacade.setSpaceReportPartsError(filteredPayload)
     } catch (e) {
-      this.log.error(e, 'Failed setting ERROR state to space report')
+      this.logger.error(e, 'Failed setting ERROR state to space report')
     }
   }
 }

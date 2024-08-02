@@ -1,7 +1,6 @@
 import { Folder } from '@shared/domain/user-file/folder.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { ValidationError } from '@shared/errors'
-import { getLogger } from '../../logger'
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { createFolderEvent, EVENT_TYPES } from '../event/event.helper'
 import { getNodePath } from './user-file.helper'
@@ -9,15 +8,17 @@ import { scopeContainsId } from '../space/space.helper'
 import { EntityScope, SCOPE } from '../../types/common'
 import { PARENT_TYPE } from './user-file.types'
 import { getEntityType, InputEntityUnion } from '../../utils/object-utils'
-import { Injectable } from '@nestjs/common'
-
-const logger = getLogger('folder.service')
+import { Injectable, Logger } from '@nestjs/common'
+import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 
 @Injectable()
 /**
  * Service for activities on folders
  */
 export class FolderService {
+  @ServiceLogger()
+  private readonly logger: Logger
+
   constructor(private readonly em: SqlEntityManager) {
     this.em = em
   }
@@ -31,7 +32,7 @@ export class FolderService {
     userId: number,
     parent?: InputEntityUnion,
   ): Promise<Folder[]> {
-    logger.verbose(`FolderService: creating folders ${path} with scope ${scope}`)
+    this.logger.log(`Creating folders ${path} with scope ${scope}`)
     if (!path) {
       throw new ValidationError('Path must not be empty')
     }
@@ -65,7 +66,7 @@ export class FolderService {
     parent?: InputEntityUnion,
     parentFolderId?: number,
   ): Promise<Folder> {
-    logger.verbose(`FolderService: creating folder ${name}` + (parentFolderId ? ` with scope ${scope} in folder ${parentFolderId}` : ''))
+    this.logger.log(`Creating folder ` + (parentFolderId ? ` with scope ${scope} in folder ${parentFolderId}` : ''))
     const user = await this.em.getRepository(User).findOneOrFail({ id: userId })
 
     try {
@@ -90,7 +91,7 @@ export class FolderService {
   ): Promise<Folder> {
     let folder = await this.findFolder(name, scope, parentFolderId)
     if (folder) {
-      logger.verbose(`FolderService: folder ${name} already exists`)
+      this.logger.log(`Folder ${name} already exists`)
       return folder
     }
 

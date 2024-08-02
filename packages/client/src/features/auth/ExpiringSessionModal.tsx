@@ -1,6 +1,7 @@
 import { differenceInSeconds, subSeconds } from 'date-fns/esm'
 import React, { useEffect, useState } from 'react'
 import { Button } from '../../components/Button'
+import { LoginButton } from '../../components/Button/LoginButton'
 import { useInterval } from '../../hooks/useInterval'
 import { getSessionExpiredAt } from '../../utils/cookies'
 import { pluralize } from '../../utils/formatting'
@@ -8,17 +9,11 @@ import { ModalHeaderTop, ModalNext } from '../modal/ModalNext'
 import { Content, Footer } from '../modal/styles'
 import { UseModal } from '../modal/useModal'
 import { useAuthUserQuery } from './api'
-import {
-  onLogInWithSSO, useSiteSettingsQuery,
-} from './useSiteSettingsQuery'
+import { useSiteSettingsQuery } from './useSiteSettingsQuery'
 
-export const ExpiringSessionModal: React.FC<{ modal: UseModal }> = ({
-  modal,
-}) => {
+export const ExpiringSessionModal: React.FC<{ modal: UseModal }> = ({ modal }) => {
   const userQuery = useAuthUserQuery()
-  const [expiredAt, setExpiredAtTimer] = useState<Date|number>(
-    getSessionExpiredAt(),
-  )
+  const [expiredAt, setExpiredAtTimer] = useState<Date | number>(getSessionExpiredAt())
   const [timer, setTimer] = useState<number>(0)
   const [currentTime, setCurrentTime] = useState<Date>(new Date())
   const sessionExpirationPassed = expiredAt < currentTime
@@ -56,13 +51,7 @@ export const ExpiringSessionModal: React.FC<{ modal: UseModal }> = ({
   }
 
   return (
-    <ModalNext
-      id="expiring-session-modal"
-      isShown={modal.isShown}
-      disableClose
-      blur
-      hide={() => {}}
-    >
+    <ModalNext id="expiring-session-modal" isShown={modal.isShown} disableClose blur hide={() => {}}>
       <ModalHeaderTop
         disableClose
         headerText={sessionExpirationPassed ? 'Session Expired' : 'Session Expiring'}
@@ -75,17 +64,7 @@ export const ExpiringSessionModal: React.FC<{ modal: UseModal }> = ({
       </Content>
       <Footer>
         {sessionExpirationPassed ? (
-          <>
-            {ssoButtonResponse?.ssoButton.isEnabled && (
-              <Button variant="primary" onClick={() => onLogInWithSSO(ssoButtonResponse.ssoButton.data.fdaSsoUrl)}>
-                Log In with SSO
-              </Button>
-            )}
-            {/*{TODO: this does not consider location to return to after login.}*/}
-            <Button variant="primary" onClick={() => window.location.assign('/login')}>
-              Log In again
-            </Button>
-          </>
+          <LoginButton siteSetting={ssoButtonResponse} />
         ) : (
           <Button variant="primary" onClick={handleStayLoggedIn}>
             Extend session

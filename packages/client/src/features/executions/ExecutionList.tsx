@@ -14,11 +14,18 @@ import { DEFAULT_RECONNECT_ATTEMPTS, DEFAULT_RECONNECT_INTERVAL, SHOULD_RECONNEC
 import { getSelectedObjectsFromIndexes, toArrayFromObject } from '../../utils/object'
 import { useAuthUser } from '../auth/useAuthUser'
 import { ActionsDropdownContent } from '../home/ActionDropdownContent'
-import {
-  ActionsRow, StyledHomeTable,
-} from '../home/home.styles'
+import { ActionsRow, StyledHomeTable } from '../home/home.styles'
 import { ActionsButton } from '../home/show.styles'
-import { HomeScope, IFilter, IMeta, KeyVal, NOTIFICATION_ACTION, Notification } from '../home/types'
+import {
+  HomeScope,
+  IFilter,
+  IMeta,
+  KeyVal,
+  NOTIFICATION_ACTION,
+  Notification,
+  WEBSOCKET_MESSSAGE_TYPE,
+  WebSocketMessage,
+} from '../home/types'
 import { useList } from '../home/useList'
 import { usePropertiesQuery } from '../home/usePropertiesQuery'
 import { ExecutionSubTable } from './ExecutionSubTable'
@@ -27,10 +34,9 @@ import { IExecution } from './executions.types'
 import { useExecutionColumns } from './useExecutionColumns'
 import { useExecutionActions } from './useExecutionSelectActions'
 
-
 type ListType = { jobs: IExecution[]; meta: IMeta }
 
-export const ExecutionList = ({ homeScope, spaceId }: { homeScope?: HomeScope, spaceId?: string }) => {
+export const ExecutionList = ({ homeScope, spaceId }: { homeScope?: HomeScope; spaceId?: string }) => {
   const navigate = useNavigate()
   const user = useAuthUser()
   const isAdmin = user?.isAdmin
@@ -63,33 +69,42 @@ export const ExecutionList = ({ homeScope, spaceId }: { homeScope?: HomeScope, s
   const { isLoading, data, error } = query
   const { data: propertiesData } = usePropertiesQuery('job', homeScope, spaceId)
 
-  const { lastJsonMessage: notification } = useWebSocket<Notification>(getNodeWsUrl(), {
+  const { lastJsonMessage } = useWebSocket<WebSocketMessage>(getNodeWsUrl(), {
     share: true,
     reconnectInterval: DEFAULT_RECONNECT_INTERVAL,
     reconnectAttempts: DEFAULT_RECONNECT_ATTEMPTS,
     shouldReconnect: () => SHOULD_RECONNECT,
+    filter: message => {
+      try {
+        const messageData = JSON.parse(message.data)
+        const notification = messageData.data as Notification
+        return (
+          messageData.type === WEBSOCKET_MESSSAGE_TYPE.NOTIFICATION &&
+          [
+            NOTIFICATION_ACTION.JOB_RUNNABLE,
+            NOTIFICATION_ACTION.JOB_RUNNING,
+            NOTIFICATION_ACTION.JOB_DONE,
+            NOTIFICATION_ACTION.JOB_FAILED,
+            NOTIFICATION_ACTION.JOB_OUTPUTS_SYNCED,
+          ].includes(notification.action)
+        )
+      } catch (e) {
+        return false
+      }
+    },
   })
 
   useEffect(() => {
-    if (notification == null) {
+    if (lastJsonMessage == null) {
       return
     }
-    if ([NOTIFICATION_ACTION.JOB_RUNNABLE,
-      NOTIFICATION_ACTION.JOB_RUNNING,
-      NOTIFICATION_ACTION.JOB_DONE,
-      NOTIFICATION_ACTION.JOB_FAILED,
-      NOTIFICATION_ACTION.JOB_OUTPUTS_SYNCED].includes(notification.action)) {
-      queryCache.invalidateQueries({
-        queryKey: ['jobs'],
-      })
-    }
-  }, [notification])
+    queryCache.invalidateQueries({
+      queryKey: ['jobs'],
+    })
+  }, [lastJsonMessage])
 
-  const selectedFileObjects = getSelectedObjectsFromIndexes(
-    selectedIndexes,
-    data?.jobs,
-  )
-  const actions = useExecutionActions({ homeScope, selectedItems: selectedFileObjects, resourceKeys: ['jobs']})
+  const selectedFileObjects = getSelectedObjectsFromIndexes(selectedIndexes, data?.jobs)
+  const actions = useExecutionActions({ homeScope, selectedItems: selectedFileObjects, resourceKeys: ['jobs'] })
 
   if (error) return <div>Error! {JSON.stringify(error)}</div>
 
@@ -103,19 +118,12 @@ export const ExecutionList = ({ homeScope, spaceId }: { homeScope?: HomeScope, s
             content={
               <ActionsDropdownContent
                 actions={actions}
-                message={
-                  homeScope === 'spaces' &&
-                  'To perform other actions on this file, access it from the Space'
-                }
+                message={homeScope === 'spaces' && 'To perform other actions on this file, access it from the Space'}
               />
             }
           >
             {dropdownProps => (
-              <ActionsButton
-                {...dropdownProps}
-                data-testid="home-executions-actions-button"
-                active={dropdownProps.isActive}
-              />
+              <ActionsButton {...dropdownProps} data-testid="home-executions-actions-button" active={dropdownProps.isActive} />
             )}
           </Dropdown>
         </ActionsRow>
@@ -164,8 +172,6 @@ export const ExecutionList = ({ homeScope, spaceId }: { homeScope?: HomeScope, s
   )
 }
 
-
-
 export const ExecutionsListTable = ({
   isAdmin,
   filters,
@@ -195,9 +201,7 @@ export const ExecutionsListTable = ({
   isLoading: boolean
   homeScope?: HomeScope
   colWidths: KeyVal
-  saveColumnResizeWidth: (
-    columnResizing: UseResizeColumnsState<any>['columnResizing']
-  ) => void
+  saveColumnResizeWidth: (columnResizing: UseResizeColumnsState<any>['columnResizing']) => void
   saveHiddenColumns: (cols: string[]) => void
   hiddenColumns: string[]
 }) => {
@@ -206,19 +210,18 @@ export const ExecutionsListTable = ({
     // Check if any of the conditions is true, then hide the column
     return !(
       // If the homeScope is 'me', hide 'added_by' regardless of other conditions.
-      (homeScope === 'me' && c.accessor === 'added_by') ||
-      
-      // Hide 'location' for all homeScopes except 'spaces'.
-      (homeScope !== 'spaces' && c.accessor === 'location') ||
-      
-      // Hide 'featured' for all homeScopes except 'everybody'.
-      (homeScope !== 'everybody' && c.accessor === 'featured') ||
-      
-      c.accessor === 'created_at_date_time'||
-      c.accessor === 'workflow_title'
+      (
+        (homeScope === 'me' && c.accessor === 'added_by') ||
+        // Hide 'location' for all homeScopes except 'spaces'.
+        (homeScope !== 'spaces' && c.accessor === 'location') ||
+        // Hide 'featured' for all homeScopes except 'everybody'.
+        (homeScope !== 'everybody' && c.accessor === 'featured') ||
+        c.accessor === 'created_at_date_time' ||
+        c.accessor === 'workflow_title'
+      )
     )
   }
-  
+
   const col = useExecutionColumns({ colWidths, isAdmin, properties }).filter(filterColsByScope)
 
   const columns = useMemo(() => col, [col, location.search, properties])

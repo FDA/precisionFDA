@@ -1,5 +1,4 @@
 import styled from 'styled-components'
-import { Svg } from '../../../../components/icons/Svg'
 
 export const Row = styled.tr`
   display: flex;
@@ -11,18 +10,34 @@ export const SubTitle = styled.div`
   font-size: 16px;
 `
 export const Remove = styled.th`
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  ${Svg} {
-    cursor: pointer;
+  padding: 4px 16px;
+  button {
+    min-height: 23px;
   }
 `
 export const Status = styled.th`
-  padding-right: 12px;
-  padding-left: 12px;
-  width: 80px;
-  text-align: right;
+  padding: 4px 16px;
+  width: 90px;
+  text-align: left;
+  vertical-align: top;
+`
+export const Name = styled.th`
+  padding: 4px 16px;
+  text-align: left;
+  vertical-align: top;
+  min-width: 260px;
+`
+export const StyledFileUploadStatus = styled.div`
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  min-height: 25px;
+  text-transform: capitalize;
+
+  svg {
+    flex-shrink: 0;
+    width: 15px;
+  }
 `
 
 export const StyledDropSection = styled.div`
@@ -31,7 +46,6 @@ export const StyledDropSection = styled.div`
   align-items: center;
   padding: 16px;
   gap: 8px;
-  border-bottom: 1px solid var(--c-layout-border-200);
 `
 
 export const StyledUploadInfoSection = styled.div`
@@ -39,7 +53,6 @@ export const StyledUploadInfoSection = styled.div`
   justify-content: space-between;
 `
 export const UploadFilesTable = styled.table`
-  padding: 1rem;
   margin-bottom: 1rem;
   width: 100%;
   thead {
@@ -48,11 +61,16 @@ export const UploadFilesTable = styled.table`
     }
     th {
       text-align: left;
+      border-bottom: 1px solid var(--c-layout-border);
     }
   }
   td {
     padding-top: 4px;
     padding-bottom: 4px;
+    
+  }
+  td, th {
+    border-bottom: 1px solid var(--c-layout-border-200);
   }
 `
 export const StyledFileItem = styled.div`

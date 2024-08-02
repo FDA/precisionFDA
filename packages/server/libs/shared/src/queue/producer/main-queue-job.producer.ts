@@ -24,7 +24,7 @@ export class MainQueueJobProducer extends QueueJobProducer {
   }
 
   async createSyncFilesStateTask(user: UserCtx) {
-    this.log.verbose({ userId: user.id }, 'Creating SyncFilesStateTask')
+    this.logger.log({ userId: user.id }, 'Creating SyncFilesStateTask')
 
     const task = {
       type: TASK_TYPE.SYNC_FILES_STATE as const,

@@ -6,7 +6,7 @@ import { log } from './utils/logger'
 import { WorkerModule } from './worker.module'
 
 export async function bootstrap() {
-  log.verbose('worker starting')
+  log.log('worker starting')
 
   const app = await NestFactory.createApplicationContext(WorkerModule, {
     snapshot: config.nestjsDevtoolsEnabled,
@@ -17,7 +17,7 @@ export async function bootstrap() {
 
   await app.init()
 
-  log.verbose('worker started successfully')
+  log.log('worker started successfully')
 
   return app
 }

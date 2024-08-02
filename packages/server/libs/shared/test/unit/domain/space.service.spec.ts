@@ -14,7 +14,7 @@ import { OrgService } from '@shared/domain/org/service/org.service'
 describe('spaces service tests', () => {
   let em: EntityManager<MySqlDriver>
   let user: User
-  let log: Logger
+  let logger: Logger
   let userCtx: UserCtx
   let platformClient: PlatformClient
   let adminClient: PlatformClient
@@ -24,7 +24,7 @@ describe('spaces service tests', () => {
     await db.dropData(database.connection())
     em = database.orm().em.fork() as EntityManager<MySqlDriver>
     user = create.userHelper.create(em)
-    log = getLogger()
+    logger = getLogger()
     await em.flush()
     userCtx = {...user, accessToken: 'foo'}
 

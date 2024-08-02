@@ -6,7 +6,6 @@ export type AlertType = (typeof alertTypes)[number]
 
 @Entity({ tableName: 'alerts' })
 export class Alert extends BaseEntity {
-
   @Property({ nullable: false })
   title: string
 

@@ -1,28 +1,29 @@
-import { Entity, PrimaryKey, Property, Reference } from "@mikro-orm/core";
+import { Entity, PrimaryKey, Property } from '@mikro-orm/core'
 import { BaseEntity } from '../../database/base-entity'
-@Entity({tableName: 'follows'})
+
+@Entity({ tableName: 'follows' })
 export class Follow extends BaseEntity {
-    @PrimaryKey()
-    id: number
+  @PrimaryKey()
+  id: number
 
-    @Property()
-    followableId: number
+  @Property()
+  followableId: number
 
-    @Property()
-    followableType: string
+  @Property()
+  followableType: string
 
-    @Property()
-    followerId: number
+  @Property()
+  followerId: number
 
-    @Property()
-    followerType: string
+  @Property()
+  followerType: string
 
-    @Property()
-    blocked: boolean
+  @Property()
+  blocked: boolean
 
-    constructor() {
-        super()
-        // this.followableId = Reference.create(discussion).id
-        // this.followableType = 'Discussion'
-    }
+  constructor() {
+    super()
+    // this.followableId = Reference.create(discussion).id
+    // this.followableType = 'Discussion'
+  }
 }

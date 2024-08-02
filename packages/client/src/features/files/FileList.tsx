@@ -11,16 +11,28 @@ import { ContentFooter } from '../../components/Page/ContentFooter'
 import { Pagination } from '../../components/Pagination'
 import Table from '../../components/Table/Table'
 import { EmptyTable } from '../../components/Table/styles'
+import { ClipboardCheckIcon } from '../../components/icons/ClipboardCheckIcon'
+import { ClipboardIcon } from '../../components/icons/ClipboardIcon'
 import { HoverDNAnexusLogo } from '../../components/icons/DNAnexusLogo'
 import { PlusIcon } from '../../components/icons/PlusIcon'
 import { ErrorBoundary } from '../../utils/ErrorBoundry'
-import { DEFAULT_RECONNECT_ATTEMPTS, DEFAULT_RECONNECT_INTERVAL, SHOULD_RECONNECT, getNodeWsUrl } from '../../utils/config'
+import { DEFAULT_RECONNECT_ATTEMPTS, DEFAULT_RECONNECT_INTERVAL, getNodeWsUrl, SHOULD_RECONNECT } from '../../utils/config'
 import { cleanObject, getSelectedObjectsFromIndexes, toArrayFromObject } from '../../utils/object'
 import { useAuthUser } from '../auth/useAuthUser'
 import { ActionsDropdownContent } from '../home/ActionDropdownContent'
 import { ActionsRow, QuickActions, StyledHomeTable } from '../home/home.styles'
 import { ActionsButton } from '../home/show.styles'
-import { HomeScope, IFilter, IMeta, KeyVal, MetaPath, Notification } from '../home/types'
+import {
+  HomeScope,
+  IFilter,
+  IMeta,
+  KeyVal,
+  MetaPath,
+  Notification,
+  NOTIFICATION_ACTION,
+  WEBSOCKET_MESSSAGE_TYPE,
+  WebSocketMessage,
+} from '../home/types'
 import { useList } from '../home/useList'
 import { usePropertiesQuery } from '../home/usePropertiesQuery'
 import { ISpace } from '../spaces/spaces.types'
@@ -75,6 +87,8 @@ export const FileList = ({
   const user = useAuthUser()
   const isAdmin = user?.isAdmin ?? false
 
+  const [isCopiedIds, setIsCopiedIds] = React.useState<boolean>(false)
+
   const navigate = useNavigate()
 
   const {
@@ -107,29 +121,41 @@ export const FileList = ({
     navigate(`${location.pathname}/${id}`, { state: { from: location.pathname, fromSearch: location.search } })
   }
 
-  const { lastJsonMessage: notification } = useWebSocket<Notification>(getNodeWsUrl(), {
+  const { lastJsonMessage } = useWebSocket<WebSocketMessage>(getNodeWsUrl(), {
     share: true,
     reconnectInterval: DEFAULT_RECONNECT_INTERVAL,
     reconnectAttempts: DEFAULT_RECONNECT_ATTEMPTS,
     shouldReconnect: () => SHOULD_RECONNECT,
+    filter: message => {
+      try {
+        const messageData = JSON.parse(message.data)
+        const notification = messageData.data as Notification
+        return (
+          messageData.type === WEBSOCKET_MESSSAGE_TYPE.NOTIFICATION &&
+          [NOTIFICATION_ACTION.NODES_REMOVED, NOTIFICATION_ACTION.NODES_COPIED, NOTIFICATION_ACTION.FILE_CLOSED].includes(
+            notification.action,
+          )
+        )
+      } catch (e) {
+        return false
+      }
+    },
   })
 
   useEffect(() => {
-    if (notification == null) {
+    if (lastJsonMessage == null) {
       return
     }
-    if (['NODES_REMOVED', 'NODES_COPIED', 'FILE_CLOSED'].includes(notification.action)) {
-      queryCache.invalidateQueries({
-        queryKey: ['files'],
-      })
-      queryCache.invalidateQueries({
-        queryKey: ['space', String(space?.id)],
-      })
-      queryCache.invalidateQueries({
-        queryKey: ['counters'],
-      })
-    }
-  }, [notification])
+    queryCache.invalidateQueries({
+      queryKey: ['files'],
+    })
+    queryCache.invalidateQueries({
+      queryKey: ['space', String(space?.id)],
+    })
+    queryCache.invalidateQueries({
+      queryKey: ['counters'],
+    })
+  }, [lastJsonMessage])
   const { data: propertiesData } = usePropertiesQuery('node', homeScope, space?.id)
   const { isLoading, data, error } = query
 
@@ -157,6 +183,7 @@ export const FileList = ({
 
   const files = data?.files || data?.entries
   const selectedObjects = getSelectedObjectsFromIndexes(selectedIndexes, files)
+  const selectedFileIds = selectedObjects.map(o => o.uid).filter(Boolean)
   const actions = useFilesSelectActions({
     homeScope,
     space,
@@ -170,6 +197,14 @@ export const FileList = ({
   delete actions['Request license approval']
 
   const listActions = useFolderActions(homeScope, folderIdParam!, space?.id)
+
+  const handleCopyIds = () => {
+    navigator.clipboard.writeText(selectedFileIds.join(', '))
+    setIsCopiedIds(true)
+    setTimeout(() => {
+      setIsCopiedIds(false)
+    }, 5000)
+  }
 
   if (error) return <div>Error! {JSON.stringify(error)}</div>
 
@@ -197,19 +232,34 @@ export const FileList = ({
               </>
             )}
           </QuickActions>
-          <Dropdown
-            trigger="click"
-            content={
-              <ActionsDropdownContent
-                actions={actions}
-                message={homeScope === 'spaces' && 'To perform other actions on this file, access it from the Space'}
-              />
-            }
-          >
-            {dropdownProps => (
-              <ActionsButton {...dropdownProps} active={dropdownProps.isActive} data-testid="home-files-actions-button" />
+          <QuickActions>
+            {selectedFileIds.length > 0 && (
+              <Button variant="primary" onClick={handleCopyIds}>
+                {isCopiedIds ? (
+                  <>
+                    <ClipboardCheckIcon height={14} /> Copied IDs
+                  </>
+                ) : (
+                  <>
+                    <ClipboardIcon height={14} /> Copy IDs
+                  </>
+                )}
+              </Button>
             )}
-          </Dropdown>
+            <Dropdown
+              trigger="click"
+              content={
+                <ActionsDropdownContent
+                  actions={actions}
+                  message={homeScope === 'spaces' && 'To perform other actions on this file, access it from the Space'}
+                />
+              }
+            >
+              {dropdownProps => (
+                <ActionsButton {...dropdownProps} active={dropdownProps.isActive} data-testid="home-files-actions-button" />
+              )}
+            </Dropdown>
+          </QuickActions>
         </ActionsRow>
         <ActionsRow>{breadcrumbs(location.pathname, homeScope, data?.meta?.path)}</ActionsRow>
       </div>

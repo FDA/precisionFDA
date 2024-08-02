@@ -1,5 +1,5 @@
+import { PlatformSpec } from '../domain/app/app.input'
 import { AnyObject } from '../types'
-import { PlatformSpec} from '../domain/app/app.input'
 
 type Starting = {
   project: string
@@ -15,54 +15,54 @@ type JobDescribeParams = { jobId: string }
 type JobTerminateParams = { jobId: string }
 
 type PackageMapping = {
-  name: string,
-  packageManager?: string,
-  version?: string,
-  stages?: string[],
+  name: string
+  packageManager?: string
+  version?: string
+  stages?: string[]
 }
 
 type RunSpec = {
-  code: string,
-  interpreter: string,
-  systemRequirements: any,
-  distribution: string,
-  release: string,
-  execDepends: PackageMapping[],
-  version?: string,
+  code: string
+  interpreter: string
+  systemRequirements: any
+  distribution: string
+  release: string
+  execDepends: PackageMapping[]
+  version?: string
 }
 
 type AppletCreateParams = {
-  project?: string,
-  name?: string,
-  title?: string,
-  inputSpec: PlatformSpec[],
-  outputSpec: PlatformSpec[],
-  runSpec: RunSpec,
-  dxapi: string,
-  access: any,
+  project?: string
+  name?: string
+  title?: string
+  inputSpec: PlatformSpec[]
+  outputSpec: PlatformSpec[]
+  runSpec: RunSpec
+  dxapi: string
+  access: any
 }
 
 type AppCreateParams = {
-  applet: string, // deprecated field!
-  name?: string,
-  title?: string,
-  summary?: string,
-  description?: string,
-  version: string,
-  resources?: string[], // deprecated field!
-  details?: any,
-  openSource?: boolean,
-  billTo?: string,
-  access?: any,
+  applet: string // deprecated field!
+  name?: string
+  title?: string
+  summary?: string
+  description?: string
+  version: string
+  resources?: string[] // deprecated field!
+  details?: any
+  openSource?: boolean
+  billTo?: string
+  access?: any
 }
 
 type AppAddAuthorizedUsersParams = {
-  appId: string,
-  authorizedUsers: string[],
+  appId: string
+  authorizedUsers: string[]
 }
 
 type AppPublishParams = {
-  appId: string,
+  appId: string
   makeDefault?: boolean
 }
 
@@ -70,8 +70,8 @@ type JobFindParams = {
   id: string[] // job dxid
   project?: string // ID of the project context, or the project in which the job was launched
 
-  includeSubjobs?: boolean,
-  describe: boolean,
+  includeSubjobs?: boolean
+  describe: boolean
 }
 
 type JobCreateParams = {
@@ -247,49 +247,53 @@ type WorkflowDescribeParams = {
 }
 
 type CloneObjectsParams = {
-  sourceProject: string,
-  destinationProject: string,
+  sourceProject: string
+  destinationProject: string
   objects: string[]
 }
 
+type ProjectLeaveParams = {
+  projectDxid: string
+}
 
 export {
-  AppletCreateParams,
-  AppCreateParams,
   AppAddAuthorizedUsersParams,
+  AppCreateParams,
+  AppDescribeParams,
+  AppletCreateParams,
   AppPublishParams,
-  ObjectsParams,
-  PackageMapping,
-  Starting,
-  IPaginatedParams,
+  CloneObjectsParams,
+  CreateFolderParams,
+  DbClusterActionParams,
+  DbClusterCreateParams,
+  DbClusterDescribeParams,
+  DescribeDataObjectsParams,
+  DescribeFoldersParams,
   FileCloseParams,
+  FileCreateParams,
   FileDescribeParams,
   FileDownloadLinkParams,
-  FileStatesParams,
-  FileCreateParams,
-  ListFilesParams,
-  JobDescribeParams,
-  JobCreateParams,
-  JobTerminateParams,
-  CreateFolderParams,
-  DescribeFoldersParams,
-  JobFindParams,
+  FileGetUploadUrlParams,
   FileRemoveParams,
+  FileStatesParams,
+  IPaginatedParams,
+  JobCreateParams,
+  JobDescribeParams,
+  JobFindParams,
+  JobTerminateParams,
+  ListFilesParams,
   MoveFilesParams,
-  DbClusterActionParams,
-  DbClusterDescribeParams,
-  DbClusterCreateParams,
+  ObjectsParams,
   OrgFindMembersParams,
-  UserInviteToOrgParams,
-  UserRemoveFromOrgParams,
+  PackageMapping,
+  ProjectLeaveParams,
   RemoveFolderParams,
   RenameFolderParams,
-  DescribeDataObjectsParams,
+  Starting,
   UserDescribeParams,
+  UserInviteToOrgParams,
+  UserRemoveFromOrgParams,
   UserResetMfaParams,
   UserUnlockParams,
-  AppDescribeParams,
   WorkflowDescribeParams,
-  FileGetUploadUrlParams,
-  CloneObjectsParams,
 }

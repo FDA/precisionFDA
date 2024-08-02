@@ -58,21 +58,6 @@ export const RightSide = styled.div`
     border-bottom: 0;
   }
 `
-export const RightSideScroll = styled.div`
-  ${compactScrollBarV2}
-  margin: 2px;
-  overflow-y: scroll;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  border-right: 1px solid var(--c-layout-border-200);
-  flex: 1 0 auto;
-  max-width: 330px;
-
-  ${RightSideItem}:last-child {
-    border-bottom: 0;
-  }
-`
 
 export const SectionTitle = styled.h3`
   font-size: 14px;

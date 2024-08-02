@@ -2,12 +2,14 @@ import { Injectable, Logger } from '@nestjs/common'
 import { QueueProxy } from '@shared/queue/queue.proxy'
 import { TaskWithAuth } from '@shared/queue/task.input'
 import { Job, Queue } from 'bull'
+import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 
 @Injectable()
 export class QueueEventListener {
-  private readonly queues: Queue[] = []
+  @ServiceLogger()
+  private readonly logger: Logger
 
-  private readonly log = new Logger('queue event listener')
+  private readonly queues: Queue[] = []
 
   constructor(queueProxy: QueueProxy) {
     this.queues.push(queueProxy.mainQueue)
@@ -23,7 +25,7 @@ export class QueueEventListener {
     this.queues.forEach((queue) => {
       queue.on('failed', (job: Job, error: Error) => {
         try {
-          this.log.error({ job: this.getJobInfo(job), error }, 'Job failed')
+          this.logger.error({ job: this.getJobInfo(job), error }, 'Job failed')
         } catch (error) {
           console.error('error during queue failed handling', { error })
         }
@@ -33,7 +35,7 @@ export class QueueEventListener {
         try {
           const job = await queue.getJob(jobId)
 
-          this.log.debug(this.getJobInfo(job), 'Job waiting in queue')
+          this.logger.debug(this.getJobInfo(job), 'Job waiting in queue')
         } catch (error) {
           console.error('error during queue waiting handling', { error })
         }

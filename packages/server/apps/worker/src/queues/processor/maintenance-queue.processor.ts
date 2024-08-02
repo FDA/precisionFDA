@@ -1,12 +1,11 @@
-import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Processor } from '@nestjs/bull'
 import { Inject } from '@nestjs/common'
 import { config } from '@shared/config'
-import { DEPRECATED_SQL_ENTITY_MANAGER } from '@shared/database/provider/deprecated-sql-entity-manager.provider'
 import { testHeapMemoryAllocationError } from '@shared/debug/memory-tests'
 import { AdminDataConsistencyReportService } from '@shared/debug/admin-data-consistency-report.service'
 import { JobService } from '@shared/domain/job/job.service'
 import { UserCheckupOperation } from '@shared/domain/user/ops/user-checkup'
+import { UserService } from '@shared/domain/user/user.service'
 import { SyncSpacesPermissionsJob, TASK_TYPE } from '@shared/queue/task.input'
 import { Job } from 'bull'
 import { checkUserJobsHandler } from '../../jobs/check-user-jobs.handler'
@@ -18,9 +17,9 @@ import { DbClusterService } from '@shared/domain/db-cluster/service/db-cluster.s
 @Processor(config.workerJobs.queues.maintenance.name)
 export class MaintenanceQueueProcessor extends BaseQueueProcessor {
   constructor(
-    @Inject(DEPRECATED_SQL_ENTITY_MANAGER) private readonly em: SqlEntityManager,
     private readonly adminDataConsistencyReportService: AdminDataConsistencyReportService,
     private readonly dbClusterService: DbClusterService,
+    private readonly userService: UserService,
     private readonly jobServiceWithPlatformClient: JobService,
     @Inject('JOB_SERVICE_WITH_CHALLENGE_BOT_CLIENT')
     private readonly jobServiceWithChallengeBotClient: JobService,
@@ -66,6 +65,11 @@ export class MaintenanceQueueProcessor extends BaseQueueProcessor {
   @ProcessWithContext(TASK_TYPE.ADMIN_DATA_CONSISTENCY_REPORT)
   async reportAdminDataConsistency() {
     await this.adminDataConsistencyReportService.createReport()
+  }
+
+  @ProcessWithContext(TASK_TYPE.USER_INACTIVITY_ALERT)
+  async userInactivityAlert() {
+    await this.userService.sendUserInactivityAlerts()
   }
 
   @ProcessWithContext(TASK_TYPE.DEBUG_MAX_MEMORY)

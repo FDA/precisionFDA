@@ -73,7 +73,7 @@ export class AppService implements IAppService {
   }
 
   private async validateAppInput(appInput: AppInput, userId: number) {
-    logger.verbose('starting app validations')
+    logger.log('Starting app validations')
 
     if (!UBUNTU_RELEASES.includes(appInput.release)) {
       this.throwValidationError(`Unacceptable release ${appInput.release}`)
@@ -115,7 +115,7 @@ export class AppService implements IAppService {
     const alreadySeenOutputs: string[] = []
     appInput.output_spec.forEach((spec) => this.validateSpec(spec, 'output', alreadySeenOutputs))
 
-    logger.verbose('app validations finished successfully')
+    logger.log('App validations finished successfully')
   }
 
   private getScope = (scope?: string) => {
@@ -165,7 +165,7 @@ export class AppService implements IAppService {
       appSeries.name = appName
       appSeries.dxid = appSeriesDxid
       appSeries.scope = scope
-      logger.verbose('AppService: creating app series', appSeries)
+      logger.log(`Creating app series ${appSeries.dxid}`)
       await this.em.persistAndFlush(appSeries)
     }
     return appSeries
@@ -207,7 +207,7 @@ export class AppService implements IAppService {
     appInput: AppInput,
     release: string,
   ): Promise<string> => {
-    logger.verbose('AppService: creating applet in platform', user, appInput, release)
+    logger.log('Creating applet in platform')
     const appletCreateParams: AppletCreateParams = {
       project: user.privateFilesProject,
       inputSpec: this.remapPfdaSpecToPlatformSpec(appInput.input_spec),
@@ -230,6 +230,7 @@ export class AppService implements IAppService {
       access: appInput.internet_access ? { network: ['*'] } : {},
     }
     const appletCreateResponse = await this.platformClient.appletCreate(appletCreateParams)
+    logger.log(`Applet with id ${appletCreateResponse.id} created successfully`)
     return appletCreateResponse.id
   }
 
@@ -240,14 +241,7 @@ export class AppService implements IAppService {
     user: User,
     assets: Asset[],
   ): Promise<string> => {
-    logger.verbose(
-      'AppService: creating app in platform',
-      appletId,
-      appInput,
-      revision,
-      user,
-      assets,
-    )
+    logger.log(`Creating app in platform for applet id ${appletId}`)
     const assetDxids = this.getAssetDxids(assets)
     const appCreateParams: AppCreateParams = {
       applet: appletId,
@@ -263,17 +257,18 @@ export class AppService implements IAppService {
       access: appInput.internet_access ? { network: ['*'] } : {},
     }
     const appCreateResponse = await this.platformClient.appCreate(appCreateParams)
+    logger.log(`App with id ${appCreateResponse.id} for applet id ${appletId} created successfully`)
     return appCreateResponse.id
   }
 
   private createAppEvent = async (user: User, app: App) => {
-    logger.verbose('AppService: creating app event', user, app)
+    logger.log(`Creating app event for app ${app.uid} and user ${user.id}`)
     const createAppEvent = await createAppCreated(user, app)
     await this.em.persistAndFlush(createAppEvent)
   }
 
   private updateAppSeries = async (appSeries: AppSeries, appInput: AppInput, app: App) => {
-    logger.verbose('AppService: updating app series', appSeries, appInput, app)
+    logger.log(`Updating app series ${appSeries.dxid}`)
     appSeries.latestRevisionAppId = app.id
     if (appInput.scope && appInput.scope !== STATIC_SCOPE.PRIVATE) {
       appSeries.latestVersionAppId = app.id
@@ -304,7 +299,7 @@ export class AppService implements IAppService {
     appInput: AppInput,
     appSeriesId: number,
   ) => {
-    logger.verbose('AppService: saving app in DB', platformAppId, appInput, revision, user, assets)
+    logger.log(`Saving app in DB with platformAppId: ${platformAppId}`)
     const app = new App(user)
     app.dxid = platformAppId
     app.uid = `${app.dxid}-${revision}`
@@ -340,7 +335,7 @@ export class AppService implements IAppService {
    * @return uid of newly created app
    */
   create = async (appInput: AppInput, userId: number): Promise<string> => {
-    logger.verbose('AppService: creating app', appInput, userId)
+    logger.log(`Creating app for userId: ${userId}`)
     await this.validateAppInput(appInput, userId)
     await this.em.begin()
     try {

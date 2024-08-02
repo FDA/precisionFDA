@@ -15,10 +15,16 @@ import { toArrayFromObject } from '../../utils/object'
 import { IExecution } from '../executions/executions.types'
 import { useExecutionColumns } from '../executions/useExecutionColumns'
 import { columnFilters } from '../home/columnFilters'
+import { StyledHomeTable } from '../home/home.styles'
 import {
-  StyledHomeTable,
-} from '../home/home.styles'
-import { IFilter, IMeta, KeyVal, NOTIFICATION_ACTION, Notification } from '../home/types'
+  IFilter,
+  IMeta,
+  KeyVal,
+  NOTIFICATION_ACTION,
+  Notification,
+  WEBSOCKET_MESSSAGE_TYPE,
+  WebSocketMessage,
+} from '../home/types'
 import { useFilterParams } from '../home/useFilterState'
 import { useListQuery } from '../home/useListQuery'
 import { fetchAppExecutions } from './apps.api'
@@ -28,7 +34,7 @@ type ListType = { jobs: IExecution[]; meta: IMeta }
 export const AppExecutionsList = ({ appUid }: { appUid: string }) => {
   const resource = 'app-executions'
   const { pageParam, perPageParam, setPageParam, setPerPageParam } = usePaginationParams()
-  const { sort, sortBy, setSortBy } = useOrderByState({ defaultOrder: { order_by: 'created_at_date_time', order_dir: 'DESC' }})
+  const { sort, sortBy, setSortBy } = useOrderByState({ defaultOrder: { order_by: 'created_at_date_time', order_dir: 'DESC' } })
   const { colWidths, saveColumnResizeWidth } = useColumnWidthLocalStorage(resource)
   const queryCache = useQueryClient()
   // useEffect(() => {
@@ -51,27 +57,39 @@ export const AppExecutionsList = ({ appUid }: { appUid: string }) => {
     setPerPageParam(perPage, 'pushIn')
   }
 
-  const { lastJsonMessage: notification } = useWebSocket<Notification>(getNodeWsUrl(), {
+  const { lastJsonMessage } = useWebSocket<WebSocketMessage>(getNodeWsUrl(), {
     share: true,
     reconnectInterval: DEFAULT_RECONNECT_INTERVAL,
     reconnectAttempts: DEFAULT_RECONNECT_ATTEMPTS,
     shouldReconnect: () => SHOULD_RECONNECT,
+    filter: message => {
+      try {
+        const messageData = JSON.parse(message.data)
+        const notification = messageData.data as Notification
+        return (
+          messageData.type === WEBSOCKET_MESSSAGE_TYPE.NOTIFICATION &&
+          [
+            NOTIFICATION_ACTION.JOB_RUNNABLE,
+            NOTIFICATION_ACTION.JOB_RUNNING,
+            NOTIFICATION_ACTION.JOB_DONE,
+            NOTIFICATION_ACTION.JOB_FAILED,
+            NOTIFICATION_ACTION.JOB_OUTPUTS_SYNCED,
+          ].includes(notification.action)
+        )
+      } catch (e) {
+        return false
+      }
+    },
   })
 
   useEffect(() => {
-    if (notification == null) {
+    if (lastJsonMessage == null) {
       return
     }
-    if ([NOTIFICATION_ACTION.JOB_RUNNABLE,
-      NOTIFICATION_ACTION.JOB_RUNNING,
-      NOTIFICATION_ACTION.JOB_DONE,
-      NOTIFICATION_ACTION.JOB_FAILED,
-      NOTIFICATION_ACTION.JOB_OUTPUTS_SYNCED].includes(notification.action)) {
-        queryCache.invalidateQueries({
-          queryKey: [resource],
-        })
-    }
-  }, [notification])
+    queryCache.invalidateQueries({
+      queryKey: [resource],
+    })
+  }, [lastJsonMessage])
 
   const { isLoading, data, error } = query
 
@@ -107,7 +125,6 @@ export const AppExecutionsList = ({ appUid }: { appUid: string }) => {
   )
 }
 
-
 export const ExecutionsListTable = ({
   filters,
   jobs,
@@ -125,9 +142,7 @@ export const ExecutionsListTable = ({
   setSortBy: (cols: SortingRule<string>[]) => void
   isLoading: boolean
   colWidths: KeyVal
-  saveColumnResizeWidth: (
-    columnResizing: UseResizeColumnsState<any>['columnResizing']
-  ) => void
+  saveColumnResizeWidth: (columnResizing: UseResizeColumnsState<any>['columnResizing']) => void
 }) => {
   const col = useExecutionColumns({ colWidths })
   const [hiddenColumns, sethiddenColumns] = useState<string[]>(['featured', 'app_title', 'location'])

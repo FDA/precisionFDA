@@ -24,4 +24,8 @@ export class TimeUtils {
   static minutesToMilliseconds(minutes: number) {
     return this.minutesToSeconds(minutes) * this.MILLISECONDS_IN_SECOND
   }
+
+  static minutesAgoInMiliseconds(minutes: number) {
+    return Date.now() - this.minutesToMilliseconds(minutes)
+  }
 }

@@ -4,7 +4,6 @@ import 'regenerator-runtime/runtime'
 import httpStatusCodes from 'http-status-codes'
 import sparkMD5 from 'spark-md5'
 import { closeFile, createFile, getUploadURL, uploadChunk } from '../../../../api/files'
-// import { closeFile, createFile, getUploadURL, uploadChunk } from "../../files.api"
 import { CHUNK_SIZE, FilesMeta, FILE_STATUS, IUploadFile, IUploadInfo } from './constants'
 
 const filterFiles = (filesBlob: any[], filesMeta: any[]) =>
@@ -57,8 +56,6 @@ export const multiFileUpload = async ({
 
     await createFile(file.name, scopeToUpload, folderId ?? null)
       .then(response => {
-        console.log(file.name)
-
         throwIfError(response.status, response.payload)
 
         const numChunks = Math.ceil(file.size / CHUNK_SIZE)
@@ -123,7 +120,7 @@ export const multiFileUpload = async ({
       })
       .catch((error) => {
         uploadInfo.status = FILE_STATUS.failure
-        // dispatch(updateFile(uploadInfo))
+        updateFileStatus(uploadInfo)
         // Rethrow error for consumers of this API to catch
         throw error
       })

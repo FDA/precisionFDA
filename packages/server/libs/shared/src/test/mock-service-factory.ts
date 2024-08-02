@@ -1,8 +1,8 @@
+import { Logger } from '@nestjs/common'
 import { Job } from '@shared/domain/job/job.entity'
 import { IPlatformAuthClient } from '@shared/platform-client/platform-auth-client'
 import { IWorkstationClient } from '@shared/workstation-client/workstation-client'
 import { AxiosInstance } from 'axios'
-import { Logger } from '@nestjs/common'
 import sinon from 'sinon'
 import { ServiceFactory, setServiceFactory } from '../services/service-factory'
 import { IEmailService } from '../services/smtp.service'
@@ -10,6 +10,10 @@ import { IEmailService } from '../services/smtp.service'
 class MockServiceFactory extends ServiceFactory {
   emailService = {
     sendEmail: sinon.stub(),
+    reset: () => {
+      this.emailService.sendEmail.resolves()
+      this.emailService.sendEmail.resetHistory()
+    },
   }
 
   notificationService = {
@@ -17,19 +21,19 @@ class MockServiceFactory extends ServiceFactory {
     reset: () => {
       this.notificationService.createNotification.callsFake(() => {})
       this.notificationService.createNotification.resetHistory()
-    }
+    },
   }
 
   platformAuthClient = {
     newAuthToken: sinon.stub(),
     userResetMfa: sinon.stub(),
     reset: () => {
-      this.platformAuthClient.newAuthToken.callsFake(() => ({ 'authorization_code': '12345678' }))
+      this.platformAuthClient.newAuthToken.callsFake(() => ({ authorization_code: '12345678' }))
       this.platformAuthClient.newAuthToken.resetHistory()
 
-      this.platformAuthClient.userResetMfa.callsFake(() => ({ 'authorization_code': '12345678' }))
+      this.platformAuthClient.userResetMfa.callsFake(() => ({ authorization_code: '12345678' }))
       this.platformAuthClient.userResetMfa.resetHistory()
-    }
+    },
   }
 
   workstationClient = {
@@ -42,7 +46,7 @@ class MockServiceFactory extends ServiceFactory {
       this.workstationClient.oauthAccess.callsFake(() => {})
       this.workstationClient.oauthAccess.resetHistory()
 
-      this.workstationClient.alive.callsFake(() => (true))
+      this.workstationClient.alive.callsFake(() => true)
       this.workstationClient.alive.resetHistory()
 
       this.workstationClient.setAPIKey.callsFake(() => ({ result: 'success' }))
@@ -53,18 +57,27 @@ class MockServiceFactory extends ServiceFactory {
 
       this.workstationClient.snapshot.callsFake(() => ({ result: 'success' }))
       this.workstationClient.snapshot.resetHistory()
-    }
+    },
   }
 
   getEmailService(): IEmailService {
     return this.emailService
   }
 
-  getPlatformAuthClient(accessToken: string, logger?: Logger, axiosInstance?: AxiosInstance): IPlatformAuthClient {
+  getPlatformAuthClient(
+    accessToken: string,
+    logger?: Logger,
+    axiosInstance?: AxiosInstance,
+  ): IPlatformAuthClient {
     return this.platformAuthClient
   }
 
-  getWorkstationClient(job: Job, url: string, axiosInstance: AxiosInstance, logger?: Logger): IWorkstationClient {
+  getWorkstationClient(
+    job: Job,
+    url: string,
+    axiosInstance: AxiosInstance,
+    logger?: Logger,
+  ): IWorkstationClient {
     return this.workstationClient
   }
 
@@ -72,6 +85,7 @@ class MockServiceFactory extends ServiceFactory {
     this.notificationService.reset()
     this.platformAuthClient.reset()
     this.workstationClient.reset()
+    this.emailService.reset()
   }
 }
 

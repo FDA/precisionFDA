@@ -22,7 +22,7 @@ export abstract class BaseOperation<CtxT extends OpsCtx, In, Out> {
 
   async execute(props?: In): Promise<Out> {
     const startTime = Date.now()
-    this.ctx.log.verbose(
+    this.ctx.log.log(
       {
         name: this.constructor.name,
         startTime,
@@ -73,14 +73,12 @@ export abstract class WorkerBaseOperation<Ctx extends OpsCtx, In, Out> extends B
       bullJobId: this.ctx.job.id,
       bullJobCustomId: path(['opts', 'repeat', 'jobId'], this.ctx.job),
     }
-    this.ctx.log.verbose({...operationInfo},
-      'Worker operation started',
-    )
+    this.ctx.log.log({ ...operationInfo }, 'Worker operation started')
 
     try {
       // run the operation with context
       const res = await this.run(props)
-      this.ctx.log.verbose(
+      this.ctx.log.log(
         {
           ...operationInfo,
           executionTime: Date.now() - startTime,

@@ -26,7 +26,7 @@ export class FolderController {
   constructor(
     private readonly user: UserContext,
     @Inject(DEPRECATED_SQL_ENTITY_MANAGER) private readonly em: SqlEntityManager,
-    private readonly log: Logger,
+    private readonly logger: Logger,
   ) {}
 
   @Patch('/:id/rename')
@@ -36,7 +36,7 @@ export class FolderController {
     body: Omit<RenameFolderInput, 'id'>,
   ) {
     const opsCtx: UserOpsCtx = {
-      log: this.log,
+      log: this.logger,
       user: this.user,
       em: this.em,
     }
@@ -51,7 +51,7 @@ export class FolderController {
   @Post('/recreate')
   async recreateFolder(@Body() body: { userId: string; projectId: string }) {
     const opsCtx: UserOpsCtx = {
-      log: this.log,
+      log: this.logger,
       user: this.user,
       em: this.em,
     }

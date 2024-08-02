@@ -1,6 +1,6 @@
 import { QueryOrder } from '@mikro-orm/core'
 import { SqlEntityManager } from '@mikro-orm/mysql'
-import { Injectable } from '@nestjs/common'
+import { Injectable, Logger } from '@nestjs/common'
 import { App } from '@shared/domain/app/app.entity'
 import { Discussion } from '@shared/domain/discussion/discussion.entity'
 import { EntityInstance } from '@shared/domain/entity/domain/entity-instance'
@@ -28,9 +28,13 @@ import { SpaceReport } from '../entity/space-report.entity'
 import { BatchComplete } from '../model/batch-complete'
 import { SpaceReportPartSource } from '../model/space-report-part-source'
 import { SpaceReportPartService } from './part/space-report-part.service'
+import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 
 @Injectable()
 export class SpaceReportService {
+  @ServiceLogger()
+  private readonly logger: Logger
+
   constructor(
     private readonly em: SqlEntityManager,
     private readonly spaceReportPartService: SpaceReportPartService,
@@ -99,7 +103,10 @@ export class SpaceReportService {
       return []
     }
 
-    await this.em.transactional(async () => this.em.remove(reports))
+    await this.em.transactional(async () => {
+      this.logger.log(`Deleting reports with ids: ${reports.map((report) => report.id)}`)
+      this.em.remove(reports)
+    })
 
     return reports.map((r) => r.id)
   }

@@ -13,7 +13,6 @@ import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
 import { Space } from '@shared/domain/space/space.entity'
 import { User } from '@shared/domain/user/user.entity'
-import { EmailProcessOperation } from '@shared/domain/email/ops/email-process'
 import { expect } from 'chai'
 import {
   SPACE_MEMBERSHIP_ROLE,
@@ -22,6 +21,7 @@ import {
 import { SpaceEvent } from '@shared/domain/space-event/space-event.entity'
 import { EMAIL_TYPES } from '@shared/domain/email/email.config'
 import { Ref } from '@mikro-orm/core'
+import { EmailFacade } from '@shared/domain/email/email.facade'
 
 describe('SpaceEvent service tests', () => {
   const USER_ID = 1
@@ -34,11 +34,13 @@ describe('SpaceEvent service tests', () => {
 
   const spaceMembershipRepoGetMembershipStub = stub()
 
+  const prepareEmailStub = stub()
+
+  const sendEmailStub = stub()
+
   const userRepoFindOneStub = stub()
 
   const emPersistAndFlushStub = stub()
-
-  const executeStub = stub()
 
   const spaceRepo = {
     findOne: spaceRepoFindOneStub,
@@ -52,9 +54,9 @@ describe('SpaceEvent service tests', () => {
     getMembership: spaceMembershipRepoGetMembershipStub,
   } as unknown as SpaceMembershipRepository
 
-  const epOperation = {
-    execute: executeStub,
-  } as unknown as EmailProcessOperation
+  const emailFacade = {
+    sendEmail: sendEmailStub,
+  } as unknown as EmailFacade
 
   const em = {
     persistAndFlush: emPersistAndFlushStub,
@@ -70,11 +72,11 @@ describe('SpaceEvent service tests', () => {
     spaceMembershipRepoGetMembershipStub.reset()
     spaceMembershipRepoGetMembershipStub.throws()
 
+    sendEmailStub.reset()
+    sendEmailStub.throws()
+
     emPersistAndFlushStub.reset()
     emPersistAndFlushStub.throws()
-
-    executeStub.reset()
-    executeStub.throws()
   })
 
   describe('#createSpaceEvent', () => {
@@ -84,7 +86,7 @@ describe('SpaceEvent service tests', () => {
       const user = createStubInstance(User)
       userRepoFindOneStub.resolves(user)
       emPersistAndFlushStub.reset()
-      executeStub.reset()
+      prepareEmailStub.returns([{ email: 'email' }])
 
       const input: SpaceEventInput = {
         spaceId: 1,
@@ -115,6 +117,9 @@ describe('SpaceEvent service tests', () => {
 
       expect(emPersistAndFlushStub.calledOnce).to.be.true
       expect(emPersistAndFlushStub.calledWith(result)).to.be.true
+      expect(prepareEmailStub.calledOnce).to.be.true
+      expect(sendEmailStub.calledOnce).to.be.true
+      expect(sendEmailStub.calledWith({ email: 'email' })).to.be.true
     })
   })
 
@@ -123,28 +128,42 @@ describe('SpaceEvent service tests', () => {
       const spaceEvent = createStubInstance(SpaceEvent)
       spaceEvent.id = 10
       spaceEvent.activityType = SPACE_EVENT_ACTIVITY_TYPE.file_added
-      executeStub.reset()
+      prepareEmailStub.returns([
+        {
+          emailTypeId: EMAIL_TYPES.newContentAdded,
+          input: { spaceEventId: spaceEvent.id },
+          receiverUserIds: [],
+        },
+      ])
+      sendEmailStub.reset()
 
       await getInstance().sendNotificationForEvent(spaceEvent)
 
-      expect(executeStub.calledOnce).to.be.true
-      expect(executeStub.firstCall.args[0].emailTypeId).to.eq(EMAIL_TYPES.newContentAdded)
-      expect(executeStub.firstCall.args[0].input.spaceEventId).to.eq(10)
-      expect(executeStub.firstCall.args[0].receiverUserIds).to.deep.eq([])
+      expect(sendEmailStub.calledOnce).to.be.true
+      expect(sendEmailStub.firstCall.args[0].emailTypeId).to.eq(EMAIL_TYPES.newContentAdded)
+      expect(sendEmailStub.firstCall.args[0].input.spaceEventId).to.eq(10)
+      expect(sendEmailStub.firstCall.args[0].receiverUserIds).to.deep.eq([])
     })
 
     it('should send notification for event - comment types', async () => {
       const spaceEvent = createStubInstance(SpaceEvent)
       spaceEvent.id = 10
       spaceEvent.activityType = SPACE_EVENT_ACTIVITY_TYPE.comment_added
-      executeStub.reset()
+      prepareEmailStub.returns([
+        {
+          emailTypeId: EMAIL_TYPES.commentAdded,
+          input: { spaceEventId: spaceEvent.id },
+          receiverUserIds: [],
+        },
+      ])
+      sendEmailStub.reset()
 
       await getInstance().sendNotificationForEvent(spaceEvent)
 
-      expect(executeStub.calledOnce).to.be.true
-      expect(executeStub.firstCall.args[0].emailTypeId).to.eq(EMAIL_TYPES.commentAdded)
-      expect(executeStub.firstCall.args[0].input.spaceEventId).to.eq(10)
-      expect(executeStub.firstCall.args[0].receiverUserIds).to.deep.eq([])
+      expect(sendEmailStub.calledOnce).to.be.true
+      expect(sendEmailStub.firstCall.args[0].emailTypeId).to.eq(EMAIL_TYPES.commentAdded)
+      expect(sendEmailStub.firstCall.args[0].input.spaceEventId).to.eq(10)
+      expect(sendEmailStub.firstCall.args[0].receiverUserIds).to.deep.eq([])
     })
 
     it('should send notification for event - space types', async () => {
@@ -157,15 +176,27 @@ describe('SpaceEvent service tests', () => {
       spaceEvent.space = {
         id: 12,
       } as unknown as Ref<Space>
-      executeStub.reset()
+
+      prepareEmailStub.returns([
+        {
+          emailTypeId: EMAIL_TYPES.spaceChanged,
+          input: {
+            initUserId: spaceEvent.user.id,
+            spaceId: spaceEvent.space.id,
+            activityType: spaceEvent.activityType,
+          },
+          receiverUserIds: [],
+        },
+      ])
+      sendEmailStub.reset()
 
       await getInstance().sendNotificationForEvent(spaceEvent)
 
-      expect(executeStub.calledOnce).to.be.true
-      expect(executeStub.firstCall.args[0].emailTypeId).to.eq(EMAIL_TYPES.spaceChanged)
-      expect(executeStub.firstCall.args[0].input.initUserId).to.eq(11)
-      expect(executeStub.firstCall.args[0].input.spaceId).to.eq(12)
-      expect(executeStub.firstCall.args[0].receiverUserIds).to.deep.eq([])
+      expect(sendEmailStub.calledOnce).to.be.true
+      expect(sendEmailStub.firstCall.args[0].emailTypeId).to.eq(EMAIL_TYPES.spaceChanged)
+      expect(sendEmailStub.firstCall.args[0].input.initUserId).to.eq(11)
+      expect(sendEmailStub.firstCall.args[0].input.spaceId).to.eq(12)
+      expect(sendEmailStub.firstCall.args[0].receiverUserIds).to.deep.eq([])
     })
 
     it('should send notification for event - membership types', async () => {
@@ -180,17 +211,33 @@ describe('SpaceEvent service tests', () => {
       } as unknown as Ref<Space>
       spaceEvent.entityId = 13
       spaceEvent.role = SPACE_MEMBERSHIP_ROLE.LEAD
-      executeStub.reset()
+
+      prepareEmailStub.returns([
+        {
+          emailTypeId: EMAIL_TYPES.memberChangedAddedRemoved,
+          input: {
+            initUserId: spaceEvent.user.id,
+            spaceId: spaceEvent.space.id,
+            updatedMembershipId: spaceEvent.entityId,
+            activityType: spaceEvent.activityType,
+            newMembershipRole: spaceEvent.role,
+          },
+          receiverUserIds: [],
+        },
+      ])
+      sendEmailStub.reset()
 
       await getInstance().sendNotificationForEvent(spaceEvent)
 
-      expect(executeStub.calledOnce).to.be.true
-      expect(executeStub.firstCall.args[0].emailTypeId).to.eq(EMAIL_TYPES.memberChangedAddedRemoved)
-      expect(executeStub.firstCall.args[0].input.initUserId).to.eq(11)
-      expect(executeStub.firstCall.args[0].input.spaceId).to.eq(12)
-      expect(executeStub.firstCall.args[0].input.updatedMembershipId).to.eq(13)
-      expect(executeStub.firstCall.args[0].input.newMembershipRole).to.eq(SPACE_MEMBERSHIP_ROLE.LEAD)
-      expect(executeStub.firstCall.args[0].receiverUserIds).to.deep.eq([])
+      expect(sendEmailStub.calledOnce).to.be.true
+      expect(sendEmailStub.firstCall.args[0].emailTypeId).to.eq(EMAIL_TYPES.memberChangedAddedRemoved)
+      expect(sendEmailStub.firstCall.args[0].input.initUserId).to.eq(11)
+      expect(sendEmailStub.firstCall.args[0].input.spaceId).to.eq(12)
+      expect(sendEmailStub.firstCall.args[0].input.updatedMembershipId).to.eq(13)
+      expect(sendEmailStub.firstCall.args[0].input.newMembershipRole).to.eq(
+        SPACE_MEMBERSHIP_ROLE.LEAD,
+      )
+      expect(sendEmailStub.firstCall.args[0].receiverUserIds).to.deep.eq([])
     })
   })
 
@@ -201,7 +248,7 @@ describe('SpaceEvent service tests', () => {
       spaceRepo,
       userRepo,
       spaceMembershipRepo,
-      epOperation,
+      emailFacade,
     )
   }
 })

@@ -152,7 +152,7 @@ class SlotModel
     @appUID = @data.uid
     @appName = ko.observable(@data.name)
     @revision = @data.revision
-    @instanceType = ko.observable(@data.spec.instance_type)
+    @instanceType = ko.observable(@data.instanceType || @data.spec.instance_type)
 
     inputs = @data.inputs || @data.spec.input_spec
     inputs = inputs.map((input) =>

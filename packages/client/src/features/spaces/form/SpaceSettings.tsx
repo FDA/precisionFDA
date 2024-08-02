@@ -20,7 +20,6 @@ import { useSpaceActions } from '../useSpaceActions'
 import { editValidationSchema } from './helpers'
 import { HintText, Row, StyledButton, StyledForm, StyledPageCenter, StyledPageContent } from './styles'
 import { UserLayout } from '../../../layouts/UserLayout'
-import { ScrollableMainGlobalStyles } from '../../../styles/global'
 import { Button } from '../../../components/Button'
 
 const EditTags = ({ spaceId, tags = [] }: { spaceId: number, tags?: string[] }) => {
@@ -187,17 +186,14 @@ export const SpaceSettings = () => {
   }
 
   return (
-    <>
-      <ScrollableMainGlobalStyles />
-      <UserLayout>
-        <StyledPageCenter>
-          <StyledPageContent>
-            <BackLinkMargin linkTo={`/spaces/${data.space.id}`}>Back to Space</BackLinkMargin>
-            <PageTitle>Space Settings</PageTitle>
-            <SpaceSettingsForm space={data.space} />
-          </StyledPageContent>
-        </StyledPageCenter>
-      </UserLayout>
-    </>
+    <UserLayout mainScroll>
+      <StyledPageCenter>
+        <StyledPageContent>
+          <BackLinkMargin linkTo={`/spaces/${data.space.id}`}>Back to Space</BackLinkMargin>
+          <PageTitle>Space Settings</PageTitle>
+          <SpaceSettingsForm space={data.space} />
+        </StyledPageContent>
+      </StyledPageCenter>
+    </UserLayout>
   )
 }

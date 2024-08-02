@@ -37,6 +37,7 @@ class JobSerializer < ApplicationSerializer # rubocop:disable Metrics/ClassLengt
     :links,
     :entity_type,
     :logged_dxuser,
+    :cost_limit,
   )
 
   attribute :all_tags_list, key: :tags
