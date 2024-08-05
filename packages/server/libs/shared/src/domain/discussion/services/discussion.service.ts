@@ -20,6 +20,7 @@ import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { Vote } from '@shared/domain/vote/vote.entity'
 import { STATIC_SCOPE } from '@shared/enums'
+import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import type { UserCtx } from '@shared/types'
 import type { SCOPE } from '@shared/types/common'
 import * as errors from '../../../errors'
@@ -41,7 +42,6 @@ import type {
 import { AnswerDTO, CommentDTO, DiscussionDTO, NoteDTO, UserDTO } from '../discussion.types'
 import { DiscussionNotificationService } from './discussion-notification.service'
 import { PublisherService } from './publisher.service'
-import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 
 export interface IDiscussionService {
   createDiscussion(discussionInput: BaseInput): Promise<DiscussionDTO>

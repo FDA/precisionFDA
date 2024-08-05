@@ -1,5 +1,5 @@
 import { DXEnityType } from '@shared/domain/entity/domain/dxid'
-import { UId } from '@shared/domain/entity/domain/uid'
+import { Uid } from '@shared/domain/entity/domain/uid'
 import { DxIdUtils } from '@shared/utils/dxid.utils'
 import { StringUtils } from '@shared/utils/string.utils'
 
@@ -7,7 +7,7 @@ export class UidUtils {
   static isValidUId<T extends DXEnityType = DXEnityType>(
     value: string,
     entityType?: T,
-  ): value is UId<T> {
+  ): value is Uid<T> {
     const lastDashIndex = value.lastIndexOf('-')
 
     if (lastDashIndex === -1) {

@@ -1,8 +1,9 @@
 import type { JSONSchema7 } from 'json-schema'
 import { config } from '../../config'
+import { SCOPE } from '../../types/common'
+import { DxId } from '../entity/domain/dxid'
 import { Job } from './job.entity'
 import { allowedFeatures, allowedInstanceTypes } from './job.enum'
-import { SCOPE } from '../../types/common'
 
 type DxIdInput = {
   dxid: string
@@ -21,7 +22,7 @@ type RunAppInput = {
     imagename?: string
     port?: number // ttyd
   }
-  appDxId: string
+  appDxId: DxId<'app'>
   output_folder_path?: string
 }
 
@@ -70,8 +71,16 @@ const runAppSchema: JSONSchema7 = {
       //TODO: at the moment only HTTPS apps are run by nodejs. Once we support the regular apps as well, we will have to refactor input validation into something more dynamic and readable
       properties: {
         // JupyterLab app
-        duration: { type: 'integer', minimum: 30, maximum: config.validation.maxJobDurationMinutes },
-        feature: { type: 'string', enum: Object.keys(allowedFeatures), default: allowedFeatures.PYTHON_R },
+        duration: {
+          type: 'integer',
+          minimum: 30,
+          maximum: config.validation.maxJobDurationMinutes,
+        },
+        feature: {
+          type: 'string',
+          enum: Object.keys(allowedFeatures),
+          default: allowedFeatures.PYTHON_R,
+        },
         imagename: { type: 'string', maxLength: config.validation.maxStrLen },
         cmd: { type: 'string', maxLength: config.validation.maxStrLen },
         in: { type: 'array', default: [] },
@@ -97,11 +106,11 @@ const runAppSchema: JSONSchema7 = {
 }
 
 export {
-  runAppSchema,
-  RunAppInput,
-  Provenance,
-  DxIdInput,
   DescribeJobInput,
+  DxIdInput,
   ListJobsInput,
   PageJobs,
+  Provenance,
+  RunAppInput,
+  runAppSchema,
 }

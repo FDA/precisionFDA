@@ -4,7 +4,7 @@ import { Injectable, Logger } from '@nestjs/common'
 import { App } from '@shared/domain/app/app.entity'
 import { Discussion } from '@shared/domain/discussion/discussion.entity'
 import { EntityInstance } from '@shared/domain/entity/domain/entity-instance'
-import { UID } from '@shared/domain/entity/entity-fetcher.service'
+import { Uid } from '@shared/domain/entity/domain/uid'
 import { Job } from '@shared/domain/job/job.entity'
 import { NotificationService } from '@shared/domain/notification/services/notification.service'
 import { SpaceReportCreateDto } from '@shared/domain/space-report/model/space-report-create.dto'
@@ -20,6 +20,7 @@ import { User } from '@shared/domain/user/user.entity'
 import { Workflow } from '@shared/domain/workflow/entity/workflow.entity'
 import { NOTIFICATION_ACTION, SEVERITY } from '@shared/enums'
 import { InvalidStateError, NotFoundError } from '@shared/errors'
+import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { EntityScope, SpaceScope } from '@shared/types/common'
 import { ArrayUtils } from '@shared/utils/array.utils'
 import { EntityScopeUtils } from '@shared/utils/entity-scope.utils'
@@ -28,7 +29,6 @@ import { SpaceReport } from '../entity/space-report.entity'
 import { BatchComplete } from '../model/batch-complete'
 import { SpaceReportPartSource } from '../model/space-report-part-source'
 import { SpaceReportPartService } from './part/space-report-part.service'
-import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 
 @Injectable()
 export class SpaceReportService {
@@ -131,7 +131,7 @@ export class SpaceReportService {
     return !Boolean(notDoneTask)
   }
 
-  async completeReportForResultFile(resultFileUid: UID<'file'>) {
+  async completeReportForResultFile(resultFileUid: Uid<'file'>) {
     const report = await this.em.transactional(async () => {
       const report = await this.em.findOneOrFail(SpaceReport, {
         resultFile: { uid: resultFileUid },
