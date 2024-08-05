@@ -1,12 +1,12 @@
-import * as errors from '../../../errors'
+import { DxId } from '@shared/domain/entity/domain/dxid'
 import { BaseOperation } from '@shared/utils/base-operation'
-import { Job } from '../job.entity'
-import { DxIdInput } from '../job.input'
+import * as errors from '../../../errors'
 import * as client from '../../../platform-client'
+import { UserOpsCtx } from '../../../types'
+import { Job } from '../job.entity'
 import { JOB_STATE } from '../job.enum'
 import { isStateTerminal } from '../job.helper'
-import { ENTITY_TYPE } from '../../app/app.enum'
-import { UserOpsCtx } from '../../../types'
+import { DxIdInput } from '../job.input'
 
 export class RequestTerminateJobOperation extends BaseOperation<UserOpsCtx, DxIdInput, Job> {
   async run(input: DxIdInput): Promise<Job> {
@@ -19,7 +19,7 @@ export class RequestTerminateJobOperation extends BaseOperation<UserOpsCtx, DxId
     const jobRepo = em.getRepository(Job)
     // scope is private/scope-x so this should work
     // no further checks, client-facing API should resolve whether given user can terminate given job (scopes)
-    const job = await jobRepo.findOne({ dxid: input.dxid })
+    const job = await jobRepo.findOne({ dxid: input.dxid as DxId<'job'> })
 
     // input validations
     if (!job) {

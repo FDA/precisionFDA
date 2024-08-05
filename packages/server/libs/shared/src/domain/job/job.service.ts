@@ -1,45 +1,46 @@
+import { EntityManager } from '@mikro-orm/core'
 import { SqlEntityManager } from '@mikro-orm/mysql'
+import { Injectable, Logger } from '@nestjs/common'
+import { config } from '@shared/config'
+import { EMAIL_TYPES, EmailSendInput } from '@shared/domain/email/email.config'
+import { EmailFacade } from '@shared/domain/email/email.facade'
+import { buildEmailTemplate } from '@shared/domain/email/email.helper'
+import { EmailQueueJobProducer } from '@shared/domain/email/producer/email-queue-job.producer'
+import {
+  reportStaleJobsTemplate,
+  ReportStaleJobsTemplateInput,
+} from '@shared/domain/email/templates/mjml/report-stale-jobs.template'
 import { Job } from '@shared/domain/job/job.entity'
+import { buildIsOverMaxDuration } from '@shared/domain/job/job.helper'
+import { SyncJobOperation } from '@shared/domain/job/ops/synchronize'
 import { NotificationService } from '@shared/domain/notification/services/notification.service'
+import { SpaceEventService } from '@shared/domain/space-event/space-event.service'
+import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
+import { Space } from '@shared/domain/space/space.entity'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { Folder } from '@shared/domain/user-file/folder.entity'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { User } from '@shared/domain/user/user.entity'
-import { PlatformClient } from '../../platform-client'
-import { EntityManager } from '@mikro-orm/core'
-import { FILE_STATE_DX, PARENT_TYPE } from '../user-file/user-file.types'
+import { ServiceLogger } from '@shared/logger/decorator/service-logger'
+import { createSyncJobStatusTask, getMainQueue } from '@shared/queue'
+import { difference } from 'ramda'
 import { NOTIFICATION_ACTION, SEVERITY } from '../../enums'
-import { createFileEvent, EVENT_TYPES } from '../event/event.helper'
+import * as errors from '../../errors'
+import { PlatformClient } from '../../platform-client'
 import {
   DnanexusLink,
   FileStateResult,
   JobOutput,
 } from '../../platform-client/platform-client.responses'
 import { UserCtx } from '../../types'
-import * as errors from '../../errors'
-import { getIdFromScopeName, scopeContainsId } from '../space/space.helper'
+import { DxId } from '../entity/domain/dxid'
+import { createFileEvent, EVENT_TYPES } from '../event/event.helper'
 import { SPACE_EVENT_ACTIVITY_TYPE } from '../space-event/space-event.enum'
-import { JobRepository } from './job.repository'
-import { UserRepository } from '../user/user.repository'
+import { getIdFromScopeName, scopeContainsId } from '../space/space.helper'
 import { FolderService } from '../user-file/folder.service'
-import { SpaceEventService } from '@shared/domain/space-event/space-event.service'
-import { Space } from '@shared/domain/space/space.entity'
-import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
-import { createSyncJobStatusTask, getMainQueue } from '@shared/queue'
-import { SyncJobOperation } from '@shared/domain/job/ops/synchronize'
-import { buildIsOverMaxDuration } from '@shared/domain/job/job.helper'
-import { difference } from 'ramda'
-import {
-  reportStaleJobsTemplate,
-  ReportStaleJobsTemplateInput,
-} from '@shared/domain/email/templates/mjml/report-stale-jobs.template'
-import { buildEmailTemplate } from '@shared/domain/email/email.helper'
-import { config } from '@shared/config'
-import { EMAIL_TYPES, EmailSendInput } from '@shared/domain/email/email.config'
-import { UserContext } from '@shared/domain/user-context/model/user-context'
-import { ServiceLogger } from '@shared/logger/decorator/service-logger'
-import { Injectable, Logger } from '@nestjs/common'
-import { EmailQueueJobProducer } from '@shared/domain/email/producer/email-queue-job.producer'
-import { EmailFacade } from '@shared/domain/email/email.facade'
+import { FILE_STATE_DX, PARENT_TYPE } from '../user-file/user-file.types'
+import { UserRepository } from '../user/user.repository'
+import { JobRepository } from './job.repository'
 
 @Injectable()
 export class JobService {
@@ -109,10 +110,7 @@ export class JobService {
       const runningJob = await getMainQueue().getJob(SyncJobOperation.getBullJobId(job.dxid))
       if (!runningJob) {
         await createSyncJobStatusTask(job, this.user)
-        this.logger.log(
-          {},
-          `Recreated missing SyncJobOperation for ${job.dxid}`,
-        )
+        this.logger.log({}, `Recreated missing SyncJobOperation for ${job.dxid}`)
       }
     })
     if (runningJobs.length === 0) {
@@ -144,10 +142,7 @@ export class JobService {
       { nonStaleJobsInfo: nonStaleJobsInfo },
       'Non stale jobs - for admin to note the times',
     )
-    this.logger.log(
-      { staleJobs: staleJobsInfo },
-      'Stale jobs - should be terminated',
-    )
+    this.logger.log({ staleJobs: staleJobsInfo }, 'Stale jobs - should be terminated')
 
     // generate email for admin with list of jobs
     const adminUser = await this.em.getRepository(User).findAdminUser()
@@ -197,7 +192,7 @@ export class JobService {
    * @param jobDxId
    * @param userId
    */
-  async syncOutputs(jobDxId: string, userId: number): Promise<void> {
+  async syncOutputs(jobDxId: DxId<'job'>, userId: number): Promise<void> {
     this.logger.log(`Syncing output files for job ${jobDxId}`)
 
     const user = await this.userRepo.findOneOrFail({ id: userId })

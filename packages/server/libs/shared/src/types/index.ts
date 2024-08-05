@@ -5,15 +5,16 @@
  */
 
 import { EntityManager } from '@mikro-orm/mysql'
-import { Job } from 'bull'
 import { Logger } from '@nestjs/common'
+import { Uid } from '@shared/domain/entity/domain/uid'
+import { Job } from 'bull'
 
 declare type DeepPartial<T> = {
   [P in keyof T]?: T[P] extends Array<infer U>
     ? Array<DeepPartial<U>>
     : T[P] extends ReadonlyArray<infer U>
-    ? ReadonlyArray<DeepPartial<U>>
-    : DeepPartial<T[P]>
+      ? ReadonlyArray<DeepPartial<U>>
+      : DeepPartial<T[P]>
 }
 
 declare type Maybe<T> = T | undefined | null
@@ -46,7 +47,7 @@ type DxIdInput = {
 }
 
 type UidInput = {
-  uid: string
+  uid: Uid
 }
 
 type IdInput = {
@@ -57,18 +58,18 @@ type IdsInput = {
   ids: number[]
 }
 
-type WorkerOpsCtx<Ctx extends OpsCtx> = Ctx & { job: Job}
+type WorkerOpsCtx<Ctx extends OpsCtx> = Ctx & { job: Job }
 
 export type {
-  DeepPartial,
   AnyObject,
-  UserCtx,
-  OpsCtx,
-  UserOpsCtx,
-  Maybe,
+  DeepPartial,
   DxIdInput,
-  UidInput,
   IdInput,
   IdsInput,
+  Maybe,
+  OpsCtx,
+  UidInput,
+  UserCtx,
+  UserOpsCtx,
   WorkerOpsCtx,
 }

@@ -3,11 +3,13 @@ import {
   Entity,
   EntityRepositoryType,
   Filter,
-  OneToMany, OneToOne,
+  OneToMany,
+  OneToOne,
   Property,
   Reference,
 } from '@mikro-orm/core'
 import { DxId } from '@shared/domain/entity/domain/dxid'
+import { Resource } from '@shared/domain/resource/resource.entity'
 import { Tagging } from '@shared/domain/tagging/tagging.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { STATIC_SCOPE } from '@shared/enums'
@@ -22,7 +24,6 @@ import {
   IFileOrAsset,
   ITrackable,
 } from './user-file.types'
-import { Resource } from '@shared/domain/resource/resource.entity'
 
 @Entity({
   tableName: 'nodes',
@@ -53,7 +54,7 @@ import { Resource } from '@shared/domain/resource/resource.entity'
 })
 class UserFile extends Node implements IFileOrAsset, ITrackable {
   @Property()
-  dxid: DxId
+  dxid: DxId<'file'>
 
   @Property()
   project: string

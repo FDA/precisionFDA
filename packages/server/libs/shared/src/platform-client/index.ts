@@ -1,6 +1,7 @@
 /* eslint-disable max-len */
 import type { Logger } from '@nestjs/common'
 // just a bunch of api calls that will be easy to mock
+import { DxId } from '@shared/domain/entity/domain/dxid'
 import axios, { AxiosRequestConfig } from 'axios'
 import { isNil, omit } from 'ramda'
 import { WebSocket } from 'ws'
@@ -122,7 +123,7 @@ export class PlatformClient {
    * API: /app/new
    * @see https://documentation.dnanexus.com/developer/api/running-analyses/apps#api-method-app-new
    */
-  async appCreate(params: AppCreateParams): Promise<ClassIdResponse> {
+  async appCreate(params: AppCreateParams): Promise<ClassIdResponse<'app'>> {
     const url = `${config.platform.apiUrl}/app/new`
     const options: AxiosRequestConfig = {
       method: 'POST',
@@ -231,7 +232,7 @@ export class PlatformClient {
     return await this.sendRequest(options)
   }
 
-  streamJobLogs(jobDxId: string): WebSocket {
+  streamJobLogs(jobDxId: DxId<'job'>): WebSocket {
     const host = new URL(config.platform.apiUrl).host
     const ws = new WebSocket(`wss://${host}/${jobDxId}/getLog/websocket`)
     ws.on('open', () => {
@@ -259,7 +260,7 @@ export class PlatformClient {
    * @see https://documentation.dnanexus.com/developer/api/introduction-to-data-object-classes/files#api-method-file-new
    * @param params name and description of the file
    */
-  async fileCreate(params: FileCreateParams): Promise<ClassIdResponse> {
+  async fileCreate(params: FileCreateParams): Promise<ClassIdResponse<'file'>> {
     const url = `${config.platform.apiUrl}/file/new`
     const options: AxiosRequestConfig = {
       method: 'POST',

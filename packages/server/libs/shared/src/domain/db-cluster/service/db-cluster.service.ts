@@ -4,24 +4,24 @@ import { DbCluster } from '@shared/domain/db-cluster/db-cluster.entity'
 import { ENGINE, ENGINES, STATUS, STATUSES } from '@shared/domain/db-cluster/db-cluster.enum'
 import { CreateDbClusterDTO } from '@shared/domain/db-cluster/dto/CreateDbClusterDTO'
 import { UpdateDbClusterDTO } from '@shared/domain/db-cluster/dto/UpdateDbClusterDTO'
-import { UId } from '@shared/domain/entity/domain/uid'
-import { UserContext } from '@shared/domain/user-context/model/user-context'
-import { User } from '@shared/domain/user/user.entity'
-import { NotFoundError } from '@shared/errors'
-import { PlatformClient } from '@shared/platform-client'
-import { DbClusterDescribeResponse } from '@shared/platform-client/platform-client.responses'
-import { MainQueueJobProducer } from '@shared/queue/producer/main-queue-job.producer'
-import { invertObj, omit } from 'ramda'
-import { getMainQueue } from '@shared/queue'
 import { SyncDbClusterOperation } from '@shared/domain/db-cluster/ops/synchronize'
+import { EMAIL_TYPES, EmailSendInput } from '@shared/domain/email/email.config'
+import { buildEmailTemplate } from '@shared/domain/email/email.helper'
+import { EmailQueueJobProducer } from '@shared/domain/email/producer/email-queue-job.producer'
 import {
   reportNonTerminatedDbClustersTemplate,
   ReportNonTerminatedDbClustersTemplateInput,
 } from '@shared/domain/email/templates/mjml/report-non-terminated-dbclusters.template'
-import { buildEmailTemplate } from '@shared/domain/email/email.helper'
-import { EMAIL_TYPES, EmailSendInput } from '@shared/domain/email/email.config'
+import { Uid } from '@shared/domain/entity/domain/uid'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { User } from '@shared/domain/user/user.entity'
+import { NotFoundError } from '@shared/errors'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
-import { EmailQueueJobProducer } from '@shared/domain/email/producer/email-queue-job.producer'
+import { PlatformClient } from '@shared/platform-client'
+import { DbClusterDescribeResponse } from '@shared/platform-client/platform-client.responses'
+import { getMainQueue } from '@shared/queue'
+import { MainQueueJobProducer } from '@shared/queue/producer/main-queue-job.producer'
+import { invertObj, omit } from 'ramda'
 
 @Injectable()
 export class DbClusterService {
@@ -121,7 +121,7 @@ export class DbClusterService {
     const dbCluster = this.em.create(DbCluster, {
       user: this.em.getReference(User, this.user.id),
       dxid: describeDbClusterRes.id,
-      uid: `${describeDbClusterRes.id}-1` as UId,
+      uid: `${describeDbClusterRes.id}-1`,
       name: describeDbClusterRes.name,
       status: STATUS[invertObj(STATUSES)[describeDbClusterRes.status]],
       project: describeDbClusterRes.project,
@@ -142,7 +142,7 @@ export class DbClusterService {
     return dbCluster
   }
 
-  async update(uid: UId, body: UpdateDbClusterDTO) {
+  async update(uid: Uid<'dbcluster'>, body: UpdateDbClusterDTO) {
     const dbCluster = await this.em.findOne(DbCluster, { uid, user: this.user.id })
     if (!dbCluster) {
       throw new NotFoundError(`DbCluster ${uid} not found`)
