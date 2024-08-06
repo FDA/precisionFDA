@@ -958,14 +958,14 @@ class HttpsAppsClient # rubocop:disable Metrics/ClassLength
   # │                         │
   # └─────────────────────────┘
 
-  def site_settings(incoming_ip = nil, user_return_to = nil)
+  def site_settings(incoming_ip = nil)
     request_headers = {}
     request_headers["X-Forwarded-For"] = incoming_ip if incoming_ip
     request(
       "/site-settings",
       {},
       Net::HTTP::Get::METHOD,
-      { user_return_to: },
+      {},
       request_headers,
     )
   end
