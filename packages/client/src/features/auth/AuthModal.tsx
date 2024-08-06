@@ -1,9 +1,10 @@
 import React from 'react'
-import { LoginButton } from '../../components/Button/LoginButton'
 import { ModalHeaderTop, ModalNext } from '../modal/ModalNext'
 import { ButtonRow, Content, Footer } from '../modal/styles'
 import { UseModal } from '../modal/useModal'
-import { useSiteSettingsQuery } from './useSiteSettingsQuery'
+import { onLogInWithSSO, useSiteSettingsQuery } from './useSiteSettingsQuery'
+import { Button } from '../../components/Button'
+
 
 export const AuthModal: React.FC<UseModal> = props => {
   const { data } = useSiteSettingsQuery()
@@ -12,15 +13,28 @@ export const AuthModal: React.FC<UseModal> = props => {
       isShown={props.isShown}
       hide={() => props.setShowModal(false)}
       headerText="Session Expired"
-      id="session-expired-modal"
+      id='session-expired-modal'
       disableClose
       blur
     >
-      <ModalHeaderTop disableClose headerText="Session Expired" hide={() => props.setShowModal(false)} />
-      <Content $overflowContent={false}>You were logged out after 15 minutes of inactivity. Please Log In again.</Content>
+      <ModalHeaderTop
+        disableClose
+        headerText="Session Expired"
+        hide={() => props.setShowModal(false)}
+      />
+      <Content $overflowContent={false}>
+        You were logged out after 15 minutes of inactivity. Please Log In again.
+      </Content>
       <Footer>
         <ButtonRow>
-          <LoginButton siteSetting={data} />
+          {data?.ssoButton.isEnabled && (
+            <Button variant="primary" onClick={() => onLogInWithSSO(data.ssoButton.data.fdaSsoUrl)}>
+              Log In with SSO
+            </Button>
+          )}
+          <Button variant="primary" onClick={() => (window.location = '/login')}>
+            Log in
+          </Button>
         </ButtonRow>
       </Footer>
     </ModalNext>
