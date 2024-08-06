@@ -94,7 +94,7 @@ export type ActionType = {
     }
   | {
       type: 'selection'
-      content: ReactNode
+      title: string
       isSelected: boolean
       func: (isSelected: boolean) => void
     }
