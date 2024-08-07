@@ -80,6 +80,8 @@ const Spaces2 = ({ space, isLoading }: { space: ISpace; isLoading: boolean }) =>
     return <GuestNotAllowed />
   }
 
+  const showDiscussions = !((space.type === 'review' && space.restricted_discussions) || space.type == 'private_type')
+
   if (space.state === 'unactivated') {
     return <Activation space={space} />
   }
@@ -149,7 +151,7 @@ const Spaces2 = ({ space, isLoading }: { space: ISpace; isLoading: boolean }) =>
             <MenuText>Reports</MenuText>
             {expandedSidebar && <MenuCounter count={space.counters.reports.toString()} active={activeResource === 'reports'} />}
           </MenuItem>
-          {space.type !== 'private_type' && (
+          {showDiscussions && (
             <MenuItem data-testid="discussions-link" to={`/spaces/${space.id}/discussions`} activeClassName="active">
               <DiscussionIcon height={14} />
               <MenuText>Discussions</MenuText>
