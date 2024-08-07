@@ -13,6 +13,7 @@ import { Follow } from '@shared/domain/follow/follow.entity'
 import { Job } from '@shared/domain/job/job.entity'
 import { Note } from '@shared/domain/note/note.entity'
 import { Space } from '@shared/domain/space/space.entity'
+import { SPACE_TYPE } from '@shared/domain/space/space.enum'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { Asset } from '@shared/domain/user-file/asset.entity'
 import { Node } from '@shared/domain/user-file/node.entity'
@@ -253,6 +254,10 @@ export class DiscussionService implements IDiscussionService {
     let space: Space | null = null
     if (discussionInput.scope.startsWith('space')) {
       space = await this.getSpaceFromScope(discussionInput.scope)
+
+      if (space.type === SPACE_TYPE.REVIEW && space.meta?.restricted_discussions) {
+        throw new errors.InvalidStateError('Unable to publish discussion: space has restricted discussions.')
+      }
     }
 
     const count = await this.em.transactional(async (tem) => {
@@ -1069,7 +1074,7 @@ export class DiscussionService implements IDiscussionService {
     if (spaceId === null) {
       return
     }
-    return await this.em.findOneOrFail(Space, {
+    const space = await this.em.findOne(Space, {
       id: spaceId,
       spaceMemberships: {
         user: this.userCtx.id,
@@ -1082,6 +1087,10 @@ export class DiscussionService implements IDiscussionService {
         },
       },
     })
+    if (!space) {
+      throw new errors.PermissionError('Unable to publish: insufficient permissions.')
+    }
+    return space
   }
 
   private async mapDiscussionDTO(discussion: Discussion): Promise<DiscussionDTO> {

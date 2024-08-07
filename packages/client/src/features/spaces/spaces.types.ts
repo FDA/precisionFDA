@@ -100,6 +100,7 @@ export interface ISpace {
   shared_space_id?: string;
   confidential_space?: ConfidentialSpace | null;
   restricted_reviewer?: boolean | null;
+  restricted_discussions?: boolean | null;
 }
 
 export const columnFilters = {
