@@ -43,6 +43,7 @@ import { fixGuestPermissions, spaceRequest } from '../spaces.api'
 import { ISpace } from '../spaces.types'
 import { useSpaceActions } from '../useSpaceActions'
 import { Activation } from './SpaceActivation'
+import { SpaceLocked } from './SpaceLocked'
 import { SpaceNotAllowed } from './SpaceNotAllowed'
 import { SpaceTypeTabs } from './SpaceTypeTabs'
 import {
@@ -210,6 +211,7 @@ const Spaces2 = ({ space, isLoading }: { space: ISpace; isLoading: boolean }) =>
 export const SpaceShow = () => {
   const { spaceId } = useParams<{ spaceId: string }>()
   const [isNotAllowed, setIsNotAllowed] = useState<boolean>(false)
+  const [isLocked, setIsLocked] = useState<boolean>(false)
   const { data, isLoading } = useQuery({
     queryKey: ['space', spaceId],
     queryFn: () => spaceId && spaceRequest({ id: spaceId }),
@@ -218,10 +220,11 @@ export const SpaceShow = () => {
         setIsNotAllowed(true)
         return false
       }
-      if (failureCount > 3) {
-        return true
+      if (error.response.status === 422) {
+        setIsLocked(true)
+        return false
       }
-      return false
+      return failureCount > 3
     },
   })
 
@@ -233,6 +236,7 @@ export const SpaceShow = () => {
 
   if (isLoading) return <Loader />
   if (isNotAllowed) return <SpaceNotAllowed />
+  if (isLocked || s?.state === 'locked') return <SpaceLocked space={s}/>
 
   return (
     <UserLayout innerScroll>
