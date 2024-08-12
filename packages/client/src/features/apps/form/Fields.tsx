@@ -389,7 +389,7 @@ export const Optional = ({ base, index, control, errors }: SpecProps) => {
           return (
             <CheckboxWrapLabel id={id}>
               <Checkbox
-                data-testid={id+'-checkbox'}
+                data-testid={`${id}-checkbox`}
                 checked={field.value}
                 onChange={field.onChange}
                 onBlur={field.onBlur}
@@ -549,7 +549,7 @@ export const SelectIOClass = ({
     <DropdownNext
       trigger="click"
       // eslint-disable-next-line react/no-unstable-nested-components
-      content={({ hide }) => (
+      content={(props, { hide }) => (
         <StyledDropMenuLinks
           data-testid="io-items">
           <StyledItem
@@ -595,11 +595,11 @@ export const SelectIOClass = ({
         </StyledDropMenuLinks>
       )}
     >
-      {({ hide, isActive, ...props }) => (
+      {({ $isActive, ...props }) => (
         <StyledButton
           type="button"
           {...props}
-          active={isActive}
+          active={$isActive}
         >
           <PlusIcon height={12} />
           {children}

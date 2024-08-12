@@ -177,12 +177,10 @@ const getUsername = (user: IUser) => {
 }
 
 const SiteNav = ({
-  isSiteAlertVisible = false,
   className,
   setShowSiteNav,
   ignoredOutsideClickRef,
 }: {
-  isSiteAlertVisible: boolean
   className: string
   setShowSiteNav: (v: boolean, ms?: number) => void
   ignoredOutsideClickRef: HTMLDivElement | null
@@ -310,7 +308,7 @@ const Header: React.FC = () => {
               return (
                 <MenuLink navItem={i} key={id} data-testid={`favoritenav-${id}`}>
                   <HeaderMenuItem $active={isActiveLink(i.link || i.alink, pathname)}>
-                    <IconWrap marginBottom={1}>
+                    <IconWrap $marginBottom={1}>
                       <Icon height={iconHeight} />
                     </IconWrap>
                     <SiteMenuText>{text}</SiteMenuText>
@@ -328,7 +326,7 @@ const Header: React.FC = () => {
             <DropdownNext
               trigger="click"
               // eslint-disable-next-line react/no-unstable-nested-components
-              content={({ hide }) => (
+              content={(props, { hide }) => (
                 <UserMenu
                   user={user}
                   userCanAdministerSite={userCanAdministerSite}

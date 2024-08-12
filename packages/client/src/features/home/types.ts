@@ -76,6 +76,8 @@ export type ActionType = {
   isDisabled?: boolean
   key?: string
   shouldHide?: boolean
+  modal?: ReactNode | null
+  cloudResourcesConditionType?: CloudResourcesConditionType
 } & (
   | {
       type: 'route'

@@ -1,12 +1,15 @@
+import { DxId } from '@shared/domain/entity/domain/dxid'
 import { Job } from '@shared/domain/job/job.entity'
+import { BaseOperation } from '@shared/utils/base-operation'
 import * as errors from '../../../errors'
 import { OpsCtx } from '../../../types'
-import { BaseOperation } from '@shared/utils/base-operation'
-import { JobRepository } from '../job.repository'
 
-abstract class WorkstationBaseOperation<CtxT extends OpsCtx, In, Out>
-  extends BaseOperation<CtxT, In, Out> {
-  protected async validatedJob(jobDxid: string): Promise<Job> {
+abstract class WorkstationBaseOperation<CtxT extends OpsCtx, In, Out> extends BaseOperation<
+  CtxT,
+  In,
+  Out
+> {
+  protected async validatedJob(jobDxid: DxId<'job'>): Promise<Job> {
     const jobRepo = this.ctx.em.getRepository(Job)
     const job = await jobRepo.findOne({ dxid: jobDxid }, { populate: ['app'] })
     if (!job) {
@@ -19,7 +22,7 @@ abstract class WorkstationBaseOperation<CtxT extends OpsCtx, In, Out>
     return job
   }
 
-  protected async validatedJobWithWorkstationAPI(jobDxid: string): Promise<Job> {
+  protected async validatedJobWithWorkstationAPI(jobDxid: DxId<'job'>): Promise<Job> {
     const job = await this.validatedJob(jobDxid)
     if (!job.app?.getEntity().hasWorkstationAPI) {
       throw new errors.InvalidStateError(`Job ${job.uid} does not have workstation API`)
@@ -28,6 +31,4 @@ abstract class WorkstationBaseOperation<CtxT extends OpsCtx, In, Out>
   }
 }
 
-export {
-  WorkstationBaseOperation,
-}
+export { WorkstationBaseOperation }

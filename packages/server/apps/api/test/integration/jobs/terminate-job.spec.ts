@@ -1,15 +1,15 @@
+import { EntityManager } from '@mikro-orm/mysql'
 import { database } from '@shared/database'
 import { App } from '@shared/domain/app/app.entity'
+import { ENTITY_TYPE } from '@shared/domain/app/app.enum'
 import { Job } from '@shared/domain/job/job.entity'
+import { JOB_STATE } from '@shared/domain/job/job.enum'
 import { User } from '@shared/domain/user/user.entity'
 import { ErrorCodes } from '@shared/errors'
-import { expect } from 'chai'
-import { EntityManager } from '@mikro-orm/mysql'
-import supertest from 'supertest'
-import { JOB_STATE } from '@shared/domain/job/job.enum'
-import { ENTITY_TYPE } from '@shared/domain/app/app.enum'
-import { create, generate, db } from '@shared/test'
+import { create, db, generate } from '@shared/test'
 import { fakes, mocksReset } from '@shared/test/mocks'
+import { expect } from 'chai'
+import supertest from 'supertest'
 import { testedApp } from '../../index'
 import { getDefaultHeaderData } from '../../utils/expect-helper'
 
@@ -40,6 +40,7 @@ describe('PATCH /jobs/:id/terminate', () => {
     expect(body).to.be.deep.equal({
       id: job.id,
       dxid: job.dxid,
+      uid: job.uid,
       project: job.project,
       state: JOB_STATE.TERMINATING,
       name: job.name,
@@ -52,7 +53,7 @@ describe('PATCH /jobs/:id/terminate', () => {
       },
       user: user.id,
       app: app.id,
-      terminationEmailSent: false
+      terminationEmailSent: false,
     })
   })
 

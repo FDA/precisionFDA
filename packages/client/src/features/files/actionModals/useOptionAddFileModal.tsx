@@ -47,12 +47,13 @@ export const useOptionAddFileModal = ({
   setShowCopyFilesModal(b: boolean): void
 }) => {
   const { isShown, setShowModal } = useModal()
-  const modalComp = isShown && (
+  const modalComp = (
     <ModalNext
       id="choose-add-file-option-modal"
       data-testid="choose-add-file-option-modal"
       isShown={isShown}
       hide={() => setShowModal(false)}
+      variant="medium"
     >
             <ModalHeaderTop
         disableClose={false}

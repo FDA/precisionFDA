@@ -536,7 +536,11 @@ const space = {
     hostProject: null as any,
     guestProject: null as any,
     description: 'desc',
-    meta: 'meta',
+    meta: {
+      restricted_discussions: false,
+      restricted_reviewer: false,
+      cts: ''
+    }
   }),
   group: (): Partial<InstanceType<typeof Space>> => ({
     name: chance.word(),

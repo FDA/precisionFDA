@@ -4,7 +4,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
 import { ErrorMessage } from '@hookform/error-message'
 import { FieldGroup, InputError } from '../../../components/form/styles'
-import { InputText } from '../../../components/InputText'
+import { InputText, InputTextArea } from '../../../components/InputText'
 import {
   ButtonRow,
   Footer,
@@ -90,7 +90,7 @@ const EditFileInfoForm = ({
           </FieldGroup>
           <FieldGroup>
             <label>Description</label>
-            <InputText
+            <InputTextArea
               {...register('description')}
               placeholder="Enter description..."
               disabled={isSubmitting}
@@ -123,13 +123,14 @@ export const useEditFileModal = (selectedItem: IFile) => {
   const handleClose = () => {
     setShowModal(false)
   }
-  const modalComp = isShown && (
+  const modalComp = (
     <ModalNext
       id="modal-files-edit"
       data-testid="modal-files-edit"
       headerText="Edit file info"
       isShown={isShown}
       hide={handleClose}
+      variant='medium'
     >
       <ModalHeaderTop headerText="Edit file info" hide={handleClose} />
       <EditFileInfoForm file={selected} handleClose={handleClose} />

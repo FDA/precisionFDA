@@ -11,27 +11,18 @@ import { useEditDatabaseModal } from './useEditDatabaseModal'
 import { useMethodModal } from './useMethodModal'
 import { useEditPropertiesModal } from '../actionModals/useEditPropertiesModal'
 
-export const HOME_DATABASES_ACTIONS = {
-  START: 'start',
-  STOP: 'stop',
-  TERMINATE: 'terminate',
-  CREATE: 'create',
-  EDIT: 'edit',
-}
-
-export enum DatabaseActions {
-  'Start' = 'Start',
-  'Stop' = 'Stop',
-  'Terminate' = 'Terminate',
-  'Track' = 'Track',
-  'Copy to space' = 'Copy to space',
-  'Move to Archive' = 'Move to Archive',
-  'Attach License' = 'Attach License',
-  'Detach License' = 'Detach License',
-  'Edit Database Info' = 'Edit Database Info',
-  'Edit tags' = 'Edit tags',
-  'Edit properties' = 'Edit properties',
-}
+export type DatabaseActions =
+  'Start' |
+  'Stop' |
+  'Terminate' |
+  'Track' |
+  'Copy to space' |
+  'Move to Archive' |
+  'Attach License' |
+  'Detach License' |
+  'Edit Database Info' |
+  'Edit tags' |
+  'Edit properties'
 
 export const useDatabaseSelectActions = (selectedItems: IDatabase[], resourceKeys: string[]) => {
   const queryClient = useQueryClient()
@@ -144,18 +135,21 @@ export const useDatabaseSelectActions = (selectedItems: IDatabase[], resourceKey
 
   const actionFunctions: ActionFunctionsType<DatabaseActions> = {
     Start: {
+      type: 'modal',
       isDisabled: selected.length !== 1 || !selected[0]?.links.start || isDisabledByStatus(selected[0].status).start,
       func: () => setMethodStartModal(true),
       modal: methodStartModal,
       showModal: isShownMethodStartModal,
     },
     Stop: {
+      type: 'modal',
       isDisabled: selected.length !== 1 || !selected[0]?.links.stop || isDisabledByStatus(selected[0].status).stop,
       func: () => setMethodStopModal(true),
       modal: methodStopModal,
       showModal: isShownMethodStopModal,
     },
     Terminate: {
+      type: 'modal',
       isDisabled: selected.length !== 1 || !selected[0]?.links.terminate || isDisabledByStatus(selected[0].status).terminate,
       func: () => setMethodTerminateModal(true),
       modal: methodTerminateModal,
@@ -167,23 +161,27 @@ export const useDatabaseSelectActions = (selectedItems: IDatabase[], resourceKey
       isDisabled: selected.length !== 1,
     },
     'Copy to space': {
+      type: 'modal',
       func: () => setCopyToSpaceModal(true),
       isDisabled: selected.length === 0 || selected.some(e => !e.links.copy),
       modal: copyToSpaceModal,
       showModal: isShownCopyToSpaceModal,
     },
     'Move to Archive': {
+      type: 'modal',
       shouldHide: true,
       isDisabled: true, // databases.length !== 1,
       func: () => {},
     },
     'Attach License': {
+      type: 'modal',
       isDisabled: selected.length !== 1 || !selected[0]?.links.license || !availableLicenses,
       func: () => setAttachLicensesModal(true),
       modal: attachLicensesModal,
       showModal: isShownAttachLicensesModal,
     },
     'Detach License': {
+      type: 'modal',
       isDisabled: selected.length !== 1,
       shouldHide: selected.length !== 1 || !selected[0]?.links.detach_license,
       func: () => setDetachLicenseModal(true),
@@ -191,18 +189,21 @@ export const useDatabaseSelectActions = (selectedItems: IDatabase[], resourceKey
       showModal: isShownDetachLicenseModal,
     },
     'Edit Database Info': {
+      type: 'modal',
       isDisabled: selected.length !== 1 || !selected[0]?.links.update,
       func: () => setEditDBModal(true),
       modal: editDBModal,
       showModal: isShownEditDBModal,
     },
     'Edit tags': {
+      type: 'modal',
       func: () => setTagsModal(true),
       isDisabled: selected.length !== 1,
       modal: tagsModal,
       showModal: isShownTagsModal,
     },
     'Edit properties': {
+      type: 'modal',
       func: () => setPropertiesModal(true),
       isDisabled: false,
       modal: propertiesModal,

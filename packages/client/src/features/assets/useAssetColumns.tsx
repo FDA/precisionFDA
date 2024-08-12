@@ -98,9 +98,9 @@ export const useAssetColumns = ({
       Header: 'Size',
       accessor: 'file_size',
       Filter: NumberRangeColumnFilter,
-      width: colWidths?.size || 198,
-      filterPlaceholderFrom: `Min(Kb)`,
-      filterPlaceholderTo: `Max(Kb)`,
+      width: colWidths?.size || 160,
+      filterPlaceholderFrom: `Min(KB)`,
+      filterPlaceholderTo: `Max(KB)`,
     },
     {
       Header: 'Created',

@@ -14,6 +14,7 @@ export interface SpaceMembership {
   role: MemberRole;
   side: MemberSide;
   org: string;
+  domain: string;
   created_at: string;
   links: Links;
   to_roles: any[];

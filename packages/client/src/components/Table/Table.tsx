@@ -153,6 +153,7 @@ export interface ITable<T extends object = {}> extends TableOptions<T> {
   showTableTools?: boolean
   showPagination?: boolean
   isColsResizable?: boolean
+  displayColFiller?: boolean
   isSelectable?: boolean
   selectedRows?: Record<IdType<T>, boolean>
   setSelectedRows?: (rowIds: Record<IdType<T>, boolean>) => void
@@ -212,6 +213,7 @@ export default function Table<T extends object>(
     shouldAllowScrollbar,
     enableColumnSelect = false,
     hiddenColumns,
+    displayColFiller = true,
     saveHiddenColumns = () => {},
   } = props
   const defaultColumn = {
@@ -341,6 +343,8 @@ export default function Table<T extends object>(
     return [...standardColumns, ...propColums]
   }
 
+  const colFiller = displayColFiller && <div className="th" style={{ width: spacerWidth - 10, minWidth: 50 }} />
+ 
   return (
     <StyledTable data-testid="pfda-table">
       <ReactTableStyles
@@ -386,7 +390,7 @@ export default function Table<T extends object>(
                   </div>
                 )
               })}
-              <div className="th" style={{ width: spacerWidth, minWidth: 50 }} />
+              {colFiller}
             </div>
 
             {isFilterable && (
@@ -399,6 +403,7 @@ export default function Table<T extends object>(
                       {column.canFilter ? column.render('Filter') : null}
                     </div>
                 )})}
+                {colFiller}
               </div>
             )}
 
@@ -435,6 +440,7 @@ export default function Table<T extends object>(
                             {cell.render('Cell')}
                           </div>
                       )})}
+                      {colFiller}
                     </div>
                     {isExpandable && r.isExpanded
                       ? subcomponent && subcomponent(r)

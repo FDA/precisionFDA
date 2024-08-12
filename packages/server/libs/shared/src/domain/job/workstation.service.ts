@@ -3,14 +3,15 @@ import { config } from '@shared/config'
 import { Job } from '@shared/domain/job/job.entity'
 import axios, { AxiosInstance } from 'axios'
 import { wrapper } from 'axios-cookiejar-support'
-import { CookieJar } from 'tough-cookie'
-import * as errors from '../../errors'
-import { UserOpsCtx } from '../../types'
-import { JOB_STATE } from './job.enum'
-import { getServiceFactory } from '../../services/service-factory'
-import { CLIConfigParams, IWorkstationClient } from '../../workstation-client/workstation-client'
 import { compareVersions } from 'compare-versions'
 import { omit } from 'ramda'
+import { CookieJar } from 'tough-cookie'
+import * as errors from '../../errors'
+import { getServiceFactory } from '../../services/service-factory'
+import { UserOpsCtx } from '../../types'
+import { CLIConfigParams, IWorkstationClient } from '../../workstation-client/workstation-client'
+import { DxId } from '../entity/domain/dxid'
+import { JOB_STATE } from './job.enum'
 
 // Service handling communicating with workstation API
 // Each instance should be paired with one particular job
@@ -28,7 +29,7 @@ class WorkstationService {
     this.authToken = authToken
   }
 
-  async initWithJob(jobDxid: string): Promise<WorkstationService> {
+  async initWithJob(jobDxid: DxId<'job'>): Promise<WorkstationService> {
     if (this.job) {
       throw new errors.InternalError('WorkstationService already initialized with a job')
     }
@@ -52,10 +53,13 @@ class WorkstationService {
 
     await this.initSession()
 
-    this.ctx.log.log({
-      jobId: job.id,
-      jobDxid: job.dxid,
-    }, 'Finished initWithJob')
+    this.ctx.log.log(
+      {
+        jobId: job.id,
+        jobDxid: job.dxid,
+      },
+      'Finished initWithJob',
+    )
     return this
   }
 
@@ -83,14 +87,19 @@ class WorkstationService {
 
   checkRunningWorkstation() {
     if (this.job.state !== JOB_STATE.RUNNING) {
-      this.ctx.log.log({ jobId: this.job.id, jobDxid: this.job.dxid }, 'Job is not in running state')
+      this.ctx.log.log(
+        { jobId: this.job.id, jobDxid: this.job.dxid },
+        'Job is not in running state',
+      )
       throw new errors.InvalidStateError('Job is not in running state')
     }
   }
 
   checkValidSession() {
     if (!this.client) {
-      throw new errors.InvalidStateError('WorkstationService initSession needs to be called before calling workstation API')
+      throw new errors.InvalidStateError(
+        'WorkstationService initSession needs to be called before calling workstation API',
+      )
     }
   }
 
@@ -118,9 +127,12 @@ class WorkstationService {
         pfdaConfig.Scope = this.job.scope
       }
 
-      this.ctx.log.log({
-        ...omit(['Key'], pfdaConfig),
-      }, 'setPFDAConfig')
+      this.ctx.log.log(
+        {
+          ...omit(['Key'], pfdaConfig),
+        },
+        'setPFDAConfig',
+      )
       return await this.client.setPFDAConfig(pfdaConfig)
     }
   }
@@ -136,6 +148,4 @@ class WorkstationService {
   }
 }
 
-export {
-  WorkstationService,
-}
+export { WorkstationService }
