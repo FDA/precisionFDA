@@ -14,6 +14,23 @@ RSpec.describe CopyService::WorkflowCopier, type: :service do
       and_return({ "results" => [{ "project" => "project-id", "id" => "workflow-id" }], "next" => nil })
     allow(api).to receive(:project_clone)
     allow(api).to receive(:applet_new).and_return({ "id" => "applet-id" })
+    allow(api).to receive(:workflow_describe).and_return(
+      {
+        "stages" => [
+          {
+            "id" => "stage-id",
+            "app_dxid" => "app-dxid",
+          },
+        ],
+      },
+    )
+    allow(api).to receive(:app_describe).and_return(
+      {
+        "name" => "app-name",
+        "version" => "app-version",
+      },
+    )
+    allow(api).to receive(:workflow_update_executable)
   end
 
   describe "#copy" do
