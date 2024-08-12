@@ -19,15 +19,14 @@ import { ServiceError } from '@shared/errors'
 import { STATIC_SCOPE } from '../../enums'
 import { CAN_EDIT_ROLES } from '../space-membership/space-membership.helper'
 import { getIdFromScopeName } from '../space/space.helper'
-
-export type UID<PREFIX extends string> = `${PREFIX}-${string}-${number}`
+import { Uid } from './domain/uid'
 
 export interface IdEntity {
   id: number
 }
 
 export interface UidEntity {
-  uid: UID<string>
+  uid: Uid
 }
 
 /**
@@ -297,16 +296,11 @@ export class EntityFetcherService {
     )
   }
 
-  async getAccessibleByUid<
-    E extends UidEntity,
-    H extends string = never,
-    F extends string = '*',
-    EX extends string = never,
-  >(
+  async getAccessibleByUid<E extends UidEntity, H extends string = never>(
     type: EntityName<E>,
     uid: E['uid'],
     where?: ObjectQuery<E>,
-    options?: FindOptions<E, H, F, EX>,
+    options?: FindOneOptions<E, H>,
   ) {
     return this.em.findOne(
       type,

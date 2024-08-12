@@ -2,7 +2,7 @@ import React from 'react'
 import { useParams } from 'react-router-dom'
 import { getBaseLink } from '../apps/run/utils'
 import { StyledBackLink } from '../home/home.styles'
-import { Header, HeaderLeft, HomeLoader, Title } from '../home/show.styles'
+import { ResourceHeader, HeaderLeft, HomeLoader, Title } from '../home/show.styles'
 import {
   EntityIcon,
   EntityType,
@@ -38,7 +38,7 @@ export const TrackInHome = ({ entityType, spaceId }: { entityType?: EntityType; 
   ) : (
     <>
       <BackLink spaceId={spaceId} entityType={entityType} identifier={identifier!} />
-      <Header>
+      <ResourceHeader>
         <HeaderLeft>
           <Title data-testid={`${entityType}-title`}>
             <TrackIcon width={24} height={20} />
@@ -47,7 +47,7 @@ export const TrackInHome = ({ entityType, spaceId }: { entityType?: EntityType; 
             &nbsp;{data?.name}
           </Title>
         </HeaderLeft>
-      </Header>
+      </ResourceHeader>
       <TrackWrapper>
         <TrackHelp />
         <TrackProvenanceContent svg={data?.svg ?? ''} />

@@ -3,7 +3,7 @@ import { Inject, Injectable, Logger } from '@nestjs/common'
 import { ComparisonInput } from '@shared/domain/comparison-input/comparison-input.entity'
 import { DownloadLinkOptionsDto } from '@shared/domain/entity/domain/download-link-options.dto'
 import { DxId } from '@shared/domain/entity/domain/dxid'
-import { UId } from '@shared/domain/entity/domain/uid'
+import { Uid } from '@shared/domain/entity/domain/uid'
 import { EntityFetcherService } from '@shared/domain/entity/entity-fetcher.service'
 import { EntityService } from '@shared/domain/entity/entity.service'
 import * as eventHelper from '@shared/domain/event/event.helper'
@@ -253,7 +253,7 @@ export class UserFileService {
    * @param fileUid
    * @private
    */
-  private async getFile(user: User, fileUid: UId): Promise<[Node, boolean]> {
+  private async getFile(user: User, fileUid: Uid<'file'>): Promise<[Node, boolean]> {
     const userIsAdmin = (await user.isSiteAdmin()) || (await user.isChallengeAdmin())
     if (userIsAdmin) {
       // first read file to find out if it's a challenge file
@@ -406,7 +406,7 @@ export class UserFileService {
     return nodes
   }
 
-  async closeFile(fileUid: UId, followUpAction?: FOLLOW_UP_ACTION) {
+  async closeFile(fileUid: Uid<'file'>, followUpAction?: FOLLOW_UP_ACTION) {
     this.logger.log(`Closing file ${fileUid}`)
 
     await this.em.transactional(async () => {
@@ -437,7 +437,7 @@ export class UserFileService {
    * @param fileUid
    * @param isChallengeBotFile
    */
-  async synchronizeFile(fileUid: UId, isChallengeBotFile: boolean): Promise<boolean> {
+  async synchronizeFile(fileUid: Uid<'file'>, isChallengeBotFile: boolean): Promise<boolean> {
     this.logger.log(`Synchronize file: ${fileUid}`)
     const node = await this.nodeRepo.findOneOrFail({ uid: fileUid })
     const platformClient = isChallengeBotFile ? this.challengeBotClient : this.userClient
@@ -483,7 +483,7 @@ export class UserFileService {
     return this.entityService.getEntityDownloadLink(file, file.name, options)
   }
 
-  async getDownloadLinkForUid(uid: UId, options?: DownloadLinkOptionsDto) {
+  async getDownloadLinkForUid(uid: Uid<'file'>, options?: DownloadLinkOptionsDto) {
     const file = await this.entityFetcherService.getAccessibleByUid(UserFile, uid)
 
     if (!file) {
@@ -597,7 +597,7 @@ export class UserFileService {
    * @param targetScope target scope
    * @returns
    */
-  async validateCopyFiles(uids: UId[], targetScope: EntityScope): Promise<ExistingFileSet> {
+  async validateCopyFiles(uids: Uid<'file'>[], targetScope: EntityScope): Promise<ExistingFileSet> {
     const existingFiles = {} as ExistingFileSet
 
     const editableSpaces = await this.entityFetcherService.getEditableSpaces()
@@ -606,9 +606,9 @@ export class UserFileService {
     }
     for (const uid of uids) {
       const lastDashIndex = uid.lastIndexOf('-')
-      const dxid = uid.substring(0, lastDashIndex)
+      const dxid = uid.substring(0, lastDashIndex) as DxId<'file'>
       const checkedFile = await this.entityFetcherService.getEditable(UserFile, {
-        dxid: dxid as DxId,
+        dxid: dxid,
         scope: targetScope,
       })
       if (checkedFile.length === 1) {

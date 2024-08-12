@@ -21,7 +21,7 @@ export class JobLogService {
   ) {}
 
   async streamJobLogs(job: Job, client: PfdaWebSocket) {
-    const jobDxId = job.dxid as DxId
+    const jobDxId = job.dxid
     const isAccessible = await this.isJobAccessible(jobDxId)
     const ws = isAccessible
       ? this.userClient.streamJobLogs(jobDxId)
@@ -63,7 +63,7 @@ export class JobLogService {
     }
   }
 
-  private async askAdminForJobLogs(jobDxId: DxId, client: PfdaWebSocket) {
+  private async askAdminForJobLogs(jobDxId: DxId<'job'>, client: PfdaWebSocket) {
     try {
       const jobDescribe = await this.adminClient
         .jobDescribe({ jobId: jobDxId })

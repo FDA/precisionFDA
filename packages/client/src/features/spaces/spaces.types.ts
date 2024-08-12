@@ -79,7 +79,7 @@ export type SideRole = 'reviewer' | 'sponsor'
 export interface ISpace {
   id: number;
   description: string;
-  state: 'active' | 'unactivated';
+  state: 'active' | 'unactivated' | 'locked' | 'deleted';
   name: string;
   type: 'groups' | 'review' | 'private_type' | 'government' | 'administrator' | number // number is the value from DB, string is value from db translated to human readable
   cts?: any;
@@ -100,6 +100,7 @@ export interface ISpace {
   shared_space_id?: string;
   confidential_space?: ConfidentialSpace | null;
   restricted_reviewer?: boolean | null;
+  restricted_discussions?: boolean | null;
 }
 
 export const columnFilters = {

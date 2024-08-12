@@ -30,7 +30,7 @@ export const StyledForm = styled.form`
   flex-direction: column;
   flex: 1;
   gap: 16px;
-  margin-bottom: 128px;
+  margin-bottom: 16px;
 `
 
 const validationSchema = Yup.object().shape({

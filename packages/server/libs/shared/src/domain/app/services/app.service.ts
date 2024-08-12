@@ -1,6 +1,7 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { AppSeries } from '@shared/domain/app-series/app-series.entity'
-import { UId } from '@shared/domain/entity/domain/uid'
+import { DxId } from '@shared/domain/entity/domain/dxid'
+import { Uid } from '@shared/domain/entity/domain/uid'
 import { Asset } from '@shared/domain/user-file/asset.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { ValidationError } from '@shared/errors'
@@ -145,7 +146,7 @@ export class AppService implements IAppService {
     }
   }
 
-  private getAssets = async (userId: number, orderedAssets: UId[]): Promise<Asset[]> => {
+  private getAssets = async (userId: number, orderedAssets: Uid<'file'>[]): Promise<Asset[]> => {
     if (orderedAssets) {
       return await this.assetRepository.findAccessibleByUser(userId, orderedAssets)
     } else {
@@ -240,7 +241,7 @@ export class AppService implements IAppService {
     revision: number,
     user: User,
     assets: Asset[],
-  ): Promise<string> => {
+  ): Promise<DxId<'app'>> => {
     logger.log(`Creating app in platform for applet id ${appletId}`)
     const assetDxids = this.getAssetDxids(assets)
     const appCreateParams: AppCreateParams = {
@@ -292,7 +293,7 @@ export class AppService implements IAppService {
 
   private saveAppInDB = async (
     user: User,
-    platformAppId: string,
+    platformAppId: DxId<'app'>,
     revision: number,
     release: string,
     assets: Asset[],

@@ -31,7 +31,7 @@ export function useDownloadAssetsModal(selectedFiles: IAsset[]) {
 
   const memoSelected = useMemo(() => selectedFiles, [isShown])
 
-  const modalComp = isShown && (
+  const modalComp = (
     <ModalNext
       data-testid="modal-assets-download"
       isShown={Boolean(isShown)}

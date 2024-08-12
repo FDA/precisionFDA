@@ -185,8 +185,8 @@ export const useFilesColumns = ({
       accessor: 'file_size',
       Filter: NumberRangeColumnFilter,
       width: colWidths?.file_size || 160,
-      filterPlaceholderFrom: 'min(kb)',
-      filterPlaceholderTo: 'max(kb)',
+      filterPlaceholderFrom: 'Min(KB)',
+      filterPlaceholderTo: 'Max(KB)',
     },
     {
       Header: 'Created',

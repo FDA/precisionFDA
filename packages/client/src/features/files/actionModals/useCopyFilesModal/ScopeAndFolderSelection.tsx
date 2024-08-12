@@ -9,7 +9,7 @@ import { FolderIcon } from '../../../../components/icons/FolderIcon'
 import { HomeIcon } from '../../../../components/icons/HomeIcon'
 import { SelectableTable, StyledCell } from '../../../actionModals/styles'
 import { ServerScope } from '../../../home/types'
-import { ModalPageCol } from '../../../modal/styles'
+import { ModalContentPadding, ModalPageCol } from '../../../modal/styles'
 import { SearchBar } from '../../../resources/styles'
 import { FdaRestrictedIcon } from '../../../spaces/FdaRestrictedIcon'
 import { ProtectedIcon } from '../../../spaces/ProtectedIcon'
@@ -30,6 +30,7 @@ import {
   StyledBreadcrumb,
   StyledBreadcrumbButton,
   StyledNameIcon,
+  StyledStickyTop,
 } from './styles'
 
 const ShorternFolderName = styled(ShorternName)`
@@ -56,7 +57,7 @@ const SpacesList = ({
   })
 
   if (isLoading) {
-    return 'Loading...'
+    return <ModalContentPadding>Loading...</ModalContentPadding>
   }
 
   const spacesList = data.filter(
@@ -125,7 +126,7 @@ const FolderList = ({
   })
 
   if (isLoading) {
-    return 'Loading...'
+    return <ModalContentPadding>Loading...</ModalContentPadding>
   }
 
   const folders = data.nodes as IFile[]
@@ -133,7 +134,9 @@ const FolderList = ({
   const filteredFolders = folders.filter(f => f.name.toLowerCase().includes(filterString.toLowerCase()))
 
   return folders.length === 0 ? (
-    'There are no folders in this directory. You can copy files directly to this location.'
+    <ModalContentPadding>
+      There are no folders in this directory. You can copy files directly to this location.
+    </ModalContentPadding>
   ) : (
     <SelectableTable>
       <tbody>
@@ -212,32 +215,35 @@ export const ScopeAndFolderSelection = ({
 
   return (
     <ModalPageCol>
-      <ModalSearchBarWrapper>
-        <SearchBar>
-          <InputText
-            placeholder={`Search ${searchType}...`}
-            value={searchQuery}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
-          />
-          <Button type="button" onClick={() => setSearchQuery('')}>
-            Clear
-          </Button>
-        </SearchBar>
-      </ModalSearchBarWrapper>
-      <ModalStyledBreadcrumbs>
-        <StyledBreadcrumbButton variant="link" onClick={() => setSelectedTarget(undefined)}>
-          All Scopes
-        </StyledBreadcrumbButton>
-        {breadcrumbs.map((b, index) => (
-          <StyledBreadcrumb key={`divider-${index}`}>
-            <BreadcrumbDivider>/</BreadcrumbDivider>
-            <StyledBreadcrumbButton variant="link" onClick={() => handleSelectBreadcrumb(b.id)}>
-              {b.name}
-            </StyledBreadcrumbButton>
-          </StyledBreadcrumb>
-        ))}
-      </ModalStyledBreadcrumbs>
       <CopyModalScrollPlace>
+        <StyledStickyTop>
+          <ModalSearchBarWrapper>
+            <SearchBar>
+              <InputText
+                placeholder={`Search ${searchType}...`}
+                value={searchQuery}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
+              />
+              <Button type="button" onClick={() => setSearchQuery('')}>
+                Clear
+              </Button>
+            </SearchBar>
+          </ModalSearchBarWrapper>
+          <ModalStyledBreadcrumbs>
+            <StyledBreadcrumbButton variant="link" onClick={() => setSelectedTarget(undefined)}>
+              All Scopes
+            </StyledBreadcrumbButton>
+            {breadcrumbs.map((b, index) => (
+              <StyledBreadcrumb key={`divider-${index}`}>
+                <BreadcrumbDivider>/</BreadcrumbDivider>
+                <StyledBreadcrumbButton variant="link" onClick={() => handleSelectBreadcrumb(b.id)}>
+                  {b.name}
+                </StyledBreadcrumbButton>
+              </StyledBreadcrumb>
+            ))}
+          </ModalStyledBreadcrumbs>
+        </StyledStickyTop>
+
         {!selectedTarget && <SpacesList sourceScopes={sourceScopes} onSelect={setSelectedTarget} filterString={searchQuery} />}
         {selectedTarget && (
           <FolderList

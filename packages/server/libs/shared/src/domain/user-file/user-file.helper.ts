@@ -1,6 +1,6 @@
 import { EntityManager, SqlEntityManager } from '@mikro-orm/mysql'
 import { DxId } from '@shared/domain/entity/domain/dxid'
-import { UId } from '@shared/domain/entity/domain/uid'
+import { Uid } from '@shared/domain/entity/domain/uid'
 import { Space } from '@shared/domain/space/space.entity'
 import { Folder } from '@shared/domain/user-file/folder.entity'
 import { Node } from '@shared/domain/user-file/node.entity'
@@ -364,7 +364,7 @@ const filterNodesByUser = async (em: SqlEntityManager, nodes: Node[], currentUse
 }
 const findFileOrAssetWithUid = async (
   em: EntityManager,
-  uid: UId,
+  uid: Uid<'file'>,
 ): Promise<IFileOrAsset | null> => {
   const userFileRepo = em.getRepository(UserFile) as UserFileRepository
   const file = await userFileRepo.findFileWithUid(uid, ['user', 'challengeResources'])
@@ -376,7 +376,10 @@ const findFileOrAssetWithUid = async (
   return (await assetRepo.findAssetWithUid(uid)) as IFileOrAsset
 }
 
-const findFileOrAssetsWithDxid = async (em: EntityManager, dxid: DxId): Promise<IFileOrAsset[]> => {
+const findFileOrAssetsWithDxid = async (
+  em: EntityManager,
+  dxid: DxId<'file'>,
+): Promise<IFileOrAsset[]> => {
   const userFileRepo = em.getRepository(UserFile) as UserFileRepository
   const res = await userFileRepo.findFilesWithDxid(dxid)
   if (res.length > 0) {
@@ -485,8 +488,8 @@ export {
   detectIntersectedTraverse,
   filterLeafPaths,
   filterNodesByUser,
-  findFileOrAssetWithUid,
   findFileOrAssetsWithDxid,
+  findFileOrAssetWithUid,
   findFolderForPath,
   findUnclosedFilesOrAssets,
   folderPathsFromFolders,

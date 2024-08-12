@@ -65,7 +65,7 @@ export const DiscussionList = ({ space, scope }: { space: ISpace; scope: string 
   const location = useLocation()
 
   const membershipType = space.current_user_membership
-  const canCreateDiscussion = membershipType.role !== 'viewer'
+  const canCreateDiscussion = membershipType.role !== 'viewer' && !space.restricted_discussions
 
   return (
     <ErrorBoundary>

@@ -8,12 +8,14 @@ import {
   Property,
   Ref,
 } from '@mikro-orm/core'
-import { UId } from '@shared/domain/entity/domain/uid'
+import { Uid } from '@shared/domain/entity/domain/uid'
 import { NodeProperty } from '@shared/domain/property/node-property.entity'
 import { NodeRepository } from '@shared/domain/user-file/node.repository'
 import { User } from '@shared/domain/user/user.entity'
 import { BaseEntity } from '../../database/base-entity'
 import { EntityScope } from '../../types/common'
+import { DxId } from '../entity/domain/dxid'
+import { Tagging } from '../tagging/tagging.entity'
 import { FILE_STATE, FILE_STI_TYPE, FOLDER_STATE, PARENT_TYPE } from './user-file.types'
 
 @Entity({
@@ -29,10 +31,10 @@ export class Node extends BaseEntity {
 
   // This is optional because local Folders do not have dxids
   @Property()
-  dxid?: string
+  dxid?: DxId<'file'>
 
   @Property({ unique: true })
-  uid: UId
+  uid: Uid<'file'>
 
   @Property()
   name: string
@@ -97,4 +99,9 @@ export class Node extends BaseEntity {
 
   @Property({ hidden: true, persist: false })
   folderPath?: string
+
+  @OneToMany(() => Tagging, (tagging) => tagging.folder || tagging.asset || tagging.userFile, {
+    orphanRemoval: true,
+  })
+  taggings = new Collection<Tagging>(this)
 }

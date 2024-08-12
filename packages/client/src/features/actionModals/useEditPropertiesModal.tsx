@@ -319,7 +319,7 @@ export function useEditPropertiesModal<
   const { isShown, setShowModal } = useModal()
   const mSelected = useMemo(() => selected, [isShown])
 
-  const modalComp = isShown && (
+  const modalComp = (
     <ModalNext
       id="edit-properties-modal"
       data-testid={`modal-${type}-edit-properties`}
@@ -328,7 +328,7 @@ export function useEditPropertiesModal<
     >
       <ModalHeaderTop
         disableClose={false}
-        headerText={`Edit ${mSelected.length > 1 ? `common properties for ${mSelected.length} items` : `properties for ${mSelected[0].name}`}`}
+        headerText={`Edit ${mSelected.length > 1 ? `common properties for ${mSelected.length} items` : `properties for ${mSelected[0]?.name}`}`}
         hide={() => setShowModal(false)}
       />
 

@@ -152,45 +152,6 @@ describe('DiscussionService tests', () => {
     expect(attachments[5].itemType).eq('Comparison')
   })
 
-  it('create discussion with non existing user', async () => {
-    userCtx = { id: 10, dxuser: 'non-existing', accessToken: 'foo' }
-    const publisherService = new PublisherService(
-      em,
-      userCtx,
-      new PlatformClient({ accessToken: 'foo' }),
-    )
-    const fetcher = new EntityFetcherService(em, userCtx)
-    discussionService = new DiscussionService(
-      em,
-      userCtx,
-      publisherService,
-      fetcher,
-      entityService,
-      discussionNotificationService,
-    )
-
-    const createDiscussionInput: BaseInput = {
-      title: 'test-discussion',
-      content: 'test-content',
-      attachments: {
-        files: [],
-        folders: [],
-        assets: [],
-        apps: [],
-        jobs: [],
-        comparisons: [],
-      },
-    }
-
-    try {
-      await discussionService.createDiscussion(createDiscussionInput)
-      expect.fail('Operation is expected to fail.')
-    } catch (error: any) {
-      expect(error.name).to.equal('NotFoundError')
-      expect(error.message).eq('User not found ({ id: 10 })')
-    }
-  })
-
   it('update discussion', async () => {
     // first create a discussion
     const discussion = create.discussionHelper.create(em, { user }, {})
@@ -328,6 +289,45 @@ describe('DiscussionService tests', () => {
     expect(note.attachments.getItems()[4].itemType).eq('Job')
   })
 
+  it('create discussion with non existing user', async () => {
+    userCtx = { id: 10, dxuser: 'non-existing', accessToken: 'foo' }
+    const publisherService = new PublisherService(
+      em,
+      userCtx,
+      new PlatformClient({ accessToken: 'foo' }),
+    )
+    const fetcher = new EntityFetcherService(em, userCtx)
+    discussionService = new DiscussionService(
+      em,
+      userCtx,
+      publisherService,
+      fetcher,
+      entityService,
+      discussionNotificationService,
+    )
+
+    const createDiscussionInput: BaseInput = {
+      title: 'test-discussion',
+      content: 'test-content',
+      attachments: {
+        files: [],
+        folders: [],
+        assets: [],
+        apps: [],
+        jobs: [],
+        comparisons: [],
+      },
+    }
+
+    try {
+      await discussionService.createDiscussion(createDiscussionInput)
+      expect.fail('Operation is expected to fail.')
+    } catch (error: any) {
+      expect(error.name).to.equal('NotFoundError')
+      expect(error.message).eq('User not found ({ id: 10 })')
+    }
+  })
+
   it('publish discussion with non existing discussion id', async () => {
     const publishDiscussionInput: PublishDiscussionInput = {
       id: 10,
@@ -375,6 +375,57 @@ describe('DiscussionService tests', () => {
     } catch (error: any) {
       expect(error.name).to.equal('NotFoundError')
       expect(error.message).eq('User not found ({ id: 10 })')
+    }
+  })
+
+  it('publish discussion in space without permission', async () => {
+    const discussion = create.discussionHelper.create(em, { user }, {})
+    const space = create.spacesHelper.create(em, generate.space.group())
+    await em.flush()
+    const scope = space.scope
+
+    const file = create.filesHelper.create(em, { user }, { name: 'file', scope })
+    await em.flush()
+
+    const publishDiscussionInput: PublishDiscussionInput = {
+      id: discussion.id,
+      scope: scope,
+      toPublish: { apps: [], folders: [], assets: [], comparisons: [], files: [file.id], jobs: [] },
+    }
+
+    try {
+      await discussionService.publishDiscussion(publishDiscussionInput)
+      expect.fail('Operation is expected to fail.')
+    } catch (error: any) {
+      expect(error.name).to.equal('PermissionError')
+      expect(error.message).eq('Unable to publish: insufficient permissions.')
+    }
+  })
+
+  it('publish discussion in space with discussion disabled', async () => {
+    const discussion = create.discussionHelper.create(em, { user }, {})
+    const space = create.spacesHelper.create(em, generate.space.simple())
+    create.spacesHelper.addMember(em, { user, space })
+    space.meta.restricted_discussions = true
+
+    await em.flush()
+    const scope = space.scope
+
+    const file = create.filesHelper.create(em, { user }, { name: 'file', scope })
+    await em.flush()
+
+    const publishDiscussionInput: PublishDiscussionInput = {
+      id: discussion.id,
+      scope: scope,
+      toPublish: { apps: [], folders: [], assets: [], comparisons: [], files: [file.id], jobs: [] },
+    }
+
+    try {
+      await discussionService.publishDiscussion(publishDiscussionInput)
+      expect.fail('Operation is expected to fail.')
+    } catch (error: any) {
+      expect(error.name).to.equal('InvalidStateError')
+      expect(error.message).eq('Unable to publish discussion: space has restricted discussions.')
     }
   })
 

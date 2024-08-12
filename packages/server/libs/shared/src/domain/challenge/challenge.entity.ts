@@ -1,15 +1,15 @@
 import {
   Collection,
   Entity,
-  Ref,
   ManyToOne,
   OneToMany,
+  OneToOne,
   PrimaryKey,
   Property,
+  Ref,
   Reference,
-  OneToOne,
 } from '@mikro-orm/core'
-import { UId } from '@shared/domain/entity/domain/uid'
+import { Uid } from '@shared/domain/entity/domain/uid'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { BaseEntity } from '../../database/base-entity'
@@ -51,7 +51,7 @@ export class Challenge extends BaseEntity {
 
   // Note: the value stored in cardImageId is actually the file's uid
   @Property()
-  cardImageId: UId
+  cardImageId: Uid<'file'>
 
   @Property()
   scope: string
@@ -73,7 +73,7 @@ export class Challenge extends BaseEntity {
   @ManyToOne(() => User)
   appOwner!: Ref<User>
 
-  @OneToMany(({ entity: () => ChallengeResource, mappedBy: 'challenge', orphanRemoval: true }))
+  @OneToMany({ entity: () => ChallengeResource, mappedBy: 'challenge', orphanRemoval: true })
   challengeResources = new Collection<ChallengeResource>(this)
 
   constructor(admin: User, appOwner: User) {

@@ -1,11 +1,12 @@
 import { Body, Controller, Get, HttpCode, Param, Post } from '@nestjs/common'
 import { CliNodeSearchDTO } from '@shared/domain/cli/dto/CliNodeSearchDTO'
 import { CliService } from '@shared/domain/cli/service/cli.service'
+import { DxId } from '@shared/domain/entity/domain/dxid'
 
 // SPECIAL ROUTES INTENDED FOR CLI USAGE ONLY. CONTAINS CLI SPECIFIC LOGIC & SPECIAL RESPONSE OBJECTS.
 @Controller('/cli')
 export class CliController {
-  constructor(private readonly cliService: CliService,) {}
+  constructor(private readonly cliService: CliService) {}
 
   @HttpCode(200)
   @Post('/nodes')
@@ -24,10 +25,9 @@ export class CliController {
   }
 
   @Get('/job/:dxid/scope')
-  async getJobScope(@Param('dxid') jobDxid: string) {
+  async getJobScope(@Param('dxid') jobDxid: DxId<'job'>) {
     return this.cliService.getJobScope(jobDxid)
   }
-
 
   @Get('/spaces/:id/members')
   async listMembers(@Param('id') spaceId: number) {
@@ -43,5 +43,4 @@ export class CliController {
   async describeDiscussion(@Param('discussionId') discussionId: number) {
     return this.cliService.describeDiscussion(discussionId)
   }
-
 }

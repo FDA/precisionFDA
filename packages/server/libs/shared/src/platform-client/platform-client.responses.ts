@@ -1,11 +1,12 @@
-import { DxId } from '@shared/domain/entity/domain/dxid'
+import { DXEnityType, DxId } from '@shared/domain/entity/domain/dxid'
+import { PlatformEntityType } from '@shared/domain/entity/domain/platform.entity.type'
 import { JOB_STATE } from '../domain/job/job.enum'
 import { FILE_STATE_DX } from '../domain/user-file/user-file.types'
 import { AnyObject } from '../types'
 import { DnanexusLink, IOType } from '../types/common'
 
 type DbClusterDescribeResponse = {
-  id: string
+  id: DxId<'dbcluster'>
   project: string
   name: string
   created: number
@@ -47,7 +48,7 @@ interface GetUploadURLResponse {
 }
 
 type ListFilesResult = {
-  id: DxId
+  id: DxId<'file'>
   project: string
   describe?: {
     id: string
@@ -60,7 +61,7 @@ type ListFilesResult = {
 type ListFilesResponse = IPaginatedResponse<ListFilesResult>
 
 type FileStateResult = {
-  id: DxId
+  id: DxId<'file'>
   project: string
   describe?: {
     name: string
@@ -160,7 +161,7 @@ type DescribeFoldersResponse = {
 }
 
 type JobCreateResponse = {
-  id: string
+  id: DxId<'job'>
 }
 
 type FindJobsResponse = {
@@ -169,10 +170,11 @@ type FindJobsResponse = {
 
 type JobTerminateResponse = JobCreateResponse
 
-type ClassIdResponse = {
-  id: DxId
+type ClassIdResponse<
+  ENTITY extends DXEnityType | PlatformEntityType = DXEnityType | PlatformEntityType,
+> = {
+  id: DxId<ENTITY>
 }
-
 
 class AppDescribeResponse {
   id: string

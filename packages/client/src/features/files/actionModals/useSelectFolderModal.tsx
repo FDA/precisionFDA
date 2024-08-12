@@ -130,7 +130,7 @@ export const useSelectFolderModal = (
     setShowModal(true)
   }
 
-  const modalComp = isShown && (
+  const modalComp = (
     <ModalNext
       id="select-folder-modal"
       disableClose={false}

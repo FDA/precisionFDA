@@ -163,7 +163,7 @@ export const useSelectJobModal = (
 
   const jobs = jobsData ?? []
 
-  const modalComp = isShown && (
+  const modalComp = (
     <ModalNext
       id="select-job-modal"
       headerText={title}

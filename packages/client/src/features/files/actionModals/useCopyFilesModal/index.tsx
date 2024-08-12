@@ -11,7 +11,7 @@ import { displayPayloadMessage } from '../../../../utils/api'
 import { HomeScope, ServerScope } from '../../../home/types'
 import { getBasePathFromScope } from '../../../home/utils'
 import { ModalHeaderTop, ModalNext } from '../../../modal/ModalNext'
-import { ButtonRow, Footer } from '../../../modal/styles'
+import { ButtonRow, Footer, ModalContentPadding } from '../../../modal/styles'
 import { useModal } from '../../../modal/useModal'
 import { copyFilesRequest, fetchSelectedFiles, validateCopyingFiles } from '../../files.api'
 import { IExistingFileSet, ISelectedFile, ISelectedFolder, SelectedNode } from '../../files.types'
@@ -32,6 +32,7 @@ import {
   ShorternName,
   StyledCopyFileDetail,
   StyledFileDetailIcon,
+  StyledStickyTop,
 } from './styles'
 
 const FileListItemContent = ({ file }: { file: ISelectedFile }) => {
@@ -255,7 +256,7 @@ export const useCopyFilesModal = ({
     setShowModal(false)
   }
 
-  const modalComp = isShown && (
+  const modalComp = (
     <ModalNext
       id="modal-files-validate-copied"
       data-testid="modal-files-validate-copied"
@@ -267,10 +268,8 @@ export const useCopyFilesModal = ({
       <CopyModalPageRow>
         <CopyModalPageCol>
           <CopyModalScrollPlace>
-            <h5>
-              <b>Selected Item(s)</b>
-            </h5>
-            {isLoading && 'Loading...'}
+            <StyledStickyTop>Selected Item(s)</StyledStickyTop>
+            {isLoading && <ModalContentPadding>Loading...</ModalContentPadding>}
             {isSuccess && <CopyFileList nodes={copyFiles} />}
           </CopyModalScrollPlace>
           {copyMessage.length > 0 && <CopyHelp>{copyMessage}</CopyHelp>}

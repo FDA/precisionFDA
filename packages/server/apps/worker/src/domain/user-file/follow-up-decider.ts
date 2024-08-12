@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common'
 import { ChallengeResourceRepository } from '@shared/domain/challenge/challenge-resource.repository'
 import { ChallengeRepository } from '@shared/domain/challenge/challenge.repository'
 import { DataPortalRepository } from '@shared/domain/data-portal/data-portal.repository'
-import { UId } from '@shared/domain/entity/domain/uid'
+import { Uid } from '@shared/domain/entity/domain/uid'
 import { SpaceReportRepository } from '@shared/domain/space-report/repository/space-report.repository'
 
 /**
@@ -19,7 +19,7 @@ export class FollowUpDecider {
     private readonly spaceReportRepo: SpaceReportRepository,
   ) {}
 
-  async decideNextAction(fileUid: UId) {
+  async decideNextAction(fileUid: Uid<'file'>) {
     this.logger.log(`Deciding about follow up action after a close of file with uid ${fileUid}`)
     try {
       if (await this.isDataPortalCardImage(fileUid)) {
@@ -61,7 +61,7 @@ export class FollowUpDecider {
     return challenges.length > 0
   }
 
-  private async isSpaceReportResult(fileUid: UId) {
+  private async isSpaceReportResult(fileUid: Uid<'file'>) {
     this.logger.log(`Is file with uid ${fileUid} a space report result`)
     const spaceReports = await this.spaceReportRepo.findByResultFileUid(fileUid)
     return spaceReports != null
