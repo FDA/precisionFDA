@@ -41,7 +41,7 @@ export interface Job {
   run_input_data: any[]
   run_output_data: any[]
   run_data_updates: RunDataUpdates
-  instance_type: string
+  instance_type: keyof typeof RESOURCE_LABELS
   duration: string
   duration_in_seconds: number
   energy_consumption: string
