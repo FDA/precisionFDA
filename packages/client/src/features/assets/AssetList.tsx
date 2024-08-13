@@ -74,7 +74,7 @@ export const AssetList = ({ homeScope, spaceId }: { homeScope?: HomeScope, space
         <ActionsRow>
           <QuickActions>
             <Button
-              variant='primary'
+              data-variant='primary'
               as="a"
               data-turbolinks="false"
               href="/docs/assets"
@@ -83,7 +83,7 @@ export const AssetList = ({ homeScope, spaceId }: { homeScope?: HomeScope, space
               <QuestionIcon height={13} /> How to create assets
             </Button>
             <Button
-              variant='primary' onClick={() => generateCLIKeyAction.setShowModal(true)}>
+              data-variant='primary' onClick={() => generateCLIKeyAction.setShowModal(true)}>
               <KeyIcon height={13} />Generate CLI Key
             </Button>
           </QuickActions>

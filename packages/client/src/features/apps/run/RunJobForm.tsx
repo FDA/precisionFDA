@@ -366,7 +366,7 @@ export const RunJobForm = ({ app, userJobLimit, spec }: { app: IApp; spec: AppSp
       </AppsConfiguration>
       <StyledActionsContainer>
         <Button
-          variant="primary"
+          data-variant="primary"
           disabled={isSubmitting || Object.keys(errors).length > 0}
           type="button"
           form="submitJobForm"
@@ -378,7 +378,7 @@ export const RunJobForm = ({ app, userJobLimit, spec }: { app: IApp; spec: AppSp
           {isBatchRun && (
             <>
               <Button
-                variant="success"
+                data-variant="success"
                 disabled={isSubmitting}
                 type="button"
                 onClick={event => exportFormData(event, getValues())}
@@ -392,13 +392,13 @@ export const RunJobForm = ({ app, userJobLimit, spec }: { app: IApp; spec: AppSp
                 id="fileInput"
                 onChange={event => importFormData(event, vals => reset(vals))}
               />
-              <Button variant="success" disabled={isSubmitting} type="button" onClick={handleImportClick}>
+              <Button data-variant="success" disabled={isSubmitting} type="button" onClick={handleImportClick}>
                 Import Inputs
               </Button>
             </>
           )}
           {computeInstances && (
-            <Button variant="success" disabled={isSubmitting} type="button" onClick={addInput}>
+            <Button data-variant="success" disabled={isSubmitting} type="button" onClick={addInput}>
               Add batch
             </Button>
           )}

@@ -94,7 +94,7 @@ export const WorkflowList = ({
           <QuickActions>
             {homeScope === 'me' && (
               <Button
-                variant='primary'
+                data-variant='primary'
                 data-testid="home-workflows-create-link"
                 as="a"
                 data-turbolinks="false"
@@ -106,7 +106,7 @@ export const WorkflowList = ({
 
             {spaceId && (
               <Button
-                variant='primary'
+                data-variant='primary'
                 data-testid="spaces-workflows-add-button"
                 onClick={() =>
                   listActions['Add Workflow']?.func({ showModal: true })

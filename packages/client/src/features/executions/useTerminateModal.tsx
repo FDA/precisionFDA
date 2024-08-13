@@ -72,7 +72,7 @@ export function useTerminateModal<T extends { ids: string[]; name: string }>({
         <ButtonRow>
           {mutation.isPending && <Loader />}
           <Button onClick={() => setShowModal(false)}>Cancel</Button>
-          <Button variant="warning" onClick={handleSubmit} disabled={mutation.isPending}>
+          <Button data-variant="warning" onClick={handleSubmit} disabled={mutation.isPending}>
             Terminate
           </Button>
         </ButtonRow>

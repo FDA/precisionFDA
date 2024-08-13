@@ -142,7 +142,7 @@ export function useAddResourceToModal({
             Cancel
           </Button>
           <Button
-            variant="primary"
+            data-variant="primary"
             type="submit"
             onClick={handleSubmit}
             disabled={!selectedUids.length || mutation?.isPending}

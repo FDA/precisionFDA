@@ -127,7 +127,7 @@ const FileUpload = ({
             Close
           </Button>
           <Button
-            variant="primary"
+            data-variant="primary"
             disabled={text === undefined || mutation.isPending}
             type="button"
             onClick={handleImportAndCreate}

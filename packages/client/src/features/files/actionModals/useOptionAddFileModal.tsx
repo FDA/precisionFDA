@@ -69,7 +69,7 @@ export const useOptionAddFileModal = ({
             </div>
             <div>
               <Button
-                variant="primary"
+                data-variant="primary"
                 onClick={() => {
                   setShowModal(false)
                   setShowCopyFilesModal(true)
@@ -91,7 +91,7 @@ export const useOptionAddFileModal = ({
             </div>
             <div>
               <Button
-                variant="primary"
+                data-variant="primary"
                 onClick={() => {
                   setShowModal(false)
                   setShowFileUploadModal(true)

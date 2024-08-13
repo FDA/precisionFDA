@@ -159,7 +159,7 @@ export const AppForm = ({
             )}
             <Button
               disabled={Object.keys(errors).length > 0 || isSubmitting}
-              variant='primary'
+              data-variant='primary'
               type="submit"
             >
               {isEdit && <div>Save Revision {(app?.revision || 0) + 1}</div>}

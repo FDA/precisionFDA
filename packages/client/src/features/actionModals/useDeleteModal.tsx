@@ -74,7 +74,7 @@ export function useDeleteModal<
         <ButtonRow>
           {mutation.isPending && <Loader />}
           <Button onClick={() => setShowModal(false)}>Cancel</Button>
-          <Button variant="warning" onClick={handleSubmit} disabled={mutation.isPending}>
+          <Button data-variant="warning" onClick={handleSubmit} disabled={mutation.isPending}>
             Delete
           </Button>
         </ButtonRow>

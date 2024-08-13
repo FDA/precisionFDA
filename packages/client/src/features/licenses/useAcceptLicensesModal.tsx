@@ -168,7 +168,7 @@ export const useAcceptLicensesModal = () => {
             Cancel
           </Button>
           <Button
-            variant="primary"
+            data-variant="primary"
             disabled={selectedLicenses.length === 0}
             onClick={() => handleSubmit()}
           >

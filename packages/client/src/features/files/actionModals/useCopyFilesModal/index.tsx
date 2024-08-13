@@ -283,7 +283,7 @@ export const useCopyFilesModal = ({
       <Footer>
         <ButtonRow>
           <Button onClick={() => setShowModal(false)}>Cancel</Button>
-          <Button variant="primary" type="button" disabled={isLoading || isDisableCopy} onClick={e => handleSubmit(e)}>
+          <Button data-variant="primary" type="button" disabled={isLoading || isDisableCopy} onClick={e => handleSubmit(e)}>
             Copy
           </Button>
         </ButtonRow>

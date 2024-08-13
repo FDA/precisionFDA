@@ -123,7 +123,7 @@ export const SpaceReportList = ({ scope }: { scope: string }) => {
       <ResourceHeader>
         <ActionsRow>
           <QuickActions>
-            <Button variant="primary" disabled={query.isLoading} onClick={() => setGenerateModal(true)}>
+            <Button data-variant="primary" disabled={query.isLoading} onClick={() => setGenerateModal(true)}>
               <PlusIcon height={12} /> Generate report
             </Button>
           </QuickActions>

@@ -106,12 +106,12 @@ const AlertForm = ({
         </FieldGroup>
 
         <StyledRow>
-          <Button variant="primary" type="submit" disabled={isSubmitting || Object.keys(errors).length > 0}>
+          <Button data-variant="primary" type="submit" disabled={isSubmitting || Object.keys(errors).length > 0}>
             Save Alert
           </Button>
           {!isNew && (
             <Button
-              variant="warning"
+              data-variant="warning"
               type="button"
               onClick={() => {
                 onDelete()

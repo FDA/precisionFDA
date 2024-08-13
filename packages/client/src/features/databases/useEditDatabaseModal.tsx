@@ -98,7 +98,7 @@ const EditDatabaseInfoForm = ({
             Cancel
           </Button>
           <Button
-            variant="primary"
+            data-variant="primary"
             type="submit"
             form="edit-database-form"
             disabled={isSubmitting}

@@ -163,7 +163,7 @@ function ListAdminNews() {
           <PageTitle>Admin News Items</PageTitle>
           <Row>
             <Link to="/admin/news/create">
-              <Button variant='primary'>Add News Item</Button>
+              <Button data-variant='primary'>Add News Item</Button>
             </Link>
             <ButtonRow>
               <TypeSelect selected={!typeParam} onClick={() => setTypeParam(null, 'replaceIn')}>

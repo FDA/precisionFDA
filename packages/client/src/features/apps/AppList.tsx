@@ -94,7 +94,7 @@ export const AppList = ({ homeScope, spaceId }: { homeScope?: HomeScope, spaceId
           <QuickActions>
             {homeScope === 'me' && (
               <Button
-                variant='primary'
+                data-variant='primary'
                 as={Link}
                 to="/home/apps/create"
                 data-turbolinks="false"
@@ -105,7 +105,7 @@ export const AppList = ({ homeScope, spaceId }: { homeScope?: HomeScope, spaceId
             )}
             {spaceId && (
               <Button
-                variant='primary'
+                data-variant='primary'
                 data-testid="spaces-apps-add-app-button"
                 onClick={() =>
                   listActions['Add App']?.func({ showModal: true })

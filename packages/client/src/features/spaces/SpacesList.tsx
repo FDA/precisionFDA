@@ -92,7 +92,7 @@ const SpacesList = () => {
     <UserLayout innerScroll>
       <SpacesHeader>
         <PageTitle>Spaces</PageTitle>
-        <Button variant='primary' as={Link} to="/spaces/new">
+        <Button data-variant='primary' as={Link} to="/spaces/new">
           Create new space
         </Button>
       </SpacesHeader>

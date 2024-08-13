@@ -89,7 +89,7 @@ const EditAssetInfoForm = ({
             Cancel
           </Button>
           <Button
-            variant="primary"
+            data-variant="primary"
             type="submit"
             form="edit-asset-form"
             disabled={editMutation.isPending}

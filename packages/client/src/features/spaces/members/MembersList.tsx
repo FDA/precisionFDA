@@ -91,7 +91,7 @@ export const MembersList = ({ space }: { space: ISpace }) => {
           )}
 
           {space.updatable && canAddMember && (
-            <AddButton variant='primary' type="button" onClick={() => setShowModal(true)}>
+            <AddButton data-variant='primary' type="button" onClick={() => setShowModal(true)}>
               <PlusIcon height={12}/>
               Add Members
             </AddButton>

@@ -108,7 +108,7 @@ const EditFileInfoForm = ({
           <Button type="button" onClick={handleClose} disabled={isSubmitting}>
             Cancel
           </Button>
-          <Button variant="primary" type="submit" form="edit-file-form" disabled={isSubmitting}>
+          <Button data-variant="primary" type="submit" form="edit-file-form" disabled={isSubmitting}>
             Edit
           </Button>
         </ButtonRow>

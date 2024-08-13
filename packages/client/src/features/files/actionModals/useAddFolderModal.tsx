@@ -102,7 +102,7 @@ export const useAddFolderModal = ({
             Cancel
           </Button>
           <Button
-            variant="primary"
+            data-variant="primary"
             type="submit"
             form="add-folder-form"
             disabled={mutation.isPending}

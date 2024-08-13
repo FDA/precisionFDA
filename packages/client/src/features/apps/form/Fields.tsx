@@ -277,7 +277,7 @@ export const DefaultBoolean = ({
             <BoolButtonGroup>
               <BoolButton
                 type="button"
-                active={field.value === 'true'}
+                data-selected={(field.value === 'true').toString() as BooleanString}
                 onClick={() =>
                   field.onChange(field.value === 'true' ? null : 'true')
                 }
@@ -287,7 +287,7 @@ export const DefaultBoolean = ({
 
               <BoolButton
                 type="button"
-                active={field.value === 'false'}
+                data-selected={(field.value === 'false').toString() as BooleanString}
                 onClick={() =>
                   field.onChange(field.value === 'false' ? null : 'false')
                 }
@@ -541,7 +541,7 @@ export const SelectIOClass = ({
         <StyledButton
           type="button"
           {...props}
-          active={$isActive}
+          active={$isActive.toString() as BooleanString}
         >
           <PlusIcon height={12} />
           {children}

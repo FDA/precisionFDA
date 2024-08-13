@@ -93,7 +93,7 @@ const DataPortalsListPage = () => {
             <TopRow>
               <PageTitle>Data Portals</PageTitle>
               {user?.isAdmin && (
-                <Button variant="primary" as={Link} to="/data-portals/create" data-turbolinks="false">
+                <Button data-variant="primary" as={Link} to="/data-portals/create" data-turbolinks="false">
                   Create a Data Portal
                 </Button>
               )}

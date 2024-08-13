@@ -72,7 +72,7 @@ export const Topbox = styled.div`
   margin-bottom: 40px;
 `
 
-export const StyledCloudResourcesHeaderButton = styled(Button).attrs({ variant: 'primary' })`
+export const StyledCloudResourcesHeaderButton = styled(Button).attrs({ 'data-variant': 'primary' })`
   gap: 8px;
   max-height: 34px;
   box-sizing: border-box;
@@ -129,7 +129,7 @@ export const StyledActionsButton = styled(Button)`
   gap: 6px;
 `
 export const ActionsButton = React.forwardRef((props: any, ref) => (
-  <StyledActionsButton variant='primary' ref={ref} {...props}>
+  <StyledActionsButton data-variant='primary' ref={ref} {...props}>
     Actions <ArrowIcon />
   </StyledActionsButton>
 ))

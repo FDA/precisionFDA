@@ -73,7 +73,7 @@ const EditFolderInfoForm = ({
       </FieldGroup>
       <ButtonRow>
         <Button type="button" onClick={handleClose} disabled={isSubmitting}>Cancel</Button>
-        <Button variant="primary" type="submit" disabled={isSubmitting}>Edit</Button>
+        <Button data-variant="primary" type="submit" disabled={isSubmitting}>Edit</Button>
       </ButtonRow>
     </StyledForm>
   )

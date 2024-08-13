@@ -279,7 +279,7 @@ const EditPropertiesForm = ({
             Cancel
           </Button>
           <Button
-            variant="primary"
+            data-variant="primary"
             type="submit"
             form="edit-properties-form"
             disabled={mutation.isPending || Object.keys(errors).length > 0}
