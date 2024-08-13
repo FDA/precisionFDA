@@ -1,7 +1,7 @@
 import { useQueryClient } from '@tanstack/react-query'
 import React from 'react'
 import { Column } from 'react-table'
-import ReactTooltip from 'react-tooltip'
+import { Tooltip } from 'react-tooltip'
 import { FeaturedToggle } from '../../components/FeaturedToggle'
 import {
   DefaultColumnFilter, NumberRangeColumnFilter, SelectColumnFilter,
@@ -38,8 +38,8 @@ export const useAssetColumns = ({
       Cell: ({ cell, value }) => (
         <>
           <StyledNameCell
-            data-tip
-            data-for={`assetNameTooltip${cell.row.original.uid}`}
+            data-tooltip-id={`assetNameTooltip${cell.row.original.uid}`}
+            data-tooltip-content={`Asset is in ${cell.row.original.state} state. Please refresh the list momentarily to update its status.`}
             color={
               isUnclosedAsset(cell.row.original)
                 ? colors.stateLabelGrey
@@ -53,13 +53,7 @@ export const useAssetColumns = ({
             {value}
           </StyledNameCell>
           {isUnclosedAsset(cell.row.original) && (
-            <ReactTooltip
-              id={`assetNameTooltip${cell.row.original.uid}`}
-              place="top"
-              effect="solid"
-            >
-              Asset is in {cell.row.original.state} state. Please refresh the list momentarily to update its status.
-            </ReactTooltip>
+            <Tooltip id={`assetNameTooltip${cell.row.original.uid}`} />
           )}
         </>
       ),

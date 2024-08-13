@@ -5,7 +5,7 @@ import { get } from 'lodash'
 import React, { useMemo } from 'react'
 import { FieldErrors, useFieldArray, useForm } from 'react-hook-form'
 import { toast } from 'react-toastify'
-import ReactTooltip from 'react-tooltip'
+import { Tooltip } from 'react-tooltip'
 import styled from 'styled-components'
 import * as Yup from 'yup'
 import { TransparentButton, Button } from '../../components/Button'
@@ -240,20 +240,13 @@ const EditPropertiesForm = ({
                   <InputTextS
                     autoComplete="off"
                     {...register(`props.${index}.key`)}
-                    data-tip
-                    data-for={`props.${index}.key`}
+                    data-tooltip-id={`props.${index}.key`}
+                    data-tooltip-content={message}
                     disabled={mutation.isPending}
                     $isError={isError}
                   />
                   {isError && (
-                    <ReactTooltip
-                      id={`props.${index}.key`}
-                      data-id={`props.${index}.key`}
-                      place="top"
-                      effect="solid"
-                    >
-                      {message}
-                    </ReactTooltip>
+                    <Tooltip id={`props.${index}.key`} />
                   )}
                   <InputTextS
                     autoComplete="off"

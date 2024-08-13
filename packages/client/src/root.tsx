@@ -22,6 +22,8 @@ import { ThemeProvider } from './utils/ThemeContext'
 import queryClient from './utils/queryClient'
 import { TrackPage } from './features/tracks/TrackPage'
 
+import 'react-tooltip/dist/react-tooltip.css'
+
 const Admin = React.lazy(() => import('./features/admin'))
 const Home2 = React.lazy(() => import('./features/home'))
 const Docs = React.lazy(() => import('./features/docs'))

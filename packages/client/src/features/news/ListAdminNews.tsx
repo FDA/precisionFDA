@@ -1,7 +1,7 @@
 import { format } from 'date-fns'
 import React from 'react'
 import { Link, Navigate } from 'react-router-dom'
-import ReactTooltip from 'react-tooltip'
+import { Tooltip } from 'react-tooltip'
 import styled from 'styled-components'
 import { StringParam, useQueryParam } from 'use-query-params'
 import { ArrowLeftIcon } from '../../components/icons/ArrowLeftIcon'
@@ -100,7 +100,7 @@ const TipIcon = ({
   children: React.ReactNode
 }) => {
   return (
-    <StyledTip enabled={enabled} data-tip={infoText} data-for="news-list-tips">
+    <StyledTip enabled={enabled} data-tooltip-content={infoText} data-tooltip-id="news-list-tips">
       {children}
     </StyledTip>
   )
@@ -145,7 +145,7 @@ export function SortableItem({
         ) : (
           <div />
         )}
-        <ReactTooltip id="news-list-tips" place="top" effect="solid" />
+        <Tooltip id="news-list-tips" />
       </CardRight>
     </StyledCard>
   )
