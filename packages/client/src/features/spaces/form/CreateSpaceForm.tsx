@@ -99,6 +99,7 @@ export const SpaceForm = ({
     }
   }, [watch().space_type])
 
+  //TODO(Jiri) - simplify this once all space types are migrated to node
   const onSubmit = () => {
     const vals = getValues()
     if (vals.space_type === 'private_type') {
@@ -112,6 +113,7 @@ export const SpaceForm = ({
       vals.host_lead_dxuser = vals.review_lead_dxuser
       vals.review_lead_dxuser = ''
       vals.guest_lead_dxuser = ''
+      vals.restricted_discussions = vals.restricted_discussions ?? false
     }
     // TODO: weird naming in the form label but the backend expects host_lead to be the review_lead
     if (vals.space_type === 'administrator') {
@@ -166,6 +168,9 @@ export const SpaceForm = ({
     }
     if (getValues().restricted_reviewer) {
       restrictions.push("FDA-associated restricted")
+    }
+    if (getValues().restricted_discussions) {
+      restrictions.push("Shared Area discussions restricted")
     }
 
     return "The space you are about to create will be " + restrictions.join(" and ")
@@ -365,7 +370,7 @@ export const SpaceForm = ({
           variant='primary'
           disabled={Object.keys(errors).length > 0 || isSubmitting}
           type="button"
-          onClick={getValues().protected || getValues().restricted_reviewer ? openConfirmation: handleSubmit(onSubmit)}
+          onClick={getValues().protected || getValues().restricted_reviewer || getValues().restricted_discussions ? openConfirmation: handleSubmit(onSubmit)}
         >
           Create Space
         </Button>

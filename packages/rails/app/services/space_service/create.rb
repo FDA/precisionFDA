@@ -249,7 +249,7 @@ module SpaceService
         restrict_to_template: space_form.restrict_to_template,
         protected: space_form.protected,
         restricted_reviewer: space_form.restricted_reviewer,
-        restricted_discussions: space_form.restricted_discussions,
+        restricted_discussions: false, # allow discussions in review space private area
       )
 
       project_dxid = api.project_new(
