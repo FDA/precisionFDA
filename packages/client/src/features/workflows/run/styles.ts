@@ -44,7 +44,6 @@ export const StyledLine = styled.div`
 
 export const StyledAnalysisName = styled.div`
   flex-grow: 1;
-  padding-right: 16px;
 `
 
 export const StyledStageHeader = styled.div`
