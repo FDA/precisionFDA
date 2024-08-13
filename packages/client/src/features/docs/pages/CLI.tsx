@@ -1137,7 +1137,7 @@ export const CLI = () => {
           The CLI command <StyledCode>pfda describe</StyledCode> is designed to display details about any entity.<br/>
           All you need is the unique entity ID. It is of the
           form <StyledCode>{'{entity}-ABCDEF1234567890-{number}'}</StyledCode>. <br/>
-          Supported types are: app, asset, discussion, file and workflow.
+          Supported types are: app, asset, discussion, file, execution and workflow.
           The response is always in JSON format.
         </p>
 
@@ -1163,6 +1163,14 @@ export const CLI = () => {
           </div>
           <code className="command">
             ./pfda describe app-GZfKXJ80GGYZKxQQGpz7KX2p-1
+          </code>
+        </ExampleBlock>
+        <ExampleBlock>
+          <div className="description">
+            # Describes an execution
+          </div>
+          <code className="command">
+            ./pfda describe job-GZg92X80Z0gx903yy68z8YPk-1
           </code>
         </ExampleBlock>
         <ExampleBlock>
