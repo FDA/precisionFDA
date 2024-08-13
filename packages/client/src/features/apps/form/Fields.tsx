@@ -8,7 +8,7 @@ import {
   FieldErrors,
   UseFormRegister,
 } from 'react-hook-form'
-import ReactTooltip from 'react-tooltip'
+import { Tooltip } from 'react-tooltip'
 import styled, { css } from 'styled-components'
 import { Button } from '../../../components/Button'
 import {
@@ -105,21 +105,14 @@ export const Name = ({ base, register, index, errors }: SpecProps) => {
           required: 'Name is required.',
           onChange: handleSnakeNameChange,
         })}
-        data-tip
-        data-for={`${base}.${index}.name`}
+        data-tooltip-id={`${base}.${index}.name`}
+        data-tooltip-content={message}
         placeholder={`Enter ${base === 'input_spec' ? 'input' : 'output'} name`}
         $isError={isError}
       />
 
       {isError && (
-        <ReactTooltip
-          id={`${base}.${index}.name`}
-          data-id={`${base}.${index}.name`}
-          place="top"
-          effect="solid"
-        >
-          {message}
-        </ReactTooltip>
+        <Tooltip id={`${base}.${index}.name`} />
       )}
     </td>
   )
@@ -133,22 +126,15 @@ export const Label = ({ base, register, index, errors }: SpecProps) => {
     <td>
       <InputTextS
         {...register(`${base}.${index}.label`)}
-        data-tip
-        data-for={`${base}.${index}.label`}
+        data-tooltip-id={`${base}.${index}.label`}
+        data-tooltip-content={errorMessage}
         $isError={isError}
         placeholder={`Enter ${
           base === 'input_spec' ? 'input' : 'output'
         } label`}
       />
       {isError && (
-        <ReactTooltip
-          data-id={`${base}.${index}.label`}
-          id={`${base}.${index}.label`}
-          place="top"
-          effect="solid"
-        >
-          {errorMessage}
-        </ReactTooltip>
+        <Tooltip id={`${base}.${index}.label`} />
       )}
     </td>
   )
@@ -162,15 +148,13 @@ export const Help = ({ base, register, index, errors }: SpecProps) => {
     <td>
       <InputTextS
         {...register(`${base}.${index}.help`)}
-        data-tip
-        data-for={`${base}.${index}.help`}
+        data-tooltip-id={`${base}.${index}.help`}
+        data-tooltip-content={errorMessage}
         $isError={isError}
         placeholder="Enter help text"
       />
       {isError && (
-        <ReactTooltip id={`${base}.${index}.help`} place="top" effect="solid">
-          {errorMessage}
-        </ReactTooltip>
+        <Tooltip id={`${base}.${index}.help`} />
       )}
     </td>
   )
@@ -184,19 +168,13 @@ export const DefaultString = ({ base, register, index, errors }: SpecProps) => {
     <td>
       <InputTextS
         {...register(`${base}.${index}.default`, { setValueAs: formatCSVStringToArray })}
-        data-tip
-        data-for={`${base}.${index}.default`}
+        data-tooltip-id={`${base}.${index}.default`}
+        data-tooltip-content={errorMessage}
         $isError={isError}
         placeholder="Optional default"
       />
       {isError && (
-        <ReactTooltip
-          id={`${base}.${index}.default`}
-          place="top"
-          effect="solid"
-        >
-          {errorMessage}
-        </ReactTooltip>
+        <Tooltip id={`${base}.${index}.default`} />
       )}
     </td>
   )
@@ -208,20 +186,14 @@ export const DefaultFloat = ({ base, register, index, errors }: SpecProps) => {
   return (
     <td>
       <InputTextS
-        data-tip
-        data-for={`${base}.${index}.default`}
+        data-tooltip-id={`${base}.${index}.default`}
+        data-tooltip-content={errorMessage}
         placeholder="Optional default"
         $isError={isError}
         {...register(`${base}.${index}.default`, { setValueAs: formatCSVStringToArray })}
       />
       {isError && (
-        <ReactTooltip
-          id={`${base}.${index}.default`}
-          place="top"
-          effect="solid"
-        >
-          {errorMessage}
-        </ReactTooltip>
+        <Tooltip id={`${base}.${index}.default`} />
       )}
     </td>
   )
@@ -233,20 +205,14 @@ export const DefaultInt = ({ base, register, index, errors }: SpecProps) => {
   return (
     <td>
       <InputTextS
-        data-tip
-        data-for={`${base}.${index}.default`}
+        data-tooltip-id={`${base}.${index}.default`}
+        data-tooltip-content={errorMessage}
         placeholder="Optional default"
         $isError={isError}
         {...register(`${base}.${index}.default`, { setValueAs: formatCSVStringToArray })}
       />
       {isError && (
-        <ReactTooltip
-          id={`${base}.${index}.default`}
-          place="top"
-          effect="solid"
-        >
-          {errorMessage}
-        </ReactTooltip>
+        <Tooltip id={`${base}.${index}.default`} />
       )}
     </td>
   )
@@ -263,7 +229,7 @@ export const DefaultFile = ({
   const errorMessage = get(errors, `${base}.${index}.default`)?.message || null
 
   return (
-    <td data-tip data-for={`${base}.${index}.default`}>
+    <td data-tooltip-id={`${base}.${index}.default`} data-tooltip-content={errorMessage}>
       <Controller
         name={`${base}.${index}.default`}
         control={control}
@@ -289,13 +255,7 @@ export const DefaultFile = ({
         }}
       />
       {isError && (
-        <ReactTooltip
-          id={`input_spec.${index}.default`}
-          place="top"
-          effect="solid"
-        >
-          {errorMessage}
-        </ReactTooltip>
+        <Tooltip id={`input_spec.${index}.default`} />
       )}
     </td>
   )
@@ -355,20 +315,14 @@ export const Choice = ({ base, register, index, errors }: SpecProps) => {
   return (
     <td>
       <InputTextS
-        data-tip
-        data-for={`${base}.${index}.choices`}
+        data-tooltip-id={`${base}.${index}.choices`}
+        data-tooltip-content={errorMessage}
         $isError={isError}
         {...register(`${base}.${index}.choices`, { setValueAs: formatCSVStringToArray })}
         placeholder="Optional comma separated values"
       />
       {isError && (
-        <ReactTooltip
-          id={`${base}.${index}.choices`}
-          place="top"
-          effect="solid"
-        >
-          {errorMessage}
-        </ReactTooltip>
+        <Tooltip id={`${base}.${index}.choices`} />
       )}
     </td>
   )
@@ -381,8 +335,8 @@ export const Optional = ({ base, index, control, errors }: SpecProps) => {
   return (
     <td>
       <Controller
-        data-tip
-        data-for={id}
+        data-tooltip-id={id}
+        data-tooltip-content={errorMessage}
         name={id}
         control={control}
         render={({ field }) => {
@@ -399,13 +353,7 @@ export const Optional = ({ base, index, control, errors }: SpecProps) => {
         }}
       />
       {isError && (
-        <ReactTooltip
-          id={id}
-          place="top"
-          effect="solid"
-        >
-          {errorMessage}
-        </ReactTooltip>
+        <Tooltip id={id} />
       )}
     </td>
   )
@@ -417,8 +365,8 @@ export const IsArray = ({ base, index, control, errors }: SpecProps) => {
   return (
     <StyledIsArray>
       <Controller
-        data-tip
-        data-for={id}
+        data-tooltip-id={id}
+        data-tooltip-content={errorMessage}
         name={id}
         control={control}
         render={({ field }) => {
@@ -435,13 +383,7 @@ export const IsArray = ({ base, index, control, errors }: SpecProps) => {
         }}
       />
       {isError && (
-        <ReactTooltip
-          id={id}
-          place="top"
-          effect="solid"
-        >
-          {errorMessage}
-        </ReactTooltip>
+        <Tooltip id={id} />
       )}
     </StyledIsArray>
   )

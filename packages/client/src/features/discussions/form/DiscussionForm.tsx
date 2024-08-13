@@ -124,7 +124,7 @@ export const DiscussionForm = ({
           </StyledAttachments>
         )}
         <ButtonRow>
-          <CheckboxLabel data-tip data-for="notify-checkbox">
+          <CheckboxLabel>
             <Checkbox
               {...register('notifyAll')}
               disabled={isSubmitting}

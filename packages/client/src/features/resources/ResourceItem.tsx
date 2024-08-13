@@ -28,7 +28,7 @@ const ResourceThumb = ({ url }: { url: string }) => {
 
 const ResourceItem = ({ resource, onClick }: { onClick: (id: number) => void, resource: Resource }) => (
   <StyledResourceItem onClick={() => onClick(resource.id)} isDeleting={resource.isDeleting}>
-    <ImageContainer data-tip data-for={`tip-${resource.id}`}>
+    <ImageContainer>
       <ResourceThumb url={resource.url} />
     </ImageContainer>
     <ItemName>{resource.name}</ItemName>
