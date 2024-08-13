@@ -150,6 +150,7 @@ export class CliExecutionDescribeDTO {
 export class CliDiscussionDescribeDTO {
   id: number
   title: string
+  content: string
   user: UserDTO
   createdAt: Date
   updatedAt: Date

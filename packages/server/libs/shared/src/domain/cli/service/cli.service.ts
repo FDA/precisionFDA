@@ -178,6 +178,7 @@ export class CliService {
     const result: CliDiscussionDescribeDTO = {
       id: discussion.id,
       title: discussion.note.title,
+      content: discussion.note.content,
       user: discussion.user,
       comments: discussion.comments,
       commentsCount: discussion.commentsCount,
