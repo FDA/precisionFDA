@@ -25,12 +25,14 @@ const getTitle = (space: ISpace): string => {
 const fetchAndConvertSelectableSpaces = async (scope: string): Promise<SelectableSpace[]> => {
   if (scope.includes('space')) {
     const spaceId = getSpaceIdFromScope(scope)
-    const spaces: ISpace[] = await fetchSelectableSpaces(spaceId)
-    return spaces.map(space => ({
-      isDisabled: false,
-      label: getTitle(space),
-      value: `space-${space.id}`,
-    }))
+    if (spaceId) {
+      const spaces: ISpace[] = await fetchSelectableSpaces(spaceId.toString())
+      return spaces.map(space => ({
+        isDisabled: false,
+        label: getTitle(space),
+        value: `space-${space.id}`,
+      }))
+    }
   }
   return []
 }
