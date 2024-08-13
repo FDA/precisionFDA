@@ -351,7 +351,7 @@ const WorkflowRun = (
           </Section>
         </WorkflowConfiguration>
         <Button
-          variant="primary"
+          data-variant="primary"
           disabled={isSubmitting}
           type="submit" form="submitJobForm" onClick={handleSubmit(onSubmit)}>
           {isSubmitting ? 'Running' : 'Run Workflow'}

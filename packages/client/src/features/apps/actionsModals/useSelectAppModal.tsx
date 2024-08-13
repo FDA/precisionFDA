@@ -228,7 +228,7 @@ export const useSelectAppModal = (
             Cancel
           </Button>
           <Button
-            variant="primary"
+            data-variant="primary"
             onClick={handleSubmit}
             disabled={selectedApps?.length === 0}
           >

@@ -75,7 +75,7 @@ export const DiscussionList = ({ space, scope }: { space: ISpace; scope: string 
           <QuickActions>
             {canCreateDiscussion && (
               <Button
-                variant="primary"
+                data-variant="primary"
                 data-turbolinks="false"
                 data-testid="space-discussion-create-link"
                 as={Link}

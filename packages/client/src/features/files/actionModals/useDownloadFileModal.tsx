@@ -114,7 +114,7 @@ export const useDownloadFileModal = (selected: IFile[], scope: ServerScope) => {
             Cancel
           </Button>
 
-          <Button variant='primary' onClick={() => {
+          <Button data-variant='primary' onClick={() => {
             handleDownloadClick(downloadUrl(scope))
             setShowModal(false)
             toast.success('Download all has been started')

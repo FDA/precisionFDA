@@ -87,7 +87,7 @@ export const ExpiringSessionModal: React.FC<{ modal: UseModal }> = ({
             </Button>
           </>
         ) : (
-          <Button variant="primary" onClick={handleStayLoggedIn}>
+          <Button data-variant="primary" onClick={handleStayLoggedIn}>
             Extend session
           </Button>
         )}

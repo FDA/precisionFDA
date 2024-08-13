@@ -98,7 +98,7 @@ export const DatabaseList = ({ homeScope }: { homeScope?: HomeScope }) => {
         <ActionsRow>
           <QuickActions>
             <Button
-              variant='primary'
+              data-variant='primary'
               data-testid="home-databases-create-link"
               as={Link}
               to="/home/databases/create"

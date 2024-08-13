@@ -230,13 +230,13 @@ export const ScopeAndFolderSelection = ({
             </SearchBar>
           </ModalSearchBarWrapper>
           <ModalStyledBreadcrumbs>
-            <StyledBreadcrumbButton variant="link" onClick={() => setSelectedTarget(undefined)}>
+            <StyledBreadcrumbButton data-variant="link" onClick={() => setSelectedTarget(undefined)}>
               All Scopes
             </StyledBreadcrumbButton>
             {breadcrumbs.map((b, index) => (
               <StyledBreadcrumb key={`divider-${index}`}>
                 <BreadcrumbDivider>/</BreadcrumbDivider>
-                <StyledBreadcrumbButton variant="link" onClick={() => handleSelectBreadcrumb(b.id)}>
+                <StyledBreadcrumbButton data-variant="link" onClick={() => handleSelectBreadcrumb(b.id)}>
                   {b.name}
                 </StyledBreadcrumbButton>
               </StyledBreadcrumb>

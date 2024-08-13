@@ -28,7 +28,7 @@ export const Dialog = (props: IDialogProps) => {
       {body}
       <StyledButtonRow>
         <Button onClick={cancel}>{cancelText || 'Cancel'}</Button>
-        <Button variant="primary" onClick={ok}>{okText || 'Ok'}</Button>
+        <Button data-variant="primary" onClick={ok}>{okText || 'Ok'}</Button>
       </StyledButtonRow>
     </StyledConfirmDialog>
   )

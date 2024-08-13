@@ -117,7 +117,7 @@ export const EditNoteForm = ({
           Cancel
         </Button>
         <Button
-          variant="primary"
+          data-variant="primary"
           type="button"
           form="commentForm"
           disabled={isSubmitting || Object.keys(errors).length > 0}

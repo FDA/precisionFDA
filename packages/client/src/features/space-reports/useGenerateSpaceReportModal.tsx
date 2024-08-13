@@ -95,7 +95,7 @@ export function useGenerateSpaceReportModal({ scope, onClose }: { scope: string;
         <ButtonRow>
           {mutation.isPending && <Loader />}
           <Button onClick={() => close()}>Cancel</Button>
-          <Button variant="primary" type="submit" form="generate-space-report-form" disabled={mutation.isPending}>
+          <Button data-variant="primary" type="submit" form="generate-space-report-form" disabled={mutation.isPending}>
             Generate
           </Button>
         </ButtonRow>

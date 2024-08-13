@@ -97,7 +97,7 @@ export const CLI = () => {
             target="_blank"
             rel="noreferrer"
           >
-            <Button variant="primary">
+            <Button data-variant="primary">
               <DownloadIcon/> Linux
             </Button>
           </a>
@@ -106,7 +106,7 @@ export const CLI = () => {
             target="_blank"
             rel="noreferrer"
           >
-            <Button variant="primary">
+            <Button data-variant="primary">
               <DownloadIcon/> Mac OS X
             </Button>
           </a>
@@ -115,7 +115,7 @@ export const CLI = () => {
             target="_blank"
             rel="noreferrer"
           >
-            <Button variant="primary">
+            <Button data-variant="primary">
               <DownloadIcon/> Windows
             </Button>
           </a>

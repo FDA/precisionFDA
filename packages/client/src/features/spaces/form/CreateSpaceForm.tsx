@@ -367,7 +367,7 @@ export const SpaceForm = ({
 
       <Row>
         <Button
-          variant='primary'
+          data-variant='primary'
           disabled={Object.keys(errors).length > 0 || isSubmitting}
           type="button"
           onClick={getValues().protected || getValues().restricted_reviewer || getValues().restricted_discussions ? openConfirmation: handleSubmit(onSubmit)}

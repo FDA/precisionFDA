@@ -101,7 +101,7 @@ const FolderSelector = ({
             Cancel
           </Button>
           <Button
-            variant="primary"
+            data-variant="primary"
             onClick={handleSubmit}
             disabled={selectedFolders?.length === 0}
           >

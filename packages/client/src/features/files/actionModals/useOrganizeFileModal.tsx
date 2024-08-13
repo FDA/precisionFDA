@@ -133,7 +133,7 @@ export const useOrganizeFileModal = ({
             Cancel
           </Button>
           <Button
-            variant="primary"
+            data-variant="primary"
             type="submit"
             onClick={handleSubmit}
             disabled={!submitEnabled}

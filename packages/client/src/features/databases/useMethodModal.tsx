@@ -58,7 +58,7 @@ export function useMethodModal<T extends { dxid: string; name: string }>({
         <ButtonRow>
           {mutation.isPending && <Loader />}
           <Button onClick={() => setShowModal(false)} disabled={mutation.isPending}>Cancel</Button>
-          <Button variant="primary" onClick={handleSubmit} disabled={mutation.isPending}>
+          <Button data-variant="primary" onClick={handleSubmit} disabled={mutation.isPending}>
             {methodText}
           </Button>
         </ButtonRow>

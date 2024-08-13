@@ -14,10 +14,10 @@ export default {
 
 // More on component templates: https://storybook.js.org/docs/react/writing-stories/introduction#using-args
 const ButtonSolidBlueTemplate: StoryFn<typeof Button> = args => (
-  <Button variant="primary" {...args}>Submit</Button>
+  <Button data-variant="primary" {...args}>Submit</Button>
 )
 const ButtonSolidRedTemplate: StoryFn<typeof Button> = args => (
-  <Button variant="warning" {...args}>Stop</Button>
+  <Button data-variant="warning" {...args}>Stop</Button>
 )
 const ButtonTextTemplate: StoryFn<typeof Button> = args => (
   <Button {...args}>Add a property</Button>

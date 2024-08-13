@@ -294,7 +294,7 @@ const FileSelectTabs = ({ type, scopes, setShowModal, handleSelect, uids }: File
           >
             Cancel
           </Button>
-          <Button variant="primary" onClick={handleSubmit} disabled={selectedFiles?.length === 0}>
+          <Button data-variant="primary" onClick={handleSubmit} disabled={selectedFiles?.length === 0}>
             Select &nbsp;<ButtonBadge>{selectedFiles?.length}</ButtonBadge>
           </Button>
         </ButtonRow>

@@ -162,7 +162,7 @@ export const useLockUnlockFileModal = ({
         <Button onClick={() => setShowModal(false)} disabled={mutation.isPending}>
           Cancel
         </Button>
-        <Button variant="primary" onClick={handleSubmit} disabled={isSubmitDisabled()}>
+        <Button data-variant="primary" onClick={handleSubmit} disabled={isSubmitDisabled()}>
           {ActionTypeName[type]}
         </Button>
       </Footer>

@@ -152,7 +152,7 @@ export const MarkdownForm = ({
         )}
         {isComment && (isEdit || isAnswerComment) && <Button onClick={() => onCancel && onCancel(getValues())}>Cancel</Button>}
         <Button
-          variant="primary"
+          data-variant="primary"
           type="button"
           form="commentForm"
           disabled={!isDirty || isSubmitting || Object.keys(errors).length > 0}

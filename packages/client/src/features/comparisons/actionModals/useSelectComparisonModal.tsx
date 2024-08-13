@@ -254,7 +254,7 @@ export const useSelectComparisonModal = (
             Cancel
           </Button>
           <Button
-            variant="primary"
+            data-variant="primary"
             onClick={handleSubmit}
             disabled={selectedComparisons?.length === 0}
           >

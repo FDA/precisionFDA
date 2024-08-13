@@ -143,7 +143,7 @@ const CopyToSpaceForm = ({
           <Button onClick={() => setShowModal(false)} disabled={mutation.isPending}>
             Cancel
           </Button>
-          <Button variant="primary" type="submit" form="copy-to-space-form" disabled={!selectedTarget || mutation.isPending}>
+          <Button data-variant="primary" type="submit" form="copy-to-space-form" disabled={!selectedTarget || mutation.isPending}>
             Copy
           </Button>
         </ButtonRow>

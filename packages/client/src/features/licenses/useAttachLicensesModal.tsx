@@ -144,7 +144,7 @@ export function useAttachLicensesModal<
         <ButtonRow>
           <Button onClick={handleClose}>Cancel</Button>
           <Button
-            variant="primary"
+            data-variant="primary"
             onClick={() => handleSubmit(selectedLicense)}
             disabled={
               !selectedLicense || selectedLicense === selected?.file_license?.id

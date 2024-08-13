@@ -206,14 +206,14 @@ export const FileList = ({
             {showFolderActions && (
               <>
                 <Button
-                  variant="primary"
+                  data-variant="primary"
                   data-testid="home-files-add-folder-button"
                   onClick={() => listActions['Add Folder']?.func({ showModal: true })}
                 >
                   <PlusIcon height={12} /> Add Folder
                 </Button>
                 <Button
-                  variant="primary"
+                  data-variant="primary"
                   data-testid="home-files-add-files-button"
                   onClick={() => listActions[space?.id ? 'Choose Add Option' : 'Add Files']?.func({ showModal: true })}
                 >
@@ -224,7 +224,7 @@ export const FileList = ({
           </QuickActions>
           <QuickActions>
             {selectedFileIds.length > 0 && (
-              <Button variant="primary" onClick={handleCopyIds}>
+              <Button data-variant="primary" onClick={handleCopyIds}>
                 {isCopiedIds ? (
                   <>
                     <ClipboardCheckIcon height={14} /> Copied IDs

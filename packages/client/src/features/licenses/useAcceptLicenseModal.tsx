@@ -61,7 +61,7 @@ export function useAcceptLicenseModal<
       footer={
         <>
           <Button onClick={handleClose}>Cancel</Button>
-          <Button variant="primary" onClick={() => handleSubmit()}>
+          <Button data-variant="primary" onClick={() => handleSubmit()}>
             Accept
           </Button>
         </>

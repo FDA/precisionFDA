@@ -195,7 +195,7 @@ export const useFileUploadModal = ({
       <StyledDropSection>
         <div {...getRootProps()}>
           <input {...getInputProps()} />
-          <Button variant="primary" disabled={uploadInProgress}>
+          <Button data-variant="primary" disabled={uploadInProgress}>
             Browse files for upload...
           </Button>
         </div>
@@ -249,10 +249,10 @@ export const useFileUploadModal = ({
             </Button>
           )}
           {uploadFinished ? (
-            <Button variant="primary" onClick={handleClose}>Close</Button>
+            <Button data-variant="primary" onClick={handleClose}>Close</Button>
           ) : (
             <Button
-              variant="primary"
+              data-variant="primary"
               type="submit"
               onClick={handleUpload}
               disabled={exceedsMax || uploadInProgress || noneSelected}

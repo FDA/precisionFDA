@@ -151,7 +151,7 @@ export const useDeleteFileModal = ({
           >
             Cancel
           </Button>
-          <Button variant="warning" onClick={handleSubmit} disabled={!nodesToBeDeleted.length || mutation.isPending}>
+          <Button data-variant="warning" onClick={handleSubmit} disabled={!nodesToBeDeleted.length || mutation.isPending}>
             Delete
           </Button>
         </ButtonRow>

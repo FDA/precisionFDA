@@ -179,7 +179,7 @@ const ChallengeAppForm = ({
             Cancel
           </Button>
           <Button
-            variant="primary"
+            data-variant="primary"
             type="submit"
             form="attach-to-challenge-form"
             disabled={!selectedId || mutation.isPending}

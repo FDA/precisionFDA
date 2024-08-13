@@ -190,7 +190,7 @@ export const AssetAttachModal = ({
             <ButtonRow>
               <Button onClick={hideAction}>Cancel</Button>
               <Button
-                variant="primary"
+                data-variant="primary"
                 onClick={() => onClickAttachAction()}
                 disabled={!checkedItem.size}
               >

@@ -223,7 +223,7 @@ const ExpertsList = () => {
               <RightSideItem>
                 <ButtonRow>
                   <Button
-                    variant="primary"
+                    data-variant="primary"
                     as="a"
                     data-turbolinks="false"
                     href="/experts/new"

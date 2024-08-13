@@ -134,12 +134,12 @@ export const DiscussionForm = ({
           </CheckboxLabel>
           <Attachments scope={scope} attachments={attachments} setValue={setValue} />
           {onDelete && (
-            <Button variant="warning" type="button" onClick={deleteDiscussion}>
+            <Button data-variant="warning" type="button" onClick={deleteDiscussion}>
               Delete
             </Button>
           )}
           <Button
-            variant="primary"
+            data-variant="primary"
             type="button"
             form="discussionForm"
             disabled={isSubmitting || !isValid}

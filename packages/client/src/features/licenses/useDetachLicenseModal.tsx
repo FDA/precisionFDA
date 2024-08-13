@@ -53,7 +53,7 @@ export function useDetachLicenseModal<
       footer={
         <>
           <Button onClick={handleClose}>Cancel</Button>
-          <Button variant="primary" type="button" onClick={onSubmit}>Detach</Button>
+          <Button data-variant="primary" type="button" onClick={onSubmit}>Detach</Button>
         </>
       }
     >
