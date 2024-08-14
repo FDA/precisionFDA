@@ -1,6 +1,5 @@
 import { Reference } from '@mikro-orm/core'
 import { SqlEntityManager } from '@mikro-orm/mysql'
-import { UId } from '@shared/domain/entity/domain/uid'
 import { EntityFetcherService } from '@shared/domain/entity/entity-fetcher.service'
 import { EntityService } from '@shared/domain/entity/entity.service'
 import { Event } from '@shared/domain/event/event.entity'
@@ -583,12 +582,12 @@ describe('UserFileService', () => {
   describe('#getDownloadLinkForUid', () => {
     const FILE_UID = 'file-uid-1'
     const FILE_NAME = 'FILE_NAME'
-    const FILE = { name: FILE_NAME, uid: FILE_UID } as unknown as UserFile
+    const FILE = { name: FILE_NAME, uid: FILE_UID, state: FILE_STATE_DX.CLOSED } as unknown as UserFile
     const OPTIONS = { preauthenticated: true }
 
     beforeEach(() => {
       getEntityDownloadLinkStub.withArgs(FILE, FILE.name, OPTIONS).resolves('LINK')
-      getAccessibleByUidStub.withArgs(UserFile, FILE_UID).resolves(FILE)
+      getAccessibleByUidStub.withArgs(Node, FILE_UID).resolves(FILE)
     })
 
     it('should not catch error from entity service', async () => {
@@ -611,6 +610,13 @@ describe('UserFileService', () => {
       const res = await getInstance().getDownloadLinkForUid(FILE_UID, OPTIONS)
 
       expect(res).to.eq('LINK')
+    })
+
+    it('should throw an error if file is not in CLOSED state', async () => {
+      const openFile = { ...FILE, state: FILE_STATE_DX.OPEN } as unknown as UserFile
+      getAccessibleByUidStub.withArgs(Node, FILE_UID).resolves(openFile)
+
+      await expect(getInstance().getDownloadLinkForUid(FILE_UID, OPTIONS)).to.be.rejectedWith(Error, "Files can only be downloaded if they are in the 'closed' state")
     })
   })
 
@@ -1071,7 +1077,7 @@ describe('UserFileService', () => {
 
     it('should throw error if user does not have access to target space', async () => {
       getEditableSpacesStub.returns([])
-      const uid = 'file-uid-1' as UId
+      const uid = 'file-uid-1'
       await expect(getInstance().validateCopyFiles([uid], `space-1`)).to.be.rejectedWith(
         PermissionError,
         'You do not have permission to copy files to this scope',

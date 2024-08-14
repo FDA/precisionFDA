@@ -7,7 +7,7 @@ import { Uid } from '@shared/domain/entity/domain/uid'
 import { EntityFetcherService } from '@shared/domain/entity/entity-fetcher.service'
 import { EntityService } from '@shared/domain/entity/entity.service'
 import * as eventHelper from '@shared/domain/event/event.helper'
-import { EVENT_TYPES, createFileEvent, createFolderEvent } from '@shared/domain/event/event.helper'
+import { createFileEvent, createFolderEvent, EVENT_TYPES } from '@shared/domain/event/event.helper'
 import { NotificationService } from '@shared/domain/notification/services/notification.service'
 import { SPACE_EVENT_ACTIVITY_TYPE } from '@shared/domain/space-event/space-event.enum'
 import { SpaceEventService } from '@shared/domain/space-event/space-event.service'
@@ -15,6 +15,7 @@ import { SpaceReport } from '@shared/domain/space-report/entity/space-report.ent
 import { getIdFromScopeName } from '@shared/domain/space/space.helper'
 import { TaggingService } from '@shared/domain/tagging/tagging.service'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { Asset } from '@shared/domain/user-file/asset.entity'
 import { FolderRepository } from '@shared/domain/user-file/folder.repository'
 import { Node } from '@shared/domain/user-file/node.entity'
 import { NodeHelper } from '@shared/domain/user-file/node.helper'
@@ -42,7 +43,9 @@ import {
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { PlatformClient } from '@shared/platform-client'
 import { FileDescribeResponse } from '@shared/platform-client/platform-client.responses'
-import { CHALLENGE_BOT_PLATFORM_CLIENT } from '@shared/platform-client/providers/platform-client.provider'
+import {
+  CHALLENGE_BOT_PLATFORM_CLIENT,
+} from '@shared/platform-client/providers/platform-client.provider'
 import { createFileSynchronizeJobTask } from '@shared/queue'
 import { UserCtx } from '@shared/types'
 import { EntityScope } from '@shared/types/common'
@@ -479,15 +482,19 @@ export class UserFileService {
     return file
   }
 
-  async getDownloadLink(file: UserFile, options?: DownloadLinkOptionsDto) {
+  async getDownloadLink(file: UserFile | Asset, options?: DownloadLinkOptionsDto) {
     return this.entityService.getEntityDownloadLink(file, file.name, options)
   }
 
   async getDownloadLinkForUid(uid: Uid<'file'>, options?: DownloadLinkOptionsDto) {
-    const file = await this.entityFetcherService.getAccessibleByUid(UserFile, uid)
+    const file = await this.entityFetcherService.getAccessibleByUid<UserFile | Asset>(Node, uid)
 
     if (!file) {
       throw new NotFoundError('File not found')
+    }
+
+    if (file.state !== FILE_STATE_DX.CLOSED) {
+      throw new ValidationError("Files can only be downloaded if they are in the 'closed' state")
     }
 
     return this.getDownloadLink(file, options)
