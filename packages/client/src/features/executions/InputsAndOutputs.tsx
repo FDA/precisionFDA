@@ -44,32 +44,31 @@ const StyledTable = styled.div`
   }
 `
 
-
 const Table = ({ title, config, dataTestId }: { title: string; config: any[], dataTestId: string }) => {
-  const list = config.map((e, i) => {
+  const list = config.map((elementConfig, i) => {
     const classes = classNames({
       row: true,
       even: !(i % 2),
     })
 
     const item = () => {
-      switch (e.type) {
+      switch (elementConfig.type) {
         case 'file':
-          return <Link to={e.link} className={classes}>
-            {String(e.value)}
-          </Link>
+          return (elementConfig.state !== 'deleted') ? <Link to={elementConfig.link} className={classes}>
+            {String(elementConfig.value)}
+          </Link> : <div className={classNames(classes, 'text-muted')}>{String(elementConfig.value)}</div>
         case 'array:file':
-          return <div>{e.value.map((name:any, index: any) => <Link key={e.link[index]} to={e.link[index]} className={classes}>
+          return <div>{elementConfig.value.map((name:any, index: any) => <Link key={elementConfig.link[index]} to={elementConfig.link[index]} className={classes}>
             {String(name)}
           </Link>)}</div>
         default:
-          return <div className={classes}>{String(e.value)}</div>
+          return <div className={classes}>{String(elementConfig.value)}</div>
       }
     }
 
     return (
         <Fragment key={i}>
-          <div className={classNames(classes, 'type')}>{e.label}</div>
+          <div className={classNames(classes, 'type')}>{elementConfig.label}</div>
           { item() }
         </Fragment>
     )
@@ -93,11 +92,12 @@ export const InputsAndOutputs = ({
   const getConfig = (config: any[]) => {
     return config.map((e: any) => {
       let link = ''
-      let value = e.value
-
+      let { value } = e
+      const { state } = e
+      
       if (e.class === 'file') {
-        value = e.file_name
-        link = `/home/files/${e.file_uid}`
+        value = (e.state !== 'deleted') ? e.file_name : 'Output file has been deleted'
+        link = (e.state !== 'deleted') ? `/home/files/${e.file_uid}`: ''
       }
       if (e.class === 'array:file') {
         value = e.file_names
@@ -109,6 +109,7 @@ export const InputsAndOutputs = ({
         type: e.class,
         link,
         value,
+        state,
       }
     })
   }
