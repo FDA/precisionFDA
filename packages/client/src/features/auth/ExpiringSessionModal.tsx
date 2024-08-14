@@ -77,12 +77,12 @@ export const ExpiringSessionModal: React.FC<{ modal: UseModal }> = ({
         {sessionExpirationPassed ? (
           <>
             {ssoButtonResponse?.ssoButton.isEnabled && (
-              <Button variant="primary" onClick={() => onLogInWithSSO(ssoButtonResponse.ssoButton.data.fdaSsoUrl)}>
+              <Button data-variant="primary" onClick={() => onLogInWithSSO(ssoButtonResponse.ssoButton.data.fdaSsoUrl)}>
                 Log In with SSO
               </Button>
             )}
             {/*{TODO: this does not consider location to return to after login.}*/}
-            <Button variant="primary" onClick={() => window.location.assign('/login')}>
+            <Button data-variant="primary" onClick={() => window.location.assign('/login')}>
               Log In again
             </Button>
           </>

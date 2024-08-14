@@ -28,11 +28,11 @@ export const AuthModal: React.FC<UseModal> = props => {
       <Footer>
         <ButtonRow>
           {data?.ssoButton.isEnabled && (
-            <Button variant="primary" onClick={() => onLogInWithSSO(data.ssoButton.data.fdaSsoUrl)}>
+            <Button data-variant="primary" onClick={() => onLogInWithSSO(data.ssoButton.data.fdaSsoUrl)}>
               Log In with SSO
             </Button>
           )}
-          <Button variant="primary" onClick={() => (window.location = '/login')}>
+          <Button data-variant="primary" onClick={() => (window.location = '/login')}>
             Log in
           </Button>
         </ButtonRow>
