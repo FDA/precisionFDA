@@ -562,7 +562,7 @@ Rails.application.routes.draw do
       get "jobs", on: :member, to: "apps#index"
       member do
         get "fork"
-        post "export"
+        get "export"
         get "cwl_export"
         get "wdl_export"
       end

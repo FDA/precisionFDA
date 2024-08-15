@@ -31,7 +31,6 @@ type ValType = 'docker' | 'cwl' | 'wdl'
 type ExportType = {
   label: string
   link?: string
-  isPost?: boolean
   value: ValType
 }
 const getConfirmationMessage = (title: ValType) => {
@@ -77,7 +76,6 @@ export function useExportToModal<
     {
       label: 'Docker Container',
       link: `/${resource}/${momoSelected?.uid}/export`,
-      isPost: true,
       value: 'docker',
     } as ExportType,
     {
@@ -110,10 +108,9 @@ export function useExportToModal<
             {exportOptions.map(e => (
               <li key={e.label}>
                 <a
+                  onClick={(event) => handleClick(event, e)}
                   href={e.link}
                   data-turbolinks="false"
-                  data-confirm={e.value && getConfirmationMessage(e.value)}
-                  data-method={e.isPost && 'post'}
                   download
                 >
                   {e.label}

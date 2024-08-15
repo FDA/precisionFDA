@@ -78,7 +78,7 @@ export const PageMainBody = styled.div`
   flex-grow: 1;
   overflow-y: scroll;
   justify-content: center;
-  padding: 64px 16px;
+  padding: 0 16px;
 `
 export const PageFilterTitle = styled.h2`
   font-size: 22px;
