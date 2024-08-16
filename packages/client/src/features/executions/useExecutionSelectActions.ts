@@ -1,4 +1,4 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQueryClient } from '@tanstack/react-query'
 import { omit, pick } from 'ramda'
 import { getSpaceIdFromScope } from '../../utils'
 import { useAttachToModal } from '../actionModals/useAttachToModal'
@@ -15,19 +15,18 @@ import { getExecutionJobsList } from './executions.util'
 import { useSnapshotModal } from './useSnapshotModal'
 import { useTerminateModal } from './useTerminateModal'
 
-export enum ExecutionAction {
-  'Terminate' = 'Terminate',
-  'Track' = 'Track',
-  'Copy to space' = 'Copy to space',
-  'Feature' = 'Feature',
-  'Snapshot' = 'Snapshot',
-  'Unfeature' = 'Unfeature',
-  'Make Public' = 'Make Public',
-  'Attach to...' = 'Attach to...',
-  'Comments' = 'Comments',
-  'Edit tags' = 'Edit tags',
-  'Edit properties' = 'Edit properties',
-}
+export type ExecutionAction =
+  'Terminate' |
+  'Track' |
+  'Copy to space' |
+  'Feature' |
+  'Snapshot' |
+  'Unfeature' |
+  'Make Public' |
+  'Attach to...' |
+  'Comments' |
+  'Edit tags' |
+  'Edit properties'
 
 export const useExecutionActions = ({
   homeScope,
@@ -112,14 +111,8 @@ export const useExecutionActions = ({
     isShown: isSnapshotModal,
   } = useSnapshotModal({ selected: selected[0] })
 
-  const attachLicenseMutation = useMutation({
-    mutationKey: ['attach-license'],
-    mutationFn: async (id: string) => {},
-  })
-
-  const availableLicenses = user?.links?.licenses ? user.links.licenses : false
   const links = selected[0]?.links
-  const spaceId = getSpaceIdFromScope(selected[0]?.scope)?.toString()
+  const spaceId = getSpaceIdFromScope(selected[0]?.scope)
 
   let actions: ActionFunctionsType<ExecutionAction> = {
     Terminate: {

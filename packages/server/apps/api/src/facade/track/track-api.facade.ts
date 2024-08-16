@@ -4,10 +4,10 @@ import { DXEntities } from '@shared/domain/entity/domain/dxid'
 import { EntityIdentifier } from '@shared/domain/entity/domain/entity-identifier'
 import { entityTypeToEntityMap } from '@shared/domain/entity/domain/entity-type-to-entity.map'
 import { EntityType } from '@shared/domain/entity/domain/entity.type'
+import { Uid } from '@shared/domain/entity/domain/uid'
 import {
   EntityFetcherService,
   IdEntity,
-  UID,
   UidEntity,
 } from '@shared/domain/entity/entity-fetcher.service'
 import { EntityProvenanceSourceUnion } from '@shared/domain/provenance/model/entity-provenance-source-union'
@@ -19,6 +19,7 @@ type TrackResourceType = Extract<
   'app' | 'job' | 'file' | 'dbcluster' | 'comparison' | 'note'
 >
 type Entity = InstanceType<(typeof entityTypeToEntityMap)[TrackResourceType]>
+type DXTrackResourceType = TrackResourceType & (typeof DXEntities)[number]
 
 @Injectable()
 export class TrackApiFacade {
@@ -32,7 +33,7 @@ export class TrackApiFacade {
     const entity = (DXEntities as ReadonlyArray<string>).includes(type)
       ? await this.entityFetcherService.getAccessibleByUid(
           entityTypeToEntityMap[type] as EntityName<UidEntity>,
-          identifier as UID<TrackResourceType>,
+          identifier as Uid<DXTrackResourceType>,
         )
       : await this.entityFetcherService.getAccessibleById(
           entityTypeToEntityMap[type] as EntityName<IdEntity>,

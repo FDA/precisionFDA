@@ -12,15 +12,14 @@ export type DropdownChildProps = {
   onMouseEnter: () => void
   onMouseLeave: () => void
   $isActive: boolean,
-  hide: () => void,
 }
 
 export const DropdownNext: FC<{
   placement?: Placement
   forceShowPopper?: boolean
   trigger?: 'click' | 'hover'
-  children: (props: DropdownChildProps) => React.ReactNode
-  content: (props: DropdownChildProps) => React.ReactNode
+  children: (props: DropdownChildProps, actions: { hide: () => void }) => React.ReactNode
+  content: (props: DropdownChildProps, actions: { hide: () => void }) => React.ReactNode
 }> = ({
   forceShowPopper,
   trigger = 'hover',
@@ -61,11 +60,12 @@ export const DropdownNext: FC<{
       {children({
         style: { cursor: 'pointer' },
         ref: buttonRef,
-        hide: () => setShowPopper(false),
         onClick: () => trigger === 'click' && setShowPopper(!showPopper), // outside only
         onMouseEnter: handleMouseEnter,
         onMouseLeave: handleMouseLeave,
         $isActive: showPopper,
+      }, {
+        hide: () => setShowPopper(false),
       })}
       {forceShowPopper ||
         (showPopper && (
@@ -83,11 +83,10 @@ export const DropdownNext: FC<{
                 ref: buttonRef,
                 onClick: () =>
                   trigger === 'click' && setShowPopper(!showPopper), // outside only
-                hide: () => setShowPopper(false),
                 onMouseEnter: handleMouseEnter,
                 onMouseLeave: handleMouseLeave,
                 $isActive: showPopper,
-              })}
+              }, { hide: () => setShowPopper(false) })}
             </DropdownMenu>
           </PopperContainer>
         ))}

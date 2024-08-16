@@ -1,16 +1,17 @@
+import { DxId } from '@shared/domain/entity/domain/dxid'
 import { WorkstationService } from '@shared/domain/job/workstation.service'
-import * as errors from '../../../errors'
-import { NOTIFICATION_ACTION, SEVERITY } from '../../../enums'
-import { UserOpsCtx } from '../../../types'
-import { omit } from 'ramda'
-import { WorkstationBaseOperation } from './workstation-base-operation'
-import { TASK_TYPE } from '../../../queue/task.input'
-import { addToFileSyncQueueEnsureUnique } from '../../../queue'
-import { JOB_STATE } from '../job.enum'
 import { NotificationService } from '@shared/domain/notification/services/notification.service'
+import { omit } from 'ramda'
+import { NOTIFICATION_ACTION, SEVERITY } from '../../../enums'
+import * as errors from '../../../errors'
+import { addToFileSyncQueueEnsureUnique } from '../../../queue'
+import { TASK_TYPE } from '../../../queue/task.input'
+import { UserOpsCtx } from '../../../types'
+import { JOB_STATE } from '../job.enum'
+import { WorkstationBaseOperation } from './workstation-base-operation'
 
 export interface WorkstationSnapshotOperationParams {
-  jobDxid: string
+  jobDxid: DxId<'job'>
   code: string // Auth code from auth server
   key: string // Key for the pFDA CLI
   name: string
@@ -26,7 +27,7 @@ export class WorkstationSnapshotOperation extends WorkstationBaseOperation<
     return TASK_TYPE.WORKSTATION_SNAPSHOT
   }
 
-  static getBullJobId(jobDxid: string): string {
+  static getBullJobId(jobDxid: DxId<'job'>): string {
     return `${this.getTaskType()}.${jobDxid}`
   }
 

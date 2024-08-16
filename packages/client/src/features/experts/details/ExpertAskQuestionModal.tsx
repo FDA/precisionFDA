@@ -25,7 +25,7 @@ const Content = styled.div`
 const Footer = ({ hideAction, action, isAskingDisabled }: any) => (
   <>
     <Button onClick={hideAction}>Cancel</Button>
-    <Button variant="primary" onClick={action} disabled={isAskingDisabled}>
+    <Button data-variant="primary" onClick={action} disabled={isAskingDisabled}>
       Submit
     </Button>
   </>

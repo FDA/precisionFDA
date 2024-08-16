@@ -5,7 +5,7 @@ import { get } from 'lodash'
 import React, { useMemo } from 'react'
 import { FieldErrors, useFieldArray, useForm } from 'react-hook-form'
 import { toast } from 'react-toastify'
-import ReactTooltip from 'react-tooltip'
+import { Tooltip } from 'react-tooltip'
 import styled from 'styled-components'
 import * as Yup from 'yup'
 import { TransparentButton, Button } from '../../components/Button'
@@ -240,20 +240,13 @@ const EditPropertiesForm = ({
                   <InputTextS
                     autoComplete="off"
                     {...register(`props.${index}.key`)}
-                    data-tip
-                    data-for={`props.${index}.key`}
+                    data-tooltip-id={`props.${index}.key`}
+                    data-tooltip-content={message}
                     disabled={mutation.isPending}
                     $isError={isError}
                   />
                   {isError && (
-                    <ReactTooltip
-                      id={`props.${index}.key`}
-                      data-id={`props.${index}.key`}
-                      place="top"
-                      effect="solid"
-                    >
-                      {message}
-                    </ReactTooltip>
+                    <Tooltip id={`props.${index}.key`} />
                   )}
                   <InputTextS
                     autoComplete="off"
@@ -286,7 +279,7 @@ const EditPropertiesForm = ({
             Cancel
           </Button>
           <Button
-            variant="primary"
+            data-variant="primary"
             type="submit"
             form="edit-properties-form"
             disabled={mutation.isPending || Object.keys(errors).length > 0}
@@ -319,7 +312,7 @@ export function useEditPropertiesModal<
   const { isShown, setShowModal } = useModal()
   const mSelected = useMemo(() => selected, [isShown])
 
-  const modalComp = isShown && (
+  const modalComp = (
     <ModalNext
       id="edit-properties-modal"
       data-testid={`modal-${type}-edit-properties`}
@@ -328,7 +321,7 @@ export function useEditPropertiesModal<
     >
       <ModalHeaderTop
         disableClose={false}
-        headerText={`Edit ${mSelected.length > 1 ? `common properties for ${mSelected.length} items` : `properties for ${mSelected[0].name}`}`}
+        headerText={`Edit ${mSelected.length > 1 ? `common properties for ${mSelected.length} items` : `properties for ${mSelected[0]?.name}`}`}
         hide={() => setShowModal(false)}
       />
 

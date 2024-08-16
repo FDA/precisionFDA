@@ -1,27 +1,20 @@
 import { IExecution } from '../executions/executions.types'
 import { ServerScope } from '../home/types'
 
-export enum WorkflowActions {
-  'Run' = 'Run',
-  'Run Batch' = 'Run Batch',
-  'Diagram' = 'Diagram',
-  'Edit' = 'Edit',
-  'Fork' = 'Fork',
-  'Export to' = 'Export to',
-  'Feature' = 'Feature',
-  'Unfeature' = 'Unfeature',
-  'Delete' = 'Delete',
-  'Copy to space' = 'Copy to space',
-  'Comments' = 'Comments',
-  'Edit tags' = 'Edit tags',
-  'Edit properties' = 'Edit properties',
-}
-
-export type WorkflowActionTypes = `${WorkflowActions}`
-
-export enum WorkflowListActions {
-  'Create Workflow' = 'Create Workflow',
-}
+export type WorkflowActions =
+  'Run' |
+  'Run Batch' |
+  'Diagram' |
+  'Edit' |
+  'Fork' |
+  'Export to' |
+  'Feature' |
+  'Unfeature' |
+  'Delete' |
+  'Copy to space' |
+  'Comments' |
+  'Edit tags' |
+  'Edit properties'
 
 
 export interface Spec2 {
@@ -60,7 +53,7 @@ export interface App {
   tag_list: any[];
 }
 
-export interface Revision {
+export interface WorkflowRevision {
   id: number;
   title: string;
   dxid: string;
@@ -122,7 +115,7 @@ export interface Spec {
 export interface WorkflowMeta {
   spec: Spec;
   apps: App[];
-  revisions: Revision[];
+  revisions: WorkflowRevision[];
   executions: Map<number, IExecution>;
   batches: Batches;
   challenges?: any;

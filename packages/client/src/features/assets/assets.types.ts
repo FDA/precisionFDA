@@ -2,13 +2,15 @@ import { ServerScope } from '../home/types'
 import { FileState } from '../files/files.types'
 import { FileOrg, FileUser } from '../apps/apps.types'
 
+export type AppsListActions = 'Create App'
+
 type Links = Record<string, string>
+
 export interface FileLicense {
   id: string;
   title: string;
   uid: string;
 }
-
 
 // TODO: revisit this type, doesn't look correct to me.
 // list_assets returns very similar results as list_files and the attributes listed here are not there

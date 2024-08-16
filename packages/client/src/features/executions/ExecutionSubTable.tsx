@@ -2,6 +2,7 @@ import React from 'react'
 import { Cell } from 'react-table'
 import styled from 'styled-components'
 import { Link } from 'react-router-dom'
+import { RESOURCE_LABELS } from '../../types/user'
 import { IExecution, Job } from './executions.types'
 import { CogsIcon } from '../../components/icons/Cogs'
 import { CubeIcon } from '../../components/icons/CubeIcon'
@@ -14,7 +15,7 @@ export const getSubComponentValue = (job: Job, cell: Cell<IExecution, any>) => {
   if (cell.column.id === 'state') {
     val = <StateCell state={job.state} />
   }
-  if (cell.column.id === 'instance_type') val = job.instance_type
+  if (cell.column.id === 'instance_type') val = RESOURCE_LABELS[job.instance_type] ?? job.instance_type
   if (cell.column.id === 'name') {
     val = (
       <StyledNameCell as={Link} to={`/home/executions/${job.uid}`}>

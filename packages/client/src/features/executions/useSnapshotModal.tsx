@@ -163,7 +163,7 @@ export function useSnapshotModal<T extends { ids: string[]; name: string }>({
           {mutation.isPending && <Loader />}
           <Button onClick={() => setShowModal(false)}>Cancel</Button>
           <Button
-            variant="primary"
+            data-variant="primary"
             type="submit"
             form="create-snapshot-form"
             disabled={mutation.isPending}

@@ -167,7 +167,7 @@ export const useChangeMemberRoleModal = ({
             Cancel
           </Button>
           <Button
-            variant="primary"
+            data-variant="primary"
             type="submit"
             disabled={Object.keys(errors).length > 0 || mutation.isPending}
             aria-label="Change member role"

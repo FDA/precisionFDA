@@ -12,7 +12,7 @@ import { getSelectedObjectsFromIndexes, toArrayFromObject } from '../../utils/ob
 import { useAuthUser } from '../auth/useAuthUser'
 import { ActionsDropdownContent } from '../home/ActionDropdownContent'
 import { ActionsRow, QuickActions, StyledHomeTable } from '../home/home.styles'
-import { ActionsButton } from '../home/show.styles'
+import { ActionsButton, ResourceHeader } from '../home/show.styles'
 import { IFilter, IMeta, KeyVal, HomeScope } from '../home/types'
 import { useList } from '../home/useList'
 import { usePropertiesQuery } from '../home/usePropertiesQuery'
@@ -89,12 +89,12 @@ export const AppList = ({ homeScope, spaceId }: { homeScope?: HomeScope, spaceId
 
   return (
     <>
-      <div>
+      <ResourceHeader>
         <ActionsRow>
           <QuickActions>
             {homeScope === 'me' && (
               <Button
-                variant='primary'
+                data-variant='primary'
                 as={Link}
                 to="/home/apps/create"
                 data-turbolinks="false"
@@ -105,7 +105,7 @@ export const AppList = ({ homeScope, spaceId }: { homeScope?: HomeScope, spaceId
             )}
             {spaceId && (
               <Button
-                variant='primary'
+                data-variant='primary'
                 data-testid="spaces-apps-add-app-button"
                 onClick={() =>
                   listActions['Add App']?.func({ showModal: true })
@@ -136,7 +136,7 @@ export const AppList = ({ homeScope, spaceId }: { homeScope?: HomeScope, spaceId
             )}
           </Dropdown>
         </ActionsRow>
-      </div>
+      </ResourceHeader>
 
       <AppsListTable
         isAdmin={isAdmin}

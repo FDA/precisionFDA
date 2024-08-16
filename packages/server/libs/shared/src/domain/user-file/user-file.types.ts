@@ -1,6 +1,6 @@
 import { Collection, Ref } from '@mikro-orm/core'
 import { DxId } from '@shared/domain/entity/domain/dxid'
-import { UId } from '@shared/domain/entity/domain/uid'
+import { Uid } from '@shared/domain/entity/domain/uid'
 import { NodeProperty } from '@shared/domain/property/node-property.entity'
 import { Tagging } from '@shared/domain/tagging/tagging.entity'
 import { EntityScope, SCOPE } from '../../types/common'
@@ -46,8 +46,8 @@ enum PARENT_TYPE {
 // but not all nodes (not Folders)
 interface IFileOrAsset {
   id: number
-  dxid: DxId
-  uid: UId
+  dxid: DxId<'file'>
+  uid: Uid<'file'>
   project: string
   name: string
   scope: EntityScope
@@ -101,12 +101,12 @@ interface ResolvePath {
 }
 
 interface ExistingFile {
-  uid: UId
+  uid: Uid<'file'>
   targetScopePath: string
 }
 
 interface ExistingFileSet {
-  [key: UId]: ExistingFile
+  [key: Uid<'file'>]: ExistingFile
 }
 
 interface ISelectedNode {
@@ -121,7 +121,7 @@ interface ISelectedNode {
 interface SelectedFile extends ISelectedNode {
   type: FILE_STI_TYPE.USERFILE
   state: FILE_STATE
-  uid: UId
+  uid: Uid<'file'>
 }
 
 interface SelectedFolder extends ISelectedNode {

@@ -10,7 +10,7 @@ import { StyledBackLink } from '../home/home.styles'
 import { License } from '../licenses/License'
 import {
   ActionsButton,
-  Header,
+  ResourceHeader,
   HeaderLeft,
   HomeLoader,
   MetadataItem,
@@ -121,11 +121,10 @@ export const AssetShow = ({ emitScope, homeScope }: { homeScope?: HomeScope, emi
         Back to Assets
       </StyledBackLink>
       <Topbox>
-        <Header>
+        <ResourceHeader>
           <HeaderLeft>
             <Title>
               <FileIcon height={24} />
-              &nbsp;
               {typeof asset?.origin === 'object'
                 ? asset.origin.text
                 : asset.name}
@@ -141,7 +140,7 @@ export const AssetShow = ({ emitScope, homeScope }: { homeScope?: HomeScope, emi
           <div>
             <AssetActions homeScope={homeScope} asset={asset} />
           </div>
-        </Header>
+        </ResourceHeader>
 
         <MetadataSection>
           <MetadataRow>

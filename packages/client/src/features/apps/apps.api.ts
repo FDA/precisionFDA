@@ -8,7 +8,7 @@ import { FileScope } from '../files/files.types'
 import { License } from '../licenses/types'
 import { IFilter, IMeta, ServerScope } from '../home/types'
 import { Params, formatScopeQ, prepareListFetch } from '../home/utils'
-import { AppSpec, ComputeInstance, IApp, IOSpec, InputSpec } from './apps.types'
+import { AppSpec, ComputeInstance, IApp, IOSpec, InputSpec, AppRevision } from './apps.types'
 
 export interface FetchAppsQuery {
   apps: IApp[]
@@ -167,6 +167,7 @@ export interface AppFetchResponse {
     }
     release: string
     assets: Asset[]
+    revisions: AppRevision[]
   }
 }
 

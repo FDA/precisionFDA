@@ -230,7 +230,7 @@ const AboutPage = () => {
                   </p>
                 </div>
                 <div className="panel-body">
-                  <Button variant="primary" as="a" href="/request_access">
+                  <Button data-variant="primary" as="a" href="/request_access">
                     <span className="fa fa-user-plus" aria-hidden="true" />{' '}
                     Request Access
                   </Button>

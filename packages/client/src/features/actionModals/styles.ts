@@ -7,7 +7,7 @@ export const StyledSubtitle = styled.div`
 
 export const SelectableTable = styled.table`
   padding: 0;
-  width: 100%;
+  min-width: max-content;
   tr:hover {
     color: var(--primary-500);
     cursor: pointer;
@@ -97,7 +97,6 @@ export const ModalPageCol = styled.div`
   flex-shrink: 0;
   align-self: stretch;
   min-width: 350px;
-  width: 40vw;
   height: 100%;
   border-right: 1px solid var(--c-layout-border-200);
   &:last-child {

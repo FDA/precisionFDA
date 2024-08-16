@@ -332,7 +332,7 @@ export const CreateDatabase = () => {
             render={({ message }) => <InputError>{message}</InputError>}
           />
         </FieldGroup>
-        <Row><Button variant="primary" disabled={Object.keys(errors).length > 0 || isSubmitting} type="submit">Submit</Button>{isSubmitting && <Loader />}</Row>
+        <Row><Button data-variant="primary" disabled={Object.keys(errors).length > 0 || isSubmitting} type="submit">Submit</Button>{isSubmitting && <Loader />}</Row>
       </StyledForm>
     </>
   )

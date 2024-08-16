@@ -89,7 +89,7 @@ export const OverviewPublic = () => {
 
       <PageMainBody>
         <InfoRow>
-          <Button variant="primary" as={Link} to="/docs">
+          <Button data-variant="primary" as={Link} to="/docs">
             Learn more about precisionFDA
           </Button>
           <a href="mailto:precisionfda@fda.hhs.gov">Feedback</a>

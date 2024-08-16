@@ -14,12 +14,12 @@ import {
   StyledTabPanel,
 } from '../../components/Tabs'
 import { StyledTagItem, StyledTags, StyledPropertyItem, StyledPropertyKey } from '../../components/Tags'
-import { getBackPath, getBackPathNext } from '../../utils/getBackPath'
+import { getBackPathNext } from '../../utils/getBackPath'
 import { ActionsDropdownContent } from '../home/ActionDropdownContent'
 import { StyledBackLink, StyledRight } from '../home/home.styles'
 import {
   ActionsButton,
-  Header,
+  ResourceHeader,
   HeaderLeft,
   HomeLoader,
   MetadataItem,
@@ -166,7 +166,7 @@ export const WorkflowShow = ({ spaceId, emitScope, homeScope }: { spaceId?: numb
   const { workflowUid } = useParams<{ workflowUid: string }>()
   const { data, isLoading } = useQuery({
     queryKey: ['workflow', workflowUid],
-    queryFn: () => fetchWorkflow(workflowUid).then(d => {
+    queryFn: () => fetchWorkflow(workflowUid!).then(d => {
       if(emitScope) emitScope(d.workflow.scope, d.workflow.featured)
       return d
     }),
@@ -192,15 +192,15 @@ export const WorkflowShow = ({ spaceId, emitScope, homeScope }: { spaceId?: numb
 
   return (
     <>
-      <StyledBackLink linkTo={getBackPathNext({location, resourceLocation: 'workflows', homeScope, spaceId})} data-testid="workflow-show-back-link">
+      <StyledBackLink linkTo={getBackPathNext({ location, resourceLocation: 'workflows', homeScope, spaceId })} data-testid="workflow-show-back-link">
         Back to Workflows
       </StyledBackLink>
       <Topbox>
-        <Header>
+        <ResourceHeader>
           <HeaderLeft>
             <Title>
               <BoltIcon height={20} />
-              &nbsp;<span data-testid="workflow-show-title">{workflowTitle}</span>
+              <span data-testid="workflow-show-title">{workflowTitle}</span>
             </Title>
             <RevisionDropdown
               revisions={meta.revisions}
@@ -213,7 +213,7 @@ export const WorkflowShow = ({ spaceId, emitScope, homeScope }: { spaceId?: numb
               {workflow && <DetailActionsDropdown workflow={workflow} />}
             </StyledRight>
           </div>
-        </Header>
+        </ResourceHeader>
 
         {renderOptions(workflow, homeScope)}
         {workflow.tags.length > 0 && (

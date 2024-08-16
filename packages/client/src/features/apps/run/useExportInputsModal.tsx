@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { toast } from 'react-toastify'
-import ReactTooltip from 'react-tooltip'
+import { Tooltip } from 'react-tooltip'
 import styled from 'styled-components'
 import { Button } from '../../../components/Button'
 import MonacoEditor from '../../../components/MonacoEditor/MonacoEditor'
@@ -41,7 +41,7 @@ export const useExportInputsModal = ({ showCopyButton }: { showCopyButton: boole
     }
   }
 
-  const modalComp = isShown && (
+  const modalComp = (
     <ModalNext
       id="modal-files-add-folder"
       data-testid="modal-files-add-folder"
@@ -73,15 +73,13 @@ export const useExportInputsModal = ({ showCopyButton }: { showCopyButton: boole
                 disabled={isFetching || (areFiles && !areAllFilePublic)}
                 type="button"
                 onClick={() => handleCopy()}
-                data-tip
-                data-for="selected-private-file-error"
+                data-tooltip-id="selected-private-file-error"
+                data-tooltip-content="One or more files are private. Make sure to make those files public to share."
               >
                 Copy link to clipboard
               </Button>
               {areFiles && !areAllFilePublic && (
-                <ReactTooltip id="selected-private-file-error" data-id="selected-private-file-error" place="top" effect="solid">
-                  One or more files are private. Make sure to make those files public to share.
-                </ReactTooltip>
+                <Tooltip id="selected-private-file-error" />
               )}
             </>
           ) : (

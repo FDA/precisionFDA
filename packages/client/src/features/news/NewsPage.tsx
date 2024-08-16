@@ -126,7 +126,7 @@ const NewsPage = () => {
             {userCanCreateNews && (
               <RightSideItem>
                 <ButtonRow>
-                  <Button variant='primary' as={Link} to="/admin/news">
+                  <Button data-variant='primary' as={Link} to="/admin/news">
                     Administer News
                   </Button>
                 </ButtonRow>

@@ -175,8 +175,8 @@ export const NewsItemForm = ({ onDelete, onSubmit, defaultValues } : { onDelete?
         />
       </FieldGroup>
       <ButtonRow>
-        <Button variant='primary' type="submit" disabled={isSubmitting || Object.keys(errors).length > 0}>Save</Button>
-        {onDelete && <Button variant='warning' type="button" onClick={deleteNewsItem}>Delete</Button>}
+        <Button data-variant='primary' type="submit" disabled={isSubmitting || Object.keys(errors).length > 0}>Save</Button>
+        {onDelete && <Button data-variant='warning' type="button" onClick={deleteNewsItem}>Delete</Button>}
       </ButtonRow>
     </StyledForm>
   )

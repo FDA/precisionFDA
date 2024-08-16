@@ -53,19 +53,6 @@ export const Assets = () => {
                     </code>
                 </p>
 
-                <DocsTip>
-                    <span className="fa fa-lightbulb-o" aria-hidden="true"/>{' '}
-                    <strong>TIP:</strong> Need to compile binaries in a compatible environment?
-                    Download the <strong><a
-                    href="https://pfda-production-static-files.s3.amazonaws.com/vmi/precisionFDA-dev-50GB-vm-II-nopass-ssh.ova"
-                    target="_blank">precisionFDA virtual machine image</a></strong> and load it into <strong><a
-                    href={"https://www.virtualbox.org/wiki/Downloads"}
-                    data-turbolinks="false">VirtualBox</a></strong> to instantiate an environment similar to the one
-                    that apps get when they run on the cloud.
-                    Power on the machine, and SSH into localhost (port 2222) as the <code>ubuntu</code> user (no
-                    password is required to log in).
-                </DocsTip>
-
                 <p>Write a short readme file describing the asset and save it as either .txt or .md file.
                     <DocsTip>
                         <span className="fa fa-lightbulb-o" aria-hidden="true"/>{' '}

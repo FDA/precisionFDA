@@ -9,6 +9,7 @@ export const StyledTable = styled.table`
   th {
     text-align: left;
     padding: 8px;
+    font-weight: bold;
   }
 `
 

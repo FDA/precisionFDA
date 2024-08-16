@@ -49,7 +49,7 @@ export const useUnlockSpaceModal = ({
           Cancel
         </Button>
         <Button
-          variant="primary"
+          data-variant="primary"
           type="button"
           onClick={() =>
             unlockSpaceMutation.mutateAsync({

@@ -104,7 +104,7 @@ const EditTagsForm = ({
             Cancel
           </Button>
           <Button
-            variant="primary"
+            data-variant="primary"
             type="submit"
             form="edit-tag-form"
             disabled={mutation.isPending}
@@ -131,8 +131,9 @@ export function useEditTagsModal<
   const { isShown, setShowModal } = useModal()
   const mSelected = useMemo(() => selected, [isShown])
 
-  const modalComp = isShown && (
+  const modalComp = (
     <ModalNext
+      id='edit-tags-modal'
       data-testid={`modal-${resource}-edit-tags`}
       isShown={isShown}
       hide={() => setShowModal(false)}

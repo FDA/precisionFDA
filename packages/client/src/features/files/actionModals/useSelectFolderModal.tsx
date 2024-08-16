@@ -101,7 +101,7 @@ const FolderSelector = ({
             Cancel
           </Button>
           <Button
-            variant="primary"
+            data-variant="primary"
             onClick={handleSubmit}
             disabled={selectedFolders?.length === 0}
           >
@@ -130,7 +130,7 @@ export const useSelectFolderModal = (
     setShowModal(true)
   }
 
-  const modalComp = isShown && (
+  const modalComp = (
     <ModalNext
       id="select-folder-modal"
       disableClose={false}

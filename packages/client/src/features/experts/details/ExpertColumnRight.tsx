@@ -75,7 +75,7 @@ export const ExpertColumnRight = ({
       <ActionRow>
         {expertIsOpened && (
           <div>
-            <Button variant="primary" onClick={() => modal.setShowModal(true)}>
+            <Button data-variant="primary" onClick={() => modal.setShowModal(true)}>
               Ask this expert
             </Button>
           </div>
@@ -83,7 +83,7 @@ export const ExpertColumnRight = ({
         {editPermitted && (
           <div>
             <Button
-              variant="primary"
+              data-variant="primary"
               as="a"
               data-turbolinks="false"
               href={`/experts/${expert?.id}/edit`}

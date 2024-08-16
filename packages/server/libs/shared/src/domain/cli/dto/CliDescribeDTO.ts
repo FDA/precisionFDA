@@ -2,7 +2,7 @@ import { App } from '@shared/domain/app/app.entity'
 import { CommentDTO, NoteDTO, UserDTO } from '@shared/domain/discussion/discussion.types'
 import { Job } from '@shared/domain/job/job.entity'
 import { Asset } from '@shared/domain/user-file/asset.entity'
-import { IFileOrAsset } from '@shared/domain/user-file/user-file.types'
+import { Node } from '@shared/domain/user-file/node.entity'
 import { Workflow } from '@shared/domain/workflow/entity/workflow.entity'
 import {
   AppDescribeResponse,
@@ -35,7 +35,7 @@ export class CliFileDescribeDTO {
 
   static async mapToDTO(
     describeFile: FileDescribeResponse,
-    file: IFileOrAsset,
+    file: Node,
   ): Promise<CliFileDescribeDTO> {
     let response: CliFileDescribeDTO = {
       ...describeFile,
@@ -55,6 +55,7 @@ export class CliFileDescribeDTO {
 
     if (file.isAsset) {
       let assetFile = file as Asset
+      await assetFile.archiveEntries.loadItems()
       response = {
         ...response,
         content: assetFile.archiveEntries.getItems().map((e) => e.path),
@@ -73,7 +74,10 @@ export class CliWorkflowDescribeDTO extends WorkflowDescribeResponse {
   createdAt: Date
   updatedAt: Date
 
-  static async mapToDTO(platformWorkflowData: WorkflowDescribeResponse, workflow: Workflow): Promise<CliWorkflowDescribeDTO> {
+  static async mapToDTO(
+    platformWorkflowData: WorkflowDescribeResponse,
+    workflow: Workflow,
+  ): Promise<CliWorkflowDescribeDTO> {
     return {
       ...platformWorkflowData,
       dxid: platformWorkflowData.id,
@@ -97,7 +101,10 @@ export class CliAppDescribeDTO extends AppDescribeResponse {
   revision: number
   updatedAt: Date
 
-  static async mapToDTO(platformAppData: AppDescribeResponse, app: App): Promise<CliAppDescribeDTO> {
+  static async mapToDTO(
+    platformAppData: AppDescribeResponse,
+    app: App,
+  ): Promise<CliAppDescribeDTO> {
     return {
       ...platformAppData,
       dxid: platformAppData.id,
@@ -123,7 +130,10 @@ export class CliExecutionDescribeDTO {
   updatedAt: Date
   location: string
 
-  static async mapToDTO(platformJobData: JobDescribeResponse, execution: Job): Promise<CliExecutionDescribeDTO> {
+  static async mapToDTO(
+    platformJobData: JobDescribeResponse,
+    execution: Job,
+  ): Promise<CliExecutionDescribeDTO> {
     return {
       ...platformJobData,
       dxid: platformJobData.id,
@@ -140,6 +150,7 @@ export class CliExecutionDescribeDTO {
 export class CliDiscussionDescribeDTO {
   id: number
   title: string
+  content: string
   user: UserDTO
   createdAt: Date
   updatedAt: Date
@@ -163,8 +174,3 @@ class CliAttachmentDTO {
   type: string
   name: string
 }
-
-
-
-
-
