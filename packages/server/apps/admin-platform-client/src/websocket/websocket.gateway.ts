@@ -7,7 +7,7 @@ import {
   SubscribeMessage,
   WebSocketGateway,
 } from '@nestjs/websockets'
-import { UId } from '@shared/domain/entity/domain/uid'
+import { Uid } from '@shared/domain/entity/domain/uid'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { PlatformClient } from '@shared/platform-client'
 import WebSocket from 'ws'
@@ -39,7 +39,10 @@ export class WebsocketGateway implements OnGatewayDisconnect, OnGatewayConnectio
   }
 
   @SubscribeMessage('getLog')
-  async fetchJobLog(@ConnectedSocket() client: WebSocket, @MessageBody() data: { jobDxId: UId }) {
+  async fetchJobLog(
+    @ConnectedSocket() client: WebSocket,
+    @MessageBody() data: { jobDxId: Uid<'job'> },
+  ) {
     try {
       const jobDxId = data.jobDxId
 

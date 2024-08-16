@@ -420,7 +420,7 @@ module Api
     def create_space_params
       params.require(:space).permit(:name, :description, :hostLeadDxuser, :guestLeadDxuser,
                                     :spaceType, :cts, :sponsorOrgHandle, :sourceSpaceId,
-                                    :sponsorLeadDxuser, :protected, :restrictedReviewer)
+                                    :sponsorLeadDxuser, :protected, :restrictedReviewer, :restrictedDiscussions)
     end
   end
 

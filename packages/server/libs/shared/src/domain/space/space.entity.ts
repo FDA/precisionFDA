@@ -8,6 +8,7 @@ import {
   PrimaryKey,
   Property,
 } from '@mikro-orm/core'
+import { WorkaroundJsonType } from '@shared/database/custom-json-type'
 import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { BaseEntity } from '../../database/base-entity'
@@ -16,6 +17,12 @@ import { SPACE_STATE, SPACE_TYPE } from './space.enum'
 import { getScopeFromSpaceId } from './space.helper'
 import { SpaceRepository } from './space.repository'
 import { DataPortal } from '@shared/domain/data-portal/data-portal.entity'
+
+type SpaceMeta = {
+  cts: string,
+  restricted_reviewer: boolean,
+  restricted_discussions: boolean,
+}
 
 @Entity({ tableName: 'spaces', repository: () => SpaceRepository })
 export class Space extends BaseEntity {
@@ -53,8 +60,11 @@ export class Space extends BaseEntity {
   @Property()
   sponsorOrgId: number
 
-  @Property()
-  meta?: string
+  @Property({
+    type: WorkaroundJsonType,
+    columnType: 'text',
+  })
+  meta?: SpaceMeta
 
   @Property()
   restrictToTemplate?: boolean

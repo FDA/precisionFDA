@@ -23,6 +23,7 @@ import {
 } from '../apps.types'
 import { isFloatValid, isStrictlyInteger } from '../form/common'
 import { fetchAndConvertSelectableContexts, fetchAndConvertSelectableSpaces } from './job-run-helper'
+import { RunWorkflowFormType } from '../../workflows/run/RunWorkflowForm'
 
 export const getLabel = (inputSpec: InputSpec) => (inputSpec.label ? inputSpec.label : inputSpec.name)
 
@@ -292,7 +293,7 @@ export const useDefaultInstanceType = (
 }
 
 export const useDefaultScopeSelection = (
-  formValues: RunJobFormType,
+  formValues: RunJobFormType | RunWorkflowFormType,
   selectableSpaces: SelectableSpace[] | undefined,
   currentScope: ServerScope,
   setValue: UseFormSetValue<RunJobFormType>,

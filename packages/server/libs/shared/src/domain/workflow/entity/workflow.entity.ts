@@ -1,4 +1,6 @@
 import { Entity, ManyToOne, PrimaryKey, Property, Ref, Reference } from '@mikro-orm/core'
+import { DxId } from '@shared/domain/entity/domain/dxid'
+import { Uid } from '@shared/domain/entity/domain/uid'
 import { User } from '@shared/domain/user/user.entity'
 import { BaseEntity } from '../../../database/base-entity'
 import { WorkaroundJsonType } from '../../../database/custom-json-type'
@@ -10,7 +12,7 @@ export class Workflow extends BaseEntity {
   id: number
 
   @Property()
-  dxid: string
+  dxid: DxId<'workflow'>
 
   @Property()
   title: string
@@ -28,7 +30,7 @@ export class Workflow extends BaseEntity {
   scope: string
 
   @Property()
-  uid: string
+  uid: Uid<'workflow'>
 
   @Property()
   editVersion: number

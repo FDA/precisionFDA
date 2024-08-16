@@ -89,7 +89,7 @@ const EditAssetInfoForm = ({
             Cancel
           </Button>
           <Button
-            variant="primary"
+            data-variant="primary"
             type="submit"
             form="edit-asset-form"
             disabled={editMutation.isPending}
@@ -107,7 +107,7 @@ export const useEditAssetModal = (selectedItem: IAsset) => {
   const selected = useMemo(() => selectedItem, [isShown])
   const handleClose = () => setShowModal(false)
 
-  const modalComp = isShown && (
+  const modalComp = (
     <ModalNext
       data-testid="modal-asset-edit"
       isShown={isShown}

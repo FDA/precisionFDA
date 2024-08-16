@@ -1,5 +1,6 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Injectable } from '@nestjs/common'
+import { App } from '@shared/domain/app/app.entity'
 import {
   CliAppDescribeDTO,
   CliDiscussionDescribeDTO,
@@ -16,7 +17,9 @@ import {
   DiscussionDTO,
 } from '@shared/domain/discussion/discussion.types'
 import { DiscussionService } from '@shared/domain/discussion/services/discussion.service'
-import { EntityFetcherService, UID } from '@shared/domain/entity/entity-fetcher.service'
+import { DxId } from '@shared/domain/entity/domain/dxid'
+import { Uid } from '@shared/domain/entity/domain/uid'
+import { EntityFetcherService } from '@shared/domain/entity/entity-fetcher.service'
 import { Job } from '@shared/domain/job/job.entity'
 import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
 import { SPACE_MEMBERSHIP_ROLE } from '@shared/domain/space-membership/space-membership.enum'
@@ -24,8 +27,10 @@ import { Space } from '@shared/domain/space/space.entity'
 import { getScopeFromSpaceId } from '@shared/domain/space/space.helper'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { Folder } from '@shared/domain/user-file/folder.entity'
+import { Node } from '@shared/domain/user-file/node.entity'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
-import { FILE_STI_TYPE, IFileOrAsset } from '@shared/domain/user-file/user-file.types'
+import { FILE_STI_TYPE } from '@shared/domain/user-file/user-file.types'
+import { Workflow } from '@shared/domain/workflow/entity/workflow.entity'
 import { STATIC_SCOPE } from '@shared/enums'
 import { NotFoundError, PermissionError } from '@shared/errors'
 import { PlatformClient } from '@shared/platform-client'
@@ -49,26 +54,25 @@ export class CliService {
   async describeEntity(uid: string) {
     switch (uid.split('-')[0]) {
       case 'file':
-        return await this.describeFile(uid as UID<'file'>)
+        return await this.describeFile(uid as Uid<'file'>)
       case 'workflow':
-        return await this.describeWorkflow(uid as UID<'workflow'>)
+        return await this.describeWorkflow(uid as Uid<'workflow'>)
       case 'app':
-        return await this.describeApp(uid as UID<'app'>)
+        return await this.describeApp(uid as Uid<'app'>)
       case 'job':
-        return await this.describeExecution(uid as UID<'job'>)
+        return await this.describeExecution(uid as Uid<'job'>)
       default:
         throw new Error('Entity not found')
     }
   }
 
-  private async describeFile(entityId: UID<'file'>) {
+  private async describeFile(entityId: Uid<'file'>) {
     // why isn't the type Node ??
     // populate has to be here, I wasn't able to make it work otherwise.
-    const file: any = await this.entityFetcherService.getAccessibleByUid(
-      'Node',
+    const file = await this.entityFetcherService.getAccessibleByUid(
+      Node,
       entityId,
       {},
-      // @ts-ignore
       { populate: ['taggings.tag', 'user'] },
     )
     if (!file) {
@@ -77,21 +81,18 @@ export class CliService {
     const describeFile = await this.platformClient.fileDescribe(
       {
         fileDxid: file.dxid,
-        projectDxid: null, // not needed - dxid is unique.
+        projectDxid: file.project,
       },
       {},
     )
 
     await file.properties.loadItems()
-    if (file.isAsset) {
-      await file.archiveEntries.loadItems()
-    }
 
-    return CliFileDescribeDTO.mapToDTO(describeFile, file as IFileOrAsset)
+    return CliFileDescribeDTO.mapToDTO(describeFile, file)
   }
 
-  private async describeWorkflow(uid: UID<'workflow'>) {
-    const workflow: any = await this.entityFetcherService.getAccessibleByUid('Workflow', uid)
+  private async describeWorkflow(uid: Uid<'workflow'>) {
+    const workflow = await this.entityFetcherService.getAccessibleByUid(Workflow, uid)
     if (!workflow) {
       throw new NotFoundError('Workflow not found or not accessible')
     }
@@ -102,8 +103,8 @@ export class CliService {
     return CliWorkflowDescribeDTO.mapToDTO(platformWorkflowData, workflow)
   }
 
-  private async describeApp(entityId: UID<'app'>) {
-    const app: any = await this.entityFetcherService.getAccessibleByUid('App', entityId)
+  private async describeApp(entityId: Uid<'app'>) {
+    const app = await this.entityFetcherService.getAccessibleByUid(App, entityId)
     if (!app) {
       throw new NotFoundError('App not found or not accessible')
     }
@@ -114,15 +115,15 @@ export class CliService {
     return CliAppDescribeDTO.mapToDTO(platformAppData, app)
   }
 
-  private async describeExecution(entityId: UID<'job'>) {
-    const execution = (await this.entityFetcherService.getAccessibleByUid(
+  private async describeExecution(entityId: Uid<'job'>) {
+    const execution = await this.entityFetcherService.getAccessibleByUid(
       Job,
       entityId,
       {},
-      // @ts-ignore :<
       // needed when the job is described by non-owner
       { populate: ['user'] },
-    )) as Job
+    )
+
     if (!execution) {
       throw new NotFoundError('Execution not found or not accessible')
     }
@@ -177,6 +178,7 @@ export class CliService {
     const result: CliDiscussionDescribeDTO = {
       id: discussion.id,
       title: discussion.note.title,
+      content: discussion.note.content,
       user: discussion.user,
       comments: discussion.comments,
       commentsCount: discussion.commentsCount,
@@ -213,7 +215,7 @@ export class CliService {
     return result
   }
 
-  async getJobScope(jobDxid: string) {
+  async getJobScope(jobDxid: DxId<'job'>) {
     const jobs: Job[] = await this.entityFetcherService.getAccessible('Job', { dxid: jobDxid })
     if (jobs.length !== 1) {
       throw new NotFoundError('Job not found or not accessible')

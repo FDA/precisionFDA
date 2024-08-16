@@ -78,7 +78,7 @@ const ButtonBar = ({ data }: { data: DataPortal }) => {
         <Button disabled={mutation.isPending} onClick={() => handleCancel()}>
           Cancel
         </Button>
-        <Button variant="primary" disabled={mutation.isPending} onClick={() => handleSave()}>
+        <Button data-variant="primary" disabled={mutation.isPending} onClick={() => handleSave()}>
           Save
         </Button>
       </SubmitRow>

@@ -11,7 +11,7 @@ import { DEFAULT_RECONNECT_ATTEMPTS, DEFAULT_RECONNECT_INTERVAL, SHOULD_RECONNEC
 import { getBackPathNext } from '../../../utils/getBackPath'
 import { ActionsRow, StyledBackLink, StyledLink } from '../../home/home.styles'
 import {
-  Header,
+  ResourceHeader,
   HeaderLeft,
   HeaderRight,
   HomeLoader,
@@ -124,16 +124,13 @@ export const ExecutionDetails = ({
         Back to Executions
       </StyledBackLink>
       <Topbox>
-        <Header>
+        <ResourceHeader>
           <HeaderLeft>
             <TitleLeft>
               <Title>
                 <CogsIcon height={20} />
-                &nbsp;<span data-testid="execution-name">{execution.name}</span>
+                <span data-testid="execution-name">{execution.name}</span>
               </Title>
-              <StyledExecutionState>
-                <StateCell state={execution.state} />
-              </StyledExecutionState>
               {execution?.failure_message && (
                 <FailureMessage>
                   {execution?.failure_reason}: {execution.failure_message}
@@ -147,10 +144,15 @@ export const ExecutionDetails = ({
               <ExecutionActionsRow homeScope={homeScope} execution={execution} refetch={refetch} isFetching={isFetching} />
             </ActionsRow>
           </HeaderRight>
-        </Header>
+        </ResourceHeader>
 
         <MetadataSection>
           <MetadataRow>
+          <MetadataItem>
+              <MetadataKey>STATE</MetadataKey>
+              <MetadataVal data-testid="execution-status"><StateCell state={execution.state} /></MetadataVal>
+            </MetadataItem>
+
             <MetadataItem>
               <MetadataKey>Location</MetadataKey>
               <MetadataVal data-testid="execution-location">

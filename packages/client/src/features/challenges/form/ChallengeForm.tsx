@@ -363,7 +363,7 @@ export const ChallengeForm = ({
           </FieldGroup>
           <Row>
             <Button
-              variant='primary'
+              data-variant='primary'
               disabled={Object.keys(errors).length > 0 || isSubmitting || isSaving}
               type="submit"
             >

@@ -1,5 +1,5 @@
 import { DxId } from '@shared/domain/entity/domain/dxid'
-import type { UId } from '../../entity/domain/uid'
+import type { Uid } from '../../entity/domain/uid'
 import type { JobInstanceType } from '../../job/job.enum'
 
 export interface WorkflowSpec {
@@ -17,7 +17,7 @@ interface WorkflowInputSpecStage {
   next_slot: DxId<'stage'>
   slotId: DxId<'stage'>
   app_dxid: DxId<'app'>
-  app_uid: UId<'app'>
+  app_uid: Uid<'app'>
   inputs: WorkflowSpecStageInputOutput[]
   outputs: WorkflowSpecStageInputOutput[]
   instanceType: JobInstanceType

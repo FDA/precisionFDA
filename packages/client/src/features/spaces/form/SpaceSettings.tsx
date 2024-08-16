@@ -164,7 +164,7 @@ export const SpaceSettingsForm = ({ space }: ISpaceSettingsForm) => {
       )}
 
       <Row>
-        <Button variant="primary" disabled={Object.keys(errors).length > 0 || isSubmitting} type="submit">
+        <Button data-variant="primary" disabled={Object.keys(errors).length > 0 || isSubmitting} type="submit">
           Save
         </Button>
         {isSubmitting && <Loader />}

@@ -86,14 +86,14 @@ const DownloadFiles = ({
 export const useDownloadFileModal = (selected: IFile[], scope: ServerScope) => {
   const { isShown, setShowModal } = useModal()
   const memoSelected = useMemo(() => selected, [isShown])
-  const [nodesToBeDownloaded, setNodesToBeDownloaded] = useState<DownloadListResponse[]>([])
+  const [nodesToBeDownloaded, setNodesToBeDownloaded] = useState<DownloadListResponse[]>()
 
   const downloadUrl = (scopeParam: ServerScope) => {
     const params = selected.map(file => `id[]=${file.id}`).join('&')
     return `/api/files/bulk_download?scope=${scopeParam}&${params}`
   }
 
-  const modalComp = isShown && (
+  const modalComp = (
     <ModalNext
       id="modal-download"
       data-test-id="modal-download"
@@ -114,7 +114,7 @@ export const useDownloadFileModal = (selected: IFile[], scope: ServerScope) => {
             Cancel
           </Button>
 
-          <Button variant='primary' onClick={() => {
+          <Button data-variant='primary' onClick={() => {
             handleDownloadClick(downloadUrl(scope))
             setShowModal(false)
             toast.success('Download all has been started')

@@ -12,7 +12,7 @@ export const StyledMemberCard = styled.div<{ $isDeactivated: boolean }>`
   border: 1px solid var(--c-border);
   ${({ $isDeactivated }) =>
     $isDeactivated && css`border: 1px solid var(--c-border);`}
-  margin-bottom: 16px;
+  margin-bottom: 4px;
   display: flex;
   flex-direction: column;
   border-radius: 6px;
@@ -98,6 +98,10 @@ export function MemberCard({
           <li>
             <Key>Organization:</Key>
             <Value>{member.org}</Value>
+          </li>
+          <li>
+            <Key>Domain:</Key>
+            <Value>{member.domain}</Value>
           </li>
           <li>
             <Key>Joined On:</Key>

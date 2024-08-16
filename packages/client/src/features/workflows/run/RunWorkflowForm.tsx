@@ -19,15 +19,7 @@ import { CubeIcon } from '../../../components/icons/CubeIcon'
 import { FieldGroup } from '../../../components/form/FieldGroup'
 import { JobRunInput } from '../../apps/run/JobRunInput'
 import { AcceptedLicense, InputSpec, SelectType } from '../../apps/apps.types'
-import {
-  Section,
-  SectionBody,
-  SectionHeader,
-  StyledLine,
-  Topbox,
-  TopboxItem,
-  WrapSingleField,
-} from '../../apps/run/styles'
+import { Section, SectionBody, SectionHeader, StyledGrid, StyledLine, Topbox, TopboxItem } from '../../apps/run/styles'
 import { StyledForm } from '../../home/home.styles'
 import { StyledAnalysisName, StyledStageHeader, WorkflowConfiguration } from './styles'
 import { GearIcon } from '../../../components/icons/GearIcon'
@@ -37,21 +29,19 @@ import { useAcceptLicensesModal } from '../../licenses/useAcceptLicensesModal'
 import { useAuthUser } from '../../auth/useAuthUser'
 import { getSpaceIdFromScope } from '../../../utils'
 import { IUser } from '../../../types/user'
-import { fetchAndConvertSelectableSpaces } from '../../apps/run/job-run-helper'
-import { IAccessibleFile } from '../../databases/databases.api'
 import { FileUid } from '../../files/files.types'
 import { FormPageContainer } from '../../../components/Page/styles'
 import { BackLink } from '../../../components/Page/PageBackLink'
-import { extractFileUids, getValue } from '../../apps/run/utils'
+import { extractFileUids, getValue, useDefaultScopeSelection, useSelectableSpaces } from '../../apps/run/utils'
 import { getDefaultValueFromServer } from '../../apps/form/common'
-import { Select } from '../../../components/Select'
 import { Button } from '../../../components/Button'
 import { ErrorMessageForField } from '../../apps/run/ErrorMessageForField'
+import { SelectSpaceScope } from '../../apps/run/SelectSpaceScope'
 
-export interface WorkflowRunData {
+export interface RunWorkflowFormType {
   analysisName: string;
   jobLimit: number;
-  spaceScope?: SelectType | null;
+  scope: SelectType;
   inputs: { // TODO add support for arrays, PFDA-5136
     [key: string]: string | boolean | FileUid | undefined,
   };
@@ -60,8 +50,8 @@ export interface WorkflowRunData {
 const getLabel = (input: InputOutput) =>
   input.label ? input.label : input.name
 
-const prepareDefaultValues = (workflow: IWorkflow, user?: IUser, stages?: Stage[]): WorkflowRunData => {
-  const defaultValues: WorkflowRunData = {
+const prepareDefaultValues = (workflow: IWorkflow, user?: IUser, stages?: Stage[]): RunWorkflowFormType => {
+  const defaultValues: RunWorkflowFormType = {
     analysisName: workflow ? workflow.name : '',
     jobLimit: user ? user.job_limit: 0,
     inputs: {},
@@ -78,7 +68,7 @@ const prepareDefaultValues = (workflow: IWorkflow, user?: IUser, stages?: Stage[
   return defaultValues
 }
 
-const fetchLicensesOnFiles = (jobData: WorkflowRunData): Promise<License[]> => {
+const fetchLicensesOnFiles = (jobData: RunWorkflowFormType): Promise<License[]> => {
   const uids = extractFileUids(jobData.inputs)
   if (uids.length > 0) {
     return fetchLicensesForFiles(uids)
@@ -119,7 +109,7 @@ const prepareValidations = (user?: IUser, stages?: Stage[], scope?: string) => {
       .positive().typeError('You must specify a number')
       .max(user?.job_limit ?? 99, `Maximum job limit for current user is ${user?.job_limit ?? 99}`),
     inputs: Yup.object().shape(inputs),
-    spaceScope: spaceValidations,
+    scope: spaceValidations,
   }
 
   return Yup.object().shape(validationObject)
@@ -145,7 +135,7 @@ const WorkflowStage = ({ app, stage, errors, isSubmitting, control, register }:
     <>
       <StyledStageHeader key={stage.app_uid}><GearIcon height={14} />&nbsp;{stage.name}</StyledStageHeader>
       {stage.inputs.map(input => {
-        const inputSpec: InputSpec = app.spec.input_spec.find(input_spec => input_spec.name === input.name)
+        const inputSpec: InputOutput = app.spec.input_spec.find(input_spec => input_spec.name === input.name)
         return (
           <Controller
             key={inputSpec.name}
@@ -171,7 +161,7 @@ const WorkflowStage = ({ app, stage, errors, isSubmitting, control, register }:
   </>)
 }
 
-const createRequestObject = (workflowId: string, vals: WorkflowRunData, stages?: Stage[]): RunWorkflowRequest => {
+const createRequestObject = (workflowId: string, vals: RunWorkflowFormType, stages?: Stage[]): RunWorkflowRequest => {
   const classes = new Map<string, string>(stages?.flatMap(stage => stage.inputs)
     .map(input => [`${input.parent_slot}#${input.name}`, input.class]))
   const inputs: RunWorkflowInput[] = []
@@ -198,12 +188,12 @@ const createRequestObject = (workflowId: string, vals: WorkflowRunData, stages?:
     workflow_id: workflowId,
     name: vals.analysisName,
     job_limit: vals.jobLimit,
-    space_id: vals.spaceScope?.value,
+    space_id: vals.scope.value,
     inputs,
   } as RunWorkflowRequest
 }
 
-const WorkflowRun = (
+const RunWorkflowForm = (
   { workflow, meta, user }:
     { workflow: IWorkflow, meta: any, user: IUser },
 ) => {
@@ -213,11 +203,7 @@ const WorkflowRun = (
   const defaultValues = prepareDefaultValues(workflow, user, stages)
   const validationSchema = prepareValidations(user, stages, workflow.scope)
 
-  const { data: selectableSpaces } = useQuery({
-    queryKey: ['selectable-spaces', workflow.scope],
-    queryFn: () => fetchAndConvertSelectableSpaces(workflow.scope).catch(() => toast.error('Error loading spaces')),
-  })
-
+  const { data: selectableSpaces } = useSelectableSpaces(workflow.scope)
   const { modalComp: licensesModal, setLicensesAndShow } = useAcceptLicensesModal()
 
   const {
@@ -226,20 +212,23 @@ const WorkflowRun = (
     handleSubmit,
     formState: { errors, isSubmitting },
     getValues,
+    setValue,
     trigger,
-  } = useForm<WorkflowRunData>({
+  } = useForm<RunWorkflowFormType>({
     mode: 'onBlur',
     resolver: yupResolver(validationSchema),
     defaultValues,
   })
 
+  useDefaultScopeSelection(getValues(), selectableSpaces, workflow.scope, setValue)
+
   const runWorkflowMutation = useMutation({
     mutationFn: (payload: RunWorkflowRequest) => runWorkflow(payload),
     onSuccess: (res) => {
       if (res?.id) {
-        const spaceScope = getValues().spaceScope?.value
-        if (spaceScope) {
-          const spaceId = spaceScope.replace('space-', '')
+        const scope = getValues().scope.value
+        if (scope.includes('space-')) {
+          const spaceId = scope.replace('space-', '')
           navigate(`/spaces/${spaceId}/executions`)
         } else {
           navigate(`/home/workflows/${workflow.uid}/jobs`)
@@ -286,72 +275,49 @@ const WorkflowRun = (
       <StyledForm id="submitWorkflowForm" autoComplete="off">
         <WorkflowConfiguration>
           <Section>
-            <SectionHeader>
-              CONFIGURE
-            </SectionHeader>
+            <SectionHeader>CONFIGURE</SectionHeader>
             <SectionBody>
-              <StyledLine>
+              <StyledGrid>
                 <StyledAnalysisName>
-                  <FieldGroup label="Analysis Name" required >
-                    <InputText
-                      {...register('analysisName')}
-                      disabled={isSubmitting}
-                    />
+                  <FieldGroup label="Analysis Name" required>
+                    <InputText {...register('analysisName')} disabled={isSubmitting} />
                     <ErrorMessageForField errors={errors} fieldName="jobName" />
                   </FieldGroup>
                 </StyledAnalysisName>
-                <FieldGroup label="Cost Execution Limit" required >
-                  <InputNumber
-                    {...register('jobLimit')}
-                    disabled={isSubmitting}
-                  />
+                <FieldGroup label="Execution Cost Limit ($)" required>
+                  <InputNumber {...register('jobLimit')} disabled={isSubmitting} />
                   <ErrorMessageForField errors={errors} fieldName="jobLimit" />
                 </FieldGroup>
-              </StyledLine>
-              {workflow.scope && workflow.scope.startsWith('space-') && (
-                <WrapSingleField>
-                  <FieldGroup label="Space scope" required>
-                    <Controller
-                      name="spaceScope"
-                      control={control}
-                      render={({ field }) => (
-                        <Select
-                          options={selectableSpaces}
-                          placeholder="Choose..."
-                          onChange={value => {
-                            field.onChange(value)
-                            field.onBlur()
-                          }}
-                          isClearable
-                          isSearchable
-                          onBlur={field.onBlur}
-                          value={field.value}
-                          isDisabled={isSubmitting}
-                          inputId="select_context"
-                        />
-                      )}
-                    />
-                    <ErrorMessageForField
-                      errors={errors}
-                      fieldName="spaceScope"
-                    />
-                  </FieldGroup>
-                </WrapSingleField>
-              )}
+                {workflow.scope && workflow.scope.startsWith('space-') && (
+                  <SelectSpaceScope
+                    control={control}
+                    isSubmitting={isSubmitting}
+                    selectableSpaces={selectableSpaces}
+                    errors={errors}
+                  />
+                )}
+              </StyledGrid>
             </SectionBody>
           </Section>
           <Section>
-            <SectionHeader>
-              INPUTS
-            </SectionHeader>
+            <SectionHeader>INPUTS</SectionHeader>
             <SectionBody>
-              {stages?.map(stage => <WorkflowStage key={stage.stageIndex} stage={stage} errors={errors}
-                app={apps.find(app => app.dxid === stage.app_dxid)} control={control} register={register} isSubmitting={isSubmitting} />)}
+              {stages?.map(stage => (
+                <WorkflowStage
+                  key={stage.stageIndex}
+                  stage={stage}
+                  errors={errors}
+                  app={apps.find(app => app.dxid === stage.app_dxid)}
+                  control={control}
+                  register={register}
+                  isSubmitting={isSubmitting}
+                />
+              ))}
             </SectionBody>
           </Section>
         </WorkflowConfiguration>
         <Button
-          variant="primary"
+          data-variant="primary"
           disabled={isSubmitting}
           type="submit" form="submitJobForm" onClick={handleSubmit(onSubmit)}>
           {isSubmitting ? 'Running' : 'Run Workflow'}
@@ -378,17 +344,17 @@ const WorkflowRunPage = () => {
   const workflow = workflowData?.workflow
   const meta = workflowData?.meta
 
+  if (!workflow)
+    return (
+      <NotFound>
+        <h1>Workflow not found</h1>
+        <div>Sorry, this workflow does not exist or is not accessible by you.</div>
+      </NotFound>
+    )
+
   const workflowTitle = workflow.title ? workflow.title : workflow.name
   const spaceId = getSpaceIdFromScope(workflow.scope)
   const baseLink = spaceId ? `spaces/${spaceId}` : 'home'
-
-  if (!workflow)
-  return (
-    <NotFound>
-      <h1>Workflow not found</h1>
-      <div>Sorry, this workflow does not exist or is not accessible by you.</div>
-    </NotFound>
-  )
 
   return (
   <FormPageContainer>
@@ -404,7 +370,7 @@ const WorkflowRunPage = () => {
         </Title>
       </TopboxItem>
     </Topbox>
-    <WorkflowRun workflow={workflow} meta={meta} user={user} />
+    <RunWorkflowForm workflow={workflow} meta={meta} user={user} />
   </FormPageContainer>
   )
 }

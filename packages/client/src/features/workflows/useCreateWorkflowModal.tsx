@@ -14,11 +14,11 @@ const StyledForm = styled.form`
 export const useCreateWorkflowModal = () => {
   const { isShown, setShowModal } = useModal()
   const mutation = useMutation({ mutationKey: ['create-workflow'], mutationFn: (name: string) => createWorkflowRequest(name) })
-  const modalComp = isShown && (
+  const modalComp = (
     <Modal headerText="Create an workflow" isShown={isShown} hide={() => setShowModal(false)} >
       <StyledForm onSubmit={(e) => mutation.mutateAsync(e.currentTarget.name)}>
         <InputText label="Workflow Name" name="name" placeholder="Enter Name..." autoFocus disabled={mutation.isPending} />
-        <Button variant="primary" type="submit" disabled={mutation.isPending}>Create</Button>
+        <Button data-variant="primary" type="submit" disabled={mutation.isPending}>Create</Button>
       </StyledForm>
       <Button onClick={() => setShowModal(false)} disabled={mutation.isPending}>Cancel</Button>
     </Modal>

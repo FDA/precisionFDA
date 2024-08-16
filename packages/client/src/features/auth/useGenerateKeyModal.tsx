@@ -104,10 +104,10 @@ const GenerateKey = ({ handleClose }: { handleClose: () => void }) => {
         </Link>
       </InfoRow>
       <StyledButtonRow>
-        <Button variant="primary" onClick={copyToClipboard}>
+        <Button data-variant="primary" onClick={copyToClipboard}>
           Copy to Clipboard
         </Button>
-        <Button variant="primary" onClick={handleClose}>Close</Button>
+        <Button data-variant="primary" onClick={handleClose}>Close</Button>
       </StyledButtonRow>
     </>
   )

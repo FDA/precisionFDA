@@ -163,7 +163,7 @@ export const useSelectJobModal = (
 
   const jobs = jobsData ?? []
 
-  const modalComp = isShown && (
+  const modalComp = (
     <ModalNext
       id="select-job-modal"
       headerText={title}
@@ -246,7 +246,7 @@ export const useSelectJobModal = (
             Cancel
           </Button>
           <Button
-            variant="primary"
+            data-variant="primary"
             onClick={handleSubmit}
             disabled={selectedJobs?.length === 0}
           >

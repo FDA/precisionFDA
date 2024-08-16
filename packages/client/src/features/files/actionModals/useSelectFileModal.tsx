@@ -294,7 +294,7 @@ const FileSelectTabs = ({ type, scopes, setShowModal, handleSelect, uids }: File
           >
             Cancel
           </Button>
-          <Button variant="primary" onClick={handleSubmit} disabled={selectedFiles?.length === 0}>
+          <Button data-variant="primary" onClick={handleSubmit} disabled={selectedFiles?.length === 0}>
             Select &nbsp;<ButtonBadge>{selectedFiles?.length}</ButtonBadge>
           </Button>
         </ButtonRow>
@@ -324,9 +324,19 @@ export const useSelectFileModal = (
     setShowModal(true)
   }
 
-  const modalComp = isShown && (
-    <ModalNext id="select-file-modal" disableClose={false} headerText={title} hide={() => setShowModal(false)} isShown={isShown}>
-      <ModalHeaderTop disableClose={false} headerText={title} hide={() => setShowModal(false)} />
+  const modalComp = (
+    <ModalNext
+      id="select-file-modal"
+      disableClose={false}
+      headerText={title}
+      hide={() => setShowModal(false)}
+      isShown={isShown}
+    >
+      <ModalHeaderTop
+        disableClose={false}
+        headerText={title}
+        hide={() => setShowModal(false)}
+      />
 
       {subtitle && <StyledSubtitle>{subtitle}</StyledSubtitle>}
       <FileSelectTabs type={type} scopes={scopes} setShowModal={setShowModal} handleSelect={handleSelect} uids={uids} />

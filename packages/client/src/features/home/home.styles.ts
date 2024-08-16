@@ -121,6 +121,7 @@ export const StyledHomeTable = styled.div`
 export const QuickActions = styled.div`
   display: flex;
   gap: 4px;
+  margin-right: 16px;
   ${Svg} {
     margin-right: 4px;
   }
@@ -179,7 +180,15 @@ export const StyledLinkCell = styled(StyledLink)`
 export const ActionsRow = styled.div`
   display: flex;
   justify-content: space-between;
-  margin: 20px;
+  align-items: center;
+  flex-grow: 1;
+  gap: 8px;
+`
+
+export const StyledBreadcrumbs = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   gap: 8px;
 `
 export const StyledRunByYouLink = styled.a`

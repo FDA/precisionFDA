@@ -21,18 +21,8 @@ import { cleanObject, getSelectedObjectsFromIndexes, toArrayFromObject } from '.
 import { useAuthUser } from '../auth/useAuthUser'
 import { ActionsDropdownContent } from '../home/ActionDropdownContent'
 import { ActionsRow, QuickActions, StyledHomeTable } from '../home/home.styles'
-import { ActionsButton } from '../home/show.styles'
-import {
-  HomeScope,
-  IFilter,
-  IMeta,
-  KeyVal,
-  MetaPath,
-  Notification,
-  NOTIFICATION_ACTION,
-  WEBSOCKET_MESSSAGE_TYPE,
-  WebSocketMessage,
-} from '../home/types'
+import { ActionsButton, FilesListResourceHeader } from '../home/show.styles'
+import { HomeScope, IFilter, IMeta, KeyVal, MetaPath, Notification, NOTIFICATION_ACTION, WEBSOCKET_MESSSAGE_TYPE, WebSocketMessage } from '../home/types'
 import { useList } from '../home/useList'
 import { usePropertiesQuery } from '../home/usePropertiesQuery'
 import { ISpace } from '../spaces/spaces.types'
@@ -210,20 +200,20 @@ export const FileList = ({
 
   return (
     <ErrorBoundary>
-      <div>
+      <FilesListResourceHeader>
         <ActionsRow>
           <QuickActions>
             {showFolderActions && (
               <>
                 <Button
-                  variant="primary"
+                  data-variant="primary"
                   data-testid="home-files-add-folder-button"
                   onClick={() => listActions['Add Folder']?.func({ showModal: true })}
                 >
                   <PlusIcon height={12} /> Add Folder
                 </Button>
                 <Button
-                  variant="primary"
+                  data-variant="primary"
                   data-testid="home-files-add-files-button"
                   onClick={() => listActions[space?.id ? 'Choose Add Option' : 'Add Files']?.func({ showModal: true })}
                 >
@@ -234,7 +224,7 @@ export const FileList = ({
           </QuickActions>
           <QuickActions>
             {selectedFileIds.length > 0 && (
-              <Button variant="primary" onClick={handleCopyIds}>
+              <Button data-variant="primary" onClick={handleCopyIds}>
                 {isCopiedIds ? (
                   <>
                     <ClipboardCheckIcon height={14} /> Copied IDs
@@ -261,8 +251,8 @@ export const FileList = ({
             </Dropdown>
           </QuickActions>
         </ActionsRow>
-        <ActionsRow>{breadcrumbs(location.pathname, homeScope, data?.meta?.path)}</ActionsRow>
-      </div>
+        {breadcrumbs(location.pathname, homeScope, data?.meta?.path)}
+      </FilesListResourceHeader>
 
       <FilesListTable
         isAdmin={isAdmin}

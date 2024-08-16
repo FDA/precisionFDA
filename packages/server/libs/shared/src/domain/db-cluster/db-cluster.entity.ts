@@ -1,37 +1,42 @@
 import {
+  Collection,
   Entity,
-  Property,
-  Unique,
+  Enum,
+  Filter,
   ManyToOne,
+  OneToMany,
+  Property,
   Ref,
   Reference,
-  Enum,
-  Filter, OneToMany, Collection,
+  Unique,
 } from '@mikro-orm/core'
-import { UId } from '@shared/domain/entity/domain/uid'
-import { DbClusterProperty } from "@shared/domain/property/db-cluster-property.entity";
+import { Uid } from '@shared/domain/entity/domain/uid'
+import { DbClusterProperty } from '@shared/domain/property/db-cluster-property.entity'
 import { SCOPE } from '@shared/types/common'
 import { BaseEntity } from '../../database/base-entity'
 import { formatDuration } from '../../utils/format'
+import { DxId } from '../entity/domain/dxid'
 import { User } from '../user/user.entity'
-import { STATUS, ENGINE } from './db-cluster.enum'
+import { ENGINE, STATUS } from './db-cluster.enum'
 
 @Entity({ tableName: 'dbclusters' })
-@Filter({ name: 'ownedBy', cond: args => ({ user: { id: args.userId } }) })
-@Filter({ name: 'isNonTerminal', cond: {
+@Filter({ name: 'ownedBy', cond: (args) => ({ user: { id: args.userId } }) })
+@Filter({
+  name: 'isNonTerminal',
+  cond: {
     status: {
-      $ne: STATUS.TERMINATED
-    }
-  }
+      $ne: STATUS.TERMINATED,
+    },
+  },
 })
 export class DbCluster extends BaseEntity {
   @Property()
   @Unique()
-  dxid!: string
+  dxid!: DxId<'dbcluster'>
 
   @Property()
   @Unique()
-  uid!: UId
+  uid!: Uid<'dbcluster'>
 
   @Property()
   name!: string
@@ -74,7 +79,7 @@ export class DbCluster extends BaseEntity {
     mappedBy: 'dbCluster',
     orphanRemoval: true,
   })
-  properties = new Collection<DbClusterProperty>(this);
+  properties = new Collection<DbClusterProperty>(this)
 
   constructor(user: User) {
     super()
@@ -88,5 +93,4 @@ export class DbCluster extends BaseEntity {
   elapsedTimeSinceCreationString(): string {
     return formatDuration(this.elapsedTimeSinceCreation())
   }
-
 }

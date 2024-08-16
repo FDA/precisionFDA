@@ -167,7 +167,7 @@ export const useSelectComparisonModal = (
 
   const comparisons = comparisonsData ?? []
 
-  const modalComp = isShown && (
+  const modalComp = (
     <ModalNext
       id="select-comparison-modal"
       headerText={title}
@@ -254,7 +254,7 @@ export const useSelectComparisonModal = (
             Cancel
           </Button>
           <Button
-            variant="primary"
+            data-variant="primary"
             onClick={handleSubmit}
             disabled={selectedComparisons?.length === 0}
           >

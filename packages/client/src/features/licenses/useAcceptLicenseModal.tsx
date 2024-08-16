@@ -52,7 +52,7 @@ export function useAcceptLicenseModal<
     setShowModal(false)
   }
 
-  const modalComp = isShown && (
+  const modalComp = (
     <Modal
       data-testid="modal-accept-licenses"
       headerText={'Accept License'}
@@ -61,7 +61,7 @@ export function useAcceptLicenseModal<
       footer={
         <>
           <Button onClick={handleClose}>Cancel</Button>
-          <Button variant="primary" onClick={() => handleSubmit()}>
+          <Button data-variant="primary" onClick={() => handleSubmit()}>
             Accept
           </Button>
         </>

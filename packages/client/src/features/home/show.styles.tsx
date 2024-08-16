@@ -48,28 +48,32 @@ export const NotFound = styled.div`
 `
 
 export const ResourceTitle = styled.h1``
-export const HeaderRight = styled.div`
-  padding: 16px;
-`
+export const HeaderRight = styled.div``
 export const HeaderLeft = styled.div`
   display: flex;
-  flex-direction: column;
-  gap: 16px;
-  margin-bottom: 16px;
+  align-items: center;
+  gap: 8px;
 `
-export const Header = styled.div`
+export const ResourceHeader = styled.div`
+  gap: 8px;
   display: flex;
   justify-content: space-between;
-  flex-wrap: nowrap;
-  padding-left: 16px;
-  padding-right: 16px;
+  flex-wrap: wrap;
+  padding: 16px;
+`
+export const FilesListResourceHeader = styled(ResourceHeader)`
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+  gap: 16px;
 `
 
 export const Topbox = styled.div`
   margin-bottom: 40px;
 `
 
-export const HeaderButton = styled(Button).attrs({ variant: 'primary' })`
+export const StyledCloudResourcesHeaderButton = styled(Button).attrs({ 'data-variant': 'primary' })`
+  gap: 8px;
   max-height: 34px;
   box-sizing: border-box;
   ${({ disabled }) =>
@@ -89,6 +93,7 @@ export const Title = styled.div`
   display: flex;
   align-items: center;
   gap: 8px;
+  flex-shrink: 0;
 `
 
 export const Description = styled.div`
@@ -124,7 +129,7 @@ export const StyledActionsButton = styled(Button)`
   gap: 6px;
 `
 export const ActionsButton = React.forwardRef((props: any, ref) => (
-  <StyledActionsButton variant='primary' ref={ref} {...props}>
+  <StyledActionsButton data-variant='primary' ref={ref} {...props}>
     Actions <ArrowIcon />
   </StyledActionsButton>
 ))

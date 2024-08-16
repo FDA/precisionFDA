@@ -118,11 +118,7 @@ export class DataPortalService {
 
   removeResource = async (id: number) => {
     this.logger.log(`Removing resource: ${id}`)
-    const resource = await this.em.findOneOrFail(
-      Resource,
-      { id: id },
-      { populate: ['userFile'] },
-    )
+    const resource = await this.em.findOneOrFail(Resource, { id: id }, { populate: ['userFile'] })
     const dataPortal = await this.em.findOneOrFail(
       DataPortal,
       { id: resource.dataPortal.id },

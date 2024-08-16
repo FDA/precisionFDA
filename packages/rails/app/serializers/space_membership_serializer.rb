@@ -8,6 +8,7 @@ class SpaceMembershipSerializer < ApplicationSerializer
     :role,
     :side,
     :org,
+    :domain,
     :created_at,
     :links,
     :to_roles,
@@ -29,6 +30,14 @@ class SpaceMembershipSerializer < ApplicationSerializer
   # @return [String] handle.
   def org
     object.user.org&.handle
+  end
+
+  # Extract the email domain without the extension from the email, empty string if something's missing
+  def domain
+    email = object.user.email
+    return "" if email.nil? || email.exclude?("@") || email.exclude?(".")
+
+    email.split("@").last.split(".").first
   end
 
   # Returns formatted created_at time.

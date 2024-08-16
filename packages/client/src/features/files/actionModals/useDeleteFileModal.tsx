@@ -127,7 +127,7 @@ export const useDeleteFileModal = ({
     mutation.mutateAsync(nodesToBeDeleted.map(s => s.id))
   }
 
-  const modalComp = isShown && (
+  const modalComp = (
     <ModalNext
       id="modal-files-delete"
       data-test-id="modal-files-delete"
@@ -151,7 +151,7 @@ export const useDeleteFileModal = ({
           >
             Cancel
           </Button>
-          <Button variant="warning" onClick={handleSubmit} disabled={!nodesToBeDeleted.length || mutation.isPending}>
+          <Button data-variant="warning" onClick={handleSubmit} disabled={!nodesToBeDeleted.length || mutation.isPending}>
             Delete
           </Button>
         </ButtonRow>

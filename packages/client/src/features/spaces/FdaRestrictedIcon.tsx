@@ -1,6 +1,6 @@
 /* eslint-disable react/jsx-no-useless-fragment */
 import React from 'react'
-import ReactTooltip from 'react-tooltip'
+import { Tooltip } from 'react-tooltip'
 import { FdaIcon } from '../../components/icons/FdaIcon'
 
 
@@ -15,7 +15,7 @@ export const FdaRestrictedIcon = ({
 }) => {
   const Icon = <FdaIcon color={color} />
   if (showToolTip) {
-      return <><span data-tip="FDA-restricted" data-for="fda-restricted">{Icon}</span><ReactTooltip id="fda-restricted" effect="solid" /></>
+      return <><span data-tooltip-content="FDA-restricted" data-tooltip-id="fda-restricted">{Icon}</span><Tooltip id="fda-restricted" /></>
   }
   return isShown ? Icon : <></>
 }

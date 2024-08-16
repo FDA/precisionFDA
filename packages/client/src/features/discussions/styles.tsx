@@ -117,7 +117,6 @@ export const Ol = styled.ol`
   border: 1px solid rgba(0, 0, 0, 0.15);
   border-radius: 3px;
   box-shadow: 0 6px 12px rgb(0 0 0 / 18%);
-  background-clip: padding-box;
 `
 
 export const UsernameLink = styled.a`
@@ -140,7 +139,7 @@ export const StyledAnswerLabel = styled.div`
   }
 `
 export const StyledEditButton = styled(TransparentButton)`
-  color: ${theme.colors.textDarkGreyInactive};
+  color: var(--c-text-400);
   padding: 4px;
   padding-bottom: 2px;
 `
