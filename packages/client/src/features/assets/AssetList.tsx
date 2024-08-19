@@ -14,7 +14,7 @@ import { useAuthUser } from '../auth/useAuthUser'
 import { useGenerateKeyModal } from '../auth/useGenerateKeyModal'
 import { ActionsDropdownContent } from '../home/ActionDropdownContent'
 import { ActionsRow, QuickActions, StyledHomeTable } from '../home/home.styles'
-import { ActionsButton } from '../home/show.styles'
+import { ActionsButton, ResourceHeader } from '../home/show.styles'
 import { IFilter, IMeta, KeyVal, HomeScope } from '../home/types'
 import { useList } from '../home/useList'
 import { usePropertiesQuery } from '../home/usePropertiesQuery'
@@ -70,11 +70,11 @@ export const AssetList = ({ homeScope, spaceId }: { homeScope?: HomeScope, space
 
   return (
     <>
-      <div>
+      <ResourceHeader>
         <ActionsRow>
           <QuickActions>
             <Button
-              variant='primary'
+              data-variant='primary'
               as="a"
               data-turbolinks="false"
               href="/docs/assets"
@@ -83,7 +83,7 @@ export const AssetList = ({ homeScope, spaceId }: { homeScope?: HomeScope, space
               <QuestionIcon height={13} /> How to create assets
             </Button>
             <Button
-              variant='primary' onClick={() => generateCLIKeyAction.setShowModal(true)}>
+              data-variant='primary' onClick={() => generateCLIKeyAction.setShowModal(true)}>
               <KeyIcon height={13} />Generate CLI Key
             </Button>
           </QuickActions>
@@ -108,7 +108,7 @@ export const AssetList = ({ homeScope, spaceId }: { homeScope?: HomeScope, space
             )}
           </Dropdown>
         </ActionsRow>
-      </div>
+      </ResourceHeader>
 
       <AssetsListTable
         isAdmin={isAdmin}

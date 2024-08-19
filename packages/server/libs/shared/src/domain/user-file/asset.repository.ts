@@ -1,21 +1,18 @@
 import { EntityRepository } from '@mikro-orm/mysql'
 import { DxId } from '@shared/domain/entity/domain/dxid'
-import { UId } from '@shared/domain/entity/domain/uid'
+import { Uid } from '@shared/domain/entity/domain/uid'
 import { User } from '@shared/domain/user/user.entity'
 import { SCOPE } from '@shared/types/common'
+import { STATIC_SCOPE } from '../../enums'
 import { Asset } from './asset.entity'
 import { FILE_STATE_DX } from './user-file.types'
-import { STATIC_SCOPE } from '../../enums'
 
 export class AssetRepository extends EntityRepository<Asset> {
-  async findAssetWithUid(uid: UId): Promise<Asset | null> {
-    return await this.findOne(
-      { uid },
-      { filters: ['asset'], populate: ['user', 'taggings.tag'] },
-    )
+  async findAssetWithUid(uid: Uid<'file'>): Promise<Asset | null> {
+    return await this.findOne({ uid }, { filters: ['asset'], populate: ['user', 'taggings.tag'] })
   }
 
-  async findAllAssetsWithDxid(dxid: DxId): Promise<Asset[]> {
+  async findAllAssetsWithDxid(dxid: DxId<'file'>): Promise<Asset[]> {
     return await this.find({ dxid }, { filters: ['asset'], populate: ['user', 'taggings.tag'] })
   }
 
@@ -36,7 +33,7 @@ export class AssetRepository extends EntityRepository<Asset> {
    * @param userId
    * @param uids
    */
-  async findAccessibleByUser(userId: number, uids: UId[]): Promise<Asset[]> {
+  async findAccessibleByUser(userId: number, uids: Uid<'file'>[]): Promise<Asset[]> {
     const userRepository = this.em.getRepository(User)
     const user: User = await userRepository.findOneOrFail(
       { id: userId },

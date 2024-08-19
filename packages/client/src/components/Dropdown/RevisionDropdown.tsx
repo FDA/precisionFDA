@@ -2,11 +2,12 @@ import React from 'react'
 import { Link } from 'react-router-dom'
 import styled, { css } from 'styled-components'
 import { Dropdown } from '.'
-import { Revision } from '../../features/workflows/workflows.types'
+import { WorkflowRevision } from '../../features/workflows/workflows.types'
 import { colors } from '../../styles/theme'
 import { compactScrollBarV2 } from '../Page/styles'
 import { CaretIcon } from '../icons/CaretIcon'
 import { HistoryIcon } from '../icons/HistoryIcon'
+import { AppRevision } from '../../features/apps/apps.types'
 
 const StyledRevisionDropdownButton = styled.button`
   width: fit-content;
@@ -41,6 +42,7 @@ const DropdownIcon = styled.div`
   display: flex;
   align-items: center;
   color: var(--warning-500);
+  flex-shrink: 0;
 `
 
 const LiTitle = styled.li`
@@ -59,14 +61,15 @@ const Li = styled.li<{$active: boolean}>`
       background-color: var(--c-dropdown-active-bg);
     }
   `}
-  a {
-    color: var(--base);
-  }
 `
 export const StyledLink = styled(Link)`
   display: flex;
   justify-content: space-between;
   padding: 3px 20px;
+  color: var(--base);
+  &:hover {
+    color: var(--base);
+  }
 `
 
 const Ol = styled.ol`
@@ -82,7 +85,6 @@ const Ol = styled.ol`
   border: 1px solid rgba(0,0,0,0.15);
   border-radius: 3px;
   box-shadow: 0 6px 12px rgb(0 0 0 / 18%);
-  background-clip: padding-box;
 `
 
 export const RevisionDropdown = ({
@@ -90,9 +92,9 @@ export const RevisionDropdown = ({
   selectedValue,
   linkToRevision,
 }: {
-  revisions: Revision[]
+  revisions: WorkflowRevision[] | AppRevision[]
   selectedValue: number
-  linkToRevision: (revision: Revision) => string
+  linkToRevision: (revision: WorkflowRevision | AppRevision) => string
 }) => {
   const lastRevision = revisions.reduce(
     (acc, shot) => (acc > shot.revision || shot.deleted ? acc : shot.revision),

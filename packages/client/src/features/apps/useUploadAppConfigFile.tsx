@@ -127,7 +127,7 @@ const FileUpload = ({
             Close
           </Button>
           <Button
-            variant="primary"
+            data-variant="primary"
             disabled={text === undefined || mutation.isPending}
             type="button"
             onClick={handleImportAndCreate}
@@ -148,7 +148,7 @@ export function useUploadAppConfigFile({
   const { isShown, setShowModal } = useModal()
   const id = `modal-${filetype}-import`
 
-  const modalComp = isShown && (
+  const modalComp = (
     <ModalNext
       id={id}
       data-testid={id}

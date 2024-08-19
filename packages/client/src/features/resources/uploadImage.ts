@@ -70,7 +70,7 @@ function readAndProcessFile(file: File, fileUid: string) {
     }
 
     reader.onerror = err => reject(err)
-    reader.readAsArrayBuffer(file as any)
+    reader.readAsArrayBuffer(file)
   })
 }
 

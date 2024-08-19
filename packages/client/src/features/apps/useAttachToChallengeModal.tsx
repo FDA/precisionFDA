@@ -179,7 +179,7 @@ const ChallengeAppForm = ({
             Cancel
           </Button>
           <Button
-            variant="primary"
+            data-variant="primary"
             type="submit"
             form="attach-to-challenge-form"
             disabled={!selectedId || mutation.isPending}
@@ -204,7 +204,7 @@ export function useAttachToChallengeModal<T extends { id: string | number }>({
   const { isShown, setShowModal } = useModal()
   const momoSelected = useMemo(() => selected, [isShown])
 
-  const modalComp = isShown && (
+  const modalComp = (
     <ModalNext
       data-testid={`modal-${resource}-attach-to-challenge`}
       isShown={isShown}

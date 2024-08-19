@@ -101,7 +101,7 @@ export const useOrganizeFileModal = ({
     }
   }
 
-  const modalComp = isShown && (
+  const modalComp = (
     <ModalNext
       id="modal-files-organize"
       hide={() => setShowModal(false)}
@@ -133,7 +133,7 @@ export const useOrganizeFileModal = ({
             Cancel
           </Button>
           <Button
-            variant="primary"
+            data-variant="primary"
             type="submit"
             onClick={handleSubmit}
             disabled={!submitEnabled}

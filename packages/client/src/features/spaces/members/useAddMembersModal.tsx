@@ -7,7 +7,6 @@ import { toast } from 'react-toastify'
 import * as Yup from 'yup'
 import { InputText } from '../../../components/InputText'
 import { FieldGroup, Hint, InputError } from '../../../components/form/styles'
-import { ModalHeaderTop, ModalNext } from '../../modal/ModalNext'
 import { ButtonRow } from '../../modal/styles'
 import { useModal } from '../../modal/useModal'
 import { addMembersToSpaceRequest } from './members.api'
@@ -15,6 +14,7 @@ import { MemberRole } from './members.types'
 import { StyledFields, StyledFooter } from './members.styles'
 import { Select } from '../../../components/Select'
 import { Button } from '../../../components/Button'
+import { ModalNext, ModalHeaderTop } from '../../modal/ModalNext'
 
 interface FormValues {
   invitees_role: { label: string; value: MemberRole }
@@ -81,6 +81,7 @@ export const useAddMembersModal = ({ spaceId }: { spaceId: string }) => {
       data-testid="modal-add-members"
       isShown={isShown}
       hide={() => setShowModal(false)}
+      variant="medium"
     >
       <form onSubmit={handleSubmit(onSubmit)}>
         <ModalHeaderTop
@@ -153,7 +154,7 @@ export const useAddMembersModal = ({ spaceId }: { spaceId: string }) => {
               Cancel
             </Button>
             <Button
-              variant="primary"
+              data-variant="primary"
               type="submit"
               disabled={Object.keys(errors).length > 0 || mutation.isPending}
               aria-label="Submit add members"

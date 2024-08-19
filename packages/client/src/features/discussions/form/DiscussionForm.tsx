@@ -30,7 +30,7 @@ export const StyledForm = styled.form`
   flex-direction: column;
   flex: 1;
   gap: 16px;
-  margin-bottom: 128px;
+  margin-bottom: 16px;
 `
 
 const validationSchema = Yup.object().shape({
@@ -124,7 +124,7 @@ export const DiscussionForm = ({
           </StyledAttachments>
         )}
         <ButtonRow>
-          <CheckboxLabel data-tip data-for="notify-checkbox">
+          <CheckboxLabel>
             <Checkbox
               {...register('notifyAll')}
               disabled={isSubmitting}
@@ -134,12 +134,12 @@ export const DiscussionForm = ({
           </CheckboxLabel>
           <Attachments scope={scope} attachments={attachments} setValue={setValue} />
           {onDelete && (
-            <Button variant="warning" type="button" onClick={deleteDiscussion}>
+            <Button data-variant="warning" type="button" onClick={deleteDiscussion}>
               Delete
             </Button>
           )}
           <Button
-            variant="primary"
+            data-variant="primary"
             type="button"
             form="discussionForm"
             disabled={isSubmitting || !isValid}

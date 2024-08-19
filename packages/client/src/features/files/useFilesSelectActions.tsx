@@ -26,30 +26,31 @@ import { useOrganizeFileModal } from './actionModals/useOrganizeFileModal'
 import { moveFilesRequest } from './files.api'
 import { IFile } from './files.types'
 
-export enum FileActions {
-  'Track' = 'Track',
-  'Open' = 'Open',
-  'Download' = 'Download',
-  'Edit file info' = 'Edit file info',
-  'Edit folder info' = 'Edit folder info',
-  'Make file public' = 'Make file public',
-  // 'Make folder public' = 'Make folder public',
-  'Feature' = 'Feature',
-  'Unfeature' = 'Unfeature',
-  'Delete' = 'Delete',
-  'Organize' = 'Organize',
-  'Copy to...' = 'Copy to...',
-  'Attach to...' = 'Attach to...',
-  'Attach License' = 'Attach License',
-  'Detach License' = 'Detach License',
-  'Request license approval' = 'Request license approval',
-  'Accept License' = 'Accept License',
-  'Edit tags' = 'Edit tags',
-  'Edit properties' = 'Edit properties',
-  'Lock' = 'Lock',
-  'Unlock' = 'Unlock',
-  'Comments' = 'Comments',
-}
+export type FileActions =
+  'Track' |
+  'Open' |
+  'Download' |
+  'Edit file info' |
+  'Edit folder info' |
+  'Make file public' |
+  'Make folder public' |
+  'Feature' |
+  'Unfeature' |
+  'Delete' |
+  'Organize' |
+  'Copy to...' |
+  'Attach to...' |
+  'Attach License' |
+  'Detach License' |
+  'Request license approval' |
+  'Accept License' |
+  'Edit tags' |
+  'Edit properties' |
+  'Lock' |
+  'Unlock' |
+  'Rename' |
+  'Comments'
+
 
 const getFileScope = (scope: HomeScope | undefined, space: ISpace | undefined): ServerScope => {
   if (scope) {
@@ -66,9 +67,6 @@ const getFileScope = (scope: HomeScope | undefined, space: ISpace | undefined): 
   }
   return `space-${space?.id}`
 }
-
-const isInSpace = (homeScope?: HomeScope) =>
-  !(homeScope && (homeScope === 'me' || homeScope === 'everybody' || homeScope === 'featured'))
 
 export const useFilesSelectActions = ({
   homeScope,
@@ -352,15 +350,6 @@ export const useFilesSelectActions = ({
       shouldHide:
         isFolder || selected.length !== 1 || homeScope !== 'me' || selected[0].links?.publish === undefined || openSelected,
     },
-    // 'Make folder public': {
-    //   func: () => {},
-    //   link: {
-    //     method: 'POST',
-    //     url: `${selected[0]?.links?.publish}&scope=public`,
-    //   },
-    //   isDisabled: selected.length !== 1 || selected[0].location === 'Public' ,
-    //   hide: !isFolder || selected.length !== 1
-    // },
     Feature: {
       type: 'modal',
       func: () => {

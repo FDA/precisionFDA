@@ -27,7 +27,7 @@ export const useOpenFileModal = (selectedFiles: IFile[]) => {
   }
 
   const momoSelected = useMemo(() => selectedFiles, [isShown])
-  const modalComp = isShown && (
+  const modalComp = (
     <ModalNext
       id="modal-files-organize"
       data-testid="modal-files-organize"

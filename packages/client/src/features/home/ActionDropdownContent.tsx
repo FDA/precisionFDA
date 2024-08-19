@@ -19,17 +19,20 @@ export const StyledActionItem = styled.li<{ disabled?: boolean, selected?: boole
     color: var(--c-text-700);
     display: inline-block;
     width: 100%;
+    &:hover {
+      color: var(--c-text-700);
+    }
   }
 
   ${({ disabled }) =>
     disabled &&
     css`
-      color: var(--c-text-500);
+      color: var(--c-dropdown-menu-text-disabled);
       cursor: not-allowed;
       a {
         cursor: not-allowed;
         /* pointer-events: none; */
-        color: var(--c-text-500);
+        color: var(--c-dropdown-menu-text-disabled);
       }
     `}
   ${({ selected }) => selected && css`
@@ -73,8 +76,6 @@ const GroupHorizontalSeparator = styled.hr`
 export const ActionMenu = styled.ul`
   margin: 0;
   padding: 4px 0px;
-  border: 1px solid rgba(0, 0, 0, 0.15);
-  border-radius: 3px;
   width: max-content;
   max-height: 500px;
   overflow-y: auto;

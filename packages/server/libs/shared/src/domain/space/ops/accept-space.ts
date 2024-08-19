@@ -2,17 +2,18 @@ import { EntityManager } from '@mikro-orm/mysql'
 import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
 import { Space } from '@shared/domain/space/space.entity'
 import { InvalidStateError } from '@shared/errors'
-import { PlatformClient } from '../../../platform-client'
+import { PlatformClient } from '@shared/platform-client'
 import { BaseOperation } from '@shared/utils/base-operation'
-import { UserOpsCtx } from '../../../types'
+import { UserOpsCtx } from '@shared/types'
 import { SPACE_MEMBERSHIP_ROLE, SPACE_MEMBERSHIP_SIDE } from '../../space-membership/space-membership.enum'
 import { SPACE_TYPE } from '../space.enum'
 import { spaceActionPolicy } from '../space.action-policy'
 import { getOppositeOrgDxid, getOrgDxid, getProjectDxid, isAcceptedBy, setOrgDxid, setProjectDxid } from '../space.helper'
 import { NotificationService } from '../../notification/services/notification.service'
-import { NOTIFICATION_ACTION, SEVERITY } from '../../../enums'
+import { NOTIFICATION_ACTION, SEVERITY } from '@shared/enums'
 
 type SpaceAcceptInput = { spaceId: number }
+
 
 export class SpaceAcceptOperation extends BaseOperation<
 UserOpsCtx,
@@ -133,12 +134,14 @@ void
     }
     await this.handleSpaceAccept(space, admin)
     // accept as regular space + some extra logic for review space type
-    // @ts-ignore
+
+    const newMeta = { ...space.meta, restricted_discussions: false }
+
     const newSpace = this.em.create(Space, {
       name: space.name,
       description: space.description,
       type: space.type,
-      meta: space.meta,
+      meta: newMeta,
       state: space.state,
       spaceId: space.id,
       protected: space.protected,

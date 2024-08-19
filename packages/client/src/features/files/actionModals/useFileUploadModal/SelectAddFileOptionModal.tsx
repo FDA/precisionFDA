@@ -13,8 +13,8 @@ export const SelectAddFileOptionModal = ({ cb }: any) => {
       hide={() => setShowModal(false)}
     >
       <div>
-        <Button variant="primary" onClick={() => cb('copy')}>Copy</Button>
-        <Button variant="primary" onClick={() => cb('upload')}>Add</Button>
+        <Button data-variant="primary" onClick={() => cb('copy')}>Copy</Button>
+        <Button data-variant="primary" onClick={() => cb('upload')}>Add</Button>
       </div>
     </Modal>
   )

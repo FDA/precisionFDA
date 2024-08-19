@@ -1,7 +1,7 @@
 import { useQueryClient } from '@tanstack/react-query'
 import React from 'react'
 import { Column } from 'react-table'
-import ReactTooltip from 'react-tooltip'
+import { Tooltip } from 'react-tooltip'
 import styled from 'styled-components'
 import { FeaturedToggle } from '../../components/FeaturedToggle'
 import { DefaultColumnFilter, NumberRangeColumnFilter, SelectColumnFilter } from '../../components/Table/filters'
@@ -61,8 +61,8 @@ export const useFilesColumns = ({
               {node.type === 'UserFile' || node.type === 'File' || node.type === 'Asset' ? (
                 <>
                   <StyledNameCell
-                    data-tip
-                    data-for={`fileNameTooltip${node.uid}`}
+                    data-tooltip-id={`fileNameTooltip${node.uid}`}
+                    data-tooltip-content={`File is in ${node.state} state.`}
                     color={
                       // TODO: Use css className or data attr
                       isIncompleteFile(node.state) ? 'var(--tertiary-600)' : 'var(--c-link)'
@@ -75,9 +75,7 @@ export const useFilesColumns = ({
                     {value}
                   </StyledNameCell>
                   {isIncompleteFile(node.state) && (
-                    <ReactTooltip id={`fileNameTooltip${node.uid}`} place="top" effect="solid">
-                      File is in {node.state} state.
-                    </ReactTooltip>
+                    <Tooltip id={`fileNameTooltip${node.uid}`} style={{ zIndex: 2 }} />
                   )}
                 </>
               ) : (
@@ -185,8 +183,8 @@ export const useFilesColumns = ({
       accessor: 'file_size',
       Filter: NumberRangeColumnFilter,
       width: colWidths?.file_size || 160,
-      filterPlaceholderFrom: 'min(kb)',
-      filterPlaceholderTo: 'max(kb)',
+      filterPlaceholderFrom: 'Min(KB)',
+      filterPlaceholderTo: 'Max(KB)',
     },
     {
       Header: 'Created',

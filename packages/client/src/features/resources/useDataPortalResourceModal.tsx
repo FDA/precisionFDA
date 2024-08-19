@@ -241,11 +241,11 @@ export const DataPortalResources = ({
           <>
             <ResourcePreview onCopy={handleCopy} resource={getSelected()} />
             <PreviewBottom>
-              <Button variant="warning" onClick={() => handleRemove(selected)} disabled={isDeletingSelected}>
+              <Button data-variant="warning" onClick={() => handleRemove(selected)} disabled={isDeletingSelected}>
                 Delete
               </Button>
               {onInsert && (
-                <Button variant="success" onClick={() => handleInsert()}>
+                <Button data-variant="success" onClick={() => handleInsert()}>
                   Insert {onlyImg ? 'Image' : 'File'}
                 </Button>
               )}
@@ -262,7 +262,7 @@ export const DataPortalResources = ({
 export const useDataPortalResourceModal = () => {
   const { isShown, setShowModal } = useModal()
 
-  const modalComp = isShown && (
+  const modalComp = (
     <ModalNext
       id="modal-files-add-folder"
       data-testid="modal-files-add-folder"

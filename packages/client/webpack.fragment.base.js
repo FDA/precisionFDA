@@ -21,6 +21,7 @@ module.exports = ({ urlLoaderOptions }) => ({
   plugins: [
     new MiniCssExtractPlugin({
       filename: 'bundle.css',
+      ignoreOrder: true,
     }),
     new webpack.DefinePlugin({
       RECAPTCHA_SITE_KEY: JSON.stringify(captchaKey),

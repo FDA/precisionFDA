@@ -109,18 +109,18 @@ export const ExecutionActionsRow = ({
         </StyledRefresh>
       )}
       {isJobOwner && execution.links.open_external && (
-        <Button variant="primary" onClick={onOpenWorkstationClick}>
+        <Button data-variant="primary" onClick={onOpenWorkstationClick}>
           Open Workstation
         </Button>
       )}
       {isJobOwner && hasWorkstationAPI && execution.links.open_external && (
-        <Button variant="primary" onClick={() => actions['Snapshot'].func()}>
+        <Button data-variant="primary" onClick={() => actions['Snapshot'].func()}>
           Snapshot
         </Button>
       )}
       {execution.app_active && (
         <Link to={getRerunExecutionLink()}>
-          <Button disabled={rerunDisabled} variant="primary">Re-Run Execution</Button>
+          <Button disabled={rerunDisabled} data-variant="primary">Re-Run Execution</Button>
         </Link>
       )}
       <Dropdown

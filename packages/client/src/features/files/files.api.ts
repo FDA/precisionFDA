@@ -110,14 +110,6 @@ export async function editFolderRequest({ name, folderId }: { name: string; fold
   return res
 }
 
-export async function uploadFilesRequest(blobs: any[]) {
-  const res = await fetch('/api/folders/', {
-    ...getApiRequestOpts('POST'),
-    body: JSON.stringify({ name }),
-  }).then(checkStatus)
-  return res.json()
-}
-
 export interface FetchFolderChildrenResponse {
   nodes: IFile[] | IFolder[]
 }
@@ -153,31 +145,6 @@ export async function createFile(name: string, scope: string, folder_id: string 
     body: JSON.stringify({ name, scope, folder_id }),
   }).then(checkStatus)
 
-  return res.json()
-}
-
-export async function getUploadURL(id: string, index: number, size: number, md5: string) {
-  const res = await fetch('/api/get_upload_url', {
-    ...getApiRequestOpts('POST'),
-    body: JSON.stringify({ id, index, size, md5 }),
-  }).then(checkStatus)
-
-  return res.json()
-}
-
-export async function uploadChunk(url: string, chunk: ArrayBuffer, headers: any) {
-  return fetch(url, {
-    method: 'PUT',
-    body: chunk,
-    headers,
-  })
-}
-
-export async function closeFile(uid: string) {
-  const res = await fetch('/api/close_file', {
-    ...getApiRequestOpts('POST'),
-    body: JSON.stringify({ uid }),
-  }).then(checkStatus)
   return res.json()
 }
 

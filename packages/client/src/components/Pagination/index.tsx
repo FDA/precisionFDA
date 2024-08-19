@@ -152,7 +152,7 @@ export const Pagination = ({
         </PerPage>
       )}
       <Button
-        variant='primary'
+        data-variant='primary'
         data-testid="pagination-previous-page-button"
         type="button"
         onClick={() => handleSetPage(Math.max(localPage - 1, 1))}
@@ -161,7 +161,7 @@ export const Pagination = ({
         Previous Page
       </Button>{' '}
       <Button
-        variant='primary'
+        data-variant='primary'
         data-testid="pagination-next-page-button"
         type="button"
         onClick={() => handleSetPage(localPage + 1)}
@@ -187,7 +187,7 @@ export const Pagination = ({
             min={1}
           />
           <Button
-            variant='primary'
+            data-variant='primary'
             data-testid="pagination-submit-jumpto-button"
             type="submit"
             disabled={localTotal <= 1}

@@ -70,6 +70,7 @@ export interface CreateSpacePayload {
   cts?: string | null
   protected: boolean | null
   restrictedReviewer?: boolean | null
+  restrictedDiscussions?: boolean | null
 }
 
 export interface CreateSpaceResponse {

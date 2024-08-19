@@ -1,11 +1,11 @@
 import { wrap } from '@mikro-orm/core'
-import * as client from '../../../platform-client'
-import * as errors from '../../../errors'
+import { DxId } from '@shared/domain/entity/domain/dxid'
 import { BaseOperation } from '@shared/utils/base-operation'
+import * as client from '../../../platform-client'
+import { UserOpsCtx } from '../../../types'
 import { Job } from '../job.entity'
 import type { DescribeJobInput } from '../job.input'
 import { getJobAccessibleByContext } from '../job.permissions'
-import { UserOpsCtx } from '../../../types'
 
 export class DescribeJobOperation extends BaseOperation<UserOpsCtx, DescribeJobInput, Job> {
   async run(input: DescribeJobInput): Promise<Job> {
@@ -15,7 +15,7 @@ export class DescribeJobOperation extends BaseOperation<UserOpsCtx, DescribeJobI
       this.ctx.log,
     )
 
-    const job = await getJobAccessibleByContext(input.dxid, this.ctx)
+    const job = await getJobAccessibleByContext(input.dxid as DxId<'job'>, this.ctx)
     await em.populate(job, ['app', 'user'])
     // TODO: only populate necessary fields:
     // await em.populate(job, [

@@ -33,6 +33,7 @@ interface SpaceCreateForm {
   cts: string | null
   protected: boolean | null
   restricted_reviewer: boolean | null
+  restricted_discussions: boolean | null
 }
 
 export interface ISpaceForm {
@@ -76,6 +77,7 @@ export const SpaceForm = ({
       cts: null,
       protected: false,
       restricted_reviewer: null,
+      restricted_discussions: null,
       ...defaultValues,
     },
   })
@@ -97,6 +99,7 @@ export const SpaceForm = ({
     }
   }, [watch().space_type])
 
+  //TODO(Jiri) - simplify this once all space types are migrated to node
   const onSubmit = () => {
     const vals = getValues()
     if (vals.space_type === 'private_type') {
@@ -110,6 +113,7 @@ export const SpaceForm = ({
       vals.host_lead_dxuser = vals.review_lead_dxuser
       vals.review_lead_dxuser = ''
       vals.guest_lead_dxuser = ''
+      vals.restricted_discussions = vals.restricted_discussions ?? false
     }
     // TODO: weird naming in the form label but the backend expects host_lead to be the review_lead
     if (vals.space_type === 'administrator') {
@@ -131,6 +135,7 @@ export const SpaceForm = ({
       cts: vals.cts,
       protected: vals.protected,
       restrictedReviewer: vals.restricted_reviewer,
+      restrictedDiscussions: vals.restricted_discussions,
     }
 
     mutation.mutateAsync(createSpaceRequest)
@@ -142,6 +147,10 @@ export const SpaceForm = ({
 
   const handleRestrictedReviewer = (event: React.ChangeEvent<HTMLInputElement>) => {
     setValue('restricted_reviewer', event.target.checked)
+  }
+
+  const handleRestrictedDiscussions = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setValue('restricted_discussions', event.target.checked)
   }
 
   const isSubmitting = mutation.isPending
@@ -159,6 +168,9 @@ export const SpaceForm = ({
     }
     if (getValues().restricted_reviewer) {
       restrictions.push("FDA-associated restricted")
+    }
+    if (getValues().restricted_discussions) {
+      restrictions.push("Shared Area discussions restricted")
     }
 
     return "The space you are about to create will be " + restrictions.join(" and ")
@@ -310,7 +322,7 @@ export const SpaceForm = ({
               Space Protection
             </FieldLabelRow>
             <HintText>
-              <p>When enabled the space will be subject to the following restrictions:</p>
+              <p>When checked, the space will be subject to the following restrictions:</p>
               <ul>
                 <li>Data in this space cannot be copied to My Home or Private Spaces, nor downloaded, except by a lead of the space.</li>
                 <li>Data in this space can only be copied to Spaces that also have protection enabled, and the copying user must be a lead member of both the source and destination spaces.</li>
@@ -321,6 +333,7 @@ export const SpaceForm = ({
       )}
 
       {watch().space_type === 'review' && (
+        <>
           <FieldGroup>
             <FieldLabelRow>
               <Checkbox
@@ -335,14 +348,29 @@ export const SpaceForm = ({
               When checked, only users who have a @fda.hhs.gov or @fda.gov email associated with their account can be added.
             </HintText>
           </FieldGroup>
+          <FieldGroup>
+            <FieldLabelRow>
+              <Checkbox
+                {...register('restricted_discussions')}
+                disabled={isSubmitting}
+                onChange={handleRestrictedDiscussions}
+                checked={watch().restricted_discussions || undefined}
+              />
+              Disable Shared Area Discussions
+            </FieldLabelRow>
+            <HintText>
+              When checked, discussions in the Shared Area of the Space are disabled.
+            </HintText>
+          </FieldGroup>
+          </>
       )}
 
       <Row>
         <Button
-          variant='primary'
+          data-variant='primary'
           disabled={Object.keys(errors).length > 0 || isSubmitting}
           type="button"
-          onClick={getValues().protected || getValues().restricted_reviewer ? openConfirmation: handleSubmit(onSubmit)}
+          onClick={getValues().protected || getValues().restricted_reviewer || getValues().restricted_discussions ? openConfirmation: handleSubmit(onSubmit)}
         >
           Create Space
         </Button>

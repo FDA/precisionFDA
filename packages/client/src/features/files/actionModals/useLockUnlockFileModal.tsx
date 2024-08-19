@@ -142,7 +142,7 @@ export const useLockUnlockFileModal = ({
     return downloadStatus !== 'success' || mutation.status !== 'idle' || !data?.length
   }
 
-  const modalComp = isShown && (
+  const modalComp = (
     <ModalNext
       id="modal-files-lock-unlock"
       data-testid="modal-files-lock-unlock"
@@ -162,7 +162,7 @@ export const useLockUnlockFileModal = ({
         <Button onClick={() => setShowModal(false)} disabled={mutation.isPending}>
           Cancel
         </Button>
-        <Button variant="primary" onClick={handleSubmit} disabled={isSubmitDisabled()}>
+        <Button data-variant="primary" onClick={handleSubmit} disabled={isSubmitDisabled()}>
           {ActionTypeName[type]}
         </Button>
       </Footer>

@@ -81,7 +81,7 @@ export const ResourceForm = ({
       </ModalScroll>
       <Footer>
         {isLoading && <Loader />}
-        <Button variant="primary" disabled={selectedFiles.length === 0 || isLoading} type="submit">
+        <Button data-variant="primary" disabled={selectedFiles.length === 0 || isLoading} type="submit">
           Upload
         </Button>
       </Footer>
@@ -95,7 +95,7 @@ export const CreateResource = ({ pid, onSuccess }: { pid: string; onSuccess: () 
   return (
     <div>
       <Button
-        variant="primary"
+        data-variant="primary"
         type="button"
         onClick={() => {
           setShowModal(true)
@@ -103,7 +103,7 @@ export const CreateResource = ({ pid, onSuccess }: { pid: string; onSuccess: () 
       >
         Upload Resources
       </Button>
-      {isShown && (
+    
         <ModalNext
           id="add-resource-to-space"
           data-testid="modal-add-resource"
@@ -113,7 +113,7 @@ export const CreateResource = ({ pid, onSuccess }: { pid: string; onSuccess: () 
         >
           <ResourceForm pid={pid} setShowModal={setShowModal} onSuccess={() => onSuccess()} />
         </ModalNext>
-      )}
+      
     </div>
   )
 }

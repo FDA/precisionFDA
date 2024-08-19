@@ -84,7 +84,7 @@ export function EditDiscussionTitle({
         Cancel
       </Button>
       <Button
-        variant="primary"
+        data-variant="primary"
         type="button"
         onClick={() =>
           inputRef.current?.value &&

@@ -9,6 +9,7 @@ class CopyService
     end
 
     def copy(workflow, scope)
+      # TODO: When moving this to Node consider creating a new workflow instead of cloning it
       new_workflow = workflow.dup
       new_workflow.scope = scope
       destination_project = Workflow.publication_project(user, scope)
@@ -48,8 +49,22 @@ class CopyService
         )
 
         new_workflow.update!(workflow_series_id: workflow_series.id)
-      end
+        workflow_from_api = api.workflow_describe(new_workflow.dxid)
 
+        workflow_from_api["stages"].each_with_index do |stage, index|
+          app_dxid = new_workflow["spec"]["input_spec"]["stages"][index]["app_dxid"]
+          app = api.app_describe(app_dxid)
+          executable = "app-#{app['name']}/#{app['version']}"
+
+          update_payload = {
+            "editVersion" => workflow_from_api["editVersion"],
+            "stage" => stage["id"],
+            "executable" => executable,
+          }
+
+          api.workflow_update_executable(new_workflow.dxid, update_payload)
+        end
+      end
       new_workflow
     end
 

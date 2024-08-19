@@ -91,8 +91,9 @@ export function useAttachLicensesModal<
       mutation.mutateAsync({ dxid: selectedId, licenseId: selectedLicenseId })
   }
 
-  const modalComp = isShown && (
+  const modalComp = (
     <ModalNext
+      id="modal-licenses-attach"
       data-testid="modal-licenses-attach"
       headerText="Select a license"
       isShown={isShown}
@@ -143,7 +144,7 @@ export function useAttachLicensesModal<
         <ButtonRow>
           <Button onClick={handleClose}>Cancel</Button>
           <Button
-            variant="primary"
+            data-variant="primary"
             onClick={() => handleSubmit(selectedLicense)}
             disabled={
               !selectedLicense || selectedLicense === selected?.file_license?.id

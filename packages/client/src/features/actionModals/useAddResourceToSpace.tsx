@@ -74,7 +74,7 @@ const ResourceTable = ({
 
   return (
     <Table<IApp>
-      fillWidth
+      displayColFiller={false}
       name="apps"
       columns={columns as any}
       data={d as any}
@@ -117,7 +117,7 @@ export function useAddResourceToModal({
     }
   }
 
-  const modalComp = isShown && (
+  const modalComp = (
     <ModalNext
       id="add-resource-to-space"
       data-testid={`modal-${resource}-add-resource`}
@@ -142,7 +142,7 @@ export function useAddResourceToModal({
             Cancel
           </Button>
           <Button
-            variant="primary"
+            data-variant="primary"
             type="submit"
             onClick={handleSubmit}
             disabled={!selectedUids.length || mutation?.isPending}

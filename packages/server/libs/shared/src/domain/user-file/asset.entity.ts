@@ -27,7 +27,7 @@ import { FILE_STATE, FILE_STI_TYPE, IFileOrAsset, ITrackable } from './user-file
 @Entity({ tableName: 'nodes', repository: () => AssetRepository })
 class Asset extends Node implements IFileOrAsset, ITrackable {
   @Property()
-  dxid: DxId
+  dxid: DxId<'file'>
 
   @Property()
   project: string

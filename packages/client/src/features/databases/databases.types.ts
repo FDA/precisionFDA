@@ -1,5 +1,5 @@
 import { RESOURCE_LABELS } from '../../types/user'
-import { ServerScope } from "../home/types";
+import { ServerScope } from '../home/types'
 
 export interface Links {
   user: string;

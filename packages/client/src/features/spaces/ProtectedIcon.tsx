@@ -1,6 +1,6 @@
 /* eslint-disable react/jsx-no-useless-fragment */
 import React from 'react'
-import ReactTooltip from 'react-tooltip'
+import { Tooltip } from 'react-tooltip'
 import { LockIcon } from '../../components/icons/LockIcon'
 
 
@@ -15,7 +15,7 @@ export const ProtectedIcon = ({
 }) => {
   const Icon = <LockIcon color={color} />
   if (showToolTip) {
-      return <><span data-tip="Protected" data-for="protected">{Icon}</span><ReactTooltip id="protected" effect="solid" /></>
+      return <><span data-tooltip-content="Protected" data-tooltip-id="protected">{Icon}</span><Tooltip id="protected" /></>
   }
   return isShown ? Icon : <></>
 }

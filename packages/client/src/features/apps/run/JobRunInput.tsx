@@ -368,7 +368,7 @@ export const JobRunInput = ({
           <BoolButtonGroup>
             <BoolButton
               type="button"
-              active={val === 'true'}
+              data-selected={(val === 'true').toString() as BooleanString}
               onClick={() => {
                 field.onChange(val === 'true' ? null : 'true')
                 field.onBlur()
@@ -379,7 +379,7 @@ export const JobRunInput = ({
 
             <BoolButton
               type="button"
-              active={val === 'false'}
+              data-selected={(val === 'false').toString() as BooleanString}
               onClick={() => {
                 field.onChange(val === 'false' ? null : 'false')
                 field.onBlur()

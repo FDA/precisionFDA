@@ -1,12 +1,12 @@
 import styled from 'styled-components'
 import { StyledBreadcrumbs } from '../../../../components/Breadcrumb'
 import { Button } from '../../../../components/Button'
+import { compactScrollBarV2 } from '../../../../components/Page/styles'
 import { StyledName } from '../../../../components/ResourceTable'
 import { Svg } from '../../../../components/icons/Svg'
 import { StyledCell, StyledFileDetail, StyledRow } from '../../../actionModals/styles'
 import { Help } from '../../../apps/form/styles'
-import { ModalPageCol, ModalPageRow, ScrollPlace } from '../../../modal/styles'
-import { SearchBarWrapper } from '../../../resources/styles'
+import { ModalPageRow } from '../../../modal/styles'
 
 export const ShorternName = styled.span`
   white-space: nowrap;
@@ -28,33 +28,54 @@ export const CopyModalPageRow = styled(ModalPageRow)`
   }
 `
 
-export const CopyModalPageCol = styled(ModalPageCol)`
-  padding: 8px;
-  box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  gap: 8px;
+export const CopyModalPageCol = styled.div`
+  flex-grow: 1;
+  flex-shrink: 0;
+  align-self: stretch;
+  min-width: 350px;
+  width: 40vw;
+
+  border-right: 1px solid var(--c-layout-border-200);
+  &:last-child {
+    border: 0;
+  }
 `
 
-export const CopyModalScrollPlace = styled(ScrollPlace)`
-  max-height: 100%;
+export const Sticky = styled.div`
+  position: sticky;
+  top: 0;
+  background-color: var(--background);
+`
+
+export const CopyModalScrollPlace = styled.div`
+  ${compactScrollBarV2}
+  overflow-y: auto;
+  height: inherit;
+  max-height: 60vh;
+`
+export const StyledStickyTop = styled.div`
+  position: sticky;
+  top: 0;
+  background-color: var(--background);
+  padding: 12px;
+  padding-bottom: 8px;
 `
 
 export const SelectedList = styled.ul`
   list-style-type: none;
-  padding-left: 0;
-  margin-top: 12px;
   display: flex;
   flex-direction: column;
   gap: 8px;
   width: 100%;
+  padding: 0 12px;
+  box-sizing: border-box;
+  padding-bottom: 16px;
 `
 
 export const FileListItem = styled.li<{ $isCopied?: boolean }>`
   padding: 12px;
   border-radius: 4px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--c-layout-border-200);
   background-color: ${({ $isCopied }) => ($isCopied ? 'var(--highlight-100)' : 'transparent')};
 `
 
@@ -68,11 +89,11 @@ export const NodeHeading = styled.a`
 
 export const FolderHeading = styled(NodeHeading)`
   padding: 12px;
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid var(--c-layout-border-200);
 `
 
 export const FolderItem = styled(FileListItem)<{ $isCopied?: boolean }>`
-  border: 1px solid #ddd;
+  border: 1px solid var(--c-layout-border-200);
   padding: 0;
   background-color: ${({ $isCopied }) => ($isCopied ? 'var(--highlight-100)' : 'transparent')};
 `
@@ -83,7 +104,7 @@ export const FolderChildrenList = styled.ul`
 `
 
 export const FolderChildrenListItem = styled.li<{ $isCopied?: boolean }>`
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid var(--c-layout-border-200);
   padding: 12px;
   background-color: ${({ $isCopied }) => ($isCopied ? 'var(--highlight-100)' : 'transparent')};
   &:last-child {
@@ -118,11 +139,9 @@ export const FileDetailItem = styled.a`
 `
 
 export const ModalStyledBreadcrumbs = styled(StyledBreadcrumbs)`
-  padding: 12px;
   height: fit-content;
   display: flex;
   align-items: center;
-  border-bottom: 1px solid #ddd;
 `
 
 export const StyledBreadcrumb = styled.div`
@@ -134,10 +153,9 @@ export const StyledBreadcrumbButton = styled(Button)`
   padding: 0;
 `
 
-export const ModalSearchBarWrapper = styled(SearchBarWrapper)`
+export const ModalSearchBarWrapper = styled.div`
   justify-content: flex-end;
-  margin-top: 8px;
-  margin-right: 8px;
+  display: flex;
 `
 
 export const ModalStyledRow = styled(StyledRow)`
@@ -149,7 +167,6 @@ export const ModalStyledRow = styled(StyledRow)`
 `
 
 export const ModalStyledCell = styled(StyledCell)`
-  max-width: 460px; // 500 - 2 - 16 - 20 and rounded down
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -157,7 +174,6 @@ export const ModalStyledCell = styled(StyledCell)`
 `
 
 export const ModalStyledSpaceCell = styled(ModalStyledCell)`
-  max-width: 350px;
 `
 
 export const SpaceStyledName = styled(StyledName)`

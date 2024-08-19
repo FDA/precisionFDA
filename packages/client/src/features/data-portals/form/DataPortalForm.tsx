@@ -324,7 +324,7 @@ export const DataPortalForm = ({
             />
           </Row>
           <Row>
-            <Button variant="primary" disabled={Object.keys(submitErrors).length > 0 || isSubmitting || isSaving} type="submit">
+            <Button data-variant="primary" disabled={Object.keys(submitErrors).length > 0 || isSubmitting || isSaving} type="submit">
               Submit
             </Button>
             {isSubmitting && <Loader />}
