@@ -52,7 +52,7 @@ export function useDeleteSpaceReportModal({
     mutation.mutateAsync(momoSelected.map(s => s.id))
   }
 
-  const modalComp = isShown && (
+  const modalComp = (
     <ModalNext
       id="space-report-delete-modal"
       isShown={isShown}
@@ -85,7 +85,7 @@ export function useDeleteSpaceReportModal({
         <ButtonRow>
           {mutation.isPending && <Loader />}
           <Button onClick={() => close()}>Cancel</Button>
-          <Button variant="warning" onClick={handleSubmit} disabled={mutation.isPending}>
+          <Button data-variant="warning" onClick={handleSubmit} disabled={mutation.isPending}>
             Delete
           </Button>
         </ButtonRow>

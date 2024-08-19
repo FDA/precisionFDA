@@ -134,8 +134,9 @@ module SpaceService
         ),
         sponsor_org_id: space_form.space_sponsor&.org_id,
         space_type: space_form.space_type,
-        cts: space_form.cts,
-        restricted_reviewer: space_form.restricted_reviewer,
+        cts: space_form.cts, # only for review spaces
+        restricted_discussions: space_form.restricted_discussions, # only for review spaces
+        restricted_reviewer: space_form.restricted_reviewer, # only for review spaces
         restrict_to_template: space_form.restrict_to_template,
         protected: space_form.protected,
       )
@@ -248,6 +249,7 @@ module SpaceService
         restrict_to_template: space_form.restrict_to_template,
         protected: space_form.protected,
         restricted_reviewer: space_form.restricted_reviewer,
+        restricted_discussions: false, # allow discussions in review space private area
       )
 
       project_dxid = api.project_new(

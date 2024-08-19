@@ -122,7 +122,7 @@ const ChallengesList = () => {
             {userCanCreateChallenge && (
               <RightSideItem>
                 <ButtonRow>
-                  <Button variant="primary" as={Link} to="/challenges/create" data-turbolinks="false">
+                  <Button data-variant="primary" as={Link} to="/challenges/create" data-turbolinks="false">
                     Create a new challenge
                   </Button>
                 </ButtonRow>

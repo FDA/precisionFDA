@@ -165,7 +165,7 @@ export const useSelectAssetModal = (
 
   const assets = assetsData ?? []
 
-  const modalComp = isShown && (
+  const modalComp = (
     <ModalNext
       id="select-asset-modal"
       headerText={title}
@@ -252,7 +252,7 @@ export const useSelectAssetModal = (
             Cancel
           </Button>
           <Button
-            variant="primary"
+            data-variant="primary"
             onClick={handleSubmit}
             disabled={selectedAssets?.length === 0}
           >

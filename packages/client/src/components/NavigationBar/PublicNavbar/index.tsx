@@ -260,9 +260,9 @@ const PublicNavbar = ({ shouldShowLogo = false }: Props) => {
       </PublicNavbarCenterButtons>
       <PublicNavbarRightButtons $isSticky={sticky}>
         <AccessButton onClick={onRequestAccess}>Request Access</AccessButton>
-        <Button variant="primary" onClick={onLogIn}>Log In</Button>
+        <Button data-variant="primary" onClick={onLogIn}>Log In</Button>
         {data?.ssoButton.isEnabled && (
-          <Button variant="primary" onClick={() => onLogInWithSSO(data.ssoButton.data.fdaSsoUrl)}>
+          <Button data-variant="primary" onClick={() => onLogInWithSSO(data.ssoButton.data.fdaSsoUrl)}>
             Log In with SSO
           </Button>
         )}

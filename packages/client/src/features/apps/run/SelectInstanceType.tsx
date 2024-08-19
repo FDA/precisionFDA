@@ -4,7 +4,7 @@ import { Select } from '../../../components/Select'
 import { ErrorMessageForField } from './ErrorMessageForField'
 import { FieldGroup } from '../../../components/form/FieldGroup'
 import { ComputeInstance, PricingMap, RunJobFormType } from '../apps.types'
-import { StyledMaxRuntime } from './styles'
+import { StyledInstanceType, StyledMaxRuntime } from './styles'
 
 export const SelectInstanceType = ({
   control,
@@ -37,7 +37,7 @@ export const SelectInstanceType = ({
       hoursRuntime++
       remainingMinutes = 0
     }
-    maxRuntime = `Maximum estimated runtime: ${Math.floor(hoursRuntime)}h${remainingMinutes ? ` ${remainingMinutes}m` : ''}`
+    maxRuntime = `Max estimated runtime: ${Math.floor(hoursRuntime)}h${remainingMinutes ? ` ${remainingMinutes}m` : ''}`
   }
 
   return (

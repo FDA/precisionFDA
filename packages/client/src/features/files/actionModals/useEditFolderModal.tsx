@@ -73,7 +73,7 @@ const EditFolderInfoForm = ({
       </FieldGroup>
       <ButtonRow>
         <Button type="button" onClick={handleClose} disabled={isSubmitting}>Cancel</Button>
-        <Button variant="primary" type="submit" disabled={isSubmitting}>Edit</Button>
+        <Button data-variant="primary" type="submit" disabled={isSubmitting}>Edit</Button>
       </ButtonRow>
     </StyledForm>
   )
@@ -84,7 +84,7 @@ export const useEditFolderModal = (selectedItem: IFile) => {
   const selected = useMemo(() => selectedItem, [isShown])
   const handleClose = () => setShowModal(false)
 
-  const modalComp = isShown && (
+  const modalComp = (
     <Modal
       id="modal-folder-edit"
       data-testid="modal-folder-edit"

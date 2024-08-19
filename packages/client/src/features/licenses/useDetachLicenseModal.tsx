@@ -44,7 +44,7 @@ export function useDetachLicenseModal<
     }
   }
 
-  const modalComp = isShown && (
+  const modalComp = (
     <Modal
       data-testid="modal-detach-license-confirmation"
       headerText="Detach License"
@@ -53,7 +53,7 @@ export function useDetachLicenseModal<
       footer={
         <>
           <Button onClick={handleClose}>Cancel</Button>
-          <Button variant="primary" type="button" onClick={onSubmit}>Detach</Button>
+          <Button data-variant="primary" type="button" onClick={onSubmit}>Detach</Button>
         </>
       }
     >

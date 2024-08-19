@@ -24,6 +24,12 @@
       "cache": false,
       "persistent": true
     },
+    "build:api": {},
+    "build:worker": {},
+    "build:admin-platform-client": {},
+    "start:api": {},
+    "start:worker": {},
+    "start:admin-platform-client": {},
     "lint": {},
     "test": {}
   }

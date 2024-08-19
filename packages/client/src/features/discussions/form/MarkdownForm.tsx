@@ -1,7 +1,7 @@
 import { yupResolver } from '@hookform/resolvers/yup'
 import React, { useEffect } from 'react'
 import { Controller, useForm } from 'react-hook-form'
-import ReactTooltip from 'react-tooltip'
+import { Tooltip } from 'react-tooltip'
 import styled from 'styled-components'
 import * as Yup from 'yup'
 import { Button } from '../../../components/Button'
@@ -129,7 +129,7 @@ export const MarkdownForm = ({
         {watch().isAnswer && <Attachments scope={scope} setValue={setValue} attachments={attachments} />}
         {!isEdit && !isAnswerComment && isComment && (
           <>
-            <CheckboxLabel data-tip data-for="answer-checkbox">
+            <CheckboxLabel data-tooltip-id="answer-checkbox" data-tooltip-content="You have already submitted an answer on this discussion.">
               <Checkbox
                 {...register('isAnswer')}
                 disabled={isSubmitting || !canUserAnswer}
@@ -137,13 +137,11 @@ export const MarkdownForm = ({
               />
               Mark as Answer
             </CheckboxLabel>
-            <ReactTooltip id="answer-checkbox" delayShow={1000} type="dark" effect="solid" disable={canUserAnswer}>
-              You have already submitted an answer on this discussion.
-            </ReactTooltip>
+            <Tooltip id="answer-checkbox" delayShow={1000} hidden={canUserAnswer} />
           </>
         )}
         {!isEdit && (isComment || isAnswerComment) && (
-          <CheckboxLabel data-tip data-for="notify-checkbox">
+          <CheckboxLabel>
             <Checkbox
               {...register('notifyAll')}
               disabled={isSubmitting}
@@ -154,7 +152,7 @@ export const MarkdownForm = ({
         )}
         {isComment && (isEdit || isAnswerComment) && <Button onClick={() => onCancel && onCancel(getValues())}>Cancel</Button>}
         <Button
-          variant="primary"
+          data-variant="primary"
           type="button"
           form="commentForm"
           disabled={!isDirty || isSubmitting || Object.keys(errors).length > 0}

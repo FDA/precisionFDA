@@ -45,11 +45,11 @@ export const DataPortalsAuthPickerModal: React.FC<{ modal: UseModal }> = ({
       <Footer>
         <>
           {siteSettings?.ssoButton.isEnabled && (
-            <Button variant="primary" onClick={() => handleSSOLoginWithDaasRedirect(siteSettings.ssoButton.data.fdaSsoUrl)}>
+            <Button data-variant="primary" onClick={() => handleSSOLoginWithDaasRedirect(siteSettings.ssoButton.data.fdaSsoUrl)}>
               Log In with FDA SSO
             </Button>
           )}
-          <Button variant="primary"
+          <Button data-variant="primary"
             onClick={() => window.location.assign(`/login?user_return_to=${encodeURIComponent('/data-portals/main')}`)}>
             Log In with Password and MFA
           </Button>

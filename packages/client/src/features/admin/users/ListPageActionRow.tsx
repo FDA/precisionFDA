@@ -82,7 +82,7 @@ const bulkDeactivate = async (ids: User['id'][]) =>
 // eslint-disable-next-line react/display-name
 const DropdownButton = React.forwardRef((props: any, ref) => (
   // eslint-disable-next-line react/jsx-props-no-spreading
-  <Button variant="primary" ref={ref} {...props}>
+  <Button data-variant="primary" ref={ref} {...props}>
     Resources &nbsp;
     <ArrowIcon />
   </Button>
@@ -186,7 +186,7 @@ export const UsersListActionRow = ({
   return (
     <ButtonsRow>
       <Button
-        variant="primary"
+        data-variant="primary"
         as="a"
         href="/admin/invitations"
         data-testid="admin-users-provision-button"
@@ -196,7 +196,7 @@ export const UsersListActionRow = ({
         &nbsp;Provision new users
       </Button>
       <Button
-        variant="primary"
+        data-variant="primary"
         data-testid="admin-users-reset-button"
         disabled={selectedUsers.length === 0}
         onClick={() => resetMutation.mutateAsync()}
@@ -205,7 +205,7 @@ export const UsersListActionRow = ({
       </Button>
       {!areAllSelectedUsersInDeactivatedState && (
         <Button
-          variant="primary"
+          data-variant="primary"
           data-testid="admin-users-deactivate-button"
           disabled={
             selectedUsers.length === 0 ||
@@ -219,7 +219,7 @@ export const UsersListActionRow = ({
       )}
       {areAllSelectedUsersInDeactivatedState && (
         <Button
-          variant="primary"
+          data-variant="primary"
           data-testid="admin-users-activate-button"
           disabled={isCurrentUserSelected}
           onClick={() => activateMutation.mutateAsync()}
@@ -228,7 +228,7 @@ export const UsersListActionRow = ({
         </Button>
       )}
       <Button
-        variant="primary"
+        data-variant="primary"
         data-testid="admin-users-unlock-button"
         disabled={
           selectedUsers.length === 0 || !areAllSelectedUsersInLockedState

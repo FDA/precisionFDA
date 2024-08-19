@@ -67,7 +67,7 @@ const ExternalLink: FunctionComponent<IExternalLinkProps> = ({
         <Footer>
           <ButtonRow>
             <Button onClick={closeModal}>Cancel</Button>
-            <Button variant='primary' onClick={openLink}>Continue</Button>
+            <Button data-variant='primary' onClick={openLink}>Continue</Button>
           </ButtonRow>
         </Footer>
       </ModalNext>

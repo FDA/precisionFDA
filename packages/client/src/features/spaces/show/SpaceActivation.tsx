@@ -171,7 +171,7 @@ export function Activation({ space }: { space: ISpace }) {
           </div>
           {!!currentUser && (
             <Button
-              variant="success"
+              data-variant="success"
               disabled={isAcceptedByUser || acceptSpaceMutation.isPending}
               onClick={() => acceptClickHandler()}
             >

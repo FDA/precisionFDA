@@ -7,7 +7,7 @@ import { HeaderText, HeaderTextDetails, ModalScroll } from '../../features/modal
 export function useEditFavoritesModal() {
   const { isShown, setShowModal } = useModal()
 
-  const modalComp = isShown && (
+  const modalComp = (
     <ModalNext id="edit-navigation" data-testid="edit-navigation" isShown={isShown} hide={() => setShowModal(false)}>
       <ModalHeaderTop
         disableClose={false}

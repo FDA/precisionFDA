@@ -65,7 +65,7 @@ export const DiscussionList = ({ space, scope }: { space: ISpace; scope: string 
   const location = useLocation()
 
   const membershipType = space.current_user_membership
-  const canCreateDiscussion = membershipType.role !== 'viewer'
+  const canCreateDiscussion = membershipType.role !== 'viewer' && !space.restricted_discussions
 
   return (
     <ErrorBoundary>
@@ -75,7 +75,7 @@ export const DiscussionList = ({ space, scope }: { space: ISpace; scope: string 
           <QuickActions>
             {canCreateDiscussion && (
               <Button
-                variant="primary"
+                data-variant="primary"
                 data-turbolinks="false"
                 data-testid="space-discussion-create-link"
                 as={Link}

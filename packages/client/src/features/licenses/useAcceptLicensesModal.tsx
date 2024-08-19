@@ -153,7 +153,7 @@ export const useAcceptLicensesModal = () => {
     setSelectedLicenses([])
   }
 
-  const modalComp = isShown && (
+  const modalComp = (
     <Modal
       headerText="Accept Licenses"
       isShown={isShown}
@@ -168,7 +168,7 @@ export const useAcceptLicensesModal = () => {
             Cancel
           </Button>
           <Button
-            variant="primary"
+            data-variant="primary"
             disabled={selectedLicenses.length === 0}
             onClick={() => handleSubmit()}
           >

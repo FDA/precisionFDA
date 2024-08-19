@@ -13,7 +13,7 @@ import { StyledBackLink, StyledRight } from '../home/home.styles'
 import {
   ActionsButton,
   Description,
-  Header,
+  ResourceHeader,
   HeaderLeft,
   HomeLoader,
   MetadataItem,
@@ -156,7 +156,7 @@ export const DatabaseShow = ({ emitScope, homeScope }: { homeScope?: HomeScope, 
         Back to Databases
       </StyledBackLink>
       <Topbox>
-        <Header>
+        <ResourceHeader>
           <HeaderLeft>
             <Title>
               <DatabaseIcon height={20}/>
@@ -173,7 +173,7 @@ export const DatabaseShow = ({ emitScope, homeScope }: { homeScope?: HomeScope, 
               {<DetailActionsDropdown db={data} refetch={refetch}/>}
             </StyledRight>
           </div>
-        </Header>
+        </ResourceHeader>
 
         {renderOptions(data, homeScope)}
 

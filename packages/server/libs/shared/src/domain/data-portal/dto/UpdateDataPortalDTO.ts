@@ -1,6 +1,6 @@
-import { UId } from '@shared/domain/entity/domain/uid'
-import { IsBoolean, IsEnum, IsNumber, IsOptional, IsString } from 'class-validator'
 import { DATA_PORTAL_STATUS } from '@shared/domain/data-portal/data-portal.enum'
+import { Uid } from '@shared/domain/entity/domain/uid'
+import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator'
 
 export class UpdateDataPortalDTO {
   @IsNumber()
@@ -20,7 +20,7 @@ export class UpdateDataPortalDTO {
 
   @IsString()
   @IsOptional()
-  cardImageUid?: UId
+  cardImageUid?: Uid<'file'>
 
   @IsEnum(DATA_PORTAL_STATUS)
   @IsOptional()

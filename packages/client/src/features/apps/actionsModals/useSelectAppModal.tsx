@@ -143,13 +143,14 @@ export const useSelectAppModal = (
 
   const apps = appsData ?? []
 
-  const modalComp = isShown && (
+  const modalComp = (
     <ModalNext
       isShown={isShown}
       data-testid="select-app-modal"
       id="select-app-modal"
       headerText={title}
       hide={() => setShowModal(false)}
+      variant='medium'
     >
       <ModalHeaderTop headerText={title} hide={() => setShowModal(false)} />
       {subtitle && <StyledSubtitle>{subtitle}</StyledSubtitle>}
@@ -227,7 +228,7 @@ export const useSelectAppModal = (
             Cancel
           </Button>
           <Button
-            variant="primary"
+            data-variant="primary"
             onClick={handleSubmit}
             disabled={selectedApps?.length === 0}
           >

@@ -68,14 +68,19 @@ export const InputTextRightMargin = styled(InputText)`
   margin-right: 16px;
 `
 
-export const StyledJobName = styled.div`
-  flex-grow: 1;
-  padding-right: 16px;
+export const StyledGrid = styled.div`
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 16px;
+  width: 100%;
 `
 
-export const StyledScopeName = styled.div`
+export const StyledJobName = styled.div`
   flex-grow: 1;
-  padding-right: 23px;
+`
+
+export const StyledInstanceType = styled.div`
+  padding-left: 23px;
 `
 
 export const StyledForm = styled.form`

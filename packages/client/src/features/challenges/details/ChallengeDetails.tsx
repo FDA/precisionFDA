@@ -285,7 +285,7 @@ export const ChallengeDetails = ({
             ) : (
               <RightSideItem>
                 <Button
-                  variant="primary"
+                  data-variant="primary"
                   className={joinChallengeButtonClasses}
                   onClick={() => {
                     if (userCanJoin) {

@@ -34,7 +34,7 @@ export const UserLimitForm = ({ buttonText, selectedUsers, onSubmit, onChange, i
       }}
     />
     <Button
-      variant="primary"
+      data-variant="primary"
       data-testid="admin-users-set-total-limit-button"
       disabled={selectedUsers.length === 0 || isSubmitButtonDisabled}
       onClick={onSubmit}

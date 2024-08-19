@@ -33,8 +33,8 @@ import {
   SectionHeader,
   StyledActionsContainer,
   StyledForm,
+  StyledGrid,
   StyledJobName,
-  StyledRow,
   TipsRow,
 } from './styles'
 import { useExportInputsModal } from './useExportInputsModal'
@@ -229,8 +229,7 @@ export const RunJobForm = ({ app, userJobLimit, spec }: { app: IApp; spec: AppSp
 
   const handleExportInputClick = () => {
     const vals = getValues()
-    const fmtVals = mapInputKeyVals(vals.inputs, spec.input_spec)
-    vals.inputs = fmtVals
+    vals.inputs = mapInputKeyVals(vals.inputs, spec.input_spec)
     const fileUids = getFileUIDsFromAppRun(vals.inputs, spec.input_spec)
 
     exportModal.openModal(vals, fileUids)
@@ -250,7 +249,7 @@ export const RunJobForm = ({ app, userJobLimit, spec }: { app: IApp; spec: AppSp
         <Section>
           <SectionHeader>CONFIGURE</SectionHeader>
           <SectionBody>
-            <StyledRow>
+            <StyledGrid>
               <StyledJobName>
                 <FieldGroup label="Job Name" required>
                   <InputText {...register('jobName')} disabled={isSubmitting} />
@@ -261,8 +260,6 @@ export const RunJobForm = ({ app, userJobLimit, spec }: { app: IApp; spec: AppSp
                 <InputNumber min="0" step="10" {...register('jobLimit')} disabled={isSubmitting} />
                 <ErrorMessageForField errors={errors as FieldErrors<Record<string, unknown>>} fieldName="jobLimit" />
               </FieldGroup>
-            </StyledRow>
-            <StyledRow>
               {app.entity_type === 'https' && (
                 <SelectContext
                   control={control}
@@ -272,12 +269,14 @@ export const RunJobForm = ({ app, userJobLimit, spec }: { app: IApp; spec: AppSp
                 />
               )}
               {app.scope.startsWith('space-') && (
-                <SelectSpaceScope
-                  control={control}
-                  isSubmitting={isSubmitting}
-                  selectableSpaces={selectableSpaces}
-                  errors={errors}
-                />
+                <StyledJobName>
+                  <SelectSpaceScope
+                    control={control}
+                    isSubmitting={isSubmitting}
+                    selectableSpaces={selectableSpaces}
+                    errors={errors}
+                  />
+                </StyledJobName>
               )}
               {!isBatchRun && (
                 <SelectInstanceType
@@ -292,7 +291,7 @@ export const RunJobForm = ({ app, userJobLimit, spec }: { app: IApp; spec: AppSp
                   inputId="select_instance_type"
                 />
               )}
-            </StyledRow>
+            </StyledGrid>
           </SectionBody>
         </Section>
       </AppsConfiguration>
@@ -366,7 +365,7 @@ export const RunJobForm = ({ app, userJobLimit, spec }: { app: IApp; spec: AppSp
       </AppsConfiguration>
       <StyledActionsContainer>
         <Button
-          variant="primary"
+          data-variant="primary"
           disabled={isSubmitting || Object.keys(errors).length > 0}
           type="button"
           form="submitJobForm"
@@ -378,7 +377,7 @@ export const RunJobForm = ({ app, userJobLimit, spec }: { app: IApp; spec: AppSp
           {isBatchRun && (
             <>
               <Button
-                variant="success"
+                data-variant="success"
                 disabled={isSubmitting}
                 type="button"
                 onClick={event => exportFormData(event, getValues())}
@@ -392,13 +391,13 @@ export const RunJobForm = ({ app, userJobLimit, spec }: { app: IApp; spec: AppSp
                 id="fileInput"
                 onChange={event => importFormData(event, vals => reset(vals))}
               />
-              <Button variant="success" disabled={isSubmitting} type="button" onClick={handleImportClick}>
+              <Button data-variant="success" disabled={isSubmitting} type="button" onClick={handleImportClick}>
                 Import Inputs
               </Button>
             </>
           )}
           {computeInstances && (
-            <Button variant="success" disabled={isSubmitting} type="button" onClick={addInput}>
+            <Button data-variant="success" disabled={isSubmitting} type="button" onClick={addInput}>
               Add batch
             </Button>
           )}

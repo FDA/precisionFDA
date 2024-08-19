@@ -13,32 +13,11 @@ import { useFeatureMutation } from '../actionModals/useFeatureMutation'
 import { useComparatorModal } from '../comparators/useComparatorModal'
 import { ActionFunctionsType, HomeScope } from '../home/types'
 import { copyAppsRequest, copyAppsToPrivate, deleteAppsRequest } from './apps.api'
-import { IApp } from './apps.types'
+import { AppActions, IApp } from './apps.types'
 import { useAttachToChallengeModal } from './useAttachToChallengeModal'
 import { useExportToModal } from './useExportToModal'
 import { getBaseLink } from './run/utils'
 
-export enum AppActions {
-  'Run' = 'Run',
-  'Track' = 'Track',
-  'Edit' = 'Edit',
-  'Fork' = 'Fork',
-  'Export to' = 'Export to',
-  'Make public' = 'Make public',
-  'Feature' = 'Feature',
-  'Unfeature' = 'Unfeature',
-  'Delete' = 'Delete',
-  'Copy to space' = 'Copy to space',
-  'Copy to My Home (private)' = 'Copy to My Home (private)',
-  'Attach to...' = 'Attach to...',
-  'Comments' = 'Comments',
-  'Set as Challenge App' = 'Set as Challenge App',
-  'Edit tags' = 'Edit tags',
-  'Edit properties' = 'Edit properties',
-  'Add to Comparators' = 'Add to Comparators',
-  'Set this app as comparison default' = 'Set this app as comparison default',
-  'Remove from Comparators' = 'Remove from Comparators',
-}
 
 export const useAppSelectionActions = ({
   homeScope,
@@ -50,7 +29,7 @@ export const useAppSelectionActions = ({
   challenges,
 }: {
   homeScope?: HomeScope,
-  spaceId?: string,
+  spaceId?: number,
   selectedItems: IApp[],
   resourceKeys: string[],
   resetSelected?: () => void,
@@ -166,7 +145,7 @@ export const useAppSelectionActions = ({
     selected: selected.map(app => ({ ...app, id: app.app_series_id  })),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: resourceKeys })
-      queryClient.invalidateQueries({ queryKey: ['edit-resource-properties', 'appSeries'] })
+      queryClient.invalidateQueries({ queryKey: ['edit-resource-properties', 'appSeries']})
     },
   })
 

@@ -19,7 +19,7 @@ import {
   QuickActions,
   StyledHomeTable, StyledRight,
 } from '../home/home.styles'
-import { ActionsButton } from '../home/show.styles'
+import { ActionsButton, ResourceHeader } from '../home/show.styles'
 import { IFilter, IMeta, KeyVal, HomeScope } from '../home/types'
 import { useList } from '../home/useList'
 import { usePropertiesQuery } from '../home/usePropertiesQuery'
@@ -94,11 +94,11 @@ export const DatabaseList = ({ homeScope }: { homeScope?: HomeScope }) => {
 
   return (
     <>
-      <div>
+      <ResourceHeader>
         <ActionsRow>
           <QuickActions>
             <Button
-              variant='primary'
+              data-variant='primary'
               data-testid="home-databases-create-link"
               as={Link}
               to="/home/databases/create"
@@ -124,7 +124,7 @@ export const DatabaseList = ({ homeScope }: { homeScope?: HomeScope }) => {
             </Dropdown>
           </DBStyledRight>
         </ActionsRow>
-      </div>
+      </ResourceHeader>
 
       <DatabaseListTable
         homeScope={homeScope}

@@ -15,6 +15,7 @@ class SpaceForm
     :restrict_to_template,
     :protected,
     :restricted_reviewer,
+    :restricted_discussions,
     :current_user,
   )
 

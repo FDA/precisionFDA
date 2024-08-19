@@ -191,7 +191,7 @@ const NotificationForm = ({ preferences, onSave }: { preferences: NotificationPr
         })}
       </StyledNotifications>
       <PageActions>
-        <Button variant="primary" type="submit" disabled={isSubmitting}>Save Settings</Button>
+        <Button data-variant="primary" type="submit" disabled={isSubmitting}>Save Settings</Button>
       </PageActions>
     </form>
   )

@@ -7,9 +7,9 @@ export const DropdownMenu = styled.div`
   text-align: left;
   list-style-type: none;
   background-color: var(--c-dropdown-bg);
-  background-clip: padding-box;
   border-radius: 4px;
   outline: none;
+  overflow: hidden;
   box-shadow: 0 3px 6px -4px rgba(0, 0, 0, 0.12),
     0 6px 16px 0 rgba(0, 0, 0, 0.08), 0 9px 28px 8px rgba(0, 0, 0, 0.05);
 `

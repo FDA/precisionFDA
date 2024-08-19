@@ -182,7 +182,7 @@ const UbuntuPackageSelect = ({
       <Box>
         <PackagesInputRow>
           <InputTextS ref={inputRef} placeholder="Package name" />
-          <Button variant='primary' type="button" onClick={addItem}>
+          <Button data-variant='primary' type="button" onClick={addItem}>
             Add
           </Button>
         </PackagesInputRow>

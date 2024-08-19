@@ -12,7 +12,7 @@ import {
 } from '@nestjs/websockets'
 import { config } from '@shared/config'
 import { OrmContextInterceptor } from '@shared/database/interceptor/orm-context.interceptor'
-import { UId } from '@shared/domain/entity/domain/uid'
+import { Uid } from '@shared/domain/entity/domain/uid'
 import { EntityFetcherService } from '@shared/domain/entity/entity-fetcher.service'
 import { Job } from '@shared/domain/job/job.entity'
 import { JobLogService } from '@shared/domain/job/services/job-log.service'
@@ -130,7 +130,7 @@ export class WebsocketGateway implements OnGatewayDisconnect, OnGatewayInit, OnG
   @SubscribeMessage(WEBSOCKET_EVENTS.JOB_LOG)
   async fetchJobLog(
     @ConnectedSocket() client: PfdaWebSocket,
-    @MessageBody() data: { jobUid: UId },
+    @MessageBody() data: { jobUid: Uid<'job'> },
   ) {
     try {
       const jobUid = data.jobUid

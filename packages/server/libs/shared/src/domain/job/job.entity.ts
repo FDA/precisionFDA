@@ -22,6 +22,8 @@ import { BaseEntity } from '../../database/base-entity'
 import { WorkaroundJsonType } from '../../database/custom-json-type'
 import { EntityScope } from '../../types/common'
 import { formatDuration } from '../../utils/format'
+import { DxId } from '../entity/domain/dxid'
+import { Uid } from '../entity/domain/uid'
 import { getIdFromScopeName, scopeContainsId } from '../space/space.helper'
 import { JOB_DB_ENTITY_TYPE, JOB_STATE } from './job.enum'
 import { isStateActive, isStateTerminal } from './job.helper'
@@ -65,7 +67,7 @@ export class Job extends BaseEntity {
   id: number
 
   @Property()
-  dxid: string
+  dxid: DxId<'job'>
 
   @Property()
   project: string
@@ -104,8 +106,8 @@ export class Job extends BaseEntity {
   @Property({ type: JsonType, hidden: true })
   provenance: Provenance
 
-  @Property({ hidden: true })
-  uid: string
+  @Property({ unique: true })
+  uid: Uid<'job'>
 
   // foreign keys -> not yet mapped
   @Property({ hidden: true })

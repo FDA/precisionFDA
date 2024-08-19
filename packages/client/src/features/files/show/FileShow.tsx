@@ -15,7 +15,7 @@ import { ActionsDropdownContent } from '../../home/ActionDropdownContent'
 import { StyledBackLink } from '../../home/home.styles'
 import {
   ActionsButton,
-  Header,
+  ResourceHeader,
   HeaderLeft,
   HomeLoader,
   LockedRow,
@@ -36,7 +36,7 @@ import { IFile } from '../files.types'
 import { useFilesSelectActions } from '../useFilesSelectActions'
 import { FileDescription } from './styles'
 
-const FileActions = ({
+const FileActionsDropdown = ({
   homeScope,
   space,
   file,
@@ -124,20 +124,20 @@ export const FileShow = ({ emitScope, space, homeScope }: { homeScope?: HomeScop
         Back to Files
       </StyledBackLink>
       <Topbox>
-        <Header>
+        <ResourceHeader>
           <HeaderLeft>
             <Title>
               <FileIcon height={22} />
-              &nbsp;<span data-testid="file-name">{file.name}</span>
+              <span data-testid="file-name">{file.name}</span>
               {file.show_license_pending && (
                 <HomeLabel value="License Pending Approval" icon="fa-clock-o" type="warning" className="" state={file.state} />
               )}
             </Title>
           </HeaderLeft>
           <div>
-            <FileActions homeScope={homeScope} space={space} file={file} folderId={folderId} />
+            <FileActionsDropdown homeScope={homeScope} space={space} file={file} folderId={folderId} />
           </div>
-        </Header>
+        </ResourceHeader>
 
         <FileDescription data-testid="file-description">
           {file.locked && (
