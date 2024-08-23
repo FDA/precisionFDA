@@ -416,7 +416,7 @@ GEM
     redis-client (0.17.0)
       connection_pool
     regexp_parser (2.8.0)
-    rexml (3.3.3)
+    rexml (3.3.6)
       strscan
     rspec (3.12.0)
       rspec-core (~> 3.12.0)
