@@ -17,7 +17,7 @@ class CopyService
         new_app = AppService.create_app(user, api, opts)
 
         authorize_users(new_app, scope)
-
+        user.tag(new_app.app_series, with: app.app_series.tags, on: :tags)
         new_app
       end
     end
