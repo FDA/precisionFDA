@@ -14,7 +14,6 @@ export enum FolderActions {
 export type FileState = 'closed' | 'closing' | 'open' | 'removing'
 export type FileLocation = 'Public' | 'Private' | string
 export type FileType = 'UserFile' | 'Folder' | 'File'
-export type FileOrigin = 'UserFile'
 export type FileScope = 'public' | 'private' | string
 export type FileUid = `file-${string}-${number}`
 
@@ -63,9 +62,7 @@ export interface IFile {
   featured: boolean
   scope: ServerScope
   space_id: string | null
-  origin:
-    | string
-    | {
+  origin: string | {
         text?: string
         fa?: string
         href?: string

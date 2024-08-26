@@ -1,5 +1,3 @@
-version: '3.7'
-
 # ! Write a documentation note
 # NOTE(samuel): docker volumes cannot be defined in abstract files
 volumes:
