@@ -4,7 +4,7 @@ import { Button } from '../../../../components/Button'
 import { compactScrollBarV2 } from '../../../../components/Page/styles'
 import { StyledName } from '../../../../components/ResourceTable'
 import { Svg } from '../../../../components/icons/Svg'
-import { StyledCell, StyledFileDetail, StyledRow } from '../../../actionModals/styles'
+import { SelectableTable, StyledCell, StyledFileDetail, StyledRow } from '../../../actionModals/styles'
 import { Help } from '../../../apps/form/styles'
 import { ModalPageRow } from '../../../modal/styles'
 
@@ -14,8 +14,15 @@ export const ShorternName = styled.span`
   text-overflow: ellipsis;
 `
 
+export const ShorternFolderName = styled(ShorternName)`
+  width: calc(100% - 30px);
+`
+
 export const CopyHelp = styled(Help)`
-  width: 100%;
+  width: calc(100% - 24px);
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: 12px;
   border-radius: 4px;
   background-color: var(--highlight-100);
   border-color: var(--highlight-500);
@@ -29,8 +36,9 @@ export const CopyModalPageRow = styled(ModalPageRow)`
 `
 
 export const CopyModalPageCol = styled.div`
-  flex-grow: 1;
-  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
   align-self: stretch;
   min-width: 350px;
   width: 40vw;
@@ -50,10 +58,10 @@ export const Sticky = styled.div`
 export const CopyModalScrollPlace = styled.div`
   ${compactScrollBarV2}
   overflow-y: auto;
-  height: inherit;
   max-height: 60vh;
 `
 export const StyledStickyTop = styled.div`
+  width: calc(100% - 1px);
   position: sticky;
   top: 0;
   background-color: var(--background);
@@ -85,6 +93,10 @@ export const NodeHeading = styled.a`
   span {
     margin-left: 8px;
   }
+`
+
+export const SpaceAndFolderTable = styled(SelectableTable)`
+  width: calc(100% - 1px);
 `
 
 export const FolderHeading = styled(NodeHeading)`
@@ -142,6 +154,7 @@ export const ModalStyledBreadcrumbs = styled(StyledBreadcrumbs)`
   height: fit-content;
   display: flex;
   align-items: center;
+  margin-top: 4px;
 `
 
 export const StyledBreadcrumb = styled.div`
@@ -161,6 +174,7 @@ export const ModalSearchBarWrapper = styled.div`
 export const ModalStyledRow = styled(StyledRow)`
   padding: 12px 8px;
   gap: 8px;
+  width: 100%;
   &:first-child {
     border-top: none;
   }
@@ -173,14 +187,12 @@ export const ModalStyledCell = styled(StyledCell)`
   gap: 8px;
 `
 
-export const ModalStyledSpaceCell = styled(ModalStyledCell)`
-`
-
 export const SpaceStyledName = styled(StyledName)`
   overflow: hidden;
+  align-items: center;
+  gap: 4px;
   ${Svg} {
     padding-right: 0;
-    margin-right: 4px;
   }
 `
 
@@ -188,6 +200,7 @@ export const StyledNameIcon = styled.div`
   width: 30px;
   height: 100%;
   display: flex;
+  justify-content: center;
   align-items: center;
   margin-right: 4px;
 `
