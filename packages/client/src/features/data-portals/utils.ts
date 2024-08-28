@@ -14,6 +14,11 @@ export function canEditSettings(user?: string, members?: DataPortal['members']) 
   return isUserInMemberRole(user, members, allowedEditSettingsRoles)
 }
 
+const allowedViewSpaceLinkRoles: SpaceMembership['role'][] = ['lead','admin']
+export function canViewSpaceLink(user?: string, members?: DataPortal['members']) {
+  return isUserInMemberRole(user, members, allowedViewSpaceLinkRoles)
+}
+
 const allowedEditContentRoles: SpaceMembership['role'][] = ['admin', 'lead', 'contributor']
 export function canEditContent(user?: string, members?: DataPortal['members']) {
   return isUserInMemberRole(user, members, allowedEditContentRoles)
