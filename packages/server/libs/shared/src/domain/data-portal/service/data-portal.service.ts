@@ -25,7 +25,7 @@ import { PlatformClient } from '@shared/platform-client'
 import { SCOPE } from '@shared/types/common'
 import { SPACE_MEMBERSHIP_ROLE } from '../../space-membership/space-membership.enum'
 import { CAN_EDIT_ROLES } from '../../space-membership/space-membership.helper'
-import { FILE_STATE_DX } from '../../user-file/user-file.types'
+import { FILE_STATE_DX, PARENT_TYPE } from '../../user-file/user-file.types'
 import { DataPortal } from '../data-portal.entity'
 import { DATA_PORTAL_MEMBER_ROLE } from '../data-portal.enum'
 import { CreateResourceResponse, DataPortalMemberParam, DataPortalParam } from './data-portal.types'
@@ -158,6 +158,7 @@ export class DataPortalService {
     userFile.state = FILE_STATE_DX.OPEN
     userFile.description = input.description
     userFile.parentId = user.id
+    userFile.parentType = PARENT_TYPE.USER
     userFile.scope = scope
     userFile.uid = `${response.id}-1`
 
