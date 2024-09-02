@@ -1,5 +1,5 @@
 'use strict'
-process.env.NODE_ENV = 'test'
+process.env.NODE_ENV = 'ci_test'
 const fs = require('fs')
 
 const getConfig = (packagePath) => {
