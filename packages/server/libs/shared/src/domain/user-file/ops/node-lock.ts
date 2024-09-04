@@ -1,16 +1,16 @@
 import { NotificationService } from '@shared/domain/notification/services/notification.service'
+import { NodesInputDTO } from '@shared/domain/user-file/dto/nodes-input.dto'
 import { User } from '@shared/domain/user/user.entity'
 import { InvalidStateError } from '@shared/errors'
-import { NOTIFICATION_ACTION, SEVERITY } from '../../../enums'
-import type { UserOpsCtx } from '../../../types'
+import { NOTIFICATION_ACTION, SEVERITY } from '@shared/enums'
+import type { UserOpsCtx } from '@shared/types'
 import { BaseOperation } from '@shared/utils/base-operation'
 import type { Node } from '../node.entity'
 import { filterNodesByUser, getSuccessMessage, loadNodes } from '../user-file.helper'
-import type { NodesInput } from '../user-file.input'
 import { FILE_STATE_DX, FILE_STI_TYPE } from '../user-file.types'
 import { FileLockOperation } from './file-lock'
 
-class NodesLockOperation extends BaseOperation<UserOpsCtx, NodesInput, void> {
+class NodesLockOperation extends BaseOperation<UserOpsCtx, NodesInputDTO, void> {
   private readonly notificationService: NotificationService
   private readonly fileLockOp: FileLockOperation
 
@@ -21,7 +21,7 @@ class NodesLockOperation extends BaseOperation<UserOpsCtx, NodesInput, void> {
     this.fileLockOp = new FileLockOperation(ctx)
   }
 
-  async run(input: NodesInput): Promise<void> {
+  async run(input: NodesInputDTO): Promise<void> {
     this.ctx.log.log(input.ids, 'NodesLockOperation: Locking ids')
     const em = this.ctx.em
     const nodes: Node[] = await loadNodes(em, input, { locked: false })
