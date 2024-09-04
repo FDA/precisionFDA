@@ -1,16 +1,6 @@
 import { UidInput } from '@shared/types'
 import type { JSONSchema7 } from 'json-schema'
 import { config } from '../../config'
-import { EntityScope } from '../../types/common'
-import { PARENT_TYPE } from './user-file.types'
-
-type SyncFoldersInput = {
-  remoteFolderPaths: string[]
-  projectDxid: string
-  parentType: PARENT_TYPE
-  parentId: number
-  scope: string
-}
 
 export type FOLLOW_UP_ACTION =
   | 'UPDATE_DATA_PORTAL_IMAGE_URL'
@@ -34,34 +24,9 @@ export type SyncFileJobInput = FileUidInput &
 
 export type UidAndFollowUpInput = UidInput & FollowUpInput
 
-type SyncFilesInFolderInput = {
-  folderId: number | null
-  projectDxid: string
-  scope: EntityScope
-  parentId: number
-  parentType: PARENT_TYPE
-  runAdd: boolean
-  runRemove: boolean
-}
-
 type RenameFolderInput = {
   id: number
   newName: string
-}
-
-type NodesInput = {
-  ids: number[]
-  async: boolean
-}
-
-const nodesSchema: JSONSchema7 = {
-  type: 'object',
-  properties: {
-    ids: { type: 'array' },
-    async: { type: 'boolean' },
-  },
-  required: ['ids'],
-  additionalProperties: false,
 }
 
 const renameFolderSchema: JSONSchema7 = {
@@ -83,11 +48,7 @@ type nodeQueryFilter = {
 
 export {
   IdsInput,
-  NodesInput,
   RenameFolderInput,
-  SyncFilesInFolderInput,
-  SyncFoldersInput,
   nodeQueryFilter,
-  nodesSchema,
   renameFolderSchema,
 }

@@ -1,4 +1,5 @@
 import { NotificationService } from '@shared/domain/notification/services/notification.service'
+import { NodesInputDTO } from '@shared/domain/user-file/dto/nodes-input.dto'
 import { FileUnlockOperation } from '@shared/domain/user-file/ops/file-unlock'
 import { FolderUnlockOperation } from '@shared/domain/user-file/ops/folder-unlock'
 import { User } from '@shared/domain/user/user.entity'
@@ -6,7 +7,6 @@ import { PermissionError } from '@shared/errors'
 import { getLogger } from '@shared/logger'
 import { BaseOperation } from '@shared/utils/base-operation'
 import { Node } from '../node.entity'
-import { NodesInput } from '../user-file.input'
 import { FILE_STATE_DX, FILE_STI_TYPE } from '../user-file.types'
 import { UserOpsCtx } from '@shared/types'
 import { filterNodesByUser, getSuccessMessage, loadNodes } from '../user-file.helper'
@@ -22,8 +22,8 @@ const rollbackUnlockingState = async (em: SqlEntityManager, nodes: Node[]): Prom
   await em.flush()
 }
 
-class NodesUnlockOperation extends BaseOperation<UserOpsCtx, NodesInput, void> {
-  async run(input: NodesInput): Promise<void> {
+class NodesUnlockOperation extends BaseOperation<UserOpsCtx, NodesInputDTO, void> {
+  async run(input: NodesInputDTO): Promise<void> {
     this.ctx.log.log(input.ids, 'Unlocking ids')
     const em = this.ctx.em
     const nodes: Node[] = await loadNodes(em, input, { locked: true })

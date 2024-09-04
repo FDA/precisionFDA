@@ -1251,7 +1251,7 @@ func (c *PFDAClient) parallelDownload(uids []string, outputFilePath string, over
 	maxGoroutines := 5 // do not exceed 10 - magical TCP issues with lost packages appears.
 	guard := make(chan struct{}, maxGoroutines)
 
-	// create outputFilePath in case it was specified & doesn't exist yet - we assume user specified a dir name
+	// create outputFilePath in case it was specified - we assume user specified a dir name
 	if outputFilePath != "" {
 		if err := os.MkdirAll(outputFilePath, os.ModePerm); err != nil {
 			log.Fatal(err)
