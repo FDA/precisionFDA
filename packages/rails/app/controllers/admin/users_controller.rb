@@ -140,16 +140,12 @@ module Admin
         unsafe_params[:ids],
         unsafe_params[:resource],
       )
-      respond_to do |format|
-        format.json { render json: response }
-      end
+      render json: response
     end
 
     def bulk_enable_all_resources
       response = https_apps_client.users_enable_all_resources(unsafe_params[:ids])
-      respond_to do |format|
-        format.json { render json: response }
-      end
+      render json: response
     end
 
     def bulk_disable_resource
@@ -157,16 +153,12 @@ module Admin
         unsafe_params[:ids],
         unsafe_params[:resource],
       )
-      respond_to do |format|
-        format.json { render json: response }
-      end
+      render json: response
     end
 
     def bulk_disable_all_resources
       response = https_apps_client.users_disable_all_resources(unsafe_params[:ids])
-      respond_to do |format|
-        format.json { render json: response }
-      end
+      render json: response
     end
 
     # ┌───────────────────────────────────────────────────────┐

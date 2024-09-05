@@ -79,9 +79,7 @@ const bulkDeactivate = async (ids: User['id'][]) =>
   }).then(checkStatus)
 
 // TODO(samuel) unify with my home
-// eslint-disable-next-line react/display-name
 const DropdownButton = React.forwardRef((props: any, ref) => (
-  // eslint-disable-next-line react/jsx-props-no-spreading
   <Button data-variant="primary" ref={ref} {...props}>
     Resources &nbsp;
     <ArrowIcon />
@@ -257,13 +255,11 @@ export const UsersListActionRow = ({
         content={
           <ResourceDropdownContent
             selectedUsers={selectedUsers}
-            refetchUsers={refetchUsers}
           />
         }
       >
         {(dropdownProps) => (
           <DropdownButton
-            // eslint-disable-next-line react/jsx-props-no-spreading
             {...dropdownProps}
             data-testid="admin-users-resource-button"
             active={dropdownProps.isActive}
@@ -274,4 +270,3 @@ export const UsersListActionRow = ({
     </ButtonsRow>
   )
 }
-
