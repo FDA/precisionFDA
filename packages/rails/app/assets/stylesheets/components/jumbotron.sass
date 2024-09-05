@@ -1,0 +1,159 @@
+@import "_common"
+
+.jumbotron-landing
+  background-color: #fff
+  position: relative
+  margin: 0
+  padding: 50px 20px
+
+  h1, h2, h3, h4, h5, p
+    color: $brand-blue-tertiary
+
+  .container
+    h1, .lead
+      text-align: center
+
+    h1, h2, h3
+      font-weight: 200
+
+    h1
+      font-size: 72px
+
+    p
+      font-size: 24px
+
+    @media (max-width: $screen-xs-max)
+      h1
+        font-size: 48px
+      p
+        font-size: 18px
+
+  &.jumbotron-particles
+    background-image: url("/assets/particles3.png")
+    background-repeat: no-repeat
+    background-position: 50% 50%
+
+  &.jumbotron-particles-top
+    background-position: 50% 475%
+
+  &.jumbotron-particles-bottom
+    background-position: 50% -100%
+
+  &:not(.jumbotron-landing-guest)
+    background: lighten($brand-blue-secondary, 30%)
+    // box-shadow: inset 0px 100px 200px rgba(255, 255, 255, 0.9)
+
+  &.jumbotron-landing-guest
+    background-color: #165B96 //mix($brand-blue-dark, $brand-blue-primary, 50%)
+    box-shadow: inset 0 -50px 100px rgba($brand-blue-dark, 0.5)
+    padding: 30px 20px 100px
+
+    h1, h2, h3, h4, h5, p
+      text-shadow: 0px 0px 5px rgba(0, 0, 0, 0.75)
+      color: $brand-blue-subtler
+
+    .container
+      h1
+        font-size: 42px
+      p
+        font-size: 40px
+        font-weight: 700
+        margin-bottom: 50px
+
+      @media (max-width: $screen-xs-max)
+        p
+          font-size: 24px
+          margin-bottom: 25px
+
+    .btn-link:hover
+      color: white
+
+.jumbotron-overview
+  background-color: darken($navbar-inverse-bg, 5%)
+  position: relative
+  margin: 0
+  padding: 50px 20px
+  overflow: hidden
+
+  background-image: url("/assets/particles3.png")
+  background-repeat: no-repeat
+  background-position: 50% 123%
+
+  h1, h2, h3, h4, h5, p, .h1, .h2, .h3, .h4, .h5
+    color: $brand-blue-subtle
+
+  .text-muted
+    color: $brand-blue-tertiary
+
+  .container
+    h1, .lead
+      text-align: center
+
+    h1, h2, h3
+      font-weight: 200
+
+    h1
+      font-size: 72px
+
+    p
+      font-size: 24px
+
+    @media (max-width: $screen-xs-max)
+      h1
+        font-size: 48px
+      p
+        font-size: 18px
+
+.jumbotron-challenges
+  background-color: $brand-blue-dark
+  position: relative
+  margin: 0
+  padding: 50px 20px
+  overflow: hidden
+
+  h1, h2, h3, h4, h5, p, .h1, .h2, .h3, .h4, .h5
+    color: $brand-blue-subtle
+
+  .text-muted
+    color: $brand-blue-tertiary
+
+  .expert-font
+    font-weight: normal
+    font-size: 16px
+    color: $text-muted
+
+.jumbotron-challenges-landing
+  background-color: $brand-blue-dark
+  position: relative
+  margin: 0
+  padding: 20px 20px
+  overflow: hidden
+
+  h1, h2, h3, h4, h5, p, .h1, .h2, .h3, .h4, .h5
+    color: $brand-blue-subtle
+
+  h2, .h2
+    font-size: 45px
+
+  .text-margin
+    padding: 0px 10px
+
+  .text-muted
+    color: $brand-blue-tertiary
+
+  .expert-font
+    font-weight: normal
+    color: $text-muted
+
+.jumbotron-news-landing
+  position: relative
+  margin: 0
+  padding: 20px 20px
+  overflow: hidden
+
+  h2, .h2
+    color: $brand-blue-primary
+    font-size: 45px
+
+  .btn-primary
+    color: white

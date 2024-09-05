@@ -1,0 +1,144 @@
+<ul class="nav nav-tabs batch-workfows-nav-tabs" role="tablist">
+  <li role="presentation" data-bind="
+    click: input.fsSetTab,
+    attr: {'data-id': input.name + '_tree_container' },
+    css: { active: input.fsActiveTab() == input.name + '_tree_container' }
+  ">
+    <a role="tab" data-toggle="tab">
+      <span class="fa fa-folder-open-o"></span>
+      <span class="tab-label">Folder Tree</span>
+    </a>
+  </li>
+  <li role="presentation" data-bind="
+    click: input.fsSetTab,
+    attr: {'data-id': input.name + '_search_container' },
+    css: { active: input.fsActiveTab() == input.name + '_search_container' }
+  ">
+    <a role="tab" data-toggle="tab">
+      <span class="fa fa-search"></span>
+      <span class="tab-label">RegExp Search</span>
+    </a>
+  </li>
+</ul>
+
+<div class="batch-workfows-tab-content">
+  <div class="tab-content">
+
+    <div class="tab-pane" data-bind="
+      attr: { id: input.name + '_tree_container' },
+      css: { active: input.fsActiveTab() == input.name + '_tree_container' }
+    ">
+      <div class="input-header">
+        <span class="input-header-title" data-bind="text: input.title"></span>
+        <a href="#" class="input-header-sort" data-bind="click: input.sortByName">
+          <span>sort by name</span>&nbsp;
+          <i class="fa" data-bind="css: input.sortNameArrow"></i>
+        </a>
+        <a href="#" class="input-header-sort" data-bind="click: input.sortByChecked">
+          <span>sort by checked</span>&nbsp;
+          <i class="fa" data-bind="css: input.sortCheckedArrow"></i>
+        </a>
+      </div>
+      <div data-bind="css: {'has-error': !input.valid()}">
+        <div class="form-control input-file-selector">
+          <!-- ko if: input.isTreeLoading() -->
+            <div class="text-center pfda-padded-v">
+              <i class="fa fa-spinner fa-spin fa-2x"></i>
+            </div>
+          <!-- /ko -->
+          <div data-bind="attr: {id: input.name}, visible: !input.isTreeLoading()"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tab-pane" data-bind="
+      attr: { id: input.name + '_search_container' },
+      css: { active: input.fsActiveTab() == input.name + '_search_container' }
+    ">
+      <div class="input-header">
+        <span class="input-header-title" data-bind="text: input.title"></span>
+        <a href="#" class="input-header-sort" data-bind="click: input.fsSortByName">
+          <span>sort by name</span>&nbsp;
+          <i class="fa" data-bind="css: input.fsSortNameArrow"></i>
+        </a>
+        <a href="#" class="input-header-sort" data-bind="click: input.fsSortByChecked">
+          <span>sort by checked</span>&nbsp;
+          <i class="fa" data-bind="css: input.fsSortCheckedArrow"></i>
+        </a>
+      </div>
+
+      <div class="input-file-search-container">
+        <div class="input-file-search form-control" data-bind="css: {'input-file-search-fs-loading': input.fsIsLoading()}">
+          <span class="text-muted">/</span>
+          <input type="text" class="input-file-search-regexp" placeholder="Regular Expression" data-bind="
+            event: {
+              keyup: input.fsSearchOnEnder
+            },
+            attr: {
+              id: input.name + '_regexp_search_input'
+            },
+            value: input.fsSearchValue,
+            textInput: input.fsSearchValue,
+            disable: input.fsIsLoading()
+          "/>
+          <span class="text-muted">/</span>
+          <input type="text" class="input-file-search-flags" placeholder="Flags" data-bind="
+            event: {
+              keyup: input.fsSearchOnEnder
+            },
+            textInput: input.fsSearchFlagsValue,
+            disable: input.fsIsLoading()
+          "/>
+          <!-- ko if: input.fsSearchValue -->
+          <div class="input-file-search-clear">
+            <i class="fa fa-times text-danger" data-bind="click: input.fsClearSearch"></i>
+          </div>
+          <!-- /ko -->
+        </div>
+        <div class="input-file-search-button">
+          <button class="btn btn-primary" data-bind="click: input.fsGetFilesByRegExp">
+            <i class="fa fa-search"></i>
+          </button>
+        </div>
+      </div>
+      <div data-bind="css: {'has-error': !input.valid(), 'wf-no-poiner-events': input.fsIsMoreLoading()}">
+        <div class="form-control input-file-selector input-file-selector-regexp" data-bind="attr: {id: input.name + '_scroll_container'}">
+        <!-- ko if: !input.fsIsLoading() -->
+          <div class="fs-scrollable-files-container">
+            <!-- ko foreach: input.fsFiles() -->
+              <div class="batch-workfows-fs-item">
+                <input type="checkbox"
+                  class="batch-workfows-fs-item-checkbox"
+                  data-bind="
+                    name: input.name + '_search_checkbox',
+                    checkedValue: $data.uid,
+                    checked: input.fsSelectedFiles(),
+                    event: { change: input.fsHandleChangeCheckbox }
+                  "
+                />
+                <span data-bind="click: input.fsToggleCheckbox">
+                  <span class="batch-workfows-fs-item-path" data-bind="text: $data.path"></span>
+                  <span class="batch-workfows-fs-item-name" data-bind="text: $data.name"></span>
+                </span>
+              </div>
+            <!-- /ko -->
+            <!-- ko if: input.fsIsMoreLoading() -->
+              <div class="wf-fs-more-loader">
+                <div class="wf-fs-more-loader-spinner">
+                  <i class="fa fa-spinner fa-spin"></i>&nbsp;loading
+                </div>
+              </div>
+            <!-- /ko -->
+          </div>
+        <!-- /ko -->
+        <!-- ko if: input.fsIsLoading() -->
+          <div class="text-center pfda-padded-v">
+            <i class="fa fa-spinner fa-spin fa-2x"></i>
+          </div>
+        <!-- /ko -->
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>

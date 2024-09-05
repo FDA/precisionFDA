@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Browser</title>
+  </head>
+
+  <body>
+    <div id="svgHolder">Dalliance genome browser goes here. If this note does not disappear soon, there was a problem loading the code.</div>
+    <div id="loadingStatus">Loading...</div>
+    <script language="javascript">
+      function renderBrowser() {
+        var options = {files:<%= raw @files_json %>};
+        var sources = [];
+
+        sources.push({
+          name: 'Genome',
+          twoBitURI: 'https://api.dnanexus.com/F/D/kbGB8kX54vq4PqVPQK9J8xV1VjjQ4Pbk75fKxjB1/hs37d5.2bit',
+          tier_type: 'sequence',
+          provides_entrypoints: true,
+          pinned: true
+        });
+
+        sources.push(
+                      {name: 'Genes',
+                      desc: 'Gene structures from GENCODE 19',
+                      bwgURI: 'https://api.dnanexus.com/F/D/f9032P65QG3xf2qzpf1g57Yy9q86BPQq4p47YxxY/gencode19.bb',
+                      stylesheet_uri: 'https://api.dnanexus.com/F/D/fqGXGzYKyQVzQ187FzZ1jPB21kv7gXBxzxfx2g52/gencode19.xml',
+                      collapseSuperGroups: true,
+                      trixURI: 'https://api.dnanexus.com/F/D/xF1fQqjPx0gjFfBKpkzFygzj6qbJf0pfjBjfK722/gencode19.ix',
+                      trixxURI: 'https://api.dnanexus.com/F/D/F9G97gXP6Pby7PQj9G3y3G4v7Q4G6qf91q9p8jy1/gencode19.ixx'});
+
+
+        // Auto cluster the files
+        var pathToURL = {};
+        for (var i = 0; i < options.files.length; ++i) {
+          pathToURL[options.files[i].name] = options.files[i].url;
+        }
+
+        // Add all vcf/tbi pairs
+        for (var path in pathToURL) {
+          var filename = path.split("/").pop();
+          if (pathToURL[path + ".tbi"] != null) {
+            sources.push({
+              name: filename,
+              tier_type: "tabix",
+              payload: "vcf",
+              uri: pathToURL[path],
+              indexURI: pathToURL[path + ".tbi"]
+            });
+          }
+        }
+
+        var browser_options = {
+          chr: '21',
+          cookieKey: 'human-hs37d5',
+          coordSystem: {
+            speciesName: 'Human',
+            taxon: 9606,
+            auth: 'GRCh',
+            version: '37'
+          },
+          fullScreen: true,
+          setDocumentTitle: true,
+          sources: sources,
+          uiPrefix: 'https://dnanexus.github.io/reporting-assets/dalliance/5412566/',
+          viewStart: 15573316,
+          viewEnd: 15621801
+        };
+
+        var b = new Browser(browser_options);
+      }
+
+      var statusContainer = document.getElementById('loadingStatus');
+      var script = document.createElement('script');
+      script.src = "https://dnanexus.github.io/reporting-assets/dalliance/5412566/dalliance-all.js"
+      document.body.appendChild(script);
+
+      script.onload = function() {
+        console.info('Browser script successfully loaded.');
+        renderBrowser();
+        statusContainer.parentNode.removeChild(statusContainer);
+      };
+
+      script.onerror = function() {
+        console.error('Error while loading Browser script.');
+        statusContainer.innerText = 'Error while loading Browser script.';
+      };
+    </script>
+  </body>
+</html>

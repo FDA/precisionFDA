@@ -1,0 +1,8 @@
+<ul class="nav nav-tabs nav-tabs-padded" role="tablist">
+  <li role="presentation" class="<% if controller_name == 'spaces' %>active<% end %>">
+    <a href="/spaces" aria-controls="tab-spaces">
+      <i class="fa fa-fw fa-object-group"></i>
+      <span class="tab-label">SPACES</span>&nbsp;(<%= Space.accessible_by(current_user).count %>)
+    </a>
+  </li>
+</ul>

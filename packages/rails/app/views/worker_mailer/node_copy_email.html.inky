@@ -1,0 +1,47 @@
+<wrapper>
+  <div class="hidden-email-preview">
+    <%= @subject %>
+  </div>
+  <spacer size="16"></spacer>
+  <container class="header">
+    <row>
+      <columns>
+        <a class="brand" href="<%= HOST %>" title="precisionFDA">
+          <img class="header-image" src="<%= HOST %>/assets/precisionFDA.email.dark.png" />
+        </a>
+      </columns>
+      <columns>
+        <p class="header-title text-right"><%= @subject %></p>
+      </columns>
+    </row>
+  </container>
+  <container class="radius">
+    <row>
+      <columns>
+        <p><%= @subject %></p>
+          <% if @not_copied_folders.present? %>
+            <p>
+              The following folders haven't been copied since they already exist in <%= @destination %>:
+              <ul>
+                <% @not_copied_folders.each do |folder| %>
+                  <li><%= folder.name %>
+                <% end %>
+              </ul>
+            </p>
+          <% end %>
+          <% if @not_copied_files.present? %>
+            <p>
+              The following files haven't been copied since they already exist in <%= @destination %>:
+              <ul>
+                <% @not_copied_files.each do |file| %>
+                  <li><%= file.name %>
+                <% end %>
+              </ul>
+            </p>
+          <% end %>
+        </p>
+      </columns>
+    </row>
+  </container>
+  <spacer size="16"></spacer>
+</wrapper>

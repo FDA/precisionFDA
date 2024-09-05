@@ -1,0 +1,38 @@
+<%= grid(submissions_grid, show_filters: defined?(show_filters) ? show_filters : :always) do |g|
+  g.blank_slate partial:  "_partials/empty_grid"
+
+  g.column name: 'Name', attribute: 'name', assoc: :job do |submission|
+    [content_tag(:a, submission.job.name,
+      tabindex: 0,
+      role: "button",
+      "data-trigger": "focus",
+      "data-toggle": "popover",
+      name: "#{submission.name}",
+      desc: "#{submission.desc}",
+      class: "strong"
+    ), {class: "submission-popover"}]
+  end
+
+  g.column name: 'Submitted by', attribute: 'dxuser', assoc: :user do |submission|
+    link_to(submission.user.full_name, user_path(submission.user.dxuser))
+  end
+
+  g.column name: 'Input File' do |submission|
+    content_tag(:ul, "", class: "submission-ul") do
+      submission.job.input_files.enum_for(:each_with_index).collect do |file, index|
+        if file.present?
+          content_tag(:li, unilinkfw(file, target: "_blank"))
+        else
+          content_tag(:li,
+            content_tag(:span, " ", class: "fa fa-file-o fa-fw") + " " + submission._inputs[index]
+          )
+        end
+      end.join.html_safe
+    end
+  end
+
+  g.column name: 'Created', attribute: 'created_at', auto_reload: true, filter_type: :standard do |submission|
+    submission.created_at.to_s(:human)
+  end
+
+end %>

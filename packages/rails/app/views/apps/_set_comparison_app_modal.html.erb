@@ -1,0 +1,24 @@
+<div id="set_comparison_app_modal" class="modal fade modal-with-loader" data-bind="css: {loading: setAsDefaultLoading}">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        <h4 class="modal-title">Set comparison app</h4>
+      </div>
+      <div class="loader-container">
+        <div class="loader">
+          <i class="fa fa-spinner fa-spin"></i>
+        </div>
+      </div>
+      <div class="modal-body">
+        <p>Are you sure you want to set this app as comparison default?</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-default" data-dismiss="modal" tabindex="-1" >No</button>
+        <button class="btn btn-primary" data-bind="click: setAppAsDefault">Yes</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->

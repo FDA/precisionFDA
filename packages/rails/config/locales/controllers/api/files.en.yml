@@ -1,0 +1,6 @@
+en:
+  api:
+    files:
+      copy:
+        files_are_copying: Files are being copied, it may take several minutes.
+                           The files will appear when copying is complete.

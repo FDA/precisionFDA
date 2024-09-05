@@ -1,0 +1,6 @@
+# TODO(samuel) migrate entries from global .gitignore file
+
+.build_cache/
+storybook-static/
+build-storybook.log
+.swc

@@ -1,0 +1,27 @@
+<script type="text/html" id="comparisons_input_template">
+<!-- ko if: Array.isArray($data) && $data.length > 0 -->
+<table class="variant-inputs">
+  <tbody data-bind="foreach: { data: $data, as: 'input' }">
+    <tr class="variant-input-tr" data-bind="css: {required: input.required}">
+      <td class="variant-input-td-label">
+        <div class="file-label">
+          <span data-bind="text: input.label"></span>
+        </div>
+        <div class="file-optional" data-bind="visible: !input.required">Optional</div>
+      </td>
+      <td>
+        <div data-bind="template: { name: 'pfda_app_input_template', data: input }"></div>
+      </td>
+    </tr>
+    <tr class="variant-input-tr-padded">
+      <td colspan="2">
+        <div class="file-help-text" data-bind="visible: input.help, text: input.help"></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<!-- /ko -->
+</script>
+
+
+<%= render "/_partials/apps/app_input_template" %>

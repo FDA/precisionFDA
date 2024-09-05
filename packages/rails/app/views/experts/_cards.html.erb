@@ -1,0 +1,53 @@
+<% if (experts.count > 0) %>
+  <div class="pfda-cards pfda-cards-list">
+    <% experts.each do |e| %>
+    <div class="pfda-card pfda-card-list pfda-card-padded">
+      <div class="pfda-card-header">
+        <div class="text-muted center-block text-center">
+          <p>
+            <%= link_to image_tag(e.image, class: 'img-rounded', height: '250px'), expert_path(e) %>
+          </p>
+        </div>
+        <div class="text-center">
+          <div class="pfda-card-title">
+            <%= link_to (e.title), expert_path(e) %>
+          </div>
+          <p>
+            <% if e.open? %>
+              <span class="label label-success"><span class="fa fa-check"></span> Open</span>
+            <% else %>
+              <span class="label label-default"><span class="fa fa-lock"></span> Closed</span>
+            <% end %>
+            <% if e.editable_by?(@context) %>
+              <% if e.is_public? %>
+                <span class="label label-primary"><span class="fa fa-eye"></span> Public</span>
+              <% else %>
+                <span class="label label-warning"><span class="fa fa-eye-slash"></span> Private</span>
+              <% end %>
+            <% end %>
+          </p>
+          <ul class="pfda-card-metadata pfda-card-metadata-glued list-inline list-inline-bullets">
+            <li><%= local_date(e.created_at, '%B %e, %Y') %></li>
+          </ul>
+          <ul class="pfda-card-metadata pfda-card-metadata-glued list-inline list-inline-bullets">
+            <li><span class="pfda-card-metadata-value"><%= e.answered_questions.count %></span> <%= "Answer".pluralize(e.answered_questions.count) %></li>
+            <li><span class="pfda-card-metadata-value"><%= e.total_comment_count %></span> <%= "Comment".pluralize(e.total_comment_count) %></li>
+          </ul>
+        </div>
+      </div>
+      <div class="text-center">
+        <% if @context.can_administer_site? %>
+          <%= link_to edit_expert_path(e), class: 'btn btn-default btn-sm' do %>
+            <span class="fa fa-pencil"></span> Edit
+          <% end %>
+        <% end %>
+        <% if e.editable_by?(@context) %>
+          <%= link_to dashboard_expert_path(e), class: 'btn btn-default btn-sm' do %>
+            <span class="fa fa-dashboard fa-fw"></span> View Your Expert Dashboard
+          <% end %>
+        <% end %>
+      </div>
+    </div>
+    <% end %>
+  </div>
+<% end %>

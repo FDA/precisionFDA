@@ -1,0 +1,24 @@
+@import "_common"
+
+.pfda-participants-section
+  border-top: 1px solid $border-default-color
+  .pfda-participants
+    min-height: 75px
+    @include flexbox
+    @include flex-wrap(wrap)
+    @include align-items(center)
+    @include align-content(stretch)
+    @include justify-content(center)
+
+    .pfda-participant
+      padding: $padding-large-horizontal * 2
+      width: 200px
+      text-align: center
+
+      &:hover
+        opacity: 0.8
+
+      img
+        height: auto
+        max-height: 75px
+        max-width: 100%

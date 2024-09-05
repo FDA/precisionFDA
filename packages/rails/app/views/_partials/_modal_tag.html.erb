@@ -1,0 +1,40 @@
+<div id="tags-modal" class="tags-modal modal fade">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">
+          Edit tags for <i><%= item_name %></i>
+          <br />
+          <small><span class="fa fa-globe" aria-hidden="true"></span> Tags are public to the community</small>
+        </h4>
+      </div>
+      <%= form_for item, url: set_tags_path, method: :post do |f| %>
+      <div class="modal-body">
+        <input type="hidden" name="taggable_uid" value="<%= item.uid %>" />
+        <div class="form-group">
+          <label class="control-label">Tags (comma-separated)</label>
+          <input type="text" name="tags" class= "form-control input-lg", placeholder="e.g. foo, bar..." value="<%= (tags_list - (suggested_tags || [])).join(', ') %>" />
+        </div>
+
+        <% if !suggested_tags.nil? && suggested_tags.size > 0 %>
+        <div class="form-group">
+          <label class="control-label">Suggested tags</label>
+          <% suggested_tags.each do |suggested_tag| %>
+            <div class="checkbox">
+              <label>
+                <input type="checkbox" name="suggested_tags[]" value="<%= suggested_tag %>" <%= tags_list.include?(suggested_tag) ? 'checked': '' %>> <%= suggested_tag %>
+              </label>
+            </div>
+          <% end %>
+        </div>
+        <% end %>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal" tabindex="-1">Cancel</button>
+        <button type="submit" class="btn btn-primary" data-disable-with="Updating...">Update tags</button>
+      </div>
+      <% end %>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->

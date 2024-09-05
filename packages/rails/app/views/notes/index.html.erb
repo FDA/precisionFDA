@@ -1,0 +1,43 @@
+<% content_for :title do %>Notes<% end %>
+
+<div class="pfda-toolbar">
+  <ul class="nav nav-pills nav-pills-center nav-pills-sm">
+    <li class="<% if action_name == 'index' %>active<% end %>">
+      <%= link_to notes_path do %>
+        <span class="fa fa-sticky-note"></span> <span class="pill-label">My Notes</span>
+      <% end %>
+    </li>
+    <li class="<% if action_name == 'featured' %>active<% end %>">
+      <%= link_to featured_notes_path do %>
+        <span class="fa fa-flag"></span> <span class="pill-label">Featured</span>
+      <% end %>
+    </li>
+    <li class="<% if action_name == 'explore' %>active<% end %>">
+      <%= link_to explore_notes_path do %>
+        <span class="fa fa-globe"></span> <span class="pill-label">Explore</span>
+      <% end %>
+    </li>
+  </ul>
+</div>
+
+<div class="pfda-toolbar">
+  <div class="btn-group">
+    <%= link_to notes_path(), class: 'btn btn-primary', method: :post, data: {disable_with: "Creating Note..."} do %>
+      <span class="fa fa-plus fa-fw"></span> New Note
+    <% end %>
+  </div>
+</div>
+
+<% if @notes.present? && @notes.count > 0 %>
+  <%= render "notes/cards", notes: @notes %>
+<% else %>
+  <div class="container-fluid container-padded">
+    <div class="alert alert-info">
+      <% if action_name == 'index' %>
+        <span class="fa fa-info-circle"></span> Notes you create will show up here. Meanwhile, check out our <%= link_to "Featured Notes", featured_notes_path %> or <%= link_to "explore community contributions", explore_notes_path %>
+      <% else %>
+        We couldn't find any notes here
+      <% end %>
+    </div>
+  </div>
+<% end %>

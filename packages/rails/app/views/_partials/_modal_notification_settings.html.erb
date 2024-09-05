@@ -1,0 +1,43 @@
+<div id="notification_settings_modal" class="modal fade modal-with-loader">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        <h4 class="modal-title">Notification Settings</h4>
+      </div>
+      <div class="loader-container">
+        <div class="loader">
+          <i class="fa fa-spinner fa-spin"></i>
+        </div>
+      </div>
+      <div class="modal-body">
+        <form class="form-horizontal">
+          <div class="form-group">
+            <label for="notification_settings_modal_role" class="col-sm-4 control-label">Choose Role:</label>
+            <div class="col-sm-10 col-md-offset-1">
+              <select class="form-control" name="notification_settings_modal_role" id="notification_settings_modal_role"></select>
+            </div>
+          </div>
+          <div id="notification_settings_modal_check_all" class="hidden">
+            <div class="form-group ">
+              <div class="checkbox col-md-offset-5">
+                <label for="notification_settings_modal_check_all_input">
+                  <input type="checkbox" name="notification_settings_modal_check_all_input" id="notification_settings_modal_check_all_input">
+                  All
+                </label>
+              </div>
+            </div>
+            <hr>
+          </div>
+          <div id="notification_settings_modal_settings"></div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-default" data-dismiss="modal" tabindex="-1" >Cancel</button>
+        <button id="notification_settings_modal_submit" class="btn btn-primary">Save Settings</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->

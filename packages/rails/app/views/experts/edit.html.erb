@@ -1,0 +1,24 @@
+<% content_for :title do %>Edit <%= user_title(@expert.user) %><% end %>
+
+<div class="page-header">
+  <div class="page-title expert-header-remediation">
+    <h1>
+      <span class="fa fa-groups"></span>
+      Edit Expert Information
+    </h1>
+  </div>
+</div>
+
+<div class="container-fluid container-padded">
+  <%= form_for @expert, url: expert_path(@expert), method: :put, html: {class: 'form form-horizontal'} do |f| %>
+
+    <%= render "experts/form_fields", f: f %>
+
+    <div class="form-group">
+      <div class="col-sm-offset-3">
+        <%= f.submit "Update", class: 'btn btn-primary', data: {disable_with: "Updating..."} %>
+      </div>
+    </div>
+  <% end %>
+  <%= render "_partials/admin/modal_image_uploader" %>
+</div>

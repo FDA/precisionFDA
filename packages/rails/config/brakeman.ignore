@@ -1,0 +1,114 @@
+{
+  "ignored_warnings": [
+    {
+      "warning_type": "Redirect",
+      "warning_code": 18,
+      "fingerprint": "32c3781bb33471096864f1d1b0deb3683e4143f15bc566155f2c376415a4f2f9",
+      "check_name": "Redirect",
+      "message": "Possible unprotected redirect",
+      "file": "app/controllers/api/jobs_controller.rb",
+      "line": 322,
+      "link": "https://brakemanscanner.org/docs/warning_types/redirect/",
+      "code": "redirect_to(Job.accessible_by(@context).find_by(:uid => params[:id]).https_job_external_url)",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "Api::JobsController",
+        "method": "open_external"
+      },
+      "user_input": "Job.accessible_by(@context).find_by(:uid => params[:id]).https_job_external_url",
+      "confidence": "High",
+      "note": ""
+    },
+    {
+      "warning_type": "Weak Hash",
+      "warning_code": 90,
+      "fingerprint": "788cfa9e741ffde67620a52a7cd027ad5191b6eea3388e4d6dded17d4e8eca07",
+      "check_name": "WeakHash",
+      "message": "Weak hashing algorithm used: SHA1",
+      "file": "config/initializers/fips.rb",
+      "line": 52,
+      "link": "https://brakemanscanner.org/docs/warning_types/weak_hash/",
+      "code": "OpenSSL::Digest::SHA1.new",
+      "render_path": null,
+      "location": null,
+      "user_input": null,
+      "confidence": "Medium",
+      "note": ""
+    },
+    {
+      "warning_type": "Weak Hash",
+      "warning_code": 90,
+      "fingerprint": "80992a8086d9d2006ec3d0c4bf366683144605bebd069c32261079e91024b6ff",
+      "check_name": "WeakHash",
+      "message": "Weak hashing algorithm used: MD5",
+      "file": "config/initializers/fips.rb",
+      "line": 57,
+      "link": "https://brakemanscanner.org/docs/warning_types/weak_hash/",
+      "code": "Digest::MD5.prepend(SHA256_OpenSSL)",
+      "render_path": null,
+      "location": null,
+      "user_input": null,
+      "confidence": "Medium",
+      "note": ""
+    },
+    {
+      "warning_type": "Weak Hash",
+      "warning_code": 90,
+      "fingerprint": "d614fbb0e0cd59bedc7c4fb66d3f2a5d581b545a33af9eb1678f8b0728bd51b6",
+      "check_name": "WeakHash",
+      "message": "Weak hashing algorithm used: SHA1",
+      "file": "config/initializers/fips.rb",
+      "line": 58,
+      "link": "https://brakemanscanner.org/docs/warning_types/weak_hash/",
+      "code": "Digest::SHA1.prepend(SHA1_OpenSSL)",
+      "render_path": null,
+      "location": null,
+      "user_input": null,
+      "confidence": "Medium",
+      "note": ""
+    },
+    {
+      "warning_type": "Command Injection",
+      "warning_code": 14,
+      "fingerprint": "e1f954ab2d232975d34163addaa3a7195705049f25d3a6c87f760872666eed3a",
+      "check_name": "Execute",
+      "message": "Possible command injection",
+      "file": "app/services/files/file_uploader.rb",
+      "line": 119,
+      "link": "https://brakemanscanner.org/docs/warning_types/command_injection/",
+      "code": "`md5sum #{Tempfile.new(\"\").path} | cut -d ' ' -f 1`",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "Files::FileUploader",
+        "method": "md5sum"
+      },
+      "user_input": "Tempfile.new(\"\").path",
+      "confidence": "Medium",
+      "note": ""
+    },
+    {
+      "warning_type": "Command Injection",
+      "warning_code": 14,
+      "fingerprint": "f841b8b95dbca0b43886ce699567ed0c260aa3b1f9aa2463f0437f821f559b5f",
+      "check_name": "Execute",
+      "message": "Possible command injection",
+      "file": "app/services/asset_service.rb",
+      "line": 230,
+      "link": "https://brakemanscanner.org/docs/warning_types/command_injection/",
+      "code": "`md5sum #{Tempfile.new(\"\").path} | cut -d ' ' -f 1`",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "AssetService",
+        "method": "md5sum"
+      },
+      "user_input": "Tempfile.new(\"\").path",
+      "confidence": "Medium",
+      "note": ""
+    }
+  ],
+  "updated": "2021-10-14 20:13:32 +0300",
+  "brakeman_version": "5.1.1"
+}

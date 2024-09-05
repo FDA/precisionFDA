@@ -1,0 +1,180 @@
+@import "_common"
+
+.btn-right
+  float: right
+
+.btn-default-version
+  font-weight: bold
+  color: $brand-blue-dark
+
+  > *
+    font-weight: normal
+
+.btn-static
+  padding: $padding-base-vertical $padding-base-horizontal
+  display: inline-block
+  float: left
+
+  &.btn-default, &.btn-default:focus, &.btn-default:active
+    background-color: $gray-subtle
+    color: $text-muted
+    border-color: $gray-lighter
+
+    .fa
+      color: $text-muted
+
+.btn-success
+  .fa
+    color: $btn-success-color
+
+.btn.btn-default
+  font-weight: bold
+  .fa
+    color: $brand-red-primary
+  &:not(.disabled)
+    &:hover, &:focus, &:active, &.active
+      color: $brand-blue-primary
+      background-color: $brand-blue-subtler
+      border-color: $brand-blue-secondary
+
+.btn-link, .btn-link:hover, .btn-link:focus
+  text-decoration: none
+
+.btn-link-light
+  color: rgba(#fff, 0.9)
+  &:hover
+    color: #fff
+
+.btn-link-danger, .link-danger
+  color: $brand-blue-tertiary
+  &:hover
+    color: $brand-red-primary
+
+.btn-box
+  text-align: center
+  .fa
+    font-size: 50px
+
+.btn-upvote, .btn-upvote-link
+  min-width: 60px
+
+  .upvote-label:after
+    content: 'Upvote'
+
+  .upvote-count
+    margin: 5px 0
+
+  &.active:not(.disabled)
+    font-weight: bold
+    .upvote-count, .fa
+      color: $brand-red-secondary
+
+    &.btn-default
+      background-color: $brand-highlight
+      border-color: darken($brand-highlight, 10%)
+      color: $brand-red-secondary
+
+    .upvote-label:after
+      content: 'Upvoted'
+
+    &:hover
+      .upvote-count, .fa
+        color: $brand-red-primary
+
+.btn-reactions
+  padding-top: 10px
+  .btn-reaction
+    margin: 0 1px
+    display: block
+
+.btn-reaction
+  color: $brand-blue-tertiary
+  text-align: center
+  font-size: 16px
+  border: 1px solid lighten($brand-blue-tertiary, 30%)
+  border-radius: 10px
+  padding: 0 5px
+
+  &:hover:not(.disabled)
+    color: darken($brand-blue-tertiary, 15%)
+    border-color: lighten($brand-blue-tertiary, 20%)
+
+  &.active:not(.disabled)
+    font-weight: bold
+    background-color: lighten($brand-red-primary, 30%)
+    .upvote-count, .fa
+      color: $brand-red-secondary
+    &:hover
+      .upvote-count, .fa
+        color: $brand-red-primary
+
+  .upvote-count
+    display: inline-block
+    color: fade-out($brand-blue-tertiary, .5)
+    font-size: 12px
+    vertical-align: middle
+
+.btn-upvote-link
+  .upvote-count
+    margin: 0
+    margin-right: 5px
+
+.btn-follow
+  min-width: 60px
+
+  .follow-label:after
+    content: 'Join'
+
+  .follow-count
+    margin: 5px 0
+
+  &.active:not(.disabled)
+    font-weight: bold
+
+    &.btn-default
+      background-color: $gray-subtle
+      color: $text-muted
+      border-color: $gray-lighter
+
+      .fa
+        color: $text-muted
+
+    .follow-label:after
+      content: 'Joined'
+
+.dropdown-menu
+  max-height: 300px
+  overflow: auto
+  > li > a
+    cursor: pointer
+
+    .label
+      margin: 2px 0 0 4px
+
+.below-fold-actions
+  padding: 20px 10px 10px
+  border-top: 1px solid $border-default-color
+  text-align: center
+
+.btn-xs .badge
+  font-size: 75%
+
+.btn-circle-singleline
+  border-radius: 50%
+  text-align: center
+  border: 1px solid $link-color
+  display: inline-block
+
+  &.btn-circle-singleline-25
+    width: 25px
+    height: 25px
+    line-height: 25px
+    font-size: 75%
+
+  &.btn-circle-singleline-50
+    width: 50px
+    height: 50px
+    line-height: 50px
+
+  &:hover
+    border-color: $link-hover-color

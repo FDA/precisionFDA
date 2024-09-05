@@ -1,0 +1,20 @@
+<% content_for :title do %>New org admin<% end %>
+
+<div class="page-header">
+  <div class="page-title">New org admin</div>
+</div>
+
+<div>&nbsp;</div>
+
+<% if @state == "step1" %>
+  <%= render "/profile/provision_org/step_1" %>
+<% elsif @state == "step2" %>
+  <%= render "/profile/provision_org/step_2" %>
+<% elsif @state == "step3" %>
+  <%= render "/profile/provision_org/step_3" %>
+<% elsif @state == "step4" %>
+  <div class="container-padded">
+    <p>You have successfully provisioned <%= @singular ? "self-represented" : ("organization <strong>".html_safe + @org_handle + "</strong> and admin".html_safe) %> username <strong><%= @suggested_username %></strong>. An activation email will be sent to <%= @email %> with further instructions.</p>
+    <%= link_to("Return to Admin Dashboard", admin_root_path, class: "btn btn-primary") %>
+  </div>
+<% end %>

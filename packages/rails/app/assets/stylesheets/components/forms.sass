@@ -1,0 +1,24 @@
+@import "_common"
+
+.input-group-addon-thin
+  padding: 0
+
+.list-group-item
+  .checkbox
+    margin: 0
+
+.form-group-optional, .form-group:not(.required)
+  label
+    color: $text-muted
+    font-weight: 300
+
+// FontAwesome overrides the line-height that breaks this Bootstrap feature
+.form-control-feedback.fa
+  line-height: 34px
+
+.form-control.input-square
+  border-radius: 0
+
+.form.form-inline
+  .checkbox
+    margin-right: 10px

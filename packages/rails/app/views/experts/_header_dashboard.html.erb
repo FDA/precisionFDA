@@ -1,0 +1,22 @@
+<h2>
+  Your Expert Q&A Dashboard
+</h2>
+<p>
+  <br/>
+  <%= image_tag(@expert.image, class: 'img-rounded', height: '350px', alt: "Expert's profile picture") %>
+</p>
+
+<p>
+  <% if @expert.open? %>
+    <span class="label label-success open-button"><span class="fa fa-check"></span> Open</span>
+  <% else %>
+    <span class="label label-default closed-button"><span class="fa fa-lock"></span> Closed</span>
+  <% end %>
+  <% if @expert.editable_by?(@context) %>
+    <% if @expert.is_public? %>
+      <span class="label label-primary"><span class="fa fa-eye"></span> Public</span>
+    <% else %>
+      <span class="label label-warning private-button"><span class="fa fa-eye-slash"></span> Private</span>
+    <% end %>
+  <% end %>
+</p>

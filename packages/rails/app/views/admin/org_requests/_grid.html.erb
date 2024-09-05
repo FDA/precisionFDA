@@ -1,0 +1,42 @@
+<%= grid(@requests_grid, show_filters: defined?(show_filters) ? show_filters : :no, hide_csv_button: true) do |g|
+    g.column name: "Initiator", assoc: :initiator, attribute: "dxuser" do |request|
+      link_to request.initiator.dxuser, user_path(request.initiator.dxuser)
+    end
+
+    g.column name: "Initiator's Email", assoc: :initiator, attribute: "email" do |request|
+      link_to request.initiator.email, user_path(request.initiator.dxuser)
+    end
+
+    g.column name: "Organization", attribute: "name", assoc: :org do |request|
+      request.org.name
+    end
+
+    g.column name: "Request Type" do |request|
+      action_type(request)
+    end
+
+    g.column name: "Member", assoc: :member, attribute: "dxuser" do |request|
+      if request.remove_member?
+        link_to request.member.dxuser, user_path(request.member.dxuser)
+      else
+        "&mdash;".html_safe
+      end
+    end
+
+    g.column name: "Request State" do |request|
+      request.state.humanize.upcase
+    end
+
+    g.column name: "Action" do |request|
+      if request.new?
+        content_tag(:button, "Approve",
+          "class" => "btn btn-primary",
+          "data-bind" => "click: showApproveModal",
+          "data-request_id" => request.id,
+        )
+      else
+        "&mdash;".html_safe
+      end
+    end
+end
+%>

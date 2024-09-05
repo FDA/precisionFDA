@@ -1,0 +1,36 @@
+<%= render "licenses/header" %>
+
+<!-- Tab panes -->
+<div class="tab-content">
+  <div role="tabpanel" class="tab-pane tab-pane-padded active" id="tab-items">
+    <% if @license.editable_by?(@context) && @license.licensed_items.count > 0 %>
+    <div class="pfda-toolbar pfda-toolbar-transparent">
+      <div class="btn-group pull-right">
+        <%= link_to remove_items_license_path(@license), method: :post, data: { confirm: 'Are you certain you want to detach all items from this license?' }, class: "btn btn-danger" do %>
+          <span class="fa fa-ban"></span> Detach all items <span class="badge"><%= @license.licensed_items.count %></span>
+        <% end %>
+      </div>
+    </div>
+    <br>
+    <% end %>
+
+    <ul class="list-group">
+      <% if @items_count > 0 %>
+        <% @items.each do |item| %>
+          <li class="list-group-item clearfix">
+            <span class="label label-info text-uppercase"><%= item.licenseable.klass %></span> <%= unilinkfw(item.licenseable, target: "_blank") %>
+            <% if @license.editable_by?(@context) %>
+            <div class="btn-group pull-right">
+              <%= link_to "Detach", remove_item_license_path(@license.id, item.licenseable.uid), method: :post %>
+            </div>
+            <% end %>
+          </li>
+        <% end %>
+      <% else %>
+        <li class="list-group-item lead text-muted">
+          No item has been attached to this license yet
+        </li>
+      <% end %>
+    </ul>
+  </div>
+</div>

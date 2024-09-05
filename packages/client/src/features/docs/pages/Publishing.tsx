@@ -1,0 +1,225 @@
+/* eslint-disable react/no-unescaped-entities */
+import React from 'react'
+import { Link } from 'react-router-dom'
+import { useScrollToHash } from '../../../hooks/useScrollToHash'
+import { DocBody, DocsTip, DocTable } from '../styles'
+
+export const Publishing = () => {
+  useScrollToHash()
+  return (
+    <DocBody>
+      <h1>Publishing</h1>
+
+      <p>
+        Publishing is the process by which you can make any item accessible to
+        the greater precisionFDA community. By using publishing, you can
+        contribute reference data, software, results, or pretty much anything
+        else, so that others can use them. The process of publishing changes the
+        access permissions of an item from 'private' to 'public'.{' '}
+        <strong>NOTE:</strong> Currently there is no way to "unpublish" an item
+        (other than deleting it).
+      </p>
+      <p>
+        Since publishing an item means that others will be able to access it,
+        it's very important to understand the exact implications, to ensure that
+        you make a conscious decision. The following table summarizes what it
+        means to publish items of a given type:
+      </p>
+      <DocTable>
+        <thead>
+          <tr>
+            <th>Type</th>
+            <th>What does it mean to publish an item of that type?</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>App</td>
+            <td>
+              The app will appear in everyone's list of available apps to run.
+              Users will be able to run the app, and view the app's
+              specification (input and output spec, VM environment details and
+              app shell script).
+            </td>
+          </tr>
+          <tr>
+            <td>App asset</td>
+            <td>
+              The asset will appear in everyone's list of available assets.
+              Users will be able to use the asset when making apps, view the
+              asset's information (readme, and list of files), and download the
+              asset.
+            </td>
+          </tr>
+          <tr>
+            <td>Comparison</td>
+            <td>
+              The comparison will appear in everyone's list of available
+              comparisons. Users will be able to view comparison details
+              (including statistics such as sensitivity and positive predictive
+              value), visualize the comparison, and download any of the
+              comparison output files.
+            </td>
+          </tr>
+          <tr>
+            <td>File</td>
+            <td>
+              The file will appear in everyone's list of available files. Users
+              will be able to download the file or use it as input in their
+              jobs.
+            </td>
+            <td>
+              The file will appear in everyone's list of available files. Users
+              will be able to download the file or use it as input in their
+              jobs.
+              <strong>NOTE:</strong> only files in root folder can be published.
+            </td>
+          </tr>
+          <tr>
+            <td>Job</td>
+            <td>
+              Users will be able to view job details, such as which
+              parameters/values were provided as inputs. <strong>NOTE:</strong>{' '}
+              users will not see the job's log.
+            </td>
+          </tr>
+          <tr>
+            <td>Note</td>
+            <td>
+              The note will appear in everyone's list of notes. Users will be
+              able to read the note.
+            </td>
+          </tr>
+        </tbody>
+      </DocTable>
+      <p>
+        The publishing interface presents you with the item you chose to publish
+        at the top, and preselects that item for publication. If the item has
+        related items, then those are also offered for publication. Among the
+        related items, those that are already public are shown as such and
+        cannot be selected for publication. Those that are owned by you and can
+        be published have a checkbox next to them. Tick that checkbox to enable
+        publication. If the item you tick contains additional related items,
+        those will be presented as well, etc. <strong>IMPORTANT:</strong> For
+        items with a long chain of dependencies (such as a file produced by a
+        series of consecutive jobs) this interface can get very deep. For that
+        reason, prior to publishing any item,{' '}
+        <u>
+          we strongly suggest that you first{' '}
+          <Link to="/docs/tracking">track the item</Link> to understand exactly
+          its dependencies and their access level
+        </u>
+        . The items offered for publication are derived in the same way as the
+        "source items / ingredients" shown in the tracking graph. The tracking
+        graph offers a more concise way to summarize the full landscape of
+        relationships.
+      </p>
+      <p>
+        For example, if you publish a note, the publishing interface will ask if
+        you would like to also publish its attachments. If you publish a file,
+        it will offer to publish the job it was generated from, and the app that
+        was used for that job, etc. We recommend publishing related items, to
+        ensure that others have access to complete information and are able to
+        reproduce your work. To better understand the implications of NOT
+        publishing a related item and instead keeping it private, consult the
+        following table:
+      </p>
+      <DocTable>
+        <thead>
+          <tr>
+            <th>If you publish a...</th>
+            <th>But not a related...</th>
+            <th>Then</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Note</td>
+            <td>Attachment</td>
+            <td>
+              When reading the note, users will see the attachment by its id and
+              not its name (i.e. file-Bk0kjkQ0ZP01x1KJqQyqJ7yq) and will not be
+              able to access the attachment.
+            </td>
+          </tr>
+          <tr>
+            <td>App</td>
+            <td>App asset</td>
+            <td>
+              Users will still be able to run the app on precisionFDA, but they
+              will not be able to access its private app asset. As a result,
+              when users fork the app, the private asset will not be included in
+              the list of assets, essentially leading to a nonfunctional fork.
+              Moreover, users won't be able to run the app outside of
+              precisionFDA, since they can't download and extract the private
+              asset.
+              <br />
+              <br />
+              Keeping an asset private may be needed in the case where you don't
+              want people to access sensitive software information, such as any
+              code that is not open-source and whose executables you don't want
+              to openly distribute.
+            </td>
+          </tr>
+          <tr>
+            <td>Comparison</td>
+            <td>Input file</td>
+            <td>
+              When viewing comparison details, users will see the input files by
+              their ids and not their names (i.e. file-Bk0kjkQ0ZP01x1KJqQyqJ7yq)
+              and will not be able to access the input files. However, they will
+              still be able to access the comparison outputs, which pretty much
+              provide for a copy of the comparison inputs (since they simply
+              split the input in terms of true positives and false positives,
+              etc.)
+            </td>
+          </tr>
+          <tr>
+            <td>File</td>
+            <td>Job</td>
+            <td>
+              In the file listing, users will see a job id (i.e.
+              job-BjgGbqQ02308XVYgV4px5Zy2) in the "Origin" column, and will not
+              be able to see further information as to how the file got
+              generated.
+              <br />
+              <br />
+              Keeping a job private may be needed in the case where the job
+              accessed sensitive information. For example, when you bring a file
+              into precisionFDA by running the "Fetch file from URL", and later
+              publish the file, you will be offered to publish the job. If the
+              input URL is sensitive information, then keep the job private.
+            </td>
+          </tr>
+          <tr>
+            <td>Job</td>
+            <td>Input file</td>
+            <td>
+              When viewing job details, users will see the input files by their
+              ids and not their names (i.e. file-Bk0kjkQ0ZP01x1KJqQyqJ7yq) and
+              will not be able to reproduce the results starting from the same
+              inputs, since those are inaccessible to them.
+            </td>
+          </tr>
+          <tr>
+            <td>Job</td>
+            <td>App</td>
+            <td>
+              When viewing job details, users will see the app by its id and not
+              its name (i.e. app-Bk7jzXj02902969jx5q2pfzq) and will not be able
+              to reproduce the work, since they can't run that app.
+            </td>
+          </tr>
+        </tbody>
+      </DocTable>
+      <DocsTip>
+        <span className="fa fa-lightbulb-o" aria-hidden="true" />{' '}
+        <strong>TIP:</strong> You can always use{' '}
+        <Link to="/docs/tracking">the tracking feature</Link> to review the
+        permissions of an item and its related items, both before and after
+        publication. This will give you an idea of what is accessible to
+        everybody (shown in green) versus only to you (shown in white).
+      </DocsTip>
+    </DocBody>
+  )
+}

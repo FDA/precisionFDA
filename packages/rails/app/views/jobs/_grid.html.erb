@@ -1,0 +1,74 @@
+<%= grid(jobs_grid, show_filters: defined?(show_filters) ? show_filters : :always) do |g|
+  g.blank_slate do
+    content_tag :div, "No jobs found", class: 'alert alert-info'
+  end
+
+  if defined?(app)
+    g.row_attributes do |job|
+      if job.app_id == app.id
+        {class: 'job-revision-active'}
+      end
+    end
+  end
+
+  g.column name: 'State', attribute: 'state' do |job|
+    [job.state, {class: "col-state state-#{job.state}"}]
+  end
+
+  g.column name: 'Job', attribute: 'name' do |job|
+    unilinkfw(job, scope_icon: (defined?(scope_icon) ? scope_icon : true))
+  end
+
+  if !defined?(app)
+    g.column name: 'App', attribute: 'title', assoc: :app  do |job|
+      unilinkfw(job.app)
+    end
+  end
+
+  if defined?(app)
+    g.column name: 'Revision', attribute: 'revision', assoc: :app do |job|
+      job.app.revision
+    end
+  end
+
+  g.column name: 'Workflow' do |job|
+    if job.try(:analysis).try(:workflow)
+      unilinkfw(job.analysis.workflow)
+    else
+      "N/A"
+    end
+  end
+
+  g.column name: 'Instance type' do |job|
+    job.resolved_instance_type
+  end
+
+  g.column name: 'Duration' do |job|
+    humanize_seconds(job.runtime)
+  end
+
+  g.column name: 'Cost in dollars' do |job|
+    content_tag(:span, " ", class: "fa fa-industry fa-fw") + " " + job.energy_string
+  end
+
+  g.column name: 'Created', attribute: 'created_at', auto_reload: true, filter_type: :standard do |job|
+    job.created_at.to_s(:human)
+  end
+
+  if !defined?(hide_access) || !hide_access
+    g.column name: 'Access', attribute: 'scope', allow_multiple_selection: false,
+      custom_filter: {'Public' => "public", 'Private' => "private"} do |job|
+      if job.public?
+        "Public"
+      elsif job.private?
+        "Private"
+      else
+        unilinkfw(item_from_uid(job.scope))
+      end
+    end
+  end
+
+  g.column name: 'Tags', attribute: 'name', assoc: [:taggings, :tag] do |item|
+    render "_partials/tags_list", tags_list: item.all_tags_list
+  end
+end -%>

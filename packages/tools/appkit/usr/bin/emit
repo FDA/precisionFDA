@@ -1,0 +1,80 @@
+#!/bin/bash
+
+set -e -o pipefail
+
+if [[ "$#" -lt 2 ]]
+then
+  echo 'Usage for single value: emit <output_field_name> <value>' 1>&2
+  echo 'Usage for arrays: emit <output_field_name> <value1> <value2>' 1>&2
+  echo '       (at least 2 arguments expected; '"$#"' given)' 1>&2
+  exit 1
+fi
+
+if ! test -e /tmp/.tmp.fields
+then
+  dx describe $DX_JOB_ID --json | jq -r .app >/tmp/.tmp.appid
+  dx describe $(< /tmp/.tmp.appid) --json | jq '[.outputSpec | .[] | {(.name): .class}] | add' >/tmp/.tmp.fields
+fi
+
+jq -r --arg out "$1" '.[$out]' < /tmp/.tmp.fields >/tmp/.tmp.class
+
+field_class="$(< /tmp/.tmp.class)"
+
+if [[ "$field_class" == "" || "$field_class" == "null" ]]
+then
+  echo "Emit: Invalid output field '$1'" 1>&2
+  exit 1
+fi
+
+rm -f /tmp/.temp_job_error.json
+if test -e /home/dnanexus/job_error.json
+then
+  mv /home/dnanexus/job_error.json /tmp/.temp_job_error.json
+fi
+
+all_args=("$@")
+second_arg=("${all_args[@]:1}")
+echo "all_args \"${all_args[*]}\""
+echo "second_arg \"${second_arg[*]}\""
+
+echo "submitted field class $field_class"
+if [[ $field_class == array* ]]
+then
+  is_array=true
+  # strip word array
+  field_class=${field_class:6:20}
+else
+  is_array=false
+fi
+
+echo "is_array $is_array"
+echo "resulting field class $field_class"
+
+for item in "${second_arg[@]}"
+do
+  echo "item's value: $item"
+  if [[ "$field_class" == "file" ]]
+  then
+    mark-section "uploading local file '$item' as output field '$1'"
+    dx upload --no-progress --brief "$item" >/tmp/.tmp.uploaded_file_id
+    value="$(< /tmp/.tmp.uploaded_file_id)"
+  else
+    value="$item"
+  fi
+
+  mark-section "setting output field '$1'"
+  if [[ "$is_array" = true ]]
+  then
+    dx-jobutil-add-output --array --class "$field_class" -o /home/dnanexus/job_output.json "$1" "$value"
+  else
+    dx-jobutil-add-output --class "$field_class" -o /home/dnanexus/job_output.json "$1" "$value"
+  fi
+done
+
+if test -e /tmp/.temp_job_error.json
+then
+  mv -f /tmp/.temp_job_error.json /home/dnanexus/job_error.json
+else
+  rm -f /home/dnanexus/job_error.json
+fi
+

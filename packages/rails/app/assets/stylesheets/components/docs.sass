@@ -1,0 +1,176 @@
+@import "_common"
+
+$docs-nav-padding: 18px
+
+.docs-container
+  .pfda-pane-sidebar
+    .list-group-item:not(.list-group-item-header)
+      font-size: 18px
+
+.docs-content
+  position: relative
+
+  a
+    font-weight: bold
+
+  /*
+   * Side navigation
+   *
+   * Scrollspy and affixed enhanced navigation to highlight sections and secondary
+   * sections of docs content. */
+
+  /* By default it's not affixed in mobile views, so undo that*/
+
+  .bs-docs-sidebar.affix
+    position: static
+
+  /* First level of nav */
+
+  .bs-docs-sidenav
+    margin-top: 20px
+    margin-bottom: 20px
+    &.nav > li > a
+      font-weight: 400
+      font-size: 16px
+
+  @media (min-width: 768px)
+    .bs-docs-sidebar
+      padding-left: $docs-nav-padding
+
+  /* All levels of nav */
+
+  .bs-docs-sidebar .nav
+    >
+      li > a
+        display: block
+        padding: 4px $docs-nav-padding
+        color: $link-muted-color
+        &:hover, &:focus
+          padding-left: $docs-nav-padding - 1
+          color: $link-muted-hover-color
+          text-decoration: none
+          background-color: transparent
+          border-left: 1px solid $link-color
+      .active
+        > a, &:hover > a, &:focus > a
+          padding-left: $docs-nav-padding - 2
+          font-weight: bold
+          color: $link-color
+          background-color: transparent
+          border-left: 2px solid $link-color
+    .nav
+      display: none
+      /* Hide by default, but at >768px, show it */
+      padding-bottom: 10px
+      padding-left: $docs-nav-padding
+
+      >
+        li > a
+          font-size: 14px
+          padding-top: 1px
+          padding-bottom: 1px
+          font-weight: normal
+          padding-left: $docs-nav-padding
+          &:hover, &:focus
+            padding-left: $docs-nav-padding - 1
+        .active
+          > a, &:hover > a, &:focus > a
+            padding-left: $docs-nav-padding - 2
+            font-weight: 500
+
+  // Show and affix the side nav when space allows it
+  @media (min-width: $screen-md-min)
+    .bs-docs-sidebar
+      .nav > .active > ul
+        display: block
+      &.affix, &.affix-bottom
+        width: 300px
+      &.affix
+        position: fixed
+        // Undo the static from mobile first approach
+        top: 20px
+      &.affix-bottom
+        position: absolute
+        // Undo the static from mobile first approach
+        .bs-docs-sidenav
+          margin-top: 0
+          margin-bottom: 0
+      &.affix .bs-docs-sidenav
+        margin-top: 0
+        margin-bottom: 0
+    // Widen the fixed sidebar
+
+  @media (min-width: $screen-lg-min)
+    // Widen the fixed sidebar again
+    .bs-docs-sidebar
+      &.affix-bottom, &.affix
+        width: 263px
+
+  /*
+   * Docs sections
+   *
+   * Content blocks for each component or feature.
+   */
+
+  /* Space things out */
+
+  .bs-docs-section
+    margin-bottom: 60px
+    &:last-child
+      margin-bottom: 0
+    &.bs-docs-media-section
+      text-align: center
+      padding: $padding-large-horizontal
+      border-radius: $border-radius-base
+      background-color: $state-warning-bg
+      color: $state-warning-text
+      border: 1px solid $state-warning-border
+      box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.1)
+    &.bs-docs-media-img
+      margin: 15px 0px 20px
+    &.bs-docs-media-img-smaller
+      width: 65%
+    &.bs-docs-media-img-smallest
+      width: 40%
+    img
+      width: 100%
+
+  .h1[id]
+    color: #344967
+    padding-bottom: 20px
+    margin-top: 0
+    border-bottom: 1px solid $border-default-color
+
+  // Show and affix the side nav when space allows it
+  @media (max-width: $screen-sm-max)
+    .nav
+      .nav
+        padding-left: 0
+
+  // Show and affix the side nav when space allows it
+  @media (min-width: $screen-md-min)
+    .bs-docs-sidebar
+      .nav > .active > ul
+        display: block
+      &.affix, &.affix-bottom
+        width: 300px
+      &.affix
+        position: fixed
+        // Undo the static from mobile first approach
+        top: 20px
+      &.affix-bottom
+        position: absolute
+        // Undo the static from mobile first approach
+        .bs-docs-sidenav
+          margin-top: 0
+          margin-bottom: 0
+      &.affix .bs-docs-sidenav
+        margin-top: 0
+        margin-bottom: 0
+    // Widen the fixed sidebar
+
+  @media (min-width: $screen-lg-min)
+    // Widen the fixed sidebar again
+    .bs-docs-sidebar
+      &.affix-bottom, &.affix
+        width: 300px

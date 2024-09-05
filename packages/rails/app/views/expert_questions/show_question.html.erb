@@ -1,0 +1,43 @@
+<% content_for :title do %><%= user_title(@expert.user) %><% end %>
+
+<div class="pfda-toolbar">
+  <%= link_to qa_expert_path(@expert), class: "btn btn-default" do %>
+    <span class="fa fa-chevron-left"></span> Back to questions
+  <% end %>
+</div>
+
+<div class="page-header text-center">
+  <h2 class="expert-question-body text-center"><%= @expert_question.body %></h2>
+  <small class="expert-question-footer text-muted">
+    <% if @expert_question.edited? %>
+      <i>Modified from a question by </i>
+    <% else %>
+      Asked by
+    <% end %>
+    <%= user_link(@expert_question.user) %>
+  </small>
+</div>
+<div class="pfda-pane container-fluid">
+  <div class="pfda-pane-content pfda-pane-content-padded-xl">
+    <div class="expert-question">
+      <div class="text-center">
+        <%= image_tag(@expert.image, class: 'img-rounded', height: '300px') %>
+        <div class="expert-question-footer text-muted">
+          <small><br/>Answer updated <%= time_ago(@expert_question.expert_answer.updated_at) %></small>
+        </div>
+      </div>
+      <br/>
+      <div class="expert-blog-text">
+        <%= simple_format(@expert_question.expert_answer.body) %>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-16">
+        <%= render "comments/comments_wrapper", comments: @comments, items_from_params: @items_from_params, url: @item_comments_path, object: @expert_question %>
+      </div>
+    </div>
+    <div class="text-left">
+      <%= render "experts/disclaimer" %>
+    </div>
+  </div>
+</div>

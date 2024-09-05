@@ -1,0 +1,53 @@
+@import "_common"
+
+.nav.nav-tabs
+  background-color: $brand-blue-subtler
+
+.nav.nav-tabs, .nav.nav-pills
+  &.nav-tabs-contained
+    background-color: transparent
+
+  &.nav-tabs-padded
+    padding: $padding-base-vertical $padding-base-horizontal 0
+
+  &.nav-tabs-center
+    margin: auto
+
+  &.nav-tabs-centered
+    display: flex
+    justify-content: center
+
+  &.nav-tabs-lg
+    font-size: 24px
+    padding: $padding-large-vertical*2 $padding-large-horizontal 0
+    > li > a
+      padding-top: $padding-large-vertical
+      padding-bottom: $padding-large-vertical
+
+    .tab-help
+      font-size: 65%
+
+  .badge
+    color: lighten($brand-blue-tertiary, 10%)
+    padding: 3px
+    background-color: transparent
+
+  .tab-label
+    text-transform: uppercase
+  .tab-help
+    font-size: 85%
+    color: $brand-blue-tertiary
+    display: block
+
+.tab-pane
+  .nav.nav-tabs
+    background-color: #fff
+
+  &.tab-pane-padded, &.tab-pane-preview
+    padding: $padding-base-vertical $padding-base-horizontal
+
+  &.tab-pane-padded-lg
+    padding: $padding-large-vertical $padding-large-horizontal
+
+  &.tab-pane-padded-xl
+    padding: $padding-large-vertical*2 $padding-large-horizontal*2

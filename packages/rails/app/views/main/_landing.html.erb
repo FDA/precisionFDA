@@ -1,0 +1,124 @@
+<h1 class="sr-only">Welcome to precisionFDA</h1>
+<div class="jumbotron jumbotron-landing jumbotron-landing-guest jumbotron-particles">
+  <div class="container">
+    <div class="pfda-brand">
+      <%= image_tag("precisionFDA.white.navbar-guest.png", alt: "Welcome to PrecisionFDA", height: "60px") %>
+    </div>
+    <div class="btn-player-wrapper">
+      <a class="btn-player fa fa-play-circle" aria-label="Play precisionFDA Introduction Video">
+      </a>
+      <div class="jumbovideo">
+        <div class="jumbovideo-player-wrapper">
+          <iframe id="ytplayer" src="" frameborder="0" allowfullscreen allow="autoplay"></iframe>
+        </div>
+      </div>
+    </div>
+    <div class="guest-actions">
+      <p class="lead"><%= t('main.header') %></p>
+      <%= render "_partials/guest_actions" %>
+    </div>
+  </div>
+  <%= render "_partials/fisma_banner", :dynamic_id => 'FISMA security information 2'  %>
+</div>
+
+<% if @event.present? %>
+  <div class="showcase showcase-padded showcase-shadow container">
+    <%= render "_partials/event", event: @event %>
+  </div>
+<% end %>
+
+<div class="showcase showcase-padded-sm showcase-shadow container">
+  <div class="h3 text-muted text-left">Expert Spotlight:</div>
+  <%= render "experts/landing_cards", experts: @experts %>
+</div>
+
+<div class="jumbotron jumbotron-challenges-landing">
+  <div class="container">
+    <div class="row">
+      <div class="col-sm-3 col-md-2 col-lg-2 landing-btn">
+        <div class="h2">
+          <span class="fa fa-2x fa-trophy"></span>
+        </div>
+      </div>
+      <div class="col-sm-13 col-md-14 col-lg-14 text-margin">
+        <div class="h2">
+          precisionFDA Challenges
+        </div>
+        <div class="h4">
+          Engage and improve NGS software through community challenges
+        </div>
+      </div>
+      <div class="col-sm-8 col-md-8 landing-btn">
+        <% if Challenge.current.present? && Challenge.current.active? %>
+          <a class="btn accessible-btn-success btn-lg btn-block" href="<%= challenge_path(Challenge.current) %>" style="white-space: normal" data-turbolinks="false">
+            <span class="fa fa-user-plus"></span>
+            &nbsp;Participate in the Current Challenge
+          </a>
+          <br/>
+          <a class="btn accessible-btn-primary btn-md btn-block" href="/challenges" style="white-space: normal" data-turbolinks="false">
+            <span class="fa fa-info-circle"></span>
+            &nbsp;Learn About Previous Challenges
+          </a>
+        <% else %>
+          <div class="h1">
+            <a class="btn accessible-btn-danger btn-lg btn-block" href="/challenges" data-turbolinks="false">Learn About Challenges</a>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="jumbotron jumbotron-news-landing">
+  <div class="container">
+    <div class="row">
+      <div class="col-sm-16 col-md-16">
+        <div class="h2">
+          Latest precisionFDA News
+        </div>
+        <div class="h4">
+          Learn about the latest precisionFDA events and news
+        </div>
+      </div>
+      <div class="col-sm-8 col-md-8 landing-btn">
+        <div class="h1">
+          <a class="btn accessible-btn-default btn-lg btn-block" href="<%= news_path %>" data-turbolinks="false">
+            <span class="fa fa-newspaper-o"></span> &nbsp;View News
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container-fluid container-padded pfda-participants-section gradient-blue-sky">
+  <div class="h2 text-center">Community Participants</div>
+  <div class="pfda-participants">
+    <% @participant_orgs.each do |participant| %>
+      <div class="pfda-participant" title="<%= participant.title %>" data-toggle="tooltip">
+        <%= image_tag(participant.image_url, alt: participant.title) %>
+      </div>
+    <% end %>
+  </div>
+  <hr>
+  <div class="pfda-participants">
+    <% @participants.each do |participant| %>
+      <div class="pfda-participant" title="<%= participant.title %>" data-toggle="tooltip">
+        <%= image_tag(participant.image_url, alt: participant.title, class: "img-circle") %>
+      </div>
+    <% end %>
+  </div>
+  <hr>
+  <div class="lead text-center">
+    The comparison framework uses open-source software by
+      <%=
+        image_tag(
+          "participants/rtg.png",
+          alt: "Real Time Genomics",
+          title: "Real Time Genomics",
+          height: "50px", "data-toggle": "tooltip"
+        )
+      %>
+  </div>
+  <hr>
+</div>

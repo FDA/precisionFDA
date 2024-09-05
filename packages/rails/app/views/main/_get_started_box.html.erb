@@ -1,0 +1,8 @@
+<li class="pfda-card pfda-card-padded pfda-card-rounded pfda-card-<%= get_started_box_style(get_started_box) %>">
+  <div class="pfda-card-title">
+    <%= link_to get_started_box_title(get_started_box), get_started_box.feature_url, rel: 'nofollow' %>
+    <%= link_to 'Learn more', get_started_box.documentation_url, class: 'link-muted pull-right' %>
+  </div>
+
+  <div class="pfda-card-body"><%= get_started_box.description %></div>
+</li>

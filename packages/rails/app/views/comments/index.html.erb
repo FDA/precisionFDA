@@ -1,0 +1,19 @@
+<% content_for :title do %>Comments for <%= @item.klass %>: <%= @item.title %><% end %>
+<% require 'cgi' %>
+
+<div class="page-header">
+  <div class="page-title">
+    <span class="fa fa-comments-o"></span> Comments for <%= @item.klass %>:
+    <%= unilinkfw(@item, noicon: true, data: { turbolinks: false }) %>
+  </div>
+</div>
+
+<div class="container-fluid container-padded">
+  <div class="row">
+    <div class="col-md-12">
+      <%= render "comments/comments", comments: @comments, items_from_params: @items_from_params %>
+      <hr>
+      <%= render "comments/new_comment", url: @item_comments_path, object: @item %>
+    </div>
+  </div>
+</div>

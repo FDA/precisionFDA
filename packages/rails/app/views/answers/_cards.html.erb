@@ -1,0 +1,74 @@
+<% if (answers.respond_to?(:total_count) && answers.total_count > 0) || (answers.respond_to?(:count) && answers.count > 0) %>
+  <div class="pfda-cards">
+    <% answers.each do |answer| %>
+      <div class="pfda-card pfda-card-bordered pfda-card-rounded pfda-card-padded pfda-answer-card <%= answer.private? ? 'pfda-card-warning' : ''%>">
+        <div class="pfda-card-header">
+          <div class="pfda-card-title">
+            <% if defined?(show_discussion) && show_discussion %>
+              <div class="pfda-answer-to-discussion-meta">
+                <div class="pfda-answer-user">
+                  <%= link_to image_tag(answer.user.gravatar_url, class: 'img-circle', height: '25px'), user_path(answer.user.dxuser) %> <%= link_to(answer.user.full_name, user_path(answer.user.dxuser)) %> (<%= answer.user.org.name %>)
+                </div>
+                <div class="pfda-answer-to-discussion">
+                  <%= link_to "Answer to #{truncate(answer.discussion.title, length: 100, escape: false, separator: ' ')}", discussion_answer_path(answer.discussion, answer.user.dxuser) %>
+                </div>
+              </div>
+            <% else %>
+              <div class="media">
+                <div class="media-left">
+                  <%= link_to image_tag(answer.user.gravatar_url, class: 'img-circle', height: '50px'), user_path(answer.user.dxuser) %>
+                </div>
+                <div class="media-body">
+                  <div class="pfda-answer-meta">
+                    <%= link_to(answer.user.full_name, discussion_answer_path(answer.discussion, answer.user.dxuser)) %>
+                    <br>
+                    <small><%= answer.user.org.name %></small>
+                  </div>
+                </div>
+                <% if answer.private? %>
+                  <div class="media-right">
+                    <span class="fa fa-lock fa-2x text-danger"></span>
+                  </div>
+                <% end %>
+              </div>
+            <% end %>
+          </div>
+          <div class="pfda-card-body">
+            <div class="pfda-answer-content">
+              <% if !answer.content.blank? %>
+                <%= truncate(answer.content, length: 250, separator: ' ') %>
+              <% end %>
+            </div>
+          </div>
+          <% if answer.publishable_by?(@context) %>
+            <%= link_to publish_path + "?" + {id: answer.uid}.to_param, method: :post, class: "btn btn-success btn-block" do %>
+              <span class="fa fa-bullhorn"></span> Publish Answer
+            <% end %>
+          <% else %>
+            <ul class="pfda-card-metadata pfda-card-metadata-small pfda-card-metadata-glued list-inline list-inline-bullets">
+              <li>
+                <%= render "_partials/upvote_link", item: answer %>
+              </li>
+              <li>
+                <%= link_to discussion_answer_path(answer.discussion, answer), class: '' do %>
+                   Comment | <%= answer.comment_threads.size %>
+                <% end %>
+              </li>
+            </ul>
+            <br>
+          <% end %>
+          <%= link_to "Read answer", discussion_answer_path(answer.discussion, answer.user.dxuser), class: "btn btn-default btn-sm btn-block" %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+  <div class="paginate-container">
+    <%= paginate answers, :theme => 'twitter-bootstrap-3', :param_name => :answers_page %>
+  </div>
+<% else %>
+<div class="pfda-cards">
+  <div class="pfda-card pfda-card-rounded">
+    <div class="lead text-muted">No answers yet</div>
+  </div>
+</div>
+<% end %>

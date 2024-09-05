@@ -1,0 +1,32 @@
+<%= grid(@notes_grid, show_filters: defined?(show_filters) ? show_filters : :always) do |g|
+  g.blank_slate partial:  "_partials/empty_grid"
+
+  g.column name: 'Title', attribute: 'title' do |note|
+    link_to(note.title, note_path(note))
+  end
+
+  g.column name: 'Added by', attribute: 'dxuser', assoc: :user do |note|
+    link_to(note.user.dxuser, user_path(note.user.dxuser))
+  end
+
+  g.column name: 'Created', attribute: 'created_at', auto_reload: true, filter_type: :standard do |note|
+    note.created_at.to_s(:human)
+  end
+
+  if defined?(hide_access) && !hide_access
+    g.column name: 'Access', attribute: 'scope',
+      custom_filter: {'Public' => "public", 'Private' => "private"} do |note|
+      if note.public?
+        "Public"
+      elsif note.private?
+        "Private"
+      else
+        unilinkfw(item_from_uid(note.scope))
+      end
+    end
+  end
+
+  g.column name: 'Tags', attribute: 'name', assoc: [:taggings, :tag] do |item|
+    render "_partials/tags_list", tags_list: item.all_tags_list
+  end
+end -%>

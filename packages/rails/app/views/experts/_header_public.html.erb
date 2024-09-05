@@ -1,0 +1,41 @@
+<div class="container-fluid container-padded">
+  <div class="row vertical-align">
+    <div class="col-sm-5 col-md-5">
+      <p>
+        <%= image_tag(@expert.image, class: 'img-rounded img-responsive center-block', style: 'max-height:500px', alt: "Expert's profile picture") %>
+      </p>
+      <br/>
+      <%= link_to(content_tag(:span, "", class: "fa fa-newspaper-o") + " Read Expert Blog Post", blog_expert_path(@expert), class: 'btn btn-default btn-block', data: { turbolinks: false }) %>
+    </div>
+    <div class="col-sm-18 col-sm-offset-1">
+      <div class="page-title">
+        Expert Q&A
+        <%= link_to(@expert.title, user_url(@expert.user.username)) %>
+        <% if !@expert.user.singular? %>
+          (<%= @expert.user.org.name %>)
+        <% end %>
+      </div>
+      <p>
+        <% if @expert.open? %>
+          <span class="label label-success open-button"><span class="fa fa-check"></span> Open</span>
+        <% else %>
+          <span class="label label-default closed-button"><span class="fa fa-lock"></span> Closed</span>
+        <% end %>
+        <% if @expert.editable_by?(@context) %>
+          <% if @expert.is_public? %>
+            <span class="label label-primary"><span class="fa fa-eye"></span> Public</span>
+          <% else %>
+            <span class="label label-warning private-button"><span class="fa fa-eye-slash"></span> Private</span>
+          <% end %>
+        <% end %>
+      </p>
+      <%= simple_format(@expert._about, {class: "expert-intro lead text-left introduction-text"}) %>
+      <% if @expert.askable? %>
+        <hr/>
+        <a class="btn btn-primary btn-lg" data-toggle="modal" data-target="#ask-question-modal">
+          <span class="fa fa-commenting-o fa-fw" aria-hidden="true"></span> Ask <%= @expert.user.first_name.capitalize %>
+        </a>
+      <% end %>
+    </div>
+  </div>
+</div>

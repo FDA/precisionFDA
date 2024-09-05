@@ -1,0 +1,55 @@
+<div class="container container-padded">
+  <div class="pfda-challenge-intro">
+    <center>
+      <mark class="lead">The challenge awards and recognitions will be revealed on <%= @truth_challenge[:results_date] ? @truth_challenge[:results_date].strftime("%d %b %Y %H:%M %Z") : 'TBD' %></mark>
+    </center>
+    <hr>
+    <div class="lead-intro">The precisionFDA Truth Challenge ran from April 26, 2016 to May 26, 2016, giving participants the unique and exciting opportunity to test their NGS pipelines on an uncharacterized sample (HG002) and publish results on precisionFDA for subsequent evaluation against newly-revealed truth data.</div>
+    <div class="lead">When the results are announced, this web page will discuss the results and lists the awards and recognitions handed out by the precisionFDA team. Due to novelties related to both the truth data and the comparison methodology, these results are only a first cut at conducting an evaluation. We will present some lessons learned during the process of setting up the challenge, determining the truth, and using a new comparison methodology; and we finally invite the community to further explore these results and provide insight for the future.</div>
+  </div>
+</div>
+
+<div class="challenge-section challenge-section-highlight pfda-challenge-awards">
+  <div class="container container-padded">
+    <div class="h3 text-center text-uppercase">
+      Community Challenge Awards
+      <br>
+      <small>Revealed <%=  @truth_challenge[:results_date] ? "in " + distance_of_time_in_words_to_now(@truth_challenge[:results_date]) : 'soon'  %></small>
+    </div>
+
+    <div class="pfda-cards pfda-cards-justify-centered">
+      <div class="pfda-card pfda-card-medal pfda-card-padded pfda-card-rounded">
+        <div class="pfda-card-body">
+          <%= medal_badge("SNP Performance", "Highest", "large") %>
+        </div>
+      </div>
+      <div class="pfda-card pfda-card-medal pfda-card-padded pfda-card-rounded">
+        <div class="pfda-card-body">
+          <%= medal_badge("SNP Recall", "Highest", "large") %>
+        </div>
+      </div>
+      <div class="pfda-card pfda-card-medal pfda-card-padded pfda-card-rounded">
+        <div class="pfda-card-body">
+          <%= medal_badge("SNP Precision", "Highest", "large") %>
+        </div>
+      </div>
+    </div>
+    <div class="pfda-cards pfda-cards-justify-centered">
+      <div class="pfda-card pfda-card-medal pfda-card-padded pfda-card-rounded">
+        <div class="pfda-card-body">
+          <%= medal_badge("INDEL Performance", "Highest", "large") %>
+        </div>
+      </div>
+      <div class="pfda-card pfda-card-medal pfda-card-padded pfda-card-rounded">
+        <div class="pfda-card-body">
+          <%= medal_badge("INDEL Recall", "Highest", "large") %>
+        </div>
+      </div>
+      <div class="pfda-card pfda-card-medal pfda-card-padded pfda-card-rounded">
+        <div class="pfda-card-body">
+          <%= medal_badge("INDEL Precision", "Highest", "large") %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

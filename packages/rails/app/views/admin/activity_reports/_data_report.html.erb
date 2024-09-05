@@ -1,0 +1,94 @@
+<div class="panel panel-default">
+  <div class="panel-body">
+    <h4>
+      <a href="#">
+        <i class="fa fa-user" aria-hidden="true"></i>
+        DATA
+      </a>
+    </h4>
+
+    <div class="chart-row">
+
+      <div class="chart" data-name="data_upload_chart">
+        <div class="chart-header">
+          <a href="#" class="chart-zoom">
+            Data upload
+            <i class="fa fa-search-plus chart-zoom" aria-hidden="true"></i>
+            <i class="fa fa-search-minus chart-zoom" aria-hidden="true"></i>
+          </a>
+          <strong class="pull-right">
+            <span data-bind="text: dataUploadTotal"></span>
+          </strong>
+        </div>
+        <div id="data_upload_chart"
+             class="chart-container"
+             data-bind="css: {
+                'loading': data_upload_chart.loading,
+                'error': data_upload_chart.error
+              }">
+        </div>
+      </div>
+      
+      <div class="chart" data-name="data_download_chart">
+        <div class="chart-header">
+          <a href="#" class="chart-zoom">
+            Data Download
+            <i class="fa fa-search-plus chart-zoom" aria-hidden="true"></i>
+            <i class="fa fa-search-minus chart-zoom" aria-hidden="true"></i>
+          </a>
+          <strong class="pull-right">
+            <span data-bind="text: dataDownloadTotal"></span>
+          </strong>
+        </div>
+        <div id="data_download_chart"
+             class="chart-container"
+             data-bind="css: {
+                'loading': data_download_chart.loading,
+                'error': data_download_chart.error
+              }">
+        </div>
+      </div>
+      
+      <div class="chart" data-name="data_generated_chart">
+        <div class="chart-header">
+          <a href="#" class="chart-zoom">
+            Data Generated
+            <i class="fa fa-search-plus chart-zoom" aria-hidden="true"></i>
+            <i class="fa fa-search-minus chart-zoom" aria-hidden="true"></i>
+          </a>
+          <span class="pull-right">
+            <span data-bind="text: dataGeneratedTotal"></span>
+          </span>
+        </div>
+        <div id="data_generated_chart"
+             class="chart-container"
+             data-bind="css: {
+                'loading': data_generated_chart.loading,
+                'error': data_generated_chart.error
+              }">
+        </div>
+      </div>
+
+    </div>
+
+    <div class="total-row">
+      <div class="total">
+        <div class="total-value">
+          <span data-bind="text: dataStorageTotal"></span>
+        </div>
+        <div class="total-label">
+          <a href="#">data storage</a>
+        </div>
+      </div>
+      <div class="total">
+        <div class="total-value">
+          <span data-bind="text: numberOfFilesTotal"></span>
+        </div>
+        <div class="total-label">
+          <a href="#">number of files</a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>

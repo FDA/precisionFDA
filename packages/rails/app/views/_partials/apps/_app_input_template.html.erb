@@ -1,0 +1,70 @@
+<script type="text/html" id="pfda_app_input_template">
+<div data-bind="css: {'has-error': showErrorCss()}" class="pfda-app-input-template">
+  <!-- ko if: template == 'default' && !hasChoices() -->
+    <input
+      type="text"
+      class="form-control"
+      data-bind="textInput: $data.value, event: {
+        change: onChange,
+        keyup: onKeyUp
+      }, attr: {
+        name: $data.templateAttrName,
+        disabled: $data.disabled
+      }"
+    />
+  <!-- /ko -->
+  <!-- ko if: template == 'default' && hasChoices() -->
+    <select
+      type="text"
+      class="form-control"
+      data-bind="value: $data.value, options: $data.choices, event: {
+        change: onChange
+      }, attr: {
+        name: $data.templateAttrName,
+        disabled: $data.disabled
+      }"
+    ></select>
+  <!-- /ko -->
+  <!-- ko if: template == 'boolean' -->
+    <div class="text-center">
+      <input type="hidden" data-bind="value: $data.value, event: {
+        change: onChange
+      }, attr: {
+        name: $data.templateAttrName
+      }" />
+      <div class="btn-group">
+        <button class="btn btn-default" data-bind="click: setBoolValueTrue, css: {
+          active: ($data.value() == true)
+        }">True</button>
+        <button class="btn btn-default" data-bind="click: setBoolValueFalse, css: {
+          active: ($data.value() == false)
+        }">False</button>
+      </div>
+    </div>
+  <!-- /ko -->
+  <!-- ko if: template == 'file' -->
+    <div class="text-center">
+      <input type="hidden" data-bind="value: $data.value, event: {
+        change: onChange
+      }, attr: {
+        name: $data.templateAttrName
+      }" />
+      <div class="btn-group">
+        <button class="btn btn-primary" data-bind="click: (input) => $data.onSelectFileClick($root, input), attr: {
+          disabled: $data.disabled
+        }">
+          <!-- ko if: $data.fileTitle -->
+            <div class="text-center spec-input-file-title" data-bind="text: $data.fileTitle"></div>
+          <!-- /ko -->
+          <!-- ko if: !$data.fileTitle() -->
+            Select File
+          <!-- /ko -->
+        </button>
+        <button class="btn btn-link" data-bind="click: clearFileValue, attr: {
+          disabled: $data.disabled
+        }">Clear</button>
+      </div>
+    </div>
+  <!-- /ko -->
+</div>
+</script>

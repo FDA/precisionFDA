@@ -1,0 +1,60 @@
+<% content_for :title do %>Edit License: <%= @license.title %><% end %>
+
+<div class="page-header">
+  <div class="media">
+    <div class="media-left text-muted">
+      <span class="fa fa-edit fa-3x"></span>
+    </div>
+    <div class="media-body">
+      <div class="page-title license-editing">
+        Edit License
+        <div class="license-titlebar">
+          <input type="text" class="form-control input-lg" name="title" placeholder="License title..." data-bind="textInput: title" />
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="pfda-toolbar">
+  <%= form_for @license, url: license_path(@license), method: :put, html: {class: "form form-inline"} do |f| %>
+    <input type="hidden" data-bind="attr: {name: 'license[title]'}, value: title"/>
+    <input type="hidden" data-bind="attr: {name: 'license[content]'}, value: content"/>
+    <div class="btn-toolbar pull-right">
+      <div class="btn-group">
+        <div class="btn-static checkbox">
+          <label>
+            <%= f.check_box :approval_required %> Require Manual Approval
+          </label>
+        </div>
+      </div>
+      <div class="btn-group">
+        <button class="btn btn-primary" type="submit">
+          <span class="fa fa-save"></span> Save and Submit
+        </button>
+      </div>
+    </div>
+  <% end %>
+</div>
+
+<div class="container-fluid">
+  <div class="ace-editor-section">
+    <!-- Nav tabs -->
+    <ul class="nav nav-tabs nav-tabs-padded" role="tablist">
+      <li role="presentation" class="active"><a href="#tab-license-editor" aria-controls="tab-license-editor" role="tab" data-toggle="tab">Edit Content</a></li>
+      <li role="presentation"><a href="#tab-license-preview" aria-controls="tab-license-preview" role="tab" data-toggle="tab">Preview</a></li>
+    </ul>
+
+    <!-- Tab panes -->
+    <div class="tab-content">
+      <div role="tabpanel" class="tab-pane tab-pane-padded active" id="tab-license-editor">
+        <%= alert_help("Learn how to format Markdown", "https://jonschlinkert.github.io/remarkable/demo/") %>
+
+        <div id="license-editor" class="ace-rounded" data-bind="ace: content, aceOptions: { mode: 'markdown', theme: 'textmate', opts: {maxLines: Infinity, wrap: 'free'}}"></div>
+      </div>
+      <div role="tabpanel" class="tab-pane tab-pane-padded-lg" id="tab-license-preview">
+        <div class="license-preview pfda-md-rendered" data-bind="html: content.preview"></div>
+      </div>
+    </div>
+  </div>
+</div>

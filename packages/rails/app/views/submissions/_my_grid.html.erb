@@ -1,0 +1,57 @@
+<%= grid(submissions_grid, show_filters: defined?(show_filters) ? show_filters : :always) do |g|
+  g.blank_slate partial:  "_partials/empty_grid"
+
+  g.column name: 'State' do |submission|
+    state = ""
+    case submission.job.state
+    when "done", "failed"
+      state = submission.job.state
+      style = submission.job.state
+    when "running"
+      state = "verifying..."
+      style = "running"
+    else
+      state = "pending verification..."
+      style = ""
+    end
+    [state, {class: "col-state state-#{style}"}]
+  end
+
+  g.column name: 'Name', attribute: 'name', assoc: :job do |submission|
+    [content_tag(:a, submission.job.name,
+      :"tabindex" => 0,
+      :"role" => "button",
+      :"data-trigger" => "focus",
+      :"data-toggle" => "popover",
+      :"name" => "#{ERB::Util.h(submission.name)}",
+      :"desc" => "#{ERB::Util.h(submission.desc)}",
+      :"class" => "strong"), {class: "submission-popover"}]
+  end
+
+  g.column name: '' do |submission|
+    link_to("Edit", edit_challenge_submission_path(submission.challenge, submission))
+  end
+
+  g.column name: '' do |submission|
+    link_to("View Log", log_challenge_submission_path(submission.challenge, submission))
+  end
+
+  g.column name: 'Input File' do |submission|
+    content_tag(:ul, "", class: "submission-ul") do
+      submission.job.input_files.enum_for(:each_with_index).collect do |file, index|
+        if file.present?
+          content_tag(:li, unilinkfw(file, target: "_blank"))
+        else
+          content_tag(:li,
+            content_tag(:span, " ", class: "fa fa-file-o fa-fw") + " " + submission._inputs[index]
+          )
+        end
+      end.join.html_safe
+    end
+  end
+
+  g.column name: 'Created', attribute: 'created_at', auto_reload: true, filter_type: :standard do |submission|
+    submission.created_at.to_s(:human)
+  end
+
+end %>

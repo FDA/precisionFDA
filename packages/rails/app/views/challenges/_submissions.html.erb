@@ -1,0 +1,26 @@
+<div role="tabpanel" class="tab-pane active">
+  <% if @context.logged_in_or_guest? %>
+    <% if submissions_grid.present? %>
+      <div class="panel">
+        <% if my_entries %>
+          <%= render "submissions/my_grid", submissions_grid: submissions_grid %>
+        <% else %>
+          <%= render "submissions/grid", submissions_grid: submissions_grid %>
+        <% end %>
+      </div>
+    <% else %>
+      <div class="alert alert-info">
+        <span class="fa fa-info-circle"></span>
+        <% if my_entries %>
+          You have not submitted any entries for this challenge.
+        <% else %>
+          No entries have been successfully submitted for this challenge.
+        <% end %>
+      </div>
+    <% end %>
+  <% else %>
+    <div class="alert alert-info">
+      <span class="fa fa-info-circle"></span> In order to participate in this challenge, please <a href="<%= login_path %>">login</a>. If you don't have a PrecisionFDA account, please <a href="<%= request_access_path %>">submit an access request</a> to join and engage in the community!
+    </div>
+  <% end %>
+</div>

@@ -1,0 +1,40 @@
+---
+site:
+  - elaine.johanson
+  - john.didion
+  - ezekiel.maier.2
+  - holly.stephens
+  - pamella.tater.2
+  - davis.feng
+  - stanley.lan
+  - sam.westreich
+  - collin.lobb.3
+  - alison.williams
+  - brijesh.prajapati
+  - ben.busby.3
+  - linda.jackson
+space:
+  - elaine.johanson
+  - john.didion
+  - ezekiel.maier.2
+  - holly.stephens
+  - sam.westreich
+  - pamella.tater.2
+  - ben.busby.3
+  - alison.williams
+  - alexis.norris
+  - linda.jackson
+challenge_eval:
+  - elaine.johanson
+  - ezekiel.maier.2
+  - heike.sichtig
+  - min.yi
+  - sharon.liang
+  - yi.yan
+  - you.li
+  - zivana.tezak
+  - pamella.tater.2
+  - mitchell.mello
+challenge_admin:
+  - ezekiel.maier
+  - errol.strain

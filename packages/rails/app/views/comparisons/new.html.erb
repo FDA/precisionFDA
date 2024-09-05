@@ -1,0 +1,72 @@
+<% content_for :title do %>Comparator<% end %>
+
+<div class="page-header clearfix">
+  <div class="page-title">
+    <i class="fa fa-area-chart fa-fw"></i>
+    <span data-bind="text: areAllInputsSet() ? 'Run' : 'Set up'"></span> your comparison
+  </div>
+</div>
+
+<div class="pfda-padded">
+  <label for="select_comparator_app">Comparator App:</label>
+  <div>
+    <select name="select_comparator_app"
+      id="select_comparator_app"
+      class="form-control"
+      data-bind="options: selectableComparators,
+                 optionsText: 'label',
+                 optionsValue: 'value',
+                 value: defaultComparator,
+                 disable: defaultComparatorIsLoading,
+                 event: { change: loadComparatorApp }">
+    </select>
+  </div>
+</div>
+
+<div class="container-fluid container-padded">
+  <%= alert_help("Learn more about creating new comparisons", "/docs/comparisons#comparisons-new") %>
+
+  <!-- ko if: defaultComparatorIsLoading -->
+    <div class="pfda-padded text-center">
+      <div class="pfda-padded">Loading Comparator...</div>
+      <div>
+        <i class="fa fa-spinner fa-spin fa-2x"></i>
+      </div>
+    </div>
+  <!-- /ko -->
+
+  <div class="affix-spacer hidden" data-bind="css: { 'hidden': defaultComparatorIsLoading }">
+    <div class="affix-container affix-container-padded">
+      <div class="variants">
+        <div class="variant-test">
+          <div class="variant-title">Test Set</div>
+          <div data-bind="template: { name: 'comparisons_input_template', data: testVariant.inputs }"></div>
+          <div class="variants-circle">
+            <!-- ko if: areAllInputsSet -->
+              <a class="variants-circle-compare" data-toggle="modal" data-target="#comparison-modal">
+                compare
+              </a>
+            <!-- /ko -->
+            <!-- ko if: !areAllInputsSet() -->
+              <div class="variants-circle-with">
+                with
+              </div>
+            <!-- /ko -->
+          </div>
+        </div>
+
+        <div class="variant-ref">
+          <div class="variant-title">Benchmark Set</div>
+          <div data-bind="template: { name: 'comparisons_input_template', data: refVariant.inputs }"></div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<%= render "/comparisons/inputs" %>
+<%= render "/comparisons/comparison_modal" %>
+<%= render "licenses/selector_modal" %>
+<%= render "/_partials/selector_modal" %>

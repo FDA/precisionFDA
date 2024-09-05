@@ -1,0 +1,9 @@
+<%
+  can_be_public = item.publishable_by?(@context, Scopes::SCOPE_PUBLIC)
+%>
+
+<% if can_be_public %>
+  <%= link_to publish_path + "?" + { id: item.uid, scope: Scopes::SCOPE_PUBLIC }.to_param, method: :post, class: "btn btn-success #{defined?(classes) ? classes : ''}" do %>
+    <span class="fa fa-bullhorn"></span> Publish publicly
+  <% end %>
+<% end %>

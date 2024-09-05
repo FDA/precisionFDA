@@ -1,0 +1,88 @@
+<% content_for :title do %>Host and organize an App-a-thon<% end %>
+
+<div class="page-header">
+  <div class="page-title">
+    <span class="fa fa-laptop"></span>
+    Host and organize an App-a-thon
+  </div>
+</div>
+
+<div class="container container-padded">
+  <%= form_for @appathon, url: meta_appathon_appathons_path(@meta_appathon), html: {class: 'form form-horizontal'} do |f| %>
+    <%= render "_partials/form_errors", object: @appathon %>
+    <div class="form-group required">
+      <%= f.label :name, "Name", class: 'control-label col-sm-2' %>
+      <div class="col-sm-11 col-sm-offset-1">
+        <%= f.text_field :name, class: "form-control input-lg", placeholder: "Name this app-a-thon...", required: "required"  %>
+      </div>
+    </div>
+    <div class="form-group required">
+      <%= f.label :location, "Location", class: 'control-label col-sm-2' %>
+      <div class="col-sm-11 col-sm-offset-1">
+        <%= f.text_field :location, class: "form-control input-lg", placeholder: "Real place and/or virtual", required: "required"  %>
+      </div>
+    </div>
+    <div class="form-group">
+      <%= f.label :description, "Description", class: 'control-label col-sm-2' %>
+      <div class="col-sm-11 col-sm-offset-1">
+        <%= f.text_area :description, class: "form-control", rows: 5, placeholder: "Additional information about this app-a-thon..." %>
+      </div>
+    </div>
+    <div class="form-group required">
+      <%= f.label :flag, "Icon", class: 'control-label col-sm-2' %>
+      <div class="col-sm-11 col-sm-offset-1">
+        <ul class="list list-inline appathon-flags">
+          <% Appathon::ICONS.each do |icon| %>
+            <li class="pfda-padded">
+              <div class="radio">
+                <label>
+                  <%= f.radio_button :flag, icon, required: '' %>
+                  <%= flag_image_tag(icon, {height: 50}) %>
+                </label>
+              </div>
+            </li>
+          <% end %>
+        </ul>
+      </div>
+    </div>
+    <div class="form-group">
+      <%= f.label :start_at, "Starts at", class: 'control-label col-sm-2' %>
+      <div class="col-sm-11 col-sm-offset-1">
+        <%= f.datetime_local_field :start_at, class: "form-control", html: {value: @meta_appathon.start_at}, min: @meta_appathon.start_at, max: @meta_appathon.end_at %>
+      </div>
+    </div>
+    <div class="form-group">
+      <%= f.label :end_at, "Ends at", class: 'control-label col-sm-2' %>
+      <div class="col-sm-11 col-sm-offset-1">
+        <%= f.datetime_local_field :end_at, class: "form-control", html: {value: @meta_appathon.end_at}, min: @meta_appathon.start_at, max: @meta_appathon.end_at %>
+      </div>
+    </div>
+
+    <div class="form-group row">
+      <div class="alert alert-warning col-sm-11 col-sm-offset-3">
+        <div class="h4">
+          Please read before proceeding
+        </div>
+        <ul>
+          <li>
+            You will be able to update all the above fields later.
+          </li>
+          <li>
+            You can only create one app-a-thon.
+          </li>
+          <li>
+            Your app-a-thon can be joined by <strong>anyone so long as they have a precisionFDA user account</strong>. People can request an account using the "Request Access" form on the site.
+          </li>
+          <li>
+            You are responsible for <strong>recruiting, hosting, and communicating</strong> with participants.
+          </li>
+          <li>
+          By clicking the button below, you are committing to an app-a-thon. Your app-a-thon will be <strong>publicly listed</strong> on precisionFDA, and <strong>cannot be deleted</strong>; only proceed if you are certain.
+          </li>
+        </ul>
+        <hr />
+        <%= f.submit "Create your App-a-thon", class: 'btn btn-lg btn-danger', data: {disable_with: "Creating app-a-thon..."} %>
+      </div>
+    </div>
+  <% end %>
+</div>

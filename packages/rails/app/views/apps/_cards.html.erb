@@ -1,0 +1,21 @@
+<div class="container-fluid">
+  <div class="pfda-cards">
+    <% @apps.each do |app| %>
+      <a class="pfda-card pfda-card-sticky-metadata pfda-card-padded pfda-card-rounded pfda-card-bordered" href="<%= app_path(app.uid) %>">
+        <div class="pfda-card-header">
+          <div class="pfda-card-title">
+            <%= truncate(app.title, :length => 40,  :separator => ' ')%>
+          </div>
+        </div>
+        <div class="pfda-card-body">
+          <%= truncate(app.readme, :length => 200,  :separator => ' ')%>
+        </div>
+        <div class="pfda-card-metadata">
+          <ul class="list-inline">
+            <li class="pull-right"><small><%= app.user.org.handle %>/<%= app.user.dxuser %></small></li>
+          </ul>
+        </div>
+      </a>
+    <% end %>
+  </div>
+</div>

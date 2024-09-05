@@ -1,0 +1,50 @@
+<% content_for :title do %><%= user_title(@expert.user) %><% end %>
+
+<%= render 'experts/header', { is_dashboard: false } %>
+
+<div class="pfda-pane container-padded container-fluid">
+  <div class="pfda-pane-content pfda-pane-content-padded-xl">
+    <% if @answered_questions.count > 0 %>
+      <% @answered_questions.each do |q|%>
+        <div class="expert-question">
+          <%= link_to expert_expert_question_path(@expert, q) do %>
+            <h3 class="expert-question-body"><%= q.body %></h3>
+            <h6 class="expert-question-footer text-muted remediated-text-grey">
+              Answered <%= time_ago(q.expert_answer.updated_at) %>
+            </h6>
+          <% end %>
+        </div>
+      <% end %>
+    <% else %>
+      No questions have been answered yet.
+    <% end %>
+    <%= render "experts/disclaimer" %>
+
+  </div>
+  <div class="pfda-pane-sidebar pfda-pane-sidebar-minimal pfda-pane-sidebar-padded-v">
+    <ul class="list-group">
+      <% if @context.logged_in? %>
+        <li class="list-group-item list-group-item-header">
+          Your Questions (<%= @user_questions.count %>)
+        </li>
+        <% if @user_questions.count > 0 %>
+          <% @user_questions.each do |q|%>
+            <li class="list-group-item">
+              <%= q._original %>
+            </li>
+          <% end %>
+        <% end %>
+      <% else %>
+        <li class="list-group-item list-group-item-header">
+          Your Questions
+        </li>
+        <li class="list-group-item">
+          Please <strong><%= link_to "login", "#{HOST}/login" %></strong> or <strong><%= link_to "request access", "#{HOST}/request_access" %></strong> to track and see your question history.
+        </li>
+      <% end %>
+      <br/>
+    </ul>
+  </div>
+</div>
+
+<%= render "experts/modal_ask_question" %>

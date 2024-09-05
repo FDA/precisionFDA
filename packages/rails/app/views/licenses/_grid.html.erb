@@ -1,0 +1,27 @@
+<%= grid(licenses_grid, show_filters: :always) do |g|
+  g.blank_slate partial:  "_partials/empty_grid"
+
+  g.column name: 'Title', attribute: 'title' do |license|
+    unilinkfw(license, scope_icon: (defined?(scope_icon) ? scope_icon : false))
+  end
+
+  g.column name: 'Org', attribute: 'handle', assoc: [:user, :org] do |license|
+    license.user.org.handle
+  end
+
+  g.column name: 'Added by', attribute: 'dxuser', assoc: :user do |license|
+    link_to(license.user.dxuser, user_path(license.user.dxuser))
+  end
+
+  g.column name: 'Created', attribute: 'created_at', auto_reload: true, filter_type: :standard do |license|
+    license.created_at.to_s(:human)
+  end
+
+  g.column name: 'Items Attached' do |license|
+    license.licensed_items.count
+  end
+
+  g.column name: 'Licensees' do |license|
+    license.accepted_licenses.count
+  end
+end -%>

@@ -1,0 +1,5 @@
+<ul>
+  <% breadcrumbs(folder).each do |ancestor| %>
+    <li><%= link_to ancestor[:name], ancestor[:path] %></li>
+  <% end %>
+</ul>

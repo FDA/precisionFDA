@@ -1,0 +1,18 @@
+// 508 Compliance variables and styles
+
+$accessible-brand-blue-primary: #165B97; //#165B97;
+$accessible-brand-red-primary: #C2524B; // #dd362a; //#88413D;
+
+$accessible-btn-primary-bg: $accessible-brand-blue-primary;
+$accessible-btn-success-color: #fff; // #005d2c; //#357556;
+$accessible-btn-success-bg: #518400;
+$accessible-btn-warning-color: #664400;
+$accessible-btn-warning-bg: #f0ad4e;
+
+$accessible-btn-danger-color: #fff;
+$accessible-btn-danger-bg: $accessible-brand-red-primary;
+
+$accessible-text-muted: #555;
+
+$accessible-link-color: $accessible-brand-blue-primary;
+$accessible-link-hover-color: darken($accessible-link-color, 15%);

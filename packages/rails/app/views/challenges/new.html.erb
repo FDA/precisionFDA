@@ -1,0 +1,28 @@
+<% content_for :title do %>Create New Challenge<% end %>
+
+<div class="page-header">
+  <h2 class="page-title">
+    <span class="fa fa-trophy"></span>
+    Create a new Challenge
+  </h2>
+</div>
+
+<div class="container-fluid container-padded">
+  <%= form_for @challenge, url: challenges_path, html: {class: 'form form-horizontal'} do |f| %>
+    <%= render "_partials/form_errors", object: @challenge %>
+    <%= render "common_inputs", f: f %>
+    <div class="form-group">
+      <div class="col-sm-offset-3">
+        <%= f.submit "Create", class: 'btn btn-primary', data: {
+          disable_with: "Creating...",
+          bind: 'enable: imageUrl'
+        } %>
+      </div>
+    </div>
+    <div class="col-sm-offset-3 text-muted pfda-padded-v challenge-upload-image-text" data-bind="visible: !imageUrl()">
+      Please upload an image for the challenge.
+    </div>
+  <% end %>
+</div>
+
+<%= render "_partials/upload_image_modal", display_url: false %>

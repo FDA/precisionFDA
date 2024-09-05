@@ -1,0 +1,47 @@
+<%= grid(analyses_grid, show_filters: defined?(show_filters) ? show_filters : :always) do |g|
+  g.blank_slate do
+    content_tag :div, "No analyses found", class: 'alert alert-info'
+  end
+
+  g.column class: 'toggle-row'  do
+    content_tag(:span, " ", class: "indicator fa fa-caret-down fa-fw")
+  end
+
+  g.row_attributes do |analysis|
+    { id: "analysis-#{analysis.id}" }
+  end
+
+  g.column name: 'State' do |analysis|
+    [analysis.all_state, {class: "col-state state-#{analysis.all_state}"}]
+  end
+
+  g.column name: 'Execution name', attribute: 'name' do |analysis|
+    analysis.batch_id.nil? ? analysis.name : content_tag(:b){ content_tag(:span, "BATCH ", class: "text-info") } + analysis.name
+  end
+
+  if !defined?(workflow)
+    g.column name: 'Workflow', attribute: 'title', assoc: :workflow do |analysis|
+      unilinkfw(analysis.workflow)
+    end
+  end
+
+  g.column name: 'App' do |analysis|
+    'N/A'
+  end
+
+  g.column name: 'Duration' do |analysis|
+    humanize_seconds(analysis.duration)
+  end
+
+  g.column name: 'Created', attribute: 'created_at', auto_reload: true, filter_type: :standard do |analysis|
+    analysis.created_at.to_s(:db)
+  end
+
+  g.column name: 'Terminate' do |analysis|
+    if analysis.can_terminate?
+      content_tag(:a, href: terminate_batch_workflow_path(id: analysis.batch_id || analysis.dxid),data: { confirm: 'Are you certainly want to Terminate this?' }, class: "btn batch_terminate") do
+        content_tag(:span, "", class: "fa fa-times") + " Terminate"
+      end
+    end
+  end
+end -%>

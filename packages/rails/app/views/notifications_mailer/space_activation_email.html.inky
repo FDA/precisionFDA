@@ -1,0 +1,33 @@
+<wrapper>
+  <div class="hidden-email-preview">
+    Space activation request for <%= @space.title %> as <%= @activation_request_lead %>
+  </div>
+  <spacer size="16"></spacer>
+  <container class="header">
+    <row>
+      <columns>
+        <a class="brand" href="<%= HOST %>" title="precisionFDA">
+          <img class="header-image" src="<%= HOST %>/assets/precisionFDA.email.dark.png" />
+        </a>
+      </columns>
+      <columns>
+        <p class="header-title text-right">Space Activation Request</p>
+      </columns>
+    </row>
+  </container>
+  <container class="radius">
+    <row>
+      <columns>
+        <p>
+          The space <strong><%= link_to @space.title, _space_url(@space) %></strong> was provisioned and listed you as <%= @activation_request_lead %>.
+        </p>
+
+        <p>
+          To start adding data to this space both <%= @space.review? ? 'reviewer and sponsor' : @leads_names %> lead admin's must accept the invitation. Please visit the space and click on "Accept space".
+        </p>
+        <button class="radius" href="<%= _space_url(@space) %>">View Space Invitation</button>
+      </columns>
+    </row>
+  </container>
+  <spacer size="16"></spacer>
+</wrapper>

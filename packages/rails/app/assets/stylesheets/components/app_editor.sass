@@ -1,0 +1,98 @@
+@import "_common"
+
+.app-editor
+  .error-section
+    .alert
+      margin: $padding-base-vertical $padding-base-horizontal 0
+
+  .access-info
+    margin: 0
+    position: absolute
+    right: 10px
+    color: $state-info-text
+
+  .nav-tabs
+    position: relative
+
+  .form-inline
+    .form-group
+      margin-right: 20px
+
+    label
+      font-weight: normal
+      text-transform: uppercase
+      color: $brand-blue-tertiary
+      margin-right: 10px
+
+    .form-control-static
+      font-weight: bold
+
+    input[type="text"]
+      min-width: 400px
+
+.assets-modal
+  .list-group-selector
+    .checkbox.list-group-item, .radio.list-group-item
+      padding: 0
+      margin: 0
+      margin-bottom: -1px
+      background: transparent
+      color: $link-color
+
+      .media-right
+        vertical-align: middle
+        padding: 0
+        .list-preview-icon
+          padding: $padding-base-vertical $padding-base-horizontal
+          display: block
+
+      label
+        display: block
+        padding: $padding-base-vertical $padding-base-horizontal
+        padding-left: 30px
+        background-color: $list-group-bg
+
+        &:hover
+          background-color: $list-group-hover-bg
+          color: $link-hover-color
+    a
+      font-weight: bold
+
+.section-io
+  .list-group-item-heading
+    margin: 5px 10px 0 0
+    text-transform: uppercase
+    font-weight: 300
+    color: $brand-blue-tertiary
+
+.table-io
+  margin: 0
+  > tbody
+    > tr.app-io-field
+      cursor: move
+      &:hover
+        background-color: $brand-blue-subtler
+
+      &.ui-sortable-helper
+        width: 100%
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.25)
+        background-color: #fff
+        > td
+          border: 0
+
+      > td
+        vertical-align: middle
+
+  .io-field-class
+    font-family: $font-family-monospace
+
+  .io-optional
+    color: $text-muted
+    font-weight: normal
+
+  tr
+    .btn-link-danger
+      visibility: hidden
+    &:hover
+      .btn-link-danger
+        visibility: visible

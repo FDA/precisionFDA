@@ -1,0 +1,57 @@
+<!--
+  Event announcement object
+
+  @event = {
+    link: "https://collaboration.fda.gov/prefda/",
+    image: "misc/taha-announcement",
+    image_alt_text: "Dr. Taha Kass-Hout LIVE at 3:30pm EDT on June 2nd, 2016",
+    datetime: DateTime.new(2016,6,2,12,25).in_time_zone + 7.hours,
+    title: "Dr. Taha Kass-Hout, FDA CHIO, to speak LIVE on FDA Community Engagement through Challenges on June 2nd, 2016 at 3:30 p.m. EDT."
+  }
+
+  @event[:upcoming] = DateTime.now.in_time_zone < @event[:datetime]
+  @event[:past] = DateTime.now.in_time_zone >= @event[:datetime] + 2.hours
+  @event[:current] = !@event[:upcoming] && !@event[:past]
+-->
+
+<div class="pfda-help-block pfda-help-warning">
+  <div class="row">
+    <div class="col-sm-12 col-sm-offset-6 col-md-4 col-md-offset-0">
+      <% if event[:current] %>
+        <%= link_to event[:link], class: "pfda-event-image" do %>
+          <%= image_tag event[:image], alt: event[:image_alt_text], class: "img-responsive img-rounded" %>
+        <% end %>
+      <% else %>
+        <%= image_tag event[:image], alt: event[:image_alt_text], class: "img-responsive img-rounded" %>
+      <% end %>
+    </div>
+    <div class="col-sm-24 col-md-16 col-md-offset-1">
+      <div class="pfda-event-label">
+        <span class="label label-info lead text-uppercase">
+          <% if event[:upcoming] %>
+            Upcoming Event
+          <% elsif event[:past] %>
+            Past Event
+          <% else %>
+            Event
+          <% end %>
+        </span>
+      </div>
+      <div class="pfda-event-title lead lead-bold"><%= event[:title] %></div>
+      <br>
+      <% if event[:upcoming] %>
+        <div class="lead text-muted">Watch live in <strong><%= distance_of_time_in_words_to_now(event[:datetime])%></strong></div>
+      <% elsif event[:current] %>
+        <%= link_to event[:link], class: 'btn accessible-btn-default' do %>
+          <div class="text-left">
+            <span class="fa fa-play" aria-hidden="true"></span> <strong class="text-uppercase">Watch now</strong>
+            <br>
+            <small style="font-weight: normal"><%= event[:link] %></small>
+          </div>
+        <% end %>
+      <% elsif event[:ended] %>
+        <div class="lead text-muted">The event has ended</div>
+      <% end %>
+    </div>
+  </div>
+</div>

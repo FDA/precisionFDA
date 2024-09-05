@@ -1,0 +1,51 @@
+<% content_for :title do %>Upload Challenge Resources<% end %>
+
+<div class="page-header clearfix">
+  <div class="page-title"><span class="fa fa-file fa-fw"></span>Challenge Resource File Upload</div>
+</div>
+
+<div class="pfda-toolbar">
+  <form class="form form-upload-files">
+    <div class="form-group text-centered">
+      <div class="control-group">
+        <span class="btn btn-primary btn-lg btn-browse-files" data-bind="visible: isBrowseVisible, disable: disableActions">
+          <span class="fa fa-files-o"></span> Browse files for upload... <input class="event-browse-files" type='file' multiple required>
+        </span>
+        <button class="btn btn-success btn-lg event-upload-files" style="display:none;" data-bind="visible: isUploadVisible, disable: disableActions">
+          <span class="fa fa-cloud-upload fa-fw"></span> Upload all
+        </button>
+        <button class="btn btn-link btn-lg event-clear-files" style="display:none;" data-bind="visible: isClearVisible, disable: disableActions">Restart</button>
+        <a class="btn btn-default btn-lg" href="<%= edit_page_challenge_path(@challenge, 'resources') %>"><span class="fa fa-reply fa-fw"></span> Return to Challenge Resources</a>
+      </div>
+    </div>
+  </form>
+</div>
+
+<div class="container-fluid">
+  <div class="section-files panel panel-info">
+    <div class="panel-heading">
+      <span class="upload-state panel-title" data-bind="text: uploadStateDisplay"></span>
+    </div>
+    <ul class="list-group list-files" data-bind="foreach: files">
+      <li class='list-group-item' data-bind="css: classes">
+        <div class='list-group-item-text clearfix'>
+          <!-- ko if: !isDone() -->
+            <span class="file-name" data-bind="text: file.name"></span>
+          <!-- /ko -->
+          <!-- ko if: isDone() -->
+            <a class="file-name" data-bind="text: file.name" href="<%= edit_page_challenge_path(@challenge, 'resources') %>"></a>
+          <!-- /ko -->
+          <span class="file-metadata-glue">&middot;</span> <small class="file-type" data-bind="text: file.type || 'File'"></small> <span class="file-metadata-glue">&middot;</span>  <small class="file-size" data-bind="text: sizeFormatted"></small>
+          <span class="pull-right" data-bind="visible: isDone">
+            <span class="fa fa-check"></span>
+          </span>
+        </div>
+        <div class='progress' data-bind="visible: isProgressVisible">
+          <div class='progress-bar progress-bar-striped active' role='progressbar' aria-valuenow='100' aria-valuemin='0' aria-valuemax='100' style='min-width: 2%' data-bind="style: {width: progressPercentFormatted}">
+          </div>
+        </div>
+      </li>
+    </ul>
+  </div>
+
+</div>

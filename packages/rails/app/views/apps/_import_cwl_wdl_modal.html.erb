@@ -1,0 +1,55 @@
+<div id="import_cwl_wdl_modal" class="modal fade modal-with-loader" data-bind="css: {loading: importModalLoading}">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        <h4 class="modal-title" data-bind="text: modalTitle"></h4>
+      </div>
+      <div class="loader-container">
+        <div class="loader">
+          <i class="fa fa-spinner fa-spin"></i>
+        </div>
+      </div>
+      <div class="modal-body">
+        <form>
+          <div class="form-group">
+            <div class="browse-files-container">
+              <label for="wdl_text_input">Type in <span data-bind="text: importType"></span> or</label>
+              <span class="btn btn-primary btn-sm btn-browse-files">
+                <span class="fa fa-files-o"></span>&nbsp;Select <span data-bind="text: importType"></span> file
+                <input  id="wdl_file_input" type="file" data-bind="attr: {accept: acceptFileType}, event: {change: fileOnChangeHandler}">
+              </span>
+            </div>
+            <textarea
+              class="form-control"
+              name="wdl_text"
+              id="wdl_text_input"
+              data-bind="value: wdlTextValue, event: {input: wdlTextValueOnInput}">
+            </textarea>
+          </div>
+          <hr>
+          <div>
+            <span class="btn btn-primary btn-sm btn-browse-files">
+              <span class="fa fa-files-o"></span>&nbsp;Select Docker Image
+              <input id="docker_image_file_input" type="file" accept=".gz" data-bind="event: {change: dockerFileOnChangeHandler}">
+            </span>
+          </div>
+          <!-- ko if: dockerImage() -->
+          <div class="docker-images-container">
+            <div class="docker-image">
+              <span class="text-muted docker-image-name" data-bind="text: dockerImage().name"></span>&nbsp;
+              <i class="fa fa-trash text-danger docker-image-remove" data-bind="click: clearDockerImage"></i>
+            </div>
+          </div>
+          <!-- /ko -->
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-default" data-dismiss="modal" tabindex="-1" >Cancel</button>
+        <button id="import_cwl_wdl_modal_submit" class="btn btn-primary" data-bind="click: importImageData, disable: importImageDisabled">Import</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->

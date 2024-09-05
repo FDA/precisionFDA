@@ -1,0 +1,36 @@
+<wrapper>
+  <div class="hidden-email-preview">
+    New question from <%= user_title(@question.user) %>
+  </div>
+  <spacer size="16"></spacer>
+  <container class="header">
+    <row>
+      <columns>
+        <a class="brand" href="<%= HOST %>" title="precisionFDA">
+          <img class="header-image" src="<%= HOST %>/assets/precisionFDA.email.dark.png" />
+        </a>
+      </columns>
+      <columns>
+        <p class="header-title text-right">Expert Q&amp;A Session Notification</p>
+      </columns>
+    </row>
+  </container>
+  <container class="radius">
+    <row>
+      <columns>
+        <p>
+          A new question was asked in your Expert Q&amp;A Session
+        </p>
+        <p>
+          Submitted by: <%= user_link(@question.user) %>
+        </p>
+        <blockquote>
+          <%= @question.body %>
+        </blockquote>
+
+        <button class="radius" href="<%= expert_edit_question_url(@expert, @question) %>">View Question in Expert Dashboard</button>
+      </columns>
+    </row>
+  </container>
+  <spacer size="16"></spacer>
+</wrapper>

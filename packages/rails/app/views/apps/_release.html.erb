@@ -1,0 +1,27 @@
+<!-- Modal -->
+<div class="modal app-release-modal fade" id="app-release-modal" data-bind="with: appReleaseModel">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Release Revision #<%= @app.revision %> of <%= @app.title %></h4>
+      </div>
+      <div class="modal-body">
+        <!-- ko if: errorMessage -->
+          <div class="alert alert-danger">
+            <span data-bind="text: errorMessage"></span>
+          </div>
+        <!-- /ko -->
+
+        <form data-bind="submit: submitRelease">
+          <p class="help-block">Follow the <a href="http://semver.org/" target="_blank">semantic versioning</a> guidelines for selecting your release version tag</p>
+          <input type="text" class="form-control input-lg" placeholder="Release version (example: 1.0.0)" data-bind="textInput: version" autofocus />
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" data-bind="click: submitRelease, enable: isReleaseEnabled">Release</button>
+      </div>
+    </div>
+  </div>
+</div>

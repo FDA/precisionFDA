@@ -1,0 +1,35 @@
+<% content_for :title do %>Publisher<% end %>
+
+
+<%= form_for :main, url: publish_path, data: { bind: "submit: $root.confirm" } do |f| %>
+  <div class="container container-padded-v">
+    <!-- ko if: !isScopeASpace() -->
+    <div class='pfda-help-block'>
+      <span class='fa fa-exclamation-triangle' aria-hidden='true'></span>
+      <div class='alert-help-remediated'>
+        Publishing items makes them publicly visible.
+      </div>
+      <%= link_to("Review important information about publishing, and learn why it's a good idea to also publish related items.", "/docs/publishing", target: '_blank', class: 'review-doc-text') %>
+    </div>
+    <!-- /ko -->
+    <!-- ko if: isScopeASpace() -->
+    <div class='pfda-help-block'>
+      <span class='fa fa-exclamation-triangle' aria-hidden='true'></span>
+      <div class='alert-help-remediated'>
+        Sharing items makes them visible to the members of the selected Space.
+      </div>
+      <%= link_to("Review important information about publishing, and learn why it's a good idea to also publish related items.", "/docs/publishing", target: '_blank', class: 'review-doc-text' ) %>
+    </div>
+    <!-- /ko -->
+    <div class="list-group">
+      <div class="list-group-item list-group-item-header">
+        <div class="btn-group">
+          <button class="btn btn-success" type="submit" name="submit" data-bind="text: primaryButtonLabel">
+          </button>
+        </div>
+      </div>
+      <ul class="list-group list-group-nested" data-bind="template: { name: 'tree-element', foreach: treeRoot }"></ul>
+    </div>
+  </div>
+  <%= render "_partials/publish_tree" %>
+<% end %>

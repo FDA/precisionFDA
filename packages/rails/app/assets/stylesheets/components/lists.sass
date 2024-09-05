@@ -1,0 +1,139 @@
+@import "_common"
+
+.list-group-item-header
+  background-color: $gray-subtle
+  color: $brand-blue-tertiary
+
+.list-group-item-muted
+  background-color: $gray-subtle
+  color: $text-muted
+
+.list-group-item-default
+  color: $text-color
+
+.list-group-item-transparent-bg
+  background: transparent
+
+.list-group.list-group-inline
+  margin-bottom: $padding-large-vertical
+
+  li
+    display: inline-block
+    &.list-group-item
+      border: 0
+      vertical-align: top
+      border-radius: $border-radius-base
+
+  .list-group-item-text
+    font-size: 19px
+
+.list-group.list-group-condensed
+  .list-group-item
+    padding: $padding-xs-vertical $padding-xs-horizontal
+    line-height: 1
+
+.list-group.list-group-condensed-sm
+  .list-group-item
+    padding: $padding-small-vertical $padding-small-horizontal
+    line-height: 1
+
+.list-group-item-heading, .panel-heading, .panel-title
+  color: $brand-blue-tertiary
+  text-transform: uppercase
+  font-weight: 300
+
+.list-group-selector
+  border-radius: 0
+  .list-group-item
+    border-radius: 0
+    &:first-child
+      border-top: 0
+
+    &.active
+      background-color: $brand-blue-subtle
+      color: $brand-blue-dark
+      border-color: $list-group-border
+
+    &:hover:not(.active)
+      .list-preview-icon .fa
+        color: $brand-blue-tertiary
+
+    .list-preview-icon
+      cursor: pointer
+      .fa
+        color: lighten($brand-blue-tertiary, 15%)
+
+.list-group-item-removeable
+  .btn-link-danger
+    visibility: hidden
+    padding: 3px
+    border: 0
+
+  &:hover
+    .btn-link-danger
+      visibility: visible
+
+.list-inline
+  &.list-inline-padding-vertical
+    > li
+      padding-top: 10px
+      padding-bottom: 10px
+  &.list-inline-padding-horizontal
+    > li
+      padding-left: 10px
+      padding-right: 10px
+
+  &.list-inline-bullets
+    vertical-align: middle
+    > li
+      padding-right: 0px
+      &::after
+        content: '\B7'
+        padding-left: 5px
+
+    > li:last-of-type
+      &::after
+        content: ''
+        padding-left: 0
+
+.list-alt-even
+  li:nth-of-type(even)
+    color: $text-muted
+
+.list-alt-odd
+  li:nth-of-type(odd)
+    color: $text-muted
+
+.list-bricks
+  li
+    border: 1px solid $gray-subtle
+    background-color: #f7f7f7
+    margin: 5px
+    padding: 2px 10px
+    border-radius: $border-radius-base
+
+.list-bricks-left
+  li
+    border: 1px solid $gray-subtle
+    margin: 0px 10px 10px 0px
+    padding: 2px 10px
+    border-radius: $border-radius-base
+
+.list-group.list-group-nested
+  .list-group
+    margin: 0
+    margin-top: 10px
+
+.list-group.list-group-contained
+  margin: 0
+  margin-top: 10px
+
+.list-group-item
+  .list-inline
+    margin-bottom: 0
+
+ul.list-contained, ol.list-contained
+  margin-bottom: 0
+
+
+@include list-group-item-variant(dark, $brand-blue-dark, #ffffff)

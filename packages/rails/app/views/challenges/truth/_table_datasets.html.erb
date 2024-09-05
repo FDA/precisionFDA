@@ -1,0 +1,22 @@
+<div class="table-responsive">
+  <table id="table-truth-datasets" class="table table-condensed table-bordered table-nowrap table-hover table-sort">
+    <thead>
+      <tr>
+        <th class='sort-default' data-sort-method='string'>Label</th>
+        <th>HG001 VCF</th>
+        <th>HG002 VCF</th>
+      </tr>
+    </thead>
+    <% results[:overview].each do |result| %>
+      <tr>
+        <td><a href="/discussions/6-precisionfda-truth-challenge/answers/<%= result[:'Answer id'] %>"><%= result[:'Label'] %></a></td>
+        <td>
+          <%= link_to truncate(result[:'HG001 VCF filename'], length: 50), "/home/files/#{result[:'HG001 VCF file id']}", title: result[:'HG001 VCF filename'] %>
+        </td>
+        <td>
+          <%= link_to truncate(result[:'HG002 VCF filename'], length: 50), "/home/files/#{result[:'HG002 VCF file id']}", title: result[:'HG002 VCF filename'] %>
+        </td>
+      </tr>
+    <% end %>
+  </table>
+</div>

@@ -1,0 +1,2 @@
+#!/bin/bash
+rm -f /home/dnanexus/job_error.json

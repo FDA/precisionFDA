@@ -1,0 +1,119 @@
+@import "_common"
+
+// WICE-GRID
+$select-width: 28px
+.wice-grid.table
+  margin-bottom: 0
+
+  td
+    white-space: nowrap
+    &.wrap-normal
+      white-space: normal
+
+  .fa
+    color: $brand-blue-tertiary
+
+  > thead > tr > th
+    color: $text-muted
+    text-transform: uppercase
+    font-size: 12px
+    font-weight: 500
+    a
+      color: $brand-blue-tertiary
+
+    &.sorted
+      a, .fa
+        color: $text-color
+
+  > tbody > tr > td, > thead > tr > th
+    border-left: 0
+    border-right: 0
+
+  &.table-hover > tbody > tr:hover > td
+    &.sorted
+      background-color: darken($brand-highlight, 1%)
+
+    &.active-filter
+      background-color: darken($gray-subtle, 3%)
+
+  &.table-striped > tbody > tr:nth-of-type(odd)
+    background-color: transparent
+
+  > tbody > tr, &.table-striped > tbody > tr:nth-of-type(odd)
+    .col-state
+      width: 120px
+      text-transform: uppercase
+      font-weight: bold
+      font-size: 10px
+      vertical-align: middle
+      color: $state-warning-text
+      background-color: $state-warning-bg
+      &.state-running
+        color: #fff
+        background-color: $brand-blue-primary
+      &.state-done, &.state-active
+        color: $state-success-text
+        background-color: $state-success-bg
+      &.state-failed, &.state-error
+        color: $state-danger-text
+        background-color: $state-danger-bg
+      &.state-inactive, &.state-archived
+        color: $text-muted
+        background-color: $gray-subtle
+      &.state-unactivated
+        color: $state-warning-text
+        background-color: $state-warning-bg
+
+  > tbody > tr > td
+    &.active-filter
+      background-color: $gray-subtle
+
+  .highlighted
+    color: $label-danger-bg
+    font-weight: bold
+
+  .sorted
+    font-weight: bold
+    background-color: lighten($brand-highlight, 2%)
+
+  td.sel, th.sel
+    width: $select-width
+
+  .wg-filter-row
+    background-color: #fff
+
+  .pagination_status
+    float: right
+    color: $brand-blue-tertiary
+
+  .custom-dropdown-container
+    .custom-dropdown
+      width: calc(100% - 30px)
+      display: inline-block
+      min-width: 75px
+
+    .clickable
+      width: 25px
+      display: inline-block
+      text-align: center
+
+  .clickable
+    cursor: pointer
+
+  .extra-row
+    border-top: 2px solid transparent
+    td
+      padding-top: 0
+    .description
+      color: $text-muted
+
+  .current
+    font-weight: bold
+
+.empty-grid
+  padding: $padding-large-vertical $padding-large-horizontal
+  .alert
+    margin-bottom: 0
+
+.empty-grid-head
+  margin: 8px 0

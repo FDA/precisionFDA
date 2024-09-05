@@ -1,0 +1,24 @@
+{
+  "ignoreUnimported": [
+    "src/components/icons/**",
+    "src/hooks/**",
+    "src/stories/**",
+    "src/test/**",
+    "src/components/Avatar.tsx",
+    "src/components/Button/ButtonGroup.tsx",
+    "src/components/ConditionalLink.tsx",
+    "src/components/Table/useDebounce.tsx",
+    "src/features/auth/SessionExpiration.tsx",
+    "src/features/challenges/form/ChallengeOrderSelect.tsx",
+    "src/features/docs/pages/VideoTutorials.tsx",
+    "src/features/docs/videos.ts",
+    "src/features/experts/styles.ts",
+    "src/features/home/databases/useDatabaseListActions.tsx",
+    "src/features/home/files/actionModals/useFileUploadModal/SelectAddFileOptionModal.tsx",
+    "src/features/home/files/actionModals/usePublishFolderModal.tsx",
+    "src/features/home/selectedContext.tsx",
+    "src/features/modal/ConfirmationModal/index.tsx",
+    "src/features/modal/ConfirmationModal/styles.tsx",
+    "src/features/space/api.ts"
+  ]
+}

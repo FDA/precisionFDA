@@ -1,0 +1,29 @@
+<div class="row">
+  <div class="col-md-24">
+    <br>
+    <div class="overview-header">
+      Public:
+    </div>
+    <ul class="pfda-cards pfda-tutorial text-left" data-bind="sortable: { template: 'getStartedBox', data: publicBoxes, afterMove: myDropCallback }"></ul>
+    <hr>
+    <div class="overview-header">
+      Private:
+    </div>
+    <ul class="pfda-cards pfda-tutorial text-left test" data-bind="sortable: { template: 'getStartedBox', data: privateBoxes, afterMove: myDropCallback }"></ul>
+
+  </div>
+</div>
+
+<script id="getStartedBox" type="text/html">
+  <li class="pfda-card pfda-card-padded pfda-card-rounded pfda-card-default">
+    <div class="pfda-card-title">
+
+      <a rel="nofollow" data-bind="text: title, attr: { href: feature_url }"></a>
+      <a class="fa fa-edit" data-bind="attr: { href: edit_url }"></a>
+      <a class="fa fa-trash" data-bind="click: $root.removeBox"></a>
+      <a class="link-muted pull-right" data-bind="attr: { href: documentation_url }">Learn more</a>
+
+    </div>
+    <div class="pfda-card-body" data-bind="text: description"></div>
+  </li>
+</script>

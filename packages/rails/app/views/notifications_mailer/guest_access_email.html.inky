@@ -1,0 +1,27 @@
+<wrapper>
+  <spacer size="16"></spacer>
+  <container class="header">
+    <row>
+      <columns>
+        <a class="brand" href="<%= HOST %>" title="precisionFDA">
+          <img class="header-image" src="<%= HOST %>/assets/precisionFDA.email.dark.png" />
+        </a>
+      </columns>
+    </row>
+  </container>
+  <container class="radius">
+    <row>
+      <columns>
+        <p>Dear <%= @invitation.first_name %> <%= @invitation.last_name %>,</p>
+
+        <p>Thank you for your interest in the precisionFDA platform. Provisioning of your full account is pending; there is no further action needed from you at this time. You will soon receive a second email with a link to set up your password and multi-factor authentication.</p>
+
+        <callout class="primary">Note: PrecisionFDA is a production regulatory research platform and is intended to inform a broad community. Your request for a full account is pending and will be provisioned by the administrators. This may take several days. If more than two weeks have elapsed and your full access account has not been provisioned, please contact PrecisionFDA@fda.hhs.gov.</callout>
+
+        <p>We are looking forward to seeing you on-line!</p>
+        <p>&mdash;The precisionFDA team</p>
+      </columns>
+    </row>
+  </container>
+  <spacer size="16"></spacer>
+</wrapper>
