@@ -1,0 +1,144 @@
+@import "_common"
+
+.landing-btn
+  .btn-lg
+    padding: 20px 20px
+
+.login-alert
+  margin-top: 20px
+  margin-bottom: 20px
+
+.news-item
+  box-shadow: 1px 2px 4px rgba(0, 0, 0, .5)
+  padding: 15px 15px 15px 15px
+  margin: 30px 10px 50px 10px
+  .lead
+    color: $text-color
+
+.pfda-guest
+  &.pfda-controller-main.pfda-action-index
+    .navbar
+      display: none
+
+    .pfda-brand
+      padding: 30px 0
+      text-align: center
+      display: block
+
+    .showcase
+      padding-bottom: 50px
+      margin-top: -75px
+      border-top-left-radius: $border-radius-base
+      border-top-right-radius: $border-radius-base
+      background-color: #fff
+
+      .pfda-quotes
+        border-top-left-radius: $border-radius-base
+        border-top-right-radius: $border-radius-base
+        background-color: $gray-subtle
+        padding-top: 20px
+        .img-responsive
+          max-height: 75px
+          text-align: right
+
+      + .showcase
+        padding-top: 50px
+        margin-top: -50px
+
+    .guest-actions
+      text-align: center
+      padding: 20px
+
+      &.guest-actions-shadowed
+        background-color: rgba(0, 0, 0, 0.05)
+
+      @media (max-width: $screen-xs-max)
+        .btn-group
+          margin-right: 0
+
+        .btn
+          margin-top: 10px
+          width: 100%
+          border-radius: $btn-border-radius-large
+
+    .jumbotron-challenges
+      .tiltview
+        opacity: 0.25
+        width: 50%
+
+      .container
+        .pfda-cards:not(.pfda-cards-list)
+          .pfda-card
+            width: 100%
+            @media (min-width: $screen-sm-min)
+              width: calc(50% - 20px)
+            @media (min-width: $screen-md-min)
+              width: calc(40% - 20px)
+            @media (min-width: $screen-lg-min)
+              width: calc(30% - 20px)
+
+.overview-header
+  color: $text-muted
+  text-transform: uppercase
+  font-size: 16px
+  font-weight: 300
+  padding-left: $padding-base-horizontal
+  margin-bottom: 10px
+
+.pfda-tutorial
+  .link-muted
+    font-weight: normal
+
+.pfda-controller-main.pfda-action-request_access main
+  .error
+    padding: 10px
+    margin: 10px
+
+  form
+    margin-top: 20px
+    padding: 10px
+
+    .form-group-lg
+      .checkbox
+        height: 46px
+        padding: 11px 16px 11px 0
+        font-size: 18px
+        line-height: 1.3333333
+        border-radius: 3px
+
+.pfda-controller-main.pfda-action-publish main
+  .media-left
+    min-width: 105px
+
+  .list-group-item-default
+    > .media > .media-body > .object-title
+      font-weight: bold
+
+  .btn-default
+    background-color: transparent
+
+  .descendent-publish-indicator
+    color: $brand-green-primary
+
+#about-docs
+  position: relative
+
+#guidelines-modal
+  .carousel-indicators li
+    cursor: default
+
+    &:not(.active):hover
+      background: #fff
+
+#admin_org_agreement_modal
+  .modal-body
+    max-height: 400px
+    overflow: auto
+
+.main-section
+  margin-bottom: 50px
+
+.stay-up-to-date
+  font-size: 16px
+  .btn
+    margin-top: 20px

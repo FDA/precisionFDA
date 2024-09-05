@@ -1,0 +1,39 @@
+<ul class="nav-links nav navbar-nav">
+  <li class="<%= 'active' if controller_name == 'main' && action_name == 'index' %>" role="presentation">
+    <%= link_to root_path do %>
+      <div class="nav-icon fa fa-2x fa-home"></div>
+      <div class="nav-pill-title">Back Home</div>
+    <% end %>
+  </li>
+  <% if UserPolicy.can_see_spaces?(@context) %>
+    <li class="<%= 'active' if controller_name == 'spaces' %>" role="presentation">
+      <%= link_to spaces_path, data: { turbolinks: false } do %>
+        <div class="nav-icon fa fa-2x fa-object-group"></div>
+        <div class="nav-pill-title">Spaces</div>
+      <% end %>
+    </li>
+
+    <% if controller_name == "apps" %>
+      <li class="active" role="presentation">
+        <%= link_to "/spaces/#{@space.id}/apps", data: { turbolinks: false } do %>
+          <div class="nav-icon fa fa-2x fa-cubes"></div>
+          <div class="nav-pill-title">Apps</div>
+        <% end %>
+      </li>
+    <% elsif controller_name == "files" %>
+      <li class="active" role="presentation">
+        <%= link_to "/spaces/#{@space.id}/files", data: { turbolinks: false } do %>
+          <div class="nav-icon fa fa-2x fa-files-o"></div>
+          <div class="nav-pill-title">Files</div>
+        <% end %>
+      </li>
+    <% elsif controller_name == "workflows" %>
+      <li class="active" role="presentation">
+        <%= link_to "/spaces/#{@space.id}/workflows", data: { turbolinks: false } do %>
+          <div class="nav-icon fa fa-2x fa-flash"></div>
+          <div class="nav-pill-title">Workflows</div>
+        <% end %>
+      </li>
+    <% end %>
+  <% end %>
+</ul>

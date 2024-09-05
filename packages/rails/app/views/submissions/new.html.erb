@@ -1,0 +1,79 @@
+<% content_for :title do %>Run <%= @app.title %><% end %>
+
+<div class="affix-spacer">
+  <div class="affix-container">
+    <div class="page-header clearfix">
+      <div class="page-title pull-left"><span class="fa fa-inbox"></span>&nbsp;New Challenge Submission</div>
+      <div class="btn-group pull-right">
+        <button type="button" class="btn btn-lg" data-bind="css: {disabled: !isRunnable(), 'btn-default': !isRunnable(), 'btn-primary': isRunnable()}, attr: {disabled: !isRunnable()}, disable: !isRunnable(), click: run"><span class="fa fa-bolt"></span> <span data-bind="text: running() ? 'Submitting...':'Submit'"></span></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container-fluid container-padded">
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h4>About Your Submission</h4>
+    </div>
+    <div class="panel-body">
+      <%= form_for @submission, url: challenge_submissions_path, html: {class: 'form form-horizontal', id: "new_submission"} do |f| %>
+        <%= render "_partials/form_errors", object: @submission %>
+        <div class="form-group required">
+          <%= f.label :name, "Name", class: 'control-label col-sm-2' %>
+          <div class="col-sm-11 col-sm-offset-1">
+            <%= f.text_field :name, class: "form-control input-md", placeholder: "Name this submission...", required: "required", data: {bind: "textInput: name"} %>
+          </div>
+        </div>
+        <div class="form-group required">
+          <%= f.label :desc, "Description", class: 'control-label col-sm-2' %>
+          <div class="col-sm-11 col-sm-offset-1">
+            <%= f.text_area :desc, class: "form-control", rows: 4, placeholder: "Submission Description [Supports MarkDown (*.md) Formatting]", required: "required", data: {bind: "textInput: desc"}  %>
+          </div>
+        </div>
+        <%= f.hidden_field :inputs %>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h4>Submission Input Data</h4>
+    </div>
+    <div class="panel-body">
+      <form class="form form-horizontal">
+        <!-- ko foreach: inputModels -->
+        <div class="form-group" data-bind="css: {required: isRequired, 'has-error': error}">
+          <label class= "col-sm-4 control-label" data-bind="text: label || name, attr: {title: help}, css: {'text-danger': needsToBeSet}"></label>
+          <div class="col-sm-10 col-sm-offset-1" data-bind="css: 'field-'+className">
+            <!-- ko if: choices -->
+              <select class="form-control" data-bind="options: choices, optionsCaption: !defaultValue ? 'Select...' : undefined, value: valueDisplay, disable: $root.busy"></select>
+            <!-- /ko -->
+            <!-- ko ifnot: choices -->
+              <!-- ko if: className == 'int' || className == 'float' || className == 'string' -->
+                <input type="text" class="form-control" data-bind="textInput: valueDisplay, attr: {name: name, placeholder: placeholder, disable: $root.busy}">
+              <!-- /ko -->
+              <!-- ko if: className == 'boolean' -->
+                <div class="btn-group">
+                  <button class="btn btn-default" data-bind="css: {active: value() === true, is_default: defaultValue === true}, click: toggleTrue, disable: $root.busy">True</button>
+                  <button class="btn btn-default" data-bind="css: {active: value() === false, is_default: defaultValue === false}, click: toggleFalse, disable: $root.busy">False</button>
+                </div>
+              <!-- /ko -->
+              <!-- ko if: className == 'file' -->
+                <button class="btn btn-info" data-bind="text: valueDisplay, attr: {name: name, disable: $root.busy}, click: openFileSelector, css: { 'btn-info': !value(), 'btn-default': value}">Select file...</button>
+                <!-- ko if: value -->
+                  <button class="btn btn-link btn-link-danger" data-bind="click: clear">Clear</button>
+                <!-- /ko -->
+                <%= render "_partials/selector_modal" %>
+              <!-- /ko -->
+            <!-- /ko -->
+            <div class="help-block" data-bind="text: error, visible: error"></div>
+          </div>
+        </div>
+        <!-- /ko -->
+      </form>
+    </div>
+  </div>
+</div>
+
+<%= render "licenses/selector_modal" %>

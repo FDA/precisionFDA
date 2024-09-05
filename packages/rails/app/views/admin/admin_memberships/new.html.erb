@@ -1,0 +1,14 @@
+<div class="pfda-padded">
+  <a class="btn btn-default" rel="nofollow" href="<%= admin_admin_memberships_path %>">
+    Back
+  </a>
+</div>
+
+<div class="infoframe-outer">
+  <div class="infoframe-inner">
+    <h4 class="infoframe-title">Users Search</h4>
+    <div>
+      <%= render "grid", show_filters: :always, users_grid: @users_grid  %>
+    </div>
+  </div>
+</div>

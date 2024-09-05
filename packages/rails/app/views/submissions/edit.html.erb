@@ -1,0 +1,70 @@
+<% content_for :title do %>Edit your submission "<%= @submission.job.name %>"<% end %>
+
+<div class="page-header">
+  <div class="page-title note-editing">
+    Edit Submission
+    <div class="note-titlebar">
+      <input type="text" class="form-control" name="title" placeholder="Submission name..." data-bind="textInput: title.cache" />
+    </div>
+  </div>
+</div>
+
+<div class="metadata-section metadata-header">
+  <ul class="list-group list-group-inline">
+    <li class="list-group-item">
+      <h5 class="list-group-item-heading">ID</h5>
+      <p class="list-group-item-text"><%= @submission.uid %></p>
+    </li>
+    <li class="list-group-item">
+      <h5 class="list-group-item-heading">Challenge</h5>
+      <p class="list-group-item-text">
+        <%= @submission.challenge.name.titleize %>
+      </p>
+    </li>
+    <li class="list-group-item">
+      <h5 class="list-group-item-heading">Added by</h5>
+      <p class="list-group-item-text">
+        <%= link_to(@submission.user.dxuser, user_path(@submission.user.dxuser))  %>
+      </p>
+    </li>
+    <li class="list-group-item">
+      <h5 class="list-group-item-heading">Created</h5>
+      <p class="list-group-item-text"><%= @submission.created_at.to_s(:human) %></p>
+    </li>
+  </ul>
+</div>
+
+
+<div class="pfda-toolbar clearfix">
+  <div class="pull-right">
+    <%= link_to "Back to your entries", "/challenges/#{@submission.challenge.id}#my_entries", class: "btn btn-link" %>
+    <a class="btn btn-primary" data-bind="click: save, css: {disabled: !isFormReady()}, text: saveBtnText"></a>
+  </div>
+</div>
+
+<div class="pfda-note-container container-fluid container-padded">
+  <div class="pfda-note note-editing">
+    <div class="note-flexbox">
+      <div class="note-pane">
+        <div class="ace-editor-section">
+          <!-- Nav tabs -->
+          <ul class="nav nav-tabs nav-tabs-padded" role="tablist">
+            <li role="presentation" class="active"><a href="#tab-note-editor" aria-controls="tab-note-editor" role="tab" data-toggle="tab">Edit Content</a></li>
+            <li role="presentation"><a href="#tab-note-preview" aria-controls="tab-note-preview" role="tab" data-toggle="tab">Preview</a></li>
+          </ul>
+
+          <!-- Tab panes -->
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane tab-pane-padded active" id="tab-note-editor">
+              <div id="note-editor" class="ace-rounded" data-bind="ace: content.cache, aceOptions: { mode: 'markdown', theme: 'textmate', opts: {maxLines: Infinity,  wrap: 'free'}}"></div>
+              <p class="help-block text-right">Format with <a href="https://jonschlinkert.github.io/remarkable/demo/" target="_blank">Markdown syntax <span class="fa fa-external-link-square" aria-hidden='true'></span></a></p>
+            </div>
+            <div role="tabpanel" class="tab-pane tab-pane-padded" id="tab-note-preview">
+              <div class="note-preview pfda-md-rendered" data-bind="html: content.preview"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

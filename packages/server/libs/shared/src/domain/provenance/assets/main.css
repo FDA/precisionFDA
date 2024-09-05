@@ -1,0 +1,88 @@
+.node-path {
+  fill: none;
+  stroke: #8198bc;
+}
+
+.node a {
+  display: inline-block;
+  padding: 0.5rem;
+  font-size: 1.3rem;
+  white-space: nowrap;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-decoration: none;
+  background-color: #eee;
+  border-radius: 0.3rem;
+  border: 0.1em solid var(--border-color);
+  color: var(--link-color);
+  font-family: serif;
+}
+
+.node.pixelated a {
+  padding: 5px;
+  font-size: 13px;
+  border-radius: 3px;
+  border-width: 1px;
+}
+
+.node a[data-depth='0'] {
+  font-weight: bold;
+  background-color: var(--link-color);
+  border-color: var(--link-color);
+  color: white;
+}
+
+.node a[data-depth='0']:hover {
+  color: white;
+  background-color: var(--link-color-hover);
+  border-color: var(--link-color-hover);
+}
+
+.node a[data-depth='0'] path {
+  fill: white;
+}
+
+.node a[data-depth='0']:hover path {
+  fill: white;
+}
+
+.node svg path {
+  fill: var(--link-color);
+}
+
+.node a:hover {
+  color: var(--link-color-hover);
+}
+
+.node a:hover svg path {
+  fill: var(--link-color-hover);
+}
+
+.node .content {
+  text-align: center;
+}
+
+.node .content svg {
+  height: 1.8rem;
+  vertical-align: middle;
+  padding-right: 0.5rem;
+}
+
+.node.pixelated .content svg {
+  height: 18px;
+  padding-right: 5px;
+}
+
+.node .content span {
+  vertical-align: middle;
+}
+
+.canvas {
+  --black-color: #343e4d;
+  --link-color: #1f70b5;
+  --link-color-hover: #4297df;
+  --main-bg-color: #ddd;
+  --border-color: #ccc;
+}

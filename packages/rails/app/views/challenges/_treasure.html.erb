@@ -1,0 +1,299 @@
+<div class="container container-padded">
+  <div class="pfda-challenge-intro">
+
+    <div class="pfda-cards pfda-cards-justify-centered ">
+      <div class="pfda-card pfda-card-rounded pfda-card-padded">
+        <div class="pfda-card-body">
+          <div class="challenge-card-icon"><span class="fa fa-sliders fa-4x" aria-hidden="true"></span></div>
+          Precision medicine holds promise for a day when an individual’s medical care will be tailored in part based on their unique characteristics and genetic make-up. The success of precision medicine relies upon robust and accurate genomic tests, so the Food and Drug Administration (FDA) created precisionFDA to support the community’s efforts in developing advanced genomic analysis technologies that use next-generation sequencing (NGS) -- specifically NGS bioinformatics.
+        </div>
+      </div>
+      <div class="pfda-card pfda-card-rounded pfda-card-padded">
+        <div class="pfda-card-body">
+          <div class="challenge-card-icon"><span class="fa fa-flask fa-4x" aria-hidden="true"></span></div>
+          The FDA is launching a new precisionFDA challenge to continue its support of the genomics community in assessing, comparing, and improving techniques used for NGS. This challenge is designed as a warm up for the community since this will be the first time we are using in silico injected variants as part of a challenge. And yes, that means there is a harder, second part coming in the fall! 
+        </div>
+      </div>
+      <div class="pfda-card pfda-card-rounded pfda-card-padded">
+        <div class="pfda-card-body">
+          <div class="challenge-card-icon"><span class="fa fa-usb fa-rotate-90 fa-4x" aria-hidden="true"></span></div>
+          PrecisionFDA invites all innovators to take the challenge and assess their (or their favorite!) software on the supplied human datasets. Participation is voluntary, but instrumental in helping the community prepare for the coming genomic data revolution.
+        </div>
+      </div>
+    </div>
+
+    <hr>
+
+    <div class="text-muted text-center">
+      <p>Challenge Time Period</p>
+      <p><mark>July 18, 2017 through September 12, 2017</mark></p>
+    </div>
+  </div>
+
+  <hr>
+
+  <br>
+
+  <div class="well">
+    <h3 class="text-uppercase">At a glance</h3>
+
+    <div class="copy">
+      <p>
+        In the context of human genome sequencing, software pipelines typically involve a wide range of processing elements, including aligning sequencing reads to a reference genome and subsequently identifying variants (differences). One way of assessing the performance of such pipelines is by using well-characterized datasets such as Genome in a Bottle’s NA12878. However, because the existing NGS reference datasets are very limited and have been widely used to train/develop software pipelines, benchmarking of pipeline performance would ideally be done on samples with unknown variants.
+      </p>
+      <p>
+        This challenge will provide a unique opportunity for participants to investigate the accuracy of their pipelines by testing the ability to find in silico injected variants in FASTQ files from exome sequencing of reference cell lines. It will be a warm up for the community ahead of a more difficult in silico challenge to come in the fall. This challenge will provide users with a FASTQ file of a NA12878 sequence that has been in silico modified with SNV and InDel (less than 40 bp) variants at Variant Allele Frequencies (VAF) greater than or equal to 20%. Users will run the FASTQ file through their pipeline, returning the VCF file to precisionFDA for comparison and determination of accuracy with respect to variant detection. We are also interested in understanding whether participants' pipelines can accurately detect the allele frequency of the called variants. Therefore we would also like the generated VCF files to either directly provide the detected allelic frequency in the INFO or FORMAT section of the VCF, or specify fields by which the VAF can be calculated.
+      </p>
+    </div>
+
+    <hr>
+
+    <div class="pfda-challenge-diagram">
+      <%= link_to image_tag("challenges/pFDA-C4-Diagram", alt: "PrecisionFDA Treasure Hunt Challenge Part 1", class: "img-responsive"), image_path("challenges/pFDA-C4-Diagram") %>
+    </div>
+
+    <hr>
+
+    <div class="copy">
+      <p>
+        The challenge begins with a precisionFDA-provided input dataset (FASTQ file), corresponding to whole exome sequencing of NA12878 modified with specific variants blinded to challenge participants. This challenge will focus on detection of SNVs and InDels, not structural or copy number variants. Your mission is to process this FASTQ dataset, completely independently with no prior comparison, through your mapping and variation calling pipeline to create a VCF file. You can generate those results in your own environment, and upload them to precisionFDA, or you can reconstruct your pipeline on precisionFDA and run it here. Regardless of how you generate your VCF file, you will subsequently submit it as your entry to the challenge. Once you submit the file you will not be able to modify your entry (but you can submit multiple entries if you wish).
+      </p>
+      <p>
+        After submissions close, the precisionFDA team will then run and publish comparative results between each contestant’s submitted VCF files and the known reference truth set. This will challenge a pipeline’s ability to detect previously unknown genetic variants.
+      </p>
+      <p>
+        Your entry to the challenge comprises your submitted NA12878MOD VCF and the comparison results conducted by precisionFDA. Selected participants and top performers will be recognized on the precisionFDA website. Therefore, we hope you are willing to share your experience with others to further enhance the community's effort to develop better technologies to detect genetic variants.
+      </p>
+      <p>
+        The challenge runs until September 12, 2017.
+      </p>
+    </div>
+  </div>
+</div>
+
+<hr>
+
+<div class="container container-padded" id="details">
+  <h3>Challenge details</h3>
+  <p>Last updated: July 13, 2017
+
+  <div class="panel-group accordion" id="accordion" role="tablist" aria-multiselectable="true">
+    <div class="panel panel-default">
+      <div class="panel-heading" role="tab" id="headingGettingOn">
+        <h4 class="panel-title">
+          <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseGettingOn" aria-expanded="true" aria-controls="collapseGettingOn">
+            Getting on the precisionFDA website
+          </a>
+        </h4>
+      </div>
+      <div id="collapseGettingOn" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingGettingOn">
+        <div class="panel-body">
+          <p class="copy">
+          If you do not yet have a contributor account on precisionFDA, <a href="/request_access">file an access request</a> with your complete information, and indicate that you are entering the challenge. The FDA acts as steward to providing the precisionFDA service to the community and ensuring proper use of the resources, so your request will be initially pending. In the meantime, you will receive an email with a link to access the precisionFDA website in browse (guest) mode. Once approved, you will receive another email with your contributor account information.
+          </p>
+          <p class="copy">
+          With your contributor account you can use the features required to participate in the challenge (such as transfer files or run apps). Everything you do on precisionFDA is initially private to you (not accessible to the FDA or the rest of the community) until you choose to publicize it. So you can immediately start working on the challenge in private, and whenever you are ready you can officially publish your results as your challenge entry.
+          </p>
+        </div>
+      </div>
+    </div>
+    <div class="panel panel-default">
+      <div class="panel-heading" role="tab" id="headingInputFiles">
+        <h4 class="panel-title">
+          <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseInputFiles" aria-expanded="false" aria-controls="collapseInputFiles">
+            Locating and understanding the input files
+          </a>
+        </h4>
+      </div>
+      <div id="collapseInputFiles" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingInputFiles">
+        <div class="panel-body">
+          <p class="copy">
+            The starting point for this challenge consists of one dataset, corresponding to exome sequencing of the NA12878 sample on an Illumina HiSeq 2500 instrument at a single site. The FASTQ has been modified in silico (NA12878MOD) to add a number of specific SNV and InDel variants at 20% or greater variant frequency. A pair of gzipped FASTQ files is provided for the dataset. The following table summarizes key information: 
+          </p>
+
+          <table class="table table-bordered table-rounded">
+            <thead>
+              <th>Dataset</th>
+              <th>NA12878MOD</th>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Files</td>
+                <td>
+                  <a class="btn btn-link" target="_blank" href="https://precision.fda.gov/home/files/file-F5VvyJ8059Qxvp0z3qXZ0Gzz"><span class="fa fa-file-o" aria-hidden="true"></span> NA12878MOD_1.fastq.gz</a>
+                  <br>
+                  <a class="btn btn-link" target="_blank" href="https://precision.fda.gov/home/files/file-F5Vqgqj059Qfpx8j0q2pyqq1"><span class="fa fa-file-o" aria-hidden="true"></span> NA12878MOD_2.fastq.gz</a>
+                </td>
+              </tr>
+              <tr>
+                <td>Library Prep</td>
+                <td>Libraries were prepared from 1 microgram of genomic DNA using Kapa Biosystems’ KAPA LTP Library Preparation Kit.  Libraries were enriched for exome content using Nimblegen’s SeqCap EZ Human Exome +UTR</td>
+              </tr>
+              <tr>
+                <td>Read Length</td>
+                <td colspan="2">2x126bp</td>
+              </tr>
+              <tr>
+                <td>Insert Size</td>
+                <td colspan="2">324bp</td>
+              </tr>
+              <tr>
+                <td>Instrument and Sequencing Chemistry</td>
+                <td colspan="2">Illumina HiSeq 2500 using Version 4 chemistry</td>
+              </tr>
+              <tr>
+                <td>Approximate Coverage</td>
+                <td>76x</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <p class="copy">
+          You will need to process these FASTQ files through your pipeline to generate a VCF file. This can be done either by downloading the files and running your pipeline on your own environment, or by reconstructing your pipeline on precisionFDA and running it there. If you will be working on your own environment, download this dataset by visiting the links above and clicking the <strong>Download</strong> button (web-browser download, not recommended for large files) or the <strong>Authorized URL</strong> button.
+          </p>
+        </div>
+      </div>
+    </div>
+    <div class="panel panel-default">
+      <div class="panel-heading" role="tab" id="headingRunPipeline">
+        <h4 class="panel-title">
+          <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseRunPipeline" aria-expanded="false" aria-controls="collapseRunPipeline">
+            Running your pipeline
+          </a>
+        </h4>
+      </div>
+      <div id="collapseRunPipeline" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingRunPipeline">
+        <div class="panel-body">
+          <p class="copy">
+            After familiarizing yourself with the input files, you will need to process them through your mapping and variation calling pipeline to generate corresponding VCF files. Your pipeline must call variants across the entire sequenced region. Each invocation of your pipeline must take as input a pair of FASTQ files and produce a VCF file containing exactly one genotyped sample. Results must be reported on GRCh37 human coordinates (i.e. chromosomes named 1, 2, ..., X, Y, and MT). You are strongly encouraged to compress the VCF file with bgzip, to reduce the file size. We are also interested in understanding whether your pipeline can accurately detect the allele frequency of the called variants. Therefore we would also prefer if your generated VCF file either directly provide the detected allelic frequency in the INFO or FORMAT section of the VCF, or contains other fields by which the VAF can be calculated.
+          </p>
+
+          <table class="table">
+            <thead>
+              <tr>
+                <th class="text-success">DO</th>
+                <th class="text-danger">DON'T</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="text-success">
+                  <span class="fa fa-check"></span> Use GRCh37<br>
+                  <span class="fa fa-check"></span> Call variants across the entire sequenced region<br>
+                  <span class="fa fa-check"></span> Compress with bgzip<br>
+                </td>
+                <td class="text-danger">
+                  <span class="fa fa-times"></span> Use hg19 or GRCh38<br>
+                  <span class="fa fa-times"></span> Call variants only in specific regions<br>
+                  <span class="fa fa-times"></span> Generate a gVCF<br>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          <table class="table table-bordered table-rounded">
+            <thead>
+              <th>Input dataset (FASTQ pair)</th>
+              <th>Output dataset</th>
+              <th>Example output filename</th>
+            </thead>
+            <tbody>
+              <tr>
+                <td>NA12878MOD</td>
+                <td>NA12878MOD VCF</td>
+                <td>YourName-NA12878MOD.vcf.gz</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="bs-callout bs-callout-info">
+            <strong>NOTE</strong>
+            <p>NOTE: The input files for this challenge correspond to approximately 76X coverage.</p>
+          </div>
+
+          <p class="copy">
+            If you are running your pipeline in your own environment, upload the two generated files to precisionFDA. Additional information on uploading files is available at the <a href="https://precision.fda.gov/docs/files#files-uploading">precisionFDA docs</a>. Your uploaded files are private, until you are ready to share them with the community (see "Submitting your entry" below).
+          </p>
+        </div>
+      </div>
+    </div>
+    <div class="panel panel-default">
+      <div class="panel-heading" role="tab" id="headingBringPipeline">
+        <h4 class="panel-title">
+          <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseBringPipeline" aria-expanded="false" aria-controls="collapseBringPipeline">
+            (Optional) Reconstructing your pipeline on precisionFDA
+          </a>
+        </h4>
+      </div>
+      <div id="collapseBringPipeline" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingBringPipeline">
+        <div class="panel-body">
+          <p class="copy">
+            Besides running your pipeline in your own environment, you have the additional option of reconstructing your pipeline on precisionFDA and running it there. To do that, you must create one or more apps on precisionFDA that encapsulate the actions performed in your pipeline. To create an app, you can provide Linux executables and an accompanying shell script to be run inside an Ubuntu VM on the cloud. The precisionFDA website contains <a href="https://precision.fda.gov/docs/creating_apps">extensive documentation</a> on how to create apps, and you can also click the <strong>Fork</strong> button on an existing app (such as <a href="https://precision.fda.gov/apps/app-BpF9YGQ0bxjbjk6Fx1F0KJF0">bwa_mem_bamsormadup</a>) to use it as starting point for developing your own.
+          </p>
+
+          <p class="copy">
+            Constructing your pipeline on precisionFDA has an important advantage: you can, at your discretion, share it with the community, so that others can take a look at it and reproduce your results – and perhaps build upon it and further improve it.
+          </p>
+        </div>
+      </div>
+    </div>
+    <div class="panel panel-default">
+      <div class="panel-heading" role="tab" id="headingSubmitEntry">
+        <h4 class="panel-title">
+          <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseSubmitEntry" aria-expanded="false" aria-controls="collapseSubmitEntry">
+            Submitting your entry
+          </a>
+        </h4>
+      </div>
+      <div id="collapseSubmitEntry" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingSubmitEntry">
+        <div class="panel-body">
+          <p class="copy">
+            To begin your submission, click "Submit Challenge Entry" at the top of this page. The submission screen will ask for a title, a description, and a VCF file for your entry.
+          </p>
+          <p class="copy">
+            Start by providing a short title for your submission entry, then fill in the description. In your description, please identify whether you are participating as an individual or as part of the team (and, if it is a team effort, don’t forget to identify the members of your team). Explain the pipeline used to obtain the results, and identify the name, version and command-line parameters of the mapper and variant caller invoked in your pipeline. Discuss what INFO or FORMAT fields can be used to calculate the allele frequency. The description entry field supports the <a target="_blank" href="https://jonschlinkert.github.io/remarkable/demo/">Markdown syntax</a>. Don't worry if you don't get it perfect right away -- you can always go back and edit this description later.
+          </p>
+          <div class="bs-callout bs-callout-info">
+            <strong>NOTE</strong>
+            <p>If you opted to construct your pipeline on precisionFDA, and your VCF was generated by running one or more precisionFDA apps, the system will automatically prompt you to share the details of these executions when submitting your entry (see below). In that case, your description only needs to provide a high-level summary, because the exact software invocations will be available to the community via the system’s sharing mechanism.</p>
+          </div>
+          <p class="copy">
+            In the submission input data section, click "Select file..." and choose the VCF file you'd like to submit. (In the popup click "Files", then tick "Only mine", then select your file).
+          </p>
+          <p class="copy">
+            Once you have entered a title and a description, and chosen a VCF file, the "Submit" button on the upper right corner will become active. Click the button to invoke the publishing wizard, which will prompt you to publish the VCF file so that others can see it (this is a requirement for participating in the challenge). If your VCF file was generated by running apps on precisionFDA (instead of being uploaded externally), the system will ask if you also want to publish the related job, app, and app assets.
+          </p>
+          <p class="copy">
+            After completing the publishing wizard, your VCF file will become public, and your entry will be officially submitted. The system will conduct an initial verification of your entry, by running software for validating VCF files, and other VCF comparisons. During that time, your entry will appear as "pending verification" under the "my entries" tab, but will not yet show up under the public "challenge submissions" tab. This step takes several minutes, and you can monitor it by clicking "View Log".
+          </p>
+          <p class="copy">
+            If your entry fails this step, it will be marked as "failed". You can click "View Log" to see some diagnostic information related to the execution of the verification software. Failed entries will not show up under the "challenge submissions" tab and will not be counted towards the challenge. (However, your VCF will have been made public -- but you are welcome to delete it).
+          </p>
+          <p class="copy">
+            If verification completes successfully, your entry will appear under "challenge submissions".
+          </p>
+          <p class="copy">
+            Successful entries cannot be revoked, but you can always submit new ones. You can also go back and edit the title and description of any entry.
+          </p>
+        </div>
+      </div>
+    </div>
+    <div class="panel panel-default">
+      <div class="panel-heading" role="tab" id="headingWinners">
+        <h4 class="panel-title">
+          <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseWinners" aria-expanded="false" aria-controls="collapseWinners">
+            Determining the top performers
+          </a>
+        </h4>
+      </div>
+      <div id="collapseWinners" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingWinners">
+        <div class="panel-body">
+          <p class="copy">
+            All valid submitted entries, after being vetted by precisionFDA, and after meeting minimum criteria for performance with NA12878MOD, will receive an acknowledgement for participation in the challenge. Among these entries, those which have correctly identified all injected variants will receive a special recognition. Additional recognition may also be awarded based on specific variant types and frequencies or based on the performance of identifying overall variants across NA12878MOD. 
+          </p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>

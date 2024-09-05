@@ -1,0 +1,57 @@
+<div class="pfda-note note-editing">
+  <div class="note-flexbox">
+    <div class="note-pane">
+      <div class="ace-editor-section">
+        <!-- Nav tabs -->
+        <ul class="nav nav-tabs nav-tabs-padded" role="tablist">
+          <li role="presentation" class="active"><a href="#tab-note-editor" aria-controls="tab-note-editor" role="tab" data-toggle="tab">Edit Content</a></li>
+          <li role="presentation"><a href="#tab-note-preview" aria-controls="tab-note-preview" role="tab" data-toggle="tab">Preview</a></li>
+        </ul>
+
+        <!-- Tab panes -->
+        <div class="tab-content">
+          <div role="tabpanel" class="tab-pane tab-pane-padded active" id="tab-note-editor">
+            <div id="note-editor" class="ace-rounded" data-bind="ace: content.cache, aceOptions: { mode: 'markdown', theme: 'textmate', opts: {maxLines: Infinity,  wrap: 'free'}}"></div>
+            <p class="help-block text-right">Format with <a href="https://jonschlinkert.github.io/remarkable/demo/" target="_blank">Markdown syntax <span class="fa fa-external-link-square" aria-hidden='true'></span></a></p>
+          </div>
+          <div role="tabpanel" class="tab-pane tab-pane-padded" id="tab-note-preview">
+            <div class="note-preview pfda-md-rendered" data-bind="html: content.preview"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="note-sidebar note-sidebar-padded">
+      <div id="note-attachments" class="note-attachments">
+        <div class="note-section-title"><span class="fa fa-paperclip"></span> Attachments</div>
+        <!-- ko foreach: attachments -->
+        <div class="list-group" data-bind="visible: items().length > 0, css: className">
+          <div class="list-group-item">
+            <div class="list-group-item-heading" data-bind="text: heading"></div>
+          </div>
+          <!-- ko foreach: items -->
+            <div class="list-group-item attachment" data-bind="attr: {'item-uid': uid, 'item-klass': klass}, css: {removed: removed.cache, 'attachment-is-new': isNew}, visible: !removed() && !(removed.cache() && !$root.editing())">
+              <div class="media">
+                <div class="media-left">
+                  <span data-bind="css: $parent.iconClass"></span>
+                </div>
+                <div class="media-body word-break-all">
+                  <span data-bind="visible: isNew" class="label label-primary">Unsaved</span>
+                  <!-- ko if: path -->
+                    <a class="item-name" data-bind="text: name, attr: {href: path}" tabindex="-1" ></a>
+                  <!-- /ko -->
+                  <!-- ko ifnot: path -->
+                    <span class="item-name" data-bind="text: uid" tabindex="-1" ></span>
+                  <!-- /ko -->
+                </div>
+                <div class="media-right">
+                  <a class="btn btn-link btn-link-danger btn-remove" data-bind="click: toggleRemove, css: removed.cache() ? 'fa fa-plus' : 'fa fa-times'"></a>
+                </div>
+              </div>
+            </div>
+          <!-- /ko -->
+        </div>
+        <!-- /ko -->
+      </div>
+    </div>
+  </div>
+</div>

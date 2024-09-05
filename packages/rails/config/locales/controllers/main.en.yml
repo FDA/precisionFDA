@@ -1,0 +1,6 @@
+en:
+  main:
+    publish:
+      apps_notification: >
+        There are apps within the workflow that have not been added to the space,
+        nevertheless all apps in the workflow will be published into the space. Do you confirm?

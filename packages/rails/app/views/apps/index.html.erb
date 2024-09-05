@@ -1,0 +1,61 @@
+<% content_for :title do %>Apps<% end %>
+
+<div class="pfda-toolbar">
+  <ul class="nav nav-pills nav-pills-center nav-pills-sm">
+    <li class="<% if action_name == 'index' %>active<% end %>">
+      <%= link_to apps_path do %>
+        <span class="fa fa-cubes"></span> <span class="pill-label">Relevant Apps</span>
+      <% end %>
+    </li>
+    <li class="<% if action_name == 'featured' %>active<% end %>">
+      <%= link_to featured_apps_path do %>
+        <span class="fa fa-flag"></span> <span class="pill-label">Featured</span>
+      <% end %>
+    </li>
+    <li class="<% if action_name == 'explore' %>active<% end %>">
+      <%= link_to explore_apps_path do %>
+        <span class="fa fa-globe"></span> <span class="pill-label">Explore</span>
+      <% end %>
+    </li>
+  </ul>
+</div>
+
+<div class="pfda-toolbar">
+  <div class="btn-group">
+    <a class="btn btn-primary" href="<%= new_app_path %>"><span class="fa fa-plus-square fa-fw"></span> Create App</a>
+    <a class="btn btn-default" href="/home/assets"><span class="fa fa-file-zip-o fa-fw"></span> Manage Assets</a>
+  </div>
+</div>
+
+<div class="pfda-pane container-fluid">
+  <div class="pfda-pane-sidebar pfda-pane-sidebar-dark pfda-pane-sidebar-padded-v">
+    <div class="list-group">
+      <a href="<%= apps_path() %>" class="list-group-item <%= @app.nil? ? 'active' : '' %>">
+        <span class="fa fa-tasks"></span> All My Jobs
+      </a>
+    </div>
+    <% if @my_apps.count > 0 %>
+    <div class="list-group list-group-condensed-sm">
+      <div class="list-group-item list-group-item-header">
+        My Apps
+      </div>
+      <%= render "_partials/apps_list_group", apps: @my_apps, active: @app.try(:app_series_id) %>
+    </div>
+    <% end %>
+    <% if @ran_apps.count > 0 %>
+    <div class="list-group list-group-condensed-sm">
+      <div class="list-group-item list-group-item-header">
+        Community Apps Ran
+      </div>
+      <%= render "_partials/apps_list_group", apps: @ran_apps, active: @app.try(:app_series_id) %>
+    </div>
+    <% end %>
+  </div>
+  <div class="pfda-pane-content">
+    <%= render "/apps/detail",
+      app: @app, jobs_grid: @jobs_grid, context: @context,
+      revisions: @revisions, jobs_grid: @jobs_grid,
+      comments: @comments, items_from_params: @items_from_params,
+      item_comments_path: @item_comments_path %>
+  </div>
+</div>

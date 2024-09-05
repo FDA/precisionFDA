@@ -1,0 +1,40 @@
+<% content_for :title do %>Apps<% end %>
+
+<div class="pfda-toolbar">
+  <ul class="nav nav-pills nav-pills-center nav-pills-sm">
+    <li class="<% if action_name == 'index' %>active<% end %>">
+      <%= link_to apps_path do %>
+        <span class="fa fa-cubes"></span> <span class="pill-label">Relevant Apps</span>
+      <% end %>
+    </li>
+    <li class="<% if action_name == 'featured' %>active<% end %>">
+      <%= link_to featured_apps_path do %>
+        <span class="fa fa-flag"></span> <span class="pill-label">Featured</span>
+      <% end %>
+    </li>
+    <li class="<% if action_name == 'explore' %>active<% end %>">
+      <%= link_to explore_apps_path do %>
+        <span class="fa fa-globe"></span> <span class="pill-label">Explore</span>
+      <% end %>
+    </li>
+  </ul>
+</div>
+
+<div class="pfda-toolbar">
+  <a class="btn btn-primary" href="<%= new_app_path %>">
+    <i class="fa fa-plus-square fa-fw"> </i> Create App
+  </a>
+  <a class="btn btn-default" href="/home/assets">
+    <i class="fa fa-file-zip-o fa-fw"> </i> Manage Assets
+  </a>
+</div>
+
+<% if @apps_grid.present? %>
+    <%= render "apps/grid", apps_grid: @apps_grid %>
+<% else %>
+  <div class="container-fluid container-padded">
+    <div class="alert alert-info">
+      We couldn't find any apps here
+    </div>
+  </div>
+<% end %>

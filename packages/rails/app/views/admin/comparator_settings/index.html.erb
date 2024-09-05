@@ -1,0 +1,44 @@
+<% content_for :title, "Comparator Settings" %>
+
+<div class="page-header">
+  <div class="media">
+    <div class="media-body">
+      <div class="page-title">
+        <i class="fa fa-bullseye" aria-hidden="true"></i>
+        Comparator Apps
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="pfda-padded">
+  <a class="btn btn-default" rel="nofollow" href="<%= admin_root_path %>">
+    Back
+  </a>
+</div>
+
+<div class="pfda-padded">
+  <div class="pfda-help-block">
+    <i class="fa fa-exclamation-circle" aria-hidden="true"></i>&nbsp;
+    <span class="pfda-help-prompt">Global comparison tool is </span>
+    <strong><%= @global_default_comparator.title %></strong>
+
+    <% if @global_default_comparator.dxid == Setting.comparison_app %>
+      <%= content_tag(:span, 'default', class: 'label label-default') %>
+    <% else %>
+      <button class="btn btn-primary btn-xs"
+              data-dxid="<%= @global_default_comparator.dxid %>"
+              data-bind='click: showSetAsDefaultModal'>
+        Set as Default
+      </button>
+    <% end %>
+
+
+  </div>
+</div>
+
+<div class="pfda-padded">
+  <%= render partial: "admin/comparator_settings/grid", locals: { comparators_grid: @comparators_grid } %>
+  <%= render partial: "admin/comparator_settings/remove_from_comparators_modal" %>
+  <%= render partial: "admin/comparator_settings/set_comparison_app_modal" %>
+</div>

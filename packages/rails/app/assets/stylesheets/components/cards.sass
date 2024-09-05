@@ -1,0 +1,233 @@
+@import "_common"
+
+.pfda-cards
+  @include flexbox
+  @include flex-wrap(wrap)
+  @include align-items(stretch)
+  @include align-content(stretch)
+  padding-top: 10px
+  padding-bottom: 10px
+
+  &.pfda-cards-list
+    padding: 0
+
+  &.pfda-cards-stretch
+    padding: 0
+    .pfda-card
+      width: 100%
+
+  &.pfda-cards-align-centered
+    @include align-items(center)
+
+  &.pfda-cards-justify-centered
+    @include justify-content(center)
+
+  .pfda-card
+    position: relative
+    margin: 10px 10px
+    overflow: hidden
+    font-weight: normal
+    color: $text-muted
+
+    .pfda-card-title
+      font-size: 20px
+      font-weight: 700
+
+    .pfda-card-body
+      font-size: 16px
+
+    .pfda-card-body-icon
+      font-size: 50px
+      opacity: 0.5
+      text-align: center
+
+    &.pfda-card-list
+      width: 100%
+      margin: 0
+      border-bottom: 1px solid lighten($border-default-color, 5%)
+
+    &.pfda-card-padded
+      padding: $padding-base-horizontal
+
+    &.pfda-card-rounded
+      border-radius: $border-radius-base
+
+    &.pfda-card-bordered
+      border: 1px solid $border-default-color
+
+    &.pfda-card-shadow
+      box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.5)
+      &:hover
+        box-shadow: 0px 0px 25px rgba(0, 0, 0, 0.9)
+
+    &.pfda-card-light
+      background-color: #fefefe
+      color: $text-color
+
+    &.pfda-card-dark
+      background-color: $brand-blue-dark
+      color: #fefefe
+
+    &.pfda-card-default
+      background-color: #fafafa
+      color: $text-color
+
+    &.pfda-card-success
+      background-color: $state-success-bg
+      color: $state-success-text
+      border-color: $state-success-border
+
+    &.pfda-card-success-solid
+      background-color: $btn-success-bg
+      color: $btn-success-color
+      border-color: $btn-success-border
+
+    &.pfda-card-warning
+      background-color: $state-warning-bg
+      color: $state-warning-text
+      border-color: $state-warning-border
+
+    &.pfda-card-warning-solid
+      background-color: $btn-warning-bg
+      color: $btn-warning-color
+      border-color: $btn-warning-border
+
+    &.pfda-card-info
+      background-color: $state-info-bg
+      color: $state-info-text
+      border-color: $state-info-border
+
+    &.pfda-card-info-solid
+      background-color: $btn-info-bg
+      color: $btn-info-color
+      border-color: $btn-info-border
+
+    &.pfda-card-danger
+      background-color: $state-danger-bg
+      color: $state-danger-text
+      border-color: $state-danger-border
+
+    &.pfda-card-medal
+      color: $brand-blue-dark
+      background-color: rgba(255, 255, 255, 0.5)
+      box-shadow: 0px 1px 2px rgba(169,68,66,0.2)
+
+    &.pfda-card-sticky-metadata
+      padding-bottom: 32px
+
+      .pfda-card-metadata
+        color: lighten($brand-blue-tertiary, 10%)
+        background-color: $brand-blue-subtler
+        position: absolute
+        bottom: 0
+        left: 0
+        right: 0
+        height: 30px
+        padding: $padding-base-vertical $padding-base-horizontal
+        border-top: 1px solid $list-group-border
+        border-bottom-left-radius: $border-radius-base
+        border-bottom-right-radius: $border-radius-base
+        .pfda-card-metadata-value
+          color: $gray-darker
+
+    .pfda-card-metadata
+      color: $brand-blue-tertiary
+      margin-bottom: 0
+      &.pfda-card-metadata-fw-indent
+        margin-left: 25px
+
+      &.pfda-card-metadata-small
+        font-size: $font-size-small
+
+      .pfda-card-metadata-value
+        font-size: $font-size-small
+        font-weight: 900
+        color: $gray-dark
+
+    .pfda-card-image-banner
+      margin: -15px
+      &.pfda-card-image-banner-top
+        margin-bottom: 0
+
+      &.pfda-card-image-banner-bottom
+        margin-top: 25px
+        border-top: 3px solid $gray-lighter
+
+  a.pfda-card
+    .pfda-card-title
+      color: $link-color
+    &:hover
+      .pfda-card-title
+        color: $link-hover-color
+
+    &.pfda-card-list:hover
+      background-color: lighten($brand-blue-subtler, 1%)
+
+    &.pfda-card-success-solid:hover
+      background-color: darken($btn-success-bg, 5%)
+
+    &.pfda-card-warning-solid:hover
+      background-color: darken($btn-warning-bg, 5%)
+
+    &.pfda-card-info-solid:hover
+      background-color: darken($btn-info-bg, 5%)
+
+.pfda-cards:not(.pfda-cards-list):not(.pfda-cards-stretch)
+  .pfda-card
+    width: 100%
+    @media (min-width: $screen-sm-min)
+      width: 300px
+
+  .pfda-challenge-card
+    width: 100%
+    @media (min-width: $screen-sm-min)
+      width: 355px
+
+
+
+.container
+  .pfda-cards:not(.pfda-cards-list):not(.pfda-cards-stretch)
+    .pfda-card
+      width: 100%
+      @media (min-width: $screen-sm-min)
+        width: calc(50% - 20px)
+      @media (min-width: $screen-md-min)
+        width: calc(33% - 20px)
+      @media (min-width: $screen-lg-min)
+        width: calc(25% - 20px)
+
+
+// Sane default, views can override depending on their use
+.pfda-tutorial.pfda-cards
+  .pfda-card
+    box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.15)
+
+  .pfda-card-body-icon
+    line-height: 100px
+    min-height: 100px
+
+  .pfda-card-title
+    font-size: 14px
+    font-weight: bold
+    margin-top: 0px
+    margin-bottom: 5px
+
+  .pfda-card-body
+    font-size: 12px
+    color: $text-muted
+
+.container
+  .pfda-cards.pfda-cards-news
+    .pfda-card
+      width: 100%
+      @media (min-width: $screen-sm-min)
+        width: calc(50% - 20px)
+      @media (min-width: $screen-md-min)
+        width: calc(40% - 20px)
+      @media (min-width: $screen-lg-min)
+        width: calc(30% - 20px)
+
+.panel
+  .pfda-cards-list
+    .pfda-card-list:last-child
+      border-bottom: 0

@@ -1,0 +1,39 @@
+<% content_for :title do %>Appathons<% end %>
+
+<div class="page-header clearfix">
+  <div class="pull-left">
+    <div class="page-title">
+      <span class="fa fa-flag-checkered"></span> <%= link_to @meta_appathon.title, meta_appathon_path(@meta_appathon) %>
+    </div>
+  </div>
+</div>
+
+<div class="metadata-section metadata-header">
+  <ul class="list-group list-group-inline">
+    <li class="list-group-item">
+      <h5 class="list-group-item-heading">Handle</h5>
+      <p class="list-group-item-text"><%= @meta_appathon.handle %></p>
+    </li>
+    <li class="list-group-item">
+      <h5 class="list-group-item-heading">Start</h5>
+      <p class="list-group-item-text"><%= @meta_appathon.start_at.to_s(:human) %></p>
+    </li>
+    <li class="list-group-item">
+      <h5 class="list-group-item-heading">End</h5>
+      <p class="list-group-item-text"><%= @meta_appathon.end_at.to_s(:human) %></p>
+    </li>
+  </ul>
+</div>
+
+
+<% if !@meta_appathon.followed_by?(@context.user) && @meta_appathon.is_ongoing? %>
+<div class="pfda-toolbar">
+  <div class="btn-group">
+    <%= link_to new_appathon_path(@meta_appathon), class: 'btn btn-primary' do %>
+      <span class="fa fa-plus fa-fw"></span> Create an Appathon
+    <% end %>
+  </div>
+</div>
+<% end %>
+
+<%= render "appathons/cards", meta_appathon: @meta_appathon, appathons: @appathons %>

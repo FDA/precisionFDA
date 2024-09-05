@@ -1,0 +1,57 @@
+require 'rails_helper'
+
+RSpec.describe ChallengesController, type: :controller do
+  let(:admin) { create(:user, :admin) }
+  let(:user1) { create(:user, dxuser: "user_1") }
+  let(:user2) { create(:user, dxuser: "user_2") }
+  let(:challenge) { create(:challenge, :skip_validate) }
+
+  before { create(:challenge, :archived, :skip_validate) }
+
+  describe "GET index" do
+    context "by a guest" do
+      before { authenticate_as_guest! }
+      it "doesn't raise an exception" do
+        get :index
+      end
+    end
+  end
+
+  describe "GET consistency" do
+    context "by a guest" do
+      before { authenticate_as_guest! }
+      it "doesn't raise an exception" do
+        get :consistency
+      end
+    end
+  end
+
+  describe "GET truth" do
+    context "by a guest" do
+      before { authenticate_as_guest! }
+      it "doesn't raise an exception" do
+        get :truth
+      end
+    end
+  end
+
+  describe "GET join" do
+    context "by a guest" do
+      before { authenticate_as_guest! }
+      it "doesn't raise an exception" do
+        get :join, params: { id: challenge.id }
+        expect(response).to redirect_to request_access_path
+      end
+    end
+  end
+
+  describe "GET show" do
+    context "by a guest" do
+      before { authenticate_as_guest! }
+      it "doesn't raise an exception" do
+        get :show, params: { id: challenge.id }
+      end
+    end
+  end
+
+end

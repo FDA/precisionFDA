@@ -1,0 +1,11 @@
+<% if item.copyable_to_cooperative_by?(@context) %>
+  <%=
+    button_to copy_to_cooperative_space_path(item.space_object, object_id: item.uid),
+    method: :post,
+    form_class: "button-to-form-inline",
+    class: "btn btn-success",
+    data: { disable_with: 'Copying...',  confirm: 'Are you sure you want to copy this?'} do
+  %>
+    <i class="fa fa-copy"></i> Copy to Cooperative
+  <% end %>
+<% end %>

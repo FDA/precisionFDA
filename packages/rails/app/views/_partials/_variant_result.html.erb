@@ -1,0 +1,27 @@
+<%
+  classes = ["active"]
+  classes << "required" if required
+%>
+
+<tr class="variant-input-tr-padded <%= classes %>">
+  <td class="variant-input-td-label">
+    <div class="file-label">
+      <span class="file-icon">
+        <i class="fa fa-fw fa-file-o"></i>
+      </span>&nbsp;
+      <span><%= title %></span>
+    </div>
+    <% if !required  %>
+      <div class="file-optional">Optional</div>
+    <% end %>
+  </td>
+  <td>
+    <% if defined?(input) and input %>
+      <span class="text-muted"><%= input[1] %></span>
+    <% elsif defined?(file) and file %>
+      <%= unilinkfw(file, scope_icon: true, icon_class: 'access-icon', target: "_blank") %>
+    <% else %>
+      <span class="text-muted">not set</span>
+    <% end %>
+  </td>
+</tr>

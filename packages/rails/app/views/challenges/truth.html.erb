@@ -1,0 +1,85 @@
+<% content_for :title do %>PrecisionFDA Truth Challenge<% end %>
+
+<div class="jumbotron jumbotron-challenges">
+  <div class="container container-padded container-fluid tiltview-container">
+    <div class="tiltview-description">
+      <h1>
+        <span class="challenge-title-muted">PrecisionFDA</span>
+        <br>
+        Truth Challenge
+      </h1>
+      <p>Engage and improve DNA test results with our community challenges</p>
+    </div>
+    <div class="tiltview col" aria-hidden="true">
+      <%= image_tag("challenges/pFDA-C2-Diagram", alt: "PrecisionFDA Truth Challenge", class: "img-responsive img-thumbnail") %>
+    </div>
+  </div>
+</div>
+
+<div class="container container-padded">
+  <div class="row">
+    <div class="col-sm-18">
+      <!-- Nav tabs -->
+      <ul class="nav nav-pills nav-tabs-contained" role="tablist">
+        <li role="presentation" class="<%= !params[:tab].present? ? 'active':'' %>"><a href="<%= truth_challenges_path %>" class="tab-label" aria-controls="info" role="tab">Challenge Info</a></li>
+        <li role="presentation" class="<%= params[:tab] == 'results' ? 'active':'' %>"><a href="<%= truth_challenges_path('results') %>" class="tab-label" aria-controls="results" role="tab"> Challenge Results</a></li>
+        <li role="presentation" class="<%= params[:tab] == 'results-explore' ? 'active':'' %>"><a href="<%= truth_challenges_path('results-explore') %>" class="tab-label" aria-controls="results" role="tab"> Explore Results</a></li>
+      </ul>
+    </div>
+    <div class="col-sm-6">
+      <% if @truth_challenge[:launched] %>
+        <a class="btn btn-join <%= @btn_class %> btn-lg text-uppercase" href="<%= @truth_challenge[:active] ? join_challenge_path(@discussion[:id]) : discussion_path(@discussion[:id]) %>" role="button">
+          <div class="media">
+            <div class="media-left">
+              <span class="fa fa-trophy" aria-hidden="true"></span>
+            </div>
+            <div class="media-body text-left">
+              <% if !@truth_challenge[:active] %>
+                Challenge Closed
+                <br>
+                <small class="time-remaining">
+                  View Responses
+                </small>
+              <% else %>
+                <% if @truth_challenge[:joined] %>
+                  Challenge Joined!
+                <% else %>
+                  Join the Challenge
+                <% end %>
+                <br>
+                <div class="time-remaining">
+                  <%= distance_of_time_in_words_to_now(@truth_challenge[:end_date]) %> remaining
+                </div>
+              <% end %>
+            </div>
+          </div>
+        </a>
+      <% else %>
+        <button class="btn btn-default btn-join btn-lg text-uppercase disabled">
+          Challenge Launching Soon
+        </button>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+
+<% if params[:tab] == 'results' %>
+  <% if @truth_challenge[:results_announced] %>
+    <%= render "challenges/truth/results" %>
+  <% else %>
+    <%= render "challenges/truth/preview_results" %>
+  <% end %>
+<% elsif params[:tab] == 'results-explore' %>
+  <% if @truth_challenge[:results_announced] %>
+    <%= render "challenges/truth/results_explore" %>
+  <% else %>
+    <%= render "challenges/truth/preview_results_explore" %>
+  <% end %>
+<% elsif params[:tab] == 'results-peek' && (@context.can_administer_site? || !Rails.env.production?) %>
+  <%= render "challenges/truth/results" %>
+<% elsif params[:tab] == 'results-explore-peek' && (@context.can_administer_site? || !Rails.env.production?) %>
+    <%= render "challenges/truth/results_explore" %>
+<% else %>
+  <%= render "challenges/truth/info" %>
+<% end %>

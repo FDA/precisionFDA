@@ -1,0 +1,21 @@
+<%= grid(memberships_grid, hide_csv_button: false,) do |g|
+  g.column name:"Username", assoc: :user, attribute: "dxuser" do |membership|
+    link_to membership.user.dxuser, user_path(membership.user.dxuser)
+  end
+
+  g.column name: "Email ID", assoc: :user, attribute: "email" do |membership|
+    link_to membership.user.email, user_path(membership.user.dxuser)
+  end
+
+  g.column name: "Action" do |membership|
+    if !membership.site? || membership.user.dxid != ADMIN_USER
+      link_to(
+        "Remove",
+        admin_admin_membership_path(membership),
+        method: :delete,
+        data: { confirm: "Are you sure?" },
+      )
+    end
+  end
+end
+%>

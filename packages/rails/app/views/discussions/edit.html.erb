@@ -1,0 +1,44 @@
+<% content_for :title do %>Edit Discussion: <%= @discussion.title %><% end %>
+
+<div class="page-header">
+  <div class="media">
+    <div class="media-left text-muted">
+      <%= link_to image_tag(@discussion.user.gravatar_url, class: 'img-circle', height: '50px'), user_path(@discussion.user.dxuser) %>
+    </div>
+    <div class="media-body">
+      <div class="page-title note-editing">
+        <div class="note-titlebar">
+          <input type="text" class="form-control" name="title" placeholder="Discussion title..." data-bind="textInput: title.cache" />
+        </div>
+      </div>
+      <% if !@discussion.public? %>
+        <span><span class="fa fa-lock"></span> This discussion has not been published yet</span>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<div class="pfda-toolbar clearfix">
+  <div class="btn-toolbar pull-left">
+    <% if @discussion.editable_by?(@context) %>
+      <button class="btn btn-default" data-bind="click: objectSelector.open"><span class="fa fa-plus" aria-hidden="true"></span> Attach to Discussion...</button>
+    <% end %>
+  </div>
+  <div class="btn-toolbar pull-right">
+    <%= link_to "Back to discussion", discussion_path(@discussion), class: "btn btn-link" %>
+    <a class="btn btn-primary" data-bind="click: save, css: {disabled: !isFormReady()}, text: saveBtnText"></a>
+    <% if @discussion.publishable_by?(@context) %>
+      <a class="btn btn-success" href="<%= publish_path + "?" + {id: @discussion.uid}.to_param %>" data-method="post" data-bind="css: {disabled: isFormReady()}" rel="nofollow">
+        <span class="fa fa-bullhorn"></span> Publish
+      </a>
+    <% end %>
+  </div>
+</div>
+
+<div class="container-fluid container-padded">
+  <%= render "notes/note_edit" %>
+</div>
+
+<% if @discussion.editable_by?(@context) %>
+  <%= render "_partials/selector_modal" %>
+<% end %>

@@ -1,0 +1,43 @@
+<%= form_for comment, url: url, html: {class: 'form form-horizontal', data: {'assoc-with': !hide_assoc_with}} do |f| %>
+  <%= render "_partials/form_errors", object: comment %>
+  <%= f.hidden_field :parent_id %>
+  <div class="form-group">
+    <div
+      class="form-control new-comment-editable"
+      contenteditable="true"
+      data-placeholder="Comment..."
+    ></div>
+    <%=
+      f.text_area :body,
+      class: "form-control new-comment-textarea hidden",
+      placeholder: "Comment..."
+    %>
+  </div>
+  <% if !hide_assoc_with && @associate_with_options %>
+    <div class="form-group">
+      <div class="search-row">
+        <div class="search-row--label">
+          <span>Associate this comment with:</span>
+        </div>
+        <div class="search-row--select">
+          <%= select(
+            "comments_content",
+            "content_type",
+            @associate_with_options,
+            {:include_blank => 'Select'},
+            data: {},
+            class: "form-control"
+          )%>
+        </div>
+        <div class="search-row--searchfield">
+          <input name="comments_content[id]" class="form-control" type="text" placeholder="Search">
+        </div>
+      </div>
+    </div>
+  <% end %>
+  <div class="form-group submit-button-container">
+    <button type="submit" class="btn btn-primary" data-disable-with="Submitting...">
+      <i class="fa fa-commenting"></i>Submit Comment
+    </button>
+  </div>
+<% end %>

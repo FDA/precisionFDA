@@ -1,0 +1,119 @@
+@import "_common"
+
+$note-background: lighten($brand-blue-subtler, 1%)
+
+.note-titlebar
+  & input
+    font-size: $font-size-h3
+    font-weight: 300
+    color: $brand-blue-dark
+    line-height: $line-height-base
+    height: auto
+
+.pfda-note
+  border: 1px solid $gray-lighter
+  border-radius: $border-radius-base
+
+  .note-flexbox
+    @include flexbox
+    @include align-items(stretch)
+    background-color: $note-background
+
+  .note-sidebar
+    min-width: 300px
+    max-width: 400px
+    border-left: 1px solid $brand-blue-subtle
+    border-top-right-radius: $border-radius-base
+    border-bottom-right-radius: $border-radius-base
+
+    &.note-sidebar-padded
+      padding: $padding-base-vertical $padding-base-horizontal
+
+  .note-pane
+    width: 100%
+    position: relative
+
+    .ace-editor-section
+      min-height: 400px
+
+      .tab-pane
+        background-color: #fff
+
+    .note-display, .note-preview
+      padding: 20px
+      min-height: 400px
+      background-color: #fff
+      border-bottom-left-radius: $border-radius-small
+
+  .note-attachments
+    .list-group
+      padding-right: $padding-xs-horizontal
+
+    .list-group-item
+      color: $brand-blue-tertiary
+      background-color: transparent
+      border-color: transparent
+      padding: $padding-xs-vertical $padding-xs-horizontal
+
+      .list-group-item-heading
+        margin: 0
+        padding: $padding-base-vertical 0
+
+      &.attachment-is-new
+        font-weight: bold
+
+  .note-section-title
+    color: $brand-blue-tertiary
+    font-size: 14px
+    font-weight: bold
+    margin: 5px 0 10px
+    text-transform: uppercase
+
+
+  @media (max-width: $screen-sm-max)
+    .note-flexbox
+      /* On small screens, we are no longer using row direction but column */
+      @include flex-direction(column)
+
+    .note-sidebar
+      max-width: none
+
+.note-editing
+  .note-titlebar
+    padding: 0
+    .input-group-addon
+      border: 0
+      background: transparent
+      font-size: $font-size-h3
+    input
+      padding: $padding-large-vertical $padding-base-horizontal
+      box-shadow: inset 0px 0px 0px 5px $brand-highlight
+      border: 0
+      border-radius: $border-radius-base
+      border-bottom-left-radius: 0
+      border-bottom-right-radius: 0
+
+  .note-attachments
+    .list-group-item
+      position: relative
+      padding-right: 15px
+      &.attachment:hover
+        border: 1px dotted #ccc
+        cursor: move
+        cursor: -webkit-grab
+        cursor: -moz-grab
+
+      .btn-remove
+        position: absolute
+        right: 0
+        top: 3px
+        background: $note-background
+        padding: 0 3px
+
+      &.removed
+        .item-name
+          text-decoration: line-through
+        .btn-remove
+          color: $link-color
+          &:hover
+            color: $link-hover-color

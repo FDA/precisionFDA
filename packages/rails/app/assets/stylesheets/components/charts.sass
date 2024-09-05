@@ -1,0 +1,50 @@
+@import "_common"
+
+svg.chart
+  margin: auto
+  .axis
+    path,
+    line
+      fill: none
+      stroke: $brand-blue-tertiary
+      shape-rendering: crispEdges
+
+    .tick text
+      fill: $brand-blue-tertiary
+
+  .line
+    fill: none
+    stroke: $brand-blue-secondary
+    stroke-width: 2.5px
+
+  .tick line
+    opacity: 0.2
+
+  .circle
+    fill: darken($brand-blue-primary, 1%)
+    stroke: transparent
+    stroke-width: 20px
+    @include transition(stroke-width 250ms linear, fill 150ms linear)
+    &:hover, .active
+      fill: $brand-red-primary
+      stroke: transparentize($brand-blue-secondary, 0.75)
+      stroke-width: 25px
+
+.pfda-charts
+  .pfda-chart
+    padding: 20px 15px
+    .list-group-item-heading
+      text-align: center
+      text-transform: uppercase
+      color: $brand-blue-tertiary
+      font-size: $font-size-h4
+      small
+        font-size: 14px
+        color: $text-color
+
+.chart-tip
+  padding: $padding-base-vertical $padding-base-horizontal
+  color: $brand-blue-subtler
+  background-color: transparentize($brand-blue-dark, 0.1)
+  box-shadow: 1px 1px 5px (0, 0, 0, 0.25)
+  border-radius: $border-radius-base

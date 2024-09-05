@@ -1,0 +1,29 @@
+<ul class="pfda-tags list list-inline">
+  <% if tags_list.count > 0 %>
+  <li class="pfda-tags-icon">
+    <span class="fa fa-fw fa-tags" aria-hidden="true"></span>
+  </li>
+  <% end %>
+  <% tags_list.each do |tag| %>
+    <li class="pfda-tag">
+      <% if @context.logged_in? %>
+        <a class="btn-upvote-link event-upvote <%= defined?(classes) ? classes : '' %> <%= @context.user.voted_up_on?(item, vote_scope: tag) ? 'active': ''%>" data-uid="<%= item.uid %>" data-upvote-count="<%= item.get_upvotes(vote_scope: tag).size %>" data-vote-scope="<%= tag %>">
+          <span class="fa fa-caret-up <%= defined?(icon_classes) ? icon_classes : '' %>"></span>
+          <% if item.get_upvotes(vote_scope: tag).size > 0 %>
+            <span class="upvote-count"><%= item.get_upvotes(vote_scope: tag).size %></span>
+          <% else %>
+            <span class="upvote-count"></span>
+          <% end %>
+          <%= tag %>
+        </a>
+      <% else %>
+        <% if item.get_upvotes(vote_scope: tag).size > 0 %>
+          <span class="upvote-count"><%= item.get_upvotes(vote_scope: tag).size %></span>
+        <% else %>
+          <span class="upvote-count"></span>
+        <% end %>
+        <%= tag %>
+      <% end %>
+    </li>
+  <% end %>
+</ul>

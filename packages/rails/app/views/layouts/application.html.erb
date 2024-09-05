@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+  <%= render "_partials/head" %>
+</head>
+  <!-- revision: <%= @context.token %> /-->
+  <!-- revision: <%= git_revision %> /-->
+  <body class="pfda-controller-<%= controller_name %> pfda-action-<%= action_name %> <% if !@context.logged_in_or_guest? %>pfda-guest<% else %>pfda-user<% end %>" <%= yield(:body_attributes) %> <% if !@context.logged_in_or_guest? %>data-no-turbolink<% end %> >
+  <header>
+    <%= render "_partials/navbar" %>
+  </header>
+  <main role="main">
+    <noscript>This website requires JavaScript</noscript>
+    <%= render partial: "_partials/messages", flash: flash %>
+    <%= render partial: "_partials/leave_org_alert" %>
+    <%= content_for?(:content) ? yield(:content) : yield %>
+  </main>
+  <footer>
+    <%= render "_partials/footer" %>
+  </footer>
+  <%= insert_paloma_hook %>
+  <%= render "_partials/templates" %>
+</body>
+  <%= render "_partials/scripts" %>
+</html>

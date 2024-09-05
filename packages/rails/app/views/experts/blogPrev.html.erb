@@ -1,0 +1,37 @@
+<% content_for :title do %><%= user_title(@expert.user) %><% end %>
+
+<div class="pfda-toolbar">
+  <%= link_to qa_expert_path(@expert), class: "btn btn-default" do %>
+    <span class="fa fa-chevron-left"></span> Back to questions
+  <% end %>
+</div>
+
+<div class="page-header text-center">
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-md-20 col-md-offset-2">
+        <p>
+          <%= image_tag(@expert.image, class: 'img-rounded', height: '300px') %>
+        </p>
+        <br/>
+        <div class="expert-blog-text">
+          <div class=strong>
+            <%= @expert._blog_title %>
+          </div>
+          <p>
+            <%= link_to(@expert.title, user_url(@expert.user.username)) %>
+            <% if !@expert.user.singular? %>
+              <br/><%= @expert.user.org.name %>
+            <% end %>
+          </p>
+        </div>
+        <br/>
+        <div class="expert-blog-text text-left" data-bind="html: blogDisplay"></div>
+        <div class="text-muted text-left">
+          <hr/>
+          The views expressed are those of the author(s) and should not be construed to represent views or policies held by the FDA.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

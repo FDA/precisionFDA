@@ -1,0 +1,31 @@
+<% if (meta_appathons.respond_to?(:total_count) && meta_appathons.total_count > 0) || (meta_appathons.respond_to?(:count) && meta_appathons.count > 0) %>
+  <div class="pfda-cards">
+    <% meta_appathons.each do |meta_appathon| %>
+      <div class="pfda-card pfda-card-bordered pfda-card-rounded pfda-card-padded pfda-meta_appathon-card">
+        <div class="pfda-card-header">
+          <div class="pfda-card-title">
+            <%= link_to(meta_appathon.name, meta_appathon_path(meta_appathon)) %>
+          </div>
+          <div class="pfda-card-body">
+            <div class="pfda-meta_appathon-content">
+              <% if !meta_appathon.description.blank? %>
+                <%= truncate(meta_appathon.description, length: 250, separator: ' ') %>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  </div>
+  <% if (meta_appathons.respond_to?(:total_count) && meta_appathons.total_count > 0) %>
+    <div class="paginate-container">
+      <%= paginate meta_appathons, :theme => 'twitter-bootstrap-3', :param_name => :meta_appathons_page %>
+    </div>
+  <% end %>
+<% else %>
+<div class="pfda-cards">
+  <div class="pfda-card pfda-card-rounded">
+    <div class="lead text-muted">No meta appathons yet</div>
+  </div>
+</div>
+<% end %>

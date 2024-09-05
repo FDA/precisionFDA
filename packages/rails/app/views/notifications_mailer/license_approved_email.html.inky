@@ -1,0 +1,31 @@
+<wrapper>
+  <div class="hidden-email-preview">
+    License request approved for <%= @license.title %>
+  </div>
+  <spacer size="16"></spacer>
+  <container class="header">
+    <row>
+      <columns>
+        <a class="brand" href="<%= HOST %>" title="precisionFDA">
+          <img class="header-image" src="<%= HOST %>/assets/precisionFDA.email.dark.png" />
+        </a>
+      </columns>
+      <columns>
+        <p class="header-title text-right">License Request Approved</p>
+      </columns>
+    </row>
+  </container>
+  <container class="radius">
+    <row>
+      <columns>
+        <p>
+          You may now <%= link_to "use or download items", items_license_url(@license) %> associated with the license <%= link_to @license.title, license_url(@license) %>.
+        </p>
+        <p>
+          <%= link_to "View licensed items", items_license_url(@license), class: 'btn btn-email-primary' %>
+        </p>
+      </columns>
+    </row>
+  </container>
+  <spacer size="16"></spacer>
+</wrapper>

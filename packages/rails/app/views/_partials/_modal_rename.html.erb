@@ -1,0 +1,23 @@
+<div id="rename-modal" class="rename-modal modal fade">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">
+          Rename "<%= ["file", "comparison", "space"].include?(item.klass) ? item.name : item.title %>"
+        </h4>
+      </div>
+      <%= form_for item, url: path_to_rename, method: :post do |f| %>
+      <div class="modal-body">
+        <div class="form-group required">
+          <%= f.text_field (["file", "comparison", "space"].include?(item.klass) ? :name : :title), class: "form-control input-lg", placeholder: "Rename...", required: "required"  %>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal" tabindex="-1">Cancel</button>
+        <button type="submit" class="btn btn-primary" data-disable-with="Renaming...">Rename</button>
+      </div>
+      <% end %>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->

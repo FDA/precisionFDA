@@ -1,0 +1,14 @@
+<li class="list-group-item">
+  <h5 class="list-group-item-heading">Access</h5>
+  <p class="list-group-item-text">
+    <% if item.public? %>
+      <span class="fa fa-globe"></span>
+      Public
+    <% elsif item.in_space? %>
+      <%= unilinkfw(item) %>
+    <% else %>
+      <span class="fa fa-lock"></span>
+      Private
+    <% end %>
+  </p>
+</li>

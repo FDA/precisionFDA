@@ -1,0 +1,15 @@
+<% if @context.logged_in? %>
+<div class="pfda-comment">
+  <div class="media">
+    <div class="media-left">
+      <%= link_to image_tag(@context.user.gravatar_url, alt:"Profile picture icon for #{@context.user.dxuser}", class: 'img-circle', height: '25px'), user_path(@context.user.dxuser) %>
+    </div>
+    <div class="media-body">
+      <div class="pfda-comment-body">
+        <%- comment = comment || Comment.new %>
+        <%= render "comments/form", comment: comment, url: url %>
+      </div>
+    </div>
+  </div>
+</div>
+<% end %>

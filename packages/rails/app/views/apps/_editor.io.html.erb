@@ -1,0 +1,141 @@
+<div class="section-io">
+  <div class="section-io-input">
+    <div class="panel panel-default">
+      <div class="panel-heading clearfix">
+        <div class="list-group-item-heading pull-left">Inputs</div>
+        <div class="btn-group pull-left">
+          <button type="button" class="btn btn-sm btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <span class="fa fa-plus"></span> Add Input Field <span class="caret"></span>
+          </button>
+          <ul class="dropdown-menu" data-bind="foreach: availableInputClasses">
+            <li><a data-bind="text: label, click: $root.addInputField"></a></li>
+          </ul>
+        </div>
+      </div>
+      <!-- ko if: inputs().length > 0 -->
+        <table class="table table-io">
+          <thead>
+            <th>Class</th>
+            <th>Name</th>
+            <th class="io-optional">Label</th>
+            <th class="io-optional">Help text</th>
+            <th class="io-optional">Default Value</th>
+            <th class="io-optional">Choices <small>Limit what values can be set</small></th>
+            <th class="io-optional">Optional?</th>
+            <th></th>
+          </thead>
+          <tbody data-bind="sortable: {data: inputs, allowDrop: false}">
+            <tr class="app-io-field">
+              <td class="io-field-class" >
+                <span data-bind="text: klass"></span>
+                <!-- ko if: error -->
+                  <span class="fa fa-fw fa-warning"></span> <span class="text-danger" data-bind="text: error"></span>
+                <!-- /ko -->
+              </td>
+              <td class="io-field-name"><input type="text" class="form-control" data-bind="textInput: name" placeholder="enter_input_name"/></td>
+              <td class="io-field-label"><input type="text" class="form-control" data-bind="textInput: label" placeholder="Enter Input Label"/></td>
+              <td class="io-field-help"><input type="text" class="form-control" data-bind="textInput: help" placeholder="Enter help text for this field"/></td>
+              <!-- ko if: !_.isEmpty(choices()) -->
+              <td class="io-field-default">
+                  <select class="form-control" data-bind="options: choices, optionsCaption: 'Select...', value: defaultValue"></select>
+              </td>
+              <!-- /ko -->
+              <!-- ko if: _.isEmpty(choices()) -->
+              <td class="io-field-default" data-bind="template: { name: 'io-field-'+klass()}"></td>
+              <!-- /ko -->
+              <td class="io-field-choices">
+                <div data-bind="visible: _.includes(['int', 'float', 'string'], klass())" style="display: none;">
+                  <input type="text" class="form-control" data-bind="textInput: choicesValue, attr: {placeholder: choicesPlaceholder}"/>
+                </div>
+              </td>
+              <td class="io-field-optional"><div class="io-checkbox"><input type="checkbox" data-bind="checked: isOptional"/></div></td>
+              <td class="io-field-remove text-right"><a class="btn btn-link btn-link-danger fa fa-times" data-bind="click: remove"></a></td>
+            </tr>
+          </tbody>
+        </table>
+      <!-- /ko -->
+      <!-- ko if: inputs().length == 0 -->
+        <div class="panel-body">
+          <span class="text-muted">No inputs defined</span>
+        </div>
+      <!-- /ko -->
+    </div>
+  </div>
+  <div class="section-io-input">
+    <div class="panel panel-default">
+      <div class="panel-heading clearfix">
+        <div class="list-group-item-heading pull-left">Outputs</div>
+        <div class="btn-group pull-left">
+          <button type="button" class="btn btn-sm btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <span class="fa fa-plus"></span> Add Output Field <span class="caret"></span>
+          </button>
+          <ul class="dropdown-menu" data-bind="foreach: availableOutputClasses">
+            <li><a data-bind="text: label, click: $root.addOutputField"></a></li>
+          </ul>
+        </div>
+      </div>
+      <!-- ko if: outputs().length > 0 -->
+        <table class="table table-io">
+          <thead>
+            <tr>
+              <th>Class</th>
+              <th>Name</th>
+              <th class="io-optional">Label</th>
+              <th class="io-optional">Help text</th>
+              <th></th>
+              <th class="io-optional">Optional?</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody data-bind="sortable: {data: outputs, allowDrop: false}">
+            <tr class="app-io-field">
+              <td class="io-field-class" data-bind="text: klass"></td>
+              <td class="io-field-name"><input type="text" class="form-control" data-bind="textInput: name" placeholder="enter_output_name"/></td>
+              <td class="io-field-label"><input type="text" class="form-control" data-bind="textInput: label" placeholder="Enter Output Label"/></td>
+              <td class="io-field-help"><input type="text" class="form-control" data-bind="textInput: help" placeholder="Enter help text for this output"/></td>
+              <td class="io-field-spacer"><input type="text" class="form-control"  style="visibility: hidden" /></td>
+              <td class="io-field-optional"><div class="io-checkbox"><input type="checkbox" data-bind="checked: isOptional"/></div></td>
+              <td class="io-field-remove text-right"><a class="btn btn-link btn-link-danger fa fa-times" data-bind="click: remove"></a></td>
+            </tr>
+          </tbody>
+        </table>
+      <!-- /ko -->
+      <!-- ko if: outputs().length == 0 -->
+        <div class="panel-body">
+          <span class="text-muted">No outputs defined</span>
+        </div>
+      <!-- /ko -->
+    </div>
+  </div>
+</div>
+
+<script type="text/html" id="io-field-file">
+  <button class="btn btn-info" data-bind="text: defaultValueDisplay, attr: {name: name, disable: $root.loading}, click: openFileSelector, css: { 'btn-info': !defaultValue(), 'btn-default': defaultValue}">Select file...</button>
+  <!-- ko if: defaultValue -->
+    <button class="btn btn-link btn-link-danger" data-bind="click: clear">Clear</button>
+  <!-- /ko -->
+  <%= render "_partials/selector_modal" %>
+</script>
+
+<script type="text/html" id="io-field-string">
+  <input type="text" class="form-control" placeholder="Optional default string" data-bind="textInput: defaultValue"/>
+</script>
+
+<script type="text/html" id="io-field-int">
+  <input type="text" class="form-control" placeholder="Optional default integer" data-bind="textInput: defaultValue"/>
+</script>
+
+<script type="text/html" id="io-field-float">
+  <input type="text" class="form-control" placeholder="Optional default float" data-bind="textInput: defaultValue"/>
+</script>
+
+<script type="text/html" id="io-field-boolean">
+  <div class="btn-group">
+    <label class="btn btn-default" data-bind="css: {active: defaultValue == 'true'}">
+      <input type="radio" data-bind="attr: {name: id, value: 'true'}, checked: defaultValue" autocomplete="off"> True
+    </label>
+    <label class="btn btn-default" data-bind="css: {active: defaultValue == 'false'}">
+      <input type="radio" data-bind="attr: {name: id, value: 'false'}, checked: defaultValue" autocomplete="off"> False
+    </label>
+  </div>
+</script>

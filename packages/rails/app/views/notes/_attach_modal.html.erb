@@ -1,0 +1,72 @@
+<script id="template-note-attach-modal" type="text/html">
+<div class="modal note-attach-modal fade" id="note-attach-modal">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Select a note or answer to attach to</h4>
+      </div>
+      <div class="modal-body modal-body-search-selector modal-body-padless">
+        <ul class="list-group list-group-selector">
+          <li class="list-group-item">
+            <div class="input-group input-group-search">
+              <input type="text" data-bind="textInput: query" class="form-control" placeholder="Search..." autofocus/>
+              <span class="input-group-btn">
+                <a class="btn btn-link" data-bind="click: queryAction, css: queryActionClasses">
+                  <span data-bind="css: queryIconClasses"></span>
+                </a>
+                <a class="btn btn-link" data-bind="click: refreshNotes">
+                  <span class="fa fa-fw fa-refresh"></span>
+                </a>
+              </span>
+            </div>
+          </li>
+          <li class="list-group-item text-muted" data-bind="visible: !loading() && notes.filtered().length == 0">
+            No results found <a class="pull-right" data-bind="click: clearQuery, visible: !_.isEmpty(query())">Clear query</a>
+          </li>
+
+          <!-- ko foreach: notes.filtered -->
+          <li class="list-group-item event-note-preview" data-bind="css: {active: $parent.previewedNote() && $parent.previewedNote().uid == uid}">
+            <div class="media">
+              <div class="media-body">
+                <div class="checkbox clearfix">
+                  <label>
+                    <input type="checkbox" data-bind="checkedValue: $data, checked: $parent.notes.selected"> <span class="label label-info-text text-uppercase" data-bind="text: className"></span> <span class="word-break-all" data-bind="text: title"></span>
+                  </label>
+                </div>
+              </div>
+              <div class="media-right">
+                <span class="list-preview-icon" data-bind="click: $parent.preview"><span class="fa fa-fw fa-chevron-right"></span></span>
+              </div>
+            </div>
+          </li>
+          <!-- /ko -->
+        </ul>
+
+        <!-- Tab panes -->
+        <div class="tab-content">
+          <div role="tabpanel" class="tab-pane tab-pane-preview active" data-bind="visible: notes.filtered().length">
+            <!-- ko if: previewedNote() -->
+              <div class="h2">
+                <a data-bind="text: previewedNote().title, attr: {href: previewedNote().path}" target="_blank"></a>
+              </div>
+              <hr>
+              <!-- ko if: previewedNote().content() -->
+              <div class="pfda-md-rendered" data-bind="html: previewedNote().content"></div>
+              <!-- /ko -->
+              <div style="display: none" data-bind="visible: !previewedNote().content()">
+                <div class="text-muted" data-bind="visible: !previewedNote().loading()" style="display: none">No content written for this item</div>
+                <div class="text-muted" data-bind="visible: previewedNote().loading()" style="display: none">Loading...</div>
+              </div>
+            <!-- /ko -->
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" data-bind="click: attach, enable: canAttach, text: attachText">Attach</button>
+      </div>
+    </div>
+  </div>
+</div>
+</script>

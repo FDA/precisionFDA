@@ -1,0 +1,12 @@
+<% content_for :title do %>Edit  Comment<% end %>
+
+<div class="page-header">
+  <div class="page-title">
+    <span class="fa fa-comment"></span>
+    Edit your comment on <%= @item.klass %>: <%= link_to @item.title, @item_comments_path %>
+  </div>
+</div>
+
+<div class="container-fluid container-padded">
+  <%= render "comments/form", comment: @comment, url: polymorphic_path(@items_from_params + [@comment]) %>
+</div>

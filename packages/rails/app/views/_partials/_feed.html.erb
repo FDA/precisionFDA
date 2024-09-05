@@ -1,0 +1,30 @@
+<ul class="pfda-feed">
+  <% feed.first(4).each do |post| %>
+    <li class="pfda-post pfda-post-<%= post.klass %> list-unstyled">
+      <div class="media">
+        <div class="media-left pfda-post-icon-wrapper">
+          <%= link_to pathify(post) do %>
+            <span class="fa fa-fw <%= fa_class(post) %>"></span>
+          <% end %>
+        </div>
+        <div class="media-body">
+          <ul class="pfda-post-metadata list-inline">
+            <li>
+              <%= link_to image_tag(post.user.gravatar_url, class: 'img-circle', height: '20px'), user_path(post.user.dxuser) %>
+              <span class="pfda-post-user"><%= link_to post.user.full_name, user_path(post.user.dxuser) , class: 'link-dark'%></span>
+              from <span class="pfda-post-org"><%= post.user.org.name %></span> shared <span class="pfda-post-timestamp"><%= time_ago_in_words(post.created_at) %> ago</span>
+            </li>
+          </ul>
+          <%= unilinkfw(post, {title_class: 'pfda-post-title', noicon: true, target: "_blank"}) %>
+          <ul class="pfda-post-actions list-inline list-inline-bullets">
+            <li class="pfda-post-comments">
+              <%= link_to pathify_comments(post), class: 'link-muted' do %>
+                 <%= post.comment_threads.size %> <%= 'comment'.pluralize(post.comment_threads.size) %>
+              <% end %>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </>
+  <% end %>
+</ul>

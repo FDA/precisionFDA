@@ -1,0 +1,465 @@
+@import "_common"
+
+.workflows
+  margin: 0
+  padding: 0 10px
+
+  &.standard
+    background: url(asset-path('backgrounds/tiny_grid.png')) repeat center center
+    min-height: 400px
+
+  &.container
+    height: 100%
+
+    &.jumbotron
+      position: relative
+      top: 50%
+      left: 30%
+      background-color: transparent
+      height: 100%
+
+  &.workflow-modal-header
+    background-color: $brand-blue-primary
+    color: $popover-bg
+  &.center-block
+    margin-left: 50px
+
+  &.io-field-default
+    background-color: $state-info-bg
+  &.select-output
+    background-color: $border-default-color
+
+  &.mapper-select-input
+    float: left
+    width: 80%
+
+  &.input-img
+    margin-top: -40px
+    margin-bottom: -20px
+    margin-left: 80px
+
+  &.input-item
+    padding-top: 25px
+    padding-left: 55px
+
+  .stage-item
+    height: 50px
+    width: 200px
+    padding-top: 12px
+    padding-left: 5px
+    background-color: $progress-bg
+    text-align: center
+
+.workflow-pre-scrollable
+  max-height: 240px
+  overflow-y: auto
+
+.all-apps-loading
+  height: 20px
+
+// #configure-stage-modal
+
+.list-inputs
+  background-color: $border-default-color
+
+a.btn.batch_terminate
+  border-color: #f44336
+  color: red
+  span.fa.fa-times
+    color: red
+
+.wf-diagram
+  padding: 20px
+  position: relative
+  &-slots
+    display: flex
+    flex-wrap: wrap
+    justify-content: space-around
+    .shifted-io
+      i.workflow-digaram-gly
+        font-size: 1.2em
+  &-arrows
+    position: relative
+    height: 30px
+    &-svg
+      width: 100%
+      height: 85px
+      position: absolute
+      left: 0
+
+.input-configured
+  width: 220px
+  height: 80px
+  background-color: $brand-bg-gray
+  border-color: $brand-purple-subtle
+  border-radius: 10px
+  border-style: solid
+  border-width: 2px
+
+.workflow
+  &.centered-div
+    margin-top: 10%
+    margin-left: 30%
+    width: 400px
+    height: 200px
+    background-color: $brand-running-bg
+
+.workflow
+  &.centered-text
+    padding-top: 80px
+    width: 400px
+    padding-left: 10px
+    color: $brand-blue-primary
+
+.workflow
+  &.position-center
+    position: relative
+    margin-top: -15px
+
+.workflow-analysis-label
+  &.control-label
+    text-align: left
+    padding-left: 36px
+    width: 208px
+
+.workflow-input-label
+  &.control-label
+    text-align: left
+    margin-right: 25px
+    width: 150px
+    float: left
+
+.data-required:after
+  color: $brand-red-primary
+  content: "*"
+  position: absolute
+  margin-top: -10px
+  margin-left: 5px
+  font-size: 20px
+
+.gi-2x
+  font-size: 1em
+.gi-3x
+  font-size: 3em
+.gi-4x
+  font-size: 4em
+.gi-5x
+  font-size: 5em
+
+.imbed-checkbox
+  display: inline-block
+
+.gly-flip-vertical
+  -webkit-transform: scale(1, -1)
+  -moz-transform: scale(1, -1)
+  -ms-transform: scale(1, -1)
+  -o-transform: scale(1, -1)
+  transform: scale(1, -1)
+
+.workflow-input-header
+  background-color: $state-info-bg
+
+.workflows-input
+  &.pfda-padded
+    padding: 5px 5px 5px 5px
+
+.shifted-io
+  display: inline-block
+  padding-left: 15px
+
+.workflow-warning
+  color: $brand-red-tertiary
+.workflow-info
+  color: $brand-green-secondary
+.workflow-digaram-gly
+  color: $brand-blue-primary
+.workflow-fa
+  color: $brand-green-secondary
+
+.pfda-controller-workflows.pfda-action-index,
+.pfda-controller-workflows.pfda-action-show
+  .toggle-row
+    width: 80px
+    padding-left: 15px
+    cursor: pointer
+    color: #00A3E0
+    &:hover
+      color: #2ec6ff
+  .workflow-run
+    .toggle-row
+      text-align: right
+      padding-right: 20px
+  .indicator
+    cursor: pointer
+    color: #00A3E0
+    &:hover
+      color: #2ec6ff
+
+.pfda-controller-workflows.pfda-action-batch_workflow
+  .tab-pane#step-1
+    min-height: 700px
+  .alert-info
+    padding-left: 5px
+    margin-bottom: 10px
+    padding: 10px
+    &:last-child
+      margin-bottom: 30px
+  .batch-workfows-nav-tabs
+    border: none
+    & > li
+      font-size: 12px
+      a
+        padding: 5px
+
+  .batch-workfows-tab-content
+    padding-top: 10px
+  .batch-workfows-fs-item
+    font-size: 1.1em
+    padding-bottom: 5px
+    white-space: nowrap
+    input, span
+      cursor: pointer
+    &-path
+      color: #CCC
+  .batch-workfows-wizard
+    .wizard-loader-container
+      display: none
+      background-color: rgba(255, 255, 255, 0.5)
+      z-index: 100
+    &.wizard-loading
+      pointer-events: none
+      position: relative
+      .wizard-loader-container
+        position: absolute
+        display: flex
+        height: 100%
+        width: 100%
+        top: 0
+        .loader
+          margin: auto
+          font-size: 30px
+    max-width: 980px
+    border: 1px solid #DDDDDD
+    padding: 20px
+    border-radius: 3px
+    &-buttons
+      margin-top: 20px
+      button.btn
+        margin-left: 5px
+        padding: 6px 20px
+    &-header
+      margin-top: 0px
+      margin-bottom: 20px
+    .app-spec
+      color: #31708f
+      .has-error
+        .btn-group
+          border: 1px solid $state-danger-text
+          border-radius: 3px
+      .btn-group
+        button
+          outline: none
+      .app-spec-column
+        padding: 0px
+        padding-right: 5px
+        width: 100%
+        border-bottom: 1px solid #DDDDDD
+        margin-bottom: 20px
+        &:last-child
+          padding-right: 0px
+        .table
+          margin-bottom: 0px
+        td
+          vertical-align: top
+          border-top: none
+          .radio
+            margin-top: 0px
+      .spec-heading
+        text-align: center
+        margin-bottom: 0px
+        padding-bottom: 10px
+        padding-left: 0px
+        border-bottom: 2px solid #DDDDDD
+      .app-spec-inputs
+        background-color: #EBF3FB
+        padding: 5px 20px
+        height: 100%
+        .radio
+          padding: 8px 0px
+          margin: 0px
+    &-step2-inputs
+      display: flex
+      justify-content: space-between
+    &-step2-input
+      width: 49%
+      padding: 10px 0px
+      .input-header
+        color: #8198BC
+        margin-bottom: 10px
+        &-title
+          text-transform: uppercase
+          font-weight: 400
+          font-size: 14px
+        &-sort
+          float: right
+          margin-left: 10px
+          i.fa
+            font-size: 12px
+      textarea
+        width: 100%
+        min-height: 150px
+        resize: vertical
+      .input-file-selector
+        height: 300px
+        overflow: auto
+        &-regexp
+          height: 256px
+        .checkbox
+          color: #555555
+        hr
+          margin-top: 10px
+          margin-bottom: 10px
+      .wf-fs-more-loader
+        position: relative
+        &-spinner
+          position: absolute
+          text-align: center
+          width: 100%
+          top: -20px
+      .wf-no-poiner-events
+        pointer-events: none
+      .input-file-search
+        margin-bottom: 10px
+        margin-right: 5px
+        display: flex
+        &-container
+          display: flex
+        &-fs-loading
+          background-color: #DDD
+        &-regexp,
+        &-flags
+          padding: 0px 5px
+          border: none
+          outline: none
+          &[disabled]
+            background-color: #DDD
+        &-regexp
+          width: 100%
+        &-flags
+          width: 100px
+        &-clear
+          text-align: right
+          position: relative
+          i.fa
+            position: absolute
+            margin-top: 2px
+            margin-left: -20px
+            cursor: pointer
+    &-step2-fileloader
+      #step2_load_file_input
+        display: none
+    #select_folder_modal
+      .section-select-folder
+        margin-top: 20px
+        .folder-search
+          margin-bottom: 10px
+        .folder-list
+          height: 100%
+          min-height: 40px
+          max-height: 200px
+          overflow: auto
+          .folder-item
+            &-label
+              cursor: pointer
+            &.selected
+              color: $brand-blue-primary
+      .section-create-folder
+        margin-top: 20px
+      .folder-buttons
+        margin-top: 10px
+        text-align: right
+      .folder-search-clear
+        text-align: right
+        position: relative
+        i.fa
+          position: absolute
+          margin-top: -25px
+          margin-left: -20px
+          cursor: pointer
+
+.wf-loader
+  text-align: center
+  font-size: 4rem
+  margin: 50px
+
+#disable-screen-modal
+  pointer-events: none
+  .workflows
+    padding: 50px
+
+.wf-stages-container
+  background-color: transparent
+  display: flex
+  flex-direction: column
+  align-items: center
+
+.wf-stage
+  display: inline-block
+  max-width: 100%
+  &-slots
+    width: 100%
+    display: flex
+    flex-wrap: wrap
+    justify-content: center
+    .wf-slot
+      flex: 1 1 auto
+      margin: 0px 10px
+      &-body
+        width: 200px
+        height: 50px
+      &-title
+        white-space: nowrap
+        text-overflow: ellipsis
+        overflow: hidden
+      &-remove
+        cursor: pointer
+      &.unconfigured
+        .wf-slot-body
+          background-color: $brand-red-tertiary
+          box-shadow: 0 0 10px $brand-red-tertiary
+        .wf-slot-remove,
+        .wf-slot-io
+          color: $brand-red-tertiary
+      &.configured
+        .wf-slot
+          background-color: $brand-green-secondary
+          box-shadow: 0 0 10px $brand-green-secondary
+        .wf-slot-remove,
+        .wf-slot-io
+          color: $brand-green-secondary
+
+
+.pfda-controller-workflows.pfda-action-new
+  #import_cwl_wdl_success_modal
+    .modal-body
+      p
+        b
+          margin-right: 5px
+  #import_cwl_wdl_modal
+    .docker-images-container
+      padding: 10px
+    .docker-image
+      &-name
+        padding-right: 10px
+        position: relative
+        top: -1px
+      &-remove
+        cursor: pointer
+    .browse-files-container
+      margin-bottom: 10px
+    .btn
+      margin-left: 5px
+    textarea
+      resize: vertical
+      height: 150px
+      max-height: 300px

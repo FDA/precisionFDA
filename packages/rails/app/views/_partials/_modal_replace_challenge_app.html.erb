@@ -1,0 +1,45 @@
+<div id="replace-challenge-app-modal" class="publish-files-modal modal fade">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">
+          Replace app for challenge
+        </h4>
+      </div>
+      <div class="modal-body">
+        <div style="padding: 16px;">
+        <p>
+          Challenge
+          <!-- ko if: selectedChallenge().link -->
+          <a data-bind="attr: { href: selectedChallenge().link }">
+            <span data-bind="text: selectedChallenge().name"></span>
+          </a>
+          <!-- /ko -->
+          <!-- ko ifnot: selectedChallenge().link -->
+          "<span data-bind="text: selectedChallenge().name"></span>"
+          <!-- /ko -->
+          already has assigned app
+          <a data-bind="attr: { href: selectedChallenge().app.link }">
+            <span data-bind="text: selectedChallenge().app.title"></span> (rev. <span data-bind="text: selectedChallenge().app.revision"></span>)
+          </a>
+        </p>
+        <p>
+          Do you really want to replace
+          <a data-bind="attr: { href: selectedChallenge().app.link }">
+            <span data-bind="text: selectedChallenge().app.title"></span> (rev. <span data-bind="text: selectedChallenge().app.revision"></span>)
+          </a>
+          with
+          <a data-bind="attr: { href: app.link }">
+            <span data-bind="text: app.title"></span> (rev. <span data-bind="text: app.revision"></span>)
+          </a>?
+        </p>
+        </div>
+      </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal" tabindex="-1">No</button>
+          <a data-method="post" data-bind="attr: { href: selectedChallenge().assign_link }" class="btn btn-primary" data-disable-with="Replacing...">Yes</a>
+        </div>
+    </div>
+  </div>
+</div>

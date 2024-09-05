@@ -1,5 +1,3 @@
-version: '3.7'
-
 volumes:
   bundler-deps-cache-ruby:
   db-pfda-mysql-volume:
@@ -7,6 +5,10 @@ volumes:
 
 services:
   web:
+    depends_on:
+      - db
+      - redis
+      - sidekiq
     extends:
       file: ./base.services.yml
       service: web
@@ -27,13 +29,23 @@ services:
         target: /precision-fda/.build_cache/
     command: pnpm run watch:docker
   nodejs-api:
+    depends_on:
+      - db
+      - redis
     extends:
       file: ./base.services.yml
       service: nodejs-api
   nodejs-worker:
+    depends_on:
+      - db
+      - redis
     extends:
       file: ./base.services.yml
       service: nodejs-worker
+  nodejs-admin-platform-client:
+    extends:
+      file: ./base.services.yml
+      service: nodejs-admin-platform-client
   db:
     extends:
       file: ./base.services.yml
@@ -45,6 +57,8 @@ services:
       file: ./base.services.yml
       service: redis
   sidekiq:
+    depends_on:
+      - redis
     extends:
       file: ./base.services.yml
       service: sidekiq

@@ -1,0 +1,28 @@
+<%= grid(@org_users) do |g|
+
+  g.column name: "MEMBER NAME", attribute: "first_name" do |user|
+    raw """<a href='/users/#{user.dxuser}'>#{user.first_name} #{user.last_name}</a>"""
+  end
+
+  g.column name: "EMAIL ADDRESS", attribute: "email" do |user|
+    user.email
+  end
+
+  g.column name: "STATUS" do |user|
+    user.user_state == "enabled" ? (user.logged_in? ? "Logged In" : "Not Logged In") : ( user.locked? ? "Locked" : "Not Logged In")
+  end
+
+  g.column name: "ROLE" do |user|
+    @org.admin.dxuser == user.dxuser ? "Admin" : "User"
+  end
+
+  g.column name: "" do |user|
+    raw user.user_state == 'enabled' ?
+      """<button class='btn btn-primary pull-right' id='toggleDisableUser' data-dxuser='#{user.dxuser}' data-bind='click: showDeactivateUserModal'>
+        Deactivate User
+      </button>""" :
+      """<a href='#{admin_toggle_activate_user_path(dxuser: user.dxuser)}' class='btn btn-primary pull-right'>
+        Activate
+      </a>"""
+  end
+end %>

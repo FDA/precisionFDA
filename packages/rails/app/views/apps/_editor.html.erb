@@ -1,0 +1,112 @@
+<div class="app-editor">
+  <div class="pfda-toolbar">
+    <form class="form-inline">
+      <div class="form-group">
+        <label>App Name</label>
+        <p class="form-control-static" style="display: none" data-bind="text: name, visible: !isNewApp"></p>
+        <input type="text" class="form-control" style="display: none" placeholder="Enter app name (e.g. app_name) - this is permanent" data-bind="textInput: name.cache, visible: isNewApp" />
+      </div>
+      <div class="form-group">
+        <label>Title</label>
+        <input type="text" class="form-control" placeholder="Enter app title - you can change this later" data-bind="textInput: title" />
+      </div>
+      <!-- ko if: showUbuntuVersionSelect -->
+      <div class="form-group">
+        <label>Ubuntu Release</label>
+        <select class="form-control" data-bind="options: ubuntuReleases, value: release, optionsCaption: 'Please select...'"></select>
+      </div>
+      <!-- /ko -->
+      <div class="pull-right">
+        <span class="btn-static text-muted" data-bind="visible: !isNewApp" style="display: none"><span data-bind="text: 'Revision ' + revision()"></span>&nbsp;<span class="fa fa-long-arrow-right fa-fw"></span></span>
+        <div class="btn-group">
+          <button class="btn btn-primary" <%= guest_hide %> data-bind="click: save, disable: !isSaveReady(), css: {'disabled': !isSaveReady()}">
+            <span data-bind="css: saveIcon"></span> <span data-bind="text: saveButtonText"></span>
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <div class="error-section" data-bind="visible: errorMessage">
+    <div class="alert alert-danger">
+      <strong>Please fix the issue and retry:</strong> <span data-bind="text: errorMessage"></span>
+    </div>
+  </div>
+
+  <div class="editor-content" data-bind="visible: isContentVisible" style="display: none">
+    <!-- Nav tabs -->
+    <ul class="nav nav-tabs nav-tabs-padded" role="tablist">
+      <li role="presentation" class="active">
+          <a href="#app-io-spec" aria-controls="app-io-spec" role="tab" data-toggle="tab"><span class="fa fa-fw fa-puzzle-piece"></span>
+            <span class="tab-label">I/O Spec</span>
+            <small class="tab-help">Configure Input & Output Fields</small>
+          </a>
+      </li>
+      <li role="presentation">
+          <a href="#app-environment" aria-controls="app-environment" role="tab" data-toggle="tab"><span class="fa fa-fw fa-database"></span>
+            <span class="tab-label">VM Environment</span>
+            <small class="tab-help">Configure your resources</small>
+          </a>
+      </li>
+      <li role="presentation">
+          <a href="#app-script" aria-controls="app-script" role="tab" data-toggle="tab"><span class="fa fa-fw fa-code"></span>
+            <span class="tab-label">Script</span>
+            <small class="tab-help">Write your shell script</small>
+          </a>
+      </li>
+      <li role="presentation">
+          <a href="#app-readme" aria-controls="app-readme" role="tab" data-toggle="tab"><span class="fa fa-fw fa-info-circle"></span>
+            <span class="tab-label">README</span>
+            <small class="tab-help">Describe your app</small>
+          </a>
+      </li>
+      <div class="access-info" data-bind="visible: !isNewApp" style="display: none">
+        <span class="fa fa-lock"></span> App revisions are <strong>private</strong>
+      </div>
+    </ul>
+
+    <!-- Tab panes -->
+    <div class="tab-content">
+      <div role="tabpanel" class="tab-pane tab-pane-padded active" id="app-io-spec">
+        <%= alert_help("Learn more about app inputs and outputs", "/docs/creating-apps#dev-io") %>
+        <%= render "apps/editor.io" %>
+      </div>
+
+      <div role="tabpanel" class="tab-pane tab-pane-padded" id="app-environment">
+        <%= alert_help("Learn more about the virtual machine environment", "/docs/creating-apps#dev-vm-env") %>
+        <%= render "apps/editor.environment" %>
+      </div>
+
+      <div role="tabpanel" class="tab-pane tab-pane-padded" id="app-script">
+        <div class="ace-editor-section">
+          <%= alert_help("Learn more about the app script", "/docs/creating-apps#dev-script") %>
+          <div id="script-editor" class="ace-rounded" data-bind="ace: code, aceOptions: { mode: 'sh', theme: 'monokai', opts: {maxLines: Infinity, wrap: 'free', newLineMode: 'unix'} }"></div>
+        </div>
+      </div>
+
+      <div role="tabpanel" class="tab-pane" id="app-readme">
+        <div class="ace-editor-section">
+          <div style="padding: 6px 12px 0px 12px">
+            <%= alert_help("Learn how to format Markdown", "https://jonschlinkert.github.io/remarkable/demo/") %>
+          </div>
+
+          <!-- Nav tabs -->
+          <ul class="nav nav-tabs nav-tabs-padded" role="tablist">
+            <li role="presentation" class="active"><a href="#tab-readme-editor" aria-controls="tab-readme-editor" role="tab" data-toggle="tab">Edit Readme</a></li>
+            <li role="presentation"><a href="#tab-readme-preview" aria-controls="tab-readme-preview" role="tab" data-toggle="tab">Preview</a></li>
+          </ul>
+
+          <!-- Tab panes -->
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane tab-pane-padded active" id="tab-readme-editor">
+              <div id="readme-editor" class="ace-rounded" data-bind="ace: readme, aceOptions: { mode: 'markdown', theme: 'textmate', opts: {maxLines: Infinity, wrap: 'free'}}"></div>
+            </div>
+            <div role="tabpanel" class="tab-pane tab-pane-padded-lg" id="tab-readme-preview">
+              <div class="readme-preview pfda-md-rendered" data-bind="html: readme.preview"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

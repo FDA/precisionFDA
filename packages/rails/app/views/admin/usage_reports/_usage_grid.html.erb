@@ -1,0 +1,47 @@
+<%= grid(@usage_grid, show_filters: true, hide_csv_button: true) do |g|
+  g.blank_slate partial: "_partials/empty_grid"
+
+  g.column name: "User", attribute: "dxuser", assoc: :user, in_csv: false do |metric|
+    link_to metric.user.dxuser, user_path(metric.user.dxuser)
+  end
+
+  g.column name: "User", attribute: "dxuser", assoc: :user, in_html: false do |metric|
+    metric.user.dxuser
+  end
+
+  g.column name: "Current storage usage", attribute: "storage_usage" do |metric|
+    number_to_human_size(metric.storage_usage || 0)
+  end
+
+  g.column name: "Compute / #{@selected_range}", attribute: "#{selected_range_name(@selected_range)}_compute_price" do |metric|
+    number_to_currency(metric.compute_price(@selected_range) || 0)
+  end
+
+  g.column name: "Consumption / #{@selected_range}", attribute: "#{selected_range_name(@selected_range)}_compute_price" do |metric|
+    number_to_human_size(metric.byte_hours(@selected_range) || 0) + "-Hours"
+  end
+
+  g.column name: "Status" do |metric|
+    metric.user.user_state == "enabled" ? metric.user.logged_in? ? "Logged In" : "Not Logged In" : "Locked"
+  end
+
+  g.column name: "Org", attribute: "name", assoc: [:user, :org], in_csv: false do |metric|
+    metric.user.org ? link_to(metric.user.org.name, admin_organization_path(metric.user.org)) : "Self-representing"
+  end
+
+  g.column name: "Org", in_html: false do |metric|
+    if metric.user.org
+      if !(metric.user.org.name.blank? or metric.user.org.handle.blank?)
+        metric.user.org.name + "  " + metric.user.org.handle
+      else
+        "No Org data"
+      end
+    else
+     "Self-representing"
+    end
+ end
+
+  g.column name: "Email", attribute: "email", assoc: :user do |metric|
+    metric.user.email
+  end
+end %>

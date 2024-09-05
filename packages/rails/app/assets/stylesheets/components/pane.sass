@@ -1,0 +1,129 @@
+@import "_common"
+
+// PANES
+
+.pfda-pane
+  @include flexbox
+  height: 100%
+
+  .pfda-pane-content + .pfda-pane-sidebar
+    border-left: 1px solid $border-default-color
+
+  .pfda-pane-sidebar + .pfda-pane-content
+    border-left: 1px solid $border-default-color
+
+  .pfda-pane-content
+    @include flex(1)
+    background-color: $body-bg
+    &.pfda-pane-content-padded
+      padding: $padding-base-horizontal
+    &.pfda-pane-content-padded-lg
+      padding: $padding-large-horizontal
+    &.pfda-pane-content-padded-xl
+      padding: $padding-large-horizontal * 2
+
+  .pfda-pane-sidebar
+    @include flex(0 300px)
+    width: 300px
+    min-width: 300px
+    min-height: 500px
+    background-color: darken(desaturate($brand-blue-subtler, 25%), 3%)
+
+    &:not(.pfda-pane-sidebar-minimal), &:not(.pfda-pane-sidebar-dark)
+      hr
+        border-color: darken(desaturate($brand-blue-subtler, 25%), 10%)
+
+    &.pfda-pane-sidebar-padded-v
+      padding-top: $padding-base-vertical
+      padding-bottom: $padding-base-vertical
+
+    &.pfda-pane-sidebar-padded-h
+      padding-left: $padding-base-horizontal
+      padding-right: $padding-base-horizontal
+
+    &.pfda-pane-sidebar-padded
+      padding: $padding-base-horizontal
+
+    &.pfda-pane-sidebar-minimal
+      background-color: transparent
+
+    &.pfda-pane-sidebar-dark
+      background-color: $brand-blue-dark
+      .pfda-toolbar
+        background-color: $brand-blue-dark
+        border-bottom-color: lighten($brand-blue-dark, 10%)
+      .btn.btn-default
+        background-color: transparent
+        border-color: lighten($brand-blue-dark, 10%)
+        color: $brand-blue-secondary
+
+        &:hover, &:focus, &:active, &.active
+          background-color: darken($brand-blue-dark, 2%)
+          border-color: $brand-blue-secondary
+
+      .list-group
+        padding-top: $padding-small-vertical
+        padding-bottom: $padding-small-vertical
+
+        a.list-group-item
+          color: $brand-blue-secondary
+
+          &:hover
+            background-color: lighten($brand-blue-dark, 5%)
+
+          &.active, &.active:hover
+            box-shadow: -5px 2px 3px rgba(0, 0, 0, 0.2)
+
+        .list-group-item
+          color: mix(#aaa, $link-color, 75%)
+          margin-bottom: 2px
+
+          &:last-child
+            margin-bottom: 0
+
+          &.list-group-item-header
+            color: #efefef
+
+        + .list-group
+          border-top-color: lighten($brand-blue-dark, 5%)
+
+    .list-group
+      border-radius: 0
+      margin: 0
+
+      .list-group-item
+        border: 0
+        border-radius: 0
+        background-color: transparent
+        color: mix($text-muted, $link-color, 75%)
+
+        &.list-group-item-header
+          font-size: 85%
+          font-weight: bold
+          text-transform: uppercase
+
+      a.list-group-item
+        color: $brand-blue-secondary
+
+        &:hover
+          background-color: $brand-blue-subtler
+
+        &.disabled, &.disabled:hover
+          color: $brand-blue-tertiary
+          background-color: transparent
+          text-transform: uppercase
+          font-size: 12px
+          font-weight: 300
+          margin-top: $padding-large-vertical
+
+        &.active, &.active:hover
+          background-color: $brand-blue-secondary
+          color: #ffffff
+          .text-muted
+            color: mix(#fff, $link-color, 75%)
+
+        .text-muted
+          color: mix(#aaa, $link-color, 75%)
+
+      + .list-group
+        border-top: 1px solid $border-default-color

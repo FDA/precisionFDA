@@ -1,0 +1,169 @@
+<% content_for :title do %><%= @user.dxuser %><% end %>
+
+<div class="page-header">
+  <div class="media">
+    <div class="media-left">
+      <%= image_tag(@user.gravatar_url, class: 'img-circle', height: '48px') %>
+    </div>
+    <div class="media-body">
+      <div class="page-title">
+        <%= @user.full_name %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="metadata-section metadata-header">
+  <ul class="list-group list-group-inline">
+    <li class="list-group-item">
+      <h5 class="list-group-item-heading">Username</h5>
+      <p class="list-group-item-text"><%= @user.dxuser %></p>
+    </li>
+
+    <li class="list-group-item">
+      <h5 class="list-group-item-heading">Email ID </h5>
+      <p class="list-group-item-text"><%= @user.email %></p>
+    </li>
+
+    <li class="list-group-item">
+      <h5 class="list-group-item-heading">Status</h5>
+      <p class="list-group-item-text"><%= @user.status %></p>
+    </li>
+
+    <li class="list-group-item">
+      <h5 class="list-group-item-heading">Joined</h5>
+      <p class="list-group-item-text"><%= @user.created_at.to_s(:human) %></p>
+    </li>
+  </ul>
+</div>
+
+
+<div class="metadata-section metadata-header">
+  <ul class="list-group list-group-inline">
+    <% if !@context.guest? && @context.user.can_administer_site? && @context.user != @user %>
+      <% if !@user.activated? %>
+        <li class="list-group-item">
+          <h5 class="list-group-item-heading">Resend Activation Email</h5>
+          <a class="btn btn-primary" href="<%=   admin_resend_activation_email_path(dxuser: @user.dxuser) %>"><span class="fa fa-key"></span> Resend</a>
+        </li>
+      <% end %>
+      <li class="list-group-item">
+        <h5 class="list-group-item-heading">Reset multi-factor authentication</h5>
+        <a class="btn btn-primary" href="<%=  admin_reset_mfa_user_path(dxuser: @user.dxuser) %>">Reset</a>
+      </li>
+      <% if ["enabled","deactivated"].include?(@user.user_state) %>
+        <li class="list-group-item">
+          <% if @user.user_state == 'enabled' %>
+            <h5 class="list-group-item-heading">Disable User</h5>
+            <button class="btn btn-primary" id="toggleDisableUser" data-dxuser="<%= @user.dxuser %>" data-bind="click: showDeactivateUserModal">
+              Deactivate
+            </button>
+            <%= render '/_partials/deactivate_user_modal' %>
+          <% else %>
+            <h5 class="list-group-item-heading">Disable User</h5>
+            <a href="<%= admin_toggle_activate_user_path(dxuser: @user.dxuser) %>" class="btn btn-primary">
+              Activate
+            </a>
+          <% end %>
+        </li>
+      <% end %>
+
+          <li class="list-group-item">
+            <h5 class="list-group-item-heading">Unlock User</h5>
+            <a class="btn btn-primary" href="<%= admin_unlock_user_path(dxuser: @user.dxuser) %>" id="toggleLockUser"><span class="fa fa-unlock"></span>Unlock</a>
+          </li>
+      <% end %>
+  </ul>
+</div>
+
+<!-- Nav tabs -->
+<ul class="nav nav-tabs nav-tabs-padded" role="tablist">
+  <% if @counts[:notes] > 0 %>
+  <li role="presentation" class="<%= params[:tab] == 'notes' ? 'active' : '' %>">
+    <a href="<%= user_path(@user.dxuser, 'notes') %>" aria-controls="tab-notes"><span class="fa fa-fw fa-sticky-note"></span>
+      <span class="tab-label">Notes <span class="badge"><%= @counts[:notes] %></span></span>
+    </a>
+  </li>
+  <% end %>
+  <% if @counts[:discussions] > 0 %>
+  <li role="presentation" class="<%= params[:tab] == 'discussions' ? 'active' : '' %>">
+    <a href="<%= user_path(@user.dxuser, 'discussions') %>" aria-controls="tab-discussions"><span class="fa fa-fw fa-comments"></span>
+      <span class="tab-label">Discussions <span class="badge"><%= @counts[:discussions] %></span></span>
+    </a>
+  </li>
+  <% end %>
+  <% if @counts[:answers] > 0 %>
+  <li role="presentation" class="<%= params[:tab] == 'answers' ? 'active' : '' %>">
+    <a href="<%= user_path(@user.dxuser, 'answers') %>" aria-controls="tab-answers"><span class="fa fa-fw fa-commenting-o"></span>
+      <span class="tab-label">Answers <span class="badge"><%= @counts[:answers] %></span></span>
+    </a>
+  </li>
+  <% end %>
+  <% if @counts[:files] > 0 %>
+  <li role="presentation" class="<%= params[:tab] == 'files' ? 'active' : '' %>">
+    <a href="<%= user_path(@user.dxuser, 'files') %>" aria-controls="tab-files"><span class="fa fa-fw fa-file-o"></span>
+      <span class="tab-label">Files <span class="badge"><%= @counts[:files] %></span></span>
+    </a>
+  </li>
+  <% end %>
+  <% if @counts[:comparisons] > 0 %>
+  <li role="presentation" class="<%= params[:tab] == 'comparisons' ? 'active' : '' %>">
+    <a href="<%= user_path(@user.dxuser, 'comparisons') %>" aria-label="CLick to view Comparisons"><span class="fa fa-fw fa-area-chart"></span>
+      <span class="tab-label">Comparisons <span class="badge"><%= @counts[:comparisons] %></span></span>
+    </a>
+  </li>
+  <% end %>
+  <% if @counts[:apps] > 0 %>
+  <li role="presentation" class="<%= params[:tab] == 'apps' ? 'active' : '' %>">
+    <a href="<%= user_path(@user.dxuser, 'apps') %>" aria-label="Click to view Apps"><span class="fa fa-fw fa-cube"></span>
+      <span class="tab-label">Apps <span class="badge"><%= @counts[:apps] %></span></span>
+    </a>
+  </li>
+  <% end %>
+</ul>
+
+<!-- Tab panes -->
+<div class="tab-content">
+  <% if defined?(@notes) %>
+    <div role="tabpanel" class="tab-pane <%= params[:tab] == 'notes' ? 'active' : '' %>" id="tab-notes">
+      <div class="panel">
+        <%= render "notes/cards", notes: @notes %>
+      </div>
+    </div>
+  <% end %>
+  <% if defined?(@discussions) %>
+    <div role="tabpanel" class="tab-pane <%= params[:tab] == 'discussions' ? 'active' : '' %>" id="tab-discussions">
+      <div class="panel">
+        <%= render "discussions/cards", discussions: @discussions %>
+      </div>
+    </div>
+  <% end %>
+  <% if defined?(@answers) %>
+    <div role="tabpanel" class="tab-pane <%= params[:tab] == 'answers' ? 'active' : '' %>" id="tab-answers">
+      <div class="panel">
+        <%= render "answers/cards", answers: @answers, show_discussion: true %>
+      </div>
+    </div>
+  <% end %>
+  <% if defined?(@files_grid) %>
+    <div role="tabpanel" class="tab-pane <%= params[:tab] == 'files' ? 'active' : '' %>" id="tab-files">
+      <div class="panel">
+        <%= render "files/grid", files_grid: @files_grid %>
+      </div>
+    </div>
+  <% end %>
+  <% if defined?(@comparisons_grid) %>
+    <div role="tabpanel" class="tab-pane <%= params[:tab] == 'comparisons' ? 'active' : '' %>" id="tab-comparisons">
+      <div class="panel">
+        <%= render "comparisons/grid", comparisons_grid: @comparisons_grid %>
+      </div>
+    </div>
+  <% end %>
+  <% if defined?(@apps_grid) %>
+    <div role="tabpanel" class="tab-pane <%= params[:tab] == 'apps' ? 'active' : '' %>" id="tab-apps">
+      <div class="panel">
+        <%= render "apps/grid", apps_grid: @apps_grid %>
+      </div>
+    </div>
+  <% end %>
+</div>

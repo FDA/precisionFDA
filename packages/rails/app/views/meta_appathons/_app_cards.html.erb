@@ -1,0 +1,58 @@
+<% if (apps.respond_to?(:total_count) && apps.total_count > 0) || (apps.respond_to?(:count) && apps.count > 0) %>
+  <div class="pfda-cards pfda-cards-list">
+    <% apps.each do |app| %>
+      <% appathon = app.user.appathon_from_meta(meta_appathon) %>
+      <div class="pfda-card pfda-card-list pfda-card-padded <%= app.private? ? 'pfda-card-warning' : ''%>">
+        <div class="pfda-card-header">
+          <div class="media">
+            <div class="media-left">
+              <%= link_to image_tag(app.user.gravatar_url, class: 'img-circle', height: 45), user_path(app.user.dxuser) %>
+            </div>
+            <div class="media-body">
+              <div class="row">
+                <div class="col-md-12">
+                  <div class="pfda-card-metadata">
+                      <%= link_to(app.user.full_name, user_path(app.user.dxuser)) %> submitted in <%= link_to flag_image_tag(appathon.flag, {width: 20}), appathon_path(appathon) %> <%= link_to appathon.title, appathon_path(appathon) %>
+                  </div>
+                  <div class="pfda-card-title">
+                    <%= link_to(app.title, app_path(app)) %>
+                  </div>
+                  <% if app.app_series.all_tags_list.count > 0 %>
+                    <div class="pfda-card-metadata">
+                      <%= render "_partials/tags_list_votable", tags_list: app.app_series.all_tags_list, item: app.app_series %>
+                    </div>
+                  <% end %>
+                </div>
+                <div class="col-md-12">
+                  <ul class="btn-reactions list-inline text-right">
+                    <% @reactions.each do |reaction| %>
+                      <li>
+                      <% if @context.logged_in? %>
+                        <a class="event-upvote btn-reaction <%= @context.user.voted_up_on?(app.app_series, vote_scope: reaction[:vote_scope]) ? 'active': ''%>" data-uid="<%= app.app_series.uid %>" data-upvote-count="<%= app.app_series.get_upvotes(vote_scope: reaction[:vote_scope]).size %>" data-vote-scope="<%= reaction[:vote_scope] %>" title="<%= reaction[:title] %>" data-toggle="tooltip">
+                          <span class="<%= reaction[:icon] %>"></span>
+                          <div class="upvote-count"><%= app.app_series.get_upvotes(vote_scope: reaction[:vote_scope]).size %></div>
+                        </a>
+                      <% else %>
+                        <a class="btn-reaction disabled" title="<%= reaction[:title] %>" data-toggle="tooltip">
+                          <span class="<%= reaction[:icon] %>"></span>
+                          <div class="upvote-count"><%= app.app_series.get_upvotes(vote_scope: reaction[:vote_scope]).size %></div>
+                        </a>
+                      <% end %>
+                      </li>
+                    <% end %>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  </div>
+<% else %>
+  <div class="pfda-cards">
+    <div class="pfda-card pfda-card-rounded">
+      <div class="lead text-muted">No apps here yet</div>
+    </div>
+  </div>
+<% end %>

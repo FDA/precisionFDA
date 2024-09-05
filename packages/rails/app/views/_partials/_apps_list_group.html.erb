@@ -1,0 +1,8 @@
+<% apps.each do |app| %>
+  <a href="<%= app_jobs_path(app) %>"
+    class="list-group-item word-break-all app-<%= app.app_series_id %> <%= app.app_series_id == active ? 'active' : ''%>"
+    data-app="<%= app.dxid %>">
+    <div class="app-list-group-item-title"><%= app.title %></div>
+    <small class="text-muted"><%= app.user.org.handle %>/<%= app.user.dxuser %></small>
+  </a>
+<% end %>

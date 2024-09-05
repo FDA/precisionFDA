@@ -1,0 +1,8 @@
+<div class="btn-group">
+  <%= link_to login_path, class: "btn accessible-btn-default btn-lg", data: {no_turbolink: true} do %>
+    <span class="fa fa-fw fa-sign-in" aria-hidden="true"></span> Log in
+  <% end %>
+  <%= link_to request_access_path, class: "btn accessible-btn-danger btn-lg" do %>
+    Request Access <span class="fa fa-fw fa-long-arrow-right" aria-hidden="true"></span>
+  <% end %>
+</div>

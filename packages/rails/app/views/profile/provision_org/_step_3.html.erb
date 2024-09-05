@@ -1,0 +1,72 @@
+<div class="container-padded">
+  <p> You entered the following information: </p>
+  <dl class="dl-horizontal">
+    <dt>First name:</dt>
+    <dd><%= @first_name %></dd>
+    <dt>Last name:</dt>
+    <dd><%= @last_name %></dd>
+    <dt>Email:</dt>
+    <dd><%= @email %></dd>
+    <dt>Country:</dt>
+    <dd><%= @country %></dd>
+    <dt>City:</dt>
+    <dd><%= @city %></dd>
+    <dt>State:</dt>
+    <dd><%= @us_state %></dd>
+    <dt>Postal Code:</dt>
+    <dd><%= @postal_code %></dd>
+    <dt>Address 1:</dt>
+    <dd><%= @address1 %></dd>
+    <dt>Address 2:</dt>
+    <dd><%= @address2 %></dd>
+    <dt>Phone:</dt>
+    <dd><%= @full_phone %></dd>
+    <dt>DUNS:</dt>
+    <dd><%= @duns %></dd>
+    <dt>Organization name:</dt>
+    <dd><%= @org %></dd>
+    <dt>Organization handle:</dt>
+    <dd><%= @org_handle %></dd>
+  </dl>
+  <p> Internal precisionFDA policies require that usernames be formed according to the pattern "<em>first_name.last_name</em>", using only lowercase English letters. </p>
+  <p> Based on the information you provided, the system will allocate the following: </p>
+  <dl class="dl-horizontal">
+    <dt>Suggested username:</dt>
+    <dd><%= @suggested_username %></dd>
+  </dl>
+  <% @warnings.each do |warning| %>
+    <div class="alert alert-danger">
+      <strong><span class="fa fa-warning"></span> <%= warning %></strong>
+    </div>
+  <% end %>
+  <p> You are about to provision username <strong><%= @suggested_username %></strong>. This action cannot be undone. </p>
+  <div class="clearfix">
+    <%= form_tag(provision_org_path, method: 'post', class: "pull-left") do -%>
+      <%= hidden_field_tag("state", "step2") %>
+      <%= hidden_field_tag("inv", @inv) %>
+      <%= hidden_field_tag("first_name", @first_name) %>
+      <%= hidden_field_tag("last_name", @last_name) %>
+      <%= hidden_field_tag("email", @email) %>
+      <%= hidden_field_tag("org", @org) %>
+      <%= hidden_field_tag("org_handle", @org_handle) %>
+      <%= hidden_field_tag("address", @address) %>
+      <%= hidden_field_tag("phone", @phone) %>
+      <%= hidden_field_tag("duns", @duns) %>
+      <%= button_tag(content_tag(:span, "", class: "fa fa-backward") + " Back", class: "btn btn-default") %>
+    <% end -%>
+    <%= form_tag(provision_org_path, method: 'post', class: "pull-left") do -%>
+      <%= hidden_field_tag("state", "step4") %>
+      <%= hidden_field_tag("inv", @inv) %>
+      <%= hidden_field_tag("first_name", @first_name) %>
+      <%= hidden_field_tag("last_name", @last_name) %>
+      <%= hidden_field_tag("email", @email) %>
+      <%= hidden_field_tag("org", @org) %>
+      <%= hidden_field_tag("org_handle", @org_handle) %>
+      <%= hidden_field_tag("duns", @duns) %>
+      <%= hidden_field_tag("suggested_username", @suggested_username) %>
+      <% opts = {class: "btn btn-primary", data: {disable_with: "Please wait..."}} -%>
+      <% opts[:data][:confirm] = "Are you sure? The system has detected one or more warnings shown on the page. Only proceed if you believe you have addressed these warnings." if @warnings.present? -%>
+      <%= button_tag(content_tag(:span, "", class: "fa fa-plus-circle") + " Provision", opts) %>
+    <% end -%>
+  </div>
+</div>

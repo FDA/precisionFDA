@@ -1,0 +1,17 @@
+<div class="pfda-toolbar">
+  <% if toolbar.has_key?(:fixed) %>
+    <div class="btn-group">
+      <% toolbar[:fixed].each do |btn| %>
+        <%= render "_partials/toolbar_button", btn: btn %>
+      <% end %>
+    </div>
+  <% end %>
+
+  <% if toolbar.has_key?(:dynamic) %>
+    <div class="btn-group">
+      <% toolbar[:dynamic].each do |btn| %>
+        <%= render "_partials/toolbar_button", btn: btn %>
+      <% end %>
+    </div>
+  <% end %>
+</div>

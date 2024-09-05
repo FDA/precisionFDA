@@ -1,0 +1,21 @@
+<%= grid(workflows_grid, show_filters: defined?(show_filters) ? show_filters : :always) do |g|
+
+  if defined?(div_if_empty)
+    g.blank_slate content_tag :div, "No workflows found", class: 'alert alert-info'
+  else
+    g.blank_slate partial:  "_partials/empty_grid"
+  end
+
+  g.column name: 'Name', attribute: 'name' do |workflow|
+    unilink(workflow)
+  end
+
+  g.column name: 'Added by', attribute: 'dxuser', assoc: :user do |workflow|
+    link_to(workflow.user.dxuser, user_path(workflow.user.dxuser))
+  end
+
+  g.column name: 'Created', attribute: 'created_at', filter_type: :standard do |workflow|
+    workflow.created_at.to_s(:human)
+  end
+
+end -%>

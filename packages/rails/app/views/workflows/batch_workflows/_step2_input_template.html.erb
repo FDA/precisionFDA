@@ -1,0 +1,20 @@
+<script type="text/html" id="batch_input_templates_step2">
+<div>
+  <!-- ko if: input.type() == 'file' -->
+  <%= render "workflows/batch_workflows/step2_file_input_template" %>
+  <!-- /ko -->
+
+  <!-- ko if: input.type() == 'string' -->
+  <div class="input-header">
+    <span class="input-header-title" data-bind="text: input.title"></span>
+  </div>
+  <div data-bind="css: {'has-error': !input.valid()}">
+    <textarea class="form-control" data-bind="value: input.value, event: {
+      change: input.onChange
+    }, attr: {
+      name: input.name
+    }"></textarea>
+  </div>
+  <!-- /ko -->
+</div>
+</script>

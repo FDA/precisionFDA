@@ -1,0 +1,38 @@
+<wrapper>
+  <div class="hidden-email-preview">
+    New Expert Q&amp;A Session for <%= user_title(@expert.user) %>
+  </div>
+  <spacer size="16"></spacer>
+  <container class="header">
+    <row>
+      <columns>
+        <a class="brand" href="<%= HOST %>" title="precisionFDA">
+          <img class="header-image" src="<%= HOST %>/assets/precisionFDA.email.dark.png" />
+        </a>
+      </columns>
+      <columns>
+        <p class="header-title text-right">Expert Q&amp;A Session Notification</p>
+      </columns>
+    </row>
+  </container>
+  <container class="radius">
+    <row>
+      <columns>
+        <p>
+          A new Expert Q&amp;A Session has been created featuring <%= user_link(@expert.user) %>.
+        </p>
+        <p>
+          The Expert Q&amp;A Session is only visible to the PrecisionFDA community and the general public when it is in the "public" state. Please coordinate with the PrecisionFDA admin when you are ready to .
+
+          At any time you can you can open the Expert Q&amp;A Session to accept question submissions by visiting the Expert Dashboard page, clicking the status drop-down button, and selecting "Open."
+          Please note that if an Expert Q&amp;A Session is open, it still needs to be made "public" before anyone else can see the Expert Q&amp;A session and submit questions.
+        </p>
+        <p>
+          To view and edit the details of your Expert Q&amp;A session, please visit your Expert Dashboard.
+        </p>
+        <button class="radius" href="<%= dashboard_expert_url(@expert) %>">View Expert Dashboard</button>
+      </columns>
+    </row>
+  </container>
+  <spacer size="16"></spacer>
+</wrapper>

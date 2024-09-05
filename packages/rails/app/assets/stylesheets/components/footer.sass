@@ -1,0 +1,20 @@
+@import "_common"
+
+.fda-footer
+  padding: $padding-base-vertical $padding-base-horizontal
+  background-color: $brand-blue-subtler
+  padding-top: $padding-large-vertical*2
+  padding-bottom: $padding-large-vertical*2
+  border-top: 1px solid $border-default-color
+
+  .site-footer-section
+    @include make-row()
+    .site-footer-aside
+      @include make-md-column(6)
+
+    .site-footer-main
+      @include make-md-column(18)
+
+  .logo-fda
+    display: block
+    margin-bottom: 10px

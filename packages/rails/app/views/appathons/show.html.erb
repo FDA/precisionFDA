@@ -1,0 +1,133 @@
+<% content_for :title do %><%= @appathon.title %><% end %>
+
+<div class="page-header clearfix">
+  <% if @appathon.editable_by?(@context) %>
+    <div class="text-right">
+      <div class="dropdown">
+        <button class="btn btn-link btn-lg" id="dLabel" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          <span class="fa fa-cog"></span>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dLabel">
+          <li>
+            <%= link_to edit_appathon_path(@appathon) do %>
+              <span class="fa fa-pencil"></span> Edit
+            <% end %>
+          </li>
+        </ul>
+      </div>
+    </div>
+  <% end %>
+  <div class="page-context-title">
+    <div class="text-center">
+      <%= flag_image_tag(@appathon.flag, width: 100)  %>
+    </div>
+    <br />
+    <br />
+    <%= link_to image_tag(@appathon.admin.gravatar_url, class: 'img-circle', height: '16px'), user_path(@appathon.admin.dxuser) %>
+ <%= link_to("#{@appathon.admin.full_name} (#{@appathon.admin.org.name})", user_path(@appathon.admin.dxuser), class: 'link-muted') %> launched an Appathon for <%= link_to("#{@meta_appathon.name}", meta_appathon_path(@meta_appathon), class: 'link-muted strong') %>
+  </div>
+  <div class="page-title">
+    <%= @appathon.title %>
+  </div>
+  <div class="metadata-section">
+    <ul class="list-group list-group-inline list-bricks">
+      <li class="list-group-item">
+        <h5 class="list-group-item-heading">Starts</h5>
+        <p class="list-group-item-text"><%= @appathon.start_at.nil? ? @appathon.meta_appathon.start_at.to_s(:human) : @appathon.start_at.to_s(:human) %></p>
+      </li>
+      <li class="list-group-item">
+        <h5 class="list-group-item-heading">Ends</h5>
+        <p class="list-group-item-text"><%= @appathon.end_at.nil? ? @appathon.meta_appathon.end_at.to_s(:human) : @appathon.end_at.to_s(:human) %></p>
+      </li>
+    </ul>
+  </div>
+  <div class="metadata-section text-center">
+    <ul class="list-group list-group-inline list-bricks">
+      <li class="list-group-item">
+        <h5 class="list-group-item-heading">Location</h5>
+        <p class="list-group-item-text"><%= @appathon.location %></p>
+      </li>
+    </ul>
+  </div>
+</div>
+
+
+<% if @context.logged_in? && !@meta_appathon.followed_by?(@context.user) && @meta_appathon.is_ongoing? %>
+<div class="pfda-toolbar text-center">
+  <%= link_to join_appathon_path(@appathon), method: :post, data: { confirm: 'Before you join, here is what you need to know: you can only join one App-a-thon, you will not be able to remove yourself. Your published apps created within the start and end dates of the Appathon will be submitted automatically. Are you sure you want to continue?' }, class: "btn btn-primary btn-lg" do %>
+    <span class="fa fa-user-plus"></span> Join this Appathon
+  <% end %>
+</div>
+<% end %>
+
+<div class="appathon-container container-fluid container-padded">
+  <div class="panel panel-default">
+    <div class="pfda-pane">
+      <div class="pfda-pane-content">
+        <% if @context.logged_in? && @appathon.followed_by?(@context.user) %>
+        <div class="pfda-help-block">
+          <span class="fa fa-lightbulb-o" aria-hidden="true"></span><a data-turbolinks="false" href="/docs/creating-apps" target="_blank">Apps you create</a>and <a data-turbolinks="false" href="/docs/publishing" target="_blank">publish</a>within the app-a-thon start/end time will automatically show up here</a>
+        </div>
+        <% end %>
+
+        <%= render "appathons/app_cards", apps: @appathon.apps, vote_scope: @appathon.uid, is_appathon_followed: @context.logged_in? && @appathon.followed_by?(@context.user)  %>
+      </div>
+      <% if @context.logged_in? && @appathon.followed_by?(@context.user) %>
+      <div class="pfda-pane-sidebar pfda-pane-sidebar-minimal pfda-pane-sidebar-padded-v">
+        <% if !@commentable.nil? %>
+          <%= render "comments/comments_wrapper", comments: @comments, items_from_params: @items_from_params, url: @item_comments_path, object: @commentable %>
+        <% end %>
+      </div>
+      <% end %>
+      <div class="pfda-pane-sidebar pfda-appathon-sidebar">
+        <div class="pfda-appathon-participants">
+          <%= render "_partials/followers", followers: @appathon.user_followers, followable: @appathon, display_names: true %>
+        </div>
+
+        <% if !@appathon.description.blank? %>
+          <div class="pfda-appathon-description">
+            <%= @appathon.description %>
+          </div>
+        <% end %>
+        <% if @context.logged_in? && @appathon.editable_by?(@context) %>
+        <div class="pfda-appathon-admin list-group">
+          <li class="list-group-item">
+            <div class="list-group-item-heading">
+              Admin Info
+            </div>
+            <div class="list-group-item-body">
+              <ul>
+                <li class="">
+                  This app-a-thon is public and cannot be deleted
+                </li>
+                <li class="">
+                  Participants must be precisionFDA members
+                </li>
+                <li class="">
+                  Non-members must first request an account indicating they want to participate in an app-a-thon
+                  <br />
+                  <input type="text" class="form-control input-sm" value="<%= request_access_url %>"/>
+                </li>
+                <li class="">
+                  Members can join on the app-a-thon page
+                  <br />
+                  <input type="text" class="form-control input-sm" value="<%= appathon_url(@appathon) %>"/>
+                </li>
+                <li class="">
+                  Participants must create (and publish) an App within the App-a-thon start/end date for it to appear in the list
+                </li>
+                <li class="">
+                  All app's in your app-a-thon will also appear on the global list on <%= link_to active_meta_appathon_url(@appathon.meta_appathon), active_meta_appathon_path(@appathon.meta_appathon) %>
+                </li>
+                <li class="">
+                  It is up to you, the organizer, to determine a "winner" of the app-a-thon, if at all
+                </li>
+              </ul>
+            </div>
+          </li>
+        </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>

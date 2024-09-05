@@ -1,5 +1,3 @@
-version: '3.7'
-
 # ! Write a documentation note
 # NOTE(samuel): docker volumes cannot be defined in abstract files
 volumes:
@@ -9,6 +7,10 @@ volumes:
 
 services:
   web:
+    depends_on:
+      - db
+      - redis
+      - sidekiq
     extends:
       file: ./base.services.yml
       service: web
@@ -35,17 +37,28 @@ services:
         source: webpack-cache-client
         target: /precision-fda/.build_cache/
   nodejs-api:
+    depends_on:
+      - db
+      - redis
     extends:
       file: ./base.services.yml
       service: nodejs-api
   nodejs-worker:
+    depends_on:
+      - db
+      - redis
     extends:
       file: ./base.services.yml
       service: nodejs-worker
-  db:
+  nodejs-admin-platform-client:
     extends:
       file: ./base.services.yml
-      service: db_emulated
+      service: nodejs-admin-platform-client
+  db:
+    platform: linux/arm64
+    extends:
+      file: ./base.services.yml
+      service: db
     volumes:
       - db-pfda-mysql-volume:/var/lib/mysql
   redis:
@@ -53,6 +66,8 @@ services:
       file: ./base.services.yml
       service: redis
   sidekiq:
+    depends_on:
+      - redis
     extends:
       file: ./base.services.yml
       service: sidekiq

@@ -1,0 +1,55 @@
+<%
+  can_be_public = item.publishable_by?(@context, Scopes::SCOPE_PUBLIC)
+  can_be_private = (item.is_a?(App) || item.is_a?(UserFile)) && item.in_space?
+
+  spaces = Space.editable_by(@context).order("spaces.name").select do |space|
+    item.publishable_by?(@context, space.scope)
+  end
+
+  copy_url = case item
+    when App then copy_api_apps_path
+    when UserFile then copy_api_files_path
+    when Workflow then copy_api_workflows_path
+  end
+%>
+
+<% if spaces.empty? %>
+  <% if can_be_public %>
+    <%= link_to publish_path + "?" + { id: item.uid, scope: Scopes::SCOPE_PUBLIC }.to_param, method: :post, class: "btn btn-success" do %>
+      <span class="fa fa-bullhorn"></span> Publish
+    <% end %>
+  <% end %>
+<% else %>
+  <div class="btn-group">
+    <button id="dLabel" type="button" data-toggle="dropdown" aria-haspopup="true"
+      aria-expanded="false"
+      class="btn btn-success dropdown-toggle">
+        Publish
+      <span class="caret"></span>
+    </button>
+
+    <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dLabel">
+      <% if can_be_public %>
+        <li>
+          <%= link_to publish_path + "?" + { id: item.uid, scope: Scopes::SCOPE_PUBLIC }.to_param, method: :post do %>
+            <span class="fa fa-globe"></span> Public
+          <% end %>
+        </li>
+      <% end %>
+
+      <% spaces.each do |space| %>
+        <li>
+          <%= link_to copy_url + "?" + { item_ids: [item.id], scope: space.uid }.to_param, method: :post do %>
+            <span class="fa fa-object-group"></span> <%= space.title %>
+          <% end %>
+        </li>
+      <% end %>
+    </ul>
+  </div>
+<% end %>
+
+<% if can_be_private %>
+  <%= link_to copy_url + "?" + { item_ids: [item.id], scope: Scopes::SCOPE_PRIVATE }.to_param, method: :post, class: "btn btn-warning" do %>
+    <span class="fa fa-lock"></span> Copy To Private
+  <% end %>
+<% end %>

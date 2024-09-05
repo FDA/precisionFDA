@@ -1,0 +1,26 @@
+<% content_for :title do %>Edit Challenge<% end %>
+
+<div class="page-header">
+  <h1 class="page-title remediation-page-header">
+    <span class="fa fa-trophy"></span>
+    Edit Challenge
+  </h1>
+</div>
+
+<div class="container-fluid container-padded">
+  <%= form_for @challenge, url: challenge_path(@challenge), html: {class: 'form form-horizontal'} do |f| %>
+    <%= render "_partials/form_errors", object: @challenge %>
+    <%= render "common_inputs", f: f %>
+
+    <div class="form-group">
+      <div class="col-sm-offset-3">
+        <%= f.submit "Update", class: 'btn btn-primary', data: {disable_with: "Updating..."} %>
+        <%- if @challenge.can_announce_result? %>
+          <%= link_to "Announce result", announce_result_challenge_path(@challenge), method: :post, class: "btn btn-warning challenges-announce-result" %>
+        <%- end %>
+      </div>
+    </div>
+  <% end %>
+</div>
+
+<%= render "_partials/upload_image_modal", display_url: false %>

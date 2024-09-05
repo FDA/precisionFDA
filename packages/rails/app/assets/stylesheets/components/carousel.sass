@@ -1,0 +1,141 @@
+@import "_common"
+
+.carousel-text
+  .carousel-control
+    color: $link-color
+    text-shadow: none
+
+    &.right, &.left
+      background-image: none
+
+    &:hover
+      color: $link-hover-color
+
+  .carousel-indicators
+    position: relative
+    text-align: center
+    bottom: 0
+    left: 0
+    margin: 0
+    margin-top: $padding-large-vertical
+    width: 100%
+
+    li
+      border-color: $gray-light
+
+      &:hover
+        background-color: $gray-lighter
+
+      &.active
+        border-color: $link-color
+        background-color: $link-color
+
+        &.carousel-indicator-blue
+          border-color: $brand-info
+          background-color: $brand-info
+        &.carousel-indicator-green
+          border-color: $brand-success
+          background-color: $brand-success
+        &.carousel-indicator-orange
+          border-color: $brand-warning
+          background-color: $brand-warning
+        &.carousel-indicator-red
+          border-color: $brand-danger
+          background-color: $brand-danger
+
+  .carousel-icon-lead
+    text-align: center
+    font-size: 75px
+    margin-bottom: $padding-large-vertical
+
+  .carousel-content
+    display: flex
+    padding: $padding-base-horizontal
+    border-radius: $border-radius-small
+    overflow: auto
+
+    &.carousel-content-blue
+      color: #fff
+      background-color: $brand-info
+    &.carousel-content-green
+      color: #fff
+      background-color: $brand-success
+    &.carousel-content-orange
+      color: #fff
+      background-color: $brand-warning
+    &.carousel-content-red
+      color: #fff
+      background-color: $brand-danger
+
+    .copy
+      font-size: 22px
+
+  &.carousel-text-padded-lg
+    .carousel-content
+      padding: 12px 25px
+
+// Source: codepen.io/Rowno/pen/Afykb
+.carousel-fade
+  .carousel-inner
+    .item
+      @include transition-property(opacity)
+
+    .item,
+    .active.left,
+    .active.right
+      opacity: 0
+
+    .active,
+    .next.left,
+    .prev.right
+      opacity: 1
+
+    .next,
+    .prev,
+    .active.left,
+    .active.right
+      left: 0
+      transform: translate3d(0, 0, 0)
+
+  .carousel-control
+    z-index: 2
+
+.carousel-indicators.carousel-indicators-logo, .carousel-indicators-logo
+  list-style: none
+  margin-top: -35px
+  background-color: #fff
+  padding-bottom: $padding-base-vertical
+  @include flexbox
+  @include flex-wrap(wrap)
+  @include align-items(center)
+  @include align-content(center)
+  @include justify-content(space-around)
+
+  li
+    @include flex-grow(1)
+    margin: 5px 10px
+    width: auto
+    height: auto
+    text-indent: 0
+    border: 0
+    cursor: pointer
+
+    &.active
+      background-color: transparent
+
+    &:not(.active)
+      opacity: 0.35
+
+      &:hover
+        background-color: transparent
+        opacity: 0.75
+
+.transition-timer-carousel-progress-bar
+  height: 3px
+  background-color: $brand-blue-primary
+  width: 0%
+  margin: 0px 0px 0px 0px
+  border: none
+  z-index: 11
+  position: relative
+  margin-top: 10px

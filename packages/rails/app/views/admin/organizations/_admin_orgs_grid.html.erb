@@ -1,0 +1,49 @@
+<%= grid(@orgs_grid, show_filters: :always) do |g|
+  g.row_attributes do |r|
+    {id: 'org-' + r.handle}
+  end
+
+  g.column name: "Name", attribute: "name", filter: :string do |org|
+    link_to org.name, admin_organization_path(org)
+  end
+
+  g.column name: "Handle", attribute: "handle", filter: :string do |org|
+    org.handle
+  end
+
+  g.column name: "Address", attribute: "address", filter: :string do |org|
+    org.address
+  end
+
+  g.column name: "Phone", attribute: "phone", filter: :string do |org|
+    org.phone
+  end
+
+  g.column name: "Admin", attribute: "email", assoc: :admin, filter: :string do |org|
+    org.admin.email rescue "No one"
+  end
+
+  g.column name: "" do |org|
+    raw """<button class='btn btn-primary pull-right' data-orgid='#{org.handle}' data-bind='click: showChangeAdminModal'>Change Admin</button>"""
+  end
+
+  g.column name: "Dissolve State", html: { style: "text-align: center" } do |org|
+    dissolve_request = org.dissolve_org_action_request
+
+    if dissolve_request&.new?
+      content_tag(
+        :button,
+        "Approve",
+        class: "btn btn-primary",
+        "data-bind" => "click: showApproveModal",
+        "data-request_id" => dissolve_request.id,
+      )
+    elsif dissolve_request
+      content_tag(:span, dissolve_request.state.titleize)
+    else
+      content_tag(:span, "No requests")
+    end
+  end
+end %>
+
+<%= render partial: "admin/organizations/org_dissolve_approve_modal" %>

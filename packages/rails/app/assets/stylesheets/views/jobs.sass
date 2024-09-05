@@ -1,0 +1,66 @@
+@import "_common"
+
+.pfda-controller-jobs.pfda-action-new main
+  form
+    .control-label
+      font-weight: normal
+
+    [for=job_limit]
+      margin-right: 20px
+
+    input[name=job_limit]
+      text-align: center
+
+    @media (max-width: $screen-sm-min - 1)
+      [for=job_limit]
+        margin-top: 15px
+
+      input[name=job_limit]
+        text-align: left
+
+    .required .control-label
+      font-weight: bold
+
+  .field-boolean
+    .is_default
+      &:after
+        content: ' (default)'
+
+.job-io
+  .job-io-column
+    padding: 0 $padding-large-horizontal $padding-small-vertical 0
+
+  .job-io-heading
+    color: $brand-blue-tertiary
+    text-transform: uppercase
+    font-weight: 400
+    font-size: $font-size-h5
+    margin-bottom: 10px
+    padding-left: 8px
+
+  .table-job-io
+    td
+      vertical-align: baseline
+
+    .job-io-label
+      font-weight: bold
+
+    .job-io-class
+      font-family: $font-family-monospace
+      color: $brand-blue-tertiary
+      font-size: 12px
+
+    .job-io-value
+      font-family: $font-family-monospace
+      color: $brand-blue-dark
+
+      &.job-io-class-file
+        font-family: $font-family-sans-serif
+
+.panel-job-failed
+  margin-top: 50px
+  .panel-heading
+    text-transform: none
+    font-weight: bold
+  .panel-body
+    min-height: 250px

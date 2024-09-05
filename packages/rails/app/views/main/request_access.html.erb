@@ -1,0 +1,190 @@
+<% content_for :title do %>Request Access
+<% end %>
+
+<div class="page-header">
+  <div class="container">
+    <div class="row">
+      <div class="col-sm-offset-5 col-sm-19">
+        <div class="page-title">
+          <div class="">Request Access to precisionFDA</div>
+        </div>
+        <hr>
+        <div class="description">
+          <% if @invitation.new_record? %>
+            <p class="lead">
+              To request access, please leave your information below.
+            </p>
+            <p class="lead">If you already have a contributor account, proceed to
+              <strong><%= link_to "Log In", login_path %></strong>.</p>
+          <% else %>
+            <p class="lead text-success">
+              <span class="fa fa-check"></span> Thank you! Your request has been registered. Check your email for
+              additional instructions.
+            </p>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<% if @invitation.new_record? %>
+  <div class="container">
+    <div class="row">
+      <%= form_for @invitation, url: request_access_path, html: { class: "form form-horizontal" } do |f| %>
+        <% if @invitation.errors.any? %>
+          <div class="form-group form-group-lg">
+            <div class="alert alert-danger col-md-offset-5 col-md-10">
+              <strong><span class="fa fa-warning"></span> Please correct the following errors:</strong>
+              <ul>
+                <% @invitation.errors.full_messages.each do |message| %>
+                  <li><%= message %></li>
+                <% end %>
+              </ul>
+            </div>
+          </div>
+        <% end %>
+        <div class="form-group form-group-lg">
+          <div class="col-sm-offset-5 col-sm-10">
+            <span class="h4 text-uppercase text-primary">About me</span>
+          </div>
+        </div>
+        <hr>
+        <div class="form-group form-group-lg">
+          <%= f.label :first_name, "First name", class: 'control-label col-sm-4 request_access_form_font_color' %>
+          <div class="col-sm-offset-1 col-sm-10">
+            <%= f.text_field :first_name, class: 'form-control input-lg', placeholder: '', required: 'required', minlength: 2 %>
+          </div>
+        </div>
+        <div class="form-group form-group-lg">
+          <%= f.label :last_name, "Last name", class: 'control-label col-sm-4 request_access_form_font_color' %>
+          <div class="col-sm-offset-1 col-sm-10">
+            <%= f.text_field :last_name, class: 'form-control input-lg', required: 'required', minlength: 2 %>
+          </div>
+        </div>
+        <div class="form-group form-group-lg">
+          <%= f.label :email, "Email address", class: 'control-label col-sm-4 request_access_form_font_color' %>
+          <div class="col-sm-offset-1 col-sm-10">
+            <%= f.email_field :email, class: 'form-control input-lg', required: 'required' %>
+          </div>
+        </div>
+        <div class="form-group form-group-lg form-group-optional">
+          <%= f.label :duns, "DUNS #", class: 'control-label col-sm-4 request_access_form_font_color' %>
+          <div class="col-sm-offset-1 col-sm-10">
+            <%= f.text_field :duns, class: 'form-control input-lg', placeholder: 'Optional' %>
+          </div>
+        </div>
+
+        <%#= render "_partials/phone_confirmation_modal" %>
+
+        <br>
+        <br>
+
+        <div class="form-group form-group-lg">
+          <div class="col-sm-offset-5 col-sm-10">
+            <span class="h4 text-uppercase text-primary">My Interest in precisionFDA</span>
+          </div>
+        </div>
+
+        <hr>
+
+        <div class="form-group form-group-lg">
+          <div class="col-sm-offset-5 col-sm-10">
+            <%= f.label :req_reason, "Tell us a bit more about your goals / reasons why are requesting access:", class: 'request_reason_text_custom request_access_form_font_color' %>
+          </div>
+        </div>
+        <div class="form-group form-group-lg">
+          <div class="col-sm-offset-5 col-sm-10">
+            <%= f.text_field :req_reason, class: 'form-control input-lg', required: 'required' %>
+          </div>
+        </div>
+        <div class="form-group form-group-lg">
+          <div class="col-sm-offset-5 col-sm-10">
+            Do you intend to organize or participate in a community challenge or appathon?
+            <div class="checkbox">
+              <label class="request_access_form_font_color">
+                <%= f.check_box :participate_intent %>
+                Yes, I intend to participate
+              </label>
+            </div>
+            <div class="checkbox">
+              <label class="request_access_form_font_color">
+                <%= f.check_box :organize_intent %>
+                Yes, I intend to organize
+              </label>
+            </div>
+          </div>
+        </div>
+        <div class="form-group form-group-lg form-group-optional">
+          <div class="col-sm-offset-5 col-sm-10">
+            <%= f.label :req_data, "Do you have any data to contribute? If so, list below.", class: 'request_data_text_custom request_access_form_font_color request_access_form_font_color' %>
+          </div>
+        </div>
+        <div class="form-group form-group-lg form-group-optional">
+          <div class="col-sm-offset-5 col-sm-10">
+            <%= f.text_field :req_data, class: 'form-control input-lg', placeholder: 'Optional' %>
+          </div>
+        </div>
+        <div class="form-group form-group-lg">
+          <div class="col-sm-offset-5 col-sm-10">
+            <%= f.label :req_software, "Do you have any software to contribute? If so, list below.", class: 'request_access_custom17080 request_access_form_font_color request_access_form_font_color' %>
+          </div>
+        </div>
+        <div class="form-group form-group-lg form-group-optional">
+          <div class="col-sm-offset-5 col-sm-10">
+            <%= f.text_field :req_software, class: 'form-control input-lg', placeholder: 'Optional' %>
+          </div>
+        </div>
+        <div class="intended-use form-group form-group-lg">
+          <div class="col-sm-offset-5 col-sm-10">
+            Ultimately, what do you see as your intended use for precisionFDA?
+            <div class="checkbox">
+              <label class="checkbox-inline request_access_form_font_color">
+                <%= f.check_box :research_intent %>
+                Research use
+              </label>
+              <label class="checkbox-inline request_access_form_font_color">
+                <%= f.check_box :clinical_intent %>
+                Clinical use
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group form-group-lg">
+          <div class="col-sm-offset-5 col-sm-10">
+            <span class="h4 text-uppercase text-primary">Submit Request</span>
+          </div>
+        </div>
+
+
+        <% unless Utils.development_or_test? %>
+          <%= recaptcha_v3 inline_script: true, action: 'registration' %>
+          <script type="text/javascript">
+              const form = document.forms.item(0)
+              const hiddenInput = document.getElementById('g-recaptcha-response-data-registration')
+              form.addEventListener('submit', async function (e) {
+                  e.preventDefault();
+                  hiddenInput.value = await window.executeRecaptchaForRegistrationAsync()
+                  form.submit()
+              });
+          </script>
+        <% end %>
+
+        <div class="form-group form-group-lg">
+          <div class="col-sm-offset-5 col-sm-10">
+            <button class="btn btn-lg accessible-btn-success">
+              Request Access to precisionFDA
+            </button>
+
+            &nbsp; or <strong><%= link_to "Log in", login_path %></strong>
+          </div>
+        </div>
+
+        <%= render "_partials/modal_access_request_confirm" %>
+      <% end %>
+    </div>
+  </div>
+<% end %>
+
+<%= render "_partials/fda_footer" %>
