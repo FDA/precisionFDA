@@ -12,7 +12,7 @@ import { useDataPortalByIdQuery } from '../queries'
 import { DataPortalError } from './DataPortalNotFound'
 
 import '../../lexi/themes/PlaygroundEditorTheme.css'
-import { canEditContent as canEditContentCheck, canEditSettings as canEditSettingsCheck } from '../utils'
+import { canEditContent as canEditContentCheck, canEditSettings as canEditSettingsCheck, canViewSpaceLink as canViewSpaceLinkCheck } from '../utils'
 import { DataPortalDetails } from './DataPortalDetails'
 
 const DataPortalDetailsPage = () => {
@@ -87,6 +87,7 @@ const DataPortalDetailsPage = () => {
         <DataPortalDetails
           portal={data}
           canViewResources={canEditContentCheck(user?.dxuser, data.members)}
+          canViewSpaceLink={canViewSpaceLinkCheck(user?.dxuser, data.members)}
           canEditContent={canEditContentCheck(user?.dxuser, data.members)}
           canEditSettings={canEditSettingsCheck(user?.dxuser, data.members)}
           canListPortals={user?.isAdmin}
