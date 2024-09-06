@@ -1,13 +1,12 @@
 import { useQuery } from '@tanstack/react-query'
 import React, { useEffect, useState } from 'react'
-import styled from 'styled-components'
 import { BreadcrumbDivider } from '../../../../components/Breadcrumb'
 import { Button } from '../../../../components/Button'
 import { InputText } from '../../../../components/InputText'
 import { StyledName } from '../../../../components/ResourceTable'
 import { FolderIcon } from '../../../../components/icons/FolderIcon'
 import { HomeIcon } from '../../../../components/icons/HomeIcon'
-import { SelectableTable, StyledCell } from '../../../actionModals/styles'
+import { StyledCell } from '../../../actionModals/styles'
 import { ServerScope } from '../../../home/types'
 import { ModalContentPadding, ModalPageCol } from '../../../modal/styles'
 import { SearchBar } from '../../../resources/styles'
@@ -23,19 +22,15 @@ import {
   ModalStyledBreadcrumbs,
   ModalStyledCell,
   ModalStyledRow,
-  ModalStyledSpaceCell,
   MyHomeStyledName,
-  ShorternName,
+  ShorternFolderName,
+  SpaceAndFolderTable,
   SpaceStyledName,
   StyledBreadcrumb,
   StyledBreadcrumbButton,
   StyledNameIcon,
   StyledStickyTop,
 } from './styles'
-
-const ShorternFolderName = styled(ShorternName)`
-  width: calc(100% - 30px);
-`
 
 const MY_HOME = {
   name: 'My Home',
@@ -71,7 +66,7 @@ const SpacesList = ({
   }
 
   return (
-    <SelectableTable>
+    <SpaceAndFolderTable>
       <tbody>
         {!isFromMyHome && (
           <ModalStyledRow onClick={() => onSelect(MY_HOME)}>
@@ -90,21 +85,21 @@ const SpacesList = ({
         )}
         {spacesList.map((s, index) => (
           <ModalStyledRow key={index} onClick={() => onSelect(s)}>
-            <ModalStyledSpaceCell>
+            <ModalStyledCell>
               <SpaceStyledName data-turbolinks="false">
                 <StyledNameIcon>{findSpaceTypeIcon(s.type)}</StyledNameIcon>
                 {s.protected && <ProtectedIcon color="var(--c-text-700)" />}
                 {s.restricted_reviewer && <FdaRestrictedIcon color="var(--c-text-700)" />}
                 <ShorternFolderName>{s.name}</ShorternFolderName>
               </SpaceStyledName>
-            </ModalStyledSpaceCell>
+            </ModalStyledCell>
             <StyledCell>
               <StyledName>{s.scope}</StyledName>
             </StyledCell>
           </ModalStyledRow>
         ))}
       </tbody>
-    </SelectableTable>
+    </SpaceAndFolderTable>
   )
 }
 
@@ -129,7 +124,7 @@ const FolderList = ({
     return <ModalContentPadding>Loading...</ModalContentPadding>
   }
 
-  const folders = data.nodes as IFile[]
+  const folders = data.nodes.filter(n => n.type === 'Folder') as IFile[]
 
   const filteredFolders = folders.filter(f => f.name.toLowerCase().includes(filterString.toLowerCase()))
 
@@ -138,7 +133,7 @@ const FolderList = ({
       There are no folders in this directory. You can copy files directly to this location.
     </ModalContentPadding>
   ) : (
-    <SelectableTable>
+    <SpaceAndFolderTable>
       <tbody>
         {filteredFolders?.map(folder => (
           <ModalStyledRow key={folder.id} onClick={() => onSelect(folder)}>
@@ -153,7 +148,7 @@ const FolderList = ({
           </ModalStyledRow>
         ))}
       </tbody>
-    </SelectableTable>
+    </SpaceAndFolderTable>
   )
 }
 
@@ -171,6 +166,7 @@ export const ScopeAndFolderSelection = ({
   const [selectedTarget, setSelectedTarget] = useState<EditableSpace | typeof MY_HOME | undefined>(undefined)
   const [searchQuery, setSearchQuery] = useState<string>('')
   const [searchType, setSearchType] = useState<'spaces' | 'folders'>('spaces')
+  const BREADCRUMBS_LIMIT = 2
 
   const handleSelectBreadcrumb = (id: number | null) => {
     setSearchQuery('')
@@ -233,7 +229,18 @@ export const ScopeAndFolderSelection = ({
             <StyledBreadcrumbButton data-variant="link" onClick={() => setSelectedTarget(undefined)}>
               All Scopes
             </StyledBreadcrumbButton>
-            {breadcrumbs.map((b, index) => (
+            {breadcrumbs.length > BREADCRUMBS_LIMIT && (
+              <StyledBreadcrumb>
+                <BreadcrumbDivider>/</BreadcrumbDivider>
+                <StyledBreadcrumbButton
+                  data-variant="link"
+                  onClick={() => handleSelectBreadcrumb(breadcrumbs[breadcrumbs.length - (BREADCRUMBS_LIMIT + 1)].id)}
+                >
+                  ...
+                </StyledBreadcrumbButton>
+              </StyledBreadcrumb>
+            )}
+            {breadcrumbs.slice(-BREADCRUMBS_LIMIT).map((b, index) => (
               <StyledBreadcrumb key={`divider-${index}`}>
                 <BreadcrumbDivider>/</BreadcrumbDivider>
                 <StyledBreadcrumbButton data-variant="link" onClick={() => handleSelectBreadcrumb(b.id)}>

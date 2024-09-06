@@ -10,6 +10,7 @@ class CopyService
       new_job = job.dup
       new_job.scope = scope
       new_job.project = Space.from_scope(scope).project_for_user(user)
+      user.tag(new_job, with: job.tags, on: :tags)
       new_job.save!
 
       copy_dependencies(new_job, job, scope)

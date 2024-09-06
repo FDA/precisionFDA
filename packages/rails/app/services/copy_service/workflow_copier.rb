@@ -47,6 +47,7 @@ class CopyService
           user_id: user.id,
           scope: scope,
         )
+        user.tag(workflow_series, with: workflow.workflow_series.tags, on: :tags)
 
         new_workflow.update!(workflow_series_id: workflow_series.id)
         workflow_from_api = api.workflow_describe(new_workflow.dxid)

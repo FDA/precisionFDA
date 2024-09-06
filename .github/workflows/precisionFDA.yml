@@ -145,7 +145,7 @@ jobs:
     name: Test HTTPS Apps
     runs-on: ubuntu-latest
     env:
-      NODE_ENV: test
+      NODE_ENV: ci_test
       DATABASE_TEST_URL: mysql://root:password@127.0.0.1:3306/test_db
       DATABASE_TEST_NAME: test_db
       MAKE: "make --jobs 4"

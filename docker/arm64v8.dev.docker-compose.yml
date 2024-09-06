@@ -1,5 +1,3 @@
-version: '3.7'
-
 # NOTE(samuel) - docs - volumes have to always be in leaf docker compose files
 volumes:
   bundler-deps-cache-ruby:

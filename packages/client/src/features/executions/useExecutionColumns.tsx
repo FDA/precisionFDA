@@ -13,7 +13,7 @@ import { RESOURCE_LABELS } from '../../types/user'
 import { getSpaceIdFromScope } from '../../utils'
 import { StyledLinkCell } from '../home/home.styles'
 import { KeyVal } from '../home/types'
-import { getBasePath } from '../home/utils'
+import { getBasePath, getBasePathFromScope } from '../home/utils'
 import { StateCell } from './StateCell'
 import { IExecution } from './executions.types'
 
@@ -157,7 +157,7 @@ export const useExecutionColumns = ({
       width: colWidths?.location || 200,
       Cell: props => (
         <StyledLinkCell
-          to={`${props.row.original.links && props.row.original.links.space}/${props.row.original.workflow_uid === 'N/A' ? 'jobs' : 'workflows'}`}
+          to={`${getBasePathFromScope(props.row.original.scope)}/executions`}
         >
           <ObjectGroupIcon height={14} />
           {props.value}

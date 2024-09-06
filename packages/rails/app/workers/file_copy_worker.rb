@@ -48,6 +48,17 @@ class FileCopyWorker < ApplicationWorker
     files = UserFile.where(id: file_ids)
     copies = copy_service.copy(files, @scope, folder_id)
 
+    # only new copies with properties - it has to be done here and not in copy service, because of non commited transaction.
+    # after the copy method the files are commited and reachable in node backend.
+    new_only = copies.select { |copy| copy.copied && copy.source.properties.present? }
+    new_only.each do |new|
+      property_hash = {}
+      new.source.properties.each do |property|
+        property_hash[property.property_name] = property.property_value
+      end
+      https_apps_client.set_properties(new.object.id, "node", property_hash)
+    end
+
     # replace COPYING state by a source file state.
     copies.each { |object, source, _| object.update!(state: source.state) }
 

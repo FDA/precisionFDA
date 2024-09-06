@@ -13,6 +13,8 @@ gem "terser", "~> 1.1"
 # Use CoffeeScript for .coffee assets and views
 gem "coffee-rails", "~> 5.0"
 
+gem "rbtrace", require: String(ENV.fetch("FEATURE_ENABLE_MEMORY_DUMPS", false)) == "true"
+
 # Use jquery as the JavaScript library
 gem "jquery-rails", "~> 4.4"
 # Turbolinks makes navigating your web application faster

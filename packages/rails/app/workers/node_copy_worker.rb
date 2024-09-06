@@ -42,6 +42,17 @@ class NodeCopyWorker < ApplicationWorker
     nodes = Node.where(id: nodes_ids)
     copies = copy_service.copy(nodes, scope, folder_id)
 
+    # only new copies with properties - it has to be done here and not in copy service, because of non commited transaction.
+    # after the copy method the files are commited and reachable in node backend.
+    new_only = copies.select { |copy| copy.copied && copy.source.properties.present? }
+    new_only.each do |new|
+        property_hash = {}
+        new.source.properties.each do |property|
+          property_hash[property.property_name] = property.property_value
+        end
+        https_apps_client.set_properties(new.object.id, "node", property_hash)
+    end
+
     message = if copies.all?(&:copied)
       "File#{nodes.length == 1 ? ' was' : 's were'} successfully copied to the space"
     elsif copies.any?(&:copied)
