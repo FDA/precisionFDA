@@ -4,6 +4,7 @@ import { Column } from 'react-table'
 import { Tooltip } from 'react-tooltip'
 import styled from 'styled-components'
 import { FeaturedToggle } from '../../components/FeaturedToggle'
+import { CogsIcon } from '../../components/icons/Cogs'
 import { DefaultColumnFilter, NumberRangeColumnFilter, SelectColumnFilter } from '../../components/Table/filters'
 import { StyledTagItem, StyledTags } from '../../components/Tags'
 import { AreaChartIcon } from '../../components/icons/AreaChartIcon'
@@ -13,7 +14,6 @@ import { FileIcon } from '../../components/icons/FileIcon'
 import { FolderIcon } from '../../components/icons/FolderIcon'
 import { LockIcon } from '../../components/icons/LockIcon'
 import { ObjectGroupIcon } from '../../components/icons/ObjectGroupIcon'
-import { TaskIcon } from '../../components/icons/TaskIcon'
 import { colors } from '../../styles/theme'
 import { StyledLinkCell, StyledNameCell } from '../home/home.styles'
 import { KeyVal } from '../home/types'
@@ -202,8 +202,8 @@ export const useFilesColumns = ({
       Cell: ({ value, row }) => (
         <>
           {typeof value === 'object' && row.original.links.origin_object?.origin_type === 'Job' && (
-            <StyledLinkCell to={`/home/executions/${row.original.links.origin_object?.origin_uid}` || '#'}>
-              <TaskIcon height={14} />
+            <StyledLinkCell to={`${row.original.origin.href}` || '#'}>
+              <CogsIcon height={14} />
               {value.text}
             </StyledLinkCell>
           )}
@@ -214,7 +214,7 @@ export const useFilesColumns = ({
             </StyledLinkCell>
           )}
           {typeof value === 'object' && row.original.links.origin_object?.origin_type === 'UserFile' && (
-            <StyledLinkCell to={`/home/files/${row.original.links.origin_object?.origin_uid}` || '#'}>
+            <StyledLinkCell to={`${row.original.origin.href}`}>
               <FileIcon height={16} />
               {value.text}
             </StyledLinkCell>

@@ -14,6 +14,7 @@ import { expect } from 'chai'
 import supertest from 'supertest'
 import { testedApp } from '../../index'
 import { getDefaultHeaderData } from '../../utils/expect-helper'
+import * as process from 'process'
 
 describe('PATCH /spaces/:id/lock', () => {
   let em: EntityManager
@@ -69,7 +70,7 @@ describe('PATCH /spaces/:id/lock', () => {
     expect(firstEmail).to.include({
       emailType: 4,
       to: guestLead.email,
-      subject: `[test] ${user.fullName} locked the space ${space.name}`,
+      subject: `[${process.env.NODE_ENV}] ${user.fullName} locked the space ${space.name}`,
     })
     expect(firstEmail.body).to.include('SPACE locked')
     expect(firstEmail.body).to.include(`Hello ${guestLead.firstName}!`)
@@ -79,7 +80,7 @@ describe('PATCH /spaces/:id/lock', () => {
     expect(secondEmail).to.include({
       emailType: 4,
       to: hostLead.email,
-      subject: `[test] ${user.fullName} locked the space ${space.name}`,
+      subject: `[${process.env.NODE_ENV}] ${user.fullName} locked the space ${space.name}`,
     })
     expect(secondEmail.body).to.include('SPACE locked')
     expect(secondEmail.body).to.include(`Hello ${hostLead.firstName}!`)

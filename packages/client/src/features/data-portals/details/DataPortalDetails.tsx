@@ -18,12 +18,14 @@ import { BodyContent, DataPortalPageMainBody, PageWrap, RightSideItem, RightSide
 export const DataPortalDetails = ({
   portal,
   canViewResources = true,
+  canViewSpaceLink = false,
   canEditSettings = false,
   canEditContent = false,
   canListPortals = false,
 }: {
   portal: DataPortal
   canViewResources: boolean
+  canViewSpaceLink: boolean
   canEditSettings: boolean
   canEditContent: boolean
   canListPortals?: boolean
@@ -36,7 +38,7 @@ export const DataPortalDetails = ({
     <Row>
       <RightSideScroll>
         <RightSideItem>
-          <DataPortalCard portal={portal} canViewSpaceLink={canEditSettings} />
+          <DataPortalCard portal={portal} canViewSpaceLink={canViewSpaceLink} />
         </RightSideItem>
         <RightSideItem>
           <ToC items={toc} />

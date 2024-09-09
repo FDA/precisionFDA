@@ -14,6 +14,7 @@ import {
   SPACE_MEMBERSHIP_SIDE,
 } from '@shared/domain/space-membership/space-membership.enum'
 import { SPACE_STATE } from '@shared/domain/space/space.enum'
+import process from 'process'
 
 describe('PATCH /spaces/:id/unlock', () => {
   let em: EntityManager
@@ -70,7 +71,7 @@ describe('PATCH /spaces/:id/unlock', () => {
     expect(firstEmail).to.include({
       emailType: 4,
       to: guestLead.email,
-      subject: `[test] ${user.fullName} unlocked the space ${space.name}`,
+      subject: `[${process.env.NODE_ENV}] ${user.fullName} unlocked the space ${space.name}`,
     })
     expect(firstEmail.body).to.include('SPACE unlocked')
     expect(firstEmail.body).to.include(`Hello ${guestLead.firstName}!`)
@@ -80,7 +81,7 @@ describe('PATCH /spaces/:id/unlock', () => {
     expect(secondEmail).to.include({
       emailType: 4,
       to: hostLead.email,
-      subject: `[test] ${user.fullName} unlocked the space ${space.name}`,
+      subject: `[${process.env.NODE_ENV}] ${user.fullName} unlocked the space ${space.name}`,
     })
     expect(secondEmail.body).to.include('SPACE unlocked')
     expect(secondEmail.body).to.include(`Hello ${hostLead.firstName}!`)

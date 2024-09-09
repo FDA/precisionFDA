@@ -1,64 +1,39 @@
-import { ConfigOverride } from '..'
+import { ConfigOverride, parseIntFromProcess } from '..'
 
 export const config: ConfigOverride = () => ({
-  logs: {
-    pretty: true,
-    level: process.env.LOG_LEVEL ?? 'error',
-  },
-  database: {
-    // different env var names are used here
-    dbName: process.env.DATABASE_TEST_NAME ?? 'precisionfda-test',
-    clientUrl:
-      process.env.DATABASE_TEST_URL ?? 'mysql://root:password@localhost:32800/precisionfda-test',
-    // Enable debug mode to inspect SQL queries
-    debug: true,
-  },
+  appName: 'https-apps-worker-test',
   api: {
-    fdaSubnet: {
-      allowedIpCidrBlock: {
-        ipv4Quadruple: [127, 0, 0, 1],
-        maskSize: 1,
-      },
-    },
-    railsHost: 'https://rails-host:1234',
-    enableSsl: false,
-  },
-  emails: {
-    smtp: {
-      saveEmailToFile: true,
-    },
-  },
-  redis: {
-    url: 'redis://localhost:6379',
-  },
-  platform: {
-    challengeBotUser: 'challenge-bot-test',
-    challengeBotAccessToken: 'challenge-bot-test-access-token',
+    railsHost: process.env.HOST,
   },
   workerJobs: {
+    syncJob: {
+      repeatPattern: '*/2 * * * *', // Every 2 minutes
+      staleJobsEmailAfter: parseIntFromProcess(process.env.NODE_STALE_JOBS_EMAIL_AFTER) ?? 60 * 50, // 50 minutes
+      staleJobsTerminateAfter:
+        parseIntFromProcess(process.env.NODE_STALE_JOBS_TERMINATE_AFTER) ?? 60 * 60, // 1 hour
+    },
     queues: {
-      default: {
-        name: 'https-apps-worker-queue-tests',
-      },
+      default: { name: 'https-apps-worker-queue-test' },
+      fileSync: { name: 'https-apps-worker-fileSync-queue-test' },
+      emails: { name: 'https-apps-worker-emails-queue-test' },
       maintenance: {
         onInit: {
-          checkNonterminatedClusters: false,
+          adminDataConsistencyReport: true,
+          checkNonterminatedClusters: true,
+          userInactivityAlert: true,
         },
       },
     },
-    syncJob: {
-      // 2 days
-      staleJobsEmailAfter: 60 * 60 * 24 * 2,
-      // 3 days
-      staleJobsTerminateAfter: 60 * 60 * 24 * 3,
-    },
-    spaceReport: {
-      partBatchSize: 3,
-    },
   },
-  devFlags: {
-    fda: {
-      skipFdaSubnetIpCheck: false,
+  platform: {
+    orgEveryoneHandle: 'precisionfda',
+  },
+  redis: {
+    isSecure: true,
+  },
+  siteSettings: {
+    ssoButton: {
+      isEnabled: true,
     },
   },
 })
