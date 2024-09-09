@@ -137,8 +137,6 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
       @participants = Participant.person.positioned
     end
 
-    @get_started_boxes = GetStartedBox.visible.positioned
-
     js show_guidelines: show_guidelines
   end
 
