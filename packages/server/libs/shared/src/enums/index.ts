@@ -1,9 +1,10 @@
 enum ENVS {
   DEV = 'dev',
+  CI_TEST = 'ci_test',
+  TEST = 'test',
   STAGING = 'staging',
   DEVELOPMENT = 'development',
   PRODUCTION = 'production',
-  TEST = 'test',
 }
 
 enum STATIC_SCOPE {

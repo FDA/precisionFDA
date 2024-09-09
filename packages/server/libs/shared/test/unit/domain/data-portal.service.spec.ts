@@ -29,7 +29,7 @@ import {
   SPACE_MEMBERSHIP_ROLE,
   SPACE_MEMBERSHIP_SIDE,
 } from '@shared/domain/space-membership/space-membership.enum'
-import { FILE_STATE_DX } from '@shared/domain/user-file/user-file.types'
+import { FILE_STATE_DX, PARENT_TYPE } from '@shared/domain/user-file/user-file.types'
 import * as generate from '../../../src/test/generate'
 import { DataPortalRepository } from '@shared/domain/data-portal/data-portal.repository'
 import { stub } from 'sinon'
@@ -629,6 +629,7 @@ describe('data portal service tests', () => {
     expect(file.description).eq('description')
     expect(file.user.id).eq(2) // challenge bot
     expect(file.parentId).eq(2) // challenge bot
+    expect(file.parentType).eq(PARENT_TYPE.USER)
     expect(file.state).eq(FILE_STATE_DX.OPEN)
     expect(file.scope).eq('space-1')
     expect(file.uid).eq('file-dxid-1')
@@ -687,6 +688,7 @@ describe('data portal service tests', () => {
     const userFile = resources[0].userFile.getEntity()
     expect(userFile.name).eq('test-resource.jpg')
     expect(userFile.description).eq('description')
+    expect(userFile.parentType).eq(PARENT_TYPE.USER)
   })
 
   it('test create data portal resource - fail with lack of privileges', async () => {

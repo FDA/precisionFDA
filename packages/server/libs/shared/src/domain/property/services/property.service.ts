@@ -46,9 +46,12 @@ export class PropertyService implements IPropertyService {
       })
 
       this.logger.log(
-        `Deleting properties with target ids: ${currentProperties.map((prop) => prop.targetId)}`,
+        `Deleting properties with target id: ${targetId} and type: ${targetType}`,
       )
       await this.em.removeAndFlush(currentProperties)
+      this.logger.log(
+        `Setting properties with target id: ${targetId} and type: ${targetType}`,
+      )
       for (const key in input.properties) {
         const newProperty = new GeneralProperty()
         newProperty.targetId = targetId

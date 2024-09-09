@@ -52,7 +52,7 @@ module FilesHelper
     elsif node.parent_type != "User"
 
       node_origin_link(
-        unilinkfw(node.parent, { no_home: true, current_user: current_user }),
+        unilinkfw(node.parent, { no_home: false, current_user: current_user }),
       )
     else
       "Uploaded"

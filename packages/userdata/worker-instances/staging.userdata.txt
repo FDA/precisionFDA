@@ -195,7 +195,6 @@ cd /
 COOKBOOKS_BRANCH=\$(aws ssm get-parameter --name /pfda/staging/chef/source_branch --query Parameter.Value --region \$REGION | tr -d '\"')  &>> /var/log/install.log 2>> /var/log/install.err
 GIT_SSH_COMMAND="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no" git clone git@github.com:dnanexus/precision-fda.git &>>  /var/log/install.log 2>> /var/log/install.err
 cd /precision-fda/; git checkout \$COOKBOOKS_BRANCH &>>  /var/log/install.log 2>> /var/log/install.err
-gem install berkshelf -N &>>  /var/log/install.log 2>> /var/log/install.err
 cd /precision-fda/chef/cookbooks/pfda; berks vendor ../ &>>  /var/log/install.log; cd /precision-fda/chef;chef-client --chef-license accept-silent --no-fips -z -E staging -r "role[pfda_server]" &>>  /var/log/install.log 2>> /var/log/install.err
 
 EOF

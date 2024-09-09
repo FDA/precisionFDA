@@ -2,6 +2,7 @@ import classNames from 'classnames'
 import React, { Fragment } from 'react'
 import { Link } from 'react-router-dom'
 import styled from 'styled-components'
+import { getBasePathFromScope } from '../home/utils'
 
 
 const StyledInputsAndOutputs = styled.div`
@@ -97,11 +98,11 @@ export const InputsAndOutputs = ({
       
       if (e.class === 'file') {
         value = (e.state !== 'deleted') ? e.file_name : 'Output file has been deleted'
-        link = (e.state !== 'deleted') ? `/home/files/${e.file_uid}`: ''
+        link = (e.state !== 'deleted') ? `${getBasePathFromScope(e.scope)}/files/${e.file_uid}`: ''
       }
       if (e.class === 'array:file') {
         value = e.file_names
-        link = e.file_uids.map(uid => `/home/files/${uid}`)
+        link = e.file_uids.map((uid, index) => `${getBasePathFromScope(e.scopes[index])}/files/${uid}`)
       }
 
       return {

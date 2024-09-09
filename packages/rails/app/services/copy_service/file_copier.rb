@@ -49,6 +49,8 @@ class CopyService
 
         project_files.each do |file|
           copied_file = self.class.copy_record(file, scope, destination_project, attrs, skip_parent)
+          # assign tags after creating the file. - tagger_id and tagger_type is set with this!
+          user.tag(copied_file, with: file.tags, on: :tags)
           @copies.push(object: copied_file, source: file)
           Event::FileCopied.create_for(file, copied_file, user)
         end
