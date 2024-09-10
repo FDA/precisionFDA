@@ -328,7 +328,7 @@ export const useFilesSelectActions = ({
       type: 'modal',
       func: () => setEditFileModal(true),
       modal: editFileModal,
-      isDisabled: selected.length !== 1 || user?.full_name !== selected[0].added_by || selected.some(e => e.locked),
+      isDisabled: selected.length !== 1 || user?.full_name !== selected[0].added_by || selected.some(e => e.locked) || selected.some(e => e.resource),
       showModal: isShownEditFileModal,
       shouldHide: isFolder || selected.length !== 1 || homeScope === 'spaces' || openSelected,
     },

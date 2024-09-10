@@ -1,11 +1,10 @@
 import { EntityRepository } from '@mikro-orm/mysql'
 import { DxId } from '@shared/domain/entity/domain/dxid'
 import { Uid } from '@shared/domain/entity/domain/uid'
-import { User } from '@shared/domain/user/user.entity'
-import { SCOPE } from '@shared/types/common'
 import { STATIC_SCOPE } from '../../enums'
 import { Asset } from './asset.entity'
 import { FILE_STATE_DX } from './user-file.types'
+import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
 
 export class AssetRepository extends EntityRepository<Asset> {
   async findAssetWithUid(uid: Uid<'file'>): Promise<Asset | null> {
@@ -34,20 +33,18 @@ export class AssetRepository extends EntityRepository<Asset> {
    * @param uids
    */
   async findAccessibleByUser(userId: number, uids: Uid<'file'>[]): Promise<Asset[]> {
-    const userRepository = this.em.getRepository(User)
-    const user: User = await userRepository.findOneOrFail(
-      { id: userId },
-      { populate: ['spaceMemberships', 'spaceMemberships.spaces'] },
-    )
+    const smRepository = this.em.getRepository(SpaceMembership)
+    const spaceUids = await smRepository.findActiveSpaceIdsByUserId(userId)
+    const scopes = spaceUids.map((id) => `space-${id}`)
     return await this.find(
       {
         $or: [
           { scope: STATIC_SCOPE.PUBLIC },
-          { user, scope: STATIC_SCOPE.PRIVATE },
-          { scope: { $in: (user.spaceUids as SCOPE[]) ?? [] } },
+          { user: userId, scope: STATIC_SCOPE.PRIVATE },
+          { scope: { $in: (scopes as []) ?? [] } },
         ],
         state: FILE_STATE_DX.CLOSED,
-        uid: { $in: uids },
+        uid: { $in: uids as [] },
       },
       { filters: ['asset'], populate: ['user', 'taggings.tag'] },
     )
