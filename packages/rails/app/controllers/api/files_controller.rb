@@ -103,6 +103,14 @@ module Api
     # Allows filtering by space_id and/or folder_id.
     # Allows filtering files/folders only.
     def cli
+      # if only folder_id is provided, check if it's a space folder
+      if params[:folder_id]
+        folder = Folder.find(params[:folder_id])
+        if (match = folder.scope.match(/^space-(\d+)$/)) && !params[:space_id]
+          params[:space_id] = match[1]
+        end
+      end
+
       space_files_cli && return if params[:space_id]
 
       files = []

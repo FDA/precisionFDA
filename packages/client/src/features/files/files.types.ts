@@ -54,6 +54,7 @@ export interface IFile {
   size?: string
   type: FileType
   locked: boolean
+  resource: boolean
   locking?: boolean
   state: FileState | null
   location: FileLocation
