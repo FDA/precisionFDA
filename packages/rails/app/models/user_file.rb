@@ -340,6 +340,10 @@ class UserFile < Node
     parent_type == "Asset" ? "asset" : "file"
   end
 
+  def resource?
+    Resource.exists?(user_file_id: id)
+  end
+
   def describe_fields
     ["title", "description", "state", "file_size"]
   end

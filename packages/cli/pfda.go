@@ -29,66 +29,6 @@ const usageString = `
 PFDA COMMAND LINE TOOL v2.7.1
 ****************************
 
-To upload a file:
-   pfda upload-file </PATH/TO/FILE> [-key <KEY>] 
-
-To upload a file to a space:
-   pfda upload-file </PATH/TO/FILE> [-key <KEY>]
-
-To upload an asset:
-   pfda upload-asset -name <NAME{.tar,.tar.gz}> -root </PATH/TO/ROOT/FOLDER> -readme <README{.txt,.md}> [-key <KEY>]
-
-To download a file:
-   pfda download <FILE_ID> [-key <KEY>]
-
-To list files:
-   pfda ls [-key <KEY>]
-
-To list available spaces:
-   pfda ls-spaces [-key <KEY>]
-
-To list space members:
-   pfda ls-members -space-id <SPACE_ID> [-key <KEY>]
-
-To list space discussions:
-   pfda ls-discussions -space-id <SPACE_ID> [-key <KEY>]
-
-To list apps:
-   pfda ls-apps [-key <KEY>]
-
-To list assets:
-   pfda ls-assets [-key <KEY>]
-
-To list workflows:
-   pfda ls-workflows [-key <KEY>]
-
-To list executions:
-   pfda ls-executions [-key <KEY>]
-
-To describe an entity:
-   pfda describe <ENTITY_ID> [-key <KEY>]
-
-To create a new folder:
-   pfda mkdir <NAME> [-key <KEY>]
-
-To delete a folder:
-   pfda rmdir <FOLDER_ID> [-key <KEY>]
-
-To delete a file:
-   pfda rm <FILE_ID> [-key <KEY>]
-
-To print content of a file:
-   pfda cat <FILE_ID> [-key <KEY>]
-
-To print first 10 lines of a file:
-   pfda head <FILE_ID> [-key <KEY>]
-
-To get current scope:
-   pfda get-scope [-key <KEY>]
-
-To print version info and exit :
-   pfda -version
-
 All available commands:
    pfda cat
    pfda describe
@@ -113,7 +53,11 @@ All available commands:
 Command specific help section with description, examples and available flags:
    pfda <COMMAND> -help
 
-Full documentation can be found in the Docs section of the precisionFDA website - https://precision.fda.gov/docs/cli`
+To print version info and exit:
+   pfda -version
+
+Full documentation can be found in the Docs section of the precisionFDA website - https://precision.fda.gov/docs/cli
+`
 
 //
 // N.B. the -cmd flag exists and is now deprecated, but the following should all work
