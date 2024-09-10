@@ -1627,6 +1627,11 @@ class ApiController < ApplicationController
       raise_api_error "The target folder is being removed."
     end
 
+    # user specified only folder id, but the folder is in space - set it for him
+    if @folder && (@folder.scope.match(/^space-(\d+)$/)) && !params[:space_id]
+      params[:scope] = @folder.scope
+    end
+
     file_name = params[:name].presence
     if file_name.blank? || !file_name.is_a?(String)
       raise_api_error "File name needs to be a non-empty String"
