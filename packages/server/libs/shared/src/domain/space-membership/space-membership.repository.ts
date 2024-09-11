@@ -19,4 +19,19 @@ export class SpaceMembershipRepository extends EntityRepository<SpaceMembership>
     }
     throw new NotFoundError(`Couldn't find membership for user ${userId}`)
   }
+
+  async findActiveSpaceIdsByUserId(userId: number): Promise<number[]> {
+    const qb = this.em.createQueryBuilder(SpaceMembership, 'sm')
+
+    const result = await qb
+      .select(['space.id', 'sm.id'])
+      .leftJoin('sm.spaces', 'space')
+      .where({
+        'sm.user': userId,
+        'sm.active': true,
+      })
+      .getResultList()
+
+    return result.map((space) => space.id)
+  }
 }
