@@ -11,10 +11,15 @@ class UserFileSerializer < NodeSerializer
     :file_license,
     :show_license_pending,
     :locked,
+    :resource,
   )
 
   def file_size
     number_to_human_size(object.file_size)
+  end
+
+  def resource
+    object.resource?
   end
 
   # Returns formatted created_at time.
@@ -109,7 +114,7 @@ class UserFileSerializer < NodeSerializer
         # publish single file if it is not public already and in a root folder
         links[:publish] = publish_object unless object.public? || object.parent_folder_id
         # POST: /api/files/remove - Delete file(s) & folder(s), being selected
-        links[:remove] = remove_api_files_path
+        links[:remove] = remove_api_files_path unless object.resource?
         # POST associate item to a license
         links[:license] = "/api/licenses/:id/license_item/:item_uid" if licenseable
         if object.license&.owned_by_user?(current_user)
