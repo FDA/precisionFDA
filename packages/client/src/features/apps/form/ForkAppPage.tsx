@@ -10,6 +10,10 @@ import { cleanObject } from '../../../utils/object'
 import { useFetchAppQuery } from '../useFetchAppQuery'
 import { mapFromServerToForm } from './common'
 import { getBasePath } from '../../home/utils'
+import {
+  APP_REVISION_CREATION_NOT_REQUESTED,
+  APP_SERIES_CREATION_NOT_REQUESTED,
+} from '../../../constants'
 
 export const ForkAppPage = ({ spaceId }: { spaceId?: number }) => {
   const navigate = useNavigate()
@@ -21,6 +25,7 @@ export const ForkAppPage = ({ spaceId }: { spaceId?: number }) => {
   const appMutation = useMutation({ mutationFn: createEditAppRequest })
 
   const onSubmit = async (d: CreateAppPayload) => {
+    d.createAppSeries = true
     const vals = { ...d, input_spec: d.input_spec.map(i => cleanObject(i)) }
 
     try {
@@ -32,7 +37,11 @@ export const ForkAppPage = ({ spaceId }: { spaceId?: number }) => {
       toast.success('App forked successfully')
     } catch (err) {
       const message = err.response?.data?.error?.message || err.message || 'Unknown error'
-      toast.error(`Error while forking app: ${message}`)
+      if (err.response?.status === 400 && [APP_SERIES_CREATION_NOT_REQUESTED, APP_REVISION_CREATION_NOT_REQUESTED].includes(err?.response?.data?.error.code)) {
+        throw err
+      } else {
+        toast.error(`Error while forking app: ${message}`)
+      }
     }
   }
 

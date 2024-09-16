@@ -4,43 +4,41 @@ import { DxId } from '@shared/domain/entity/domain/dxid'
 import { Uid } from '@shared/domain/entity/domain/uid'
 import { Asset } from '@shared/domain/user-file/asset.entity'
 import { User } from '@shared/domain/user/user.entity'
-import { ValidationError } from '@shared/errors'
+import { ErrorCodes, ValidationError } from '@shared/errors'
 import * as crypto from 'crypto'
-import { UBUNTU_20, UBUNTU_RELEASES, VALID_IO_CLASSES } from '../../../config/consts'
-import { validUbuntuPackages } from '../../../config/ubuntu_packages'
-import { STATIC_SCOPE } from '../../../enums'
-import { getLogger } from '../../../logger'
-import { PlatformClient } from '../../../platform-client'
+import { UBUNTU_20, UBUNTU_RELEASES, VALID_IO_CLASSES } from '@shared/config/consts'
+import { validUbuntuPackages } from '@shared/config/ubuntu_packages'
+import { STATIC_SCOPE } from '@shared/enums'
+import { PlatformClient } from '@shared/platform-client'
 import {
   AppCreateParams,
   AppletCreateParams,
   PackageMapping,
-} from '../../../platform-client/platform-client.params'
-import { codeRemap } from '../../../utils/app'
+} from '@shared/platform-client/platform-client.params'
+import { codeRemap } from '@shared/utils/app'
 import { createAppCreated } from '../../event/event.helper'
 import { allowedInstanceTypes } from '../../job/job.enum'
 import { AssetRepository } from '../../user-file/asset.repository'
 import { App, AppSpec, Internal } from '../app.entity'
 import { ENTITY_TYPE } from '../app.enum'
-import { constructDxid, constructDxname } from '../app.helper'
-import { AppInput, PlatformSpec, Spec } from '../app.input'
+import { constructDxid, constructDxName } from '../app.helper'
+import { PlatformSpec, Spec } from '../app.input'
+import { Injectable, Logger } from '@nestjs/common'
+import { ServiceLogger } from '@shared/logger/decorator/service-logger'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { SaveAppDto } from '@shared/domain/app/dto/save-app.dto'
 
-const logger = getLogger('app.service')
+@Injectable()
+export class AppService {
+  @ServiceLogger()
+  private readonly logger: Logger
 
-export interface IAppService {
-  create: (appInput: AppInput, userId: number) => Promise<string>
-}
-
-export class AppService implements IAppService {
-  private platformClient: PlatformClient
-  private em: SqlEntityManager
-  private assetRepository: AssetRepository
-
-  constructor(em: SqlEntityManager, platformClient: PlatformClient) {
-    this.em = em
-    this.platformClient = platformClient
-    this.assetRepository = em.getRepository(Asset)
-  }
+  constructor(
+    private readonly em: SqlEntityManager,
+    private readonly user: UserContext,
+    private readonly platformClient: PlatformClient,
+    private readonly assetRepository: AssetRepository,
+  ) {}
 
   private validateSpec(spec: Spec, type: string, alreadySeenSpec: string[]) {
     if (!spec.name || spec.name.length === 0) {
@@ -69,12 +67,12 @@ export class AppService implements IAppService {
   }
 
   private throwValidationError(message: string) {
-    logger.error(message)
+    this.logger.error(message)
     throw new ValidationError(message)
   }
 
-  private async validateAppInput(appInput: AppInput, userId: number) {
-    logger.log('Starting app validations')
+  private async validateAppInput(appInput: SaveAppDto) {
+    this.logger.log('Starting app validations')
 
     if (!UBUNTU_RELEASES.includes(appInput.release)) {
       this.throwValidationError(`Unacceptable release ${appInput.release}`)
@@ -101,7 +99,7 @@ export class AppService implements IAppService {
 
     if (appInput.ordered_assets) {
       let inaccessible = [...appInput.ordered_assets]
-      const assets = await this.getAssets(userId, appInput.ordered_assets)
+      const assets = await this.getAssets(appInput.ordered_assets)
       assets.forEach((asset) => (inaccessible = inaccessible.filter((item) => item !== asset.uid)))
       if (inaccessible.length > 0) {
         this.throwValidationError(
@@ -116,10 +114,32 @@ export class AppService implements IAppService {
     const alreadySeenOutputs: string[] = []
     appInput.output_spec.forEach((spec) => this.validateSpec(spec, 'output', alreadySeenOutputs))
 
-    logger.log('App validations finished successfully')
+    this.logger.log('App validations finished successfully')
   }
 
-  private getScope = (scope?: string) => {
+  private validateAppSeriesCreation(appSeries?: AppSeries, createAppSeries?: boolean) {
+    if (!appSeries && !createAppSeries) {
+      throw new ValidationError(
+        'This would create a new app series and client did not request its creation.',
+        {
+          code: ErrorCodes.APP_SERIES_CREATION_NOT_REQUESTED,
+        },
+      )
+    }
+  }
+
+  private validateAppRevisionCreation(appSeries?: AppSeries, createAppRevision?: boolean) {
+    if (appSeries && !createAppRevision) {
+      throw new ValidationError(
+        'This would create a new app revision and client did not request its creation.',
+        {
+          code: ErrorCodes.APP_REVISION_CREATION_NOT_REQUESTED,
+        },
+      )
+    }
+  }
+
+  private getScope(scope?: string) {
     if (
       scope &&
       [STATIC_SCOPE.PUBLIC.toString(), STATIC_SCOPE.PRIVATE.toString(), null].includes(scope)
@@ -130,7 +150,7 @@ export class AppService implements IAppService {
     }
   }
 
-  private getAssetDxids = (assets: Asset[]): string[] => {
+  private getAssetDxids(assets: Asset[]) {
     if (assets.length === 1) {
       return [assets[0].dxid]
     } else {
@@ -138,7 +158,7 @@ export class AppService implements IAppService {
     }
   }
 
-  private getEntityType = (entityType: string) => {
+  private getEntityType(entityType: string) {
     if (entityType && entityType === 'https') {
       return ENTITY_TYPE.HTTPS
     } else {
@@ -146,33 +166,34 @@ export class AppService implements IAppService {
     }
   }
 
-  private getAssets = async (userId: number, orderedAssets: Uid<'file'>[]): Promise<Asset[]> => {
+  private async getAssets(orderedAssets: Uid<'file'>[]) {
     if (orderedAssets) {
-      return await this.assetRepository.findAccessibleByUser(userId, orderedAssets)
+      return await this.assetRepository.findAccessibleByUser(this.user.id, orderedAssets)
     } else {
       return []
     }
   }
 
-  private createOrGetAppSeries = async (
-    user: User,
-    appName: string,
-    scope?: string,
-  ): Promise<AppSeries> => {
-    const appSeriesDxid = constructDxid(user.dxuser, appName, scope)
-    let appSeries: AppSeries | null = await this.em.findOne(AppSeries, { dxid: appSeriesDxid })
-    if (!appSeries) {
-      appSeries = new AppSeries(user)
-      appSeries.name = appName
-      appSeries.dxid = appSeriesDxid
-      appSeries.scope = scope
-      logger.log(`Creating app series ${appSeries.dxid}`)
-      await this.em.persistAndFlush(appSeries)
-    }
+  private async getAppSeries(appName: string, scope: string) {
+    return await this.em.findOne(AppSeries, {
+      name: appName,
+      scope: scope,
+      user: this.user.id,
+    })
+  }
+
+  private async createAppSeries(appName: string, user: User, scope?: string) {
+    const appSeriesDxid = constructDxid(this.user.dxuser, appName, scope)
+    const appSeries = new AppSeries(user)
+    appSeries.name = appName
+    appSeries.dxid = appSeriesDxid
+    appSeries.scope = scope
+    this.logger.log(`Creating app series ${appSeries.dxid}`)
+    await this.em.persistAndFlush(appSeries)
     return appSeries
   }
 
-  private getAppRevision = async (latestRevisionAppId?: number) => {
+  private async getAppRevision(latestRevisionAppId?: number) {
     const latestRevisionApp = await this.em.findOne(App, { id: latestRevisionAppId })
     if (latestRevisionApp) {
       return latestRevisionApp.revision + 1
@@ -203,12 +224,8 @@ export class AppService implements IAppService {
    * @param appInput
    * @param release
    */
-  private createApplet = async (
-    user: User,
-    appInput: AppInput,
-    release: string,
-  ): Promise<string> => {
-    logger.log('Creating applet in platform')
+  private async createApplet(user: User, appInput: SaveAppDto, release: string) {
+    this.logger.log('Creating applet in platform')
     const appletCreateParams: AppletCreateParams = {
       project: user.privateFilesProject,
       inputSpec: this.remapPfdaSpecToPlatformSpec(appInput.input_spec),
@@ -217,7 +234,6 @@ export class AppService implements IAppService {
         code: codeRemap(appInput.code),
         interpreter: 'bash',
         systemRequirements: {
-          // @ts-ignore
           '*': { instanceType: allowedInstanceTypes[appInput.instance_type] },
         },
         distribution: 'Ubuntu',
@@ -231,22 +247,22 @@ export class AppService implements IAppService {
       access: appInput.internet_access ? { network: ['*'] } : {},
     }
     const appletCreateResponse = await this.platformClient.appletCreate(appletCreateParams)
-    logger.log(`Applet with id ${appletCreateResponse.id} created successfully`)
+    this.logger.log(`Applet with id ${appletCreateResponse.id} created successfully`)
     return appletCreateResponse.id
   }
 
-  private createAppInPlatform = async (
+  private async createAppInPlatform(
     appletId: string,
-    appInput: AppInput,
+    appInput: SaveAppDto,
     revision: number,
     user: User,
     assets: Asset[],
-  ): Promise<DxId<'app'>> => {
-    logger.log(`Creating app in platform for applet id ${appletId}`)
+  ) {
+    this.logger.log(`Creating app in platform for applet id ${appletId}`)
     const assetDxids = this.getAssetDxids(assets)
     const appCreateParams: AppCreateParams = {
       applet: appletId,
-      name: constructDxname(user.dxuser, appInput.name, appInput.scope),
+      name: constructDxName(user.dxuser, appInput.name, appInput.scope),
       title: appInput.title,
       summary: ' ',
       description: appInput.readme && appInput.readme.length > 1 ? appInput.readme : ' ',
@@ -258,18 +274,20 @@ export class AppService implements IAppService {
       access: appInput.internet_access ? { network: ['*'] } : {},
     }
     const appCreateResponse = await this.platformClient.appCreate(appCreateParams)
-    logger.log(`App with id ${appCreateResponse.id} for applet id ${appletId} created successfully`)
+    this.logger.log(
+      `App with id ${appCreateResponse.id} for applet id ${appletId} created successfully`,
+    )
     return appCreateResponse.id
   }
 
-  private createAppEvent = async (user: User, app: App) => {
-    logger.log(`Creating app event for app ${app.uid} and user ${user.id}`)
+  private async createAppEvent(user: User, app: App) {
+    this.logger.log(`Creating app event for app ${app.uid} and user ${user.id}`)
     const createAppEvent = await createAppCreated(user, app)
     await this.em.persistAndFlush(createAppEvent)
   }
 
-  private updateAppSeries = async (appSeries: AppSeries, appInput: AppInput, app: App) => {
-    logger.log(`Updating app series ${appSeries.dxid}`)
+  private async updateAppSeries(appSeries: AppSeries, appInput: SaveAppDto, app: App) {
+    this.logger.log(`Updating app series ${appSeries.dxid}`)
     appSeries.latestRevisionAppId = app.id
     if (appInput.scope && appInput.scope !== STATIC_SCOPE.PRIVATE) {
       appSeries.latestVersionAppId = app.id
@@ -291,16 +309,16 @@ export class AppService implements IAppService {
     })
   }
 
-  private saveAppInDB = async (
+  private async saveAppInDB(
     user: User,
     platformAppId: DxId<'app'>,
     revision: number,
     release: string,
     assets: Asset[],
-    appInput: AppInput,
+    appInput: SaveAppDto,
     appSeriesId: number,
-  ) => {
-    logger.log(`Saving app in DB with platformAppId: ${platformAppId}`)
+  ) {
+    this.logger.log(`Saving app in DB with platformAppId: ${platformAppId}`)
     const app = new App(user)
     app.dxid = platformAppId
     app.uid = `${app.dxid}-${revision}`
@@ -332,23 +350,33 @@ export class AppService implements IAppService {
   /**
    * Creates app in database and platform.
    * @param appInput properties of newly created app
-   * @param userId id of the calling user
    * @return uid of newly created app
    */
-  create = async (appInput: AppInput, userId: number): Promise<string> => {
-    logger.log(`Creating app for userId: ${userId}`)
-    await this.validateAppInput(appInput, userId)
+  async create(appInput: SaveAppDto) {
+    this.logger.log(
+      `Creating app for user: ${this.user.dxuser}, createAppSeries ${appInput.createAppSeries}`,
+    )
+    await this.validateAppInput(appInput)
     await this.em.begin()
     try {
-      const user = await this.em.findOneOrFail(User, { id: userId }, { populate: ['organization'] })
-      const scope = this.getScope(appInput.scope)
-      const assets = await this.getAssets(
-        userId,
-        appInput.ordered_assets ? appInput.ordered_assets : [],
+      const user = await this.em.findOneOrFail(
+        User,
+        { id: this.user.id },
+        { populate: ['organization'] },
       )
+      const scope = this.getScope(appInput.scope)
+      const assets = await this.getAssets(appInput.ordered_assets ? appInput.ordered_assets : [])
 
       // - create app series
-      const appSeries = await this.createOrGetAppSeries(user, appInput.name, scope)
+      let appSeries = await this.getAppSeries(appInput.name, scope)
+      this.validateAppSeriesCreation(appSeries, appInput.createAppSeries)
+      this.validateAppRevisionCreation(appSeries, appInput.createAppRevision)
+      if (!appSeries && appInput.createAppSeries) {
+        appSeries = await this.createAppSeries(appInput.name, user, scope)
+        this.logger.log(
+          `App series for dxid ${appSeries.dxid} did not exist and user requested its creation`,
+        )
+      }
 
       // - get release
       const release = appInput.release ? appInput.release : UBUNTU_20
@@ -394,7 +422,7 @@ export class AppService implements IAppService {
       await this.em.commit()
       return app.uid
     } catch (error) {
-      logger.error('AppService: error creating an app', error)
+      this.logger.error('Error creating an app', error)
       await this.em.rollback()
       throw error
     }
