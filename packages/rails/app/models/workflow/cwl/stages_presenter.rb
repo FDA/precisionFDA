@@ -50,19 +50,19 @@ class Workflow
 
       def apps
         ActiveRecord::Base.transaction do
-          @apps ||= stages_objects.map do |stage_object|
-            image = steps[stage_object.title][:attached_image]
-            asset = DockerImporter.import(
-              context: context,
-              attached_image: image,
-              docker_image: stage_object.docker_image
-            )
+        end
+        @apps ||= stages_objects.map do |stage_object|
+          image = steps[stage_object.title][:attached_image]
+          asset = DockerImporter.import(
+            context:,
+            attached_image: image,
+            docker_image: stage_object.docker_image,
+          )
 
-            stage_object.asset = asset
-            opts = App::CwlParser.parse(stage_object)
+          stage_object.asset = asset
+          opts = App::CwlParser.parse(stage_object)
 
-            AppService.create_app(@context.user, @context.api, opts)
-          end
+          AppService.create_app(@context.user, @context.api, opts)
         end
       end
     end

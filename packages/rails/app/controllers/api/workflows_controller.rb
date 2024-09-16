@@ -201,9 +201,10 @@ module Api
 
     # Copies workflows to another scope.
     def copy
-      workflows = Workflow.accessible_by(@context).where(id: params[:item_ids])
+      properties = params[:properties].present? ? params.require(:properties).permit!.to_h : {}
 
-      new_workflows = workflows.map { |wf| copy_service.copy(wf, params[:scope]).first }
+      workflows = Workflow.accessible_by(@context).where(id: params[:item_ids])
+      new_workflow = workflows.map { |wf| copy_service.copy(wf, params[:scope], properties) }
 
       # TODO: change old UI to handle json-response!
       respond_to do |format|
@@ -212,8 +213,10 @@ module Api
                       success: "The workflow has been published successfully!"
         end
 
-        format.json { render json: new_workflows, root: Workflow.model_name.plural, adapter: :json }
+        format.json { render json: new_workflow, root: Workflow.model_name.plural, adapter: :json }
       end
+    rescue HttpsAppsClient::Error => e
+      render status: e.status_code, json: { error: { message: e.message, statusCode: e.status_code, code: e.code } }
     rescue StandardError => e
       raise ApiError, Message.bad_request(e.message)
     end
@@ -333,7 +336,7 @@ module Api
     end
 
     def copy_service
-      @copy_service ||= CopyService.new(api: @context.api, user: current_user)
+      @copy_service ||= CopyService::WorkflowCopier.new(api: @context.api, user: current_user)
     end
 
     def can_copy_to_scope?

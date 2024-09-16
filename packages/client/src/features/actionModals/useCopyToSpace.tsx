@@ -16,6 +16,12 @@ import { useModal } from '../modal/useModal'
 import { FdaRestrictedIcon } from '../spaces/FdaRestrictedIcon'
 import { ProtectedIcon } from '../spaces/ProtectedIcon'
 import { fetchEditableSpacesList } from '../spaces/spaces.api'
+import { useConfirmModal } from '../files/actionModals/useConfirmModal'
+import {
+  APP_REVISION_CREATION_NOT_REQUESTED,
+  APP_SERIES_CREATION_NOT_REQUESTED,
+} from '../../constants'
+import { CONFIRM_APP_REVISION, CONFIRM_APP_SERIES } from '../../constants/consts'
 
 const SpacesList = ({
   selected,
@@ -93,26 +99,47 @@ const CopyToSpaceForm = ({
   selected: string[]
   spaceId?: number
   setShowModal: (show: boolean) => void
-  updateFunction: (space: string, ids: string[]) => Promise<any>
+  updateFunction: (space: string, ids: string[], properties?: Record<string, any>) => Promise<any>
   onSuccess: (res: any) => void
 }) => {
   const [selectedTarget, setSelectedTarget] = useState<string>()
+  let mutation
+  const { modalComp: appRevisionConfirmModal, setShowModal: setShowAppRevisionConfirmModal } = useConfirmModal(
+    'Confirm',
+    CONFIRM_APP_REVISION,
+    async () => {
+      setShowAppRevisionConfirmModal(false)
+      await mutation.mutateAsync({ space: selectedTarget, properties: { createAppRevision: true }})
+    },
+  )
 
-  const mutation = useMutation({
+  const { modalComp: appSeriesConfirmModal, setShowModal: setShowAppSeriesConfirmModal } = useConfirmModal(
+    'Confirm',
+    CONFIRM_APP_SERIES,
+    async () => {
+      setShowAppSeriesConfirmModal(false)
+      await mutation.mutateAsync({ space: selectedTarget, properties: { createAppSeries: true }})
+    },
+  )
+
+  mutation = useMutation({
     mutationKey: ['copy-to-space', resource],
-    mutationFn: (space: string) => updateFunction(space, selected),
+    mutationFn: ({ space, properties }: { space: string, properties?: Record<string, any> }) => updateFunction(space, selected, properties),
     onSuccess: (res: any) => {
       if (onSuccess) onSuccess(res)
       setShowModal(false)
       displayPayloadMessage(res)
     },
-    onError: (e: AxiosError) => {
-      const error = e?.response?.data?.error
-      if (error?.message) {
-        toast.error(`${error?.type}: ${error?.message}`)
-        return
+    onError: (err: AxiosError) => {
+      const code = err.response?.data?.error?.code
+      if (code === APP_SERIES_CREATION_NOT_REQUESTED) {
+        setShowAppSeriesConfirmModal(true)
+      } else if (code === APP_REVISION_CREATION_NOT_REQUESTED) {
+        setShowAppRevisionConfirmModal(true)
+      } else {
+        const message = err.response?.data?.error?.message || err.message || 'Unknown error'
+        toast.error(message)
       }
-      toast.error(error.message)
     },
   })
 
@@ -127,7 +154,7 @@ const CopyToSpaceForm = ({
   const handleSubmit = (e: any) => {
     e.preventDefault()
     if (selectedTarget) {
-      mutation.mutateAsync(selectedTarget)
+      mutation.mutateAsync({ space: selectedTarget })
     }
   }
   return (
@@ -148,6 +175,8 @@ const CopyToSpaceForm = ({
           </Button>
         </ButtonRow>
       </Footer>
+      {appSeriesConfirmModal}
+      {appRevisionConfirmModal}
     </>
   )
 }
@@ -162,7 +191,7 @@ export function useCopyToSpaceModal<T extends { id: string | number }>({
   resource: APIResource
   selected: T[]
   spaceId?: number
-  updateFunction: (space: string, ids: string[]) => Promise<any>
+  updateFunction: (space: string, ids: string[], properties?: Record<string, any>) => Promise<any>
   onSuccess: (res: any) => void
 }) {
   const { isShown, setShowModal } = useModal()

@@ -79,12 +79,8 @@ export async function createWorkflowRequest(name: string) {
   return res
 }
 
-export async function copyWorkflowsRequest(scope: string, ids: string[]) {
-  const res = await fetch('/api/workflows/copy', {
-    ...getApiRequestOpts('POST'),
-    body: JSON.stringify({ item_ids: ids, scope }),
-  }).then(checkStatus)
-  return res.json()
+export async function copyWorkflowsRequest(scope: string, ids: string[], properties?: Record<string, any>) {
+  return axios.post('/api/workflows/copy', { item_ids: ids, scope, properties }).then(r => r.data)
 }
 
 export async function deleteWorkflowRequest(ids: string[]) {
