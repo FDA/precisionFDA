@@ -212,21 +212,6 @@ export class User extends BaseEntity {
     return `user-${this.dxuser}`
   }
 
-  @Property({ persist: false })
-  get spaceUids(): string[] {
-    const spaceUids: string[] = []
-    this.spaceMemberships.isInitialized()
-      ? Array.from(this.spaceMemberships)
-          .filter((m) => m.active)
-          .forEach((spaceMembership) => {
-            Array.from(spaceMembership.spaces).forEach((space) =>
-              spaceUids.push(`space-${space.id}`),
-            )
-          })
-      : []
-    return spaceUids
-  }
-
   username(): string {
     return this.dxuser
   }

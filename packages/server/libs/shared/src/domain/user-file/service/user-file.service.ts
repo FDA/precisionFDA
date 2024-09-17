@@ -413,9 +413,7 @@ export class UserFileService {
     this.logger.log(`Closing file ${fileUid}`)
 
     await this.em.transactional(async () => {
-      const user = await this.userRepo.findOneOrFail(this.user.id, {
-        populate: ['spaceMemberships', 'spaceMemberships.spaces'],
-      })
+      const user = await this.userRepo.findOneOrFail(this.user.id, {})
 
       const [file, isChallengeBotFile] = await this.getFile(user, fileUid)
 
