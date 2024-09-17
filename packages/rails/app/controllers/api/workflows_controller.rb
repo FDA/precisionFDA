@@ -201,7 +201,11 @@ module Api
 
     # Copies workflows to another scope.
     def copy
-      properties = params[:properties].present? ? params.require(:properties).permit!.to_h : {}
+      properties = if params[:properties].present?
+        params.require(:properties).permit(:createAppSeries, :createAppRevision).to_h
+      else
+        {}
+      end
 
       workflows = Workflow.accessible_by(@context).where(id: params[:item_ids])
       new_workflow = workflows.map { |wf| copy_service.copy(wf, params[:scope], properties) }
