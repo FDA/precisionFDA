@@ -15,8 +15,8 @@ import { useConfirmModal } from '../files/actionModals/useConfirmModal'
 import {
   APP_REVISION_CREATION_NOT_REQUESTED,
   APP_SERIES_CREATION_NOT_REQUESTED,
-  CONFIRM_APP_REVISION,
 } from '../../constants'
+import { CONFIRM_APP_REVISION } from '../../constants/consts'
 
 const StyledResourceTable = styled(ResourceTable)`
   padding: 0.5rem;
