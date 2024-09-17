@@ -1,6 +1,6 @@
 import { Collection, Entity, OneToMany, PrimaryKey, Property } from '@mikro-orm/core'
 import { User } from '@shared/domain/user/user.entity'
-import { BaseEntity } from '../../database/base-entity'
+import { BaseEntity } from '../../database/base.entity'
 
 @Entity({ tableName: 'orgs' })
 export class Organization extends BaseEntity {

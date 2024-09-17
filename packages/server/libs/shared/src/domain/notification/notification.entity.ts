@@ -1,6 +1,6 @@
 import { Entity, Ref, ManyToOne, PrimaryKey, Property, Reference } from '@mikro-orm/core'
 import { User } from '@shared/domain/user/user.entity'
-import { BaseEntity } from '../../database/base-entity'
+import { BaseEntity } from '../../database/base.entity'
 import { NOTIFICATION_ACTION, SEVERITY } from '../../enums'
 
 export type NotificationMeta = {

@@ -17,7 +17,7 @@ const log = getLogger()
 // See https://github.com/mochajs/mocha/issues/1128#issuecomment-975324465
 //     https://github.com/modernweb-dev/web/issues/1730
 //     https://github.com/mochajs/mocha/issues/2640
-process.on('uncaughtException', err => {
+process.on('uncaughtException', (err) => {
   log.log('nodejs worker test: uncaughtException', err.stack)
   throw err
 })
@@ -34,7 +34,12 @@ let app: INestApplicationContext
 before(async () => {
   mocksSetup()
 
-  app = await NestFactory.create(DatabaseModule)
+  app = await NestFactory.create(
+    DatabaseModule.forRoot({
+      distPath: null,
+      sourcePath: './libs/shared/src',
+    }),
+  )
   app.enableShutdownHooks()
   exposeOrm(app)
 
