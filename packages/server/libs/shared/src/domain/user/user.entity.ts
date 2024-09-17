@@ -20,7 +20,7 @@ import { NotificationPreference } from '@shared/domain/notification-preference/n
 import { Organization } from '@shared/domain/org/org.entity'
 import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
 import { config } from '../../config'
-import { BaseEntity } from '../../database/base-entity'
+import { BaseEntity } from '../../database/base.entity'
 import { WorkaroundJsonType } from '../../database/custom-json-type'
 import { AdminMembership } from '../admin-membership/admin-membership.entity'
 import { UserRepository } from './user.repository'
