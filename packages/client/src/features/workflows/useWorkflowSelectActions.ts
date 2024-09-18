@@ -33,7 +33,7 @@ export const useWorkflowSelectActions = ({ homeScope, spaceId, selectedItems, re
     selected,
     updateFunction: copyWorkflowsRequest,
     onSuccess: (res: any) => {
-      toast.success('The workflow has been published successfully!')
+      toast.success('The workflow has been copied to the space successfully.')
       queryClient.invalidateQueries({ queryKey: resourceKeys }).then(() => {
         if (Array.isArray(res.workflows)) {
           navigate(`/home/workflows/${res.workflows[0].uid}`)
