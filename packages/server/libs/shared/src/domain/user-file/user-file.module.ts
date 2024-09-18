@@ -17,6 +17,7 @@ import { TaggingModule } from '@shared/domain/tagging/tagging.module'
 import { SpaceEventModule } from '@shared/domain/space-event/space-event.module'
 import { Folder } from '@shared/domain/user-file/folder.entity'
 import { FolderService } from '@shared/domain/user-file/folder.service'
+import { Asset } from '@shared/domain/user-file/asset.entity'
 
 @Module({
   imports: [
@@ -35,9 +36,15 @@ import { FolderService } from '@shared/domain/user-file/folder.service'
     ResourceModule,
     TaggingModule,
     SpaceEventModule,
-    MikroOrmModule.forFeature([Node, UserFile, Folder, User, Resource]),
+    MikroOrmModule.forFeature([Node, UserFile, Asset, Folder, User, Resource]),
   ],
   providers: [UserFileService, FolderService, NodeHelper, FileSyncQueueJobProducer],
-  exports: [UserFileService, FolderService, BullQueueModule, FileSyncQueueJobProducer],
+  exports: [
+    UserFileService,
+    FolderService,
+    BullQueueModule,
+    FileSyncQueueJobProducer,
+    MikroOrmModule,
+  ],
 })
 export class UserFileModule {}

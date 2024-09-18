@@ -36,6 +36,10 @@ import {
   sendJobFailedEmails,
   shouldSyncStatus,
 } from '../job.helper'
+import {
+  JobFinishedInputTemplate,
+  jobFinishedTemplate,
+} from '@shared/domain/email/templates/mjml/job-finished.template'
 
 /**
  * Checks job status if notifications should be triggered.
@@ -156,10 +160,7 @@ export class SyncJobOperation extends WorkerBaseOperation<
     this.ctx.log.log({ jobId: job.id }, 'Processing job')
 
     if (!shouldSyncStatus(job)) {
-      this.ctx.log.log(
-        { input, job },
-        'Job is already finished. Removing task from main queue',
-      )
+      this.ctx.log.log({ input, job }, 'Job is already finished. Removing task from main queue')
       await removeRepeatable(this.ctx.job, getMainQueue())
       this.removeTerminationEmailJob()
       return
@@ -176,27 +177,18 @@ export class SyncJobOperation extends WorkerBaseOperation<
           // Unauthorized. Expected scenario is that the user token has expired
           // Removing the sync task will allow a new sync task to be recreated
           // when user next logs in via UserCheckupTask
-          this.ctx.log.log(
-            { error: err.props },
-            'Received 401 from platform, removing sync task',
-          )
+          this.ctx.log.log({ error: err.props }, 'Received 401 from platform, removing sync task')
           await removeRepeatable(this.ctx.job)
         }
       } else {
-        this.ctx.log.log(
-          { error: err },
-          'Unhandled error from job/describe, will retry later',
-        )
+        this.ctx.log.log({ error: err }, 'Unhandled error from job/describe, will retry later')
       }
       return
     }
 
     // TODO(samuel) this shoudl be part of platform client
     delete platformJobData['sshHostKey']
-    this.ctx.log.log(
-      { platformJobData: platformJobData },
-      'Received job/describe from platform',
-    )
+    this.ctx.log.log({ platformJobData: platformJobData }, 'Received job/describe from platform')
 
     const isOverNotifyMaxDuration = buildIsOverMaxDuration('notify')
     const isOverTerminateMaxDuration = buildIsOverMaxDuration('terminate')
@@ -315,14 +307,23 @@ export class SyncJobOperation extends WorkerBaseOperation<
         'Detected failed job',
       )
 
-      try {
-        await sendJobFailedEmails(this.job.id.toString(), this.ctx)
-      } catch (e) {
-        this.ctx.log.error({ job: updatedJob }, 'Failed to send emails')
+      if (!job.terminationEmailSent) {
+        try {
+          await sendJobFailedEmails(this.job.id.toString(), this.ctx)
+          job.terminationEmailSent = true
+        } catch (e) {
+          this.ctx.log.error({ job: updatedJob }, 'Failed to send emails')
+        }
       }
     }
 
+    if (remoteState === JOB_STATE.DONE && !job.terminationEmailSent) {
+      await this.sendJobFinishedEmail()
+      job.terminationEmailSent = true
+    }
+
     this.ctx.log.debug({ job: updatedJob }, 'SyncJobOperation: Updated job')
+    await em.flush()
   }
 
   private async sendTerminationEmail(): Promise<void> {
@@ -347,6 +348,31 @@ export class SyncJobOperation extends WorkerBaseOperation<
         bullJobId: jobId,
       },
       'Sending termination warning email to user',
+    )
+    await createSendEmailTask(email, this.ctx.user, jobId)
+  }
+
+  private async sendJobFinishedEmail(): Promise<void> {
+    const body = buildEmailTemplate<JobFinishedInputTemplate>(jobFinishedTemplate, {
+      receiver: this.user,
+      content: { job: { id: this.job.id, name: this.job.name, uid: this.job.uid } },
+    })
+    const email: EmailSendInput = {
+      emailType: EMAIL_TYPES.jobTerminationWarning,
+      to: this.user.email,
+      subject: `Execution ${this.job.name} completed successfully`,
+      body,
+    }
+    const jobId = getBullJobIdForEmailOperation(EMAIL_TYPES.jobFinished, this.job.dxid)
+    this.ctx.log.log(
+      {
+        jobId: this.job.id,
+        jobDxid: this.job.dxid,
+        user: this.user.dxuser,
+        recipient: this.user.email,
+        bullJobId: jobId,
+      },
+      'Sending job finished email to user',
     )
     await createSendEmailTask(email, this.ctx.user, jobId)
   }

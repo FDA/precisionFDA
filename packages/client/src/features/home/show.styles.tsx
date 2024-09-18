@@ -15,6 +15,10 @@ export const MetadataSection = styled.div`
   gap: 16px;
 `
 
+export const PathSection = styled.div`
+  padding: 10px 15px;
+`
+
 export const MetadataRow = styled.div`
   display: flex;
   flex-wrap: wrap;

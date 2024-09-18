@@ -11,7 +11,7 @@ import {
 import { WorkaroundJsonType } from '@shared/database/custom-json-type'
 import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
 import { User } from '@shared/domain/user/user.entity'
-import { BaseEntity } from '../../database/base-entity'
+import { BaseEntity } from '../../database/base.entity'
 import { SPACE_MEMBERSHIP_SIDE } from '../space-membership/space-membership.enum'
 import { SPACE_STATE, SPACE_TYPE } from './space.enum'
 import { getScopeFromSpaceId } from './space.helper'

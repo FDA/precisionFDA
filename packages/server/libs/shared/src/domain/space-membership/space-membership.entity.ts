@@ -12,7 +12,7 @@ import {
 } from '@mikro-orm/core'
 import { Space } from '@shared/domain/space/space.entity'
 import { User } from '@shared/domain/user/user.entity'
-import { BaseEntity } from '../../database/base-entity'
+import { BaseEntity } from '../../database/base.entity'
 import { SPACE_MEMBERSHIP_ROLE, SPACE_MEMBERSHIP_SIDE } from './space-membership.enum'
 import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
 

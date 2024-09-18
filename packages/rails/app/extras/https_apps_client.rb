@@ -1120,13 +1120,17 @@ class HttpsAppsClient # rubocop:disable Metrics/ClassLength
       parsed = JSON.parse(response.body || "")
       parsed.is_a?(Hash) ? parsed.with_indifferent_access : parsed
     else
+      # look for how to forward the error to the client
+      # example apps_controller:copy - HttpsAppsClient rescue branch
       error_details = JSON.parse(response.body)
       error_message = error_details.dig("error", "message")
-      raise StandardError, error_message
+      status_code = error_details.dig("error", "statusCode")
+      code = error_details.dig("error", "code")
+      raise HttpsAppsClient::Error.new(error_message, code, status_code)
     end
   rescue JSON::ParserError
     response.body
-  rescue Net::HTTPClientException => e
+  rescue Net::HTTPClientException, HttpsAppsClient::Error => e
     raise e
   rescue StandardError => e
     raise Error, e.message

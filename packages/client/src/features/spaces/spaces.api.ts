@@ -51,10 +51,12 @@ export async function acceptSpaceRequest({ id }: { id: string }): Promise<unknow
   return res.json()
 }
 
-export async function addDataRequest({ spaceId, uids }: { spaceId: string; uids: string[] }): Promise<any> {
+export async function addDataRequest({ spaceId, uids, properties }: { spaceId: string; uids: string[], properties?: Record<string, any> }): Promise<any> {
+  const requestProperties = properties || { createAppSeries: true, createAppRevision: false }
   return axios
     .post(`/api/spaces/${spaceId}/add_data`, {
       uids,
+      properties: requestProperties,
     })
     .then(res => res.data)
 }

@@ -9,6 +9,7 @@ export const config: ConfigOverride = () => ({
   database: {
     debug: true,
     clientUrl: process.env.NODE_DATABASE_URL ?? 'mysql://root:password@0.0.0.0:32800/precision-fda',
+    ormMetadataCacheEnabled: true,
   },
   logs: {
     pretty: true,

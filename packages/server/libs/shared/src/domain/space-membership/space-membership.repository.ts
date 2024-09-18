@@ -25,7 +25,7 @@ export class SpaceMembershipRepository extends EntityRepository<SpaceMembership>
 
     const result = await qb
       .select(['space.id', 'sm.id'])
-      .leftJoin('sm.spaces', 'space')
+      .join('sm.spaces', 'space')
       .where({
         'sm.user': userId,
         'sm.active': true,

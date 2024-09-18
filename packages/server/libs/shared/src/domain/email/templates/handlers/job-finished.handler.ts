@@ -2,7 +2,12 @@ import { BaseTemplate } from '@shared/domain/email/templates/base-template'
 import { Job } from '@shared/domain/job/job.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { pipe, uniqBy } from 'ramda'
-import { EmailSendInput, EmailTemplate, EMAIL_TYPES, NOTIFICATION_TYPES_BASE } from '../../email.config'
+import {
+  EmailSendInput,
+  EmailTemplate,
+  EMAIL_TYPES,
+  NOTIFICATION_TYPES_BASE,
+} from '../../email.config'
 import { JobFinishedInputTemplate, jobFinishedTemplate } from '../mjml/job-finished.template'
 import {
   buildEmailTemplate,
@@ -10,13 +15,14 @@ import {
   buildIsNotificationEnabled,
 } from '../../email.helper'
 import { isJobInSpace, isJobPublic } from '../../../job/job.helper'
-import { UserOpsCtx } from '../../../../types'
+import { UserOpsCtx } from '@shared/types'
 
 type JobFinishedInputType = { jobId: number }
 
 export class JobFinishedEmailHandler
   extends BaseTemplate<JobFinishedInputType, UserOpsCtx>
-  implements EmailTemplate {
+  implements EmailTemplate
+{
   templateFile = jobFinishedTemplate
   job: Job
 
@@ -30,7 +36,7 @@ export class JobFinishedEmailHandler
 
   async determineReceivers(): Promise<User[]> {
     if (isJobPublic(this.job)) {
-      this.ctx.log.log({ jobId: this.job.id }, 'Job is public, noone is notified')
+      this.ctx.log.log({ jobId: this.job.id }, 'Job is public, no one is notified')
       return []
     }
     // todo: other users if job runs in a space?

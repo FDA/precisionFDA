@@ -1,4 +1,4 @@
-import { BaseEntity } from '../database/base-entity'
+import { BaseEntity } from '../database/base.entity'
 import { buildJsonPath } from './path'
 
 export type ColumnNode<T extends BaseEntity> = {

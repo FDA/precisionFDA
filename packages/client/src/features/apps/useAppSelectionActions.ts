@@ -17,7 +17,7 @@ import { AppActions, IApp } from './apps.types'
 import { useAttachToChallengeModal } from './useAttachToChallengeModal'
 import { useExportToModal } from './useExportToModal'
 import { getBaseLink } from './run/utils'
-
+import { toast } from 'react-toastify'
 
 export const useAppSelectionActions = ({
   homeScope,
@@ -78,9 +78,15 @@ export const useAppSelectionActions = ({
     modalComp: copyToSpaceModal,
     setShowModal: setCopyToSpaceModal,
     isShown: isShownCopyToSpaceModal,
-  } = useCopyToSpaceModal<IApp>({ resource: 'apps', selected, updateFunction: copyAppsRequest, onSuccess: () => {
-    queryClient.invalidateQueries({ queryKey: resourceKeys })
-  } })
+  } = useCopyToSpaceModal<IApp>({
+    resource: 'apps',
+    selected,
+    updateFunction: copyAppsRequest,
+    onSuccess: () => {
+      toast.success('App has been copied')
+      queryClient.invalidateQueries({ queryKey: resourceKeys })
+    },
+  })
 
   const {
     modalComp: copyToPrivateModal,
@@ -89,7 +95,7 @@ export const useAppSelectionActions = ({
   } = useCopyToPrivateModal({
     resource: 'apps',
     selected,
-    request: copyAppsToPrivate,
+    copyFunction: copyAppsToPrivate,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: resourceKeys })
     },
