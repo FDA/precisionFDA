@@ -83,7 +83,7 @@ export const useAppSelectionActions = ({
     selected,
     updateFunction: copyAppsRequest,
     onSuccess: () => {
-      toast.success('App has been copied')
+      toast.success('The app has been copied to the space successfully.')
       queryClient.invalidateQueries({ queryKey: resourceKeys })
     },
   })
