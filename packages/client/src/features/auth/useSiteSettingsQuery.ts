@@ -9,6 +9,12 @@ export const CDMHNames: Record<CDMHKey, string> = {
   connectPortal: 'Connect Portal',
 }
 
+export interface SiteSettingsDataPortal {
+  accessible: boolean,
+  tooltipText: string,
+  mailto: string
+}
+
 export interface SiteSettingsResponse {
   cdmh: {
       isEnabled: boolean,
@@ -19,7 +25,8 @@ export interface SiteSettingsResponse {
           fdaSsoUrl: string
       },
   },
-  alerts: Alert[]
+  alerts: Alert[],
+  dataPortals: { [key: string]: SiteSettingsDataPortal }
 }
 
 export const onLogInWithSSO = (fdaSsoUrl: string) => {
