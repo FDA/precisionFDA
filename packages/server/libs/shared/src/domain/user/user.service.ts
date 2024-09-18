@@ -35,8 +35,13 @@ export class UserService {
 
   async listGovernmentUserNames(): Promise<string[]> {
     this.logger.log('getting list of government user names')
-    const result = await this.em.find(User, { $and: [{ userState: 0 }, { email: { $like: '%fda.hhs.gov' } }] })
-    return result.map(user => user.dxuser)
+    const result = await this.em.find(User, {
+      $and: [
+        { userState: 0 },
+        { $or: [{ email: { $like: '%fda.hhs.gov' } }, { email: { $like: '%fda.gov' } }] },
+      ],
+    })
+    return result.map((user) => user.dxuser)
   }
 
   /**

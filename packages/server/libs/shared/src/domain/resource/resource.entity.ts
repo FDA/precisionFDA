@@ -2,7 +2,7 @@ import { Entity, ManyToOne, OneToOne, Property, Ref, Reference } from '@mikro-or
 import { DataPortal } from '@shared/domain/data-portal/data-portal.entity'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { User } from '@shared/domain/user/user.entity'
-import { BaseEntity } from '../../database/base-entity'
+import { BaseEntity } from '../../database/base.entity'
 
 @Entity({ tableName: 'resources' })
 class Resource extends BaseEntity {

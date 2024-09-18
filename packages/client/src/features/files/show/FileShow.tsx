@@ -27,6 +27,7 @@ import {
   NotFound,
   Title,
   Topbox,
+  PathSection,
 } from '../../home/show.styles'
 import { EmmitScope, HomeScope } from '../../home/types'
 import { License } from '../../licenses/License'
@@ -35,6 +36,7 @@ import { fetchFile } from '../files.api'
 import { IFile } from '../files.types'
 import { useFilesSelectActions } from '../useFilesSelectActions'
 import { FileDescription } from './styles'
+import { FileBreadcrumb } from '../FileBreadcrumb'
 
 const FileActionsDropdown = ({
   homeScope,
@@ -139,15 +141,9 @@ export const FileShow = ({ emitScope, space, homeScope }: { homeScope?: HomeScop
           </div>
         </ResourceHeader>
 
-        <FileDescription data-testid="file-description">
-          {file.locked && (
-            <LockedRow data-testid="file-locked">
-              <LockIcon height={14} color={theme.colors.darkYellow} />
-              File is locked
-            </LockedRow>
-          )}
-          {file.description ? file.description : 'No description provided.'}
-        </FileDescription>
+        <PathSection>
+          <FileBreadcrumb fileName={file.name} basePath={`/${space ? `spaces/${space.id}` : 'home'}/files`} labelText='File Path:' scope={homeScope} metaPath={data?.meta?.path} />
+        </PathSection>
 
         <MetadataSection>
           <MetadataRow>
@@ -235,7 +231,17 @@ export const FileShow = ({ emitScope, space, homeScope }: { homeScope?: HomeScop
             </MetadataRow>
           </MetadataSection>
         )}
+        <FileDescription data-testid="file-description">
+          {file.locked && (
+            <LockedRow data-testid="file-locked">
+              <LockIcon height={14} color={theme.colors.darkYellow} />
+              File is locked
+            </LockedRow>
+          )}
+          {file.description ? file.description : 'No description provided.'}
+        </FileDescription>
       </Topbox>
+
 
       <Filler $size={40} />
       <TabsSwitch tabsConfig={tabsConfig} />

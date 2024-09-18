@@ -4,8 +4,6 @@ import { isRequestFromAuthenticatedUser, isRequestFromFdaSubnet } from '../../..
 import { log } from '../../../src/logger'
 
 describe('Server.utils ', () => {
-  let mockCtx: Api.Ctx
-
   context('isRequestFromFdaSubnet', () => {
     it('should return true - valid IP', async () => {
       const result = isRequestFromFdaSubnet(log, '127.0.0.1')
@@ -20,7 +18,11 @@ describe('Server.utils ', () => {
 
   context('isRequestFromAuthenticatedUser()', () => {
     it('should return true - user context is set', async () => {
-      const ctx = { [USER_CONTEXT_HTTP_HEADERS.id]: 12, [USER_CONTEXT_HTTP_HEADERS.dxUser]: 'testing.user', [USER_CONTEXT_HTTP_HEADERS.accessToken]: 'fake-token' }
+      const ctx = {
+        [USER_CONTEXT_HTTP_HEADERS.id]: 12,
+        [USER_CONTEXT_HTTP_HEADERS.dxUser]: 'testing.user',
+        [USER_CONTEXT_HTTP_HEADERS.accessToken]: 'fake-token',
+      }
       const req = { headers: { 'X-Forwarded-For': '127.0.0.1', ...ctx } }
 
       const result = isRequestFromAuthenticatedUser(req.headers)

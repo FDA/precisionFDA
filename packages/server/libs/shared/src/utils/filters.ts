@@ -1,5 +1,5 @@
 /* eslint-disable multiline-ternary */
-import { BaseEntity } from '../database/base-entity'
+import { BaseEntity } from '../database/base.entity'
 import { wrapMaybeUndefined, parseEnumValueFromString, parseNumericRange, parseNonEmptyString } from '../validation/parsers'
 import { MapValueObjectByKey, MapValuesToReturnType } from './generics'
 import { ColumnNode } from './sql-json-column-utils'

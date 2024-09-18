@@ -20,7 +20,7 @@ import { NotificationPreference } from '@shared/domain/notification-preference/n
 import { Organization } from '@shared/domain/org/org.entity'
 import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
 import { config } from '../../config'
-import { BaseEntity } from '../../database/base-entity'
+import { BaseEntity } from '../../database/base.entity'
 import { WorkaroundJsonType } from '../../database/custom-json-type'
 import { AdminMembership } from '../admin-membership/admin-membership.entity'
 import { UserRepository } from './user.repository'
@@ -210,21 +210,6 @@ export class User extends BaseEntity {
   @Property({ persist: false })
   get dxid(): string {
     return `user-${this.dxuser}`
-  }
-
-  @Property({ persist: false })
-  get spaceUids(): string[] {
-    const spaceUids: string[] = []
-    this.spaceMemberships.isInitialized()
-      ? Array.from(this.spaceMemberships)
-          .filter((m) => m.active)
-          .forEach((spaceMembership) => {
-            Array.from(spaceMembership.spaces).forEach((space) =>
-              spaceUids.push(`space-${space.id}`),
-            )
-          })
-      : []
-    return spaceUids
   }
 
   username(): string {

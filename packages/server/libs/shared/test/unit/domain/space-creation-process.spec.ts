@@ -3,21 +3,20 @@ import { database } from '@shared/database'
 import { ADMIN_GROUP_ROLES, AdminGroup } from '@shared/domain/admin-group/admin-group.entity'
 import { AdministratorSpaceCreationProcess } from '@shared/domain/space/create/administrator-space-creation.process'
 import { GovernmentSpaceCreationProcess } from '@shared/domain/space/create/government-space-creation.process'
-import { PrivateSpaceCreationProcess } from '@shared/domain/space/create/private-space-creation.process'
 import { GroupsSpaceCreationProcess } from '@shared/domain/space/create/groups-space-creation.process'
+import { PrivateSpaceCreationProcess } from '@shared/domain/space/create/private-space-creation.process'
+import { CreateSpaceDto } from '@shared/domain/space/dto/create-space.dto'
+import { SpaceNotificationService } from '@shared/domain/space/service/space-notification.service'
+import { SPACE_TYPE } from '@shared/domain/space/space.enum'
 import { User } from '@shared/domain/user/user.entity'
+import { PlatformClient } from '@shared/platform-client'
 import { ClassIdResponse } from '@shared/platform-client/platform-client.responses'
 import * as generate from '@shared/test/generate'
 import { expect } from 'chai'
 import { stub } from 'sinon'
 import { create, db } from '../../../src/test'
-import { CreateSpaceDto } from '@shared/domain/space/dto/create-space.dto'
-import { SpaceNotificationService } from '@shared/domain/space/service/space-notification.service'
-import { SPACE_TYPE } from '@shared/domain/space/space.enum'
-import { PlatformClient } from '@shared/platform-client'
 
 describe('space creation process tests', () => {
-
   let userCtx: UserCtx
   let user: User
   let em: EntityManager<MySqlDriver>
@@ -30,7 +29,6 @@ describe('space creation process tests', () => {
   const projectCreateStub = stub()
   const projectInviteStub = stub()
   const notifySpaceCreatedStub = stub()
-  const removeUserFromOrganizationStub = stub()
 
   beforeEach(async () => {
     await db.dropData(database.connection())
@@ -48,7 +46,6 @@ describe('space creation process tests', () => {
       createOrg: createOrgStub,
       projectCreate: projectCreateStub,
       projectInvite: projectInviteStub,
-      removeUserFromOrganization: removeUserFromOrganizationStub
     } as unknown as PlatformClient
 
     spaceNotificationService = {
@@ -60,11 +57,9 @@ describe('space creation process tests', () => {
     projectCreateStub.reset()
     projectInviteStub.reset()
     notifySpaceCreatedStub.reset()
-    removeUserFromOrganizationStub.reset()
 
     projectCreateStub.returns({ id: `project-${generate.random.dxstr()}` } as ClassIdResponse)
     createOrgStub.returns({ id: `org-${generate.random.dxstr()}` } as ClassIdResponse)
-
   })
 
   it('create groups space as site admin', async () => {
@@ -169,7 +164,6 @@ describe('space creation process tests', () => {
     input.description = 'test'
     input.hostLeadDxuser = differentUser.dxuser
 
-
     try {
       await privateProcess().build(input)
       expect.fail('Operation is expected to fail.')
@@ -236,7 +230,9 @@ describe('space creation process tests', () => {
       expect.fail('Operation is expected to fail.')
     } catch (error) {
       expect(error.name).to.equal('PermissionError')
-      expect(error.message).eq('You are not allowed to create new Administrator Space for another user!')
+      expect(error.message).eq(
+        'You are not allowed to create new Administrator Space for another user!',
+      )
     }
   })
 
@@ -271,7 +267,9 @@ describe('space creation process tests', () => {
       expect.fail('Operation is expected to fail.')
     } catch (error) {
       expect(error.name).to.equal('PermissionError')
-      expect(error.message).eq('You are not allowed to create new Government Space for another user!')
+      expect(error.message).eq(
+        'You are not allowed to create new Government Space for another user!',
+      )
     }
   })
 
@@ -294,26 +292,46 @@ describe('space creation process tests', () => {
     }
   })
 
-
-
   function groupsProcess() {
     userCtx = { dxuser: user.dxuser, id: user.id, accessToken: 'secret-token' }
-    return new GroupsSpaceCreationProcess(userCtx, em, spaceNotificationService, adminPlatformClient)
+    return new GroupsSpaceCreationProcess(
+      userCtx,
+      em,
+      spaceNotificationService,
+      adminPlatformClient,
+    )
   }
 
   function privateProcess() {
     userCtx = { dxuser: user.dxuser, id: user.id, accessToken: 'secret-token' }
-    return new PrivateSpaceCreationProcess(userCtx, em, spaceNotificationService, platformClient, adminPlatformClient)
+    return new PrivateSpaceCreationProcess(
+      userCtx,
+      em,
+      spaceNotificationService,
+      platformClient,
+      adminPlatformClient,
+    )
   }
 
   function administratorProcess() {
     userCtx = { dxuser: user.dxuser, id: user.id, accessToken: 'secret-token' }
-    return new AdministratorSpaceCreationProcess(userCtx, em, spaceNotificationService, platformClient, adminPlatformClient)
+    return new AdministratorSpaceCreationProcess(
+      userCtx,
+      em,
+      spaceNotificationService,
+      platformClient,
+      adminPlatformClient,
+    )
   }
 
   function governmentProcess() {
     userCtx = { dxuser: user.dxuser, id: user.id, accessToken: 'secret-token' }
-    return new GovernmentSpaceCreationProcess(userCtx, em, spaceNotificationService, platformClient, adminPlatformClient)
+    return new GovernmentSpaceCreationProcess(
+      userCtx,
+      em,
+      spaceNotificationService,
+      platformClient,
+      adminPlatformClient,
+    )
   }
-
 })

@@ -317,8 +317,15 @@ module Api
         accessible_by(@context).
         discussions.order(id: :desc).page(params[:discussions_page])
 
+      path = if @file.parent_folder
+        build_path(@file.parent_folder, []).reverse
+      else
+        []
+      end
+
       render json: @file, root: "files", adapter: :json,
              meta: {
+               path: path,
                user_licenses: @licenses,
                object_license: @license,
                comments: comments,

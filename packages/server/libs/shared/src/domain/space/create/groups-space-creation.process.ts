@@ -1,6 +1,5 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Inject, Injectable } from '@nestjs/common'
-import { config } from '@shared/config'
 import { getHandle } from '@shared/domain/org/org.utils'
 import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
 import {
@@ -17,13 +16,11 @@ import { NotFoundError, PermissionError } from '@shared/errors'
 import { PlatformClient } from '@shared/platform-client'
 import { ADMIN_PLATFORM_CLIENT } from '@shared/platform-client/providers/admin-platform-client.provider'
 
-
 /**
  * Concrete subclass of {@link SpaceCreationProcess} for creating a Groups space.
  */
 @Injectable()
 export class GroupsSpaceCreationProcess extends SpaceCreationProcess {
-
   constructor(
     userContext: UserContext,
     em: SqlEntityManager,
@@ -38,7 +35,7 @@ export class GroupsSpaceCreationProcess extends SpaceCreationProcess {
       throw new NotFoundError(`User with ID: ${this.userContext.id} was not found!`)
     }
     // space admin is called reviewSpaceAdmin but it's wrong - PFDA-5437 will resolve it in the future
-    if (!await user.isSiteAdmin() && !await user.isReviewSpaceAdmin()) {
+    if (!(await user.isSiteAdmin()) && !(await user.isReviewSpaceAdmin())) {
       throw new PermissionError('Only admins can create Groups spaces')
     }
   }
@@ -69,10 +66,13 @@ export class GroupsSpaceCreationProcess extends SpaceCreationProcess {
     }
   }
 
-  protected async inviteMembers(space: Space, leads: {
-    host: User,
-    guest: User
-  }): Promise<SpaceMembership[]> {
+  protected async inviteMembers(
+    space: Space,
+    leads: {
+      host: User
+      guest: User
+    },
+  ): Promise<SpaceMembership[]> {
     const hostLead = leads.host
     const guestLead = leads.guest
     // invite host lead as admin on platform host org
@@ -119,8 +119,18 @@ export class GroupsSpaceCreationProcess extends SpaceCreationProcess {
     })
     this.logger.log(`invited guest lead: ${guestLead.dxuser} to guest org: ${space.guestDxOrg}`)
 
-    const hostLeadMembership = new SpaceMembership(hostLead, space, SPACE_MEMBERSHIP_SIDE.HOST, SPACE_MEMBERSHIP_ROLE.LEAD)
-    const guestLeadMembership = new SpaceMembership(guestLead, space, SPACE_MEMBERSHIP_SIDE.GUEST, SPACE_MEMBERSHIP_ROLE.LEAD)
+    const hostLeadMembership = new SpaceMembership(
+      hostLead,
+      space,
+      SPACE_MEMBERSHIP_SIDE.HOST,
+      SPACE_MEMBERSHIP_ROLE.LEAD,
+    )
+    const guestLeadMembership = new SpaceMembership(
+      guestLead,
+      space,
+      SPACE_MEMBERSHIP_SIDE.GUEST,
+      SPACE_MEMBERSHIP_ROLE.LEAD,
+    )
     this.em.persist([hostLeadMembership, guestLeadMembership])
 
     return [hostLeadMembership, guestLeadMembership]
@@ -136,13 +146,17 @@ export class GroupsSpaceCreationProcess extends SpaceCreationProcess {
       name: `precisionfda-${space.uid}-HOST`,
       billTo: hostLead.user.getEntity().billTo(),
     })
-    this.logger.log(`created host project: ${hostProject.id} with lead: ${hostLead.user.getProperty('dxuser')}`)
+    this.logger.log(
+      `created host project: ${hostProject.id} with lead: ${hostLead.user.getProperty('dxuser')}`,
+    )
 
     const guestProject = await this.adminClient.projectCreate({
       name: `precisionfda-${space.uid}-GUEST`,
       billTo: guestLead.user.getEntity().billTo(),
     })
-    this.logger.log(`created guest project: ${guestProject.id} with lead: ${guestLead.user.getProperty('dxuser')}`)
+    this.logger.log(
+      `created guest project: ${guestProject.id} with lead: ${guestLead.user.getProperty('dxuser')}`,
+    )
 
     // we could do two parallel calls to each project,
     // but not to the same one - you will get cannot acquire lock error from platform
@@ -173,18 +187,6 @@ export class GroupsSpaceCreationProcess extends SpaceCreationProcess {
       level: 'CONTRIBUTE',
     })
     this.logger.log(`invited guest org: ${space.guestDxOrg} to guest project: ${guestProject.id}`)
-
-    //INVESTIGATION NEEDED - PFDA-5212
-    // https://jira.internal.dnanexus.com/browse/PFDA-5212?focusedId=297720&page=com.atlassian.jira.plugin.system.issuetabpanels%3Acomment-tabpanel#comment-297720
-    // SpaceService::Create#remove_pfda_admin_user in ruby
-    await this.adminClient.removeUserFromOrganization({
-      orgDxId: space.hostDxOrg,
-      data: { user: `user-${config.platform.adminUser}` },
-    })
-    await this.adminClient.removeUserFromOrganization({
-      orgDxId: space.guestDxOrg,
-      data: { user: `user-${config.platform.adminUser}` },
-    })
 
     space.hostProject = hostProject.id
     space.guestProject = guestProject.id

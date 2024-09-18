@@ -13,7 +13,7 @@ import { App } from '@shared/domain/app/app.entity'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { SCOPE } from '@shared/types/common'
-import { BaseEntity } from '../../database/base-entity'
+import { BaseEntity } from '../../database/base.entity'
 import { STATIC_SCOPE } from '@shared/enums'
 
 enum COMPARISON_STATE {
