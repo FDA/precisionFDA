@@ -11,19 +11,18 @@ import {
   UseGuards,
 } from '@nestjs/common'
 import { DEPRECATED_SQL_ENTITY_MANAGER } from '@shared/database/provider/deprecated-sql-entity-manager.provider'
-import { AppInput, saveAppSchema } from '@shared/domain/app/app.input'
 import { AppService } from '@shared/domain/app/services/app.service'
 import { DxId } from '@shared/domain/entity/domain/dxid'
 import { RunAppInput, runAppSchema } from '@shared/domain/job/job.input'
 import { CreateJobOperation } from '@shared/domain/job/ops/create'
 import { LicensesForAppOperation } from '@shared/domain/license/ops/licenses-for-app'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
-import { PlatformClient } from '@shared/platform-client'
 import { UserOpsCtx } from '@shared/types'
 import { schemas } from '@shared/utils/base-schemas'
 import { UserContextGuard } from '../user-context/guard/user-context.guard'
 import { JsonSchemaPipe } from '../validation/pipes/json-schema.pipe'
 import { AppUidParamDto } from './model/app-uid-param.dto'
+import { SaveAppDto } from '@shared/domain/app/dto/save-app.dto'
 
 @UseGuards(UserContextGuard)
 @Controller('/apps')
@@ -32,15 +31,13 @@ export class AppController {
     private readonly user: UserContext,
     @Inject(DEPRECATED_SQL_ENTITY_MANAGER) private readonly em: SqlEntityManager,
     private readonly logger: Logger,
+    private readonly appService: AppService,
   ) {}
 
   @HttpCode(200)
   @Post()
-  async createApp(@Body(new JsonSchemaPipe(saveAppSchema)) body: AppInput) {
-    const platformClient = new PlatformClient({ accessToken: this.user.accessToken })
-    const appService = new AppService(this.em, platformClient)
-
-    return await appService.create(body, this.user.id)
+  async createApp(@Body() body: SaveAppDto) {
+    return await this.appService.create(body)
   }
 
   @Get('/:appUid/licenses-to-accept')

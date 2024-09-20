@@ -1,11 +1,12 @@
 import classNames from 'classnames'
 import React, { useRef, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
+import { PlacesType, Tooltip } from 'react-tooltip'
 import { useAlertDismissed } from '../../features/admin/alerts/useAlertDismissedLocalStorage'
 import { CDMHKey, logout } from '../../features/auth/api'
 import { useAuthUser } from '../../features/auth/useAuthUser'
 import { useGenerateKeyModal } from '../../features/auth/useGenerateKeyModal'
-import { CDMHNames, useSiteSettingsQuery } from '../../features/auth/useSiteSettingsQuery'
+import { CDMHNames, SiteSettingsDataPortal, useSiteSettingsQuery } from '../../features/auth/useSiteSettingsQuery'
 import { useOnOutsideClickRef } from '../../hooks/useOnOutsideClick'
 import { IUser } from '../../types/user'
 import { AlertBanner } from '../AlertBanner'
@@ -23,6 +24,7 @@ import { SiteNavItemType } from './NavItems'
 import { orderArrayByReference } from './orderArrayByReference'
 import { getObjectsByIds } from './orderObjectById'
 import {
+  DisabledSiteMenuItem,
   DropdownMenuItem,
   EditMenuWrap,
   HeaderItemText,
@@ -166,6 +168,37 @@ const MenuItem = ({ navItem, pathname, onClick }: {navItem: SiteNavItemType, pat
   )
 }
 
+const DisabledMenuItem = ({ navItem, siteSettingsDataPortal, tooltipPos }: {navItem: SiteNavItemType, siteSettingsDataPortal: SiteSettingsDataPortal, tooltipPos?: PlacesType}) => {
+  const tooltipPosition: PlacesType = tooltipPos || 'right'
+  return (
+    <DisabledSiteMenuItem $active={false} data-tooltip-id={`menu-item.${navItem.id}.${tooltipPosition}`}>
+      <Tooltip id={`menu-item.${navItem.id}.${tooltipPosition}`} clickable place={tooltipPosition}>
+        <div>{siteSettingsDataPortal?.tooltipText}</div>
+        <div>
+          <a style={{ textDecoration: 'underline' }} href={`mailto:${siteSettingsDataPortal?.mailto}`}>Reach out to the FDA for access.</a>
+        </div>
+      </Tooltip>
+      <IconWrap>
+        <navItem.icon height={navItem.iconHeight}/>
+      </IconWrap>
+      <SiteMenuText>{navItem.text}</SiteMenuText>
+    </DisabledSiteMenuItem>
+  )
+}
+
+const DisabledTopMenuItem = ({ navItem, siteSettingsDataPortal }: {navItem: SiteNavItemType, siteSettingsDataPortal: SiteSettingsDataPortal}) => {
+  return (
+    <DisabledMenuItem key={navItem.id} navItem={navItem} siteSettingsDataPortal={siteSettingsDataPortal} tooltipPos="bottom"/>
+  )
+}
+
+const dataPortalMenuItem = (i: SiteNavItemType, pathname: string, setShowSiteNav: (v: boolean, ms?: number) => void, siteSettingsDataPortal: SiteSettingsDataPortal) => {
+  if (siteSettingsDataPortal?.accessible) {
+    return <MenuItem key={i.id} navItem={i} pathname={pathname} onClick={() => setShowSiteNav(false)}/>
+  }
+  return <DisabledMenuItem key={i.id} navItem={i} siteSettingsDataPortal={siteSettingsDataPortal} />
+}
+
 const getUsername = (user: IUser) => {
   if (user) {
     if (user.full_name === ' ') {
@@ -210,7 +243,7 @@ const SiteNav = ({
             {getObjectsByIds(['docs', 'support'], userSiteNavItems).map((i) => <MenuItem key={i.id} navItem={i} pathname={pathname} onClick={() => setShowSiteNav(false)} />)}
           </div>
           <div>
-            {getObjectsByIds(['daaas', 'prism', 'tools'], userSiteNavItems).map((i) => <MenuItem key={i.id} navItem={i} pathname={pathname} onClick={() => setShowSiteNav(false)} />)}
+            {getObjectsByIds(['daaas', 'prism', 'tools'], userSiteNavItems).map((i) => dataPortalMenuItem(i, pathname, setShowSiteNav, siteSettings?.data?.dataPortals[i.id]))}
             <HeaderSpacer />
 
             {showGSRSLink && (
@@ -219,7 +252,13 @@ const SiteNav = ({
             <HeaderSpacer />
             {showCDMHLink && (
               <>
-                <SiteMenuItem className='noHover'>
+                <Tooltip id="menu-item.cdmh.right" clickable place="right">
+                  <div>This is the Common Data Model Harmonization; access is currently restricted to FDA users.</div>
+                  <div>
+                    <a style={{ textDecoration: 'underline' }} href="mailto:mitra.rocca@fda.hhs.gov?cc=precisionFDA@fda.hhs.gov&subject=CDMH access request">Reach out to the FDA for access.</a>
+                  </div>
+                </Tooltip>
+                <SiteMenuItem className='noHover' data-tooltip-id="menu-item.cdmh.right">
                   <IconWrap>
                     <CDMHIcon height={20} />
                   </IconWrap>
@@ -304,6 +343,19 @@ const Header: React.FC = () => {
           </MenuButton>
           <HeaderLeft>
             {getObjectsByIds(orderedFavorites, userSiteNavItems).map(i => {
+              if (siteSettings?.data?.dataPortals[i.id]?.accessible === false) {
+                return <DisabledTopMenuItem key={i.id} navItem={i} siteSettingsDataPortal={siteSettings.data.dataPortals[i.id]} />
+              }
+
+              // If CDMH item, get the correct link
+              const normalizedId = i.id.replace(/-([a-z])/g, (_match, letter) => {
+                return letter.toUpperCase()
+              }) as CDMHKey
+              const cdmhList = siteSettings.data?.cdmh.data
+              if (cdmhList !== undefined && cdmhList[normalizedId] !== undefined) {
+                i.link = cdmhList[normalizedId]
+              }
+
               const { id, iconHeight, text, icon: Icon } = i
               return (
                 <MenuLink navItem={i} key={id} data-testid={`favoritenav-${id}`}>

@@ -41,7 +41,10 @@ import { WorkflowApiModule } from './workflows/workflow.api.module'
       http: config.nestjsDevtoolsEnabled,
       port: 8000,
     }),
-    DatabaseModule,
+    DatabaseModule.forRoot({
+      distPath: './dist/apps/api',
+      sourcePath: './apps/api/src',
+    }),
     LoggerModule,
     QueueModule,
     UserContextModule,

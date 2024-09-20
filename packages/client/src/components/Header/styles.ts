@@ -126,6 +126,18 @@ export const SiteMenuItem = styled.div<{$active: boolean}>`
     background-color:  var(--c-app-header-menu-hover);
   `}
 `
+
+export const DisabledSiteMenuItem = styled(SiteMenuItem)`
+  color: var(--c-text-500);
+  cursor: not-allowed;
+  &:hover {
+    background-color: initial;
+  }
+  div a {
+    color: var(--c-link);
+  }
+`
+
 export const HeaderMenuItem = styled.div<{ $active: boolean }>`
   display: flex;
   align-items: center;
@@ -360,6 +372,14 @@ export const StyledSiteNav = styled.div`
     border-radius: 3px;
     padding-left: 10px;
     padding-right: 4px;
+  }
+
+  ${DisabledSiteMenuItem} {
+    color: var(--c-text-500);
+    cursor: not-allowed;
+    &:hover {
+      background-color: var(--tertiary-70);
+    }
   }
 
   ${SiteMenuItem} .noHover {

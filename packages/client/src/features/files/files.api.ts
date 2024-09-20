@@ -1,7 +1,7 @@
 import axios from 'axios'
 import { checkStatus, getApiRequestOpts } from '../../utils/api'
 import { cleanObject } from '../../utils/object'
-import { DownloadListResponse, HomeScope, IFilter, IMeta, ServerScope } from '../home/types'
+import { DownloadListResponse, HomeScope, IFilter, IMeta, MetaPath, ServerScope } from '../home/types'
 import { Params, formatScopeQ, prepareListFetch } from '../home/utils'
 import { IExistingFileSet, IFile, IFolder, SelectedNode } from './files.types'
 
@@ -19,7 +19,9 @@ export async function fetchFiles(filters: IFilter[], params: Params) {
 
 export interface FetchFileQuery {
   files: IFile
-  meta: any
+  meta: {
+    path: MetaPath[]
+  }
 }
 
 export async function fetchFile(uid: string) {

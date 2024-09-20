@@ -107,12 +107,9 @@ export async function fetchAppExecutions(filters: IFilter[], params: FetchAppExe
   return res.json()
 }
 
-export async function copyAppsRequest(scope: string, ids: string[]) {
-  const res = await fetch('/api/apps/copy', {
-    ...getApiRequestOpts('POST'),
-    body: JSON.stringify({ item_ids: ids, scope }),
-  }).then(checkStatus)
-  return res.json()
+export async function copyAppsRequest(scope: string, ids: string[], properties?: Record<string, any>) {
+  const requestProperties = properties || { createAppSeries: true, createAppRevision: false }
+  return axios.post('/api/apps/copy', { item_ids: ids, scope, properties: requestProperties }).then(r => r.data)
 }
 
 export async function deleteAppsRequest(ids: string[]): Promise<any> {
@@ -123,18 +120,20 @@ export async function deleteAppsRequest(ids: string[]): Promise<any> {
   return res.json()
 }
 
-export async function copyAppsToPrivate(ids: number[]) {
-  const res = await fetch('/api/apps/copy', {
-    ...getApiRequestOpts('POST'),
-    body: JSON.stringify({ item_ids: ids, scope: 'private' }),
-  }).then(checkStatus)
-
-  return res.json()
+export async function copyAppsToPrivate(ids: number[], properties?: Record<string, any>) {
+  const requestProperties = properties || { createAppSeries: true, createAppRevision: false }
+  return axios
+    .post('/api/apps/copy', {
+      item_ids: ids,
+      scope: 'private',
+      properties: requestProperties,
+    })
+    .then(r => r.data)
 }
 
-
-
 export interface CreateAppPayload {
+  createAppSeries: boolean
+  createAppRevision: boolean
   is_new: boolean
   forked_from: null | string
   name: string
@@ -150,7 +149,6 @@ export interface CreateAppPayload {
   ordered_assets: string[]
   code: string
 }
-
 
 export interface CreateAppResponse {
   id: string

@@ -16,7 +16,7 @@ export class CliController {
 
   @Get('/version/latest')
   getLatestVersion() {
-    return { version: '2.7.1' }
+    return { version: '2.7.2' }
   }
 
   @Get('/:uid/describe')

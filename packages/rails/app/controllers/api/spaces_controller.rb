@@ -217,10 +217,12 @@ module Api
       user_files, assets, apps, workflows = grouped.values_at("file", "asset", "app", "workflow")
       files = Array(user_files) + Array(assets)
       copy_files_to_space(files)
-      workflows&.each { |workflow| copy_service.copy(workflow, @space.scope) }
-      apps&.each { |app| copy_service.copy(app, @space.scope) }
+      workflows&.each { |workflow| workflow_copy_service.copy(workflow, @space.scope, params[:properties]) }
+      apps&.each { |app| app_copy_service.copy(app, @space.scope, params[:properties]) }
 
       head :ok
+    rescue HttpsAppsClient::Error => e
+      render status: e.status_code, json: { error: { message: e.message, statusCode: e.status_code, code: e.code } }
     end
 
     def fix_guest_permissions
@@ -322,8 +324,12 @@ module Api
       end
     end
 
-    def copy_service
-      @copy_service ||= CopyService.new(api: api, user: current_user)
+    def app_copy_service
+      @app_copy_service ||= CopyService::AppCopier.new(api:, user: current_user)
+    end
+
+    def workflow_copy_service
+      @workflow_copy_service ||= CopyService::WorkflowCopier.new(api:, user: current_user)
     end
 
     # Checks if items are accessible by a user.

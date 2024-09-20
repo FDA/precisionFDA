@@ -1,7 +1,6 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "declaration": false,
     "outDir": "../../dist/apps/admin-platform-client"
   },
   "include": ["src/**/*"],

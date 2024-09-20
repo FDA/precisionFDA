@@ -185,12 +185,6 @@ export const ActionsRow = styled.div`
   gap: 8px;
 `
 
-export const StyledBreadcrumbs = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 8px;
-`
 export const StyledRunByYouLink = styled.a`
   font-size: 12px;
 `

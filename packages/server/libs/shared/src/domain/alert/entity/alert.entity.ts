@@ -1,5 +1,5 @@
 import { Entity, Property } from '@mikro-orm/core'
-import { BaseEntity } from '@shared/database/base-entity'
+import { BaseEntity } from '@shared/database/base.entity'
 
 export const alertTypes = ['info', 'warning', 'danger'] as const
 export type AlertType = (typeof alertTypes)[number]

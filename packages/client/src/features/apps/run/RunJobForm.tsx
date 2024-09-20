@@ -1,5 +1,5 @@
 import { yupResolver } from '@hookform/resolvers/yup'
-import React from 'react'
+import React, { useState } from 'react'
 import { Controller, FieldErrors, useFieldArray, useForm } from 'react-hook-form'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
@@ -56,6 +56,7 @@ import {
   useSelectableSpaces,
   useUserComputeInstances,
 } from './utils'
+import { SavingModal } from '../../modal/SavingModal'
 
 /**
  * If params are specified in the URL, decode them and set them as default values.
@@ -95,8 +96,8 @@ export const RunJobForm = ({ app, userJobLimit, spec }: { app: IApp; spec: AppSp
   const navigate = useNavigate()
 
   const { modalComp: licensesModal, setLicensesAndShow } = useAcceptLicensesModal()
-
   const defaultValues = getDefaults(hash, { app, userJobLimit, spec })
+  const [executedBatchCount, setExecutedBatchCount] = useState(0)
 
   if (hash.startsWith('#')) {
     navigate(pathname, { replace: true })
@@ -138,8 +139,14 @@ export const RunJobForm = ({ app, userJobLimit, spec }: { app: IApp; spec: AppSp
     control,
     name: 'inputs',
   })
+
+  const getRunningLabelText = () => {
+    return `Running Batch App (${executedBatchCount} of ${inputs.fields.length})`
+  }
+
   const isBatchRun = inputs.fields.length > 1
   const runButtonText = isBatchRun ? 'Run Batch App' : 'Run App'
+  const runningButtonText = isBatchRun ? getRunningLabelText(): 'Running App'
 
   const addInput = () => {
     if (computeInstances) {
@@ -167,6 +174,7 @@ export const RunJobForm = ({ app, userJobLimit, spec }: { app: IApp; spec: AppSp
   const onSubmit = async () => {
     const vals = getValues()
     const valid = await trigger()
+    setExecutedBatchCount(prevCount => prevCount + 1)
 
     if (valid) {
       const r = await Promise.all([
@@ -176,10 +184,13 @@ export const RunJobForm = ({ app, userJobLimit, spec }: { app: IApp; spec: AppSp
 
       const acceptedLicenses = await fetchAcceptedLicenses()
       const licensesToAccept = getLicensesToAccept(r.flat(), acceptedLicenses)
+
       if (licensesToAccept.length > 0) {
         setLicensesAndShow(licensesToAccept, acceptedLicenses)
       } else {
-        const mutations = vals.inputs.map((batchInput, index) => {
+        for (let index = 0; index < vals.inputs.length; index++) {
+          const batchInput = vals.inputs[index]
+
           const req = createRequestObject(
             isBatchRun ? `${vals.jobName} (${index + 1} of ${vals.inputs.length})` : vals.jobName,
             vals.jobLimit,
@@ -190,33 +201,39 @@ export const RunJobForm = ({ app, userJobLimit, spec }: { app: IApp; spec: AppSp
             app,
             spec.input_spec,
           )
-          return runJobMutation.mutateAsync(req)
-        })
-        try {
-          await Promise.all(mutations).then(data => {
-            if (data[0]?.id) {
-              if (vals.scope.value === 'private') {
-                if (isBatchRun) {
-                  navigate(`/home/apps/${app.uid}/jobs`)
-                } else {
-                  navigate(`/home/executions/${data[0].id}`)
-                }
-              } else {
-                const spaceId = vals.scope.value.replace('space-', '')
-                if (isBatchRun) {
-                  navigate(`/spaces/${spaceId}/apps/${app.uid}/jobs`)
-                } else {
-                  navigate(`/spaces/${spaceId}/executions/${data[0].id}`)
-                }
-              }
-            } else if (res?.error) {
-              toast.error(res.error.message)
-            } else {
+
+          try {
+            const data = await runJobMutation.mutateAsync(req)
+            setExecutedBatchCount(prevCount => prevCount + 1)
+
+            if (!data?.id && data?.error) {
+              toast.error(data.error.message)
+            } else if (!data?.id) {
               toast.error('Something went wrong!')
             }
-          })
-        } catch (error) {
-          console.error(error)
+
+            if (!isBatchRun) {
+              if (vals.scope.value === 'private') {
+                navigate(`/home/executions/${data?.id}`)
+              } else {
+                const spaceId = vals.scope.value.replace('space-', '')
+                navigate(`/spaces/${spaceId}/executions/${data?.id}`)
+              }
+            }
+          } catch (error) {
+            console.error(`Error starting job ${index + 1}:`, error)
+            toast.error('Failed to start job.')
+          }
+        }
+
+        // Navigate after all jobs have been executed
+        if (isBatchRun) {
+          if (vals.scope.value === 'private') {
+            navigate(`/home/apps/${app.uid}/jobs`)
+          } else {
+            const spaceId = vals.scope.value.replace('space-', '')
+            navigate(`/spaces/${spaceId}/apps/${app.uid}/jobs`)
+          }
         }
       }
     }
@@ -371,7 +388,7 @@ export const RunJobForm = ({ app, userJobLimit, spec }: { app: IApp; spec: AppSp
           form="submitJobForm"
           onClick={handleSubmit(onSubmit)}
         >
-          {isSubmitting ? 'Running' : runButtonText}
+          {isSubmitting ? runningButtonText : runButtonText}
         </Button>
         <RightGroup>
           {isBatchRun && (
@@ -405,6 +422,18 @@ export const RunJobForm = ({ app, userJobLimit, spec }: { app: IApp; spec: AppSp
       </StyledActionsContainer>
       {licensesModal}
       {organizeFileModal}
+
+      <SavingModal
+        headerText="Starting batch run jobs"
+        body={(
+          <div>
+            <p>{getRunningLabelText()}.</p>
+            <p>Please wait until this message disappears.</p>
+          </div>
+        )}
+        isSaving={isSubmitting && isBatchRun}
+        key="run-batch-job-processing"
+      />
     </StyledForm>
   )
 }
