@@ -1,5 +1,5 @@
 import { Entity, Collection, OneToMany, Enum } from '@mikro-orm/core'
-import { BaseEntity } from '../../database/base-entity'
+import { BaseEntity } from '../../database/base.entity'
 import { AdminMembership } from '../admin-membership/admin-membership.entity'
 
 export enum ADMIN_GROUP_ROLES {

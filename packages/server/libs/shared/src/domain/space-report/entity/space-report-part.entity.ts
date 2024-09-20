@@ -1,7 +1,7 @@
 import { Entity, JsonType, ManyToOne, Property, Ref } from '@mikro-orm/core'
 import { SpaceReportFormat } from '@shared/domain/space-report/model/space-report-format'
 import { SpaceReportPartResult } from '@shared/domain/space-report/model/space-report-part-result'
-import { BaseEntity } from '@shared/database/base-entity'
+import { BaseEntity } from '@shared/database/base.entity'
 import { SpaceReportPartSourceType } from '../model/space-report-part-source.type'
 import { SpaceReportPartState } from '../model/space-report-part-state.type'
 import { SpaceReport } from './space-report.entity'

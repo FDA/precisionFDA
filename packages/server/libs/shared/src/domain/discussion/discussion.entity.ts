@@ -13,7 +13,7 @@ import { Answer } from '@shared/domain/answer/answer.entity'
 import { DiscussionComment } from '@shared/domain/comment/discussion-comment.entity'
 import { Note } from '@shared/domain/note/note.entity'
 import { User } from '@shared/domain/user/user.entity'
-import { BaseEntity } from '../../database/base-entity'
+import { BaseEntity } from '../../database/base.entity'
 
 @Entity({ tableName: 'discussions' })
 export class Discussion extends BaseEntity {

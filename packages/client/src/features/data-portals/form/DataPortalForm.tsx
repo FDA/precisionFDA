@@ -11,7 +11,7 @@ import { Loader } from '../../../components/Loader'
 import { FieldGroup } from '../../../components/form/FieldGroup'
 import { FieldInfo } from '../../../components/form/FieldInfo'
 import { InputError } from '../../../components/form/styles'
-import { SavingModal } from './SavingModal'
+import { SavingModal } from '../../modal/SavingModal'
 import { StatusSelect } from './StatusSelect'
 import { UsersSelect } from './UsersSelect'
 import { createValidationSchema, editValidationSchema } from './common'
@@ -166,172 +166,123 @@ export const DataPortalForm = ({
 
   return (
     <>
-        <StyledForm onSubmit={handleSubmit(onSubmit)} autoComplete="off">
-          <FieldGroup label="Name" required>
-            <InputText
-              placeholder="Name of the portal"
-              {...register('name')}
-              disabled={isSubmitting}
-            />
-            <ErrorMessage
-              errors={errors}
-              name="name"
-              render={({ message }) => <InputError>{message}</InputError>}
-            />
-          </FieldGroup>
-          <FieldGroup label="URL slug" required>
-            <InputText
-                placeholder="URL slug"
-                {...register('url_slug')}
-                disabled={isSubmitting || isEditMode}
-                onBlur={() => setSlugEdited(true)}
-            />
-            <FieldInfo text="Once Data portal is created, the URL slug cannot be edited" />
-            <ErrorMessage
-                errors={errors}
-                name="url_slug"
-                render={({ message }) => <InputError>{message}</InputError>}
-            />
-          </FieldGroup>
-          <FieldGroup label="Description">
-            <InputText
-                type="textarea"
-                placeholder="What is this portal about?"
-                {...register('description')}
-                disabled={isSubmitting}
-            />
-            <ErrorMessage
-                errors={errors}
-                name="description"
-                render={({ message }) => <InputError>{message}</InputError>}
-            />
-          </FieldGroup>
-          <FieldGroup label="Portal image" required>
-            {base64Image ? (
-              <ImageUploadPreview
-                width={300}
-                src={base64Image || undefined}
-                alt="portal img"
-              />
-            ) : (
-              defaultValues?.card_image_url && (
-                <ImageUploadPreview
-                  width={300}
-                  src={defaultValues?.card_image_url}
-                  alt="portal img"
-                />
-              )
-            )}
-
-            <>
-              <InputFile
-                type="file"
-                accept="image/*"
-                {...register('card_image_file')}
-                disabled={isSubmitting}
-              />
-              <ErrorMessage
-                errors={errors}
-                name="card_image_file"
-                render={({ message }) => <InputError>{message}</InputError>}
-              />
-            </>
-
-            {/* disabled changing image for edit mode */}
-          </FieldGroup>
-          <FieldGroup label="First Lead User" required>
-            <Controller
-              name="host_lead_dxuser"
-              control={control}
-              render={({ field: { value, onChange, onBlur }}) => (
-                <UsersSelect
-                  isDisabled={isEditMode || isSubmitting}
-                  onChange={onChange}
-                  onBlur={onBlur}
-                  value={value}
-                  inputId="data-portal_host-lead"
-                />
-              )}
-            />
-            <ErrorMessage
-              errors={errors}
-              name="host_lead_dxuser"
-              render={({ message }) => <InputError>{message}</InputError>}
-            />
-          </FieldGroup>
-          <FieldGroup label="Second Lead User" required>
-            <Controller
-              name="guest_lead_dxuser"
-              control={control}
-              render={({ field: { value, onChange, onBlur }}) => (
-                <UsersSelect
-                  onChange={onChange}
-                  onBlur={onBlur}
-                  value={value}
-                  isDisabled={isEditMode || isSubmitting}
-                  inputId="data-portal_guest-lead"
-                />
-              )}
-            />
-            <ErrorMessage
-              errors={errors}
-              name="guest_lead_dxuser"
-              render={({ message }) => <InputError>{message}</InputError>}
-            />
-          </FieldGroup>
-          <FieldGroup label="Status" required>
-            <Controller
-              name="status"
-              control={control}
-              render={({ field: { value, onChange, onBlur }}) => (
-                <StatusSelect
-                  isDisabled={isSubmitting}
-                  onChange={onChange}
-                  onBlur={onBlur}
-                  value={value}
-                />
-              )}
-            />
-            <ErrorMessage
-              errors={errors}
-              name="status"
-              render={({ message }) => <InputError>{message}</InputError>}
-            />
-          </FieldGroup>
-          {canEditMainDataPortal && (
-            <Row>
-              <FieldGroup label="Sort order">
-                <InputNumber
-                  step="1"
-                  min="0"
-                  placeholder="What is the portal's sort order?"
-                  {...register('sort_order')}
-                  disabled={isSubmitting}
-                />
-                <ErrorMessage
-                  errors={errors}
-                  name="sort_order"
-                  render={({ message }) => <InputError>{message}</InputError>}
-                />
-              </FieldGroup>
-            </Row>
+      <StyledForm onSubmit={handleSubmit(onSubmit)} autoComplete="off">
+        <FieldGroup label="Name" required>
+          <InputText placeholder="Name of the portal" {...register('name')} disabled={isSubmitting} />
+          <ErrorMessage errors={errors} name="name" render={({ message }) => <InputError>{message}</InputError>} />
+        </FieldGroup>
+        <FieldGroup label="URL slug" required>
+          <InputText
+            placeholder="URL slug"
+            {...register('url_slug')}
+            disabled={isSubmitting || isEditMode}
+            onBlur={() => setSlugEdited(true)}
+          />
+          <FieldInfo text="Once Data portal is created, the URL slug cannot be edited" />
+          <ErrorMessage errors={errors} name="url_slug" render={({ message }) => <InputError>{message}</InputError>} />
+        </FieldGroup>
+        <FieldGroup label="Description">
+          <InputText
+            type="textarea"
+            placeholder="What is this portal about?"
+            {...register('description')}
+            disabled={isSubmitting}
+          />
+          <ErrorMessage errors={errors} name="description" render={({ message }) => <InputError>{message}</InputError>} />
+        </FieldGroup>
+        <FieldGroup label="Portal image" required>
+          {base64Image ? (
+            <ImageUploadPreview width={300} src={base64Image || undefined} alt="portal img" />
+          ) : (
+            defaultValues?.card_image_url && (
+              <ImageUploadPreview width={300} src={defaultValues?.card_image_url} alt="portal img" />
+            )
           )}
-          <Row>
-            <ErrorMessage
-              errors={errors}
-              name="root.serverError"
-              render={({ message }) => <InputError>{message}</InputError>}
-            />
-          </Row>
-          <Row>
-            <Button data-variant="primary" disabled={Object.keys(submitErrors).length > 0 || isSubmitting || isSaving} type="submit">
-              Submit
-            </Button>
-            {isSubmitting && <Loader />}
-          </Row>
-        </StyledForm>
 
-      <SavingModal isEditMode={isEditMode} isSaving={isSubmitting} key="data-portal-save" />
+          <>
+            <InputFile type="file" accept="image/*" {...register('card_image_file')} disabled={isSubmitting} />
+            <ErrorMessage errors={errors} name="card_image_file" render={({ message }) => <InputError>{message}</InputError>} />
+          </>
+
+          {/* disabled changing image for edit mode */}
+        </FieldGroup>
+        <FieldGroup label="First Lead User" required>
+          <Controller
+            name="host_lead_dxuser"
+            control={control}
+            render={({ field: { value, onChange, onBlur } }) => (
+              <UsersSelect
+                isDisabled={isEditMode || isSubmitting}
+                onChange={onChange}
+                onBlur={onBlur}
+                value={value}
+                inputId="data-portal_host-lead"
+              />
+            )}
+          />
+          <ErrorMessage errors={errors} name="host_lead_dxuser" render={({ message }) => <InputError>{message}</InputError>} />
+        </FieldGroup>
+        <FieldGroup label="Second Lead User" required>
+          <Controller
+            name="guest_lead_dxuser"
+            control={control}
+            render={({ field: { value, onChange, onBlur } }) => (
+              <UsersSelect
+                onChange={onChange}
+                onBlur={onBlur}
+                value={value}
+                isDisabled={isEditMode || isSubmitting}
+                inputId="data-portal_guest-lead"
+              />
+            )}
+          />
+          <ErrorMessage errors={errors} name="guest_lead_dxuser" render={({ message }) => <InputError>{message}</InputError>} />
+        </FieldGroup>
+        <FieldGroup label="Status" required>
+          <Controller
+            name="status"
+            control={control}
+            render={({ field: { value, onChange, onBlur } }) => (
+              <StatusSelect isDisabled={isSubmitting} onChange={onChange} onBlur={onBlur} value={value} />
+            )}
+          />
+          <ErrorMessage errors={errors} name="status" render={({ message }) => <InputError>{message}</InputError>} />
+        </FieldGroup>
+        {canEditMainDataPortal && (
+          <Row>
+            <FieldGroup label="Sort order">
+              <InputNumber
+                step="1"
+                min="0"
+                placeholder="What is the portal's sort order?"
+                {...register('sort_order')}
+                disabled={isSubmitting}
+              />
+              <ErrorMessage errors={errors} name="sort_order" render={({ message }) => <InputError>{message}</InputError>} />
+            </FieldGroup>
+          </Row>
+        )}
+        <Row>
+          <ErrorMessage errors={errors} name="root.serverError" render={({ message }) => <InputError>{message}</InputError>} />
+        </Row>
+        <Row>
+          <Button
+            data-variant="primary"
+            disabled={Object.keys(submitErrors).length > 0 || isSubmitting || isSaving}
+            type="submit"
+          >
+            Submit
+          </Button>
+          {isSubmitting && <Loader />}
+        </Row>
+      </StyledForm>
+
+      <SavingModal
+        headerText={isEditMode ? 'Updating Data Portal' : 'Creating new Data Portal'}
+        body={`The Data Portal is being ${isEditMode ? 'updated' : 'created'}, please wait until this message disappears.`}
+        isSaving={isSubmitting}
+        key="data-portal-save"
+      />
     </>
   )
 }

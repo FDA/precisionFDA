@@ -31,3 +31,7 @@ export const SUPPORT_EMAIL = 'precisionfda-support@dnanexus.com'
 export const PFDA_EMAIL = 'precisionfda@fda.hhs.gov'
 
 export const SPACE_PREFIX = 'space-'
+
+// validation errors for app series/revision start with this string
+export const APP_SERIES_CREATION_NOT_REQUESTED = 'E_APP_SERIES_CREATION_NOT_REQUESTED'
+export const APP_REVISION_CREATION_NOT_REQUESTED = 'E_APP_REVISION_CREATION_NOT_REQUESTED'

@@ -1,6 +1,6 @@
 module dnanexus.com/precision-fda-cli
 
-go 1.22.1
+go 1.23.1
 
 require (
 	github.com/docker/go-units v0.5.0
@@ -14,5 +14,5 @@ require (
 require (
 	github.com/chzyer/readline v1.5.1 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
-	golang.org/x/sys v0.20.0 // indirect
+	golang.org/x/sys v0.25.0 // indirect
 )

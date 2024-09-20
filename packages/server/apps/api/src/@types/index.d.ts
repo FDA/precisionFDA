@@ -4,7 +4,7 @@ import { EntityManager } from '@mikro-orm/mysql'
 import Koa from 'koa'
 import { Logger } from '@nestjs/common'
 import { types } from '@shared'
-import { BaseEntity } from '@shared/database/base-entity'
+import { BaseEntity } from '@shared/database/base.entity'
 import { MapValueObjectByKey, MapValuesToReturnType } from '@shared/utils/generics'
 import { FilterSchemaNode } from '@shared/utils/filters'
 

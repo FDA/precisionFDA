@@ -2,7 +2,7 @@ import { Entity, ManyToOne, PrimaryKey, Property, Ref, Reference } from '@mikro-
 import { DxId } from '@shared/domain/entity/domain/dxid'
 import { Uid } from '@shared/domain/entity/domain/uid'
 import { User } from '@shared/domain/user/user.entity'
-import { BaseEntity } from '../../../database/base-entity'
+import { BaseEntity } from '../../../database/base.entity'
 import { WorkaroundJsonType } from '../../../database/custom-json-type'
 import { WorkflowSpec } from '../model/workflow-spec'
 

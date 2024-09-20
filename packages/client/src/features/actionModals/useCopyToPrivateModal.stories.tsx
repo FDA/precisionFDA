@@ -26,7 +26,7 @@ type Story = StoryObj<Props>
 
 const CopyToPrivateModalWrapper = (props: Props) => {
   const { modalComp, setShowModal } = useCopyToPrivateModal({
-    request: props.request,
+    copyFunction: props.request,
     resource: props.type,
     selected: props.data,
   })

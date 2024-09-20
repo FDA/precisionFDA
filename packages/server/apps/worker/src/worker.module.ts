@@ -15,7 +15,10 @@ import { QueueWorkerModule } from './queues/queue-worker.module'
       http: config.nestjsDevtoolsEnabled,
       port: 8001,
     }),
-    DatabaseModule,
+    DatabaseModule.forRoot({
+      distPath: './dist/apps/worker',
+      sourcePath: './apps/worker/src',
+    }),
     LoggerModule,
     UserContextModule,
     QueueWorkerModule,

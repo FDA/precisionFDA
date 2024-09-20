@@ -1,5 +1,6 @@
 'use strict'
 process.env.NODE_ENV = 'ci_test'
+process.chdir(__dirname)
 const fs = require('fs')
 
 const getConfig = (packagePath) => {

@@ -32,7 +32,7 @@ import (
 	"github.com/manifoldco/promptui"
 )
 
-const userAgent = "precisionFDA CLI/2.7.1 "
+const userAgent = "precisionFDA CLI/2.7.2 "
 const defaultNumRoutines = 10
 const defaultChunkSize = 1 << 26 // default 64MB (min. 16MB)
 const minRoutines = 1

@@ -10,7 +10,7 @@ import {
   Ref,
   Reference,
 } from '@mikro-orm/core'
-import { BaseEntity } from '@shared/database/base-entity'
+import { BaseEntity } from '@shared/database/base.entity'
 import { SpaceReportFormat } from '@shared/domain/space-report/model/space-report-format'
 import { SpaceReportFormatToOptionsMap } from '@shared/domain/space-report/model/space-report-format-to-options.map'
 import { SpaceReportPartSourceType } from '@shared/domain/space-report/model/space-report-part-source.type'
