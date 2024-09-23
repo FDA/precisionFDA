@@ -63,7 +63,7 @@ http {
     # Reverse proxy for GSRS js, images, and CSS files
     # This is because of actions made by request_forgery_protection.rb; check method verify_same_origin_request for more details
     # The non js file extensions are added just to offload serving static content via ruby
-    location ~ ^/ginas/.*\.(js|css|png|jpg|jpeg|gif)$ {
+    location ~ ^/ginas/.*((\.(js|css|png|jpg|jpeg|gif))|(manifest\.json))$ {
       proxy_pass <%= @gsrs_host %>;
     }
 
