@@ -72,6 +72,7 @@ const defaultConfig = {
     clientUrl:
       process.env.NODE_DATABASE_URL ?? 'mysql://root:password@localhost:32800/precisionfda-test',
     debug: parseBooleanFromProcess(process.env.NODE_DATABASE_DEBUG) ?? false,
+    ormMetadataCacheEnabled: false,
   },
   validation: {
     maxStrLen: 255,

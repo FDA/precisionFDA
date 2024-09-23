@@ -9,13 +9,18 @@ class CopyService
     # Creates a copy of an app in another scope.
     # @param app [App] A source app.
     # @param scope [String] A destination scope.
+    # @param properties [Hash] Properties to create a new app with.
     # return [CopyService::Copies] Object that includes a source and a new app.
-    def copy(app, scope)
+    def copy(app, scope, properties = {})
+      opts = {}
       ActiveRecord::Base.transaction do
         opts = build_opts(app, scope)
 
-        new_app = AppService.create_app(user, api, opts)
-
+        opts[:createAppSeries] = properties["createAppSeries"] if properties.key?("createAppSeries")
+        opts[:createAppRevision] = properties["createAppRevision"] if properties.key?("createAppRevision")
+      end
+      new_app = AppService.create_app(user, api, opts)
+      ActiveRecord::Base.transaction do
         authorize_users(new_app, scope)
         user.tag(new_app.app_series, with: app.app_series.tags, on: :tags)
         new_app

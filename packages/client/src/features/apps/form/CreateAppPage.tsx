@@ -7,6 +7,10 @@ import { toast } from 'react-toastify'
 import { cleanObject } from '../../../utils/object'
 import { CreateAppPayload, CreateAppResponse, createEditAppRequest } from '../apps.api'
 import { AppForm } from './AppForm'
+import {
+  APP_REVISION_CREATION_NOT_REQUESTED,
+  APP_SERIES_CREATION_NOT_REQUESTED,
+} from '../../../constants'
 
 export const CreateAppPage = () => {
   const navigate = useNavigate()
@@ -17,6 +21,7 @@ export const CreateAppPage = () => {
   const appMutation = useMutation({ mutationFn: createEditAppRequest })
 
   const onSubmit = async (d: CreateAppPayload) => {
+    d.createAppSeries = true
     const vals = { ...d, input_spec: d.input_spec.map(i => cleanObject(i)) }
 
     try {
@@ -33,8 +38,12 @@ export const CreateAppPage = () => {
       // The default error message choice is an error we "intentionally" send from the backend
       // The second choice is a standard Error object message
       // The 'Unknown error' is a fallback in case the previous options provide nothing better than - for example - an empty string
-      const message = err.response?.data?.error?.message || err.message || 'Unknown error'
-      toast.error(`Error while creating app: ${message}`)
+      if (err.response?.status === 400 && [APP_SERIES_CREATION_NOT_REQUESTED, APP_REVISION_CREATION_NOT_REQUESTED].includes(err?.response?.data?.error.code)) {
+        throw err
+      } else {
+        const message = err.response?.data?.error?.message || err.message || 'Unknown error'
+        toast.error(`Error while creating app: ${message}`)
+      }
     }
   }
 

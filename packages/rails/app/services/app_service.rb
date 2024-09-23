@@ -21,78 +21,8 @@ class AppService
   # @param opts [Hash] Options to create app with.
   # @return [App] Created app.
   def create_app(opts)
-    app = nil
-    scope = select_scope(opts[:scope])
-
-    assets = Asset.accessible_by_user(user).
-      where(
-        state: Asset::STATE_CLOSED,
-        uid: opts[:ordered_assets],
-      )
-
-    App.transaction do
-      app_series = create_app_series(opts[:name], scope)
-      release = opts.fetch(:release, UBUNTU_16)
-      revision = app_series.latest_revision_app.try(:revision).to_i + 1
-
-      applet_dxid = new_applet(
-        opts.slice(
-          :input_spec,
-          :output_spec,
-          :code,
-          :instance_type,
-          :packages,
-          :internet_access,
-        ),
-        release,
-      )
-
-      app_dxid = new_app(
-        opts.slice(
-          :name,
-          :title,
-          :internet_access,
-          :readme,
-        ).merge(
-          applet_dxid: applet_dxid,
-          asset_dxids: assets.map(&:dxid),
-          revision: revision,
-          scope: scope,
-        ),
-      )
-
-      api.project_remove_objects(project, [applet_dxid])
-
-      app = App.create!(
-        dxid: app_dxid,
-        version: nil,
-        revision: revision,
-        title: opts[:title],
-        readme: opts[:readme],
-        entity_type: opts[:entity_type] || App::TYPE_REGULAR,
-        user: user,
-        scope: scope,
-        forked_from: opts[:forked_from],
-        app_series: app_series,
-        input_spec: opts[:input_spec],
-        output_spec: opts[:output_spec],
-        internet_access: opts[:internet_access],
-        instance_type: opts[:instance_type],
-        ordered_assets: opts[:ordered_assets],
-        packages: opts[:packages],
-        code: opts[:code].strip,
-        assets: assets,
-        release: release,
-      )
-
-      app_series.update!(latest_revision_app: app)
-      app_series.update!(latest_version_app: app) if Space.valid_scope?(scope)
-      app_series.update!(deleted: false) if app_series.deleted?
-
-      Event::AppCreated.create_for(app, user)
-    end
-
-    app
+    app_uid = https_apps_client.app_save(opts)
+    App.find_by!(uid: app_uid)
   end
 
   # Determine a proper scope for new app copy, depends upon current scope.
@@ -192,4 +122,8 @@ class AppService
   end
 
   attr_reader :user, :api
+
+  def https_apps_client
+    @https_apps_client ||= HttpsAppsClient.new
+  end
 end

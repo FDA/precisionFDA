@@ -2,7 +2,7 @@ import { Entity, Enum, Ref, ManyToOne, OneToOne, Property, Reference } from "@mi
 import { ExpertAnswer } from '@shared/domain/expert-answer/expert-answer.entity'
 import { Expert } from '@shared/domain/expert/expert.entity'
 import { User } from '@shared/domain/user/user.entity'
-import { BaseEntity } from '../../database/base-entity'
+import { BaseEntity } from '../../database/base.entity'
 
 export enum ExpertQuestionState {
   OPEN = 'open',

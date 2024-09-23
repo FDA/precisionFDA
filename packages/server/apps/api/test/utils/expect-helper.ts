@@ -1,5 +1,5 @@
 import { USER_CONTEXT_HTTP_HEADERS } from '@shared/config/consts'
-import { BaseEntity } from '@shared/database/base-entity'
+import { BaseEntity } from '@shared/database/base.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { omit } from 'ramda'
 

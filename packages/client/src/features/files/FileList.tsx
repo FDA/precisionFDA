@@ -1,10 +1,9 @@
 import { useQueryClient } from '@tanstack/react-query'
 import React, { useEffect, useMemo, useRef } from 'react'
-import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { Column, SortingRule, UseResizeColumnsState } from 'react-table'
 import useWebSocket from 'react-use-websocket'
 import { useQueryParam } from 'use-query-params'
-import { BreadcrumbDivider, BreadcrumbLabel, StyledBreadcrumbs } from '../../components/Breadcrumb'
 import { Button } from '../../components/Button'
 import Dropdown from '../../components/Dropdown'
 import { ContentFooter } from '../../components/Page/ContentFooter'
@@ -22,42 +21,16 @@ import { useAuthUser } from '../auth/useAuthUser'
 import { ActionsDropdownContent } from '../home/ActionDropdownContent'
 import { ActionsRow, QuickActions, StyledHomeTable } from '../home/home.styles'
 import { ActionsButton, FilesListResourceHeader } from '../home/show.styles'
-import { HomeScope, IFilter, IMeta, KeyVal, MetaPath, Notification, NOTIFICATION_ACTION, WEBSOCKET_MESSSAGE_TYPE, WebSocketMessage } from '../home/types'
+import { HomeScope, IFilter, IMeta, KeyVal, Notification, NOTIFICATION_ACTION, WEBSOCKET_MESSSAGE_TYPE, WebSocketMessage } from '../home/types'
 import { useList } from '../home/useList'
 import { usePropertiesQuery } from '../home/usePropertiesQuery'
 import { ISpace } from '../spaces/spaces.types'
+import { FileBreadcrumb } from './FileBreadcrumb'
 import { fetchFiles } from './files.api'
 import { IFile } from './files.types'
 import { useFilesColumns } from './useFilesColumns'
 import { useFilesSelectActions } from './useFilesSelectActions'
 import { useFolderActions } from './useFolderActions'
-
-const createSearchParam = (params: Record<string, unknown>) => {
-  const query = cleanObject(params)
-  const paramQ = `?${new URLSearchParams(query).toString()}`
-  return paramQ
-}
-
-const breadcrumbs = (basePath: string, scope?: HomeScope, metaPath: MetaPath[] = []) => (
-  <StyledBreadcrumbs>
-    <BreadcrumbLabel>You are here:</BreadcrumbLabel>
-    {[{ id: 0, name: 'Files', href: `${basePath}${createSearchParam({ scope })}` }]
-      .concat(
-        metaPath.map(folder => ({
-          id: folder.id,
-          name: folder.name,
-          href: `${createSearchParam({ scope, folder_id: folder.id })}`,
-        })),
-      )
-      .map(folder => (
-        <Link key={`folder-${folder.id}`} to={folder.href || ''}>
-          {folder.name}
-        </Link>
-      ))
-      // @ts-ignore
-      .reduce((prev, curr) => [prev, <BreadcrumbDivider key={`divider-${prev.id}`}>/</BreadcrumbDivider>, curr])}
-  </StyledBreadcrumbs>
-)
 
 type ListType = { files: IFile[]; meta: IMeta }
 
@@ -251,7 +224,7 @@ export const FileList = ({
             </Dropdown>
           </QuickActions>
         </ActionsRow>
-        {breadcrumbs(location.pathname, homeScope, data?.meta?.path)}
+        <FileBreadcrumb basePath={location.pathname} scope={homeScope} labelText='You are here:' metaPath={data?.meta?.path} />
       </FilesListResourceHeader>
 
       <FilesListTable

@@ -1,5 +1,5 @@
 import { Injectable, Logger, PipeTransform } from '@nestjs/common'
-import { BaseEntity } from '@shared/database/base-entity'
+import { BaseEntity } from '@shared/database/base.entity'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { ValidationError } from '@shared/errors'
 import {

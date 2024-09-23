@@ -209,7 +209,7 @@ module Api
     # Copies apps to another scope.
     #   HTML-format response is used only for copying a single app to a space from App Page.
     def copy
-      new_apps = @apps.map { |app| copy_service.copy(app, params[:scope]).first }
+      new_apps = @apps.map { |app| copy_service.copy(app, params[:scope], params[:properties]).first }
 
       respond_to do |format|
         format.html do
@@ -223,6 +223,8 @@ module Api
                  }
         end
       end
+    rescue HttpsAppsClient::Error => e
+      render status: e.status_code, json: { error: { message: e.message, statusCode: e.status_code, code: e.code } }
     rescue DXClient::Errors::ChargesMismatchError => e
       respond_to do |format|
         format.html { redirect_back(fallback_location: @apps.first, flash: { error: e.message }) }
@@ -249,8 +251,8 @@ module Api
     def create
       app_uid = https_apps_client.app_save(unsafe_params)
       render json: { id: app_uid }
-    rescue Net::HTTPClientException => e
-      render status: e.response.code, json: e.response.body
+    rescue HttpsAppsClient::Error => e
+      render status: e.status_code, json: { error: { message: e.message, statusCode: e.status_code, code: e.code } }
     end
 
     def import
@@ -729,7 +731,7 @@ module Api
     end
 
     def copy_service
-      @copy_service ||= CopyService.new(api: @context.api, user: current_user)
+      @copy_service ||= CopyService::AppCopier.new(api: @context.api, user: current_user)
     end
 
     def can_copy_to_scope?

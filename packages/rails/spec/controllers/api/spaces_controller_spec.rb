@@ -30,12 +30,14 @@ RSpec.describe Api::SpacesController, type: :controller do
 
   describe "POST add_data" do
     let(:space) { create(:space, :review, :active, host_lead_id: user.id) }
-    let(:copy_service) { instance_double(CopyService, copy: []) }
+    let(:workflow_copy_service) { instance_double(CopyService::WorkflowCopier, copy: []) }
+    let(:app_copy_service) { instance_double(CopyService::AppCopier, copy: []) }
 
     before do
       authenticate!(user)
 
-      allow(CopyService).to receive(:new).and_return(copy_service)
+      allow(CopyService::WorkflowCopier).to receive(:new).and_return(workflow_copy_service)
+      allow(CopyService::AppCopier).to receive(:new).and_return(app_copy_service)
     end
 
     it "copies files" do
@@ -59,7 +61,7 @@ RSpec.describe Api::SpacesController, type: :controller do
       expect(response).to be_successful
 
       apps.each do |app|
-        expect(copy_service).to have_received(:copy).with(app, space.scope).exactly(1).times
+        expect(app_copy_service).to have_received(:copy).with(app, space.scope, nil).exactly(1).times
       end
     end
 
@@ -71,7 +73,7 @@ RSpec.describe Api::SpacesController, type: :controller do
       expect(response).to be_successful
 
       workflows.each do |workflow|
-        expect(copy_service).to have_received(:copy).with(workflow, space.scope).exactly(1).times
+        expect(workflow_copy_service).to have_received(:copy).with(workflow, space.scope, nil).exactly(1).times
       end
     end
   end

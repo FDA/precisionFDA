@@ -14,7 +14,6 @@ import { PfTabContent } from '../../../components/Tabs/PfTab'
 import {
   FieldGroup,
   InputError,
-  SelectFieldLabel,
 } from '../../../components/form/styles'
 import { ArrowLeftIcon } from '../../../components/icons/ArrowLeftIcon'
 import { StyledBackLink } from '../../home/home.styles'
@@ -49,6 +48,12 @@ import { getSpaceIdFromScope } from '../../../utils'
 import { CreateAppPayload } from '../apps.api'
 import { Select } from '../../../components/Select'
 import MonacoEditor from '../../../components/MonacoEditor/MonacoEditor'
+import { useConfirmModal } from '../../files/actionModals/useConfirmModal'
+import {
+  APP_REVISION_CREATION_NOT_REQUESTED,
+  APP_SERIES_CREATION_NOT_REQUESTED,
+} from '../../../constants'
+import { CONFIRM_APP_REVISION, CONFIRM_APP_SERIES } from '../../../constants/consts'
 
 type SelectedSection = 'io' | 'vm' | 'script' | 'readme'
 
@@ -116,23 +121,51 @@ export const AppForm = ({
   if (isEdit) pageTitle = 'Edit App'
   if (isFork) pageTitle = 'Fork App'
 
-  const submitHandler = async () => {
-    const vals = getValues() as CreateAppForm
+  let submitHandler: (createAppSeries: boolean, createAppRevision: boolean) => Promise<void>
+  const { modalComp: appSeriesConfirmModal, setShowModal: setShowAppSeriesConfirmModal } = useConfirmModal(
+    'Confirm',
+    CONFIRM_APP_SERIES,
+    async () => {
+      setShowAppSeriesConfirmModal(false)
+      await submitHandler(true, false)
+    },
+  )
+  const { modalComp: appRevisionConfirmModal, setShowModal: setShowAppRevisionConfirmModal } = useConfirmModal(
+    'Confirm',
+    CONFIRM_APP_REVISION,
+    async () => {
+      setShowAppSeriesConfirmModal(false)
+      await submitHandler(false, true)
+    },
+  )
 
+  submitHandler = async (createAppSeries: boolean, createAppRevision: boolean) => {
+    const vals = getValues() as CreateAppForm
     const formatted: CreateAppPayload = {
       ...vals,
       is_new: false,
       ordered_assets: vals.ordered_assets?.map(asset => asset.uid),
       input_spec: vals.input_spec.map(i => {
-        const spec = {
+        return {
           ...i,
           default: getDefaultValueFromForm(i.class, i.default),
           choices: i?.choices && getChoicesValueFromForm(i.class, i.choices),
         }
-        return spec
       }),
+    } as CreateAppPayload
+    formatted.createAppSeries = createAppSeries
+    formatted.createAppRevision = createAppRevision
+    try {
+      await onSubmit(formatted)
+    } catch (err) {
+      const code = err.response?.data?.error?.code
+      if (code === APP_SERIES_CREATION_NOT_REQUESTED)  {
+        setShowAppSeriesConfirmModal(true)
+      }
+      if (code === APP_REVISION_CREATION_NOT_REQUESTED)  {
+        setShowAppRevisionConfirmModal(true)
+      }
     }
-    await onSubmit(formatted)
   }
 
   const backLink = isEdit || isFork ? `/${getBaseLink(spaceId)}/apps/${app?.uid}` : `/${getBaseLink(spaceId)}/apps`
@@ -146,7 +179,7 @@ export const AppForm = ({
         {backLabel}
       </StyledBackLink>
 
-      <StyledForm onSubmit={handleSubmit(submitHandler)} autoComplete="off">
+      <StyledForm onSubmit={handleSubmit(() => submitHandler(false, false))} autoComplete="off">
         <Row>
           <PageTitle>{pageTitle}</PageTitle>
           <SubmitRow>
@@ -336,6 +369,8 @@ export const AppForm = ({
             />
           </PfTabContent>
         </div>
+        {appSeriesConfirmModal}
+        {appRevisionConfirmModal}
       </StyledForm>
     </>
   )

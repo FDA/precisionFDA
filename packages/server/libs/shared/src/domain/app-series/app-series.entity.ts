@@ -9,7 +9,7 @@ import {
 } from '@mikro-orm/core'
 import { AppSeriesProperty } from '@shared/domain/property/app-series-property.entity'
 import { User } from '@shared/domain/user/user.entity'
-import { BaseEntity } from '../../database/base-entity'
+import { BaseEntity } from '../../database/base.entity'
 
 @Entity({ tableName: 'app_series' })
 export class AppSeries extends BaseEntity {
