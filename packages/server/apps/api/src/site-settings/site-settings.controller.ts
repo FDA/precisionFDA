@@ -50,19 +50,19 @@ export class SiteSettingsController {
       const dataPortalsList = (await this.dataPortalService.list()).data_portals
       const dataPortals = {
         daaas: {
-          accessible: dataPortalsList.find((portal) => portal.name === 'DAaaS') !== undefined,
+          accessible: dataPortalsList.find((portal) => portal.name === 'FDA Data Analytics as a Service (DAaaS)') !== undefined,
           tooltipText: 'This is the DaaaS Data Portal; access is controlled by the FDA.',
           mailto: 'precisionFDA@fda.hhs.gov?subject=DaaaS Data Portal access request',
         },
         prism: {
           accessible:
-            dataPortalsList.find((portal) => portal.name === 'PRISM') !== undefined && false,
+            dataPortalsList.find((portal) => portal.name === 'PRISM – precisionFDA Regulatory Information Service Module ') !== undefined,
           tooltipText: 'This is the PRISM Data Portal; access is controlled by the FDA.',
           mailto:
             'virginia.Hussong@fda.hhs.gov?cc=precisionFDA@fda.hhs.gov&subject=PRISM Data Portal access request',
         },
         tools: {
-          accessible: dataPortalsList.find((portal) => portal.name === 'Tools') !== undefined,
+          accessible: dataPortalsList.find((portal) => portal.name === 'PrecisionFDA Getting Started and Next Steps') !== undefined,
           tooltipText:
             'This is the FDA Use Case Toolbox Data Portal; access is available for all FDA users.',
           mailto: 'precisionFDA@fda.hhs.gov?subject=Toolbox Data Portal access request',
