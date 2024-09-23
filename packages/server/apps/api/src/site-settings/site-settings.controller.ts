@@ -56,7 +56,7 @@ export class SiteSettingsController {
         },
         prism: {
           accessible:
-            dataPortalsList.find((portal) => portal.name === 'PRISM – precisionFDA Regulatory Information Service Module ') !== undefined && false,
+            dataPortalsList.find((portal) => portal.name === 'PRISM – precisionFDA Regulatory Information Service Module ') !== undefined,
           tooltipText: 'This is the PRISM Data Portal; access is controlled by the FDA.',
           mailto:
             'virginia.Hussong@fda.hhs.gov?cc=precisionFDA@fda.hhs.gov&subject=PRISM Data Portal access request',
