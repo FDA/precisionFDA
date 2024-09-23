@@ -2,7 +2,6 @@ module Api
   # Front controller that delegates call for Count per Section.
   class CountersController < ApiController
     CONTROLLERS = {
-      "apps" => AppsController,
       "assets" => AssetsController,
       "dbclusters" => DbClustersController,
       "jobs" => JobsController,
@@ -36,6 +35,13 @@ module Api
       end
 
       counters[:reports] = SpaceReport.accessible_by_private.where(created_by: @context.user.id).count
+
+      apps = if params[:action] == "spaces"
+        AppSeries.editable_by(@context).where.not(scope: [Scopes::SCOPE_PUBLIC, Scopes::SCOPE_PRIVATE])
+      else
+        AppSeries.editable_by(@context).where(scope: Scopes::SCOPE_PRIVATE)
+      end
+      counters[:apps] = apps.count
 
       render json: counters
     end

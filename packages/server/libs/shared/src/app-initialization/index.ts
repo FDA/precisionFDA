@@ -21,7 +21,7 @@ export async function setupNestApp(app: INestApplicationContext) {
  * Should be removed when everything is DI integrated
  */
 async function exposeModules(app: INestApplicationContext) {
-  exposeOrm(app.select(DatabaseModule))
+  exposeOrm(app)
   await exposeBull(app.select(QueueModule))
 }
 

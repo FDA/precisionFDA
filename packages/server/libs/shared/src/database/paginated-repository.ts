@@ -5,7 +5,7 @@ import { EntityRepository } from '@mikro-orm/mysql'
 import { FilterSchemaNode, FilterWithColumnNode } from '../utils/filters'
 import { ColumnNode, resolveColumnNode } from '../utils/sql-json-column-utils'
 import { validateDefined } from '../validation/validators'
-import { BaseEntity } from './base-entity'
+import { BaseEntity } from './base.entity'
 
 type FindPaginatedOpts<T extends BaseEntity> = {
   page: number

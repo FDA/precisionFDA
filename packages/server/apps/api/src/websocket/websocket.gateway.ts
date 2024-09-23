@@ -11,6 +11,7 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets'
 import { config } from '@shared/config'
+import { database } from '@shared/database'
 import { OrmContextInterceptor } from '@shared/database/interceptor/orm-context.interceptor'
 import { Uid } from '@shared/domain/entity/domain/uid'
 import { EntityFetcherService } from '@shared/domain/entity/entity-fetcher.service'
@@ -54,7 +55,7 @@ export class WebsocketGateway implements OnGatewayDisconnect, OnGatewayInit, OnG
     )
   }
 
-  @CreateRequestContext()
+  @CreateRequestContext(() => database.orm())
   async handleConnection(client: PfdaWebSocket, message: IncomingMessage) {
     try {
       this.logger.log(`Websocket client connected: ${client}`)

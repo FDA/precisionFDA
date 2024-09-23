@@ -22,6 +22,7 @@ export const EditAppPage = ({ spaceId }: { spaceId?: string }) => {
   const appMutation = useMutation({ mutationFn: createEditAppRequest })
 
   const onSubmit = async (d: CreateAppPayload) => {
+    d.createAppRevision = true
     const vals = { ...d, input_spec: d.input_spec.map(i => cleanObject(i)) }
 
     try {

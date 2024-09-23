@@ -13,7 +13,7 @@ import {
 import { Resource } from '@shared/domain/resource/resource.entity'
 import { Space } from '@shared/domain/space/space.entity'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
-import { BaseEntity } from '../../database/base-entity'
+import { BaseEntity } from '../../database/base.entity'
 import { DATA_PORTAL_STATUS } from './data-portal.enum'
 import { DataPortalRepository } from '@shared/domain/data-portal/data-portal.repository'
 

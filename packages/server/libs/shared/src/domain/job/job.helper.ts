@@ -10,13 +10,7 @@ import { ACTIVE_STATES, JOB_STATE, TERMINAL_STATES } from './job.enum'
 export const isStateTerminal = (state: string): boolean =>
   Object.values(TERMINAL_STATES).includes(state as JOB_STATE)
 
-export const shouldSyncStatus = (job: Job): boolean => {
-  if (isStateTerminal(job.state)) {
-    // the job has already ended and PFDA knows of it
-    return false
-  }
-  return true
-}
+export const shouldSyncStatus = (job: Job): boolean => !isStateTerminal(job.state)
 
 export const isJobPrivate = (job: Job): boolean => job.scope.toLowerCase() === 'private'
 
@@ -42,36 +36,36 @@ export const buildIsOverMaxDuration = (
   return (job: Job): boolean => {
     const createdAt = DateTime.fromJSDate(job.createdAt)
     const currentJobInterval = Interval.fromDateTimes(createdAt, current)
-    if (currentJobInterval.toDuration() >= maxDuration) {
-      return true
-    }
-    return false
+    return currentJobInterval.toDuration() >= maxDuration
   }
 }
 
-export const sendJobFailedEmails = async (jobId:string, ctx: WorkerOpsCtx<UserOpsCtx>): Promise<void> => {
-  const handler = new EMAIL_CONFIG.jobFailed.handlerClass(
-    EMAIL_TYPES.jobFailed,
-    { jobId},
-    ctx,
-  )
+export const sendJobFailedEmails = async (
+  jobId: string,
+  ctx: WorkerOpsCtx<UserOpsCtx>,
+): Promise<void[]> => {
+  const handler = new EMAIL_CONFIG.jobFailed.handlerClass(EMAIL_TYPES.jobFailed, { jobId }, ctx)
   await handler.setupContext()
 
   const receivers = await handler.determineReceivers()
   const emails = await Promise.all(
-    receivers.map(async receiver => {
-      const template = await handler.template(receiver)
-      return template
+    receivers.map(async (receiver) => {
+      return await handler.template(receiver)
     }),
   )
 
-  return Promise.all(emails.map(async email => {
-    ctx.log.log({
-      jobId,
-      user: ctx.user.dxuser,
-      recipient: email.to,
-    }, 'Sending failed job email to user')
+  return await Promise.all(
+    emails.map(async (email) => {
+      ctx.log.log(
+        {
+          jobId,
+          user: ctx.user.dxuser,
+          recipient: email.to,
+        },
+        'Sending failed job email to user',
+      )
 
-    await createSendEmailTask(email, ctx.user)
-  })) as any
+      await createSendEmailTask(email, ctx.user)
+    }),
+  )
 }

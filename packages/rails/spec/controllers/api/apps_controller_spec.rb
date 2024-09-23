@@ -16,21 +16,22 @@ RSpec.describe Api::AppsController, type: :controller do
   describe "POST copy" do
     let(:space) { create(:space, :review, :active, host_lead_id: user.id) }
     let(:apps) { create_list(:app, 2, user: user) }
-    let(:copy_service) { instance_double(CopyService, copy: []) }
+    let(:copy_service) { instance_double(CopyService::AppCopier, copy: []) }
 
     before do
       authenticate!(user)
 
-      allow(CopyService).to receive(:new).and_return(copy_service)
+      allow(CopyService::AppCopier).to receive(:new).and_return(copy_service)
     end
 
     it "copies apps" do
       post :copy, params: { item_ids: apps.map(&:id), scope: space.scope }, format: :json
 
+      puts "response #{response.body}"
       expect(response).to be_successful
 
       apps.each do |app|
-        expect(copy_service).to have_received(:copy).with(app, space.scope).exactly(1).times
+        expect(copy_service).to have_received(:copy).with(app, space.scope, nil).exactly(1).times
       end
     end
   end

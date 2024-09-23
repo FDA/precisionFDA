@@ -23,7 +23,6 @@ import { ADMIN_PLATFORM_CLIENT } from '@shared/platform-client/providers/admin-p
  */
 @Injectable()
 export class AdministratorSpaceCreationProcess extends SpaceCreationProcess {
-
   constructor(
     userContext: UserContext,
     em: SqlEntityManager,
@@ -39,11 +38,13 @@ export class AdministratorSpaceCreationProcess extends SpaceCreationProcess {
       throw new NotFoundError(`User with ID: ${this.userContext.id} was not found!`)
     }
     // space admin is called reviewSpaceAdmin but it's wrong - PFDA-5437 will resolve it in the future
-    if (!await user.isSiteAdmin()) {
+    if (!(await user.isSiteAdmin())) {
       throw new PermissionError('Only admins can create Administrator space')
     }
     if (input.hostLeadDxuser !== user.dxuser) {
-      throw new PermissionError(`You are not allowed to create new Administrator Space for another user!`)
+      throw new PermissionError(
+        `You are not allowed to create new Administrator Space for another user!`,
+      )
     }
   }
 
@@ -60,10 +61,13 @@ export class AdministratorSpaceCreationProcess extends SpaceCreationProcess {
     }
   }
 
-  protected async inviteMembers(space: Space, leads: {
-    host: User,
-    guest: never
-  }): Promise<SpaceMembership[]> {
+  protected async inviteMembers(
+    space: Space,
+    leads: {
+      host: User
+      guest: never
+    },
+  ): Promise<SpaceMembership[]> {
     const hostLead = leads.host
 
     await this.adminClient.inviteUserToOrganization({
@@ -98,9 +102,17 @@ export class AdministratorSpaceCreationProcess extends SpaceCreationProcess {
       })
       this.logger.log(`invited host admin: ${admin.dxuser} to host org: ${space.hostDxOrg}`)
     }
-    const spaceMemberships = admins.map((admin) => new SpaceMembership(admin, space, SPACE_MEMBERSHIP_SIDE.HOST, SPACE_MEMBERSHIP_ROLE.ADMIN))
+    const spaceMemberships = admins.map(
+      (admin) =>
+        new SpaceMembership(admin, space, SPACE_MEMBERSHIP_SIDE.HOST, SPACE_MEMBERSHIP_ROLE.ADMIN),
+    )
 
-    const hostLeadMembership = new SpaceMembership(hostLead, space, SPACE_MEMBERSHIP_SIDE.HOST, SPACE_MEMBERSHIP_ROLE.LEAD)
+    const hostLeadMembership = new SpaceMembership(
+      hostLead,
+      space,
+      SPACE_MEMBERSHIP_SIDE.HOST,
+      SPACE_MEMBERSHIP_ROLE.LEAD,
+    )
 
     this.em.persist([hostLeadMembership, ...spaceMemberships])
 
@@ -117,7 +129,9 @@ export class AdministratorSpaceCreationProcess extends SpaceCreationProcess {
       name: `precisionfda-${space.uid}-HOST`,
       billTo: hostLead.user.getEntity().billTo(),
     })
-    this.logger.log(`created host project: ${hostProject.id} with lead: ${hostLead.user.getProperty('dxuser')}`)
+    this.logger.log(
+      `created host project: ${hostProject.id} with lead: ${hostLead.user.getProperty('dxuser')}`,
+    )
 
     await this.userClient.projectInvite({
       projectDxid: hostProject.id,
@@ -125,12 +139,6 @@ export class AdministratorSpaceCreationProcess extends SpaceCreationProcess {
       level: 'CONTRIBUTE',
     })
     this.logger.log(`invited host org: ${space.hostDxOrg} to host project: ${hostProject.id}`)
-
-
-    await this.adminClient.removeUserFromOrganization({
-      orgDxId: space.hostDxOrg,
-      data: { user: `user-${config.platform.adminUser}` },
-    })
 
     space.hostProject = hostProject.id
     this.em.persist(space)

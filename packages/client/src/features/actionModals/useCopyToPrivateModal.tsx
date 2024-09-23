@@ -2,14 +2,21 @@ import React, { useMemo } from 'react'
 import { useMutation } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
 import styled from 'styled-components'
+import { AxiosError } from 'axios'
 import { Loader } from '../../components/Loader'
 import { ResourceTable } from '../../components/ResourceTable'
 import { ButtonRow, Footer, ModalScroll } from '../modal/styles'
 import { useModal } from '../modal/useModal'
-import { APIResource, HomeScope } from '../home/types'
+import { APIResource } from '../home/types'
 import { resourceCountString } from '../../utils/formatting'
 import { ModalHeaderTop, ModalNext } from '../modal/ModalNext'
 import { Button } from '../../components/Button'
+import { useConfirmModal } from '../files/actionModals/useConfirmModal'
+import {
+  APP_REVISION_CREATION_NOT_REQUESTED,
+  APP_SERIES_CREATION_NOT_REQUESTED,
+} from '../../constants'
+import { CONFIRM_APP_REVISION } from '../../constants/consts'
 
 const StyledResourceTable = styled(ResourceTable)`
   padding: 0.5rem;
@@ -19,23 +26,41 @@ const StyledResourceTable = styled(ResourceTable)`
 export function useCopyToPrivateModal<T extends { id: number; name: string }>({
   resource,
   selected,
-  scope,
-  request,
+  copyFunction,
   onSuccess,
 }: {
   resource: APIResource
   selected: T[]
-  request: (ids: number[]) => Promise<any>
-  scope?: HomeScope
+  copyFunction: (ids: number[], properties?: Record<string, any>) => Promise<any>
   onSuccess?: (res: any) => void
 }) {
   const { isShown, setShowModal } = useModal()
   const momoSelected = useMemo(() => selected, [isShown])
-  const mutation = useMutation({
+
+  let mutation
+  const { modalComp: confirmModal, setShowModal: setShowConfirmModal } = useConfirmModal(
+    'Confirm',
+    CONFIRM_APP_REVISION,
+    async () => {
+      setShowConfirmModal(false)
+      await mutation.mutateAsync({ ids: momoSelected.map(s => s.id), properties: { createAppRevision: true }})
+    },
+  )
+
+  mutation = useMutation({
     mutationKey: ['copy-to-private', resource],
-    mutationFn: request,
-    onError: () => {
-      toast.error(`Error: Copying ${resource} to private area`)
+    mutationFn: ({ ids, properties }: { ids: number[]; properties?: Record<string, any> }) => copyFunction(ids, properties),
+    onError: (e: AxiosError) => {
+      const error = e?.response?.data?.error
+      if (e.response?.status === 400 && [APP_SERIES_CREATION_NOT_REQUESTED, APP_REVISION_CREATION_NOT_REQUESTED].includes(error.code)) {
+        setShowConfirmModal(true)
+      } else {
+        if (error?.message) {
+          toast.error(`${error?.type}: ${error?.message}`)
+          return
+        }
+        toast.error(error.message)
+      }
     },
     onSuccess: (res: any) => {
       if (res?.meta?.messages[0].type === 'error') {
@@ -43,18 +68,13 @@ export function useCopyToPrivateModal<T extends { id: number; name: string }>({
       } else {
         if (onSuccess) onSuccess(res)
         setShowModal(false)
-        toast.success(
-          `Copied ${resourceCountString(
-            resource,
-            momoSelected.length,
-          )} to private area`,
-        )
+        toast.success(`Copied ${resourceCountString(resource, momoSelected.length)} to private area`)
       }
     },
   })
 
   const handleSubmit = () => {
-    mutation.mutateAsync(momoSelected.map(s => s.id))
+    mutation.mutateAsync({ ids: momoSelected.map(s => s.id) })
   }
 
   const modalComp = (
@@ -90,6 +110,7 @@ export function useCopyToPrivateModal<T extends { id: number; name: string }>({
           </Button>
         </ButtonRow>
       </Footer>
+      {confirmModal}
     </ModalNext>
   )
   return {
