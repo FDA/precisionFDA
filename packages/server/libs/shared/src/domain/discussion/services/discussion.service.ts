@@ -307,9 +307,9 @@ export class DiscussionService implements IDiscussionService {
 
     await this.em.transactional(async (tem) => {
       const discussionNote = discussion.note.getEntity()
-      if (discussionNote.scope !== STATIC_SCOPE.PUBLIC && discussion.user.id !== this.userCtx.id) {
+      if (!discussionNote.isPublic() && discussion.user.id !== this.userCtx.id) {
         const space = await this.em.findOne(Space, {
-          id: getIdFromScopeName(discussionNote.scope),
+          id: discussionNote.getSpaceId(),
           spaceMemberships: {
             user: this.userCtx.id,
             role: { $in: [SPACE_MEMBERSHIP_ROLE.ADMIN, SPACE_MEMBERSHIP_ROLE.LEAD] },
@@ -754,7 +754,7 @@ export class DiscussionService implements IDiscussionService {
       if (!file) {
         throw new errors.NotFoundError(`Unable to publish: file ${id} not found or inaccessible.`)
       }
-      if (![STATIC_SCOPE.PUBLIC, scope].includes(file.scope)) {
+      if (!(file.isPublic() || file.scope === scope)) {
         throw new errors.InvalidStateError(
           'Unable to publish file - file is not in the space or is not public.',
         )
@@ -765,7 +765,7 @@ export class DiscussionService implements IDiscussionService {
       if (!asset) {
         throw new errors.NotFoundError(`Unable to publish: asset ${id} not found or inaccessible.`)
       }
-      if (![STATIC_SCOPE.PUBLIC, scope].includes(asset.scope)) {
+      if (!(asset.isPublic() || asset.scope === scope)) {
         throw new errors.InvalidStateError(
           'Unable to publish asset - file is not in the space or is not public.',
         )
@@ -777,7 +777,7 @@ export class DiscussionService implements IDiscussionService {
       if (!app) {
         throw new errors.NotFoundError(`Unable to publish: app ${id} not found or inaccessible.`)
       }
-      if (app.scope && ![STATIC_SCOPE.PUBLIC, scope].includes(app.scope)) {
+      if (!(app.isPublic() || app.scope === scope)) {
         throw new errors.InvalidStateError(
           'Unable to publish app - app is not in the space or is not public.',
         )
@@ -791,7 +791,7 @@ export class DiscussionService implements IDiscussionService {
           `Unable to publish: comparison ${id} not found or inaccessible.`,
         )
       }
-      if (comparison.scope && ![STATIC_SCOPE.PUBLIC, scope].includes(comparison.scope)) {
+      if (!(comparison.isPublic() || comparison.scope === scope)) {
         throw new errors.InvalidStateError(
           'Unable to publish comparison - comparison is not in the space or is not public.',
         )
@@ -803,7 +803,7 @@ export class DiscussionService implements IDiscussionService {
       if (!job) {
         throw new errors.NotFoundError(`Unable to publish: job ${id} not found or inaccessible.`)
       }
-      if (![STATIC_SCOPE.PUBLIC, scope].includes(job.scope)) {
+      if (!(job.isPublic() || job.scope === scope)) {
         throw new errors.InvalidStateError(
           'Unable to publish job - job is not in the space or is not public.',
         )
@@ -914,8 +914,7 @@ export class DiscussionService implements IDiscussionService {
       return
     } else {
       const note = await comment.commentableId.getEntity().note.load()
-      const targetScope = note.scope
-      const spaceId = getIdFromScopeName(targetScope)
+      const spaceId = note.getSpaceId()
       const space = await this.em.findOne(Space, {
         id: spaceId,
         spaceMemberships: {

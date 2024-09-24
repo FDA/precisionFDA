@@ -110,9 +110,9 @@ describe('AssetRepository tests', () => {
     let result = await repo.findAccessibleByUser(user1.id, uids)
 
     expect(result.length).to.equal(4)
-    const publicAsset = result.filter(asset => asset.scope === STATIC_SCOPE.PUBLIC.toString())[0]
+    const publicAsset = result.filter(asset => asset.isPublic())[0]
     expect(publicAsset.name).to.equal('user1_asset1')
-    const privateAssets = result.filter(asset => asset.scope === STATIC_SCOPE.PRIVATE.toString())
+    const privateAssets = result.filter(asset => asset.isPrivate())
     expect(privateAssets.length).to.equal(2)
     const spaceAsset = result.filter(asset => asset.scope === 'space-1')[0]
     expect(spaceAsset.name).to.equal('user1_asset3')

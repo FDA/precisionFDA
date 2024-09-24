@@ -18,17 +18,15 @@ import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { STATIC_SCOPE } from '@shared/enums'
 import { JobDescribeResponse } from '@shared/platform-client/platform-client.responses'
-import { BaseEntity } from '../../database/base.entity'
 import { WorkaroundJsonType } from '../../database/custom-json-type'
-import { EntityScope } from '../../types/common'
 import { formatDuration } from '../../utils/format'
 import { DxId } from '../entity/domain/dxid'
 import { Uid } from '../entity/domain/uid'
-import { getIdFromScopeName, scopeContainsId } from '../space/space.helper'
 import { JOB_DB_ENTITY_TYPE, JOB_STATE } from './job.enum'
 import { isStateActive, isStateTerminal } from './job.helper'
 import { Provenance } from './job.input'
 import { JobRepository } from './job.repository'
+import { ScopedEntity } from '@shared/database/scoped.entity'
 
 @Entity({ tableName: 'jobs', repository: () => JobRepository })
 @Filter({ name: 'ownedBy', cond: (args) => ({ user: { id: args.userId } }) })
@@ -62,7 +60,7 @@ import { JobRepository } from './job.repository'
     ],
   }),
 })
-export class Job extends BaseEntity {
+export class Job extends ScopedEntity {
   @PrimaryKey()
   id: number
 
@@ -77,9 +75,6 @@ export class Job extends BaseEntity {
 
   @Property()
   name: string
-
-  @Property()
-  scope: EntityScope
 
   @Property()
   entityType: number
@@ -159,18 +154,6 @@ export class Job extends BaseEntity {
 
   isTerminal(): boolean {
     return isStateTerminal(this.state)
-  }
-
-  isSpaceScope(): boolean {
-    return scopeContainsId(this.scope)
-  }
-
-  getSpaceId(): number | undefined {
-    try {
-      return getIdFromScopeName(this.scope)
-    } catch {
-      return undefined
-    }
   }
 
   getEntityTypeString(): string {

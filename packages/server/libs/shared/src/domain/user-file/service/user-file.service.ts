@@ -12,7 +12,6 @@ import { NotificationService } from '@shared/domain/notification/services/notifi
 import { SPACE_EVENT_ACTIVITY_TYPE } from '@shared/domain/space-event/space-event.enum'
 import { SpaceEventService } from '@shared/domain/space-event/space-event.service'
 import { SpaceReport } from '@shared/domain/space-report/entity/space-report.entity'
-import { getIdFromScopeName } from '@shared/domain/space/space.helper'
 import { TaggingService } from '@shared/domain/tagging/tagging.service'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { Asset } from '@shared/domain/user-file/asset.entity'
@@ -43,9 +42,7 @@ import {
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { PlatformClient } from '@shared/platform-client'
 import { FileDescribeResponse } from '@shared/platform-client/platform-client.responses'
-import {
-  CHALLENGE_BOT_PLATFORM_CLIENT,
-} from '@shared/platform-client/providers/platform-client.provider'
+import { CHALLENGE_BOT_PLATFORM_CLIENT } from '@shared/platform-client/providers/platform-client.provider'
 import { createFileSynchronizeJobTask } from '@shared/queue'
 import { UserCtx } from '@shared/types'
 import { EntityScope } from '@shared/types/common'
@@ -231,11 +228,10 @@ export class UserFileService {
         })
       }
 
-      if (fileToRemove.scope && fileToRemove.scope.startsWith('space')) {
-        const spaceId = getIdFromScopeName(fileToRemove.scope)
+      if (fileToRemove.isInSpace()) {
         await this.spaceEventService.createSpaceEvent({
           entity: { type: 'userFile', value: fileToRemove },
-          spaceId,
+          spaceId: fileToRemove.getSpaceId(),
           userId: this.user.id,
           activityType: SPACE_EVENT_ACTIVITY_TYPE.file_deleted,
         })
