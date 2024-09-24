@@ -53,9 +53,9 @@ jobs:
         working-directory: ./packages/rails
         run: bundle exec brakeman -A -w2 --parser-timeout 30
 
-  static-analysis-pr:
+  ruby-static-analysis-pr:
     if: ${{ github.event_name == 'pull_request' }}
-    name: Static Analysis for PR
+    name: Ruby Static Analysis for PR
     runs-on: ubuntu-latest
     env:
       MAKE: "make --jobs 4"
@@ -92,6 +92,35 @@ jobs:
           PRONTO_PULL_REQUEST_ID: ${{ github.event.pull_request.number }}
           PRONTO_GITHUB_ACCESS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BUNDLE_PATH: "vendor/bundle"
+
+  node-static-analysis-pr:
+    name: Node Static Analysis for PR
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      statuses: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+
+      - name: Setup pnpm
+        run: |
+          corepack enable
+          corepack prepare pnpm@latest --activate
+
+      - name: Install modules
+        run: pnpm install
+
+      - name: Run eslint on changed files
+        uses: tj-actions/eslint-changed-files@v24
+        with:
+          config_path: "./packages/server/eslint.config.mjs"
+          level: 'info'
+          token: ${{ secrets.GITHUB_TOKEN }}
 
   test-ruby:
     name: Test Ruby

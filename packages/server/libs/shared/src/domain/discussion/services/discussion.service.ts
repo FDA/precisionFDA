@@ -116,6 +116,7 @@ export class DiscussionService implements IDiscussionService {
 
   async getDiscussion(discussionId: number): Promise<DiscussionDTO> {
     this.logger.log(`Getting discussion id: ${discussionId}`)
+
     const res = await this.fetcher.getAccessibleById(
       Discussion,
       discussionId,
@@ -256,7 +257,9 @@ export class DiscussionService implements IDiscussionService {
       space = await this.getSpaceFromScope(discussionInput.scope)
 
       if (space.type === SPACE_TYPE.REVIEW && space.meta?.restricted_discussions) {
-        throw new errors.InvalidStateError('Unable to publish discussion: space has restricted discussions.')
+        throw new errors.InvalidStateError(
+          'Unable to publish discussion: space has restricted discussions.',
+        )
       }
     }
 
