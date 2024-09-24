@@ -24,7 +24,7 @@ export class SpaceMembershipRepository extends EntityRepository<SpaceMembership>
     const qb = this.em.createQueryBuilder(SpaceMembership, 'sm')
 
     const result = await qb
-      .select(['space.id', 'sm.id'])
+      .select(['space.id'])
       .join('sm.spaces', 'space')
       .where({
         'sm.user': userId,
