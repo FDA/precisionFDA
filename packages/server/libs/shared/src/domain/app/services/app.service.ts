@@ -4,7 +4,7 @@ import { DxId } from '@shared/domain/entity/domain/dxid'
 import { Uid } from '@shared/domain/entity/domain/uid'
 import { Asset } from '@shared/domain/user-file/asset.entity'
 import { User } from '@shared/domain/user/user.entity'
-import { ErrorCodes, ValidationError } from '@shared/errors'
+import { ErrorCodes, PermissionError, ValidationError } from '@shared/errors'
 import * as crypto from 'crypto'
 import { UBUNTU_20, UBUNTU_RELEASES, VALID_IO_CLASSES } from '@shared/config/consts'
 import { validUbuntuPackages } from '@shared/config/ubuntu_packages'
@@ -27,6 +27,7 @@ import { Injectable, Logger } from '@nestjs/common'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { SaveAppDto } from '@shared/domain/app/dto/save-app.dto'
+import { EntityScope } from '@shared/types/common'
 
 @Injectable()
 export class AppService {
@@ -48,7 +49,7 @@ export class AppService {
     if (!/^[a-zA-Z0-9._-]+$/.test(spec.name)) {
       this.throwValidationError(
         `The ${type} name \'${spec.name}\' can only contain the characters A-Z, a-z, 0-9, ` +
-          "'.' (period), '_' (underscore) and '-' (dash).",
+        "'.' (period), '_' (underscore) and '-' (dash).",
       )
     }
 
@@ -81,7 +82,7 @@ export class AppService {
     if (!/^[a-zA-Z0-9._-]+$/.test(appInput.name)) {
       this.throwValidationError(
         "The app 'name' can only contain the characters A-Z, a-z, 0-9, " +
-          "'.' (period), '_' (underscore) and '-' (dash).",
+        "'.' (period), '_' (underscore) and '-' (dash).",
       )
     }
 
@@ -104,7 +105,7 @@ export class AppService {
       if (inaccessible.length > 0) {
         this.throwValidationError(
           `The app assets with uids '${JSON.stringify(inaccessible)}' do ` +
-            'not exist or are not accessible by you.',
+          'not exist or are not accessible by you.',
         )
       }
     }
@@ -115,6 +116,12 @@ export class AppService {
     appInput.output_spec.forEach((spec) => this.validateSpec(spec, 'output', alreadySeenOutputs))
 
     this.logger.log('App validations finished successfully')
+  }
+
+  private async validateScopeAndUser(user: User, scope: EntityScope) {
+    if (scope === STATIC_SCOPE.PUBLIC && !(await user.isSiteAdmin())) {
+      throw new PermissionError('Only site admins can create public apps.')
+    }
   }
 
   private validateAppSeriesCreation(appSeries?: AppSeries, createAppSeries?: boolean) {
@@ -136,17 +143,6 @@ export class AppService {
           code: ErrorCodes.APP_REVISION_CREATION_NOT_REQUESTED,
         },
       )
-    }
-  }
-
-  private getScope(scope?: string) {
-    if (
-      scope &&
-      [STATIC_SCOPE.PUBLIC.toString(), STATIC_SCOPE.PRIVATE.toString(), null].includes(scope)
-    ) {
-      return STATIC_SCOPE.PRIVATE.toString()
-    } else {
-      return scope
     }
   }
 
@@ -174,7 +170,7 @@ export class AppService {
     }
   }
 
-  private async getAppSeries(appName: string, scope: string) {
+  private async getAppSeries(appName: string, scope: EntityScope) {
     return await this.em.findOne(AppSeries, {
       name: appName,
       scope: scope,
@@ -182,7 +178,7 @@ export class AppService {
     })
   }
 
-  private async createAppSeries(appName: string, user: User, scope?: string) {
+  private async createAppSeries(appName: string, user: User, scope?: EntityScope) {
     const appSeriesDxid = constructDxid(this.user.dxuser, appName, scope)
     const appSeries = new AppSeries(user)
     appSeries.name = appName
@@ -364,15 +360,15 @@ export class AppService {
         { id: this.user.id },
         { populate: ['organization'] },
       )
-      const scope = this.getScope(appInput.scope)
       const assets = await this.getAssets(appInput.ordered_assets ? appInput.ordered_assets : [])
 
+      await this.validateScopeAndUser(user, appInput.scope)
       // - create app series
-      let appSeries = await this.getAppSeries(appInput.name, scope)
+      let appSeries = await this.getAppSeries(appInput.name, appInput.scope)
       this.validateAppSeriesCreation(appSeries, appInput.createAppSeries)
       this.validateAppRevisionCreation(appSeries, appInput.createAppRevision)
       if (!appSeries && appInput.createAppSeries) {
-        appSeries = await this.createAppSeries(appInput.name, user, scope)
+        appSeries = await this.createAppSeries(appInput.name, user, appInput.scope)
         this.logger.log(
           `App series for dxid ${appSeries.dxid} did not exist and user requested its creation`,
         )

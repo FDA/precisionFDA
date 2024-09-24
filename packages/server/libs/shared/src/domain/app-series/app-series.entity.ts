@@ -2,17 +2,18 @@ import {
   Collection,
   Entity,
   Ref,
-  ManyToOne, OneToMany,
+  ManyToOne,
+  OneToMany,
   PrimaryKey,
   Property,
   Reference,
 } from '@mikro-orm/core'
 import { AppSeriesProperty } from '@shared/domain/property/app-series-property.entity'
 import { User } from '@shared/domain/user/user.entity'
-import { BaseEntity } from '../../database/base.entity'
+import { ScopedEntity } from '@shared/database/scoped.entity'
 
 @Entity({ tableName: 'app_series' })
-export class AppSeries extends BaseEntity {
+export class AppSeries extends ScopedEntity {
   @PrimaryKey()
   id: number
 
@@ -27,9 +28,6 @@ export class AppSeries extends BaseEntity {
 
   @Property()
   latestVersionAppId?: number
-
-  @Property()
-  scope?: string
 
   @Property()
   verified: boolean

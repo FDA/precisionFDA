@@ -625,10 +625,13 @@ describe('UserFileService', () => {
     let folder = {
       id: FOLDER_ID,
       scope: STATIC_SCOPE.PUBLIC,
+      isPublic: () => true,
+      isPrivate: () => false,
       children: {
         init: () => [],
         length: 0,
       },
+      isInSpace: () => false,
     } as unknown as Folder
 
     it('test remove folder', async () => {
@@ -664,6 +667,8 @@ describe('UserFileService', () => {
           init: () => [],
           length: 0,
         },
+        isInSpace: () => true,
+        getSpaceId: () => 1,
       } as unknown as Folder
       folderRepoFindOneStub.withArgs(FOLDER_ID).returns(folder)
       emFindOneOrFailStub.returns({
@@ -689,6 +694,7 @@ describe('UserFileService', () => {
           init: () => [{}],
           length: 1,
         },
+        isInSpace: () => false,
       } as unknown as Folder
       folderRepoFindOneStub.withArgs(FOLDER_ID).returns(folder)
       await expect(getInstance().removeFolder(FOLDER_ID)).to.be.rejectedWith(
@@ -702,11 +708,14 @@ describe('UserFileService', () => {
         id: FOLDER_ID,
         name: 'folder-name',
         scope: STATIC_SCOPE.PRIVATE,
+        isPrivate: () => true,
+        isPublic: () => false,
         user: { id: 2 },
         children: {
           init: () => [],
           length: 0,
         },
+        isInSpace: () => false,
       } as unknown as Folder
       folderRepoFindOneStub.withArgs(FOLDER_ID).returns(folder)
       await expect(getInstance().removeFolder(FOLDER_ID)).to.be.rejectedWith(
@@ -720,6 +729,8 @@ describe('UserFileService', () => {
         id: FOLDER_ID,
         name: 'folder-name',
         scope: 'space-1',
+        isPublic: () => false,
+        isPrivate: () => false,
         user: {
           id: USER_ID,
         },
@@ -727,6 +738,8 @@ describe('UserFileService', () => {
           init: () => [],
           length: 0,
         },
+        isInSpace: () => true,
+        getSpaceId: () => 1,
       } as unknown as Folder
       folderRepoFindOneStub.withArgs(FOLDER_ID).returns(folder)
       emFindOneOrFailStub.returns({
@@ -747,6 +760,8 @@ describe('UserFileService', () => {
         id: FOLDER_ID,
         name: 'folder-name',
         scope: 'space-1',
+        isPublic: () => false,
+        isPrivate: () => false,
         user: {
           id: 1234,
         },
@@ -754,6 +769,8 @@ describe('UserFileService', () => {
           init: () => [],
           length: 0,
         },
+        isInSpace: () => true,
+        getSpaceId: () => 1,
       } as unknown as Folder
       folderRepoFindOneStub.withArgs(FOLDER_ID).returns(folder)
       emFindOneOrFailStub.returns({
@@ -776,6 +793,9 @@ describe('UserFileService', () => {
     let file = {
       id: FILE_ID,
       scope: STATIC_SCOPE.PUBLIC,
+      isPublic: () => true,
+      isPrivate: () => false,
+      isInSpace: () => false,
     } as unknown as UserFile
 
     beforeEach(() => {
@@ -825,7 +845,10 @@ describe('UserFileService', () => {
         id: FILE_ID,
         name: 'file-name',
         scope: STATIC_SCOPE.PRIVATE,
+        isPrivate: () => true,
+        isPublic: () => false,
         user: { id: 2 },
+        isInSpace: () => false,
       } as unknown as UserFile
       fileRepoFindOneOrFailStub.withArgs(FILE_ID).returns(file)
 
@@ -854,9 +877,13 @@ describe('UserFileService', () => {
         id: FILE_ID,
         name: 'file-name',
         scope: 'space-1',
+        isPublic: () => false,
+        isPrivate: () => false,
         user: {
           id: USER_ID,
         },
+        isInSpace: () => true,
+        getSpaceId: () => 1,
       } as unknown as UserFile
       fileRepoFindOneOrFailStub.withArgs(FILE_ID).returns(file)
       emFindOneOrFailStub.returns({
@@ -876,9 +903,13 @@ describe('UserFileService', () => {
         id: FILE_ID,
         name: 'file-name',
         scope: 'space-1',
+        isPublic: () => false,
+        isPrivate: () => false,
         user: {
           id: USER_ID,
         },
+        isInSpace: () => true,
+        getSpaceId: () => 1,
       } as unknown as UserFile
       fileRepoFindOneOrFailStub.withArgs(FILE_ID).returns(file)
       emFindOneOrFailStub.returns({
@@ -899,9 +930,12 @@ describe('UserFileService', () => {
         id: FILE_ID,
         name: 'file-name',
         scope: STATIC_SCOPE.PRIVATE,
+        isPublic: () => false,
+        isPrivate: () => true,
         user: {
           id: USER_ID,
         },
+        isInSpace: () => false,
       } as unknown as UserFile
       fileRepoFindOneOrFailStub.withArgs(FILE_ID).returns(file)
       emCountStub.returns(5)
@@ -921,25 +955,34 @@ describe('UserFileService', () => {
         name: 'file-in-root',
         stiType: FILE_STI_TYPE.USERFILE,
         scope: STATIC_SCOPE.PUBLIC,
+        isPublic: () => true,
+        isPrivate: () => false,
+        isInSpace: () => false,
       } as UserFile
       const folderInRoot = {
         id: 2,
         name: 'folder-in-root',
         scope: STATIC_SCOPE.PUBLIC,
+        isPublic: () => true,
+        isPrivate: () => false,
         children: {
           init: () => [],
           length: 0,
         },
+        isInSpace: () => false,
       } as unknown as Folder
       const nestedFolder = {
         id: 3,
         name: 'nested-folder',
         parentFolder: folderInRoot,
         scope: STATIC_SCOPE.PUBLIC,
+        isPublic: () => true,
+        isPrivate: () => false,
         children: {
           init: () => [],
           length: 0,
         },
+        isInSpace: () => false,
       } as unknown as Folder
       const fileInNestedFolder = {
         id: 4,
@@ -947,6 +990,9 @@ describe('UserFileService', () => {
         stiType: FILE_STI_TYPE.USERFILE,
         parentFolder: nestedFolder,
         scope: STATIC_SCOPE.PUBLIC,
+        isPublic: () => true,
+        isPrivate: () => false,
+        isInSpace: () => false,
       } as unknown as Folder
       loadNodesStub.returns([fileInNestedFolder, nestedFolder, folderInRoot, fileInRoot])
       fileRepoCountStub.returns(0)
