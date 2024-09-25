@@ -118,7 +118,8 @@ jobs:
       - name: Run eslint on changed files
         uses: tj-actions/eslint-changed-files@v24
         with:
-          config_path: "./packages/server/eslint.config.mjs"
+          path: packages/server
+          config_path: "./eslint.config.mjs"
           level: 'info'
           token: ${{ secrets.GITHUB_TOKEN }}
 
