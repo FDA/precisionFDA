@@ -1,11 +1,11 @@
 import styled from 'styled-components'
 import { StyledBreadcrumbs } from '../../../../components/Breadcrumb'
 import { Button } from '../../../../components/Button'
+import { Callout } from '../../../../components/Callout'
 import { compactScrollBarV2 } from '../../../../components/Page/styles'
 import { StyledName } from '../../../../components/ResourceTable'
 import { Svg } from '../../../../components/icons/Svg'
 import { SelectableTable, StyledCell, StyledFileDetail, StyledRow } from '../../../actionModals/styles'
-import { Help } from '../../../apps/form/styles'
 import { ModalPageRow } from '../../../modal/styles'
 
 export const ShorternName = styled.span`
@@ -18,14 +18,11 @@ export const ShorternFolderName = styled(ShorternName)`
   width: calc(100% - 30px);
 `
 
-export const CopyHelp = styled(Help)`
+export const CopyHelp = styled(Callout)`
   width: calc(100% - 24px);
   margin-left: auto;
   margin-right: auto;
   margin-bottom: 12px;
-  border-radius: 4px;
-  background-color: var(--highlight-100);
-  border-color: var(--highlight-500);
 `
 
 export const CopyModalPageRow = styled(ModalPageRow)`
