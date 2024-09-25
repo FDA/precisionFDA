@@ -82,6 +82,7 @@ const Spaces2 = ({ space, isLoading }: { space: ISpace; isLoading: boolean }) =>
   }
 
   const showDiscussions = !((space.type === 'review' && space.restricted_discussions) || space.type == 'private_type')
+  const isContributorOrHigher = ['lead', 'admin', 'contributor'].includes(space.current_user_membership.role)
 
   if (space.state === 'unactivated') {
     return <Activation space={space} />
@@ -171,22 +172,28 @@ const Spaces2 = ({ space, isLoading }: { space: ISpace; isLoading: boolean }) =>
             <Loader />
           ) : (
             <Routes>
-              <Route path="files" element={<FileList space={space} showFolderActions={!!space.links.add_data} />} />
+              <Route path="files" element={<FileList space={space} isContributorOrHigher={isContributorOrHigher} />} />
               <Route path="files/:fileId" element={<FileShow space={space} />} />
               <Route path="files/:identifier/track" element={<TrackInHome spaceId={space.id} />} />
-              <Route path="apps" element={<AppList spaceId={space.id} />} />
+              <Route path="apps" element={<AppList spaceId={space.id} isContributorOrHigher={isContributorOrHigher} />} />
               <Route path="apps/:appUid/jobs/new" element={<RunJobPage spaceId={space.id} />} />
               <Route path="apps/:appUid/edit" element={<EditAppPage spaceId={space.id} />} />
               <Route path="apps/:appUid/fork" element={<ForkAppPage spaceId={space.id} />} />
               <Route path="apps/:appUid/*" element={<AppsShow spaceId={space.id} />} />
               <Route path="apps/:identifier/track" element={<TrackInHome spaceId={space.id} />} />
-              <Route path="workflows" element={<WorkflowList spaceId={space.id} />} />
+              <Route
+                path="workflows"
+                element={<WorkflowList spaceId={space.id} isContributorOrHigher={isContributorOrHigher} />}
+              />
               <Route path="workflows/:workflowUid/*" element={<WorkflowShow spaceId={space.id} />} />
               <Route path="executions" element={<ExecutionList spaceId={space.id} />} />
               <Route path="executions/:executionUid/*" element={<ExecutionDetails spaceId={space.id} />} />
               <Route path="executions/:identifier/track" element={<TrackInHome entityType="execution" spaceId={space.id} />} />
               <Route path="members" element={<MembersList space={space} />} />
-              <Route path="reports" element={<SpaceReportList scope={`space-${space.id}`} />} />
+              <Route
+                path="reports"
+                element={<SpaceReportList scope={`space-${space.id}`} isContributorOrHigher={isContributorOrHigher} />}
+              />
               <Route path="discussions" element={<DiscussionList space={space} scope={`space-${space.id}`} />} />
               <Route
                 path="discussions/create"
@@ -236,7 +243,7 @@ export const SpaceShow = () => {
 
   if (isLoading) return <Loader />
   if (isNotAllowed) return <SpaceNotAllowed />
-  if (isLocked || s?.state === 'locked') return <SpaceLocked space={s}/>
+  if (isLocked || s?.state === 'locked') return <SpaceLocked space={s} />
 
   return (
     <UserLayout innerScroll>
