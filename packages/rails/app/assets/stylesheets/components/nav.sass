@@ -1,4 +1,5 @@
-@import "_common"
+.gap-2
+  gap: 16px
 
 .navbar
   background-color: $navbar-bg-color
@@ -81,10 +82,13 @@
 @media (min-width: $screen-sm-min)
   .navbar-brand
     height: auto
-    padding-top: 15px
+    padding-top: 6px
     padding-bottom: 10px
 
 @media (max-width: $screen-sm-max)
   .navbar-inverse .navbar-nav.nav-links
     li > a
       min-width: 0
+
+#pfda-navbar-collapse .dropdown-menu
+  font-size: 14px

@@ -2,7 +2,7 @@
 <div class="page-header">
   <div class="media">
     <div class="media-left text-muted">
-      <%= link_to image_tag(@discussion.user.gravatar_url, class: 'img-circle', height: '50px'), user_path(@discussion.user.dxuser) %>
+      <%= link_to image_tag(@discussion.user.gravatar_url, class: 'rounded-circle', height: '50px'), user_path(@discussion.user.dxuser) %>
     </div>
     <div class="media-body">
       <div class="pfda-discussion-user">
@@ -105,7 +105,7 @@
         <% end %>
         <%= render "_partials/follow_link", classes: "btn btn-default btn-block", item: @discussion %>
       </li>
-      <li class="list-group-item list-group-item-header">
+      <li class="list-group-item list-group-item-header text-center">
         <%= link_to "Followers", followers_discussion_path(@discussion) %>
       </li>
       <li class="list-group-item">

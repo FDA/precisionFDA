@@ -93,6 +93,17 @@ export const DocsContent = styled.div`
     border-radius: 3px;
     white-space: pre-line;
   }
+
+  code {
+    padding: 2px 4px;
+    font-size: 90%;
+    color: #c7254e;
+    background-color: #f9f2f4;
+    border-radius: 3px;
+  }
+  code, kbd, pre, samp {
+      font-family: "PT Mono", Menlo, Monaco, Consolas, "Courier New", monospace;
+  }
 `
 export const DocsNav = styled.div`
   ${compactScrollBarV2}

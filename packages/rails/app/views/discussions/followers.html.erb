@@ -3,7 +3,7 @@
 <div class="page-header">
   <div class="media">
     <div class="media-left text-muted">
-      <%= link_to image_tag(@discussion.user.gravatar_url, class: 'img-circle', height: '50px'), user_path(@discussion.user.dxuser) %>
+      <%= link_to image_tag(@discussion.user.gravatar_url, class: 'rounded-circle', height: '50px'), user_path(@discussion.user.dxuser) %>
     </div>
     <div class="media-body">
       <div class="pfda-discussion-user">
@@ -22,7 +22,7 @@
     <li class="">
       <div class="media">
         <div class="media-left">
-          <%= link_to image_tag(follower.gravatar_url, class: 'img-circle', height: '40px'), user_path(follower.dxuser) %>
+          <%= link_to image_tag(follower.gravatar_url, class: 'rounded-circle', height: '40px'), user_path(follower.dxuser) %>
         </div>
         <div class="media-body">
           <div class="pfda-user-fullname">

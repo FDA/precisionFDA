@@ -12,7 +12,7 @@
         <div class="modal-body">
 
           <div class="pfda-toolbar">
-            <ul class="nav nav-pills nav-pills-center" role="tablist">
+            <ul class="nav nav-pills nav-pills-center flex gap-2" role="tablist">
               <li role="presentation" class="active">
                 <a href="#all-apps" role="tab" data-toggle="tab">All Apps</a>
               </li>
@@ -33,7 +33,7 @@
 
           <div class="tab-content">
             <div role="tabpanel" class="tab-pane" id="private-apps">
-              <div class="container-fluid container-padded">
+              <div class="container-fluid" style="padding-left: 0; padding-right: 0;">
                 <div class="workflow-pre-scrollable" id="private-apps-scrollable">
                   <form class="form form-horizontal">
                     <div class="pfda-padded-v scrollable-apps-container" data-bind='template: {name: "add-stages", foreach: privateApps()}'></div>
@@ -42,7 +42,7 @@
               </div>
             </div>
             <div role="tabpanel" class="tab-pane" id="public-apps">
-              <div class="container-fluid container-padded">
+              <div class="container-fluid" style="padding-left: 0; padding-right: 0;">
                 <div class="workflow-pre-scrollable" id="public-apps-scrollable">
                   <form class="form form-horizontal">
                     <div class="pfda-padded-v scrollable-apps-container" data-bind='template: {name: "add-stages", foreach: publicApps()}'></div>
@@ -51,7 +51,7 @@
               </div>
             </div>
             <div role="tabpanel" class="tab-pane active" id="all-apps">
-              <div class="container-fluid container-padded">
+              <div class="container-fluid" style="padding-left: 0; padding-right: 0;">
                 <div class="workflow-pre-scrollable" id="all-apps-scrollable">
                   <form class="form form-horizontal">
                     <div class="pfda-padded-v scrollable-apps-container" data-bind='template: {name: "add-stages", foreach: allApps()}'></div>
@@ -79,7 +79,7 @@
   <script id='add-stages' type='text/html'>
     <table class="table pfda-table table-striped">
       <tbody>
-        <tr class="row">
+        <tr class="row" style="display: block;">
           <td class="col-sm-5"><span data-bind="text: $data.app.name" ></span></td>
           <td class="col-sm-12">
             <!-- ko if: inputsForApp().length > 0 -->

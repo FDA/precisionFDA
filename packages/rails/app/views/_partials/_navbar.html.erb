@@ -1,28 +1,22 @@
 <% if @context.logged_in_or_guest? || controller_name == "main" && action_name == "index" %>
-  <nav class="navbar navbar-inverse navbar-static-top">
+  <nav class="navbar navbar-expand-lg">
     <div class="container-fluid">
-      <!-- Brand and toggle get grouped for better mobile display -->
-      <div class="navbar-header">
-        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
-          data-target="#pfda-navbar-collapse" aria-expanded="false">
-
-          <span class="sr-only">Toggle navigation</span>
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-        </button>
-        <%= link_to image_tag("precisionFDA.white.navbar.png", alt: "PrecisionFDA Home", height: "33px"), root_path, class: "navbar-brand", data: { turbolinks: false } %>
+      <div class="nav-links nav navbar-nav navbar-left">
+        <div class="navbar-header">
+          <%= link_to image_tag("precisionFDA.white.navbar.png", alt: "PrecisionFDA Home", height: "33px"), root_path, class: "navbar-brand", data: { turbolinks: false } %>
+          <a class="nav-item" href="/home" data-turbolinks="false">
+            <span class="fa fa-fw fa-arrow-left"></span>
+            Back Home
+          </a>
+        </div>
       </div>
 
-      <!-- Collect the nav links, forms, and other content for toggling -->
-      <div class="collapse navbar-collapse" id="pfda-navbar-collapse">
+      <div id="pfda-navbar-collapse">
         <% if @context.logged_in_or_guest? %>
           <% if inside_of_spaces? %>
             <%= render "_partials/nav_links_spaces" %>
           <% elsif inside_of_space_item?(@space) %>
             <%= render "_partials/nav_links_space_item" %>
-          <% else %>
-            <%= render "_partials/nav_links" %>
           <% end %>
           <%= render "_partials/nav_user" %>
         <% else %>

@@ -250,7 +250,7 @@ export const OverviewAuthed = () => {
     useExpertsListQuery({})
 
   return (
-    <PublicLayout mainScroll>
+    <PublicLayout mainScroll={!!user}>
       <NavigationBar user={user} title="Overview"/>
       <PageContainerMargin>
         <PageRow>
