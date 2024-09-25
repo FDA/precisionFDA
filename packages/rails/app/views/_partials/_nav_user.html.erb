@@ -1,50 +1,38 @@
 <ul class="nav-links nav navbar-nav navbar-right">
-  <li role="presentation">
-    <a href="mailto:<%= SUPPORT_EMAIL %>">
-      <div class="nav-icon fa fa-fw fa-commenting-o"></div>
-      <div class="nav-pill-title">Support</div>
-    </a>
-  </li>
-  <li role="presentation">
-    <a data-turbolinks="false" href="/docs">
-      <div class="nav-icon fa fa-question"></div>
-      <div class="nav-pill-title">Get Started</div>
-    </a>
-  </li>
-  <li class="dropdown">
-    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" style="background: none;">
+  <li class="nav-item dropdown">
+    <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" style="background: none;">
       <svg height="16" data-prefix="fas" data-icon="user-circle" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512" class="Svg__Icon-sc-1hisztr-0 Svg-sc-1hisztr-1" aria-label="User profile icon"><path fill="currentColor" d="M248 8a248 248 0 100 496 248 248 0 000-496zm0 96a88 88 0 110 176 88 88 0 010-176zm0 344a191.6 191.6 0 01-146.5-68.2A111.5 111.5 0 01200 320c2.4 0 4.8.4 7.1 1.1 13 4.2 26.6 6.9 40.9 6.9 14.3 0 28-2.7 40.9-6.9 2.3-.7 4.7-1.1 7.1-1.1 42.9 0 79.7 24.4 98.5 59.8A191.6 191.6 0 01248 448z"></path></svg>
       <div>
         <%= @context.logged_in? ? @context.user.full_name : @context.username %>
         <span class="caret"></span>
       </div>
     </a>
-    <ul class="dropdown-menu">
-      <li><%= link_to "Profile", profile_path %></li>
+    <div class="dropdown-menu dropdown-menu-right">
+      <div class="dropdown-item"><%= link_to "Profile", profile_path %></div>
       <% if @context.logged_in? %>
-        <li><%= link_to "Public Profile", user_path(@context.username) %></li>
+        <div class="dropdown-item"><%= link_to "Public Profile", user_path(@context.username) %></div>
       <% end %>
       <% if @context.logged_in? %>
-        <li>
-          <p data-bind="click: showCloudResourcesModal">
+        <div class="dropdown-item">
+          <a data-bind="click: showCloudResourcesModal">
             Cloud Resources
-          </p>
-        </li>
+          </a>
+        </div>
       <% end %>
-      <li><%= link_to "Manage Licenses", licenses_path %></li>
+      <div class="dropdown-item"><%= link_to "Manage Licenses", licenses_path %></div>
       <% if @context.logged_in? %>
-        <li><%= link_to "Notification Settings", '/account/notifications', data: { turbolinks: false } %></li>
+        <div class="dropdown-item"><%= link_to "Notification Settings", '/account/notifications', data: { turbolinks: false } %></div>
       <% end %>
-      <li role="separator" class="divider"></li>
-      <li><a href="<%= about_path %>" data-turbolinks="false"><span class="fa fa-fw fa-info-circle"></span> About</a></li>
-      <li><a href="<%= guidelines_path %>" data-turbolinks="false"><span class="fa fa-fw fa-institution"></span> Guidelines</a></li>
-      <li><a href="<%= docs_path %>" data-turbolinks="false"><span class="fa fa-fw fa-book"></span> Docs</a></li>
-      <li role="separator" class="divider"></li>
+      <div role="separator" class="divider"></div>
+      <div class="dropdown-item"><a href="<%= about_path %>" data-turbolinks="false"><span class="fa fa-fw fa-info-circle"></span> About</a></div>
+      <div class="dropdown-item"><a href="<%= guidelines_path %>" data-turbolinks="false"><span class="fa fa-fw fa-institution"></span> Guidelines</a></div>
+      <div class="dropdown-item"><a href="<%= docs_path %>" data-turbolinks="false"><span class="fa fa-fw fa-book"></span> Docs</a></div>
+      <div role="separator" class="divider"></div>
       <% if @context.logged_in? && @context.can_administer_site? %>
-        <li><%= link_to "Admin Dashboard", admin_root_path, data: { turbolinks: false } %></li>
-        <li role="separator" class="divider"></li>
+        <div class="dropdown-item"><%= link_to "Admin Dashboard", admin_root_path, data: { turbolinks: false } %></div>
+        <div role="separator" class="divider"></div>
       <% end %>
-      <li><%= link_to "Log out", logout_path, method: :delete, data: { no_turbolink: true } %></li>
-    </ul>
+      <div class="dropdown-item"><%= link_to "Log out", logout_path, method: :delete, data: { no_turbolink: true } %></div>
+    </div>
   </li>
 </ul>

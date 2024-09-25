@@ -8,14 +8,14 @@
   <form class="form form-upload-files">
     <div class="form-group text-centered">
       <div class="control-group">
-        <span class="btn btn-primary btn-lg btn-browse-files" data-bind="visible: isBrowseVisible, disable: disableActions">
+        <span class="btn btn-primary btn-md btn-browse-files" data-bind="visible: isBrowseVisible, disable: disableActions">
           <span class="fa fa-files-o"></span> Browse files for upload... <input class="event-browse-files" type='file' multiple required>
         </span>
-        <button class="btn btn-success btn-lg event-upload-files" style="display:none;" data-bind="visible: isUploadVisible, disable: disableActions">
+        <button class="btn btn-success btn-md event-upload-files" style="display:none;" data-bind="visible: isUploadVisible, disable: disableActions">
           <span class="fa fa-cloud-upload fa-fw"></span> Upload all
         </button>
-        <button class="btn btn-link btn-lg event-clear-files" style="display:none;" data-bind="visible: isClearVisible, disable: disableActions">Restart</button>
-        <a class="btn btn-default btn-lg" href="<%= edit_page_challenge_path(@challenge, 'resources') %>"><span class="fa fa-reply fa-fw"></span> Return to Challenge Resources</a>
+        <button class="btn btn-link btn-md event-clear-files" style="display:none;" data-bind="visible: isClearVisible, disable: disableActions">Restart</button>
+        <a class="btn btn-default btn-md" href="<%= edit_page_challenge_path(@challenge, 'resources') %>"><span class="fa fa-reply fa-fw"></span> Return to Challenge Resources</a>
       </div>
     </div>
   </form>

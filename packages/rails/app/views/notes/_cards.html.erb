@@ -7,7 +7,7 @@
             <%= unilinkfw(note, {scope_icon: (defined?(scope_icon) ? scope_icon : true), nolink: true}) %>
           </div>
         </div>
-        <ul class="pfda-card-metadata pfda-card-metadata-glued pfda-card-metadata-fw-indent list-inline list-inline-bullets">
+        <ul class="pfda-card-metadata pfda-card-metadata-glued pfda-card-metadata-fw-indent list-inline list-inline-bullets flex flex-wrap">
           <li><%= note.user.org.handle %>/<%= note.user.dxuser %></li>
           <li><%= note.created_at.to_s(:human) %></li>
           <% if note.real_files.count > 0 %>

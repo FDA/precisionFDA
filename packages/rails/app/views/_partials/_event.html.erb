@@ -19,10 +19,10 @@
     <div class="col-sm-12 col-sm-offset-6 col-md-4 col-md-offset-0">
       <% if event[:current] %>
         <%= link_to event[:link], class: "pfda-event-image" do %>
-          <%= image_tag event[:image], alt: event[:image_alt_text], class: "img-responsive img-rounded" %>
+          <%= image_tag event[:image], alt: event[:image_alt_text], class: "img-responsive rounded" %>
         <% end %>
       <% else %>
-        <%= image_tag event[:image], alt: event[:image_alt_text], class: "img-responsive img-rounded" %>
+        <%= image_tag event[:image], alt: event[:image_alt_text], class: "img-responsive rounded" %>
       <% end %>
     </div>
     <div class="col-sm-24 col-md-16 col-md-offset-1">

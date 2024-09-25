@@ -15,10 +15,12 @@
 #= require vendor
 #= require cookies-js
 #= require jquery3
+#= require popper
 #= require jquery-ui
 #= require jquery_ujs
+#= require bootstrap
+#= require bootstrap-sprockets
 #= require turbolinks
-#= require bootstrap-sass/assets/javascripts/bootstrap-sprockets
 #= require lodash
 #= require graphlib
 #= require d3
@@ -55,4 +57,5 @@
 #= require bootstrap-select/bootstrap-select.min.js
 #= require datatables.net
 #= require datatables.net-bs
+
 #= require_tree .

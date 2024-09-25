@@ -50,7 +50,7 @@ const ExpertsSingleDetails = ({ expert }: { expert: ExpertDetails }) => {
   const user = useAuthUser()!
 
   return (
-    <PublicLayout mainScroll>
+    <PublicLayout mainScroll={!!user}>
       <NavigationBar title="" subtitle="" user={user}>
         <PageContainerMargin>
           <StyledNavigationBar>
