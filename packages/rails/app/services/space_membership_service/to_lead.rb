@@ -13,6 +13,7 @@ module SpaceMembershipService
         update_current_lead(space, admin_member)
 
         member.role = SpaceMembership::ROLE_LEAD
+        member.side = admin_member.side if member.side != admin_member.side
         SpaceMembershipService::Update.call(api, space, member)
         create_event(space, member, admin_member)
       end

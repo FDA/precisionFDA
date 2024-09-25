@@ -4,7 +4,7 @@ module SpaceMembershipService
     # @param [Space] space
     # @param [SpaceMembership] membership
     def self.call(api, space, membership)
-      return if membership.side_changed?
+      return if !(space.groups? && membership.role == SpaceMembership::ROLE_LEAD) && membership.side_changed?
 
       org_dxid = space.org_dxid(membership)
 
