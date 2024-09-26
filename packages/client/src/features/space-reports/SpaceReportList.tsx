@@ -131,7 +131,7 @@ export const SpaceReportList = ({ scope, isContributorOrHigher }: { scope: strin
       <ResourceHeader>
         <ActionsRow>
           <QuickActions>
-            {isContributorOrHigher && (
+            {(scope === 'private' || isContributorOrHigher) && (
               <Button data-variant="primary" disabled={query.isLoading} onClick={() => setGenerateModal(true)}>
                 <PlusIcon height={12} /> Generate report
               </Button>
