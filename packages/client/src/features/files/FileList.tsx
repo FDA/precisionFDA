@@ -46,11 +46,11 @@ type ListType = { files: IFile[]; meta: IMeta }
 export const FileList = ({
   homeScope,
   space,
-  isContributorOrHigher = false,
+  showFolderActions = false,
 }: {
   homeScope?: HomeScope
   space?: ISpace
-  isContributorOrHigher?: boolean
+  showFolderActions?: boolean
 }) => {
   const location = useLocation()
   const queryCache = useQueryClient()
@@ -185,7 +185,7 @@ export const FileList = ({
       <FilesListResourceHeader>
         <ActionsRow>
           <QuickActions>
-            {isContributorOrHigher && (
+            {showFolderActions && (
               <>
                 <Button
                   data-variant="primary"

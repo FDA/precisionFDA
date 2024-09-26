@@ -172,7 +172,7 @@ const Spaces2 = ({ space, isLoading }: { space: ISpace; isLoading: boolean }) =>
             <Loader />
           ) : (
             <Routes>
-              <Route path="files" element={<FileList space={space} isContributorOrHigher={isContributorOrHigher} />} />
+              <Route path="files" element={<FileList space={space} showFolderActions={isContributorOrHigher} />} />
               <Route path="files/:fileId" element={<FileShow space={space} />} />
               <Route path="files/:identifier/track" element={<TrackInHome spaceId={space.id} />} />
               <Route path="apps" element={<AppList spaceId={space.id} isContributorOrHigher={isContributorOrHigher} />} />
