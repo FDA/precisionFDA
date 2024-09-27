@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2024_09_24_123228) do
+ActiveRecord::Schema.define(version: 2024_09_04_135015) do
 
   create_table "accepted_licenses", id: :integer, charset: "utf8mb3", collation: "utf8mb3_unicode_ci", force: :cascade do |t|
     t.integer "license_id"
@@ -409,7 +409,7 @@ ActiveRecord::Schema.define(version: 2024_09_24_123228) do
     t.integer "app_id"
     t.string "project"
     t.text "run_data"
-    t.text "describe", size: :medium
+    t.text "describe"
     t.text "provenance"
     t.string "state"
     t.string "name"
