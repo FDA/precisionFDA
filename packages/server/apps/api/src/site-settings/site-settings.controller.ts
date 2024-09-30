@@ -44,6 +44,7 @@ export class SiteSettingsController {
     body = {
       ...body,
       alerts,
+      dataPortals: {},
     }
 
     if (this.user?.id) {
