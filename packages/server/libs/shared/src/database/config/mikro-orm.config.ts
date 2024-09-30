@@ -26,6 +26,7 @@ export function getMikroOrmConfig(opts: MikroOrmConfigOptions): MikroOrmModuleSy
     metadataCache: { enabled: config.database.ormMetadataCacheEnabled },
     // https://jira.internal.dnanexus.com/browse/PFDA-5349
     discovery: { checkDuplicateFieldNames: false },
+    registerRequestContext: false,
   }
 }
 

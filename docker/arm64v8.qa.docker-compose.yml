@@ -80,3 +80,7 @@ services:
       - type: volume
         source: bundler-deps-cache-ruby
         target: /usr/local/bundle
+  nginx:
+    extends:
+      file: ./base.services.yml
+      service: nginx

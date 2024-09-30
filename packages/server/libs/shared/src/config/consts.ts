@@ -8,8 +8,18 @@ export const UBUNTU_16 = '16.04'
 export const UBUNTU_20 = '20.04'
 export const UBUNTU_RELEASES = [UBUNTU_14, UBUNTU_16, UBUNTU_20]
 
-export const VALID_IO_CLASSES = ['file', 'string', 'boolean', 'int', 'float', 'array:file',
-  'array:string', 'array:boolean', 'array:int', 'array:float']
+export const VALID_IO_CLASSES = [
+  'file',
+  'string',
+  'boolean',
+  'int',
+  'float',
+  'array:file',
+  'array:string',
+  'array:boolean',
+  'array:int',
+  'array:float',
+]
 
 export const BILLING_INFO = {
   email: 'billing@dnanexus.com',
@@ -25,7 +35,8 @@ export const BILLING_INFO = {
 }
 
 export const USER_CONTEXT_HTTP_HEADERS = {
-  id: 'x-user_id',
-  accessToken: 'x-accesstoken',
-  dxUser: 'x-dxuser',
+  csrfToken: 'x-csrf-token',
+  userAgent: 'user-agent',
 }
+
+export const COOKIE_SESSION_KEY = '_precision-fda_session'

@@ -1,10 +1,10 @@
+import { EntityManager } from '@mikro-orm/mysql'
 import { database } from '@shared/database'
 import { User } from '@shared/domain/user/user.entity'
-import { expect } from 'chai'
-import { EntityManager } from '@mikro-orm/core'
-import supertest from 'supertest'
-import { create, generate, db } from '@shared/test'
+import { create, db, generate } from '@shared/test'
 import { fakes, mocksReset } from '@shared/test/mocks'
+import { expect } from 'chai'
+import supertest from 'supertest'
 import { testedApp } from '../../index'
 import { getDefaultHeaderData } from '../../utils/expect-helper'
 
@@ -21,6 +21,7 @@ describe('POST /folders/recreate', () => {
     em = database.orm().em.fork()
     em.clear()
     user = create.userHelper.create(em, { privateFilesProject: generate.random.dxstr() })
+    create.sessionHelper.create(em, { user })
     // app = create.appHelper.create(em, { user }, { spec: generate.app.jupyterAppSpecData() })
     // job = create.jobHelper.create(em, { user, app }, { scope: 'private', state: JOB_STATE.IDLE })
     await em.flush()

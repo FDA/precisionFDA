@@ -2,10 +2,10 @@ name: precisionFDA
 on:
   push:
     branches:
-      - 'master'
+      - "master"
   pull_request:
     branches:
-      - '*'
+      - "*"
 
 jobs:
   # Prepopulates ruby cache
@@ -120,7 +120,7 @@ jobs:
         with:
           path: packages/server
           config_path: "./eslint.config.mjs"
-          level: 'info'
+          level: "info"
           token: ${{ secrets.GITHUB_TOKEN }}
 
   test-ruby:
@@ -175,6 +175,7 @@ jobs:
       NODE_ENV: ci_test
       DATABASE_TEST_URL: mysql://root:password@127.0.0.1:3306/test_db
       DATABASE_TEST_NAME: test_db
+      SECRET_KEY_BASE: secret
       MAKE: "make --jobs 4"
 
     services:
@@ -202,8 +203,8 @@ jobs:
           version: 9.0.6
       - uses: actions/setup-node@v4
         with:
-          node-version: '20.12.2'
-          cache: 'pnpm'
+          node-version: "20.12.2"
+          cache: "pnpm"
       - name: Prepare env & db
         working-directory: ./packages/rails
         env:
@@ -247,8 +248,8 @@ jobs:
           version: 9.0.6
       - uses: actions/setup-node@v4
         with:
-          node-version: '20.12.2'
-          cache: 'pnpm'
+          node-version: "20.12.2"
+          cache: "pnpm"
       - name: Install dependencies
         working-directory: ./packages/client
         run: pnpm install --frozen-lockfile --prod=false
@@ -269,8 +270,8 @@ jobs:
           version: 9.0.6
       - uses: actions/setup-node@v4
         with:
-          node-version: '20.12.2'
-          cache: 'pnpm'
+          node-version: "20.12.2"
+          cache: "pnpm"
       - name: Install dependencies
         working-directory: ./packages/client
         run: pnpm install --frozen-lockfile --prod=false
