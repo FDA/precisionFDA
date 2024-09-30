@@ -176,7 +176,10 @@ export const DataPortalForm = ({
             placeholder="URL slug"
             {...register('url_slug')}
             disabled={isSubmitting || isEditMode}
-            onBlur={() => setSlugEdited(true)}
+            onChange={(e) => {
+              setSlugEdited(true)  // The URL slug field was manually edited
+              register('url_slug').onChange(e) // Trigger default onChange event
+            }}
           />
           <FieldInfo text="Once Data portal is created, the URL slug cannot be edited" />
           <ErrorMessage errors={errors} name="url_slug" render={({ message }) => <InputError>{message}</InputError>} />
