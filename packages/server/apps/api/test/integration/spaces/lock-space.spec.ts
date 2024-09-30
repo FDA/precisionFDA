@@ -36,6 +36,8 @@ describe('PATCH /spaces/:id/lock', () => {
     alreadyLockedSpace = create.spacesHelper.create(em, { state: SPACE_STATE.LOCKED })
     guestLead = create.userHelper.create(em, { email: generate.random.chance.email() })
     hostLead = create.userHelper.create(em, { email: generate.random.chance.email() })
+    create.sessionHelper.create(em, { user })
+    create.sessionHelper.create(em, { user: hostLead })
 
     create.spacesHelper.addMember(em, { user, space })
 

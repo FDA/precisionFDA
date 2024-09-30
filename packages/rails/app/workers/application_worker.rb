@@ -10,6 +10,7 @@ class ApplicationWorker
     scope = job["args"].first
 
     context = build_context(job)
+    forward_header = job["args"].last
 
     subject = "An error occurred during the copying to scope '#{scope}'"
     message = "#{subject}: #{job['error_message']}"
@@ -21,7 +22,7 @@ class ApplicationWorker
       userId: context.user_id,
     }
     h_a_client = HttpsAppsClient.new
-    RequestContext.begin_request(context.user_id, context.username, context.token)
+    RequestContext.begin_request(context.user_id, context.username, context.token, forward_header)
     h_a_client.send_notification(notification)
     RequestContext.end_request
 

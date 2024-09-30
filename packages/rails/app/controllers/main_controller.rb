@@ -74,7 +74,7 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
           end
         end
 
-        api_with_user_token = DNAnexusAPI.new(RequestContext.instance.token)
+        api_with_user_token = DNAnexusAPI.new(@context.token)
 
         login_tasks_processor = LoginTasksProcessor.new(
           OrgService::LeaveOrgProcess.new(
@@ -368,8 +368,6 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
           user.inactivity_email_sent = false
           user.save(validate: false)
         end
-
-        post_login_checks user, token
       end
 
       Session.delete_expired
@@ -402,20 +400,6 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
     uri.to_s
   rescue Addressable::URI::InvalidURIError
     root_url
-  end
-
-  def post_login_checks(user, token)
-    # User logged in successfully, a good time to run user checkup with the new token
-    # N.B. We need to set RequestContext manually here because when return_from_login
-    #      is called there is no valid session yet
-    RequestContext.begin_request(user.id, user.dxuser, token)
-    https_apps_client = HttpsAppsClient.new
-    https_apps_client.user_checkup
-  rescue StandardError => e
-    # Error in requesting a user checkup shouldn't interrupt the login process
-    Rails.logger.error("Error requesting user checkup: #{e.message}")
-  ensure
-    RequestContext.end_request
   end
 
   def check_webapp

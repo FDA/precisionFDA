@@ -1,14 +1,15 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { getLogger } from '@shared/logger'
+import { ClassIdResponse } from '@shared/platform-client/platform-client.responses'
+import { BILLING_INFO } from '../../../config/consts'
+import { ClientErrorProps, ServiceError } from '../../../errors'
 import { PlatformClient } from '../../../platform-client'
 import { getHandle } from '../org.utils'
-import { ClientErrorProps, ServiceError } from '../../../errors'
-import { BILLING_INFO } from '../../../config/consts'
 
 const logger = getLogger('org.service')
 
 export interface IOrgService {
-  create: (dxid: string, billable?: boolean) => Promise<string>
+  create: (dxid: string, billable?: boolean) => Promise<ClassIdResponse>
 }
 
 /**
@@ -33,12 +34,12 @@ export class OrgService implements IOrgService {
     try {
       await this.adminPlatformClient.objectDescribe(dxid)
       return true
-    } catch (error) {
+    } catch {
       return false
     }
   }
 
-  async create(dxid: string, billable: boolean | undefined): Promise<string> {
+  async create(dxid: string, billable: boolean | undefined): Promise<ClassIdResponse> {
     logger.log(`Creating new organization ${dxid}, billable: ${billable}`)
 
     if (await this.exists(dxid)) {
@@ -51,7 +52,7 @@ export class OrgService implements IOrgService {
     // TODO add audit as in app/services/org_service/create.rb when implmenting auditing for Node
 
     if (billable) {
-      await this.userPlatformClient.updateBillingInformation(orgDxid, BILLING_INFO)
+      await this.userPlatformClient.updateBillingInformation(orgDxid.id, BILLING_INFO)
     }
 
     return orgDxid

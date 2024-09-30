@@ -24,6 +24,7 @@ import { NewsItem } from '@shared/domain/news-item/news-item.entity'
 import { Note } from '@shared/domain/note/note.entity'
 import { Organization } from '@shared/domain/org/org.entity'
 import { Resource } from '@shared/domain/resource/resource.entity'
+import { Session } from '@shared/domain/session/session.entity'
 import { SpaceEvent } from '@shared/domain/space-event/space-event.entity'
 import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
 import { Space } from '@shared/domain/space/space.entity'
@@ -36,6 +37,7 @@ import { User } from '@shared/domain/user/user.entity'
 import { WorkflowSeries } from '@shared/domain/workflow-series/workflow-series.entity'
 import { Workflow } from '@shared/domain/workflow/entity/workflow.entity'
 import { STATIC_SCOPE } from '@shared/enums'
+import { HashUtils } from '@shared/utils/hash.utils'
 import { config } from '../config'
 import { getScopeFromSpaceId } from '../domain/space/space.helper'
 import { PARENT_TYPE } from '../domain/user-file/user-file.types'
@@ -680,7 +682,9 @@ const spacesHelper = {
       ...defaults,
       ...data,
     }
-    const membership = wrap(new SpaceMembership(references.user, references.space, input.side, input.role)).assign(input)
+    const membership = wrap(
+      new SpaceMembership(references.user, references.space, input.side, input.role),
+    ).assign(input)
     em.persist(membership)
     return membership
   },
@@ -851,6 +855,15 @@ const newsHelper = {
   },
 }
 
+const sessionHelper = {
+  create: (em: EntityManager, references: { user: InstanceType<typeof User> }) => {
+    const session = new Session(references.user)
+    session.key = HashUtils.hashSessionId(`session-id-${references.user.dxuser}`)
+    em.persist(session)
+    return session
+  },
+}
+
 const workflowHelper = {
   create: (
     em: EntityManager,
@@ -906,6 +919,7 @@ export {
   newsHelper,
   noteHelper,
   orgHelper,
+  sessionHelper,
   spacesHelper,
   tagsHelper,
   userHelper,

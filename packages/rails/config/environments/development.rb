@@ -94,4 +94,5 @@ Rails.application.configure do
 
   # Allow access from any ip
   config.web_console.whiny_requests = false
+  config.hosts << "web"
 end

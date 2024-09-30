@@ -134,6 +134,7 @@ RSpec.describe Api::FilesController, type: :controller do
       let(:file_other) { create(:user_file, :private, user: create(:user)) }
 
       before do
+        travel_to Time.current
         authenticate!(user)
       end
 
@@ -147,8 +148,10 @@ RSpec.describe Api::FilesController, type: :controller do
           item_ids: node_ids,
         }, format: :json
 
+        user_session = context_attributes_for(user).stringify_keys
+
         expect(NodeCopyWorker).to have_received(:perform_async).
-          with(space.scope, node_ids[0..-2], nil, anything)
+          with(space.scope, node_ids[0..-2], nil, user_session, {})
 
         expect(response).to be_successful
       end

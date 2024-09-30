@@ -1,20 +1,20 @@
-import { database } from '@shared/database'
-import { Space } from '@shared/domain/space/space.entity'
-import { User } from '@shared/domain/user/user.entity'
-import { ErrorCodes } from '@shared/errors'
-import { expect } from 'chai'
 import { EntityManager } from '@mikro-orm/mysql'
-import supertest from 'supertest'
-import { create, generate, db } from '@shared/test'
-import { fakes, mocksReset } from '@shared/test/mocks'
-import { testedApp } from '../../index'
-import { getDefaultHeaderData } from '../../utils/expect-helper'
+import { database } from '@shared/database'
 import {
   SPACE_MEMBERSHIP_ROLE,
   SPACE_MEMBERSHIP_SIDE,
 } from '@shared/domain/space-membership/space-membership.enum'
+import { Space } from '@shared/domain/space/space.entity'
 import { SPACE_STATE } from '@shared/domain/space/space.enum'
+import { User } from '@shared/domain/user/user.entity'
+import { ErrorCodes } from '@shared/errors'
+import { create, db, generate } from '@shared/test'
+import { fakes, mocksReset } from '@shared/test/mocks'
+import { expect } from 'chai'
 import process from 'process'
+import supertest from 'supertest'
+import { testedApp } from '../../index'
+import { getDefaultHeaderData } from '../../utils/expect-helper'
 
 describe('PATCH /spaces/:id/unlock', () => {
   let em: EntityManager
@@ -35,6 +35,8 @@ describe('PATCH /spaces/:id/unlock', () => {
     alreadyUnlockedSpace = create.spacesHelper.create(em, { state: SPACE_STATE.ACTIVE })
     guestLead = create.userHelper.create(em, { email: generate.random.chance.email() })
     hostLead = create.userHelper.create(em, { email: generate.random.chance.email() })
+    create.sessionHelper.create(em, { user })
+    create.sessionHelper.create(em, { user: hostLead })
 
     create.spacesHelper.addMember(em, { user, space })
 

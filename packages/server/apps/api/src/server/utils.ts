@@ -1,7 +1,5 @@
 import { Logger } from '@nestjs/common'
 import { config } from '@shared/config'
-import { schemas } from '@shared/utils/base-schemas'
-import { ajv } from '@shared/utils/validator'
 import { ipv4QuadrupleToBooleanArray, ipv4StringToQuadruple } from '../utils/ipv4'
 
 // TODO(samuel) investigate if it's possible to have this logic on Nginx
@@ -18,7 +16,7 @@ export const isRequestFromFdaSubnet = (logger: Logger, ipv4Header: string): bool
 
   logger.debug(
     { ipv4Header },
-    `Processing nginx header ${config.api.fdaSubnet.nginxIpHeader} with value "${ipv4Header}"`,
+    `Processing nginx header ${config.api.nginxIpHeader} with value "${ipv4Header}"`,
   )
   // Client IP should be 1st value in provided list
   const ipv4String = ipv4Header.split(',')[0]
@@ -44,8 +42,4 @@ export const isRequestFromFdaSubnet = (logger: Logger, ipv4Header: string): bool
   }
   logger.debug({ ip: ipv4String }, 'IP address within CIDR block')
   return true
-}
-export const isRequestFromAuthenticatedUser = (headers: Record<string, string>): boolean => {
-  const userContextValidatorFn = ajv.compile(schemas.userContextSchema)
-  return userContextValidatorFn(headers) as boolean
 }

@@ -10,7 +10,7 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets'
-import { config } from '@shared/config'
+import { COOKIE_SESSION_KEY } from '@shared/config/consts'
 import { database } from '@shared/database'
 import { OrmContextInterceptor } from '@shared/database/interceptor/orm-context.interceptor'
 import { Uid } from '@shared/domain/entity/domain/uid'
@@ -20,16 +20,15 @@ import { JobLogService } from '@shared/domain/job/services/job-log.service'
 import { NotificationService } from '@shared/domain/notification/services/notification.service'
 import { Session } from '@shared/domain/session/session.entity'
 import { PermissionError } from '@shared/errors'
+import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { NOTIFICATIONS_QUEUE, createRedisClient } from '@shared/services/redis.service'
-import { CookieUtils } from '@shared/utils/cookie-utils'
-import { Encryptor } from '@shared/utils/encryptor'
-import { HashUtils } from '@shared/utils/hash-utils'
-import { TimeUtils } from '@shared/utils/time.utils'
+import { CookieUtils } from '@shared/utils/cookie.utils'
+import { Encryptor } from '@shared/utils/encryptors/encryptor'
+import { HashUtils } from '@shared/utils/hash.utils'
 import { PfdaWebSocket, WEBSOCKET_EVENTS } from '@shared/websocket/model/pfda-web-socket'
 import { IncomingMessage } from 'http'
 import { Server } from 'ws'
 import { UserContextTokenInterceptor } from '../user-context/interceptor/user-context-token.interceptor'
-import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 
 @UseInterceptors(UserContextTokenInterceptor, OrmContextInterceptor)
 @WebSocketGateway()
@@ -59,19 +58,21 @@ export class WebsocketGateway implements OnGatewayDisconnect, OnGatewayInit, OnG
     try {
       this.logger.debug(`WebSocket client connected, IP: ${message.socket.remoteAddress}`)
 
-      const token = CookieUtils.getCookie('_precision-fda_session', message.headers.cookie)
+      const token = CookieUtils.getCookie(COOKIE_SESSION_KEY, message.headers.cookie)
       if (!token) {
         throw new Error('Missing authentication token')
       }
       client.PFDA_AUTH_TOKEN = token
 
       const decrypted = Encryptor.decrypt(token)
+
       const sessionId = decrypted.session_id
       const session = await this.em.findOneOrFail(Session, {
         key: HashUtils.hashSessionId(sessionId),
+        user: decrypted.user_id,
       })
 
-      if (session.updatedAt.getTime() < TimeUtils.minutesAgoInMiliseconds(config.maxTimeInactivity)) {
+      if (session.isExpired()) {
         throw new Error('Session expired')
       }
 
