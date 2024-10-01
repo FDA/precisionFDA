@@ -53,18 +53,19 @@ class CopyService
       new_workflow.update!(workflow_series_id: workflow_series.id)
       workflow_from_api = api.workflow_describe(new_workflow.dxid)
 
+      copied_workflow_version = workflow_from_api["editVersion"]
       workflow_from_api["stages"].each_with_index do |stage, index|
         app_dxid = new_workflow["spec"]["input_spec"]["stages"][index]["app_dxid"]
         app = api.app_describe(app_dxid)
         executable = "app-#{app['name']}/#{app['version']}"
 
         update_payload = {
-          "editVersion" => workflow_from_api["editVersion"],
+          "editVersion" => copied_workflow_version,
           "stage" => stage["id"],
           "executable" => executable,
         }
-
         api.workflow_update_executable(new_workflow.dxid, update_payload)
+        copied_workflow_version += 1
       end
       new_workflow
     end
