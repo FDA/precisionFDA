@@ -39,10 +39,7 @@ module.exports = merge(base({ urlLoaderOptions }), swc({ swcLoaderOptions }), {
     publicPath: '/',
   },
   watchOptions: {
-    ignored: [
-      path.resolve(__dirname, 'dist'),
-      path.resolve(__dirname, 'node_modules'),
-    ],
+    ignored: [path.resolve(__dirname, 'dist'), path.resolve(__dirname, 'node_modules')],
   },
   devtool: 'eval-source-map',
   devServer: {

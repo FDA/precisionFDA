@@ -12,7 +12,6 @@ import { PermissionError } from '../../errors'
 import { SPACE_MEMBERSHIP_ROLE } from '../space-membership/space-membership.enum'
 import { CAN_EDIT_ROLES } from '../space-membership/space-membership.helper'
 import { SPACE_STATE, SPACE_TYPE } from '../space/space.enum'
-import { getIdFromScopeName, scopeContainsId } from '../space/space.helper'
 import { Asset } from './asset.entity'
 import { AssetRepository } from './asset.repository'
 import { FolderRepository } from './folder.repository'
@@ -262,8 +261,8 @@ const getNodePath = async (
 }
 
 const validateVerificationSpace = async (em: SqlEntityManager, node: Node): Promise<void> => {
-  if (node.scope && node.scope.startsWith('space')) {
-    const spaceId = getIdFromScopeName(node.scope)
+  if (node.isInSpace()) {
+    const spaceId = node.getSpaceId()
     const space = await em.findOneOrFail(Space, { id: spaceId })
     if (space.type === SPACE_TYPE.VERIFICATION && space.state === SPACE_STATE.LOCKED) {
       throw new Error(
@@ -289,8 +288,8 @@ const validateProtectedSpaces = async (
   userId: number,
   node: Node,
 ) => {
-  if (scopeContainsId(node.scope)) {
-    const spaceId = getIdFromScopeName(node.scope)
+  if (node.isInSpace()) {
+    const spaceId = node.getSpaceId()
     const space = await em.findOneOrFail(Space, spaceId, {
       populate: ['spaceMemberships', 'spaceMemberships.user'],
     })
@@ -313,14 +312,14 @@ const validateEditableBy = async (em: SqlEntityManager, node: Node, currentUser:
     throw new Error('Locked items cannot be removed.')
   }
   if (
-    node.scope === STATIC_SCOPE.PUBLIC ||
+    node.isPublic() ||
     node.user.id === currentUser.id ||
     (await currentUser.isSiteAdmin())
   ) {
     return
   }
-  if (scopeContainsId(node.scope)) {
-    const spaceId = getIdFromScopeName(node.scope)
+  if (node.isInSpace()) {
+    const spaceId = node.getSpaceId()
     const space = await em.findOne(Space, {
       id: spaceId,
       state: SPACE_STATE.ACTIVE,
@@ -338,8 +337,8 @@ const validateEditableBy = async (em: SqlEntityManager, node: Node, currentUser:
 
 const filterNodesByUser = async (em: SqlEntityManager, nodes: Node[], currentUser: User) => {
   for (const node of nodes) {
-    if (scopeContainsId(node.scope)) {
-      const spaceId = getIdFromScopeName(node.scope)
+    if (node.isInSpace()) {
+      const spaceId = node.getSpaceId()
       const space = await em.findOneOrFail(Space, spaceId, {
         populate: ['spaceMemberships', 'spaceMemberships.user'],
       })

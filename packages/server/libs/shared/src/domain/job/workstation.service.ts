@@ -123,7 +123,7 @@ class WorkstationService {
         const hostUrl = new URL(config.api.railsHost)
         pfdaConfig.Server = hostUrl.port ? `${hostUrl.hostname}:${hostUrl.port}` : hostUrl.hostname
       }
-      if (this.job.isSpaceScope()) {
+      if (this.job.isInSpace()) {
         pfdaConfig.Scope = this.job.scope
       }
 

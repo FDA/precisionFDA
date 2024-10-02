@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common'
 import { EntityLinkProvider } from '@shared/domain/entity/entity-link/entity-link.provider'
-import { getIdFromScopeName } from '@shared/domain/space/space.helper'
 import { Folder } from '@shared/domain/user-file/folder.entity'
 
 @Injectable()
@@ -12,7 +11,7 @@ export class FolderEntityLinkProvider extends EntityLinkProvider<'folder'> {
       return this.getHomeLink(folder)
     }
 
-    return this.getSpaceLink(folder, getIdFromScopeName(scope))
+    return this.getSpaceLink(folder, folder.getSpaceId())
   }
 
   private getHomeLink(folder: Folder) {

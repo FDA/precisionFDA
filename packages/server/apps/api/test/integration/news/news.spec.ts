@@ -1,11 +1,11 @@
+import { EntityManager } from '@mikro-orm/mysql'
 import { database } from '@shared/database'
 import { NewsItem } from '@shared/domain/news-item/news-item.entity'
 import { User } from '@shared/domain/user/user.entity'
-import { expect } from 'chai'
-import { EntityManager } from '@mikro-orm/mysql'
-import supertest from 'supertest'
-import { create, generate, db } from '@shared/test'
+import { create, db, generate } from '@shared/test'
 import { mocksReset } from '@shared/test/mocks'
+import { expect } from 'chai'
+import supertest from 'supertest'
 import { testedApp } from '../../index'
 import { getDefaultHeaderData } from '../../utils/expect-helper'
 
@@ -24,18 +24,32 @@ describe('/news', () => {
     user1 = create.userHelper.create(em)
     user2 = create.userHelper.create(em)
     siteAdmin = create.userHelper.createSiteAdmin(em)
+    create.sessionHelper.create(em, { user: user1 })
+    create.sessionHelper.create(em, { user: siteAdmin })
 
     // Create a series of news, some are publications and some are not published
     news = []
-    const createMockNewsItem = (u: User, date: Date, isPublication: boolean, published: boolean) => {
-      news.push(create.newsHelper.create(em, { user: u }, {
-        createdAt: date,
-        updatedAt: date,
-        isPublication,
-        published,
-      }))
+    const createMockNewsItem = (
+      u: User,
+      date: Date,
+      isPublication: boolean,
+      published: boolean,
+    ) => {
+      news.push(
+        create.newsHelper.create(
+          em,
+          { user: u },
+          {
+            createdAt: date,
+            updatedAt: date,
+            isPublication,
+            published,
+          },
+        ),
+      )
     }
-    const getUTCDate = (year: number, month: number, day: number) => new Date(Date.UTC(year, month, day))
+    const getUTCDate = (year: number, month: number, day: number) =>
+      new Date(Date.UTC(year, month, day))
 
     // 2023
     createMockNewsItem(user1, getUTCDate(2023, 3, 1), false, true)
@@ -66,9 +80,7 @@ describe('/news', () => {
   })
 
   it('GET /news public access', async () => {
-    const { body } = await supertest(testedApp.getHttpServer())
-      .get(`/news`)
-      .expect(200)
+    const { body } = await supertest(testedApp.getHttpServer()).get(`/news`).expect(200)
 
     const newsItems = body.news_items
     expect(newsItems).to.have.length(10)
@@ -118,6 +130,7 @@ describe('/news', () => {
   it('GET /news public access with year filter', async () => {
     let response = await supertest(testedApp.getHttpServer())
       .get(`/news`)
+      .set(getDefaultHeaderData())
       .query({ year: 2022 })
       .expect(200)
 
@@ -188,9 +201,9 @@ describe('/news', () => {
     expect(newsItemFromDb).to.deep.include(data)
   })
 
-  it('POST /news doesn\'t work if not site admin', async () => {
+  it("POST /news doesn't work if not site admin", async () => {
     const data = generate.news.create()
-    const { body } = await supertest(testedApp.getHttpServer())
+    await supertest(testedApp.getHttpServer())
       .post(`/news`)
       .set(getDefaultHeaderData(user1))
       .send(data)

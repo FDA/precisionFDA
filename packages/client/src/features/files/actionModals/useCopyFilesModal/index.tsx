@@ -272,7 +272,7 @@ export const useCopyFilesModal = ({
             {isLoading && <ModalContentPadding>Loading...</ModalContentPadding>}
             {isSuccess && <CopyFileList nodes={copyFiles} />}
           </CopyModalScrollPlace>
-          {copyMessage.length > 0 && <CopyHelp>{copyMessage}</CopyHelp>}
+          {copyMessage.length > 0 && <CopyHelp data-variant="info">{copyMessage}</CopyHelp>}
         </CopyModalPageCol>
         <ScopeAndFolderSelection
           sourceScopes={sourceScopes}

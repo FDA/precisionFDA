@@ -1,4 +1,4 @@
-@import "_common"
+
 
 .fda-footer
   padding: $padding-base-vertical $padding-base-horizontal
@@ -8,12 +8,12 @@
   border-top: 1px solid $border-default-color
 
   .site-footer-section
+    justify-content: space-between
+    gap: 16px
     @include make-row()
     .site-footer-aside
-      @include make-md-column(6)
 
     .site-footer-main
-      @include make-md-column(18)
 
   .logo-fda
     display: block

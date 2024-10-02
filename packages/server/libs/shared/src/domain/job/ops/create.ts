@@ -84,7 +84,7 @@ export class CreateJobOperation extends BaseOperation<UserOpsCtx, RunAppInput, J
     if (input.scope === 'private') {
       this.projectId = getProjectToRunApp(user)
     } else {
-      let spaceId = getIdFromScopeName(input.scope)
+      const spaceId = getIdFromScopeName(input.scope)
       const space = await em.findOne(Space, {id: spaceId})
       const membership = await em.findOne(SpaceMembership, {spaces: spaceId, user: user})
       if (space == null || membership == null){

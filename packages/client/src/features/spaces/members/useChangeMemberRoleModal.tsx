@@ -7,6 +7,8 @@ import { useNavigate } from 'react-router-dom'
 import Select from 'react-select'
 import { toast } from 'react-toastify'
 import * as Yup from 'yup'
+import { Button } from '../../../components/Button'
+import { Callout } from '../../../components/Callout'
 import { InputText } from '../../../components/InputText'
 import { FieldGroup, Hint, InputError } from '../../../components/form/styles'
 import { capitalize } from '../../../utils/formatting'
@@ -14,9 +16,8 @@ import { useAuthUser } from '../../auth/useAuthUser'
 import { ModalHeaderTop, ModalNext } from '../../modal/ModalNext'
 import { useModal } from '../../modal/useModal'
 import { changeMembershipRoleRequest } from './members.api'
-import { MemberRole, SpaceMembership } from './members.types'
 import { StyledFields, StyledFooter } from './members.styles'
-import { Button } from '../../../components/Button'
+import { MemberRole, SpaceMembership } from './members.types'
 
 interface FormValues {
   role: { label: string; value: MemberRole }
@@ -39,13 +40,7 @@ const validationSchema = Yup.object().shape({
     .required('Required'),
 })
 
-export const useChangeMemberRoleModal = ({
-  spaceId,
-  member,
-}: {
-  spaceId: number
-  member: SpaceMembership
-}) => {
+export const useChangeMemberRoleModal = ({ spaceId, member }: { spaceId: number; member: SpaceMembership }) => {
   const authUser = useAuthUser()
   const queryClient = useQueryClient()
   const navigate = useNavigate()
@@ -55,9 +50,12 @@ export const useChangeMemberRoleModal = ({
     control,
     formState: { errors },
     reset,
+    watch,
   } = useForm<FormValues>({
     resolver: yupResolver(validationSchema),
   })
+  const isLeadSelected = watch(['role'])[0]?.value === 'lead'
+
   const mutation = useMutation({
     mutationKey: ['change-membership-role'],
     mutationFn: ({ role }: FormValues) =>
@@ -77,9 +75,7 @@ export const useChangeMemberRoleModal = ({
         })
         setShowModal(false)
         if (['enable', 'disable'].includes(res.role)) {
-          toast.success(
-            `${capitalize(res.role)}d member ${res.member} in the space`,
-          )
+          toast.success(`${capitalize(res.role)}d member ${res.member} in the space`)
         } else {
           toast.success(`Changed ${res.member} member role to ${res.role}`)
         }
@@ -109,12 +105,9 @@ export const useChangeMemberRoleModal = ({
       data-testid="modal-change-membership-role"
       isShown={isShown}
       hide={() => setShowModal(false)}
+      variant="medium"
     >
-      <ModalHeaderTop
-        disableClose={false}
-        headerText="Change member role"
-        hide={() => setShowModal(false)}
-      />
+      <ModalHeaderTop disableClose={false} headerText="Change member role" hide={() => setShowModal(false)} />
       <form onSubmit={handleSubmit(onSubmit)}>
         <StyledFields>
           <FieldGroup>
@@ -123,11 +116,7 @@ export const useChangeMemberRoleModal = ({
           </FieldGroup>
           <FieldGroup>
             <label>Current role</label>
-            <InputText
-              label="Current Role"
-              value={member.active ? member.role : `${member.role} (disabled)`}
-              disabled
-            />
+            <InputText label="Current Role" value={member.active ? member.role : `${member.role} (disabled)`} disabled />
           </FieldGroup>
           <FieldGroup>
             <label>Change to role</label>
@@ -147,12 +136,14 @@ export const useChangeMemberRoleModal = ({
               )}
             />
             <Hint>Select the members role</Hint>
-            <ErrorMessage
-              errors={errors}
-              name="name"
-              render={({ message }) => <InputError>{message}</InputError>}
-            />
+            <ErrorMessage errors={errors} name="name" render={({ message }) => <InputError>{message}</InputError>} />
           </FieldGroup>
+          {isLeadSelected && (
+            <Callout data-variant="warning">
+              Changing this user to Lead role will make you admin in this space. The new Lead will assume billing for this Space,
+              including storage costs for files and run costs for App Executions.
+            </Callout>
+          )}
         </StyledFields>
         <StyledFooter>
           <Button

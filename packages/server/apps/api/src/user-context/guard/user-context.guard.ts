@@ -1,38 +1,28 @@
-import { CanActivate, ExecutionContext, Injectable, Logger } from '@nestjs/common'
+import { SqlEntityManager } from '@mikro-orm/mysql'
+import { CanActivate, Injectable, Logger } from '@nestjs/common'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
-import { ErrorCodes, ValidationError } from '@shared/errors'
-import { schemas } from '@shared/utils/base-schemas'
-import { maskAccessTokenUserCtx } from '@shared/utils/logging'
-import { ajv } from '@shared/utils/validator'
+import { User } from '@shared/domain/user/user.entity'
+import { UnauthorizedRequestError } from '@shared/errors'
 
 @Injectable()
 export class UserContextGuard implements CanActivate {
   constructor(
     private readonly logger: Logger,
     private readonly user: UserContext,
+    private readonly em: SqlEntityManager,
   ) {}
 
-  public async canActivate(context: ExecutionContext): Promise<boolean> {
-    const request = context.switchToHttp().getRequest<Request>()
+  public async canActivate(): Promise<boolean> {
+    if (!this.user.id || !this.user.dxuser || !this.user.accessToken) {
+      throw new UnauthorizedRequestError()
+    }
 
-    const validatorFn = ajv.compile(schemas.userContextSchema)
-
-    if (validatorFn(request.headers)) {
+    const userFromDb = await this.em.findOne(User, { id: this.user.id, dxuser: this.user.dxuser })
+    if (userFromDb) {
       return true
     }
 
-    this.logger.warn(
-      {
-        url: request.url,
-        input: maskAccessTokenUserCtx(this.user),
-        errors: validatorFn.errors,
-      },
-      'User context - validation failed',
-    )
-    throw new ValidationError('User context (request headers) invalid', {
-      code: ErrorCodes.USER_CONTEXT_QUERY_INVALID,
-      statusCode: 400,
-      validationErrors: validatorFn.errors,
-    })
+    this.logger.error(`User not found in the database: ${this.user.id}, ${this.user.dxuser}`)
+    throw new UnauthorizedRequestError()
   }
 }

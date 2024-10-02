@@ -1,5 +1,3 @@
-/* eslint-disable import/group-exports, max-classes-per-file */
-
 import type { AnyObject } from '../types'
 
 type BaseErrorProps = AnyObject & {
@@ -24,6 +22,8 @@ export enum ErrorCodes {
   NOT_FOUND = 'E_NOT_FOUND',
   NOT_PERMITTED = 'E_NOT_PERMITTED',
   INVALID_STATE = 'E_INVALID_STATE',
+  INVALID_REQUEST = 'E_INVALID_REQUEST',
+  UNAUTHORIZED_REQUEST = 'E_UNAUTHORIZED_REQUEST',
   // for specific situations
   USER_CONTEXT_QUERY_INVALID = 'E_USER_CONTEXT_QUERY_INVALID',
   JOB_NOT_FOUND = 'E_JOB_NOT_FOUND',
@@ -50,6 +50,7 @@ export enum ErrorCodes {
   DATA_PORTAL_CREATE_ERROR = 'E_DATA_PORTAL_CREATE_ERROR',
   APP_SERIES_CREATION_NOT_REQUESTED = 'E_APP_SERIES_CREATION_NOT_REQUESTED',
   APP_REVISION_CREATION_NOT_REQUESTED = 'E_APP_REVISION_CREATION_NOT_REQUESTED',
+  UNPROCESSABLE_ENTITY = 'E_UNPROCESSABLE_ENTITY',
 }
 
 export class BaseError extends Error {
@@ -111,7 +112,10 @@ export class IncompatibleVersionError extends BaseError {
 }
 
 export class InvalidStateError extends BaseError {
-  constructor(message = 'Error: Entity is in invalid state for the operation', props: MaybeBaseErrorProps = {}) {
+  constructor(
+    message = 'Error: Entity is in invalid state for the operation',
+    props: MaybeBaseErrorProps = {},
+  ) {
     super(message, {
       code: ErrorCodes.INVALID_STATE,
       statusCode: 422,
@@ -120,8 +124,41 @@ export class InvalidStateError extends BaseError {
   }
 }
 
+export class UnprocessableEntityError extends BaseError {
+  constructor(message = 'Error: Unprocessable entity', props: MaybeBaseErrorProps = {}) {
+    super(message, {
+      code: ErrorCodes.UNPROCESSABLE_ENTITY,
+      statusCode: 422,
+      ...props,
+    })
+  }
+}
+
+export class InvalidRequestError extends BaseError {
+  constructor(message = 'Error: Invalid request', props: MaybeBaseErrorProps = {}) {
+    super(message, {
+      code: ErrorCodes.INVALID_REQUEST,
+      statusCode: 400,
+      ...props,
+    })
+  }
+}
+
+export class UnauthorizedRequestError extends BaseError {
+  constructor(message = 'Error: Unauthorized request', props: MaybeBaseErrorProps = {}) {
+    super(message, {
+      code: ErrorCodes.UNAUTHORIZED_REQUEST,
+      statusCode: 401,
+      ...props,
+    })
+  }
+}
+
 export class PermissionError extends BaseError {
-  constructor(message = 'Error: You do have permissions to access this entity', props: MaybeBaseErrorProps = {}) {
+  constructor(
+    message = 'Error: You do not have permissions to access this entity',
+    props: MaybeBaseErrorProps = {},
+  ) {
     super(message, {
       code: ErrorCodes.NOT_PERMITTED,
       statusCode: 403,

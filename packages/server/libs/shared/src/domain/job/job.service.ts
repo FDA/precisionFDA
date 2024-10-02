@@ -36,7 +36,6 @@ import { UserCtx } from '../../types'
 import { DxId } from '../entity/domain/dxid'
 import { createFileEvent, EVENT_TYPES } from '../event/event.helper'
 import { SPACE_EVENT_ACTIVITY_TYPE } from '../space-event/space-event.enum'
-import { getIdFromScopeName, scopeContainsId } from '../space/space.helper'
 import { FolderService } from '../user-file/folder.service'
 import { FILE_STATE_DX, PARENT_TYPE } from '../user-file/user-file.types'
 import { UserRepository } from '../user/user.repository'
@@ -212,7 +211,7 @@ export class JobService {
 
       this.updateJobRunData(job, remappedOutput)
 
-      if (scopeContainsId(job.scope)) {
+      if (job.isInSpace()) {
         // TODO temporarily before we move to Service model
         const spaceService = new SpaceEventService(
           { id: userId } as UserCtx,
@@ -224,7 +223,7 @@ export class JobService {
         )
         const spaceEvent = await spaceService.createSpaceEvent({
           entity: { type: 'job', value: job },
-          spaceId: getIdFromScopeName(job.scope),
+          spaceId: job.getSpaceId(),
           userId,
           activityType: SPACE_EVENT_ACTIVITY_TYPE.job_completed,
         })
@@ -346,13 +345,13 @@ export class JobService {
     file.scope = parentFolder ? parentFolder.scope : job.scope
 
     if (parentFolder) {
-      if (scopeContainsId(file.scope)) {
+      if (file.isInSpace()) {
         file.scopedParentFolderId = parentFolder.id
       } else {
         file.parentFolderId = parentFolder.id
       }
     } else if (job.localFolderId) {
-      if (scopeContainsId(file.scope)) {
+      if (file.isInSpace()) {
         file.scopedParentFolderId = job.localFolderId
       } else {
         file.parentFolderId = job.localFolderId

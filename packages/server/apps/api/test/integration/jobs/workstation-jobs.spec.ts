@@ -1,20 +1,20 @@
+import { EntityManager } from '@mikro-orm/mysql'
 import { database } from '@shared/database'
 import { App } from '@shared/domain/app/app.entity'
+import { ENTITY_TYPE } from '@shared/domain/app/app.enum'
 import { Job } from '@shared/domain/job/job.entity'
+import { JOB_STATE } from '@shared/domain/job/job.enum'
 import { WorkstationSnapshotOperation } from '@shared/domain/job/ops/workstation-snapshot'
 import { Space } from '@shared/domain/space/space.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { ErrorCodes } from '@shared/errors'
-import { expect } from 'chai'
-import { EntityManager } from '@mikro-orm/mysql'
-import supertest from 'supertest'
-import { JOB_STATE } from '@shared/domain/job/job.enum'
-import { ENTITY_TYPE } from '@shared/domain/app/app.enum'
-import { create, generate, db } from '@shared/test'
+import { TASK_TYPE } from '@shared/queue/task.input'
+import { create, db, generate } from '@shared/test'
 import { fakes, mocksReset } from '@shared/test/mocks'
+import { expect } from 'chai'
+import supertest from 'supertest'
 import { testedApp } from '../../index'
 import { getDefaultHeaderData } from '../../utils/expect-helper'
-import { TASK_TYPE } from '@shared/queue/task.input'
 
 describe('PATCH /jobs/:id/setAPIKey', () => {
   let em: EntityManager
@@ -32,23 +32,44 @@ describe('PATCH /jobs/:id/setAPIKey', () => {
     em = database.orm().em.fork()
     em.clear()
     user = create.userHelper.create(em)
-    app_v1_0 = create.appHelper.createHTTPS(em, { user }, {
-      spec: generate.app.ttydAppSpecData(),
-      internal: generate.app.ttydAppInternalWithAPI('1.0.0')
-    })
-    app_v1_1 = create.appHelper.createHTTPS(em, { user },{
-      spec: generate.app.ttydAppSpecData(),
-      internal: generate.app.ttydAppInternalWithAPI('1.1.0')
-    })
-    job_v1_0 = create.jobHelper.create(em, { user, app: app_v1_0 }, { scope: 'private', state: JOB_STATE.RUNNING })
-    job_v1_1 = create.jobHelper.create(em, { user, app: app_v1_1 }, { scope: 'private', state: JOB_STATE.RUNNING })
+    create.sessionHelper.create(em, { user })
+    app_v1_0 = create.appHelper.createHTTPS(
+      em,
+      { user },
+      {
+        spec: generate.app.ttydAppSpecData(),
+        internal: generate.app.ttydAppInternalWithAPI('1.0.0'),
+      },
+    )
+    app_v1_1 = create.appHelper.createHTTPS(
+      em,
+      { user },
+      {
+        spec: generate.app.ttydAppSpecData(),
+        internal: generate.app.ttydAppInternalWithAPI('1.1.0'),
+      },
+    )
+    job_v1_0 = create.jobHelper.create(
+      em,
+      { user, app: app_v1_0 },
+      { scope: 'private', state: JOB_STATE.RUNNING },
+    )
+    job_v1_1 = create.jobHelper.create(
+      em,
+      { user, app: app_v1_1 },
+      { scope: 'private', state: JOB_STATE.RUNNING },
+    )
 
     space = create.spacesHelper.create(em, generate.space.group())
-		create.spacesHelper.addMember(em, { user, space: space })
+    create.spacesHelper.addMember(em, { user, space: space })
     await em.flush()
 
     // Space needs id before we assign its scope to job
-    job_in_space = create.jobHelper.create(em, { user, app: app_v1_1 }, { scope: space.scope, state: JOB_STATE.RUNNING })
+    job_in_space = create.jobHelper.create(
+      em,
+      { user, app: app_v1_1 },
+      { scope: space.scope, state: JOB_STATE.RUNNING },
+    )
     await em.flush()
     mocksReset()
   })
@@ -60,10 +81,10 @@ describe('PATCH /jobs/:id/setAPIKey', () => {
       .send({ key: 'hello world', code: 'code from auth server' })
 
     expect(response.statusCode).to.equal(200)
-    expect(response.body).to.be.deep.equal({ 'result': 'success' })
-    expect(fakes.workstationClient.oauthAccess.getCall(0).args).to.be.deep.equal(
-      ['code from auth server']
-    )
+    expect(response.body).to.be.deep.equal({ result: 'success' })
+    expect(fakes.workstationClient.oauthAccess.getCall(0).args).to.be.deep.equal([
+      'code from auth server',
+    ])
     expect(fakes.workstationClient.setAPIKey.calledOnce).to.be.true()
     expect(fakes.workstationClient.setAPIKey.getCall(0).args[0]).to.equal('hello world')
   })
@@ -75,10 +96,10 @@ describe('PATCH /jobs/:id/setAPIKey', () => {
       .send({ key: 'hello world', code: 'code from auth server' })
 
     expect(response.statusCode).to.equal(200)
-    expect(response.body).to.be.deep.equal({ 'result': 'success' })
-    expect(fakes.workstationClient.oauthAccess.getCall(0).args).to.be.deep.equal(
-      ['code from auth server']
-    )
+    expect(response.body).to.be.deep.equal({ result: 'success' })
+    expect(fakes.workstationClient.oauthAccess.getCall(0).args).to.be.deep.equal([
+      'code from auth server',
+    ])
     expect(fakes.workstationClient.setPFDAConfig.calledOnce).to.be.true()
     expect(fakes.workstationClient.setPFDAConfig.getCall(0).args[0]).to.deep.equal({
       Key: 'hello world',
@@ -93,10 +114,10 @@ describe('PATCH /jobs/:id/setAPIKey', () => {
       .send({ key: 'hello world', code: 'code from auth server' })
 
     expect(response.statusCode).to.equal(200)
-    expect(response.body).to.be.deep.equal({ 'result': 'success' })
-    expect(fakes.workstationClient.oauthAccess.getCall(0).args).to.be.deep.equal(
-      ['code from auth server']
-    )
+    expect(response.body).to.be.deep.equal({ result: 'success' })
+    expect(fakes.workstationClient.oauthAccess.getCall(0).args).to.be.deep.equal([
+      'code from auth server',
+    ])
     expect(fakes.workstationClient.setPFDAConfig.calledOnce).to.be.true()
     expect(fakes.workstationClient.setPFDAConfig.getCall(0).args[0]).to.deep.equal({
       Key: 'hello world',
@@ -151,7 +172,6 @@ describe('PATCH /jobs/:id/setAPIKey', () => {
   })
 })
 
-
 describe('PATCH /jobs/:id/snapshot', () => {
   let em: EntityManager
   let user: User
@@ -164,10 +184,15 @@ describe('PATCH /jobs/:id/snapshot', () => {
     em = database.orm().em.fork()
     em.clear()
     user = create.userHelper.create(em)
-    app = create.appHelper.createHTTPS(em, { user }, {
-      spec: generate.app.ttydAppSpecData(),
-      internal: generate.app.ttydAppInternalWithAPI('1.1.0'),
-    })
+    create.sessionHelper.create(em, { user })
+    app = create.appHelper.createHTTPS(
+      em,
+      { user },
+      {
+        spec: generate.app.ttydAppSpecData(),
+        internal: generate.app.ttydAppInternalWithAPI('1.1.0'),
+      },
+    )
     job = create.jobHelper.create(em, { user, app }, { scope: 'private', state: JOB_STATE.RUNNING })
 
     await em.flush()
@@ -193,7 +218,7 @@ describe('PATCH /jobs/:id/snapshot', () => {
     expect(bullJob.type).to.equal(TASK_TYPE.WORKSTATION_SNAPSHOT)
     expect(bullJob.payload).to.deep.include({
       ...params,
-      jobDxid: job.dxid
+      jobDxid: job.dxid,
     })
     expect(bullJobOptions.jobId).to.equal(WorkstationSnapshotOperation.getBullJobId(job.dxid))
   })
@@ -219,7 +244,7 @@ describe('PATCH /jobs/:id/snapshot', () => {
     expect(bullJob.type).to.equal(TASK_TYPE.WORKSTATION_SNAPSHOT)
     expect(bullJob.payload).to.deep.include({
       ...params,
-      jobDxid: job.dxid
+      jobDxid: job.dxid,
     })
     expect(bullJobOptions.jobId).to.equal(WorkstationSnapshotOperation.getBullJobId(job.dxid))
   })
@@ -259,7 +284,12 @@ describe('PATCH /jobs/:id/snapshot', () => {
   })
 
   it('does not call workstation API if the job is not in running state', async () => {
-    const nonRunningStates = [JOB_STATE.IDLE, JOB_STATE.FAILED, JOB_STATE.TERMINATING, JOB_STATE.TERMINATED]
+    const nonRunningStates = [
+      JOB_STATE.IDLE,
+      JOB_STATE.FAILED,
+      JOB_STATE.TERMINATING,
+      JOB_STATE.TERMINATED,
+    ]
     for (const state of nonRunningStates) {
       job.state = state
       await em.flush()

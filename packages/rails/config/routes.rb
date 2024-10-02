@@ -301,13 +301,6 @@ Rails.application.routes.draw do
         end
       end
 
-      resources :reports, only: [:create] do
-        collection do
-          get :list, path: "/", action: :list
-          delete :delete, path: "/", action: :delete, constraints: ->(request) { request.query_parameters.key?("id") }
-        end
-      end
-
       resources :spaces, only: %i(index show create update) do
         collection do
           get :cli

@@ -12,12 +12,11 @@ import {
 } from '@mikro-orm/core'
 import { Uid } from '@shared/domain/entity/domain/uid'
 import { DbClusterProperty } from '@shared/domain/property/db-cluster-property.entity'
-import { SCOPE } from '@shared/types/common'
-import { BaseEntity } from '../../database/base.entity'
 import { formatDuration } from '../../utils/format'
 import { DxId } from '../entity/domain/dxid'
 import { User } from '../user/user.entity'
 import { ENGINE, STATUS } from './db-cluster.enum'
+import { ScopedEntity } from '@shared/database/scoped.entity'
 
 @Entity({ tableName: 'dbclusters' })
 @Filter({ name: 'ownedBy', cond: (args) => ({ user: { id: args.userId } }) })
@@ -29,7 +28,7 @@ import { ENGINE, STATUS } from './db-cluster.enum'
     },
   },
 })
-export class DbCluster extends BaseEntity {
+export class DbCluster extends ScopedEntity {
   @Property()
   @Unique()
   dxid!: DxId<'dbcluster'>
@@ -40,9 +39,6 @@ export class DbCluster extends BaseEntity {
 
   @Property()
   name!: string
-
-  @Property()
-  scope!: SCOPE
 
   @Property()
   project!: string

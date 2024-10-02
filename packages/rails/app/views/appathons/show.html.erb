@@ -23,7 +23,7 @@
     </div>
     <br />
     <br />
-    <%= link_to image_tag(@appathon.admin.gravatar_url, class: 'img-circle', height: '16px'), user_path(@appathon.admin.dxuser) %>
+    <%= link_to image_tag(@appathon.admin.gravatar_url, class: 'rounded-circle', height: '16px'), user_path(@appathon.admin.dxuser) %>
  <%= link_to("#{@appathon.admin.full_name} (#{@appathon.admin.org.name})", user_path(@appathon.admin.dxuser), class: 'link-muted') %> launched an Appathon for <%= link_to("#{@meta_appathon.name}", meta_appathon_path(@meta_appathon), class: 'link-muted strong') %>
   </div>
   <div class="page-title">

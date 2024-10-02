@@ -4,7 +4,7 @@
 <div class="page-header">
   <div class="media">
     <div class="media-left text-center">
-      <%= link_to(image_tag(@user.gravatar_url, class: 'img-circle', height: '48px'), "http://en.gravatar.com/emails/", title: "Edit profile image on Gravatar", target: "_blank") %>
+      <%= link_to(image_tag(@user.gravatar_url, class: 'rounded-circle', height: '48px'), "http://en.gravatar.com/emails/", title: "Edit profile image on Gravatar", target: "_blank") %>
       <br>
       <%= link_to "http://en.gravatar.com/emails/", class: "edit-gravatar-text", title: "Edit profile image on Gravatar", target: "_blank" do %>
         Set <span class="fa fa-external-link"></span>

@@ -126,9 +126,12 @@ describe('data portal service tests', () => {
     portalName: string,
     urlSlug: string,
     role: SPACE_MEMBERSHIP_ROLE,
+    isSiteAdminUser: boolean = false,
   ): Promise<any> => {
     const space = create.spacesHelper.create(em, { name: portalName })
-    const internalUser = create.userHelper.create(em, { dxuser: generate.random.chance.name() })
+    const internalUser = isSiteAdminUser
+      ? create.userHelper.createSiteAdmin(em)
+      : create.userHelper.create(em, { dxuser: generate.random.chance.name() })
     await em.flush()
 
     const portal = create.dataPortalsHelper.create(
@@ -584,6 +587,12 @@ describe('data portal service tests', () => {
     )
     const admin = await createPortalAndAddMember('portal3', 'portal3', SPACE_MEMBERSHIP_ROLE.ADMIN)
     const lead = await createPortalAndAddMember('portal4', 'portal4', SPACE_MEMBERSHIP_ROLE.LEAD)
+    const siteAdmin = await createPortalAndAddMember(
+      'portal5',
+      'portal5',
+      SPACE_MEMBERSHIP_ROLE.ADMIN,
+      true,
+    )
     const nocoiner = create.userHelper.create(em, { dxuser: 'has nothing' })
 
     dataPortalService = createDataPortalService(viewer.userId)
@@ -605,6 +614,15 @@ describe('data portal service tests', () => {
     dataPortalService = createDataPortalService(nocoiner.id)
     result = await dataPortalService.list()
     expect(result.data_portals.length).eq(0)
+
+    // Site admin can list all the data portals
+    dataPortalService = createDataPortalService(siteAdmin.userId)
+    result = await dataPortalService.list()
+    expect(result.data_portals.length).eq(5)
+
+    // ...unless specified otherwise
+    result = await dataPortalService.list(true)
+    expect(result.data_portals.length).eq(1)
   })
 
   it('test create data portal card image', async () => {

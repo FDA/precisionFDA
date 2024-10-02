@@ -115,11 +115,13 @@ class HttpsAppsClient # rubocop:disable Metrics/ClassLength
   # User checkup
   # To be run whenever user logs in to make sure sync tasks are
   # healthy and to check the general health of the user account
-  def user_checkup
+  def user_checkup(cookie_value)
     request(
       "/account/checkup",
       {},
       Net::HTTP::Get::METHOD,
+      {},
+      { Cookie: cookie_value },
     )
   end
 
@@ -1097,11 +1099,7 @@ class HttpsAppsClient # rubocop:disable Metrics/ClassLength
       return {}
     end
 
-    {
-      "x-user_id": RequestContext.instance.user_id.to_s,
-      "x-dxuser": RequestContext.instance.username,
-      "x-accesstoken": RequestContext.instance.token,
-    }.compact_blank
+    RequestContext.instance.forward_header
   end
 
   # Returns HTTP headers to be sent during every request.

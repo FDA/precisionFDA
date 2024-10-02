@@ -29,7 +29,7 @@ class FileCopyWorker < ApplicationWorker
     # @param job [Sidekiq::Job] Current job.
     # @return [Context] A user context.
     def build_context(job)
-      Context.build(job["args"].last)
+      Context.build(job["args"][3])
     end
   end
 
@@ -40,9 +40,9 @@ class FileCopyWorker < ApplicationWorker
   # @param session_auth_params [Hash] User session auth params.
   #
   # @return [Copies] Object that includes all copied files.
-  def perform(scope, file_ids, folder_id, session_auth_params)
+  def perform(scope, file_ids, folder_id, session_auth_params, forward_header)
     @context = Context.build(session_auth_params)
-    RequestContext.begin_request(@context.user_id, @context.username, @context.token)
+    RequestContext.begin_request(@context.user_id, @context.username, @context.token, forward_header)
     @scope = scope
 
     files = UserFile.where(id: file_ids)

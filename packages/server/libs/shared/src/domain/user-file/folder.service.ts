@@ -4,7 +4,6 @@ import { ValidationError } from '@shared/errors'
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { createFolderEvent, EVENT_TYPES } from '../event/event.helper'
 import { getNodePath } from './user-file.helper'
-import { scopeContainsId } from '../space/space.helper'
 import { EntityScope, SCOPE } from '../../types/common'
 import { PARENT_TYPE } from './user-file.types'
 import { getEntityType, InputEntityUnion } from '../../utils/object-utils'
@@ -66,7 +65,10 @@ export class FolderService {
     parent?: InputEntityUnion,
     parentFolderId?: number,
   ): Promise<Folder> {
-    this.logger.log(`Creating folder ` + (parentFolderId ? ` with scope ${scope} in folder ${parentFolderId}` : ''))
+    this.logger.log(
+      `Creating folder ` +
+        (parentFolderId ? ` with scope ${scope} in folder ${parentFolderId}` : ''),
+    )
     const user = await this.em.getRepository(User).findOneOrFail({ id: userId })
 
     try {
@@ -105,7 +107,7 @@ export class FolderService {
       folder.parentId = parent.value.id
     }
 
-    if (scopeContainsId(scope)) {
+    if (folder.isInSpace()) {
       folder.scopedParentFolderId = parentFolderId && parentFolderId
     } else {
       folder.parentFolderId = parentFolderId && parentFolderId
@@ -117,35 +119,21 @@ export class FolderService {
   }
 
   private async findFolder(name: string, scope: EntityScope, parentFolderId?: number) {
-    if (scopeContainsId(scope)) {
-      return await this.em.getRepository(Folder).findOne({
-        name,
-        scope,
-        scopedParentFolderId: parentFolderId,
-      })
-    } else {
-      return await this.em.getRepository(Folder).findOne({
-        name,
-        scope,
-        parentFolderId: parentFolderId,
-      })
-    }
+    return await this.em.getRepository(Folder).findOne({
+      name,
+      scope,
+      $or: [{ scopedParentFolderId: parentFolderId }, { parentFolderId: parentFolderId }],
+    })
   }
 
   private async createEventForFolder(folder: Folder, eventType: string, user: User): Promise<void> {
-    const loadedFolder = await this.em.getRepository(Folder).findOneOrFail(
-      { id: folder.id },
-      { populate: ['parentFolder', 'scopedParentFolder'] },
-    )
+    const loadedFolder = await this.em
+      .getRepository(Folder)
+      .findOneOrFail({ id: folder.id }, { populate: ['parentFolder', 'scopedParentFolder'] })
 
     const folderPath = await getNodePath(this.em, loadedFolder)
 
-    const folderEvent = await createFolderEvent(
-      eventType,
-      loadedFolder,
-      folderPath,
-      user,
-    )
+    const folderEvent = await createFolderEvent(eventType, loadedFolder, folderPath, user)
 
     this.em.persist(folderEvent)
   }

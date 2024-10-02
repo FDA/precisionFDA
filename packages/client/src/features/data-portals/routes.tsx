@@ -35,7 +35,7 @@ const DataPortalRoutes = () => {
 
   if (!user && !loading ) {
     // if accessed as non-logged user, present modal with landing-page background
-    return <PublicLayout mainScroll>
+    return <PublicLayout mainScroll={!!user}>
       <DataPortalsAuthPickerModal modal={modal}/>
       <NavigationBar user={null}>
         <PageContainerMargin>

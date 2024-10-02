@@ -1,5 +1,6 @@
 require_relative "boot"
 require_relative "../app/middleware/rack/permanent_redirect"
+require_relative "../app/middleware/rack/capture_session"
 
 require "rails/all"
 
@@ -43,6 +44,8 @@ module PrecisionFda
                              sanitizable_content_types: ["application/x-www-form-urlencoded"],
                              only: %w(rack.input QUERY_STRING PATH_INFO),
                              strategy: :replace
+
+    config.middleware.insert_after ActionDispatch::Executor, Rack::CaptureSession
 
     # Minimum Sass number precision required by bootstrap-sass
     ::SassC::Script::Value::Number.precision = [8, ::SassC::Script::Value::Number.precision].max

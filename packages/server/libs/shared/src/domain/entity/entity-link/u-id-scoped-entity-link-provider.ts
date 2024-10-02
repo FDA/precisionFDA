@@ -3,7 +3,6 @@ import { EntityInstance } from '@shared/domain/entity/domain/entity-instance'
 import { EntityType } from '@shared/domain/entity/domain/entity.type'
 import { EntityLinkProvider } from '@shared/domain/entity/entity-link/entity-link.provider'
 import { getIdFromScopeName } from '@shared/domain/space/space.helper'
-import { STATIC_SCOPE } from '@shared/enums'
 import { EntityUtils } from '@shared/utils/entity.utils'
 import { Extends } from '@shared/utils/types/extends'
 
