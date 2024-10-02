@@ -7,7 +7,7 @@ describe('DiscussionEntityLinkProvider', () => {
 
   const SPACE_ID = 10
   const NOTE_SCOPE = `space-${SPACE_ID}`
-  const NOTE = { scope: NOTE_SCOPE }
+  const NOTE = { scope: NOTE_SCOPE, getSpaceId: () => SPACE_ID }
 
   const DISCUSSION = {
     id: ID,

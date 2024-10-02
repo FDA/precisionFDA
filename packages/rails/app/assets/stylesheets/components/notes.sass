@@ -1,10 +1,14 @@
-@import "_common"
-
 $note-background: lighten($brand-blue-subtler, 1%)
+
+.flex
+  display: flex
+
+.flex-wrap
+  flex-wrap: wrap
 
 .note-titlebar
   & input
-    font-size: $font-size-h3
+    font-size: 16px
     font-weight: 300
     color: $brand-blue-dark
     line-height: $line-height-base
@@ -17,7 +21,6 @@ $note-background: lighten($brand-blue-subtler, 1%)
   .note-flexbox
     @include flexbox
     @include align-items(stretch)
-    background-color: $note-background
 
   .note-sidebar
     min-width: 300px
@@ -84,7 +87,7 @@ $note-background: lighten($brand-blue-subtler, 1%)
     .input-group-addon
       border: 0
       background: transparent
-      font-size: $font-size-h3
+      font-size: 24px
     input
       padding: $padding-large-vertical $padding-base-horizontal
       box-shadow: inset 0px 0px 0px 5px $brand-highlight

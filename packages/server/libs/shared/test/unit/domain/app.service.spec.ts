@@ -24,7 +24,7 @@ import { codeRemap } from '@shared/utils/app'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { AssetRepository } from '@shared/domain/user-file/asset.repository'
 import { Asset } from '@shared/domain/user-file/asset.entity'
-import { ErrorCodes, ValidationError } from '@shared/errors'
+import { PermissionError, ValidationError } from '@shared/errors'
 import { SaveAppDto } from '@shared/domain/app/dto/save-app.dto'
 
 describe('app service tests', () => {
@@ -210,6 +210,26 @@ describe('app service tests', () => {
     await expect(appService.create(appInput)).to.be.rejectedWith(
       ValidationError,
       'This would create a new app revision and client did not request its creation.',
+    )
+  })
+
+  it('save app - test create public app with non site admin user', async () => {
+    const appInput = getDefaultApp()
+    appInput.scope = 'public'
+    create.appSeriesHelper.create(em, { user }, { name: appInput.name, scope: 'public' })
+
+    const nonAdminUser = create.userHelper.create(em, { isAdmin: false })
+    await em.flush()
+    const nonAdminUserCtx = {
+      id: nonAdminUser.id,
+      dxuser: nonAdminUser.dxuser,
+    } as UserContext
+
+    const appService = new AppService(em, nonAdminUserCtx, platformClient, assetRepository)
+
+    await expect(appService.create(appInput)).to.be.rejectedWith(
+      PermissionError,
+      'Only site admins can create public apps.',
     )
   })
 

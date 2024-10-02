@@ -9,6 +9,7 @@ import PublicLayout from '../../layouts/PublicLayout'
 import { colors } from '../../styles/theme'
 import { PfTab, PfTabContent, PfTabRow, PfTabTitle } from '../../components/Tabs/PfTab'
 import { Button } from '../../components/Button'
+import { RichText } from '../styles'
 
 
 const Row = styled.div`
@@ -26,6 +27,24 @@ const Row = styled.div`
 
 const AboutGuestInfo = styled.div`
   margin-bottom: 64px;
+
+  .panel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border: 1px solid var(--c-layout-border);
+    background-color: var(--tertiary-70);
+    padding: 32px;
+    text-align: center;
+  }
+  p {
+    margin-bottom: 16px;
+  }
+
+  .lead-bold {
+    font-weight: bold;
+    font-size: 20px;
+  }
 `
 
 const MainLine = styled.div`
@@ -47,7 +66,7 @@ const AboutPage = () => {
 
   const title = 'About precisionFDA'
   return (
-    <PublicLayout mainScroll>
+    <PublicLayout mainScroll={!!user}>
       <NavigationBar title={title} user={user} />
 
       <PageContainerMargin>
@@ -88,7 +107,7 @@ const AboutPage = () => {
           </MainLine>
           <hr />
           <Row>
-            <div>
+            <RichText>
               <p>
                 To accelerate progress towards this vision, in July 2014, FDA’s
                 Chief Health Informatics Officer (CHIO), Taha Kass-Hout, M.D.,
@@ -107,7 +126,7 @@ const AboutPage = () => {
                 initiated on July 22, 2015 with a scheduled beta launch date of
                 December 15, 2015.
               </p>
-            </div>
+            </RichText>
             <div>
               <p>
                 <img
@@ -127,29 +146,31 @@ const AboutPage = () => {
             benchmark their approaches and advance regulatory science.
           </MainLine>
           <hr />
-          <p>
-            While precisionFDA does not serve a regulatory role, it is expected
-            to generate knowledge to inform future regulatory pathways and
-            decision making.
-          </p>
-          <p>
-            PrecisionFDA provides a private area where participants (individuals
-            or organizations) can conduct genome analysis and comparison against
-            reference material, and a community area where they can publish and
-            share results, reference materials, and tools. The precisionFDA
-            community continues to grow and includes:
-          </p>
+          <RichText>
+            <p>
+              While precisionFDA does not serve a regulatory role, it is expected
+              to generate knowledge to inform future regulatory pathways and
+              decision making.
+            </p>
+            <p>
+              PrecisionFDA provides a private area where participants (individuals
+              or organizations) can conduct genome analysis and comparison against
+              reference material, and a community area where they can publish and
+              share results, reference materials, and tools. The precisionFDA
+              community continues to grow and includes:
+            </p>
 
-          <ul>
-            <li>Genome Test or Software Providers</li>
-            <li>Standards-making Bodies</li>
-            <li>Pharmaceutical &amp; Biotechnology Companies</li>
-            <li>Healthcare Providers</li>
-            <li>Academic Medical Centers</li>
-            <li>Researchers</li>
-            <li>Patients</li>
-            <li>FDA &amp; Other Government Agencies</li>
-          </ul>
+            <ul>
+              <li>Genome Test or Software Providers</li>
+              <li>Standards-making Bodies</li>
+              <li>Pharmaceutical &amp; Biotechnology Companies</li>
+              <li>Healthcare Providers</li>
+              <li>Academic Medical Centers</li>
+              <li>Researchers</li>
+              <li>Patients</li>
+              <li>FDA &amp; Other Government Agencies</li>
+            </ul>
+          </RichText>
         </PfTabContent>
 
         <PfTabContent $isShown={selectedSection === 'who'}>
@@ -159,62 +180,64 @@ const AboutPage = () => {
             Informatics Officer (CHIO), Dr. Taha Kass-Hout, MD, MS.
           </MainLine>
           <hr />
-          <p>
-            The core project team consists of the following individuals, in
-            alphabetical order:
-          </p>
-          <ul>
-            <li>George Asimenos*</li>
-            <li>Ruth Bandler</li>
-            <li>Adam Berger</li>
-            <li>Elaine Johanson</li>
-            <li>Taha Kass-Hout</li>
-            <li>Xueying (Sharon) Liang</li>
-            <li>David Litwack</li>
-            <li>Elizabeth Mansfield</li>
-            <li>Omar Serang*</li>
-            <li>Sam Westreich*</li>
-            <li>Zivana Tezak</li>
-          </ul>
-          <hr />
-          <p>
-            The team also wishes to thank the following individuals for their
-            significant contributions to the effort:
-          </p>
-          <ul>
-            <li>Vincent Amatrudo</li>
-            <li>Angela Anderson*</li>
-            <li>Rob Califf</li>
-            <li>Mohammed (Sohail) Chaudhry</li>
-            <li>Caroline Clode*</li>
-            <li>Stephanie Devaney</li>
-            <li>Amber Griffin</li>
-            <li>Letria Hall</li>
-            <li>Walter Harris</li>
-            <li>Sally Howard</li>
-            <li>Sean Hanlon</li>
-            <li>Farhan Khan</li>
-            <li>Bruce Kuhlik</li>
-            <li>Margaret Leizear</li>
-            <li>DJ Patil</li>
-            <li>Shawn Porter</li>
-            <li>Karen Riley</li>
-            <li>Alyson Saben</li>
-            <li>Jeff Shuren</li>
-            <li>Vahan Simonyan</li>
-            <li>Todd Simpson</li>
-            <li>Sean Wybenga</li>
-          </ul>
-          <br />
-          <p>*Contractor to FDA’s Office of Health Informatics</p> <hr />
-          <div>
-            Media asset attributions:
+          <RichText>
+            <p>
+              The core project team consists of the following individuals, in
+              alphabetical order:
+            </p>
             <ul>
-              <li>
-                <a href="http://medialoot.com/">MediaLoot</a>
-              </li>
+              <li>George Asimenos*</li>
+              <li>Ruth Bandler</li>
+              <li>Adam Berger</li>
+              <li>Elaine Johanson</li>
+              <li>Taha Kass-Hout</li>
+              <li>Xueying (Sharon) Liang</li>
+              <li>David Litwack</li>
+              <li>Elizabeth Mansfield</li>
+              <li>Omar Serang*</li>
+              <li>Sam Westreich*</li>
+              <li>Zivana Tezak</li>
             </ul>
-          </div>
+            <hr />
+            <p>
+              The team also wishes to thank the following individuals for their
+              significant contributions to the effort:
+            </p>
+            <ul>
+              <li>Vincent Amatrudo</li>
+              <li>Angela Anderson*</li>
+              <li>Rob Califf</li>
+              <li>Mohammed (Sohail) Chaudhry</li>
+              <li>Caroline Clode*</li>
+              <li>Stephanie Devaney</li>
+              <li>Amber Griffin</li>
+              <li>Letria Hall</li>
+              <li>Walter Harris</li>
+              <li>Sally Howard</li>
+              <li>Sean Hanlon</li>
+              <li>Farhan Khan</li>
+              <li>Bruce Kuhlik</li>
+              <li>Margaret Leizear</li>
+              <li>DJ Patil</li>
+              <li>Shawn Porter</li>
+              <li>Karen Riley</li>
+              <li>Alyson Saben</li>
+              <li>Jeff Shuren</li>
+              <li>Vahan Simonyan</li>
+              <li>Todd Simpson</li>
+              <li>Sean Wybenga</li>
+            </ul>
+            <br />
+            <p>*Contractor to FDA’s Office of Health Informatics</p> <hr />
+            <div>
+              Media asset attributions:
+              <ul>
+                <li>
+                  <a href="http://medialoot.com/">MediaLoot</a>
+                </li>
+              </ul>
+            </div>
+          </RichText>
         </PfTabContent>
         {!isLoggedIn && (
           <AboutGuestInfo>

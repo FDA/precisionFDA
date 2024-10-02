@@ -1,10 +1,21 @@
-import { Body, Controller, Delete, Get, ParseArrayPipe, Post, Query } from '@nestjs/common'
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  ParseArrayPipe,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common'
 import { SpaceReportCreateDto } from '@shared/domain/space-report/model/space-report-create.dto'
 import { SpaceReportService } from '@shared/domain/space-report/service/space-report.service'
 import { SpaceReportCreateFacade } from '../facade/space-report/space-report-create.facade'
 import { SpaceReportDeleteFacade } from '../facade/space-report/space-report-delete.facade'
+import { UserContextGuard } from '../user-context/guard/user-context.guard'
 import { SpaceReportListQueryDto } from './model/space-report-list.dto'
 
+@UseGuards(UserContextGuard)
 @Controller('reports')
 export class ReportsController {
   constructor(

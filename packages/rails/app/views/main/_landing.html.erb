@@ -104,7 +104,7 @@
   <div class="pfda-participants">
     <% @participants.each do |participant| %>
       <div class="pfda-participant" title="<%= participant.title %>" data-toggle="tooltip">
-        <%= image_tag(participant.image_url, alt: participant.title, class: "img-circle") %>
+        <%= image_tag(participant.image_url, alt: participant.title, class: "rounded-circle") %>
       </div>
     <% end %>
   </div>

@@ -2,17 +2,16 @@ import styled, { css } from 'styled-components'
 import { FieldGroup } from '../../../components/form/styles'
 import { PfTab } from '../../../components/Tabs/PfTab'
 
-
 export const TopFieldGroup = styled(FieldGroup)`
   flex: 1;
   max-width: 400px;
   min-width: 270px;
-` 
+`
 
 export const TopFieldGroupUbuntu = styled(TopFieldGroup)`
   max-width: 200px;
   min-width: 100px;
-` 
+`
 
 export const StyledForm = styled.form`
   margin: 16px;
@@ -80,7 +79,7 @@ export const TableStyles = styled.div`
   display: flex;
   margin-top: 12px;
   margin-left: 12px;
-  input[type="checkbox"] {
+  input[type='checkbox'] {
     margin: 3px 4px;
   }
   table {
@@ -92,7 +91,8 @@ export const TableStyles = styled.div`
     th {
       text-align: left;
     }
-    td, th {
+    td,
+    th {
       padding: 1px;
     }
   }
@@ -113,7 +113,7 @@ export const SectionTitleRow = styled.div`
   color: var(--c-text-700);
   background-color: var(--tertiary-70);
   border-color: var(--c-layout-border-200);
-  `
+`
 
 export const StyledInputOutputBox = styled.div`
   max-width: 1357px;
@@ -123,7 +123,7 @@ export const StyledInputOutputBox = styled.div`
   background-color: var(--tertiary-50);
   border: 1px solid var(--c-layout-border-200);
   border-radius: 3px;
-  box-shadow: 0 1px 1px rgba(0,0,0,0.05);
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
   font-size: 14px;
 `
 

@@ -5,7 +5,7 @@
       <div class="pfda-card-header">
         <div class="text-muted center-block text-center">
           <p>
-            <%= link_to image_tag(e.image, class: 'img-rounded', height: '250px'), expert_path(e) %>
+            <%= link_to image_tag(e.image, class: 'rounded', height: '250px'), expert_path(e) %>
           </p>
         </div>
         <div class="text-center">
@@ -14,15 +14,15 @@
           </div>
           <p>
             <% if e.open? %>
-              <span class="label label-success"><span class="fa fa-check"></span> Open</span>
+              <span class="badge badge-success"><span class="fa fa-check"></span> Open</span>
             <% else %>
-              <span class="label label-default"><span class="fa fa-lock"></span> Closed</span>
+              <span class="badge badge-default"><span class="fa fa-lock"></span> Closed</span>
             <% end %>
             <% if e.editable_by?(@context) %>
               <% if e.is_public? %>
-                <span class="label label-primary"><span class="fa fa-eye"></span> Public</span>
+                <span class="badge badge-primary"><span class="fa fa-eye"></span> Public</span>
               <% else %>
-                <span class="label label-warning"><span class="fa fa-eye-slash"></span> Private</span>
+                <span class="badge badge-warning"><span class="fa fa-eye-slash"></span> Private</span>
               <% end %>
             <% end %>
           </p>

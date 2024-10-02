@@ -6,9 +6,9 @@ import {
 import { useAuthUser } from '../../features/auth/useAuthUser'
 import NavigationBar from '../../components/NavigationBar/NavigationBar'
 import PublicLayout from '../../layouts/PublicLayout'
+import { RichText } from '../styles'
 
-const StyledTos = styled.div`
-  line-height: 22px;
+const StyledRichText = styled(RichText)`
   padding-top: 32px;
   padding-bottom: 32px;
 `
@@ -16,14 +16,14 @@ const StyledTos = styled.div`
 const ToS = () => {
   const user = useAuthUser()
   return (
-    <PublicLayout mainScroll>
+    <PublicLayout mainScroll={!!user}>
       <NavigationBar
         title="Terms of Service"
         subtitle="Insights from academic, industry, and FDA experts from the precisionFDA Community."
         user={user}
       />
       <PageContainerMargin>
-        <StyledTos>
+        <StyledRichText>
           <h1>Terms of Service</h1>
           <p>Last modified: January 24, 2024</p>
           <hr />
@@ -263,7 +263,7 @@ const ToS = () => {
             access to any User Data, which may be deleted without liability.
             <br />
           </p>
-        </StyledTos>
+        </StyledRichText>
       </PageContainerMargin>
     </PublicLayout>
   )

@@ -106,7 +106,7 @@ class ComparisonsController < ApplicationController
       link = []
       link << {
         "relation" => "next",
-        "url" => request.base_url + request.path + "?" + filtered_params.map { |k, v| "#{CGI.escape(k.to_s)}=#{CGI.escape(v.to_s)};" }.join + "page=#{page_number + 1}",
+        "url" => request.base_url + request.path + "?" + query_params.map { |k, v| "#{CGI.escape(k.to_s)}=#{CGI.escape(v.to_s)};" }.join + "page=#{page_number + 1}",
       }
     end
 

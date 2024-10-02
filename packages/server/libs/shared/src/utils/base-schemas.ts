@@ -1,6 +1,5 @@
 import type { JSONSchema7, JSONSchema7Definition } from 'json-schema'
 import { config } from '../config'
-import { USER_CONTEXT_HTTP_HEADERS } from '../config/consts'
 
 // generic schemas
 
@@ -57,21 +56,6 @@ const getDxidInputSchema: (paramName: string) => JSONSchema7 = (paramName = 'id'
   additionalProperties: false,
 })
 
-const userContextSchema: JSONSchema7 = {
-  type: 'object',
-  properties: {
-    [USER_CONTEXT_HTTP_HEADERS.id]: idProp,
-    [USER_CONTEXT_HTTP_HEADERS.accessToken]: {
-      type: 'string',
-      minLength: 1,
-      maxLength: config.validation.maxStrLen,
-    },
-    [USER_CONTEXT_HTTP_HEADERS.dxUser]: dxidProp,
-  },
-  required: Object.values(USER_CONTEXT_HTTP_HEADERS),
-  additionalProperties: true,
-}
-
 const paginationSchema: JSONSchema7 = {
   type: 'object',
   properties: {
@@ -83,7 +67,6 @@ const paginationSchema: JSONSchema7 = {
 }
 
 const schemas = {
-  userContextSchema,
   getDxidInputSchema,
   getDxidsInputSchema,
   idInputSchema,

@@ -1,21 +1,20 @@
-import { USER_CONTEXT_HTTP_HEADERS } from '@shared/config/consts'
+import { EntityManager } from '@mikro-orm/mysql'
 import { database } from '@shared/database'
 import { App } from '@shared/domain/app/app.entity'
 import { Job } from '@shared/domain/job/job.entity'
-import { User } from '@shared/domain/user/user.entity'
-import { ErrorCodes } from '@shared/errors'
-import { expect } from 'chai'
-import { EntityManager } from '@mikro-orm/mysql'
-import supertest from 'supertest'
 import {
-  JOB_STATE,
-  JOB_DB_ENTITY_TYPE,
   DEFAULT_INSTANCE_TYPE,
+  JOB_DB_ENTITY_TYPE,
+  JOB_STATE,
   allowedFeatures,
   allowedInstanceTypes,
 } from '@shared/domain/job/job.enum'
-import { create, generate, db } from '@shared/test'
+import { User } from '@shared/domain/user/user.entity'
+import { ErrorCodes } from '@shared/errors'
+import { create, db, generate } from '@shared/test'
 import { fakes, mocksReset } from '@shared/test/mocks'
+import { expect } from 'chai'
+import supertest from 'supertest'
 import { testedApp } from '../../index'
 import { getDefaultHeaderData, stripEntityDates } from '../../utils/expect-helper'
 
@@ -31,6 +30,7 @@ describe('POST /apps/:id/run', () => {
     em.clear()
     user = create.userHelper.create(em)
     app = create.appHelper.createHTTPS(em, { user }, { spec: generate.app.jupyterAppSpecData() })
+    create.sessionHelper.create(em, { user })
     await em.flush()
     // handle the stubs
     mocksReset()
@@ -71,15 +71,13 @@ describe('POST /apps/:id/run', () => {
     expect(jobInDb).to.have.property('uid', `${generate.job.jobId()}-1`)
     expect(jobInDb).to.have.property('describe', '{}')
     var provenance = jobInDb?.provenance
-    expect(provenance).to.deep.equal(
-      {
-        [generate.job.jobId()]: {
-          app_dxid: app.dxid,
-          app_id: app.id,
-          inputs: {},
-        },
+    expect(provenance).to.deep.equal({
+      [generate.job.jobId()]: {
+        app_dxid: app.dxid,
+        app_id: app.id,
+        inputs: {},
       },
-    )
+    })
   })
 
   it('response shape - ttyd app (still user.private project)', async () => {
@@ -181,7 +179,11 @@ describe('POST /apps/:id/run', () => {
   })
 
   it('accepts params for ttyd app', async () => {
-    const ttydApp = create.appHelper.createHTTPS(em, { user }, { spec: generate.app.ttydAppSpecData() })
+    const ttydApp = create.appHelper.createHTTPS(
+      em,
+      { user },
+      { spec: generate.app.ttydAppSpecData() },
+    )
     await em.flush()
     const ttydAppInput = {
       ...generate.app.runTtydAppInput(),
@@ -192,7 +194,7 @@ describe('POST /apps/:id/run', () => {
         port: 8081,
       },
     }
-    const { body } = await supertest(testedApp.getHttpServer())
+    await supertest(testedApp.getHttpServer())
       .post(`/apps/${ttydApp.dxid}/run`)
       .set(getDefaultHeaderData(user))
       .send(ttydAppInput)
@@ -305,16 +307,15 @@ describe('POST /apps/:id/run', () => {
   // todo: should test different project selection anyways
 
   context('error states', () => {
-    it('throws 404 when user does not exist', async () => {
+    it('throws 401 when user does not exist', async () => {
       const { body } = await supertest(testedApp.getHttpServer())
         .post(`/apps/${app.dxid}/run`)
         .set({
-          ...getDefaultHeaderData(user),
-          [USER_CONTEXT_HTTP_HEADERS.id]: user.id + 1,
+          ...getDefaultHeaderData({ ...user, id: user.id + 1 } as User),
         })
         .send(generate.app.runAppInput())
-        .expect(404)
-      expect(body.error).to.have.property('code', ErrorCodes.USER_NOT_FOUND)
+        .expect(401)
+      expect(body.error).to.have.property('code', ErrorCodes.UNAUTHORIZED_REQUEST)
     })
 
     it('throws 404 when user does not have the project set', async () => {
@@ -336,7 +337,7 @@ describe('POST /apps/:id/run', () => {
       await em.flush()
       const { body } = await supertest(testedApp.getHttpServer())
         .post(`/apps/${anotherApp.dxid}/run`)
-       .set(getDefaultHeaderData(user))
+        .set(getDefaultHeaderData(user))
         .send(generate.app.runAppInput())
       expect(body.error).to.have.property('code', ErrorCodes.APP_NOT_FOUND)
     })
@@ -346,7 +347,7 @@ describe('POST /apps/:id/run', () => {
       await em.flush()
       const { body } = await supertest(testedApp.getHttpServer())
         .post(`/apps/${anotherApp.dxid}/run`)
-       .set(getDefaultHeaderData(user))
+        .set(getDefaultHeaderData(user))
         .send(generate.app.runAppInput())
         .expect(404)
       expect(body.error).to.have.property('code', ErrorCodes.APP_NOT_FOUND)
@@ -355,7 +356,7 @@ describe('POST /apps/:id/run', () => {
     it('throws 404 when snapshot is provided but file does not exist', async () => {
       const { body } = await supertest(testedApp.getHttpServer())
         .post(`/apps/${app.dxid}/run`)
-       .set(getDefaultHeaderData(user))
+        .set(getDefaultHeaderData(user))
         .send({ ...generate.app.runAppInput(), input: { snapshot: generate.random.dxstr() } })
         .expect(404)
       expect(body.error).to.have.property('code', ErrorCodes.USER_FILE_NOT_FOUND)

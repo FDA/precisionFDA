@@ -1,6 +1,19 @@
-@import "_common"
+
 
 $invitations-search-width: 900px
+
+#invitations_data_grid_length
+  label
+    gap: 8px
+
+#invitations_data_grid_wrapper
+  flex-direction: column
+  .row
+    flex-wrap: nowrap
+
+#invitations_data_grid_paginate
+  .pagination
+    gap: 8px
 
 .pfda-controller-invitations.pfda-action-index
   .invitations-search

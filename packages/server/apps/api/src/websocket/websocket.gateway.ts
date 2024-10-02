@@ -10,7 +10,7 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets'
-import { config } from '@shared/config'
+import { COOKIE_SESSION_KEY } from '@shared/config/consts'
 import { database } from '@shared/database'
 import { OrmContextInterceptor } from '@shared/database/interceptor/orm-context.interceptor'
 import { Uid } from '@shared/domain/entity/domain/uid'
@@ -20,17 +20,15 @@ import { JobLogService } from '@shared/domain/job/services/job-log.service'
 import { NotificationService } from '@shared/domain/notification/services/notification.service'
 import { Session } from '@shared/domain/session/session.entity'
 import { PermissionError } from '@shared/errors'
+import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { NOTIFICATIONS_QUEUE, createRedisClient } from '@shared/services/redis.service'
-import { CookieUtils } from '@shared/utils/cookie-utils'
-import { Encryptor } from '@shared/utils/encryptor'
-import { HashUtils } from '@shared/utils/hash-utils'
-import { TimeUtils } from '@shared/utils/time.utils'
+import { CookieUtils } from '@shared/utils/cookie.utils'
+import { Encryptor } from '@shared/utils/encryptors/encryptor'
+import { HashUtils } from '@shared/utils/hash.utils'
 import { PfdaWebSocket, WEBSOCKET_EVENTS } from '@shared/websocket/model/pfda-web-socket'
 import { IncomingMessage } from 'http'
 import { Server } from 'ws'
-import { log } from '../logger'
 import { UserContextTokenInterceptor } from '../user-context/interceptor/user-context-token.interceptor'
-import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 
 @UseInterceptors(UserContextTokenInterceptor, OrmContextInterceptor)
 @WebSocketGateway()
@@ -51,27 +49,30 @@ export class WebsocketGateway implements OnGatewayDisconnect, OnGatewayInit, OnG
 
   afterInit() {
     this.setupRedisSubscriber().catch((err) =>
-      this.logger.error(`Failed to setup Redis subscriber: ${err}`),
+      this.logger.error({ message: 'Failed to setup Redis subscriber', error: err.message }),
     )
   }
 
   @CreateRequestContext(() => database.orm())
   async handleConnection(client: PfdaWebSocket, message: IncomingMessage) {
     try {
-      this.logger.log(`Websocket client connected: ${client}`)
+      this.logger.debug(`WebSocket client connected, IP: ${message.socket.remoteAddress}`)
 
-      const token = CookieUtils.getCookie('_precision-fda_session', message.headers.cookie)
+      const token = CookieUtils.getCookie(COOKIE_SESSION_KEY, message.headers.cookie)
+      if (!token) {
+        throw new Error('Missing authentication token')
+      }
       client.PFDA_AUTH_TOKEN = token
 
       const decrypted = Encryptor.decrypt(token)
+
       const sessionId = decrypted.session_id
       const session = await this.em.findOneOrFail(Session, {
         key: HashUtils.hashSessionId(sessionId),
+        user: decrypted.user_id,
       })
-      // ref: app/models/session.rb#expired?
-      if (
-        session.updatedAt.getTime() < TimeUtils.minutesAgoInMiliseconds(config.maxTimeInactivity)
-      ) {
+
+      if (session.isExpired()) {
         throw new Error('Session expired')
       }
 
@@ -84,47 +85,50 @@ export class WebsocketGateway implements OnGatewayDisconnect, OnGatewayInit, OnG
 
       this.clientConnections.get(userId).add(client)
 
-      this.logger.log(
-        `User ${dxuser} successfully authenticated for receiving WebSocket notifications`,
-      )
+      this.logger.debug({
+        message: 'User authenticated for WebSocket notifications',
+        user: dxuser,
+        userId: userId,
+      })
 
       const unreadNotifications = await this.notificationService.getUnreadNotifications(userId)
       unreadNotifications.forEach((notification) => {
         client.send(JSON.stringify(notification))
       })
     } catch (e) {
-      this.logger.error(`WebSocket connection error: ${e}`)
-
-      client.close(4001, e?.message)
+      this.logger.error({ message: 'WebSocket connection error', error: e.message })
+      client.close(4001, e.message)
     }
   }
 
   handleDisconnect(client: PfdaWebSocket) {
     try {
-      this.logger.log(`Websocket client disconnected: ${client}`)
-
       const token = client.PFDA_AUTH_TOKEN
-
       const decrypted = Encryptor.decrypt(token)
       const userId = decrypted.user_id
-      if (userId == null) {
+
+      if (!userId) {
+        this.logger.warn('Disconnecting client with missing user ID')
         return
       }
 
       const connections = this.clientConnections.get(userId)
-
       if (!connections) {
         return
       }
 
-      client.close()
       connections.delete(client)
-
       if (connections.size === 0) {
         this.clientConnections.delete(userId)
       }
+
+      this.logger.debug({
+        message: 'WebSocket client disconnected',
+        userId: userId,
+        remainingConnections: connections.size,
+      })
     } catch (e) {
-      this.logger.error(`Websocket disconnection error: ${e}`)
+      this.logger.error({ message: 'WebSocket disconnection error', error: e.message })
     }
   }
 
@@ -134,14 +138,13 @@ export class WebsocketGateway implements OnGatewayDisconnect, OnGatewayInit, OnG
     @MessageBody() data: { jobUid: Uid<'job'> },
   ) {
     try {
-      const jobUid = data.jobUid
-      const job = (await this.entityFetcherService.getAccessibleByUid(Job, jobUid)) as Job
+      const job = await this.entityFetcherService.getAccessibleByUid(Job, data.jobUid)
       if (!job) {
         throw new PermissionError('User is not the owner of this job')
       }
       await this.jobLogService.streamJobLogs(job, client)
     } catch (error) {
-      this.logger.error(`Failed to fetch job log. ${error}`)
+      this.logger.error({ message: 'Failed to fetch job log', error: error.message })
     }
   }
 
@@ -164,7 +167,7 @@ export class WebsocketGateway implements OnGatewayDisconnect, OnGatewayInit, OnG
     })
 
     this.server.on('close', () => {
-      this.logger.log('Closing Redis connection')
+      this.logger.debug('Closing Redis connection')
       client.quit()
     })
   }
@@ -172,12 +175,14 @@ export class WebsocketGateway implements OnGatewayDisconnect, OnGatewayInit, OnG
   private sendNotification(userId: number, notification: string) {
     this.clientConnections.get(userId)?.forEach((connection) => {
       try {
-        log.log(
-          `Sending notification to client. UserId: ${userId}, notification: ${notification}`,
-        )
+        this.logger.log({
+          message: 'Sending notification to client',
+          userId: userId,
+          notification: notification,
+        })
         connection.send(notification)
       } catch (error) {
-        log.error(`Sending notification failed. ${error}`)
+        this.logger.error({ message: 'Sending notification failed', error: error.message })
       }
     })
   }

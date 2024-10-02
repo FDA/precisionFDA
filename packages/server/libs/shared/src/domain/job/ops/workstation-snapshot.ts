@@ -67,7 +67,6 @@ export class WorkstationSnapshotOperation extends WorkstationBaseOperation<
       )
       const terminate = input.terminate ?? false
       const res = await workstationService.snapshot(input.key, input.name, terminate)
-
       log.log({ res }, 'Received snapshot response')
 
       if (res.result === 'success') {
@@ -86,7 +85,7 @@ export class WorkstationSnapshotOperation extends WorkstationBaseOperation<
         })
       } else {
         await notificationService.createNotification({
-          message: `Error creating snapshot for ${job.name}: ${res.error?.message}`,
+          message: `Error creating snapshot for ${job.name}: ${res.error}`,
           meta: {
             linkTitle: 'View Execution',
             linkUrl: `/home/executions/${job.uid}`,

@@ -9,12 +9,6 @@
     <!-- Wrapper for slides -->
     <div style="width: 70%; margin: auto">
       <!-- Indicators -->
-      <ol class="carousel-indicators">
-        <li data-target="#guidelines-carousel" data-slide-to="0" class="carousel-indicator-green active"></li>
-        <li data-target="#guidelines-carousel" data-slide-to="1" class="carousel-indicator-blue"></li>
-        <li data-target="#guidelines-carousel" data-slide-to="2" class="carousel-indicator-red"></li>
-      </ol>
-
       <%= render "_partials/guidelines_content" %>
     </div>
 
@@ -31,7 +25,7 @@
   <hr>
   <div class="row">
     <div class="col-sm-offset-6 col-sm-12">
-      <div class="help-block">Additional information available in our <%= link_to "Terms of Service", terms_path %>.</div>
+      <div class="help-block">Additional information available in our <%= link_to "Terms of Service", terms_path, data: { turbolinks: false } %>.</div>
     </div>
   </div>
 </div>

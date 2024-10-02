@@ -11,7 +11,6 @@ export const createRedisClient = async (): Promise<any> => {
   const url = new URL(config.redis.url)
 
   try {
-    getLogger().log('connecting to redis')
     const client = createClient({
       socket: {
         port: parseInt(url.port),
@@ -25,7 +24,6 @@ export const createRedisClient = async (): Promise<any> => {
     if (config.redis.isSecure) {
       await client.auth({ password: config.redis.authPassword })
     }
-    getLogger().log('connected to redis')
     return client
   } catch (error) {
     getLogger().error(error)

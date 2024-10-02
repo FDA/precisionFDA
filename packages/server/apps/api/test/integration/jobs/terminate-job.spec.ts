@@ -25,6 +25,7 @@ describe('PATCH /jobs/:id/terminate', () => {
     em = database.orm().em.fork()
     em.clear()
     user = create.userHelper.create(em)
+    create.sessionHelper.create(em, { user })
     app = create.appHelper.createHTTPS(em, { user }, { spec: generate.app.jupyterAppSpecData() })
     job = create.jobHelper.create(em, { user, app }, { scope: 'private', state: JOB_STATE.IDLE })
     await em.flush()

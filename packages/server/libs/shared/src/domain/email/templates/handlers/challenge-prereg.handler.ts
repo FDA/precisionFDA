@@ -3,7 +3,7 @@ import { SpaceMembership } from '@shared/domain/space-membership/space-membershi
 import { User } from '@shared/domain/user/user.entity'
 import { pipe, uniqBy } from 'ramda'
 import { LoadedReference } from '@mikro-orm/core'
-import { STATIC_SCOPE } from '../../../../enums'
+import { STATIC_SCOPE } from '@shared/enums'
 import {
   EmailTemplate,
   ChallengeCreated,
@@ -22,7 +22,7 @@ import {
   challengePreregTemplate,
   ChallengePreregTemplateInput,
 } from '../mjml/challenge-preregister.template'
-import { InternalError } from '../../../../errors'
+import { InternalError } from '@shared/errors'
 import { getIdFromScopeName, scopeContainsId } from '../../../space/space.helper'
 
 export class ChallengePreregEmailHandler

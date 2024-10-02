@@ -361,11 +361,13 @@ module Api
       verify_nodes_for_locked(nodes, "copy")
       verify_target_scope_for_protection(nodes, params[:scope])
 
+      forward_header = RequestContext.instance.forward_header
       NodeCopyWorker.perform_async(
         params[:scope],
         nodes.pluck(:id),
         params[:folder_id] || nil,
         session_auth_params,
+        forward_header,
       )
 
       render json: nodes, root: "nodes", adapter: :json,
