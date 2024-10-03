@@ -143,7 +143,7 @@ module Api
       response = https_apps_client.answer_comment_update(params[:discussion_id],
                                                          params[:answer_id],
                                                          params[:comment_id],
-                                                         sanitize_content(params[:comment]))
+                                                         sanitize_field(params[:comment], "content"))
       render json: response, adapter: :json
     end
   end

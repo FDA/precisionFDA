@@ -1,16 +1,17 @@
+import { Reference } from '@mikro-orm/core'
 import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
 import { database } from '@shared/database'
-import { NotificationService } from '@shared/domain/notification/services/notification.service'
 import { Notification } from '@shared/domain/notification/notification.entity'
-import { User } from '@shared/domain/user/user.entity'
-import { create, db } from '@shared/test'
-import { NOTIFICATION_ACTION, SEVERITY } from '@shared/enums'
-import { expect } from 'chai'
-import sinon from 'sinon'
-import { createClient } from 'redis'
-import { NOTIFICATIONS_QUEUE } from '@shared/services/redis.service'
+import { NotificationService } from '@shared/domain/notification/services/notification.service'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
-import { Reference } from '@mikro-orm/core'
+import { User } from '@shared/domain/user/user.entity'
+import { NOTIFICATION_ACTION, SEVERITY } from '@shared/enums'
+import { PermissionError } from '@shared/errors'
+import { NOTIFICATIONS_QUEUE } from '@shared/services/redis.service'
+import { create, db } from '@shared/test'
+import { expect } from 'chai'
+import { createClient } from 'redis'
+import sinon from 'sinon'
 
 describe('Notification service tests', () => {
   let em: EntityManager<MySqlDriver>
@@ -35,7 +36,7 @@ describe('Notification service tests', () => {
 
   it('Test create Notification', async () => {
     const redisClient = {
-      publish: function (channel: string, message: string) {},
+      publish: function () {},
     } as RedisClientType
     const redisClientMock = sinon.mock(redisClient)
     redisClientMock.expects('publish').withArgs(
@@ -66,7 +67,7 @@ describe('Notification service tests', () => {
 
   it('Test create Notification with linkTitle and linkUrl', async () => {
     const redisClient = {
-      publish: function (channel: string, message: string) {},
+      publish: function () {},
     } as RedisClientType
     const redisClientMock = sinon.mock(redisClient)
     redisClientMock.expects('publish').withArgs(
@@ -160,9 +161,11 @@ describe('Notification service tests', () => {
     try {
       await notificationService.updateDeliveredAt(savedNotification.id, new Date())
       expect.fail('Validation should have thrown error')
-    } catch (error: any) {
-      expect(error.name).to.equal('PermissionError')
-      expect(error.message).to.equal('Error: You do have permissions to access this entity')
+    } catch (error: unknown) {
+      if (error instanceof PermissionError) {
+        expect(error.name).to.equal('PermissionError')
+        expect(error.message).to.equal('Error: You do not have permissions to access this entity')
+      }
     }
   })
 })

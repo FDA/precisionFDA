@@ -34,6 +34,7 @@ RSpec.describe Api::SpacesController, type: :controller do
     let(:app_copy_service) { instance_double(CopyService::AppCopier, copy: []) }
 
     before do
+      travel_to Time.current
       authenticate!(user)
 
       allow(CopyService::WorkflowCopier).to receive(:new).and_return(workflow_copy_service)
@@ -46,10 +47,12 @@ RSpec.describe Api::SpacesController, type: :controller do
 
       allow(FileCopyWorker).to receive(:perform_async)
 
-      post :add_data, params: { id: space.id, uids: [file.uid], folder_id: folder.id }, as: :json
+      post :add_data, params: { id: space.id, uids: [file.uid], folder_id: folder.id }, format: :json
+
+      user_session = context_attributes_for(user).stringify_keys
 
       expect(FileCopyWorker).to have_received(:perform_async).
-        with(space.scope, [file.id], folder.id, anything)
+        with(space.scope, [file.id], folder.id.to_s, user_session, {})
       expect(response).to be_successful
     end
 

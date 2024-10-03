@@ -11,9 +11,12 @@ export const ipv4StringToQuadruple = (ipv4String: string | undefined) => {
   try {
     return parseIpv4Address(ipv4String)
   } catch (validationError) {
-    throw new InvalidIpHeaderError(`Invalid IPv4 address parsed from '${config.api.fdaSubnet.nginxIpHeader}' header`, {
-      //@ts-ignore
-      validationError,
-    })
+    throw new InvalidIpHeaderError(
+      `Invalid IPv4 address parsed from '${config.api.nginxIpHeader}' header`,
+      {
+        //@ts-ignore
+        validationError,
+      },
+    )
   }
 }

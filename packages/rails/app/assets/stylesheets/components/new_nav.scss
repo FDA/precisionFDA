@@ -1,0 +1,33 @@
+.nav-link {
+  gap: 4px;
+  align-items: center;
+  display: flex;
+
+  color: white;
+  &:hover {
+    color: rgb(231, 231, 231);
+  }
+}
+
+.dropdown-item {
+  &:active {
+    background: initial;
+  }
+  a {
+    display:block;
+    color: black;
+  }
+}
+
+.navbar-header {
+  display: flex;
+  align-items: center;
+  color: white;
+  
+  a {
+    color: white;
+    &:hover {
+      color: rgb(231, 231, 231);
+    }
+  }
+}

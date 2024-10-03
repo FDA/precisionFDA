@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react'
-import { Link, useNavigate, useLocation } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { Column, SortingRule, UseResizeColumnsState } from 'react-table'
+import { Button } from '../../components/Button'
 import Dropdown from '../../components/Dropdown'
 import { ContentFooter } from '../../components/Page/ContentFooter'
 import { Pagination } from '../../components/Pagination'
@@ -13,7 +14,7 @@ import { useAuthUser } from '../auth/useAuthUser'
 import { ActionsDropdownContent } from '../home/ActionDropdownContent'
 import { ActionsRow, QuickActions, StyledHomeTable } from '../home/home.styles'
 import { ActionsButton, ResourceHeader } from '../home/show.styles'
-import { IFilter, IMeta, KeyVal, HomeScope } from '../home/types'
+import { HomeScope, IFilter, IMeta, KeyVal } from '../home/types'
 import { useList } from '../home/useList'
 import { usePropertiesQuery } from '../home/usePropertiesQuery'
 import { fetchApps } from './apps.api'
@@ -21,11 +22,18 @@ import { IApp } from './apps.types'
 import { useAppListActions } from './useAppListActions'
 import { useAppSelectionActions } from './useAppSelectionActions'
 import { useAppsColumns } from './useAppsColumns'
-import { Button } from '../../components/Button'
 
 type ListType = { apps: IApp[]; meta: IMeta }
 
-export const AppList = ({ homeScope, spaceId }: { homeScope?: HomeScope, spaceId?: string }) => {
+export const AppList = ({
+  homeScope,
+  spaceId,
+  isContributorOrHigher,
+}: {
+  homeScope?: HomeScope
+  spaceId?: number
+  isContributorOrHigher?: boolean
+}) => {
   const navigate = useNavigate()
   const user = useAuthUser()
   const isAdmin = user?.isAdmin
@@ -55,14 +63,11 @@ export const AppList = ({ homeScope, spaceId }: { homeScope?: HomeScope, spaceId
       scope: homeScope || undefined,
     },
   })
-  const { data: propertiesData } = usePropertiesQuery('appSeries', homeScope, spaceId) 
+  const { data: propertiesData } = usePropertiesQuery('appSeries', homeScope, spaceId)
 
   const { isLoading, data, error } = query
 
-  const selectedAppObjects = getSelectedObjectsFromIndexes(
-    selectedIndexes,
-    data?.apps,
-  )
+  const selectedAppObjects = getSelectedObjectsFromIndexes(selectedIndexes, data?.apps)
   const actions = useAppSelectionActions({
     homeScope,
     spaceId,
@@ -78,7 +83,7 @@ export const AppList = ({ homeScope, spaceId }: { homeScope?: HomeScope, spaceId
     resourceKeys: ['apps'],
   })
 
-  if(homeScope) {
+  if (homeScope) {
     delete actions['Copy to My Home (private)']
   } else {
     // Disable actions in spaces
@@ -94,7 +99,7 @@ export const AppList = ({ homeScope, spaceId }: { homeScope?: HomeScope, spaceId
           <QuickActions>
             {homeScope === 'me' && (
               <Button
-                data-variant='primary'
+                data-variant="primary"
                 as={Link}
                 to="/home/apps/create"
                 data-turbolinks="false"
@@ -103,13 +108,11 @@ export const AppList = ({ homeScope, spaceId }: { homeScope?: HomeScope, spaceId
                 <PlusIcon height={12} /> Create App
               </Button>
             )}
-            {spaceId && (
+            {spaceId && isContributorOrHigher && (
               <Button
-                data-variant='primary'
+                data-variant="primary"
                 data-testid="spaces-apps-add-app-button"
-                onClick={() =>
-                  listActions['Add App']?.func({ showModal: true })
-                }
+                onClick={() => listActions['Add App']?.func({ showModal: true })}
               >
                 <PlusIcon height={12} /> Add App
               </Button>
@@ -120,19 +123,12 @@ export const AppList = ({ homeScope, spaceId }: { homeScope?: HomeScope, spaceId
             content={
               <ActionsDropdownContent
                 actions={actions}
-                message={
-                  homeScope === 'spaces' &&
-                  'To perform other actions on this app, access it from the Space'
-                }
+                message={homeScope === 'spaces' && 'To perform other actions on this app, access it from the Space'}
               />
             }
           >
             {dropdownProps => (
-              <ActionsButton
-                {...dropdownProps}
-                data-testid="home-apps-actions-button"
-                active={dropdownProps.isActive}
-              />
+              <ActionsButton {...dropdownProps} data-testid="home-apps-actions-button" active={dropdownProps.isActive} />
             )}
           </Dropdown>
         </ActionsRow>
@@ -158,18 +154,18 @@ export const AppList = ({ homeScope, spaceId }: { homeScope?: HomeScope, spaceId
         hiddenColumns={hiddenColumns}
       />
 
-        <ContentFooter>
-          <Pagination
-            page={data?.meta?.pagination?.current_page}
-            totalCount={data?.meta?.pagination?.total_count}
-            totalPages={data?.meta?.pagination?.total_pages}
-            perPage={perPageParam}
-            isHidden={false}
-            isPreviousData={data?.meta?.pagination?.prev_page !== null}
-            isNextData={data?.meta?.pagination?.next_page !== null}
-            setPage={p => setPageParam(p, 'replaceIn')}
-            onPerPageSelect={p => setPerPageParam(p, 'replaceIn')}
-          />
+      <ContentFooter>
+        <Pagination
+          page={data?.meta?.pagination?.current_page}
+          totalCount={data?.meta?.pagination?.total_count}
+          totalPages={data?.meta?.pagination?.total_pages}
+          perPage={perPageParam}
+          isHidden={false}
+          isPreviousData={data?.meta?.pagination?.prev_page !== null}
+          isNextData={data?.meta?.pagination?.next_page !== null}
+          setPage={p => setPageParam(p, 'replaceIn')}
+          onPerPageSelect={p => setPerPageParam(p, 'replaceIn')}
+        />
         <HoverDNAnexusLogo opacity height={14} />
       </ContentFooter>
 
@@ -181,7 +177,7 @@ export const AppList = ({ homeScope, spaceId }: { homeScope?: HomeScope, spaceId
       {actions['Export to']?.modal}
       {actions['Set as Challenge App']?.modal}
       {actions['Copy to My Home (private)']?.modal}
-      
+
       {listActions['Add App']?.modal}
     </>
   )
@@ -218,9 +214,7 @@ export const AppsListTable = ({
   isLoading: boolean
   homeScope?: HomeScope
   colWidths: KeyVal
-  saveColumnResizeWidth: (
-    columnResizing: UseResizeColumnsState<any>['columnResizing'],
-  ) => void
+  saveColumnResizeWidth: (columnResizing: UseResizeColumnsState<any>['columnResizing']) => void
   saveHiddenColumns: (cols: string[]) => void
   hiddenColumns: string[]
 }) => {
@@ -230,18 +224,17 @@ export const AppsListTable = ({
     // Check if any of the conditions is true, then hide the column
     return !(
       // If the homeScope is 'me', hide 'added_by' regardless of other conditions.
-      (homeScope === 'me' && c.accessor === 'added_by') ||
-      
-      // Hide 'location' for all homeScopes except 'spaces'.
-      (homeScope !== 'spaces' && c.accessor === 'location') ||
-      
-      // Hide 'featured' for all homeScopes except 'everybody'.
-      (homeScope !== 'everybody' && c.accessor === 'featured') ||
-      
-      // Hide 'explorers', 'org', 'run_by_you' if homeScope is defined to something specific.
-      (homeScope !== undefined && c.accessor === 'explorers') ||
-      (homeScope !== undefined && c.accessor === 'org') ||
-      (homeScope !== undefined && c.accessor === 'run_by_you')
+      (
+        (homeScope === 'me' && c.accessor === 'added_by') ||
+        // Hide 'location' for all homeScopes except 'spaces'.
+        (homeScope !== 'spaces' && c.accessor === 'location') ||
+        // Hide 'featured' for all homeScopes except 'everybody'.
+        (homeScope !== 'everybody' && c.accessor === 'featured') ||
+        // Hide 'explorers', 'org', 'run_by_you' if homeScope is defined to something specific.
+        (homeScope !== undefined && c.accessor === 'explorers') ||
+        (homeScope !== undefined && c.accessor === 'org') ||
+        (homeScope !== undefined && c.accessor === 'run_by_you')
+      )
     )
   }
 

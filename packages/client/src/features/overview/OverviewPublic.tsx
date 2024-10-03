@@ -40,7 +40,7 @@ export const OverviewPublic = () => {
   const { data: expertsData, isLoading: expertsIsLoading } = useExpertsListQuery({})
 
   return (
-    <PublicLayout mainScroll>
+    <PublicLayout mainScroll={!!user}>
       <NavigationBar user={user}>
         <PageContainerMargin>
           <NavigationBarBanner>

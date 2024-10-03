@@ -1,6 +1,7 @@
 <% content_for :title do %>Edit Note: <%= @note.title %><% end %>
 
 <div class="page-header">
+  <%= link_to "Back", note_path(@note), class: "btn btn-link" %>
   <div class="page-title note-editing">
     Edit
     <div class="note-titlebar">

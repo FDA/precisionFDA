@@ -242,7 +242,7 @@ module Api
       redirect_back(fallback_location: job_path(job)) && return unless job.https? && job.running?
 
       # Update the API key in the background
-      refresh_api_key_internal(job, background: true)
+      refresh_api_key_internal(job, cookies.to_hash, background: true)
 
       redirect_to(job.https_job_external_url) && return if Utils.development_or_test?
 
@@ -264,13 +264,14 @@ module Api
       job = Job.accessible_by(@context).find_by(dxid: params[:id])
       raise ApiError, "You have no permissions to access this job" unless job
 
-      response = refresh_api_key_internal(job, background: false)
+      forward_header = RequestContext.instance.forward_header
+      response = refresh_api_key_internal(job, forward_header, background: false)
       render json: response
     rescue StandardError => e
       raise ApiError, e.message
     end
 
-    def refresh_api_key_internal(job, background: false)
+    def refresh_api_key_internal(job, forward_header, background: false)
       api = DIContainer.resolve("api.auth_user")
       code = api.get_https_job_auth_token(job)
       key = generate_auth_key
@@ -281,7 +282,7 @@ module Api
       # rubocop:disable Style/BlockDelimiters
       Thread.start {
         begin
-          RequestContext.begin_request(context.user_id, context.username, context.token)
+          RequestContext.begin_request(context.user_id, context.username, context.token, forward_header)
           https_apps_client.workstation_set_api_key(job.dxid, code, key)
         ensure
           RequestContext.end_request

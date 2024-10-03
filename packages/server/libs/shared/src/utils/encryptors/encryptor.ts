@@ -1,7 +1,7 @@
 import { config } from '@shared/config'
 import crypto from 'crypto'
 
-interface RailsToken {
+type RailsToken = {
   _rails: {
     message: string
     exp?: string
@@ -9,14 +9,14 @@ interface RailsToken {
   }
 }
 
-interface UserSession {
+export type UserSession = {
   session_id: string
-  user_id: number
-  username: string
-  token: string
-  expiration: number
-  org_id: number
   _csrf_token: string
+  user_id?: number
+  username?: string
+  token?: string
+  expiration?: number
+  org_id?: number
 }
 
 /**
@@ -29,8 +29,9 @@ export class Encryptor {
   private static readonly digest = 'sha1'
   private static readonly iterations = 1000
   private static readonly keySize = 32
+  private static readonly pfdaSession = 'cookie._precision-fda_session'
 
-  static get derivedKey() {
+  private static get derivedKey() {
     return crypto.pbkdf2Sync(
       this.secretKeyBase,
       this.authEncryptedCookie,
@@ -38,6 +39,29 @@ export class Encryptor {
       this.keySize,
       this.digest,
     )
+  }
+
+  static encrypt(userSession: UserSession): string {
+    try {
+      const iv = crypto.randomBytes(12)
+      const cipher = crypto.createCipheriv(this.algorithm, this.derivedKey, iv)
+
+      const sessionStr = Buffer.from(JSON.stringify(userSession)).toString('base64')
+      const message = JSON.stringify({
+        _rails: {
+          message: sessionStr,
+          exp: null,
+          pur: this.pfdaSession,
+        },
+      })
+      let encrypted = cipher.update(message, 'utf8', 'base64')
+      encrypted += cipher.final('base64')
+
+      const authTag = cipher.getAuthTag().toString('base64')
+      return `${encrypted}--${iv.toString('base64')}--${authTag}`
+    } catch (error) {
+      throw new Error(`Failed to encrypt token: ${error}`)
+    }
   }
 
   /**

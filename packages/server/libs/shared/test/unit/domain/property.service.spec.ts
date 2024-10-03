@@ -12,12 +12,12 @@ import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { WorkflowSeries } from '@shared/domain/workflow-series/workflow-series.entity'
 import { STATIC_SCOPE } from '@shared/enums'
+import { PermissionError } from '@shared/errors'
 import { create, db } from '@shared/test'
 import { mocksReset } from '@shared/test/mocks'
 import { SCOPE } from '@shared/types/common'
 import { mocksReset as localMocksReset } from '@worker-test/utils/mocks'
 import { expect } from 'chai'
-
 
 describe('property service tests', () => {
   let em: EntityManager<MySqlDriver>
@@ -43,8 +43,8 @@ describe('property service tests', () => {
     const asset = create.assetHelper.create(em, { user })
     const app = create.appHelper.createRegular(em, { user })
     const appSeries = create.appSeriesHelper.create(em, { user }, {})
-    const spec = '{"input_spec": {"stages": [{"app_uid": "'
-      + `${app.uid}"},{"app_uid": "${app.uid}"}]}}`
+    const spec =
+      '{"input_spec": {"stages": [{"app_uid": "' + `${app.uid}"},{"app_uid": "${app.uid}"}]}}`
     const workflow = create.workflowHelper.create(em, { user }, { spec })
     const workflowSeries = create.workflowSeriesHelper.create(em, { user }, {})
     const job = create.jobHelper.create(em, { user })
@@ -57,22 +57,22 @@ describe('property service tests', () => {
       targetId: file.id,
       targetType: 'node' as PropertyType,
       properties: {
-        'stage': 'final',
+        stage: 'final',
       },
     }
     const assetInput = {
       targetId: asset.id,
       targetType: 'node' as PropertyType,
       properties: {
-        'stage': 'final',
-        'type': 'general asset',
+        stage: 'final',
+        type: 'general asset',
       },
     }
     const workflowSeriesInput = {
       targetId: workflowSeries.id,
       targetType: 'workflowSeries' as PropertyType,
       properties: {
-        'stage': 'final',
+        stage: 'final',
       },
     }
 
@@ -80,23 +80,23 @@ describe('property service tests', () => {
       targetId: job.id,
       targetType: 'job' as PropertyType,
       properties: {
-        'stage': 'final',
-        'type': 'general job',
+        stage: 'final',
+        type: 'general job',
       },
     }
     const dbClusterInput = {
       targetId: dbCluster.id,
       targetType: 'dbCluster' as PropertyType,
       properties: {
-        'stage': 'final',
+        stage: 'final',
       },
     }
     const appSeriesInput = {
       targetId: appSeries.id,
       targetType: 'appSeries' as PropertyType,
       properties: {
-        'stage': 'final',
-        'type': 'general app',
+        stage: 'final',
+        type: 'general app',
       },
     }
 
@@ -110,11 +110,27 @@ describe('property service tests', () => {
     em.clear()
 
     const loadedNode = await em.findOneOrFail(Node, { id: file.id }, { populate: ['properties'] })
-    const loadedAppSeries = await em.findOneOrFail(AppSeries, { id: app.id }, { populate: ['properties'] })
-    const loadedAsset = await em.findOneOrFail(Asset, { id: asset.id }, { populate: ['properties'] })
-    const loadedWorkflowSeries = await em.findOneOrFail(WorkflowSeries, { id: workflow.id }, { populate: ['properties'] })
+    const loadedAppSeries = await em.findOneOrFail(
+      AppSeries,
+      { id: app.id },
+      { populate: ['properties'] },
+    )
+    const loadedAsset = await em.findOneOrFail(
+      Asset,
+      { id: asset.id },
+      { populate: ['properties'] },
+    )
+    const loadedWorkflowSeries = await em.findOneOrFail(
+      WorkflowSeries,
+      { id: workflow.id },
+      { populate: ['properties'] },
+    )
     const loadedJob = await em.findOneOrFail(Job, { id: job.id }, { populate: ['properties'] })
-    const loadedDbCluster = await em.findOneOrFail(DbCluster, { id: dbCluster.id }, { populate: ['properties'] })
+    const loadedDbCluster = await em.findOneOrFail(
+      DbCluster,
+      { id: dbCluster.id },
+      { populate: ['properties'] },
+    )
 
     expect(loadedNode.properties.getItems()).to.have.length(1)
     expect(loadedAppSeries.properties.getItems()).to.have.length(2)
@@ -124,24 +140,20 @@ describe('property service tests', () => {
     expect(loadedDbCluster.properties.getItems()).to.have.length(1)
   })
 
-
   it('save properties - owner of target', async () => {
     const propertyService = new PropertyService(em, userCtx)
     const input = {
       targetId: file.id,
       targetType: 'node' as PropertyType,
       properties: {
-        'language': 'python',
-        'version': '3',
-        'stage': 'final',
+        language: 'python',
+        version: '3',
+        stage: 'final',
       },
     }
     await propertyService.setProperty(input)
     em.clear()
-    const loadedNode = await em.findOneOrFail(Node,
-      { id: file.id },
-      { populate: ['properties'] },
-    )
+    const loadedNode = await em.findOneOrFail(Node, { id: file.id }, { populate: ['properties'] })
 
     const savedProperties = loadedNode.properties.getItems()
 
@@ -173,9 +185,9 @@ describe('property service tests', () => {
       targetId: file.id,
       targetType: 'node' as PropertyType,
       properties: {
-        'language': 'python',
-        'version': '3',
-        'stage': 'final',
+        language: 'python',
+        version: '3',
+        stage: 'final',
       },
     }
     await propertyService.setProperty(input)
@@ -184,20 +196,16 @@ describe('property service tests', () => {
       targetId: file.id,
       targetType: 'node' as PropertyType,
       properties: {
-        'language': 'python',
-        'version': '3',
-        'stage': 'final',
-        'target': 'TBD',
+        language: 'python',
+        version: '3',
+        stage: 'final',
+        target: 'TBD',
       },
     }
     await propertyService.setProperty(newInput)
 
-
     em.clear()
-    const loadedNode = await em.findOneOrFail(Node,
-      { id: file.id },
-      { populate: ['properties'] },
-    )
+    const loadedNode = await em.findOneOrFail(Node, { id: file.id }, { populate: ['properties'] })
 
     const savedProperties = loadedNode.properties.getItems()
     expect(loadedNode.id).to.equal(file.id)
@@ -216,9 +224,9 @@ describe('property service tests', () => {
       targetId: file.id,
       targetType: 'node' as PropertyType,
       properties: {
-        'language': 'python',
-        'version': '3',
-        'stage': 'final',
+        language: 'python',
+        version: '3',
+        stage: 'final',
       },
     }
     await propertyService.setProperty(input)
@@ -228,23 +236,19 @@ describe('property service tests', () => {
       targetId: file.id,
       targetType: 'node' as PropertyType,
       properties: {
-        'language': 'python',
-        'version': '3',
+        language: 'python',
+        version: '3',
       },
     }
     await propertyService.setProperty(newInput)
 
     em.clear()
-    const loadedNode = await em.findOneOrFail(Node,
-      { id: file.id },
-      { populate: ['properties'] },
-    )
+    const loadedNode = await em.findOneOrFail(Node, { id: file.id }, { populate: ['properties'] })
 
     const savedProperties = loadedNode.properties.getItems()
 
     expect(loadedNode.id).to.equal(file.id)
     expect(savedProperties).to.have.length(2)
-
   })
 
   it('save properties - owner change existing target properties', async () => {
@@ -253,9 +257,9 @@ describe('property service tests', () => {
       targetId: file.id,
       targetType: 'node' as PropertyType,
       properties: {
-        'language': 'python',
-        'version': '3',
-        'stage': 'final',
+        language: 'python',
+        version: '3',
+        stage: 'final',
       },
     }
     await propertyService.setProperty(input)
@@ -265,18 +269,15 @@ describe('property service tests', () => {
       targetId: file.id,
       targetType: 'node' as PropertyType,
       properties: {
-        'language': 'Java',
-        'version': '17',
-        'stage': 'final',
+        language: 'Java',
+        version: '17',
+        stage: 'final',
       },
     }
     await propertyService.setProperty(newInput)
 
     em.clear()
-    const loadedNode = await em.findOneOrFail(Node,
-      { id: file.id },
-      { populate: ['properties'] },
-    )
+    const loadedNode = await em.findOneOrFail(Node, { id: file.id }, { populate: ['properties'] })
 
     const savedProperties = loadedNode.properties.getItems()
 
@@ -300,18 +301,25 @@ describe('property service tests', () => {
       propertyName: 'stage',
       propertyValue: 'final',
     })
-
   })
 
   it('save properties - target from space and user does have sufficient permissions', async () => {
     const space = create.spacesHelper.create(em, { name: 'test-space' })
     const notOwner = create.userHelper.create(em)
     await em.flush()
-    const spaceFile = create.filesHelper.create(em, { user }, { scope: 'space-' + space.id as SCOPE })
-    create.spacesHelper.addMember(em, {
-      user: notOwner,
-      space,
-    }, { role: SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR })
+    const spaceFile = create.filesHelper.create(
+      em,
+      { user },
+      { scope: ('space-' + space.id) as SCOPE },
+    )
+    create.spacesHelper.addMember(
+      em,
+      {
+        user: notOwner,
+        space,
+      },
+      { role: SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR },
+    )
     await em.flush()
 
     let propertyService = new PropertyService(em, { ...notOwner, accessToken: 'secretToken' })
@@ -319,15 +327,16 @@ describe('property service tests', () => {
       targetId: spaceFile.id,
       targetType: 'node' as PropertyType,
       properties: {
-        'language': 'python',
-        'version': '3',
-        'stage': 'final',
+        language: 'python',
+        version: '3',
+        stage: 'final',
       },
     }
 
     await propertyService.setProperty(input)
     em.clear()
-    const loadedNode = await em.findOneOrFail(Node,
+    const loadedNode = await em.findOneOrFail(
+      Node,
       { id: spaceFile.id },
       { populate: ['properties'] },
     )
@@ -336,7 +345,6 @@ describe('property service tests', () => {
 
     expect(loadedNode.id).to.equal(spaceFile.id)
     expect(savedProperties).to.have.length(3)
-
   })
 
   it('save properties - public target and user does have sufficient permissions', async () => {
@@ -352,14 +360,15 @@ describe('property service tests', () => {
       targetId: publicFile.id,
       targetType: 'node' as PropertyType,
       properties: {
-        'language': 'python',
-        'version': '3',
-        'stage': 'final',
+        language: 'python',
+        version: '3',
+        stage: 'final',
       },
     }
     await propertyService.setProperty(input)
     em.clear()
-    const loadedNode = await em.findOneOrFail(Node,
+    const loadedNode = await em.findOneOrFail(
+      Node,
       { id: publicFile.id },
       { populate: ['properties'] },
     )
@@ -368,7 +377,6 @@ describe('property service tests', () => {
 
     expect(loadedNode.id).to.equal(publicFile.id)
     expect(savedProperties).to.have.length(3)
-
   })
 
   it('fail save properties - not owner of private target', async () => {
@@ -377,9 +385,9 @@ describe('property service tests', () => {
       targetId: file.id,
       targetType: 'node' as PropertyType,
       properties: {
-        'language': 'python',
-        'version': '3',
-        'stage': 'final',
+        language: 'python',
+        version: '3',
+        stage: 'final',
       },
     }
     await propertyService.setProperty(input)
@@ -389,9 +397,11 @@ describe('property service tests', () => {
     try {
       await propertyService.setProperty(input)
       expect.fail('Operation is expected to fail.')
-    } catch (error: any) {
-      expect(error.name).to.equal('PermissionError')
-      expect(error.message).to.equal('Error: You do have permissions to access this entity')
+    } catch (error: unknown) {
+      if (error instanceof PermissionError) {
+        expect(error.name).to.equal('PermissionError')
+        expect(error.message).to.equal('Error: You do not have permissions to access this entity')
+      }
     }
   })
 
@@ -405,17 +415,19 @@ describe('property service tests', () => {
       targetId: publicFile.id,
       targetType: 'node' as PropertyType,
       properties: {
-        'language': 'python',
-        'version': '3',
-        'stage': 'final',
+        language: 'python',
+        version: '3',
+        stage: 'final',
       },
     }
     try {
       await propertyService.setProperty(input)
       expect.fail('Operation is expected to fail.')
-    } catch (error: any) {
-      expect(error.name).to.equal('PermissionError')
-      expect(error.message).to.equal('Error: You do have permissions to access this entity')
+    } catch (error: unknown) {
+      if (error instanceof PermissionError) {
+        expect(error.name).to.equal('PermissionError')
+        expect(error.message).to.equal('Error: You do not have permissions to access this entity')
+      }
     }
   })
 
@@ -424,11 +436,19 @@ describe('property service tests', () => {
     const notOwner = create.userHelper.create(em)
     await em.flush()
 
-    const spaceFile = create.filesHelper.create(em, { user }, { scope: 'space-' + space.id as SCOPE })
-    create.spacesHelper.addMember(em, {
-      user: notOwner,
-      space,
-    }, { role: SPACE_MEMBERSHIP_ROLE.VIEWER })
+    const spaceFile = create.filesHelper.create(
+      em,
+      { user },
+      { scope: ('space-' + space.id) as SCOPE },
+    )
+    create.spacesHelper.addMember(
+      em,
+      {
+        user: notOwner,
+        space,
+      },
+      { role: SPACE_MEMBERSHIP_ROLE.VIEWER },
+    )
     await em.flush()
 
     const propertyService = new PropertyService(em, { ...notOwner, accessToken: 'secretToken' })
@@ -436,17 +456,19 @@ describe('property service tests', () => {
       targetId: spaceFile.id,
       targetType: 'node' as PropertyType,
       properties: {
-        'language': 'python',
-        'version': '3',
-        'stage': 'final',
+        language: 'python',
+        version: '3',
+        stage: 'final',
       },
     }
     try {
       await propertyService.setProperty(input)
       expect.fail('Operation is expected to fail.')
-    } catch (error: any) {
-      expect(error.name).to.equal('PermissionError')
-      expect(error.message).to.equal('Error: You do have permissions to access this entity')
+    } catch (error: unknown) {
+      if (error instanceof PermissionError) {
+        expect(error.name).to.equal('PermissionError')
+        expect(error.message).to.equal('Error: You do not have permissions to access this entity')
+      }
     }
   })
 
@@ -466,40 +488,40 @@ describe('property service tests', () => {
       targetId: file.id,
       targetType: 'node' as PropertyType,
       properties: {
-        'language': 'python',
-        'version': '3',
-        'stage': 'final',
+        language: 'python',
+        version: '3',
+        stage: 'final',
       },
     }
     const input1 = {
       targetId: file1.id,
       targetType: 'node' as PropertyType,
       properties: {
-        'language': 'java',
-        'purpose': 'love',
+        language: 'java',
+        purpose: 'love',
       },
     }
     const input2 = {
       targetId: file2.id,
       targetType: 'node' as PropertyType,
       properties: {
-        'language': 'python',
-        'deprecated': 'true',
+        language: 'python',
+        deprecated: 'true',
       },
     }
     const input3 = {
       targetId: folder3.id,
       targetType: 'node' as PropertyType,
       properties: {
-        'isLeaf': 'false',
-        'children': '3',
+        isLeaf: 'false',
+        children: '3',
       },
     }
     const input4 = {
       targetId: file4.id,
       targetType: 'node' as PropertyType,
       properties: {
-        'stage': 'initial',
+        stage: 'initial',
       },
     }
 
@@ -507,8 +529,8 @@ describe('property service tests', () => {
       targetId: file5.id,
       targetType: 'node' as PropertyType,
       properties: {
-        'type': 'data',
-        'normalized': 'false',
+        type: 'data',
+        normalized: 'false',
       },
     }
 
@@ -537,5 +559,4 @@ describe('property service tests', () => {
     expect(res).to.not.contain('type')
     expect(res).to.not.contain('normalized')
   })
-
 })

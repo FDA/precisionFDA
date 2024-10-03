@@ -2,7 +2,7 @@
   <div class="row vertical-align">
     <div class="col-sm-5 col-md-5">
       <p>
-        <%= image_tag(@expert.image, class: 'img-rounded img-responsive center-block', style: 'max-height:500px', alt: "Expert's profile picture") %>
+        <%= image_tag(@expert.image, class: 'rounded img-responsive center-block', style: 'max-height:500px', alt: "Expert's profile picture") %>
       </p>
       <br/>
       <%= link_to(content_tag(:span, "", class: "fa fa-newspaper-o") + " Read Expert Blog Post", blog_expert_path(@expert), class: 'btn btn-default btn-block', data: { turbolinks: false }) %>
@@ -17,15 +17,15 @@
       </div>
       <p>
         <% if @expert.open? %>
-          <span class="label label-success open-button"><span class="fa fa-check"></span> Open</span>
+          <span class="badge badge-success open-button"><span class="fa fa-check"></span> Open</span>
         <% else %>
-          <span class="label label-default closed-button"><span class="fa fa-lock"></span> Closed</span>
+          <span class="badge badge-default closed-button"><span class="fa fa-lock"></span> Closed</span>
         <% end %>
         <% if @expert.editable_by?(@context) %>
           <% if @expert.is_public? %>
-            <span class="label label-primary"><span class="fa fa-eye"></span> Public</span>
+            <span class="badge badge-primary"><span class="fa fa-eye"></span> Public</span>
           <% else %>
-            <span class="label label-warning private-button"><span class="fa fa-eye-slash"></span> Private</span>
+            <span class="badge badge-warning private-button"><span class="fa fa-eye-slash"></span> Private</span>
           <% end %>
         <% end %>
       </p>

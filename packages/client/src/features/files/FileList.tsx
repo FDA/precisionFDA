@@ -21,7 +21,16 @@ import { useAuthUser } from '../auth/useAuthUser'
 import { ActionsDropdownContent } from '../home/ActionDropdownContent'
 import { ActionsRow, QuickActions, StyledHomeTable } from '../home/home.styles'
 import { ActionsButton, FilesListResourceHeader } from '../home/show.styles'
-import { HomeScope, IFilter, IMeta, KeyVal, Notification, NOTIFICATION_ACTION, WEBSOCKET_MESSSAGE_TYPE, WebSocketMessage } from '../home/types'
+import {
+  HomeScope,
+  IFilter,
+  IMeta,
+  KeyVal,
+  Notification,
+  NOTIFICATION_ACTION,
+  WEBSOCKET_MESSSAGE_TYPE,
+  WebSocketMessage,
+} from '../home/types'
 import { useList } from '../home/useList'
 import { usePropertiesQuery } from '../home/usePropertiesQuery'
 import { ISpace } from '../spaces/spaces.types'
@@ -224,7 +233,7 @@ export const FileList = ({
             </Dropdown>
           </QuickActions>
         </ActionsRow>
-        <FileBreadcrumb basePath={location.pathname} scope={homeScope} labelText='You are here:' metaPath={data?.meta?.path} />
+        <FileBreadcrumb basePath={location.pathname} scope={homeScope} labelText="You are here:" metaPath={data?.meta?.path} />
       </FilesListResourceHeader>
 
       <FilesListTable

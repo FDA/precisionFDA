@@ -12,13 +12,13 @@ import {
 import { Uid } from '@shared/domain/entity/domain/uid'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { User } from '@shared/domain/user/user.entity'
-import { BaseEntity } from '../../database/base.entity'
 import { ChallengeResource } from './challenge-resource.entity'
 import { CHALLENGE_STATUS } from './challenge.enum'
 import { ChallengeRepository } from './challenge.repository'
+import { ScopedEntity } from '@shared/database/scoped.entity'
 
 @Entity({ tableName: 'challenges', repository: () => ChallengeRepository })
-export class Challenge extends BaseEntity {
+export class Challenge extends ScopedEntity {
   @PrimaryKey()
   id: number
 
@@ -52,9 +52,6 @@ export class Challenge extends BaseEntity {
   // Note: the value stored in cardImageId is actually the file's uid
   @Property()
   cardImageId: Uid<'file'>
-
-  @Property()
-  scope: string
 
   @Property()
   preRegistrationUrl: string

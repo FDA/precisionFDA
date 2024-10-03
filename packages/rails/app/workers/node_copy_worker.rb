@@ -26,7 +26,7 @@ class NodeCopyWorker < ApplicationWorker
     # @param job [Sidekiq::Job] Current job.
     # @return [Context] A user context.
     def build_context(job)
-      Context.build(job["args"].last)
+      Context.build(job["args"][3])
     end
   end
 
@@ -35,9 +35,9 @@ class NodeCopyWorker < ApplicationWorker
   # @param scope [String] A destination scope (private, space-xxx).
   # @param nodes_ids [Array<Integer>] Files or folders IDs to copy.
   # @param session_auth_params [Hash] User session auth params.
-  def perform(scope, nodes_ids, folder_id, session_auth_params)
+  def perform(scope, nodes_ids, folder_id, session_auth_params, forward_header)
     @context = Context.build(session_auth_params)
-    RequestContext.begin_request(@context.user_id, @context.username, @context.token)
+    RequestContext.begin_request(@context.user_id, @context.username, @context.token, forward_header)
 
     nodes = Node.where(id: nodes_ids)
     copies = copy_service.copy(nodes, scope, folder_id)

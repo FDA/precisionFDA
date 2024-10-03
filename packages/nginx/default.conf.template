@@ -1,0 +1,19 @@
+server {
+  listen 443 ssl http2;
+  listen [::]:443 ssl http2;
+
+  server_name localhost;
+  ssl_certificate /keys/cert.pem;
+  ssl_certificate_key /keys/key.pem;
+
+  location / {
+    proxy_pass ${RUBY_API_URL};
+    proxy_set_header Host $host:${PROXY_PORT};
+    proxy_http_version 1.1;
+  }
+
+  location /api/v2/ {
+    proxy_pass ${NODE_API_URL}/;
+    proxy_http_version 1.1;
+  }
+}

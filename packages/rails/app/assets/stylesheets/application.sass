@@ -10,13 +10,14 @@
  * defined in the other CSS/SCSS files in this directory. It is generally better to create a new
  * file per style scope.
  *= require content-tools.min
- *= require bundle
- *= require datatables.net-bs/css/dataTables.bootstrap.min
- *= require_self
- *= require_tree .
  *
  */
 
-.rails-alert
-  margin: 0px
-  padding: 8px 32px
+$primary: #1F70B5
+
+@import "bootstrap"
+@import "_common"
+@import "site.scss"
+@import "views/**/*"
+@import "components/**/*"
+

@@ -14,7 +14,6 @@ import {
   buildFilterByUserSettings,
   buildIsNotificationEnabled,
 } from '../../email.helper'
-import { isJobInSpace, isJobPublic } from '../../../job/job.helper'
 import { UserOpsCtx } from '@shared/types'
 
 type JobFinishedInputType = { jobId: number }
@@ -35,12 +34,12 @@ export class JobFinishedEmailHandler
   }
 
   async determineReceivers(): Promise<User[]> {
-    if (isJobPublic(this.job)) {
-      this.ctx.log.log({ jobId: this.job.id }, 'Job is public, no one is notified')
+    if (this.job.isPublic()) {
+      this.ctx.log.log({ jobId: this.job.id }, 'Job is public, noone is notified')
       return []
     }
     // todo: other users if job runs in a space?
-    if (isJobInSpace(this.job)) {
+    if (this.job.isInSpace()) {
       this.ctx.log.log({ jobId: this.job.id }, 'Job is in a space, todo')
       return []
     }

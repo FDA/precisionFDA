@@ -62,8 +62,8 @@
     </style> %>
     <!-- TODO(samuel) temporary workaround for server-side errors, should be migrated to toastify -->
     <%= render partial: "_partials/messages", flash: flash %>
-    <%# <script>
-        // Code to close rails alert messages because we no longer have jquery and bootstrap loading
+    <script>
+        // Code to close rails alert messages
         document.addEventListener('DOMContentLoaded', function() {
             const closeButtons = document.querySelectorAll('[data-dismiss="alert"]');
             if(closeButtons) {
@@ -77,7 +77,7 @@
                 });
             }
         });
-    </script> %>
+    </script>
     <div id="modal-root"></div>
     <%= content_for?(:content) ? yield(:content) : yield %>
   </body>

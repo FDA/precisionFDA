@@ -57,7 +57,7 @@ services:
     build:
       context: ../packages/server
       dockerfile: ./docker/images/node.isolated-dev.Dockerfile
-    command: ['make', 'watch']
+    command: ["make", "watch"]
     depends_on:
       - db
       - redis
@@ -84,7 +84,7 @@ services:
     build:
       context: ../packages/server
       dockerfile: ./docker/images/node.isolated-dev.Dockerfile
-    command: ['make', 'watch-worker']
+    command: ["make", "watch-worker"]
     environment:
       - NODE_ENV=development
       - NODE_DATABASE_NAME=precision-fda
@@ -104,7 +104,7 @@ services:
     build:
       context: ../packages/server
       dockerfile: ./docker/images/node.isolated-dev.Dockerfile
-    command: [ 'make', 'watch-admin-platform-client' ]
+    command: ["make", "watch-admin-platform-client"]
     environment:
       - NODE_ENV=development
       - SKIP_NODEJS_DB_WAITING=1
@@ -141,3 +141,7 @@ services:
       - type: volume
         source: bundler-deps-cache-ruby
         target: /usr/local/bundle
+  nginx:
+    extends:
+      file: ./base.services.yml
+      service: nginx

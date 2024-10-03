@@ -4,7 +4,7 @@ import { SpaceMembership } from '@shared/domain/space-membership/space-membershi
 import { User } from '@shared/domain/user/user.entity'
 import { pipe, uniqBy } from 'ramda'
 import { LoadedReference } from '@mikro-orm/core'
-import { STATIC_SCOPE } from '../../../../enums'
+import { STATIC_SCOPE } from '@shared/enums'
 import {
   EmailTemplate,
   ChallengeOpened,
@@ -22,8 +22,7 @@ import {
   challengeOpenedTemplate,
   ChallengeOpenedTemplateInput,
 } from '../mjml/challenge-opened.template'
-import { InternalError } from '../../../../errors'
-import { getIdFromScopeName, scopeContainsId } from '../../../space/space.helper'
+import { InternalError } from '@shared/errors'
 
 export class ChallengeOpenedEmailHandler
   extends BaseTemplate<ChallengeOpened>
@@ -44,15 +43,14 @@ export class ChallengeOpenedEmailHandler
   async determineReceivers(): Promise<User[]> {
     const userRepo = this.ctx.em.getRepository(User)
     let users: User[]
-    if (this.challenge.scope === STATIC_SCOPE.PUBLIC) {
+    if (this.challenge.isPublic()) {
       // all active users
       users = await userRepo.findActive({ populate: ['notificationPreference'] as never[] })
-    } else if (scopeContainsId(this.challenge.scope)) {
+    } else if (this.challenge.isInSpace()) {
       // find space, memberships, inform only those users
-      const spaceId = getIdFromScopeName(this.challenge.scope)
       const memberships = await this.ctx.em.find(
         SpaceMembership,
-        { spaces: spaceId, active: true },
+        { spaces: this.challenge.getSpaceId(), active: true },
         { populate: ['user.notificationPreference'] },
       )
       // todo: should filter out active users as well .. probably redundant (if they can be added to space)
