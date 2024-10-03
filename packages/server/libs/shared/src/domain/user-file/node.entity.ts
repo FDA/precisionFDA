@@ -12,11 +12,10 @@ import { Uid } from '@shared/domain/entity/domain/uid'
 import { NodeProperty } from '@shared/domain/property/node-property.entity'
 import { NodeRepository } from '@shared/domain/user-file/node.repository'
 import { User } from '@shared/domain/user/user.entity'
-import { BaseEntity } from '../../database/base.entity'
-import { EntityScope } from '../../types/common'
 import { DxId } from '../entity/domain/dxid'
 import { Tagging } from '../tagging/tagging.entity'
 import { FILE_STATE, FILE_STI_TYPE, FOLDER_STATE, PARENT_TYPE } from './user-file.types'
+import { ScopedEntity } from '@shared/database/scoped.entity'
 
 @Entity({
   abstract: true,
@@ -25,7 +24,7 @@ import { FILE_STATE, FILE_STI_TYPE, FOLDER_STATE, PARENT_TYPE } from './user-fil
   tableName: 'nodes',
   repository: () => NodeRepository,
 })
-export class Node extends BaseEntity {
+export class Node extends ScopedEntity {
   @PrimaryKey()
   id: number
 
@@ -47,9 +46,6 @@ export class Node extends BaseEntity {
 
   @Property({ type: 'numeric' })
   fileSize?: number
-
-  @Property()
-  scope: EntityScope
 
   @Property()
   createdAt: Date

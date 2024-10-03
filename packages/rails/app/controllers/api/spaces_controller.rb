@@ -295,11 +295,13 @@ module Api
 
       prepare_files_to_copy(files)
 
+      forward_header = RequestContext.instance.forward_header
       FileCopyWorker.perform_async(
         @space.scope,
         files.map(&:id),
         params[:folder_id],
         session_auth_params,
+        forward_header,
       )
     end
 

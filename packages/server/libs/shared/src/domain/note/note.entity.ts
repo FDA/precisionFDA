@@ -12,9 +12,9 @@ import {
 } from '@mikro-orm/core'
 import { Attachment } from '@shared/domain/attachment/attachment.entity'
 import { User } from '@shared/domain/user/user.entity'
-import { BaseEntity } from '../../database/base.entity'
 import { SCOPE } from '../../types/common'
 import { STATIC_SCOPE } from '@shared/enums'
+import { ScopedEntity } from '@shared/database/scoped.entity'
 
 export type NoteType = 'Discussion' | 'Answer'
 
@@ -28,7 +28,7 @@ export type NoteType = 'Discussion' | 'Answer'
     ],
   }),
 })
-export class Note extends BaseEntity {
+export class Note extends ScopedEntity {
   @PrimaryKey()
   id: number
 

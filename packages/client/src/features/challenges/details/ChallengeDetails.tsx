@@ -347,7 +347,7 @@ const ChallengeDetailsPage = () => {
 
   if (isFetched && !data) {
     return (
-      <PublicLayout mainScroll>
+      <PublicLayout mainScroll={!!user}>
         <NavigationBar user={user} />
         <ChallengeNotFound />
       </PublicLayout>
@@ -355,7 +355,7 @@ const ChallengeDetailsPage = () => {
   }
 
   return (
-    <PublicLayout mainScroll>
+    <PublicLayout mainScroll={!!user}>
       {!isLoading && data ? (
         <>
           <ChallengeDetailsBanner challenge={data} user={user} />

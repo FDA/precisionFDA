@@ -1,11 +1,10 @@
-import { USER_CONTEXT_HTTP_HEADERS } from '@shared/config/consts'
+import { EntityManager } from '@mikro-orm/mysql'
 import { database } from '@shared/database'
 import { User } from '@shared/domain/user/user.entity'
-import { expect } from 'chai'
-import { EntityManager } from '@mikro-orm/mysql'
-import supertest from 'supertest'
 import { create, db } from '@shared/test'
 import { fakes, mocksReset } from '@shared/test/mocks'
+import { expect } from 'chai'
+import supertest from 'supertest'
 import { testedApp } from '../../index'
 import { getDefaultHeaderData } from '../../utils/expect-helper'
 
@@ -18,6 +17,7 @@ describe('POST /account/checkSpacesPermissions', () => {
     em = database.orm().em.fork()
     em.clear()
     user = create.userHelper.create(em)
+    create.sessionHelper.create(em, { user })
     await em.flush()
     mocksReset()
   })
@@ -41,7 +41,7 @@ describe('POST /account/checkSpacesPermissions', () => {
     expect(fakeCreateSyncSpacesPermissionsArgs).to.deep.equal([
       {
         id: user.id,
-        accessToken: userHeaderData[USER_CONTEXT_HTTP_HEADERS.accessToken],
+        accessToken: 'fake-token',
         dxuser: user.dxuser,
       },
     ])

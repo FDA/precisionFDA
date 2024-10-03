@@ -392,11 +392,15 @@ export class DataPortalService {
     }
   }
 
-  async list() {
+  /**
+   * Returns all the data portals where current user has membership or all data portals (regardless of membership) in case the user is a site admin
+   * @param withMembershipOnly Relevant for site admins only. If true, returns only data portals where the current user is a member
+   */
+  async list(withMembershipOnly: boolean = false) {
     this.logger.log('Getting data portals for user', this.user.id)
     let portals: DataPortal[]
 
-    if (await this.hasSiteAdminRole(this.user.id)) {
+    if (!withMembershipOnly && (await this.hasSiteAdminRole(this.user.id))) {
       portals = await this.em.find(
         DataPortal,
         {},
@@ -412,7 +416,7 @@ export class DataPortalService {
           $and: [
             {
               space: {
-                spaceMemberships: { user: this.user.id },
+                spaceMemberships: { user: this.user.id, active: true },
               },
             },
           ],

@@ -121,7 +121,7 @@
   <div class="list-group-item" data-bind="css: {selectable: isSelectable, 'not-selectable': !isSelectable(), radio: selectionType == 'radio', checkbox: selectionType == 'checkbox'}">
     <div class="media">
       <div class="media-body">
-        <label data-bind="attr: {title: uid}">
+        <label data-bind="attr: {title: uid}" style="margin-bottom: 0;">
           <!-- ko if: isSelectable -->
             <!-- ko if: selectionType == "radio" -->
               <input type="radio" data-bind="
@@ -138,7 +138,7 @@
           <!-- /ko -->
           <span data-bind="css: classIcon" aria-hidden="true"></span> <span class="object-name" data-bind="text: title"></span>
           <div class="object-metadata clearfix">
-            <ul class="list-inline list-inline-bullets pull-left">
+            <ul class="list-inline list-inline-bullets pull-left" style="display: flex;">
               <li>
                 <span data-bind="css: scopeIcon"></span>
                 <span data-bind="text: scopeFormatted" class="text-capitalize"></span>

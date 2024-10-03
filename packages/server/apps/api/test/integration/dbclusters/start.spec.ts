@@ -1,16 +1,13 @@
+import { EntityManager } from '@mikro-orm/mysql'
 import { database } from '@shared/database'
 import { DbCluster } from '@shared/domain/db-cluster/db-cluster.entity'
+import { STATUS as DB_CLUSTER_STATUS, STATUSES } from '@shared/domain/db-cluster/db-cluster.enum'
 import { User } from '@shared/domain/user/user.entity'
 import { ErrorCodes } from '@shared/errors'
-import { expect } from 'chai'
-import { EntityManager } from '@mikro-orm/mysql'
-import supertest from 'supertest'
-import { create, generate, db } from '@shared/test'
-import {
-  STATUS as DB_CLUSTER_STATUS,
-  STATUSES,
-} from '@shared/domain/db-cluster/db-cluster.enum'
+import { create, db, generate } from '@shared/test'
 import { fakes, mocksReset } from '@shared/test/mocks'
+import { expect } from 'chai'
+import supertest from 'supertest'
 import { testedApp } from '../../index'
 import { getDefaultHeaderData } from '../../utils/expect-helper'
 
@@ -25,17 +22,18 @@ describe('POST /dbclusters/start', () => {
     em = database.orm().em.fork()
     em.clear()
     user = create.userHelper.create(em)
+    create.sessionHelper.create(em, { user })
     dbClusters = [
       create.dbClusterHelper.create(em, { user }, { status: DB_CLUSTER_STATUS.STOPPED }),
       create.dbClusterHelper.create(em, { user }, { status: DB_CLUSTER_STATUS.STOPPED }),
     ]
-    dxids = dbClusters.map(dbCluster => dbCluster.dxid)
+    dxids = dbClusters.map((dbCluster) => dbCluster.dxid)
     await em.flush()
     mocksReset()
   })
 
   it('responds with success', async () => {
-    const { body } = await supertest(testedApp.getHttpServer())
+    await supertest(testedApp.getHttpServer())
       .post(`/dbclusters/start`)
       .set(getDefaultHeaderData(user))
       .send({ dxids: dxids })
@@ -55,7 +53,7 @@ describe('POST /dbclusters/start', () => {
     const describeCallRes = { status: STATUSES.STARTING, id: dxid }
     fakes.client.dbClusterDescribeFake.onCall(0).returns(describeCallRes)
 
-    const { body } = await supertest(testedApp.getHttpServer())
+    await supertest(testedApp.getHttpServer())
       .post(`/dbclusters/start`)
       .set(getDefaultHeaderData(user))
       .send({ dxids: [dxid] })

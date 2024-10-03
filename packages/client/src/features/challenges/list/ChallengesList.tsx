@@ -85,7 +85,7 @@ const ChallengesList = () => {
   }, [lastJsonMessage])
 
   return (
-    <PublicLayout mainScroll>
+    <PublicLayout mainScroll={!!user}>
       <NavigationBar
         title="Challenges"
         subtitle="Advancing regulatory standards for bioinformatics, RWD, and AI, through community-sourced science."

@@ -4,6 +4,8 @@ ruby "3.2.2"
 
 gem "rails", "6.1.7.7"
 
+gem "bootstrap", "~> 4.6.2"
+
 gem "rails-html-sanitizer", "~> 1.4.4"
 
 # Use SCSS for stylesheets
@@ -55,7 +57,7 @@ gem "paloma", "~> 5.1.0"
 gem "websocket"
 
 gem "sprockets", "~> 4.0"
-gem "sprockets-rails", "~> 3.3.0", require: "sprockets/railtie"
+gem "sprockets-rails", "~> 3.3.0"
 
 gem "hashdiff", "~> 1.0.1"
 

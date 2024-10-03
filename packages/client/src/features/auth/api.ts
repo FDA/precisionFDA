@@ -1,5 +1,5 @@
-import axios from 'axios'
 import { useQuery } from '@tanstack/react-query'
+import axios from 'axios'
 import { IUser } from '../../types/user'
 import { SiteSettingsResponse } from './useSiteSettingsQuery'
 
@@ -7,9 +7,10 @@ export function useAuthUserQuery() {
   return useQuery({
     queryKey: ['auth-user'],
 
-    queryFn: () => axios.get('/api/user').then(r => {
-      return r.data as { user: IUser, meta: any }
-    }),
+    queryFn: () =>
+      axios.get('/api/user').then(r => {
+        return r.data as { user: IUser; meta: any }
+      }),
     staleTime: Infinity,
     gcTime: Infinity,
     retry: 1,

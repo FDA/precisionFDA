@@ -14,7 +14,15 @@ import { getSelectedObjectsFromIndexes } from '../../utils/object'
 import { ActionsDropdownContent } from '../home/ActionDropdownContent'
 import { ActionsRow, QuickActions, StyledHomeTable } from '../home/home.styles'
 import { ActionsButton, ResourceHeader } from '../home/show.styles'
-import { IFilter, IMeta, KeyVal, Notification, NOTIFICATION_ACTION, WEBSOCKET_MESSSAGE_TYPE, WebSocketMessage } from '../home/types'
+import {
+  IFilter,
+  IMeta,
+  KeyVal,
+  Notification,
+  NOTIFICATION_ACTION,
+  WEBSOCKET_MESSSAGE_TYPE,
+  WebSocketMessage,
+} from '../home/types'
 import { useList } from '../home/useList'
 import { ISpaceReport } from './space-report.types'
 import { fetchReports } from './space-reports.api'
@@ -62,7 +70,7 @@ const SpaceReportListTable = ({
   )
 }
 
-export const SpaceReportList = ({ scope }: { scope: string }) => {
+export const SpaceReportList = ({ scope, isContributorOrHigher }: { scope: string; isContributorOrHigher?: boolean }) => {
   const { query, selectedIndexes, setSelectedIndexes, saveColumnResizeWidth, colWidths, resetSelected } = useList<ListType>({
     fetchList: async (filters: IFilter[], params: { scope: string }) => {
       const reports = await fetchReports(params.scope)
@@ -123,9 +131,11 @@ export const SpaceReportList = ({ scope }: { scope: string }) => {
       <ResourceHeader>
         <ActionsRow>
           <QuickActions>
-            <Button data-variant="primary" disabled={query.isLoading} onClick={() => setGenerateModal(true)}>
-              <PlusIcon height={12} /> Generate report
-            </Button>
+            {(scope === 'private' || isContributorOrHigher) && (
+              <Button data-variant="primary" disabled={query.isLoading} onClick={() => setGenerateModal(true)}>
+                <PlusIcon height={12} /> Generate report
+              </Button>
+            )}
           </QuickActions>
           <Dropdown trigger="click" content={<ActionsDropdownContent actions={actions} />}>
             {dropdownProps => <ActionsButton {...dropdownProps} active={dropdownProps.isActive} />}

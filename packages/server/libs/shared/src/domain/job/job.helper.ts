@@ -12,12 +12,6 @@ export const isStateTerminal = (state: string): boolean =>
 
 export const shouldSyncStatus = (job: Job): boolean => !isStateTerminal(job.state)
 
-export const isJobPrivate = (job: Job): boolean => job.scope.toLowerCase() === 'private'
-
-export const isJobPublic = (job: Job): boolean => job.scope.toLowerCase() === 'public'
-
-export const isJobInSpace = (job: Job): boolean => job.scope.toLowerCase().startsWith('space')
-
 export const isStateActive = (state: string): boolean =>
   Object.values(ACTIVE_STATES).includes(state as JOB_STATE)
 

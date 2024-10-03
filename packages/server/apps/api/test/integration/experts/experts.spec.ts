@@ -1,13 +1,13 @@
-import { database } from '@shared/database'
-import { User } from '@shared/domain/user/user.entity'
-import { expect } from 'chai'
 import { EntityManager } from '@mikro-orm/mysql'
-import supertest from 'supertest'
+import { database } from '@shared/database'
+import { Expert, ExpertScope, ExpertState } from '@shared/domain/expert/expert.entity'
+import { User } from '@shared/domain/user/user.entity'
 import { create, db } from '@shared/test'
 import { mocksReset } from '@shared/test/mocks'
+import { expect } from 'chai'
+import supertest from 'supertest'
 import { testedApp } from '../../index'
 import { getDefaultHeaderData } from '../../utils/expect-helper'
-import { Expert, ExpertScope, ExpertState } from '@shared/domain/expert/expert.entity'
 
 describe('/experts', () => {
   let em: EntityManager
@@ -20,23 +20,36 @@ describe('/experts', () => {
     em.clear()
 
     user = create.userHelper.create(em)
+    create.sessionHelper.create(em, { user })
     // Createa a series of experts
 
     // 2023
     const date2023 = new Date(2023, 1)
     experts = []
-    experts.push(create.expertHelper.create(em, { user }, { createdAt: date2023, updatedAt: date2023 }))
-    experts.push(create.expertHelper.create(em, { user }, { createdAt: date2023, updatedAt: date2023 }))
-    experts.push(create.expertHelper.create(em, { user }, { createdAt: date2023, updatedAt: date2023 }))
+    experts.push(
+      create.expertHelper.create(em, { user }, { createdAt: date2023, updatedAt: date2023 }),
+    )
+    experts.push(
+      create.expertHelper.create(em, { user }, { createdAt: date2023, updatedAt: date2023 }),
+    )
+    experts.push(
+      create.expertHelper.create(em, { user }, { createdAt: date2023, updatedAt: date2023 }),
+    )
 
     // 2022
     const date2022 = new Date(2022, 1)
-    experts.push(create.expertHelper.create(em, { user }, { createdAt: date2022, updatedAt: date2022 }))
-    experts.push(create.expertHelper.create(em, { user }, { createdAt: date2022, updatedAt: date2022 }))
+    experts.push(
+      create.expertHelper.create(em, { user }, { createdAt: date2022, updatedAt: date2022 }),
+    )
+    experts.push(
+      create.expertHelper.create(em, { user }, { createdAt: date2022, updatedAt: date2022 }),
+    )
 
     // 2021
     const date2019 = new Date(2019, 1)
-    experts.push(create.expertHelper.create(em, { user }, { createdAt: date2019, updatedAt: date2019 }))
+    experts.push(
+      create.expertHelper.create(em, { user }, { createdAt: date2019, updatedAt: date2019 }),
+    )
 
     await em.flush()
     mocksReset()
@@ -61,9 +74,10 @@ describe('/experts', () => {
           blogTitle: expert.meta?._blog_title,
           blogPreview: expert.meta?._challenge,
           title: expert.meta?._prefname,
-          totalQuestionCount: await expert.getAnsweredQuestionsCount() +
-                              await expert.getIgnoredQuestionsCount() +
-                              await expert.getOpenQuestionsCount(),
+          totalQuestionCount:
+            (await expert.getAnsweredQuestionsCount()) +
+            (await expert.getIgnoredQuestionsCount()) +
+            (await expert.getOpenQuestionsCount()),
           totalAnswerCount: await expert.getAnsweredQuestionsCount(),
         },
         state: ExpertState.OPEN,
@@ -77,10 +91,6 @@ describe('/experts', () => {
       .get(`/experts/years`)
       .set(getDefaultHeaderData(user))
       .expect(200)
-    expect(body).to.deep.equal([
-      2023,
-      2022,
-      2019,
-    ])
+    expect(body).to.deep.equal([2023, 2022, 2019])
   })
 })

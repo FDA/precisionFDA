@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react'
-import { useNavigate, useLocation } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { Column, SortingRule, UseResizeColumnsState } from 'react-table'
+import { Button } from '../../components/Button'
 import Dropdown from '../../components/Dropdown'
 import { ContentFooter } from '../../components/Page/ContentFooter'
 import { Pagination } from '../../components/Pagination'
@@ -12,13 +13,9 @@ import { ErrorBoundary } from '../../utils/ErrorBoundry'
 import { getSelectedObjectsFromIndexes, toArrayFromObject } from '../../utils/object'
 import { useAuthUser } from '../auth/useAuthUser'
 import { ActionsDropdownContent } from '../home/ActionDropdownContent'
-import {
-  ActionsRow,
-  QuickActions,
-  StyledHomeTable,
-} from '../home/home.styles'
+import { ActionsRow, QuickActions, StyledHomeTable } from '../home/home.styles'
 import { ActionsButton, ResourceHeader } from '../home/show.styles'
-import { IFilter, IMeta, KeyVal, HomeScope } from '../home/types'
+import { HomeScope, IFilter, IMeta, KeyVal } from '../home/types'
 import { useList } from '../home/useList'
 import { usePropertiesQuery } from '../home/usePropertiesQuery'
 import { useWorkflowColumns } from './useWorkflowColumns'
@@ -26,16 +23,17 @@ import { useWorkflowListActions } from './useWorkflowListActions'
 import { useWorkflowSelectActions } from './useWorkflowSelectActions'
 import { fetchWorkflowList } from './workflows.api'
 import { IWorkflow } from './workflows.types'
-import { Button } from '../../components/Button'
 
 type ListType = { workflows: IWorkflow[]; meta: IMeta }
 
 export const WorkflowList = ({
   homeScope,
   spaceId,
+  isContributorOrHigher,
 }: {
   homeScope?: HomeScope
-  spaceId?: string
+  spaceId?: number
+  isContributorOrHigher?: boolean
 }) => {
   const navigate = useNavigate()
   const user = useAuthUser()
@@ -69,10 +67,7 @@ export const WorkflowList = ({
   const { isLoading, data, error } = query
   const { data: propetiesData } = usePropertiesQuery('workflowSeries', homeScope, spaceId)
 
-  const selectedObjects = getSelectedObjectsFromIndexes(
-    selectedIndexes,
-    data?.workflows,
-  )
+  const selectedObjects = getSelectedObjectsFromIndexes(selectedIndexes, data?.workflows)
   const actions = useWorkflowSelectActions({
     homeScope,
     spaceId,
@@ -81,9 +76,7 @@ export const WorkflowList = ({
     resetSelected,
   })
   const listActions = useWorkflowListActions({ spaceId })
-  const message =
-    homeScope === 'spaces' &&
-    'To perform other actions on this workflow, access it from the Space'
+  const message = homeScope === 'spaces' && 'To perform other actions on this workflow, access it from the Space'
 
   if (error) return <div>Error! {JSON.stringify(error)}</div>
 
@@ -94,7 +87,7 @@ export const WorkflowList = ({
           <QuickActions>
             {homeScope === 'me' && (
               <Button
-                data-variant='primary'
+                data-variant="primary"
                 data-testid="home-workflows-create-link"
                 as="a"
                 data-turbolinks="false"
@@ -104,30 +97,19 @@ export const WorkflowList = ({
               </Button>
             )}
 
-            {spaceId && (
+            {spaceId && isContributorOrHigher && (
               <Button
-                data-variant='primary'
+                data-variant="primary"
                 data-testid="spaces-workflows-add-button"
-                onClick={() =>
-                  listActions['Add Workflow']?.func({ showModal: true })
-                }
+                onClick={() => listActions['Add Workflow']?.func({ showModal: true })}
               >
                 <PlusIcon height={12} /> Add Workflow
               </Button>
             )}
           </QuickActions>
-          <Dropdown
-            trigger="click"
-            content={
-              <ActionsDropdownContent actions={actions} message={message} />
-            }
-          >
+          <Dropdown trigger="click" content={<ActionsDropdownContent actions={actions} message={message} />}>
             {dropdownProps => (
-              <ActionsButton
-                {...dropdownProps}
-                data-testid="home-workflows-actions-button"
-                active={dropdownProps.isActive}
-              />
+              <ActionsButton {...dropdownProps} data-testid="home-workflows-actions-button" active={dropdownProps.isActive} />
             )}
           </Dropdown>
         </ActionsRow>
@@ -210,9 +192,7 @@ export const WorkflowListTable = ({
   isLoading: boolean
   homeScope?: HomeScope
   colWidths: KeyVal
-  saveColumnResizeWidth: (
-    columnResizing: UseResizeColumnsState<any>['columnResizing'],
-  ) => void
+  saveColumnResizeWidth: (columnResizing: UseResizeColumnsState<any>['columnResizing']) => void
   saveHiddenColumns: (cols: string[]) => void
   hiddenColumns: string[]
 }) => {
@@ -222,16 +202,15 @@ export const WorkflowListTable = ({
     // Check if any of the conditions is true, then hide the column
     return !(
       // If the homeScope is 'me', hide 'added_by' regardless of other conditions.
-      (homeScope === 'me' && c.accessor === 'added_by') ||
-      
-      // Hide 'location' for all homeScopes except 'spaces'.
-      (homeScope !== 'spaces' && c.accessor === 'location') ||
-      
-      // Hide 'featured' for all homeScopes except 'everybody'.
-      (homeScope !== 'everybody' && c.accessor === 'featured')
+      (
+        (homeScope === 'me' && c.accessor === 'added_by') ||
+        // Hide 'location' for all homeScopes except 'spaces'.
+        (homeScope !== 'spaces' && c.accessor === 'location') ||
+        // Hide 'featured' for all homeScopes except 'everybody'.
+        (homeScope !== 'everybody' && c.accessor === 'featured')
+      )
     )
   }
-
 
   const col = useWorkflowColumns({ handleRowClick, colWidths, isAdmin, properties }).filter(filterColsByScope)
 

@@ -35,7 +35,7 @@ services:
       - ../key.pem:/key.pem
     working_dir: /precision-fda
     ports:
-      - 3000:3000
+      - 5012:3000
     extra_hosts:
       - "host.docker.internal:host-gateway"
     entrypoint: ./docker/entrypoint/isolation.docker-entrypoint.sh
@@ -59,7 +59,7 @@ services:
       - NODE_PATH_KEY_CERT=/keys/key.pem
     extends:
       service: base_nodejs
-    command: ['make', 'run-dist']
+    command: ["make", "run-dist"]
     volumes:
       - ../cert.pem:/keys/cert.pem
       - ../key.pem:/keys/key.pem
@@ -68,11 +68,11 @@ services:
   nodejs-worker:
     extends:
       service: base_nodejs
-    command: ['make', 'run-worker-dist']
+    command: ["make", "run-worker-dist"]
   nodejs-admin-platform-client:
     extends:
       service: base_nodejs
-    command: [ 'make', 'run-admin-platform-client-dist' ]
+    command: ["make", "run-admin-platform-client-dist"]
     ports:
       - 3002:3002
   sidekiq:
@@ -94,3 +94,15 @@ services:
     image: redis:6.2.11
     ports:
       - 6379:6379
+  nginx:
+    image: nginx:1.27.0
+    environment:
+      - PROXY_PORT=3000
+      - NODE_API_URL=${NODE_API_URL}
+      - RUBY_API_URL=${RUBY_API_URL}
+    volumes:
+      - ../cert.pem:/keys/cert.pem
+      - ../key.pem:/keys/key.pem
+      - ../packages/nginx:/etc/nginx/templates
+    ports:
+      - 3000:443

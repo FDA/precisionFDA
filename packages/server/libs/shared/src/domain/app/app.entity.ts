@@ -16,7 +16,6 @@ import { Job } from '@shared/domain/job/job.entity'
 import { Asset } from '@shared/domain/user-file/asset.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { STATIC_SCOPE } from '@shared/enums'
-import { BaseEntity } from '../../database/base.entity'
 import { WorkaroundJsonType } from '../../database/custom-json-type'
 import { getLogger } from '../../logger'
 import { DxId } from '../entity/domain/dxid'
@@ -24,6 +23,7 @@ import { Uid } from '../entity/domain/uid'
 import { ENTITY_TYPE } from './app.enum'
 import type { Spec } from './app.input'
 import { AppRepository } from './app.repository'
+import { ScopedEntity } from '@shared/database/scoped.entity'
 
 const logger = getLogger('app.entity')
 
@@ -51,7 +51,7 @@ export interface Internal {
     ],
   }),
 })
-export class App extends BaseEntity {
+export class App extends ScopedEntity {
   @PrimaryKey()
   id: number
 
@@ -69,9 +69,6 @@ export class App extends BaseEntity {
 
   @Property()
   readme: string
-
-  @Property()
-  scope?: string
 
   @Property({ type: WorkaroundJsonType })
   spec: AppSpec

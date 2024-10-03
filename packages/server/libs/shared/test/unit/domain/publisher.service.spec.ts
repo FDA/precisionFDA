@@ -45,9 +45,9 @@ describe('PublisherService tests', () => {
     const loadedNode2 = await em.findOneOrFail(Node, { id: node2.id })
     const loadedNode3 = await em.findOneOrFail(Node, { id: node3.id })
     expect(count).eq(3)
-    expect(loadedNode1.scope).eq(STATIC_SCOPE.PUBLIC)
-    expect(loadedNode2.scope).eq(STATIC_SCOPE.PUBLIC)
-    expect(loadedNode3.scope).eq(STATIC_SCOPE.PUBLIC)
+    expect(loadedNode1.isPublic()).is.true
+    expect(loadedNode2.isPublic()).is.true
+    expect(loadedNode3.isPublic()).is.true
   })
 
   it('publish apps to public', async () => {
@@ -84,10 +84,10 @@ describe('PublisherService tests', () => {
     const loadedApp1 = await em.findOneOrFail(App, { id: app1.id })
     const loadedApp2 = await em.findOneOrFail(App, { id: app2.id })
     expect(count).eq(2)
-    expect(loadedApp1.scope).eq(STATIC_SCOPE.PUBLIC)
-    expect(appSeries1.scope).eq(STATIC_SCOPE.PUBLIC)
-    expect(loadedApp2.scope).eq(STATIC_SCOPE.PUBLIC)
-    expect(appSeries2.scope).eq(STATIC_SCOPE.PUBLIC)
+    expect(loadedApp1.isPublic()).is.true
+    expect(appSeries1.isPublic()).is.true
+    expect(loadedApp2.isPublic()).is.true
+    expect(appSeries2.isPublic()).is.true
   })
 
   it('publish jobs to public', async () => {
@@ -98,7 +98,7 @@ describe('PublisherService tests', () => {
     expect(count).eq(1)
     em.clear()
     const loadedJob1 = await em.findOneOrFail(Job, { id: job1.id })
-    expect(loadedJob1.scope).eq(STATIC_SCOPE.PUBLIC)
+    expect(loadedJob1.isPublic()).is.true
   })
 
   it('publish comparisons to public', async () => {
@@ -150,8 +150,8 @@ describe('PublisherService tests', () => {
     em.clear()
     const loadedComparison1 = await em.findOneOrFail(Comparison, { id: comparison1.id })
     const loadedComparison2 = await em.findOneOrFail(Comparison, { id: comparison2.id })
-    expect(loadedComparison1.scope).eq(STATIC_SCOPE.PUBLIC)
-    expect(loadedComparison2.scope).eq(STATIC_SCOPE.PUBLIC)
+    expect(loadedComparison1.isPublic()).is.true
+    expect(loadedComparison2.isPublic()).is.true
   })
 
   it('publish folder to public - fail', async () => {

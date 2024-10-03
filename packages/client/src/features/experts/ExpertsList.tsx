@@ -115,7 +115,7 @@ const ExpertsList = () => {
   })
 
   return (
-    <PublicLayout mainScroll>
+    <PublicLayout mainScroll={!!user}>
       <NavigationBar
         title="Experts Blog"
         subtitle="Insights from academic, industry, and FDA experts from the precisionFDA Community."

@@ -1,10 +1,7 @@
-/* eslint-disable import/group-exports */
-/* eslint-disable max-classes-per-file */
-import { Job } from 'bull'
 import { nanoid } from 'nanoid'
 import { path } from 'ramda'
-import { OpsCtx, WorkerOpsCtx } from '../types'
 import type { AnyObject } from '../types'
+import { OpsCtx, WorkerOpsCtx } from '../types'
 import { maskAccessTokenUserCtx } from './logging'
 
 export type DefaultInput = AnyObject

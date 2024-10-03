@@ -28,6 +28,7 @@ describe('PATCH /folders/:id/rename', () => {
     em = database.orm().em.fork() as EntityManager
     em.clear()
     user = create.userHelper.create(em)
+    create.sessionHelper.create(em, { user })
     app = create.appHelper.createHTTPS(em, { user }, { spec: generate.app.jupyterAppSpecData() })
     job = create.jobHelper.create(
       em,

@@ -1,18 +1,18 @@
 <% content_for :title do %>Comparisons<% end %>
 
 <div class="pfda-toolbar">
-  <ul class="nav nav-pills nav-pills-center nav-pills-sm">
-    <li class="<% if action_name == 'index' %>active<% end %>">
+  <ul class="nav nav-pills nav-pills-center nav-pills-sm gap-2">
+    <li class="nav-pills-item <% if action_name == 'index' %>active<% end %>">
       <%= link_to comparisons_path do %>
         <span class="fa fa-bullseye"></span> <span class="pill-label">My Comparisons</span>
       <% end %>
     </li>
-    <li class="<% if action_name == 'featured' %>active<% end %>">
+    <li class="nav-pills-item <% if action_name == 'featured' %>active<% end %>">
       <%= link_to featured_comparisons_path do %>
         <span class="fa fa-flag"></span> <span class="pill-label">Featured</span>
       <% end %>
     </li>
-    <li class="<% if action_name == 'explore' %>active<% end %>">
+    <li class="nav-pills-item <% if action_name == 'explore' %>active<% end %>">
       <%= link_to explore_comparisons_path do %>
         <span class="fa fa-globe"></span> <span class="pill-label">Explore</span>
       <% end %>

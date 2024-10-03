@@ -5,13 +5,13 @@
     <span class="fa fa-tasks"></span>
     <% case @job.state
       when "failed" %>
-      <span class="label label-danger"><%= @job.state.upcase %></span>
+      <span class="badge badge-danger"><%= @job.state.upcase %></span>
     <% when "done" %>
-      <span class="label label-success"><%= @job.state.upcase %></span>
+      <span class="badge badge-success"><%= @job.state.upcase %></span>
     <% when "running" %>
-      <span class="label label-primary"><%= "verifying...".upcase %></span>
+      <span class="badge badge-primary"><%= "verifying...".upcase %></span>
     <% else %>
-      <span class="label label-warning"><%= "pending verification...".upcase %></span>
+      <span class="badge badge-warning"><%= "pending verification...".upcase %></span>
     <% end %>
     <span class="name"><%= @submission.job.name %></span>
   </div>

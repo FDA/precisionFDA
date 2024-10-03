@@ -12,9 +12,8 @@ import {
 import { App } from '@shared/domain/app/app.entity'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { User } from '@shared/domain/user/user.entity'
-import { SCOPE } from '@shared/types/common'
-import { BaseEntity } from '../../database/base.entity'
 import { STATIC_SCOPE } from '@shared/enums'
+import { ScopedEntity } from '@shared/database/scoped.entity'
 
 enum COMPARISON_STATE {
   DONE = 'done',
@@ -32,7 +31,7 @@ enum COMPARISON_STATE {
     ],
   }),
 })
-class Comparison extends BaseEntity {
+class Comparison extends ScopedEntity {
   @PrimaryKey()
   id: number
 
@@ -50,9 +49,6 @@ class Comparison extends BaseEntity {
 
   @Property()
   project?: string
-
-  @Property()
-  scope?: SCOPE
 
   @Property()
   run_input?: string

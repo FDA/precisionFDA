@@ -1,6 +1,7 @@
 import { IsBoolean, IsString, IsArray, IsOptional } from 'class-validator'
 import { Uid } from '@shared/domain/entity/domain/uid'
 import { Spec } from '@shared/domain/app/app.input'
+import { EntityScope } from '@shared/types/common'
 
 export class SaveAppDto {
   @IsBoolean()
@@ -23,7 +24,7 @@ export class SaveAppDto {
 
   @IsOptional()
   @IsString()
-  scope?: string
+  scope?: EntityScope
 
   @IsString()
   title: string

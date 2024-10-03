@@ -21,7 +21,7 @@
                 <a href="<%= truth_challenges_path({tab: @tab}) %>?query_id=<%=query.id%>">
                   <div class="media">
                     <div class="media-left">
-                      <%= image_tag(query.user.gravatar_url, class: 'img-circle', height: '25px') %>
+                      <%= image_tag(query.user.gravatar_url, class: 'rounded-circle', height: '25px') %>
                     </div>
                     <div class="media-body">
                       <strong><%= query.name %></strong>

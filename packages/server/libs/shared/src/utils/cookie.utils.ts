@@ -16,4 +16,8 @@ export class CookieUtils {
       return acc
     }, {})
   }
+
+  static testCookieByKey(key: string, cookies: string): boolean {
+    return new RegExp(`${key}=(.+)`).test(cookies)
+  }
 }

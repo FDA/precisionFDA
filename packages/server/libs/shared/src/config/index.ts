@@ -1,6 +1,4 @@
-/* eslint-disable no-warning-comments */
 import { parseEnumValueFromString } from '@shared/validation/parsers'
-/* eslint-disable max-len */
 import { default as dotenv } from 'dotenv'
 import path from 'path'
 
@@ -34,7 +32,6 @@ const getEnv = () => {
   }
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 const env = getEnv()
 
 const defaultConfig = {
@@ -58,8 +55,9 @@ const defaultConfig = {
         ipv4Quadruple: [127, 0, 0, 1],
         maskSize: 0,
       },
-      nginxIpHeader: 'x-forwarded-for',
     },
+    nginxIpHeader: 'x-forwarded-for',
+    enableForgeryProtection: true,
   },
   logs: {
     pretty: false,
@@ -212,7 +210,8 @@ const defaultConfig = {
     },
   },
   secretKeyBase: process.env.SECRET_KEY_BASE,
-  maxTimeInactivity: parseIntFromProcess(process.env.MAX_TIME_INACTIVITY) ?? 30,
+  maxInactivityMinutes: parseIntFromProcess(process.env.MAX_TIME_INACTIVITY) ?? 30,
+  minusExpirationMinutes: 4,
 }
 
 // lazily plug-in the overrides that are based on the NODE_ENV
