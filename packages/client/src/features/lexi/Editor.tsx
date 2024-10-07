@@ -159,9 +159,9 @@ export default function Editor(): JSX.Element {
               <CollapsiblePlugin />
               <PageBreakPlugin />
               <LayoutPlugin />
+              {floatingAnchorElem && <DraggableBlockPlugin anchorElem={floatingAnchorElem} />}
               {floatingAnchorElem && !isSmallWidthViewport && (
                 <>
-                  <DraggableBlockPlugin anchorElem={floatingAnchorElem} />
                   <CodeActionMenuPlugin anchorElem={floatingAnchorElem} />
                   <FloatingLinkEditorPlugin
                     anchorElem={floatingAnchorElem}
