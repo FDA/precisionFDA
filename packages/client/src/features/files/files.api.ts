@@ -127,18 +127,15 @@ export const fetchFolderChildren = async (scope?: 'private' | 'public', spaceId?
   return axios.get(url).then(res => res.data as FetchFolderChildrenResponse)
 }
 
-export const moveFilesRequest = async (nodeIds: number[], targetFolderId: number, homeScope?: HomeScope, spaceId?: string) => {
+
+export type MoveFilesResponse = {count: number}
+export const moveFilesRequest = async (nodeIds: number[], targetFolderId: number | null, spaceId?: number) => {
   const url = spaceId ? `/api/spaces/${spaceId}/files/move` : '/api/files/move'
   const body = cleanObject({
     node_ids: nodeIds,
     target_id: targetFolderId,
   })
-
-  const res = await fetch(url, {
-    ...getApiRequestOpts('POST'),
-    body: JSON.stringify(body),
-  }).then(checkStatus)
-  return res.json()
+  return axios.post(url, body).then(res => res.data as MoveFilesResponse)
 }
 
 export async function createFile(name: string, scope: string, folder_id: string | null) {

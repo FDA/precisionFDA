@@ -39,7 +39,9 @@ const StyledCheckbox = styled.div<{ checked?: boolean; $indeterminate?: boolean,
   --focus-color: var(--primary-200);
   --base-color: var(--tertiary-300);
   --icon-color: white;
-
+  
+  box-sizing: content-box;
+  margin: 0;
   display: inline-flex;
   justify-content: center;
   align-items: center;

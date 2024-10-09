@@ -68,7 +68,7 @@ describe('Job service tests', () => {
     } as UserCtx
 
     notificationService = new NotificationService(em, userCtx)
-    folderService = new FolderService(em)
+    folderService = new FolderService(em, userCtx)
     emailQueueJobProducer = new EmailQueueJobProducer(queue)
     emailPrepareService = {
       prepareEmails: prepareEmailsStub,

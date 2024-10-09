@@ -73,11 +73,11 @@ class SaveEmailToFileClient implements IEmailService {
     <pre>email: ${input.to}\n
     subject: ${input.subject}\n</pre>
     ${input.body}`
-    const currentDate = new Date().toJSON().slice(0, 10)
+    const currentDate = new Date().toJSON().slice(0, 19)
     const targetPath = path.join(
       process.cwd(),
       'test-emails',
-      `test-email-${input.emailType}-${currentDate}.html`,
+      `test-email-${input.emailType}-${input.to}-${currentDate}.html`,
     )
     await fs.promises.writeFile(targetPath, html)
     log.log({ targetPath }, 'Email has been successfully saved to file')

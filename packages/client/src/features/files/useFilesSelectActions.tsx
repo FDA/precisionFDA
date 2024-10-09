@@ -101,7 +101,7 @@ export const useFilesSelectActions = ({
     mutationKey: ['move-files'],
     mutationFn: (folderIdParam: number) => {
       const selectedIds = selected.map(f => f.id)
-      return moveFilesRequest(selectedIds, folderIdParam, homeScope, space?.id)
+      return moveFilesRequest(selectedIds, folderIdParam, space?.id)
     },
     onSuccess: res => {
       queryClient.invalidateQueries({

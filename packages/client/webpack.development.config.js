@@ -172,6 +172,11 @@ module.exports = merge(base({ urlLoaderOptions }), swc({ swcLoaderOptions }), {
         target: TARGET,
         secure: false,
       },
+      {
+        context: ['/admin/users_list'],
+        target: TARGET,
+        secure: false,
+      },
     ],
   },
 })

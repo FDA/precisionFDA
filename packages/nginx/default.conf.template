@@ -16,4 +16,7 @@ server {
     proxy_pass ${NODE_API_URL}/;
     proxy_http_version 1.1;
   }
+
+  proxy_buffer_size 16k;
+  proxy_buffers 4 32k;
 }

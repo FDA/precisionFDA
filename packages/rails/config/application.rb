@@ -37,6 +37,9 @@ module PrecisionFda
 
     config.assets.precompile << "next_application.js"
 
+    config.middleware.insert_before(Rails::Rack::Logger, ActionDispatch::Session::CookieStore)
+    config.middleware.insert_before(ActionDispatch::Session::CookieStore, ActionDispatch::Cookies)
+
     config.middleware.use Rack::PermanentRedirect
 
     config.middleware.insert 0,

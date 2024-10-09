@@ -1,14 +1,14 @@
+import { Reference } from '@mikro-orm/core'
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Injectable, Optional } from '@nestjs/common'
+import { Notification } from '@shared/domain/notification/notification.entity'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { User } from '@shared/domain/user/user.entity'
 import { NotFoundError, PermissionError } from '@shared/errors'
+import { createRedisClient, NOTIFICATIONS_QUEUE } from '@shared/services/redis.service'
 import { createClient } from 'redis'
 import { defaultLogger as logger } from '../../../logger'
-import { createRedisClient, NOTIFICATIONS_QUEUE } from '@shared/services/redis.service'
-import { Notification } from '@shared/domain/notification/notification.entity'
 import { NotificationInput } from '../notification.input'
-import { UserContext } from '@shared/domain/user-context/model/user-context'
-import { Reference } from '@mikro-orm/core'
 
 export type RedisClientType = ReturnType<typeof createClient>
 
@@ -62,7 +62,10 @@ export class NotificationService {
    * Returns notifications for current user that have empty deliveredAt flag.
    */
   async getUnreadNotifications(userId: number): Promise<Notification[]> {
-    logger.log(`Getting unread notifications for user id: ${userId}`)
+    logger.log({
+      message: `Getting unread notifications for user id: ${userId}`,
+      userId: userId,
+    })
     return await this.em.find(Notification, { user: userId, deliveredAt: null })
   }
 
