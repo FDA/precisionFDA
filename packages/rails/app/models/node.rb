@@ -96,7 +96,11 @@ class Node < ApplicationRecord
 
   def parent_folder(file_scope = scope)
     column_name = Node.scope_column_name(file_scope)
-    Folder.find_by(id: self[column_name])
+    parent_folder_id = self[column_name]
+
+    return nil if parent_folder_id.nil?
+
+    Folder.find_by(id: parent_folder_id)
   end
 
   # Returns a parent folder name of an item
