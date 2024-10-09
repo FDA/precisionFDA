@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { Loader } from '../../components/Loader'
 import { PageContainerMargin } from '../../components/Page/styles'
 import {
-  PageMainBody,
+  OverviewCenterSection,
   PageRow,
   RightSide,
   RightSideItem,
@@ -87,14 +87,14 @@ export const OverviewPublic = () => {
         <ParticipantOrgsList />
       </CommunityParticipants>
 
-      <PageMainBody>
+      <OverviewCenterSection>
         <InfoRow>
           <Button data-variant="primary" as={Link} to="/docs">
             Learn more about precisionFDA
           </Button>
           <a href="mailto:precisionfda@fda.hhs.gov">Feedback</a>
         </InfoRow>
-      </PageMainBody>
+      </OverviewCenterSection>
     </PublicLayout>
   )
 }
