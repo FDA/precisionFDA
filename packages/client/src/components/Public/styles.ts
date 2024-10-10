@@ -76,10 +76,16 @@ export const PageMainBody = styled.div`
   display: flex;
   flex: 1;
   flex-grow: 1;
-  overflow-y: scroll;
+`
+
+export const OverviewCenterSection = styled.div`
+  display: flex;
+  flex: 1;
+  flex-grow: 1;
   justify-content: center;
   padding: 0 16px;
 `
+
 export const PageFilterTitle = styled.h2`
   font-size: 22px;
   font-weight: bold;

@@ -9,6 +9,9 @@ import { PARENT_TYPE } from './user-file.types'
 import { getEntityType, InputEntityUnion } from '../../utils/object-utils'
 import { Injectable, Logger } from '@nestjs/common'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { STATIC_SCOPE } from '@shared/enums'
+import { FilterQuery } from '@mikro-orm/core'
 
 @Injectable()
 /**
@@ -18,7 +21,10 @@ export class FolderService {
   @ServiceLogger()
   private readonly logger: Logger
 
-  constructor(private readonly em: SqlEntityManager) {
+  constructor(
+    private readonly em: SqlEntityManager,
+    private readonly user: UserContext,
+  ) {
     this.em = em
   }
 
@@ -119,11 +125,18 @@ export class FolderService {
   }
 
   private async findFolder(name: string, scope: EntityScope, parentFolderId?: number) {
-    return await this.em.getRepository(Folder).findOne({
+    const whereClause: FilterQuery<NoInfer<Folder>> = {
       name,
       scope,
       $or: [{ scopedParentFolderId: parentFolderId }, { parentFolderId: parentFolderId }],
-    })
+    }
+
+    // Add the user condition only when the scope is private
+    if (scope === STATIC_SCOPE.PRIVATE) {
+      whereClause.user = this.user.id
+    }
+
+    return await this.em.findOne(Folder, whereClause)
   }
 
   private async createEventForFolder(folder: Folder, eventType: string, user: User): Promise<void> {

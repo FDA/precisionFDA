@@ -16,17 +16,18 @@ export const selectionHook = (hooks: Hooks<any>) => {
       // The header can use the table's getToggleAllRowsSelectedProps method
       // to render a checkbox
       Header: ({ getToggleAllRowsSelectedProps }) => (
-        <SelectCheckLabel id="select-header">
+        <SelectCheckLabel id="select-header" data-no-dnd="true">
           <Checkbox {...getToggleAllRowsSelectedProps()} />
         </SelectCheckLabel>
       ),
       // The cell can use the individual row's getToggleRowSelectedProps method
       // to the render a checkbox
-      Cell: ({ row }) => (
-        <SelectCheckLabel id={`select-row-${row.id}`}>
+      Cell: ({ row }) => {      
+        return (
+        <SelectCheckLabel id={`select-row-${row.id}`} data-no-dnd="true" onClick={(e) => e.stopPropagation()}>
           <Checkbox {...row.getToggleRowSelectedProps()} />
         </SelectCheckLabel>
-      ),
+      )},
     },
     ...columns,
   ])

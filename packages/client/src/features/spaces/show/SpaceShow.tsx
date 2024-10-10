@@ -3,7 +3,6 @@ import React, { useMemo, useState } from 'react'
 import { Navigate, Route, Routes, useNavigate, useParams } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import { GuestNotAllowed } from '../../../components/GuestNotAllowed'
-import { Loader } from '../../../components/Loader'
 import { MenuCounter } from '../../../components/MenuCounter'
 import { BoltIcon } from '../../../components/icons/BoltIcon'
 import { CogsIcon } from '../../../components/icons/Cogs'
@@ -56,6 +55,7 @@ import {
   SpaceTypeHeader,
   TopSpaceHeader,
 } from './styles'
+import { HomeLoader } from '../../home/show.styles'
 
 const Spaces2 = ({ space, isLoading }: { space: ISpace; isLoading: boolean }) => {
   const navigate = useNavigate()
@@ -169,7 +169,7 @@ const Spaces2 = ({ space, isLoading }: { space: ISpace; isLoading: boolean }) =>
         </StyledMenu>
         <Main>
           {isLoading ? (
-            <Loader />
+            <HomeLoader />
           ) : (
             <Routes>
               <Route path="files" element={<FileList space={space} showFolderActions={isContributorOrHigher} />} />
@@ -241,7 +241,7 @@ export const SpaceShow = () => {
   const prevSpace = usePrevious(space)
   const s = useMemo(() => space || prevSpace, [space])
 
-  if (isLoading) return <Loader />
+  if (isLoading) return <HomeLoader />
   if (isNotAllowed) return <SpaceNotAllowed />
   if (isLocked || s?.state === 'locked') return <SpaceLocked space={s} />
 
