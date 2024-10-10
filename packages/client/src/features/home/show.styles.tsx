@@ -128,6 +128,7 @@ export const Pill = styled.div`
 
 export const HomeLoader = styled(Loader)`
   justify-self: center;
+  padding: 20px;
 `
 export const StyledActionsButton = styled(Button)`
   gap: 6px;

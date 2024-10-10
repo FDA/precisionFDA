@@ -12,6 +12,7 @@ export const ExpandArrowIcon = styled(ArrowIcon)<{expanded?: boolean, hide?: boo
 
 export const SelectCheckLabel = styled.label`
   padding-left: 12px;
+  margin: 0;
   display: flex;
   align-items: center;
   position: relative;

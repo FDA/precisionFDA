@@ -1,5 +1,6 @@
 import { config } from '@shared/config'
 import { COOKIE_SESSION_KEY } from '@shared/config/consts'
+import { userContextStorage } from '@shared/domain/user-context/storage/user-context.storage'
 import { nanoid } from 'nanoid'
 import { Params } from 'nestjs-pino/params'
 import pino from 'pino'
@@ -17,6 +18,14 @@ export const pinoConfig: Params = {
         }
       : undefined,
     level: config.logs.level,
+    formatters: {
+      log(obj) {
+        return {
+          ...obj,
+          userId: obj.userId || userContextStorage.getStore()?.id || 'unknown',
+        }
+      },
+    },
     genReqId: () => nanoid(),
     serializers: {
       error: pino.stdSerializers.err,

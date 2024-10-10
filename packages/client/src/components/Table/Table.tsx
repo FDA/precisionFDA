@@ -44,6 +44,7 @@ import { DefaultColumnFilter } from './helpers'
 import { ReactTableStyles, StyledTable } from './styles'
 import { expandHook, selectionHook } from './tableHooks'
 import { useComponentWidth } from './useComponentWidth'
+import { Draggable, Droppable } from './DnD'
 
 const StyledColumnSelect = styled.div`
   position: sticky;
@@ -136,12 +137,84 @@ const ColumnSelect = ({
   )
 }
 
+const Column = ({ cell, cellProps }: { cell: Cell, cellProps?: (cell: Cell) => any }) => {
+  const classes = classNames('td', { 'row-expander': cell.column.id === 'row-expander' })
+  return (
+    // eslint-disable-next-line react/jsx-key
+    <div
+      {...cell.getCellProps(cellProps && cellProps(cell))}
+      className={classes}
+      data-testid={`table-col-${cell.column.id}`}
+    >
+      {cell.render('Cell')}
+    </div>
+  )
+}
+
+type RowProps = {
+  row: Row<any>
+  rowProps?: (row: Row<any>) => any
+  cellProps?: (cell: Cell<any>) => any
+  subcomponent?: (row: Row<any>) => ReactNode
+  isExpandable: boolean
+  colFiller: ReactNode
+  numSelected?: number
+}
+
+const DefaultRow = ({
+  row,
+  rowProps,
+  cellProps,
+  subcomponent,
+  isExpandable,
+  colFiller,
+}: RowProps) => {
+  return (
+    <>
+      <div {...row.getRowProps(rowProps && rowProps(row))} className="tr" role="row" data-testid="data-row">
+        {row.cells.map(cell => <Column key={cell.column.id} cell={cell} cellProps={cellProps} />)}
+        {colFiller}
+      </div>
+      {isExpandable && row.isExpanded ? subcomponent && subcomponent(row) : null}
+    </>
+  )
+}
+const DnDRow = ({
+  row,
+  rowProps,
+  cellProps,
+  subcomponent,
+  isExpandable,
+  colFiller,
+  numSelected,
+}: RowProps) => {
+  
+  let DnDComp = row.isSelected ? Draggable : 'div'
+  if(row.isSelected && row.original.type === 'Folder') {
+    DnDComp = Draggable
+  }
+  if(!row.isSelected && row.original.type === 'Folder') {
+    DnDComp = Droppable
+  }
+  
+  return (
+    <>
+      <DnDComp {...row.getRowProps(rowProps && rowProps(row))} name={row.original.name} numSelected={numSelected} className="tr" role="row" data-testid="data-row">
+        {row.cells.map(cell => <Column key={cell.column.id} cell={cell} cellProps={cellProps} />)}
+        {colFiller}
+      </DnDComp>
+      {isExpandable && row.isExpanded ? subcomponent && subcomponent(row) : null}
+    </>
+  )
+}
+
 export interface IRowActionProps<T extends object = {}> extends CellProps<T> {
   context: any
 }
 
 export interface ITable<T extends object = {}> extends TableOptions<T> {
   name: string
+  dnd?: boolean
   fillWidth?: boolean
   hiddenColumns?: string[]
   properties?: string[] | undefined
@@ -185,6 +258,7 @@ export default function Table<T extends object>(
   props: PropsWithChildren<ITable<T>>,
 ): ReactElement {
   const {
+    dnd = false,
     fillWidth = false,
     loading = true,
     columns,
@@ -347,41 +421,27 @@ export default function Table<T extends object>(
  
   return (
     <StyledTable data-testid="pfda-table">
-      <ReactTableStyles
-        $shouldFillWidth={fillWidth}
-        $shouldAllowScrollbar={shouldAllowScrollbar}
-      >
+      <ReactTableStyles $shouldFillWidth={fillWidth} $shouldAllowScrollbar={shouldAllowScrollbar}>
         <div className="tableWrap" ref={containerRef}>
           <div {...getTableProps()} className="table sticky">
             <div className="thead" role="row">
-              {enableColumnSelect && <ColumnSelect
-                columns={getAvailableCols()}
-                hiddenColumns={hiddenColumns}
-                onChangeVisible={onChangeVisible}
-                />
-              }
-              {visibleColumns.map((column) => {
+              {enableColumnSelect && (
+                <ColumnSelect columns={getAvailableCols()} hiddenColumns={hiddenColumns} onChangeVisible={onChangeVisible} />
+              )}
+              {visibleColumns.map(column => {
                 const classes = classNames('th', { 'row-expander': column.id === 'row-expander' })
                 return (
                   // eslint-disable-next-line react/jsx-key
                   <div {...column.getHeaderProps()} className={classes}>
                     {isColsResizable && column.getResizerProps && (
-                      <div
-                        {...column.getResizerProps()}
-                        className={`resizer ${column.isResizing ? 'isResizing' : ''
-                          }`}
-                      />
+                      <div {...column.getResizerProps()} className={`resizer ${column.isResizing ? 'isResizing' : ''}`} />
                     )}
                     {isSortable && column.canSort ? (
                       <div {...column.getSortByToggleProps()} className="sort">
                         {column.render('Header')}
                         <span>
                           {/* eslint-disable-next-line no-nested-ternary */}
-                          {column.isSorted
-                            ? column.isSortedDesc
-                              ? ' ↓'
-                              : ' ↑'
-                            : ''}
+                          {column.isSorted ? (column.isSortedDesc ? ' ↓' : ' ↑') : ''}
                         </span>
                       </div>
                     ) : (
@@ -402,50 +462,33 @@ export default function Table<T extends object>(
                     <div {...column.getHeaderProps()} className={classes}>
                       {column.canFilter ? column.render('Filter') : null}
                     </div>
-                )})}
+                  )
+                })}
                 {colFiller}
               </div>
             )}
 
             <div {...getTableBodyProps()} className="tbody">
               {range(0, 10).map(i => (
-                <LoadingRows<T>
-                  loading={loading}
-                  visibleColumns={visibleColumns}
-                  delay={i}
-                  key={i}
-                />
+                <LoadingRows<T> loading={loading} visibleColumns={visibleColumns} delay={i} key={i} />
               ))}
               {!loading && page.length === 0 && emptyComponent}
               {page.map((row, index) => {
                 const r: Row<T> = (updateRowState && updateRowState(row)) || row
+                const rProps = {
+                  row: r,
+                  numSelected: Object.keys(selectedRowIds).length,
+                  colFiller,
+                  cellProps,
+                  rowProps,
+                  isExpandable,
+                  subcomponent,
+                }
                 prepareRow(r)
-                return (
-                  <React.Fragment key={r.id}>
-                    <div
-                      {...r.getRowProps(rowProps && rowProps(r))}
-                      className="tr"
-                      role="row"
-                      data-testid="data-row"
-                    >
-                      {r.cells.map(cell => {
-                        const classes = classNames('td', { 'row-expander': cell.column.id === 'row-expander' })
-                        return (
-                          // eslint-disable-next-line react/jsx-key
-                          <div
-                            {...cell.getCellProps(cellProps && cellProps(cell))}
-                            className={classes}
-                            data-testid={`table-col-${cell.column.id}`}
-                          >
-                            {cell.render('Cell')}
-                          </div>
-                      )})}
-                      {colFiller}
-                    </div>
-                    {isExpandable && r.isExpanded
-                      ? subcomponent && subcomponent(r)
-                      : null}
-                  </React.Fragment>
+                return dnd ? (
+                  <DnDRow key={r.id} {...rProps} />
+                ) : (
+                  <DefaultRow key={r.id} {...rProps} />
                 )
               })}
             </div>
