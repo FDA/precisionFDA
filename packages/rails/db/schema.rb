@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2024_09_24_123228) do
+ActiveRecord::Schema.define(version: 2024_10_08_083518) do
 
   create_table "accepted_licenses", id: :integer, charset: "utf8mb3", collation: "utf8mb3_unicode_ci", force: :cascade do |t|
     t.integer "license_id"
@@ -504,8 +504,10 @@ ActiveRecord::Schema.define(version: 2024_09_24_123228) do
     t.boolean "featured", default: false
     t.boolean "locked", default: false
     t.index ["dxid", "sti_type"], name: "index_nodes_on_dxid_and_sti_type"
+    t.index ["parent_folder_id"], name: "index_nodes_on_parent_folder_id"
     t.index ["parent_type", "parent_id"], name: "index_nodes_on_parent_type_and_parent_id"
     t.index ["scope"], name: "index_nodes_on_scope"
+    t.index ["scoped_parent_folder_id"], name: "index_nodes_on_scoped_parent_folder_id"
     t.index ["state"], name: "index_nodes_on_state"
     t.index ["uid"], name: "index_nodes_on_uid", unique: true
     t.index ["user_id"], name: "index_nodes_on_user_id"
