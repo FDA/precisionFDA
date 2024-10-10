@@ -4,6 +4,7 @@ import { config } from '@shared/config'
 import { DatabaseModule } from '@shared/database/database.module'
 import { UserContextModule } from '@shared/domain/user-context/user-context.module'
 import { LoggerModule } from '@shared/logger/logger.module'
+import { DiscussionWorkerModule } from './domain/discussion/discussion.worker.module'
 import { EmailWorkerModule } from './domain/email/email.worker.module'
 import { SpaceReportWorkerModule } from './domain/space-report/space-report.worker.module'
 import { UserFileWorkerModule } from './domain/user-file/user-file.worker.module'
@@ -22,6 +23,7 @@ import { QueueWorkerModule } from './queues/queue-worker.module'
     LoggerModule,
     UserContextModule,
     QueueWorkerModule,
+    DiscussionWorkerModule,
     SpaceReportWorkerModule,
     EmailWorkerModule,
     UserFileWorkerModule,
