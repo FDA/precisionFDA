@@ -424,6 +424,7 @@ export const RunJobForm = ({ app, userJobLimit, spec }: { app: IApp; spec: AppSp
       {organizeFileModal}
 
       <SavingModal
+        modalId="run-batch-job-processing"
         headerText="Starting batch run jobs"
         body={(
           <div>

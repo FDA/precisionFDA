@@ -281,10 +281,10 @@ export const DataPortalForm = ({
       </StyledForm>
 
       <SavingModal
+        modalId="data-portal-save"
         headerText={isEditMode ? 'Updating Data Portal' : 'Creating new Data Portal'}
         body={`The Data Portal is being ${isEditMode ? 'updated' : 'created'}, please wait until this message disappears.`}
         isSaving={isSubmitting}
-        key="data-portal-save"
       />
     </>
   )

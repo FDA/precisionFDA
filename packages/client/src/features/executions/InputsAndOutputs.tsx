@@ -1,92 +1,155 @@
-import classNames from 'classnames'
-import React, { Fragment } from 'react'
+import React from 'react'
 import { Link } from 'react-router-dom'
 import styled from 'styled-components'
+import { FileIcon } from '../../components/icons/FileIcon'
 import { getBasePathFromScope } from '../home/utils'
+import { JobState } from './executions.types'
 
 
-const StyledInputsAndOutputs = styled.div`
-  border-bottom-right-radius: 3px;
-  border-bottom-left-radius: 3px;
-  display: flex;
-  flex-wrap: wrap;
-`
-
-const StyledGrid = styled.div`
-  display: grid;
-  grid-template-columns: auto auto;
-`
-
-const StyledTable = styled.div`
-  padding: 10px 15px;
-  font-size: 14px;
+const StyledIOTable = styled.div`
+  padding: 32px 15px;
   flex: 0 1 auto;
-  min-width: 300px;
+  min-width: 600px;
 
+  table {
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.7;
+    font-family: 'PT Mono', monospace;
+    border-collapse: separate;
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0px;
+    border-bottom: 1px solid #e0e0e0;
+  }
+
+  th {
+    font-weight: 900;
+    min-width: 100px;
+    vertical-align: baseline;
+    text-align: left;
+    padding: 4px 8px;
+    text-transform: uppercase;
+  }
+
+  tbody {
+    tr:hover {
+      background-color: var(--tertiary-70);
+    }
+  }
+
+  tr {
+    th {
+      font-family: 'Courier New', monospace;
+      border-bottom: 1px solid #e0e0e0;
+    }
+  }
+  td {
+    vertical-align: baseline;
+    padding: 8px;
+  }
+  .noio {
+    padding: 16px 0;
+    font-style: italic;
+    font-size: 16px;
+    font-weight: 900;
+  }
+  .empty {
+    height: 32px;
+  }
   .title {
     text-transform: uppercase;
-    font-weight: 400;
+    font-weight: 900;
     font-size: 14px;
-    margin-bottom: 10px;
-    padding-left: 8px;
   }
-  .row {
-    display: flex;
-    padding: 8px;
-    border-top: 1px solid var(--c-layout-border);
+  .label {
+    min-width: 130px;
+    overflow-wrap: anywhere;
+    overflow: hidden;
+    min-width: 180px;
   }
-  .even {
+  .cont {
     display: flex;
-    padding: 8px;
-    border-top: 1px solid var(--c-layout-border);
+    align-items: center;
   }
   .type {
-    font-family: 'PT Mono', Menlo, Monaco, Consolas, 'Courier New', monospace;
+    padding-right: 24px;
+  }
+  .value > * {
+    overflow-wrap: anywhere;
+    overflow: hidden;
+  }
+  .link-file {
+    width: fit-content;
+    gap: 4px;
+    svg {
+      box-sizing: content-box;
+      padding-top: 5px;
+      align-self: flex-start;
+      flex-shrink: 0;
+    }
   }
 `
 
-const Table = ({ title, config, dataTestId }: { title: string; config: any[], dataTestId: string }) => {
+const Table = ({ title, config, dataTestId }: { title: string; config: any[]; dataTestId: string }) => {
   const list = config.map((elementConfig, i) => {
-    const classes = classNames({
-      row: true,
-      even: !(i % 2),
-    })
-
     const item = () => {
       switch (elementConfig.type) {
         case 'file':
-          return (elementConfig.state !== 'deleted') ? <Link to={elementConfig.link} className={classes}>
-            {String(elementConfig.value)}
-          </Link> : <div className={classNames(classes, 'text-muted')}>{String(elementConfig.value)}</div>
+          return elementConfig.state !== 'deleted' ? (
+            <Link to={elementConfig.link} className="cont link-file">
+              <FileIcon height={12} />
+              {String(elementConfig.value)}
+            </Link>
+          ) : (
+            <div className="cont text-muted">{String(elementConfig.value)}</div>
+          )
         case 'array:file':
-          return <div>{elementConfig.value.map((name:any, index: any) => <Link key={elementConfig.link[index]} to={elementConfig.link[index]} className={classes}>
-            {String(name)}
-          </Link>)}</div>
+          return (
+            <>
+              {elementConfig.value.map((name: any, index: any) => (
+                <Link key={elementConfig.link[index]} to={elementConfig.link[index]} className="cont link-file">
+                  <FileIcon height={12} />
+                  {String(name)}
+                </Link>
+              ))}
+            </>
+          )
         default:
-          return <div className={classes}>{String(elementConfig.value)}</div>
+          return <div className="cont">{String(elementConfig.value)}</div>
       }
     }
 
     return (
-        <Fragment key={i}>
-          <div className={classNames(classes, 'type')}>{elementConfig.label}</div>
-          { item() }
-        </Fragment>
+      <tr key={i} data-testid={dataTestId}>
+        <td className="label">{elementConfig.label}</td>
+        <td className="type">{elementConfig.type}</td>
+        <td className="value">{item()}</td>
+      </tr>
     )
   })
 
   return (
-    <StyledTable data-testid={dataTestId}>
-      <div className="title">{title}</div>
-      <StyledGrid>{list}</StyledGrid>
-    </StyledTable>
+    <table>
+      <thead>
+        <tr>
+          <th className="label">{title}</th>
+          <th className="type">type</th>
+          <th>value</th>
+        </tr>
+      </thead>
+      <tbody>{list}</tbody>
+      <tr className="empty" />
+    </table>
   )
 }
 
 export const InputsAndOutputs = ({
+  executionState,
   runInputData,
   runOutputData,
 }: {
+  executionState: JobState
   runInputData: any[]
   runOutputData: any[]
 }) => {
@@ -95,10 +158,10 @@ export const InputsAndOutputs = ({
       let link = ''
       let { value } = e
       const { state } = e
-      
+
       if (e.class === 'file') {
-        value = (e.state !== 'deleted') ? e.file_name : 'Output file has been deleted'
-        link = (e.state !== 'deleted') ? `${getBasePathFromScope(e.scope)}/files/${e.file_uid}`: ''
+        value = e.state !== 'deleted' ? e.file_name : 'Output file has been deleted'
+        link = e.state !== 'deleted' ? `${getBasePathFromScope(e.scope)}/files/${e.file_uid}` : ''
       }
       if (e.class === 'array:file') {
         value = e.file_names
@@ -118,10 +181,25 @@ export const InputsAndOutputs = ({
   const inputConfig = getConfig(runInputData)
   const outputConfig = getConfig(runOutputData)
 
+  const noInputs = inputConfig.length === 0
+  const noOutputs = outputConfig.length === 0
+
   return (
-    <StyledInputsAndOutputs>
-      <Table title="inputs" config={inputConfig} dataTestId="execution-inputs" />
-      <Table title="outputs" config={outputConfig} dataTestId="execution-outputs" />
-    </StyledInputsAndOutputs>
+    <StyledIOTable>
+      {noInputs ? (
+        <div className="noio">No input parameters have been configured for this app.</div>
+      ) : (
+        <Table title="inputs" config={inputConfig} dataTestId="execution-inputs" />
+      )}
+      {noOutputs ? (
+        <div className="noio">
+          {executionState !== 'done'
+            ? 'Outputs will be visible after the execution completes.'
+            : 'No ouputs from this execution run.'}
+        </div>
+      ) : (
+        <Table title="outputs" config={outputConfig} dataTestId="execution-outputs" />
+      )}
+    </StyledIOTable>
   )
 }
