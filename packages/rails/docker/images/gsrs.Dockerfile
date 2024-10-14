@@ -1,6 +1,6 @@
 FROM tomcat:10.1.10-jdk11
 
-ARG gsrs_branch=gsrs_240111
+ARG gsrs_branch=gsrs_240919
 ENV GSRS_BRANCH=$gsrs_branch
 
 ENV CATALINA_HOME /usr/local/tomcat
