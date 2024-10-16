@@ -54,15 +54,21 @@ const createAppPublished = async (app: App, user: User, scope: string): Promise<
   return event
 }
 
-const createJobClosed = async (user: User, job: Job, platformJobData: JobDescribeResponse): Promise<Event> => {
+const createJobClosed = async (
+  user: User,
+  job: Job,
+  platformJobData: JobDescribeResponse,
+): Promise<Event> => {
   const event = new Event()
   const app = job.app
-    ? job.app.isInitialized() ? job.app.getEntity() : await job.app.load()
+    ? job.app.isInitialized()
+      ? job.app.getEntity()
+      : await job.app.load()
     : undefined
-  const organization = await user.organization.load()
+  const organization = await user.organization?.load()
   wrap(event).assign({
     type: EVENT_TYPES.JOB_CLOSED,
-    orgHandle: organization.handle,
+    orgHandle: organization ? organization.handle : 'no-org',
     dxuser: user.dxuser,
     param1: job.dxid,
     param2: app?.dxid,
