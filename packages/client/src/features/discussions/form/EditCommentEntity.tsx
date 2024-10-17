@@ -40,7 +40,7 @@ export const EditCommentEntity = ({
     },
     onSuccess: () => {
       if(onSuccess) onSuccess()
-      toast.success(`${answerId && commentId ? 'Comment': 'Answer'} has been updated`)
+      toast.success(`${(answerId && !commentId) ? 'Answer': 'Comment'} has been updated`)
       queryClient.invalidateQueries({
         queryKey: ['discussion'],
       })
