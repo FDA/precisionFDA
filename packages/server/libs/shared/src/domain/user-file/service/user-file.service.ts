@@ -33,6 +33,7 @@ import { User } from '@shared/domain/user/user.entity'
 import { UserRepository } from '@shared/domain/user/user.repository'
 import { NOTIFICATION_ACTION, SEVERITY } from '@shared/enums'
 import {
+  ClientRequestError,
   DeleteRelationError,
   FolderNotFoundError,
   NotFoundError,
@@ -222,10 +223,20 @@ export class UserFileService {
       if (lastNode) {
         // we're deleting from platform only if it's the last with given dxid
         this.logger.log(`Removing file with dxid: ${fileToRemove.dxid} from platform`)
-        await this.userClient.fileRemove({
-          projectId: fileToRemove.project,
-          ids: [fileToRemove.dxid],
-        })
+        try {
+          await this.userClient.fileRemove({
+            projectId: fileToRemove.project,
+            ids: [fileToRemove.dxid],
+          })
+        } catch (error: unknown) {
+          if (error instanceof ClientRequestError && error.props.clientStatusCode === 404) {
+            this.logger.log(
+              `File with uid: ${fileToRemove.uid} not found on platform, continuing with delete in pFDA DB`,
+            )
+          } else {
+            throw error
+          }
+        }
       }
 
       if (fileToRemove.isInSpace()) {
