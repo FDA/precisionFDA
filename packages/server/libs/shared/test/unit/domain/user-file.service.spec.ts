@@ -28,7 +28,7 @@ import {
 import { User } from '@shared/domain/user/user.entity'
 import { UserRepository } from '@shared/domain/user/user.repository'
 import { NOTIFICATION_ACTION, SEVERITY, STATIC_SCOPE } from '@shared/enums'
-import { DeleteRelationError, PermissionError } from '@shared/errors'
+import { ClientRequestError, DeleteRelationError, PermissionError } from '@shared/errors'
 import { PlatformClient } from '@shared/platform-client'
 import * as queue from '@shared/queue'
 import { expect } from 'chai'
@@ -944,6 +944,51 @@ describe('UserFileService', () => {
         DeleteRelationError,
         'Cannot delete a file, as it is related to a space report',
       )
+    })
+
+    it("remove even if it doesn't exist in platform", async () => {
+      fileRemoveStub.throws(
+        new ClientRequestError('ResourceNotFound (404)', {
+          clientStatusCode: 404,
+          clientResponse: {},
+        }),
+      )
+
+      emFindStub.returns(undefined)
+      getNodePathStub.returns('')
+      removeTaggingsStub.reset()
+      createFileEventStub.reset()
+      emCountStub.returns(0)
+      fileRepoCountStub.returns(1)
+      removeStub.reset()
+
+      const result = await getInstance().removeFile(FILE_ID)
+
+      expect(result).to.eq(1)
+
+      expect(fileDescribeStub.calledOnce).to.be.true
+      expect(removeStub.calledOnce).to.be.true
+    })
+
+    it("don't remove if there's any other platform error than 404", async () => {
+      const error = new ClientRequestError('Any other error', {
+        clientStatusCode: 123,
+        clientResponse: {},
+      })
+      fileRemoveStub.throws(error)
+
+      emFindStub.returns(undefined)
+      getNodePathStub.returns('')
+      removeTaggingsStub.reset()
+      createFileEventStub.reset()
+      emCountStub.returns(0)
+      fileRepoCountStub.returns(1)
+      removeStub.reset()
+
+      await expect(getInstance().removeFile(FILE_ID)).to.be.rejectedWith(error)
+
+      expect(fileDescribeStub.calledOnce).to.be.true
+      expect(removeStub.callCount).to.eq(0)
     })
   })
 
