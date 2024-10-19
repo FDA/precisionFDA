@@ -569,7 +569,7 @@ export class UserFileService {
     const fileList = [] as SelectedNode[]
     for (const node of selectedNodes) {
       let nodePath = ''
-      const parentFolder = await userFileHelper.getParentFolder(node as UserFile)
+      const parentFolder = userFileHelper.getParentFolder(node as UserFile)
       if (parentFolder) {
         nodePath = await userFileHelper.getNodePath(this.em, parentFolder)
       }
@@ -616,21 +616,38 @@ export class UserFileService {
     if (targetScope !== 'private' && editableSpaces.indexOf(targetScope) === -1) {
       throw new PermissionError('You do not have permission to copy files to this scope')
     }
-    for (const uid of uids) {
+
+    const uidsMap: Map<DxId<'file'>, string> = new Map()
+    uids.forEach((uid) => {
       const lastDashIndex = uid.lastIndexOf('-')
       const dxid = uid.substring(0, lastDashIndex) as DxId<'file'>
-      const checkedFile = await this.entityFetcherService.getEditable(UserFile, {
-        dxid: dxid,
-        scope: targetScope,
-      })
-      if (checkedFile.length === 1) {
-        const copiedFile = checkedFile[0]
-        existingFiles[uid] = {
-          uid: copiedFile.uid,
-          targetScopePath: await userFileHelper.getNodePath(this.em, copiedFile),
+      uidsMap.set(dxid, uid)
+    })
+
+    // Fetch all relevant files in a single query
+    const dxids = Array.from(uidsMap.keys())
+    const checkedFiles = await this.entityFetcherService.getEditable(UserFile, {
+      dxid: { $in: dxids },
+      scope: targetScope,
+    })
+
+    const fileMap: Map<DxId<'file'>, UserFile> = new Map()
+    checkedFiles.forEach((file) => {
+      fileMap.set(file.dxid, file)
+    })
+
+    await Promise.all(
+      checkedFiles.map(async (file) => {
+        const uid = uidsMap.get(file.dxid)
+        if (file) {
+          existingFiles[uid] = {
+            uid: file.uid,
+            targetScopePath: await userFileHelper.getNodePath(this.em, file),
+          }
         }
-      }
-    }
+      }),
+    )
+
     return { ...existingFiles }
   }
 }

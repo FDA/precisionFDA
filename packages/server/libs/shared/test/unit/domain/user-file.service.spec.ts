@@ -1157,11 +1157,13 @@ describe('UserFileService', () => {
     const FILE_DXID3 = 'file-uid3'
     const existingFile1 = {
       id: 1,
+      dxid: FILE_DXID1,
       uid: FILE_UID1,
       scope: SPACE,
     } as unknown as UserFile
     const existingFile2 = {
       id: 2,
+      dxid: FILE_DXID2,
       uid: FILE_UID2,
       scope: SPACE,
     } as unknown as UserFile
@@ -1179,17 +1181,10 @@ describe('UserFileService', () => {
       getEditableSpacesStub.returns(['space-1'])
       getEditableStub
         .withArgs(UserFile, {
-          dxid: FILE_DXID1,
+          dxid: { $in: [FILE_DXID1, FILE_DXID2, FILE_DXID3] },
           scope: SPACE,
         })
-        .returns([existingFile1])
-      getEditableStub
-        .withArgs(UserFile, {
-          dxid: FILE_DXID2,
-          scope: SPACE,
-        })
-        .returns([existingFile2])
-      getEditableStub.withArgs(UserFile, { dxid: FILE_DXID3, scope: SPACE }).returns([])
+        .returns([existingFile1, existingFile2])
       getNodePathStub.returns('path')
 
       const res = await getInstance().validateCopyFiles([FILE_UID1, FILE_UID2, FILE_UID3], SPACE)
