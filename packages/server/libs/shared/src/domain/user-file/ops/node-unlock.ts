@@ -9,9 +9,13 @@ import { BaseOperation } from '@shared/utils/base-operation'
 import { Node } from '../node.entity'
 import { FILE_STATE_DX, FILE_STI_TYPE } from '../user-file.types'
 import { UserOpsCtx } from '@shared/types'
-import { filterNodesByUser, getSuccessMessage, loadNodes } from '../user-file.helper'
+import { filterNodesByUser, getSuccessMessage } from '../user-file.helper'
 import { NOTIFICATION_ACTION, SEVERITY } from '@shared/enums'
 import { SqlEntityManager } from '@mikro-orm/mysql'
+import { Space } from '@shared/domain/space/space.entity'
+import { NodeRepository } from '@shared/domain/user-file/node.repository'
+import { NodeService } from '@shared/domain/user-file/node.service'
+import { Folder } from '@shared/domain/user-file/folder.entity'
 
 const rollbackUnlockingState = async (em: SqlEntityManager, nodes: Node[]): Promise<void> => {
   getLogger().error(`Rolling back unlocking state for ${nodes.length} nodes`)
@@ -26,8 +30,21 @@ class NodesUnlockOperation extends BaseOperation<UserOpsCtx, NodesInputDTO, void
   async run(input: NodesInputDTO): Promise<void> {
     this.ctx.log.log(input.ids, 'Unlocking ids')
     const em = this.ctx.em
-    const nodes: Node[] = await loadNodes(em, input, { locked: true })
     const notificationService = new NotificationService(em)
+    const spaceRepository = this.ctx.em.getRepository(Space)
+    const nodeRepository = this.ctx.em.getRepository(Node) as NodeRepository
+    const userRepository = this.ctx.em.getRepository(User)
+    const folderRepository = this.ctx.em.getRepository(Folder)
+    const nodeService = new NodeService(
+      this.ctx.em,
+      this.ctx.user,
+      spaceRepository,
+      nodeRepository,
+      userRepository,
+      folderRepository,
+    )
+    const nodes: Node[] = await nodeService.loadNodes(input.ids, { locked: true })
+
     const currentUser: User = await em.findOneOrFail(User, { id: this.ctx.user.id })
     const filteredNodes = await filterNodesByUser(em, nodes, currentUser)
     let unlockedFilesCount = 0

@@ -9,6 +9,9 @@ import { UserDataConsistencyReportService } from '@shared/domain/user/user-data-
 import { AdminDataConsistencyReportService } from '@shared/debug/admin-data-consistency-report.service'
 import { DbClusterService } from '@shared/domain/db-cluster/service/db-cluster.service'
 import { JobService } from '@shared/domain/job/job.service'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { RemoveNodesFacade } from '@shared/facade/node-remove/remove-nodes.facade'
+import { NotificationService } from '@shared/domain/notification/services/notification.service'
 
 const dbClusterService = {} as DbClusterService
 
@@ -19,7 +22,6 @@ const adminDataConsistencyReportService = {
 const userService = {
   sendUserInactivityAlerts: () => {},
 } as UserService
-
 
 const userDataConsistencyReportService = {
   createReport: () => {},
@@ -32,6 +34,10 @@ const jobServiceChallengeBotClient = {
   checkChallengeJobs: () => {},
 } as JobService
 
+const userCtx = {} as unknown as UserContext
+const removeNodesFacade = {} as unknown as RemoveNodesFacade
+const notificationService = {} as unknown as NotificationService
+
 const processor = {
   MAIN: () => new MainQueueProcessor(),
   MAINTENANCE: () =>
@@ -42,7 +48,14 @@ const processor = {
       jobServiceUserClient,
       jobServiceChallengeBotClient,
     ),
-  FILE: () => new FileSyncQueueProcessor(userDataConsistencyReportService, jobServiceUserClient),
+  FILE: () =>
+    new FileSyncQueueProcessor(
+      userCtx,
+      userDataConsistencyReportService,
+      removeNodesFacade,
+      notificationService,
+      jobServiceUserClient,
+    ),
   EMAIL: () => new EmailQueueProcessor(),
 }
 
@@ -60,7 +73,7 @@ const jobToProcessorMap: Partial<Record<TASK_TYPE, (job: Job) => Promise<void> |
   [TASK_TYPE.SYNC_DBCLUSTER_STATUS]: (job) => processor.MAIN().syncDbClusterStatus(job),
   [TASK_TYPE.SYNC_SPACES_PERMISSIONS]: (job) => processor.MAINTENANCE().syncSpacesPermissions(job),
   [TASK_TYPE.USER_CHECKUP]: (job) => processor.MAINTENANCE().userCheckup(job),
-  [TASK_TYPE.USER_INACTIVITY_ALERT]: (job) => processor.MAINTENANCE().userInactivityAlert(),
+  [TASK_TYPE.USER_INACTIVITY_ALERT]: () => processor.MAINTENANCE().userInactivityAlert(),
   [TASK_TYPE.USER_DATA_CONSISTENCY_REPORT]: () => processor.FILE().reportUserDataConsistency(),
   [TASK_TYPE.CHECK_USER_JOBS]: (job) => processor.MAINTENANCE().checkUserJobs(job),
   [TASK_TYPE.ADMIN_DATA_CONSISTENCY_REPORT]: () =>

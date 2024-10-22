@@ -1,41 +1,25 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Inject, Injectable, Logger } from '@nestjs/common'
-import { ComparisonInput } from '@shared/domain/comparison-input/comparison-input.entity'
 import { DownloadLinkOptionsDto } from '@shared/domain/entity/domain/download-link-options.dto'
 import { DxId } from '@shared/domain/entity/domain/dxid'
 import { Uid } from '@shared/domain/entity/domain/uid'
 import { EntityFetcherService } from '@shared/domain/entity/entity-fetcher.service'
 import { EntityService } from '@shared/domain/entity/entity.service'
 import * as eventHelper from '@shared/domain/event/event.helper'
-import { createFileEvent, createFolderEvent, EVENT_TYPES } from '@shared/domain/event/event.helper'
 import { NotificationService } from '@shared/domain/notification/services/notification.service'
-import { SPACE_EVENT_ACTIVITY_TYPE } from '@shared/domain/space-event/space-event.enum'
-import { SpaceEventService } from '@shared/domain/space-event/space-event.service'
 import { SpaceReport } from '@shared/domain/space-report/entity/space-report.entity'
-import { TaggingService } from '@shared/domain/tagging/tagging.service'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { Asset } from '@shared/domain/user-file/asset.entity'
-import { FolderRepository } from '@shared/domain/user-file/folder.repository'
 import { Node } from '@shared/domain/user-file/node.entity'
 import { NodeHelper } from '@shared/domain/user-file/node.helper'
 import { NodeRepository } from '@shared/domain/user-file/node.repository'
 import * as userFileHelper from '@shared/domain/user-file/user-file.helper'
-import {
-  getNodePath,
-  getSuccessMessage,
-  loadNodes,
-  validateEditableBy,
-  validateProtectedSpaces,
-  validateVerificationSpace,
-} from '@shared/domain/user-file/user-file.helper'
 import { UserFileRepository } from '@shared/domain/user-file/user-file.repository'
 import { User } from '@shared/domain/user/user.entity'
 import { UserRepository } from '@shared/domain/user/user.repository'
 import { NOTIFICATION_ACTION, SEVERITY } from '@shared/enums'
 import {
-  ClientRequestError,
   DeleteRelationError,
-  FolderNotFoundError,
   NotFoundError,
   PermissionError,
   ValidationError,
@@ -48,7 +32,6 @@ import { createFileSynchronizeJobTask } from '@shared/queue'
 import { UserCtx } from '@shared/types'
 import { EntityScope } from '@shared/types/common'
 import { TimeUtils } from '@shared/utils/time.utils'
-import { TypeUtils } from '@shared/utils/type-utils'
 import { UserFileCreate } from '../domain/user-file-create'
 import { Folder } from '../folder.entity'
 import { UserFile } from '../user-file.entity'
@@ -64,6 +47,9 @@ import {
   SelectedFolder,
   SelectedNode,
 } from '../user-file.types'
+import { SpaceRepository } from '@shared/domain/space/space.repository'
+import { SPACE_MEMBERSHIP_ROLE } from '@shared/domain/space-membership/space-membership.enum'
+import { NodeService } from '@shared/domain/user-file/node.service'
 
 @Injectable()
 export class UserFileService {
@@ -78,181 +64,13 @@ export class UserFileService {
     private readonly notificationService: NotificationService,
     private readonly nodeRepo: NodeRepository,
     private readonly fileRepo: UserFileRepository,
-    private readonly folderRepo: FolderRepository,
     private readonly userRepo: UserRepository,
+    private readonly spaceRepo: SpaceRepository,
     private readonly entityFetcherService: EntityFetcherService,
     private readonly nodeHelper: NodeHelper,
     private readonly entityService: EntityService,
-    private readonly taggingService: TaggingService,
-    private readonly spaceEventService: SpaceEventService,
+    private readonly nodeService: NodeService,
   ) {}
-
-  /**
-   * Removes all files and folders specified by id in input. Operation traverses
-   * also through children.
-   * @param ids
-   * @param async
-   */
-  async removeNodes(ids: number[], async: boolean) {
-    this.logger.log(ids, 'Removing ids')
-    const nodes: Node[] = await loadNodes(this.em, { ids }, {})
-
-    let removedFilesCount = 0
-    let removedFoldersCount = 0
-
-    try {
-      // required because of a bug in the orm, where an entity fetched as part of a related collection to a different entity gets inserted back into the database in case it is deleted in very specific situations.
-      // this might get fixed in the future in the ORM and therefore the clear might not be needed anymore
-      // see JIRA PFDA-5169 for reproduction steps
-      this.em.clear()
-
-      for (const node of nodes) {
-        if (node.stiType === FILE_STI_TYPE.USERFILE) {
-          await this.removeFile(node.id)
-          removedFilesCount++
-        } else {
-          await this.removeFolder(node.id)
-          removedFoldersCount++
-        }
-      }
-
-      if (async) {
-        await this.notificationService.createNotification({
-          message: getSuccessMessage(
-            removedFilesCount,
-            removedFoldersCount,
-            'Successfully deleted',
-          ),
-          severity: SEVERITY.INFO,
-          action: NOTIFICATION_ACTION.NODES_REMOVED,
-          userId: this.user.id,
-        })
-      }
-
-      this.logger.log(
-        { foldersCount: removedFoldersCount, filesCount: removedFilesCount },
-        'Removed total objects',
-      )
-    } catch (err) {
-      this.logger.error(err)
-      if (async) {
-        await this.notificationService.createNotification({
-          message:
-            TypeUtils.getPropertyValueFromUnknownObject<string>(err, 'message') ??
-            'Error deleting files and folders.',
-          severity: SEVERITY.ERROR,
-          action: NOTIFICATION_ACTION.NODES_REMOVED,
-          userId: this.user.id,
-        })
-
-        await this.rollbackRemovingState(nodes)
-      } else {
-        throw new Error(`Failed to remove nodes: ${err.message}`)
-      }
-    }
-    return removedFilesCount + removedFoldersCount
-  }
-
-  async removeFolder(id: number) {
-    const folderToRemove = await this.folderRepo.findOne(id)
-
-    folderToRemove &&
-      (await validateProtectedSpaces(this.em, 'remove', this.user.id, folderToRemove))
-
-    if (!folderToRemove) {
-      throw new FolderNotFoundError()
-    }
-
-    await folderToRemove.children.init()
-    if (folderToRemove.children.length > 0) {
-      throw new Error(
-        `Cannot remove folder ${folderToRemove.name} with children. Remove children first.`,
-      )
-    }
-    const user = await this.userRepo.findOneOrFail(this.user.id)
-
-    await validateEditableBy(this.em, folderToRemove, user)
-    await validateVerificationSpace(this.em, folderToRemove)
-
-    const folderPath = await getNodePath(this.em, folderToRemove)
-
-    return await this.em.transactional(async () => {
-      await this.taggingService.removeTaggings(folderToRemove.id)
-
-      const folderEvent = await createFolderEvent(
-        EVENT_TYPES.FOLDER_DELETED,
-        folderToRemove,
-        folderPath,
-        user,
-      )
-
-      this.em.persist(folderEvent)
-      this.em.remove(folderToRemove)
-      this.logger.log(`Removed folder with id: ${folderToRemove.id}`)
-      return 1
-    })
-  }
-
-  async removeFile(id: number) {
-    this.logger.log(`Removing file with id: ${id}`)
-
-    const user = await this.userRepo.findOneOrFail(this.user.id)
-    const fileToRemove = await this.fileRepo.findOneOrFail(id)
-    this.logger.log(`Removing file with uid: ${fileToRemove.uid}`)
-
-    await this.validateComparisons(fileToRemove)
-    await validateEditableBy(this.em, fileToRemove, user)
-    await validateVerificationSpace(this.em, fileToRemove)
-    await validateProtectedSpaces(this.em, 'remove', this.user.id, fileToRemove)
-    await this.validateSpaceReports(fileToRemove)
-
-    const lastNode = (await this.fileRepo.count({ dxid: fileToRemove.dxid })) === 1
-    const filePath = await getNodePath(this.em, fileToRemove)
-
-    return await this.em.transactional(async () => {
-      await this.taggingService.removeTaggings(fileToRemove.id)
-
-      const fileEvent = await createFileEvent(
-        EVENT_TYPES.FILE_DELETED,
-        fileToRemove,
-        filePath,
-        user,
-      )
-      this.em.persist(fileEvent)
-
-      if (lastNode) {
-        // we're deleting from platform only if it's the last with given dxid
-        this.logger.log(`Removing file with dxid: ${fileToRemove.dxid} from platform`)
-        try {
-          await this.userClient.fileRemove({
-            projectId: fileToRemove.project,
-            ids: [fileToRemove.dxid],
-          })
-        } catch (error: unknown) {
-          if (error instanceof ClientRequestError && error.props.clientStatusCode === 404) {
-            this.logger.log(
-              `File with uid: ${fileToRemove.uid} not found on platform, continuing with delete in pFDA DB`,
-            )
-          } else {
-            throw error
-          }
-        }
-      }
-
-      if (fileToRemove.isInSpace()) {
-        await this.spaceEventService.createSpaceEvent({
-          entity: { type: 'userFile', value: fileToRemove },
-          spaceId: fileToRemove.getSpaceId(),
-          userId: this.user.id,
-          activityType: SPACE_EVENT_ACTIVITY_TYPE.file_deleted,
-        })
-      }
-
-      this.em.remove(fileToRemove)
-      this.logger.log(`Removed file with uid: ${fileToRemove.uid}`)
-      return 1
-    })
-  }
 
   /**
    * Loads file and returns it if the user is allowed to close it.
@@ -405,7 +223,7 @@ export class UserFileService {
   }
 
   private async getAccessibleNodes(fileIDs: number[]) {
-    const nodes: Node[] = await userFileHelper.loadNodes(this.em, { ids: fileIDs }, {})
+    const nodes: Node[] = await this.nodeService.loadNodes(fileIDs, {})
     const idsToCheck = nodes
       .filter((node) => node.stiType === FILE_STI_TYPE.USERFILE)
       .map((node) => node.id)
@@ -505,29 +323,7 @@ export class UserFileService {
     return this.getDownloadLink(file, options)
   }
 
-  private async rollbackRemovingState(nodes: Node[]) {
-    this.logger.error(`Rolling back removing state for nodes ${nodes.map((node) => node.id)}`)
-    nodes.forEach((node) => {
-      if (node.stiType === FILE_STI_TYPE.FOLDER) {
-        node.state = null
-      } else {
-        node.state = FILE_STATE_DX.CLOSED
-      }
-    })
-    await this.em.persistAndFlush(nodes)
-  }
-
-  private async validateComparisons(fileToRemove: UserFile) {
-    const result = await this.em.find(ComparisonInput, { userFile: fileToRemove })
-    if (result && result.length > 0) {
-      throw new Error(
-        `File ${fileToRemove.name} cannot be deleted because it participates` +
-          ' in one or more comparisons. Please delete all the comparisons first.',
-      )
-    }
-  }
-
-  private async validateSpaceReports(fileToRemove: UserFile) {
+  async validateSpaceReports(fileToRemove: UserFile) {
     const count = await this.em.count(SpaceReport, { resultFile: fileToRemove })
 
     if (count > 0) {
@@ -579,7 +375,7 @@ export class UserFileService {
         continue
       }
       const children = [] as UserFile[]
-      await userFileHelper.collectChildren(node as Folder, children, this.em)
+      await this.nodeService.collectChildren(node as Folder, children)
       const folder = {
         id: node.id,
         name: node.name,
@@ -649,5 +445,39 @@ export class UserFileService {
     )
 
     return { ...existingFiles }
+  }
+
+  /**
+   * Validates for Protected Spaces. If node is in protected space then
+   * given userId needs to be in a lead role otherwise error is thrown.
+   *
+   * @param action action that is to be performed on the node (for possible validation error message)
+   * @param userId current user
+   * @param node node that is being verified
+   */
+  async validateProtectedSpaces(action: string, userId: number, node: Node) {
+    if (!node.isInSpace()) {
+      return
+    }
+
+    const spaceId = node.getSpaceId()
+    const space = await this.spaceRepo.findOne(spaceId, {
+      populate: ['spaceMemberships', 'spaceMemberships.user'],
+    })
+
+    if (!space.protected) {
+      return
+    }
+
+    const isLeadMember = space.spaceMemberships
+      .getItems()
+      .some(
+        (membership) =>
+          membership.role === SPACE_MEMBERSHIP_ROLE.LEAD && membership.user.id === userId,
+      )
+
+    if (!isLeadMember) {
+      throw new Error(`You have no permissions to ${action} from a Protected Space`)
+    }
   }
 }

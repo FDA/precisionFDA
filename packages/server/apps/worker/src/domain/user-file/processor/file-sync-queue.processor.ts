@@ -9,13 +9,25 @@ import { unlockNodesHandler } from '../../../jobs/unlock-nodes.handler'
 import { ProcessWithContext } from '../../../queues/decorator/process-with-context'
 import { BaseQueueProcessor } from '../../../queues/processor/base-queue.processor'
 import { UserDataConsistencyReportService } from '@shared/domain/user/user-data-consistency-report.service'
-import { UserFileService } from '@shared/domain/user-file/service/user-file.service'
+import { RemoveNodesFacade } from '@shared/facade/node-remove/remove-nodes.facade'
+import { NotificationService } from '@shared/domain/notification/services/notification.service'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { getSuccessMessage } from '@shared/domain/user-file/user-file.helper'
+import { NOTIFICATION_ACTION, SEVERITY } from '@shared/enums'
+import { TypeUtils } from '@shared/utils/type-utils'
+import { ServiceLogger } from '@shared/logger/decorator/service-logger'
+import { Logger } from '@nestjs/common'
 
 @Processor(config.workerJobs.queues.fileSync.name)
 export class FileSyncQueueProcessor extends BaseQueueProcessor {
+  @ServiceLogger()
+  private readonly logger: Logger
+
   constructor(
+    private readonly user: UserContext,
     private readonly userDataConsistencyReportService: UserDataConsistencyReportService,
-    private readonly userFileService: UserFileService,
+    private readonly removeNodesFacade: RemoveNodesFacade,
+    private readonly notificationService: NotificationService,
     private readonly jobServiceWithPlatformClient: JobService,
   ) {
     super()
@@ -29,7 +41,28 @@ export class FileSyncQueueProcessor extends BaseQueueProcessor {
   @ProcessWithContext(TASK_TYPE.REMOVE_NODES)
   async removeNodes(job: Job) {
     const ids: number[] = job.data.payload as number[]
-    await this.userFileService.removeNodes(ids, true)
+    try {
+      const { removedFilesCount, removedFoldersCount } = await this.removeNodesFacade.removeNodes(
+        ids,
+        true,
+      )
+      await this.notificationService.createNotification({
+        message: getSuccessMessage(removedFilesCount, removedFoldersCount, 'Successfully deleted'),
+        severity: SEVERITY.INFO,
+        action: NOTIFICATION_ACTION.NODES_REMOVED,
+        userId: this.user.id,
+      })
+    } catch (error) {
+      this.logger.error(error)
+      await this.notificationService.createNotification({
+        message:
+          TypeUtils.getPropertyValueFromUnknownObject<string>(error, 'message') ??
+          'Error deleting files and folders.',
+        severity: SEVERITY.ERROR,
+        action: NOTIFICATION_ACTION.NODES_REMOVED,
+        userId: this.user.id,
+      })
+    }
   }
 
   @ProcessWithContext(TASK_TYPE.LOCK_NODES)

@@ -8,6 +8,8 @@ import { ChallengeModule } from '@shared/domain/challenge/challenge.module'
 import { UserModule } from '@shared/domain/user/user.module'
 import { UserFileModule } from '@shared/domain/user-file/user-file.module'
 import { JobModule } from '@shared/domain/job/job.module'
+import { RemoveNodesFacadeModule } from '@shared/facade/node-remove/remove-nodes-facade.module'
+import { NotificationModule } from '@shared/domain/notification/notification.module'
 
 @Module({
   imports: [
@@ -18,6 +20,8 @@ import { JobModule } from '@shared/domain/job/job.module'
     UserModule,
     UserFileModule,
     JobModule,
+    NotificationModule,
+    RemoveNodesFacadeModule,
   ],
   providers: [FileSyncQueueProcessor, FollowUpDecider],
   exports: [FollowUpDecider],
