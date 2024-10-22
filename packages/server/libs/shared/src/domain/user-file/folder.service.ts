@@ -90,6 +90,17 @@ export class FolderService {
     }
   }
 
+  /**
+   * Throws error if folder has children.
+   * @param folder
+   */
+  async validateFolderChildren(folder: Folder) {
+    await folder.children.init()
+    if (folder.children.length > 0) {
+      throw new Error(`Cannot remove folder ${folder.name} with children. Remove children first.`)
+    }
+  }
+
   private async createFolderInternal(
     name: string,
     scope: EntityScope,

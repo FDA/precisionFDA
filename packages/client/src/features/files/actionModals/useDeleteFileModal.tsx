@@ -104,7 +104,7 @@ export const useDeleteFileModal = ({
     onError: (e: AxiosError) => {
       const error = e?.response?.data?.error
       if(error?.message) {
-        toast.error(`${error?.type}: ${error?.message}`)
+        toast.error(error?.message)
         return
       }
       toast.error(`Deleting of ${getMessage(nodesToBeDeleted)} has failed`)
