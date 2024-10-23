@@ -24,6 +24,7 @@ import {
 import { isFloatValid, isStrictlyInteger } from '../form/common'
 import { fetchAndConvertSelectableContexts, fetchAndConvertSelectableSpaces } from './job-run-helper'
 import { RunWorkflowFormType } from '../../workflows/run/RunWorkflowForm'
+import { fetchAccessibleFilesByUID } from '../../databases/databases.api'
 
 export const getLabel = (inputSpec: InputSpec) => (inputSpec.label ? inputSpec.label : inputSpec.name)
 
@@ -327,36 +328,10 @@ export const exportFormData = (event: React.MouseEvent<HTMLButtonElement>, formD
   downloadAnchorNode.remove()
 }
 
-export const importFormData = (event: React.ChangeEvent<HTMLInputElement>, setVals: (val: RunJobFormType) => void) => {
-  event.preventDefault()
-  const fileReader = new FileReader()
+export const validateFile = async (fileUid: string) => {
+  const data = await fetchAccessibleFilesByUID({ uid: [fileUid]})
 
-  if (event.target.files && event.target.files.length > 0) {
-    const file = event.target.files[0]
-
-    fileReader.readAsText(file, 'UTF-8')
-    fileReader.onload = e => {
-      const content = e.target?.result
-
-      if (typeof content === 'string') {
-        try {
-          const importedData = JSON.parse(content)
-
-          if (importedData.inputs && Array.isArray(importedData.inputs)) {
-            importedData.inputs = importedData.inputs.map((item: BatchInput, index: number) => ({
-              ...item,
-              id: index + 1,
-            }))
-          }
-
-          setVals(importedData)
-        } catch (error) {
-          console.log(error)
-          toast.error('Invalid file format')
-        }
-      }
-    }
-  }
+  return data && data.length > 0
 }
 
 export const collectFileUidsFromBatchInput = (batchInput: BatchInput): FileUid[] => {

@@ -40,6 +40,7 @@ import {
 import { useExportInputsModal } from './useExportInputsModal'
 import { useRunJobMutation } from './useRunJobMutation'
 import {
+  collectFileUidsFromBatchInput,
   createRequestObject,
   exportFormData,
   extractFileUidsFromBatchInputs,
@@ -47,14 +48,13 @@ import {
   getFileUIDsFromAppRun,
   getLabel,
   getLicensesToAccept,
-  importFormData,
   mapInputKeyVals,
   prepareValidations,
   useDefaultInstanceType,
   useDefaultScopeSelection,
   useSelectableContexts,
   useSelectableSpaces,
-  useUserComputeInstances,
+  useUserComputeInstances, validateFile,
 } from './utils'
 import { SavingModal } from '../../modal/SavingModal'
 
@@ -88,12 +88,90 @@ const getDefaults = (hash: string, opts: { app: IApp; spec: AppSpec; userJobLimi
   }
 }
 
+const readFileAsText = (file: File): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const fileReader = new FileReader()
+    fileReader.readAsText(file, 'UTF-8')
+
+    fileReader.onload = (e) => {
+      const result = e.target?.result
+      if (typeof result === 'string') {
+        resolve(result)
+      } else {
+        reject(new Error('File reading failed'))
+      }
+    }
+
+    fileReader.onerror = () => {
+      reject(new Error('File reading failed'))
+    }
+  })
+}
+
+const importFormData = async (
+  event: React.ChangeEvent<HTMLInputElement>,
+  setVals: (val: RunJobFormType) => void,
+  setShowValidationWait: (val: boolean) => void,
+  setValidatedFilesCache: (cache: Record<string, boolean>) => void,
+  setTotalFilesToValidate: (val: number) => void,
+  setTotalFilesValidated: (val: number | ((prevVal: number) => number)) => void,
+) => {
+  event.preventDefault()
+
+  const delayDialogTimeout = setTimeout(() => {
+    setShowValidationWait(true)
+  }, 1000)
+
+  if (event.target.files && event.target.files.length > 0) {
+    const file = event.target.files[0]
+
+    try {
+      // Convert FileReader to promise-based API
+      const content = await readFileAsText(file)
+
+      const importedData = JSON.parse(content)
+      if (importedData.inputs && Array.isArray(importedData.inputs)) {
+        // Add ids to each input item
+        importedData.inputs = importedData.inputs.map(
+          (item: BatchInput, index: number) => ({
+            ...item,
+            id: index + 1,
+          }),
+        )
+      }
+      const validationCache: Record<string, boolean> = {}
+
+      const allFileUids = importedData.inputs.flatMap(item => collectFileUidsFromBatchInput(item))
+      setTotalFilesToValidate(allFileUids.length)
+      for (const fileUid of allFileUids) {
+        await validateFile(fileUid)
+        setTotalFilesValidated((prevCount) => prevCount + 1)
+        validationCache[fileUid] = true
+      }
+
+      setValidatedFilesCache(validationCache)
+      clearTimeout(delayDialogTimeout)
+      setShowValidationWait(false)
+      setVals(importedData)
+    } catch (error) {
+      console.log(error)
+      toast.error('Invalid file format')
+      clearTimeout(delayDialogTimeout)
+      setShowValidationWait(false)
+    }
+  }
+}
+
 export const RunJobForm = ({ app, userJobLimit, spec }: { app: IApp; spec: AppSpec; userJobLimit: IUser['job_limit'] }) => {
   const { data: computeInstances, isLoading: computeInstancesLoading } = useUserComputeInstances()
   const { data: selectableContexts } = useSelectableContexts(app.scope, app.entity_type)
   const { data: selectableSpaces } = useSelectableSpaces(app.scope)
   const { hash, pathname } = useLocation()
   const navigate = useNavigate()
+  const [ showValidationWait, setShowValidationWait ] = useState(false)
+  const [ totalFilesToValidate, setTotalFilesToValidate ] = useState(0)
+  const [ totalFilesValidated, setTotalFilesValidated ] = useState(0)
+  const [ validatedFilesCache, setValidatedFilesCache ] = useState<Record<string, boolean>>({})
 
   const { modalComp: licensesModal, setLicensesAndShow } = useAcceptLicensesModal()
   const defaultValues = getDefaults(hash, { app, userJobLimit, spec })
@@ -188,21 +266,21 @@ export const RunJobForm = ({ app, userJobLimit, spec }: { app: IApp; spec: AppSp
       if (licensesToAccept.length > 0) {
         setLicensesAndShow(licensesToAccept, acceptedLicenses)
       } else {
-        for (let index = 0; index < vals.inputs.length; index++) {
-          const batchInput = vals.inputs[index]
+        try {
+          for (let index = 0; index < vals.inputs.length; index++) {
+            const batchInput = vals.inputs[index]
 
-          const req = createRequestObject(
-            isBatchRun ? `${vals.jobName} (${index + 1} of ${vals.inputs.length})` : vals.jobName,
-            vals.jobLimit,
-            vals.output_folder_path,
-            batchInput.instanceType.value,
-            vals.scope.value as ServerScope,
-            batchInput.fields,
-            app,
-            spec.input_spec,
-          )
+            const req = createRequestObject(
+              isBatchRun ? `${vals.jobName} (${index + 1} of ${vals.inputs.length})` : vals.jobName,
+              vals.jobLimit,
+              vals.output_folder_path,
+              batchInput.instanceType.value,
+              vals.scope.value as ServerScope,
+              batchInput.fields,
+              app,
+              spec.input_spec,
+            )
 
-          try {
             const data = await runJobMutation.mutateAsync(req)
             setExecutedBatchCount(prevCount => prevCount + 1)
 
@@ -220,20 +298,20 @@ export const RunJobForm = ({ app, userJobLimit, spec }: { app: IApp; spec: AppSp
                 navigate(`/spaces/${spaceId}/executions/${data?.id}`)
               }
             }
-          } catch (error) {
-            console.error(`Error starting job ${index + 1}:`, error)
-            toast.error('Failed to start job.')
           }
-        }
 
-        // Navigate after all jobs have been executed
-        if (isBatchRun) {
-          if (vals.scope.value === 'private') {
-            navigate(`/home/apps/${app.uid}/jobs`)
-          } else {
-            const spaceId = vals.scope.value.replace('space-', '')
-            navigate(`/spaces/${spaceId}/apps/${app.uid}/jobs`)
+          // Navigate after all jobs have been executed
+          if (isBatchRun) {
+            if (vals.scope.value === 'private') {
+              navigate(`/home/apps/${app.uid}/jobs`)
+            } else {
+              const spaceId = vals.scope.value.replace('space-', '')
+              navigate(`/spaces/${spaceId}/apps/${app.uid}/jobs`)
+            }
           }
+        } catch (error) {
+          console.error('Error starting job :', error)
+          toast.error('Failed to start job.')
         }
       }
     }
@@ -366,6 +444,7 @@ export const RunJobForm = ({ app, userJobLimit, spec }: { app: IApp; spec: AppSp
                             register={register}
                             setError={setError}
                             scope={app.entity_type === 'https' ? watch().scope?.value : app.scope}
+                            validatedFilesCache={validatedFilesCache}
                           />
                         </FieldGroup>
                       )}
@@ -406,7 +485,16 @@ export const RunJobForm = ({ app, userJobLimit, spec }: { app: IApp; spec: AppSp
                 type="file"
                 style={{ display: 'none' }}
                 id="fileInput"
-                onChange={event => importFormData(event, vals => reset(vals))}
+                onChange={event =>
+                  importFormData(
+                    event,
+                    vals => reset(vals),
+                    setShowValidationWait,
+                    setValidatedFilesCache,
+                    setTotalFilesToValidate,
+                    setTotalFilesValidated,
+                  )
+                }
               />
               <Button data-variant="success" disabled={isSubmitting} type="button" onClick={handleImportClick}>
                 Import Inputs
@@ -426,14 +514,26 @@ export const RunJobForm = ({ app, userJobLimit, spec }: { app: IApp; spec: AppSp
       <SavingModal
         modalId="run-batch-job-processing"
         headerText="Starting batch run jobs"
-        body={(
+        body={
           <div>
             <p>{getRunningLabelText()}.</p>
             <p>Please wait until this message disappears.</p>
           </div>
-        )}
+        }
         isSaving={isSubmitting && isBatchRun}
         key="run-batch-job-processing"
+      />
+      <SavingModal
+        headerText="Validating file inputs"
+        body={
+          <div>
+            <p>File inputs are being validated.</p>
+            <p>Processing file {totalFilesValidated}/{totalFilesToValidate}.</p>
+            <p>Please wait until this message disappears.</p>
+          </div>
+        }
+        isSaving={showValidationWait}
+        key="data-portal-save"
       />
     </StyledForm>
   )
