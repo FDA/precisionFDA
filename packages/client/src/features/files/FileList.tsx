@@ -376,7 +376,7 @@ export const FilesListTable = ({
   }).filter(filterColsByScope)
   
   const columns = useMemo(() => col, [col, location.search, properties])
-  const data = useMemo(() => files || [], [files])
+  const data = useMemo(() => files || [], [files, selectedRows])
 
   return (
     <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd} sensors={sensors} collisionDetection={centerToCursorCollisionDetection}>
