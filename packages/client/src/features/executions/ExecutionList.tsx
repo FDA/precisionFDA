@@ -219,7 +219,7 @@ export const ExecutionsListTable = ({
 
   const columns = useMemo(() => col, [col, location.search, properties])
 
-  const data = useMemo(() => jobs || [], [jobs])
+  const data = useMemo(() => jobs || [], [jobs, selectedRows])
 
   return (
     <StyledHomeTable>
