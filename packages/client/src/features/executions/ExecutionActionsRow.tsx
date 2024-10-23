@@ -128,7 +128,7 @@ export const ExecutionActionsRow = ({
         content={
           <ActionsDropdownContent
             actions={
-              ['terminated', 'failed', 'done'].includes(execution.state)
+              terminalStates.includes(execution.state)
                 ? omit(['Snapshot', 'Terminate'], actions)
                 : omit(['Copy to space', 'Snapshot'], actions)
             }

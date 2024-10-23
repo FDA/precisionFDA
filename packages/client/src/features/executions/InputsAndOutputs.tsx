@@ -178,6 +178,8 @@ export const InputsAndOutputs = ({
     })
   }
 
+  const terminalStates = ['terminated', 'failed', 'done']
+
   const inputConfig = getConfig(runInputData)
   const outputConfig = getConfig(runOutputData)
 
@@ -193,9 +195,9 @@ export const InputsAndOutputs = ({
       )}
       {noOutputs ? (
         <div className="noio">
-          {executionState !== 'done'
-            ? 'Outputs will be visible after the execution completes.'
-            : 'No ouputs from this execution run.'}
+          {terminalStates.includes(executionState)
+            ? 'No ouputs from this execution run.'
+            : 'Outputs will be visible after the execution completes.'}
         </div>
       ) : (
         <Table title="outputs" config={outputConfig} dataTestId="execution-outputs" />
