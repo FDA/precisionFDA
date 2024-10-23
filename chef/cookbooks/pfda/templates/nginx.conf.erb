@@ -84,7 +84,8 @@ http {
       proxy_set_header Connection "upgrade";
     }
 
-    location /api/v2/ {
+    location /api/v2/reports {
+      rewrite ^/api/v2/reports(.*)$ /reports$1 break;
       proxy_pass https://localhost:3001/;
       proxy_http_version 1.1;
     }
