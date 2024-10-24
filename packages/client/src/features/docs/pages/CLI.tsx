@@ -93,7 +93,7 @@ export const CLI = () => {
         <h2 id="download">Download the CLI</h2>
         <ButtonRow>
           <a
-            href="https://pfda-production-static-files.s3.amazonaws.com/cli/pfda-linux-2.7.2.tar.gz"
+            href="https://pfda-production-static-files.s3.amazonaws.com/cli/pfda-linux-2.7.3.tar.gz"
             target="_blank"
             rel="noreferrer"
           >
@@ -102,7 +102,7 @@ export const CLI = () => {
             </Button>
           </a>
           <a
-            href="https://pfda-production-static-files.s3.amazonaws.com/cli/pfda-darwin-2.7.2.tar.gz"
+            href="https://pfda-production-static-files.s3.amazonaws.com/cli/pfda-darwin-2.7.3.tar.gz"
             target="_blank"
             rel="noreferrer"
           >
@@ -111,7 +111,7 @@ export const CLI = () => {
             </Button>
           </a>
           <a
-            href="https://pfda-production-static-files.s3.amazonaws.com/cli/pfda-windows-2.7.2.zip"
+            href="https://pfda-production-static-files.s3.amazonaws.com/cli/pfda-windows-2.7.3.zip"
             target="_blank"
             rel="noreferrer"
           >
