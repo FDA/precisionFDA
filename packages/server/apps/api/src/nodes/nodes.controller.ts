@@ -9,7 +9,6 @@ import { RequestNodesUnlockOperation } from '@shared/domain/user-file/ops/start-
 import { UserOpsCtx } from '@shared/types'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { UserContextGuard } from '../user-context/guard/user-context.guard'
-import { UserFileService } from '@shared/domain/user-file/service/user-file.service'
 import { RemoveNodesFacade } from '@shared/facade/node-remove/remove-nodes.facade'
 
 @UseGuards(UserContextGuard)
@@ -19,7 +18,6 @@ export class NodesController {
     private readonly user: UserContext,
     @Inject(DEPRECATED_SQL_ENTITY_MANAGER) private readonly em: SqlEntityManager,
     private readonly logger: Logger,
-    private readonly userFileService: UserFileService,
     private readonly removeNodesFacade: RemoveNodesFacade,
   ) {}
 
@@ -66,7 +64,8 @@ export class NodesController {
     if (async) {
       await this.removeNodesFacade.removeNodesAsync(ids)
     } else {
-      await this.removeNodesFacade.removeNodes(ids)
+      const res = await this.removeNodesFacade.removeNodes(ids)
+      return res.removedFoldersCount + res.removedFilesCount
     }
   }
 }
