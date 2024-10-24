@@ -18,7 +18,7 @@ export class CliController {
 
   @Get('/version/latest')
   getLatestVersion() {
-    return { version: '2.7.2' }
+    return { version: '2.7.3' }
   }
 
   @UseGuards(UserContextGuard)
@@ -45,6 +45,7 @@ export class CliController {
     return this.cliService.listSpaceDiscussions(spaceId)
   }
 
+  // TODO: REMOVE IN V3.0.0, migrated to /cli/{uid}/describe
   @UseGuards(UserContextGuard)
   @Get('/discussions/:discussionId/describe')
   async describeDiscussion(@Param('discussionId') discussionId: number) {
