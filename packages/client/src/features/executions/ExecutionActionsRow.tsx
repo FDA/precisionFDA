@@ -95,7 +95,7 @@ export const ExecutionActionsRow = ({
         },
       ],
     }
-    const hash = btoa(JSON.stringify(formValues))
+    const hash = btoa(encodeURIComponent(JSON.stringify(formValues)))
 
     return `${link}#${hash}`
   }
