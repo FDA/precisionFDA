@@ -68,7 +68,7 @@ import { SavingModal } from '../../modal/SavingModal'
 const getDefaults = (hash: string, opts: { app: IApp; spec: AppSpec; userJobLimit: IUser['job_limit'] }): RunJobFormType => {
   const base64Encoded = hash.split('#')[1]
   const decoded = base64Encoded ? atob(base64Encoded) : '{}'
-  const values = JSON.parse(decoded)
+  const values = JSON.parse(decodeURIComponent(decoded))
 
   return {
     jobName: values.jobName ?? opts.app.name,
