@@ -1,13 +1,13 @@
-import { Body, Controller, Get, HttpCode, Param, Post } from '@nestjs/common'
+import { Body, Controller, Get, HttpCode, Param, Post, UseGuards } from '@nestjs/common'
 import { CreatePropertyDTO } from '@shared/domain/property/dto/CreatePropertyDTO'
 import { PropertyType } from '@shared/domain/property/property.entity'
 import { PropertyService } from '@shared/domain/property/services/property.service'
+import { UserContextGuard } from '../user-context/guard/user-context.guard'
 
+@UseGuards(UserContextGuard)
 @Controller('/properties')
 export class PropertiesController {
-  constructor(
-    private readonly propertyService: PropertyService,
-  ) {}
+  constructor(private readonly propertyService: PropertyService) {}
 
   @HttpCode(201)
   @Post()

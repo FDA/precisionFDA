@@ -14,6 +14,7 @@ import { Job } from '@shared/domain/job/job.entity'
 import { Note } from '@shared/domain/note/note.entity'
 import { Space } from '@shared/domain/space/space.entity'
 import { SPACE_TYPE } from '@shared/domain/space/space.enum'
+import { SpaceRepository } from '@shared/domain/space/space.repository'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { Asset } from '@shared/domain/user-file/asset.entity'
 import { Node } from '@shared/domain/user-file/node.entity'
@@ -41,7 +42,7 @@ import type {
   UpdateDiscussionInput,
 } from '../discussion.types'
 import { AnswerDTO, CommentDTO, DiscussionDTO, NoteDTO, UserDTO } from '../discussion.types'
-import { DiscussionNotificationService } from './discussion-notification.service'
+import { DiscussionQueueJobProducer } from '../producer/discussion-queue-job.producer'
 import { PublisherService } from './publisher.service'
 
 export interface IDiscussionService {
@@ -95,7 +96,8 @@ export class DiscussionService implements IDiscussionService {
   private readonly publisher: PublisherService
   private readonly fetcher: EntityFetcherService
   private readonly entityService: EntityService
-  private readonly discussionNotificationService: DiscussionNotificationService
+  private readonly discussionQueueJobProducer: DiscussionQueueJobProducer
+  private readonly spaceRepository: SpaceRepository
 
   constructor(
     em: SqlEntityManager,
@@ -103,14 +105,17 @@ export class DiscussionService implements IDiscussionService {
     publisherService: PublisherService,
     fetcher: EntityFetcherService,
     entityService: EntityService,
-    discussionNotificationService: DiscussionNotificationService,
+    discussionQueueJobProducer: DiscussionQueueJobProducer,
+    spaceRepository: SpaceRepository,
   ) {
     this.em = em
     this.userCtx = userCtx
     this.publisher = publisherService
     this.fetcher = fetcher
     this.entityService = entityService
-    this.discussionNotificationService = discussionNotificationService
+    this.discussionQueueJobProducer = discussionQueueJobProducer
+    this.spaceRepository = spaceRepository
+
     this.logger.debug('DiscussionService initialized')
   }
 
@@ -254,7 +259,10 @@ export class DiscussionService implements IDiscussionService {
 
     let space: Space | null = null
     if (discussionInput.scope.startsWith('space')) {
-      space = await this.getSpaceFromScope(discussionInput.scope)
+      space = await this.spaceRepository.findSpaceByScopeAndUser(
+        discussionInput.scope,
+        this.userCtx.id,
+      )
 
       if (space.type === SPACE_TYPE.REVIEW && space.meta?.restricted_discussions) {
         throw new errors.InvalidStateError(
@@ -281,8 +289,12 @@ export class DiscussionService implements IDiscussionService {
       tem.persist(note)
       return count
     })
-    if (discussionInput.notifyAll && space) {
-      await this.discussionNotificationService.notifyDiscussion(space, discussion)
+
+    if (discussion.note.getEntity().scope.startsWith('space')) {
+      await this.discussionQueueJobProducer.createSpaceNotificationTask(
+        discussionInput.id,
+        !!discussionInput.notifyAll,
+      )
     }
     return count
   }
@@ -494,11 +506,6 @@ export class DiscussionService implements IDiscussionService {
       )
     }
 
-    let space: Space | null = null
-    if (answerInput.scope.startsWith('space')) {
-      space = await this.getSpaceFromScope(answerInput.scope)
-    }
-
     const count = await this.em.transactional(async (tem) => {
       let count = 0
       if (answerInput.scope === 'public') {
@@ -513,9 +520,13 @@ export class DiscussionService implements IDiscussionService {
       return count
     })
 
-    if (answerInput.notifyAll && space) {
-      await this.discussionNotificationService.notifyDiscussionAnswer(space, answer)
+    if (answer.note.getEntity().isInSpace()) {
+      await this.discussionQueueJobProducer.createSpaceNotificationTask(
+        answer.discussion.id,
+        !!answerInput.notifyAll,
+      )
     }
+
     return count
   }
 
@@ -823,7 +834,14 @@ export class DiscussionService implements IDiscussionService {
     }
 
     if (commentInput.targetType === 'Discussion') {
-      const target = await this.fetcher.getAccessibleById(Discussion, commentInput.targetId)
+      const target = await this.fetcher.getAccessibleById(
+        Discussion,
+        commentInput.targetId,
+        {},
+        {
+          populate: ['note'],
+        },
+      )
       if (!target) {
         throw new errors.NotFoundError(
           `Unable to create comment: ${commentInput.targetType} not found or insufficient permissions.`,
@@ -834,14 +852,22 @@ export class DiscussionService implements IDiscussionService {
       newComment.commentableId = Reference.create(target)
       // other params are intentionally null.
       await this.em.persistAndFlush(newComment)
-      if (commentInput.notifyAll) {
-        await this.em.populate(target, ['note'])
-        const space = await this.getSpaceFromScope(target.note.getEntity().scope)
-        await this.discussionNotificationService.notifyDiscussionComment(space, target)
+
+      if (target.note.getEntity().isInSpace()) {
+        await this.discussionQueueJobProducer.createSpaceNotificationTask(
+          commentInput.targetId,
+          !!commentInput.notifyAll,
+        )
       }
+
       return this.mapCommentDTO(newComment)
     }
-    const target = await this.fetcher.getAccessibleById(Answer, commentInput.targetId)
+    const target = await this.fetcher.getAccessibleById(
+      Answer,
+      commentInput.targetId,
+      {},
+      { populate: ['note'] },
+    )
     if (!target) {
       throw new errors.NotFoundError(
         `Unable to create comment: ${commentInput.targetType} not found or insufficient permissions.`,
@@ -852,11 +878,12 @@ export class DiscussionService implements IDiscussionService {
     newComment.commentableId = Reference.create(target)
     // other params are intentionally null.
     await this.em.persistAndFlush(newComment)
-    if (commentInput.notifyAll) {
-      await this.em.populate(target, ['discussion', 'note'])
-      const discussion = await target.discussion.getEntity()
-      const space = await this.getSpaceFromScope(target.note.getEntity().scope)
-      await this.discussionNotificationService.notifyDiscussionComment(space, discussion)
+
+    if (target.note.getEntity().isInSpace()) {
+      await this.discussionQueueJobProducer.createSpaceNotificationTask(
+        target.discussion.id,
+        !!commentInput.notifyAll,
+      )
     }
     return this.mapCommentDTO(newComment)
   }
@@ -1069,30 +1096,6 @@ export class DiscussionService implements IDiscussionService {
       // refactor the response mapping - for every return in this class.
       return this.mapCommentDTO(res)
     }
-  }
-
-  private async getSpaceFromScope(scope: SCOPE): Promise<Space | null> {
-    const spaceId = getIdFromScopeName(scope)
-    if (spaceId === null) {
-      return
-    }
-    const space = await this.em.findOne(Space, {
-      id: spaceId,
-      spaceMemberships: {
-        user: this.userCtx.id,
-        role: {
-          $in: [
-            SPACE_MEMBERSHIP_ROLE.ADMIN,
-            SPACE_MEMBERSHIP_ROLE.LEAD,
-            SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR,
-          ],
-        },
-      },
-    })
-    if (!space) {
-      throw new errors.PermissionError('Unable to publish: insufficient permissions.')
-    }
-    return space
   }
 
   private async mapDiscussionDTO(discussion: Discussion): Promise<DiscussionDTO> {

@@ -210,7 +210,7 @@ export const DatabaseListTable = ({
   const col = useDatabaseColumns({ handleRowClick, colWidths, properties })
 
   const columns = useMemo(() => col, [col, properties])
-  const memoData = useMemo(() => data || [], [data])
+  const memoData = useMemo(() => data || [], [data, selectedRows])
 
   return (
     <StyledHomeTable>

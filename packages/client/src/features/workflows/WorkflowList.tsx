@@ -216,7 +216,7 @@ export const WorkflowListTable = ({
 
   const columns = useMemo(() => col, [col, location.search, properties])
 
-  const data = useMemo(() => workflows || [], [workflows])
+  const data = useMemo(() => workflows || [], [workflows, selectedRows])
 
   return (
     <StyledHomeTable>
