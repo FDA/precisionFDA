@@ -7,20 +7,19 @@ export const SavingModal = ({
   headerText,
   body,
   isSaving,
-  key,
+  modalId,
 }: {
   headerText: string
   body: React.ReactNode
   isSaving: boolean
-  key: string
+  modalId: string
 }) => {
   return (
     <ModalNext
-      id={key}
+      id={modalId}
       isShown={isSaving}
       hide={() => null}
       headerText={headerText}
-      disableClose
     >
       <ModalHeaderTop
         disableClose

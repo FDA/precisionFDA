@@ -1,5 +1,6 @@
 import { http, HttpResponse } from 'msw'
 import { FetchExecutionsQuery } from './executions.api'
+import { IExecution } from './executions.types'
 
 const workflowExecution = {
   id: 111,
@@ -105,7 +106,7 @@ const workflowExecution = {
 }
 
 export const executionsMocks = [
-  http.get('/api/jobs*', () =>
+  http.get('/api/jobs', () =>
     HttpResponse.json<FetchExecutionsQuery>(
       {
         jobs: [
@@ -472,4 +473,69 @@ export const executionsMocks = [
       { status: 200 },
     ),
   ),
+  http.get('/api/jobs/*', () =>
+    HttpResponse.json<{ job: IExecution }>({
+      'job': {
+          'id': 2,
+          'uid': 'job-Gv3p08j0GKb1QjK844gpVz2K-1',
+          'dxid': 'job-Gv3p08j0GKb1QjK844gpVz2K',
+          'state': 'done',
+          'name': 'dna_challenge',
+          'app_title': 'challenge app',
+          'app_uid': 'app-Gv2b0bj0Jq0j9ZG24XBjg034-1',
+          'app_revision': 1,
+          'app_active': true,
+          'workflow_title': 'N/A',
+          'workflow_uid': 'N/A',
+          'platform_tags': null,
+          'workstation_api_version': null,
+          'run_input_data': [
+              {
+                  'name': 'dddd',
+                  'class': 'string',
+                  'value': 'sdf',
+              },
+              {
+                'name': 'dna_file',
+                'class': 'file',
+                'value': 'file-Gv3p08j0GKb1QjK844gpVz2K-1',
+              },
+          ],
+          'run_output_data': [
+            {
+              'name': 'Computed-Output',
+              'class': 'string',
+              'value': 'This is wht is coming out of the executino from being run.',
+            },
+
+          ],
+          'run_data_updates': {
+              'output_folder_path': '',
+              'run_instance_type': 'baseline-8',
+              'run_inputs': {
+                  'dddd': 'sdfjklh',
+              },
+              'run_outputs': {},
+          },
+          'instance_type': 'baseline-8',
+          'duration': '2 minutes 35 seconds',
+          'duration_in_seconds': 155,
+          'energy_consumption': '$0.05',
+          'failure_reason': '',
+          'failure_message': '',
+          'created_at': '10/10/2024',
+          'created_at_date_time': '2024-10-10 11:36:35 CEST',
+          'scope': 'private',
+          'location': 'Private',
+          'launched_by': 'Randall Ebert',
+          'launched_by_dxuser': 'randall.ebert',
+          'launched_on': null,
+          'featured': false,
+          'entity_type': 'regular',
+          'logged_dxuser': 'randall.ebert',
+          'cost_limit': 500,
+          'tags': [],
+          'properties': {},
+      },
+  }, { status: 200 })),
 ]

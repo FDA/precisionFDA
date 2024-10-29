@@ -19,7 +19,7 @@ export class LicensesForAppOperation extends BaseOperation<UserOpsCtx, UidInput,
     await currentApp.assets.init()
 
     const licensePromises = await Promise.all(
-      currentApp.assets.getItems().map((asset) => licensedItemRepo.getLicenses(asset.id)),
+      currentApp.assets.getItems().map((asset) => licensedItemRepo.getLicensesForNode(asset.id)),
     )
     const licenses = (await Promise.all(licensePromises)).flat()
 

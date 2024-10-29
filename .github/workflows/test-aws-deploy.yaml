@@ -10,7 +10,7 @@ on:
       GSRS_BRANCH:
         description: GSRS revision
         type: string
-        default: gsrs_240514
+        default: gsrs_240919
       CHEF_RUNLIST:
         description: Chef Runlist
         type: string

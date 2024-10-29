@@ -122,8 +122,13 @@
   overflow-y: scroll;
   overflow-x: scroll;
   table-layout: fixed;
+  width: fit-content;
   /* NOTE: Change to main theme */
-  margin: 30px 0;
+  /* margin: 30px 0; */
+  margin: 0px 25px 30px 0px;
+}
+.PlaygroundEditorTheme__tableRowStriping tr:nth-child(even) {
+  background-color: #f2f5fb;
 }
 .PlaygroundEditorTheme__tableSelection *::selection {
   background-color: transparent;
@@ -134,7 +139,6 @@
 .PlaygroundEditorTheme__tableCell {
   border: 1px solid #bbb;
   width: 75px;
-  min-width: 75px;
   vertical-align: top;
   text-align: start;
   padding: 6px 8px;
@@ -206,16 +210,14 @@
   height: 100%;
   opacity: 0.4;
 }
-.PlaygroundEditorTheme__tableAddColumns:hover {
+.PlaygroundEditorTheme__tableAddColumns:hover,
+.PlaygroundEditorTheme__tableAddRows:hover {
   background-color: #c9dbf0;
 }
 .PlaygroundEditorTheme__tableAddRows {
   position: absolute;
-  bottom: -25px;
   width: calc(100% - 25px);
   background-color: #eee;
-  height: 20px;
-  left: 0;
   animation: table-controls 0.2s ease;
   border: 0;
   cursor: pointer;
@@ -233,9 +235,6 @@
   width: 100%;
   height: 100%;
   opacity: 0.4;
-}
-.PlaygroundEditorTheme__tableAddRows:hover {
-  background-color: #c9dbf0;
 }
 @keyframes table-controls {
   0% {

@@ -241,7 +241,7 @@ export const AppsListTable = ({
   const col = useAppsColumns({ colWidths, isAdmin, properties }).filter(filterColsByScope)
 
   const columns = useMemo(() => col, [col, location.search, properties])
-  const data = useMemo(() => apps || [], [apps])
+  const data = useMemo(() => apps || [], [apps, selectedRows])
 
   return (
     <StyledHomeTable>

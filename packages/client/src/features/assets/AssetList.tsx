@@ -213,7 +213,7 @@ export const AssetsListTable = ({
   const col = useAssetColumns({ handleRowClick, colWidths, isAdmin, properties }).filter(filterColsByScope)
 
   const columns = useMemo(() => col, [col, properties])
-  const data = useMemo(() => apps || [], [apps])
+  const data = useMemo(() => apps || [], [apps, selectedRows])
 
   return (
     <StyledHomeTable>

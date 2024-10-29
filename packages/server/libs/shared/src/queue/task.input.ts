@@ -42,6 +42,7 @@ export enum TASK_TYPE {
   USER_DATA_CONSISTENCY_REPORT = 'user_data_consistency_report',
   GENERATE_SPACE_REPORT_BATCH = 'generate_space_report_batch',
   GENERATE_SPACE_REPORT_RESULT = 'generate_space_report_result',
+  NOTIFY_SPACE_DISCUSSION = 'notify_space_discussion',
 }
 
 // will be used in the sub-handler
@@ -87,6 +88,15 @@ export type GenerateSpaceReportResultJob = TaskWithAuth & {
   type: TASK_TYPE.GENERATE_SPACE_REPORT_RESULT
   payload: number
 }
+
+export type NotifyNewDiscussionJob = TaskWithAuth & {
+  type: TASK_TYPE.NOTIFY_SPACE_DISCUSSION
+  payload: {
+    discussionId: number
+    notifyAll: boolean
+  }
+}
+
 // ---------------------
 // Admin and Debug tasks
 // ---------------------
