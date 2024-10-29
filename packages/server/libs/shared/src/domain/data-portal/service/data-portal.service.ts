@@ -29,6 +29,7 @@ import { FILE_STATE_DX, PARENT_TYPE } from '../../user-file/user-file.types'
 import { DataPortal } from '../data-portal.entity'
 import { DATA_PORTAL_MEMBER_ROLE } from '../data-portal.enum'
 import { CreateResourceResponse, DataPortalMemberParam, DataPortalParam } from './data-portal.types'
+import { RemoveNodesFacade } from '@shared/facade/node-remove/remove-nodes.facade'
 
 @Injectable()
 export class DataPortalService {
@@ -55,6 +56,7 @@ export class DataPortalService {
     private readonly platformClient: PlatformClient,
     private readonly notificationService: NotificationService,
     private readonly userFileService: UserFileService,
+    private readonly removeNodesFacade: RemoveNodesFacade,
   ) {}
 
   listResources = async (
@@ -135,7 +137,7 @@ export class DataPortalService {
     await this.em.transactional(async () => {
       await this.em.removeAndFlush(resource)
       this.logger.log(`Deleting user file with uid: ${resource.userFile.getEntity().uid}`)
-      await this.userFileService.removeFile(resource.userFile.id)
+      await this.removeNodesFacade.removeNodes([resource.userFile.id])
     })
   }
 

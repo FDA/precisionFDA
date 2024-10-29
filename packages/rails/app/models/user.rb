@@ -261,7 +261,8 @@ class User < ApplicationRecord
   end
 
   def logged_in?
-    !Session.find_by(user_id: id).expired?
+    sessions = Session.where(user_id: id)
+    sessions.any? { |session| !session.expired? }
   rescue StandardError
     false
   end

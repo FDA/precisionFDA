@@ -13,6 +13,9 @@ import { SelectMultiFileInput } from '../SelectMultiFileInput'
 import { IOSpec, InputSpec, RunJobFormType } from '../apps.types'
 import { isFloatValid, isStrictlyInteger } from '../form/common'
 import { ErrorMessageForField } from './ErrorMessageForField'
+import { useQuery } from '@tanstack/react-query'
+import { fetchAccessibleFilesByUID } from '../../databases/databases.api'
+import { validateFile } from './utils'
 
 const getDefaultValue = val => {
   if (val === null || val === undefined || val.length === 0) return undefined
@@ -93,6 +96,7 @@ const ArrayFileInput = ({
   inputSpec,
   errors,
   setError,
+  validatedFilesCache,
 }: {
   inputSpec: InputSpec
   field: ControllerRenderProps<RunJobFormType, any>
@@ -100,16 +104,25 @@ const ArrayFileInput = ({
   setError: UseFormSetError<RunJobFormType>
   disabled: boolean
   scope: string
+  validatedFilesCache: Record<string, boolean>
 }) => {
-  const fileListQuery = useFetchFilesByUIDQuery(field?.value || [])
+  const fileUids: string[] = field?.value || []
+  const areAllFilesPreValidated = fileUids.every(fileUid => validatedFilesCache[fileUid])
+
+  const fileListQuery = useQuery({
+    queryFn: () => Promise.all(fileUids.map(uid => validateFile(uid))),
+    queryKey: ['user-list-files', fileUids],
+    enabled: fileUids.length > 0 && !areAllFilesPreValidated,
+  })
+
+  const allFilesValidated = fileListQuery?.data?.every((isValid: boolean) => isValid) ?? false
+  const error = fileUids.length > 0 && !(areAllFilesPreValidated || allFilesValidated)
 
   useEffect(() => {
-    if (!field.value?.length || !fileListQuery?.data?.length) return
-
-    if (field.value.length !== fileListQuery.data.length) {
+    if (error) {
       setError(field.name, { type: 'custom', message: noAccessText.multi })
     }
-  }, [field?.value, fileListQuery?.data])
+  }, [error, setError, field.name])
 
   return (
     <>
@@ -138,6 +151,7 @@ const SingleFileInput = ({
   inputSpec,
   errors,
   setError,
+  validatedFilesCache,
 }: {
   inputSpec: InputSpec
   field: ControllerRenderProps<RunJobFormType, any>
@@ -145,15 +159,25 @@ const SingleFileInput = ({
   setError: UseFormSetError<RunJobFormType>
   disabled: boolean
   scope: string
+  validatedFilesCache: Record<string, boolean>
 }) => {
-  const fileListQuery = useFetchFilesByUIDQuery([field?.value] || [])
-  const error = fileListQuery?.data?.length === 0
+  const fileUid = field?.value
+  const hasValue = !!fileUid && fileUid.length > 0
+  const isSuccessfullyPreValidated = validatedFilesCache[fileUid]
+
+  const fileListQuery = useQuery({
+    queryFn: () => validateFile(fileUid),
+    queryKey: ['user-list-files', fileUid],
+    enabled: !!fileUid && fileUid.length > 0 && !(isSuccessfullyPreValidated),
+  })
+
+  const error = hasValue && !(isSuccessfullyPreValidated || fileListQuery?.data === true)
 
   useEffect(() => {
     if (error) {
       setError(field.name, { type: 'custom', message: noAccessText.single })
     }
-  }, [error])
+  }, [error, setError, field.name])
 
   return (
     <>
@@ -183,6 +207,7 @@ export const JobRunInput = ({
   register,
   scope,
   setError,
+  validatedFilesCache,
 }: {
   inputSpec: InputSpec
   field: ControllerRenderProps<RunJobFormType, any>
@@ -191,6 +216,7 @@ export const JobRunInput = ({
   register: UseFormRegister<RunJobFormType>
   setError: UseFormSetError<RunJobFormType>
   scope: string
+  validatedFilesCache?: Record<string, boolean>
 }) => {
   const choices = Array.isArray(inputSpec?.choices) ? inputSpec.choices : null
 
@@ -206,6 +232,7 @@ export const JobRunInput = ({
           field={field}
           inputSpec={inputSpec}
           scope={scope}
+          validatedFilesCache={validatedFilesCache || {}}
         />
       )
     }
@@ -218,6 +245,7 @@ export const JobRunInput = ({
           field={field}
           inputSpec={inputSpec}
           scope={scope}
+          validatedFilesCache={validatedFilesCache || {}}
         />
       )
     }

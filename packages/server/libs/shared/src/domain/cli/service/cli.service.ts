@@ -32,7 +32,7 @@ import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { FILE_STI_TYPE } from '@shared/domain/user-file/user-file.types'
 import { Workflow } from '@shared/domain/workflow/entity/workflow.entity'
 import { STATIC_SCOPE } from '@shared/enums'
-import { NotFoundError, PermissionError } from '@shared/errors'
+import { InvalidStateError, NotFoundError, PermissionError } from '@shared/errors'
 import { PlatformClient } from '@shared/platform-client'
 import { SCOPE } from '@shared/types/common'
 
@@ -47,7 +47,7 @@ export class CliService {
   ) {}
 
   /**
-   * entity can be one of: file, asset - also file, app, workflow, job.
+   * entity can be one of: file, asset - also file, app, workflow, job, discussion.
    * Consolidating both pFDA and platform data for the response.
    * @param uid - UID of the entity to describe
    */
@@ -61,8 +61,10 @@ export class CliService {
         return await this.describeApp(uid as Uid<'app'>)
       case 'job':
         return await this.describeExecution(uid as Uid<'job'>)
+      case 'discussion':
+        return await this.describeDiscussion(parseInt(uid.split('-')[1]))
       default:
-        throw new Error('Entity not found')
+        throw new InvalidStateError('Unsupported entity type!')
     }
   }
 
@@ -139,38 +141,6 @@ export class CliService {
     return CliExecutionDescribeDTO.mapToDTO(platformExecutionData, execution)
   }
 
-  async listSpaceMembers(spaceId: number) {
-    const space = await this.em.findOne(Space, {
-      id: spaceId,
-      spaceMemberships: { user: this.user.id },
-    })
-    if (!space) {
-      throw new NotFoundError('Space does not exist or is not accessible')
-    }
-    const memberships = await this.em.find(
-      SpaceMembership,
-      { spaces: spaceId },
-      {
-        orderBy: {
-          side: 'ASC',
-          role: 'ASC',
-        },
-      },
-    )
-
-    return await Promise.all(
-      memberships.map((membership) => CliSpaceMemberDTO.mapToDTO(membership)),
-    )
-  }
-
-  async listSpaceDiscussions(spaceId: number) {
-    const discussions = await this.discussionService.getDiscussions(`space-${spaceId}`)
-
-    return discussions.map((d: DiscussionDTO) => {
-      return CliDiscussionDTO.mapToDTO(d)
-    })
-  }
-
   async describeDiscussion(discussionId: number) {
     const discussion = await this.discussionService.getDiscussion(discussionId)
     const attachments = await this.discussionService.getAttachments(discussion.note.id)
@@ -213,6 +183,38 @@ export class CliService {
     }
 
     return result
+  }
+
+  async listSpaceMembers(spaceId: number) {
+    const space = await this.em.findOne(Space, {
+      id: spaceId,
+      spaceMemberships: { user: this.user.id },
+    })
+    if (!space) {
+      throw new NotFoundError('Space does not exist or is not accessible')
+    }
+    const memberships = await this.em.find(
+      SpaceMembership,
+      { spaces: spaceId },
+      {
+        orderBy: {
+          side: 'ASC',
+          role: 'ASC',
+        },
+      },
+    )
+
+    return await Promise.all(
+      memberships.map((membership) => CliSpaceMemberDTO.mapToDTO(membership)),
+    )
+  }
+
+  async listSpaceDiscussions(spaceId: number) {
+    const discussions = await this.discussionService.getDiscussions(`space-${spaceId}`)
+
+    return discussions.map((d: DiscussionDTO) => {
+      return CliDiscussionDTO.mapToDTO(d)
+    })
   }
 
   async getJobScope(jobDxid: DxId<'job'>) {

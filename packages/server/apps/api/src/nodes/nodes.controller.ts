@@ -5,12 +5,11 @@ import { NodesInputDTO } from '@shared/domain/user-file/dto/nodes-input.dto'
 import { NodesLockOperation } from '@shared/domain/user-file/ops/node-lock'
 import { NodesUnlockOperation } from '@shared/domain/user-file/ops/node-unlock'
 import { RequestNodesLockOperation } from '@shared/domain/user-file/ops/start-lock-nodes-job'
-import { StartRemoveNodesJob } from '@shared/domain/user-file/ops/start-remove-nodes-job'
 import { RequestNodesUnlockOperation } from '@shared/domain/user-file/ops/start-unlock-nodes-job'
 import { UserOpsCtx } from '@shared/types'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { UserContextGuard } from '../user-context/guard/user-context.guard'
-import { UserFileService } from '@shared/domain/user-file/service/user-file.service'
+import { RemoveNodesFacade } from '@shared/facade/node-remove/remove-nodes.facade'
 
 @UseGuards(UserContextGuard)
 @Controller('/nodes')
@@ -19,7 +18,7 @@ export class NodesController {
     private readonly user: UserContext,
     @Inject(DEPRECATED_SQL_ENTITY_MANAGER) private readonly em: SqlEntityManager,
     private readonly logger: Logger,
-    private readonly userFileService: UserFileService,
+    private readonly removeNodesFacade: RemoveNodesFacade,
   ) {}
 
   @HttpCode(204)
@@ -60,18 +59,13 @@ export class NodesController {
 
   @Delete('/remove')
   async removeNodes(@Body() input: NodesInputDTO) {
-    const opsCtx: UserOpsCtx = {
-      log: this.logger,
-      user: this.user,
-      em: this.em,
-    }
-
     const { ids, async } = input
 
     if (async) {
-      await new StartRemoveNodesJob(opsCtx).execute({ ids })
+      await this.removeNodesFacade.removeNodesAsync(ids)
     } else {
-      return await this.userFileService.removeNodes(ids, async)
+      const res = await this.removeNodesFacade.removeNodes(ids)
+      return res.removedFoldersCount + res.removedFilesCount
     }
   }
 }

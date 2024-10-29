@@ -32,7 +32,7 @@ import {
   FileStateResult,
   JobOutput,
 } from '../../platform-client/platform-client.responses'
-import { UserCtx } from '../../types'
+import { UserCtx, UserOpsCtx, WorkerOpsCtx } from '../../types'
 import { DxId } from '../entity/domain/dxid'
 import { createFileEvent, EVENT_TYPES } from '../event/event.helper'
 import { SPACE_EVENT_ACTIVITY_TYPE } from '../space-event/space-event.enum'
@@ -40,6 +40,8 @@ import { FolderService } from '../user-file/folder.service'
 import { FILE_STATE_DX, PARENT_TYPE } from '../user-file/user-file.types'
 import { UserRepository } from '../user/user.repository'
 import { JobRepository } from './job.repository'
+import { CheckStatusJob, TASK_TYPE } from '@shared/queue/task.input'
+import { Job as BullJob } from 'bull'
 
 @Injectable()
 export class JobService {
@@ -71,7 +73,32 @@ export class JobService {
     if (jobs.length > 0) {
       this.logger.log('Found non-terminal users for challenge bot user, syncing outputs')
       for (const job of jobs) {
-        await this.syncOutputs(job.dxid, challengeBotUser.id)
+        // TODO just temporary before we move to DI
+        // DI needs to take into account that the operation is run
+        // under challenge bot user
+        const user = {
+          id: challengeBotUser.id,
+          dxuser: challengeBotUser.dxuser,
+          accessToken: config.platform.challengeBotAccessToken,
+        }
+        const data: CheckStatusJob = {
+          user,
+          type: TASK_TYPE.SYNC_JOB_STATUS,
+          payload: {
+            dxid: job.dxid,
+          },
+        }
+        const bullJob = {
+          id: 1,
+          data,
+        } as unknown as BullJob
+        const ctx: WorkerOpsCtx<UserOpsCtx> = {
+          em: this.em as SqlEntityManager,
+          log: this.logger,
+          user: data.user,
+          job: bullJob,
+        }
+        await new SyncJobOperation(ctx).execute(data.payload)
       }
     } else {
       this.logger.log('No non-terminal jobs found for challenge bot user')
@@ -312,7 +339,6 @@ export class JobService {
   private async getJobResult(job: Job) {
     const result = await this.platformClient.jobFind({
       id: [job.dxid],
-      project: job.project,
       describe: true,
     })
     if (result.results.length !== 1) {

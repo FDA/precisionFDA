@@ -6,12 +6,8 @@ import { Event } from '@shared/domain/event/event.entity'
 import * as eventHelper from '@shared/domain/event/event.helper'
 import { EVENT_TYPES } from '@shared/domain/event/event.helper'
 import { NotificationService } from '@shared/domain/notification/services/notification.service'
-import { SpaceEventService } from '@shared/domain/space-event/space-event.service'
-import { SPACE_STATE, SPACE_TYPE } from '@shared/domain/space/space.enum'
-import { TaggingService } from '@shared/domain/tagging/tagging.service'
 import { UserFileCreate } from '@shared/domain/user-file/domain/user-file-create'
 import { Folder } from '@shared/domain/user-file/folder.entity'
-import { FolderRepository } from '@shared/domain/user-file/folder.repository'
 import { Node } from '@shared/domain/user-file/node.entity'
 import { NodeHelper } from '@shared/domain/user-file/node.helper'
 import { NodeRepository } from '@shared/domain/user-file/node.repository'
@@ -28,11 +24,14 @@ import {
 import { User } from '@shared/domain/user/user.entity'
 import { UserRepository } from '@shared/domain/user/user.repository'
 import { NOTIFICATION_ACTION, SEVERITY, STATIC_SCOPE } from '@shared/enums'
-import { DeleteRelationError, PermissionError } from '@shared/errors'
+import { PermissionError } from '@shared/errors'
 import { PlatformClient } from '@shared/platform-client'
 import * as queue from '@shared/queue'
 import { expect } from 'chai'
-import sinon, { SinonStub, match, restore, stub } from 'sinon'
+import sinon, { SinonStub, match, stub } from 'sinon'
+import { NodeService } from '@shared/domain/user-file/node.service'
+import { SpaceRepository } from '@shared/domain/space/space.repository'
+import { Space } from '@shared/domain/space/space.entity'
 
 describe('UserFileService', () => {
   const USER_ID = 0
@@ -92,6 +91,8 @@ describe('UserFileService', () => {
   const fileDescribeStub = stub()
   const fileRemoveStub = stub()
 
+  const spaceFindOneStub = stub()
+
   const removeTaggingsStub = stub()
 
   const createSpaceEventStub = stub()
@@ -99,6 +100,14 @@ describe('UserFileService', () => {
   const emFindStub = stub()
   const emCountStub = stub()
   const emFindOneOrFailStub = stub()
+
+  let createFileSynchronizeJobTaskStub: SinonStub
+  let loadNodesStub = stub()
+  let getNodePathStub: SinonStub
+  let createFileEventStub: SinonStub
+  let createFolderEventStub: SinonStub
+  let collectChildrenStub = stub()
+  let referenceCreateStub: SinonStub
 
   const userClient = {
     fileDownloadLink: fileDownloadLinkStub,
@@ -142,12 +151,12 @@ describe('UserFileService', () => {
     findOne: fileRepoFindOneStub,
     count: fileRepoCountStub,
   } as unknown as UserFileRepository
-  const folderRepository = {
-    findOne: folderRepoFindOneStub,
-  } as unknown as FolderRepository
   const userRepository = {
     findOneOrFail: userRepoFindOneOrFailStub,
   } as unknown as UserRepository
+  const spaceRepository = {
+    findOne: spaceFindOneStub,
+  } as unknown as SpaceRepository
   const nodeRepository = {
     findOneOrFail: nodeRepoFindOneOrFailStub,
     loadIfAccessibleByUser: nodeLoadIfAccessibleByUserStub,
@@ -178,32 +187,19 @@ describe('UserFileService', () => {
     getEntityDownloadLink: getEntityDownloadLinkStub,
   } as unknown as EntityService
 
-  const taggingService = {
-    removeTaggings: removeTaggingsStub,
-  } as unknown as TaggingService
-
-  const spaceEventService = {
-    createSpaceEvent: createSpaceEventStub,
-  } as unknown as SpaceEventService
-
-  let createFileSynchronizeJobTaskStub: SinonStub
-  let loadNodesStub: SinonStub
-  let getNodePathStub: SinonStub
-  let createFileEventStub: SinonStub
-  let createFolderEventStub: SinonStub
-  let collectChildrenStub: SinonStub
-
-  before(() => {
-    stub(Reference, 'create').withArgs(USER).returns(USER)
-    createFileSynchronizeJobTaskStub = stub(queue, 'createFileSynchronizeJobTask')
-    getNodePathStub = stub(userFileHelper, 'getNodePath')
-    loadNodesStub = stub(userFileHelper, 'loadNodes')
-    createFileEventStub = stub(eventHelper, 'createFileEvent')
-    createFolderEventStub = stub(eventHelper, 'createFolderEvent')
-    collectChildrenStub = stub(userFileHelper, 'collectChildren')
-  })
+  const nodeService = {
+    collectChildren: collectChildrenStub,
+    loadNodes: loadNodesStub,
+  } as unknown as NodeService
 
   beforeEach(() => {
+    referenceCreateStub = stub(Reference, 'create')
+    referenceCreateStub.withArgs(USER).returns(USER)
+    createFileSynchronizeJobTaskStub = stub(queue, 'createFileSynchronizeJobTask')
+    getNodePathStub = stub(userFileHelper, 'getNodePath')
+    createFileEventStub = stub(eventHelper, 'createFileEvent')
+    createFolderEventStub = stub(eventHelper, 'createFolderEvent')
+
     loadNodesStub.reset()
     loadNodesStub.throws()
     getNodePathStub.reset()
@@ -322,8 +318,12 @@ describe('UserFileService', () => {
     emFindOneOrFailStub.throws()
   })
 
-  after(() => {
-    restore()
+  afterEach(() => {
+    referenceCreateStub.restore()
+    createFileSynchronizeJobTaskStub.restore()
+    getNodePathStub.restore()
+    createFileEventStub.restore()
+    createFolderEventStub.restore()
   })
 
   describe('#createFile', () => {
@@ -509,7 +509,7 @@ describe('UserFileService', () => {
 
       // assert
       expect(loadNodesStub.calledOnce).to.be.true
-      expect(loadNodesStub.firstCall.args[1].ids).to.eq(IDs)
+      expect(loadNodesStub.firstCall.args[0]).to.eq(IDs)
 
       expect(fileDownloadLinkStub.calledTwice).to.be.true
       expect(fileDownloadLinkStub.firstCall.args[0]).to.deep.eq({
@@ -582,7 +582,11 @@ describe('UserFileService', () => {
   describe('#getDownloadLinkForUid', () => {
     const FILE_UID = 'file-uid-1'
     const FILE_NAME = 'FILE_NAME'
-    const FILE = { name: FILE_NAME, uid: FILE_UID, state: FILE_STATE_DX.CLOSED } as unknown as UserFile
+    const FILE = {
+      name: FILE_NAME,
+      uid: FILE_UID,
+      state: FILE_STATE_DX.CLOSED,
+    } as unknown as UserFile
     const OPTIONS = { preauthenticated: true }
 
     beforeEach(() => {
@@ -616,447 +620,10 @@ describe('UserFileService', () => {
       const openFile = { ...FILE, state: FILE_STATE_DX.OPEN } as unknown as UserFile
       getAccessibleByUidStub.withArgs(Node, FILE_UID).resolves(openFile)
 
-      await expect(getInstance().getDownloadLinkForUid(FILE_UID, OPTIONS)).to.be.rejectedWith(Error, "Files can only be downloaded if they are in the 'closed' state")
-    })
-  })
-
-  describe('#removeFolder', async () => {
-    const FOLDER_ID = 1
-    let folder = {
-      id: FOLDER_ID,
-      scope: STATIC_SCOPE.PUBLIC,
-      isPublic: () => true,
-      isPrivate: () => false,
-      children: {
-        init: () => [],
-        length: 0,
-      },
-      isInSpace: () => false,
-    } as unknown as Folder
-
-    it('test remove folder', async () => {
-      folderRepoFindOneStub.withArgs(FOLDER_ID).returns(folder)
-      getNodePathStub.returns('')
-      removeTaggingsStub.reset()
-      createFolderEventStub.reset()
-      removeStub.reset()
-
-      const result = await getInstance().removeFolder(FOLDER_ID)
-
-      expect(result).to.eq(1)
-
-      expect(getNodePathStub.calledOnce).to.be.true
-      expect(getNodePathStub.firstCall.args[1].id).to.eq(FOLDER_ID)
-
-      expect(removeTaggingsStub.calledOnce).to.be.true
-      expect(removeTaggingsStub.firstCall.args[0]).to.eq(FOLDER_ID)
-
-      expect(createFolderEventStub.calledOnce).to.be.true
-      expect(createFolderEventStub.firstCall.args[0]).to.eq(EVENT_TYPES.FOLDER_DELETED)
-
-      expect(removeStub.calledOnce).to.be.true
-      expect(removeStub.firstCall.args[0].id).to.eq(FOLDER_ID)
-    })
-
-    it('test fail remove folder - protected space', async () => {
-      folder = {
-        id: FOLDER_ID,
-        name: 'folder-name',
-        scope: 'space-1',
-        children: {
-          init: () => [],
-          length: 0,
-        },
-        isInSpace: () => true,
-        getSpaceId: () => 1,
-      } as unknown as Folder
-      folderRepoFindOneStub.withArgs(FOLDER_ID).returns(folder)
-      emFindOneOrFailStub.returns({
-        protected: true,
-        spaceMemberships: {
-          getItems: () => [],
-        },
-      })
-      emFindOneStub.returns(undefined)
-
-      await expect(getInstance().removeFolder(FOLDER_ID)).to.be.rejectedWith(
+      await expect(getInstance().getDownloadLinkForUid(FILE_UID, OPTIONS)).to.be.rejectedWith(
         Error,
-        'You have no permissions to remove from a Protected Space',
+        "Files can only be downloaded if they are in the 'closed' state",
       )
-    })
-
-    it('test fail remove folder with children', async () => {
-      folder = {
-        id: FOLDER_ID,
-        name: 'folder-name',
-        scope: STATIC_SCOPE.PUBLIC,
-        children: {
-          init: () => [{}],
-          length: 1,
-        },
-        isInSpace: () => false,
-      } as unknown as Folder
-      folderRepoFindOneStub.withArgs(FOLDER_ID).returns(folder)
-      await expect(getInstance().removeFolder(FOLDER_ID)).to.be.rejectedWith(
-        Error,
-        `Cannot remove folder ${folder.name} with children. Remove children first.`,
-      )
-    })
-
-    it('test fail remove folder - editable by private scope and different user', async () => {
-      folder = {
-        id: FOLDER_ID,
-        name: 'folder-name',
-        scope: STATIC_SCOPE.PRIVATE,
-        isPrivate: () => true,
-        isPublic: () => false,
-        user: { id: 2 },
-        children: {
-          init: () => [],
-          length: 0,
-        },
-        isInSpace: () => false,
-      } as unknown as Folder
-      folderRepoFindOneStub.withArgs(FOLDER_ID).returns(folder)
-      await expect(getInstance().removeFolder(FOLDER_ID)).to.be.rejectedWith(
-        PermissionError,
-        `You have no permissions to remove '${folder.name}'.`,
-      )
-    })
-
-    it('test fail remove folder in locked verification space', async () => {
-      folder = {
-        id: FOLDER_ID,
-        name: 'folder-name',
-        scope: 'space-1',
-        isPublic: () => false,
-        isPrivate: () => false,
-        user: {
-          id: USER_ID,
-        },
-        children: {
-          init: () => [],
-          length: 0,
-        },
-        isInSpace: () => true,
-        getSpaceId: () => 1,
-      } as unknown as Folder
-      folderRepoFindOneStub.withArgs(FOLDER_ID).returns(folder)
-      emFindOneOrFailStub.returns({
-        type: SPACE_TYPE.VERIFICATION,
-        state: SPACE_STATE.LOCKED,
-      })
-      emFindOneStub.returns(undefined)
-
-      await expect(getInstance().removeFolder(FOLDER_ID)).to.be.rejectedWith(
-        Error,
-        `You have no permissions to remove ${folder.name} as` +
-          ' it is part of Locked Verification space.',
-      )
-    })
-
-    it('test fail remove file in space with no membership', async () => {
-      folder = {
-        id: FOLDER_ID,
-        name: 'folder-name',
-        scope: 'space-1',
-        isPublic: () => false,
-        isPrivate: () => false,
-        user: {
-          id: 1234,
-        },
-        children: {
-          init: () => [],
-          length: 0,
-        },
-        isInSpace: () => true,
-        getSpaceId: () => 1,
-      } as unknown as Folder
-      folderRepoFindOneStub.withArgs(FOLDER_ID).returns(folder)
-      emFindOneOrFailStub.returns({
-        protected: false,
-        spaceMemberships: {
-          getItems: () => [],
-        },
-      })
-      emFindOneStub.returns(undefined)
-
-      await expect(getInstance().removeFolder(FOLDER_ID)).to.be.rejectedWith(
-        Error,
-        `You have no permissions to remove '${folder.name}'.`,
-      )
-    })
-  })
-
-  describe('#removeFile', async () => {
-    const FILE_ID = 1
-    let file = {
-      id: FILE_ID,
-      scope: STATIC_SCOPE.PUBLIC,
-      isPublic: () => true,
-      isPrivate: () => false,
-      isInSpace: () => false,
-    } as unknown as UserFile
-
-    beforeEach(() => {
-      fileRepoFindOneOrFailStub.withArgs(FILE_ID).returns(file)
-      emFindStub.returns(undefined)
-    })
-
-    it('test remove file', async () => {
-      emFindStub.returns(undefined)
-      getNodePathStub.returns('')
-      removeTaggingsStub.reset()
-      createFileEventStub.reset()
-      emCountStub.returns(0)
-      fileRepoCountStub.returns(0)
-      removeStub.reset()
-      fileRemoveStub.reset()
-
-      const result = await getInstance().removeFile(FILE_ID)
-
-      expect(result).to.eq(1)
-
-      expect(getNodePathStub.calledOnce).to.be.true
-      expect(getNodePathStub.firstCall.args[1].id).to.eq(FILE_ID)
-
-      expect(removeTaggingsStub.calledOnce).to.be.true
-      expect(removeTaggingsStub.firstCall.args[0]).to.eq(FILE_ID)
-
-      expect(createFileEventStub.calledOnce).to.be.true
-      expect(createFileEventStub.firstCall.args[0]).to.eq(EVENT_TYPES.FILE_DELETED)
-
-      expect(removeStub.calledOnce).to.be.true
-      expect(removeStub.firstCall.args[0].id).to.eq(FILE_ID)
-    })
-
-    it('test fail remove file in comparison', async () => {
-      emFindStub.returns([{}]) // it's in a comparison
-
-      await expect(getInstance().removeFile(FILE_ID)).to.be.rejectedWith(
-        Error,
-        `File ${file.name} cannot be deleted because it participates` +
-          ' in one or more comparisons. Please delete all the comparisons first.',
-      )
-    })
-
-    it('test fail remove file not editable', async () => {
-      file = {
-        id: FILE_ID,
-        name: 'file-name',
-        scope: STATIC_SCOPE.PRIVATE,
-        isPrivate: () => true,
-        isPublic: () => false,
-        user: { id: 2 },
-        isInSpace: () => false,
-      } as unknown as UserFile
-      fileRepoFindOneOrFailStub.withArgs(FILE_ID).returns(file)
-
-      await expect(getInstance().removeFile(FILE_ID)).to.be.rejectedWith(
-        PermissionError,
-        `You have no permissions to remove '${file.name}'.`,
-      )
-    })
-
-    it('test fail remove file locked', async () => {
-      file = {
-        id: FILE_ID,
-        name: 'file-name',
-        locked: true,
-      } as unknown as UserFile
-      fileRepoFindOneOrFailStub.withArgs(FILE_ID).returns(file)
-
-      await expect(getInstance().removeFile(FILE_ID)).to.be.rejectedWith(
-        Error,
-        'Locked items cannot be removed.',
-      )
-    })
-
-    it('test fail remove file in verification space', async () => {
-      file = {
-        id: FILE_ID,
-        name: 'file-name',
-        scope: 'space-1',
-        isPublic: () => false,
-        isPrivate: () => false,
-        user: {
-          id: USER_ID,
-        },
-        isInSpace: () => true,
-        getSpaceId: () => 1,
-      } as unknown as UserFile
-      fileRepoFindOneOrFailStub.withArgs(FILE_ID).returns(file)
-      emFindOneOrFailStub.returns({
-        type: SPACE_TYPE.VERIFICATION,
-        state: SPACE_STATE.LOCKED,
-      })
-
-      await expect(getInstance().removeFile(FILE_ID)).to.be.rejectedWith(
-        Error,
-        `You have no permissions to remove ${file.name} as` +
-          ' it is part of Locked Verification space.',
-      )
-    })
-
-    it('test fail remove file in protected space', async () => {
-      file = {
-        id: FILE_ID,
-        name: 'file-name',
-        scope: 'space-1',
-        isPublic: () => false,
-        isPrivate: () => false,
-        user: {
-          id: USER_ID,
-        },
-        isInSpace: () => true,
-        getSpaceId: () => 1,
-      } as unknown as UserFile
-      fileRepoFindOneOrFailStub.withArgs(FILE_ID).returns(file)
-      emFindOneOrFailStub.returns({
-        protected: true,
-        spaceMemberships: {
-          getItems: () => [],
-        },
-      })
-
-      await expect(getInstance().removeFile(FILE_ID)).to.be.rejectedWith(
-        Error,
-        `You have no permissions to remove from a Protected Space`,
-      )
-    })
-
-    it('test fail to remove file in space reports', async () => {
-      file = {
-        id: FILE_ID,
-        name: 'file-name',
-        scope: STATIC_SCOPE.PRIVATE,
-        isPublic: () => false,
-        isPrivate: () => true,
-        user: {
-          id: USER_ID,
-        },
-        isInSpace: () => false,
-      } as unknown as UserFile
-      fileRepoFindOneOrFailStub.withArgs(FILE_ID).returns(file)
-      emCountStub.returns(5)
-
-      await expect(getInstance().removeFile(FILE_ID)).to.be.rejectedWith(
-        DeleteRelationError,
-        'Cannot delete a file, as it is related to a space report',
-      )
-    })
-  })
-
-  describe('#removeNodes', async () => {
-    it('test remove nodes', async () => {
-      clearStub.reset()
-      const fileInRoot = {
-        id: 1,
-        name: 'file-in-root',
-        stiType: FILE_STI_TYPE.USERFILE,
-        scope: STATIC_SCOPE.PUBLIC,
-        isPublic: () => true,
-        isPrivate: () => false,
-        isInSpace: () => false,
-      } as UserFile
-      const folderInRoot = {
-        id: 2,
-        name: 'folder-in-root',
-        scope: STATIC_SCOPE.PUBLIC,
-        isPublic: () => true,
-        isPrivate: () => false,
-        children: {
-          init: () => [],
-          length: 0,
-        },
-        isInSpace: () => false,
-      } as unknown as Folder
-      const nestedFolder = {
-        id: 3,
-        name: 'nested-folder',
-        parentFolder: folderInRoot,
-        scope: STATIC_SCOPE.PUBLIC,
-        isPublic: () => true,
-        isPrivate: () => false,
-        children: {
-          init: () => [],
-          length: 0,
-        },
-        isInSpace: () => false,
-      } as unknown as Folder
-      const fileInNestedFolder = {
-        id: 4,
-        name: 'nested-file',
-        stiType: FILE_STI_TYPE.USERFILE,
-        parentFolder: nestedFolder,
-        scope: STATIC_SCOPE.PUBLIC,
-        isPublic: () => true,
-        isPrivate: () => false,
-        isInSpace: () => false,
-      } as unknown as Folder
-      loadNodesStub.returns([fileInNestedFolder, nestedFolder, folderInRoot, fileInRoot])
-      fileRepoCountStub.returns(0)
-
-      folderRepoFindOneStub.withArgs(folderInRoot.id).returns(folderInRoot)
-      folderRepoFindOneStub.withArgs(nestedFolder.id).returns(nestedFolder)
-      fileRepoFindOneOrFailStub.withArgs(fileInNestedFolder.id).returns(fileInNestedFolder)
-      fileRepoFindOneOrFailStub.withArgs(fileInRoot.id).returns(fileInRoot)
-      emFindStub.reset()
-      emCountStub.reset()
-      getNodePathStub.returns('')
-      removeTaggingsStub.reset()
-      createFolderEventStub.reset()
-      createFileEventStub.reset()
-      fileRepoCountStub.returns(0)
-      removeStub.reset()
-
-      const result = await getInstance().removeNodes([4, 3, 2, 1], false)
-
-      expect(result).to.eq(4)
-
-      expect(removeStub.callCount).to.eq(4)
-      expect(removeStub.firstCall.args[0].id).to.eq(4)
-      expect(removeStub.secondCall.args[0].id).to.eq(3)
-      expect(removeStub.thirdCall.args[0].id).to.eq(2)
-      expect(createNotificationStub.notCalled).to.be.true
-
-      createNotificationStub.reset()
-      await getInstance().removeNodes([4, 3, 2, 1], true)
-      expect(createNotificationStub.callCount).to.eq(1)
-      expect(createNotificationStub.firstCall.args[0].message).to.eq(
-        'Successfully deleted 2 files and 2 folders',
-      )
-      expect(createNotificationStub.firstCall.args[0].severity).to.eq(SEVERITY.INFO)
-      expect(createNotificationStub.firstCall.args[0].action).to.eq(
-        NOTIFICATION_ACTION.NODES_REMOVED,
-      )
-      expect(createNotificationStub.firstCall.args[0].userId).to.eq(USER_ID)
-    })
-
-    it('test remove nodes - fail async true - no error', async () => {
-      loadNodesStub.returns([{}])
-      userRepoFindOneOrFailStub.throws()
-      createNotificationStub.returns({})
-      clearStub.returns({})
-
-      await getInstance().removeNodes([1], true)
-
-      expect(createNotificationStub.calledOnce).to.be.true
-      expect(createNotificationStub.firstCall.args[0].message).to.eq('Error')
-      expect(createNotificationStub.firstCall.args[0].severity).to.eq(SEVERITY.ERROR)
-      expect(createNotificationStub.firstCall.args[0].action).to.eq(
-        NOTIFICATION_ACTION.NODES_REMOVED,
-      )
-    })
-
-    it('test remove nodes - fail async false', async () => {
-      loadNodesStub.returns([{}])
-      userRepoFindOneOrFailStub.throws()
-      clearStub.returns({})
-
-      await expect(getInstance().removeNodes([1], false)).to.be.rejectedWith(Error, '')
-
-      expect(createNotificationStub.notCalled).to.be.true
     })
   })
 
@@ -1112,11 +679,13 @@ describe('UserFileService', () => {
     const FILE_DXID3 = 'file-uid3'
     const existingFile1 = {
       id: 1,
+      dxid: FILE_DXID1,
       uid: FILE_UID1,
       scope: SPACE,
     } as unknown as UserFile
     const existingFile2 = {
       id: 2,
+      dxid: FILE_DXID2,
       uid: FILE_UID2,
       scope: SPACE,
     } as unknown as UserFile
@@ -1134,22 +703,51 @@ describe('UserFileService', () => {
       getEditableSpacesStub.returns(['space-1'])
       getEditableStub
         .withArgs(UserFile, {
-          dxid: FILE_DXID1,
+          dxid: { $in: [FILE_DXID1, FILE_DXID2, FILE_DXID3] },
           scope: SPACE,
         })
-        .returns([existingFile1])
-      getEditableStub
-        .withArgs(UserFile, {
-          dxid: FILE_DXID2,
-          scope: SPACE,
-        })
-        .returns([existingFile2])
-      getEditableStub.withArgs(UserFile, { dxid: FILE_DXID3, scope: SPACE }).returns([])
+        .returns([existingFile1, existingFile2])
       getNodePathStub.returns('path')
 
       const res = await getInstance().validateCopyFiles([FILE_UID1, FILE_UID2, FILE_UID3], SPACE)
       expect(Object.keys(res).length).to.eq(2)
     })
+  })
+
+  describe('#validateProtectedSpaces', () => {
+    const userFileService = getInstance()
+    it('do nothing if not in space', async () => {
+      const nodeNotInSpace = {
+        isInSpace: () => false,
+      } as unknown as Node
+
+      await userFileService.validateProtectedSpaces('action', 1, nodeNotInSpace)
+
+      expect(spaceFindOneStub.callCount).to.eq(0)
+    })
+
+    it('find space and find leaderships', async () => {
+      const nodeInSpace = {
+        isInSpace: () => true,
+        getSpaceId: () => 1,
+      } as unknown as Node
+      spaceFindOneStub.returns({
+        spaceMemberships: {
+          getItems: () => {
+            find: (membership) => membership
+          },
+        },
+      } as unknown as Space)
+
+      await userFileService.validateProtectedSpaces('action', 1, nodeInSpace)
+      expect(spaceFindOneStub.calledOnce).to.be.true
+      expect(spaceFindOneStub.firstCall.args[0]).to.eq(1)
+      expect(spaceFindOneStub.firstCall.args[1]).to.deep.eq({
+        populate: ['spaceMemberships', 'spaceMemberships.user'],
+      })
+    })
+
+    it('throw error if not in leadership', async () => {})
   })
 
   function getInstance() {
@@ -1161,13 +759,12 @@ describe('UserFileService', () => {
       notificationService,
       nodeRepository,
       fileRepository,
-      folderRepository,
       userRepository,
+      spaceRepository,
       entityFetcherService,
       nodesHelper,
       entityService,
-      taggingService,
-      spaceEventService,
+      nodeService,
     )
   }
 })
