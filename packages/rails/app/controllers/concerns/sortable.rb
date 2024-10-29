@@ -7,6 +7,7 @@ module Sortable
     "created_at" => %w(created_at),
     "name" => %w(name),
     "title" => %w(title),
+    "size" => %w(file_size),
     "username" => %w(users.first_name users.last_name),
     "revision" => %w(revision),
   }.freeze
@@ -55,11 +56,9 @@ module Sortable
   # @return { order => order_dir }, { :launched_on => 'DESC' }
   #   if no param values provided.
   def order_from_params(default_order = "launched_on")
-    order_by = params[:order_by].presence_in(ORDER_FIELDS.keys) || default_order
-
+    order_by_key = params[:order_by].presence_in(ORDER_FIELDS.keys) || default_order
     order_dir = order_direction(params[:order_dir])
-
-    order_query([order_by], order_dir, ORDER_FIELD_VALUES)
+    order_query(ORDER_FIELDS[order_by_key], order_dir, ORDER_FIELD_VALUES)
   end
 
   # Convert input value to array.

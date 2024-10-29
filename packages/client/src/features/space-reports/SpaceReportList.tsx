@@ -49,7 +49,7 @@ const SpaceReportListTable = ({
 }) => {
   const col = useSpaceReportColumns({ colWidths })
   const columns = useMemo(() => col, [col])
-  const data = useMemo(() => reports || [], [reports])
+  const data = useMemo(() => reports || [], [reports, selectedRows])
 
   return (
     <StyledHomeTable>

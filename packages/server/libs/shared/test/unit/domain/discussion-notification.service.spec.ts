@@ -1,9 +1,9 @@
 import { EntityManager, MySqlDriver, SqlEntityManager } from '@mikro-orm/mysql'
 import { database } from '@shared/database'
-import { Answer } from '@shared/domain/answer/answer.entity'
 import { Discussion } from '@shared/domain/discussion/discussion.entity'
 import { DiscussionNotificationService } from '@shared/domain/discussion/services/discussion-notification.service'
 import { EmailQueueJobProducer } from '@shared/domain/email/producer/email-queue-job.producer'
+import { EntityFetcherService } from '@shared/domain/entity/entity-fetcher.service'
 import { EntityService } from '@shared/domain/entity/entity.service'
 import { Note } from '@shared/domain/note/note.entity'
 import {
@@ -12,8 +12,10 @@ import {
 } from '@shared/domain/space-membership/space-membership.enum'
 import { Space } from '@shared/domain/space/space.entity'
 import { SPACE_TYPE } from '@shared/domain/space/space.enum'
+import { SpaceRepository } from '@shared/domain/space/space.repository'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { User } from '@shared/domain/user/user.entity'
+import { STATIC_SCOPE } from '@shared/enums'
 import { create, db } from '@shared/test'
 import { mocksReset } from '@shared/test/mocks'
 import { expect } from 'chai'
@@ -26,16 +28,17 @@ describe('DiscussionNotificationService', () => {
   let user3: User
   let space: Space
   let discussion: Discussion
+  let discussionNote: Note
 
   const DISCUSSION_ID = 1
   const DISCUSSION_NOTE_ID = 2
   const DISCUSSION_NOTE_TITLE = 'title'
   const DISCUSSION_LINK = 'link'
 
-  const ANSWER_ID = 3
-
   const createSendEmailTaskStub = stub()
   const getEntityUiLinkStub = stub()
+  const getEditableByIdStub = stub()
+  const findSpaceByScopeAndUserStub = stub()
 
   beforeEach(async () => {
     await db.dropData(database.connection())
@@ -63,14 +66,16 @@ describe('DiscussionNotificationService', () => {
       { role: SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR, side: SPACE_MEMBERSHIP_SIDE.HOST },
     )
     await em.flush()
-    const discussionNote = {
+    discussionNote = {
       id: DISCUSSION_NOTE_ID,
       title: DISCUSSION_NOTE_TITLE,
       scope: `space-${space.id}`,
+      isInSpace: () => true,
     } as unknown as Note
     discussion = {
       id: DISCUSSION_ID,
       user: {
+        id: user1.id,
         getEntity: () => user1,
       },
       note: {
@@ -81,10 +86,31 @@ describe('DiscussionNotificationService', () => {
     getEntityUiLinkStub.withArgs(discussion).resolves(DISCUSSION_LINK)
     mocksReset()
     createSendEmailTaskStub.reset()
+    getEditableByIdStub.reset()
+    findSpaceByScopeAndUserStub.reset()
   })
 
-  it('should send email to space members seperately', async () => {
-    await getInstance(user1).notifyDiscussion(space, discussion)
+  it('should not send email if discussion is not found', async () => {
+    getEditableByIdStub.resolves(undefined)
+
+    await getInstance(user1).notifySpaceDiscussion(discussion.id, true)
+    expect(createSendEmailTaskStub.callCount).to.be.equal(0)
+  })
+
+  it('should not send email if discussion is not in a space', async () => {
+    getEditableByIdStub.resolves(discussion)
+    discussionNote.scope = STATIC_SCOPE.PRIVATE
+    discussionNote.isInSpace = () => false
+
+    await getInstance(user1).notifySpaceDiscussion(discussion.id, true)
+    expect(createSendEmailTaskStub.callCount).to.be.equal(0)
+  })
+
+  it('should send email to space members seperately if notifyAll is true', async () => {
+    getEditableByIdStub.resolves(discussion)
+    findSpaceByScopeAndUserStub.resolves(space)
+
+    await getInstance(user1).notifySpaceDiscussion(discussion.id, true)
     expect(createSendEmailTaskStub.callCount).to.be.equal(3)
     expect(createSendEmailTaskStub.args[0][0].to).to.be.equal(user1.email)
     expect(createSendEmailTaskStub.args[1][0].to).to.be.equal(user2.email)
@@ -94,24 +120,16 @@ describe('DiscussionNotificationService', () => {
     )
   })
 
-  it('test notifyDiscussionAnswer', async () => {
-    const answer = {
-      id: ANSWER_ID,
-      discussion: {
-        isInitialized: () => true,
-        getEntity: () => discussion,
-      },
-      user: {
-        getEntity: () => user2,
-      },
-    } as unknown as Answer
-    await getInstance(user2).notifyDiscussionAnswer(space, answer)
-    expect(createSendEmailTaskStub.callCount).to.be.equal(3)
-  })
+  it('should send email to the poster if notifyAll is false', async () => {
+    getEditableByIdStub.resolves(discussion)
+    findSpaceByScopeAndUserStub.resolves(space)
 
-  it('test notifyDiscussionComment', async () => {
-    await getInstance(user3).notifyDiscussionComment(space, discussion)
-    expect(createSendEmailTaskStub.callCount).to.be.equal(3)
+    await getInstance(user1).notifySpaceDiscussion(discussion.id, false)
+    expect(createSendEmailTaskStub.callCount).to.be.equal(1)
+    expect(createSendEmailTaskStub.args[0][0].to).to.be.equal(user1.email)
+    expect(createSendEmailTaskStub.args[0][0].subject).to.be.equal(
+      `[precisionFDA] Discussion update notification: ${space.name}`,
+    )
   })
 
   function getInstance(user: User) {
@@ -121,10 +139,23 @@ describe('DiscussionNotificationService', () => {
     const entityService = {
       getEntityUiLink: getEntityUiLinkStub,
     } as unknown as EntityService
+    const entityFetcherService = {
+      getEditableById: getEditableByIdStub,
+    } as unknown as EntityFetcherService
     const userCtx = {
       id: user.id,
       dxuser: user.dxuser,
     } as unknown as UserContext
-    return new DiscussionNotificationService(em, emailQueueJobProducer, entityService, userCtx)
+    const spaceRepository = {
+      findSpaceByScopeAndUser: findSpaceByScopeAndUserStub,
+    } as unknown as SpaceRepository
+    return new DiscussionNotificationService(
+      em,
+      emailQueueJobProducer,
+      entityService,
+      entityFetcherService,
+      userCtx,
+      spaceRepository,
+    )
   }
 })

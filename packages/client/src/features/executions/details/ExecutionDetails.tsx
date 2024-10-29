@@ -280,7 +280,7 @@ export const ExecutionDetails = ({
         <Routes>
           <Route
             path="/"
-            element={<InputsAndOutputs runInputData={execution.run_input_data} runOutputData={execution.run_output_data} />}
+            element={<InputsAndOutputs executionState={execution.state} runInputData={execution.run_input_data} runOutputData={execution.run_output_data} />}
           />
           <Route path="logs" element={<Logs jobUid={execution.uid} jobState={execution.state} />} />
         </Routes>

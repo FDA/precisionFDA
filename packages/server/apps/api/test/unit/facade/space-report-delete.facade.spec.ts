@@ -6,7 +6,7 @@ import { expect } from 'chai'
 import type { SinonStub } from 'sinon'
 import { stub } from 'sinon'
 import { SpaceReportDeleteFacade } from '../../../src/facade/space-report/space-report-delete.facade'
-import { UserFileService } from '@shared/domain/user-file/service/user-file.service'
+import { RemoveNodesFacade } from '@shared/facade/node-remove/remove-nodes.facade'
 
 describe('SpaceReportDeleteFacade', () => {
   const SPACE_REPORT_1_ID = 0
@@ -67,7 +67,7 @@ describe('SpaceReportDeleteFacade', () => {
     deleteReportsStub.withArgs(SPACE_REPORTS).returns(SPACE_REPORT_IDS)
 
     nodesRemoveStub = stub().throws()
-    nodesRemoveStub.withArgs(FILE_IDS, false).returns(undefined)
+    nodesRemoveStub.withArgs(FILE_IDS, true).returns(undefined)
   })
 
   it('should run under transaction', async () => {
@@ -161,10 +161,15 @@ describe('SpaceReportDeleteFacade', () => {
       deleteReports: deleteReportsStub,
     } as unknown as SpaceReportService
 
-    const userFileService = {
+    const removeNodesService = {
       removeNodes: nodesRemoveStub,
-    } as unknown as UserFileService
+    } as unknown as RemoveNodesFacade
 
-    return new SpaceReportDeleteFacade(em, spaceReportService, userFileService, user as UserContext)
+    return new SpaceReportDeleteFacade(
+      em,
+      spaceReportService,
+      removeNodesService,
+      user as UserContext,
+    )
   }
 })

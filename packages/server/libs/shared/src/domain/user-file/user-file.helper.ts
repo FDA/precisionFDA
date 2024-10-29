@@ -8,16 +8,12 @@ import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { difference, isNil } from 'ramda'
 import { STATIC_SCOPE } from '../../enums'
-import { PermissionError } from '../../errors'
 import { SPACE_MEMBERSHIP_ROLE } from '../space-membership/space-membership.enum'
-import { CAN_EDIT_ROLES } from '../space-membership/space-membership.helper'
-import { SPACE_STATE, SPACE_TYPE } from '../space/space.enum'
 import { Asset } from './asset.entity'
 import { AssetRepository } from './asset.repository'
 import { FolderRepository } from './folder.repository'
-import { IdsInput, nodeQueryFilter } from './user-file.input'
 import { UserFileRepository } from './user-file.repository'
-import { FILE_STI_TYPE, IFileOrAsset } from './user-file.types'
+import { IFileOrAsset } from './user-file.types'
 
 // Split folder path into a list of folder names
 const splitFolderPath = (pathStr: string) => pathStr.split('/').slice(1)
@@ -260,81 +256,6 @@ const getNodePath = async (
   return getNodePath(em, parentFolder as Node, folders)
 }
 
-const validateVerificationSpace = async (em: SqlEntityManager, node: Node): Promise<void> => {
-  if (node.isInSpace()) {
-    const spaceId = node.getSpaceId()
-    const space = await em.findOneOrFail(Space, { id: spaceId })
-    if (space.type === SPACE_TYPE.VERIFICATION && space.state === SPACE_STATE.LOCKED) {
-      throw new Error(
-        `You have no permissions to remove ${node.name} as` +
-          ' it is part of Locked Verification space.',
-      )
-    }
-  }
-}
-
-/**
- * Validates for Protected Spaces. If node is in protected space then
- * given userId needs to be in a lead role otherwise error is thrown.
- *
- * @param em EntityManager instance
- * @param action action that is to be performed on the node (for possible validation error message)
- * @param userId current user
- * @param node node that is being verified
- */
-const validateProtectedSpaces = async (
-  em: SqlEntityManager,
-  action: string,
-  userId: number,
-  node: Node,
-) => {
-  if (node.isInSpace()) {
-    const spaceId = node.getSpaceId()
-    const space = await em.findOneOrFail(Space, spaceId, {
-      populate: ['spaceMemberships', 'spaceMemberships.user'],
-    })
-    if (space.protected) {
-      const leadMemberships = space.spaceMemberships
-        .getItems()
-        .find(
-          (membership) =>
-            membership.role === SPACE_MEMBERSHIP_ROLE.LEAD && membership.user.id === userId,
-        )
-      if (!leadMemberships) {
-        throw new Error(`You have no permissions to ${action} from a Protected Space`)
-      }
-    }
-  }
-}
-
-const validateEditableBy = async (em: SqlEntityManager, node: Node, currentUser: User) => {
-  if (node.locked) {
-    throw new Error('Locked items cannot be removed.')
-  }
-  if (
-    node.isPublic() ||
-    node.user.id === currentUser.id ||
-    (await currentUser.isSiteAdmin())
-  ) {
-    return
-  }
-  if (node.isInSpace()) {
-    const spaceId = node.getSpaceId()
-    const space = await em.findOne(Space, {
-      id: spaceId,
-      state: SPACE_STATE.ACTIVE,
-      spaceMemberships: {
-        user: {
-          id: currentUser.id,
-        },
-        role: CAN_EDIT_ROLES,
-      },
-    })
-    if (space) return
-  }
-  throw new PermissionError(`You have no permissions to remove '${node.name}'.`)
-}
-
 const filterNodesByUser = async (em: SqlEntityManager, nodes: Node[], currentUser: User) => {
   for (const node of nodes) {
     if (node.isInSpace()) {
@@ -401,66 +322,6 @@ const findUnclosedFilesOrAssets = async (
   return results
 }
 
-/**
- * Method recursively collects all children of given node if it's a folder.
- */
-const collectChildren = async (parentFolder: Folder, wholeTree: Node[], em: SqlEntityManager) => {
-  await parentFolder.children.init()
-  if (!parentFolder?.folderPath?.length) {
-    // only called for root folder
-    const parentNode = getParentFolder(parentFolder)
-    parentFolder.folderPath = parentNode ? `${await getNodePath(em, parentNode)}/` : '/'
-  }
-  for (const childrenNode of parentFolder.children) {
-    childrenNode.folderPath = `${parentFolder.folderPath}${parentFolder.name}/`
-    if (childrenNode.stiType === FILE_STI_TYPE.FOLDER) {
-      await collectChildren(childrenNode as Folder, wholeTree, em)
-    } else {
-      wholeTree.push(childrenNode)
-    }
-  }
-  // TODO(PFDA-5325): remove this line to avoid adding folder items
-  wholeTree.push(parentFolder)
-}
-
-/**
- * Loads the whole tree that is filtered by parameters and returns
- * it sorted with leaves first
- *
- * @param em
- * @param input
- * @param filters
- * @returns
- */
-const loadNodes = async (em: SqlEntityManager, input: IdsInput, filters: nodeQueryFilter) => {
-  const nodes: Node[] = await em.find(Node, {
-    $or: [
-      {
-        id: { $in: input.ids },
-        ...filters,
-      },
-      {
-        scopedParentFolder: { $in: input.ids },
-        ...filters,
-      },
-    ],
-  })
-  await em.populate(nodes, ['parentFolder', 'scopedParentFolder'])
-  const wholeTree: Node[] = []
-  for (const node of nodes) {
-    if (node.stiType === FILE_STI_TYPE.FOLDER) {
-      await collectChildren(node as Folder, wholeTree, em)
-    } else {
-      wholeTree.push(node)
-    }
-  }
-  // ensure uniqueness
-  const unique = [...new Map(wholeTree.map((item) => [item.id, item])).values()]
-  // sort all nodes, folders last
-  unique.sort((a, b) => (a.isFolder && b.isFolder ? 0 : b.isFolder ? -1 : 1))
-  return unique
-}
-
 const getPluralizedTerm = (itemCount: number, itemName: string): string => {
   if (itemCount === 1) {
     return `${itemCount.toString()} ${itemName}`
@@ -482,7 +343,6 @@ const getSuccessMessage = (filesCount: number, foldersCount: number, message: st
 
 export {
   childrenTraverse,
-  collectChildren,
   createFoldersTraverse,
   detectIntersectedTraverse,
   filterLeafPaths,
@@ -496,10 +356,6 @@ export {
   getNodePath,
   getPathsToBuild,
   getSuccessMessage,
-  loadNodes,
   parseFoldersFromClient,
   splitFolderPath,
-  validateEditableBy,
-  validateProtectedSpaces,
-  validateVerificationSpace,
 }

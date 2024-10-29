@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
 import * as Yup from 'yup'
-import { Control, Controller, useForm, UseFormRegister } from 'react-hook-form'
+import { Control, Controller, useForm, UseFormRegister, UseFormSetError } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import {
   fetchLicensesOnWorkflow,
@@ -19,7 +19,7 @@ import { CubeIcon } from '../../../components/icons/CubeIcon'
 import { FieldGroup } from '../../../components/form/FieldGroup'
 import { JobRunInput } from '../../apps/run/JobRunInput'
 import { AcceptedLicense, InputSpec, SelectType } from '../../apps/apps.types'
-import { Section, SectionBody, SectionHeader, StyledGrid, StyledLine, Topbox, TopboxItem } from '../../apps/run/styles'
+import { Section, SectionBody, SectionHeader, StyledGrid, Topbox, TopboxItem } from '../../apps/run/styles'
 import { StyledForm } from '../../home/home.styles'
 import { StyledAnalysisName, StyledStageHeader, WorkflowConfiguration } from './styles'
 import { GearIcon } from '../../../components/icons/GearIcon'
@@ -127,9 +127,9 @@ const getLicensesToAccept = (
   )
 }
 
-const WorkflowStage = ({ app, stage, errors, isSubmitting, control, register }:
+const WorkflowStage = ({ app, stage, errors, isSubmitting, control, register, setError }:
   { app: any, stage: Stage, errors: any, isSubmitting: boolean,
-    control: Control<any>, register: UseFormRegister<any>}) => {
+    control: Control<any>, register: UseFormRegister<any>, setError: UseFormSetError<RunWorkflowFormType>}) => {
 
   return (<> {hasUnfilledInputs(stage) &&
     <>
@@ -148,6 +148,7 @@ const WorkflowStage = ({ app, stage, errors, isSubmitting, control, register }:
                   inputSpec={inputSpec}
                   errors={errors}
                   disabled={isSubmitting}
+                  setError={setError}
                   register={register}
                   scope={app.scope}
                   />
@@ -209,6 +210,7 @@ const RunWorkflowForm = (
   const {
     control,
     register,
+    setError,
     handleSubmit,
     formState: { errors, isSubmitting },
     getValues,
@@ -310,6 +312,7 @@ const RunWorkflowForm = (
                   app={apps.find(app => app.dxid === stage.app_dxid)}
                   control={control}
                   register={register}
+                  setError={setError}
                   isSubmitting={isSubmitting}
                 />
               ))}

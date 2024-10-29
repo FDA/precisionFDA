@@ -8,12 +8,14 @@ import {
   Property,
   Reference,
   Filter,
+  EntityRepositoryType,
 } from '@mikro-orm/core'
 import { App } from '@shared/domain/app/app.entity'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { STATIC_SCOPE } from '@shared/enums'
 import { ScopedEntity } from '@shared/database/scoped.entity'
+import { ComparisonRepository } from '@shared/domain/comparison/comparison.repository'
 
 enum COMPARISON_STATE {
   DONE = 'done',
@@ -21,7 +23,7 @@ enum COMPARISON_STATE {
   PENDING = 'pending',
 }
 
-@Entity({ tableName: 'comparisons' })
+@Entity({ tableName: 'comparisons', repository: () => ComparisonRepository })
 @Filter({
   name: 'accessibleBy',
   cond: (args) => ({
@@ -68,10 +70,11 @@ class Comparison extends ScopedEntity {
   app: Ref<App>
 
   @ManyToOne({ entity: () => User, fieldName: 'user_id', nullable: false })
-  user: Ref<User>
+  user: Ref<User>;
 
   // TODO: Add rest of the references in comparison.rb
 
+  [EntityRepositoryType]?: ComparisonRepository
   constructor(user: User, app: App) {
     super()
     this.user = Reference.create(user)

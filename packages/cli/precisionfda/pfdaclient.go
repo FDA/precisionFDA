@@ -32,7 +32,7 @@ import (
 	"github.com/manifoldco/promptui"
 )
 
-const userAgent = "precisionFDA CLI/2.7.2 "
+const userAgent = "precisionFDA CLI/2.7.3 "
 const defaultNumRoutines = 10
 const defaultChunkSize = 1 << 26 // default 64MB (min. 16MB)
 const minRoutines = 1
@@ -60,7 +60,7 @@ type IPFDAClient interface {
 	Download(args []string, folderID string, spaceID string, public bool, recursive bool, outputFilePath string, overwrite string) error
 	FileViewLink(arg string, preauthenticated bool, ttl int64) error
 	UploadResources(args []string, portalID string) error
-	DescribeEntity(entityID string, entityType string) error
+	DescribeEntity(entityID string) error
 	LsSpaces(flags map[string]bool) error
 	LsApps(spaceID string, flags map[string]bool) error
 	LsAssets(spaceID string, flags map[string]bool) error
@@ -244,7 +244,7 @@ func (c *PFDAClient) UploadAsset(rootFolderPath string, name string, readmeFileP
 	closeURL := c.BaseURL + "/api/close_asset"
 
 	// Get list of all asset files
-	fileList := []string{}
+	var fileList []string
 	assetSize := int64(0)
 	err := filepath.Walk(rootFolderPath, func(path string, f os.FileInfo, err error) error {
 		if !f.IsDir() {
@@ -793,8 +793,8 @@ func (c *PFDAClient) FileViewLink(arg string, preauthenticated bool, duration in
 	return nil
 }
 
-func (c *PFDAClient) DescribeEntity(entityID string, entityType string) error {
-	apiURL := fmt.Sprintf("%s/api/%ss/%s/describe", c.BaseURL, entityType, entityID)
+func (c *PFDAClient) DescribeEntity(entityID string) error {
+	apiURL := fmt.Sprintf("%s/api/v2/cli/%s/describe", c.BaseURL, entityID)
 
 	status, body, err := c.makeRequestFail("GET", apiURL, nil)
 	if err != nil {
@@ -1075,7 +1075,7 @@ func (c *PFDAClient) RefreshToken(autoRefresh bool) (string, error) {
 }
 
 func (c *PFDAClient) GetLatestVersion() (string, error) {
-	apiURL := fmt.Sprintf("%s/api/cli_latest_version", c.BaseURL)
+	apiURL := fmt.Sprintf("%s/api/v2/cli/version/latest", c.BaseURL)
 
 	_, body, err := c.makeRequestFail("GET", apiURL, nil)
 	if err != nil {
@@ -1409,7 +1409,9 @@ func (c *PFDAClient) sendToStore(id string, chunk uploadChunk) error {
 
 func (c *PFDAClient) setPostHeaders(req *retryablehttp.Request) {
 	req.Header.Set("User-Agent", userAgent+"("+c.Platform+")")
-	req.Header.Set("Authorization", "Key "+c.AuthKey)
+	if c.AuthKey != "" {
+		req.Header.Set("Authorization", "Key "+c.AuthKey)
+	}
 	req.Header.Set("Content-Type", "application/json")
 }
 

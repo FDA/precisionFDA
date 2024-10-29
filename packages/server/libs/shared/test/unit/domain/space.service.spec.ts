@@ -1,48 +1,110 @@
-import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
-import { database } from '@shared/database'
-import { User } from '@shared/domain/user/user.entity'
-import { getLogger } from '@shared/logger'
-import { Logger } from 'nestjs-pino'
-import { create, db } from '../../../src/test'
-import { PlatformClient } from '@shared/platform-client'
-import { OrgService } from '@shared/domain/org/service/org.service'
+import { expect } from 'chai'
+import { stub } from 'sinon'
+import { SPACE_STATE, SPACE_TYPE } from '@shared/domain/space/space.enum'
+import { GroupsSpaceCreationProcess } from '@shared/domain/space/create/groups-space-creation.process'
+import { SpaceService } from '@shared/domain/space/service/space.service'
+import { SpaceCreationProcess } from '@shared/domain/space/create/space-creation.process'
+import { SpaceRepository } from '@shared/domain/space/space.repository'
+import { CreateSpaceDto } from '@shared/domain/space/dto/create-space.dto'
+import { ServiceError } from '@shared/errors'
+import { Node } from '@shared/domain/user-file/node.entity'
 
-/**
- * This is just a test in progress.
- * We had to temporarily suspend work on it due to large complexity and lack of time.
- */
-describe('spaces service tests', () => {
-  let em: EntityManager<MySqlDriver>
-  let user: User
-  let logger: Logger
-  let userCtx: UserCtx
-  let platformClient: PlatformClient
-  let adminClient: PlatformClient
-  let orgService: OrgService
+describe('SpaceService', () => {
+  const findOneStub = stub()
+  const buildStub = stub()
+
+  const createSpaceService = () => {
+    const spaceRepository = {
+      findOne: findOneStub,
+    } as unknown as SpaceRepository
+    const buildProcess = {
+      build: buildStub,
+    } as unknown as GroupsSpaceCreationProcess
+    const spaceTypeToCreatorProviderMap = {
+      [SPACE_TYPE.GROUPS]: buildProcess,
+    } as unknown as { [T in SPACE_TYPE]: SpaceCreationProcess }
+    return new SpaceService(spaceTypeToCreatorProviderMap, spaceRepository)
+  }
 
   beforeEach(async () => {
-    await db.dropData(database.connection())
-    em = database.orm().em.fork() as EntityManager<MySqlDriver>
-    user = create.userHelper.create(em)
-    logger = getLogger()
-    await em.flush()
-    userCtx = {...user, accessToken: 'foo'}
+    findOneStub.reset()
+    findOneStub.throws()
 
-    platformClient = {
-      // TODO add methods
-    } as PlatformClient
-
-    adminClient = {
-      // TODO add methods
-    } as PlatformClient
-
-    // TODO mock orgService
-    //@ts-ignore we're not implementing all methods
-    orgService = {
-      async create(dxid: string, billable: boolean | undefined): Promise<string> {
-        return Promise.resolve("");
-      }
-    }
+    buildStub.reset()
+    buildStub.throws()
   })
 
+  describe('#create', () => {
+    it('basic', async () => {
+      buildStub.resolves()
+      const spaceService = createSpaceService()
+      const createSpaceDto = {
+        name: 'test-space',
+        spaceType: SPACE_TYPE.GROUPS,
+      } as unknown as CreateSpaceDto
+
+      await spaceService.create(createSpaceDto)
+
+      expect(buildStub.calledOnce).to.be.true
+      expect(buildStub.firstCall.args[0]).to.deep.equal(createSpaceDto)
+    })
+
+    it('validation fail', async () => {
+      buildStub.resolves()
+      const spaceService = createSpaceService()
+      const createSpaceDto = {
+        name: 'test-space',
+        spaceType: SPACE_TYPE.REVIEW,
+      } as unknown as CreateSpaceDto
+
+      await expect(spaceService.create(createSpaceDto)).to.be.rejectedWith(
+        ServiceError,
+        `Creation of ${SPACE_TYPE[SPACE_TYPE.REVIEW]} space is not available yet.`,
+      )
+    })
+  })
+
+  describe('#validateVefificationSpace', () => {
+    it('basic', async () => {
+      const node = {
+        isInSpace: () => true,
+        getSpaceId: () => 1,
+      } as unknown as Node
+      findOneStub.resolves({ type: SPACE_TYPE.REVIEW })
+      const spaceService = createSpaceService()
+
+      await spaceService.validateVerificationSpace(node)
+
+      expect(findOneStub.calledOnce).to.be.true
+      expect(findOneStub.firstCall.args[0]).to.equal(1)
+    })
+
+    it('node not in space', async () => {
+      const node = {
+        isInSpace: () => false,
+        getSpaceId: () => 1,
+      } as unknown as Node
+      const spaceService = createSpaceService()
+
+      await spaceService.validateVerificationSpace(node)
+
+      expect(findOneStub.calledOnce).to.be.false
+    })
+
+    it('validation fail', async () => {
+      const node = {
+        name: 'node',
+        isInSpace: () => true,
+        getSpaceId: () => 1,
+      } as unknown as Node
+      findOneStub.resolves({ type: SPACE_TYPE.VERIFICATION, state: SPACE_STATE.LOCKED })
+      const spaceService = createSpaceService()
+
+      await expect(spaceService.validateVerificationSpace(node)).to.be.rejectedWith(
+        Error,
+        `You have no permissions to remove ${node.name} as` +
+          ' it is part of Locked Verification space.',
+      )
+    })
+  })
 })

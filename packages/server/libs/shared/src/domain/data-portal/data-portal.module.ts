@@ -6,6 +6,7 @@ import { NotificationModule } from '@shared/domain/notification/notification.mod
 import { UserFileModule } from '@shared/domain/user-file/user-file.module'
 import { MikroOrmModule } from '@mikro-orm/nestjs'
 import { DataPortal } from '@shared/domain/data-portal/data-portal.entity'
+import { RemoveNodesFacadeModule } from '@shared/facade/node-remove/remove-nodes-facade.module'
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { DataPortal } from '@shared/domain/data-portal/data-portal.entity'
     UserFileModule,
     EntityModule,
     MikroOrmModule.forFeature([DataPortal]),
+    RemoveNodesFacadeModule,
   ],
   providers: [DataPortalService],
   exports: [DataPortalService, MikroOrmModule],
