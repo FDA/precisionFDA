@@ -315,7 +315,10 @@ export const useDefaultScopeSelection = (
 export const exportFormData = (event: React.MouseEvent<HTMLButtonElement>, formData: RunJobFormType) => {
   event.preventDefault()
   event.stopPropagation()
+
   const dataToExport = JSON.parse(JSON.stringify(formData))
+  delete dataToExport.scope
+
   if (dataToExport.inputs && Array.isArray(dataToExport.inputs)) {
     dataToExport.inputs.forEach((item: BatchInput) => delete item.id)
   }
