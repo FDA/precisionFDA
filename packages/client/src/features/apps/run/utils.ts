@@ -357,14 +357,14 @@ export const collectFileUidsFromBatchInput = (batchInput: BatchInput): FileUid[]
 }
 
 export const extractFileUidsFromBatchInputs = (batchInputs: BatchInput[]): FileUid[] => {
-  let allFileUids: FileUid[] = []
+  const allFileUidsSet = new Set<FileUid>()
 
   batchInputs.forEach(batchInput => {
     const fileUids = collectFileUidsFromBatchInput(batchInput)
-    allFileUids = [...allFileUids, ...fileUids]
+    fileUids.forEach(fileUid => allFileUidsSet.add(fileUid))
   })
 
-  return allFileUids
+  return Array.from(allFileUidsSet)
 }
 
 export const getBaseLink = (spaceId?: number) => (spaceId ? `spaces/${spaceId}` : 'home')
