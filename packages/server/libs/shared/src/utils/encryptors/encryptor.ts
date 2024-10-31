@@ -26,7 +26,7 @@ export class Encryptor {
   private static readonly algorithm = 'aes-256-gcm'
   private static readonly secretKeyBase = config.secretKeyBase
   private static readonly authEncryptedCookie = 'authenticated encrypted cookie'
-  private static readonly digest = 'sha1'
+  private static readonly digest = 'sha256'
   private static readonly iterations = 1000
   private static readonly keySize = 32
   private static readonly pfdaSession = 'cookie._precision-fda_session'
@@ -43,7 +43,7 @@ export class Encryptor {
 
   static encrypt(userSession: UserSession): string {
     try {
-      const iv = crypto.randomBytes(12)
+      const iv = crypto.randomBytes(16)
       const cipher = crypto.createCipheriv(this.algorithm, this.derivedKey, iv)
 
       const sessionStr = Buffer.from(JSON.stringify(userSession)).toString('base64')
@@ -80,11 +80,11 @@ export class Encryptor {
       )
       decipher.setAuthTag(Buffer.from(authTag, 'base64'))
 
-      let deccrypted = decipher.update(encryptedValue, 'base64', 'utf8')
-      deccrypted += decipher.final('utf8')
+      let decrypted = decipher.update(encryptedValue, 'base64', 'utf8')
+      decrypted += decipher.final('utf8')
 
-      const deccryptedObj = JSON.parse(deccrypted) as RailsToken
-      const message = deccryptedObj._rails.message
+      const decryptedObj = JSON.parse(decrypted) as RailsToken
+      const message = decryptedObj._rails.message
       const session = Buffer.from(message, 'base64').toString('utf8')
       return JSON.parse(session) as UserSession
     } catch (error) {
