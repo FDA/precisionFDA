@@ -43,7 +43,7 @@ export class Encryptor {
 
   static encrypt(userSession: UserSession): string {
     try {
-      const iv = crypto.randomBytes(16)
+      const iv = crypto.randomBytes(12)
       const cipher = crypto.createCipheriv(this.algorithm, this.derivedKey, iv)
 
       const sessionStr = Buffer.from(JSON.stringify(userSession)).toString('base64')
