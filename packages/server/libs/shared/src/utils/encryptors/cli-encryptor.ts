@@ -16,7 +16,7 @@ export class CliEncryptor {
   private static readonly secretKeyBase = config.secretKeyBase
   private static readonly iterations = 1000
   private static readonly keySize = 32
-  private static readonly digest = 'sha1'
+  private static readonly digest = 'sha256'
   private static readonly encryptedCookieSalt = 'encrypted cookie'
   private static readonly encryptedSignedCookieSalt = 'signed encrypted cookie'
 
@@ -41,7 +41,7 @@ export class CliEncryptor {
   }
 
   private static validateToken = (data: string, digest: string) => {
-    const hmac = crypto.createHmac('sha1', this.signedSecretKey)
+    const hmac = crypto.createHmac('sha256', this.signedSecretKey)
     hmac.update(data)
     return SecurityUtils.secureCompare(hmac.digest(), Buffer.from(digest, 'hex'))
   }
