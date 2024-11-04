@@ -106,6 +106,9 @@ export interface IExecution {
   energy_consumption: string
   cost_limit: number
   duration: string
+  duration_in_seconds: number
+  startedRunning?: number
+  stoppedRunning?: number
   instance_type: keyof typeof RESOURCE_LABELS
   launched_by: string
   launched_by_dxuser: string

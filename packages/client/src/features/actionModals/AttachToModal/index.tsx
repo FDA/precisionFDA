@@ -10,13 +10,7 @@ import { Loader } from '../../../components/Loader'
 import { ModalHeaderTop, ModalNext } from '../../modal/ModalNext'
 import { ButtonRow, Footer, ModalScroll } from '../../modal/styles'
 import { ATTACHABLE_TYPES } from '../useAttachToModal'
-import {
-  LeftBar,
-  NoteContainer,
-  NotesMarkdown,
-  SearchInput,
-  StyledAttachToModal,
-} from './styles'
+import { LeftBar, NoteContainer, NotesMarkdown, SearchInput, StyledAttachToModal } from './styles'
 import { useAttachToMutation } from './useAttachToMutation'
 import { useListNotesQuery } from './useListNotesQuery'
 import { Button, TransparentButton } from '../../../components/Button'
@@ -29,17 +23,7 @@ const types = {
   WORKFLOW: 'Workflow',
 } as Record<ATTACHABLE_TYPES, string>
 
-export const AttachToModal = ({
-  isShown,
-  hideAction,
-  ids,
-  itemsType,
-}: {
-  isShown: boolean
-  hideAction: () => void
-  ids: string[] | number[]
-  itemsType: ATTACHABLE_TYPES
-}) => {
+const AttachTo = ({ hideAction, ids }: { hideAction: () => void; ids: string[] | number[] }) => {
   const { data: notesData, isLoading } = useListNotesQuery()
   const mutation = useAttachToMutation()
   const items = notesData || []
@@ -69,18 +53,16 @@ export const AttachToModal = ({
       }
     })
 
-    await mutation.mutateAsync({ items: it, noteUids: [...checkedItemIds]})
+    await mutation.mutateAsync({ items: it, noteUids: [...checkedItemIds] })
     setSelectedItem({})
     setCheckedItemIds(new Set())
     hideAction()
   }
+  
+  if (isLoading) return <Loader />
 
   const reg = new RegExp(search, 'i')
-  const filteredItems = search
-    ? items.filter((e: any) => reg.test(e.title))
-    : items
-
-  if (isLoading) return <Loader />
+  const filteredItems = search ? items.filter((e: any) => reg.test(e.title)) : items
 
   const itemsList = filteredItems.map(note => {
     const classes = classNames(
@@ -91,23 +73,10 @@ export const AttachToModal = ({
     )
 
     return (
-      <li
-        key={note.uid}
-        className={classes}
-        onClick={() => setSelectedItem(note)}
-        onKeyPress={() => setSelectedItem(note)}
-      >
+      <li key={note.uid} className={classes} onClick={() => setSelectedItem(note)} onKeyPress={() => setSelectedItem(note)}>
         <div>
-          <span
-            className="__menu-item_label-wrapper"
-            onClick={() => onCheckboxClick(note.uid)}
-          >
-            <input
-              type="checkbox"
-              name={note.uid}
-              checked={checkedItemIds.has(note.uid)}
-              onChange={() => {}}
-            />
+          <span className="__menu-item_label-wrapper" onClick={() => onCheckboxClick(note.uid)}>
+            <input type="checkbox" name={note.uid} checked={checkedItemIds.has(note.uid)} onChange={() => {}} />
             <span className="__menu-item_class-label">{note.className}</span>
             <span className="__menu-item_title">{note.title}</span>
           </span>
@@ -115,31 +84,17 @@ export const AttachToModal = ({
       </li>
     )
   })
-
   return (
-    <ModalNext
-      hide={hideAction}
-      isShown={isShown}
-      disableClose={false}
-      data-testid="modal-attachto"
-    >
-      <ModalHeaderTop
-        disableClose={false}
-        headerText={`Attach note to ${types[itemsType]}:`}
-        hide={hideAction}
-      />
+    <>
       <StyledAttachToModal>
         <LeftBar>
           <SearchInput>
-            <InputText
-              name="search"
-              placeholder="Search..."
-              value={search}
-              onChange={(e: any) => setSearch(e.target.value)}
-            />
+            <InputText name="search" placeholder="Search..." value={search} onChange={(e: any) => setSearch(e.target.value)} />
             <span className="__menu-item_search-icons">
               {search ? (
-                <TransparentButton onClick={() => setSearch('')}><CrossIcon height={16} /></TransparentButton>
+                <TransparentButton onClick={() => setSearch('')}>
+                  <CrossIcon height={16} />
+                </TransparentButton>
               ) : (
                 <SearchIcon height={16} />
               )}
@@ -151,13 +106,8 @@ export const AttachToModal = ({
                 {itemsList}
                 {!itemsList.length && (
                   <div className="__menu-item">
-                    <span className="text-muted _no-content">
-                      No results found
-                    </span>
-                    <TransparentButton
-                      className="__menu-item_clear"
-                      onClick={() => setSearch('')}
-                    >
+                    <span className="text-muted _no-content">No results found</span>
+                    <TransparentButton className="__menu-item_clear" onClick={() => setSearch('')}>
                       Clear query
                     </TransparentButton>
                   </div>
@@ -174,9 +124,7 @@ export const AttachToModal = ({
               </a>
             </div>
             <NotesMarkdown data={selectedItem.content} />
-            <div className="_no-content">
-              {!selectedItem.content && 'No content written for this item'}
-            </div>
+            <div className="_no-content">{!selectedItem.content && 'No content written for this item'}</div>
           </ModalScroll>
         </NoteContainer>
       </StyledAttachToModal>
@@ -193,6 +141,25 @@ export const AttachToModal = ({
           </Button>
         </ButtonRow>
       </Footer>
+    </>
+  )
+}
+
+export const AttachToModal = ({
+  isShown,
+  hideAction,
+  ids,
+  itemsType,
+}: {
+  isShown: boolean
+  hideAction: () => void
+  ids: string[] | number[]
+  itemsType: ATTACHABLE_TYPES
+}) => {
+  return (
+    <ModalNext hide={hideAction} isShown={isShown} id="modal-attachto" data-testid="modal-attachto">
+      <ModalHeaderTop disableClose={false} headerText={`Attach note to ${types[itemsType]}:`} hide={hideAction} />
+      {isShown && <AttachTo hideAction={hideAction} ids={ids} />}
     </ModalNext>
   )
 }

@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Link, Route, Routes, useLocation, useParams } from 'react-router-dom'
 import useWebSocket from 'react-use-websocket'
 import { HomeLabel } from '../../../components/HomeLabel'
@@ -7,11 +7,15 @@ import { StyledTab, StyledTabList, StyledTabPanel } from '../../../components/Ta
 import { StyledPropertyItem, StyledPropertyKey, StyledTagItem, StyledTags } from '../../../components/Tags'
 import { CogsIcon } from '../../../components/icons/Cogs'
 import { RESOURCE_LABELS } from '../../../types/user'
-import { DEFAULT_RECONNECT_ATTEMPTS, DEFAULT_RECONNECT_INTERVAL, SHOULD_RECONNECT, getNodeWsUrl } from '../../../utils/config'
+import {
+  DEFAULT_RECONNECT_ATTEMPTS,
+  DEFAULT_RECONNECT_INTERVAL,
+  getNodeWsUrl,
+  SHOULD_RECONNECT,
+} from '../../../utils/config'
 import { getBackPathNext } from '../../../utils/getBackPath'
 import { ActionsRow, StyledBackLink, StyledLink } from '../../home/home.styles'
 import {
-  ResourceHeader,
   HeaderLeft,
   HeaderRight,
   HomeLoader,
@@ -21,14 +25,15 @@ import {
   MetadataSection,
   MetadataVal,
   NotFound,
+  ResourceHeader,
   Title,
   Topbox,
 } from '../../home/show.styles'
 import {
   EmmitScope,
   HomeScope,
-  NOTIFICATION_ACTION,
   Notification,
+  NOTIFICATION_ACTION,
   WEBSOCKET_MESSSAGE_TYPE,
   WebSocketMessage,
 } from '../../home/types'
@@ -38,7 +43,10 @@ import { InputsAndOutputs } from '../InputsAndOutputs'
 import { Logs } from '../Log'
 import { StateCell } from '../StateCell'
 import { fetchExecution } from '../executions.api'
-import { FailureMessage, StyledExecutionState, TitleLeft } from './styles'
+import { FailureMessage, TitleLeft } from './styles'
+import { IExecution } from '../executions.types'
+import { PricingMap } from '../../apps/apps.types'
+import {pluralize} from "../../../utils/formatting";
 
 export const ExecutionDetails = ({
   emitScope,
@@ -100,20 +108,81 @@ export const ExecutionDetails = ({
 
   const execution = data?.job
 
+
+  const [currentCost, setCurrentCost] = useState('$0')
+  const [currentDuration, setCurrentDuration] = useState('0s')
+
+  const updateCostAndDuration = (e: IExecution) => {
+    if (!e.startedRunning) {
+      return
+    }
+    const now = Date.now()
+
+    const durationInSeconds = Math.floor((now - e.startedRunning) / 1000)
+
+    const days = Math.floor(durationInSeconds / (24 * 3600))
+    const hours = Math.floor((durationInSeconds % (24 * 3600)) / 3600)
+    const minutes = Math.floor((durationInSeconds % 3600) / 60)
+    const seconds = durationInSeconds % 60
+
+    // Create a human-readable string
+    const durationString = `${days > 0 ? `${days}  ${pluralize('day', days)}` : ''}${
+        hours > 0 ? `${hours} ${pluralize('hour', hours)} ` : ''
+    }${minutes > 0 ? `${minutes} ${pluralize('minute', minutes)} ` : ''}${seconds} ${pluralize('second', seconds)}`
+
+    setCurrentDuration(durationString)
+    const runtimeHours = durationInSeconds / (60 * 60)
+    const perHourCost: number = PricingMap[e.instance_type as keyof typeof PricingMap]
+    setCurrentCost(`$${(parseFloat((runtimeHours * perHourCost).toFixed(2)))}`)
+  }
+
+  useEffect(() => {
+    if (data?.job && (data.job.state === 'running' || data.job.state === 'terminating')) {
+      updateCostAndDuration(data.job)
+
+      const interval = setInterval(() => {
+        updateCostAndDuration(data.job)
+      }, 1000)
+
+      return () => clearInterval(interval)
+    }
+    return undefined
+  }, [data?.job])
+
+  const scopeParamLink = `?scope=${homeScope?.toLowerCase()}`
+  const basePath = getBasePath(spaceId)
+
+  const getDuration = (e: IExecution) => {
+    if (e.state === 'running' || e.state === 'terminating') {
+      return currentDuration
+    }
+    return e.duration
+  }
+
+  const getCostMetadataItem = (e: IExecution) => {
+    const isRunningOrTerminating = e.state === 'running' || e.state === 'terminating'
+    const costTitle = isRunningOrTerminating ? 'Estimated Cost' : 'Cost'
+    const costValue = isRunningOrTerminating ? currentCost : e.energy_consumption
+
+    return (
+        <MetadataItem>
+          <MetadataKey>{costTitle}</MetadataKey>
+          <MetadataVal data-testid="execution-cost">{costValue}</MetadataVal>
+        </MetadataItem>
+    )
+  }
+
   if (isLoading) {
     return <HomeLoader />
   }
 
   if (!execution || !execution.id)
     return (
-      <NotFound>
-        <h1>Execution not found</h1>
-        <div>Sorry, this execution does not exist or is not accessible by you.</div>
-      </NotFound>
+        <NotFound>
+          <h1>Execution not found</h1>
+          <div>Sorry, this execution does not exist or is not accessible by you.</div>
+        </NotFound>
     )
-
-  const scopeParamLink = `?scope=${homeScope?.toLowerCase()}`
-  const basePath = getBasePath(spaceId)
 
   return (
     <>
@@ -212,12 +281,9 @@ export const ExecutionDetails = ({
           <MetadataRow>
             <MetadataItem>
               <MetadataKey>Duration</MetadataKey>
-              <MetadataVal data-testid="execution-duration">{execution.duration}</MetadataVal>
+              <MetadataVal data-testid="execution-duration">{getDuration(execution)}</MetadataVal>
             </MetadataItem>
-            <MetadataItem>
-              <MetadataKey>Cost</MetadataKey>
-              <MetadataVal data-testid="execution-cost">{execution.energy_consumption}</MetadataVal>
-            </MetadataItem>
+            {getCostMetadataItem(execution)}
             <MetadataItem>
               <MetadataKey>App Revision</MetadataKey>
               <MetadataVal data-testid="execution-app-revision">{execution.app_revision}</MetadataVal>

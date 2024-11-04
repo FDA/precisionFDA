@@ -1,13 +1,13 @@
 # These people or teams will be automatically included in PRs and can be required for review by policy for selected branches.
 
 # DevOps
-/.github @johnymachine @gitbisect
-/chef @johnymachine @gitbisect
-/userdata @johnymachine @gitbisect
-/infra @johnymachine @gitbisect
+/.github @gitbisect
+/chef @gitbisect
+/userdata @gitbisect
+/infra @gitbisect
 
 # Frontend
-/packages/client @ddcech
+/packages/client @ddcech @jirkalagan @pavelkubal @lbobek-dnanexus @bartapes @nganphtgit
 
 # CLI
 /packages/cli @jirkalagan

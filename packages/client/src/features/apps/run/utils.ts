@@ -315,7 +315,10 @@ export const useDefaultScopeSelection = (
 export const exportFormData = (event: React.MouseEvent<HTMLButtonElement>, formData: RunJobFormType) => {
   event.preventDefault()
   event.stopPropagation()
+
   const dataToExport = JSON.parse(JSON.stringify(formData))
+  delete dataToExport.scope
+
   if (dataToExport.inputs && Array.isArray(dataToExport.inputs)) {
     dataToExport.inputs.forEach((item: BatchInput) => delete item.id)
   }
@@ -357,14 +360,14 @@ export const collectFileUidsFromBatchInput = (batchInput: BatchInput): FileUid[]
 }
 
 export const extractFileUidsFromBatchInputs = (batchInputs: BatchInput[]): FileUid[] => {
-  let allFileUids: FileUid[] = []
+  const allFileUidsSet = new Set<FileUid>()
 
   batchInputs.forEach(batchInput => {
     const fileUids = collectFileUidsFromBatchInput(batchInput)
-    allFileUids = [...allFileUids, ...fileUids]
+    fileUids.forEach(fileUid => allFileUidsSet.add(fileUid))
   })
 
-  return allFileUids
+  return Array.from(allFileUidsSet)
 }
 
 export const getBaseLink = (spaceId?: number) => (spaceId ? `spaces/${spaceId}` : 'home')

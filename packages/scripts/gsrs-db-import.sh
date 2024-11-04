@@ -75,21 +75,10 @@ restore_dump() {
 }
 
 dump_users_and_roles() {
-    mysqldump -h $OLD_DB_HOST -u $OLD_DB_USER -p$OLD_DB_PASS -P $OLD_DB_PORT --skip-opt \
-        --insert-ignore --ssl-mode=DISABLED --column-statistics=0 \
-        --skip-tz-utc --no-create-info --extended-insert=FALSE --set-gtid-purged=OFF $OLD_DB_NAME ix_core_principal \
-        --where="ID > 10000" >ix_core_principal.sql
-    mysqldump -h $OLD_DB_HOST -u $OLD_DB_USER -p$OLD_DB_PASS -P $OLD_DB_PORT --skip-opt \
-        --insert-ignore --ssl-mode=DISABLED --column-statistics=0 \
-        --skip-triggers --skip-tz-utc --no-create-info --extended-insert=FALSE --set-gtid-purged=OFF $OLD_DB_NAME ix_core_userprof \
-        --where="ID > 10000" >ix_core_userprof.sql
-    mysqldump -h $OLD_DB_HOST -u $OLD_DB_USER -p$OLD_DB_PASS -P $OLD_DB_PORT --skip-opt \
-        --insert-ignore --ssl-mode=DISABLED --column-statistics=0 \
-        --add-drop-table --skip-tz-utc --set-gtid-purged=OFF $OLD_DB_NAME \
-        ix_core_group_principal >ix_core_group_principal.sql
-    mysqldump -h $OLD_DB_HOST -u $OLD_DB_USER -p$OLD_DB_PASS -P $OLD_DB_PORT --skip-opt \
-        --insert-ignore --ssl-mode=DISABLED --column-statistics=0 \
-        --add-drop-table --skip-tz-utc --set-gtid-purged=OFF $OLD_DB_NAME ix_core_group >ix_core_group.sql
+    mysqldump -h $OLD_DB_HOST -u $OLD_DB_USER -p$OLD_DB_PASS -P $OLD_DB_PORT  $OLD_DB_NAME ix_core_principal > ix_core_principal.sql
+    mysqldump -h $OLD_DB_HOST -u $OLD_DB_USER -p$OLD_DB_PASS -P $OLD_DB_PORT  $OLD_DB_NAME ix_core_userprof > ix_core_userprof.sql
+    mysqldump -h $OLD_DB_HOST -u $OLD_DB_USER -p$OLD_DB_PASS -P $OLD_DB_PORT  $OLD_DB_NAME ix_core_group_principal > ix_core_group_principal.sql
+    mysqldump -h $OLD_DB_HOST -u $OLD_DB_USER -p$OLD_DB_PASS -P $OLD_DB_PORT  $OLD_DB_NAME ix_core_group > ix_core_group.sql
 }
 
 # this will fail if the dump has anyone else rather than admin.

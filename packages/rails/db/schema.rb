@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2024_10_08_083518) do
+ActiveRecord::Schema.define(version: 2024_10_29_115056) do
 
   create_table "accepted_licenses", id: :integer, charset: "utf8mb3", collation: "utf8mb3_unicode_ci", force: :cascade do |t|
     t.integer "license_id"
@@ -745,6 +745,7 @@ ActiveRecord::Schema.define(version: 2024_10_08_083518) do
     t.boolean "restrict_to_template", default: false
     t.boolean "inactivity_notified", default: false
     t.boolean "protected", default: false
+    t.index ["space_id"], name: "fk_rails_b7a2c80157"
   end
 
   create_table "submissions", id: :integer, charset: "utf8mb3", collation: "utf8mb3_unicode_ci", force: :cascade do |t|
@@ -994,6 +995,7 @@ ActiveRecord::Schema.define(version: 2024_10_08_083518) do
   add_foreign_key "challenge_resources", "nodes", column: "user_file_id"
   add_foreign_key "challenge_resources", "users"
   add_foreign_key "challenges", "apps"
+  add_foreign_key "challenges", "spaces"
   add_foreign_key "challenges", "users", column: "admin_id"
   add_foreign_key "challenges", "users", column: "app_owner_id"
   add_foreign_key "comparisons", "users"
@@ -1036,9 +1038,11 @@ ActiveRecord::Schema.define(version: 2024_10_08_083518) do
   add_foreign_key "space_invitations", "spaces"
   add_foreign_key "space_invitations", "users", column: "inviter_id"
   add_foreign_key "space_memberships", "users"
+  add_foreign_key "space_memberships_spaces", "spaces"
   add_foreign_key "space_report_parts", "space_reports", on_delete: :cascade
   add_foreign_key "space_reports", "nodes", column: "result_file_id"
   add_foreign_key "space_reports", "users", column: "created_by"
+  add_foreign_key "spaces", "spaces"
   add_foreign_key "submissions", "challenges"
   add_foreign_key "submissions", "jobs"
   add_foreign_key "submissions", "users"
