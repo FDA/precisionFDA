@@ -13,7 +13,8 @@ export const config: ConfigOverride = () => ({
     syncJob: {
       repeatPattern: '*/2 * * * *', // Every 2 minutes
       staleJobsEmailAfter: parseIntFromProcess(process.env.NODE_STALE_JOBS_EMAIL_AFTER) ?? 60 * 50, // 50 minutes
-      staleJobsTerminateAfter: parseIntFromProcess(process.env.NODE_STALE_JOBS_TERMINATE_AFTER) ?? 60 * 60, // 1 hour
+      staleJobsTerminateAfter:
+        parseIntFromProcess(process.env.NODE_STALE_JOBS_TERMINATE_AFTER) ?? 60 * 60, // 1 hour
     },
     queues: {
       default: { name: 'https-apps-worker-queue-stg' },
@@ -23,20 +24,21 @@ export const config: ConfigOverride = () => ({
         onInit: {
           adminDataConsistencyReport: true,
           checkNonterminatedClusters: true,
-          userInactivityAlert: true
+          userInactivityAlert: true,
         },
       },
     },
   },
   platform: {
     orgEveryoneHandle: 'precisionfda',
+    adminUser: 'precisionfda.admin',
   },
   redis: {
     isSecure: true,
   },
   siteSettings: {
     ssoButton: {
-        isEnabled: true,
+      isEnabled: true,
     },
   },
 })

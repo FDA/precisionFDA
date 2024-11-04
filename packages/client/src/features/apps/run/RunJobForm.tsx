@@ -111,6 +111,7 @@ const readFileAsText = (file: File): Promise<string> => {
 const importFormData = async (
   event: React.ChangeEvent<HTMLInputElement>,
   setVals: (val: RunJobFormType) => void,
+  currentVals: RunJobFormType,
   setShowValidationWait: (val: boolean) => void,
   setValidatedFilesCache: (cache: Record<string, boolean>) => void,
   setTotalFilesToValidate: (val: number) => void,
@@ -141,7 +142,9 @@ const importFormData = async (
       }
       const validationCache: Record<string, boolean> = {}
 
-      const allFileUids = importedData.inputs.flatMap(item => collectFileUidsFromBatchInput(item))
+      const allFileUids = Array.from(
+        new Set(importedData.inputs.flatMap(item => collectFileUidsFromBatchInput(item))),
+      )
       setTotalFilesToValidate(allFileUids.length)
       for (const fileUid of allFileUids) {
         await validateFile(fileUid)
@@ -152,7 +155,12 @@ const importFormData = async (
       setValidatedFilesCache(validationCache)
       clearTimeout(delayDialogTimeout)
       setShowValidationWait(false)
-      setVals(importedData)
+
+      // Merge current `scope` with imported data
+      setVals({
+        ...importedData,
+        scope: currentVals.scope,  // Preserve the existing scope value
+      })
     } catch (error) {
       console.log(error)
       toast.error('Invalid file format')
@@ -489,6 +497,7 @@ export const RunJobForm = ({ app, userJobLimit, spec }: { app: IApp; spec: AppSp
                   importFormData(
                     event,
                     vals => reset(vals),
+                    getValues(),
                     setShowValidationWait,
                     setValidatedFilesCache,
                     setTotalFilesToValidate,
