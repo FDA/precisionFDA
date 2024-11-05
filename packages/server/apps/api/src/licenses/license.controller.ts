@@ -1,5 +1,14 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
-import { Controller, Get, HttpCode, Inject, ParseArrayPipe, Query, UseGuards } from '@nestjs/common'
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  Inject,
+  ParseArrayPipe,
+  Post,
+  UseGuards,
+} from '@nestjs/common'
 import { DEPRECATED_SQL_ENTITY_MANAGER } from '@shared/database/provider/deprecated-sql-entity-manager.provider'
 import { AcceptedLicense } from '@shared/domain/accepted-license/accepted-license.entity'
 import { Uid } from '@shared/domain/entity/domain/uid'
@@ -26,9 +35,9 @@ export class LicenseController {
   }
 
   @HttpCode(200)
-  @Get('/files')
+  @Post('/files')
   async listLicencesForFiles(
-    @Query('uids', new ParseArrayPipe({ items: String })) uids: Uid<'file'>[],
+    @Body('uids', new ParseArrayPipe({ items: String })) uids: Uid<'file'>[],
   ) {
     return this.licenseService.findLicensedItemsByNodeUids(uids)
   }

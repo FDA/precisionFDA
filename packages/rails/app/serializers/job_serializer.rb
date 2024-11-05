@@ -40,6 +40,8 @@ class JobSerializer < ApplicationSerializer # rubocop:disable Metrics/ClassLengt
     :cost_limit,
   )
 
+  attribute :started_running, key: :startedRunning
+  attribute :stopped_running, key: :stoppedRunning
   attribute :all_tags_list, key: :tags
   attribute :properties_object, key: :properties
   attr_reader :launched_on
@@ -102,6 +104,14 @@ class JobSerializer < ApplicationSerializer # rubocop:disable Metrics/ClassLengt
 
   def app_uid
     object.app&.uid
+  end
+
+  def started_running
+    object.describe["startedRunning"]
+  end
+
+  def stopped_running
+    object.describe["stoppedRunning"]
   end
 
   # TODO: (samuel) - fix properly by adding NOT NULL constraint on db column

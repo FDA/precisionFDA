@@ -21,7 +21,7 @@ export async function fetchAcceptedLicenses(): Promise<AcceptedLicense[]> {
 }
 
 export async function fetchLicensesForFiles(uids: FileUid[]) {
-  return axios.get<License[]>('/api/list_licenses_for_files', { params: { uids }}).then(r => r.data )
+  return axios.post<License[]>('/api/v2/licenses/files', { uids }).then(r => r.data )
 }
 
 export async function fetchLicensesList(): Promise<{ licenses: License[]}> {

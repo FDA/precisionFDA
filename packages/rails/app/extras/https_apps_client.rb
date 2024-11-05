@@ -166,17 +166,6 @@ class HttpsAppsClient # rubocop:disable Metrics/ClassLength
     )
   end
 
-  # List licenses for a file
-  # @param uids list of file uids
-  def list_licenses_for_files(uids)
-    request(
-      "/licenses/files",
-      {},
-      Net::HTTP::Get::METHOD,
-      { uids: },
-    )
-  end
-
   # Start nodes removal job
   # @param ids [Array of Integers] id's of nodes to be removed
   def remove_nodes(ids)
