@@ -78,8 +78,8 @@ const defaultConfig = {
     maxJobDurationMinutes: Math.ceil(MAX_JOB_DURATION_SECONDS / 60),
   },
   platform: {
-    apiUrl: 'https://stagingapi.dnanexus.com',
-    authApiUrl: 'https://stagingauth.dnanexus.com',
+    apiUrl: process.env.API_URL ?? 'https://stagingapi.dnanexus.com',
+    authApiUrl: process.env.AUTH_API_URL ?? 'https://stagingauth.dnanexus.com',
     adminUser: 'precisionfda.admin_dev',
     adminUserAccessToken: process.env.ADMIN_TOKEN ?? 'admin-token',
     challengeBotUser: 'challenge.bot.2',
