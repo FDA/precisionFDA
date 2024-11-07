@@ -27,7 +27,8 @@ import { getIdFromScopeName, scopeContainsId } from '../../../space/space.helper
 
 export class ChallengePreregEmailHandler
   extends BaseTemplate<ChallengeCreated>
-  implements EmailTemplate {
+  implements EmailTemplate<ChallengePreregTemplateInput>
+{
   templateFile = challengePreregTemplate
   challenge: Challenge | null
 

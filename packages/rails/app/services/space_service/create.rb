@@ -6,10 +6,10 @@ module SpaceService
       new(**options).call(space_form)
     end
 
-    def initialize(user:, api:, for_challenge: false, notification_mailer: NotificationsMailer)
+    def initialize(user:, api:, for_challenge: false)
       @api = api
       @admin_api = DIContainer.resolve("api.admin")
-      @notification_mailer = notification_mailer
+      @notification_mailer = NotificationsMailer.new
       @user = user
       @for_challenge = for_challenge
     end
@@ -196,7 +196,7 @@ module SpaceService
     # @param [Space]
     def send_emails(space)
       space.leads.find_each do |lead|
-        notification_mailer.space_activation_email(space, lead).deliver_later!
+        NotificationsMailer.space_activation_email(space, lead).deliver_later!
       end
     end
 

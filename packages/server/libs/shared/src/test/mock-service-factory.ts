@@ -1,11 +1,8 @@
-import { Logger } from '@nestjs/common'
-import { Job } from '@shared/domain/job/job.entity'
 import { IPlatformAuthClient } from '@shared/platform-client/platform-auth-client'
 import { IWorkstationClient } from '@shared/workstation-client/workstation-client'
-import { AxiosInstance } from 'axios'
 import sinon from 'sinon'
 import { ServiceFactory, setServiceFactory } from '../services/service-factory'
-import { IEmailService } from '../services/smtp.service'
+import { EmailClient } from '../services/email-client'
 
 class MockServiceFactory extends ServiceFactory {
   emailService = {
@@ -60,25 +57,16 @@ class MockServiceFactory extends ServiceFactory {
     },
   }
 
-  getEmailService(): IEmailService {
+  getEmailService(): EmailClient {
     return this.emailService
   }
 
-  getPlatformAuthClient(
-    accessToken: string,
-    logger?: Logger,
-    axiosInstance?: AxiosInstance,
-  ): IPlatformAuthClient {
+  getPlatformAuthClient(): IPlatformAuthClient {
     return this.platformAuthClient
   }
 
-  getWorkstationClient(
-    job: Job,
-    url: string,
-    axiosInstance: AxiosInstance,
-    logger?: Logger,
-  ): IWorkstationClient {
-    return this.workstationClient
+  getWorkstationClient(): IWorkstationClient {
+    return this.workstationClient as unknown as IWorkstationClient
   }
 
   reset() {

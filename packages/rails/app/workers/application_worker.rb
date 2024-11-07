@@ -24,14 +24,10 @@ class ApplicationWorker
     h_a_client = HttpsAppsClient.new
     RequestContext.begin_request(context.user_id, context.username, context.token, forward_header)
     h_a_client.send_notification(notification)
-    RequestContext.end_request
 
     Rails.logger.error(message)
 
-    WorkerMailer.alert_email(context.user.email, message, subject).deliver_now
-  end
-
-  def https_apps_client
-    HttpsAppsClient.new
+    h_a_client.email_send(NotificationPreference.email_types[:alert_message], [context.user.id], { subject:, message: })
+    RequestContext.end_request
   end
 end

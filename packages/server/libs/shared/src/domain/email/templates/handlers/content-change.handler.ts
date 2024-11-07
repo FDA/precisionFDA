@@ -24,7 +24,8 @@ import { User } from '@shared/domain/user/user.entity'
 
 export class ContentChangedEmailHandler
   extends BaseTemplate<NewContentAdded>
-  implements EmailTemplate {
+  implements EmailTemplate<NewContentTemplateInput>
+{
   templateFile = newContentTemplate
   templateContent?: NewContentTemplateInput['content']
 

@@ -20,7 +20,7 @@ type JobFinishedInputType = { jobId: number }
 
 export class JobFinishedEmailHandler
   extends BaseTemplate<JobFinishedInputType, UserOpsCtx>
-  implements EmailTemplate
+  implements EmailTemplate<JobFinishedInputTemplate>
 {
   templateFile = jobFinishedTemplate
   job: Job
