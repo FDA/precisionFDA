@@ -110,6 +110,7 @@ describe('Notification service tests', () => {
   it('Test get unread Notifications', async () => {
     const savedNotification = new Notification(
       Reference.createFromPK(User, user1.id),
+      '1',
       NOTIFICATION_ACTION.NODES_REMOVED,
       'test',
       SEVERITY.ERROR,
@@ -118,6 +119,7 @@ describe('Notification service tests', () => {
     await em.persistAndFlush(
       new Notification(
         Reference.createFromPK(User, user2.id),
+        '2',
         NOTIFICATION_ACTION.NODES_REMOVED,
         'test',
         SEVERITY.ERROR,
@@ -132,6 +134,7 @@ describe('Notification service tests', () => {
   it('Test update Notification', async () => {
     const savedNotification = new Notification(
       Reference.createFromPK(User, user1.id),
+      '1',
       NOTIFICATION_ACTION.NODES_REMOVED,
       'test',
       SEVERITY.ERROR,
@@ -152,6 +155,7 @@ describe('Notification service tests', () => {
 
     const savedNotification = new Notification(
       Reference.createFromPK(User, user1.id),
+      '1',
       NOTIFICATION_ACTION.NODES_REMOVED,
       'test',
       SEVERITY.ERROR,

@@ -19,6 +19,7 @@ import { Job } from '@shared/domain/job/job.entity'
 import { JobLogService } from '@shared/domain/job/services/job-log.service'
 import { NotificationService } from '@shared/domain/notification/services/notification.service'
 import { Session } from '@shared/domain/session/session.entity'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { PermissionError } from '@shared/errors'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { NOTIFICATIONS_QUEUE, createRedisClient } from '@shared/services/redis.service'
@@ -62,22 +63,27 @@ export class WebsocketGateway implements OnGatewayDisconnect, OnGatewayInit, OnG
       if (!token) {
         throw new Error('Missing authentication token')
       }
-      client.PFDA_AUTH_TOKEN = token
 
-      const decrypted = Encryptor.decrypt(token)
+      const decryptedUserSession = Encryptor.decrypt(token)
 
-      const sessionId = decrypted.session_id
+      client.pfdaUserContext = new UserContext(
+        decryptedUserSession.user_id,
+        decryptedUserSession.token,
+        decryptedUserSession.username,
+        decryptedUserSession.session_id,
+      )
+
       const session = await this.em.findOneOrFail(Session, {
-        key: HashUtils.hashSessionId(sessionId),
-        user: decrypted.user_id,
+        key: HashUtils.hashSessionId(client.pfdaUserContext.sessionId),
+        user: client.pfdaUserContext.id,
       })
 
       if (session.isExpired()) {
         throw new Error('Session expired')
       }
 
-      const userId = decrypted.user_id
-      const dxuser = decrypted.username
+      const userId = client.pfdaUserContext.id
+      const dxuser = client.pfdaUserContext.dxuser
 
       if (!this.clientConnections.has(userId)) {
         this.clientConnections.set(userId, new Set())
@@ -93,7 +99,12 @@ export class WebsocketGateway implements OnGatewayDisconnect, OnGatewayInit, OnG
 
       const unreadNotifications = await this.notificationService.getUnreadNotifications(userId)
       unreadNotifications.forEach((notification) => {
-        client.send(JSON.stringify(notification))
+        client.send(
+          JSON.stringify({
+            type: WEBSOCKET_EVENTS.NOTIFICATION,
+            data: notification,
+          }),
+        )
       })
     } catch (e) {
       this.logger.error({ message: 'WebSocket connection error', error: e.message })
@@ -103,9 +114,7 @@ export class WebsocketGateway implements OnGatewayDisconnect, OnGatewayInit, OnG
 
   handleDisconnect(client: PfdaWebSocket) {
     try {
-      const token = client.PFDA_AUTH_TOKEN
-      const decrypted = Encryptor.decrypt(token)
-      const userId = decrypted.user_id
+      const userId = client.pfdaUserContext.id
 
       if (!userId) {
         this.logger.warn('Disconnecting client with missing user ID')
@@ -152,10 +161,12 @@ export class WebsocketGateway implements OnGatewayDisconnect, OnGatewayInit, OnG
     const client = await createRedisClient()
 
     client.subscribe(NOTIFICATIONS_QUEUE, (notificationJson: string) => {
-      const notification: { user: number } = JSON.parse(notificationJson)
+      const notification: { user: number; sessionId?: string } = JSON.parse(notificationJson)
       const userId = notification.user
+      const sessionId = notification.sessionId
 
       delete notification.user // not sending user info to client
+      delete notification.sessionId // not sending session id to client
 
       this.sendNotification(
         userId,
@@ -163,6 +174,7 @@ export class WebsocketGateway implements OnGatewayDisconnect, OnGatewayInit, OnG
           type: WEBSOCKET_EVENTS.NOTIFICATION,
           data: notification,
         }),
+        sessionId,
       )
     })
 
@@ -172,8 +184,12 @@ export class WebsocketGateway implements OnGatewayDisconnect, OnGatewayInit, OnG
     })
   }
 
-  private sendNotification(userId: number, notification: string) {
+  private sendNotification(userId: number, notification: string, sessionId?: string) {
     this.clientConnections.get(userId)?.forEach((connection) => {
+      if (sessionId && connection.pfdaUserContext.sessionId !== sessionId) {
+        // CLI doesn't set sessionId, and we don't send notifications to CLI
+        return
+      }
       try {
         this.logger.log({
           message: 'Sending notification to client',

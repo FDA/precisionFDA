@@ -241,7 +241,7 @@ export class JobService {
       if (job.isInSpace()) {
         // TODO temporarily before we move to Service model
         const spaceService = new SpaceEventService(
-          { id: userId } as UserCtx,
+          this.user,
           this.em as SqlEntityManager,
           this.em.getRepository(Space),
           this.em.getRepository(User),
@@ -257,7 +257,7 @@ export class JobService {
         await spaceService.sendNotificationForEvent(spaceEvent)
       }
 
-      await this.createNotification(jobDxId, userId)
+      await this.createNotification(jobDxId, userId, this.user.sessionId)
       await this.em.commit()
       this.logger.log(`Outputs for job ${jobDxId} have been synchronized`)
     } catch (error) {
@@ -309,12 +309,13 @@ export class JobService {
     return outputFiles
   }
 
-  private async createNotification(jobDxId: string, userId: number) {
+  private async createNotification(jobDxId: string, userId: number, sessionId: string) {
     await this.notificationService.createNotification({
       message: `Outputs for job ${jobDxId} have been synchronized`,
       severity: SEVERITY.INFO,
       action: NOTIFICATION_ACTION.JOB_OUTPUTS_SYNCED,
       userId,
+      sessionId,
     })
   }
 

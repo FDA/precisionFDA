@@ -1,4 +1,4 @@
-import { Entity, Ref, ManyToOne, PrimaryKey, Property, Reference } from '@mikro-orm/core'
+import { Entity, Ref, ManyToOne, PrimaryKey, Property } from '@mikro-orm/core'
 import { User } from '@shared/domain/user/user.entity'
 import { BaseEntity } from '../../database/base.entity'
 import { NOTIFICATION_ACTION, SEVERITY } from '../../enums'
@@ -25,6 +25,9 @@ export class Notification extends BaseEntity {
   @Property()
   userId: number
 
+  @Property()
+  sessionId: string
+
   @Property({ type: 'json', nullable: true })
   meta?: NotificationMeta
 
@@ -36,6 +39,7 @@ export class Notification extends BaseEntity {
 
   constructor(
     user: Ref<User> | null,
+    sessionId: string,
     action?: NOTIFICATION_ACTION,
     message?: string,
     severity?: SEVERITY,
@@ -47,6 +51,7 @@ export class Notification extends BaseEntity {
     if (user !== null) {
       this.user = user
     }
+    this.sessionId = sessionId
     if (action) this.action = action
     if (message) this.message = message
     if (severity) this.severity = severity
