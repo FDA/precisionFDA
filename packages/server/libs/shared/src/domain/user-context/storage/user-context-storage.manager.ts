@@ -24,5 +24,8 @@ export function createUserContextManager(storage: AsyncLocalStorage<UserContext>
     get accessToken() {
       return getCurrentContext()?.accessToken
     },
+    get sessionId() {
+      return getCurrentContext()?.sessionId
+    },
   }
 }
