@@ -500,47 +500,12 @@ module Api
 
     # GET /api/files/:uid/:filename
     def download_file
-      file = UserFile.accessible_by(@context).find_by_uid!(params[:uid])
-      file_link = file.file_link(@context, params[:inline], true, false)
+      options = params[:inline] ? { inline: true } : {}
 
-      uri = URI(file_link[:url])
-      http = Net::HTTP.new(uri.host, uri.port)
-      http.use_ssl = true
+      response = https_apps_client.file_download(params[:uid], params[:file_name], options)
+      response.each_header { |key, value| headers[key] = value unless %w[transfer-encoding connection].include?(key.downcase) }
 
-      range = request.headers["Range"]
-      req = Net::HTTP::Get.new(uri)
-      # !!! DON'T FORGET TO HANDLE RANGE REQUESTS IN NODE WHEN MIGRATING !!!
-      req["Range"] = range if range.present?
-      file_link[:headers].each { |k, v| req[k] = v }
-
-      response.headers["Accept-Ranges"] = "bytes"
-
-      begin
-        http.request(req) do |resp|
-          # !!! DON'T FORGET TO HANDLE RANGE REQUESTS IN NODE WHEN MIGRATING !!!
-          send_data_response(resp, range)
-        end
-      ensure
-        response.stream.close if response.stream.respond_to?(:close)
-      end
-    end
-
-    def send_data_response(resp, range)
-      if range.present? && resp.code == "206" # Partial content
-        response.status = 206
-        response.headers["Content-Range"] = resp["Content-Range"]
-        response.headers["Content-Length"] = resp["Content-Length"]
-      end
-
-      response.headers["Content-Type"] = resp["Content-Type"]
-      response.headers["Content-Disposition"] = resp["Content-Disposition"]
-      response.headers['Cache-Control'] = 'public, max-age=86400' # 24 hours in seconds
-      response.headers['Expires'] = 24.hours.from_now.httpdate
-      response.headers["ETag"] = "0"
-
-      resp.read_body do |chunk|
-        response.stream.write chunk
-      end
+      render plain: response.body, status: response.code.to_i
     end
 
     # POST /api/files/bulk_download
