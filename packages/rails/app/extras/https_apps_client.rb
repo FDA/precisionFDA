@@ -1022,6 +1022,18 @@ class HttpsAppsClient # rubocop:disable Metrics/ClassLength
     )
   end
 
+  def file_download(uid, filename, options = {})
+    request(
+      "/files/#{uid}/#{URI.encode_www_form_component(filename)}",
+      {},
+      Net::HTTP::Get::METHOD,
+      options,
+      {},
+      false,
+      false
+      )
+  end
+
   private
 
   def prepare_request(uri, body, headers, method_name)
@@ -1033,7 +1045,7 @@ class HttpsAppsClient # rubocop:disable Metrics/ClassLength
   end
 
   # rubocop:disable Metrics/ParameterLists
-  def request(path, body = {}, method_name = Net::HTTP::Post::METHOD, query = {}, additional_headers = {}, streaming = false)
+  def request(path, body = {}, method_name = Net::HTTP::Post::METHOD, query = {}, additional_headers = {}, streaming = false, parse_response = true)
     # Rails to_query method adds a suffix "[]" to keys of query parameters with array values.
     #
     # Rails approach - { id: [0,1,2]} => ?id[]=1&id[]=2&id[]=3
@@ -1065,8 +1077,10 @@ class HttpsAppsClient # rubocop:disable Metrics/ClassLength
             yield chunk
           end
         end
-      else
+      elsif parse_response
         handle_response(http.request(request))
+      else
+        http.request(request)
       end
     end
   rescue Errno::ECONNREFUSED

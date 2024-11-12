@@ -69,8 +69,15 @@ export class EntityLinkService {
       return new URL(link.url)
     }
 
+    // TODO(PFDA-5831) - v2 endpoint
     return new URL(
-      `${config.api.railsHost}/api/files/${entity.uid}/${encodeURIComponent(fileName)}`,
+      `${config.api.railsHost}/api/files/${entity.uid}/${this.sanitizeFileName(fileName)}`,
     )
+  }
+
+  private sanitizeFileName(name: string): string {
+    const re = /[<>:"/\\|?*]+/g
+
+    return encodeURIComponent(name.replace(re, '_'))
   }
 }
