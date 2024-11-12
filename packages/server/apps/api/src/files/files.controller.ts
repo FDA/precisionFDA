@@ -1,11 +1,13 @@
 import {
   Body,
   Controller,
+  DefaultValuePipe,
   Get,
   Header,
   Logger,
   Param,
   ParseArrayPipe,
+  ParseBoolPipe,
   Patch,
   Post,
   Query,
@@ -13,10 +15,12 @@ import {
   UseGuards,
 } from '@nestjs/common'
 import { DownloadLinkOptionsDto } from '@shared/domain/entity/domain/download-link-options.dto'
+import { Uid } from '@shared/domain/entity/domain/uid'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { ResolvePathDTO } from '@shared/domain/user-file/dto/user-file.dto'
 import { UserFileService } from '@shared/domain/user-file/service/user-file.service'
 import { createCloseFileJobTask } from '@shared/queue'
+import { TimeUtils } from '@shared/utils/time.utils'
 import { CustomValidationPipe } from '@shared/validation/pipes/validation.pipe'
 import archiver from 'archiver'
 import axios from 'axios'
@@ -127,5 +131,20 @@ export class FilesController {
   @Post('/copy/validate')
   async validateCopyFiles(@Body() body: FilesValidateCopyingBodyDto) {
     return this.userFileService.validateCopyFiles(body.uids, body.scope)
+  }
+
+  @Get(':uid/:fileName')
+  async downloadFile(
+    @Param('uid') uid: Uid<'file'>,
+    @Query('inline', new DefaultValuePipe(false), ParseBoolPipe) inline: boolean,
+    @Res() res: Response,
+  ): Promise<void> {
+    const link = await this.userFileService.getDownloadLinkForUid(uid, {
+      preauthenticated: true,
+      inline,
+      duration: TimeUtils.minutesToSeconds(5),
+    })
+
+    return res.redirect(link)
   }
 }
