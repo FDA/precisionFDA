@@ -19,11 +19,18 @@ const StyledResourceTable = styled(ResourceTable)`
   }
 `
 
+const sanitizeFileName = (name: string): string => {
+  const re = /[<>:"/\\|?*]+/g
+
+  return encodeURIComponent(name.replace(re, '_'))
+}
+
 export const useOpenFileModal = (selectedFiles: IFile[]) => {
   const { isShown, setShowModal } = useModal()
   const handleOpenClick = (item: IFile) => {
-      const win = window.open(`/api/files/${item.uid}/${item.name}?inline=true`, '_blank')
-      win?.focus()
+    // TODO(PFDA-5831) - v2 endpoint
+    const win = window.open(`/api/files/${item.uid}/${sanitizeFileName(item.name)}?inline=true`, '_blank')
+    win?.focus()
   }
 
   const momoSelected = useMemo(() => selectedFiles, [isShown])

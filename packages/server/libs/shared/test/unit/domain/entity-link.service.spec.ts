@@ -88,7 +88,7 @@ describe('EntityLinkService', () => {
       const res = await getInstance().getDownloadLink(FILE, "Crazy&File *Name #123?='Yes'.jpg")
 
       expect(res).to.equal(
-        "https://rails-host:1234/api/files/FILE_UID/Crazy%26File%20*Name%20%23123%3F%3D'Yes'.jpg",
+        "https://rails-host:1234/api/files/FILE_UID/Crazy%26File%20_Name%20%23123_%3D'Yes'.jpg",
       )
     })
 
