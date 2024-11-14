@@ -604,6 +604,7 @@ func (c *PFDAClient) DownloadFile(arg string, outputFilePath string, overwrite s
 	if err != nil {
 		fileName = originalName
 	}
+	fileName = sanitizeFileName(fileName)
 
 	fileSize := resultJSON["file_size"].(float64)
 	if !c.JsonResponse {
@@ -1494,4 +1495,9 @@ func printSpaceMembersResponse(members []jsonMembersResponse, asJSON bool) {
 		}
 		writer.Flush()
 	}
+}
+
+func sanitizeFileName(name string) string {
+	re := regexp.MustCompile(`[<>:"/\\|?*]+`)
+	return re.ReplaceAllString(name, "_")
 }
