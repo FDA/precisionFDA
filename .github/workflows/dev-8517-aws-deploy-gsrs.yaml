@@ -1,14 +1,18 @@
-name: WIP - 8517 DEV - Deploy GSRS to AWS
+name: DEV - Deploy GSRS to AWS
 
 on:
   workflow_dispatch:
     inputs:
       GSRS_BRANCH:
-        description: GSRS revision
+        description: GSRS Revision
         type: string
-        default: gsrs_240919
+        default: gsrs_241029
+      GSRS_DATABASE_NAME:
+        description: GSRS Database and Index Name
+        type: string
+        default: ixginas20240911
       LT_VERSION:
-        description: Version of Launch Template
+        description: Launch Template Version
         type: string
         default: $Default
 
@@ -20,7 +24,7 @@ permissions:
   id-token: write
   contents: read
 
-run-name: ${{ github.event_name == 'workflow_dispatch' && format('{0} | GSRS_BRANCH={1}, LT_VERSION={2}', github.workflow, inputs.GSRS_BRANCH, inputs.LT_VERSION) || '' }}
+run-name: ${{ github.event_name == 'workflow_dispatch' && format('{0} | GSRS_BRANCH={1}, GSRS_DATABASE_NAME={2}, LT_VERSION={3}', github.workflow, inputs.GSRS_BRANCH, inputs.GSRS_DATABASE_NAME, inputs.LT_VERSION) || '' }}
 jobs:
   deploy:
     name: deploy to AWS
@@ -40,11 +44,13 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ vars.REGION }}
-          role-to-assume: ${{ vars.ROLE_ARN }}
+          role-to-assume: ${{ vars.ROLE_GSRS_ARN }}
 
       - name: Set SSM Parameters
         run: |
+          aws ssm put-parameter --name /pfda/${{ vars.ENVIRONMENT }}/chef/source_branch --value '${{ github.ref_name }}' --type String --overwrite >/dev/null
           aws ssm put-parameter --name /pfda/${{ vars.ENVIRONMENT }}/gsrs/revision --value '${{ inputs.GSRS_BRANCH }}' --overwrite >/dev/null
+          aws ssm put-parameter --name /pfda/${{ vars.ENVIRONMENT }}/gsrs/database_name --value '${{ inputs.GSRS_DATABASE_NAME }}' --overwrite >/dev/null
 
       - name: Run deploy.sh script
         env:
@@ -58,6 +64,7 @@ jobs:
           ENV_TG: ${{ vars.ENV_GSRS_TG }}
           ENV_LT_NAME: ${{ vars.ENV_GSRS_LT_NAME }}
           ENV_LT_VERSION: ${{ inputs.LT_VERSION }}
+          ENV_INSTANCE_TYPE: gsrsinstance
           ENV_MIN_SIZE: ${{ vars.ENV_GSRS_MIN_SIZE }}
           ENV_MAX_SIZE: ${{ vars.ENV_GSRS_MAX_SIZE }}
           ENV_DESIRED_CAP: ${{ vars.ENV_GSRS_DESIRED_CAP }}
