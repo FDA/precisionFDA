@@ -11,25 +11,11 @@
 # Flow:
 # Download the latest dump from S3
 # Restore dump to a new database
-# Migrate users, roles and groups
 # Create a trigger for user roles assignment
 
 set -o errexit -o pipefail
 
 DUMP_BUCKET="gsrs-database-dumps"
-
-# If OLD_DB_HOST is not set, the new database will still receive the database
-# dump but user roles will not be transferred
-# OLD_DB_HOST="pfda-dev-gsrs-db.cyy6pahwar0b.us-west-2.rds.amazonaws.com"
-# OLD_DB_PORT=3306
-# OLD_DB_NAME="ixginas"
-# OLD_DB_USER="admin"
-# OLD_DB_PASS="INSERT_PASSWORD"
-OLD_DB_HOST="127.0.0.1"
-OLD_DB_PORT=32900
-OLD_DB_NAME="ixginas20230708"
-OLD_DB_USER="root"
-OLD_DB_PASS="password"
 
 # NEW_DB_HOST="pfda-dev-gsrs-db-mysql.cyy6pahwar0b.us-west-2.rds.amazonaws.com"
 # NEW_DB_PORT=3306
@@ -74,25 +60,6 @@ restore_dump() {
     zcat "$1" | mysql -h $NEW_DB_HOST -P $NEW_DB_PORT -u $NEW_DB_USER -p$NEW_DB_PASS --ssl-mode=DISABLED $NEW_DB_NAME
 }
 
-dump_users_and_roles() {
-    mysqldump -h $OLD_DB_HOST -u $OLD_DB_USER -p$OLD_DB_PASS -P $OLD_DB_PORT  $OLD_DB_NAME ix_core_principal > ix_core_principal.sql
-    mysqldump -h $OLD_DB_HOST -u $OLD_DB_USER -p$OLD_DB_PASS -P $OLD_DB_PORT  $OLD_DB_NAME ix_core_userprof > ix_core_userprof.sql
-    mysqldump -h $OLD_DB_HOST -u $OLD_DB_USER -p$OLD_DB_PASS -P $OLD_DB_PORT  $OLD_DB_NAME ix_core_group_principal > ix_core_group_principal.sql
-    mysqldump -h $OLD_DB_HOST -u $OLD_DB_USER -p$OLD_DB_PASS -P $OLD_DB_PORT  $OLD_DB_NAME ix_core_group > ix_core_group.sql
-}
-
-# this will fail if the dump has anyone else rather than admin.
-restore_users_and_roles() {
-    mysql -h $NEW_DB_HOST -P $NEW_DB_PORT -u $NEW_DB_USER \
-        -p$NEW_DB_PASS --ssl-mode=DISABLED $NEW_DB_NAME <ix_core_principal.sql
-    mysql -h $NEW_DB_HOST -P $NEW_DB_PORT -u $NEW_DB_USER \
-        -p$NEW_DB_PASS --ssl-mode=DISABLED $NEW_DB_NAME <ix_core_userprof.sql
-    mysql -h $NEW_DB_HOST -P $NEW_DB_PORT -u $NEW_DB_USER \
-        -p$NEW_DB_PASS --ssl-mode=DISABLED $NEW_DB_NAME <ix_core_group.sql
-    mysql -h $NEW_DB_HOST -P $NEW_DB_PORT -u $NEW_DB_USER \
-        -p$NEW_DB_PASS --ssl-mode=DISABLED $NEW_DB_NAME <ix_core_group_principal.sql
-}
-
 create_roles_trigger() {
     mysql -h $NEW_DB_HOST -P $NEW_DB_PORT -u $NEW_DB_USER -p$NEW_DB_PASS --ssl-mode=DISABLED $NEW_DB_NAME \
         -e "$ROLES_TRIGGER"
@@ -124,17 +91,9 @@ main() {
     echo
     echo "Restore dump to the new database..."
     restore_dump "$dump_path"
-    if [ -n "$OLD_DB_HOST" ]; then
-        echo "Dump users, roles and groups..."
-        dump_users_and_roles
-        echo "Restore users, roles and groups to the new database..."
-        restore_users_and_roles
-    else
-        echo "\$OLD_DB_HOST not set, skipping user roles transfer"
-    fi
 
     echo
-    echo "Create roles trigger..."
+    echo "Create roles trigger... (may already exist)"
     create_roles_trigger
 
     # Better to explicitly uncomment this when needing to clean up, because if something went wrong during
