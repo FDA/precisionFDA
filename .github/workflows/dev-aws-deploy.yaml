@@ -1,4 +1,4 @@
-name: DEV - Deploy to AWS
+name: DEV (old) - Deploy to AWS
 
 on:
   workflow_dispatch:
@@ -66,6 +66,7 @@ jobs:
           ENV_TG: ${{ vars.ENV_TG }}
           ENV_LT_NAME: ${{ vars.ENV_LT_NAME }}
           ENV_LT_VERSION: ${{ inputs.LT_VERSION }}
+          ENV_INSTANCE_TYPE: appinstance
           ENV_MIN_SIZE: ${{ vars.ENV_MIN_SIZE }}
           ENV_MAX_SIZE: ${{ vars.ENV_MAX_SIZE }}
           ENV_DESIRED_CAP: ${{ vars.ENV_DESIRED_CAP }}

@@ -25,6 +25,20 @@ template "#{node[:gsrs][:tomcat_path]}/conf/context.xml" do
   notifies :restart, 'tomcat_service[gsrs]', :delayed
 end
 
+ruby_block 'assign gsrs variables' do
+  block do
+    node.run_state['gsrs_index_path'] = lazy do
+      "#{node.run_state.dig('ssm_params', 'gsrs', 'index_bucket')}/#{node.run_state.dig('ssm_params', 'gsrs', 'database_name')}/"
+    end.call
+    puts "gsrs_index_path is #{node.run_state['gsrs_index_path']}"
+
+    node.run_state['gsrs_database_url'] = lazy do
+      "jdbc:mariadb://#{node.run_state.dig('ssm_params', 'app', 'environment', 'GSRS_DATABASE_HOST')}/#{node.run_state.dig('ssm_params', 'gsrs', 'database_name')}"
+    end.call
+    puts "gsrs_database_url is #{node.run_state['gsrs_database_url']}"
+  end
+end
+
 bash 'sync ginas indexes' do
   live_stream true
   code <<-BASH
@@ -34,17 +48,22 @@ bash 'sync ginas indexes' do
   BASH
   environment(lazy do
     {
-      SOURCE_PATH: node.run_state.dig('ssm_params', 'gsrs', 'index_path') || node['gsrs']['index_path'],
+      SOURCE_PATH: node.run_state['gsrs_index_path'],
       DESTINATION_PATH: "#{node['gsrs']['tomcat_path']}/ginas.ix",
       OWNER_USER: node['gsrs']['tomcat_user'],
       OWNER_GROUP: node['gsrs']['tomcat_group']
     }
   end)
   only_if do
-    shell_out("aws s3 sync #{node.run_state.dig('ssm_params', 'gsrs',
-                                                'index_path') || node['gsrs']['index_path']} #{node['gsrs']['tomcat_path']}/ginas.ix --delete --dryrun | grep download").exitstatus == 0
+    shell_out("aws s3 sync #{node.run_state['gsrs_index_path']} #{node['gsrs']['tomcat_path']}/ginas.ix --delete --dryrun | grep download").exitstatus == 0
   end
   notifies :run, 'bash[wipe tomcat cache]', :immediately
+end
+
+file "#{node['gsrs']['tomcat_path']}/ixginas_version" do
+  content lazy { node.run_state.dig('ssm_params', 'gsrs', 'database_name') }
+  mode '0644'
+  action :create
 end
 
 git "#{node[:gsrs][:tomcat_path]}/repo" do
@@ -125,7 +144,7 @@ template "#{node[:gsrs][:tomcat_path]}/webapps/substances/WEB-INF/classes/applic
                                              node.run_state.dig('ssm_params', 'app', 'environment',
                                                                 'GSRS_AUTHENTICATION_HEADER_NAME_EMAIL')
                                            end,
-    GSRS_DATABASE_URL: lazy { node.run_state.dig('ssm_params', 'app', 'environment', 'GSRS_DATABASE_URL') },
+    GSRS_DATABASE_URL: lazy { node.run_state['gsrs_database_url'] },
     GSRS_DATABASE_USERNAME: lazy { node.run_state.dig('ssm_params', 'app', 'environment', 'GSRS_DATABASE_USERNAME') },
     GSRS_DATABASE_PASSWORD: lazy { node.run_state.dig('ssm_params', 'app', 'environment', 'GSRS_DATABASE_PASSWORD') },
     HOST: lazy { node.run_state.dig('ssm_params', 'app', 'environment', 'HOST') }
