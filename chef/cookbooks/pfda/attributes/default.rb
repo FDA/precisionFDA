@@ -28,6 +28,7 @@ default[:app_root_dir] = "/srv/www/precision_fda/current"
 default[:mysql_rds_sslca_path] = "/etc/ssl/certs/global-bundle.pem"
 default[:nginx][:log_dir] = "/var/log/nginx"
 
+default["nodejs"]["api-internal"]["port"] = 3003
 default["nodejs"]["worker"]["instances"] = 2
 default["nodejs"]["admin-platform-client"]["instances"] = 2
 

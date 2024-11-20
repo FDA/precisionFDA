@@ -6,6 +6,7 @@ export const config: ConfigOverride = () => ({
     certPath: process.env.NODE_PATH_CERT ?? '../cert.pem',
     keyCertPath: process.env.NODE_PATH_KEY_CERT ?? '../key.pem',
     enableForgeryProtection: false,
+    internalEndpointsEnabled: true,
   },
   database: {
     debug: true,

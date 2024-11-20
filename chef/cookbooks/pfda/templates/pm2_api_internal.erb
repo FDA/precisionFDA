@@ -1,0 +1,19 @@
+{
+  "apps": [
+    {
+      name: "server_api_internal",
+      script: "dist/apps/api/apps/api/src/index.js",
+      instances: 1,
+      exec_mode: "fork",
+      watch: false,
+  	  log_file: "../../log/node-api-internal.log",
+  	  error_file: "../../log/node-api-internal-error.log",
+  	  time: true,
+			args: "--internal",
+			merge_logs: true,
+			env: {
+				NODE_PORT: <%= @port %>
+			}
+    }
+  ]
+}
