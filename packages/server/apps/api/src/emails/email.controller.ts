@@ -1,9 +1,10 @@
 import { Body, Controller, HttpCode, Param, ParseIntPipe, Post, UseGuards } from '@nestjs/common'
+import { InternalRouteGuard } from '../internal/guard/internal.guard'
 import { UserContextGuard } from '../user-context/guard/user-context.guard'
 import { EmailFacade } from '@shared/domain/email/email.facade'
 import { TypedEmailBodyDto } from '@shared/domain/email/dto/typed-email-body.dto'
 
-@UseGuards(UserContextGuard)
+@UseGuards(InternalRouteGuard, UserContextGuard)
 @Controller('/emails')
 export class EmailController {
   constructor(private readonly emailFacade: EmailFacade) {}

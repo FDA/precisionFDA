@@ -26,6 +26,7 @@ import archiver from 'archiver'
 import axios from 'axios'
 import { Response } from 'express'
 import { UserFileResolverFacade } from '../facade/user-file/user-file-resolver.facade'
+import { InternalRouteGuard } from '../internal/guard/internal.guard'
 import { UserContextGuard } from '../user-context/guard/user-context.guard'
 import { OptionalParseIntPipe } from '../validation/pipes/optional-int.pipe'
 import { DownloadLinkParamDto } from './model/download-link-param.dto'
@@ -111,6 +112,7 @@ export class FilesController {
     return `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`
   }
 
+  @UseGuards(InternalRouteGuard)
   @Get('/path-resolver')
   async resolvePath(@Query(new CustomValidationPipe({ transform: true })) query: ResolvePathDTO) {
     return await this.userFileResolverFacade.resolvePath(query)
