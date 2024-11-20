@@ -25,6 +25,7 @@ import {
 import { SectionTitle, SectionTitleRow, StyledClassTd, StyledInputOutputBox, StyledRemove, TableStyles } from './styles'
 import { CreateAppForm, IOSpec } from '../apps.types'
 import { removeArrayStringFromClassType, setClassVal } from './common'
+import { useSkipFirstRenderUseEffect } from '../../../hooks/useSkipFirstRender'
 
 
 interface InputSpecRowProps {
@@ -53,8 +54,7 @@ const InputSpecRow = ({
   const sClass = watch(`input_spec.${index}.class`)
   const isArray = watch(`input_spec.${index}.isArray`)
 
-  // trigger validations on 'default' if 'isArray' changes
-  useEffect(() => {
+  useSkipFirstRenderUseEffect(() => {
     trigger(`input_spec.${index}.default`)
     setValue(`input_spec.${index}.default`, null)
     setValue(`input_spec.${index}.class`, setClassVal(sClass, isArray))
