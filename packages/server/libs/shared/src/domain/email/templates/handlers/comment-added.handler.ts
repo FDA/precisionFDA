@@ -24,7 +24,10 @@ import { BaseTemplate } from '@shared/domain/email/templates/base-template'
 import { commentAddedTemplate, CommentAddedTemplateInput } from '../mjml/comment-added.template'
 import { generateObjectCommentsLink } from '../mjml/common'
 
-export class CommentAddedEmailHandler extends BaseTemplate<CommentAdded> implements EmailTemplate {
+export class CommentAddedEmailHandler
+  extends BaseTemplate<CommentAdded>
+  implements EmailTemplate<CommentAddedTemplateInput>
+{
   templateFile = commentAddedTemplate
   comment: Comment & { user: LoadedReference<User> }
   spaceEvent: SpaceEvent & { space: LoadedReference<Space> }

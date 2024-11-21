@@ -23,7 +23,7 @@ const types = {
   WORKFLOW: 'Workflow',
 } as Record<ATTACHABLE_TYPES, string>
 
-const AttachTo = ({ hideAction, ids }: { hideAction: () => void; ids: string[] | number[] }) => {
+const AttachTo = ({ hideAction, ids, type }: { hideAction: () => void; ids: string[] | number[], type: ATTACHABLE_TYPES }) => {
   const { data: notesData, isLoading } = useListNotesQuery()
   const mutation = useAttachToMutation()
   const items = notesData || []
@@ -49,11 +49,11 @@ const AttachTo = ({ hideAction, ids }: { hideAction: () => void; ids: string[] |
     const it = ids.map((id: string | number) => {
       return {
         id,
-        type: types[itemsType],
+        type: types[type],
       }
     })
 
-    await mutation.mutateAsync({ items: it, noteUids: [...checkedItemIds] })
+    await mutation.mutateAsync({ items: it, noteUids: [...checkedItemIds]})
     setSelectedItem({})
     setCheckedItemIds(new Set())
     hideAction()
@@ -73,7 +73,7 @@ const AttachTo = ({ hideAction, ids }: { hideAction: () => void; ids: string[] |
     )
 
     return (
-      <li key={note.uid} className={classes} onClick={() => setSelectedItem(note)} onKeyPress={() => setSelectedItem(note)}>
+      <li key={note.uid} className={classes} onClick={() => setSelectedItem(note)} onKeyDown={() => setSelectedItem(note)}>
         <div>
           <span className="__menu-item_label-wrapper" onClick={() => onCheckboxClick(note.uid)}>
             <input type="checkbox" name={note.uid} checked={checkedItemIds.has(note.uid)} onChange={() => {}} />
@@ -89,7 +89,7 @@ const AttachTo = ({ hideAction, ids }: { hideAction: () => void; ids: string[] |
       <StyledAttachToModal>
         <LeftBar>
           <SearchInput>
-            <InputText name="search" placeholder="Search..." value={search} onChange={(e: any) => setSearch(e.target.value)} />
+            <InputText name="search" placeholder="Search..." value={search} onChange={(e) => setSearch(e.target.value)} />
             <span className="__menu-item_search-icons">
               {search ? (
                 <TransparentButton onClick={() => setSearch('')}>
@@ -159,7 +159,7 @@ export const AttachToModal = ({
   return (
     <ModalNext hide={hideAction} isShown={isShown} id="modal-attachto" data-testid="modal-attachto">
       <ModalHeaderTop disableClose={false} headerText={`Attach note to ${types[itemsType]}:`} hide={hideAction} />
-      {isShown && <AttachTo hideAction={hideAction} ids={ids} />}
+      {isShown && <AttachTo hideAction={hideAction} ids={ids} type={itemsType} />}
     </ModalNext>
   )
 }

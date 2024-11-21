@@ -66,6 +66,8 @@ class NotificationPreference < ApplicationRecord
     # jobTerminationWarning = 8,
     # staleJobsReport = 9,
     notification_job_failed: 11,
+    alert_message: 17,
+    expert_question_added: 18,
   }.freeze
 
   ALL_KEYS = REVIEWER_KEYS + SPONSOR_KEYS + REVIEWER_LEAD_KEYS + SPONSOR_LEAD_KEYS +

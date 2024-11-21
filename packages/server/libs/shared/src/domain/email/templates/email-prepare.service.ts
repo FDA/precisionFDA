@@ -32,7 +32,9 @@ export class EmailPrepareService {
     )
   }
 
-  private async getEmailTemplate(emailProcessInput: EmailProcessInput): Promise<EmailTemplate> {
+  private async getEmailTemplate<T>(
+    emailProcessInput: EmailProcessInput,
+  ): Promise<EmailTemplate<T>> {
     const emailConfig = getEmailConfig(emailProcessInput.emailTypeId)
     const handler = emailConfig.handlerClass
     // this also runs input validation
@@ -41,7 +43,12 @@ export class EmailPrepareService {
       user: this.user,
       em: this.em,
     }
-    const instance = new handler(emailProcessInput.emailTypeId, emailProcessInput.input, opsCtx)
+    const instance = new handler(
+      emailProcessInput.emailTypeId,
+      emailProcessInput.input,
+      opsCtx,
+      emailProcessInput.receiverUserIds,
+    )
     await instance.setupContext()
     return instance
   }

@@ -48,11 +48,13 @@ export class ChallengeService {
     this.logger.log(`Card image url for fileUid ${fileUid} updated`)
     try {
       const userId = this.user.id
+      const sessionId = this.user.sessionId
       await this.notificationService.createNotification({
         message: `Card image url for ${challenge.name} has been updated`,
         severity: SEVERITY.INFO,
         action: NOTIFICATION_ACTION.CHALLENGE_CARD_IMAGE_URL_UPDATED,
         userId,
+        sessionId,
       })
     } catch (error) {
       this.logger.error(`Error creating notification ${error}`)
@@ -87,11 +89,13 @@ export class ChallengeService {
 
     try {
       const userId = this.user.id
+      const sessionId = this.user.sessionId
       await this.notificationService.createNotification({
         message: `Resource url for ${challengeResource.name} has been updated`,
         severity: SEVERITY.INFO,
         action: NOTIFICATION_ACTION.CHALLENGE_RESOURCE_URL_UPDATED,
         userId,
+        sessionId,
       })
     } catch (error) {
       this.logger.error(`Error creating notification ${error}`)

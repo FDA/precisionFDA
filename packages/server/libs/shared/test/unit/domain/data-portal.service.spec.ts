@@ -64,6 +64,7 @@ describe('DataPortalService', () => {
       id: userId,
       accessToken: 'accessToken',
       dxuser: 'dxuser',
+      sessionId: 'sessionId',
     }
     dataPortalRepository = {
       findDataPortalsByCardImageUid: findDataPortalsStub,
@@ -828,6 +829,7 @@ describe('DataPortalService', () => {
         severity: SEVERITY.INFO,
         action: NOTIFICATION_ACTION.DATA_PORTAL_CARD_IMAGE_URL_UPDATED,
         userId: user.id,
+        sessionId: 'sessionId',
       })
     })
 

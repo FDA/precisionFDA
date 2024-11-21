@@ -1,7 +1,8 @@
 import { WebSocket } from 'ws'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
 
 export interface PfdaWebSocket extends WebSocket {
-  PFDA_AUTH_TOKEN: string
+  pfdaUserContext: UserContext
 }
 
 export enum WEBSOCKET_EVENTS {

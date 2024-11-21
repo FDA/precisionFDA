@@ -1,15 +1,14 @@
 import { parseEnumValueFromString } from '@shared/validation/parsers'
 import { default as dotenv } from 'dotenv'
 import path from 'path'
-
-// load process.env values
-dotenv.config()
-
 import { mergeDeepRight } from 'ramda'
 import { ENVS } from '../enums'
 import { DeepPartial } from '../types'
 import { MAX_JOB_DURATION_SECONDS } from './constants'
 import * as overrides from './envs'
+
+// load process.env values
+dotenv.config()
 
 type Maybe<T> = T | null
 
@@ -58,6 +57,7 @@ const defaultConfig = {
     },
     nginxIpHeader: 'x-forwarded-for',
     enableForgeryProtection: true,
+    internalEndpointsEnabled: process.argv.includes('--internal'),
   },
   logs: {
     pretty: false,
@@ -78,8 +78,8 @@ const defaultConfig = {
     maxJobDurationMinutes: Math.ceil(MAX_JOB_DURATION_SECONDS / 60),
   },
   platform: {
-    apiUrl: 'https://stagingapi.dnanexus.com',
-    authApiUrl: 'https://stagingauth.dnanexus.com',
+    apiUrl: process.env.API_URL ?? 'https://stagingapi.dnanexus.com',
+    authApiUrl: process.env.AUTH_API_URL ?? 'https://stagingauth.dnanexus.com',
     adminUser: 'precisionfda.admin_dev',
     adminUserAccessToken: process.env.ADMIN_TOKEN ?? 'admin-token',
     challengeBotUser: 'challenge.bot.2',

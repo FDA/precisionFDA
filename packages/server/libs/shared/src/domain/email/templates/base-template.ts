@@ -1,6 +1,6 @@
 import { ErrorCodes, ValidationError } from '@shared/errors'
-import { OpsCtx } from '../../../types'
-import { ajv } from '../../../utils/validator'
+import { OpsCtx } from '@shared/types'
+import { ajv } from '@shared/utils/validator'
 import { EMAIL_TYPES, getEmailConfig, EmailConfigItem } from '../email.config'
 
 // used mostly for validation and setting correct type of validated input
@@ -9,14 +9,16 @@ export class BaseTemplate<InputT, CtxT extends OpsCtx = OpsCtx> {
   config: EmailConfigItem
   ctx: CtxT
   validatedInput: InputT
+  receiverUserIds: number[]
 
-  constructor(emailTypeId: number, input: unknown, ctx: CtxT) {
+  constructor(emailTypeId: number, input: unknown, ctx: CtxT, receiverUserIds: number[] = []) {
     this.ctx = ctx
     this.config = getEmailConfig(emailTypeId)
     this.emailType = emailTypeId
     this.ctx.log.log({ emailType: this.emailType }, 'Email template build')
 
     this.validatedInput = this.validate(input)
+    this.receiverUserIds = receiverUserIds
   }
 
   validate(payload: unknown): InputT {

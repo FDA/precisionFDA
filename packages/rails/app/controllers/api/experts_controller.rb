@@ -67,7 +67,7 @@ module Api
               "Your question was not submitted because of an unknown reason, Please try again."
       end
 
-      NotificationsMailer.new_expert_question_email(@expert, exp_question).deliver_now!
+      https_apps_client.email_send(NotificationPreference.email_types[:expert_question_added], [], { questionId: exp_question.id })
 
       render json: @expert, adapter: :json
     end

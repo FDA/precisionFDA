@@ -59,7 +59,7 @@ export class WorkstationSnapshotOperation extends WorkstationBaseOperation<
       )
     }
 
-    const notificationService = new NotificationService(this.ctx.em)
+    const notificationService = new NotificationService(this.ctx.em, this.ctx.user)
 
     try {
       const workstationService = await new WorkstationService(this.ctx, input.code).initWithJob(
@@ -82,6 +82,7 @@ export class WorkstationSnapshotOperation extends WorkstationBaseOperation<
           severity: SEVERITY.INFO,
           action: NOTIFICATION_ACTION.WORKSTATION_SNAPSHOT_COMPLETED,
           userId: this.ctx.user.id,
+          sessionId: this.ctx.user.sessionId,
         })
       } else {
         await notificationService.createNotification({
@@ -93,6 +94,7 @@ export class WorkstationSnapshotOperation extends WorkstationBaseOperation<
           severity: SEVERITY.ERROR,
           action: NOTIFICATION_ACTION.WORKSTATION_SNAPSHOT_ERROR,
           userId: this.ctx.user.id,
+          sessionId: this.ctx.user.sessionId,
         })
       }
       return res
@@ -107,6 +109,7 @@ export class WorkstationSnapshotOperation extends WorkstationBaseOperation<
         severity: SEVERITY.ERROR,
         action: NOTIFICATION_ACTION.WORKSTATION_SNAPSHOT_ERROR,
         userId: this.ctx.user.id,
+        sessionId: this.ctx.user.sessionId,
       })
       return {
         error: {

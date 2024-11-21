@@ -109,7 +109,7 @@ class ExpertsController < ApplicationController
     if @context.logged_in?
       exp_question = ExpertQuestion.provision(expert, @context, unsafe_params[:expert][:question])
       if exp_question
-        NotificationsMailer.new_expert_question_email(expert, exp_question).deliver_now!
+        https_apps_client.email_send(NotificationPreference.email_types[:expert_question_added], [], { questionId: exp_question.id })
         flash[:success] = "Your question was submitted successfully."
       else
         flash[:error] = "Your question was not submitted because of an unknown reason, Please try again."
@@ -127,7 +127,7 @@ class ExpertsController < ApplicationController
       result = verify_captcha_assessment(token, "question")
 
       if result && @exp_question.save!
-        NotificationsMailer.new_expert_question_email(expert, @exp_question).deliver_now!
+        https_apps_client.email_send(NotificationPreference.email_types[:expert_question_added], [], { questionId: exp_question.id })
         flash[:success] = "Your question was submitted successfully."
       else
         flash[:error] = "Your question was not submitted because of an unknown reason. Please try again."
