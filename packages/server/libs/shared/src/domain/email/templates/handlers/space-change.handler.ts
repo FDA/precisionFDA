@@ -20,7 +20,10 @@ import {
 import { LoadedReference } from '@mikro-orm/core'
 import { SPACE_MEMBERSHIP_SIDE } from '../../../space-membership/space-membership.enum'
 
-export class SpaceChangedEmailHandler extends BaseTemplate<SpaceChanged> implements EmailTemplate {
+export class SpaceChangedEmailHandler
+  extends BaseTemplate<SpaceChanged>
+  implements EmailTemplate<SpaceChangeTemplateInput>
+{
   templateFile = spaceChangedTemplate
   space: Space
   user: User

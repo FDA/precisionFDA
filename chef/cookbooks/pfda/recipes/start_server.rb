@@ -26,6 +26,13 @@ execute 'run the admin platform client' do
   })
 end
 
+execute 'run the internal api' do
+  cwd server_dir
+  user node[:deploy_user]
+  command 'pm2 startOrReload ./pm2-api-internal.json'
+  environment(lazy { ENV.to_hash })
+end
+
 execute 'setup systemd unit' do
   cwd server_dir
   user 'root'

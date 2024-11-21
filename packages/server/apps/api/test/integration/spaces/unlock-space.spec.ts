@@ -6,10 +6,12 @@ import {
 } from '@shared/domain/space-membership/space-membership.enum'
 import { Space } from '@shared/domain/space/space.entity'
 import { SPACE_STATE } from '@shared/domain/space/space.enum'
+import { EmailSendService } from '@shared/domain/email/email-send.service'
+import { SinonSpy, spy } from 'sinon'
 import { User } from '@shared/domain/user/user.entity'
 import { ErrorCodes } from '@shared/errors'
 import { create, db, generate } from '@shared/test'
-import { fakes, mocksReset } from '@shared/test/mocks'
+import { mocksReset } from '@shared/test/mocks'
 import { expect } from 'chai'
 import process from 'process'
 import supertest from 'supertest'
@@ -23,6 +25,8 @@ describe('PATCH /spaces/:id/unlock', () => {
   let alreadyUnlockedSpace: Space
   let guestLead: User
   let hostLead: User
+
+  let sendEmailStub: SinonSpy
 
   beforeEach(async () => {
     await db.dropData(database.connection())
@@ -56,6 +60,12 @@ describe('PATCH /spaces/:id/unlock', () => {
 
     await em.flush()
     mocksReset()
+    const emailSendService = testedApp.get<EmailSendService>(EmailSendService)
+    sendEmailStub = spy(emailSendService, 'sendEmail')
+  })
+
+  afterEach(() => {
+    sendEmailStub.restore()
   })
 
   it('unlocks space', async () => {
@@ -66,7 +76,6 @@ describe('PATCH /spaces/:id/unlock', () => {
 
     em.clear()
 
-    const sendEmailStub = fakes.emailService.sendEmail
     expect(sendEmailStub.calledTwice).to.be.true()
 
     const firstEmail = sendEmailStub.args[0][0]

@@ -14,9 +14,9 @@ type JobFailedInputType = { jobId: number }
 
 export class JobFailedEmailHandler
   extends BaseTemplate<JobFailedInputType, UserOpsCtx>
-  implements Omit<EmailTemplate, 'templateFile'> {
+  implements Omit<EmailTemplate<JobFailedInputTemplate>, 'templateFile'>
+{
   job: Job
-
 
   getNotificationKey(): keyof typeof NOTIFICATION_TYPES_BASE {
     return 'job_failed'

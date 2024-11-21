@@ -25,6 +25,7 @@ export const config: ConfigOverride = () => ({
     },
     railsHost: 'https://rails-host:1234',
     enableSsl: false,
+    internalEndpointsEnabled: true,
   },
   emails: {
     smtp: {

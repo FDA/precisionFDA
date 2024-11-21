@@ -84,7 +84,12 @@ export class UserContextMiddleware implements NestMiddleware {
       secure: true,
     })
 
-    return new UserContext(userSession.user_id, userSession.token, userSession.username)
+    return new UserContext(
+      userSession.user_id,
+      userSession.token,
+      userSession.username,
+      userSession.session_id,
+    )
   }
 
   private async getUserContextFromAuthHeader(req: Request): Promise<UserContext> {

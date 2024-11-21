@@ -383,11 +383,13 @@ export class DataPortalService {
     this.logger.log(`Card image url for fileUid ${fileUid} updated`)
     try {
       const userId = this.user.id
+      const sessionId = this.user.sessionId
       await this.notificationService.createNotification({
         message: `Card image url for ${dataPortal.name} has been updated`,
         severity: SEVERITY.INFO,
         action: NOTIFICATION_ACTION.DATA_PORTAL_CARD_IMAGE_URL_UPDATED,
         userId,
+        sessionId,
       })
     } catch (error) {
       this.logger.error(`Error creating notification ${error}`)

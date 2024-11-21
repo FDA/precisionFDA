@@ -1,22 +1,23 @@
 import { ErrorCodes, ServiceError } from '@shared/errors'
 import * as nodemailer from 'nodemailer'
 import { config } from '../config'
-import { SendEmailJob } from '../queue/task.input'
 import { getLogger } from '../logger'
 import SMTPTransport from 'nodemailer/lib/smtp-transport'
 import fs from 'fs'
 import path from 'path'
+import { EmailSendInput } from '@shared/domain/email/email.config'
 
 const log = getLogger('nodemailer-logger')
 
-interface IEmailService {
-  sendEmail: (input: SendEmailJob['payload']) => Promise<void>
+abstract class EmailClient {
+  abstract sendEmail(input: EmailSendInput): Promise<void>
 }
 
-class EmailClient implements IEmailService {
+class SMTPEmailClient extends EmailClient {
   transporter: nodemailer.Transporter
 
   constructor() {
+    super()
     const transportConfig: SMTPTransport.Options = {
       host: config.emails.smtp.host,
       port: parseInt(config.emails.smtp.port) || 0,
@@ -38,12 +39,13 @@ class EmailClient implements IEmailService {
     })
   }
 
-  async sendEmail(input: SendEmailJob['payload']): Promise<void> {
+  async sendEmail(input: EmailSendInput): Promise<void> {
     try {
       const info = await this.transporter.sendMail({
-        from: config.emails.smtp.fromAddress,
+        from: input.from ?? config.emails.smtp.fromAddress,
         cc: [],
         to: input.to,
+        replyTo: input.replyTo,
         subject: input.subject,
         html: input.body,
       })
@@ -62,12 +64,13 @@ class EmailClient implements IEmailService {
   }
 }
 
-class SaveEmailToFileClient implements IEmailService {
+class FileEmailClient extends EmailClient {
   constructor() {
+    super()
     log.log('Email saving to file is enabled')
   }
 
-  async sendEmail(input: SendEmailJob['payload']): Promise<void> {
+  async sendEmail(input: EmailSendInput): Promise<void> {
     log.log('Email saving to file is started')
     const html = `
     <pre>email: ${input.to}\n
@@ -84,7 +87,4 @@ class SaveEmailToFileClient implements IEmailService {
   }
 }
 
-const emailClient = new EmailClient()
-const saveEmailToFileClient = new SaveEmailToFileClient()
-
-export { emailClient, saveEmailToFileClient, IEmailService }
+export { EmailClient, FileEmailClient, SMTPEmailClient }

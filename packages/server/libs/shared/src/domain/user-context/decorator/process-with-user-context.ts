@@ -7,7 +7,7 @@ export function ProcessInUserContext(descriptor: PropertyDescriptor) {
   descriptor.value = function (job: { data: { user?: UserContext } }, ...args: unknown[]) {
     const user = job?.data?.user
 
-    const userContext = new UserContext(user?.id, user?.accessToken, user?.dxuser)
+    const userContext = new UserContext(user?.id, user?.accessToken, user?.dxuser, user?.sessionId)
 
     return userContextStorage.run(userContext, () => {
       return originalMethod.apply(this, [job, ...args])

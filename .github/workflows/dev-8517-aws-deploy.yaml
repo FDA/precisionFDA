@@ -1,18 +1,10 @@
-name: 8517 DEV - Deploy to AWS
+name: DEV - Deploy pFDA to AWS
 
 on:
   workflow_dispatch:
     inputs:
-      GSRS_ENABLED:
-        description: GSRS enabled
-        type: boolean
-        default: true
-      GSRS_BRANCH:
-        description: GSRS revision
-        type: string
-        default: gsrs_240613
       LT_VERSION:
-        description: Version of Launch Template
+        description: Launch Template Version
         type: string
         default: $Default
 
@@ -24,7 +16,7 @@ permissions:
   id-token: write
   contents: read
 
-run-name: ${{ github.event_name == 'workflow_dispatch' && format('{0} | GSRS_ENABLED={1}, GSRS_BRANCH={2}, LT_VERSION={3}', github.workflow, inputs.GSRS_ENABLED, inputs.GSRS_BRANCH, inputs.LT_VERSION) || '' }}
+run-name: ${{ github.event_name == 'workflow_dispatch' && format('{0} | LT_VERSION={1}', github.workflow, inputs.LT_VERSION) || '' }}
 jobs:
   deploy:
     name: deploy to AWS
@@ -51,8 +43,6 @@ jobs:
         run: |
           aws ssm put-parameter --name /pfda/${{ vars.ENVIRONMENT }}/chef/source_branch --value '${{ github.ref_name }}' --type String --overwrite >/dev/null
           aws ssm put-parameter --name /pfda/${{ vars.ENVIRONMENT }}/app/app_source/revision --value '${{ github.ref_name }}' --type String --overwrite >/dev/null
-          aws ssm put-parameter --name /pfda/${{ vars.ENVIRONMENT }}/app/environment/GSRS_ENABLED --value "$([[ "${{ inputs.GSRS_ENABLED }}" == "true" ]] && echo 1 || echo 0)" --type String --overwrite >/dev/null
-          aws ssm put-parameter --name /pfda/${{ vars.ENVIRONMENT }}/gsrs/revision --value '${{ inputs.GSRS_BRANCH }}' --overwrite >/dev/null
 
       - name: Run deploy.sh script
         env:
@@ -66,6 +56,7 @@ jobs:
           ENV_TG: ${{ vars.ENV_TG }}
           ENV_LT_NAME: ${{ vars.ENV_LT_NAME }}
           ENV_LT_VERSION: ${{ inputs.LT_VERSION }}
+          ENV_INSTANCE_TYPE: appinstance
           ENV_MIN_SIZE: ${{ vars.ENV_MIN_SIZE }}
           ENV_MAX_SIZE: ${{ vars.ENV_MAX_SIZE }}
           ENV_DESIRED_CAP: ${{ vars.ENV_DESIRED_CAP }}

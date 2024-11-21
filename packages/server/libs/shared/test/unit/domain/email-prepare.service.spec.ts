@@ -22,7 +22,7 @@ describe('EmailPrepareService', () => {
   let emailPrepareService: EmailPrepareService
   const findOneOrFailStub = stub()
   const findStub = stub()
-  const userContext = new UserContext(userId, 'accessToken', 'dxuser')
+  const userContext = new UserContext(userId, 'accessToken', 'dxuser', 'session_id')
 
   const em = {
     findOneOrFail: findOneOrFailStub,

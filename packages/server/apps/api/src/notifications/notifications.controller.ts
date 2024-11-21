@@ -1,9 +1,10 @@
 import { Body, Controller, HttpCode, Param, Post, Put, UseGuards } from '@nestjs/common'
 import { NotificationInput } from '@shared/domain/notification/notification.input'
 import { NotificationService } from '@shared/domain/notification/services/notification.service'
+import { InternalRouteGuard } from '../internal/guard/internal.guard'
 import { UserContextGuard } from '../user-context/guard/user-context.guard'
 
-@UseGuards(UserContextGuard)
+@UseGuards(InternalRouteGuard, UserContextGuard)
 @Controller('/notifications')
 export class NotificationsController {
   constructor(private readonly notificationService: NotificationService) {}
