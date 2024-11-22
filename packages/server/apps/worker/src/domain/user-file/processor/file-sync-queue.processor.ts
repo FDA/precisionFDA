@@ -51,6 +51,7 @@ export class FileSyncQueueProcessor extends BaseQueueProcessor {
         severity: SEVERITY.INFO,
         action: NOTIFICATION_ACTION.NODES_REMOVED,
         userId: this.user.id,
+        sessionId: this.user.sessionId,
       })
     } catch (error) {
       this.logger.error(error)
@@ -61,6 +62,7 @@ export class FileSyncQueueProcessor extends BaseQueueProcessor {
         severity: SEVERITY.ERROR,
         action: NOTIFICATION_ACTION.NODES_REMOVED,
         userId: this.user.id,
+        sessionId: this.user.sessionId,
       })
     }
   }

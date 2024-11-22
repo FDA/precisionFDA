@@ -540,6 +540,7 @@ ActiveRecord::Schema.define(version: 2024_10_29_115056) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "meta", limit: 4096
+    t.string "session_id"
     t.index ["user_id"], name: "index_notifications_on_user_id"
   end
 

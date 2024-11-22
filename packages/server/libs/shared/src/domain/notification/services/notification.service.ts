@@ -35,6 +35,7 @@ export class NotificationService {
 
     const notification = new Notification(
       notificationInput.userId ? Reference.createFromPK(User, notificationInput.userId) : null,
+      notificationInput.sessionId ?? null,
       notificationInput.action,
       notificationInput.message,
       notificationInput.severity,
@@ -46,6 +47,7 @@ export class NotificationService {
 
     const notificationMessage = {
       id: notification.id,
+      sessionId: notificationInput.sessionId,
       user: notificationInput.userId,
       action: notification.action,
       message: notification.message,

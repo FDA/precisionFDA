@@ -17,7 +17,7 @@ export const EditAppPage = ({ spaceId }: { spaceId?: string }) => {
   const queryClient = useQueryClient()
   const { appUid } = useParams<{ appUid: string }>()
 
-  const { data, isError, isLoading } = useFetchAppQuery(appUid)
+  const { data, isError, isLoading } = useFetchAppQuery(appUid!)
 
   const appMutation = useMutation({ mutationFn: createEditAppRequest })
 
@@ -41,6 +41,7 @@ export const EditAppPage = ({ spaceId }: { spaceId?: string }) => {
 
   if (isLoading) return <Loader className="pageloader" />
   if (isError && !data) return <NotAllowedPage />
+  if (!data) return null
 
   return (
     <AppForm

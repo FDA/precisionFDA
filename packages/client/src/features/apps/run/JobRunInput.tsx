@@ -171,7 +171,7 @@ const SingleFileInput = ({
     enabled: !!fileUid && fileUid.length > 0 && !(isSuccessfullyPreValidated),
   })
 
-  const error = hasValue && !(isSuccessfullyPreValidated || fileListQuery?.data === true)
+  const error = hasValue && fileListQuery.isSuccess && !(isSuccessfullyPreValidated || fileListQuery?.data === true)
 
   useEffect(() => {
     if (error) {

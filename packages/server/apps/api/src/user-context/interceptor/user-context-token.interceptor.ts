@@ -1,7 +1,5 @@
 import { CallHandler, ExecutionContext, NestInterceptor } from '@nestjs/common'
-import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { userContextStorage } from '@shared/domain/user-context/storage/user-context.storage'
-import { Encryptor } from '@shared/utils/encryptors/encryptor'
 import { PfdaWebSocket } from '@shared/websocket/model/pfda-web-socket'
 import { Observable } from 'rxjs'
 
@@ -14,12 +12,7 @@ export class UserContextTokenInterceptor implements NestInterceptor {
     }
 
     const client: PfdaWebSocket = context.switchToWs().getClient()
-    const token = client.PFDA_AUTH_TOKEN
 
-    const decrypted = Encryptor.decrypt(token)
-
-    const userContext = new UserContext(decrypted.user_id, decrypted.token, decrypted.username)
-
-    return userContextStorage.run(userContext, () => next.handle())
+    return userContextStorage.run(client.pfdaUserContext, () => next.handle())
   }
 }

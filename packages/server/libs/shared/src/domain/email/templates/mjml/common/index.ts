@@ -1,6 +1,5 @@
-/* eslint-disable max-len */
-
 import { config } from '@shared/config'
+import { User } from '@shared/domain/user/user.entity'
 
 const header = `
   <mjml>
@@ -60,6 +59,9 @@ const generateSpaceLink = (spaceId: IDType): string =>
 const generateJobDetailLink = (jobUid: IDType): string =>
   `${config.api.railsHost}/home/jobs/${jobUid}`
 
+const generateExpertQuestionLink = (expertId: IDType, questionId: IDType): string =>
+  `${config.api.railsHost}/experts/${expertId}/dashboard/expert_questions/${questionId}`
+
 const generateChallengeDetailLink = (challengeId: IDType): string =>
   `${config.api.railsHost}/challenges/${challengeId.toString()}`
 
@@ -80,6 +82,10 @@ const ctoButton = (text: string, generateLinkFn: (spaceId: IDType) => string) =>
   </mj-button>
 `
 
+const getUserTitle = (user?: User) => {
+  return user ? `${user?.firstName} ${user?.lastName}` : 'Anonymous'
+}
+
 const getViewSpaceButton = ctoButton('View space', generateSpaceLink)
 const getChallengeCtoButton = ctoButton('Join challenge', generateChallengeDetailLink)
 const viewChallengePreregPageCtoButton = ctoButton(
@@ -95,8 +101,10 @@ export {
   footer,
   generateJobDetailLink,
   generateObjectCommentsLink,
+  generateExpertQuestionLink,
   generateSpaceLink,
   getBottomSpacer,
+  getUserTitle,
   getChallengeCtoButton,
   getExecutionDetailButton,
   getMiddleSpacer,

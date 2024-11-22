@@ -9,11 +9,13 @@ import { SPACE_STATE } from '@shared/domain/space/space.enum'
 import { User } from '@shared/domain/user/user.entity'
 import { ErrorCodes } from '@shared/errors'
 import { create, db, generate } from '@shared/test'
-import { fakes, mocksReset } from '@shared/test/mocks'
+import { mocksReset } from '@shared/test/mocks'
 import { expect } from 'chai'
 import supertest from 'supertest'
 import { testedApp } from '../../index'
 import { getDefaultHeaderData } from '../../utils/expect-helper'
+import { SinonSpy, spy } from 'sinon'
+import { EmailSendService } from '@shared/domain/email/email-send.service'
 import * as process from 'process'
 
 describe('PATCH /spaces/:id/lock', () => {
@@ -24,6 +26,8 @@ describe('PATCH /spaces/:id/lock', () => {
   let groupSpace: Space
   let guestLead: User
   let hostLead: User
+
+  let sendEmailStub: SinonSpy
 
   beforeEach(async () => {
     await db.dropData(database.connection())
@@ -57,6 +61,13 @@ describe('PATCH /spaces/:id/lock', () => {
 
     await em.flush()
     mocksReset()
+
+    const emailSendService = testedApp.get<EmailSendService>(EmailSendService)
+    sendEmailStub = spy(emailSendService, 'sendEmail')
+  })
+
+  afterEach(() => {
+    sendEmailStub.restore()
   })
 
   it('locks space', async () => {
@@ -65,8 +76,7 @@ describe('PATCH /spaces/:id/lock', () => {
       .set(getDefaultHeaderData(user))
       .expect(204)
 
-    const sendEmailStub = fakes.emailService.sendEmail
-    expect(sendEmailStub.calledTwice).to.be.true()
+    expect(sendEmailStub.calledTwice).to.be.true
 
     const firstEmail = sendEmailStub.args[0][0]
     expect(firstEmail).to.include({

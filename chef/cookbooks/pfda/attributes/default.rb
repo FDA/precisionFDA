@@ -12,7 +12,7 @@ default[:gsrs][:tomcat_user] = "gsrs"
 default[:gsrs][:tomcat_group] = "gsrs"
 default[:gsrs][:tarball_base_uri] = "https://archive.apache.org/dist/tomcat/" # By default it goes to http and this is causing build issues
 default[:gsrs][:checksum_base_uri] = "https://archive.apache.org/dist/tomcat/" # By default it goes to http and this is causing build issues
-default[:gsrs][:index_path] = "s3://gsrs-indexes-#{node.environment}/ginas.ix/"
+default[:gsrs][:index_bucket] = "s3://gsrs-indexes-#{node.environment}"
 default[:gsrs][:repo_url] = "https://github.com/dnanexus/gsrs-play-dist.git"
 default[:gsrs][:revision] = "gsrs_PROD"
 default[:gsrs][:tomcat_start] = true
@@ -28,6 +28,7 @@ default[:app_root_dir] = "/srv/www/precision_fda/current"
 default[:mysql_rds_sslca_path] = "/etc/ssl/certs/global-bundle.pem"
 default[:nginx][:log_dir] = "/var/log/nginx"
 
+default["nodejs"]["api-internal"]["port"] = 3003
 default["nodejs"]["worker"]["instances"] = 2
 default["nodejs"]["admin-platform-client"]["instances"] = 2
 

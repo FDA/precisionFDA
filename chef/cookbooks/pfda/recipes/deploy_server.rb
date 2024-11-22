@@ -39,6 +39,16 @@ template File.join(server_dir, 'pm2-api.json') do
   source 'pm2_api.erb'
 end
 
+template File.join(server_dir, 'pm2-api-internal.json') do
+  source 'pm2_api_internal.erb'
+  variables(lazy do
+    {
+      port: node.run_state.dig('ssm_params', 'app', 'environment',
+                                    'NODE_INTERNAL_PORT') || node['nodejs']['api-internal']['port']
+    }
+  end)
+end
+
 template File.join(server_dir, 'pm2-worker.json') do
   source 'pm2_worker.erb'
   variables(lazy do
