@@ -21,14 +21,13 @@ class ApplicationWorker
       severity: "ERROR",
       userId: context.user_id,
     }
-    h_a_client = HttpsAppsClient.new
     RequestContext.begin_request(context.user_id, context.username, context.token, forward_header)
-    h_a_client.send_notification(notification)
-    RequestContext.end_request
+    https_apps_client.send_notification(notification)
 
     Rails.logger.error(message)
 
-    WorkerMailer.alert_email(context.user.email, message, subject).deliver_now
+    https_apps_client.email_send(NotificationPreference.email_types[:alert_message], [context.user.id], { subject:, message: })
+    RequestContext.end_request
   end
 
   def https_apps_client

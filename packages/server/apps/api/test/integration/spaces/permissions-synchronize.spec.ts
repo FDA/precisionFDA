@@ -43,6 +43,7 @@ describe('POST /account/checkSpacesPermissions', () => {
         id: user.id,
         accessToken: 'fake-token',
         dxuser: user.dxuser,
+        sessionId: `session-id-${user.dxuser}`,
       },
     ])
 

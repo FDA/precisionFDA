@@ -49,6 +49,7 @@ const checkJobStatusForNotifications = async (
   userId: number,
   job: Job,
   remoteJob: JobDescribeResponse,
+  sessionId?: string,
 ) => {
   const notificationService = new NotificationService(em)
   const meta = {
@@ -60,7 +61,14 @@ const checkJobStatusForNotifications = async (
     severity: SEVERITY,
     action: NOTIFICATION_ACTION,
   ) => {
-    await notificationService.createNotification({ message, severity, action, userId, meta })
+    await notificationService.createNotification({
+      message,
+      severity,
+      action,
+      userId,
+      sessionId,
+      meta,
+    })
   }
 
   const remoteState = remoteJob.state
@@ -276,7 +284,13 @@ export class SyncJobOperation extends WorkerBaseOperation<
       }
     }
 
-    await checkJobStatusForNotifications(em, this.ctx.user.id, job, platformJobData)
+    await checkJobStatusForNotifications(
+      em,
+      this.ctx.user.id,
+      job,
+      platformJobData,
+      this.ctx.user.sessionId,
+    )
 
     this.ctx.log.log(
       {
@@ -312,7 +326,7 @@ export class SyncJobOperation extends WorkerBaseOperation<
           await sendJobFailedEmails(this.job.id.toString(), this.ctx)
           job.terminationEmailSent = true
         } catch (e) {
-          this.ctx.log.error({ job: updatedJob }, 'Failed to send emails')
+          this.ctx.log.error({ job: updatedJob }, 'Failed to send emails', e)
         }
       }
     }

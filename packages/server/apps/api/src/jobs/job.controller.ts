@@ -22,6 +22,7 @@ import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { createSyncJobStatusTask } from '@shared/queue'
 import { UserOpsCtx } from '@shared/types'
 import { schemas } from '@shared/utils/base-schemas'
+import { InternalRouteGuard } from '../internal/guard/internal.guard'
 import { UserContextGuard } from '../user-context/guard/user-context.guard'
 import { JsonSchemaPipe } from '../validation/pipes/json-schema.pipe'
 import {
@@ -108,6 +109,7 @@ export class JobController {
     return await workstationService.alive()
   }
 
+  @UseGuards(InternalRouteGuard)
   @Patch('/:jobDxId/setAPIKey')
   async setApiKey(
     @Param('jobDxId', new JsonSchemaPipe(schemas.dxidProp)) dxid: DxId<'job'>,

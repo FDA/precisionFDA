@@ -33,7 +33,8 @@ const ACTION_NAMES: ActionNames = {
 
 export class MemberChangedEmailHandler
   extends BaseTemplate<MemberChanged>
-  implements EmailTemplate {
+  implements EmailTemplate<MemberChangeTemplateInput>
+{
   templateFile = memberChangedTemplate
   space: Space
   user: User

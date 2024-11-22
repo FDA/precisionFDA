@@ -1,8 +1,8 @@
 # Some globally available constants
 
 if Rails.env.production?
-  DNANEXUS_AUTHSERVER_URI = "https://auth.dnanexus.com/".freeze
-  DNANEXUS_APISERVER_URI = "https://api.dnanexus.com/".freeze
+  DNANEXUS_AUTHSERVER_URI = ENV["AUTH_API_URL"].presence || "https://auth.dnanexus.com/".freeze
+  DNANEXUS_APISERVER_URI = ENV["API_URL"].presence || "https://api.dnanexus.com/".freeze
   DNANEXUS_PLATFORM_URI = "https://platform.dnanexus.com/".freeze
   APPKIT_TGZ = "project-GYP09280XPx4p0gJ8XPY27b0:/appKit-1.2.tgz".freeze
   DEFAULT_COMPARISON_APP = "app-pfda-comparator/0.2.4".freeze
@@ -16,8 +16,8 @@ if Rails.env.production?
   CHALLENGE_BOT_PUBLIC_FILES_PROJECT = "project-F5g2fGj0458P90BP9ZbpkpvG".freeze
   CHALLENGE_BOT_PRIVATE_FILES_PROJECT = "project-F5g2fGj06B2Vy5Yx7pKPVb50".freeze
 else # these values are for staging, dev, development and test environments
-  DNANEXUS_AUTHSERVER_URI = "https://stagingauth.dnanexus.com/".freeze
-  DNANEXUS_APISERVER_URI = "https://stagingapi.dnanexus.com/".freeze
+  DNANEXUS_AUTHSERVER_URI = ENV["AUTH_API_URL"].presence || "https://stagingauth.dnanexus.com/".freeze
+  DNANEXUS_APISERVER_URI = ENV["API_URL"].presence || "https://stagingapi.dnanexus.com/".freeze
   DNANEXUS_PLATFORM_URI = "https://staging.dnanexus.com/".freeze
   APPKIT_TGZ = "project-GVg2Zg80fQb20gg39J507VYx:/appKit-1.2.tgz".freeze
   DEFAULT_COMPARISON_APP = "app-pfda-comparator/0.2.4".freeze

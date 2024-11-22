@@ -205,6 +205,7 @@ describe('UserContextMiddleware', () => {
       id: USER_ID,
       accessToken: PLATFORM_TOKEN,
       dxuser: USER_NAME,
+      sessionId: SESSION_ID,
     })
   })
 
@@ -237,6 +238,7 @@ describe('UserContextMiddleware', () => {
       id: USER_ID,
       accessToken: PLATFORM_TOKEN,
       dxuser: USER_NAME,
+      sessionId: undefined, // no session id in cli key
     })
   })
 

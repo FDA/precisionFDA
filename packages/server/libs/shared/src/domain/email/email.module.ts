@@ -5,6 +5,7 @@ import { BullQueueModule } from '@shared/queue/module/bull-queue-module'
 import { EmailPrepareService } from '@shared/domain/email/templates/email-prepare.service'
 import { EmailSendService } from '@shared/domain/email/email-send.service'
 import { EmailFacade } from '@shared/domain/email/email.facade'
+import { emailClientProvider } from '@shared/domain/email/email-client.provider'
 
 @Module({
   imports: [
@@ -19,7 +20,13 @@ import { EmailFacade } from '@shared/domain/email/email.facade'
       },
     }),
   ],
-  providers: [EmailQueueJobProducer, EmailPrepareService, EmailSendService, EmailFacade],
+  providers: [
+    EmailQueueJobProducer,
+    EmailPrepareService,
+    EmailSendService,
+    EmailFacade,
+    emailClientProvider,
+  ],
   exports: [
     BullQueueModule,
     EmailQueueJobProducer,

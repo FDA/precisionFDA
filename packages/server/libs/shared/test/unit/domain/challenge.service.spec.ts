@@ -55,6 +55,7 @@ describe('ChallengeService', () => {
       id: user.id,
       accessToken: 'accessToken',
       dxuser: 'dxuser',
+      sessionId: 'sessionId',
     }
 
     findChallengesStub.reset()
@@ -127,6 +128,7 @@ describe('ChallengeService', () => {
       action: 'CHALLENGE_CARD_IMAGE_URL_UPDATED',
       severity: 'INFO',
       userId: user.id,
+      sessionId: 'sessionId',
     })
   })
 
@@ -153,6 +155,7 @@ describe('ChallengeService', () => {
       action: 'CHALLENGE_RESOURCE_URL_UPDATED',
       severity: 'INFO',
       userId: user.id,
+      sessionId: 'sessionId',
     })
   })
 

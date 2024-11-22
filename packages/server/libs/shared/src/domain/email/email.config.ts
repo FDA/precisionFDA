@@ -16,6 +16,8 @@ import { groupBy, map, mergeAll, pipe, prop } from 'ramda'
 import { AnyObject, OpsCtx } from '../../types'
 import { SPACE_EVENT_ACTIVITY_TYPE } from '../space-event/space-event.enum'
 import { SPACE_MEMBERSHIP_ROLE } from '../space-membership/space-membership.enum'
+import { AlertMessageHandler } from '@shared/domain/email/templates/handlers/alert-message.handler'
+import { ExpertQuestionAddedHandler } from '@shared/domain/email/templates/handlers/expert-question-added.handler'
 
 // KEY NAMES AND DEFAULT VALUES FOR EMAIL NOTIFICATION SETTINGS
 
@@ -35,6 +37,8 @@ export const NOTIFICATION_TYPES_BASE = {
   // challenges
   challenge_opened: true,
   challenge_preregister: true,
+  alert_message: true,
+  expert_question_added: true,
 }
 
 /**
@@ -125,6 +129,25 @@ export const NOTIFICATION_TYPES: Partial<typeof NOTIFICATION_TYPES_ADMIN> &
 
 // EMAIL VALIDATION SCHEMAS
 
+const expertQuestionSchema: JSONSchema7 = {
+  type: 'object',
+  properties: {
+    questionId: schemas.idProp,
+  },
+  required: ['questionId'],
+  additionalProperties: false,
+}
+
+const alertMessageSchema: JSONSchema7 = {
+  type: 'object',
+  properties: {
+    subject: { type: 'string', maxLength: config.validation.maxStrLen },
+    message: { type: 'string', maxLength: config.validation.maxStrLen },
+  },
+  required: ['message'],
+  additionalProperties: false,
+}
+
 const jobFinishedEmailSchema: JSONSchema7 = {
   type: 'object',
   properties: {
@@ -201,6 +224,8 @@ const membershipChangedEmailSchema: JSONSchema7 = {
 
 const emailInputSchemas = {
   jobFinishedEmailSchema,
+  alertMessageSchema,
+  expertQuestionSchema,
   jobFailedEmailSchema,
   challengeStartedEmailSchema,
   spaceEventEmailSchema,
@@ -242,9 +267,12 @@ export type EmailProcessInput = {
 
 export type EmailSendInput = {
   emailType: EMAIL_TYPES
+  from?: string
   to: string
   subject: string
-  body: string
+  bcc?: string
+  replyTo?: string
+  body?: string
 }
 
 export type EmailTemplateInput = { receiver: User }
@@ -252,17 +280,20 @@ export type EmailTemplateInput = { receiver: User }
 // fixme: NOTIFICATION_TYPES into EMAIL_TYPES mapping
 
 // EMAIL CONFIG AND HELPERS
-export type EmailTemplateContructor = new (
+export type EmailTemplateConstructor = new (
   emailTypeId: number,
+  // @ts-ignore let's leave something for future PRs
   emailInput: any,
   ctx: OpsCtx,
+  receiverUserIds: number[],
+  // @ts-ignore let's leave something for future PRs
 ) => EmailTemplate
 
-export interface EmailTemplate {
+export interface EmailTemplate<T> {
   config: EmailConfigItem
   emailType: EMAIL_TYPES
   ctx: OpsCtx
-  templateFile: (data: any) => string
+  templateFile: (data: T) => string
 
   // validate(payload: any): void
   // todo: make this one abstract maybe?
@@ -273,6 +304,7 @@ export interface EmailTemplate {
 }
 
 export enum EMAIL_TYPES {
+  emailWithoutTemplate = 0,
   jobFinished = 1,
   newContentAdded = 2,
   memberChangedAddedRemoved = 3,
@@ -287,8 +319,10 @@ export enum EMAIL_TYPES {
   adminDataConsistencyReport = 12,
   userDataConsistencyReport = 13,
   spaceDiscussion = 14,
-  spaceCreated  = 15,
+  spaceCreated = 15,
   userInactivityAlert = 16,
+  alertMessage = 17,
+  expertQuestionAdded = 18,
 }
 
 export type EmailConfigItem = {
@@ -300,10 +334,22 @@ export type EmailConfigItem = {
   // optional, some emails may not require any dynamic content
   schema?: JSONSchema7
   // handler for given email type
-  handlerClass: EmailTemplateContructor
+  handlerClass: EmailTemplateConstructor
 }
 
 export const EMAIL_CONFIG = {
+  expertQuestionAdded: {
+    name: 'expertQuestionAdded',
+    emailId: EMAIL_TYPES.expertQuestionAdded,
+    schema: expertQuestionSchema,
+    handlerClass: ExpertQuestionAddedHandler,
+  },
+  alertMessage: {
+    name: 'alertMessage',
+    emailId: EMAIL_TYPES.alertMessage,
+    schema: alertMessageSchema,
+    handlerClass: AlertMessageHandler,
+  },
   jobFinished: {
     name: 'jobFinished',
     emailId: EMAIL_TYPES.jobFinished,
@@ -353,10 +399,6 @@ export const EMAIL_CONFIG = {
     handlerClass: ChallengePreregEmailHandler,
   },
 } as const
-
-export const emailTypeIds = Object.entries(EMAIL_CONFIG).map(([key, value]) => {
-  return value.emailId
-})
 
 // { '1': { email_config_object } } structure
 const emailConfigPerId = pipe(

@@ -4,7 +4,6 @@ import { SpaceMembership } from '@shared/domain/space-membership/space-membershi
 import { User } from '@shared/domain/user/user.entity'
 import { pipe, uniqBy } from 'ramda'
 import { LoadedReference } from '@mikro-orm/core'
-import { STATIC_SCOPE } from '@shared/enums'
 import {
   EmailTemplate,
   ChallengeOpened,
@@ -26,7 +25,8 @@ import { InternalError } from '@shared/errors'
 
 export class ChallengeOpenedEmailHandler
   extends BaseTemplate<ChallengeOpened>
-  implements EmailTemplate {
+  implements EmailTemplate<ChallengeOpenedTemplateInput>
+{
   templateFile = challengeOpenedTemplate
   challenge: Challenge
 

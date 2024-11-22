@@ -57,6 +57,11 @@ cat <<EOF > /tmp/config.json
                          "log_stream_name": "{instance_id}"
                      },
                      {
+                         "file_path": "/srv/www/precision_fda/current/log/node-api-internal.log",
+                         "log_group_name": "production/node/api-0.log",
+                         "log_stream_name": "{instance_id}-internal"
+                     },
+                     {
                          "file_path": "/srv/www/precision_fda/current/log/node-worker-1.log",
                          "log_group_name": "production/node/workers",
                          "log_stream_name": "{instance_id}-worker-1"
@@ -105,6 +110,11 @@ cat <<EOF > /tmp/config.json
                          "file_path": "/srv/www/precision_fda/current/log/node-api-error-0.log",
                          "log_group_name": "production/node/api-errors",
                          "log_stream_name": "{instance_id}"
+                     },
+                     {
+                         "file_path": "/srv/www/precision_fda/current/log/node-api-internal-error.log",
+                         "log_group_name": "production/node/api-errors",
+                         "log_stream_name": "{instance_id}-internal-error"
                      },
                      {
                          "file_path": "/srv/www/precision_fda/current/log/node-worker-error-1.log",
