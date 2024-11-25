@@ -16,7 +16,7 @@ import {
   PageLoaderWrapper,
   PageMainBody,
   PageRow,
-  RightList,
+  RightListNext,
   RightSide,
   RightSideItem,
   SectionTitle,
@@ -130,7 +130,7 @@ const ChallengesList = () => {
             )}
             <RightSideItem>
               <SectionTitle>Filter Challenges</SectionTitle>
-              <RightList>
+              <RightListNext>
                 <ItemButton as={Link} to="/challenges" selected={!time_status} data-turbolinks="false">
                   All
                 </ItemButton>
@@ -158,11 +158,11 @@ const ChallengesList = () => {
                 >
                   Ended
                 </ItemButton>
-              </RightList>
+              </RightListNext>
             </RightSideItem>
             <RightSideItem>
               <SectionTitle>Previous Challenges</SectionTitle>
-              <RightList>
+              <RightListNext>
                 <ItemButton as={Link} to="/challenges" selected={!year} data-turbolinks="false">
                   All
                 </ItemButton>
@@ -181,7 +181,7 @@ const ChallengesList = () => {
                         {y}
                       </ItemButton>
                     ))}
-              </RightList>
+              </RightListNext>
             </RightSideItem>
             <RightSideItem>
               <SectionTitle>Other Challenges</SectionTitle>

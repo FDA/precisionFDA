@@ -107,9 +107,12 @@ export const DatabaseList = ({ homeScope }: { homeScope?: HomeScope }) => {
             </Button>
           </QuickActions>
           <DBStyledRight>
-            <Refresh $spin={query.isFetching} onClick={() => query.refetch()}>
-              <SyncIcon />
-            </Refresh>
+            <Button onClick={() => query.refetch()} disabled={query.isFetching}>
+              <Refresh $spin={query.isFetching}>
+                <SyncIcon height={13} />
+              </Refresh>
+              Refresh
+            </Button>
             <Dropdown
               trigger="click"
               content={<ActionsDropdownContent actions={actions} />}

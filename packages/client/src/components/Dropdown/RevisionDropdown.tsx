@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom'
 import styled, { css } from 'styled-components'
 import { Dropdown } from '.'
 import { WorkflowRevision } from '../../features/workflows/workflows.types'
-import { colors } from '../../styles/theme'
 import { compactScrollBarV2 } from '../Page/styles'
 import { CaretIcon } from '../icons/CaretIcon'
 import { HistoryIcon } from '../icons/HistoryIcon'
@@ -31,7 +30,7 @@ const RevisionNum = styled.span`
   color: var(--c-text-700);
 `
 const TagPill = styled.div`
-  color: #ffffff;
+  color: white;
   background-color: var(--primary-500);
   font-weight: 400;
   font-size: 12px;
@@ -48,7 +47,7 @@ const DropdownIcon = styled.div`
 const LiTitle = styled.li`
   white-space: nowrap;
   padding: 3px 20px;
-  color: ${colors.textMediumGrey};
+  color: var(--c-text-500);
 `
 const Li = styled.li<{$active: boolean}>`
   white-space: nowrap;
@@ -82,9 +81,9 @@ const Ol = styled.ol`
   width: 100%;
   min-width: 180px;
   max-height: 350px;
-  border: 1px solid rgba(0,0,0,0.15);
+  border: 1px solid var(--background-shaded);
   border-radius: 3px;
-  box-shadow: 0 6px 12px rgb(0 0 0 / 18%);
+  box-shadow: 0 6px 12px var(--tertiary-100);
 `
 
 export const RevisionDropdown = ({

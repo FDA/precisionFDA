@@ -12,14 +12,19 @@ type Props = {
   isSubmitButtonDisabled: boolean
 }
 
-const LimitButtonWrapper = styled.div`
+const ButtonWrapper = styled.div`
   display: flex;
-  gap: 1px;
-  margin-left: 16px;
+  margin-right: 16px;
+  input {
+    border-radius: 3px 0 0 3px;
+  }
+  button {
+    border-radius: 0 3px 3px 0;
+  }
 `
 
 export const UserLimitForm = ({ buttonText, selectedUsers, onSubmit, onChange, isSubmitButtonDisabled }: Props) => (
-  <LimitButtonWrapper>
+  <ButtonWrapper>
     <InputNumber
       step={0.01}
       onChange={(e) => {
@@ -41,5 +46,5 @@ export const UserLimitForm = ({ buttonText, selectedUsers, onSubmit, onChange, i
     >
       {buttonText}
     </Button>
-  </LimitButtonWrapper>
+  </ButtonWrapper>
 )

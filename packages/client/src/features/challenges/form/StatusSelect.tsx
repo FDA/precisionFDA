@@ -1,6 +1,5 @@
 import React from 'react'
-import Select from 'react-select'
-
+import { Select } from '../../../components/Select'
 
 export const StatusSelect = ({
   isEditing = false,

@@ -1,7 +1,7 @@
 import React from 'react'
 import { useQuery } from '@tanstack/react-query'
-import Select from 'react-select'
 import { fetchGuestLeads } from './api'
+import { Select } from '../../../components/Select'
 
 const useFetchGuestLeadUsersQuery = () =>
   useQuery({

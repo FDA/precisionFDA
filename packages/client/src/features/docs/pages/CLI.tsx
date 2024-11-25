@@ -1,78 +1,22 @@
 /* eslint-disable react/no-unescaped-entities */
 import React from 'react'
-import styled from 'styled-components'
 import {
   ButtonRow,
   DocBody,
   DocRow,
+  ExampleBlock,
+  HelpSection,
+  HelpTip,
+  HelpTipText,
+  HelpTitle,
   PageMap,
   RightSide,
+  StyledCode,
 } from '../styles'
 
+import { Button } from '../../../components/Button'
 import { DownloadIcon } from '../../../components/icons/DownloadIcon'
 import { useScrollToHash } from '../../../hooks/useScrollToHash'
-import { Button } from '../../../components/Button'
-
-const HelpSection = styled.div`
-  background-color: #d9edf7;
-  border-radius: 5px;
-  padding: 13px;
-  position: relative;
-  margin-bottom: 20px;
-
-  &:before {
-    height: 100%;
-    width: 4px;
-    content: "";
-    background: #31708f;
-    display: block;
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    border-top-left-radius: 3px;
-    border-bottom-left-radius: 3px;
-  }
-`
-
-const HelpTitle = styled.div`
-  font-weight: bold;
-  font-size: 1.2em;
-  color: #31708f;
-`
-
-const HelpTip = styled.p`
-  color: #31708f;
-  margin-left: 5px;
-`
-
-const HelpTipText = styled.p`
-  color: #31708f;
-  margin-left: 10px;
-`
-
-const ExampleBlock = styled.div`
-    margin-bottom: 10px;
-    font-family: 'Courier New', Courier, monospace;
-
-    .description {
-        font-style: italic;
-    }
-
-    .command {
-        background-color: #f4f4f4;
-        color: #007bff;
-        padding: 5px 10px;
-        margin-top: 5px;
-    }
-`
-
-const StyledCode = styled.code`
-    background-color: #f4f4f4;
-    color: #007bff;
-    padding: 2px 4px;
-    margin-top: 5px;
-`
 
 export const CLI = () => {
   useScrollToHash()
@@ -135,7 +79,7 @@ export const CLI = () => {
         </a>{' '}
         page and click on 'Generate CLI Key' button and copy the presented key.
         <br/>
-        <div className={'text-danger'}><strong>Note:</strong> This does not apply to CLI usage on workstations, the key
+        <div className="text-danger"><strong>Note:</strong> This does not apply to CLI usage on workstations, the key
           is already
           pre-generated for you in workstation's config.
         </div>

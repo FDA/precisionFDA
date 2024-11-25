@@ -180,7 +180,7 @@ export const useWorkflowSelectActions = ({ homeScope, spaceId, selectedItems, re
     'Edit properties': {
       type: 'modal',
       func: () => setPropertiesModal(true),
-      isDisabled: false,
+      isDisabled: selected.length === 0,
       modal: propertiesModal,
       showModal: isShownPropertiesModal,
       shouldHide: (!isAdmin && selected[0]?.added_by !== user.full_name),

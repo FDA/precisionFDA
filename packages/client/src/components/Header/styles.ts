@@ -1,5 +1,4 @@
 import styled, { css } from 'styled-components'
-import { theme } from '../../styles/theme'
 import { PFDALogoLight } from '../NavigationBar/PFDALogo'
 import { Svg } from '../icons/Svg'
 import { compactScrollBarV2 } from '../Page/styles'
@@ -17,11 +16,11 @@ export const MenuButton = styled(TransparentButton)<{$active: boolean}>`
   transition-property: background-color, color;
   &:hover {
     background-color: var(--c-app-header-bg-hover);
-    color: var(--c-app-header-menu-hover);
+    color: var(--c-app-header-menu-base);
   }
   ${({ $active }) => $active && css`
     background-color: var(--c-app-header-bg-hover);
-    color: var(--c-app-header-menu-hover);
+    color: white;
   `}
 `
 
@@ -32,35 +31,6 @@ export const StyledHeaderLogo = styled(PFDALogoLight)`
 `
 
 export const LogoWrap = styled.div`
-`
-
-
-export const SiteItem = styled.div<{ $active?: boolean }>`
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  align-items: center;
-  cursor: pointer;
-  color: var(--c-app-header-menu-base);
-  box-sizing: border-box;
-  
-  ${({ $active = false }) => {
-    if ($active) {
-      return css`
-        background-color: var(--c-app-header-menu-active-bg);
-        color: var(--c-app-header-menu-hover);
-        `
-    } 
-    return css`
-    `
-  }}
-  &:hover {
-    color: var(--c-app-header-menu-hover);
-  }
-  
-  ${bpMedium} {
-    height: ${theme.sizing.navigationBarHeight};
-  }
 `
 
 export const HeaderItem = styled.div<{ $active?: boolean }>`
@@ -80,10 +50,6 @@ export const HeaderItem = styled.div<{ $active?: boolean }>`
   
   &:hover {
     color: var(--c-app-header-menu-hover);
-  }
-  
-  ${bpMedium} {
-    height: ${theme.sizing.navigationBarHeight};
   }
 `
 
@@ -172,19 +138,6 @@ export const HeaderItemText = styled.div`
   font-size: 13px;
 `
 
-export const StyledHeaderDropItem = styled(HeaderItem)`
-  display: none;
-  
-  &:hover {
-    background-color: var(--c-app-header-menu-active-bg);
-  }
-  
-  ${Svg} {
-    margin-left: 5px;
-    margin-right: 5px;
-  }
-  `
-
 export const IconWrap = styled.div<{ $marginBottom?: number}>`
   height: 16px;
   display: flex;
@@ -217,7 +170,37 @@ export const SiteNavBody = styled.div`
   padding: 0 16px;
   overflow-y: auto;
   ${compactScrollBarV2}
-  `
+`
+
+export const SiteNavBottom = styled.div`
+  position: absolute;
+  right: 16px;
+  bottom: 8px;
+  display: flex;
+  justify-content: space-between;
+  
+  
+  ${TransparentButton} {
+    padding: 8px;
+  }
+`
+
+export const StyledToggle = styled.div`
+  padding: 3px;
+  width: -moz-fit-content;
+  width: fit-content;
+  display: flex;
+  border-radius: 9999px;
+  border: 1px solid var(--c-app-header-menu-hover);
+`
+
+export const StyledToggleButton = styled(TransparentButton)`
+  &[data-active='true'] {
+    background: var(--c-app-header-menu-hover);
+  }
+  color: var(--ds-gray-1000);
+  border-radius: inherit;
+`
 
 export const StyledDropMenuLinks = styled.div`
   padding-top: 0;
@@ -288,6 +271,10 @@ export const HeaderLeft = styled.div`
     content: '';
     width: 12px;
   }
+
+  ${DisabledSiteMenuItem} {
+    color: var(--c-menu-item-disabled);
+  }
 `
 
 export const HeaderRight = styled.div`
@@ -323,7 +310,7 @@ export const Nav = styled.nav`
   flex: 1;
   align-items: center;
   font-size: 12px;
-  font-weight: ${theme.fontWeight.regular};
+  font-weight: 400;
   white-space: nowrap;
   transition: all 0.18s ease-in-out;
 
@@ -349,9 +336,14 @@ export const StyledHeader = styled.header`
   ${headerPaddings}
 
   ${MenuItem} {
-      padding: 13px 10px;
-    }
-  `
+    padding: 13px 10px;
+  }
+  
+  --c-menu-item-disabled: var(--tertiary-500);
+  ${(props) => props.theme.colorMode === 'dark' && css`
+    --c-menu-item-disabled: var(--tertiary-300);
+  `}
+`
   
 export const StyledSiteNav = styled.div`
   top: calc(var(--site-header-height) + var(--rails-alert-height, 0px) + var(--site-alert-height, 0px));
@@ -365,6 +357,7 @@ export const StyledSiteNav = styled.div`
   box-shadow: 6px 0px 24px 0px rgba(0, 0, 0, 0);
   display: flex;
   flex-direction: column;
+  border-right: 1px solid var(--c-layout-border);
   
   ${SiteMenuItem} {
     color: var(--base);
@@ -374,8 +367,10 @@ export const StyledSiteNav = styled.div`
     padding-right: 4px;
   }
 
+  --c-menu-item-disabled: var(--tertiary-400);
+
   ${DisabledSiteMenuItem} {
-    color: var(--c-text-500);
+    color: var(--c-menu-item-disabled);
     cursor: not-allowed;
     &:hover {
       background-color: var(--tertiary-70);

@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import { Button } from '../../components/Button'
 import Dropdown from '../../components/Dropdown'
-import { SyncIcon } from '../../components/icons/SyncIcon'
+import { Running } from '../../components/icons/StateIcons'
 import { getSpaceIdFromScope } from '../../utils'
 import { getBaseLink, useSelectableSpaces, useUserComputeInstances } from '../apps/run/utils'
 import { useAuthUser } from '../auth/useAuthUser'
@@ -19,7 +19,6 @@ export const ExecutionActionsRow = ({
   homeScope,
   execution,
   refetch,
-  isFetching,
 }: {
   homeScope?: HomeScope
   execution: IExecution
@@ -105,7 +104,7 @@ export const ExecutionActionsRow = ({
       {terminalStates.includes(execution.state) ? null : (
         <StyledRefresh title="Page will automatically refresh when the job has launched" onClick={() => refetch()}>
           {getStatusText()}
-          <SyncIcon />
+          <Running />
         </StyledRefresh>
       )}
       {isJobOwner && execution.links.open_external && (

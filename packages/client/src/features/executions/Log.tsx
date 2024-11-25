@@ -1,3 +1,4 @@
+/* eslint-disable react/no-array-index-key */
 import React, { useEffect, useRef, useState } from 'react'
 import useWebSocket from 'react-use-websocket'
 import styled from 'styled-components'
@@ -14,7 +15,7 @@ import { Button } from '../../components/Button'
 const StyledLogsContainer = styled.div`
   padding: 4px 0 4px 12px;
   margin: 10px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--c-layout-border);
   border-radius: 3px;
   position: relative;
 `

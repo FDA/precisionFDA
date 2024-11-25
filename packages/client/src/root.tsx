@@ -18,11 +18,12 @@ import { useModal } from './features/modal/useModal'
 import { LayoutLoader } from './layouts/UserLayout'
 import NoFoundPage from './pages/NoFoundPage'
 import GlobalStyle from './styles/global'
-import { ThemeProvider } from './utils/ThemeContext'
+import { ColorModeProvider } from './utils/ThemeContext'
 import queryClient from './utils/queryClient'
 import { TrackPage } from './features/tracks/TrackPage'
 
 import 'react-tooltip/dist/react-tooltip.css'
+import { PFDAToastContainer } from './utils/PFDAToastContainer'
 
 const Admin = React.lazy(() => import('./features/admin'))
 const Home2 = React.lazy(() => import('./features/home'))
@@ -59,7 +60,7 @@ const RootComponent = () => {
   }, [])
 
   return (
-    <ThemeProvider>
+    <ColorModeProvider>
       <React.Fragment>
         <GlobalStyle railsAlertHeight={railsAlertHeight} />
         <QueryClientProvider
@@ -76,13 +77,7 @@ const RootComponent = () => {
                     <Outlet />
                   </React.Suspense>
                 </QueryParamProvider>
-                <ToastContainer
-                  position="top-right"
-                  transition={Slide}
-                  hideProgressBar
-                  pauseOnHover
-                  limit={5}
-                />
+                <PFDAToastContainer />
                 <AuthModal {...authModal} />
                 <ExpiringSessionModal modal={expiringSessionModal} />
               </NavFavoritesProvider>
@@ -90,7 +85,7 @@ const RootComponent = () => {
           </AlertDismissedProvider>
         </QueryClientProvider>
       </React.Fragment>
-    </ThemeProvider>
+    </ColorModeProvider>
   )
 }
 

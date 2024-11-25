@@ -45,12 +45,12 @@ export const colorvars = css`
     --success-100: hsl(142, 83%, 93%);
     --success-200: hsl(141, 79%, 85%);
     --success-300: hsl(142, 77%, 73%);
-    --success-400: hsl(142, 69%, 58%);
-    --success-500: hsl(142, 76%, 43%);
-    --success-600: hsl(142, 76%, 36%);
-    --success-700: hsl(142, 72%, 29%);
-    --success-800: hsl(143, 61%, 27%);
-    --success-900: hsl(144, 63%, 18%);
+    --success-400: hsl(142, 76%, 43%);
+    --success-500: hsl(142, 76%, 36%);
+    --success-600: hsl(142, 72%, 29%);
+    --success-700: hsl(143, 61%, 27%);
+    --success-800: hsl(144, 63%, 18%);
+    --success-900: hsl(144, 63%, 9%);
 
     --highlight-50: hsl(55, 92%, 95%);
     --highlight-100: hsl(55, 97%, 88%);
@@ -221,8 +221,8 @@ html[data-theme="dark"] {
     --c-text-300: var(--tertiary-300);
     --c-text-100: var(--tertiary-100);
 
-    --c-link: var(--primary-500);
-    --c-link-hover: var(--primary-600);
+    --c-link: var(--primary-600);
+    --c-link-hover: var(--primary-700);
 
     --c-loading-primary: hsl(0, 0%, 13%);
     --c-loading-secondary: hsl(0, 0%, 26%);
