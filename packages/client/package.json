@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "packageManager": "pnpm@9.0.6",
+  "packageManager": "pnpm@9.14.2",
   "scripts": {
     "build": "webpack --config webpack.production.config.js",
     "build:docker": "webpack --config webpack.docker.development.config.js",

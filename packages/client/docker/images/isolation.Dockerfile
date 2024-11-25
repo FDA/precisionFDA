@@ -3,7 +3,7 @@ ARG FRONTEND_IMAGE_TAG
 FROM node:${FRONTEND_IMAGE_TAG}
 
 WORKDIR /precision-fda
-RUN npm i -g pnpm@9.0.6
+RUN npm i -g pnpm@9.14.2
 COPY package.json \
     pnpm-lock.yaml \
     /precision-fda/

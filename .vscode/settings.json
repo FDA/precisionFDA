@@ -1,8 +1,8 @@
 {
   "prettier.configPath": "",
-  "eslint.packageManager": "pnpm",
   "eslint.workingDirectories": [
-  "./server"
+  "./server",
+  "./client",
   ],
   "markdown.preview.scrollPreviewWithEditor": false
 }
