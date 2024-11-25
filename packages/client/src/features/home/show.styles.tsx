@@ -71,6 +71,9 @@ export const FilesListResourceHeader = styled(ResourceHeader)`
   padding: 16px;
   gap: 16px;
 `
+export const FilesListBreadcrumbHeader = styled(FilesListResourceHeader)`
+  padding-top: 0;
+`
 
 export const Topbox = styled.div`
   margin-bottom: 40px;

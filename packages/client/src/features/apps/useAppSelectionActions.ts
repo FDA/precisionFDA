@@ -272,7 +272,7 @@ export const useAppSelectionActions = ({
       type: 'modal',
       func: () => setPropertiesModal(true),
       modal: propertiesModal,
-      isDisabled: false,
+      isDisabled: selected.length === 0,
       showModal: isShownPropertiesModal,
       shouldHide: (!isAdmin && selected[0]?.added_by !== user?.dxuser),
     },

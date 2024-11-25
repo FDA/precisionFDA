@@ -18,16 +18,16 @@ const ResourceItem = styled.li`
   margin: 0;
   list-style: none;
   line-height: 23px;
-  color: #272727;
   font-size: 14px;
-  cursor: pointer;
+  label {
+    cursor: pointer;
+    display: flex;
+  }
   &:hover {
-    background: rgb(242,242,242);
+    background: var(--c-dropdown-hover-bg);
   }
   a {
-    color: #272727;
     display: inline-block;
-    width: 100%;
   }
 `
 
@@ -37,7 +37,9 @@ const CheckBoxLabelText = styled.span`
 `
 
 const StyledCheckboxInputWrapper = styled.span`
-  margin-left: 50px;
+  margin-left: 16px;
+  display: flex;
+  align-items: center;
 `
 
 const getCheckboxValue = (users: User[], predicate: (user: User) => boolean) => {

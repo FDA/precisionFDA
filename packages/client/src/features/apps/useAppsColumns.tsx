@@ -11,7 +11,6 @@ import {
 import { StyledTagItem, StyledTags } from '../../components/Tags'
 import { CubeIcon } from '../../components/icons/CubeIcon'
 import { ObjectGroupIcon } from '../../components/icons/ObjectGroupIcon'
-import { colors } from '../../styles/theme'
 import { StyledLinkCell, StyledNameCell, StyledRunByYouLink } from '../home/home.styles'
 import { KeyVal } from '../home/types'
 import { getBasePathFromScope } from '../home/utils'
@@ -19,8 +18,8 @@ import { IApp } from './apps.types'
 
 export const Pill = styled.div`
   border-radius: 7px;
-  background-color: ${colors.primaryBlue};
-  color: ${colors.white110};
+  background-color: var(--primary-500);
+  color: white;
   font-size: 0.7rem;
   font-weight: bold;
   padding: 2px 6px;
@@ -76,8 +75,8 @@ export const useAppsColumns = ({
     {
       Header: 'Revision',
       accessor: 'revision',
-      Filter: DefaultColumnFilter,
-      width: colWidths?.revision || 198,
+      disableFilters: true,
+      width: colWidths?.revision || 80,
     },
     {
       Header: 'Explorers',

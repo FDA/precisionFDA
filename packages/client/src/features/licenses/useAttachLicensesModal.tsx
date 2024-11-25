@@ -21,7 +21,7 @@ const HiddenElement = styled.div`
 `
 
 const StyledAction = styled.div<{ isCurrent: boolean }>`
-  color: ${theme.colors.primaryBlue};
+  color: var(--success-500);
 `
 
 const ScrollWrapper = styled(ModalScroll)`
