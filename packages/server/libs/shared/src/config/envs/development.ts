@@ -1,4 +1,4 @@
-import { ConfigOverride, parseIntFromProcess } from '..'
+import { ConfigOverride, defaultConfig, parseIntFromProcess } from '..'
 
 export const config: ConfigOverride = () => ({
   appName: 'https-apps-worker-dev',
@@ -61,4 +61,5 @@ export const config: ConfigOverride = () => ({
   },
   bullBoardEnabled: true,
   nestjsDevtoolsEnabled: true,
+  challengeProposalRecipients: [defaultConfig.supportEmail],
 })

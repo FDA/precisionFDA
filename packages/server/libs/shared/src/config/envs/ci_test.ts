@@ -65,4 +65,5 @@ export const config: ConfigOverride = () => ({
       skipFdaSubnetIpCheck: false,
     },
   },
+  challengeProposalRecipients: ['test@email.com'],
 })

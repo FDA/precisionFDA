@@ -13,11 +13,15 @@ import { schemas } from '@shared/utils/base-schemas'
 import { stringValues, stringValuesDowncased } from '@shared/utils/enum-utils'
 import type { JSONSchema7 } from 'json-schema'
 import { groupBy, map, mergeAll, pipe, prop } from 'ramda'
-import { AnyObject, OpsCtx } from '../../types'
+import { OpsCtx } from '../../types'
 import { SPACE_EVENT_ACTIVITY_TYPE } from '../space-event/space-event.enum'
 import { SPACE_MEMBERSHIP_ROLE } from '../space-membership/space-membership.enum'
 import { AlertMessageHandler } from '@shared/domain/email/templates/handlers/alert-message.handler'
 import { ExpertQuestionAddedHandler } from '@shared/domain/email/templates/handlers/expert-question-added.handler'
+import { ExpertAddedHandler } from '@shared/domain/email/templates/handlers/expert-added.handler'
+import { ChallengeProposalReceivedHandler } from '@shared/domain/email/templates/handlers/challenge-proposal-received.handler'
+import { emailTypeToInputDtoMap } from '@shared/domain/email/dto/email-type-to-input.map'
+import { GuestAccessEmailHandler } from '@shared/domain/email/templates/handlers/guest-access-email.handler'
 
 // KEY NAMES AND DEFAULT VALUES FOR EMAIL NOTIFICATION SETTINGS
 
@@ -39,6 +43,9 @@ export const NOTIFICATION_TYPES_BASE = {
   challenge_preregister: true,
   alert_message: true,
   expert_question_added: true,
+  expert_added: true,
+  challenge_proposal_received: true,
+  guest_access_email: true,
 }
 
 /**
@@ -125,17 +132,29 @@ export const NOTIFICATION_TYPES: Partial<typeof NOTIFICATION_TYPES_ADMIN> &
   NOTIFICATION_TYPES_REVIEWER_LEAD,
   NOTIFICATION_TYPES_SPONSOR_LEAD,
   NOTIFICATION_PRIVATE,
-]) as any
+])
 
 // EMAIL VALIDATION SCHEMAS
-
-const expertQuestionSchema: JSONSchema7 = {
+const objectIdSchema: JSONSchema7 = {
   type: 'object',
   properties: {
-    questionId: schemas.idProp,
+    id: schemas.idProp,
   },
-  required: ['questionId'],
+  required: ['id'],
   additionalProperties: false,
+}
+
+const challengeProposalSchema: JSONSchema7 = {
+  type: 'object',
+  properties: {
+    name: { type: 'string', maxLength: config.validation.maxStrLen },
+    email: { type: 'string', format: 'email' },
+    organisation: { type: 'string', maxLength: config.validation.maxStrLen },
+    specificQuestion: { type: 'string', maxLength: config.validation.maxStrLen },
+    specificQuestionText: { type: 'string', maxLength: config.validation.maxStrLen },
+    dataDetails: { type: 'string', maxLength: config.validation.maxStrLen },
+    dataDetailsText: { type: 'string', maxLength: config.validation.maxStrLen },
+  },
 }
 
 const alertMessageSchema: JSONSchema7 = {
@@ -223,15 +242,29 @@ const membershipChangedEmailSchema: JSONSchema7 = {
 }
 
 const emailInputSchemas = {
+  objectIdSchema,
   jobFinishedEmailSchema,
   alertMessageSchema,
-  expertQuestionSchema,
   jobFailedEmailSchema,
   challengeStartedEmailSchema,
   spaceEventEmailSchema,
   spaceChangedEmailSchema,
   membershipChangedEmailSchema,
   challengeCreatedEmailSchema,
+  challengeProposalSchema,
+}
+
+/**
+ * It still comes as snake case from rails.
+ */
+export type ChallengeProposalInput = {
+  name: string
+  email: string
+  organisation: string
+  specific_question: string
+  specific_question_text: string
+  data_details: string
+  data_details_text: string
 }
 
 export type NewContentAdded = { spaceEventId: number }
@@ -259,10 +292,10 @@ export type ChallengeCreated = { challengeId: number; name: string; scope: strin
 
 // EMAIL OPERATIONS INPUTS
 
-export type EmailProcessInput = {
+export type EmailProcessInput<T extends EMAIL_TYPES> = {
   emailTypeId: number
   receiverUserIds: number[]
-  input: AnyObject
+  input: InstanceType<(typeof emailTypeToInputDtoMap)[T]>
 }
 
 export type EmailSendInput = {
@@ -296,8 +329,7 @@ export interface EmailTemplate<T> {
   templateFile: (data: T) => string
 
   // validate(payload: any): void
-  // todo: make this one abstract maybe?
-  determineReceivers(...args: any[]): Promise<User[]>
+  determineReceivers(): Promise<User[]>
   template(receiver: User): Promise<EmailSendInput>
   getNotificationKey(spaceEvent?: SpaceEvent): keyof typeof NOTIFICATION_TYPES_BASE
   setupContext(): Promise<void>
@@ -323,6 +355,9 @@ export enum EMAIL_TYPES {
   userInactivityAlert = 16,
   alertMessage = 17,
   expertQuestionAdded = 18,
+  expertAdded = 19,
+  challengeProposalReceived = 20,
+  guestAccessEmail = 21,
 }
 
 export type EmailConfigItem = {
@@ -338,10 +373,28 @@ export type EmailConfigItem = {
 }
 
 export const EMAIL_CONFIG = {
+  guestAccessEmail: {
+    name: 'guestAccessEmail',
+    emailId: EMAIL_TYPES.guestAccessEmail,
+    schema: objectIdSchema,
+    handlerClass: GuestAccessEmailHandler,
+  },
+  challengeProposalReceived: {
+    name: 'challengeProposalReceived',
+    emailId: EMAIL_TYPES.challengeProposalReceived,
+    schema: challengeProposalSchema,
+    handlerClass: ChallengeProposalReceivedHandler,
+  },
+  expertAdded: {
+    name: 'expertAdded',
+    emailId: EMAIL_TYPES.expertAdded,
+    schema: objectIdSchema,
+    handlerClass: ExpertAddedHandler,
+  },
   expertQuestionAdded: {
     name: 'expertQuestionAdded',
     emailId: EMAIL_TYPES.expertQuestionAdded,
-    schema: expertQuestionSchema,
+    schema: objectIdSchema,
     handlerClass: ExpertQuestionAddedHandler,
   },
   alertMessage: {
