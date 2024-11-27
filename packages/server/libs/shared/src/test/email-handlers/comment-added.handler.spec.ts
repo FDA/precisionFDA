@@ -1,9 +1,6 @@
 import { database } from '@shared/database'
 import { Job } from '@shared/domain/job/job.entity'
-import {
-  NotificationPreference
-} from '@shared/domain/notification-preference/notification-preference.entity'
-import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
+import { NotificationPreference } from '@shared/domain/notification-preference/notification-preference.entity'
 import { Space } from '@shared/domain/space/space.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { Comment } from '@shared/domain/comment/comment.entity'
@@ -24,7 +21,6 @@ describe('member-change.handler', () => {
   let comment: Comment
   let job: Job
   let ctx: UserOpsCtx
-  let anotherUserMembership: SpaceMembership
   const emailConfig = EMAIL_CONFIG.newContentAdded
 
   beforeEach(async () => {
@@ -39,7 +35,7 @@ describe('member-change.handler', () => {
     comment = create.commentHelper.create(em, { user })
     job = create.jobHelper.create(em, { user })
     create.spacesHelper.addMember(em, { user, space })
-    anotherUserMembership = create.spacesHelper.addMember(
+    create.spacesHelper.addMember(
       em,
       { user: anotherUser, space },
       { role: SPACE_MEMBERSHIP_ROLE.VIEWER },
@@ -92,7 +88,7 @@ describe('member-change.handler', () => {
       await handler.setupContext()
       const receivers = await handler.determineReceivers()
       expect(receivers).to.have.lengthOf(1)
-      expect(receivers.map(u => u.id)).to.have.all.members([anotherUser.id])
+      expect(receivers.map((u) => u.id)).to.have.all.members([anotherUser.id])
     })
 
     it('applies users email settings', async () => {

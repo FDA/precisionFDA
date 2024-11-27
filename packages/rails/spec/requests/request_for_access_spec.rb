@@ -5,6 +5,7 @@ describe "Request for access", type: :request do
 
   context "when visiting request for access page" do
     before do
+      stub_request(:post, "https://localhost:3001/emails/typed")
       get request_access_path
     end
 
@@ -15,6 +16,7 @@ describe "Request for access", type: :request do
 
   context "when requesting for access" do
     before do
+      stub_request(:post, "https://localhost:3001/emails/typed")
       post request_access_path, params: {
         invitation: {
           first_name: FFaker::Name.first_name,

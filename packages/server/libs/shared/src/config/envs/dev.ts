@@ -1,4 +1,4 @@
-import { ConfigOverride, parseIntFromProcess } from '..'
+import { ConfigOverride, defaultConfig, parseIntFromProcess } from '..'
 
 export const config: ConfigOverride = () => ({
   // NOTE(samuel) copied from "staging.ts" configuration, so to avoid breaking changes, left unchanged
@@ -13,7 +13,8 @@ export const config: ConfigOverride = () => ({
     syncJob: {
       repeatPattern: '*/2 * * * *', // Every 2 minutes
       staleJobsEmailAfter: parseIntFromProcess(process.env.NODE_STALE_JOBS_EMAIL_AFTER) ?? 60 * 50, // 50 minutes
-      staleJobsTerminateAfter: parseIntFromProcess(process.env.NODE_STALE_JOBS_TERMINATE_AFTER) ?? 60 * 60, // 1 hour
+      staleJobsTerminateAfter:
+        parseIntFromProcess(process.env.NODE_STALE_JOBS_TERMINATE_AFTER) ?? 60 * 60, // 1 hour
     },
     queues: {
       default: { name: 'https-apps-worker-queue-stg' },
@@ -41,4 +42,5 @@ export const config: ConfigOverride = () => ({
       saveEmailToFile: false,
     },
   },
+  challengeProposalRecipients: [defaultConfig.supportEmail],
 })

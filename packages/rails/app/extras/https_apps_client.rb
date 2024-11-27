@@ -663,8 +663,8 @@ class HttpsAppsClient # rubocop:disable Metrics/ClassLength
 
   def email_send(email_type_id, receiver_user_ids, opts)
     request(
-      "/emails/#{email_type_id}/send",
-      { input: opts, receiverUserIds: receiver_user_ids },
+      "/emails/typed",
+      { type: email_type_id, input: opts, receiverUserIds: receiver_user_ids },
       Net::HTTP::Post::METHOD,
     )
   end

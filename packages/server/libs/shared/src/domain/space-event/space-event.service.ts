@@ -82,21 +82,21 @@ export class SpaceEventService {
       `Sending notification for space event id: ${event.id} activityType: ${event.activityType}`,
     )
     if (CONTENT_TYPES.includes(event.activityType)) {
-      const input: EmailProcessInput = {
+      const input: EmailProcessInput<EMAIL_TYPES.newContentAdded> = {
         emailTypeId: EMAIL_TYPES.newContentAdded,
         input: { spaceEventId: event.id },
         receiverUserIds: [],
       }
       await this.emailFacade.sendEmail(input)
     } else if (COMMENT_TYPES.includes(event.activityType)) {
-      const input: EmailProcessInput = {
+      const input: EmailProcessInput<EMAIL_TYPES.commentAdded> = {
         emailTypeId: EMAIL_TYPES.commentAdded,
         input: { spaceEventId: event.id },
         receiverUserIds: [],
       }
       await this.emailFacade.sendEmail(input)
     } else if (SPACE_TYPES.includes(event.activityType)) {
-      const input: EmailProcessInput = {
+      const input: EmailProcessInput<EMAIL_TYPES.spaceChanged> = {
         emailTypeId: EMAIL_TYPES.spaceChanged,
         input: {
           initUserId: event.user.id,
@@ -107,7 +107,7 @@ export class SpaceEventService {
       }
       await this.emailFacade.sendEmail(input)
     } else if (MEMBERSHIP_TYPES.includes(event.activityType)) {
-      const input: EmailProcessInput = {
+      const input: EmailProcessInput<EMAIL_TYPES.memberChangedAddedRemoved> = {
         emailTypeId: EMAIL_TYPES.memberChangedAddedRemoved,
         input: {
           initUserId: event.user.id,

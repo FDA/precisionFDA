@@ -212,6 +212,9 @@ const defaultConfig = {
   secretKeyBase: process.env.SECRET_KEY_BASE,
   maxInactivityMinutes: parseIntFromProcess(process.env.MAX_TIME_INACTIVITY) ?? 30,
   minusExpirationMinutes: 4,
+  supportEmail: 'precisionfda-support@dnanexus.com',
+  pfdaEmail: 'precisionfda@fda.hhs.gov',
+  challengeProposalRecipients: [] as String[],
 }
 
 // lazily plug-in the overrides that are based on the NODE_ENV

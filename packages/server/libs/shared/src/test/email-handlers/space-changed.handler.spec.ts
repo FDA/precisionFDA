@@ -1,6 +1,5 @@
 import { database } from '@shared/database'
 import { App } from '@shared/domain/app/app.entity'
-import { Job } from '@shared/domain/job/job.entity'
 import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
 import { Space } from '@shared/domain/space/space.entity'
 import { User } from '@shared/domain/user/user.entity'
@@ -24,10 +23,8 @@ describe('space-change.handler', () => {
   let anotherUser: User
   let anotherUserLead: User
   let app: App
-  let job: Job
   let space: Space
   let spaceMembership: SpaceMembership
-  let addedSpaceMembership: SpaceMembership
   let ctx: UserOpsCtx
   const emailConfig = EMAIL_CONFIG.spaceChanged
 
@@ -41,10 +38,10 @@ describe('space-change.handler', () => {
     anotherUserLead = create.userHelper.create(em, { email: generate.random.chance.email() })
 
     app = create.appHelper.createHTTPS(em, { user }, { spec: generate.app.jupyterAppSpecData() })
-    job = create.jobHelper.create(em, { user, app }, { scope: 'private', state: JOB_STATE.IDLE })
+    create.jobHelper.create(em, { user, app }, { scope: 'private', state: JOB_STATE.IDLE })
     space = create.spacesHelper.create(em, { name: 'my-test-space' })
     spaceMembership = create.spacesHelper.addMember(em, { user, space })
-    addedSpaceMembership = create.spacesHelper.addMember(
+    create.spacesHelper.addMember(
       em,
       { user: anotherUser, space },
       { role: SPACE_MEMBERSHIP_ROLE.VIEWER, side: SPACE_MEMBERSHIP_SIDE.GUEST },
@@ -124,7 +121,7 @@ describe('space-change.handler', () => {
       await handler.setupContext()
       const receivers = await handler.determineReceivers()
       expect(receivers).to.have.lengthOf(1)
-      expect(receivers.map(r => r.id)).to.have.all.members([anotherUserLead.id])
+      expect(receivers.map((r) => r.id)).to.have.all.members([anotherUserLead.id])
     })
   })
 
