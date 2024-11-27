@@ -115,3 +115,9 @@
 <% if @license.editable_by?(@context) %>
   <%= render "_partials/modal_rename", item: @license, path_to_rename: rename_license_path(@license) %>
 <% end %>
+
+<%= javascript_tag do %>
+  // FIX for PFDA-5712
+  $('#dLabel').dropdown();
+<% end %>
+

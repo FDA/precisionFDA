@@ -94,3 +94,8 @@
 <% if @note.editable_by?(@context) %>
   <%= render "_partials/modal_rename", item: @note, path_to_rename: rename_note_path(@note) %>
 <% end %>
+
+<%= javascript_tag do %>
+  // FIX for PFDA-5712
+  $('#dLabel').dropdown();
+<% end %>

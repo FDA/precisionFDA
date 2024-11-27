@@ -350,3 +350,8 @@
 <% if @comparison.editable_by?(@context) %>
   <%= render "_partials/modal_file_comparison_edit", item: @comparison, path_to_rename: rename_comparison_path(@comparison.id) %>
 <% end %>
+
+<%= javascript_tag do %>
+  // FIX for PFDA-5712
+  $('#dLabel').dropdown();
+<% end %>
