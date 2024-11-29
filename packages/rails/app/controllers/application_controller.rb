@@ -56,7 +56,9 @@ class ApplicationController < ActionController::Base
 
       if cookies.present?
         forward_header[:Cookie] = cookies.to_hash.map { |k, v| "#{k}=#{v}" }.join(";")
-        forward_header["x-csrf-token"] = request.headers["X-CSRF-Token"]
+        csrf_token = request.headers["X-CSRF-Token"]
+        csrf_token ||= unsafe_params[:authenticity_token]
+        forward_header["x-csrf-token"] = csrf_token if csrf_token.present?
       end
 
       auth_key = request.headers["Authorization"]
