@@ -85,27 +85,25 @@ const renderOptions = (app: IApp, meta: { release: string }, homeScope?: HomeSco
 
   const scopeParamLink = `?scope=${homeScope?.toLowerCase()}`
 
-  const list = columns.map((e: any) => (
+  const list = columns.map(e => (
     <MetadataItem key={e.header}>
       <MetadataKey>{e.header}</MetadataKey>
       {e.header === 'location' && !e.link ? (
-        // @ts-ignore
         <MetadataVal data-testid={e.dataTestId}>
           <Link to={`/home/apps${scopeParamLink}`}>
-            {/* @ts-ignore */}
+            {/* @ts-expect-error dynamic key */}
             {homeScope === 'featured' ? 'Featured' : app[e.value]}
           </Link>
         </MetadataVal>
       ) : e.link ? (
-        // @ts-ignore
         <MetadataVal data-testid={e.dataTestId}>
           <Link to={e.link} target="_blank">
-            {/* @ts-ignore */}
+            {/* @ts-expect-error dynamic key */}
             {app[e.value]}
           </Link>
         </MetadataVal>
       ) : (
-        // @ts-ignore
+        // @ts-expect-error dynamic key
         <MetadataVal data-testid={e.dataTestId}>{app[e.value]}</MetadataVal>
       )}
     </MetadataItem>
@@ -171,7 +169,7 @@ const DetailActionsDropdown = (
 export const AppsShow = ({ spaceId, emitScope, homeScope }: { homeScope?: HomeScope, spaceId?: string, emitScope?: EmmitScope }) => {
   const location = useLocation()
   const { appUid } = useParams<{ appUid: string }>()
-  const { data, isLoading } = useFetchAppQuery(appUid)
+  const { data, isLoading } = useFetchAppQuery(appUid!)
 
   useEffect(() => {
     if(data) {

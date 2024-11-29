@@ -1,6 +1,6 @@
 import React from 'react'
 import { Meta, StoryObj } from '@storybook/react'
-import Header from '.'
+import Header from './HeaderNext'
 import { StorybookProviders } from '../../stories/StorybookProviders'
 
 const meta: Meta = {

@@ -1,11 +1,20 @@
-import { IsArray, IsNotEmpty, IsObject, IsOptional } from 'class-validator'
+import { IsArray, IsEnum, IsNotEmpty, IsObject, IsOptional } from 'class-validator'
+import { EMAIL_TYPES } from '@shared/domain/email/email.config'
+import { EmailTypeToInputMap } from '@shared/domain/email/dto/email-type-to-input.map'
+import { IsEmailInputValid } from '@shared/domain/email/dto/is-email-input-valid.constraint'
 
-export class TypedEmailBodyDto {
+export type EmailInputFormat = keyof EmailTypeToInputMap
+
+export class TypedEmailBodyDto<T extends EMAIL_TYPES = EMAIL_TYPES.emailWithoutTemplate> {
+  @IsEnum(EMAIL_TYPES)
+  type: T
+
   @IsObject()
   @IsNotEmpty()
-  input: Record<string, string>
+  @IsEmailInputValid()
+  input: EmailTypeToInputMap[T]
 
   @IsArray()
   @IsOptional()
-  receiverUserIds?: number[]
+  receiverUserIds?: number[] = []
 }

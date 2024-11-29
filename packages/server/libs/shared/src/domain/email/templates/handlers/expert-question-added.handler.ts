@@ -15,13 +15,13 @@ import {
 import { buildEmailTemplate } from '@shared/domain/email/email.helper'
 import { getUserTitle } from '@shared/domain/email/templates/mjml/common'
 
-export type ExpertQuestionAddedInputType = { questionId: number }
+export type ExpertQuestionAddedInputType = { id: number }
 
 export class ExpertQuestionAddedHandler
   extends BaseTemplate<ExpertQuestionAddedInputType, UserOpsCtx>
   implements EmailTemplate<ExpertQuestionTemplateInput>
 {
-  expertQuestionId = this.validatedInput.questionId
+  expertQuestionId = this.validatedInput.id
   expertQuestion: ExpertQuestion
   templateFile = expertQuestionAddedTemplate
 
@@ -43,7 +43,7 @@ export class ExpertQuestionAddedHandler
   }
 
   async template(receiver: User): Promise<EmailSendInput> {
-    const name = getUserTitle(this.expertQuestion.user)
+    const name = getUserTitle(receiver)
     const body = buildEmailTemplate(this.templateFile, {
       content: {
         senderName: name,

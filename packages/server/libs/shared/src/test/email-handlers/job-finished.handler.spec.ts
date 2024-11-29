@@ -1,9 +1,7 @@
 import { database } from '@shared/database'
 import { App } from '@shared/domain/app/app.entity'
 import { Job } from '@shared/domain/job/job.entity'
-import {
-  NotificationPreference
-} from '@shared/domain/notification-preference/notification-preference.entity'
+import { NotificationPreference } from '@shared/domain/notification-preference/notification-preference.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { expect } from 'chai'
 import { EntityManager, Reference } from '@mikro-orm/core'
@@ -61,7 +59,7 @@ describe('job-finished.handler', () => {
       await handler.setupContext()
       const receivers = await handler.determineReceivers()
       expect(receivers).to.have.lengthOf(1)
-      expect(receivers.map(r => r.id)).to.have.all.members([user.id])
+      expect(receivers.map((r) => r.id)).to.have.all.members([user.id])
     })
 
     it('applies owners notification settings', async () => {

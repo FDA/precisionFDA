@@ -1,7 +1,6 @@
 import { config } from '@shared/config'
 import { database } from '@shared/database'
 import { App } from '@shared/domain/app/app.entity'
-import { Job } from '@shared/domain/job/job.entity'
 import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
 import { Space } from '@shared/domain/space/space.entity'
 import { User } from '@shared/domain/user/user.entity'
@@ -21,7 +20,6 @@ describe('member-change.handler', () => {
   let user: User
   let anotherUser: User
   let app: App
-  let job: Job
   let space: Space
   let ctx: UserOpsCtx
   let anotherUserMembership: SpaceMembership
@@ -36,7 +34,7 @@ describe('member-change.handler', () => {
     anotherUser = create.userHelper.create(em, { email: generate.random.email() })
 
     app = create.appHelper.createHTTPS(em, { user }, { spec: generate.app.jupyterAppSpecData() })
-    job = create.jobHelper.create(em, { user, app }, { scope: 'private', state: JOB_STATE.IDLE })
+    create.jobHelper.create(em, { user, app }, { scope: 'private', state: JOB_STATE.IDLE })
     space = create.spacesHelper.create(em, { name: 'my-test-space' })
     create.spacesHelper.addMember(em, { user, space })
     anotherUserMembership = create.spacesHelper.addMember(
@@ -117,7 +115,7 @@ describe('member-change.handler', () => {
       await handler.setupContext()
       const receivers = await handler.determineReceivers()
       expect(receivers).to.have.lengthOf(1)
-      expect(receivers.map(r => r.id)).to.have.all.members([anotherUser.id])
+      expect(receivers.map((r) => r.id)).to.have.all.members([anotherUser.id])
     })
 
     it('if other user is challenge bot, it is filter out', async () => {
@@ -183,7 +181,7 @@ describe('member-change.handler', () => {
       const receivers = await handler.determineReceivers()
 
       expect(receivers).to.have.lengthOf(1)
-      expect(receivers.map(r => r.id)).to.have.all.members([anotherLeadUser.id])
+      expect(receivers.map((r) => r.id)).to.have.all.members([anotherLeadUser.id])
     })
   })
 

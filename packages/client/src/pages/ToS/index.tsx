@@ -1,8 +1,6 @@
 import React from 'react'
 import styled from 'styled-components'
-import {
-  PageContainerMargin,
-} from '../../components/Page/styles'
+import { PageContainerMargin } from '../../components/Page/styles'
 import { useAuthUser } from '../../features/auth/useAuthUser'
 import NavigationBar from '../../components/NavigationBar/NavigationBar'
 import PublicLayout from '../../layouts/PublicLayout'
@@ -17,9 +15,9 @@ const ToS = () => {
   const user = useAuthUser()
   return (
     <PublicLayout mainScroll={!!user}>
-      <NavigationBar
+       <NavigationBar
         title="Terms of Service"
-        subtitle="Insights from academic, industry, and FDA experts from the precisionFDA Community."
+        subtitle=""
         user={user}
       />
       <PageContainerMargin>

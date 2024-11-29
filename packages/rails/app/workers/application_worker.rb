@@ -27,6 +27,7 @@ class ApplicationWorker
     Rails.logger.error(message)
 
     https_apps_client.email_send(NotificationPreference.email_types[:alert_message], [context.user.id], { subject:, message: })
+
     RequestContext.end_request
   end
 

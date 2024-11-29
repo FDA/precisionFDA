@@ -21,13 +21,6 @@ class NotificationsMailer < ApplicationMailer
          subject: "New access request from #{invitation.first_name} #{invitation.last_name}")
   end
 
-  def guest_access_email(invitation)
-    @invitation = invitation
-    mail(to: @invitation.email,
-         bcc: "precisionfda-support@dnanexus.com",
-         subject: "Your precisionFDA access request")
-  end
-
   def license_request_email(license, user, message)
     @license = license
     @user = user
@@ -85,19 +78,6 @@ class NotificationsMailer < ApplicationMailer
          subject: "#{admin.user.full_name} added you to the space \"#{space.title}\"")
   end
 
-  def external_user_invited_to_space_email(space, email, admin, role)
-    @space = space
-    @admin = admin
-    @role = role
-    @email = email
-
-    subject = %(You have been invited to join "#{space.title}" space)
-
-    mail(to: email,
-         reply_to: admin.user.email,
-         subject: subject)
-  end
-
   def user_remove_approved_email(org, member, approver)
     @org = org
     @member = member
@@ -127,43 +107,5 @@ class NotificationsMailer < ApplicationMailer
     mail(to: @org.admin.email,
          reply_to: @approver.email,
          subject: "#{@approver.full_name} approved your request to dissolve \"#{@org.name}\" org")
-  end
-
-  def new_expert_email(expert)
-    @expert = expert
-    mail(to: @expert.user.email,
-         subject: "A new Expert Q&A Session was created for \"#{@expert.user.full_name.titleize}\"")
-  end
-
-  def challenge_results(file, user_id, test_email = nil)
-    @user = User.find(user_id)
-
-    attachments[File.basename(file)] = {
-      content: Base64.encode64(File.read(file)),
-    }
-
-    if test_email.present?
-      mail(
-        to: test_email,
-        from: "notification@dnanexus.com",
-        subject: "Results of NCI-CPTAC challenge",
-      )
-    else
-      mail(to: @user.email, subject: "Results of NCI-CPTAC challenge")
-    end
-  end
-
-  def challenge_proposal_received(proposal)
-    recipients = CHALLENGE_PROPOSAL_RECIPIENTS.fetch(Rails.env.to_sym, [])
-
-    return if recipients.blank?
-
-    @subject = "[#{Rails.env.titleize}] New challenge proposal received from " \
-               "#{proposal[:name]} (#{proposal[:email]})"
-    @proposal = proposal
-
-    mail(to: recipients,
-         reply_to: SUPPORT_EMAIL,
-         subject: @subject)
   end
 end

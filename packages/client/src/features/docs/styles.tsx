@@ -1,5 +1,5 @@
-import styled from 'styled-components'
-import { breakPoints, colors } from '../../styles/theme'
+import styled, { css } from 'styled-components'
+import { breakPoints } from '../../styles/theme'
 import { NavLink } from '../../components/NavLink'
 import { compactScrollBarV2 } from '../../components/Page/styles'
 
@@ -27,6 +27,49 @@ export const DocsMainContainer = styled.div`
   justify-content: center;
 `
 export const DocsContent = styled.div`
+  --c-doc-table-border: var(--c-layout-border-200);
+
+  --c-doc-warning-bg: #fddbdc;
+  --c-doc-warning-border: #e2b2b4;
+  --c-doc-warning-color: #8c0808;
+
+  --c-doc-tip-bg: #d9edf7;
+  --c-doc-tip-border: #bce8f1;
+  --c-doc-tip-color: #31708f;
+  
+  --c-doc-pre-bg: #f5f5f5;
+  --c-doc-pre-border: #cccccc;
+
+  --c-doc-code-bg: #f9f2f4;
+  --c-doc-code-color: #c7254e;
+  --c-doc-code-border: var(--c-layout-border-200);
+
+  --c-doc-command-bg: #f4f4f4;
+  --c-doc-command-color: #007bff;
+  --c-doc-command-border: var(--c-layout-border-200);
+  
+${({ theme }) => theme.colorMode === 'dark' && css`
+
+  --c-doc-warning-bg: #532626;
+  --c-doc-warning-border: #7b4b4b;
+  --c-doc-warning-color: #c69696;
+
+  --c-doc-tip-bg: #264053;
+  --c-doc-tip-border: #4b677b;
+  --c-doc-tip-color: #96b6c6;
+  
+  --c-doc-pre-bg: #161616;
+  --c-doc-pre-border: #474747;
+
+  --c-doc-code-bg: var(--background);
+  --c-doc-code-color: #c7254e;
+  --c-doc-code-border: var(--c-layout-border-200);
+
+  --c-doc-command-bg: #161616;
+  --c-doc-command-color: var(--base);
+  --c-doc-command-border: var(--c-layout-border-200);
+`}
+
   display: flex;
   flex: 1 1 auto;
   color: var(--c-text-700);
@@ -88,8 +131,8 @@ export const DocsContent = styled.div`
     line-height: 1.428571429;
     word-break: break-all;
     word-wrap: break-word;
-    background-color: #f5f5f5;
-    border: 1px solid #ccc;
+    background-color: var(--c-doc-pre-bg);
+    border: 1px solid var(--c-doc-pre-border);
     border-radius: 3px;
     white-space: pre-line;
   }
@@ -97,8 +140,9 @@ export const DocsContent = styled.div`
   code {
     padding: 2px 4px;
     font-size: 90%;
-    color: #c7254e;
-    background-color: #f9f2f4;
+    color: var(--c-doc-code-color);
+    background-color: var(--c-doc-code-bg);
+    border: 1px solid var(--c-doc-code-border);
     border-radius: 3px;
   }
   code, kbd, pre, samp {
@@ -122,7 +166,7 @@ export const NavItem = styled(NavLink)<{$active?: boolean}>`
   padding: 8px 16px 8px 32px;
   
   &.active {
-    background-color: ${colors.primaryBlue};
+    background-color: var(--primary-500);
     color: #ffffff;
   }
 
@@ -141,26 +185,14 @@ export const DocsPageContainer = styled.div`
 `
 
 export const DocsTip = styled.div`
-  background-color: #d9edf7;
-  border-color: #bce8f1;
-  color: #31708f;
+  background-color: var(--c-doc-tip-bg);
+  border-color: var(--c-doc-tip-border);
+  color: var(--c-doc-tip-color);;
 
   padding: 15px;
   margin-bottom: 20px;
   border: 1px solid transparent;
   border-radius: 3px;
-`
-
-export const DocsTip2 = styled.div`
-    background-color: #d9edf7;
-    color: #31708f;
-    padding: 15px;
-    top: -3px;
-    position: relative;
-    margin-bottom: 20px;
-    border: 2px solid #31708f;
-    border-bottom-width: 5px;
-    border-radius: 8px;
 `
 
 export const VideoWrapper = styled.div`
@@ -207,7 +239,7 @@ export const DocRow = styled.div`
   }
 `
 export const DocTable = styled.table`
-  border: 1px solid #ddd;
+  border: 1px solid var(--c-doc-table-border);
   width: 100%;
   max-width: 100%;
   margin-bottom: 20px;
@@ -221,10 +253,10 @@ export const DocTable = styled.table`
   thead {
     text-align: left;
     vertical-align: middle;
-    border-bottom: 2px solid #ddd;
+    border-bottom: 2px solid var(--c-doc-table-border);
 
     th {
-      border: 1px solid #ddd;
+      border: 1px solid var(--c-doc-table-border);
       padding: 8px;
     }
   }
@@ -235,7 +267,7 @@ export const DocTable = styled.table`
     border-color: inherit;
 
     td {
-      border: 1px solid #ddd;
+      border: 1px solid var(--c-doc-table-border);
       padding: 8px;
       line-height: 1.428571429;
       vertical-align: top;
@@ -261,4 +293,75 @@ export const PageMap = styled.ol`
       border-left: 1px solid #2f7abc;
     }
   }
+`
+
+export const StyledOutdatedDocs = styled.div`
+  color: var(--c-doc-warning-color);
+  background-color: var(--c-doc-warning-bg);
+  border: 1px solid var(--c-doc-warning-border);
+  padding: 16px;
+  border-radius: 4px;
+  margin-bottom: 32px;
+`
+
+export const HelpSection = styled.div`
+  background-color: var(--c-doc-tip-bg);
+  color: var(--c-doc-tip-color);
+  border-radius: 5px;
+  padding: 13px;
+  position: relative;
+  margin-bottom: 20px;
+
+  &:before {
+    height: 100%;
+    width: 4px;
+    content: "";
+    background: #31708f;
+    display: block;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    border-top-left-radius: 3px;
+    border-bottom-left-radius: 3px;
+  }
+`
+
+export const HelpTitle = styled.div`
+  font-weight: bold;
+  font-size: 1.2em;
+  color: var(--c-doc-tip-color);
+`
+
+export const HelpTip = styled.p`
+  color: var(--c-doc-tip-color);
+  margin-left: 5px;
+`
+
+export const HelpTipText = styled.p`
+  color: var(--c-doc-tip-color);
+  margin-left: 10px;
+`
+
+export const ExampleBlock = styled.div`
+    margin-bottom: 10px;
+    font-family: 'Courier New', Courier, monospace;
+
+    .description {
+        font-style: italic;
+    }
+
+  .command {
+    background-color: var(--c-doc-command-bg);
+    color: var(--c-doc-command-color);
+    padding: 5px 10px;
+    margin-top: 5px;
+  }
+`
+
+export const StyledCode = styled.code`
+    background-color: var(--c-doc-command-bg);
+    color: var(--c-doc-command-color);
+    padding: 2px 4px;
+    margin-top: 5px;
 `

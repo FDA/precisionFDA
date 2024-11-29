@@ -40,6 +40,7 @@ import {
   SiteMenuItem,
   SiteMenuText,
   SiteNavBody,
+  SiteNavBottom,
   SiteNavTop,
   StyledDivider,
   StyledDropMenuLinks,
@@ -48,12 +49,16 @@ import {
   StyledLink,
   StyledOnClickModalDiv,
   StyledSiteNav,
+  StyledToggle,
+  StyledToggleButton,
   SubLink,
 } from './styles'
 import { useEditFavoritesModal } from './useEditFavoritesModal'
 import { useNavFavoritesLocalStorage } from './useNavFavoritesLocalStorage'
 import { useNavOrderLocalStorage } from './useNavOrderLocalStorage'
 import { useUserSiteNavItems } from './useUserSiteNavItems'
+import { DarkModeIcon, LightModeIcon } from '../icons/ColorModes'
+import { useTheme } from '../../utils/ThemeContext'
 
 type UserMenuProps = {
   user: IUser | null | undefined
@@ -218,6 +223,7 @@ const SiteNav = ({
   setShowSiteNav: (v: boolean, ms?: number) => void
   ignoredOutsideClickRef: HTMLDivElement | null
 }) => {
+  const { theme, toggleTheme } = useTheme()
   const clickRef = useOnOutsideClickRef(true, setShowSiteNav, ignoredOutsideClickRef)
   const { pathname } = useLocation()
   const siteSettings = useSiteSettingsQuery()
@@ -278,6 +284,13 @@ const SiteNav = ({
           </div>
         </Row>
       </SiteNavBody>
+      <SiteNavBottom>
+        <div />
+        <StyledToggle>
+          <StyledToggleButton data-active={theme === 'light'} onClick={() => toggleTheme()}><LightModeIcon height={16} /></StyledToggleButton>
+          <StyledToggleButton data-active={theme === 'dark'} onClick={() => toggleTheme()}><DarkModeIcon height={16} /></StyledToggleButton>
+        </StyledToggle>
+      </SiteNavBottom>
     </StyledSiteNav>
   )
 }

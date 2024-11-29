@@ -190,10 +190,10 @@ export const useExecutionActions = ({
     'Edit properties': {
       type: 'modal',
       func: () => setPropertiesModal(true),
-      isDisabled: false,
+      isDisabled: selected.length === 0,
       modal: propertiesModal,
       showModal: isShownPropertiesModal,
-      shouldHide: (!isAdmin && !isJobOwner) || selected.length !== 1,
+      shouldHide: (!isAdmin && !isJobOwner),
     },
   }
 

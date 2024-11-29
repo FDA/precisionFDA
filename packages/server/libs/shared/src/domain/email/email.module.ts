@@ -33,6 +33,7 @@ import { emailClientProvider } from '@shared/domain/email/email-client.provider'
     EmailPrepareService,
     EmailSendService,
     EmailFacade,
+    emailClientProvider,
   ],
 })
 export class EmailModule {}

@@ -68,6 +68,9 @@ class NotificationPreference < ApplicationRecord
     notification_job_failed: 11,
     alert_message: 17,
     expert_question_added: 18,
+    expert_added: 19,
+    challenge_proposal_received: 20,
+    guest_access_email: 21,
   }.freeze
 
   ALL_KEYS = REVIEWER_KEYS + SPONSOR_KEYS + REVIEWER_LEAD_KEYS + SPONSOR_LEAD_KEYS +

@@ -19,11 +19,7 @@ export const useRunJobMutation = (scope: ServerScope) => {
     },
     onError: (error: AxiosError) => {
       const errorMessage = error?.response?.data?.error?.message || ''
-      if (errorMessage.includes('BillTo for this job\'s project must have the "httpsApp" feature enabled to run this executable')) {
-        toast.error('Error: You do not have permission to run this Workstation. Email Support to get this permission added to your account')
-      } else {
-        toast.error(`Error running app: ${errorMessage}`)
-      }
+      toast.error(`Error running app: ${errorMessage}`)
     },
   })
 }

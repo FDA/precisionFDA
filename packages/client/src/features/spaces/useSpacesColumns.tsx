@@ -56,12 +56,15 @@ export const StyledName = styled.span<{ $isAccess: boolean }>`
 export const StatusCell = styled.div<{ $isActive: boolean }>`
   display: flex;
   align-items: center;
-  color: ${({ $isActive }) => ($isActive ? 'var(--success-600)' : 'var(--warning-500)')};
+  color: ${({ $isActive }) => ($isActive ? 'var(--success-400)' : 'var(--warning-500)')};
   text-transform: capitalize;
   font-weight: 600;
 
   ${Dot} {
-    color: ${({ $isActive }) => ($isActive ? 'var(--success-600)' : 'var(--warning-500)')};
+    ${({ $isActive }) => ($isActive 
+      ? css`color: var(--success-400); background-color: var(--success-400);` 
+      : css`color: var(--warning-500); background-color: var(--warning-500);`
+    )};
     margin-right: 8px;
   }
 `
