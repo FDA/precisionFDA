@@ -29,15 +29,18 @@ describe('job-failed.handler', () => {
     anotherUser = create.userHelper.create(em, { email: generate.random.email() })
 
     app = create.appHelper.createHTTPS(em, { user }, { spec: generate.app.jupyterAppSpecData() })
-    job = create.jobHelper.create(em, { user, app },
+    job = create.jobHelper.create(
+      em,
+      { user, app },
       {
-      scope: 'private',
-      state: JOB_STATE.FAILED,
-      describe: {
-        failureReason: 'FailureReason',
-        failureMessage: 'failure message',
+        scope: 'private',
+        state: JOB_STATE.FAILED,
+        describe: {
+          failureReason: 'FailureReason',
+          failureMessage: 'failure message',
+        },
       },
-    })
+    )
     const space = create.spacesHelper.create(em, { name: 'my-test-space' })
     create.spacesHelper.addMember(em, { user, space })
     create.spacesHelper.addMember(em, { user: anotherUser, space })
@@ -68,7 +71,7 @@ describe('job-failed.handler', () => {
       await handler.setupContext()
       const receivers = await handler.determineReceivers()
       expect(receivers).to.have.lengthOf(1)
-      expect(receivers.map(r => r.id)).to.have.all.members([user.id])
+      expect(receivers.map((r) => r.id)).to.have.all.members([user.id])
     })
   })
 

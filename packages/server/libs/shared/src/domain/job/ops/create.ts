@@ -7,7 +7,7 @@ import { User } from '@shared/domain/user/user.entity'
 import { getProjectToRunApp } from '@shared/domain/user/user.helper'
 import { PlatformClient } from '@shared/platform-client'
 import { JobCreateParams } from '@shared/platform-client/platform-client.params'
-import { difference, intersection, isNil, prop } from 'ramda'
+import { difference, intersection, isNil } from 'ramda'
 import * as errors from '../../../errors'
 import type { RunAppInput, Provenance } from '../job.input'
 import { BaseOperation } from '@shared/utils/base-operation'
@@ -18,13 +18,14 @@ import {
   JOB_DB_ENTITY_TYPE,
   DEFAULT_INSTANCE_TYPE,
 } from '../job.enum'
-import { createSyncJobStatusTask } from '../../../queue'
+import { createSyncJobStatusTask } from '@shared/queue'
 import { AppInputSpecItem } from '../../app/app.enum'
-import { AnyObject, UserOpsCtx } from '../../../types'
-import { config } from '../../../config'
+import { AnyObject, UserOpsCtx } from '@shared/types'
+import { config } from '@shared/config'
 import { getIdFromScopeName, getProjectDxid } from '../../space/space.helper'
-import { MAX_PLATFORM_ALLOWED_TIMEOUT_SECONDS } from '../../../config/constants'
+import { MAX_PLATFORM_ALLOWED_TIMEOUT_SECONDS } from '@shared/config/constants'
 import { getPluralizedTerm } from '@shared/utils/format'
+import { JobCreateResponse } from '@shared/platform-client/platform-client.responses'
 
 export class CreateJobOperation extends BaseOperation<UserOpsCtx, RunAppInput, Job> {
   private input: RunAppInput
@@ -71,10 +72,13 @@ export class CreateJobOperation extends BaseOperation<UserOpsCtx, RunAppInput, J
         if (files.length) {
           const inputFiles = await em.find(UserFile, { uid: { $in: files } })
           if (inputFiles.length !== files.length) {
-            const foundFiles = inputFiles.map(f => f.uid)
-            throw new errors.NotFoundError(`${getPluralizedTerm(files.length, 'file')} in input but found ${inputFiles.length}: ${foundFiles}`, {
-              code: errors.ErrorCodes.USER_FILE_NOT_FOUND,
-            })
+            const foundFiles = inputFiles.map((f) => f.uid)
+            throw new errors.NotFoundError(
+              `${getPluralizedTerm(files.length, 'file')} in input but found ${inputFiles.length}: ${foundFiles}`,
+              {
+                code: errors.ErrorCodes.USER_FILE_NOT_FOUND,
+              },
+            )
           }
           this.inputFiles.push(...inputFiles)
         }
@@ -85,11 +89,11 @@ export class CreateJobOperation extends BaseOperation<UserOpsCtx, RunAppInput, J
       this.projectId = getProjectToRunApp(user)
     } else {
       const spaceId = getIdFromScopeName(input.scope)
-      const space = await em.findOne(Space, {id: spaceId})
-      const membership = await em.findOne(SpaceMembership, {spaces: spaceId, user: user})
-      if (space == null || membership == null){
-        throw new errors.PermissionError("Unable to execute the app in selected context.",{
-          statusCode: 401
+      const space = await em.findOne(Space, { id: spaceId })
+      const membership = await em.findOne(SpaceMembership, { spaces: spaceId, user: user })
+      if (space == null || membership == null) {
+        throw new errors.PermissionError('Unable to execute the app in selected context.', {
+          statusCode: 401,
         })
       }
       this.projectId = getProjectDxid(space, membership)
@@ -102,7 +106,27 @@ export class CreateJobOperation extends BaseOperation<UserOpsCtx, RunAppInput, J
     // todo: more conditions, user can use the file -> could be the spaces again etc
 
     const repo = this.ctx.em.getRepository(Job)
-    const newJobClientRes = await platformClient.jobCreate(runDxInput)
+    let newJobClientRes: JobCreateResponse
+    try {
+      newJobClientRes = await platformClient.jobCreate(runDxInput)
+    } catch (e) {
+      if (
+        e.message ===
+        'PermissionDenied (401): BillTo for this job\'s project must have the "httpsApp" feature enabled to run this executable'
+      ) {
+        if (runDxInput.project !== user.privateFilesProject) {
+          throw new errors.PermissionError(
+            'The Lead of this Space does not have Workstations permissions for their account, so a Workstation cannot be launched in this Space context.',
+          )
+        } else {
+          throw new errors.PermissionError(
+            'Workstations require additional account permissions. Reach out to precisionFDA support to request this permission.',
+          )
+        }
+      }
+      throw e
+    }
+
     // add all the data to the database
     await em.begin()
     let job: Job
@@ -140,9 +164,13 @@ export class CreateJobOperation extends BaseOperation<UserOpsCtx, RunAppInput, J
       await em.commit()
     } catch (err) {
       await em.rollback()
-      this.ctx.log.error({
-        error: err,
-      }, 'CreateJobOperation: Error creating job')
+      this.ctx.log.error(
+        {
+          error: err,
+        },
+        'CreateJobOperation: Error creating job',
+      )
+
       throw err
     }
 
@@ -151,21 +179,19 @@ export class CreateJobOperation extends BaseOperation<UserOpsCtx, RunAppInput, J
   }
 
   private getAppInputSpec(app: App): AppInputSpecItem[] {
-    const inputSpec: AppInputSpecItem[] = app.spec.input_spec.map(
-      spec => {
-        const appInputSpec: AppInputSpecItem = {
-          name: spec.name,
-          // @ts-ignore
-          class: spec.class,
-          // @ts-ignore
-          default: spec.default,
-          label: spec.label,
-          help: spec.help,
-          optional: spec.optional,
-        }
-        return appInputSpec
-      },
-    )
+    const inputSpec: AppInputSpecItem[] = app.spec.input_spec.map((spec) => {
+      const appInputSpec: AppInputSpecItem = {
+        name: spec.name,
+        // @ts-ignore
+        class: spec.class,
+        // @ts-ignore
+        default: spec.default,
+        label: spec.label,
+        help: spec.help,
+        optional: spec.optional,
+      }
+      return appInputSpec
+    })
     if (!inputSpec || !Array.isArray(inputSpec)) {
       throw new errors.InternalError('Input spec is not set or it is not an array')
     }
@@ -174,14 +200,14 @@ export class CreateJobOperation extends BaseOperation<UserOpsCtx, RunAppInput, J
 
   private getInputFieldNames(app: App): string[] {
     const inputSpec = this.getAppInputSpec(app)
-    const inputSpecFieldNames = inputSpec.map(spec => spec.name)
-    const mandatorySpecFields = inputSpec.filter(spec => !spec.optional)
+    const inputSpecFieldNames = inputSpec.map((spec) => spec.name)
+    const mandatorySpecFields = inputSpec.filter((spec) => !spec.optional)
     const inputFieldNames = Object.keys(this.jobInput)
     // these are set in endpoint payload
     const presentInputFields = intersection(inputFieldNames, inputSpecFieldNames)
     // these are required by app spec and are NOT set in the endpoint payload
     const missingMandatoryInputFields = difference(
-      mandatorySpecFields.map(spec => spec.name),
+      mandatorySpecFields.map((spec) => spec.name),
       inputFieldNames,
     )
 
@@ -206,7 +232,7 @@ export class CreateJobOperation extends BaseOperation<UserOpsCtx, RunAppInput, J
 
   private getDefaultSpecValue(app: App, key: string): string | number {
     const inputSpec = this.getAppInputSpec(app)
-    const value = inputSpec.find(entry => entry.name === key)
+    const value = inputSpec.find((entry) => entry.name === key)
     if (!value) {
       throw new errors.InternalError(`Unknown input spec key ${key}`)
     }
@@ -224,10 +250,10 @@ export class CreateJobOperation extends BaseOperation<UserOpsCtx, RunAppInput, J
     const inputFieldNames = this.getInputFieldNames(app)
 
     const inputs = inputFieldNames.reduce((obj, key) => {
-      const specItem = inputSpec.find(spec => spec.name === key)
+      const specItem = inputSpec.find((spec) => spec.name === key)
       if (specItem?.class === 'file') {
         const fileUid: string = this.jobInput[key]
-        const inputFile = this.inputFiles.find(f => f.uid === fileUid)
+        const inputFile = this.inputFiles.find((f) => f.uid === fileUid)
         if (!inputFile) {
           throw new errors.NotFoundError(`User file uid: ${fileUid} not found`, {
             code: errors.ErrorCodes.USER_FILE_NOT_FOUND,
@@ -249,13 +275,18 @@ export class CreateJobOperation extends BaseOperation<UserOpsCtx, RunAppInput, J
   // Let the worker terminate the job first, then let platform do it (with 5 minutes delay)
   private computeTimeoutPolicyForPlatformInMinutes(): number {
     // value in config is in seconds, platform needs days|hours|minutes
-    const platformTimeoutInMinutes = Math.ceil(Number(config.workerJobs.syncJob.staleJobsTerminateAfter) / 60) + 5
-    const maxPlatformAllowedTimeoutInMinutes =  Math.ceil(MAX_PLATFORM_ALLOWED_TIMEOUT_SECONDS / 60)
+    const platformTimeoutInMinutes =
+      Math.ceil(Number(config.workerJobs.syncJob.staleJobsTerminateAfter) / 60) + 5
+    const maxPlatformAllowedTimeoutInMinutes = Math.ceil(MAX_PLATFORM_ALLOWED_TIMEOUT_SECONDS / 60)
 
     return Math.min(platformTimeoutInMinutes, maxPlatformAllowedTimeoutInMinutes)
   }
 
-  private buildClientApiCall(app: App, jobInput: AnyObject, mappingClass: AnyObject): JobCreateParams {
+  private buildClientApiCall(
+    app: App,
+    jobInput: AnyObject,
+    mappingClass: AnyObject,
+  ): JobCreateParams {
     // shared payload here
     const payload: JobCreateParams = {
       project: this.projectId,
@@ -268,25 +299,25 @@ export class CreateJobOperation extends BaseOperation<UserOpsCtx, RunAppInput, J
       timeoutPolicyByExecutable: {
         [app.dxid]: {
           '*': {
-            minutes: this.computeTimeoutPolicyForPlatformInMinutes()
+            minutes: this.computeTimeoutPolicyForPlatformInMinutes(),
           },
         },
       },
       costLimit: this.input.jobLimit,
       name: this.input.name,
-      input: {...jobInput},
+      input: { ...jobInput },
     }
     for (const field in mappingClass) {
       if (mappingClass[field] === 'file') {
-        const inputFile = this.inputFiles.find(f => f.uid === this.jobInput[field])
+        const inputFile = this.inputFiles.find((f) => f.uid === this.jobInput[field])
         payload.input[field] = {
-          $dnanexus_link: { id: inputFile.dxid, project: inputFile.project }
+          $dnanexus_link: { id: inputFile.dxid, project: inputFile.project },
         }
       } else {
         payload.input[field] = this.jobInput[field].map((fileUid: string) => {
-          const inputFile = this.inputFiles.find(f => f.uid === fileUid)
+          const inputFile = this.inputFiles.find((f) => f.uid === fileUid)
           return {
-            $dnanexus_link: { id: inputFile.dxid, project: inputFile.project }
+            $dnanexus_link: { id: inputFile.dxid, project: inputFile.project },
           }
         })
       }

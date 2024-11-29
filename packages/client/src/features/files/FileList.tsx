@@ -21,7 +21,7 @@ import { cleanObject, getSelectedObjectsFromIndexes, toArrayFromObject } from '.
 import { useAuthUser } from '../auth/useAuthUser'
 import { ActionsDropdownContent } from '../home/ActionDropdownContent'
 import { ActionsRow, QuickActions, StyledHomeTable } from '../home/home.styles'
-import { ActionsButton, FilesListResourceHeader } from '../home/show.styles'
+import { ActionsButton, FilesListResourceHeader, FilesListBreadcrumbHeader } from '../home/show.styles'
 import {
   HomeScope,
   IFilter,
@@ -381,9 +381,9 @@ export const FilesListTable = ({
   return (
     <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd} sensors={sensors} collisionDetection={centerToCursorCollisionDetection}>
       {dndMoveModal.modalComp}
-      <FilesListResourceHeader>
+      <FilesListBreadcrumbHeader>
         <FileBreadcrumb currentFolderId={folderId || 0} basePath={location.pathname} scope={homeScope} metaPath={filesMeta?.path} labelText="You are here:" />
-      </FilesListResourceHeader>
+      </FilesListBreadcrumbHeader>
       <StyledHomeTable>
         <Table<IFile>
           name="files"

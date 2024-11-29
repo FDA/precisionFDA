@@ -7,7 +7,7 @@
   <!-- revision: <%= git_revision %> /-->
   <body data-turbolinks="false">
     <noscript>This website requires JavaScript</noscript>
-    <%# <style>
+    <style>
       .alert {
         padding-left: 32px;
         padding-right: 32px;
@@ -59,7 +59,7 @@
         color: #a94442;
       }
 
-    </style> %>
+    </style>
     <!-- TODO(samuel) temporary workaround for server-side errors, should be migrated to toastify -->
     <%= render partial: "_partials/messages", flash: flash %>
     <script>

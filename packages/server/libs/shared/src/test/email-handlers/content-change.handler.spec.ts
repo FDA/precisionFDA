@@ -1,9 +1,7 @@
 import { database } from '@shared/database'
 import { App } from '@shared/domain/app/app.entity'
 import { Job } from '@shared/domain/job/job.entity'
-import {
-  NotificationPreference
-} from '@shared/domain/notification-preference/notification-preference.entity'
+import { NotificationPreference } from '@shared/domain/notification-preference/notification-preference.entity'
 import { SpaceEvent } from '@shared/domain/space-event/space-event.entity'
 import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
 import { Space } from '@shared/domain/space/space.entity'
@@ -65,7 +63,7 @@ describe('content-change.handler', () => {
       const handler = new ContentChangedEmailHandler(config.emailId, input, ctx)
       const receivers = await handler.determineReceivers()
       expect(receivers).to.have.lengthOf(1)
-      expect(receivers.map(r => r.id)).to.have.all.members([anotherUser.id])
+      expect(receivers.map((r) => r.id)).to.have.all.members([anotherUser.id])
     })
 
     it('other users from the space with active membership', async () => {
@@ -97,7 +95,7 @@ describe('content-change.handler', () => {
       const handler = new ContentChangedEmailHandler(config.emailId, input, ctx)
       const receivers = await handler.determineReceivers()
       expect(receivers).to.have.lengthOf(1)
-      expect(receivers.map(r => r.id)).to.have.all.members([anotherUser.id])
+      expect(receivers.map((r) => r.id)).to.have.all.members([anotherUser.id])
     })
 
     it('prefix has to match users space role', async () => {

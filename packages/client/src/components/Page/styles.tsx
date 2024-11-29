@@ -1,6 +1,6 @@
 import styled, { css } from 'styled-components'
 import { commonStyles } from '../../styles/commonStyles'
-import { breakPoints, padding } from '../../styles/theme'
+import { breakPoints } from '../../styles/theme'
 import { Svg } from '../icons/Svg'
 
 export const compactScrollBar = css`
@@ -103,6 +103,7 @@ export const Refresh = styled.span<{ $spin?: boolean }>`
   display: flex;
   align-items: center;
   cursor: pointer;
+  margin-right: 8px;
 
   ${Svg} {
     animation-name: ${({ $spin }) => ($spin ? 'spin' : 'none')};

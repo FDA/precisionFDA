@@ -178,7 +178,7 @@ module Api
       # https_apps_client.propose_challenge(proposal)
 
       if @context.logged_in? || verify_captcha_assessment(params[:captchaValue], "propose")
-        NotificationsMailer.challenge_proposal_received(proposal).deliver_now
+        https_apps_client.email_send(NotificationPreference.email_types[:challenge_proposal_received], [], proposal)
         render json: {}
       else
         raise ApiError,

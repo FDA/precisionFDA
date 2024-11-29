@@ -33,6 +33,11 @@ COPY ./docker/misc/gsrs/context.xml /usr/local/tomcat/conf/context.xml
 # Script to switch between frontend built from the users source code and prebuilt FE
 COPY ./docker/misc/gsrs/switch-frontend.sh /switch-frontend.sh
 RUN chmod +x /switch-frontend.sh
+# Script to run specific version of GSRS from gsrs-play-dist repo
+COPY ./docker/misc/gsrs/run-version.sh /run-version.sh
+RUN mkdir /gsrs-conf
+COPY ./docker/misc/gsrs/config/* /gsrs-conf/
+RUN chmod +x /run-version.sh
 
 WORKDIR /usr/local/tomcat/webapps
 RUN git clone -b $GSRS_BRANCH https://github.com/dnanexus/gsrs-play-dist.git .
