@@ -44,6 +44,11 @@ const StyledTextarea = styled.textarea`
   resize: none;
   box-sizing: border-box;
   font-size: 12.5px;
+
+  &:disabled {
+    background-color: var(--tertiary-100);
+    color: var(--tertiary-600);
+  }
 `
 const ContentWrapper = styled.div`
   padding: 12px 24px;

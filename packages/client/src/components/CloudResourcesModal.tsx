@@ -14,25 +14,34 @@ const StyledTable = styled.table`
   width: 100%;
 `
 
+const StyledTr = styled.tr`
+  ${({ $main }) => $main && css`
+    font-weight: bold;
+    background-color: var(--tertiary-100);
+  `}
+`
+
 const StyledHeaderCell = styled.th`
-  background-color: ${theme.colors.darkBlue};
-  color: ${theme.colors.textWhite};
-  text-align: center;
+  text-align: left;
+  padding: 0 20px;
+  font-weight: bold;
+  line-height: 26px;
+  border-bottom: 1px solid var(--c-layout-border);
 `
 const StyledBodyCell = styled.td<{
   $bold?: boolean,
   $textAlign: 'left' | 'right'
   $bgColor: string
 }>`
+  line-height: 32px;
+
   ${({ $bold }) => $bold && css`
     font-weight: bold;
+    background-color: var(--tertiary-200);
   `}
-  ${({ $textAlign, $bgColor }) => (
-    css`
-      text-align: ${$textAlign};
-      background-color: ${$bgColor};
-    `
-  )}
+  ${({ $textAlign, $bgColor }) => css`
+    text-align: ${$textAlign};
+  `}
   padding: 0 20px;
 `
 
@@ -88,7 +97,7 @@ const CloudUsageReport = ({ stats }: CloudUsageReportProps) => {
       </thead>
       <tbody>
         {tableBodyConfig.map((row, index) => (
-          <tr key={row.resource}>
+          <StyledTr key={row.resource} $main={row.bold}>
             <StyledBodyCell $bold={row.bold} $textAlign='left' $bgColor={
               index % 2 === 0 ? colors.borderDefault : colors.backgroundLightGray
             }>
@@ -99,7 +108,7 @@ const CloudUsageReport = ({ stats }: CloudUsageReportProps) => {
             }>
               {`$${row.usage.toFixed(2)}`}
             </StyledBodyCell>
-          </tr>
+          </StyledTr>
         ))}
       </tbody>
     </StyledTable>
@@ -117,7 +126,7 @@ export const CloudResourceModal = ({ isShown, hide }: Props) => {
     >
       <ModalHeaderTop
         disableClose={false}
-        headerText="Cloud usage report"
+        headerText="Cloud Usage Report"
         hide={hide}
       />
       {query.isLoading && <Loader height={14} />}

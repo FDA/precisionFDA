@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useEffect, useState } from 'react'
+import React, { createContext, useContext, useEffect } from 'react'
+import { ThemeProvider } from 'styled-components'
 import { useLocalStorage } from '../hooks/useLocalStorage'
 
 type Theme = 'light' | 'dark'
@@ -7,17 +8,17 @@ type ThemeContextType = {
   toggleTheme: () => void
 }
 
-const ThemeContext = createContext<ThemeContextType | undefined>(undefined)
+const ColorModeContext = createContext<ThemeContextType | undefined>(undefined)
 
 export const useTheme = () => {
-  const context = useContext(ThemeContext)
+  const context = useContext(ColorModeContext)
   if (!context) {
     throw new Error('useTheme must be used within a ThemeProvider')
   }
   return context
 }
 
-export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
+export const ColorModeProvider = ({ children }: { children: React.ReactNode }) => {
   const [theme, setTheme] = useLocalStorage<Theme>(
     'theme',
     'light',
@@ -54,5 +55,5 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }, [theme])
 
-  return <ThemeContext.Provider value={{ theme, toggleTheme }}>{children}</ThemeContext.Provider>
+  return <ColorModeContext.Provider value={{ theme, toggleTheme }}><ThemeProvider theme={{ colorMode: theme }}>{children}</ThemeProvider></ColorModeContext.Provider>
 }

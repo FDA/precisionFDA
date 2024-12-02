@@ -72,6 +72,8 @@ export const Title = styled.div`
   font-weight: bold;
   align-items: center;
   margin: 16px 0;
+  margin-right: 16px;
+  margin-bottom: 8px;
   gap: 8px;
 `
 
@@ -85,9 +87,8 @@ export const Topbox = styled.div`
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
-  padding-left: 16px;
+  padding-left: 32px;
   padding-right: 16px;
-  gap: 16px;
 `
 
 const StyledTable = styled.div`
@@ -98,10 +99,10 @@ const StyledTable = styled.div`
 
   ${ReactTableStyles} {
     margin-inline: auto;
-    width: min(100% - 32px, 100%);
+    /* width: min(100% - 32px, 100%); */
     font-size: 14px;
     .table {
-      border-left: 1px solid #d5d5d5;
+
       .tr {
         height: 56px;
         .td {

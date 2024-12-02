@@ -245,7 +245,7 @@ export const useAssetActions = ({ homeScope, selectedItems, resourceKeys, resetS
     'Edit properties': {
       type: 'modal',
       func: () => setPropertiesModal(true),
-      isDisabled: false,
+      isDisabled: selected.length === 0,
       modal: propertiesModal,
       showModal: isShownPropertiesModal,
       shouldHide: (!isAdmin && selected[0]?.added_by !== user?.full_name),

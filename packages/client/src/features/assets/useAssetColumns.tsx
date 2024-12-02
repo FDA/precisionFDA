@@ -9,7 +9,6 @@ import {
 import { StyledTagItem, StyledTags } from '../../components/Tags'
 import { FileZipIcon } from '../../components/icons/FileZipIcon'
 import { ObjectGroupIcon } from '../../components/icons/ObjectGroupIcon'
-import { colors } from '../../styles/theme'
 import { StyledLinkCell, StyledNameCell } from '../home/home.styles'
 import { KeyVal } from '../home/types'
 import { IAsset } from './assets.types'
@@ -42,8 +41,7 @@ export const useAssetColumns = ({
             data-tooltip-content={`Asset is in ${cell.row.original.state} state. Please refresh the list momentarily to update its status.`}
             color={
               isUnclosedAsset(cell.row.original)
-                ? colors.stateLabelGrey
-                : colors.primaryBlue
+                ? 'var(--tertiary-600)' : 'var(--c-link)'
             }
             onClick={
               () => handleRowClick(cell.row.original.uid.toString())

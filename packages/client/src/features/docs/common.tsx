@@ -1,15 +1,6 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
-import styled from 'styled-components'
-import { theme } from '../../styles/theme'
-
-const StyledOutdatedDocs = styled.div`
-  color: ${theme.colors.hoverDarkRed};
-  background-color: #fddbdc;
-  padding: 16px;
-  border-radius: 4px;
-  margin-bottom: 32px;
-`
+import { StyledOutdatedDocs } from './styles'
 
 export const OutdatedDocsApps = () => {
   return <StyledOutdatedDocs>

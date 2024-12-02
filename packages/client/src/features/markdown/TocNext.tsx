@@ -61,13 +61,16 @@ export const TocPanel = styled.div`
   padding-right: 2px;
   background-color: var(--tertiary-100);
   ${compactScrollBarV2}
-  position: sticky;
   top: 32px;
   overflow-y: scroll;
-  max-height: calc(80vh - 100px);
   box-shadow: 0 6px 6px rgb(0 0 0 / 8%);
   border-radius: 3px;
   margin-bottom: 20px;
+  
+  @media (min-width: ${breakPoints.large}px) {
+    position: sticky;
+    max-height: calc(80vh - 100px);
+  }
 `
 
 export interface IToCItem {
