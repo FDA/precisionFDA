@@ -5,14 +5,12 @@ import { UserLayout } from '../../../layouts/UserLayout'
 import { AdminIcon } from '../../../components/icons/AdminIcon'
 import { UsersIcon } from '../../../components/icons/UsersIcon'
 import { BullsEyeIcon } from '../../../components/icons/BullsEyeIcon'
-import { commonStyles } from '../../../styles/commonStyles'
 import { ChartColumnIcon } from '../../../components/icons/ChartColumnIcon'
 import { BellIcon } from '../../../components/icons/BellIcon'
 import LinkButton from './LinkButton'
 import { HandshakeIcon } from '../../../components/icons/HandshakeIcon'
 import { ChartLineIcon } from '../../../components/icons/ChartLineIcon'
 import { NewspaperIcon } from '../../../components/icons/NewspaperIcon'
-import { colors, fontWeight } from '../../../styles/theme'
 import { fetchAdminStats } from '../admin.api'
 import { Loader } from '../../../components/Loader'
 
@@ -20,57 +18,53 @@ import { Loader } from '../../../components/Loader'
 const PageHeader = styled.div`
   margin: 0;
   padding: 20px 16px;
-  background-color: ${colors.subtleBlue};
-  color: ${colors.darkGreyOnGrey};
-  border-bottom: 1px solid ${colors.shadedBg};
+  border-bottom: 1px solid var(--c-layout-border);
 `
 
 export const TopLeft = styled.div`
-  ${commonStyles.pageTitle};
+  font-size: 24px;
   display: flex;
   align-items: center;
   gap: 8px;
 `
 
 const Infoframe = styled.div`
-  background-color: ${colors.subtleBlue};
   outline-offset: -15px;
-  outline: 1px solid ${colors.textLightGrey};
+  outline: 1px solid var(--c-layout-border);
   padding: 19px 30px 20px;
 `
 
 const InfoframeTitle = styled.h4`
-    position: relative;
-    top: -0.8em;
-    margin-left: 0em;
-    display: inline;
-    background-color: ${colors.subtleBlue};
-    padding-top: 5px;
-    padding-left: 5px;
-    padding-right: 5px;
+  position: relative;
+  top: -0.8em;
+  margin-left: 0em;
+  display: inline;
+  background-color: var(--background);
+  padding-top: 5px;
+  padding-left: 5px;
+  padding-right: 5px;
 `
 
 const InfoTable = styled.table`
-  border: 1px solid ${colors.textLightGrey};
+  border: 1px solid var(--c-layout-border);
   margin-bottom: 10px;
   border-spacing: 0px;
 `
 
 const InfoTableTh = styled.th`
   padding: 6px 15px 4px;
-  background-color: white;
   text-transform: uppercase;
-  color: ${colors.inactiveBlue};
-  font-weight: ${fontWeight.light};
-  border-right: 1px solid ${colors.textLightGrey};
+  color: var(--c-text-300);
+  font-weight: 300;
+  border-right: 1px solid var(--c-layout-border);;
 `
 
 const InfoTableTd = styled.td`
-  background-color: white;
   padding: 2px 15px 6px;
   margin-bottom: 0;
   line-height: 1.3;
-  border-right: 1px solid ${colors.textLightGrey};
+  min-height: 16px;
+  border-right: 1px solid var(--c-layout-border);
 `
 
 const ButtonBar = styled.div`
@@ -88,7 +82,7 @@ export function AdminDashboard() {
     <UserLayout mainScroll>
       <PageHeader>
         <TopLeft>
-          <ChartColumnIcon height={30} />Admin Dashboard
+          <ChartColumnIcon height={24} />Admin Dashboard
         </TopLeft>
       </PageHeader>
       <Infoframe>

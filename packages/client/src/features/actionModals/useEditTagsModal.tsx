@@ -22,7 +22,7 @@ const StyledForm = styled.form`
 
 const StyledSubtext = styled.div`
   font-size: 12px;
-  color: #6f6d6d;
+  color: var(--c-text-500);
 `
 
 async function editTagsRequest({

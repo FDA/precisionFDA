@@ -232,6 +232,7 @@ export const UsersListActionRow = ({
           selectedUsers.length === 0 || !areAllSelectedUsersInLockedState
         }
         onClick={() => unlockMutation.mutateAsync()}
+        style={{ marginRight: 16 }}
       >
         <UnlockIcon height={12} />
         &nbsp;Unlock

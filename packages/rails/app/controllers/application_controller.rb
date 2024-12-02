@@ -52,15 +52,19 @@ class ApplicationController < ActionController::Base
       end
 
       cookies = request.cookies
+      forward_header = {}
+
       if cookies.present?
-        forward_header = {
-          Cookie: cookies.to_hash.map { |k, v| "#{k}=#{v}" }.join(";"),
-          "x-csrf-token": request.headers["X-CSRF-Token"],
-        }.compact_blank
-      else
-        auth_key = request.headers["Authorization"]
-        forward_header = { Authorization: auth_key }.compact_blank if auth_key.present?
+        forward_header[:Cookie] = cookies.to_hash.map { |k, v| "#{k}=#{v}" }.join(";")
+        csrf_token = request.headers["X-CSRF-Token"]
+        csrf_token ||= unsafe_params[:authenticity_token]
+        forward_header["x-csrf-token"] = csrf_token if csrf_token.present?
       end
+
+      auth_key = request.headers["Authorization"]
+      forward_header[:Authorization] = auth_key if auth_key.present?
+
+      forward_header.compact_blank!
       RequestContext.begin_request(user_id, username, token, forward_header)
       yield
     ensure

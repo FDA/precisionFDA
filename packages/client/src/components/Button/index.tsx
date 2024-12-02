@@ -66,8 +66,8 @@ export const Button = styled.button.attrs(({ disabled }) => ({ 'aria-disabled': 
   }
 
   &[data-variant='success'] {
-    border-color: var(--success-700);
-    background: var(--success-600);
+    border-color: var(--success-500);
+    background: var(--success-400);
     color: hsl(0, 0%, 97%);
     &:hover {
       filter: brightness(94%);
@@ -75,7 +75,7 @@ export const Button = styled.button.attrs(({ disabled }) => ({ 'aria-disabled': 
     &:active {
       box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.26);
       filter: brightness(93%);
-      border-color: var(--success-600);
+      border-color: var(--success-400);
     }
   }
 

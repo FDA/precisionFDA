@@ -7,6 +7,7 @@ export const InfoRow = styled.div`
   justify-content: center;
   align-items: center;
   gap: 16px;
+  margin: 64px 0;
 `
 
 export const ViewAllButton = styled.div`
@@ -28,7 +29,6 @@ export const Hr = styled.div`
 export const CommunityParticipants = styled.div`
   background-color: var(--tertiary-100);
   margin: 0;
-  margin-bottom: 64px;
   padding: 32px 0;
   text-align: center;
   color: var(--base);

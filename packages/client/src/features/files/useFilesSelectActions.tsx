@@ -471,7 +471,7 @@ export const useFilesSelectActions = ({
     'Edit properties': {
       type: 'modal',
       func: () => setPropertiesModal(true),
-      isDisabled: openSelected || selected.some(e => e.locked),
+      isDisabled: openSelected || selected.length === 0 || selected.some(e => e.locked),
       modal: propertiesModal,
       showModal: isShownPropertiesModal,
       shouldHide: (!isAdmin && selected[0]?.added_by !== user?.full_name) || homeScope === 'spaces',

@@ -2,7 +2,7 @@ import { format } from 'date-fns'
 import React from 'react'
 import { Link, Navigate } from 'react-router-dom'
 import { Tooltip } from 'react-tooltip'
-import styled from 'styled-components'
+import styled, { css } from 'styled-components'
 import { StringParam, useQueryParam } from 'use-query-params'
 import { ArrowLeftIcon } from '../../components/icons/ArrowLeftIcon'
 import { GlobeIcon } from '../../components/icons/GlobeIcon'
@@ -22,11 +22,11 @@ import { ButtonRow } from '../modal/styles'
 const StyledCard = styled.div`
   display: flex;
   justify-content: space-between;
-  border: 1px solid #777;
+  border: 1px solid var(--c-layout-border-200);
   gap: 12px;
   padding: 16px;
   flex: 1;
-  background-color: white;
+  background-color: var(--tertiary-50);
   align-items: center;
 `
 
@@ -87,7 +87,10 @@ const TypeSelect = styled(TransparentButton)<{ selected: boolean}>`
   padding: 4px 8px;
   display: flex;
   align-items: center;
-  ${props => props.selected && 'background-color: #eee;'}
+  ${props => props.selected && css`
+    background-color: var(--primary-500);
+    color: white;
+  `}
 `
 
 const TipIcon = ({

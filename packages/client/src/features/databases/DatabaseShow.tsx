@@ -29,6 +29,7 @@ import { fetchDatabaseRequest } from './databases.api'
 import { IDatabase } from './databases.types'
 import { useDatabaseSelectActions } from './useDatabaseSelectActions'
 import { EmmitScope, HomeScope } from '../home/types'
+import { Button } from '../../components/Button'
 
 const renderOptions = (db: IDatabase, homeScope?: HomeScope) => (
   <MetadataSection>
@@ -167,9 +168,14 @@ export const DatabaseShow = ({ emitScope, homeScope }: { homeScope?: HomeScope, 
           </HeaderLeft>
           <div>
             <StyledRight>
-              {data.status !== 'terminated' && <Refresh $spin={isFetching} onClick={() => refetch()}>
-                <SyncIcon/>
-              </Refresh>}
+              {data.status !== 'terminated' && (
+                <Button onClick={() => refetch()} disabled={isFetching}>
+                  <Refresh $spin={isFetching}>
+                    <SyncIcon/>
+                  </Refresh>
+                  Refresh
+                </Button>
+              )}
               {<DetailActionsDropdown db={data} refetch={refetch}/>}
             </StyledRight>
           </div>

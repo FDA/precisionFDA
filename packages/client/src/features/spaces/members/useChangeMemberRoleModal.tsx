@@ -4,7 +4,6 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import React from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { useNavigate } from 'react-router-dom'
-import Select from 'react-select'
 import { toast } from 'react-toastify'
 import * as Yup from 'yup'
 import { Button } from '../../../components/Button'
@@ -18,6 +17,7 @@ import { useModal } from '../../modal/useModal'
 import { changeMembershipRoleRequest } from './members.api'
 import { StyledFields, StyledFooter } from './members.styles'
 import { MemberRole, SpaceMembership } from './members.types'
+import { Select } from '../../../components/Select'
 
 interface FormValues {
   role: { label: string; value: MemberRole }

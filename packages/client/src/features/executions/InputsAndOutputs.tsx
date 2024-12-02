@@ -20,7 +20,7 @@ const StyledIOTable = styled.div`
     width: 100%;
     border-collapse: separate;
     border-spacing: 0px;
-    border-bottom: 1px solid #e0e0e0;
+    border-bottom: 1px solid var(--tertiary-300);
   }
 
   th {
@@ -41,7 +41,7 @@ const StyledIOTable = styled.div`
   tr {
     th {
       font-family: 'Courier New', monospace;
-      border-bottom: 1px solid #e0e0e0;
+      border-bottom: 1px solid var(--tertiary-300);
     }
   }
   td {

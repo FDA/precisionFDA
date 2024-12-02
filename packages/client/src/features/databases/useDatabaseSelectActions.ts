@@ -205,7 +205,7 @@ export const useDatabaseSelectActions = (selectedItems: IDatabase[], resourceKey
     'Edit properties': {
       type: 'modal',
       func: () => setPropertiesModal(true),
-      isDisabled: false,
+      isDisabled: selected.length === 0,
       modal: propertiesModal,
       showModal: isShownPropertiesModal,
     },

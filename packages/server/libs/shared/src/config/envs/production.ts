@@ -1,4 +1,4 @@
-import { ConfigOverride, parseIntFromProcess } from '..'
+import { ConfigOverride, defaultConfig, parseIntFromProcess } from '..'
 import { parseIpv4Cidr } from '../../validation/parsers'
 import { MAX_JOB_DURATION_SECONDS } from '../constants'
 
@@ -59,4 +59,5 @@ export const config: ConfigOverride = () => ({
       isEnabled: false,
     },
   },
+  challengeProposalRecipients: [defaultConfig.pfdaEmail, defaultConfig.supportEmail],
 })

@@ -98,10 +98,10 @@ export const Li = styled.li`
   padding: 4px 16px;
   white-space: nowrap;
   &:hover {
-    background-color: ${colors.white110};
+    background-color: var(--c-dropdown-hover-bg);
   }
   a {
-    color: var(--c-text-700);
+    color: initial;
   }
 `
 
@@ -112,9 +112,8 @@ export const Ol = styled.ol`
   font-size: 14px;
   width: min-content;
   max-height: 350px;
-  background-color: #fff;
-  border: 1px solid #ccc;
-  border: 1px solid rgba(0, 0, 0, 0.15);
+  border: 1px solid var(--c-dropdown-menu-border, transparent);
+  background-color: var(--c-dropdown-bg);
   border-radius: 3px;
   box-shadow: 0 6px 12px rgb(0 0 0 / 18%);
 `
