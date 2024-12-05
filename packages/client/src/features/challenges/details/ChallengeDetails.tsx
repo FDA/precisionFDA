@@ -30,6 +30,7 @@ import { CallToActionButton, NoInfo, StyledTabs } from './styles'
 import { setTocFromRef, ToC, IToCItem } from '../../markdown/TocNext'
 import { AddIdsToHeaders } from '../../../components/Markdown/AddIdsToHeaders'
 import { Button } from '../../../components/Button'
+import { MDStyles } from '../../../components/Markdown/styles'
 
 export const ChallengeDetails = ({
   challenge,
@@ -136,7 +137,7 @@ export const ChallengeDetails = ({
       tabs.push({
         title: 'PRE-REGISTRATION',
         subroute: '',
-        content: <AddIdsToHeaders docRef={docRef} content={preRegistrationContent} />,
+        content: <MDStyles><AddIdsToHeaders docRef={docRef} content={preRegistrationContent} /></MDStyles>,
       })
     }
   }
@@ -147,7 +148,7 @@ export const ChallengeDetails = ({
       tabs.push({
         title: 'INTRODUCTION',
         subroute: '',
-        content: <AddIdsToHeaders docRef={docRef} content={introductionContent} />,
+        content: <MDStyles><AddIdsToHeaders docRef={docRef} content={introductionContent} /></MDStyles>,
       })
     }
   }
@@ -186,7 +187,7 @@ export const ChallengeDetails = ({
       tabs.push({
         title: 'RESULTS',
         subroute: '/results',
-        content: <AddIdsToHeaders docRef={docRef} content={resultsContent} />,
+        content: <MDStyles><AddIdsToHeaders docRef={docRef} content={resultsContent} /></MDStyles>,
       })
     }
   }
