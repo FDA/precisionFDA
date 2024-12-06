@@ -9,6 +9,8 @@ import { entityTypeToLinkProviderMapProvider } from '@shared/domain/entity/entit
 import { UIdScopedEntityLinkProvider } from '@shared/domain/entity/entity-link/u-id-scoped-entity-link-provider'
 import { UserEntityLinkProvider } from '@shared/domain/entity/entity-link/user-entity-link.provider'
 import { PlatformClientModule } from '@shared/platform-client/platform-client.module'
+import { AnswerEntityLinkProvider } from '@shared/domain/entity/entity-link/answer-entity-link.provider'
+import { CommentEntityLinkProvider } from '@shared/domain/entity/entity-link/comment-entity-link.provider'
 
 @Module({
   imports: [PlatformClientModule],
@@ -20,6 +22,8 @@ import { PlatformClientModule } from '@shared/platform-client/platform-client.mo
     DiscussionEntityLinkProvider,
     FolderEntityLinkProvider,
     NoteEntityLinkProvider,
+    AnswerEntityLinkProvider,
+    CommentEntityLinkProvider,
     entityTypeToLinkProviderMapProvider,
     EntityLinkService,
   ],

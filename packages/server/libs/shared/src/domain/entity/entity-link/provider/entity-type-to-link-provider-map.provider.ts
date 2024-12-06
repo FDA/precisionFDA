@@ -8,6 +8,8 @@ import { FolderEntityLinkProvider } from '@shared/domain/entity/entity-link/fold
 import { NoteEntityLinkProvider } from '@shared/domain/entity/entity-link/note-entity-link.provider'
 import { UIdScopedEntityLinkProvider } from '@shared/domain/entity/entity-link/u-id-scoped-entity-link-provider'
 import { UserEntityLinkProvider } from '@shared/domain/entity/entity-link/user-entity-link.provider'
+import { AnswerEntityLinkProvider } from '@shared/domain/entity/entity-link/answer-entity-link.provider'
+import { CommentEntityLinkProvider } from '@shared/domain/entity/entity-link/comment-entity-link.provider'
 
 export const ENTITY_TYPE_TO_LINK_PROVIDER_MAP = 'ENTITY_TYPE_TO_LINK_PROVIDER_MAP'
 
@@ -21,6 +23,8 @@ export const entityTypeToLinkProviderMapProvider: Provider = {
     DiscussionEntityLinkProvider,
     FolderEntityLinkProvider,
     NoteEntityLinkProvider,
+    AnswerEntityLinkProvider,
+    CommentEntityLinkProvider,
   ],
   useFactory: (
     uidScoped: UIdScopedEntityLinkProvider,
@@ -30,6 +34,8 @@ export const entityTypeToLinkProviderMapProvider: Provider = {
     discussion: DiscussionEntityLinkProvider,
     folder: FolderEntityLinkProvider,
     note: NoteEntityLinkProvider,
+    answer: AnswerEntityLinkProvider,
+    comment: CommentEntityLinkProvider,
   ): { [T in UiLinkableEntityType]: EntityLinkProvider<T> } => {
     return {
       user,
@@ -38,6 +44,8 @@ export const entityTypeToLinkProviderMapProvider: Provider = {
       folder,
       note,
       dbcluster,
+      answer,
+      comment,
       file: uidScoped,
       app: uidScoped,
       job: uidScoped,

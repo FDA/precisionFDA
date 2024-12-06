@@ -32,7 +32,7 @@ import (
 	"github.com/manifoldco/promptui"
 )
 
-const userAgent = "precisionFDA CLI/2.7.3 "
+const userAgent = "precisionFDA CLI/2.8.0 "
 const defaultNumRoutines = 10
 const defaultChunkSize = 1 << 26 // default 64MB (min. 16MB)
 const minRoutines = 1
@@ -74,6 +74,10 @@ type IPFDAClient interface {
 	Rm(args []string, folderID string, spaceID string) error
 	Head(arg string, lines int) error
 	GetScope() error
+	CreateDiscussion(spaceID string, jsonBody string) error
+	CreateReply(jsonBody string) error
+	EditDiscussion(jsonBody string) error
+	EditReply(jsonBody string) error
 	RefreshToken(autoRefresh bool) (string, error)
 	GetLatestVersion() (string, error)
 	SetChunkSize(chunkSize int)
@@ -797,13 +801,9 @@ func (c *PFDAClient) FileViewLink(arg string, preauthenticated bool, duration in
 func (c *PFDAClient) DescribeEntity(entityID string) error {
 	apiURL := fmt.Sprintf("%s/api/v2/cli/%s/describe", c.BaseURL, entityID)
 
-	status, body, err := c.makeRequestFail("GET", apiURL, nil)
+	_, body, err := c.makeRequest("GET", apiURL, nil)
 	if err != nil {
-		if status == "404 Not Found" {
-			return fmt.Errorf("%s not found - please check that it does exist and you have access to it", entityID)
-		} else {
-			return err
-		}
+		return err
 	}
 
 	var resultJSON map[string]interface{}
@@ -1078,7 +1078,7 @@ func (c *PFDAClient) RefreshToken(autoRefresh bool) (string, error) {
 func (c *PFDAClient) GetLatestVersion() (string, error) {
 	apiURL := fmt.Sprintf("%s/api/v2/cli/version/latest", c.BaseURL)
 
-	_, body, err := c.makeRequestFail("GET", apiURL, nil)
+	_, body, err := c.makeRequest("GET", apiURL, nil)
 	if err != nil {
 		return "", err
 	}
@@ -1314,6 +1314,7 @@ func (c *PFDAClient) initWaitGroup(fileID string, chunkPool <-chan uploadChunk, 
 	return
 }
 
+// Deprecated: This method is not handling errors correctly, use makeRequest instead.
 func (c *PFDAClient) makeRequestFail(requestType string, url string, data []byte) (status string, body []byte, err error) {
 	req, err := retryablehttp.NewRequest(requestType, url, bytes.NewReader(data))
 	helpers.CheckErr(err)

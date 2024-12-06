@@ -6,8 +6,8 @@ import {
   type DiscussionAttachment,
   UserDTO,
 } from '@shared/domain/discussion/discussion.types'
+import { AttachableEntityType } from '@shared/domain/discussion/model/attachable-entity.type'
 import { DiscussionService } from '@shared/domain/discussion/services/discussion.service'
-import { EntityType } from '@shared/domain/entity/domain/entity.type'
 import {
   SpaceReportPartDiscussionResult,
   SpaceReportPartDiscussionResultAnswer,
@@ -21,7 +21,7 @@ import { SpaceReportPartResultProvider } from './space-report-part-result.provid
 export class SpaceReportPartDiscussionResultProviderService extends SpaceReportPartResultProvider<'discussion'> {
   private readonly ATTACHMENT_TYPE_TO_ENTITY_TYPE_MAP: Record<
     DiscussionAttachment['type'],
-    EntityType
+    AttachableEntityType
   > = {
     App: 'app',
     UserFile: 'file',

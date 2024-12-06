@@ -1,6 +1,6 @@
-import { EntityType } from '@shared/domain/entity/domain/entity.type'
+import { EntityIconType } from '@shared/domain/entity/entity-icon/entity-icon.type'
 
-export interface EntityProvenanceData<T extends EntityType> {
+export interface EntityProvenanceData<T extends EntityIconType> {
   type: T
   title: string
   url: string
