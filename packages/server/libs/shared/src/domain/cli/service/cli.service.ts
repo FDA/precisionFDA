@@ -6,6 +6,7 @@ import {
   CliDiscussionDescribeDTO,
   CliExecutionDescribeDTO,
   CliFileDescribeDTO,
+  CliFolderDescribeDTO,
   CliWorkflowDescribeDTO,
 } from '@shared/domain/cli/dto/CliDescribeDTO'
 import { CliDiscussionDTO } from '@shared/domain/cli/dto/CliDiscussionDTO'
@@ -13,6 +14,7 @@ import { CliNodeSearchDTO } from '@shared/domain/cli/dto/CliNodeSearchDTO'
 import { CliSpaceMemberDTO } from '@shared/domain/cli/dto/CliSpaceMemberDTO'
 import {
   AnswerDTO,
+  CommentDTO,
   DiscussionAttachment,
   DiscussionDTO,
 } from '@shared/domain/discussion/discussion.types'
@@ -35,6 +37,17 @@ import { STATIC_SCOPE } from '@shared/enums'
 import { InvalidStateError, NotFoundError, PermissionError } from '@shared/errors'
 import { PlatformClient } from '@shared/platform-client'
 import { SCOPE } from '@shared/types/common'
+import { CliCreateDiscussionDTO } from '@shared/domain/cli/dto/cli-create-discussion.dto'
+import { Asset } from '@shared/domain/user-file/asset.entity'
+import { CliCreateReplyDTO } from '@shared/domain/cli/dto/cli-create-reply.dto'
+import { Discussion } from '@shared/domain/discussion/discussion.entity'
+import { Answer } from '@shared/domain/answer/answer.entity'
+import { CliEditDiscussionDTO } from '@shared/domain/cli/dto/cli-edit-discussion.dto'
+import { CliEditReplyDTO } from '@shared/domain/cli/dto/cli-edit-reply.dto'
+import { Comment } from '@shared/domain/comment/comment.entity'
+import { CliAttachmentsDTO } from '@shared/domain/cli/dto/cli-attachments.dto'
+import { EntityLinkService } from '@shared/domain/entity/entity-link/entity-link.service'
+import { getNodePath } from '@shared/domain/user-file/user-file.helper'
 
 @Injectable()
 export class CliService {
@@ -44,6 +57,7 @@ export class CliService {
     private readonly entityFetcherService: EntityFetcherService,
     private readonly discussionService: DiscussionService,
     private readonly platformClient: PlatformClient,
+    private readonly entityLinkService: EntityLinkService,
   ) {}
 
   /**
@@ -63,6 +77,8 @@ export class CliService {
         return await this.describeExecution(uid as Uid<'job'>)
       case 'discussion':
         return await this.describeDiscussion(parseInt(uid.split('-')[1]))
+      case 'folder':
+        return await this.describeFolder(parseInt(uid.split('-')[1]))
       default:
         throw new InvalidStateError('Unsupported entity type!')
     }
@@ -90,7 +106,16 @@ export class CliService {
 
     await file.properties.loadItems()
 
-    return CliFileDescribeDTO.mapToDTO(describeFile, file)
+    return CliFileDescribeDTO.fromEntity(describeFile, file)
+  }
+
+  private async describeFolder(id: number) {
+    const folder = await this.entityFetcherService.getAccessibleById(Folder, id)
+    if (!folder) {
+      throw new NotFoundError('Folder not found or not accessible')
+    }
+    const path = await getNodePath(this.em, folder)
+    return CliFolderDescribeDTO.fromEntity(folder, path)
   }
 
   private async describeWorkflow(uid: Uid<'workflow'>) {
@@ -102,7 +127,7 @@ export class CliService {
       dxid: workflow.dxid,
     })
 
-    return CliWorkflowDescribeDTO.mapToDTO(platformWorkflowData, workflow)
+    return CliWorkflowDescribeDTO.fromEntity(platformWorkflowData, workflow)
   }
 
   private async describeApp(entityId: Uid<'app'>) {
@@ -114,7 +139,7 @@ export class CliService {
       dxid: app.dxid,
     })
 
-    return CliAppDescribeDTO.mapToDTO(platformAppData, app)
+    return CliAppDescribeDTO.fromEntity(platformAppData, app)
   }
 
   private async describeExecution(entityId: Uid<'job'>) {
@@ -138,51 +163,61 @@ export class CliService {
         }
         throw err
       })
-    return CliExecutionDescribeDTO.mapToDTO(platformExecutionData, execution)
+    return CliExecutionDescribeDTO.fromEntity(platformExecutionData, execution)
   }
 
   async describeDiscussion(discussionId: number) {
     const discussion = await this.discussionService.getDiscussion(discussionId)
-    const attachments = await this.discussionService.getAttachments(discussion.note.id)
+    const attachments = await this.fetchAttachments(discussion.note.id)
 
     const result: CliDiscussionDescribeDTO = {
       id: discussion.id,
       title: discussion.note.title,
       content: discussion.note.content,
       user: discussion.user,
-      comments: discussion.comments,
+      comments: this.mapComments(discussion.comments),
       commentsCount: discussion.commentsCount,
       createdAt: discussion.createdAt,
       updatedAt: discussion.updatedAt,
-      answers: await Promise.all(
-        discussion.answers.map(async (answer: AnswerDTO) => {
-          return {
-            ...answer,
-            attachments: await this.discussionService
-              .getAttachments(answer.note.id)
-              .then((attachments) => {
-                return attachments.map((attachment: DiscussionAttachment) => {
-                  return {
-                    uid: attachment.uid,
-                    type: attachment.type,
-                    name: attachment.name,
-                  }
-                })
-              }),
-          }
-        }),
-      ),
+      answers: await this.mapAnswers(discussion.answers),
       answersCount: discussion.answersCount,
-      attachments: attachments.map((attachment: DiscussionAttachment) => {
-        return {
-          uid: attachment.uid,
-          type: attachment.type,
-          name: attachment.name,
-        }
-      }),
+      attachments,
     }
 
     return result
+  }
+
+  private async fetchAttachments(noteId: number) {
+    const attachments = await this.discussionService.getAttachments(noteId)
+    return attachments.map((attachment: DiscussionAttachment) => ({
+      uid: attachment.uid ?? attachment.id,
+      type: attachment.type,
+      name: attachment.name,
+    }))
+  }
+
+  private mapComments(comments: CommentDTO[]) {
+    return comments.map((comment) => ({
+      id: comment.id,
+      user: comment.user,
+      content: comment.body,
+      createdAt: comment.createdAt,
+      updatedAt: comment.updatedAt,
+    }))
+  }
+
+  private async mapAnswers(answers: AnswerDTO[]) {
+    return Promise.all(
+      answers.map(async (answer) => ({
+        id: answer.id,
+        user: answer.user,
+        content: answer.note.content,
+        createdAt: answer.createdAt,
+        updatedAt: answer.updatedAt,
+        comments: this.mapComments(answer.comments),
+        attachments: await this.fetchAttachments(answer.note.id),
+      })),
+    )
   }
 
   async listSpaceMembers(spaceId: number) {
@@ -205,7 +240,7 @@ export class CliService {
     )
 
     return await Promise.all(
-      memberships.map((membership) => CliSpaceMemberDTO.mapToDTO(membership)),
+      memberships.map((membership) => CliSpaceMemberDTO.fromEntity(membership)),
     )
   }
 
@@ -235,6 +270,7 @@ export class CliService {
     const spaces = await this.em.find(Space, {
       spaceMemberships: {
         user: { id: this.user.id },
+        active: true,
         role: {
           $in: [
             SPACE_MEMBERSHIP_ROLE.ADMIN,
@@ -281,5 +317,167 @@ export class CliService {
     }
 
     return result
+  }
+
+  async createDiscussion(spaceId: number, body: CliCreateDiscussionDTO) {
+    const space = await this.em.findOne(Space, {
+      id: spaceId,
+      spaceMemberships: { user: this.user.id },
+    })
+
+    if (!space) {
+      throw new NotFoundError('Space does not exist or is not accessible')
+    }
+    const attachments = await this.transformAttachments(body.attachments)
+
+    return await this.em.transactional(async () => {
+      const discussion = await this.discussionService.createDiscussion({
+        title: body.title,
+        content: body.content,
+        attachments,
+      })
+
+      await this.discussionService.publishDiscussion({
+        id: discussion.id,
+        scope: `space-${spaceId}`,
+        toPublish: attachments,
+        notifyAll: false,
+      })
+
+      const url = await this.em.findOne(Discussion, { id: discussion.id })
+      return await this.entityLinkService.getUiLink(url)
+    })
+  }
+
+  async createReply(body: CliCreateReplyDTO) {
+    // user can not reply with answer to answer
+    if (body.answerId && body.discussionId) {
+      throw new InvalidStateError('Cannot reply to both answer and discussion')
+    }
+
+    if (body.replyType === 'answer' && body.answerId) {
+      throw new InvalidStateError('Cannot reply with answer to answer')
+    }
+
+    const targetType = body.discussionId ? 'Discussion' : 'Answer'
+    const replyType = body.replyType === 'answer' ? 'Answer' : 'Comment'
+    const targetId = body.discussionId ?? body.answerId
+    let result = null
+
+    if (replyType === 'Answer' && targetType === 'Discussion') {
+      await this.em.transactional(async () => {
+        const discussion = await this.discussionService.getDiscussion(targetId)
+        const attachments = await this.transformAttachments(body.attachments)
+
+        // permissions to the target are checked in the discussion service
+        const answer = await this.discussionService.createAnswer({
+          title: replyType,
+          content: body.content,
+          discussionId: targetId,
+          attachments,
+        })
+
+        await this.discussionService.publishAnswer({
+          id: answer.id,
+          discussionId: targetId,
+          scope: discussion.note.scope,
+          toPublish: attachments,
+          notifyAll: false,
+        })
+        result = await this.em.findOne(Answer, { id: answer.id })
+      })
+    }
+
+    if (replyType === 'Comment') {
+      const comment = await this.discussionService.createComment({
+        targetId: targetId,
+        targetType: targetType,
+        comment: body.content,
+        notifyAll: false,
+      })
+
+      result = await this.em.findOne(Comment, { id: comment.id })
+    }
+
+    return await this.entityLinkService.getUiLink(result)
+  }
+
+  async editDiscussion(discussionId: number, body: CliEditDiscussionDTO) {
+    const attachments = await this.transformAttachments(body.attachments)
+    await this.discussionService.appendToDiscussion(discussionId, body.content, attachments)
+
+    const discussion = await this.entityFetcherService.getEditableById(Discussion, discussionId)
+    return await this.entityLinkService.getUiLink(discussion)
+  }
+
+  async editReply(body: CliEditReplyDTO) {
+    if (body.answerId && body.commentId) {
+      throw new InvalidStateError('Cannot edit both answer and comment')
+    }
+
+    const targetType = body.answerId ? 'Answer' : 'Comment'
+    const targetId = body.answerId ?? body.commentId
+
+    const target = await this.em.findOne(targetType, { id: targetId, user: this.user.id })
+    if (!target) {
+      throw new NotFoundError('Reply not found or not accessible')
+    }
+
+    if (target instanceof Answer) {
+      const attachments = await this.transformAttachments(body.attachments)
+      await this.discussionService.appendToAnswer(target.id, body.content, attachments)
+      return await this.entityLinkService.getUiLink(target)
+    } else if (target instanceof Comment) {
+      await this.discussionService.appendToComment(target.id, body.content)
+      return await this.entityLinkService.getUiLink(target)
+    }
+  }
+
+  private async transformAttachments(body: CliAttachmentsDTO) {
+    // transform attachments to the format expected by the discussion service
+    const attachments = {
+      files: [],
+      folders: [],
+      assets: [],
+      apps: [],
+      jobs: [],
+      comparisons: [],
+    }
+    // iterate over uids and get ids instead - access rights are checked in discussion service.
+    for (const uid of body.files) {
+      const file = await this.entityFetcherService.getByUid(UserFile, uid)
+      if (!file) {
+        throw new NotFoundError(`File ${uid} not found or not accessible`)
+      }
+      attachments.files.push(file.id)
+    }
+    for (const id of body.folders) {
+      attachments.folders.push(id)
+    }
+    for (const uid of body.assets) {
+      const asset = await this.entityFetcherService.getByUid(Asset, uid)
+      if (!asset) {
+        throw new NotFoundError(`Asset ${uid} not found or not accessible`)
+      }
+      attachments.assets.push(asset.id)
+    }
+    for (const uid of body.apps) {
+      const app = await this.entityFetcherService.getByUid(App, uid)
+      if (!app) {
+        throw new NotFoundError(`App ${uid} not found or not accessible`)
+      }
+      attachments.apps.push(app.id)
+    }
+    for (const uid of body.jobs) {
+      const job = await this.entityFetcherService.getByUid(Job, uid)
+      if (!job) {
+        throw new NotFoundError(`Job ${uid} not found or not accessible`)
+      }
+      attachments.jobs.push(job.id)
+    }
+    for (const id of body.comparisons) {
+      attachments.comparisons.push(id)
+    }
+    return attachments
   }
 }

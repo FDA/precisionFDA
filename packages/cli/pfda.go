@@ -1,5 +1,5 @@
 // PrecisionFDA CLI
-// Version 2.7.3
+// Version 2.8.0
 package main
 
 import (
@@ -26,7 +26,7 @@ const defaultChunkSize = 1 << 26 // default 64MB (min. 16MB)
 const defaultSkipVerify = "false"
 const usageString = `
 ****************************
-PFDA COMMAND LINE TOOL v2.7.3
+PFDA COMMAND LINE TOOL v2.8.0
 ****************************
 
 All available commands:
@@ -189,6 +189,22 @@ var invokeCat = func(client precisionfda.IPFDAClient, arg *string) error {
 
 var invokeGetScope = func(client precisionfda.IPFDAClient) error {
 	return client.GetScope()
+}
+
+var invokeCreateDiscussion = func(client precisionfda.IPFDAClient, spaceID *string, jsonBody *string) error {
+	return client.CreateDiscussion(*spaceID, *jsonBody)
+}
+
+var invokeCreateReply = func(client precisionfda.IPFDAClient, jsonBody *string) error {
+	return client.CreateReply(*jsonBody)
+}
+
+var invokeEditDiscussion = func(client precisionfda.IPFDAClient, jsonBody *string) error {
+	return client.EditDiscussion(*jsonBody)
+}
+
+var invokeEditReply = func(client precisionfda.IPFDAClient, jsonBody *string) error {
+	return client.EditReply(*jsonBody)
 }
 
 var invokeRefreshToken = func(client precisionfda.IPFDAClient, autoRefresh bool) (string, error) {
@@ -785,6 +801,50 @@ func mainInternal() int {
 		}
 
 		err := invokeGetScope(pfdaclient)
+		if err != nil {
+			return helpers.ErrorFromError(err, *flagJson)
+		}
+
+	case "create-discussion":
+		if help {
+			return helpers.PrintCreateDiscussionHelp()
+		}
+
+		if *spaceID == "" {
+			return helpers.ErrorFromString("Space ID is required", *flagJson)
+		}
+
+		err := invokeCreateDiscussion(pfdaclient, spaceID, &args[0])
+		if err != nil {
+			return helpers.ErrorFromError(err, *flagJson)
+		}
+
+	case "create-reply":
+		if help {
+			return helpers.PrintCreateReplyHelp()
+		}
+
+		err := invokeCreateReply(pfdaclient, &args[0])
+		if err != nil {
+			return helpers.ErrorFromError(err, *flagJson)
+		}
+
+	case "edit-discussion":
+		if help {
+			return helpers.PrintEditDiscussionHelp()
+		}
+
+		err := invokeEditDiscussion(pfdaclient, &args[0])
+		if err != nil {
+			return helpers.ErrorFromError(err, *flagJson)
+		}
+
+	case "edit-reply":
+		if help {
+			return helpers.PrintEditReplyHelp()
+		}
+
+		err := invokeEditReply(pfdaclient, &args[0])
 		if err != nil {
 			return helpers.ErrorFromError(err, *flagJson)
 		}

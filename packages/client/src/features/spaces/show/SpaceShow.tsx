@@ -204,7 +204,7 @@ const Spaces2 = ({ space, isLoading }: { space: ISpace; isLoading: boolean }) =>
                   />
                 }
               />
-              <Route path="discussions/:discussionId" element={<DiscussionShow space={space} />} />
+              <Route path="discussions/:discussionId/*"  element={<DiscussionShow space={space} />} />
 
               <Route path="/" element={<Navigate to="files" replace />} />
             </Routes>
