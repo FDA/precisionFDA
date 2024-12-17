@@ -5,13 +5,8 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
 
   class Error < StandardError; end
 
-  GSRS_DEFAULT_URL = "http://localhost:8080".freeze
-  GSRS_URL = ENV.fetch("GSRS_URL", GSRS_DEFAULT_URL)
+  GSRS_URL = ENV.fetch("GSRS_URL", "http://localhost:8080")
   GSRS_ENABLED = ActiveRecord::Type::Boolean.new.cast(ENV["GSRS_ENABLED"])
-  GSRS_HEADER_USER_NAME =
-    ENV.fetch("GSRS_AUTHENTICATION_HEADER_NAME", "AUTHENTICATION_HEADER_NAME")
-  GSRS_HEADER_USER_EMAIL =
-    ENV.fetch("GSRS_AUTHENTICATION_HEADER_NAME_EMAIL", "AUTHENTICATION_HEADER_NAME_EMAIL")
   # rubocop:todo Rails/LexicallyScopedActionFilter
   skip_before_action :require_login, only: %i( # rubocop:todo Rails/LexicallyScopedActionFilter
                                                index
@@ -145,34 +140,7 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
       Auditor.perform_audit(action: "destroy", record_type: "Session", record: { message: "User #{session[:username]} logged out" })
     end
 
-    if GSRS_ENABLED
-      begin
-        session_key = http_request(
-          "#{GSRS_URL}/api/v1/whoami",
-          {},
-          Net::HTTP::Get::METHOD,
-          {},
-          {
-            GSRS_HEADER_USER_NAME => current_user.username,
-            GSRS_HEADER_USER_EMAIL => current_user.email,
-          },
-          true,
-        )
-
-        request_headers = {}
-        request_headers["Cookie"] = "ix.session=#{session_key.flatten.first}"
-        http_request(
-          "#{GSRS_URL}/ginas/app/logout",
-          {},
-          Net::HTTP::Get::METHOD,
-          {},
-          request_headers,
-        )
-      rescue StandardError => e
-        # No reaction to unsuccessful GSRS logout, because raising an Error would stop the pFDA logout process.
-        logger.warn("Error while logging out from GSRS: #{e.message}")
-      end
-    end
+    logout_from_gsrs if GSRS_ENABLED
 
     Session.where(key: session_id).delete_all
     DIContainer.shutdown
@@ -709,6 +677,33 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
   end
 
   private
+
+  def logout_from_gsrs
+    session_key = http_request(
+      "#{GSRS_URL}/api/v1/whoami",
+      {},
+      Net::HTTP::Get::METHOD,
+      {},
+      {
+        AUTHENTICATION_USERNAME: current_user.username,
+        AUTHENTICATION_EMAIL: current_user.email,
+      },
+      true,
+    )
+
+    request_headers = {}
+    request_headers["Cookie"] = "ix.session=#{session_key.flatten.first}"
+    http_request(
+      "#{GSRS_URL}/ginas/app/logout",
+      {},
+      Net::HTTP::Get::METHOD,
+      {},
+      request_headers,
+    )
+  rescue StandardError => e
+    # No reaction to unsuccessful GSRS logout, because raising an Error would stop the pFDA logout process.
+    logger.warn("Error while logging out from GSRS: #{e.message}")
+  end
 
   def oauth2_redirect_url
     URI.join(request.base_url, "/return_from_login").to_s
