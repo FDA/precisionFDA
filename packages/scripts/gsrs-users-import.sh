@@ -28,7 +28,7 @@ for row in $users; do
     IFS=',' read -r username email <<< "$row"
 
     echo "Import user: $username ; $email"
-    curl -H "AUTHENTICATION_HEADER_NAME: $username" -H "AUTHENTICATION_HEADER_NAME_EMAIL: $email" \
+    curl -H "AUTHENTICATION_USERNAME: $username" -H "AUTHENTICATION_EMAIL: $email" \
         'http://localhost:8080/ginas/app/api/v1/buildInfo' -o /dev/null -s -w "%{http_code}\n"
 
     sleep 0.2

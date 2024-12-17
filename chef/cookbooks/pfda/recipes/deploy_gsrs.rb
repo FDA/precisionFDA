@@ -136,14 +136,6 @@ template "#{node[:gsrs][:tomcat_path]}/webapps/substances/WEB-INF/classes/applic
   group node[:gsrs][:tomcat_grop]
   variables(
     TOMCAT_PATH: node[:gsrs][:tomcat_path],
-    GSRS_AUTHENTICATION_HEADER_NAME: lazy do
-                                       node.run_state.dig('ssm_params', 'app', 'environment',
-                                                          'GSRS_AUTHENTICATION_HEADER_NAME')
-                                     end,
-    GSRS_AUTHENTICATION_HEADER_NAME_EMAIL: lazy do
-                                             node.run_state.dig('ssm_params', 'app', 'environment',
-                                                                'GSRS_AUTHENTICATION_HEADER_NAME_EMAIL')
-                                           end,
     GSRS_DATABASE_URL: lazy { node.run_state['gsrs_database_url'] },
     GSRS_DATABASE_USERNAME: lazy { node.run_state.dig('ssm_params', 'app', 'environment', 'GSRS_DATABASE_USERNAME') },
     GSRS_DATABASE_PASSWORD: lazy { node.run_state.dig('ssm_params', 'app', 'environment', 'GSRS_DATABASE_PASSWORD') },
