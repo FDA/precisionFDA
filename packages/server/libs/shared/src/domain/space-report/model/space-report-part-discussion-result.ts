@@ -1,4 +1,4 @@
-import { EntityType } from '@shared/domain/entity/domain/entity.type'
+import { AttachableEntityType } from '@shared/domain/discussion/model/attachable-entity.type'
 import { SpaceReportPartResultBase } from '@shared/domain/space-report/model/space-report-part-result-base'
 
 export interface SpaceReportPartDiscussionResultCommentCreatedBy {
@@ -9,7 +9,7 @@ export interface SpaceReportPartDiscussionResultCommentCreatedBy {
 export interface SpaceReportPartDiscussionResultAttachment {
   name: string
   link: string
-  type: EntityType
+  type: AttachableEntityType
 }
 
 export interface SpaceReportPartDiscussionResultComment {
