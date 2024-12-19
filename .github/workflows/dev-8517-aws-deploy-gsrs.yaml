@@ -6,7 +6,7 @@ on:
       GSRS_BRANCH:
         description: GSRS Revision
         type: string
-        default: gsrs_241029
+        default: gsrs_241211
       GSRS_DATABASE_NAME:
         description: GSRS Database and Index Name
         type: string

@@ -257,6 +257,9 @@ const PublicNavbar = ({ shouldShowLogo = false }: Props) => {
         <a href="/uniisearch" target="_blank">
           UNII Search
         </a>
+        <a href="/ginas/app/beta" target="_blank">
+          GSRS
+        </a>
       </PublicNavbarCenterButtons>
       <PublicNavbarRightButtons $isSticky={sticky}>
         <AccessButton onClick={onRequestAccess}>Request Access</AccessButton>

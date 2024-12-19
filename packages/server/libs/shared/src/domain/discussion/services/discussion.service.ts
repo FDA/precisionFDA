@@ -26,7 +26,7 @@ import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import type { UserCtx } from '@shared/types'
 import type { SCOPE } from '@shared/types/common'
 import * as errors from '../../../errors'
-import { CommentableType } from '../../comment/comment.entity'
+import { Comment, CommentableType } from '../../comment/comment.entity'
 import { EntityFetcherService } from '../../entity/entity-fetcher.service'
 import { SPACE_MEMBERSHIP_ROLE } from '../../space-membership/space-membership.enum'
 import { getIdFromScopeName } from '../../space/space.helper'
@@ -41,7 +41,14 @@ import type {
   UpdateAnswerInput,
   UpdateDiscussionInput,
 } from '../discussion.types'
-import { AnswerDTO, CommentDTO, DiscussionDTO, NoteDTO, UserDTO } from '../discussion.types'
+import {
+  AnswerDTO,
+  CommentDTO,
+  DiscussionDTO,
+  NoteDTO,
+  UserDTO,
+  Attachments,
+} from '../discussion.types'
 import { DiscussionQueueJobProducer } from '../producer/discussion-queue-job.producer'
 import { PublisherService } from './publisher.service'
 
@@ -264,7 +271,10 @@ export class DiscussionService implements IDiscussionService {
         this.userCtx.id,
       )
 
-      if (space.type === SPACE_TYPE.REVIEW && space.meta?.restricted_discussions) {
+      if (
+        space.type === SPACE_TYPE.PRIVATE_TYPE ||
+        (space.type === SPACE_TYPE.REVIEW && space.meta?.restricted_discussions)
+      ) {
         throw new errors.InvalidStateError(
           'Unable to publish discussion: space has restricted discussions.',
         )
@@ -643,23 +653,23 @@ export class DiscussionService implements IDiscussionService {
     return count
   }
 
-  private async createAttachments(
-    note: Note,
-    attachmentsToSave: {
-      files?: number[]
-      folders?: number[]
-      assets?: number[]
-      apps?: number[]
-      jobs?: number[]
-      comparisons?: number[]
-    },
-  ) {
+  private async createAttachments(note: Note, attachmentsToSave: Attachments) {
     for (const id of attachmentsToSave.files) {
       // if it's not accessible it will fail. - but maybe it's better to return null and let caller handle the case?
       const res = await this.fetcher.getAccessibleById(Node, id)
       if (!res) {
         throw new errors.NotFoundError(
           `Unable to attach file ${id}: file not found or inaccessible.`,
+        )
+      }
+      const exists = await this.em.findOne(Attachment, {
+        itemId: id,
+        itemType: 'Node',
+        note: note.id,
+      })
+      if (exists) {
+        throw new errors.InvalidStateError(
+          `Unable to attach file ${id}: file attachment already exists.`,
         )
       }
       const attachment = new Attachment(note)
@@ -672,6 +682,16 @@ export class DiscussionService implements IDiscussionService {
       if (!res) {
         throw new errors.NotFoundError(
           `Unable to attach folder ${id}: folder not found or inaccessible.`,
+        )
+      }
+      const exists = await this.em.findOne(Attachment, {
+        itemId: id,
+        itemType: 'Node',
+        note: note.id,
+      })
+      if (exists) {
+        throw new errors.InvalidStateError(
+          `Unable to attach folder ${id}: folder attachment already exists.`,
         )
       }
       const attachment = new Attachment(note)
@@ -687,6 +707,16 @@ export class DiscussionService implements IDiscussionService {
           `Unable to attach asset ${id}: asset not found or inaccessible.`,
         )
       }
+      const exists = await this.em.findOne(Attachment, {
+        itemId: id,
+        itemType: 'Asset',
+        note: note.id,
+      })
+      if (exists) {
+        throw new errors.InvalidStateError(
+          `Unable to attach asset ${id}: asset attachment already exists.`,
+        )
+      }
       const attachment = new Attachment(note)
       attachment.itemId = id
       attachment.itemType = 'Node'
@@ -697,6 +727,16 @@ export class DiscussionService implements IDiscussionService {
       if (!res) {
         throw new errors.NotFoundError(`Unable to attach app ${id}: app not found or inaccessible.`)
       }
+      const exists = await this.em.findOne(Attachment, {
+        itemId: id,
+        itemType: 'App',
+        note: note.id,
+      })
+      if (exists) {
+        throw new errors.InvalidStateError(
+          `Unable to attach app ${id}: app attachment already exists.`,
+        )
+      }
       const attachment = new Attachment(note)
       attachment.itemId = id
       attachment.itemType = 'App'
@@ -706,6 +746,16 @@ export class DiscussionService implements IDiscussionService {
       const res = await this.fetcher.getAccessibleById(Job, id)
       if (!res) {
         throw new errors.NotFoundError(`Unable to attach job ${id}: job not found or inaccessible.`)
+      }
+      const exists = await this.em.findOne(Attachment, {
+        itemId: id,
+        itemType: 'Job',
+        note: note.id,
+      })
+      if (exists) {
+        throw new errors.InvalidStateError(
+          `Unable to attach job ${id}: job attachment already exists.`,
+        )
       }
       const attachment = new Attachment(note)
       attachment.itemId = id
@@ -719,6 +769,16 @@ export class DiscussionService implements IDiscussionService {
           `Unable to attach comparison ${id}: comparison not found or inaccessible.`,
         )
       }
+      const exists = await this.em.findOne(Attachment, {
+        itemId: id,
+        itemType: 'Comparison',
+        note: note.id,
+      })
+      if (exists) {
+        throw new errors.InvalidStateError(
+          `Unable to attach comparison ${id}: comparison attachment already exists.`,
+        )
+      }
       const attachment = new Attachment(note)
       attachment.itemId = id
       attachment.itemType = 'Comparison'
@@ -727,17 +787,7 @@ export class DiscussionService implements IDiscussionService {
     await this.em.flush()
   }
 
-  private async updateAttachments(
-    note: Note,
-    attachments: {
-      files?: number[]
-      folders?: number[]
-      assets?: number[]
-      apps?: number[]
-      jobs?: number[]
-      comparisons?: number[]
-    },
-  ) {
+  private async updateAttachments(note: Note, attachments: Attachments) {
     const oldAttachments = await this.em.find(Attachment, { note })
     this.logger.log(`Deleting old attachments: ${oldAttachments.map((a) => a.id)}`)
     await this.em.removeAndFlush(oldAttachments)
@@ -751,17 +801,7 @@ export class DiscussionService implements IDiscussionService {
    * @param scope - scope to publish to
    * @private - only for internal use while publishing to space.
    */
-  private async checkValidScope(
-    toPublish: {
-      files?: number[]
-      folders?: number[]
-      assets?: number[]
-      apps?: number[]
-      jobs?: number[]
-      comparisons?: number[]
-    },
-    scope: string,
-  ) {
+  private async checkValidScope(toPublish: Attachments, scope: string) {
     // nodes - TODO Jiri: refactor to fetch all at once.
     for (const id of toPublish.files) {
       const file = await this.fetcher.getAccessibleById(Node, id)
@@ -1096,6 +1136,72 @@ export class DiscussionService implements IDiscussionService {
       // refactor the response mapping - for every return in this class.
       return this.mapCommentDTO(res)
     }
+  }
+
+  async appendToDiscussion(discussionId: number, content: string, attachments: Attachments) {
+    this.logger.log(`Appending content and attachments to discussion: ${discussionId}`)
+
+    const discussion = await this.fetcher.getEditableById(
+      Discussion,
+      discussionId,
+      {},
+      { populate: ['note'] },
+    )
+    if (!discussion) {
+      throw new errors.NotFoundError(
+        'Unable to get discussion: not found or insufficient permissions.',
+      )
+    }
+
+    return await this.em.transactional(async (tem) => {
+      const note = discussion.note.getEntity()
+      if (content) {
+        note.content = `${note.content}\n\n${content}`
+        tem.persist(note)
+      }
+      await this.createAttachments(note, attachments)
+      return { discussionId: discussionId, spaceId: note.getSpaceId() }
+    })
+  }
+
+  async appendToAnswer(answerId: number, content: string, attachments: Attachments) {
+    this.logger.log(`Appending content and attachments to answer: ${answerId}`)
+
+    const answer = await this.em.findOne(
+      Answer,
+      { id: answerId, user: this.userCtx.id },
+      { populate: ['note'] },
+    )
+    if (!answer) {
+      throw new errors.NotFoundError('Unable to get answer: not found or insufficient permissions.')
+    }
+
+    return await this.em.transactional(async (tem) => {
+      const note = answer.note.getEntity()
+      if (content) {
+        note.content = `${note.content}\n\n${content}`
+        tem.persist(note)
+      }
+      await this.createAttachments(note, attachments)
+      return { discussionId: answer.discussion.id, spaceId: note.getSpaceId() }
+    })
+  }
+
+  async appendToComment(commentId: number, content: string) {
+    this.logger.log(`Appending content to comment: ${commentId}`)
+
+    const comment = await this.em.findOne(Comment, { id: commentId, user: this.userCtx.id })
+    if (!comment) {
+      throw new errors.NotFoundError(
+        'Unable to get comment: not found or insufficient permissions.',
+      )
+    }
+
+    return await this.em.transactional(async (tem) => {
+      comment.body = `${comment.body}\n\n${content}`
+      await tem.persistAndFlush(comment)
+      return commentId
+    })
   }
 
   private async mapDiscussionDTO(discussion: Discussion): Promise<DiscussionDTO> {

@@ -9,6 +9,9 @@ services:
       - type: bind
         source: ${GSRS_FRONTEND_PATH:-/dev/null}
         target: /usr/local/GSRSFrontend
+      - type: bind
+        source: ${GSRS_INDEX_PATH:-/dev/null}
+        target: /ginas.ix
 
   gsrsdb:
     image: "mariadb:10.6.15"
