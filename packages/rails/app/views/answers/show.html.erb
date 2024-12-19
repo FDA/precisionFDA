@@ -61,3 +61,8 @@
     <%= render "notes/note" %>
   </div>
 </div>
+
+<%= javascript_tag do %>
+  // FIX for PFDA-5712 / 5896
+  $('#dLabel').dropdown();
+<% end %>
