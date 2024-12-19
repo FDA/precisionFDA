@@ -24,6 +24,7 @@ func ParseEntityType(entityType string) string {
 		"app":        true,
 		"job":        true,
 		"file":       true,
+		"folder":     true,
 		"workflow":   true,
 		"discussion": true,
 	}

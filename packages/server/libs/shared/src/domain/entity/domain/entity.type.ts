@@ -2,6 +2,8 @@ export const entityTypes = [
   'user',
   'job',
   'asset',
+  'answer',
+  'comment',
   'comparison',
   'file',
   'folder',

@@ -6,7 +6,7 @@ import { Comment } from '@shared/domain/comment/comment.entity'
 @Entity({ discriminatorValue: 'Discussion' })
 export class DiscussionComment extends Comment {
   @ManyToOne({ entity: () => Discussion, fieldName: 'commentable_id' })
-    commentableId: Ref<Discussion>
+  commentableId: Ref<Discussion>
 
   constructor(user: User) {
     super(user)

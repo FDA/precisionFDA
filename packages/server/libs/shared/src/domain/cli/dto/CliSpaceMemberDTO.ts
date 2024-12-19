@@ -13,7 +13,7 @@ export class CliSpaceMemberDTO {
   name: string
   username: string
 
-  static async mapToDTO(membership: SpaceMembership): Promise<CliSpaceMemberDTO> {
+  static async fromEntity(membership: SpaceMembership): Promise<CliSpaceMemberDTO> {
     await membership.user.load()
     return {
       id: membership.id,

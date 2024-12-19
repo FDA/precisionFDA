@@ -59,6 +59,15 @@ type EditCommentInput = {
   comment: string
 }
 
+type Attachments = {
+  files?: number[]
+  folders?: number[]
+  assets?: number[]
+  apps?: number[]
+  jobs?: number[]
+  comparisons?: number[]
+}
+
 type DiscussionAttachment = {
   id: number
   uid: string
@@ -134,4 +143,5 @@ export {
   UpdateAnswerInput,
   UpdateDiscussionInput,
   UserDTO,
+  Attachments,
 }

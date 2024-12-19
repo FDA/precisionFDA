@@ -37,7 +37,7 @@ export const CLI = () => {
         <h2 id="download">Download the CLI</h2>
         <ButtonRow>
           <a
-            href="https://pfda-production-static-files.s3.amazonaws.com/cli/pfda-linux-2.7.3.tar.gz"
+            href="https://pfda-production-static-files.s3.amazonaws.com/cli/pfda-linux-2.8.0.tar.gz"
             target="_blank"
             rel="noreferrer"
           >
@@ -46,7 +46,7 @@ export const CLI = () => {
             </Button>
           </a>
           <a
-            href="https://pfda-production-static-files.s3.amazonaws.com/cli/pfda-darwin-2.7.3.tar.gz"
+            href="https://pfda-production-static-files.s3.amazonaws.com/cli/pfda-darwin-2.8.0.tar.gz"
             target="_blank"
             rel="noreferrer"
           >
@@ -55,7 +55,7 @@ export const CLI = () => {
             </Button>
           </a>
           <a
-            href="https://pfda-production-static-files.s3.amazonaws.com/cli/pfda-windows-2.7.3.zip"
+            href="https://pfda-production-static-files.s3.amazonaws.com/cli/pfda-windows-2.8.0.zip"
             target="_blank"
             rel="noreferrer"
           >
@@ -1235,7 +1235,8 @@ export const CLI = () => {
         <h2 id="changelog">pFDA CLI Changelog</h2>
         <br/>
 
-        <p>Version 2.7.3 (11/27/2024): security fixes, improved error handling </p>
+        <p>Version 2.8.0 (11/27/2024): New features: create-discussion, create-reply, edit-discussion, edit-reply </p>
+        <p>Version 2.7.3 (10/27/2024): security fixes, improved error handling </p>
         <p>Version 2.7.2 (09/12/2024): upgrade Go to 1.23.1 </p>
         <p>Version 2.7.1 (05/31/2024): ls shows files and folders in all states </p>
         <p>Version 2.7.0 (05/16/2024): Fixed file-upload bug, various improvements </p>

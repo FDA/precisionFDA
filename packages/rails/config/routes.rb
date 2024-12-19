@@ -162,11 +162,13 @@ Rails.application.routes.draw do
     get "/discussions/create", to: "discussions#index2"
 
     if ActiveRecord::Type::Boolean.new.cast(ENV["GSRS_ENABLED"])
-      match "/ginas/app/logout", to: "main#destroy", via: :all
-      get "/ginas/app/api/v1/substances:path", to: "ginas#skip_request",
-        constraints: ->(request) { request.fullpath.ends_with? "(undefined)?view=internal" }
-      match "/ginas/app/api/v1/substances", to: "ginas#substances", via: %i(put post)
-      match "/ginas/*path", to: "ginas#index", via: :all
+      get "/csrf-token", to: "ginas_unauthorized#csrf_token"
+      get "/ginas/close-pfda-login-window", to: "ginas_authorized#close_login_window"
+      get "/ginas/app/api/v1/whoami", to: "ginas_authorized#whoami"
+      get "/ginas/app/api/v1/substances:path", to: "ginas_unauthorized#skip_request",
+          constraints: ->(request) { request.fullpath.ends_with? "(undefined)?view=internal" }
+      match "/ginas/app/api/v1/substances", to: "ginas_authorized#substances", via: %i(put post)
+      match "/ginas/*path", to: "ginas_unauthorized#index", via: :all
       match "/substances/api/v1/substances/*query" => redirect(path: "/ginas/app/api/v1/substances/%{query}"), via: :all
     end
 
@@ -459,11 +461,11 @@ Rails.application.routes.draw do
       end
 
       resources :dbclusters, controller: :db_clusters,
-                             param: :uid, only: %i(index show create update) do
+                param: :uid, only: %i(index show create update) do
         post ":api_method", on: :collection,
-                            to: "db_clusters#run",
-                            as: :run,
-                            api_method: /(start|stop|terminate)/
+             to: "db_clusters#run",
+             as: :run,
+             api_method: /(start|stop|terminate)/
         get :allowed_instances, on: :collection, to: "db_clusters#allowed_db_instances_by_user"
         resources :comments
       end
@@ -707,7 +709,7 @@ Rails.application.routes.draw do
 
     get "/spaces/*all", to: "spaces#index"
     get "/spaces-old/*all", to: "spaces#index"
-    
+
     get "/experts/:id/about", to: "experts#show"
 
     # to debug
