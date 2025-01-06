@@ -90,8 +90,10 @@ RSpec.describe WorkflowsController, type: :controller do
       it "responds with an error" do
         get :batch_workflow, params: { id: workflow.uid }
 
-        expect(response).to have_http_status(:found)
-        expect(flash[:error]).to include(I18n.t("api.errors.exceeded_charges_limit"))
+        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response.content_type).to eq("application/json; charset=utf-8")
+        parsed_response = JSON.parse(response.body)
+        expect(parsed_response["error"]["message"]).to include(I18n.t("api.errors.exceeded_charges_limit"))
       end
     end
   end
@@ -107,11 +109,15 @@ RSpec.describe WorkflowsController, type: :controller do
       end
 
       it "responds with an error" do
+        # Enable the controller to rescue exceptions using rescue_from handlers
+        allow(controller).to receive(:rescue_with_handler).and_call_original
+
         post :run_batch, params: { id: workflow.uid }, format: :json
 
-        expect(response.status).to eq(422)
-        expect(parsed_response["error"]["message"]).to \
-          include(I18n.t("api.errors.exceeded_charges_limit"))
+        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response.content_type).to eq("application/json; charset=utf-8")
+        parsed_response = JSON.parse(response.body)
+        expect(parsed_response["error"]["message"]).to include(I18n.t("api.errors.exceeded_charges_limit"))
       end
     end
   end
