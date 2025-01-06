@@ -15,7 +15,7 @@ import { proposeValidationSchema } from './common'
 import { SectionTitle } from '../../../components/Public/styles'
 import { Button } from '../../../components/Button'
 
-interface ProposeChallengeForm {
+export interface ProposeChallengeFormValues {
   name: string,
   email: string,
   organisation: string,
@@ -42,13 +42,11 @@ const Row = styled.div`
   gap: 16px;
 `
 
-export const PrososeChallengeForm = ({
+export const ProposeChallengeForm = ({
   onSubmit,
-  isSavingChallenge = false,
   mutationErrors,
 }: {
-  onSubmit: (a: any) => Promise<any>
-  isSavingChallenge?: boolean
+  onSubmit: (a: ProposeChallengeFormValues) => Promise<void>
   mutationErrors?: MutationErrors
 }) => {
 
@@ -61,12 +59,12 @@ export const PrososeChallengeForm = ({
     setValue,
     clearErrors,
     formState: { errors, isSubmitting, dirtyFields },
-  } = useForm<ProposeChallengeForm>({
+  } = useForm<ProposeChallengeFormValues>({
     mode: 'onBlur',
     resolver: yupResolver(proposeValidationSchema),
     defaultValues: {
       data_details: 'Yes',
-      specific_question: 'Yes'
+      specific_question: 'Yes',
     },
   })
 

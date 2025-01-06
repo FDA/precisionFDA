@@ -71,6 +71,7 @@ SecureHeaders::Configuration.default do |config|
       https://dnanexus.github.io
       https://www.recaptcha.net/recaptcha/
       https://www.gstatic.com/recaptcha/
+      https://www.google.com/recaptcha/
     ),
     style_src: %w(
       'self' 'unsafe-inline'

@@ -28,7 +28,7 @@ export const ChallengeThumbnail = styled.img`
   height: 180px;
   object-fit: contain;
   overflow: hidden;
-  box-shadow: 0px 0px 16px #000;
+  box-shadow: 0 0 16px #000;
 `
 
 export const StyledChallengeDetailsBanner = styled(PageContainer)`
