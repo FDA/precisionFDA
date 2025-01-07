@@ -158,6 +158,11 @@ type CreateFolderParams = {
 
 type OrgFindMembersParams = {
   orgDxid: string
+  level?: string
+  id?: string | string[]
+  describe?: boolean | { [key: string]: boolean }
+  starting?: { [key: string]: boolean }
+  limit?: number
 }
 
 type UserInviteToOrgParams = {

@@ -13,7 +13,7 @@ import {
 import { defaultLogger as log } from '../logger'
 import { UserCtx } from '../types'
 import { clearOrphanedRepeatableJobs as utilsClearOrphanedRepeatableJobs } from './queue.utils'
-import { BasicUserJob, CheckStatusJob, SendEmailJob, SyncDbClusterJob, Task } from './task.input'
+import { CheckStatusJob, SendEmailJob, SyncDbClusterJob, Task } from './task.input'
 
 let mainQueue: Bull.Queue
 let fileSyncQueue: Bull.Queue
@@ -59,7 +59,6 @@ const createQueues = async (provider: QueueProxy): Promise<void> => {
   await fileSyncQueue.isReady()
   await emailsQueue.isReady()
   await maintenanceQueue.isReady()
-  // eslint-disable-next-line @typescript-eslint/no-use-before-define
   await initMaintenanceQueue()
 
   // TODO - doing 'await clearOrphanedRepeatableJobs' will cause nodejs-api tests to fail
@@ -119,10 +118,7 @@ const removeRepeatable = async (job: Job, queue?: Queue) => {
 }
 
 const removeRepeatableJob = async (job: JobInformation, queue: Queue) => {
-  log.log(
-    { jobId: job.id, cron: job.cron },
-    'removeRepeatableJob: trying to remove repeatable job',
-  )
+  log.log({ jobId: job.id, cron: job.cron }, 'removeRepeatableJob: trying to remove repeatable job')
   // await mainQueue.removeRepeatableByKey(job.key)
   await queue.removeRepeatable({ jobId: job.id, cron: job.cron })
 }
@@ -133,11 +129,6 @@ const findRepeatable = async (bullJobId: string) => {
 }
 
 // TASK PRODUCERS
-/**
- * @deprecated Use the job producer directly within the DI
- */
-const createSyncFilesStateTask = (user: UserCtx) => mainJobProducer.createSyncFilesStateTask(user)
-
 /**
  * @deprecated Use the job producer directly within the DI
  */
@@ -165,12 +156,6 @@ const createSendEmailTask = async (
  * @deprecated Use the job producer directly within the DI
  */
 const removeFromEmailQueue = (jobId: string) => emailsJobProducer.removeJobs(jobId)
-
-/**
- * @deprecated Use the job producer directly within the DI
- */
-const createSyncSpacesPermissionsTask = async (user: UserCtx) =>
-  maintenanceJobProducer.createSyncSpacesPermissionsTask(user)
 
 /**
  * @deprecated Use the job producer directly within the DI
@@ -220,18 +205,6 @@ const createDbClusterSyncTask = async (data: SyncDbClusterJob['payload'], user: 
 /**
  * @deprecated Use the job producer directly within the DI
  */
-const createUserCheckupTask = async (data: BasicUserJob) =>
-  maintenanceJobProducer.createUserCheckupTask(data)
-
-/**
- * @deprecated Use the job producer directly within the DI
- */
-const createCheckUserJobsTask = async (data: BasicUserJob) =>
-  maintenanceJobProducer.createCheckUserJobsTask(data)
-
-/**
- * @deprecated Use the job producer directly within the DI
- */
 const createTestMaxMemoryTask = async (): Promise<any> =>
   maintenanceJobProducer.createTestMaxMemoryTask()
 
@@ -247,32 +220,28 @@ export * as debug from './queue.debug'
 export { CleanupWorkerQueueOperation } from './ops/cleanup-worker-queue'
 
 export {
-  createSyncFilesStateTask,
-  createSyncJobStatusTask,
-  createSendEmailTask,
-  removeFromEmailQueue,
-  createSyncSpacesPermissionsTask,
+  addToFileSyncQueueEnsureUnique,
+  clearOrphanedRepeatableJobs,
+  createCloseFileJobTask,
   createDbClusterSyncTask,
   createFileSynchronizeJobTask,
-  createSyncOutputsTask,
-  createUserCheckupTask,
-  createCheckUserJobsTask,
-  createTestMaxMemoryTask,
+  createLockNodesJobTask,
   createQueues,
-  getMainQueue,
   createRemoveNodesJobTask,
-  getFileSyncQueue,
+  createRunFollowUpActionJobTask,
+  createSendEmailTask,
+  createSyncJobStatusTask,
+  createSyncOutputsTask,
+  createTestMaxMemoryTask,
+  createUnlockNodesJobTask,
+  findRepeatable,
   getEmailsQueue,
+  getFileSyncQueue,
+  getMainQueue,
   getMaintenanceQueue,
   getQueues,
+  logQueueStatus,
+  removeFromEmailQueue,
   removeRepeatable,
   removeRepeatableJob,
-  findRepeatable,
-  addToFileSyncQueueEnsureUnique,
-  createRunFollowUpActionJobTask,
-  createCloseFileJobTask,
-  clearOrphanedRepeatableJobs,
-  createLockNodesJobTask,
-  createUnlockNodesJobTask,
-  logQueueStatus,
 }

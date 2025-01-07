@@ -22,7 +22,6 @@ import {
   DbClusterActionParams,
   DbClusterCreateParams,
   DbClusterDescribeParams,
-  DescribeDataObjectsParams,
   DescribeFoldersParams,
   FileCloseParams,
   FileCreateParams,
@@ -781,6 +780,16 @@ export class PlatformClient {
     return await this.sendRequest(options)
   }
 
+  async projectUpdate(params: any): Promise<ClassIdResponse> {
+    const url = `${config.platform.apiUrl}/${params.projectDxid}/update`
+    const options: AxiosRequestConfig = {
+      method: 'POST',
+      data: params.data,
+      url,
+    }
+    return await this.sendRequest(options)
+  }
+
   // -------------
   //    O R G S
   // -------------
@@ -881,9 +890,7 @@ export class PlatformClient {
    * @param {any} classDescribeOptions
    * For param details look at platform API page
    */
-  async describeDataObjects(
-    params: DescribeDataObjectsParams,
-  ): Promise<DescribeDataObjectsResponse> {
+  async describeDataObjects(): Promise<DescribeDataObjectsResponse> {
     const url = `${config.platform.apiUrl}/system/describeDataObjects`
     const options: AxiosRequestConfig = {
       method: 'POST',
