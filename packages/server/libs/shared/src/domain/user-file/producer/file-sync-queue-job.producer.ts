@@ -1,6 +1,7 @@
 import { InjectQueue } from '@nestjs/bull'
 import { Injectable } from '@nestjs/common'
 import { config } from '@shared/config'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { InvalidStateError } from '@shared/errors'
 import { QueueJobProducer } from '@shared/queue/queue-job.producer'
 import { getJobStatusMessage } from '@shared/queue/queue.utils'
@@ -14,6 +15,7 @@ export class FileSyncQueueJobProducer extends QueueJobProducer {
   constructor(
     @InjectQueue(config.workerJobs.queues.fileSync.name)
     protected readonly queue: Queue,
+    private readonly user: UserContext,
   ) {
     super()
   }
@@ -59,6 +61,17 @@ export class FileSyncQueueJobProducer extends QueueJobProducer {
     }
     const options: JobOptions = {
       jobId: `${wrapped.type}.${user.dxuser}-${+new Date()}`,
+    }
+    return await this.addToQueue(wrapped, options)
+  }
+
+  async createUserDataConsistencyReportJobTask() {
+    const wrapped = {
+      type: TASK_TYPE.USER_DATA_CONSISTENCY_REPORT as const,
+      user: this.user,
+    }
+    const options: JobOptions = {
+      jobId: `${wrapped.type}.${this.user.dxuser}-${+new Date()}`,
     }
     return await this.addToQueue(wrapped, options)
   }

@@ -96,6 +96,7 @@ const defaultConfig = {
       host: process.env.SMTP_HOST ?? 'aws-ses-host',
       fromAddress: process.env.SMTP_FROM_ADDRESS ?? 'precisionfda-no-reply@dnanexus.com',
     },
+    report: 'pfda-reports-dev@dnanexus.com',
   },
   redis: {
     url: process.env.NODE_REDIS_URL ?? 'redis://localhost:6379',
