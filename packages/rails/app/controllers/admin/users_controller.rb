@@ -99,15 +99,6 @@ module Admin
       end
     end
 
-    def bulk_reset_2fa
-      response = https_apps_client.users_reset_2fa(
-        unsafe_params[:ids],
-      )
-      respond_to do |format|
-        format.json { render json: response }
-      end
-    end
-
     def bulk_unlock
       response = https_apps_client.users_unlock(
         unsafe_params[:ids],
