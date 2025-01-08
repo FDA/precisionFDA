@@ -2,8 +2,8 @@ import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
 import { database } from '@shared/database'
 import { ClassIdResponse } from '@shared/platform-client/platform-client.responses'
 import { expect } from 'chai'
-import { OrgService } from '../../../src/domain/org/service/org.service'
-import { PlatformClient } from '../../../src/platform-client'
+import { OrgService } from '@shared/domain/org/service/org.service'
+import { PlatformClient } from '@shared/platform-client'
 import { db } from '../../../src/test'
 
 describe('org service tests', () => {

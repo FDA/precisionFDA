@@ -56,7 +56,6 @@ Rails.application.routes.draw do
       get "resend_activation_email", to: "users#resend_activation_email"
       post "set_total_limit", to: "users#set_total_limit"
       post "set_job_limit", to: "users#set_job_limit"
-      post "bulk_reset_2fa", to: "users#bulk_reset_2fa"
       post "bulk_unlock", to: "users#bulk_unlock"
       post "bulk_activate", to: "users#bulk_activate"
       post "bulk_deactivate", to: "users#bulk_deactivate"

@@ -765,16 +765,6 @@ class HttpsAppsClient # rubocop:disable Metrics/ClassLength
     )
   end
 
-  def users_reset_2fa(ids)
-    request(
-      "/admin/users/reset2fa",
-      {
-        ids: ids,
-      },
-      Net::HTTP::Post::METHOD,
-    )
-  end
-
   def users_unlock(ids)
     request(
       "/admin/users/unlock",

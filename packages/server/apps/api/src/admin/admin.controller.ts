@@ -11,7 +11,6 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common'
-import { config } from '@shared/config'
 import { DEPRECATED_SQL_ENTITY_MANAGER } from '@shared/database/provider/deprecated-sql-entity-manager.provider'
 import { RESOURCE_TYPES, User } from '@shared/domain/user/user.entity'
 import { ValidationError } from '@shared/errors'
@@ -25,6 +24,7 @@ import { AdminUsersPaginationPipe } from './pipes/admin-users-pagination.pipe'
 import { enumValidator, numericBodyValidator } from './possibly-reusable-things'
 import { Organization } from '@shared/domain/org/org.entity'
 import { MaintenanceQueueJobProducer } from '@shared/queue/producer/maintenance-queue-job.producer'
+import { ADMIN_PLATFORM_CLIENT } from '@shared/platform-client/providers/admin-platform-client.provider'
 
 interface ISetTotalLimitParams {
   ids: number[]
@@ -54,6 +54,7 @@ export class AdminController {
     private readonly user: UserContext,
     private readonly logger: Logger,
     @Inject(DEPRECATED_SQL_ENTITY_MANAGER) private readonly em: SqlEntityManager,
+    @Inject(ADMIN_PLATFORM_CLIENT) private readonly adminClient: PlatformClient,
     private readonly maintenanceJobProducer: MaintenanceQueueJobProducer,
   ) {}
 
@@ -165,17 +166,18 @@ export class AdminController {
     return 'updated'
   }
 
+  /**
+   * @DEPRECATED - TO BE REPLACED WITH SINGLE USER RESET 2FA
+   * TODO: PFDA-5953
+   */
   @HttpCode(200)
   @Post('/users/reset2fa')
   async resetUsers2fa(@Body(getAdminBodyValidationPipe()) body: IIdListParams) {
     const { ids } = body
-    const adminUserClient = new PlatformClient(
-      { accessToken: config.platform.adminUserAccessToken },
-      this.logger,
-    )
+
     const results = await this.em
       .getRepository(User)
-      .bulkUpdateReset2fa(ids, adminUserClient, this.user)
+      .bulkUpdateReset2fa(ids, this.adminClient, this.user)
 
     return results
   }
@@ -184,13 +186,10 @@ export class AdminController {
   @Post('/users/unlock')
   async unlockUsers(@Body(getAdminBodyValidationPipe()) body: IIdListParams) {
     const { ids } = body
-    const adminUserClient = new PlatformClient(
-      { accessToken: config.platform.adminUserAccessToken },
-      this.logger,
-    )
+
     const results = await this.em
       .getRepository(User)
-      .bulkUpdateUnlock(ids, adminUserClient, this.user)
+      .bulkUpdateUnlock(ids, this.adminClient, this.user)
 
     if (results.some(({ result }) => result.status === 'unhandledError')) {
       throw new ValidationError(undefined, { details: results })

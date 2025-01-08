@@ -81,7 +81,6 @@ const defaultConfig = {
     apiUrl: process.env.API_URL ?? 'https://stagingapi.dnanexus.com',
     authApiUrl: process.env.AUTH_API_URL ?? 'https://stagingauth.dnanexus.com',
     adminUser: 'precisionfda.admin_dev',
-    adminUserAccessToken: process.env.ADMIN_TOKEN ?? 'admin-token',
     challengeBotUser: 'challenge.bot.2',
     challengeBotAccessToken: process.env.CHALLENGE_BOT_TOKEN ?? '',
     findDataObjectsQueryLimit: 1000,
