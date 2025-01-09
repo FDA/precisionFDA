@@ -75,6 +75,43 @@ const discussionHelper = {
     em.persist(discussion)
     return discussion
   },
+  createInSpace(
+    em: EntityManager,
+    references: {
+      user: InstanceType<typeof User>
+      space: InstanceType<typeof Space>
+    },
+    data?: Partial<InstanceType<typeof Discussion>>,
+  ) {
+    const note = wrap(new Note(references.user)).assign({
+      title: generate.random.word(),
+      content: generate.random.chance.paragraph(),
+      scope: references.space.scope,
+      noteType: 'Discussion',
+    })
+    em.persist(note)
+    const discussion = wrap(new Discussion(note, references.user)).assign(data ?? {}, { em })
+    em.persist(discussion)
+    return discussion
+  },
+  createPublic: (
+    em: EntityManager,
+    references: {
+      user: InstanceType<typeof User>
+    },
+    data?: Partial<InstanceType<typeof Discussion>>,
+  ) => {
+    const note = wrap(new Note(references.user)).assign({
+      title: generate.random.word(),
+      content: generate.random.chance.paragraph(),
+      scope: STATIC_SCOPE.PUBLIC,
+      noteType: 'Discussion',
+    })
+    em.persist(note)
+    const discussion = wrap(new Discussion(note, references.user)).assign(data ?? {}, { em })
+    em.persist(discussion)
+    return discussion
+  },
   createAnswer: (
     em: EntityManager,
     references: {
@@ -617,7 +654,7 @@ const dataPortalsHelper = {
       { user: references.user },
       {
         name: name,
-        uid: `${dxid}-1`,
+        uid: `file-${dxid}-1`,
       },
     )
     const resource = new Resource(references.user, userFile)

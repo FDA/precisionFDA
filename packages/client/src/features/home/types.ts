@@ -17,6 +17,7 @@ export interface BaseError {
     type: 'error'
   }
 }
+
 export type ResourceTypeUrlNames =
   | 'files'
   | 'apps'
@@ -28,6 +29,7 @@ export type ResourceTypeUrlNames =
   | 'executions'
   | 'reports'
   | 'discussions'
+
 export type APIResource =
   | 'files'
   | 'folders'
@@ -40,6 +42,8 @@ export type APIResource =
   | 'workflow-executions'
   | 'spaces'
   | 'space-reports'
+  | 'discussions'
+
 export type HomeScope = 'everybody' | 'featured' | 'spaces' | 'me'
 export type ServerScope = 'public' | 'private' | `space-${string}`
 export type PropertiesResource = 'node' | 'asset' | 'workflowSeries' | 'job' | 'appSeries' | 'dbCluster'

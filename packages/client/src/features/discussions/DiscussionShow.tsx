@@ -1,6 +1,6 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import React, { useRef, useState } from 'react'
-import { useLocation, useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { TransparentButton } from '../../components/Button'
 import { BackLink } from '../../components/Page/PageBackLink'
 import { PencilIcon } from '../../components/icons/PencilIcon'
@@ -16,15 +16,13 @@ import { CreateCommentEntity } from './form/CreateCommentEntity'
 import { EditDiscussionTitle } from './form/EditDiscussionTitle'
 import { CommentCount, DiscussionTitle, PageContent, StyledCardList, StyledTitle, UsernameLink } from './styles'
 
-export const DiscussionShow = ({ space }: { space: ISpace }) => {
+export const DiscussionShow = ({ space }: { space?: ISpace }) => {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const [isEditing, setIsEditing] = useState(false)
   const markdownInputRef = useRef<HTMLInputElement | null>(null)
-  const { discussionId: discussionIdParam } = useParams<{ discussionId: string }>()
-  const discussionId = parseInt(discussionIdParam, 10)
-
-  const location = useLocation()
+  const { discussionId: discussionIdParam, spaceId } = useParams<{ discussionId: string; spaceId: string }>()
+  const discussionId = parseInt(discussionIdParam!, 10)
   const user = useAuthUser()
 
   const { data: discussion, isLoading } = useQuery({
@@ -44,7 +42,11 @@ export const DiscussionShow = ({ space }: { space: ISpace }) => {
     queryClient.invalidateQueries({
       queryKey: ['discussions'],
     })
-    navigate(`/spaces/${space.id}/discussions`)
+    if (space) {
+      navigate(`/spaces/${space.id}/discussions`)
+    } else {
+      navigate('/home/discussions?scope=everybody')
+    }
   }
 
   if (isLoading) {
@@ -59,9 +61,9 @@ export const DiscussionShow = ({ space }: { space: ISpace }) => {
       </NotFound>
     )
 
-  const backPath = location.pathname.replace(`/${discussionId}`, '')
-  const canReply = space.current_user_membership.role !== 'viewer'
-  const isLead = space.current_user_membership.role === 'lead'
+  const backPath = space ? `/spaces/${spaceId}/discussions` : '/home/discussions?scope=everybody'
+  const canReply = space?.current_user_membership.role !== 'viewer'
+  const isLead = space?.current_user_membership.role === 'lead'
   const canUserEdit = (noteUserId: number) => user?.id === noteUserId || isLead
   const canUserAnswer = !discussion.answers.map(a => a.note.user.id).includes(user!.id)
 

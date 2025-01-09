@@ -50,25 +50,15 @@ func (c *PFDAClient) EditDiscussion(jsonBody string) error {
 		Attachments  *json.RawMessage `json:"attachments,omitempty"`
 	}
 
-	err := json.Unmarshal([]byte(jsonBody), &data)
-	if err != nil {
+	if err := json.Unmarshal([]byte(jsonBody), &data); err != nil {
 		return err
 	}
-	discussionID := data.DiscussionID
 
-	// Remove the discussionId by re-marshaling without it
-	modifiedData := map[string]interface{}{
-		"content":     data.Content,
-		"attachments": data.Attachments,
-	}
-	modifiedJSON, err := json.Marshal(modifiedData)
-	if err != nil {
-		return err
-	}
+	discussionID := data.DiscussionID
 
 	apiURL := fmt.Sprintf("%s/api/v2/cli/discussions/%d", c.BaseURL, discussionID)
 
-	_, body, err := c.makeRequest("PUT", apiURL, modifiedJSON)
+	_, body, err := c.makeRequest("PUT", apiURL, []byte(jsonBody))
 
 	if err != nil {
 		return err

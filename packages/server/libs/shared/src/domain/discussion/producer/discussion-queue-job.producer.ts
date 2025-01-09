@@ -5,6 +5,7 @@ import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { QueueJobProducer } from '@shared/queue/queue-job.producer'
 import { TASK_TYPE } from '@shared/queue/task.input'
 import { Queue } from 'bull'
+import { NotifyType } from '@shared/domain/discussion/dto/notify.type'
 
 @Injectable()
 export class DiscussionQueueJobProducer extends QueueJobProducer {
@@ -16,12 +17,17 @@ export class DiscussionQueueJobProducer extends QueueJobProducer {
     super()
   }
 
-  async createSpaceNotificationTask(discussionId: number, notifyAll: boolean) {
+  /**
+   * Create a new discussion notification task
+   * @param discussionId
+   * @param notify - list of usernames to notify OR 'all' to notify all users OR 'author' to notify the author only
+   */
+  async createSpaceNotificationTask(discussionId: number, notify: NotifyType) {
     const wrapped = {
       type: TASK_TYPE.NOTIFY_SPACE_DISCUSSION as const,
       payload: {
         discussionId,
-        notifyAll,
+        notify,
       },
       user: this.user,
     }
