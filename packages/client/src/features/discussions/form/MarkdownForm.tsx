@@ -4,14 +4,19 @@ import { Controller, useForm } from 'react-hook-form'
 import { Tooltip } from 'react-tooltip'
 import styled from 'styled-components'
 import * as Yup from 'yup'
+import { ErrorMessage } from '@hookform/error-message'
 import { Button } from '../../../components/Button'
 import { Checkbox } from '../../../components/Checkbox'
-import { MarkdownEditor } from '../../../components/Markdown/MarkdownEditor'
-import { CheckboxLabel } from '../../../components/form/styles'
+import { MarkdownEditor, StyledMarkdownHelper, WeMarkdown } from '../../../components/Markdown/MarkdownEditor'
+import { CheckboxLabel, InputError } from '../../../components/form/styles'
 import { AttachmentsList } from '../AttachmentsList'
 import { NoteScope } from '../api'
 import { NoteForm } from '../discussions.types'
 import { Attachments } from './Attachments'
+import { NotifyMembersSelect } from './NotifyMembersSelect'
+import { TabPanel } from '../../../components/TabsSwitch'
+import ExternalLink from '../../../components/Controls/ExternalLink'
+import { MarkdownIcon } from '../../../components/icons/MarkdownIcon'
 
 const StyledForm = styled.form`
   display: flex;
@@ -22,15 +27,31 @@ const StyledForm = styled.form`
   border: 1px solid var(--c-layout-border);
   background: var(--background);
 `
-
+const MarkAsAnswer = styled.div`
+  min-height: 34px;
+`
 const ButtonRow = styled.div`
-  align-self: flex-end;
-  padding: 8px;
-  padding-top: 0;
+  flex-grow: 1;
   display: flex;
   gap: 8px;
   justify-content: space-between;
   align-items: center;
+  padding: 8px;
+  padding-top: 0;
+  min-height: 34px;
+`
+const ButtonRowActions = styled.div`
+  flex-grow: 1;
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  align-items: flex-start;
+  align-self: stretch;
+`
+const ContentGroup = styled.div`
+  ${TabPanel} {
+    padding: 0 8px;
+  }
 `
 
 const validationSchema = Yup.object().shape({
@@ -75,7 +96,7 @@ export const MarkdownForm = ({
     defaultValues: {
       content: '',
       isAnswer: false,
-      notifyAll: false,
+      notify: [],
       attachments: {
         files: [],
         apps: [],
@@ -106,49 +127,77 @@ export const MarkdownForm = ({
   const { attachments } = watch()
 
   return (
-    <StyledForm id="commentForm" autoComplete="off">
-      <Controller
-        control={control}
-        name="content"
-        render={({ field }) => (
-          <MarkdownEditor field={{ ...field, ref: markdownInputRef || field.ref }} disabled={isSubmitting} />
-        )}
-      />
+    <>
+      <StyledForm id="commentForm" autoComplete="off">
+        <ContentGroup>
+          <Controller
+            control={control}
+            name="content"
+            render={({ field }) => (
+              <MarkdownEditor field={{ ...field, ref: markdownInputRef || field.ref }} disabled={isSubmitting} />
+            )}
+          />
+        </ContentGroup>
 
-      {watch().isAnswer && (
-        <Controller
-          name="attachments"
-          control={control}
-          render={({ field }) => (
-            <AttachmentsList scope={scope} attachments={field.value} onRemoveAttachment={deleteAttachment} />
-          )}
-        />
-      )}
-
-      <ButtonRow>
-        {watch().isAnswer && <Attachments scope={scope} setValue={setValue} attachments={attachments} />}
-        {!isEdit && !isAnswerComment && isComment && (
-          <>
-            <CheckboxLabel data-tooltip-id="answer-checkbox" data-tooltip-content="You have already submitted an answer on this discussion.">
-              <Checkbox
-                {...register('isAnswer')}
-                disabled={isSubmitting || !canUserAnswer}
-                onChange={(event: any) => setValue('isAnswer', event.target.checked)}
-              />
-              Mark as Answer
-            </CheckboxLabel>
-            <Tooltip id="answer-checkbox" delayShow={1000} hidden={canUserAnswer} />
-          </>
+        {watch().isAnswer && (
+          <Controller
+            name="attachments"
+            control={control}
+            render={({ field }) => (
+              <AttachmentsList scope={scope} attachments={field.value} onRemoveAttachment={deleteAttachment} />
+            )}
+          />
         )}
+
+        <ButtonRow>
+          <StyledMarkdownHelper>
+            <ExternalLink to="https://www.markdownguide.org/basic-syntax/">
+              <WeMarkdown>
+                <MarkdownIcon height={17} />
+                Markdown Support
+              </WeMarkdown>
+            </ExternalLink>
+          </StyledMarkdownHelper>
+          <div className="flex gap-2">
+            {watch().isAnswer && <Attachments scope={scope} setValue={setValue} attachments={attachments} />}
+            {!isEdit && !isAnswerComment && isComment && (
+              <MarkAsAnswer>
+                <CheckboxLabel
+                  data-tooltip-id="answer-checkbox"
+                  data-tooltip-content="You have already submitted an answer on this discussion."
+                >
+                  <Checkbox
+                    {...register('isAnswer')}
+                    disabled={isSubmitting || !canUserAnswer}
+                    onChange={(event: any) => setValue('isAnswer', event.target.checked)}
+                  />
+                  Mark as Answer
+                </CheckboxLabel>
+                <Tooltip id="answer-checkbox" delayShow={1000} hidden={canUserAnswer} />
+              </MarkAsAnswer>
+            )}
+          </div>
+        </ButtonRow>
+      </StyledForm>
+
+      <ButtonRowActions>
         {!isEdit && (isComment || isAnswerComment) && (
-          <CheckboxLabel>
-            <Checkbox
-              {...register('notifyAll')}
-              disabled={isSubmitting}
-              onChange={(event: React.ChangeEvent<HTMLInputElement>) => setValue('notifyAll', event.target.checked)}
+          <div>
+            <Controller
+              name="notify"
+              control={control}
+              render={({ field: { onChange, onBlur, value } }) => (
+                <NotifyMembersSelect
+                  onChange={onChange}
+                  onBlur={onBlur}
+                  value={value}
+                  scope={scope}
+                  isSubmitting={isSubmitting}
+                />
+              )}
             />
-            Notify All Members
-          </CheckboxLabel>
+            <ErrorMessage errors={errors} name="scope" render={({ message }) => <InputError>{message}</InputError>} />
+          </div>
         )}
         {isComment && (isEdit || isAnswerComment) && <Button onClick={() => onCancel && onCancel(getValues())}>Cancel</Button>}
         <Button
@@ -160,7 +209,7 @@ export const MarkdownForm = ({
         >
           {isSubmitting ? 'Saving' : submitText}
         </Button>
-      </ButtonRow>
-    </StyledForm>
+      </ButtonRowActions>
+    </>
   )
 }
