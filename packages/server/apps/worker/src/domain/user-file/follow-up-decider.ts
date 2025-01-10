@@ -55,7 +55,7 @@ export class FollowUpDecider {
     return challengeResources.length > 0
   }
 
-  private async isChallengeCardImage(fileUid: string) {
+  private async isChallengeCardImage(fileUid: Uid<'file'>) {
     this.logger.log(`Is file with uid ${fileUid} a challenge card image`)
     const challenges = await this.challengeRepo.findChallengesByCardImageFileUid(fileUid)
     return challenges.length > 0

@@ -31,7 +31,7 @@ const Docs = React.lazy(() => import('./features/docs'))
 const ChallengesList = React.lazy(() => import('./features/challenges/list/ChallengesList'))
 const Spaces = React.lazy(() => import('./features/spaces'))
 const CreateChallengePage = React.lazy(() => import('./features/challenges/form/CreateChallengePage'))
-const EditChallengePage = React.lazy(() => import('./features/challenges/form/EditChallengePage'))
+const ChallengeRoutes = React.lazy(() => import('./features/challenges/routes'))
 const ProposeChallengePage = React.lazy(() => import('./features/challenges/form/ProposeChallengePage'))
 const NewsListPage = React.lazy(() => import('./features/news/NewsPage'))
 const CreateNewsItemPage = React.lazy(() => import('./features/news/form/CreateNewsItemPage'))
@@ -39,7 +39,6 @@ const LandingPage = React.lazy(() => import('./features/overview/OverviewPage'))
 const AboutPage = React.lazy(() => import('./pages/AboutPage'))
 const NotificationsPage = React.lazy(() => import('./pages/Account/Notifications'))
 const ExpertsListPage = React.lazy(() => import('./features/experts/ExpertsList'))
-const ChallengeDetailsPage = React.lazy(() => import('./features/challenges/details/ChallengeDetails'))
 const WorkflowRunPage = React.lazy(() => import('./features/workflows/run/RunWorkflowForm'))
 const EditNewsItemPage = React.lazy(() => import('./features/news/form/EditNewsItemPage'))
 const ListAdminNews = React.lazy(() => import('./features/news/ListAdminNews'))
@@ -104,10 +103,8 @@ const router = createBrowserRouter([
       { path: 'workflows/:workflowUid/analyses/new', element: <WorkflowRunPage /> },
       { path: 'challenges', element: <ChallengesList /> },
       { path: 'challenges/create', element: <CreateChallengePage /> },
-      { path: 'challenges/:challengeId/edit', element: <EditChallengePage /> },
       { path: 'challenges/propose', element: <ProposeChallengePage /> },
-      { path: 'challenges/:challengeId/:page', element: <ChallengeDetailsPage /> },
-      { path: 'challenges/:challengeId', element: <ChallengeDetailsPage /> },
+      { path: 'challenges/:challengeId/*', element: <ChallengeRoutes /> },
       { path: 'news', element: <NewsListPage /> },
       { path: 'experts/:expertId/*', element: <ExpertsSinglePage /> },
       { path: 'experts', element: <ExpertsListPage /> },

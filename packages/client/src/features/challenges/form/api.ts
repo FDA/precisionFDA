@@ -1,18 +1,18 @@
 import axios from 'axios'
 
-
 export interface ProposeChallengePayload {
-  name: string,
-  email: string,
-  organisation: string,
-  specific_question: boolean,
-  specific_question_text: string,
-  data_details: boolean,
-  data_details_text: string,
+  name: string
+  email: string
+  organisation: string
+  specificQuestion: string
+  specificQuestionText: string
+  dataDetails: string
+  dataDetailsText: string
+  captchaValue?: string
 }
 
 export async function proposeChallengeRequest(payload: ProposeChallengePayload) {
-  return axios.post('/api/challenges/propose', payload).then(r => r.data)
+  return axios.post('/api/v2/challenges/propose', payload).then(r => r.data)
 }
 
 export async function fetchScoringAppUsers(): Promise<[]> {

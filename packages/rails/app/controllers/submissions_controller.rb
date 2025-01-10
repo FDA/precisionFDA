@@ -106,7 +106,7 @@ class SubmissionsController < ApplicationController
     end
 
     run_job_create_submission(unsafe_params, input_info)
-    redirect_to show_challenge_path(unsafe_params[:challenge_id], "my_entries")
+    redirect_to show_challenge_path(unsafe_params[:challenge_id], "my-entries")
   end
 
   def publish
@@ -195,7 +195,7 @@ class SubmissionsController < ApplicationController
     flash[:success] = message
     run_job_create_submission(sub_params)
 
-    redirect_to show_challenge_path(unsafe_params[:challenge_id], "my_entries")
+    redirect_to show_challenge_path(unsafe_params[:challenge_id], "my-entries")
   end
 
   def log

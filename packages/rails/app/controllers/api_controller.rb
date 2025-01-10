@@ -812,6 +812,8 @@ class ApiController < ApplicationController
     name = unsafe_params[:name]
     fail "File name needs to be a non-empty String" unless name.is_a?(String) && name != ""
 
+    challenge = Challenge.find_by!(id: unsafe_params[:challengeId])
+
     description = unsafe_params["description"]
     unless description.nil?
       fail "File description needs to be a String" unless description.is_a?(String)
@@ -831,6 +833,9 @@ class ApiController < ApplicationController
       parent: User.challenge_bot,
       scope: "public",
     )
+
+    challenge.card_image_id = file.id
+    challenge.save!
 
     render json: { uid: file.uid, id: file.id }
   end
@@ -1172,37 +1177,8 @@ class ApiController < ApplicationController
   # @param @context [Context] - user logged in
   # @return json { path: path(), message: { type: type, text: text } }
   def assign_app
-    return unless @context.logged_in?
-
-    challenge = Challenge.find_by!(id: unsafe_params[:id])
-    app = App.editable_by(@context).find_by(id: unsafe_params[:app_id])
-
-    unless challenge.can_assign_specific_app?(@context, app)
-      path = app_path(app)
-      type = :error
-      text = "This app cannot be assigned to the current challenge."
-
-      render json: { path: path, message: { type: type, text: text } }
-    end
-
-    if app
-      path = jobs_api_app_path(app)
-      if Challenge.add_app_dev(@context, challenge.id, app.id)
-        type = :success
-        text = "Your app '#{app.title}' was successfully assigned to: #{challenge.name}"
-      else
-        type = :error
-        text = "The specified app could not be assigned to the current \
-          challenge: #{challenge.name} due to an internal error."
-      end
-    else
-      path = app_path(app)
-      type = :error
-      text = "The specified app was not found and could not be assigned \
-        to the current challenge: #{challenge.name}."
-    end
-
-    render json: { path: path, message: { type: type, text: text } }
+    res = https_apps_client.assign_app(unsafe_params[:id], unsafe_params[:app_id])
+    render json: { id: res }
   end
 
   # Inputs

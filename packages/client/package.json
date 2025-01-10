@@ -62,7 +62,7 @@
     "lodash": "^4.17.21",
     "monaco-editor": "^0.50.0",
     "msw": "^2.4.9",
-    "query-string": "^7.0.1",
+    "query-string": "^9.1.1",
     "ramda": "^0.29.1",
     "rc-tree": "^5.7.0",
     "react": "^18.3.1",

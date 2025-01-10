@@ -226,7 +226,7 @@ export class UserNotFoundError extends NotFoundError {
 export class UserInvalidPermissionsError extends NotFoundError {
   constructor(message = 'Error: User invalid permissions', props: MaybeBaseErrorProps = {}) {
     super(message, {
-      code: ErrorCodes.USER_NOT_FOUND,
+      code: ErrorCodes.NOT_PERMITTED,
       statusCode: 403,
       ...props,
     })

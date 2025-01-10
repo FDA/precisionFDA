@@ -1,7 +1,7 @@
 ARG FRONTEND_IMAGE_TAG
 
 # Note(samuel) - non-emulated image doesn't build because of node-sass error
-FROM amd64/node:${FRONTEND_IMAGE_TAG}
+FROM node:${FRONTEND_IMAGE_TAG}
 
 WORKDIR /precision-fda
 RUN npm i -g pnpm@9.0.6

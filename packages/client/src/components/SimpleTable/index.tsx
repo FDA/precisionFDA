@@ -7,8 +7,18 @@ import { useTable, useSortBy, Column } from 'react-table'
 const Styles = styled.div`
   table {
     border-spacing: 0;
-    border: 1px solid black;
+    border: 1px solid var(--c-layout-border-200);
+    thead {
+      border-color: var(--c-layout-border-200);
+    }
+    tbody tr {
+      border-color: var(--c-layout-border-200);
+    }
+    tbody tr:nth-of-type(even) {
+      background-color: inherit;
+    }
     tr {
+      border-color: var(--c-layout-border-200);
       &:last-child {
         td {
           border-bottom: 0;
@@ -19,8 +29,8 @@ const Styles = styled.div`
     td {
       margin: 0;
       padding: 0.5rem;
-      border-bottom: 1px solid black;
-      border-right: 1px solid black;
+      border-bottom: 1px solid var(--c-layout-border-200);
+      border-right: 1px solid var(--c-layout-border-200);
       &:last-child {
         border-right: 0;
       }

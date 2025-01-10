@@ -201,7 +201,9 @@ export const themes = css`
   --c-discussion-answer-bg: #fdfcf2;
   --c-discussion-answer-500: #ac8f43;
   --c-discussion-answer-300: #e4c472;
-  
+
+  --c-tabs-selected: rgba(179, 69, 61, 1);
+
   --c-footer-bg: #f4f8fd;
 }
 
@@ -248,6 +250,8 @@ html[data-theme="dark"] {
     --c-discussion-answer-bg: #32312d;
     --c-discussion-answer-500: #ba983e;
     --c-discussion-answer-300: #7a6633;
+
+    --c-tabs-selected: rgba(203, 84, 76, 1);
 
     --c-modal-border: var(--c-layout-border);
   }
