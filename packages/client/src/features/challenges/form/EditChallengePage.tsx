@@ -5,7 +5,6 @@ import React from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import { Loader } from '../../../components/Loader'
-import NavigationBar from '../../../components/NavigationBar/NavigationBar'
 import { NotAllowedPage } from '../../../components/NotAllowed'
 import { BackLinkMargin } from '../../../components/Page/PageBackLink'
 import { PageTitle } from '../../../components/Page/styles'
@@ -16,19 +15,18 @@ import { StyledPageCenter, StyledPageContent } from '../../spaces/form/styles'
 import { ChallengePayload, editChallengeRequest } from '../api'
 import { useChallengeDetailsQuery } from '../useChallengeDetailsQuery'
 import { ChallengeForm, IChallengeForm } from './ChallengeForm'
-import { formatMutationErrors, mapFormToPayload, subtitle, title } from './common'
+import { mapFormToPayload } from './common'
 
 const EditChallengePage = () => {
   const navigate = useNavigate()
   const user = useAuthUser()
   const queryClient = useQueryClient()
   const { challengeId } = useParams<{ challengeId: string }>()
-  const { data, isLoading } = useChallengeDetailsQuery(challengeId, true)
+  const { data, isLoading } = useChallengeDetailsQuery(challengeId!)
 
   const mutation = useMutation({
     mutationKey: ['edit-challenge'],
-    mutationFn: (payload: ChallengePayload) =>
-      editChallengeRequest(payload, parseInt(challengeId, 10)),
+    mutationFn: (payload: ChallengePayload) => editChallengeRequest(payload, parseInt(challengeId!, 10)),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ['challenge-custom', challengeId],
@@ -40,16 +38,13 @@ const EditChallengePage = () => {
       toast.success('Challenge successfully edited')
     },
     onError: (e: AxiosError) => {
-      if (e?.response?.data?.app_id)
-        toast.error(`Error: ${e?.response?.data?.app_id}`)
+      if (e?.response?.data?.error.message) {
+        toast.error(`Error: ${e?.response?.data?.error.message}`)
+      } else {
+        toast.error('An error occurred while editing the challenge')
+      }
     },
   })
-
-  const mutationErrors = formatMutationErrors(
-    mutation.error instanceof AxiosError
-      ? mutation.error.response?.data
-      : undefined,
-  )
 
   const handleSubmit = async (v: IChallengeForm) => {
     await mutation.mutateAsync(mapFormToPayload(v))
@@ -60,11 +55,11 @@ const EditChallengePage = () => {
   const defaultValues = challenge && {
     name: challenge?.name,
     description: challenge?.description,
-    pre_registration_url: challenge?.pre_registration_url,
-    card_image_url: challenge?.card_image_url,
-    card_image_id: challenge?.card_image_id,
-    start_at: dateToInput(challenge?.start_at),
-    end_at: dateToInput(challenge?.end_at),
+    preRegistrationUrl: challenge?.pre_registration_url,
+    cardImageUrl: challenge?.card_image_url,
+    cardImageId: challenge?.card_image_id,
+    startAt: dateToInput(challenge?.start_at),
+    endAt: dateToInput(challenge?.end_at),
     status: {
       value: challenge?.status,
       label: challenge?.status,
@@ -73,15 +68,15 @@ const EditChallengePage = () => {
       value: challenge?.scope,
       label: challenge?.scope,
     },
-    host_lead_dxuser: challenge?.host_lead_dxuser && {
+    hostLeadDxuser: challenge?.host_lead_dxuser && {
       value: challenge?.host_lead_dxuser,
       label: challenge?.host_lead_dxuser,
     },
-    guest_lead_dxuser: challenge?.guest_lead_dxuser && {
+    guestLeadDxuser: challenge?.guest_lead_dxuser && {
       value: challenge?.guest_lead_dxuser,
       label: challenge?.guest_lead_dxuser,
     },
-    app_owner_id: challenge?.app_owner_id && {
+    appOwnerId: challenge?.app_owner_id && {
       value: challenge?.app_owner_id[1],
       label: challenge?.app_owner_id[0],
     },
@@ -89,22 +84,18 @@ const EditChallengePage = () => {
 
   return (
     <UserLayout mainScroll>
-      <NavigationBar title={title} subtitle={subtitle} user={user} />
       <StyledPageCenter>
         <StyledPageContent>
-          <BackLinkMargin linkTo={`/challenges/${challengeId}`}>
-            Back to Challenge
-          </BackLinkMargin>
+          <BackLinkMargin linkTo={`/challenges/${challengeId}`}>Back to Challenge</BackLinkMargin>
           {isLoading ? (
             <Loader />
           ) : user?.can_create_challenges ? (
             <>
-              <PageTitle>Editing Challenge: {data?.name}</PageTitle>
+              <PageTitle>Settings for Challenge</PageTitle>
               <ChallengeForm
                 defaultValues={defaultValues}
                 challenge={data}
                 onSubmit={handleSubmit}
-                mutationErrors={mutationErrors}
                 isSaving={mutation.isPending}
               />
             </>

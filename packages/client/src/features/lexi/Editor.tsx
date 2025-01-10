@@ -36,7 +36,7 @@ import DragDropPaste from './plugins/DragDropPastePlugin';
 import DraggableBlockPlugin from './plugins/DraggableBlockPlugin';
 import FloatingLinkEditorPlugin from './plugins/FloatingLinkEditorPlugin';
 import FloatingTextFormatToolbarPlugin from './plugins/FloatingTextFormatToolbarPlugin';
-import ImagesPlugin from './plugins/ImagesPlugin';
+import ImagesPlugin, { InsertImageType } from './plugins/ImagesPlugin';
 import InlineImagePlugin from './plugins/InlineImagePlugin';
 import KeywordsPlugin from './plugins/KeywordsPlugin';
 import {LayoutPlugin} from './plugins/LayoutPlugin/LayoutPlugin';
@@ -56,7 +56,7 @@ const skipCollaborationInit =
   // @ts-expect-error
   window.parent != null && window.parent.frames.right === window;
 
-export default function Editor(): JSX.Element {
+export default function Editor({ insertImageType }: { insertImageType: InsertImageType }): JSX.Element {
   const {historyState} = useSharedHistoryContext();
   const {
     settings: {
@@ -113,7 +113,7 @@ export default function Editor(): JSX.Element {
 
   return (
     <>
-      {isRichText && <ToolbarPlugin setIsLinkEditMode={setIsLinkEditMode} />}
+      {isRichText && <ToolbarPlugin setIsLinkEditMode={setIsLinkEditMode} insertImageType={insertImageType} />}
       <div className="editor-wrapper">
         <div
           className={`editor-container ${showTreeView ? 'tree-view' : ''} ${

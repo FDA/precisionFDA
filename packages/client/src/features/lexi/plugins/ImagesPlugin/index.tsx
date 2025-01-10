@@ -43,6 +43,7 @@ import FileInput from '../../ui/FileInput';
 import TextInput from '../../ui/TextInput';
 import { DataPortalResources } from '../../../resources/useDataPortalResourceModal';
 
+export type InsertImageType = 'resource' | 'uri';
 export type InsertImagePayload = Readonly<ImagePayload>;
 
 const getDOMSelection = (targetWindow: Window | null): Selection | null =>
@@ -73,17 +74,16 @@ export function InsertImageUriDialogBody({
   const isDisabled = src === '';
 
   return (
-    <>
+    <div data-testid="lexi-uri-insert">
       <TextInput
         label="Image URL"
-        placeholder="i.e. https://source.unsplash.com/random"
+        placeholder="i.e. https://example.com/image.jpg"
         onChange={setSrc}
         value={src}
         data-test-id="image-modal-url-input"
       />
       <TextInput
         label="Alt Text"
-        placeholder="Random unsplash image"
         onChange={setAltText}
         value={altText}
         data-test-id="image-modal-alt-text-input"
@@ -96,7 +96,7 @@ export function InsertImageUriDialogBody({
           Confirm
         </Button>
       </DialogActions>
-    </>
+    </div>
   );
 }
 
@@ -151,9 +151,11 @@ export function InsertImageUploadedDialogBody({
 }
 
 export function InsertImageDialog({
+  insertImageType,
   activeEditor,
   onClose,
 }: {
+  insertImageType: InsertImageType;
   activeEditor: LexicalEditor;
   onClose: () => void;
 }): JSX.Element {
@@ -176,9 +178,8 @@ export function InsertImageDialog({
     onClose();
   };
   // NOTE: change from main
-  return (
-    <InsertResourceImageDialogBody onClick={onClick} />
-  );
+  if(insertImageType === 'resource') return <InsertResourceImageDialogBody onClick={onClick} />
+  return <InsertImageUriDialogBody onClick={onClick} />
 }
 
 export default function ImagesPlugin({

@@ -276,6 +276,14 @@ class HttpsAppsClient # rubocop:disable Metrics/ClassLength
     )
   end
 
+  def assign_app(id, app_id)
+    request(
+      "/challenges/#{id}/app",
+      { appId: app_id },
+      Net::HTTP::Put::METHOD,
+    )
+  end
+
   def discussion_create(body)
     request(
       "/discussions",
@@ -848,7 +856,7 @@ class HttpsAppsClient # rubocop:disable Metrics/ClassLength
       "/spaces",
       params,
       Net::HTTP::Post::METHOD,
-      )
+    )
   end
 
   def accept_space(id)

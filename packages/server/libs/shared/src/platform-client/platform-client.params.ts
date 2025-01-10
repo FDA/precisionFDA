@@ -61,6 +61,11 @@ type AppAddAuthorizedUsersParams = {
   authorizedUsers: string[]
 }
 
+type AppAddDevelopersParams = {
+  appId: string
+  developers: string[] // user/org dxids
+}
+
 type AppPublishParams = {
   appId: string
   makeDefault?: boolean
@@ -263,6 +268,7 @@ type ProjectLeaveParams = {
 
 export {
   AppAddAuthorizedUsersParams,
+  AppAddDevelopersParams,
   AppCreateParams,
   AppDescribeParams,
   AppletCreateParams,

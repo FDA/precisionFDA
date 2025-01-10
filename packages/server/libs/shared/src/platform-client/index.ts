@@ -1,4 +1,3 @@
-/* eslint-disable max-len */
 import type { Logger } from '@nestjs/common'
 // just a bunch of api calls that will be easy to mock
 import { DxId } from '@shared/domain/entity/domain/dxid'
@@ -13,6 +12,7 @@ import type { AnyObject } from '../types'
 import { maskAuthHeader } from '../utils/logging'
 import {
   AppAddAuthorizedUsersParams,
+  AppAddDevelopersParams,
   AppCreateParams,
   AppDescribeParams,
   AppletCreateParams,
@@ -132,6 +132,11 @@ export class PlatformClient {
     return await this.sendRequest(options)
   }
 
+  /**
+   * Add users and/or orgs to the access list.
+   * @param params
+   * @see https://documentation.dnanexus.com/developer/api/running-analyses/apps#api-method-app-xxxx-yyyy-addauthorizedusers
+   */
   async appAddAuthorizedUsers(params: AppAddAuthorizedUsersParams): Promise<ClassIdResponse> {
     const url = `${config.platform.apiUrl}/${params.appId}/addAuthorizedUsers`
     const options: AxiosRequestConfig = {
@@ -144,6 +149,28 @@ export class PlatformClient {
     return await this.sendRequest(options)
   }
 
+  /**
+   * Add developers (users and/or orgs) to the app.
+   * @param params
+   * @see https://documentation.dnanexus.com/developer/api/running-analyses/apps#api-method-app-xxxx-yyyy-adddevelopers
+   */
+  async appAddDevelopers(params: AppAddDevelopersParams): Promise<ClassIdResponse> {
+    const url = `${config.platform.apiUrl}/${params.appId}/addDevelopers`
+    const options: AxiosRequestConfig = {
+      method: 'POST',
+      data: {
+        developers: params.developers,
+      },
+      url,
+    }
+    return await this.sendRequest(options)
+  }
+
+  /**
+   *
+   * @param params
+   * @see https://documentation.dnanexus.com/developer/api/running-analyses/apps#api-method-app-xxxx-yyyy-publish
+   */
   async appPublish(params: AppPublishParams): Promise<ClassIdResponse> {
     const url = `${config.platform.apiUrl}/${params.appId}/publish`
     const options: AxiosRequestConfig = {
@@ -208,6 +235,7 @@ export class PlatformClient {
     return await this.sendRequest(options)
   }
 
+  // NOT USED ANYMORE
   async folderRemove(params: RemoveFolderParams): Promise<ClassIdResponse> {
     const url = `${config.platform.apiUrl}/${params.projectId}/removeFolder`
     const options: AxiosRequestConfig = {
@@ -916,13 +944,10 @@ export class PlatformClient {
     const results: T[] = []
     const paginateSeq = async (): Promise<void> => {
       do {
-        // eslint-disable-next-line no-await-in-loop
         const res = await requestFunc(nextMapping)
         if (!isNil(res.next)) {
-          // eslint-disable-next-line require-atomic-updates
           nextMapping = { id: res.next.id, project: res.next.project }
         } else {
-          // eslint-disable-next-line require-atomic-updates
           nextMapping = undefined
         }
         results.push(...res.results)
@@ -985,7 +1010,7 @@ export class PlatformClient {
       //     "message": "BillTo for this job's project must have the \"httpsApp\" feature enabled to run this executable"
       //   }
       //
-      // Howvever, there's also a class of error response where the response payload is HTML
+      // However, there's also a class of error response where the response payload is HTML
       // See platform-client.mock.ts for more examples
       //
       const statusCode = err.response.status

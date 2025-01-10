@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2024_10_29_115056) do
+ActiveRecord::Schema.define(version: 2024_11_12_111500) do
 
   create_table "accepted_licenses", id: :integer, charset: "utf8mb3", collation: "utf8mb3_unicode_ci", force: :cascade do |t|
     t.integer "license_id"
@@ -194,6 +194,12 @@ ActiveRecord::Schema.define(version: 2024_10_29_115056) do
     t.integer "specified_order"
     t.string "scope", default: "public", null: false
     t.string "pre_registration_url"
+    t.text "info_editor_state", size: :medium
+    t.text "info_content", size: :medium
+    t.text "results_editor_state", size: :medium
+    t.text "results_content", size: :medium
+    t.text "pre_registration_editor_state", size: :medium
+    t.text "pre_registration_content", size: :medium
     t.index ["admin_id"], name: "index_challenges_on_admin_id"
     t.index ["app_id"], name: "index_challenges_on_app_id"
     t.index ["app_owner_id"], name: "index_challenges_on_app_owner_id"
@@ -288,6 +294,7 @@ ActiveRecord::Schema.define(version: 2024_10_29_115056) do
     t.string "uid", collation: "utf8mb3_bin"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.string "salt"
     t.index ["dxid"], name: "index_dbclusters_on_dxid", unique: true
     t.index ["uid"], name: "index_dbclusters_on_uid", unique: true
     t.index ["user_id"], name: "index_dbclusters_on_user_id"
@@ -883,6 +890,16 @@ ActiveRecord::Schema.define(version: 2024_10_29_115056) do
     t.bigint "cumulative_byte_hours"
   end
 
+  create_table "user_dbcluster_salt", charset: "utf8mb3", collation: "utf8mb3_unicode_ci", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.bigint "dbcluster_id", null: false
+    t.string "salt", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["dbcluster_id"], name: "fk_rails_087f59dba3"
+    t.index ["user_id"], name: "fk_rails_35beefcb02"
+  end
+
   create_table "users", id: :integer, charset: "utf8mb3", collation: "utf8mb3_unicode_ci", force: :cascade do |t|
     t.string "dxuser"
     t.string "private_files_project"
@@ -1047,5 +1064,7 @@ ActiveRecord::Schema.define(version: 2024_10_29_115056) do
   add_foreign_key "submissions", "challenges"
   add_foreign_key "submissions", "jobs"
   add_foreign_key "submissions", "users"
+  add_foreign_key "user_dbcluster_salt", "dbclusters"
+  add_foreign_key "user_dbcluster_salt", "users"
   add_foreign_key "users", "orgs"
 end

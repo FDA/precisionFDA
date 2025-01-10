@@ -8,10 +8,10 @@ export const subtitle = 'Advancing regulatory standards for bioinformatics, RWD,
 
 const commonValidationSchema = {
   name: Yup.string().required('Name is required').max(150, 'Name cannot be longer than 150 characters'),
-  card_image_id: Yup.string().nullable().optional(),
-  card_image_url: Yup.string().nullable().optional(),
-  card_image_file: Yup.mixed()
-  .when('card_image_url', {
+  cardImageId: Yup.string().nullable().optional(),
+  cardImageUrl: Yup.string().nullable().optional(),
+  cardImageFile: Yup.mixed()
+  .when('cardImageUrl', {
     is: (val: string) => !val,
     then: Yup.mixed().test('presence', 'Image file is required', (value: FileList) => {
       if(value?.length > 0) {
@@ -26,19 +26,19 @@ const commonValidationSchema = {
     })
     .nullable()
     .required('Scope is required'),
-  app_owner_id: Yup.object()
+  appOwnerId: Yup.object()
     .shape({
-      value: Yup.string(),
+      value: Yup.number(),
     })
     .nullable()
     .required('Scoring App User is required'),
-  start_at: Yup.date()
+  startAt: Yup.date()
     .min(new Date(), 'Start date has to be in the future')
     .nullable()
     .typeError('Invalid Date')
     .required('Start Date is required'),
-  end_at: Yup.date()
-    .min(Yup.ref('start_at'), 'End date cannot be before start date')
+  endAt: Yup.date()
+    .min(Yup.ref('startAt'), 'End date cannot be before start date')
     .nullable()
     .typeError('Invalid Date')
     .required('End Date is required'),
@@ -48,11 +48,11 @@ const commonValidationSchema = {
     })
     .nullable()
     .required('Status is required'),
-  pre_registration_url: Yup.string()
+  preRegistrationUrl: Yup.string()
     .when('status', {
       is: (val: { value: string }) => val?.value === 'pre-registration',
       then: Yup.string()
-        .required('Preregistration link is required for the pre-registration status')
+        .required('Preregistration link is required for the pre-registration status'),
     }).test(
       'is-valid-url',
       'Link must be a valid URL and start with either \'http://\' or \'https://\'',
@@ -62,13 +62,13 @@ const commonValidationSchema = {
 
 export const createValidationSchema = Yup.object().shape({
   ...commonValidationSchema,
-  host_lead_dxuser: Yup.object()
+  hostLeadDxuser: Yup.object()
     .shape({
       value: Yup.string(),
     })
     .nullable()
     .required('Host Lead User is required'),
-  guest_lead_dxuser: Yup.object()
+  guestLeadDxuser: Yup.object()
     .shape({
       value: Yup.string(),
     })
@@ -78,7 +78,7 @@ export const createValidationSchema = Yup.object().shape({
 
 export const editValidationSchema = Yup.object().shape({
   ...commonValidationSchema,
-  start_at: Yup.date()
+  startAt: Yup.date()
     .nullable()
     .typeError('Invalid Date')
     .required('Start date is required'),
@@ -88,15 +88,15 @@ export const proposeValidationSchema = Yup.object().shape({
   name: Yup.string().required('Name is required'),
   email: Yup.string().email().required('Email is required'),
   organisation: Yup.string().required('Organisation is required'),
-  specific_question: Yup.string().required('Please select one of the options'),
-  specific_question_text: Yup.string().when('specific_question', {
-    is: (specific_question: string) => specific_question === 'Yes',
+  specificQuestion: Yup.string().required('Please select one of the options'),
+  specificQuestionText: Yup.string().when('specificQuestion', {
+    is: (specificQuestion: string) => specificQuestion === 'Yes',
     then: Yup.string().required('Field is required'),
     otherwise: Yup.string().nullable(),
   }),
-  data_details: Yup.string().required('Please select one of the options'),
-  data_details_text: Yup.string().when('data_details', {
-    is: (data_details: string) => data_details === 'Yes',
+  dataDetails: Yup.string().required('Please select one of the options'),
+  dataDetailsText: Yup.string().when('dataDetails', {
+    is: (dataDetails: string) => dataDetails === 'Yes',
     then: Yup.string().required('Field is required'),
     otherwise: Yup.string().nullable(),
   }),
@@ -118,16 +118,16 @@ export function formatMutationErrors(
 
 export function mapFormToPayload(v: IChallengeForm): ChallengePayload {
   return {
-    app_owner_id: v.app_owner_id?.value,
+    appOwnerId: v.appOwnerId?.value,
     description: v.description,
-    end_at: v.end_at,
-    guest_lead_dxuser: v.guest_lead_dxuser?.value,
-    host_lead_dxuser: v.host_lead_dxuser?.value,
-    image: v?.card_image_file?.[0],
+    endAt: v.endAt,
+    guestLeadDxuser: v.guestLeadDxuser?.value,
+    hostLeadDxuser: v.hostLeadDxuser?.value,
+    image: v?.cardImageFile?.[0],
     name: v.name,
-    pre_registration_url: v.pre_registration_url,
+    preRegistrationUrl: v.preRegistrationUrl === '' ? null : v.preRegistrationUrl,
     scope: v.scope.value,
-    start_at: v.start_at,
+    startAt: v.startAt,
     status: v.status?.value,
   }
 }

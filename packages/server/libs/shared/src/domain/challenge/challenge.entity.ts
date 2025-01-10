@@ -7,7 +7,6 @@ import {
   PrimaryKey,
   Property,
   Ref,
-  Reference,
 } from '@mikro-orm/core'
 import { Uid } from '@shared/domain/entity/domain/uid'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
@@ -64,8 +63,26 @@ export class Challenge extends ScopedEntity {
   @Property()
   appId: number
 
-  @ManyToOne(() => User)
-  admin!: Ref<User>
+  @Property()
+  infoContent: string
+
+  @Property()
+  infoEditorState: string
+
+  @Property()
+  resultsContent: string
+
+  @Property()
+  resultsEditorState: string
+
+  @Property()
+  preRegistrationContent: string
+
+  @Property()
+  preRegistrationEditorState: string
+
+  @Property()
+  specifiedOrder: number
 
   @ManyToOne(() => User)
   appOwner!: Ref<User>
@@ -73,9 +90,7 @@ export class Challenge extends ScopedEntity {
   @OneToMany({ entity: () => ChallengeResource, mappedBy: 'challenge', orphanRemoval: true })
   challengeResources = new Collection<ChallengeResource>(this)
 
-  constructor(admin: User, appOwner: User) {
+  constructor() {
     super()
-    this.admin = Reference.create(admin)
-    this.appOwner = Reference.create(appOwner)
   }
 }

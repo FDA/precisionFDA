@@ -5,7 +5,7 @@ import { SimpleTable } from '../../../components/SimpleTable'
 import { IUser } from '../../../types/user'
 import { StyledNameCell } from '../../home/home.styles'
 import { StyledChallengeSubmissionsTable } from './styles'
-import { Submission } from './submission.types'
+import { SubmissionV2 } from './submission.types'
 import { InputFileCell, NameCell } from './SubmissionTable'
 import { useChallengeSubmissionQuery } from './useChallengeSubmissionQuery'
 
@@ -16,7 +16,7 @@ export const useSubmissionTableColumns = ({
   isSpaceMember: boolean
   authUser: IUser
 }) => {
-  return useMemo<Column<Submission>[]>(
+  return useMemo<Column<SubmissionV2>[]>(
     () =>
       [
         {
@@ -33,7 +33,7 @@ export const useSubmissionTableColumns = ({
               as="a"
               href={`/users/${cell.row.original.user.dxuser}`}
             >
-              {`${value.first_name} ${value.last_name}`}
+              {`${value.fullName}`}
             </StyledNameCell>
           ),
         },
@@ -50,10 +50,10 @@ export const useSubmissionTableColumns = ({
         },
         {
           Header: 'Created',
-          accessor: 'created_at',
+          accessor: 'createdAt',
           minWidth: 200,
         },
-      ] as Column<Submission>[],
+      ] as Column<SubmissionV2>[],
     [],
   )
 }
@@ -62,15 +62,15 @@ export const ChallengeSubmissionsTable = ({
   challengeId,
   user,
   isSpaceMember,
-}: any) => {
+}: {challengeId: number, user: IUser, isSpaceMember: boolean}) => {
   const { data: submissionsData, isLoading } =
     useChallengeSubmissionQuery(challengeId)
-
+    
   const columns = useSubmissionTableColumns({ authUser: user, isSpaceMember })
 
   const data = useMemo(
-    () => submissionsData?.submissions || [],
-    [submissionsData?.submissions],
+    () => submissionsData || [],
+    [submissionsData],
   )
 
   const isLoggedIn = user && Object.keys(user).length > 0

@@ -91,9 +91,6 @@ export const Pagination = ({
   showPageOf?: boolean
   showPageJump?: boolean
 }) => {
-  if (isHidden) {
-    return null
-  }
   const [localTotal, setLocalTotal] = useState<number>(totalPages || 1)
   const [localPage, setLocalPage] = useState<number>(page || 1)
   const pageLowerBound = (page - 1) * perPage + 1
@@ -124,6 +121,10 @@ export const Pagination = ({
   const handleSetPage = (pa: number) => {
     setLocalPage(pa)
     setPage(pa)
+  }
+
+  if (isHidden) {
+    return null
   }
 
   return (

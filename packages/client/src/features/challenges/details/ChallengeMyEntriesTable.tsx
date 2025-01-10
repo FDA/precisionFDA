@@ -3,48 +3,51 @@ import { Column } from 'react-table'
 import styled, { css } from 'styled-components'
 import { Loader } from '../../../components/Loader'
 import { SimpleTable } from '../../../components/SimpleTable'
-import { colors } from '../../../styles/theme'
 import { IUser } from '../../../types/user'
 import { StyledNameCell } from '../../home/home.styles'
 import { StyledChallengeSubmissionsTable } from './styles'
-import { Submission } from './submission.types'
+import { SubmissionV2 } from './submission.types'
 import { InputFileCell, NameCell } from './SubmissionTable'
 import { useChallengeEntriesQuery } from './useChallengeEntriesQuery'
 
-const StyledStateCell = styled.div<{state: Submission['job_state']}>`
-  color: ${colors.textDarkGrey};
+const StyledStateCell = styled.div<{state: SubmissionV2['job']['state']}>`
+  color: var(--c-text-700);
   padding: 4px 15px;
   border-radius: 3px;
   width: fit-content;
-  margin-left: 15px;
+  margin: 8px;
 
   ${({ state }) => {
     if(state === 'running' || state === 'idle') {
       return css`
-        color: ${colors.primaryBlue};
-        background-color: #f0f9fd;
+        color: var(--primary-600);
+        background-color: var(--primary-100);
+        border: 1px solid var(--primary-300);
       `
     }
     if(state === 'done') {
       return css`
-        color: #3c763d;
-        background-color: #dff0d8;
+        color: var(--success-600);
+        background-color: var(--success-100);
+        border: 1px solid var(--success-300);
       `
     }
     if(state === 'failed' || state === 'terminated') {
       return css`
-        color: #821a1d;
-        background-color: #ffeeed;
+        color: var(--warning-600);
+        background-color: var(--warning-100);
+        border: 1px solid var(--warning-300);
       `
     }
     return css`
-      color: ${colors.primaryBlue};
-      background-color: #f0f9fd;
+      color: var(--primary-600);
+      background-color: var(--primary-100);
+      border: 1px solid var(--primary-300);
     `
   }}
 `
 
-const StateCell = ({ jobState }: { jobState: Submission['job_state'] }) => {
+const StateCell = ({ jobState }: { jobState: SubmissionV2['job']['state'] }) => {
   let state = ''
   switch (jobState) {
     case 'done':
@@ -71,12 +74,12 @@ export const useSubmissionTableColumns = ({
   isSpaceMember: boolean
   authUser: IUser
 }) => {
-  return useMemo<Column<Submission>[]>(
+  return useMemo<Column<SubmissionV2>[]>(
     () =>
       [
         {
           Header: 'State',
-          accessor: 'job_state',
+          accessor: 'job.state',
           minWidth: 100,
           className: 'state-cell',
           Cell: ({ cell, value }) => {
@@ -97,7 +100,7 @@ export const useSubmissionTableColumns = ({
               as="a"
               href={`/users/${cell.row.original.user.dxuser}`}
             >
-              {`${value.first_name} ${value.last_name}`}
+              {`${value.firstName} ${value.lastName}`}
             </StyledNameCell>
           ),
         },
@@ -115,10 +118,10 @@ export const useSubmissionTableColumns = ({
         },
         {
           Header: 'Created',
-          accessor: 'created_at',
+          accessor: 'createdAt',
           minWidth: 200,
         },
-      ] as Column<Submission>[],
+      ] as Column<SubmissionV2>[],
     [],
   )
 }
@@ -133,11 +136,11 @@ export const ChallengeMyEntriesTable = ({
   const columns = useSubmissionTableColumns({ authUser: user, isSpaceMember })
 
   const data = useMemo(
-    () => submissionsData?.submissions || [],
-    [submissionsData?.submissions],
+      () => submissionsData || [],
+      [submissionsData],
   )
 
-  const isLoggedIn = user && Object.keys(user).length > 0
+  const isLoggedIn = !!user && Object.keys(user).length > 0
   if (!isLoggedIn) {
     return (
       <Info>

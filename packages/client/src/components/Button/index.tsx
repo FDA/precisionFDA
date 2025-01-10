@@ -7,6 +7,7 @@ export const Button = styled.button.attrs(({ disabled }) => ({ 'aria-disabled': 
 } >`
   position: relative;
   display: flex;
+  gap: 8px;
   width: fit-content;
   align-items: center;
   white-space: nowrap;
@@ -106,6 +107,10 @@ export const Button = styled.button.attrs(({ disabled }) => ({ 'aria-disabled': 
       border: 1px solid transparent;
     }
   }
+`
+export const OutlineButton = styled(Button)`
+  background: transparent;
+  color: white;
 `
 
 export const TransparentButton = styled(Button)`

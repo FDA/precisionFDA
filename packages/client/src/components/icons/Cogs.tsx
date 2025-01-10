@@ -1,7 +1,7 @@
 import React from 'react'
 import { Svg } from './Svg'
 
-export const CogsIcon = ({ width, height }: { width?: number, height?: number }) => (
+export const CogsIcon = ({ width, height = 12 }: { width?: number, height?: number }) => (
   <Svg
     aria-hidden="true"
     data-prefix="fas"
