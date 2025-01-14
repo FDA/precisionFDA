@@ -21,10 +21,10 @@
         <button class="btn btn-default" data-type="month">Month</button>
         <button class="btn btn-default" data-type="year">Year</button>
       </div>
-      <div class="pull-left">
-        <input class="form-control add-datetimepicker" type="text" name="date_at" />
-        <input class="form-control add-datetimepicker" type="text" name="date_to" />
-        <button class="btn btn-primary" data-bind="click: loadData">Submit</button>
+      <div class="pull-left d-flex">
+        <input class="form-control date-input" type="text" name="date_at" placeholder="MM/DD/YYYY" />
+        <input class="form-control date-input" type="text" name="date_to" placeholder="MM/DD/YYYY" />
+        <button class="btn btn-primary" data-bind="click: validateAndSubmit">Submit</button>
       </div>
     </div>
 
