@@ -21,12 +21,9 @@ const CreateDataPortalPage = React.lazy(
 const DataPortalDetailsPage = React.lazy(
   () => import('./details/DataPortalDetailsPage'),
 )
-const DataPortalContentEditPage = React.lazy(
-  () => import('./form/DataPortalContentEditPage'),
-)
 
 const DataPortalRoutes = () => {
-  usePageMeta({ title: 'DAaaS - precisionFDA' })
+  usePageMeta({ title: 'Data Portals - precisionFDA' })
   const { loading, user } = useAuthUser(true)
 
   useToastWSHandler(user)
