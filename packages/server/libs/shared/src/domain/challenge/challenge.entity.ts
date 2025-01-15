@@ -15,6 +15,7 @@ import { ChallengeResource } from './challenge-resource.entity'
 import { CHALLENGE_STATUS } from './challenge.enum'
 import { ChallengeRepository } from './challenge.repository'
 import { ScopedEntity } from '@shared/database/scoped.entity'
+import { SpaceScope } from '@shared/types/common'
 
 @Entity({ tableName: 'challenges', repository: () => ChallengeRepository })
 export class Challenge extends ScopedEntity {
@@ -92,5 +93,27 @@ export class Challenge extends ScopedEntity {
 
   constructor() {
     super()
+  }
+
+  async isAccessibleBy(user: User) {
+    if (await user?.isSiteOrChallengeAdmin()) {
+      return true
+    }
+
+    if (this.isPublic()) {
+      return this.status !== CHALLENGE_STATUS.SETUP
+    }
+
+    if (this.isInSpace()) {
+      const spaces = (await user?.accessibleSpaces()) ?? []
+      return spaces.map((space) => space.scope).includes(this.scope as SpaceScope)
+    }
+  }
+
+  async isEditableBy(user: User) {
+    if (!user) {
+      return false
+    }
+    return await user.isSiteOrChallengeAdmin()
   }
 }
