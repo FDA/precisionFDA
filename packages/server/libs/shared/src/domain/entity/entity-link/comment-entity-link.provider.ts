@@ -21,15 +21,15 @@ export class CommentEntityLinkProvider extends EntityLinkProvider<'comment'> {
 
     const answerID = comment.commentableId.id
     const discussionID = answer.discussion.id
-    const commentSegment = this.getUrlSegment(comment)
+    const commentSegment = this.getCommentUrlSegment(comment)
 
     if (this.MY_HOME_SCOPES.includes(scope)) {
-      const url = this.getUrl(discussionID, undefined, answerID)
+      const url = this.getDiscussionUrlSegment(discussionID, undefined, answerID)
       // currently not used and not working properly (page still in ruby)
       return `/${url}/${commentSegment}` as const
     } else {
       const spaceID = note.getSpaceId()
-      const url = this.getUrl(discussionID, spaceID, answerID)
+      const url = this.getDiscussionUrlSegment(discussionID, spaceID, answerID)
       return `/${url}/${commentSegment}` as const
     }
   }
@@ -39,27 +39,31 @@ export class CommentEntityLinkProvider extends EntityLinkProvider<'comment'> {
     const note = await discussion.note.load()
     const scope = note.scope
     const discussionID = discussion.id
-    const commentSegment = this.getUrlSegment(comment)
+    const commentSegment = this.getCommentUrlSegment(comment)
 
     if (this.MY_HOME_SCOPES.includes(scope)) {
       // currently not used and not working properly (page still in ruby)
-      const url = this.getUrl(discussionID, undefined, undefined)
+      const url = this.getDiscussionUrlSegment(discussionID, undefined, undefined)
       return `/${url}/${commentSegment}` as const
     } else {
       const note = comment.commentableId.getProperty('note').getEntity()
       const spaceID = note.getSpaceId()
-      const url = this.getUrl(discussionID, spaceID, undefined)
+      const url = this.getDiscussionUrlSegment(discussionID, spaceID, undefined)
       return `/${url}/${commentSegment}` as const
     }
   }
 
-  private getUrl(discussionID: number, spaceID?: number, answerID?: number): string {
-    const spaceSegment = spaceID ? `spaces/${spaceID}` : ''
+  private getDiscussionUrlSegment(
+    discussionID: number,
+    spaceID?: number,
+    answerID?: number,
+  ): string {
+    const spaceSegment = spaceID ? `spaces/${spaceID}/` : '/'
     const answerSegment = answerID ? `/answers/${answerID}` : ''
-    return `${spaceSegment}/discussions/${discussionID}${answerSegment}`
+    return `${spaceSegment}discussions/${discussionID}${answerSegment}`
   }
 
-  private getUrlSegment(comment: Comment): string {
+  private getCommentUrlSegment(comment: Comment): string {
     return 'comments/' + comment.id
   }
 }

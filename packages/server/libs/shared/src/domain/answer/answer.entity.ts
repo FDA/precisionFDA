@@ -19,26 +19,29 @@ import { BaseEntity } from '../../database/base.entity'
 @Entity({ tableName: 'answers' })
 export class Answer extends BaseEntity {
   @PrimaryKey()
-    id: number
+  id: number
 
   @OneToOne({ entity: () => Note, cascade: [Cascade.REMOVE] })
-    note: Ref<Note>
+  note: Ref<Note>
 
   @ManyToOne({ entity: () => Discussion })
-    discussion: Ref<Discussion>
+  discussion: Ref<Discussion>
 
   @ManyToOne({ entity: () => User })
-    user: Ref<User>
+  user: Ref<User>
 
-  @OneToMany({ entity: () => AnswerComment, mappedBy: ac => ac.commentableId,
-    cascade: [Cascade.REMOVE]})
-    comments = new Collection<AnswerComment>(this)
+  @OneToMany({
+    entity: () => AnswerComment,
+    mappedBy: (ac) => ac.commentableId,
+    cascade: [Cascade.REMOVE],
+  })
+  comments = new Collection<AnswerComment>(this)
 
   @Property({ hidden: false })
-    createdAt = new Date()
+  createdAt = new Date()
 
   @Property({ onUpdate: () => new Date(), hidden: false })
-    updatedAt = new Date()
+  updatedAt = new Date()
 
   constructor(note: Note, discussion: Discussion, user: User) {
     super()

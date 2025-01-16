@@ -120,7 +120,7 @@ export const PageRow = styled.div`
   width: 100%;
   flex-direction: column-reverse;
   gap: 64px;
-  padding: 64px 0;
+  padding: 44px 0;
   @media (min-width: ${breakPoints.large}px) {
     flex-direction: row;
     justify-content: space-between;

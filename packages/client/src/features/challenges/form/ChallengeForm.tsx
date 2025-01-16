@@ -5,12 +5,10 @@ import React, { useEffect } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import styled from 'styled-components'
 import { unstable_usePrompt } from 'react-router-dom'
-
-import { FieldGroup, FieldLabel, InputError } from '../../../components/form/styles'
+import { FieldGroup } from '../../../components/form/FieldGroup'
+import { FieldLabel, InputError } from '../../../components/form/styles'
 import { InputDateTime, InputFile, InputText } from '../../../components/InputText'
 import { Loader } from '../../../components/Loader'
-import { useMutationErrorEffect } from '../../../hooks/useMutationErrorEffect'
-import { MutationErrors } from '../../../types/utils'
 import { Challenge } from '../types'
 import { ChallengeCreateUpdateModal } from './ChallengeCreateUpdateModal'
 import { createValidationSchema, editValidationSchema } from './common'
@@ -29,16 +27,16 @@ export interface IChallengeForm {
   name: string
   description: string
   scope: { label: string; value: string }
-  app_owner_id: { label: string; value: string }
-  start_at: Date
-  end_at: Date
-  host_lead_dxuser: { label: string; value: string }
-  guest_lead_dxuser: { label: string; value: string }
-  card_image_url: string
-  card_image_id: string
-  card_image_file: File[]
+  appOwnerId: { label: string; value: number }
+  startAt: Date
+  endAt: Date
+  hostLeadDxuser: { label: string; value: string }
+  guestLeadDxuser: { label: string; value: string }
+  cardImageUrl: string
+  cardImageId: string
+  cardImageFile: File[]
   status: { label: string; value: string }
-  pre_registration_url: string
+  preRegistrationUrl: string
 }
 
 const StyledForm = styled.form`
@@ -82,25 +80,22 @@ export const ChallengeForm = ({
   defaultValues = {},
   onSubmit,
   isSaving = false,
-  mutationErrors,
 }: {
   challenge?: Challenge
   defaultValues?: any
   onSubmit: (a: any) => Promise<any>
   isSaving?: boolean
-  mutationErrors?: MutationErrors
 }) => {
   const [base64Image, setBase64Image] = React.useState<string | null>(null)
   const isEditMode = !!challenge
   const ended = isEditMode
-    ? new Date().getTime() > new Date(challenge.end_at).getTime()
+    ? new Date().getTime() > new Date(challenge.endAt).getTime()
     : false
 
   const {
     control,
     register,
     handleSubmit,
-    setError,
     watch,
     formState: { errors, isSubmitting, dirtyFields },
     trigger,
@@ -113,32 +108,31 @@ export const ChallengeForm = ({
       name: '',
       description: '',
       scope: null,
-      app_owner_id: null,
-      start_at: null,
-      end_at: null,
-      host_lead_dxuser: null,
-      guest_lead_dxuser: null,
-      card_image_file: null,
-      card_image_url: null,
-      card_image_id: null,
+      appOwnerId: null,
+      startAt: null,
+      endAt: null,
+      hostLeadDxuser: null,
+      guestLeadDxuser: null,
+      cardImageFile: null,
+      cardImageUrl: null,
+      cardImageId: null,
       status: null,
-      pre_registration_url: '',
+      preRegistrationUrl: '',
       ...defaultValues,
     },
   })
 
   useEffect(() => {
-    const img = watch().card_image_file
+    const img = watch().cardImageFile
     if (img?.[0] != null) {
       getBase64(img?.[0], setBase64Image)
     }
-  }, [watch().card_image_file])
+  }, [watch().cardImageFile])
 
-  useMutationErrorEffect(setError, mutationErrors)
 
   unstable_usePrompt({
     message: 'There are unsaved changes, are you sure you want to leave?',
-    when: ({ currentLocation, nextLocation }: any) => 
+    when: ({ currentLocation, nextLocation }: any) =>
       (!isSubmitting && Object.keys(dirtyFields).length > 0) &&
       currentLocation.pathname !== nextLocation.pathname,
   })
@@ -147,8 +141,7 @@ export const ChallengeForm = ({
     <>
       <div>
         <StyledForm onSubmit={handleSubmit(onSubmit)} autoComplete="off">
-          <FieldGroup>
-            <label>Name (required)</label>
+          <FieldGroup label='Name' required>
             <InputText
               placeholder="Name of the challenge"
               {...register('name')}
@@ -161,8 +154,7 @@ export const ChallengeForm = ({
             />
           </FieldGroup>
 
-          <FieldGroup>
-            <label>Description</label>
+          <FieldGroup label='Description'>
             <InputText
               type="textarea"
               placeholder="What is this challenge about?"
@@ -181,13 +173,13 @@ export const ChallengeForm = ({
               <ImageUploadPreview
                 width={300}
                 src={base64Image || undefined}
-                alt="portal img"
+                alt="challenge img"
               />
             ) : (
-              defaultValues?.card_image_url && (
+              defaultValues?.cardImageUrl && (
                 <ImageUploadPreview
                   width={300}
-                  src={defaultValues?.card_image_url}
+                  src={defaultValues?.cardImageUrl}
                   alt="challenge img"
                 />
               )
@@ -198,27 +190,26 @@ export const ChallengeForm = ({
                 Challenge image file
               </FieldLabel>
               <InputFile
-                {...register('card_image_file')}
+                {...register('cardImageFile')}
                 type="file"
                 accept="image/*"
                 disabled={isSubmitting}
               />
               <ErrorMessage
                 errors={errors}
-                name="card_image_file"
+                name="cardImageFile"
                 render={({ message }) => <InputError>{message}</InputError>}
               />
             </>
           </FieldGroup>
 
-          <FieldGroup>
-            <label>Scope (required)</label>
+          <FieldGroup label='Scope' required>
             <Controller
               name="scope"
               control={control}
               render={({ field: { onChange, onBlur, value }}) => (
                 <ScopeFieldSelect
-                  isSubmitting={isSubmitting}
+                  isSubmitting={isSubmitting || isEditMode}
                   onChange={onChange}
                   onBlur={onBlur}
                   value={value}
@@ -232,10 +223,9 @@ export const ChallengeForm = ({
             />
           </FieldGroup>
 
-          <FieldGroup>
-            <label>Scoring App User (required)</label>
+          <FieldGroup label='Scoring App User' required>
             <Controller
-              name="app_owner_id"
+              name="appOwnerId"
               control={control}
               render={({ field: { value, onChange, onBlur }}) => (
                 <ScoringAppUserSelect
@@ -253,38 +243,35 @@ export const ChallengeForm = ({
             />
           </FieldGroup>
 
-          <FieldGroup>
-            <label>Start at (required)</label>
+          <FieldGroup label='Start at' required>
             <StyledDateInput
               type="datetime-local"
-              {...register('start_at', { valueAsDate: true })}
+              {...register('startAt', { valueAsDate: true })}
               disabled={isSubmitting || ended}
             />
             <ErrorMessage
               errors={errors}
-              name="start_at"
+              name="startAt"
               render={({ message }) => <InputError>{message}</InputError>}
             />
           </FieldGroup>
 
-          <FieldGroup>
-            <label>End at (required)</label>
+          <FieldGroup label='End at' required>
             <StyledDateInput
               type="datetime-local"
-              {...register('end_at', { valueAsDate: true })}
+              {...register('endAt', { valueAsDate: true })}
               disabled={isSubmitting || ended}
             />
             <ErrorMessage
               errors={errors}
-              name="end_at"
+              name="endAt"
               render={({ message }) => <InputError>{message}</InputError>}
             />
           </FieldGroup>
 
-          <FieldGroup>
-            <label>Host Lead User (required)</label>
+          <FieldGroup label='Host Lead User' required>
             <Controller
-              name="host_lead_dxuser"
+              name="hostLeadDxuser"
               control={control}
               render={({ field: { value, onChange, onBlur }}) => (
                 <HostLeadUserSelect
@@ -297,15 +284,14 @@ export const ChallengeForm = ({
             />
             <ErrorMessage
               errors={errors}
-              name="host_lead_dxuser"
+              name="hostLeadDxuser"
               render={({ message }) => <InputError>{message}</InputError>}
             />
           </FieldGroup>
 
-          <FieldGroup>
-            <label>Guest Lead User (required)</label>
+          <FieldGroup label='Guest Lead User' required>
             <Controller
-              name="guest_lead_dxuser"
+              name="guestLeadDxuser"
               control={control}
               render={({ field: { value, onChange, onBlur }}) => (
                 <GuestLeadUserSelect
@@ -318,13 +304,12 @@ export const ChallengeForm = ({
             />
             <ErrorMessage
               errors={errors}
-              name="guest_lead_dxuser"
+              name="guestLeadDxuser"
               render={({ message }) => <InputError>{message}</InputError>}
             />
           </FieldGroup>
 
-          <FieldGroup>
-            <label>Status (required)</label>
+          <FieldGroup label='Status' required >
             <Controller
               name="status"
               control={control}
@@ -348,16 +333,15 @@ export const ChallengeForm = ({
             />
           </FieldGroup>
 
-          <FieldGroup>
-            <label>Preregistration Link</label>
+          <FieldGroup label='Preregistration Link'>
             <InputText
               placeholder="URL for challenge pre-registration"
-              {...register('pre_registration_url')}
+              {...register('preRegistrationUrl')}
               disabled={isSubmitting}
             />
             <ErrorMessage
               errors={errors}
-              name="pre_registration_url"
+              name="preRegistrationUrl"
               render={({ message }) => <InputError>{message}</InputError>}
             />
           </FieldGroup>

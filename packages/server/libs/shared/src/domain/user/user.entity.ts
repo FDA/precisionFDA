@@ -24,6 +24,8 @@ import { BaseEntity } from '../../database/base.entity'
 import { WorkaroundJsonType } from '../../database/custom-json-type'
 import { AdminMembership } from '../admin-membership/admin-membership.entity'
 import { UserRepository } from './user.repository'
+import { Space } from '@shared/domain/space/space.entity'
+import { CAN_EDIT_ROLES } from '@shared/domain/space-membership/space-membership.helper'
 
 export enum USER_STATE {
   ENABLED = 0,
@@ -67,7 +69,7 @@ type CloudResourceSettings = {
 }
 
 type Extras = {
-  has_seen_guidelines: boolean,
+  has_seen_guidelines: boolean
   inactivity_email_sent: boolean
 }
 
@@ -161,7 +163,7 @@ export class User extends BaseEntity {
     mappedBy: 'user',
     nullable: true,
   })
-  notificationPreference: Ref<NotificationPreference>
+  notificationPreference: Ref<NotificationPreference>;
 
   [EntityRepositoryType]?: UserRepository
 
@@ -216,6 +218,22 @@ export class User extends BaseEntity {
     return this.dxuser
   }
 
+  async accessibleSpaces(): Promise<Space[]> {
+    await this.spaceMemberships.load({ populate: ['spaces'] })
+
+    return Array.from(this.spaceMemberships)
+      .filter((m) => m.active)
+      .flatMap((spaceMembership) => Array.from(spaceMembership.spaces))
+  }
+
+  async editableSpaces(): Promise<Space[]> {
+    await this.spaceMemberships.load({ populate: ['spaces'] })
+
+    return Array.from(this.spaceMemberships)
+      .filter((m) => m.active && CAN_EDIT_ROLES.includes(m.role))
+      .flatMap((spaceMembership) => Array.from(spaceMembership.spaces))
+  }
+
   isChallengeBot(): boolean {
     return this.dxuser === config.platform.challengeBotUser
   }
@@ -226,7 +244,7 @@ export class User extends BaseEntity {
 
   isGovUser(): boolean {
     const emailDomain = this.email.split('@').pop()
-    return ['fda.hhs.gov','fda.gov'].includes(emailDomain)
+    return ['fda.hhs.gov', 'fda.gov'].includes(emailDomain)
   }
 
   async isMemberOfAdminGroup(adminGroup: ADMIN_GROUP_ROLES): Promise<boolean> {
@@ -252,6 +270,10 @@ export class User extends BaseEntity {
 
   async isChallengeAdmin(): Promise<boolean> {
     return await this.isMemberOfAdminGroup(ADMIN_GROUP_ROLES.ROLE_CHALLENGE_ADMIN)
+  }
+
+  async isSiteOrChallengeAdmin(): Promise<boolean> {
+    return (await this.isSiteAdmin()) || (await this.isChallengeAdmin())
   }
 
   billTo(): string {

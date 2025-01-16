@@ -26,7 +26,6 @@ import { Logger } from 'nestjs-pino'
  * @abstract
  */
 export abstract class SpaceCreationProcess {
-
   @ServiceLogger()
   protected readonly logger: Logger
 
@@ -35,8 +34,7 @@ export abstract class SpaceCreationProcess {
     protected readonly em: SqlEntityManager,
     protected readonly notificationService: SpaceNotificationService,
     protected readonly adminClient: PlatformClient,
-  ) {
-  }
+  ) {}
 
   /**
    * Main method to build the space.
@@ -65,7 +63,6 @@ export abstract class SpaceCreationProcess {
    * @throws {Error} For any other errors that occur during the execution of the steps.
    */
   public async build(input: CreateSpaceDto): Promise<number> {
-
     const user = await this.em.findOne(User, {
       id: this.userContext.id,
       userState: USER_STATE.ENABLED,
@@ -74,7 +71,6 @@ export abstract class SpaceCreationProcess {
     const leads = await this.findLeads(input)
 
     return await this.em.transactional(async () => {
-
       const space = await this.createDbRecord(input)
       await this.buildOrgs(space)
       const memberships = await this.inviteMembers(space, leads)
@@ -82,7 +78,7 @@ export abstract class SpaceCreationProcess {
         await this.inviteChallengeBot(space)
       }
       await this.buildProjects(space, memberships)
-      const users = memberships.map(m => m.user.getEntity())
+      const users = memberships.map((m) => m.user.getEntity())
       await this.sendEmails(space, users)
       return space.id
     })
@@ -92,10 +88,13 @@ export abstract class SpaceCreationProcess {
     let hostLead: User, guestLead: User
 
     hostLead = await this.em.findOne(User, {
-      dxuser: input.hostLeadDxuser, userState: { $ne: USER_STATE.DEACTIVATED },
+      dxuser: input.hostLeadDxuser,
+      userState: { $ne: USER_STATE.DEACTIVATED },
     })
     if (!hostLead) {
-      throw new NotFoundError(`Host lead user: ${input.hostLeadDxuser} was not found or is not active !`)
+      throw new NotFoundError(
+        `Host lead user: ${input.hostLeadDxuser} was not found or is not active !`,
+      )
     }
 
     if (input.guestLeadDxuser) {
@@ -104,7 +103,9 @@ export abstract class SpaceCreationProcess {
         userState: { $ne: USER_STATE.DEACTIVATED },
       })
       if (!guestLead) {
-        throw new NotFoundError(`Guest lead user: ${input.guestLeadDxuser} was not found or is not active !`)
+        throw new NotFoundError(
+          `Guest lead user: ${input.guestLeadDxuser} was not found or is not active !`,
+        )
       }
     }
 
@@ -124,10 +125,13 @@ export abstract class SpaceCreationProcess {
 
   protected abstract buildOrgs(space: Space): Promise<void>
 
-  protected abstract inviteMembers(space: Space, leads: {
-    host: User,
-    guest: User
-  }): Promise<SpaceMembership[]>
+  protected abstract inviteMembers(
+    space: Space,
+    leads: {
+      host: User
+      guest: User
+    },
+  ): Promise<SpaceMembership[]>
 
   protected abstract buildProjects(space: Space, leads: SpaceMembership[]): Promise<void>
 
@@ -135,7 +139,9 @@ export abstract class SpaceCreationProcess {
     // invite challenge bot as admin by host lead - only applicable for challenge's group space.
     const challengeBot = await this.em.findOne(User, { dxuser: config.platform.challengeBotUser })
     if (!challengeBot) {
-      throw new NotFoundError(`Challenge bot user: ${config.platform.challengeBotUser} was not found !`)
+      throw new NotFoundError(
+        `Challenge bot user: ${config.platform.challengeBotUser} was not found !`,
+      )
     }
 
     await this.adminClient.inviteUserToOrganization({
@@ -156,9 +162,16 @@ export abstract class SpaceCreationProcess {
         suppressEmailNotification: true,
       },
     })
-    this.logger.log(`invited challenge bot: ${challengeBot.dxuser} to guest org: ${space.guestDxOrg}`)
+    this.logger.log(
+      `invited challenge bot: ${challengeBot.dxuser} to guest org: ${space.guestDxOrg}`,
+    )
 
-    const membership = new SpaceMembership(challengeBot, space, SPACE_MEMBERSHIP_SIDE.HOST, SPACE_MEMBERSHIP_ROLE.ADMIN)
+    const membership = new SpaceMembership(
+      challengeBot,
+      space,
+      SPACE_MEMBERSHIP_SIDE.HOST,
+      SPACE_MEMBERSHIP_ROLE.ADMIN,
+    )
     this.em.persist(membership)
   }
 

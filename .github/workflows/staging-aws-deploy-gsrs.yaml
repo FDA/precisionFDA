@@ -1,4 +1,4 @@
-name: STAGING - Deploy GSRS to AWS (WIP)
+name: STAGING - Deploy GSRS to AWS
 
 on:
   workflow_dispatch:

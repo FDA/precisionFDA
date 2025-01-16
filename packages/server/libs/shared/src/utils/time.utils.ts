@@ -36,4 +36,31 @@ export class TimeUtils {
   static floorMilisecondsToSeconds(milliseconds: number) {
     return Math.floor(milliseconds / this.MILLISECONDS_IN_SECOND)
   }
+
+  static getTimeRangeForYear(year: number) {
+    const startDate = new Date(year, 0, 1)
+    const endDate = new Date(year, 11, 31, 23, 59, 59, 999)
+    return [startDate, endDate]
+  }
+
+  static milisecondsToSeconds(milliseconds: number) {
+    return milliseconds / this.MILLISECONDS_IN_SECOND
+  }
+
+  static elapsedTimeSinceStringFormatted(createdAt: Date) {
+    const elapsed = this.milisecondsToSeconds(Date.now() - createdAt.getTime())
+    const days = Math.floor(elapsed / this.daysToSeconds(1))
+    const hours = Math.floor((elapsed - this.daysToSeconds(days)) / this.hoursToSeconds(1))
+    const minutes = Math.floor(
+      (elapsed - this.daysToSeconds(days) - this.hoursToSeconds(hours)) / this.minutesToSeconds(1),
+    )
+    const seconds = Math.floor(
+      (elapsed -
+        this.daysToSeconds(days) -
+        this.hoursToSeconds(hours) -
+        this.minutesToSeconds(minutes)) /
+        this.SECONDS_IN_MINUTE,
+    )
+    return `${days}d ${hours}h ${minutes}m ${seconds}s`
+  }
 }

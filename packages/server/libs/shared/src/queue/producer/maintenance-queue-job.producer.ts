@@ -1,6 +1,7 @@
 import { InjectQueue } from '@nestjs/bull'
 import { Injectable } from '@nestjs/common'
 import { config } from '@shared/config'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { QueueJobProducer } from '@shared/queue/queue-job.producer'
 import { BasicUserJob, TASK_TYPE } from '@shared/queue/task.input'
 import { UserCtx } from '@shared/types'
@@ -11,6 +12,7 @@ export class MaintenanceQueueJobProducer extends QueueJobProducer {
   constructor(
     @InjectQueue(config.workerJobs.queues.maintenance.name)
     protected readonly queue: Queue,
+    private readonly user: UserContext,
   ) {
     super()
   }
@@ -63,7 +65,7 @@ export class MaintenanceQueueJobProducer extends QueueJobProducer {
   async createUserInactivityAlertTask() {
     const wrapped = {
       type: TASK_TYPE.USER_INACTIVITY_ALERT as const,
-      payload: undefined as any
+      payload: undefined as any,
     }
 
     const options: JobOptions = {
@@ -86,23 +88,23 @@ export class MaintenanceQueueJobProducer extends QueueJobProducer {
     return await this.addToQueue(wrapped, options)
   }
 
-  async createSyncSpacesPermissionsTask(user: UserCtx) {
+  async createSyncSpacesPermissionsTask() {
     const wrapped = {
       type: TASK_TYPE.SYNC_SPACES_PERMISSIONS as const,
       payload: undefined as any,
-      user,
+      user: this.user,
     }
 
     const options: JobOptions = { jobId: TASK_TYPE.SYNC_SPACES_PERMISSIONS }
     return await this.addToQueue(wrapped, options)
   }
 
-  async createUserCheckupTask(data: BasicUserJob) {
+  async createUserCheckupTask() {
     const wrapped = {
       type: TASK_TYPE.USER_CHECKUP as const,
-      user: data.user,
+      user: this.user,
     }
-    const options: JobOptions = { jobId: `${wrapped.type}.${data.user.dxuser}` }
+    const options: JobOptions = { jobId: `${wrapped.type}.${this.user.dxuser}` }
     return await this.addToQueue(wrapped, options)
   }
 

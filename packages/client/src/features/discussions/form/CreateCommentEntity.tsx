@@ -12,7 +12,6 @@ import {
 import { NoteForm } from '../discussions.types'
 import { pickIdsFromFormAttachments } from '../helpers'
 import { MarkdownForm } from './MarkdownForm'
-import { usePublishNoteMutation } from './usePublishNoteMutation'
 
 export const CreateCommentEntity = ({
   canUserAnswer,
@@ -33,7 +32,6 @@ export const CreateCommentEntity = ({
 }) => {
   const queryClient = useQueryClient()
 
-  const publishMutation = usePublishNoteMutation()
 
   const createCommentMutation = useMutation({
     mutationKey: ['create-comment'],
@@ -47,17 +45,7 @@ export const CreateCommentEntity = ({
         ? createAnswerCommentRequest(discussionId, answerId, { ...payload, isAnswer })
         : createDiscussionCommentRequest(discussionId, { ...payload, isAnswer })
     },
-    onSuccess: async (data, vars) => {
-      if (vars.isAnswer) {
-        await publishMutation.mutateAsync({
-          discussionId,
-          scope,
-          isAnswer: vars.isAnswer,
-          id: data.id,
-          toPublish: vars.attachments,
-          notifyAll: vars.notifyAll,
-        })
-      }
+    onSuccess: () => {
       if (onSuccess) onSuccess()
       queryClient.invalidateQueries({
         queryKey: ['discussion'],
@@ -65,7 +53,7 @@ export const CreateCommentEntity = ({
       queryClient.invalidateQueries({
         queryKey: ['attachments'],
       })
-      toast.success(`${vars.isAnswer ? 'Answer' : 'Comment'} has been published`)
+      toast.success('Reply has been published')
     },
     onError: error => {
       // TODO add strong typing to error
@@ -74,9 +62,15 @@ export const CreateCommentEntity = ({
   })
 
   const handleSubmit = (vals: NoteForm) => {
+
+    const notify = vals.notify.length && ['author', 'all'].includes(vals.notify[0].value)
+        ? vals.notify[0].value
+        : vals.notify.map(n => n.value)
+
     return createCommentMutation.mutateAsync({
       ...vals,
       attachments: pickIdsFromFormAttachments(vals.attachments),
+      notify,
     })
   }
 

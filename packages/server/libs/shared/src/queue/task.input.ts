@@ -93,7 +93,7 @@ export type NotifyNewDiscussionJob = TaskWithAuth & {
   type: TASK_TYPE.NOTIFY_SPACE_DISCUSSION
   payload: {
     discussionId: number
-    notifyAll: boolean
+    notify: string[]
   }
 }
 
