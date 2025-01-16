@@ -5,7 +5,7 @@ import { ChallengeListParams } from '../types'
 
 
 export const useChallengesListQuery = (params: ChallengeListParams) => useQuery({
-  queryKey: ['challengesList', params.year, params.time_status, params?.page, params.perPage],
+  queryKey: ['challengesList', params.year, params.timeStatus, params?.page, params.pageSize],
   queryFn: () => challengesRequest(params).catch(err => {
     if (err && err.message) toast.error(err.message)
   }),

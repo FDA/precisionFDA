@@ -1,5 +1,10 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Injectable, Logger } from '@nestjs/common'
+import { config } from '@shared/config'
+import {
+  buildEmailTemplate,
+  getBullJobIdForEmailOperation,
+} from '@shared/domain/email/email.helper'
 import { EmailQueueJobProducer } from '@shared/domain/email/producer/email-queue-job.producer'
 import { Job } from '@shared/domain/job/job.entity'
 import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
@@ -7,15 +12,16 @@ import { Space } from '@shared/domain/space/space.entity'
 import { Folder } from '@shared/domain/user-file/folder.entity'
 import { Node } from '@shared/domain/user-file/node.entity'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
-import { User } from '@shared/domain/user/user.entity'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
+import { TimeUtils } from '@shared/utils/time.utils'
 import { EMAIL_TYPES, EmailSendInput } from '../domain/email/email.config'
-import { adminDataConsistencyReportTemplate } from '../domain/email/templates/mjml/admin-data-consistency-report.template'
+import {
+  adminDataConsistencyReportTemplate,
+  AdminDataConsistencyReportTemplateInput,
+} from '../domain/email/templates/mjml/admin-data-consistency-report.template'
 import { JobRepository } from '../domain/job/job.repository'
 import { SPACE_MEMBERSHIP_SIDE } from '../domain/space-membership/space-membership.enum'
 import { SPACE_TYPE } from '../domain/space/space.enum'
-import { UserCtx } from '../types'
-import { getBullJobIdForEmailOperation } from '@shared/domain/email/email.helper'
 
 export type AdminDataConsistencyReportOutput = {
   pfdaOnlyFoldersCount?: number
@@ -66,7 +72,8 @@ export class AdminDataConsistencyReportService {
           dxuser: f.user.getEntity().dxuser,
           state: f.state,
           entityType: f.entityType,
-          elapsedTimeSinceCreation: f.elapsedTimeSinceCreationString(),
+          createdAt: f.createdAt,
+          elapsedTimeSinceCreation: TimeUtils.elapsedTimeSinceStringFormatted(f.createdAt),
         }
       }
 
@@ -227,25 +234,21 @@ export class AdminDataConsistencyReportService {
   }
 
   private async sendReportEmail(output: AdminDataConsistencyReportOutput): Promise<void> {
-    const adminUser = await this.em.getRepository(User).findAdminUser()
-    const body = adminDataConsistencyReportTemplate({
-      receiver: adminUser,
-      content: output,
-    })
+    const body = buildEmailTemplate<AdminDataConsistencyReportTemplateInput>(
+      adminDataConsistencyReportTemplate,
+      {
+        content: output,
+      },
+    )
     const email: EmailSendInput = {
       emailType: EMAIL_TYPES.adminDataConsistencyReport,
-      to: adminUser.email,
+      to: config.emails.report,
       subject: 'Admin Data Consistency Report',
       body,
     }
 
     const jobId = getBullJobIdForEmailOperation(EMAIL_TYPES.adminDataConsistencyReport)
     this.logger.log('Sending report email to admin')
-    const tempUserCtx: UserCtx = {
-      id: adminUser.id,
-      dxuser: adminUser.dxuser,
-      accessToken: 'notUsed',
-    }
-    await this.emailsJobProducer.createSendEmailTask(email, tempUserCtx, jobId)
+    await this.emailsJobProducer.createSendEmailTask(email, null, jobId)
   }
 }

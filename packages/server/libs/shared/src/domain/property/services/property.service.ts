@@ -45,13 +45,9 @@ export class PropertyService implements IPropertyService {
         targetId,
       })
 
-      this.logger.log(
-        `Deleting properties with target id: ${targetId} and type: ${targetType}`,
-      )
+      this.logger.log(`Deleting properties with target id: ${targetId} and type: ${targetType}`)
       await this.em.removeAndFlush(currentProperties)
-      this.logger.log(
-        `Setting properties with target id: ${targetId} and type: ${targetType}`,
-      )
+      this.logger.log(`Setting properties with target id: ${targetId} and type: ${targetType}`)
       for (const key in input.properties) {
         const newProperty = new GeneralProperty()
         newProperty.targetId = targetId
@@ -70,7 +66,7 @@ export class PropertyService implements IPropertyService {
       await this.getConditionByType(scope, targetType),
     )
 
-    return Promise.resolve([...new Set(results.map(p => p.propertyName))])
+    return Promise.resolve([...new Set(results.map((p) => p.propertyName))])
   }
 
   private getEntityByType(targetType: PropertyType) {
@@ -99,6 +95,7 @@ export class PropertyService implements IPropertyService {
       scopes = await this.em
         .find(Space, {
           spaceMemberships: {
+            active: true,
             user: {
               id: this.user.id,
             },
@@ -124,13 +121,13 @@ export class PropertyService implements IPropertyService {
     switch (targetType) {
       case 'node':
         condition['node'] = {
-          scope: { $in: scopes},
+          scope: { $in: scopes },
           stiType: [FILE_STI_TYPE.FOLDER, FILE_STI_TYPE.USERFILE],
         }
         break
       case 'asset':
         condition['node'] = {
-          scope: { $in: scopes},
+          scope: { $in: scopes },
           stiType: [FILE_STI_TYPE.ASSET],
         }
         break

@@ -6,6 +6,7 @@ import { ChallengeService } from '@shared/domain/challenge/challenge.service'
 import { NotificationModule } from '@shared/domain/notification/notification.module'
 import { UserFileModule } from '@shared/domain/user-file/user-file.module'
 import { PlatformClientModule } from '@shared/platform-client/platform-client.module'
+import { EmailModule } from '@shared/domain/email/email.module'
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { PlatformClientModule } from '@shared/platform-client/platform-client.mo
     NotificationModule,
     UserFileModule,
     MikroOrmModule.forFeature([ChallengeResource, Challenge]),
+    EmailModule,
   ],
   providers: [ChallengeService],
   exports: [ChallengeService, MikroOrmModule],

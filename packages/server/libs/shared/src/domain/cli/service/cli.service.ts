@@ -48,6 +48,8 @@ import { Comment } from '@shared/domain/comment/comment.entity'
 import { CliAttachmentsDTO } from '@shared/domain/cli/dto/cli-attachments.dto'
 import { EntityLinkService } from '@shared/domain/entity/entity-link/entity-link.service'
 import { getNodePath } from '@shared/domain/user-file/user-file.helper'
+import { UpdateDiscussionDTO } from '@shared/domain/discussion/dto/update-discussion.dto'
+import { UpdateAnswerDTO } from '@shared/domain/discussion/dto/update-answer.dto'
 
 @Injectable()
 export class CliService {
@@ -296,7 +298,7 @@ export class CliService {
           { userId: this.user.id, scope: STATIC_SCOPE.PRIVATE },
           { scope: { $in: spaceScopes as SCOPE[] } },
         ],
-        $and: [{ id: arg as any }, { stiType: FILE_STI_TYPE.FOLDER }],
+        $and: [{ id: arg as unknown as number }, { stiType: FILE_STI_TYPE.FOLDER }],
       })
 
       for (const folder of result) {
@@ -320,32 +322,19 @@ export class CliService {
   }
 
   async createDiscussion(spaceId: number, body: CliCreateDiscussionDTO) {
-    const space = await this.em.findOne(Space, {
-      id: spaceId,
-      spaceMemberships: { user: this.user.id },
-    })
-
-    if (!space) {
-      throw new NotFoundError('Space does not exist or is not accessible')
-    }
     const attachments = await this.transformAttachments(body.attachments)
 
     return await this.em.transactional(async () => {
-      const discussion = await this.discussionService.createDiscussion({
+      const result = await this.discussionService.createDiscussion({
         title: body.title,
         content: body.content,
         attachments,
-      })
-
-      await this.discussionService.publishDiscussion({
-        id: discussion.id,
         scope: `space-${spaceId}`,
-        toPublish: attachments,
-        notifyAll: false,
+        notify: [],
       })
 
-      const url = await this.em.findOne(Discussion, { id: discussion.id })
-      return await this.entityLinkService.getUiLink(url)
+      const newDiscussion = await this.em.findOne(Discussion, { id: result.id })
+      return await this.entityLinkService.getUiLink(newDiscussion)
     })
   }
 
@@ -359,41 +348,28 @@ export class CliService {
       throw new InvalidStateError('Cannot reply with answer to answer')
     }
 
-    const targetType = body.discussionId ? 'Discussion' : 'Answer'
-    const replyType = body.replyType === 'answer' ? 'Answer' : 'Comment'
-    const targetId = body.discussionId ?? body.answerId
     let result = null
 
-    if (replyType === 'Answer' && targetType === 'Discussion') {
+    if (body.replyType === 'answer') {
       await this.em.transactional(async () => {
-        const discussion = await this.discussionService.getDiscussion(targetId)
         const attachments = await this.transformAttachments(body.attachments)
 
         // permissions to the target are checked in the discussion service
         const answer = await this.discussionService.createAnswer({
-          title: replyType,
+          title: 'Answer',
           content: body.content,
-          discussionId: targetId,
+          discussionId: body.discussionId,
+          notify: [],
           attachments,
-        })
-
-        await this.discussionService.publishAnswer({
-          id: answer.id,
-          discussionId: targetId,
-          scope: discussion.note.scope,
-          toPublish: attachments,
-          notifyAll: false,
         })
         result = await this.em.findOne(Answer, { id: answer.id })
       })
     }
 
-    if (replyType === 'Comment') {
+    if (body.replyType === 'comment') {
       const comment = await this.discussionService.createComment({
-        targetId: targetId,
-        targetType: targetType,
-        comment: body.content,
-        notifyAll: false,
+        ...body,
+        notify: [],
       })
 
       result = await this.em.findOne(Comment, { id: comment.id })
@@ -403,10 +379,39 @@ export class CliService {
   }
 
   async editDiscussion(discussionId: number, body: CliEditDiscussionDTO) {
-    const attachments = await this.transformAttachments(body.attachments)
-    await this.discussionService.appendToDiscussion(discussionId, body.content, attachments)
+    const newAttachments = await this.transformAttachments(body.attachments)
 
     const discussion = await this.entityFetcherService.getEditableById(Discussion, discussionId)
+    if (!discussion) {
+      throw new NotFoundError('Discussion not found or not accessible')
+    }
+
+    const note = await discussion.note.load()
+    const existingAttachments = await this.discussionService.getAttachments(note.id)
+
+    const attachments = {
+      files: existingAttachments.filter((a) => a.type === 'UserFile').map((a) => a.id),
+      folders: existingAttachments.filter((a) => a.type === 'Folder').map((a) => a.id),
+      assets: existingAttachments.filter((a) => a.type === 'Asset').map((a) => a.id),
+      apps: existingAttachments.filter((a) => a.type === 'App').map((a) => a.id),
+      jobs: existingAttachments.filter((a) => a.type === 'Job').map((a) => a.id),
+      comparisons: existingAttachments.filter((a) => a.type === 'Comparison').map((a) => a.id),
+    }
+
+    attachments.files.push(...newAttachments.files)
+    attachments.folders.push(...newAttachments.folders)
+    attachments.assets.push(...newAttachments.assets)
+    attachments.apps.push(...newAttachments.apps)
+    attachments.jobs.push(...newAttachments.jobs)
+    attachments.comparisons.push(...newAttachments.comparisons)
+
+    const updateDTO: UpdateDiscussionDTO = {
+      title: note.title,
+      content: body.content ? `${note.content}\n\n${body.content}` : note.content,
+      attachments: attachments,
+    }
+
+    await this.discussionService.updateDiscussion(discussionId, updateDTO)
     return await this.entityLinkService.getUiLink(discussion)
   }
 
@@ -424,11 +429,33 @@ export class CliService {
     }
 
     if (target instanceof Answer) {
-      const attachments = await this.transformAttachments(body.attachments)
-      await this.discussionService.appendToAnswer(target.id, body.content, attachments)
+      const newAttachments = await this.transformAttachments(body.attachments)
+      const note = await target.note.load()
+      const existingAttachments = await this.discussionService.getAttachments(note.id)
+      const attachments = {
+        files: existingAttachments.filter((a) => a.type === 'UserFile').map((a) => a.id),
+        folders: existingAttachments.filter((a) => a.type === 'Folder').map((a) => a.id),
+        assets: existingAttachments.filter((a) => a.type === 'Asset').map((a) => a.id),
+        apps: existingAttachments.filter((a) => a.type === 'App').map((a) => a.id),
+        jobs: existingAttachments.filter((a) => a.type === 'Job').map((a) => a.id),
+        comparisons: existingAttachments.filter((a) => a.type === 'Comparison').map((a) => a.id),
+      }
+
+      attachments.files.push(...newAttachments.files)
+      attachments.folders.push(...newAttachments.folders)
+      attachments.assets.push(...newAttachments.assets)
+      attachments.apps.push(...newAttachments.apps)
+      attachments.jobs.push(...newAttachments.jobs)
+      attachments.comparisons.push(...newAttachments.comparisons)
+
+      const updateDTO: UpdateAnswerDTO = {
+        content: body.content ? `${note.content}\n\n${body.content}` : note.content,
+        attachments: attachments,
+      }
+      await this.discussionService.updateAnswer(target.id, updateDTO)
       return await this.entityLinkService.getUiLink(target)
     } else if (target instanceof Comment) {
-      await this.discussionService.appendToComment(target.id, body.content)
+      await this.discussionService.updateComment(target.id, body)
       return await this.entityLinkService.getUiLink(target)
     }
   }

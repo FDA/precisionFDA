@@ -7,7 +7,6 @@ import { NotificationService } from '@shared/domain/notification/services/notifi
 import { NotificationInput } from '@shared/domain/notification/notification.input'
 import { PlatformClient } from '@shared/platform-client'
 import { create, db } from '../../../src/test'
-import { Logger } from '@nestjs/common'
 import { NotFoundError } from '@shared/errors'
 import { stub } from 'sinon'
 import { ChallengeRepository } from '@shared/domain/challenge/challenge.repository'
@@ -42,6 +41,10 @@ describe('ChallengeService', () => {
   } as unknown as ChallengeResourceRepository
 
   const platformClient = {
+    fileDownloadLink: fileDownloadLinkStub,
+  } as unknown as PlatformClient
+
+  const challengePlatformClient = {
     fileDownloadLink: fileDownloadLinkStub,
   } as unknown as PlatformClient
 
@@ -98,14 +101,10 @@ describe('ChallengeService', () => {
       },
     } as NotificationService
 
-    const logger = {
-      log: () => {},
-    } as unknown as Logger
-
     challengeService = new ChallengeService(
       em,
       userCtx,
-      logger,
+      challengePlatformClient,
       platformClient,
       notificationService,
       challengeRepository,

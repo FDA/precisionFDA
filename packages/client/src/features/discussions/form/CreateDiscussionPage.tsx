@@ -11,7 +11,6 @@ import { NoteScope, createDiscussionRequest } from '../api'
 import { DiscussionForm as DiscussionFormType } from '../discussions.types'
 import { pickIdsFromFormAttachments } from '../helpers'
 import { DiscussionForm } from './DiscussionForm'
-import { usePublishNoteMutation } from './usePublishNoteMutation'
 
 
 const WarningSection = styled.div`
@@ -47,35 +46,30 @@ export const CreateDiscussionPage = ({ scope, displayWarning = false }: { scope:
   const location = useLocation()
   const queryClient = useQueryClient()
 
-  const publishMutation = usePublishNoteMutation()
-
   const createDiscussionMutation = useMutation({
     mutationKey: ['create-discussion'],
     mutationFn: createDiscussionRequest,
-    onSuccess: async (data, variables) => {
-      await publishMutation.mutateAsync({
-        id: data.id,
-        scope,
-        discussionId: data.id,
-        isAnswer: false,
-        toPublish: variables.attachments,
-        notifyAll: variables.notifyAll,
-      })
-      queryClient.invalidateQueries({
-        queryKey: ['space'],
-      })
+    onSuccess: async (data) => {
+      queryClient.invalidateQueries({ queryKey: ['space']})
       navigate(`/spaces/${getSpaceIdFromScope(scope)}/discussions/${data.id}`)
     },
-    onError: () => {
+    onError: (e) => {
+      // todo: handle error
       toast.error('Error while creating discussion.')
     },
   })
 
   const handleSubmit = async (vals: DiscussionFormType) => {
+
+    const notify = vals.notify.length && ['author', 'all'].includes(vals.notify[0].value)
+        ? vals.notify[0].value
+        : vals.notify.map(n => n.value)
+
     return createDiscussionMutation.mutateAsync({
       title: vals.title,
       content: vals.content,
-      notifyAll: vals.notifyAll,
+      scope,
+      notify,
       attachments: pickIdsFromFormAttachments(vals.attachments),
     })
   }

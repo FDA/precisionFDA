@@ -188,7 +188,6 @@ export class EntityFetcherService {
     return editableSpaces
   }
 
-  // eslint-disable-next-line max-len
   async getAccessible<E extends UidEntity | IdEntity, H extends string = never>(
     type: EntityName<E>,
     where?: ObjectQuery<E>,
@@ -201,7 +200,6 @@ export class EntityFetcherService {
     )
   }
 
-  // eslint-disable-next-line max-len
   async getEditable<E extends UidEntity | IdEntity, H extends string = never>(
     type: EntityName<E>,
     where?: ObjectQuery<E>,

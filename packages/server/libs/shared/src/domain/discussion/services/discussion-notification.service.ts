@@ -16,6 +16,7 @@ import {
   spaceDiscussionTemplate,
 } from '../../email/templates/mjml/space-discussion.template'
 import { Discussion } from '../discussion.entity'
+import { NotifyType } from '@shared/domain/discussion/dto/notify.type'
 
 @Injectable()
 export class DiscussionNotificationService {
@@ -63,7 +64,7 @@ export class DiscussionNotificationService {
     await this.emailQueueJobProducer.createSendEmailTask(emailTask, this.user)
   }
 
-  async notifySpaceDiscussion(discussionId: number, notifyAll: boolean) {
+  async notifySpaceDiscussion(discussionId: number, notify: NotifyType) {
     const discussion = await this.entityFetcherService.getEditableById(
       Discussion,
       discussionId,
@@ -88,10 +89,26 @@ export class DiscussionNotificationService {
     } as DiscussionEmailInput
     const emailBody = buildEmailTemplate<DiscussionEmailInput>(spaceDiscussionTemplate, emailInput)
     const subject = `[precisionFDA] Discussion update notification: ${space.name}`
-    if (notifyAll) {
+
+    if (notify === 'all') {
       await this.notifySpaceMembers(emailBody, subject, space)
-    } else {
+    } else if (notify === 'author') {
       await this.notifyPoster(emailBody, subject, discussion.user.id)
+    } else {
+      for (const username of notify) {
+        const user = await this.em.findOneOrFail(User, {
+          dxuser: username,
+          spaceMemberships: { spaces: space.id, active: true },
+        })
+        const email = user.email
+        const emailTask = {
+          emailType: EMAIL_TYPES.spaceDiscussion,
+          to: email,
+          subject: subject,
+          body: emailBody,
+        } as EmailSendInput
+        await this.emailQueueJobProducer.createSendEmailTask(emailTask, this.user)
+      }
     }
   }
 }

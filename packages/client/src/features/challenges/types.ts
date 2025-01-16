@@ -16,30 +16,36 @@ export interface Challenge {
   name: string;
   description: string;
   meta: Meta;
-  start_at: Date;
-  end_at: Date;
-  created_at: Date;
-  updated_at: Date;
+  startAt: Date;
+  endAt: Date;
   status: ChallengeStatus;
   scope: string;
-  card_image_url: string;
-  card_image_id: string;
-  pre_registration_url: string;
-  guest_lead_dxuser: string;
-  host_lead_dxuser: string;
-  app_owner_id: string;
-  /** @deprecated create links from client side */
-  links?: any;
-  is_followed?: any;
-  can_edit?: any;
-  is_space_member: boolean;
+  appUid: string;
+  spaceId: string;
+  cardImageUrl: string;
+  preRegistrationUrl: string;
+  // guest_lead_dxuser: string;
+  // host_lead_dxuser: string;
+  // app_owner_id: string;
+  follows?: boolean;
+  canEdit?: boolean;
+  isSpaceMember: boolean;
+
+  infoContent: string
+  infoEditorState: string
+
+  preRegistrationContent: string
+  preRegistrationEditorState: string
+
+  resultsContent: string
+  resultsEditorState: string
 }
 
 export type TimeStatus = 'upcoming' | 'ended' | 'current'
 
 export interface ChallengeListParams {
   year?: string
-  time_status?: TimeStatus
+  timeStatus?: TimeStatus
   page?: number
-  perPage?: number
+  pageSize?: number
 }

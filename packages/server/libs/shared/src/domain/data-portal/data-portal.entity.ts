@@ -3,7 +3,6 @@ import {
   Entity,
   EntityRepositoryType,
   Enum,
-  ManyToOne,
   OneToMany,
   OneToOne,
   Property,

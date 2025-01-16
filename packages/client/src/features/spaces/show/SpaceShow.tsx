@@ -81,8 +81,9 @@ const Spaces2 = ({ space, isLoading }: { space: ISpace; isLoading: boolean }) =>
     return <GuestNotAllowed />
   }
 
-  const showDiscussions = !((space.type === 'review' && space.restricted_discussions) || space.type == 'private_type')
+  const showDiscussions = !((space.type === 'review' && space.restricted_discussions) || space.type === 'private_type')
   const isContributorOrHigher = ['lead', 'admin', 'contributor'].includes(space.current_user_membership.role)
+  const canCreateDiscussion = isContributorOrHigher && !space.restricted_discussions
 
   if (space.state === 'unactivated') {
     return <Activation space={space} />
@@ -143,11 +144,6 @@ const Spaces2 = ({ space, isLoading }: { space: ISpace; isLoading: boolean }) =>
             <MenuText>Executions</MenuText>
             {expandedSidebar && <MenuCounter count={space.counters.jobs.toString()} active={activeResource === 'executions'} />}
           </MenuItem>
-          <MenuItem data-testid="members-link" to={`/spaces/${space.id}/members`} activeClassName="active">
-            <UsersIcon height={14} />
-            <MenuText>Members</MenuText>
-            {expandedSidebar && <MenuCounter count={space.counters.members.toString()} active={activeResource === 'members'} />}
-          </MenuItem>
           <MenuItem data-testid="space-reports-link" to={`/spaces/${space.id}/reports`} activeClassName="active">
             <SpaceReportIcon height={14} />
             <MenuText>Reports</MenuText>
@@ -162,6 +158,11 @@ const Spaces2 = ({ space, isLoading }: { space: ISpace; isLoading: boolean }) =>
               )}
             </MenuItem>
           )}
+          <MenuItem data-testid="members-link" to={`/spaces/${space.id}/members`} activeClassName="active">
+            <UsersIcon height={14} />
+            <MenuText>Members</MenuText>
+            {expandedSidebar && <MenuCounter count={space.counters.members.toString()} active={activeResource === 'members'} />}
+          </MenuItem>
           <Fill />
           <Expand data-testid="expand-sidebar" onClick={() => setExpandedSidebar(!expandedSidebar)}>
             <FlapIcon />
@@ -194,7 +195,7 @@ const Spaces2 = ({ space, isLoading }: { space: ISpace; isLoading: boolean }) =>
                 path="reports"
                 element={<SpaceReportList scope={`space-${space.id}`} isContributorOrHigher={isContributorOrHigher} />}
               />
-              <Route path="discussions" element={<DiscussionList space={space} scope={`space-${space.id}`} />} />
+              <Route path="discussions" element={<DiscussionList canCreateDiscussion={canCreateDiscussion} scope={`space-${space.id}`} />} />
               <Route
                 path="discussions/create"
                 element={

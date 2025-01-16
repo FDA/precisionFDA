@@ -14,7 +14,7 @@ export const ChallengeCreateUpdateModal = ({
       isShown={isSaving}
       hide={() => null}
       headerText={isEditMode ? 'Updating challenge' : 'Creating new challenge'}
-      disableClose
+      id='challenge-create-update-modal'
     >
       <ModalHeaderTop
         disableClose

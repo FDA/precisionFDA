@@ -77,17 +77,12 @@ module CloudResourcesConcern
     charges_errors = charges_validation_results.compact
     return if charges_errors.empty?
 
-    respond_to do |format|
-      e_msg = charges_errors.join("\n")
-
-      format.html do
-        flash[:error] = e_msg
-        redirect_back(fallback_location: root_path)
-      end
-
-      # Normally I would pass array, but the message gets stringified along the way
-      format.json { raise_api_error e_msg }
+    if charges_errors.is_a?(Array) && !charges_errors.empty?
+      error_message = charges_errors.first
+    else
+      error_message = charges_errors
     end
+    raise ApiError, error_message
   end
 
   def validate_total_limit

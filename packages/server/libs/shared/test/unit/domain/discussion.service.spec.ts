@@ -3,13 +3,6 @@ import { database } from '@shared/database'
 import { App } from '@shared/domain/app/app.entity'
 import { Comparison } from '@shared/domain/comparison/comparison.entity'
 import { Discussion } from '@shared/domain/discussion/discussion.entity'
-import {
-  BaseInput,
-  CreateCommentInput,
-  PublishAnswerInput,
-  PublishDiscussionInput,
-  UpdateDiscussionInput,
-} from '@shared/domain/discussion/discussion.types'
 import { DiscussionQueueJobProducer } from '@shared/domain/discussion/producer/discussion-queue-job.producer'
 import { DiscussionService } from '@shared/domain/discussion/services/discussion.service'
 import { PublisherService } from '@shared/domain/discussion/services/publisher.service'
@@ -28,6 +21,10 @@ import { PlatformClient } from '@shared/platform-client'
 import { expect } from 'chai'
 import { stub } from 'sinon'
 import { create, db, generate } from '../../../src/test'
+import { CreateDiscussionDTO } from '@shared/domain/discussion/dto/create-discussion.dto'
+import { CreateAnswerDTO } from '@shared/domain/discussion/dto/create-answer.dto'
+import { UpdateDiscussionDTO } from '@shared/domain/discussion/dto/update-discussion.dto'
+import { CreateCommentDTO } from '@shared/domain/discussion/dto/create-comment.dto'
 
 describe('DiscussionService tests', () => {
   let em: EntityManager<MySqlDriver>
@@ -39,6 +36,14 @@ describe('DiscussionService tests', () => {
   let discussionQueueJobProducer: DiscussionQueueJobProducer
   let spaceRepository: SpaceRepository
 
+  const EMPTY_ATTACHMENTS = {
+    files: [],
+    folders: [],
+    assets: [],
+    apps: [],
+    jobs: [],
+    comparisons: [],
+  }
   const getEntityLinkStub = stub()
   const createSpaceNotificationTaskStub = stub()
 
@@ -105,9 +110,11 @@ describe('DiscussionService tests', () => {
     )
     await em.flush()
 
-    const createDiscussionInput: BaseInput = {
+    const createDiscussionInput: CreateDiscussionDTO = {
       title: 'test-discussion',
       content: 'test-content',
+      scope: 'public',
+      notify: [],
       attachments: {
         files: [file.id],
         folders: [folder.id],
@@ -128,7 +135,7 @@ describe('DiscussionService tests', () => {
     const note = loadedDiscussion.note.getEntity()
     expect(note.title).eq(createDiscussionInput.title)
     expect(note.content).eq(createDiscussionInput.content)
-    expect(note.scope).eq('private')
+    expect(note.scope).eq('public')
     expect(note.noteType).eq('Discussion')
 
     const follow = await em.findOneOrFail(Follow, { followableId: loadedDiscussion.id })
@@ -155,7 +162,7 @@ describe('DiscussionService tests', () => {
 
   it('update discussion', async () => {
     // first create a discussion
-    const discussion = create.discussionHelper.create(em, { user }, {})
+    const discussion = create.discussionHelper.createPublic(em, { user }, {})
     await em.flush()
     const file = create.filesHelper.create(em, { user }, { name: 'file' })
     const folder = create.filesHelper.createFolder(em, { user }, { name: 'folder' })
@@ -222,22 +229,14 @@ describe('DiscussionService tests', () => {
     )
     await em.flush()
 
-    let updateDiscussionInput: UpdateDiscussionInput = {
-      id: discussion.id,
+    let updateDiscussionInput: UpdateDiscussionDTO = {
       title: 'updated-title',
       content: 'updated-content',
-      attachments: {
-        folders: [],
-        files: [],
-        assets: [],
-        apps: [],
-        jobs: [],
-        comparisons: [],
-      },
+      attachments: EMPTY_ATTACHMENTS,
     }
 
     // then update a discussion
-    await discussionService.updateDiscussion(updateDiscussionInput)
+    await discussionService.updateDiscussion(discussion.id, updateDiscussionInput)
 
     let loadedDiscussion = await em.findOneOrFail(
       Discussion,
@@ -247,13 +246,12 @@ describe('DiscussionService tests', () => {
     let note = loadedDiscussion.note.getEntity()
     expect(note.title).eq('updated-title')
     expect(note.content).eq('updated-content')
-    expect(note.scope).eq('private')
+    expect(note.scope).eq('public')
     expect(note.noteType).eq('Discussion')
     expect(note.attachments.getItems().length).eq(0)
 
     // then add old attachments back to discussion, except one
     updateDiscussionInput = {
-      id: discussion.id,
       title: 'updated-title',
       content: 'updated-content',
       attachments: {
@@ -265,7 +263,7 @@ describe('DiscussionService tests', () => {
         comparisons: [],
       },
     }
-    await discussionService.updateDiscussion(updateDiscussionInput)
+    await discussionService.updateDiscussion(discussion.id, updateDiscussionInput)
 
     loadedDiscussion = await em.findOneOrFail(
       Discussion,
@@ -275,7 +273,7 @@ describe('DiscussionService tests', () => {
     note = loadedDiscussion.note.getEntity()
     expect(note.title).eq('updated-title')
     expect(note.content).eq('updated-content')
-    expect(note.scope).eq('private')
+    expect(note.scope).eq('public')
     expect(note.noteType).eq('Discussion')
     expect(note.attachments.getItems().length).eq(5)
     expect(note.attachments.getItems()[0].itemId).eq(file.id)
@@ -292,11 +290,7 @@ describe('DiscussionService tests', () => {
 
   it('create discussion with non existing user', async () => {
     userCtx = { id: 10, dxuser: 'non-existing', accessToken: 'foo' }
-    const publisherService = new PublisherService(
-      em,
-      userCtx,
-      new PlatformClient({ accessToken: 'foo' }),
-    )
+    const publisherService = new PublisherService(em, new PlatformClient({ accessToken: 'foo' }))
     const fetcher = new EntityFetcherService(em, userCtx)
     discussionService = new DiscussionService(
       em,
@@ -308,11 +302,38 @@ describe('DiscussionService tests', () => {
       spaceRepository,
     )
 
-    const createDiscussionInput: BaseInput = {
+    const createDiscussionInput: CreateDiscussionDTO = {
       title: 'test-discussion',
       content: 'test-content',
+      scope: 'public',
+      notify: [],
+      attachments: EMPTY_ATTACHMENTS,
+    }
+
+    try {
+      await discussionService.createDiscussion(createDiscussionInput)
+      expect.fail('Operation is expected to fail.')
+    } catch (error) {
+      expect(error.name).to.equal('NotFoundError')
+      expect(error.message).eq('User not found ({ id: 10 })')
+    }
+  })
+
+  it('create discussion in space without permission', async () => {
+    const space = create.spacesHelper.create(em, generate.space.group())
+    await em.flush()
+    const scope = space.scope
+
+    const file = create.filesHelper.create(em, { user }, { name: 'file', scope })
+    await em.flush()
+
+    const createDiscussionInput: CreateDiscussionDTO = {
+      title: 'test-discussion',
+      content: 'test-content',
+      scope: scope,
+      notify: [],
       attachments: {
-        files: [],
+        files: [file.id],
         folders: [],
         assets: [],
         apps: [],
@@ -324,89 +345,13 @@ describe('DiscussionService tests', () => {
     try {
       await discussionService.createDiscussion(createDiscussionInput)
       expect.fail('Operation is expected to fail.')
-    } catch (error: any) {
+    } catch (error) {
       expect(error.name).to.equal('NotFoundError')
-      expect(error.message).eq('User not found ({ id: 10 })')
+      expect(error.message).eq('Unable to attach file 1: file not found or inaccessible.')
     }
   })
 
-  it('publish discussion with non existing discussion id', async () => {
-    const publishDiscussionInput: PublishDiscussionInput = {
-      id: 10,
-      scope: STATIC_SCOPE.PUBLIC,
-      toPublish: { apps: [], folders: [], assets: [], comparisons: [], files: [], jobs: [] },
-    }
-
-    try {
-      await discussionService.publishDiscussion(publishDiscussionInput)
-      expect.fail('Operation is expected to fail.')
-    } catch (error: any) {
-      expect(error.name).to.equal('NotFoundError')
-      expect(error.message).eq(
-        'Unable to publish discussion: not found or insufficient permissions.',
-      )
-    }
-  })
-
-  it('publish discussion with non existing user', async () => {
-    userCtx = { id: 10, dxuser: 'non-existing', accessToken: 'foo' }
-    const publisherService = new PublisherService(
-      em,
-      userCtx,
-      new PlatformClient({ accessToken: 'foo' }),
-    )
-    const fetcher = new EntityFetcherService(em, userCtx)
-    discussionService = new DiscussionService(
-      em,
-      userCtx,
-      publisherService,
-      fetcher,
-      entityService,
-      discussionQueueJobProducer,
-      spaceRepository,
-    )
-
-    const publishDiscussionInput: PublishDiscussionInput = {
-      id: 10,
-      scope: STATIC_SCOPE.PUBLIC,
-      toPublish: { apps: [], folders: [], assets: [], comparisons: [], files: [], jobs: [] },
-    }
-
-    try {
-      await discussionService.publishDiscussion(publishDiscussionInput)
-      expect.fail('Operation is expected to fail.')
-    } catch (error: any) {
-      expect(error.name).to.equal('NotFoundError')
-      expect(error.message).eq('User not found ({ id: 10 })')
-    }
-  })
-
-  it('publish discussion in space without permission', async () => {
-    const discussion = create.discussionHelper.create(em, { user }, {})
-    const space = create.spacesHelper.create(em, generate.space.group())
-    await em.flush()
-    const scope = space.scope
-
-    const file = create.filesHelper.create(em, { user }, { name: 'file', scope })
-    await em.flush()
-
-    const publishDiscussionInput: PublishDiscussionInput = {
-      id: discussion.id,
-      scope: scope,
-      toPublish: { apps: [], folders: [], assets: [], comparisons: [], files: [file.id], jobs: [] },
-    }
-
-    try {
-      await discussionService.publishDiscussion(publishDiscussionInput)
-      expect.fail('Operation is expected to fail.')
-    } catch (error: any) {
-      expect(error.name).to.equal('PermissionError')
-      expect(error.message).eq('Unable to publish: insufficient permissions.')
-    }
-  })
-
-  it('publish discussion in space with discussion disabled', async () => {
-    const discussion = create.discussionHelper.create(em, { user }, {})
+  it('create discussion in space with discussions disabled', async () => {
     const space = create.spacesHelper.create(em, generate.space.simple())
     create.spacesHelper.addMember(em, { user, space })
     space.meta.restricted_discussions = true
@@ -417,23 +362,31 @@ describe('DiscussionService tests', () => {
     const file = create.filesHelper.create(em, { user }, { name: 'file', scope })
     await em.flush()
 
-    const publishDiscussionInput: PublishDiscussionInput = {
-      id: discussion.id,
+    const createDiscussionInput: CreateDiscussionDTO = {
+      title: 'test-discussion',
+      content: 'test-content',
       scope: scope,
-      toPublish: { apps: [], folders: [], assets: [], comparisons: [], files: [file.id], jobs: [] },
+      notify: [],
+      attachments: {
+        files: [file.id],
+        folders: [],
+        assets: [],
+        apps: [],
+        jobs: [],
+        comparisons: [],
+      },
     }
 
     try {
-      await discussionService.publishDiscussion(publishDiscussionInput)
+      await discussionService.createDiscussion(createDiscussionInput)
       expect.fail('Operation is expected to fail.')
-    } catch (error: any) {
+    } catch (error) {
       expect(error.name).to.equal('InvalidStateError')
       expect(error.message).eq('Unable to publish discussion: space has restricted discussions.')
     }
   })
 
-  it('publish discussion with public scope', async () => {
-    const discussion = create.discussionHelper.create(em, { user }, {})
+  it('create discussion with public scope', async () => {
     await em.flush()
     const file = create.filesHelper.create(em, { user }, { name: 'file' })
     const asset = create.filesHelper.createUploadedAsset(em, { user }, { name: 'asset-file' })
@@ -449,10 +402,12 @@ describe('DiscussionService tests', () => {
     )
     await em.flush()
 
-    const publishDiscussionInput: PublishDiscussionInput = {
-      id: discussion.id,
-      scope: STATIC_SCOPE.PUBLIC,
-      toPublish: {
+    const createDiscussionInput: CreateDiscussionDTO = {
+      title: 'test-discussion',
+      content: 'test-content',
+      scope: 'public',
+      notify: [],
+      attachments: {
         files: [file.id],
         folders: [],
         assets: [asset.id],
@@ -461,12 +416,12 @@ describe('DiscussionService tests', () => {
         comparisons: [comparison.id],
       },
     }
-    const count = await discussionService.publishDiscussion(publishDiscussionInput)
-    expect(count).eq(5)
+
+    const discussion = await discussionService.createDiscussion(createDiscussionInput)
+    expect(discussion.note.scope).eq('public')
   })
 
-  it('publish discussion in space', async () => {
-    const discussion = create.discussionHelper.create(em, { user }, {})
+  it('create discussion in space with attachment in wrong scope', async () => {
     const space = create.spacesHelper.create(em, generate.space.group())
     const guestLead = create.userHelper.create(em, { email: generate.random.chance.email() })
     const hostLead = create.userHelper.create(em, { email: generate.random.chance.email() })
@@ -487,70 +442,7 @@ describe('DiscussionService tests', () => {
     )
     await em.flush()
 
-    const scope = space.scope as any
-
-    const file = create.filesHelper.create(em, { user }, { name: 'file', scope })
-    const folder = create.filesHelper.createFolder(em, { user }, { name: 'folder', scope })
-    const asset = create.filesHelper.createUploadedAsset(
-      em,
-      { user },
-      {
-        name: 'asset-file',
-        scope,
-      },
-    )
-    const app = create.appHelper.createRegular(em, { user }, { title: 'app', scope })
-    const job = create.jobHelper.create(em, { user }, { name: 'job', scope })
-    const comparison = create.comparisonHelper.create(
-      em,
-      {
-        app,
-        user,
-      },
-      { name: 'comparison-file', scope },
-    )
-    await em.flush()
-
-    const publishDiscussionInput: PublishDiscussionInput = {
-      id: discussion.id,
-      scope: scope,
-      toPublish: {
-        files: [file.id],
-        folders: [folder.id],
-        assets: [asset.id],
-        apps: [app.id],
-        jobs: [job.id],
-        comparisons: [comparison.id],
-      },
-    }
-
-    const count = await discussionService.publishDiscussion(publishDiscussionInput)
-    expect(count).eq(0) // nothing should be published - all items already in the space.
-  })
-
-  it('publish discussion in space with attachment in wrong scope', async () => {
-    const discussion = create.discussionHelper.create(em, { user }, {})
-    const space = create.spacesHelper.create(em, generate.space.group())
-    const guestLead = create.userHelper.create(em, { email: generate.random.chance.email() })
-    const hostLead = create.userHelper.create(em, { email: generate.random.chance.email() })
-
-    create.spacesHelper.addMember(em, { user, space })
-    create.spacesHelper.addMember(
-      em,
-      { user: guestLead, space },
-      { role: SPACE_MEMBERSHIP_ROLE.LEAD },
-    )
-    create.spacesHelper.addMember(
-      em,
-      { user: hostLead, space },
-      {
-        role: SPACE_MEMBERSHIP_ROLE.LEAD,
-        side: SPACE_MEMBERSHIP_SIDE.HOST,
-      },
-    )
-    await em.flush()
-
-    const scope = space.scope as any
+    const scope = space.scope
 
     const file = create.filesHelper.create(em, { user }, { name: 'file', scope })
     const folder = create.filesHelper.createFolder(em, { user }, { name: 'folder', scope })
@@ -574,10 +466,12 @@ describe('DiscussionService tests', () => {
     )
     await em.flush()
 
-    const publishDiscussionInput: PublishDiscussionInput = {
-      id: discussion.id,
+    const createDiscussionInput: CreateDiscussionDTO = {
+      title: 'test-discussion',
+      content: 'test-content',
       scope: scope,
-      toPublish: {
+      notify: [],
+      attachments: {
         files: [file.id],
         folders: [folder.id],
         assets: [asset.id],
@@ -588,16 +482,15 @@ describe('DiscussionService tests', () => {
     }
 
     try {
-      await discussionService.publishDiscussion(publishDiscussionInput)
+      await discussionService.createDiscussion(createDiscussionInput)
       expect.fail('Operation is expected to fail.')
-    } catch (error: any) {
+    } catch (error) {
       expect(error.name).to.equal('InvalidStateError')
       expect(error.message).eq('Unable to publish job - job is not in the space or is not public.')
     }
   })
 
-  it('publish discussion in space with attachment that is not accessible by user', async () => {
-    const discussion = create.discussionHelper.create(em, { user }, {})
+  it('create discussion in space with attachment that is not accessible by user', async () => {
     const space = create.spacesHelper.create(em, generate.space.group())
     const guestLead = create.userHelper.create(em, { email: generate.random.chance.email() })
     const hostLead = create.userHelper.create(em, { email: generate.random.chance.email() })
@@ -618,7 +511,7 @@ describe('DiscussionService tests', () => {
     )
     await em.flush()
 
-    const scope = space.scope as any
+    const scope = space.scope
 
     const file = create.filesHelper.create(em, { user }, { name: 'file', scope })
     const folder = create.filesHelper.createFolder(em, { user }, { name: 'folder-1', scope })
@@ -642,10 +535,12 @@ describe('DiscussionService tests', () => {
     )
     await em.flush()
 
-    const publishDiscussionInput: PublishDiscussionInput = {
-      id: discussion.id,
+    const createDiscussionInput: CreateDiscussionDTO = {
+      title: 'test-discussion',
+      content: 'test-content',
       scope: scope,
-      toPublish: {
+      notify: [],
+      attachments: {
         files: [file.id],
         folders: [folder.id],
         assets: [asset.id],
@@ -656,17 +551,16 @@ describe('DiscussionService tests', () => {
     }
 
     try {
-      await discussionService.publishDiscussion(publishDiscussionInput)
+      await discussionService.createDiscussion(createDiscussionInput)
       expect.fail('Operation is expected to fail.')
-    } catch (error: any) {
+    } catch (error) {
       expect(error.name).to.equal('InvalidStateError')
       expect(error.message).eq('Unable to publish job - job is not in the space or is not public.')
     }
   })
 
-  context('publish discussion in space and create task to notify', () => {
-    it('should send discussionId and notifyAll value', async () => {
-      const discussion = create.discussionHelper.create(em, { user }, {})
+  context('create discussion in space and create task to notify members', () => {
+    it('should send discussionId and notify all members', async () => {
       const space = create.spacesHelper.create(em, generate.space.group())
       const guestLead = create.userHelper.create(em, { email: generate.random.chance.email() })
       const hostLead = create.userHelper.create(em, { email: generate.random.chance.email() })
@@ -689,29 +583,20 @@ describe('DiscussionService tests', () => {
       )
       await em.flush()
 
-      const publishDiscussionInput: PublishDiscussionInput = {
-        id: discussion.id,
+      const createDiscussionInput: CreateDiscussionDTO = {
+        title: 'test-discussion',
+        content: 'test-content',
         scope: scope,
-        toPublish: {
-          files: [],
-          assets: [],
-          apps: [],
-          jobs: [],
-          comparisons: [],
-        },
-        notifyAll: true,
+        notify: 'all',
+        attachments: EMPTY_ATTACHMENTS,
       }
-      const count = await discussionService.publishDiscussion(publishDiscussionInput)
-      expect(count).eq(0)
+      const discussion = await discussionService.createDiscussion(createDiscussionInput)
       expect(createSpaceNotificationTaskStub.callCount).eq(1)
       expect(createSpaceNotificationTaskStub.args[0][0]).to.be.equal(discussion.id)
-      expect(createSpaceNotificationTaskStub.args[0][1]).to.be.equal(
-        publishDiscussionInput.notifyAll,
-      )
+      expect(createSpaceNotificationTaskStub.args[0][1]).to.be.equal(createDiscussionInput.notify)
     })
 
-    it('value should be false if notifyAll is missing', async () => {
-      const discussion = create.discussionHelper.create(em, { user }, {})
+    it('value should be false if notify is empty', async () => {
       const space = create.spacesHelper.create(em, generate.space.group())
       const guestLead = create.userHelper.create(em, { email: generate.random.chance.email() })
       const hostLead = create.userHelper.create(em, { email: generate.random.chance.email() })
@@ -734,55 +619,43 @@ describe('DiscussionService tests', () => {
       await em.flush()
       const scope = `space-${space.id}` as Scope
 
-      const basePublishDiscussionInput: PublishDiscussionInput = {
-        id: discussion.id,
+      const createDiscussionInput: CreateDiscussionDTO = {
+        title: 'test-discussion',
+        content: 'test-content',
         scope: scope,
-        toPublish: {
-          files: [],
-          assets: [],
-          apps: [],
-          jobs: [],
-          comparisons: [],
-        },
+        notify: [],
+        attachments: EMPTY_ATTACHMENTS,
       }
 
-      const count1 = await discussionService.publishDiscussion(basePublishDiscussionInput)
-      expect(count1).eq(0)
-      expect(createSpaceNotificationTaskStub.callCount).eq(1)
-      expect(createSpaceNotificationTaskStub.args[0][0]).to.be.equal(discussion.id)
-      expect(createSpaceNotificationTaskStub.args[0][1]).to.be.equal(false)
+      await discussionService.createDiscussion(createDiscussionInput)
+      expect(createSpaceNotificationTaskStub.callCount).eq(0)
     })
 
-    it('should not create task if discusion is not in space', async () => {
-      const discussion = create.discussionHelper.create(em, { user }, {})
+    it('should not create task if discussion is not in space', async () => {
       await em.flush()
-      create.discussionHelper.createAnswer(em, { user, discussion })
       await em.flush()
 
-      const basePublishDiscussionInput: PublishDiscussionInput = {
-        id: discussion.id,
+      const createDiscussionInput: CreateDiscussionDTO = {
+        title: 'test-discussion',
+        content: 'test-content',
         scope: STATIC_SCOPE.PUBLIC,
-        toPublish: {
-          files: [],
-          assets: [],
-          apps: [],
-          jobs: [],
-          comparisons: [],
-        },
+        notify: 'all',
+        attachments: EMPTY_ATTACHMENTS,
       }
-      const count1 = await discussionService.publishDiscussion(basePublishDiscussionInput)
-      expect(count1).eq(0)
+
+      const discussion = await discussionService.createDiscussion(createDiscussionInput)
+      await em.flush()
       expect(createSpaceNotificationTaskStub.callCount).eq(0)
     })
   })
 
-  context('publish answer in space and create task to notify', () => {
-    it('should send discussionId and notifyAll value', async () => {
+  context('create answer in space and create notification tasks', () => {
+    it('should send discussionId and notify all value', async () => {
       const space = create.spacesHelper.create(em, generate.space.group())
       const guestLead = create.userHelper.create(em, { email: generate.random.chance.email() })
       const hostLead = create.userHelper.create(em, { email: generate.random.chance.email() })
       await em.flush()
-      const discussion = create.discussionHelper.create(em, { user: guestLead }, {})
+      const discussion = create.discussionHelper.createInSpace(em, { user: guestLead, space }, {})
       create.spacesHelper.addMember(
         em,
         { user: hostLead, space },
@@ -799,37 +672,28 @@ describe('DiscussionService tests', () => {
         { role: SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR, side: SPACE_MEMBERSHIP_SIDE.HOST },
       )
       await em.flush()
-      const answer = create.discussionHelper.createAnswer(em, { user, discussion })
-      await em.flush()
-      const scope = `space-${space.id}` as Scope
 
-      const publishAnswerInput: PublishAnswerInput = {
-        id: answer.id,
+      const createAnswerInput: CreateAnswerDTO = {
         discussionId: discussion.id,
-        scope: scope,
-        toPublish: {
-          files: [],
-          assets: [],
-          apps: [],
-          jobs: [],
-          comparisons: [],
-        },
-        notifyAll: true,
+        title: 'answer',
+        content: 'test-content',
+        attachments: EMPTY_ATTACHMENTS,
+        notify: 'all',
       }
-      const count = await discussionService.publishAnswer(publishAnswerInput)
-      expect(count).eq(0)
+
+      await discussionService.createAnswer(createAnswerInput)
       expect(createSpaceNotificationTaskStub.callCount).eq(1)
       expect(createSpaceNotificationTaskStub.args[0][0]).to.be.equal(discussion.id)
-      expect(createSpaceNotificationTaskStub.args[0][1]).to.be.equal(publishAnswerInput.notifyAll)
+      expect(createSpaceNotificationTaskStub.args[0][1]).to.be.equal(createAnswerInput.notify)
     })
 
-    it('value should be false if notifyAll is missing', async () => {
+    it('should not create task if notify is empty', async () => {
       const space = create.spacesHelper.create(em, generate.space.group())
-      const guestLead = create.userHelper.create(em, { email: generate.random.chance.email() })
-      const hostLead = create.userHelper.create(em, { email: generate.random.chance.email() })
+      const guestLead = create.userHelper.create(em)
+      const hostLead = create.userHelper.create(em)
       await em.flush()
 
-      const discussion = create.discussionHelper.create(em, { user: guestLead }, {})
+      const discussion = create.discussionHelper.createInSpace(em, { user: guestLead, space }, {})
       create.spacesHelper.addMember(
         em,
         { user: hostLead, space },
@@ -846,61 +710,42 @@ describe('DiscussionService tests', () => {
         { role: SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR, side: SPACE_MEMBERSHIP_SIDE.HOST },
       )
       await em.flush()
-      const answer = create.discussionHelper.createAnswer(em, { user, discussion })
-      await em.flush()
-      const scope = `space-${space.id}` as Scope
+      // const scope = `space-${space.id}` as Scope
 
-      const basePublishAnswerInput: PublishAnswerInput = {
-        id: answer.id,
+      const createAnswerInput: CreateAnswerDTO = {
         discussionId: discussion.id,
-        scope: scope,
-        toPublish: {
-          files: [],
-          assets: [],
-          apps: [],
-          jobs: [],
-          comparisons: [],
-        },
+        title: 'answer',
+        content: 'test-content',
+        attachments: EMPTY_ATTACHMENTS,
+        notify: [],
       }
-      const count1 = await discussionService.publishAnswer(basePublishAnswerInput)
-      expect(count1).eq(0)
-      expect(createSpaceNotificationTaskStub.callCount).eq(1)
-      expect(createSpaceNotificationTaskStub.args[0][0]).to.be.equal(discussion.id)
-      expect(createSpaceNotificationTaskStub.args[0][1]).to.be.equal(false)
+      await discussionService.createAnswer(createAnswerInput)
+      expect(createSpaceNotificationTaskStub.callCount).eq(0)
     })
 
     it('should not create task if answer is not for a space discussion', async () => {
-      const discussion = create.discussionHelper.create(em, { user }, {})
-      await em.flush()
-      const answer = create.discussionHelper.createAnswer(em, { user, discussion })
+      const discussion = create.discussionHelper.createPublic(em, { user }, {})
       await em.flush()
 
-      const basePublishAnswerInput: PublishAnswerInput = {
-        id: answer.id,
+      const createAnswerInput: CreateAnswerDTO = {
         discussionId: discussion.id,
-        scope: STATIC_SCOPE.PUBLIC,
-        toPublish: {
-          files: [],
-          assets: [],
-          apps: [],
-          jobs: [],
-          comparisons: [],
-        },
-        notifyAll: false,
+        title: 'answer',
+        content: 'test-content',
+        attachments: EMPTY_ATTACHMENTS,
+        notify: [],
       }
-      const count1 = await discussionService.publishAnswer(basePublishAnswerInput)
-      expect(count1).eq(0)
+      await discussionService.createAnswer(createAnswerInput)
       expect(createSpaceNotificationTaskStub.callCount).eq(0)
     })
   })
 
-  context('create comment and create task to notify', () => {
-    it('should send discussionId and notifyAll value', async () => {
+  context('create comment and create notification tasks', () => {
+    it('should send discussionId and notify all value', async () => {
       const space = create.spacesHelper.create(em, generate.space.group())
-      const guestLead = create.userHelper.create(em, { email: generate.random.chance.email() })
-      const hostLead = create.userHelper.create(em, { email: generate.random.chance.email() })
-      const discussion = create.discussionHelper.create(em, { user }, {})
+      const guestLead = create.userHelper.create(em)
+      const hostLead = create.userHelper.create(em)
       await em.flush()
+      const discussion = create.discussionHelper.createInSpace(em, { user, space }, {})
 
       create.spacesHelper.addMember(
         em,
@@ -918,32 +763,26 @@ describe('DiscussionService tests', () => {
         { role: SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR, side: SPACE_MEMBERSHIP_SIDE.GUEST },
       )
       await em.flush()
-      await discussionService.publishDiscussion({
-        id: discussion.id,
-        scope: `space-${space.id}` as Scope,
-        toPublish: { apps: [], assets: [], comparisons: [], files: [], jobs: [] },
-      })
-      createSpaceNotificationTaskStub.reset()
+      // createSpaceNotificationTaskStub.reset()
 
-      const comment = 'test-comment'
-      const createCommentInput = {
-        comment,
-        notifyAll: true,
-        targetId: discussion.id,
-        targetType: 'Discussion',
-      } as CreateCommentInput
+      const createCommentInput: CreateCommentDTO = {
+        content: 'test-comment',
+        notify: 'all',
+        discussionId: discussion.id,
+      }
       const createdComment = await discussionService.createComment(createCommentInput)
-      expect(createdComment.body).eq(comment)
+      expect(createdComment.body).eq(createCommentInput.content)
       expect(createSpaceNotificationTaskStub.callCount).eq(1)
       expect(createSpaceNotificationTaskStub.args[0][0]).to.be.equal(discussion.id)
-      expect(createSpaceNotificationTaskStub.args[0][1]).to.be.equal(createCommentInput.notifyAll)
+      expect(createSpaceNotificationTaskStub.args[0][1]).to.be.equal(createCommentInput.notify)
     })
 
     it('value should be false if notifyAll is missing', async () => {
       const space = create.spacesHelper.create(em, generate.space.group())
-      const guestLead = create.userHelper.create(em, { email: generate.random.chance.email() })
-      const hostLead = create.userHelper.create(em, { email: generate.random.chance.email() })
-      const discussion = create.discussionHelper.create(em, { user }, {})
+      const guestLead = create.userHelper.create(em)
+      const hostLead = create.userHelper.create(em)
+      await em.flush()
+      const discussion = create.discussionHelper.createInSpace(em, { user, space }, {})
       await em.flush()
 
       create.spacesHelper.addMember(
@@ -962,31 +801,26 @@ describe('DiscussionService tests', () => {
         { role: SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR, side: SPACE_MEMBERSHIP_SIDE.GUEST },
       )
       await em.flush()
-      await discussionService.publishDiscussion({
-        id: discussion.id,
-        scope: `space-${space.id}` as Scope,
-        toPublish: { apps: [], assets: [], comparisons: [], files: [], jobs: [] },
-      })
+
       createSpaceNotificationTaskStub.reset()
 
       const comment = 'test-comment'
-      const createCommentInput = {
-        comment,
-        targetId: discussion.id,
-        targetType: 'Discussion',
-      } as CreateCommentInput
+      const createCommentInput: CreateCommentDTO = {
+        content: comment,
+        discussionId: discussion.id,
+        notify: [],
+      }
       const createdComment = await discussionService.createComment(createCommentInput)
       expect(createdComment.body).eq(comment)
-      expect(createSpaceNotificationTaskStub.callCount).eq(1)
-      expect(createSpaceNotificationTaskStub.args[0][0]).to.be.equal(discussion.id)
-      expect(createSpaceNotificationTaskStub.args[0][1]).to.be.equal(false)
+      expect(createSpaceNotificationTaskStub.callCount).eq(0)
     })
 
-    it("should create task if comment is a space discussion's answer", async () => {
+    it("should not create task if comment is a space discussion's answer", async () => {
       const space = create.spacesHelper.create(em, generate.space.group())
-      const guestLead = create.userHelper.create(em, { email: generate.random.chance.email() })
-      const hostLead = create.userHelper.create(em, { email: generate.random.chance.email() })
-      const discussion = create.discussionHelper.create(em, { user }, {})
+      const guestLead = create.userHelper.create(em)
+      const hostLead = create.userHelper.create(em)
+      await em.flush()
+      const discussion = create.discussionHelper.createInSpace(em, { user, space }, {})
       await em.flush()
       create.spacesHelper.addMember(
         em,
@@ -1006,65 +840,47 @@ describe('DiscussionService tests', () => {
       await em.flush()
       const answer = create.discussionHelper.createAnswer(em, { user, discussion })
       await em.flush()
-      await discussionService.publishDiscussion({
-        id: discussion.id,
-        scope: `space-${space.id}` as Scope,
-        toPublish: { apps: [], assets: [], comparisons: [], files: [], jobs: [] },
-      })
 
       const comment = 'test-comment'
-      const createCommentInput = {
-        notifyAll: false,
-        comment,
-        targetId: answer.id,
-        targetType: 'Answer',
-      } as CreateCommentInput
+      const createCommentInput: CreateCommentDTO = {
+        content: comment,
+        answerId: answer.id,
+        notify: [],
+      }
       const createdComment = await discussionService.createComment(createCommentInput)
       expect(createdComment.body).eq(comment)
-      expect(createSpaceNotificationTaskStub.callCount).eq(1)
-      expect(createSpaceNotificationTaskStub.args[0][0]).to.be.equal(discussion.id)
-      expect(createSpaceNotificationTaskStub.args[0][1]).to.be.equal(createCommentInput.notifyAll)
+      expect(createSpaceNotificationTaskStub.callCount).eq(0)
     })
   })
 
   it('should not create task if comment is not for a space discussion', async () => {
-    const discussion = create.discussionHelper.create(em, { user }, {})
+    const discussion = create.discussionHelper.createPublic(em, { user }, {})
     await em.flush()
-    await discussionService.publishDiscussion({
-      id: discussion.id,
-      scope: STATIC_SCOPE.PUBLIC,
-      toPublish: { apps: [], assets: [], comparisons: [], files: [], jobs: [] },
-    })
 
     const comment = 'test-comment'
-    const createCommentInput = {
-      comment,
-      targetId: discussion.id,
-      targetType: 'Discussion',
-    } as CreateCommentInput
+    const createCommentInput: CreateCommentDTO = {
+      content: comment,
+      discussionId: discussion.id,
+      notify: [],
+    }
     const createdComment = await discussionService.createComment(createCommentInput)
     expect(createdComment.body).eq(comment)
     expect(createSpaceNotificationTaskStub.callCount).eq(0)
   })
 
   it("should create task if comment is not for a space discussion's answer", async () => {
-    const discussion = create.discussionHelper.create(em, { user }, {})
-    create.userHelper.create(em, { email: generate.random.chance.email() })
+    const discussion = create.discussionHelper.createPublic(em, { user }, {})
+    create.userHelper.create(em)
     await em.flush()
     const answer = create.discussionHelper.createAnswer(em, { user, discussion })
     await em.flush()
-    await discussionService.publishDiscussion({
-      id: discussion.id,
-      scope: STATIC_SCOPE.PUBLIC,
-      toPublish: { apps: [], assets: [], comparisons: [], files: [], jobs: [] },
-    })
 
     const comment = 'test-comment'
-    const createCommentInput = {
-      comment,
-      targetId: answer.id,
-      targetType: 'Answer',
-    } as CreateCommentInput
+    const createCommentInput: CreateCommentDTO = {
+      content: comment,
+      answerId: answer.id,
+      notify: [],
+    }
     const createdComment = await discussionService.createComment(createCommentInput)
     expect(createdComment.body).eq(comment)
     expect(createSpaceNotificationTaskStub.callCount).eq(0)

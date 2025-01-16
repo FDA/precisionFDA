@@ -36,12 +36,16 @@ module Api
 
       counters[:reports] = SpaceReport.accessible_by_private.where(created_by: @context.user.id).count
 
-      apps = if params[:action] == "spaces"
-        AppSeries.editable_by(@context).where.not(scope: [Scopes::SCOPE_PUBLIC, Scopes::SCOPE_PRIVATE])
+      if params[:action] == "spaces"
+        apps = AppSeries.editable_by(@context).where.not(scope: [Scopes::SCOPE_PUBLIC, Scopes::SCOPE_PRIVATE])
+        discussions = Discussion.accessibly_in_spaces(@context)
       else
-        AppSeries.editable_by(@context).where(scope: Scopes::SCOPE_PRIVATE)
+        apps = AppSeries.editable_by(@context).where(scope: Scopes::SCOPE_PRIVATE)
+        discussions = Discussion.accessible_by(@context).where(notes: { scope: Scopes::SCOPE_PUBLIC })
       end
+
       counters[:apps] = apps.count
+      counters[:discussions] = discussions.count
 
       render json: counters
     end

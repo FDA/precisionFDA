@@ -9,14 +9,13 @@ import { Node } from '@shared/domain/user-file/node.entity'
 import { PlatformClient } from '@shared/platform-client'
 import { mocksReset } from '@worker-test/utils/mocks'
 import { expect } from 'chai'
-import { PARENT_TYPE } from '../../../src/domain/user-file/user-file.types'
-import { STATIC_SCOPE } from '../../../src/enums'
+import { PARENT_TYPE } from '@shared/domain/user-file/user-file.types'
+import { STATIC_SCOPE } from '@shared/enums'
 import { create, db } from '../../../src/test'
 
 describe('PublisherService tests', () => {
   let em: EntityManager<MySqlDriver>
   let user: User
-  let userCtx: UserCtx
   let publisherService: PublisherService
 
   beforeEach(async () => {
@@ -24,8 +23,7 @@ describe('PublisherService tests', () => {
     em = database.orm().em.fork() as EntityManager<MySqlDriver>
     user = create.userHelper.create(em)
     await em.flush()
-    userCtx = { ...user, accessToken: 'foo' }
-    publisherService = new PublisherService(em, userCtx, new PlatformClient({ accessToken: 'foo' }))
+    publisherService = new PublisherService(em, new PlatformClient({ accessToken: 'foo' }))
     // using mocked platform client to avoid actual calls to platform
     mocksReset()
   })
@@ -57,7 +55,6 @@ describe('PublisherService tests', () => {
       em,
       {
         user,
-        appId: app1.id,
       },
       { scope: STATIC_SCOPE.PRIVATE },
     )
@@ -71,7 +68,6 @@ describe('PublisherService tests', () => {
       em,
       {
         user,
-        appId: app2.id,
       },
       { scope: STATIC_SCOPE.PRIVATE },
     )
@@ -120,7 +116,7 @@ describe('PublisherService tests', () => {
       { scope: STATIC_SCOPE.PRIVATE },
     )
     await em.flush()
-    const compFile1 = create.filesHelper.create(
+    create.filesHelper.create(
       em,
       { user },
       {
@@ -130,7 +126,7 @@ describe('PublisherService tests', () => {
         project: user.privateComparisonsProject,
       },
     )
-    const compFile2 = create.filesHelper.create(
+    create.filesHelper.create(
       em,
       { user },
       {
@@ -159,7 +155,7 @@ describe('PublisherService tests', () => {
     const node = create.filesHelper.create(em, { user }, {})
     await em.flush()
     try {
-      const count = await publisherService.publishNodes([node, folder], user, STATIC_SCOPE.PUBLIC)
+      await publisherService.publishNodes([node, folder], user, STATIC_SCOPE.PUBLIC)
       expect.fail('Operation is expected to fail.')
     } catch (error: any) {
       expect(error.name).eq('InvalidStateError')

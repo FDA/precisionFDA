@@ -1,9 +1,9 @@
-import { EntityRepository } from '@mikro-orm/mysql'
 import { Uid } from '@shared/domain/entity/domain/uid'
+import { PaginatedRepository } from '@shared/domain/entity/repository/paginated.repository'
 import { Challenge } from './challenge.entity'
 
-class ChallengeRepository extends EntityRepository<Challenge> {
-  async findChallengesByCardImageFileUid(fileUid) {
+class ChallengeRepository extends PaginatedRepository<Challenge> {
+  async findChallengesByCardImageFileUid(fileUid: Uid<'file'>) {
     return await this.createQueryBuilder('ch')
       .leftJoinAndSelect('ch.cardImage', 'ci')
       .where({ 'ci.uid': fileUid })

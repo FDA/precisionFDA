@@ -107,7 +107,7 @@ export default function DataPortalContentEditPage(): JSX.Element {
     <LexiContext editorState={data?.editorState}>
       {portalId && data && (
         <div className="editor-shell">
-          <Editor />
+          <Editor insertImageType="resource" />
           <ButtonBar data={data} />
         </div>
       )}

@@ -75,7 +75,7 @@ export class CliController {
   @UseGuards(UserContextGuard)
   @Put('/discussions/reply')
   async editReply(@Body() body: CliEditReplyDTO) {
-    const url = this.cliService.editReply(body)
+    const url = await this.cliService.editReply(body)
     return { url }
   }
 

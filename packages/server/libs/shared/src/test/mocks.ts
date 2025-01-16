@@ -1,21 +1,21 @@
 import { PlatformClient } from '@shared/platform-client'
 import * as queue from '@shared/queue'
 import * as redis from '@shared/services/redis.service'
-import sinon from 'sinon'
 import Bull from 'bull'
+import sinon from 'sinon'
 // import { handler } from '../../src/jobs'
+import { RedisClient } from 'redis'
+import { FileCloseParams } from '../platform-client/platform-client.params'
 import * as generate from './generate'
 import {
+  DBCLUSTER_DESC_RES,
+  FILE_REMOVED_RES,
   FILES_DESC_RES,
   FILES_LIST_RES_ROOT,
-  FOLDERS_LIST_RES,
-  DBCLUSTER_DESC_RES,
   FIND_MEMBERS_RES,
-  FILE_REMOVED_RES,
+  FOLDERS_LIST_RES,
 } from './mock-responses'
-import { FileCloseParams } from '../platform-client/platform-client.params'
 import { createMockServiceFactory } from './mock-service-factory'
-import { RedisClient } from 'redis'
 
 const mockServiceFactory = createMockServiceFactory()
 
@@ -56,13 +56,9 @@ const fakes = {
     findRepeatableFake: sinon.stub(),
     removeRepeatableFake: sinon.fake(),
     removeRepeatableJobsFake: sinon.fake(),
-    createCheckUserJobsTask: sinon.fake(),
     createDbClusterSyncTaskFake: sinon.stub(),
     createEmailSendTaskFake: sinon.fake(),
-    createSyncFilesStateTask: sinon.fake(),
     createSyncJobStatusTaskFake: sinon.stub(),
-    createUserCheckupTask: sinon.fake(),
-    createSyncSpacesPermissionsTask: sinon.stub(),
     clearOrphanedRepeatableJobs: sinon.fake(),
   },
   bull: {
@@ -183,20 +179,12 @@ const mocksSetup = () => {
   sandbox.replace(queue, 'findRepeatable', fakes.queue.findRepeatableFake)
   sandbox.replace(queue, 'removeRepeatable', fakes.queue.removeRepeatableFake)
   sandbox.replace(queue, 'removeRepeatableJob', fakes.queue.removeRepeatableJobsFake)
-  sandbox.replace(queue, 'createCheckUserJobsTask', fakes.queue.createCheckUserJobsTask)
   sandbox.replace(queue, 'createDbClusterSyncTask', fakes.queue.createDbClusterSyncTaskFake)
   sandbox.replace(queue, 'createSendEmailTask', fakes.queue.createEmailSendTaskFake)
-  sandbox.replace(queue, 'createSyncFilesStateTask', fakes.queue.createSyncFilesStateTask)
   sandbox.replace(queue, 'createSyncJobStatusTask', fakes.queue.createSyncJobStatusTaskFake)
-  sandbox.replace(queue, 'createUserCheckupTask', fakes.queue.createUserCheckupTask)
-  sandbox.replace(
-    queue,
-    'createSyncSpacesPermissionsTask',
-    fakes.queue.createSyncSpacesPermissionsTask,
-  )
   sandbox.replace(queue, 'clearOrphanedRepeatableJobs', fakes.queue.clearOrphanedRepeatableJobs)
   sandbox.stub(redis, 'createRedisClient').returns({
-    publish(channel: string, value: string) {},
+    publish() {},
     subscribe() {},
     quit() {},
   } as RedisClient)
@@ -233,13 +221,9 @@ const mocksReset = () => {
 
   fakes.queue.removeRepeatableFake.resetHistory()
   fakes.queue.removeRepeatableJobsFake.resetHistory()
-  fakes.queue.createCheckUserJobsTask.resetHistory()
   fakes.queue.createDbClusterSyncTaskFake.resetHistory()
   fakes.queue.createEmailSendTaskFake.resetHistory()
-  fakes.queue.createSyncFilesStateTask.resetHistory()
   fakes.queue.createSyncJobStatusTaskFake.resetHistory()
-  fakes.queue.createUserCheckupTask.resetHistory()
-  fakes.queue.createSyncSpacesPermissionsTask.resetHistory()
   fakes.queue.clearOrphanedRepeatableJobs.resetHistory()
 
   fakes.bull.processFake.resetHistory()
@@ -254,4 +238,4 @@ const mocksRestore = () => {
   sandbox.restore()
 }
 
-export { fakes, mocksSetup, mocksRestore, mocksReset }
+export { fakes, mocksReset, mocksRestore, mocksSetup }

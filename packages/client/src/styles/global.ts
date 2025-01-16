@@ -3,6 +3,8 @@ import { colors, sizing, theme } from './theme'
 import { colorvars, themes } from './variables'
 import { compactScrollBarV2 } from '../components/Page/styles'
 
+import './cssHelpers.css'
+
 const GlobalStyle = createGlobalStyle<{railsAlertHeight: number}>`
   ${colorvars}
   ${themes}
