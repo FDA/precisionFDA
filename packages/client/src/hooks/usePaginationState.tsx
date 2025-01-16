@@ -9,7 +9,7 @@ export interface PaginationParams {
 }
 
 const defaultPage = 1
-const defaultPerPageCount = 3
+const defaultPerPageCount = 20
 
 export function usePaginationState() {
   const [page, setPage] = useState(1)
