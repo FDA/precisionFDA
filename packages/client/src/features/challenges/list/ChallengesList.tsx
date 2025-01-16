@@ -55,7 +55,7 @@ const ChallengesList = () => {
     queryFn: () => challengesYearsListRequest(),
   })
 
-  useToastWSHandler(user)
+  useToastWSHandler()
 
   const { lastJsonMessage } = useWebSocket<WebSocketMessage>(getNodeWsUrl(), {
     share: true,
