@@ -268,7 +268,7 @@ class ChallengesController < ApplicationController
       flash[:success] = "You are already following the challenge! Remember to submit your " \
                         "entries by the challenge deadline!"
     end
-    redirect_to challenge_path(challenge)
+    redirect_to "/challenges/#{challenge.id}/intro"
   end
 
   def edit_page

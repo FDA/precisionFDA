@@ -50,7 +50,7 @@
   <div class="form-group">
     <%= f.label :scope, "Visibility", class: 'control-label col-sm-2 ff-label-color' %>
     <div class="col-sm-11 col-sm-offset-1">
-      <%= f.select :scope, options_for_select({ "Private" => "private", "Public" => "public" }, "Private"), {}, class: "form-control" %>
+      <%= f.select :scope, options_for_select({ "Private" => "private", "Public" => "public" }, f.object.scope), {}, class: "form-control" %>
     </div>
   </div>
 <% end %>

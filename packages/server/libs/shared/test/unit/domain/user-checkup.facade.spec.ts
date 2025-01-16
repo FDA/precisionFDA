@@ -2,64 +2,48 @@ import type { EntityManager } from '@mikro-orm/mysql'
 import { config } from '@shared/config'
 import { database } from '@shared/database'
 import { App } from '@shared/domain/app/app.entity'
-import { User } from '@shared/domain/user/user.entity'
-import { getMainQueue } from '@shared/queue'
-import { TASK_TYPE } from '@shared/queue/task.input'
-import { expect } from 'chai'
-import { create, generate, db } from '@shared/test'
-import { fakes, mocksReset } from '@shared/test/mocks'
+import { STATUS as DB_CLUSTER_STATUS } from '@shared/domain/db-cluster/db-cluster.enum'
 import { JOB_STATE } from '@shared/domain/job/job.enum'
-import type { UserCtx } from '@shared/types'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { FileSyncQueueJobProducer } from '@shared/domain/user-file/producer/file-sync-queue-job.producer'
 import { FILE_STATE_DX, PARENT_TYPE } from '@shared/domain/user-file/user-file.types'
-import { fakes as queueFakes, mocksReset as queueMocksReset } from '../utils/mocks'
-import { doesUserNeedFullCheckup } from '@shared/domain/user/ops/user-checkup'
+import { User } from '@shared/domain/user/user.entity'
+import { UserCheckupFacade } from '@shared/facade/user/user-checkup.facade'
+import { MainQueueJobProducer } from '@shared/queue/producer/main-queue-job.producer'
+import { TASK_TYPE } from '@shared/queue/task.input'
+import { create, db, generate } from '@shared/test'
+import { fakes, mocksReset } from '@shared/test/mocks'
+import type { UserCtx } from '@shared/types'
+import { Job } from 'bull'
+import { expect } from 'chai'
+import { stub, useFakeTimers } from 'sinon'
 
-const createUserCheckupTask = async (user: UserCtx) => {
-  const defaultTestQueue = getMainQueue()
-  await defaultTestQueue.add(TASK_TYPE.USER_CHECKUP, {
-    type: TASK_TYPE.USER_CHECKUP,
-    user,
-  })
-}
-
-describe('TASK: user-checkup', () => {
+describe('UserCheckupFacade', () => {
   let em: EntityManager
   let user: User
-  let user2: User
   let userContext: UserCtx
   let regularApp: App
   let httpsApp: App
+
+  const job = { data: { type: TASK_TYPE.USER_CHECKUP, user: userContext } } as Job
+
+  const createUserDataConsistencyReportJobTaskStub = stub()
+  const createSyncFilesStateTaskStub = stub()
 
   beforeEach(async () => {
     await db.dropData(database.connection())
     em = database.orm().em.fork() as EntityManager
     em.clear()
     user = create.userHelper.create(em)
-    user2 = create.userHelper.create(em, { email: generate.random.email() })
     create.userHelper.createAdmin(em)
     regularApp = create.appHelper.createRegular(em, { user })
     httpsApp = create.appHelper.createHTTPS(em, { user })
     await em.flush()
-    userContext = { id: user.id, dxuser: user.dxuser, accessToken: 'fake-token' }
 
     // reset fakes
     mocksReset()
-    queueMocksReset()
-  })
-
-  it('processes a queue task - calls the queue handlers', async () => {
-    await createUserCheckupTask(userContext)
-    // expect UserCheckupOperation to be queued but not UserDataConsistencyReportOperation
-    expect(queueFakes.addToQueueStub.callCount).to.equal(1)
-  })
-
-  it("queues UserDataConsistencyReportOperation if it hasn't been run before", async () => {
-    user.lastDataCheckup = null
-    await em.flush()
-
-    await createUserCheckupTask(userContext)
-    // expect both UserCheckupOperation and UserDataConsistencyReportOperation to be queued
-    expect(queueFakes.addToQueueStub.callCount).to.equal(2)
+    createUserDataConsistencyReportJobTaskStub.reset()
+    createSyncFilesStateTaskStub.reset()
   })
 
   it('adds job sync tasks for HTTPS apps but not regular apps to the queue', async () => {
@@ -109,7 +93,7 @@ describe('TASK: user-checkup', () => {
 
     fakes.client.jobDescribeFake.returns({ state: JOB_STATE.TERMINATED })
 
-    await createUserCheckupTask(userContext)
+    await getInstance().runCheckup(job)
 
     // Only non-terminated HTTPS jobs should result in task creation
     // In this case only job2 and job4
@@ -172,7 +156,7 @@ describe('TASK: user-checkup', () => {
       .onCall(3)
       .returns(generate.bullQueue.syncJobStatus(job4.dxid, userContext))
 
-    await createUserCheckupTask(userContext)
+    await getInstance().runCheckup(job)
 
     expect(fakes.queue.createSyncJobStatusTaskFake.callCount).to.equal(2)
 
@@ -192,9 +176,9 @@ describe('TASK: user-checkup', () => {
     create.filesHelper.create(em, { user }, { name: 'file2', ...params })
     await em.flush()
 
-    await createUserCheckupTask(userContext)
+    await getInstance().runCheckup(job)
 
-    expect(fakes.queue.createSyncFilesStateTask.callCount).to.equal(0)
+    expect(createSyncFilesStateTaskStub.callCount).to.equal(0)
   })
 
   it('adds SyncFilesStateTask if user has an open file', async () => {
@@ -206,9 +190,9 @@ describe('TASK: user-checkup', () => {
     create.filesHelper.create(em, { user }, { name: 'file1', ...params })
     await em.flush()
 
-    await createUserCheckupTask(userContext)
+    await getInstance().runCheckup(job)
 
-    expect(fakes.queue.createSyncFilesStateTask.callCount).to.equal(1)
+    expect(createSyncFilesStateTaskStub.callCount).to.equal(1)
   })
 
   it('adds SyncFilesStateTask if user has an open asset', async () => {
@@ -220,9 +204,9 @@ describe('TASK: user-checkup', () => {
     create.filesHelper.create(em, { user }, { name: 'asset1', ...params })
     await em.flush()
 
-    await createUserCheckupTask(userContext)
+    await getInstance().runCheckup(job)
 
-    expect(fakes.queue.createSyncFilesStateTask.callCount).to.equal(1)
+    expect(createSyncFilesStateTaskStub.callCount).to.equal(1)
   })
 
   it('does not add SyncFilesStateTask if a task already exists', async () => {
@@ -238,54 +222,83 @@ describe('TASK: user-checkup', () => {
       generate.bullQueueRepeatable.syncFilesState(user.dxuser),
     )
 
-    await createUserCheckupTask(userContext)
+    await getInstance().runCheckup(job)
 
-    expect(fakes.queue.createSyncFilesStateTask.callCount).to.equal(0)
+    expect(createSyncFilesStateTaskStub.callCount).to.equal(0)
   })
 
   it('queues UserDataConsistencyReport if last checkup is null', async () => {
     user.lastDataCheckup = null
     await em.flush()
 
-    await createUserCheckupTask(userContext)
-    expect(queueFakes.addToQueueStub.callCount).to.equal(2)
+    await getInstance().runCheckup(job)
+    expect(createUserDataConsistencyReportJobTaskStub.callCount).to.equal(1)
   })
 
-  it('queues UserDataConsistencyReport if last checkup is over the limit', async () => {
+  it('queues UserDataConsistencyReportTask and BillToAdjustmentTask if last checkup is over the limit', async () => {
     const repeat = config.workerJobs.userDataConsistencyReport.repeatSeconds
-    user.lastDataCheckup = new Date(new Date().getTime() + repeat * 1000 + 1)
+    user.lastDataCheckup = new Date(new Date().getTime() - (repeat + 1) * 1000)
     await em.flush()
 
-    await createUserCheckupTask(userContext)
-    expect(queueFakes.addToQueueStub.callCount).to.equal(1)
+    await getInstance().runCheckup(job)
+    expect(createUserDataConsistencyReportJobTaskStub.callCount).to.equal(1)
   })
 
-  it('does not queue UserDataConsistencyReport if last checkup is under the limit', async () => {
+  it('does not queue UserDataConsistencyReportTask and BillToAdjustmentTask if last checkup is under the limit', async () => {
     const repeat = config.workerJobs.userDataConsistencyReport.repeatSeconds
-    user.lastDataCheckup = new Date(new Date().getTime() + repeat * 1000 - 1)
+    const testTime = 1708698323689
+    user.lastDataCheckup = new Date(testTime - repeat * 1000 + 1)
     await em.flush()
 
-    await createUserCheckupTask(userContext)
-    expect(queueFakes.addToQueueStub.callCount).to.equal(1)
+    // set time to testTime
+    const clock = useFakeTimers()
+    clock.tickAsync(testTime - Date.now())
+    await getInstance().runCheckup(job)
+    expect(createUserDataConsistencyReportJobTaskStub.callCount).to.equal(0)
+    clock.restore()
   })
 
-  it('doesUserNeedFullCheckup returns true if it has not been run before', async () => {
-    user2.lastDataCheckup = null
+  it('adds db sync tasks to the queue', async () => {
+    const dbCluster1 = create.dbClusterHelper.create(
+      em,
+      { user },
+      { status: DB_CLUSTER_STATUS.AVAILABLE },
+    )
+    const dbCluster2 = create.dbClusterHelper.create(
+      em,
+      { user },
+      { status: DB_CLUSTER_STATUS.STOPPED },
+    )
     await em.flush()
-    expect(doesUserNeedFullCheckup(user2)).to.equal(true)
+
+    await getInstance().runCheckup(job)
+    expect(fakes.queue.createDbClusterSyncTaskFake.callCount).to.equal(2)
+    const [payload1] = fakes.queue.createDbClusterSyncTaskFake.getCall(0).args
+    expect(payload1).to.have.property('dxid', dbCluster1.dxid)
+    const [payload2] = fakes.queue.createDbClusterSyncTaskFake.getCall(1).args
+    expect(payload2).to.have.property('dxid', dbCluster2.dxid)
   })
 
-  it('doesUserNeedFullCheckup returns true if checkup is overdue', async () => {
-    const repeatMilliseconds = config.workerJobs.userDataConsistencyReport.repeatSeconds * 1000
-    user2.lastDataCheckup = new Date(new Date().getTime() - repeatMilliseconds - 100)
+  it('does nothing if all DbClusters already have sync task', async () => {
+    create.dbClusterHelper.create(em, { user }, { status: DB_CLUSTER_STATUS.TERMINATED })
     await em.flush()
-    expect(doesUserNeedFullCheckup(user2)).to.equal(true)
+
+    await getInstance().runCheckup(job)
+    expect(fakes.queue.createDbClusterSyncTaskFake.callCount).to.equal(0)
   })
 
-  it('doesUserNeedFullCheckup returns true if checkup is before due date', async () => {
-    const repeatMilliseconds = config.workerJobs.userDataConsistencyReport.repeatSeconds * 1000
-    user2.lastDataCheckup = new Date(new Date().getTime() - repeatMilliseconds + 100)
-    await em.flush()
-    expect(doesUserNeedFullCheckup(user2)).to.equal(false)
-  })
+  function getInstance() {
+    const userContext = {
+      id: user.id,
+      dxuser: user.dxuser,
+      accessToken: 'token',
+    } as unknown as UserContext
+    const fileSyncQueueJobProducer = {
+      createUserDataConsistencyReportJobTask: createUserDataConsistencyReportJobTaskStub,
+    } as unknown as FileSyncQueueJobProducer
+    const mainQueueJobProducer = {
+      createSyncFilesStateTask: createSyncFilesStateTaskStub,
+    } as unknown as MainQueueJobProducer
+    return new UserCheckupFacade(em, userContext, fileSyncQueueJobProducer, mainQueueJobProducer)
+  }
 })

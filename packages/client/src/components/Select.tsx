@@ -12,15 +12,18 @@ export const Select = styled(ReactSelect).attrs({
     menu: () => 'pf-select-menu',
     option: ({ isSelected }) => (isSelected ? 'pf-select-option selected' : 'pf-select-option'),
     menuList: () => 'pf-select-listbox',
+    multiValue: () => 'pf-select-multi-value',
   },
 })`
-  --height: 32px;
-
+  --height: var(--slect-height, 32px);
+  min-height: 34px;
+  min-width: 200px;
   .pf-select-single {
     font-weight: 500;
     color: var(--c-text-600);
   }
   .pf-select-valueContainer {
+    font-size: 14px;
     height: var(--height);
     padding-top: 0;
   }
@@ -28,6 +31,7 @@ export const Select = styled(ReactSelect).attrs({
     height: var(--height);
   }
   .pf-select-listbox {
+    font-size: 14px;
     ${compactScrollBarV2}
   }
   .pf-select-control {
@@ -48,10 +52,26 @@ export const Select = styled(ReactSelect).attrs({
   .pf-select-option {
     height: var(--height);
     font-weight: 500;
+    font-size: 14px;
     background: var(--c-dropdown-bg);
     &:hover {
       background: var(--c-dropdown-hover-bg);
     }
+  }
+  [class*="-indicatorSeparator"] {
+    background-color: var(--c-layout-border);
+  }
+  [class*="-indicatorContainer"] {
+    color: var(--c-layout-border);
+  }
+  [class*="-Svg"] {
+    height: 16px;
+  }
+  .pf-select-multi-value {
+    background: var(--c-dropdown-bg);
+    border: 1px solid var(--c-layout-border-200);
+    border-radius: 4px;
+    font-size: 14px;
   }
   .selected {
     background: var(--primary-600);

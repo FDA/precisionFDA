@@ -22,7 +22,7 @@ import {
   SectionTitle,
 } from '../../../components/Public/styles'
 import { usePageMeta } from '../../../hooks/usePageMeta'
-import { usePaginationParams } from '../../../hooks/usePaginationState'
+import { usePaginationParamsV2 } from '../../../hooks/usePaginationState'
 import { useToastWSHandler } from '../../../hooks/useToastWSHandler'
 import PublicLayout from '../../../layouts/PublicLayout'
 import { DEFAULT_RECONNECT_ATTEMPTS, DEFAULT_RECONNECT_INTERVAL, getNodeWsUrl, SHOULD_RECONNECT } from '../../../utils/config'
@@ -38,16 +38,17 @@ const ChallengesList = () => {
   const user = useAuthUser()
   const userCanCreateChallenge = user?.can_create_challenges
   const location = useLocation()
-  const { year, time_status }: any = queryString.parse(location.search)
+  const { 'filter[status]': timeStatus, 'filter[year]': year }: any = queryString.parse(location.search)
+  
   const queryClient = useQueryClient()
 
-  const pagination = usePaginationParams()
+  const pagination = usePaginationParamsV2()
 
   const { data, isLoading, isFetched } = useChallengesListQuery({
     year,
-    time_status,
+    timeStatus,
     page: pagination.pageParam,
-    perPage: pagination.perPageParam,
+    pageSize: pagination.pageSizeParam,
   })
   const { data: yearsListData, isLoading: isLoadingYearsList } = useQuery({
     queryKey: ['challenges-years'],
@@ -93,27 +94,28 @@ const ChallengesList = () => {
       />
       <PageContainerMargin>
         <PageRow>
-          {isLoading ? (
+          {isLoading || !data?.data ? (
             <PageLoaderWrapper>
               <Loader />
             </PageLoaderWrapper>
           ) : (
             <PageMainBody>
-              {time_status && <PageFilterTitle>{getTimeStatusName(time_status)}</PageFilterTitle>}
+              {timeStatus && <PageFilterTitle>{getTimeStatusName(timeStatus)}</PageFilterTitle>}
               {year && <PageFilterTitle>{year}</PageFilterTitle>}
               <PageList>
-                {data?.challenges.length === 0 && renderEmpty(time_status)}
-                {data?.challenges?.map(n => <ChallengeListItem key={n.id} challenge={n} />)}
+                {data?.data?.length === 0 && renderEmpty(timeStatus)}
+                {data?.data?.map(n => <ChallengeListItem key={n.id} challenge={n} />)}
                 <Pagination
                   showPerPage={false}
-                  page={data?.meta?.current_page}
-                  totalCount={data?.meta?.total_count}
-                  totalPages={data?.meta?.total_pages}
-                  isHidden={hidePagination(isFetched, data?.challenges?.length, data?.meta?.total_pages)}
-                  isPreviousData={data?.meta?.prev_page !== null}
-                  isNextData={data?.meta?.next_page !== null}
+                  perPage={pagination.pageSizeParam}
+                  page={data?.meta?.page}
+                  totalCount={data?.meta?.total}
+                  totalPages={data?.meta?.totalPages}
+                  isHidden={hidePagination(isFetched, data?.data?.length, data?.meta?.total)}
+                  isPreviousData={data?.meta?.page > 1}
+                  isNextData={data?.meta?.page < data?.meta?.totalPages}
                   setPage={pagination.setPageParam}
-                  onPerPageSelect={pagination.setPerPageParam}
+                  onPerPageSelect={pagination.setPageSizeParam}
                 />
               </PageList>
             </PageMainBody>
@@ -131,31 +133,16 @@ const ChallengesList = () => {
             <RightSideItem>
               <SectionTitle>Filter Challenges</SectionTitle>
               <RightListNext>
-                <ItemButton as={Link} to="/challenges" selected={!time_status} data-turbolinks="false">
+                <ItemButton as={Link} to="/challenges" selected={!timeStatus} data-turbolinks="false">
                   All
                 </ItemButton>
-                <ItemButton
-                  data-turbolinks="false"
-                  as={Link}
-                  to="/challenges?time_status=current"
-                  selected={time_status === 'current'}
-                >
+                <ItemButton data-turbolinks="false" as={Link} to="/challenges?filter[status]=current" selected={timeStatus === 'current'}>
                   Currently Open
                 </ItemButton>
-                <ItemButton
-                  data-turbolinks="false"
-                  as={Link}
-                  to="/challenges?time_status=upcoming"
-                  selected={time_status === 'upcoming'}
-                >
+                <ItemButton data-turbolinks="false" as={Link} to="/challenges?filter[status]=upcoming" selected={timeStatus === 'upcoming'}>
                   Upcoming
                 </ItemButton>
-                <ItemButton
-                  data-turbolinks="false"
-                  as={Link}
-                  to="/challenges?time_status=ended"
-                  selected={time_status === 'ended'}
-                >
+                <ItemButton data-turbolinks="false" as={Link} to="/challenges?filter[status]=ended" selected={timeStatus === 'ended'}>
                   Ended
                 </ItemButton>
               </RightListNext>
@@ -173,7 +160,7 @@ const ChallengesList = () => {
                       <ItemButton
                         data-turbolinks="false"
                         as={Link}
-                        to={`/challenges?year=${y}`}
+                        to={`/challenges?filter[year]=${y}`}
                         key={y}
                         selected={y === year}
                         // onClick={() => handleYearPress(y)}

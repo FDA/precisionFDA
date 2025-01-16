@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { parse } from 'query-string'
+import queryString from 'query-string'
 import React from 'react'
 import { Link, useLocation, useParams } from 'react-router-dom'
 import Dropdown from '../../../components/Dropdown'
@@ -94,7 +94,7 @@ export const FileShow = ({ emitScope, space, homeScope }: { homeScope?: HomeScop
   })
   const file = data?.files
   const meta = data?.meta
-  const params = parse(location?.state?.fromSearch)
+  const params = queryString.parse(location?.state?.fromSearch)
   const folderId = params?.folder_id as string | undefined
 
   if (isLoading) {

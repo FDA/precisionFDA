@@ -163,7 +163,12 @@ module.exports = merge(base({ urlLoaderOptions }), swc({ swcLoaderOptions }), {
         secure: false,
       },
       {
-        context: ['/challenges/*/editor/*'],
+        context: ['/challenges/*/editor/resources'],
+        target: TARGET,
+        secure: false,
+      },
+      {
+        context: ['/challenges/*/challenge_resources/new'],
         target: TARGET,
         secure: false,
       },

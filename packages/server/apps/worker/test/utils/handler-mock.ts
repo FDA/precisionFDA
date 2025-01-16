@@ -1,17 +1,19 @@
+import { AdminDataConsistencyReportService } from '@shared/debug/admin-data-consistency-report.service'
+import { DbClusterService } from '@shared/domain/db-cluster/service/db-cluster.service'
+import { EmailSendService } from '@shared/domain/email/email-send.service'
+import { JobService } from '@shared/domain/job/job.service'
+import { NotificationService } from '@shared/domain/notification/services/notification.service'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { UserService } from '@shared/domain/user/user.service'
+import { RemoveNodesFacade } from '@shared/facade/node-remove/remove-nodes.facade'
+import { UserCheckupFacade } from '@shared/facade/user/user-checkup.facade'
+import { UserDataConsistencyReportFacade } from '@shared/facade/user/user-data-consistency-report.facade'
 import { Task, TASK_TYPE } from '@shared/queue/task.input'
 import { Job } from 'bull'
 import { EmailQueueProcessor } from '../../src/domain/email/processor/email-queue.processor'
 import { FileSyncQueueProcessor } from '../../src/domain/user-file/processor/file-sync-queue.processor'
 import { MainQueueProcessor } from '../../src/queues/processor/main-queue.processor'
 import { MaintenanceQueueProcessor } from '../../src/queues/processor/maintenance-queue.processor'
-import { UserDataConsistencyReportService } from '@shared/domain/user/user-data-consistency-report.service'
-import { AdminDataConsistencyReportService } from '@shared/debug/admin-data-consistency-report.service'
-import { DbClusterService } from '@shared/domain/db-cluster/service/db-cluster.service'
-import { JobService } from '@shared/domain/job/job.service'
-import { UserContext } from '@shared/domain/user-context/model/user-context'
-import { RemoveNodesFacade } from '@shared/facade/node-remove/remove-nodes.facade'
-import { NotificationService } from '@shared/domain/notification/services/notification.service'
 
 const dbClusterService = {} as DbClusterService
 
@@ -23,13 +25,21 @@ const userService = {
   sendUserInactivityAlerts: () => {},
 } as UserService
 
-const userDataConsistencyReportService = {
+const userDataConsistencyReportFacade = {
   createReport: () => {},
-} as UserDataConsistencyReportService
+  fixInconsistentData: () => {},
+} as unknown as UserDataConsistencyReportFacade
+
+const userCheckupFacade = {
+  runCheckup: (job: Job) => {
+    console.log(job)
+  },
+} as UserCheckupFacade
 
 const jobServiceUserClient = {
   checkStaleJobs: () => {},
 } as JobService
+
 const jobServiceChallengeBotClient = {
   checkChallengeJobs: () => {},
 } as JobService
@@ -37,6 +47,7 @@ const jobServiceChallengeBotClient = {
 const userCtx = {} as unknown as UserContext
 const removeNodesFacade = {} as unknown as RemoveNodesFacade
 const notificationService = {} as unknown as NotificationService
+const emailSendService = {} as EmailSendService
 
 const processor = {
   MAIN: () => new MainQueueProcessor(),
@@ -45,18 +56,19 @@ const processor = {
       adminDataConsistencyReportService,
       dbClusterService,
       userService,
+      userCheckupFacade,
       jobServiceUserClient,
       jobServiceChallengeBotClient,
     ),
   FILE: () =>
     new FileSyncQueueProcessor(
       userCtx,
-      userDataConsistencyReportService,
+      userDataConsistencyReportFacade,
       removeNodesFacade,
       notificationService,
       jobServiceUserClient,
     ),
-  EMAIL: () => new EmailQueueProcessor(),
+  EMAIL: () => new EmailQueueProcessor(emailSendService),
 }
 
 const jobToProcessorMap: Partial<Record<TASK_TYPE, (job: Job) => Promise<void> | void>> = {

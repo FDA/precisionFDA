@@ -1,9 +1,9 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { getLogger } from '@shared/logger'
 import { ClassIdResponse } from '@shared/platform-client/platform-client.responses'
-import { BILLING_INFO } from '../../../config/consts'
-import { ClientErrorProps, ServiceError } from '../../../errors'
-import { PlatformClient } from '../../../platform-client'
+import { BILLING_INFO } from '@shared/config/consts'
+import { ClientErrorProps, ServiceError } from '@shared/errors'
+import { PlatformClient } from '@shared/platform-client'
 import { getHandle } from '../org.utils'
 
 const logger = getLogger('org.service')
@@ -13,7 +13,8 @@ export interface IOrgService {
 }
 
 /**
- * Org service should be initialized with admin access token (config.platform.adminUserAccessToken)
+ @deprecated - TO BE REMOVED.
+  TODO: PFDA-5953
  */
 export class OrgService implements IOrgService {
   private em: SqlEntityManager

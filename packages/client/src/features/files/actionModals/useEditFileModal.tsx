@@ -1,8 +1,10 @@
 import React, { useMemo } from 'react'
+import * as Yup from 'yup'
 import { useForm } from 'react-hook-form'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
 import { ErrorMessage } from '@hookform/error-message'
+import { yupResolver } from '@hookform/resolvers/yup'
 import { FieldGroup, InputError } from '../../../components/form/styles'
 import { InputText, InputTextArea } from '../../../components/InputText'
 import {
@@ -16,6 +18,11 @@ import { editFileRequest } from '../files.api'
 import { IFile } from '../files.types'
 import { ModalHeaderTop, ModalNext } from '../../modal/ModalNext'
 import { Button } from '../../../components/Button'
+
+const editFileSchema = Yup.object().shape({
+    name: Yup.string().min(1).max(255).required(),
+    description: Yup.string().max(65535).nullable(),
+})
 
 const EditFileInfoForm = ({
   file,
@@ -31,6 +38,7 @@ const EditFileInfoForm = ({
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm({
+    resolver: yupResolver(editFileSchema),
     defaultValues: {
       name: file?.name,
       description: file?.description,

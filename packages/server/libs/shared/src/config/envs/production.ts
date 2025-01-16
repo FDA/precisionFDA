@@ -44,6 +44,9 @@ export const config: ConfigOverride = () => ({
     challengeBotUser: 'challenge.bot',
     orgEveryoneHandle: 'precisionfda',
   },
+  emails: {
+    report: 'pfda-reports-production@dnanexus.com',
+  },
   redis: {
     isSecure: true,
   },

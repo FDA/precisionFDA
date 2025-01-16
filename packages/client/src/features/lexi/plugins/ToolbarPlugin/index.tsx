@@ -86,6 +86,7 @@ import {
   INSERT_IMAGE_COMMAND,
   InsertImageDialog,
   InsertImagePayload,
+  InsertImageType,
 } from '../ImagesPlugin';
 import {InsertInlineImageDialog} from '../InlineImagePlugin';
 import InsertLayoutDialog from '../LayoutPlugin/InsertLayoutDialog';
@@ -507,8 +508,10 @@ function ElementFormatDropdown({
 }
 
 export default function ToolbarPlugin({
+  insertImageType,
   setIsLinkEditMode,
 }: {
+  insertImageType: InsertImageType;
   setIsLinkEditMode: Dispatch<boolean>;
 }): JSX.Element {
   const [editor] = useLexicalComposerContext();
@@ -1081,6 +1084,7 @@ export default function ToolbarPlugin({
                       <InsertImageDialog
                         activeEditor={activeEditor}
                         onClose={onClose}
+                        insertImageType={insertImageType}
                       />
                     ));
                   }}
