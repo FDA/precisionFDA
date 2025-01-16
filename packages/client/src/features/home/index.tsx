@@ -11,7 +11,6 @@ import {
   BannerTitle,
   ResourceBanner,
 } from '../../components/Banner'
-import { GuestNotAllowed } from '../../components/GuestNotAllowed'
 import { MenuCounter } from '../../components/MenuCounter'
 import { BoltIcon } from '../../components/icons/BoltIcon'
 import { CogsIcon } from '../../components/icons/Cogs'
@@ -88,7 +87,7 @@ const Home2 = () => {
   const [activeResource] = useActiveResourceFromUrl('myhome')
   const [isPushed, setIsPushed] = useState<boolean>(false)
 
-  useToastWSHandler(user)
+  useToastWSHandler()
   const handleScopeClick = async (newHomeScope: HomeScope) => {
     // Depending on if the user is on the list page or the show page, we need to redirect to the list page
     if (location.pathname === `/home/${activeResource}`) {
@@ -234,14 +233,6 @@ const Home2 = () => {
     ),
   }
 
-  if (!user || user?.is_guest) {
-    return (
-      <UserLayout mainScroll>
-        <GuestNotAllowed />
-      </UserLayout>
-    )
-  }
-
   // TODO: If scopeDescriptions is reused in another component, extract this to a utility function
   const capitalizedResource = activeResource ? toTitleCase(activeResource) : 'Undefined'
   const homeScopeDescriptions: { [key: string]: string } = {
@@ -309,7 +300,7 @@ const Home2 = () => {
                 element={
                   <FileList
                     homeScope={persistedHomeScope}
-                    showFolderActions={(persistedHomeScope === 'everybody' && user.admin) || persistedHomeScope === 'me'}
+                    showFolderActions={(persistedHomeScope === 'everybody' && user?.admin) || persistedHomeScope === 'me'}
                   />
                 }
               />
