@@ -56,7 +56,6 @@ Rails.application.routes.draw do
       get "resend_activation_email", to: "users#resend_activation_email"
       post "set_total_limit", to: "users#set_total_limit"
       post "set_job_limit", to: "users#set_job_limit"
-      post "bulk_reset_2fa", to: "users#bulk_reset_2fa"
       post "bulk_unlock", to: "users#bulk_unlock"
       post "bulk_activate", to: "users#bulk_activate"
       post "bulk_deactivate", to: "users#bulk_deactivate"
@@ -251,6 +250,7 @@ Rails.application.routes.draw do
 
         post :save_editor_page, on: :member
         post :propose, on: :collection
+        put :update_content, on: :member
       end
 
       resources :data_portals, only: %i(index show create update) do
@@ -624,6 +624,7 @@ Rails.application.routes.draw do
     get "challenges/#{ACTIVE_META_APPATHON}" => "meta_appathons#show", as: "active_meta_appathon"
     get "challenges/#{APPATHON_IN_A_BOX_HANDLE}", as: "appathon_in_a_box"
     get "challenges", to: "challenges#index"
+    get "challenges/:id/content/*all" => "challenges#show"
     get "old_challenges/treasure", to: "challenges#treasure_old"
     get "old_challenges/treasure(/:tab)", to: "challenges#treasure_old"
 

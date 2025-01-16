@@ -5,3 +5,10 @@ export interface Pagination {
   total_pages: number,
   total_count: number
 }
+
+export interface PaginationMetaV2 {
+  total: number
+  totalPages: number
+  pageSize: number
+  page: number
+}

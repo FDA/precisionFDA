@@ -6,32 +6,20 @@ import {
   HttpCode,
   Param,
   ParseIntPipe,
+  Patch,
   Post,
   Put,
   Query,
   UseGuards,
 } from '@nestjs/common'
-import { CommentableType } from '@shared/domain/comment/comment.entity'
-import { CreateCommentInput, EditCommentInput } from '@shared/domain/discussion/discussion.types'
 import { DiscussionService } from '@shared/domain/discussion/services/discussion.service'
 import { UserContextGuard } from '../user-context/guard/user-context.guard'
-import { ZodPipe } from '../validation/pipes/zod.pipe'
-import type {
-  AnswerPostReqBody,
-  AnswerPutReqBody,
-  CommentReqBody,
-  DiscussionsPostReqBody,
-  DiscussionsPublishReqBody,
-  DiscussionsPutReqBody,
-} from './discussions.schemas'
-import {
-  answerPostRequestSchema,
-  answerPutRequestSchema,
-  commentsPostRequestSchema,
-  discussionsPostRequestSchema,
-  discussionsPublishRequestSchema,
-  discussionsPutRequestSchema,
-} from './discussions.schemas'
+import { CreateDiscussionDTO } from '@shared/domain/discussion/dto/create-discussion.dto'
+import { CreateAnswerDTO } from '@shared/domain/discussion/dto/create-answer.dto'
+import { UpdateDiscussionDTO } from '@shared/domain/discussion/dto/update-discussion.dto'
+import { CreateCommentDTO } from '@shared/domain/discussion/dto/create-comment.dto'
+import { UpdateAnswerDTO } from '@shared/domain/discussion/dto/update-answer.dto'
+import { UpdateCommentDTO } from '@shared/domain/discussion/dto/update-comment.dto'
 
 @UseGuards(UserContextGuard)
 @Controller('/discussions')
@@ -62,9 +50,7 @@ export class DiscussionsController {
 
   @HttpCode(201)
   @Post()
-  async createDiscussion(
-    @Body(new ZodPipe(discussionsPostRequestSchema)) body: DiscussionsPostReqBody,
-  ) {
+  async createDiscussion(@Body() body: CreateDiscussionDTO) {
     const result = await this.discussionService.createDiscussion(body)
 
     return { id: result.id }
@@ -74,7 +60,7 @@ export class DiscussionsController {
   @Post('/:discussionId/answers')
   async createAnswer(
     @Param('discussionId', ParseIntPipe) discussionId: number,
-    @Body(new ZodPipe(answerPostRequestSchema)) body: AnswerPostReqBody,
+    @Body() body: CreateAnswerDTO,
   ) {
     const result = await this.discussionService.createAnswer({ discussionId, ...body })
 
@@ -82,51 +68,29 @@ export class DiscussionsController {
   }
 
   @HttpCode(204)
-  @Put('/:id')
-  async updateDiscussion(
-    @Param('id', ParseIntPipe) id: number,
-    @Body(new ZodPipe(discussionsPutRequestSchema)) body: DiscussionsPutReqBody,
-  ) {
-    await this.discussionService.updateDiscussion(body)
+  @Patch('/:id')
+  async updateDiscussion(@Param('id', ParseIntPipe) id: number, @Body() body: UpdateDiscussionDTO) {
+    await this.discussionService.updateDiscussion(id, body)
   }
 
   @HttpCode(204)
   @Put('/:discussionId/comments/:commentId')
   async editDiscussionComment(
     @Param('commentId', ParseIntPipe) commentId: number,
-    @Body(new ZodPipe(commentsPostRequestSchema)) body: CommentReqBody,
+    @Body() body: UpdateCommentDTO,
   ) {
-    const { id } = await this.handleCommentEdit(body, commentId, 'Discussion')
-
-    return { id }
+    const result = await this.discussionService.updateComment(commentId, body)
+    return { id: result.id }
   }
 
   @HttpCode(204)
-  @Put('/:discussionId/answers/:answerId')
+  @Patch('/:discussionId/answers/:answerId')
   async updateAnswer(
     @Param('discussionId', ParseIntPipe) discussionId: number,
     @Param('answerId', ParseIntPipe) answerId: number,
-    @Body(new ZodPipe(answerPutRequestSchema)) body: AnswerPutReqBody,
+    @Body() body: UpdateAnswerDTO,
   ) {
-    await this.discussionService.updateAnswer({ discussionId, answerId, ...body })
-  }
-
-  @HttpCode(200)
-  @Post('/:id/publish')
-  async publishDiscussion(
-    @Param('id', ParseIntPipe) discussionId: number,
-    @Body(new ZodPipe(discussionsPublishRequestSchema)) body: DiscussionsPublishReqBody,
-  ) {
-    const result = await this.discussionService.publishDiscussion({
-      id: discussionId,
-      toPublish: body.toPublish,
-      notifyAll: body.notifyAll,
-      // TODO fix
-      // @ts-ignore
-      scope: body.scope,
-    })
-
-    return { id: discussionId, count: result }
+    await this.discussionService.updateAnswer(answerId, body)
   }
 
   @HttpCode(204)
@@ -147,26 +111,6 @@ export class DiscussionsController {
     await this.discussionService.deleteComment(id, 'Discussion')
   }
 
-  @HttpCode(200)
-  @Post('/:discussionId/answers/:id/publish')
-  async publishAnswer(
-    @Param('discussionId', ParseIntPipe) discussionId: number,
-    @Param('id', ParseIntPipe) id: number,
-    @Body() body: DiscussionsPublishReqBody,
-  ) {
-    const result = await this.discussionService.publishAnswer({
-      discussionId,
-      id,
-      toPublish: body.toPublish,
-      notifyAll: body.notifyAll,
-      // TODO fix
-      // @ts-ignore
-      scope: body.scope,
-    })
-
-    return { id, count: result }
-  }
-
   @HttpCode(204)
   @Delete('/:discussionId/answers/:answerId/comments/:id')
   async deleteAnswerComment(@Param('id', ParseIntPipe) id: number) {
@@ -175,16 +119,10 @@ export class DiscussionsController {
 
   @Post('/:discussionId/comments')
   async createDiscussionComment(
-    @Param('discussionId', ParseIntPipe) discussionId: number,
-    @Body(new ZodPipe(commentsPostRequestSchema)) body: CommentReqBody,
+    @Param('discussionId', ParseIntPipe) id: number,
+    @Body() body: CreateCommentDTO,
   ) {
-    const input: CreateCommentInput = {
-      targetId: discussionId,
-      targetType: 'Discussion',
-      comment: body.content,
-      notifyAll: body.notifyAll,
-    }
-    const result = await this.discussionService.createComment(input)
+    const result = await this.discussionService.createComment({ discussionId: id, ...body })
 
     return { id: result.id }
   }
@@ -202,16 +140,10 @@ export class DiscussionsController {
   @HttpCode(200)
   @Post('/:discussionId/answers/:answerId/comments')
   async createAnswerComment(
-    @Param('answerId', ParseIntPipe) answerId: number,
-    @Body(new ZodPipe(commentsPostRequestSchema)) body: CommentReqBody,
+    @Param('answerId', ParseIntPipe) id: number,
+    @Body() body: CreateCommentDTO,
   ) {
-    const input: CreateCommentInput = {
-      targetId: answerId,
-      targetType: 'Answer',
-      comment: body.content,
-      notifyAll: body.notifyAll,
-    }
-    const result = await this.discussionService.createComment(input)
+    const result = await this.discussionService.createComment({ answerId: id, ...body })
 
     return { id: result.id }
   }
@@ -219,18 +151,8 @@ export class DiscussionsController {
   @Put('/:discussionId/answers/:answerId/comments/:commentId')
   async editAnswerComment(
     @Param('commentId', ParseIntPipe) commentId: number,
-    @Body(new ZodPipe(commentsPostRequestSchema)) body: CommentReqBody,
+    @Body() body: UpdateCommentDTO,
   ) {
-    await this.handleCommentEdit(body, commentId, 'Answer')
-  }
-
-  private async handleCommentEdit(body: CommentReqBody, commentId: number, type: CommentableType) {
-    const input: EditCommentInput = {
-      id: commentId,
-      comment: body.content,
-      targetType: type,
-    }
-
-    return await this.discussionService.updateComment(input)
+    return await this.discussionService.updateComment(commentId, body)
   }
 }

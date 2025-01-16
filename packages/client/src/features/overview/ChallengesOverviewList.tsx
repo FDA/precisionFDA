@@ -53,29 +53,32 @@ const NoChallenges = styled.div`
 export default function ChallengesOverviewList() {
   const { data: current, isLoading: currentIsLoading } = useChallengesListQuery(
     {
-      time_status: 'current',
+      timeStatus: 'current',
+      pageSize: 2,
     },
   )
   const { data: upcoming, isLoading: upcomingIsLoading } =
     useChallengesListQuery({
-      time_status: 'upcoming',
+      timeStatus: 'upcoming',
+      pageSize: 2,
     })
   const { data: ended, isLoading: endedIsLoading } = useChallengesListQuery({
-    time_status: 'ended',
+    timeStatus: 'ended',
+    pageSize: 2,
   })
 
   return (
     <StyledChallengesOverview>
       {(currentIsLoading || upcomingIsLoading || endedIsLoading) && <Loader className="inline" />}
       {!currentIsLoading &&
-        current?.challenges &&
-        current.challenges.length > 0 && (
+        current?.data &&
+        current.data?.length > 0 && (
           <Row>
             <StyledSectionTitle $tscolor={getTimeStatusColor('current')}>
               Current Challenges
             </StyledSectionTitle>
             <StyledChallengeList>
-              {current?.challenges?.slice(0, 2).map(c => (
+              {current?.data?.slice(0, 2).map(c => (
                 <ChallengeListItem key={c.id} challenge={c} />
               ))}
             </StyledChallengeList>
@@ -83,14 +86,14 @@ export default function ChallengesOverviewList() {
         )}
 
       {!upcomingIsLoading &&
-        upcoming?.challenges &&
-        upcoming.challenges.length > 0 && (
+        upcoming?.data &&
+        upcoming.data?.length > 0 && (
           <Row>
             <StyledSectionTitle $tscolor={getTimeStatusColor('upcoming')}>
               Upcoming Challenges
             </StyledSectionTitle>
             <StyledChallengeList>
-              {upcoming?.challenges?.slice(0, 2).map(c => (
+              {upcoming?.data?.slice(0, 2).map(c => (
                 <ChallengeListItem key={c.id} challenge={c} />
               ))}
             </StyledChallengeList>
@@ -98,16 +101,16 @@ export default function ChallengesOverviewList() {
         )}
 
       {!endedIsLoading &&
-        ended?.challenges &&
-        ended.challenges.length > 0 &&
-        current?.challenges.length === 0 &&
-        upcoming?.challenges.length === 0 && (
+        ended?.data &&
+        ended.data?.length > 0 &&
+        current?.data?.length === 0 &&
+        upcoming?.data?.length === 0 && (
           <Row>
             <StyledSectionTitle $tscolor={getTimeStatusColor('ended')}>
               Ended Challenges
             </StyledSectionTitle>
             <StyledChallengeList>
-              {ended?.challenges?.slice(0, 2).map(c => (
+              {ended?.data?.slice(0, 2).map(c => (
                 <ChallengeListItem key={c.id} challenge={c} />
               ))}
             </StyledChallengeList>
@@ -116,9 +119,9 @@ export default function ChallengesOverviewList() {
       {!currentIsLoading &&
         !upcomingIsLoading &&
         !endedIsLoading &&
-        ended?.challenges.length === 0 &&
-        current?.challenges.length === 0 &&
-        upcoming?.challenges.length === 0 && (
+        ended?.data?.length === 0 &&
+        current?.data?.length === 0 &&
+        upcoming?.data?.length === 0 && (
           <Row>
             <Filler />
             <NoChallenges>Currently no challenges</NoChallenges>

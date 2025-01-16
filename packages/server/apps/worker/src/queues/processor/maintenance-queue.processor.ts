@@ -1,18 +1,18 @@
 import { Processor } from '@nestjs/bull'
 import { Inject } from '@nestjs/common'
 import { config } from '@shared/config'
-import { testHeapMemoryAllocationError } from '@shared/debug/memory-tests'
 import { AdminDataConsistencyReportService } from '@shared/debug/admin-data-consistency-report.service'
+import { testHeapMemoryAllocationError } from '@shared/debug/memory-tests'
+import { DbClusterService } from '@shared/domain/db-cluster/service/db-cluster.service'
 import { JobService } from '@shared/domain/job/job.service'
-import { UserCheckupOperation } from '@shared/domain/user/ops/user-checkup'
 import { UserService } from '@shared/domain/user/user.service'
+import { UserCheckupFacade } from '@shared/facade/user/user-checkup.facade'
 import { SyncSpacesPermissionsJob, TASK_TYPE } from '@shared/queue/task.input'
 import { Job } from 'bull'
 import { checkUserJobsHandler } from '../../jobs/check-user-jobs.handler'
 import { syncSpacesPermissionsHandler } from '../../jobs/sync-spaces-permissions.handler'
 import { ProcessWithContext } from '../decorator/process-with-context'
 import { BaseQueueProcessor } from './base-queue.processor'
-import { DbClusterService } from '@shared/domain/db-cluster/service/db-cluster.service'
 
 @Processor(config.workerJobs.queues.maintenance.name)
 export class MaintenanceQueueProcessor extends BaseQueueProcessor {
@@ -20,6 +20,7 @@ export class MaintenanceQueueProcessor extends BaseQueueProcessor {
     private readonly adminDataConsistencyReportService: AdminDataConsistencyReportService,
     private readonly dbClusterService: DbClusterService,
     private readonly userService: UserService,
+    private readonly userCheckupFacade: UserCheckupFacade,
     private readonly jobServiceWithPlatformClient: JobService,
     @Inject('JOB_SERVICE_WITH_CHALLENGE_BOT_CLIENT')
     private readonly jobServiceWithChallengeBotClient: JobService,
@@ -52,9 +53,7 @@ export class MaintenanceQueueProcessor extends BaseQueueProcessor {
     // This is a composite job, consisting of various checks that we can do
     // to a user's account. This should be triggered when user logs in with means
     // we have a new platform accessToken to work with
-    return await this.handleUserTask(job, async (ctx) => {
-      return await new UserCheckupOperation(ctx).execute()
-    })
+    await this.userCheckupFacade.runCheckup(job)
   }
 
   @ProcessWithContext(TASK_TYPE.CHECK_USER_JOBS)

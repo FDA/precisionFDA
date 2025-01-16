@@ -1,8 +1,7 @@
 import { useQuery, UseQueryOptions } from '@tanstack/react-query'
 import { toArrayFromObject } from '../../utils/object'
-import { APIResource, IMeta, HomeScope } from './types'
+import { APIResource, HomeScope } from './types'
 
-type ListType = { [key: string]: {}; meta: IMeta }
 interface IUseListQuery<T> {
   spaceId?: string
   scope?: HomeScope

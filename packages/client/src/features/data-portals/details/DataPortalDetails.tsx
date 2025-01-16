@@ -12,7 +12,8 @@ import '../../lexi/themes/PlaygroundEditorTheme.css'
 import { ToC, useMarkdownToc } from '../../markdown/TocNext'
 import { useDataPortalResourceModal } from '../../resources/useDataPortalResourceModal'
 import DataPortalContentEditPage from '../form/DataPortalContentEditPage'
-import { BodyContent, DataPortalPageMainBody, PageWrap, RightSideItem, RightSideScroll, Row, StyledInnerHTML } from './styles'
+import { BodyContent, DataPortalPageMainBody, PageWrap, RightSideItem, RightSideScroll, Row } from './styles'
+import { StyledInnerHTML } from '../../lexi/styles'
 
 
 export const DataPortalDetails = ({

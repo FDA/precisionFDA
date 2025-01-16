@@ -11,8 +11,8 @@ export class DiscussionQueueProcessor {
 
   @ProcessWithContext(TASK_TYPE.NOTIFY_SPACE_DISCUSSION)
   async notifyNewDiscussion(job: Job<NotifyNewDiscussionJob>) {
-    const { discussionId, notifyAll } = job.data.payload
+    const { discussionId, notify } = job.data.payload
 
-    await this.discussionNotificationService.notifySpaceDiscussion(discussionId, notifyAll)
+    await this.discussionNotificationService.notifySpaceDiscussion(discussionId, notify)
   }
 }

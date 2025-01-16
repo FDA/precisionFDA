@@ -1235,7 +1235,7 @@ export const CLI = () => {
         <h2 id="changelog">pFDA CLI Changelog</h2>
         <br/>
 
-        <p>Version 2.8.0 (11/27/2024): New features: create-discussion, create-reply, edit-discussion, edit-reply </p>
+        <p>Version 2.8.0 (01/20/2025): New features: create-discussion, create-reply, edit-discussion, edit-reply </p>
         <p>Version 2.7.3 (10/27/2024): security fixes, improved error handling </p>
         <p>Version 2.7.2 (09/12/2024): upgrade Go to 1.23.1 </p>
         <p>Version 2.7.1 (05/31/2024): ls shows files and folders in all states </p>

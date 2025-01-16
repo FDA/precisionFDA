@@ -19,11 +19,12 @@ RSpec.describe AnalysesController, type: :controller do
         allow(Users::ChargesFetcher).to receive(:exceeded_charges_limit?).and_return(true)
       end
 
-      it "redirects with an error" do
-        get "new", params: { workflow_id: workflow.uid }
+      it "raises an ApiError when user exceeds charges limit" do
+        allow(Users::ChargesFetcher).to receive(:exceeded_charges_limit?).and_return(true)
 
-        expect(response).to have_http_status(:found)
-        expect(flash[:error]).to include(I18n.t("api.errors.exceeded_charges_limit"))
+        expect do
+          get :new, params: { workflow_id: workflow.uid }
+        end.to raise_error(ApiError, I18n.t("api.errors.exceeded_charges_limit"))
       end
     end
   end

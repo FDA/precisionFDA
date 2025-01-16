@@ -15,7 +15,7 @@ describe('Lexical Editor', () => {
   it('should have custom resource image insert component', async () => {
     render(
       <LexiContext>
-        <Editor />
+        <Editor insertImageType='resource' />
       </LexiContext>,
     { route: '/data-portals/my-portal/content' })
 
@@ -30,11 +30,29 @@ describe('Lexical Editor', () => {
       expect(resourceSelect).toBeInTheDocument()
     })
   })
+  it('should have custom resource image uri insert component', async () => {
+    render(
+      <LexiContext>
+        <Editor insertImageType='uri' />
+      </LexiContext>,
+    { route: '/data-portals/my-portal/content' })
+
+    await waitFor(async () => {
+      const insertButton = screen.getByText('Insert')
+      await userEvent.click(insertButton)
+
+      const imageItem = screen.getByText('Image')
+      await userEvent.click(imageItem)
+
+      const resourceSelect = screen.getByTestId('lexi-uri-insert')
+      expect(resourceSelect).toBeInTheDocument()
+    })
+  })
 
   it('should have default font of Lato', async () => {
     render(
       <LexiContext>
-        <Editor />
+        <Editor insertImageType="uri" />
       </LexiContext>,
     )
 

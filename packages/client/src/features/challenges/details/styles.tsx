@@ -1,5 +1,5 @@
 import styled, { css } from 'styled-components'
-import { PageContainer, pagePadding } from '../../../components/Page/styles'
+import { PageContainer, pagePaddingLR } from '../../../components/Page/styles'
 import { commonStyles } from '../../../styles/commonStyles'
 import { breakPoints, colors, theme } from '../../../styles/theme'
 import { TimeStatus } from '../types'
@@ -17,72 +17,83 @@ export const LeftColumn = styled.div`
 
 export const RightColumn = styled.div`
   display: flex;
-  justify-content: center;
+  justify-content: flex-end;
   align-items: center;
   min-width: 320px;
   flex: 1 1 auto;
-  padding: 32px 16px;
 `
 
 export const ChallengeThumbnail = styled.img`
   height: 180px;
   object-fit: contain;
   overflow: hidden;
-  box-shadow: 0px 0px 16px #000;
+  border-radius: 8px;
+  background-color: white;
+  min-height: 300px;
+  border: 2px solid white;
+  box-shadow: 0 0 16px #000;
 `
 
 export const StyledChallengeDetailsBanner = styled(PageContainer)`
-  ${pagePadding}
+  ${pagePaddingLR}
   display: flex;
+  padding-top: 32px;
   flex-direction: column;
   flex-wrap: nowrap;
   justify-content: space-between;
+  gap: 32px;
+
+
+  a {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    color: var(--primary-400);
+    &:hover {
+      color: var(--primary-300);
+    }
+  }
 
   @media (min-width: ${breakPoints.medium}px) {
     flex-direction: row;
-
-    ${RightColumn} {
-      padding: 0 16px;
-    }
   }
 `
 
 export const ChallengeName = styled.h1`
   ${commonStyles.bannerTitle};
-  margin: ${theme.padding.contentMargin} 0px;
-  color: ${theme.colors.textWhite};
+  margin: 16px 0px;
 `
 
 export const ChallengeDescription = styled.p`
   font-size: ${theme.fontSize.body};
   font-weight: ${theme.fontWeight.regular};
-  color: ${theme.colors.textWhite};
-  margin-top: ${theme.padding.contentMargin};
+  margin-top: 16px;
+  margin-bottom: 16px;
 `
 export const NoInfo = styled.div`
   margin-bottom: 24px;
 `
 
-export const ChallengeStateLabel = styled.span<{timeStatus: TimeStatus}>`
+export const ChallengeStateLabel = styled.span<{$timeStatus: TimeStatus}>`
   ${commonStyles.sectionHeading};
   text-transform: uppercase;
   padding: 3px 0px;
   color: ${theme.colors.textWhite};
 
-  ${({ timeStatus }) => {
-    if (timeStatus === 'upcoming') {
+  ${({ $timeStatus }) => {
+    if ($timeStatus === 'upcoming') {
       return css`
         color: ${theme.colors.highlightYellow};
         border-top: ${theme.sizing.highlightBarWidth} solid ${theme.colors.highlightYellow};
       `
     }
-    if (timeStatus === 'current') {
+    if ($timeStatus === 'current') {
       return css`
         color: ${theme.colors.highlightGreen};
         border-top: ${theme.sizing.highlightBarWidth} solid ${theme.colors.highlightGreen};
       `
     }
-    if (timeStatus === 'ended') {
+    if ($timeStatus === 'ended') {
       return css`
         color: ${theme.colors.stateLabelGrey};
         border-top: ${theme.sizing.highlightBarWidth} solid ${theme.colors.stateLabelGrey};
@@ -93,37 +104,44 @@ export const ChallengeStateLabel = styled.span<{timeStatus: TimeStatus}>`
 `
 
 export const ChallengeDateArea = styled.div`
-  display: flex;
-  align-items: flex-end;
   font-size: 12px;
-  color: white;
+  padding-top: 16px;
+  flex-wrap: wrap;
+`
+
+export const StartEnd = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
 `
 
 export const ChallengeDateLabel = styled.div`
   font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 0.1em;
+  font-weight: bold;
+  white-space: nowrap;
 `
 
-export const ChallengeDate = styled.div<{timeStatus: TimeStatus}>`
+export const ChallengeDate = styled.div<{$timeStatus: TimeStatus}>`
   padding: ${theme.padding.contentMarginThird} 0px;
   padding-right: 20px;
   font-size: 13px;
   font-weight: ${theme.fontWeight.medium};
   text-align: left;
 
-  ${({ timeStatus }) => {
-    if (timeStatus === 'upcoming') {
+  ${({ $timeStatus }) => {
+    if ($timeStatus === 'upcoming') {
       return css`
         color: ${theme.colors.highlightYellow};
       `
     }
-    if (timeStatus === 'current') {
+    if ($timeStatus === 'current') {
       return css`
         color: ${theme.colors.highlightGreen};
       `
     }
-    if (timeStatus === 'ended') {
+    if ($timeStatus === 'ended') {
       return css`
         color: ${theme.colors.colorDateGrey};
       `
@@ -133,9 +151,9 @@ export const ChallengeDate = styled.div<{timeStatus: TimeStatus}>`
 `
 
 export const ChallengeDateRemaining = styled.div`
-  padding: ${theme.padding.contentMarginThird} 0px;
+  padding: 16px 0px;
   font-weight: ${theme.fontWeight.bold};
-  margin-left: 24px;
+  white-space: nowrap;
 `
 
 export const StyledTabs = styled.div`
@@ -177,7 +195,7 @@ export const StyledTabs = styled.div`
   }
 `
 
-export const CallToActionButton = styled(Button).attrs({ variant: 'primary' })`
+export const CallToActionButton = styled(Button).attrs({ 'data-variant': 'primary' })`
   display: block;
   width: 100%;
   margin-bottom: 0px;

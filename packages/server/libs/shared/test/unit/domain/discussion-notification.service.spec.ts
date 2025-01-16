@@ -93,7 +93,7 @@ describe('DiscussionNotificationService', () => {
   it('should not send email if discussion is not found', async () => {
     getEditableByIdStub.resolves(undefined)
 
-    await getInstance(user1).notifySpaceDiscussion(discussion.id, true)
+    await getInstance(user1).notifySpaceDiscussion(discussion.id, 'all')
     expect(createSendEmailTaskStub.callCount).to.be.equal(0)
   })
 
@@ -102,15 +102,15 @@ describe('DiscussionNotificationService', () => {
     discussionNote.scope = STATIC_SCOPE.PRIVATE
     discussionNote.isInSpace = () => false
 
-    await getInstance(user1).notifySpaceDiscussion(discussion.id, true)
+    await getInstance(user1).notifySpaceDiscussion(discussion.id, 'all')
     expect(createSendEmailTaskStub.callCount).to.be.equal(0)
   })
 
-  it('should send email to space members seperately if notifyAll is true', async () => {
+  it('should send email to space members separately if notify is all', async () => {
     getEditableByIdStub.resolves(discussion)
     findSpaceByScopeAndUserStub.resolves(space)
 
-    await getInstance(user1).notifySpaceDiscussion(discussion.id, true)
+    await getInstance(user1).notifySpaceDiscussion(discussion.id, 'all')
     expect(createSendEmailTaskStub.callCount).to.be.equal(3)
     expect(createSendEmailTaskStub.args[0][0].to).to.be.equal(user1.email)
     expect(createSendEmailTaskStub.args[1][0].to).to.be.equal(user2.email)
@@ -120,16 +120,28 @@ describe('DiscussionNotificationService', () => {
     )
   })
 
-  it('should send email to the poster if notifyAll is false', async () => {
+  it('should not send any email if notify is empty', async () => {
     getEditableByIdStub.resolves(discussion)
     findSpaceByScopeAndUserStub.resolves(space)
 
-    await getInstance(user1).notifySpaceDiscussion(discussion.id, false)
+    await getInstance(user1).notifySpaceDiscussion(discussion.id, [])
+    expect(createSendEmailTaskStub.callCount).to.be.equal(0)
+  })
+
+  it('should send email if notify is author', async () => {
+    getEditableByIdStub.resolves(discussion)
+    findSpaceByScopeAndUserStub.resolves(space)
+
+    await getInstance(user1).notifySpaceDiscussion(discussion.id, 'author')
     expect(createSendEmailTaskStub.callCount).to.be.equal(1)
-    expect(createSendEmailTaskStub.args[0][0].to).to.be.equal(user1.email)
-    expect(createSendEmailTaskStub.args[0][0].subject).to.be.equal(
-      `[precisionFDA] Discussion update notification: ${space.name}`,
-    )
+  })
+
+  it('should send emails to selected members', async () => {
+    getEditableByIdStub.resolves(discussion)
+    findSpaceByScopeAndUserStub.resolves(space)
+
+    await getInstance(user1).notifySpaceDiscussion(discussion.id, [user2.dxuser, user3.dxuser])
+    expect(createSendEmailTaskStub.callCount).to.be.equal(2)
   })
 
   function getInstance(user: User) {

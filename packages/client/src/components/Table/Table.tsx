@@ -10,7 +10,6 @@ import React, {
 } from 'react'
 import {
   Cell,
-  CellProps,
   Filters,
   IdType,
   Row,
@@ -51,7 +50,6 @@ const StyledColumnSelect = styled.div`
   top: 0;
   left: calc(100%);
   width: 0;
-  display: flex;
   align-items: center;
   justify-content: flex-end;
   z-index: 3;
@@ -85,10 +83,6 @@ type SelectColumn = {
   title: string
   isVisible: boolean
   groupTitle: string
-}
-
-type FilterSelectColumn = {
-  [key: string]: SelectColumn
 }
 
 const ColumnSelect = ({
@@ -208,9 +202,6 @@ const DnDRow = ({
   )
 }
 
-export interface IRowActionProps<T extends object = {}> extends CellProps<T> {
-  context: any
-}
 
 export interface ITable<T extends object = {}> extends TableOptions<T> {
   name: string
@@ -274,7 +265,6 @@ export default function Table<T extends object>(
     shouldResetFilters,
     isColsResizable = false,
     emptyComponent,
-    context = {},
     isFilterable = false,
     filters,
     setFilters,
@@ -333,7 +323,7 @@ export default function Table<T extends object>(
     )
     
     const {
-      getTableProps,
+    getTableProps,
     getTableBodyProps,
     prepareRow,
     visibleColumns,
@@ -410,7 +400,7 @@ export default function Table<T extends object>(
   }
 
   const getAvailableCols = () => {
-    const standardColumns = columns?.filter((c) => c?.id === typeof 'string' || true && !c.id?.includes('props.'))
+    const standardColumns = columns?.filter((c) => c?.id === typeof 'string' || !c.id?.includes('props.'))
     .map(c => ({ key: c?.accessor, title: c.Header, groupTitle: 'Standard Columns', isVisible: !hiddenColumns?.includes(c.accessor) })) ?? []
     const propColums = properties?.map(p => ({ key: `props.${p}`, title: p, groupTitle: 'Property Columns', isVisible: !hiddenColumns?.includes(`props.${p}`) })) ?? []
 

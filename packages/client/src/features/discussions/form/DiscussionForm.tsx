@@ -5,18 +5,17 @@ import { Controller, useForm } from 'react-hook-form'
 import styled from 'styled-components'
 import * as Yup from 'yup'
 import { Button } from '../../../components/Button'
-import { Checkbox } from '../../../components/Checkbox'
 import { InputText } from '../../../components/InputText'
 import { MarkdownEditor } from '../../../components/Markdown/MarkdownEditor'
 import { FieldGroup } from '../../../components/form/FieldGroup'
-import { CheckboxLabel, InputError } from '../../../components/form/styles'
-import { ButtonRow } from '../../modal/styles'
+import { InputError } from '../../../components/form/styles'
 import { AttachmentsList } from '../AttachmentsList'
 import { NoteScope } from '../api'
 import { DiscussionForm as DiscussionFormType } from '../discussions.types'
 import { areAttachmentsEmpty } from '../helpers'
 import { Attachments } from './Attachments'
 import { StyledPage } from './styles'
+import { NotifyMembersSelect } from './NotifyMembersSelect'
 
 const StyledAttachments = styled.div`
   display: flex;
@@ -29,12 +28,19 @@ export const StyledForm = styled.form`
   display: flex;
   flex-direction: column;
   flex: 1;
-  gap: 16px;
   margin-bottom: 16px;
 `
 
+const ButtonRow = styled.div`
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  align-items: center;
+  flex-wrap: wrap;
+`
+
 const validationSchema = Yup.object().shape({
-  title: Yup.string().min(1).max(255).required('Title required'),
+  title: Yup.string().min(1).max(255).required(),
   content: Yup.string().max(100000).required(),
   notifyAll: Yup.boolean().default(false),
   attachments: Yup.object().shape({
@@ -81,7 +87,7 @@ export const DiscussionForm = ({
         assets: [],
         jobs: [],
       },
-      notifyAll: false,
+      notify: [],
       ...defaultValues,
     },
   })
@@ -92,6 +98,7 @@ export const DiscussionForm = ({
       return onSubmit(getValues())
     }
   }
+  
   const deleteDiscussion = () => {
     if (onDelete) onDelete()
   }
@@ -106,8 +113,8 @@ export const DiscussionForm = ({
 
   return (
     <StyledPage>
-      <StyledForm id="discussionForm" autoComplete="off">
-        <FieldGroup label="Title" required>
+      <StyledForm id="discussionForm" autoComplete="off" className='mb-10'>
+        <FieldGroup label="Title" required className="mb-4">
           <InputText label="Title" {...register('title', { required: 'title is required.' })} disabled={isSubmitting} />
           <ErrorMessage errors={errors} name="title" render={({ message }) => <InputError>{message}</InputError>} />
         </FieldGroup>
@@ -124,14 +131,29 @@ export const DiscussionForm = ({
           </StyledAttachments>
         )}
         <ButtonRow>
-          <CheckboxLabel>
-            <Checkbox
-              {...register('notifyAll')}
-              disabled={isSubmitting}
-              onChange={(event: React.ChangeEvent<HTMLInputElement>) => setValue('notifyAll', event.target.checked)}
+          <div style={{ flex: 'auto' }}>
+
+            <Controller
+                name="notify"
+                control={control}
+                render={({ field: { onChange, onBlur, value }}) => (
+                  <NotifyMembersSelect
+                      onChange={onChange}
+                      onBlur={onBlur}
+                      value={value}
+                      scope={scope}
+                      isSubmitting={isSubmitting}
+                  />
+                )}
             />
-            Notify All Members
-          </CheckboxLabel>
+            <ErrorMessage
+                errors={errors}
+                name="scope"
+                render={({ message }) => <InputError>{message}</InputError>}
+            />
+          </div>
+          <div className='flex gap-2'>
+
           <Attachments scope={scope} attachments={attachments} setValue={setValue} />
           {onDelete && (
             <Button data-variant="warning" type="button" onClick={deleteDiscussion}>
@@ -144,9 +166,10 @@ export const DiscussionForm = ({
             form="discussionForm"
             disabled={isSubmitting || !isValid}
             onClick={handleSubmit(onSubmitForm)}
-          >
+            >
             {isSubmitting ? 'Saving' : 'Create'}
           </Button>
+            </div>
         </ButtonRow>
       </StyledForm>
     </StyledPage>

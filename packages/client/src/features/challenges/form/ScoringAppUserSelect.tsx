@@ -21,7 +21,7 @@ export const ScoringAppUserSelect = ({
   isSubmitting,
   onChange,
 }: {
-  value: {label: string, value: string} | null
+  value: {label: string, value: number} | null
   onBlur: () => void
   isSubmitting: boolean
   onChange: (v:any) => void
