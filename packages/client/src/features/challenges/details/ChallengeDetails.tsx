@@ -93,10 +93,6 @@ const StyledChallengeNavigationItem = styled.div`
   }
 `
 
-const StyledInnerHTMLChallenge = styled.div`
-  line-height: 1.7;
-`
-
 export const ChallengeDetails = () => {
   usePageMeta({ title: 'Challenge - precisionFDA' })
 
