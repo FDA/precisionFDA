@@ -138,8 +138,8 @@ Rails.application.routes.draw do
     end
 
     # My Home (Site-Wide UI & API Redesign)
-    get "home" => "home#index"
-    get "/home/*all", to: "home#index"
+    get "home" => "main#home"
+    get "/home/*all", to: "main#home"
     get "docs" => "docs#index"
     get "/docs/*all", to: "docs#index"
     get "data-portals" => "main#data_portals"

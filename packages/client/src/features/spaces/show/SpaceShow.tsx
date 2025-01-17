@@ -59,9 +59,8 @@ import { HomeLoader } from '../../home/show.styles'
 
 const Spaces2 = ({ space, isLoading }: { space: ISpace; isLoading: boolean }) => {
   const navigate = useNavigate()
-  const user = useAuthUser()
   const [expandedSidebar, setExpandedSidebar] = useLocalStorage('expandedSpacesSidebar', true)
-  useToastWSHandler(user)
+  useToastWSHandler()
 
   const spaceActions = useSpaceActions({ space })
   const [activeResource] = useActiveResourceFromUrl('spaces')
@@ -76,10 +75,6 @@ const Spaces2 = ({ space, isLoading }: { space: ISpace; isLoading: boolean }) =>
       toast.error(e.response.data.error.message)
     },
   })
-
-  if (user?.is_guest) {
-    return <GuestNotAllowed />
-  }
 
   const showDiscussions = !((space.type === 'review' && space.restricted_discussions) || space.type === 'private_type')
   const isContributorOrHigher = ['lead', 'admin', 'contributor'].includes(space.current_user_membership.role)
