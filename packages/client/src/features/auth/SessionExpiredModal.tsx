@@ -6,7 +6,7 @@ import { onLogInWithSSO, useSiteSettingsQuery } from './useSiteSettingsQuery'
 import { Button } from '../../components/Button'
 
 
-export const AuthModal: React.FC<UseModal> = props => {
+export const SessionExpiredModal: React.FC<UseModal> = props => {
   const { data } = useSiteSettingsQuery()
   return (
     <ModalNext
@@ -28,7 +28,7 @@ export const AuthModal: React.FC<UseModal> = props => {
       <Footer>
         <ButtonRow>
           {data?.ssoButton.isEnabled && (
-            <Button data-variant="primary" onClick={() => onLogInWithSSO(data.ssoButton.data.fdaSsoUrl)}>
+            <Button data-variant="primary" onClick={() => onLogInWithSSO(data.ssoButton.data.ssoUrl)}>
               Log In with SSO
             </Button>
           )}

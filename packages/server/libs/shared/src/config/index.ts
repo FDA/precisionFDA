@@ -20,8 +20,10 @@ export const parseIntFromProcess = (envValue: string | undefined): Maybe<number>
   }
   return null
 }
-const parseBooleanFromProcess = (value: string | undefined, defaultValue = false): boolean =>
-  value ? value.toLowerCase() === 'true' : defaultValue
+export const parseBooleanFromProcess = (
+  value: string | undefined,
+  defaultValue = false,
+): boolean => (value ? value.toLowerCase() === 'true' : defaultValue)
 
 const getEnv = () => {
   try {
@@ -166,10 +168,9 @@ const defaultConfig = {
   // https://devblogs.microsoft.com/typescript/announcing-typescript-4-9-beta/#the-satisfies-operator
   siteSettings: {
     ssoButton: {
-      isEnabled: false,
+      isEnabled: parseBooleanFromProcess(process.env.SSO_ENABLED),
       data: {
-        fdaSsoUrl:
-          'https://sso2.fda.gov/idp/startSSO.ping?PartnerSpId=https%3A%2F%2Fwww.okta.com%2Fsaml2%2Fservice-provider%2Fspllmwzmzinhnfpurqly&TargetResource=https%3A%2F%2Fstaging.dnanexus.com%2Flogin%3Fiss%3Dhttps%3A%2F%2Fsso-staging.dnanexus.com%26redirect_uri%3Dhttps%3A%2F%2Fprecisionfda-staging.dnanexus.com%2Freturn_from_login%26client_id%3Dprecision_fda_gov%26scope%3D%7B%22full%22%3A%2Btrue%7D',
+        ssoUrl: process.env.SSO_URL,
       },
     },
     cdmh: {
