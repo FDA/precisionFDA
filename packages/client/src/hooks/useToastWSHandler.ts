@@ -4,7 +4,6 @@ import useWebSocket from 'react-use-websocket'
 import { BasicToast, ToastWithLink } from '../components/Toast'
 import { NOTIFICATION_ACTION, Notification, SEVERITY, WEBSOCKET_MESSSAGE_TYPE, WebSocketMessage } from '../features/home/types'
 import { confirmNotification } from '../features/notifications/notifications.api'
-import { IUser } from '../types/user'
 import {
   DEFAULT_RECONNECT_ATTEMPTS,
   DEFAULT_RECONNECT_INTERVAL,
@@ -30,7 +29,7 @@ const toastHandlers = {
   [SEVERITY.INFO]: toast.success,
 }
 
-export const useToastWSHandler = (user?: IUser) => {
+export const useToastWSHandler = () => {
   const { lastJsonMessage } = useWebSocket<WebSocketMessage>(getNodeWsUrl(), {
     share: true,
     reconnectInterval: DEFAULT_RECONNECT_INTERVAL,

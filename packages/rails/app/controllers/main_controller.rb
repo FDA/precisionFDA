@@ -23,12 +23,13 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
                                                presskit
                                                news
                                                mislabeling
-                                               data_portals)
+                                               data_portals
+                                               home)
   # rubocop:enable Rails/LexicallyScopedActionFilter
 
   before_action :init_countries, only: %i(request_access create_request_access)
 
-  layout "react", only: %i(about index news terms security data_portals)
+  layout "react", only: %i(about index news terms security data_portals home)
 
   def index # rubocop:todo Metrics/MethodLength
     show_guidelines = false
@@ -154,6 +155,8 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
   def about; end
 
   def data_portals; end
+
+  def home; end
 
   def guidelines; end
 
