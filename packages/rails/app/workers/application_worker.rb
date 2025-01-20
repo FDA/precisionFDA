@@ -22,16 +22,12 @@ class ApplicationWorker
       userId: context.user_id,
     }
     RequestContext.begin_request(context.user_id, context.username, context.token, forward_header)
+    https_apps_client = HttpsAppsClient.new
     https_apps_client.send_notification(notification)
 
     Rails.logger.error(message)
-
     https_apps_client.email_send(NotificationPreference.email_types[:alert_message], [context.user.id], { subject:, message: })
 
     RequestContext.end_request
-  end
-
-  def https_apps_client
-    HttpsAppsClient.new
   end
 end

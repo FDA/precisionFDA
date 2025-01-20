@@ -30,9 +30,6 @@ export const expertQuestionAddedTemplate = (data: ExpertQuestionTemplateInput): 
 
     <mj-section css-class="header">
       <mj-column>
-        <mj-image src="\${HOST}/assets/precisionFDA.email.dark.png" alt="precisionFDA" href="\${HOST}" title="precisionFDA" />
-      </mj-column>
-      <mj-column>
         <mj-text align="right">
           Expert Q&A Session Notification
         </mj-text>
