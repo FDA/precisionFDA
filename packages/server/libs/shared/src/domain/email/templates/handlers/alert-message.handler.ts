@@ -30,10 +30,6 @@ export class AlertMessageHandler
     })
   }
 
-  async getTemplateContent(): Promise<void> {
-    return null
-  }
-
   async template(receiver: User): Promise<EmailSendInput> {
     const body = buildEmailTemplate<AlertMessageInputDto>(this.templateFile, this.alertMessageInput)
     return {

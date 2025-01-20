@@ -10,9 +10,6 @@ export const alertMessageTemplate = (alertMessageInput: AlertMessageInputDto): s
   ${header}
     <mj-section css-class="header-title">
       <mj-column>
-        <mj-image src="\${HOST}/assets/precisionFDA.email.dark.png" alt="precisionFDA" href="\${HOST}" title="precisionFDA" />
-      </mj-column>
-      <mj-column>
         <mj-text align="right">
           ${alertMessageInput.subject}
         </mj-text>

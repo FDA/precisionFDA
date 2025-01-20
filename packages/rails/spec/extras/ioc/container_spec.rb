@@ -49,10 +49,6 @@ RSpec.describe IOC::Container do
         expect(container.resolve("orgs.member_removal_policy")).to eq(MemberRemovalPolicy)
       end
 
-      it "resolves organization dissolve policy" do
-        expect(container.resolve("orgs.org_dissolve_policy")).to eq(OrgDissolvePolicy)
-      end
-
       describe "leave organization request creator" do
         let(:user_removal_policy) { "User removal policy" }
 
@@ -86,24 +82,6 @@ RSpec.describe IOC::Container do
 
           expect(OrgService::RemoveMemberRequest).
             to(have_received(:new).with(member_removal_policy))
-        end
-      end
-
-      describe "dissolve organization request creator" do
-        let(:org_dissolve_policy) { "Organization dissolve policy" }
-
-        before do
-          allow(OrgService::DissolveOrgRequest).to receive(:new).and_call_original
-
-          container.stub("orgs.org_dissolve_policy", org_dissolve_policy)
-        end
-
-        it "resolves organization dissolve request creator" do
-          expect(container.resolve("orgs.dissolve_org_request_creator")).
-            to(be_instance_of(OrgService::DissolveOrgRequest))
-
-          expect(OrgService::DissolveOrgRequest).
-            to(have_received(:new).with(org_dissolve_policy))
         end
       end
 
