@@ -11,8 +11,6 @@ describe OrgService::LeaveOrgApprove do
 
   before do
     allow(mail).to receive(:deliver_now!).and_return(nil)
-    allow(mailer).to receive(:user_remove_approved_email).and_return(mail)
-    allow(mailer).to receive(:user_leave_approved_email).and_return(mail)
   end
 
   context "when admin is not FDA admin" do
@@ -59,32 +57,6 @@ describe OrgService::LeaveOrgApprove do
             approver: admin,
             approved_at: approval_time,
           )
-      end
-
-      context "when request is REMOVE_MEMBER" do
-        it "correctly calls mailer" do
-          service.call(remove_request)
-
-          expect(mailer).to(
-            have_received(:user_remove_approved_email).
-              with(remove_request.org, remove_request.member, admin),
-          )
-
-          expect(mail).to have_received(:deliver_now!)
-        end
-      end
-
-      context "when request is LEAVE" do
-        it "correctly calls mailer" do
-          service.call(request)
-
-          expect(mailer).to(
-            have_received(:user_leave_approved_email).
-              with(request.org, request.initiator, admin),
-          )
-
-          expect(mail).to have_received(:deliver_now!)
-        end
       end
     end
   end

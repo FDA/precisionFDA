@@ -85,6 +85,7 @@ RSpec.describe Api::SpacesController, type: :controller do
     before do
       authenticate!(review_space_admin)
       sponsor_lead.org.update(admin_id: sponsor_lead.id)
+      stub_request(:post, "https://localhost:3001/emails/typed")
     end
 
     context "when type is review" do

@@ -1,9 +1,6 @@
 enum SPACE_MEMBERSHIP_SIDE {
   HOST = 0,
   GUEST = 1,
-  // fixme: how do I need to handle this?
-  // HOST_ALIAS = 'reviewer'
-  // GUEST_ALIAS = 'sponsor'
 }
 
 enum SPACE_MEMBERSHIP_ROLE {
