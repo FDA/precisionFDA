@@ -25,13 +25,12 @@ Rails.application.configure do
   config.assets.debug = false
   config.assets.digest = true
 
-  config.action_mailer.delivery_method = :file
-  config.action_mailer.default_url_options = { host: "localhost", port: 3000, protocol: "https" }
-  config.action_mailer.default_options = { from: "test@pfda" }
-
   # Enable locale fallbacks for I18n (makes lookups for any locale fall back to
   # the I18n.default_locale when a translation cannot be found).
   config.i18n.fallbacks = true
+
+  # necessary for Rails.application.routes.url_helpers to work
+  config.action_mailer.default_url_options = { host: "localhost", port: 3000, protocol: "https" }
 
   # Print deprecation notices to the stderr.
   config.active_support.deprecation = :stderr

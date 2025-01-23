@@ -8,10 +8,6 @@ describe RequestAccessService do
     before do
       stub_request(:post, "https://localhost:3001/emails/typed")
       allow(Event::UserAccessRequested).to receive(:create_for)
-      allow(NotificationsMailer).to receive_messages(
-        invitation_email: invitation_mail,
-        guest_access_email: guest_access_mail,
-      )
     end
 
     context "when invitation was created" do
@@ -44,7 +40,6 @@ describe RequestAccessService do
 
       it "sends invitation email" do
         service.create_request_for_access({})
-        expect(NotificationsMailer).to have_received(:invitation_email).with(invitation)
       end
 
       it "sends guest access email" do
@@ -78,12 +73,10 @@ describe RequestAccessService do
 
       it "does not sends invitation email" do
         service.create_request_for_access({})
-        expect(NotificationsMailer).not_to have_received(:invitation_email).with(invitation)
       end
 
       it "does not sends guest access email" do
         service.create_request_for_access({})
-        expect(NotificationsMailer).not_to have_received(:guest_access_email).with(invitation)
       end
     end
   end

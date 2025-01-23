@@ -86,15 +86,26 @@ class NodeCopyWorker < ApplicationWorker
   def notify_user(copies, scope)
     return if copies.all?(&:copied)
 
-    copy_ids = copies.instance_variable_get(:@copies).map { |copy| copy.object.id }
-    WorkerMailer.node_copy_email(
-      @context.user.email,
-      copy_ids,
-      scope,
-    ).deliver_later
+    not_copied_items = copies.instance_variable_get(:@copies).reject { |copy| copy.copied == true }
+    not_copied_folders = not_copied_items.select { |item| item.object.is_a?(Folder) }
+    not_copied_files = not_copied_items.select { |item| item.object.is_a?(UserFile) || item.object.is_a?(Asset) }
+
+    space = Space.valid_scope?(scope) && Space.find(Space.scope_id(scope))
+    destination = space.try(:title) || "#{scope} area"
+    request = {
+      destination:,
+      notCopiedFolderNames: not_copied_folders.map { |folder| folder.object.name },
+      notCopiedFileNames: not_copied_files.map { |file| file.object.name },
+    }
+
+    https_apps_client.email_send(NotificationPreference.email_types[:node_copy], [@context.user.id], request)
   end
 
   def copy_service
     @copy_service ||= CopyService::NodeCopier.new(api: @context.api, user: @context.user)
+  end
+
+  def https_apps_client
+    HttpsAppsClient.new
   end
 end
