@@ -11,6 +11,7 @@ import { UsersIcon } from '../../../components/icons/UserIcon'
 import { ContentFooter } from '../../../components/Page/ContentFooter'
 import { hidePagination, Pagination } from '../../../components/Pagination'
 import {
+  DateRangeColumnFilter,
   DefaultColumnFilter,
   NumberRangeColumnFilter,
   SelectColumnFilter,
@@ -18,7 +19,7 @@ import {
 import { EmptyTable, ReactTableStyles } from '../../../components/Table/styles'
 import Table from '../../../components/Table/Table'
 import { useColumnWidthLocalStorage } from '../../../hooks/useColumnWidthLocalStorage'
-import { MetaT, useList } from '../../../hooks/useList'
+import { useList } from '../../../hooks/useList'
 import { usePageMeta } from '../../../hooks/usePageMeta'
 import {
   FilterT,
@@ -30,8 +31,10 @@ import { cleanObject, toArrayFromObject } from '../../../utils/object'
 import { UserLayout } from '../../../layouts/UserLayout'
 import { UsersListActionRow } from './ListPageActionRow'
 import { User } from './types'
+import { IUser } from '../../../types/user'
+import { MetaV2 } from '../../home/types'
 
-type AdminUserListType = { users: User[]; meta: MetaT }
+type AdminUserListType = { data: User[]; meta: MetaV2 }
 
 // TODO(samuel) migrate definition of related fieds to server-side
 const USERS_TABLE_KEYS = [
@@ -56,7 +59,7 @@ export const fetchUsers = async (
   const query = prepareListFetch(filters, pagination, order)
   const paramQ = `?${new URLSearchParams(cleanObject(query) as any).toString()}`
   return axios
-    .get(`/admin/users_list/${paramQ}`)
+    .get(`/api/v2/admin/users/${paramQ}`)
     .then(r => r.data as AdminUserListType)
 }
 
@@ -117,7 +120,7 @@ const StyledTable = styled.div`
   }
 `
 
-export const getAdminUserColumns = (colWidths: any) =>
+export const getAdminUserColumns = (colWidths: Record<string, number>) =>
   [
     {
       Header: 'Username',
@@ -150,11 +153,9 @@ export const getAdminUserColumns = (colWidths: any) =>
     {
       Header: 'Login Date',
       accessor: 'lastLogin',
-      Filter: DefaultColumnFilter,
-      width: colWidths?.lastLogin ?? 300,
+      Filter: DateRangeColumnFilter,
+      width: colWidths?.lastLogin ?? 320,
       Cell: ({ value, row }: React.PropsWithChildren<CellProps<User>>) => {
-        const userTimeZone = new Intl.DateTimeFormat().resolvedOptions()
-          .timeZone
         return (
           <StyledLinkCell
             data-turbolinks="false"
@@ -227,7 +228,7 @@ export const getAdminUserColumns = (colWidths: any) =>
         </StyledLinkCell>
       ),
     },
-  ] as any as Column<User>[]
+  ] as Column<User>[]
 
 const UsersList = () => {
   usePageMeta({ title: 'precisionFDA Admin - Users' })
@@ -263,6 +264,7 @@ const UsersList = () => {
   if (query.error) {
     return <div>{JSON.stringify(query.error)}</div>
   }
+
   const filters = toArrayFromObject(filterQuery)
   return (
     <UserLayout innerScroll>
@@ -273,7 +275,7 @@ const UsersList = () => {
         </TopLeft>
         <UsersListActionRow
           selectedUsers={
-            data?.users.filter(user => selectedIndexes?.[user.id]) ?? []
+            data?.data?.filter(user => selectedIndexes?.[user.id]) ?? []
           }
           refetchUsers={query.refetch}
         />
@@ -284,7 +286,7 @@ const UsersList = () => {
           name="admin_users"
           columns={columns}
           hiddenColumns={[]}
-          data={data?.users ?? []}
+          data={data?.data ?? []}
           isSelectable
           isSortable
           isFilterable
@@ -301,25 +303,23 @@ const UsersList = () => {
           isColsResizable
           saveColumnResizeWidth={saveColumnResizeWidth}
           // TODO(samuel) fix - getRowId in table component not correctly typed
-          getRowId={user => (user as any).id}
+          getRowId={user => (user as IUser).id.toString()}
         />
       </StyledTable>
 
       <ContentFooter>
         <Pagination
-          page={data?.meta?.pagination?.currentPage!}
-          totalCount={data?.meta?.pagination?.totalCount!}
-          totalPages={data?.meta?.pagination?.totalPages!}
+          page={data?.meta?.page!}
+          totalCount={data?.meta?.total!}
+          totalPages={data?.meta?.totalPages!}
           perPage={perPageParam}
           isHidden={hidePagination(
             query.isFetched,
-            data?.users?.length,
-            data?.meta?.pagination?.totalPages,
+            data?.data?.length,
+            data?.meta?.totalPages,
           )}
-          isPreviousData={data?.meta?.pagination?.prevPage! !== null}
-          isNextData={data?.meta?.pagination?.nextPage! !== null}
-          setPage={setPageParam as any}
-          onPerPageSelect={setPerPageParam as any}
+          setPage={setPageParam as (n: number) => void}
+          onPerPageSelect={setPerPageParam as (n: number) => void}
           showListCount
         />
         <HoverDNAnexusLogo opacity height={14} />

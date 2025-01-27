@@ -736,21 +736,6 @@ class HttpsAppsClient # rubocop:disable Metrics/ClassLength
     )
   end
 
-  def users_list(page, per_page, order_by, order_dir, filters)
-    pagination_args = {}
-    pagination_args[:page] = page if page
-    pagination_args[:per_page] = per_page if per_page
-    pagination_args[:order_by] = order_by if order_by
-    pagination_args[:order_dir] = order_dir if order_dir
-    pagination_args[:filters] = filters if filters
-    request(
-      "/admin/users",
-      {},
-      Net::HTTP::Get::METHOD,
-      pagination_args,
-    )
-  end
-
   def users_set_total_limit(ids, total_limit)
     request(
       "/admin/users/setTotalLimit",
