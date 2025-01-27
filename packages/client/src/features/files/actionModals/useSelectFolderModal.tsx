@@ -1,161 +1,145 @@
+import { DataNode, Key } from 'rc-tree/lib/interface'
 import React, { useState } from 'react'
+import styled from 'styled-components'
 import { useImmer } from 'use-immer'
 import { Button } from '../../../components/Button'
-import { getSpaceIdFromScope } from '../../../utils'
 import { ModalHeaderTop, ModalNext } from '../../modal/ModalNext'
 import { ButtonRow, Footer, ModalScroll } from '../../modal/styles'
 import { useModal } from '../../modal/useModal'
-import {
-  ButtonBadge,
-  StyledSubtitle,
-} from '../../actionModals/styles'
 import { ServerScope } from '../../home/types'
 import { fetchFolderChildren } from '../files.api'
 import { FileTree } from '../FileTree'
-import { CustomDataNode, SelectionDetails } from '../files.types'
+import { TreeOnSelectInfo } from '../files.types'
 import { findById } from '../file.utils'
+import { getSpaceIdFromScope } from '../../../utils'
 
-interface SelectorProps {
-  scopes: string[]
-  setShowModal: (show: boolean) => void
-  handleSelect: (folders: CustomDataNode[]) => void
+type EnhancedDataNode = DataNode &{
+  path: string
 }
 
-const FolderSelector = ({
-  scopes,
-  setShowModal,
-  handleSelect,
-}: SelectorProps) => {
-  const [selectedFolders, setSelectedFolders] = useState<CustomDataNode[]>([])
+const OrganizeFiles = ({
+  scope,
+  onSelect,
+}: {
+  scope?: ServerScope
+  onSelect: (selectedKeys: Key[], info: TreeOnSelectInfo) => void,
+}) => {
+  const spaceId = getSpaceIdFromScope(scope)
+  const [treeData, setTreeData] = useImmer<DataNode[]>([
+    { key: 'ROOT', title: '/', children: []} as unknown as DataNode,
+  ])
 
-  const spaceId = getSpaceIdFromScope(scopes[0] as ServerScope)
+  return (
+    <FileTree
+      onExpand={d => {}}
+      loadData={async (node: EnhancedDataNode) => {
+        const { nodes } = await fetchFolderChildren(
+          scope === 'private' ? 'private' : 'public', // TODO fix this in fetchFolderChildren
+          spaceId,
+          node.key.toString(),
+        )
+        const children = nodes
+          .filter((e) => e.type === 'Folder')
+          .map((d) => ({
+            key: d.id.toString(),
+            title: d.name,
+            children: [],
+            parent: d.path[d.path.length-1],
+            path: (node.path) ? `${node.path}/${d.name}`: `/${d.name}`,
+          }))
 
-  const addFolder = (folders: CustomDataNode[]) => {
-    setSelectedFolders(folders)
+        setTreeData((draft: DataNode[]) => {
+          const folder = findById(draft, node.key.toString())
+          if (folder) {
+            folder.children = children
+          }
+        })
+      }}
+      treeData={treeData}
+      onSelect={onSelect}
+    />
+  )
+}
+
+const StyledForm = styled.form`
+  padding: 1rem;
+`
+
+export const useSelectFolderModal = ({
+  headerText,
+  submitCaption,
+  scope,
+  onHandleSubmit,
+}: {
+  headerText: string
+  submitCaption: string // submit button caption
+  scope?: ServerScope
+  onHandleSubmit?: (folderId: number, info: TreeOnSelectInfo) => void
+}) => {
+  const { isShown, setShowModal } = useModal()
+  const [selectedTarget, setSelectedTarget] = useState<string>()
+  const [selectedTargetInfo, setSelectedTargetInfo] = useState<any>()
+  const [submitEnabled, setSubmitEnabled] = useState(false)
+
+  const handleSelect = (selectedKey: string, selectedInfo: TreeOnSelectInfo) => {
+    setSelectedTarget(selectedKey)
+    setSelectedTargetInfo(selectedInfo)
+    setSubmitEnabled(true)
   }
 
   const handleSubmit = () => {
-    handleSelect(selectedFolders)
-    setShowModal(false)
+    if (onHandleSubmit && selectedTarget) {
+      onHandleSubmit(parseInt(selectedTarget, 10), selectedTargetInfo)
+      setSubmitEnabled(false)
+    }
   }
 
-  const [treeData, setTreeData] = useImmer<CustomDataNode[]>([
-    { key: 'ROOT', title: '/', children: []} as unknown as CustomDataNode,
-  ])
-
-  const onSelect = (_: never, details: SelectionDetails) => {
-    const folders = details.selectedNodes
-      .filter(n => n.key !== 'ROOT')
-      .map(node => {
-        return {
-          title: node.title,
-          id: node.key,
-          scope: scopes[0],
-        } as unknown as CustomDataNode
-      })
-    addFolder(folders)
-  }
-
-  const loadData = async (node: CustomDataNode) => {
-    const { nodes } = await fetchFolderChildren(
-      'public',
-      spaceId,
-      node.key.toString(),
-    )
-
-    const children = nodes
-      .filter((e) => e.type === 'Folder')
-      .map((d) => ({
-        key: d.id,
-        title: d.name,
-        children: [],
-        parent: d.path[d.path.length-1],
-      } as CustomDataNode))
-    setTreeData((draft: CustomDataNode[]) => {
-      const folder = findById(draft, node.key)
-      if (folder) {
-        folder.children = children
-      }
-    })
-  }
-
-  return (
-    <>
+  const modalComp = (
+    <ModalNext
+      id="modal-select-folder"
+      hide={() => setShowModal(false)}
+      isShown={isShown}
+      disableClose={false}
+      data-testid="modal-select-folder"
+    >
+      <ModalHeaderTop
+        disableClose={false}
+        headerText={headerText}
+        hide={() => setShowModal(false)}
+      />
       <ModalScroll>
-        {/* TODO: need to revisit types for FileTree and fix them. PFDA-5238 */}
-        <FileTree
-          onExpand={d => {}}
-          loadData={loadData}
-          treeData={treeData}
-          onSelect={onSelect}
-          multiple
-        />
+        <StyledForm as="div">
+          <OrganizeFiles
+            scope={scope}
+            onSelect={(selectedKeys, info) => {
+              handleSelect(selectedKeys[0]?.toString(), info)
+            }}
+          />
+        </StyledForm>
       </ModalScroll>
       <Footer>
         <ButtonRow>
           <Button
-            onClick={() => {
-              setShowModal(false)
-            }}
+            type="button"
+            onClick={() => setShowModal(false)}
           >
             Cancel
           </Button>
           <Button
             data-variant="primary"
+            type="submit"
             onClick={handleSubmit}
-            disabled={selectedFolders?.length === 0}
+            disabled={!submitEnabled}
           >
-            Select &nbsp;<ButtonBadge>{selectedFolders?.length}</ButtonBadge>
+            {submitCaption}
           </Button>
         </ButtonRow>
       </Footer>
-    </>
-  )
-}
-
-/**
- * Dialog for selecting folder(s). It allows user select multiple folders.
- *
- * @returns list of selected folders
- */
-export const useSelectFolderModal = (
-  title: string,
-  handleSelect: (folders: CustomDataNode[]) => void,
-  subtitle?: string,
-  scopes?: string[],
-) => {
-  const { isShown, setShowModal } = useModal()
-
-  const showModalResetState = () => {
-    setShowModal(true)
-  }
-
-  const modalComp = (
-    <ModalNext
-      id="select-folder-modal"
-      disableClose={false}
-      headerText={title}
-      hide={() => setShowModal(false)}
-      isShown={isShown}
-    >
-      <ModalHeaderTop
-        disableClose={false}
-        headerText={title}
-        hide={() => setShowModal(false)}
-      />
-
-      {subtitle && <StyledSubtitle>{subtitle}</StyledSubtitle>}
-      <FolderSelector
-        scopes={scopes || []}
-        setShowModal={setShowModal}
-        handleSelect={handleSelect}
-      />
     </ModalNext>
   )
   return {
     modalComp,
     setShowModal,
-    showModalResetState,
     isShown,
   }
 }

@@ -10,7 +10,7 @@ import { QuestionIcon } from '../../../components/icons/QuestionIcon'
 import { InputNumber, InputText } from '../../../components/InputText'
 import { EmptyTable } from '../../../components/Table/styles'
 import { IUser } from '../../../types/user'
-import { useOrganizeFileModal } from '../../files/actionModals/useOrganizeFileModal'
+import { useSelectFolderModal } from '../../files/actionModals/useSelectFolderModal'
 import { TreeOnSelectInfo } from '../../files/files.types'
 import { ServerScope } from '../../home/types'
 import { fetchAcceptedLicenses } from '../../licenses/api'
@@ -208,13 +208,13 @@ export const RunJobForm = ({ app, userJobLimit, spec }: { app: IApp; spec: AppSp
     defaultValues,
   })
 
-  const { modalComp: organizeFileModal, setShowModal: setOrganizeFileModal } = useOrganizeFileModal({
+  const { modalComp: selectFolderModal, setShowModal: setSelectFolderModal } = useSelectFolderModal({
     headerText: 'Select output folder',
     submitCaption: 'Select folder',
     scope: app.scope === 'public' ? 'private' : app.scope, // show private folders for public apps
     onHandleSubmit: (folderId, info: TreeOnSelectInfo) => {
       setValue('output_folder_path', info.node.path)
-      setOrganizeFileModal(false)
+      setSelectFolderModal(false)
     },
   })
 
@@ -465,7 +465,7 @@ export const RunJobForm = ({ app, userJobLimit, spec }: { app: IApp; spec: AppSp
             </SectionBody>
           </Section>
         ))}
-        <SetOutputFolder control={control} isSubmitting={isSubmitting} spec={spec} setShowModal={setOrganizeFileModal} />
+        <SetOutputFolder control={control} isSubmitting={isSubmitting} spec={spec} setShowModal={setSelectFolderModal} />
       </AppsConfiguration>
       <StyledActionsContainer>
         <Button
@@ -518,7 +518,7 @@ export const RunJobForm = ({ app, userJobLimit, spec }: { app: IApp; spec: AppSp
         </RightGroup>
       </StyledActionsContainer>
       {licensesModal}
-      {organizeFileModal}
+      {selectFolderModal}
 
       <SavingModal
         modalId="run-batch-job-processing"
@@ -533,6 +533,7 @@ export const RunJobForm = ({ app, userJobLimit, spec }: { app: IApp; spec: AppSp
         key="run-batch-job-processing"
       />
       <SavingModal
+        modalId="select-output-folder"
         headerText="Validating file inputs"
         body={
           <div>
@@ -542,7 +543,7 @@ export const RunJobForm = ({ app, userJobLimit, spec }: { app: IApp; spec: AppSp
           </div>
         }
         isSaving={showValidationWait}
-        key="data-portal-save"
+        key="select-output-folder"
       />
     </StyledForm>
   )
