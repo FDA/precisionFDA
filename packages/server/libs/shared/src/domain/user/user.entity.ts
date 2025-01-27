@@ -62,7 +62,7 @@ export const RESOURCE_TYPES = [
   'db_mem1_x64',
 ] as const
 
-type CloudResourceSettings = {
+export type CloudResourceSettings = {
   job_limit: number
   total_limit: number
   resources: Array<(typeof RESOURCE_TYPES)[number]>
@@ -137,10 +137,7 @@ export class User extends BaseEntity {
   })
   userState: USER_STATE
 
-  @Property({
-    type: WorkaroundJsonType,
-    columnType: 'text',
-  })
+  @Property({ type: 'json' })
   cloudResourceSettings?: CloudResourceSettings
 
   @Property({

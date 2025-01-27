@@ -11,7 +11,7 @@ export const StyledInputJumpTo = styled.input`
   border: 1px solid var(--c-input-border);
   border-radius: 2px;
   transition: all 0.3s;
-  ${inputFocus}
+  ${inputFocus};
   background-color: var(--background);
 `
 
@@ -63,13 +63,11 @@ export function hidePagination(
 }
 
 export const Pagination = ({
-  page,
+  page = 1,
   setPage,
   totalCount = 0,
-  perPage,
+  perPage = 10,
   totalPages = Math.ceil(totalCount / perPage),
-  isPreviousData,
-  isNextData,
   isHidden,
   onPerPageSelect,
   showPerPage = true,
@@ -83,8 +81,6 @@ export const Pagination = ({
   totalCount?: number
   totalPages?: number
   perPage?: number
-  isPreviousData: boolean
-  isNextData: boolean
   isHidden: boolean
   showListCount?: boolean
   showPerPage?: boolean
@@ -108,9 +104,10 @@ export const Pagination = ({
     }
   }, [page])
 
-  const handleJumpToSubmit = (e: any) => {
+  const handleJumpToSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    const value = parseInt(e.target[0].value, 10)
+    const target = e.target as HTMLFormElement
+    const value = parseInt((target[0] as HTMLInputElement).value, 10)
     if (value > localTotal || value <= 0) {
       setPage(1)
     } else {
