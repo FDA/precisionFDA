@@ -1,7 +1,6 @@
 import { Entity, ManyToOne, PrimaryKey, Property, Ref } from '@mikro-orm/core'
 import { User } from '@shared/domain/user/user.entity'
 import { BaseEntity } from '@shared/database/base.entity'
-import { WorkaroundJsonType } from '@shared/database/custom-json-type'
 
 export interface Extras {
   req_reason: string
@@ -44,7 +43,7 @@ export class Invitation extends BaseEntity {
   @Property()
   ip: string
 
-  @Property({ type: WorkaroundJsonType })
+  @Property({ type: 'json' })
   extras: Extras
 
   @ManyToOne(() => User)

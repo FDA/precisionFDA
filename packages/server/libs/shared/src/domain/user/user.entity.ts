@@ -21,7 +21,6 @@ import { Organization } from '@shared/domain/org/org.entity'
 import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
 import { config } from '../../config'
 import { BaseEntity } from '../../database/base.entity'
-import { WorkaroundJsonType } from '../../database/custom-json-type'
 import { AdminMembership } from '../admin-membership/admin-membership.entity'
 import { UserRepository } from './user.repository'
 import { Space } from '@shared/domain/space/space.entity'
@@ -140,10 +139,7 @@ export class User extends BaseEntity {
   @Property({ type: 'json' })
   cloudResourceSettings?: CloudResourceSettings
 
-  @Property({
-    type: WorkaroundJsonType,
-    columnType: 'text',
-  })
+  @Property({ type: 'json' })
   extras?: Extras
 
   @OneToMany({ entity: () => Job, mappedBy: 'user' })
