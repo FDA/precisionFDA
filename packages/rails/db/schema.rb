@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2024_11_12_111500) do
+ActiveRecord::Schema.define(version: 2025_01_16_120925) do
 
   create_table "accepted_licenses", id: :integer, charset: "utf8mb3", collation: "utf8mb3_unicode_ci", force: :cascade do |t|
     t.integer "license_id"
@@ -358,7 +358,7 @@ ActiveRecord::Schema.define(version: 2024_11_12_111500) do
     t.index ["image"], name: "index_experts_on_image"
     t.index ["scope"], name: "index_experts_on_scope"
     t.index ["state"], name: "index_experts_on_state"
-    t.index ["user_id"], name: "index_experts_on_user_id"
+    t.index ["user_id"], name: "index_experts_on_user_id", unique: true
   end
 
   create_table "follows", id: :integer, charset: "utf8mb3", collation: "utf8mb3_unicode_ci", force: :cascade do |t|

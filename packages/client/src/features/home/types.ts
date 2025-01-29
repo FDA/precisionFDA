@@ -121,6 +121,14 @@ export interface MetaPath {
   id: number
   name: string
 }
+
+export type MetaV2 = {
+  page: number
+  pageSize: number
+  total: number
+  totalPages: number
+}
+
 export interface IMeta {
   links: {
     copy_private?: string

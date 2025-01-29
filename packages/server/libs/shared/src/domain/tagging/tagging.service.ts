@@ -24,7 +24,7 @@ export class TaggingService {
     return this.em.transactional(async () => {
       const taggings = await this.taggingRepo.findForTaggableId(id)
       taggings.forEach((tagging) => {
-        if (tagging.tag.taggingCount > 1) {
+        if (tagging.tag?.taggingCount > 1) {
           tagging.tag.taggingCount -= 1
         } else {
           this.em.remove(tagging.tag)

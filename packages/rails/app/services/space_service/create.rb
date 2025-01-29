@@ -9,7 +9,6 @@ module SpaceService
     def initialize(user:, api:, for_challenge: false)
       @api = api
       @admin_api = DIContainer.resolve("api.admin")
-      @notification_mailer = NotificationsMailer.new
       @user = user
       @for_challenge = for_challenge
     end
@@ -70,7 +69,7 @@ module SpaceService
         Rails.logger.info("Adding site admin #{user.dxuser} to space #{space.id}" \
                           " with admin membership #{admin_membership.id}")
         new_membership = SpaceMembershipService::CreateOrUpdate.call(api, space, site_admin, SpaceMembership::ROLE_ADMIN, admin_membership, false)
-        NotificationsMailer.space_activated_email(space, new_membership).deliver_later!
+        https_apps_client.email_send(NotificationPreference.email_types[:space_activated], [], { id: new_membership.id }) # id is membership id
         # rubocop:enable Layout/LineLength
       end
     end
@@ -196,7 +195,7 @@ module SpaceService
     # @param [Space]
     def send_emails(space)
       space.leads.find_each do |lead|
-        NotificationsMailer.space_activation_email(space, lead).deliver_later!
+        https_apps_client.email_send(NotificationPreference.email_types[:space_activation], [], { id: lead.id }) # id is membership id
       end
     end
 
@@ -310,6 +309,10 @@ module SpaceService
 
     def guest_dx_org(uuid, _space, _space_form)
       Org.construct_dxorg("space_guest_#{uuid}")
+    end
+
+    def https_apps_client
+      @https_apps_client ||= HttpsAppsClient.new
     end
   end
 end

@@ -22,6 +22,14 @@ import { ExpertAddedHandler } from '@shared/domain/email/templates/handlers/expe
 import { ChallengeProposalReceivedHandler } from '@shared/domain/email/templates/handlers/challenge-proposal-received.handler'
 import { emailTypeToInputDtoMap } from '@shared/domain/email/dto/email-type-to-input.map'
 import { GuestAccessEmailHandler } from '@shared/domain/email/templates/handlers/guest-access-email.handler'
+import { LicenseApprovalRequestHandler } from '@shared/domain/email/templates/handlers/license-approval-request.handler'
+import { LicenseApprovedHandler } from '@shared/domain/email/templates/handlers/license-approved.handler'
+import { LicenseRevokedHandler } from '@shared/domain/email/templates/handlers/license-revoked.handler'
+import { SpaceActivatedHandler } from '@shared/domain/email/templates/handlers/space-activated.handler'
+import { SpaceActivationHandler } from '@shared/domain/email/templates/handlers/space-activation.handler'
+import { InvitationHandler } from '@shared/domain/email/templates/handlers/invitation.handler'
+import { SpaceInvitationHandler } from '@shared/domain/email/templates/handlers/space-invitation.handler'
+import { NodeCopyHandler } from '@shared/domain/email/templates/handlers/node-copy.handler'
 
 // KEY NAMES AND DEFAULT VALUES FOR EMAIL NOTIFICATION SETTINGS
 
@@ -29,16 +37,13 @@ import { GuestAccessEmailHandler } from '@shared/domain/email/templates/handlers
  * List of all notification bases, which may be applied to a role.
  */
 export const NOTIFICATION_TYPES_BASE = {
-  // space event based
   membership_changed: true,
   member_added_to_space: true,
   comment_activity: true,
   content_added_or_deleted: true,
   space_locked_unlocked_deleted: true,
-  // jobs
   job_finished: true,
   job_failed: true,
-  // challenges
   challenge_opened: true,
   challenge_preregister: true,
   alert_message: true,
@@ -46,6 +51,14 @@ export const NOTIFICATION_TYPES_BASE = {
   expert_added: true,
   challenge_proposal_received: true,
   guest_access_email: true,
+  license_approval_request: true,
+  license_approved: true,
+  license_revoked: true,
+  space_activated: true,
+  space_activation: true,
+  invitation: true,
+  space_invitation: true,
+  node_copy: true,
 }
 
 /**
@@ -141,6 +154,44 @@ const objectIdSchema: JSONSchema7 = {
     id: schemas.idProp,
   },
   required: ['id'],
+  additionalProperties: false,
+}
+
+const invitationToSpaceSchema: JSONSchema7 = {
+  type: 'object',
+  properties: {
+    membershipId: schemas.idProp,
+    adminId: schemas.idProp,
+  },
+  required: ['membershipId', 'adminId'],
+  additionalProperties: false,
+}
+
+const nodeCopySchema: JSONSchema7 = {
+  type: 'object',
+  properties: {
+    destination: { type: 'string', maxLength: config.validation.maxStrLen },
+    notCopiedFolderNames: {
+      type: 'array',
+      items: { type: 'string', maxLength: config.validation.maxStrLen },
+    },
+    notCopiedFileNames: {
+      type: 'array',
+      items: { type: 'string', maxLength: config.validation.maxStrLen },
+    },
+  },
+  required: ['destination', 'notCopiedFolderNames', 'notCopiedFileNames'],
+  additionalProperties: false,
+}
+
+const licenseApprovalRequest: JSONSchema7 = {
+  type: 'object',
+  properties: {
+    license_id: schemas.idProp,
+    user_id: schemas.idProp,
+    message: { type: 'string', maxLength: config.validation.maxStrLen },
+  },
+  required: ['license_id', 'user_id', 'message'],
   additionalProperties: false,
 }
 
@@ -267,6 +318,11 @@ export type ChallengeProposalInput = {
   data_details_text: string
 }
 
+export type InvitationToSpace = {
+  membershipId: number
+  adminId: number
+}
+
 export type NewContentAdded = { spaceEventId: number }
 
 export type CommentAdded = { spaceEventId: number }
@@ -358,6 +414,14 @@ export enum EMAIL_TYPES {
   expertAdded = 19,
   challengeProposalReceived = 20,
   guestAccessEmail = 21,
+  licenseApprovalRequest = 22,
+  licenseApproved = 23,
+  licenseRevoked = 24,
+  spaceActivated = 25,
+  spaceActivation = 26,
+  invitation = 27, // invitation to the pFDA
+  spaceInvitation = 28,
+  nodeCopy = 29,
 }
 
 export type EmailConfigItem = {
@@ -373,6 +437,54 @@ export type EmailConfigItem = {
 }
 
 export const EMAIL_CONFIG = {
+  nodeCopy: {
+    name: 'nodeCopy',
+    emailId: EMAIL_TYPES.nodeCopy,
+    schema: nodeCopySchema,
+    handlerClass: NodeCopyHandler,
+  },
+  spaceInvitation: {
+    name: 'spaceInvitation',
+    emailId: EMAIL_TYPES.spaceInvitation,
+    schema: invitationToSpaceSchema,
+    handlerClass: SpaceInvitationHandler,
+  },
+  invitation: {
+    name: 'invitation',
+    emailId: EMAIL_TYPES.invitation,
+    schema: objectIdSchema,
+    handlerClass: InvitationHandler,
+  },
+  spaceActivation: {
+    name: 'spaceActivation',
+    emailId: EMAIL_TYPES.spaceActivation,
+    schema: objectIdSchema,
+    handlerClass: SpaceActivationHandler,
+  },
+  spaceActivated: {
+    name: 'spaceActivated',
+    emailId: EMAIL_TYPES.spaceActivated,
+    schema: objectIdSchema,
+    handlerClass: SpaceActivatedHandler,
+  },
+  licenseRevoked: {
+    name: 'licenseRevoked',
+    emailId: EMAIL_TYPES.licenseRevoked,
+    schema: objectIdSchema,
+    handlerClass: LicenseRevokedHandler,
+  },
+  licenseApproved: {
+    name: 'licenseApproved',
+    emailId: EMAIL_TYPES.licenseApproved,
+    schema: objectIdSchema,
+    handlerClass: LicenseApprovedHandler,
+  },
+  licenseApprovalRequest: {
+    name: 'licenseApprovalRequest',
+    emailId: EMAIL_TYPES.licenseApprovalRequest,
+    schema: licenseApprovalRequest,
+    handlerClass: LicenseApprovalRequestHandler,
+  },
   guestAccessEmail: {
     name: 'guestAccessEmail',
     emailId: EMAIL_TYPES.guestAccessEmail,

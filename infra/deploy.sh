@@ -7,7 +7,7 @@ declare -i MAX_SIZE=${ENV_MAX_SIZE:-1}
 declare -i DESIRED_CAP=${ENV_DESIRED_CAP:-1}
 declare -i ASG_HEALTH_CHECK_GRACE_PERIOD=${ENV_ASG_HEALTH_CHECK_GRACE_PERIOD:-1200}
 declare -i ASG_INITIALIZATION_DELAY=60
-declare -i ATTEMPTS=${ENV_ATTEMPTS:-80}
+declare -i ATTEMPTS=${ENV_ATTEMPTS:-36}
 declare -i ASG_DESTROY_DELAY=30
 
 # Launch Autoscaling Group from Launch Template
@@ -29,7 +29,9 @@ echo "Sleep $ASG_INITIALIZATION_DELAY seconds to wait for Autoscaling Group init
 sleep $ASG_INITIALIZATION_DELAY
 
 # Wait for instances to become healthy
-echo "Waiting for instances to become healthy (minimum: $MIN_SIZE, desired: $DESIRED_CAP, maximum: $MAX_SIZE)"
+TIMEOUT=$((ATTEMPTS / 2))
+echo "Waiting for instances to become healthy (minimum: $MIN_SIZE, desired: $DESIRED_CAP, maximum: $MAX_SIZE, timeout: $TIMEOUT minutes)"
+
 i=0
 status="unhealthy"
 while [ "$status" = "unhealthy" ] && [ $i -lt $ATTEMPTS ]; do
