@@ -70,4 +70,29 @@ export class SpaceMembership extends BaseEntity {
     return this.role === SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR
   }
 
+  getSpaceMembershipSideAlias() {
+    switch (this.side) {
+      case SPACE_MEMBERSHIP_SIDE.HOST:
+        return 'reviewer'
+      case SPACE_MEMBERSHIP_SIDE.GUEST:
+        return 'sponsor'
+      default:
+        return null
+    }
+  }
+
+  getSpaceMembershipRoleAlias() {
+    switch (this.role) {
+      case SPACE_MEMBERSHIP_ROLE.ADMIN:
+        return 'Administrator'
+      case SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR:
+        return 'Contributor'
+      case SPACE_MEMBERSHIP_ROLE.VIEWER:
+        return 'Viewer'
+      case SPACE_MEMBERSHIP_ROLE.LEAD:
+        return 'Lead'
+      default:
+        return null
+    }
+  }
 }

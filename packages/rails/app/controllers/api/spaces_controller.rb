@@ -32,7 +32,8 @@ module Api
     def accept
       https_apps_client.accept_space(@space.id)
       space = Space.undeleted.find(params[:id])
-      # Refactor this email action to node-api as well. (No template in node yet)
+      # TODO template is already in node, but
+      # refactoring would require refactoring SpaceAcceptOperation PFDA-5864
       send_emails(space) if space.accepted?
       render json: space, adapter: :json
     end
@@ -282,10 +283,10 @@ module Api
 
     private
 
-    # Sends space activatio email to leads.
+    # Sends space activation email to leads.
     def send_emails(space)
       space.leads.find_each do |lead|
-        NotificationsMailer.space_activated_email(space, lead).deliver_later!
+        https_apps_client.email_send(NotificationPreference.email_types[:space_activated], [], { id: lead.id }) # id is membership id
       end
     end
 

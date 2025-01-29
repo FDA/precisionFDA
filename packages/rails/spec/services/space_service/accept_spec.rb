@@ -11,6 +11,7 @@ RSpec.describe SpaceService::Accept, type: :service do
   before do
     rack = PlatformRack.new
     stub_request(:any, /^#{rack.path}/).to_rack(rack)
+    stub_request(:post, "https://localhost:3001/emails/typed")
   end
 
   describe "#call" do

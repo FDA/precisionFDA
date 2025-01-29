@@ -49,6 +49,7 @@ jobs:
           BUILD_NUMBER: ${{ github.run_number }}
           ENVIRONMENT: ${{ vars.ENVIRONMENT }}
           AWS_REGION: ${{ vars.REGION }}
+          ENV_ATTEMPTS: ${{ vars.ENV_ATTEMPTS }}
           ENV_SUBNET1: ${{ vars.ENV_SUBNET1 }}
           ENV_SUBNET2: ${{ vars.ENV_SUBNET2 }}
           ENV_SUBNET3: ${{ vars.ENV_SUBNET3 }}

@@ -3,6 +3,8 @@ import { EMAIL_TYPES } from '@shared/domain/email/email.config'
 import { ObjectIdInputDto } from '@shared/domain/email/email.helper'
 import { NewContentAddedInputDto } from '@shared/domain/email/dto/new-content-added-input.dto'
 import { AlertMessageInputDto } from '@shared/domain/email/dto/alert-message-input.dto'
+import { LicenseApprovalRequestDto } from '@shared/domain/email/dto/license-approval-request.dto'
+import { NodeCopyInputDto } from '@shared/domain/email/dto/node-copy-input.dto'
 
 export const emailTypeToInputDtoMap = {
   0: EmptyEmailInputDto, // emailWithoutTemplate
@@ -10,6 +12,14 @@ export const emailTypeToInputDtoMap = {
   17: AlertMessageInputDto, // alertMessage
   19: ObjectIdInputDto, // expertQuestionAdded
   21: ObjectIdInputDto, // guestAccessEmail
+  22: LicenseApprovalRequestDto, // licenseApprovalRequest
+  23: ObjectIdInputDto, // licenseApproved
+  24: ObjectIdInputDto, // licenseRevoked
+  25: ObjectIdInputDto, // spaceActivated
+  26: ObjectIdInputDto, // spaceActivation
+  27: ObjectIdInputDto, // invitation to the pFDA
+  28: ObjectIdInputDto, // invitation to the space
+  29: NodeCopyInputDto, // some nodes weren't copied
 
   1: EmptyEmailInputDto, // jobFinished
   3: EmptyEmailInputDto, // memberChangedAddedRemoved

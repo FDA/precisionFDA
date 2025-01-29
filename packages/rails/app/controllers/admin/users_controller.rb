@@ -4,19 +4,6 @@ module Admin
     skip_before_action  :check_admin, only: :toggle_activate_user
     layout "react", only: %i(index)
 
-    # GET
-    # list users.
-    def list
-      response = https_apps_client.users_list(
-        unsafe_params[:page],
-        unsafe_params[:per_page],
-        unsafe_params[:order_by],
-        unsafe_params[:order_dir],
-        unsafe_params[:filters],
-      )
-      render json: response, adapter: :json
-    end
-
     def index; end
 
     # TODO(samuel) unify this method
