@@ -42,7 +42,7 @@ export class CliFileDescribeDTO {
       id: file.uid,
       title: file.name,
       size: file.fileSize,
-      tags: file.taggings.map((t) => t.tag.name),
+      tags: file.taggings.map((t) => t.tag?.name),
       properties: file.properties.reduce((acc, p) => {
         acc[p.propertyName] = p.propertyValue
         return acc
