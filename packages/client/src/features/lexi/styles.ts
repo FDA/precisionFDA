@@ -106,9 +106,8 @@ export const StyledInnerHTML = styled.div`
   img {
       height: auto;
       max-width: 100%;
-      display: block;
+      display: inline-block;
       margin: 0 auto;
-      padding: 0.5em;
   }
 
   blockquote {
