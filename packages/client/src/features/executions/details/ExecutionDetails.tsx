@@ -46,7 +46,7 @@ import { fetchExecution } from '../executions.api'
 import { FailureMessage, TitleLeft } from './styles'
 import { IExecution } from '../executions.types'
 import { PricingMap } from '../../apps/apps.types'
-import {pluralize} from "../../../utils/formatting";
+import { pluralize } from '../../../utils/formatting'
 
 export const ExecutionDetails = ({
   emitScope,
@@ -160,14 +160,21 @@ export const ExecutionDetails = ({
   }
 
   const getCostMetadataItem = (e: IExecution) => {
-    const isRunningOrTerminating = e.state === 'running' || e.state === 'terminating'
-    const costTitle = isRunningOrTerminating ? 'Estimated Cost' : 'Cost'
-    const costValue = isRunningOrTerminating ? currentCost : e.energy_consumption
+    const isActiveState = e.state === 'running' || e.state === 'terminating'
+    const calculatedCost = `$${(e.duration_in_seconds / 3600 * PricingMap[e.instance_type as keyof typeof PricingMap])
+        .toFixed(2)}`
+
+    let finalCost: string
+    if (!isActiveState) {
+      finalCost = e.energy_consumption === 'N/A' ? calculatedCost : e.energy_consumption
+    } else {
+      finalCost = currentCost
+    }
 
     return (
         <MetadataItem>
-          <MetadataKey>{costTitle}</MetadataKey>
-          <MetadataVal data-testid="execution-cost">{costValue}</MetadataVal>
+          <MetadataKey>{isActiveState ? 'Estimated Cost' : 'Cost'}</MetadataKey>
+          <MetadataVal data-testid="execution-cost">{finalCost}</MetadataVal>
         </MetadataItem>
     )
   }

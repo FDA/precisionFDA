@@ -2,6 +2,18 @@ import { Entity, ManyToOne, PrimaryKey, Property, Ref } from '@mikro-orm/core'
 import { User } from '@shared/domain/user/user.entity'
 import { BaseEntity } from '@shared/database/base.entity'
 
+export interface Extras {
+  req_reason: string
+  req_data: string
+  req_software: string
+  research_intent: boolean
+  clinical_intent: boolean
+  consistency_challenge_intent: string
+  truth_challenge_intent: string
+  participate_intent: boolean
+  organize_intent: boolean
+}
+
 @Entity({ tableName: 'invitations' })
 export class Invitation extends BaseEntity {
   @PrimaryKey()
@@ -31,8 +43,8 @@ export class Invitation extends BaseEntity {
   @Property()
   ip: string
 
-  @Property()
-  extras: string
+  @Property({ type: 'json' })
+  extras: Extras
 
   @ManyToOne(() => User)
   user: Ref<User>

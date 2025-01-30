@@ -12,33 +12,12 @@ import {
 import { MapValueObjectByKey, MapValuesToReturnType } from '@shared/utils/generics'
 import { parseEnumValueFromString } from '@shared/validation/parsers'
 
-type PaginationOpts<
-  SortColumnT,
-  FilterSchemaT extends Record<string, FilterSchemaNode>,
-> = Partial<{
-  pagination: {
-    defaultPerPage?: number
-    defaultPage?: number
-  }
-  sort: {
-    sortableColumns: SortColumnT[]
-    isOrderByMandatory?: boolean
-    // TODO(samuel) unify typescript types
-    defaultOrderDir?: 'ASC' | 'DESC'
-  }
-  filter: {
-    schema: FilterSchemaT
-    keyMapper?: (key: string) => string
-  }
-}>
-
 const DEFAULT_PER_PAGE = 20
 const DEFAULT_PAGE = 1
 
 @Injectable()
 export class AdminUsersPaginationPipe<
   T extends BaseEntity,
-  SortColumnT extends string = Extract<keyof T, string>,
   FilterSchemaT extends Partial<Record<string, FilterSchemaNode>> = Partial<
     Record<Extract<keyof T, string>, FilterSchemaNode>
   >,
@@ -128,7 +107,7 @@ export class AdminUsersPaginationPipe<
     const filters = Object.fromEntries(
       Object.entries(
         bindGetValueToSchema(
-          (key) => value.filters?.[key]?.toString(),
+          (key) => value.filter?.[key]?.toString(),
           (this.opts?.filter?.schema ?? {}) as FilterSchemaT,
         ),
       ).map(([schemaKey, schemaValue]) => [schemaKey, schemaValue.parser(schemaKey)]),

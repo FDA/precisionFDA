@@ -35,13 +35,21 @@ class ExpertsController < ApplicationController
     user = User.real.find_by(dxuser: expert_params[:username])
 
     if user
-      expert = Expert.provision(@context, expert_params)
-      if expert
-        https_apps_client.email_send(NotificationPreference.email_types[:expert_added], [], { id: expert.id })
-        flash[:success] = "A new Expert of the Month was successfully created for #{expert.user.full_name.titleize} (#{expert.user.dxuser})."
-        redirect_to experts_path and return
+      # Check if an expert already exists for the user
+      existing_expert = Expert.find_by(user_id: user.id)
+
+      if existing_expert
+        flash[:error] = "An expert for #{user.full_name.titleize} (#{user.dxuser}) already exists."
       else
-        flash[:error] = "The Expert could not be provisioned because of an unknown reason."
+        expert = Expert.provision(@context, expert_params.merge(user_id: user.id))
+
+        if expert
+          https_apps_client.email_send(NotificationPreference.email_types[:expert_added], [], { id: expert.id })
+          flash[:success] = "A new Expert of the Month was successfully created for #{expert.user.full_name.titleize} (#{expert.user.dxuser})."
+          redirect_to experts_path and return
+        else
+          flash[:error] = "The Expert could not be provisioned because of an unknown reason."
+        end
       end
     else
       flash[:error] = "Expert username #{expert_params[:username]} not found!"

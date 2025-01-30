@@ -2,7 +2,6 @@ import { ArgumentsHost, ExceptionFilter } from '@nestjs/common'
 import { ErrorCodes } from '@shared/errors'
 import { Response } from 'express'
 
-
 export type ErrorPayload = {
   error: {
     message: string
@@ -13,7 +12,6 @@ export type ErrorPayload = {
 }
 
 export abstract class AbstractExceptionFilter<T> implements ExceptionFilter {
-
   protected abstract getStatusCode(exception: T): number
 
   protected abstract formatError(exception: T): ErrorPayload

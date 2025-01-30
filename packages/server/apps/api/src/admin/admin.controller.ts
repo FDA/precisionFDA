@@ -5,7 +5,6 @@ import {
   Get,
   HttpCode,
   Inject,
-  Logger,
   Post,
   Put,
   Query,
@@ -16,15 +15,15 @@ import { RESOURCE_TYPES, User } from '@shared/domain/user/user.entity'
 import { ValidationError } from '@shared/errors'
 import { PlatformClient } from '@shared/platform-client'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
-import { buildFiltersWithColumnNodes } from '@shared/utils/filters'
 import { UserContextGuard } from '../user-context/guard/user-context.guard'
 import { SiteAdminGuard } from './guards/site-admin.guard'
 import { getAdminBodyValidationPipe } from './pipes/admin-body-validation.pipe'
-import { AdminUsersPaginationPipe } from './pipes/admin-users-pagination.pipe'
 import { enumValidator, numericBodyValidator } from './possibly-reusable-things'
 import { Organization } from '@shared/domain/org/org.entity'
 import { MaintenanceQueueJobProducer } from '@shared/queue/producer/maintenance-queue-job.producer'
+import { UserPaginationDto } from '@shared/domain/user/dto/user-pagination.dto'
 import { ADMIN_PLATFORM_CLIENT } from '@shared/platform-client/providers/admin-platform-client.provider'
+import { UserService } from '@shared/domain/user/user.service'
 
 interface ISetTotalLimitParams {
   ids: number[]
@@ -52,9 +51,9 @@ interface IResourceTypeParams {
 export class AdminController {
   constructor(
     private readonly user: UserContext,
-    private readonly logger: Logger,
     @Inject(DEPRECATED_SQL_ENTITY_MANAGER) private readonly em: SqlEntityManager,
     @Inject(ADMIN_PLATFORM_CLIENT) private readonly adminClient: PlatformClient,
+    private readonly userService: UserService,
     private readonly maintenanceJobProducer: MaintenanceQueueJobProducer,
   ) {}
 
@@ -74,66 +73,15 @@ export class AdminController {
   }
 
   @Get('/users')
-  async getUsers(@Query(AdminUsersPaginationPipe) pagination: any) {
-    const { orderBy, filters } = pagination
-    // TODO simplify this craziness
-    const res =
-      orderBy === 'totalLimit' ||
-      orderBy === 'jobLimit' ||
-      Boolean(filters.totalLimit) ||
-      Boolean(filters.jobLimit)
-        ? await this.em.getRepository(User).findPaginatedWithJsonFields({
-            ...pagination,
-            ...(function () {
-              if (!orderBy) {
-                return {} as const
-              } else if (orderBy === 'totalLimit' || orderBy === 'jobLimit') {
-                return {
-                  orderBy: {
-                    type: 'json' as const,
-                    // TODO(samuel) solve this camelCase vs snake_case issue
-                    sqlColumn: 'cloud_resource_settings',
-                    path: [
-                      {
-                        totalLimit: 'total_limit',
-                        jobLimit: 'job_limit',
-                      }[orderBy],
-                    ],
-                  },
-                }
-              }
-              return {
-                orderBy: {
-                  type: 'standard' as const,
-                  value: orderBy,
-                },
-              } as any
-              // Note(samuel) added 'as any' because of poor type resolution of conditionals
-            })(),
-            filters: buildFiltersWithColumnNodes(filters, {
-              totalLimit: {
-                sqlColumn: 'cloud_resource_settings' as any,
-                path: ['total_limit'],
-              },
-              jobLimit: {
-                sqlColumn: 'cloud_resource_settings' as any,
-                path: ['job_limit'],
-              },
-            }),
-          })
-        : await this.em.getRepository(User).findPaginated({
-            ...pagination,
-            orderBy,
-            filters: {
-              dxuser: filters.dxuser,
-              email: filters.email,
-              userState: parseInt(filters.userState, 10),
-              // NOTE(samuel) unsafe in terms of type, but somehow it works
-              // *vomits
-              lastLogin: filters.lastLogin as any,
-            },
-          })
-    return res
+  async getUsers(@Query() query: UserPaginationDto) {
+    // temporarily override because new paging uses
+    // pageSize on backend and the infrastructure
+    // on FE uses perPage :-(
+    if (query.perPage) {
+      query.pageSize = query.perPage
+    }
+
+    return this.userService.paginateUsers(query)
   }
 
   @Put('/users/setTotalLimit')
