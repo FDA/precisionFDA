@@ -29,7 +29,11 @@ export class UserSpaceInconsistencyFixService {
       this.logger.log(`Inviting admin user to space org ${org}`)
       await this.platformClient.inviteUserToOrganization({
         orgDxId: org,
-        data: { invitee: `user-${config.platform.adminUser}`, level: 'ADMIN' },
+        data: {
+          invitee: `user-${config.platform.adminUser}`,
+          level: 'ADMIN',
+          suppressEmailNotification: true,
+        },
       })
     } catch (error: any) {
       this.logger.error(`Invite admin user to space org failed: ${error.message}`)

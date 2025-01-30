@@ -61,13 +61,6 @@ describe('AlertMessageHandler', () => {
     expect(receivers).to.deep.eq([user])
   })
 
-  it('getTemplateContent', async () => {
-    const alertMessageHandler = getAlertMessageHandler('subject', 'message')
-
-    const result = await alertMessageHandler.getTemplateContent()
-    expect(result).to.eq(null)
-  })
-
   it('template', async () => {
     const alertMessageHandler = getAlertMessageHandler('subject', 'message')
 

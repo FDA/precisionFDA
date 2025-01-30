@@ -2,7 +2,6 @@ import { Entity, Ref, ManyToOne, Property, EntityRepositoryType, Reference } fro
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { BaseEntity } from '../../database/base.entity'
-import { WorkaroundJsonType } from '../../database/custom-json-type'
 import { Challenge } from './challenge.entity'
 import { ChallengeResourceRepository } from '@shared/domain/challenge/challenge-resource.repository'
 
@@ -11,7 +10,7 @@ class ChallengeResource extends BaseEntity {
   @Property()
   url: string
 
-  @Property({ type: WorkaroundJsonType, columnType: 'text' })
+  @Property({ type: 'json' })
   meta: any
 
   @ManyToOne({ entity: () => Challenge })

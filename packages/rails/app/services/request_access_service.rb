@@ -17,7 +17,7 @@ class RequestAccessService
     end
 
     def send_invitation_email(invitation)
-      NotificationsMailer.invitation_email(invitation).deliver_later!
+      https_apps_client.email_send(NotificationPreference.email_types[:invitation], [], { id: invitation.id })
     end
 
     def send_guest_access_email(invitation)

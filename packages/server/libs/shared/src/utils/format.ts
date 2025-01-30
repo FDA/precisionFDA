@@ -21,3 +21,12 @@ export const formatDuration = (duration: number): string => {
 export const getPluralizedTerm = (itemCount: number, itemName: string): string => {
   return `${itemCount.toString()} ${itemName}${itemCount > 1 ? 's' : ''}`
 }
+
+/**
+ * Especially useful for creating URLs of licenses and other entities, because
+ * id of the license in dash and lowercase is used in the URL.
+ * @param str
+ */
+export const lowercaseAndDash = (str: string): string => {
+  return str.toLowerCase().replace(/\s+/g, '-')
+}

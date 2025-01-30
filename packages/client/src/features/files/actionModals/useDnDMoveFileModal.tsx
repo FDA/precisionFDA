@@ -61,8 +61,10 @@ export const useDnDMoveFileModal = ({
         queryKey: ['counters'],
       })
       setShowModal(false)
-      toast.success(`Moving ${memoSelected.length} ${pluralize('item', memoSelected.length)} has been started`)
-      if (onSuccess) onSuccess()
+      if (onSuccess) {
+        onSuccess()
+        toast.success(`Successfully moved ${memoSelected.length} ${pluralize('item', memoSelected.length)} to ${targetNode.name}`)
+      }
     },
   })
 
