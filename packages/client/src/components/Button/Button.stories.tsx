@@ -1,40 +1,45 @@
 import React from 'react'
-import { StoryFn, Meta } from '@storybook/react'
+import { Meta, StoryObj } from '@storybook/react'
 import { Button } from '.'
+import { StorybookProviders } from '../../stories/StorybookProviders'
 
-// More on default export: https://storybook.js.org/docs/react/writing-stories/introduction#default-export
-export default {
+type Story = StoryObj<typeof Button>;
+
+
+const meta: Meta<typeof Button> = {
   title: 'Components/Button',
   component: Button,
-  // More on argTypes: https://storybook.js.org/docs/react/api/argtypes
-  argTypes: {
-    backgroundColor: { control: 'color' },
+  decorators: [
+    (Story) => (
+      <StorybookProviders>
+        <Story />
+      </StorybookProviders>
+    ),
+  ],
+}
+
+export const Primary: Story = {
+  args: {
+    'data-variant': 'primary',
+    children: 'Primary',
   },
-} as Meta<typeof Button>
-
-// More on component templates: https://storybook.js.org/docs/react/writing-stories/introduction#using-args
-const ButtonSolidBlueTemplate: StoryFn<typeof Button> = args => (
-  <Button data-variant="primary" {...args}>Submit</Button>
-)
-const ButtonSolidRedTemplate: StoryFn<typeof Button> = args => (
-  <Button data-variant="warning" {...args}>Stop</Button>
-)
-const ButtonTextTemplate: StoryFn<typeof Button> = args => (
-  <Button {...args}>Add a property</Button>
-)
-
-export const Blue = ButtonSolidBlueTemplate.bind({})
-// More on args: https://storybook.js.org/docs/react/writing-stories/args
-Blue.args = {
-  disabled: false,
+}
+export const Danger: Story = {
+  args: {
+    'data-variant': 'warning',
+    children: 'Danger',
+  },
+}
+export const Green: Story = {
+  args: {
+    'data-variant': 'success',
+    children: 'Continue',
+  },
+}
+export const Outline: Story = {
+  args: {
+    children: 'Click Me',
+  },
 }
 
-export const Red = ButtonSolidRedTemplate.bind({})
-Red.args = {
-  disabled: false,
-}
-
-export const Text = ButtonTextTemplate.bind({})
-Text.args = {
-  disabled: false,
-}
+export default meta

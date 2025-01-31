@@ -15,8 +15,6 @@ const meta: Meta = {
   ],
 }
 
-export const LoggedIn: StoryObj = {
-  render: () => (<Header />),
-}
+export const LoggedIn: StoryObj = {}
 
 export default meta

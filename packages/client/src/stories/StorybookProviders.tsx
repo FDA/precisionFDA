@@ -7,6 +7,7 @@ import GlobalStyle from '../styles/global'
 import { AlertDismissedProvider } from '../features/admin/alerts/useAlertDismissedLocalStorage'
 import { NavOrderProvider } from '../components/Header/useNavOrderLocalStorage'
 import { NavFavoritesProvider } from '../components/Header/useNavFavoritesLocalStorage'
+import { ColorModeProvider } from '../utils/ThemeContext'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -19,17 +20,19 @@ const queryClient = new QueryClient({
 
 export function StorybookProviders({ children }: React.PropsWithChildren) {
   return (
-    <BrowserRouter>
-      <GlobalStyle railsAlertHeight={0} />
-      <QueryClientProvider client={queryClient}>
-        <AlertDismissedProvider>
-          <NavOrderProvider>
-            <NavFavoritesProvider>
-              <QueryParamProvider adapter={ReactRouter6Adapter}>{children}</QueryParamProvider>
-            </NavFavoritesProvider>
-          </NavOrderProvider>
-        </AlertDismissedProvider>
-      </QueryClientProvider>
-    </BrowserRouter>
+    <ColorModeProvider>
+      <BrowserRouter>
+        <GlobalStyle railsAlertHeight={0} />
+        <QueryClientProvider client={queryClient}>
+          <AlertDismissedProvider>
+            <NavOrderProvider>
+              <NavFavoritesProvider>
+                <QueryParamProvider adapter={ReactRouter6Adapter}>{children}</QueryParamProvider>
+              </NavFavoritesProvider>
+            </NavOrderProvider>
+          </AlertDismissedProvider>
+        </QueryClientProvider>
+      </BrowserRouter>
+    </ColorModeProvider>
   )
 }
