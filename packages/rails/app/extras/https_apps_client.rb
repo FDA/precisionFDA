@@ -276,6 +276,14 @@ class HttpsAppsClient # rubocop:disable Metrics/ClassLength
     )
   end
 
+  def assign_app(id, app_id)
+    request(
+      "/challenges/#{id}/app",
+      { appId: app_id },
+      Net::HTTP::Put::METHOD,
+    )
+  end
+
   def discussion_create(body)
     request(
       "/discussions",
@@ -663,8 +671,8 @@ class HttpsAppsClient # rubocop:disable Metrics/ClassLength
 
   def email_send(email_type_id, receiver_user_ids, opts)
     request(
-      "/emails/#{email_type_id}/send",
-      { input: opts, receiverUserIds: receiver_user_ids },
+      "/emails/typed",
+      { type: email_type_id, input: opts, receiverUserIds: receiver_user_ids },
       Net::HTTP::Post::METHOD,
     )
   end
@@ -728,21 +736,6 @@ class HttpsAppsClient # rubocop:disable Metrics/ClassLength
     )
   end
 
-  def users_list(page, per_page, order_by, order_dir, filters)
-    pagination_args = {}
-    pagination_args[:page] = page if page
-    pagination_args[:per_page] = per_page if per_page
-    pagination_args[:order_by] = order_by if order_by
-    pagination_args[:order_dir] = order_dir if order_dir
-    pagination_args[:filters] = filters if filters
-    request(
-      "/admin/users",
-      {},
-      Net::HTTP::Get::METHOD,
-      pagination_args,
-    )
-  end
-
   def users_set_total_limit(ids, total_limit)
     request(
       "/admin/users/setTotalLimit",
@@ -762,16 +755,6 @@ class HttpsAppsClient # rubocop:disable Metrics/ClassLength
         jobLimit: job_limit,
       },
       Net::HTTP::Put::METHOD,
-    )
-  end
-
-  def users_reset_2fa(ids)
-    request(
-      "/admin/users/reset2fa",
-      {
-        ids: ids,
-      },
-      Net::HTTP::Post::METHOD,
     )
   end
 
@@ -858,7 +841,7 @@ class HttpsAppsClient # rubocop:disable Metrics/ClassLength
       "/spaces",
       params,
       Net::HTTP::Post::METHOD,
-      )
+    )
   end
 
   def accept_space(id)

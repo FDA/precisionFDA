@@ -1,3 +1,4 @@
+/* eslint-disable react/no-array-index-key */
 import React, { useEffect, useState } from 'react'
 import styled from 'styled-components'
 import { breakPoints } from '../../styles/theme'
@@ -34,6 +35,9 @@ const StyledTOCTitle = styled.div`
 `
 
 export const StyledToCWrap = styled.div`
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--c-text-500);
   padding-left: 12px;
   @media (min-width: ${breakPoints.large}px) {
     max-width: 380px;
@@ -111,9 +115,9 @@ export const TocList = ({ items }: { items?: IToCItem[] }) => {
   if(!items) return null
   return (
     <StyledToC>
-        {items.map(i => {
+        {items.map((i, k) => {
           return (
-            <ToCItemWrap key={i.id} href={`#${i.id}`} $level={parseInt(i.tagName[1], 10) - 2}>
+            <ToCItemWrap key={`${i.id}-${k}`} href={`#${i.id}`} $level={parseInt(i.tagName[1], 10) - 2}>
               <ToCItem>{i.textContent}</ToCItem>
             </ToCItemWrap>
           )

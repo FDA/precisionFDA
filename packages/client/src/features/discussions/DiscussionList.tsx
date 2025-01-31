@@ -1,77 +1,111 @@
-import { useQuery } from '@tanstack/react-query'
-import React from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import React, { useMemo } from 'react'
+import { Column, UseResizeColumnsState } from 'react-table'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
-import { Button } from '../../components/Button'
-import { Loader } from '../../components/Loader'
-import { PlusIcon } from '../../components/icons/PlusIcon'
-import { ErrorBoundary } from '../../utils/ErrorBoundry'
-import { pluralize } from '../../utils/formatting'
-import { QuickActions, SpaceTitle } from '../home/home.styles'
-import { ISpace } from '../spaces/spaces.types'
+import { HoverDNAnexusLogo } from '../../components/icons/DNAnexusLogo'
+import { ContentFooter } from '../../components/Page/ContentFooter'
+import { EmptyTable } from '../../components/Table/styles'
+import Table from '../../components/Table/Table'
+import { ActionsRow, QuickActions, StyledHomeTable } from '../home/home.styles'
+import { ResourceHeader } from '../home/show.styles'
+import { HomeScope, IFilter, IMeta, KeyVal } from '../home/types'
+import { useList } from '../home/useList'
+import { useDiscussionColumns } from './useDiscussionColumns'
+import { Discussion } from './discussions.types'
 import { fetchDiscussionsRequest } from './api'
-import { formatDiscussionDate } from './helpers'
-import { UsernameLink } from './styles'
+import { Button } from '../../components/Button'
+import { PlusIcon } from '../../components/icons/PlusIcon'
+import { getSpaceIdFromScope } from '../../utils'
 
-const DiscussionsActionRow = styled.div`
-  display: flex;
-  gap: 16px;
-  max-width: 856px;
-  flex: 1;
-  width: 100%;
-`
-
-const StyledListPage = styled.div`
-  display: flex;
-  flex-direction: column;
-  padding: 32px;
-  gap: 32px;
+const StyledTable = styled(StyledHomeTable)`
+  .td:first-child,
+  .th:first-child {
+    padding: 20px;
+  }
 `
 
-const StyledDiscussionLink = styled(Link)`
-  font-size: 16px;
-  font-weight: bold;
-  line-height: 20px;
-  width: fit-content;
-`
-const Info = styled.div`
-  font-size: 12px;
-  padding: 4px 0;
-`
-const DiscussionListItem = styled.div`
-  align-self: stretch;
-  border-bottom: 1px solid var(--c-layout-border);
-  display: flex;
-  justify-content: space-between;
-  flex: 1;
-  padding: 16px 0;
-`
-const DiscussionTable = styled.div`
-  max-width: 856px;
-  flex: 1;
-  width: 100%;
-`
-const Left = styled.div``
-const Right = styled.div`
-  font-size: 14px;
-  align-self: flex-end;
-`
+type ListType = { discussions: Discussion[]; meta: IMeta }
 
-export const DiscussionList = ({ space, scope }: { space: ISpace; scope: string }) => {
-  const { data, isLoading } = useQuery({
-    queryKey: ['discussions', scope],
-    queryFn: () => fetchDiscussionsRequest(scope),
-  })
+const DiscussionListTable = ({
+  discussions,
+  homeScope,
+  isLoading,
+  selectedRows,
+  setSelectedRows,
+  saveColumnResizeWidth,
+  saveHiddenColumns,
+  colWidths,
+}: {
+  discussions: Discussion[]
+  homeScope?: HomeScope
+  selectedRows?: Record<string, boolean>
+  setSelectedRows: (ids: Record<string, boolean>) => void
+  isLoading: boolean
+  colWidths: KeyVal
+  saveHiddenColumns: (cols: string[]) => void
+  saveColumnResizeWidth: (columnResizing: UseResizeColumnsState<Discussion>['columnResizing']) => void
+}) => {
   const location = useLocation()
+  const navigate = useNavigate()
 
-  const membershipType = space.current_user_membership
-  const canCreateDiscussion = membershipType.role !== 'viewer' && !space.restricted_discussions
+  const onClick = (discussion: Discussion) => {
+    const spaceId = getSpaceIdFromScope(discussion.note.scope)
+
+    if (spaceId) {
+      navigate(`/spaces/${spaceId}/discussions/${discussion.id}`, {
+        state: {
+          from: location.pathname,
+          fromSearch: location.search,
+        },
+      })
+    } else {
+      window.location.replace(`/discussions/${discussion.id}`)
+    }
+  }
+
+  function filterColsByScope(c: Column<Discussion>): boolean {
+    // Hide 'location' for all homeScopes except 'spaces'.
+    return !(homeScope !== 'spaces' && c.accessor === 'note.scope')
+  }
+
+  const col = useDiscussionColumns({ colWidths, onClick }).filter(filterColsByScope)
+  const columns = useMemo(() => col, [col])
+  const data = useMemo(() => discussions || [], [discussions, selectedRows])
 
   return (
-    <ErrorBoundary>
-      <StyledListPage>
-        <DiscussionsActionRow>
-          <SpaceTitle>Space Discussions</SpaceTitle>
+    <StyledTable>
+      <Table<Discussion>
+        name="discussions"
+        columns={columns}
+        data={data}
+        saveHiddenColumns={saveHiddenColumns}
+        loading={isLoading}
+        loadingComponent={<div>Loading...</div>}
+        emptyComponent={<EmptyTable>No one has started a discussion yet.</EmptyTable>}
+        isColsResizable
+        saveColumnResizeWidth={saveColumnResizeWidth}
+      />
+    </StyledTable>
+  )
+}
+
+export const DiscussionList = ({ scope, canCreateDiscussion }: { scope: HomeScope; canCreateDiscussion?: boolean }) => {
+  const { query, selectedIndexes, setSelectedIndexes, saveColumnResizeWidth, colWidths, saveHiddenColumns } = useList<ListType>({
+    fetchList: async (filters: IFilter[], params: { scope: string }) => {
+      return fetchDiscussionsRequest(params.scope)
+    },
+    resource: 'discussions',
+    params: { scope },
+  })
+
+  const location = useLocation()
+
+  if (query.error) return <div>Error! {JSON.stringify(query.error)}</div>
+
+  return (
+    <>
+      <ResourceHeader>
+        <ActionsRow>
           <QuickActions>
             {canCreateDiscussion && (
               <Button
@@ -85,37 +119,21 @@ export const DiscussionList = ({ space, scope }: { space: ISpace; scope: string 
               </Button>
             )}
           </QuickActions>
-        </DiscussionsActionRow>
-        {isLoading && (
-          <div>
-            <Loader />
-          </div>
-        )}
-        <DiscussionTable>
-          {data &&
-            data
-              .slice()
-              .reverse()
-              .map(discussion => (
-                <DiscussionListItem key={discussion.id}>
-                  <Left>
-                    <StyledDiscussionLink to={`${location.pathname}/${discussion.id}`}>
-                      {discussion.note.title}
-                    </StyledDiscussionLink>
-                    <Info>
-                      Started by <UsernameLink href={`/users/${discussion.user.dxuser}`}>{discussion.user.fullName}</UsernameLink>{' '}
-                      on {formatDiscussionDate(discussion.createdAt)}
-                    </Info>
-                  </Left>
-                  <Right>
-                    {discussion.commentsCount} {pluralize('Comment', discussion.commentsCount)} and {discussion.answersCount}{' '}
-                    {pluralize('Answer', discussion.answersCount)}
-                  </Right>
-                </DiscussionListItem>
-              ))}
-          {data?.length === 0 && 'No one has started a discussion yet.'}
-        </DiscussionTable>
-      </StyledListPage>
-    </ErrorBoundary>
+        </ActionsRow>
+      </ResourceHeader>
+      <DiscussionListTable
+        homeScope={scope}
+        discussions={query.data ?? []}
+        isLoading={query.isLoading}
+        selectedRows={selectedIndexes}
+        saveHiddenColumns={saveHiddenColumns}
+        setSelectedRows={setSelectedIndexes}
+        saveColumnResizeWidth={saveColumnResizeWidth}
+        colWidths={colWidths}
+      />
+      <ContentFooter>
+        <HoverDNAnexusLogo opacity height={14} />
+      </ContentFooter>
+    </>
   )
 }

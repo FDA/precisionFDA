@@ -1,4 +1,4 @@
-import { ConfigOverride, parseIntFromProcess } from '..'
+import { ConfigOverride, defaultConfig, parseIntFromProcess } from '..'
 import { parseIpv4Cidr } from '../../validation/parsers'
 
 export const config: ConfigOverride = () => ({
@@ -41,4 +41,5 @@ export const config: ConfigOverride = () => ({
       isEnabled: true,
     },
   },
+  challengeProposalRecipients: ['swestreich+pfda@dnanexus.com', defaultConfig.supportEmail],
 })

@@ -22,46 +22,6 @@ module Api
              adapter: :json
     end
 
-    def create
-      ActiveRecord::Base.transaction do
-        @challenge = Challenge.new(challenge_params)
-        if @challenge.save
-          @challenge.provision_space!(
-            @context,
-            challenge_params[:host_lead_dxuser],
-            challenge_params[:guest_lead_dxuser],
-          )
-          @challenge.update_card_image_url!
-          render json: @challenge, adapter: :json
-        else
-          render json: @challenge.errors, status: :unprocessable_entity
-        end
-      end
-    end
-
-    def update
-      @challenge = Challenge.find(params[:id])
-
-      ActiveRecord::Base.transaction do
-        if @challenge.update(update_challenge_params)
-          @challenge.update_card_image_url!
-          @challenge.update_order(challenge_params["replacement_id"])
-
-          unless @challenge.space
-            @challenge.provision_space!(
-              @context,
-              challenge_params[:host_lead_dxuser],
-              challenge_params[:guest_lead_dxuser],
-            )
-          end
-        else
-          render json: @challenge.errors, status: :unprocessable_entity
-          return
-        end
-      end
-      render json: @challenge, adapter: :json
-    end
-
     def show
       challenge = accessible_challenges.find_by(id: params[:id])
 
@@ -177,8 +137,9 @@ module Api
       # proposal[:captchaValue] = params[:captchaValue] unless @context.logged_in?
       # https_apps_client.propose_challenge(proposal)
 
+
       if @context.logged_in? || verify_captcha_assessment(params[:captchaValue], "propose")
-        NotificationsMailer.challenge_proposal_received(proposal).deliver_now
+        https_apps_client.email_send(NotificationPreference.email_types[:challenge_proposal_received], [], proposal)
         render json: {}
       else
         raise ApiError,

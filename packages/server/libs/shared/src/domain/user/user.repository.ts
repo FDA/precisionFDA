@@ -1,6 +1,5 @@
 import { FindOptions } from '@mikro-orm/core'
 import { config } from '../../config'
-import { PaginatedEntityRepository } from '../../database/paginated-repository'
 import { buildJsonPath } from '../../utils/path'
 import { mysqlJsonArrayAppend, mysqlJsonSet } from '../../utils/sql-json-column-utils'
 import { DNANEXUS_INVALID_EMAIL, ORG_EVERYONE } from '../../config/consts'
@@ -9,14 +8,11 @@ import { UserCtx } from '../../types'
 import { MfaAlreadyResetError, ValidationError } from '../../errors'
 import { classifyErrorTypes } from '../../utils/classify-error-types'
 import { RESOURCE_TYPES, User, USER_STATE } from './user.entity'
+import { PaginatedRepository } from '@shared/domain/entity/repository/paginated.repository'
 
 type Resource = (typeof RESOURCE_TYPES)[number]
 
-export class UserRepository extends PaginatedEntityRepository<User> {
-  protected getEntityKey(): string {
-    return 'users'
-  }
-
+export class UserRepository extends PaginatedRepository<User> {
   findActive(findOptions?: FindOptions<User>) {
     return this.find({ lastLogin: { $ne: null }, privateFilesProject: { $ne: null } }, findOptions)
   }

@@ -18,7 +18,6 @@ import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { STATIC_SCOPE } from '@shared/enums'
 import { JobDescribeResponse } from '@shared/platform-client/platform-client.responses'
-import { WorkaroundJsonType } from '../../database/custom-json-type'
 import { formatDuration } from '../../utils/format'
 import { DxId } from '../entity/domain/dxid'
 import { Uid } from '../entity/domain/uid'
@@ -89,12 +88,12 @@ export class Job extends ScopedEntity {
   })
   properties = new Collection<JobProperty>(this)
 
-  @Property({ type: WorkaroundJsonType })
+  @Property({ type: 'json' })
   runData: JobRunData
 
   @Property({
     hidden: true,
-    type: WorkaroundJsonType,
+    type: 'json',
   })
   describe: JobDescribeResponse
 

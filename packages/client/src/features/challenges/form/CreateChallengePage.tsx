@@ -23,19 +23,13 @@ const CreateChallengePage = () => {
   const mutation = useMutation({
     mutationKey: ['create-challenge'],
     mutationFn: (payload: ChallengePayload) => createChallengeRequest(payload),
-    onSuccess: res => {
-      if (res?.challenge) {
+    onSuccess: () => {
         queryClient.invalidateQueries({
           queryKey: ['challenges'],
         })
         navigate('/challenges')
         toast.success('Challenge has been created')
-      } else if (res?.error) {
-        toast.error(`${res.error.type}: ${res.error.message}`)
-      } else {
-        toast.error('Error: Something went wrong')
-      }
-    },
+      },
     onError: () => {
       toast.error('Error: Adding challenge')
     },

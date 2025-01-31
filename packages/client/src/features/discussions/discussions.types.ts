@@ -64,7 +64,7 @@ export type NoteForm = {
   attachments: FormAttachments
   content: string
   isAnswer: boolean
-  notifyAll: boolean
+  notify: { label: string, value: string }[] | []
 }
 
 export type PostAttachments = {
@@ -80,7 +80,7 @@ export interface DiscussionForm {
   title: string
   content: string
   attachments: FormAttachments
-  notifyAll: boolean
+  notify: { label: string, value: string }[] | []
 }
 
 export interface CommentForm {

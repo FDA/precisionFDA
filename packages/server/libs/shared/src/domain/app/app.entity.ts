@@ -16,7 +16,6 @@ import { Job } from '@shared/domain/job/job.entity'
 import { Asset } from '@shared/domain/user-file/asset.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { STATIC_SCOPE } from '@shared/enums'
-import { WorkaroundJsonType } from '../../database/custom-json-type'
 import { getLogger } from '../../logger'
 import { DxId } from '../entity/domain/dxid'
 import { Uid } from '../entity/domain/uid'
@@ -70,10 +69,10 @@ export class App extends ScopedEntity {
   @Property()
   readme: string
 
-  @Property({ type: WorkaroundJsonType })
+  @Property({ type: 'json' })
   spec: AppSpec
 
-  @Property({ type: WorkaroundJsonType })
+  @Property({ type: 'json' })
   internal: Internal
 
   @Property()

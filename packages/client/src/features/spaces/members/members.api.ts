@@ -3,10 +3,9 @@ import { SideRole } from '../spaces.types'
 import { ListMembersResponse, MemberRole } from './members.types'
 
 export async function spacesMembersListRequest({ spaceId, sideRole }: { spaceId: number, sideRole?: SideRole }): Promise<ListMembersResponse> {
-  const params = sideRole ? { side: sideRole } : {};
+  const params = sideRole ? { side: sideRole } : {}
 
-  const res = await axios.get(`/api/spaces/${spaceId}/members`, { params })
-  return res.data
+  return axios.get(`/api/spaces/${spaceId}/members`, { params }).then(r => r.data)
 }
 
 export async function addMembersToSpaceRequest({ spaceId, invitees, invitees_role }: { spaceId: string, invitees: string, invitees_role: MemberRole }) {

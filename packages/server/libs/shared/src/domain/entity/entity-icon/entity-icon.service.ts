@@ -1,8 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common'
-import { EntityType } from '@shared/domain/entity/domain/entity.type'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import fs from 'fs/promises'
 import path from 'path'
+import { EntityIconType } from '@shared/domain/entity/entity-icon/entity-icon.type'
 
 @Injectable()
 export class EntityIconService {
@@ -14,7 +14,7 @@ export class EntityIconService {
     '../../../../../../../../../libs/shared/src/domain/entity/entity-icon/assets',
   )
 
-  private readonly ICON_MAP: Record<EntityType, Promise<string>>
+  private readonly ICON_MAP: Record<EntityIconType, Promise<string>>
 
   constructor() {
     this.ICON_MAP = {
@@ -28,12 +28,10 @@ export class EntityIconService {
       note: this.getFile('note-icon.svg'),
       user: this.getFile('user-icon.svg'),
       workflow: this.getFile('workflow-icon.svg'),
-      discussion: Promise.resolve(''),
-      resource: Promise.resolve(''),
     }
   }
 
-  async getIcon(entityType: EntityType): Promise<string> {
+  async getIcon(entityType: EntityIconType): Promise<string> {
     return (await this.ICON_MAP[entityType]) ?? ''
   }
 

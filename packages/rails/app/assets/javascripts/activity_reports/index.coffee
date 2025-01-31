@@ -29,11 +29,33 @@ class ActivityReportsView
       when bytes > KB then return (bytes / KB).toFixed(1) + " KB"
       else return (bytes) + " B"
 
-  setDateRange: (type = 'week') ->
+    # Validate date input format
+  isValidDate = (dateStr) ->
+    dateRegex = /^(0[1-9]|1[0-2])\/(0[1-9]|[12][0-9]|3[01])\/\d{4}$/
+    if not dateRegex.test(dateStr)
+       return false
 
+    [month, day, year] = dateStr.split('/').map((item) -> parseInt(item)) # Use map after splitting
+    date = new Date(year, month - 1, day) # JS months are 0-indexed
+    date.getFullYear() == year and date.getMonth() == (month - 1) and date.getDate() == day
+
+  validateAndSubmit: ->
+    # Example logic for validation and submission
+    date_at = $('input[name="date_at"]').val()
+    date_to = $('input[name="date_to"]').val()
+
+    if not isValidDate(date_at) or not isValidDate(date_to)
+      alert 'Invalid dates. Please ensure both start and end dates are in MM/DD/YYYY format.'
+      return false
+
+    # Submit the form or trigger data loading
+    @loadData()
+    return true
+
+  setDateRange: (type = 'week') ->
+    # Generate date range dynamically
     date_at = moment()
     date_to = moment()
-
     switch type
       when 'day' then date_at = date_at.subtract(24, 'hours')
       when 'week' then date_at = date_at.startOf('week')
@@ -41,29 +63,31 @@ class ActivityReportsView
       when 'year' then date_at = date_at.startOf('year')
       else return false
 
-    @dateAtDatepicker.setValue(date_at)
-    @dateToDatepicker.setValue(date_to)
+    # Set values in inputs
+    $('input[name="date_at"]').val(date_at.format('MM/DD/YYYY'))
+    $('input[name="date_to"]').val(date_to.format('MM/DD/YYYY'))
     @loadData()
 
   loadData: ->
-    date_at = @dateAtDatepicker.getValue()
-    date_to = @dateToDatepicker.getValue()
+    # Read values from inputs
+    date_at = $('input[name="date_at"]').val()
+    date_to = $('input[name="date_to"]').val()
 
-    moment_date_at = @dateAtDatepicker.getMomentValue()
-    moment_date_to = @dateToDatepicker.getMomentValue()
 
-    if moment_date_at and moment_date_to
-      date_at = moment_date_at.startOf('day').format(@dateAtDatepicker.getReturnFormat())
-      date_to = moment_date_to.endOf('day').format(@dateToDatepicker.getReturnFormat())
+    # Convert to moments for validation and formatting
+    moment_date_at = moment(date_at, 'MM/DD/YYYY')
+    moment_date_to = moment(date_to, 'MM/DD/YYYY')
 
-      if moment_date_at.unix() > moment_date_to.unix()
-        Precision.alert.show('Start Date is greater than End Date!')
-        return false
+    if moment_date_at.isAfter(moment_date_to)
+      alert 'Start date cannot be after end date!'
+      return false
 
+    # Use formatted dates in API parameters
     params = {
-      date_at: date_at,
-      date_to: date_to
+      date_at: moment_date_at.startOf('day').format('YYYY-MM-DD'),
+      date_to: moment_date_to.endOf('day').format('YYYY-MM-DD')
     }
+
 
     ### Users Charts ###
     @users_views_chart.loadData '/api/activity_reports/user_viewed', params, (data) =>
@@ -148,15 +172,9 @@ class ActivityReportsView
     ### Challenges Charts END ###
 
   constructor: (data) ->
-
-    @dateAtDatepicker = new Precision.Datepicker $('.add-datetimepicker[name="date_at"]')[0], {
-      dafaultValue: new Date(),
-      format: 'MM/DD/YYYY'
-    }
-    @dateToDatepicker = new Precision.Datepicker $('.add-datetimepicker[name="date_to"]')[0], {
-      dafaultValue: new Date(),
-      format: 'MM/DD/YYYY'
-    }
+    # Initialize the view
+    $('input[name="date_at"]').val(moment().startOf('week').format('MM/DD/YYYY'))
+    $('input[name="date_to"]').val(moment().endOf('week').format('MM/DD/YYYY'))
 
     ### Users Charts ###
     @users_views_chart = new Precision.Chart({

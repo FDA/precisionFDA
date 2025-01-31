@@ -1,5 +1,5 @@
 import { App } from '@shared/domain/app/app.entity'
-import { CommentDTO, NoteDTO, UserDTO } from '@shared/domain/discussion/discussion.types'
+import { UserDTO } from '@shared/domain/discussion/discussion.types'
 import { Job } from '@shared/domain/job/job.entity'
 import { Asset } from '@shared/domain/user-file/asset.entity'
 import { Node } from '@shared/domain/user-file/node.entity'
@@ -33,7 +33,7 @@ export class CliFileDescribeDTO {
   properties: {}
   content?: string[]
 
-  static async mapToDTO(
+  static async fromEntity(
     describeFile: FileDescribeResponse,
     file: Node,
   ): Promise<CliFileDescribeDTO> {
@@ -42,7 +42,7 @@ export class CliFileDescribeDTO {
       id: file.uid,
       title: file.name,
       size: file.fileSize,
-      tags: file.taggings.map((t) => t.tag.name),
+      tags: file.taggings.map((t) => t.tag?.name),
       properties: file.properties.reduce((acc, p) => {
         acc[p.propertyName] = p.propertyValue
         return acc
@@ -74,7 +74,7 @@ export class CliWorkflowDescribeDTO extends WorkflowDescribeResponse {
   createdAt: Date
   updatedAt: Date
 
-  static async mapToDTO(
+  static async fromEntity(
     platformWorkflowData: WorkflowDescribeResponse,
     workflow: Workflow,
   ): Promise<CliWorkflowDescribeDTO> {
@@ -101,7 +101,7 @@ export class CliAppDescribeDTO extends AppDescribeResponse {
   revision: number
   updatedAt: Date
 
-  static async mapToDTO(
+  static async fromEntity(
     platformAppData: AppDescribeResponse,
     app: App,
   ): Promise<CliAppDescribeDTO> {
@@ -130,7 +130,7 @@ export class CliExecutionDescribeDTO {
   updatedAt: Date
   location: string
 
-  static async mapToDTO(
+  static async fromEntity(
     platformJobData: JobDescribeResponse,
     execution: Job,
   ): Promise<CliExecutionDescribeDTO> {
@@ -147,6 +147,28 @@ export class CliExecutionDescribeDTO {
   }
 }
 
+export class CliFolderDescribeDTO {
+  id: string
+  name: string
+  location: string
+  path: string
+  createdAt: Date
+  updatedAt: Date
+  addedBy: string
+
+  static fromEntity(folder: Node, path: string): CliFolderDescribeDTO {
+    return {
+      id: folder.uid,
+      name: folder.name,
+      location: folder.scope,
+      createdAt: folder.createdAt,
+      updatedAt: folder.updatedAt,
+      path: path,
+      addedBy: folder.user.getProperty('dxuser'),
+    }
+  }
+}
+
 export class CliDiscussionDescribeDTO {
   id: number
   title: string
@@ -156,21 +178,31 @@ export class CliDiscussionDescribeDTO {
   updatedAt: Date
   answersCount: number
   commentsCount: number
-  answers: {
-    id: number
-    user: UserDTO
-    note: NoteDTO
-    comments: CommentDTO[]
-    createdAt: Date
-    updatedAt: Date
-    attachments: CliAttachmentDTO[]
-  }[]
-  comments: CommentDTO[]
+  answers: CliAnswerDTO[]
+  comments: CliCommentDTO[]
   attachments: CliAttachmentDTO[]
 }
 
 class CliAttachmentDTO {
-  uid: string
+  uid: string | number
   type: string
   name: string
+}
+
+class CliCommentDTO {
+  id: number
+  content: string
+  user: UserDTO
+  createdAt: Date
+  updatedAt: Date
+}
+
+class CliAnswerDTO {
+  id: number
+  user: UserDTO
+  content: string
+  comments: CliCommentDTO[]
+  createdAt: Date
+  updatedAt: Date
+  attachments: CliAttachmentDTO[]
 }

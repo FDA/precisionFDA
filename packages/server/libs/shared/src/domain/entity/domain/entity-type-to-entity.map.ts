@@ -11,6 +11,8 @@ import { Folder } from '@shared/domain/user-file/folder.entity'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { Workflow } from '@shared/domain/workflow/entity/workflow.entity'
+import { Answer } from '@shared/domain/answer/answer.entity'
+import { Comment } from '@shared/domain/comment/comment.entity'
 
 export const entityTypeToEntityMap = {
   asset: Asset,
@@ -25,4 +27,6 @@ export const entityTypeToEntityMap = {
   resource: Resource,
   note: Note,
   dbcluster: DbCluster,
+  answer: Answer,
+  comment: Comment,
 } satisfies Record<EntityType, object>

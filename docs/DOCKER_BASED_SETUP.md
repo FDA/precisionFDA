@@ -134,6 +134,12 @@ Run in the same way with
 make run
 ```
 
+#### Switch GSRS version running in the container
+1. Connect to the running container
+2. Run script _run-version.sh_
+3. Upon request paste required GSRS version branch name as in [gsrs-play-dist repo](https://github.com/dnanexus/gsrs-play-dist)
+
+#### GSRS frontend development live update
 Once you have the _gsrs_ container running, you can use it for GSRS frontend development:
 1. Clone [GSRSFrontend repo](https://github.com/ncats/GSRSFrontend/tree/precision_new), branch _precision_new_.
 2. Create env _GSRS_FRONTEND_PATH_ (eg. in your `~/.zshrc`) with an absolute path to the repo (eg. _/Users/pbarta@dnanexus.com/ncats/GSRSFrontend_)

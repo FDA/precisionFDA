@@ -22,15 +22,15 @@ export interface SiteSettingsResponse {
   ssoButton: {
       isEnabled: boolean
       data?: {
-          fdaSsoUrl: string
+          ssoUrl: string
       },
   },
   alerts: Alert[],
   dataPortals: { [key: string]: SiteSettingsDataPortal }
 }
 
-export const onLogInWithSSO = (fdaSsoUrl: string) => {
-  window.location.assign(fdaSsoUrl)
+export const onLogInWithSSO = (ssoUrl: string) => {
+  window.location.assign(ssoUrl)
 }
 
 export const useSiteSettingsQuery = () => useQuery({

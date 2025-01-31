@@ -17,11 +17,11 @@ class RequestAccessService
     end
 
     def send_invitation_email(invitation)
-      NotificationsMailer.invitation_email(invitation).deliver_later!
+      https_apps_client.email_send(NotificationPreference.email_types[:invitation], [], { id: invitation.id })
     end
 
     def send_guest_access_email(invitation)
-      NotificationsMailer.guest_access_email(invitation).deliver_later!
+      https_apps_client.email_send(NotificationPreference.email_types[:guest_access_email], [], { id: invitation.id })
     end
 
     # Creates an invitation for site access.
@@ -54,6 +54,10 @@ class RequestAccessService
           message: "Access requested: #{params.to_json}",
         },
       }
+    end
+
+    def https_apps_client
+      @https_apps_client ||= HttpsAppsClient.new
     end
   end
 end

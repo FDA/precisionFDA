@@ -28,7 +28,7 @@ type Story = StoryObj<Props>
 const EditPropertiesModalWrapper = (props: Props) => {
   const { modalComp, setShowModal } = useEditPropertiesModal({
     resource: props.type,
-    selected: props.data,
+    selected: [props.data],
   })
 
   useEffect(() => {
@@ -48,7 +48,9 @@ export const EditPropertiesModal: Story = {
     }
     return (
       <WithListData resource={type} fetchList={fetchFunc || fetchFiles}>
-        {({ data }) => <EditPropertiesModalWrapper data={data[type][0]} type={type} />}
+        {({ data }) => {
+          return <EditPropertiesModalWrapper data={data[type]?.[0]} type={type} />
+        }}
       </WithListData>
     )
   },

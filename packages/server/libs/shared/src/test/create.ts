@@ -1,4 +1,4 @@
-import { Reference, wrap } from '@mikro-orm/core'
+import { wrap } from '@mikro-orm/core'
 import { EntityManager } from '@mikro-orm/mysql'
 import { AcceptedLicense } from '@shared/domain/accepted-license/accepted-license.entity'
 import { ADMIN_GROUP_ROLES, AdminGroup } from '@shared/domain/admin-group/admin-group.entity'
@@ -68,6 +68,43 @@ const discussionHelper = {
       title: generate.random.word(),
       content: generate.random.chance.paragraph(),
       scope: STATIC_SCOPE.PRIVATE,
+      noteType: 'Discussion',
+    })
+    em.persist(note)
+    const discussion = wrap(new Discussion(note, references.user)).assign(data ?? {}, { em })
+    em.persist(discussion)
+    return discussion
+  },
+  createInSpace(
+    em: EntityManager,
+    references: {
+      user: InstanceType<typeof User>
+      space: InstanceType<typeof Space>
+    },
+    data?: Partial<InstanceType<typeof Discussion>>,
+  ) {
+    const note = wrap(new Note(references.user)).assign({
+      title: generate.random.word(),
+      content: generate.random.chance.paragraph(),
+      scope: references.space.scope,
+      noteType: 'Discussion',
+    })
+    em.persist(note)
+    const discussion = wrap(new Discussion(note, references.user)).assign(data ?? {}, { em })
+    em.persist(discussion)
+    return discussion
+  },
+  createPublic: (
+    em: EntityManager,
+    references: {
+      user: InstanceType<typeof User>
+    },
+    data?: Partial<InstanceType<typeof Discussion>>,
+  ) => {
+    const note = wrap(new Note(references.user)).assign({
+      title: generate.random.word(),
+      content: generate.random.chance.paragraph(),
+      scope: STATIC_SCOPE.PUBLIC,
       noteType: 'Discussion',
     })
     em.persist(note)
@@ -617,7 +654,7 @@ const dataPortalsHelper = {
       { user: references.user },
       {
         name: name,
-        uid: `${dxid}-1`,
+        uid: `file-${dxid}-1`,
       },
     )
     const resource = new Resource(references.user, userFile)
@@ -718,9 +755,7 @@ const challengeHelper = {
       ...defaults,
       ...data,
     }
-    const challenge = wrap(new Challenge(references.userAndAdmin, references.userAndAdmin)).assign(
-      input,
-    )
+    const challenge = wrap(new Challenge()).assign(input)
     em.persist(challenge)
     return challenge
   },
@@ -730,25 +765,18 @@ const challengeResourceHelper = {
   create: (
     em: EntityManager,
     references: {
-      user?: InstanceType<typeof User>
-      challenge?: InstanceType<typeof Challenge>
-      file?: InstanceType<typeof UserFile>
+      user: InstanceType<typeof User>
+      challenge: InstanceType<typeof Challenge>
+      file: InstanceType<typeof UserFile>
     },
     data?: Partial<InstanceType<typeof ChallengeResource>>,
   ) => {
     const input = {
       ...data,
     }
-    const challengeResource = wrap(new ChallengeResource()).assign(input, { em })
-    if (references.user) {
-      challengeResource.user = Reference.create(references.user)
-    }
-    if (references.challenge) {
-      challengeResource.challenge = Reference.create(references.challenge)
-    }
-    if (references.file) {
-      challengeResource.userFile = Reference.create(references.file)
-    }
+    const challengeResource = wrap(
+      new ChallengeResource(references.user.id, references.challenge.id, references.file.id),
+    ).assign(input, { em })
     em.persist(challengeResource)
     return challengeResource
   },

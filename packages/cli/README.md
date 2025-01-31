@@ -139,6 +139,26 @@ To test for FIPS compliance we can inspect the symbols using `go tool nm ./pfda`
 
 # Version History
 
+### 2.8.0 (2025-01-20)
+- New feature - create-discussion; create a new discussion in a space
+- New feature - create-reply; create a reply to a discussion
+- New feature - edit-discussion; append content and attachments to existing discussion
+- New feature - edit-reply; append content and attachments to existing reply
+
+### 2.7.3 (2024-10-27)
+- security fixes
+- improved error handling
+
+### 2.7.2 (2024-09-12)
+- upgrade Go to 1.23.1
+
+### 2.7.1 (2024-05-31)
+- ls shows files and folders in all states
+
+### 2.7.0 (2024-05-16)
+- fixed issue with file-upload
+- various improvements
+
 ### 2.6.0 (2024-04-02)
 - New feature - ls-assets; listing private or public assets
 - New feature - ls-members; listing given space members
@@ -157,11 +177,9 @@ To test for FIPS compliance we can inspect the symbols using `go tool nm ./pfda`
 ### 2.4.1 (2023-07-20)
 - fixed folder-id manipulation
 
-
 ### 2.4 (2023-05-25)
 - New feature - get-space-id; get space ID from current workstation's context
 - New feature - upload-file stdin; added support for stdin input
-
 
 ### 2.3 (2023-03-08)
 - improved syntax of commands 
@@ -171,54 +189,42 @@ To test for FIPS compliance we can inspect the symbols using `go tool nm ./pfda`
 - New feature - rm; delete files from any location
 - New feature - head, cat; print content of a file
 
-
 ### 2.2.1 (2022-12-20)
-
 - improved output of ls command
 - added `-overwrite` flag for download command
 
 ### 2.2 (2022-12-07)
-
 - New feature - ls; list files from private home or a space
 - New feature - list-spaces; list all available spaces
 - New feature - describe-app; describe-workflow; describe the entity
 - Added new `-help` flag for all commands with examples and brief instructions
 
 ### 2.1.2 (2022-08-03)
-
 - Fixed windows asset upload
 
 ### 2.1.1 (2022-07-18)
-
 - Improvements to asset upload
 - Fixed downloading file with spaces in filename
 
-
 ### 2.1 (2022-02-22)
-
 - The CLI can now download files from private home or a space
 - When uploading files, add the -space-id option to specify a space
 - Specifying -folder-id will allow files to be uploaded to a specific folder
 - -version flag now prints FIPS only mode confirmation
 
 ### 2.0.1 (2021-08-26)
-
 - Fix an issue uploading very large files
 - Improved uploading progress display
 - Upgraded to goboring 1.16.7b7
 
 ### 2.0.0 (2021-02-06)
-
 - TLS 1.2 and FIPS 140-2 support
 
 ### 1.0.4 (2016-01-05)
-
 - Reduced memory usage of each thread
 
 ### 1.0.3 (2015-12-14)
-
 - The uploader can now be used for both assets and files
 
 ### 1.0.2 (2015-12-03)
-
 - Multi-threaded uploading, for faster uploading of large assets

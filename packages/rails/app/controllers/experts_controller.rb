@@ -35,13 +35,21 @@ class ExpertsController < ApplicationController
     user = User.real.find_by(dxuser: expert_params[:username])
 
     if user
-      expert = Expert.provision(@context, expert_params)
-      if expert
-        NotificationsMailer.new_expert_email(expert).deliver_now!
-        flash[:success] = "A new Expert of the Month was successfully created for #{expert.user.full_name.titleize} (#{expert.user.dxuser})."
-        redirect_to experts_path and return
+      # Check if an expert already exists for the user
+      existing_expert = Expert.find_by(user_id: user.id)
+
+      if existing_expert
+        flash[:error] = "An expert for #{user.full_name.titleize} (#{user.dxuser}) already exists."
       else
-        flash[:error] = "The Expert could not be provisioned because of an unknown reason."
+        expert = Expert.provision(@context, expert_params.merge(user_id: user.id))
+
+        if expert
+          https_apps_client.email_send(NotificationPreference.email_types[:expert_added], [], { id: expert.id })
+          flash[:success] = "A new Expert of the Month was successfully created for #{expert.user.full_name.titleize} (#{expert.user.dxuser})."
+          redirect_to experts_path and return
+        else
+          flash[:error] = "The Expert could not be provisioned because of an unknown reason."
+        end
       end
     else
       flash[:error] = "Expert username #{expert_params[:username]} not found!"
@@ -109,7 +117,7 @@ class ExpertsController < ApplicationController
     if @context.logged_in?
       exp_question = ExpertQuestion.provision(expert, @context, unsafe_params[:expert][:question])
       if exp_question
-        https_apps_client.email_send(NotificationPreference.email_types[:expert_question_added], [], { questionId: exp_question.id })
+        https_apps_client.email_send(NotificationPreference.email_types[:expert_question_added], [], { id: exp_question.id })
         flash[:success] = "Your question was submitted successfully."
       else
         flash[:error] = "Your question was not submitted because of an unknown reason, Please try again."
@@ -127,7 +135,7 @@ class ExpertsController < ApplicationController
       result = verify_captcha_assessment(token, "question")
 
       if result && @exp_question.save!
-        https_apps_client.email_send(NotificationPreference.email_types[:expert_question_added], [], { questionId: exp_question.id })
+        https_apps_client.email_send(NotificationPreference.email_types[:expert_question_added], [], { id: exp_question.id })
         flash[:success] = "Your question was submitted successfully."
       else
         flash[:error] = "Your question was not submitted because of an unknown reason. Please try again."

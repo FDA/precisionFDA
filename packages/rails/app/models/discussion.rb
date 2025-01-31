@@ -88,6 +88,10 @@ class Discussion < ApplicationRecord
     end
   end
 
+  def self.accessibly_in_spaces(context)
+    joins(:note).where(notes: { scope: context.user.space_uids })
+  end
+
   def self.accessible_by_public
     joins(:note).where(notes: {scope: "public"})
   end

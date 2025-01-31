@@ -8,7 +8,6 @@ import {
   PrimaryKey,
   Property,
 } from '@mikro-orm/core'
-import { WorkaroundJsonType } from '@shared/database/custom-json-type'
 import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { BaseEntity } from '../../database/base.entity'
@@ -60,10 +59,7 @@ export class Space extends BaseEntity {
   @Property()
   sponsorOrgId: number
 
-  @Property({
-    type: WorkaroundJsonType,
-    columnType: 'text',
-  })
+  @Property({ type: 'json' })
   meta?: SpaceMeta
 
   @Property()

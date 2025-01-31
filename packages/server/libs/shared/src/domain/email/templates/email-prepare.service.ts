@@ -1,5 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common'
-import { EmailProcessInput, EmailTemplate, getEmailConfig } from '@shared/domain/email/email.config'
+import {
+  EMAIL_TYPES,
+  EmailProcessInput,
+  EmailTemplate,
+  getEmailConfig,
+} from '@shared/domain/email/email.config'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { DNANEXUS_INVALID_EMAIL } from '@shared/config/consts'
 import { UserOpsCtx } from '@shared/types'
@@ -21,7 +26,7 @@ export class EmailPrepareService {
     private readonly user: UserContext,
   ) {}
 
-  async prepareEmails(input: EmailProcessInput) {
+  async prepareEmails<T extends EMAIL_TYPES>(input: EmailProcessInput<T>) {
     const emailTemplate = await this.getEmailTemplate(input)
     const receivers = await emailTemplate.determineReceivers()
     const activeReceivers = receivers.filter(
@@ -32,8 +37,8 @@ export class EmailPrepareService {
     )
   }
 
-  private async getEmailTemplate<T>(
-    emailProcessInput: EmailProcessInput,
+  private async getEmailTemplate<T, D extends EMAIL_TYPES>(
+    emailProcessInput: EmailProcessInput<D>,
   ): Promise<EmailTemplate<T>> {
     const emailConfig = getEmailConfig(emailProcessInput.emailTypeId)
     const handler = emailConfig.handlerClass

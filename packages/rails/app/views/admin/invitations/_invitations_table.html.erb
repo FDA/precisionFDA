@@ -36,13 +36,13 @@
     </tr>
     <!-- ko if: $data.errors().length -->
       <!-- ko foreach: $data.errors -->
-      <tr class='bg-danger text-danger'>
+      <tr class='bg-danger'>
         <td colspan="12" data-bind="text: $data"></td>
       </tr>
       <!-- /ko -->
     <!-- /ko -->
     <!-- ko if: $data.success() -->
-      <tr class='bg-success text-success'>
+      <tr class='bg-success'>
         <td colspan="12">Request completed successfully.</td>
       </tr>
     <!-- /ko -->

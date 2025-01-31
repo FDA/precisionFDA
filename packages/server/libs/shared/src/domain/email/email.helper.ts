@@ -17,6 +17,10 @@ import {
 } from './email.config'
 import { nanoid } from 'nanoid'
 
+export class ObjectIdInputDto {
+  id: number
+}
+
 type EmailHelperCtx = OpsCtx & {
   config: EmailConfigItem
 }
@@ -128,7 +132,7 @@ const buildFilterByUserSettings =
   (ctx: EmailHelperCtx, isEnabledFn: ReturnType<typeof buildIsNotificationEnabled>) =>
   (membershipOrUsers: Array<SpaceMembership | User>): User[] => {
     const { log, config } = ctx
-    const filtered = membershipOrUsers.filter(membershipOrUser => {
+    const filtered = membershipOrUsers.filter((membershipOrUser) => {
       const emailTypeIsEnabled = isEnabledFn(membershipOrUser)
       if (!emailTypeIsEnabled) {
         const userId =
@@ -145,7 +149,7 @@ const buildFilterByUserSettings =
       }
       return emailTypeIsEnabled
     })
-    return filtered.map(membershipOrUser =>
+    return filtered.map((membershipOrUser) =>
       membershipOrUser instanceof SpaceMembership
         ? membershipOrUser.user.unwrap()
         : membershipOrUser,

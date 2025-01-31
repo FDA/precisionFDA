@@ -37,8 +37,8 @@ export const NavigationBarPublicLandingTitle = styled.div`
     font-size: 18px;
     font-weight: 400;
     line-height: 133%;
-    padding-bottom: 0px;
-    margin-bottom: 0px;
+    padding-bottom: 0;
+    margin-bottom: 0;
   }
 
   .pfda-navbar-logo {

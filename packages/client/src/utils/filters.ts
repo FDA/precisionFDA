@@ -48,18 +48,16 @@ export function prepareListFetchArgs<
 >(
   filters: FilterType[],
   pagination: Partial<PaginationInput>,
-  sort: Partial<SortInput<SortableKeys>>
+  sort: Partial<SortInput<SortableKeys>>,
 ) {
   const mappedFilters = prepareFilterParams(filters)
-  const snakeCasePagination = translateApiKeys(camelToSnakeMapping, pagination)
-  const snakeCaseSorting = translateApiKeys(camelToSnakeMapping, sort)
   return {
-    ...snakeCasePagination,
-    ...snakeCaseSorting,
+    ...pagination,
+    ...sort,
     // TODO(samuel): filters are not merged because they have to be wrapped like this
     // .map(({id, value}) => [`filters[${id}]` as const, value] as const)
     // TODO(samuel): refactor to flat structure
-    filters: mappedFilters
+    filters: mappedFilters,
   }
 }
 

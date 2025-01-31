@@ -15,14 +15,15 @@ import { proposeValidationSchema } from './common'
 import { SectionTitle } from '../../../components/Public/styles'
 import { Button } from '../../../components/Button'
 
-interface ProposeChallengeForm {
-  name: string,
-  email: string,
-  organisation: string,
-  specific_question: string,
-  specific_question_text: string | null,
-  data_details: string,
-  data_details_text: string | null,
+
+export interface ProposeChallengeFormValues {
+  name: string
+  email: string
+  organisation: string
+  specificQuestion: string
+  specificQuestionText: string
+  dataDetails: string
+  dataDetailsText: string
 }
 
 const StyledForm = styled.form`
@@ -42,13 +43,11 @@ const Row = styled.div`
   gap: 16px;
 `
 
-export const PrososeChallengeForm = ({
+export const ProposeChallengeForm = ({
   onSubmit,
-  isSavingChallenge = false,
   mutationErrors,
 }: {
-  onSubmit: (a: any) => Promise<any>
-  isSavingChallenge?: boolean
+  onSubmit: (a: ProposeChallengeFormValues) => Promise<void>
   mutationErrors?: MutationErrors
 }) => {
 
@@ -61,34 +60,33 @@ export const PrososeChallengeForm = ({
     setValue,
     clearErrors,
     formState: { errors, isSubmitting, dirtyFields },
-  } = useForm<ProposeChallengeForm>({
+  } = useForm<ProposeChallengeFormValues>({
     mode: 'onBlur',
     resolver: yupResolver(proposeValidationSchema),
     defaultValues: {
-      data_details: 'Yes',
-      specific_question: 'Yes'
+      dataDetails: 'Yes',
+      dataDetailsText: '',
+      specificQuestion: 'Yes',
+      specificQuestionText: '',
     },
   })
 
-  const hasQuestion = watch().specific_question
-  const hasData = watch().data_details
+  const hasQuestion = watch().specificQuestion
+  const hasData = watch().dataDetails
 
   useEffect(() => {
-    if (hasQuestion === 'Yes') {
-    } else {
-      setValue('specific_question_text', null)
-      clearErrors(['specific_question_text'])
+    if (hasQuestion === 'Yes') {} else {
+      setValue('specificQuestionText', '')
+      clearErrors(['specificQuestionText'])
     }
-  }, [watch().specific_question])
+  }, [watch().specificQuestion])
   useEffect(() => {
-    if (hasData === 'Yes') {
-    } else {
-      setValue('data_details_text', null)
-      clearErrors(['data_details_text'])
+    if (hasData === 'Yes') {} else {
+      setValue('dataDetailsText', '')
+      clearErrors(['dataDetailsText'])
 
     }
-  }, [watch().data_details])
-
+  }, [watch().dataDetails])
 
   useMutationErrorEffect(setError, mutationErrors)
 
@@ -149,11 +147,11 @@ export const PrososeChallengeForm = ({
           <FieldGroup >
             <label>Do you have specific scientific question driving the challenge?</label>
             <Controller
-              name="specific_question"
+              name="specificQuestion"
               control={control}
               render={({ field: { value, onChange, onBlur }}) => (
                 <RadioButtonGroup
-                  name="specific_question"
+                  name="specificQuestion"
                   ariaLabel='challenge-question'
                   onChange={onChange}
                   value={value}
@@ -167,7 +165,7 @@ export const PrososeChallengeForm = ({
             />
             <ErrorMessage
               errors={errors}
-              name="specific_question"
+              name="specificQuestion"
               render={({ message }) => <InputError>{message}</InputError>}
             />
           </FieldGroup>
@@ -178,11 +176,11 @@ export const PrososeChallengeForm = ({
               type="textarea"
               disabled={hasQuestion === 'No'}
               placeholder="Enter the question details"
-              {...register('specific_question_text')}
+              {...register('specificQuestionText')}
             />
             <ErrorMessage
               errors={errors}
-              name="specific_question_text"
+              name="specificQuestionText"
               render={({ message }) => <InputError>{message}</InputError>}
             />
           </FieldGroup>
@@ -190,11 +188,11 @@ export const PrososeChallengeForm = ({
           <FieldGroup >
             <label>Do you have access to data for the challenge?</label>
             <Controller
-              name="data_details"
+              name="dataDetails"
               control={control}
               render={({ field: { value, onChange, onBlur }}) => (
                 <RadioButtonGroup
-                  name="data_details"
+                  name="dataDetails"
                   ariaLabel='data-details'
                   onChange={onChange}
                   value={value}
@@ -208,7 +206,7 @@ export const PrososeChallengeForm = ({
             />
             <ErrorMessage
               errors={errors}
-              name="data_details"
+              name="dataDetails"
               render={({ message }) => <InputError>{message}</InputError>}
             />
           </FieldGroup>
@@ -219,11 +217,11 @@ export const PrososeChallengeForm = ({
               type="textarea"
               disabled={hasData === 'No'}
               placeholder="Enter the data details"
-              {...register('data_details_text')}
+              {...register('dataDetailsText')}
             />
             <ErrorMessage
               errors={errors}
-              name="data_details_text"
+              name="dataDetailsText"
               render={({ message }) => <InputError>{message}</InputError>}
             />
           </FieldGroup>

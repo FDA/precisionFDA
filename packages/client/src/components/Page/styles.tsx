@@ -29,6 +29,20 @@ export const pagePadding = css`
     padding: 32px;
   }
 `
+export const pagePaddingLR = css`
+  padding-left: 8px;
+  padding-right: 8px;
+
+  @media (min-width: ${breakPoints.small}px) {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  @media (min-width: ${breakPoints.medium}px) {
+    padding-left: 32px;
+    padding-right: 32px;
+  }
+`
 
 export const PageLoadWrapper = styled.div`
   flex: 1 0 auto;

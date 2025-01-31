@@ -1,22 +1,22 @@
 import { Processor } from '@nestjs/bull'
+import { Logger } from '@nestjs/common'
 import { config } from '@shared/config'
 import { JobService } from '@shared/domain/job/job.service'
 import { WorkstationSnapshotOperation } from '@shared/domain/job/ops/workstation-snapshot'
+import { NotificationService } from '@shared/domain/notification/services/notification.service'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { getSuccessMessage } from '@shared/domain/user-file/user-file.helper'
+import { NOTIFICATION_ACTION, SEVERITY } from '@shared/enums'
+import { RemoveNodesFacade } from '@shared/facade/node-remove/remove-nodes.facade'
+import { UserDataConsistencyReportFacade } from '@shared/facade/user/user-data-consistency-report.facade'
+import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { CheckStatusJob, TASK_TYPE } from '@shared/queue/task.input'
+import { TypeUtils } from '@shared/utils/type-utils'
 import { Job } from 'bull'
 import { lockNodesHandler } from '../../../jobs/lock-nodes.handler'
 import { unlockNodesHandler } from '../../../jobs/unlock-nodes.handler'
 import { ProcessWithContext } from '../../../queues/decorator/process-with-context'
 import { BaseQueueProcessor } from '../../../queues/processor/base-queue.processor'
-import { UserDataConsistencyReportService } from '@shared/domain/user/user-data-consistency-report.service'
-import { RemoveNodesFacade } from '@shared/facade/node-remove/remove-nodes.facade'
-import { NotificationService } from '@shared/domain/notification/services/notification.service'
-import { UserContext } from '@shared/domain/user-context/model/user-context'
-import { getSuccessMessage } from '@shared/domain/user-file/user-file.helper'
-import { NOTIFICATION_ACTION, SEVERITY } from '@shared/enums'
-import { TypeUtils } from '@shared/utils/type-utils'
-import { ServiceLogger } from '@shared/logger/decorator/service-logger'
-import { Logger } from '@nestjs/common'
 
 @Processor(config.workerJobs.queues.fileSync.name)
 export class FileSyncQueueProcessor extends BaseQueueProcessor {
@@ -25,7 +25,7 @@ export class FileSyncQueueProcessor extends BaseQueueProcessor {
 
   constructor(
     private readonly user: UserContext,
-    private readonly userDataConsistencyReportService: UserDataConsistencyReportService,
+    private readonly userDataConsistencyReportFacade: UserDataConsistencyReportFacade,
     private readonly removeNodesFacade: RemoveNodesFacade,
     private readonly notificationService: NotificationService,
     private readonly jobServiceWithPlatformClient: JobService,
@@ -86,6 +86,7 @@ export class FileSyncQueueProcessor extends BaseQueueProcessor {
 
   @ProcessWithContext(TASK_TYPE.USER_DATA_CONSISTENCY_REPORT)
   async reportUserDataConsistency() {
-    await this.userDataConsistencyReportService.createReport()
+    const result = await this.userDataConsistencyReportFacade.createReport()
+    await this.userDataConsistencyReportFacade.fixInconsistentData(result.inconsistentFixes)
   }
 }
