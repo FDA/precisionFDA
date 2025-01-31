@@ -4,19 +4,6 @@ module Admin
     skip_before_action  :check_admin, only: :toggle_activate_user
     layout "react", only: %i(index)
 
-    # GET
-    # list users.
-    def list
-      response = https_apps_client.users_list(
-        unsafe_params[:page],
-        unsafe_params[:per_page],
-        unsafe_params[:order_by],
-        unsafe_params[:order_dir],
-        unsafe_params[:filters],
-      )
-      render json: response, adapter: :json
-    end
-
     def index; end
 
     # TODO(samuel) unify this method
@@ -93,15 +80,6 @@ module Admin
       response = https_apps_client.users_set_job_limit(
         unsafe_params[:ids],
         unsafe_params[:jobLimit],
-      )
-      respond_to do |format|
-        format.json { render json: response }
-      end
-    end
-
-    def bulk_reset_2fa
-      response = https_apps_client.users_reset_2fa(
-        unsafe_params[:ids],
       )
       respond_to do |format|
         format.json { render json: response }

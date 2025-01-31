@@ -21,73 +21,39 @@ import { Node } from '@shared/domain/user-file/node.entity'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { Vote } from '@shared/domain/vote/vote.entity'
-import { STATIC_SCOPE } from '@shared/enums'
+import { HOME_SCOPE, STATIC_SCOPE } from '@shared/enums'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import type { UserCtx } from '@shared/types'
-import type { SCOPE } from '@shared/types/common'
+import type { EntityScope } from '@shared/types/common'
 import * as errors from '../../../errors'
-import { CommentableType } from '../../comment/comment.entity'
+import { Comment, CommentableType } from '../../comment/comment.entity'
 import { EntityFetcherService } from '../../entity/entity-fetcher.service'
 import { SPACE_MEMBERSHIP_ROLE } from '../../space-membership/space-membership.enum'
 import { getIdFromScopeName } from '../../space/space.helper'
 import type {
-  BaseInput,
-  CreateAnswerInput,
-  CreateCommentInput,
   DiscussionAttachment,
-  EditCommentInput,
   PublishAnswerInput,
   PublishDiscussionInput,
-  UpdateAnswerInput,
-  UpdateDiscussionInput,
 } from '../discussion.types'
-import { AnswerDTO, CommentDTO, DiscussionDTO, NoteDTO, UserDTO } from '../discussion.types'
+import {
+  AnswerDTO,
+  CommentDTO,
+  DiscussionDTO,
+  NoteDTO,
+  UserDTO,
+  Attachments,
+} from '../discussion.types'
 import { DiscussionQueueJobProducer } from '../producer/discussion-queue-job.producer'
 import { PublisherService } from './publisher.service'
-
-export interface IDiscussionService {
-  createDiscussion(discussionInput: BaseInput): Promise<DiscussionDTO>
-
-  updateDiscussion(discussionInput: UpdateDiscussionInput): Promise<void>
-
-  publishDiscussion(discussionInput: PublishDiscussionInput): Promise<number>
-
-  deleteDiscussion(discussionId: number): Promise<void>
-
-  getDiscussions(scope: string): Promise<DiscussionDTO[]>
-
-  getDiscussion(discussionId: number): Promise<DiscussionDTO>
-
-  // answers part
-  createAnswer(answerInput: CreateAnswerInput): Promise<AnswerDTO>
-
-  updateAnswer(answerInput: UpdateAnswerInput): Promise<void>
-
-  publishAnswer(answerInput: PublishAnswerInput): Promise<number>
-
-  deleteAnswer(answerId: number): Promise<void>
-
-  getAnswers(discussionId: number): Promise<AnswerDTO[]>
-
-  getAnswer(answerId: number): Promise<AnswerDTO>
-
-  // comments part
-  createComment(commentInput: CreateCommentInput): Promise<CommentDTO>
-
-  updateComment(commentInput: EditCommentInput): Promise<CommentDTO>
-
-  deleteComment(commentId: number, type: CommentableType): Promise<void>
-
-  getComment(commentId: number, type: CommentableType): Promise<CommentDTO>
-
-  // attachments
-  getAttachments(
-    noteId: number,
-  ): Promise<Array<{ id: number; uid: string; type: string; name: string }>>
-}
+import { CreateDiscussionDTO } from '@shared/domain/discussion/dto/create-discussion.dto'
+import { CreateAnswerDTO } from '@shared/domain/discussion/dto/create-answer.dto'
+import { UpdateDiscussionDTO } from '@shared/domain/discussion/dto/update-discussion.dto'
+import { CreateCommentDTO } from '@shared/domain/discussion/dto/create-comment.dto'
+import { UpdateAnswerDTO } from '@shared/domain/discussion/dto/update-answer.dto'
+import { UpdateCommentDTO } from '@shared/domain/discussion/dto/update-comment.dto'
 
 @Injectable()
-export class DiscussionService implements IDiscussionService {
+export class DiscussionService {
   @ServiceLogger()
   private readonly logger: Logger
 
@@ -148,34 +114,11 @@ export class DiscussionService implements IDiscussionService {
     return this.mapDiscussionDTO(res)
   }
 
-  async getAnswers(discussionId: number): Promise<AnswerDTO[]> {
-    this.logger.log(`Getting answers for discussion id: ${discussionId}`)
-    const user = await this.fetcher.getById(User, this.userCtx.id)
-    if (!user) {
-      throw new errors.NotFoundError('User not found.')
-    }
-    const discussion = await this.fetcher.getAccessibleById(
-      Discussion,
-      discussionId,
-      {},
-      { populate: ['note'] },
-    )
-    if (!discussion) {
-      throw new errors.NotFoundError('Unable to get answers: discussion not found or inaccessible.')
-    }
-    const answers = await this.fetcher.getAccessible(
-      Answer,
-      { discussion },
-      { populate: ['note', 'user'] },
-    )
-    return answers.map((answer) => this.mapAnswerDTO(answer))
-  }
-
   /**
    * Creates discussion and related note and persists them in a database. Returns error when an error occurs.
    * @param discussionInput
    */
-  async createDiscussion(discussionInput: BaseInput) {
+  async createDiscussion(discussionInput: CreateDiscussionDTO) {
     this.logger.log(`Creating discussion: ${JSON.stringify(discussionInput)}`)
     const user = await this.fetcher.getById(User, this.userCtx.id)
     if (!user) {
@@ -202,17 +145,26 @@ export class DiscussionService implements IDiscussionService {
       newFollow.followerType = 'User'
       newFollow.blocked = false
       tem.persist(newFollow)
+
+      // TODO: refactor this into single method without all the refetching in the publish method.
+      await this.publishDiscussion({
+        id: newDiscussion.id,
+        scope: discussionInput.scope,
+        toPublish: discussionInput.attachments,
+        notify: discussionInput.notify,
+      })
+
       return this.mapDiscussionDTO(newDiscussion)
     })
   }
 
-  async updateDiscussion(discussionInput: UpdateDiscussionInput): Promise<void> {
+  async updateDiscussion(id: number, discussionInput: UpdateDiscussionDTO): Promise<void> {
     this.logger.log(`Updating discussion: ${JSON.stringify(discussionInput)}`)
 
     return await this.em.transactional(async () => {
       const discussion = await this.fetcher.getEditableById(
         Discussion,
-        discussionInput.id,
+        id,
         {},
         { populate: ['note'] },
       )
@@ -236,7 +188,7 @@ export class DiscussionService implements IDiscussionService {
     })
   }
 
-  async publishDiscussion(discussionInput: PublishDiscussionInput): Promise<number> {
+  private async publishDiscussion(discussionInput: PublishDiscussionInput): Promise<number> {
     this.logger.log(`Publishing discussion: ${JSON.stringify(discussionInput)}`)
 
     const user = await this.fetcher.getById(User, this.userCtx.id)
@@ -264,7 +216,10 @@ export class DiscussionService implements IDiscussionService {
         this.userCtx.id,
       )
 
-      if (space.type === SPACE_TYPE.REVIEW && space.meta?.restricted_discussions) {
+      if (
+        space.type === SPACE_TYPE.PRIVATE_TYPE ||
+        (space.type === SPACE_TYPE.REVIEW && space.meta?.restricted_discussions)
+      ) {
         throw new errors.InvalidStateError(
           'Unable to publish discussion: space has restricted discussions.',
         )
@@ -290,10 +245,10 @@ export class DiscussionService implements IDiscussionService {
       return count
     })
 
-    if (discussion.note.getEntity().scope.startsWith('space')) {
+    if (discussion.note.getEntity().isInSpace() && discussionInput.notify.length > 0) {
       await this.discussionQueueJobProducer.createSpaceNotificationTask(
         discussionInput.id,
-        !!discussionInput.notifyAll,
+        discussionInput.notify,
       )
     }
     return count
@@ -363,7 +318,7 @@ export class DiscussionService implements IDiscussionService {
 
   async getDiscussions(scope: string): Promise<DiscussionDTO[]> {
     this.logger.log(`Getting discussions with scope: ${scope}`)
-    if (scope === 'public') {
+    if (scope === HOME_SCOPE.EVERYBODY) {
       const publishedDiscussions = await this.fetcher.getPublic(
         Discussion,
         {},
@@ -379,6 +334,32 @@ export class DiscussionService implements IDiscussionService {
         privateDiscussions
           .concat(publishedDiscussions)
           .map((discussion) => this.mapDiscussionDTO(discussion)),
+      )
+    }
+    if (scope === HOME_SCOPE.SPACES) {
+      const spaces = await this.em.find(Space, {
+        spaceMemberships: {
+          active: true,
+          user: {
+            id: this.userCtx.id,
+          },
+        },
+      })
+
+      const scopes = spaces.map((s) => s.scope)
+
+      const spacesDiscussions = await this.em.find(
+        Discussion,
+        {
+          note: {
+            scope: { $in: scopes },
+          },
+        },
+        { populate: ['note', 'user'] },
+      )
+
+      return await Promise.all(
+        spacesDiscussions.map((discussion) => this.mapDiscussionDTO(discussion)),
       )
     }
     const spaceId = getIdFromScopeName(scope)
@@ -407,7 +388,7 @@ export class DiscussionService implements IDiscussionService {
     )
   }
 
-  async createAnswer(answerInput: CreateAnswerInput) {
+  async createAnswer(answerInput: CreateAnswerDTO) {
     this.logger.log(`Creating answer: ${JSON.stringify(answerInput)}`)
     const discussion = await this.fetcher.getAccessibleById(
       Discussion,
@@ -437,29 +418,31 @@ export class DiscussionService implements IDiscussionService {
       )
     }
 
-    return await this.em.transactional(async (tem) => {
+    return await this.em.transactional(async () => {
       const newNote = new Note(user)
       newNote.title = answerInput.title
       newNote.content = answerInput.content
       newNote.scope = STATIC_SCOPE.PRIVATE
       newNote.noteType = 'Answer'
-      tem.persist(newNote)
+      this.em.persist(newNote)
       await this.createAttachments(newNote, answerInput.attachments)
 
       const newAnswer = new Answer(newNote, discussion, user)
-      await tem.persistAndFlush(newAnswer)
+      await this.em.persistAndFlush(newAnswer)
+      await this.publishAnswer({
+        id: newAnswer.id,
+        discussionId: answerInput.discussionId,
+        scope: discussionNote.scope,
+        toPublish: answerInput.attachments,
+        notify: answerInput.notify,
+      })
       return this.mapAnswerDTO(newAnswer)
     })
   }
 
-  async updateAnswer(input: UpdateAnswerInput) {
+  async updateAnswer(id: number, input: UpdateAnswerDTO) {
     this.logger.log(`Updating answer: ${JSON.stringify(input)}`)
-    const answer = await this.fetcher.getEditableById(
-      Answer,
-      input.answerId,
-      {},
-      { populate: ['note'] },
-    )
+    const answer = await this.fetcher.getEditableById(Answer, id, {}, { populate: ['note'] })
 
     if (!answer) {
       throw new errors.NotFoundError(
@@ -482,7 +465,7 @@ export class DiscussionService implements IDiscussionService {
     })
   }
 
-  async publishAnswer(answerInput: PublishAnswerInput) {
+  private async publishAnswer(answerInput: PublishAnswerInput) {
     this.logger.log(`Publishing answer: ${JSON.stringify(answerInput)}`)
 
     const user = await this.fetcher.getById(User, this.userCtx.id)
@@ -520,10 +503,10 @@ export class DiscussionService implements IDiscussionService {
       return count
     })
 
-    if (answer.note.getEntity().isInSpace()) {
+    if (answer.note.getEntity().isInSpace() && answerInput.notify.length > 0) {
       await this.discussionQueueJobProducer.createSpaceNotificationTask(
         answer.discussion.id,
-        !!answerInput.notifyAll,
+        answerInput.notify,
       )
     }
 
@@ -578,7 +561,7 @@ export class DiscussionService implements IDiscussionService {
       comparisons?: number[]
     },
     user: User,
-    scope: SCOPE,
+    scope: EntityScope,
   ) {
     let count = 0
 
@@ -643,23 +626,23 @@ export class DiscussionService implements IDiscussionService {
     return count
   }
 
-  private async createAttachments(
-    note: Note,
-    attachmentsToSave: {
-      files?: number[]
-      folders?: number[]
-      assets?: number[]
-      apps?: number[]
-      jobs?: number[]
-      comparisons?: number[]
-    },
-  ) {
+  private async createAttachments(note: Note, attachmentsToSave: Attachments) {
     for (const id of attachmentsToSave.files) {
       // if it's not accessible it will fail. - but maybe it's better to return null and let caller handle the case?
       const res = await this.fetcher.getAccessibleById(Node, id)
       if (!res) {
         throw new errors.NotFoundError(
           `Unable to attach file ${id}: file not found or inaccessible.`,
+        )
+      }
+      const exists = await this.em.findOne(Attachment, {
+        itemId: id,
+        itemType: 'Node',
+        note: note.id,
+      })
+      if (exists) {
+        throw new errors.InvalidStateError(
+          `Unable to attach file ${id}: file attachment already exists.`,
         )
       }
       const attachment = new Attachment(note)
@@ -672,6 +655,16 @@ export class DiscussionService implements IDiscussionService {
       if (!res) {
         throw new errors.NotFoundError(
           `Unable to attach folder ${id}: folder not found or inaccessible.`,
+        )
+      }
+      const exists = await this.em.findOne(Attachment, {
+        itemId: id,
+        itemType: 'Node',
+        note: note.id,
+      })
+      if (exists) {
+        throw new errors.InvalidStateError(
+          `Unable to attach folder ${id}: folder attachment already exists.`,
         )
       }
       const attachment = new Attachment(note)
@@ -687,6 +680,16 @@ export class DiscussionService implements IDiscussionService {
           `Unable to attach asset ${id}: asset not found or inaccessible.`,
         )
       }
+      const exists = await this.em.findOne(Attachment, {
+        itemId: id,
+        itemType: 'Asset',
+        note: note.id,
+      })
+      if (exists) {
+        throw new errors.InvalidStateError(
+          `Unable to attach asset ${id}: asset attachment already exists.`,
+        )
+      }
       const attachment = new Attachment(note)
       attachment.itemId = id
       attachment.itemType = 'Node'
@@ -697,6 +700,16 @@ export class DiscussionService implements IDiscussionService {
       if (!res) {
         throw new errors.NotFoundError(`Unable to attach app ${id}: app not found or inaccessible.`)
       }
+      const exists = await this.em.findOne(Attachment, {
+        itemId: id,
+        itemType: 'App',
+        note: note.id,
+      })
+      if (exists) {
+        throw new errors.InvalidStateError(
+          `Unable to attach app ${id}: app attachment already exists.`,
+        )
+      }
       const attachment = new Attachment(note)
       attachment.itemId = id
       attachment.itemType = 'App'
@@ -706,6 +719,16 @@ export class DiscussionService implements IDiscussionService {
       const res = await this.fetcher.getAccessibleById(Job, id)
       if (!res) {
         throw new errors.NotFoundError(`Unable to attach job ${id}: job not found or inaccessible.`)
+      }
+      const exists = await this.em.findOne(Attachment, {
+        itemId: id,
+        itemType: 'Job',
+        note: note.id,
+      })
+      if (exists) {
+        throw new errors.InvalidStateError(
+          `Unable to attach job ${id}: job attachment already exists.`,
+        )
       }
       const attachment = new Attachment(note)
       attachment.itemId = id
@@ -719,6 +742,16 @@ export class DiscussionService implements IDiscussionService {
           `Unable to attach comparison ${id}: comparison not found or inaccessible.`,
         )
       }
+      const exists = await this.em.findOne(Attachment, {
+        itemId: id,
+        itemType: 'Comparison',
+        note: note.id,
+      })
+      if (exists) {
+        throw new errors.InvalidStateError(
+          `Unable to attach comparison ${id}: comparison attachment already exists.`,
+        )
+      }
       const attachment = new Attachment(note)
       attachment.itemId = id
       attachment.itemType = 'Comparison'
@@ -727,17 +760,7 @@ export class DiscussionService implements IDiscussionService {
     await this.em.flush()
   }
 
-  private async updateAttachments(
-    note: Note,
-    attachments: {
-      files?: number[]
-      folders?: number[]
-      assets?: number[]
-      apps?: number[]
-      jobs?: number[]
-      comparisons?: number[]
-    },
-  ) {
+  private async updateAttachments(note: Note, attachments: Attachments) {
     const oldAttachments = await this.em.find(Attachment, { note })
     this.logger.log(`Deleting old attachments: ${oldAttachments.map((a) => a.id)}`)
     await this.em.removeAndFlush(oldAttachments)
@@ -751,17 +774,7 @@ export class DiscussionService implements IDiscussionService {
    * @param scope - scope to publish to
    * @private - only for internal use while publishing to space.
    */
-  private async checkValidScope(
-    toPublish: {
-      files?: number[]
-      folders?: number[]
-      assets?: number[]
-      apps?: number[]
-      jobs?: number[]
-      comparisons?: number[]
-    },
-    scope: string,
-  ) {
+  private async checkValidScope(toPublish: Attachments, scope: string) {
     // nodes - TODO Jiri: refactor to fetch all at once.
     for (const id of toPublish.files) {
       const file = await this.fetcher.getAccessibleById(Node, id)
@@ -825,7 +838,7 @@ export class DiscussionService implements IDiscussionService {
     }
   }
 
-  async createComment(commentInput: CreateCommentInput) {
+  async createComment(commentInput: CreateCommentDTO) {
     this.logger.log(`Creating comment: ${JSON.stringify(commentInput)}`)
 
     const user = await this.fetcher.getById(User, this.userCtx.id)
@@ -833,10 +846,10 @@ export class DiscussionService implements IDiscussionService {
       throw new errors.NotFoundError('User not found.')
     }
 
-    if (commentInput.targetType === 'Discussion') {
+    if (commentInput.discussionId) {
       const target = await this.fetcher.getAccessibleById(
         Discussion,
-        commentInput.targetId,
+        commentInput.discussionId,
         {},
         {
           populate: ['note'],
@@ -844,19 +857,19 @@ export class DiscussionService implements IDiscussionService {
       )
       if (!target) {
         throw new errors.NotFoundError(
-          `Unable to create comment: ${commentInput.targetType} not found or insufficient permissions.`,
+          `Unable to create comment: Discussion (id:${commentInput.discussionId}) not found or insufficient permissions.`,
         )
       }
       const newComment = new DiscussionComment(user)
-      newComment.body = commentInput.comment
+      newComment.body = commentInput.content
       newComment.commentableId = Reference.create(target)
       // other params are intentionally null.
       await this.em.persistAndFlush(newComment)
 
-      if (target.note.getEntity().isInSpace()) {
+      if (target.note.getEntity().isInSpace() && commentInput.notify.length > 0) {
         await this.discussionQueueJobProducer.createSpaceNotificationTask(
-          commentInput.targetId,
-          !!commentInput.notifyAll,
+          commentInput.discussionId,
+          commentInput.notify,
         )
       }
 
@@ -864,51 +877,51 @@ export class DiscussionService implements IDiscussionService {
     }
     const target = await this.fetcher.getAccessibleById(
       Answer,
-      commentInput.targetId,
+      commentInput.answerId,
       {},
       { populate: ['note'] },
     )
     if (!target) {
       throw new errors.NotFoundError(
-        `Unable to create comment: ${commentInput.targetType} not found or insufficient permissions.`,
+        `Unable to create comment: Answer (id: ${commentInput.answerId}) not found or insufficient permissions.`,
       )
     }
     const newComment = new AnswerComment(user)
-    newComment.body = commentInput.comment
+    newComment.body = commentInput.content
     newComment.commentableId = Reference.create(target)
     // other params are intentionally null.
     await this.em.persistAndFlush(newComment)
 
-    if (target.note.getEntity().isInSpace()) {
+    if (target.note.getEntity().isInSpace() && commentInput.notify.length > 0) {
       await this.discussionQueueJobProducer.createSpaceNotificationTask(
         target.discussion.id,
-        !!commentInput.notifyAll,
+        commentInput.notify,
       )
     }
     return this.mapCommentDTO(newComment)
   }
 
-  async updateComment(commentInput: EditCommentInput) {
+  async updateComment(id: number, commentInput: UpdateCommentDTO) {
     this.logger.log(`Editing comment: ${JSON.stringify(commentInput)}`)
 
-    if (commentInput.targetType === 'Discussion') {
-      const comment = await this.fetcher.getEditableById(DiscussionComment, commentInput.id)
-      if (!comment) {
-        throw new errors.NotFoundError(
-          'Unable to edit comment: comment not found or insufficient permissions.',
-        )
-      }
-      comment.body = commentInput.comment
-      await this.em.persistAndFlush(comment)
-      return this.mapCommentDTO(comment)
+    const commentType = await this.em.findOne(Comment, id)
+    if (!commentType) {
+      throw new errors.NotFoundError(
+        'Unable to edit comment: comment not found or insufficient permissions.',
+      )
     }
-    const comment = await this.fetcher.getEditableById(AnswerComment, commentInput.id)
+
+    const commentClass =
+      commentType instanceof DiscussionComment ? DiscussionComment : AnswerComment
+
+    const comment = await this.fetcher.getEditableById(commentClass, id)
     if (!comment) {
       throw new errors.NotFoundError(
         'Unable to edit comment: comment not found or insufficient permissions.',
       )
     }
-    comment.body = commentInput.comment
+
+    comment.body = commentInput.content
     await this.em.persistAndFlush(comment)
     return this.mapCommentDTO(comment)
   }

@@ -20,12 +20,6 @@ module OrgService
       check_admin!
       check_request_state!
       approve_request!
-
-      if request.remove_member?
-        @mailer.user_remove_approved_email(@request.org, @request.member, @admin).deliver_now!
-      elsif request.leave?
-        @mailer.user_leave_approved_email(@request.org, @request.initiator, @admin).deliver_now!
-      end
     end
 
     private

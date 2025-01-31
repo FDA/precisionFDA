@@ -1,16 +1,20 @@
 /* eslint-disable max-classes-per-file */
 import React from 'react'
+import styled from 'styled-components'
 import { Button } from '../../../components/Button'
 import { Markdown, MarkdownStyle } from '../../../components/Markdown'
 import { IUser } from '../../../types/user'
 import { StyledNameCell } from '../../home/home.styles'
-import { Modal } from '../../modal'
-import { ButtonRow } from '../../modal/styles'
+import { ButtonRow, Footer } from '../../modal/styles'
 import { useModal } from '../../modal/useModal'
-import { Submission } from './submission.types'
+import { SubmissionInputFile, SubmissionV2 } from './submission.types'
+import { ModalHeaderTop, ModalNext } from '../../modal/ModalNext'
 
+const StyledFileList = styled.ul`
+  margin-left: 14px;
+`
 
-export const NameCell = ({ submission }: { submission: Submission }) => {
+export const NameCell = ({ submission }: { submission: SubmissionV2 }) => {
   const { isShown, setShowModal } = useModal()
 
   return (
@@ -18,21 +22,21 @@ export const NameCell = ({ submission }: { submission: Submission }) => {
       <StyledNameCell onClick={() => setShowModal(true)}>
         {submission.name}
       </StyledNameCell>
-      <Modal
+      <ModalNext
         id="submission-detail-modal"
         isShown={isShown}
         hide={() => setShowModal(false)}
-        headerText={`Submittion: ${submission.name}`}
-        footer={
+      >
+        <ModalHeaderTop headerText={`Submission: ${submission.name}`}  hide={() => setShowModal(false)} />
+        <MarkdownStyle>
+          <Markdown data={submission.description} />
+        </MarkdownStyle>
+        <Footer>
           <ButtonRow>
             <Button onClick={() => setShowModal(false)}>Close</Button>
           </ButtonRow>
-        }
-      >
-        <MarkdownStyle>
-          <Markdown data={submission.desc} />
-        </MarkdownStyle>
-      </Modal>
+        </Footer>
+      </ModalNext>
     </>
   )
 }
@@ -43,39 +47,26 @@ export const InputFileCell = ({
   isSpaceMember,
 }: {
   authUser: IUser
-  submission: Submission
+  submission: SubmissionV2
   isSpaceMember: boolean
 }) => {
   return (
-    <ul className="submission-ul">
-      {submission.job_input_files.map(file => {
-        const userCanAccessFile = (f: any) => {
+    <StyledFileList>
+      {submission.job.inputFiles.map(file => {
+        const userCanAccessFile = (f: SubmissionInputFile) => {
           const fileIsPublic = f.scope === 'public'
-          const userIsOwnerOfFile = f.user_id === authUser.id
+          const userIsOwnerOfFile = f.userId === authUser?.id
           return (
-            !authUser.is_guest &&
+            !authUser?.is_guest &&
             (fileIsPublic || userIsOwnerOfFile || isSpaceMember)
           )
-        }
-
-        const generateAppropriateLink = (f: any) => {
-          if (isSpaceMember) {
-            const space_file: any = submission.run_input_data.filter(
-              (v: any) => v.file_name === f.name,
-            )?.[0]
-            return space_file
-              ? `/home/files/${space_file?.file_uid}`
-              : `/home/files/${f.uid}`
-          }
-
-          return `/home/files/${f.uid}`
         }
 
         if (userCanAccessFile(file)) {
           return (
             <li key={file.id}>
               <a
-                href={generateAppropriateLink(file)}
+                href={`/home/files/${file.uid}`}
                 target="_blank"
                 rel="noreferrer"
               >
@@ -86,6 +77,6 @@ export const InputFileCell = ({
         }
         return <li key={file.id}>{file.name}</li>
       })}
-    </ul>
+    </StyledFileList>
   )
 }

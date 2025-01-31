@@ -8,21 +8,37 @@ import { PlatformClient } from '@shared/platform-client'
 import { EntityUtils } from '@shared/utils/entity.utils'
 import { expect } from 'chai'
 import { stub } from 'sinon'
+import { Answer } from '@shared/domain/answer/answer.entity'
+import { Discussion } from '@shared/domain/discussion/discussion.entity'
+import { AnswerComment } from '@shared/domain/comment/answer-comment.entity'
+import { DiscussionComment } from '@shared/domain/comment/discussion-comment.entity'
 
 describe('EntityLinkService', () => {
   const appGetLinkStub = stub()
+  const answerGetLinkStub = stub()
   const userGetLinkStub = stub()
   const fileDownloadLinkStub = stub()
+  const commentGetLinkStub = stub()
+  const discussionGetLinkStub = stub()
 
   beforeEach(() => {
     appGetLinkStub.reset()
     appGetLinkStub.throws()
+
+    answerGetLinkStub.reset()
+    answerGetLinkStub.throws()
 
     userGetLinkStub.reset()
     userGetLinkStub.throws()
 
     fileDownloadLinkStub.reset()
     fileDownloadLinkStub.throws()
+
+    commentGetLinkStub.reset()
+    commentGetLinkStub.throws()
+
+    discussionGetLinkStub.reset()
+    discussionGetLinkStub.throws()
   })
 
   describe('#getUiLink', () => {
@@ -34,15 +50,39 @@ describe('EntityLinkService', () => {
     const USER = { id: USER_ID } as unknown as User
     const USER_LINK = 'USER_LINK'
 
+    const ANSWER_ID = 20
+    const ANSWER = { id: ANSWER_ID } as unknown as Answer
+    const ANSWER_LINK = 'ANSWER_LINK'
+
+    const ANSWER_COMMENT_ID = 30
+    const ANSWER_COMMENT = { id: ANSWER_COMMENT_ID } as unknown as AnswerComment
+    const ANSWER_COMMENT_LINK = 'ANSWER_COMMENT_LINK'
+
+    const DISCUSSION_COMMENT_ID = 40
+    const DISCUSSION_COMMENT = { id: DISCUSSION_COMMENT_ID } as unknown as DiscussionComment
+    const DISCUSSION_COMMENT_LINK = 'DISCUSSION_COMMENT_LINK'
+
+    const DISCUSSION_ID = 50
+    const DISCUSSION = { id: DISCUSSION_ID } as unknown as Discussion
+    const DISCUSSION_LINK = 'DISCUSSION_LINK'
+
     let getEntityTypeForEntityStub
 
     beforeEach(() => {
       appGetLinkStub.withArgs(APP).resolves(APP_LINK)
+      answerGetLinkStub.withArgs(ANSWER).resolves(ANSWER_LINK)
       userGetLinkStub.withArgs(USER).resolves(USER_LINK)
+      commentGetLinkStub.withArgs(DISCUSSION_COMMENT).resolves(DISCUSSION_COMMENT_LINK)
+      commentGetLinkStub.withArgs(ANSWER_COMMENT).resolves(ANSWER_COMMENT_LINK)
+      discussionGetLinkStub.withArgs(DISCUSSION).resolves(DISCUSSION_LINK)
 
       getEntityTypeForEntityStub = stub(EntityUtils, 'getEntityTypeForEntity').throws()
       getEntityTypeForEntityStub.withArgs(APP).returns('app')
+      getEntityTypeForEntityStub.withArgs(ANSWER).returns('answer')
       getEntityTypeForEntityStub.withArgs(USER).returns('user')
+      getEntityTypeForEntityStub.withArgs(DISCUSSION_COMMENT).returns('comment')
+      getEntityTypeForEntityStub.withArgs(ANSWER_COMMENT).returns('comment')
+      getEntityTypeForEntityStub.withArgs(DISCUSSION).returns('discussion')
     })
 
     afterEach(() => {
@@ -59,6 +99,27 @@ describe('EntityLinkService', () => {
       const res = await getInstance().getUiLink(USER)
 
       expect(res).to.equal(USER_LINK)
+    })
+
+    it('should return correct link for an answer', async () => {
+      const res = await getInstance().getUiLink(ANSWER)
+
+      expect(res).to.equal(ANSWER_LINK)
+    })
+
+    it('should return correct link for a comment', async () => {
+      const res1 = await getInstance().getUiLink(ANSWER_COMMENT)
+
+      expect(res1).to.equal(ANSWER_COMMENT_LINK)
+
+      const res2 = await getInstance().getUiLink(DISCUSSION_COMMENT)
+      expect(res2).to.equal(DISCUSSION_COMMENT_LINK)
+    })
+
+    it('should return correct link for a discussion', async () => {
+      const res = await getInstance().getUiLink(DISCUSSION)
+
+      expect(res).to.equal(DISCUSSION_LINK)
     })
 
     it('should throw an error for unsupported entity', async () => {
@@ -147,6 +208,9 @@ describe('EntityLinkService', () => {
     const linkProviderMap = {
       app: { getLink: appGetLinkStub },
       user: { getLink: userGetLinkStub },
+      answer: { getLink: answerGetLinkStub },
+      comment: { getLink: commentGetLinkStub },
+      discussion: { getLink: discussionGetLinkStub },
     } as unknown as {
       [T in UiLinkableEntityType]: EntityLinkProvider<T>
     }

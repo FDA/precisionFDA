@@ -31,6 +31,15 @@ const header = `
           padding: 20px;
           line-height: 1.8;
         }
+        .note-section {
+          border: 1px solid #7a93b8;
+          background-color: rgb(217, 234, 248);
+          border-radius: 3px;
+          line-height: 1.3;
+          font-size: 16px;
+          margin: 0;
+          padding: 10px;
+        }
       </mj-style>
     </mj-head>
       <mj-body>
@@ -62,6 +71,9 @@ const generateJobDetailLink = (jobUid: IDType): string =>
 const generateExpertQuestionLink = (expertId: IDType, questionId: IDType): string =>
   `${config.api.railsHost}/experts/${expertId}/dashboard/expert_questions/${questionId}`
 
+const generateExpertDashboardLink = (expertId: IDType): string =>
+  `${config.api.railsHost}/experts/${expertId}/dashboard`
+
 const generateChallengeDetailLink = (challengeId: IDType): string =>
   `${config.api.railsHost}/challenges/${challengeId.toString()}`
 
@@ -88,6 +100,7 @@ const getUserTitle = (user?: User) => {
 
 const getViewSpaceButton = ctoButton('View space', generateSpaceLink)
 const getChallengeCtoButton = ctoButton('Join challenge', generateChallengeDetailLink)
+const getExpertCtoButton = ctoButton('Expert dashboard', generateExpertDashboardLink)
 const viewChallengePreregPageCtoButton = ctoButton(
   'Join challenge',
   generateChallengePreregPageLink,
@@ -102,11 +115,13 @@ export {
   generateJobDetailLink,
   generateObjectCommentsLink,
   generateExpertQuestionLink,
+  generateExpertDashboardLink,
   generateSpaceLink,
   getBottomSpacer,
   getUserTitle,
   getChallengeCtoButton,
   getExecutionDetailButton,
+  getExpertCtoButton,
   getMiddleSpacer,
   getViewSpaceButton,
   header,

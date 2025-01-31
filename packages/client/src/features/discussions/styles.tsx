@@ -1,5 +1,4 @@
 import styled, { css } from 'styled-components'
-import { colors, theme } from '../../styles/theme'
 import { TransparentButton } from '../../components/Button'
 import { imageReset } from '../../styles/commonStyles'
 
@@ -20,7 +19,7 @@ export const StyledTitle = styled.div`
   font-weight: bolder;
   height: 36px;
   svg {
-    color: ${theme.colors.stateLabelGrey};
+    color: var(--tertiary-400);
   }
 `
 export const StyledTitleEdit = styled.div`
@@ -40,7 +39,6 @@ export const StyledReplyButton = styled(TransparentButton)`
   display: flex;
   gap: 6px;
   align-items: center;
-  margin-top: 16px;
 `
 
 export const PageContent = styled.div`
@@ -62,7 +60,6 @@ export const PageContent = styled.div`
 `
 
 export const StyledTextArea = styled.textarea`
-  font-family: ${theme.fontFamily};
   width: 100%;
 `
 
@@ -72,7 +69,7 @@ export const ImageContainer = styled.div`
 
 export const AttachmentsLabel = styled.span`
   font-weight: bold;
-  margin-bottom: 8px;
+  margin: 1rem 0;
 `
 
 export const StyledCommentCard = styled.div<{ $isAnswer?: boolean }>`
@@ -168,6 +165,9 @@ export const StyledMarkdown = styled.div<{ $isAnswer?: boolean }>`
     `}
   font-size: 14px;
   align-self: stretch;
+  h1, h2, h3, h4, h5, h6 {
+    margin: 1rem 0;
+  }
   h1 {
     font-size: 28px;
   }
@@ -183,6 +183,7 @@ export const StyledMarkdown = styled.div<{ $isAnswer?: boolean }>`
     margin: 1em 0;
   }
   ul {
+    padding-inline-start: 1rem;
     li {
       line-height: 1.6em;
     }

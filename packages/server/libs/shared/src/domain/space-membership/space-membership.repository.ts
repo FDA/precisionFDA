@@ -1,6 +1,8 @@
+import { EntityRepository, PopulateHint } from '@mikro-orm/mysql'
 import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
-import { EntityRepository } from '@mikro-orm/mysql'
 import { NotFoundError } from '@shared/errors'
+import { SPACE_STATE } from '../space/space.enum'
+import { SPACE_MEMBERSHIP_ROLE } from './space-membership.enum'
 
 export class SpaceMembershipRepository extends EntityRepository<SpaceMembership> {
   protected getEntityKey(): string {
@@ -33,5 +35,27 @@ export class SpaceMembershipRepository extends EntityRepository<SpaceMembership>
       .getResultList()
 
     return result.map((space) => space.id)
+  }
+
+  async findActiveMembershipAndSpace(
+    userId: number,
+    role: SPACE_MEMBERSHIP_ROLE,
+  ): Promise<SpaceMembership[]> {
+    const spaceMemberships = await this.em.find(
+      SpaceMembership,
+      {
+        user: userId,
+        role,
+        active: true,
+        spaces: {
+          state: SPACE_STATE.ACTIVE,
+        },
+      },
+      {
+        populate: ['spaces'],
+        populateWhere: PopulateHint.INFER,
+      },
+    )
+    return spaceMemberships
   }
 }

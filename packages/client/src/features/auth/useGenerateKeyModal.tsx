@@ -21,8 +21,7 @@ const StyledButtonRow = styled.div`
 const InfoRow = styled.div`
   display: flex;
   justify-content: space-between;
-  padding: 12px 24px;
-  padding-bottom: 0;
+  padding: 12px 24px 0;
 `
 
 const ExpirationInfo = styled.div`
@@ -40,10 +39,10 @@ const StyledTextarea = styled.textarea`
   flex: 1 0 auto;
   font-family: ${theme.monofontFamily};
   width: 450px;
-  height: 150px;
+  height: 140px;
   resize: none;
   box-sizing: border-box;
-  font-size: 12.5px;
+  font-size: 11.5px;
 
   &:disabled {
     background-color: var(--tertiary-100);
@@ -51,8 +50,7 @@ const StyledTextarea = styled.textarea`
   }
 `
 const ContentWrapper = styled.div`
-  padding: 12px 24px;
-  padding-bottom: 0;
+  padding: 12px 24px 0;
 `
 
 const KeyLoader = styled.div`

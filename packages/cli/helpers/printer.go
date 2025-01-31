@@ -439,3 +439,79 @@ func PrintViewLinkHelp() int {
 	writer.Flush()
 	return 0
 }
+
+func PrintNoHelpAvailable() int {
+	writer := tabwriter.NewWriter(os.Stdout, 0, 8, 1, '\t', tabwriter.AlignRight)
+	writeLine := newLineWriter(writer)
+	writeLine("  ", "  ")
+	writeLine("  Error:", "No help available for the given command. For assistance, please contact the support team.")
+	writer.Flush()
+	return 0
+}
+
+func PrintCreateDiscussionHelp() int {
+	writer := tabwriter.NewWriter(os.Stdout, 0, 8, 1, '\t', tabwriter.AlignRight)
+	writeLine := newLineWriter(writer)
+
+	writeLine("  ", "  ")
+	writeLine("  For:", "Creates a new discussion in the selected space. Only accepts JSON body with the following attributes:\n\t"+
+		"title, content - required string, attachments - optional object. All attributes in the attachments object are also optional:\n\t"+
+		"files, assets, apps, jobs, workflows - string array of UIDs; folders, comparisons - integer array of IDs.\n")
+	writeLine("  Usage:", "create-discussion '<JSON_BODY>' -space-id <SPACE_ID> [FLAG...]\n")
+	//writeLine("  Examples:", "create-discussion '{\"title\":\"..title..\", \"content\":\"..content..\"}' -space-id 12 [Creates discussion without attachments in given space]")
+	writeLine("  Flags:", "All flags listed below are OPTIONAL")
+	writeLine("   -h, -help", "Displays the help message and exit")
+
+	writer.Flush()
+	return 0
+}
+
+func PrintEditDiscussionHelp() int {
+	writer := tabwriter.NewWriter(os.Stdout, 0, 8, 1, '\t', tabwriter.AlignRight)
+	writeLine := newLineWriter(writer)
+
+	writeLine("  ", "  ")
+	writeLine("  For:", "Only allows appending content and/or attachments to the selected discussion. Only accepts JSON body with the following attributes:\n\t"+
+		"discussionId - required integer, content - optional string, attachments - optional object. All attributes in the attachments object are also optional:\n\t"+
+		"files, assets, apps, jobs, workflows - string array of UIDs; folders, comparisons - integer array of IDs.\n")
+	writeLine("  Usage:", "edit-discussion '<JSON_BODY>' [FLAG...]\n")
+	writeLine("  Flags:", "All flags listed below are OPTIONAL")
+	writeLine("   -h, -help", "Displays the help message and exit")
+
+	writer.Flush()
+	return 0
+}
+
+func PrintCreateReplyHelp() int {
+	writer := tabwriter.NewWriter(os.Stdout, 0, 8, 1, '\t', tabwriter.AlignRight)
+	writeLine := newLineWriter(writer)
+
+	writeLine("  ", "  ")
+	writeLine("  For:", "Creates a new reply in the selected discussion or answer. Only accepts JSON body with the following attributes:\n"+
+		"\tdiscussionId or answerId - integer ID (exclusive), replyType - required string ('answer' or 'comment'), content - required string,\n"+
+		"\tattachments - optional object, only allowed if replyType is 'answer'. All attributes in the attachments object are also optional:\n"+
+		"\tfiles, assets, apps, jobs, workflows - string array of UIDs; folders, comparisons - integer array of IDs.\n")
+	writeLine("  Usage:", "create-reply '<JSON_BODY>' [FLAG...]\n")
+	writeLine("  Flags:", "All flags listed below are OPTIONAL")
+	writeLine("   -h, -help", "Displays the help message and exit")
+
+	writer.Flush()
+	return 0
+}
+
+func PrintEditReplyHelp() int {
+	writer := tabwriter.NewWriter(os.Stdout, 0, 8, 1, '\t', tabwriter.AlignRight)
+	writeLine := newLineWriter(writer)
+
+	writeLine("  ", "  ")
+	writeLine("  For:", "Only allows appending content and/or attachments to the selected reply. Only accepts JSON body with the following attributes:\n\t"+
+		"answerId or commentId - required integer, content - optional string, attachments - optional object, only allowed if appending to an answer.\n"+
+		"\tAll attributes in the attachments object are also optional:\n"+
+		"\tfiles, assets, apps, jobs, workflows - string array of UIDs; folders, comparisons - integer array of IDs.\n")
+	writeLine("  Usage:", "edit-discussion '<JSON_BODY>' [FLAG...]\n")
+	writeLine("  Flags:", "All flags listed below are OPTIONAL")
+	writeLine("   -h, -help", "Displays the help message and exit")
+
+	writer.Flush()
+	return 0
+}

@@ -14,7 +14,6 @@ import { ArrowIcon } from '../../../components/icons/ArrowIcon'
 import { Dropdown } from '../../../components/Dropdown'
 import { ResourceDropdownContent } from './ResourceDropdown'
 import { UserLimitForm } from './UserLimitForm'
-import { buildMessageFromMfaResponse } from './buildMfaErrorMessage'
 import { useAuthUser } from '../../auth/useAuthUser'
 import { Button } from '../../../components/Button'
 
@@ -45,14 +44,6 @@ const setJobLimit = async (ids: User['id'][], jobLimit: number) =>
     }),
   }).then(checkStatus)
 
-const bulkReset2fa = async (ids: User['id'][]) =>
-  fetch('/admin/bulk_reset_2fa', {
-    ...getApiRequestOpts('POST'),
-    body: JSON.stringify({
-      ids,
-    }),
-  }).then(checkStatus as any)
-  .then((res: Response) => res.json())
 
 const bulkUnlock = async (ids: User['id'][]) =>
   fetch('/admin/bulk_unlock', {
@@ -101,17 +92,6 @@ export const UsersListActionRow = ({
   const currentUserCtx = useAuthUser()
 
   const selectedIds = selectedUsers.map(({ id }) => id)
-  const resetMutation = useMutation({
-    mutationKey: ['bulk-reset-2fa'],
-    mutationFn: () => bulkReset2fa(selectedIds),
-    onSuccess: (res: any) => {
-      const { success, message } = buildMessageFromMfaResponse(res);
-      (success ? toast.success : toast.error)(message)
-    },
-    onError: () => {
-      toast.error('Error reseting users')
-    },
-  })
   const unlockMutation = useMutation({
     mutationKey: ['bulk-unlock'],
     mutationFn: () => bulkUnlock(selectedIds),
@@ -192,14 +172,6 @@ export const UsersListActionRow = ({
       >
         <PlusIcon height={12} />
         &nbsp;Provision new users
-      </Button>
-      <Button
-        data-variant="primary"
-        data-testid="admin-users-reset-button"
-        disabled={selectedUsers.length === 0}
-        onClick={() => resetMutation.mutateAsync()}
-      >
-        Reset
       </Button>
       {!areAllSelectedUsersInDeactivatedState && (
         <Button

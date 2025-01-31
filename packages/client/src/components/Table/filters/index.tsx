@@ -1,25 +1,112 @@
 import React, { useState } from 'react'
 import { InputSelect } from '../../form/styles'
-import { InputId, InputNumber, InputText } from '../../InputText'
+import { InputDateTime, InputId, InputNumber, InputText } from '../../InputText'
 
 export * from './numericFilter'
 
-const sanitizeRangeFilterValue = (rawValue: string | [number | null | undefined, number | null | undefined]) => {
-  if (typeof rawValue === 'string') {
-    return rawValue.split(',')
+interface ColumnFilterOption {
+  value: string
+  label: string
+}
+
+interface BaseColumnFilterProps<TFilterValue> {
+  column: {
+    filterValue: TFilterValue | undefined
+    setFilter: (value: TFilterValue | undefined) => void
+    filterDataTestId?: string
   }
-  // No idea what's the reason behind this, just want to avoid breaking change
-  let v = rawValue
-  if(v[0] === undefined) {
-    v[0] = null
+}
+
+interface ColumnFilterProps extends BaseColumnFilterProps<string> {
+  column: BaseColumnFilterProps<string>['column'] & {
+    options: ColumnFilterOption[]
+    title: string
   }
-  return v
+}
+
+interface RangeColumnFilterProps extends BaseColumnFilterProps<string> {
+  column: BaseColumnFilterProps<string>['column'] & {
+    filterPlaceholderFrom?: string
+    filterPlaceholderTo?: string
+  }
+}
+
+function parseNumberRange(range: string): [number | null, number | null] {
+  const [lower, upper] = range.split(',').map((value) => (value ? parseFloat(value) : null))
+  return [lower, upper]
+}
+
+function parseDateRange(filterValue: string): [Date | null, Date | null] {
+  const [from, to] = filterValue.split(',').map((value) => (value && value !== '0' ? new Date(value) : null))
+  return [from, to]
+}
+
+function formatDateForInput (date: Date | null): string {
+  if (!date) return ''
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  const hours = String(date.getHours()).padStart(2, '0')
+  const minutes = String(date.getMinutes()).padStart(2, '0')
+  return `${year}-${month}-${day}T${hours}:${minutes}`
+}
+
+export function DateRangeColumnFilter({
+                                        column: {
+                                          filterValue = '',
+                                          setFilter,
+                                          filterDataTestId,
+                                          filterPlaceholderFrom = 'From Date',
+                                          filterPlaceholderTo = 'To Date',
+                                        },
+                                      }: RangeColumnFilterProps) {
+  const parsedFilterValue = parseDateRange(filterValue) || [null, null]
+
+  return (
+    <div
+      style={{
+        display: 'flex',
+        gap: 4,
+      }}
+      data-testid={filterDataTestId}
+    >
+      <InputDateTime
+        value={parsedFilterValue[0] ? formatDateForInput(parsedFilterValue[0]) : ''}
+        onChange={(e) => {
+          const val = e.target.value
+          setFilter([val || null, parsedFilterValue[1]]?.join(',') || '')
+        }}
+        placeholder={filterPlaceholderFrom}
+        style={{
+          width: '160px',
+          fontSize: 11,
+          lineHeight: '1.1rem',
+          paddingRight: 2,
+        }}
+      />
+      <InputDateTime
+        value={parsedFilterValue[1] ? parsedFilterValue[1].toISOString().slice(0, -8) : ''}
+        onChange={(e) => {
+          const val = e.target.value
+          setFilter([parsedFilterValue[0], val || null]?.join(',') || '')
+        }}
+        placeholder={filterPlaceholderTo}
+        style={{
+          width: '160px',
+          fontSize: 11,
+          lineHeight: '1.1rem',
+          paddingRight: 2,
+        }}
+      />
+    </div>
+  )
 }
 
 export function NumberRangeColumnFilter({
-  column: { filterValue = [null,null], setFilter, filterDataTestId, filterPlaceholderFrom, filterPlaceholderTo },
-}: any) {
-  const parsedFilterValue = sanitizeRangeFilterValue(filterValue)
+                                          column: { filterValue = '', setFilter, filterDataTestId, filterPlaceholderFrom, filterPlaceholderTo },
+                                        }: RangeColumnFilterProps) {
+  const parsedFilterValue = parseNumberRange(filterValue) || [null, null]
+
   return (
     <div
       style={{
@@ -30,33 +117,32 @@ export function NumberRangeColumnFilter({
     >
       <InputNumber
         value={parsedFilterValue[0] || ''}
-        onChange={e => {
+        onChange={(e) => {
           const val = e.target.value
-          setFilter((old = []) => [val ? parseInt(val, 10) : null, old[1]])
+          setFilter([val ? parseInt(val, 10) : null, parsedFilterValue[1]]?.join(',') || '')
         }}
         min={0}
         placeholder={filterPlaceholderFrom}
         style={{
           width: '72px',
           fontSize: 11,
-          lineHeight:'1.1rem',
-          paddingRight: 2
+          lineHeight: '1.1rem',
+          paddingRight: 2,
         }}
       />
       <InputNumber
         value={parsedFilterValue[1] || ''}
-        type="number"
-        onChange={e => {
+        onChange={(e) => {
           const val = e.target.value
-          setFilter((old = []) => [old[0], val ? parseInt(val, 10) : null])
+          setFilter([parsedFilterValue[0], val ? parseInt(val, 10) : null]?.join(',') || '')
         }}
         min={0}
         placeholder={filterPlaceholderTo}
         style={{
           width: '72px',
           fontSize: 11,
-          lineHeight:'1.1rem',
-          paddingRight: 2
+          lineHeight: '1.1rem',
+          paddingRight: 2,
         }}
       />
     </div>
@@ -65,7 +151,7 @@ export function NumberRangeColumnFilter({
 
 export function SelectColumnFilter({
   column: { filterValue, setFilter, options, filterDataTestId, title },
-}: any) {
+}: ColumnFilterProps) {
   return (
     <InputSelect
       title={title}
@@ -74,7 +160,7 @@ export function SelectColumnFilter({
       data-testid={filterDataTestId}
     >
       <option value="">All</option>
-      {options.map((option: any, i: number) => (
+      {options.map((option: ColumnFilterOption, i: number) => (
         <option key={i} value={option.value}>
           {option.label}
         </option>
@@ -85,9 +171,7 @@ export function SelectColumnFilter({
 
 export function DefaultColumnFilter({
   column: { filterValue, setFilter, filterDataTestId },
-}: {
-  column: any
-}) {
+}:  ColumnFilterProps) {
   return (
     <InputText
       value={filterValue || ''}
@@ -101,9 +185,7 @@ export function DefaultColumnFilter({
 
 export function IdColumnFilter({
   column: { filterValue, setFilter, filterDataTestId },
-}: {
-  column: any
-}) {
+}: ColumnFilterProps) {
   const [value, setValue] = useState(filterValue || '')
   const handleChange = (e) => {
     const inputValue = e.target.value

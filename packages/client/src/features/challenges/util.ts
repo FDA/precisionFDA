@@ -53,15 +53,15 @@ export const getTimeStatus = (startAt: Date, endAt: Date): TimeStatus => {
   return 'ended'
 }
 
-export const getChallengeTimeRemaining = ({ start_at, end_at }: { start_at: Date, end_at: Date }) => {
+export const getChallengeTimeRemaining = ({ startAt, endAt }: { startAt: Date, endAt: Date }) => {
   let timeRemainingLabel = 'Ended'
-  const timeStatus = getTimeStatus(start_at, end_at)
+  const timeStatus = getTimeStatus(startAt, endAt)
   switch (timeStatus) {
     case 'upcoming':
-      timeRemainingLabel = `Starting in about ${formatDistance(new Date(), start_at).replace('about ', '')}`
+      timeRemainingLabel = `Starting in about ${formatDistance(new Date(), startAt).replace('about ', '')}`
       break
     case 'current':
-      timeRemainingLabel = `About ${formatDistance(new Date(), end_at).replace('about ', '')  } remaining`
+      timeRemainingLabel = `About ${formatDistance(new Date(), endAt).replace('about ', '')  } remaining`
       break
     default:
       break

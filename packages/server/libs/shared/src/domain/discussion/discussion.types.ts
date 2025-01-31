@@ -1,62 +1,26 @@
-import { SCOPE } from '../../types/common'
+import { EntityScope } from '../../types/common'
 import { CommentableType } from '../comment/comment.entity'
 import { NoteType } from '../note/note.entity'
-
-type BaseInput = {
-  title?: string
-  content?: string
-  attachments?: {
-    files?: number[]
-    folders?: number[]
-    assets?: number[]
-    apps?: number[]
-    jobs?: number[]
-    comparisons?: number[]
-  }
-}
-
-type UpdateDiscussionInput = Partial<BaseInput> & {
-  id?: number
-}
+import { NotifyType } from '@shared/domain/discussion/dto/notify.type'
 
 type PublishDiscussionInput = {
   id: number
-  scope: SCOPE
-  toPublish: {
-    files?: number[]
-    folders?: number[]
-    assets?: number[]
-    apps?: number[]
-    jobs?: number[]
-    comparisons?: number[]
-  }
-  notifyAll?: boolean
-}
-
-type CreateAnswerInput = BaseInput & {
-  discussionId: number
-}
-
-type UpdateAnswerInput = Partial<BaseInput> & {
-  answerId: number
-  discussionId: number
+  scope: EntityScope
+  toPublish: Attachments
+  notify: NotifyType
 }
 
 type PublishAnswerInput = PublishDiscussionInput & {
   discussionId: number
 }
 
-type CreateCommentInput = {
-  comment: string
-  notifyAll?: boolean
-  targetId: number
-  targetType: CommentableType
-}
-
-type EditCommentInput = {
-  id: number
-  targetType: CommentableType
-  comment: string
+type Attachments = {
+  files?: number[]
+  folders?: number[]
+  assets?: number[]
+  apps?: number[]
+  jobs?: number[]
+  comparisons?: number[]
 }
 
 type DiscussionAttachment = {
@@ -81,7 +45,7 @@ class NoteDTO {
   title: string
   content: string
   noteType: NoteType
-  scope: SCOPE
+  scope: EntityScope
   user: UserDTO
   createdAt: Date
   updatedAt: Date
@@ -121,17 +85,12 @@ class DiscussionDTO {
 
 export {
   AnswerDTO,
-  BaseInput,
   CommentDTO,
-  CreateAnswerInput,
-  CreateCommentInput,
   DiscussionAttachment,
   DiscussionDTO,
-  EditCommentInput,
   NoteDTO,
   PublishAnswerInput,
   PublishDiscussionInput,
-  UpdateAnswerInput,
-  UpdateDiscussionInput,
   UserDTO,
+  Attachments,
 }

@@ -6,7 +6,7 @@ on:
       GSRS_BRANCH:
         description: GSRS Revision
         type: string
-        default: gsrs_241029
+        default: gsrs_241211
       GSRS_DATABASE_NAME:
         description: GSRS Database and Index Name
         type: string
@@ -57,6 +57,7 @@ jobs:
           BUILD_NUMBER: ${{ github.run_number }}
           ENVIRONMENT: ${{ vars.ENVIRONMENT }}
           AWS_REGION: ${{ vars.REGION }}
+          ENV_ATTEMPTS: ${{ vars.ENV_ATTEMPTS }}
           ENV_SUBNET1: ${{ vars.ENV_SUBNET1 }}
           ENV_SUBNET2: ${{ vars.ENV_SUBNET2 }}
           ENV_SUBNET3: ${{ vars.ENV_SUBNET3 }}

@@ -1,6 +1,6 @@
 <ul class="nav-links nav navbar-nav navbar-right">
   <li class="nav-item dropdown">
-    <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" style="background: none;">
+    <a href="#" class="nav-link dropdown-toggle" id="user_dropdown" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" style="background: none;">
       <svg height="16" data-prefix="fas" data-icon="user-circle" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512" class="Svg__Icon-sc-1hisztr-0 Svg-sc-1hisztr-1" aria-label="User profile icon"><path fill="currentColor" d="M248 8a248 248 0 100 496 248 248 0 000-496zm0 96a88 88 0 110 176 88 88 0 010-176zm0 344a191.6 191.6 0 01-146.5-68.2A111.5 111.5 0 01200 320c2.4 0 4.8.4 7.1 1.1 13 4.2 26.6 6.9 40.9 6.9 14.3 0 28-2.7 40.9-6.9 2.3-.7 4.7-1.1 7.1-1.1 42.9 0 79.7 24.4 98.5 59.8A191.6 191.6 0 01248 448z"></path></svg>
       <div>
         <%= @context.logged_in? ? @context.user.full_name : @context.username %>
@@ -36,3 +36,8 @@
     </div>
   </li>
 </ul>
+
+<%= javascript_tag do %>
+  // FIX for PFDA-5712
+  $('#user_dropdown').dropdown();
+<% end %>

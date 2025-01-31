@@ -257,12 +257,15 @@ const PublicNavbar = ({ shouldShowLogo = false }: Props) => {
         <a href="/uniisearch" target="_blank">
           UNII Search
         </a>
+        <a href="/ginas/app/beta" target="_blank">
+          GSRS
+        </a>
       </PublicNavbarCenterButtons>
       <PublicNavbarRightButtons $isSticky={sticky}>
         <AccessButton onClick={onRequestAccess}>Request Access</AccessButton>
         <Button data-variant="primary" onClick={onLogIn}>Log In</Button>
         {data?.ssoButton.isEnabled && (
-          <Button data-variant="primary" onClick={() => onLogInWithSSO(data.ssoButton.data.fdaSsoUrl)}>
+          <Button data-variant="primary" onClick={() => onLogInWithSSO(data.ssoButton.data.ssoUrl)}>
             Log In with SSO
           </Button>
         )}

@@ -288,7 +288,7 @@ export const FileList = ({
       {actions['Edit file info']?.modal}
       {actions['Edit folder info']?.modal}
       {actions['Delete']?.modal}
-      {actions['Organize']?.modal}
+      {actions['Move']?.modal}
       {actions['Copy to...']?.modal}
       {actions['Attach to...']?.modal}
       {actions['Attach License']?.modal}

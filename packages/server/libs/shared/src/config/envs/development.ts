@@ -1,4 +1,4 @@
-import { ConfigOverride, parseIntFromProcess } from '..'
+import { ConfigOverride, defaultConfig, parseIntFromProcess } from '..'
 
 export const config: ConfigOverride = () => ({
   appName: 'https-apps-worker-dev',
@@ -54,6 +54,11 @@ export const config: ConfigOverride = () => ({
     url: process.env.NODE_REDIS_URL ?? 'redis://0.0.0.0:6379/0',
     isSecure: false,
   },
+  siteSettings: {
+    ssoButton: {
+      isEnabled: true,
+    },
+  },
   emails: {
     smtp: {
       saveEmailToFile: true,
@@ -61,4 +66,5 @@ export const config: ConfigOverride = () => ({
   },
   bullBoardEnabled: true,
   nestjsDevtoolsEnabled: true,
+  challengeProposalRecipients: [defaultConfig.supportEmail],
 })

@@ -11,7 +11,6 @@ import {
   BannerTitle,
   ResourceBanner,
 } from '../../components/Banner'
-import { GuestNotAllowed } from '../../components/GuestNotAllowed'
 import { MenuCounter } from '../../components/MenuCounter'
 import { BoltIcon } from '../../components/icons/BoltIcon'
 import { CogsIcon } from '../../components/icons/Cogs'
@@ -51,6 +50,8 @@ import { Expand, Fill, Main, MenuItem, MenuText, Row, StyledMenu } from './home.
 import { HomeScope, ResourceTypeUrlNames, ServerScope } from './types'
 import { useActiveResourceFromUrl } from './useActiveResourceFromUrl'
 import { toTitleCase } from './utils'
+import { DiscussionIcon } from '../../components/icons/DiscussionIcon'
+import { DiscussionList } from '../discussions/DiscussionList'
 
 interface CounterRequest {
   apps: string
@@ -60,6 +61,7 @@ interface CounterRequest {
   files: string
   workflows: string
   reports: string
+  discussions: string
 }
 
 export async function counterRequest(homeScope: HomeScope): Promise<CounterRequest> {
@@ -85,7 +87,7 @@ const Home2 = () => {
   const [activeResource] = useActiveResourceFromUrl('myhome')
   const [isPushed, setIsPushed] = useState<boolean>(false)
 
-  useToastWSHandler(user)
+  useToastWSHandler()
   const handleScopeClick = async (newHomeScope: HomeScope) => {
     // Depending on if the user is on the list page or the show page, we need to redirect to the list page
     if (location.pathname === `/home/${activeResource}`) {
@@ -97,13 +99,13 @@ const Home2 = () => {
     }
   }
 
-  type HomeResourceType = Exclude<ResourceTypeUrlNames, 'jobs' | 'members' | 'discussions'>
+  type HomeResourceType = Exclude<ResourceTypeUrlNames, 'jobs' | 'members'>
 
   const homeScopeToResourceTypesMap: Record<HomeScope, HomeResourceType[]> = {
     me: ['files', 'apps', 'databases', 'assets', 'workflows', 'executions', 'reports'],
-    everybody: ['files', 'apps', 'assets', 'workflows', 'executions'],
+    everybody: ['files', 'apps', 'assets', 'discussions', 'workflows', 'executions'],
     featured: ['files', 'apps', 'assets', 'workflows', 'executions'],
-    spaces: ['files', 'apps', 'assets', 'workflows', 'executions'],
+    spaces: ['files', 'apps', 'assets', 'discussions', 'workflows', 'executions'],
   }
 
   useEffect(() => {
@@ -179,6 +181,17 @@ const Home2 = () => {
         {expandedSidebar && <MenuCounter count={counterData?.assets} active={activeResource === 'assets'} />}
       </MenuItem>
     ),
+   discussions: (
+     <MenuItem
+         data-testid="home-discussions-link"
+         to={`/home/discussions${routeScopeParam}`}
+         activeClassName="active"
+         title="Discussions"
+         key="discussions">
+         <DiscussionIcon height={14} />
+         <MenuText>Discussions</MenuText>
+         {expandedSidebar && (<MenuCounter count={counterData?.discussions} active={activeResource === 'discussions'} />)}
+     </MenuItem>),
     workflows: (
       <MenuItem
         data-testid="home-workflows-link"
@@ -218,14 +231,6 @@ const Home2 = () => {
         {expandedSidebar && <MenuCounter count={counterData?.reports} active={activeResource === 'reports'} />}
       </MenuItem>
     ),
-  }
-
-  if (!user || user?.is_guest) {
-    return (
-      <UserLayout mainScroll>
-        <GuestNotAllowed />
-      </UserLayout>
-    )
   }
 
   // TODO: If scopeDescriptions is reused in another component, extract this to a utility function
@@ -295,7 +300,7 @@ const Home2 = () => {
                 element={
                   <FileList
                     homeScope={persistedHomeScope}
-                    showFolderActions={(persistedHomeScope === 'everybody' && user.admin) || persistedHomeScope === 'me'}
+                    showFolderActions={(persistedHomeScope === 'everybody' && user?.admin) || persistedHomeScope === 'me'}
                   />
                 }
               />
@@ -335,6 +340,7 @@ const Home2 = () => {
               />
               <Route path="/executions/:identifier/track" element={<TrackInHome entityType="execution" />} />
               <Route path="reports" element={<SpaceReportList scope="private" />} />
+              <Route path="discussions" element={<DiscussionList canCreateDiscussion={false} scope={persistedHomeScope}/>}/>
               {/* TODO: remove this route when we have a better way to redirect user to executions page */}
               <Route path="jobs/:executionUid" element={<NavigateWithParams to="/home/executions/:executionUid" replace />} />
               <Route path="jobs" element={<Navigate to="/home/executions" replace />} />

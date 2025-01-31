@@ -11,13 +11,16 @@ const meta: Meta = {
   title: 'Modals/Common',
 }
 type Props = {
-  data: {id: string}[]
+  data: { id: string }[]
   type: ATTACHABLE_TYPES
 }
 type Story = StoryObj<Props>
 
 const AttachToModalWrapper = (props: Props) => {
-  const { modalComp, setShowModal } = useAttachToModal(props.data.map(i => i.id), props.type)
+  const { modalComp, setShowModal } = useAttachToModal(
+    props.data.map(i => i.id),
+    props.type,
+  )
 
   useEffect(() => {
     setShowModal(true)
@@ -29,21 +32,22 @@ export const AttachToModal: Story = {
   render: ({ type = 'FILE' }) => {
     let resource: APIResource = 'files'
     let fetchFunc: unknown
-    if(type === 'FILE') {
+    if (type === 'FILE') {
       resource = 'files'
       fetchFunc = fetchFiles
     }
-    if(type === 'APP') {
+    if (type === 'APP') {
       resource = 'apps'
       fetchFunc = fetchApps
     }
     return (
-    <StorybookProviders>
-      <WithListData resource={resource} fetchList={fetchFunc || fetchFiles}>
-        {({ data }) => <AttachToModalWrapper data={data[resource]} type={type} />}
-      </WithListData>
-    </StorybookProviders>
-  )},
+      <StorybookProviders>
+        <WithListData resource={resource} fetchList={fetchFunc || fetchFiles}>
+          {({ data }) => <AttachToModalWrapper data={data[resource]} type={type} />}
+        </WithListData>
+      </StorybookProviders>
+    )
+  },
   argTypes: {
     type: {
       options: ['FILE', 'APP'],

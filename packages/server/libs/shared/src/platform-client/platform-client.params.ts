@@ -61,6 +61,11 @@ type AppAddAuthorizedUsersParams = {
   authorizedUsers: string[]
 }
 
+type AppAddDevelopersParams = {
+  appId: string
+  developers: string[] // user/org dxids
+}
+
 type AppPublishParams = {
   appId: string
   makeDefault?: boolean
@@ -158,6 +163,11 @@ type CreateFolderParams = {
 
 type OrgFindMembersParams = {
   orgDxid: string
+  level?: string
+  id?: string | string[]
+  describe?: boolean | { [key: string]: boolean }
+  starting?: { [key: string]: boolean }
+  limit?: number
 }
 
 type UserInviteToOrgParams = {
@@ -258,6 +268,7 @@ type ProjectLeaveParams = {
 
 export {
   AppAddAuthorizedUsersParams,
+  AppAddDevelopersParams,
   AppCreateParams,
   AppDescribeParams,
   AppletCreateParams,

@@ -36,7 +36,6 @@ module IOC
       namespace "orgs" do # rubocop:todo Metrics/BlockLength
         register("user_removal_policy") { UserRemovalPolicy }
         register("member_removal_policy") { MemberRemovalPolicy }
-        register("org_dissolve_policy") { OrgDissolvePolicy }
 
         register("leave_org_request_creator") do
           OrgService::LeaveOrgRequest.new(resolve("user_removal_policy"))
@@ -44,10 +43,6 @@ module IOC
 
         register("remove_member_request_creator") do
           OrgService::RemoveMemberRequest.new(resolve("member_removal_policy"))
-        end
-
-        register("dissolve_org_request_creator") do
-          OrgService::DissolveOrgRequest.new(resolve("org_dissolve_policy"))
         end
 
         register("on_platform_provisioner") do

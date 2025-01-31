@@ -18,10 +18,17 @@ http {
 
   include /etc/nginx/conf.d/json_analytics_log_format_for_prometheus.conf;
 
+  log_format custom_format '$remote_addr - $remote_user [$time_local] '
+    '"$request" $status $body_bytes_sent '
+    'AUTH_EMAIL="$http_authentication_email" '
+    'AUTH_NAME="$http_authentication_username" '
+    'USER_AGENT="$http_user_agent"';
+  access_log /var/log/nginx/access.log custom_format;
+
   server {
     listen 80;
 
-    # The following is needed for AUTHENTICATION_HEADER_NAME and AUTHENTICATION_HEADER_NAME_EMAIL
+    # The following is needed to pass headers AUTHENTICATION_USERNAME and AUTHENTICATION_EMAIL
     underscores_in_headers on;
 
     location /ginas/app {

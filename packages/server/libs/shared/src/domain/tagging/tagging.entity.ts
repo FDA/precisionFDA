@@ -51,7 +51,7 @@ export class Tagging {
   asset: Asset
 
   @ManyToOne(() => Tag, { joinColumn: 'tag_id' })
-  tag: Tag
+  tag?: Tag
 
   @ManyToOne(() => User, { joinColumn: 'tagger_id' })
   tagger: User;

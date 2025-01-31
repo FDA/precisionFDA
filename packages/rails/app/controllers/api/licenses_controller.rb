@@ -144,7 +144,12 @@ module Api
           message: message,
         })
         if accepted_license.persisted?
-          NotificationsMailer.license_request_email(license, @context.user, message).deliver_now!
+          request = {
+            license_id: @license.id,
+            user_id: @context.user.id,
+            message:,
+          }
+          https_apps_client.email_send(NotificationPreference.email_types[:license_request_email], [], request)
           type = :success
           text = "License \"#{@license.title}\" approval requested"
         else

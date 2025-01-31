@@ -22,9 +22,10 @@ import { useEditFileModal } from './actionModals/useEditFileModal'
 import { useEditFolderModal } from './actionModals/useEditFolderModal'
 import { useLockUnlockFileModal } from './actionModals/useLockUnlockFileModal'
 import { useOpenFileModal } from './actionModals/useOpenFileModal'
-import { useOrganizeFileModal } from './actionModals/useOrganizeFileModal'
+import { useSelectFolderModal } from './actionModals/useSelectFolderModal'
 import { moveFilesRequest } from './files.api'
-import { IFile } from './files.types'
+import { IFile, TreeOnSelectInfo } from './files.types'
+import { pluralize } from '../../utils/formatting'
 
 export type FileActions =
   'Track' |
@@ -37,7 +38,7 @@ export type FileActions =
   'Feature' |
   'Unfeature' |
   'Delete' |
-  'Organize' |
+  'Move' |
   'Copy to...' |
   'Attach to...' |
   'Attach License' |
@@ -230,17 +231,22 @@ export const useFilesSelectActions = ({
     },
   })
   const {
-    modalComp: organizeFileModal,
-    setShowModal: setOrganizeFileModal,
-    isShown: isShownOrganizeFileModal,
-  } = useOrganizeFileModal({
+    modalComp: moveFileModal,
+    setShowModal: setMoveFileModal,
+    isShown: isShownMoveFileModal,
+  } = useSelectFolderModal({
     headerText: `Move ${selected.length} item${selected.length === 1 ? '' : 's'}`,
     submitCaption: 'Move',
     scope: getFileScope(homeScope, space),
-    onHandleSubmit: selectedFolderId => {
-      moveFilesMutation.mutateAsync(selectedFolderId).then(() => {
-        setOrganizeFileModal(false)
-      })
+    onHandleSubmit: (selectedFolderId: number, info: TreeOnSelectInfo) => {
+      moveFilesMutation.mutateAsync(selectedFolderId)
+        .then(() => {
+          setMoveFileModal(false)
+          toast.success(`Successfully moved ${selected.length} ${pluralize('item', selected.length)} to ${info.node.title}`)
+        })
+        .catch((error) => {
+          toast.error(`Error moving files: ${error}`)
+        })
     },
   })
   const sourceScopes = new Set()
@@ -400,12 +406,12 @@ export const useFilesSelectActions = ({
       modal: unlockFileModal,
       showModal: isShownUnlockFileModal,
     },
-    Organize: {
+    Move: {
       type: 'modal',
-      func: () => setOrganizeFileModal(true),
+      func: () => setMoveFileModal(true),
       isDisabled: selected.length === 0 || selected.some(e => e.locked) || selected.some(e => !e.links.organize) || openSelected,
-      modal: organizeFileModal,
-      showModal: isShownOrganizeFileModal,
+      modal: moveFileModal,
+      showModal: isShownMoveFileModal,
       shouldHide: !isAdmin && homeScope !== 'me' && isViewer,
     },
     'Copy to...': {

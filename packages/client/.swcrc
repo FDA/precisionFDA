@@ -7,7 +7,6 @@
       "dynamicImport": false
     },
     "transform": null,
-    "target": "es2020",
     "loose": false,
     "externalHelpers": false,
     "experimental": {

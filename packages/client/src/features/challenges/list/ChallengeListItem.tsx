@@ -2,7 +2,7 @@ import { format } from 'date-fns'
 import React from 'react'
 import { Link } from 'react-router-dom'
 import styled from 'styled-components'
-import { Content, ItemBody, Title } from '../../../components/Public/styles'
+import { Content, ItemBody } from '../../../components/Public/styles'
 import { DateArea, ItemImage, ViewDetailsButton } from '../styles'
 import { Challenge } from '../types'
 import { getChallengeTimeRemaining, getTimeStatus } from '../util'
@@ -18,27 +18,35 @@ const StyledChallengeListItem = styled.div`
   }
 `
 
-export const ChallengeListItem = ({ challenge }: { challenge: Challenge }) => (
+export const Title = styled(Link)`
+  color: var(--c-text-700);
+  font-size: 20px;
+  font-weight: bold;
+  line-height: 20px;
+`
+
+export const ChallengeListItem = ({ challenge }: { challenge: Challenge }) => {
+  return (
   <StyledChallengeListItem>
-    <ItemImage $timeStatus={getTimeStatus(challenge.start_at, challenge.end_at)}>
-      <img width="100%" src={challenge.card_image_url} alt="sf" />
+    <ItemImage $timeStatus={getTimeStatus(challenge.startAt, challenge.endAt)}>
+      <img width="100%" src={challenge.cardImageUrl} alt="sf" />
     </ItemImage>
     <ItemBody>
-      <Title>{challenge.name}</Title>
+      <Title to={`/challenges/${challenge.id}`}>{challenge.name}</Title>
       <DateArea>
         <span className="challenge-date-label">Starts</span>
         <span className="challenge-date">
-          {format(challenge.start_at, 'MM/dd/yyyy')}
+          {format(challenge.startAt, 'MM/dd/yyyy')}
         </span>
         <span>&rarr;</span>
         <span className="challenge-date-label">Ends</span>
         <span className="challenge-date">
-          {format(challenge.end_at, 'MM/dd/yyyy')}{' '}
+          {format(challenge.endAt, 'MM/dd/yyyy')}{' '}
         </span>
         <div className="challenge-date-remaining">
           {getChallengeTimeRemaining({
-            start_at: challenge.start_at,
-            end_at: challenge.end_at,
+            startAt: challenge.startAt,
+            endAt: challenge.endAt,
           })}
         </div>
       </DateArea>
@@ -51,3 +59,4 @@ export const ChallengeListItem = ({ challenge }: { challenge: Challenge }) => (
     </ItemBody>
   </StyledChallengeListItem>
 )
+}

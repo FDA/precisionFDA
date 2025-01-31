@@ -12,7 +12,6 @@ import {
 } from '@mikro-orm/core'
 import { Attachment } from '@shared/domain/attachment/attachment.entity'
 import { User } from '@shared/domain/user/user.entity'
-import { SCOPE } from '../../types/common'
 import { STATIC_SCOPE } from '@shared/enums'
 import { ScopedEntity } from '@shared/database/scoped.entity'
 
@@ -37,9 +36,6 @@ export class Note extends ScopedEntity {
 
   @Property()
   content: string
-
-  @Property()
-  scope: SCOPE
 
   @Property()
   noteType: NoteType
