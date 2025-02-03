@@ -33,7 +33,7 @@ export class InvitationHandler
   }
 
   async determineReceivers(): Promise<User[]> {
-    const recipients = [{ email: this.invitation.email } as User]
+    const recipients = [{ email: config.supportEmail } as User]
     if (config.env === 'production') {
       recipients.push({ email: config.pfdaEmail } as User)
     }
@@ -44,7 +44,7 @@ export class InvitationHandler
     const body = buildEmailTemplate<InvitationTemplateInput>(this.templateFile, {
       firstName: this.invitation.firstName,
       lastName: this.invitation.lastName,
-      email: receiver.email,
+      email: this.invitation.email,
       address1: this.invitation.address1,
       address2: this.invitation.address2,
       phone: this.invitation.phone,
