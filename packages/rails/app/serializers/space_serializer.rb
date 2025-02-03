@@ -16,6 +16,7 @@ class SpaceSerializer < ApplicationSerializer
     :links,
     :updatable,
     :protected,
+    :hidden,
     :restricted_reviewer,
     :restricted_discussions,
   )

@@ -1,13 +1,8 @@
 /* eslint-disable react/require-default-props */
+import classNames from 'classnames'
 import 'core-js'
 import { range } from 'ramda'
-import React, {
-  MouseEventHandler,
-  PropsWithChildren,
-  ReactElement,
-  ReactNode,
-  useMemo,
-} from 'react'
+import React, { MouseEventHandler, PropsWithChildren, ReactElement, ReactNode, useMemo } from 'react'
 import {
   Cell,
   Filters,
@@ -32,18 +27,17 @@ import {
 } from 'react-table'
 import 'regenerator-runtime'
 import styled from 'styled-components'
-import classNames from 'classnames'
 import { ActionsDropdownGroupContent } from '../../features/home/ActionDropdownContent'
 import { ActionFunctionsType, ActionGroupType } from '../../features/home/types'
 import { TransparentButton } from '../Button'
 import Dropdown from '../Dropdown'
 import { ColumnsIcon } from '../icons/ColumnsIcon'
+import { Draggable, Droppable } from './DnD'
 import { LoadingRows } from './LoadingRows'
 import { DefaultColumnFilter } from './helpers'
 import { ReactTableStyles, StyledTable } from './styles'
 import { expandHook, selectionHook } from './tableHooks'
 import { useComponentWidth } from './useComponentWidth'
-import { Draggable, Droppable } from './DnD'
 
 const StyledColumnSelect = styled.div`
   position: sticky;
@@ -89,10 +83,10 @@ const ColumnSelect = ({
   columns,
   onChangeVisible,
 }: {
-  columns: SelectColumn[],
-  onChangeVisible: (hiddenCols: string, cols: boolean) => void,
+  columns: SelectColumn[]
+  onChangeVisible: (hiddenCols: string, cols: boolean) => void
 }) => {
-  const actions: {[key: string]: ActionFunctionsType<any>} = {}
+  const actions: { [key: string]: ActionFunctionsType<any> } = {}
   for (const col of columns) {
     if (!actions[col.groupTitle]) {
       actions[col.groupTitle] = {}
@@ -114,12 +108,7 @@ const ColumnSelect = ({
   }))
   return (
     <StyledColumnSelect>
-      <Front
-        trigger="click"
-        content={
-          <ActionsDropdownGroupContent content={content} />
-        }
-      >
+      <Front trigger="click" content={<ActionsDropdownGroupContent content={content} />}>
         {dropdownProps => (
           <TransparentButton {...dropdownProps} active={dropdownProps.isActive} title="Column Select">
             <ColumnsIcon height={14} />
@@ -131,15 +120,15 @@ const ColumnSelect = ({
   )
 }
 
-const Column = ({ cell, cellProps }: { cell: Cell, cellProps?: (cell: Cell) => any }) => {
-  const classes = classNames('td', { 'row-expander': cell.column.id === 'row-expander' })
+const Column = ({ cell, cellProps }: { cell: Cell; cellProps?: (cell: Cell) => any }) => {
+  const classes = classNames(
+    'td',
+    { 'row-expander': cell.column.id === 'row-expander' },
+    { selection: cell.column.id === 'selection' },
+  )
   return (
     // eslint-disable-next-line react/jsx-key
-    <div
-      {...cell.getCellProps(cellProps && cellProps(cell))}
-      className={classes}
-      data-testid={`table-col-${cell.column.id}`}
-    >
+    <div {...cell.getCellProps(cellProps && cellProps(cell))} className={classes} data-testid={`table-col-${cell.column.id}`}>
       {cell.render('Cell')}
     </div>
   )
@@ -155,53 +144,47 @@ type RowProps = {
   numSelected?: number
 }
 
-const DefaultRow = ({
-  row,
-  rowProps,
-  cellProps,
-  subcomponent,
-  isExpandable,
-  colFiller,
-}: RowProps) => {
+const DefaultRow = ({ row, rowProps, cellProps, subcomponent, isExpandable, colFiller }: RowProps) => {
   return (
     <>
       <div {...row.getRowProps(rowProps && rowProps(row))} className="tr" role="row" data-testid="data-row">
-        {row.cells.map(cell => <Column key={cell.column.id} cell={cell} cellProps={cellProps} />)}
+        {row.cells.map(cell => (
+          <Column key={cell.column.id} cell={cell} cellProps={cellProps} />
+        ))}
         {colFiller}
       </div>
       {isExpandable && row.isExpanded ? subcomponent && subcomponent(row) : null}
     </>
   )
 }
-const DnDRow = ({
-  row,
-  rowProps,
-  cellProps,
-  subcomponent,
-  isExpandable,
-  colFiller,
-  numSelected,
-}: RowProps) => {
-  
+const DnDRow = ({ row, rowProps, cellProps, subcomponent, isExpandable, colFiller, numSelected }: RowProps) => {
   let DnDComp = row.isSelected ? Draggable : 'div'
-  if(row.isSelected && row.original.type === 'Folder') {
+  if (row.isSelected && row.original.type === 'Folder') {
     DnDComp = Draggable
   }
-  if(!row.isSelected && row.original.type === 'Folder') {
+  if (!row.isSelected && row.original.type === 'Folder') {
     DnDComp = Droppable
   }
-  
+
   return (
     <>
-      <DnDComp {...row.getRowProps(rowProps && rowProps(row))} name={row.original.name} numSelected={numSelected} className="tr" role="row" data-testid="data-row">
-        {row.cells.map(cell => <Column key={cell.column.id} cell={cell} cellProps={cellProps} />)}
+      <DnDComp
+        {...row.getRowProps(rowProps && rowProps(row))}
+        name={row.original.name}
+        numSelected={numSelected}
+        className="tr"
+        role="row"
+        data-testid="data-row"
+      >
+        {row.cells.map(cell => (
+          <Column key={cell.column.id} cell={cell} cellProps={cellProps} />
+        ))}
         {colFiller}
       </DnDComp>
       {isExpandable && row.isExpanded ? subcomponent && subcomponent(row) : null}
     </>
   )
 }
-
 
 export interface ITable<T extends object = {}> extends TableOptions<T> {
   name: string
@@ -236,18 +219,14 @@ export interface ITable<T extends object = {}> extends TableOptions<T> {
   cellProps?: (cell: Cell<T>) => any
   rowProps?: (row: Row<T>) => any
   updateRowState?: (row: Row<T>) => any
-  saveColumnResizeWidth?: (
-    columnResizing: UseResizeColumnsState<any>['columnResizing'],
-  ) => void
+  saveColumnResizeWidth?: (columnResizing: UseResizeColumnsState<any>['columnResizing']) => void
   getRowId?: Parameters<typeof useTable>[0]['getRowId']
   enableColumnSelect?: boolean
   shouldAllowScrollbar?: boolean
   saveHiddenColumns: (cols: string[]) => void
 }
 
-export default function Table<T extends object>(
-  props: PropsWithChildren<ITable<T>>,
-): ReactElement {
+export default function Table<T extends object>(props: PropsWithChildren<ITable<T>>): ReactElement {
   const {
     dnd = false,
     fillWidth = false,
@@ -309,20 +288,20 @@ export default function Table<T extends object>(
     },
 
     useColumnOrder,
-    isFilterable ? useFilters : () => { },
-    isFilterable ? useGlobalFilter : () => { },
+    isFilterable ? useFilters : () => {},
+    isFilterable ? useGlobalFilter : () => {},
     useGroupBy,
-    isSortable ? useSortBy : () => { },
-    isExpandable ? useExpanded : () => { },
+    isSortable ? useSortBy : () => {},
+    isExpandable ? useExpanded : () => {},
     usePagination,
     useFlexLayout,
-    isExpandable ? expandHook : () => { },
-    isSelectable ? useRowSelect : () => { },
-    isSelectable ? selectionHook : () => { },
-    isColsResizable ? useResizeColumns : () => { },
-    )
-    
-    const {
+    isExpandable ? expandHook : () => {},
+    isSelectable ? useRowSelect : () => {},
+    isSelectable ? selectionHook : () => {},
+    isColsResizable ? useResizeColumns : () => {},
+  )
+
+  const {
     getTableProps,
     getTableBodyProps,
     prepareRow,
@@ -334,14 +313,15 @@ export default function Table<T extends object>(
     toggleAllRowsSelected,
     setAllFilters,
   } = instance
-  
 
   // Fix empty space with column header with calculated width
   const { containerRef, containerWidth = 50 } = useComponentWidth()
   const spacerWidth = useMemo(() => {
-    const sum = visibleColumns.map(c => c.width as number).reduce((accumulator, value) => {
-      return accumulator + value
-    }, 0)
+    const sum = visibleColumns
+      .map(c => c.width as number)
+      .reduce((accumulator, value) => {
+        return accumulator + value
+      }, 0)
     return containerWidth > sum ? containerWidth - sum - 8 : 50
   }, [visibleColumns])
 
@@ -386,29 +366,42 @@ export default function Table<T extends object>(
   }, [columnResizing])
 
   const onChangeVisible = (col: string, isVisible: boolean) => {
-    const newHCols = [...hiddenColumns ?? []]
+    const newHCols = [...(hiddenColumns ?? [])]
     if (isVisible) {
       const index = hiddenColumns?.indexOf(col) ?? -1
       if (index > -1) {
         newHCols?.splice(index, 1)
-        saveHiddenColumns([...newHCols || []])
+        saveHiddenColumns([...(newHCols || [])])
       }
     } else {
       newHCols?.push(col)
-      saveHiddenColumns([...newHCols || []])
+      saveHiddenColumns([...(newHCols || [])])
     }
   }
 
   const getAvailableCols = () => {
-    const standardColumns = columns?.filter((c) => c?.id === typeof 'string' || !c.id?.includes('props.'))
-    .map(c => ({ key: c?.accessor, title: c.Header, groupTitle: 'Standard Columns', isVisible: !hiddenColumns?.includes(c.accessor) })) ?? []
-    const propColums = properties?.map(p => ({ key: `props.${p}`, title: p, groupTitle: 'Property Columns', isVisible: !hiddenColumns?.includes(`props.${p}`) })) ?? []
+    const standardColumns =
+      columns
+        ?.filter(c => c?.id === typeof 'string' || !c.id?.includes('props.'))
+        .map(c => ({
+          key: c?.accessor,
+          title: c.Header,
+          groupTitle: 'Standard Columns',
+          isVisible: !hiddenColumns?.includes(c.accessor),
+        })) ?? []
+    const propColums =
+      properties?.map(p => ({
+        key: `props.${p}`,
+        title: p,
+        groupTitle: 'Property Columns',
+        isVisible: !hiddenColumns?.includes(`props.${p}`),
+      })) ?? []
 
     return [...standardColumns, ...propColums]
   }
 
   const colFiller = displayColFiller && <div className="th" style={{ width: spacerWidth - 10, minWidth: 50 }} />
- 
+
   return (
     <StyledTable data-testid="pfda-table">
       <ReactTableStyles $shouldFillWidth={fillWidth} $shouldAllowScrollbar={shouldAllowScrollbar}>
@@ -475,11 +468,7 @@ export default function Table<T extends object>(
                   subcomponent,
                 }
                 prepareRow(r)
-                return dnd ? (
-                  <DnDRow key={r.id} {...rProps} />
-                ) : (
-                  <DefaultRow key={r.id} {...rProps} />
-                )
+                return dnd ? <DnDRow key={r.id} {...rProps} /> : <DefaultRow key={r.id} {...rProps} />
               })}
             </div>
           </div>
