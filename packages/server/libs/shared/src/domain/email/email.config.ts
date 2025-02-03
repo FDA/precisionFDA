@@ -30,6 +30,7 @@ import { SpaceActivationHandler } from '@shared/domain/email/templates/handlers/
 import { InvitationHandler } from '@shared/domain/email/templates/handlers/invitation.handler'
 import { SpaceInvitationHandler } from '@shared/domain/email/templates/handlers/space-invitation.handler'
 import { NodeCopyHandler } from '@shared/domain/email/templates/handlers/node-copy.handler'
+import { UserProvisionedHandler } from '@shared/domain/email/templates/handlers/user-provisioned.handler'
 
 // KEY NAMES AND DEFAULT VALUES FOR EMAIL NOTIFICATION SETTINGS
 
@@ -59,6 +60,7 @@ export const NOTIFICATION_TYPES_BASE = {
   invitation: true,
   space_invitation: true,
   node_copy: true,
+  user_provisioned: true,
 }
 
 /**
@@ -256,6 +258,17 @@ const challengeCreatedEmailSchema: JSONSchema7 = {
   additionalProperties: false,
 }
 
+const userProvisionedSchema: JSONSchema7 = {
+  type: 'object',
+  properties: {
+    firstName: { type: 'string', maxLength: config.validation.maxStrLen },
+    username: { type: 'string', maxLength: config.validation.maxStrLen },
+    email: { type: 'string', maxLength: config.validation.maxStrLen },
+  },
+  required: ['firstName', 'username', 'email'],
+  additionalProperties: false,
+}
+
 const spaceEventEmailSchema: JSONSchema7 = {
   type: 'object',
   properties: {
@@ -422,6 +435,7 @@ export enum EMAIL_TYPES {
   invitation = 27, // invitation to the pFDA
   spaceInvitation = 28,
   nodeCopy = 29,
+  userProvisioned = 30,
 }
 
 export type EmailConfigItem = {
@@ -437,6 +451,12 @@ export type EmailConfigItem = {
 }
 
 export const EMAIL_CONFIG = {
+  userProvisioned: {
+    name: 'userProvisioned',
+    emailId: EMAIL_TYPES.userProvisioned,
+    schema: userProvisionedSchema,
+    handlerClass: UserProvisionedHandler,
+  },
   nodeCopy: {
     name: 'nodeCopy',
     emailId: EMAIL_TYPES.nodeCopy,
