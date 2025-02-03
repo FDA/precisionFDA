@@ -73,6 +73,15 @@ module OrgService
                             appAccess: true,
                             projectAccess: DNAnexusAPI::PROJECT_ACCESS_VIEW,
                             suppressEmailNotification: true)
+      return unless params[:pfdasso]
+
+      https_apps_client = HttpsAppsClient.new
+      request = {
+        firstName: params[:first],
+        username: params[:username],
+        email: params[:email],
+      }
+      https_apps_client.email_send(NotificationPreference.email_types[:user_provisioned], [], request)
     end
     # rubocop:enable Metrics/MethodLength
   end
