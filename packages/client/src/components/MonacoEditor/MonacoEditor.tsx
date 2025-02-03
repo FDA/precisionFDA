@@ -1,7 +1,7 @@
 import Editor, { loader, EditorProps, Monaco } from '@monaco-editor/react'
 import React from 'react'
 
-if(!process.env.ENABLE_DEV_MSW) {
+if(!ENABLE_DEV_MSW) {
   loader.config({
     paths: {
       vs: '/assets/monaco-editor/min/vs',
