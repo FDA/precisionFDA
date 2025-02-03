@@ -110,7 +110,7 @@ jobs:
       - name: Setup pnpm
         run: |
           corepack enable
-          corepack prepare pnpm@latest --activate
+          corepack prepare pnpm@9.0.6 --activate
 
       - name: Install modules
         run: pnpm install
