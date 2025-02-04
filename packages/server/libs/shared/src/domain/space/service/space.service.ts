@@ -1,13 +1,15 @@
+import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Inject, Injectable } from '@nestjs/common'
 import { SpaceCreationProcess } from '@shared/domain/space/create/space-creation.process'
-import { CreateSpaceDto } from '@shared/domain/space/dto/create-space.dto'
 import { SPACE_TYPE_TO_PROCESS_PROVIDER_MAP } from '@shared/domain/space/create/space-type-to-process-map.provider'
+import { CreateSpaceDto } from '@shared/domain/space/dto/create-space.dto'
+import { SpaceRepository } from '@shared/domain/space/space.repository'
+import { Node } from '@shared/domain/user-file/node.entity'
 import { PermissionError, ServiceError } from '@shared/errors'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { Logger } from 'nestjs-pino'
+import { Space } from '../space.entity'
 import { SPACE_STATE, SPACE_TYPE } from '../space.enum'
-import { Node } from '@shared/domain/user-file/node.entity'
-import { SpaceRepository } from '@shared/domain/space/space.repository'
 
 @Injectable()
 export class SpaceService {
@@ -15,6 +17,7 @@ export class SpaceService {
   protected readonly logger: Logger
 
   constructor(
+    private readonly em: SqlEntityManager,
     @Inject(SPACE_TYPE_TO_PROCESS_PROVIDER_MAP)
     private readonly spaceTypeToCreatorProviderMap: {
       [T in SPACE_TYPE]: SpaceCreationProcess
@@ -46,5 +49,9 @@ export class SpaceService {
           ' it is part of Locked Verification space.',
       )
     }
+  }
+
+  async updateSpacesHiddenForAdmin(spaceIds: number[], hidden: boolean): Promise<void> {
+    await this.em.nativeUpdate(Space, { id: { $in: spaceIds } }, { hidden })
   }
 }

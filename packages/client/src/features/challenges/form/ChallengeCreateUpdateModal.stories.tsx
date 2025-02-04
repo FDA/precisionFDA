@@ -14,12 +14,11 @@ export const CreateUpdateModal: Story = {
     isEditMode: true,
     isSaving: true,
   },
-  render: (args) => (
+  render: args => (
     <StorybookProviders>
       <ChallengeCreateUpdateModal {...args} isSaving />
     </StorybookProviders>
   ),
-
 }
 
 export default meta

@@ -753,6 +753,7 @@ ActiveRecord::Schema.define(version: 2025_01_16_120925) do
     t.boolean "restrict_to_template", default: false
     t.boolean "inactivity_notified", default: false
     t.boolean "protected", default: false
+    t.boolean "hidden", default: false
     t.index ["space_id"], name: "fk_rails_b7a2c80157"
   end
 

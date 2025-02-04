@@ -16,7 +16,7 @@ const meta: Meta = {
   ],
 }
 type Props = {
-  data: {id: string}[]
+  data: { id: string }[]
 }
 type Story = StoryObj<Props>
 
