@@ -9,14 +9,14 @@ then
   cd /usr/local/GSRSFrontend
   bash /usr/local/GSRSFrontend/build.sh
   npm install webpack
-  sed -i 's$http://localhost:8080/frontend/ginas/app/beta$http://localhost:4200/ginas/app/beta$g' /usr/local/tomcat/webapps/ROOT/WEB-INF/classes/application.yml
+  sed -i 's$http://localhost:8080/frontend/ginas/app/ui$http://localhost:4200/ginas/app/ui$g' /usr/local/tomcat/webapps/ROOT/WEB-INF/classes/application.yml
   /usr/local/tomcat/bin/catalina.sh stop && rm -rf /usr/local/tomcat/work
   /usr/local/tomcat/bin/catalina.sh start
   npm run start:fda:local &
   cd $oldPwd
 elif [[ $choice -eq 2 ]]
 then
-  sed -i 's$http://localhost:4200/ginas/app/beta$http://localhost:8080/frontend/ginas/app/beta$g' /usr/local/tomcat/webapps/ROOT/WEB-INF/classes/application.yml
+  sed -i 's$http://localhost:4200/ginas/app/ui$http://localhost:8080/frontend/ginas/app/ui$g' /usr/local/tomcat/webapps/ROOT/WEB-INF/classes/application.yml
   /usr/local/tomcat/bin/catalina.sh stop && rm -rf /usr/local/tomcat/work
   /usr/local/tomcat/bin/catalina.sh start
 else
