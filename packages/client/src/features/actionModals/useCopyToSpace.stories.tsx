@@ -11,7 +11,7 @@ const meta: Meta = {
   title: 'Modals/Common',
 }
 type Props = {
-  data: {id: string}[]
+  data: { id: string }[]
   type: APIResource
 }
 type Story = StoryObj<Props>
@@ -28,19 +28,20 @@ const CopyToSpaceModalWrapper = (props: Props) => {
 export const CopyToSpaceModal: Story = {
   render: ({ type = 'files' }) => {
     let fetchFunc: unknown
-    if(type === 'files') {
+    if (type === 'files') {
       fetchFunc = fetchFiles
     }
-    if(type === 'apps') {
+    if (type === 'apps') {
       fetchFunc = fetchApps
     }
     return (
-    <StorybookProviders>
-      <WithListData resource={type} fetchList={fetchFunc || fetchFiles}>
-        {({ data }) => <CopyToSpaceModalWrapper data={data[type]} type={type} />}
-      </WithListData>
-    </StorybookProviders>
-  )},
+      <StorybookProviders>
+        <WithListData resource={type} fetchList={fetchFunc || fetchFiles}>
+          {({ data }) => <CopyToSpaceModalWrapper data={data[type]} type={type} />}
+        </WithListData>
+      </StorybookProviders>
+    )
+  },
   argTypes: {
     type: {
       options: ['files', 'apps'] as APIResource[],

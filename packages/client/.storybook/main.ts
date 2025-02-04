@@ -1,27 +1,30 @@
-import { addons } from '@storybook/manager-api'
-import { themes } from '@storybook/theming'
 
-addons.setConfig({
-  theme: themes.light,
-})
+import type { StorybookConfig } from '@storybook/react-webpack5'
+import webpack from 'webpack';
 
-module.exports = {
-  'stories': [
+const config: StorybookConfig = {
+  stories: [
     '../src/**/*.mdx',
     '../src/**/*.stories.@(js|jsx|ts|tsx)'
   ],
-  'addons': [
-    '@storybook/addon-links',
-    '@storybook/addon-essentials',
-    '@storybook/addon-interactions',
-    'storybook-addon-swc'
+  addons: [
+    '@storybook/addon-webpack5-compiler-swc'
   ],
-  'framework': {
-    'name': '@storybook/react-webpack5',
-    'options': {}
+  framework: {
+    name: '@storybook/react-webpack5',
+    options: {}
   },
-  'staticDirs': ['../public'],
-  'docs': {
-    'autodocs': 'tag'
+  staticDirs: ['../public'],
+  webpackFinal: async (webpackConfig) => {
+    webpackConfig.plugins = webpackConfig.plugins || [];
+    webpackConfig.plugins.push(
+      new webpack.DefinePlugin({
+        ENABLE_DEV_MSW: JSON.stringify(Boolean(process.env.ENABLE_DEV_MSW)),
+      })
+    );
+
+    return webpackConfig;
   }
-}
+};
+
+export default config

@@ -19,15 +19,34 @@ function fileSizeParamMap(fileSize?: [number | null, number | null]) {
       fileSize = undefined
     }
     return fileSize
-  } 
-    return fileSize
-  
+  }
+  return fileSize
 }
 
-const KEYS = ['id', 'name', 'tags', 'featured', 'revision', 'added_by', 'title', 'state', 'status', 'engine', 'dx_instance_class', 'location', 'app_title', 'launched_by', 'type', 'guest_lead', 'host_lead', 'workflow_title']
+const KEYS = [
+  'id',
+  'name',
+  'tags',
+  'featured',
+  'revision',
+  'added_by',
+  'title',
+  'state',
+  'hidden',
+  'status',
+  'engine',
+  'dx_instance_class',
+  'location',
+  'app_title',
+  'launched_by',
+  'type',
+  'guest_lead',
+  'host_lead',
+  'workflow_title',
+]
 function getObjectKeys<T>(a: string[]) {
   const o = {} as any
-  a.forEach(k => o[k] = undefined)
+  a.forEach(k => (o[k] = undefined))
   return o
 }
 
@@ -48,16 +67,16 @@ export function useFilterState({ onSetFilter }: { onSetFilter?: (values: any) =>
   }
 }
 
-type FilterArgs =  Record<string, string>
-type ParamsType = {[key: string]: QueryParamConfig<any, any>}
+type FilterArgs = Record<string, string>
+type ParamsType = { [key: string]: QueryParamConfig<any, any> }
 
-export function useFilterParams({ filters, onSetFilter }: { filters: FilterArgs, onSetFilter?: (values: any) => void }) {
+export function useFilterParams({ filters, onSetFilter }: { filters: FilterArgs; onSetFilter?: (values: any) => void }) {
   const params: ParamsType = {}
   Object.keys(filters).forEach(v => {
-    if(filters[v] === 'string' || filters[v] === 'number') {
+    if (filters[v] === 'string' || filters[v] === 'number') {
       params[v] = withDefault(StringParam, undefined)
     }
-    if(filters[v] === 'range') {
+    if (filters[v] === 'range') {
       params[v] = withDefault(DelimitedNumericArrayParam, undefined)
     }
   })
@@ -66,7 +85,7 @@ export function useFilterParams({ filters, onSetFilter }: { filters: FilterArgs,
   const debouncedSetFilterQuery = debounce(v => {
     v.file_size = fileSizeParamMap(v.file_size)
     setFilterParam(v, 'replaceIn')
-    if(onSetFilter) onSetFilter(v)
+    if (onSetFilter) onSetFilter(v)
   }, 500)
 
   const setSearchFilter = useCallback((val: IFilter[]) => {

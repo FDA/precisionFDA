@@ -17,7 +17,7 @@ export async function spaceRequest({ id }: { id: number }): Promise<FetchSpaceDe
   return axios.get(`/api/spaces/${id}`).then(res => res.data)
 }
 
-export async function fixGuestPermissions({ id }:{id: string}): Promise<unknown> {
+export async function fixGuestPermissions({ id }: { id: string }): Promise<unknown> {
   return axios.patch(`/api/spaces/${id}/fix_guest_permissions`).then(res => res.data)
 }
 
@@ -51,7 +51,15 @@ export async function acceptSpaceRequest({ id }: { id: string }): Promise<unknow
   return res.json()
 }
 
-export async function addDataRequest({ spaceId, uids, properties }: { spaceId: string; uids: string[], properties?: Record<string, any> }): Promise<any> {
+export async function addDataRequest({
+  spaceId,
+  uids,
+  properties,
+}: {
+  spaceId: string
+  uids: string[]
+  properties?: Record<string, any>
+}): Promise<any> {
   const requestProperties = properties || { createAppSeries: true, createAppRevision: false }
   return axios
     .post(`/api/spaces/${spaceId}/add_data`, {
@@ -106,4 +114,8 @@ export async function createSpaceRequest(payload: CreateSpacePayload): Promise<C
 
 export async function editSpaceRequest(spaceId: number, payload: CreateSpacePayload): Promise<CreateSpaceResponse> {
   return axios.put(`/api/spaces/${spaceId}`, { space: payload }).then(res => res.data)
+}
+
+export async function updateSpacesHidden(spaceIds: number[], hidden: boolean): Promise<void> {
+  await axios.patch('/api/v2/spaces/hidden', { ids: spaceIds, hidden })
 }

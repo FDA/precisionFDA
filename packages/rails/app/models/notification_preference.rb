@@ -79,6 +79,7 @@ class NotificationPreference < ApplicationRecord
     invitation: 27,
     space_invitation: 28,
     node_copy: 29,
+    user_provisioned: 30,
   }.freeze
 
   ALL_KEYS = REVIEWER_KEYS + SPONSOR_KEYS + REVIEWER_LEAD_KEYS + SPONSOR_LEAD_KEYS +

@@ -8,6 +8,7 @@ import {
   PrimaryKey,
   Property,
 } from '@mikro-orm/core'
+import { DataPortal } from '@shared/domain/data-portal/data-portal.entity'
 import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { BaseEntity } from '../../database/base.entity'
@@ -15,12 +16,11 @@ import { SPACE_MEMBERSHIP_SIDE } from '../space-membership/space-membership.enum
 import { SPACE_STATE, SPACE_TYPE } from './space.enum'
 import { getScopeFromSpaceId } from './space.helper'
 import { SpaceRepository } from './space.repository'
-import { DataPortal } from '@shared/domain/data-portal/data-portal.entity'
 
 type SpaceMeta = {
-  cts: string,
-  restricted_reviewer: boolean,
-  restricted_discussions: boolean,
+  cts: string
+  restricted_reviewer: boolean
+  restricted_discussions: boolean
 }
 
 @Entity({ tableName: 'spaces', repository: () => SpaceRepository })
@@ -67,6 +67,9 @@ export class Space extends BaseEntity {
 
   @Property()
   protected?: boolean
+
+  @Property()
+  hidden: boolean
 
   @ManyToMany(() => SpaceMembership, 'spaces', {
     pivotTable: 'space_memberships_spaces',

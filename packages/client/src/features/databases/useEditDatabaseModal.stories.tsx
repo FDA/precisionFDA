@@ -16,7 +16,7 @@ const meta: Meta = {
   ],
 }
 type Props = {
-  data: Partial<{ uid: string, id: string }>
+  data: Partial<{ uid: string; id: string }>
 }
 type Story = StoryObj<Props>
 
