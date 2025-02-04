@@ -21,6 +21,7 @@ import { TaggingService } from '@shared/domain/tagging/tagging.service'
 import { SpaceEventService } from '@shared/domain/space-event/space-event.service'
 import { UserFileRepository } from '@shared/domain/user-file/user-file.repository'
 import { LicensedItemService } from '@shared/domain/licensed-item/licensed-item.service'
+import { TAGGABLE_TYPE } from '@shared/domain/tagging/tagging.types'
 
 @Injectable()
 export class RemoveNodesFacade {
@@ -124,7 +125,7 @@ export class RemoveNodesFacade {
 
     return await this.em.transactional(async () => {
       await this.licensedItemService.removeItemLicensedForNode(fileToRemove.id)
-      await this.taggingService.removeTaggings(fileToRemove.id)
+      await this.taggingService.removeTaggings(fileToRemove.id, TAGGABLE_TYPE.NODE)
 
       const fileEvent = await createFileEvent(
         EVENT_TYPES.FILE_DELETED,
@@ -163,8 +164,6 @@ export class RemoveNodesFacade {
     const folderPath = await getNodePath(this.em, folderToRemove)
 
     return await this.em.transactional(async () => {
-      await this.taggingService.removeTaggings(folderToRemove.id)
-
       const folderEvent = await createFolderEvent(
         EVENT_TYPES.FOLDER_DELETED,
         folderToRemove,
