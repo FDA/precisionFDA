@@ -12,12 +12,18 @@ enum SPACE_TYPE {
 
 function getSpaceTypeEnum(key: string): SPACE_TYPE {
   switch (key?.toUpperCase()) {
-    case 'GROUPS': return SPACE_TYPE.GROUPS;
-    case 'REVIEW': return SPACE_TYPE.REVIEW;
-    case 'PRIVATE_TYPE': return SPACE_TYPE.PRIVATE_TYPE;
-    case 'GOVERNMENT': return SPACE_TYPE.GOVERNMENT;
-    case 'ADMINISTRATOR': return SPACE_TYPE.ADMINISTRATOR;
-    default: throw new InvalidStateError(`Unknown SPACE_TYPE: ${key}`);
+    case 'GROUPS':
+      return SPACE_TYPE.GROUPS
+    case 'REVIEW':
+      return SPACE_TYPE.REVIEW
+    case 'PRIVATE_TYPE':
+      return SPACE_TYPE.PRIVATE_TYPE
+    case 'GOVERNMENT':
+      return SPACE_TYPE.GOVERNMENT
+    case 'ADMINISTRATOR':
+      return SPACE_TYPE.ADMINISTRATOR
+    default:
+      throw new InvalidStateError(`Unknown SPACE_TYPE: ${key}`)
   }
 }
 
@@ -28,4 +34,4 @@ enum SPACE_STATE {
   DELETED = 3,
 }
 
-export { SPACE_TYPE, SPACE_STATE, getSpaceTypeEnum }
+export { getSpaceTypeEnum, SPACE_STATE, SPACE_TYPE }

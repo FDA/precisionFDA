@@ -238,15 +238,10 @@ export const useFilesSelectActions = ({
     headerText: `Move ${selected.length} item${selected.length === 1 ? '' : 's'}`,
     submitCaption: 'Move',
     scope: getFileScope(homeScope, space),
-    onHandleSubmit: (selectedFolderId: number, info: TreeOnSelectInfo) => {
-      moveFilesMutation.mutateAsync(selectedFolderId)
-        .then(() => {
-          setMoveFileModal(false)
-          toast.success(`Successfully moved ${selected.length} ${pluralize('item', selected.length)} to ${info.node.title}`)
-        })
-        .catch((error) => {
-          toast.error(`Error moving files: ${error}`)
-        })
+    onHandleSubmit: selectedFolderId => {
+      moveFilesMutation.mutateAsync(selectedFolderId).then(() => {
+        setMoveFileModal(false)
+      })
     },
   })
   const sourceScopes = new Set()

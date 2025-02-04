@@ -1,19 +1,21 @@
+import { SqlEntityManager } from '@mikro-orm/mysql'
+import { GroupsSpaceCreationProcess } from '@shared/domain/space/create/groups-space-creation.process'
+import { SpaceCreationProcess } from '@shared/domain/space/create/space-creation.process'
+import { CreateSpaceDto } from '@shared/domain/space/dto/create-space.dto'
+import { SpaceService } from '@shared/domain/space/service/space.service'
+import { SPACE_STATE, SPACE_TYPE } from '@shared/domain/space/space.enum'
+import { SpaceRepository } from '@shared/domain/space/space.repository'
+import { Node } from '@shared/domain/user-file/node.entity'
+import { ServiceError } from '@shared/errors'
 import { expect } from 'chai'
 import { stub } from 'sinon'
-import { SPACE_STATE, SPACE_TYPE } from '@shared/domain/space/space.enum'
-import { GroupsSpaceCreationProcess } from '@shared/domain/space/create/groups-space-creation.process'
-import { SpaceService } from '@shared/domain/space/service/space.service'
-import { SpaceCreationProcess } from '@shared/domain/space/create/space-creation.process'
-import { SpaceRepository } from '@shared/domain/space/space.repository'
-import { CreateSpaceDto } from '@shared/domain/space/dto/create-space.dto'
-import { ServiceError } from '@shared/errors'
-import { Node } from '@shared/domain/user-file/node.entity'
 
 describe('SpaceService', () => {
   const findOneStub = stub()
   const buildStub = stub()
 
   const createSpaceService = () => {
+    const em = {} as unknown as SqlEntityManager
     const spaceRepository = {
       findOne: findOneStub,
     } as unknown as SpaceRepository
@@ -23,7 +25,7 @@ describe('SpaceService', () => {
     const spaceTypeToCreatorProviderMap = {
       [SPACE_TYPE.GROUPS]: buildProcess,
     } as unknown as { [T in SPACE_TYPE]: SpaceCreationProcess }
-    return new SpaceService(spaceTypeToCreatorProviderMap, spaceRepository)
+    return new SpaceService(em, spaceTypeToCreatorProviderMap, spaceRepository)
   }
 
   beforeEach(async () => {
