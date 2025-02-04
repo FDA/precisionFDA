@@ -20,9 +20,7 @@ type Props = {
 type Story = StoryObj<Props>
 
 export const Default: Story = {
-  render: () => (
-    <ListAdminNewsPage />
-  ),
+  render: () => <ListAdminNewsPage />,
 }
 
 export default meta

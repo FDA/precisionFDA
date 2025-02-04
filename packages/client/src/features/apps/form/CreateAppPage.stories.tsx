@@ -6,14 +6,17 @@ import { StorybookProviders } from '../../../stories/StorybookProviders'
 const meta: Meta = {
   title: 'Apps/Create',
   component: CreateAppPageImport,
-}
-
-const CreateAppPageWrapper = () => {
-  return <StorybookProviders><CreateAppPageImport /></StorybookProviders>
+  decorators: [
+    Story => (
+      <StorybookProviders>
+        <Story />
+      </StorybookProviders>
+    ),
+  ],
 }
 
 export const CreateAppPage: StoryObj = {
-  render: args => <CreateAppPageWrapper {...args} />,
+  render: args => <CreateAppPageImport {...args} />,
 }
 
 export default meta

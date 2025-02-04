@@ -9,9 +9,7 @@ module SpaceService
     # @return [ActiveRecord::Relation<Space>] Filtered spaces.
     def call(user, filters = nil)
       spaces_site_admin = user.site_admin? ? Space.groups : Space.none
-
       spaces_rsa = user.review_space_admin? ? Space.shared : Space.none
-
       spaces =
         Space.where(id: spaces_site_admin).joins(:space_memberships).distinct.
           or(
@@ -20,6 +18,11 @@ module SpaceService
           or(
             Space.shared.or(Space.where.not(space_type: "review")).visible_by(user),
           )
+      # always filtering hidden spaces for non site_admin
+      unless user.site_admin?
+        filters ||= {}
+        filters[:hidden] = false
+      end
 
       spaces = spaces.where(build_where(filters)).joins(:users) if filters.present?
       spaces
@@ -61,6 +64,7 @@ module SpaceService
 
       conditions << space_arel[:space_type].eq(space_type) if space_type
       conditions << space_arel[:state].eq(space_state) if space_state
+      conditions << space_arel[:hidden].eq(filters[:hidden]) if filters.key?(:hidden)
       conditions << space_arel[:name].matches(wildcard(filters[:name])) if filters[:name]
       conditions << Arel::Nodes::SqlLiteral.new("CAST(spaces.id AS CHAR)").matches(wildcard(filters[:id])) if filters[:id]
       conditions << space_arel[:created_at].matches(wildcard(filters[:created_at])) if filters[:created_at]

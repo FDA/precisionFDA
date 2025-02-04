@@ -1,7 +1,8 @@
-import React, { useMemo } from 'react'
+import React, { useEffect, useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { Column } from 'react-table'
 import styled, { css } from 'styled-components'
+import { SwitchButton } from '../../components/Button'
 import { DefaultColumnFilter, IdColumnFilter, SelectColumnFilter } from '../../components/Table/filters'
 import { StyledTagItem, StyledTags } from '../../components/Tags'
 import { AdminIcon } from '../../components/icons/AdminIcon'
@@ -18,6 +19,7 @@ import { FdaRestrictedIcon } from './FdaRestrictedIcon'
 import { ProtectedIcon } from './ProtectedIcon'
 import { SpaceTypeName } from './common'
 import { ISpace } from './spaces.types'
+import { useSpaceHiddenMutation } from './useSpaceHiddenMutation'
 
 export const SpaceTableNameCell = styled.div`
   display: flex;
@@ -61,10 +63,16 @@ export const StatusCell = styled.div<{ $isActive: boolean }>`
   font-weight: 600;
 
   ${Dot} {
-    ${({ $isActive }) => ($isActive 
-      ? css`color: var(--success-400); background-color: var(--success-400);` 
-      : css`color: var(--warning-500); background-color: var(--warning-500);`
-    )};
+    ${({ $isActive }) =>
+      $isActive
+        ? css`
+            color: var(--success-400);
+            background-color: var(--success-400);
+          `
+        : css`
+            color: var(--warning-500);
+            background-color: var(--warning-500);
+          `};
     margin-right: 8px;
   }
 `
@@ -115,7 +123,24 @@ export const findSpaceTypeIcon = (type: string) => {
   }
 }
 
-export const useSpacesColumns = ({ colWidths, isAdmin = false }: { colWidths?: any; isAdmin?: boolean }) =>
+const SpaceHiddenToggle = ({ id, hidden }: { id: number; hidden: boolean }) => {
+  const spaceHiddenMutation = useSpaceHiddenMutation()
+  const [spaceHidden, setSpaceHidden] = React.useState(hidden)
+  useEffect(() => {
+    setSpaceHidden(hidden)
+  }, [hidden])
+  return (
+    <SwitchButton
+      data-active={spaceHidden}
+      onClick={() => {
+        spaceHiddenMutation.mutateAsync({ ids: [id], hidden: !spaceHidden })
+        setSpaceHidden(!spaceHidden)
+      }}
+    />
+  )
+}
+
+export const useSpacesColumns = ({ colWidths, isSiteAdmin = false }: { colWidths?: any; isSiteAdmin?: boolean }) =>
   useMemo<Column<ISpace>[]>(
     () =>
       [
@@ -176,7 +201,7 @@ export const useSpacesColumns = ({ colWidths, isAdmin = false }: { colWidths?: a
         {
           Header: 'State',
           accessor: 'state',
-          width: colWidths?.state || 150,
+          width: colWidths?.state || 160,
           disableSortBy: true,
           Filter: SelectColumnFilter,
           title: 'Select state',
@@ -192,6 +217,23 @@ export const useSpacesColumns = ({ colWidths, isAdmin = false }: { colWidths?: a
             </StatusCell>
           ),
         },
+        ...(isSiteAdmin
+          ? [
+              {
+                Header: 'Hidden',
+                accessor: 'hidden',
+                width: colWidths?.hidden || 100,
+                disableSortBy: true,
+                Filter: SelectColumnFilter,
+                title: 'Select hidden',
+                options: [
+                  { label: 'Not hidden', value: 'false' },
+                  { label: 'Hidden', value: 'true' },
+                ],
+                Cell: ({ row }) => <SpaceHiddenToggle id={row.original.id} hidden={row.original.hidden} />,
+              },
+            ]
+          : []),
         {
           Header: 'Tags',
           accessor: 'tags',
