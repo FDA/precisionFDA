@@ -257,7 +257,7 @@ const PublicNavbar = ({ shouldShowLogo = false }: Props) => {
         <a href="/uniisearch" target="_blank">
           UNII Search
         </a>
-        <a href="/ginas/app/beta" target="_blank">
+        <a href="/ginas/app/ui" target="_blank">
           GSRS
         </a>
       </PublicNavbarCenterButtons>

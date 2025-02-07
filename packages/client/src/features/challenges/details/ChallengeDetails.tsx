@@ -160,19 +160,19 @@ export const ChallengeDetails = () => {
   const userCanSeeResults = userIsChallengeAdmin || challenge.status === 'result_announced' || challenge.status === 'archived'
 
 
-  let regions = {}
-  if(challenge?.meta) {
-    const meta = JSON.parse(challenge?.meta)
+  let regions: { intro: string; results: string; preReg: string }
+  if (challenge.meta) {
+    const meta = JSON.parse(challenge.meta)
     regions = {
-      intro: meta.regions?.intro ?? challenge.infoContent,
-      results: meta.regions?.intro ?? challenge.resultsContent,
-      preReg: meta.regions?.intro ?? challenge.preRegistrationContent,
+      intro: meta.regions?.intro,
+      results: `${meta.regions?.results || ''} ${meta.regions?.['results-details'] || ''}`,
+      preReg: meta.regions?.['pre-registration'],
     }
   } else {
     regions = {
-      intro: challenge?.infoContent,
-      results: challenge?.resultsContent,
-      preReg: challenge?.preRegistrationContent,
+      intro: challenge.infoContent,
+      results: challenge.resultsContent,
+      preReg: challenge.preRegistrationContent,
     }
   }
 

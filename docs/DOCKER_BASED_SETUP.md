@@ -145,12 +145,12 @@ Once you have the _gsrs_ container running, you can use it for GSRS frontend dev
 2. Create env _GSRS_FRONTEND_PATH_ (eg. in your `~/.zshrc`) with an absolute path to the repo (eg. _/Users/pbarta@dnanexus.com/ncats/GSRSFrontend_)
 3. Restart _gsrs_ container
 4. Edit several config files in the cloned repo (these changes are not supposed to be committed):
- - `angular.json` - add line `"baseHref": "/ginas/app/beta/",` under `projects.gsrs-client.architect.options`
+ - `angular.json` - add line `"baseHref": "/ginas/app/ui/",` under `projects.gsrs-client.architect.options`
  - `src/app/fda/config/config.json` - add line `"customToolbarComponent": "precisionFDA",`
  - `src/environments/environment.fda.local.ts` - set following variables:
     ```bash
     environment.apiBaseUrl = 'https://localhost:3000/ginas/app/';
-    environment.baseHref = '/ginas/app/beta/';
+    environment.baseHref = '/ginas/app/ui/';
     ```
 5. Connect to the running _gsrs_ container, run script `switch-frontend.sh` (located in root) and follow the instructions.
     ```bash
