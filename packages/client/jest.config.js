@@ -135,7 +135,7 @@ module.exports = {
   // runner: "jest-runner",
 
   // The paths to modules that run some code to configure or set up the testing environment before each test
-  setupFiles: ['./jest.polyfills.js'],
+  // setupFiles: ['./jest.polyfills.js'],
 
   // A list of paths to modules that run some code to configure or set up the testing framework before each test
   // setupFilesAfterEnv: ['./jest.setup.js'],
@@ -149,7 +149,7 @@ module.exports = {
   },
     
   // The test environment that will be used for testing
-  testEnvironment: 'jsdom',
+  testEnvironment: 'jest-fixed-jsdom',
 
   moduleDirectories: [
     'node_modules',
