@@ -146,7 +146,7 @@ export const gsrsNavItems: SiteNavItemType[] = [
     iconHeight: 17,
     text: 'GSRS',
     link: '',
-    alink: '/ginas/app/beta',
+    alink: '/ginas/app/ui',
     external: true,
   },
 ]
