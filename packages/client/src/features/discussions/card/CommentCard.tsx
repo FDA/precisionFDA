@@ -23,7 +23,7 @@ export function CommentCard({
   const [editMode, setEditMode] = useState(false)
 
   const deleteMutation = useMutation({
-    mutationKey: ['delete-comment-discussion'],
+    mutationKey: ['delete-discussion-comment'],
     mutationFn: () => {
       if(answerId) {
         return deleteAnswerCommentRequest(discussionId, answerId, comment.id)

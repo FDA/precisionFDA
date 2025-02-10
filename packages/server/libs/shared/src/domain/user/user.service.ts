@@ -72,7 +72,7 @@ export class UserService {
     return await this.userRepo.paginate(query, where, { orderBy: orderByClause })
   }
 
-  // TODO Ludvik Bobek will update this to use the new pagination method
+  // PFDA-6051 TODO Ludvik Bobek will update this to use the new pagination method
   private extractOrderByClause(query: UserPaginationDto) {
     if (['totalLimit', 'jobLimit'].includes(query.orderBy)) {
       if (query.orderBy === 'totalLimit') {

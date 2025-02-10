@@ -25,6 +25,7 @@ import { CreateDiscussionDTO } from '@shared/domain/discussion/dto/create-discus
 import { CreateAnswerDTO } from '@shared/domain/discussion/dto/create-answer.dto'
 import { UpdateDiscussionDTO } from '@shared/domain/discussion/dto/update-discussion.dto'
 import { CreateCommentDTO } from '@shared/domain/discussion/dto/create-comment.dto'
+import DiscussionRepository from '@shared/domain/discussion/discussion.repository'
 
 describe('DiscussionService tests', () => {
   let em: EntityManager<MySqlDriver>
@@ -35,6 +36,7 @@ describe('DiscussionService tests', () => {
   let fetcher: EntityFetcherService
   let discussionQueueJobProducer: DiscussionQueueJobProducer
   let spaceRepository: SpaceRepository
+  let discussionRepository: DiscussionRepository
 
   const EMPTY_ATTACHMENTS = {
     files: [],
@@ -81,6 +83,7 @@ describe('DiscussionService tests', () => {
       createSpaceNotificationTask: createSpaceNotificationTaskStub,
     } as unknown as DiscussionQueueJobProducer
     spaceRepository = new SpaceRepository(em, 'space')
+    discussionRepository = new DiscussionRepository(em, 'discussion')
     discussionService = new DiscussionService(
       em,
       userCtx,
@@ -89,6 +92,7 @@ describe('DiscussionService tests', () => {
       entityService,
       discussionQueueJobProducer,
       spaceRepository,
+      discussionRepository,
     )
     getEntityLinkStub.reset()
     createSpaceNotificationTaskStub.reset()
@@ -300,6 +304,7 @@ describe('DiscussionService tests', () => {
       entityService,
       discussionQueueJobProducer,
       spaceRepository,
+      discussionRepository,
     )
 
     const createDiscussionInput: CreateDiscussionDTO = {
@@ -418,7 +423,7 @@ describe('DiscussionService tests', () => {
     }
 
     const discussion = await discussionService.createDiscussion(createDiscussionInput)
-    expect(discussion.note.scope).eq('public')
+    expect(discussion.scope).eq('public')
   })
 
   it('create discussion in space with attachment in wrong scope', async () => {

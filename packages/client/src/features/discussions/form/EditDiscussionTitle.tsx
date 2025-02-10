@@ -40,14 +40,14 @@ export function EditDiscussionTitle({
       await queryClient.cancelQueries({
         queryKey: ['discussion', { id: discussionId }],
       })
-      const prevDiscu = await queryClient.getQueryData<Discussion>([
+      const prevDiscu = queryClient.getQueryData<Discussion>([
         'discussion',
         { id: discussionId },
       ])
       let newDiscu
       if (prevDiscu) {
         newDiscu = { ...prevDiscu }
-        newDiscu.note.title = title
+        newDiscu.title = title
       }
 
       queryClient.setQueryData(['discussion', { id: discussionId }], newDiscu)

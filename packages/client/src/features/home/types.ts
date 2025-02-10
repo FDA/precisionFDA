@@ -1,12 +1,7 @@
 import { ReactNode } from 'react'
-import { JsonValue } from 'react-use-websocket/src/lib/types'
 import { CloudResourcesConditionType } from '../../hooks/useCloudResourcesCondition'
 import { IChallenge } from '../../types/challenge'
 
-export interface TableSelected<T> {
-  selectedItems: T[]
-  resetSelected: () => void
-}
 export interface BaseAPIResponse {
   error?: { message: string; type: 'API Error' }
 }
@@ -62,9 +57,6 @@ export interface DownloadListResponse {
   locked: boolean
 }
 
-export interface FetchQuery {
-  meta: IMeta
-}
 interface IModal {
   showModal?: boolean
 }
@@ -114,8 +106,6 @@ export type ActionGroupType = {
   actions: ActionFunctionsType<any>
   title: string
 }
-
-export type ResourcePage = 'details' | 'list'
 
 export interface MetaPath {
   id: number
@@ -193,7 +183,7 @@ export type NotificationMeta = {
   linkUrl?: string
 }
 
-export type Notification = JsonValue & {
+export type Notification = {
   id: number
   action: NOTIFICATION_ACTION
   message: string
