@@ -261,6 +261,7 @@ export const DataPortalForm = ({
                 {...register('sort_order')}
                 disabled={isSubmitting}
               />
+              <FieldInfo text="Portals are presented in ascending order" />
               <ErrorMessage errors={errors} name="sort_order" render={({ message }) => <InputError>{message}</InputError>} />
             </FieldGroup>
           </Row>

@@ -17,7 +17,6 @@ import {
   buildFilterByUserSettings,
   buildIsNotificationEnabled,
 } from '../../email.helper'
-import { LoadedReference } from '@mikro-orm/core'
 import { SPACE_MEMBERSHIP_SIDE } from '../../../space-membership/space-membership.enum'
 
 export class SpaceChangedEmailHandler
@@ -27,12 +26,12 @@ export class SpaceChangedEmailHandler
   templateFile = spaceChangedTemplate
   space: Space
   user: User
-  receiversSides: any
+  receiversSides: object
 
   // to take away the following?
-  spaceMembership: SpaceMembership & { user: LoadedReference<User> } & { space: LoadedReference<Space> }
-  spaceMembershipSide: any
-  receiverMembershipSide: any
+  spaceMembership: SpaceMembership
+  spaceMembershipSide: string | object
+  receiverMembershipSide: string | object
 
   getNotificationKey(): keyof typeof NOTIFICATION_TYPES_BASE {
     return 'space_locked_unlocked_deleted'
@@ -43,17 +42,15 @@ export class SpaceChangedEmailHandler
       id: this.validatedInput.spaceId,
     })
     if (!this.space) {
-      throw new NotFoundError(
-        `Space id ${this.validatedInput.spaceId.toString()} not found`,
-        { code: ErrorCodes.EMAIL_PAYLOAD_NOT_FOUND },
-      )
+      throw new NotFoundError(`Space id ${this.validatedInput.spaceId.toString()} not found`, {
+        code: ErrorCodes.EMAIL_PAYLOAD_NOT_FOUND,
+      })
     }
     this.user = await this.ctx.em.findOneOrFail(User, { id: this.validatedInput.initUserId })
     if (!this.user) {
-      throw new NotFoundError(
-        `User id ${this.validatedInput.initUserId.toString()} not found`,
-        { code: ErrorCodes.EMAIL_PAYLOAD_NOT_FOUND },
-      )
+      throw new NotFoundError(`User id ${this.validatedInput.initUserId.toString()} not found`, {
+        code: ErrorCodes.EMAIL_PAYLOAD_NOT_FOUND,
+      })
     }
 
     const spaceMemberships = await this.ctx.em.find(
@@ -62,14 +59,16 @@ export class SpaceChangedEmailHandler
       { populate: ['user.notificationPreference'] },
     )
 
-    const spaceMembership: any = spaceMemberships.filter(memberShip => {
+    const spaceMembership = spaceMemberships.filter((memberShip) => {
       if (memberShip.user.id === this.user.id) {
         return memberShip
       }
     })
 
     this.spaceMembership = spaceMembership[0] // future need
-    this.spaceMembershipSide = spaceMembership[0] ? SPACE_MEMBERSHIP_SIDE[spaceMembership[0].side] : undefined // no need
+    if (spaceMembership[0]) {
+      this.spaceMembershipSide = SPACE_MEMBERSHIP_SIDE[spaceMembership[0].side]
+    }
     this.receiverMembershipSide = {} // future need
     this.receiversSides = {}
   }
@@ -95,16 +94,14 @@ export class SpaceChangedEmailHandler
     const receivers = filterUsers(memberships)
     // based on email type, find who will be the receiver
     // users who are in the space + active ?
-    const receiversSidesArr = receivers.map(a =>
-      [
-        a.id.toString(),
-        // @ts-ignore
-        SPACE_MEMBERSHIP_SIDE[memberships.find(membership => membership.user.id === a.id).side]
-      ]
-    )
+    const receiversSidesArr = receivers.map((a) => [
+      a.id.toString(),
+      // @ts-ignore
+      SPACE_MEMBERSHIP_SIDE[memberships.find((membership) => membership.user.id === a.id).side],
+    ])
     // @ts-ignore
     this.receiversSides = Object.fromEntries(receiversSidesArr)
-    const receiverMembership: any = memberships.filter(membership => {
+    const receiverMembership = memberships.filter((membership) => {
       if (receivers && membership.user.id === receivers[0].id) {
         return membership
       }
@@ -114,7 +111,6 @@ export class SpaceChangedEmailHandler
     return receivers
   }
 
-  // eslint-disable-next-line @typescript-eslint/require-await, require-await
   async getTemplateContent(): Promise<SpaceChangeTemplateInput['content']> {
     // todo: validate the incoming action?
     const actionKey = this.validatedInput.activityType
@@ -125,8 +121,8 @@ export class SpaceChangedEmailHandler
       action,
       initiator: { fullName: this.user.fullName },
       spaceMembership: { side: this.spaceMembership ? this.spaceMembership.side : undefined },
-      spaceMembershipSide: this.spaceMembershipSide,
-      receiverMembershipSide: this.receiverMembershipSide,
+      spaceMembershipSide: this.spaceMembershipSide.toString(),
+      receiverMembershipSide: this.receiverMembershipSide.toString(),
       receiversSides: this.receiversSides,
     }
   }
