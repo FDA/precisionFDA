@@ -90,6 +90,8 @@ run:
 stop:
 	docker compose -p $(DOCKER_COMPOSE_PREFIX) $(DOCKER_COMPOSE_FILE_FLAGS) down
 	echo Stopped
+run-spec:
+	docker compose -p $(DOCKER_COMPOSE_PREFIX) -f docker/spec.docker-compose.yml up
 
 # ┌───────────────────────────────────┐
 # │                                   │

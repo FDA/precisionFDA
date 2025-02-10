@@ -1,0 +1,13 @@
+openapi: 3.0.2
+info:
+  title: precisionFDA API Specifications
+  description: |-
+    - /auth.yaml: precisionFDA Usage of Auth API
+    - /platform.yaml: precisionFDA Usage of Platform API
+  version: 1.0.0
+
+paths:
+  /auth:
+    $ref: "auth.yaml"
+  /platform:
+    $ref: "platform.yaml"
