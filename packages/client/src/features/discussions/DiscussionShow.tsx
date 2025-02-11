@@ -11,10 +11,10 @@ import { ISpace } from '../spaces/spaces.types'
 import { DiscussionAnswer } from './DiscussionAnswer'
 import { fetchDiscussionRequest } from './api'
 import { CommentCard } from './card/CommentCard'
-import { NoteCard } from './card/NoteCard'
 import { CreateCommentEntity } from './form/CreateCommentEntity'
 import { EditDiscussionTitle } from './form/EditDiscussionTitle'
 import { CommentCount, DiscussionTitle, PageContent, StyledCardList, StyledTitle, UsernameLink } from './styles'
+import { DiscussionCard } from './card/DiscussionCard'
 
 export const DiscussionShow = ({ space }: { space?: ISpace }) => {
   const navigate = useNavigate()
@@ -65,18 +65,18 @@ export const DiscussionShow = ({ space }: { space?: ISpace }) => {
   const canReply = space?.current_user_membership.role !== 'viewer'
   const isLead = space?.current_user_membership.role === 'lead'
   const canUserEdit = (noteUserId: number) => user?.id === noteUserId || isLead
-  const canUserAnswer = !discussion.answers.map(a => a.note.user.id).includes(user!.id)
+  const canUserAnswer = !discussion.answers.map(a => a.user.id).includes(user!.id)
 
   return (
     <PageContent>
       <BackLink linkTo={backPath}>Back to Discussions</BackLink>
       <DiscussionTitle>
         {isEditing ? (
-          <EditDiscussionTitle discussionId={discussionId} defaultValue={discussion.note.title} setIsEditing={setIsEditing} />
+          <EditDiscussionTitle discussionId={discussionId} defaultValue={discussion.title} setIsEditing={setIsEditing} />
         ) : (
           <StyledTitle>
-            {discussion.note.title}
-            {canUserEdit(discussion.note.user.id) && (
+            {discussion.title}
+            {canUserEdit(discussion.user.id) && (
               <TransparentButton onClick={() => setIsEditing(true)}>
                 <PencilIcon height={16} />
               </TransparentButton>
@@ -87,11 +87,10 @@ export const DiscussionShow = ({ space }: { space?: ISpace }) => {
       <div>
         <UsernameLink href={`/users/${discussion.user.dxuser}`}>{discussion.user.fullName}</UsernameLink> started this discussion
       </div>
-      <NoteCard
-        canEdit={canUserEdit(discussion.note.user.id)}
+      <DiscussionCard
+        canEdit={canUserEdit(discussion.user.id)}
         canReply={canReply}
-        discussionId={discussion.id}
-        note={discussion.note}
+        discussion={discussion}
         onReply={() => markdownInputRef?.current?.focus()}
         onDelete={handleDeleteDiscussion}
       />
@@ -104,7 +103,7 @@ export const DiscussionShow = ({ space }: { space?: ISpace }) => {
           <>
             {discussion.answers.map(answer => (
               <DiscussionAnswer
-                canEdit={canUserEdit(answer.note.user.id)}
+                canEdit={canUserEdit(answer.user.id)}
                 canReply={canReply}
                 key={answer.id}
                 currentUserId={user!.id}
@@ -131,7 +130,7 @@ export const DiscussionShow = ({ space }: { space?: ISpace }) => {
             onCancel={() => setIsEditing(false)}
             markdownInputRef={markdownInputRef}
             discussionId={discussionId}
-            scope={discussion.note.scope}
+            scope={discussion.scope}
           />
         )}
       </StyledCardList>

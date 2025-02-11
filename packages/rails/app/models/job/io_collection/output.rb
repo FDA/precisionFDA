@@ -8,6 +8,8 @@ class Job::IOCollection::Output < Job::IOCollection::Input
 
   def files
     return nil unless files?
+    # file array output can be either nil or array
+    return [] if value.nil?
 
     file_values = []
     value.each do |value_item|

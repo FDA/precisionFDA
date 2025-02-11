@@ -20,6 +20,7 @@ import { UpdateDiscussionDTO } from '@shared/domain/discussion/dto/update-discus
 import { CreateCommentDTO } from '@shared/domain/discussion/dto/create-comment.dto'
 import { UpdateAnswerDTO } from '@shared/domain/discussion/dto/update-answer.dto'
 import { UpdateCommentDTO } from '@shared/domain/discussion/dto/update-comment.dto'
+import { DiscussionPaginationDTO } from '@shared/domain/discussion/dto/discussion-pagination.dto'
 
 @UseGuards(UserContextGuard)
 @Controller('/discussions')
@@ -27,8 +28,8 @@ export class DiscussionsController {
   constructor(private readonly discussionService: DiscussionService) {}
 
   @Get()
-  async getDiscussions(@Query('scope') scope: string) {
-    return await this.discussionService.getDiscussions(scope)
+  async listDiscussions(@Query() query: DiscussionPaginationDTO) {
+    return await this.discussionService.listDiscussions(query)
   }
 
   @Get('/:id')

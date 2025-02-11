@@ -44,8 +44,8 @@ describe('InvitationHandler', () => {
   const createMockInvitation = (id: number, user: User) =>
     ({
       id,
-      firstName: 'John',
-      lastName: 'Doe',
+      firstName: user.firstName,
+      lastName: user.lastName,
       email: user.email,
       address1: '123 Main St',
       address2: 'Apt 4B',
@@ -96,7 +96,7 @@ describe('InvitationHandler', () => {
   })
 
   it('template should generate correct email template', async () => {
-    const invitationUser = createMockUser(3, 'user@domain.com')
+    const invitationUser = createMockUser(3, 'user@domain.com', 'InvitFistName', 'InvitLastName')
     const invitation = createMockInvitation(INVITATION_ID, invitationUser)
 
     emFindOneOrFailStub.withArgs(Invitation, { id: INVITATION_ID }).resolves(invitation)
@@ -113,7 +113,9 @@ describe('InvitationHandler', () => {
     expect(result.subject).to.eq(
       `New access request from ${invitationUser.firstName} ${invitationUser.lastName}`,
     )
-    expect(result.body).to.contain('Access Request for John Doe')
+    expect(result.body).to.contain(
+      `Access Request for ${invitationUser.firstName} ${invitationUser.lastName}`,
+    )
     expect(result.body).to.contain('192.168.1.1')
     expect(result.body).to.contain('Research')
   })
