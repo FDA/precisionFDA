@@ -1,4 +1,4 @@
-import { Reference } from '@mikro-orm/core'
+import { OrderDefinition, Reference } from '@mikro-orm/core'
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Injectable, Logger } from '@nestjs/common'
 import { Answer } from '@shared/domain/answer/answer.entity'
@@ -31,17 +31,10 @@ import { EntityFetcherService } from '../../entity/entity-fetcher.service'
 import { SPACE_MEMBERSHIP_ROLE } from '../../space-membership/space-membership.enum'
 import { getIdFromScopeName } from '../../space/space.helper'
 import type {
+  Attachments,
   DiscussionAttachment,
   PublishAnswerInput,
   PublishDiscussionInput,
-} from '../discussion.types'
-import {
-  AnswerDTO,
-  CommentDTO,
-  DiscussionDTO,
-  NoteDTO,
-  UserDTO,
-  Attachments,
 } from '../discussion.types'
 import { DiscussionQueueJobProducer } from '../producer/discussion-queue-job.producer'
 import { PublisherService } from './publisher.service'
@@ -51,6 +44,11 @@ import { UpdateDiscussionDTO } from '@shared/domain/discussion/dto/update-discus
 import { CreateCommentDTO } from '@shared/domain/discussion/dto/create-comment.dto'
 import { UpdateAnswerDTO } from '@shared/domain/discussion/dto/update-answer.dto'
 import { UpdateCommentDTO } from '@shared/domain/discussion/dto/update-comment.dto'
+import { DiscussionPaginationDTO } from '@shared/domain/discussion/dto/discussion-pagination.dto'
+import DiscussionRepository from '@shared/domain/discussion/discussion.repository'
+import { DiscussionDTO } from '@shared/domain/discussion/dto/discussion.dto'
+import { AnswerDTO } from '@shared/domain/discussion/dto/answer.dto'
+import { CommentDTO } from '@shared/domain/discussion/dto/comment.dto'
 
 @Injectable()
 export class DiscussionService {
@@ -64,6 +62,7 @@ export class DiscussionService {
   private readonly entityService: EntityService
   private readonly discussionQueueJobProducer: DiscussionQueueJobProducer
   private readonly spaceRepository: SpaceRepository
+  private readonly discussionRepository: DiscussionRepository
 
   constructor(
     em: SqlEntityManager,
@@ -73,6 +72,7 @@ export class DiscussionService {
     entityService: EntityService,
     discussionQueueJobProducer: DiscussionQueueJobProducer,
     spaceRepository: SpaceRepository,
+    discussionRepository: DiscussionRepository,
   ) {
     this.em = em
     this.userCtx = userCtx
@@ -81,14 +81,14 @@ export class DiscussionService {
     this.entityService = entityService
     this.discussionQueueJobProducer = discussionQueueJobProducer
     this.spaceRepository = spaceRepository
-
+    this.discussionRepository = discussionRepository
     this.logger.debug('DiscussionService initialized')
   }
 
   async getDiscussion(discussionId: number): Promise<DiscussionDTO> {
     this.logger.log(`Getting discussion id: ${discussionId}`)
 
-    const res = await this.fetcher.getAccessibleById(
+    const discussion = await this.fetcher.getAccessibleById(
       Discussion,
       discussionId,
       {},
@@ -106,12 +106,13 @@ export class DiscussionService {
         ],
       },
     )
-    if (!res) {
+    if (!discussion) {
       throw new errors.NotFoundError(
         'Unable to get discussion: not found or insufficient permissions.',
       )
     }
-    return this.mapDiscussionDTO(res)
+    // TODO Jiri - https://jira.internal.dnanexus.com/browse/PFDA-6053
+    return DiscussionDTO.fromEntity(discussion)
   }
 
   /**
@@ -154,7 +155,7 @@ export class DiscussionService {
         notify: discussionInput.notify,
       })
 
-      return this.mapDiscussionDTO(newDiscussion)
+      return DiscussionDTO.fromEntity(newDiscussion)
     })
   }
 
@@ -316,27 +317,31 @@ export class DiscussionService {
     })
   }
 
-  async getDiscussions(scope: string): Promise<DiscussionDTO[]> {
+  async listDiscussions(query: DiscussionPaginationDTO) {
+    // const where: ObjectQuery<Discussion> = {}
+    //todo PFDA-6051: Ludvik fix type
+    const where = { note: { $and: [] } }
+    const { scope, sort } = query
+    const { title } = query.filter ?? {}
+
+    if (title) {
+      where.note.$and.push({ title: { $like: `%${title}%` } })
+    }
+
+    //TODO PFDA-6051: Ludvik fix everything below
+    const sortCopy = { ...sort }
+    const order: OrderDefinition<Discussion> = sortCopy
+    if (sortCopy.title) {
+      order.note = { title: sortCopy.title }
+      delete sortCopy.title
+    }
+
+    query.sort = sortCopy
+
     this.logger.log(`Getting discussions with scope: ${scope}`)
     if (scope === HOME_SCOPE.EVERYBODY) {
-      const publishedDiscussions = await this.fetcher.getPublic(
-        Discussion,
-        {},
-        { populate: ['note', 'user'] },
-      )
-      const privateDiscussions = await this.fetcher.getPrivate(
-        Discussion,
-        {},
-        { populate: ['note', 'user'] },
-      )
-
-      return await Promise.all(
-        privateDiscussions
-          .concat(publishedDiscussions)
-          .map((discussion) => this.mapDiscussionDTO(discussion)),
-      )
-    }
-    if (scope === HOME_SCOPE.SPACES) {
+      where.note.$and.push({ scope: STATIC_SCOPE.PUBLIC })
+    } else if (scope === HOME_SCOPE.SPACES) {
       const spaces = await this.em.find(Space, {
         spaceMemberships: {
           active: true,
@@ -347,45 +352,36 @@ export class DiscussionService {
       })
 
       const scopes = spaces.map((s) => s.scope)
-
-      const spacesDiscussions = await this.em.find(
-        Discussion,
-        {
-          note: {
-            scope: { $in: scopes },
-          },
+      where.note.$and.push({ scope: { $in: scopes } })
+    } else {
+      const spaceId = getIdFromScopeName(scope)
+      const space = await this.em.findOne(Space, {
+        id: spaceId,
+        spaceMemberships: {
+          user: this.userCtx.id,
+          active: true,
         },
-        { populate: ['note', 'user'] },
-      )
+      })
+      if (!space) {
+        throw new errors.PermissionError(
+          'Unable to get discussions in selected space: insufficient permissions.',
+        )
+      }
 
-      return await Promise.all(
-        spacesDiscussions.map((discussion) => this.mapDiscussionDTO(discussion)),
-      )
+      where.note.$and.push({ scope: scope })
     }
-    const spaceId = getIdFromScopeName(scope)
-    // const space = await this.fetcher.getEditableById(Space, spaceId)
-    // find space with correct permissions
-    const space = await this.em.findOne(Space, {
-      id: spaceId,
-      spaceMemberships: {
-        user: this.userCtx.id,
-        active: true,
-      },
+    const result = await this.discussionRepository.paginate(query, where, {
+      populate: ['note', 'user'],
     })
-    if (!space) {
-      throw new errors.PermissionError(
-        'Unable to get discussions in selected space: insufficient permissions.',
-      )
+
+    const discussions = await Promise.all(
+      result.data.map((discussion) => DiscussionDTO.fromEntity(discussion)),
+    )
+
+    return {
+      data: discussions,
+      meta: result.meta,
     }
-    const spaceDiscussions = await this.fetcher.getFromSpace(
-      Discussion,
-      spaceId,
-      {},
-      { populate: ['note', 'user'] },
-    )
-    return await Promise.all(
-      spaceDiscussions.map((discussion) => this.mapDiscussionDTO(discussion)),
-    )
   }
 
   async createAnswer(answerInput: CreateAnswerDTO) {
@@ -436,7 +432,7 @@ export class DiscussionService {
         toPublish: answerInput.attachments,
         notify: answerInput.notify,
       })
-      return this.mapAnswerDTO(newAnswer)
+      return AnswerDTO.fromEntity(newAnswer)
     })
   }
 
@@ -873,7 +869,7 @@ export class DiscussionService {
         )
       }
 
-      return this.mapCommentDTO(newComment)
+      return await CommentDTO.fromEntity(newComment)
     }
     const target = await this.fetcher.getAccessibleById(
       Answer,
@@ -898,7 +894,7 @@ export class DiscussionService {
         commentInput.notify,
       )
     }
-    return this.mapCommentDTO(newComment)
+    return await CommentDTO.fromEntity(newComment)
   }
 
   async updateComment(id: number, commentInput: UpdateCommentDTO) {
@@ -923,7 +919,7 @@ export class DiscussionService {
 
     comment.body = commentInput.content
     await this.em.persistAndFlush(comment)
-    return this.mapCommentDTO(comment)
+    return await CommentDTO.fromEntity(comment)
   }
 
   async deleteComment(commentId: number, type: CommentableType) {
@@ -1069,7 +1065,7 @@ export class DiscussionService {
         'Unable to get discussion: not found or insufficient permissions.',
       )
     }
-    return this.mapAnswerDTO(res)
+    return AnswerDTO.fromEntity(res)
   }
 
   async getComment(commentId: number, type: CommentableType): Promise<CommentDTO> {
@@ -1092,7 +1088,7 @@ export class DiscussionService {
           'Unable to get comment: not found or insufficient permissions.',
         )
       }
-      return this.mapCommentDTO(res)
+      return await CommentDTO.fromEntity(res)
     } else {
       const res = await this.em.findOne(AnswerComment, { id: commentId }, { populate: ['user'] })
       if (!res) {
@@ -1106,97 +1102,7 @@ export class DiscussionService {
           'Unable to get comment: not found or insufficient permissions.',
         )
       }
-      // refactor the response mapping - for every return in this class.
-      return this.mapCommentDTO(res)
+      return await CommentDTO.fromEntity(res)
     }
-  }
-
-  private async mapDiscussionDTO(discussion: Discussion): Promise<DiscussionDTO> {
-    const discussionDTO = new DiscussionDTO()
-    discussionDTO.id = discussion.id
-    discussionDTO.createdAt = discussion.createdAt
-    discussionDTO.updatedAt = discussion.updatedAt
-    if (discussion.note.isInitialized()) {
-      discussionDTO.note = this.mapNoteDTO(discussion.note.getEntity())
-    }
-    if (discussion.user.isInitialized()) {
-      discussionDTO.user = this.mapUserDTO(discussion.user.getEntity())
-    }
-    if (discussion.answers.isInitialized()) {
-      discussionDTO.answers = discussion.answers
-        .getItems()
-        .map((answer) => this.mapAnswerDTO(answer))
-      discussionDTO.answersCount = discussion.answers.count()
-    } else {
-      discussionDTO.answers = []
-      discussionDTO.answersCount = await discussion.answers.loadCount()
-    }
-    if (discussion.comments.isInitialized()) {
-      discussionDTO.comments = discussion.comments
-        .getItems()
-        .map((comment) => this.mapCommentDTO(comment))
-      discussionDTO.commentsCount = discussion.comments.count()
-    } else {
-      discussionDTO.comments = []
-      discussionDTO.commentsCount = await discussion.comments.loadCount()
-    }
-    return discussionDTO
-  }
-
-  private mapNoteDTO(note: Note): NoteDTO {
-    const noteDTO = new NoteDTO()
-    noteDTO.id = note.id
-    noteDTO.createdAt = note.createdAt
-    noteDTO.updatedAt = note.updatedAt
-    noteDTO.title = note.title
-    noteDTO.content = note.content
-    noteDTO.noteType = note.noteType
-    noteDTO.scope = note.scope
-    if (note.user?.isInitialized()) {
-      noteDTO.user = this.mapUserDTO(note.user.getEntity())
-    }
-    return noteDTO
-  }
-
-  private mapAnswerDTO(answer: Answer): AnswerDTO {
-    const answerDTO = new AnswerDTO()
-    answerDTO.id = answer.id
-    answerDTO.createdAt = answer.createdAt
-    answerDTO.updatedAt = answer.updatedAt
-    answerDTO.discussion = answer.discussion.id
-    if (answer.note?.isInitialized()) {
-      answerDTO.note = this.mapNoteDTO(answer.note.getEntity())
-    }
-    if (answer.user?.isInitialized()) {
-      answerDTO.user = this.mapUserDTO(answer.user.getEntity())
-    }
-    if (answer.comments.isInitialized()) {
-      answerDTO.comments = answer.comments.getItems().map((comment) => this.mapCommentDTO(comment))
-    }
-    return answerDTO
-  }
-
-  private mapCommentDTO(comment: DiscussionComment | AnswerComment): CommentDTO {
-    const commentDTO = new CommentDTO()
-    commentDTO.id = comment.id
-    commentDTO.createdAt = comment.createdAt
-    commentDTO.updatedAt = comment.updatedAt
-    commentDTO.commentableId = comment.commentableId.id
-    commentDTO.commentableType = comment.commentableType
-    commentDTO.body = comment.body
-    if (comment.user?.isInitialized()) {
-      commentDTO.user = this.mapUserDTO(comment.user.getEntity())
-    }
-    return commentDTO
-  }
-
-  private mapUserDTO(user: User): UserDTO {
-    const userDTO = new UserDTO()
-    userDTO.id = user.id
-    userDTO.dxuser = user.dxuser
-    userDTO.firstName = user.firstName
-    userDTO.lastName = user.lastName
-    userDTO.fullName = user.fullName
-    return userDTO
   }
 }

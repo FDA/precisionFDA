@@ -64,7 +64,7 @@ export class InvitationHandler
       to: receiver.email,
       replyTo: config.supportEmail,
       body,
-      subject: `New access request from ${receiver.firstName} ${receiver.lastName}`,
+      subject: `New access request from ${this.invitation.firstName} ${this.invitation.lastName}`,
     }
   }
 }

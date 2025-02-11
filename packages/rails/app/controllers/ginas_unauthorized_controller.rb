@@ -67,7 +67,7 @@ class GinasUnauthorizedController < ApplicationController
   private
 
   def beta_redirect
-    modified_path = request.fullpath.sub("/ginas/app", "/ginas/app/beta")
+    modified_path = request.fullpath.sub("/ginas/app", "/ginas/app/ui")
     safe_modified_path = CGI.escape(modified_path)
 
     redirect_to safe_modified_path

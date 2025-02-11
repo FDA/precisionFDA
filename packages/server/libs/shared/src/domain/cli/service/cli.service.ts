@@ -12,12 +12,7 @@ import {
 import { CliDiscussionDTO } from '@shared/domain/cli/dto/CliDiscussionDTO'
 import { CliNodeSearchDTO } from '@shared/domain/cli/dto/CliNodeSearchDTO'
 import { CliSpaceMemberDTO } from '@shared/domain/cli/dto/CliSpaceMemberDTO'
-import {
-  AnswerDTO,
-  CommentDTO,
-  DiscussionAttachment,
-  DiscussionDTO,
-} from '@shared/domain/discussion/discussion.types'
+import { DiscussionAttachment } from '@shared/domain/discussion/discussion.types'
 import { DiscussionService } from '@shared/domain/discussion/services/discussion.service'
 import { DxId } from '@shared/domain/entity/domain/dxid'
 import { Uid } from '@shared/domain/entity/domain/uid'
@@ -50,6 +45,9 @@ import { EntityLinkService } from '@shared/domain/entity/entity-link/entity-link
 import { getNodePath } from '@shared/domain/user-file/user-file.helper'
 import { UpdateDiscussionDTO } from '@shared/domain/discussion/dto/update-discussion.dto'
 import { UpdateAnswerDTO } from '@shared/domain/discussion/dto/update-answer.dto'
+import { CommentDTO } from '@shared/domain/discussion/dto/comment.dto'
+import { AnswerDTO } from '@shared/domain/discussion/dto/answer.dto'
+import { DiscussionDTO } from '@shared/domain/discussion/dto/discussion.dto'
 
 @Injectable()
 export class CliService {
@@ -170,12 +168,12 @@ export class CliService {
 
   async describeDiscussion(discussionId: number) {
     const discussion = await this.discussionService.getDiscussion(discussionId)
-    const attachments = await this.fetchAttachments(discussion.note.id)
+    const attachments = await this.fetchAttachments(discussion.noteId)
 
     const result: CliDiscussionDescribeDTO = {
       id: discussion.id,
-      title: discussion.note.title,
-      content: discussion.note.content,
+      title: discussion.title,
+      content: discussion.content,
       user: discussion.user,
       comments: this.mapComments(discussion.comments),
       commentsCount: discussion.commentsCount,
@@ -213,11 +211,11 @@ export class CliService {
       answers.map(async (answer) => ({
         id: answer.id,
         user: answer.user,
-        content: answer.note.content,
+        content: answer.content,
         createdAt: answer.createdAt,
         updatedAt: answer.updatedAt,
         comments: this.mapComments(answer.comments),
-        attachments: await this.fetchAttachments(answer.note.id),
+        attachments: await this.fetchAttachments(answer.noteId),
       })),
     )
   }
@@ -247,9 +245,9 @@ export class CliService {
   }
 
   async listSpaceDiscussions(spaceId: number) {
-    const discussions = await this.discussionService.getDiscussions(`space-${spaceId}`)
+    const response = await this.discussionService.listDiscussions({ scope: `space-${spaceId}` })
 
-    return discussions.map((d: DiscussionDTO) => {
+    return response.data.map((d: DiscussionDTO) => {
       return CliDiscussionDTO.mapToDTO(d)
     })
   }

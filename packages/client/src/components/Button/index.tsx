@@ -4,7 +4,7 @@ export const Button = styled.button.attrs(({ disabled }) => ({ 'aria-disabled': 
   'data-variant'?: 'primary' | 'success' | 'warning' | 'link'
   disabled?: boolean
   active?: BooleanString
-} >`
+}>`
   position: relative;
   display: flex;
   gap: 8px;
@@ -129,6 +129,31 @@ export const TransparentButton = styled(Button)`
   }
   &:focus {
     outline: none;
+  }
+`
+
+export const SwitchButton = styled.div`
+  display: flex;
+  width: 24px;
+  height: 12px;
+  border-radius: 9999px;
+  background-color: var(--tertiary-500);
+  padding: 2px;
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+  &::before {
+    content: '';
+    width: 12px;
+    height: 12px;
+    border-radius: inherit;
+    background-color: var(--tertiary-30);
+    transition: all 0.3s ease-in-out;
+  }
+  &[data-active='true'] {
+    background: var(--success-600);
+    &::before {
+      transform: translateX(12px);
+    }
   }
 `
 

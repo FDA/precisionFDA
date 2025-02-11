@@ -259,7 +259,7 @@ const Header: React.FC = () => {
             {showGSRSLink && (
               <a
                 data-turbolinks="false"
-                href="/ginas/app/beta"
+                href="/ginas/app/ui"
                 target="_blank"
                 title="GSRS"
               >

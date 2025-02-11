@@ -2,6 +2,7 @@ import React, { useLayoutEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { SortingRule, UseResizeColumnsState } from 'react-table'
 import styled from 'styled-components'
+import { Button } from '../../components/Button'
 import { HoverDNAnexusLogo } from '../../components/icons/DNAnexusLogo'
 import { ContentFooter } from '../../components/Page/ContentFooter'
 import { compactScrollBarV2, Filler, PageTitle } from '../../components/Page/styles'
@@ -9,24 +10,30 @@ import { Pagination } from '../../components/Pagination'
 import { EmptyTable, ReactTableStyles } from '../../components/Table/styles'
 import Table from '../../components/Table/Table'
 import { useColumnWidthLocalStorage } from '../../hooks/useColumnWidthLocalStorage'
+import { useHiddenColumnLocalStorage } from '../../hooks/useHiddenColumnLocalStorage'
 import { useOrderByParams } from '../../hooks/useOrderByState'
 import { usePaginationParams } from '../../hooks/usePaginationState'
-import { toArrayFromObject } from '../../utils/object'
+import { UserLayout } from '../../layouts/UserLayout'
+import { getSelectedObjectsFromIndexes, toArrayFromObject } from '../../utils/object'
+import { useAuthUser } from '../auth/useAuthUser'
+import { QuickActions } from '../home/home.styles'
 import { IFilter, IMeta, KeyVal } from '../home/types'
 import { useFilterParams } from '../home/useFilterState'
 import { useListQuery } from '../home/useListQuery'
 import { spacesListRequest } from './spaces.api'
 import { columnFilters, ISpace } from './spaces.types'
+import { useSpaceHiddenMutation } from './useSpaceHiddenMutation'
 import { useSpacesColumns } from './useSpacesColumns'
-import { useHiddenColumnLocalStorage } from '../../hooks/useHiddenColumnLocalStorage'
-import { UserLayout } from '../../layouts/UserLayout'
-import { Button } from '../../components/Button'
 
 const SpacesHeader = styled.div`
   display: flex;
   justify-content: flex-start;
   padding: 32px 20px;
   justify-content: space-between;
+`
+
+const SpacesQuickActions = styled(QuickActions)`
+  align-items: center;
 `
 
 type ListType = { spaces: ISpace[]; meta: IMeta }
@@ -55,10 +62,9 @@ export function useWindowWidth() {
 
 const SpacesList = () => {
   const resource = 'spaces'
+  const user = useAuthUser()
   const pagination = usePaginationParams()
-  const [selectedIndexes, setSelectedIndexes] = useState<
-    Record<string, boolean> | undefined
-  >({})
+  const [selectedIndexes, setSelectedIndexes] = useState<Record<string, boolean> | undefined>({})
   const { sortBy, sort, setSortBy } = useOrderByParams({
     onSetSortBy: () => setSelectedIndexes({}),
   })
@@ -85,16 +91,32 @@ const SpacesList = () => {
 
   const { isLoading, data, error } = query
   const meta = data?.meta
+  const userCanAdministerSite = !!user?.can_administer_site
 
   if (error) return <div>Error! {JSON.stringify(error)}</div>
+
+  const spaceHiddenMutation = useSpaceHiddenMutation()
+  const hideSpaces = () => {
+    const spaces = getSelectedObjectsFromIndexes(selectedIndexes, data?.spaces) as unknown as ISpace[]
+    const ids = spaces.map(s => s.id)
+    spaceHiddenMutation.mutateAsync({ ids, hidden: true })
+    setSelectedIndexes({})
+  }
 
   return (
     <UserLayout innerScroll>
       <SpacesHeader>
         <PageTitle>Spaces</PageTitle>
-        <Button data-variant='primary' as={Link} to="/spaces/new">
-          Create new space
-        </Button>
+        <SpacesQuickActions>
+          {userCanAdministerSite && (
+            <Button data-variant="primary" disabled={Object.keys(selectedIndexes || {}).length === 0} onClick={hideSpaces}>
+              Hide spaces
+            </Button>
+          )}
+          <Button data-variant="primary" as={Link} to="/spaces/new">
+            Create new space
+          </Button>
+        </SpacesQuickActions>
       </SpacesHeader>
 
       <TableTable
@@ -110,6 +132,7 @@ const SpacesList = () => {
         colWidths={colWidths}
         hiddenColumns={hiddenColumns}
         saveHiddenColumns={saveHiddenColumns}
+        isSiteAdmin={userCanAdministerSite}
       />
 
       <ContentFooter>
@@ -143,7 +166,7 @@ const StyledTable = styled.div`
     width: min(100% - 32px, 100%);
     font-size: 14px;
     .table {
-      border-left:1px solid var(--c-layout-border);
+      border-left: 1px solid var(--c-layout-border);
       .tr {
         height: 56px;
         .td {
@@ -152,6 +175,9 @@ const StyledTable = styled.div`
           height: auto;
           justify-content: flex-start;
           align-items: flex-start;
+        }
+        .td.selection {
+          padding: 10px 5px;
         }
       }
     }
@@ -171,6 +197,7 @@ const TableTable = ({
   setSelectedRows,
   hiddenColumns,
   saveHiddenColumns,
+  isSiteAdmin,
 }: {
   data?: ISpace[]
   filters: IFilter[]
@@ -179,15 +206,14 @@ const TableTable = ({
   setSortBy: (cols: SortingRule<string>[]) => void
   isLoading: boolean
   colWidths: KeyVal
-  saveColumnResizeWidth: (
-    columnResizing: UseResizeColumnsState<any>['columnResizing'],
-  ) => void
+  saveColumnResizeWidth: (columnResizing: UseResizeColumnsState<any>['columnResizing']) => void
   selectedRows?: Record<string, boolean>
   setSelectedRows: (ids: Record<string, boolean>) => void
   saveHiddenColumns: (cols: string[]) => void
   hiddenColumns: string[]
+  isSiteAdmin: boolean
 }) => {
-  const columns = useSpacesColumns({ colWidths, isAdmin: false })
+  const columns = useSpacesColumns({ colWidths, isSiteAdmin })
   const mdata = useMemo(() => data || [], [data])
   return (
     <StyledTable>
@@ -197,7 +223,7 @@ const TableTable = ({
         data={mdata}
         loading={isLoading}
         saveColumnResizeWidth={saveColumnResizeWidth}
-        enableColumnSelect
+        isSelectable={isSiteAdmin}
         hiddenColumns={hiddenColumns}
         saveHiddenColumns={saveHiddenColumns}
         manualFilters

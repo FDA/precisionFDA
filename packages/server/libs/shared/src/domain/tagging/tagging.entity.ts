@@ -5,6 +5,7 @@ import { Folder } from '@shared/domain/user-file/folder.entity'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { TaggingRepository } from './tagging.repository'
+import { TAGGABLE_TYPE } from '@shared/domain/tagging/tagging.types'
 
 @Entity({ tableName: 'taggings', repository: () => TaggingRepository })
 export class Tagging {
@@ -28,9 +29,8 @@ export class Tagging {
   @Property()
   tagId: number
 
-  // hardcoded to "Node"
   @Property({ hidden: true })
-  taggableType: string
+  taggableType: TAGGABLE_TYPE
 
   // hardcoded to "User"
   @Property({ hidden: true })

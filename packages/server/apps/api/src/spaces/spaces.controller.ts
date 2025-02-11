@@ -12,10 +12,9 @@ import {
   Post,
   UseGuards,
 } from '@nestjs/common'
-import {
-  DEPRECATED_SQL_ENTITY_MANAGER,
-} from '@shared/database/provider/deprecated-sql-entity-manager.provider'
+import { DEPRECATED_SQL_ENTITY_MANAGER } from '@shared/database/provider/deprecated-sql-entity-manager.provider'
 import { EMAIL_TYPES } from '@shared/domain/email/email.config'
+import { EmailFacade } from '@shared/domain/email/email.facade'
 import { SPACE_EVENT_ACTIVITY_TYPE } from '@shared/domain/space-event/space-event.enum'
 import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
 import {
@@ -23,10 +22,8 @@ import {
   SPACE_MEMBERSHIP_SIDE,
 } from '@shared/domain/space-membership/space-membership.enum'
 import { CreateSpaceDto } from '@shared/domain/space/dto/create-space.dto'
+import { SpacesHiddenDto } from '@shared/domain/space/dto/spaces-hidden.dto'
 import { SpaceAcceptOperation } from '@shared/domain/space/ops/accept-space'
-import { SpaceLockOperation } from '@shared/domain/space/ops/lock-space'
-import { SelectableSpacesOperation } from '@shared/domain/space/ops/selectable-spaces'
-import { SpaceUnlockOperation } from '@shared/domain/space/ops/unlock-space'
 import { SpaceService } from '@shared/domain/space/service/space.service'
 import { Space } from '@shared/domain/space/space.entity'
 import { SPACE_TYPE } from '@shared/domain/space/space.enum'
@@ -34,8 +31,8 @@ import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { PermissionError } from '@shared/errors'
 import { PlatformClient } from '@shared/platform-client'
 import { UserOpsCtx } from '@shared/types'
+import { SiteAdminGuard } from '../admin/guards/site-admin.guard'
 import { UserContextGuard } from '../user-context/guard/user-context.guard'
-import { EmailFacade } from '@shared/domain/email/email.facade'
 
 @UseGuards(UserContextGuard)
 @Controller('/spaces')
@@ -68,13 +65,7 @@ export class SpacesController {
   @HttpCode(204)
   @Patch('/:id/lock')
   async lockSpace(@Param('id', ParseIntPipe) spaceId: number) {
-    const opsCtx: UserOpsCtx = {
-      log: this.logger,
-      user: this.user,
-      em: this.oldEm,
-    }
-
-    await new SpaceLockOperation(opsCtx).execute({ spaceId })
+    await this.spaceService.lockSpace(spaceId)
 
     await this.emailFacade.sendEmail({
       input: {
@@ -83,20 +74,14 @@ export class SpacesController {
         activityType: SPACE_EVENT_ACTIVITY_TYPE[SPACE_EVENT_ACTIVITY_TYPE.space_locked],
       },
       receiverUserIds: [],
-      emailTypeId: EMAIL_TYPES.spaceChanged as any,
+      emailTypeId: EMAIL_TYPES.spaceChanged,
     })
   }
 
   @HttpCode(204)
   @Patch('/:id/unlock')
   async unlockSpace(@Param('id', ParseIntPipe) spaceId: number) {
-    const opsCtx: UserOpsCtx = {
-      log: this.logger,
-      user: this.user,
-      em: this.oldEm,
-    }
-
-    await new SpaceUnlockOperation(opsCtx).execute({ spaceId })
+    await this.spaceService.unlockSpace(spaceId)
 
     await this.emailFacade.sendEmail({
       input: {
@@ -105,7 +90,7 @@ export class SpacesController {
         activityType: SPACE_EVENT_ACTIVITY_TYPE[SPACE_EVENT_ACTIVITY_TYPE.space_unlocked],
       },
       receiverUserIds: [],
-      emailTypeId: EMAIL_TYPES.spaceChanged as any,
+      emailTypeId: EMAIL_TYPES.spaceChanged,
     })
   }
 
@@ -139,7 +124,7 @@ export class SpacesController {
           projectDxid: spaceToFix.hostProject,
           body: {},
         })
-      } catch (err) {
+      } catch {
         throw new PermissionError(
           'Please contact host lead of this space to perform the same action. You can copy the URL and send it to the lead.',
         )
@@ -172,12 +157,13 @@ export class SpacesController {
 
   @Get('/:id/selectable-spaces')
   async getSelectableSpaces(@Param('id', ParseIntPipe) id: number) {
-    const opsCtx: UserOpsCtx = {
-      log: this.logger,
-      user: this.user,
-      em: this.oldEm,
-    }
+    return await this.spaceService.getSelectableSpaces(id)
+  }
 
-    return await new SelectableSpacesOperation(opsCtx).execute(id)
+  @UseGuards(SiteAdminGuard)
+  @HttpCode(204)
+  @Patch('/hidden')
+  async updateSpacesHidden(@Body() spacesHiddenDto: SpacesHiddenDto) {
+    await this.spaceService.updateSpacesHiddenForAdmin(spacesHiddenDto.ids, spacesHiddenDto.hidden)
   }
 }
