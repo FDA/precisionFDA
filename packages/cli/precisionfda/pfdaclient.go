@@ -32,7 +32,7 @@ import (
 	"github.com/manifoldco/promptui"
 )
 
-const userAgent = "precisionFDA CLI/2.7.1 "
+const userAgent = "precisionFDA CLI/2.8.0 "
 const defaultNumRoutines = 10
 const defaultChunkSize = 1 << 26 // default 64MB (min. 16MB)
 const minRoutines = 1
@@ -60,7 +60,7 @@ type IPFDAClient interface {
 	Download(args []string, folderID string, spaceID string, public bool, recursive bool, outputFilePath string, overwrite string) error
 	FileViewLink(arg string, preauthenticated bool, ttl int64) error
 	UploadResources(args []string, portalID string) error
-	DescribeEntity(entityID string, entityType string) error
+	DescribeEntity(entityID string) error
 	LsSpaces(flags map[string]bool) error
 	LsApps(spaceID string, flags map[string]bool) error
 	LsAssets(spaceID string, flags map[string]bool) error
@@ -74,6 +74,10 @@ type IPFDAClient interface {
 	Rm(args []string, folderID string, spaceID string) error
 	Head(arg string, lines int) error
 	GetScope() error
+	CreateDiscussion(spaceID string, jsonBody string) error
+	CreateReply(jsonBody string) error
+	EditDiscussion(jsonBody string) error
+	EditReply(jsonBody string) error
 	RefreshToken(autoRefresh bool) (string, error)
 	GetLatestVersion() (string, error)
 	SetChunkSize(chunkSize int)
@@ -244,7 +248,7 @@ func (c *PFDAClient) UploadAsset(rootFolderPath string, name string, readmeFileP
 	closeURL := c.BaseURL + "/api/close_asset"
 
 	// Get list of all asset files
-	fileList := []string{}
+	var fileList []string
 	assetSize := int64(0)
 	err := filepath.Walk(rootFolderPath, func(path string, f os.FileInfo, err error) error {
 		if !f.IsDir() {
@@ -604,6 +608,7 @@ func (c *PFDAClient) DownloadFile(arg string, outputFilePath string, overwrite s
 	if err != nil {
 		fileName = originalName
 	}
+	fileName = sanitizeFileName(fileName)
 
 	fileSize := resultJSON["file_size"].(float64)
 	if !c.JsonResponse {
@@ -793,16 +798,12 @@ func (c *PFDAClient) FileViewLink(arg string, preauthenticated bool, duration in
 	return nil
 }
 
-func (c *PFDAClient) DescribeEntity(entityID string, entityType string) error {
-	apiURL := fmt.Sprintf("%s/api/%ss/%s/describe", c.BaseURL, entityType, entityID)
+func (c *PFDAClient) DescribeEntity(entityID string) error {
+	apiURL := fmt.Sprintf("%s/api/v2/cli/%s/describe", c.BaseURL, entityID)
 
-	status, body, err := c.makeRequestFail("GET", apiURL, nil)
+	_, body, err := c.makeRequest("GET", apiURL, nil)
 	if err != nil {
-		if status == "404 Not Found" {
-			return fmt.Errorf("%s not found - please check that it does exist and you have access to it", entityID)
-		} else {
-			return err
-		}
+		return err
 	}
 
 	var resultJSON map[string]interface{}
@@ -1075,9 +1076,9 @@ func (c *PFDAClient) RefreshToken(autoRefresh bool) (string, error) {
 }
 
 func (c *PFDAClient) GetLatestVersion() (string, error) {
-	apiURL := fmt.Sprintf("%s/api/cli_latest_version", c.BaseURL)
+	apiURL := fmt.Sprintf("%s/api/v2/cli/version/latest", c.BaseURL)
 
-	_, body, err := c.makeRequestFail("GET", apiURL, nil)
+	_, body, err := c.makeRequest("GET", apiURL, nil)
 	if err != nil {
 		return "", err
 	}
@@ -1313,6 +1314,7 @@ func (c *PFDAClient) initWaitGroup(fileID string, chunkPool <-chan uploadChunk, 
 	return
 }
 
+// Deprecated: This method is not handling errors correctly, use makeRequest instead.
 func (c *PFDAClient) makeRequestFail(requestType string, url string, data []byte) (status string, body []byte, err error) {
 	req, err := retryablehttp.NewRequest(requestType, url, bytes.NewReader(data))
 	helpers.CheckErr(err)
@@ -1409,7 +1411,9 @@ func (c *PFDAClient) sendToStore(id string, chunk uploadChunk) error {
 
 func (c *PFDAClient) setPostHeaders(req *retryablehttp.Request) {
 	req.Header.Set("User-Agent", userAgent+"("+c.Platform+")")
-	req.Header.Set("Authorization", "Key "+c.AuthKey)
+	if c.AuthKey != "" {
+		req.Header.Set("Authorization", "Key "+c.AuthKey)
+	}
 	req.Header.Set("Content-Type", "application/json")
 }
 
@@ -1492,4 +1496,9 @@ func printSpaceMembersResponse(members []jsonMembersResponse, asJSON bool) {
 		}
 		writer.Flush()
 	}
+}
+
+func sanitizeFileName(name string) string {
+	re := regexp.MustCompile(`[<>:"/\\|?*]+`)
+	return re.ReplaceAllString(name, "_")
 }

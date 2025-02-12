@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2024_05_07_152233) do
+ActiveRecord::Schema.define(version: 2025_01_16_120925) do
 
   create_table "accepted_licenses", id: :integer, charset: "utf8mb3", collation: "utf8mb3_unicode_ci", force: :cascade do |t|
     t.integer "license_id"
@@ -194,6 +194,12 @@ ActiveRecord::Schema.define(version: 2024_05_07_152233) do
     t.integer "specified_order"
     t.string "scope", default: "public", null: false
     t.string "pre_registration_url"
+    t.text "info_editor_state", size: :medium
+    t.text "info_content", size: :medium
+    t.text "results_editor_state", size: :medium
+    t.text "results_content", size: :medium
+    t.text "pre_registration_editor_state", size: :medium
+    t.text "pre_registration_content", size: :medium
     t.index ["admin_id"], name: "index_challenges_on_admin_id"
     t.index ["app_id"], name: "index_challenges_on_app_id"
     t.index ["app_owner_id"], name: "index_challenges_on_app_owner_id"
@@ -288,6 +294,7 @@ ActiveRecord::Schema.define(version: 2024_05_07_152233) do
     t.string "uid", collation: "utf8mb3_bin"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.string "salt"
     t.index ["dxid"], name: "index_dbclusters_on_dxid", unique: true
     t.index ["uid"], name: "index_dbclusters_on_uid", unique: true
     t.index ["user_id"], name: "index_dbclusters_on_user_id"
@@ -351,7 +358,7 @@ ActiveRecord::Schema.define(version: 2024_05_07_152233) do
     t.index ["image"], name: "index_experts_on_image"
     t.index ["scope"], name: "index_experts_on_scope"
     t.index ["state"], name: "index_experts_on_state"
-    t.index ["user_id"], name: "index_experts_on_user_id"
+    t.index ["user_id"], name: "index_experts_on_user_id", unique: true
   end
 
   create_table "follows", id: :integer, charset: "utf8mb3", collation: "utf8mb3_unicode_ci", force: :cascade do |t|
@@ -364,18 +371,6 @@ ActiveRecord::Schema.define(version: 2024_05_07_152233) do
     t.datetime "updated_at"
     t.index ["followable_id", "followable_type"], name: "fk_followables"
     t.index ["follower_id", "follower_type"], name: "fk_follows"
-  end
-
-  create_table "get_started_boxes", id: :integer, charset: "utf8mb3", collation: "utf8mb3_unicode_ci", force: :cascade do |t|
-    t.string "title"
-    t.string "feature_url"
-    t.string "documentation_url"
-    t.text "description"
-    t.boolean "public"
-    t.integer "kind", default: 0
-    t.integer "position", default: 0
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
   end
 
   create_table "invitations", id: :integer, charset: "utf8mb3", collation: "utf8mb3_unicode_ci", force: :cascade do |t|
@@ -421,7 +416,7 @@ ActiveRecord::Schema.define(version: 2024_05_07_152233) do
     t.integer "app_id"
     t.string "project"
     t.text "run_data"
-    t.text "describe"
+    t.text "describe", size: :medium
     t.text "provenance"
     t.string "state"
     t.string "name"
@@ -516,8 +511,10 @@ ActiveRecord::Schema.define(version: 2024_05_07_152233) do
     t.boolean "featured", default: false
     t.boolean "locked", default: false
     t.index ["dxid", "sti_type"], name: "index_nodes_on_dxid_and_sti_type"
+    t.index ["parent_folder_id"], name: "index_nodes_on_parent_folder_id"
     t.index ["parent_type", "parent_id"], name: "index_nodes_on_parent_type_and_parent_id"
     t.index ["scope"], name: "index_nodes_on_scope"
+    t.index ["scoped_parent_folder_id"], name: "index_nodes_on_scoped_parent_folder_id"
     t.index ["state"], name: "index_nodes_on_state"
     t.index ["uid"], name: "index_nodes_on_uid", unique: true
     t.index ["user_id"], name: "index_nodes_on_user_id"
@@ -550,6 +547,7 @@ ActiveRecord::Schema.define(version: 2024_05_07_152233) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "meta", limit: 4096
+    t.string "session_id"
     t.index ["user_id"], name: "index_notifications_on_user_id"
   end
 
@@ -755,6 +753,8 @@ ActiveRecord::Schema.define(version: 2024_05_07_152233) do
     t.boolean "restrict_to_template", default: false
     t.boolean "inactivity_notified", default: false
     t.boolean "protected", default: false
+    t.boolean "hidden", default: false
+    t.index ["space_id"], name: "fk_rails_b7a2c80157"
   end
 
   create_table "submissions", id: :integer, charset: "utf8mb3", collation: "utf8mb3_unicode_ci", force: :cascade do |t|
@@ -891,6 +891,16 @@ ActiveRecord::Schema.define(version: 2024_05_07_152233) do
     t.bigint "cumulative_byte_hours"
   end
 
+  create_table "user_dbcluster_salt", charset: "utf8mb3", collation: "utf8mb3_unicode_ci", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.bigint "dbcluster_id", null: false
+    t.string "salt", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["dbcluster_id"], name: "fk_rails_087f59dba3"
+    t.index ["user_id"], name: "fk_rails_35beefcb02"
+  end
+
   create_table "users", id: :integer, charset: "utf8mb3", collation: "utf8mb3_unicode_ci", force: :cascade do |t|
     t.string "dxuser"
     t.string "private_files_project"
@@ -1004,6 +1014,7 @@ ActiveRecord::Schema.define(version: 2024_05_07_152233) do
   add_foreign_key "challenge_resources", "nodes", column: "user_file_id"
   add_foreign_key "challenge_resources", "users"
   add_foreign_key "challenges", "apps"
+  add_foreign_key "challenges", "spaces"
   add_foreign_key "challenges", "users", column: "admin_id"
   add_foreign_key "challenges", "users", column: "app_owner_id"
   add_foreign_key "comparisons", "users"
@@ -1046,11 +1057,15 @@ ActiveRecord::Schema.define(version: 2024_05_07_152233) do
   add_foreign_key "space_invitations", "spaces"
   add_foreign_key "space_invitations", "users", column: "inviter_id"
   add_foreign_key "space_memberships", "users"
+  add_foreign_key "space_memberships_spaces", "spaces"
   add_foreign_key "space_report_parts", "space_reports", on_delete: :cascade
   add_foreign_key "space_reports", "nodes", column: "result_file_id"
   add_foreign_key "space_reports", "users", column: "created_by"
+  add_foreign_key "spaces", "spaces"
   add_foreign_key "submissions", "challenges"
   add_foreign_key "submissions", "jobs"
   add_foreign_key "submissions", "users"
+  add_foreign_key "user_dbcluster_salt", "dbclusters"
+  add_foreign_key "user_dbcluster_salt", "users"
   add_foreign_key "users", "orgs"
 end

@@ -4,9 +4,10 @@ export const Button = styled.button.attrs(({ disabled }) => ({ 'aria-disabled': 
   'data-variant'?: 'primary' | 'success' | 'warning' | 'link'
   disabled?: boolean
   active?: BooleanString
-} >`
+}>`
   position: relative;
   display: flex;
+  gap: 8px;
   width: fit-content;
   align-items: center;
   white-space: nowrap;
@@ -66,8 +67,8 @@ export const Button = styled.button.attrs(({ disabled }) => ({ 'aria-disabled': 
   }
 
   &[data-variant='success'] {
-    border-color: var(--success-700);
-    background: var(--success-600);
+    border-color: var(--success-500);
+    background: var(--success-400);
     color: hsl(0, 0%, 97%);
     &:hover {
       filter: brightness(94%);
@@ -75,7 +76,7 @@ export const Button = styled.button.attrs(({ disabled }) => ({ 'aria-disabled': 
     &:active {
       box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.26);
       filter: brightness(93%);
-      border-color: var(--success-600);
+      border-color: var(--success-400);
     }
   }
 
@@ -107,6 +108,10 @@ export const Button = styled.button.attrs(({ disabled }) => ({ 'aria-disabled': 
     }
   }
 `
+export const OutlineButton = styled(Button)`
+  background: transparent;
+  color: white;
+`
 
 export const TransparentButton = styled(Button)`
   display: flex;
@@ -124,6 +129,31 @@ export const TransparentButton = styled(Button)`
   }
   &:focus {
     outline: none;
+  }
+`
+
+export const SwitchButton = styled.div`
+  display: flex;
+  width: 24px;
+  height: 12px;
+  border-radius: 9999px;
+  background-color: var(--tertiary-500);
+  padding: 2px;
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+  &::before {
+    content: '';
+    width: 12px;
+    height: 12px;
+    border-radius: inherit;
+    background-color: var(--tertiary-30);
+    transition: all 0.3s ease-in-out;
+  }
+  &[data-active='true'] {
+    background: var(--success-600);
+    &::before {
+      transform: translateX(12px);
+    }
   }
 `
 

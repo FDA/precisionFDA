@@ -10,7 +10,8 @@ export const StyledBreadcrumbs = styled.div`
 export const BreadcrumbLabel = styled.span`
   margin-right: 8px;
 `
+
 export const BreadcrumbDivider = styled.span`
-  margin-right: 6px;
-  margin-left: 6px;
+  margin-right: 3px;
+  margin-left: 3px;
 `

@@ -18,13 +18,14 @@ export function usePaginationState() {
   return { page, perPage, setPerPage, setPage }
 }
 
+ /** @deprecated use usePaginationParamsV2 instead when endpoints using this are written in Node */
 export function usePaginationParams(initialPerPageCount?: number) {
   const [pageParam, setPageParam] = useQueryParam(
     'page',
     withDefault(NumberParam, defaultPage),
   )
   const [perPageParam, setPerPageParam] = useQueryParam(
-    'per_page',
+    'perPage',
     withDefault(NumberParam, initialPerPageCount ?? defaultPerPageCount),
   )
 
@@ -42,4 +43,30 @@ export function usePaginationParams(initialPerPageCount?: number) {
   }
 
   return { pageParam, perPageParam, setPerPageParam: handleSetPerPageParam, setPageParam: handleSetPageParam }
+}
+
+export function usePaginationParamsV2() {
+  const [pageParam, setPageParam] = useQueryParam(
+    'page',
+    withDefault(NumberParam, defaultPage),
+  )
+  const [pageSizeParam, setPageSizeParam] = useQueryParam(
+    'pageSize',
+    withDefault(NumberParam, defaultPerPageCount),
+  )
+
+  const handleSetPageParam = (v: number, updateType: UrlUpdateType) => {
+    if(v === 1) {
+      setPageParam(undefined, updateType)
+    } else {
+      setPageParam(v, updateType)
+    }
+  }
+
+  const handleSetPageSizeParam = (v: number) => {
+    setPageParam(undefined)
+    setPageSizeParam(v, 'pushIn')
+  }
+
+  return { pageParam, pageSizeParam, setPageSizeParam: handleSetPageSizeParam, setPageParam: handleSetPageParam }
 }

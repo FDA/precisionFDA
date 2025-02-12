@@ -1,6 +1,6 @@
 import styled, { css } from 'styled-components'
 import { commonStyles } from '../../styles/commonStyles'
-import { breakPoints, padding } from '../../styles/theme'
+import { breakPoints } from '../../styles/theme'
 import { Svg } from '../icons/Svg'
 
 export const compactScrollBar = css`
@@ -27,6 +27,20 @@ export const pagePadding = css`
 
   @media (min-width: ${breakPoints.medium}px) {
     padding: 32px;
+  }
+`
+export const pagePaddingLR = css`
+  padding-left: 8px;
+  padding-right: 8px;
+
+  @media (min-width: ${breakPoints.small}px) {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  @media (min-width: ${breakPoints.medium}px) {
+    padding-left: 32px;
+    padding-right: 32px;
   }
 `
 
@@ -103,6 +117,7 @@ export const Refresh = styled.span<{ $spin?: boolean }>`
   display: flex;
   align-items: center;
   cursor: pointer;
+  margin-right: 8px;
 
   ${Svg} {
     animation-name: ${({ $spin }) => ($spin ? 'spin' : 'none')};

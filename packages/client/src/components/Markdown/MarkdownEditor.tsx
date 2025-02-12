@@ -1,13 +1,11 @@
 /* eslint-disable react/jsx-no-useless-fragment */
 import React from 'react'
-import styled from 'styled-components'
 import { ControllerRenderProps } from 'react-hook-form'
+import styled from 'styled-components'
 import { Markdown } from '.'
 
-import { ITab, TabsSwitch } from '../TabsSwitch'
 import { StyledMarkdown } from '../../features/discussions/styles'
-import { MarkdownIcon } from '../icons/MarkdownIcon'
-import ExternalLink from '../Controls/ExternalLink'
+import { ITab, TabsSwitch } from '../TabsSwitch'
 
 export const Help = styled.div`
   padding: 6px;
@@ -39,10 +37,12 @@ export const WeMarkdown = styled.div`
 `
 export const StyledMarkdownHelper = styled.div`
   width: fit-content;
+  padding: 8px 0;
+  justify-self: flex-start;
 `
 
 export const StyedEditor = styled.div`
-  padding: 8px;
+  padding: 8px 0;
 
   --spacing: 8px;
   textarea {
@@ -77,7 +77,6 @@ export const MarkdownEditor = ({
 }) => {
   return (
     <TabsSwitch
-      transparent
       tabsConfig={
         [
           {
@@ -89,7 +88,6 @@ export const MarkdownEditor = ({
                   disabled={disabled}
                   {...field}
                 />
-                <StyledMarkdownHelper><ExternalLink to="https://www.markdownguide.org/basic-syntax/"><WeMarkdown><MarkdownIcon height={17} />Markdown Support</WeMarkdown></ExternalLink></StyledMarkdownHelper>
               </StyedEditor>
             ),
             hide: false,

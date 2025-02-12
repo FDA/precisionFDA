@@ -1,12 +1,12 @@
 import { useRef, useEffect } from 'react'
 
-export const useSkipFirstRender = (fn: () => void, deps: any[]) => {
-  const first = useRef(true);
+export const useSkipFirstRenderUseEffect = (fn: () => void, deps: unknown[]) => {
+  const first = useRef(true)
   useEffect(() => {
     if (first.current) {
-      first.current = false;
-      return;
+      first.current = false
+      return
     }
     fn()
   }, deps)
-};
+}

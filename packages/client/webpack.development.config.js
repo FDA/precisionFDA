@@ -39,10 +39,7 @@ module.exports = merge(base({ urlLoaderOptions }), swc({ swcLoaderOptions }), {
     publicPath: '/',
   },
   watchOptions: {
-    ignored: [
-      path.resolve(__dirname, 'dist'),
-      path.resolve(__dirname, 'node_modules'),
-    ],
+    ignored: [path.resolve(__dirname, 'dist'), path.resolve(__dirname, 'node_modules')],
   },
   devtool: 'eval-source-map',
   devServer: {
@@ -166,12 +163,22 @@ module.exports = merge(base({ urlLoaderOptions }), swc({ swcLoaderOptions }), {
         secure: false,
       },
       {
-        context: ['/challenges/*/editor/*'],
+        context: ['/challenges/*/editor/resources'],
+        target: TARGET,
+        secure: false,
+      },
+      {
+        context: ['/challenges/*/challenge_resources/new'],
         target: TARGET,
         secure: false,
       },
       {
         context: ['/jobs'],
+        target: TARGET,
+        secure: false,
+      },
+      {
+        context: ['/admin/users_list'],
         target: TARGET,
         secure: false,
       },

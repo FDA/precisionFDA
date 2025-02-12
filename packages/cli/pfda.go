@@ -1,5 +1,5 @@
 // PrecisionFDA CLI
-// Version 2.7.1
+// Version 2.8.0
 package main
 
 import (
@@ -26,7 +26,7 @@ const defaultChunkSize = 1 << 26 // default 64MB (min. 16MB)
 const defaultSkipVerify = "false"
 const usageString = `
 ****************************
-PFDA COMMAND LINE TOOL v2.7.1
+PFDA COMMAND LINE TOOL v2.8.0
 ****************************
 
 All available commands:
@@ -130,8 +130,8 @@ var invokeUploadResources = func(client precisionfda.IPFDAClient, args *[]string
 	return client.UploadResources(*args, *portalID)
 }
 
-var invokeDescribe = func(client precisionfda.IPFDAClient, entityID *string, entityType string) error {
-	return client.DescribeEntity(*entityID, entityType)
+var invokeDescribe = func(client precisionfda.IPFDAClient, entityID *string) error {
+	return client.DescribeEntity(*entityID)
 }
 
 var invokeLsSpaces = func(client precisionfda.IPFDAClient, flags map[string]bool) error {
@@ -189,6 +189,22 @@ var invokeCat = func(client precisionfda.IPFDAClient, arg *string) error {
 
 var invokeGetScope = func(client precisionfda.IPFDAClient) error {
 	return client.GetScope()
+}
+
+var invokeCreateDiscussion = func(client precisionfda.IPFDAClient, spaceID *string, jsonBody *string) error {
+	return client.CreateDiscussion(*spaceID, *jsonBody)
+}
+
+var invokeCreateReply = func(client precisionfda.IPFDAClient, jsonBody *string) error {
+	return client.CreateReply(*jsonBody)
+}
+
+var invokeEditDiscussion = func(client precisionfda.IPFDAClient, jsonBody *string) error {
+	return client.EditDiscussion(*jsonBody)
+}
+
+var invokeEditReply = func(client precisionfda.IPFDAClient, jsonBody *string) error {
+	return client.EditReply(*jsonBody)
 }
 
 var invokeRefreshToken = func(client precisionfda.IPFDAClient, autoRefresh bool) (string, error) {
@@ -273,6 +289,7 @@ func mainInternal() int {
 		flag.Parse()
 	}
 
+	//	TODO: REMOVE IN V3.0.0
 	if *command != "" {
 		fmt.Println("\nWARNING! THIS SYNTAX IS BEING DEPRECATED. PLEASE USE THE FOLLOWING SYNTAX INSTEAD: ./pfda <command> <args> \n")
 	}
@@ -500,6 +517,7 @@ func mainInternal() int {
 			return helpers.ErrorFromError(err, *flagJson)
 		}
 
+	//	TODO: REMOVE IN V3.0.0
 	case "describe-app":
 
 		fmt.Println("\nWARNING! THIS COMMAND IS BEING DEPRECATED. PLEASE USE THE FOLLOWING SYNTAX INSTEAD: ./pfda describe <APP_ID>")
@@ -516,7 +534,7 @@ func mainInternal() int {
 			return helpers.ErrorFromString("App ID is required", *flagJson)
 		}
 
-		err := invokeDescribe(pfdaclient, &args[0], "app")
+		err := invokeDescribe(pfdaclient, &args[0])
 		if err != nil {
 			return helpers.ErrorFromError(err, *flagJson)
 		}
@@ -531,14 +549,12 @@ func mainInternal() int {
 			return helpers.ErrorFromString("Entity ID is required", *flagJson)
 		}
 
-		entityType, entityId := helpers.ParseEntityType(args[0])
+		entityType := helpers.ParseEntityType(args[0])
 		if entityType == "" {
 			return helpers.ErrorFromString(fmt.Sprintf("Invalid entity type '%s' - must be one of: app, job, file, worklfow, discussion.", args[0]), *flagJson)
 		}
-		if entityType == "discussion" {
-			args[0] = entityId
-		}
-		err := invokeDescribe(pfdaclient, &args[0], entityType)
+
+		err := invokeDescribe(pfdaclient, &args[0])
 		if err != nil {
 			return helpers.ErrorFromError(err, *flagJson)
 		}
@@ -561,6 +577,7 @@ func mainInternal() int {
 			return helpers.ErrorFromError(err, *flagJson)
 		}
 
+	//	TODO: REMOVE IN V3.0.0
 	case "describe-workflow":
 
 		fmt.Println("\nWARNING! THIS COMMAND IS BEING DEPRECATED. PLEASE USE THE FOLLOWING SYNTAX INSTEAD: ./pfda describe <WORKFLOW_ID>")
@@ -577,7 +594,7 @@ func mainInternal() int {
 			return helpers.ErrorFromString("Workflow ID is required", *flagJson)
 		}
 
-		err := invokeDescribe(pfdaclient, &args[0], "workflow")
+		err := invokeDescribe(pfdaclient, &args[0])
 		if err != nil {
 			return helpers.ErrorFromError(err, *flagJson)
 		}
@@ -784,6 +801,50 @@ func mainInternal() int {
 		}
 
 		err := invokeGetScope(pfdaclient)
+		if err != nil {
+			return helpers.ErrorFromError(err, *flagJson)
+		}
+
+	case "create-discussion":
+		if help {
+			return helpers.PrintCreateDiscussionHelp()
+		}
+
+		if *spaceID == "" {
+			return helpers.ErrorFromString("Space ID is required", *flagJson)
+		}
+
+		err := invokeCreateDiscussion(pfdaclient, spaceID, &args[0])
+		if err != nil {
+			return helpers.ErrorFromError(err, *flagJson)
+		}
+
+	case "create-reply":
+		if help {
+			return helpers.PrintCreateReplyHelp()
+		}
+
+		err := invokeCreateReply(pfdaclient, &args[0])
+		if err != nil {
+			return helpers.ErrorFromError(err, *flagJson)
+		}
+
+	case "edit-discussion":
+		if help {
+			return helpers.PrintEditDiscussionHelp()
+		}
+
+		err := invokeEditDiscussion(pfdaclient, &args[0])
+		if err != nil {
+			return helpers.ErrorFromError(err, *flagJson)
+		}
+
+	case "edit-reply":
+		if help {
+			return helpers.PrintEditReplyHelp()
+		}
+
+		err := invokeEditReply(pfdaclient, &args[0])
 		if err != nil {
 			return helpers.ErrorFromError(err, *flagJson)
 		}

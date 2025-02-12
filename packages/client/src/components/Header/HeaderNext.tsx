@@ -1,13 +1,15 @@
 import classNames from 'classnames'
 import React, { useRef, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
+import { PlacesType, Tooltip } from 'react-tooltip'
 import { useAlertDismissed } from '../../features/admin/alerts/useAlertDismissedLocalStorage'
 import { CDMHKey, logout } from '../../features/auth/api'
 import { useAuthUser } from '../../features/auth/useAuthUser'
 import { useGenerateKeyModal } from '../../features/auth/useGenerateKeyModal'
-import { CDMHNames, useSiteSettingsQuery } from '../../features/auth/useSiteSettingsQuery'
+import { CDMHNames, SiteSettingsDataPortal, useSiteSettingsQuery } from '../../features/auth/useSiteSettingsQuery'
 import { useOnOutsideClickRef } from '../../hooks/useOnOutsideClick'
 import { IUser } from '../../types/user'
+import { useTheme } from '../../utils/ThemeContext'
 import { AlertBanner } from '../AlertBanner'
 import { TransparentButton } from '../Button'
 import { CloudResourceModal } from '../CloudResourcesModal'
@@ -15,6 +17,7 @@ import { DropdownNext } from '../Dropdown/DropdownNext'
 import { ArrowLeftIcon } from '../icons/ArrowLeftIcon'
 import { CDMHIcon } from '../icons/CDMHIcon'
 import { CaretIcon } from '../icons/CaretIcon'
+import { DarkModeIcon, LightModeIcon } from '../icons/ColorModes'
 import { CrossIcon } from '../icons/PlusIcon'
 import { ProfileIcon } from '../icons/ProfileIcon'
 import { SiteMenuIcon } from '../icons/SiteMenuIcon'
@@ -23,6 +26,7 @@ import { SiteNavItemType } from './NavItems'
 import { orderArrayByReference } from './orderArrayByReference'
 import { getObjectsByIds } from './orderObjectById'
 import {
+  DisabledSiteMenuItem,
   DropdownMenuItem,
   EditMenuWrap,
   HeaderItemText,
@@ -38,6 +42,7 @@ import {
   SiteMenuItem,
   SiteMenuText,
   SiteNavBody,
+  SiteNavBottom,
   SiteNavTop,
   StyledDivider,
   StyledDropMenuLinks,
@@ -46,6 +51,8 @@ import {
   StyledLink,
   StyledOnClickModalDiv,
   StyledSiteNav,
+  StyledToggle,
+  StyledToggleButton,
   SubLink,
 } from './styles'
 import { useEditFavoritesModal } from './useEditFavoritesModal'
@@ -81,16 +88,23 @@ export const UserMenu = ({
         <StyledLink data-turbolinks="false" href={`/users/${user?.dxuser}`} onClick={() => hide()}>
           Public Profile
         </StyledLink>
-        <StyledOnClickModalDiv onClick={() => {
+        <StyledOnClickModalDiv
+          onClick={() => {
             showCloudResourcesModal()
             hide()
-        }}>Cloud Resources</StyledOnClickModalDiv>
+          }}
+        >
+          Cloud Resources
+        </StyledOnClickModalDiv>
       </>
     )}
-    <StyledLink as="div" onClick={() => {
-      generateCLIKey()
-      hide()
-    }}>
+    <StyledLink
+      as="div"
+      onClick={() => {
+        generateCLIKey()
+        hide()
+      }}
+    >
       Generate CLI Key
     </StyledLink>
     <StyledLink data-turbolinks="false" href="/licenses" onClick={() => hide()}>
@@ -120,10 +134,13 @@ export const UserMenu = ({
         <StyledDivider />
       </>
     )}
-    <StyledLink as="div" onClick={() => {
-      hide()
-      handleLogout()
-    }}>
+    <StyledLink
+      as="div"
+      onClick={() => {
+        hide()
+        handleLogout()
+      }}
+    >
       Log Out
     </StyledLink>
   </StyledDropMenuLinks>
@@ -137,26 +154,34 @@ const isActiveLink = (linkPath: string, pathname: string) => {
   return pathname.startsWith(linkPath)
 }
 
-const MenuLink = ({ navItem, onClick, children, ...rest }: {navItem: SiteNavItemType, onClick?: () => void, children: React.ReactNode, 'data-testid': string }) => {
+const MenuLink = ({
+  navItem,
+  onClick,
+  children,
+  ...rest
+}: {
+  navItem: SiteNavItemType
+  onClick?: () => void
+  children: React.ReactNode
+  'data-testid': string
+}) => {
   const MenuLinkComp = navItem.alink ? 'a' : Link
   const menuLinkProps = {
     rel: navItem.alink?.startsWith('mailto:') ? 'noreferrer' : undefined,
-    target: navItem?.external ? '_blank': undefined,
+    target: navItem?.external ? '_blank' : undefined,
     onClick,
     href: navItem?.alink,
     to: navItem.link,
     title: navItem.text,
     'data-testid': rest['data-testid'],
   }
-  return (
-    <MenuLinkComp {...menuLinkProps}>{children}</MenuLinkComp>
-  )
+  return <MenuLinkComp {...menuLinkProps}>{children}</MenuLinkComp>
 }
 
-const MenuItem = ({ navItem, pathname, onClick }: {navItem: SiteNavItemType, pathname: string, onClick: () => void }) => {
+const MenuItem = ({ navItem, pathname, onClick }: { navItem: SiteNavItemType; pathname: string; onClick: () => void }) => {
   return (
     <MenuLink navItem={navItem} onClick={onClick} data-testid={`sitenav-${navItem.id}`}>
-      <SiteMenuItem $active={isActiveLink(navItem.link || navItem.alink , pathname)}>
+      <SiteMenuItem $active={isActiveLink(navItem.link || navItem.alink, pathname)}>
         <IconWrap>
           <navItem.icon height={navItem.iconHeight} />
         </IconWrap>
@@ -164,6 +189,58 @@ const MenuItem = ({ navItem, pathname, onClick }: {navItem: SiteNavItemType, pat
       </SiteMenuItem>
     </MenuLink>
   )
+}
+
+const DisabledMenuItem = ({
+  navItem,
+  siteSettingsDataPortal,
+  tooltipPos,
+}: {
+  navItem: SiteNavItemType
+  siteSettingsDataPortal: SiteSettingsDataPortal
+  tooltipPos?: PlacesType
+}) => {
+  const tooltipPosition: PlacesType = tooltipPos || 'right'
+  return (
+    <DisabledSiteMenuItem $active={false} data-tooltip-id={`menu-item.${navItem.id}.${tooltipPosition}`}>
+      <Tooltip id={`menu-item.${navItem.id}.${tooltipPosition}`} clickable place={tooltipPosition}>
+        <div>{siteSettingsDataPortal?.tooltipText}</div>
+        <div>
+          <a style={{ textDecoration: 'underline' }} href={`mailto:${siteSettingsDataPortal?.mailto}`}>
+            Reach out to the FDA for access.
+          </a>
+        </div>
+      </Tooltip>
+      <IconWrap>
+        <navItem.icon height={navItem.iconHeight} />
+      </IconWrap>
+      <SiteMenuText>{navItem.text}</SiteMenuText>
+    </DisabledSiteMenuItem>
+  )
+}
+
+const DisabledTopMenuItem = ({
+  navItem,
+  siteSettingsDataPortal,
+}: {
+  navItem: SiteNavItemType
+  siteSettingsDataPortal: SiteSettingsDataPortal
+}) => {
+  return (
+    <DisabledMenuItem key={navItem.id} navItem={navItem} siteSettingsDataPortal={siteSettingsDataPortal} tooltipPos="bottom" />
+  )
+}
+
+const dataPortalMenuItem = (
+  i: SiteNavItemType,
+  pathname: string,
+  setShowSiteNav: (v: boolean, ms?: number) => void,
+  siteSettingsDataPortal: SiteSettingsDataPortal,
+) => {
+  if (siteSettingsDataPortal?.accessible) {
+    return <MenuItem key={i.id} navItem={i} pathname={pathname} onClick={() => setShowSiteNav(false)} />
+  }
+  return <DisabledMenuItem key={i.id} navItem={i} siteSettingsDataPortal={siteSettingsDataPortal} />
 }
 
 const getUsername = (user: IUser) => {
@@ -185,6 +262,7 @@ const SiteNav = ({
   setShowSiteNav: (v: boolean, ms?: number) => void
   ignoredOutsideClickRef: HTMLDivElement | null
 }) => {
+  const { theme, toggleTheme } = useTheme()
   const clickRef = useOnOutsideClickRef(true, setShowSiteNav, ignoredOutsideClickRef)
   const { pathname } = useLocation()
   const siteSettings = useSiteSettingsQuery()
@@ -201,25 +279,47 @@ const SiteNav = ({
       <SiteNavBody>
         <Row>
           <div>
-            {getObjectsByIds(['overview', 'discussions', 'challenges', 'experts'], userSiteNavItems).map((i) => <MenuItem key={i.id} navItem={i} pathname={pathname} onClick={() => setShowSiteNav(false)} /> )}
+            {getObjectsByIds(['overview', 'discussions', 'challenges', 'experts'], userSiteNavItems).map(i => (
+              <MenuItem key={i.id} navItem={i} pathname={pathname} onClick={() => setShowSiteNav(false)} />
+            ))}
             <HeaderSpacer />
-            {getObjectsByIds(['home', 'spaces'], userSiteNavItems).map((i) => <MenuItem key={i.id} navItem={i} pathname={pathname} onClick={() => setShowSiteNav(false)} />)}
+            {getObjectsByIds(['home', 'spaces'], userSiteNavItems).map(i => (
+              <MenuItem key={i.id} navItem={i} pathname={pathname} onClick={() => setShowSiteNav(false)} />
+            ))}
             <HeaderSpacer />
-            {getObjectsByIds(['notes', 'comparisons'], userSiteNavItems).map((i) => <MenuItem key={i.id} navItem={i} pathname={pathname} onClick={() => setShowSiteNav(false)} />)}
+            {getObjectsByIds(['notes', 'comparisons'], userSiteNavItems).map(i => (
+              <MenuItem key={i.id} navItem={i} pathname={pathname} onClick={() => setShowSiteNav(false)} />
+            ))}
             <HeaderSpacer />
-            {getObjectsByIds(['docs', 'support'], userSiteNavItems).map((i) => <MenuItem key={i.id} navItem={i} pathname={pathname} onClick={() => setShowSiteNav(false)} />)}
+            {getObjectsByIds(['docs', 'support'], userSiteNavItems).map(i => (
+              <MenuItem key={i.id} navItem={i} pathname={pathname} onClick={() => setShowSiteNav(false)} />
+            ))}
           </div>
           <div>
-            {getObjectsByIds(['daaas', 'prism', 'tools'], userSiteNavItems).map((i) => <MenuItem key={i.id} navItem={i} pathname={pathname} onClick={() => setShowSiteNav(false)} />)}
+            {getObjectsByIds(['daaas', 'prism', 'tools'], userSiteNavItems).map(i =>
+              dataPortalMenuItem(i, pathname, setShowSiteNav, siteSettings?.data?.dataPortals[i.id]),
+            )}
             <HeaderSpacer />
 
-            {showGSRSLink && (
-              getObjectsByIds(['gsrs'], userSiteNavItems).map((i) => <MenuItem key={i.id} navItem={i} pathname={pathname} onClick={() => setShowSiteNav(false)} />)
-            )}
+            {showGSRSLink &&
+              getObjectsByIds(['gsrs'], userSiteNavItems).map(i => (
+                <MenuItem key={i.id} navItem={i} pathname={pathname} onClick={() => setShowSiteNav(false)} />
+              ))}
             <HeaderSpacer />
             {showCDMHLink && (
               <>
-                <SiteMenuItem className='noHover'>
+                <Tooltip id="menu-item.cdmh.right" clickable place="right">
+                  <div>This is the Common Data Model Harmonization; access is currently restricted to FDA users.</div>
+                  <div>
+                    <a
+                      style={{ textDecoration: 'underline' }}
+                      href="mailto:mitra.rocca@fda.hhs.gov?cc=precisionFDA@fda.hhs.gov&subject=CDMH access request"
+                    >
+                      Reach out to the FDA for access.
+                    </a>
+                  </div>
+                </Tooltip>
+                <SiteMenuItem className="noHover" data-tooltip-id="menu-item.cdmh.right">
                   <IconWrap>
                     <CDMHIcon height={20} />
                   </IconWrap>
@@ -229,7 +329,8 @@ const SiteNav = ({
                   Object.keys(siteSettings.data.cdmh.data).map((s: CDMHKey) => {
                     return (
                       <SubLink as="a" key={s} target="_blank" rel="noreferrer" href={siteSettings.data.cdmh.data[s]}>
-                        {CDMHNames[s]}&nbsp;<ArrowLeftIcon />
+                        {CDMHNames[s]}&nbsp;
+                        <ArrowLeftIcon />
                       </SubLink>
                     )
                   })}
@@ -239,6 +340,17 @@ const SiteNav = ({
           </div>
         </Row>
       </SiteNavBody>
+      <SiteNavBottom>
+        <div />
+        <StyledToggle>
+          <StyledToggleButton data-active={theme === 'light'} onClick={() => toggleTheme()}>
+            <LightModeIcon height={16} />
+          </StyledToggleButton>
+          <StyledToggleButton data-active={theme === 'dark'} onClick={() => toggleTheme()}>
+            <DarkModeIcon height={16} />
+          </StyledToggleButton>
+        </StyledToggle>
+      </SiteNavBottom>
     </StyledSiteNav>
   )
 }
@@ -299,11 +411,32 @@ const Header: React.FC = () => {
           <LogoWrap as={Link} to="/" data-turbolinks="false">
             <StyledHeaderLogo height={20} />
           </LogoWrap>
-          <MenuButton $active={showSiteNav} data-testid="button-open-menu" ref={buttonRef} onClick={() => setSidebar(!showSiteNav, 100)}>
+          <MenuButton
+            $active={showSiteNav}
+            data-testid="button-open-menu"
+            ref={buttonRef}
+            onClick={() => setSidebar(!showSiteNav, 100)}
+          >
             <SiteMenuIcon height={20} />
           </MenuButton>
           <HeaderLeft>
             {getObjectsByIds(orderedFavorites, userSiteNavItems).map(i => {
+              if (siteSettings?.data?.dataPortals[i.id]?.accessible === false) {
+                return <DisabledTopMenuItem key={i.id} navItem={i} siteSettingsDataPortal={siteSettings.data.dataPortals[i.id]} />
+              }
+
+              // If CDMH item, get the correct link
+              const normalizedId = i.id.replace(/-([a-z])/g, (_match, letter) => {
+                return letter.toUpperCase()
+              }) as CDMHKey
+              const cdmhList = siteSettings.data?.cdmh.data
+              if (cdmhList !== undefined && cdmhList[normalizedId] !== undefined) {
+                i.link = cdmhList[normalizedId]
+              }
+              if (i.id === 'spaces' && !!user?.can_administer_site) {
+                i.link = '/spaces?hidden=false'
+              }
+
               const { id, iconHeight, text, icon: Icon } = i
               return (
                 <MenuLink navItem={i} key={id} data-testid={`favoritenav-${id}`}>
@@ -317,7 +450,11 @@ const Header: React.FC = () => {
               )
             })}
             <EditMenuWrap>
-              <TransparentButton data-testid="button-edit-menu-favorites" onClick={() => setShowModal(!isShown)} title="Edit Favorites">
+              <TransparentButton
+                data-testid="button-edit-menu-favorites"
+                onClick={() => setShowModal(!isShown)}
+                title="Edit Favorites"
+              >
                 <StarIcon height={14} />
               </TransparentButton>
             </EditMenuWrap>
@@ -337,7 +474,7 @@ const Header: React.FC = () => {
                   hide={hide}
                 />
               )}
-              >
+            >
               {dropdownProps => (
                 <DropdownMenuItem {...dropdownProps} $active={dropdownProps.$isActive} data-testid="user-context-menu">
                   <IconWrap>

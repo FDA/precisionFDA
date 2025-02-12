@@ -16,11 +16,9 @@
   ],
   "dependencies": {
     "SparkMD5": "~1.0.0",
-    "bootstrap-sass": "~3.3.7",
     "d3": "~3.5.10",
     "fontawesome": "~4.5.0",
     "human-format": "~0.5.0",
-    "jquery": "~2.1.4",
     "jquery-ui": "~1.12.1",
     "knockout": "~3.4.0",
     "lodash": "~3.10.1",
@@ -32,8 +30,8 @@
     "ace-builds": "~1.2.3",
     "tablesort": "table.sort#^4.0.1",
     "eonasdan-bootstrap-datetimepicker": "^4.17.47",
-    "datatables.net": "1.13.10",
-    "datatables.net-bs": "2.1.1",
+    "datatables.net": "1.13.11",
+    "datatables.net-bs": "1.13.11",
     "cookies-js": "^1.2.3",
     "highcharts": "^10.3.3",
     "jstree": "^3.3.15"

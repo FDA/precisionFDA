@@ -18,20 +18,21 @@ func ParseArgsUntilFlag(args []string) ([]string, int) {
 	return validArgs, len(args)
 }
 
-func ParseEntityType(entityType string) (string, string) {
+func ParseEntityType(entityType string) string {
 
 	validTypes := map[string]bool{
 		"app":        true,
 		"job":        true,
 		"file":       true,
+		"folder":     true,
 		"workflow":   true,
 		"discussion": true,
 	}
 	parts := strings.SplitN(entityType, "-", 2)
 
 	if len(parts) > 0 && validTypes[parts[0]] {
-		return parts[0], parts[1]
+		return parts[0]
 	}
 
-	return "", ""
+	return ""
 }

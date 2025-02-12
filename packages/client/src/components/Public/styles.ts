@@ -76,15 +76,23 @@ export const PageMainBody = styled.div`
   display: flex;
   flex: 1;
   flex-grow: 1;
-  overflow-y: scroll;
+`
+
+export const OverviewCenterSection = styled.div`
+  display: flex;
+  flex: 1;
+  flex-grow: 1;
   justify-content: center;
   padding: 0 16px;
 `
+
 export const PageFilterTitle = styled.h2`
   font-size: 22px;
   font-weight: bold;
   margin-bottom: 32px;
-  margin-top: 0;
+  margin-top: -5px;
+  margin-right: 16px;
+  vertical-align: top;
   text-transform: uppercase;
   color: var(--c-text-500);
 `
@@ -112,7 +120,7 @@ export const PageRow = styled.div`
   width: 100%;
   flex-direction: column-reverse;
   gap: 64px;
-  padding: 64px 0;
+  padding: 44px 0;
   @media (min-width: ${breakPoints.large}px) {
     flex-direction: row;
     justify-content: space-between;
@@ -136,6 +144,15 @@ export const RightList = styled.div`
     cursor: pointer;
   }
 `
+export const RightListNext = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+
+  ${ListItem} {
+    cursor: pointer;
+  }
+`
 export const Container = styled.div`
   margin-inline: auto;
   width: min(100% - 32px, 1100px);
@@ -146,10 +163,10 @@ export const ItemButton = styled.button<{ selected?: boolean }>`
   border-color: transparent;
   background: none;
   padding: 3px 4px;
-  color: var(--primary-500);
+  color: var(--c-link);
   cursor: pointer;
   &:hover {
-    color: var(--primary-400);
+    color: var(--c-link-hover);
   }
   ${({ selected }) => selected && css`
     background-color: var(--primary-500);
