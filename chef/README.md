@@ -29,7 +29,8 @@ Notes:
 
 ``` bash
   sudo su - root
-  REGION=$(curl http://169.254.169.254/latest/meta-data/placement/region)
+  TOKEN=$(curl -X PUT "http://169.254.169.254/latest/api/token" -H "x-aws-ec2-metadata-token-ttl-seconds: 21600")
+  REGION=$(curl -H "x-aws-ec2-metadata-token: $TOKEN" http://169.254.169.254/latest/meta-data/placement/region)
   curl -L https://omnitruck.chef.io/install.sh | sudo bash -s -- -v 16.12.3-1
   aws configure
   aws ssm get-parameter --name /pfda/dev/app/app_source/ssh_key --with-decryption --output text --query Parameter.Value --region $REGION  > /root/.ssh/id_rsa
