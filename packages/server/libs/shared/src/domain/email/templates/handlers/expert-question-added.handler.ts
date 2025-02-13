@@ -12,13 +12,11 @@ import {
   expertQuestionAddedTemplate,
   ExpertQuestionTemplateInput,
 } from '@shared/domain/email/templates/mjml/expert-question-added.template'
-import { buildEmailTemplate } from '@shared/domain/email/email.helper'
+import { buildEmailTemplate, ObjectIdInputDTO } from '@shared/domain/email/email.helper'
 import { getUserTitle } from '@shared/domain/email/templates/mjml/common'
 
-export type ExpertQuestionAddedInputType = { id: number }
-
 export class ExpertQuestionAddedHandler
-  extends BaseTemplate<ExpertQuestionAddedInputType, UserOpsCtx>
+  extends BaseTemplate<ObjectIdInputDTO, UserOpsCtx>
   implements EmailTemplate<ExpertQuestionTemplateInput>
 {
   expertQuestionId = this.validatedInput.id
