@@ -1,7 +1,7 @@
 import { BaseTemplate } from '@shared/domain/email/templates/base-template'
-import { buildEmailTemplate, ObjectIdInputDto } from '@shared/domain/email/email.helper'
+import { buildEmailTemplate, ObjectIdInputDTO } from '@shared/domain/email/email.helper'
 import { UserOpsCtx } from '@shared/types'
-import { EmptyEmailInputDto } from '@shared/domain/email/dto/empty-email-input.dto'
+import { EmptyEmailInputDTO } from '@shared/domain/email/dto/empty-email-input.dto'
 import {
   EMAIL_TYPES,
   EmailSendInput,
@@ -17,8 +17,8 @@ import { Invitation } from '@shared/domain/invitation/invitation.entity'
 import { config } from '@shared/config'
 
 export class GuestAccessEmailHandler
-  extends BaseTemplate<ObjectIdInputDto, UserOpsCtx>
-  implements EmailTemplate<EmptyEmailInputDto>
+  extends BaseTemplate<ObjectIdInputDTO, UserOpsCtx>
+  implements EmailTemplate<EmptyEmailInputDTO>
 {
   templateFile = guestAccessTemplate
   invitation: Invitation

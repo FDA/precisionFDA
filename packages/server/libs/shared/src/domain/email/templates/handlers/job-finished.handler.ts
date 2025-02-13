@@ -15,11 +15,10 @@ import {
   buildIsNotificationEnabled,
 } from '../../email.helper'
 import { UserOpsCtx } from '@shared/types'
-
-type JobFinishedInputType = { jobId: number }
+import { JobEventDTO } from '@shared/domain/email/dto/job-event.dto'
 
 export class JobFinishedEmailHandler
-  extends BaseTemplate<JobFinishedInputType, UserOpsCtx>
+  extends BaseTemplate<JobEventDTO, UserOpsCtx>
   implements EmailTemplate<JobFinishedInputTemplate>
 {
   templateFile = jobFinishedTemplate

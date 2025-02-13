@@ -1,4 +1,4 @@
-import { buildEmailTemplate, ObjectIdInputDto } from '@shared/domain/email/email.helper'
+import { buildEmailTemplate, ObjectIdInputDTO } from '@shared/domain/email/email.helper'
 import { BaseTemplate } from '@shared/domain/email/templates/base-template'
 import {
   EMAIL_TYPES,
@@ -16,7 +16,7 @@ import { User } from '@shared/domain/user/user.entity'
 import { config } from '@shared/config'
 
 export class SpaceActivatedHandler
-  extends BaseTemplate<ObjectIdInputDto, UserOpsCtx>
+  extends BaseTemplate<ObjectIdInputDTO, UserOpsCtx>
   implements EmailTemplate<SpaceActivatedTemplateInput>
 {
   templateFile = spaceActivatedTemplate
