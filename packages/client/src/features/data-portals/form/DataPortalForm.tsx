@@ -110,7 +110,6 @@ export const DataPortalForm = ({
       sort_order: 0,
       card_image_file: null,
       card_image_uid: null,
-      status: { label: 'open', value: 'open' },
     },
   })
 
@@ -240,16 +239,6 @@ export const DataPortalForm = ({
             )}
           />
           <ErrorMessage errors={errors} name="guest_lead_dxuser" render={({ message }) => <InputError>{message}</InputError>} />
-        </FieldGroup>
-        <FieldGroup label="Status" required>
-          <Controller
-            name="status"
-            control={control}
-            render={({ field: { value, onChange, onBlur } }) => (
-              <StatusSelect isDisabled={isSubmitting} onChange={onChange} onBlur={onBlur} value={value} />
-            )}
-          />
-          <ErrorMessage errors={errors} name="status" render={({ message }) => <InputError>{message}</InputError>} />
         </FieldGroup>
         {canEditMainDataPortal && (
           <Row>

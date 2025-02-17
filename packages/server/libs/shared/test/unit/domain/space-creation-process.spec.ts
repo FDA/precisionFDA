@@ -5,7 +5,7 @@ import { AdministratorSpaceCreationProcess } from '@shared/domain/space/create/a
 import { GovernmentSpaceCreationProcess } from '@shared/domain/space/create/government-space-creation.process'
 import { GroupsSpaceCreationProcess } from '@shared/domain/space/create/groups-space-creation.process'
 import { PrivateSpaceCreationProcess } from '@shared/domain/space/create/private-space-creation.process'
-import { CreateSpaceDto } from '@shared/domain/space/dto/create-space.dto'
+import { CreateSpaceDto } from '@shared/domain/space/dto/create-space-dto'
 import { SpaceNotificationService } from '@shared/domain/space/service/space-notification.service'
 import { SPACE_TYPE } from '@shared/domain/space/space.enum'
 import { User } from '@shared/domain/user/user.entity'

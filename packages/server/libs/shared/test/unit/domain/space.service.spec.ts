@@ -1,7 +1,6 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { GroupsSpaceCreationProcess } from '@shared/domain/space/create/groups-space-creation.process'
 import { SpaceCreationProcess } from '@shared/domain/space/create/space-creation.process'
-import { CreateSpaceDto } from '@shared/domain/space/dto/create-space.dto'
 import { SpaceService } from '@shared/domain/space/service/space.service'
 import { SPACE_STATE, SPACE_TYPE } from '@shared/domain/space/space.enum'
 import { SpaceRepository } from '@shared/domain/space/space.repository'
@@ -22,6 +21,7 @@ import {
   SPACE_EVENT_OBJECT_TYPE,
 } from '@shared/domain/space-event/space-event.enum'
 import { Reference } from '@mikro-orm/core'
+import { CreateSpaceDto } from '@shared/domain/space/dto/create-space-dto'
 
 describe('SpaceService', () => {
   const USER_ID = 1

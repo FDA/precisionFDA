@@ -15,11 +15,15 @@ import { UserContextGuard } from '../user-context/guard/user-context.guard'
 import { CreateFileParamDTO } from '@shared/domain/data-portal/dto/CreateFileParamDTO'
 import { CreateDataPortalDTO } from '@shared/domain/data-portal/dto/CreateDataPortalDTO'
 import { UpdateDataPortalDTO } from '@shared/domain/data-portal/dto/UpdateDataPortalDTO'
+import { CreateDataPortalFacade } from '@shared/facade/data-portal-create/create-data-portal.facade'
 
 @UseGuards(UserContextGuard)
 @Controller('/data-portals')
 export class DataPortalsController {
-  constructor(private readonly dataPortalService: DataPortalService) {}
+  constructor(
+    private readonly dataPortalService: DataPortalService,
+    private readonly createDataPortalFacade: CreateDataPortalFacade,
+  ) {}
 
   /**
    * Creates new resource (just the metadata).
@@ -39,21 +43,12 @@ export class DataPortalsController {
   }
 
   /**
-   * Creates new card image (just the metadata).
-   */
-  @HttpCode(201)
-  @Post('/:id/card-image')
-  async createCardImage(@Param('id', ParseIntPipe) id: number, @Body() body: CreateFileParamDTO) {
-    return await this.dataPortalService.createCardImage(body, id)
-  }
-
-  /**
    * Creates new data portal.
    */
   @HttpCode(201)
   @Post()
   async createDataPortal(@Body() body: CreateDataPortalDTO) {
-    return await this.dataPortalService.create(body)
+    return await this.createDataPortalFacade.create(body)
   }
 
   /**
