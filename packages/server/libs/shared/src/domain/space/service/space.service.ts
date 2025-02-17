@@ -3,7 +3,6 @@ import { Inject, Injectable } from '@nestjs/common'
 import { SpaceCreationProcess } from '@shared/domain/space/create/space-creation.process'
 import { SPACE_TYPE_TO_PROCESS_PROVIDER_MAP } from '@shared/domain/space/create/space-type-to-process-map.provider'
 import { SpaceNotFoundError, UserNotFoundError } from '@shared/errors'
-import { CreateSpaceDto } from '@shared/domain/space/dto/create-space.dto'
 import { SpaceRepository } from '@shared/domain/space/space.repository'
 import { Node } from '@shared/domain/user-file/node.entity'
 import { PermissionError, ServiceError } from '@shared/errors'
@@ -21,6 +20,7 @@ import {
 import { UserRepository } from '@shared/domain/user/user.repository'
 import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
 import { Space } from '@shared/domain/space/space.entity'
+import { CreateSpaceDto } from '@shared/domain/space/dto/create-space-dto'
 
 @Injectable()
 export class SpaceService {

@@ -126,7 +126,7 @@ export const handlers = [
     ),
   ),
 
-  http.get('/api/data_portals/*/resources', () => HttpResponse.json<Resource[]>([], { status: 200 })),
+  http.get('/api/v2/data-portals/*/resources', () => HttpResponse.json<Resource[]>([], { status: 200 })),
   http.get('/api/list_licenses', () => HttpResponse.json({ licenses: [] }, { status: 200 })),
   http.post('/api/list_notes', () =>
     HttpResponse.json(

@@ -252,14 +252,6 @@ Rails.application.routes.draw do
         put :update_content, on: :member
       end
 
-      resources :data_portals, only: %i(index show create update) do
-        post :resources, on: :member, to: "data_portals#create_resource"
-        get :resources, on: :member, to: "data_portals#list_resources"
-        post :card_image, on: :member
-        delete "/resources/:resource_id" => "data_portals#remove_resource", as: :delete_resource_route
-        get :custom, on: :collection, to: "data_portals#custom"
-      end
-
       resources :submissions, only: %i(index) do
         get :my_entries, on: :collection
       end

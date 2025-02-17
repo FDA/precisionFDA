@@ -1,4 +1,4 @@
-import type { DATA_PORTAL_MEMBER_ROLE, DATA_PORTAL_STATUS } from '../data-portal.enum'
+import type { DATA_PORTAL_MEMBER_ROLE } from '../data-portal.enum'
 
 class CreateResourceResponse {
   id: number
@@ -29,7 +29,6 @@ class DataPortalParam {
   spaceId: number
   sortOrder: number
   default: boolean
-  status: DATA_PORTAL_STATUS
   members: DataPortalMemberParam[]
 }
 
