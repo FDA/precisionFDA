@@ -24,8 +24,10 @@ import { useLockUnlockFileModal } from './actionModals/useLockUnlockFileModal'
 import { useOpenFileModal } from './actionModals/useOpenFileModal'
 import { useSelectFolderModal } from './actionModals/useSelectFolderModal'
 import { moveFilesRequest } from './files.api'
+
 import { IFile, TreeOnSelectInfo } from './files.types'
-import { pluralize } from '../../utils/formatting'
+import { pluralize, sanitizeFileName } from '../../utils/formatting'
+
 
 export type FileActions =
   'Track' |
@@ -50,7 +52,8 @@ export type FileActions =
   'Lock' |
   'Unlock' |
   'Rename' |
-  'Comments'
+  'Comments' |
+  'Load into GSRS'
 
 
 const getFileScope = (scope: HomeScope | undefined, space: ISpace | undefined): ServerScope => {
@@ -486,6 +489,11 @@ export const useFilesSelectActions = ({
       type: 'link',
       link: `/files/${selected[0]?.uid}/comments`,
       isDisabled: false,
+    },
+    'Load into GSRS': {
+      type: 'link',
+      isDisabled: selected.length !== 1 || !selected[0].tags.includes('GSRS'),
+      link: selected.length === 1 ? `/ginas/app/ui/substances/register?action=pfda-file-import&file-uri=${encodeURIComponent(`/api/files/${selected[0].uid}/${sanitizeFileName(selected[0].name)}?inline=true`)}` : '',
     },
   }
 

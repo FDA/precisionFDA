@@ -5,7 +5,7 @@ import { DownloadIcon } from '../../../components/icons/DownloadIcon'
 import { FileIcon } from '../../../components/icons/FileIcon'
 import { VerticalCenter } from '../../../components/Page/styles'
 import { ResourceTable, StyledAction, StyledName } from '../../../components/ResourceTable'
-import { pluralize } from '../../../utils/formatting'
+import { pluralize, sanitizeFileName } from '../../../utils/formatting'
 import { ModalHeaderTop, ModalNext } from '../../modal/ModalNext'
 import { ButtonRow, Footer, ModalScroll } from '../../modal/styles'
 import { useModal } from '../../modal/useModal'
@@ -18,12 +18,6 @@ const StyledResourceTable = styled(ResourceTable)`
     margin-left: auto;
   }
 `
-
-const sanitizeFileName = (name: string): string => {
-  const re = /[<>:"/\\|?*]+/g
-
-  return encodeURIComponent(name.replace(re, '_'))
-}
 
 export const useOpenFileModal = (selectedFiles: IFile[]) => {
   const { isShown, setShowModal } = useModal()
