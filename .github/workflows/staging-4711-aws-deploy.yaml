@@ -1,4 +1,4 @@
-name: STAGING (old) - Deploy pFDA to AWS
+name: STAGING - Deploy pFDA to AWS
 
 on:
   workflow_dispatch:
@@ -23,13 +23,13 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 60
     environment:
-      name: staging
-      url: https://precisionfda-staging.dnanexus.com
+      name: staging_4711
+      url: https://staging.pfda.dnanexus.com
 
     steps:
       - name: Output Inputs
         run: echo "${{ toJSON(github.event.inputs) }}"
-
+   
       - name: Checkout code
         uses: actions/checkout@v4
 
