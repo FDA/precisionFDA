@@ -28,11 +28,11 @@ zuul:
   routes:
     beta-ui:
       path: /ginas/app/beta/**
-      url: http://localhost:8080/frontend/ginas/app/beta
+      url: http://localhost:8080/frontend/ginas/app/ui
       serviceId: frontend
     ui:
       path: /ginas/app/ui/**
-      url: http://localhost:8080/frontend/ginas/app/beta
+      url: http://localhost:8080/frontend/ginas/app/ui
       serviceId: frontend
     ginas_app:
       path: /ginas/app/**

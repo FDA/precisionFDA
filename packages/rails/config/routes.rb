@@ -161,6 +161,7 @@ Rails.application.routes.draw do
 
     if ActiveRecord::Type::Boolean.new.cast(ENV["GSRS_ENABLED"])
       get "/csrf-token", to: "ginas_unauthorized#csrf_token"
+      get "/reverse-proxy", to: "ginas_unauthorized#json_reverse_proxy"
       get "/ginas/close-pfda-login-window", to: "ginas_authorized#close_login_window"
       get "/ginas/app/api/v1/whoami", to: "ginas_authorized#whoami"
       get "/ginas/app/api/v1/substances:path", to: "ginas_unauthorized#skip_request",

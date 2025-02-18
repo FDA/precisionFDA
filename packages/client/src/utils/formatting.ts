@@ -19,3 +19,9 @@ export const formatDate = (date: Date) => new Date(date).toLocaleDateString('en-
   minute: 'numeric',
   second: 'numeric',
 })
+
+export const sanitizeFileName = (name: string): string => {
+  const re = /[<>:"/\\|?*]+/g
+
+  return encodeURIComponent(name.replace(re, '_'))
+}

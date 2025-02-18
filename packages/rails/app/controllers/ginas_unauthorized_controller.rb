@@ -43,7 +43,15 @@ class GinasUnauthorizedController < ApplicationController
   end
 
   def index
-    headers = {}
+    # This is a temporal solution, specifically implemented to go around this very GSRS code change:
+    # https://github.com/ncats/gsrs-spring-starter/blame/06a1b6f1c1aeb3f379e6e944fc7a7c4549b4f3ce/gsrs-spring-boot-autoconfigure/src/main/java/gsrs/controller/AbstractGsrsEntityController.java#L175
+    # It was agreed on the authentication should not be necessary, so once the endpoint becomes public,
+    # this "pfda-guest" authentication header is not necessary anymore.
+    # Note: there is no meaning behind the used email address.
+    headers = {
+      AUTHENTICATION_USERNAME: "pfda-guest",
+      AUTHENTICATION_EMAIL: "pfda-guest@5832cb59-c313-4b28-b308-677980604c2a.com",
+    }
     unless current_user.nil?
       headers = {
         AUTHENTICATION_USERNAME: current_user.username,
@@ -64,7 +72,44 @@ class GinasUnauthorizedController < ApplicationController
     head :ok
   end
 
+  # Reverse proxy for importing substances from URL
+  def json_reverse_proxy
+    url = request.query_parameters[:url]
+    if url.blank?
+      render status: :bad_request, json: { message: "URL param is empty" }
+      return
+    end
+
+    begin
+      uri = URI(url)
+      response = Net::HTTP.get_response(uri)
+    rescue StandardError => e
+      logger.warn "Error while loading '#{url}'; #{e.message}"
+      render status: :bad_request, json: { message: "Could not load given URL" }
+      return
+    end
+
+    if response.is_a?(Net::HTTPSuccess)
+      if valid_json?(response.body)
+        render json: response.body
+      else
+        logger.warn "The URL '#{url}' was loaded, but does not contain valid JSON"
+        render status: :bad_request, json: { message: "The URL was loaded, but does not contain valid JSON" }
+      end
+    else
+      logger.warn "Error while loading '#{url}'; status #{response.code}"
+      render status: :bad_request, json: { message: "Could not load given URL" }
+    end
+  end
+
   private
+
+  def valid_json?(input)
+    JSON.parse(input)
+    true
+  rescue JSON::ParserError, TypeError => e
+    false
+  end
 
   def beta_redirect
     modified_path = request.fullpath.sub("/ginas/app", "/ginas/app/ui")
