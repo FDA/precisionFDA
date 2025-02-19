@@ -1,5 +1,5 @@
 import { BaseTemplate } from '@shared/domain/email/templates/base-template'
-import { buildEmailTemplate, ObjectIdInputDto } from '@shared/domain/email/email.helper'
+import { buildEmailTemplate, ObjectIdInputDTO } from '@shared/domain/email/email.helper'
 import { UserOpsCtx } from '@shared/types'
 import {
   EMAIL_TYPES,
@@ -16,7 +16,7 @@ import {
 import { getUserTitle } from '@shared/domain/email/templates/mjml/common'
 
 export class ExpertAddedHandler
-  extends BaseTemplate<ObjectIdInputDto, UserOpsCtx>
+  extends BaseTemplate<ObjectIdInputDTO, UserOpsCtx>
   implements EmailTemplate<ExpertAddedTemplateInput>
 {
   expertId = this.validatedInput.id

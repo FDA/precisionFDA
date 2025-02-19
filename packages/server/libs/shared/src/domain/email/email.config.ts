@@ -1,4 +1,3 @@
-import { config } from '@shared/config'
 import { ChallengeOpenedEmailHandler } from '@shared/domain/email/templates/handlers/challenge-opened.handler'
 import { ChallengePreregEmailHandler } from '@shared/domain/email/templates/handlers/challenge-prereg.handler'
 import { CommentAddedEmailHandler } from '@shared/domain/email/templates/handlers/comment-added.handler'
@@ -9,13 +8,8 @@ import { MemberChangedEmailHandler } from '@shared/domain/email/templates/handle
 import { SpaceChangedEmailHandler } from '@shared/domain/email/templates/handlers/space-change.handler'
 import { SpaceEvent } from '@shared/domain/space-event/space-event.entity'
 import { User } from '@shared/domain/user/user.entity'
-import { schemas } from '@shared/utils/base-schemas'
-import { stringValues, stringValuesDowncased } from '@shared/utils/enum-utils'
-import type { JSONSchema7 } from 'json-schema'
 import { groupBy, map, mergeAll, pipe, prop } from 'ramda'
 import { OpsCtx } from '../../types'
-import { SPACE_EVENT_ACTIVITY_TYPE } from '../space-event/space-event.enum'
-import { SPACE_MEMBERSHIP_ROLE } from '../space-membership/space-membership.enum'
 import { AlertMessageHandler } from '@shared/domain/email/templates/handlers/alert-message.handler'
 import { ExpertQuestionAddedHandler } from '@shared/domain/email/templates/handlers/expert-question-added.handler'
 import { ExpertAddedHandler } from '@shared/domain/email/templates/handlers/expert-added.handler'
@@ -149,175 +143,6 @@ export const NOTIFICATION_TYPES: Partial<typeof NOTIFICATION_TYPES_ADMIN> &
   NOTIFICATION_PRIVATE,
 ])
 
-// EMAIL VALIDATION SCHEMAS
-const objectIdSchema: JSONSchema7 = {
-  type: 'object',
-  properties: {
-    id: schemas.idProp,
-  },
-  required: ['id'],
-  additionalProperties: false,
-}
-
-const invitationToSpaceSchema: JSONSchema7 = {
-  type: 'object',
-  properties: {
-    membershipId: schemas.idProp,
-    adminId: schemas.idProp,
-  },
-  required: ['membershipId', 'adminId'],
-  additionalProperties: false,
-}
-
-const nodeCopySchema: JSONSchema7 = {
-  type: 'object',
-  properties: {
-    destination: { type: 'string', maxLength: config.validation.maxStrLen },
-    notCopiedFolderNames: {
-      type: 'array',
-      items: { type: 'string', maxLength: config.validation.maxStrLen },
-    },
-    notCopiedFileNames: {
-      type: 'array',
-      items: { type: 'string', maxLength: config.validation.maxStrLen },
-    },
-  },
-  required: ['destination', 'notCopiedFolderNames', 'notCopiedFileNames'],
-  additionalProperties: false,
-}
-
-const licenseApprovalRequest: JSONSchema7 = {
-  type: 'object',
-  properties: {
-    license_id: schemas.idProp,
-    user_id: schemas.idProp,
-    message: { type: 'string', maxLength: config.validation.maxStrLen },
-  },
-  required: ['license_id', 'user_id', 'message'],
-  additionalProperties: false,
-}
-
-const challengeProposalSchema: JSONSchema7 = {
-  type: 'object',
-  properties: {
-    name: { type: 'string', maxLength: config.validation.maxStrLen },
-    email: { type: 'string', format: 'email' },
-    organisation: { type: 'string', maxLength: config.validation.maxStrLen },
-    specificQuestion: { type: 'string', maxLength: config.validation.maxStrLen },
-    specificQuestionText: { type: 'string', maxLength: config.validation.maxStrLen },
-    dataDetails: { type: 'string', maxLength: config.validation.maxStrLen },
-    dataDetailsText: { type: 'string', maxLength: config.validation.maxStrLen },
-  },
-}
-
-const alertMessageSchema: JSONSchema7 = {
-  type: 'object',
-  properties: {
-    subject: { type: 'string', maxLength: config.validation.maxStrLen },
-    message: { type: 'string', maxLength: config.validation.maxStrLen },
-  },
-  required: ['message'],
-  additionalProperties: false,
-}
-
-const jobFinishedEmailSchema: JSONSchema7 = {
-  type: 'object',
-  properties: {
-    jobId: schemas.idProp,
-  },
-  required: ['jobId'],
-  additionalProperties: false,
-}
-
-const jobFailedEmailSchema: JSONSchema7 = {
-  type: 'object',
-  properties: {
-    jobId: schemas.idProp,
-  },
-  required: ['jobId'],
-  additionalProperties: false,
-}
-
-const challengeStartedEmailSchema: JSONSchema7 = {
-  type: 'object',
-  properties: {
-    challengeId: schemas.idProp,
-  },
-  required: ['challengeId'],
-  additionalProperties: false,
-}
-
-const challengeCreatedEmailSchema: JSONSchema7 = {
-  type: 'object',
-  properties: {
-    challengeId: schemas.idProp,
-    name: { type: 'string', maxLength: config.validation.maxStrLen },
-    scope: { type: 'string', maxLength: config.validation.maxStrLen },
-  },
-  required: ['challengeId', 'name', 'scope'],
-  additionalProperties: false,
-}
-
-const userProvisionedSchema: JSONSchema7 = {
-  type: 'object',
-  properties: {
-    firstName: { type: 'string', maxLength: config.validation.maxStrLen },
-    username: { type: 'string', maxLength: config.validation.maxStrLen },
-    email: { type: 'string', maxLength: config.validation.maxStrLen },
-  },
-  required: ['firstName', 'username', 'email'],
-  additionalProperties: false,
-}
-
-const spaceEventEmailSchema: JSONSchema7 = {
-  type: 'object',
-  properties: {
-    spaceEventId: schemas.idProp,
-  },
-  required: ['spaceEventId'],
-  additionalProperties: false,
-}
-
-const spaceChangedEmailSchema: JSONSchema7 = {
-  type: 'object',
-  properties: {
-    initUserId: schemas.idProp,
-    spaceId: schemas.idProp,
-    activityType: { type: 'string', enum: stringValues(SPACE_EVENT_ACTIVITY_TYPE) },
-  },
-  required: ['initUserId', 'spaceId', 'activityType'],
-  additionalProperties: false,
-}
-
-const membershipChangedEmailSchema: JSONSchema7 = {
-  type: 'object',
-  properties: {
-    initUserId: schemas.idProp,
-    spaceId: schemas.idProp,
-    updatedMembershipId: schemas.idProp,
-    activityType: { type: 'string', enum: stringValues(SPACE_EVENT_ACTIVITY_TYPE) },
-    newMembershipRole: {
-      type: 'string',
-      enum: stringValuesDowncased(SPACE_MEMBERSHIP_ROLE),
-    },
-  },
-  required: ['initUserId', 'spaceId', 'activityType', 'updatedMembershipId'],
-  additionalProperties: false,
-}
-
-const emailInputSchemas = {
-  objectIdSchema,
-  jobFinishedEmailSchema,
-  alertMessageSchema,
-  jobFailedEmailSchema,
-  challengeStartedEmailSchema,
-  spaceEventEmailSchema,
-  spaceChangedEmailSchema,
-  membershipChangedEmailSchema,
-  challengeCreatedEmailSchema,
-  challengeProposalSchema,
-}
-
 /**
  * It still comes as snake case from rails.
  */
@@ -330,34 +155,6 @@ export type ChallengeProposalInput = {
   data_details: string
   data_details_text: string
 }
-
-export type InvitationToSpace = {
-  membershipId: number
-  adminId: number
-}
-
-export type NewContentAdded = { spaceEventId: number }
-
-export type CommentAdded = { spaceEventId: number }
-
-export type MemberChanged = {
-  updatedMembershipId: number
-  initUserId: number
-  spaceId: number
-  activityType: keyof typeof SPACE_EVENT_ACTIVITY_TYPE
-  newMembershipRole?: keyof typeof SPACE_MEMBERSHIP_ROLE
-}
-
-export type SpaceChanged = {
-  initUserId: number
-  spaceId: number
-  activityType: string
-  spaceMembershipId: number
-}
-
-export type ChallengeOpened = { challengeId: number }
-
-export type ChallengeCreated = { challengeId: number; name: string; scope: string }
 
 // EMAIL OPERATIONS INPUTS
 
@@ -443,9 +240,6 @@ export type EmailConfigItem = {
   name: string
   // API param value -> EMAIL_TYPE, must be also unique
   emailId: number
-  // schema used from ajv validation
-  // optional, some emails may not require any dynamic content
-  schema?: JSONSchema7
   // handler for given email type
   handlerClass: EmailTemplateConstructor
 }
@@ -454,133 +248,111 @@ export const EMAIL_CONFIG = {
   userProvisioned: {
     name: 'userProvisioned',
     emailId: EMAIL_TYPES.userProvisioned,
-    schema: userProvisionedSchema,
     handlerClass: UserProvisionedHandler,
   },
   nodeCopy: {
     name: 'nodeCopy',
     emailId: EMAIL_TYPES.nodeCopy,
-    schema: nodeCopySchema,
     handlerClass: NodeCopyHandler,
   },
   spaceInvitation: {
     name: 'spaceInvitation',
     emailId: EMAIL_TYPES.spaceInvitation,
-    schema: invitationToSpaceSchema,
     handlerClass: SpaceInvitationHandler,
   },
   invitation: {
     name: 'invitation',
     emailId: EMAIL_TYPES.invitation,
-    schema: objectIdSchema,
     handlerClass: InvitationHandler,
   },
   spaceActivation: {
     name: 'spaceActivation',
     emailId: EMAIL_TYPES.spaceActivation,
-    schema: objectIdSchema,
     handlerClass: SpaceActivationHandler,
   },
   spaceActivated: {
     name: 'spaceActivated',
     emailId: EMAIL_TYPES.spaceActivated,
-    schema: objectIdSchema,
     handlerClass: SpaceActivatedHandler,
   },
   licenseRevoked: {
     name: 'licenseRevoked',
     emailId: EMAIL_TYPES.licenseRevoked,
-    schema: objectIdSchema,
     handlerClass: LicenseRevokedHandler,
   },
   licenseApproved: {
     name: 'licenseApproved',
     emailId: EMAIL_TYPES.licenseApproved,
-    schema: objectIdSchema,
     handlerClass: LicenseApprovedHandler,
   },
   licenseApprovalRequest: {
     name: 'licenseApprovalRequest',
     emailId: EMAIL_TYPES.licenseApprovalRequest,
-    schema: licenseApprovalRequest,
     handlerClass: LicenseApprovalRequestHandler,
   },
   guestAccessEmail: {
     name: 'guestAccessEmail',
     emailId: EMAIL_TYPES.guestAccessEmail,
-    schema: objectIdSchema,
     handlerClass: GuestAccessEmailHandler,
   },
   challengeProposalReceived: {
     name: 'challengeProposalReceived',
     emailId: EMAIL_TYPES.challengeProposalReceived,
-    schema: challengeProposalSchema,
     handlerClass: ChallengeProposalReceivedHandler,
   },
   expertAdded: {
     name: 'expertAdded',
     emailId: EMAIL_TYPES.expertAdded,
-    schema: objectIdSchema,
     handlerClass: ExpertAddedHandler,
   },
   expertQuestionAdded: {
     name: 'expertQuestionAdded',
     emailId: EMAIL_TYPES.expertQuestionAdded,
-    schema: objectIdSchema,
     handlerClass: ExpertQuestionAddedHandler,
   },
   alertMessage: {
     name: 'alertMessage',
     emailId: EMAIL_TYPES.alertMessage,
-    schema: alertMessageSchema,
     handlerClass: AlertMessageHandler,
   },
   jobFinished: {
     name: 'jobFinished',
     emailId: EMAIL_TYPES.jobFinished,
-    schema: emailInputSchemas.jobFinishedEmailSchema,
     handlerClass: JobFinishedEmailHandler,
   },
   jobFailed: {
     name: 'jobFailed',
     emailId: EMAIL_TYPES.jobFailed,
-    schema: emailInputSchemas.jobFailedEmailSchema,
     handlerClass: JobFailedEmailHandler,
   },
   newContentAdded: {
     name: 'newContentAdded',
     emailId: EMAIL_TYPES.newContentAdded,
-    schema: emailInputSchemas.spaceEventEmailSchema,
     handlerClass: ContentChangedEmailHandler,
   },
   memberChangedAddedRemoved: {
     name: 'memberChangedAddedRemoved',
     emailId: EMAIL_TYPES.memberChangedAddedRemoved,
-    schema: emailInputSchemas.membershipChangedEmailSchema,
     handlerClass: MemberChangedEmailHandler,
   },
   spaceChanged: {
     name: 'spaceChanged',
     emailId: EMAIL_TYPES.spaceChanged,
-    schema: emailInputSchemas.spaceChangedEmailSchema,
     handlerClass: SpaceChangedEmailHandler,
   },
   commentAdded: {
     name: 'commentAdded',
     emailId: EMAIL_TYPES.commentAdded,
-    schema: emailInputSchemas.spaceEventEmailSchema,
     handlerClass: CommentAddedEmailHandler,
   },
   challengeOpened: {
     name: 'challengeOpened',
     emailId: EMAIL_TYPES.challengeOpened,
-    schema: emailInputSchemas.challengeStartedEmailSchema,
     handlerClass: ChallengeOpenedEmailHandler,
   },
   challengePrereg: {
     name: 'challengePrereg',
     emailId: EMAIL_TYPES.challengePrereg,
-    schema: emailInputSchemas.challengeCreatedEmailSchema,
     handlerClass: ChallengePreregEmailHandler,
   },
 } as const

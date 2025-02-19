@@ -1,8 +1,3 @@
-enum DATA_PORTAL_STATUS  {
-  OPEN = 'open',
-  CLOSED = 'closed',
-}
-
 enum DATA_PORTAL_MEMBER_ROLE {
   LEAD = 'lead',
   CONTRIBUTOR = 'contributor',
@@ -10,4 +5,4 @@ enum DATA_PORTAL_MEMBER_ROLE {
   ADMIN = 'admin',
 }
 
-export { DATA_PORTAL_STATUS, DATA_PORTAL_MEMBER_ROLE }
+export { DATA_PORTAL_MEMBER_ROLE }

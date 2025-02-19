@@ -323,7 +323,7 @@ export class SyncJobOperation extends WorkerBaseOperation<
 
       if (!job.terminationEmailSent) {
         try {
-          await sendJobFailedEmails(this.job.id.toString(), this.ctx)
+          await sendJobFailedEmails(this.job.id as number, this.ctx)
           job.terminationEmailSent = true
         } catch (e) {
           this.ctx.log.error({ job: updatedJob }, 'Failed to send emails', e)
