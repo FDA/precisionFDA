@@ -9,7 +9,6 @@ import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { pipe, filter, uniqBy } from 'ramda'
 import {
-  CommentAdded,
   EmailSendInput,
   EmailTemplate,
   EMAIL_TYPES,
@@ -23,9 +22,10 @@ import {
 import { BaseTemplate } from '@shared/domain/email/templates/base-template'
 import { commentAddedTemplate, CommentAddedTemplateInput } from '../mjml/comment-added.template'
 import { generateObjectCommentsLink } from '../mjml/common'
+import { SpaceEventDTO } from '@shared/domain/email/dto/space-event.dto'
 
 export class CommentAddedEmailHandler
-  extends BaseTemplate<CommentAdded>
+  extends BaseTemplate<SpaceEventDTO>
   implements EmailTemplate<CommentAddedTemplateInput>
 {
   templateFile = commentAddedTemplate

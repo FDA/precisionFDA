@@ -64,7 +64,7 @@ const ButtonBar = ({ data }: { data: DataPortal }) => {
       mutation.mutateAsync({
         id: data.id,
         content: htmlString,
-        editor_state: jsonString,
+        editorState: jsonString,
       })
     })
   }

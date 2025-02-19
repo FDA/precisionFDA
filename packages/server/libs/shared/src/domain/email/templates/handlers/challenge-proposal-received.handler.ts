@@ -1,5 +1,4 @@
 import {
-  ChallengeProposalInput,
   EMAIL_TYPES,
   EmailSendInput,
   EmailTemplate,
@@ -15,9 +14,10 @@ import { User } from '@shared/domain/user/user.entity'
 import { buildEmailTemplate } from '@shared/domain/email/email.helper'
 import process from 'process'
 import { config } from '@shared/config'
+import { ChallengeProposalInputDTO } from '@shared/domain/email/dto/challenge-proposal.dto'
 
 export class ChallengeProposalReceivedHandler
-  extends BaseTemplate<ChallengeProposalInput, UserOpsCtx>
+  extends BaseTemplate<ChallengeProposalInputDTO, UserOpsCtx>
   implements EmailTemplate<ChallengeProposalTemplateInput>
 {
   input = this.validatedInput

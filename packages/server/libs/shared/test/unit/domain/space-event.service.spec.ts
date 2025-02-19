@@ -22,6 +22,7 @@ import { SpaceEvent } from '@shared/domain/space-event/space-event.entity'
 import { EMAIL_TYPES } from '@shared/domain/email/email.config'
 import { Ref } from '@mikro-orm/core'
 import { EmailFacade } from '@shared/domain/email/email.facade'
+import { getEnumKeyByValue } from '@shared/utils/enum-utils'
 
 describe('SpaceEvent service tests', () => {
   const USER_ID = 1
@@ -230,12 +231,14 @@ describe('SpaceEvent service tests', () => {
       await getInstance().sendNotificationForEvent(spaceEvent)
 
       expect(sendEmailStub.calledOnce).to.be.true
-      expect(sendEmailStub.firstCall.args[0].emailTypeId).to.eq(EMAIL_TYPES.memberChangedAddedRemoved)
+      expect(sendEmailStub.firstCall.args[0].emailTypeId).to.eq(
+        EMAIL_TYPES.memberChangedAddedRemoved,
+      )
       expect(sendEmailStub.firstCall.args[0].input.initUserId).to.eq(11)
       expect(sendEmailStub.firstCall.args[0].input.spaceId).to.eq(12)
       expect(sendEmailStub.firstCall.args[0].input.updatedMembershipId).to.eq(13)
       expect(sendEmailStub.firstCall.args[0].input.newMembershipRole).to.eq(
-        SPACE_MEMBERSHIP_ROLE.LEAD,
+        getEnumKeyByValue(SPACE_MEMBERSHIP_ROLE, SPACE_MEMBERSHIP_ROLE.LEAD),
       )
       expect(sendEmailStub.firstCall.args[0].receiverUserIds).to.deep.eq([])
     })

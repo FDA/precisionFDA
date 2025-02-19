@@ -171,26 +171,6 @@ export class DataPortalService {
     return userFile
   }
 
-  createCardImage = async (input: CreateFileParamDTO, dataPortalId: number): Promise<UserFile> => {
-    this.logger.log('Creating card image', input)
-    const dataPortal = await this.em.findOneOrFail(
-      DataPortal,
-      { id: dataPortalId },
-      { populate: ['space'] },
-    )
-    const user = await this.em.findOneOrFail(
-      User,
-      { id: this.user.id },
-      { populate: ['organization'] },
-    )
-    return await this.createFile(
-      input,
-      user,
-      dataPortal.space.getEntity().hostProject,
-      `space-${dataPortal.space?.getEntity().id}`,
-    )
-  }
-
   private hasSiteAdminRole = async (userId: number): Promise<boolean> => {
     this.logger.log(`Verifying site admin role for id ${userId}`)
     const user = await this.em.findOneOrFail(
@@ -241,15 +221,14 @@ export class DataPortalService {
     }
   }
 
-  // TODO add creating spaces once we have them in Node.js
-  create = async (input: CreateDataPortalDTO): Promise<DataPortalParam> => {
+  async create(input: CreateDataPortalDTO, spaceId: number) {
     this.logger.log('Creating data portal', input, this.user.id)
     if (!(await this.hasSiteAdminRole(this.user.id))) {
       throw new PermissionError('Only site admins can create Data Portals')
     }
     const space = await this.em.findOneOrFail(
       Space,
-      { id: input.spaceId },
+      { id: spaceId },
       { populate: ['spaceMemberships.user'] },
     )
 
@@ -260,7 +239,6 @@ export class DataPortalService {
     dataPortal.description = input.description
     dataPortal.urlSlug = input.urlSlug
     dataPortal.sortOrder = input.sortOrder
-    dataPortal.status = input.status
     dataPortal.content = input.content
 
     await this.em.persistAndFlush(dataPortal)
@@ -432,9 +410,7 @@ export class DataPortalService {
       )
     }
 
-    const response = portals.map((portal: DataPortal) => this.map(portal))
-
-    return { data_portals: response } // Ruby needs the root key
+    return portals.map((portal: DataPortal) => this.map(portal))
   }
 
   get = async (id: number): Promise<DataPortalParam> => {
@@ -495,7 +471,6 @@ export class DataPortalService {
     param.sortOrder = portal.sortOrder
     param.cardImageUid = portal.cardImage?.getEntity().uid
     param.cardImageUrl = portal.cardImageUrl
-    param.status = portal.status
     param.spaceId = portal.space?.getEntity().id
     param.lastUpdated = portal.updatedAt.toString()
 

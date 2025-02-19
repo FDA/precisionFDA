@@ -1,1 +1,1 @@
-export class EmptyEmailInputDto {}
+export class EmptyEmailInputDTO {}

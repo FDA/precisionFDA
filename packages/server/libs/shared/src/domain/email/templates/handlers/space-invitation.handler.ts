@@ -5,7 +5,6 @@ import {
   EMAIL_TYPES,
   EmailSendInput,
   EmailTemplate,
-  InvitationToSpace,
   NOTIFICATION_TYPES_BASE,
 } from '@shared/domain/email/email.config'
 import {
@@ -15,9 +14,10 @@ import {
 import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { config } from '@shared/config'
+import { InvitationToSpaceDTO } from '@shared/domain/email/dto/invitation-to-space.dto'
 
 export class SpaceInvitationHandler
-  extends BaseTemplate<InvitationToSpace, UserOpsCtx>
+  extends BaseTemplate<InvitationToSpaceDTO, UserOpsCtx>
   implements EmailTemplate<SpaceInvitationTemplateInput>
 {
   templateFile = spaceInvitationTemplate
