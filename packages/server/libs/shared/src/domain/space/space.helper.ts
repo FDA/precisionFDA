@@ -17,7 +17,7 @@ const getIdFromScopeName = (name: string): number => {
   return idValue
 }
 
-const getScopeFromSpaceId = (spaceId: number): string => `space-${spaceId}`
+const getScopeFromSpaceId = (spaceId: number): `space-${number}` => `space-${spaceId}`
 
 const scopeContainsId = (name: string): boolean => {
   try {

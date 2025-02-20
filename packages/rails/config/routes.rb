@@ -161,6 +161,7 @@ Rails.application.routes.draw do
 
     if ActiveRecord::Type::Boolean.new.cast(ENV["GSRS_ENABLED"])
       get "/csrf-token", to: "ginas_unauthorized#csrf_token"
+      get "/reverse-proxy", to: "ginas_unauthorized#json_reverse_proxy"
       get "/ginas/close-pfda-login-window", to: "ginas_authorized#close_login_window"
       get "/ginas/app/api/v1/whoami", to: "ginas_authorized#whoami"
       get "/ginas/app/api/v1/substances:path", to: "ginas_unauthorized#skip_request",
@@ -252,14 +253,6 @@ Rails.application.routes.draw do
         put :update_content, on: :member
       end
 
-      resources :data_portals, only: %i(index show create update) do
-        post :resources, on: :member, to: "data_portals#create_resource"
-        get :resources, on: :member, to: "data_portals#list_resources"
-        post :card_image, on: :member
-        delete "/resources/:resource_id" => "data_portals#remove_resource", as: :delete_resource_route
-        get :custom, on: :collection, to: "data_portals#custom"
-      end
-
       resources :submissions, only: %i(index) do
         get :my_entries, on: :collection
       end
@@ -302,7 +295,7 @@ Rails.application.routes.draw do
         end
       end
 
-      resources :spaces, only: %i(index show create update) do
+      resources :spaces, only: %i(index show update) do
         collection do
           get :cli
           get :editable_spaces

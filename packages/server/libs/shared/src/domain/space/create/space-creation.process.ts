@@ -5,7 +5,6 @@ import {
   SPACE_MEMBERSHIP_ROLE,
   SPACE_MEMBERSHIP_SIDE,
 } from '@shared/domain/space-membership/space-membership.enum'
-import { CreateSpaceDto } from '@shared/domain/space/dto/create-space.dto'
 import { SpaceNotificationService } from '@shared/domain/space/service/space-notification.service'
 import { Space } from '@shared/domain/space/space.entity'
 import { SPACE_TYPE } from '@shared/domain/space/space.enum'
@@ -14,8 +13,9 @@ import { User, USER_STATE } from '@shared/domain/user/user.entity'
 import { NotFoundError } from '@shared/errors'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { PlatformClient } from '@shared/platform-client'
-import { Logger } from 'nestjs-pino'
-
+import { Logger } from '@nestjs/common'
+import { getHandle } from '@shared/domain/org/org.utils'
+import { CreateSpaceDTO } from '@shared/domain/space/dto/create-space-dto'
 /**
  * Abstract class representing the process of creating a space.
  *
@@ -30,7 +30,7 @@ export abstract class SpaceCreationProcess {
   protected readonly logger: Logger
 
   protected constructor(
-    protected readonly userContext: UserContext,
+    protected readonly user: UserContext,
     protected readonly em: SqlEntityManager,
     protected readonly notificationService: SpaceNotificationService,
     protected readonly adminClient: PlatformClient,
@@ -62,9 +62,11 @@ export abstract class SpaceCreationProcess {
    * @throws {NotFoundError} If the host or guest lead user is not found or deactivated.
    * @throws {Error} For any other errors that occur during the execution of the steps.
    */
-  public async build(input: CreateSpaceDto): Promise<number> {
+  public async build(input: CreateSpaceDTO): Promise<number> {
+    await this.validateInput(input)
+
     const user = await this.em.findOne(User, {
-      id: this.userContext.id,
+      id: this.user.id,
       userState: USER_STATE.ENABLED,
     })
     await this.checkPermissions(user, input)
@@ -84,7 +86,9 @@ export abstract class SpaceCreationProcess {
     })
   }
 
-  private async findLeads(input: CreateSpaceDto) {
+  protected abstract validateInput(input: CreateSpaceDTO)
+
+  protected async findLeads(input: CreateSpaceDTO) {
     let hostLead: User, guestLead: User
 
     hostLead = await this.em.findOne(User, {
@@ -112,7 +116,7 @@ export abstract class SpaceCreationProcess {
     return { host: hostLead, guest: guestLead }
   }
 
-  private async createDbRecord(input: CreateSpaceDto): Promise<Space> {
+  protected async createDbRecord(input: CreateSpaceDTO): Promise<Space> {
     const space = input.buildEntity()
     await this.em.persistAndFlush(space)
     if (input.spaceType === SPACE_TYPE.PRIVATE_TYPE) {
@@ -121,12 +125,12 @@ export abstract class SpaceCreationProcess {
     return space
   }
 
-  protected abstract checkPermissions(user: User, input: CreateSpaceDto): Promise<void>
+  protected abstract checkPermissions(user: User, input: CreateSpaceDTO): Promise<void>
 
   protected abstract buildOrgs(space: Space): Promise<void>
 
   protected abstract inviteMembers(
-    space: Space,
+    input: Space,
     leads: {
       host: User
       guest: User
@@ -173,6 +177,19 @@ export abstract class SpaceCreationProcess {
       SPACE_MEMBERSHIP_ROLE.ADMIN,
     )
     this.em.persist(membership)
+  }
+
+  protected async createOrgForSpace(spaceId: number, organization: string) {
+    try {
+      const handle = getHandle(organization)
+      const org = await this.adminClient.createOrg(handle, handle)
+      this.logger.log(`created host org on platform: ${org.id} for space: ${spaceId}`)
+      //TODO: PFDA-6076 add auditing like rails have in packages/rails/app/services/org_service/create.rb#L12
+    } catch (e) {
+      // an error might be thrown when the org name already exist, but it is very unlikely so we do not handle any recovery
+      this.logger.error(`error creating host org on platform: ${organization}`)
+      throw e
+    }
   }
 
   protected async sendEmails(space: Space, users: User[]): Promise<void> {

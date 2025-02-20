@@ -32,9 +32,31 @@ export const SPACE_TYPE_HINT: Record<ISpace['type'], string> = {
   review:
     'Each Review Space has 2 areas: private and cooperative ones.\nEach review Space has 2 sides: reviewers and sponsors.',
   government:
-    'Only a government user may create or join a Government-Restriced Space.\nValidation and error message should appear in the "Create Space" and "Add Members" forms to check that an entered username belongs to a government user.\nGovernment spaces only has one side, which is the Shared area.',
+    'Only a government user may create or join a Government-Restricted Space.\nValidation and error message should appear in the "Create Space" and "Add Members" forms to check that an entered username belongs to a government user.\nGovernment spaces only has one side, which is the Shared area.',
   administrator:
     'Only site admins can be members of an Administrator Space. Membership is implicit, i.e. all site admins can access and use any Administrator Space\nAdministrator space has only one side, which is the Shared area',
+}
+
+const nameOfLead = (leadType: 'guest' | 'host', spaceType: ISpace['type']) => {
+  if (leadType === 'guest') {
+    switch (spaceType) {
+      case 'groups':
+        return 'Guest'
+      case 'review':
+        return 'Sponsor'
+      default:
+        return 'Lead'
+    }
+  }
+  // host
+  switch (spaceType) {
+    case 'groups':
+      return 'Host'
+    case 'review':
+      return 'Review'
+    default:
+      return 'Lead'
+  }
 }
 
 export const validationSchema = Yup.object().shape({
@@ -43,28 +65,19 @@ export const validationSchema = Yup.object().shape({
   description: Yup.string().required('Description required'),
   guest_lead_dxuser: Yup.string()
     .nullable()
-    .when('space_type', {
-      is: (space_type: string) => space_type === 'groups',
-      then: Yup.string().required('Guest lead required'),
-    }),
-  review_lead_dxuser: Yup.string()
-    .nullable()
-    .when('space_type', {
-      is: (space_type: string) => space_type === 'review',
-      then: Yup.string().required('Review lead required'),
-    }),
+    .when('space_type', (space_type: string, schema: Yup.StringSchema<string | null | undefined>) =>
+      ['groups', 'review'].includes(space_type)
+        ? schema.required(`${nameOfLead('guest', space_type as ISpace['type'])} lead required`)
+        : schema,
+    ),
+
   host_lead_dxuser: Yup.string()
     .nullable()
-    .when('space_type', {
-      is: (space_type: string) => space_type === 'groups',
-      then: Yup.string().required('Host lead required'),
-    }),
-  sponsor_lead_dxuser: Yup.string()
-    .nullable()
-    .when('space_type', {
-      is: (space_type: string) => space_type === 'review',
-      then: Yup.string().required('Sponsor lead required'),
-    }),
+    .when('space_type', (space_type: string, schema: Yup.StringSchema<string | null | undefined>) =>
+      ['groups', 'review'].includes(space_type)
+        ? schema.required(`${nameOfLead('host', space_type as ISpace['type'])} lead required`)
+        : schema,
+    ),
   cts: Yup.string()
     .nullable()
     .when('space_type', {

@@ -10,7 +10,7 @@ import {
   nodeCopyTemplate,
   NodeCopyTemplateInput,
 } from '@shared/domain/email/templates/mjml/node-copy.template'
-import { NodeCopyInputDto } from '@shared/domain/email/dto/node-copy-input.dto'
+import { NodeCopyInputDTO } from '@shared/domain/email/dto/node-copy-input.dto'
 import { User } from '@shared/domain/user/user.entity'
 import { buildEmailTemplate } from '@shared/domain/email/email.helper'
 
@@ -18,11 +18,11 @@ import { buildEmailTemplate } from '@shared/domain/email/email.helper'
  * Notifies users if some items weren't copied.
  */
 export class NodeCopyHandler
-  extends BaseTemplate<NodeCopyInputDto, UserOpsCtx>
+  extends BaseTemplate<NodeCopyInputDTO, UserOpsCtx>
   implements EmailTemplate<NodeCopyTemplateInput>
 {
   templateFile = nodeCopyTemplate
-  nodeCopyInput: NodeCopyInputDto = this.validatedInput
+  nodeCopyInput: NodeCopyInputDTO = this.validatedInput
 
   getNotificationKey(): keyof typeof NOTIFICATION_TYPES_BASE {
     return 'node_copy'

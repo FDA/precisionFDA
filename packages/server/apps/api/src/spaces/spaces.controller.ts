@@ -21,7 +21,6 @@ import {
   SPACE_MEMBERSHIP_ROLE,
   SPACE_MEMBERSHIP_SIDE,
 } from '@shared/domain/space-membership/space-membership.enum'
-import { CreateSpaceDto } from '@shared/domain/space/dto/create-space.dto'
 import { SpacesHiddenDto } from '@shared/domain/space/dto/spaces-hidden.dto'
 import { SpaceAcceptOperation } from '@shared/domain/space/ops/accept-space'
 import { SpaceService } from '@shared/domain/space/service/space.service'
@@ -33,6 +32,7 @@ import { PlatformClient } from '@shared/platform-client'
 import { UserOpsCtx } from '@shared/types'
 import { SiteAdminGuard } from '../admin/guards/site-admin.guard'
 import { UserContextGuard } from '../user-context/guard/user-context.guard'
+import { CreateSpaceDTO } from '@shared/domain/space/dto/create-space-dto'
 
 @UseGuards(UserContextGuard)
 @Controller('/spaces')
@@ -46,8 +46,9 @@ export class SpacesController {
   ) {}
 
   @Post()
-  async create(@Body() space: CreateSpaceDto) {
-    return await this.spaceService.create(space)
+  async create(@Body() space: CreateSpaceDTO) {
+    const spaceId = await this.spaceService.create(space)
+    return { id: spaceId }
   }
 
   @HttpCode(204)

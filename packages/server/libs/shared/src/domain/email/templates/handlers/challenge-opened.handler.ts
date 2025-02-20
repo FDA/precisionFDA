@@ -6,7 +6,6 @@ import { pipe, uniqBy } from 'ramda'
 import { LoadedReference } from '@mikro-orm/core'
 import {
   EmailTemplate,
-  ChallengeOpened,
   NOTIFICATION_TYPES_BASE,
   EmailSendInput,
   EMAIL_TYPES,
@@ -22,9 +21,10 @@ import {
   ChallengeOpenedTemplateInput,
 } from '../mjml/challenge-opened.template'
 import { InternalError } from '@shared/errors'
+import { ChallengeOpenedDTO } from '@shared/domain/email/dto/challenge-opened.dto'
 
 export class ChallengeOpenedEmailHandler
-  extends BaseTemplate<ChallengeOpened>
+  extends BaseTemplate<ChallengeOpenedDTO>
   implements EmailTemplate<ChallengeOpenedTemplateInput>
 {
   templateFile = challengeOpenedTemplate

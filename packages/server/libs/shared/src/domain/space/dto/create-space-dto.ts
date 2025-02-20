@@ -5,7 +5,7 @@ import { Transform } from 'class-transformer'
 import { IsBoolean, IsEnum, IsNotEmpty, IsString, ValidateIf } from 'class-validator'
 import crypto from 'crypto'
 
-export class CreateSpaceDto {
+export class CreateSpaceDTO {
   @IsString()
   @IsNotEmpty()
   name: string
@@ -22,7 +22,19 @@ export class CreateSpaceDto {
   @IsString()
   hostLeadDxuser: string
 
-  @ValidateIf((o) => o.spaceType === SPACE_TYPE.GROUPS)
+  @ValidateIf((o) => o.spaceType === SPACE_TYPE.REVIEW)
+  @IsBoolean()
+  restrictedReviewer: boolean = false
+
+  @ValidateIf((o) => o.spaceType === SPACE_TYPE.REVIEW)
+  @IsBoolean()
+  restrictedDiscussions: boolean = false
+
+  @ValidateIf((o) => o.spaceType === SPACE_TYPE.REVIEW)
+  @IsString()
+  cts: string
+
+  @ValidateIf((o) => o.spaceType === SPACE_TYPE.GROUPS || o.spaceType === SPACE_TYPE.REVIEW)
   @IsString()
   guestLeadDxuser?: string
 
@@ -30,15 +42,10 @@ export class CreateSpaceDto {
   @IsBoolean()
   protected: boolean = false
 
-  @ValidateIf((o) => o.spaceType === SPACE_TYPE.REVIEW)
-  @IsBoolean()
-  restrictedReviewer: boolean = false
-
   @ValidateIf((o) => o.spaceType === SPACE_TYPE.GROUPS)
   @IsBoolean()
   forChallenge: boolean = false
 
-  // ATM only for non-review spaces !!
   buildEntity() {
     const uuid = crypto.randomBytes(7).toString('hex')
     const space = new Space()
@@ -48,11 +55,15 @@ export class CreateSpaceDto {
     space.state = SPACE_STATE.ACTIVE
     space.protected = false
     space.hostDxOrg = constructDxOrg(`space_host_${uuid}`)
-    if (this.spaceType === SPACE_TYPE.GROUPS) {
+    if (this.spaceType in [SPACE_TYPE.GROUPS, SPACE_TYPE.REVIEW]) {
       space.guestDxOrg = constructDxOrg(`space_guest_${uuid}`)
       space.protected = this.protected
     }
-    space.meta = null //TODO: CTS for review space ?
+    space.meta = {
+      restricted_reviewer: this.restrictedReviewer,
+      restricted_discussions: this.restrictedDiscussions,
+      cts: this.cts,
+    }
     return space
   }
 }

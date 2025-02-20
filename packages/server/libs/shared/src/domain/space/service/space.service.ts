@@ -3,10 +3,9 @@ import { Inject, Injectable } from '@nestjs/common'
 import { SpaceCreationProcess } from '@shared/domain/space/create/space-creation.process'
 import { SPACE_TYPE_TO_PROCESS_PROVIDER_MAP } from '@shared/domain/space/create/space-type-to-process-map.provider'
 import { SpaceNotFoundError, UserNotFoundError } from '@shared/errors'
-import { CreateSpaceDto } from '@shared/domain/space/dto/create-space.dto'
 import { SpaceRepository } from '@shared/domain/space/space.repository'
 import { Node } from '@shared/domain/user-file/node.entity'
-import { PermissionError, ServiceError } from '@shared/errors'
+import { PermissionError } from '@shared/errors'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { Logger } from 'nestjs-pino'
 import { SPACE_STATE, SPACE_TYPE } from '../space.enum'
@@ -21,6 +20,7 @@ import {
 import { UserRepository } from '@shared/domain/user/user.repository'
 import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
 import { Space } from '@shared/domain/space/space.entity'
+import { CreateSpaceDTO } from '@shared/domain/space/dto/create-space-dto'
 
 @Injectable()
 export class SpaceService {
@@ -40,15 +40,9 @@ export class SpaceService {
     private readonly userRepository: UserRepository,
   ) {}
 
-  async create(space: CreateSpaceDto) {
+  async create(space: CreateSpaceDTO): Promise<number> {
     this.logger.log(`Creating new ${SPACE_TYPE[space.spaceType]} space`)
 
-    // REVIEW spaces not supported yet
-    if ([SPACE_TYPE.REVIEW].includes(space.spaceType)) {
-      throw new ServiceError(
-        `Creation of ${SPACE_TYPE[space.spaceType]} space is not available yet.`,
-      )
-    }
     const process = this.spaceTypeToCreatorProviderMap[space.spaceType]
     return await process.build(space)
   }

@@ -7,7 +7,6 @@ import { FileParam } from '@shared/domain/data-portal/service/data-portal.types'
 import { NotificationInput } from '@shared/domain/notification/notification.input'
 import { NotificationService } from '@shared/domain/notification/services/notification.service'
 import { UserFileService } from '@shared/domain/user-file/service/user-file.service'
-import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { NOTIFICATION_ACTION, SEVERITY } from '@shared/enums'
 import { expect } from 'chai'
@@ -21,15 +20,12 @@ import type {
   ClassIdResponse,
   FileDownloadLinkResponse,
 } from '@shared/platform-client/platform-client.responses'
-import {
-  DATA_PORTAL_MEMBER_ROLE,
-  DATA_PORTAL_STATUS,
-} from '@shared/domain/data-portal/data-portal.enum'
+import { DATA_PORTAL_MEMBER_ROLE } from '@shared/domain/data-portal/data-portal.enum'
 import {
   SPACE_MEMBERSHIP_ROLE,
   SPACE_MEMBERSHIP_SIDE,
 } from '@shared/domain/space-membership/space-membership.enum'
-import { FILE_STATE_DX, PARENT_TYPE } from '@shared/domain/user-file/user-file.types'
+import { PARENT_TYPE } from '@shared/domain/user-file/user-file.types'
 import * as generate from '../../../src/test/generate'
 import { DataPortalRepository } from '@shared/domain/data-portal/data-portal.repository'
 import { stub } from 'sinon'
@@ -170,7 +166,6 @@ describe('DataPortalService', () => {
     portalName: string,
     urlSlug: string,
     description: string,
-    status: DATA_PORTAL_STATUS,
     sortOrder: number,
     cardImageUrl: string,
   ): Promise<DataPortal> => {
@@ -214,7 +209,6 @@ describe('DataPortalService', () => {
         name: portalName,
         urlSlug,
         description,
-        status,
         sortOrder,
         cardImageUrl,
       },
@@ -258,12 +252,13 @@ describe('DataPortalService', () => {
         urlSlug: 'test-data-portal',
         description: 'description',
         sortOrder: 1,
-        status: DATA_PORTAL_STATUS.OPEN,
-        spaceId: space.id,
+        cardImageFileName: 'file.jpg',
+        hostLeadDxUser: 'hostLeadDxUser',
+        guestLeadDxUser: 'guestLeadDxUser',
       } as CreateDataPortalDTO
 
       dataPortalService = createDataPortalService(siteAdmin.id)
-      const portal = await dataPortalService.create(input)
+      const portal = await dataPortalService.create(input, space.id)
       em.clear()
 
       const loadedDataPortal = await em.findOneOrFail(
@@ -274,7 +269,6 @@ describe('DataPortalService', () => {
       expect(loadedDataPortal.name).eq('test-data-portal')
       expect(loadedDataPortal.description).eq('description')
       expect(loadedDataPortal.sortOrder).eq(1)
-      expect(loadedDataPortal.status).eq(DATA_PORTAL_STATUS.OPEN)
       expect(loadedDataPortal.space.id).eq(space.id)
     })
 
@@ -288,12 +282,10 @@ describe('DataPortalService', () => {
         name: 'test-data-portal',
         description: 'description',
         sortOrder: 1,
-        status: DATA_PORTAL_STATUS.OPEN,
-        spaceId: space.id,
       } as CreateDataPortalDTO
 
       try {
-        await dataPortalService.create(input)
+        await dataPortalService.create(input, space.id)
         expect.fail('Operation is expected to fail.')
       } catch (error: unknown) {
         if (error instanceof Error) {
@@ -306,7 +298,7 @@ describe('DataPortalService', () => {
 
       try {
         dataPortalService = createDataPortalService(adminUser.id)
-        await dataPortalService.create(input)
+        await dataPortalService.create(input, space.id)
         expect.fail('Operation is expected to fail.')
       } catch (error: unknown) {
         if (error instanceof Error) {
@@ -319,7 +311,7 @@ describe('DataPortalService', () => {
 
       try {
         dataPortalService = createDataPortalService(challengeBotUser.id)
-        await dataPortalService.create(input)
+        await dataPortalService.create(input, space.id)
         expect.fail('Operation is expected to fail.')
       } catch (error: unknown) {
         if (error instanceof Error) {
@@ -343,24 +335,33 @@ describe('DataPortalService', () => {
         urlSlug: null,
         description: 'description',
         sortOrder: 1,
-        status: DATA_PORTAL_STATUS.OPEN,
-        spaceId: space.id,
+        cardImageFileName: 'file.jpg',
+        hostLeadDxUser: 'hostLeadDxUser',
+        guestLeadDxUser: 'guestLeadDxUser',
       } as CreateDataPortalDTO
 
       // Null url slug
-      await expect(dataPortalService.create(input)).to.be.rejectedWith(DataPortalUrlSlugFormatError)
+      await expect(dataPortalService.create(input, space.id)).to.be.rejectedWith(
+        DataPortalUrlSlugFormatError,
+      )
 
       // Digits only url slug
       input.urlSlug = '42'
-      await expect(dataPortalService.create(input)).to.be.rejectedWith(DataPortalUrlSlugFormatError)
+      await expect(dataPortalService.create(input, space.id)).to.be.rejectedWith(
+        DataPortalUrlSlugFormatError,
+      )
 
       // Special chars in url slug
       input.urlSlug = 'abc$'
-      await expect(dataPortalService.create(input)).to.be.rejectedWith(DataPortalUrlSlugFormatError)
+      await expect(dataPortalService.create(input, space.id)).to.be.rejectedWith(
+        DataPortalUrlSlugFormatError,
+      )
 
       // Uppercase chars in url slug
       input.urlSlug = 'abc-D'
-      await expect(dataPortalService.create(input)).to.be.rejectedWith(DataPortalUrlSlugFormatError)
+      await expect(dataPortalService.create(input, space.id)).to.be.rejectedWith(
+        DataPortalUrlSlugFormatError,
+      )
     })
 
     it('duplicate url slug', async () => {
@@ -428,7 +429,6 @@ describe('DataPortalService', () => {
           name: 'test-data-portal',
           urlSlug: 'test-data-portal',
           description: 'description',
-          status: DATA_PORTAL_STATUS.OPEN,
           sortOrder: 1,
           cardImageUrl: 'testUrl',
         },
@@ -447,7 +447,6 @@ describe('DataPortalService', () => {
         id: portal.id,
         name: 'name-updated',
         description: 'description-updated',
-        status: DATA_PORTAL_STATUS.CLOSED,
         sortOrder: 2,
         cardImageUid: cardImageFile.uid,
         content: 'content-update',
@@ -580,7 +579,6 @@ describe('DataPortalService', () => {
         'test-data-portal',
         'test-data-portal',
         'description',
-        DATA_PORTAL_STATUS.OPEN,
         1,
         'testUrl',
       )
@@ -598,7 +596,6 @@ describe('DataPortalService', () => {
       const result = await dataPortalService.get(portal.id)
       expect(result.name).eq('test-data-portal')
       expect(result.description).eq('description')
-      expect(result.status).eq(DATA_PORTAL_STATUS.OPEN)
       expect(result.sortOrder).eq(1)
       expect(result.cardImageUrl).eq('testUrl')
       expect(result.hostLeadDxuser).eq('host-lead')
@@ -623,7 +620,6 @@ describe('DataPortalService', () => {
         'test-data-portal',
         'urlSlug',
         'description',
-        DATA_PORTAL_STATUS.OPEN,
         1,
         'testUrl',
       )
@@ -694,7 +690,6 @@ describe('DataPortalService', () => {
         'test-data-portal_1',
         'test-data-portal_1',
         'description_1',
-        DATA_PORTAL_STATUS.OPEN,
         2,
         'testUrl_1',
       )
@@ -705,29 +700,26 @@ describe('DataPortalService', () => {
         'test-data-portal_2',
         'test-data-portal_2',
         'description_2',
-        DATA_PORTAL_STATUS.CLOSED,
         1,
         'testUrl_2',
       )
 
       const result = await dataPortalService.list()
 
-      expect(result.data_portals.length).eq(2)
-      expect(result.data_portals[0].name).eq('test-data-portal_2')
-      expect(result.data_portals[0].description).eq('description_2')
-      expect(result.data_portals[0].hostLeadDxuser).eq('host-lead_2')
-      expect(result.data_portals[0].guestLeadDxuser).eq('guest-lead_2')
-      expect(result.data_portals[0].status).eq(DATA_PORTAL_STATUS.CLOSED)
-      expect(result.data_portals[0].sortOrder).eq(1)
-      expect(result.data_portals[0].cardImageUrl).eq('testUrl_2')
+      expect(result.length).eq(2)
+      expect(result[0].name).eq('test-data-portal_2')
+      expect(result[0].description).eq('description_2')
+      expect(result[0].hostLeadDxuser).eq('host-lead_2')
+      expect(result[0].guestLeadDxuser).eq('guest-lead_2')
+      expect(result[0].sortOrder).eq(1)
+      expect(result[0].cardImageUrl).eq('testUrl_2')
 
-      expect(result.data_portals[1].name).eq('test-data-portal_1')
-      expect(result.data_portals[1].description).eq('description_1')
-      expect(result.data_portals[1].hostLeadDxuser).eq('host-lead_1')
-      expect(result.data_portals[1].guestLeadDxuser).eq('guest-lead_1')
-      expect(result.data_portals[1].status).eq(DATA_PORTAL_STATUS.OPEN)
-      expect(result.data_portals[1].sortOrder).eq(2)
-      expect(result.data_portals[1].cardImageUrl).eq('testUrl_1')
+      expect(result[1].name).eq('test-data-portal_1')
+      expect(result[1].description).eq('description_1')
+      expect(result[1].hostLeadDxuser).eq('host-lead_1')
+      expect(result[1].guestLeadDxuser).eq('guest-lead_1')
+      expect(result[1].sortOrder).eq(2)
+      expect(result[1].cardImageUrl).eq('testUrl_1')
     })
 
     it('filter by user roles', async () => {
@@ -757,65 +749,32 @@ describe('DataPortalService', () => {
 
       dataPortalService = createDataPortalService(viewer.userId)
       let result = await dataPortalService.list()
-      expect(result.data_portals.length).eq(1)
+      expect(result.length).eq(1)
 
       dataPortalService = createDataPortalService(contributor.userId)
       result = await dataPortalService.list()
-      expect(result.data_portals.length).eq(1)
+      expect(result.length).eq(1)
 
       dataPortalService = createDataPortalService(admin.userId)
       result = await dataPortalService.list()
-      expect(result.data_portals.length).eq(1)
+      expect(result.length).eq(1)
 
       dataPortalService = createDataPortalService(lead.userId)
       result = await dataPortalService.list()
-      expect(result.data_portals.length).eq(1)
+      expect(result.length).eq(1)
 
       dataPortalService = createDataPortalService(nocoiner.id)
       result = await dataPortalService.list()
-      expect(result.data_portals.length).eq(0)
+      expect(result.length).eq(0)
 
       // Site admin can list all the data portals
       dataPortalService = createDataPortalService(siteAdmin.userId)
       result = await dataPortalService.list()
-      expect(result.data_portals.length).eq(5)
+      expect(result.length).eq(5)
 
       // ...unless specified otherwise
       result = await dataPortalService.list(true)
-      expect(result.data_portals.length).eq(1)
-    })
-  })
-
-  describe('#createCardImage', () => {
-    it('basic', async () => {
-      const challengeUser = create.userHelper.createChallengeBot(em)
-      const space = create.spacesHelper.create(em, {
-        name: 'space-name',
-        hostProject: 'hostProject',
-      })
-      const dataPortal = create.dataPortalsHelper.create(
-        em,
-        { space },
-        { name: 'test-data-portal', urlSlug: 'testdataportal' },
-      )
-      await em.flush()
-
-      dataPortalService = createDataPortalService(challengeUser.id)
-      await dataPortalService.createCardImage(
-        { name: 'test-card.jpg', description: 'description' },
-        dataPortal.id,
-      )
-      const file = await em.findOneOrFail(UserFile, { name: 'test-card.jpg' })
-
-      expect(file.uid).eq('file-dxid-1')
-      expect(file.project).eq('hostProject')
-      expect(file.description).eq('description')
-      expect(file.user.id).eq(2) // challenge bot
-      expect(file.parentId).eq(2) // challenge bot
-      expect(file.parentType).eq(PARENT_TYPE.USER)
-      expect(file.state).eq(FILE_STATE_DX.OPEN)
-      expect(file.scope).eq('space-1')
-      expect(file.uid).eq('file-dxid-1')
+      expect(result.length).eq(1)
     })
   })
 
