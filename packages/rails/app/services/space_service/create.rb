@@ -19,7 +19,6 @@ module SpaceService
     def call(space_form)
       space = nil
       site_admins = nil
-
       Space.transaction do
         space = build_space(space_form)
         dxorgs = [space.host_dxorg, space.guest_dxorg].uniq.compact
@@ -111,7 +110,7 @@ module SpaceService
       )
     end
 
-    # Construct guest dxorg upon its existance - used for Non review and Non groups
+    # Construct guest dxorg upon its existence - used for Non review and Non groups
     #   and Non gov., admin groups types,
     #   which have space_form.guest_lead_dxuser == '' and space_form.sponsor_lead_dxuser == ''
     #   - for Private type spaces we do not create dxorg here

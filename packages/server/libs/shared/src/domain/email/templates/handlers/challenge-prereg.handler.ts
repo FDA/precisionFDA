@@ -6,7 +6,6 @@ import { LoadedReference } from '@mikro-orm/core'
 import { STATIC_SCOPE } from '@shared/enums'
 import {
   EmailTemplate,
-  ChallengeCreated,
   NOTIFICATION_TYPES_BASE,
   EmailSendInput,
   EMAIL_TYPES,
@@ -24,9 +23,10 @@ import {
 } from '../mjml/challenge-preregister.template'
 import { InternalError } from '@shared/errors'
 import { getIdFromScopeName, scopeContainsId } from '../../../space/space.helper'
+import { ChallengeCreatedDTO } from '@shared/domain/email/dto/challenge-created.dto'
 
 export class ChallengePreregEmailHandler
-  extends BaseTemplate<ChallengeCreated>
+  extends BaseTemplate<ChallengeCreatedDTO>
   implements EmailTemplate<ChallengePreregTemplateInput>
 {
   templateFile = challengePreregTemplate

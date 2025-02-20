@@ -82,7 +82,7 @@ const DataPortalsListPage = () => {
     if (lastJsonMessage == null) {
       return
     }
-    queryClient.invalidateQueries({ queryKey: ['data-portals-list'] })
+    queryClient.invalidateQueries({ queryKey: ['data-portals-list']})
   }, [lastJsonMessage])
 
   return (

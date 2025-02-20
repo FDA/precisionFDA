@@ -6,7 +6,6 @@ import { pipe, filter, uniqBy } from 'ramda'
 import {
   EmailSendInput,
   EmailTemplate,
-  SpaceChanged,
   NOTIFICATION_TYPES_BASE,
   EMAIL_TYPES,
 } from '../../email.config'
@@ -18,9 +17,10 @@ import {
   buildIsNotificationEnabled,
 } from '../../email.helper'
 import { SPACE_MEMBERSHIP_SIDE } from '../../../space-membership/space-membership.enum'
+import { SpaceChangedDTO } from '@shared/domain/email/dto/space-changed.dto'
 
 export class SpaceChangedEmailHandler
-  extends BaseTemplate<SpaceChanged>
+  extends BaseTemplate<SpaceChangedDTO>
   implements EmailTemplate<SpaceChangeTemplateInput>
 {
   templateFile = spaceChangedTemplate

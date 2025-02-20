@@ -1,4 +1,9 @@
 import { InvalidStateError } from '@shared/errors'
+import { GroupsSpaceCreationProcess } from '@shared/domain/space/create/groups-space-creation.process'
+import { ReviewSpaceCreationProcess } from '@shared/domain/space/create/review-space-creation.process'
+import { PrivateSpaceCreationProcess } from '@shared/domain/space/create/private-space-creation.process'
+import { GovernmentSpaceCreationProcess } from '@shared/domain/space/create/government-space-creation.process'
+import { AdministratorSpaceCreationProcess } from '@shared/domain/space/create/administrator-space-creation.process'
 
 enum SPACE_TYPE {
   GROUPS = 0,
@@ -8,6 +13,15 @@ enum SPACE_TYPE {
   ADMINISTRATOR = 5,
   // deprecated type - no longer in use
   VERIFICATION = 2,
+}
+
+type SpaceProcessTypeMap = {
+  [SPACE_TYPE.GROUPS]: GroupsSpaceCreationProcess
+  [SPACE_TYPE.REVIEW]: ReviewSpaceCreationProcess
+  [SPACE_TYPE.PRIVATE_TYPE]: PrivateSpaceCreationProcess
+  [SPACE_TYPE.GOVERNMENT]: GovernmentSpaceCreationProcess
+  [SPACE_TYPE.ADMINISTRATOR]: AdministratorSpaceCreationProcess
+  [SPACE_TYPE.VERIFICATION]: Object // unused
 }
 
 function getSpaceTypeEnum(key: string): SPACE_TYPE {
@@ -34,4 +48,4 @@ enum SPACE_STATE {
   DELETED = 3,
 }
 
-export { getSpaceTypeEnum, SPACE_STATE, SPACE_TYPE }
+export { getSpaceTypeEnum, SPACE_STATE, SPACE_TYPE, SpaceProcessTypeMap }

@@ -4,9 +4,9 @@ import {
   getMiddleSpacer,
   header,
 } from '@shared/domain/email/templates/mjml/common'
-import { AlertMessageInputDto } from '@shared/domain/email/dto/alert-message-input.dto'
+import { AlertMessageInputDTO } from '@shared/domain/email/dto/alert-message-input.dto'
 
-export const alertMessageTemplate = (alertMessageInput: AlertMessageInputDto): string => `
+export const alertMessageTemplate = (alertMessageInput: AlertMessageInputDTO): string => `
   ${header}
     <mj-section css-class="header-title">
       <mj-column>

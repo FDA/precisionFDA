@@ -35,7 +35,7 @@ export const buildIsOverMaxDuration = (
 }
 
 export const sendJobFailedEmails = async (
-  jobId: string,
+  jobId: number,
   ctx: WorkerOpsCtx<UserOpsCtx>,
 ): Promise<void[]> => {
   const handler = new EMAIL_CONFIG.jobFailed.handlerClass(EMAIL_TYPES.jobFailed, { jobId }, ctx)

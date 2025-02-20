@@ -6,7 +6,6 @@ import { EmailFacade } from '@shared/domain/email/email.facade'
 import { STATIC_SCOPE } from '@shared/enums'
 import { CHALLENGE_STATUS } from '@shared/domain/challenge/challenge.enum'
 import { EMAIL_TYPES } from '@shared/domain/email/email.config'
-import { CreateSpaceDto } from '@shared/domain/space/dto/create-space.dto'
 import { SPACE_TYPE } from '@shared/domain/space/space.enum'
 import { ChallengeService } from '@shared/domain/challenge/challenge.service'
 import { UserFileService } from '@shared/domain/user-file/service/user-file.service'
@@ -15,6 +14,7 @@ import { CHALLENGE_BOT_PLATFORM_CLIENT } from '@shared/platform-client/providers
 import { PlatformClient } from '@shared/platform-client'
 import { FILE_STATE_DX, PARENT_TYPE } from '@shared/domain/user-file/user-file.types'
 import { EntityScopeUtils } from '@shared/utils/entity-scope.utils'
+import { CreateSpaceDTO } from '@shared/domain/space/dto/create-space-dto'
 
 @Injectable()
 export class ChallengeFacade {
@@ -88,7 +88,7 @@ export class ChallengeFacade {
   }
 
   private async provideChallengeSpace(body: CreateChallengeDTO) {
-    const space = new CreateSpaceDto()
+    const space = new CreateSpaceDTO()
     space.name = body.name
     space.forChallenge = true
     space.spaceType = SPACE_TYPE.GROUPS

@@ -1,19 +1,13 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { GroupsSpaceCreationProcess } from '@shared/domain/space/create/groups-space-creation.process'
 import { SpaceCreationProcess } from '@shared/domain/space/create/space-creation.process'
-import { CreateSpaceDto } from '@shared/domain/space/dto/create-space.dto'
 import { SpaceService } from '@shared/domain/space/service/space.service'
 import { SPACE_STATE, SPACE_TYPE } from '@shared/domain/space/space.enum'
 import { SpaceRepository } from '@shared/domain/space/space.repository'
 import { Node } from '@shared/domain/user-file/node.entity'
 import { expect } from 'chai'
 import { stub } from 'sinon'
-import {
-  ServiceError,
-  PermissionError,
-  SpaceNotFoundError,
-  UserNotFoundError,
-} from '@shared/errors'
+import { PermissionError, SpaceNotFoundError, UserNotFoundError } from '@shared/errors'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
 import { UserRepository } from '@shared/domain/user/user.repository'
@@ -22,6 +16,7 @@ import {
   SPACE_EVENT_OBJECT_TYPE,
 } from '@shared/domain/space-event/space-event.enum'
 import { Reference } from '@mikro-orm/core'
+import { CreateSpaceDTO } from '@shared/domain/space/dto/create-space-dto'
 
 describe('SpaceService', () => {
   const USER_ID = 1
@@ -121,26 +116,12 @@ describe('SpaceService', () => {
       const createSpaceDto = {
         name: 'test-space',
         spaceType: SPACE_TYPE.GROUPS,
-      } as unknown as CreateSpaceDto
+      } as unknown as CreateSpaceDTO
 
       await spaceService.create(createSpaceDto)
 
       expect(buildStub.calledOnce).to.be.true
       expect(buildStub.firstCall.args[0]).to.deep.equal(createSpaceDto)
-    })
-
-    it('validation fail', async () => {
-      buildStub.resolves()
-      const spaceService = createSpaceService()
-      const createSpaceDto = {
-        name: 'test-space',
-        spaceType: SPACE_TYPE.REVIEW,
-      } as unknown as CreateSpaceDto
-
-      await expect(spaceService.create(createSpaceDto)).to.be.rejectedWith(
-        ServiceError,
-        `Creation of ${SPACE_TYPE[SPACE_TYPE.REVIEW]} space is not available yet.`,
-      )
     })
   })
 

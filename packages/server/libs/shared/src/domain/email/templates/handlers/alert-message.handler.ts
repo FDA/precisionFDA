@@ -9,14 +9,14 @@ import {
 import { alertMessageTemplate } from '@shared/domain/email/templates/mjml/alert-message.template'
 import { User } from '@shared/domain/user/user.entity'
 import { buildEmailTemplate } from '@shared/domain/email/email.helper'
-import { AlertMessageInputDto } from '@shared/domain/email/dto/alert-message-input.dto'
+import { AlertMessageInputDTO } from '@shared/domain/email/dto/alert-message-input.dto'
 
 export class AlertMessageHandler
-  extends BaseTemplate<AlertMessageInputDto, UserOpsCtx>
-  implements EmailTemplate<AlertMessageInputDto>
+  extends BaseTemplate<AlertMessageInputDTO, UserOpsCtx>
+  implements EmailTemplate<AlertMessageInputDTO>
 {
   templateFile = alertMessageTemplate
-  alertMessageInput: AlertMessageInputDto = this.validatedInput
+  alertMessageInput: AlertMessageInputDTO = this.validatedInput
 
   getNotificationKey(): keyof typeof NOTIFICATION_TYPES_BASE {
     return 'alert_message'
@@ -31,7 +31,7 @@ export class AlertMessageHandler
   }
 
   async template(receiver: User): Promise<EmailSendInput> {
-    const body = buildEmailTemplate<AlertMessageInputDto>(this.templateFile, this.alertMessageInput)
+    const body = buildEmailTemplate<AlertMessageInputDTO>(this.templateFile, this.alertMessageInput)
     return {
       emailType: EMAIL_TYPES.alertMessage,
       to: receiver.email,
