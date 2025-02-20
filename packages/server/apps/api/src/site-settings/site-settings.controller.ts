@@ -48,7 +48,7 @@ export class SiteSettingsController {
     }
 
     if (this.user?.id) {
-      const dataPortalsList = (await this.dataPortalService.list(true)).data_portals
+      const dataPortalsList = await this.dataPortalService.list(true)
       const dataPortals = {
         daaas: {
           accessible: dataPortalsList.find((portal) => portal.urlSlug === 'daaas') !== undefined,

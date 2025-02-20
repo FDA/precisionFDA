@@ -7,30 +7,39 @@ import { isAcceptedBy } from './space.helper'
 
 class SpaceActionPolicy {
   canAccept(space: Space, confidentialSpaces: Space[], spaceMembership: SpaceMembership): boolean {
-    return space && spaceMembership && isAdminOrLead(spaceMembership.role) && !isAcceptedBy(space, confidentialSpaces, spaceMembership)
+    return (
+      space &&
+      spaceMembership &&
+      isAdminOrLead(spaceMembership.role) &&
+      !isAcceptedBy(space, confidentialSpaces, spaceMembership)
+    )
   }
 
   async canLock(space: Space, user: User): Promise<boolean> {
     const isRSA = await user.isReviewSpaceAdmin()
 
-    return space
-      && space.state === SPACE_STATE.ACTIVE
-      && (!space.isConfidential() && space.type === SPACE_TYPE.REVIEW)
-      && isRSA
+    return (
+      space &&
+      space.state === SPACE_STATE.ACTIVE &&
+      !space.isConfidential() &&
+      space.type === SPACE_TYPE.REVIEW &&
+      isRSA
+    )
   }
 
   async canUnlock(space: Space, user: User): Promise<boolean> {
     const isRSA = await user.isReviewSpaceAdmin()
 
-    return space
-      && space.state === SPACE_STATE.LOCKED
-      && (!space.isConfidential() && space.type === SPACE_TYPE.REVIEW)
-      && isRSA
+    return (
+      space &&
+      space.state === SPACE_STATE.LOCKED &&
+      !space.isConfidential() &&
+      space.type === SPACE_TYPE.REVIEW &&
+      isRSA
+    )
   }
 }
-
 
 const spaceActionPolicy = new SpaceActionPolicy()
 
 export { spaceActionPolicy }
-

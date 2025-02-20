@@ -1,10 +1,10 @@
 import { useQueryClient } from '@tanstack/react-query'
 import React, { useEffect, useRef, useState } from 'react'
 import { CommentCard } from './card/CommentCard'
-import { NoteCard } from './card/NoteCard'
 import { Answer } from './discussions.types'
 import { CreateCommentEntity } from './form/CreateCommentEntity'
 import { StyledCardList } from './styles'
+import { AnswerCard } from './card/AnswerCard'
 
 export const DiscussionAnswer = ({
   canEdit,
@@ -38,12 +38,10 @@ export const DiscussionAnswer = ({
 
   return (
     <>
-      <NoteCard
+      <AnswerCard
         canEdit={canEdit}
         canReply={canReply}
-        note={answer.note}
-        discussionId={answer.discussion}
-        answerId={answer.id}
+        answer={answer}
         onReply={() => {
           inputRef.current?.focus()
           setIsEditing(true)
@@ -58,16 +56,18 @@ export const DiscussionAnswer = ({
               canUserEdit={currentUserId === comment.user.id || isLead}
               comment={comment}
               answerId={answer.id}
-              discussionId={answer.discussion}
+              discussionId={answer.discussionId}
             />
           ))}
         {isEditing && (
           <CreateCommentEntity
+            canUserAnswer
+            scope={answer.scope}
             onSuccess={() => setIsEditing(false)}
             answerId={answer.id}
             onCancel={() => setIsEditing(false)}
             markdownInputRef={inputRef}
-            discussionId={answer.discussion}
+            discussionId={answer.discussionId}
           />
         )}
       </StyledCardList>

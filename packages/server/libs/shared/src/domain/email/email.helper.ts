@@ -16,8 +16,11 @@ import {
   EMAIL_TYPES,
 } from './email.config'
 import { nanoid } from 'nanoid'
+import { IsNotEmpty, IsNumber } from 'class-validator'
 
-export class ObjectIdInputDto {
+export class ObjectIdInputDTO {
+  @IsNumber()
+  @IsNotEmpty()
   id: number
 }
 

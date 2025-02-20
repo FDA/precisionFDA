@@ -8,26 +8,38 @@ export abstract class PaginatedRepository<T extends object> extends EntityReposi
     Fields extends string = '*',
     Excludes extends string = never,
   >(
-    paginationDto: PaginationDto,
+    paginationDto: PaginationDto<T>,
     where: FilterQuery<T> = {},
+    // options?: Omit<FindOptions<T, Hint, Fields, Excludes>, 'limit' | 'offset' | 'orderBy'>,
     options?: Omit<FindOptions<T, Hint, Fields, Excludes>, 'limit' | 'offset'>,
   ): Promise<PaginatedResult<Loaded<T, Hint, Fields, Excludes>>> {
-    const { page, pageSize: limit } = paginationDto
+    const { page, pageSize: limit, sort: orderBy } = paginationDto
+
+    const offset = this.calculateOffset(page, limit)
 
     const [data, total] = await this.findAndCount<Hint, Fields, Excludes>(where, {
       ...options,
       limit,
-      offset: (page - 1) * limit,
+      offset,
+      orderBy,
     })
 
     return {
       data,
       meta: {
         total,
-        totalPages: Math.ceil(total / limit),
-        pageSize: limit,
+        //TODO PFDA-6051 revisit what to return if limit is not set.
+        totalPages: limit ? Math.ceil(total / limit) : 1,
+        pageSize: limit ?? 0,
         page,
       },
     }
+  }
+
+  private calculateOffset(page?: number, limit?: number): number | null {
+    if (page == null || limit == null) {
+      return null
+    }
+    return (page - 1) * limit
   }
 }

@@ -1,11 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { Discussion } from '@shared/domain/discussion/discussion.entity'
-import {
-  AnswerDTO,
-  CommentDTO,
-  type DiscussionAttachment,
-  UserDTO,
-} from '@shared/domain/discussion/discussion.types'
+import { type DiscussionAttachment } from '@shared/domain/discussion/discussion.types'
 import { AttachableEntityType } from '@shared/domain/discussion/model/attachable-entity.type'
 import { DiscussionService } from '@shared/domain/discussion/services/discussion.service'
 import {
@@ -16,6 +11,9 @@ import {
   SpaceReportPartDiscussionResultCommentCreatedBy,
 } from '@shared/domain/space-report/model/space-report-part-discussion-result'
 import { SpaceReportPartResultProvider } from './space-report-part-result.provider'
+import { AnswerDTO } from '@shared/domain/discussion/dto/answer.dto'
+import { CommentDTO } from '@shared/domain/discussion/dto/comment.dto'
+import { SimpleUserDTO } from '@shared/domain/user/dto/simple-user.dto'
 
 @Injectable()
 export class SpaceReportPartDiscussionResultProviderService extends SpaceReportPartResultProvider<'discussion'> {
@@ -44,8 +42,8 @@ export class SpaceReportPartDiscussionResultProviderService extends SpaceReportP
     const attachments = await this.discussionService.getAttachments(entity.note.id)
 
     return {
-      title: discussion.note.title,
-      content: discussion.note.content,
+      title: discussion.title,
+      content: discussion.content,
       createdBy: this.mapCreatedBy(discussion.user),
       createdAt: discussion.createdAt,
       answers: await Promise.all(discussion.answers.map((a) => this.mapAnswer(a))),
@@ -55,10 +53,10 @@ export class SpaceReportPartDiscussionResultProviderService extends SpaceReportP
   }
 
   private async mapAnswer(answer: AnswerDTO): Promise<SpaceReportPartDiscussionResultAnswer> {
-    const attachments = await this.discussionService.getAttachments(answer.note.id)
+    const attachments = await this.discussionService.getAttachments(answer.noteId)
 
     return {
-      content: answer.note.content,
+      content: answer.content,
       createdBy: this.mapCreatedBy(answer.user),
       createdAt: answer.createdAt,
       comments: answer.comments.map((c) => this.mapComment(c)),
@@ -84,7 +82,7 @@ export class SpaceReportPartDiscussionResultProviderService extends SpaceReportP
     }
   }
 
-  private mapCreatedBy(user: UserDTO): SpaceReportPartDiscussionResultCommentCreatedBy {
+  private mapCreatedBy(user: SimpleUserDTO): SpaceReportPartDiscussionResultCommentCreatedBy {
     return {
       fullName: user.fullName,
       dxuser: user.dxuser,

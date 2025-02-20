@@ -132,7 +132,6 @@ export const DiscussionForm = ({
         )}
         <ButtonRow>
           <div style={{ flex: 'auto' }}>
-
             <Controller
                 name="notify"
                 control={control}

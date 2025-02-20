@@ -1,22 +1,18 @@
-import { IUser } from '../../types/user'
 import { ServerScope } from '../home/types'
 import { NoteScope } from './api'
 
-export interface Note {
-  content: string
+export type SimpleUser = {
   id: number
-  noteType: 'Answer' | 'Discussion'
-  scope: NoteScope
-  title: string
-  user: IUser
-  createdAt: string
-  updatedAt: string
+  dxuser: string
+  firstName: string,
+  lastName: string
+  fullName: string,
 }
 
 export interface Comment {
   id: number
   discussion: number
-  user: IUser
+  user: SimpleUser
   body: string
   commentableId: number
   commentableType: string
@@ -24,11 +20,15 @@ export interface Comment {
   createdAt: string
   updatedAt: string
 }
+
 export interface Answer {
   id: number
-  note: Note
-  discussion: number
-  user: IUser
+  discussionId: number
+  title: string
+  content: string
+  noteId: number
+  scope: NoteScope
+  user: SimpleUser
   comments: Comment[]
   createdAt: string
   updatedAt: string
@@ -36,8 +36,11 @@ export interface Answer {
 
 export interface Discussion {
   id: number
-  note: Note
-  user: IUser
+  title: string
+  content: string
+  scope: NoteScope
+  noteId: number
+  user: SimpleUser
   createdAt: string
   updatedAt: string
   answers: Answer[]

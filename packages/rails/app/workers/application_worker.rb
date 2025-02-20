@@ -15,6 +15,9 @@ class ApplicationWorker
     subject = "An error occurred during the copying to scope '#{scope}'"
     message = "#{subject}: #{job['error_message']}"
 
+    max_db_length = 4000
+    message = message[0, max_db_length] if message.length > max_db_length
+
     notification = {
       action: "NODES_COPIED",
       message:,
@@ -26,6 +29,9 @@ class ApplicationWorker
     https_apps_client.send_notification(notification)
 
     Rails.logger.error(message)
+
+    max_mail_length = 255
+    message = message[0, max_mail_length] if message.length > max_mail_length
     https_apps_client.email_send(NotificationPreference.email_types[:alert_message], [context.user.id], { subject:, message: })
 
     RequestContext.end_request

@@ -1,0 +1,2920 @@
+openapi: 3.0.2
+info:
+  title: precisionFDA Usage of Platform API
+  description: |-
+    precisionFDA Usage of Platform API
+  version: 1.0.0
+servers:
+  - url: https://stagingapi.dnanexus.com
+    description: Staging platform API server
+  - url: https://api.dnanexus.com
+    description: Production platform API server
+tags:
+  - name: org
+    description: Org
+  - name: user
+    description: User Operations
+  - name: project
+    description: Project Operations
+  - name: class
+    description: Class Operations
+  - name: system
+    description: System operations
+  - name: file
+    description: File Operations
+  - name: applet
+    description: Applet Operations
+  - name: app
+    description: App Operations
+  - name: job
+    description: Job Operations
+  - name: workflow
+    description: Workflow Operations
+  - name: dbcluster
+paths:
+  /org/new:
+    post:
+      tags:
+        - org
+      summary: Create users orgs, spaces orgs
+      description: |
+        - https://documentation.dnanexus.com/developer/api/organizations#api-method-org-new
+        - Create org from name and handle, org's handle pattern: "pfda.."
+      operationId: orgNew
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PFDAOrgNew"
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OrgIdResponse"
+  /{orgDxid}/invite:
+    post:
+      tags:
+        - org
+      summary: Invite user to a space org, called from Admin Token
+      description: |
+        - https://documentation.dnanexus.com/developer/api/organizations#api-method-org-xxxx-invite
+      operationId: orgInvite
+      parameters:
+        - $ref: "#/components/parameters/orgDxidParam"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PFDAOrgInvite"
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/OrgIdResponse"
+                  - type: object
+                    properties:
+                      state:
+                        type: string
+  /{orgDxid}/describe:
+    post:
+      tags:
+        - org
+      summary: Org Describe
+      description: |
+        - https://documentation.dnanexus.com/developer/api/organizations#api-method-org-xxxx-describe
+        - Used to describe cloud costs `computeCharges, storageCharges, dataEgressCharges`
+      operationId: orgDescribe
+      parameters:
+        - $ref: "#/components/parameters/orgDxidParam"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                defaultFields:
+                  description: default false if fields is supplied, true otherwise
+                  type: boolean
+                fields:
+                  type: object
+                  additionalProperties:
+                    type: boolean
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OrgDescribeResponse"
+  /{orgDxid}/removeMember:
+    post:
+      tags:
+        - org
+      summary: Remove member out of the org
+      description: |
+        - https://documentation.dnanexus.com/developer/api/organizations#api-method-org-xxxx-removemember
+      operationId: orgRemoveMember
+      parameters:
+        - $ref: "#/components/parameters/orgDxidParam"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user:
+                  $ref: "#/components/schemas/UserDxidString"
+                revokeProjectPermissions:
+                  type: boolean
+                  default: true
+                revokeAppPermissions:
+                  type: boolean
+                  default: true
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    $ref: "#/components/schemas/OrgDxidString"
+                  projects:
+                    type: object
+                    additionalProperties:
+                      type: boolean
+                  apps:
+                    type: object
+                    additionalProperties:
+                      type: boolean
+  /{orgDxid}/findMembers:
+    post:
+      tags:
+        - org
+      summary: Find org members
+      description: |
+        - https://documentation.dnanexus.com/developer/api/organizations#api-method-org-xxxx-findmembers
+      operationId: orgFindMembers
+      parameters:
+        - name: orgDxid
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/OrgDxidString"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PFDAOrgFindMembers"
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/OrgMember"
+                  next:
+                    type: object
+  /{userDxid}/describe:
+    post:
+      tags:
+        - user
+      summary: Describe user
+      description: |
+        - https://documentation.dnanexus.com/developer/api/users#api-method-user-xxxx-describe
+        - Basically, other users (admin users) can only see the basic information (id, name, etc), other fields are present when requesting user as same as the user
+      operationId: userDescribe
+      parameters:
+        - $ref: "#/components/parameters/userDxidParam"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ObjectDescribeFields"
+            example:
+              fields:
+                email: true
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserDescribeResponse"
+  /{userDxid}/update:
+    post:
+      tags:
+        - user
+      summary: Update user (Unused in Node and Ruby)
+      description: |
+        - https://documentation.dnanexus.com/developer/api/users#api-method-user-xxxx-update
+      operationId: userUpdate
+      parameters:
+        - $ref: "#/components/parameters/userDxidParam"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                first:
+                  type: string
+                last:
+                  type: string
+                middle:
+                  type: string
+                policies:
+                  type: object
+                  properties:
+                    emailWhenJobComplete:
+                      type: string
+                      enum: ["never", "failuresOnly", "always"]
+                sshPublicKey:
+                  type: string
+                billTo:
+                  $ref: "#/components/schemas/OrgDxidString"
+                defaultRegion:
+                  type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    $ref: "#/components/schemas/UserDxidString"
+  /project/new:
+    post:
+      tags:
+        - project
+      summary: Create new project
+      description: |
+        - https://documentation.dnanexus.com/developer/api/data-containers/projects#api-method-project-new
+      operationId: projectNew
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PFDAProjectNew"
+            example:
+              name: "project-name"
+              billTo: "org-pfda..harry.potter"
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    $ref: "#/components/schemas/ProjectDxidString"
+  /{projectDxid}/describe:
+    post:
+      tags:
+        - project
+      summary: Project Describe
+      description: |
+        - https://documentation.dnanexus.com/developer/api/data-containers/projects#api-method-project-xxxx-describe
+      operationId: projectDescribe
+      parameters:
+        - $ref: "#/components/parameters/projectDxidParam"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                fields:
+                  type: object
+                  additionalProperties:
+                    type: boolean
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProjectDescribeResponse"
+  /{projectDxid}/invite:
+    post:
+      tags:
+        - project
+      summary: Project Invite
+      description: |
+        - https://documentation.dnanexus.com/developer/api/data-containers/project-permissions-and-sharing#api-method-project-xxxx-invite
+      operationId: projectInvite
+      parameters:
+        - $ref: "#/components/parameters/projectDxidParam"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                fields:
+                  type: object
+                  properties:
+                    invitee:
+                      type: string
+                    level:
+                      type: string
+                      enum: ["VIEW", "UPLOAD", "CONTRIBUTE", "ADMINISTER"]
+                    suppressEmailNotification:
+                      type: boolean
+                      default: true
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProjectIdResponse"
+  /{projectDxid}/update:
+    post:
+      tags:
+        - project
+      summary: Project Update
+      description: |
+        - https://documentation.dnanexus.com/developer/api/data-containers/projects#api-method-project-xxxx-update
+        - Used for updating project's billTo
+      operationId: projectUpdate
+      parameters:
+        - $ref: "#/components/parameters/projectDxidParam"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProjectNew"
+            example:
+              billTo: "org-pfda..harry.potter"
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProjectIdResponse"
+  /{projectDxid}/decreasePermissions:
+    post:
+      tags:
+        - project
+      summary: Project decrease permissions
+      description: |
+        - https://documentation.dnanexus.com/developer/api/data-containers/project-permissions-and-sharing#api-method-project-xxxx-decreasepermissions
+      operationId: projectDecreasePermissions
+      parameters:
+        - $ref: "#/components/parameters/projectDxidParam"
+      requestBody:
+        content:
+          application/json:
+            example:
+              "user-harry.potter": "VIEW"
+            schema:
+              additionalProperties:
+                $ref: "#/components/schemas/ProjectPermission"
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProjectIdResponse"
+  /{projectDxid}/leave:
+    post:
+      tags:
+        - project
+      summary: Project leave
+      description: Project leave
+      operationId: projectLeave
+      parameters:
+        - $ref: "#/components/parameters/projectDxidParam"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: |
+                - pFDA only allows users to leave projects, not orgs
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProjectIdResponse"
+  /{projectDxid}/transfer:
+    post:
+      tags:
+        - project
+      summary: Project transfer
+      description: |
+        - https://documentation.dnanexus.com/developer/api/data-containers/project-permissions-and-sharing#api-method-project-xxxx-transfer
+      operationId: projectTransfer
+      parameters:
+        - $ref: "#/components/parameters/projectDxidParam"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                invitee:
+                  type: string
+                suppressEmailNotification:
+                  type: boolean
+                  default: true
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProjectIdResponse"
+  /{projectDxid}/acceptTransfer:
+    post:
+      tags:
+        - project
+      summary: Project accept transfer
+      description: |
+        - https://documentation.dnanexus.com/developer/api/data-containers/project-permissions-and-sharing#api-method-project-xxxx-accepttransfer
+      operationId: projectAcceptTransfer
+      parameters:
+        - $ref: "#/components/parameters/projectDxidParam"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                billTo:
+                  $ref: "#/components/schemas/OrgDxidString"
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProjectIdResponse"
+  /{projectDxid}/destroy:
+    post:
+      tags:
+        - project
+      summary: Project destroy
+      description: |
+        - https://documentation.dnanexus.com/developer/api/data-containers/projects#api-method-project-xxxx-destroy
+      operationId: projectDestroy
+      parameters:
+        - $ref: "#/components/parameters/projectDxidParam"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                terminateJobs:
+                  type: boolean
+                  default: false
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProjectIdResponse"
+  /{objectDxid}/clone:
+    post:
+      tags:
+        - class
+      summary: Project destroy
+      description: |
+        - https://documentation.dnanexus.com/developer/api/data-containers/cloning#api-method-class-xxxx-clone
+      operationId: classClone
+      parameters:
+        - $ref: "#/components/parameters/objectDxidParam"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PFDAObjectClone"
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ObjectCloneResponse"
+  /{objectDxid}/move:
+    post:
+      tags:
+        - class
+      summary: Class move
+      description: |
+        - https://documentation.dnanexus.com/developer/api/data-containers/folders-and-deletion#api-method-class-xxxx-move
+      operationId: classMove
+      parameters:
+        - $ref: "#/components/parameters/objectDxidParam"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                objects:
+                  $ref: "#/components/schemas/StringArray"
+                folders:
+                  $ref: "#/components/schemas/StringArray"
+                destination:
+                  type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ObjectIdResponse"
+  /{objectDxid}/removeObjects:
+    post:
+      tags:
+        - class
+      summary: Class remove objects
+      description: |
+        - https://documentation.dnanexus.com/developer/api/data-containers/folders-and-deletion#api-method-class-xxxx-removeobjects
+      operationId: classRemoveObjects
+      parameters:
+        - $ref: "#/components/parameters/objectDxidParam"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                objects:
+                  type: array
+                  items:
+                    $ref: "#/components/schemas/ObjectDxidString"
+                force:
+                  type: boolean
+                  default: false
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ObjectIdResponse"
+  /system/findDataObjects:
+    post:
+      tags:
+        - system
+      summary: System find data objects
+      description: |
+        - https://documentation.dnanexus.com/developer/api/search#api-method-system-finddataobjects
+      operationId: systemFindDataObjects
+      requestBody:
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: "#/components/schemas/PFDAFindFile"
+                - $ref: "#/components/schemas/PFDAFindWorkflow"
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/PFDAFindFileResponse"
+                  - $ref: "#/components/schemas/ObjectFindResponse"
+  /system/findOrgs:
+    post:
+      tags:
+        - system
+      summary: System find orgs
+      description: |
+        - https://documentation.dnanexus.com/developer/api/search#api-method-system-findorgs
+      operationId: systemFindOrgs
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FindOrgs"
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ObjectFindResponse"
+  /system/findJobs:
+    post:
+      tags:
+        - system
+      summary: System find jobs
+      description: |
+        - https://documentation.dnanexus.com/developer/api/search#api-method-system-findjobs
+      operationId: systemFindJobs
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PFDAFindJobs"
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ObjectFindResponse"
+  /system/findApps:
+    post:
+      tags:
+        - system
+      summary: System find apps
+      description: |
+        - https://documentation.dnanexus.com/developer/api/search#api-method-system-findapps
+      operationId: systemFindApps
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PFDAFindApps"
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ObjectFindResponse"
+  /system/findProjects:
+    post:
+      tags:
+        - system
+      summary: System find projects
+      description: |
+        - https://documentation.dnanexus.com/developer/api/search#api-method-system-findprojects
+      operationId: systemFindProjects
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                id:
+                  type: array
+                  items:
+                    $ref: "#/components/schemas/ProjectDxidString"
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ObjectFindResponse"
+  /system/describeDataObjects:
+    post:
+      tags:
+        - system
+      summary: System describe data objects
+      description: |
+        - https://documentation.dnanexus.com/developer/api/system-methods#api-method-system-describedataobjects
+      operationId: systemDescribeDataObjects
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PFDADescribeDataObjects"
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DescribeDataObjectsResponse"
+  /file/new:
+    post:
+      tags:
+        - file
+      summary: File New
+      description: |
+        - https://documentation.dnanexus.com/developer/api/introduction-to-data-object-classes/files#api-method-file-new
+      operationId: fileNew
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PFDAFileNew"
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FileIdResponse"
+  /{fileDxid}/upload:
+    post:
+      tags:
+        - file
+      summary: File Upload
+      description: |
+        - https://documentation.dnanexus.com/developer/api/introduction-to-data-object-classes/files#api-method-file-xxxx-upload
+      operationId: fileUpload
+      parameters:
+        - $ref: "#/components/parameters/fileDxidParam"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FileUpload"
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  url:
+                    type: string
+                  headers:
+                    type: object
+                  expires:
+                    $ref: "#/components/schemas/Timestamp"
+  /{fileDxid}/describe:
+    post:
+      tags:
+        - file
+      summary: File Desribe
+      description: |
+        - https://documentation.dnanexus.com/developer/api/introduction-to-data-object-classes/files#api-method-file-xxxx-describe
+      operationId: fileDescribe
+      parameters:
+        - $ref: "#/components/parameters/fileDxidParam"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              allOf:
+                - type: object
+                  properties:
+                    projectDxid:
+                      $ref: "#/components/schemas/ProjectDxidString"
+                - $ref: "#/components/schemas/ObjectDescribeFields"
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FileDescribeResponse"
+  /{fileDxid}/close:
+    post:
+      tags:
+        - file
+      summary: File Close
+      description: |
+        - https://documentation.dnanexus.com/developer/api/introduction-to-data-object-classes/files#api-method-file-xxxx-close
+      operationId: fileClose
+      parameters:
+        - $ref: "#/components/parameters/fileDxidParam"
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    $ref: "#/components/schemas/FileDxidString"
+                  detail:
+                    type: string
+  /{fileDxid}/download:
+    post:
+      tags:
+        - file
+      summary: File Download
+      description: |
+        - https://documentation.dnanexus.com/developer/api/introduction-to-data-object-classes/files#api-method-file-xxxx-download
+      operationId: fileDownload
+      parameters:
+        - $ref: "#/components/parameters/fileDxidParam"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PFDAFileDownload"
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  url:
+                    type: string
+                  headers:
+                    type: object
+                    additionalProperties:
+                      type: string
+  /applet/new:
+    post:
+      tags:
+        - applet
+      summary: Applet New
+      description: |
+        - https://documentation.dnanexus.com/developer/api/running-analyses/applets-and-entry-points#api-method-applet-new
+      operationId: appletNew
+      requestBody:
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: "#/components/schemas/PFDAApletNew"
+                - $ref: "#/components/schemas/AppletNew"
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AppletIdResponse"
+  /{appletDxid}/describe:
+    post:
+      tags:
+        - applet
+      summary: Applet Describe
+      description: |
+        - https://documentation.dnanexus.com/developer/api/running-analyses/applets-and-entry-points#api-method-applet-xxxx-describe
+      operationId: appletDescribe
+      parameters:
+        - $ref: "#/components/parameters/appletDxidParam"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              allOf:
+                - type: object
+                  properties:
+                    project:
+                      $ref: "#/components/schemas/ProjectDxidString"
+                - $ref: "#/components/schemas/ObjectDescribeFields"
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AppletDescribeResponse"
+  /app/new:
+    post:
+      tags:
+        - app
+      summary: App New
+      description: |
+        - https://documentation.dnanexus.com/developer/api/running-analyses/apps#api-method-app-new
+      operationId: appNew
+      requestBody:
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: "#/components/schemas/PFDAAppNew"
+                - $ref: "#/components/schemas/AppNew"
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AppIdResponse"
+  /{appDxid}/run:
+    post:
+      tags:
+        - app
+      summary: App Run
+      description: |
+        - https://documentation.dnanexus.com/developer/api/running-analyses/apps#api-method-app-xxxx-yyyy-run
+      operationId: appRun
+      parameters:
+        - $ref: "#/components/parameters/appDxidParam"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PFDAAppRun"
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AppIdResponse"
+  /{appDxid}/addAuthorizedUsers:
+    post:
+      tags:
+        - app
+      summary: App Add Authorized Users
+      description: |
+        - https://documentation.dnanexus.com/developer/api/running-analyses/apps#api-method-app-xxxx-yyyy-addauthorizedusers
+      operationId: appAddAuthorizedUsers
+      parameters:
+        - $ref: "#/components/parameters/appDxidParam"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                authorizedUsers:
+                  type: array
+                  items:
+                    oneOf:
+                      - $ref: "#/components/schemas/UserDxidString"
+                      - $ref: "#/components/schemas/OrgDxidString"
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AppNameResponse"
+  /{appDxid}/addDevelopers:
+    post:
+      tags:
+        - app
+      summary: App Add Deverlopers
+      description: |
+        - https://documentation.dnanexus.com/developer/api/running-analyses/apps#api-method-app-xxxx-yyyy-adddevelopers
+      operationId: appAddDevelopers
+      parameters:
+        - $ref: "#/components/parameters/appDxidParam"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                developers:
+                  type: array
+                  items:
+                    oneOf:
+                      - $ref: "#/components/schemas/UserDxidString"
+                      - $ref: "#/components/schemas/OrgDxidString"
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AppNameResponse"
+  /{appDxid}/describe:
+    post:
+      tags:
+        - app
+      summary: App Describe
+      description: |
+        - https://documentation.dnanexus.com/developer/api/running-analyses/apps#api-method-app-xxxx-yyyy-describe
+      operationId: appDescribe
+      parameters:
+        - $ref: "#/components/parameters/appDxidParam"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                fields:
+                  type: object
+                  additionalProperties:
+                    type: boolean
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AppDescribeResponse"
+  /{appDxid}/publish:
+    post:
+      tags:
+        - app
+      summary: App Publish
+      description: |
+        - https://documentation.dnanexus.com/developer/api/running-analyses/apps#api-method-app-xxxx-yyyy-publish
+      operationId: appPublish
+      parameters:
+        - $ref: "#/components/parameters/appDxidParam"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                makeDefault:
+                  type: boolean
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AppIdResponse"
+  /{jobDxid}/terminate:
+    post:
+      tags:
+        - job
+      summary: Job Terminate
+      description: |
+        - https://documentation.dnanexus.com/developer/api/running-analyses/applets-and-entry-points#api-method-job-xxxx-terminate
+      operationId: jobTerminate
+      parameters:
+        - $ref: "#/components/parameters/jobDxidParam"
+      responses:
+        "200":
+          description: sucessful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JobIdResponse"
+  /{jobDxid}/describe:
+    post:
+      tags:
+        - job
+      summary: Job Describe
+      description: |
+        - https://documentation.dnanexus.com/developer/api/running-analyses/applets-and-entry-points#api-method-job-xxxx-describe
+      operationId: jobDescribe
+      parameters:
+        - $ref: "#/components/parameters/jobDxidParam"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: "#/components/schemas/ObjectDescribeFields"
+                - type: object
+                  properties:
+                    try:
+                      type: integer
+                      minimum: 0
+      responses:
+        "200":
+          description: sucessful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JobDescribeResponse"
+  /{jobDxid}/getLog/websocket:
+    get:
+      tags:
+        - job
+      summary: Fetching Job log
+      description: |
+        **Note: This is a websocket endpoint and is not supported in OpenAPI.**
+      operationId: jobLog
+      parameters:
+        - name: jobDxid
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/JobDxidString"
+      servers:
+        - url: wss://stagingapi.dnanexus.com
+          description: Staging platform API server
+      responses:
+        "101":
+          description: WebSocket connection established (Switching Protocols)
+      x-message:
+        - name: SendMessage
+          summary: Send a message over WebSocket
+          payload:
+            access_token: string
+            token_type: "Bearer"
+  /workflow/new:
+    post:
+      tags:
+        - workflow
+      summary: Workflow New
+      description: Workflow New
+      operationId: workflowNew
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WorkflowNew"
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    $ref: "#/components/schemas/WorkflowDxidString"
+                  editVersion:
+                    type: integer
+  /{workflowDxid}/run:
+    post:
+      tags:
+        - workflow
+      summary: Workflow Run
+      description: |
+        - https://documentation.dnanexus.com/developer/api/running-analyses/workflows-and-analyses#api-method-workflow-xxxx-run
+      operationId: workflowRun
+      parameters:
+        - $ref: "#/components/parameters/workflowDxidParam"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WorkflowRun"
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    $ref: "#/components/schemas/WorkflowDxidString"
+                  stages:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/JobDxidString"
+  /{workflowDxid}/describe:
+    post:
+      tags:
+        - workflow
+      summary: Workflow Describe
+      description: |
+        - https://documentation.dnanexus.com/developer/api/running-analyses/workflows-and-analyses#api-method-workflow-xxxx-describe
+      operationId: workflowDescribe
+      parameters:
+        - $ref: "#/components/parameters/workflowDxidParam"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: "#/components/schemas/ObjectDescribeFields"
+                - type: object
+                  properties:
+                    project:
+                      $ref: "#/components/schemas/ProjectDxidString"
+                    includeHidden:
+                      type: boolean
+                      default: false
+                    getRerunInfo:
+                      type: boolean
+                      default: false
+                    rerunStages:
+                      $ref: "#/components/schemas/StringArray"
+                    rerunProject:
+                      $ref: "#/components/schemas/ProjectDxidString"
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkflowDescribeResponse"
+  /dbcluster/new:
+    post:
+      tags:
+        - dbcluster
+      summary: DbCluster New
+      description: |
+        - https://documentation.dnanexus.com/developer/api/introduction-to-data-object-classes/dbclusters#api-method-dbcluster-new
+      operationId: dbclusterNew
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                project:
+                  $ref: "#/components/schemas/ProjectDxidString"
+                engine:
+                  type: string
+                engineVersion:
+                  type: string
+                dxInstanceClass:
+                  type: string
+                adminPassword:
+                  type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DbClusterIdResponse"
+  /{dbclusterDxid}/describe:
+    post:
+      tags:
+        - dbcluster
+      summary: DbCluster Describe
+      description: |
+        - https://documentation.dnanexus.com/developer/api/introduction-to-data-object-classes/dbclusters#api-method-dbcluster-xxxx-describe
+      operationId: dbclusterDescribe
+      parameters:
+        - $ref: "#/components/parameters/dbclusterDxidParam"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              allOf:
+                - type: object
+                  properties:
+                    project:
+                      $ref: "#/components/schemas/ProjectDxidString"
+                - $ref: "#/components/schemas/ObjectDescribeFields"
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DbClusterDescribeResponse"
+  /{dbclusterDxid}/start:
+    post:
+      tags:
+        - dbcluster
+      summary: DbCluster Start
+      description: |
+        - https://documentation.dnanexus.com/developer/api/introduction-to-data-object-classes/dbclusters#api-method-dbcluster-xxxx-start
+      operationId: dbclusterStart
+      parameters:
+        - $ref: "#/components/parameters/dbclusterDxidParam"
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DbClusterIdResponse"
+  /{dbclusterDxid}/stop:
+    post:
+      tags:
+        - dbcluster
+      summary: DbCluster Stop
+      description: |
+        - https://documentation.dnanexus.com/developer/api/introduction-to-data-object-classes/dbclusters#api-method-dbcluster-xxxx-stop
+      operationId: dbclusterStop
+      parameters:
+        - $ref: "#/components/parameters/dbclusterDxidParam"
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DbClusterIdResponse"
+  /{dbclusterDxid}/terminate:
+    post:
+      tags:
+        - dbcluster
+      summary: DbCluster Terminate
+      description: |
+        - https://documentation.dnanexus.com/developer/api/introduction-to-data-object-classes/dbclusters#api-method-dbcluster-xxxx-terminate
+      operationId: dbclusterTerminate
+      parameters:
+        - $ref: "#/components/parameters/dbclusterDxidParam"
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DbClusterIdResponse"
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+  schemas:
+    StringArray:
+      type: array
+      items:
+        type: string
+    IntegerArray:
+      type: array
+      items:
+        type: integer
+    Timestamp:
+      type: integer
+      minimum: 1230768000000
+    Float:
+      type: number
+      format: float
+    MappingOrArray:
+      oneOf:
+        - type: object
+        - type: array
+    BooleanOrMapping:
+      oneOf:
+        - type: boolean
+        - type: object
+    OrgLevel:
+      type: string
+      enum: ["ADMIN", "MEMBER"]
+    ProjectAccess:
+      type: string
+      enum: ["VIEW", "UPLOAD", "CONTRIBUTE", "ADMINISTER", "NONE"]
+    ProjectPermission:
+      type: string
+      enum: ["VIEW", "UPLOAD", "CONTRIBUTE", "ADMINISTER"]
+    AppState:
+      type: string
+      enum: ["open", "closed"]
+    UserDxidString:
+      type: string
+      pattern: "^user-[a-zA-Z0-9._]"
+      example: "user-harry.potter"
+    OrgDxidString:
+      type: string
+      pattern: "^org-pfda..[a-zA-Z0-9._]"
+      example: "org-pfda..harry.potter"
+    OrgDxidHandle:
+      type: string
+      pattern: "^pfda..[a-zA-Z0-9._]"
+      example: "pfda..harry.potter"
+    ProjectDxidString:
+      type: string
+      pattern: "^project-[0123456789BFGJKPQVXYZbfgjkpqvxyz]{24}"
+    FileDxidString:
+      type: string
+      pattern: "^file-[0123456789BFGJKPQVXYZbfgjkpqvxyz]{24}"
+    AppletDxidString:
+      type: string
+      pattern: "^applet-[0123456789BFGJKPQVXYZbfgjkpqvxyz]{24}"
+    AppDxidString:
+      type: string
+      pattern: "^app-[0123456789BFGJKPQVXYZbfgjkpqvxyz]{24}"
+    JobDxidString:
+      type: string
+      pattern: "^job-[0123456789BFGJKPQVXYZbfgjkpqvxyz]{24}"
+    WorkflowDxidString:
+      type: string
+      pattern: "^workflow-[0123456789BFGJKPQVXYZbfgjkpqvxyz]{24}"
+    DbClusterDxidString:
+      type: string
+      pattern: "^dbcluster-[0123456789BFGJKPQVXYZbfgjkpqvxyz]{24}"
+    ContainerDxidString:
+      type: string
+      pattern: "^container-[0123456789BFGJKPQVXYZbfgjkpqvxyz]{24}"
+    StageDxidString:
+      type: string
+      pattern: "^stage-[0123456789BFGJKPQVXYZbfgjkpqvxyz]{24}"
+    ObjectDxidString:
+      oneOf:
+        - $ref: "#/components/schemas/ProjectDxidString"
+        - $ref: "#/components/schemas/FileDxidString"
+        - $ref: "#/components/schemas/AppletDxidString"
+        - $ref: "#/components/schemas/AppDxidString"
+        - $ref: "#/components/schemas/JobDxidString"
+        - $ref: "#/components/schemas/WorkflowDxidString"
+        - $ref: "#/components/schemas/DbClusterDxidString"
+    CreatedBy:
+      oneOf:
+        - type: object
+          properties:
+            user:
+              $ref: "#/components/schemas/UserDxidString"
+        - type: object
+          properties:
+            job:
+              $ref: "#/components/schemas/JobDxidString"
+        - type: object
+          properties:
+            executable:
+              $ref: "#/components/schemas/AppDxidString"
+    ObjectIdResponse:
+      type: object
+      properties:
+        id:
+          $ref: "#/components/schemas/ObjectDxidString"
+    OrgIdResponse:
+      type: object
+      properties:
+        id:
+          $ref: "#/components/schemas/OrgDxidString"
+    ObjectDescribeFields:
+      type: object
+      properties:
+        defaultFields:
+          description: default false if fields is supplied, true otherwise
+          type: boolean
+        fields:
+          type: object
+          additionalProperties:
+            type: boolean
+    PFDAOrgNew:
+      type: object
+      properties:
+        handle:
+          type: string
+        name:
+          type: string
+    PFDAOrgInvite:
+      type: object
+      properties:
+        invitee:
+          $ref: "#/components/schemas/UserDxidString"
+        level:
+          $ref: "#/components/schemas/OrgLevel"
+        suppressEmailNotification:
+          type: boolean
+    PFDAOrgFindMembers:
+      type: object
+      properties:
+        id:
+          type: array
+          items:
+            $ref: "#/components/schemas/UserDxidString"
+    UserDescribeResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        class:
+          type: string
+        first:
+          type: string
+        middle:
+          type: string
+        last:
+          type: string
+        handle:
+          type: string
+        email:
+          type: string
+        billTo:
+          type: string
+    OrgDescribeResponse:
+      type: object
+      properties:
+        id:
+          $ref: "#/components/schemas/OrgDxidString"
+        class:
+          type: string
+          default: "org"
+        handle:
+          $ref: "#/components/schemas/OrgDxidHandle"
+        name:
+          type: string
+        admin:
+          $ref: "#/components/schemas/StringArray"
+        level:
+          type: string
+        allowBillableActivities:
+          type: boolean
+        projectAccess:
+          $ref: "#/components/schemas/ProjectAccess"
+        appAccess:
+          type: boolean
+        policies:
+          type: object
+        pendingBillingInformation:
+          type: object
+        estSpendingLimitLeft:
+          type: number
+        phiFeaturesEnabled:
+          type: boolean
+        defaultRegion:
+          type: string
+        permittedRegions:
+          $ref: "#/components/schemas/StringArray"
+        billingInformation:
+          type: object
+        computeCharges:
+          type: number
+        computeChargesReflectedUntil:
+          $ref: "#/components/schemas/Timestamp"
+        computeChargesComputedAt:
+          $ref: "#/components/schemas/Timestamp"
+        storageCharges:
+          type: number
+        storageChargesReflectedUntil:
+          $ref: "#/components/schemas/Timestamp"
+        storageChargesComputedAt:
+          $ref: "#/components/schemas/Timestamp"
+        dataEgressCharges:
+          type: number
+        dataEgressChargesReflectedUntil:
+          $ref: "#/components/schemas/Timestamp"
+        dataEgressChargesComputedAt:
+          $ref: "#/components/schemas/Timestamp"
+        dearchivalCharges:
+          type: number
+        dearchivalChargesReflectedUntil:
+          $ref: "#/components/schemas/Timestamp"
+        dearchivalChargesComputedAt:
+          $ref: "#/components/schemas/Timestamp"
+        dbclusterCharges:
+          type: number
+        dbclusterChargesReflectedUntil:
+          $ref: "#/components/schemas/Timestamp"
+        dbclusterChargesComputedAt:
+          $ref: "#/components/schemas/Timestamp"
+        pricingModelsByRegion:
+          type: object
+        dbclusterStorageRatePerGBMonth:
+          type: number
+        dbclusterBackupPerGBMonth:
+          type: number
+        dbclusterIORequestsPer1M:
+          type: number
+        dbclusterInstanceRatesPerHour:
+          type: object
+        dbclusterInstanceCpuBurstRatesPerHour:
+          type: object
+        pendingTransfers:
+          $ref: "#/components/schemas/StringArray"
+        userCreationFeaturesEnabled:
+          type: boolean
+        jobLogsForwarding:
+          type: object
+    OrgMember:
+      type: object
+      properties:
+        id:
+          type: string
+        level:
+          $ref: "#/components/schemas/OrgLevel"
+        allowBillableActivities:
+          type: boolean
+        projectAccess:
+          $ref: "#/components/schemas/ProjectAccess"
+        appAccess:
+          type: boolean
+    PFDAProjectNew:
+      type: object
+      properties:
+        name:
+          type: string
+        billTo:
+          $ref: "#/components/schemas/OrgDxidString"
+    ProjectNew:
+      type: object
+      properties:
+        name:
+          type: string
+        summary:
+          type: string
+        description:
+          type: string
+        protected:
+          type: boolean
+        restricted:
+          type: boolean
+        downloadRestricted:
+          type: boolean
+        externalUploadRestricted:
+          type: boolean
+          default: false
+        containsPHI:
+          type: boolean
+        egressBillTo:
+          type: string
+          enum: ["projectBillTo", "downloaderBillTo"]
+        databaseUIViewOnly:
+          type: boolean
+        version:
+          type: integer
+        billTo:
+          $ref: "#/components/schemas/OrgDxidString"
+        allowedExecutables:
+          $ref: "#/components/schemas/StringArray"
+        monthlyComputeLimit:
+          type: integer
+        monthlyEgressBytesLimit:
+          type: integer
+        monthlyStorageLimit:
+          $ref: "#/components/schemas/Float"
+    ProjectIdResponse:
+      type: object
+      properties:
+        id:
+          $ref: "#/components/schemas/ProjectDxidString"
+    ProjectDescribeResponse:
+      type: object
+      properties:
+        id:
+          $ref: "#/components/schemas/ProjectDxidString"
+        class:
+          type: string
+          default: project
+        name:
+          type: string
+        region:
+          type: string
+        summary:
+          type: string
+        desription:
+          type: string
+        version:
+          type: integer
+        tags:
+          $ref: "#/components/schemas/StringArray"
+        billTo:
+          type: string
+        protected:
+          type: boolean
+        restricted:
+          type: boolean
+        downloadRestricted:
+          type: boolean
+        externalUploadRestricted:
+          type: boolean
+        containsPHI:
+          type: boolean
+        databaseUIViewOnly:
+          type: boolean
+        created:
+          $ref: "#/components/schemas/Timestamp"
+        createdBy:
+          $ref: "#/components/schemas/CreatedBy"
+        modified:
+          $ref: "#/components/schemas/Timestamp"
+        level:
+          type: string
+        dataUsage:
+          type: number
+        defaultInstanceType:
+          type: string
+        sponsoredDataUsage:
+          type: number
+        sponsoredUntil:
+          $ref: "#/components/schemas/Timestamp"
+        pendingTransfer:
+          type: string
+        totalSponsoredEgressBytes:
+          type: integer
+        consumedSponsoredEgressBytes:
+          type: integer
+        allowedExecutables:
+          $ref: "#/components/schemas/StringArray"
+        atSpendingLimit:
+          type: boolean
+        storageCost:
+          type: integer
+        folders:
+          $ref: "#/components/schemas/StringArray"
+        objects:
+          type: integer
+        permissions:
+          type: object
+        egressBillTo:
+          type: string
+        appCaches:
+          type: object
+        properties:
+          type: object
+          additionalProperties:
+            type: string
+        fileUploadParameters:
+          type: object
+        availableInstanceTypes:
+          type: object
+        monthlyComputeLimit:
+          type: integer
+        monthlyEgressBytesLimit:
+          type: integer
+        currentMonthComputeAvailableBudget:
+          $ref: "#/components/schemas/Float"
+        currentMonthEgressBytesAvailableBudget:
+          $ref: "#/components/schemas/Float"
+        currentMonthComputeUsage:
+          $ref: "#/components/schemas/Float"
+        currentMonthEgressBytesUsage:
+          $ref: "#/components/schemas/Float"
+        monthlyStorageLimit:
+          $ref: "#/components/schemas/Float"
+        currentMonthStorageAvailableBudget:
+          $ref: "#/components/schemas/Float"
+        currentMonthExpectedStorageUsage:
+          $ref: "#/components/schemas/Float"
+    PFDAObjectClone:
+      type: object
+      properties:
+        project:
+          $ref: "#/components/schemas/ProjectDxidString"
+        objects:
+          type: array
+          items:
+            $ref: "#/components/schemas/FileDxidString"
+    ObjectCloneResponse:
+      type: object
+      properties:
+        id:
+          $ref: "#/components/schemas/ObjectDxidString"
+        project:
+          $ref: "#/components/schemas/ProjectDxidString"
+        exists:
+          $ref: "#/components/schemas/StringArray"
+    PFDAFindFile:
+      type: object
+      properties:
+        class:
+          type: string
+          default: "file"
+        limit:
+          type: integer
+        id:
+          $ref: "#/components/schemas/FileDxidString"
+        scope:
+          type: object
+          properties:
+            project:
+              $ref: "#/components/schemas/ProjectDxidString"
+            recurse:
+              type: boolean
+        describe:
+          type: object
+          properties:
+            name:
+              type: boolean
+              default: true
+            created:
+              type: boolean
+              default: true
+            modified:
+              type: boolean
+              default: true
+            size:
+              type: boolean
+              default: true
+            state:
+              type: boolean
+              default: true
+        starting:
+          type: object
+    PFDAFindFileResponse:
+      type: object
+      properties:
+        id:
+          $ref: "#/components/schemas/FileDxidString"
+        project:
+          $ref: "#/components/schemas/ProjectDxidString"
+        describe:
+          type: object
+          properties:
+            name:
+              type: string
+            size:
+              type: number
+            created:
+              type: number
+            modified:
+              type: number
+            state:
+              type: string
+              enum: ["open", "closed", "closing", "abandoned"]
+    PFDAFindWorkflow:
+      type: object
+      properties:
+        scope:
+          type: object
+          properties:
+            project:
+              $ref: "#/components/schemas/ProjectDxidString"
+        class:
+          type: string
+          default: "workflow"
+        name:
+          type: string
+    ObjectFindResponse:
+      type: object
+      properties:
+        results:
+          type: array
+          items:
+            type: object
+            properties:
+              project:
+                $ref: "#/components/schemas/ProjectDxidString"
+              id:
+                $ref: "#/components/schemas/ObjectDxidString"
+              describe:
+                type: object
+        next:
+          type: object
+    FindOrgs:
+      type: object
+      properties:
+        id:
+          $ref: "#/components/schemas/StringArray"
+        level:
+          $ref: "#/components/schemas/OrgLevel"
+        allowBillableActivities:
+          type: boolean
+        describe:
+          oneOf:
+            - type: boolean
+            - type: object
+        starting:
+          type: object
+        limit:
+          type: integer
+          default: 1000
+          minimum: 1
+          maximum: 1000
+    PFDAFindJobs:
+      type: object
+      properties:
+        id:
+          $ref: "#/components/schemas/JobDxidString"
+        includeSubjobs:
+          type: boolean
+          default: false
+        project:
+          $ref: "#/components/schemas/ProjectDxidString"
+        describe:
+          type: boolean
+          default: true
+        parentJob:
+          type: string
+          default: null
+        parentAnalysis:
+          type: string
+          default: null
+    PFDAFindApps:
+      type: object
+      properties:
+        name:
+          type: string
+    PFDADescribeDataObjects:
+      type: object
+      properties:
+        objects:
+          type: string
+          items:
+            $ref: "#/components/schemas/ObjectDxidString"
+    DescribeDataObjectsResponse:
+      type: object
+      properties:
+        results:
+          type: array
+          items:
+            type: object
+            properties:
+              describe:
+                type: object
+              error:
+                type: object
+              statusCode:
+                type: integer
+    FileIdResponse:
+      type: object
+      properties:
+        id:
+          $ref: "#/components/schemas/FileDxidString"
+    FileDescribeResponse:
+      type: object
+      properties:
+        id:
+          $ref: "#/components/schemas/FileDxidString"
+        project:
+          $ref: "#/components/schemas/ProjectDxidString"
+        class:
+          type: string
+          default: "file"
+        types:
+          $ref: "#/components/schemas/StringArray"
+        created:
+          $ref: "#/components/schemas/Timestamp"
+        state:
+          type: string
+          enum: ["open", "closing", "closed"]
+        hidden:
+          type: boolean
+        links:
+          $ref: "#/components/schemas/StringArray"
+        name:
+          type: string
+        folder:
+          type: string
+        sponsored:
+          type: boolean
+        tags:
+          $ref: "#/components/schemas/StringArray"
+        modified:
+          $ref: "#/components/schemas/Timestamp"
+        media:
+          type: string
+        archivalState:
+          type: string
+          enum: ["live", "archived", "archival", "unarchiving"]
+        createdBy:
+          $ref: "#/components/schemas/CreatedBy"
+        drive:
+          type: string
+        symlinkPath:
+          type: object
+          properties:
+            container:
+              type: string
+            object:
+              type: string
+        md5:
+          type: string
+        parts:
+          type: object
+          properties:
+            state:
+              type: string
+              enum: ["pending", "complete"]
+            size:
+              type: integer
+            md5:
+              type: string
+        size:
+          type: integer
+        sponsoredUntil:
+          $ref: "#/components/schemas/Timestamp"
+        properties:
+          type: object
+          additionalProperties:
+            type: string
+        details:
+          $ref: "#/components/schemas/MappingOrArray"
+        watermarkId:
+          type: string
+        resolvedPolicies:
+          type: object
+          properties:
+            isExternalDownloadable:
+              type: boolean
+    PFDAFileNew:
+      type: object
+      properties:
+        name:
+          type: string
+        project:
+          $ref: "#/components/schemas/ProjectDxidString"
+        description:
+          type: string
+    FileUpload:
+      type: object
+      properties:
+        size:
+          type: integer
+        md5:
+          type: string
+        index:
+          type: integer
+    PFDAFileDownload:
+      type: object
+      properties:
+        filename:
+          type: string
+        project:
+          $ref: "#/components/schemas/ProjectDxidString"
+        duration:
+          type: integer
+        preauthenticated:
+          type: boolean
+    AppInputSpec:
+      type: object
+      properties:
+        name:
+          type: string
+        class:
+          type: string
+        optional:
+          type: boolean
+        default:
+          type: object
+        type:
+          oneOf:
+            - type: string
+            - type: object
+        patterns:
+          $ref: "#/components/schemas/MappingOrArray"
+        suggestions:
+          $ref: "#/components/schemas/StringArray"
+        choices:
+          $ref: "#/components/schemas/StringArray"
+        label:
+          type: string
+        group:
+          type: string
+        help:
+          type: string
+    AppOutputSpec:
+      type: object
+      properties:
+        name:
+          type: string
+        class:
+          type: string
+        optional:
+          type: boolean
+        type:
+          oneOf:
+            - type: string
+            - type: object
+        patterns:
+          $ref: "#/components/schemas/MappingOrArray"
+        label:
+          type: string
+        group:
+          type: string
+        help:
+          type: string
+    HttpsApp:
+      type: object
+      properties:
+        shared_access:
+          type: string
+        ports:
+          $ref: "#/components/schemas/IntegerArray"
+        dns:
+          type: object
+          properties:
+            hostname:
+              type: string
+    AppletIdResponse:
+      type: object
+      properties:
+        id:
+          $ref: "#/components/schemas/AppletDxidString"
+    AppIdResponse:
+      type: object
+      properties:
+        id:
+          $ref: "#/components/schemas/AppDxidString"
+    AppNameResponse:
+      type: object
+      properties:
+        name:
+          type: string
+    AppRunSpec:
+      type: object
+      properties:
+        interpreter:
+          type: string
+          default: "bash"
+        bundledDependsByRegion:
+          type: object
+        systemRequirements:
+          type: object
+        executionPolicy:
+          type: object
+        headJobOnDemand:
+          type: boolean
+        execDepends:
+          type: array
+          items:
+            type: string
+        distribution:
+          type: string
+          default: "Ubuntu"
+        release:
+          type: string
+          default: "20.04"
+        version:
+          type: string
+          default: "9"
+        systemRequirementsByRegion:
+          type: object
+    PFDAApletNew:
+      type: object
+      properties:
+        project:
+          $ref: "#/components/schemas/ProjectDxidString"
+        name:
+          type: string
+        title:
+          type: string
+        inputSpec:
+          type: array
+          items:
+            $ref: "#/components/schemas/AppInputSpec"
+        outputSpec:
+          type: array
+          items:
+            $ref: "#/components/schemas/AppOutputSpec"
+        runSpec:
+          $ref: "#/components/schemas/AppRunSpec"
+        dxapi:
+          type: string
+        access:
+          type: object
+          properties:
+            network:
+              type: array
+              default: ["*"]
+              items:
+                type: string
+    AppletNew:
+      type: object
+      properties:
+        summary:
+          type: string
+        description:
+          type: string
+        developerNotes:
+          type: string
+        tags:
+          $ref: "#/components/schemas/StringArray"
+        type:
+          $ref: "#/components/schemas/StringArray"
+        hidden:
+          type: boolean
+        properties:
+          type: object
+          additionalProperties:
+            type: string
+        details:
+          $ref: "#/components/schemas/MappingOrArray"
+        folder:
+          type: string
+        parents:
+          type: boolean
+          default: false
+        ignoreReuse:
+          type: boolean
+        dxapi:
+          type: string
+        httpsApp:
+          $ref: "#/components/schemas/HttpsApp"
+        nonce:
+          type: string
+        treeTurnaroundTimeThreshold:
+          type: integer
+    AppletDescribeResponse:
+      allOf:
+        - type: object
+          properties:
+            id:
+              $ref: "#/components/schemas/AppletDxidString"
+            class:
+              type: string
+              default: "applet"
+            created:
+              $ref: "#/components/schemas/Timestamp"
+            state:
+              $ref: "#/components/schemas/AppState"
+            links:
+              $ref: "#/components/schemas/StringArray"
+            sponsored:
+              type: boolean
+            createdBy:
+              $ref: "#/components/schemas/CreatedBy"
+        - $ref: "#/components/schemas/AppletNew"
+    PFDAAppNew:
+      type: object
+      properties:
+        applet:
+          $ref: "#/components/schemas/AppletDxidString"
+        name:
+          type: string
+        title:
+          type: string
+        summary:
+          type: string
+          default: " "
+        description:
+          type: string
+        version:
+          type: string
+        resources:
+          type: array
+          items:
+            $ref: "#/components/schemas/FileDxidString"
+        details:
+          type: object
+          properties:
+            ordered_assets:
+              type: array
+              items:
+                $ref: "#/components/schemas/FileDxidString"
+        openSource:
+          type: boolean
+          default: false
+        billTo:
+          type: string
+        access:
+          type: object
+          properties:
+            network:
+              type: array
+              default: ["*"]
+              items:
+                type: string
+    AppNew:
+      type: object
+      properties:
+        regionalOptions:
+          type: object
+        initializeFrom:
+          type: string
+        developerNotes:
+          type: string
+        ignoreReuse:
+          type: boolean
+        nonce:
+          type: string
+        treeTurnaroundTimeThreshold:
+          type: integer
+    PFDAAppRun:
+      type: object
+      properties:
+        project:
+          $ref: "#/components/schemas/ProjectDxidString"
+        name:
+          type: string
+        costLimit:
+          type: integer
+        input:
+          type: object
+    AppDescribeResponse:
+      allOf:
+        - $ref: "#/components/schemas/PFDAAppNew"
+        - type: object
+          properties:
+            id:
+              $ref: "#/components/schemas/AppDxidString"
+            class:
+              type: string
+              default: "app"
+            version:
+              type: string
+            aliases:
+              $ref: "#/components/schemas/StringArray"
+            createdBy:
+              $ref: "#/components/schemas/UserDxidString"
+            created:
+              $ref: "#/components/schemas/Timestamp"
+            modified:
+              $ref: "#/components/schemas/Timestamp"
+            installed:
+              type: boolean
+            ignoreReuse:
+              type: boolean
+            deleted:
+              type: boolean
+            installs:
+              type: integer
+              minimum: 0
+            isDeveloperFor:
+              type: boolean
+            authorizedUsers:
+              $ref: "#/components/schemas/StringArray"
+            regionalOptions:
+              type: object
+            httpsApp:
+              $ref: "#/components/schemas/HttpsApp"
+            published:
+              $ref: "#/components/schemas/Timestamp"
+            categories:
+              $ref: "#/components/schemas/StringArray"
+            lineItemPerTest:
+              type: boolean
+            inputSpec:
+              type: array
+              items:
+                type: object
+            outputSpec:
+              type: array
+              items:
+                type: object
+            dxapi:
+              type: string
+            runSpec:
+              $ref: "#/components/schemas/AppRunSpec"
+            treeTurnaroundTimeThreshold:
+              type: integer
+            region:
+              type: string
+            developerNotes:
+              type: string
+    JobIdResponse:
+      type: object
+      properties:
+        id:
+          $ref: "#/components/schemas/JobDxidString"
+    JobDescribeResponse:
+      type: object
+      properties:
+        id:
+          $ref: "#/components/schemas/JobDxidString"
+        try:
+          type: integer
+          minimum: 0
+        class:
+          type: string
+          default: "job"
+        name:
+          type: string
+        executableName:
+          type: string
+        created:
+          $ref: "#/components/schemas/Timestamp"
+        tryCreated:
+          $ref: "#/components/schemas/Timestamp"
+        modified:
+          $ref: "#/components/schemas/Timestamp"
+        startedRunning:
+          $ref: "#/components/schemas/Timestamp"
+        stoppedRunning:
+          $ref: "#/components/schemas/Timestamp"
+        egressReport:
+          type: object
+          properties:
+            internetEgress:
+              type: integer
+            regionLocalEgress:
+              type: integer
+            interRegionEgress:
+              type: integer
+        billTo:
+          $ref: "#/components/schemas/OrgDxidString"
+        project:
+          $ref: "#/components/schemas/ProjectDxidString"
+        folder:
+          type: string
+        rootExecution:
+          type: string
+        parentJob:
+          type: string
+        parentJobTry:
+          type: integer
+          minimum: 0
+        originalJob:
+          type: string
+        detachedFrom:
+          type: string
+        detachedFromTry:
+          type: integer
+          minimum: 0
+        parentAnalysis:
+          type: string
+        analysis:
+          type: string
+        stage:
+          type: string
+        state:
+          type: string
+          enum:
+            [
+              "idle",
+              "waiting_on_input",
+              "runnable",
+              "running",
+              "waiting_on_output",
+              "restartable",
+              "failed",
+              "terminating",
+              "terminated",
+            ]
+        stateTransitions:
+          type: array
+          items:
+            type: object
+            properties:
+              newState:
+                type: string
+              setAt:
+                $ref: "#/components/schemas/Timestamp"
+        workspace:
+          type: string
+        launchedBy:
+          $ref: "#/components/schemas/UserDxidString"
+        function:
+          type: string
+        tags:
+          $ref: "#/components/schemas/StringArray"
+        properties:
+          type: object
+          additionalProperties:
+            type: string
+        regions:
+          type: string
+        executable:
+          $ref: "#/components/schemas/AppDxidString"
+        finalPriority:
+          type: string
+        rank:
+          type: integer
+        details:
+          $ref: "#/components/schemas/MappingOrArray"
+        systemRequirements:
+          type: object
+        executionPolicy:
+          type: object
+        timeout:
+          type: integer
+        instanceType:
+          type: string
+        networkAccess:
+          $ref: "#/components/schemas/StringArray"
+        delayWorkspaceDestruction:
+          type: boolean
+        dependsOn:
+          $ref: "#/components/schemas/StringArray"
+        failureReason:
+          type: string
+        failureMessage:
+          type: string
+        failureFrom:
+          type: object
+        failureReports:
+          type: object
+        failureCounts:
+          type: object
+        runInput:
+          type: object
+        originalInput:
+          type: object
+        input:
+          type: object
+        output:
+          type: object
+        region:
+          type: string
+        singleContext:
+          type: boolean
+        ignoreReuse:
+          type: boolean
+        httpsApp:
+          type: object
+          properties:
+            enable:
+              type: boolean
+            shared_access:
+              type: string
+            ports:
+              type: array
+              items:
+                type: integer
+            dns:
+              type: object
+              properties:
+                url:
+                  type: string
+        preserveJobOutputs:
+          type: object
+        detailedJobMetrics:
+          type: boolean
+        clusterSpec:
+          type: object
+        clusterID:
+          type: string
+        costLimit:
+          $ref: "#/components/schemas/Float"
+        selectedTreeTurnaroundTimeThreshold:
+          type: integer
+        selectedTreeTurnaroundTimeThresholdFrom:
+          type: string
+        treeTurnaroundTime:
+          type: integer
+        debugOn:
+          $ref: "#/components/schemas/StringArray"
+        isFree:
+          type: boolean
+        currency:
+          type: object
+        totalPrice:
+          type: number
+        priceComputedAt:
+          $ref: "#/components/schemas/Timestamp"
+        totalEgress:
+          type: object
+          properties:
+            internetEgress:
+              type: number
+            regionLocalEgress:
+              type: number
+            interRegionEgress:
+              type: number
+        egressComputedAt:
+          $ref: "#/components/schemas/Timestamp"
+        allowSSH:
+          $ref: "#/components/schemas/StringArray"
+        sshHostKey:
+          type: string
+        host:
+          type: string
+        sshPort:
+          type: string
+        clusterSlaves:
+          type: array
+          items:
+            type: object
+        applet:
+          $ref: "#/components/schemas/AppletDxidString"
+        app:
+          $ref: "#/components/schemas/AppDxidString"
+        resources:
+          $ref: "#/components/schemas/ContainerDxidString"
+        projectCache:
+          $ref: "#/components/schemas/ProjectDxidString"
+        headJobOnDemand:
+          type: boolean
+        runSystemRequirements:
+          type: object
+        runSystemRequirementsByExecutable:
+          type: object
+        mergedSystemRequirementsByExecutable:
+          type: object
+        internetUsageIPs:
+          $ref: "#/components/schemas/StringArray"
+        subtotalPriceInfo:
+          type: object
+        subtotalEgressInfo:
+          type: object
+        jobLogsForwardingStatus:
+          type: object
+    WorkflowSharedFields:
+      type: object
+      properties:
+        name:
+          type: string
+        project:
+          $ref: "#/components/schemas/ProjectDxidString"
+        folder:
+          type: string
+          default: "/"
+        details:
+          $ref: "#/components/schemas/MappingOrArray"
+        properties:
+          type: object
+          additionalProperties:
+            type: string
+        tags:
+          $ref: "#/components/schemas/StringArray"
+        ignoreReuse:
+          $ref: "#/components/schemas/StringArray"
+        nonce:
+          type: string
+        detach:
+          type: boolean
+    WorkflowNew:
+      allOf:
+        - $ref: "#/components/schemas/WorkflowSharedFields"
+        - type: object
+          properties:
+            title:
+              type: string
+            summary:
+              type: string
+            description:
+              type: string
+            outputFolder:
+              type: string
+            types:
+              $ref: "#/components/schemas/StringArray"
+            hidden:
+              type: boolean
+            parents:
+              type: boolean
+              default: false
+            inputs:
+              type: array
+              items:
+                $ref: "#/components/schemas/AppInputSpec"
+            outputs:
+              type: array
+              items:
+                $ref: "#/components/schemas/AppOutputSpec"
+            initializeFrom:
+              type: object
+              properties:
+                id:
+                  type: string
+                project:
+                  $ref: "#/components/schemas/ProjectDxidString"
+            stages:
+              type: array
+              items:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  executable:
+                    $ref: "#/components/schemas/AppDxidString"
+                  name:
+                    type: string
+                  folder:
+                    type: string
+                  input:
+                    additionalProperties:
+                      type: string
+                  executionPolicy:
+                    type: object
+                    properties:
+                      restartOn:
+                        type: object
+                        additionalProperties:
+                          type: string
+                      maxRestarts:
+                        type: integer
+                        default: 9
+                      onNonRestartableFailure:
+                        type: string
+                        default: "failStage"
+                  systemRequirements:
+                    type: object
+                    additionalProperties:
+                      type: string
+            treeTurnaroundTimeThreshold:
+              type: integer
+    WorkflowRun:
+      allOf:
+        - $ref: "#/components/schemas/WorkflowSharedFields"
+        - type: object
+          properties:
+            input:
+              type: object
+              additionalProperties:
+                type: string
+            stageFolders:
+              type: object
+              additionalProperties:
+                type: string
+            delayWorkspaceDestruction:
+              type: boolean
+            rerunStages:
+              $ref: "#/components/schemas/StringArray"
+            executionPolicy:
+              type: object
+              properties:
+                restartOn:
+                  type: object
+                  additionalProperties:
+                    type: string
+                maxRestarts:
+                  type: integer
+                  default: 9
+                onNonRestartableFailure:
+                  type: string
+            systemRequirements:
+              type: object
+            stageSystemRequirements:
+              type: object
+              additionalProperties:
+                type: string
+            systemRequirementsByExecutable:
+              type: object
+            timeoutPolicyByExecutable:
+              type: object
+            allowSSH:
+              $ref: "#/components/schemas/StringArray"
+            debug:
+              type: object
+            editVersion:
+              type: integer
+            singleContext:
+              type: boolean
+            rank:
+              type: integer
+            costLimit:
+              $ref: "#/components/schemas/Float"
+            preserveJobOutputs:
+              type: object
+            detailedJobMetrics:
+              type: boolean
+    WorkflowDescribeResponse:
+      type: object
+      properties:
+        id:
+          $ref: "#/components/schemas/WorkflowDxidString"
+        project:
+          $ref: "#/components/schemas/ProjectDxidString"
+        class:
+          type: string
+          default: "workflow"
+        types:
+          $ref: "#/components/schemas/StringArray"
+        created:
+          $ref: "#/components/schemas/Timestamp"
+        state:
+          $ref: "#/components/schemas/AppState"
+        hidden:
+          type: boolean
+        links:
+          $ref: "#/components/schemas/StringArray"
+        name:
+          type: string
+        folder:
+          type: string
+        sponsored:
+          type: boolean
+        tags:
+          $ref: "#/components/schemas/StringArray"
+        modified:
+          $ref: "#/components/schemas/Timestamp"
+        createdBy:
+          $ref: "#/components/schemas/CreatedBy"
+        title:
+          type: string
+        summary:
+          type: string
+        description:
+          type: string
+        outputFolder:
+          type: string
+        inputSpec:
+          type: array
+          items:
+            $ref: "#/components/schemas/AppInputSpec"
+        outputSpec:
+          type: array
+          items:
+            $ref: "#/components/schemas/AppOutputSpec"
+        inputs:
+          type: array
+          items:
+            type: object
+        outputs:
+          type: array
+          items:
+            type: object
+        editVersion:
+          type: integer
+        ignoreReuse:
+          $ref: "#/components/schemas/StringArray"
+        stages:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                $ref: "#/components/schemas/StageDxidString"
+              executable:
+                $ref: "#/components/schemas/AppDxidString"
+              name:
+                type: string
+              folder:
+                type: string
+              input:
+                type: object
+              accessible:
+                type: boolean
+              executionPolicy:
+                type: object
+              systemRequirements:
+                type: object
+              inputSpecMods:
+                type: object
+              outputSpecMods:
+                type: object
+              wouldBeRerun:
+                type: boolean
+              cachedExecution:
+                type: string
+              cachedOutput:
+                type: object
+              initializedFrom:
+                type: object
+              editVersion:
+                type: integer
+              treeTurnaroundTimeThreshold:
+                type: integer
+    DbClusterIdResponse:
+      type: object
+      properties:
+        id:
+          $ref: "#/components/schemas/DbClusterDxidString"
+    DbClusterDescribeResponse:
+      type: object
+      properties:
+        id:
+          $ref: "#/components/schemas/DbClusterDxidString"
+        project:
+          $ref: "#/components/schemas/ProjectDxidString"
+        class:
+          type: string
+          default: "dbcluster"
+        types:
+          $ref: "#/components/schemas/StringArray"
+        created:
+          $ref: "#/components/schemas/Timestamp"
+        state:
+          type: string
+          default: "open"
+        hidden:
+          type: boolean
+        name:
+          type: string
+        folder:
+          type: string
+        sponsored:
+          type: boolean
+        tags:
+          $ref: "#/components/schemas/StringArray"
+        modified:
+          $ref: "#/components/schemas/Timestamp"
+        createdBy:
+          type: object
+          properties:
+            user:
+              $ref: "#/components/schemas/UserDxidString"
+        properties:
+          type: object
+        details:
+          $ref: "#/components/schemas/MappingOrArray"
+        status:
+          type: string
+        port:
+          type: integer
+        engineVersion:
+          type: string
+        engine:
+          type: string
+        dxInstanceClass:
+          type: string
+        statusAsOf:
+          $ref: "#/components/schemas/Timestamp"
+        endpoint:
+          type: string
+        sponsoredUntil:
+          $ref: "#/components/schemas/Timestamp"
+  parameters:
+    userDxidParam:
+      name: userDxid
+      in: path
+      required: true
+      schema:
+        $ref: "#/components/schemas/UserDxidString"
+    orgDxidParam:
+      name: orgDxid
+      in: path
+      required: true
+      schema:
+        $ref: "#/components/schemas/OrgDxidString"
+    objectDxidParam:
+      name: objectDxid
+      in: path
+      required: true
+      schema:
+        $ref: "#/components/schemas/ObjectDxidString"
+    projectDxidParam:
+      name: projectDxid
+      in: path
+      required: true
+      schema:
+        $ref: "#/components/schemas/ProjectDxidString"
+    fileDxidParam:
+      name: fileDxid
+      in: path
+      required: true
+      schema:
+        $ref: "#/components/schemas/FileDxidString"
+    appletDxidParam:
+      name: appletDxid
+      in: path
+      required: true
+      schema:
+        $ref: "#/components/schemas/AppletDxidString"
+    appDxidParam:
+      name: appDxid
+      in: path
+      required: true
+      schema:
+        $ref: "#/components/schemas/AppDxidString"
+    jobDxidParam:
+      name: jobDxid
+      in: path
+      required: true
+      schema:
+        $ref: "#/components/schemas/JobDxidString"
+    workflowDxidParam:
+      name: workflowDxid
+      in: path
+      required: true
+      schema:
+        $ref: "#/components/schemas/WorkflowDxidString"
+    dbclusterDxidParam:
+      name: dbclusterDxid
+      in: path
+      required: true
+      schema:
+        $ref: "#/components/schemas/DbClusterDxidString"
+security:
+  - bearerAuth: []

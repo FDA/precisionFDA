@@ -15,7 +15,6 @@ export interface DataPortal {
   cardImageUid: string
   cardImageUrl: string
   cardImageFileName?: string
-  status: 'open' | string
   spaceId: number
   hostLeadDxuser: string
   guestLeadDxuser: string

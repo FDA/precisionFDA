@@ -127,7 +127,7 @@
     "chai-as-promised": "^7.1.1",
     "chance": "^1.1.11",
     "dirty-chai": "^2.0.1",
-    "esbuild": "^0.17.19",
+    "esbuild": "^0.25.0",
     "eslint": "^9.10.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-import": "^2.30.0",

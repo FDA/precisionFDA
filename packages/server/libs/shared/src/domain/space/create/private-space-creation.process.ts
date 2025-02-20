@@ -7,7 +7,7 @@ import {
   SPACE_MEMBERSHIP_SIDE,
 } from '@shared/domain/space-membership/space-membership.enum'
 import { SpaceCreationProcess } from '@shared/domain/space/create/space-creation.process'
-import { CreateSpaceDto } from '@shared/domain/space/dto/create-space.dto'
+import { CreateSpaceDto } from '@shared/domain/space/dto/create-space-dto'
 import { SpaceNotificationService } from '@shared/domain/space/service/space-notification.service'
 import { Space } from '@shared/domain/space/space.entity'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
@@ -21,7 +21,6 @@ import { ADMIN_PLATFORM_CLIENT } from '@shared/platform-client/providers/admin-p
  */
 @Injectable()
 export class PrivateSpaceCreationProcess extends SpaceCreationProcess {
-
   constructor(
     userContext: UserContext,
     em: SqlEntityManager,
@@ -55,10 +54,13 @@ export class PrivateSpaceCreationProcess extends SpaceCreationProcess {
     }
   }
 
-  protected async inviteMembers(space: Space, leads: {
-    host: User,
-    guest: undefined
-  }): Promise<SpaceMembership[]> {
+  protected async inviteMembers(
+    space: Space,
+    leads: {
+      host: User
+      guest: undefined
+    },
+  ): Promise<SpaceMembership[]> {
     const hostLead = leads.host
 
     // invite host lead as admin on platform host org
@@ -72,7 +74,12 @@ export class PrivateSpaceCreationProcess extends SpaceCreationProcess {
     })
     this.logger.log(`invited host lead: ${hostLead.dxuser} to host org: ${space.hostDxOrg}`)
 
-    const hostLeadMembership = new SpaceMembership(hostLead, space, SPACE_MEMBERSHIP_SIDE.HOST, SPACE_MEMBERSHIP_ROLE.LEAD)
+    const hostLeadMembership = new SpaceMembership(
+      hostLead,
+      space,
+      SPACE_MEMBERSHIP_SIDE.HOST,
+      SPACE_MEMBERSHIP_ROLE.LEAD,
+    )
     this.em.persist(hostLeadMembership)
 
     return [hostLeadMembership]
@@ -88,7 +95,9 @@ export class PrivateSpaceCreationProcess extends SpaceCreationProcess {
       name: `precisionfda-${space.uid}-HOST`,
       billTo: hostLead.user.getEntity().billTo(),
     })
-    this.logger.log(`created host project: ${hostProject.id} with lead: ${hostLead.user.getProperty('dxuser')}`)
+    this.logger.log(
+      `created host project: ${hostProject.id} with lead: ${hostLead.user.getProperty('dxuser')}`,
+    )
 
     await this.userClient.projectInvite({
       projectDxid: hostProject.id,
@@ -101,8 +110,7 @@ export class PrivateSpaceCreationProcess extends SpaceCreationProcess {
     this.em.persist(space)
   }
 
-  protected async sendEmails(space: Space, users: User[]) {
+  protected async sendEmails() {
     // no emails for private space - user is creating it for themselves and is redirected into it immediately
   }
-
 }
