@@ -1,19 +1,23 @@
 import { BaseTemplate } from '@shared/domain/email/templates/base-template'
 import { Job } from '@shared/domain/job/job.entity'
 import { User } from '@shared/domain/user/user.entity'
-import { UserOpsCtx } from '../../../../types'
-import { EmailSendInput, EmailTemplate, EMAIL_TYPES, NOTIFICATION_TYPES_BASE } from '../../email.config'
+import { UserOpsCtx } from '@shared/types'
+import {
+  EmailSendInput,
+  EmailTemplate,
+  EMAIL_TYPES,
+  NOTIFICATION_TYPES_BASE,
+} from '../../email.config'
 import {
   JobFailedInputTemplate,
   jobFailedTemplate,
   jobCostLimitExceededTemplate,
 } from '../mjml/job-failed.template'
 import { buildEmailTemplate } from '../../email.helper'
-
-type JobFailedInputType = { jobId: number }
+import { JobEventDTO } from '@shared/domain/email/dto/job-event.dto'
 
 export class JobFailedEmailHandler
-  extends BaseTemplate<JobFailedInputType, UserOpsCtx>
+  extends BaseTemplate<JobEventDTO, UserOpsCtx>
   implements Omit<EmailTemplate<JobFailedInputTemplate>, 'templateFile'>
 {
   job: Job
@@ -21,7 +25,6 @@ export class JobFailedEmailHandler
   getNotificationKey(): keyof typeof NOTIFICATION_TYPES_BASE {
     return 'job_failed'
   }
-
 
   async setupContext(): Promise<void> {
     this.job = await this.ctx.em.findOneOrFail(Job, { id: this.validatedInput.jobId })
@@ -43,7 +46,9 @@ export class JobFailedEmailHandler
 
   async template(receiver: User): Promise<EmailSendInput> {
     const body = buildEmailTemplate<JobFailedInputTemplate>(
-      this.job.describe?.failureReason === 'CostLimitExceeded' ? jobCostLimitExceededTemplate : jobFailedTemplate,
+      this.job.describe?.failureReason === 'CostLimitExceeded'
+        ? jobCostLimitExceededTemplate
+        : jobFailedTemplate,
       {
         receiver,
         content: {
@@ -67,4 +72,3 @@ export class JobFailedEmailHandler
     }
   }
 }
-

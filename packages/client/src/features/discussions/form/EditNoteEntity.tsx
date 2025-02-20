@@ -18,7 +18,7 @@ import { MarkdownEditor } from '../../../components/Markdown/MarkdownEditor'
 import { InputError } from '../../../components/form/styles'
 import { ButtonRow } from '../../modal/styles'
 import { AttachmentsList } from '../AttachmentsList'
-import { Note, NoteForm } from '../discussions.types'
+import { NoteForm } from '../discussions.types'
 import { groupByAttachmentType, pickIdsFromFormAttachments } from '../helpers'
 import { Attachments } from './Attachments'
 import { Button } from '../../../components/Button'
@@ -133,19 +133,23 @@ export const EditNoteForm = ({
 export const EditNoteEntity = ({
   onSuccess,
   onCancel,
-  note,
+  noteId,
+  scope,
+  content,
   discussionId,
   answerId,
 }: {
   onSuccess?: () => void
   onCancel: (vals: NoteForm) => void
-  note: Note
+  scope: NoteScope,
+  content: string,
   discussionId: number
+  noteId: number,
   answerId?: number
 }) => {
   const queryClient = useQueryClient()
 
-  const editNodeMutation = useMutation({
+  const editNoteMutation = useMutation({
     mutationKey: ['edit-discussion'],
     mutationFn: (payload: NotePayload) => {
       if (answerId) {
@@ -172,7 +176,7 @@ export const EditNoteEntity = ({
   })
 
   const handleSubmit = async (vals: NoteForm) => {
-    await editNodeMutation.mutateAsync({
+    await editNoteMutation.mutateAsync({
       id: discussionId,
       content: vals.content,
       attachments: pickIdsFromFormAttachments(vals.attachments),
@@ -180,16 +184,16 @@ export const EditNoteEntity = ({
   }
 
   const defaultValues = {
-    content: note.content,
+    content,
   }
 
   return (
     <EditNoteForm
-      noteId={note.id}
+      noteId={noteId}
       onCancel={onCancel}
       onSubmit={handleSubmit}
       defaultValues={defaultValues}
-      scope={note.scope}
+      scope={scope}
     />
   )
 }

@@ -108,9 +108,11 @@ const SpacesList = () => {
       <SpacesHeader>
         <PageTitle>Spaces</PageTitle>
         <SpacesQuickActions>
-          <Button data-variant="primary" disabled={Object.keys(selectedIndexes || {}).length === 0} onClick={hideSpaces}>
-            Hide spaces
-          </Button>
+          {userCanAdministerSite && (
+            <Button data-variant="primary" disabled={Object.keys(selectedIndexes || {}).length === 0} onClick={hideSpaces}>
+              Hide spaces
+            </Button>
+          )}
           <Button data-variant="primary" as={Link} to="/spaces/new">
             Create new space
           </Button>

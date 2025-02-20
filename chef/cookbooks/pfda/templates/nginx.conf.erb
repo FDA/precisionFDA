@@ -53,11 +53,12 @@ http {
 
     <%= render 'ssl_settings.conf.erb' %>
 
+    resolver 169.254.169.253 valid=60s;
+
     # Reverse proxy to UNII site on CloudFront
     location /uniisearch {
       proxy_pass https://<%= @unii_host %>$uri$is_args$args;
       proxy_set_header Host <%= @unii_host %>;
-      resolver 8.8.8.8 valid=60s;
     }
 
     # Reverse proxy for GSRS js, images, and CSS files
@@ -65,7 +66,6 @@ http {
     # The non js file extensions are added just to offload serving static content via ruby
     location ~ ^/ginas/.*((\.(js|css|png|jpg|jpeg|gif))|(manifest\.json))$ {
       proxy_pass <%= @gsrs_host %>;
-      resolver 169.254.169.253 valid=60s;
     }
 
     root /srv/pfda/public;

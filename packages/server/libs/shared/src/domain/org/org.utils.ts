@@ -1,4 +1,3 @@
-
 const ORG_PREFIX = 'org-'
 const PFDA_PREFIX = 'pfda..'
 
@@ -8,7 +7,7 @@ const constructDxOrg = (handle: string) => {
 }
 
 const getHandle = (id: string) => {
-  const pattern = "org-"
+  const pattern = 'org-'
   return id.slice(id.indexOf(pattern) + pattern.length)
 }
 

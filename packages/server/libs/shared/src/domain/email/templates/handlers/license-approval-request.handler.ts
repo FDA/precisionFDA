@@ -13,12 +13,12 @@ import {
   LicenseApprovalTemplateInput,
 } from '@shared/domain/email/templates/mjml/license-approval-request.template'
 import { buildEmailTemplate } from '@shared/domain/email/email.helper'
-import { LicenseApprovalRequestDto } from '@shared/domain/email/dto/license-approval-request.dto'
+import { LicenseApprovalRequestDTO } from '@shared/domain/email/dto/license-approval-request.dto'
 import { config } from '@shared/config'
 import { lowercaseAndDash } from '@shared/utils/format'
 
 export class LicenseApprovalRequestHandler
-  extends BaseTemplate<LicenseApprovalRequestDto, UserOpsCtx>
+  extends BaseTemplate<LicenseApprovalRequestDTO, UserOpsCtx>
   implements EmailTemplate<LicenseApprovalTemplateInput>
 {
   templateFile = licenseApprovalRequestTemplate

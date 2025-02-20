@@ -69,7 +69,7 @@ export const NotifyMembersSelect = ({
       value={value}
       isDisabled={isSubmitting}
       isLoading={isLoading}
-      maxMenuHeight={100}
+      maxMenuHeight={300}
       closeMenuOnSelect={false}
       inputId="notify_members"
     />

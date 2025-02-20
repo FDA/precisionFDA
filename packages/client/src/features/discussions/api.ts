@@ -79,8 +79,9 @@ export async function editAnswerCommentRequest(
 }
 
 
-export async function fetchDiscussionsRequest(scope: string) {
-  return axios.get(`/api/v2/discussions?scope=${scope}`).then(r => r.data as Discussion[])
+export async function fetchDiscussionsRequest(filters: any, params: any) {
+  const paramQ = `?${new URLSearchParams(params).toString()}`
+  return axios.get(`/api/v2/discussions${paramQ}`).then(r => r.data as Discussion[])
 }
 
 export async function fetchDiscussionRequest(discussionId: number) {

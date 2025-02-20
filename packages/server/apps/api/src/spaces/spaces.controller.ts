@@ -21,12 +21,8 @@ import {
   SPACE_MEMBERSHIP_ROLE,
   SPACE_MEMBERSHIP_SIDE,
 } from '@shared/domain/space-membership/space-membership.enum'
-import { CreateSpaceDto } from '@shared/domain/space/dto/create-space.dto'
 import { SpacesHiddenDto } from '@shared/domain/space/dto/spaces-hidden.dto'
 import { SpaceAcceptOperation } from '@shared/domain/space/ops/accept-space'
-import { SpaceLockOperation } from '@shared/domain/space/ops/lock-space'
-import { SelectableSpacesOperation } from '@shared/domain/space/ops/selectable-spaces'
-import { SpaceUnlockOperation } from '@shared/domain/space/ops/unlock-space'
 import { SpaceService } from '@shared/domain/space/service/space.service'
 import { Space } from '@shared/domain/space/space.entity'
 import { SPACE_TYPE } from '@shared/domain/space/space.enum'
@@ -36,6 +32,7 @@ import { PlatformClient } from '@shared/platform-client'
 import { UserOpsCtx } from '@shared/types'
 import { SiteAdminGuard } from '../admin/guards/site-admin.guard'
 import { UserContextGuard } from '../user-context/guard/user-context.guard'
+import { CreateSpaceDto } from '@shared/domain/space/dto/create-space-dto'
 
 @UseGuards(UserContextGuard)
 @Controller('/spaces')
@@ -68,13 +65,7 @@ export class SpacesController {
   @HttpCode(204)
   @Patch('/:id/lock')
   async lockSpace(@Param('id', ParseIntPipe) spaceId: number) {
-    const opsCtx: UserOpsCtx = {
-      log: this.logger,
-      user: this.user,
-      em: this.oldEm,
-    }
-
-    await new SpaceLockOperation(opsCtx).execute({ spaceId })
+    await this.spaceService.lockSpace(spaceId)
 
     await this.emailFacade.sendEmail({
       input: {
@@ -83,20 +74,14 @@ export class SpacesController {
         activityType: SPACE_EVENT_ACTIVITY_TYPE[SPACE_EVENT_ACTIVITY_TYPE.space_locked],
       },
       receiverUserIds: [],
-      emailTypeId: EMAIL_TYPES.spaceChanged as any,
+      emailTypeId: EMAIL_TYPES.spaceChanged,
     })
   }
 
   @HttpCode(204)
   @Patch('/:id/unlock')
   async unlockSpace(@Param('id', ParseIntPipe) spaceId: number) {
-    const opsCtx: UserOpsCtx = {
-      log: this.logger,
-      user: this.user,
-      em: this.oldEm,
-    }
-
-    await new SpaceUnlockOperation(opsCtx).execute({ spaceId })
+    await this.spaceService.unlockSpace(spaceId)
 
     await this.emailFacade.sendEmail({
       input: {
@@ -105,7 +90,7 @@ export class SpacesController {
         activityType: SPACE_EVENT_ACTIVITY_TYPE[SPACE_EVENT_ACTIVITY_TYPE.space_unlocked],
       },
       receiverUserIds: [],
-      emailTypeId: EMAIL_TYPES.spaceChanged as any,
+      emailTypeId: EMAIL_TYPES.spaceChanged,
     })
   }
 
@@ -172,13 +157,7 @@ export class SpacesController {
 
   @Get('/:id/selectable-spaces')
   async getSelectableSpaces(@Param('id', ParseIntPipe) id: number) {
-    const opsCtx: UserOpsCtx = {
-      log: this.logger,
-      user: this.user,
-      em: this.oldEm,
-    }
-
-    return await new SelectableSpacesOperation(opsCtx).execute(id)
+    return await this.spaceService.getSelectableSpaces(id)
   }
 
   @UseGuards(SiteAdminGuard)

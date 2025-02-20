@@ -25,6 +25,8 @@ export class IsEmailInputValidConstraint implements ValidatorConstraintInterface
     const nnOptions = value ?? {}
 
     if (!isPlainObject(nnOptions)) {
+      // Store error messages directly on the object
+      object['validationErrors'] = ['Input must be a plain object']
       return false
     }
 
@@ -33,12 +35,26 @@ export class IsEmailInputValidConstraint implements ValidatorConstraintInterface
 
     const errors = await validate(instance)
 
-    return errors.length === 0
+    if (errors.length > 0) {
+      // Collect validation error messages
+      object['validationErrors'] = errors.map((error) =>
+        Object.values(error.constraints ?? {}).join(', '),
+      )
+      return false
+    }
+
+    // Clear errors if validation passes
+    delete object['validationErrors']
+    return true
   }
 
   defaultMessage(args: ValidationArguments) {
-    const type = (args.object as TypedEmailBodyDto)?.type
-    return `Email Input does not satisfy constraints for the provided type "${type}"`
+    const object = args.object as TypedEmailBodyDto
+    const type = object.type
+    const additionalErrors = object['validationErrors']
+      ? `: ${object['validationErrors'].join('; ')}`
+      : ''
+    return `Email Input does not satisfy constraints for the provided type "${type}"${additionalErrors}`
   }
 }
 

@@ -1,15 +1,15 @@
-import { UserDTO } from '@shared/domain/discussion/discussion.types'
 import { Submission } from '@shared/domain/challenge/submission.entity'
 import { JOB_STATE } from '@shared/domain/job/job.enum'
 import { EntityScope } from '@shared/types/common'
 import { Uid } from '@shared/domain/entity/domain/uid'
+import { SimpleUserDTO } from '@shared/domain/user/dto/simple-user.dto'
 
 export class SubmissionDTO {
   id: number
   challengeId: number
   name: string
   description: string
-  user: UserDTO
+  user: SimpleUserDTO
   job: {
     state: JOB_STATE
     inputFiles: { id: number; uid: Uid<'file'>; name: string; userId: number; scope: EntityScope }[]

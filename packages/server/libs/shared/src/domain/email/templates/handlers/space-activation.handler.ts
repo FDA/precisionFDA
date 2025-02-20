@@ -1,6 +1,6 @@
 import { BaseTemplate } from '@shared/domain/email/templates/base-template'
 import { UserOpsCtx } from '@shared/types'
-import { buildEmailTemplate, ObjectIdInputDto } from '@shared/domain/email/email.helper'
+import { buildEmailTemplate, ObjectIdInputDTO } from '@shared/domain/email/email.helper'
 import {
   EMAIL_TYPES,
   EmailSendInput,
@@ -18,7 +18,7 @@ import { SPACE_MEMBERSHIP_SIDE } from '@shared/domain/space-membership/space-mem
 import { config } from '@shared/config'
 
 export class SpaceActivationHandler
-  extends BaseTemplate<ObjectIdInputDto, UserOpsCtx>
+  extends BaseTemplate<ObjectIdInputDTO, UserOpsCtx>
   implements EmailTemplate<SpaceActivationTemplateInput>
 {
   templateFile = spaceActivationTemplate

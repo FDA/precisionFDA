@@ -11,6 +11,8 @@ import { SpaceMembershipRepository } from '@shared/domain/space-membership/space
 import { EMAIL_TYPES, EmailProcessInput } from '@shared/domain/email/email.config'
 import { SPACE_EVENT_ACTIVITY_TYPE } from '@shared/domain/space-event/space-event.enum'
 import { EmailFacade } from '@shared/domain/email/email.facade'
+import { getEnumKeyByValue } from '@shared/utils/enum-utils'
+import { SPACE_MEMBERSHIP_ROLE } from '@shared/domain/space-membership/space-membership.enum'
 
 const CONTENT_TYPES = [
   SPACE_EVENT_ACTIVITY_TYPE.file_added,
@@ -101,7 +103,7 @@ export class SpaceEventService {
         input: {
           initUserId: event.user.id,
           spaceId: event.space.id,
-          activityType: event.activityType,
+          activityType: getEnumKeyByValue(SPACE_EVENT_ACTIVITY_TYPE, event.activityType),
         },
         receiverUserIds: [],
       }
@@ -113,8 +115,8 @@ export class SpaceEventService {
           initUserId: event.user.id,
           spaceId: event.space.id,
           updatedMembershipId: event.entityId,
-          activityType: event.activityType,
-          newMembershipRole: event.role,
+          activityType: getEnumKeyByValue(SPACE_EVENT_ACTIVITY_TYPE, event.activityType),
+          newMembershipRole: getEnumKeyByValue(SPACE_MEMBERSHIP_ROLE, event.role),
         },
         receiverUserIds: [],
       }

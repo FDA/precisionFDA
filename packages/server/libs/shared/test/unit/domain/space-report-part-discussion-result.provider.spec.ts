@@ -1,11 +1,10 @@
-import { Collection } from '@mikro-orm/core'
-import { Answer } from '@shared/domain/answer/answer.entity'
-import { DiscussionComment } from '@shared/domain/comment/discussion-comment.entity'
 import { Discussion } from '@shared/domain/discussion/discussion.entity'
 import { DiscussionService } from '@shared/domain/discussion/services/discussion.service'
 import { SpaceReportPartDiscussionResultProviderService } from '@shared/facade/space-report/service/space-report-part-discussion-result-provider.service'
 import { expect } from 'chai'
 import { stub } from 'sinon'
+import { DiscussionDTO } from '@shared/domain/discussion/dto/discussion.dto'
+import { AnswerDTO } from '@shared/domain/discussion/dto/answer.dto'
 
 describe('SpaceReportPartDiscussionResultProviderService', () => {
   const ID = 1
@@ -58,11 +57,12 @@ describe('SpaceReportPartDiscussionResultProviderService', () => {
     user: ANSWER_COMMENT_USER,
   }
   const ANSWER = {
-    note: ANSWER_NOTE,
+    content: ANSWER_NOTE.content,
+    noteId: ANSWER_NOTE.id,
     user: ANSWER_USER,
     createdAt: ANSWER_CREATED_AT,
     comments: [ANSWER_COMMENT],
-  }
+  } as unknown as AnswerDTO
 
   const ATTACHMENT_1_NAME = 'ATTACHMENT_1_NAME'
   const ATTACHMENT_1_LINK = 'ATTACHMENT_1_LINK'
@@ -91,19 +91,21 @@ describe('SpaceReportPartDiscussionResultProviderService', () => {
 
   const DISCUSSION_ENTITY = { id: ID, note: NOTE } as unknown as Discussion
 
-  let DISCUSSION: Discussion
+  let DISCUSSION: DiscussionDTO
 
   const getDiscussionStub = stub()
   const getAttachmentsStub = stub()
 
   beforeEach(() => {
     DISCUSSION = {
-      note: NOTE,
+      title: NOTE.title,
+      content: NOTE.content,
+      noteId: NOTE.id,
       user: USER,
       createdAt: CREATED_AT,
       comments: COMMENTS,
       answers: [ANSWER],
-    } as unknown as Discussion
+    } as unknown as DiscussionDTO
 
     getDiscussionStub.reset()
     getDiscussionStub.throws()
@@ -194,7 +196,7 @@ describe('SpaceReportPartDiscussionResultProviderService', () => {
     })
 
     it('should work with no comments', async () => {
-      DISCUSSION.comments = new Collection<DiscussionComment>([])
+      DISCUSSION.comments = []
 
       const res = await getInstance().getResult(DISCUSSION_ENTITY, null, format)
 
@@ -251,7 +253,7 @@ describe('SpaceReportPartDiscussionResultProviderService', () => {
     })
 
     it('should work with no answers', async () => {
-      DISCUSSION.answers = new Collection<Answer>([])
+      DISCUSSION.answers = []
 
       const res = await getInstance().getResult(DISCUSSION_ENTITY, null, format)
 

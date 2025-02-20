@@ -8,7 +8,12 @@ import {
   ValidatorConstraintInterface,
 } from 'class-validator'
 
-type ConstraintOptions = { allowPrivate: boolean; allowPublic: boolean; allowSpace: boolean }
+type ConstraintOptions = {
+  allowPrivate: boolean
+  allowPublic: boolean
+  allowSpace: boolean
+  allowHomeScope: boolean
+}
 
 @ValidatorConstraint({ name: 'isValidScope', async: false })
 class IsValidScopeConstraint implements ValidatorConstraintInterface {
@@ -24,6 +29,10 @@ class IsValidScopeConstraint implements ValidatorConstraintInterface {
     }
 
     if (options.allowPublic && scope === 'public') {
+      return true
+    }
+
+    if (options.allowHomeScope && ['me', 'featured', 'everybody', 'spaces'].includes(scope)) {
       return true
     }
 
@@ -57,6 +66,7 @@ export function IsValidScope(
     allowPrivate: true,
     allowPublic: true,
     allowSpace: true,
+    allowHomeScope: false,
   }
   const effectiveOptions = { ...defaultOptions, ...options }
 

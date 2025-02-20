@@ -2,7 +2,6 @@ import React from 'react'
 import { DropdownNext } from '../../../components/Dropdown/DropdownNext'
 import { StarIcon } from '../../../components/icons/StarIcon'
 import { ThreeDotsIcon } from '../../../components/icons/ThreeDotsIcon'
-import { IUser } from '../../../types/user'
 import { formatDiscussionDate } from '../helpers'
 import {
   CardLeft,
@@ -15,7 +14,7 @@ import {
   UsernameLink,
 } from '../styles'
 import { Identicon } from '../../../components/Identicon'
-import { CardType } from '../discussions.types'
+import { CardType, SimpleUser } from '../discussions.types'
 
 
 const EDIT_TEXT = {
@@ -40,7 +39,7 @@ export const CardHeader = ({
 }: {
   timestamp: string
   cardType: CardType
-  user: IUser
+  user: SimpleUser
   canUserEdit: boolean
   onClickEdit: () => void
   onClickDelete: () => void

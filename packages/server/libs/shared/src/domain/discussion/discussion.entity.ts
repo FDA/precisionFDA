@@ -14,8 +14,9 @@ import { DiscussionComment } from '@shared/domain/comment/discussion-comment.ent
 import { Note } from '@shared/domain/note/note.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { BaseEntity } from '../../database/base.entity'
+import DiscussionRepository from '@shared/domain/discussion/discussion.repository'
 
-@Entity({ tableName: 'discussions' })
+@Entity({ tableName: 'discussions', repository: () => DiscussionRepository })
 export class Discussion extends BaseEntity {
   @OneToOne({ entity: () => Note, cascade: [Cascade.REMOVE] })
   note: Ref<Note>
@@ -28,7 +29,7 @@ export class Discussion extends BaseEntity {
 
   @OneToMany({
     entity: () => DiscussionComment,
-    mappedBy: dc => dc.commentableId,
+    mappedBy: (dc) => dc.commentableId,
     cascade: [Cascade.REMOVE],
   })
   comments = new Collection<DiscussionComment>(this)
