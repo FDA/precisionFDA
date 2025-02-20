@@ -4,8 +4,8 @@ import { DataPortalService } from '@shared/domain/data-portal/service/data-porta
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { SpaceService } from '@shared/domain/space/service/space.service'
 import { CreateDataPortalDTO } from '@shared/domain/data-portal/dto/CreateDataPortalDTO'
-import { CreateSpaceDto } from '@shared/domain/space/dto/create-space-dto'
 import { SPACE_TYPE } from '@shared/domain/space/space.enum'
+import { CreateSpaceDTO } from '@shared/domain/space/dto/create-space-dto'
 
 @Injectable()
 export class CreateDataPortalFacade {
@@ -24,7 +24,7 @@ export class CreateDataPortalFacade {
   async create(body: CreateDataPortalDTO) {
     this.logger.log(`Creating data portal ${body.name}`)
     return await this.em.transactional(async () => {
-      const createSpaceDto = new CreateSpaceDto()
+      const createSpaceDto = new CreateSpaceDTO()
       createSpaceDto.name = body.name
       createSpaceDto.description = body.description
       createSpaceDto.spaceType = SPACE_TYPE.GROUPS
