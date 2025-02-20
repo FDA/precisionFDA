@@ -12,14 +12,12 @@ import { User } from '@shared/domain/user/user.entity'
 
 @Injectable()
 export class SpaceNotificationService {
-
   constructor(
     private readonly emailQueueJobProducer: EmailQueueJobProducer,
     private readonly userContext: UserContext,
   ) {}
 
   async notifySpaceCreated(space: Space, user: User) {
-
     const emailInput: SpaceCreatedTemplateInput = {
       receiver: user,
       space: {
@@ -36,7 +34,10 @@ export class SpaceNotificationService {
       body,
     }
 
-    await this.emailQueueJobProducer.createSendEmailTask(emailTask, this.userContext, space.id.toString())
+    await this.emailQueueJobProducer.createSendEmailTask(
+      emailTask,
+      this.userContext,
+      `${space.id.toString()}-${user.email}`,
+    )
   }
-
 }

@@ -1067,6 +1067,7 @@ class HttpsAppsClient # rubocop:disable Metrics/ClassLength
       end
     end
   rescue Errno::ECONNREFUSED
+    Rails.logger.info("Can't connect to nodejs-api service")
     raise Error, "Can't connect to nodejs-api service"
   end
 
