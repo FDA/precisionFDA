@@ -6,7 +6,6 @@ import {
   EmailSendInput,
   EmailTemplate,
   EMAIL_TYPES,
-  NewContentAdded,
   NOTIFICATION_TYPES_BASE,
 } from '../../email.config'
 import {
@@ -21,9 +20,10 @@ import {
 import { newContentTemplate, NewContentTemplateInput } from '../mjml/new-content.template'
 import { BaseTemplate } from '@shared/domain/email/templates/base-template'
 import { User } from '@shared/domain/user/user.entity'
+import { SpaceEventDTO } from '@shared/domain/email/dto/space-event.dto'
 
 export class ContentChangedEmailHandler
-  extends BaseTemplate<NewContentAdded>
+  extends BaseTemplate<SpaceEventDTO>
   implements EmailTemplate<NewContentTemplateInput>
 {
   templateFile = newContentTemplate

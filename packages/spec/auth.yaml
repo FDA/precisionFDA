@@ -1,0 +1,426 @@
+openapi: 3.0.2
+info:
+  title: precisionFDA Usage of Auth API
+  description: |-
+    precisionFDA Usage of Auth API
+  version: 1.0.0
+servers:
+  - url: https://stagingauth.dnanexus.com
+    description: Staging platform auth API server
+  - url: https://auth.dnanexus.com
+    description: Production platform auth API server
+tags:
+  - name: auth
+    description: Auth
+paths:
+  /oauth2/token:
+    post:
+      tags:
+        - auth
+      summary: Obtain access token
+      description: |
+        - https://github.com/dnanexus/nucleus/blob/master/authserver/Internal-API-Methods.md#oauth-20-api-method-post-oauth2token
+        - Obtain access token from a temporary code, this cannot be tested on OpenAPI because of the one time code
+        - Used in return_from_login
+      operationId: oauth2Token
+      security: []
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                grant_type:
+                  type: string
+                  default: authorization_code
+                code:
+                  type: string
+                redirect_uri:
+                  type: string
+                client_id:
+                  type: string
+                  enum: ["precision_fda_gov", "precision_fda"]
+                  default: precision_fda
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  access_token:
+                    type: string
+                  expires_in:
+                    type: integer
+                    format: int64
+                  refresh_token:
+                    type: string
+                  scope:
+                    type: object
+                    example: { "full": true }
+                  token_signature:
+                    type: string
+                  token_type:
+                    type: string
+                    example: bearer
+                  user_id:
+                    type: string
+  /system/newAuthToken:
+    post:
+      tags:
+        - auth
+      summary: Generate new auth token
+      description: |
+        - https://github.com/dnanexus/nucleus/blob/master/authserver/Internal-API-Methods.md#auth-api-method-post-systemnewauthtoken
+        - Generate new auth token from the current session, pFDA calls this to generate access token for https jobs
+      operationId: systemNewAuthToken
+      requestBody:
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - type: object
+                  description: Generate new auth token
+                  properties:
+                    grant_type:
+                      type: string
+                      example: authorization_code
+                    scope:
+                      description: pFDA only uses scope full, look into the docs for other scopes
+                      example: { "full": true }
+                      oneOf:
+                        - type: object
+                          properties:
+                            full:
+                              type: boolean
+                    label:
+                      type: string
+                      example: httpsapp
+                    client_id:
+                      type: string
+                      example: httpsapp
+                    redirect_uri:
+                      type: string
+                      example: "{job_url}/oauth2/access"
+                - type: object
+                  description: Login and get access token
+                  properties:
+                    username:
+                      type: string
+                    password:
+                      type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - type: object
+                    description: Auth token response
+                    properties:
+                      authorization_code:
+                        type: string
+                      token_type:
+                        type: string
+                        example: "code"
+                      user_id:
+                        $ref: "#/components/schemas/UserDxidString"
+                  - type: object
+                    description: Access token response from login
+                    properties:
+                      access_token:
+                        type: string
+                      token_signature:
+                        type: string
+                      token_type:
+                        type: string
+                        example: "bearer"
+                      user_id:
+                        $ref: "#/components/schemas/UserDxidString"
+  /user/new:
+    post:
+      tags:
+        - auth
+      summary: Register new user
+      description: |
+        - https://github.com/dnanexus/nucleus/blob/master/authserver/Internal-API-Methods.md#auth-api-method-post-usernew
+        - Called from admin to provision new user
+      operationId: newUser
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                email:
+                  type: string
+                first:
+                  type: string
+                last:
+                  type: string
+                billTo:
+                  type: string
+                  enum: ["org-precisionfda", "org-precisionfda_dev"]
+                  default: "org-precisionfda_dev"
+                pfdasso:
+                  description: if value is True user_doc["samlIdentityProvider"] = query_nuc_config('authserver.pfdaSamlIdentityProvider')
+                  type: boolean
+                  default: false
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserBaseResponse"
+  /account/resendActivationEmail:
+    post:
+      tags:
+        - auth
+      summary: Resend activation email
+      description: |
+        - https://github.com/dnanexus/nucleus/blob/master/authserver/Internal-API-Methods.md#auth-api-method-post-accountresendactivationemail
+        - Resend activation email, called from pFDA admin
+      operationId: resendActivationEmail
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ResendActivationEmail"
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  status:
+                    type: string
+  /{userDxid}/resetUserMFA:
+    post:
+      tags:
+        - auth
+      summary: Reset MFA
+      description: |
+        - https://github.com/dnanexus/nucleus/blob/master/authserver/Internal-API-Methods.md#auth-api-method-post-user-xxxxresetusermfa
+        - Reset MFA, called from pFDA admin
+      operationId: resetUserMFA
+      parameters:
+        - $ref: "#/components/parameters/userDxidParam"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AdminControl"
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminControlResponse"
+  /{userDxid}/lockUserAccount:
+    post:
+      tags:
+        - auth
+      summary: Lock user account
+      description: |
+        - https://github.com/dnanexus/nucleus/blob/master/authserver/Internal-API-Methods.md#auth-api-method-post-user-xxxxlockuseraccount
+        - Lock user account, called from pFDA admin
+      operationId: lockUserAccount
+      parameters:
+        - $ref: "#/components/parameters/userDxidParam"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AdminControl"
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminControlResponse"
+  /{userDxid}/unlockUserAccount:
+    post:
+      tags:
+        - auth
+      summary: Unlock user account
+      description: |
+        - https://github.com/dnanexus/nucleus/blob/master/authserver/Internal-API-Methods.md#auth-api-method-post-user-xxxxunlockuseraccount
+        - Unlock user account, called from pFDA admin
+      operationId: unlockUserAccount
+      parameters:
+        - $ref: "#/components/parameters/userDxidParam"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AdminControl"
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminControlResponse"
+  /{userDxid}/updateEmail:
+    post:
+      tags:
+        - auth
+      summary: Update email
+      description: |
+        - https://github.com/dnanexus/nucleus/blob/master/authserver/Internal-API-Methods.md#auth-api-method-post-user-xxxxupdateemail
+      operationId: updateUserEmail
+      parameters:
+        - $ref: "#/components/parameters/userDxidParam"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserUpdateEmail"
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserBaseResponse"
+  /{orgDxid}/updateBillingInformation:
+    post:
+      tags:
+        - auth
+      summary: Update the billing information for the user's billable org
+      description: |
+        - https://github.com/dnanexus/nucleus/blob/master/authserver/Internal-API-Methods.md#auth-api-method-post-user-xxxxupdatebillinginformation-post-org-xxxxupdatebillinginformation
+        - Called from admin when provisioning new user
+      operationId: orgUpdateBillingInformation
+      parameters:
+        - $ref: "#/components/parameters/orgDxidParam"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                billingInformation:
+                  $ref: "#/components/schemas/OrgBillingInfo"
+                autoConfirm:
+                  type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OrgIdResponse"
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+  schemas:
+    UserUpdateEmail:
+      type: object
+      properties:
+        password:
+          type: string
+        otp:
+          type: string
+        newEmail:
+          type: string
+    UserBaseResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: ["EmailValidationRequired", "ApprovalRequired"]
+          default: "EmailValidationRequired"
+        message:
+          type: string
+        emailSentTo:
+          type: string
+      xml:
+        name: userCreateResponse
+    ResendActivationEmail:
+      type: object
+      properties:
+        usernameOrEmail:
+          type: string
+    UserDxidString:
+      type: string
+      pattern: "^user-[a-zA-Z0-9._]"
+      example: "user-harry.potter"
+    OrgDxidString:
+      type: string
+      pattern: "^org-pfda..[a-zA-Z0-9._]"
+      example: "org-pfda..harry.potter"
+    OrgIdResponse:
+      type: object
+      properties:
+        id:
+          $ref: "#/components/schemas/OrgDxidString"
+    OrgBillingInfo:
+      type: object
+      properties:
+        email:
+          type: string
+        name:
+          type: string
+        companyName:
+          type: string
+        address1:
+          type: string
+        address2:
+          type: string
+        city:
+          type: string
+        state:
+          type: string
+        postCode:
+          type: string
+        country:
+          type: string
+        phone:
+          type: string
+    AdminControl:
+      type: object
+      properties:
+        user_id:
+          type: string
+        org_id:
+          type: string
+          enum: ["org-precisionfda", "org-precisionfda_dev"]
+          example: org-precisionfda_dev
+    AdminControlResponse:
+      type: object
+      properties:
+        admin_id:
+          type: string
+        org_id:
+          type: string
+        user_id:
+          type: string
+  parameters:
+    userDxidParam:
+      name: userDxid
+      in: path
+      required: true
+      schema:
+        $ref: "#/components/schemas/UserDxidString"
+    orgDxidParam:
+      name: orgDxid
+      in: path
+      required: true
+      schema:
+        $ref: "#/components/schemas/OrgDxidString"
+security:
+  - bearerAuth: []

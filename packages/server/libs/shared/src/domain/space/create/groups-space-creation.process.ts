@@ -7,7 +7,6 @@ import {
   SPACE_MEMBERSHIP_SIDE,
 } from '@shared/domain/space-membership/space-membership.enum'
 import { SpaceCreationProcess } from '@shared/domain/space/create/space-creation.process'
-import { CreateSpaceDto } from '@shared/domain/space/dto/create-space.dto'
 import { SpaceNotificationService } from '@shared/domain/space/service/space-notification.service'
 import { Space } from '@shared/domain/space/space.entity'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
@@ -30,7 +29,7 @@ export class GroupsSpaceCreationProcess extends SpaceCreationProcess {
     super(userContext, em, notificationService, adminClient)
   }
 
-  protected async checkPermissions(user: User, input: CreateSpaceDto): Promise<void> {
+  protected async checkPermissions(user: User): Promise<void> {
     if (!user) {
       throw new NotFoundError(`User with ID: ${this.userContext.id} was not found!`)
     }

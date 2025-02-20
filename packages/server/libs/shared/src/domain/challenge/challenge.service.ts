@@ -434,9 +434,7 @@ export class ChallengeService {
       where.scope = { $in: [STATIC_SCOPE.PUBLIC, ...scopes] }
     }
 
-    const response = await this.challengeRepo.paginate(pagination, where, {
-      orderBy: { endAt: 'DESC' },
-    })
+    const response = await this.challengeRepo.paginate(pagination, where)
     const challenges = response.data.map((challenge) => ChallengeDTO.mapToDTO(challenge))
     return { ...response, data: challenges }
   }

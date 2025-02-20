@@ -22,6 +22,7 @@ export const lockNodesHandler = async (bullJob: Job) => {
   try {
     await new NodesLockOperation(ctx).execute({ ids, async: true })
   } catch (error) {
-    await sendJobFailedEmails(bullJob.id.toString(), ctx)
+    log.error('Failed to lock nodes', error)
+    await sendJobFailedEmails(bullJob.id as number, ctx)
   }
 }

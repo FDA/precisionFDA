@@ -5,7 +5,7 @@ import {
   SPACE_MEMBERSHIP_ROLE,
   SPACE_MEMBERSHIP_SIDE,
 } from '@shared/domain/space-membership/space-membership.enum'
-import { CreateSpaceDto } from '@shared/domain/space/dto/create-space.dto'
+import { CreateSpaceDto } from '@shared/domain/space/dto/create-space-dto'
 import { SpaceNotificationService } from '@shared/domain/space/service/space-notification.service'
 import { Space } from '@shared/domain/space/space.entity'
 import { SPACE_TYPE } from '@shared/domain/space/space.enum'

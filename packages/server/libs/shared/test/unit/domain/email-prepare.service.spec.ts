@@ -48,8 +48,10 @@ describe('EmailPrepareService', () => {
       })
 
       findStub.returns([
-        getMembership(user, space as any, SPACE_MEMBERSHIP_SIDE.HOST),
-        getMembership(user2, space as any, SPACE_MEMBERSHIP_SIDE.HOST),
+        // @ts-ignore just for test purposes
+        getMembership(user, space, SPACE_MEMBERSHIP_SIDE.HOST),
+        // @ts-ignore just for test purposes
+        getMembership(user2, space, SPACE_MEMBERSHIP_SIDE.HOST),
       ])
 
       const input = {
@@ -59,8 +61,8 @@ describe('EmailPrepareService', () => {
           activityType: SPACE_EVENT_ACTIVITY_TYPE[SPACE_EVENT_ACTIVITY_TYPE.space_locked],
         },
         receiverUserIds: [],
-        emailTypeId: EMAIL_TYPES.spaceChanged as any,
-      } as unknown as EmailProcessInput
+        emailTypeId: EMAIL_TYPES.spaceChanged,
+      } as EmailProcessInput<EMAIL_TYPES.spaceChanged>
       const emails = await emailPrepareService.prepareEmails(input)
 
       expect(emails.length).to.eq(1)
@@ -71,10 +73,7 @@ describe('EmailPrepareService', () => {
   })
 
   const getMembership = (user: User, space: Space, side: SPACE_MEMBERSHIP_SIDE) => {
-    const membership = new SpaceMembership(user, space)
-    membership.side = side
-    membership.role = SPACE_MEMBERSHIP_ROLE.ADMIN
-    return membership
+    return new SpaceMembership(user, space, side, SPACE_MEMBERSHIP_ROLE.ADMIN)
   }
 
   const getUser = (id: number) => {
@@ -82,7 +81,7 @@ describe('EmailPrepareService', () => {
     const notificationPrefStub = createStubInstance(NotificationPreference)
     const expertStub = createStubInstance(Expert)
 
-    const userStub = new User(orgStub as any, notificationPrefStub as any, expertStub as any)
+    const userStub = new User(orgStub, notificationPrefStub, expertStub)
 
     userStub.id = id
     userStub.email = 'john.doe@test.com'
