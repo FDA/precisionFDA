@@ -615,7 +615,6 @@ module Api
       if result.success?
         target_folder_name = target_folder.present? ? target_folder.name : "root directory"
         type = :success
-        text = "Successfully moved #{result.value[:count]} item(s) to #{target_folder_name}"
       else
         type = :error
         text = result.value.values
@@ -627,7 +626,7 @@ module Api
                result.value[:scope] == "public" ? everybody_api_files_path : api_files_path
              end
 
-      render json: { path: path, message: { type: type, text: text } }, adapter: :json
+      render json: { path: path }, adapter: :json
     end
 
     # POST /api/files/remove

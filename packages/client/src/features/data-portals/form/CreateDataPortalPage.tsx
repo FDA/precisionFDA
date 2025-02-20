@@ -24,12 +24,11 @@ const CreateDataPortalPage = () => {
       dataPortal: {
         name: v.name,
         description: v.description,
-        url_slug: v.url_slug,
-        card_image_file_name: v.card_image_file[0]?.name,
-        status: v.status?.value,
-        host_lead_dxuser: v.host_lead_dxuser?.value,
-        guest_lead_dxuser: v.guest_lead_dxuser?.value,
-        sort_order: v.sort_order,
+        urlSlug: v.url_slug,
+        cardImageFileName: v.card_image_file[0]?.name,
+        hostLeadDxUser: v.host_lead_dxuser?.value,
+        guestLeadDxUser: v.guest_lead_dxuser?.value,
+        sortOrder: Number(v.sort_order),
       },
       image: v.card_image_file[0],
     } as CreateDataPortalData

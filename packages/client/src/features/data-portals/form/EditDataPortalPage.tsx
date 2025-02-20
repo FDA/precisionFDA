@@ -31,7 +31,7 @@ const EditDataPortalPage = () => {
         id: portal?.id,
         name: v.name,
         description: v.description,
-        sort_order: v.sort_order,
+        sortOrder: v.sort_order,
         status: v.status?.value,
       } as UpdateDataPortalRequest,
       spaceId: v.card_image_file ? portal?.spaceId : undefined,

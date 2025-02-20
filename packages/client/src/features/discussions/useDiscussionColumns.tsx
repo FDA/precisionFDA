@@ -16,8 +16,9 @@ export const useDiscussionColumns = ({ colWidths, onClick }: { colWidths?: KeyVa
       [
         {
           Header: 'Title',
-          accessor: 'note.title',
+          accessor: 'title',
           Filter: DefaultColumnFilter,
+          disableSortBy: true,
           width: colWidths?.title || 480,
           Cell: ({ cell, value }) => {
             return <StyledNameCell onClick={() => onClick(cell.row.original)}>{value}</StyledNameCell>
@@ -26,9 +27,19 @@ export const useDiscussionColumns = ({ colWidths, onClick }: { colWidths?: KeyVa
         {
           Header: 'Created',
           accessor: 'createdAt',
+          disableFilters: true,
           disableSortBy: true,
           width: colWidths?.created_at_date_time || 190,
+          Cell({ value }) {
+            return formatDate(value as any)
+          },
+        },
+        {
+          Header: 'Updated',
+          accessor: 'updatedAt',
           disableFilters: true,
+          disableSortBy: true,
+          width: colWidths?.created_at_date_time || 190,
           Cell({ value }) {
             return formatDate(value as any)
           },
@@ -44,11 +55,13 @@ export const useDiscussionColumns = ({ colWidths, onClick }: { colWidths?: KeyVa
         },
         {
           Header: 'Location',
-          accessor: 'note.scope',
+          accessor: 'scope',
           Filter: DefaultColumnFilter,
+          disableSortBy: true,
+
           width: colWidths?.location || 150,
           Cell: ({ row, value }) => (
-            <StyledLinkCell to={`/spaces/${getSpaceIdFromScope(row.original.note.scope)}/discussions`}>
+            <StyledLinkCell to={`/spaces/${getSpaceIdFromScope(row.original.scope)}/discussions`}>
               <ObjectGroupIcon />
               {value}
             </StyledLinkCell>

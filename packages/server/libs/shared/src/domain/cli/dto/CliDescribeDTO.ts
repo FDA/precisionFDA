@@ -1,5 +1,4 @@
 import { App } from '@shared/domain/app/app.entity'
-import { UserDTO } from '@shared/domain/discussion/discussion.types'
 import { Job } from '@shared/domain/job/job.entity'
 import { Asset } from '@shared/domain/user-file/asset.entity'
 import { Node } from '@shared/domain/user-file/node.entity'
@@ -11,6 +10,7 @@ import {
   WorkflowDescribeResponse,
 } from '@shared/platform-client/platform-client.responses'
 import { EntityScope } from '@shared/types/common'
+import { SimpleUserDTO } from '@shared/domain/user/dto/simple-user.dto'
 
 export class CliFileDescribeDTO {
   types: string[]
@@ -173,7 +173,7 @@ export class CliDiscussionDescribeDTO {
   id: number
   title: string
   content: string
-  user: UserDTO
+  user: SimpleUserDTO
   createdAt: Date
   updatedAt: Date
   answersCount: number
@@ -192,14 +192,14 @@ class CliAttachmentDTO {
 class CliCommentDTO {
   id: number
   content: string
-  user: UserDTO
+  user: SimpleUserDTO
   createdAt: Date
   updatedAt: Date
 }
 
 class CliAnswerDTO {
   id: number
-  user: UserDTO
+  user: SimpleUserDTO
   content: string
   comments: CliCommentDTO[]
   createdAt: Date

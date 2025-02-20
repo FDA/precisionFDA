@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2025_01_16_120925) do
+ActiveRecord::Schema.define(version: 2025_01_27_090212) do
 
   create_table "accepted_licenses", id: :integer, charset: "utf8mb3", collation: "utf8mb3_unicode_ci", force: :cascade do |t|
     t.integer "license_id"
@@ -267,7 +267,6 @@ ActiveRecord::Schema.define(version: 2025_01_16_120925) do
     t.string "card_image_url"
     t.integer "card_image_id"
     t.integer "sort_order"
-    t.string "status"
     t.integer "space_id"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false

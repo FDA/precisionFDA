@@ -1,7 +1,11 @@
 import { Type } from 'class-transformer'
-import { IsInt, Min } from 'class-validator'
+import { IsInt, IsOptional, Min } from 'class-validator'
+import { OrderDefinition, QueryOrder } from '@mikro-orm/core'
 
-export class PaginationDto {
+//TODO PFDA-6051: Ludvik - revisit if we need this custom type.
+export type SortDefinition<Entity extends object> = Partial<{ [key in keyof Entity]: QueryOrder }>
+
+export class PaginationDto<Entity extends object> {
   @Type(() => Number)
   @IsInt()
   @Min(1)
@@ -10,5 +14,9 @@ export class PaginationDto {
   @Type(() => Number)
   @IsInt()
   @Min(1)
-  pageSize?: number = 30
+  pageSize?: number = 10
+
+  // TODO(PFDA-6051) - validation
+  @IsOptional()
+  sort?: SortDefinition<Entity> & OrderDefinition<Entity> = {}
 }

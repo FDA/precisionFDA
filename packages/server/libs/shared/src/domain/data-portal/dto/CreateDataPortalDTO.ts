@@ -1,5 +1,4 @@
-import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator'
-import { DATA_PORTAL_STATUS } from '@shared/domain/data-portal/data-portal.enum'
+import { IsNumber, IsOptional, IsString } from 'class-validator'
 
 export class CreateDataPortalDTO {
   @IsString()
@@ -25,11 +24,5 @@ export class CreateDataPortalDTO {
   guestLeadDxUser: string
 
   @IsNumber()
-  spaceId: number
-
-  @IsNumber()
   sortOrder: number
-
-  @IsEnum(DATA_PORTAL_STATUS)
-  status: DATA_PORTAL_STATUS
 }

@@ -8,7 +8,6 @@ import {
   EmailSendInput,
   EmailTemplate,
   EMAIL_TYPES,
-  MemberChanged,
   NOTIFICATION_TYPES_BASE,
 } from '../../email.config'
 import { SPACE_EVENT_ACTIVITY_TYPE } from '../../../space-event/space-event.enum'
@@ -20,6 +19,7 @@ import {
   buildFilterByUserSettings,
   buildIsNotificationEnabled,
 } from '../../email.helper'
+import { MemberChangedDTO } from '@shared/domain/email/dto/member-changed.dto'
 
 type ActionNames = {
   [s in keyof typeof SPACE_EVENT_ACTIVITY_TYPE]?: string
@@ -32,7 +32,7 @@ const ACTION_NAMES: ActionNames = {
 } as const
 
 export class MemberChangedEmailHandler
-  extends BaseTemplate<MemberChanged>
+  extends BaseTemplate<MemberChangedDTO>
   implements EmailTemplate<MemberChangeTemplateInput>
 {
   templateFile = memberChangedTemplate
@@ -49,21 +49,17 @@ export class MemberChangedEmailHandler
       })
     } catch (err) {
       this.ctx.log.error({ err }, 'space not found - DB error')
-      throw new NotFoundError(
-        `Space id ${this.validatedInput.spaceId.toString()} not found`,
-        {
-          code: ErrorCodes.SPACE_NOT_FOUND,
-        },
-      )
+      throw new NotFoundError(`Space id ${this.validatedInput.spaceId.toString()} not found`, {
+        code: ErrorCodes.SPACE_NOT_FOUND,
+      })
     }
     try {
       this.user = await this.ctx.em.findOneOrFail(User, { id: this.validatedInput.initUserId })
     } catch (err) {
       this.ctx.log.error({ err }, 'user in space not found - DB error')
-      throw new NotFoundError(
-        `User id ${this.validatedInput.initUserId.toString()} not found`,
-        { code: ErrorCodes.EMAIL_PAYLOAD_NOT_FOUND },
-      )
+      throw new NotFoundError(`User id ${this.validatedInput.initUserId.toString()} not found`, {
+        code: ErrorCodes.EMAIL_PAYLOAD_NOT_FOUND,
+      })
     }
 
     try {
@@ -123,24 +119,26 @@ export class MemberChangedEmailHandler
     const isEnabledFn = buildIsNotificationEnabled(this.getNotificationKey(), this.ctx)
     const filterFn = buildFilterByUserSettings({ ...this.ctx, config: this.config }, isEnabledFn)
     const spaceEventUserId = this.user.id
-    const userMembership: any = memberships.filter(memberShip => {
+    const userMembership = memberships.filter((memberShip) => {
       if (memberShip.user.id === spaceEventUserId) {
         return memberShip
       }
     })
 
-    const receiverMembershipForAdding: any = memberships.filter(memberShip => {
-      if (userMembership &&
-          memberShip.side === userMembership[0].side &&
-          memberShip.user.id !== spaceEventUserId &&
-          [SPACE_MEMBERSHIP_ROLE.ADMIN, SPACE_MEMBERSHIP_ROLE.LEAD].includes(memberShip.role)
+    const receiverMembershipForAdding = memberships.filter((memberShip) => {
+      if (
+        userMembership &&
+        memberShip.side === userMembership[0].side &&
+        memberShip.user.id !== spaceEventUserId &&
+        [SPACE_MEMBERSHIP_ROLE.ADMIN, SPACE_MEMBERSHIP_ROLE.LEAD].includes(memberShip.role)
       ) {
         return memberShip
       }
     })
 
-    const receiverMembershipForChanging: any = memberships.filter(memberShip => {
-      if (userMembership &&
+    const receiverMembershipForChanging = memberships.filter((memberShip) => {
+      if (
+        userMembership &&
         memberShip.side === userMembership[0].side &&
         memberShip.user.id !== spaceEventUserId
       ) {
@@ -159,13 +157,18 @@ export class MemberChangedEmailHandler
     )
     let receivers
     // membership_added
-    if(this.validatedInput.activityType === 'membership_added') {
+    if (this.validatedInput.activityType === 'membership_added') {
       receivers = filterUsers(receiverMembershipForAdding)
-    } else { // other actions for membership: enable/disable/role change
+    } else {
+      // other actions for membership: enable/disable/role change
       receivers = filterUsers(receiverMembershipForChanging)
-      if(this.validatedInput.activityType === 'membership_enabled' &&
-        !this.updatedMembership.active) {
-        const enabledUser = await this.ctx.em.findOneOrFail(User, { id: this.updatedMembership.user.id })
+      if (
+        this.validatedInput.activityType === 'membership_enabled' &&
+        !this.updatedMembership.active
+      ) {
+        const enabledUser = await this.ctx.em.findOneOrFail(User, {
+          id: this.updatedMembership.user.id,
+        })
         receivers.push(enabledUser)
       }
     }
