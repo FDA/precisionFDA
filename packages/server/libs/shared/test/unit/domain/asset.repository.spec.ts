@@ -1,4 +1,3 @@
-/* eslint-disable max-len */
 import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
 import { Asset } from '@shared/domain/user-file/asset.entity'
 import { User } from '@shared/domain/user/user.entity'
@@ -75,12 +74,12 @@ describe('AssetRepository tests', () => {
 
     result = await repo.findUnclosedAssets(user1.id)
     expect(result).to.have.length(3)
-    let resultUids = result.map(x => x.uid)
+    let resultUids = result.map((x) => x.uid)
     expect(resultUids).to.deep.equal([assets[1].uid, assets[2].uid, assets[4].uid])
 
     result = await repo.findUnclosedAssets(user2.id)
     expect(result).to.have.length(1)
-    resultUids = result.map(x => x.uid)
+    resultUids = result.map((x) => x.uid)
     expect(resultUids).to.deep.equal([assets[5].uid])
   })
 
@@ -93,28 +92,28 @@ describe('AssetRepository tests', () => {
     // in private scope for different user - no
     assets[5].scope = STATIC_SCOPE.PRIVATE
     // in space the user has membership - yes
-    const space1 = create.spacesHelper.create(em, {name: 'space1'})
-    create.spacesHelper.addMember(em, {space: space1, user: user1})
+    const space1 = create.spacesHelper.create(em, { name: 'space1' })
+    create.spacesHelper.addMember(em, { space: space1, user: user1 })
     await em.flush()
-    assets[2].scope = space1.uid
+    assets[2].scope = space1.scope
     // in space that the user has no membership - no
-    const space2 = create.spacesHelper.create(em, {name: 'space2'})
-    create.spacesHelper.addMember(em, {space: space2, user: user2})
+    const space2 = create.spacesHelper.create(em, { name: 'space2' })
+    create.spacesHelper.addMember(em, { space: space2, user: user2 })
     await em.flush()
-    assets[3].scope = space2.uid
+    assets[3].scope = space2.scope
     await em.flush()
 
     // get ids for all assets (test filtering)
-    const uids = assets.map(asset => asset.uid)
+    const uids = assets.map((asset) => asset.uid)
     const repo = em.getRepository(Asset)
     let result = await repo.findAccessibleByUser(user1.id, uids)
 
     expect(result.length).to.equal(4)
-    const publicAsset = result.filter(asset => asset.isPublic())[0]
+    const publicAsset = result.filter((asset) => asset.isPublic())[0]
     expect(publicAsset.name).to.equal('user1_asset1')
-    const privateAssets = result.filter(asset => asset.isPrivate())
+    const privateAssets = result.filter((asset) => asset.isPrivate())
     expect(privateAssets.length).to.equal(2)
-    const spaceAsset = result.filter(asset => asset.scope === 'space-1')[0]
+    const spaceAsset = result.filter((asset) => asset.scope === 'space-1')[0]
     expect(spaceAsset.name).to.equal('user1_asset3')
   })
 })

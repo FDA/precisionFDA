@@ -5,7 +5,7 @@
   "author": "",
   "private": true,
   "license": "UNLICENSED",
-  "packageManager": "pnpm@9.0.6",
+  "packageManager": "pnpm@9.14.2",
   "scripts": {
     "format": "prettier --write \"apps/**/*.ts\" \"libs/**/*.ts\"",
     "build": "npm run build:api && npm run build:worker && npm run build:admin-platform-client",

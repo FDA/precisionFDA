@@ -26,6 +26,7 @@ import { CreateAnswerDTO } from '@shared/domain/discussion/dto/create-answer.dto
 import { UpdateDiscussionDTO } from '@shared/domain/discussion/dto/update-discussion.dto'
 import { CreateCommentDTO } from '@shared/domain/discussion/dto/create-comment.dto'
 import DiscussionRepository from '@shared/domain/discussion/discussion.repository'
+import { EntityScope } from '@shared/types/common'
 
 describe('DiscussionService tests', () => {
   let em: EntityManager<MySqlDriver>
@@ -335,7 +336,7 @@ describe('DiscussionService tests', () => {
     const createDiscussionInput: CreateDiscussionDTO = {
       title: 'test-discussion',
       content: 'test-content',
-      scope: scope,
+      scope: scope as EntityScope,
       notify: [],
       attachments: {
         files: [file.id],
