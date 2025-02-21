@@ -1,39 +1,109 @@
 import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
-import { database } from '@shared/database'
-import { ADMIN_GROUP_ROLES, AdminGroup } from '@shared/domain/admin-group/admin-group.entity'
 import { AdministratorSpaceCreationProcess } from '@shared/domain/space/create/administrator-space-creation.process'
 import { GovernmentSpaceCreationProcess } from '@shared/domain/space/create/government-space-creation.process'
 import { GroupsSpaceCreationProcess } from '@shared/domain/space/create/groups-space-creation.process'
 import { PrivateSpaceCreationProcess } from '@shared/domain/space/create/private-space-creation.process'
-import { CreateSpaceDto } from '@shared/domain/space/dto/create-space-dto'
 import { SpaceNotificationService } from '@shared/domain/space/service/space-notification.service'
 import { SPACE_TYPE } from '@shared/domain/space/space.enum'
-import { User } from '@shared/domain/user/user.entity'
+import { User, USER_STATE } from '@shared/domain/user/user.entity'
 import { PlatformClient } from '@shared/platform-client'
 import { ClassIdResponse } from '@shared/platform-client/platform-client.responses'
 import * as generate from '@shared/test/generate'
 import { expect } from 'chai'
 import { stub } from 'sinon'
-import { create, db } from '../../../src/test'
+import { ReviewSpaceCreationProcess } from '@shared/domain/space/create/review-space-creation.process'
+import { UserRepository } from '@shared/domain/user/user.repository'
+import { TaggingService } from '@shared/domain/tagging/tagging.service'
+import { Reference } from '@mikro-orm/core'
+import { Space } from '@shared/domain/space/space.entity'
+import { TAGGABLE_TYPE } from '@shared/domain/tagging/tagging.types'
+import {
+  SPACE_MEMBERSHIP_ROLE,
+  SPACE_MEMBERSHIP_SIDE,
+} from '@shared/domain/space-membership/space-membership.enum'
+import { config } from '@shared/config'
+import { ADMIN_GROUP_ROLES } from '@shared/domain/admin-group/admin-group.entity'
+import { CreateSpaceDTO } from '@shared/domain/space/dto/create-space-dto'
 
 describe('space creation process tests', () => {
+  const SHARED_SPACE_ID = 2
+  const GUEST_PRIVATE_SPACE_ID = 12
+  const HOST_PRIVATE_SPACE_ID = 13
+  const SINGLE_SPACE_ID = 15
+  const GUEST_ORG_ID = 20
+  const HOST_ORG_ID = 25
+
   let userCtx: UserCtx
-  let user: User
-  let em: EntityManager<MySqlDriver>
+  let emMocked: EntityManager<MySqlDriver>
   let platformClient: PlatformClient
   let adminPlatformClient: PlatformClient
   let spaceNotificationService: SpaceNotificationService
+  let taggingService: TaggingService
+  let userRepository: UserRepository
+  let referenceStub
 
   const createOrgStub = stub()
   const inviteUserToOrgStub = stub()
   const projectCreateStub = stub()
   const projectInviteStub = stub()
   const notifySpaceCreatedStub = stub()
+  const userRepoFindOneStub = stub()
+  const emFindOneStub = stub()
+  const emPersistAndFlushStub = stub()
+  const emCreateStub = stub()
+  const emTransactionalStub = stub()
+  const emPopulateStub = stub()
+  const emPersistStub = stub()
+  const emFindStub = stub()
+  const addTaggingForEntityStub = stub()
+
+  const siteAdmin = {
+    id: 1,
+    dxuser: 'siteAdminDxuser',
+    getEntity: () => {
+      return {
+        billTo: () => 'admin-bill-to',
+      }
+    },
+    isSiteAdmin: () => true,
+    isGovUser: () => false,
+    getProperty: (prop: string) => {
+      if (prop === 'dxuser') return 'siteAdminDxuser'
+      return undefined
+    },
+  }
+  const hostLeadUser = {
+    id: 3,
+    dxuser: 'hostLeadDxuser',
+    isSiteAdmin: () => false,
+    isReviewSpaceAdmin: () => true,
+    isGovUser: () => true,
+    getEntity: () => {
+      return {
+        billTo: () => 'host-bill-to',
+      }
+    },
+    getProperty: (prop: string) => {
+      if (prop === 'dxuser') return 'hostLeadDxuser'
+      return undefined
+    },
+  }
+  const guestLeadUser = {
+    id: 4,
+    dxuser: 'guestLeadDxuser',
+    organization: { id: GUEST_ORG_ID },
+    getEntity: () => {
+      return {
+        billTo: () => 'guest-bill-to',
+      }
+    },
+    getProperty: (prop: string) => {
+      if (prop === 'dxuser') return 'guestLeadDxuser'
+      return undefined
+    },
+  }
 
   beforeEach(async () => {
-    await db.dropData(database.connection())
-    em = database.orm().em.fork({ useContext: true }) as EntityManager<MySqlDriver>
-
     platformClient = {
       inviteUserToOrganization: inviteUserToOrgStub,
       createOrg: createOrgStub,
@@ -52,283 +122,672 @@ describe('space creation process tests', () => {
       notifySpaceCreated: notifySpaceCreatedStub,
     } as unknown as SpaceNotificationService
 
+    userRepository = {
+      findOne: userRepoFindOneStub,
+    } as unknown as UserRepository
+
+    taggingService = {
+      addTaggingForEntity: addTaggingForEntityStub,
+    } as unknown as TaggingService
+
+    emMocked = {
+      find: emFindStub,
+      findOne: emFindOneStub,
+      persist: emPersistStub,
+      persistAndFlush: emPersistAndFlushStub,
+      create: emCreateStub,
+      transactional: emTransactionalStub,
+      populate: emPopulateStub,
+    } as unknown as EntityManager<MySqlDriver>
+
     createOrgStub.reset()
-    inviteUserToOrgStub.reset()
     projectCreateStub.reset()
     projectInviteStub.reset()
     notifySpaceCreatedStub.reset()
+    emFindStub.reset()
 
     projectCreateStub.returns({ id: `project-${generate.random.dxstr()}` } as ClassIdResponse)
     createOrgStub.returns({ id: `org-${generate.random.dxstr()}` } as ClassIdResponse)
+
+    emTransactionalStub.callsFake(async (callback) => {
+      return callback(emTransactionalStub)
+    })
+
+    userRepoFindOneStub.reset()
+    userRepoFindOneStub.throws()
+
+    emFindOneStub.reset()
+    emFindOneStub.throws()
+
+    emPersistAndFlushStub.reset()
+    emPersistAndFlushStub.throws()
+
+    addTaggingForEntityStub.reset()
+    addTaggingForEntityStub.throws()
+
+    emPersistStub.reset()
+
+    referenceStub = stub(Reference, 'create')
+
+    emFindOneStub
+      .withArgs(User, {
+        id: siteAdmin.id,
+        userState: USER_STATE.ENABLED,
+      })
+      .resolves(siteAdmin)
+    emFindOneStub
+      .withArgs(User, {
+        dxuser: hostLeadUser.dxuser,
+        userState: { $ne: USER_STATE.DEACTIVATED },
+      })
+      .resolves(hostLeadUser)
+    emFindOneStub
+      .withArgs(User, {
+        dxuser: guestLeadUser.dxuser,
+        userState: { $ne: USER_STATE.DEACTIVATED },
+      })
+      .resolves(guestLeadUser)
+    emPersistAndFlushStub.reset()
+    emPersistAndFlushStub.callsFake(async (entity) => {
+      entity.id = SINGLE_SPACE_ID // setting group space id
+    })
+    createOrgStub.callsFake((handle) => {
+      if (handle.includes('guest')) {
+        return { id: GUEST_ORG_ID }
+      }
+      return { id: HOST_ORG_ID }
+    })
+    inviteUserToOrgStub.reset()
+    emPersistStub.reset()
+    emPopulateStub.reset()
+
+    referenceStub.withArgs(siteAdmin).returns(siteAdmin)
+    referenceStub.withArgs(hostLeadUser).returns(hostLeadUser)
+    referenceStub.withArgs(guestLeadUser).returns(guestLeadUser)
   })
 
-  it('create groups space as site admin', async () => {
-    user = create.userHelper.createSiteAdmin(em)
-    const hostLead = create.userHelper.create(em)
-    const guestLead = create.userHelper.create(em)
-    await em.flush()
-
-    const input = new CreateSpaceDto()
-    input.spaceType = SPACE_TYPE.GROUPS
-    input.name = 'test'
-    input.description = 'test'
-    input.hostLeadDxuser = hostLead.dxuser
-    input.guestLeadDxuser = guestLead.dxuser
-    input.protected = true
-    input.forChallenge = false
-    input.restrictedReviewer = false
-
-    const res = await groupsProcess().build(input)
-    expect(res).eq(1)
-    expect(createOrgStub.calledTwice).to.be.true()
-    expect(inviteUserToOrgStub.callCount).to.be.eq(4)
-    expect(projectCreateStub.calledTwice).to.be.true()
-    expect(projectInviteStub.callCount).to.eq(4)
-    expect(notifySpaceCreatedStub.calledTwice).to.be.true()
+  afterEach(() => {
+    referenceStub.restore()
   })
 
-  it('create challenge groups space as site admin', async () => {
-    user = create.userHelper.createSiteAdmin(em)
-    create.userHelper.createChallengeBot(em)
-    const hostLead = create.userHelper.create(em)
-    const guestLead = create.userHelper.create(em)
-    await em.flush()
+  describe('create groups space', () => {
+    it('as site admin', async () => {
+      const input = new CreateSpaceDTO()
+      input.spaceType = SPACE_TYPE.GROUPS
+      input.name = 'test'
+      input.description = 'test'
+      input.hostLeadDxuser = hostLeadUser.dxuser
+      input.guestLeadDxuser = guestLeadUser.dxuser
+      input.protected = true
+      input.forChallenge = false
+      input.restrictedReviewer = false
 
-    const input = new CreateSpaceDto()
-    input.spaceType = SPACE_TYPE.GROUPS
-    input.name = 'test'
-    input.description = 'test'
-    input.hostLeadDxuser = hostLead.dxuser
-    input.guestLeadDxuser = guestLead.dxuser
-    input.protected = false
-    input.forChallenge = true
-    input.restrictedReviewer = false
+      const res = await groupsProcess(siteAdmin.dxuser, siteAdmin.id).build(input)
+      expect(res).eq(SINGLE_SPACE_ID)
+      expect(createOrgStub.calledTwice).to.be.true()
+      expect(inviteUserToOrgStub.callCount).to.be.eq(4)
+      expect(projectCreateStub.calledTwice).to.be.true()
+      expect(projectInviteStub.callCount).to.eq(4)
+      expect(notifySpaceCreatedStub.calledTwice).to.be.true()
 
-    const res = await groupsProcess().build(input)
-    expect(res).eq(1)
-    expect(createOrgStub.calledTwice).to.be.true()
-    expect(inviteUserToOrgStub.callCount).to.be.eq(6)
-    expect(projectCreateStub.calledTwice).to.be.true()
-    expect(projectInviteStub.callCount).to.eq(4)
-    expect(notifySpaceCreatedStub.calledTwice).to.be.true()
+      // TODO more detailed expects for the call attributes
+    })
+
+    it('challenge groups space as site admin', async () => {
+      const input = new CreateSpaceDTO()
+      input.spaceType = SPACE_TYPE.GROUPS
+      input.name = 'test'
+      input.description = 'test'
+      input.hostLeadDxuser = hostLeadUser.dxuser
+      input.guestLeadDxuser = guestLeadUser.dxuser
+      input.protected = false
+      input.forChallenge = true
+      input.restrictedReviewer = false
+
+      const challengeBotUser = {
+        dxuser: config.platform.challengeBotUser,
+      }
+
+      emFindOneStub
+        .withArgs(User, { dxuser: config.platform.challengeBotUser })
+        .resolves({ challengeBotUser })
+
+      const res = await groupsProcess(siteAdmin.dxuser, siteAdmin.id).build(input)
+      expect(res).eq(SINGLE_SPACE_ID)
+      expect(createOrgStub.calledTwice).to.be.true()
+      expect(inviteUserToOrgStub.callCount).to.be.eq(6)
+      expect(projectCreateStub.calledTwice).to.be.true()
+      expect(projectInviteStub.callCount).to.eq(4)
+      expect(notifySpaceCreatedStub.calledTwice).to.be.true()
+
+      // TODO more detailed expects for the call attributes
+    })
+
+    it('non-admin - should fail', async () => {
+      const nonAdminUser = {
+        id: 2,
+        dxuser: 'nonAdminDxuser',
+        isSiteAdmin: () => false,
+        isReviewSpaceAdmin: () => false,
+      }
+
+      const input = new CreateSpaceDTO()
+      input.spaceType = SPACE_TYPE.GROUPS
+      input.name = 'test'
+      input.description = 'test'
+      input.hostLeadDxuser = hostLeadUser.dxuser
+      input.guestLeadDxuser = guestLeadUser.dxuser
+      input.protected = true
+      input.forChallenge = false
+      input.restrictedReviewer = false
+
+      emFindOneStub
+        .withArgs(User, {
+          id: nonAdminUser.id,
+          userState: USER_STATE.ENABLED,
+        })
+        .resolves(nonAdminUser)
+
+      try {
+        await groupsProcess(nonAdminUser.dxuser, nonAdminUser.id).build(input)
+        expect.fail('Operation is expected to fail.')
+      } catch (error) {
+        expect(error.name).to.equal('PermissionError')
+        expect(error.message).eq('Only admins can create Groups spaces')
+      }
+    })
   })
 
-  it('create groups space as non-admin - should fail', async () => {
-    user = create.userHelper.create(em)
-    const hostLead = create.userHelper.create(em)
-    const guestLead = create.userHelper.create(em)
-    await em.flush()
+  describe('create private space', () => {
+    it('basic', async () => {
+      const input = new CreateSpaceDTO()
+      input.spaceType = SPACE_TYPE.PRIVATE_TYPE
+      input.name = 'test'
+      input.description = 'test'
+      input.hostLeadDxuser = hostLeadUser.dxuser
 
-    const input = new CreateSpaceDto()
-    input.spaceType = SPACE_TYPE.GROUPS
-    input.name = 'test'
-    input.description = 'test'
-    input.hostLeadDxuser = hostLead.dxuser
-    input.guestLeadDxuser = guestLead.dxuser
-    input.protected = true
-    input.forChallenge = false
-    input.restrictedReviewer = false
+      emFindOneStub
+        .withArgs(User, {
+          id: hostLeadUser.id,
+          userState: USER_STATE.ENABLED,
+        })
+        .resolves(hostLeadUser)
 
-    try {
-      await groupsProcess().build(input)
-      expect.fail('Operation is expected to fail.')
-    } catch (error) {
-      expect(error.name).to.equal('PermissionError')
-      expect(error.message).eq('Only admins can create Groups spaces')
-    }
+      const res = await privateProcess(hostLeadUser.dxuser, hostLeadUser.id).build(input)
+      expect(res).eq(SINGLE_SPACE_ID)
+      expect(createOrgStub.calledOnce).to.be.true()
+
+      // TODO more detailed expects for the call attributes
+    })
+
+    it('for another user - should fail', async () => {
+      const input = new CreateSpaceDTO()
+      input.spaceType = SPACE_TYPE.PRIVATE_TYPE
+      input.name = 'test'
+      input.description = 'test'
+      input.hostLeadDxuser = guestLeadUser.dxuser
+
+      emFindOneStub
+        .withArgs(User, {
+          id: hostLeadUser.id,
+          userState: USER_STATE.ENABLED,
+        })
+        .resolves(hostLeadUser)
+
+      try {
+        await privateProcess(hostLeadUser.dxuser, hostLeadUser.id).build(input)
+        expect.fail('Operation is expected to fail.')
+      } catch (error) {
+        expect(error.name).to.equal('PermissionError')
+        expect(error.message).eq(
+          'You are not allowed to create new Private Space for another user!',
+        )
+      }
+    })
   })
 
-  it('create private space', async () => {
-    user = create.userHelper.create(em)
-    await em.flush()
+  describe('create administrator space', () => {
+    it('basic', async () => {
+      const input = new CreateSpaceDTO()
+      input.spaceType = SPACE_TYPE.ADMINISTRATOR
+      input.name = 'test'
+      input.description = 'test'
+      input.hostLeadDxuser = siteAdmin.dxuser
 
-    const input = new CreateSpaceDto()
-    input.spaceType = SPACE_TYPE.PRIVATE_TYPE
-    input.name = 'test'
-    input.description = 'test'
-    input.hostLeadDxuser = user.dxuser
+      emFindOneStub
+        .withArgs(User, {
+          dxuser: siteAdmin.dxuser,
+          userState: { $ne: USER_STATE.DEACTIVATED },
+        })
+        .resolves(siteAdmin)
+      emFindStub
+        .withArgs(User, {
+          dxuser: { $ne: siteAdmin.dxuser },
+          adminMemberships: {
+            adminGroup: { role: ADMIN_GROUP_ROLES.ROLE_SITE_ADMIN },
+          },
+        })
+        .returns([guestLeadUser])
 
-    const res = await privateProcess().build(input)
-    expect(res).eq(1)
-    expect(createOrgStub.calledOnce).to.be.true()
+      const res = await administratorProcess(siteAdmin.dxuser, siteAdmin.id).build(input)
+      expect(res).eq(SINGLE_SPACE_ID)
+      expect(createOrgStub.calledOnce).to.be.true()
+      expect(inviteUserToOrgStub.callCount).to.eq(2)
+
+      // TODO more detailed expects for the call attributes
+    })
+
+    it('as regular user - should fail', async () => {
+      const input = new CreateSpaceDTO()
+      input.spaceType = SPACE_TYPE.ADMINISTRATOR
+      input.name = 'test'
+      input.description = 'test'
+      input.hostLeadDxuser = hostLeadUser.dxuser
+
+      emFindOneStub
+        .withArgs(User, {
+          id: hostLeadUser.id,
+          userState: USER_STATE.ENABLED,
+        })
+        .resolves(hostLeadUser)
+
+      try {
+        await administratorProcess(hostLeadUser.dxuser, hostLeadUser.id).build(input)
+        expect.fail('Operation is expected to fail.')
+      } catch (error) {
+        expect(error.name).to.equal('PermissionError')
+        expect(error.message).eq('Only admins can create Administrator space')
+      }
+    })
+
+    it('for another user - should fail', async () => {
+      const input = new CreateSpaceDTO()
+      input.spaceType = SPACE_TYPE.ADMINISTRATOR
+      input.name = 'test'
+      input.description = 'test'
+      input.hostLeadDxuser = guestLeadUser.dxuser
+
+      try {
+        await administratorProcess(siteAdmin.dxuser, siteAdmin.id).build(input)
+        expect.fail('Operation is expected to fail.')
+      } catch (error) {
+        expect(error.name).to.equal('PermissionError')
+        expect(error.message).eq(
+          'You are not allowed to create new Administrator Space for another user!',
+        )
+      }
+    })
   })
 
-  it('create private space for another user - should fail', async () => {
-    user = create.userHelper.create(em)
-    const differentUser = create.userHelper.create(em)
-    await em.flush()
+  describe('create government space', () => {
+    it('basic', async () => {
+      const input = new CreateSpaceDTO()
+      input.spaceType = SPACE_TYPE.GOVERNMENT
+      input.name = 'test'
+      input.description = 'test'
+      input.hostLeadDxuser = hostLeadUser.dxuser
 
-    const input = new CreateSpaceDto()
-    input.spaceType = SPACE_TYPE.PRIVATE_TYPE
-    input.name = 'test'
-    input.description = 'test'
-    input.hostLeadDxuser = differentUser.dxuser
+      emFindOneStub
+        .withArgs(User, {
+          id: hostLeadUser.id,
+          userState: USER_STATE.ENABLED,
+        })
+        .resolves(hostLeadUser)
 
-    try {
-      await privateProcess().build(input)
-      expect.fail('Operation is expected to fail.')
-    } catch (error) {
-      expect(error.name).to.equal('PermissionError')
-      expect(error.message).eq('You are not allowed to create new Private Space for another user!')
-    }
+      const res = await governmentProcess(hostLeadUser.dxuser, hostLeadUser.id).build(input)
+      expect(res).eq(SINGLE_SPACE_ID)
+      expect(createOrgStub.calledOnce).to.be.true()
+
+      // TODO more detailed expects for the call attributes
+    })
+
+    it('for another user - should fail', async () => {
+      const input = new CreateSpaceDTO()
+      input.spaceType = SPACE_TYPE.GOVERNMENT
+      input.name = 'test'
+      input.description = 'test'
+      input.hostLeadDxuser = guestLeadUser.dxuser
+
+      emFindOneStub
+        .withArgs(User, {
+          id: hostLeadUser.id,
+          userState: USER_STATE.ENABLED,
+        })
+        .resolves(hostLeadUser)
+
+      try {
+        await governmentProcess(hostLeadUser.dxuser, hostLeadUser.id).build(input)
+        expect.fail('Operation is expected to fail.')
+      } catch (error) {
+        expect(error.name).to.equal('PermissionError')
+        expect(error.message).eq(
+          'You are not allowed to create new Government Space for another user!',
+        )
+      }
+    })
+
+    it('as regular user - should fail', async () => {
+      const input = new CreateSpaceDTO()
+      input.spaceType = SPACE_TYPE.GOVERNMENT
+      input.name = 'test'
+      input.description = 'test'
+      input.hostLeadDxuser = siteAdmin.dxuser
+
+      emFindOneStub
+        .withArgs(User, {
+          id: siteAdmin.id,
+          userState: USER_STATE.ENABLED,
+        })
+        .resolves(siteAdmin)
+
+      try {
+        await governmentProcess(siteAdmin.dxuser, siteAdmin.id).build(input)
+        expect.fail('Operation is expected to fail.')
+      } catch (error) {
+        expect(error.name).to.equal('PermissionError')
+        expect(error.message).eq('Only government users can create Government space!')
+      }
+    })
   })
 
-  it('create administrator space', async () => {
-    user = create.userHelper.createSiteAdmin(em)
-    const adminGroup = await em.findOne(AdminGroup, { role: ADMIN_GROUP_ROLES.ROLE_SITE_ADMIN })
-    create.userHelper.createSiteAdmin(em, adminGroup)
-    create.userHelper.createSiteAdmin(em, adminGroup)
+  describe('create review space', () => {
+    it('sponsor and reviewer must be different', async () => {
+      const input = new CreateSpaceDTO()
+      input.spaceType = SPACE_TYPE.REVIEW
+      input.guestLeadDxuser = 'the-same'
+      input.hostLeadDxuser = 'the-same'
 
-    const input = new CreateSpaceDto()
-    input.spaceType = SPACE_TYPE.ADMINISTRATOR
-    input.name = 'test'
-    input.description = 'test'
-    input.hostLeadDxuser = user.dxuser
-
-    const res = await administratorProcess().build(input)
-    expect(res).eq(1)
-    expect(createOrgStub.calledOnce).to.be.true()
-    expect(inviteUserToOrgStub.callCount).to.eq(3)
-  })
-
-  it('create administrator space as regular user - should fail', async () => {
-    user = create.userHelper.create(em)
-    create.userHelper.createSiteAdmin(em)
-    const adminGroup = await em.findOne(AdminGroup, { role: ADMIN_GROUP_ROLES.ROLE_SITE_ADMIN })
-    create.userHelper.createSiteAdmin(em, adminGroup)
-
-    const input = new CreateSpaceDto()
-    input.spaceType = SPACE_TYPE.ADMINISTRATOR
-    input.name = 'test'
-    input.description = 'test'
-    input.hostLeadDxuser = user.dxuser
-
-    try {
-      await administratorProcess().build(input)
-      expect.fail('Operation is expected to fail.')
-    } catch (error) {
-      expect(error.name).to.equal('PermissionError')
-      expect(error.message).eq('Only admins can create Administrator space')
-    }
-  })
-
-  it('create administrator space for another user - should fail', async () => {
-    user = create.userHelper.createSiteAdmin(em)
-    const differentUser = create.userHelper.create(em)
-    const adminGroup = await em.findOne(AdminGroup, { role: ADMIN_GROUP_ROLES.ROLE_SITE_ADMIN })
-    create.userHelper.createSiteAdmin(em, adminGroup)
-    create.userHelper.createSiteAdmin(em, adminGroup)
-
-    const input = new CreateSpaceDto()
-    input.spaceType = SPACE_TYPE.ADMINISTRATOR
-    input.name = 'test'
-    input.description = 'test'
-    input.hostLeadDxuser = differentUser.dxuser
-
-    try {
-      await administratorProcess().build(input)
-      expect.fail('Operation is expected to fail.')
-    } catch (error) {
-      expect(error.name).to.equal('PermissionError')
-      expect(error.message).eq(
-        'You are not allowed to create new Administrator Space for another user!',
+      await expect(reviewProcess('dxuser', 1).build(input)).to.be.rejectedWith(
+        Error,
+        'Sponsor and Reviewer leads must be different users',
       )
-    }
-  })
+    })
 
-  it('create government space', async () => {
-    user = create.userHelper.createGov(em)
-    await em.flush()
+    it('restricted reviewer is not FDA-asscociated', async () => {
+      const input = new CreateSpaceDTO()
+      input.spaceType = SPACE_TYPE.REVIEW
+      input.guestLeadDxuser = 'guestLeadDxuser'
+      input.hostLeadDxuser = 'hostLeadDxuser'
+      input.restrictedReviewer = true
+      const hostUser = {
+        id: 1,
+        dxuser: 'host',
+        isGovUser: () => false,
+      }
+      userRepoFindOneStub.reset()
+      userRepoFindOneStub.withArgs({ dxuser: 'hostLeadDxuser' }).resolves(hostUser)
 
-    const input = new CreateSpaceDto()
-    input.spaceType = SPACE_TYPE.GOVERNMENT
-    input.name = 'test'
-    input.description = 'test'
-    input.hostLeadDxuser = user.dxuser
-
-    const res = await governmentProcess().build(input)
-    expect(res).eq(1)
-    expect(createOrgStub.calledOnce).to.be.true()
-  })
-
-  it('create government space for another user - should fail', async () => {
-    user = create.userHelper.createGov(em)
-    const differentUser = create.userHelper.create(em)
-    await em.flush()
-
-    const input = new CreateSpaceDto()
-    input.spaceType = SPACE_TYPE.GOVERNMENT
-    input.name = 'test'
-    input.description = 'test'
-    input.hostLeadDxuser = differentUser.dxuser
-
-    try {
-      await governmentProcess().build(input)
-      expect.fail('Operation is expected to fail.')
-    } catch (error) {
-      expect(error.name).to.equal('PermissionError')
-      expect(error.message).eq(
-        'You are not allowed to create new Government Space for another user!',
+      await expect(reviewProcess('dxuser', 1).build(input)).to.be.rejectedWith(
+        Error,
+        `Reviewer lead ${hostUser.dxuser} is not an FDA-associated user`,
       )
-    }
+    })
+
+    it('checkPermissions - user not found', async () => {
+      const USER_ID = 1
+      const input = new CreateSpaceDTO()
+      input.spaceType = SPACE_TYPE.REVIEW
+      input.guestLeadDxuser = 'guestLeadDxuser'
+      input.hostLeadDxuser = 'hostLeadDxuser'
+
+      emFindOneStub.withArgs(User, { id: USER_ID, userState: USER_STATE.ENABLED }).resolves(null)
+
+      await expect(reviewProcess('dxuser', 1).build(input)).to.be.rejectedWith(
+        Error,
+        `User with ID: ${USER_ID} was not found!`,
+      )
+    })
+
+    it('checkPermissions - user is not ReviewSpaceAdmin', async () => {
+      const USER_ID = 1
+      const input = new CreateSpaceDTO()
+      input.spaceType = SPACE_TYPE.REVIEW
+      input.guestLeadDxuser = 'guestLeadDxuser'
+      input.hostLeadDxuser = 'hostLeadDxuser'
+      const user = {
+        isReviewSpaceAdmin: () => false,
+      }
+
+      emFindOneStub.withArgs(User, { id: USER_ID, userState: USER_STATE.ENABLED }).resolves(user)
+
+      await expect(reviewProcess('dxuser', 1).build(input)).to.be.rejectedWith(
+        Error,
+        'Only review space admins can create Review spaces',
+      )
+    })
+
+    it('basic', async () => {
+      const input = new CreateSpaceDTO()
+      input.spaceType = SPACE_TYPE.REVIEW
+      input.guestLeadDxuser = guestLeadUser.dxuser
+      input.hostLeadDxuser = hostLeadUser.dxuser
+      input.protected = true
+      input.restrictedReviewer = true
+
+      emFindOneStub
+        .withArgs(User, { id: hostLeadUser.id, userState: USER_STATE.ENABLED })
+        .resolves(hostLeadUser)
+      emFindOneStub
+        .withArgs(User, {
+          dxuser: hostLeadUser.dxuser,
+          userState: { $ne: USER_STATE.DEACTIVATED },
+        })
+        .resolves(hostLeadUser)
+      emFindOneStub
+        .withArgs(User, {
+          dxuser: guestLeadUser.dxuser,
+          userState: { $ne: USER_STATE.DEACTIVATED },
+        })
+        .resolves(guestLeadUser)
+      userRepoFindOneStub
+        .withArgs({ dxuser: input.guestLeadDxuser }, { populate: ['organization'] })
+        .resolves(guestLeadUser)
+      userRepoFindOneStub.withArgs({ dxuser: input.hostLeadDxuser }).resolves(hostLeadUser)
+      emPersistAndFlushStub.reset()
+      emPersistAndFlushStub.callsFake(async (entity) => {
+        entity.id = SHARED_SPACE_ID // setting shared space id
+        if (entity.sponsorOrgId) {
+          // It's a shared space, so set confidential spaces
+          const confidentialSponsorSpace = new Space()
+          confidentialSponsorSpace.id = GUEST_PRIVATE_SPACE_ID
+          const confidentialReviewerSpace = new Space()
+          confidentialReviewerSpace.id = HOST_PRIVATE_SPACE_ID
+          stub(entity, 'confidentialSponsorSpace').get(() => confidentialSponsorSpace)
+          stub(entity, 'confidentialReviewerSpace').get(() => confidentialReviewerSpace)
+        }
+      })
+      addTaggingForEntityStub.reset()
+      emCreateStub.callsFake((entityClass, entityData) => entityData)
+      emPopulateStub.resolves({})
+      createOrgStub.callsFake((handle) => {
+        if (handle.includes('guest')) {
+          return { id: GUEST_ORG_ID }
+        }
+        return { id: HOST_ORG_ID }
+      })
+      inviteUserToOrgStub.reset()
+      emPersistStub.reset()
+      referenceStub.withArgs(hostLeadUser).returns(hostLeadUser)
+      referenceStub.withArgs(guestLeadUser).returns(guestLeadUser)
+
+      await reviewProcess(hostLeadUser.dxuser, hostLeadUser.id).build(input)
+
+      expect(userRepoFindOneStub.calledTwice).to.be.true()
+      expect(userRepoFindOneStub.calledWith({ dxuser: input.hostLeadDxuser })).to.be.true()
+      expect(
+        userRepoFindOneStub.calledWith(
+          { dxuser: input.guestLeadDxuser },
+          { populate: ['organization'] },
+        ),
+      ).to.be.true()
+
+      expect(emFindOneStub.calledThrice).to.be.true()
+      expect(
+        emFindOneStub.calledWith(User, { id: hostLeadUser.id, userState: USER_STATE.ENABLED }),
+      ).to.be.true()
+      expect(
+        emFindOneStub.calledWith(User, {
+          dxuser: hostLeadUser.dxuser,
+          userState: { $ne: USER_STATE.DEACTIVATED },
+        }),
+      ).to.be.true()
+      expect(
+        emFindOneStub.calledWith(User, {
+          dxuser: guestLeadUser.dxuser,
+          userState: { $ne: USER_STATE.DEACTIVATED },
+        }),
+      ).to.be.true()
+
+      expect(emPersistAndFlushStub.calledOnce).to.be.true()
+      expect(emPersistAndFlushStub.firstCall.args[0].type).to.be.eq(SPACE_TYPE.REVIEW)
+
+      expect(addTaggingForEntityStub.calledTwice).to.be.true()
+      expect(addTaggingForEntityStub.firstCall.args[0]).to.be.eq('Protected')
+      expect(addTaggingForEntityStub.firstCall.args[1]).to.be.eq('User')
+      expect(addTaggingForEntityStub.firstCall.args[2]).to.be.eq(hostLeadUser.id)
+      expect(addTaggingForEntityStub.firstCall.args[3]).to.be.eq(SHARED_SPACE_ID)
+      expect(addTaggingForEntityStub.firstCall.args[4]).to.be.eq(TAGGABLE_TYPE.SPACE)
+      expect(addTaggingForEntityStub.secondCall.args[0]).to.be.eq('FDA-restricted')
+      expect(addTaggingForEntityStub.secondCall.args[1]).to.be.eq('User')
+      expect(addTaggingForEntityStub.secondCall.args[2]).to.be.eq(hostLeadUser.id)
+      expect(addTaggingForEntityStub.secondCall.args[3]).to.be.eq(SHARED_SPACE_ID)
+      expect(addTaggingForEntityStub.secondCall.args[4]).to.be.eq(TAGGABLE_TYPE.SPACE)
+
+      expect(emCreateStub.calledTwice).to.be.true()
+      expect(emCreateStub.firstCall.args[0]).to.be.eq(Space)
+      expect(emCreateStub.firstCall.args[1].spaceId).to.be.eq(SHARED_SPACE_ID)
+      expect(emCreateStub.secondCall.args[0]).to.be.eq(Space)
+      expect(emCreateStub.secondCall.args[1].spaceId).to.be.eq(SHARED_SPACE_ID)
+
+      expect(emPopulateStub.calledTwice).to.be.true()
+      expect(emPopulateStub.firstCall.args[1]).to.deep.eq(['confidentialSpaces'])
+      expect(emPopulateStub.firstCall.args[2]).to.deep.eq({ refresh: true })
+
+      expect(createOrgStub.calledTwice).to.be.true()
+      expect(createOrgStub.firstCall.args[0]).to.contain('host')
+      expect(createOrgStub.firstCall.args[1]).to.contain('host')
+      expect(createOrgStub.secondCall.args[0]).to.contain('guest')
+      expect(createOrgStub.secondCall.args[1]).to.contain('guest')
+
+      expect(emPopulateStub.secondCall.args[0].length).to.eq(2) // hostLead and guestLead
+      expect(emPopulateStub.secondCall.args[0][0].role).to.eq(SPACE_MEMBERSHIP_ROLE.LEAD)
+      expect(emPopulateStub.secondCall.args[0][0].side).to.eq(SPACE_MEMBERSHIP_SIDE.HOST)
+      expect(emPopulateStub.secondCall.args[0][1].role).to.eq(SPACE_MEMBERSHIP_ROLE.LEAD)
+      expect(emPopulateStub.secondCall.args[0][1].side).to.eq(SPACE_MEMBERSHIP_SIDE.GUEST)
+
+      expect(projectCreateStub.callCount).to.eq(4)
+      expect(projectCreateStub.firstCall.args[0].name).to.eq('precisionfda-space-2-HOST')
+      expect(projectCreateStub.firstCall.args[0].billTo).to.eq('host-bill-to')
+      expect(projectCreateStub.secondCall.args[0].name).to.eq('precisionfda-space-2-GUEST')
+      expect(projectCreateStub.secondCall.args[0].billTo).to.eq('guest-bill-to')
+      expect(projectCreateStub.thirdCall.args[0].name).to.eq(
+        'precisionfda-space-2-REVIEWER-PRIVATE',
+      )
+      expect(projectCreateStub.thirdCall.args[0].billTo).to.eq('host-bill-to')
+      expect(projectCreateStub.getCall(3).args[0].name).to.eq(
+        'precisionfda-space-2-SPONSOR-PRIVATE',
+      )
+      const guestProjectId = projectCreateStub.firstCall.returnValue.id
+      const hostProjectId = projectCreateStub.secondCall.returnValue.id
+      const hostPrivateProjectId = projectCreateStub.thirdCall.returnValue.id
+      const guestPrivateProjectId = projectCreateStub.getCall(3).returnValue.id
+
+      expect(projectCreateStub.getCall(3).args[0].billTo).to.eq('guest-bill-to')
+      expect(projectInviteStub.callCount).to.eq(6)
+      expect(projectInviteStub.firstCall.args[0].projectDxid).to.eq(hostProjectId)
+      expect(projectInviteStub.firstCall.args[0].invitee).to.contain('host')
+      expect(projectInviteStub.firstCall.args[0].level).to.contain('CONTRIBUTE')
+      expect(projectInviteStub.secondCall.args[0].projectDxid).to.eq(hostProjectId)
+      expect(projectInviteStub.secondCall.args[0].invitee).to.contain('guest')
+      expect(projectInviteStub.secondCall.args[0].level).to.contain('CONTRIBUTE')
+      expect(projectInviteStub.thirdCall.args[0].projectDxid).to.eq(guestProjectId)
+      expect(projectInviteStub.thirdCall.args[0].invitee).to.contain('host')
+      expect(projectInviteStub.thirdCall.args[0].level).to.contain('CONTRIBUTE')
+      expect(projectInviteStub.getCall(3).args[0].projectDxid).to.eq(guestProjectId)
+      expect(projectInviteStub.getCall(3).args[0].invitee).to.contain('guest')
+      expect(projectInviteStub.getCall(3).args[0].level).to.contain('CONTRIBUTE')
+      expect(projectInviteStub.getCall(4).args[0].projectDxid).to.eq(hostPrivateProjectId)
+      expect(projectInviteStub.getCall(4).args[0].invitee).to.contain('host')
+      expect(projectInviteStub.getCall(4).args[0].level).to.contain('CONTRIBUTE')
+      expect(projectInviteStub.getCall(5).args[0].projectDxid).to.eq(guestPrivateProjectId)
+      expect(projectInviteStub.getCall(5).args[0].invitee).to.contain('guest')
+      expect(projectInviteStub.getCall(5).args[0].level).to.contain('CONTRIBUTE')
+
+      expect(emPersistStub.callCount).to.eq(6)
+      expect(emPersistStub.firstCall.args[0].spaceId).to.be.eq(SHARED_SPACE_ID)
+      expect(emPersistStub.secondCall.args[0].spaceId).to.be.eq(SHARED_SPACE_ID)
+      expect(emPersistStub.thirdCall.args[0].length).to.eq(4)
+      expect(emPersistStub.thirdCall.args[0][0].side).to.eq(SPACE_MEMBERSHIP_SIDE.HOST)
+      expect(emPersistStub.thirdCall.args[0][0].role).to.eq(SPACE_MEMBERSHIP_ROLE.LEAD)
+      expect(emPersistStub.thirdCall.args[0][1].side).to.eq(SPACE_MEMBERSHIP_SIDE.GUEST)
+      expect(emPersistStub.thirdCall.args[0][1].role).to.eq(SPACE_MEMBERSHIP_ROLE.LEAD)
+      expect(emPersistStub.thirdCall.args[0][2].side).to.eq(SPACE_MEMBERSHIP_SIDE.HOST)
+      expect(emPersistStub.thirdCall.args[0][2].role).to.eq(SPACE_MEMBERSHIP_ROLE.LEAD)
+      expect(emPersistStub.thirdCall.args[0][3].side).to.eq(SPACE_MEMBERSHIP_SIDE.GUEST)
+      expect(emPersistStub.thirdCall.args[0][3].role).to.eq(SPACE_MEMBERSHIP_ROLE.LEAD)
+      expect(emPersistStub.getCall(3).args[0].id).to.eq(SHARED_SPACE_ID)
+      expect(emPersistStub.getCall(4).args[0].id).to.eq(GUEST_PRIVATE_SPACE_ID)
+      expect(emPersistStub.getCall(4).args[0].guestProject).to.eq(guestProjectId)
+      expect(emPersistStub.getCall(5).args[0].id).to.eq(HOST_PRIVATE_SPACE_ID)
+      expect(emPersistStub.getCall(5).args[0].hostProject).to.eq(hostProjectId)
+
+      expect(notifySpaceCreatedStub.calledTwice).to.be.true()
+      expect(notifySpaceCreatedStub.firstCall.args[0].id).to.eq(SHARED_SPACE_ID)
+      expect(notifySpaceCreatedStub.firstCall.args[1].billTo()).to.eq('host-bill-to')
+      expect(notifySpaceCreatedStub.secondCall.args[0].id).to.eq(SHARED_SPACE_ID)
+      expect(notifySpaceCreatedStub.secondCall.args[1].billTo()).to.eq('guest-bill-to')
+    })
   })
 
-  it('create government space as regular user - should fail', async () => {
-    user = create.userHelper.create(em)
-    await em.flush()
+  function reviewProcess(dxuser: string, userId: number) {
+    userCtx = { dxuser, id: userId, accessToken: 'secret-token' }
+    return new ReviewSpaceCreationProcess(
+      userCtx,
+      emMocked,
+      spaceNotificationService,
+      adminPlatformClient,
+      taggingService,
+      userRepository,
+    )
+  }
 
-    const input = new CreateSpaceDto()
-    input.spaceType = SPACE_TYPE.GOVERNMENT
-    input.name = 'test'
-    input.description = 'test'
-    input.hostLeadDxuser = user.dxuser
-
-    try {
-      await governmentProcess().build(input)
-      expect.fail('Operation is expected to fail.')
-    } catch (error) {
-      expect(error.name).to.equal('PermissionError')
-      expect(error.message).eq('Only government users can create Government space!')
-    }
-  })
-
-  function groupsProcess() {
-    userCtx = { dxuser: user.dxuser, id: user.id, accessToken: 'secret-token' }
+  function groupsProcess(dxuser: string, userId: number) {
+    userCtx = { dxuser, id: userId, accessToken: 'secret-token' }
     return new GroupsSpaceCreationProcess(
       userCtx,
-      em,
+      emMocked,
       spaceNotificationService,
       adminPlatformClient,
     )
   }
 
-  function privateProcess() {
-    userCtx = { dxuser: user.dxuser, id: user.id, accessToken: 'secret-token' }
+  function privateProcess(dxuser: string, userId: number) {
+    userCtx = { dxuser, id: userId, accessToken: 'secret-token' }
     return new PrivateSpaceCreationProcess(
       userCtx,
-      em,
+      emMocked,
       spaceNotificationService,
       platformClient,
       adminPlatformClient,
     )
   }
 
-  function administratorProcess() {
-    userCtx = { dxuser: user.dxuser, id: user.id, accessToken: 'secret-token' }
+  function administratorProcess(dxuser: string, userId: number) {
+    userCtx = { dxuser, id: userId, accessToken: 'secret-token' }
     return new AdministratorSpaceCreationProcess(
       userCtx,
-      em,
+      emMocked,
       spaceNotificationService,
       platformClient,
       adminPlatformClient,
     )
   }
 
-  function governmentProcess() {
-    userCtx = { dxuser: user.dxuser, id: user.id, accessToken: 'secret-token' }
+  function governmentProcess(dxuser: string, userId: number) {
+    userCtx = { dxuser, id: userId, accessToken: 'secret-token' }
     return new GovernmentSpaceCreationProcess(
       userCtx,
-      em,
+      emMocked,
       spaceNotificationService,
       platformClient,
       adminPlatformClient,

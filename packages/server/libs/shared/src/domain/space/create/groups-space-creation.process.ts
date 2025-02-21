@@ -1,6 +1,5 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Inject, Injectable } from '@nestjs/common'
-import { getHandle } from '@shared/domain/org/org.utils'
 import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
 import {
   SPACE_MEMBERSHIP_ROLE,
@@ -14,6 +13,7 @@ import { User } from '@shared/domain/user/user.entity'
 import { NotFoundError, PermissionError } from '@shared/errors'
 import { PlatformClient } from '@shared/platform-client'
 import { ADMIN_PLATFORM_CLIENT } from '@shared/platform-client/providers/admin-platform-client.provider'
+import { CreateSpaceDTO } from '@shared/domain/space/dto/create-space-dto'
 
 /**
  * Concrete subclass of {@link SpaceCreationProcess} for creating a Groups space.
@@ -21,48 +21,33 @@ import { ADMIN_PLATFORM_CLIENT } from '@shared/platform-client/providers/admin-p
 @Injectable()
 export class GroupsSpaceCreationProcess extends SpaceCreationProcess {
   constructor(
-    userContext: UserContext,
+    user: UserContext,
     em: SqlEntityManager,
     notificationService: SpaceNotificationService,
     @Inject(ADMIN_PLATFORM_CLIENT) adminClient: PlatformClient,
   ) {
-    super(userContext, em, notificationService, adminClient)
+    super(user, em, notificationService, adminClient)
+  }
+
+  protected validateInput(input: CreateSpaceDTO) {
+    if (input.guestLeadDxuser === input.hostLeadDxuser) {
+      throw new Error('Host and Guest leads must be different users')
+    }
   }
 
   protected async checkPermissions(user: User): Promise<void> {
     if (!user) {
-      throw new NotFoundError(`User with ID: ${this.userContext.id} was not found!`)
+      throw new NotFoundError(`User with ID: ${this.user.id} was not found!`)
     }
-    // space admin is called reviewSpaceAdmin but it's wrong - PFDA-5437 will resolve it in the future
+    // space admin is called reviewSpaceAdmin, but it's wrong - PFDA-5437 will resolve it in the future
     if (!(await user.isSiteAdmin()) && !(await user.isReviewSpaceAdmin())) {
       throw new PermissionError('Only admins can create Groups spaces')
     }
   }
 
   protected async buildOrgs(space: Space): Promise<void> {
-    try {
-      const handle = getHandle(space.hostDxOrg)
-      const org = await this.adminClient.createOrg(handle, handle)
-
-      this.logger.log(`created host org on platform: ${org.id} for space: ${space.id}`)
-      //TODO: add auditing like rails have in packages/rails/app/services/org_service/create.rb#L12
-    } catch (e) {
-      // an error might be thrown when the org name already exist, but it is very unlikely so we do not handle any recovery
-      this.logger.error(`error creating host org on platform: ${space.hostDxOrg}`)
-      throw e
-    }
-
-    try {
-      const handle = getHandle(space.guestDxOrg)
-      const org = await this.adminClient.createOrg(handle, handle)
-      this.logger.log(`created guest org on platform: ${org.id} for space: ${space.id}`)
-
-      //TODO: add auditing like rails have in packages/rails/app/services/org_service/create.rb#L12
-    } catch (e) {
-      // an error might be thrown when the org name already exist, but it is very unlikely so we do not handle any recovery
-      this.logger.error(`error creating guest org on platform: ${space.guestDxOrg}`)
-      throw e
-    }
+    await super.createOrgForSpace(space.id, space.hostDxOrg)
+    await super.createOrgForSpace(space.id, space.guestDxOrg)
   }
 
   protected async inviteMembers(
@@ -142,7 +127,7 @@ export class GroupsSpaceCreationProcess extends SpaceCreationProcess {
     await this.em.populate([hostLead, guestLead], ['user.organization'])
 
     const hostProject = await this.adminClient.projectCreate({
-      name: `precisionfda-${space.uid}-HOST`,
+      name: `precisionfda-${space.scope}-HOST`,
       billTo: hostLead.user.getEntity().billTo(),
     })
     this.logger.log(
@@ -150,7 +135,7 @@ export class GroupsSpaceCreationProcess extends SpaceCreationProcess {
     )
 
     const guestProject = await this.adminClient.projectCreate({
-      name: `precisionfda-${space.uid}-GUEST`,
+      name: `precisionfda-${space.scope}-GUEST`,
       billTo: guestLead.user.getEntity().billTo(),
     })
     this.logger.log(

@@ -1,13 +1,11 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Inject, Injectable } from '@nestjs/common'
-import { getHandle } from '@shared/domain/org/org.utils'
 import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
 import {
   SPACE_MEMBERSHIP_ROLE,
   SPACE_MEMBERSHIP_SIDE,
 } from '@shared/domain/space-membership/space-membership.enum'
 import { SpaceCreationProcess } from '@shared/domain/space/create/space-creation.process'
-import { CreateSpaceDto } from '@shared/domain/space/dto/create-space-dto'
 import { SpaceNotificationService } from '@shared/domain/space/service/space-notification.service'
 import { Space } from '@shared/domain/space/space.entity'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
@@ -15,6 +13,7 @@ import { User } from '@shared/domain/user/user.entity'
 import { NotFoundError, PermissionError } from '@shared/errors'
 import { PlatformClient } from '@shared/platform-client'
 import { ADMIN_PLATFORM_CLIENT } from '@shared/platform-client/providers/admin-platform-client.provider'
+import { CreateSpaceDTO } from '@shared/domain/space/dto/create-space-dto'
 
 /**
  * Concrete subclass of {@link SpaceCreationProcess} for creating a Private space.
@@ -22,18 +21,18 @@ import { ADMIN_PLATFORM_CLIENT } from '@shared/platform-client/providers/admin-p
 @Injectable()
 export class PrivateSpaceCreationProcess extends SpaceCreationProcess {
   constructor(
-    userContext: UserContext,
+    user: UserContext,
     em: SqlEntityManager,
     notificationService: SpaceNotificationService,
     private readonly userClient: PlatformClient,
     @Inject(ADMIN_PLATFORM_CLIENT) adminClient: PlatformClient,
   ) {
-    super(userContext, em, notificationService, adminClient)
+    super(user, em, notificationService, adminClient)
   }
 
-  protected async checkPermissions(user: User, input: CreateSpaceDto): Promise<void> {
+  protected async checkPermissions(user: User, input: CreateSpaceDTO): Promise<void> {
     if (!user) {
-      throw new NotFoundError(`User with ID: ${this.userContext.id} was not found!`)
+      throw new NotFoundError(`User with ID: ${this.user.id} was not found!`)
     }
     if (input.hostLeadDxuser !== user.dxuser) {
       throw new PermissionError(`You are not allowed to create new Private Space for another user!`)
@@ -41,17 +40,7 @@ export class PrivateSpaceCreationProcess extends SpaceCreationProcess {
   }
 
   protected async buildOrgs(space: Space): Promise<void> {
-    try {
-      const handle = getHandle(space.hostDxOrg)
-      // userclient instead of admin. user is creating the org for themselves.
-      const org = await this.adminClient.createOrg(handle, handle)
-      this.logger.log(`created host org on platform: ${org.id} for space: ${space.id}`)
-      //TODO: add auditing like rails have in packages/rails/app/services/org_service/create.rb#L12
-    } catch (e) {
-      // an error might be thrown when the org name already exist, but it is very unlikely so we do not handle any recovery
-      this.logger.error(`error creating host org on platform: ${space.hostDxOrg}`)
-      throw e
-    }
+    await super.createOrgForSpace(space.id, space.hostDxOrg)
   }
 
   protected async inviteMembers(
@@ -92,7 +81,7 @@ export class PrivateSpaceCreationProcess extends SpaceCreationProcess {
 
     // create project as user creating the space
     const hostProject = await this.userClient.projectCreate({
-      name: `precisionfda-${space.uid}-HOST`,
+      name: `precisionfda-${space.scope}-HOST`,
       billTo: hostLead.user.getEntity().billTo(),
     })
     this.logger.log(
@@ -109,6 +98,8 @@ export class PrivateSpaceCreationProcess extends SpaceCreationProcess {
     space.hostProject = hostProject.id
     this.em.persist(space)
   }
+
+  protected validateInput() {}
 
   protected async sendEmails() {
     // no emails for private space - user is creating it for themselves and is redirected into it immediately

@@ -84,6 +84,7 @@ describe('ChallengeFacade', () => {
         guestLeadDxuser: CREATE_CHALLENGE_DTO.guestLeadDxuser,
         hostLeadDxuser: CREATE_CHALLENGE_DTO.hostLeadDxuser,
         spaceType: SPACE_TYPE.GROUPS,
+        restrictedDiscussions: false,
         restrictedReviewer: false,
         protected: false,
       })

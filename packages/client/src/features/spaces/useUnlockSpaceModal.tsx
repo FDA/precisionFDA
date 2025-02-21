@@ -13,8 +13,10 @@ export const useUnlockSpaceModal = ({
   onSuccess,
 }: {
   space: ISpace
-  onSuccess?: () => void
+  onSuccess?: (isLocked: boolean) => void
 }) => {
+  const isLocked = space.links.unlock
+
   const { isShown, setShowModal } = useModal()
   const unlockSpaceMutation = useMutation({
     mutationKey: ['lock-unlock-space'],
@@ -24,7 +26,7 @@ export const useUnlockSpaceModal = ({
       link?: string
     }) => unlockSpaceRequest(payload),
     onSuccess: () => {
-      if(onSuccess) onSuccess()
+      if(onSuccess) onSuccess(!!isLocked)
       setShowModal(false)
     },
     onError: (err) => {
@@ -35,7 +37,6 @@ export const useUnlockSpaceModal = ({
     setShowModal(false)
   }
 
-  const isLocked = space.links.unlock
   const modalComp = (
     <Modal
       data-testid="modal-unlock-lock-space"
