@@ -74,7 +74,9 @@ class GinasUnauthorizedController < ApplicationController
 
   # Reverse proxy for importing substances from URL
   def json_reverse_proxy
-    url = request.query_parameters[:url]
+    raw_query = request.query_string
+    url = raw_query.match(/(?:^|&|\?)url=([^&]*)/)&.captures&.first
+
     if url.blank?
       render status: :bad_request, json: { message: "URL param is empty" }
       return
