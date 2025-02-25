@@ -10,12 +10,14 @@ import {AutoFocusPlugin} from '@lexical/react/LexicalAutoFocusPlugin';
 import {CharacterLimitPlugin} from '@lexical/react/LexicalCharacterLimitPlugin';
 import {ClearEditorPlugin} from '@lexical/react/LexicalClearEditorPlugin';
 import {ClickableLinkPlugin} from '@lexical/react/LexicalClickableLinkPlugin';
+import {useLexicalComposerContext} from '@lexical/react/LexicalComposerContext';
 import {LexicalErrorBoundary} from '@lexical/react/LexicalErrorBoundary';
 import {HistoryPlugin} from '@lexical/react/LexicalHistoryPlugin';
 import {HorizontalRulePlugin} from '@lexical/react/LexicalHorizontalRulePlugin';
 import {ListPlugin} from '@lexical/react/LexicalListPlugin';
 import {PlainTextPlugin} from '@lexical/react/LexicalPlainTextPlugin';
 import {RichTextPlugin} from '@lexical/react/LexicalRichTextPlugin';
+import {SelectionAlwaysOnDisplay} from '@lexical/react/LexicalSelectionAlwaysOnDisplay';
 import {TabIndentationPlugin} from '@lexical/react/LexicalTabIndentationPlugin';
 import {TablePlugin} from '@lexical/react/LexicalTablePlugin';
 import {useLexicalEditable} from '@lexical/react/useLexicalEditable';
@@ -47,6 +49,7 @@ import PageBreakPlugin from './plugins/PageBreakPlugin';
 import TabFocusPlugin from './plugins/TabFocusPlugin';
 import TableCellActionMenuPlugin from './plugins/TableActionMenuPlugin';
 import TableCellResizer from './plugins/TableCellResizer';
+import TableHoverActionsPlugin from './plugins/TableHoverActionsPlugin';
 import TableOfContentsPlugin from './plugins/TableOfContentsPlugin';
 import ToolbarPlugin from './plugins/ToolbarPlugin';
 import YouTubePlugin from './plugins/YouTubePlugin';
@@ -64,6 +67,7 @@ export default function Editor({ insertImageType }: { insertImageType: InsertIma
       isAutocomplete,
       isMaxLength,
       isCharLimit,
+      hasLinkAttributes,
       isCharLimitUtf8,
       isRichText,
       showTreeView,
@@ -72,6 +76,9 @@ export default function Editor({ insertImageType }: { insertImageType: InsertIma
       shouldPreserveNewLinesInMarkdown,
       tableCellMerge,
       tableCellBackgroundColor,
+      tableHorizontalScroll,
+      shouldAllowHighlightingWithBrackets,
+      selectionAlwaysOnDisplay,
     },
   } = useSettings();
   const isEditable = useLexicalEditable();
@@ -86,6 +93,8 @@ export default function Editor({ insertImageType }: { insertImageType: InsertIma
     useState<HTMLDivElement | null>(null);
   const [isSmallWidthViewport, setIsSmallWidthViewport] =
     useState<boolean>(false);
+  const [editor] = useLexicalComposerContext();
+  const [activeEditor, setActiveEditor] = useState(editor);
   const [isLinkEditMode, setIsLinkEditMode] = useState<boolean>(false);
 
   const onRef = (_floatingAnchorElem: HTMLDivElement) => {
@@ -113,7 +122,15 @@ export default function Editor({ insertImageType }: { insertImageType: InsertIma
 
   return (
     <>
-      {isRichText && <ToolbarPlugin setIsLinkEditMode={setIsLinkEditMode} insertImageType={insertImageType} />}
+      {isRichText && (
+        <ToolbarPlugin
+          editor={editor}
+          activeEditor={activeEditor}
+          setActiveEditor={setActiveEditor}
+          setIsLinkEditMode={setIsLinkEditMode}
+          insertImageType={insertImageType}
+        />
+      )}
       <div className="editor-wrapper">
         <div
           className={`editor-container ${showTreeView ? 'tree-view' : ''} ${
@@ -122,6 +139,7 @@ export default function Editor({ insertImageType }: { insertImageType: InsertIma
           {isMaxLength && <MaxLengthPlugin maxLength={30} />}
           <DragDropPaste />
           <AutoFocusPlugin />
+          {selectionAlwaysOnDisplay && <SelectionAlwaysOnDisplay />}
           <ClearEditorPlugin />
           <ComponentPickerPlugin />
           <AutoEmbedPlugin />
@@ -144,11 +162,12 @@ export default function Editor({ insertImageType }: { insertImageType: InsertIma
               <TablePlugin
                 hasCellMerge={tableCellMerge}
                 hasCellBackgroundColor={tableCellBackgroundColor}
+                hasHorizontalScroll={tableHorizontalScroll}
               />
               <TableCellResizer />
               <ImagesPlugin />
               <InlineImagePlugin />
-              <LinkPlugin />
+              <LinkPlugin hasLinkAttributes={hasLinkAttributes} />
               <YouTubePlugin />
               <ClickableLinkPlugin disabled={isEditable} />
               <HorizontalRulePlugin />
@@ -157,25 +176,26 @@ export default function Editor({ insertImageType }: { insertImageType: InsertIma
               <CollapsiblePlugin />
               <PageBreakPlugin />
               <LayoutPlugin />
-              {floatingAnchorElem && <DraggableBlockPlugin anchorElem={floatingAnchorElem} />}
               {floatingAnchorElem && !isSmallWidthViewport && (
-                <>
-                  <CodeActionMenuPlugin anchorElem={floatingAnchorElem} />
-                  <FloatingLinkEditorPlugin
-                    anchorElem={floatingAnchorElem}
-                    isLinkEditMode={isLinkEditMode}
-                    setIsLinkEditMode={setIsLinkEditMode}
-                  />
-                  <TableCellActionMenuPlugin
-                    anchorElem={floatingAnchorElem}
-                    cellMerge={true}
-                  />
-                  <FloatingTextFormatToolbarPlugin
-                    anchorElem={floatingAnchorElem}
-                    setIsLinkEditMode={setIsLinkEditMode}
-                  />
-                </>
-              )}
+              <>
+                <DraggableBlockPlugin anchorElem={floatingAnchorElem} />
+                <CodeActionMenuPlugin anchorElem={floatingAnchorElem} />
+                <FloatingLinkEditorPlugin
+                  anchorElem={floatingAnchorElem}
+                  isLinkEditMode={isLinkEditMode}
+                  setIsLinkEditMode={setIsLinkEditMode}
+                />
+                <TableCellActionMenuPlugin
+                  anchorElem={floatingAnchorElem}
+                  cellMerge={true}
+                />
+                <TableHoverActionsPlugin anchorElem={floatingAnchorElem} />
+                <FloatingTextFormatToolbarPlugin
+                  anchorElem={floatingAnchorElem}
+                  setIsLinkEditMode={setIsLinkEditMode}
+                />
+              </>
+            )}
             </>
           ) : (
             <>
