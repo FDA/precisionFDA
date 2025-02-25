@@ -26,12 +26,13 @@ import {
   DRAGOVER_COMMAND,
   DRAGSTART_COMMAND,
   DROP_COMMAND,
+  getDOMSelectionFromTarget,
+  isHTMLElement,
   LexicalCommand,
   LexicalEditor,
 } from 'lexical';
 import * as React from 'react';
 import {useEffect, useRef, useState} from 'react';
-import {CAN_USE_DOM} from '../../environment';
 
 import {
   $createInlineImageNode,
@@ -46,9 +47,6 @@ import Select from '../../ui/Select';
 import TextInput from '../../ui/TextInput';
 
 export type InsertInlineImagePayload = Readonly<InlineImagePayload>;
-
-const getDOMSelection = (targetWindow: Window | null): Selection | null =>
-  CAN_USE_DOM ? (targetWindow || window).getSelection() : null;
 
 export const INSERT_INLINE_IMAGE_COMMAND: LexicalCommand<InlineImagePayload> =
   createCommand('INSERT_INLINE_IMAGE_COMMAND');
@@ -304,24 +302,16 @@ declare global {
 function canDropImage(event: DragEvent): boolean {
   const target = event.target;
   return !!(
-    target &&
-    target instanceof HTMLElement &&
+    isHTMLElement(target) &&
     !target.closest('code, span.editor-image') &&
-    target.parentElement &&
+    isHTMLElement(target.parentElement) &&
     target.parentElement.closest('div.ContentEditable__root')
   );
 }
 
 function getDragSelection(event: DragEvent): Range | null | undefined {
   let range;
-  const target = event.target as null | Element | Document;
-  const targetWindow =
-    target == null
-      ? null
-      : target.nodeType === 9
-      ? (target as Document).defaultView
-      : (target as Element).ownerDocument.defaultView;
-  const domSelection = getDOMSelection(targetWindow);
+  const domSelection = getDOMSelectionFromTarget(event.target);
   if (document.caretRangeFromPoint) {
     range = document.caretRangeFromPoint(event.clientX, event.clientY);
   } else if (event.rangeParent && domSelection !== null) {
