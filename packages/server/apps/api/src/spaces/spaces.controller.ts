@@ -32,7 +32,7 @@ import { PlatformClient } from '@shared/platform-client'
 import { UserOpsCtx } from '@shared/types'
 import { SiteAdminGuard } from '../admin/guards/site-admin.guard'
 import { UserContextGuard } from '../user-context/guard/user-context.guard'
-import { CreateSpaceDto } from '@shared/domain/space/dto/create-space-dto'
+import { CreateSpaceDTO } from '@shared/domain/space/dto/create-space-dto'
 
 @UseGuards(UserContextGuard)
 @Controller('/spaces')
@@ -46,8 +46,9 @@ export class SpacesController {
   ) {}
 
   @Post()
-  async create(@Body() space: CreateSpaceDto) {
-    return await this.spaceService.create(space)
+  async create(@Body() space: CreateSpaceDTO) {
+    const spaceId = await this.spaceService.create(space)
+    return { id: spaceId }
   }
 
   @HttpCode(204)

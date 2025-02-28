@@ -5,7 +5,7 @@
   "main": "index.js",
   "dependencies": {},
   "devDependencies": {},
-  "packageManager": "pnpm@9.0.6",
+  "packageManager": "pnpm@9.14.2",
   "scripts": {
     "build": "turbo run build",
     "test": "turbo run test"

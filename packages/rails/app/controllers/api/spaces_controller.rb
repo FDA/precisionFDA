@@ -38,38 +38,6 @@ module Api
       render json: space, adapter: :json
     end
 
-    # POST /api/spaces
-    # Creates a new space.
-    def create
-
-      if ["groups", "private_type", "administrator", "government"].include?(create_space_params[:spaceType])
-        create_space_dto = create_space_params
-        id = https_apps_client.create_space(create_space_dto)
-        space = Space.undeleted.find(id)
-      else
-        # review space in this branch
-        space_params = create_space_params.transform_keys! { |key| key.to_s.underscore.to_sym }
-        space_form = SpaceForm.new(space_params.merge(current_user: @context.user))
-
-        unless space_form.valid?
-          # TODO: This format of errors is used to fit the client code.
-          render json: { errors: [space_form.errors.full_messages.join(", ")] },
-                 status: :unprocessable_entity
-          return
-        end
-
-        space = space_form.persist!(api, current_user)
-
-        space.tag_list.push("Protected") if create_space_params[:protected]
-
-        space.tag_list.push("FDA-restricted") if create_space_params[:restrictedReviewer]
-
-        space.save unless space.tag_list.empty?
-      end
-
-      render json: space, adapter: :json
-    end
-
     # GET /api/spaces/editable_spaces
     # Returns editable spaces list. Used only for Copy to space dropdown for now.
     def editable_spaces

@@ -38,6 +38,7 @@ import { Submission } from '@shared/domain/challenge/submission.entity'
 import { SubmissionDTO } from '@shared/domain/challenge/dto/submission.dto'
 import { JOB_STATE } from '@shared/domain/job/job.enum'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
+import { EntityScope } from '@shared/types/common'
 
 @Injectable()
 export class ChallengeService {
@@ -430,7 +431,7 @@ export class ChallengeService {
       where.scope = STATIC_SCOPE.PUBLIC
     } else if (!(await user.isSiteOrChallengeAdmin())) {
       const spaces = await user.accessibleSpaces()
-      const scopes = spaces.map((space) => space.scope)
+      const scopes = spaces.map((space) => space.scope as EntityScope)
       where.scope = { $in: [STATIC_SCOPE.PUBLIC, ...scopes] }
     }
 
