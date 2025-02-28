@@ -186,7 +186,7 @@ export class SpaceAcceptOperation extends BaseOperation<UserOpsCtx, SpaceAcceptI
     await this.em.persistAndFlush(newSpace)
 
     const newProjectRes = await this.platformClient.projectCreate({
-      name: `precisionfda-${newSpace.uid}-${SPACE_MEMBERSHIP_SIDE[admin.side]}-PRIVATE`,
+      name: `precisionfda-${newSpace.scope}-${SPACE_MEMBERSHIP_SIDE[admin.side]}-PRIVATE`,
       admin,
     })
 

@@ -19,6 +19,7 @@ import {
   $isTextNode,
   COMMAND_PRIORITY_LOW,
   FORMAT_TEXT_COMMAND,
+  getDOMSelection,
   LexicalEditor,
   SELECTION_CHANGE_COMMAND,
 } from 'lexical';
@@ -37,6 +38,9 @@ function TextFormatFloatingToolbar({
   isBold,
   isItalic,
   isUnderline,
+  isUppercase,
+  isLowercase,
+  isCapitalize,
   isCode,
   isStrikethrough,
   isSubscript,
@@ -49,6 +53,9 @@ function TextFormatFloatingToolbar({
   isCode: boolean;
   isItalic: boolean;
   isLink: boolean;
+  isUppercase: boolean;
+  isLowercase: boolean;
+  isCapitalize: boolean;
   isStrikethrough: boolean;
   isSubscript: boolean;
   isSuperscript: boolean;
@@ -108,7 +115,7 @@ function TextFormatFloatingToolbar({
     const selection = $getSelection();
 
     const popupCharStylesEditorElem = popupCharStylesEditorRef.current;
-    const nativeSelection = window.getSelection();
+    const nativeSelection = getDOMSelection(editor._window);
 
     if (popupCharStylesEditorElem === null) {
       return;
@@ -187,6 +194,7 @@ function TextFormatFloatingToolbar({
               editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'bold');
             }}
             className={'popup-item spaced ' + (isBold ? 'active' : '')}
+            title="Bold"
             aria-label="Format text as bold">
             <i className="format bold" />
           </button>
@@ -196,6 +204,7 @@ function TextFormatFloatingToolbar({
               editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'italic');
             }}
             className={'popup-item spaced ' + (isItalic ? 'active' : '')}
+            title="Italic"
             aria-label="Format text as italics">
             <i className="format italic" />
           </button>
@@ -205,6 +214,7 @@ function TextFormatFloatingToolbar({
               editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'underline');
             }}
             className={'popup-item spaced ' + (isUnderline ? 'active' : '')}
+            title="Underline"
             aria-label="Format text to underlined">
             <i className="format underline" />
           </button>
@@ -214,6 +224,7 @@ function TextFormatFloatingToolbar({
               editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'strikethrough');
             }}
             className={'popup-item spaced ' + (isStrikethrough ? 'active' : '')}
+            title="Strikethrough"
             aria-label="Format text with a strikethrough">
             <i className="format strikethrough" />
           </button>
@@ -240,9 +251,40 @@ function TextFormatFloatingToolbar({
           <button
             type="button"
             onClick={() => {
+              editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'uppercase');
+            }}
+            className={'popup-item spaced ' + (isUppercase ? 'active' : '')}
+            title="Uppercase"
+            aria-label="Format text to uppercase">
+            <i className="format uppercase" />
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'lowercase');
+            }}
+            className={'popup-item spaced ' + (isLowercase ? 'active' : '')}
+            title="Lowercase"
+            aria-label="Format text to lowercase">
+            <i className="format lowercase" />
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'capitalize');
+            }}
+            className={'popup-item spaced ' + (isCapitalize ? 'active' : '')}
+            title="Capitalize"
+            aria-label="Format text to capitalize">
+            <i className="format capitalize" />
+          </button>
+          <button
+            type="button"
+            onClick={() => {
               editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'code');
             }}
             className={'popup-item spaced ' + (isCode ? 'active' : '')}
+            title="Insert code block"
             aria-label="Insert code block">
             <i className="format code" />
           </button>
@@ -250,6 +292,7 @@ function TextFormatFloatingToolbar({
             type="button"
             onClick={insertLink}
             className={'popup-item spaced ' + (isLink ? 'active' : '')}
+            title="Insert link"
             aria-label="Insert link">
             <i className="format link" />
           </button>
@@ -269,6 +312,9 @@ function useFloatingTextFormatToolbar(
   const [isBold, setIsBold] = useState(false);
   const [isItalic, setIsItalic] = useState(false);
   const [isUnderline, setIsUnderline] = useState(false);
+  const [isUppercase, setIsUppercase] = useState(false);
+  const [isLowercase, setIsLowercase] = useState(false);
+  const [isCapitalize, setIsCapitalize] = useState(false);
   const [isStrikethrough, setIsStrikethrough] = useState(false);
   const [isSubscript, setIsSubscript] = useState(false);
   const [isSuperscript, setIsSuperscript] = useState(false);
@@ -281,7 +327,7 @@ function useFloatingTextFormatToolbar(
         return;
       }
       const selection = $getSelection();
-      const nativeSelection = window.getSelection();
+      const nativeSelection = getDOMSelection(editor._window);
       const rootElement = editor.getRootElement();
 
       if (
@@ -304,6 +350,9 @@ function useFloatingTextFormatToolbar(
       setIsBold(selection.hasFormat('bold'));
       setIsItalic(selection.hasFormat('italic'));
       setIsUnderline(selection.hasFormat('underline'));
+      setIsUppercase(selection.hasFormat('uppercase'));
+      setIsLowercase(selection.hasFormat('lowercase'));
+      setIsCapitalize(selection.hasFormat('capitalize'));
       setIsStrikethrough(selection.hasFormat('strikethrough'));
       setIsSubscript(selection.hasFormat('subscript'));
       setIsSuperscript(selection.hasFormat('superscript'));
@@ -365,6 +414,9 @@ function useFloatingTextFormatToolbar(
       isLink={isLink}
       isBold={isBold}
       isItalic={isItalic}
+      isUppercase={isUppercase}
+      isLowercase={isLowercase}
+      isCapitalize={isCapitalize}
       isStrikethrough={isStrikethrough}
       isSubscript={isSubscript}
       isSuperscript={isSuperscript}

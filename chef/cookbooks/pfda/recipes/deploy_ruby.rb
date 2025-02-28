@@ -56,7 +56,8 @@ execute 'Add HOST env var' do
   only_if { File.exist?(env_file) && File.foreach(env_file).grep(/HOST=/).none? }
 
   command %{
-    echo "HOST=$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4)" >> #{env_file}
+    TOKEN=$(curl -X PUT "http://169.254.169.254/latest/api/token" -H "x-aws-ec2-metadata-token-ttl-seconds: 21600")
+    echo "HOST=$(curl -H \"x-aws-ec2-metadata-token: $TOKEN\" -s http://169.254.169.254/latest/meta-data/public-ipv4)" >> #{env_file}
   }
 end
 

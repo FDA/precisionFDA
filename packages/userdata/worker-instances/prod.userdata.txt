@@ -197,7 +197,8 @@ EOF
 
 cat <<EOF > /root/install_app.sh
 #!/bin/bash -e
-REGION=\$(curl http://169.254.169.254/latest/meta-data/placement/region)
+TOKEN=$(curl -X PUT "http://169.254.169.254/latest/api/token" -H "x-aws-ec2-metadata-token-ttl-seconds: 21600")
+REGION=\$(curl -H "x-aws-ec2-metadata-token: $TOKEN" http://169.254.169.254/latest/meta-data/placement/region)
 while fuser /var/lib/dpkg/lock /var/lib/dpkg/lock-frontend >> /var/log/install.log 2>&1; do echo 'Waiting for release of dpkg locks'; sleep 5; done;
 aws ssm get-parameter --name /pfda/production/app/app_source/ssh_key --with-decryption --output text --query Parameter.Value --region \$REGION  > /root/.ssh/id_rsa 2>> /var/log/install.err
 chmod 400 /root/.ssh/id_rsa &>> /var/log/install.log 2>> /var/log/install.err

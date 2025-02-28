@@ -37,7 +37,7 @@ export const adminPlatformClientProvider = {
         }
 
         return async (...args: unknown[]) => {
-          const stackTrace = new Error().stack
+          const stackTrace = new Error().stack?.split('\n').slice(1).join('\n')
           logger.log(
             { stackTrace },
             `Calling admin platform client method. Method: "${prop}", Args: ${JSON.stringify(args)}`,

@@ -9,6 +9,7 @@ import PlaygroundEditorTheme from './themes/PlaygroundEditorTheme'
 
 import './setupEnv'
 import './index.css'
+import { ToolbarContext } from './context/ToolbarContext'
 
 export function LexiContext({ children, editorState }: any): JSX.Element {
   const initialConfig = {
@@ -27,7 +28,11 @@ export function LexiContext({ children, editorState }: any): JSX.Element {
     <SettingsContext>
       <FlashMessageContext>
         <LexicalComposer initialConfig={initialConfig}>
-          <TableContext>{children}</TableContext>
+          <TableContext>
+            <ToolbarContext>
+              {children}
+            </ToolbarContext>
+          </TableContext>
         </LexicalComposer>
       </FlashMessageContext>
     </SettingsContext>
