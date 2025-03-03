@@ -78,35 +78,41 @@ export async function editAnswerCommentRequest(
     .then(r => r.data)
 }
 
-
 export async function fetchDiscussionsRequest(filters: any, params: any) {
   const paramQ = `?${new URLSearchParams(params).toString()}`
   return axios.get(`/api/v2/discussions${paramQ}`).then(r => r.data as Discussion[])
 }
 
 export async function fetchDiscussionRequest(discussionId: number) {
-  return axios.get<Discussion>(`/api/discussions/${discussionId}`).then(r => r.data)
+  return axios.get<Discussion>(`/api/v2/discussions/${discussionId}`).then(r => r.data)
 }
-
 
 export async function fetchAttachmentsRequest(noteId?: number) {
   if (!noteId) return []
   // yes this is wrong - i just want to avoid creating another ruby endpoint class for now.
-  return axios.get(`/api/discussions/${noteId}/attachments`).then(r => r.data.attachments as Attachment[])
+  return axios.get(`/api/v2/discussions/${noteId}/attachments`).then(r => r.data as Attachment[])
 }
 
 export async function deleteDiscussionRequest(discussionId: number) {
-  return axios.delete(`/api/discussions/${discussionId}`).then(r => r.data) // no response except http code
+  return axios.delete(`/api/v2/discussions/${discussionId}`).then(r => r.data) // no response except http code
 }
 
 export async function deleteAnswerRequest(discussionId: number, answerId: number) {
-  return axios.delete(`/api/discussions/${discussionId}/answers/${answerId}`).then(r => r.data) // no response except http code
+  return axios.delete(`/api/v2/discussions/${discussionId}/answers/${answerId}`).then(r => r.data) // no response except http code
 }
 
 export async function deleteDiscussionCommentRequest(discussionId: number, commentId: number) {
-  return axios.delete(`/api/discussions/${discussionId}/comments/${commentId}`).then(r => r.data) // no response except http code
+  return axios.delete(`/api/v2/discussions/${discussionId}/comments/${commentId}`).then(r => r.data) // no response except http code
 }
 
 export async function deleteAnswerCommentRequest(discussionId: number, answerId: number, commentId: number) {
-  return axios.delete(`/api/discussions/${discussionId}/answers/${answerId}/comments/${commentId}`).then(r => r.data) // no response except http code
+  return axios.delete(`/api/v2/discussions/${discussionId}/answers/${answerId}/comments/${commentId}`).then(r => r.data) // no response except http code
+}
+
+export async function followDiscussionRequest(discussionId: number) {
+  return axios.post(`/api/v2/discussions/${discussionId}/follow`).then(r => r.data)
+}
+
+export async function unfollowDiscussionRequest(discussionId: number) {
+  return axios.post(`/api/v2/discussions/${discussionId}/unfollow`).then(r => r.data)
 }

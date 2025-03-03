@@ -152,7 +152,7 @@ export class EntityFetcherService {
     }
     if (this.isDiscussionCommentOrAnswerComment(classType)) {
       return {
-        commentableId: {
+        commentable: {
           note: {
             $or: [this.ownerScopeCondition(), { scope: { $in: editableSpaces } }],
           },

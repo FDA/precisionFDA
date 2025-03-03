@@ -30,7 +30,7 @@ describe('PublisherService tests', () => {
 
   it('publish nodes to public', async () => {
     const node1 = create.filesHelper.create(em, { user }, {})
-    const node2 = create.filesHelper.createUploadedAsset(em, { user }, {})
+    const node2 = create.filesHelper.createAsset(em, { user }, {})
     const node3 = create.filesHelper.createUploaded(em, { user }, {})
     await em.flush()
     const count = await publisherService.publishNodes(
@@ -157,7 +157,7 @@ describe('PublisherService tests', () => {
     try {
       await publisherService.publishNodes([node, folder], user, STATIC_SCOPE.PUBLIC)
       expect.fail('Operation is expected to fail.')
-    } catch (error: any) {
+    } catch (error) {
       expect(error.name).eq('InvalidStateError')
       expect(error.message).eq(`Unable to publish node ${folder.id}: folders are not supported.`)
     }

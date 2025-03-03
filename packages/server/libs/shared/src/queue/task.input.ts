@@ -1,5 +1,6 @@
 import type { EmailSendInput } from '../domain/email/email.config'
 import type { UserCtx } from '../types'
+import { NotifyType } from '@shared/domain/discussion/dto/notify.type'
 
 export type Task = {
   type: TASK_TYPE
@@ -42,7 +43,8 @@ export enum TASK_TYPE {
   USER_DATA_CONSISTENCY_REPORT = 'user_data_consistency_report',
   GENERATE_SPACE_REPORT_BATCH = 'generate_space_report_batch',
   GENERATE_SPACE_REPORT_RESULT = 'generate_space_report_result',
-  NOTIFY_SPACE_DISCUSSION = 'notify_space_discussion',
+  NOTIFY_NEW_DISCUSSION = 'notify_new_discussion',
+  NOTIFY_NEW_DISCUSSION_REPLY = 'notify_new_discussion_reply',
 }
 
 // will be used in the sub-handler
@@ -90,10 +92,18 @@ export type GenerateSpaceReportResultJob = TaskWithAuth & {
 }
 
 export type NotifyNewDiscussionJob = TaskWithAuth & {
-  type: TASK_TYPE.NOTIFY_SPACE_DISCUSSION
+  type: TASK_TYPE.NOTIFY_NEW_DISCUSSION
   payload: {
     discussionId: number
-    notify: string[]
+    notify: NotifyType
+  }
+}
+
+export type NotifyNewDiscussionReplyJob = TaskWithAuth & {
+  type: TASK_TYPE.NOTIFY_NEW_DISCUSSION_REPLY
+  payload: {
+    discussionId: number
+    notify: NotifyType
   }
 }
 

@@ -5,20 +5,19 @@ export type DiscussionEmailInput = {
   spaceName: string
 }
 
-export const spaceDiscussionTemplate = (data: DiscussionEmailInput): string => `
+export const newDiscussionTemplate = (data: DiscussionEmailInput): string => `
   ${header}
   <mj-section css-class="header-title">
       <mj-column>
         <mj-text align="right">
-          SPACE NOTIFICATION
+          New Discussion Thread
         </mj-text>
       </mj-column>
     </mj-section>
   <mj-section css-class="body-section">
     <mj-column width="100%">
       <mj-text>
-        <p>As a member of precisionFDA space "${data.spaceName}", you are being notified that a fellow member has posted a discussion thread or comment in the space that they would like you to read.</p>
-      </mj-text>
+<p>As a member of precisionFDA${data.spaceName ? ' space ' + data.spaceName : ''}, you are receiving this notification because a fellow member has posted a new discussion thread${data.spaceName ? ' in this space' : ''} that they would like you to read.</p>      </mj-text>
       <mj-button
         background-color="#1F70B5"
         line-weight="30px"

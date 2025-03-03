@@ -10,15 +10,16 @@ const unpluralizeIfOne = (noun: string, count: number) => `${count === 1 ? noun.
 
 export const capitalize = (text: string) => text.charAt(0).toUpperCase() + text.slice(1)
 
-export const formatDate = (date: Date) => new Date(date).toLocaleDateString('en-US', {
-  month: 'short',
-  day: '2-digit',
-  year: 'numeric',
-  hour12: true,
-  hour: 'numeric',
-  minute: 'numeric',
-  second: 'numeric',
-})
+export const formatDate = (date: Date | string) =>
+  new Date(date).toLocaleDateString('en-US', {
+    month: 'short',
+    day: '2-digit',
+    year: 'numeric',
+    hour12: true,
+    hour: 'numeric',
+    minute: 'numeric',
+    second: 'numeric',
+  })
 
 export const sanitizeFileName = (name: string): string => {
   const re = /[<>:"/\\|?*]+/g

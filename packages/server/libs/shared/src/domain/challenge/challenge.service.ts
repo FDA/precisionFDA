@@ -31,13 +31,13 @@ import { CHALLENGE_STATUS } from '@shared/domain/challenge/challenge.enum'
 import { config } from '@shared/config'
 import { ChallengeDTO } from '@shared/domain/challenge/dto/challenge.dto'
 import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
-import { Follow } from '@shared/domain/follow/follow.entity'
 import { TimeUtils } from '@shared/utils/time.utils'
 import { ChallengeResource } from '@shared/domain/challenge/challenge-resource.entity'
 import { Submission } from '@shared/domain/challenge/submission.entity'
 import { SubmissionDTO } from '@shared/domain/challenge/dto/submission.dto'
 import { JOB_STATE } from '@shared/domain/job/job.enum'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
+import { ChallengeFollow } from '@shared/domain/follow/challenge-follow.entity'
 import { EntityScope } from '@shared/types/common'
 
 @Injectable()
@@ -192,9 +192,8 @@ export class ChallengeService {
       })) === 1
 
     const follows =
-      (await this.em.count(Follow, {
+      (await this.em.count(ChallengeFollow, {
         followableId: challenge.id,
-        followableType: 'Challenge',
         followerId: this.user.id,
         followerType: 'User',
       })) === 1

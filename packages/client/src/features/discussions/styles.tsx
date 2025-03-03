@@ -8,6 +8,8 @@ export const CommentCount = styled.div`
 `
 export const DiscussionTitle = styled.div`
   display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-top: 16px;
   margin-bottom: 16px;
 `
@@ -45,11 +47,9 @@ export const PageContent = styled.div`
   display: flex;
   flex-direction: column;
   flex: 1 0 auto;
-  padding: 16px;
-  padding-bottom: 120px;
+  padding: 16px 16px 120px;
   gap: 16px;
   max-width: 880px;
-  width: fill-available;
   align-self: center;
   box-sizing: border-box;
   width: 100%;
@@ -165,7 +165,12 @@ export const StyledMarkdown = styled.div<{ $isAnswer?: boolean }>`
     `}
   font-size: 14px;
   align-self: stretch;
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     margin: 1rem 0;
   }
   h1 {
@@ -194,7 +199,7 @@ export const StyledMarkdown = styled.div<{ $isAnswer?: boolean }>`
 `
 export const StyledCardList = styled.div`
   display: flex;
-  padding-left: 0px;
+  padding-left: 0;
   flex-direction: column;
   align-items: flex-start;
   gap: 16px;

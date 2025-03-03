@@ -12,6 +12,7 @@ import { QueueModule } from '@shared/queue/queue.module'
 import { UserFileWorkerModule } from '../domain/user-file/user-file.worker.module'
 import { MainQueueProcessor } from './processor/main-queue.processor'
 import { MaintenanceQueueProcessor } from './processor/maintenance-queue.processor'
+import { DiscussionModule } from '@shared/domain/discussion/discussion.module'
 @Module({
   imports: [
     QueueModule,
@@ -24,6 +25,7 @@ import { MaintenanceQueueProcessor } from './processor/maintenance-queue.process
     UserModule,
     DebugModule,
     JobModule,
+    DiscussionModule,
     UserFacadeModule,
   ],
   providers: [MainQueueProcessor, MaintenanceQueueProcessor],
