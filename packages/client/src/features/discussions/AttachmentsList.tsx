@@ -13,6 +13,8 @@ import { Attachment, AttachmentType, FormAttachments } from './discussions.types
 import { areAttachmentsEmpty, typeAttachmentKey } from './helpers'
 import { AttachmentsLabel } from './styles'
 
+const StyledAttachmentsContainer = styled.div``
+
 const TableRow = styled.div`
   display: flex;
   justify-content: space-between;
@@ -42,6 +44,16 @@ const IconRight = styled.div`
   display: flex;
   align-items: center;
   flex: 0 1 auto;
+`
+
+const NoLink = styled.div`
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: flex;
+  overflow: hidden;
+  flex: 0 1 auto;
+  align-items: center;
+  gap: 4px;
 `
 
 const StyledAttachmentsList = styled.div`
@@ -81,6 +93,7 @@ export const AttachmentsList = ({
     if (items.length === 0) {
       return null
     }
+
     return (
       <StyledAttachmentsList>
         <TypeLabel>{type}</TypeLabel>
@@ -88,11 +101,17 @@ export const AttachmentsList = ({
         {items.map(item => (
           <TableRow key={item.id}>
             <TableCell>
-              <Link target="_blank" to={item.link} rel="noopener noreferrer">
-                {typeIcon[item.type]}
-                {`  ${item.name}`}
-              </Link>
+              {item.link ? (
+                <Link target="_blank" to={item.link} rel="noopener noreferrer">
+                  {typeIcon[item.type]} {item.name}
+                </Link>
+              ) : (
+                <NoLink>
+                  {typeIcon[item.type]} {item.name}
+                </NoLink>
+              )}
             </TableCell>
+
             {onRemoveAttachment && (
               <TableCell>
                 <IconRight>
@@ -114,12 +133,14 @@ export const AttachmentsList = ({
   return (
     <>
       <AttachmentsLabel>Attachments</AttachmentsLabel>
-      {renderList(files, 'Files')}
-      {renderList(folders, 'Folders')}
-      {renderList(assets, 'Assets')}
-      {renderList(apps, 'Apps')}
-      {renderList(jobs, 'Jobs')}
-      {renderList(comparisons, 'Comparisons')}
+      <StyledAttachmentsContainer>
+        {renderList(files, 'Files')}
+        {renderList(folders, 'Folders')}
+        {renderList(assets, 'Assets')}
+        {renderList(apps, 'Apps')}
+        {renderList(jobs, 'Jobs')}
+        {renderList(comparisons, 'Comparisons')}
+      </StyledAttachmentsContainer>
     </>
   )
 }
