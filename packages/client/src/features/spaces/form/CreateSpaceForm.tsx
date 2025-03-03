@@ -28,8 +28,6 @@ interface SpaceCreateForm {
   source_space_id: string | null
   guest_lead_dxuser: string | null
   host_lead_dxuser: string | null
-  sponsor_lead_dxuser: string | null
-  review_lead_dxuser: string | null
   cts: string | null
   protected: boolean | null
   restricted_reviewer: boolean | null
@@ -72,8 +70,7 @@ export const SpaceForm = ({
       name: '',
       description: '',
       host_lead_dxuser: '',
-      review_lead_dxuser: '',
-      sponsor_lead_dxuser: '',
+      guest_lead_dxuser: '',
       cts: null,
       protected: false,
       restricted_reviewer: null,
@@ -92,38 +89,21 @@ export const SpaceForm = ({
       setValue('cts', null)
       clearErrors([
         'host_lead_dxuser',
-        'sponsor_lead_dxuser',
         'guest_lead_dxuser',
         'cts',
       ])
     }
   }, [watch().space_type])
 
-  //TODO(Jiri) - simplify this once all space types are migrated to node
   const onSubmit = () => {
     const vals = getValues()
-    if (vals.space_type === 'private_type') {
+    if (['private_type', 'administrator', 'government'].includes(vals.space_type.toString())) {
       vals.host_lead_dxuser = user ? user.dxuser : null
-      vals.sponsor_lead_dxuser = ''
       vals.guest_lead_dxuser = ''
     }
 
-    // TODO: weird naming in the form label but the backend expects host_lead to be the review_lead
-    if (vals.space_type === 'review') {
-      vals.host_lead_dxuser = vals.review_lead_dxuser
-      vals.review_lead_dxuser = ''
-      vals.guest_lead_dxuser = ''
-      vals.restricted_discussions = vals.restricted_discussions ?? false
-    }
-    // TODO: weird naming in the form label but the backend expects host_lead to be the review_lead
-    if (vals.space_type === 'administrator') {
-      vals.host_lead_dxuser = user ? user.dxuser : null
-      vals.guest_lead_dxuser = ''
-      vals.sponsor_lead_dxuser = ''
-    }
-    if (vals.space_type === 'government') {
-      vals.host_lead_dxuser = user ? user.dxuser : null
-    }
+    vals.restricted_discussions = vals.restricted_discussions ?? false
+
     const createSpaceRequest: CreateSpacePayload = {
       name: vals.name,
       description: vals.description,
@@ -131,10 +111,9 @@ export const SpaceForm = ({
       sourceSpaceId: vals.source_space_id,
       guestLeadDxuser: vals.guest_lead_dxuser,
       hostLeadDxuser: vals.host_lead_dxuser,
-      sponsorLeadDxuser: vals.sponsor_lead_dxuser,
-      cts: vals.cts,
+      cts: vals.cts ?? '',
       protected: vals.protected,
-      restrictedReviewer: vals.restricted_reviewer,
+      restrictedReviewer: vals.restricted_reviewer ?? false,
       restrictedDiscussions: vals.restricted_discussions,
     }
 
@@ -164,16 +143,16 @@ export const SpaceForm = ({
   const getConfirmMessage = () => {
     const restrictions: string[] = []
     if (getValues().protected) {
-      restrictions.push("protected")
+      restrictions.push('protected')
     }
     if (getValues().restricted_reviewer) {
-      restrictions.push("FDA-associated restricted")
+      restrictions.push('FDA-associated restricted')
     }
     if (getValues().restricted_discussions) {
-      restrictions.push("Shared Area discussions restricted")
+      restrictions.push('Shared Area discussions restricted')
     }
 
-    return "The space you are about to create will be " + restrictions.join(" and ")
+    return `The space you are about to create will be ${restrictions.join(' and ')}`
   }
 
   const {
@@ -265,24 +244,24 @@ export const SpaceForm = ({
         <>
           <FieldGroup label="Reviewer Lead" required>
             <InputText
-              {...register('review_lead_dxuser')}
+              {...register('host_lead_dxuser')}
               disabled={isSubmitting}
             />
             <ErrorMessage
               errors={errors}
-              name="review_lead_dxuser"
+              name="host_lead_dxuser"
               render={({ message }) => <InputError>{message}</InputError>}
             />
           </FieldGroup>
 
           <FieldGroup label="Sponsor Lead" required>
             <InputText
-              {...register('sponsor_lead_dxuser')}
+              {...register('guest_lead_dxuser')}
               disabled={isSubmitting}
             />
             <ErrorMessage
               errors={errors}
-              name="sponsor_lead_dxuser"
+              name="guest_lead_dxuser"
               render={({ message }) => <InputError>{message}</InputError>}
             />
           </FieldGroup>
@@ -340,7 +319,7 @@ export const SpaceForm = ({
                 {...register('restricted_reviewer')}
                 disabled={isSubmitting}
                 onChange={handleRestrictedReviewer}
-                checked={watch().restricted_reviewer || undefined}
+                checked={watch().restricted_reviewer || false}
               />
               Restrict Reviewer side of Space to FDA users only
             </FieldLabelRow>
@@ -354,7 +333,7 @@ export const SpaceForm = ({
                 {...register('restricted_discussions')}
                 disabled={isSubmitting}
                 onChange={handleRestrictedDiscussions}
-                checked={watch().restricted_discussions || undefined}
+                checked={watch().restricted_discussions || false}
               />
               Disable Shared Area Discussions
             </FieldLabelRow>

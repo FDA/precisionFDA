@@ -9,10 +9,13 @@ import { SpaceTypeToProcessMapProvider } from '@shared/domain/space/create/space
 import { SpaceNotificationService } from '@shared/domain/space/service/space-notification.service'
 import { User } from '@shared/domain/user/user.entity'
 import { PlatformClientModule } from '@shared/platform-client/platform-client.module'
+import { ReviewSpaceCreationProcess } from '@shared/domain/space/create/review-space-creation.process'
+import { TaggingModule } from '@shared/domain/tagging/tagging.module'
 
 @Module({
-  imports: [PlatformClientModule, EmailModule, MikroOrmModule.forFeature([User])],
+  imports: [PlatformClientModule, EmailModule, TaggingModule, MikroOrmModule.forFeature([User])],
   providers: [
+    ReviewSpaceCreationProcess,
     AdministratorSpaceCreationProcess,
     GroupsSpaceCreationProcess,
     PrivateSpaceCreationProcess,
@@ -22,5 +25,4 @@ import { PlatformClientModule } from '@shared/platform-client/platform-client.mo
   ],
   exports: [SpaceTypeToProcessMapProvider],
 })
-export class SpaceCreateModule {
-}
+export class SpaceCreateModule {}

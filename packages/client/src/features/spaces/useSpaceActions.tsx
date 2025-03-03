@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom'
 import { ActionFunctionsType } from '../home/types'
 import { ISpace } from './spaces.types'
 import { useUnlockSpaceModal } from './useUnlockSpaceModal'
+import { toast } from 'react-toastify'
 
 export enum SpaceActions {
   'Lock/Unlock' = 'Lock/Unlock',
@@ -17,7 +18,8 @@ export const useSpaceActions = ({ space }: { space: ISpace }) => {
 
   const modal = useUnlockSpaceModal({
     space,
-    onSuccess: () => {
+    onSuccess: (isLocked) => {
+      toast.success(`Space ${isLocked ? 'unlocked' : 'locked'} successfully`)
       queryClient.invalidateQueries({
         queryKey: ['space', `${space.id}`],
       })

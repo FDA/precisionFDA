@@ -15,6 +15,12 @@ import {
 import { server } from '../mocks/server'
 import { AlertDismissedProvider } from '../features/admin/alerts/useAlertDismissedLocalStorage'
 
+global.ResizeObserver = jest.fn().mockImplementation(() => ({
+  observe: jest.fn(),
+  unobserve: jest.fn(),
+  disconnect: jest.fn(),
+}))
+
 const queryCache = new QueryCache()
 const queryClient = new QueryClient({
   defaultOptions: {

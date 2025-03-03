@@ -77,16 +77,20 @@ export interface CreateSpacePayload {
   guestLeadDxuser?: string | null
   hostLeadDxuser?: string | null
   sponsorLeadDxuser?: string | null
-  cts?: string | null
+  cts?: string
   protected: boolean | null
-  restrictedReviewer?: boolean | null
+  restrictedReviewer?: boolean
   restrictedDiscussions?: boolean | null
 }
 
-export interface CreateSpaceResponse {
-  space: ISpace
+export interface EditSpaceResponse {
+  space: { id: number }
   error?: Error
   errors?: string[]
+}
+
+export interface CreateSpaceResponse {
+  id: number
 }
 
 export interface EditableSpace {
@@ -105,14 +109,12 @@ export async function fetchEditableSpacesList(): Promise<EditableSpacesResponse>
 }
 
 export async function createSpaceRequest(payload: CreateSpacePayload): Promise<CreateSpaceResponse> {
-  const res = await fetch('/api/spaces', {
-    ...getApiRequestOpts('POST'),
-    body: JSON.stringify({ space: payload }),
-  })
-  return res.json()
+  return axios.post('/api/v2/spaces', payload).then(res => res.data)
 }
 
-export async function editSpaceRequest(spaceId: number, payload: CreateSpacePayload): Promise<CreateSpaceResponse> {
+export async function editSpaceRequest(spaceId: number, payload: CreateSpacePayload): Promise<EditSpaceResponse> {
+  // TODO temporarily until edit is moved from ruby to node PFDA-6046
+  payload.sponsorLeadDxuser = payload.guestLeadDxuser
   return axios.put(`/api/spaces/${spaceId}`, { space: payload }).then(res => res.data)
 }
 

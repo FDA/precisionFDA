@@ -1,6 +1,6 @@
 ruby_block 'Get AWS region' do
   block do
-    node.run_state['aws_region'] = `curl -s http://169.254.169.254/latest/meta-data/placement/region`.strip
+    node.run_state['aws_region'] = `curl -H "x-aws-ec2-metadata-token: $(curl -s -X PUT "http://169.254.169.254/latest/api/token" -H "x-aws-ec2-metadata-token-ttl-seconds: 21600")" -s http://169.254.169.254/latest/meta-data/placement/region`.strip
   end
 end
 
