@@ -4,6 +4,8 @@ import {
   EntityRepositoryType,
   Enum,
   ManyToMany,
+  ManyToOne,
+  OneToMany,
   OneToOne,
   PrimaryKey,
   Property,
@@ -14,7 +16,6 @@ import { User } from '@shared/domain/user/user.entity'
 import { BaseEntity } from '../../database/base.entity'
 import { SPACE_MEMBERSHIP_SIDE } from '../space-membership/space-membership.enum'
 import { SPACE_STATE, SPACE_TYPE } from './space.enum'
-import { getScopeFromSpaceId } from './space.helper'
 import { SpaceRepository } from './space.repository'
 
 type SpaceMeta = {
@@ -56,6 +57,12 @@ export class Space extends BaseEntity {
   @Property({ fieldName: 'space_id', nullable: true })
   spaceId: number
 
+  @ManyToOne(() => Space, { nullable: true })
+  space?: Space
+
+  @OneToMany(() => Space, (space) => space.space)
+  confidentialSpaces = new Collection<Space>(this)
+
   @Property()
   sponsorOrgId: number
 
@@ -81,13 +88,22 @@ export class Space extends BaseEntity {
   dataPortal?: DataPortal
 
   @Property({ persist: false })
-  get uid(): string {
-    return getScopeFromSpaceId(this.id)
+  get scope(): `space-${number}` {
+    return `space-${this.id}`
   }
 
-  @Property({ persist: false })
-  get scope() {
-    return `space-${this.id}` as const
+  /**
+   * Returns the space that is the confidential reviewer space for this space.
+   */
+  get confidentialReviewerSpace(): Space | undefined {
+    return this.confidentialSpaces.getItems().find((x) => x.isConfidentialReviewerSpace())
+  }
+
+  /**
+   * Returns the space that is the confidential sponsor space for this space.
+   */
+  get confidentialSponsorSpace(): Space | undefined {
+    return this.confidentialSpaces.getItems().find((x) => x.isConfidentialSponsorSpace())
   }
 
   isConfidential(): boolean {

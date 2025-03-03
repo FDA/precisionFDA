@@ -22,7 +22,7 @@ import { HintText, Row, StyledButton, StyledForm, StyledPageCenter, StyledPageCo
 import { UserLayout } from '../../../layouts/UserLayout'
 import { Button } from '../../../components/Button'
 
-const EditTags = ({ spaceId, tags = [] }: { spaceId: number, tags?: string[] }) => {
+const EditTags = ({ spaceId, tags = []}: { spaceId: number, tags?: string[] }) => {
   const queryClient = useQueryClient()
   const { modalComp: tagsModal, setShowModal: setTagsModal } = useEditTagsModal({
     resource: 'spaces',
@@ -54,8 +54,6 @@ interface SpaceSettingsVals {
   sourceSpaceId: string | null
   guestLeadDxuser: string | null
   hostLeadDxuser: string | null
-  sponsorLeadDxuser: string | null
-  reviewLeadDxuser: string | null
   cts: string | null
   protected: boolean | null
 }
@@ -87,7 +85,6 @@ export const SpaceSettingsForm = ({ space }: ISpaceSettingsForm) => {
       description: space.description,
       hostLeadDxuser: space.host_lead?.dxuser,
       guestLeadDxuser: space.guest_lead?.dxuser,
-      sponsorLeadDxuser: space.guest_lead?.dxuser,
       cts: space.cts,
       protected: space.protected,
     },
@@ -97,12 +94,12 @@ export const SpaceSettingsForm = ({ space }: ISpaceSettingsForm) => {
     mutationKey: ['edit-space'],
     mutationFn: (payload: CreateSpacePayload) => editSpaceRequest(space.id, payload),
     onSuccess: res => {
-      if (res?.space) {
-        navigate(`/spaces/${res?.space?.id}`)
+      if (res?.space.id) {
+        navigate(`/spaces/${res?.space.id}`)
         queryClient.invalidateQueries({
           queryKey: ['spaces'],
         })
-        toast.success('Success: editing space settings')
+        toast.success('Space settings has been saved')
       } else if (res?.errors) {
         toast.error(`Error: ${res.errors.messages.join('\r\n')}`)
         setFormError(`Error: ${res.errors.messages.join('\r\n')}`)
@@ -148,19 +145,17 @@ export const SpaceSettingsForm = ({ space }: ISpaceSettingsForm) => {
       <EditTags spaceId={space.id} tags={space.tags} />
 
       {watch().spaceType === 'review' && (
-        <>
-          <FieldGroup label="Center Tracking System #">
-            <InputText {...register('cts')} disabled={isSubmitting} />
-            <HintText>
-              FDA uses the Center Tracking System (CTS) to track the progress of industry submitted pre-market documents through
-              the review process. CTS is a workflow/work management system that provides support for the Center for Devices and
-              Radiogical Health (CDRH) business processes and business rules, for all stages of the product lifecycle for medical
-              devices.
-            </HintText>
-            <ErrorMessage errors={errors} name="cts" render={({ message }) => <InputError>{message}</InputError>} />
-            <Divider />
-          </FieldGroup>
-        </>
+        <FieldGroup label="Center Tracking System #">
+          <InputText {...register('cts')} disabled={isSubmitting} />
+          <HintText>
+            FDA uses the Center Tracking System (CTS) to track the progress of industry submitted pre-market documents through the
+            review process. CTS is a workflow/work management system that provides support for the Center for Devices and
+            Radiogical Health (CDRH) business processes and business rules, for all stages of the product lifecycle for medical
+            devices.
+          </HintText>
+          <ErrorMessage errors={errors} name="cts" render={({ message }) => <InputError>{message}</InputError>} />
+          <Divider />
+        </FieldGroup>
       )}
 
       <Row>

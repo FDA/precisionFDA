@@ -23,6 +23,7 @@ import {LexicalErrorBoundary} from '@lexical/react/LexicalErrorBoundary';
 import {HistoryPlugin} from '@lexical/react/LexicalHistoryPlugin';
 import {LexicalNestedComposer} from '@lexical/react/LexicalNestedComposer';
 import {RichTextPlugin} from '@lexical/react/LexicalRichTextPlugin';
+import {useLexicalEditable} from '@lexical/react/useLexicalEditable';
 import {useLexicalNodeSelection} from '@lexical/react/useLexicalNodeSelection';
 import {mergeRegister} from '@lexical/utils';
 import {
@@ -163,6 +164,7 @@ export default function ImageComponent({
   const [selection, setSelection] = useState<BaseSelection | null>(null);
   const activeEditorRef = useRef<LexicalEditor | null>(null);
   const [isLoadError, setIsLoadError] = useState<boolean>(false);
+  const isEditable = useLexicalEditable();
 
   const $onDelete = useCallback(
     (payload: KeyboardEvent) => {
@@ -390,7 +392,7 @@ export default function ImageComponent({
   } = useSettings();
 
   const draggable = isSelected && $isNodeSelection(selection) && !isResizing;
-  const isFocused = isSelected || isResizing;
+  const isFocused = (isSelected || isResizing) && isEditable;
   return (
     <Suspense fallback={null}>
       <>
