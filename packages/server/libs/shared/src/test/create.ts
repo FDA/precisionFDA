@@ -525,7 +525,7 @@ const filesHelper = {
     em.persist(file)
     return file
   },
-  createUploadedAsset: (
+  createAsset: (
     em: EntityManager,
     references: {
       user: InstanceType<typeof User>

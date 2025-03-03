@@ -15,11 +15,11 @@ export class CommentEntityLinkProvider extends EntityLinkProvider<'comment'> {
   }
 
   private async getAnswerCommentLink(comment: AnswerComment) {
-    const answer = await comment.commentableId.load()
+    const answer = await comment.commentable.load()
     const note = await answer.note.load()
     const scope = note.scope
 
-    const answerID = comment.commentableId.id
+    const answerID = comment.commentable.id
     const discussionID = answer.discussion.id
     const commentSegment = this.getCommentUrlSegment(comment)
 
@@ -35,7 +35,7 @@ export class CommentEntityLinkProvider extends EntityLinkProvider<'comment'> {
   }
 
   private async getDiscussionCommentLink(comment: DiscussionComment) {
-    const discussion = await comment.commentableId.load()
+    const discussion = await comment.commentable.load()
     const note = await discussion.note.load()
     const scope = note.scope
     const discussionID = discussion.id
@@ -46,7 +46,7 @@ export class CommentEntityLinkProvider extends EntityLinkProvider<'comment'> {
       const url = this.getDiscussionUrlSegment(discussionID, undefined, undefined)
       return `/${url}/${commentSegment}` as const
     } else {
-      const note = comment.commentableId.getProperty('note').getEntity()
+      const note = comment.commentable.getProperty('note').getEntity()
       const spaceID = note.getSpaceId()
       const url = this.getDiscussionUrlSegment(discussionID, spaceID, undefined)
       return `/${url}/${commentSegment}` as const

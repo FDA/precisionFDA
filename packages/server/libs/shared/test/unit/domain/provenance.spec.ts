@@ -4,7 +4,7 @@ import { Job } from '@shared/domain/job/job.entity'
 import { Asset } from '@shared/domain/user-file/asset.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { expect } from 'chai'
-import { database } from '../../../src/database'
+import { database } from '@shared/database'
 import { create, db } from '@shared/test'
 import { findParentEntity } from '@shared/domain/user-file/provenance'
 import { PARENT_TYPE } from '@shared/domain/user-file/user-file.types'
@@ -27,20 +27,24 @@ describe('Provenance tests', () => {
 
     const parent = await findParentEntity(em, file)
     expect(parent instanceof User).to.equal(true)
-    const parentUser = parent as any
+    const parentUser = parent as User
     expect(parentUser.id).to.equal(userId)
     expect(parentUser.dxuser).to.equal(user.dxuser)
   })
 
   it('findParentEntity finds Asset parent', async () => {
-    const asset = create.filesHelper.createUploadedAsset(em, { user }, { id: 123, name: 'Asset 1' })
+    const asset = create.filesHelper.createAsset(em, { user }, { id: 123, name: 'Asset 1' })
     await em.flush()
-    const file = create.filesHelper.create(em, { user }, { name: 'file4', parentType: PARENT_TYPE.ASSET, parentId: asset.id })
+    const file = create.filesHelper.create(
+      em,
+      { user },
+      { name: 'file4', parentType: PARENT_TYPE.ASSET, parentId: asset.id },
+    )
     await em.flush()
 
     const parent = await findParentEntity(em, file)
     expect(parent instanceof Asset).to.equal(true)
-    const parentAsset = parent as any
+    const parentAsset = parent as Asset
     expect(parentAsset.id).to.equal(123)
     expect(parentAsset.name).to.equal('Asset 1')
   })
@@ -53,21 +57,29 @@ describe('Provenance tests', () => {
 
     const parent = await findParentEntity(em, file)
     expect(parent instanceof Job).to.equal(true)
-    const parentJob = parent as any
+    const parentJob = parent as Job
     expect(parentJob.id).to.equal(123)
     expect(parentJob.name).to.equal('Job 1')
   })
 
   it('findParentEntity finds Comparison parent', async () => {
     const app = create.appHelper.createRegular(em, { user })
-    const comparison = create.comparisonHelper.create(em, { user, app }, { id: 123, name: 'Comparison 1' })
+    const comparison = create.comparisonHelper.create(
+      em,
+      { user, app },
+      { id: 123, name: 'Comparison 1' },
+    )
     await em.flush()
-    const file = create.filesHelper.createComparisonOutput(em, { user, comparisonId: comparison.id }, { name: 'file3' })
+    const file = create.filesHelper.createComparisonOutput(
+      em,
+      { user, comparisonId: comparison.id },
+      { name: 'file3' },
+    )
     await em.flush()
 
     const parent = await findParentEntity(em, file)
     expect(parent instanceof Comparison).to.equal(true)
-    const parentComparison = parent as any
+    const parentComparison = parent as Comparison
     expect(parentComparison.id).to.equal(123)
     expect(parentComparison.name).to.equal('Comparison 1')
   })

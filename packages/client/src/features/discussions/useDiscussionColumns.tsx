@@ -4,12 +4,12 @@ import { Column } from 'react-table'
 import { formatDate } from '../../utils/formatting'
 import { KeyVal } from '../home/types'
 import { Discussion } from './discussions.types'
-import { StyledLinkCell, StyledNameCell } from '../home/home.styles'
+import { StyledLink, StyledLinkCell } from '../home/home.styles'
 import { DefaultColumnFilter } from '../../components/Table/filters'
 import { ObjectGroupIcon } from '../../components/icons/ObjectGroupIcon'
 import { getSpaceIdFromScope } from '../../utils'
 
-export const useDiscussionColumns = ({ colWidths, onClick }: { colWidths?: KeyVal; onClick?: any }) => {
+export const useDiscussionColumns = ({ colWidths }: { colWidths?: KeyVal }) => {
   const location = useLocation()
   return useMemo<Column<Discussion>[]>(
     () =>
@@ -21,7 +21,9 @@ export const useDiscussionColumns = ({ colWidths, onClick }: { colWidths?: KeyVa
           disableSortBy: true,
           width: colWidths?.title || 480,
           Cell: ({ cell, value }) => {
-            return <StyledNameCell onClick={() => onClick(cell.row.original)}>{value}</StyledNameCell>
+            const spaceId = getSpaceIdFromScope(cell.row.original.scope)
+            const basePath = spaceId ? `/spaces/${spaceId}/discussions` : location.pathname
+            return <StyledLink to={`${basePath}/${cell.row.original.id}`}>{value}</StyledLink>
           },
         },
         {
@@ -31,7 +33,7 @@ export const useDiscussionColumns = ({ colWidths, onClick }: { colWidths?: KeyVa
           disableSortBy: true,
           width: colWidths?.created_at_date_time || 190,
           Cell({ value }) {
-            return formatDate(value as any)
+            return formatDate(value)
           },
         },
         {
@@ -41,7 +43,7 @@ export const useDiscussionColumns = ({ colWidths, onClick }: { colWidths?: KeyVa
           disableSortBy: true,
           width: colWidths?.created_at_date_time || 190,
           Cell({ value }) {
-            return formatDate(value as any)
+            return formatDate(value)
           },
         },
         {
@@ -51,7 +53,11 @@ export const useDiscussionColumns = ({ colWidths, onClick }: { colWidths?: KeyVa
           disableFilters: true,
           disableSortBy: true,
           width: colWidths?.format || 150,
-          Cell: ({ cell, value }) => <StyledLinkCell to={`/users/${cell.row.original.user.dxuser}`}>{value}</StyledLinkCell>,
+          Cell: ({ cell, value }) => (
+            <a data-turbolinks="false" href={`/users/${cell.row.original.user.dxuser}`}>
+              {value}
+            </a>
+          ),
         },
         {
           Header: 'Location',

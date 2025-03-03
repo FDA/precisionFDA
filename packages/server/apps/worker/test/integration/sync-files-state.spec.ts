@@ -1,5 +1,3 @@
-/* eslint-disable no-await-in-loop */
-/* eslint-disable max-len */
 import { EntityManager } from '@mikro-orm/mysql'
 import { database } from '@shared/database'
 import { Asset } from '@shared/domain/user-file/asset.entity'
@@ -26,6 +24,7 @@ import {
 } from '@shared/domain/user-file/user-file.helper'
 import { fakes as localFakes, mocksReset as localMocksReset } from '../utils/mocks'
 import { errorsFactory } from '../utils/errors-factory'
+import { DxId } from '@shared/domain/entity/domain/dxid'
 
 describe('SyncFilesStateOperation static methods', () => {
   it('creates correct bullJob ids', async () => {
@@ -52,8 +51,6 @@ describe('TASK: sync-files-states (SyncFilesStateOperation)', () => {
   let user1Ctx: UserCtx
   let user2: User
   let user2Ctx: UserCtx
-  let botUser: User
-  let botUserCtx: UserCtx
   let files: UserFile[]
   let assets: Asset[]
   let filesAndAssets: IFileOrAsset[]
@@ -66,16 +63,10 @@ describe('TASK: sync-files-states (SyncFilesStateOperation)', () => {
     em.clear()
     user1 = create.userHelper.create(em, { email: generate.random.email() })
     user2 = create.userHelper.create(em, { email: generate.random.email() })
-    botUser = create.userHelper.createChallengeBot(em)
     await em.flush()
 
     user1Ctx = { id: user1.id, dxuser: user1.dxuser, accessToken: 'foo1' }
     user2Ctx = { id: user2.id, dxuser: user2.dxuser, accessToken: 'foo2' }
-    botUserCtx = {
-      id: botUser.id,
-      dxuser: botUser.dxuser,
-      accessToken: create.userHelper.getChallengeBotToken(),
-    }
 
     const filesParams = (userId: number, state: FILE_STATE) => ({
       parentId: userId,
@@ -101,7 +92,7 @@ describe('TASK: sync-files-states (SyncFilesStateOperation)', () => {
       createFile(em, { user: user2 }, { name: 'user2_file4', ...closedFilesParams(user2.id) }),
     ]
 
-    const createAsset = create.filesHelper.createUploadedAsset
+    const createAsset = create.filesHelper.createAsset
     assets = [
       // user1
       createAsset(em, { user: user1 }, { name: 'user1_asset1', ...openFilesParams(user1.id) }),
@@ -237,12 +228,12 @@ describe('TASK: sync-files-states (SyncFilesStateOperation)', () => {
   })
 
   it('removes abandoned file uploads', async () => {
-    const user1Abandoned: string[] = [
+    const user1Abandoned: DxId<'file'>[] = [
       files[0].dxid, // user1
       files[3].dxid, // user1
       assets[1].dxid, // user1
     ]
-    const user2Abandoned: string[] = [
+    const user2Abandoned: DxId<'file'>[] = [
       files[5].dxid, // user2
       assets[4].dxid, // user2
     ]

@@ -15,21 +15,23 @@ import { GlobeIcon } from '../icons/GlobeIcon'
 import { QuestionIcon } from '../icons/QuestionIcon'
 import { SUPPORT_EMAIL } from '../../constants'
 
-export type SiteNavItemType = {
-  id: string,
-  icon: React.JSX.ElementType,
-  iconHeight: number,
-  text: string,
-  alink?: string,
-  external: boolean,
-} | {
-  id: string,
-  icon: React.JSX.ElementType,
-  iconHeight: number,
-  text: string,
-  link?: string,
-  external: boolean,
-} 
+export type SiteNavItemType =
+  | {
+      id: string
+      icon: React.JSX.ElementType
+      iconHeight: number
+      text: string
+      alink?: string
+      external: boolean
+    }
+  | {
+      id: string
+      icon: React.JSX.ElementType
+      iconHeight: number
+      text: string
+      link?: string
+      external: boolean
+    }
 
 export const siteNavItems: SiteNavItemType[] = [
   {
@@ -45,7 +47,7 @@ export const siteNavItems: SiteNavItemType[] = [
     icon: DiscussionIcon,
     iconHeight: 17,
     text: 'Discussions',
-    alink: '/discussions',
+    alink: '/home/discussions?scope=everybody',
     external: false,
   },
   {

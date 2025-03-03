@@ -29,7 +29,7 @@ describe('FileUpdateOperation tests', () => {
     userCtx = { id: user.id, dxuser: user.dxuser, accessToken: 'foo1' }
 
     file = create.filesHelper.create(em, { user })
-    asset = create.filesHelper.createUploadedAsset(em, { user })
+    asset = create.filesHelper.createAsset(em, { user })
     await em.flush()
 
     // reset fakes
@@ -113,10 +113,11 @@ describe('FileUpdateOperation tests', () => {
     }))
 
     const execute = async () => {
-      await op.execute({ uid: 'no-such-uid' })
+      await op.execute({ uid: 'file-nosuchuid-1' })
     }
-    await expect(execute()).to.eventually.be
-      .rejectedWith('File or asset with uid no-such-uid not found')
+    await expect(execute()).to.eventually.be.rejectedWith(
+      'File or asset with uid file-nosuchuid-1 not found',
+    )
     expect(fakes.client.fileDescribeFake.callCount).to.equal(0)
   })
 })
