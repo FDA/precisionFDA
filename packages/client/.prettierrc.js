@@ -2,7 +2,7 @@
 
 module.exports = {
   arrowParens: 'avoid',
-  bracketSpacing: false,
+  bracketSpacing: true,
   printWidth: 130,
   semi: false,
   singleQuote: true,
