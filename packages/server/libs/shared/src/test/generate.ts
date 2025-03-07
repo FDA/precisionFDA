@@ -33,7 +33,7 @@ import {
   STATUS as DB_CLUSTER_STATUS,
   ENGINES,
 } from '../domain/db-cluster/db-cluster.enum'
-import { Expert, ExpertScope, ExpertState } from '../domain/expert/expert.entity'
+import { Expert, EXPERT_STATE } from '../domain/expert/expert.entity'
 import { JOB_DB_ENTITY_TYPE, JOB_STATE } from '../domain/job/job.enum'
 import {
   SPACE_EVENT_ACTIVITY_TYPE,
@@ -646,8 +646,8 @@ const expert = {
     const expertName = chance.name()
     const fileDxid = `file-${random.dxstr()}-1`
     return {
-      scope: ExpertScope.PUBLIC,
-      state: ExpertState.OPEN,
+      scope: STATIC_SCOPE.PUBLIC,
+      state: EXPERT_STATE.OPEN,
       meta: {
         _prefname: expertName,
         _about: `About - ${expertName}`,

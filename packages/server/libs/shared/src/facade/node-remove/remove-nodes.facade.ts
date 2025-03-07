@@ -1,7 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
-import { NodeRepository } from '@shared/domain/user-file/node.repository'
 import { FILE_STI_TYPE } from '@shared/domain/user-file/user-file.types'
 import { ComparisonService } from '@shared/domain/comparison/comparison.service'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
@@ -32,7 +31,6 @@ export class RemoveNodesFacade {
     private readonly em: SqlEntityManager,
     private readonly user: UserContext,
     private readonly userRepository: UserRepository,
-    private readonly nodeRepository: NodeRepository,
     private readonly userFileRepository: UserFileRepository,
     private readonly comparisonService: ComparisonService,
     private readonly userFileService: UserFileService,

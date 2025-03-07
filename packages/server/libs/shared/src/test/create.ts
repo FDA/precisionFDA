@@ -853,7 +853,7 @@ const expertHelper = {
   create: (
     em: EntityManager,
     references: { user: InstanceType<typeof User> },
-    data?: Partial<InstanceType<typeof Comment>>,
+    data?: Partial<InstanceType<typeof Expert>>,
   ): Expert => {
     const defaults = generate.expert.simple()
     const input = {

@@ -2,7 +2,6 @@ import { RemoveNodesFacade } from '@shared/facade/node-remove/remove-nodes.facad
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { UserRepository } from '@shared/domain/user/user.repository'
-import { NodeRepository } from '@shared/domain/user-file/node.repository'
 import { UserFileRepository } from '@shared/domain/user-file/user-file.repository'
 import { ComparisonService } from '@shared/domain/comparison/comparison.service'
 import { UserFileService } from '@shared/domain/user-file/service/user-file.service'
@@ -37,7 +36,7 @@ describe('RemoveNodesFacade', () => {
   const emPersistStub = stub()
   const emRemoveStub = stub()
   const nodeServiceLoadNodesStub = stub()
-  const nodeRepositoryFindNodesStub = stub()
+  // const nodeRepositoryFindNodesStub = stub()
   const userFileServiceValidateProtectedSpacesStub = stub()
   const nodeServiceValidateEditableByStub = stub()
   const spaceServiceValidateVerificationSpaceStub = stub()
@@ -63,9 +62,7 @@ describe('RemoveNodesFacade', () => {
     const userRepository = {
       findOne: userRepositoryFindOneStub,
     } as unknown as UserRepository
-    const nodeRepository = {
-      find: nodeRepositoryFindNodesStub,
-    } as unknown as NodeRepository
+
     const userFileRepository = {
       count: userFileRepositoryCountStub,
     } as unknown as UserFileRepository
@@ -105,7 +102,6 @@ describe('RemoveNodesFacade', () => {
       em,
       userCtx,
       userRepository,
-      nodeRepository,
       userFileRepository,
       comparisonService,
       userFileService,
@@ -131,9 +127,6 @@ describe('RemoveNodesFacade', () => {
 
     nodeServiceLoadNodesStub.reset()
     nodeServiceLoadNodesStub.throws()
-
-    nodeRepositoryFindNodesStub.reset()
-    nodeRepositoryFindNodesStub.throws()
 
     userFileServiceValidateProtectedSpacesStub.reset()
     userFileServiceValidateProtectedSpacesStub.throws()
@@ -197,11 +190,6 @@ describe('RemoveNodesFacade', () => {
       const nodes = [node1, node2, node3]
 
       nodeServiceLoadNodesStub.withArgs(ids).returns(nodes)
-      nodeRepositoryFindNodesStub
-        .withArgs({
-          id: { $in: ids },
-        })
-        .returns(nodes)
       userFileServiceValidateProtectedSpacesStub.reset()
       nodeServiceValidateEditableByStub.reset()
       spaceServiceValidateVerificationSpaceStub.reset()
@@ -218,9 +206,6 @@ describe('RemoveNodesFacade', () => {
 
       expect(nodeServiceLoadNodesStub.calledOnce).to.be.true
       expect(nodeServiceLoadNodesStub.calledWith(ids)).to.be.true
-
-      expect(nodeRepositoryFindNodesStub.calledOnce).to.be.true
-      expect(nodeRepositoryFindNodesStub.calledWith(ids)).to.be.true
 
       expect(userFileServiceValidateProtectedSpacesStub.calledThrice).to.be.true
       expect(userFileServiceValidateProtectedSpacesStub.calledWith('remove', USER_ID, node1)).to.be
