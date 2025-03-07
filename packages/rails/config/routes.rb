@@ -621,6 +621,8 @@ Rails.application.routes.draw do
       post "announce_result", on: :member
     end
 
+    resources :discussions, only: :show
+
     resources :licenses do
       post "accept(/:redirect_to_uid)", on: :member, action: :accept, as: "accept"
       post "license_item/:item_uid",
