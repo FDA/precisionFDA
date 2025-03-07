@@ -86,10 +86,12 @@ export const ExpertColumnRight = ({ expert, user, toc }: { expert: ExpertDetails
           </div>
         )}
         {editPermitted && (
+          <Button data-variant="primary" as="a" data-turbolinks="false" href={`/experts/${expert?.id}/edit`}>
+            Edit Expert Info
+          </Button>
+        )}
+        {user?.can_administer_site && (
           <>
-            <Button data-variant="primary" as="a" data-turbolinks="false" href={`/experts/${expert?.id}/edit`}>
-              Edit Expert Info
-            </Button>
             <Button data-variant="warning" onClick={openConfirmation}>
               Delete Expert
             </Button>
