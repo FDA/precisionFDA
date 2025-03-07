@@ -116,7 +116,11 @@ export const useSelectAssetModal = (
   const [showOnlyMyAssets, setShowOnlyMyAssets] = useState(false)
   const searchText = useDebounce(filter, 250)
 
-  const { data: assetsData, isLoading: isLoadingAssets, status: loadingAssetsStatus } = useQuery({
+  const {
+    data: assetsData,
+    isLoading: isLoadingAssets,
+    status: loadingAssetsStatus,
+  } = useQuery({
     queryKey: ['list_assets', searchText],
     queryFn: () => fetchFilteredAssets(searchText, scopes ?? ([] as any)), // scopes: [] mean all scopes.
     enabled: isShown,
@@ -158,27 +162,20 @@ export const useSelectAssetModal = (
   const handleSubmit = () => {
     handleSelect(selectedAssets)
     setShowModal(false)
+    setFilter('')
   }
 
-  const isMyAsset = (asset: IAsset): boolean =>
-    asset.user.dxuser === user?.dxuser
+  const isMyAsset = (asset: IAsset): boolean => asset.user.dxuser === user?.dxuser
 
   const assets = assetsData ?? []
 
   const modalComp = (
-    <ModalNext
-      id="select-asset-modal"
-      headerText={title}
-      isShown={isShown}
-      hide={() => setShowModal(false)}
-    >
+    <ModalNext id="select-asset-modal" headerText={title} isShown={isShown} hide={() => setShowModal(false)}>
       <ModalHeaderTop headerText={title} hide={() => setShowModal(false)} />
       {subtitle && <StyledSubtitle>{subtitle}</StyledSubtitle>}
       <Tabs>
         <Tab title={`Selected ${selectedAssets.length}`} key="selected">
-          {selectedAssets.length === 0 && (
-            <StyledRow>No selected assets</StyledRow>
-          )}
+          {selectedAssets.length === 0 && <StyledRow>No selected assets</StyledRow>}
           {selectedAssets.length > 0 && (
             <ModalScroll>
               <SelectableTable>
@@ -200,15 +197,9 @@ export const useSelectAssetModal = (
         </Tab>
         <Tab title={`Assets ${assets.length}`} key="files">
           <StyledFilterSection>
-            <InputText
-              placeholder="Filter..."
-              onChange={evt => setFilter(evt.target.value)}
-            />
+            <InputText placeholder="Filter..." onChange={evt => setFilter(evt.target.value)} />
             <StyledOnlyMine>
-              <input
-                type="checkbox"
-                onClick={evt => toggleOnlyMine(evt.target.checked)}
-              />
+              <input type="checkbox" onClick={evt => toggleOnlyMine(evt.target.checked)} />
               Only mine
             </StyledOnlyMine>
           </StyledFilterSection>
@@ -218,11 +209,7 @@ export const useSelectAssetModal = (
               <SelectableTable>
                 <tbody>
                   {assets
-                    .filter((asset: IAsset) =>
-                      showOnlyMyAssets
-                        ? isMyAsset(asset) && showOnlyMyAssets
-                        : true,
-                    )
+                    .filter((asset: IAsset) => (showOnlyMyAssets ? isMyAsset(asset) && showOnlyMyAssets : true))
                     .map((asset: IAsset) => (
                       <Row
                         asset={asset}
@@ -231,9 +218,7 @@ export const useSelectAssetModal = (
                         key={asset.id}
                         radioCallback={radioCallback}
                         checkboxCallback={checkboxCallback}
-                        checked={selectedAssets.some(
-                          selected => asset.id === selected.id,
-                        )}
+                        checked={selectedAssets.some(selected => asset.id === selected.id)}
                       />
                     ))}
                 </tbody>
@@ -251,11 +236,7 @@ export const useSelectAssetModal = (
           >
             Cancel
           </Button>
-          <Button
-            data-variant="primary"
-            onClick={handleSubmit}
-            disabled={selectedAssets?.length === 0}
-          >
+          <Button data-variant="primary" onClick={handleSubmit} disabled={selectedAssets?.length === 0}>
             Select &nbsp;<ButtonBadge>{selectedAssets?.length}</ButtonBadge>
           </Button>
         </ButtonRow>
