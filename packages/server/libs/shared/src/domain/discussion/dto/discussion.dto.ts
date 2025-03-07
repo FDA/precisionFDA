@@ -17,8 +17,12 @@ export class DiscussionDTO {
   commentsCount: number
   createdAt: Date
   updatedAt: Date
+  following: boolean
 
-  static async fromEntity(discussion: Discussion): Promise<DiscussionDTO> {
+  static async fromEntity(
+    discussion: Discussion,
+    following: boolean = false,
+  ): Promise<DiscussionDTO> {
     const dto = new DiscussionDTO()
     dto.id = discussion.id
 
@@ -34,6 +38,7 @@ export class DiscussionDTO {
     dto.answersCount = await discussion.answers.loadCount()
     dto.commentsCount = await discussion.comments.loadCount()
     dto.user = SimpleUserDTO.fromEntity(discussion.user.getEntity())
+    dto.following = following
 
     if (discussion.answers.isInitialized()) {
       dto.answers = await Promise.all(discussion.answers.getItems().map(AnswerDTO.fromEntity))

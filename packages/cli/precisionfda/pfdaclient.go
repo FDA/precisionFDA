@@ -1317,11 +1317,15 @@ func (c *PFDAClient) initWaitGroup(fileID string, chunkPool <-chan uploadChunk, 
 // Deprecated: This method is not handling errors correctly, use makeRequest instead.
 func (c *PFDAClient) makeRequestFail(requestType string, url string, data []byte) (status string, body []byte, err error) {
 	req, err := retryablehttp.NewRequest(requestType, url, bytes.NewReader(data))
-	helpers.CheckErr(err)
+	if err != nil {
+		return "", nil, fmt.Errorf("request failed: %w", err)
+	}
 	c.setPostHeaders(req)
 
 	resp, err := c.Client.Do(req)
-	helpers.CheckErr(err)
+	if err != nil {
+		return "", nil, fmt.Errorf("request failed: %w", err)
+	}
 	defer resp.Body.Close()
 	status = resp.Status
 	body, _ = io.ReadAll(resp.Body)
@@ -1332,17 +1336,21 @@ func (c *PFDAClient) makeRequestFail(requestType string, url string, data []byte
 	return status, body, err
 }
 
+// Deprecated: This method is not handling errors correctly, use makeRequest instead.
 func (c *PFDAClient) makeRequestWithHeadersFail(requestType string, url string, headers map[string]interface{}, data []byte) (status string, body []byte, err error) {
 	req, err := retryablehttp.NewRequest(requestType, url, bytes.NewReader(data))
-	helpers.CheckErr(err)
+	if err != nil {
+		return "", nil, fmt.Errorf("request failed: %w", err)
+	}
 	for header, value := range headers {
 		req.Header.Set(header, value.(string))
 	}
 
 	resp, err := c.Client.Do(req)
-	helpers.CheckErr(err)
+	if err != nil {
+		return "", nil, fmt.Errorf("request failed: %w", err)
+	}
 	defer resp.Body.Close()
-
 	status = resp.Status
 	body, _ = io.ReadAll(resp.Body)
 
@@ -1395,13 +1403,12 @@ func (c *PFDAClient) sendToStore(id string, chunk uploadChunk) error {
 	})
 
 	_, body, err := c.makeRequestFail("POST", uploadURL, jsonData)
-	if err != nil {
-		return err
-	}
 
 	var resultJSON map[string]interface{}
 	err = json.Unmarshal(body, &resultJSON)
-	helpers.CheckErr(err)
+	if err != nil {
+		return err
+	}
 	if resultJSON["url"] == "" {
 		panic("No url in response!")
 	}

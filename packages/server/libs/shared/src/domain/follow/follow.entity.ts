@@ -1,13 +1,11 @@
 import { Entity, PrimaryKey, Property } from '@mikro-orm/core'
 import { BaseEntity } from '../../database/base.entity'
 
-@Entity({ tableName: 'follows' })
+// this might be done as "comment" - abstract table with discriminator column
+@Entity({ tableName: 'follows', abstract: true, discriminatorColumn: 'followableType' })
 export class Follow extends BaseEntity {
   @PrimaryKey()
   id: number
-
-  @Property()
-  followableId: number
 
   @Property()
   followableType: string

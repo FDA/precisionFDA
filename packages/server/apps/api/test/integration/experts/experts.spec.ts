@@ -1,6 +1,6 @@
 import { EntityManager } from '@mikro-orm/mysql'
 import { database } from '@shared/database'
-import { Expert, ExpertScope, ExpertState } from '@shared/domain/expert/expert.entity'
+import { Expert, EXPERT_STATE } from '@shared/domain/expert/expert.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { create, db } from '@shared/test'
 import { mocksReset } from '@shared/test/mocks'
@@ -8,6 +8,7 @@ import { expect } from 'chai'
 import supertest from 'supertest'
 import { testedApp } from '../../index'
 import { getDefaultHeaderData } from '../../utils/expect-helper'
+import { STATIC_SCOPE } from '@shared/enums'
 
 describe('/experts', () => {
   let em: EntityManager
@@ -20,6 +21,12 @@ describe('/experts', () => {
     em.clear()
 
     user = create.userHelper.create(em)
+    const expertUser1 = create.userHelper.create(em)
+    const expertUser2 = create.userHelper.create(em)
+    const expertUser3 = create.userHelper.create(em)
+    const expertUser4 = create.userHelper.create(em)
+    const expertUser5 = create.userHelper.create(em)
+    const expertUser6 = create.userHelper.create(em)
     create.sessionHelper.create(em, { user })
     // Createa a series of experts
 
@@ -27,28 +34,52 @@ describe('/experts', () => {
     const date2023 = new Date(2023, 1)
     experts = []
     experts.push(
-      create.expertHelper.create(em, { user }, { createdAt: date2023, updatedAt: date2023 }),
+      create.expertHelper.create(
+        em,
+        { user: expertUser1 },
+        { createdAt: date2023, updatedAt: date2023 },
+      ),
     )
     experts.push(
-      create.expertHelper.create(em, { user }, { createdAt: date2023, updatedAt: date2023 }),
+      create.expertHelper.create(
+        em,
+        { user: expertUser2 },
+        { createdAt: date2023, updatedAt: date2023 },
+      ),
     )
     experts.push(
-      create.expertHelper.create(em, { user }, { createdAt: date2023, updatedAt: date2023 }),
+      create.expertHelper.create(
+        em,
+        { user: expertUser3 },
+        { createdAt: date2023, updatedAt: date2023 },
+      ),
     )
 
     // 2022
     const date2022 = new Date(2022, 1)
     experts.push(
-      create.expertHelper.create(em, { user }, { createdAt: date2022, updatedAt: date2022 }),
+      create.expertHelper.create(
+        em,
+        { user: expertUser4 },
+        { createdAt: date2022, updatedAt: date2022 },
+      ),
     )
     experts.push(
-      create.expertHelper.create(em, { user }, { createdAt: date2022, updatedAt: date2022 }),
+      create.expertHelper.create(
+        em,
+        { user: expertUser5 },
+        { createdAt: date2022, updatedAt: date2022 },
+      ),
     )
 
     // 2021
     const date2019 = new Date(2019, 1)
     experts.push(
-      create.expertHelper.create(em, { user }, { createdAt: date2019, updatedAt: date2019 }),
+      create.expertHelper.create(
+        em,
+        { user: expertUser6 },
+        { createdAt: date2019, updatedAt: date2019 },
+      ),
     )
 
     await em.flush()
@@ -60,10 +91,10 @@ describe('/experts', () => {
       .get(`/experts`)
       .set(getDefaultHeaderData(user))
       .expect(200)
-    expect(body.experts).to.have.length(6)
+    expect(body.data).to.have.length(6)
     for (let i = 0; i < 6; i++) {
       const expert = experts[i]
-      const receivedExpert = body.experts[i]
+      const receivedExpert = body.data[i]
       expect(receivedExpert).to.deep.include({
         id: expert.id,
         createdAt: expert.createdAt.toISOString(),
@@ -72,16 +103,12 @@ describe('/experts', () => {
           about: expert.meta?._about,
           blog: expert.meta?._blog,
           blogTitle: expert.meta?._blog_title,
-          blogPreview: expert.meta?._challenge,
+          challenge: expert.meta?._challenge,
           title: expert.meta?._prefname,
-          totalQuestionCount:
-            (await expert.getAnsweredQuestionsCount()) +
-            (await expert.getIgnoredQuestionsCount()) +
-            (await expert.getOpenQuestionsCount()),
-          totalAnswerCount: await expert.getAnsweredQuestionsCount(),
+          imageId: expert.meta?._image_id,
         },
-        state: ExpertState.OPEN,
-        scope: ExpertScope.PUBLIC,
+        state: EXPERT_STATE.OPEN,
+        scope: STATIC_SCOPE.PUBLIC,
       })
     }
   })

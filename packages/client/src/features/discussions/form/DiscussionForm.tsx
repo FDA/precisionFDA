@@ -12,7 +12,6 @@ import { InputError } from '../../../components/form/styles'
 import { AttachmentsList } from '../AttachmentsList'
 import { NoteScope } from '../api'
 import { DiscussionForm as DiscussionFormType } from '../discussions.types'
-import { areAttachmentsEmpty } from '../helpers'
 import { Attachments } from './Attachments'
 import { StyledPage } from './styles'
 import { NotifyMembersSelect } from './NotifyMembersSelect'
@@ -98,7 +97,7 @@ export const DiscussionForm = ({
       return onSubmit(getValues())
     }
   }
-  
+
   const deleteDiscussion = () => {
     if (onDelete) onDelete()
   }
@@ -113,7 +112,7 @@ export const DiscussionForm = ({
 
   return (
     <StyledPage>
-      <StyledForm id="discussionForm" autoComplete="off" className='mb-10'>
+      <StyledForm id="discussionForm" autoComplete="off" className="mb-10">
         <FieldGroup label="Title" required className="mb-4">
           <InputText label="Title" {...register('title', { required: 'title is required.' })} disabled={isSubmitting} />
           <ErrorMessage errors={errors} name="title" render={({ message }) => <InputError>{message}</InputError>} />
@@ -125,50 +124,45 @@ export const DiscussionForm = ({
             render={({ field }) => <MarkdownEditor field={field} disabled={isSubmitting} />}
           />
         </FieldGroup>
-        {!areAttachmentsEmpty(attachments) && (
-          <StyledAttachments>
-            <AttachmentsList attachments={attachments} scope={scope} onRemoveAttachment={deleteAttachment} />
-          </StyledAttachments>
-        )}
+        <StyledAttachments>
+          <AttachmentsList attachments={attachments} onRemoveAttachment={deleteAttachment} />
+        </StyledAttachments>
         <ButtonRow>
-          <div style={{ flex: 'auto' }}>
-            <Controller
+          {scope !== 'public' && (
+            <div style={{ flex: 'auto' }}>
+              <Controller
                 name="notify"
                 control={control}
-                render={({ field: { onChange, onBlur, value }}) => (
+                render={({ field: { onChange, onBlur, value } }) => (
                   <NotifyMembersSelect
-                      onChange={onChange}
-                      onBlur={onBlur}
-                      value={value}
-                      scope={scope}
-                      isSubmitting={isSubmitting}
+                    onChange={onChange}
+                    onBlur={onBlur}
+                    value={value}
+                    scope={scope}
+                    isSubmitting={isSubmitting}
                   />
                 )}
-            />
-            <ErrorMessage
-                errors={errors}
-                name="scope"
-                render={({ message }) => <InputError>{message}</InputError>}
-            />
-          </div>
-          <div className='flex gap-2'>
-
-          <Attachments scope={scope} attachments={attachments} setValue={setValue} />
-          {onDelete && (
-            <Button data-variant="warning" type="button" onClick={deleteDiscussion}>
-              Delete
-            </Button>
-          )}
-          <Button
-            data-variant="primary"
-            type="button"
-            form="discussionForm"
-            disabled={isSubmitting || !isValid}
-            onClick={handleSubmit(onSubmitForm)}
-            >
-            {isSubmitting ? 'Saving' : 'Create'}
-          </Button>
+              />
+              <ErrorMessage errors={errors} name="scope" render={({ message }) => <InputError>{message}</InputError>} />
             </div>
+          )}
+          <div className="flex gap-2">
+            <Attachments scope={scope} attachments={attachments} setValue={setValue} />
+            {onDelete && (
+              <Button data-variant="warning" type="button" onClick={deleteDiscussion}>
+                Delete
+              </Button>
+            )}
+            <Button
+              data-variant="primary"
+              type="button"
+              form="discussionForm"
+              disabled={isSubmitting || !isValid}
+              onClick={handleSubmit(onSubmitForm)}
+            >
+              {isSubmitting ? 'Saving' : 'Create'}
+            </Button>
+          </div>
         </ButtonRow>
       </StyledForm>
     </StyledPage>

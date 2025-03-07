@@ -2,7 +2,6 @@ import { useMutation, useQuery } from '@tanstack/react-query'
 import React, { useMemo, useState } from 'react'
 import { Navigate, Route, Routes, useNavigate, useParams } from 'react-router-dom'
 import { toast } from 'react-toastify'
-import { GuestNotAllowed } from '../../../components/GuestNotAllowed'
 import { MenuCounter } from '../../../components/MenuCounter'
 import { BoltIcon } from '../../../components/icons/BoltIcon'
 import { CogsIcon } from '../../../components/icons/Cogs'
@@ -21,7 +20,6 @@ import { AppsShow } from '../../apps/AppsShow'
 import { EditAppPage } from '../../apps/form/EditAppPage'
 import { ForkAppPage } from '../../apps/form/ForkAppPage'
 import { RunJobPage } from '../../apps/run/RunJobPage'
-import { useAuthUser } from '../../auth/useAuthUser'
 import { DiscussionList } from '../../discussions/DiscussionList'
 import { DiscussionShow } from '../../discussions/DiscussionShow'
 import { CreateDiscussionPage } from '../../discussions/form/CreateDiscussionPage'
@@ -77,6 +75,7 @@ const Spaces2 = ({ space, isLoading }: { space: ISpace; isLoading: boolean }) =>
   })
 
   const showDiscussions = !((space.type === 'review' && space.restricted_discussions) || space.type === 'private_type')
+  const showMembers = space.type !== 'private_type'
   const isContributorOrHigher = ['lead', 'admin', 'contributor'].includes(space.current_user_membership.role)
   const canCreateDiscussion = isContributorOrHigher && !space.restricted_discussions
 
@@ -153,11 +152,13 @@ const Spaces2 = ({ space, isLoading }: { space: ISpace; isLoading: boolean }) =>
               )}
             </MenuItem>
           )}
-          <MenuItem data-testid="members-link" to={`/spaces/${space.id}/members`} activeClassName="active">
-            <UsersIcon height={14} />
-            <MenuText>Members</MenuText>
-            {expandedSidebar && <MenuCounter count={space.counters.members.toString()} active={activeResource === 'members'} />}
-          </MenuItem>
+          {showMembers && (
+            <MenuItem data-testid="members-link" to={`/spaces/${space.id}/members`} activeClassName="active">
+              <UsersIcon height={14} />
+              <MenuText>Members</MenuText>
+              {expandedSidebar && <MenuCounter count={space.counters.members.toString()} active={activeResource === 'members'} />}
+            </MenuItem>
+          )}
           <Fill />
           <Expand data-testid="expand-sidebar" onClick={() => setExpandedSidebar(!expandedSidebar)}>
             <FlapIcon />
@@ -190,7 +191,10 @@ const Spaces2 = ({ space, isLoading }: { space: ISpace; isLoading: boolean }) =>
                 path="reports"
                 element={<SpaceReportList scope={`space-${space.id}`} isContributorOrHigher={isContributorOrHigher} />}
               />
-              <Route path="discussions" element={<DiscussionList canCreateDiscussion={canCreateDiscussion} scope={`space-${space.id}`} />} />
+              <Route
+                path="discussions"
+                element={<DiscussionList canCreateDiscussion={canCreateDiscussion} scope={`space-${space.id}`} />}
+              />
               <Route
                 path="discussions/create"
                 element={
@@ -200,7 +204,7 @@ const Spaces2 = ({ space, isLoading }: { space: ISpace; isLoading: boolean }) =>
                   />
                 }
               />
-              <Route path="discussions/:discussionId/*"  element={<DiscussionShow space={space} />} />
+              <Route path="discussions/:discussionId/*" element={<DiscussionShow space={space} />} />
 
               <Route path="/" element={<Navigate to="files" replace />} />
             </Routes>

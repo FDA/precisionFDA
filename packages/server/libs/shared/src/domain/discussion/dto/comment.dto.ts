@@ -16,7 +16,7 @@ export class CommentDTO {
     dto.id = comment.id
     dto.createdAt = comment.createdAt
     dto.updatedAt = comment.updatedAt
-    dto.commentableId = comment.commentableId.id
+    dto.commentableId = comment.commentable.id
     dto.commentableType = comment.commentableType
     dto.body = comment.body
     dto.user = SimpleUserDTO.fromEntity(await comment.user.load())
