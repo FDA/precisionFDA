@@ -51,7 +51,6 @@ export const NotFound = styled.div`
   gap: 1rem;
 `
 
-export const ResourceTitle = styled.h1``
 export const HeaderRight = styled.div``
 export const HeaderLeft = styled.div`
   display: flex;
@@ -94,7 +93,6 @@ export const StyledCloudResourcesHeaderButton = styled(Button).attrs({ 'data-var
 `
 
 export const Title = styled.div`
-  display: inline-block;
   font-size: 20px;
   font-weight: bold;
   display: flex;
@@ -137,7 +135,7 @@ export const StyledActionsButton = styled(Button)`
   gap: 6px;
 `
 export const ActionsButton = React.forwardRef((props: any, ref) => (
-  <StyledActionsButton data-variant='primary' ref={ref} {...props}>
+  <StyledActionsButton data-variant="primary" ref={ref} {...props}>
     Actions <ArrowIcon />
   </StyledActionsButton>
 ))

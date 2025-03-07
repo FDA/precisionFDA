@@ -13,7 +13,7 @@ export const Button = styled.button.attrs(({ disabled }) => ({ 'aria-disabled': 
   white-space: nowrap;
   text-align: center;
   background-image: none;
-  border: 1px solid transparent;
+  border: 1px solid;
   box-shadow: 0 2px 0 rgba(0, 0, 0, 0.015);
   cursor: pointer;
   user-select: none;
