@@ -95,7 +95,11 @@ export const useSelectAppModal = (
   const [showOnlyMyApps, setShowOnlyMyApps] = useState(false)
   const searchText = useDebounce(filter, 250)
 
-  const { data: appsData, isLoading: isLoadingApps, status: loadingAppsStatus } = useQuery({
+  const {
+    data: appsData,
+    isLoading: isLoadingApps,
+    status: loadingAppsStatus,
+  } = useQuery({
     queryKey: ['list_apps', searchText],
     queryFn: () => fetchFilteredApps(searchText, scopes ?? ([] as any)), // scopes: [] mean all scopes.
     enabled: isShown,
@@ -137,6 +141,7 @@ export const useSelectAppModal = (
   const handleSubmit = () => {
     handleSelect(selectedApps)
     setShowModal(false)
+    setFilter('')
   }
 
   const isMyApp = (app: IApp): boolean => app.user.dxuser === user?.dxuser
@@ -150,7 +155,7 @@ export const useSelectAppModal = (
       id="select-app-modal"
       headerText={title}
       hide={() => setShowModal(false)}
-      variant='medium'
+      variant="medium"
     >
       <ModalHeaderTop headerText={title} hide={() => setShowModal(false)} />
       {subtitle && <StyledSubtitle>{subtitle}</StyledSubtitle>}
@@ -178,15 +183,9 @@ export const useSelectAppModal = (
         </Tab>
         <Tab title={`Apps ${apps.length}`} key="files">
           <StyledFilterSection>
-            <InputText
-              placeholder="Filter..."
-              onChange={evt => setFilter(evt.target.value)}
-            />
+            <InputText placeholder="Filter..." onChange={evt => setFilter(evt.target.value)} />
             <StyledOnlyMine>
-              <input
-                type="checkbox"
-                onClick={evt => toggleOnlyMine(evt.target.checked)}
-              />
+              <input type="checkbox" onClick={evt => toggleOnlyMine(evt.target.checked)} />
               Only mine
             </StyledOnlyMine>
           </StyledFilterSection>
@@ -196,9 +195,7 @@ export const useSelectAppModal = (
               <SelectableTable>
                 <tbody>
                   {apps
-                    .filter((asset: IApp) =>
-                      showOnlyMyApps ? isMyApp(asset) && showOnlyMyApps : true,
-                    )
+                    .filter((asset: IApp) => (showOnlyMyApps ? isMyApp(asset) && showOnlyMyApps : true))
                     .map((app: IApp) => (
                       <Row
                         app={app}
@@ -207,9 +204,7 @@ export const useSelectAppModal = (
                         key={app.id}
                         radioCallback={radioCallback}
                         checkboxCallback={checkboxCallback}
-                        checked={selectedApps.some(
-                          selected => app.id === selected.id,
-                        )}
+                        checked={selectedApps.some(selected => app.id === selected.id)}
                       />
                     ))}
                 </tbody>
@@ -227,11 +222,7 @@ export const useSelectAppModal = (
           >
             Cancel
           </Button>
-          <Button
-            data-variant="primary"
-            onClick={handleSubmit}
-            disabled={selectedApps?.length === 0}
-          >
+          <Button data-variant="primary" onClick={handleSubmit} disabled={selectedApps?.length === 0}>
             Select &nbsp;<ButtonBadge>{selectedApps?.length}</ButtonBadge>
           </Button>
         </ButtonRow>

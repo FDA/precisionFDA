@@ -1,15 +1,16 @@
 import * as Yup from 'yup'
 import { ISpace } from '../spaces.types'
 
-export const getSpaceTypeOptions = ({ isGovUser, isAdmin, isReviewAdmin }: {
-  isGovUser: boolean,
-  isAdmin: boolean,
-  isReviewAdmin: boolean,
+export const getSpaceTypeOptions = ({
+  isGovUser,
+  isAdmin,
+  isReviewAdmin,
+}: {
+  isGovUser: boolean
+  isAdmin: boolean
+  isReviewAdmin: boolean
 }) => {
-
-  const options: { value: ISpace['type']; label: string }[] = [
-    { value: 'private_type', label: 'Private' },
-  ]
+  const options: { value: ISpace['type']; label: string }[] = [{ value: 'private_type', label: 'Private' }]
   if (isGovUser) {
     options.push({ value: 'government', label: 'Government' })
   }
@@ -20,7 +21,7 @@ export const getSpaceTypeOptions = ({ isGovUser, isAdmin, isReviewAdmin }: {
     options.push({ value: 'review', label: 'Review' })
   }
   if (isReviewAdmin || isAdmin) {
-    options.push({ value: 'groups', label: 'Groups' })
+    options.push({ value: 'groups', label: 'Group' })
   }
   return options
 }
@@ -29,8 +30,7 @@ export const SPACE_TYPE_HINT: Record<ISpace['type'], string> = {
   private_type: 'Available to all users, and only consists of a private area.',
   groups:
     'Site admins can create a space in which any users can be invited.\nFor challenges, a group space is automatically created to house all user submissions.\nGroup spaces has two sides (Host and Lead), ',
-  review:
-    'Each Review Space has 2 areas: private and cooperative ones.\nEach review Space has 2 sides: reviewers and sponsors.',
+  review: 'Each Review Space has 2 areas: private and cooperative ones.\nEach review Space has 2 sides: reviewers and sponsors.',
   government:
     'Only a government user may create or join a Government-Restricted Space.\nValidation and error message should appear in the "Create Space" and "Add Members" forms to check that an entered username belongs to a government user.\nGovernment spaces only has one side, which is the Shared area.',
   administrator:

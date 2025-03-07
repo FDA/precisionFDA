@@ -115,7 +115,11 @@ export const useSelectJobModal = (
   const [showOnlyMyJobs, setShowOnlyMyJobs] = useState(false)
   const searchText = useDebounce(filter, 250)
 
-  const { data: jobsData, isLoading: isLoadingJobs, status: loadingJobsStatus } = useQuery({
+  const {
+    data: jobsData,
+    isLoading: isLoadingJobs,
+    status: loadingJobsStatus,
+  } = useQuery({
     queryKey: ['list_jobs', searchText],
     queryFn: () => fetchFilteredJobs(searchText, scopes ?? ([] as any)), // scopes: [] mean all scopes.
     enabled: isShown,
@@ -125,19 +129,19 @@ export const useSelectJobModal = (
     setSelectedJobs([job])
   }
 
-  const addApp = (job: IJob) => {
+  const addJob = (job: IJob) => {
     setSelectedJobs(prev => [...prev, job])
   }
 
-  const removeApp = (job: IJob) => {
+  const removeJob = (job: IJob) => {
     setSelectedJobs(prev => [...prev.filter(item => job.id !== item.id)])
   }
 
   const checkboxCallback = (checked: boolean, job: IJob) => {
     if (checked) {
-      addApp(job)
+      addJob(job)
     } else {
-      removeApp(job)
+      removeJob(job)
     }
   }
 
@@ -157,19 +161,15 @@ export const useSelectJobModal = (
   const handleSubmit = () => {
     handleSelect(selectedJobs)
     setShowModal(false)
+    setFilter('')
   }
 
-  const isMyApp = (job: IJob): boolean => job.user.dxuser === user?.dxuser
+  const isMyJob = (job: IJob): boolean => job.user.dxuser === user?.dxuser
 
   const jobs = jobsData ?? []
 
   const modalComp = (
-    <ModalNext
-      id="select-job-modal"
-      headerText={title}
-      isShown={isShown}
-      hide={() => setShowModal(false)}
-    >
+    <ModalNext id="select-job-modal" headerText={title} isShown={isShown} hide={() => setShowModal(false)}>
       <ModalHeaderTop headerText={title} hide={() => setShowModal(false)} />
       {subtitle && <StyledSubtitle>{subtitle}</StyledSubtitle>}
       <Tabs>
@@ -196,15 +196,9 @@ export const useSelectJobModal = (
         </Tab>
         <Tab title={`Jobs ${jobs.length}`} key="files">
           <StyledFilterSection>
-            <InputText
-              placeholder="Filter..."
-              onChange={evt => setFilter(evt.target.value)}
-            />
+            <InputText placeholder="Filter..." onChange={evt => setFilter(evt.target.value)} />
             <StyledOnlyMine>
-              <input
-                type="checkbox"
-                onClick={e => toggleOnlyMine(e.target.checked)}
-              />
+              <input type="checkbox" onClick={e => toggleOnlyMine(e.target.checked)} />
               Only mine
             </StyledOnlyMine>
           </StyledFilterSection>
@@ -214,9 +208,7 @@ export const useSelectJobModal = (
               <SelectableTable>
                 <tbody>
                   {jobs
-                    .filter((asset: IJob) =>
-                      showOnlyMyJobs ? isMyApp(asset) && showOnlyMyJobs : true,
-                    )
+                    .filter((asset: IJob) => (showOnlyMyJobs ? isMyJob(asset) && showOnlyMyJobs : true))
                     .map((job: IJob) => (
                       <Row
                         job={job}
@@ -225,9 +217,7 @@ export const useSelectJobModal = (
                         key={job.id}
                         radioCallback={radioCallback}
                         checkboxCallback={checkboxCallback}
-                        checked={selectedJobs.some(
-                          selected => job.id === selected.id,
-                        )}
+                        checked={selectedJobs.some(selected => job.id === selected.id)}
                       />
                     ))}
                 </tbody>
@@ -245,11 +235,7 @@ export const useSelectJobModal = (
           >
             Cancel
           </Button>
-          <Button
-            data-variant="primary"
-            onClick={handleSubmit}
-            disabled={selectedJobs?.length === 0}
-          >
+          <Button data-variant="primary" onClick={handleSubmit} disabled={selectedJobs?.length === 0}>
             Select &nbsp;<ButtonBadge>{selectedJobs?.length}</ButtonBadge>
           </Button>
         </ButtonRow>
