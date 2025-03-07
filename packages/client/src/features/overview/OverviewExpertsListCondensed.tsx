@@ -20,7 +20,7 @@ export const OverviewExpertsCondensedList = ({ pick }: { pick?: number }) => {
   })
 
   if (isLoading) return <Loader className="inline" />
-  const expertsList = pick ? data?.experts.slice(0, pick) : data?.experts
+  const expertsList = pick ? data?.data.slice(0, pick) : data?.data
 
   return (
     <StyledCondensedList>
@@ -36,9 +36,7 @@ export const OverviewExpertsCondensedList = ({ pick }: { pick?: number }) => {
               </Link>
             </Name>
             <StyledPreview>{e.meta.blogPreview}</StyledPreview>
-            <CeatedAtDate>
-              {format(new Date(e.createdAt), 'MMM dd, yyyy')}
-            </CeatedAtDate>
+            <CeatedAtDate>{format(new Date(e.createdAt), 'MMM dd, yyyy')}</CeatedAtDate>
           </div>
         </ExpertRow>
       ))}
