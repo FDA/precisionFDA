@@ -2,18 +2,9 @@ import React from 'react'
 import { Link } from 'react-router-dom'
 import { Loader } from '../../components/Loader'
 import { PageContainerMargin } from '../../components/Page/styles'
-import {
-  OverviewCenterSection,
-  PageRow,
-  RightSide,
-  RightSideItem,
-  SectionTitle,
-} from '../../components/Public/styles'
+import { OverviewCenterSection, PageRow, RightSide, RightSideItem, SectionTitle } from '../../components/Public/styles'
 import { usePageMeta } from '../../hooks/usePageMeta'
-import NavigationBar, {
-  NavigationBarBanner,
-  NavigationBarPublicLandingTitle,
-} from '../../components/NavigationBar/NavigationBar'
+import NavigationBar, { NavigationBarBanner, NavigationBarPublicLandingTitle } from '../../components/NavigationBar/NavigationBar'
 import SocialMediaButtons from '../../components/NavigationBar/SocialMediaButtons'
 import PublicLayout from '../../layouts/PublicLayout'
 import { Tagline } from '../../pages/Tagline'
@@ -25,13 +16,7 @@ import ChallengesOverviewList from './ChallengesOverviewList'
 import { OverviewExpertsCondensedList } from './OverviewExpertsListCondensed'
 import { OverviewNewsList } from './OverviewNewsList'
 import { ParticipantOrgsList } from './ParticipantsOrgsList'
-import {
-  CommunityParticipants,
-  ExpertSection,
-  Hr,
-  InfoRow,
-  PageOverviewMainBody,
-} from './styles'
+import { CommunityParticipants, ExpertSection, Hr, InfoRow, PageOverviewMainBody } from './styles'
 import { Button } from '../../components/Button'
 
 export const OverviewPublic = () => {
@@ -56,9 +41,12 @@ export const OverviewPublic = () => {
           <PageOverviewMainBody>
             <ExpertSection>
               <SectionTitle>Expert Highlight</SectionTitle>
-              {expertsData?.experts[0] && (expertsIsLoading ? (
-                <Loader className="inline" />
-              ) : expertsData?.experts[0] && <ExpertListItem expert={expertsData.experts[0]} />)}
+              {expertsData?.data[0] &&
+                (expertsIsLoading ? (
+                  <Loader className="inline" />
+                ) : (
+                  expertsData?.data[0] && <ExpertListItem expert={expertsData.data[0]} />
+                ))}
             </ExpertSection>
 
             <ChallengesBanner />

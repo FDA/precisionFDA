@@ -420,6 +420,9 @@ class ApiController < ApplicationController
       comparisons = comparisons.where(scope: unsafe_params[:scopes])
     end
 
+    search_string = unsafe_params[:search_string]
+    comparisons = comparisons.where("comparisons.name LIKE ?", "%#{ActiveRecord::Base.sanitize_sql_like(search_string)}%") if search_string.present?
+
     result = comparisons.order(id: :desc).map do |comparison|
       describe_for_api(comparison, unsafe_params[:describe])
     end
@@ -474,6 +477,9 @@ class ApiController < ApplicationController
     apps = App.accessible_by(@context).unremoved.includes(:app_series).order(:title)
     apps = apps.where(scope: params[:scopes]) if params[:scopes].present?
 
+    search_string = unsafe_params[:search_string]
+    apps = apps.where("apps.title LIKE ?", "%#{ActiveRecord::Base.sanitize_sql_like(search_string)}%") if search_string.present?
+
     # Filter by latest revisions or versions.
     #   This is kinda tricky, but we need to handle the apps which revisions were moved to a space
     #   before we migrated to the new way how app is published to a space.
@@ -522,6 +528,9 @@ class ApiController < ApplicationController
       jobs = jobs.terminal
     end
 
+    search_string = unsafe_params[:search_string]
+    jobs = jobs.where("jobs.name LIKE ?", "%#{ActiveRecord::Base.sanitize_sql_like(search_string)}%") if search_string.present?
+
     result = jobs.eager_load(user: :org).order(id: :desc).map do |job|
       describe_for_api(job, unsafe_params[:describe])
     end
@@ -567,6 +576,9 @@ class ApiController < ApplicationController
       check_scope!
       assets = assets.where(scope: unsafe_params[:scopes])
     end
+
+    search_string = unsafe_params[:search_string]
+    assets = assets.where("nodes.name LIKE ?", "%#{ActiveRecord::Base.sanitize_sql_like(search_string)}%") if search_string.present?
 
     result = assets.order(:name).map do |asset|
       describe_for_api(asset, unsafe_params[:describe])

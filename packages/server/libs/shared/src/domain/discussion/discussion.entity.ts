@@ -15,6 +15,8 @@ import { Note } from '@shared/domain/note/note.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { BaseEntity } from '../../database/base.entity'
 import DiscussionRepository from '@shared/domain/discussion/discussion.repository'
+import { DiscussionFollow } from '@shared/domain/follow/discussion-follow.entity'
+import { SpaceScope } from '@shared/types/common'
 
 @Entity({ tableName: 'discussions', repository: () => DiscussionRepository })
 export class Discussion extends BaseEntity {
@@ -29,7 +31,7 @@ export class Discussion extends BaseEntity {
 
   @OneToMany({
     entity: () => DiscussionComment,
-    mappedBy: (dc) => dc.commentableId,
+    mappedBy: (dc) => dc.commentable,
     cascade: [Cascade.REMOVE],
   })
   comments = new Collection<DiscussionComment>(this)
@@ -40,9 +42,34 @@ export class Discussion extends BaseEntity {
   @Property({ onUpdate: () => new Date(), hidden: false })
   updatedAt = new Date()
 
+  @OneToMany({
+    entity: () => DiscussionFollow,
+    mappedBy: (dc) => dc.followableId,
+    cascade: [Cascade.REMOVE],
+  })
+  follows = new Collection<DiscussionFollow>(this)
+
   constructor(note: Note, user: User) {
     super()
     this.note = Reference.create(note)
     this.user = Reference.create(user)
+  }
+
+  async isAccessibleBy(user: User) {
+    if (!user) {
+      return false
+    }
+
+    const note = await this.note.load()
+
+    if (this.user.id === user.id || note.isPublic()) {
+      return true
+    }
+
+    if (note.isInSpace()) {
+      const spaces = await user.accessibleSpaces()
+      const scope = note.scope as SpaceScope
+      return spaces.map((space) => space.scope).includes(scope)
+    }
   }
 }

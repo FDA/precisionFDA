@@ -33,6 +33,7 @@ export interface UidEntity {
  * This service is used to fetch entities from the database.
  * E - ENTITY - entity type to fetch.
  * H - HINT - used to specify the relations to populate. Some magic is making it work - do not touch it.
+ * @deprecated
  */
 @Injectable()
 export class EntityFetcherService {
@@ -152,7 +153,7 @@ export class EntityFetcherService {
     }
     if (this.isDiscussionCommentOrAnswerComment(classType)) {
       return {
-        commentableId: {
+        commentable: {
           note: {
             $or: [this.ownerScopeCondition(), { scope: { $in: editableSpaces } }],
           },

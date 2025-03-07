@@ -1,10 +1,10 @@
 /* eslint-disable no-restricted-syntax */
 /* eslint-disable no-await-in-loop */
-import 'regenerator-runtime/runtime'
 import httpStatusCodes from 'http-status-codes'
+import 'regenerator-runtime/runtime'
 import sparkMD5 from 'spark-md5'
 import { closeFile, createFile, getUploadURL, uploadChunk } from '../../../../api/files'
-import { CHUNK_SIZE, FilesMeta, FILE_STATUS, IUploadFile, IUploadInfo } from './constants'
+import { CHUNK_SIZE, FILE_STATUS, FilesMeta, IUploadFile, IUploadInfo } from './constants'
 
 const filterFiles = (filesBlob: any[], filesMeta: any[]) =>
   filesBlob.filter(b => {
@@ -24,21 +24,15 @@ const throwIfError = (status: number, payload?: any) => {
 }
 
 interface IMultiFileUpload {
-  filesBlob: any[],
-  filesMeta: FilesMeta[],
-  updateFileStatus: (info: IUploadInfo) => void,
-  spaceId?: string,
-  scope?: string,
+  filesBlob: any[]
+  filesMeta: FilesMeta[]
+  updateFileStatus: (info: IUploadInfo) => void
+  spaceId?: string
+  scope?: string
   folderId?: string
 }
 
-export const multiFileUpload = async ({
-  filesBlob,
-  filesMeta,
-  updateFileStatus,
-  spaceId,
-  scope,
-  folderId }: IMultiFileUpload) => {
+export const multiFileUpload = async ({ filesBlob, filesMeta, updateFileStatus, spaceId, scope, folderId }: IMultiFileUpload) => {
   const scopeToUpload = scope || `space-${spaceId}`
 
   const filteredFiles: IUploadFile[] = filterFiles(filesBlob, filesMeta)
@@ -87,7 +81,6 @@ export const multiFileUpload = async ({
                 })
                 .then(res => {
                   throwIfError(res.status)
-
                   uploadInfo.status = FILE_STATUS.uploading
                   uploadInfo.uploadedSize += buffer.byteLength
                   updateFileStatus(uploadInfo)
@@ -98,6 +91,7 @@ export const multiFileUpload = async ({
 
                     return closeFile(fileUid)
                   }
+                  return { status: httpStatusCodes.OK }
                 })
                 .then(res => {
                   throwIfError(res!.status)
@@ -113,12 +107,11 @@ export const multiFileUpload = async ({
                 })
             }
           }
-
         }
 
         reader.readAsArrayBuffer(file as any)
       })
-      .catch((error) => {
+      .catch(error => {
         uploadInfo.status = FILE_STATUS.failure
         updateFileStatus(uploadInfo)
         // Rethrow error for consumers of this API to catch
@@ -126,4 +119,3 @@ export const multiFileUpload = async ({
       })
   }
 }
-

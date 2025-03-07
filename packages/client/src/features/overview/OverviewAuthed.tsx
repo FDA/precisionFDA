@@ -5,13 +5,7 @@ import { Link } from 'react-router-dom'
 import styled from 'styled-components'
 import { Loader } from '../../components/Loader'
 import { PageContainerMargin } from '../../components/Page/styles'
-import {
-  OverviewCenterSection,
-  PageRow,
-  RightSide,
-  RightSideItem,
-  SectionTitle,
-} from '../../components/Public/styles'
+import { OverviewCenterSection, PageRow, RightSide, RightSideItem, SectionTitle } from '../../components/Public/styles'
 import { usePageMeta } from '../../hooks/usePageMeta'
 import { IUser } from '../../types/user'
 import GuestRestrictedLink from '../../components/Controls/GuestRestrictedLink'
@@ -26,13 +20,7 @@ import { ChallengesBanner } from './ChallengesBanner'
 import ChallengesOverviewList from './ChallengesOverviewList'
 import { OverviewNewsList } from './OverviewNewsList'
 import { ParticipantOrgsList } from './ParticipantsOrgsList'
-import {
-  CommunityParticipants,
-  ExpertSection,
-  Hr,
-  InfoRow,
-  PageOverviewMainBody,
-} from './styles'
+import { CommunityParticipants, ExpertSection, Hr, InfoRow, PageOverviewMainBody } from './styles'
 import { AppTypeIconBlue } from '../../components/icons/AppTypeIconBlue'
 import { AppTypeIconYellow } from '../../components/icons/AppTypeIconYellow'
 import { Button } from '../../components/Button'
@@ -60,7 +48,7 @@ const GetStarted = ({ user }: { user?: IUser }) => {
     return (
       <StyledGetStarted>
         <SectionTitle>Getting Started</SectionTitle>
-        <Hr/>
+        <Hr />
         <IconLink data-turbolinks="false" to="/data-portals/19">
           <RocketIcon height={17} />
           Introduction and Next Steps
@@ -91,15 +79,21 @@ const GetStarted = ({ user }: { user?: IUser }) => {
   return (
     <StyledGetStarted>
       <SectionTitle>Getting Started</SectionTitle>
-      <Hr/>
+      <Hr />
       <div>
-        <Link data-turbolinks="false" to="/docs/introduction">Introduction to precisionFDA</Link>
+        <Link data-turbolinks="false" to="/docs/introduction">
+          Introduction to precisionFDA
+        </Link>
       </div>
       <div>
-        <Link data-turbolinks="false" to="/docs/files">Uploading Files &amp; Data</Link>
+        <Link data-turbolinks="false" to="/docs/files">
+          Uploading Files &amp; Data
+        </Link>
       </div>
       <div>
-        <Link data-turbolinks="false" to="/docs/apps">Running Apps</Link>
+        <Link data-turbolinks="false" to="/docs/apps">
+          Running Apps
+        </Link>
       </div>
       <div>
         <Link to="/docs/spaces">Collaborating with Spaces</Link>
@@ -107,7 +101,7 @@ const GetStarted = ({ user }: { user?: IUser }) => {
       <div>
         <Link to="/home/files/file-GfkBx1j0Kj2Yj04FJVV0xXzF-2">Multi-omics App Library</Link>
       </div>
-      <Hr/>
+      <Hr />
       <div>
         <a
           href="https://public.govdelivery.com/accounts/USFDA/subscriber/new?topic_id=USFDA_564"
@@ -149,7 +143,7 @@ const StyledTopAppItem = styled.div`
   gap: 12px;
 
   a {
-      cursor: pointer;
+    cursor: pointer;
   }
 `
 
@@ -186,11 +180,7 @@ const TopAppItem = ({ app }: { app: IApp }) => {
     <StyledTopAppItem>
       <div>
         <GuestRestrictedLink to={linkToApp} aria-label={ariaLabel}>
-          {isRegular ? (
-            <AppTypeIconBlue width={56} height={56}/>
-          ) : (
-            <AppTypeIconYellow width={56} height={56}/>
-          )}
+          {isRegular ? <AppTypeIconBlue width={56} height={56} /> : <AppTypeIconYellow width={56} height={56} />}
         </GuestRestrictedLink>
       </div>
       <div>
@@ -211,20 +201,19 @@ export const TopApps = () => {
     queryKey: ['recent-apps-everybody'],
     queryFn: () => fetchApps([], { scope: 'everybody' }),
   })
-  const { data: featuredAppsData, isLoading: isLoadingFeaturedAppsData } =
-    useQuery({
-      queryKey: ['featured-apps'],
-      queryFn: () => fetchApps([], { scope: 'featured' }),
-    })
+  const { data: featuredAppsData, isLoading: isLoadingFeaturedAppsData } = useQuery({
+    queryKey: ['featured-apps'],
+    queryFn: () => fetchApps([], { scope: 'featured' }),
+  })
   return (
     <TopAppsContainer>
       <TopAppsColumn>
         <SectionTitle>Most Recent Apps</SectionTitle>
         <TopAppsList>
           {isLoadingRecentAppsData ? (
-            <Loader className="inline"/>
+            <Loader className="inline" />
           ) : (
-            recentAppsData?.apps?.slice(0, 4).map(a => <TopAppItem key={a.id} app={a}/>)
+            recentAppsData?.apps?.slice(0, 4).map(a => <TopAppItem key={a.id} app={a} />)
           )}
         </TopAppsList>
       </TopAppsColumn>
@@ -232,10 +221,9 @@ export const TopApps = () => {
         <SectionTitle>Top Featured Apps</SectionTitle>
         <TopAppsList>
           {isLoadingFeaturedAppsData ? (
-            <Loader className="inline"/>
+            <Loader className="inline" />
           ) : (
-            featuredAppsData?.apps?.slice(0, 4)
-              .map(a => <TopAppItem key={a.id} app={a}/>)
+            featuredAppsData?.apps?.slice(0, 4).map(a => <TopAppItem key={a.id} app={a} />)
           )}
         </TopAppsList>
       </TopAppsColumn>
@@ -246,35 +234,31 @@ export const TopApps = () => {
 export const OverviewAuthed = () => {
   usePageMeta({ title: 'precisionFDA - Overview' })
   const user = useAuthUser()
-  const { data: expertsData, isLoading: expertsIsLoading } =
-    useExpertsListQuery({})
+  const { data: expertsData, isLoading: expertsIsLoading } = useExpertsListQuery({})
 
   return (
     <PublicLayout mainScroll={!!user}>
-      <NavigationBar user={user} title="Overview"/>
+      <NavigationBar user={user} title="Overview" />
       <PageContainerMargin>
         <PageRow>
           <PageOverviewMainBody>
-            <TopApps/>
-            <ChallengesBanner/>
-            <ChallengesOverviewList/>
+            <TopApps />
+            <ChallengesBanner />
+            <ChallengesOverviewList />
             <ExpertSection>
               <SectionTitle>Expert Highlight</SectionTitle>
-              {expertsData?.experts[0] && (expertsIsLoading ? (
-                <Loader className="inline"/>
-              ) : (
-                <ExpertListItem expert={expertsData.experts[0]}/>
-              ))}
+              {expertsData?.data[0] &&
+                (expertsIsLoading ? <Loader className="inline" /> : <ExpertListItem expert={expertsData.data[0]} />)}
             </ExpertSection>
           </PageOverviewMainBody>
           <RightSide>
-            <GetStarted user={user}/>
+            <GetStarted user={user} />
             <RightSideItem>
               <SectionTitle>Latest News</SectionTitle>
-              <OverviewNewsList pick={3}/>
-              <Hr/>
+              <OverviewNewsList pick={3} />
+              <Hr />
               <Link to="/news">View All News</Link>
-              <Hr/>
+              <Hr />
               <Link to="/news?type=publication">View All Publications</Link>
             </RightSideItem>
           </RightSide>
@@ -282,7 +266,7 @@ export const OverviewAuthed = () => {
       </PageContainerMargin>
       <CommunityParticipants>
         <SectionTitle>COMMUNITY PARTICIPANTS</SectionTitle>
-        <ParticipantOrgsList/>
+        <ParticipantOrgsList />
       </CommunityParticipants>
 
       <OverviewCenterSection>

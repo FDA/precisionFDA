@@ -12,7 +12,6 @@ import { DiscussionForm as DiscussionFormType } from '../discussions.types'
 import { pickIdsFromFormAttachments } from '../helpers'
 import { DiscussionForm } from './DiscussionForm'
 
-
 const WarningSection = styled.div`
   background-color: var(--highlight-100);
   border-radius: 5px;
@@ -23,7 +22,7 @@ const WarningSection = styled.div`
   &:before {
     height: 100%;
     width: 4px;
-    content: "";
+    content: '';
     background: var(--highlight-500);
     display: block;
     position: absolute;
@@ -40,8 +39,18 @@ const WarningTitle = styled.div`
   font-size: 1.2em;
 `
 
+const renderWarning = () => (
+  <WarningSection>
+    <WarningTitle>⚠️ Discussion Visibility</WarningTitle>
+    <p>
+      This discussion will be posted in the Shared area of this Interactive Review Space.
+      <br />
+      <b>All members</b> of this Space will be able to see this Discussion.
+    </p>
+  </WarningSection>
+)
 
-export const CreateDiscussionPage = ({ scope, displayWarning = false }: { scope: NoteScope, displayWarning: boolean }) => {
+export const CreateDiscussionPage = ({ scope, displayWarning = false }: { scope: NoteScope; displayWarning: boolean }) => {
   const navigate = useNavigate()
   const location = useLocation()
   const queryClient = useQueryClient()
@@ -49,19 +58,24 @@ export const CreateDiscussionPage = ({ scope, displayWarning = false }: { scope:
   const createDiscussionMutation = useMutation({
     mutationKey: ['create-discussion'],
     mutationFn: createDiscussionRequest,
-    onSuccess: async (data) => {
-      queryClient.invalidateQueries({ queryKey: ['space']})
-      navigate(`/spaces/${getSpaceIdFromScope(scope)}/discussions/${data.id}`)
+    onSuccess: async data => {
+      if (scope === 'public') {
+        queryClient.invalidateQueries({ queryKey: ['discussions'] })
+        navigate(`/home/discussions/${data.id}`)
+      } else {
+        queryClient.invalidateQueries({ queryKey: ['space'] })
+        navigate(`/spaces/${getSpaceIdFromScope(scope)}/discussions/${data.id}`)
+      }
     },
-    onError: (e) => {
+    onError: e => {
       // todo: handle error
       toast.error('Error while creating discussion.')
     },
   })
 
   const handleSubmit = async (vals: DiscussionFormType) => {
-
-    const notify = vals.notify.length && ['author', 'all'].includes(vals.notify[0].value)
+    const notify =
+      vals.notify.length && ['author', 'all'].includes(vals.notify[0].value)
         ? vals.notify[0].value
         : vals.notify.map(n => n.value)
 
@@ -79,12 +93,7 @@ export const CreateDiscussionPage = ({ scope, displayWarning = false }: { scope:
   return (
     <FormPageContainer>
       <StyledBackLink linkTo={backPath}>Back to Discussions</StyledBackLink>
-      {displayWarning && <WarningSection>
-          <WarningTitle>⚠️ Discussion Visibility</WarningTitle>
-          <p>This discussion will be posted in the Shared area of this Interactive Review Space.<br/>
-              <b>All members</b> of this Space will be able to see this Discussion.
-          </p>
-      </WarningSection>}
+      {displayWarning && renderWarning()}
       <PageTitle>Create a discussion</PageTitle>
       <DiscussionForm onSubmit={handleSubmit} scope={scope} />
     </FormPageContainer>

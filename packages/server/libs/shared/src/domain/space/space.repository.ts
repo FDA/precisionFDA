@@ -1,9 +1,7 @@
 import { EntityRepository } from '@mikro-orm/mysql'
-import { PermissionError } from '@shared/errors'
-import { EntityScope } from '@shared/types/common'
-import { SPACE_MEMBERSHIP_ROLE } from '../space-membership/space-membership.enum'
 import { Space } from './space.entity'
-import { getIdFromScopeName } from './space.helper'
+import { SPACE_MEMBERSHIP_ROLE } from '../space-membership/space-membership.enum'
+import { User } from '@shared/domain/user/user.entity'
 
 export class SpaceRepository extends EntityRepository<Space> {
   async findSpacesByIdAndUser(spaceIds: number[], userId: number): Promise<Space[]> {
@@ -15,15 +13,22 @@ export class SpaceRepository extends EntityRepository<Space> {
     return await qb.execute()
   }
 
-  async findSpaceByScopeAndUser(scope: EntityScope, userId: number): Promise<Space | null> {
-    const spaceId = getIdFromScopeName(scope)
-    if (spaceId === null) {
-      return
-    }
-    const space = await this.em.findOne(Space, {
+  async findAccessibleByIdAndUser(spaceId: number, user: User): Promise<Space | null> {
+    return this.em.findOne(Space, {
       id: spaceId,
       spaceMemberships: {
-        user: userId,
+        user: user.id,
+        active: true,
+      },
+    })
+  }
+
+  async findEditableByIdAndUser(spaceId: number, user: User): Promise<Space | null> {
+    return this.em.findOne(Space, {
+      id: spaceId,
+      spaceMemberships: {
+        user: user.id,
+        active: true,
         role: {
           $in: [
             SPACE_MEMBERSHIP_ROLE.ADMIN,
@@ -33,9 +38,5 @@ export class SpaceRepository extends EntityRepository<Space> {
         },
       },
     })
-    if (!space) {
-      throw new PermissionError('Unable to publish: insufficient permissions.')
-    }
-    return space
   }
 }

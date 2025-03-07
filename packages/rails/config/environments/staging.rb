@@ -53,9 +53,6 @@ Rails.application.configure do
   # Store uploaded files on the local file system (see config/storage.yml for options)
   config.active_storage.service = :local
 
-  # necessary for Rails.application.routes.url_helpers to work
-  config.action_mailer.default_url_options = { host: "localhost", port: 3000, protocol: "https" }
-
   # Mount Action Cable outside main process or domain
   # config.action_cable.mount_path = nil
   # config.action_cable.url = 'wss://example.com/cable'
@@ -77,6 +74,26 @@ Rails.application.configure do
   # Use a real queuing backend for Active Job (and separate queues per environment)
   # config.active_job.queue_adapter     = :resque
   # config.active_job.queue_name_prefix = "pfda_#{Rails.env}"
+
+  # Ignore bad email addresses and do not raise email delivery errors.
+  # Set this to true and configure the email server for immediate delivery to raise delivery errors.
+  # config.action_mailer.raise_delivery_errors = false
+  config.action_mailer.default_url_options = {
+    host: "precisionfda-staging.dnanexus.com",
+    protocol: "https",
+  }
+  config.action_mailer.smtp_settings = {
+    address: ENV.fetch("SMTP_HOST"),
+    port: ENV.fetch("SMTP_PORT"),
+    user_name: ENV.fetch("SMTP_USER"),
+    password: ENV.fetch("SMTP_PASSWORD"),
+    tls: true,
+  }
+
+  config.action_mailer.delivery_method = :smtp
+  config.action_mailer.perform_deliveries = true
+  config.action_mailer.default_options = { from: ENV.fetch("SMTP_FROM_ADDRESS") }
+  config.action_mailer.raise_delivery_errors = true
 
   # Enable locale fallbacks for I18n (makes lookups for any locale fall back to
   # the I18n.default_locale when a translation cannot be found).

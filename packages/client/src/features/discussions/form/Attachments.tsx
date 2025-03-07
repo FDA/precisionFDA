@@ -13,10 +13,11 @@ import { useSelectJobModal } from '../../executions/actionModals/useSelectJobMod
 import { IJob } from '../../executions/executions.types'
 import { useSelectFileModal } from '../../files/actionModals/useSelectFileModal'
 import { useSelectFolderModal } from '../../files/actionModals/useSelectFolderModal'
-import { IFolder } from '../../files/files.types'
+import { IFolder, TreeOnSelectInfo } from '../../files/files.types'
 import { ActionsDropdownContent } from '../../home/ActionDropdownContent'
 import { Attachment, AttachmentType, FormAttachments, NoteForm } from '../discussions.types'
 import { typeAttachmentKey } from '../helpers'
+import { NoteScope } from '../api'
 
 export function Attachments({
   setValue,
@@ -24,7 +25,7 @@ export function Attachments({
   attachments,
 }: {
   setValue: UseFormSetValue<NoteForm>
-  scope: string
+  scope: NoteScope
   attachments: FormAttachments
 }) {
   const onChangeHandler = (
@@ -58,12 +59,17 @@ export function Attachments({
     [scope, 'public'],
   )
 
-  const { modalComp: foldersModalComp, setShowModal: setFoldersShowModal } = useSelectFolderModal(
-    'Select Folders',
-    v => onChangeHandler('Folder', v),
-    '',
-    [scope],
-  )
+  const { modalComp: foldersModalComp, setShowModal: setFoldersShowModal } = useSelectFolderModal({
+    headerText: 'Select Folders',
+    submitCaption: 'Select folder',
+    scope,
+    onHandleSubmit: (folderId, info: TreeOnSelectInfo) => {
+      if (info.node.title !== '/') {
+        onChangeHandler('Folder', [{ id: folderId, title: info.node.title } as unknown as IFolder])
+        setFoldersShowModal(false)
+      }
+    },
+  })
 
   const { modalComp: appsModalComp, setShowModal: setAppsShowModal } = useSelectAppModal(
     'Select Apps',
@@ -116,7 +122,7 @@ export function Attachments({
               },
               Folders: {
                 func: () => setFoldersShowModal(true),
-                isDisabled: false,
+                isDisabled: scope === 'public',
               },
               Apps: {
                 func: () => setAppsShowModal(true),

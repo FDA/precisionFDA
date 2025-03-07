@@ -5,6 +5,7 @@ import { Answer } from './discussions.types'
 import { CreateCommentEntity } from './form/CreateCommentEntity'
 import { StyledCardList } from './styles'
 import { AnswerCard } from './card/AnswerCard'
+import { NoteScope } from './api'
 
 export const DiscussionAnswer = ({
   canEdit,
@@ -12,12 +13,14 @@ export const DiscussionAnswer = ({
   answer,
   currentUserId,
   isLead,
+  scope,
 }: {
   canEdit: boolean
   canReply: boolean
   answer: Answer
   currentUserId: number
   isLead: boolean
+  scope: NoteScope
 }) => {
   const queryClient = useQueryClient()
 
@@ -42,6 +45,7 @@ export const DiscussionAnswer = ({
         canEdit={canEdit}
         canReply={canReply}
         answer={answer}
+        scope={scope}
         onReply={() => {
           inputRef.current?.focus()
           setIsEditing(true)
@@ -62,7 +66,7 @@ export const DiscussionAnswer = ({
         {isEditing && (
           <CreateCommentEntity
             canUserAnswer
-            scope={answer.scope}
+            scope={scope}
             onSuccess={() => setIsEditing(false)}
             answerId={answer.id}
             onCancel={() => setIsEditing(false)}

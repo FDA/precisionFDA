@@ -5,7 +5,7 @@ import { useQuery } from '@tanstack/react-query'
 import { Link, useLocation } from 'react-router-dom'
 import styled from 'styled-components'
 import { Loader } from '../../components/Loader'
-import { hidePagination, Pagination } from '../../components/Pagination'
+import { Pagination } from '../../components/Pagination'
 import {
   ButtonRow,
   Content,
@@ -27,9 +27,7 @@ import PublicLayout from '../../layouts/PublicLayout'
 import { useAuthUser } from '../auth/useAuthUser'
 import { expertsYearsListRequest } from './api'
 import { ExpertsCondensedList } from './ExpertsCondensedList/ExpertsCondensedList'
-import {
-  useExpertsListQuery,
-} from './useExpertsListQuery'
+import { useExpertsListQuery } from './useExpertsListQuery'
 import { PageContainerMargin } from '../../components/Page/styles'
 import { usePageMeta } from '../../hooks/usePageMeta'
 import { Button } from '../../components/Button'
@@ -105,7 +103,7 @@ const ExpertsList = () => {
 
   const pagination = usePaginationParams()
 
-  const { data, isLoading, isFetched } = useExpertsListQuery({
+  const { data: response, isLoading } = useExpertsListQuery({
     year,
     page: pagination.pageParam,
   })
@@ -132,10 +130,8 @@ const ExpertsList = () => {
               <PageFilterTitle>Expert Highlights</PageFilterTitle>
               {year && <PageFilterTitle>{year}</PageFilterTitle>}
               <PageList>
-                {data?.experts?.length === 0 && (
-                  <div>There are no experts.</div>
-                )}
-                {data?.experts?.map(n => (
+                {response?.data.length === 0 && <div>There are no experts.</div>}
+                {response?.data.map(n => (
                   <ExpertListItem key={n.id}>
                     <ItemImage>
                       <img width="100%" src={n.image} alt="sf" />
@@ -151,25 +147,15 @@ const ExpertsList = () => {
                         <ExpertButtonRow>
                           <Button
                             title={`Click here to View ${n.meta.title}'s Q&A`}
-                            onClick={() =>
-                              window.location.assign(`/experts/${n.id}/qa`)
-                            }
+                            onClick={() => window.location.assign(`/experts/${n.id}/qa`)}
                           >
                             Expert Q&amp;A
                           </Button>
                           <Link to={`/experts/${n.id}`} data-turbolinks="false">
-                            <span
-                              aria-label={`Click to view more information about ${n.meta.title}`}
-                            >
-                              ☆ About This Expert
-                            </span>
+                            <span aria-label={`Click to view more information about ${n.meta.title}`}>☆ About This Expert</span>
                           </Link>
                           <Link to={`/experts/${n.id}/blog`} data-turbolinks="false">
-                            <span
-                              aria-label={`Click to read ${n.meta.title}'s blog post`}
-                            >
-                              Read Expert Blog Post &#x2197;
-                            </span>
+                            <span aria-label={`Click to read ${n.meta.title}'s blog post`}>Read Expert Blog Post &#x2197;</span>
                           </Link>
                         </ExpertButtonRow>
                         {user?.admin && (
@@ -200,20 +186,12 @@ const ExpertsList = () => {
                 ))}
                 <Pagination
                   showPerPage={false}
-                  page={data?.meta?.current_page}
-                  totalCount={data?.meta?.total_count}
-                  totalPages={data?.meta?.total_pages}
-                  isHidden={hidePagination(
-                    isFetched,
-                    data?.experts?.length,
-                    data?.meta?.total_pages,
-                  )}
-                  isPreviousData={data?.meta?.prev_page !== null}
-                  isNextData={data?.meta?.next_page !== null}
+                  page={response?.meta?.page}
+                  totalCount={response?.meta?.total}
+                  totalPages={response?.meta?.totalPages}
+                  isHidden={false}
                   setPage={n => pagination.setPageParam(n, 'replaceIn')}
-                  onPerPageSelect={n =>
-                    pagination.setPerPageParam(n, 'replaceIn')
-                  }
+                  onPerPageSelect={n => pagination.setPerPageParam(n, 'replaceIn')}
                 />
               </PageList>
             </div>
@@ -222,12 +200,7 @@ const ExpertsList = () => {
             {userCanCreateExpert && (
               <RightSideItem>
                 <ButtonRow>
-                  <Button
-                    data-variant="primary"
-                    as="a"
-                    data-turbolinks="false"
-                    href="/experts/new"
-                  >
+                  <Button data-variant="primary" as="a" data-turbolinks="false" href="/experts/new">
                     Add an expert
                   </Button>
                 </ButtonRow>
@@ -243,13 +216,7 @@ const ExpertsList = () => {
                   yearsListData
                     ?.map(y => y?.toString() || null)
                     .map((y, i) => (
-                      <ItemButton
-                        as={Link}
-                        to={`/experts?year=${y}`}
-                        data-turbolinks="false"
-                        key={i}
-                        selected={y === year}
-                      >
+                      <ItemButton as={Link} to={`/experts?year=${y}`} data-turbolinks="false" key={i} selected={y === year}>
                         {y}
                       </ItemButton>
                     ))}

@@ -21,11 +21,15 @@ import { CreateCommentDTO } from '@shared/domain/discussion/dto/create-comment.d
 import { UpdateAnswerDTO } from '@shared/domain/discussion/dto/update-answer.dto'
 import { UpdateCommentDTO } from '@shared/domain/discussion/dto/update-comment.dto'
 import { DiscussionPaginationDTO } from '@shared/domain/discussion/dto/discussion-pagination.dto'
+import { DiscussionFacade } from '../facade/discussion/discussion.facade'
 
 @UseGuards(UserContextGuard)
 @Controller('/discussions')
 export class DiscussionsController {
-  constructor(private readonly discussionService: DiscussionService) {}
+  constructor(
+    private readonly discussionService: DiscussionService,
+    private readonly discussionFacade: DiscussionFacade,
+  ) {}
 
   @Get()
   async listDiscussions(@Query() query: DiscussionPaginationDTO) {
@@ -52,7 +56,7 @@ export class DiscussionsController {
   @HttpCode(201)
   @Post()
   async createDiscussion(@Body() body: CreateDiscussionDTO) {
-    const result = await this.discussionService.createDiscussion(body)
+    const result = await this.discussionFacade.createDiscussion(body)
 
     return { id: result.id }
   }
@@ -63,7 +67,7 @@ export class DiscussionsController {
     @Param('discussionId', ParseIntPipe) discussionId: number,
     @Body() body: CreateAnswerDTO,
   ) {
-    const result = await this.discussionService.createAnswer({ discussionId, ...body })
+    const result = await this.discussionFacade.createAnswer({ discussionId, ...body })
 
     return { id: result.id }
   }
@@ -120,10 +124,13 @@ export class DiscussionsController {
 
   @Post('/:discussionId/comments')
   async createDiscussionComment(
-    @Param('discussionId', ParseIntPipe) id: number,
+    @Param('discussionId', ParseIntPipe) discussionId: number,
     @Body() body: CreateCommentDTO,
   ) {
-    const result = await this.discussionService.createComment({ discussionId: id, ...body })
+    const result = await this.discussionFacade.createComment(discussionId, {
+      discussionId,
+      ...body,
+    })
 
     return { id: result.id }
   }
@@ -155,5 +162,17 @@ export class DiscussionsController {
     @Body() body: UpdateCommentDTO,
   ) {
     return await this.discussionService.updateComment(commentId, body)
+  }
+
+  @HttpCode(201)
+  @Post('/:discussionId/follow')
+  async followDiscussion(@Param('discussionId', ParseIntPipe) discussionId: number) {
+    return await this.discussionService.followDiscussion(discussionId)
+  }
+
+  @HttpCode(201)
+  @Post('/:discussionId/unfollow')
+  async unfollowDiscussion(@Param('discussionId', ParseIntPipe) discussionId: number) {
+    return await this.discussionService.unfollowDiscussion(discussionId)
   }
 }

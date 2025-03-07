@@ -2,10 +2,10 @@ import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
 import { Asset } from '@shared/domain/user-file/asset.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { expect } from 'chai'
-import { database } from '../../../src/database'
+import { database } from '@shared/database'
 import { create, db } from '@shared/test'
 import { FILE_STATE_DX } from '@shared/domain/user-file/user-file.types'
-import { STATIC_SCOPE } from '../../../src/enums'
+import { STATIC_SCOPE } from '@shared/enums'
 
 describe('AssetRepository tests', () => {
   let em: EntityManager<MySqlDriver>
@@ -24,17 +24,17 @@ describe('AssetRepository tests', () => {
 
     assets = [
       // user1
-      create.filesHelper.createUploadedAsset(em, { user: user1 }, { name: 'user1_asset1' }),
-      create.filesHelper.createUploadedAsset(em, { user: user1 }, { name: 'user1_asset2' }),
-      create.filesHelper.createUploadedAsset(em, { user: user1 }, { name: 'user1_asset3' }),
-      create.filesHelper.createUploadedAsset(em, { user: user1 }, { name: 'user1_asset4' }),
-      create.filesHelper.createUploadedAsset(em, { user: user1 }, { name: 'user1_asset5' }),
+      create.filesHelper.createAsset(em, { user: user1 }, { name: 'user1_asset1' }),
+      create.filesHelper.createAsset(em, { user: user1 }, { name: 'user1_asset2' }),
+      create.filesHelper.createAsset(em, { user: user1 }, { name: 'user1_asset3' }),
+      create.filesHelper.createAsset(em, { user: user1 }, { name: 'user1_asset4' }),
+      create.filesHelper.createAsset(em, { user: user1 }, { name: 'user1_asset5' }),
       // user2
-      create.filesHelper.createUploadedAsset(em, { user: user2 }, { name: 'user2_asset1' }),
-      create.filesHelper.createUploadedAsset(em, { user: user2 }, { name: 'user2_asset2' }),
-      create.filesHelper.createUploadedAsset(em, { user: user2 }, { name: 'user2_asset3' }),
-      create.filesHelper.createUploadedAsset(em, { user: user2 }, { name: 'user2_asset4' }),
-      create.filesHelper.createUploadedAsset(em, { user: user2 }, { name: 'user2_asset5' }),
+      create.filesHelper.createAsset(em, { user: user2 }, { name: 'user2_asset1' }),
+      create.filesHelper.createAsset(em, { user: user2 }, { name: 'user2_asset2' }),
+      create.filesHelper.createAsset(em, { user: user2 }, { name: 'user2_asset3' }),
+      create.filesHelper.createAsset(em, { user: user2 }, { name: 'user2_asset4' }),
+      create.filesHelper.createAsset(em, { user: user2 }, { name: 'user2_asset5' }),
     ]
     await em.flush()
   })
@@ -49,7 +49,7 @@ describe('AssetRepository tests', () => {
     expect(result).to.be.not.null()
     expect(result?.name).to.equal('user2_asset2')
 
-    result = await repo.findAssetWithUid('file-no-such-uid')
+    result = await repo.findAssetWithUid('file-nosuchid-1')
     expect(result).to.be.null()
   })
 

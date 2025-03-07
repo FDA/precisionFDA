@@ -6,18 +6,18 @@ import { useConfirm } from '../../modal/useConfirm'
 import { AttachmentsList } from '../AttachmentsList'
 import { deleteDiscussionRequest, fetchAttachmentsRequest } from '../api'
 import { Discussion } from '../discussions.types'
-import { areAttachmentsEmpty, groupByAttachmentType } from '../helpers'
-import { AttachmentsLabel, StyledCommentCard, StyledMarkdown, StyledReplyButton } from '../styles'
+import { groupByAttachmentType } from '../helpers'
+import { StyledCommentCard, StyledMarkdown, StyledReplyButton } from '../styles'
 import { CardHeader } from './CardHeader'
 import { EditNoteEntity } from '../form/EditNoteEntity'
 
 export function DiscussionCard({
-                           canEdit,
-                           canReply,
-                           discussion,
-                           onReply,
-                           onDelete,
-                         }: {
+  canEdit,
+  canReply,
+  discussion,
+  onReply,
+  onDelete,
+}: {
   canEdit: boolean
   canReply: boolean
   discussion: Discussion
@@ -44,7 +44,7 @@ export function DiscussionCard({
       return deleteDiscussionRequest(discussion.id)
     },
     onSuccess: () => {
-      if(onDelete) onDelete()
+      if (onDelete) onDelete()
     },
   })
   const { open: openConfirmation, Confirm: ConfirmSubmit } = useConfirm({
@@ -52,53 +52,48 @@ export function DiscussionCard({
     okText: 'OK',
     headerText: 'You are about to delete this discussion',
     body: (
-        <div>
-          <p>Are you sure you would like to continue?</p>
-        </div>
+      <div>
+        <p>Are you sure you would like to continue?</p>
+      </div>
     ),
   })
 
   if (editMode) {
     return (
-        <StyledMarkdown $isAnswer={false}>
-          <EditNoteEntity
-              onSuccess={() => setEditMode(false)}
-              onCancel={() => setEditMode(false)}
-              discussionId={discussion.id}
-              content={discussion.content}
-              scope={discussion.scope}
-              noteId={discussion.noteId}
-          />
-        </StyledMarkdown>
+      <StyledMarkdown $isAnswer={false}>
+        <EditNoteEntity
+          onSuccess={() => setEditMode(false)}
+          onCancel={() => setEditMode(false)}
+          discussionId={discussion.id}
+          content={discussion.content}
+          scope={discussion.scope}
+          noteId={discussion.noteId}
+        />
+      </StyledMarkdown>
     )
   }
 
   return (
-      <StyledCommentCard $isAnswer={false}>
-        <CardHeader
-            timestamp={discussion.createdAt}
-            cardType="discussion"
-            canUserEdit={canEdit}
-            user={discussion.user}
-            onClickEdit={() => setEditMode(true)}
-            onClickDelete={openConfirmation}
-        />
-        <StyledMarkdown>
-          <Markdown data={discussion.content} />
-        </StyledMarkdown>
-        {attachments && !areAttachmentsEmpty(attachments) && (
-            <>
-              <AttachmentsLabel>Attachments</AttachmentsLabel>
-              <AttachmentsList attachments={attachments} scope={discussion.scope} />
-            </>
-        )}
-        {canReply && (
-            <StyledReplyButton onClick={() => onReply()}>
-              <ReplyArrowIcon height={12} />
-              Reply
-            </StyledReplyButton>
-        )}
-        <ConfirmSubmit />
-      </StyledCommentCard>
+    <StyledCommentCard $isAnswer={false}>
+      <CardHeader
+        timestamp={discussion.createdAt}
+        cardType="discussion"
+        canUserEdit={canEdit}
+        user={discussion.user}
+        onClickEdit={() => setEditMode(true)}
+        onClickDelete={openConfirmation}
+      />
+      <StyledMarkdown>
+        <Markdown data={discussion.content} />
+      </StyledMarkdown>
+      <AttachmentsList attachments={attachments} />
+      {canReply && (
+        <StyledReplyButton onClick={() => onReply()}>
+          <ReplyArrowIcon height={12} />
+          Reply
+        </StyledReplyButton>
+      )}
+      <ConfirmSubmit />
+    </StyledCommentCard>
   )
 }
