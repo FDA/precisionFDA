@@ -16,7 +16,6 @@ import { SpaceTitle } from '../../home/home.styles'
 import { PlusIcon } from '../../../components/icons/PlusIcon'
 import { Button } from '../../../components/Button'
 
-
 const StyledMemberListPage = styled.div`
   padding: 32px;
   display: flex;
@@ -29,14 +28,13 @@ const SearchWrapper = styled.div`
   align-items: flex-start;
 `
 
-
 const StyledMemberList = styled.div`
-display: flex;
-padding-left: 0px;
-align-items: flex-start;
-gap: 16px;
-align-self: stretch;
-flex-wrap: wrap;
+  display: flex;
+  padding-left: 0;
+  align-items: flex-start;
+  gap: 16px;
+  align-self: stretch;
+  flex-wrap: wrap;
 `
 
 const StyledButtonGroup = styled.div`
@@ -59,18 +57,15 @@ export const MembersList = ({ space }: { space: ISpace }) => {
   })
   const { modalComp, setShowModal } = useAddMembersModal({ spaceId: space.id })
   const members = data?.space_memberships ?? []
-  const canAddMember =
-    space.type !== 'private_type' && space.type !== 'administrator'
+  const canAddMember = space.type !== 'private_type' && space.type !== 'administrator'
 
   const [searchQuery, setSearchQuery] = useState('')
 
   // Filter members based on the search query
-  const filteredMembers = members.filter((member) =>
+  const filteredMembers = members.filter(member =>
     Object.entries(member)
       .filter(([key, value]) => key !== 'to_roles' && value !== null && value !== undefined) // Exclude 'to_roles' and null/undefined values
-      .some(([key, value]) =>
-        value.toString().toLowerCase().includes(searchQuery.toLowerCase())
-      )
+      .some(([, value]) => value.toString().toLowerCase().includes(searchQuery.toLowerCase())),
   )
 
   return (
@@ -91,8 +86,8 @@ export const MembersList = ({ space }: { space: ISpace }) => {
           )}
 
           {space.updatable && canAddMember && (
-            <AddButton data-variant='primary' type="button" onClick={() => setShowModal(true)}>
-              <PlusIcon height={12}/>
+            <AddButton data-variant="primary" type="button" onClick={() => setShowModal(true)}>
+              <PlusIcon height={12} />
               Add Members
             </AddButton>
           )}
@@ -109,17 +104,18 @@ export const MembersList = ({ space }: { space: ISpace }) => {
         {isLoading && (
           <div>
             <div>Loading members...</div>
-            <Loader/>
+            <Loader />
           </div>
         )}
 
         <StyledMemberList>
-          { filteredMembers.length === 0 ?  <NoContent>
-            <AlertText>No members found</AlertText>
-          </NoContent> :
-            filteredMembers.map(member => (
-              <MemberCard key={member.id} member={member} spaceId={space.id}/>
-            ))}
+          {filteredMembers.length === 0 ? (
+            <NoContent>
+              <AlertText>No members found</AlertText>
+            </NoContent>
+          ) : (
+            filteredMembers.map(member => <MemberCard key={member.id} member={member} spaceId={space.id} />)
+          )}
         </StyledMemberList>
       </StyledMemberListPage>
       {modalComp}
