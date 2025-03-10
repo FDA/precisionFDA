@@ -1,7 +1,9 @@
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQueryClient } from '@tanstack/react-query'
 import React, { useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { TransparentButton } from '../../components/Button'
+import { Tooltip } from 'react-tooltip'
+import { toast } from 'react-toastify'
+import { Button, TransparentButton } from '../../components/Button'
 import { BackLink } from '../../components/Page/PageBackLink'
 import { PencilIcon } from '../../components/icons/PencilIcon'
 import { pluralize } from '../../utils/formatting'
@@ -9,12 +11,19 @@ import { useAuthUser } from '../auth/useAuthUser'
 import { HomeLoader, NotFound } from '../home/show.styles'
 import { ISpace } from '../spaces/spaces.types'
 import { DiscussionAnswer } from './DiscussionAnswer'
-import { fetchDiscussionRequest } from './api'
 import { CommentCard } from './card/CommentCard'
 import { CreateCommentEntity } from './form/CreateCommentEntity'
 import { EditDiscussionTitle } from './form/EditDiscussionTitle'
 import { CommentCount, DiscussionTitle, PageContent, StyledCardList, StyledTitle, UsernameLink } from './styles'
 import { DiscussionCard } from './card/DiscussionCard'
+import { useToggleFollowDiscussionMutation } from '../../api/mutations/discussion'
+import { getFetchDiscussionQueryKey, useFetchDiscussionQuery } from '../../api/queries/discussion'
+
+const getTooltipContent = (following: boolean) => {
+  return following
+    ? 'Unfollow this discussion to stop receiving email notifications'
+    : 'Follow this discussion to receive email notifications when new replies are added'
+}
 
 export const DiscussionShow = ({ space }: { space?: ISpace }) => {
   const navigate = useNavigate()
@@ -25,10 +34,7 @@ export const DiscussionShow = ({ space }: { space?: ISpace }) => {
   const discussionId = parseInt(discussionIdParam!, 10)
   const user = useAuthUser()
 
-  const { data: discussion, isLoading } = useQuery({
-    queryKey: ['discussion', { id: discussionId }],
-    queryFn: () => fetchDiscussionRequest(discussionId),
-  })
+  const { data: discussion, isLoading, error } = useFetchDiscussionQuery(discussionId)
 
   const handleSuccess = () => {
     if (markdownInputRef.current) {
@@ -49,17 +55,28 @@ export const DiscussionShow = ({ space }: { space?: ISpace }) => {
     }
   }
 
+  const { mutate: toggleFollow } = useToggleFollowDiscussionMutation()
+
   if (isLoading) {
     return <HomeLoader />
   }
 
-  if (!discussion)
+  if (!discussion || error)
     return (
       <NotFound>
         <h1>Discussion not found</h1>
         <div>Sorry, this discussion does not exist or is not accessible by you.</div>
       </NotFound>
     )
+
+  const handleToggleFollow = () => {
+    toggleFollow(discussion, {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: getFetchDiscussionQueryKey(discussionId) })
+        toast.success(`Discussion successfully ${discussion.following ? 'unfollowed' : 'followed'}`)
+      },
+    })
+  }
 
   const backPath = space ? `/spaces/${spaceId}/discussions` : '/home/discussions?scope=everybody'
   const canReply = space?.current_user_membership.role !== 'viewer'
@@ -74,14 +91,25 @@ export const DiscussionShow = ({ space }: { space?: ISpace }) => {
         {isEditing ? (
           <EditDiscussionTitle discussionId={discussionId} defaultValue={discussion.title} setIsEditing={setIsEditing} />
         ) : (
-          <StyledTitle>
-            {discussion.title}
-            {canUserEdit(discussion.user.id) && (
-              <TransparentButton onClick={() => setIsEditing(true)}>
-                <PencilIcon height={16} />
-              </TransparentButton>
-            )}
-          </StyledTitle>
+          <>
+            <StyledTitle>
+              {discussion.title}
+              {canUserEdit(discussion.user.id) && (
+                <TransparentButton onClick={() => setIsEditing(true)}>
+                  <PencilIcon height={16} />
+                </TransparentButton>
+              )}
+            </StyledTitle>
+            <Button
+              data-variant="primary"
+              data-tooltip-id="follow-tooltip"
+              data-tooltip-content={getTooltipContent(discussion.following)}
+              onClick={handleToggleFollow}
+            >
+              {discussion.following ? 'Unfollow discussion' : 'Follow discussion'}
+            </Button>
+            <Tooltip id="follow-tooltip" delayShow={100} />
+          </>
         )}
       </DiscussionTitle>
       <div>
@@ -109,6 +137,7 @@ export const DiscussionShow = ({ space }: { space?: ISpace }) => {
                 currentUserId={user!.id}
                 answer={answer}
                 isLead={isLead}
+                scope={discussion.scope}
               />
             ))}
             <hr />

@@ -6,13 +6,7 @@ import { Controller, useForm } from 'react-hook-form'
 import { toast } from 'react-toastify'
 import styled from 'styled-components'
 import * as Yup from 'yup'
-import {
-  NotePayload,
-  NoteScope,
-  editAnswerRequest,
-  editDiscussionRequest,
-  fetchAttachmentsRequest,
-} from '../api'
+import { NotePayload, NoteScope, editAnswerRequest, editDiscussionRequest, fetchAttachmentsRequest } from '../api'
 
 import { MarkdownEditor } from '../../../components/Markdown/MarkdownEditor'
 import { InputError } from '../../../components/form/styles'
@@ -85,7 +79,7 @@ export const EditNoteForm = ({
   }
 
   const deleteAttachment = (key: any, id: number) => {
-    const v = getValues(key) as {id: number}[]
+    const v = getValues(key) as { id: number }[]
     const newAttachments = v.filter(a => a.id !== id)
     setValue(key, newAttachments)
   }
@@ -95,27 +89,13 @@ export const EditNoteForm = ({
       <Controller
         control={control}
         name="content"
-        render={({ field }) => (
-          <MarkdownEditor field={field} disabled={isSubmitting} />
-        )}
+        render={({ field }) => <MarkdownEditor field={field} disabled={isSubmitting} />}
       />
-      <ErrorMessage
-        errors={errors}
-        name="content"
-        render={({ message }) => <InputError>{message}</InputError>}
-      />
-      {!isLoading && (
-        <AttachmentsList
-          attachments={watch().attachments}
-          scope={scope}
-          onRemoveAttachment={deleteAttachment}
-        />
-      )}
+      <ErrorMessage errors={errors} name="content" render={({ message }) => <InputError>{message}</InputError>} />
+      {!isLoading && <AttachmentsList attachments={watch().attachments} onRemoveAttachment={deleteAttachment} />}
       <ButtonRow>
         <Attachments setValue={setValue} attachments={watch().attachments} scope={scope} />
-        <Button onClick={() => onCancel && onCancel(getValues())}>
-          Cancel
-        </Button>
+        <Button onClick={() => onCancel && onCancel(getValues())}>Cancel</Button>
         <Button
           data-variant="primary"
           type="button"
@@ -141,10 +121,10 @@ export const EditNoteEntity = ({
 }: {
   onSuccess?: () => void
   onCancel: (vals: NoteForm) => void
-  scope: NoteScope,
-  content: string,
+  scope: NoteScope
+  content: string
   discussionId: number
-  noteId: number,
+  noteId: number
   answerId?: number
 }) => {
   const queryClient = useQueryClient()
@@ -158,7 +138,7 @@ export const EditNoteEntity = ({
       return editDiscussionRequest(discussionId, payload)
     },
     onSuccess: () => {
-      toast.success(`${answerId ? 'Answer': 'Discussion'} has been updated`)
+      toast.success(`${answerId ? 'Answer' : 'Discussion'} has been updated`)
       if (onSuccess) onSuccess()
     },
     onSettled: async () => {
@@ -187,13 +167,5 @@ export const EditNoteEntity = ({
     content,
   }
 
-  return (
-    <EditNoteForm
-      noteId={noteId}
-      onCancel={onCancel}
-      onSubmit={handleSubmit}
-      defaultValues={defaultValues}
-      scope={scope}
-    />
-  )
+  return <EditNoteForm noteId={noteId} scope={scope} onCancel={onCancel} onSubmit={handleSubmit} defaultValues={defaultValues} />
 }

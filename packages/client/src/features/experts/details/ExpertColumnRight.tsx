@@ -8,26 +8,19 @@ import { EXPERT_STATE } from '../../../constants'
 import { IUser } from '../../../types/user'
 import { ToC } from '../../markdown/Toc'
 import { useModal } from '../../modal/useModal'
-import { askQuestion } from '../api'
+import { askQuestion, deleteExpertRequest } from '../api'
 import { ExpertDetails } from '../types'
 import { ExpertAskQuestionModal } from './ExpertAskQuestionModal'
 import { StyledPageRightColumn } from './styles'
 import { Button } from '../../../components/Button'
+import { useConfirm } from '../../modal/useConfirm'
 
 const ActionRow = styled.div`
   display: flex;
   gap: 8px;
 `
 
-export const ExpertColumnRight = ({
-  expert,
-  user,
-  toc,
-}: {
-  expert: ExpertDetails
-  user: IUser
-  toc?: any[]
-}) => {
+export const ExpertColumnRight = ({ expert, user, toc }: { expert: ExpertDetails; user: IUser; toc?: any[] }) => {
   const modal = useModal()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
@@ -37,37 +30,49 @@ export const ExpertColumnRight = ({
   const isLoggedIn = (user?.id && Object.keys(user).length > 0) || false
   const createQuestionMutation = useMutation({
     mutationKey: ['create-question'],
-    mutationFn: ({
-      userName,
-      question,
-      captchaValue,
-    }: {
-      userName: string
-      question: string
-      captchaValue: string
-    }) =>
+    mutationFn: ({ userName, question, captchaValue }: { userName: string; question: string; captchaValue: string }) =>
       askQuestion({ userName, question, captchaValue }, expert.id.toString()),
   })
-  const askExpert = (
-    userName: string,
-    question: string,
-    captchaValue: string,
-  ) => {
-    createQuestionMutation
-      .mutateAsync({ userName, question, captchaValue })
-      .then(response => {
-        if (response.status === httpStatusCodes.OK) {
-          queryClient.invalidateQueries({
-            queryKey: ['queryExpertDetails'],
-          })
-          toast.success('Your question was submitted successfully')
-          modal.setShowModal(false)
-          navigate(`/experts/${expert.id}`)
-        } else {
-          const errorMessage = response.payload?.error?.message
-          toast.error(errorMessage || 'Your question was not submitted')
-        }
-      })
+
+  const deleteMutation = useMutation({
+    mutationKey: ['delete-expert'],
+    mutationFn: () => deleteExpertRequest(expert.id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['experts'] })
+      toast.success('Expert was deleted successfully')
+      navigate('/experts')
+    },
+    onError: error => {
+      const errorMessage = error?.message
+      toast.error(errorMessage || 'Expert was not deleted due to internal error')
+    },
+  })
+
+  const { open: openConfirmation, Confirm: ConfirmSubmit } = useConfirm({
+    onOk: deleteMutation.mutate,
+    okText: 'OK',
+    headerText: 'You are about to delete this expert',
+    body: (
+      <div>
+        <p>Are you sure you would like to continue? This will delete the expert and all its related Q&A.</p>
+      </div>
+    ),
+  })
+
+  const askExpert = (userName: string, question: string, captchaValue: string) => {
+    createQuestionMutation.mutateAsync({ userName, question, captchaValue }).then(response => {
+      if (response.status === httpStatusCodes.OK) {
+        queryClient.invalidateQueries({
+          queryKey: ['queryExpertDetails'],
+        })
+        toast.success('Your question was submitted successfully')
+        modal.setShowModal(false)
+        navigate(`/experts/${expert.id}`)
+      } else {
+        const errorMessage = response.payload?.error?.message
+        toast.error(errorMessage || 'Your question was not submitted')
+      }
+    })
   }
 
   return (
@@ -81,16 +86,17 @@ export const ExpertColumnRight = ({
           </div>
         )}
         {editPermitted && (
-          <div>
-            <Button
-              data-variant="primary"
-              as="a"
-              data-turbolinks="false"
-              href={`/experts/${expert?.id}/edit`}
-            >
-              Edit Expert Info
+          <Button data-variant="primary" as="a" data-turbolinks="false" href={`/experts/${expert?.id}/edit`}>
+            Edit Expert Info
+          </Button>
+        )}
+        {user?.can_administer_site && (
+          <>
+            <Button data-variant="warning" onClick={openConfirmation}>
+              Delete Expert
             </Button>
-          </div>
+            <ConfirmSubmit />
+          </>
         )}
       </ActionRow>
       {toc && toc.length > 0 && (

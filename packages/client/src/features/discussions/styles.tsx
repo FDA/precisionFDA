@@ -8,6 +8,8 @@ export const CommentCount = styled.div`
 `
 export const DiscussionTitle = styled.div`
   display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-top: 16px;
   margin-bottom: 16px;
 `
@@ -18,6 +20,7 @@ export const StyledTitle = styled.div`
   font-size: 32px;
   font-weight: bolder;
   height: 36px;
+
   svg {
     color: var(--tertiary-400);
   }
@@ -27,6 +30,7 @@ export const StyledTitleEdit = styled.div`
   flex: 1;
   gap: 8px;
   align-items: center;
+
   input {
     width: 100%;
     max-width: 300px;
@@ -45,11 +49,9 @@ export const PageContent = styled.div`
   display: flex;
   flex-direction: column;
   flex: 1 0 auto;
-  padding: 16px;
-  padding-bottom: 120px;
+  padding: 16px 16px 120px;
   gap: 16px;
   max-width: 880px;
-  width: fill-available;
   align-self: center;
   box-sizing: border-box;
   width: 100%;
@@ -69,7 +71,7 @@ export const ImageContainer = styled.div`
 
 export const AttachmentsLabel = styled.span`
   font-weight: bold;
-  margin: 1rem 0;
+  margin: 0.25rem 0;
 `
 
 export const StyledCommentCard = styled.div<{ $isAnswer?: boolean }>`
@@ -94,9 +96,11 @@ export const Li = styled.li`
   cursor: pointer;
   padding: 4px 16px;
   white-space: nowrap;
+
   &:hover {
     background-color: var(--c-dropdown-hover-bg);
   }
+
   a {
     color: initial;
   }
@@ -130,6 +134,7 @@ export const StyledAnswerLabel = styled.div`
   align-items: center;
   font-weight: bold;
   color: var(--c-discussion-answer-500);
+
   svg {
     margin-right: 4px;
   }
@@ -165,36 +170,49 @@ export const StyledMarkdown = styled.div<{ $isAnswer?: boolean }>`
     `}
   font-size: 14px;
   align-self: stretch;
-  h1, h2, h3, h4, h5, h6 {
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     margin: 1rem 0;
   }
+
   h1 {
     font-size: 28px;
   }
+
   h2 {
     font-size: 21px;
   }
+
   h2 {
     font-size: 17.5px;
   }
+
   p {
     font-size: 14px;
     line-height: 1.6em;
     margin: 1em 0;
   }
+
   ul {
     padding-inline-start: 1rem;
+
     li {
       line-height: 1.6em;
     }
   }
+
   img {
     ${imageReset}
   }
 `
 export const StyledCardList = styled.div`
   display: flex;
-  padding-left: 0px;
+  padding-left: 0;
   flex-direction: column;
   align-items: flex-start;
   gap: 16px;

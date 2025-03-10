@@ -1,114 +1,110 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
 import styled, { css } from 'styled-components'
-import { Identicon } from '../../../components/Identicon'
 import MemberEditButton from './MemberEditButton'
-import { SpaceMembership } from './members.types'
+import { getSpaceMembershipSideAlias, SpaceMembership } from './members.types'
+import { ISpace } from '../spaces.types'
 
-export const StyledMemberCard = styled.div<{ $isDeactivated: boolean }>`
-  --c-border: var(--c-layout-border);
-
-  min-width: 300px;
+const deactivatedStyles = css`
+  color: var(--c-text-400);
   border: 1px solid var(--c-border);
-  ${({ $isDeactivated }) =>
-    $isDeactivated && css`border: 1px solid var(--c-border);`}
+`
+
+const Card = styled.div<{ $isDeactivated: boolean }>`
+  min-width: 300px;
+  border: 1px solid var(--c-layout-border);
+  border-radius: 6px;
   margin-bottom: 4px;
   display: flex;
   flex-direction: column;
-  border-radius: 6px;
+  ${({ $isDeactivated }) => $isDeactivated && deactivatedStyles}
 `
-export const StyledCardHeader = styled.div`
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 1px solid var(--c-border);
-    padding: 4px 8px 4px 4px;
 
-    a {
-        display: flex;
-        gap: 8px;
-        align-items: center;
-        font-size: 14px;
-        line-height: 30px;
-        cursor: pointer;
-    }
+const CardHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--c-layout-border);
+  padding: 4px 8px 4px 4px;
+
+  a {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    font-size: 14px;
+    line-height: 30px;
+    cursor: pointer;
+    font-weight: bold;
+  }
 `
-export const Key = styled.span`
-  font-weight: bold;
+
+const UserInfo = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
 `
-export const Value = styled.span``
-export const StyledDetails = styled.div<{ $isDeactivated: boolean }>`
-  ${({ $isDeactivated }) =>
-    $isDeactivated && css`color: var(--c-text-400);`}
+
+const Details = styled.div<{ $isDeactivated: boolean }>`
   font-size: 14px;
   line-height: 22px;
+  ${({ $isDeactivated }) =>
+    $isDeactivated &&
+    css`
+      color: var(--c-text-400);
+    `}
+
   ul {
     list-style: none;
     padding: 8px;
     margin: 0;
-    li {
-      display: flex;
-      justify-content: space-between;
-    }
+  }
+
+  li {
+    display: flex;
+    justify-content: space-between;
   }
 `
 
-export function MemberCard({
-  member,
-  spaceId,
-}: {
-  member: SpaceMembership
-  spaceId: number
-}) {
+const Label = styled.span`
+  font-weight: bold;
+`
+
+const DetailItem = ({ label, value, isLink = false, username = '' }) => (
+  <li>
+    <Label>{label}:</Label>
+    {isLink ? (
+      <Link to={`/users/${username}`} target="_blank" rel="noopener noreferrer">
+        {value}
+      </Link>
+    ) : (
+      <span>{value}</span>
+    )}
+  </li>
+)
+
+export function MemberCard({ member, space }: { member: SpaceMembership; space: ISpace }) {
+  const isDeactivated = !member.active
+  const role = isDeactivated ? `${member.role} (disabled)` : member.role
+
   return (
-    <StyledMemberCard $isDeactivated={!member.active}>
-      <StyledCardHeader>
-        <Link
-          to={`/users/${member.user_name}`}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Identicon dxuser={member.user_name} />
-          {member.title}
-        </Link>
-        {member.to_roles.length > 0 && (
-          <MemberEditButton spaceId={spaceId} member={member} />
-        )}
-      </StyledCardHeader>
-      <StyledDetails $isDeactivated={!member.active}>
+    <Card $isDeactivated={isDeactivated}>
+      <CardHeader>
+        <UserInfo>
+          <Link to={`/users/${member.user_name}`} target="_blank" rel="noopener noreferrer">
+            {member.title}
+          </Link>
+        </UserInfo>
+        {member.to_roles.length > 0 && <MemberEditButton spaceId={space.id} member={member} />}
+      </CardHeader>
+      <Details $isDeactivated={isDeactivated}>
         <ul>
-          <li>
-            <Key>Username:</Key>
-            <Value>
-              <Link
-                to={`/users/${member.user_name}`}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {member.user_name}
-              </Link>
-            </Value>
-          </li>
-          <li>
-            <Key>Role:</Key>
-            <Value>
-              {member.active ? member.role : `${member.role} (disabled)`}
-            </Value>
-          </li>
-          <li>
-            <Key>Organization:</Key>
-            <Value>{member.org}</Value>
-          </li>
-          <li>
-            <Key>Domain:</Key>
-            <Value>{member.domain}</Value>
-          </li>
-          <li>
-            <Key>Joined On:</Key>
-            <Value>{member.created_at}</Value>
-          </li>
+          <DetailItem label="Username" value={member.user_name} isLink username={member.user_name} />
+          <DetailItem label="Role" value={role} />
+          <DetailItem label="Side" value={getSpaceMembershipSideAlias(member.side, space)} />
+          <DetailItem label="Domain" value={member.domain} />
+          <DetailItem label="Joined On" value={member.created_at} />
         </ul>
-      </StyledDetails>
-    </StyledMemberCard>
+      </Details>
+    </Card>
   )
 }

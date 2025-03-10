@@ -13,12 +13,15 @@ import { QueueJobProducer } from '@shared/queue/queue-job.producer'
 import { CheckStatusJob, SyncDbClusterJob, TASK_TYPE } from '@shared/queue/task.input'
 import { UserCtx } from '@shared/types'
 import { JobOptions, Queue } from 'bull'
+import { NotifyType } from '@shared/domain/discussion/dto/notify.type'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
 
 @Injectable()
 export class MainQueueJobProducer extends QueueJobProducer {
   constructor(
     @InjectQueue(config.workerJobs.queues.default.name)
     protected readonly queue: Queue,
+    private readonly user: UserContext,
   ) {
     super()
   }
@@ -122,5 +125,41 @@ export class MainQueueJobProducer extends QueueJobProducer {
     }
 
     return await this.addToQueue(wrapped, options)
+  }
+
+  /**
+   * Create a new discussion notification task
+   * @param discussionId
+   * @param notify - list of usernames to notify OR 'all' to notify all users OR 'author' to notify the author only
+   */
+  async createNewDiscussionNotificationTask(discussionId: number, notify: NotifyType) {
+    const wrapped = {
+      type: TASK_TYPE.NOTIFY_NEW_DISCUSSION as const,
+      payload: {
+        discussionId,
+        notify,
+      },
+      user: this.user,
+    }
+
+    return await this.addToQueue(wrapped)
+  }
+
+  /**
+   * Create a new discussion notification task
+   * @param discussionId
+   * @param notify - list of usernames to notify OR 'all' to notify all users OR 'author' to notify the author only
+   */
+  async createNewReplyNotificationTask(discussionId: number, notify: NotifyType) {
+    const wrapped = {
+      type: TASK_TYPE.NOTIFY_NEW_DISCUSSION_REPLY as const,
+      payload: {
+        discussionId,
+        notify,
+      },
+      user: this.user,
+    }
+
+    return await this.addToQueue(wrapped)
   }
 }

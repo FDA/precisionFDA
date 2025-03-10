@@ -8,24 +8,30 @@ import {
   OneToOne,
   Property,
   Reference,
+  Cascade,
 } from '@mikro-orm/core'
 import { User } from '@shared/domain/user/user.entity'
-import { BaseEntity } from '../../database/base.entity'
 import { ExpertQuestion, ExpertQuestionState } from '../expert-question/expert-question.entity'
-import { ExpertMeta } from './expert.serializer'
 import { ExpertRepository } from './expert.repository'
+import { ExpertAnswer } from '@shared/domain/expert-answer/expert-answer.entity'
+import { ScopedEntity } from '@shared/database/scoped.entity'
 
-export enum ExpertState {
+export enum EXPERT_STATE {
   OPEN = 'open',
   CLOSED = 'closed',
 }
 
-export enum ExpertScope {
-  PUBLIC = 'public',
+export interface ExpertMeta {
+  _prefname: string
+  _about: string
+  _blog: string
+  _blog_title: string
+  _challenge: string
+  _image_id: string
 }
 
 @Entity({ tableName: 'experts', repository: () => ExpertRepository })
-export class Expert extends BaseEntity {
+export class Expert extends ScopedEntity {
   @Property()
   createdAt = new Date()
 
@@ -35,20 +41,20 @@ export class Expert extends BaseEntity {
   @OneToOne({ entity: () => User, inversedBy: 'expert' })
   user: Ref<User>
 
-  @OneToMany({ entity: () => ExpertQuestion, mappedBy: 'expert' })
+  @OneToMany(() => ExpertQuestion, (question) => question.expert, {
+    cascade: [Cascade.REMOVE],
+  })
   questions = new Collection<ExpertQuestion>(this)
 
-  @Enum({ nullable: true })
-  scope?: ExpertScope
+  @OneToMany(() => ExpertAnswer, (answer) => answer.expert, {
+    cascade: [Cascade.REMOVE],
+  })
+  answers = new Collection<ExpertAnswer>(this)
 
-  @Enum({ nullable: true })
-  state?: ExpertState
+  @Enum()
+  state: EXPERT_STATE
 
-  // TODO(samuel) refactor this type to string, and find proper solution to define 2 versions of the entity
-  // 1st that corresponds to db
-  // 2nd that is properly typed
-  // Or alternatively migrate mysql schema to json column and fix in ruby as well :D
-  @Property({ type: 'text' })
+  @Property({ type: 'json' })
   meta?: ExpertMeta
 
   @Property({ type: 'varchar' })
@@ -62,20 +68,48 @@ export class Expert extends BaseEntity {
   }
 
   async getAnsweredQuestionsCount() {
-    return (await this.questions.matching({ where: {
-      state: ExpertQuestionState.ANSWERED,
-    }})).length
+    return (
+      await this.questions.matching({
+        where: {
+          state: ExpertQuestionState.ANSWERED,
+        },
+      })
+    ).length
   }
 
   async getIgnoredQuestionsCount() {
-    return (await this.questions.matching({ where: {
-      state: ExpertQuestionState.IGNORED,
-    }})).length
+    return (
+      await this.questions.matching({
+        where: {
+          state: ExpertQuestionState.IGNORED,
+        },
+      })
+    ).length
   }
 
   async getOpenQuestionsCount() {
-    return (await this.questions.matching({ where: {
-      state: ExpertQuestionState.OPEN,
-    }})).length
+    return (
+      await this.questions.matching({
+        where: {
+          state: ExpertQuestionState.OPEN,
+        },
+      })
+    ).length
+  }
+
+  async isAccessibleBy(user?: User) {
+    if (!user || !(await user.isSiteAdmin())) {
+      return this.isPublic()
+    }
+
+    return await this.isEditableBy(user)
+  }
+
+  async isEditableBy(user: User) {
+    if (await user.isSiteAdmin()) {
+      return true
+    }
+
+    return this.user.id === user.id
   }
 }

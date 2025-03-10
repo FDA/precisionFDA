@@ -162,11 +162,7 @@ paths:
         - https://documentation.dnanexus.com/developer/api/organizations#api-method-org-xxxx-findmembers
       operationId: orgFindMembers
       parameters:
-        - name: orgDxid
-          in: path
-          required: true
-          schema:
-            $ref: "#/components/schemas/OrgDxidString"
+        - $ref: "#/components/parameters/orgDxidParam"
       requestBody:
         content:
           application/json:
@@ -186,6 +182,41 @@ paths:
                       $ref: "#/components/schemas/OrgMember"
                   next:
                     type: object
+  /{orgDxid}/setMemberAccess:
+    post:
+      tags:
+        - org
+      summary: Set member access
+      description: |
+        - https://documentation.dnanexus.com/developer/api/organizations#api-method-org-xxxx-setmemberaccess
+      operationId: orgSetMemberAccess
+      parameters:
+        - $ref: "#/components/parameters/orgDxidParam"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              additionalProperties:
+                type: object
+                properties:
+                  level:
+                    $ref: "#/components/schemas/OrgLevel"
+                  allowBillableActivities:
+                    type: boolean
+                  appAccess:
+                    type: boolean
+                  projectAccess:
+                    $ref: "#/components/schemas/ProjectAccess"
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    $ref: "#/components/schemas/OrgDxidString"
   /{userDxid}/describe:
     post:
       tags:
@@ -576,6 +607,33 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ObjectIdResponse"
+  /{objectDxid}/rename:
+    post:
+      tags:
+        - class
+      summary: Class rename
+      description: |
+        - https://documentation.dnanexus.com/developer/api/introduction-to-data-object-metadata/name#api-method-class-xxxx-rename
+      operationId: classRename
+      parameters:
+        - $ref: "#/components/parameters/objectDxidParam"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                project:
+                  $ref: "#/components/schemas/ProjectDxidString"
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ObjectIdResponse"
   /system/findDataObjects:
     post:
       tags:
@@ -926,7 +984,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/AppIdResponse"
+                $ref: "#/components/schemas/JobIdResponse"
   /{appDxid}/addAuthorizedUsers:
     post:
       tags:
@@ -1333,6 +1391,8 @@ components:
       oneOf:
         - type: object
         - type: array
+          items:
+            type: object
     BooleanOrMapping:
       oneOf:
         - type: boolean

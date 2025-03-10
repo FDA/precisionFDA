@@ -37,7 +37,9 @@ export class ExpertQuestionAddedHandler
   }
 
   async determineReceivers(): Promise<User[]> {
-    return [this.expertQuestion.expert.user.getEntity()]
+    const expert = await this.expertQuestion.expert.load()
+    const user = await expert.user.load()
+    return [user]
   }
 
   async template(receiver: User): Promise<EmailSendInput> {

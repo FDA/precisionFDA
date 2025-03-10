@@ -1,15 +1,2 @@
-<% content_for :title do %>Discussions<% end %>
+<div id="app-root"></div>
 
-<div class="pfda-toolbar">
-  <div class="btn-group">
-    <%= link_to discussions_path(), method: :post, class: 'btn btn-primary', data: {disable_with: "Loading..."} do %>
-      <span class="fa fa-plus fa-fw"></span> Start a discussion
-    <% end %>
-  </div>
-</div>
-
-<div class="pfda-pane container-fluid">
-  <div class="pfda-pane-content">
-    <%= render "discussions/cards", discussions: @discussions %>
-  </div>
-</div>

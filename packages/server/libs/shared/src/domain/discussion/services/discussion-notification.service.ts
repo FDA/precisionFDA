@@ -1,9 +1,8 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
-import { Injectable } from '@nestjs/common'
+import { Injectable, Logger } from '@nestjs/common'
 import { EMAIL_TYPES, EmailSendInput } from '@shared/domain/email/email.config'
 import { buildEmailTemplate } from '@shared/domain/email/email.helper'
 import { EmailQueueJobProducer } from '@shared/domain/email/producer/email-queue-job.producer'
-import { EntityFetcherService } from '@shared/domain/entity/entity-fetcher.service'
 import { EntityService } from '@shared/domain/entity/entity.service'
 import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
 import { Space } from '@shared/domain/space/space.entity'
@@ -13,23 +12,27 @@ import { User } from '@shared/domain/user/user.entity'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import {
   DiscussionEmailInput,
-  spaceDiscussionTemplate,
-} from '../../email/templates/mjml/space-discussion.template'
-import { Discussion } from '../discussion.entity'
+  newDiscussionTemplate,
+} from '../../email/templates/mjml/new-discussion.template'
 import { NotifyType } from '@shared/domain/discussion/dto/notify.type'
+import { EntityScopeUtils } from '@shared/utils/entity-scope.utils'
+import DiscussionRepository from '@shared/domain/discussion/discussion.repository'
+import { DiscussionService } from '@shared/domain/discussion/services/discussion.service'
+import { newDiscussionReplyTemplate } from '@shared/domain/email/templates/mjml/new-discussion-reply.template'
 
 @Injectable()
 export class DiscussionNotificationService {
   @ServiceLogger()
-  private readonly logger
+  private readonly logger: Logger
 
   constructor(
     private readonly em: SqlEntityManager,
+    private readonly user: UserContext,
+    private readonly discussionService: DiscussionService,
     private readonly emailQueueJobProducer: EmailQueueJobProducer,
     private readonly entityService: EntityService,
-    private readonly entityFetcherService: EntityFetcherService,
-    private readonly user: UserContext,
     private readonly spaceRepository: SpaceRepository,
+    private readonly discussionRepository: DiscussionRepository,
   ) {}
 
   private async notifySpaceMembers(emailBody: string, subject: string, space: Space) {
@@ -38,6 +41,11 @@ export class DiscussionNotificationService {
       { spaces: space.id, active: true },
       { populate: ['user'] },
     )
+
+    this.logger.log(
+      `Sending discussion email notification to ${spaceMemberships.length} members of space (id: ${space.id})`,
+    )
+
     for (const member of spaceMemberships) {
       const email = member.user.getEntity().email
       const emailTask = {
@@ -50,11 +58,10 @@ export class DiscussionNotificationService {
     }
   }
 
-  private async notifyPoster(emailBody: string, subject: String, posterId: number) {
-    const poster = await this.em.findOneOrFail(User, {
-      id: posterId,
-    })
-    const email = poster.email
+  private async notifyUser(emailBody: string, subject: String, user: User) {
+    this.logger.log(`Sending discussion email notification to user (id: ${user.id})`)
+
+    const email = user.email
     const emailTask = {
       emailType: EMAIL_TYPES.spaceDiscussion,
       to: email,
@@ -64,51 +71,118 @@ export class DiscussionNotificationService {
     await this.emailQueueJobProducer.createSendEmailTask(emailTask, this.user)
   }
 
-  async notifySpaceDiscussion(discussionId: number, notify: NotifyType) {
-    const discussion = await this.entityFetcherService.getEditableById(
-      Discussion,
-      discussionId,
-      {},
-      { populate: ['note'] },
-    )
+  async notifyNewDiscussion(discussionId: number, notify: NotifyType) {
+    const discussion = await this.discussionRepository.findOne(discussionId, {
+      populate: ['note'],
+    })
+
     if (!discussion) {
-      this.logger.log('Discussion not found, skipping notification')
+      this.logger.log(`Discussion with id ${discussionId} not found, skipping notification`)
       return
     }
 
     const discussionLink = await this.entityService.getEntityUiLink(discussion)
     const note = discussion.note.getEntity()
-    if (!note.isInSpace()) {
-      this.logger.log('Discussion is not in a space, skipping notification')
+    const scope = note.scope
+
+    if (!EntityScopeUtils.isSpaceScope(scope)) {
+      this.logger.log('New discussion is public, not in a space, skipping notification')
       return
     }
-    const space = await this.spaceRepository.findSpaceByScopeAndUser(note.scope, this.user.id)
-    const emailInput = {
+
+    const spaceId = EntityScopeUtils.getSpaceIdFromScope(scope)
+    const space = await this.spaceRepository.findOne(spaceId)
+
+    const emailBody = buildEmailTemplate<DiscussionEmailInput>(newDiscussionTemplate, {
       url: discussionLink,
       spaceName: space.name,
-    } as DiscussionEmailInput
-    const emailBody = buildEmailTemplate<DiscussionEmailInput>(spaceDiscussionTemplate, emailInput)
-    const subject = `[precisionFDA] Discussion update notification: ${space.name}`
+    })
+
+    const subject = `[precisionFDA] New Discussion notification: ${space.name}`
 
     if (notify === 'all') {
-      await this.notifySpaceMembers(emailBody, subject, space)
-    } else if (notify === 'author') {
-      await this.notifyPoster(emailBody, subject, discussion.user.id)
-    } else {
-      for (const username of notify) {
-        const user = await this.em.findOneOrFail(User, {
-          dxuser: username,
-          spaceMemberships: { spaces: space.id, active: true },
-        })
-        const email = user.email
-        const emailTask = {
-          emailType: EMAIL_TYPES.spaceDiscussion,
-          to: email,
-          subject: subject,
-          body: emailBody,
-        } as EmailSendInput
-        await this.emailQueueJobProducer.createSendEmailTask(emailTask, this.user)
-      }
+      return this.notifySpaceMembers(emailBody, subject, space)
     }
+
+    if (notify === 'author') {
+      return this.notifyUser(emailBody, subject, discussion.user.getEntity())
+    }
+
+    // Notify specific users selected by the author
+    const emailTasks = notify.map(async (username) => {
+      const user = await this.em.findOneOrFail(User, {
+        dxuser: username,
+        spaceMemberships: { spaces: space.id, active: true },
+      })
+
+      return this.notifyUser(emailBody, subject, user)
+    })
+
+    await Promise.all(emailTasks)
+  }
+
+  async notifyNewDiscussionReply(discussionId: number, notify: NotifyType) {
+    const discussion = await this.discussionRepository.findOne(discussionId, {
+      populate: ['note', 'follows'],
+    })
+
+    if (!discussion) {
+      this.logger.log(`Discussion (id: ${discussionId}) not found, skipping notification`)
+      return
+    }
+
+    let followers = await this.discussionService.getFollowers(discussionId)
+    const note = discussion.note.getEntity()
+    const discussionLink = await this.entityService.getEntityUiLink(discussion)
+
+    let subject: string
+    let emailBody: string
+
+    if (EntityScopeUtils.isSpaceScope(note.scope)) {
+      this.logger.log('Discussion is in space....')
+
+      const spaceId = EntityScopeUtils.getSpaceIdFromScope(note.scope)
+      const space = await this.spaceRepository.findOne(spaceId)
+
+      subject = `[precisionFDA] New Discussion reply notification: ${space.name}`
+      emailBody = buildEmailTemplate<DiscussionEmailInput>(newDiscussionReplyTemplate, {
+        url: discussionLink,
+        spaceName: space.name,
+      })
+
+      if (notify === 'all') {
+        return this.notifySpaceMembers(emailBody, subject, space)
+      }
+
+      if (notify === 'author') {
+        followers.push(discussion.user.getEntity())
+      }
+
+      if (Array.isArray(notify) && notify.length) {
+        const users = await Promise.all(
+          notify.map((username) =>
+            this.em.findOneOrFail(User, {
+              dxuser: username,
+              spaceMemberships: { spaces: space.id, active: true },
+            }),
+          ),
+        )
+        followers.push(...users)
+      }
+
+      followers = Array.from(new Set(followers.map((user) => user.id))).map(
+        (id) => followers.find((user) => user.id === id)!,
+      )
+    } else {
+      this.logger.log('Discussion is public...')
+
+      subject = `[precisionFDA] New Public Discussion notification`
+      emailBody = buildEmailTemplate<DiscussionEmailInput>(newDiscussionReplyTemplate, {
+        url: discussionLink,
+        spaceName: null,
+      })
+    }
+
+    await Promise.all(followers.map((follower) => this.notifyUser(emailBody, subject, follower)))
   }
 }

@@ -16,7 +16,6 @@ import { SpaceTitle } from '../../home/home.styles'
 import { PlusIcon } from '../../../components/icons/PlusIcon'
 import { Button } from '../../../components/Button'
 
-
 const StyledMemberListPage = styled.div`
   padding: 32px;
   display: flex;
@@ -29,14 +28,13 @@ const SearchWrapper = styled.div`
   align-items: flex-start;
 `
 
-
 const StyledMemberList = styled.div`
-display: flex;
-padding-left: 0px;
-align-items: flex-start;
-gap: 16px;
-align-self: stretch;
-flex-wrap: wrap;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding-left: 0;
+  align-items: flex-start;
+  align-self: stretch;
 `
 
 const StyledButtonGroup = styled.div`
@@ -52,25 +50,24 @@ const AddButton = styled(Button)`
 `
 
 export const MembersList = ({ space }: { space: ISpace }) => {
-  const [sideRole, setSideRole] = useState<SideRole | undefined>()
+  const [sideRole, setSideRole] = useState<SideRole>()
+  const [searchQuery, setSearchQuery] = useState('')
+  const { modalComp, setShowModal } = useAddMembersModal({ spaceId: space.id })
+
   const { data, isLoading } = useQuery({
     queryKey: ['space-members', space.id, sideRole],
     queryFn: () => spacesMembersListRequest({ spaceId: space.id, sideRole }),
   })
-  const { modalComp, setShowModal } = useAddMembersModal({ spaceId: space.id })
-  const members = data?.space_memberships ?? []
-  const canAddMember =
-    space.type !== 'private_type' && space.type !== 'administrator'
 
-  const [searchQuery, setSearchQuery] = useState('')
+
+  const members = data?.space_memberships || []
+  const canAddMember = space.type !== 'private_type' && space.type !== 'administrator'
 
   // Filter members based on the search query
-  const filteredMembers = members.filter((member) =>
+  const filteredMembers = members.filter(member =>
     Object.entries(member)
       .filter(([key, value]) => key !== 'to_roles' && value !== null && value !== undefined) // Exclude 'to_roles' and null/undefined values
-      .some(([key, value]) =>
-        value.toString().toLowerCase().includes(searchQuery.toLowerCase())
-      )
+      .some(([, value]) => value.toString().toLowerCase().includes(searchQuery.toLowerCase())),
   )
 
   return (
@@ -91,36 +88,31 @@ export const MembersList = ({ space }: { space: ISpace }) => {
           )}
 
           {space.updatable && canAddMember && (
-            <AddButton data-variant='primary' type="button" onClick={() => setShowModal(true)}>
-              <PlusIcon height={12}/>
-              Add Members
+            <AddButton data-variant="primary" onClick={() => setShowModal(true)}>
+              <PlusIcon height={12} /> Add Members
             </AddButton>
           )}
           <SearchWrapper>
             <SearchBar>
               <InputText placeholder="Search members..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
-              <Button type="button" onClick={() => setSearchQuery('')}>
-                Clear
-              </Button>
+              <Button onClick={() => setSearchQuery('')}>Clear</Button>
             </SearchBar>
           </SearchWrapper>
         </StyledButtonGroup>
 
-        {isLoading && (
-          <div>
-            <div>Loading members...</div>
-            <Loader/>
-          </div>
-        )}
-
-        <StyledMemberList>
-          { filteredMembers.length === 0 ?  <NoContent>
+        {isLoading && <Loader />}
+        {!isLoading && filteredMembers.length === 0 && (
+          <NoContent>
             <AlertText>No members found</AlertText>
-          </NoContent> :
-            filteredMembers.map(member => (
-              <MemberCard key={member.id} member={member} spaceId={space.id}/>
+          </NoContent>
+        )}
+        {!isLoading && filteredMembers.length > 0 && (
+          <StyledMemberList>
+            {filteredMembers.map(member => (
+              <MemberCard key={member.id} member={member} space={space} />
             ))}
-        </StyledMemberList>
+          </StyledMemberList>
+        )}
       </StyledMemberListPage>
       {modalComp}
     </ErrorBoundary>

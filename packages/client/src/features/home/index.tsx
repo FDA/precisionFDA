@@ -52,6 +52,8 @@ import { useActiveResourceFromUrl } from './useActiveResourceFromUrl'
 import { toTitleCase } from './utils'
 import { DiscussionIcon } from '../../components/icons/DiscussionIcon'
 import { DiscussionList } from '../discussions/DiscussionList'
+import { DiscussionShow } from '../discussions/DiscussionShow'
+import { CreateDiscussionPage } from '../discussions/form/CreateDiscussionPage'
 
 interface CounterRequest {
   apps: string
@@ -181,17 +183,19 @@ const Home2 = () => {
         {expandedSidebar && <MenuCounter count={counterData?.assets} active={activeResource === 'assets'} />}
       </MenuItem>
     ),
-   discussions: (
-     <MenuItem
-         data-testid="home-discussions-link"
-         to={`/home/discussions${routeScopeParam}`}
-         activeClassName="active"
-         title="Discussions"
-         key="discussions">
-         <DiscussionIcon height={14} />
-         <MenuText>Discussions</MenuText>
-         {expandedSidebar && (<MenuCounter count={counterData?.discussions} active={activeResource === 'discussions'} />)}
-     </MenuItem>),
+    discussions: (
+      <MenuItem
+        data-testid="home-discussions-link"
+        to={`/home/discussions${routeScopeParam}`}
+        activeClassName="active"
+        title="Discussions"
+        key="discussions"
+      >
+        <DiscussionIcon height={14} />
+        <MenuText>Discussions</MenuText>
+        {expandedSidebar && <MenuCounter count={counterData?.discussions} active={activeResource === 'discussions'} />}
+      </MenuItem>
+    ),
     workflows: (
       <MenuItem
         data-testid="home-workflows-link"
@@ -277,74 +281,77 @@ const Home2 = () => {
               Spaces
             </BannerPickerItem>
           </BannerPicker>
-          <BannerPickedInfo>
-            {homeScopeDescriptions[persistedHomeScope]}
-          </BannerPickedInfo>
+          <BannerPickedInfo>{homeScopeDescriptions[persistedHomeScope]}</BannerPickedInfo>
         </BannerRight>
       </ResourceBanner>
       <Row>
         <StyledMenu $expanded={expandedSidebar}>
-          { homeScopeToResourceTypesMap[persistedHomeScope].map(t => menuItems[t]) }
+          {homeScopeToResourceTypesMap[persistedHomeScope].map(t => menuItems[t])}
           <Fill />
-          <Expand
-            data-testid="expand-sidebar"
-            onClick={() => setExpandedSidebar(!expandedSidebar)}
-          >
+          <Expand data-testid="expand-sidebar" onClick={() => setExpandedSidebar(!expandedSidebar)}>
             <FlapIcon />
           </Expand>
         </StyledMenu>
         <Main>
           <Routes>
-          <Route
-                path="files"
-                element={
-                  <FileList
-                    homeScope={persistedHomeScope}
-                    showFolderActions={(persistedHomeScope === 'everybody' && user?.admin) || persistedHomeScope === 'me'}
-                  />
-                }
-              />
-              <Route path="apps" element={<AppList homeScope={persistedHomeScope} />} />
-              <Route path="apps/create" element={<CreateAppPage />} />
-              <Route path="apps/:appUid/fork" element={<ForkAppPage />} />
-              <Route path="apps/:appUid/edit" element={<EditAppPage />} />
-              <Route path="apps/:appUid/jobs/new" element={<RunJobPage />} />
-              <Route
-                path="apps/:appUid/*"
-                element={<AppsShow homeScope={persistedHomeScope} emitScope={handleSetPersistedHomeScope} />}
-              />
-              <Route path="/apps/:identifier/track" element={<TrackInHome />} />
-              <Route path="databases" element={<DatabaseList homeScope={persistedHomeScope} />} />
-              <Route path="databases/create" element={<CreateDatabase />} />
-              <Route path="databases/:uid" element={<DatabaseShow homeScope={persistedHomeScope} emitScope={handleSetPersistedHomeScope} />}/>
-              <Route path="databases/:identifier/track" element={<TrackInHome entityType="database" />} />
-              <Route path="assets" element={<AssetList homeScope={persistedHomeScope} />} />
-              <Route
-                path="assets/:assetUid/*"
-                element={<AssetShow homeScope={persistedHomeScope} emitScope={handleSetPersistedHomeScope} />}
-              />
-              <Route path="workflows" element={<WorkflowList homeScope={persistedHomeScope} />} />
-              <Route
-                path="workflows/:workflowUid/*"
-                element={<WorkflowShow homeScope={persistedHomeScope} emitScope={handleSetPersistedHomeScope} />}
-              />
-              <Route
-                path="files/:fileId"
-                element={<FileShow homeScope={persistedHomeScope} emitScope={handleSetPersistedHomeScope} />}
-              />
-              <Route path="/files/:identifier/track" element={<TrackInHome />} />
-              <Route path="executions" element={<ExecutionList homeScope={persistedHomeScope} />} />
-              <Route
-                path="executions/:executionUid/*"
-                element={<ExecutionDetails homeScope={persistedHomeScope} emitScope={handleSetPersistedHomeScope} />}
-              />
-              <Route path="/executions/:identifier/track" element={<TrackInHome entityType="execution" />} />
-              <Route path="reports" element={<SpaceReportList scope="private" />} />
-              <Route path="discussions" element={<DiscussionList canCreateDiscussion={false} scope={persistedHomeScope}/>}/>
-              {/* TODO: remove this route when we have a better way to redirect user to executions page */}
-              <Route path="jobs/:executionUid" element={<NavigateWithParams to="/home/executions/:executionUid" replace />} />
-              <Route path="jobs" element={<Navigate to="/home/executions" replace />} />
-              <Route path="*" element={<Navigate to="/home/files" replace />} />
+            <Route
+              path="files"
+              element={
+                <FileList
+                  homeScope={persistedHomeScope}
+                  showFolderActions={(persistedHomeScope === 'everybody' && user?.admin) || persistedHomeScope === 'me'}
+                />
+              }
+            />
+            <Route path="apps" element={<AppList homeScope={persistedHomeScope} />} />
+            <Route path="apps/create" element={<CreateAppPage />} />
+            <Route path="apps/:appUid/fork" element={<ForkAppPage />} />
+            <Route path="apps/:appUid/edit" element={<EditAppPage />} />
+            <Route path="apps/:appUid/jobs/new" element={<RunJobPage />} />
+            <Route
+              path="apps/:appUid/*"
+              element={<AppsShow homeScope={persistedHomeScope} emitScope={handleSetPersistedHomeScope} />}
+            />
+            <Route path="/apps/:identifier/track" element={<TrackInHome />} />
+            <Route path="databases" element={<DatabaseList homeScope={persistedHomeScope} />} />
+            <Route path="databases/create" element={<CreateDatabase />} />
+            <Route
+              path="databases/:uid"
+              element={<DatabaseShow homeScope={persistedHomeScope} emitScope={handleSetPersistedHomeScope} />}
+            />
+            <Route path="databases/:identifier/track" element={<TrackInHome entityType="database" />} />
+            <Route path="assets" element={<AssetList homeScope={persistedHomeScope} />} />
+            <Route
+              path="assets/:assetUid/*"
+              element={<AssetShow homeScope={persistedHomeScope} emitScope={handleSetPersistedHomeScope} />}
+            />
+            <Route path="workflows" element={<WorkflowList homeScope={persistedHomeScope} />} />
+            <Route
+              path="workflows/:workflowUid/*"
+              element={<WorkflowShow homeScope={persistedHomeScope} emitScope={handleSetPersistedHomeScope} />}
+            />
+            <Route
+              path="files/:fileId"
+              element={<FileShow homeScope={persistedHomeScope} emitScope={handleSetPersistedHomeScope} />}
+            />
+            <Route path="/files/:identifier/track" element={<TrackInHome />} />
+            <Route path="executions" element={<ExecutionList homeScope={persistedHomeScope} />} />
+            <Route
+              path="executions/:executionUid/*"
+              element={<ExecutionDetails homeScope={persistedHomeScope} emitScope={handleSetPersistedHomeScope} />}
+            />
+            <Route path="/executions/:identifier/track" element={<TrackInHome entityType="execution" />} />
+            <Route path="reports" element={<SpaceReportList scope="private" />} />
+            <Route
+              path="discussions"
+              element={<DiscussionList canCreateDiscussion={persistedHomeScope === 'everybody'} scope={persistedHomeScope} />}
+            />
+            <Route path="discussions/create" element={<CreateDiscussionPage displayWarning={false} scope="public" />} />
+            <Route path="discussions/:discussionId" element={<DiscussionShow />} />
+            {/* TODO: remove this route when we have a better way to redirect user to executions page */}
+            <Route path="jobs/:executionUid" element={<NavigateWithParams to="/home/executions/:executionUid" replace />} />
+            <Route path="jobs" element={<Navigate to="/home/executions" replace />} />
+            <Route path="*" element={<Navigate to="/home/files" replace />} />
           </Routes>
         </Main>
       </Row>
