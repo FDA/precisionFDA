@@ -77,12 +77,6 @@ export const StatusCell = styled.div<{ $isActive: boolean }>`
   }
 `
 
-export const TypeDot = styled.div`
-  width: 14px;
-  height: 14px;
-  border-radius: 16px;
-`
-
 export const NameRow = styled.div`
   display: flex;
   gap: 8px;
@@ -95,6 +89,7 @@ export const SpaceTableTypeCell = styled.div`
   display: flex;
   align-items: center;
   gap: 10px;
+  flex-shrink: 0;
 `
 export const SpaceTableCounterCell = styled.div`
   display: flex;
