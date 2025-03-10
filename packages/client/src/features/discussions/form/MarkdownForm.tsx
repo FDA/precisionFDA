@@ -36,8 +36,7 @@ const ButtonRow = styled.div`
   gap: 8px;
   justify-content: space-between;
   align-items: center;
-  padding: 8px;
-  padding-top: 0;
+  padding: 0 8px 8px;
   min-height: 34px;
 `
 const ButtonRowActions = styled.div`
@@ -109,22 +108,19 @@ export const MarkdownForm = ({
   })
 
   useEffect(() => {
-    if (isSubmitSuccessful) {
-      reset()
-    }
+    if (isSubmitSuccessful) reset()
   }, [isSubmitSuccessful])
 
-  const onSubmitForm = async () => {
-    await onSubmit(getValues())
-  }
+  const onSubmitForm = async () => onSubmit(getValues())
 
   const deleteAttachment = (key: any, id: number) => {
-    const v = getValues(key) as { id: number }[]
-    const newAttachments = v.filter(a => a.id !== id)
-    setValue(key, newAttachments)
+    setValue(
+      key,
+      getValues(key).filter((a: { id: number }) => a.id !== id),
+    )
   }
 
-  const { attachments } = watch()
+  const { attachments, isAnswer } = watch()
 
   return (
     <>
@@ -139,13 +135,11 @@ export const MarkdownForm = ({
           />
         </ContentGroup>
 
-        {watch().isAnswer && (
+        {isAnswer && (
           <Controller
             name="attachments"
             control={control}
-            render={({ field }) => (
-              <AttachmentsList scope={scope} attachments={field.value} onRemoveAttachment={deleteAttachment} />
-            )}
+            render={({ field }) => <AttachmentsList attachments={field.value} onRemoveAttachment={deleteAttachment} />}
           />
         )}
 
@@ -158,8 +152,10 @@ export const MarkdownForm = ({
               </WeMarkdown>
             </ExternalLink>
           </StyledMarkdownHelper>
+
           <div className="flex gap-2">
-            {watch().isAnswer && <Attachments scope={scope} setValue={setValue} attachments={attachments} />}
+            {isAnswer && <Attachments scope={scope} setValue={setValue} attachments={attachments} />}
+
             {!isEdit && !isAnswerComment && isComment && (
               <MarkAsAnswer>
                 <CheckboxLabel
@@ -169,7 +165,7 @@ export const MarkdownForm = ({
                   <Checkbox
                     {...register('isAnswer')}
                     disabled={isSubmitting || !canUserAnswer}
-                    onChange={(event: any) => setValue('isAnswer', event.target.checked)}
+                    onChange={e => setValue('isAnswer', e.target.checked)}
                   />
                   Mark as Answer
                 </CheckboxLabel>
@@ -181,7 +177,7 @@ export const MarkdownForm = ({
       </StyledForm>
 
       <ButtonRowActions>
-        {!isEdit && (isComment || isAnswerComment) && (
+        {!isEdit && (isComment || isAnswerComment) && scope !== 'public' && (
           <div>
             <Controller
               name="notify"
@@ -199,7 +195,9 @@ export const MarkdownForm = ({
             <ErrorMessage errors={errors} name="scope" render={({ message }) => <InputError>{message}</InputError>} />
           </div>
         )}
+
         {isComment && (isEdit || isAnswerComment) && <Button onClick={() => onCancel && onCancel(getValues())}>Cancel</Button>}
+
         <Button
           data-variant="primary"
           type="button"

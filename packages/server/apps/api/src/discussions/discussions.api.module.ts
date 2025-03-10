@@ -1,9 +1,10 @@
 import { Module } from '@nestjs/common'
 import { DiscussionModule } from '@shared/domain/discussion/discussion.module'
 import { DiscussionsController } from './discussions.controller'
+import { DiscussionApiFacadeModule } from '../facade/discussion/discussion-api-facade.module'
 
 @Module({
-  imports: [DiscussionModule],
+  imports: [DiscussionModule, DiscussionApiFacadeModule],
   controllers: [DiscussionsController],
 })
 export class DiscussionsApiModule {}

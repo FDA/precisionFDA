@@ -1,8 +1,6 @@
 import classNames from 'classnames'
 import React, { useEffect, useState } from 'react'
-import {
-  TransparentButton, Button,
-} from '../../components/Button'
+import { TransparentButton, Button } from '../../components/Button'
 import { InputText } from '../../components/InputText'
 import { Loader } from '../../components/Loader'
 import { CrossIcon } from '../../components/icons/PlusIcon'
@@ -10,39 +8,18 @@ import { SearchIcon } from '../../components/icons/SearchIcon'
 import { ModalHeaderTop, ModalNext } from '../modal/ModalNext'
 import { ButtonRow, Footer, HeaderText, ModalScroll } from '../modal/styles'
 import { useModal } from '../modal/useModal'
-import {
-  LeftBar,
-  ModalLoader,
-  NoteContainer,
-  NotesMarkdown,
-  SearchInput,
-  StyledAttachToModal,
-} from './AttachToModal/styles'
+import { LeftBar, ModalLoader, NoteContainer, NotesMarkdown, SearchInput, StyledAttachToModal } from './AttachToModal/styles'
 import { Asset, useListAssetsQuery } from './AttachToModal/useListAssetsQuery'
-
-export type ATTACHABLE_TYPES =
-  | 'FILE'
-  | 'APP'
-  | 'DATABASE'
-  | 'WORKFLOW'
-  | 'JOB'
-  | 'ASSET'
 
 const AssetHeaderText = () => {
   return (
     <>
-      <HeaderText>Selected Assets for your VM Environment</HeaderText>{' '}
-      <span>Manage your assets</span>
+      <HeaderText>Selected Assets for your VM Environment</HeaderText> <span>Manage your assets</span>
     </>
   )
 }
 
-export const AssetAttachModal = ({
-  hideAction,
-  isShown,
-  values,
-  onChange,
-}: any) => {
+export const AssetAttachModal = ({ hideAction, isShown, values, onChange }: any) => {
   const { data: notesData, isLoading } = useListAssetsQuery()
   const items = notesData || []
   const [search, setSearch] = useState('')
@@ -69,9 +46,7 @@ export const AssetAttachModal = ({
   }
 
   const reg = new RegExp(search, 'i')
-  const filteredItems = search
-    ? items.filter((e: any) => reg.test(e.title))
-    : items
+  const filteredItems = search ? items.filter((e: any) => reg.test(e.title)) : items
 
   const itemsList = filteredItems.map(item => {
     const classes = classNames(
@@ -82,23 +57,10 @@ export const AssetAttachModal = ({
     )
 
     return (
-      <li
-        key={item.uid}
-        className={classes}
-        onClick={() => setSelectedItem(item)}
-        onKeyPress={() => setSelectedItem(item)}
-      >
+      <li key={item.uid} className={classes} onClick={() => setSelectedItem(item)} onKeyPress={() => setSelectedItem(item)}>
         <div>
-          <span
-            className="__menu-item_label-wrapper"
-            onClick={() => onCheckboxClick(item)}
-          >
-            <input
-              type="checkbox"
-              name={item.uid}
-              checked={checkedItem.has(item)}
-              onChange={() => {}}
-            />
+          <span className="__menu-item_label-wrapper" onClick={() => onCheckboxClick(item)}>
+            <input type="checkbox" name={item.uid} checked={checkedItem.has(item)} onChange={() => {}} />
             <span className="__menu-item_class-label">{item.className}</span>
             <span className="__menu-item_title">{item.title}</span>
           </span>
@@ -115,11 +77,7 @@ export const AssetAttachModal = ({
       data-testid="modal-attachto-asset"
       id="modal-attachto-asset"
     >
-      <ModalHeaderTop
-        disableClose={false}
-        headerText={<AssetHeaderText />}
-        hide={hideAction}
-      />
+      <ModalHeaderTop disableClose={false} headerText={<AssetHeaderText />} hide={hideAction} />
       {isLoading ? (
         <ModalLoader>
           <Loader />
@@ -151,13 +109,8 @@ export const AssetAttachModal = ({
                     {itemsList}
                     {!itemsList.length && (
                       <div className="__menu-item">
-                        <span className="text-muted _no-content">
-                          No results found
-                        </span>
-                        <TransparentButton
-                          className="__menu-item_clear"
-                          onClick={() => setSearch('')}
-                        >
+                        <span className="text-muted _no-content">No results found</span>
+                        <TransparentButton className="__menu-item_clear" onClick={() => setSearch('')}>
                           Clear query
                         </TransparentButton>
                       </div>
@@ -176,10 +129,7 @@ export const AssetAttachModal = ({
                       </a>
                     </div>
                     <NotesMarkdown data={selectedItem?.content} />
-                    <div className="_no-content">
-                      {!selectedItem?.content &&
-                        'No content written for this item'}
-                    </div>
+                    <div className="_no-content">{!selectedItem?.content && 'No content written for this item'}</div>
                   </>
                 )}
               </ModalScroll>
@@ -189,11 +139,7 @@ export const AssetAttachModal = ({
           <Footer>
             <ButtonRow>
               <Button onClick={hideAction}>Cancel</Button>
-              <Button
-                data-variant="primary"
-                onClick={() => onClickAttachAction()}
-                disabled={!checkedItem.size}
-              >
+              <Button data-variant="primary" onClick={() => onClickAttachAction()} disabled={!checkedItem.size}>
                 Attach
               </Button>
             </ButtonRow>
@@ -204,19 +150,11 @@ export const AssetAttachModal = ({
   )
 }
 
-export function useAssetAttachModal(
-  value: Asset[],
-  onChange: (a: any) => void,
-) {
+export function useAssetAttachModal(value: Asset[], onChange: (a: any) => void) {
   const { isShown, setShowModal } = useModal()
 
   const modalComp = (
-    <AssetAttachModal
-      onChange={onChange}
-      isShown={isShown}
-      hideAction={() => setShowModal(false)}
-      value={value}
-    />
+    <AssetAttachModal onChange={onChange} isShown={isShown} hideAction={() => setShowModal(false)} value={value} />
   )
 
   return {

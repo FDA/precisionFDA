@@ -6,7 +6,10 @@ import { EntityLinkProvider } from '@shared/domain/entity/entity-link/entity-lin
 export class DiscussionEntityLinkProvider extends EntityLinkProvider<'discussion'> {
   protected async getRelativeLink(discussion: Discussion) {
     const note = await discussion.note.load()
+    const scope = note.scope
 
-    return `/spaces/${note.getSpaceId()}/discussions/${discussion.id}` as const
+    if (this.MY_HOME_SCOPES.includes(scope)) {
+      return `/home/discussions/${discussion.id}` as const
+    } else return `/spaces/${note.getSpaceId()}/discussions/${discussion.id}` as const
   }
 }

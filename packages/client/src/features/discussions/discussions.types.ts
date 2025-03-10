@@ -4,9 +4,9 @@ import { NoteScope } from './api'
 export type SimpleUser = {
   id: number
   dxuser: string
-  firstName: string,
+  firstName: string
   lastName: string
-  fullName: string,
+  fullName: string
 }
 
 export interface Comment {
@@ -27,7 +27,6 @@ export interface Answer {
   title: string
   content: string
   noteId: number
-  scope: NoteScope
   user: SimpleUser
   comments: Comment[]
   createdAt: string
@@ -40,6 +39,7 @@ export interface Discussion {
   content: string
   scope: NoteScope
   noteId: number
+  following: boolean
   user: SimpleUser
   createdAt: string
   updatedAt: string
@@ -67,7 +67,7 @@ export type NoteForm = {
   attachments: FormAttachments
   content: string
   isAnswer: boolean
-  notify: { label: string, value: string }[] | []
+  notify: { label: string; value: string }[] | []
 }
 
 export type PostAttachments = {
@@ -83,7 +83,7 @@ export interface DiscussionForm {
   title: string
   content: string
   attachments: FormAttachments
-  notify: { label: string, value: string }[] | []
+  notify: { label: string; value: string }[] | []
 }
 
 export interface CommentForm {

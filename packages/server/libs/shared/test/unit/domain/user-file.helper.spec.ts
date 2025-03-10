@@ -4,11 +4,11 @@ import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { expect } from 'chai'
 import { create, db } from '@shared/test'
-import { database } from '../../../src/database'
+import { database } from '@shared/database'
 import {
   findFileOrAssetWithUid,
   findFileOrAssetsWithDxid,
-} from '../../../src/domain/user-file/user-file.helper'
+} from '@shared/domain/user-file/user-file.helper'
 
 // TODO: Migrate tests from user-file.helper.spec.ts in api and worker packages here
 
@@ -18,8 +18,8 @@ describe('user-file.helper', () => {
     let user: User
     let file: UserFile
     let asset: Asset
-    const fileUid = 'file-custom-uid'
-    const assetUid = 'asset-custom-uid'
+    const fileUid = 'file-abc-1'
+    const assetUid = 'file-abc-2'
 
     beforeEach(async () => {
       await db.dropData(database.connection())
@@ -28,7 +28,7 @@ describe('user-file.helper', () => {
       await em.flush()
 
       file = create.filesHelper.create(em, { user }, { uid: fileUid })
-      asset = create.filesHelper.createUploadedAsset(em, { user }, { uid: assetUid })
+      asset = create.filesHelper.createAsset(em, { user }, { uid: assetUid })
       await em.flush()
     })
 
@@ -49,7 +49,7 @@ describe('user-file.helper', () => {
     })
 
     it('findFileOrAssetWithUid should return null if the uid is neither file or asset', async () => {
-      const result = await findFileOrAssetWithUid(em, 'friday-night-uid')
+      const result = await findFileOrAssetWithUid(em, 'file-cba-1')
       expect(result).to.be.null()
     })
 
@@ -68,7 +68,7 @@ describe('user-file.helper', () => {
     })
 
     it('findFileOrAssetsWithDxid should return null if the uid is neither file or asset', async () => {
-      const result = await findFileOrAssetsWithDxid(em, 'saturday-night-uid')
+      const result = await findFileOrAssetsWithDxid(em, 'file-cba-1')
       expect(result).to.deep.equal([])
     })
   })
