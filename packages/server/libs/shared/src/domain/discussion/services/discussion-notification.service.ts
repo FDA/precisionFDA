@@ -123,7 +123,7 @@ export class DiscussionNotificationService {
 
   async notifyNewDiscussionReply(discussionId: number, notify: NotifyType) {
     const discussion = await this.discussionRepository.findOne(discussionId, {
-      populate: ['note', 'follows'],
+      populate: ['note', 'user', 'follows'],
     })
 
     if (!discussion) {
