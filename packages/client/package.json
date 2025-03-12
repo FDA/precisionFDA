@@ -104,7 +104,7 @@
     "@babel/preset-env": "^7.23.3",
     "@babel/preset-react": "^7.23.3",
     "@babel/preset-typescript": "^7.23.3",
-    "@babel/runtime": "^7.23.4",
+    "@babel/runtime": "^7.26.10",
     "@eslint/js": "^9.21.0",
     "@pmmmwh/react-refresh-webpack-plugin": "^0.5.15",
     "@storybook/react-webpack5": "^8.5.2",
