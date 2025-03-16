@@ -12,8 +12,13 @@ services:
     extends:
       file: ./base.services.yml
       service: web
+    build:
+      context: ../packages/rails
+      dockerfile: ./docker/images/isolation.Dockerfile
     environment:
       - RAILS_ENV=development
+      - SKIP_RUBY_DEPS_SETUP=${SKIP_RUBY_DEPS_SETUP}
+      - SKIP_DB_SETUP=${SKIP_DB_SETUP}
     volumes:
       - type: volume
         source: bundler-deps-cache-ruby
@@ -23,6 +28,11 @@ services:
     extends:
       file: ./base.services.yml
       service: frontend
+    build:
+      context: ../packages/client
+      dockerfile: ./docker/images/isolation.Dockerfile
+    environment:
+      - SKIP_FRONTEND_DEPS_SETUP=${SKIP_FRONTEND_DEPS_SETUP}
     volumes:
       - type: volume
         source: webpack-cache-client
@@ -35,6 +45,20 @@ services:
     extends:
       file: ./base.services.yml
       service: nodejs-api
+    build:
+      context: ../packages/server
+      dockerfile: ./docker/images/node.isolated-dev.Dockerfile
+    command: ["make", "watch"]
+    environment:
+      - NODE_ENV=development
+      - NODE_DATABASE_NAME=precision-fda
+      - NODE_DATABASE_URL=mysql://root:password@db:3306/precision-fda
+      - SKIP_NODEJS_DEPS_SETUP=${SKIP_NODEJS_DEPS_SETUP}
+      - SKIP_NODEJS_DB_WAITING=${SKIP_NODEJS_DB_WAITING}
+    volumes:
+      - type: bind
+        source: ../packages/server
+        target: /app
   nodejs-worker:
     depends_on:
       - db
@@ -42,10 +66,35 @@ services:
     extends:
       file: ./base.services.yml
       service: nodejs-worker
+    build:
+      context: ../packages/server
+      dockerfile: ./docker/images/node.isolated-dev.Dockerfile
+    command: ["make", "watch-worker"]
+    environment:
+      - NODE_ENV=development
+      - NODE_DATABASE_NAME=precision-fda
+      - NODE_DATABASE_URL=mysql://root:password@db:3306/precision-fda
+      - SKIP_NODEJS_DEPS_SETUP=${SKIP_NODEJS_DEPS_SETUP}
+      - SKIP_NODEJS_DB_WAITING=${SKIP_NODEJS_DB_WAITING}
+    volumes:
+      - type: bind
+        source: ../packages/server
+        target: /app
   nodejs-admin-platform-client:
     extends:
       file: ./base.services.yml
       service: nodejs-admin-platform-client
+    build:
+      context: ../packages/server
+      dockerfile: ./docker/images/node.isolated-dev.Dockerfile
+    command: ["make", "watch-admin-platform-client"]
+    environment:
+      - NODE_ENV=development
+      - SKIP_NODEJS_DB_WAITING=1
+    volumes:
+      - type: bind
+        source: ../packages/server
+        target: /app
   db:
     extends:
       file: ./base.services.yml
@@ -64,6 +113,8 @@ services:
       service: sidekiq
     environment:
       - RAILS_ENV=development
+      - SKIP_RUBY_DEPS_SETUP=${SKIP_RUBY_DEPS_SETUP}
+      - SKIP_DB_SETUP=${SKIP_DB_SETUP}
     volumes:
       - type: volume
         source: bundler-deps-cache-ruby
