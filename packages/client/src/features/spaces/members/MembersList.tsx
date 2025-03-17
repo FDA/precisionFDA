@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import styled from 'styled-components'
 import { RadioButtonGroup } from '../../../components/form/RadioButtonGroup'
@@ -37,6 +37,12 @@ const StyledMemberList = styled.div`
   align-self: stretch;
 `
 
+const StyledMemberToolRow = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+`
+
 const StyledButtonGroup = styled.div`
   display: flex;
   flex-wrap: wrap;
@@ -50,18 +56,24 @@ const AddButton = styled(Button)`
 `
 
 export const MembersList = ({ space }: { space: ISpace }) => {
-  const [sideRole, setSideRole] = useState<SideRole>()
+  const [sideRole, setSideRole] = useState<SideRole | undefined>()
   const [searchQuery, setSearchQuery] = useState('')
   const { modalComp, setShowModal } = useAddMembersModal({ spaceId: space.id })
+
+  useEffect(() => {
+    setSideRole(undefined)
+  }, [space.id])
 
   const { data, isLoading } = useQuery({
     queryKey: ['space-members', space.id, sideRole],
     queryFn: () => spacesMembersListRequest({ spaceId: space.id, sideRole }),
   })
 
-
   const members = data?.space_memberships || []
   const canAddMember = space.type !== 'private_type' && space.type !== 'administrator'
+  const isPrivateArea = Boolean(space.shared_space_id)
+  const currentUserSide = space.current_user_membership.side
+  const sideText = currentUserSide === 'host' ? 'Review' : 'Sponsor'
 
   // Filter members based on the search query
   const filteredMembers = members.filter(member =>
@@ -74,30 +86,35 @@ export const MembersList = ({ space }: { space: ISpace }) => {
     <ErrorBoundary>
       <StyledMemberListPage>
         <StyledButtonGroup>
-          <SpaceTitle>Shared Area Members</SpaceTitle>
-          {space.type === 'review' && (
-            <RadioButtonGroup
-              options={[
-                { value: undefined, label: 'All' },
-                { value: 'reviewer', label: 'Reviewer' },
-                { value: 'sponsor', label: 'Sponsor' },
-              ]}
-              onChange={setSideRole}
-              ariaLabel="Members option filter"
-            />
-          )}
+          <SpaceTitle>
+            {isPrivateArea ? sideText : 'Shared Area'}
+            &nbsp;Space Members
+          </SpaceTitle>
+          <StyledMemberToolRow>
+            {space.type === 'review' && !isPrivateArea && (
+              <RadioButtonGroup
+                options={[
+                  { value: undefined, label: 'All' },
+                  { value: 'reviewer', label: 'Reviewer' },
+                  { value: 'sponsor', label: 'Sponsor' },
+                ]}
+                onChange={setSideRole}
+                ariaLabel="Members option filter"
+              />
+            )}
 
-          {space.updatable && canAddMember && (
-            <AddButton data-variant="primary" onClick={() => setShowModal(true)}>
-              <PlusIcon height={12} /> Add Members
-            </AddButton>
-          )}
-          <SearchWrapper>
-            <SearchBar>
-              <InputText placeholder="Search members..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
-              <Button onClick={() => setSearchQuery('')}>Clear</Button>
-            </SearchBar>
-          </SearchWrapper>
+            {space.updatable && canAddMember && (
+              <AddButton data-variant="primary" onClick={() => setShowModal(true)}>
+                <PlusIcon height={12} /> Add Members
+              </AddButton>
+            )}
+            <SearchWrapper>
+              <SearchBar>
+                <InputText placeholder="Search members..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
+                <Button onClick={() => setSearchQuery('')}>Clear</Button>
+              </SearchBar>
+            </SearchWrapper>
+          </StyledMemberToolRow>
         </StyledButtonGroup>
 
         {isLoading && <Loader />}
