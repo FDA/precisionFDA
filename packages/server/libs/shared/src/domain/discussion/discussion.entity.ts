@@ -72,4 +72,22 @@ export class Discussion extends BaseEntity {
       return spaces.map((space) => space.scope).includes(scope)
     }
   }
+
+  async isEditableBy(user: User) {
+    if (!user) {
+      return false
+    }
+
+    if (this.user.id === user.id || (await user.isSiteAdmin())) {
+      return true
+    }
+
+    const note = await this.note.load()
+
+    if (note.isInSpace()) {
+      const spaces = await user.editableSpaces()
+      const scope = note.scope as SpaceScope
+      return spaces.map((space) => space.scope).includes(scope)
+    }
+  }
 }
