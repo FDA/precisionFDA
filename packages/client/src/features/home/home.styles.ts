@@ -54,6 +54,7 @@ export const Expand = styled.div`
   position: relative;
   padding-right: 24px;
   padding-bottom: 16px;
+  padding-top: 16px;
   display: flex;
   cursor: pointer;
   justify-content: flex-end;
