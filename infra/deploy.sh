@@ -10,6 +10,9 @@ declare -i ASG_INITIALIZATION_DELAY=60
 declare -i ATTEMPTS=${ENV_ATTEMPTS:-36}
 declare -i ASG_DESTROY_DELAY=30
 
+# Split ENV_TG into an array
+IFS=' ' read -r -a TG_ARRAY <<< "$ENV_TG"
+
 # Launch Autoscaling Group from Launch Template
 echo "Creating new Autoscaling Group: $ASG_NAME from Launch Template: $ENV_LT_NAME:$ENV_LT_VERSION"
 aws autoscaling create-auto-scaling-group \
@@ -20,7 +23,7 @@ aws autoscaling create-auto-scaling-group \
     --desired-capacity $DESIRED_CAP \
     --tags "Key=Environment,Value=${ENVIRONMENT}" "Key=Role,Value=${ENV_INSTANCE_TYPE}" "Key=Namespace,Value=pfda" "Key=Name,Value=pfda-${ENVIRONMENT}-${ENV_INSTANCE_TYPE}-vm" \
     --vpc-zone-identifier "$ENV_SUBNET1","$ENV_SUBNET2","$ENV_SUBNET3" \
-    --target-group-arns "$ENV_TG" \
+    --target-group-arns "${TG_ARRAY[@]}" \
     --health-check-type "ELB" \
     --health-check-grace-period $ASG_HEALTH_CHECK_GRACE_PERIOD
 
@@ -39,10 +42,13 @@ while [ "$status" = "unhealthy" ] && [ $i -lt $ATTEMPTS ]; do
     status_check="healthy"
     instance_ids=$(aws autoscaling describe-auto-scaling-groups --auto-scaling-group-names "$ASG_NAME" --query AutoScalingGroups[].Instances[].InstanceId --output text)
     for instance_id in $instance_ids; do
-        instance_status=$(aws elbv2 describe-target-health --target-group-arn "$ENV_TG" --targets "Id=$instance_id" --query "TargetHealthDescriptions[].TargetHealth.State" --output text)
-        if [ "$instance_status" != "healthy" ]; then
-            status_check="unhealthy"
-        fi
+        for tg_arn in "${TG_ARRAY[@]}"; do
+            instance_status=$(aws elbv2 describe-target-health --target-group-arn "$tg_arn" --targets "Id=$instance_id" --query "TargetHealthDescriptions[].TargetHealth.State" --output text)
+            if [ "$instance_status" != "healthy" ]; then
+                status_check="unhealthy"
+                break 2 # Break out of both loops
+            fi
+        done
     done
     echo " - $status_check"
     status="$status_check"
@@ -66,7 +72,7 @@ for asg_name in $asg_names; do
         lbtg="undef"
     fi
     if [ "$lbtg" = "$ENV_TG" ] && [ "$asg_name" != "$ASG_NAME" ]; then
-        aws autoscaling detach-load-balancer-target-groups --auto-scaling-group-name "$asg_name" --target-group-arns "$ENV_TG"
+        aws autoscaling detach-load-balancer-target-groups --auto-scaling-group-name "$asg_name" --target-group-arns "${TG_ARRAY[@]}"
         asg_to_destroy="$asg_to_destroy$asg_name "
     fi
 done
