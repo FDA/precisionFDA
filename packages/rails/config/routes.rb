@@ -210,6 +210,7 @@ Rails.application.routes.draw do
 
       resources :discussions, only: %i(index) do
         get :describe, on: :member # for CLI
+        get "answers/:answer_id" => "discussions#answer_show"
       end
 
       # News
