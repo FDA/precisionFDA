@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import { AxiosError } from 'axios'
 import { PageTitle } from '../../../components/Page/styles'
-import { createSpaceRequest } from '../spaces.api'
+import { createSpaceRequest, spaceRequest } from '../spaces.api'
 import { SpaceForm } from './CreateSpaceForm'
 import { StyledBack, StyledPageCenter, StyledPageContent } from './styles'
 import { UserLayout } from '../../../layouts/UserLayout'
@@ -15,13 +15,22 @@ export const CreateSpace = () => {
   const mutation = useMutation({
     mutationKey: ['create-space'],
     mutationFn: createSpaceRequest,
-    onSuccess: res => {
+    onSuccess: async res => {
       if (res?.id) {
-        navigate(`/spaces/${res?.id}`)
+        try {
+          const spaceDetails = await spaceRequest({ id: res.id })
+          navigate(`/spaces/${spaceDetails?.space.id}`)
+        } catch (err: any) {
+          if (err.response && err.response.status === 403) {
+            navigate('/spaces')
+          } else {
+            toast.error('Error fetching space details')
+          }
+        }
+        toast.success('Space successfully created')
         queryClient.invalidateQueries({
           queryKey: ['spaces'],
         })
-        toast.success('Space successfully created')
       } else if (res?.errors) {
         toast.error(`${res.errors[0]}`)
       } else {
