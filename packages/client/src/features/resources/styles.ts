@@ -107,6 +107,7 @@ export const SearchBar = styled.div`
     max-width: 330px;
     min-width: 120px;
     flex-grow: 1;
+    height: 34px;
   }
 `
 

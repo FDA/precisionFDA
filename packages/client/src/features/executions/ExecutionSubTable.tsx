@@ -4,10 +4,10 @@ import styled from 'styled-components'
 import { Link } from 'react-router-dom'
 import { RESOURCE_LABELS } from '../../types/user'
 import { IExecution, Job } from './executions.types'
-import { CogsIcon } from '../../components/icons/Cogs'
 import { CubeIcon } from '../../components/icons/CubeIcon'
 import { StyledNameCell } from '../home/home.styles'
 import { StateCell } from './StateCell'
+import { BoltIcon } from '../../components/icons/BoltIcon'
 
 export const getSubComponentValue = (job: Job, cell: Cell<IExecution, any>) => {
   let val
@@ -19,7 +19,7 @@ export const getSubComponentValue = (job: Job, cell: Cell<IExecution, any>) => {
   if (cell.column.id === 'name') {
     val = (
       <StyledNameCell as={Link} to={`/home/executions/${job.uid}`}>
-        <CogsIcon height={14} /> {job.name}
+        <BoltIcon height={14} /> {job.name}
       </StyledNameCell>
     )
   }

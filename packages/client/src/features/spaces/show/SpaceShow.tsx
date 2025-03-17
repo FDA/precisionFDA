@@ -1,6 +1,6 @@
 import { useMutation, useQuery } from '@tanstack/react-query'
 import React, { useMemo, useState } from 'react'
-import { Navigate, Route, Routes, useNavigate, useParams } from 'react-router-dom'
+import { Navigate, Route, Routes, useParams } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import { MenuCounter } from '../../../components/MenuCounter'
 import { BoltIcon } from '../../../components/icons/BoltIcon'
@@ -28,6 +28,7 @@ import { ExecutionDetails } from '../../executions/details/ExecutionDetails'
 import { FileList } from '../../files/FileList'
 import { FileShow } from '../../files/show/FileShow'
 import { Expand, Fill, Main, MenuItem, MenuText, Row, StyledMenu } from '../../home/home.styles'
+import { HomeLoader } from '../../home/show.styles'
 import { useActiveResourceFromUrl } from '../../home/useActiveResourceFromUrl'
 import { SpaceReportList } from '../../space-reports/SpaceReportList'
 import { TrackInHome } from '../../tracks/TrackInHome'
@@ -45,18 +46,16 @@ import { SpaceNotAllowed } from './SpaceNotAllowed'
 import { SpaceTypeTabs } from './SpaceTypeTabs'
 import {
   ActionButton,
-  ButtonRow,
   SpaceHeader,
   SpaceHeaderDescrip,
   SpaceHeaderTitle,
   SpaceMainInfo,
-  SpaceTypeHeader,
+  SpaceTopRight,
   TopSpaceHeader,
 } from './styles'
-import { HomeLoader } from '../../home/show.styles'
+import { NetworkIcon } from '../../../components/icons/NetworkIcon'
 
 const Spaces2 = ({ space, isLoading }: { space: ISpace; isLoading: boolean }) => {
-  const navigate = useNavigate()
   const [expandedSidebar, setExpandedSidebar] = useLocalStorage('expandedSpacesSidebar', true)
   useToastWSHandler()
 
@@ -95,23 +94,18 @@ const Spaces2 = ({ space, isLoading }: { space: ISpace; isLoading: boolean }) =>
               {space.description}
             </SpaceHeaderDescrip>
           </SpaceMainInfo>
-
-          <ButtonRow>
-            {!spaceActions['Edit Space']?.shouldHide && (
-              <ActionButton data-testid="edit-space-button" onClick={() => navigate(`/spaces/${space.id}/edit`)}>
-                Space Settings
-              </ActionButton>
-            )}
+          <SpaceTopRight>
             {!spaceActions['Fix Permissions']?.shouldHide && (
-              <ActionButton data-testid="fix-space-button" onClick={() => fixSpaceMutation.mutate({ id: space.id })}>
-                Fix Guest Side Permissions
-              </ActionButton>
+              <div>
+                <ActionButton data-testid="fix-space-button" onClick={() => fixSpaceMutation.mutate({ id: space.id })}>
+                  Fix Guest Side Permissions
+                </ActionButton>
+              </div>
             )}
-          </ButtonRow>
+
+            <SpaceTypeTabs space={space} activeResource={activeResource} />
+          </SpaceTopRight>
         </TopSpaceHeader>
-        <SpaceTypeHeader $expandedSidebar={expandedSidebar}>
-          <SpaceTypeTabs space={space} />
-        </SpaceTypeHeader>
       </SpaceHeader>
 
       <Row>
@@ -127,14 +121,14 @@ const Spaces2 = ({ space, isLoading }: { space: ISpace; isLoading: boolean }) =>
             {expandedSidebar && <MenuCounter count={space.counters.apps.toString()} active={activeResource === 'apps'} />}
           </MenuItem>
           <MenuItem data-testid="workflows-link" to={`/spaces/${space.id}/workflows`} activeClassName="active">
-            <BoltIcon height={14} />
+            <NetworkIcon height={18} />
             <MenuText>Workflows</MenuText>
             {expandedSidebar && (
               <MenuCounter count={space.counters.workflows.toString()} active={activeResource === 'workflows'} />
             )}
           </MenuItem>
           <MenuItem data-testid="executions-link" to={`/spaces/${space.id}/executions`} activeClassName="active">
-            <CogsIcon height={14} />
+            <BoltIcon height={15} />
             <MenuText>Executions</MenuText>
             {expandedSidebar && <MenuCounter count={space.counters.jobs.toString()} active={activeResource === 'executions'} />}
           </MenuItem>
@@ -160,6 +154,12 @@ const Spaces2 = ({ space, isLoading }: { space: ISpace; isLoading: boolean }) =>
             </MenuItem>
           )}
           <Fill />
+          {!spaceActions['Edit Space']?.shouldHide && (
+            <MenuItem data-testid="edit-space-link" to={`/spaces/${space.id}/edit`} activeClassName="active">
+              <CogsIcon height={14} />
+              <MenuText>Space Settings</MenuText>
+            </MenuItem>
+          )}
           <Expand data-testid="expand-sidebar" onClick={() => setExpandedSidebar(!expandedSidebar)}>
             <FlapIcon />
           </Expand>
