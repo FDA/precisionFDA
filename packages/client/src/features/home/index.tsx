@@ -13,7 +13,6 @@ import {
 } from '../../components/Banner'
 import { MenuCounter } from '../../components/MenuCounter'
 import { BoltIcon } from '../../components/icons/BoltIcon'
-import { CogsIcon } from '../../components/icons/Cogs'
 import { CubeIcon } from '../../components/icons/CubeIcon'
 import { DatabaseIcon } from '../../components/icons/DatabaseIcon'
 import { FileIcon } from '../../components/icons/FileIcon'
@@ -54,6 +53,7 @@ import { DiscussionIcon } from '../../components/icons/DiscussionIcon'
 import { DiscussionList } from '../discussions/DiscussionList'
 import { DiscussionShow } from '../discussions/DiscussionShow'
 import { CreateDiscussionPage } from '../discussions/form/CreateDiscussionPage'
+import { NetworkIcon } from '../../components/icons/NetworkIcon'
 
 interface CounterRequest {
   apps: string
@@ -204,7 +204,7 @@ const Home2 = () => {
         title="Workflows"
         key="workflows"
       >
-        <BoltIcon height={14} />
+        <NetworkIcon height={18} />
         <MenuText>Workflows</MenuText>
         {expandedSidebar && <MenuCounter count={counterData?.workflows} active={activeResource === 'workflows'} />}
       </MenuItem>
@@ -217,7 +217,7 @@ const Home2 = () => {
         title="Executions"
         key="executions"
       >
-        <CogsIcon height={14} />
+        <BoltIcon height={15} />
         <MenuText>Executions</MenuText>
         {expandedSidebar && <MenuCounter count={counterData?.jobs} active={activeResource === 'executions'} />}
       </MenuItem>
