@@ -218,7 +218,7 @@ export class DiscussionService {
       )
     }
 
-    await this.em.transactional(async (tem) => {
+    await this.em.transactional(async () => {
       const discussionNote = discussion.note.getEntity()
       if (!discussionNote.isPublic() && discussion.user.id !== this.userCtx.id) {
         const space = await this.em.findOne(Space, {
@@ -233,28 +233,28 @@ export class DiscussionService {
         }
       }
 
-      const discussionVotes = await tem.find(Vote, {
+      const discussionVotes = await this.em.find(Vote, {
         votableId: discussionId,
         votableType: 'Discussion',
       })
-      const noteVotes = await tem.find(Vote, {
+      const noteVotes = await this.em.find(Vote, {
         votableId: discussionNote.id,
         votableType: 'Note',
       })
-      const follows = await tem.find(DiscussionFollow, {
+      const follows = await this.em.find(DiscussionFollow, {
         followableId: discussionId,
       })
       this.logger.log(
         `Deleting discussion votes with ids: ${discussionVotes.map((vote) => vote.id)}`,
       )
-      tem.remove(discussionVotes)
+      this.em.remove(discussionVotes)
       this.logger.log(`Deleting note votes with ids: ${noteVotes.map((vote) => vote.id)}`)
-      tem.remove(noteVotes)
+      this.em.remove(noteVotes)
       this.logger.log(`Deleting follows with ids: ${follows.map((follow) => follow.id)}`)
-      tem.remove(follows)
+      this.em.remove(follows)
       // removal of discussion triggers cascade removal of answers,comments and attachments.
       this.logger.log(`Deleting discussion with id: ${discussion.id}`)
-      await tem.removeAndFlush(discussion)
+      await this.em.removeAndFlush(discussion)
     })
   }
 
