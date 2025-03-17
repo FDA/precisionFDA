@@ -43,7 +43,6 @@ while [ "$status" = "unhealthy" ] && [ $i -lt $ATTEMPTS ]; do
     instance_ids=$(aws autoscaling describe-auto-scaling-groups --auto-scaling-group-names "$ASG_NAME" --query AutoScalingGroups[].Instances[].InstanceId --output text)
     for instance_id in $instance_ids; do
         for tg_arn in "${TG_ARRAY[@]}"; do
-            echo "Checking instance health: $instance_id in Target Group: $tg_arn"
             instance_status=$(aws elbv2 describe-target-health --target-group-arn "$tg_arn" --targets "Id=$instance_id" --query "TargetHealthDescriptions[].TargetHealth.State" --output text)
             if [ "$instance_status" != "healthy" ]; then
                 status_check="unhealthy"
@@ -72,10 +71,12 @@ for asg_name in $asg_names; do
     if [ ! "$lbtg" ]; then
         lbtg="undef"
     fi
-    if [ "$lbtg" = "$ENV_TG" ] && [ "$asg_name" != "$ASG_NAME" ]; then
-        aws autoscaling detach-load-balancer-target-groups --auto-scaling-group-name "$asg_name" --target-group-arns "${TG_ARRAY[@]}"
-        asg_to_destroy="$asg_to_destroy$asg_name "
-    fi
+    for tg_arn in "${TG_ARRAY[@]}"; do
+        if [[ "$lbtg" == *"$tg_arn"* ]] && [ "$asg_name" != "$ASG_NAME" ]; then
+            aws autoscaling detach-load-balancer-target-groups --auto-scaling-group-name "$asg_name" --target-group-arns "$tg_arn"
+            asg_to_destroy="$asg_to_destroy$asg_name "
+        fi
+    done
 done
 
 # Destroy old Auto Scaling Groups
