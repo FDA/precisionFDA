@@ -199,23 +199,23 @@ export class DiscussionService {
 
   async deleteDiscussion(discussionId: number): Promise<void> {
     this.logger.log(`Deleting discussion: ${discussionId}`)
-    const discussion = await this.fetcher.getEditableById(
-      Discussion,
-      discussionId,
-      {},
-      {
-        populate: [
-          'note',
-          'answers',
-          'comments',
-          'note.attachments',
-          'answers.note',
-          'answers.note.attachments',
-        ],
-      },
-    )
-    if (!discussion) {
-      throw new errors.NotFoundError('Unable to delete discussion: insufficient permissions.')
+
+    const user = await this.em.findOneOrFail(User, this.userCtx.id)
+    const discussion = await this.discussionRepository.findOne(discussionId, {
+      populate: [
+        'note',
+        'answers',
+        'comments',
+        'note.attachments',
+        'answers.note',
+        'answers.note.attachments',
+      ],
+    })
+
+    if (!discussion || !(await discussion.isEditableBy(user))) {
+      throw new errors.NotFoundError(
+        'Unable to delete discussion: not found or insufficient permissions.',
+      )
     }
 
     await this.em.transactional(async (tem) => {
