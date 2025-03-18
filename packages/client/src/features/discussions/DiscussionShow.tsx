@@ -48,6 +48,8 @@ export const DiscussionShow = ({ space }: { space?: ISpace }) => {
     queryClient.invalidateQueries({
       queryKey: ['discussions'],
     })
+    toast.success('Discussion successfully removed')
+
     if (space) {
       navigate(`/spaces/${space.id}/discussions`)
     } else {
@@ -81,7 +83,7 @@ export const DiscussionShow = ({ space }: { space?: ISpace }) => {
   const backPath = space ? `/spaces/${spaceId}/discussions` : '/home/discussions?scope=everybody'
   const canReply = space?.current_user_membership.role !== 'viewer'
   const isLead = space?.current_user_membership.role === 'lead'
-  const canUserEdit = (noteUserId: number) => user?.id === noteUserId || isLead
+  const canUserEdit = (noteUserId: number) => user?.id === noteUserId || isLead || (user?.can_administer_site ?? false)
   const canUserAnswer = !discussion.answers.map(a => a.user.id).includes(user!.id)
 
   return (
