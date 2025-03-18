@@ -25,6 +25,7 @@ SecureHeaders::Configuration.default do |config|
       wss://precisionfda-staging.dnanexus.com
       wss://precisionfda-staging.dnanexus.com
       wss://precision.fda.gov
+      *.google-analytics.com
       https://dnanexus-platform-upload-prod.s3.amazonaws.com
       https://dnanexus-platform-upload-prod.s3-fips.us-east-1.amazonaws.com
       https://dnanexus-platform-upload-stg.s3.amazonaws.com
@@ -72,6 +73,8 @@ SecureHeaders::Configuration.default do |config|
       https://www.recaptcha.net/recaptcha/
       https://www.gstatic.com/recaptcha/
       https://www.google.com/recaptcha/
+      https://dap.digitalgov.gov/
+      https://www.googletagmanager.com/gtag/
     ),
     style_src: %w(
       'self' 'unsafe-inline'
