@@ -621,7 +621,9 @@ Rails.application.routes.draw do
       post "announce_result", on: :member
     end
 
-    resources :discussions, only: :show
+    resources :discussions, only: [:show] do
+      resources :answers, only: [:show]
+    end
 
     resources :licenses do
       post "accept(/:redirect_to_uid)", on: :member, action: :accept, as: "accept"
