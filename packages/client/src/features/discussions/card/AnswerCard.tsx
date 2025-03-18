@@ -7,8 +7,8 @@ import { AttachmentsList } from '../AttachmentsList'
 import { deleteAnswerRequest, fetchAttachmentsRequest, NoteScope } from '../api'
 import { Answer } from '../discussions.types'
 import { EditNoteEntity } from '../form/EditNoteEntity'
-import { areAttachmentsEmpty, groupByAttachmentType } from '../helpers'
-import { AttachmentsLabel, StyledCommentCard, StyledMarkdown, StyledReplyButton } from '../styles'
+import { groupByAttachmentType } from '../helpers'
+import { StyledCommentCard, StyledMarkdown, StyledReplyButton } from '../styles'
 import { CardHeader } from './CardHeader'
 
 export function AnswerCard({
@@ -90,7 +90,7 @@ export function AnswerCard({
       </StyledMarkdown>
       <AttachmentsList attachments={attachments} />
       {canReply && (
-        <StyledReplyButton onClick={() => onReply()}>
+        <StyledReplyButton data-testid="reply-answer" onClick={() => onReply()}>
           <ReplyArrowIcon height={12} />
           Reply
         </StyledReplyButton>
