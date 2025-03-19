@@ -332,8 +332,7 @@ module Api
     def find_space
       @space = Space.undeleted.find(params[:id])
 
-      return if @space.accessible_by_user?(current_user) ||
-        (current_user.review_space_admin? && @space.review?)
+      return if @space.accessible_by_user?(current_user)
 
       raise ApiError, "The space is locked." if @space.visible_by?(current_user) && @space.locked?
 

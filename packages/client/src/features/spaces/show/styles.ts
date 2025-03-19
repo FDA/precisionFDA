@@ -1,16 +1,11 @@
-import styled, { css } from 'styled-components'
+import styled from 'styled-components'
 import { Button } from '../../../components/Button'
 import { Svg } from '../../../components/icons/Svg'
-
-const marginBottom = css`
-  margin-bottom: 16px;
-`
 
 export const SpaceMainInfo = styled.div`
   display: flex;
   flex-direction: column;
-  ${marginBottom}
-  `
+`
 
 export const SpaceHeaderDescrip = styled.div`
   font-size: 14px;
@@ -53,43 +48,108 @@ export const ActionButton = styled(Button)`
 export const ButtonRow = styled.div`
   display: flex;
   gap: 8px;
-  justify-content: flex-end;
   height: 32px;
   flex-wrap: wrap;
-  ${marginBottom}
+  margin-bottom: 16px;
 `
-export const Tabs = styled.div`
-  display: flex;
-  flex-direction: row;
-  align-items: flex-end;
-  padding: 0px;
-  gap: 10px;
-  margin-bottom: -1px;
-`
-export const Tab = styled.div<{ $isactive?: string }>`
+
+export const Tab = styled.div`
   font-size: 14px;
   font-weight: 600;
   box-sizing: border-box;
-  background: var(--tertiary-100);
-  border-width: 1px 1px 1px 1px;
-  border-style: solid;
-  border-color: var(--c-layout-border);
-  border-radius: 4px 4px 0px 0px;
+  background-color: var(--success-600);
+  border: 2px solid white;
+  border-radius: 5px 5px 5px 5px;
   padding: 6px 20px;
-  color: var(--c-text-400);
-  cursor: pointer;
-  flex: 1 0 auto;
+  flex: 1 0 50%;
+  display: flex;
+  flex-direction: column;
+  min-width: 180px;
+  max-width: 300px;
+  overflow: hidden;
   
-  ${({ $isactive }) => $isactive &&
-    css`
-      background: var(--background);
-      border-bottom: 0;
-      color: var(--c-text-700);
+  &[data-variant="shared"] {
+    background-color: oklch(56% 0.15 155.65);
+    border-color: oklch(76% 0.15 155.65);
+    color: oklch(90% 0.08 155.65);
+    margin-left: -5px;
+    z-index: 2;
+    transition: box-shadow, transform 0.1s;
+    
+    &[data-isactive="false"] {
+      opacity: 0.5;
+      background-color: oklch(43% 0.05 155.65);
+      border-color: oklch(76% 0.05 155.65);
+      box-shadow: 28px 0 10px -20px rgba(0,0,0,1) inset;
+      transform: scale(0.985);
+      z-index: 1;
       &:hover {
-        color: var(--c-text-700);
+        opacity: 0.55;
+        transition: opacity 0.3s;
       }
-    `}
+    }
+  }
+
+  &[data-variant="private"] {
+    background-color: oklch(56% 0.15 308.12);
+    border-color: oklch(76% 0.15 308.12);
+    color: oklch(96% 0.08 308.12);
+    margin-right: -5px;
+    z-index: 2;
+    transition: box-shadow, transform 0.1s;
+    
+    &[data-isactive="false"] {
+      opacity: 0.5;
+      background-color: oklch(50% 0.05 300.12);
+      border-color: oklch(76% 0.05 308.12);
+      box-shadow: -28px 0 10px -20px rgba(0,0,0,1) inset;
+      transform: scale(0.985);
+      z-index: 1;
+      &:hover {
+        transition: opacity 0.3s;
+        opacity: 0.55;
+      }
+    }
+  }
+  
+  p {
+    margin-top: 4px;
+    font-size: 12px;
+    font-weight: 300;
+    text-wrap: pretty;
+  }
 `
+
+export const Tabs = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  flex: 1 0 50%;
+  max-width: 500px;
+  
+  ${Tab} {
+    min-height: 38px;
+    justify-content: center;
+    text-align: center;
+    p {
+      display: none;
+    }
+  }
+
+  @media (min-width: 950px) {
+    max-width: 550px;
+    min-height: auto;
+    ${Tab} {
+      justify-content: flex-start;
+      align-items: flex-start;
+      text-align: left;
+      p {
+        display: initial;
+      }
+    }
+  }
+`
+
 export const TransparentTab = styled(Tab)`
   border: none;
   background: transparent;
@@ -99,15 +159,17 @@ export const TransparentTab = styled(Tab)`
 export const KeyValRow = styled.div`
   display: flex;
   gap: 32px;
-  ${marginBottom}
+  margin-bottom: 16px;
 `
 
 export const TopSpaceHeader = styled.div`
   display: flex;
   justify-content: space-between;
-  align-items: flex-end;
-  gap: 8px;
+  gap: 16px;
   flex-wrap: wrap;
+  @media (min-width: 950px) {
+    flex-wrap: nowrap;
+  }
 `
 
 export const SpaceHeader = styled.div`
@@ -117,15 +179,16 @@ export const SpaceHeader = styled.div`
   display: flex;
   flex-direction: column;
   background-color: var(--background-color);
-  padding: 0 20px;
-  padding-top: 16px;
+  padding: 18px 32px;
   border-bottom: 1px solid var(--border-color);
 `
 
-export const SpaceTypeHeader = styled.div<{ $expandedSidebar: boolean }>`
-  ${({ $expandedSidebar }) => $expandedSidebar ? css`
-  margin-left: 244px;
-  `: css`
-  margin-left: 86px;
-  `}
+export const SpaceTopRight = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  flex: 1 0 auto;
+  gap: 16px;
+  flex: 1 1 auto;
+  justify-content: flex-end;
+  align-self: flex-start;
 `

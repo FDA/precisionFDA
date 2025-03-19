@@ -9,8 +9,8 @@ import eslintConfigPrettier from 'eslint-config-prettier'
 export default tseslint.config(
   eslint.configs.recommended,
   ...tseslint.configs.recommended,
-  eslintPluginReact.configs.flat['recommended'],
   eslintPluginReact.configs.flat['jsx-runtime'],
+  eslintPluginReact.configs.flat['recommended'],
   jsxA11y.flatConfigs.recommended,
   eslintConfigPrettier,
   {
