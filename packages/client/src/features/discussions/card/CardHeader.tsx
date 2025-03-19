@@ -57,7 +57,7 @@ export const CardHeader = ({
             )}
           >
             {dropdownProps => (
-              <StyledEditButton tabIndex={0} {...dropdownProps}>
+              <StyledEditButton data-testid={`${cardType}-dropdown`} tabIndex={0} {...dropdownProps}>
                 <ThreeDotsIcon width={16} />
               </StyledEditButton>
             )}
