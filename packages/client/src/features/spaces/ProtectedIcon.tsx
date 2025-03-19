@@ -1,21 +1,21 @@
-/* eslint-disable react/jsx-no-useless-fragment */
-import React from 'react'
+import React, { useId } from 'react'
 import { Tooltip } from 'react-tooltip'
+import styled from 'styled-components'
 import { LockIcon } from '../../components/icons/LockIcon'
 
+const StyledProtectedIcon = styled.span`
+  flex-shrink: 0;
+`
 
-export const ProtectedIcon = ({
-  color,
-  isShown = true,
-  showToolTip = true,
-}: {
-  color?: string
-  isShown?: boolean
-  showToolTip?: boolean
-}) => {
-  const Icon = <LockIcon color={color} />
-  if (showToolTip) {
-      return <><span data-tooltip-content="Protected" data-tooltip-id="protected">{Icon}</span><Tooltip id="protected" /></>
-  }
-  return isShown ? Icon : <></>
+export const ProtectedIcon = ({ color, showToolTip = true }: { color?: string; showToolTip?: boolean }) => {
+  const tooltipId = useId()
+
+  if (!showToolTip) return <LockIcon color={color} />
+
+  return (
+    <StyledProtectedIcon data-tooltip-content="Protected" data-tooltip-id={`protected-${tooltipId}`}>
+      <LockIcon color={color} />
+      <Tooltip id={`protected-${tooltipId}`} />
+    </StyledProtectedIcon>
+  )
 }

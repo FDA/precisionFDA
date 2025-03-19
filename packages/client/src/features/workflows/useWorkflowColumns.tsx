@@ -7,11 +7,11 @@ import {
   DefaultColumnFilter, SelectColumnFilter,
 } from '../../components/Table/filters'
 import { StyledTagItem, StyledTags } from '../../components/Tags'
-import { BoltIcon } from '../../components/icons/BoltIcon'
 import { ObjectGroupIcon } from '../../components/icons/ObjectGroupIcon'
 import { StyledLinkCell, StyledNameCell } from '../home/home.styles'
 import { KeyVal } from '../home/types'
 import { IWorkflow } from './workflows.types'
+import { NetworkIcon } from '../../components/icons/NetworkIcon'
 
 export const useWorkflowColumns = ({
   isAdmin = false,
@@ -39,7 +39,7 @@ export const useWorkflowColumns = ({
           to={`${location.pathname}/${props.cell.row.original.uid}`}
           state={{ from: location.pathname, fromSearch: location.search }}
         >
-          <BoltIcon height={14} />
+          <NetworkIcon height={18} />
           {props.value}
         </StyledNameCell>
       ),

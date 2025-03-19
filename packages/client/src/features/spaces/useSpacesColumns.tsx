@@ -6,7 +6,6 @@ import { SwitchButton } from '../../components/Button'
 import { DefaultColumnFilter, IdColumnFilter, SelectColumnFilter } from '../../components/Table/filters'
 import { StyledTagItem, StyledTags } from '../../components/Tags'
 import { AdminIcon } from '../../components/icons/AdminIcon'
-import { BoltIcon } from '../../components/icons/BoltIcon'
 import { CogsIcon } from '../../components/icons/Cogs'
 import { CubeIcon } from '../../components/icons/CubeIcon'
 import { DiscussionIcon } from '../../components/icons/DiscussionIcon'
@@ -20,6 +19,7 @@ import { ProtectedIcon } from './ProtectedIcon'
 import { SpaceTypeName } from './common'
 import { ISpace } from './spaces.types'
 import { useSpaceHiddenMutation } from './useSpaceHiddenMutation'
+import { NetworkIcon } from '../../components/icons/NetworkIcon'
 
 export const SpaceTableNameCell = styled.div`
   display: flex;
@@ -77,12 +77,6 @@ export const StatusCell = styled.div<{ $isActive: boolean }>`
   }
 `
 
-export const TypeDot = styled.div`
-  width: 14px;
-  height: 14px;
-  border-radius: 16px;
-`
-
 export const NameRow = styled.div`
   display: flex;
   gap: 8px;
@@ -95,6 +89,7 @@ export const SpaceTableTypeCell = styled.div`
   display: flex;
   align-items: center;
   gap: 10px;
+  flex-shrink: 0;
 `
 export const SpaceTableCounterCell = styled.div`
   display: flex;
@@ -293,7 +288,7 @@ export const useSpacesColumns = ({ colWidths, isSiteAdmin = false }: { colWidths
                 <CubeIcon height={14} /> {row.original?.counters.apps}
               </SpaceTableCounterItem>
               <SpaceTableCounterItem>
-                <BoltIcon /> {row.original?.counters.workflows}
+                <NetworkIcon height={16} /> {row.original?.counters.workflows}
               </SpaceTableCounterItem>
               <SpaceTableCounterItem>
                 <CogsIcon height={14} />

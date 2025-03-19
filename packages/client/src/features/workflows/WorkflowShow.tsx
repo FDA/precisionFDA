@@ -6,7 +6,6 @@ import { Link, Route, Navigate, Routes, useLocation, useParams } from 'react-rou
 import { CloudResourcesHeaderButton } from '../../components/CloudResourcesHeaderButton'
 import Dropdown from '../../components/Dropdown'
 import { RevisionDropdown } from '../../components/Dropdown/RevisionDropdown'
-import { BoltIcon } from '../../components/icons/BoltIcon'
 import { Markdown, MarkdownStyle } from '../../components/Markdown'
 import {
   StyledTab,
@@ -40,6 +39,7 @@ import { IWorkflow } from './workflows.types'
 import WorkflowsDiagram from './WorkflowsDiagram'
 import HomeWorkflowsSpec from './WorkflowSpec/WorkflowSpec'
 import { getBasePath } from '../home/utils'
+import { NetworkIcon } from '../../components/icons/NetworkIcon'
 
 interface IColumn {
   header: string
@@ -199,7 +199,7 @@ export const WorkflowShow = ({ spaceId, emitScope, homeScope }: { spaceId?: numb
         <ResourceHeader>
           <HeaderLeft>
             <Title>
-              <BoltIcon height={20} />
+              <NetworkIcon height={20} />
               <span data-testid="workflow-show-title">{workflowTitle}</span>
             </Title>
             <RevisionDropdown
