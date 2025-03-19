@@ -6,7 +6,6 @@ import { FeaturedToggle } from '../../components/FeaturedToggle'
 import { DefaultColumnFilter, SelectColumnFilter } from '../../components/Table/filters'
 import { StyledTagItem, StyledTags } from '../../components/Tags'
 import { BoltIcon } from '../../components/icons/BoltIcon'
-import { CogsIcon } from '../../components/icons/Cogs'
 import { CubeIcon } from '../../components/icons/CubeIcon'
 import { ObjectGroupIcon } from '../../components/icons/ObjectGroupIcon'
 import { RESOURCE_LABELS } from '../../types/user'
@@ -16,6 +15,7 @@ import { KeyVal } from '../home/types'
 import { getBasePath, getBasePathFromScope } from '../home/utils'
 import { StateCell } from './StateCell'
 import { IExecution } from './executions.types'
+import { NetworkIcon } from '../../components/icons/NetworkIcon'
 
 export const useExecutionColumns = ({
   colWidths,
@@ -44,12 +44,12 @@ export const useExecutionColumns = ({
 
         return rowType === 'workflows' ? (
           <StyledLinkCell to={pathname} state={{ from: location.pathname, fromSearch: location.search }}>
-            <BoltIcon width={14} height={14} />
+            <NetworkIcon width={14} height={14} />
             {value}
           </StyledLinkCell>
         ) : (
           <StyledLinkCell to={pathname} state={{ from: location.pathname, fromSearch: location.search }}>
-            <CogsIcon height={14} />
+            <BoltIcon height={14} />
             {value}
           </StyledLinkCell>
         )
@@ -85,7 +85,7 @@ export const useExecutionColumns = ({
         }
         return (
           <StyledLinkCell to={`${getBasePath(spaceId)}/workflows/${row.original.workflow_uid}`}>
-            <BoltIcon height={14} />
+            <NetworkIcon height={16} />
             {value}
           </StyledLinkCell>
         )
