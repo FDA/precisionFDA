@@ -27,7 +27,6 @@ import { useSpacesColumns } from './useSpacesColumns'
 
 const SpacesHeader = styled.div`
   display: flex;
-  justify-content: flex-start;
   padding: 32px 20px;
   justify-content: space-between;
 `
@@ -142,8 +141,6 @@ const SpacesList = () => {
           totalPages={meta?.pagination?.total_pages}
           perPage={pagination.perPageParam}
           isHidden={false}
-          isPreviousData={meta?.pagination?.prev_page !== null}
-          isNextData={meta?.pagination?.next_page !== null}
           setPage={p => pagination.setPageParam(p, 'replaceIn')}
           onPerPageSelect={p => pagination.setPerPageParam(p, 'replaceIn')}
         />
