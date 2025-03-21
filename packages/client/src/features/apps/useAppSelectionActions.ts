@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom'
 import { pick } from 'ramda'
 import { IChallenge } from '../../types/challenge'
 import { useAuthUser } from '../auth/useAuthUser'
-import { useAttachToModal } from '../actionModals/useAttachToModal'
 import { useCopyToPrivateModal } from '../actionModals/useCopyToPrivateModal'
 import { useCopyToSpaceModal } from '../actionModals/useCopyToSpace'
 import { useDeleteModal } from '../actionModals/useDeleteModal'
@@ -28,12 +27,12 @@ export const useAppSelectionActions = ({
   comparatorLinks,
   challenges,
 }: {
-  homeScope?: HomeScope,
-  spaceId?: number,
-  selectedItems: IApp[],
-  resourceKeys: string[],
-  resetSelected?: () => void,
-    comparatorLinks: { [key: string]: string },
+  homeScope?: HomeScope
+  spaceId?: number
+  selectedItems: IApp[]
+  resourceKeys: string[]
+  resetSelected?: () => void
+  comparatorLinks: { [key: string]: string }
   challenges: IChallenge[] | undefined
 }) => {
   const queryClient = useQueryClient()
@@ -42,37 +41,46 @@ export const useAppSelectionActions = ({
   const user = useAuthUser()
   const isAdmin = user?.admin
 
-  const featureMutation = useFeatureMutation({ resource: 'apps', onSuccess: () => {
-    queryClient.invalidateQueries({ queryKey: resourceKeys })
-  } })
+  const featureMutation = useFeatureMutation({
+    resource: 'apps',
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: resourceKeys })
+    },
+  })
 
   const {
     modalComp: comparatorAddModal,
     setShowModal: setShowComparatorAddModal,
     isShown: isShownComparatorAddModal,
-  } = useComparatorModal({ actionType: 'add_to_comparators', selected: selected[0], onSuccess: () => {
-    queryClient.invalidateQueries({ queryKey: resourceKeys })
-  } })
+  } = useComparatorModal({
+    actionType: 'add_to_comparators',
+    selected: selected[0],
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: resourceKeys })
+    },
+  })
   const {
     modalComp: comparatorSetModal,
     setShowModal: setShowComparatorSetModal,
     isShown: isShownComparatorSetModal,
-  } = useComparatorModal({ actionType: 'set_app', selected: selected[0], onSuccess: () => {
-    queryClient.invalidateQueries({ queryKey: resourceKeys })
-  } })
+  } = useComparatorModal({
+    actionType: 'set_app',
+    selected: selected[0],
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: resourceKeys })
+    },
+  })
   const {
     modalComp: comparatorRemoveModal,
     setShowModal: setShowComparatorRemoveModal,
     isShown: isShownComparatorRemoveModal,
-  } = useComparatorModal({ actionType: 'remove_from_comparators', selected: selected[0], onSuccess: () => {
-    queryClient.invalidateQueries({ queryKey: resourceKeys })
-  } })
-
-  const {
-    modalComp: attachToModal,
-    setShowModal: setAttachToModal,
-    isShown: isShownAttachToModal,
-  } = useAttachToModal(selected.map(s => s.id), 'APP')
+  } = useComparatorModal({
+    actionType: 'remove_from_comparators',
+    selected: selected[0],
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: resourceKeys })
+    },
+  })
 
   const {
     modalComp: copyToSpaceModal,
@@ -105,9 +113,13 @@ export const useAppSelectionActions = ({
     modalComp: attachToChallengeModal,
     setShowModal: setAttachToChallengeModal,
     isShown: isShownAttachToChallengeModal,
-  } = useAttachToChallengeModal<IApp>({ resource: 'apps', selected: selected[0], onSuccess: () => {
-    queryClient.invalidateQueries({ queryKey: resourceKeys })
-  } })
+  } = useAttachToChallengeModal<IApp>({
+    resource: 'apps',
+    selected: selected[0],
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: resourceKeys })
+    },
+  })
 
   const {
     modalComp: deleteModal,
@@ -121,12 +133,12 @@ export const useAppSelectionActions = ({
       queryClient.invalidateQueries({
         queryKey: ['apps'],
       })
-      if(spaceId) {
+      if (spaceId) {
         navigate(`/spaces/${spaceId}/apps`)
       } else {
         navigate(`/home/apps?scope=${homeScope}`)
       }
-      if(resetSelected) resetSelected()
+      if (resetSelected) resetSelected()
     },
   })
 
@@ -148,10 +160,10 @@ export const useAppSelectionActions = ({
     isShown: isShownPropertiesModal,
   } = useEditPropertiesModal({
     type: 'appSeries',
-    selected: selected.map(app => ({ ...app, id: app.app_series_id  })),
+    selected: selected.map(app => ({ ...app, id: app.app_series_id })),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: resourceKeys })
-      queryClient.invalidateQueries({ queryKey: ['edit-resource-properties', 'appSeries']})
+      queryClient.invalidateQueries({ queryKey: ['edit-resource-properties', 'appSeries'] })
     },
   })
 
@@ -162,23 +174,23 @@ export const useAppSelectionActions = ({
   } = useExportToModal({ selected: selected[0], resource: 'apps' })
 
   let actions: ActionFunctionsType<AppActions> = {
-    'Run': {
+    Run: {
       type: 'route',
       to: `/${getBaseLink(spaceId)}/apps/${selected[0]?.uid}/jobs/new`,
       isDisabled: selected.length !== 1 || !selected[0].links.run_job,
       cloudResourcesConditionType: 'all',
     },
-    'Track': {
+    Track: {
       type: 'route',
       to: `/${getBaseLink(spaceId)}/apps/${selected[0]?.uid}/track`,
       isDisabled: selected.length !== 1,
     },
-    'Edit': {
+    Edit: {
       type: 'route',
       to: `/${getBaseLink(spaceId)}/apps/${selected[0]?.uid}/edit`,
       isDisabled: selected.length !== 1 || !selected[0].latest_revision || selected[0].added_by !== user?.dxuser,
     },
-    'Fork': {
+    Fork: {
       type: 'route',
       to: `/${getBaseLink(spaceId)}/apps/${selected[0]?.uid}/fork`,
       isDisabled: selected.length !== 1 || !selected[0].links.fork,
@@ -199,7 +211,7 @@ export const useAppSelectionActions = ({
       isDisabled: selected.length !== 1 || !selected[0].links.publish || !user?.allowed_to_publish,
       shouldHide: selected[0]?.location !== 'Private',
     },
-    'Feature': {
+    Feature: {
       type: 'modal',
       func: () => {
         featureMutation.mutateAsync({ featured: true, uids: selected.map(f => f.uid) })
@@ -207,26 +219,25 @@ export const useAppSelectionActions = ({
       isDisabled: selected.length === 0 || !selected.every(e => !e.featured || !e.links.feature),
       shouldHide: !isAdmin || homeScope !== 'everybody',
     },
-    'Unfeature': {
+    Unfeature: {
       type: 'modal',
       func: () => {
         featureMutation.mutateAsync({ featured: false, uids: selected.map(f => f.uid) })
       },
       isDisabled: selected.length === 0 || !selected.every(e => e.featured || !e.links.feature),
-      shouldHide: !isAdmin || homeScope !== 'everybody' && homeScope !== 'featured',
+      shouldHide: !isAdmin || (homeScope !== 'everybody' && homeScope !== 'featured'),
     },
-    'Delete': {
+    Delete: {
       type: 'modal',
       func: () => setDeleteModal(true),
-      isDisabled: selected.some((e) => !e.links.delete) || selected.length === 0,
+      isDisabled: selected.some(e => !e.links.delete) || selected.length === 0,
       modal: deleteModal,
       showModal: isShownDeleteModal,
     },
     'Copy to space': {
       type: 'modal',
       func: () => setCopyToSpaceModal(true),
-      isDisabled:
-        selected.length === 0 || selected.some(e => !e.links.copy),
+      isDisabled: selected.length === 0 || selected.some(e => !e.links.copy),
       modal: copyToSpaceModal,
       showModal: isShownCopyToSpaceModal,
     },
@@ -236,18 +247,9 @@ export const useAppSelectionActions = ({
       isDisabled: selected.length === 0,
       modal: copyToPrivateModal,
       showModal: isShownCopyToPrivateModal,
-      shouldHide: ['private','public'].includes(selected[0]?.scope),
+      shouldHide: ['private', 'public'].includes(selected[0]?.scope),
     },
-    'Attach to...': {
-      type: 'modal',
-      func: () => setAttachToModal(true),
-      isDisabled:
-        selected.length === 0 ||
-        selected.some(e => !e.links.attach_to),
-      modal: attachToModal,
-      showModal: isShownAttachToModal,
-    },
-    'Comments': {
+    Comments: {
       type: 'link',
       link: `/apps/${selected[0]?.uid}/comments`,
       isDisabled: selected.length !== 1,
@@ -266,7 +268,7 @@ export const useAppSelectionActions = ({
       isDisabled: selected.length !== 1,
       modal: tagsModal,
       showModal: isShownTagsModal,
-      shouldHide: (!isAdmin && selected[0]?.added_by !== user?.dxuser) || (selected.length !== 1),
+      shouldHide: (!isAdmin && selected[0]?.added_by !== user?.dxuser) || selected.length !== 1,
     },
     'Edit properties': {
       type: 'modal',
@@ -274,7 +276,7 @@ export const useAppSelectionActions = ({
       modal: propertiesModal,
       isDisabled: selected.length === 0,
       showModal: isShownPropertiesModal,
-      shouldHide: (!isAdmin && selected[0]?.added_by !== user?.dxuser),
+      shouldHide: !isAdmin && selected[0]?.added_by !== user?.dxuser,
     },
     'Add to Comparators': {
       type: 'modal',
@@ -302,8 +304,8 @@ export const useAppSelectionActions = ({
     },
   }
 
-  if(homeScope === 'spaces') {
-    actions = pick(['Copy to space', 'Attach to...'], actions)
+  if (homeScope === 'spaces') {
+    actions = pick(['Copy to space'], actions)
   }
 
   return actions

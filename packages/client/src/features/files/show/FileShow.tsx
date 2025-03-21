@@ -69,7 +69,6 @@ const FileActionsDropdown = ({
       {actions['Delete']?.modal}
       {actions['Move']?.modal}
       {actions['Copy to...']?.modal}
-      {actions['Attach to...']?.modal}
       {actions['Attach License']?.modal}
       {actions['Detach License']?.modal}
       {actions['Accept License']?.modal}
@@ -142,7 +141,13 @@ export const FileShow = ({ emitScope, space, homeScope }: { homeScope?: HomeScop
         </ResourceHeader>
 
         <PathSection>
-          <FileBreadcrumb fileName={file.name} basePath={`/${space ? `spaces/${space.id}` : 'home'}/files`} labelText='File Path:' scope={homeScope} metaPath={data?.meta?.path} />
+          <FileBreadcrumb
+            fileName={file.name}
+            basePath={`/${space ? `spaces/${space.id}` : 'home'}/files`}
+            labelText="File Path:"
+            scope={homeScope}
+            metaPath={data?.meta?.path}
+          />
         </PathSection>
 
         <MetadataSection>
@@ -241,7 +246,6 @@ export const FileShow = ({ emitScope, space, homeScope }: { homeScope?: HomeScop
           {file.description ? file.description : 'No description provided.'}
         </FileDescription>
       </Topbox>
-
 
       <Filler $size={40} />
       <TabsSwitch tabsConfig={tabsConfig} />

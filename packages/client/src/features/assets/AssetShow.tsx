@@ -31,13 +31,7 @@ import { ITab, TabsSwitch } from '../../components/TabsSwitch'
 import { FileIcon } from '../../components/icons/FileIcon'
 import { Filler } from '../../components/Page/styles'
 
-const AssetActions = ({
-  homeScope,
-  asset,
-}: {
-  homeScope?: HomeScope
-  asset: IAsset
-}) => {
+const AssetActions = ({ homeScope, asset }: { homeScope?: HomeScope; asset: IAsset }) => {
   const actions = useAssetActions({
     homeScope,
     selectedItems: [asset],
@@ -45,17 +39,11 @@ const AssetActions = ({
   })
   return (
     <>
-      <Dropdown
-        trigger="click"
-        content={<ActionsDropdownContent actions={actions} />}
-      >
-        {dropdownProps => (
-          <ActionsButton {...dropdownProps} active={dropdownProps.isActive} />
-        )}
+      <Dropdown trigger="click" content={<ActionsDropdownContent actions={actions} />}>
+        {dropdownProps => <ActionsButton {...dropdownProps} active={dropdownProps.isActive} />}
       </Dropdown>
       {actions['Delete']?.modal}
       {actions['Download']?.modal}
-      {actions['Attach to...']?.modal}
       {actions['Attach License']?.modal}
       {actions['Detach License']?.modal}
       {actions['Accept License']?.modal}
@@ -66,15 +54,16 @@ const AssetActions = ({
   )
 }
 
-export const AssetShow = ({ emitScope, homeScope }: { homeScope?: HomeScope, emitScope?: EmmitScope }) => {
+export const AssetShow = ({ emitScope, homeScope }: { homeScope?: HomeScope; emitScope?: EmmitScope }) => {
   const { assetUid } = useParams<{ assetUid: string }>()
 
   const { data, isLoading } = useQuery({
     queryKey: ['asset', assetUid],
-    queryFn: () => fetchAsset(assetUid).then(d => {
-      if(emitScope) emitScope(d.asset.scope, d.asset.featured)
-      return d
-    }),
+    queryFn: () =>
+      fetchAsset(assetUid).then(d => {
+        if (emitScope) emitScope(d.asset.scope, d.asset.featured)
+        return d
+      }),
   })
 
   const asset = data?.asset
@@ -95,7 +84,11 @@ export const AssetShow = ({ emitScope, homeScope }: { homeScope?: HomeScope, emi
   const tabsConfig = [
     {
       header: 'Description',
-      tab: <MarkdownStyle><Markdown data={asset.description} /></MarkdownStyle>,
+      tab: (
+        <MarkdownStyle>
+          <Markdown data={asset.description} />
+        </MarkdownStyle>
+      ),
     },
     {
       header: 'Archive Contents',
@@ -103,12 +96,7 @@ export const AssetShow = ({ emitScope, homeScope }: { homeScope?: HomeScope, emi
     },
     {
       header: `License: ${meta.object_license && meta.object_license.title}`,
-      tab: (
-        <License
-          license={meta.object_license}
-          link={asset.links.show_license}
-        />
-      ),
+      tab: <License license={meta.object_license} link={asset.links.show_license} />,
       hide: !meta.object_license || !meta.object_license.uid,
     },
   ] as ITab[]
@@ -117,25 +105,15 @@ export const AssetShow = ({ emitScope, homeScope }: { homeScope?: HomeScope, emi
 
   return (
     <>
-      <StyledBackLink linkTo={`/home/assets${scopeParamLink}`}>
-        Back to Assets
-      </StyledBackLink>
+      <StyledBackLink linkTo={`/home/assets${scopeParamLink}`}>Back to Assets</StyledBackLink>
       <Topbox>
         <ResourceHeader>
           <HeaderLeft>
             <Title>
               <FileIcon height={24} />
-              {typeof asset?.origin === 'object'
-                ? asset.origin.text
-                : asset.name}
+              {typeof asset?.origin === 'object' ? asset.origin.text : asset.name}
             </Title>
-            {asset.show_license_pending && (
-              <HomeLabel
-                value="License Pending Approval"
-                icon="fa-clock-o"
-                type="warning"
-              />
-            )}
+            {asset.show_license_pending && <HomeLabel value="License Pending Approval" icon="fa-clock-o" type="warning" />}
           </HeaderLeft>
           <div>
             <AssetActions homeScope={homeScope} asset={asset} />
@@ -152,9 +130,7 @@ export const AssetShow = ({ emitScope, homeScope }: { homeScope?: HomeScope, emi
                     {asset.location}
                   </Link>
                 ) : (
-                  <Link to={`/home/assets${scopeParamLink}`}>
-                    {homeScope === 'featured' ? 'Featured' : asset.location}
-                  </Link>
+                  <Link to={`/home/assets${scopeParamLink}`}>{homeScope === 'featured' ? 'Featured' : asset.location}</Link>
                 )}
               </MetadataVal>
             </MetadataItem>
@@ -189,7 +165,7 @@ export const AssetShow = ({ emitScope, homeScope }: { homeScope?: HomeScope, emi
             </MetadataItem>
           </MetadataRow>
         </MetadataSection>
-        
+
         {asset.tags.length > 0 && (
           <MetadataSection>
             <StyledTags>
@@ -203,16 +179,16 @@ export const AssetShow = ({ emitScope, homeScope }: { homeScope?: HomeScope, emi
           <MetadataSection>
             <MetadataRow>
               <MetadataItem>
-                  <MetadataKey>Properties</MetadataKey>
-                    <StyledTags>
-                      {Object.entries(asset.properties).map(([key, value]) => (
-                        <StyledPropertyItem key={key}>
-                          <StyledPropertyKey>{key}</StyledPropertyKey>
-                          <span>{value}</span>
-                        </StyledPropertyItem>
-                      ))}
-                    </StyledTags>
-                </MetadataItem>
+                <MetadataKey>Properties</MetadataKey>
+                <StyledTags>
+                  {Object.entries(asset.properties).map(([key, value]) => (
+                    <StyledPropertyItem key={key}>
+                      <StyledPropertyKey>{key}</StyledPropertyKey>
+                      <span>{value}</span>
+                    </StyledPropertyItem>
+                  ))}
+                </StyledTags>
+              </MetadataItem>
             </MetadataRow>
           </MetadataSection>
         )}
