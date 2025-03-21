@@ -1,7 +1,6 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { omit, pick } from 'ramda'
 import { getSpaceIdFromScope } from '../../utils'
-import { useAttachToModal } from '../actionModals/useAttachToModal'
 import { useCopyToSpaceModal } from '../actionModals/useCopyToSpace'
 import { useEditPropertiesModal } from '../actionModals/useEditPropertiesModal'
 import { useEditTagsModal } from '../actionModals/useEditTagsModal'
@@ -16,17 +15,16 @@ import { useSnapshotModal } from './useSnapshotModal'
 import { useTerminateModal } from './useTerminateModal'
 
 export type ExecutionAction =
-  'Terminate' |
-  'Track' |
-  'Copy to space' |
-  'Feature' |
-  'Snapshot' |
-  'Unfeature' |
-  'Make Public' |
-  'Attach to...' |
-  'Comments' |
-  'Edit tags' |
-  'Edit properties'
+  | 'Terminate'
+  | 'Track'
+  | 'Copy to space'
+  | 'Feature'
+  | 'Snapshot'
+  | 'Unfeature'
+  | 'Make Public'
+  | 'Comments'
+  | 'Edit tags'
+  | 'Edit properties'
 
 export const useExecutionActions = ({
   homeScope,
@@ -89,15 +87,6 @@ export const useExecutionActions = ({
       queryClient.invalidateQueries({ queryKey: resourceKeys })
     },
   })
-  // "Items need to be an array of objects with id and type (one of App, Comparison, Job, or UserFile)"
-  const {
-    modalComp: attachToModal,
-    setShowModal: setAttachToModal,
-    isShown: isShownAttachToModal,
-  } = useAttachToModal(
-    selected.map(s => s.id),
-    'JOB',
-  )
 
   const {
     modalComp: terminateModal,
@@ -111,7 +100,6 @@ export const useExecutionActions = ({
     isShown: isSnapshotModal,
   } = useSnapshotModal({ selected: selected[0] })
 
-  const links = selected[0]?.links
   const spaceId = getSpaceIdFromScope(selected[0]?.scope)
 
   let actions: ActionFunctionsType<ExecutionAction> = {
@@ -159,13 +147,6 @@ export const useExecutionActions = ({
         url: `${selected[0]?.links?.publish}&scope=public`,
       },
     },
-    'Attach to...': {
-      type: 'modal',
-      func: () => setAttachToModal(true),
-      isDisabled: selected.length === 0 || selected.length > 1,
-      modal: attachToModal,
-      showModal: isShownAttachToModal,
-    },
     Snapshot: {
       type: 'modal',
       func: () => setSnapshotModal(true),
@@ -193,7 +174,7 @@ export const useExecutionActions = ({
       isDisabled: selected.length === 0,
       modal: propertiesModal,
       showModal: isShownPropertiesModal,
-      shouldHide: (!isAdmin && !isJobOwner),
+      shouldHide: !isAdmin && !isJobOwner,
     },
   }
 
@@ -203,7 +184,7 @@ export const useExecutionActions = ({
     } else {
       // If the user is not the owner of the job in a space, they cannot connect
       // to the workstation or perform other actions where ownership is needed
-      actions = pick(['Track', 'Copy to space', 'Attach to...', 'Comments', 'Edit tags', 'Edit properties'], actions)
+      actions = pick(['Track', 'Copy to space', 'Comments', 'Edit tags', 'Edit properties'], actions)
     }
   }
 

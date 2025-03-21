@@ -1131,7 +1131,7 @@ class ApiController < ApplicationController
   #
   # notes_added (Array[String])
   # items_added (Array[Integer])
-  #
+  # - check if we can remove this safely.
   def attach_to_notes
     items = unsafe_params[:items]
     note_uids = unsafe_params[:note_uids]

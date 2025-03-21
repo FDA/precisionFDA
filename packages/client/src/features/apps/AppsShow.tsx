@@ -7,11 +7,7 @@ import Dropdown from '../../components/Dropdown'
 import { RevisionDropdown } from '../../components/Dropdown/RevisionDropdown'
 import { HomeLabel } from '../../components/HomeLabel'
 import { Markdown, MarkdownStyle } from '../../components/Markdown'
-import {
-  StyledTab,
-  StyledTabList,
-  StyledTabPanel,
-} from '../../components/Tabs'
+import { StyledTab, StyledTabList, StyledTabPanel } from '../../components/Tabs'
 import { StyledTagItem, StyledTags, StyledPropertyItem, StyledPropertyKey } from '../../components/Tags'
 import { CubeIcon } from '../../components/icons/CubeIcon'
 import { IChallenge } from '../../types/challenge'
@@ -122,20 +118,30 @@ const renderOptions = (app: IApp, meta: { release: string }, homeScope?: HomeSco
   )
 }
 
-const DetailActionsDropdown = (
-  { homeScope, app, comparatorLinks, challenges, spaceId }:
-    { homeScope?: HomeScope, app: IApp, comparatorLinks: { [key: string]: string }, challenges?: IChallenge[], spaceId?: string }) => {
+const DetailActionsDropdown = ({
+  homeScope,
+  app,
+  comparatorLinks,
+  challenges,
+  spaceId,
+}: {
+  homeScope?: HomeScope
+  app: IApp
+  comparatorLinks: { [key: string]: string }
+  challenges?: IChallenge[]
+  spaceId?: string
+}) => {
   let actions = useAppSelectionActions({
     homeScope,
     spaceId,
     selectedItems: [app],
-    resetSelected: () => { },
+    resetSelected: () => {},
     resourceKeys: ['app', app.uid],
     comparatorLinks,
     challenges,
   })
 
-  if(homeScope === 'spaces') {
+  if (homeScope === 'spaces') {
     actions = pick(['Copy to space', 'Attach to...'], actions)
   }
 
@@ -143,17 +149,11 @@ const DetailActionsDropdown = (
 
   return (
     <>
-      <Dropdown
-        trigger="click"
-        content={<ActionsDropdownContent actions={actions} />}
-      >
-        {dropdownProps => (
-          <ActionsButton {...dropdownProps} active={dropdownProps.isActive} />
-        )}
+      <Dropdown trigger="click" content={<ActionsDropdownContent actions={actions} />}>
+        {dropdownProps => <ActionsButton {...dropdownProps} active={dropdownProps.isActive} />}
       </Dropdown>
       {actions['Delete']?.modal}
       {actions['Copy to space']?.modal}
-      {actions['Attach to...']?.modal}
       {actions['Edit tags']?.modal}
       {actions['Edit properties']?.modal}
       {actions['Export to']?.modal}
@@ -166,33 +166,41 @@ const DetailActionsDropdown = (
   )
 }
 
-export const AppsShow = ({ spaceId, emitScope, homeScope }: { homeScope?: HomeScope, spaceId?: string, emitScope?: EmmitScope }) => {
+export const AppsShow = ({
+  spaceId,
+  emitScope,
+  homeScope,
+}: {
+  homeScope?: HomeScope
+  spaceId?: string
+  emitScope?: EmmitScope
+}) => {
   const location = useLocation()
   const { appUid } = useParams<{ appUid: string }>()
   const { data, isLoading } = useFetchAppQuery(appUid!)
 
   useEffect(() => {
-    if(data) {
-      if(emitScope) emitScope(data.app.scope, data.app.featured)
+    if (data) {
+      if (emitScope) emitScope(data.app.scope, data.app.featured)
     }
   }, [data])
 
   const app = data?.app
   const meta = data?.meta
-  
+
   if (isLoading) return <HomeLoader />
-  
+
   if (!app || !meta)
-  return (
-    <NotFound>
-      <h1>App not found</h1>
-      <div>Sorry, this app does not exist or is not accessible by you.</div>
-    </NotFound>
-  )
+    return (
+      <NotFound>
+        <h1>App not found</h1>
+        <div>Sorry, this app does not exist or is not accessible by you.</div>
+      </NotFound>
+    )
 
   const appTitle = app.title ? app.title : app.name
   const backPath = getBackPathNext({
-    location, 
+    location,
     resourceLocation: 'apps',
     homeScope,
     spaceId,
@@ -211,25 +219,12 @@ export const AppsShow = ({ spaceId, emitScope, homeScope }: { homeScope?: HomeSc
             <Title>
               <CubeIcon height={20} />
               <span data-testid="app-title">{appTitle}</span>
-              {meta.comparator && (
-                <HomeLabel
-                  value="Comparator"
-                  icon="fa-bullseye"
-                  type="success"
-                />
-              )}
-              {meta.default_comparator && (
-                <HomeLabel value="Default comparator" icon="fa-bullseye" />
-              )}
+              {meta.comparator && <HomeLabel value="Comparator" icon="fa-bullseye" type="success" />}
+              {meta.default_comparator && <HomeLabel value="Default comparator" icon="fa-bullseye" />}
               {meta.assigned_challenges.length
                 ? meta.assigned_challenges.map((item: any) => (
-                  <HomeLabel
-                    type="warning"
-                    icon="fa-trophy"
-                    value={item.name}
-                    key={item.id}
-                  />
-                ))
+                    <HomeLabel type="warning" icon="fa-trophy" value={item.name} key={item.id} />
+                  ))
                 : null}
             </Title>
 
@@ -244,7 +239,7 @@ export const AppsShow = ({ spaceId, emitScope, homeScope }: { homeScope?: HomeSc
               <CloudResourcesHeaderButton
                 href={`${getBasePath(spaceId)}/apps/${app.uid}/jobs/new`}
                 isLinkDisabled={!app.links.run_job}
-                conditionType='all'
+                conditionType="all"
                 asReactLink
               >
                 Run App
@@ -269,7 +264,9 @@ export const AppsShow = ({ spaceId, emitScope, homeScope }: { homeScope?: HomeSc
                 <MetadataKey>Tags</MetadataKey>
                 <StyledTags data-testid="tags-container">
                   {app.tags.map(tag => (
-                    <StyledTagItem data-testid="app-tag-item" key={tag}>{tag}</StyledTagItem>
+                    <StyledTagItem data-testid="app-tag-item" key={tag}>
+                      {tag}
+                    </StyledTagItem>
                   ))}
                 </StyledTags>
               </MetadataItem>
@@ -280,29 +277,42 @@ export const AppsShow = ({ spaceId, emitScope, homeScope }: { homeScope?: HomeSc
           <MetadataSection>
             <MetadataRow>
               <MetadataItem>
-                  <MetadataKey>Properties</MetadataKey>
-                    <StyledTags data-testid="properties-container">
-                      {Object.entries(app.properties).map(([key, value]) => (
-                        <StyledPropertyItem key={key}>
-                          <StyledPropertyKey data-testid="app-property-key">{key}</StyledPropertyKey>
-                          <span data-testid={`app-property-value-${key}`}>{value}</span>
-                        </StyledPropertyItem>
-                      ))}
-                    </StyledTags>
-                </MetadataItem>
+                <MetadataKey>Properties</MetadataKey>
+                <StyledTags data-testid="properties-container">
+                  {Object.entries(app.properties).map(([key, value]) => (
+                    <StyledPropertyItem key={key}>
+                      <StyledPropertyKey data-testid="app-property-key">{key}</StyledPropertyKey>
+                      <span data-testid={`app-property-value-${key}`}>{value}</span>
+                    </StyledPropertyItem>
+                  ))}
+                </StyledTags>
+              </MetadataItem>
             </MetadataRow>
           </MetadataSection>
         )}
       </Topbox>
 
       <StyledTabList>
-        <StyledTab activeClassName="active" end to={{ pathname: `${basePath}/apps/${app.uid}`, state: location.state }} data-testid="app-show-tab-spec">
+        <StyledTab
+          activeClassName="active"
+          end
+          to={{ pathname: `${basePath}/apps/${app.uid}`, state: location.state }}
+          data-testid="app-show-tab-spec"
+        >
           Spec
         </StyledTab>
-        <StyledTab activeClassName="active" to={{ pathname: `${basePath}/apps/${app.uid}/jobs`, state: location.state }} data-testid="app-show-tab-executions">
+        <StyledTab
+          activeClassName="active"
+          to={{ pathname: `${basePath}/apps/${app.uid}/jobs`, state: location.state }}
+          data-testid="app-show-tab-executions"
+        >
           Executions ({meta.accessible_jobs_count})
         </StyledTab>
-        <StyledTab activeClassName="active" to={{ pathname: `${basePath}/apps/${app.uid}/readme`, state: location.state }} data-testid="app-show-tab-readme">
+        <StyledTab
+          activeClassName="active"
+          to={{ pathname: `${basePath}/apps/${app.uid}/readme`, state: location.state }}
+          data-testid="app-show-tab-readme"
+        >
           Readme
         </StyledTab>
       </StyledTabList>
@@ -310,7 +320,14 @@ export const AppsShow = ({ spaceId, emitScope, homeScope }: { homeScope?: HomeSc
         <Routes>
           <Route path="/" element={<SpecTab spaceId={spaceId} spec={meta.spec} />} />
           <Route path="spec" element={<Navigate to={`${location.pathname}`} replace />} />
-          <Route path="readme" element={<MarkdownStyle><Markdown data={app.readme} /></MarkdownStyle>} />
+          <Route
+            path="readme"
+            element={
+              <MarkdownStyle>
+                <Markdown data={app.readme} />
+              </MarkdownStyle>
+            }
+          />
           <Route path="jobs" element={<AppExecutionsList appUid={app.uid} />} />
         </Routes>
       </StyledTabPanel>
