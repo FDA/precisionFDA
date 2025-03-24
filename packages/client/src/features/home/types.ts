@@ -45,7 +45,7 @@ export type PropertiesResource = 'node' | 'asset' | 'workflowSeries' | 'job' | '
 
 export type DialogType = 'radio' | 'checkbox'
 
-export type EmmitScope = (scope: ServerScope, featured: boolean) => void
+export type EmitScope = (scope: ServerScope, featured: boolean) => void
 
 export interface DownloadListResponse {
   id: number

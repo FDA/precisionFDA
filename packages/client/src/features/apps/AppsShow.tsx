@@ -1,4 +1,3 @@
-/* eslint-disable no-nested-ternary */
 import { omit, pick } from 'ramda'
 import React, { useEffect } from 'react'
 import { Link, Route, Routes, useLocation, useParams, Navigate } from 'react-router-dom'
@@ -29,7 +28,7 @@ import {
   Title,
   Topbox,
 } from '../home/show.styles'
-import { EmmitScope, HomeScope } from '../home/types'
+import { EmitScope, HomeScope } from '../home/types'
 import { AppExecutionsList } from './AppExecutionsList'
 import { SpecTab } from './SpecTab'
 import { IApp } from './apps.types'
@@ -142,7 +141,7 @@ const DetailActionsDropdown = ({
   })
 
   if (homeScope === 'spaces') {
-    actions = pick(['Copy to space', 'Attach to...'], actions)
+    actions = pick(['Copy to space'], actions)
   }
 
   actions = omit(['Run'], actions)
@@ -173,7 +172,7 @@ export const AppsShow = ({
 }: {
   homeScope?: HomeScope
   spaceId?: string
-  emitScope?: EmmitScope
+  emitScope?: EmitScope
 }) => {
   const location = useLocation()
   const { appUid } = useParams<{ appUid: string }>()
@@ -207,6 +206,7 @@ export const AppsShow = ({
   })
 
   const basePath = getBasePath(spaceId)
+  const properties = Object.entries(app?.properties || {})
 
   return (
     <>
@@ -273,13 +273,13 @@ export const AppsShow = ({
             </MetadataRow>
           </MetadataSection>
         )}
-        {app?.properties && Object.entries(app.properties).length > 0 && (
+        {properties.length > 0 && (
           <MetadataSection>
             <MetadataRow>
               <MetadataItem>
                 <MetadataKey>Properties</MetadataKey>
                 <StyledTags data-testid="properties-container">
-                  {Object.entries(app.properties).map(([key, value]) => (
+                  {properties.map(([key, value]) => (
                     <StyledPropertyItem key={key}>
                       <StyledPropertyKey data-testid="app-property-key">{key}</StyledPropertyKey>
                       <span data-testid={`app-property-value-${key}`}>{value}</span>
