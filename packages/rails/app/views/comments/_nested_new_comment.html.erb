@@ -1,9 +1,6 @@
 <% if @context.logged_in? %>
 <div class="pfda-comment pfda-comment--with-mentions">
   <div class="media">
-    <div class="media-left">
-      <%= link_to image_tag(@context.user.gravatar_url, class: 'rounded-circle', height: '25px'), user_path(@context.user.dxuser) %>
-    </div>
     <div class="media-body">
       <div class="pfda-comment-body">
         <%- comment = comment || Comment.new %>

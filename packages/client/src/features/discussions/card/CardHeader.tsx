@@ -4,7 +4,6 @@ import { StarIcon } from '../../../components/icons/StarIcon'
 import { ThreeDotsIcon } from '../../../components/icons/ThreeDotsIcon'
 import { formatDiscussionDate } from '../helpers'
 import { CardLeft, CardRight, Li, Ol, StyledAnswerLabel, StyledCardHeader, StyledEditButton, UsernameLink } from '../styles'
-import { Identicon } from '../../../components/Identicon'
 import { CardType, SimpleUser } from '../discussions.types'
 
 const EDIT_TEXT = {
@@ -37,10 +36,7 @@ export const CardHeader = ({
   return (
     <StyledCardHeader>
       <CardLeft>
-        <Identicon dxuser={user.dxuser} />
-        <span>
-          <UsernameLink href={`/users/${user.dxuser}`}>{user.fullName}</UsernameLink> on {formatDiscussionDate(timestamp)}
-        </span>
+        <UsernameLink href={`/users/${user.dxuser}`}>{user.fullName}</UsernameLink> on {formatDiscussionDate(timestamp)}
       </CardLeft>
       <CardRight>
         {cardType === 'answer' && (
@@ -53,7 +49,6 @@ export const CardHeader = ({
           <DropdownNext
             placement="bottom-end"
             trigger="click"
-            // eslint-disable-next-line react/no-unstable-nested-components
             content={() => (
               <Ol>
                 <Li onClick={() => onClickEdit()}>{EDIT_TEXT[cardType]}</Li>
