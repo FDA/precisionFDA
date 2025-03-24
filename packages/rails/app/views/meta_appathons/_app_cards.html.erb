@@ -5,9 +5,6 @@
       <div class="pfda-card pfda-card-list pfda-card-padded <%= app.private? ? 'pfda-card-warning' : ''%>">
         <div class="pfda-card-header">
           <div class="media">
-            <div class="media-left">
-              <%= link_to image_tag(app.user.gravatar_url, class: 'rounded-circle', height: 45), user_path(app.user.dxuser) %>
-            </div>
             <div class="media-body">
               <div class="row">
                 <div class="col-md-12">
