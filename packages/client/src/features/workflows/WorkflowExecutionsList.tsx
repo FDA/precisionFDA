@@ -23,7 +23,7 @@ import {
   KeyVal,
   NOTIFICATION_ACTION,
   Notification,
-  WEBSOCKET_MESSSAGE_TYPE,
+  WEBSOCKET_MESSAGE_TYPE,
   WebSocketMessage,
 } from '../home/types'
 import { useFilterParams } from '../home/useFilterState'
@@ -68,7 +68,7 @@ export const WorkflowExecutionsList = ({ uid }: { uid: string }) => {
         const messageData = JSON.parse(message.data)
         const notification = messageData.data as Notification
         return (
-          messageData.type === WEBSOCKET_MESSSAGE_TYPE.NOTIFICATION &&
+          messageData.type === WEBSOCKET_MESSAGE_TYPE.NOTIFICATION &&
           [
             NOTIFICATION_ACTION.JOB_RUNNABLE,
             NOTIFICATION_ACTION.JOB_RUNNING,

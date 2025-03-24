@@ -27,7 +27,7 @@ import { useToastWSHandler } from '../../../hooks/useToastWSHandler'
 import PublicLayout from '../../../layouts/PublicLayout'
 import { DEFAULT_RECONNECT_ATTEMPTS, DEFAULT_RECONNECT_INTERVAL, getNodeWsUrl, SHOULD_RECONNECT } from '../../../utils/config'
 import { useAuthUser } from '../../auth/useAuthUser'
-import { Notification, NOTIFICATION_ACTION, WEBSOCKET_MESSSAGE_TYPE, WebSocketMessage } from '../../home/types'
+import { Notification, NOTIFICATION_ACTION, WEBSOCKET_MESSAGE_TYPE, WebSocketMessage } from '../../home/types'
 import { challengesYearsListRequest } from '../api'
 import { getTimeStatusName, renderEmpty } from '../util'
 import { ChallengeListItem } from './ChallengeListItem'
@@ -39,7 +39,7 @@ const ChallengesList = () => {
   const userCanCreateChallenge = user?.can_create_challenges
   const location = useLocation()
   const { 'filter[status]': timeStatus, 'filter[year]': year }: any = queryString.parse(location.search)
-  
+
   const queryClient = useQueryClient()
 
   const pagination = usePaginationParamsV2()
@@ -67,7 +67,7 @@ const ChallengesList = () => {
         const messageData = JSON.parse(message.data)
         const notification = messageData.data as Notification
         return (
-          messageData.type === WEBSOCKET_MESSSAGE_TYPE.NOTIFICATION &&
+          messageData.type === WEBSOCKET_MESSAGE_TYPE.NOTIFICATION &&
           NOTIFICATION_ACTION.CHALLENGE_CARD_IMAGE_URL_UPDATED === notification.action
         )
       } catch (e) {
@@ -136,13 +136,28 @@ const ChallengesList = () => {
                 <ItemButton as={Link} to="/challenges" selected={!timeStatus} data-turbolinks="false">
                   All
                 </ItemButton>
-                <ItemButton data-turbolinks="false" as={Link} to="/challenges?filter[status]=current" selected={timeStatus === 'current'}>
+                <ItemButton
+                  data-turbolinks="false"
+                  as={Link}
+                  to="/challenges?filter[status]=current"
+                  selected={timeStatus === 'current'}
+                >
                   Currently Open
                 </ItemButton>
-                <ItemButton data-turbolinks="false" as={Link} to="/challenges?filter[status]=upcoming" selected={timeStatus === 'upcoming'}>
+                <ItemButton
+                  data-turbolinks="false"
+                  as={Link}
+                  to="/challenges?filter[status]=upcoming"
+                  selected={timeStatus === 'upcoming'}
+                >
                   Upcoming
                 </ItemButton>
-                <ItemButton data-turbolinks="false" as={Link} to="/challenges?filter[status]=ended" selected={timeStatus === 'ended'}>
+                <ItemButton
+                  data-turbolinks="false"
+                  as={Link}
+                  to="/challenges?filter[status]=ended"
+                  selected={timeStatus === 'ended'}
+                >
                   Ended
                 </ItemButton>
               </RightListNext>
