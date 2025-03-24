@@ -25,7 +25,7 @@ import {
   Topbox,
 } from '../../home/show.styles'
 import {
-  EmmitScope,
+  EmitScope,
   HomeScope,
   Notification,
   NOTIFICATION_ACTION,
@@ -48,7 +48,7 @@ export const ExecutionDetails = ({
   spaceId,
   homeScope,
 }: {
-  emitScope?: EmmitScope
+  emitScope?: EmitScope
   spaceId?: number
   homeScope?: HomeScope
 }) => {

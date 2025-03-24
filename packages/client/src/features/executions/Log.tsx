@@ -78,7 +78,7 @@ export const Logs = ({ jobUid, jobState }: { jobUid: string; jobState: JobState 
               level: newLog.level,
               msg: newLog.msg,
               line: newLog.line,
-  ,            source: newLog.source,
+              source: newLog.source,
             },
           ])
         }

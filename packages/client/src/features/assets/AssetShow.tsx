@@ -22,7 +22,7 @@ import {
   Title,
   Topbox,
 } from '../home/show.styles'
-import { EmmitScope, HomeScope } from '../home/types'
+import { EmitScope, HomeScope } from '../home/types'
 import { ArchiveContents } from './ArchiveContents'
 import { fetchAsset } from './assets.api'
 import { IAsset } from './assets.types'
@@ -54,7 +54,7 @@ const AssetActions = ({ homeScope, asset }: { homeScope?: HomeScope; asset: IAss
   )
 }
 
-export const AssetShow = ({ emitScope, homeScope }: { homeScope?: HomeScope; emitScope?: EmmitScope }) => {
+export const AssetShow = ({ emitScope, homeScope }: { homeScope?: HomeScope; emitScope?: EmitScope }) => {
   const { assetUid } = useParams<{ assetUid: string }>()
 
   const { data, isLoading } = useQuery({
