@@ -85,7 +85,7 @@ module PathHelper
     when "db-cluster"
       "/home/databases/#{item.dxid}"
     when "job"
-      job_path(item)
+      "/home/executions/#{item.uid}"
     when "asset"
       "/home/assets/#{item.uid}"
     when "comment"

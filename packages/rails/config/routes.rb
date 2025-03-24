@@ -110,7 +110,7 @@ Rails.application.routes.draw do
     delete "logout" => "main#destroy"
     get "return_from_login" => "main#return_from_login"
     get "check_webapp" => "main#check_webapp"
-    post "publish" => "main#publish"
+    get "publish" => "main#publish"
     get "request_access" => "main#request_access"
     post "request_access" => "main#create_request_access"
     get "browse_access" => "main#browse_access"
@@ -505,6 +505,7 @@ Rails.application.routes.draw do
       get "cli_latest_version"
       get "list_licenses_for_files"
       get "tracks/provenance", action: :track_provenance, as: "track_provenance"
+      post "publish"
     end
     # end API
 
