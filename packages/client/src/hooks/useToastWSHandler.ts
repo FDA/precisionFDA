@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import { toast } from 'react-toastify'
 import useWebSocket from 'react-use-websocket'
 import { BasicToast, ToastWithLink } from '../components/Toast'
-import { NOTIFICATION_ACTION, Notification, SEVERITY, WEBSOCKET_MESSSAGE_TYPE, WebSocketMessage } from '../features/home/types'
+import { NOTIFICATION_ACTION, Notification, SEVERITY, WEBSOCKET_MESSAGE_TYPE, WebSocketMessage } from '../features/home/types'
 import { confirmNotification } from '../features/notifications/notifications.api'
 import {
   DEFAULT_RECONNECT_ATTEMPTS,
@@ -38,7 +38,7 @@ export const useToastWSHandler = () => {
     filter: message => {
       try {
         const data = JSON.parse(message.data)
-        return data.type === WEBSOCKET_MESSSAGE_TYPE.NOTIFICATION
+        return data.type === WEBSOCKET_MESSAGE_TYPE.NOTIFICATION
       } catch (e) {
         return false
       }

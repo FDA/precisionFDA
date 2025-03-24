@@ -205,13 +205,13 @@ export type JobLogItem = {
   msg: string
 }
 
-export enum WEBSOCKET_MESSSAGE_TYPE {
+export enum WEBSOCKET_MESSAGE_TYPE {
   NOTIFICATION = 'notification',
   JOB_LOG = 'jobLog',
 }
 
 export type WebSocketMessage = {
-  type: WEBSOCKET_MESSSAGE_TYPE
+  type: WEBSOCKET_MESSAGE_TYPE
   data: Notification | JobLogItem
 }
 

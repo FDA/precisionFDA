@@ -30,7 +30,7 @@ import {
   MetaPath,
   Notification,
   NOTIFICATION_ACTION,
-  WEBSOCKET_MESSSAGE_TYPE,
+  WEBSOCKET_MESSAGE_TYPE,
   WebSocketMessage,
 } from '../home/types'
 import { useList } from '../home/useList'
@@ -107,7 +107,7 @@ export const FileList = ({
         const messageData = JSON.parse(message.data)
         const notification = messageData.data as Notification
         return (
-          messageData.type === WEBSOCKET_MESSSAGE_TYPE.NOTIFICATION &&
+          messageData.type === WEBSOCKET_MESSAGE_TYPE.NOTIFICATION &&
           [NOTIFICATION_ACTION.NODES_REMOVED, NOTIFICATION_ACTION.NODES_COPIED, NOTIFICATION_ACTION.FILE_CLOSED].includes(
             notification.action,
           )
