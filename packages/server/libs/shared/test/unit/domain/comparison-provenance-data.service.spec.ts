@@ -4,6 +4,7 @@ import { EntityService } from '@shared/domain/entity/entity.service'
 import { ComparisonProvenanceDataService } from '@shared/domain/provenance/service/entity-data/comparison-provenance-data.service'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { PARENT_TYPE } from '@shared/domain/user-file/user-file.types'
+import { STATIC_SCOPE } from '@shared/enums'
 import { EntityUtils } from '@shared/utils/entity.utils'
 import { expect } from 'chai'
 import { SinonStub, stub } from 'sinon'
@@ -34,6 +35,7 @@ describe('ComparisonProvenanceDataService', () => {
     id: ID,
     name: NAME,
     inputFiles: { loadItems: loadFilesStub },
+    scope: STATIC_SCOPE.PRIVATE,
   } as unknown as Comparison
 
   let getEntityTypeForEntityStub: SinonStub
@@ -72,6 +74,7 @@ describe('ComparisonProvenanceDataService', () => {
         url: LINK,
         title: NAME,
         identifier: String(ID),
+        scope: STATIC_SCOPE.PRIVATE,
       })
     })
   })

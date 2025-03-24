@@ -5,6 +5,7 @@ import { JOB_STATE } from '@shared/domain/job/job.enum'
 import { JobProvenanceDataService } from '@shared/domain/provenance/service/entity-data/job-provenance-data.service'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { PARENT_TYPE } from '@shared/domain/user-file/user-file.types'
+import { STATIC_SCOPE } from '@shared/enums'
 import { EntityUtils } from '@shared/utils/entity.utils'
 import { expect } from 'chai'
 import { SinonStub, stub } from 'sinon'
@@ -39,6 +40,7 @@ describe('JobProvenanceDataService', () => {
     inputFiles: { loadItems: loadFilesStub },
     app: { load: loadAppStub },
     uid: UID,
+    scope: STATIC_SCOPE.PRIVATE,
   } as unknown as Job
 
   let getEntityTypeForEntityStub: SinonStub
@@ -78,6 +80,7 @@ describe('JobProvenanceDataService', () => {
         url: LINK,
         title: NAME,
         identifier: UID,
+        scope: STATIC_SCOPE.PRIVATE,
       })
     })
   })

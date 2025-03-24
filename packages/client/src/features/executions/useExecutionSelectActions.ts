@@ -16,17 +16,17 @@ import { useSnapshotModal } from './useSnapshotModal'
 import { useTerminateModal } from './useTerminateModal'
 
 export type ExecutionAction =
-  'Terminate' |
-  'Track' |
-  'Copy to space' |
-  'Feature' |
-  'Snapshot' |
-  'Unfeature' |
-  'Make Public' |
-  'Attach to...' |
-  'Comments' |
-  'Edit tags' |
-  'Edit properties'
+  | 'Terminate'
+  | 'Track'
+  | 'Copy to space'
+  | 'Feature'
+  | 'Snapshot'
+  | 'Unfeature'
+  | 'Make Public'
+  | 'Attach to...'
+  | 'Comments'
+  | 'Edit tags'
+  | 'Edit properties'
 
 export const useExecutionActions = ({
   homeScope,
@@ -155,9 +155,10 @@ export const useExecutionActions = ({
         (selected[0].jobs && selected[0].scope === 'private') ||
         !user?.allowed_to_publish,
       link: {
-        method: 'POST',
-        url: `${selected[0]?.links?.publish}&scope=public`,
+        method: 'GET',
+        url: `/publish?identifier=${selected[0]?.uid}&type=job`,
       },
+      shouldHide: selected.length !== 1 || homeScope !== 'me',
     },
     'Attach to...': {
       type: 'modal',
@@ -193,7 +194,7 @@ export const useExecutionActions = ({
       isDisabled: selected.length === 0,
       modal: propertiesModal,
       showModal: isShownPropertiesModal,
-      shouldHide: (!isAdmin && !isJobOwner),
+      shouldHide: !isAdmin && !isJobOwner,
     },
   }
 
