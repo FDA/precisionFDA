@@ -29,7 +29,7 @@ import {
   Topbox,
   PathSection,
 } from '../../home/show.styles'
-import { EmmitScope, HomeScope } from '../../home/types'
+import { EmitScope, HomeScope } from '../../home/types'
 import { License } from '../../licenses/License'
 import { ISpace } from '../../spaces/spaces.types'
 import { fetchFile } from '../files.api'
@@ -80,7 +80,7 @@ const FileActionsDropdown = ({
   )
 }
 
-export const FileShow = ({ emitScope, space, homeScope }: { homeScope?: HomeScope; emitScope?: EmmitScope; space?: ISpace }) => {
+export const FileShow = ({ emitScope, space, homeScope }: { homeScope?: HomeScope; emitScope?: EmitScope; space?: ISpace }) => {
   const location = useLocation()
   const { fileId } = useParams<{ fileId: string }>()
   const { data, isLoading } = useQuery({
