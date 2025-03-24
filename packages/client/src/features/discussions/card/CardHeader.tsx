@@ -3,19 +3,9 @@ import { DropdownNext } from '../../../components/Dropdown/DropdownNext'
 import { StarIcon } from '../../../components/icons/StarIcon'
 import { ThreeDotsIcon } from '../../../components/icons/ThreeDotsIcon'
 import { formatDiscussionDate } from '../helpers'
-import {
-  CardLeft,
-  CardRight,
-  Li,
-  Ol,
-  StyledAnswerLabel,
-  StyledCardHeader,
-  StyledEditButton,
-  UsernameLink,
-} from '../styles'
+import { CardLeft, CardRight, Li, Ol, StyledAnswerLabel, StyledCardHeader, StyledEditButton, UsernameLink } from '../styles'
 import { Identicon } from '../../../components/Identicon'
 import { CardType, SimpleUser } from '../discussions.types'
-
 
 const EDIT_TEXT = {
   answer: 'Edit Answer',
@@ -53,7 +43,12 @@ export const CardHeader = ({
         </span>
       </CardLeft>
       <CardRight>
-        {cardType === 'answer' && <StyledAnswerLabel><StarIcon height={12} />Answer</StyledAnswerLabel>}
+        {cardType === 'answer' && (
+          <StyledAnswerLabel>
+            <StarIcon height={12} />
+            Answer
+          </StyledAnswerLabel>
+        )}
         {canUserEdit && (
           <DropdownNext
             placement="bottom-end"
@@ -67,7 +62,9 @@ export const CardHeader = ({
             )}
           >
             {dropdownProps => (
-              <StyledEditButton tabIndex={0} {...dropdownProps}><ThreeDotsIcon width={16} /></StyledEditButton>
+              <StyledEditButton data-testid={`${cardType}-dropdown`} tabIndex={0} {...dropdownProps}>
+                <ThreeDotsIcon width={16} />
+              </StyledEditButton>
             )}
           </DropdownNext>
         )}
