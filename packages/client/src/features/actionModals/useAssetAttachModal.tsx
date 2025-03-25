@@ -23,7 +23,7 @@ export const AssetAttachModal = ({ hideAction, isShown, values, onChange }) => {
   const items = notesData || []
   const [search, setSearch] = useState('')
   const [selectedItem, setSelectedItem] = useState<Asset>()
-  const [checkedItem, setCheckedItem] = useState(new Set(values))
+  const [checkedItem, setCheckedItem] = useState(new Set(values.map(v => v.uid)))
 
   useEffect(() => {
     if (items.length) setSelectedItem(items[0])
@@ -31,18 +31,24 @@ export const AssetAttachModal = ({ hideAction, isShown, values, onChange }) => {
 
   const onCheckboxClick = (item: Asset) => {
     const newSet = new Set(checkedItem)
-    if (newSet.has(item)) {
-      newSet.delete(item)
+    if (newSet.has(item.uid)) {
+      newSet.delete(item.uid)
     } else {
-      newSet.add(item)
+      newSet.add(item.uid)
     }
     setCheckedItem(newSet)
   }
 
   const onClickAttachAction = () => {
-    if (onChange) onChange(Array.from(checkedItem))
+    if (onChange) onChange(items.filter(item => checkedItem.has(item.uid)))
     hideAction()
   }
+
+  console.log('checkedItem', checkedItem)
+  console.log('values', values)
+  console.log('items', items)
+  console.log('items[0]', items[0])
+  console.log('???', checkedItem.has(items[0]))
 
   const reg = new RegExp(search, 'i')
   const filteredItems = search ? items.filter(e => reg.test(e.title)) : items
@@ -56,7 +62,7 @@ export const AssetAttachModal = ({ hideAction, isShown, values, onChange }) => {
       <li key={item.uid} className={classes} onClick={() => setSelectedItem(item)}>
         <div>
           <span className="__menu-item_label-wrapper" onClick={() => onCheckboxClick(item)}>
-            <input type="checkbox" name={item.uid} checked={checkedItem.has(item)} readOnly />
+            <input type="checkbox" name={item.uid} checked={checkedItem.has(item.uid)} readOnly />
             <span className="__menu-item_class-label">{item.className}</span>
             <span className="__menu-item_title">{item.title}</span>
           </span>
