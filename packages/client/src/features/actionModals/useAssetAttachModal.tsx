@@ -44,12 +44,6 @@ export const AssetAttachModal = ({ hideAction, isShown, values, onChange }) => {
     hideAction()
   }
 
-  console.log('checkedItem', checkedItem)
-  console.log('values', values)
-  console.log('items', items)
-  console.log('items[0]', items[0])
-  console.log('???', checkedItem.has(items[0]))
-
   const reg = new RegExp(search, 'i')
   const filteredItems = search ? items.filter(e => reg.test(e.title)) : items
 
