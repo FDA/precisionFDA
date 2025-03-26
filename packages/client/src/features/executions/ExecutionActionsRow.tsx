@@ -60,13 +60,13 @@ export const ExecutionActionsRow = ({
     }
   }
 
-  const [ rerunDisabled, setRerunDisabled ] = useState(false)
+  const [rerunDisabled, setRerunDisabled] = useState(false)
   const { data: computeInstances } = useUserComputeInstances()
   const { data: selectableSpaces } = useSelectableSpaces(execution.scope)
 
   useEffect(() => {
     setRerunDisabled(execution.state === 'idle' || !computeInstances || !selectableSpaces)
-  }, [ execution, computeInstances, selectableSpaces ])
+  }, [execution, computeInstances, selectableSpaces])
 
   const getScope = () => {
     if (execution.scope === 'private') {
@@ -119,7 +119,9 @@ export const ExecutionActionsRow = ({
       )}
       {execution.app_active && (
         <Link to={getRerunExecutionLink()}>
-          <Button disabled={rerunDisabled} data-variant="primary">Re-Run Execution</Button>
+          <Button disabled={rerunDisabled} data-variant="primary">
+            Re-Run Execution
+          </Button>
         </Link>
       )}
       <Dropdown
@@ -139,7 +141,6 @@ export const ExecutionActionsRow = ({
       {actions['Copy to space']?.modal}
       {actions['Edit tags']?.modal}
       {actions['Edit properties']?.modal}
-      {actions['Attach to...']?.modal}
       {actions['Terminate']?.modal}
       {actions['Snapshot']?.modal}
     </>

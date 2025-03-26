@@ -1131,7 +1131,8 @@ class ApiController < ApplicationController
   #
   # notes_added (Array[String])
   # items_added (Array[Integer])
-  #
+  # TODO (PFDA-6173) check if we can remove this safely - the feature has been removed from the UI and needs to be cleaned up on backend.
+  # Make sure no path generation errors are introduced.
   def attach_to_notes
     items = unsafe_params[:items]
     note_uids = unsafe_params[:note_uids]

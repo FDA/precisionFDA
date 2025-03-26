@@ -171,7 +171,6 @@ export const AppList = ({
 
       {actions['Delete']?.modal}
       {actions['Copy to space']?.modal}
-      {actions['Attach to...']?.modal}
       {actions['Edit tags']?.modal}
       {actions['Edit properties']?.modal}
       {actions['Export to']?.modal}
