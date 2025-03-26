@@ -53,6 +53,10 @@ import {
   SpaceTopRight,
   TopSpaceHeader,
 } from './styles'
+import { DatabaseIcon } from '../../../components/icons/DatabaseIcon'
+import { DatabaseList } from '../../databases/DatabaseList'
+import { CreateDatabase } from '../../databases/create/CreateDatabase'
+import { DatabaseShow } from '../../databases/DatabaseShow'
 import { NetworkIcon } from '../../../components/icons/NetworkIcon'
 
 const Spaces2 = ({ space, isLoading }: { space: ISpace; isLoading: boolean }) => {
@@ -120,6 +124,17 @@ const Spaces2 = ({ space, isLoading }: { space: ISpace; isLoading: boolean }) =>
             <MenuText>Apps</MenuText>
             {expandedSidebar && <MenuCounter count={space.counters.apps.toString()} active={activeResource === 'apps'} />}
           </MenuItem>
+          <MenuItem
+            data-testid="home-databases-link"
+            to={`/spaces/${space.id}/databases`}
+            activeClassName="active"
+            title="Databases"
+            key="databases"
+          >
+            <DatabaseIcon height={14} />
+            <MenuText>Databases</MenuText>
+            {expandedSidebar && <MenuCounter count={space.counters?.dbclusters} active={activeResource === 'databases'} />}
+          </MenuItem>
           <MenuItem data-testid="workflows-link" to={`/spaces/${space.id}/workflows`} activeClassName="active">
             <NetworkIcon height={18} />
             <MenuText>Workflows</MenuText>
@@ -172,6 +187,12 @@ const Spaces2 = ({ space, isLoading }: { space: ISpace; isLoading: boolean }) =>
               <Route path="files" element={<FileList space={space} showFolderActions={isContributorOrHigher} />} />
               <Route path="files/:fileId" element={<FileShow space={space} />} />
               <Route path="files/:identifier/track" element={<TrackInHome spaceId={space.id} />} />
+              
+              <Route path="databases" element={<DatabaseList spaceId={space.id} />} />
+              <Route path="databases/create" element={<CreateDatabase spaceId={space.id} />} />
+              <Route path="databases/:uid" element={<DatabaseShow spaceId={space.id} />}/>
+              {/* <Route path="databases/:identifier/track" element={<TrackInHome entityType="database" />} /> */}
+
               <Route path="apps" element={<AppList spaceId={space.id} isContributorOrHigher={isContributorOrHigher} />} />
               <Route path="apps/:appUid/jobs/new" element={<RunJobPage spaceId={space.id} />} />
               <Route path="apps/:appUid/edit" element={<EditAppPage spaceId={space.id} />} />

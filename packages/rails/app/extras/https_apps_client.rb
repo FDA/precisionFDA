@@ -703,6 +703,14 @@ class HttpsAppsClient # rubocop:disable Metrics/ClassLength
     )
   end
 
+  def dbcluster_sync(space_id)
+    request(
+      "/dbclusters/sync",
+      { spaceId: space_id },
+      Net::HTTP::Post::METHOD,
+    )
+  end
+
   def experts_list(page, limit, year)
     query_args = { page: page, limit: limit }
     query_args[:year] = year if year

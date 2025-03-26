@@ -37,7 +37,7 @@ export const CLI = () => {
         <h2 id="download">Download the CLI</h2>
         <ButtonRow>
           <a
-            href="https://pfda-production-static-files.s3.amazonaws.com/cli/pfda-linux-2.8.0.tar.gz"
+            href="https://pfda-production-static-files.s3.amazonaws.com/cli/pfda-linux-2.9.0.tar.gz"
             target="_blank"
             rel="noreferrer"
           >
@@ -46,7 +46,7 @@ export const CLI = () => {
             </Button>
           </a>
           <a
-            href="https://pfda-production-static-files.s3.amazonaws.com/cli/pfda-darwin-2.8.0.tar.gz"
+            href="https://pfda-production-static-files.s3.amazonaws.com/cli/pfda-darwin-2.9.0.tar.gz"
             target="_blank"
             rel="noreferrer"
           >
@@ -55,7 +55,7 @@ export const CLI = () => {
             </Button>
           </a>
           <a
-            href="https://pfda-production-static-files.s3.amazonaws.com/cli/pfda-windows-2.8.0.zip"
+            href="https://pfda-production-static-files.s3.amazonaws.com/cli/pfda-windows-2.9.0.zip"
             target="_blank"
             rel="noreferrer"
           >
@@ -257,7 +257,7 @@ export const CLI = () => {
           </HelpTipText>
           <HelpTip><strong>Optimizing uploads:</strong></HelpTip>
           <HelpTipText>
-            The <StyledCode>{'-threads'}</StyledCode> and <StyledCode>{'-chunksize'}</StyledCode> flags are useful for
+            The <StyledCode>-threads</StyledCode> and <StyledCode>-chunksize</StyledCode> flags are useful for
             optimizing uploads.
             Increasing the number of threads can speed up the process, but be mindful of memory usage.
             Similarly, increasing the chunk size can reduce the number of API calls, though this also impacts memory
@@ -442,7 +442,7 @@ export const CLI = () => {
           <div className="description">
             # Downloads from the root folder of the Space - has no valid folder-id.
           </div>
-          <code className={'command'}>
+          <code className="command">
             ./pfda download -space-id 1995 -folder-id root
           </code>
         </ExampleBlock>
@@ -450,7 +450,7 @@ export const CLI = () => {
           <div className="description">
             # Downloads multiple files - combine file-ids and filenames.
           </div>
-          <code className={'command'}>
+          <code className="command">
             ./pfda download file-GJk1kpQ05xgQd8bP54kJFjzkz-1 intro.pdf file-YZm9QpQ0b69Qd8bP454kmcf76-2
           </code>
         </ExampleBlock>
@@ -535,7 +535,7 @@ export const CLI = () => {
           <div className="description">
             # Creates new folder named DATA in the root of the space.
           </div>
-          <code className={'command'}>
+          <code className="command">
             ./pfda mkdir DATA -space-id 1995
           </code>
         </ExampleBlock>
@@ -543,7 +543,7 @@ export const CLI = () => {
           <div className="description">
             # Creates 3 new folders in the specified folder.
           </div>
-          <code className={'command'}>
+          <code className="command">
             ./pfda mkdir DATA scripts results -folder-id 2704
           </code>
         </ExampleBlock>
@@ -551,7 +551,7 @@ export const CLI = () => {
           <div className="description">
             # Creates the specified nested folder structure.
           </div>
-          <code className={'command'}>
+          <code className="command">
             ./pfda mkdir scripts/python/v1 scripts/python/v2 -p
           </code>
         </ExampleBlock>
@@ -607,7 +607,7 @@ export const CLI = () => {
           <div className="description">
             # Removes a folder by id
           </div>
-          <code className={'command'}>
+          <code className="command">
             ./pfda rmdir 2704
           </code>
         </ExampleBlock>
@@ -615,7 +615,7 @@ export const CLI = () => {
           <div className="description">
             # Removes multiple folders
           </div>
-          <code className={'command'}>
+          <code className="command">
             ./pfda rmdir 2704 3404 4504
           </code>
         </ExampleBlock>
@@ -623,7 +623,7 @@ export const CLI = () => {
           <div className="description">
             # Removes a folder by id and responds with JSON result
           </div>
-          <code className={'command'}>
+          <code className="command">
             ./pfda rmdir 2704 -json
           </code>
         </ExampleBlock>
@@ -707,7 +707,7 @@ export const CLI = () => {
           <div className="description">
             # Removes multiple files - combine file-ids and filenames.
           </div>
-          <code className={'command'}>
+          <code className="command">
             ./pfda rm file-GJk1kpQ05xgQd8bP54kJFjzkz-1 intro.pdf file-YZm9QpQ0b69Qd8bP454kmcf76-2
           </code>
         </ExampleBlock>
@@ -916,7 +916,7 @@ export const CLI = () => {
         </p>
 
         <h3>Usage</h3>
-        <StyledCode>{ './pfda ls-discussions [FLAG...]'}</StyledCode>
+        <StyledCode>./pfda ls-discussions [FLAG...]</StyledCode>
 
         <h3>Available Flags</h3>
         <p>All flags are optional and can be used to specify the discussions to list.</p>
@@ -1075,6 +1075,7 @@ export const CLI = () => {
             ./pfda ls-members -space-id 24 -json
           </code>
         </ExampleBlock>
+        {/* ls-workflows section should be here */}
 
         <h2 id="describe">Describing Entities</h2>
         <p>
@@ -1230,11 +1231,83 @@ export const CLI = () => {
           </code>
         </ExampleBlock>
 
+        <h2 id="rotate-password">Rotating Password</h2>
+        <p>
+          The CLI command <StyledCode>pfda rotate-password</StyledCode> is designed to rotate the password for a specified database cluster.
+          This command will generate a new secure password, update it in the system, and return the new password in JSON format.
+          Make sure to save the new password in a secure location as it will only be displayed once.
+          Please note that it may take several minutes for the new password to take effect.
+        </p>
+
+        <h3>Usage</h3>
+        <StyledCode>{' ./pfda rotate-password <DbClusterId> '}</StyledCode>
+
+        <h3>Arguments</h3>
+        <ul>
+          <li><StyledCode>DbClusterId</StyledCode>: The identifier of the database cluster whose password you want to rotate.</li>
+        </ul>
+
+        <h3>Available Flags</h3>
+        <p>
+          All flags are optional.
+        </p>
+        <ul>
+          <li><StyledCode>-h, -help</StyledCode>: Displays the help message and exit.</li>
+        </ul>
+
+        <h3>Examples</h3>
+        <p>
+          The following example demonstrates how to use the <StyledCode>rotate-password</StyledCode> command:
+        </p>
+        <ExampleBlock>
+          <div className="description">
+            # Rotates password for database cluster 'prod-cluster-01'
+          </div>
+          <code className="command">
+            ./pfda rotate-password dbcluster-Gy54pFQ0bgVjF542f2fq8q1b-1
+          </code>
+        </ExampleBlock>
+
+        <h2 id="get-password">Getting Password</h2>
+        <p>
+          The CLI command <StyledCode>pfda get-password</StyledCode> is designed to retrieve the current password for a specified database cluster.
+          The password will be returned in JSON format. For security reasons, this command will only work if the user has appropriate authentication permissions.
+        </p>
+
+        <h3>Usage</h3>
+        <StyledCode>{' ./pfda get-password <DbClusterId> '}</StyledCode>
+
+        <h3>Arguments</h3>
+        <ul>
+          <li><StyledCode>DbClusterId</StyledCode>: The identifier of the database cluster whose password you want to retrieve.</li>
+        </ul>
+
+        <h3>Available Flags</h3>
+        <p>
+          All flags are optional.
+        </p>
+        <ul>
+          <li><StyledCode>-h, -help</StyledCode>: Displays the help message and exit.</li>
+        </ul>
+
+        <h3>Example</h3>
+        <p>
+          The following example demonstrates how to use the <StyledCode>get-password</StyledCode> command:
+        </p>
+        <ExampleBlock>
+          <div className="description">
+            # Retrieves current password for database cluster 'prod-cluster-01'
+          </div>
+          <code className="command">
+            ./pfda get-password dbcluster-Gy54pFQ0bgVjF542f2fq8q1b-1
+          </code>
+        </ExampleBlock>
 
         <hr/>
         <h2 id="changelog">pFDA CLI Changelog</h2>
         <br/>
 
+        <p>Version 2.9.0 (02/20/2025): New features: rotate-password, get-password of dbclusters </p>
         <p>Version 2.8.0 (01/20/2025): New features: create-discussion, create-reply, edit-discussion, edit-reply </p>
         <p>Version 2.7.3 (10/27/2024): security fixes, improved error handling </p>
         <p>Version 2.7.2 (09/12/2024): upgrade Go to 1.23.1 </p>
@@ -1279,6 +1352,8 @@ export const CLI = () => {
           <li><a href="#describe" data-turbolinks="false">Describing Entities</a></li>
           <li><a href="#get-scope" data-turbolinks="false">Getting Scope</a></li>
           <li><a href="#print-content" data-turbolinks="false">Printing Content</a></li>
+          <li><a href="#rotate-password" data-turbolinks="false">Rotating Password</a></li>
+          <li><a href="#get-password" data-turbolinks="false">Getting Password</a></li>
           <li><a href="#changelog" data-turbolinks="false">Changelog</a></li>
         </PageMap>
       </RightSide>

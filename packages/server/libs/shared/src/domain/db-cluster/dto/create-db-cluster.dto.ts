@@ -1,12 +1,12 @@
 import { config } from '@shared/config'
 import {
+  allowedEngines,
   allowedEngineVersions,
   allowedInstanceTypes,
-  ENGINE,
-  ENGINES,
 } from '@shared/domain/db-cluster/db-cluster.enum'
-import { STATIC_SCOPE } from '@shared/enums'
-import { IsEnum, IsIn, IsOptional, IsString, MaxLength, MinLength } from 'class-validator'
+import { IsValidScope } from '@shared/domain/entity/constraint/is-valid-scope.constraint'
+import { EntityScope } from '@shared/types/common'
+import { IsIn, IsOptional, IsString, MaxLength } from 'class-validator'
 
 export class CreateDbClusterDTO {
   @IsString()
@@ -14,11 +14,8 @@ export class CreateDbClusterDTO {
   name: string
 
   @IsString()
-    // Assuming schemas.dxidProp defines some sort of string validation
-  project: string
-
-  @IsEnum(ENGINES)
-  engine: ENGINE
+  @IsIn(allowedEngines)
+  engine: string
 
   @IsString()
   @IsIn(allowedEngineVersions)
@@ -28,14 +25,8 @@ export class CreateDbClusterDTO {
   @IsIn(allowedInstanceTypes)
   dxInstanceClass: string
 
-  @IsString()
-  @MinLength(8)
-  @MaxLength(config.validation.maxStrLen)
-  adminPassword: string
-
-
-  @IsEnum(STATIC_SCOPE)
-  scope: STATIC_SCOPE
+  @IsValidScope({ allowPublic: false })
+  scope: EntityScope
 
   @IsString()
   @IsOptional()

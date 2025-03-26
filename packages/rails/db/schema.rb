@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2025_01_27_090212) do
+ActiveRecord::Schema.define(version: 2025_02_18_100212) do
 
   create_table "accepted_licenses", id: :integer, charset: "utf8mb3", collation: "utf8mb3_unicode_ci", force: :cascade do |t|
     t.integer "license_id"
@@ -890,16 +890,6 @@ ActiveRecord::Schema.define(version: 2025_01_27_090212) do
     t.bigint "cumulative_byte_hours"
   end
 
-  create_table "user_dbcluster_salt", charset: "utf8mb3", collation: "utf8mb3_unicode_ci", force: :cascade do |t|
-    t.integer "user_id", null: false
-    t.bigint "dbcluster_id", null: false
-    t.string "salt", null: false
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
-    t.index ["dbcluster_id"], name: "fk_rails_087f59dba3"
-    t.index ["user_id"], name: "fk_rails_35beefcb02"
-  end
-
   create_table "users", id: :integer, charset: "utf8mb3", collation: "utf8mb3_unicode_ci", force: :cascade do |t|
     t.string "dxuser"
     t.string "private_files_project"
@@ -926,6 +916,16 @@ ActiveRecord::Schema.define(version: 2025_01_27_090212) do
     t.index ["dxuser"], name: "index_users_on_dxuser", unique: true
     t.index ["normalized_email"], name: "index_users_on_normalized_email"
     t.index ["org_id"], name: "index_users_on_org_id"
+  end
+
+  create_table "users_dbclusters_salts", charset: "utf8mb3", collation: "utf8mb3_unicode_ci", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.bigint "dbcluster_id", null: false
+    t.string "salt", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["dbcluster_id"], name: "fk_rails_087f59dba3"
+    t.index ["user_id"], name: "fk_rails_35beefcb02"
   end
 
   create_table "versions", id: :integer, charset: "utf8mb3", collation: "utf8mb3_unicode_ci", force: :cascade do |t|
@@ -1064,7 +1064,7 @@ ActiveRecord::Schema.define(version: 2025_01_27_090212) do
   add_foreign_key "submissions", "challenges"
   add_foreign_key "submissions", "jobs"
   add_foreign_key "submissions", "users"
-  add_foreign_key "user_dbcluster_salt", "dbclusters"
-  add_foreign_key "user_dbcluster_salt", "users"
   add_foreign_key "users", "orgs"
+  add_foreign_key "users_dbclusters_salts", "dbclusters"
+  add_foreign_key "users_dbclusters_salts", "users"
 end

@@ -27,6 +27,7 @@ func ParseEntityType(entityType string) string {
 		"folder":     true,
 		"workflow":   true,
 		"discussion": true,
+		"dbcluster":  true,
 	}
 	parts := strings.SplitN(entityType, "-", 2)
 

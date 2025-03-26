@@ -1,7 +1,8 @@
 import React, { useMemo } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { SortingRule, UseResizeColumnsState } from 'react-table'
 import styled from 'styled-components'
+import { Button } from '../../components/Button'
 import Dropdown from '../../components/Dropdown'
 import { ContentFooter } from '../../components/Page/ContentFooter'
 import { BackLink } from '../../components/Page/PageBackLink'
@@ -20,14 +21,14 @@ import {
   StyledHomeTable, StyledRight,
 } from '../home/home.styles'
 import { ActionsButton, ResourceHeader } from '../home/show.styles'
-import { IFilter, IMeta, KeyVal, HomeScope } from '../home/types'
+import { HomeScope, IFilter, IMeta, KeyVal } from '../home/types'
 import { useList } from '../home/useList'
 import { usePropertiesQuery } from '../home/usePropertiesQuery'
+import { getBasePath } from '../home/utils'
 import { fetchDatabaseList } from './databases.api'
 import { IDatabase } from './databases.types'
 import { useDatabaseColumns } from './useDatabaseColumns'
 import { useDatabaseSelectActions } from './useDatabaseSelectActions'
-import { Button } from '../../components/Button'
 
 const DBStyledRight = styled(StyledRight)`
   gap: 20px;
@@ -39,10 +40,11 @@ const NoDatabases = styled.div`
   gap: 16px;
 `
 
-type ListType = { dbclusters: IDatabase[]; meta: IMeta }
+type ListType = { data: IDatabase[]; meta: IMeta }
 
-export const DatabaseList = ({ homeScope }: { homeScope?: HomeScope }) => {
-  if (homeScope !== 'me') {
+export const DatabaseList = ({ homeScope, spaceId }: { homeScope?: HomeScope, spaceId?: number }) => {
+  const basePath = getBasePath(spaceId)
+  if (homeScope && homeScope !== 'me' && homeScope !== 'spaces') {
     return (
       <NoDatabases>
         <div>Scope: "{homeScope}", does not have any databases.</div>
@@ -52,8 +54,6 @@ export const DatabaseList = ({ homeScope }: { homeScope?: HomeScope }) => {
       </NoDatabases>
     )
   }
-  const navigate = useNavigate()
-  const onRowClick = (id: string) => navigate(`/home/databases/${id}`)
   const {
     setSortBy,
     sortBy,
@@ -73,6 +73,7 @@ export const DatabaseList = ({ homeScope }: { homeScope?: HomeScope }) => {
     fetchList: fetchDatabaseList,
     resource: 'dbclusters',
     params: {
+      spaceId: spaceId || undefined,
       scope: homeScope || undefined,
     },
   })
@@ -81,15 +82,15 @@ export const DatabaseList = ({ homeScope }: { homeScope?: HomeScope }) => {
 
   const selectedObjects = getSelectedObjectsFromIndexes(
     selectedIndexes,
-    data?.dbclusters,
+    data?.data,
   )
   const actions = useDatabaseSelectActions(selectedObjects, ['dbclusters'])
 
   if (error)
     return (
-      <ActionsRow>
+      <div>
         Error! Something broke, or this resource type does not exist.
-      </ActionsRow>
+      </div>
     )
 
   return (
@@ -99,9 +100,9 @@ export const DatabaseList = ({ homeScope }: { homeScope?: HomeScope }) => {
           <QuickActions>
             <Button
               data-variant='primary'
-              data-testid="home-databases-create-link"
+              data-testid="databases-create-link"
               as={Link}
-              to="/home/databases/create"
+              to={`${basePath}/databases/create`}
             >
               <PlusIcon height={12} /> Create Database
             </Button>
@@ -120,7 +121,7 @@ export const DatabaseList = ({ homeScope }: { homeScope?: HomeScope }) => {
               {dropdownProps => (
                 <ActionsButton
                   {...dropdownProps}
-                  data-testid="home-databases-actions-button"
+                  data-testid="databases-actions-button"
                   active={dropdownProps.isActive}
                 />
               )}
@@ -134,10 +135,9 @@ export const DatabaseList = ({ homeScope }: { homeScope?: HomeScope }) => {
         setFilters={setSearchFilter}
         // TODO(samuel) Typescript fix
         filters={toArrayFromObject(filterQuery as any)}
-        data={data?.dbclusters}
+        data={data?.data}
         properties={propertiesData?.keys}
         isLoading={isLoading}
-        handleRowClick={onRowClick}
         selectedRows={selectedIndexes}
         setSelectedRows={setSelectedIndexes}
         setSortBy={setSortBy}
@@ -149,9 +149,9 @@ export const DatabaseList = ({ homeScope }: { homeScope?: HomeScope }) => {
       />
       <ContentFooter>
         <Pagination
-          page={data?.meta?.pagination?.current_page}
-          totalCount={data?.meta?.pagination?.total_count}
-          totalPages={data?.meta?.pagination?.total_pages}
+          page={data?.meta?.page}
+          totalCount={data?.meta?.total}
+          totalPages={data?.meta?.totalPages}
           perPage={perPageParam}
           isHidden={false}
           isPreviousData={data?.meta?.pagination?.prev_page !== null}
@@ -179,7 +179,6 @@ export const DatabaseListTable = ({
   filters,
   data,
   properties,
-  handleRowClick,
   isLoading,
   setFilters,
   selectedRows,
@@ -195,7 +194,6 @@ export const DatabaseListTable = ({
   filters: IFilter[]
   data?: IDatabase[]
   properties?: string[]
-  handleRowClick: (fileId: string) => void
   setFilters: (val: IFilter[]) => void
   selectedRows?: Record<string, boolean>
   setSelectedRows: (ids: Record<string, boolean>) => void
@@ -210,7 +208,7 @@ export const DatabaseListTable = ({
   saveHiddenColumns: (cols: string[]) => void
   hiddenColumns: string[]
 }) => {
-  const col = useDatabaseColumns({ handleRowClick, colWidths, properties })
+  const col = useDatabaseColumns({ colWidths, properties })
 
   const columns = useMemo(() => col, [col, properties])
   const memoData = useMemo(() => data || [], [data, selectedRows])

@@ -41,6 +41,10 @@ export const MetadataVal = styled.div`
   font-weight: 700;
   white-space: nowrap;
 `
+export const MetadataValBreakAll = styled(MetadataVal)`
+  white-space: initial;
+  word-break: break-all;
+`
 
 export const NotFound = styled.div`
   display: flex;

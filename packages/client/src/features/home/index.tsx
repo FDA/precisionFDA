@@ -107,7 +107,7 @@ const Home2 = () => {
     me: ['files', 'apps', 'databases', 'assets', 'workflows', 'executions', 'reports'],
     everybody: ['files', 'apps', 'assets', 'discussions', 'workflows', 'executions'],
     featured: ['files', 'apps', 'assets', 'workflows', 'executions'],
-    spaces: ['files', 'apps', 'assets', 'discussions', 'workflows', 'executions'],
+    spaces: ['files', 'apps', 'databases', 'assets', 'discussions', 'workflows', 'executions'],
   }
 
   useEffect(() => {
@@ -314,7 +314,7 @@ const Home2 = () => {
             />
             <Route path="/apps/:identifier/track" element={<TrackInHome />} />
             <Route path="databases" element={<DatabaseList homeScope={persistedHomeScope} />} />
-            <Route path="databases/create" element={<CreateDatabase />} />
+            <Route path="databases/create" element={<CreateDatabase homeScope={persistedHomeScope} />} />
             <Route
               path="databases/:uid"
               element={<DatabaseShow homeScope={persistedHomeScope} emitScope={handleSetPersistedHomeScope} />}
