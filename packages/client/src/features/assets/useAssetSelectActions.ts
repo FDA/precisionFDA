@@ -1,7 +1,6 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { pick } from 'ramda'
 import { useNavigate } from 'react-router-dom'
-import { useAttachToModal } from '../actionModals/useAttachToModal'
 import { useDeleteModal } from '../actionModals/useDeleteModal'
 import { useEditPropertiesModal } from '../actionModals/useEditPropertiesModal'
 import { useEditTagsModal } from '../actionModals/useEditTagsModal'
@@ -22,7 +21,6 @@ export type AssetActions =
   | 'Feature'
   | 'Unfeature'
   | 'Make Public'
-  | 'Attach to...'
   | 'Delete'
   | 'Attach License'
   | 'Detach License'
@@ -52,15 +50,6 @@ export const useAssetActions = ({ homeScope, selectedItems, resourceKeys, resetS
       queryClient.invalidateQueries({ queryKey: resourceKeys })
     },
   })
-
-  const {
-    modalComp: attachToModal,
-    setShowModal: setAttachToModal,
-    isShown: isShownAttachToModal,
-  } = useAttachToModal(
-    selected.map(s => s.id),
-    'ASSET',
-  )
   const {
     modalComp: downloadModal,
     setShowModal: setDownloadModal,
@@ -186,13 +175,6 @@ export const useAssetActions = ({ homeScope, selectedItems, resourceKeys, resetS
         url: `/publish?identifier=${selected[0]?.uid}&type=asset`,
       },
     },
-    'Attach to...': {
-      type: 'modal',
-      isDisabled: selected.length === 0 || selected.some(e => !e?.links?.attach_to),
-      func: () => setAttachToModal(true),
-      modal: attachToModal,
-      showModal: isShownAttachToModal,
-    },
     Delete: {
       type: 'modal',
       isDisabled: selected.length !== 1 || !selected[0]?.links.remove,
@@ -255,7 +237,7 @@ export const useAssetActions = ({ homeScope, selectedItems, resourceKeys, resetS
   }
 
   if (homeScope === 'spaces') {
-    actions = pick(['Download', 'Attach to...'], actions)
+    actions = pick(['Download'], actions)
   }
 
   return actions

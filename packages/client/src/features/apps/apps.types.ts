@@ -4,28 +4,26 @@ import { CreateAppPayload } from './apps.api'
 import { FileUid } from '../files/files.types'
 import { IAccessibleFile } from '../databases/databases.api'
 
-export type AppActions = 
-  'Run' |
-  'Run batch' |
-  'Track' |
-  'Edit' |
-  'Fork' |
-  'Export to' |
-  'Make public' |
-  'Feature' |
-  'Unfeature' |
-  'Delete' |
-  'Copy to space' |
-  'Copy to My Home (private)' |
-  'Attach to...' |
-  'Comments' |
-  'Set as Challenge App' |
-  'Edit tags' |
-  'Edit properties' |
-  'Add to Comparators' |
-  'Set this app as comparison default' |
-  'Remove from Comparators'
-
+export type AppActions =
+  | 'Run'
+  | 'Run batch'
+  | 'Track'
+  | 'Edit'
+  | 'Fork'
+  | 'Export to'
+  | 'Make public'
+  | 'Feature'
+  | 'Unfeature'
+  | 'Delete'
+  | 'Copy to space'
+  | 'Copy to My Home (private)'
+  | 'Comments'
+  | 'Set as Challenge App'
+  | 'Edit tags'
+  | 'Edit properties'
+  | 'Add to Comparators'
+  | 'Set this app as comparison default'
+  | 'Remove from Comparators'
 
 export enum PricingMap {
   'baseline-2' = 0.286,
@@ -47,7 +45,7 @@ export enum PricingMap {
 }
 
 export interface IOSpec {
-  class: 'string'| 'array:string' | 'file' | 'array:file' | 'int' | 'array:int' | 'float' | 'array:float' | 'boolean'
+  class: 'string' | 'array:string' | 'file' | 'array:file' | 'int' | 'array:int' | 'float' | 'array:float' | 'boolean'
   isArray?: boolean
   help: string
   label: string
@@ -63,101 +61,101 @@ export interface InputSpec extends IOSpec {
 type Links = Record<string, string>
 
 export interface IApp {
-  id: number;
-  uid: string;
-  dxid: string;
-  entity_type: string;
-  name: string;
-  title: string;
-  added_by: string;
-  added_by_fullname: string;
-  created_at: string;
-  created_at_date_time: string;
-  updated_at: string;
-  location: HomeScope | 'Private';
-  readme: string;
-  revision: number;
-  latest_revision: boolean;
-  job_count: number;
-  app_series_id: number;
-  run_by_you: string;
-  org: string;
-  explorers: number;
-  featured: boolean;
-  active: boolean;
+  id: number
+  uid: string
+  dxid: string
+  entity_type: string
+  name: string
+  title: string
+  added_by: string
+  added_by_fullname: string
+  created_at: string
+  created_at_date_time: string
+  updated_at: string
+  location: HomeScope | 'Private'
+  readme: string
+  revision: number
+  latest_revision: boolean
+  job_count: number
+  app_series_id: number
+  run_by_you: string
+  org: string
+  explorers: number
+  featured: boolean
+  active: boolean
   /** @deprecated create links from client side */
-  links: Links;
-  tags: string[];
+  links: Links
+  tags: string[]
   properties: {
-    [key: string]: string;
-  };
-  scope: ServerScope;
-  forked_from?: string;
+    [key: string]: string
+  }
+  scope: ServerScope
+  forked_from?: string
 }
 
 export interface AppRevision {
-  id: number;
-  revision: number;
-  tag_list: [];
-  title: string;
-  uid: string;
-  version: string;
-  deleted: boolean;
+  id: number
+  revision: number
+  tag_list: []
+  title: string
+  uid: string
+  version: string
+  deleted: boolean
 }
 
 export interface OutputSpec extends IOSpec {
-  requiredRunInput: boolean;
+  requiredRunInput: boolean
 }
 
 export interface AppSpec {
-  instance_type: string;
-  internet_access: boolean;
-  input_spec: InputSpec[];
-  output_spec: OutputSpec[];
+  instance_type: string
+  internet_access: boolean
+  input_spec: InputSpec[]
+  output_spec: OutputSpec[]
 }
 
 export interface AppMeta {
-  answers: [];
-  assigned_challenges: [];
-  challenges: [];
-  comments: [];
-  comparator: boolean;
-  default_comparator: boolean;
-  discussions: [];
-  jobs: [];
-  links: Links;
+  answers: []
+  assigned_challenges: []
+  challenges: []
+  comments: []
+  comparator: boolean
+  default_comparator: boolean
+  discussions: []
+  jobs: []
+  links: Links
   notes: []
-  revisions: AppRevision[];
-  spec: AppSpec;
+  revisions: AppRevision[]
+  spec: AppSpec
 }
 
 export interface FileUser {
-  dxuser: string;
-  full_name: string;
+  dxuser: string
+  full_name: string
 }
 
 export interface FileOrg {
-  handle: string;
-  name: string;
+  handle: string
+  name: string
 }
 
 export interface AcceptedLicense {
-  id: number,
-  license: number, // ID of actual license that is accepted
-  message: string,
-  state: string,
-  user: number, // ID of the user
+  id: number
+  license: number // ID of actual license that is accepted
+  message: string
+  state: string
+  user: number // ID of the user
 }
 
 export interface ComputeInstance {
-  value: string;
-  label: string;
+  value: string
+  label: string
 }
 
 export interface SelectType {
-  isDisabled?: boolean,
-  label: string,
-  value: string,
+  isDisabled?: boolean
+  label: string
+  value: string
 }
 
 export type FormInput = string | string[] | boolean | number | number[] | FileUid | FileUid[] | ComputeInstance | undefined
@@ -168,12 +166,11 @@ export interface BatchInput {
   fields: { [key: string]: FormInput }
 }
 
-export interface RunJobFormType
-{
-  output_folder_path: string | null;
-  jobName: string;
-  jobLimit: number;
-  scope: SelectType;
+export interface RunJobFormType {
+  output_folder_path: string | null
+  jobName: string
+  jobLimit: number
+  scope: SelectType
   inputs: BatchInput[]
 }
 

@@ -26,7 +26,7 @@ import { Button } from '../../components/Button'
 
 type ListType = { assets: IAsset[]; meta: IMeta }
 
-export const AssetList = ({ homeScope, spaceId }: { homeScope?: HomeScope, spaceId?: string }) => {
+export const AssetList = ({ homeScope, spaceId }: { homeScope?: HomeScope; spaceId?: string }) => {
   const navigate = useNavigate()
   const user = useAuthUser()
   const isAdmin = user?.isAdmin
@@ -59,10 +59,7 @@ export const AssetList = ({ homeScope, spaceId }: { homeScope?: HomeScope, space
   const { isLoading, data, error } = query
   const { data: propertiesData } = usePropertiesQuery('asset', homeScope, spaceId)
 
-  const selectedFileObjects = getSelectedObjectsFromIndexes(
-    selectedIndexes,
-    data?.assets,
-  )
+  const selectedFileObjects = getSelectedObjectsFromIndexes(selectedIndexes, data?.assets)
   const actions = useAssetActions({ homeScope, selectedItems: selectedFileObjects, resourceKeys: ['assets'], resetSelected })
   const generateCLIKeyAction = useGenerateKeyModal()
 
@@ -74,7 +71,7 @@ export const AssetList = ({ homeScope, spaceId }: { homeScope?: HomeScope, space
         <ActionsRow>
           <QuickActions>
             <Button
-              data-variant='primary'
+              data-variant="primary"
               as="a"
               data-turbolinks="false"
               href="/docs/assets"
@@ -82,9 +79,9 @@ export const AssetList = ({ homeScope, spaceId }: { homeScope?: HomeScope, space
             >
               <QuestionIcon height={13} /> How to create assets
             </Button>
-            <Button
-              data-variant='primary' onClick={() => generateCLIKeyAction.setShowModal(true)}>
-              <KeyIcon height={13} />Generate CLI Key
+            <Button data-variant="primary" onClick={() => generateCLIKeyAction.setShowModal(true)}>
+              <KeyIcon height={13} />
+              Generate CLI Key
             </Button>
           </QuickActions>
           <Dropdown
@@ -92,19 +89,12 @@ export const AssetList = ({ homeScope, spaceId }: { homeScope?: HomeScope, space
             content={
               <ActionsDropdownContent
                 actions={actions}
-                message={
-                  homeScope === 'spaces' &&
-                  'To perform other actions on this asset, access it from the Space'
-                }
+                message={homeScope === 'spaces' && 'To perform other actions on this asset, access it from the Space'}
               />
             }
           >
             {dropdownProps => (
-              <ActionsButton
-                {...dropdownProps}
-                data-testid="home-assets-actions-button"
-                active={dropdownProps.isActive}
-              />
+              <ActionsButton {...dropdownProps} data-testid="home-assets-actions-button" active={dropdownProps.isActive} />
             )}
           </Dropdown>
         </ActionsRow>
@@ -147,7 +137,6 @@ export const AssetList = ({ homeScope, spaceId }: { homeScope?: HomeScope, space
 
       {actions['Delete']?.modal}
       {actions['Download']?.modal}
-      {actions['Attach to...']?.modal}
       {actions['Attach License']?.modal}
       {actions['Detach License']?.modal}
       {actions['Accept License']?.modal}
@@ -190,9 +179,7 @@ export const AssetsListTable = ({
   isLoading: boolean
   homeScope?: HomeScope
   colWidths: KeyVal
-  saveColumnResizeWidth: (
-    columnResizing: UseResizeColumnsState<any>['columnResizing'],
-  ) => void
+  saveColumnResizeWidth: (columnResizing: UseResizeColumnsState<any>['columnResizing']) => void
   saveHiddenColumns: (cols: string[]) => void
   hiddenColumns: string[]
 }) => {
@@ -200,13 +187,13 @@ export const AssetsListTable = ({
     // Check if any of the conditions is true, then hide the column
     return !(
       // If the homeScope is 'me', hide 'added_by' regardless of other conditions.
-            (homeScope === 'me' && c.accessor === 'added_by') ||
-      
-      // Hide 'location' for all homeScopes except 'spaces'.
-      (homeScope !== 'spaces' && c.accessor === 'location') ||
-      
-      // Hide 'featured' for all homeScopes except 'everybody'.
-      (homeScope !== 'everybody' && c.accessor === 'featured')
+      (
+        (homeScope === 'me' && c.accessor === 'added_by') ||
+        // Hide 'location' for all homeScopes except 'spaces'.
+        (homeScope !== 'spaces' && c.accessor === 'location') ||
+        // Hide 'featured' for all homeScopes except 'everybody'.
+        (homeScope !== 'everybody' && c.accessor === 'featured')
+      )
     )
   }
 

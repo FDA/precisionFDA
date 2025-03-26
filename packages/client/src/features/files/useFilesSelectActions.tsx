@@ -3,7 +3,6 @@ import { pick } from 'ramda'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import { displayPayloadMessage } from '../../utils/api'
-import { useAttachToModal } from '../actionModals/useAttachToModal'
 import { useEditPropertiesModal } from '../actionModals/useEditPropertiesModal'
 import { useEditTagsModal } from '../actionModals/useEditTagsModal'
 import { useFeatureMutation } from '../actionModals/useFeatureMutation'
@@ -40,7 +39,6 @@ export type FileActions =
   | 'Delete'
   | 'Move'
   | 'Copy to...'
-  | 'Attach to...'
   | 'Attach License'
   | 'Detach License'
   | 'Request license approval'
@@ -267,14 +265,6 @@ export const useFilesSelectActions = ({
     },
   })
   const {
-    modalComp: attachToModal,
-    setShowModal: setAttachToModal,
-    isShown: isShownAttachToModal,
-  } = useAttachToModal(
-    selected.map(s => s.id),
-    'FILE',
-  )
-  const {
     modalComp: tagsModal,
     setShowModal: setTagsModal,
     isShown: isShownTagsModal,
@@ -429,18 +419,6 @@ export const useFilesSelectActions = ({
         isActionDisabledBasedOnLocked(selected, user?.id, space),
       modal: copyToModal,
       showModal: isShownCopyToModal,
-    },
-    'Attach to...': {
-      type: 'modal',
-      func: () => setAttachToModal(true),
-      // TODO: filesAttachTo is missing
-      isDisabled:
-        selected.length === 0 ||
-        selected.some(e => !e.links.attach_to) ||
-        openSelected ||
-        isActionDisabledBasedOnLocked(selected, user?.id, space),
-      modal: attachToModal,
-      showModal: isShownAttachToModal,
     },
     'Attach License': {
       type: 'modal',

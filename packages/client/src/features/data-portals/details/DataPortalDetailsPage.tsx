@@ -7,12 +7,16 @@ import { PageContainerMargin } from '../../../components/Page/styles'
 import { UserLayout } from '../../../layouts/UserLayout'
 import { DEFAULT_RECONNECT_ATTEMPTS, DEFAULT_RECONNECT_INTERVAL, getNodeWsUrl, SHOULD_RECONNECT } from '../../../utils/config'
 import { useAuthUser } from '../../auth/useAuthUser'
-import { Notification, NOTIFICATION_ACTION, WEBSOCKET_MESSSAGE_TYPE, WebSocketMessage } from '../../home/types'
+import { Notification, NOTIFICATION_ACTION, WEBSOCKET_MESSAGE_TYPE, WebSocketMessage } from '../../home/types'
 import { useDataPortalByIdQuery } from '../queries'
 import { DataPortalError } from './DataPortalNotFound'
 
 import '../../lexi/themes/PlaygroundEditorTheme.css'
-import { canEditContent as canEditContentCheck, canEditSettings as canEditSettingsCheck, canViewSpaceLink as canViewSpaceLinkCheck } from '../utils'
+import {
+  canEditContent as canEditContentCheck,
+  canEditSettings as canEditSettingsCheck,
+  canViewSpaceLink as canViewSpaceLinkCheck,
+} from '../utils'
 import { DataPortalDetails } from './DataPortalDetails'
 
 const DataPortalDetailsPage = () => {
@@ -36,7 +40,7 @@ const DataPortalDetailsPage = () => {
         const messageData = JSON.parse(message.data)
         const notification = messageData.data as Notification
         return (
-          messageData.type === WEBSOCKET_MESSSAGE_TYPE.NOTIFICATION &&
+          messageData.type === WEBSOCKET_MESSAGE_TYPE.NOTIFICATION &&
           NOTIFICATION_ACTION.DATA_PORTAL_CARD_IMAGE_URL_UPDATED === notification.action
         )
       } catch (e) {
