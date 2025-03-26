@@ -3,7 +3,6 @@ import { pick } from 'ramda'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import { IChallenge } from '../../types/challenge'
-import { useAttachToModal } from '../actionModals/useAttachToModal'
 import { useCopyToPrivateModal } from '../actionModals/useCopyToPrivateModal'
 import { useCopyToSpaceModal } from '../actionModals/useCopyToSpace'
 import { useDeleteModal } from '../actionModals/useDeleteModal'
@@ -82,15 +81,6 @@ export const useAppSelectionActions = ({
       queryClient.invalidateQueries({ queryKey: resourceKeys })
     },
   })
-
-  const {
-    modalComp: attachToModal,
-    setShowModal: setAttachToModal,
-    isShown: isShownAttachToModal,
-  } = useAttachToModal(
-    selected.map(s => s.id),
-    'APP',
-  )
 
   const {
     modalComp: copyToSpaceModal,
@@ -259,13 +249,6 @@ export const useAppSelectionActions = ({
       showModal: isShownCopyToPrivateModal,
       shouldHide: ['private', 'public'].includes(selected[0]?.scope),
     },
-    'Attach to...': {
-      type: 'modal',
-      func: () => setAttachToModal(true),
-      isDisabled: selected.length === 0 || selected.some(e => !e.links.attach_to),
-      modal: attachToModal,
-      showModal: isShownAttachToModal,
-    },
     Comments: {
       type: 'link',
       link: `/apps/${selected[0]?.uid}/comments`,
@@ -322,7 +305,7 @@ export const useAppSelectionActions = ({
   }
 
   if (homeScope === 'spaces') {
-    actions = pick(['Copy to space', 'Attach to...'], actions)
+    actions = pick(['Copy to space'], actions)
   }
 
   return actions
