@@ -33,7 +33,7 @@ export const EditDatabaseModal: Story = {
   render: () => {
     return (
       <WithListData resource="dbclusters" fetchList={fetchDatabaseList}>
-        {({ data }) => <EditDatabaseModalWrapper data={data['dbclusters'][0]} />}
+        {({ data }) => <EditDatabaseModalWrapper data={data['data'][0]} />}
       </WithListData>
     )
   },

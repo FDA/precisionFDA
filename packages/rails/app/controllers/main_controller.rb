@@ -49,7 +49,7 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
       @user_appathon = @context.user.appathon_from_meta(@meta_appathon) if @context.logged_in?
     end
 
-    if @context.logged_in_or_guest?
+    if @context.logged_in?
       @feed = collect_feed
 
       if @context.logged_in?
@@ -225,26 +225,21 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
   end
 
   def login
-    if @context.guest?
-      render "_partials/_error", status: :forbidden,
-                                 locals: { message: I18n.t("main.login_as_guest_warning") }
-    else
-      user_return_to = params[:user_return_to].presence
-      uri_attrs = [oauth2_redirect_url]
-      uri_attrs << "?#{URI.encode_www_form(redirect_uri: user_return_to)}" if user_return_to
+    user_return_to = params[:user_return_to].presence
+    uri_attrs = [oauth2_redirect_url]
+    uri_attrs << "?#{URI.encode_www_form(redirect_uri: user_return_to)}" if user_return_to
 
-      query_params = URI.encode_www_form(
-        response_type: "code",
-        client_id: OAUTH2_CLIENT_ID,
-        redirect_uri: URI.join(*uri_attrs),
-      )
+    query_params = URI.encode_www_form(
+      response_type: "code",
+      client_id: OAUTH2_CLIENT_ID,
+      redirect_uri: URI.join(*uri_attrs),
+    )
 
-      redirect_to URI.join(
-        DNANEXUS_AUTHSERVER_URI,
-        "oauth2/authorize",
-        "?#{query_params}",
-      ).to_s
-    end
+    redirect_to URI.join(
+      DNANEXUS_AUTHSERVER_URI,
+      "oauth2/authorize",
+      "?#{query_params}",
+    ).to_s
   end
 
   def return_from_login # rubocop:todo Metrics/MethodLength
@@ -451,7 +446,7 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
   end
 
   def browse_access
-    if @context.logged_in_or_guest?
+    if @context.logged_in?
       redirect_to root_url
       return
     end

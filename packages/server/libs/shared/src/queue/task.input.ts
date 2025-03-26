@@ -29,6 +29,7 @@ export enum TASK_TYPE {
   FOLLOW_UP_ACTION = 'follow_up_action',
   CHECK_NON_TERMINATED_DBCLUSTERS = 'check_non_terminated_dbclusters',
   SYNC_DBCLUSTER_STATUS = 'sync_dbcluster_status',
+  SYNC_DBCLUSTER_JOB_OUTPUT = 'sync_dbcluster_job_output',
   SYNC_SPACES_PERMISSIONS = 'sync_spaces_permissions',
   USER_CHECKUP = 'user_checkup',
   DEBUG_MAX_MEMORY = 'debug_test_max_memory',
@@ -69,6 +70,11 @@ export type CheckStaleJobsJob = TaskWithAuth & {
 
 export type SyncDbClusterJob = TaskWithAuth & {
   type: TASK_TYPE.SYNC_DBCLUSTER_STATUS
+  payload: { dxid: string }
+}
+
+export type SyncDbClusterJobOutput = TaskWithAuth & {
+  type: TASK_TYPE.SYNC_DBCLUSTER_JOB_OUTPUT
   payload: { dxid: string }
 }
 

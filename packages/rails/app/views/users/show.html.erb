@@ -37,7 +37,7 @@
 
 <div class="metadata-section metadata-header">
   <ul class="list-group list-group-inline">
-    <% if !@context.guest? && @context.user.can_administer_site? && @context.user != @user %>
+    <% if @context.user.can_administer_site? && @context.user != @user %>
       <% if !@user.activated? %>
         <li class="list-group-item">
           <h5 class="list-group-item-heading">Resend Activation Email</h5>

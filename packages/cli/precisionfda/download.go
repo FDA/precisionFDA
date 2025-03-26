@@ -177,24 +177,3 @@ func (c *PFDAClient) HeadFile(fileURL string, lines int) error {
 	defer os.Remove(tmp.Name())
 	return nil
 }
-
-func (c *PFDAClient) processDownloadArgs(args []string) ([]string, []string) {
-	c.ContinueOnError = len(args) > 1
-
-	fileIDs := make([]string, 0)
-	fileNames := make([]string, 0)
-
-	if len(args) == 0 {
-		args = append(args, "")
-	}
-
-	for _, arg := range args {
-		arg = strings.TrimSpace(arg)
-		if helpers.IsFileId(arg) {
-			fileIDs = append(fileIDs, arg)
-		} else {
-			fileNames = append(fileNames, arg)
-		}
-	}
-	return fileIDs, fileNames
-}

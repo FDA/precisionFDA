@@ -12,10 +12,10 @@ import { createRunFollowUpActionJobTask } from '@shared/queue'
 import { NotifyNewDiscussionJob, TASK_TYPE } from '@shared/queue/task.input'
 import { Job } from 'bull'
 import { FollowUpDecider } from '../../domain/user-file/follow-up-decider'
-import { dbClusterSyncHandler } from '../../jobs/db-cluster-sync.handler'
 import { jobStatusHandler } from '../../jobs/job-status.handler'
 import { ProcessWithContext } from '../decorator/process-with-context'
 import { BaseQueueProcessor } from './base-queue.processor'
+import { DbClusterService } from '@shared/domain/db-cluster/service/db-cluster.service'
 import { DiscussionNotificationService } from '@shared/domain/discussion/services/discussion-notification.service'
 
 @Processor(config.workerJobs.queues.default.name)
@@ -29,6 +29,7 @@ export class MainQueueProcessor extends BaseQueueProcessor {
     private readonly discussionNotificationService: DiscussionNotificationService,
     private readonly followUpDecider: FollowUpDecider,
     private readonly spaceReportService: SpaceReportService,
+    private readonly dbClusterService: DbClusterService,
   ) {
     super()
   }
@@ -47,7 +48,12 @@ export class MainQueueProcessor extends BaseQueueProcessor {
 
   @ProcessWithContext(TASK_TYPE.SYNC_DBCLUSTER_STATUS)
   async syncDbClusterStatus(job: Job) {
-    await dbClusterSyncHandler(job)
+    await this.dbClusterService.syncDbClusterStatus(job)
+  }
+
+  @ProcessWithContext(TASK_TYPE.SYNC_DBCLUSTER_JOB_OUTPUT)
+  async syncDbClusterJobOutput(job: Job) {
+    await this.dbClusterService.syncDbClusterJobOutput(job)
   }
 
   @ProcessWithContext(TASK_TYPE.SYNC_FILE_STATE)

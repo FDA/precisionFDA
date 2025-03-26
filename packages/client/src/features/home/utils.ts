@@ -22,12 +22,13 @@ export function mapSizeFilter(filters: IFilter[]): IFilter[] {
 export function renameFilterKeys(filters: IFilter[]) {
   return filters.map((filter: IFilter) => {
     const key = { ...filter }
-    key.id = {
-      added_by: 'username',
-      engine: 'type',
-      dx_instance_class: 'instance',
-      launched_by: 'username',
-    }[key.id] ?? key.id
+    key.id =
+      {
+        added_by: 'username',
+        engine: 'type',
+        dx_instance_class: 'instance',
+        launched_by: 'username',
+      }[key.id] ?? key.id
 
     return key
   })
@@ -42,22 +43,34 @@ const customKeyMappings = {
 }
 // Some of the list API's order_by values do not match their keys in JSON responses
 // so we need a custom mapping
-const renameOrderByKeys = (key?: string) => key && key in customKeyMappings ?
-  customKeyMappings[key as keyof typeof customKeyMappings] : key
+const renameOrderByKeys = (key?: string) =>
+  key && key in customKeyMappings ? customKeyMappings[key as keyof typeof customKeyMappings] : key
 
-export type Params = { folderId?: string, spaceId?: string, scope?: HomeScope, page?: string, perPage?: number, sortBy?: SortBy }
+export type Params = { folderId?: string; spaceId?: string; scope?: HomeScope; page?: string; perPage?: number; sortBy?: SortBy }
 
 export function formatScopeQ(scope?: HomeScope) {
   let scopeQ = ''
-  if(scope) {
+  if (scope) {
     scopeQ = scope === 'me' ? '' : scope
-    scopeQ = `/${  scopeQ}`
+    scopeQ = `/${scopeQ}`
   }
   return scopeQ
 }
 
-export const getBasePath = (spaceId?: string|number) => {
-  if(spaceId) return `/spaces/${spaceId}`
+export function formatScopeQuery(scope?: HomeScope, spaceId?: string) {
+  let scopeQ = '?scope='
+  if (scope) {
+    const scopeVal = scope === 'me' ? 'private' : scope
+    scopeQ = `${scopeQ}${scopeVal}`
+  }
+  if (spaceId) {
+    scopeQ = `${scopeQ}space-${spaceId}`
+  }
+  return scopeQ
+}
+
+export const getBasePath = (spaceId?: string | number) => {
+  if (spaceId) return `/spaces/${spaceId}`
   return '/home'
 }
 
@@ -79,12 +92,11 @@ export function prepareListFetch(filters: IFilter[], params: Params) {
     filterParams[`filters[${f.id}]`] = f.value
   })
 
-  const order_by_key = params.sortBy?.order_by?.includes('props.')
-    ? 'order_by_property'
-    : 'order_by'
-  const order_by_val = order_by_key === 'order_by_property'
-    ? params.sortBy?.order_by.replace('props.', '')
-    : renameOrderByKeys(params?.sortBy?.order_by)
+  const order_by_key = params.sortBy?.order_by?.includes('props.') ? 'order_by_property' : 'order_by'
+  const order_by_val =
+    order_by_key === 'order_by_property'
+      ? params.sortBy?.order_by.replace('props.', '')
+      : renameOrderByKeys(params?.sortBy?.order_by)
 
   const queryParams = cleanObject({
     folder_id: params?.folderId,

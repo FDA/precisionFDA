@@ -350,14 +350,10 @@ class UserFile < Node
 
   def feedback(context)
     if dxid == NIST_VCF_UID && context
-      if context.guest?
-        "https://docs.google.com/forms/d/1cF0XoeGbLJUSRC3pvEz36DMdlpWA9nFwUXJA_o-oxrU/viewform?entry.556919704=NISTv2.19"
-      else
-        user_name = URI.encode_www_form_component(context.user.full_name)
-        user_email = URI.encode_www_form_component(context.user.email)
-        user_org = URI.encode_www_form_component(context.user.org.name)
-        "https://docs.google.com/forms/d/1cF0XoeGbLJUSRC3pvEz36DMdlpWA9nFwUXJA_o-oxrU/viewform?entry.764685280=#{user_name}&entry.1095215913=#{user_email}&entry.451016179=#{user_org}&entry.556919704=NISTv2.19"
-      end
+      user_name = URI.encode_www_form_component(context.user.full_name)
+      user_email = URI.encode_www_form_component(context.user.email)
+      user_org = URI.encode_www_form_component(context.user.org.name)
+      "https://docs.google.com/forms/d/1cF0XoeGbLJUSRC3pvEz36DMdlpWA9nFwUXJA_o-oxrU/viewform?entry.764685280=#{user_name}&entry.1095215913=#{user_email}&entry.451016179=#{user_org}&entry.556919704=NISTv2.19"
     else
       nil
     end

@@ -62,7 +62,6 @@ import { useUserSiteNavItems } from './useUserSiteNavItems'
 
 type UserMenuProps = {
   user: IUser | null | undefined
-  userIsGuest?: boolean
   userCanAdministerSite?: boolean
   handleLogout: () => void
   showCloudResourcesModal: () => void
@@ -72,7 +71,6 @@ type UserMenuProps = {
 
 export const UserMenu = ({
   user,
-  userIsGuest = true,
   userCanAdministerSite = false,
   handleLogout,
   showCloudResourcesModal,
@@ -83,7 +81,7 @@ export const UserMenu = ({
     <StyledLink data-turbolinks="false" href="/profile" onClick={() => hide()}>
       Profile
     </StyledLink>
-    {user && !userIsGuest && (
+    {user && (
       <>
         <StyledLink data-turbolinks="false" href={`/users/${user?.dxuser}`} onClick={() => hide()}>
           Public Profile
@@ -110,11 +108,9 @@ export const UserMenu = ({
     <StyledLink data-turbolinks="false" href="/licenses" onClick={() => hide()}>
       Manage Licenses
     </StyledLink>
-    {!userIsGuest && (
-      <StyledLink as={Link} data-turbolinks="false" to="/account/notifications" onClick={() => hide()}>
-        Notification Settings
-      </StyledLink>
-    )}
+    <StyledLink as={Link} data-turbolinks="false" to="/account/notifications" onClick={() => hide()}>
+      Notification Settings
+    </StyledLink>
     <StyledDivider />
     <StyledLink as={Link} to="/about" data-turbolinks="false" onClick={() => hide()}>
       About
@@ -372,7 +368,6 @@ const Header: React.FC = () => {
   if (!user) return null
 
   const userCanAdministerSite = user.can_administer_site
-  const userIsGuest = user.is_guest
   const showAlertBanner = !isAlertDismissed && !!siteSettings.data?.alerts?.[0]
 
   const handleLogout = async () => {
@@ -467,7 +462,6 @@ const Header: React.FC = () => {
                 <UserMenu
                   user={user}
                   userCanAdministerSite={userCanAdministerSite}
-                  userIsGuest={userIsGuest}
                   handleLogout={handleLogout}
                   showCloudResourcesModal={() => setCloudResourcesModalShown(true)}
                   generateCLIKey={() => generateCLIKeyAction.setShowModal(true)}

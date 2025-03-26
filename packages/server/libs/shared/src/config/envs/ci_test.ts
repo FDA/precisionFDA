@@ -65,5 +65,8 @@ export const config: ConfigOverride = () => ({
       skipFdaSubnetIpCheck: false,
     },
   },
+  dbCluster: {
+    passwordSecret: 'secret',
+  },
   challengeProposalRecipients: ['test@email.com'],
 })

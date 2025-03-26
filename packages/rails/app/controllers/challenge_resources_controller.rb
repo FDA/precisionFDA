@@ -1,6 +1,4 @@
 class ChallengeResourcesController < ApplicationController
-  skip_before_action :require_login, {only: []}
-  before_action :require_login_or_guest, only: []
 
   def new
     @challenge = Challenge.find_by!(id: unsafe_params[:challenge_id])

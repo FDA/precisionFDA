@@ -1,13 +1,14 @@
 import { MemberRole, MemberSide } from './members/members.types'
 
 export interface Counters {
-  files: number
-  apps: number
-  workflows: number
-  jobs: number
-  members: number
-  reports: number
-  discussions: number
+  files: number;
+  apps: number;
+  workflows: number;
+  jobs: number;
+  members: number;
+  reports: number;
+  discussions: number;
+  dbclusters: number;
 }
 
 export interface Links {

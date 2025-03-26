@@ -99,3 +99,6 @@ docker/docker-compose.yml
 vendor/assets/bower_components/
 
 .turbo
+
+# Python
+*.pyc

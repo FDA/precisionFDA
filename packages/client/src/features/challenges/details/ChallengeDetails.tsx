@@ -101,7 +101,7 @@ export const ChallengeDetails = () => {
   const user = useAuthUser()
   const { data: challenge, isLoading, error } = useChallengeByIDQuery(challengeId!)
   const isLoggedIn = !!user?.id
-  const canCreate = user?.is_guest
+  const canCreate = user?.can_create_challenges
 
   const isOld = undefined
 

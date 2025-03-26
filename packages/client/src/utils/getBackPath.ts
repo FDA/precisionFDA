@@ -1,7 +1,7 @@
 import { Location } from 'react-router-dom'
 import { HomeScope } from '../features/home/types'
 
-export type LocationResource = 'files' | 'apps' | 'workflows' | 'executions' | 'members' | 'discussions'
+export type LocationResource = 'files' | 'apps' | 'workflows' | 'executions' | 'members' | 'discussions' | 'databases'
 
 export function getBackPath(
   location: Location,
