@@ -231,10 +231,6 @@ export class User extends BaseEntity {
     return this.dxuser === config.platform.challengeBotUser
   }
 
-  isGuest(): boolean {
-    return this.dxuser.startsWith('Guest-')
-  }
-
   isGovUser(): boolean {
     const emailDomain = this.email.split('@').pop()
     return ['fda.hhs.gov', 'fda.gov'].includes(emailDomain)

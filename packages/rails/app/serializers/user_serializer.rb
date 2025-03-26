@@ -10,7 +10,6 @@ class UserSerializer < ApplicationSerializer
     :admin,
     :counters,
     :links,
-    :is_guest,
     :gravatar_url,
     :job_limit,
     :pricing_map,
@@ -18,7 +17,6 @@ class UserSerializer < ApplicationSerializer
     :total_limit,
   )
 
-  attribute :guest?, key: :is_guest
   attribute :can_administer_site?, key: :can_administer_site
   attribute :can_create_challenges?, key: :can_create_challenges
   attribute :can_see_spaces?, key: :can_see_spaces
@@ -37,8 +35,6 @@ class UserSerializer < ApplicationSerializer
   # Returns user counters for related objects.
   # @return [Hash] User counters for files, apps, workflows, etc.
   def counters
-    return {} if object.guest?
-
     {
       files: files_private_count,
       folders: folders_private_count,
@@ -53,7 +49,7 @@ class UserSerializer < ApplicationSerializer
   # Builds links to user.
   # @return [Hash] Links.
   def links
-    return unless current_user && !current_user.guest?
+    return unless current_user
 
     {}.tap do |links|
       # GET user accessible licenses list - show this link when current user has licenses

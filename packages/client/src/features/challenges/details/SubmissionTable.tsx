@@ -57,7 +57,6 @@ export const InputFileCell = ({
           const fileIsPublic = f.scope === 'public'
           const userIsOwnerOfFile = f.userId === authUser?.id
           return (
-            !authUser?.is_guest &&
             (fileIsPublic || userIsOwnerOfFile || isSpaceMember)
           )
         }

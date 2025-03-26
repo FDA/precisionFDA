@@ -4,9 +4,6 @@
 #
 
 class Context
-  GRAVATAR_GUEST_AVATAR =
-    "https://secure.gravatar.com/avatar/00000000000000000000000000000000.png?d=mm&r=PG".freeze
-
   INVALID_TOKEN = "INVALID".freeze
 
   attr_accessor :user_id, :username, :token, :expiration, :org_id
@@ -47,9 +44,7 @@ class Context
   end
 
   def user
-    @user ||= begin
-      User.new(dxuser: @username, expiration: @expiration) if guest?
-    end
+    @user ||= nil
   end
 
   def cli_client?
@@ -57,8 +52,6 @@ class Context
   end
 
   def gravatar_url
-    return GRAVATAR_GUEST_AVATAR if guest?
-
     @user.gravatar_url
   end
 
@@ -73,19 +66,6 @@ class Context
       @token != INVALID_TOKEN &&
       @org_id != -1 &&
       (@user ? @user.enabled? : true)
-  end
-
-  def guest?
-    @user_id == -1 &&
-      @username.start_with?("Guest-") &&
-      @token == INVALID_TOKEN &&
-      @expiration.present? &&
-      ((@expiration - Time.now.to_i) > 5.minutes) &&
-      @org_id == -1
-  end
-
-  def logged_in_or_guest?
-    logged_in? || guest?
   end
 
   def challenge_admin?

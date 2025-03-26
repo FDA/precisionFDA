@@ -4,7 +4,7 @@ module Api
     include Paginationable
     include Sanitizable
 
-    before_action :require_login_or_guest
+    before_action :require_login
 
     # GET /api/discussions/:id/describe
     # used by CLI - keep this for older version before deprecation.

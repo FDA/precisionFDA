@@ -2,8 +2,6 @@
 class SubmissionsController < ApplicationController
   include CloudResourcesConcern
 
-  skip_before_action :require_login, only: []
-  before_action :require_login_or_guest, only: []
   before_action :check_challenge_access
 
   def new

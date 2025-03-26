@@ -1,8 +1,6 @@
 module Api
   # Submissions API controller.
   class SubmissionsController < BaseController
-    skip_before_action :require_api_login
-    before_action :require_api_login_or_guest
 
     def index
       challenge_id = params[:challenge_id]

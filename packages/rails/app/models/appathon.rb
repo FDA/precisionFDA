@@ -70,12 +70,9 @@ class Appathon < ApplicationRecord
   end
 
   def self.editable_by(context)
-    if context.guest?
-      none
-    else
-      raise unless context.user_id.present?
-      where(admin_id: context.user_id)
-    end
+    raise if context.user_id.blank?
+
+    where(admin_id: context.user_id)
   end
 
   def self.active
