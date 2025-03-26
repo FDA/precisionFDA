@@ -165,7 +165,6 @@ export const ExecutionList = ({ homeScope, spaceId }: { homeScope?: HomeScope; s
       {actions['Copy to space']?.modal}
       {actions['Edit tags']?.modal}
       {actions['Edit properties']?.modal}
-      {actions['Attach to...']?.modal}
       {actions['Snapshot']?.modal}
       {actions['Terminate']?.modal}
     </ErrorBoundary>
