@@ -1,22 +1,23 @@
 import { useQueryClient } from '@tanstack/react-query'
-import { useNavigate } from 'react-router-dom'
 import { pick } from 'ramda'
+import { useNavigate } from 'react-router-dom'
+import { toast } from 'react-toastify'
 import { IChallenge } from '../../types/challenge'
-import { useAuthUser } from '../auth/useAuthUser'
+import { useAttachToModal } from '../actionModals/useAttachToModal'
 import { useCopyToPrivateModal } from '../actionModals/useCopyToPrivateModal'
 import { useCopyToSpaceModal } from '../actionModals/useCopyToSpace'
 import { useDeleteModal } from '../actionModals/useDeleteModal'
-import { useEditTagsModal } from '../actionModals/useEditTagsModal'
 import { useEditPropertiesModal } from '../actionModals/useEditPropertiesModal'
+import { useEditTagsModal } from '../actionModals/useEditTagsModal'
 import { useFeatureMutation } from '../actionModals/useFeatureMutation'
+import { useAuthUser } from '../auth/useAuthUser'
 import { useComparatorModal } from '../comparators/useComparatorModal'
 import { ActionFunctionsType, HomeScope } from '../home/types'
 import { copyAppsRequest, copyAppsToPrivate, deleteAppsRequest } from './apps.api'
 import { AppActions, IApp } from './apps.types'
+import { getBaseLink } from './run/utils'
 import { useAttachToChallengeModal } from './useAttachToChallengeModal'
 import { useExportToModal } from './useExportToModal'
-import { getBaseLink } from './run/utils'
-import { toast } from 'react-toastify'
 
 export const useAppSelectionActions = ({
   homeScope,
@@ -81,6 +82,15 @@ export const useAppSelectionActions = ({
       queryClient.invalidateQueries({ queryKey: resourceKeys })
     },
   })
+
+  const {
+    modalComp: attachToModal,
+    setShowModal: setAttachToModal,
+    isShown: isShownAttachToModal,
+  } = useAttachToModal(
+    selected.map(s => s.id),
+    'APP',
+  )
 
   const {
     modalComp: copyToSpaceModal,
@@ -205,8 +215,8 @@ export const useAppSelectionActions = ({
     'Make public': {
       type: 'link',
       link: {
-        method: 'POST',
-        url: `${selected[0]?.links?.publish}&scope=public`,
+        method: 'GET',
+        url: `/publish?identifier=${selected[0]?.uid}&type=app`,
       },
       isDisabled: selected.length !== 1 || !selected[0].links.publish || !user?.allowed_to_publish,
       shouldHide: selected[0]?.location !== 'Private',
@@ -248,6 +258,13 @@ export const useAppSelectionActions = ({
       modal: copyToPrivateModal,
       showModal: isShownCopyToPrivateModal,
       shouldHide: ['private', 'public'].includes(selected[0]?.scope),
+    },
+    'Attach to...': {
+      type: 'modal',
+      func: () => setAttachToModal(true),
+      isDisabled: selected.length === 0 || selected.some(e => !e.links.attach_to),
+      modal: attachToModal,
+      showModal: isShownAttachToModal,
     },
     Comments: {
       type: 'link',
@@ -305,7 +322,7 @@ export const useAppSelectionActions = ({
   }
 
   if (homeScope === 'spaces') {
-    actions = pick(['Copy to space'], actions)
+    actions = pick(['Copy to space', 'Attach to...'], actions)
   }
 
   return actions

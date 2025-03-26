@@ -1,19 +1,20 @@
-import { pick } from 'ramda'
 import { useQueryClient } from '@tanstack/react-query'
+import { pick } from 'ramda'
 import { useNavigate } from 'react-router-dom'
-import { useAuthUser } from '../auth/useAuthUser'
+import { useAttachToModal } from '../actionModals/useAttachToModal'
 import { useDeleteModal } from '../actionModals/useDeleteModal'
+import { useEditPropertiesModal } from '../actionModals/useEditPropertiesModal'
 import { useEditTagsModal } from '../actionModals/useEditTagsModal'
 import { useFeatureMutation } from '../actionModals/useFeatureMutation'
+import { useAuthUser } from '../auth/useAuthUser'
+import { ActionFunctionsType, HomeScope } from '../home/types'
 import { useAcceptLicenseModal } from '../licenses/useAcceptLicenseModal'
 import { useAttachLicensesModal } from '../licenses/useAttachLicensesModal'
 import { useDetachLicenseModal } from '../licenses/useDetachLicenseModal'
-import { ActionFunctionsType, HomeScope } from '../home/types'
 import { useDownloadAssetsModal } from './actionModals/useDownloadAssetsModal'
 import { useEditAssetModal } from './actionModals/useEditAssetModal'
 import { deleteAssetsRequest } from './assets.api'
 import { IAsset } from './assets.types'
-import { useEditPropertiesModal } from '../actionModals/useEditPropertiesModal'
 
 export type AssetActions =
   | 'Rename'
@@ -21,6 +22,7 @@ export type AssetActions =
   | 'Feature'
   | 'Unfeature'
   | 'Make Public'
+  | 'Attach to...'
   | 'Delete'
   | 'Attach License'
   | 'Detach License'
@@ -51,6 +53,14 @@ export const useAssetActions = ({ homeScope, selectedItems, resourceKeys, resetS
     },
   })
 
+  const {
+    modalComp: attachToModal,
+    setShowModal: setAttachToModal,
+    isShown: isShownAttachToModal,
+  } = useAttachToModal(
+    selected.map(s => s.id),
+    'ASSET',
+  )
   const {
     modalComp: downloadModal,
     setShowModal: setDownloadModal,
@@ -172,9 +182,16 @@ export const useAssetActions = ({ homeScope, selectedItems, resourceKeys, resetS
       type: 'link',
       isDisabled: selected.length !== 1 || !selected[0]?.links?.publish || !user?.allowed_to_publish,
       link: {
-        method: 'POST',
-        url: `${selected[0]?.links?.publish}&scope=public`,
+        method: 'GET',
+        url: `/publish?identifier=${selected[0]?.uid}&type=asset`,
       },
+    },
+    'Attach to...': {
+      type: 'modal',
+      isDisabled: selected.length === 0 || selected.some(e => !e?.links?.attach_to),
+      func: () => setAttachToModal(true),
+      modal: attachToModal,
+      showModal: isShownAttachToModal,
     },
     Delete: {
       type: 'modal',
@@ -238,7 +255,7 @@ export const useAssetActions = ({ homeScope, selectedItems, resourceKeys, resetS
   }
 
   if (homeScope === 'spaces') {
-    actions = pick(['Download'], actions)
+    actions = pick(['Download', 'Attach to...'], actions)
   }
 
   return actions
