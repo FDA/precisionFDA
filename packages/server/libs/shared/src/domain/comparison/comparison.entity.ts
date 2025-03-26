@@ -1,21 +1,21 @@
 import {
   Collection,
   Entity,
-  Ref,
+  EntityRepositoryType,
+  Filter,
   ManyToMany,
   ManyToOne,
   PrimaryKey,
   Property,
+  Ref,
   Reference,
-  Filter,
-  EntityRepositoryType,
 } from '@mikro-orm/core'
+import { ScopedEntity } from '@shared/database/scoped.entity'
 import { App } from '@shared/domain/app/app.entity'
+import { ComparisonRepository } from '@shared/domain/comparison/comparison.repository'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { STATIC_SCOPE } from '@shared/enums'
-import { ScopedEntity } from '@shared/database/scoped.entity'
-import { ComparisonRepository } from '@shared/domain/comparison/comparison.repository'
 
 enum COMPARISON_STATE {
   DONE = 'done',
@@ -70,7 +70,11 @@ class Comparison extends ScopedEntity {
   app: Ref<App>
 
   @ManyToOne({ entity: () => User, fieldName: 'user_id', nullable: false })
-  user: Ref<User>;
+  user: Ref<User>
+
+  isPublishable() {
+    return this.state === COMPARISON_STATE.DONE
+  }
 
   // TODO: Add rest of the references in comparison.rb
 
@@ -82,4 +86,4 @@ class Comparison extends ScopedEntity {
   }
 }
 
-export { COMPARISON_STATE, Comparison }
+export { Comparison, COMPARISON_STATE }

@@ -100,6 +100,10 @@ class UserFile extends Node implements IFileOrAsset, ITrackable {
   isCreatedByChallengeBot(): boolean {
     return this.challengeResources.length > 0 || this.user.getEntity().isChallengeBot()
   }
+
+  isPublishable(): boolean {
+    return this.isPrivate() && this.state === FILE_STATE_DX.CLOSED
+  }
 }
 
 export { UserFile }
