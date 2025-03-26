@@ -15,7 +15,13 @@ import { ArchiveEntry } from '@shared/domain/user-file/archive-entry.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { AssetRepository } from './asset.repository'
 import { Node } from './node.entity'
-import { FILE_STATE, FILE_STI_TYPE, IFileOrAsset, ITrackable } from './user-file.types'
+import {
+  FILE_STATE,
+  FILE_STATE_DX,
+  FILE_STI_TYPE,
+  IFileOrAsset,
+  ITrackable,
+} from './user-file.types'
 
 @Filter({ name: 'asset', cond: { stiType: FILE_STI_TYPE.ASSET } })
 @Filter({
@@ -58,6 +64,10 @@ class Asset extends Node implements IFileOrAsset, ITrackable {
   isCreatedByChallengeBot(): boolean {
     // Challenge resources are always files, see create_challenge_resource in api_controller.rb
     return false
+  }
+
+  isPublishable(): boolean {
+    return this.isPrivate() && this.state === FILE_STATE_DX.CLOSED
   }
 
   [EntityRepositoryType]?: AssetRepository

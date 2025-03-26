@@ -1,16 +1,17 @@
 import { EntityService } from '@shared/domain/entity/entity.service'
+import { AssetProvenanceDataService } from '@shared/domain/provenance/service/entity-data/asset-provenance-data.service'
 import { Asset } from '@shared/domain/user-file/asset.entity'
+import { STATIC_SCOPE } from '@shared/enums'
 import { EntityUtils } from '@shared/utils/entity.utils'
 import { expect } from 'chai'
 import { SinonStub, stub } from 'sinon'
-import { AssetProvenanceDataService } from '@shared/domain/provenance/service/entity-data/asset-provenance-data.service'
 
 describe('AssetProvenanceDataService', () => {
   const NAME = 'name'
   const LINK = 'LINK'
   const UID = 'UID'
 
-  const ASSET = { name: NAME, uid: UID } as unknown as Asset
+  const ASSET = { name: NAME, uid: UID, scope: STATIC_SCOPE.PRIVATE } as unknown as Asset
 
   const getEntityUiLinkStub = stub()
 
@@ -33,7 +34,13 @@ describe('AssetProvenanceDataService', () => {
     it('should provide correct data about the asset', async () => {
       const res = await getInstance().getData(ASSET)
 
-      expect(res).to.deep.equal({ type: 'asset', url: LINK, title: NAME, identifier: UID })
+      expect(res).to.deep.equal({
+        type: 'asset',
+        url: LINK,
+        title: NAME,
+        identifier: UID,
+        scope: STATIC_SCOPE.PRIVATE,
+      })
     })
   })
 
