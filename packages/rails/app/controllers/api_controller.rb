@@ -15,35 +15,7 @@ class ApiController < ApplicationController
   skip_before_action :verify_authenticity_token, unless: lambda {
     @context.present? && @context.key?(:cli_client) && @context[:cli_client] == true
   }
-  # rubocop:todo Rails/LexicallyScopedActionFilter
-  before_action :require_api_login,
-                except: %i(
-                  destroy
-                  list_apps
-                  list_assets
-                  list_comparisons
-                  list_files
-                  list_jobs
-                  list_workflows
-                  list_notes
-                  list_related
-                  describe
-                  search_assets
-                  cli_latest_version
-                )
-  # rubocop:enable Rails/LexicallyScopedActionFilter
-  before_action :require_api_login_or_guest,
-                only: %i(
-                  list_apps
-                  list_assets
-                  list_comparisons
-                  list_files
-                  list_jobs
-                  list_workflows
-                  list_related
-                  describe
-                  search_assets
-                )
+  before_action :require_api_login, except: %i(destroy cli_latest_version)
   before_action :validate_create_asset, only: :create_asset
   before_action :check_total_and_job_charges_limit, only: %i(run_workflow)
   before_action :check_total_charges_limit, only: %i(create_file create_asset)

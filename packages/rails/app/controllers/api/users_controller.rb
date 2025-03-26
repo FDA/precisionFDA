@@ -1,9 +1,6 @@
 module Api
   # Responsible for user-related information.
   class UsersController < BaseController
-    skip_before_action :require_api_login, only: :show
-    before_action :require_api_login_or_guest, only: :show
-
     before_action :check_admin, only: %i(update)
 
     def show
@@ -43,8 +40,6 @@ module Api
 
     def meta
       links = { links: {} }
-
-      return links if @context.guest?
 
       links.tap do |meta|
         meta[:links][:space_create] = api_spaces_path

@@ -9,9 +9,7 @@ class UserPolicy
     end
 
     def can_see_gsrs?(context)
-      return false unless context.logged_in?
-
-      !context.user.guest?
+      context.logged_in?
     end
 
     def access_notification_preference?(user)

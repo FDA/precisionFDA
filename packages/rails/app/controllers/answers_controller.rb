@@ -1,6 +1,4 @@
 class AnswersController < ApplicationController
-  skip_before_action :require_login,     only: [:index, :show]
-  before_action :require_login_or_guest, only: [:index, :show]
 
   def index
     discussion = Discussion.accessible_by(@context).find(unsafe_params[:discussion_id])

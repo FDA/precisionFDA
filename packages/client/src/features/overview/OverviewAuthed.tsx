@@ -8,7 +8,6 @@ import { PageContainerMargin } from '../../components/Page/styles'
 import { OverviewCenterSection, PageRow, RightSide, RightSideItem, SectionTitle } from '../../components/Public/styles'
 import { usePageMeta } from '../../hooks/usePageMeta'
 import { IUser } from '../../types/user'
-import GuestRestrictedLink from '../../components/Controls/GuestRestrictedLink'
 import NavigationBar from '../../components/NavigationBar/NavigationBar'
 import PublicLayout from '../../layouts/PublicLayout'
 import { useAuthUser } from '../auth/useAuthUser'
@@ -179,15 +178,13 @@ const TopAppItem = ({ app }: { app: IApp }) => {
   return (
     <StyledTopAppItem>
       <div>
-        <GuestRestrictedLink to={linkToApp} aria-label={ariaLabel}>
+        <Link data-turbolinks="false" to={linkToApp} aria-label={ariaLabel}>
           {isRegular ? <AppTypeIconBlue width={56} height={56} /> : <AppTypeIconYellow width={56} height={56} />}
-        </GuestRestrictedLink>
+        </Link>
       </div>
       <div>
         <Title>
-          <GuestRestrictedLink to={linkToApp} aria-label={ariaLabel}>
-            {app.title}
-          </GuestRestrictedLink>
+          <Link data-turbolinks="false" to={linkToApp} aria-label={ariaLabel}>{app.title}</Link>
         </Title>
         <AppOrg>{app.org}</AppOrg>
         <AppUpdatedAt>Updated {timeDistance} ago</AppUpdatedAt>

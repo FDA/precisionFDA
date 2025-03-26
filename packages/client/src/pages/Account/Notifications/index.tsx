@@ -3,7 +3,6 @@ import React, { useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { toast } from 'react-toastify'
 import { Checkbox } from '../../../components/CheckboxNext'
-import { GuestNotAllowed } from '../../../components/GuestNotAllowed'
 import { Loader } from '../../../components/Loader'
 import { PageActions, PageHeader, PageTitle } from '../../../components/Page/styles'
 import { Select } from '../../../components/Select'
@@ -234,14 +233,6 @@ const NotificationsPage = () => {
     })
 
     return notificationsMutation(payload)
-  }
-
-  if (user?.is_guest) {
-    return (
-      <UserLayout mainScroll>
-        <GuestNotAllowed />
-      </UserLayout>
-    )
   }
 
   return (

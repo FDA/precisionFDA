@@ -8,7 +8,6 @@ module ProfileHelper
   end
 
   def user_org_admin?
-    return false if @context.guest?
     current_user.id == current_user.org.admin_id
   end
 
@@ -16,8 +15,6 @@ module ProfileHelper
   # @return [true, false] Returns true if user has created organization leave request,
   #   false otherwise.
   def active_leave_org_request_present?
-    return false if @context.guest?
-
     current_user.active_leave_org_request.present?
   end
 

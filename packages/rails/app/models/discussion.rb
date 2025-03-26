@@ -78,14 +78,10 @@ class Discussion < ApplicationRecord
   end
 
   def self.accessible_by(context)
-    if context.guest?
-      accessible_by_public
-    else
-      raise unless context.user_id.present? && context.user.present?
+    raise unless context.user_id.present? && context.user.present?
 
-      joins(:note).where(user_id: context.user_id).
-        or(joins(:note).where({ notes: { scope: "public" } }))
-    end
+    joins(:note).where(user_id: context.user_id).
+      or(joins(:note).where({ notes: { scope: "public" } }))
   end
 
   def self.accessibly_in_spaces(context)
