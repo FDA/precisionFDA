@@ -1,6 +1,6 @@
 import React from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useLocation, useParams } from 'react-router-dom'
 import Dropdown from '../../components/Dropdown'
 import { Loader } from '../../components/Loader'
 import { DatabaseIcon } from '../../components/icons/DatabaseIcon'
@@ -24,76 +24,82 @@ import {
   NotFound,
   Title,
   Topbox,
+  MetadataValBreakAll,
 } from '../home/show.styles'
 import { fetchDatabaseRequest } from './databases.api'
 import { IDatabase } from './databases.types'
 import { useDatabaseSelectActions } from './useDatabaseSelectActions'
 import { EmitScope, HomeScope } from '../home/types'
 import { Button } from '../../components/Button'
+import { DBStatus } from './DbStatus'
+import { getBackPathNext } from '../../utils/getBackPath'
+import { getSpaceIdFromScope } from '../../utils'
 
-const renderOptions = (db: IDatabase, homeScope?: HomeScope) => (
+const renderOptions = (db: IDatabase, homeScope?: HomeScope) => {
+  const spaceId = getSpaceIdFromScope(db.scope)
+  return (
   <MetadataSection>
     <MetadataRow>
       <MetadataItem>
         <MetadataKey>Location</MetadataKey>
-        <MetadataVal>
-          <Link target="_blank" to={`/home/databases?scope=${homeScope?.toLowerCase()}`}>
+        <MetadataVal data-testid="db-location">
+          <Link target="_blank" to={ spaceId ? `/spaces/${spaceId}/databases` : `/home/databases?scope=${homeScope?.toLowerCase()}`}>
             {homeScope === 'featured' ? 'Featured' : db.location}
           </Link>
         </MetadataVal>
       </MetadataItem>
       <MetadataItem>
         <MetadataKey>ID</MetadataKey>
-        <MetadataVal>{db.uid}</MetadataVal>
+        <MetadataVal data-testid="db-id">{db.uid}</MetadataVal>
       </MetadataItem>
       <MetadataItem>
         <MetadataKey>Added By</MetadataKey>
-        <MetadataVal>
+        <MetadataVal data-testid="db-added-by">
           {' '}
-          <Link target="_blank" to={db.links.user}>
-            {db.added_by_fullname}
+          <Link target="_blank" to={`/users/${db.addedBy}`}>
+            {db.addedByFullname}
           </Link>
         </MetadataVal>
       </MetadataItem>
       <MetadataItem>
         <MetadataKey>Created On</MetadataKey>
-        <MetadataVal>{db.created_at_date_time}</MetadataVal>
+        <MetadataVal data-testid="db-created-on">{db.createdAtDateTime}</MetadataVal>
       </MetadataItem>
     </MetadataRow>
     <MetadataRow>
       <MetadataItem>
-        <MetadataKey>DB Status</MetadataKey>
-        <MetadataVal>{db.status}</MetadataVal>
+        <MetadataKey>Status</MetadataKey>
+        <MetadataVal data-testid="db-status"><DBStatus status={db.status} /></MetadataVal>
       </MetadataItem>
       <MetadataItem>
         <MetadataKey>DB Port</MetadataKey>
-        <MetadataVal>{db.port}</MetadataVal>
+        <MetadataVal data-testid="db-port">{db.port}</MetadataVal>
       </MetadataItem>
       <MetadataItem>
         <MetadataKey>Engine</MetadataKey>
-        <MetadataVal>{db.engine}</MetadataVal>
+        <MetadataVal data-testid="db-engine">{db.engine}</MetadataVal>
       </MetadataItem>
       <MetadataItem>
         <MetadataKey>Version</MetadataKey>
-        <MetadataVal>{db.engine_version}</MetadataVal>
+        <MetadataVal data-testid="db-version">{db.engineVersion}</MetadataVal>
       </MetadataItem>
       <MetadataItem>
         <MetadataKey>Instance</MetadataKey>
-        <MetadataVal>{RESOURCE_LABELS[db.dx_instance_class] ?? db.dx_instance_class}</MetadataVal>
+        <MetadataVal data-testid="db-instance">{RESOURCE_LABELS[db.dxInstanceClass] ?? db.dxInstanceClass}</MetadataVal>
       </MetadataItem>
     </MetadataRow>
     <MetadataRow>
       <MetadataItem>
         <MetadataKey>Status Updated</MetadataKey>
-        <MetadataVal>{db.status_updated_date_time}</MetadataVal>
+        <MetadataVal data-testid="db-status-updated">{db.statusUpdatedDateTime}</MetadataVal>
       </MetadataItem>
       <MetadataItem>
         <MetadataKey>Host Endpoint</MetadataKey>
-        <MetadataVal>{db.host}</MetadataVal>
+        <MetadataValBreakAll data-testid="db-host">{db.host}</MetadataValBreakAll>
       </MetadataItem>
     </MetadataRow>
   </MetadataSection>
-)
+)}
 
 const DetailActionsDropdown = ({ db, refetch }: { db: IDatabase; refetch: () => void }) => {
   const actions = useDatabaseSelectActions([db], ['dbclusters', db.uid])
@@ -117,9 +123,10 @@ const DetailActionsDropdown = ({ db, refetch }: { db: IDatabase; refetch: () => 
   )
 }
 
-export const DatabaseShow = ({ emitScope, homeScope }: { homeScope?: HomeScope; emitScope?: EmitScope }) => {
+export const DatabaseShow = ({ emitScope, homeScope, spaceId }: { homeScope?: HomeScope, emitScope?: EmitScope, spaceId?: number }) => {
   const { uid } = useParams<{ uid: string }>()
-  const { data, status, isLoading, refetch, isFetching } = useQuery({
+  const location = useLocation()
+  const { data, isLoading, refetch, isFetching } = useQuery({
     queryKey: ['dbclusters', uid],
     queryFn: () =>
       fetchDatabaseRequest(uid!).then(dbCluster => {
@@ -129,6 +136,13 @@ export const DatabaseShow = ({ emitScope, homeScope }: { homeScope?: HomeScope; 
   })
 
   if (isLoading) return <HomeLoader />
+
+  const backPath = getBackPathNext({
+    location, 
+    resourceLocation: 'databases',
+    homeScope,
+    spaceId,
+  })
 
   if (!data)
     return (
@@ -140,21 +154,23 @@ export const DatabaseShow = ({ emitScope, homeScope }: { homeScope?: HomeScope; 
 
   return (
     <>
-      <StyledBackLink linkTo="/home/databases">Back to Databases</StyledBackLink>
+      <StyledBackLink linkTo={backPath} data-testid="db-back-link">
+        Back to Databases
+      </StyledBackLink>
       <Topbox>
         <ResourceHeader>
           <HeaderLeft>
             <Title>
-              <DatabaseIcon height={20} />
-              &nbsp;{data.name}
-              {['starting', 'stopping', 'terminating'].includes(data.status) && <Loader />}
+              <DatabaseIcon height={20}/>
+              &nbsp;<span data-testid="db-name">{data.name}</span>
+              {['creating', 'starting', 'stopping', 'terminating'].includes(data.status) && <Loader/>}
             </Title>
-            <Description>{data.description}</Description>
+            <Description data-testid="db-description">{data.description}</Description>
           </HeaderLeft>
           <div>
             <StyledRight>
               {data.status !== 'terminated' && (
-                <Button onClick={() => refetch()} disabled={isFetching}>
+                <Button data-testid="db-refresh-status" onClick={() => refetch()} disabled={isFetching}>
                   <Refresh $spin={isFetching}>
                     <SyncIcon />
                   </Refresh>
@@ -170,11 +186,18 @@ export const DatabaseShow = ({ emitScope, homeScope }: { homeScope?: HomeScope; 
 
         {data.tags.length > 0 && (
           <MetadataSection>
-            <StyledTags>
-              {data.tags.map(tag => (
-                <StyledTagItem key={tag}>{tag}</StyledTagItem>
-              ))}
-            </StyledTags>
+            <MetadataRow>
+              <MetadataItem>
+                <MetadataKey>Tags</MetadataKey>
+                <StyledTags data-testid="tags-container">
+                  {data.tags.map(tag => (
+                    <StyledTagItem data-testid="db-tag-item" key={tag}>
+                      {tag}
+                    </StyledTagItem>
+                  ))}
+                </StyledTags>
+              </MetadataItem>
+            </MetadataRow>
           </MetadataSection>
         )}
         {Object.entries(data.properties).length > 0 && (
@@ -182,11 +205,11 @@ export const DatabaseShow = ({ emitScope, homeScope }: { homeScope?: HomeScope; 
             <MetadataRow>
               <MetadataItem>
                 <MetadataKey>Properties</MetadataKey>
-                <StyledTags>
+                <StyledTags data-testid="properties-container">
                   {Object.entries(data.properties).map(([key, value]) => (
                     <StyledPropertyItem key={key}>
-                      <StyledPropertyKey>{key}</StyledPropertyKey>
-                      <span>{value}</span>
+                      <StyledPropertyKey data-testid="db-property-key">{key}</StyledPropertyKey>
+                      <span data-testid={`db-property-value-${key}`}>{value}</span>
                     </StyledPropertyItem>
                   ))}
                 </StyledTags>

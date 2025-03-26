@@ -170,6 +170,10 @@ class Space < ActiveRecord::Base
     AppSeries.accessible_by_space(self)
   end
 
+  def dbclusters
+    DbCluster.accessible_by_space(self)
+  end
+
   def latest_revision_apps
     App.where(id: app_series.pluck(:latest_version_app_id))
   end

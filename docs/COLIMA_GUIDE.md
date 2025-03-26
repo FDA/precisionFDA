@@ -6,14 +6,14 @@ This guide contains steps to get started with colima on PFDA
 
 https://github.com/abiosoft/colima
 
-_Last updated: 19.06.2024_
+_Last updated: 17.12.2024_
 
 ## Install
 - `brew install docker`
 - `brew install colima`
 
 ## Start Colima
-- `colima start -f --cpu 4 --memory 12 --disk 20`
+- `colima start -f --cpu 4 --memory 10 --disk 30 --arch aarch64 --vz-rosetta --mount-type=virtiofs`
 
 ## Run PFDA
 - From inside the project root `make run`

@@ -10,7 +10,12 @@ import {
   UidAndFollowUpInput,
 } from '@shared/domain/user-file/user-file.input'
 import { QueueJobProducer } from '@shared/queue/queue-job.producer'
-import { CheckStatusJob, SyncDbClusterJob, TASK_TYPE } from '@shared/queue/task.input'
+import {
+  CheckStatusJob,
+  SyncDbClusterJob,
+  SyncDbClusterJobOutput,
+  TASK_TYPE,
+} from '@shared/queue/task.input'
 import { UserCtx } from '@shared/types'
 import { JobOptions, Queue } from 'bull'
 import { NotifyType } from '@shared/domain/discussion/dto/notify.type'
@@ -122,6 +127,21 @@ export class MainQueueJobProducer extends QueueJobProducer {
     const options: JobOptions = {
       jobId: SyncDbClusterOperation.getBullJobId(data.dxid),
       repeat: { cron: config.workerJobs.syncDbClusters.repeatPattern },
+    }
+
+    return await this.addToQueue(wrapped, options)
+  }
+
+  async createDbClusterSyncJobOutputTask(data: SyncDbClusterJobOutput['payload'], user: UserCtx) {
+    const wrapped = {
+      type: TASK_TYPE.SYNC_DBCLUSTER_JOB_OUTPUT as const,
+      payload: data,
+      user,
+    }
+
+    const options: JobOptions = {
+      jobId: `${TASK_TYPE.SYNC_DBCLUSTER_JOB_OUTPUT}.${data.dxid}`,
+      repeat: { cron: config.workerJobs.syncDbClusterJobOutput.repeatPattern },
     }
 
     return await this.addToQueue(wrapped, options)

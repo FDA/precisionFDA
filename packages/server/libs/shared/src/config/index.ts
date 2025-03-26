@@ -131,6 +131,9 @@ const defaultConfig = {
     syncDbClusters: {
       repeatPattern: '*/1 * * * *', // Every minute
     },
+    syncDbClusterJobOutput: {
+      repeatPattern: '*/2 * * * *', // Every 2 minutes
+    },
     syncFiles: {
       repeatPattern: '*/15 * * * * *', // Every 15 seconds
     },
@@ -187,6 +190,13 @@ const defaultConfig = {
     projectId: process.env.RECAPTCHA_PROJECT_ID,
     siteKey: process.env.RECAPTCHA_SITE_KEY,
     apiKey: process.env.RECAPTCHA_API_KEY,
+  },
+  dbCluster: {
+    passwordSecret: process.env.DBCLUSTER_PASSWORD_SECRET,
+    synchronizationApp: {
+      id: process.env.DBCLUSTER_SYNCHRONIZATION_APP_ID,
+      encryptionKey: process.env.DBCLUSTER_SYNCHRONIZATION_APP_ENCRYPTION_KEY,
+    },
   },
   devFlags: {
     middleware: {
