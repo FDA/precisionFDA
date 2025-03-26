@@ -2,13 +2,8 @@
 import React, { useEffect, useRef, useState } from 'react'
 import useWebSocket from 'react-use-websocket'
 import styled from 'styled-components'
-import {
-  DEFAULT_RECONNECT_ATTEMPTS,
-  DEFAULT_RECONNECT_INTERVAL,
-  getNodeWsUrl,
-  SHOULD_RECONNECT,
-} from '../../utils/config'
-import { JobLogItem, WEBSOCKET_MESSSAGE_TYPE, WebSocketMessage } from '../home/types'
+import { DEFAULT_RECONNECT_ATTEMPTS, DEFAULT_RECONNECT_INTERVAL, getNodeWsUrl, SHOULD_RECONNECT } from '../../utils/config'
+import { JobLogItem, WEBSOCKET_MESSAGE_TYPE, WebSocketMessage } from '../home/types'
 import { JobState } from './executions.types'
 import { Button } from '../../components/Button'
 
@@ -38,10 +33,9 @@ const StyledDownloadButton = styled(Button)`
   right: 14px;
 `
 
-type ShowingLogItem = Pick<JobLogItem, 'source' | 'line' | 'level' | 'msg'>;
+type ShowingLogItem = Pick<JobLogItem, 'source' | 'line' | 'level' | 'msg'>
 
-const isStopSignal = (log: ShowingLogItem) =>
-    log.source === 'SYSTEM' && log.msg === 'END_LOG'
+const isStopSignal = (log: ShowingLogItem) => log.source === 'SYSTEM' && log.msg === 'END_LOG'
 
 export const Logs = ({ jobUid, jobState }: { jobUid: string; jobState: JobState }) => {
   const [logs, setLogs] = useState<ShowingLogItem[]>([])
@@ -56,20 +50,20 @@ export const Logs = ({ jobUid, jobState }: { jobUid: string; jobState: JobState 
     filter: message => {
       try {
         const data = JSON.parse(message.data)
-        return data.type === WEBSOCKET_MESSSAGE_TYPE.JOB_LOG
+        return data.type === WEBSOCKET_MESSAGE_TYPE.JOB_LOG
       } catch {
         return false
       }
     },
     onOpen: () => {
       if (!isStreamingDone && jobUid) {
-        sendMessage(JSON.stringify({ event: WEBSOCKET_MESSSAGE_TYPE.JOB_LOG, data: { jobUid }}))
+        sendMessage(JSON.stringify({ event: WEBSOCKET_MESSAGE_TYPE.JOB_LOG, data: { jobUid } }))
       }
     },
     onMessage: message => {
       try {
         const messageData = JSON.parse(message.data)
-        if (messageData.type === WEBSOCKET_MESSSAGE_TYPE.JOB_LOG) {
+        if (messageData.type === WEBSOCKET_MESSAGE_TYPE.JOB_LOG) {
           const newLog = messageData.data as JobLogItem
           if (isStopSignal(newLog)) {
             setIsStreamingDone(true)
@@ -80,7 +74,12 @@ export const Logs = ({ jobUid, jobState }: { jobUid: string; jobState: JobState 
           }
           setLogs(prevLogs => [
             ...prevLogs,
-            { level: newLog.level, msg: newLog.msg, line: newLog.line, source: newLog.source },
+            {
+              level: newLog.level,
+              msg: newLog.msg,
+              line: newLog.line,
+              source: newLog.source,
+            },
           ])
         }
       } catch {
@@ -101,9 +100,7 @@ export const Logs = ({ jobUid, jobState }: { jobUid: string; jobState: JobState 
   }, [logs, jobState])
 
   const downloadLogs = () => {
-    const logText = logs
-        .map(log => `${log.level}: ${log.msg}`)
-        .join('\n')
+    const logText = logs.map(log => `${log.level}: ${log.msg}`).join('\n')
 
     const blob = new Blob([logText], { type: 'text/plain' })
     const link = document.createElement('a')
@@ -114,21 +111,21 @@ export const Logs = ({ jobUid, jobState }: { jobUid: string; jobState: JobState 
   }
 
   return (
-      <StyledLogsContainer>
-        <StyledDownloadButton data-variant="success" onClick={downloadLogs} disabled={logs.length === 0}>
-          Download Log File
-        </StyledDownloadButton>
-        <StyledLogs ref={logRef}>
-          {logs.length > 0 ? (
-              logs.map((log) => (
-                  <StyledLogLine key={`${log.line}-${log.level}`}>
-                    {log.level}: {log.msg}
-                  </StyledLogLine>
-              ))
-          ) : (
-              <StyledLogLine>Loading...</StyledLogLine>
-          )}
-        </StyledLogs>
-      </StyledLogsContainer>
+    <StyledLogsContainer>
+      <StyledDownloadButton data-variant="success" onClick={downloadLogs} disabled={logs.length === 0}>
+        Download Log File
+      </StyledDownloadButton>
+      <StyledLogs ref={logRef}>
+        {logs.length > 0 ? (
+          logs.map(log => (
+            <StyledLogLine key={`${log.line}-${log.level}`}>
+              {log.level}: {log.msg}
+            </StyledLogLine>
+          ))
+        ) : (
+          <StyledLogLine>Loading...</StyledLogLine>
+        )}
+      </StyledLogs>
+    </StyledLogsContainer>
   )
 }

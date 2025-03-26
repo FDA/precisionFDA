@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { EntityService } from '@shared/domain/entity/entity.service'
 import { EntityWithProvenanceType } from '@shared/domain/provenance/model/entity-with-provenance.type'
+import { EntityScope } from '@shared/types/common'
 import { EntityUtils } from '@shared/utils/entity.utils'
 import { EntityProvenanceData } from '../../model/entity-provenance-data'
 import { EntityProvenanceSource } from '../../model/entity-provenance-source'
@@ -18,6 +19,13 @@ export abstract class EntityProvenanceDataService<T extends EntityWithProvenance
     return EntityUtils.getEntityName(source)
   }
 
+  protected getScope(source: EntityProvenanceSource<T>['entity']): EntityScope | null {
+    if (!('scope' in source) || !source.scope) {
+      return null
+    }
+    return source.scope as EntityScope
+  }
+
   abstract getParents(
     source: EntityProvenanceSource<T>['entity'],
   ): Promise<EntityProvenanceSourceUnion[]>
@@ -32,6 +40,7 @@ export abstract class EntityProvenanceDataService<T extends EntityWithProvenance
       title: this.getTitle(source),
       url: await this.entityService.getEntityUiLink(source),
       identifier: this.getIdentifier(source),
+      scope: this.getScope(source),
     }
   }
 }

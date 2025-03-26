@@ -20,7 +20,7 @@ import {
   KeyVal,
   Notification,
   NOTIFICATION_ACTION,
-  WEBSOCKET_MESSSAGE_TYPE,
+  WEBSOCKET_MESSAGE_TYPE,
   WebSocketMessage,
 } from '../home/types'
 import { useList } from '../home/useList'
@@ -94,7 +94,7 @@ export const SpaceReportList = ({ scope, isContributorOrHigher }: { scope: strin
     filter: message => {
       try {
         const messageData = JSON.parse(message.data)
-        return messageData.type === WEBSOCKET_MESSSAGE_TYPE.NOTIFICATION
+        return messageData.type === WEBSOCKET_MESSAGE_TYPE.NOTIFICATION
       } catch (e) {
         return false
       }
