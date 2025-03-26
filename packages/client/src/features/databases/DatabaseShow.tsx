@@ -28,7 +28,7 @@ import {
 import { fetchDatabaseRequest } from './databases.api'
 import { IDatabase } from './databases.types'
 import { useDatabaseSelectActions } from './useDatabaseSelectActions'
-import { EmmitScope, HomeScope } from '../home/types'
+import { EmitScope, HomeScope } from '../home/types'
 import { Button } from '../../components/Button'
 
 const renderOptions = (db: IDatabase, homeScope?: HomeScope) => (
@@ -95,24 +95,13 @@ const renderOptions = (db: IDatabase, homeScope?: HomeScope) => (
   </MetadataSection>
 )
 
-const DetailActionsDropdown = ({
-  db,
-  refetch,
-}: {
-  db: IDatabase
-  refetch: () => void
-}) => {
+const DetailActionsDropdown = ({ db, refetch }: { db: IDatabase; refetch: () => void }) => {
   const actions = useDatabaseSelectActions([db], ['dbclusters', db.uid])
 
   return (
     <>
-      <Dropdown
-        trigger="click"
-        content={<ActionsDropdownContent actions={actions}/>}
-      >
-        {dropdownProps => (
-          <ActionsButton {...dropdownProps} active={dropdownProps.isActive}/>
-        )}
+      <Dropdown trigger="click" content={<ActionsDropdownContent actions={actions} />}>
+        {dropdownProps => <ActionsButton {...dropdownProps} active={dropdownProps.isActive} />}
       </Dropdown>
 
       {actions['Copy to space']?.modal}
@@ -128,41 +117,37 @@ const DetailActionsDropdown = ({
   )
 }
 
-export const DatabaseShow = ({ emitScope, homeScope }: { homeScope?: HomeScope, emitScope?: EmmitScope }) => {
+export const DatabaseShow = ({ emitScope, homeScope }: { homeScope?: HomeScope; emitScope?: EmitScope }) => {
   const { uid } = useParams<{ uid: string }>()
   const { data, status, isLoading, refetch, isFetching } = useQuery({
     queryKey: ['dbclusters', uid],
-    queryFn: () => fetchDatabaseRequest(uid!).then((dbCluster) => {
-      if (emitScope) emitScope(dbCluster.scope, dbCluster.featured)
-      return dbCluster
-    }),
+    queryFn: () =>
+      fetchDatabaseRequest(uid!).then(dbCluster => {
+        if (emitScope) emitScope(dbCluster.scope, dbCluster.featured)
+        return dbCluster
+      }),
   })
 
-
-  if (isLoading) return <HomeLoader/>
+  if (isLoading) return <HomeLoader />
 
   if (!data)
     return (
       <NotFound>
         <h1>Database not found</h1>
-        <div>
-          Sorry, this database does not exist or is not accessible by you.
-        </div>
+        <div>Sorry, this database does not exist or is not accessible by you.</div>
       </NotFound>
     )
 
   return (
     <>
-      <StyledBackLink linkTo="/home/databases">
-        Back to Databases
-      </StyledBackLink>
+      <StyledBackLink linkTo="/home/databases">Back to Databases</StyledBackLink>
       <Topbox>
         <ResourceHeader>
           <HeaderLeft>
             <Title>
-              <DatabaseIcon height={20}/>
+              <DatabaseIcon height={20} />
               &nbsp;{data.name}
-              {['starting', 'stopping', 'terminating'].includes(data.status) && <Loader/>}
+              {['starting', 'stopping', 'terminating'].includes(data.status) && <Loader />}
             </Title>
             <Description>{data.description}</Description>
           </HeaderLeft>
@@ -171,40 +156,44 @@ export const DatabaseShow = ({ emitScope, homeScope }: { homeScope?: HomeScope, 
               {data.status !== 'terminated' && (
                 <Button onClick={() => refetch()} disabled={isFetching}>
                   <Refresh $spin={isFetching}>
-                    <SyncIcon/>
+                    <SyncIcon />
                   </Refresh>
                   Refresh
                 </Button>
               )}
-              {<DetailActionsDropdown db={data} refetch={refetch}/>}
+              {<DetailActionsDropdown db={data} refetch={refetch} />}
             </StyledRight>
           </div>
         </ResourceHeader>
 
         {renderOptions(data, homeScope)}
 
-        {data.tags.length > 0 && (<MetadataSection>
-          <StyledTags>
-            {data.tags.map(tag => (
-              <StyledTagItem key={tag}>{tag}</StyledTagItem>
-            ))}
-          </StyledTags>
-        </MetadataSection>)}
-        {Object.entries(data.properties).length > 0 && (<MetadataSection>
-          <MetadataRow>
-            <MetadataItem>
-              <MetadataKey>Properties</MetadataKey>
-              <StyledTags>
-                {Object.entries(data.properties).map(([key, value]) => (
-                  <StyledPropertyItem key={key}>
-                    <StyledPropertyKey>{key}</StyledPropertyKey>
-                    <span>{value}</span>
-                  </StyledPropertyItem>
-                ))}
-              </StyledTags>
-            </MetadataItem>
-          </MetadataRow>
-        </MetadataSection>)}
+        {data.tags.length > 0 && (
+          <MetadataSection>
+            <StyledTags>
+              {data.tags.map(tag => (
+                <StyledTagItem key={tag}>{tag}</StyledTagItem>
+              ))}
+            </StyledTags>
+          </MetadataSection>
+        )}
+        {Object.entries(data.properties).length > 0 && (
+          <MetadataSection>
+            <MetadataRow>
+              <MetadataItem>
+                <MetadataKey>Properties</MetadataKey>
+                <StyledTags>
+                  {Object.entries(data.properties).map(([key, value]) => (
+                    <StyledPropertyItem key={key}>
+                      <StyledPropertyKey>{key}</StyledPropertyKey>
+                      <span>{value}</span>
+                    </StyledPropertyItem>
+                  ))}
+                </StyledTags>
+              </MetadataItem>
+            </MetadataRow>
+          </MetadataSection>
+        )}
       </Topbox>
     </>
   )

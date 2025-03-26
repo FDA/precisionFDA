@@ -30,7 +30,7 @@ import {
   MetaPath,
   Notification,
   NOTIFICATION_ACTION,
-  WEBSOCKET_MESSSAGE_TYPE,
+  WEBSOCKET_MESSAGE_TYPE,
   WebSocketMessage,
 } from '../home/types'
 import { useList } from '../home/useList'
@@ -94,7 +94,7 @@ export const FileList = ({
   })
 
   const onRowClick = (id: string) => {
-    navigate(`${location.pathname}/${id}`, { state: { from: location.pathname, fromSearch: location.search }})
+    navigate(`${location.pathname}/${id}`, { state: { from: location.pathname, fromSearch: location.search } })
   }
 
   const { lastJsonMessage } = useWebSocket<WebSocketMessage>(getNodeWsUrl(), {
@@ -107,7 +107,7 @@ export const FileList = ({
         const messageData = JSON.parse(message.data)
         const notification = messageData.data as Notification
         return (
-          messageData.type === WEBSOCKET_MESSSAGE_TYPE.NOTIFICATION &&
+          messageData.type === WEBSOCKET_MESSAGE_TYPE.NOTIFICATION &&
           [NOTIFICATION_ACTION.NODES_REMOVED, NOTIFICATION_ACTION.NODES_COPIED, NOTIFICATION_ACTION.FILE_CLOSED].includes(
             notification.action,
           )
@@ -290,7 +290,6 @@ export const FileList = ({
       {actions['Delete']?.modal}
       {actions['Move']?.modal}
       {actions['Copy to...']?.modal}
-      {actions['Attach to...']?.modal}
       {actions['Attach License']?.modal}
       {actions['Detach License']?.modal}
       {actions['Accept License']?.modal}
@@ -326,8 +325,8 @@ export const FilesListTable = ({
   filesMeta,
   folderId,
 }: {
-  spaceId?: number,
-  filesMeta?: {path: MetaPath[]},
+  spaceId?: number
+  filesMeta?: { path: MetaPath[] }
   shouldResetFilters?: any[]
   isAdmin: boolean
   filters: IFilter[]
@@ -350,7 +349,12 @@ export const FilesListTable = ({
   folderId?: number
 }) => {
   const location = useLocation()
-  const { handleDragEnd, handleDragStart, sensors, dndMoveModal } = useFileDnd({ setSelectedRows, selectedObjects, files, spaceId })
+  const { handleDragEnd, handleDragStart, sensors, dndMoveModal } = useFileDnd({
+    setSelectedRows,
+    selectedObjects,
+    files,
+    spaceId,
+  })
 
   function filterColsByScope(c: Column<IFile>): boolean {
     return !(
@@ -366,7 +370,7 @@ export const FilesListTable = ({
       )
     )
   }
-  
+
   const col = useFilesColumns({
     onFolderClick,
     onFileClick,
@@ -374,15 +378,26 @@ export const FilesListTable = ({
     isAdmin,
     properties,
   }).filter(filterColsByScope)
-  
+
   const columns = useMemo(() => col, [col, location.search, properties])
   const data = useMemo(() => files || [], [files, selectedRows])
 
   return (
-    <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd} sensors={sensors} collisionDetection={centerToCursorCollisionDetection}>
+    <DndContext
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
+      sensors={sensors}
+      collisionDetection={centerToCursorCollisionDetection}
+    >
       {dndMoveModal.modalComp}
       <FilesListBreadcrumbHeader>
-        <FileBreadcrumb currentFolderId={folderId || 0} basePath={location.pathname} scope={homeScope} metaPath={filesMeta?.path} labelText="You are here:" />
+        <FileBreadcrumb
+          currentFolderId={folderId || 0}
+          basePath={location.pathname}
+          scope={homeScope}
+          metaPath={filesMeta?.path}
+          labelText="You are here:"
+        />
       </FilesListBreadcrumbHeader>
       <StyledHomeTable>
         <Table<IFile>
