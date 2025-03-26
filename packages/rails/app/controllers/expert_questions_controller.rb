@@ -1,6 +1,5 @@
 class ExpertQuestionsController < ApplicationController
-  skip_before_action :require_login,     only: [:show_question]
-  before_action :require_login_or_guest, only: [:index, :show, :edit, :create, :update]
+  skip_before_action :require_login, only: [:show_question]
 
   def index
     @expert = Expert.find(unsafe_params[:expert_id])

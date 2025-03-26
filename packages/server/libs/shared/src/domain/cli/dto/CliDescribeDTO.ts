@@ -5,11 +5,15 @@ import { Node } from '@shared/domain/user-file/node.entity'
 import { Workflow } from '@shared/domain/workflow/entity/workflow.entity'
 import {
   AppDescribeResponse,
+  DbClusterDescribeResponse,
   FileDescribeResponse,
   JobDescribeResponse,
   WorkflowDescribeResponse,
 } from '@shared/platform-client/platform-client.responses'
 import { EntityScope } from '@shared/types/common'
+import { DbCluster } from '@shared/domain/db-cluster/db-cluster.entity'
+import { ENGINE, ENGINES, STATUS, STATUSES } from '@shared/domain/db-cluster/db-cluster.enum'
+import { invertObj } from 'ramda'
 import { SimpleUserDTO } from '@shared/domain/user/dto/simple-user.dto'
 
 export class CliFileDescribeDTO {
@@ -143,6 +147,57 @@ export class CliExecutionDescribeDTO {
       createdAt: execution.createdAt,
       updatedAt: execution.updatedAt,
       addedBy: execution.user.getProperty('dxuser'),
+    }
+  }
+}
+
+export class CliDbClusterDescribeDTO {
+  id: number
+  dxid: string
+  name: string
+  title: string
+  status: string
+  location: string
+  description?: string
+  addedBy: string
+  createdAt: Date
+  updatedAt: Date
+  engine: string
+  engineVersion: string
+  dxInstanceClass: string
+  statusAsOf: Date
+  host: string
+  port: string
+  tags: string[]
+  properties: {}
+
+  static fromEntity(
+    platformDbClusterData: DbClusterDescribeResponse,
+    dbcluster: DbCluster,
+  ): CliDbClusterDescribeDTO {
+    return {
+      ...platformDbClusterData,
+      id: dbcluster.id,
+      dxid: dbcluster.dxid,
+      name: dbcluster.name,
+      title: dbcluster.name,
+      status: STATUSES[invertObj(STATUS)[dbcluster.status]],
+      location: dbcluster.scope,
+      description: dbcluster.description,
+      addedBy: dbcluster.user.getProperty('dxuser'),
+      createdAt: dbcluster.createdAt,
+      updatedAt: dbcluster.updatedAt,
+      engine: ENGINES[invertObj(ENGINE)[dbcluster.engine]],
+      engineVersion: dbcluster.engineVersion,
+      dxInstanceClass: dbcluster.dxInstanceClass,
+      statusAsOf: dbcluster.statusAsOf,
+      host: dbcluster.host,
+      port: dbcluster.port,
+      tags: dbcluster.taggings.map((t) => t.tag.name),
+      properties: dbcluster.properties.reduce((acc, p) => {
+        acc[p.propertyName] = p.propertyValue
+        return acc
+      }, {}),
     }
   }
 }

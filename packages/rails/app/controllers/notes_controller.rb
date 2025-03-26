@@ -1,15 +1,7 @@
 class NotesController < ApplicationController
-  skip_before_action :require_login,     only: %i(index featured explore show track)
-  before_action :require_login_or_guest, only: %i(index featured explore show track)
-
   layout "react", only: [:track]
 
   def index
-    if @context.guest?
-      redirect_to explore_notes_path
-      return
-    end
-
     @notes = Note.editable_by(@context).real_notes.order(id: :desc).page unsafe_params[:notes_page]
   end
 

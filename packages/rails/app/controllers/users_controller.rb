@@ -1,6 +1,4 @@
 class UsersController < ApplicationController
-  skip_before_action :require_login,     only: [:show]
-  before_action :require_login_or_guest, only: [:show]
 
   def show
     @user = User.find_by!(dxuser: unsafe_params[:username])

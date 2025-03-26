@@ -7,7 +7,7 @@ import { FieldGroup, InputError } from '../../components/form/styles'
 import { InputText } from '../../components/InputText'
 import { ButtonRow, Footer, ModalScroll, StyledForm } from '../modal/styles'
 import { useModal } from '../modal/useModal'
-import { editDatabaseRequest } from './databases.api'
+import { EditDatabasePayload, editDatabaseRequest } from './databases.api'
 import { IDatabase } from './databases.types'
 import { ModalHeaderTop, ModalNext } from '../modal/ModalNext'
 import { Button } from '../../components/Button'
@@ -25,7 +25,6 @@ const EditDatabaseInfoForm = ({
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-    setValue,
   } = useForm({
     defaultValues: {
       name: db?.name,
@@ -35,9 +34,9 @@ const EditDatabaseInfoForm = ({
 
   const editDbClusterMutation = useMutation({
     mutationKey: ['edit-database'],
-    mutationFn: (payload: { name: string; description: string }) =>
+    mutationFn: (payload: EditDatabasePayload) =>
       editDatabaseRequest(payload, db.uid),
-    onSuccess: res => {
+    onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ['dbcluster', db.uid],
       })
@@ -47,12 +46,14 @@ const EditDatabaseInfoForm = ({
       handleClose()
       toast.success('Success: Editing database info')
     },
-    onError: e => {
-      toast.error('Error: Editing database info')
+    onError: (error: any) => {
+      const payload = error.response?.data as any
+      const message = payload?.error?.message ?? error.message
+      toast.error(`Error: ${message}`)
     },
   })
 
-  const onSubmit = (vals: any) => {
+  const onSubmit = (vals: EditDatabasePayload) => {
     editDbClusterMutation.mutateAsync({
       name: vals.name,
       description: vals.description,
@@ -66,7 +67,6 @@ const EditDatabaseInfoForm = ({
           <FieldGroup>
             <label>Database Name</label>
             <InputText
-              label="Database Name"
               {...register('name', { required: 'Name is required.' })}
               placeholder="Enter name..."
               disabled={isSubmitting}
@@ -119,7 +119,7 @@ export const useEditDatabaseModal = (selectedItem: IDatabase) => {
   }
   const modalComp = (
     <ModalNext
-      id={'modal-dbclusters-edit'}
+      id="modal-dbclusters-edit"
       data-testid="modal-dbclusters-edit"
       isShown={isShown}
       hide={handleClose}

@@ -20,12 +20,12 @@ class Event::UserViewed < Event
 
   class << self
     def create_for(context, request_path)
-      return if !context.guest? && !context.logged_in?
+      return unless context.logged_in?
 
       create(
-        guest: context.guest?,
+        guest: false,
         dxuser: identifier_for(context),
-        org_handle: context.guest? ? nil : context.user.org.handle,
+        org_handle: context.user.org.handle,
         request_path: request_path,
       )
     end
@@ -33,11 +33,7 @@ class Event::UserViewed < Event
     private
 
     def identifier_for(context)
-      if context.guest?
-        context.username
-      else
-        context.user.dxuser
-      end
+      context.user.dxuser
     end
   end
 end

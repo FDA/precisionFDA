@@ -48,7 +48,6 @@ import {
 
 type UserMenuProps = {
   user: IUser | null | undefined
-  userIsGuest?: boolean
   userCanAdministerSite?: boolean
   handleLogout: () => void
   showCloudResourcesModal: () => void
@@ -57,7 +56,6 @@ type UserMenuProps = {
 
 export const UserMenu = ({
   user,
-  userIsGuest = true,
   userCanAdministerSite = false,
   handleLogout,
   showCloudResourcesModal,
@@ -67,7 +65,7 @@ export const UserMenu = ({
     <StyledLink data-turbolinks="false" href="/profile">
       Profile
     </StyledLink>
-    {user && !userIsGuest && (
+    {user && (
       <>
         <StyledLink data-turbolinks="false" href={`/users/${user?.dxuser}`}>
           Public Profile
@@ -83,11 +81,9 @@ export const UserMenu = ({
     <StyledLink data-turbolinks="false" href="/licenses">
       Manage Licenses
     </StyledLink>
-    {!userIsGuest && (
-      <StyledLink as={Link} data-turbolinks="false" to="/account/notifications">
-        Notification Settings
-      </StyledLink>
-    )}
+    <StyledLink as={Link} data-turbolinks="false" to="/account/notifications">
+      Notification Settings
+    </StyledLink>
     <StyledDivider />
     <StyledLink as={Link} to="/about" data-turbolinks="false">
       About
@@ -131,7 +127,6 @@ const Header: React.FC = () => {
   const { isAlertDismissed, setIsAlertDismissed } = useAlertDismissed()
 
   const userCanAdministerSite = user?.can_administer_site
-  const userIsGuest = user?.is_guest
   const isSpacesPath = pathname.startsWith('/spaces')
   const isDataPortalsPath = pathname.startsWith('/data-portals')
 
@@ -154,7 +149,7 @@ const Header: React.FC = () => {
 
   if (!user) return null
 
-  const showGSRSLink = !isSpacesPath && !isDataPortalsPath && !userIsGuest
+  const showGSRSLink = !isSpacesPath && !isDataPortalsPath
   const showCDMHLink = !isSpacesPath && !isDataPortalsPath && !!siteSettings?.data?.cdmh.isEnabled
   const showAlertBanner = !isAlertDismissed && siteSettings.data?.alerts?.[0]
 
@@ -362,7 +357,6 @@ const Header: React.FC = () => {
                 <UserMenu
                   user={user}
                   userCanAdministerSite={userCanAdministerSite}
-                  userIsGuest={userIsGuest}
                   handleLogout={handleLogout}
                   showCloudResourcesModal={() => setCloudResourcesModalShown(true)}
                   generateCLIKey={() => generateCLIKeyAction.setShowModal(true)}

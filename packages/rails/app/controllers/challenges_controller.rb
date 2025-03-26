@@ -3,7 +3,6 @@
 class ChallengesController < ApplicationController
   skip_before_action :require_login,
                      only: %i(index consistency truth appathons join show treasure_old)
-  before_action :require_login_or_guest, only: []
   before_action :check_on_challenge_admin, only: %i(new create)
   before_action :find_editable_challenge, only: %i(edit update edit_page announce_result)
   before_action :check_scope_accessibility, only: %i(create update)
@@ -352,7 +351,7 @@ class ChallengesController < ApplicationController
 
       if @tab == "results-explore-peek" ||
          @truth_challenge[:results_announced] && @tab == "results-explore"
-        if @context.logged_in_or_guest?
+        if @context.logged_in?
           @new_saved_query = SavedQuery.new(
             query: filter_and_order_state_as_hash(@results_grid).to_json,
             grid_name: @results_grid.name,

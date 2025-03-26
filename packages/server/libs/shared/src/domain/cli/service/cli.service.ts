@@ -3,6 +3,7 @@ import { Injectable } from '@nestjs/common'
 import { App } from '@shared/domain/app/app.entity'
 import {
   CliAppDescribeDTO,
+  CliDbClusterDescribeDTO,
   CliDiscussionDescribeDTO,
   CliExecutionDescribeDTO,
   CliFileDescribeDTO,
@@ -12,6 +13,7 @@ import {
 import { CliDiscussionDTO } from '@shared/domain/cli/dto/CliDiscussionDTO'
 import { CliNodeSearchDTO } from '@shared/domain/cli/dto/CliNodeSearchDTO'
 import { CliSpaceMemberDTO } from '@shared/domain/cli/dto/CliSpaceMemberDTO'
+import { DbClusterService } from '@shared/domain/db-cluster/service/db-cluster.service'
 import { DiscussionAttachment } from '@shared/domain/discussion/discussion.types'
 import { DiscussionService } from '@shared/domain/discussion/services/discussion.service'
 import { DxId } from '@shared/domain/entity/domain/dxid'
@@ -45,6 +47,7 @@ import { EntityLinkService } from '@shared/domain/entity/entity-link/entity-link
 import { getNodePath } from '@shared/domain/user-file/user-file.helper'
 import { UpdateDiscussionDTO } from '@shared/domain/discussion/dto/update-discussion.dto'
 import { UpdateAnswerDTO } from '@shared/domain/discussion/dto/update-answer.dto'
+import { DbCluster } from '@shared/domain/db-cluster/db-cluster.entity'
 import { CommentDTO } from '@shared/domain/discussion/dto/comment.dto'
 import { AnswerDTO } from '@shared/domain/discussion/dto/answer.dto'
 import { DiscussionDTO } from '@shared/domain/discussion/dto/discussion.dto'
@@ -55,6 +58,7 @@ export class CliService {
     private readonly em: SqlEntityManager,
     private readonly user: UserContext,
     private readonly entityFetcherService: EntityFetcherService,
+    private readonly dbclusterService: DbClusterService,
     private readonly discussionService: DiscussionService,
     private readonly platformClient: PlatformClient,
     private readonly entityLinkService: EntityLinkService,
@@ -79,6 +83,8 @@ export class CliService {
         return await this.describeDiscussion(parseInt(uid.split('-')[1]))
       case 'folder':
         return await this.describeFolder(parseInt(uid.split('-')[1]))
+      case 'dbcluster':
+        return await this.describeDbCluster(uid as Uid<'dbcluster'>)
       default:
         throw new InvalidStateError('Unsupported entity type!')
     }
@@ -185,6 +191,25 @@ export class CliService {
     }
 
     return result
+  }
+
+  async describeDbCluster(dbClusterUid: Uid<'dbcluster'>) {
+    const dbCluster = await this.entityFetcherService.getAccessibleByUid(
+      DbCluster,
+      dbClusterUid,
+      {},
+      { populate: ['taggings.tag', 'user', 'properties'] },
+    )
+    if (!dbCluster) {
+      throw new NotFoundError('Database cluster not found or not accessible')
+    }
+
+    const describeResult = await this.platformClient.dbClusterDescribe({
+      dxid: dbCluster.dxid,
+      project: dbCluster.project,
+    })
+
+    return CliDbClusterDescribeDTO.fromEntity(describeResult, dbCluster)
   }
 
   private async fetchAttachments(noteId: number) {
@@ -317,6 +342,14 @@ export class CliService {
     }
 
     return result
+  }
+
+  async dbClusterGetPassword(dbclusterUid: Uid<'dbcluster'>) {
+    return await this.dbclusterService.getPassword(dbclusterUid)
+  }
+
+  async dbClusterRotatePassword(dbclusterUid: Uid<'dbcluster'>) {
+    return await this.dbclusterService.rotatePassword(dbclusterUid)
   }
 
   async createDiscussion(spaceId: number, body: CliCreateDiscussionDTO) {

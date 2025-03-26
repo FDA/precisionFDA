@@ -5,7 +5,6 @@ import React from 'react'
 import { Link } from 'react-router-dom'
 import styled from 'styled-components'
 import { Button, OutlineButton } from '../../../components/Button'
-import GuestRestrictedLink from '../../../components/Controls/GuestRestrictedLink'
 import NavigationBar from '../../../components/NavigationBar/NavigationBar'
 import { IUser } from '../../../types/user'
 import { Challenge } from '../types'
@@ -104,10 +103,6 @@ export const ChallengeDetailsBanner = ({ challenge, user }: { challenge: Challen
 
     if (timeStatus === 'ended') {
       return null
-    }
-
-    if (user?.is_guest) {
-      return <GuestRestrictedLink to={`/challenges/${challenge.id}/join`}>Join Challenge</GuestRestrictedLink>
     }
 
     return (

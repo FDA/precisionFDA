@@ -1,6 +1,4 @@
 class LicensesController < ApplicationController
-  skip_before_action :require_login,     only: [:index, :show]
-  before_action :require_login_or_guest, only: [:index, :show]
 
   def index
     @owned_licenses_grid = initialize_grid(License.editable_by(@context), {

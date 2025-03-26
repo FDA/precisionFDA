@@ -29,6 +29,7 @@ module Api
 
           begin
             invited_emails = space_invite_form.invite(membership, api)
+            https_apps_client.dbcluster_sync(@space.id)
           rescue StandardError => e
             error = e.message
             logger.error error
@@ -55,7 +56,7 @@ module Api
             raise ApiError, "Can't designate user #{member.user.full_name} as #{role}"
           end
         end
-
+        https_apps_client.dbcluster_sync(@space.id)
         render json: { member: member.user.dxuser, role: role }, adapter: :json
       end
 

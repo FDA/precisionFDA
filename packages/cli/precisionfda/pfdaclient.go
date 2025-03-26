@@ -32,7 +32,7 @@ import (
 	"github.com/manifoldco/promptui"
 )
 
-const userAgent = "precisionFDA CLI/2.8.0 "
+const userAgent = "precisionFDA CLI/2.9.0 "
 const defaultNumRoutines = 10
 const defaultChunkSize = 1 << 26 // default 64MB (min. 16MB)
 const minRoutines = 1
@@ -78,6 +78,8 @@ type IPFDAClient interface {
 	CreateReply(jsonBody string) error
 	EditDiscussion(jsonBody string) error
 	EditReply(jsonBody string) error
+	GetDbClusterPassword(dbClusterID string) error
+	RotateDbClusterPassword(dbClusterID string) error
 	RefreshToken(autoRefresh bool) (string, error)
 	GetLatestVersion() (string, error)
 	SetChunkSize(chunkSize int)
@@ -806,16 +808,7 @@ func (c *PFDAClient) DescribeEntity(entityID string) error {
 		return err
 	}
 
-	var resultJSON map[string]interface{}
-	err = json.Unmarshal(body, &resultJSON)
-	if err != nil {
-		return err
-	}
-
-	prettyJSON, _ := json.MarshalIndent(resultJSON, "", "    ")
-	fmt.Printf("%s\n", string(prettyJSON))
-
-	return nil
+	return helpers.PrintPrettyJSON(body)
 }
 
 func (c *PFDAClient) GetScope() error {
