@@ -39,6 +39,7 @@ import { UserContextMiddleware } from './user-context/middleware/user-context.mi
 import { UsersApiModule } from './users/users.api.module'
 import { WebsocketModule } from './websocket/websocket.module'
 import { WorkflowApiModule } from './workflows/workflow.api.module'
+import { SessionApiModule } from './session/session.api.module'
 
 @Module({
   imports: [
@@ -80,6 +81,7 @@ import { WorkflowApiModule } from './workflows/workflow.api.module'
     UsersApiModule,
     WorkflowApiModule,
     ReportsApiModule,
+    SessionApiModule,
     PublishApiModule,
   ],
   providers: [
