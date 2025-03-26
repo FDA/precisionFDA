@@ -11,6 +11,7 @@ import {
   Ref,
   Reference,
 } from '@mikro-orm/core'
+import { ScopedEntity } from '@shared/database/scoped.entity'
 import { App } from '@shared/domain/app/app.entity'
 import { JobRunData } from '@shared/domain/job/job.types'
 import { JobProperty } from '@shared/domain/property/job-property.entity'
@@ -21,11 +22,10 @@ import { JobDescribeResponse } from '@shared/platform-client/platform-client.res
 import { formatDuration } from '../../utils/format'
 import { DxId } from '../entity/domain/dxid'
 import { Uid } from '../entity/domain/uid'
-import { JOB_DB_ENTITY_TYPE, JOB_STATE } from './job.enum'
+import { JOB_DB_ENTITY_TYPE, JOB_STATE, TERMINAL_STATES } from './job.enum'
 import { isStateActive, isStateTerminal } from './job.helper'
 import { Provenance } from './job.input'
 import { JobRepository } from './job.repository'
-import { ScopedEntity } from '@shared/database/scoped.entity'
 
 @Entity({ tableName: 'jobs', repository: () => JobRepository })
 @Filter({ name: 'ownedBy', cond: (args) => ({ user: { id: args.userId } }) })
@@ -183,7 +183,7 @@ export class Job extends ScopedEntity {
   }
 
   isHttpsAppRunning(): boolean {
-    return this.describe?.properties?.httpsAppState === 'running' ?? false
+    return this.describe?.properties?.httpsAppState === 'running'
   }
 
   getHttpsAppUrl(): string | null {
@@ -200,6 +200,10 @@ export class Job extends ScopedEntity {
     url = url.endsWith('/') ? url.slice(0, -1) : url
     // return port === '443' ? url : `${url}:${port}`
     return `${url}:${port}`
+  }
+
+  isPublishable(): boolean {
+    return this.isPrivate() && TERMINAL_STATES.includes(this.state)
   }
 }
 

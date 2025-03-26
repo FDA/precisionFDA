@@ -1,6 +1,7 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { omit, pick } from 'ramda'
 import { getSpaceIdFromScope } from '../../utils'
+import { useAttachToModal } from '../actionModals/useAttachToModal'
 import { useCopyToSpaceModal } from '../actionModals/useCopyToSpace'
 import { useEditPropertiesModal } from '../actionModals/useEditPropertiesModal'
 import { useEditTagsModal } from '../actionModals/useEditTagsModal'
@@ -22,6 +23,7 @@ export type ExecutionAction =
   | 'Snapshot'
   | 'Unfeature'
   | 'Make Public'
+  | 'Attach to...'
   | 'Comments'
   | 'Edit tags'
   | 'Edit properties'
@@ -87,6 +89,15 @@ export const useExecutionActions = ({
       queryClient.invalidateQueries({ queryKey: resourceKeys })
     },
   })
+  // "Items need to be an array of objects with id and type (one of App, Comparison, Job, or UserFile)"
+  const {
+    modalComp: attachToModal,
+    setShowModal: setAttachToModal,
+    isShown: isShownAttachToModal,
+  } = useAttachToModal(
+    selected.map(s => s.id),
+    'JOB',
+  )
 
   const {
     modalComp: terminateModal,
@@ -100,6 +111,7 @@ export const useExecutionActions = ({
     isShown: isSnapshotModal,
   } = useSnapshotModal({ selected: selected[0] })
 
+  const links = selected[0]?.links
   const spaceId = getSpaceIdFromScope(selected[0]?.scope)
 
   let actions: ActionFunctionsType<ExecutionAction> = {
@@ -143,9 +155,17 @@ export const useExecutionActions = ({
         (selected[0].jobs && selected[0].scope === 'private') ||
         !user?.allowed_to_publish,
       link: {
-        method: 'POST',
-        url: `${selected[0]?.links?.publish}&scope=public`,
+        method: 'GET',
+        url: `/publish?identifier=${selected[0]?.uid}&type=job`,
       },
+      shouldHide: selected.length !== 1 || homeScope !== 'me',
+    },
+    'Attach to...': {
+      type: 'modal',
+      func: () => setAttachToModal(true),
+      isDisabled: selected.length === 0 || selected.length > 1,
+      modal: attachToModal,
+      showModal: isShownAttachToModal,
     },
     Snapshot: {
       type: 'modal',
@@ -184,7 +204,7 @@ export const useExecutionActions = ({
     } else {
       // If the user is not the owner of the job in a space, they cannot connect
       // to the workstation or perform other actions where ownership is needed
-      actions = pick(['Track', 'Copy to space', 'Comments', 'Edit tags', 'Edit properties'], actions)
+      actions = pick(['Track', 'Copy to space', 'Attach to...', 'Comments', 'Edit tags', 'Edit properties'], actions)
     }
   }
 

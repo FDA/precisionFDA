@@ -1486,6 +1486,112 @@ class ApiController < ApplicationController
     render json: res, adapter: :json
   end
 
+  def publish
+    # TODO (PFDA-6082): return error if file has been published already
+    identifier = unsafe_params[:identifier]
+    fail "Missing identifier in publish route" unless identifier.is_a?(String) && identifier.present?
+
+    fail "User is not allowed to publish any data objects" unless @context.user.allowed_to_publish?
+
+    service = SpaceService::Publishing.new(@context)
+
+    check_result = service.scope_check(unsafe_params[:scope])
+    scope = check_result[:scope]
+
+    pitem = item_from_uid(identifier)
+
+    fail "This item is not owned by you" unless pitem.editable_by?(@context)
+
+    fail "This item is already public" if pitem.public?
+
+    fail "This item cannot be published in this state" unless pitem.publishable_by?(@context, scope)
+
+    uids = unsafe_params[:uids]
+    if !uids.is_a?(Hash) || !uids.all? { |uid, checked| uid.is_a?(String) && checked == "on" }
+      fail "The object 'uids' must be a hash of object ids (strings) with value 'on'."
+    end
+
+    items = ([identifier] + uids.keys).uniq.map { |uid| item_from_uid(uid) }.reject { |item| item.public? || item.scope == scope }
+    fail "Unpublishable items detected" unless items.all? { |item| item.publishable_by?(@context, scope) }
+
+    # Files to publish:
+    # - All real_files selected by the user
+    files = items.select { |item| item.klass == "file" }
+
+    # Assets
+    assets = items.select { |item| item.klass == "asset" }
+
+    # Comparisons
+    comparisons = items.select { |item| item.klass == "comparison" }
+
+    # Apps
+    apps = items.select { |item| item.klass == "app" }
+
+    # Jobs
+    jobs = items.select { |item| item.klass == "job" }
+
+    # Notes
+    notes = items.select { |item| item.klass == "note" }
+
+    # Discussions
+    discussions = items.select { |item| item.klass == "discussion" }
+
+    # Answers
+    answers = items.select { |item| item.klass == "answer" }
+
+    # Workflows
+    workflows = items.select { |item| item.klass == "workflow" }
+
+    published_count = 0
+
+    # Files
+    published_count += UserFile.publish(files, @context, scope) unless files.empty?
+
+    published_count += Asset.publish(assets, @context, scope) unless assets.empty?
+
+    # Comparisons
+    published_count += Comparison.publish(comparisons, @context, scope) unless comparisons.empty?
+
+    # Apps
+    published_count += AppSeries.publish(apps, @context, scope) unless apps.empty?
+
+    # Jobs
+    published_count += PublishService::JobPublisher.new(@context).publish(jobs, scope) unless jobs.empty?
+
+    # Notes
+    published_count += Note.publish(notes, @context, scope) unless notes.empty?
+
+    # Discussions
+    published_count += Discussion.publish(discussions, @context, scope) unless discussions.empty?
+
+    # Answers
+    published_count += Answer.publish(answers, @context, scope) unless answers.empty?
+
+    if workflows.any?
+      PublishService::WorkflowPublisher.call(workflows, @context, scope)
+      published_count += workflows.count
+    end
+
+    message = published_count.to_s
+    message += " (out of #{items.count})" if published_count != items.count
+    message += if published_count == 1
+      " item has been published."
+    else
+      " items have been published."
+    end
+
+    path = pathify(pitem)
+    if pitem.klass == "file"
+      published_file = UserFile.find_by!(dxid: pitem.dxid, scope: "public")
+      path = pathify(published_file)
+    end
+
+    render json: {
+      message:,
+      path:,
+    }
+  end
+
   protected
 
   # Verifies that if nodes collection contains items that belong to Protected

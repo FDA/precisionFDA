@@ -29,6 +29,7 @@ import { NewsApiModule } from './news/news.api.module'
 import { NodesApiModule } from './nodes/nodes.api.module'
 import { NotificationsApiModule } from './notifications/notifications.api.module'
 import { PropertiesApiModule } from './properties/properties.api.module'
+import { PublishApiModule } from './publish/publish.api.module'
 import { ReportsApiModule } from './reports/reports.api.module'
 import { SiteSettingsApiModule } from './site-settings/site-settings.api.module'
 import { SpacesApiModule } from './spaces/spaces.api.module'
@@ -79,6 +80,7 @@ import { WorkflowApiModule } from './workflows/workflow.api.module'
     UsersApiModule,
     WorkflowApiModule,
     ReportsApiModule,
+    PublishApiModule,
   ],
   providers: [
     ...apiExceptionFilterProviders,

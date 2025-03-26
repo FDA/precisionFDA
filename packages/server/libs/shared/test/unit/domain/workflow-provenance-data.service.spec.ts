@@ -2,6 +2,7 @@ import { EntityService } from '@shared/domain/entity/entity.service'
 import { WorkflowProvenanceDataService } from '@shared/domain/provenance/service/entity-data/workflow-provenance-data.service'
 import { Workflow } from '@shared/domain/workflow/entity/workflow.entity'
 import { WorkflowService } from '@shared/domain/workflow/service/workflow.service'
+import { STATIC_SCOPE } from '@shared/enums'
 import { EntityUtils } from '@shared/utils/entity.utils'
 import { expect } from 'chai'
 import { SinonStub, stub } from 'sinon'
@@ -20,7 +21,7 @@ describe('WorkflowProvenanceDataService', () => {
 
   const UID = 'UID'
 
-  const WORKFLOW = { title: TITLE, uid: UID } as unknown as Workflow
+  const WORKFLOW = { title: TITLE, uid: UID, scope: STATIC_SCOPE.PRIVATE } as unknown as Workflow
 
   const getAppsStub = stub()
   const getEntityUiLinkStub = stub()
@@ -53,6 +54,7 @@ describe('WorkflowProvenanceDataService', () => {
         url: LINK,
         title: TITLE,
         identifier: UID,
+        scope: STATIC_SCOPE.PRIVATE,
       })
     })
   })
