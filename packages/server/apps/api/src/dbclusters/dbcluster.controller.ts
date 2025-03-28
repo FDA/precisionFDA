@@ -29,6 +29,8 @@ import { Uid } from '@shared/domain/entity/domain/uid'
 import { DbClusterPaginationDTO } from '@shared/domain/db-cluster/dto/db-cluster-pagination.dto'
 import { InternalRouteGuard } from '../internal/guard/internal.guard'
 import { SyncDbClusterDTO } from '@shared/domain/db-cluster/dto/sync-db-cluster.dto'
+import { ADMIN_PLATFORM_CLIENT } from '@shared/platform-client/providers/admin-platform-client.provider'
+import { PlatformClient } from '@shared/platform-client'
 
 interface IDxidListParams {
   dxids: string[]
@@ -42,6 +44,9 @@ export class DbClusterController {
     @Inject(DEPRECATED_SQL_ENTITY_MANAGER) private readonly em: SqlEntityManager,
     private readonly logger: Logger,
     private readonly dbClusterService: DbClusterService,
+    @Inject(ADMIN_PLATFORM_CLIENT)
+    private readonly adminClient: PlatformClient,
+    private readonly userClient: PlatformClient,
   ) {}
 
   @Get()
@@ -68,9 +73,11 @@ export class DbClusterController {
 
     await Promise.all(
       body.dxids.map(async (dxid) => {
-        return await new StartDbClusterOperation(opsCtx).execute({
-          dxid,
-        })
+        return await new StartDbClusterOperation(opsCtx, this.userClient, this.adminClient).execute(
+          {
+            dxid,
+          },
+        )
       }),
     )
   }
@@ -88,7 +95,7 @@ export class DbClusterController {
 
     await Promise.all(
       body.dxids.map(async (dxid) => {
-        return await new StopDbClusterOperation(opsCtx).execute({
+        return await new StopDbClusterOperation(opsCtx, this.userClient, this.adminClient).execute({
           dxid,
         })
       }),
@@ -108,7 +115,11 @@ export class DbClusterController {
 
     await Promise.all(
       body.dxids.map(async (dxid) => {
-        return await new TerminateDbClusterOperation(opsCtx).execute({
+        return await new TerminateDbClusterOperation(
+          opsCtx,
+          this.userClient,
+          this.adminClient,
+        ).execute({
           dxid,
         })
       }),
