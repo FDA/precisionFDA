@@ -20,7 +20,7 @@ export const FeaturedToggle = ({
   featured: boolean
   resource: APIResource
   onSuccess?: (res: any) => void
-  uids: string[]
+  uids: (string | number)[]
   disabled?: boolean
 }) => {
   const featureMutation = useFeatureMutation({ resource, onSuccess })

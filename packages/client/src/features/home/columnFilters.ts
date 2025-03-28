@@ -14,4 +14,8 @@ export const columnFilters = {
   launched_by: 'string',
   file_size: 'range',
   workflow_title: 'string',
+  dxuser: 'string',
+  email: 'string',
+  userState: 'string',
+  lastLogin: 'date_range',
 }

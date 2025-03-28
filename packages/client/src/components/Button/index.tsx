@@ -133,6 +133,7 @@ export const TransparentButton = styled(Button)`
 `
 
 export const SwitchButton = styled.div`
+  box-sizing: content-box !important;
   display: flex;
   width: 24px;
   height: 12px;

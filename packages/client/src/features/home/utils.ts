@@ -1,6 +1,6 @@
 import { getSpaceIdFromScope } from '../../utils'
 import { cleanObject } from '../../utils/object'
-import { IFilter, HomeScope, ServerScope, SortBy } from './types'
+import { IFilter, HomeScope, ServerScope } from './types'
 
 // Only return the objects with keys from the pick array
 export function pickActions<T>(actions: T, pick: string[]) {
@@ -15,6 +15,15 @@ export function mapSizeFilter(filters: IFilter[]): IFilter[] {
   filter.value?.[0] && filters.push({ id: 'size', value: filter.value[0] } as IFilter)
   filter.value?.[1] && filters.push({ id: 'size2', value: filter.value[1] } as IFilter)
   return filters.filter(f => f.id !== 'file_size')
+}
+export function mapLastLoginFilter(filters: IFilter[]): IFilter[] {
+  const filter: any = filters.find(f => f.id === 'lastLogin')
+  if (!filter) {
+    return filters
+  }
+  filter.value?.[0] && filters.push({ id: 'lastLogin', value: filter.value[0] } as IFilter)
+  filter.value?.[1] && filters.push({ id: 'lastLogin', value: filter.value[1] } as IFilter)
+  return filters.filter(f => f.id !== 'lastLogin')
 }
 
 // Some of the list API's filter keys do not match their keys in JSON responses
@@ -46,7 +55,7 @@ const customKeyMappings = {
 const renameOrderByKeys = (key?: string) =>
   key && key in customKeyMappings ? customKeyMappings[key as keyof typeof customKeyMappings] : key
 
-export type Params = { folderId?: string; spaceId?: string; scope?: HomeScope; page?: string; perPage?: number; sortBy?: SortBy }
+export type Params = Partial<Record<string, any>>
 
 export function formatScopeQ(scope?: HomeScope) {
   let scopeQ = ''
@@ -83,6 +92,7 @@ export function prepareListFetch(filters: IFilter[], params: Params) {
   let modFilters = filters
   modFilters = renameFilterKeys(modFilters)
   modFilters = mapSizeFilter(modFilters)
+  modFilters = mapLastLoginFilter(modFilters)
   modFilters = modFilters.filter(f => f.value !== undefined)
 
   // Convert params in a way to work with backend - not a great way to pass params in the url
@@ -99,9 +109,43 @@ export function prepareListFetch(filters: IFilter[], params: Params) {
       : renameOrderByKeys(params?.sortBy?.order_by)
 
   const queryParams = cleanObject({
+    scope: params.entityScope,
     folder_id: params?.folderId,
     space_id: params?.spaceId,
     per_page: params?.perPage,
+    page: params?.page,
+    [order_by_key]: order_by_val,
+    order_dir: params?.sortBy?.order_dir,
+    ...filterParams,
+  })
+
+  return queryParams
+}
+
+export function prepareListFetchV2(filters: IFilter[], params: Params) {
+  let modFilters = filters
+  modFilters = renameFilterKeys(modFilters)
+  modFilters = mapSizeFilter(modFilters)
+  modFilters = modFilters.filter(f => f.value !== undefined)
+
+  // Convert params in a way to work with backend - not a great way to pass params in the url
+  const filterParams: { [key: string]: string } = {}
+
+  modFilters.forEach((f: any) => {
+    filterParams[`filters[${f.id}]`] = f.value
+  })
+
+  const order_by_key = params.sortBy?.order_by?.includes('props.')
+    ? 'order_by_property'
+    : 'order_by'
+  const order_by_val = order_by_key === 'order_by_property'
+    ? params.sortBy?.order_by.replace('props.', '')
+    : renameOrderByKeys(params?.sortBy?.order_by)
+
+  const queryParams = cleanObject({
+    folder_id: params?.folderId,
+    space_id: params?.spaceId,
+    perPage: params?.perPage,
     page: params?.page,
     [order_by_key]: order_by_val,
     order_dir: params?.sortBy?.order_dir,

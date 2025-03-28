@@ -1,14 +1,13 @@
-import React, { useLayoutEffect, useMemo, useState } from 'react'
+import { ColumnDefResolved, ColumnFiltersState, ColumnSizingState, ColumnSort, VisibilityState } from '@tanstack/react-table'
+import React, { useLayoutEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { SortingRule, UseResizeColumnsState } from 'react-table'
 import styled from 'styled-components'
 import { Button } from '../../components/Button'
 import { HoverDNAnexusLogo } from '../../components/icons/DNAnexusLogo'
 import { ContentFooter } from '../../components/Page/ContentFooter'
-import { compactScrollBarV2, Filler, PageTitle } from '../../components/Page/styles'
+import { compactScrollBarV2, PageTitle } from '../../components/Page/styles'
 import { Pagination } from '../../components/Pagination'
-import { EmptyTable, ReactTableStyles } from '../../components/Table/styles'
-import Table from '../../components/Table/Table'
+import Table from '../../components/Table'
 import { useColumnWidthLocalStorage } from '../../hooks/useColumnWidthLocalStorage'
 import { useHiddenColumnLocalStorage } from '../../hooks/useHiddenColumnLocalStorage'
 import { useOrderByParams } from '../../hooks/useOrderByState'
@@ -17,13 +16,14 @@ import { UserLayout } from '../../layouts/UserLayout'
 import { getSelectedObjectsFromIndexes, toArrayFromObject } from '../../utils/object'
 import { useAuthUser } from '../auth/useAuthUser'
 import { QuickActions } from '../home/home.styles'
-import { IFilter, IMeta, KeyVal } from '../home/types'
+import { IMeta } from '../home/types'
 import { useFilterParams } from '../home/useFilterState'
 import { useListQuery } from '../home/useListQuery'
 import { spacesListRequest } from './spaces.api'
 import { columnFilters, ISpace } from './spaces.types'
 import { useSpaceHiddenMutation } from './useSpaceHiddenMutation'
 import { useSpacesColumns } from './useSpacesColumns'
+import { useListSelect } from '../home/useListSelect'
 
 const SpacesHeader = styled.div`
   display: flex;
@@ -63,12 +63,13 @@ const SpacesList = () => {
   const resource = 'spaces'
   const user = useAuthUser()
   const pagination = usePaginationParams()
-  const [selectedIndexes, setSelectedIndexes] = useState<Record<string, boolean> | undefined>({})
+  // const [selectedIndexes, setSelectedIndexes] = useState<Record<string, boolean> | undefined>({})
+  const { selectedIndexes, setSelectedIndexes } = useListSelect()
   const { sortBy, sort, setSortBy } = useOrderByParams({
     onSetSortBy: () => setSelectedIndexes({}),
   })
   const { colWidths, saveColumnResizeWidth } = useColumnWidthLocalStorage(resource)
-  const { hiddenColumns, saveHiddenColumns } = useHiddenColumnLocalStorage(resource)
+  const { columnVisibility, setColumnVisibility } = useHiddenColumnLocalStorage(resource)
   const { filterQuery, setSearchFilter } = useFilterParams({
     filters: columnFilters,
     onSetFilter: () => {
@@ -119,6 +120,7 @@ const SpacesList = () => {
       </SpacesHeader>
 
       <TableTable
+        userCanAdministerSite={userCanAdministerSite}
         setFilters={setSearchFilter}
         filters={toArrayFromObject(filterQuery)}
         data={data?.spaces}
@@ -127,11 +129,10 @@ const SpacesList = () => {
         sortBy={sortBy}
         selectedRows={selectedIndexes}
         setSelectedRows={setSelectedIndexes}
-        saveColumnResizeWidth={saveColumnResizeWidth}
-        colWidths={colWidths}
-        hiddenColumns={hiddenColumns}
-        saveHiddenColumns={saveHiddenColumns}
-        isSiteAdmin={userCanAdministerSite}
+        setColumnSizing={saveColumnResizeWidth}
+        columnSizing={colWidths}
+        columnVisibility={columnVisibility}
+        setColumnVisibility={setColumnVisibility}
       />
 
       <ContentFooter>
@@ -151,92 +152,67 @@ const SpacesList = () => {
 }
 
 const StyledTable = styled.div`
+  font-size: 14px;
   overflow-x: auto;
   overflow-y: auto;
   flex-grow: 1;
   height: 0;
 
   ${compactScrollBarV2}
-
-  ${ReactTableStyles} {
-    margin-inline: auto;
-    width: min(100% - 32px, 100%);
-    font-size: 14px;
-    .table {
-      border-left: 1px solid var(--c-layout-border);
-      .tr {
-        height: 56px;
-        .td {
-          position: relative;
-          padding: 10px;
-          height: auto;
-          justify-content: flex-start;
-          align-items: flex-start;
-        }
-        .td.selection {
-          padding: 10px 5px;
-        }
-      }
-    }
-  }
 `
 
 const TableTable = ({
+  userCanAdministerSite,
   filters,
   data,
   isLoading,
   setFilters,
   setSortBy,
   sortBy,
-  saveColumnResizeWidth,
-  colWidths,
   selectedRows,
   setSelectedRows,
-  hiddenColumns,
-  saveHiddenColumns,
-  isSiteAdmin,
+  columnSizing,
+  setColumnSizing,
+  columnVisibility,
+  setColumnVisibility,
 }: {
+  userCanAdministerSite?: boolean,
   data?: ISpace[]
-  filters: IFilter[]
-  setFilters: (val: IFilter[]) => void
-  sortBy?: SortingRule<string>[]
-  setSortBy: (cols: SortingRule<string>[]) => void
+  filters: ColumnFiltersState
+  setFilters: (val: ColumnFiltersState) => void
+  sortBy: ColumnSort[]
+  setSortBy: (cols: ColumnSort[]) => void
   isLoading: boolean
-  colWidths: KeyVal
-  saveColumnResizeWidth: (columnResizing: UseResizeColumnsState<any>['columnResizing']) => void
   selectedRows?: Record<string, boolean>
   setSelectedRows: (ids: Record<string, boolean>) => void
-  saveHiddenColumns: (cols: string[]) => void
-  hiddenColumns: string[]
-  isSiteAdmin: boolean
+  columnSizing: ColumnSizingState
+  setColumnSizing: (columnResizing: ColumnSizingState) => void
+  setColumnVisibility: (cols: VisibilityState) => void
+  columnVisibility: VisibilityState
 }) => {
-  const columns = useSpacesColumns({ colWidths, isSiteAdmin })
-  const mdata = useMemo(() => data || [], [data])
+  function filterCols(c: ColumnDefResolved<ISpace>) {
+    // Check if any of the conditions is true, then hide the column
+    return !(!userCanAdministerSite && (c.accessorKey === 'hidden' || c.id === 'select'))
+  }
+  const columns = useSpacesColumns().filter(filterCols)
   return (
     <StyledTable>
       <Table<ISpace>
-        name="spaces"
+        isLoading={isLoading}
+        data={data || []}
         columns={columns}
-        data={mdata}
-        loading={isLoading}
-        saveColumnResizeWidth={saveColumnResizeWidth}
-        isSelectable={isSiteAdmin}
-        hiddenColumns={hiddenColumns}
-        saveHiddenColumns={saveHiddenColumns}
-        manualFilters
-        emptyComponent={<EmptyTable>You have no spaces.</EmptyTable>}
-        isColsResizable
-        isSortable
-        isFilterable
-        loadingComponent={<div>Loading...</div>}
-        sortByPreference={sortBy}
-        setSortByPreference={a => setSortBy(a)}
-        filters={filters}
-        setFilters={setFilters}
-        selectedRows={selectedRows}
+        columnSizing={columnSizing}
+        setColumnSizing={setColumnSizing}
+        rowSelection={selectedRows ?? {}}
         setSelectedRows={setSelectedRows}
+        setColumnFilters={setFilters}
+        columnSortBy={sortBy}
+        setColumnSortBy={setSortBy}
+        columnFilters={filters}
+        columnVisibility={columnVisibility}
+        setColumnVisibility={setColumnVisibility}
+        emptyText="You don't have access to any spaces yet."
       />
-      <Filler $size={16} />
     </StyledTable>
   )
 }

@@ -16,6 +16,15 @@ export const MenuText = styled.span`
   font-weight: ${fontWeight.bold};
 `
 
+export const Empty = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 50;
+  padding: 20px;
+  white-space: normal;
+`
+
 export const MenuItem = styled(NavLink)`
   justify-self: normal;
   display: flex;
@@ -110,13 +119,6 @@ export const Main = styled.div`
 export const Fill = styled.div`
   flex: 1 0 auto;
   min-height: 20px;
-`
-
-export const StyledHomeTable = styled.div`
-  overflow-y: auto;
-  font-size: 14px;
-  flex: 1;
-  ${compactScrollBarV2}
 `
 
 export const QuickActions = styled.div`

@@ -60,6 +60,8 @@ export interface InputSpec extends IOSpec {
 
 type Links = Record<string, string>
 
+export type ResourceProperties = {[key: string]: string}
+
 export interface IApp {
   id: number
   uid: string
@@ -84,13 +86,11 @@ export interface IApp {
   featured: boolean
   active: boolean
   /** @deprecated create links from client side */
-  links: Links
-  tags: string[]
-  properties: {
-    [key: string]: string
-  }
-  scope: ServerScope
-  forked_from?: string
+  links: Links;
+  tags: string[];
+  properties: ResourceProperties
+  scope: ServerScope;
+  forked_from?: string;
 }
 
 export interface AppRevision {

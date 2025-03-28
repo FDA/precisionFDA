@@ -1,8 +1,6 @@
-import React, { useMemo } from 'react'
-import { useLocation } from 'react-router-dom'
-import { Column } from 'react-table'
+import { ColumnDef } from '@tanstack/react-table'
+import React from 'react'
 import { formatDate } from '../../utils/formatting'
-import { KeyVal } from '../home/types'
 import { ISpaceReport, SpaceReportState } from './space-report.types'
 
 export const reportStateToTextMap: Record<SpaceReportState, string> = {
@@ -12,68 +10,55 @@ export const reportStateToTextMap: Record<SpaceReportState, string> = {
   ERROR: 'Error',
 }
 
-export const useSpaceReportColumns = ({
-  colWidths,
-}: {
-  colWidths?: KeyVal
-}) => {
-  const location = useLocation()
-  return useMemo<Column<ISpaceReport>[]>(
-    () =>
-      [
-        {
-          Header: 'Created',
-          accessor: 'createdAt',
-          disableSortBy: true,
-          width: colWidths?.created_at_date_time || 198,
-          disableFilters: true,
-          Cell({ value }) {
-            if (!value) {
-              return ''
-            }
+export const useSpaceReportColumns = (): ColumnDef<ISpaceReport>[] => {
+  return [
+    {
+      header: 'Created',
+      accessorKey: 'createdAt',
+      enableSorting: false,
+      size: 198,
+      enableColumnFilter: false,
+      cell: c => {
+        if (!c.row.original?.createdAt) {
+          return ''
+        }
 
-            return formatDate(value)
-          },
-        },
-        {
-          Header: 'State',
-          accessor: 'state',
-          disableFilters: true,
-          disableSortBy: true,
-          width: colWidths?.state || 100,
-          Cell({ value }) {
-            return reportStateToTextMap[value]
-          },
-        },
-        {
-          Header: 'Format',
-          accessor: 'format',
-          disableFilters: true,
-          disableSortBy: true,
-          width: colWidths?.format || 100,
-        },
-        {
-          Header: 'File',
-          accessor: 'resultFile',
-          disableFilters: true,
-          disableSortBy: true,
-          width: colWidths?.location || 150,
-          Cell({ value }) {
-            if (value?.state !== 'closed') {
-              return ''
-            }
+        return formatDate(c.row.original?.createdAt)
+      },
+    },
+    {
+      header: 'State',
+      accessorKey: 'state',
+      enableColumnFilter: false,
+      enableSorting: false,
+      size: 100,
+      cell: c => {
+        return reportStateToTextMap[c.row.original?.state]
+      },
+    },
+    {
+      header: 'Format',
+      accessorKey: 'format',
+      enableColumnFilter: false,
+      enableSorting: false,
+      size: 100,
+    },
+    {
+      header: 'File',
+      enableColumnFilter: false,
+      enableSorting: false,
+      size: 150,
+      cell: c => {
+        if (c.row.original?.state !== 'DONE') {
+          return ''
+        }
 
-            return (
-              <a
-                data-turbolinks="false"
-                href={value.links.download}
-              >
-                Download
-              </a>
-            )
-          },
-        },
-      ] as Column<ISpaceReport>[],
-    [location.search],
-  )
+        return (
+          <a data-turbolinks="false" href={c.row.original?.resultFile?.links.download}>
+            Download
+          </a>
+        )
+      },
+    },
+  ]
 }
