@@ -15,16 +15,16 @@ import { SPACE_MEMBERSHIP_ROLE } from '@shared/domain/space-membership/space-mem
 
 // TODO PFDA-5995: Jarda - get rid of operation, move it to DbCluster service
 export class TerminateDbClusterOperation extends BaseOperation<UserOpsCtx, DxIdInput, DbCluster> {
+  constructor(
+    inputCtx: UserOpsCtx,
+    private readonly userClient: client.PlatformClient,
+    private readonly adminClient: client.PlatformClient,
+  ) {
+    super(inputCtx)
+  }
+
   async run(input: DxIdInput): Promise<DbCluster> {
     const em = this.ctx.em
-    const userClient = new client.PlatformClient(
-      { accessToken: this.ctx.user.accessToken },
-      this.ctx.log,
-    )
-    const adminClient = new client.PlatformClient(
-      { accessToken: process.env.ADMIN_TOKEN },
-      this.ctx.log,
-    )
     const dbCluster = await em.findOne(DbCluster, { dxid: input.dxid as DxId<'dbcluster'> })
 
     if (!dbCluster) {
@@ -38,7 +38,7 @@ export class TerminateDbClusterOperation extends BaseOperation<UserOpsCtx, DxIdI
       )
     }
 
-    let platformClient = userClient
+    let platformClient = this.userClient
     const user = await em.findOne(User, { id: this.ctx.user.id })
 
     if (dbCluster.scope !== STATIC_SCOPE.PRIVATE) {
@@ -64,7 +64,7 @@ export class TerminateDbClusterOperation extends BaseOperation<UserOpsCtx, DxIdI
       }
 
       if (space.type === SPACE_TYPE.GROUPS || space.type === SPACE_TYPE.REVIEW) {
-        platformClient = adminClient
+        platformClient = this.adminClient
       }
     }
 
@@ -80,7 +80,7 @@ export class TerminateDbClusterOperation extends BaseOperation<UserOpsCtx, DxIdI
       'Run terminate action for DB Cluster',
     )
 
-    const describeResult = await userClient.dbClusterDescribe({
+    const describeResult = await this.userClient.dbClusterDescribe({
       dxid: dbCluster.dxid,
       project: dbCluster.project,
     })
