@@ -29,8 +29,8 @@ export function usePaginationParams(initialPerPageCount?: number) {
     withDefault(NumberParam, initialPerPageCount ?? defaultPerPageCount),
   )
 
-  const handleSetPageParam = (v: number, updateType: UrlUpdateType) => {
-    if(v === 1) {
+  const handleSetPageParam = (v: number | undefined, updateType: UrlUpdateType) => {
+    if(v === 1 || v === undefined) {
       setPageParam(undefined, updateType)
     } else {
       setPageParam(v, updateType)

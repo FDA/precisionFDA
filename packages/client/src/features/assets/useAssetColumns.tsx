@@ -1,127 +1,119 @@
 import { useQueryClient } from '@tanstack/react-query'
+import { ColumnDef } from '@tanstack/react-table'
 import React from 'react'
-import { Column } from 'react-table'
 import { Tooltip } from 'react-tooltip'
 import { FeaturedToggle } from '../../components/FeaturedToggle'
-import {
-  DefaultColumnFilter, NumberRangeColumnFilter, SelectColumnFilter,
-} from '../../components/Table/filters'
+import { propertiesColumnDef } from '../../components/Table/selectColumnDef'
 import { StyledTagItem, StyledTags } from '../../components/Tags'
 import { FileZipIcon } from '../../components/icons/FileZipIcon'
 import { ObjectGroupIcon } from '../../components/icons/ObjectGroupIcon'
 import { StyledLinkCell, StyledNameCell } from '../home/home.styles'
-import { KeyVal } from '../home/types'
 import { IAsset } from './assets.types'
 
-const isUnclosedAsset = (asset: IAsset): boolean =>
-  asset.state === 'open' || asset.state === 'closing'
+const isUnclosedAsset = (asset: IAsset): boolean => asset.state === 'open' || asset.state === 'closing'
 
 export const useAssetColumns = ({
   isAdmin = false,
   handleRowClick,
-  colWidths,
   properties = [],
 }: {
   isAdmin?: boolean
   handleRowClick: (id: string) => void
-  colWidths: KeyVal
   properties?: string[]
-}) => {
+}): ColumnDef<IAsset>[] => {
   const queryClient = useQueryClient()
   return [
     {
-      Header: 'Name',
-      accessor: 'name',
-      Filter: DefaultColumnFilter,
-      width: colWidths?.name || 300,
-      Cell: ({ cell, value }) => (
+      header: 'Name',
+      accessorKey: 'name',
+      filterFn: 'includesString',
+      size: 300,
+      cell: (c) => (
         <>
           <StyledNameCell
-            data-tooltip-id={`assetNameTooltip${cell.row.original.uid}`}
-            data-tooltip-content={`Asset is in ${cell.row.original.state} state. Please refresh the list momentarily to update its status.`}
-            color={
-              isUnclosedAsset(cell.row.original)
-                ? 'var(--tertiary-600)' : 'var(--c-link)'
-            }
-            onClick={
-              () => handleRowClick(cell.row.original.uid.toString())
-            }
+            data-tooltip-id={`assetNameTooltip${c.row.original.uid}`}
+            data-tooltip-content={`Asset is in ${c.row.original.state} state. Please refresh the list momentarily to update its status.`}
+            color={isUnclosedAsset(c.row.original) ? 'var(--tertiary-600)' : 'var(--c-link)'}
+            onClick={() => handleRowClick(c.row.original.uid.toString())}
           >
             <FileZipIcon height={14} />
-            {value}
+            {c.row.original.name}
           </StyledNameCell>
-          {isUnclosedAsset(cell.row.original) && (
-            <Tooltip id={`assetNameTooltip${cell.row.original.uid}`} />
-          )}
+          {isUnclosedAsset(c.row.original) && <Tooltip id={`assetNameTooltip${c.row.original.uid}`} />}
         </>
       ),
     },
     {
-      Header: 'Location',
-      accessor: 'location',
-      Filter: DefaultColumnFilter,
-      width: colWidths?.location || 250,
-      Cell: props => (
-        <StyledLinkCell to={`${props.row.original.links.space}/apps`}><ObjectGroupIcon />{props.value}</StyledLinkCell>
+      header: 'Location',
+      accessorKey: 'location',
+      filterFn: 'includesString',
+      size: 250,
+      cell: c => (
+        <StyledLinkCell to={`${c.row.original.links.space}/apps`}>
+          <ObjectGroupIcon />
+          {c.row.original.location}
+        </StyledLinkCell>
       ),
     },
     {
-      Header: 'Featured',
-      accessor: 'featured',
-      Filter: SelectColumnFilter,
-      options: [{ label: 'Yes', value: 'true' }, { label: 'No', value: 'false'}],
-      width: colWidths?.featured || 93,
-      Cell: props => (
-        <div style={{ paddingLeft: 20 }}><FeaturedToggle disabled={!isAdmin} resource="assets" featured={props.cell.row.original.featured} uids={[props.cell.row.original.uid]} onSuccess={() => queryClient.invalidateQueries({ queryKey: ['assets']})} /></div>
+      header: 'Featured',
+      accessorKey: 'featured',
+      enableColumnFilter: false,
+      size: 93,
+      cell: props => (
+        <div style={{ paddingLeft: 20 }}>
+          <FeaturedToggle
+            disabled={!isAdmin}
+            resource="assets"
+            featured={props.cell.row.original.featured}
+            uids={[props.cell.row.original.uid]}
+            onSuccess={() => queryClient.invalidateQueries({ queryKey: ['assets'] })}
+          />
+        </div>
       ),
     },
     {
-      Header: 'Added By',
-      accessor: 'added_by',
-      Filter: DefaultColumnFilter,
-      width: colWidths?.added_by || 200,
-      Cell: props => (
-        <a data-turbolinks="false" href={props.cell.row.original.links.user || '#'}>
-          {props.value}
+      header: 'Added By',
+      accessorKey: 'added_by',
+      filterFn: 'includesString',
+      size: 200,
+      cell: c => (
+        <a data-turbolinks="false" href={c.cell.row.original.links.user || '#'}>
+          {c.row.original.added_by}
         </a>
       ),
     },
     {
-      Header: 'Size',
-      accessor: 'file_size',
-      Filter: NumberRangeColumnFilter,
-      width: colWidths?.size || 160,
+      header: 'Size',
+      accessorKey: 'file_size',
+      // Filter: NumberRangeColumnFilter,
+      size: 160,
       filterPlaceholderFrom: `Min(KB)`,
       filterPlaceholderTo: `Max(KB)`,
     },
     {
-      Header: 'Created',
-      accessor: 'created_at_date_time',
+      header: 'Created',
+      accessorKey: 'created_at_date_time',
       sortDescFirst: true,
-      width: colWidths?.created_at_date_time || 198,
-      disableFilters: true,
+      size: 198,
+      enableColumnFilter: false,
     },
     {
-      Header: 'Tags',
-      accessor: 'tags',
-      disableSortBy: true,
-      Filter: DefaultColumnFilter,
-      width: colWidths?.tags || 500,
-      Cell: props => {
-        return(
+      header: 'Tags',
+      accessorKey: 'tags',
+      enableSorting: false,
+      filterFn: 'includesString',
+      size: 500,
+      cell: c => {
+        return (
           <StyledTags>
-            {props.value.map(tag => (
+            {c.row.original.tags.map(tag => (
               <StyledTagItem key={tag}>{tag}</StyledTagItem>
             ))}
           </StyledTags>
-      )},
+        )
+      },
     },
-    ...properties.map(property => ({
-      Header: property,
-      accessor: row => row.properties[property],
-      id: `props.${property}`,
-      disableFilters: true,
-      width: colWidths?.[property] || 200,
-    })),
-  ] as Column<IAsset>[]
+    ...propertiesColumnDef<IAsset>(properties),
+  ]
 }

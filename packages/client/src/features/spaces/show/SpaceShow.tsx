@@ -214,7 +214,7 @@ const Spaces2 = ({ space, isLoading }: { space: ISpace; isLoading: boolean }) =>
               />
               <Route
                 path="discussions"
-                element={<DiscussionList canCreateDiscussion={canCreateDiscussion} scope={`space-${space.id}`} />}
+                element={<DiscussionList canCreateDiscussion={canCreateDiscussion} spaceId={space.id} />}
               />
               <Route
                 path="discussions/create"

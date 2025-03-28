@@ -26,6 +26,7 @@ export type ResourceTypeUrlNames =
   | 'discussions'
 
 export type APIResource =
+  | 'admin-users'
   | 'files'
   | 'folders'
   | 'apps'
@@ -138,10 +139,7 @@ export interface IMeta {
 }
 
 export type Size = null | number
-export interface IFilter {
-  id: string
-  value: string | number | Size[]
-}
+export type IFilter = Record<string,  Size[] | any>
 
 export interface SortBy {
   order_by: string

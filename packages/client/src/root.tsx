@@ -1,4 +1,3 @@
-/* eslint-disable react/jsx-fragments */
 import { QueryClientProvider } from '@tanstack/react-query'
 import React, { useEffect, useState } from 'react'
 import { Navigate, Outlet, RouterProvider, createBrowserRouter } from 'react-router-dom'

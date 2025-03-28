@@ -1,66 +1,35 @@
 // TODO(samuel) fix
-/* eslint-disable @typescript-eslint/no-non-null-asserted-optional-chain */
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
+
+
+import { Column, ColumnDef } from '@tanstack/react-table'
 import axios from 'axios'
-import React, { useMemo } from 'react'
-import { CellProps, Column } from 'react-table'
+import React from 'react'
 import styled from 'styled-components'
-import { StringParam, withDefault } from 'use-query-params'
 import { HoverDNAnexusLogo } from '../../../components/icons/DNAnexusLogo'
 import { UsersIcon } from '../../../components/icons/UserIcon'
 import { ContentFooter } from '../../../components/Page/ContentFooter'
 import { hidePagination, Pagination } from '../../../components/Pagination'
-import {
-  DateRangeColumnFilter,
-  DefaultColumnFilter,
-  NumberRangeColumnFilter,
-  SelectColumnFilter,
-} from '../../../components/Table/filters'
-import { EmptyTable, ReactTableStyles } from '../../../components/Table/styles'
-import Table from '../../../components/Table/Table'
-import { useColumnWidthLocalStorage } from '../../../hooks/useColumnWidthLocalStorage'
-import { useList } from '../../../hooks/useList'
+import Table from '../../../components/Table'
+import { selectColumnDef } from '../../../components/Table/selectColumnDef'
+import DateTimeRangeFilter, { dateRangeFilterFn } from '../../../components/Table/components/DateTimeRangeFilter'
+import SelectFilter, { selectFilterFn } from '../../../components/Table/components/SelectFilter'
+import { StyledPageTable } from '../../../components/Table/components/styles'
 import { usePageMeta } from '../../../hooks/usePageMeta'
-import {
-  FilterT,
-  PaginationInput,
-  prepareListFetch,
-  SortInput,
-} from '../../../utils/filters'
-import { cleanObject, toArrayFromObject } from '../../../utils/object'
 import { UserLayout } from '../../../layouts/UserLayout'
+import { IUser } from '../../../types/user'
+import { getSelectedObjectsFromIndexes, toArrayFromObject } from '../../../utils/object'
+import { IFilter, IMeta, MetaV2 } from '../../home/types'
+import { useList } from '../../home/useList'
+import { Params, prepareListFetchV2 } from '../../home/utils'
 import { UsersListActionRow } from './ListPageActionRow'
 import { User } from './types'
-import { IUser } from '../../../types/user'
-import { MetaV2 } from '../../home/types'
 
 type AdminUserListType = { data: User[]; meta: MetaV2 }
 
-// TODO(samuel) migrate definition of related fieds to server-side
-const USERS_TABLE_KEYS = [
-  'dxuser' as const,
-  'email' as const,
-  'lastLogin' as const,
-  'userState' as const,
-  'totalLimit' as const,
-  'jobLimit' as const,
-]
-
-type UserTableCols = (typeof USERS_TABLE_KEYS)[number]
-
-type UserFilter = FilterT<UserTableCols>
-type UserSortInput = SortInput<UserTableCols>
-
-export const fetchUsers = async (
-  filters: UserFilter[],
-  pagination: PaginationInput,
-  order: Partial<UserSortInput>,
-) => {
-  const query = prepareListFetch(filters, pagination, order)
-  const paramQ = `?${new URLSearchParams(cleanObject(query) as any).toString()}`
-  return axios
-    .get(`/api/v2/admin/users/${paramQ}`)
-    .then(r => r.data as AdminUserListType)
+export async function fetchUsers(filters: IFilter[], params: Params) {
+  const query = prepareListFetchV2(filters, params)
+  const paramQ = `?${new URLSearchParams(query as {}).toString()}`
+  return axios.get<AdminUserListType>(`/api/v2/admin/users/${paramQ}`).then(r => r.data)
 }
 
 export const StyledLinkCell = styled.a`
@@ -94,177 +63,140 @@ export const Topbox = styled.div`
   padding-right: 16px;
 `
 
-const StyledTable = styled.div`
-  overflow-x: auto;
-  overflow-y: auto;
-  flex-grow: 1;
-  height: 0;
+export const getAdminUserColumns = (): ColumnDef<User>[] => [
+  selectColumnDef<User>(),
+  {
+    header: 'Username',
+    accessorKey: 'dxuser',
+    filterFn: 'includesString',
+    size: 198,
+    cell: c => (
+      <StyledLinkCell data-turbolinks="false" href={`/users/${c.row.original.dxuser}`}>
+        {c.row.original.dxuser}
+      </StyledLinkCell>
+    ),
+  },
+  {
+    header: 'Email ID',
+    accessorKey: 'email',
+    filterFn: 'includesString',
+    size: 300,
+    cell: c => (
+      <StyledLinkCell data-turbolinks="false" href={`/users/${c.row.original.dxuser}`}>
+        {c.row.original.email}
+      </StyledLinkCell>
+    ),
+  },
+  {
+    header: 'Login Date',
+    accessorKey: 'lastLogin',
+    filterFn: dateRangeFilterFn,
+    meta: {
+      filterElement: (column: Column<IUser>) => <DateTimeRangeFilter column={column} />,
+    },
+    size: 320,
+    cell: c => {
+      return (
+        <StyledLinkCell data-turbolinks="false" href={`/users/${c.row.original.dxuser}`}>
+          {c.row.original.lastLogin &&
+            new Date(c.row.original.lastLogin).toLocaleDateString('en-US', {
+              month: 'short',
+              day: '2-digit',
+              year: 'numeric',
+              hour12: true,
+              hour: 'numeric',
+              minute: 'numeric',
+              second: 'numeric',
+            })}
+        </StyledLinkCell>
+      )
+    },
+  },
+  {
+    header: 'Status',
+    accessorKey: 'userState',
+    filterFn: selectFilterFn,
+    meta: {
+      filterElement: (column: Column<User>) => (
+        <SelectFilter
+          column={column}
+          options={[
+            { label: 'Active', option: 0 },
+            { label: 'Locked', option: 1 },
+            { label: 'Deactivated', option: 2 },
+          ]}
+        />
+      ),
+    },
+    size: 300,
+    cell: c => (
+      <StyledLinkCell data-turbolinks="false" href={`/users/${c.row.original.dxuser}`}>
+        {c.row.original.userState.toUpperCase()}
+      </StyledLinkCell>
+    ),
+  },
+  {
+    header: 'Total Limit',
+    accessorKey: 'cloudResourceSettings.total_limit',
+    id: 'totalLimit',
+    size: 300,
+    enableColumnFilter: false,
+    cell: (props) => (
+      <StyledLinkCell
+        data-turbolinks="false"
+        href={`/users/${props.row.original.dxuser}`}
+      >
+        {`$${props.row.original.cloudResourceSettings.total_limit}`}
+      </StyledLinkCell>
+    ),
+  },
+  {
+    header: 'Job Limit',
+    id: 'jobLimit',
+    accessorKey: 'cloudResourceSettings.job_limit',
+    enableColumnFilter: false,
+    size: 300,
+    cell: c => (
+      <StyledLinkCell data-turbolinks="false" href={`/users/${c.row.original.dxuser}`}>
+        {`$${c.row.original.cloudResourceSettings.job_limit}`}
+      </StyledLinkCell>
+    ),
+  },
+]
 
-  ${ReactTableStyles} {
-    margin-inline: auto;
-    /* width: min(100% - 32px, 100%); */
-    font-size: 14px;
-    .table {
-
-      .tr {
-        height: 56px;
-        .td {
-          position: relative;
-          padding: 10px;
-          height: auto;
-          justify-content: flex-start;
-          align-items: flex-start;
-        }
-      }
-    }
-  }
-`
-
-export const getAdminUserColumns = (colWidths: Record<string, number>) =>
-  [
-    {
-      Header: 'Username',
-      accessor: 'dxuser',
-      Filter: DefaultColumnFilter,
-      width: colWidths?.dxuser ?? 198,
-      Cell: ({ value, row }: React.PropsWithChildren<CellProps<User>>) => (
-        <StyledLinkCell
-          data-turbolinks="false"
-          href={`/users/${row.original.dxuser}`}
-        >
-          {value}
-        </StyledLinkCell>
-      ),
-    },
-    {
-      Header: 'Email ID',
-      accessor: 'email',
-      Filter: DefaultColumnFilter,
-      width: colWidths?.email ?? 300,
-      Cell: ({ value, row }: React.PropsWithChildren<CellProps<User>>) => (
-        <StyledLinkCell
-          data-turbolinks="false"
-          href={`/users/${row.original.dxuser}`}
-        >
-          {value}
-        </StyledLinkCell>
-      ),
-    },
-    {
-      Header: 'Login Date',
-      accessor: 'lastLogin',
-      Filter: DateRangeColumnFilter,
-      width: colWidths?.lastLogin ?? 320,
-      Cell: ({ value, row }: React.PropsWithChildren<CellProps<User>>) => {
-        return (
-          <StyledLinkCell
-            data-turbolinks="false"
-            href={`/users/${row.original.dxuser}`}
-          >
-            {value &&
-              new Date(value).toLocaleDateString('en-US', {
-                month: 'short',
-                day: '2-digit',
-                year: 'numeric',
-                hour12: true,
-                hour: 'numeric',
-                minute: 'numeric',
-                second: 'numeric',
-              })}
-          </StyledLinkCell>
-        )
-      },
-    },
-    {
-      Header: 'Status',
-      accessor: 'userState',
-      Filter: SelectColumnFilter,
-      options: [
-        { label: 'Active', value: 0 },
-        { label: 'Locked', value: 1 },
-        { label: 'Deactivated', value: 2 },
-      ],
-      width: colWidths?.lastLogin ?? 300,
-      Cell: ({ value, row }: React.PropsWithChildren<CellProps<User>>) => (
-        <StyledLinkCell
-          data-turbolinks="false"
-          href={`/users/${row.original.dxuser}`}
-        >
-          {value.toUpperCase()}
-        </StyledLinkCell>
-      ),
-    },
-    {
-      Header: 'Total Limit',
-      id: 'totalLimit',
-      accessor: 'cloudResourceSettings.total_limit',
-      Filter: NumberRangeColumnFilter,
-      filterPlaceholderFrom: 'Min $',
-      filterPlaceholderTo: 'Max $',
-      width: colWidths?.lastLogin ?? 300,
-      Cell: ({ value, row }: React.PropsWithChildren<CellProps<User>>) => (
-        <StyledLinkCell
-          data-turbolinks="false"
-          href={`/users/${row.original.dxuser}`}
-        >
-          {`$${value}`}
-        </StyledLinkCell>
-      ),
-    },
-    {
-      Header: 'Job Limit',
-      id: 'jobLimit',
-      accessor: 'cloudResourceSettings.job_limit',
-      Filter: NumberRangeColumnFilter,
-      width: colWidths?.lastLogin ?? 300,
-      filterPlaceholderFrom: 'Min $',
-      filterPlaceholderTo: 'Max $',
-      Cell: ({ value, row }: React.PropsWithChildren<CellProps<User>>) => (
-        <StyledLinkCell
-          data-turbolinks="false"
-          href={`/users/${row.original.dxuser}`}
-        >
-          {`$${value}`}
-        </StyledLinkCell>
-      ),
-    },
-  ] as Column<User>[]
+type ListType = { apps: IUser[]; meta: IMeta }
 
 const UsersList = () => {
   usePageMeta({ title: 'precisionFDA Admin - Users' })
+
   const {
-    sortBy,
-    setSortBy,
     setPerPageParam,
     setPageParam,
     setSearchFilter,
     filterQuery,
     perPageParam,
+    sortBy,
+    setSortBy,
     query,
     selectedIndexes,
     setSelectedIndexes,
-  } = useList<AdminUserListType, UserTableCols>({
-    resource: 'users',
+    saveColumnResizeWidth,
+    colWidths,
+  } = useList<ListType>({
     fetchList: fetchUsers,
-    allFields: USERS_TABLE_KEYS,
-    filterQueryParams: {
-      dxuser: withDefault(StringParam, undefined),
-      email: withDefault(StringParam, undefined),
-      lastLogin: withDefault(StringParam, undefined),
-      userState: withDefault(StringParam, undefined),
-      totalLimit: withDefault(StringParam, undefined),
-      jobLimit: withDefault(StringParam, undefined),
-    },
-    defaultPerPage: 50,
+    resource: 'admin-users',
+    params: {},
   })
-  const { colWidths, saveColumnResizeWidth } =
-    useColumnWidthLocalStorage('users')
-  const columns = useMemo(() => getAdminUserColumns(colWidths), [colWidths])
-  const { data } = query
+
+  const columns = getAdminUserColumns()
+  const { data, isLoading } = query
   if (query.error) {
     return <div>{JSON.stringify(query.error)}</div>
   }
 
+  const selectedObjects = getSelectedObjectsFromIndexes(selectedIndexes, data?.data)
+  // console.log(filterQuery);
+  
   const filters = toArrayFromObject(filterQuery)
   return (
     <UserLayout innerScroll>
@@ -273,51 +205,32 @@ const UsersList = () => {
           <UsersIcon height={20} />
           <Title>User Management</Title>
         </TopLeft>
-        <UsersListActionRow
-          selectedUsers={
-            data?.data?.filter(user => selectedIndexes?.[user.id]) ?? []
-          }
-          refetchUsers={query.refetch}
-        />
+        <UsersListActionRow selectedUsers={selectedObjects} refetchUsers={query.refetch} />
       </Topbox>
 
-      <StyledTable>
+      <StyledPageTable>
         <Table<User>
-          name="admin_users"
-          columns={columns}
-          hiddenColumns={[]}
+          isLoading={isLoading}
           data={data?.data ?? []}
-          isSelectable
-          isSortable
-          isFilterable
-          loading={query.isLoading}
-          loadingComponent={<div>Loading...</div>}
-          selectedRows={selectedIndexes}
+          columns={columns}
+          columnSizing={colWidths}
+          setColumnSizing={saveColumnResizeWidth}
+          rowSelection={selectedIndexes}
           setSelectedRows={setSelectedIndexes}
-          sortByPreference={sortBy}
-          setSortByPreference={setSortBy}
-          manualFilters
-          filters={filters}
-          setFilters={setSearchFilter}
-          emptyComponent={<EmptyTable>No users found</EmptyTable>}
-          isColsResizable
-          saveColumnResizeWidth={saveColumnResizeWidth}
-          // TODO(samuel) fix - getRowId in table component not correctly typed
-          getRowId={user => (user as IUser).id.toString()}
+          setColumnFilters={setSearchFilter}
+          columnSortBy={sortBy}
+          setColumnSortBy={setSortBy}
+          columnFilters={filters}
         />
-      </StyledTable>
+      </StyledPageTable>
 
       <ContentFooter>
         <Pagination
-          page={data?.meta?.page!}
-          totalCount={data?.meta?.total!}
-          totalPages={data?.meta?.totalPages!}
+          page={data?.meta?.page}
+          totalCount={data?.meta?.total}
+          totalPages={data?.meta?.totalPages}
           perPage={perPageParam}
-          isHidden={hidePagination(
-            query.isFetched,
-            data?.data?.length,
-            data?.meta?.totalPages,
-          )}
+          isHidden={hidePagination(query.isFetched, data?.data?.length, data?.meta?.totalPages)}
           setPage={setPageParam as (n: number) => void}
           onPerPageSelect={setPerPageParam as (n: number) => void}
           showListCount

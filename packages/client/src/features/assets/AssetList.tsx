@@ -1,11 +1,11 @@
-import React, { useMemo } from 'react'
+import { ColumnDefResolved, ColumnFiltersState, ColumnSizingState, ColumnSort, VisibilityState } from '@tanstack/react-table'
+import React from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Column, SortingRule, UseResizeColumnsState } from 'react-table'
+import { Button } from '../../components/Button'
 import Dropdown from '../../components/Dropdown'
 import { ContentFooter } from '../../components/Page/ContentFooter'
 import { Pagination } from '../../components/Pagination'
-import Table from '../../components/Table/Table'
-import { EmptyTable } from '../../components/Table/styles'
+import Table from '../../components/Table'
 import { HoverDNAnexusLogo } from '../../components/icons/DNAnexusLogo'
 import { KeyIcon } from '../../components/icons/KeyIcon'
 import { QuestionIcon } from '../../components/icons/QuestionIcon'
@@ -13,16 +13,16 @@ import { getSelectedObjectsFromIndexes, toArrayFromObject } from '../../utils/ob
 import { useAuthUser } from '../auth/useAuthUser'
 import { useGenerateKeyModal } from '../auth/useGenerateKeyModal'
 import { ActionsDropdownContent } from '../home/ActionDropdownContent'
-import { ActionsRow, QuickActions, StyledHomeTable } from '../home/home.styles'
+import { ActionsRow, QuickActions } from '../home/home.styles'
 import { ActionsButton, ResourceHeader } from '../home/show.styles'
-import { IFilter, IMeta, KeyVal, HomeScope } from '../home/types'
+import { HomeScope, IMeta } from '../home/types'
 import { useList } from '../home/useList'
 import { usePropertiesQuery } from '../home/usePropertiesQuery'
 import { fetchAssets } from './assets.api'
 import { IAsset } from './assets.types'
 import { useAssetColumns } from './useAssetColumns'
 import { useAssetActions } from './useAssetSelectActions'
-import { Button } from '../../components/Button'
+import { StyledPageTable } from '../../components/Table/components/styles'
 
 type ListType = { assets: IAsset[]; meta: IMeta }
 
@@ -46,8 +46,8 @@ export const AssetList = ({ homeScope, spaceId }: { homeScope?: HomeScope; space
     saveColumnResizeWidth,
     colWidths,
     resetSelected,
-    hiddenColumns,
-    saveHiddenColumns,
+    columnVisibility,
+    setColumnVisibility,
   } = useList<ListType>({
     fetchList: fetchAssets,
     resource: 'assets',
@@ -114,10 +114,10 @@ export const AssetList = ({ homeScope, spaceId }: { homeScope?: HomeScope; space
         setSelectedRows={setSelectedIndexes}
         setSortBy={setSortBy}
         sortBy={sortBy}
-        saveColumnResizeWidth={saveColumnResizeWidth}
-        colWidths={colWidths}
-        hiddenColumns={hiddenColumns}
-        saveHiddenColumns={saveHiddenColumns}
+        setColumnSizing={saveColumnResizeWidth}
+        columnSizing={colWidths}
+        columnVisibility={columnVisibility}
+        setColumnVisibility={setColumnVisibility}
       />
 
       <ContentFooter>
@@ -161,74 +161,61 @@ export const AssetsListTable = ({
   setSortBy,
   sortBy,
   homeScope,
-  saveColumnResizeWidth,
-  colWidths,
-  hiddenColumns,
-  saveHiddenColumns,
+  columnSizing,
+  setColumnSizing,
+  columnVisibility,
+  setColumnVisibility,
 }: {
   isAdmin?: boolean
-  filters: IFilter[]
+  filters: ColumnFiltersState
+  setFilters: (val: ColumnFiltersState) => void
+  sortBy: ColumnSort[]
+  setSortBy: (cols: ColumnSort[]) => void
   apps?: IAsset[]
   properties?: string[]
   handleRowClick: (fileId: string) => void
-  setFilters: (val: IFilter[]) => void
   selectedRows?: Record<string, boolean>
   setSelectedRows: (ids: Record<string, boolean>) => void
-  sortBy?: SortingRule<string>[]
-  setSortBy: (cols: SortingRule<string>[]) => void
   isLoading: boolean
   homeScope?: HomeScope
-  colWidths: KeyVal
-  saveColumnResizeWidth: (columnResizing: UseResizeColumnsState<any>['columnResizing']) => void
-  saveHiddenColumns: (cols: string[]) => void
-  hiddenColumns: string[]
+  columnSizing: ColumnSizingState
+  setColumnSizing: (columnResizing: ColumnSizingState) => void
+  setColumnVisibility: (cols: VisibilityState) => void
+  columnVisibility: VisibilityState
 }) => {
-  function filterColsByScope(c: Column<IAsset>): boolean {
+  function filterColsByScope(c: ColumnDefResolved<IAsset>): boolean {
     // Check if any of the conditions is true, then hide the column
     return !(
       // If the homeScope is 'me', hide 'added_by' regardless of other conditions.
       (
-        (homeScope === 'me' && c.accessor === 'added_by') ||
+        (homeScope === 'me' && c.accessorKey === 'added_by') ||
         // Hide 'location' for all homeScopes except 'spaces'.
-        (homeScope !== 'spaces' && c.accessor === 'location') ||
+        (homeScope !== 'spaces' && c.accessorKey === 'location') ||
         // Hide 'featured' for all homeScopes except 'everybody'.
-        (homeScope !== 'everybody' && c.accessor === 'featured')
+        (homeScope !== 'everybody' && c.accessorKey === 'featured')
       )
     )
   }
 
-  const col = useAssetColumns({ handleRowClick, colWidths, isAdmin, properties }).filter(filterColsByScope)
-
-  const columns = useMemo(() => col, [col, properties])
-  const data = useMemo(() => apps || [], [apps, selectedRows])
+  const col = useAssetColumns({ handleRowClick, isAdmin, properties }).filter(filterColsByScope)
 
   return (
-    <StyledHomeTable>
+    <StyledPageTable>
       <Table<IAsset>
-        name="apps"
-        columns={columns}
-        enableColumnSelect
-        hiddenColumns={hiddenColumns}
-        saveHiddenColumns={saveHiddenColumns}
-        data={data}
-        properties={properties}
-        isSelectable
-        isSortable
-        isFilterable
-        loading={isLoading}
-        loadingComponent={<div>Loading...</div>}
-        selectedRows={selectedRows}
+        isLoading={isLoading}
+        data={apps || []}
+        columns={col}
+        columnSizing={columnSizing}
+        setColumnSizing={setColumnSizing}
+        rowSelection={selectedRows ?? {}}
         setSelectedRows={setSelectedRows}
-        sortByPreference={sortBy}
-        setSortByPreference={setSortBy}
-        manualFilters
-        shouldResetFilters={[homeScope]}
-        filters={filters}
-        setFilters={setFilters}
-        emptyComponent={<EmptyTable>You have no assets here.</EmptyTable>}
-        isColsResizable
-        saveColumnResizeWidth={saveColumnResizeWidth}
+        setColumnFilters={setFilters}
+        columnSortBy={sortBy}
+        setColumnSortBy={setSortBy}
+        columnFilters={filters}
+        columnVisibility={columnVisibility}
+        setColumnVisibility={setColumnVisibility}
       />
-    </StyledHomeTable>
+    </StyledPageTable>
   )
 }

@@ -13,10 +13,11 @@ export const Select = styled(ReactSelect).attrs({
     option: ({ isSelected }) => (isSelected ? 'pf-select-option selected' : 'pf-select-option'),
     menuList: () => 'pf-select-listbox',
     multiValue: () => 'pf-select-multi-value',
+    input: () => 'pf-select-input',
   },
 })`
   --height: var(--slect-height, 32px);
-  min-height: 34px;
+  min-height: var(--height);
   min-width: 200px;
   .pf-select-single {
     font-weight: 500;

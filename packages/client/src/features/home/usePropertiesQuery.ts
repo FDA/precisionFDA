@@ -13,14 +13,14 @@ async function fetchProperties(type: PropertiesResource, scope: PropertiesScope)
   const r = await axios.get<FetchProperties>(url)
   return r.data
 }
-export const usePropertiesQuery = (type: PropertiesResource, homeScope?: HomeScope, spaceId?: string) => {
+export const usePropertiesQuery = (type: PropertiesResource, homeScope?: HomeScope, spaceId?: number) => {
   const map = {
     'me': 'private',
     'spaces': 'spaces',
     'everybody': 'public',
     'featured': 'public',
-  }
-  const mappingScope: PropertiesScope = spaceId ? `space-${spaceId}` : map[homeScope ?? 'me'] as 'private' | 'public' | 'spaces'
+  } as const
+  const mappingScope: PropertiesScope = spaceId ? `space-${spaceId}` : map[homeScope ?? 'me']
   return useQuery({
     queryKey: ['edit-resource-properties', type, mappingScope],
     queryFn: () => fetchProperties(type, mappingScope),

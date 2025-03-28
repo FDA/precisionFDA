@@ -13,8 +13,6 @@ const IndeterminateIcon = () => (
   </svg>
 )
 
-
-
 const HiddenCheckbox = styled.input.attrs({ type: 'checkbox' })`
   border: 0;
   clip: rect(0 0 0 0);
@@ -53,6 +51,10 @@ const StyledCheckbox = styled.div<{ checked?: boolean; $indeterminate?: boolean,
   border-radius: 3px;
   color: var(--base-color);
 
+  &:focus-visible {
+    outline: none;
+  }
+
   svg {
     visibility: ${props => (props.checked || props.$indeterminate ? 'visible' : 'hidden')};
     color: ${props => (props.checked ? 'var(--icon-color)' : 'var(--checked-background-color)')};
@@ -77,6 +79,7 @@ const StyledCheckbox = styled.div<{ checked?: boolean; $indeterminate?: boolean,
 export type CheckboxProps = {
   id?: string
   disabled?: boolean
+  style?: React.CSSProperties
   onChange?: (e: ChangeEvent<HTMLInputElement>) => void
   checked: boolean
   indeterminate?: boolean
@@ -90,7 +93,7 @@ export const Checkbox = React.forwardRef((props: CheckboxProps, ref) => {
   return (
     <>
       <HiddenCheckbox id={props.id} ref={ref} checked={isChecked} onChange={props.onChange} />
-      <StyledCheckbox checked={isChecked} $indeterminate={props.indeterminate} disabled={props.disabled}>
+      <StyledCheckbox style={props.style} checked={isChecked} $indeterminate={props.indeterminate} disabled={props.disabled}>
         {props.indeterminate ? <IndeterminateIcon /> : <CheckIcon />}
       </StyledCheckbox>
     </>

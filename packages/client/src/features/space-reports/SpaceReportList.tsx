@@ -1,34 +1,27 @@
 import { useQueryClient } from '@tanstack/react-query'
-import React, { useEffect, useMemo } from 'react'
-import { UseResizeColumnsState } from 'react-table'
+import { ColumnSizingState } from '@tanstack/react-table'
+import React, { useEffect } from 'react'
 import useWebSocket from 'react-use-websocket'
 import { Button } from '../../components/Button'
 import Dropdown from '../../components/Dropdown'
 import { HoverDNAnexusLogo } from '../../components/icons/DNAnexusLogo'
 import { PlusIcon } from '../../components/icons/PlusIcon'
 import { ContentFooter } from '../../components/Page/ContentFooter'
-import { EmptyTable } from '../../components/Table/styles'
-import Table from '../../components/Table/Table'
+import Table from '../../components/Table'
 import { DEFAULT_RECONNECT_ATTEMPTS, DEFAULT_RECONNECT_INTERVAL, getNodeWsUrl, SHOULD_RECONNECT } from '../../utils/config'
 import { getSelectedObjectsFromIndexes } from '../../utils/object'
 import { ActionsDropdownContent } from '../home/ActionDropdownContent'
-import { ActionsRow, QuickActions, StyledHomeTable } from '../home/home.styles'
+import { ActionsRow, QuickActions } from '../home/home.styles'
 import { ActionsButton, ResourceHeader } from '../home/show.styles'
-import {
-  IFilter,
-  IMeta,
-  KeyVal,
-  Notification,
-  NOTIFICATION_ACTION,
-  WEBSOCKET_MESSAGE_TYPE,
-  WebSocketMessage,
-} from '../home/types'
+import { IFilter, IMeta, Notification, NOTIFICATION_ACTION, WEBSOCKET_MESSAGE_TYPE, WebSocketMessage } from '../home/types'
 import { useList } from '../home/useList'
 import { ISpaceReport } from './space-report.types'
 import { fetchReports } from './space-reports.api'
 import { useGenerateSpaceReportModal } from './useGenerateSpaceReportModal'
 import { useSpaceReportColumns } from './useSpaceReportColumns'
 import { userReportSelectActions } from './useSpaceReportSelectActions'
+import { StyledPageTable } from '../../components/Table/components/styles'
+import { Params } from '../home/utils'
 
 type ListType = { reports: ISpaceReport[]; meta: IMeta }
 
@@ -37,42 +30,38 @@ const SpaceReportListTable = ({
   isLoading,
   selectedRows,
   setSelectedRows,
-  saveColumnResizeWidth,
-  colWidths,
+  columnSizing,
+  setColumnSizing,
 }: {
   reports: ISpaceReport[]
-  selectedRows?: Record<string, boolean>
+  selectedRows: Record<string, boolean>
   setSelectedRows: (ids: Record<string, boolean>) => void
   isLoading: boolean
-  colWidths: KeyVal
-  saveColumnResizeWidth: (columnResizing: UseResizeColumnsState<ISpaceReport>['columnResizing']) => void
+  columnSizing: ColumnSizingState
+  setColumnSizing: (columnSizing: ColumnSizingState) => void
 }) => {
-  const col = useSpaceReportColumns({ colWidths })
-  const columns = useMemo(() => col, [col])
-  const data = useMemo(() => reports || [], [reports, selectedRows])
+  const col = useSpaceReportColumns()
 
   return (
-    <StyledHomeTable>
+    <StyledPageTable>
       <Table<ISpaceReport>
-        name="spaceReports"
-        columns={columns}
-        data={data}
-        isSelectable
-        loading={isLoading}
-        loadingComponent={<div>Loading...</div>}
-        selectedRows={selectedRows}
+        isLoading={isLoading}
+        data={reports || []}
+        columns={col}
+        columnSizing={columnSizing}
+        setColumnSizing={setColumnSizing}
+        rowSelection={selectedRows}
         setSelectedRows={setSelectedRows}
-        emptyComponent={<EmptyTable>You have no reports here.</EmptyTable>}
-        isColsResizable
-        saveColumnResizeWidth={saveColumnResizeWidth}
+        emptyText="You don't have any reports yet."
+        enableColumnFilters={false}
       />
-    </StyledHomeTable>
+    </StyledPageTable>
   )
 }
 
 export const SpaceReportList = ({ scope, isContributorOrHigher }: { scope: string; isContributorOrHigher?: boolean }) => {
   const { query, selectedIndexes, setSelectedIndexes, saveColumnResizeWidth, colWidths, resetSelected } = useList<ListType>({
-    fetchList: async (filters: IFilter[], params: { scope: string }) => {
+    fetchList: async (filters: IFilter[], params: Params) => {
       const reports = await fetchReports(params.scope)
 
       return {
@@ -106,7 +95,7 @@ export const SpaceReportList = ({ scope, isContributorOrHigher }: { scope: strin
     if ([NOTIFICATION_ACTION.SPACE_REPORT_DONE, NOTIFICATION_ACTION.SPACE_REPORT_ERROR].includes(notification?.action)) {
       query.refetch()
     }
-    client.invalidateQueries({ queryKey: ['space', scope] })
+    client.invalidateQueries({ queryKey: ['space', scope]})
   }, [lastJsonMessage])
 
   const selectedItems = getSelectedObjectsFromIndexes<number, ISpaceReport>(selectedIndexes, query.data?.reports)
@@ -148,8 +137,8 @@ export const SpaceReportList = ({ scope, isContributorOrHigher }: { scope: strin
         isLoading={query.isLoading}
         selectedRows={selectedIndexes}
         setSelectedRows={setSelectedIndexes}
-        saveColumnResizeWidth={saveColumnResizeWidth}
-        colWidths={colWidths}
+        setColumnSizing={saveColumnResizeWidth}
+        columnSizing={colWidths}
       />
 
       <ContentFooter>

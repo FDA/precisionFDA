@@ -1,93 +1,74 @@
-import React, { useMemo } from 'react'
-import { useLocation } from 'react-router-dom'
-import { Column } from 'react-table'
-import { formatDate } from '../../utils/formatting'
-import { KeyVal } from '../home/types'
-import { Discussion } from './discussions.types'
-import { StyledLink, StyledLinkCell } from '../home/home.styles'
-import { DefaultColumnFilter } from '../../components/Table/filters'
+import { ColumnDef } from '@tanstack/react-table'
+import React from 'react'
+import { useLocation } from 'react-router'
 import { ObjectGroupIcon } from '../../components/icons/ObjectGroupIcon'
 import { getSpaceIdFromScope } from '../../utils'
+import { formatDate } from '../../utils/formatting'
+import { StyledLink, StyledLinkCell } from '../home/home.styles'
+import { Discussion } from './discussions.types'
 
-export const useDiscussionColumns = ({ colWidths }: { colWidths?: KeyVal }) => {
+export const useDiscussionColumns = (): ColumnDef<Discussion>[] => {
   const location = useLocation()
-  return useMemo<Column<Discussion>[]>(
-    () =>
-      [
-        {
-          Header: 'Title',
-          accessor: 'title',
-          Filter: DefaultColumnFilter,
-          disableSortBy: true,
-          width: colWidths?.title || 480,
-          Cell: ({ cell, value }) => {
-            const spaceId = getSpaceIdFromScope(cell.row.original.scope)
-            const basePath = spaceId ? `/spaces/${spaceId}/discussions` : location.pathname
-            return <StyledLink to={`${basePath}/${cell.row.original.id}`}>{value}</StyledLink>
-          },
-        },
-        {
-          Header: 'Created',
-          accessor: 'createdAt',
-          disableFilters: true,
-          disableSortBy: true,
-          width: colWidths?.created_at_date_time || 190,
-          Cell({ value }) {
-            return formatDate(value)
-          },
-        },
-        {
-          Header: 'Updated',
-          accessor: 'updatedAt',
-          disableFilters: true,
-          disableSortBy: true,
-          width: colWidths?.created_at_date_time || 190,
-          Cell({ value }) {
-            return formatDate(value)
-          },
-        },
-        {
-          Header: 'Added by',
-          accessor: 'user.fullName',
-          Filter: DefaultColumnFilter,
-          disableFilters: true,
-          disableSortBy: true,
-          width: colWidths?.format || 150,
-          Cell: ({ cell, value }) => (
-            <a data-turbolinks="false" href={`/users/${cell.row.original.user.dxuser}`}>
-              {value}
-            </a>
-          ),
-        },
-        {
-          Header: 'Location',
-          accessor: 'scope',
-          Filter: DefaultColumnFilter,
-          disableSortBy: true,
-
-          width: colWidths?.location || 150,
-          Cell: ({ row, value }) => (
-            <StyledLinkCell to={`/spaces/${getSpaceIdFromScope(row.original.scope)}/discussions`}>
-              <ObjectGroupIcon />
-              {value}
-            </StyledLinkCell>
-          ),
-        },
-        {
-          Header: 'Answers',
-          accessor: 'answersCount',
-          disableFilters: true,
-          disableSortBy: true,
-          width: colWidths?.format || 80,
-        },
-        {
-          Header: 'Comments',
-          accessor: 'commentsCount',
-          disableFilters: true,
-          disableSortBy: true,
-          width: colWidths?.format || 80,
-        },
-      ] as Column<Discussion>[],
-    [location.search],
-  )
+  return [
+    {
+      header: 'Title',
+      accessorKey: 'title',
+      enableSorting: false,
+      enableColumnFilter: false,
+      filterFn: 'includesString',
+      size: 480,
+      cell: c => {
+        const spaceId = getSpaceIdFromScope(c.row.original.scope)
+        const basePath = spaceId ? `/spaces/${spaceId}/discussions` : location.pathname
+        return <StyledLink to={`${basePath}/${c.row.original.id}`}>{c.row.original.title}</StyledLink>
+      },
+    },
+    {
+      header: 'Created',
+      accessorKey: 'createdAt',
+      enableSorting: false,
+      enableColumnFilter: false,
+      size: 190,
+      cell: c => {
+        return formatDate(c.row.original.createdAt)
+      },
+    },
+    {
+      header: 'Added by',
+      accessorKey: 'user.fullName',
+      enableColumnFilter: false,
+      filterFn: 'includesString',
+      enableSorting: false,
+      size: 150,
+      cell: c => <StyledLinkCell to={`/users/${c.row.original.user.dxuser}`}>{c.row.original.user.fullName}</StyledLinkCell>,
+    },
+    {
+      header: 'Location',
+      accessorKey: 'scope',
+      enableSorting: false,
+      enableColumnFilter: false,
+      filterFn: 'includesString',
+      size: 150,
+      cell: c => (
+        <StyledLinkCell to={`/spaces/${getSpaceIdFromScope(c.row.original.scope)}/discussions`}>
+          <ObjectGroupIcon />
+          {c.row.original.scope}
+        </StyledLinkCell>
+      ),
+    },
+    {
+      header: 'Answers',
+      accessorKey: 'answersCount',
+      enableColumnFilter: false,
+      enableSorting: false,
+      size: 80,
+    },
+    {
+      header: 'Comments',
+      accessorKey: 'commentsCount',
+      enableColumnFilter: false,
+      enableSorting: false,
+      size: 80,
+    },
+  ]
 }

@@ -8,7 +8,6 @@ import { FieldGroup } from '../../../components/form/FieldGroup'
 import { CrossIcon } from '../../../components/icons/PlusIcon'
 import { QuestionIcon } from '../../../components/icons/QuestionIcon'
 import { InputNumber, InputText } from '../../../components/InputText'
-import { EmptyTable } from '../../../components/Table/styles'
 import { IUser } from '../../../types/user'
 import { useSelectFolderModal } from '../../files/actionModals/useSelectFolderModal'
 import { TreeOnSelectInfo } from '../../files/files.types'
@@ -57,6 +56,7 @@ import {
   useUserComputeInstances, validateFile,
 } from './utils'
 import { SavingModal } from '../../modal/SavingModal'
+import { Empty } from '../../home/home.styles'
 
 /**
  * If params are specified in the URL, decode them and set them as default values.
@@ -460,7 +460,7 @@ export const RunJobForm = ({ app, userJobLimit, spec }: { app: IApp; spec: AppSp
                   )
                 })
               ) : (
-                <EmptyTable>App has no inputs.</EmptyTable>
+                <Empty>App has no inputs.</Empty>
               )}
             </SectionBody>
           </Section>

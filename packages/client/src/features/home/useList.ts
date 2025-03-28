@@ -1,15 +1,17 @@
-import { useEffect, useState } from 'react'
 import { UseQueryOptions } from '@tanstack/react-query'
-import { usePrevious } from '../../hooks/usePrevious'
-import { columnFilters } from './columnFilters'
-import { APIResource, IMeta, HomeScope } from './types'
+import { useEffect } from 'react'
 import { IColumnWidthLocalStorage, useColumnWidthLocalStorage } from '../../hooks/useColumnWidthLocalStorage'
-import { useFilterParams } from './useFilterState'
-import { useListQuery } from './useListQuery'
+import { useHiddenColumnLocalStorage } from '../../hooks/useHiddenColumnLocalStorage'
 import { ISortByParams, useOrderByParams } from '../../hooks/useOrderByState'
 import { usePaginationParams } from '../../hooks/usePaginationState'
-import { useHiddenColumnLocalStorage } from '../../hooks/useHiddenColumnLocalStorage'
+import { usePrevious } from '../../hooks/usePrevious'
 import { createLocationKey } from '../../utils'
+import { columnFilters } from './columnFilters'
+import { APIResource, HomeScope, IMeta, MetaV2 } from './types'
+import { useFilterParams } from './useFilterState'
+import { FetchListFn, useListQuery } from './useListQuery'
+import { useListSelect } from './useListSelect'
+import { Params } from './utils'
 
 export interface IListProps {
   pagination: ReturnType<typeof usePaginationParams>
@@ -18,15 +20,13 @@ export interface IListProps {
   colWidth: IColumnWidthLocalStorage
 }
 
-type ListType = { [key: string]: {}, meta: IMeta }
+type ListType = { [key: string]: unknown, meta: IMeta | MetaV2 }
 interface IUseList<T> {
   spaceId?: string,
   scope?: HomeScope,
-  fetchList: any,
+  fetchList: FetchListFn,
   resource: APIResource,
-  params?: {
-    [key: string]: string | undefined
-  }
+  params?: Params
   queryOptions?: UseQueryOptions<T>
 }
 
@@ -36,15 +36,15 @@ Object.keys(columnFilters).forEach(v => {
 })
 
 
-export function useList<T extends ListType>({ fetchList, resource, params = {}, queryOptions }: IUseList<T>) {
+export function useList<T extends ListType>({ fetchList, resource, params = {}}: IUseList<T>) {
   const locationKey = createLocationKey(resource, params?.spaceId)
   const { pageParam, perPageParam, setPageParam, setPerPageParam } = usePaginationParams()
-  const [selectedIndexes, setSelectedIndexes] = useState<Record<string, boolean> | undefined>({})
-  const { sortBy, sort, setSortBy } = useOrderByParams({ onSetSortBy: (cols) => setSelectedIndexes({}) })
+  const { selectedIndexes, setSelectedIndexes } = useListSelect()
+  const { sortBy, sort, setSortBy } = useOrderByParams({ onSetSortBy: () => setSelectedIndexes({}) })
   const { colWidths, saveColumnResizeWidth } = useColumnWidthLocalStorage(locationKey)
-  const { hiddenColumns, saveHiddenColumns } = useHiddenColumnLocalStorage(locationKey)
-  
-  const resetSelected = () => setSelectedIndexes(undefined)
+  const { columnVisibility, setColumnVisibility } = useHiddenColumnLocalStorage(locationKey)
+
+  const resetSelected = () => setSelectedIndexes({})
 
   const { filterQuery, setSearchFilter, setFilterParam } = useFilterParams({
     filters: columnFilters,
@@ -57,12 +57,12 @@ export function useList<T extends ListType>({ fetchList, resource, params = {}, 
   useEffect(() => {
     // Reset selected rows if pageParam, perPageParam, sort, filterQuery, scope, spaceId change 
     resetSelected()
-  }, [pageParam, perPageParam, sort, filterQuery, params.scope, params.spaceId])
+  }, [pageParam, perPageParam, sort, params.scope, params.spaceId])
 
   const prevScope = usePrevious(params.scope)
   useEffect(() => {
     // skip first render
-    if(prevScope) {
+    if (prevScope) {
       setPageParam(undefined, 'replaceIn')
       setFilterParam(filterReset, 'replaceIn')
     }
@@ -91,7 +91,7 @@ export function useList<T extends ListType>({ fetchList, resource, params = {}, 
     perPageParam,
     saveColumnResizeWidth,
     colWidths,
-    hiddenColumns,
-    saveHiddenColumns,
+    columnVisibility,
+    setColumnVisibility,
   }
 }
