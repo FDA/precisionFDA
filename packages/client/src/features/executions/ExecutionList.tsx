@@ -29,6 +29,7 @@ import { fetchExecutions } from './executions.api'
 import { IExecution } from './executions.types'
 import { useExecutionColumns } from './useExecutionColumns'
 import { useExecutionActions } from './useExecutionSelectActions'
+import { ResouceQueryErrorMessage } from '../home/ResouceQueryErrorMessage'
 import { StyledPageTable } from '../../components/Table/components/styles'
 
 type ListType = { jobs: IExecution[]; meta: IMeta }
@@ -101,7 +102,7 @@ export const ExecutionList = ({ homeScope, spaceId }: { homeScope?: HomeScope; s
   const selectedFileObjects = getSelectedObjectsFromIndexes(selectedIndexes, data?.jobs)
   const actions = useExecutionActions({ homeScope, selectedItems: selectedFileObjects, resourceKeys: ['jobs'] })
 
-  if (error) return <div>Error! {JSON.stringify(error)}</div>
+  if (error) return <ResouceQueryErrorMessage />
 
   return (
     <ErrorBoundary>

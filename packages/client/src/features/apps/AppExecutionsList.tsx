@@ -32,6 +32,7 @@ import {
 import { useFilterParams } from '../home/useFilterState'
 import { useListQuery } from '../home/useListQuery'
 import { fetchAppExecutions } from './apps.api'
+import { ResouceQueryErrorMessage } from '../home/ResouceQueryErrorMessage'
 import { createLocationKey } from '../../utils'
 import { StyledPageTable } from '../../components/Table/components/styles'
 
@@ -98,10 +99,10 @@ export const AppExecutionsList = ({ spaceId, appUid }: { spaceId?: string, appUi
 
   const { isLoading, data, error } = query
 
-  if (error) return <div>Error! {JSON.stringify(error)}</div>
+  if (error) return <ResouceQueryErrorMessage />
 
   return (
-    <ErrorBoundary>
+    <>
       <ExecutionsListTable
         jobs={data?.jobs}
         isLoading={isLoading}
@@ -127,7 +128,7 @@ export const AppExecutionsList = ({ spaceId, appUid }: { spaceId?: string, appUi
           onPerPageSelect={setPerPage}
         />
       </ContentFooter>
-    </ErrorBoundary>
+    </>
   )
 }
 

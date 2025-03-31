@@ -28,6 +28,7 @@ import { IApp } from './apps.types'
 import { useAppListActions } from './useAppListActions'
 import { useAppSelectionActions } from './useAppSelectionActions'
 import { useAppsColumns } from './useAppsColumns'
+import { ResouceQueryErrorMessage } from '../home/ResouceQueryErrorMessage'
 import { StyledPageTable } from '../../components/Table/components/styles'
 
 type ListType = { apps: IApp[]; meta: IMeta }
@@ -97,7 +98,7 @@ export const AppList = ({
     delete actions['Make public']
   }
 
-  if (error) return <div>Error! {JSON.stringify(error)}</div>
+  if (error) return <ResouceQueryErrorMessage />
 
   return (
     <>

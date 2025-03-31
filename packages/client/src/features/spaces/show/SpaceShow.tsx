@@ -53,6 +53,7 @@ import {
   SpaceTopRight,
   TopSpaceHeader,
 } from './styles'
+import { ErrorBoundary } from '../../../utils/ErrorBoundry'
 import { DatabaseIcon } from '../../../components/icons/DatabaseIcon'
 import { DatabaseList } from '../../databases/DatabaseList'
 import { CreateDatabase } from '../../databases/create/CreateDatabase'
@@ -180,6 +181,7 @@ const Spaces2 = ({ space, isLoading }: { space: ISpace; isLoading: boolean }) =>
           </Expand>
         </StyledMenu>
         <Main>
+          <ErrorBoundary>
           {isLoading ? (
             <HomeLoader />
           ) : (
@@ -230,6 +232,7 @@ const Spaces2 = ({ space, isLoading }: { space: ISpace; isLoading: boolean }) =>
               <Route path="/" element={<Navigate to="files" replace />} />
             </Routes>
           )}
+          </ErrorBoundary>
         </Main>
       </Row>
     </>

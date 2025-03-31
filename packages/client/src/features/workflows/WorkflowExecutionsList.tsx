@@ -9,7 +9,6 @@ import { useColumnWidthLocalStorage } from '../../hooks/useColumnWidthLocalStora
 import { useOrderByState } from '../../hooks/useOrderByState'
 import { usePaginationParams } from '../../hooks/usePaginationState'
 import { DEFAULT_RECONNECT_ATTEMPTS, DEFAULT_RECONNECT_INTERVAL, SHOULD_RECONNECT, getNodeWsUrl } from '../../utils/config'
-import { ErrorBoundary } from '../../utils/ErrorBoundry'
 import { toArrayFromObject } from '../../utils/object'
 import { IExecution } from '../executions/executions.types'
 import { createLocationKey } from '../../utils'
@@ -19,6 +18,7 @@ import { IMeta, NOTIFICATION_ACTION, Notification, WEBSOCKET_MESSAGE_TYPE, WebSo
 import { useFilterParams } from '../home/useFilterState'
 import { useListQuery } from '../home/useListQuery'
 import { fetchWorkflowExecutions } from './workflows.api'
+import { ResouceQueryErrorMessage } from '../home/ResouceQueryErrorMessage'
 import { useHiddenColumnLocalStorage } from '../../hooks/useHiddenColumnLocalStorage'
 import { StyledPageTable } from '../../components/Table/components/styles'
 
@@ -87,10 +87,10 @@ export const WorkflowExecutionsList = ({ spaceId, uid }: { spaceId?: string; uid
     })
   }, [lastJsonMessage])
 
-  if (error) return <div>Error! {JSON.stringify(error)}</div>
+  if (error) return <ResouceQueryErrorMessage />
 
   return (
-    <ErrorBoundary>
+    <>
       <ExecutionsListTable
         jobs={data?.jobs}
         isLoading={isLoading}
@@ -116,7 +116,7 @@ export const WorkflowExecutionsList = ({ spaceId, uid }: { spaceId?: string; uid
           onPerPageSelect={setPerPage}
         />
       </ContentFooter>
-    </ErrorBoundary>
+    </>
   )
 }
 
@@ -158,6 +158,7 @@ export const ExecutionsListTable = ({
       c.id === 'select'
     )
   }
+  // @ts-expect-error: type is broken from react-table library
   const col = useExecutionColumns({ filterDataTestIdPrefix: 'workflow-executions-list' }).filter(filterColsByScope)
 
   return (

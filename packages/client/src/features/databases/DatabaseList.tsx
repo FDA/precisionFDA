@@ -25,6 +25,7 @@ import { fetchDatabaseList } from './databases.api'
 import { IDatabase } from './databases.types'
 import { useDatabaseColumns } from './useDatabaseColumns'
 import { useDatabaseSelectActions } from './useDatabaseSelectActions'
+import { ResouceQueryErrorMessage } from '../home/ResouceQueryErrorMessage'
 
 const DBStyledRight = styled(StyledRight)`
   gap: 20px;
@@ -80,12 +81,7 @@ export const DatabaseList = ({ homeScope, spaceId }: { homeScope?: HomeScope, sp
   )
   const actions = useDatabaseSelectActions(selectedObjects, ['dbclusters'])
 
-  if (error)
-    return (
-      <div>
-        Error! Something broke, or this resource type does not exist.
-      </div>
-    )
+  if (error) return <ResouceQueryErrorMessage />
 
   return (
     <>
