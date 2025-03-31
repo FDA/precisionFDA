@@ -45,6 +45,7 @@ export const StyledContainer = styled.div`
 export const StyledFilterSection = styled.div`
   display: flex;
   flex-direction: row;
+  gap: 8px;
   padding: 0 12px 6px 12px;
 `
 
@@ -69,7 +70,9 @@ export const StyledFileDetailItem = styled.span`
   margin-left: 4px;
 `
 
-export const Tab = styled.div``
+export const Tab = styled.div`
+  min-width: 400px;
+`
 
 export const StyledAction = styled.a`
   color: var(--primary-500);
