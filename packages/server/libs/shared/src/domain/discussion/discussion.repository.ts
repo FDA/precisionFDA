@@ -1,33 +1,45 @@
-import { PaginatedRepository } from '@shared/domain/entity/repository/paginated.repository'
 import { Discussion } from '@shared/domain/discussion/discussion.entity'
-import { User } from '@shared/domain/user/user.entity'
+import { AccessControlRepository } from '@shared/repository/access-control.repository'
+import { FilterQuery } from '@mikro-orm/core'
 import { STATIC_SCOPE } from '@shared/enums'
-import { EntityScope } from '@shared/types/common'
+import { SqlEntityManager } from '@mikro-orm/mysql'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { User } from '@shared/domain/user/user.entity'
+import { Injectable } from '@nestjs/common'
 
-export default class DiscussionRepository extends PaginatedRepository<Discussion> {
-  async findAccessibleByIdAndUser(id: number, user: User): Promise<Discussion | null> {
-    const accessibleSpaces = await user.accessibleSpaces()
-    const accessibleScopes: EntityScope[] = accessibleSpaces.map((space) => space.scope)
-
-    accessibleScopes.push(STATIC_SCOPE.PUBLIC)
-
-    return this.findOne({
-      id,
-      note: {
-        scope: { $in: accessibleScopes },
-      },
-    })
+@Injectable()
+export default class DiscussionRepository extends AccessControlRepository<Discussion> {
+  constructor(
+    em: SqlEntityManager,
+    private readonly user: UserContext, // need also the user db record (for accessible spaces)
+  ) {
+    // TODO XXXX_LUDVIK
+    super(em, Discussion)
   }
 
-  async findEditableByIdAndUser(id: number, user: User): Promise<Discussion | null> {
-    const editableSpaces = await user.editableSpaces()
-    const editableScopes: EntityScope[] = editableSpaces.map((space) => space.scope)
+  protected async getAccessibleWhere(): Promise<FilterQuery<Discussion>> {
+    const user = await this.em.findOneOrFail(User, { id: this.user.id })
+    // const user = await this.em.findOneOrFail(User, { id: 7 })
+    const accessibleSpaces = await user.accessibleSpaces()
+    const scopes = accessibleSpaces.map((space) => space.scope)
 
-    return this.findOne({
-      id,
+    return {
       note: {
-        $or: [{ user: user.id, scope: STATIC_SCOPE.PUBLIC }, { scope: { $in: editableScopes } }],
+        $or: [{ scope: STATIC_SCOPE.PUBLIC }, { scope: { $in: scopes } }],
       },
-    })
+    }
+  }
+
+  protected async getEditableWhere(): Promise<FilterQuery<Discussion>> {
+    // const user = await this.em.findOneOrFail(User, { id: this.user.id })
+    const user = await this.em.findOneOrFail(User, { id: 7 })
+    const accessibleSpaces = await user.editableSpaces() //TODO for discussions the rules should differ a bit - only admin/leads and authors can touch the discussion in spaces.
+    const scopes = accessibleSpaces.map((space) => space.scope)
+
+    return {
+      note: {
+        $or: [{ scope: STATIC_SCOPE.PUBLIC }, { scope: { $in: scopes } }],
+      },
+    }
   }
 }
