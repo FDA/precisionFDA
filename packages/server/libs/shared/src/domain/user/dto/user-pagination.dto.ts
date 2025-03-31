@@ -1,10 +1,10 @@
-import { PaginationDto } from '@shared/domain/entity/domain/pagination.dto'
+import { PaginationDTO } from '@shared/domain/entity/domain/pagination.dto'
 import { Type } from 'class-transformer'
 import { IsIn, IsInt, IsOptional, Min, ValidateNested } from 'class-validator'
 import { UserPaginationFilter } from '@shared/domain/user/dto/user-pagination-filter'
 import { User } from '@shared/domain/user/user.entity'
 
-export class UserPaginationDto extends PaginationDto<User> {
+export class UserPaginationDto extends PaginationDTO<User> {
   @IsOptional()
   @Type(() => String)
   orderBy?: string

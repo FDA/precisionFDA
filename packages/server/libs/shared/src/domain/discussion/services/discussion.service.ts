@@ -76,6 +76,8 @@ export class DiscussionService {
   async getDiscussion(discussionId: number): Promise<DiscussionDTO> {
     this.logger.log(`Getting discussion id: ${discussionId}`)
 
+    const xxx = await this.discussionRepository.findAccessible({})
+
     const discussion = await this.em.findOne(Discussion, discussionId, {
       populate: [
         'note',

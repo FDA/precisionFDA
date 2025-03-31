@@ -1,4 +1,4 @@
-import { PaginationDto, SortDefinition } from '@shared/domain/entity/domain/pagination.dto'
+import { PaginationDTO, SortDefinition } from '@shared/domain/entity/domain/pagination.dto'
 import { Type } from 'class-transformer'
 import { IsEnum, IsInt, IsOptional, ValidateNested } from 'class-validator'
 import { Challenge } from '@shared/domain/challenge/challenge.entity'
@@ -21,7 +21,7 @@ class ChallengeFilter {
   status: FILTER_STATUS
 }
 
-export class ChallengePaginationDto extends PaginationDto<Challenge> {
+export class ChallengePaginationDto extends PaginationDTO<Challenge> {
   @IsOptional()
   @ValidateNested()
   @Type(() => ChallengeFilter)
