@@ -160,9 +160,9 @@ export const StyledNameCell = styled.div<{ color?: string }>`
   min-width: max-content;
 `
 
-export const StyledLink = styled(Link)<{ disable?: boolean }>`
-  ${({ disable }) =>
-    disable &&
+export const StyledLink = styled(Link)<{ $disable?: boolean }>`
+  ${({ $disable }) =>
+    $disable &&
     css`
       pointer-events: none;
       color: var(--c-text-400);

@@ -7,7 +7,7 @@ export const StyledSubtitle = styled.div`
 
 export const SelectableTable = styled.table`
   padding: 0;
-  min-width: max-content;
+  width: 100%;
   tr:hover {
     color: var(--primary-500);
     cursor: pointer;
@@ -44,6 +44,7 @@ export const StyledContainer = styled.div`
 
 export const StyledFilterSection = styled.div`
   display: flex;
+  gap: 8px;
   flex-direction: row;
   gap: 8px;
   padding: 0 12px 6px 12px;
