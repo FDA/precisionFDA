@@ -23,7 +23,7 @@ import {
 } from '@shared/domain/space-membership/space-membership.enum'
 import { config } from '@shared/config'
 import { ADMIN_GROUP_ROLES } from '@shared/domain/admin-group/admin-group.entity'
-import { CreateSpaceDTO } from '@shared/domain/space/dto/create-space-dto'
+import { CreateSpaceDTO } from '@shared/domain/space/dto/create-space.dto'
 
 describe('space creation process tests', () => {
   const SHARED_SPACE_ID = 2
