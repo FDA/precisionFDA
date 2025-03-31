@@ -160,7 +160,7 @@ const MenuLink = ({
   children: React.ReactNode
   'data-testid': string
 }) => {
-  const MenuLinkComp = navItem.alink ? 'a' : Link
+  const MenuLinkComp = navItem?.alink ? 'a' : Link
   const menuLinkProps = {
     rel: navItem.alink?.startsWith('mailto:') ? 'noreferrer' : undefined,
     target: navItem?.external ? '_blank' : undefined,
@@ -176,7 +176,7 @@ const MenuLink = ({
 const MenuItem = ({ navItem, pathname, onClick }: { navItem: SiteNavItemType; pathname: string; onClick: () => void }) => {
   return (
     <MenuLink navItem={navItem} onClick={onClick} data-testid={`sitenav-${navItem.id}`}>
-      <SiteMenuItem $active={isActiveLink(navItem.link || navItem.alink, pathname)}>
+      <SiteMenuItem $active={isActiveLink(navItem?.link || navItem.alink, pathname)}>
         <IconWrap>
           <navItem.icon height={navItem.iconHeight} />
         </IconWrap>
@@ -433,7 +433,7 @@ const Header: React.FC = () => {
               const { id, iconHeight, text, icon: Icon } = i
               return (
                 <MenuLink navItem={i} key={id} data-testid={`favoritenav-${id}`}>
-                  <HeaderMenuItem $active={isActiveLink(i.link || i.alink, pathname)}>
+                  <HeaderMenuItem $active={isActiveLink(i?.link || i.alink, pathname)}>
                     <IconWrap $marginBottom={1}>
                       <Icon height={iconHeight} />
                     </IconWrap>
