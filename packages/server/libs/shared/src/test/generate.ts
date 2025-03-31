@@ -49,6 +49,7 @@ import { USER_STATE, User } from '../domain/user/user.entity'
 import { STATIC_SCOPE } from '../enums'
 import { TASK_TYPE } from '../queue/task.input'
 import type { AnyObject, UserCtx } from '../types'
+import { UserExtras } from '@shared/domain/user/user-extras'
 
 const chance = new Chance()
 
@@ -79,10 +80,7 @@ const user = {
     userState: USER_STATE.ENABLED,
     lastDataCheckup: new Date(),
     lastLogin: new Date(),
-    extras: {
-      has_seen_guidelines: false,
-      inactivity_email_sent: false,
-    },
+    extras: new UserExtras(),
     privateFilesProject: `project-${random.dxstr()}`,
     publicFilesProject: `project-${random.dxstr()}`,
     privateComparisonsProject: `project-${random.dxstr()}`,
