@@ -25,6 +25,7 @@ import { AdminMembership } from '../admin-membership/admin-membership.entity'
 import { UserRepository } from './user.repository'
 import { Space } from '@shared/domain/space/space.entity'
 import { CAN_EDIT_ROLES } from '@shared/domain/space-membership/space-membership.helper'
+import { UserExtras } from '@shared/domain/user/user-extras'
 
 export enum USER_STATE {
   ENABLED = 0,
@@ -65,11 +66,6 @@ export type CloudResourceSettings = {
   job_limit: number
   total_limit: number
   resources: Array<(typeof RESOURCE_TYPES)[number]>
-}
-
-type Extras = {
-  has_seen_guidelines: boolean
-  inactivity_email_sent: boolean
 }
 
 // contains the bare minimum to work with the user instance
@@ -140,7 +136,7 @@ export class User extends BaseEntity {
   cloudResourceSettings?: CloudResourceSettings
 
   @Property({ type: 'json' })
-  extras?: Extras
+  extras?: UserExtras
 
   @OneToMany({ entity: () => Job, mappedBy: 'user' })
   jobs = new Collection<Job>(this)

@@ -23,7 +23,7 @@ import { ProfileIcon } from '../icons/ProfileIcon'
 import { SiteMenuIcon } from '../icons/SiteMenuIcon'
 import { StarIcon } from '../icons/StarIcon'
 import { SiteNavItemType } from './NavItems'
-import { orderArrayByReference } from './orderArrayByReference'
+import { getOrderedFavoritesOnly } from './getOrderedFavoritesOnly'
 import { getObjectsByIds } from './orderObjectById'
 import {
   DisabledSiteMenuItem,
@@ -56,8 +56,7 @@ import {
   SubLink,
 } from './styles'
 import { useEditFavoritesModal } from './useEditFavoritesModal'
-import { useNavFavoritesLocalStorage } from './useNavFavoritesLocalStorage'
-import { useNavOrderLocalStorage } from './useNavOrderLocalStorage'
+import { useNavFavorites } from './useNavFavorites'
 import { useUserSiteNavItems } from './useUserSiteNavItems'
 
 type UserMenuProps = {
@@ -357,8 +356,7 @@ const Header: React.FC = () => {
   const user = useAuthUser()
   const siteSettings = useSiteSettingsQuery()
   const { isAlertDismissed, setIsAlertDismissed } = useAlertDismissed()
-  const { selFavorites } = useNavFavoritesLocalStorage()
-  const { order } = useNavOrderLocalStorage()
+  const { selFavorites } = useNavFavorites()
   const [isCloudResourcesModalShown, setCloudResourcesModalShown] = useState(false)
   const buttonRef = useRef<HTMLDivElement>(null)
   const generateCLIKeyAction = useGenerateKeyModal()
@@ -383,7 +381,7 @@ const Header: React.FC = () => {
     }, ms ?? 225)
   }
 
-  const orderedFavorites = orderArrayByReference(selFavorites, order)
+  const orderedFavorites = getOrderedFavoritesOnly(selFavorites)
 
   return (
     <>
