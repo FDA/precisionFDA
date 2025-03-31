@@ -305,28 +305,6 @@ class Space < ActiveRecord::Base
     "space-#{id}"
   end
 
-  # @param update_space_params [Object] - consists of SpaceEditForm attributes
-  # @param api [DNAnexusAPI]
-  def leads_updates(update_space_params, api)
-    return unless review?
-
-    lead_invite_and_update(
-      host_lead_dxuser,
-      update_space_params.host_lead_dxuser,
-      update_space_params.current_user,
-      SpaceMembership::SIDE_HOST,
-      api,
-    )
-
-    lead_invite_and_update(
-      guest_lead_dxuser,
-      update_space_params.sponsor_lead_dxuser,
-      update_space_params.current_user,
-      SpaceMembership::SIDE_GUEST,
-      api,
-    )
-  end
-
   # @param space_lead_dxuser [String] dxuser of a current space lead - to be changed to Admin.
   # @param updated_lead_dxuser [String] dxuser of a new space lead - to be changed to Lead.
   # @param side [String] dxuser of a current space lead - to be changed to Admin.

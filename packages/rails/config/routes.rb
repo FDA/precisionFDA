@@ -277,7 +277,7 @@ Rails.application.routes.draw do
         end
       end
 
-      resources :spaces, only: %i(index show update) do
+      resources :spaces, only: %i(index show) do
         collection do
           get :cli
           get :editable_spaces

@@ -69,22 +69,25 @@ export async function addDataRequest({
     .then(res => res.data)
 }
 
-export interface CreateSpacePayload {
+export interface EditSpacePayload {
   name: string
   description: string
+  cts?: string
+}
+
+export interface CreateSpacePayload extends EditSpacePayload {
   spaceType: ISpace['type']
   sourceSpaceId?: string | null
   guestLeadDxuser?: string | null
   hostLeadDxuser?: string | null
   sponsorLeadDxuser?: string | null
-  cts?: string
   protected: boolean | null
   restrictedReviewer?: boolean
   restrictedDiscussions?: boolean | null
 }
 
 export interface EditSpaceResponse {
-  space: { id: number }
+  id: number,
   error?: Error
   errors?: string[]
 }
@@ -112,10 +115,8 @@ export async function createSpaceRequest(payload: CreateSpacePayload): Promise<C
   return axios.post('/api/v2/spaces', payload).then(res => res.data)
 }
 
-export async function editSpaceRequest(spaceId: number, payload: CreateSpacePayload): Promise<EditSpaceResponse> {
-  // TODO temporarily until edit is moved from ruby to node PFDA-6046
-  payload.sponsorLeadDxuser = payload.guestLeadDxuser
-  return axios.put(`/api/spaces/${spaceId}`, { space: payload }).then(res => res.data)
+export async function editSpaceRequest(spaceId: number, payload: EditSpacePayload): Promise<EditSpaceResponse> {
+  return axios.put(`/api/v2/spaces/${spaceId}`, payload).then(res => res.data)
 }
 
 export async function updateSpacesHidden(spaceIds: number[], hidden: boolean): Promise<void> {
