@@ -1,13 +1,18 @@
-import { BaseEntity } from '@shared/database/base.entity'
+import { FindOptions } from '@mikro-orm/core'
 import { FilterQuery, Loaded } from '@mikro-orm/mysql'
-import { FindOneOptions, FindOptions } from '@mikro-orm/core'
-import { PaginatedRepository } from '@shared/domain/entity/repository/paginated.repository'
-import { PaginationDTO } from '@shared/domain/entity/domain/pagination.dto'
+import { BaseEntity } from '@shared/database/base.entity'
 import { PaginatedResult } from '@shared/domain/entity/domain/paginated.result'
+import { PaginationDTO } from '@shared/domain/entity/domain/pagination.dto'
+import { PaginatedRepository } from '@shared/domain/entity/repository/paginated.repository'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { createUserContextManager } from '@shared/domain/user-context/storage/user-context-storage.manager'
+import { userContextStorage } from '@shared/domain/user-context/storage/user-context.storage'
 
 export abstract class AccessControlRepository<
   Entity extends BaseEntity,
 > extends PaginatedRepository<Entity> {
+  protected readonly user: UserContext = createUserContextManager(userContextStorage)
+
   async findAccessible<
     Hint extends string = never,
     Fields extends string = '*',
