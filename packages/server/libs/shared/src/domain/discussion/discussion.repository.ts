@@ -9,7 +9,6 @@ import { AccessControlRepository } from '@shared/repository/access-control.repos
 export default class DiscussionRepository extends AccessControlRepository<Discussion> {
   protected async getAccessibleWhere(): Promise<FilterQuery<Discussion>> {
     const user = await this.em.findOneOrFail(User, { id: this.user.id })
-    // const user = await this.em.findOneOrFail(User, { id: 7 })
     const accessibleSpaces = await user.accessibleSpaces()
     const scopes = accessibleSpaces.map((space) => space.scope)
 
@@ -21,9 +20,8 @@ export default class DiscussionRepository extends AccessControlRepository<Discus
   }
 
   protected async getEditableWhere(): Promise<FilterQuery<Discussion>> {
-    // const user = await this.em.findOneOrFail(User, { id: this.user.id })
-    const user = await this.em.findOneOrFail(User, { id: 7 })
-    const accessibleSpaces = await user.editableSpaces() //TODO for discussions the rules should differ a bit - only admin/leads and authors can touch the discussion in spaces.
+    const user = await this.em.findOneOrFail(User, { id: this.user.id })
+    const accessibleSpaces = await user.editableSpaces() //TODO for discussions the rules should differ a bit - only admin/leads and authors can edit the discussion in spaces.
     const scopes = accessibleSpaces.map((space) => space.scope)
 
     return {

@@ -43,40 +43,25 @@ import { CommentDTO } from '@shared/domain/discussion/dto/comment.dto'
 import { EntityScopeUtils } from '@shared/utils/entity-scope.utils'
 import { DiscussionFollow } from '@shared/domain/follow/discussion-follow.entity'
 import { AttachmentsDTO } from '@shared/domain/discussion/dto/attachments.dto'
+import { UserRepository } from '@shared/domain/user/user.repository'
 
 @Injectable()
 export class DiscussionService {
   @ServiceLogger()
   private readonly logger: Logger
 
-  private readonly em: SqlEntityManager
-  private readonly userCtx: UserCtx
-  private readonly fetcher: EntityFetcherService
-  private readonly entityService: EntityService
-  private readonly spaceRepository: SpaceRepository
-  private readonly discussionRepository: DiscussionRepository
-
   constructor(
-    em: SqlEntityManager,
-    userCtx: UserContext,
-    fetcher: EntityFetcherService,
-    entityService: EntityService,
-    spaceRepository: SpaceRepository,
-    discussionRepository: DiscussionRepository,
-  ) {
-    this.em = em
-    this.userCtx = userCtx
-    this.fetcher = fetcher
-    this.entityService = entityService
-    this.spaceRepository = spaceRepository
-    this.discussionRepository = discussionRepository
-    this.logger.debug('DiscussionService initialized')
-  }
+    private readonly em: SqlEntityManager,
+    private readonly userCtx: UserContext,
+    private readonly fetcher: EntityFetcherService,
+    private readonly entityService: EntityService,
+    private readonly userRepository: UserRepository,
+    private readonly spaceRepository: SpaceRepository,
+    private readonly discussionRepository: DiscussionRepository,
+  ) {}
 
   async getDiscussion(discussionId: number): Promise<DiscussionDTO> {
     this.logger.log(`Getting discussion id: ${discussionId}`)
-
-    const xxx = await this.discussionRepository.findAccessible({})
 
     const discussion = await this.em.findOne(Discussion, discussionId, {
       populate: [
@@ -93,7 +78,7 @@ export class DiscussionService {
       ],
     })
 
-    const user = await this.em.findOneOrFail(User, this.userCtx.id)
+    const user = await this.userRepository.findOneOrFail({ id: this.userCtx.id })
 
     if (!discussion || !(await discussion.isAccessibleBy(user))) {
       throw new errors.NotFoundError(
@@ -119,7 +104,7 @@ export class DiscussionService {
   async createDiscussion(dto: CreateDiscussionDTO) {
     this.logger.log(`Creating discussion: ${JSON.stringify(dto)}`)
 
-    const user = await this.fetcher.getById(User, this.userCtx.id)
+    const user = await this.userRepository.findOneOrFail({ id: this.userCtx.id })
     if (!user) {
       throw new errors.NotFoundError(`User not found ({ id: ${this.userCtx.id} })`)
     }
@@ -202,7 +187,7 @@ export class DiscussionService {
   async deleteDiscussion(discussionId: number): Promise<void> {
     this.logger.log(`Deleting discussion: ${discussionId}`)
 
-    const user = await this.em.findOneOrFail(User, this.userCtx.id)
+    const user = await this.userRepository.findOneOrFail({ id: this.userCtx.id })
     const discussion = await this.discussionRepository.findOne(discussionId, {
       populate: [
         'note',
@@ -329,7 +314,7 @@ export class DiscussionService {
 
   async createAnswer(dto: CreateAnswerDTO) {
     this.logger.log(`Creating answer: ${JSON.stringify(dto)}`)
-    const user = await this.em.findOneOrFail(User, this.userCtx.id)
+    const user = await this.userRepository.findOneOrFail({ id: this.userCtx.id })
 
     const discussion = await this.em.findOne(Discussion, dto.discussionId, { populate: ['note'] })
 
@@ -563,7 +548,7 @@ export class DiscussionService {
   async createComment(commentInput: CreateCommentDTO) {
     this.logger.log(`Creating comment: ${JSON.stringify(commentInput)}`)
 
-    const user = await this.fetcher.getById(User, this.userCtx.id)
+    const user = await this.userRepository.findOneOrFail({ id: this.userCtx.id })
     if (!user) {
       throw new errors.NotFoundError('User not found.')
     }
@@ -611,7 +596,7 @@ export class DiscussionService {
   async updateComment(id: number, commentInput: UpdateCommentDTO) {
     this.logger.log(`Editing comment: ${JSON.stringify(commentInput)}`)
 
-    const user = await this.em.findOneOrFail(User, this.userCtx.id)
+    const user = await this.userRepository.findOneOrFail({ id: this.userCtx.id })
     const comment = await this.em.findOne(Comment, id)
     const commentClass = comment instanceof DiscussionComment ? DiscussionComment : AnswerComment
     const commentEntity = await this.em.findOne(commentClass, id, { populate: ['commentable'] })
@@ -629,7 +614,7 @@ export class DiscussionService {
   async deleteComment(commentId: number, type: CommentableType) {
     this.logger.log(`Deleting comment with id: ${commentId}`)
 
-    const user = await this.em.findOneOrFail(User, this.userCtx.id)
+    const user = await this.userRepository.findOneOrFail({ id: this.userCtx.id })
 
     let comment: AnswerComment | DiscussionComment | null
     if (type == 'Discussion') {
@@ -806,7 +791,7 @@ export class DiscussionService {
 
   async followDiscussion(discussionId: number): Promise<void> {
     this.logger.log(`Adding new follower (user: ${this.userCtx.id}) to discussion: ${discussionId}`)
-    const user = await this.em.findOne(User, { id: this.userCtx.id })
+    const user = await this.userRepository.findOneOrFail({ id: this.userCtx.id })
 
     const discussion = await this.discussionRepository.findOne({ id: discussionId })
     if (!discussion || !(await discussion.isAccessibleBy(user))) {
@@ -830,7 +815,7 @@ export class DiscussionService {
   async unfollowDiscussion(discussionId: number): Promise<void> {
     this.logger.log(`Removing follower (user: ${this.userCtx.id}) from discussion: ${discussionId}`)
 
-    const user = await this.em.findOne(User, { id: this.userCtx.id })
+    const user = await this.userRepository.findOneOrFail({ id: this.userCtx.id })
 
     const discussion = await this.discussionRepository.findOne({ id: discussionId })
     if (!discussion || !(await discussion.isAccessibleBy(user))) {
