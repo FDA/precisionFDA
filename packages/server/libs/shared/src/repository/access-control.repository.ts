@@ -1,4 +1,4 @@
-import { FindOptions } from '@mikro-orm/core'
+import { FindOneOptions, FindOptions } from '@mikro-orm/core'
 import { FilterQuery, Loaded } from '@mikro-orm/mysql'
 import { BaseEntity } from '@shared/database/base.entity'
 import { PaginatedResult } from '@shared/domain/entity/domain/paginated.result'
@@ -43,14 +43,14 @@ export abstract class AccessControlRepository<
     return this.paginate(pagination, mergedWhere, options)
   }
 
-  // async findAccessibleOne(
-  //   where: FilterQuery<Entity> = {},
-  //   options?: FindOneOptions<Entity>,
-  // ): Promise<Entity | null> {
-  //   const accessWhere = await this.getAccessibleWhere()
-  //   const mergedWhere = this.getMergedWhere(where, accessWhere)
-  //   return this.findOne(mergedWhere, options)
-  // }
+  async findAccessibleOne(
+    where: FilterQuery<Entity> = {},
+    options?: FindOneOptions<Entity>,
+  ): Promise<Entity | null> {
+    const accessWhere = await this.getAccessibleWhere()
+    const mergedWhere = this.getMergedWhere(where, accessWhere)
+    return this.findOne(mergedWhere, options)
+  }
 
   protected abstract getAccessibleWhere(): Promise<FilterQuery<Entity>>
 
