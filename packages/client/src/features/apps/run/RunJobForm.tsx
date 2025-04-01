@@ -11,9 +11,11 @@ import { InputNumber, InputText } from '../../../components/InputText'
 import { IUser } from '../../../types/user'
 import { useSelectFolderModal } from '../../files/actionModals/useSelectFolderModal'
 import { TreeOnSelectInfo } from '../../files/files.types'
+import { Empty } from '../../home/home.styles'
 import { ServerScope } from '../../home/types'
 import { fetchAcceptedLicenses } from '../../licenses/api'
 import { useAcceptLicensesModal } from '../../licenses/useAcceptLicensesModal'
+import { SavingModal } from '../../modal/SavingModal'
 import { fetchLicensesOnApp } from '../apps.api'
 import { AppSpec, BatchInput, IApp, RunJobFormType } from '../apps.types'
 import { getDefaultValueFromServer } from '../form/common'
@@ -53,10 +55,9 @@ import {
   useDefaultScopeSelection,
   useSelectableContexts,
   useSelectableSpaces,
-  useUserComputeInstances, validateFile,
+  useUserComputeInstances,
+  validateFile,
 } from './utils'
-import { SavingModal } from '../../modal/SavingModal'
-import { Empty } from '../../home/home.styles'
 
 /**
  * If params are specified in the URL, decode them and set them as default values.
@@ -93,7 +94,7 @@ const readFileAsText = (file: File): Promise<string> => {
     const fileReader = new FileReader()
     fileReader.readAsText(file, 'UTF-8')
 
-    fileReader.onload = (e) => {
+    fileReader.onload = e => {
       const result = e.target?.result
       if (typeof result === 'string') {
         resolve(result)
@@ -133,22 +134,18 @@ const importFormData = async (
       const importedData = JSON.parse(content)
       if (importedData.inputs && Array.isArray(importedData.inputs)) {
         // Add ids to each input item
-        importedData.inputs = importedData.inputs.map(
-          (item: BatchInput, index: number) => ({
-            ...item,
-            id: index + 1,
-          }),
-        )
+        importedData.inputs = importedData.inputs.map((item: BatchInput, index: number) => ({
+          ...item,
+          id: index + 1,
+        }))
       }
       const validationCache: Record<string, boolean> = {}
 
-      const allFileUids = Array.from(
-        new Set(importedData.inputs.flatMap(item => collectFileUidsFromBatchInput(item))),
-      )
+      const allFileUids = Array.from(new Set(importedData.inputs.flatMap(item => collectFileUidsFromBatchInput(item))))
       setTotalFilesToValidate(allFileUids.length)
       for (const fileUid of allFileUids) {
         await validateFile(fileUid)
-        setTotalFilesValidated((prevCount) => prevCount + 1)
+        setTotalFilesValidated(prevCount => prevCount + 1)
         validationCache[fileUid] = true
       }
 
@@ -159,7 +156,7 @@ const importFormData = async (
       // Merge current `scope` with imported data
       setVals({
         ...importedData,
-        scope: currentVals.scope,  // Preserve the existing scope value
+        scope: currentVals.scope, // Preserve the existing scope value
       })
     } catch (error) {
       console.log(error)
@@ -176,10 +173,10 @@ export const RunJobForm = ({ app, userJobLimit, spec }: { app: IApp; spec: AppSp
   const { data: selectableSpaces } = useSelectableSpaces(app.scope)
   const { hash, pathname } = useLocation()
   const navigate = useNavigate()
-  const [ showValidationWait, setShowValidationWait ] = useState(false)
-  const [ totalFilesToValidate, setTotalFilesToValidate ] = useState(0)
-  const [ totalFilesValidated, setTotalFilesValidated ] = useState(0)
-  const [ validatedFilesCache, setValidatedFilesCache ] = useState<Record<string, boolean>>({})
+  const [showValidationWait, setShowValidationWait] = useState(false)
+  const [totalFilesToValidate, setTotalFilesToValidate] = useState(0)
+  const [totalFilesValidated, setTotalFilesValidated] = useState(0)
+  const [validatedFilesCache, setValidatedFilesCache] = useState<Record<string, boolean>>({})
 
   const { modalComp: licensesModal, setLicensesAndShow } = useAcceptLicensesModal()
   const defaultValues = getDefaults(hash, { app, userJobLimit, spec })
@@ -232,7 +229,7 @@ export const RunJobForm = ({ app, userJobLimit, spec }: { app: IApp; spec: AppSp
 
   const isBatchRun = inputs.fields.length > 1
   const runButtonText = isBatchRun ? 'Run Batch App' : 'Run App'
-  const runningButtonText = isBatchRun ? getRunningLabelText(): 'Running App'
+  const runningButtonText = isBatchRun ? getRunningLabelText() : 'Running App'
 
   const addInput = () => {
     if (computeInstances) {
@@ -255,7 +252,7 @@ export const RunJobForm = ({ app, userJobLimit, spec }: { app: IApp; spec: AppSp
   }
 
   const runJobMutation = useRunJobMutation(getValues().scope?.value as ServerScope)
-  const exportModal = useExportInputsModal({ showCopyButton: true })
+  const exportModal = useExportInputsModal({ showCopyButton: true, app })
 
   const onSubmit = async () => {
     const vals = getValues()
@@ -538,7 +535,9 @@ export const RunJobForm = ({ app, userJobLimit, spec }: { app: IApp; spec: AppSp
         body={
           <div>
             <p>File inputs are being validated.</p>
-            <p>Processing file {totalFilesValidated}/{totalFilesToValidate}.</p>
+            <p>
+              Processing file {totalFilesValidated}/{totalFilesToValidate}.
+            </p>
             <p>Please wait until this message disappears.</p>
           </div>
         }

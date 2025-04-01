@@ -8,13 +8,14 @@ import { useFetchFilesByUIDQuery } from '../../files/query/useFetchFilesByUIDQue
 import { ModalHeaderTop, ModalNext } from '../../modal/ModalNext'
 import { ButtonRow, Footer, ModalScroll } from '../../modal/styles'
 import { useModal } from '../../modal/useModal'
+import { IApp } from '../apps.types'
 
 const StyledButtonRow = styled(ButtonRow)`
   justify-content: space-between;
   flex: 1 0 auto;
 `
 
-export const useExportInputsModal = ({ showCopyButton }: { showCopyButton: boolean }) => {
+export const useExportInputsModal = ({ showCopyButton, app }: { showCopyButton: boolean; app: IApp }) => {
   const { isShown, setShowModal } = useModal()
   const [displayData, setDisplayData] = useState('')
   const [fileUids, setFileUids] = useState<string[]>([])
@@ -31,13 +32,14 @@ export const useExportInputsModal = ({ showCopyButton }: { showCopyButton: boole
     setDisplayData(JSON.stringify(data))
   }
 
-  const handleCopy = () => {
+  const handleCopy = (copyType: 'app' | 'appSeries') => {
     const base64Encoded = btoa(encodeURIComponent(displayData))
-    const { href } = window.location
+    const currentUrl = window.location.href
+    const url = currentUrl.replace(/app-[^/]+/, copyType === 'app' ? `${app.uid}` : `app-series-${app.app_series_id.toString()}`)
 
     if (displayData) {
       toast.success('The link has been copied into your clipboard')
-      navigator.clipboard.writeText(`${href}#${base64Encoded}`)
+      navigator.clipboard.writeText(`${url}#${base64Encoded}`)
     }
   }
 
@@ -68,20 +70,25 @@ export const useExportInputsModal = ({ showCopyButton }: { showCopyButton: boole
       <Footer>
         <StyledButtonRow>
           {showCopyButton ? (
-            <>
+            <ButtonRow>
               <Button
                 disabled={isFetching || (areFiles && !areAllFilePublic)}
                 type="button"
-                onClick={() => handleCopy()}
+                onClick={() => handleCopy('app')}
                 data-tooltip-id="selected-private-file-error"
                 data-tooltip-content="One or more files are private. Make sure to make those files public to share."
               >
-                Copy link to clipboard
+                Copy link for Current App
               </Button>
-              {areFiles && !areAllFilePublic && (
-                <Tooltip id="selected-private-file-error" />
-              )}
-            </>
+              <Button
+                type="button"
+                onClick={() => handleCopy('appSeries')}
+                data-tooltip-content="One or more files are private. Make sure to make those files public to share."
+              >
+                Copy link for Latest App
+              </Button>
+              {areFiles && !areAllFilePublic && <Tooltip id="selected-private-file-error" />}
+            </ButtonRow>
           ) : (
             <div />
           )}
