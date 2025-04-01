@@ -145,6 +145,7 @@ export function CustomTable<T extends RowData>({
                 className={classNames({ 'cell-select sticky-left': cell.column.id === 'select', relative: true })}
                 key={cell.id}
                 style={{ width: cell.column.getSize() }}
+                data-testid={`table-col-${cell.column.id}`}
               >
                 {flexRender(cell.column.columnDef.cell, cell.getContext())}
               </td>
