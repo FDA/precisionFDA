@@ -129,6 +129,7 @@ function Table<T extends { id: number }>({
     getFacetedMinMaxValues: getFacetedMinMaxValues(),
     onColumnFiltersChange: handleColumnFiltersChange,
     onSortingChange: handleColumnSortChange,
+    manualPagination: true,
     enableColumnResizing: true,
     columnResizeMode: 'onChange',
     onColumnVisibilityChange: handleSetColumnVisibility,
