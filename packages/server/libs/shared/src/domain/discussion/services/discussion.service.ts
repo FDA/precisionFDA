@@ -44,6 +44,7 @@ import { DiscussionFollow } from '@shared/domain/follow/discussion-follow.entity
 import { AttachmentsDTO } from '@shared/domain/discussion/dto/attachments.dto'
 import { UserRepository } from '@shared/domain/user/user.repository'
 import AnswerRepository from '@shared/domain/answer/answer.repository'
+import { NodeRepository } from '@shared/domain/user-file/node.repository'
 
 @Injectable()
 export class DiscussionService {
@@ -59,6 +60,7 @@ export class DiscussionService {
     private readonly spaceRepository: SpaceRepository,
     private readonly discussionRepository: DiscussionRepository,
     private readonly answerRepository: AnswerRepository,
+    private readonly nodeRepository: NodeRepository,
   ) {}
 
   async getDiscussion(discussionId: number): Promise<DiscussionDTO> {
@@ -361,7 +363,8 @@ export class DiscussionService {
 
   async updateAnswer(id: number, input: UpdateAnswerDTO) {
     this.logger.log(`Updating answer: ${JSON.stringify(input)}`)
-    const answer = await this.fetcher.getEditableById(Answer, id, {}, { populate: ['note'] })
+    // const answer = await this.fetcher.getEditableById(Answer, id, {}, { populate: ['note'] })
+    const answer = await this.answerRepository.findEditableOne({ id }, { populate: ['note'] })
 
     if (!answer) {
       throw new errors.NotFoundError(
@@ -386,12 +389,19 @@ export class DiscussionService {
 
   async deleteAnswer(answerId: number) {
     this.logger.log(`Deleting answer with id: ${answerId}`)
-    const answer = await this.fetcher.getEditableById(
-      Answer,
-      answerId,
-      {},
+
+    const answer = await this.answerRepository.findEditableOne(
+      { id: answerId },
       { populate: ['note', 'comments', 'note.attachments'] },
     )
+
+    // const answer = await this.fetcher.getEditableById(
+    //   Answer,
+    //   answerId,
+    //   {},
+    //   { populate: ['note', 'comments', 'note.attachments'] },
+    // )
+
     if (answer === null) {
       throw new errors.NotFoundError(
         'Unable to delete answer: not found or insufficient permissions.',
@@ -419,7 +429,9 @@ export class DiscussionService {
 
   private async createAttachments(note: Note, attachmentsToSave: AttachmentsDTO) {
     for (const id of attachmentsToSave.files) {
-      const res = await this.fetcher.getAccessibleById(Node, id)
+      // const res = await this.fetcher.getAccessibleById(Node, id)
+      const res = await this.nodeRepository.findAccessibleOne({ id })
+
       if (!res || (!res.isPublic() && res.scope !== note.scope)) {
         throw new errors.NotFoundError(
           `Unable to attach ${res?.uid ?? 'file ' + id}: file not found or is in a wrong scope.`,
