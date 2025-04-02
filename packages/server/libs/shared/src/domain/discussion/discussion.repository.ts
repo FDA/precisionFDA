@@ -12,6 +12,11 @@ export default class DiscussionRepository extends AccessControlRepository<Discus
     const accessibleSpaces = await user.accessibleSpaces()
     const scopes = accessibleSpaces.map((space) => space.scope)
 
+    const isSiteAdmin = await user.isSiteAdmin()
+    if (isSiteAdmin) {
+      return {}
+    }
+
     return {
       note: {
         $or: [{ scope: STATIC_SCOPE.PUBLIC }, { scope: { $in: scopes } }],
@@ -24,9 +29,14 @@ export default class DiscussionRepository extends AccessControlRepository<Discus
     const accessibleSpaces = await user.editableSpaces() //TODO for discussions the rules should differ a bit - only admin/leads and authors can edit the discussion in spaces.
     const scopes = accessibleSpaces.map((space) => space.scope)
 
+    const isSiteAdmin = await user.isSiteAdmin()
+    if (isSiteAdmin) {
+      return {}
+    }
+
     return {
       note: {
-        $or: [{ scope: STATIC_SCOPE.PUBLIC }, { scope: { $in: scopes } }],
+        $or: [{ scope: STATIC_SCOPE.PUBLIC }, { scope: { $in: scopes } }, { user: user.id }],
       },
     }
   }

@@ -47,8 +47,17 @@ export abstract class AccessControlRepository<
     where: FilterQuery<Entity> = {},
     options?: FindOneOptions<Entity>,
   ): Promise<Entity | null> {
-    const accessWhere = await this.getAccessibleWhere()
-    const mergedWhere = this.getMergedWhere(where, accessWhere)
+    const accessibleWhere = await this.getAccessibleWhere()
+    const mergedWhere = this.getMergedWhere(where, accessibleWhere)
+    return this.findOne(mergedWhere, options)
+  }
+
+  async findEditableOne(
+    where: FilterQuery<Entity> = {},
+    options?: FindOneOptions<Entity>,
+  ): Promise<Entity | null> {
+    const editableWhere = await this.getEditableWhere()
+    const mergedWhere = this.getMergedWhere(where, editableWhere)
     return this.findOne(mergedWhere, options)
   }
 
