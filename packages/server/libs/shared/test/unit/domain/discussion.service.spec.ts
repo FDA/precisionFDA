@@ -45,6 +45,7 @@ describe('DiscussionService tests', () => {
     comparisons: [],
   }
   const getEntityLinkStub = stub()
+  const findOneStub = stub()
 
   beforeEach(async () => {
     await db.dropData(database.connection())
@@ -57,7 +58,11 @@ describe('DiscussionService tests', () => {
     } as unknown as EntityService
     fetcher = new EntityFetcherService(em, userCtx)
     spaceRepository = new SpaceRepository(em, 'space')
-    discussionRepository = new DiscussionRepository(em, 'discussion')
+
+    discussionRepository = {
+      findOne: findOneStub,
+    } as unknown as DiscussionRepository
+
     discussionService = new DiscussionService(
       em,
       userCtx,
@@ -520,15 +525,79 @@ describe('DiscussionService tests', () => {
     expect(loadedComment.commentable.id).eq(answer.id)
   })
 
-  // not working because of some metadata issue :((
-  // it('create a new follow for a discussion', async () => {
-  //   const space = await createBasicSpace()
-  //   const discussion = create.discussionHelper.createInSpace(em, { user, space })
-  //   await em.flush()
-  //
-  //   await discussionService.followDiscussion(discussion.id)
-  //   expect(await em.count(DiscussionFollow, { followableId: discussion.id })).eq(1)
-  // })
+  it('create a new follow for a discussion', async () => {
+    const space = await createBasicSpace()
+    const discussion = create.discussionHelper.createInSpace(em, { user, space })
+    await em.flush()
+
+    findOneStub.resolves(discussion)
+
+    await discussionService.followDiscussion(discussion.id)
+    expect(await em.count(DiscussionFollow, { followableId: discussion.id })).eq(1)
+  })
+
+  it('remove a public discussion as author', async () => {
+    const discussion = create.discussionHelper.createPublic(em, { user })
+    await em.flush()
+
+    findOneStub.resolves(discussion)
+
+    await discussionService.deleteDiscussion(discussion.id)
+    expect(await em.count(Discussion, { id: discussion.id })).eq(0)
+  })
+
+  it('remove a public discussion as site admin', async () => {
+    const discussion = create.discussionHelper.createPublic(em, { user })
+    const adminUser = create.userHelper.createSiteAdmin(em)
+    await em.flush()
+
+    findOneStub.resolves(discussion)
+
+    const adminUserCtx = {
+      user: adminUser,
+      id: adminUser.id,
+      dxuser: adminUser.dxuser,
+      accessToken: 'foo',
+    }
+
+    discussionService = new DiscussionService(
+      em,
+      adminUserCtx,
+      fetcher,
+      entityService,
+      spaceRepository,
+      discussionRepository,
+    )
+
+    await discussionService.deleteDiscussion(discussion.id)
+    expect(await em.count(Discussion, { id: discussion.id })).eq(0)
+  })
+  it('fail removing a public discussion as non-author', async () => {
+    const differentUser = create.userHelper.create(em)
+    const discussion = create.discussionHelper.createPublic(em, { user: differentUser })
+    await em.flush()
+
+    findOneStub.resolves(discussion)
+
+    try {
+      await discussionService.deleteDiscussion(discussion.id)
+      expect.fail('Operation is expected to fail.')
+    } catch (error) {
+      expect(error.name).to.equal('NotFoundError')
+      expect(error.message).eq(
+        `Unable to delete discussion: not found or insufficient permissions.`,
+      )
+    }
+  })
+  it('remove a space discussion as author', async () => {
+    const space = await createBasicSpace()
+    const discussion = create.discussionHelper.createInSpace(em, { user, space })
+    await em.flush()
+    findOneStub.resolves(discussion)
+
+    await discussionService.deleteDiscussion(discussion.id)
+    expect(await em.count(Discussion, { id: discussion.id })).eq(0)
+  })
 
   async function createBasicSpace() {
     const space = create.spacesHelper.create(em, generate.space.group())

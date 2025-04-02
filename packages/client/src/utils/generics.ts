@@ -1,7 +1,5 @@
 export type GetObjValues<T> = T extends Record<any, infer V> ? V : never
 
-// type GetObjectAsAst<ObjT> = 
-
 export type FlipKeysAndValues<
   ObjT extends Record<string | symbol | number, string | symbol | number>,
   Ast extends Record<string, {
@@ -39,54 +37,10 @@ export type MapKeysByObj<
   }
 > = Result
 
-// TODO(samuel) write unit-tests
-
-export type MapValuesByFn<
-  T,
-  MapperT extends (arg: any) => any,
-  Result = {
-    [key in keyof T]: T[key] extends Parameters<MapperT>[0] ? ReturnType<MapperT> : unknown
-  }
-> = Result
-
-// ┌───────────────────────────────┐
-// │                               │
-// │   Unit test "MapValuesByFn"   │
-// │                               │
-// └───────────────────────────────┘
-
-// const x = {
-//   a: 5,
-//   b: 7,
-//   c: 12,
-// } as const
-
-// const mapper = (x: number) => x.toString()
-
-// type TestMapValuesByFn = MapValuesByFn<typeof x, typeof mapper>
-
-export type KeysOfUnion<T> = T extends T ? keyof T: never;
-
-// TODO(samuel) this works only with strict null check compiler option
-// TODO(samuel) add to docs
 export type NonNullableKeys<T> = {
     [P in keyof T]-? :  Exclude<T[P], null | undefined> extends never ? never: P
 }[keyof T]
 export type ExtractNonNullable<T> = {
     [P in NonNullableKeys<T>]: NonNullable<T[P]>
 }
-
-// ┌─────────────────────────────────┐
-// │                                 │
-// │   Unit test "NonNullableKeys"   │
-// │                                 │
-// └─────────────────────────────────┘
-
-// const x = {
-//   a: true ,
-//   b: null
-// } as const
-
-// type A = typeof x
-// type B = NonNullableKeys<A>
 

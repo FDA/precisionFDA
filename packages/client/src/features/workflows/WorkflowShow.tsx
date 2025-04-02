@@ -7,11 +7,7 @@ import { CloudResourcesHeaderButton } from '../../components/CloudResourcesHeade
 import Dropdown from '../../components/Dropdown'
 import { RevisionDropdown } from '../../components/Dropdown/RevisionDropdown'
 import { Markdown, MarkdownStyle } from '../../components/Markdown'
-import {
-  StyledTab,
-  StyledTabList,
-  StyledTabPanel,
-} from '../../components/Tabs'
+import { StyledTab, StyledTabList, StyledTabPanel } from '../../components/Tabs'
 import { StyledTagItem, StyledTags, StyledPropertyItem, StyledPropertyKey } from '../../components/Tags'
 import { getBackPathNext } from '../../utils/getBackPath'
 import { ActionsDropdownContent } from '../home/ActionDropdownContent'
@@ -31,7 +27,7 @@ import {
   Title,
   Topbox,
 } from '../home/show.styles'
-import { EmmitScope, HomeScope } from '../home/types'
+import { EmitScope, HomeScope } from '../home/types'
 import { useWorkflowSelectActions } from './useWorkflowSelectActions'
 import { WorkflowExecutionsList } from './WorkflowExecutionsList'
 import { fetchWorkflow } from './workflows.api'
@@ -103,7 +99,11 @@ const renderOptions = (workflow: IWorkflow, homeScope?: HomeScope) => {
     </MetadataItem>
   ))
 
-  return <MetadataSection><MetadataRow>{list}</MetadataRow></MetadataSection>
+  return (
+    <MetadataSection>
+      <MetadataRow>{list}</MetadataRow>
+    </MetadataSection>
+  )
 }
 
 const DetailActionsDropdown = ({ workflow }: { workflow: IWorkflow }) => {
@@ -120,8 +120,8 @@ const DetailActionsDropdown = ({ workflow }: { workflow: IWorkflow }) => {
         data-turbolinks="false"
         href={`${workflow.links.show}/analyses/new`}
         isLinkDisabled={!workflow.links.run_workflow}
-        data-testid='workflow-show-actions-run'
-        conditionType='all'
+        data-testid="workflow-show-actions-run"
+        conditionType="all"
       >
         <>
           Run Workflow&nbsp;
@@ -132,25 +132,16 @@ const DetailActionsDropdown = ({ workflow }: { workflow: IWorkflow }) => {
         data-turbolinks="false"
         href={workflow.links.batch_run_workflow}
         isLinkDisabled={!workflow.links.batch_run_workflow}
-        data-testid='workflow-show-actions-run-batch'
-        conditionType='all'
+        data-testid="workflow-show-actions-run-batch"
+        conditionType="all"
       >
         <>
           Run Batch Workflow&nbsp;
           <Pill>rev{workflow.revision}</Pill>
         </>
       </CloudResourcesHeaderButton>
-      <Dropdown
-        trigger="click"
-        content={
-          <ActionsDropdownContent
-            actions={omit(['Run', 'Run Batch'], actions)}
-          />
-        }
-      >
-        {dropdownProps => (
-          <ActionsButton {...dropdownProps} active={dropdownProps.isActive} />
-        )}
+      <Dropdown trigger="click" content={<ActionsDropdownContent actions={omit(['Run', 'Run Batch'], actions)} />}>
+        {dropdownProps => <ActionsButton {...dropdownProps} active={dropdownProps.isActive} />}
       </Dropdown>
       {actions['Edit tags']?.modal}
       {actions['Edit properties']?.modal}
@@ -161,15 +152,24 @@ const DetailActionsDropdown = ({ workflow }: { workflow: IWorkflow }) => {
   )
 }
 
-export const WorkflowShow = ({ spaceId, emitScope, homeScope }: { spaceId?: number, homeScope?: HomeScope, emitScope?: EmmitScope }) => {
+export const WorkflowShow = ({
+  spaceId,
+  emitScope,
+  homeScope,
+}: {
+  spaceId?: number
+  homeScope?: HomeScope
+  emitScope?: EmitScope
+}) => {
   const location = useLocation()
   const { workflowUid } = useParams<{ workflowUid: string }>()
   const { data, isLoading } = useQuery({
     queryKey: ['workflow', workflowUid],
-    queryFn: () => fetchWorkflow(workflowUid!).then(d => {
-      if(emitScope) emitScope(d.workflow.scope, d.workflow.featured)
-      return d
-    }),
+    queryFn: () =>
+      fetchWorkflow(workflowUid!).then(d => {
+        if (emitScope) emitScope(d.workflow.scope, d.workflow.featured)
+        return d
+      }),
   })
 
   const workflow = data?.workflow as IWorkflow
@@ -180,9 +180,7 @@ export const WorkflowShow = ({ spaceId, emitScope, homeScope }: { spaceId?: numb
     return (
       <NotFound>
         <h1>Workflow not found</h1>
-        <div>
-          Sorry, this workflow does not exist or is not accessible by you.
-        </div>
+        <div>Sorry, this workflow does not exist or is not accessible by you.</div>
       </NotFound>
     )
 
@@ -192,7 +190,10 @@ export const WorkflowShow = ({ spaceId, emitScope, homeScope }: { spaceId?: numb
 
   return (
     <>
-      <StyledBackLink linkTo={getBackPathNext({ location, resourceLocation: 'workflows', homeScope, spaceId })} data-testid="workflow-show-back-link">
+      <StyledBackLink
+        linkTo={getBackPathNext({ location, resourceLocation: 'workflows', homeScope, spaceId })}
+        data-testid="workflow-show-back-link"
+      >
         Back to Workflows
       </StyledBackLink>
       <Topbox>
@@ -209,9 +210,7 @@ export const WorkflowShow = ({ spaceId, emitScope, homeScope }: { spaceId?: numb
             />
           </HeaderLeft>
           <div>
-            <StyledRight>
-              {workflow && <DetailActionsDropdown workflow={workflow} />}
-            </StyledRight>
+            <StyledRight>{workflow && <DetailActionsDropdown workflow={workflow} />}</StyledRight>
           </div>
         </ResourceHeader>
 
@@ -220,13 +219,15 @@ export const WorkflowShow = ({ spaceId, emitScope, homeScope }: { spaceId?: numb
           <MetadataSection>
             <MetadataRow>
               <MetadataItem>
-                  <MetadataKey>Tags</MetadataKey>
-                  <StyledTags data-testid="tags-container">
-                    {/* TODO(samuel) validate that tag is non-null string */}
-                    {workflow.tags.map(tag => (
-                      <StyledTagItem data-testid="workflow-tag-item" key={tag}>{tag}</StyledTagItem>
-                      ))}
-                  </StyledTags>
+                <MetadataKey>Tags</MetadataKey>
+                <StyledTags data-testid="tags-container">
+                  {/* TODO(samuel) validate that tag is non-null string */}
+                  {workflow.tags.map(tag => (
+                    <StyledTagItem data-testid="workflow-tag-item" key={tag}>
+                      {tag}
+                    </StyledTagItem>
+                  ))}
+                </StyledTags>
               </MetadataItem>
             </MetadataRow>
           </MetadataSection>
@@ -235,58 +236,66 @@ export const WorkflowShow = ({ spaceId, emitScope, homeScope }: { spaceId?: numb
           <MetadataSection>
             <MetadataRow>
               <MetadataItem>
-                  <MetadataKey>Properties</MetadataKey>
-                    <StyledTags data-testid="properties-container">
-                      {Object.entries(workflow.properties).map(([key, value]) => (
-                        <StyledPropertyItem key={key}>
-                          <StyledPropertyKey data-testid="workflow-property-key">{key}</StyledPropertyKey>
-                          <span data-testid={`workflow-property-value-${key}`}>{value}</span>
-                        </StyledPropertyItem>
-                      ))}
-                    </StyledTags>
-                </MetadataItem>
+                <MetadataKey>Properties</MetadataKey>
+                <StyledTags data-testid="properties-container">
+                  {Object.entries(workflow.properties).map(([key, value]) => (
+                    <StyledPropertyItem key={key}>
+                      <StyledPropertyKey data-testid="workflow-property-key">{key}</StyledPropertyKey>
+                      <span data-testid={`workflow-property-value-${key}`}>{value}</span>
+                    </StyledPropertyItem>
+                  ))}
+                </StyledTags>
+              </MetadataItem>
             </MetadataRow>
           </MetadataSection>
         )}
-
       </Topbox>
 
       <StyledTabList>
-        <StyledTab activeClassName="active" end to={{ pathname: `${basePath}/workflows/${workflow.uid}`, state: location.state }} data-testid="workflow-show-tab-spec">
+        <StyledTab
+          activeClassName="active"
+          end
+          to={{ pathname: `${basePath}/workflows/${workflow.uid}`, state: location.state }}
+          data-testid="workflow-show-tab-spec"
+        >
           Spec
         </StyledTab>
-        <StyledTab activeClassName="active" to={{ pathname: `${basePath}/workflows/${workflow.uid}/jobs`, state: location.state }} data-testid="workflow-show-tab-executions">
+        <StyledTab
+          activeClassName="active"
+          to={{ pathname: `${basePath}/workflows/${workflow.uid}/jobs`, state: location.state }}
+          data-testid="workflow-show-tab-executions"
+        >
           Executions ({workflow.job_count})
         </StyledTab>
-        <StyledTab activeClassName="active" to={{ pathname: `${basePath}/workflows/${workflow.uid}/diagram`, state: location.state }} data-testid="workflow-show-tab-diagram">
+        <StyledTab
+          activeClassName="active"
+          to={{ pathname: `${basePath}/workflows/${workflow.uid}/diagram`, state: location.state }}
+          data-testid="workflow-show-tab-diagram"
+        >
           Diagram
         </StyledTab>
-        <StyledTab activeClassName="active" to={{ pathname: `${basePath}/workflows/${workflow.uid}/readme`, state: location.state }} data-testid="workflow-show-tab-readme">
+        <StyledTab
+          activeClassName="active"
+          to={{ pathname: `${basePath}/workflows/${workflow.uid}/readme`, state: location.state }}
+          data-testid="workflow-show-tab-readme"
+        >
           Readme
         </StyledTab>
       </StyledTabList>
       <StyledTabPanel>
         <Routes>
-          <Route
-            path="/"
-            element={<HomeWorkflowsSpec spec={meta.spec} />}
-          />
-          <Route
-            path="spec"
-            element={<Navigate to={`${location.pathname}`} replace />}
-          />
+          <Route path="/" element={<HomeWorkflowsSpec spec={meta.spec} />} />
+          <Route path="spec" element={<Navigate to={`${location.pathname}`} replace />} />
           <Route
             path="readme"
-            element={<MarkdownStyle><Markdown data={workflow.readme} /></MarkdownStyle>}
+            element={
+              <MarkdownStyle>
+                <Markdown data={workflow.readme} />
+              </MarkdownStyle>
+            }
           />
-          <Route
-            path="diagram"
-            element={<WorkflowsDiagram workflowId={workflow.uid} />}
-          />
-          <Route
-            path="jobs"
-            element={<WorkflowExecutionsList uid={workflow.uid} />}
-          />
+          <Route path="diagram" element={<WorkflowsDiagram workflowId={workflow.uid} />} />
+          <Route path="jobs" element={<WorkflowExecutionsList uid={workflow.uid} />} />
         </Routes>
       </StyledTabPanel>
     </>

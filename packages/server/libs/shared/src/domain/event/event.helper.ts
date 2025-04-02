@@ -6,6 +6,7 @@ import { User } from '@shared/domain/user/user.entity'
 import { JobDescribeResponse } from '@shared/platform-client/platform-client.responses'
 import { IFileOrAsset } from '../user-file/user-file.types'
 import { Event } from './event.entity'
+import { DbCluster } from '../db-cluster/db-cluster.entity'
 
 const EVENT_TYPES = {
   FOLDER_CREATED: 'Event::FolderCreated',
@@ -22,6 +23,7 @@ const EVENT_TYPES = {
   APP_CREATED: 'Event::AppCreated',
   APP_PUBLISHED: 'Event::AppPublished',
   FILE_CREATED: 'Event::FileCreated',
+  DBCLUSTER_PASSWORD_ROTATED: 'Event::DbClusterPasswordRotated',
 }
 
 const createAppCreated = async (user: User, app: App): Promise<Event> => {
@@ -54,6 +56,21 @@ const createAppPublished = async (app: App, user: User, scope: string): Promise<
   return event
 }
 
+const createDbClusterPasswordRotated = async (user: User, dbCluster: DbCluster): Promise<Event> => {
+  const event = new Event()
+  const organization = user.organization.isInitialized()
+    ? user.organization.getEntity()
+    : await user.organization.load()
+  wrap(event).assign({
+    type: EVENT_TYPES.DBCLUSTER_PASSWORD_ROTATED,
+    orgHandle: organization.handle,
+    dxuser: user.dxuser,
+    param1: dbCluster.uid,
+    param2: dbCluster.scope,
+  })
+  return event
+}
+
 const createJobClosed = async (
   user: User,
   job: Job,
@@ -77,7 +94,12 @@ const createJobClosed = async (
   return event
 }
 
-const createFolderEvent = async (eventType: string, folder: Folder, folderPath: string, user: User): Promise<Event> => {
+const createFolderEvent = async (
+  eventType: string,
+  folder: Folder,
+  folderPath: string,
+  user: User,
+): Promise<Event> => {
   const event = new Event()
   const organization = user.organization.isInitialized()
     ? user.organization.getEntity()
@@ -134,4 +156,5 @@ export {
   createFileEvent,
   createAppCreated,
   createAppPublished,
+  createDbClusterPasswordRotated,
 }

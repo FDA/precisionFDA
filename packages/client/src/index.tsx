@@ -1,9 +1,8 @@
-/* eslint-disable import/no-import-module-exports */
 import 'core-js/stable'
 import 'regenerator-runtime/runtime'
+import React from 'react'
 
 import Axios from 'axios'
-import React from 'react'
 import { createRoot } from 'react-dom/client'
 import ReactModal from 'react-modal'
 import Root from './root'
@@ -18,7 +17,6 @@ async function enableMocking() {
 
   // `worker.start()` returns a Promise that resolves
   // once the Service Worker is up and ready to intercept requests.
-  // eslint-disable-next-line consistent-return
   return worker.start({
     serviceWorker: {
       url: '/mockServiceWorker.js',

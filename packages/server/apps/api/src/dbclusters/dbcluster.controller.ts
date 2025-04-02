@@ -2,17 +2,19 @@ import { SqlEntityManager } from '@mikro-orm/mysql'
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   Inject,
   Logger,
   Param,
   Post,
   Put,
+  Query,
   UseGuards,
 } from '@nestjs/common'
 import { DEPRECATED_SQL_ENTITY_MANAGER } from '@shared/database/provider/deprecated-sql-entity-manager.provider'
-import { CreateDbClusterDTO } from '@shared/domain/db-cluster/dto/CreateDbClusterDTO'
-import { UpdateDbClusterDTO } from '@shared/domain/db-cluster/dto/UpdateDbClusterDTO'
+import { CreateDbClusterDTO } from '@shared/domain/db-cluster/dto/create-db-cluster.dto'
+import { UpdateDbClusterDTO } from '@shared/domain/db-cluster/dto/update-db-cluster.dto'
 import { StartDbClusterOperation } from '@shared/domain/db-cluster/ops/start'
 import { StopDbClusterOperation } from '@shared/domain/db-cluster/ops/stop'
 import { TerminateDbClusterOperation } from '@shared/domain/db-cluster/ops/terminate'
@@ -23,6 +25,12 @@ import { schemas } from '@shared/utils/base-schemas'
 import { UserContextGuard } from '../user-context/guard/user-context.guard'
 import { JsonSchemaPipe } from '../validation/pipes/json-schema.pipe'
 import { DbClusterUidParamDto } from './model/dbcluster-uid-param.dto'
+import { Uid } from '@shared/domain/entity/domain/uid'
+import { DbClusterPaginationDTO } from '@shared/domain/db-cluster/dto/db-cluster-pagination.dto'
+import { InternalRouteGuard } from '../internal/guard/internal.guard'
+import { SyncDbClusterDTO } from '@shared/domain/db-cluster/dto/sync-db-cluster.dto'
+import { ADMIN_PLATFORM_CLIENT } from '@shared/platform-client/providers/admin-platform-client.provider'
+import { PlatformClient } from '@shared/platform-client'
 
 interface IDxidListParams {
   dxids: string[]
@@ -36,7 +44,21 @@ export class DbClusterController {
     @Inject(DEPRECATED_SQL_ENTITY_MANAGER) private readonly em: SqlEntityManager,
     private readonly logger: Logger,
     private readonly dbClusterService: DbClusterService,
+    @Inject(ADMIN_PLATFORM_CLIENT)
+    private readonly adminClient: PlatformClient,
+    private readonly userClient: PlatformClient,
   ) {}
+
+  @Get()
+  async list(@Query() query: DbClusterPaginationDTO) {
+    return await this.dbClusterService.list(query)
+  }
+
+  @HttpCode(200)
+  @Get(':uid')
+  async get(@Param('uid') uid: Uid<'dbcluster'>) {
+    return await this.dbClusterService.getDbCluster(uid)
+  }
 
   @HttpCode(204)
   @Post('/start')
@@ -51,9 +73,11 @@ export class DbClusterController {
 
     await Promise.all(
       body.dxids.map(async (dxid) => {
-        return await new StartDbClusterOperation(opsCtx).execute({
-          dxid,
-        })
+        return await new StartDbClusterOperation(opsCtx, this.userClient, this.adminClient).execute(
+          {
+            dxid,
+          },
+        )
       }),
     )
   }
@@ -71,7 +95,7 @@ export class DbClusterController {
 
     await Promise.all(
       body.dxids.map(async (dxid) => {
-        return await new StopDbClusterOperation(opsCtx).execute({
+        return await new StopDbClusterOperation(opsCtx, this.userClient, this.adminClient).execute({
           dxid,
         })
       }),
@@ -91,7 +115,11 @@ export class DbClusterController {
 
     await Promise.all(
       body.dxids.map(async (dxid) => {
-        return await new TerminateDbClusterOperation(opsCtx).execute({
+        return await new TerminateDbClusterOperation(
+          opsCtx,
+          this.userClient,
+          this.adminClient,
+        ).execute({
           dxid,
         })
       }),
@@ -108,5 +136,12 @@ export class DbClusterController {
   @Put(':dbclusterUid')
   async updateDbCluster(@Param() params: DbClusterUidParamDto, @Body() body: UpdateDbClusterDTO) {
     return await this.dbClusterService.update(params.dbclusterUid, body)
+  }
+
+  @UseGuards(InternalRouteGuard)
+  @HttpCode(201)
+  @Post('/sync')
+  async sync(@Body() body: SyncDbClusterDTO) {
+    await this.dbClusterService.synchronizeInSpace(body.spaceId)
   }
 }

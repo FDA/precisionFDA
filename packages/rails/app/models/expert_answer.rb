@@ -34,9 +34,8 @@ class ExpertAnswer < ApplicationRecord
   end
 
   def editable_by?(context)
-    if !context.guest?
-      raise unless context.user_id.present?
-      expert.user_id == context.user_id
-    end
+    raise if context.user_id.blank?
+
+    expert.user_id == context.user_id
   end
 end

@@ -1,7 +1,8 @@
-import { PaginationDto } from '@shared/domain/entity/domain/pagination.dto'
+import { PaginationDto, SortDefinition } from '@shared/domain/entity/domain/pagination.dto'
 import { IsInt, IsOptional, ValidateNested } from 'class-validator'
 import { Type } from 'class-transformer'
 import { Expert } from '@shared/domain/expert/expert.entity'
+import { QueryOrder } from '@mikro-orm/core'
 
 class ExpertFilter {
   @IsOptional()
@@ -14,4 +15,6 @@ export class ExpertPaginationDTO extends PaginationDto<Expert> {
   @ValidateNested()
   @Type(() => ExpertFilter)
   filter?: ExpertFilter
+
+  sort?: SortDefinition<Expert> = { createdAt: QueryOrder.DESC }
 }

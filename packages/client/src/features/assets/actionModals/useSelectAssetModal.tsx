@@ -173,7 +173,7 @@ export const useSelectAssetModal = (
     <ModalNext id="select-asset-modal" headerText={title} isShown={isShown} hide={() => setShowModal(false)}>
       <ModalHeaderTop headerText={title} hide={() => setShowModal(false)} />
       {subtitle && <StyledSubtitle>{subtitle}</StyledSubtitle>}
-      <Tabs>
+      <Tabs nonSelected={selectedAssets.length === 0}>
         <Tab title={`Selected ${selectedAssets.length}`} key="selected">
           {selectedAssets.length === 0 && <StyledRow>No selected assets</StyledRow>}
           {selectedAssets.length > 0 && (

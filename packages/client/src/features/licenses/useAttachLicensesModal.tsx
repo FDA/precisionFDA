@@ -4,8 +4,6 @@ import { toast } from 'react-toastify'
 import styled from 'styled-components'
 import { CircleCheckIcon } from '../../components/icons/CircleCheckIcon'
 import { ResourceTable, StyledName } from '../../components/ResourceTable'
-import { theme } from '../../styles/theme'
-import { EmptyTable } from '../../components/Table/styles'
 import { useModal } from '../modal/useModal'
 import { FileLicense } from '../assets/assets.types'
 import { APIResource } from '../home/types'
@@ -14,6 +12,7 @@ import { License } from './types'
 import { ModalHeaderTop, ModalNext } from '../modal/ModalNext'
 import { ButtonRow, Footer, ModalScroll } from '../modal/styles'
 import { Button } from '../../components/Button'
+import { Empty } from '../home/home.styles'
 
 const HiddenElement = styled.div`
   width: 16px;
@@ -107,7 +106,7 @@ export function useAttachLicensesModal<
         <ScrollWrapper>
           <>
             {licenses.length === 0 ? (
-              <EmptyTable>You don&apos;t have any licenses.</EmptyTable>
+              <Empty>You don&apos;t have any licenses.</Empty>
             ) : (
               <ResourceTable
                 rows={licenses.map((s, i) => {

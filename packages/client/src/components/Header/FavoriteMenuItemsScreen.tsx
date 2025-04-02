@@ -7,16 +7,15 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import React, { useEffect } from 'react'
+import React from 'react'
 import styled from 'styled-components'
 
 import { TransparentButton } from '../Button'
 import { StarIcon } from '../icons/StarIcon'
-import { getObjectsByIds } from './orderObjectById'
 import { HeaderItemText, IconWrap } from './styles'
-import { useNavFavoritesLocalStorage } from './useNavFavoritesLocalStorage'
-import { useNavOrderLocalStorage } from './useNavOrderLocalStorage'
+import { useNavFavorites } from './useNavFavorites'
 import { useUserSiteNavItems } from './useUserSiteNavItems'
+import { SiteNavItemType } from './NavItems'
 
 export const Name = styled.div`
   display: flex;
@@ -82,37 +81,22 @@ const SiteNavItem = props => {
   )
 }
 
-function arraysContainSameValues<T>(array1: T[], array2: T[]): boolean {
-  if (array1.length !== array2.length) {
-    return false
-  }
-
-  const sortedArray1 = array1.slice().sort()
-  const sortedArray2 = array2.slice().sort()
-
-  for (let i = 0; i < sortedArray1.length; i++) {
-    if (sortedArray1[i] !== sortedArray2[i]) {
-      return false
+function getAllObjectsByIds(ids: string[], items: SiteNavItemType[]) {
+  const itemMap = Object.fromEntries(items.map(item => [item.id, item]))
+  const list = ids.map(id => itemMap[id]).filter(Boolean) as SiteNavItemType[]
+  items.forEach(item => {
+    if (!list.find(listItem => listItem.id === item.id)) {
+      list.push(item)
     }
-  }
-
-  return true
+  })
+  return list
 }
 
 export const FavoriteMenuItemsScreen = () => {
-  const { selFavorites, setSelFavorites } = useNavFavoritesLocalStorage()
-  const { order, setOrder } = useNavOrderLocalStorage()
+  const { selFavorites, updateFavorites } = useNavFavorites()
   const { userSiteNavItems } = useUserSiteNavItems()
-  const userSiteNavItemsIds = userSiteNavItems.map(i => i.id)
 
-  useEffect(() => {
-    const validOrder = arraysContainSameValues(order, userSiteNavItemsIds)
-    if(!validOrder) {
-      setOrder(userSiteNavItemsIds)
-    }
-  }, [])
-
-  const li = getObjectsByIds(order, userSiteNavItems)
+  const displayList = getAllObjectsByIds(selFavorites.map(item => item.name), userSiteNavItems)
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -125,42 +109,48 @@ export const FavoriteMenuItemsScreen = () => {
     }),
   )
 
-  const handleItemClick = (item: string, position: number) => {
-    setSelFavorites(prev => {
-      if (prev.includes(item)) {
-        return prev.filter(favorite => favorite !== item)
+  const handleItemClick = (itemId: string) => {
+    // New settings is based on "displayList" (because that's what user sees on the screen)
+    const newNavSettings = displayList.map(liItem => {
+      const currentSettingsItem = selFavorites.find(item => item.name === liItem.id)
+
+      let favorite = false
+      if (liItem.id === itemId) {
+        favorite = currentSettingsItem ? !currentSettingsItem.favorite : true
+      } else if (currentSettingsItem) {
+        favorite = currentSettingsItem.favorite
       }
-      return [...prev, item]
+
+      return { name: liItem.id, favorite }
     })
+    updateFavorites(newNavSettings)
   }
 
   const reorder = (e: DragEndEvent) => {
     if (!e.over) return
     if (e.active.id !== e.over.id) {
-      setOrder(l => {
-        const oldIdx = l.findIndex(item => item === e.active.id)
-        const newIndex = l.findIndex(item => item === e.over!.id)
-        const newL = arrayMove(l, oldIdx, newIndex)
-        return newL
-      })
+      const oldIdx = displayList.findIndex(item => item.id === e.active.id)
+      const newIndex = displayList.findIndex(item => item.id === e.over!.id)
+      const newLi = arrayMove(displayList, oldIdx, newIndex)
+      updateFavorites(newLi.map(item => {return { name: item.id, favorite: selFavorites.find(selFavItem => selFavItem.name === item.id && selFavItem.favorite) !== undefined }}))
     }
   }
 
   return (
     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={reorder}>
-      <SortableContext items={li} strategy={verticalListSortingStrategy}>
+      <SortableContext items={displayList} strategy={verticalListSortingStrategy}>
         <StyledFavorites>
-          {li.map((i, index) => {
+          {displayList.map((i) => {
             const { id, iconHeight, text, icon: Icon } = i
             return (
-              <SiteNavItem key={id} item={i} onClick={() => handleItemClick(i.id, index)}>
+              <SiteNavItem key={id} item={i} onClick={() => handleItemClick(i.id)}>
                 <Name>
                   <IconWrap>
                     <Icon height={iconHeight} />
                   </IconWrap>
                   <HeaderItemText>{text}</HeaderItemText>
                 </Name>
-                <FavIconWrap $selected={selFavorites.includes(i.id)} data-testid={'favorite-menu-star-'+id}>
+                <FavIconWrap $selected={selFavorites.find(item => item.name === i.id && item.favorite) !== undefined} data-testid={`favorite-menu-star-${id}`}>
                   <StarIcon height={15} />
                 </FavIconWrap>
               </SiteNavItem>

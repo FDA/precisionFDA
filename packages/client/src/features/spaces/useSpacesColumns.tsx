@@ -1,16 +1,18 @@
-import React, { useEffect, useMemo } from 'react'
+import { Column, ColumnDef } from '@tanstack/react-table'
+import React, { useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { Column } from 'react-table'
 import styled, { css } from 'styled-components'
 import { SwitchButton } from '../../components/Button'
-import { DefaultColumnFilter, IdColumnFilter, SelectColumnFilter } from '../../components/Table/filters'
+import SelectFilter, { selectFilterFn } from '../../components/Table/components/SelectFilter'
+import { selectColumnDef } from '../../components/Table/selectColumnDef'
 import { StyledTagItem, StyledTags } from '../../components/Tags'
 import { AdminIcon } from '../../components/icons/AdminIcon'
-import { CogsIcon } from '../../components/icons/Cogs'
+import { BoltIcon } from '../../components/icons/BoltIcon'
 import { CubeIcon } from '../../components/icons/CubeIcon'
 import { DiscussionIcon } from '../../components/icons/DiscussionIcon'
 import { FileIcon } from '../../components/icons/FileIcon'
 import { GovernmentIcon } from '../../components/icons/GovernmentIcon'
+import { NetworkIcon } from '../../components/icons/NetworkIcon'
 import { PrivateIcon } from '../../components/icons/PrivateIcon'
 import { ProfileIcon } from '../../components/icons/ProfileIcon'
 import { UsersIcon } from '../../components/icons/UsersIcon'
@@ -19,7 +21,23 @@ import { ProtectedIcon } from './ProtectedIcon'
 import { SpaceTypeName } from './common'
 import { ISpace } from './spaces.types'
 import { useSpaceHiddenMutation } from './useSpaceHiddenMutation'
-import { NetworkIcon } from '../../components/icons/NetworkIcon'
+
+const SpaceHiddenToggle = ({ id, hidden }: { id: number; hidden: boolean }) => {
+  const spaceHiddenMutation = useSpaceHiddenMutation()
+  const [spaceHidden, setSpaceHidden] = React.useState(hidden)
+  useEffect(() => {
+    setSpaceHidden(hidden)
+  }, [hidden])
+  return (
+    <SwitchButton
+      data-active={spaceHidden}
+      onClick={() => {
+        spaceHiddenMutation.mutateAsync({ ids: [id], hidden: !spaceHidden })
+        setSpaceHidden(!spaceHidden)
+      }}
+    />
+  )
+}
 
 export const SpaceTableNameCell = styled.div`
   display: flex;
@@ -39,7 +57,7 @@ export const SpaceTableNameCell = styled.div`
 `
 
 export const Dot = styled.div`
-  width: 8px;
+  size: 8px;
   height: 8px;
   border-radius: 5px;
 `
@@ -94,14 +112,18 @@ export const SpaceTableTypeCell = styled.div`
 export const SpaceTableCounterCell = styled.div`
   display: flex;
   gap: 14px;
+  width: max-content;
 `
 export const SpaceTableCounterItem = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 3px;
+  & svg {
+    flex-shrink: 0;
+  }
 `
-export const findSpaceTypeIcon = (type: string) => {
+export const findSpaceTypeIcon = (type: string | number) => {
   switch (type) {
     case 'groups':
       return <UsersIcon />
@@ -118,191 +140,185 @@ export const findSpaceTypeIcon = (type: string) => {
   }
 }
 
-const SpaceHiddenToggle = ({ id, hidden }: { id: number; hidden: boolean }) => {
-  const spaceHiddenMutation = useSpaceHiddenMutation()
-  const [spaceHidden, setSpaceHidden] = React.useState(hidden)
-  useEffect(() => {
-    setSpaceHidden(hidden)
-  }, [hidden])
-  return (
-    <SwitchButton
-      data-active={spaceHidden}
-      onClick={() => {
-        spaceHiddenMutation.mutateAsync({ ids: [id], hidden: !spaceHidden })
-        setSpaceHidden(!spaceHidden)
-      }}
-    />
-  )
+export const useSpacesColumns = (): ColumnDef<ISpace>[] => {
+  return [
+    selectColumnDef<ISpace>(),
+    {
+      header: 'Type',
+      accessorKey: 'type',
+      enableSorting: false,
+      filterFn: selectFilterFn,
+      meta: {
+        filterElement: (column: Column<ISpace>) => (
+          <SelectFilter
+            column={column}
+            options={[
+              { label: 'Groups', option: 'groups' },
+              { label: 'Review', option: 'review' },
+              { label: 'Private', option: 'private_type' },
+              { label: 'Government', option: 'government' },
+              { label: 'Administrator', option: 'administrator' },
+            ]}
+          />
+        ),
+      },
+      size: 150,
+      cell: ({ row }) => (
+        <SpaceTableTypeCell>
+          {findSpaceTypeIcon(row.original.type)}
+          {SpaceTypeName[row.original.type]}
+        </SpaceTableTypeCell>
+      ),
+    },
+    {
+      header: 'Name',
+      accessorKey: 'name',
+      size: 368,
+      filterFn: 'includesString',
+      cell: ({ row }) => (
+        <SpaceTableNameCell>
+          <NameRow>
+            {row.original.protected && (
+              <ProtectedIcon color={row.original.current_user_membership ? undefined : 'var(--c-text-400)'} />
+            )}
+            {row.original.restricted_reviewer && (
+              <FdaRestrictedIcon color={row.original.current_user_membership ? undefined : 'var(--c-text-400)'} />
+            )}
+            {row.original.current_user_membership ? (
+              <StyledName $isAccess as={Link} to={{ pathname: `/spaces/${row.original.id}` }}>
+                {row.original.name}
+              </StyledName>
+            ) : (
+              <StyledName $isAccess={false}>{row.original.name}</StyledName>
+            )}
+          </NameRow>
+          <p>{row.original.description}</p>
+        </SpaceTableNameCell>
+      ),
+    },
+    {
+      header: 'ID',
+      accessorKey: 'id',
+      enableSorting: false,
+      size: 100,
+    },
+    {
+      header: 'State',
+      accessorKey: 'state',
+      size: 150,
+      enableSorting: false,
+      filterFn: selectFilterFn,
+      meta: {
+        filterElement: (column: Column<ISpace>) => (
+          <SelectFilter
+            column={column}
+            options={[
+              { label: 'Active', option: 'active' },
+              { label: 'Locked', option: 'locked' },
+              { label: 'Unactivated', option: 'unactivated' },
+            ]}
+          />
+        ),
+      },
+      cell: ({ row }) => (
+        <StatusCell $isActive={row.original.state === 'active'}>
+          <Dot />
+          {row.original.state}
+        </StatusCell>
+      ),
+    },
+    {
+      header: 'Hidden',
+      accessorKey: 'hidden',
+      size: 100,
+      enableSorting: false,
+      filterFn: selectFilterFn,
+      meta: {
+        filterElement: (column: Column<ISpace>) => (
+          <SelectFilter
+            column={column}
+            options={[
+              { label: 'Not hidden', option: 'false' },
+              { label: 'Hidden', option: 'true' },
+            ]}
+          />
+        ),
+      },
+      cell: (c) => <div><SpaceHiddenToggle id={c.row.original.id} hidden={c.row.original.hidden} /></div>,
+    },
+    {
+      header: 'Tags',
+      accessorKey: 'tags',
+      enableSorting: false,
+      filterFn: 'includesString',
+      size: 200,
+      cell: ({ row }) => (
+        <StyledTags>
+          {row.original.tags.map(tag => (
+            <StyledTagItem key={tag}>{tag}</StyledTagItem>
+          ))}
+        </StyledTags>
+      ),
+    },
+    {
+      header: 'Created on',
+      accessorKey: 'created_at',
+      sortDescFirst: true,
+      enableColumnFilter: false,
+      size: 150,
+    },
+    {
+      header: 'Modified on',
+      accessorKey: 'updated_at',
+      sortDescFirst: true,
+      enableColumnFilter: false,
+      size: 150,
+    },
+    {
+      header: 'Reviewer/Host lead',
+      accessorKey: 'host_lead',
+      enableSorting: false,
+      enableColumnFilter: false,
+      size: 200,
+      cell: ({ row }) => <div>{row.original?.host_lead?.name}</div>,
+    },
+    {
+      header: 'Sponsor/Guest lead',
+      accessorKey: 'guest_lead',
+      enableSorting: false,
+      enableColumnFilter: false,
+      size: 200,
+      cell: ({ row }) => <div>{row.original?.guest_lead?.name}</div>,
+    },
+    {
+      header: 'Counters',
+      accessorKey: 'counters',
+      enableSorting: false,
+      enableColumnFilter: false,
+      size: 300,
+      cell: ({ row }) => (
+        <SpaceTableCounterCell>
+          <SpaceTableCounterItem>
+            <FileIcon /> {row.original?.counters.files}
+          </SpaceTableCounterItem>
+          <SpaceTableCounterItem>
+            <CubeIcon height={14} /> {row.original?.counters.apps}
+          </SpaceTableCounterItem>
+          <SpaceTableCounterItem>
+            <NetworkIcon /> {row.original?.counters.workflows}
+          </SpaceTableCounterItem>
+          <SpaceTableCounterItem>
+            <BoltIcon height={14} />
+            {row.original?.counters.jobs}
+          </SpaceTableCounterItem>
+          <SpaceTableCounterItem>
+            <UsersIcon /> {row.original?.counters.members}
+          </SpaceTableCounterItem>
+          <SpaceTableCounterItem>
+            <DiscussionIcon /> {row.original?.counters.discussions}
+          </SpaceTableCounterItem>
+        </SpaceTableCounterCell>
+      ),
+    },
+  ]
 }
-
-export const useSpacesColumns = ({ colWidths, isSiteAdmin = false }: { colWidths?: any; isSiteAdmin?: boolean }) =>
-  useMemo<Column<ISpace>[]>(
-    () =>
-      [
-        {
-          Header: 'Type',
-          accessor: 'type',
-          disableSortBy: true,
-          Filter: SelectColumnFilter,
-          title: 'Select space type',
-          options: [
-            { label: 'Groups', value: 'groups' },
-            { label: 'Review', value: 'review' },
-            { label: 'Private', value: 'private_type' },
-            { label: 'Government', value: 'government' },
-            { label: 'Administrator', value: 'administrator' },
-          ],
-          width: colWidths?.type || 150,
-          Cell: ({ row }) => (
-            <SpaceTableTypeCell>
-              {findSpaceTypeIcon(row.original.type)}
-              {SpaceTypeName[row.original.type]}
-            </SpaceTableTypeCell>
-          ),
-        },
-        {
-          Header: 'Name',
-          accessor: 'name',
-          width: colWidths?.name || 368,
-          Filter: DefaultColumnFilter,
-          Cell: ({ row: { original } }) => (
-            <SpaceTableNameCell>
-              <NameRow>
-                {original.protected && (
-                  <ProtectedIcon color={original.current_user_membership ? undefined : 'var(--c-text-400)'} />
-                )}
-                {original.restricted_reviewer && (
-                  <FdaRestrictedIcon color={original.current_user_membership ? undefined : 'var(--c-text-400)'} />
-                )}
-                {original.current_user_membership ? (
-                  <StyledName $isAccess as={Link} to={{ pathname: `/spaces/${original.id}` }}>
-                    {original.name}
-                  </StyledName>
-                ) : (
-                  <StyledName $isAccess={false}>{original.name}</StyledName>
-                )}
-              </NameRow>
-              <p>{original.description}</p>
-            </SpaceTableNameCell>
-          ),
-        },
-        {
-          Header: 'ID',
-          accessor: 'id',
-          disableSortBy: true,
-          Filter: IdColumnFilter,
-          width: colWidths?.id || 100,
-        },
-        {
-          Header: 'State',
-          accessor: 'state',
-          width: colWidths?.state || 160,
-          disableSortBy: true,
-          Filter: SelectColumnFilter,
-          title: 'Select state',
-          options: [
-            { label: 'Active', value: 'active' },
-            { label: 'Locked', value: 'locked' },
-            { label: 'Unactivated', value: 'unactivated' },
-          ],
-          Cell: ({ row }) => (
-            <StatusCell $isActive={row.original.state === 'active'}>
-              <Dot />
-              {row.original.state}
-            </StatusCell>
-          ),
-        },
-        ...(isSiteAdmin
-          ? [
-              {
-                Header: 'Hidden',
-                accessor: 'hidden',
-                width: colWidths?.hidden || 100,
-                disableSortBy: true,
-                Filter: SelectColumnFilter,
-                title: 'Select hidden',
-                options: [
-                  { label: 'Not hidden', value: 'false' },
-                  { label: 'Hidden', value: 'true' },
-                ],
-                Cell: ({ row }) => <SpaceHiddenToggle id={row.original.id} hidden={row.original.hidden} />,
-              },
-            ]
-          : []),
-        {
-          Header: 'Tags',
-          accessor: 'tags',
-          disableSortBy: true,
-          Filter: DefaultColumnFilter,
-          width: colWidths?.tags || 200,
-          Cell: ({ value }) => (
-            <StyledTags>
-              {value.map(tag => (
-                <StyledTagItem key={tag}>{tag}</StyledTagItem>
-              ))}
-            </StyledTags>
-          ),
-        },
-        {
-          Header: 'Created on',
-          accessor: 'created_at',
-          sortDescFirst: true,
-          disableFilters: true,
-          width: colWidths?.created_at || 150,
-        },
-        {
-          Header: 'Modified on',
-          accessor: 'updated_at',
-          sortDescFirst: true,
-          disableFilters: true,
-          width: colWidths?.updated_at || 150,
-        },
-        {
-          Header: 'Reviewer/Host lead',
-          accessor: 'host_lead',
-          disableSortBy: true,
-          disableFilters: true,
-          width: colWidths?.host_lead || 200,
-          Cell: ({ row }) => <div>{row.original?.host_lead?.name}</div>,
-        },
-        {
-          Header: 'Sponsor/Guest lead',
-          accessor: 'guest_lead',
-          disableSortBy: true,
-          disableFilters: true,
-          width: colWidths?.guest_lead || 200,
-          Cell: ({ row }) => <div>{row.original?.guest_lead?.name}</div>,
-        },
-        {
-          Header: 'Counters',
-          accessor: 'counters',
-          disableSortBy: true,
-          disableFilters: true,
-          width: colWidths?.counters || 300,
-          Cell: ({ row }) => (
-            <SpaceTableCounterCell>
-              <SpaceTableCounterItem>
-                <FileIcon /> {row.original?.counters.files}
-              </SpaceTableCounterItem>
-              <SpaceTableCounterItem>
-                <CubeIcon height={14} /> {row.original?.counters.apps}
-              </SpaceTableCounterItem>
-              <SpaceTableCounterItem>
-                <NetworkIcon height={16} /> {row.original?.counters.workflows}
-              </SpaceTableCounterItem>
-              <SpaceTableCounterItem>
-                <CogsIcon height={14} />
-                {row.original?.counters.jobs}
-              </SpaceTableCounterItem>
-              <SpaceTableCounterItem>
-                <UsersIcon /> {row.original?.counters.members}
-              </SpaceTableCounterItem>
-              <SpaceTableCounterItem>
-                <DiscussionIcon /> {row.original?.counters.discussions}
-              </SpaceTableCounterItem>
-            </SpaceTableCounterCell>
-          ),
-        },
-      ] as Column<ISpace>[],
-    [],
-  )

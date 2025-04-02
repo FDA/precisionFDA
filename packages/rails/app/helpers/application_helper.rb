@@ -173,14 +173,6 @@ module ApplicationHelper
     unilink(item, local_opts, current_user)
   end
 
-  def guest_hide
-    'style="display: none"'.html_safe if @context.guest?
-  end
-
-  def guest_disable
-    'disabled="true"'.html_safe if @context.guest?
-  end
-
   def time_ago(time)
     if time.to_date == Date.today
       "#{time_ago_in_words(time)} ago"

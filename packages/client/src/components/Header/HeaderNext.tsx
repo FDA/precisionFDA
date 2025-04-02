@@ -23,7 +23,7 @@ import { ProfileIcon } from '../icons/ProfileIcon'
 import { SiteMenuIcon } from '../icons/SiteMenuIcon'
 import { StarIcon } from '../icons/StarIcon'
 import { SiteNavItemType } from './NavItems'
-import { orderArrayByReference } from './orderArrayByReference'
+import { getOrderedFavoritesOnly } from './getOrderedFavoritesOnly'
 import { getObjectsByIds } from './orderObjectById'
 import {
   DisabledSiteMenuItem,
@@ -56,13 +56,11 @@ import {
   SubLink,
 } from './styles'
 import { useEditFavoritesModal } from './useEditFavoritesModal'
-import { useNavFavoritesLocalStorage } from './useNavFavoritesLocalStorage'
-import { useNavOrderLocalStorage } from './useNavOrderLocalStorage'
+import { useNavFavorites } from './useNavFavorites'
 import { useUserSiteNavItems } from './useUserSiteNavItems'
 
 type UserMenuProps = {
   user: IUser | null | undefined
-  userIsGuest?: boolean
   userCanAdministerSite?: boolean
   handleLogout: () => void
   showCloudResourcesModal: () => void
@@ -72,7 +70,6 @@ type UserMenuProps = {
 
 export const UserMenu = ({
   user,
-  userIsGuest = true,
   userCanAdministerSite = false,
   handleLogout,
   showCloudResourcesModal,
@@ -83,7 +80,7 @@ export const UserMenu = ({
     <StyledLink data-turbolinks="false" href="/profile" onClick={() => hide()}>
       Profile
     </StyledLink>
-    {user && !userIsGuest && (
+    {user && (
       <>
         <StyledLink data-turbolinks="false" href={`/users/${user?.dxuser}`} onClick={() => hide()}>
           Public Profile
@@ -110,11 +107,9 @@ export const UserMenu = ({
     <StyledLink data-turbolinks="false" href="/licenses" onClick={() => hide()}>
       Manage Licenses
     </StyledLink>
-    {!userIsGuest && (
-      <StyledLink as={Link} data-turbolinks="false" to="/account/notifications" onClick={() => hide()}>
-        Notification Settings
-      </StyledLink>
-    )}
+    <StyledLink as={Link} data-turbolinks="false" to="/account/notifications" onClick={() => hide()}>
+      Notification Settings
+    </StyledLink>
     <StyledDivider />
     <StyledLink as={Link} to="/about" data-turbolinks="false" onClick={() => hide()}>
       About
@@ -165,7 +160,7 @@ const MenuLink = ({
   children: React.ReactNode
   'data-testid': string
 }) => {
-  const MenuLinkComp = navItem.alink ? 'a' : Link
+  const MenuLinkComp = navItem?.alink ? 'a' : Link
   const menuLinkProps = {
     rel: navItem.alink?.startsWith('mailto:') ? 'noreferrer' : undefined,
     target: navItem?.external ? '_blank' : undefined,
@@ -181,7 +176,7 @@ const MenuLink = ({
 const MenuItem = ({ navItem, pathname, onClick }: { navItem: SiteNavItemType; pathname: string; onClick: () => void }) => {
   return (
     <MenuLink navItem={navItem} onClick={onClick} data-testid={`sitenav-${navItem.id}`}>
-      <SiteMenuItem $active={isActiveLink(navItem.link || navItem.alink, pathname)}>
+      <SiteMenuItem $active={isActiveLink(navItem?.link || navItem.alink, pathname)}>
         <IconWrap>
           <navItem.icon height={navItem.iconHeight} />
         </IconWrap>
@@ -361,8 +356,7 @@ const Header: React.FC = () => {
   const user = useAuthUser()
   const siteSettings = useSiteSettingsQuery()
   const { isAlertDismissed, setIsAlertDismissed } = useAlertDismissed()
-  const { selFavorites } = useNavFavoritesLocalStorage()
-  const { order } = useNavOrderLocalStorage()
+  const { selFavorites } = useNavFavorites()
   const [isCloudResourcesModalShown, setCloudResourcesModalShown] = useState(false)
   const buttonRef = useRef<HTMLDivElement>(null)
   const generateCLIKeyAction = useGenerateKeyModal()
@@ -372,7 +366,6 @@ const Header: React.FC = () => {
   if (!user) return null
 
   const userCanAdministerSite = user.can_administer_site
-  const userIsGuest = user.is_guest
   const showAlertBanner = !isAlertDismissed && !!siteSettings.data?.alerts?.[0]
 
   const handleLogout = async () => {
@@ -388,7 +381,7 @@ const Header: React.FC = () => {
     }, ms ?? 225)
   }
 
-  const orderedFavorites = orderArrayByReference(selFavorites, order)
+  const orderedFavorites = getOrderedFavoritesOnly(selFavorites)
 
   return (
     <>
@@ -440,7 +433,7 @@ const Header: React.FC = () => {
               const { id, iconHeight, text, icon: Icon } = i
               return (
                 <MenuLink navItem={i} key={id} data-testid={`favoritenav-${id}`}>
-                  <HeaderMenuItem $active={isActiveLink(i.link || i.alink, pathname)}>
+                  <HeaderMenuItem $active={isActiveLink(i?.link || i.alink, pathname)}>
                     <IconWrap $marginBottom={1}>
                       <Icon height={iconHeight} />
                     </IconWrap>
@@ -467,7 +460,6 @@ const Header: React.FC = () => {
                 <UserMenu
                   user={user}
                   userCanAdministerSite={userCanAdministerSite}
-                  userIsGuest={userIsGuest}
                   handleLogout={handleLogout}
                   showCloudResourcesModal={() => setCloudResourcesModalShown(true)}
                   generateCLIKey={() => generateCLIKeyAction.setShowModal(true)}

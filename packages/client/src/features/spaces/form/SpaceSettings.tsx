@@ -92,10 +92,10 @@ export const SpaceSettingsForm = ({ space }: ISpaceSettingsForm) => {
 
   const mutation = useMutation({
     mutationKey: ['edit-space'],
-    mutationFn: (payload: CreateSpacePayload) => editSpaceRequest(space.id, payload),
+    mutationFn: (payload: EditSpacePayload) => editSpaceRequest(space.id, payload),
     onSuccess: res => {
-      if (res?.space.id) {
-        navigate(`/spaces/${res?.space.id}`)
+      if (res?.id) {
+        navigate(`/spaces/${res?.id}`)
         queryClient.invalidateQueries({
           queryKey: ['spaces'],
         })

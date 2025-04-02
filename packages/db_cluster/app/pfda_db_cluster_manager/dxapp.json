@@ -1,0 +1,59 @@
+{
+  "name": "pfda_db_cluster_manager",
+  "title": "pfda_db_cluster_manager",
+  "summary": "pfda_db_cluster_manager",
+  "dxapi": "1.0.0",
+  "version": "1.0.0",
+  "inputSpec": [
+    {
+      "name": "encrypted_input_json",
+      "class": "hash",
+      "optional": false,
+      "help": "Encrypted input JSON"
+    }
+  ],
+  "outputSpec": [],
+  "runSpec": {
+    "timeoutPolicy": {
+      "*": {
+        "hours": 12
+      }
+    },
+    "interpreter": "python3",
+    "execDepends": [
+        { "name": "psycopg2-binary", "package_manager": "pip3" },
+        { "name": "pycryptodomex", "package_manager": "pip3" },
+        { "name": "mysql-connector-python", "package_manager": "pip3" }
+      ],
+    "file": "src/pfda_db_cluster_manager.py",
+    "distribution": "Ubuntu",
+    "release": "20.04",
+    "version": "0"
+  },
+  "access": {
+    "network": [
+      "*"
+    ],
+    "project": "CONTRIBUTE",
+    "allProjects": "CONTRIBUTE"
+  },
+  "developers": [
+    "org-precisionfda",
+    "user-zchang",
+    "user-jiha_dnanexus.com",
+    "user-precisionfda.admin"
+  ],
+  "authorizedUsers": [
+    "org-precisionfda",
+    "user-precisionfda.admin"
+  ],
+  "regionalOptions": {
+    "aws:us-east-1": {
+      "systemRequirements": {
+        "*": {
+          "instanceType": "mem1_ssd1_x2_fedramp"
+        }
+      }
+    }
+  }
+}

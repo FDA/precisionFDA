@@ -75,6 +75,7 @@ export function EditDiscussionTitle({
         type="text"
         defaultValue={defaultValue}
         disabled={editTitleMutation.isPending}
+        autoFocus
       />
       <Button
         disabled={editTitleMutation.isPending}

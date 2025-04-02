@@ -60,10 +60,10 @@ class MetaAppathon < ApplicationRecord
   end
 
   def self.editable_by(context)
-    if context.guest? || !context.user.can_administer_site?
-      none
-    else
+    if context.user.can_administer_site?
       all
+    else
+      none
     end
   end
 

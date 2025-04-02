@@ -62,7 +62,7 @@ jobs:
           ENV_SUBNET2: ${{ vars.ENV_SUBNET2 }}
           ENV_SUBNET3: ${{ vars.ENV_SUBNET3 }}
           ENV_ASG_NAME: ${{ vars.ENV_GSRS_ASG_NAME }}
-          ENV_TG: ${{ vars.ENV_GSRS_TG }}
+          ENV_TG: ${{ vars.ENV_GSRS_TG }} ${{ vars.ENV_GSRS_STATIG_ASSETS_TG }}
           ENV_LT_NAME: ${{ vars.ENV_GSRS_LT_NAME }}
           ENV_LT_VERSION: ${{ inputs.LT_VERSION }}
           ENV_INSTANCE_TYPE: gsrsinstance

@@ -1,29 +1,29 @@
+import { useQuery } from '@tanstack/react-query'
 import React from 'react'
 import { useParams } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
+import { CubeIcon } from '../../../components/icons/CubeIcon'
 import { BackLink } from '../../../components/Page/PageBackLink'
 import { FormPageContainer } from '../../../components/Page/styles'
-import { Topbox, TopboxItem } from './styles'
 import { useAuthUser } from '../../auth/useAuthUser'
-import { fetchApp } from '../apps.api'
 import { HomeLoader, NotFound, Title } from '../../home/show.styles'
-import { getBaseLink } from './utils'
-import { CubeIcon } from '../../../components/icons/CubeIcon'
+import { fetchApp } from '../apps.api'
 import { RunJobForm } from './RunJobForm'
+import { Topbox, TopboxItem } from './styles'
+import { getBaseLink } from './utils'
 
 export const RunJobPage = ({ spaceId }: { spaceId?: number }) => {
-  const { appUid } = useParams<{ appUid: string }>()
+  const { appIdentifier } = useParams<{ appIdentifier: string }>()
   const user = useAuthUser()
   const { data: appData, isLoading } = useQuery({
-    queryKey: ['app', appUid],
-    queryFn: () => fetchApp(appUid as string),
-    enabled: !!appUid,
+    queryKey: ['app', appIdentifier],
+    queryFn: () => fetchApp(appIdentifier as string),
+    enabled: !!appIdentifier,
   })
 
   const app = appData?.app
   const spec = appData?.meta.spec
 
-  if (isLoading || user === undefined ) {
+  if (isLoading || user === undefined) {
     return <HomeLoader />
   }
 
@@ -41,14 +41,14 @@ export const RunJobPage = ({ spaceId }: { spaceId?: number }) => {
   return (
     <FormPageContainer>
       <Topbox>
-        <BackLink linkTo={`/${getBaseLink(spaceId)}/apps/${app.uid}`}>
-          Back to App
-        </BackLink>
+        <BackLink linkTo={`/${getBaseLink(spaceId)}/apps/${app.uid}`}>Back to App</BackLink>
         <TopboxItem>
           <Title>
             <CubeIcon height={20} />
             <span>Run App:</span>
-            <span>{appTitle}</span>
+            <span>
+              {appTitle} (rev{app.revision})
+            </span>
           </Title>
         </TopboxItem>
       </Topbox>
