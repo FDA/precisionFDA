@@ -22,7 +22,6 @@ import { User, USER_STATE } from '@shared/domain/user/user.entity'
 import { Vote } from '@shared/domain/vote/vote.entity'
 import { HOME_SCOPE, STATIC_SCOPE } from '@shared/enums'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
-import type { UserCtx } from '@shared/types'
 import * as errors from '../../../errors'
 import { Comment, CommentableType } from '../../comment/comment.entity'
 import { EntityFetcherService } from '../../entity/entity-fetcher.service'
@@ -158,12 +157,18 @@ export class DiscussionService {
     this.logger.log(`Updating discussion: ${JSON.stringify(discussionInput)}`)
 
     return await this.em.transactional(async () => {
-      const discussion = await this.fetcher.getEditableById(
-        Discussion,
-        id,
-        {},
+      // TODO XX2 Ludvik - not sure why this is not working, check fetcher code below
+      const discussion = await this.discussionRepository.findEditableOne(
+        { id },
         { populate: ['note'] },
       )
+      // kept this as comment because populate worked fine here.
+      // const discussion = await this.fetcher.getEditableById(
+      //   Discussion,
+      //   id,
+      //   {},
+      //   { populate: ['note'] },
+      // )
       if (!discussion) {
         throw new errors.NotFoundError(
           'Unable to update discussion: not found or insufficient permissions.',
@@ -188,16 +193,19 @@ export class DiscussionService {
     this.logger.log(`Deleting discussion: ${discussionId}`)
 
     const user = await this.userRepository.findOneOrFail({ id: this.userCtx.id })
-    const discussion = await this.discussionRepository.findOne(discussionId, {
-      populate: [
-        'note',
-        'answers',
-        'comments',
-        'note.attachments',
-        'answers.note',
-        'answers.note.attachments',
-      ],
-    })
+    const discussion = await this.discussionRepository.findEditableOne(
+      { id: discussionId },
+      {
+        populate: [
+          'note',
+          'answers',
+          'comments',
+          'note.attachments',
+          'answers.note',
+          'answers.note.attachments',
+        ],
+      },
+    )
 
     if (!discussion || !(await discussion.isEditableBy(user))) {
       throw new errors.NotFoundError(
@@ -793,8 +801,8 @@ export class DiscussionService {
     this.logger.log(`Adding new follower (user: ${this.userCtx.id}) to discussion: ${discussionId}`)
     const user = await this.userRepository.findOneOrFail({ id: this.userCtx.id })
 
-    const discussion = await this.discussionRepository.findOne({ id: discussionId })
-    if (!discussion || !(await discussion.isAccessibleBy(user))) {
+    const discussion = await this.discussionRepository.findAccessibleOne({ id: discussionId })
+    if (!discussion) {
       throw new errors.NotFoundError('Discussion not found or insufficient permissions.')
     }
 
@@ -817,8 +825,8 @@ export class DiscussionService {
 
     const user = await this.userRepository.findOneOrFail({ id: this.userCtx.id })
 
-    const discussion = await this.discussionRepository.findOne({ id: discussionId })
-    if (!discussion || !(await discussion.isAccessibleBy(user))) {
+    const discussion = await this.discussionRepository.findAccessibleOne({ id: discussionId })
+    if (!discussion) {
       throw new errors.NotFoundError('Discussion not found or insufficient permissions.')
     }
 
