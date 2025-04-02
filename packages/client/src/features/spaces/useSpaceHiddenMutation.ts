@@ -1,7 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { AxiosError } from 'axios'
 import { toast } from 'react-toastify'
-import { pluralize } from '../../utils/formatting'
 import { updateSpacesHidden } from './spaces.api'
 
 export const useSpaceHiddenMutation = () => {
@@ -13,7 +12,7 @@ export const useSpaceHiddenMutation = () => {
     },
     onSuccess: async (data: void, variables: { ids: number[]; hidden: boolean }) => {
       toast.success(
-        `${pluralize('Space', variables.ids.length)} have been ${variables.hidden ? 'hidden' : 'unhidden'} successfully`,
+        `${variables.ids.length > 0 ? 'Spaces have' : 'Space has'} been ${variables.hidden ? 'hidden' : 'unhidden'} successfully`,
       )
       queryClient.invalidateQueries({ queryKey: ['spaces'] })
     },

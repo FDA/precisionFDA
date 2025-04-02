@@ -15,7 +15,9 @@ import { FileSyncQueueProcessor } from '../../src/domain/user-file/processor/fil
 import { MainQueueProcessor } from '../../src/queues/processor/main-queue.processor'
 import { MaintenanceQueueProcessor } from '../../src/queues/processor/maintenance-queue.processor'
 
-const dbClusterService = {} as DbClusterService
+const dbClusterService = {
+  syncDbClusterStatus: () => {},
+} as unknown as DbClusterService
 
 const adminDataConsistencyReportService = {
   createReport: () => {},

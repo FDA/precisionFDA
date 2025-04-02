@@ -16,7 +16,7 @@ import {
 } from '@shared/domain/space-membership/space-membership.enum'
 import { TaggingService } from '@shared/domain/tagging/tagging.service'
 import { TAGGABLE_TYPE } from '@shared/domain/tagging/tagging.types'
-import { CreateSpaceDTO } from '@shared/domain/space/dto/create-space-dto'
+import { CreateSpaceDTO } from '@shared/domain/space/dto/create-space.dto'
 
 @Injectable()
 export class ReviewSpaceCreationProcess extends SpaceCreationProcess {

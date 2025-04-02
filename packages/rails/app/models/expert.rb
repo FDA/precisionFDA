@@ -68,9 +68,10 @@ class Expert < ApplicationRecord
   end
 
   def editable_by?(context)
-    return false unless context.logged_in? && !context.guest?
+    return false unless context.logged_in?
 
-    raise unless context.user_id.present?
+    raise if context.user_id.blank?
+
     user.id == context.user_id || context.user.can_administer_site?
   end
 
@@ -91,7 +92,7 @@ class Expert < ApplicationRecord
   end
 
   def self.viewable_by(context)
-    if !context.guest? && context.logged_in?
+    if context.logged_in?
       if context.user.present? && context.user.can_administer_site?
         Expert.all
       else
@@ -103,10 +104,9 @@ class Expert < ApplicationRecord
   end
 
   def self.editable_by(context)
-    if !context.guest?
-      raise unless context.user_id.present?
-      Expert.where(user_id: context.user_id).distinct
-    end
+    raise if context.user_id.blank?
+
+    Expert.where(user_id: context.user_id).distinct
   end
 
   def update_expert(context, expert_params)
@@ -131,6 +131,7 @@ class Expert < ApplicationRecord
       if u.nil?
         return e
       end
+
       expert_params[:image] = Expert.get_perm_link(context, expert_params[:_image_id])
       expert_params[:state] = "closed"
       expert_params[:user_id] = u.id

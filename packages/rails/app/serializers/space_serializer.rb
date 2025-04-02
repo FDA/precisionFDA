@@ -99,6 +99,7 @@ class SpaceSerializer < ApplicationSerializer
       members: members_count,
       reports: reports_count,
       discussions: discussions_count,
+      dbclusters: dbclusters_count,
     }
   end
 
@@ -128,6 +129,12 @@ class SpaceSerializer < ApplicationSerializer
   # @return [Integer] Apps count.
   def apps_count
     object.latest_revision_apps.unremoved.count
+  end
+
+  # Returns dbclusters count.
+  # @return [Integer] DbCluster count.
+  def dbclusters_count
+    object.dbclusters.count
   end
 
   # Returns files count.

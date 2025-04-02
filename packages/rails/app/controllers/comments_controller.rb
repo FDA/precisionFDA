@@ -1,6 +1,4 @@
 class CommentsController < ApplicationController
-  skip_before_action :require_login,     only: [:index, :show]
-  before_action :require_login_or_guest, only: [:index, :show]
 
   def index
     @items_from_params = get_item_array_from_params

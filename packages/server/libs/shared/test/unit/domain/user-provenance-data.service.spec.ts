@@ -33,7 +33,13 @@ describe('UserProvenanceDataService', () => {
     it('should provide correct data about the user', async () => {
       const res = await getInstance().getData(USER)
 
-      expect(res).to.deep.equal({ type: 'user', url: LINK, title: FULL_NAME, identifier: DXUSER })
+      expect(res).to.deep.equal({
+        type: 'user',
+        url: LINK,
+        title: FULL_NAME,
+        identifier: DXUSER,
+        scope: null,
+      })
     })
   })
 

@@ -29,7 +29,7 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
 
   before_action :init_countries, only: %i(request_access create_request_access)
 
-  layout "react", only: %i(about index news terms security data_portals home)
+  layout "react", only: %i(about index news terms security data_portals home publish)
 
   def index # rubocop:todo Metrics/MethodLength
     show_guidelines = false
@@ -49,7 +49,7 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
       @user_appathon = @context.user.appathon_from_meta(@meta_appathon) if @context.logged_in?
     end
 
-    if @context.logged_in_or_guest?
+    if @context.logged_in?
       @feed = collect_feed
 
       if @context.logged_in?
@@ -164,6 +164,8 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
 
   def security; end
 
+  def publish; end
+
   def presskit # rubocop:todo Metrics/MethodLength
     @images = [
       {
@@ -223,26 +225,21 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
   end
 
   def login
-    if @context.guest?
-      render "_partials/_error", status: :forbidden,
-                                 locals: { message: I18n.t("main.login_as_guest_warning") }
-    else
-      user_return_to = params[:user_return_to].presence
-      uri_attrs = [oauth2_redirect_url]
-      uri_attrs << "?#{URI.encode_www_form(redirect_uri: user_return_to)}" if user_return_to
+    user_return_to = params[:user_return_to].presence
+    uri_attrs = [oauth2_redirect_url]
+    uri_attrs << "?#{URI.encode_www_form(redirect_uri: user_return_to)}" if user_return_to
 
-      query_params = URI.encode_www_form(
-        response_type: "code",
-        client_id: OAUTH2_CLIENT_ID,
-        redirect_uri: URI.join(*uri_attrs),
-      )
+    query_params = URI.encode_www_form(
+      response_type: "code",
+      client_id: OAUTH2_CLIENT_ID,
+      redirect_uri: URI.join(*uri_attrs),
+    )
 
-      redirect_to URI.join(
-        DNANEXUS_AUTHSERVER_URI,
-        "oauth2/authorize",
-        "?#{query_params}",
-      ).to_s
-    end
+    redirect_to URI.join(
+      DNANEXUS_AUTHSERVER_URI,
+      "oauth2/authorize",
+      "?#{query_params}",
+    ).to_s
   end
 
   def return_from_login # rubocop:todo Metrics/MethodLength
@@ -449,7 +446,7 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
   end
 
   def browse_access
-    if @context.logged_in_or_guest?
+    if @context.logged_in?
       redirect_to root_url
       return
     end
@@ -484,127 +481,6 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
       Auditor.perform_audit(auditor_data)
       redirect_to root_url
     end
-  end
-
-  def publish # rubocop:todo Metrics/MethodLength
-    id = unsafe_params[:id]
-    raise "Missing id in publish route" unless id.is_a?(String) && id.present?
-
-    raise "User is not allowed to publish any data objects" unless @context.user.allowed_to_publish?
-
-    service = SpaceService::Publishing.new(@context)
-
-    check_result = service.scope_check(unsafe_params[:scope])
-    scope = check_result[:scope]
-    space = check_result[:space]
-
-    if unsafe_params[:uids]
-      uids = unsafe_params[:uids]
-      if !uids.is_a?(Hash) || !uids.all? { |uid, checked| uid.is_a?(String) && checked == "on" }
-        raise "The object 'uids' must be a hash of object ids (strings) with value 'on'."
-      end
-
-      items = ([id] + uids.keys).uniq.map { |uid| item_from_uid(uid) }.reject { |item| item.public? || item.scope == scope }
-      unless items.all? { |item| item.publishable_by?(@context, scope) }
-        raise "Unpublishable items detected"
-      end
-
-      # Files to publish:
-      # - All real_files selected by the user
-      files = items.select { |item| item.klass == "file" }
-
-      # Assets
-      assets = items.select { |item| item.klass == "asset" }
-
-      # Comparisons
-      comparisons = items.select { |item| item.klass == "comparison" }
-
-      # Apps
-      apps = items.select { |item| item.klass == "app" }
-
-      # Jobs
-      jobs = items.select { |item| item.klass == "job" }
-
-      # Notes
-      notes = items.select { |item| item.klass == "note" }
-
-      # Discussions
-      discussions = items.select { |item| item.klass == "discussion" }
-
-      # Answers
-      answers = items.select { |item| item.klass == "answer" }
-
-      # Workflows
-      workflows = items.select { |item| item.klass == "workflow" }
-
-      published_count = 0
-
-      # Files
-      published_count += UserFile.publish(files, @context, scope) unless files.empty?
-
-      published_count += Asset.publish(assets, @context, scope) unless assets.empty?
-
-      # Comparisons
-      published_count += Comparison.publish(comparisons, @context, scope) unless comparisons.empty?
-
-      # Apps
-      published_count += AppSeries.publish(apps, @context, scope) unless apps.empty?
-
-      # Jobs
-      unless jobs.empty?
-        published_count += PublishService::JobPublisher.new(@context).publish(jobs, scope)
-      end
-
-      # Notes
-      published_count += Note.publish(notes, @context, scope) unless notes.empty?
-
-      # Discussions
-      published_count += Discussion.publish(discussions, @context, scope) unless discussions.empty?
-
-      # Answers
-      published_count += Answer.publish(answers, @context, scope) unless answers.empty?
-
-      if workflows.any?
-        PublishService::WorkflowPublisher.call(workflows, @context, scope)
-        published_count += workflows.count
-      end
-
-      message = published_count.to_s
-      message += " (out of #{items.count})" if published_count != items.count
-      message += if published_count == 1
-        " item has been published."
-      else
-        " items have been published."
-      end
-      flash[:success] = message
-      item = item_from_uid(id)
-      path = concat_path(item)
-
-      redirect_to path
-      return
-    end
-
-    item = item_from_uid(id)
-    path_item = concat_path(item)
-
-    unless item.editable_by?(@context)
-      flash[:error] = "This item is not owned by you."
-      redirect_back(fallback_location: root_path) && return
-    end
-
-    if item.public?
-      flash[:error] = "This item is already public."
-      redirect_to(path_item) && return
-    end
-
-    unless item.publishable_by?(@context, scope)
-      flash[:error] = "This item cannot be published in this state."
-      redirect_to(path_item) && return
-    end
-
-    js graph: GraphDecorator.for_publisher(@context, item, scope),
-       space: space.nil? ? nil : space.slice(:uid, :title),
-       scope_to_publish_to: scope, message: t("main.publish.apps_notification")
   end
 
   def tokify

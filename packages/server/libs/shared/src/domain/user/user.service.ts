@@ -13,6 +13,10 @@ import { UserRepository } from '@shared/domain/user/user.repository'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { UserPaginationDto } from '@shared/domain/user/dto/user-pagination.dto'
 import { StringUtils } from '@shared/utils/string.utils'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { HeaderItem } from '@shared/domain/user/header-item'
+import { NoHeaderItemsSetError, NotFoundError } from '@shared/errors'
+import { UserExtras } from '@shared/domain/user/user-extras'
 
 @Injectable()
 export class UserService {
@@ -23,6 +27,7 @@ export class UserService {
     private readonly em: SqlEntityManager,
     private readonly emailsJobProducer: EmailQueueJobProducer,
     private readonly userRepo: UserRepository,
+    private readonly user: UserContext,
   ) {}
 
   async paginateUsers(query: UserPaginationDto) {
@@ -106,6 +111,36 @@ export class UserService {
     return result.map((user) => user.dxuser)
   }
 
+  async listHeaderItems(): Promise<HeaderItem[]> {
+    this.logger.log(`Getting header items settings for user: ${this.user.dxuser}`)
+    const user = await this.userRepo.findOne({ id: this.user.id })
+    if (!user) {
+      throw new NotFoundError('User not found')
+    }
+
+    if (user.extras.header_items === undefined) {
+      // TODO: PFDA-6176 Return default header items settings
+      throw new NoHeaderItemsSetError(
+        `Header items have not been set yet for user ${this.user.dxuser}`,
+      )
+    }
+
+    return user.extras.header_items
+  }
+
+  async updateHeaderItems(headerItems: HeaderItem[]): Promise<void> {
+    this.logger.log(`Updating header items settings for user: ${this.user.dxuser}`)
+    const filteredHeaderItems = headerItems
+
+    const user = await this.userRepo.findOne({ id: this.user.id })
+    if (!user) {
+      throw new NotFoundError('User not found')
+    }
+
+    user.extras.header_items = filteredHeaderItems
+    await this.em.flush()
+  }
+
   /**
    * Sends inactivity alerts to users who are soon to be locked due to inactivity (55 days of inactivity, locked account at 60 days).
    * This is called by the maintenance queue processor - do not call manually.
@@ -156,7 +191,7 @@ export class UserService {
         }
         await this.emailsJobProducer.createSendEmailTask(emailTask, undefined)
         // this might be null for some users, so initialize it
-        user.extras ??= { has_seen_guidelines: false, inactivity_email_sent: false }
+        user.extras ??= new UserExtras()
         user.extras.inactivity_email_sent = true
       })
     }

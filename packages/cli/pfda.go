@@ -1,5 +1,5 @@
 // PrecisionFDA CLI
-// Version 2.8.0
+// Version 2.9.0
 package main
 
 import (
@@ -26,7 +26,7 @@ const defaultChunkSize = 1 << 26 // default 64MB (min. 16MB)
 const defaultSkipVerify = "false"
 const usageString = `
 ****************************
-PFDA COMMAND LINE TOOL v2.8.0
+PFDA COMMAND LINE TOOL v2.9.0
 ****************************
 
 All available commands:
@@ -205,6 +205,14 @@ var invokeEditDiscussion = func(client precisionfda.IPFDAClient, jsonBody *strin
 
 var invokeEditReply = func(client precisionfda.IPFDAClient, jsonBody *string) error {
 	return client.EditReply(*jsonBody)
+}
+
+var invokeGetDbClusterPassword = func(client precisionfda.IPFDAClient, dbClusterId *string) error {
+	return client.GetDbClusterPassword(*dbClusterId)
+}
+
+var invokeRotateDbClusterPassword = func(client precisionfda.IPFDAClient, dbClusterId *string) error {
+	return client.RotateDbClusterPassword(*dbClusterId)
 }
 
 var invokeRefreshToken = func(client precisionfda.IPFDAClient, autoRefresh bool) (string, error) {
@@ -551,7 +559,7 @@ func mainInternal() int {
 
 		entityType := helpers.ParseEntityType(args[0])
 		if entityType == "" {
-			return helpers.ErrorFromString(fmt.Sprintf("Invalid entity type '%s' - must be one of: app, job, file, worklfow, discussion.", args[0]), *flagJson)
+			return helpers.ErrorFromString(fmt.Sprintf("Invalid entity type '%s' - must be one of: app, dbcluster, job, file, worklfow, discussion.", args[0]), *flagJson)
 		}
 
 		err := invokeDescribe(pfdaclient, &args[0])
@@ -847,6 +855,45 @@ func mainInternal() int {
 		err := invokeEditReply(pfdaclient, &args[0])
 		if err != nil {
 			return helpers.ErrorFromError(err, *flagJson)
+		}
+
+	case "get-password":
+		if help {
+			return helpers.PrintGetPasswordHelp()
+		}
+
+		if len(args) == 0 {
+			return helpers.ErrorFromString("DbCluster ID is required", *flagJson)
+		}
+
+		if len(args) != 1 {
+			return helpers.ErrorFromString("Only one DbCluster ID is allowed", *flagJson)
+		}
+
+		err := invokeGetDbClusterPassword(pfdaclient, &args[0])
+		if err != nil {
+			return helpers.ErrorFromError(err, *flagJson)
+		}
+
+	case "rotate-password":
+		{
+			if help {
+				return helpers.PrintRotatePasswordHelp()
+			}
+
+			if len(args) == 0 {
+				return helpers.ErrorFromString("DbCluster ID is required", *flagJson)
+			}
+
+			if len(args) != 1 {
+				return helpers.ErrorFromString("Only one DbCluster ID is allowed", *flagJson)
+			}
+
+			err := invokeRotateDbClusterPassword(pfdaclient, &args[0])
+			if err != nil {
+				return helpers.ErrorFromError(err, *flagJson)
+			}
+
 		}
 
 	case "refresh-key":

@@ -1,11 +1,10 @@
+import { Cell } from '@tanstack/react-table'
 import React from 'react'
-import { Cell } from 'react-table'
-import styled from 'styled-components'
 import { Link } from 'react-router-dom'
-import { RESOURCE_LABELS } from '../../types/user'
-import { IExecution, Job } from './executions.types'
 import { CubeIcon } from '../../components/icons/CubeIcon'
+import { RESOURCE_LABELS } from '../../types/user'
 import { StyledNameCell } from '../home/home.styles'
+import { IExecution, Job } from './executions.types'
 import { StateCell } from './StateCell'
 import { BoltIcon } from '../../components/icons/BoltIcon'
 
@@ -34,30 +33,8 @@ export const getSubComponentValue = (job: Job, cell: Cell<IExecution, any>) => {
     val = job.created_at_date_time
   }
   return (
-    <div
-      className="td"
-      {...cell.getCellProps()}
-      style={{
-        ...cell.getCellProps().style,
-      }}
-    >
-      {val}
-    </div>
+
+      <td>{val}</td>
   )
 }
 
-
-const SubTable = styled.div``
-
-export const ExecutionSubTable = (row: any) =>
-  row.original.jobs &&
-  row.original.jobs.map((job: Job) => (
-    <SubTable
-      className="tr sub"
-      {...row.getRowProps()}
-      key={`${row.getRowProps().key}-sub-${job.id}`}
-      style={row.getRowProps().style}
-    >
-      {row.cells.map((cell: Cell<IExecution, any>) => getSubComponentValue(job, cell))}
-    </SubTable>
-  ))

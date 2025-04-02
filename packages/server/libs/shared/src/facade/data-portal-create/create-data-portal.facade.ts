@@ -5,7 +5,7 @@ import { SqlEntityManager } from '@mikro-orm/mysql'
 import { SpaceService } from '@shared/domain/space/service/space.service'
 import { CreateDataPortalDTO } from '@shared/domain/data-portal/dto/CreateDataPortalDTO'
 import { SPACE_TYPE } from '@shared/domain/space/space.enum'
-import { CreateSpaceDTO } from '@shared/domain/space/dto/create-space-dto'
+import { CreateSpaceDTO } from '@shared/domain/space/dto/create-space.dto'
 
 @Injectable()
 export class CreateDataPortalFacade {

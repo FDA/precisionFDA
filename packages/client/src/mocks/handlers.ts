@@ -29,7 +29,6 @@ export const handlers = [
           admin: true,
           counters: { files: 0, folders: 0, apps: 2, workflows: 2, jobs: 1, assets: 0, notes: 0 },
           links: {},
-          is_guest: false,
           gravatar_url: 'https://secure.gravatar.com/avatar/4a93eb40a70557dec9c5b7582da070fb.png?d=retro\u0026r=PG',
           job_limit: 100,
           pricing_map: {
@@ -332,7 +331,6 @@ export const handlers = [
           admin: true,
           counters: { files: 0, folders: 0, apps: 2, workflows: 2, jobs: 1, assets: 0, notes: 0 },
           links: {},
-          is_guest: false,
           gravatar_url: 'https://secure.gravatar.com/avatar/4a93eb40a70557dec9c5b7582da070fb.png?d=retro\u0026r=PG',
           job_limit: 100,
           pricing_map: {

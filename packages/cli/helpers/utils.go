@@ -1,6 +1,7 @@
 package helpers
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"math"
@@ -140,4 +141,14 @@ func PrettyPrint(data interface{}) {
 		jsonData, _ = json.MarshalIndent(data, "", "  ")
 	}
 	fmt.Println(string(jsonData))
+}
+
+func PrintPrettyJSON(body []byte) error {
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, body, "", "    "); err != nil {
+		return fmt.Errorf("failed to format JSON: %w", err)
+	}
+
+	fmt.Println(prettyJSON.String())
+	return nil
 }

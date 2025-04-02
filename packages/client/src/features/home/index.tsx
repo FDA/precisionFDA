@@ -15,9 +15,11 @@ import { MenuCounter } from '../../components/MenuCounter'
 import { BoltIcon } from '../../components/icons/BoltIcon'
 import { CubeIcon } from '../../components/icons/CubeIcon'
 import { DatabaseIcon } from '../../components/icons/DatabaseIcon'
+import { DiscussionIcon } from '../../components/icons/DiscussionIcon'
 import { FileIcon } from '../../components/icons/FileIcon'
 import { FileZipIcon } from '../../components/icons/FileZipIcon'
 import { FlapIcon } from '../../components/icons/FlapIcon'
+import { NetworkIcon } from '../../components/icons/NetworkIcon'
 import { SpaceReportIcon } from '../../components/icons/SpaceReportIcon'
 import { useLocalStorage } from '../../hooks/useLocalStorage'
 import { usePageMeta } from '../../hooks/usePageMeta'
@@ -36,6 +38,9 @@ import { useAuthUser } from '../auth/useAuthUser'
 import { DatabaseList } from '../databases/DatabaseList'
 import { DatabaseShow } from '../databases/DatabaseShow'
 import { CreateDatabase } from '../databases/create/CreateDatabase'
+import { DiscussionList } from '../discussions/DiscussionList'
+import { DiscussionShow } from '../discussions/DiscussionShow'
+import { CreateDiscussionPage } from '../discussions/form/CreateDiscussionPage'
 import { ExecutionList } from '../executions/ExecutionList'
 import { ExecutionDetails } from '../executions/details/ExecutionDetails'
 import { FileList } from '../files/FileList'
@@ -49,11 +54,6 @@ import { Expand, Fill, Main, MenuItem, MenuText, Row, StyledMenu } from './home.
 import { HomeScope, ResourceTypeUrlNames, ServerScope } from './types'
 import { useActiveResourceFromUrl } from './useActiveResourceFromUrl'
 import { toTitleCase } from './utils'
-import { DiscussionIcon } from '../../components/icons/DiscussionIcon'
-import { DiscussionList } from '../discussions/DiscussionList'
-import { DiscussionShow } from '../discussions/DiscussionShow'
-import { CreateDiscussionPage } from '../discussions/form/CreateDiscussionPage'
-import { NetworkIcon } from '../../components/icons/NetworkIcon'
 
 interface CounterRequest {
   apps: string
@@ -107,7 +107,7 @@ const Home2 = () => {
     me: ['files', 'apps', 'databases', 'assets', 'workflows', 'executions', 'reports'],
     everybody: ['files', 'apps', 'assets', 'discussions', 'workflows', 'executions'],
     featured: ['files', 'apps', 'assets', 'workflows', 'executions'],
-    spaces: ['files', 'apps', 'assets', 'discussions', 'workflows', 'executions'],
+    spaces: ['files', 'apps', 'databases', 'assets', 'discussions', 'workflows', 'executions'],
   }
 
   useEffect(() => {
@@ -307,14 +307,14 @@ const Home2 = () => {
             <Route path="apps/create" element={<CreateAppPage />} />
             <Route path="apps/:appUid/fork" element={<ForkAppPage />} />
             <Route path="apps/:appUid/edit" element={<EditAppPage />} />
-            <Route path="apps/:appUid/jobs/new" element={<RunJobPage />} />
+            <Route path="apps/:appIdentifier/jobs/new" element={<RunJobPage />} />
             <Route
               path="apps/:appUid/*"
               element={<AppsShow homeScope={persistedHomeScope} emitScope={handleSetPersistedHomeScope} />}
             />
             <Route path="/apps/:identifier/track" element={<TrackInHome />} />
             <Route path="databases" element={<DatabaseList homeScope={persistedHomeScope} />} />
-            <Route path="databases/create" element={<CreateDatabase />} />
+            <Route path="databases/create" element={<CreateDatabase homeScope={persistedHomeScope} />} />
             <Route
               path="databases/:uid"
               element={<DatabaseShow homeScope={persistedHomeScope} emitScope={handleSetPersistedHomeScope} />}

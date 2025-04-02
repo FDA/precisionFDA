@@ -1,21 +1,19 @@
-import React, { useMemo } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
-import { Column, SortingRule, UseResizeColumnsState } from 'react-table'
+import { ColumnDefResolved, ColumnFiltersState, ColumnSizingState, ColumnSort, VisibilityState } from '@tanstack/react-table'
+import React from 'react'
 import { Button } from '../../components/Button'
 import Dropdown from '../../components/Dropdown'
 import { ContentFooter } from '../../components/Page/ContentFooter'
 import { Pagination } from '../../components/Pagination'
-import Table from '../../components/Table/Table'
-import { EmptyTable } from '../../components/Table/styles'
+import Table from '../../components/Table'
 import { HoverDNAnexusLogo } from '../../components/icons/DNAnexusLogo'
 import { PlusIcon } from '../../components/icons/PlusIcon'
 import { ErrorBoundary } from '../../utils/ErrorBoundry'
 import { getSelectedObjectsFromIndexes, toArrayFromObject } from '../../utils/object'
 import { useAuthUser } from '../auth/useAuthUser'
 import { ActionsDropdownContent } from '../home/ActionDropdownContent'
-import { ActionsRow, QuickActions, StyledHomeTable } from '../home/home.styles'
+import { ActionsRow, QuickActions } from '../home/home.styles'
 import { ActionsButton, ResourceHeader } from '../home/show.styles'
-import { HomeScope, IFilter, IMeta, KeyVal } from '../home/types'
+import { HomeScope, IMeta } from '../home/types'
 import { useList } from '../home/useList'
 import { usePropertiesQuery } from '../home/usePropertiesQuery'
 import { useWorkflowColumns } from './useWorkflowColumns'
@@ -23,6 +21,7 @@ import { useWorkflowListActions } from './useWorkflowListActions'
 import { useWorkflowSelectActions } from './useWorkflowSelectActions'
 import { fetchWorkflowList } from './workflows.api'
 import { IWorkflow } from './workflows.types'
+import { StyledPageTable } from '../../components/Table/components/styles'
 
 type ListType = { workflows: IWorkflow[]; meta: IMeta }
 
@@ -35,11 +34,9 @@ export const WorkflowList = ({
   spaceId?: number
   isContributorOrHigher?: boolean
 }) => {
-  const navigate = useNavigate()
   const user = useAuthUser()
   const isAdmin = user?.isAdmin
 
-  const onRowClick = (id: string) => navigate(`/home/workflows/${id}`)
   const {
     sortBy,
     setSortBy,
@@ -54,8 +51,8 @@ export const WorkflowList = ({
     saveColumnResizeWidth,
     colWidths,
     resetSelected,
-    hiddenColumns,
-    saveHiddenColumns,
+    columnVisibility,
+    setColumnVisibility,
   } = useList<ListType>({
     fetchList: fetchWorkflowList,
     resource: 'workflows',
@@ -124,15 +121,14 @@ export const WorkflowList = ({
         workflows={data?.workflows}
         properties={propetiesData?.keys}
         isLoading={isLoading}
-        handleRowClick={onRowClick}
         selectedRows={selectedIndexes}
         setSelectedRows={setSelectedIndexes}
         sortBy={sortBy}
         setSortBy={setSortBy}
-        saveColumnResizeWidth={saveColumnResizeWidth}
-        colWidths={colWidths}
-        hiddenColumns={hiddenColumns}
-        saveHiddenColumns={saveHiddenColumns}
+        columnSizing={colWidths}
+        setColumnSizing={saveColumnResizeWidth}
+        columnVisibility={columnVisibility}
+        setColumnVisibility={setColumnVisibility}
       />
 
       <ContentFooter>
@@ -164,87 +160,70 @@ export const WorkflowList = ({
 export const WorkflowListTable = ({
   isAdmin,
   filters,
+  setFilters,
   workflows,
   properties,
-  handleRowClick,
   isLoading,
-  setFilters,
   selectedRows,
   setSelectedRows,
   sortBy,
   setSortBy,
   homeScope,
-  saveColumnResizeWidth,
-  colWidths,
-  hiddenColumns,
-  saveHiddenColumns,
+  columnSizing,
+  setColumnSizing,
+  setColumnVisibility,
+  columnVisibility,
 }: {
   isAdmin?: boolean
-  filters: IFilter[]
+  filters: ColumnFiltersState
+  setFilters: (val: ColumnFiltersState) => void
   workflows?: IWorkflow[]
   properties?: string[]
-  handleRowClick: (fileId: string) => void
-  setFilters: (val: IFilter[]) => void
   selectedRows?: Record<string, boolean>
   setSelectedRows: (ids: Record<string, boolean>) => void
-  sortBy: SortingRule<string>[]
-  setSortBy: (cols: SortingRule<string>[]) => void
+  sortBy: ColumnSort[]
+  setSortBy: (cols: ColumnSort[]) => void
   isLoading: boolean
   homeScope?: HomeScope
-  colWidths: KeyVal
-  saveColumnResizeWidth: (columnResizing: UseResizeColumnsState<any>['columnResizing']) => void
-  saveHiddenColumns: (cols: string[]) => void
-  hiddenColumns: string[]
+  columnSizing: ColumnSizingState
+  setColumnSizing: (columnResizing: ColumnSizingState) => void
+  setColumnVisibility: (cols: VisibilityState) => void
+  columnVisibility: VisibilityState
 }) => {
-  const location = useLocation()
-
-  function filterColsByScope(c: Column<IWorkflow>): boolean {
+  function filterColsByScope(c: ColumnDefResolved<IWorkflow>) {
     // Check if any of the conditions is true, then hide the column
     return !(
       // If the homeScope is 'me', hide 'added_by' regardless of other conditions.
       (
-        (homeScope === 'me' && c.accessor === 'added_by') ||
+        (homeScope === 'me' && c.accessorKey === 'added_by') ||
         // Hide 'location' for all homeScopes except 'spaces'.
-        (homeScope !== 'spaces' && c.accessor === 'location') ||
+        (homeScope !== 'spaces' && c.accessorKey === 'location') ||
         // Hide 'featured' for all homeScopes except 'everybody'.
-        (homeScope !== 'everybody' && c.accessor === 'featured')
+        (homeScope !== 'everybody' && c.accessorKey === 'featured')
       )
     )
   }
-
-  const col = useWorkflowColumns({ handleRowClick, colWidths, isAdmin, properties }).filter(filterColsByScope)
-
-  const columns = useMemo(() => col, [col, location.search, properties])
-
-  const data = useMemo(() => workflows || [], [workflows, selectedRows])
+  // @ts-expect-error filter
+  const col = useWorkflowColumns({ isAdmin, properties }).filter(filterColsByScope)
 
   return (
-    <StyledHomeTable>
+    <StyledPageTable>
       <Table<IWorkflow>
-        name="apps"
-        columns={columns}
-        enableColumnSelect
-        hiddenColumns={hiddenColumns}
-        saveHiddenColumns={saveHiddenColumns}
-        data={data}
-        properties={properties}
-        isSelectable
-        isSortable
-        isFilterable
-        loading={isLoading}
-        loadingComponent={<div>Loading...</div>}
-        selectedRows={selectedRows}
+        isLoading={isLoading}
+        data={workflows || []}
+        columns={col}
+        columnSizing={columnSizing}
+        setColumnSizing={setColumnSizing}
+        rowSelection={selectedRows ?? {}}
         setSelectedRows={setSelectedRows}
-        sortByPreference={sortBy}
-        setSortByPreference={setSortBy}
-        manualFilters
-        shouldResetFilters={[homeScope]}
-        filters={filters}
-        setFilters={setFilters}
-        emptyComponent={<EmptyTable>You have no workflows here.</EmptyTable>}
-        isColsResizable
-        saveColumnResizeWidth={saveColumnResizeWidth}
+        setColumnFilters={setFilters}
+        columnSortBy={sortBy}
+        setColumnSortBy={setSortBy}
+        columnFilters={filters}
+        columnVisibility={columnVisibility}
+        setColumnVisibility={setColumnVisibility}
+        emptyText="You don't have any workflows yet."
       />
-    </StyledHomeTable>
+    </StyledPageTable>
   )
 }

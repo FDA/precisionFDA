@@ -1,28 +1,29 @@
-import React, { useMemo } from 'react'
-import { Column, UseResizeColumnsState } from 'react-table'
+import {
+  ColumnDefResolved,
+  ColumnFiltersState,
+  ColumnSizingState,
+  ColumnSort,
+  RowSelectionState,
+  VisibilityState,
+} from '@tanstack/react-table'
+import React from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import styled from 'styled-components'
-import { HoverDNAnexusLogo } from '../../components/icons/DNAnexusLogo'
-import { ContentFooter } from '../../components/Page/ContentFooter'
-import { EmptyTable } from '../../components/Table/styles'
-import Table from '../../components/Table/Table'
-import { ActionsRow, QuickActions, StyledHomeTable } from '../home/home.styles'
-import { ResourceHeader } from '../home/show.styles'
-import { HomeScope, KeyVal, MetaV2 } from '../home/types'
-import { useList } from '../home/useList'
-import { useDiscussionColumns } from './useDiscussionColumns'
-import { Discussion } from './discussions.types'
-import { fetchDiscussionsRequest } from './api'
 import { Button } from '../../components/Button'
+import { HoverDNAnexusLogo } from '../../components/icons/DNAnexusLogo'
 import { PlusIcon } from '../../components/icons/PlusIcon'
+import { ContentFooter } from '../../components/Page/ContentFooter'
 import { Pagination } from '../../components/Pagination'
-
-const StyledTable = styled(StyledHomeTable)`
-  .td:first-child,
-  .th:first-child {
-    padding: 20px;
-  }
-`
+import { ResouceQueryErrorMessage } from '../home/ResouceQueryErrorMessage'
+import Table from '../../components/Table'
+import { StyledPageTable } from '../../components/Table/components/styles'
+import { toArrayFromObject } from '../../utils/object'
+import { ActionsRow, QuickActions } from '../home/home.styles'
+import { ResourceHeader } from '../home/show.styles'
+import { HomeScope, MetaV2 } from '../home/types'
+import { useList } from '../home/useList'
+import { fetchDiscussionsRequest } from './api'
+import { Discussion } from './discussions.types'
+import { useDiscussionColumns } from './useDiscussionColumns'
 
 type ListType = { data: Discussion[]; meta: MetaV2 }
 
@@ -30,64 +31,93 @@ const DiscussionListTable = ({
   discussions,
   homeScope,
   isLoading,
+  columnFilters,
+  setColumnFilters,
+  sortBy,
+  setSortBy,
   selectedRows,
-  saveColumnResizeWidth,
-  saveHiddenColumns,
-  colWidths,
+  setSelectedRows,
+  columnVisibility,
+  setColumnVisibility,
+  columnSizing,
+  setColumnSizing,
 }: {
+  isLoading: boolean
   discussions: Discussion[]
   homeScope?: HomeScope
-  selectedRows?: Record<string, boolean>
-  isLoading: boolean
-  colWidths: KeyVal
-  saveHiddenColumns: (cols: string[]) => void
-  saveColumnResizeWidth: (columnResizing: UseResizeColumnsState<Discussion>['columnResizing']) => void
+  columnFilters: ColumnFiltersState
+  setColumnFilters: (val: ColumnFiltersState) => void
+  sortBy: ColumnSort[]
+  setSortBy: (cols: ColumnSort[]) => void
+  selectedRows?: RowSelectionState
+  setSelectedRows: (ids: RowSelectionState) => void
+  columnSizing: ColumnSizingState
+  setColumnSizing: (columnResizing: ColumnSizingState) => void
+  columnVisibility: VisibilityState
+  setColumnVisibility: (cols: VisibilityState) => void
 }) => {
-  function filterColsByScope(c: Column<Discussion>): boolean {
+  function filterColsByScope(c: ColumnDefResolved<Discussion>): boolean {
     // Hide 'location' for all homeScopes except 'spaces'.
-    return !(homeScope !== 'spaces' && c.accessor === 'scope')
+    return !(homeScope !== 'spaces' && c.accessorKey === 'note.scope')
   }
 
-  const col = useDiscussionColumns({ colWidths }).filter(filterColsByScope)
-  const columns = useMemo(() => col, [col])
-  const data = useMemo(() => discussions || [], [discussions, selectedRows])
+  // @ts-expect-error: type is broken from react-table library
+  const col = useDiscussionColumns().filter(filterColsByScope)
 
   return (
-    <StyledTable>
+    <StyledPageTable>
       <Table<Discussion>
-        name="discussions"
-        columns={columns}
-        data={data}
-        saveHiddenColumns={saveHiddenColumns}
-        loading={isLoading}
-        loadingComponent={<div>Loading...</div>}
-        emptyComponent={<EmptyTable>No one has started a discussion yet.</EmptyTable>}
-        isColsResizable
-        saveColumnResizeWidth={saveColumnResizeWidth}
+        isLoading={isLoading}
+        data={discussions || []}
+        columns={col}
+        columnSizing={columnSizing || {}}
+        setColumnSizing={setColumnSizing}
+        rowSelection={selectedRows ?? {}}
+        setSelectedRows={setSelectedRows}
+        columnSortBy={sortBy}
+        columnVisibility={columnVisibility}
+        setColumnVisibility={setColumnVisibility}
+        setColumnFilters={setColumnFilters}
+        columnFilters={columnFilters}
+        emptyText="No one's started a discussion yet."
+        enableColumnFilters={false}
       />
-    </StyledTable>
+    </StyledPageTable>
   )
 }
 
-export const DiscussionList = ({ scope, canCreateDiscussion }: { scope: HomeScope; canCreateDiscussion?: boolean }) => {
+export const DiscussionList = ({
+  spaceId,
+  scope,
+  canCreateDiscussion,
+}: {
+  spaceId?: number
+  scope?: HomeScope
+  canCreateDiscussion?: boolean
+}) => {
   const {
     query,
     selectedIndexes,
     setSelectedIndexes,
     saveColumnResizeWidth,
     colWidths,
-    saveHiddenColumns,
-    setPerPageParam,
+    setColumnVisibility,
+    columnVisibility,
+    filterQuery,
+    setSearchFilter,
     setPageParam,
+    setPerPageParam,
   } = useList<ListType>({
     fetchList: fetchDiscussionsRequest,
     resource: 'discussions',
-    params: { scope },
+    params: {
+      entityScope: spaceId ? `space-${spaceId}` : scope === 'spaces' ? 'spaces' : 'everybody',
+    },
   })
 
   const location = useLocation()
 
-  if (query.error) return <div>Error! {JSON.stringify(query.error)}</div>
+  if (query.error) return <ResouceQueryErrorMessage />
 
   return (
     <>
@@ -110,13 +140,16 @@ export const DiscussionList = ({ scope, canCreateDiscussion }: { scope: HomeScop
       </ResourceHeader>
       <DiscussionListTable
         homeScope={scope}
-        discussions={query.data?.data ?? []}
+        discussions={query?.data?.data ?? []}
         isLoading={query.isLoading}
         selectedRows={selectedIndexes}
-        saveHiddenColumns={saveHiddenColumns}
+        columnVisibility={columnVisibility}
+        setColumnVisibility={setColumnVisibility}
         setSelectedRows={setSelectedIndexes}
-        saveColumnResizeWidth={saveColumnResizeWidth}
-        colWidths={colWidths}
+        setColumnSizing={saveColumnResizeWidth}
+        columnSizing={colWidths}
+        columnFilters={toArrayFromObject(filterQuery as any).filter(i => i.value !== undefined)}
+        setColumnFilters={setSearchFilter}
       />
       <ContentFooter>
         <Pagination
@@ -125,6 +158,7 @@ export const DiscussionList = ({ scope, canCreateDiscussion }: { scope: HomeScop
           totalPages={query.data?.meta.totalPages}
           perPage={query.data?.meta.pageSize}
           isHidden={false}
+          showPerPage={false}
           setPage={p => setPageParam(p, 'replaceIn')}
           onPerPageSelect={p => setPerPageParam(p, 'replaceIn')}
         />
