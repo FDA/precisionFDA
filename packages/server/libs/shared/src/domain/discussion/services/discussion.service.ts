@@ -43,6 +43,7 @@ import { EntityScopeUtils } from '@shared/utils/entity-scope.utils'
 import { DiscussionFollow } from '@shared/domain/follow/discussion-follow.entity'
 import { AttachmentsDTO } from '@shared/domain/discussion/dto/attachments.dto'
 import { UserRepository } from '@shared/domain/user/user.repository'
+import AnswerRepository from '@shared/domain/answer/answer.repository'
 
 @Injectable()
 export class DiscussionService {
@@ -57,29 +58,40 @@ export class DiscussionService {
     private readonly userRepository: UserRepository,
     private readonly spaceRepository: SpaceRepository,
     private readonly discussionRepository: DiscussionRepository,
+    private readonly answerRepository: AnswerRepository,
   ) {}
 
   async getDiscussion(discussionId: number): Promise<DiscussionDTO> {
     this.logger.log(`Getting discussion id: ${discussionId}`)
 
-    const discussion = await this.em.findOne(Discussion, discussionId, {
-      populate: [
-        'note',
-        'user',
-        'answers',
-        'answers.note',
-        'answers.user',
-        'answers.comments',
-        'answers.comments.user',
-        'comments',
-        'comments.user',
-        'follows',
-      ],
-    })
+    const discussion = await this.discussionRepository.findAccessibleOne(
+      { id: discussionId },
+      {
+        populate: [
+          'note',
+          'user',
+          'answers',
+          'answers.note',
+          'answers.user',
+          'answers.comments',
+          'answers.comments.user',
+          'comments',
+          'comments.user',
+          'follows',
+        ],
+      },
+    )
 
-    const user = await this.userRepository.findOneOrFail({ id: this.userCtx.id })
+    //TODO XX2 ludvik - em inside repo is not initialized
+    const answers = await this.answerRepository.findAccessible(
+      {},
+      { discussion: discussionId },
+      {
+        populate: ['note', 'user', 'comments', 'comments.user'],
+      },
+    )
 
-    if (!discussion || !(await discussion.isAccessibleBy(user))) {
+    if (!discussion) {
       throw new errors.NotFoundError(
         'Unable to get discussion: not found or insufficient permissions.',
       )
@@ -157,18 +169,11 @@ export class DiscussionService {
     this.logger.log(`Updating discussion: ${JSON.stringify(discussionInput)}`)
 
     return await this.em.transactional(async () => {
-      // TODO XX2 Ludvik - not sure why this is not working, check fetcher code below
       const discussion = await this.discussionRepository.findEditableOne(
         { id },
         { populate: ['note'] },
       )
-      // kept this as comment because populate worked fine here.
-      // const discussion = await this.fetcher.getEditableById(
-      //   Discussion,
-      //   id,
-      //   {},
-      //   { populate: ['note'] },
-      // )
+
       if (!discussion) {
         throw new errors.NotFoundError(
           'Unable to update discussion: not found or insufficient permissions.',
@@ -207,7 +212,7 @@ export class DiscussionService {
       },
     )
 
-    if (!discussion || !(await discussion.isEditableBy(user))) {
+    if (!discussion) {
       throw new errors.NotFoundError(
         'Unable to delete discussion: not found or insufficient permissions.',
       )
@@ -324,9 +329,12 @@ export class DiscussionService {
     this.logger.log(`Creating answer: ${JSON.stringify(dto)}`)
     const user = await this.userRepository.findOneOrFail({ id: this.userCtx.id })
 
-    const discussion = await this.em.findOne(Discussion, dto.discussionId, { populate: ['note'] })
+    const discussion = await this.discussionRepository.findAccessibleOne(
+      { id: dto.discussionId },
+      { populate: ['note'] },
+    )
 
-    if (!discussion || !(await discussion.isAccessibleBy(user))) {
+    if (!discussion) {
       throw new errors.NotFoundError(
         'Unable to create answer: discussion not found or inaccessible.',
       )

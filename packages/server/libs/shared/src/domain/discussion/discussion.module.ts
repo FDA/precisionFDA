@@ -8,6 +8,7 @@ import { PlatformClientModule } from '@shared/platform-client/platform-client.mo
 import { DiscussionNotificationService } from './services/discussion-notification.service'
 import { MikroOrmModule } from '@mikro-orm/nestjs'
 import { Discussion } from '@shared/domain/discussion/discussion.entity'
+import { AnswerModule } from '@shared/domain/answer/answer.module'
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { Discussion } from '@shared/domain/discussion/discussion.entity'
     EntityModule,
     EmailModule,
     SpaceModule,
+    AnswerModule,
     MikroOrmModule.forFeature([Discussion]),
   ],
   providers: [PublisherService, DiscussionNotificationService, DiscussionService],
