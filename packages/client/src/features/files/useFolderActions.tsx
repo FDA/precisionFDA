@@ -6,18 +6,30 @@ import { useFileUploadModal } from './actionModals/useFileUploadModal'
 import { useOptionAddFileModal } from './actionModals/useOptionAddFileModal'
 import { FolderActions } from './files.types'
 
-export const useFolderActions = (homeScope?: HomeScope, folderId?: string, spaceId?: string) => {
+export const useFolderActions = (homeScope?: HomeScope, folderId?: string, spaceId?: string, resetSelected?: () => void) => {
   const { isAllowed, onViolation } = useCloudResourcesCondition('totalLimitCheck')
-  const { modalComp: AddFolderModal, setShowModal: setShowAddFolderModal } =
-    useAddFolderModal({ homeScope, folderId, spaceId, isAllowed, onViolation })
-  const { modalComp: FileUploadModal, setShowModal: setShowFileUploadModal } =
-    useFileUploadModal({ homeScope, folderId, spaceId, isAllowed, onViolation })
-  const { modalComp: CopyFilesModal, setShowModal: setShowCopyFilesModal } =
-    useCopyFilesToSpaceModal({ spaceId })
-  const {
-    modalComp: OptionAddFileModal,
-    setShowModal: setShowOptionAddFileModal,
-  } = useOptionAddFileModal({ setShowFileUploadModal, setShowCopyFilesModal })
+  const { modalComp: AddFolderModal, setShowModal: setShowAddFolderModal } = useAddFolderModal({
+    homeScope,
+    folderId,
+    spaceId,
+    isAllowed,
+    onViolation,
+  })
+  const { modalComp: FileUploadModal, setShowModal: setShowFileUploadModal } = useFileUploadModal({
+    homeScope,
+    folderId,
+    spaceId,
+    isAllowed,
+    onViolation,
+    onUpload: () => {
+      if (resetSelected) resetSelected()
+    },
+  })
+  const { modalComp: CopyFilesModal, setShowModal: setShowCopyFilesModal } = useCopyFilesToSpaceModal({ spaceId })
+  const { modalComp: OptionAddFileModal, setShowModal: setShowOptionAddFileModal } = useOptionAddFileModal({
+    setShowFileUploadModal,
+    setShowCopyFilesModal,
+  })
 
   const listActionsFunctions: ActionFunctionsType<FolderActions> = {
     'Add Folder': {
@@ -40,8 +52,7 @@ export const useFolderActions = (homeScope?: HomeScope, folderId?: string, space
     },
     'Choose Add Option': {
       type: 'modal',
-      func: ({ showModal = false } = {}) =>
-        setShowOptionAddFileModal(showModal),
+      func: ({ showModal = false } = {}) => setShowOptionAddFileModal(showModal),
       isDisabled: false,
       modal: OptionAddFileModal,
     },

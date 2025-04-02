@@ -1,12 +1,19 @@
 import { useQueryClient } from '@tanstack/react-query'
-import React, { useEffect, useMemo, useState } from 'react'
-import { SortingRule, UseResizeColumnsState } from 'react-table'
+import {
+  ColumnDefResolved,
+  ColumnFiltersState,
+  ColumnSizingState,
+  ColumnSort,
+  RowSelectionState,
+  VisibilityState,
+} from '@tanstack/react-table'
+import React, { useEffect, useMemo } from 'react'
 import useWebSocket from 'react-use-websocket'
 import { ContentFooter } from '../../components/Page/ContentFooter'
 import { Pagination, hidePagination } from '../../components/Pagination'
-import Table from '../../components/Table/Table'
-import { EmptyTable } from '../../components/Table/styles'
+import Table from '../../components/Table'
 import { useColumnWidthLocalStorage } from '../../hooks/useColumnWidthLocalStorage'
+import { useHiddenColumnLocalStorage } from '../../hooks/useHiddenColumnLocalStorage'
 import { useOrderByState } from '../../hooks/useOrderByState'
 import { usePaginationParams } from '../../hooks/usePaginationState'
 import { ErrorBoundary } from '../../utils/ErrorBoundry'
@@ -15,31 +22,30 @@ import { toArrayFromObject } from '../../utils/object'
 import { IExecution } from '../executions/executions.types'
 import { useExecutionColumns } from '../executions/useExecutionColumns'
 import { columnFilters } from '../home/columnFilters'
-import { StyledHomeTable } from '../home/home.styles'
 import {
-  IFilter,
   IMeta,
-  KeyVal,
   NOTIFICATION_ACTION,
   Notification,
-  WEBSOCKET_MESSSAGE_TYPE,
+  WEBSOCKET_MESSAGE_TYPE,
   WebSocketMessage,
 } from '../home/types'
 import { useFilterParams } from '../home/useFilterState'
 import { useListQuery } from '../home/useListQuery'
 import { fetchAppExecutions } from './apps.api'
+import { ResouceQueryErrorMessage } from '../home/ResouceQueryErrorMessage'
+import { createLocationKey } from '../../utils'
+import { StyledPageTable } from '../../components/Table/components/styles'
 
 type ListType = { jobs: IExecution[]; meta: IMeta }
 
-export const AppExecutionsList = ({ appUid }: { appUid: string }) => {
+export const AppExecutionsList = ({ spaceId, appUid }: { spaceId?: string, appUid: string }) => {
   const resource = 'app-executions'
+  const locationKey = createLocationKey(resource, spaceId)
   const { pageParam, perPageParam, setPageParam, setPerPageParam } = usePaginationParams()
-  const { sort, sortBy, setSortBy } = useOrderByState({ defaultOrder: { order_by: 'created_at_date_time', order_dir: 'DESC' } })
-  const { colWidths, saveColumnResizeWidth } = useColumnWidthLocalStorage(resource)
+  const { sort, sortBy, setSortBy } = useOrderByState({ defaultOrder: { order_by: 'created_at_date_time', order_dir: 'DESC' }})
+  const { colWidths, saveColumnResizeWidth } = useColumnWidthLocalStorage(locationKey)
+  const { columnVisibility, setColumnVisibility } = useHiddenColumnLocalStorage(locationKey)
   const queryCache = useQueryClient()
-  // useEffect(() => {
-  //   setSortByParam({orderBy: 'created_at_date_time', order: 'desc'})
-  // }, [])
 
   const { filterQuery, setSearchFilter } = useFilterParams({ filters: columnFilters })
 
@@ -67,7 +73,7 @@ export const AppExecutionsList = ({ appUid }: { appUid: string }) => {
         const messageData = JSON.parse(message.data)
         const notification = messageData.data as Notification
         return (
-          messageData.type === WEBSOCKET_MESSSAGE_TYPE.NOTIFICATION &&
+          messageData.type === WEBSOCKET_MESSAGE_TYPE.NOTIFICATION &&
           [
             NOTIFICATION_ACTION.JOB_RUNNABLE,
             NOTIFICATION_ACTION.JOB_RUNNING,
@@ -87,26 +93,27 @@ export const AppExecutionsList = ({ appUid }: { appUid: string }) => {
       return
     }
     queryCache.invalidateQueries({
-      queryKey: [resource],
+      queryKey: [locationKey],
     })
   }, [lastJsonMessage])
 
   const { isLoading, data, error } = query
 
-  if (error) return <div>Error! {JSON.stringify(error)}</div>
+  if (error) return <ResouceQueryErrorMessage />
 
   return (
-    <ErrorBoundary>
+    <>
       <ExecutionsListTable
-        setFilters={setSearchFilter}
-        // TODO(samuel) fix possibly undefined values from querystring
-        filters={toArrayFromObject(filterQuery as any)}
         jobs={data?.jobs}
         isLoading={isLoading}
+        setFilters={setSearchFilter}
+        filters={toArrayFromObject(filterQuery as any)}
         setSortBy={setSortBy}
         sortBy={sortBy}
-        saveColumnResizeWidth={saveColumnResizeWidth}
-        colWidths={colWidths}
+        setColumnSizing={saveColumnResizeWidth}
+        columnSizing={colWidths}
+        setColumnVisibility={setColumnVisibility}
+        columnVisibility={columnVisibility}
       />
       <ContentFooter>
         <Pagination
@@ -121,63 +128,64 @@ export const AppExecutionsList = ({ appUid }: { appUid: string }) => {
           onPerPageSelect={setPerPage}
         />
       </ContentFooter>
-    </ErrorBoundary>
+    </>
   )
 }
 
 export const ExecutionsListTable = ({
-  filters,
   jobs,
   isLoading,
-  setFilters,
-  setSortBy,
   sortBy,
-  saveColumnResizeWidth,
-  colWidths,
+  setSortBy,
+  filters,
+  setFilters,
+  selectedRows,
+  setSelectedRows,
+  columnSizing,
+  setColumnSizing,
+  setColumnVisibility,
+  columnVisibility,
 }: {
-  filters: IFilter[]
   jobs?: IExecution[]
-  setFilters: (val: IFilter[]) => void
-  sortBy?: SortingRule<string>[]
-  setSortBy: (cols: SortingRule<string>[]) => void
   isLoading: boolean
-  colWidths: KeyVal
-  saveColumnResizeWidth: (columnResizing: UseResizeColumnsState<any>['columnResizing']) => void
+  sortBy: ColumnSort[]
+  setSortBy: (cols: ColumnSort[]) => void
+  filters: ColumnFiltersState
+  setFilters: (val: ColumnFiltersState) => void
+  selectedRows?: RowSelectionState
+  setSelectedRows: (ids: RowSelectionState) => void
+  columnSizing: ColumnSizingState
+  setColumnSizing: (columnResizing: ColumnSizingState) => void
+  setColumnVisibility: (cols: VisibilityState) => void
+  columnVisibility: VisibilityState
 }) => {
-  const col = useExecutionColumns({ colWidths })
-  const [hiddenColumns, sethiddenColumns] = useState<string[]>(['featured', 'app_title', 'location'])
+  function filterColsByScope(c: ColumnDefResolved<IExecution>): boolean {
+    // Check if any of the conditions is true, then hide the column
+    return !(c.accessorKey === 'featured' || c.accessorKey === 'app_title' || c.accessorKey === 'location' || c.id === 'select')
+  }
 
-  const columns = useMemo(() => col, [col])
+  const col = useExecutionColumns({}).filter(filterColsByScope)
+  // const columns = useMemo(() => col, [col])
 
   const data = useMemo(() => jobs || [], [jobs])
 
   return (
-    <StyledHomeTable>
+    <StyledPageTable>
       <Table<IExecution>
-        name="jobs"
-        columns={columns}
-        hiddenColumns={hiddenColumns}
-        data={data}
-        loading={isLoading}
-        loadingComponent={<div>Loading...</div>}
-        sortByPreference={sortBy}
-        setSortByPreference={setSortBy}
-        manualFilters
-        filters={filters}
-        setFilters={setFilters}
-        emptyComponent={<EmptyTable>You have no executions here.</EmptyTable>}
-        isColsResizable
-        isSortable
-        isFilterable
-        saveColumnResizeWidth={saveColumnResizeWidth}
-        rowProps={row => ({
-          className: 'hideExpand',
-        })}
-        updateRowState={row => ({
-          ...row,
-          hideExpand: !row.original.jobs,
-        })}
+        isLoading={isLoading}
+        data={data || []}
+        columns={col}
+        columnSizing={columnSizing}
+        setColumnSizing={setColumnSizing}
+        rowSelection={selectedRows ?? {}}
+        setSelectedRows={setSelectedRows}
+        setColumnFilters={setFilters}
+        columnVisibility={columnVisibility}
+        setColumnVisibility={setColumnVisibility}
+        columnSortBy={sortBy}
+        setColumnSortBy={setSortBy}
+        columnFilters={filters}
       />
-    </StyledHomeTable>
+    </StyledPageTable>
   )
 }

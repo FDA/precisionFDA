@@ -29,6 +29,7 @@ module Api
 
           begin
             invited_emails = space_invite_form.invite(membership, api)
+            https_apps_client.dbcluster_sync(@space.id)
           rescue StandardError => e
             error = e.message
             logger.error error
@@ -37,14 +38,24 @@ module Api
           if invited_emails.present?
             message = "The invitations to the space have been sent to the following " \
                               "emails: #{invited_emails.to_sentence}"
-            render json: { invited_emails: invited_emails, message: message }, adapter: :json
+
+            # Set favorite header items for invited users (if applicable)
+            # We don't want to fail whole operation in case of error here
+            begin
+              favorite_header_items(space_invite_form.invitees[:dxuser])
+            rescue StandardError => e
+              error = e.message
+              logger.error error
+            end
+
+            render json: { invited_emails:, message: }, adapter: :json
           else
             render json: { errors: error }, status: :unprocessable_entity, adapter: :json
           end
         else
           errors = errors(space_invite_form.errors&.messages)
 
-          render json: { errors: errors }, status: :unprocessable_entity, adapter: :json
+          render json: { errors: }, status: :unprocessable_entity, adapter: :json
         end
       end
 
@@ -56,10 +67,39 @@ module Api
           end
         end
 
-        render json: { member: member.user.dxuser, role: role }, adapter: :json
+        https_apps_client.dbcluster_sync(@space.id)
+        render json: { member: member.user.dxuser, role: }, adapter: :json
       end
 
       private
+
+      def favorite_header_items(dxusers)
+        return unless dxusers
+
+        favorite = nil
+        @space.data_portals.each do |data_portal|
+          case data_portal.url_slug
+          when "tools"
+            favorite = "tools"
+            break
+          when "prism"
+            favorite = "prism"
+            break
+          when "daaas"
+            favorite = "daaas"
+            break
+          end
+        end
+
+        return unless favorite
+
+        dxusers.each do |dxuser|
+          invitee = User.find_by(dxuser:)
+          next unless invitee
+
+          invitee.favorite(favorite)
+        end
+      end
 
       # Fetch objects necessary for invite.
       def fetch_membership

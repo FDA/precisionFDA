@@ -27,6 +27,7 @@ import { DiscussionModule } from '@shared/domain/discussion/discussion.module'
     JobModule,
     DiscussionModule,
     UserFacadeModule,
+    DbClusterModule,
   ],
   providers: [MainQueueProcessor, MaintenanceQueueProcessor],
 })

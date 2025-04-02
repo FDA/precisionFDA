@@ -1,20 +1,35 @@
-import { UseResizeColumnsState } from 'react-table'
+import { ColumnSizingState } from '@tanstack/react-table'
+import { debounce } from 'lodash'
+import { useMemo } from 'react'
 import { useLocalStorage } from './useLocalStorage'
-import { LocationKey } from '../utils'
+
 
 export interface IColumnWidthLocalStorage {
-  saveColumnResizeWidth: (columnResizing: UseResizeColumnsState<any>['columnResizing']) => void
-  colWidths: Record<string, number>
+  saveColumnResizeWidth: (columnResizing: ColumnSizingState) => void
+  colWidths: ColumnSizingState
 }
 
-export function useColumnWidthLocalStorage(locationKey: LocationKey): IColumnWidthLocalStorage {
-  const [colWidths, setColWidths] = useLocalStorage<Record<LocationKey, Record<string, number>>>('columns-width', {})
-  const saveColumnResizeWidth = (columnResizing: UseResizeColumnsState<any>['columnResizing']) => {
-    setColWidths({ ...colWidths, ...columnResizing.columnWidths })
-    setColWidths({ ...colWidths, [locationKey]: { ...colWidths[locationKey], ...columnResizing.columnWidths }})
+export function useColumnWidthLocalStorage(locationKey: string): IColumnWidthLocalStorage {
+  const [colWidths, setColWidths] = useLocalStorage<Record<string, ColumnSizingState>>(
+    "columns-width",
+    {}
+  )
+
+  const debouncedSave = useMemo(() => {
+    return debounce((updatedColWidths: Record<string, ColumnSizingState>) => {
+      setColWidths(updatedColWidths)
+    }, 300)
+  }, [setColWidths])
+
+  return {
+    colWidths: colWidths[locationKey] || {},
+    saveColumnResizeWidth: (resizingColumnValue: ColumnSizingState) => {
+      const updatedColWidths = {
+        ...colWidths,
+        [locationKey]: { ...colWidths[locationKey], ...resizingColumnValue },
+      }
+
+      debouncedSave(updatedColWidths)
+    },
   }
-  return ({
-    colWidths: colWidths[locationKey],
-    saveColumnResizeWidth,
-  })
 }

@@ -42,7 +42,7 @@ export const StyledMarkdownHelper = styled.div`
 `
 
 export const StyedEditor = styled.div`
-  padding: 8px 0;
+  padding: 8px 8px;
 
   --spacing: 8px;
   textarea {

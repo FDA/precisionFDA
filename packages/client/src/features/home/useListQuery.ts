@@ -1,15 +1,16 @@
 import { useQuery, UseQueryOptions } from '@tanstack/react-query'
 import { toArrayFromObject } from '../../utils/object'
-import { APIResource, HomeScope } from './types'
+import { APIResource, HomeScope, IFilter } from './types'
+import { Params } from './utils'
+
+export type FetchListFn = (filter: IFilter[], params: Params) => Promise<any>
 
 interface IUseListQuery<T> {
   spaceId?: string
   scope?: HomeScope
-  fetchList: any
+  fetchList: FetchListFn
   resource: APIResource
-  params?: {
-    [key: string]: string | undefined
-  }
+  params?: Params
   order?: {
     order_by?: string | null
     order_dir?: string | null
@@ -19,7 +20,7 @@ interface IUseListQuery<T> {
     page?: number
   }
   queryOptions?: UseQueryOptions<T>
-  filter?: any
+  filter?: IFilter
 }
 
 

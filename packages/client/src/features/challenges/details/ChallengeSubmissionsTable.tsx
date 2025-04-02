@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react'
-import { Column } from 'react-table'
+import { ColumnDef } from '@tanstack/react-table'
 import { Loader } from '../../../components/Loader'
 import { SimpleTable } from '../../../components/SimpleTable'
 import { IUser } from '../../../types/user'
@@ -15,63 +15,50 @@ export const useSubmissionTableColumns = ({
 }: {
   isSpaceMember: boolean
   authUser: IUser
-}) => {
-  return useMemo<Column<SubmissionV2>[]>(
-    () =>
-      [
-        {
-          Header: 'Name',
-          accessor: 'name',
-          minWidth: 450,
-          Cell: ({ cell }) => <NameCell submission={cell.row.original} />,
-        },
-        {
-          Header: 'Submitted By',
-          accessor: 'user',
-          Cell: ({ cell, value }) => (
-            <StyledNameCell
-              as="a"
-              href={`/users/${cell.row.original.user.dxuser}`}
-            >
-              {`${value.fullName}`}
-            </StyledNameCell>
-          ),
-        },
-        {
-          Header: 'Input File',
-          accessor: 'job_input_files',
-          Cell: ({ cell }) => (
-            <InputFileCell
-              authUser={authUser}
-              submission={cell.row.original}
-              isSpaceMember={isSpaceMember}
-            />
-          ),
-        },
-        {
-          Header: 'Created',
-          accessor: 'createdAt',
-          minWidth: 200,
-        },
-      ] as Column<SubmissionV2>[],
-    [],
-  )
+}): ColumnDef<SubmissionV2>[] => {
+  return [
+    {
+      header: 'Name',
+      accessorKey: 'name',
+      size: 450,
+      cell: c => <NameCell submission={c.row.original} />,
+    },
+    {
+      header: 'Submitted By',
+      accessorKey: 'user.dxuser',
+      cell: c => (
+        <StyledNameCell as="a" href={`/users/${c.row.original.user.dxuser}`}>
+          {`${c.row.original.user.dxuser}`}
+        </StyledNameCell>
+      ),
+    },
+    {
+      header: 'Input File',
+      accessorKey: 'job_input_files',
+      cell: ({ cell }) => <InputFileCell authUser={authUser} submission={cell.row.original} isSpaceMember={isSpaceMember} />,
+    },
+    {
+      header: 'Created',
+      accessorKey: 'createdAt',
+      size: 200,
+    },
+  ]
 }
 
 export const ChallengeSubmissionsTable = ({
   challengeId,
   user,
   isSpaceMember,
-}: {challengeId: number, user: IUser, isSpaceMember: boolean}) => {
-  const { data: submissionsData, isLoading } =
-    useChallengeSubmissionQuery(challengeId)
-    
+}: {
+  challengeId: number
+  user: IUser
+  isSpaceMember: boolean
+}) => {
+  const { data: submissionsData, isLoading } = useChallengeSubmissionQuery(challengeId)
+
   const columns = useSubmissionTableColumns({ authUser: user, isSpaceMember })
 
-  const data = useMemo(
-    () => submissionsData || [],
-    [submissionsData],
-  )
+  const data = useMemo(() => submissionsData || [], [submissionsData])
 
   const isLoggedIn = user && Object.keys(user).length > 0
   if (!isLoggedIn) {
@@ -93,9 +80,7 @@ export const ChallengeSubmissionsTable = ({
   if (isLoading) return <Loader />
 
   if (!data || data.length === 0) {
-    return (
-      <div>There are no submissions for this challenge yet.</div>
-    )
+    return <div>There are no submissions for this challenge yet.</div>
   }
 
   return (

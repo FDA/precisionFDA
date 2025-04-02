@@ -392,7 +392,7 @@ func PrintHeadHelp() int {
 	writeLine := newLineWriter(writer)
 
 	writeLine("  ", "  ")
-	writeLine("  For:", "Displays the first lines of a file. By default, the first 10 lines are displayed.\n")
+	writeLine("  For:", "Displaying the first lines of a file. By default, the first 10 lines are displayed.\n")
 	writeLine("  Usage:", "head <FILE_ID> [FLAGS...]\n")
 	writeLine("  Examples:", "head file-GJk1kpQ05xgQd8bP54kJFjzkz-1 [Prints the first 10 lines of the given file]")
 	writeLine("  ", "head file-GJk1kpQ05xgQd8bP54kJFjzkz-1 -lines 50 [Prints the first 50 lines of the given file]\n")
@@ -409,7 +409,7 @@ func PrintGetScopeHelp() int {
 	writeLine := newLineWriter(writer)
 
 	writeLine("  ", "  ")
-	writeLine("  For:", "Displays the scope of the current context. If you are running it in a private scope, 'private' is printed to the console.\n In case you are in a space, only the integer Space ID is printed to the console.\n")
+	writeLine("  For:", "Displaying the scope of the current context. If you are running it in a private scope, 'private' is printed to the console.\n In case you are in a space, only the integer Space ID is printed to the console.\n")
 	writeLine("  Usage:", "get-scope [FLAG...]\n")
 	writeLine("  Examples:", "get-scope [Prints current scope]\n")
 	writeLine("  Flags:", "All flags listed below are OPTIONAL")
@@ -425,7 +425,7 @@ func PrintViewLinkHelp() int {
 	writeLine := newLineWriter(writer)
 
 	writeLine("  ", "  ")
-	writeLine("  For:", "Get view link of the file. You can choose between protected and pre-authenticated links.\n\tPre-authenticated links are valid for 24 hours by default, unless -duration flag is specified.\n")
+	writeLine("  For:", "Getting view link of a file. You can choose between protected and pre-authenticated links.\n\tPre-authenticated links are valid for 24 hours by default, unless -duration flag is specified.\n")
 	writeLine("  Usage:", "view-link <FILE_ID> [FLAG...]\n")
 	writeLine("  Examples:", "view-link file-GbKF3qQ0Z0gqk80j1QF47K8j-1 [Prints view link for specified file.]\n")
 	writeLine(" ", "view-link file-GbKF3qQ0Z0gqk80j1QF47K8j-1 -auth [Prints pre-authenticated view link for specified file.]\n")
@@ -454,7 +454,7 @@ func PrintCreateDiscussionHelp() int {
 	writeLine := newLineWriter(writer)
 
 	writeLine("  ", "  ")
-	writeLine("  For:", "Creates a new discussion in the selected space. Only accepts JSON body with the following attributes:\n\t"+
+	writeLine("  For:", "Creating a new discussion in the selected space. Only accepts JSON body with the following attributes:\n\t"+
 		"title, content - required string, attachments - optional object. All attributes in the attachments object are also optional:\n\t"+
 		"files, assets, apps, jobs, workflows - string array of UIDs; folders, comparisons - integer array of IDs.\n")
 	writeLine("  Usage:", "create-discussion '<JSON_BODY>' -space-id <SPACE_ID> [FLAG...]\n")
@@ -487,7 +487,7 @@ func PrintCreateReplyHelp() int {
 	writeLine := newLineWriter(writer)
 
 	writeLine("  ", "  ")
-	writeLine("  For:", "Creates a new reply in the selected discussion or answer. Only accepts JSON body with the following attributes:\n"+
+	writeLine("  For:", "Creating a new reply in a selected discussion or answer. Only accepts JSON body with the following attributes:\n"+
 		"\tdiscussionId or answerId - integer ID (exclusive), replyType - required string ('answer' or 'comment'), content - required string,\n"+
 		"\tattachments - optional object, only allowed if replyType is 'answer'. All attributes in the attachments object are also optional:\n"+
 		"\tfiles, assets, apps, jobs, workflows - string array of UIDs; folders, comparisons - integer array of IDs.\n")
@@ -509,6 +509,36 @@ func PrintEditReplyHelp() int {
 		"\tAll attributes in the attachments object are also optional:\n"+
 		"\tfiles, assets, apps, jobs, workflows - string array of UIDs; folders, comparisons - integer array of IDs.\n")
 	writeLine("  Usage:", "edit-discussion '<JSON_BODY>' [FLAG...]\n")
+	writeLine("  Flags:", "All flags listed below are OPTIONAL")
+	writeLine("   -h, -help", "Displays the help message and exit")
+
+	writer.Flush()
+	return 0
+}
+
+func PrintGetPasswordHelp() int {
+	writer := tabwriter.NewWriter(os.Stdout, 0, 8, 1, '\t', tabwriter.AlignRight)
+	writeLine := newLineWriter(writer)
+
+	writeLine("  ", "  ")
+	writeLine("  For:", "Getting password of a database cluster. Always responds in JSON format.\n")
+	writeLine("  Usage:", "get-password <DBCLUSTER_ID>\n")
+	writeLine("  Examples:", "get-password dbcluster-Gy54pFQ0bgVjF542f2fq8q1b-1 [Gets password for the specified database cluster]")
+	writeLine("  Flags:", "All flags listed below are OPTIONAL")
+	writeLine("   -h, -help", "Displays the help message and exit")
+
+	writer.Flush()
+	return 0
+}
+
+func PrintRotatePasswordHelp() int {
+	writer := tabwriter.NewWriter(os.Stdout, 0, 8, 1, '\t', tabwriter.AlignRight)
+	writeLine := newLineWriter(writer)
+
+	writeLine("  ", "  ")
+	writeLine("  For:", "Rotating password of a database cluster. Returns the new password in JSON format.\n\tPlease note that it may take several minutes for the new password to take effect.\n")
+	writeLine("  Usage:", "rotate-password <DBCLUSTER_ID>\n")
+	writeLine("  Examples:", "rotate-password dbcluster-Gy54pFQ0bgVjF542f2fq8q1b-1 [Rotates password for the specified database cluster]")
 	writeLine("  Flags:", "All flags listed below are OPTIONAL")
 	writeLine("   -h, -help", "Displays the help message and exit")
 

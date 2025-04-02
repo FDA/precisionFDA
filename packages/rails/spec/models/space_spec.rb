@@ -44,7 +44,6 @@ RSpec.describe Space, type: :model do
 
   before do
     allow(context).to receive(:logged_in?).and_return(true)
-    allow(context).to receive(:guest?).and_return(false)
     allow(context).to receive(:user).and_return(guest_lead)
     allow(context).to receive(:user_id).and_return(guest_lead.id)
   end

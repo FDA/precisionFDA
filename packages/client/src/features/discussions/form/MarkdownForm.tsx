@@ -48,9 +48,6 @@ const ButtonRowActions = styled.div`
   align-self: stretch;
 `
 const ContentGroup = styled.div`
-  ${TabPanel} {
-    padding: 0 8px;
-  }
 `
 
 const validationSchema = Yup.object().shape({

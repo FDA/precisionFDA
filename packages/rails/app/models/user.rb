@@ -29,6 +29,8 @@
 class User < ApplicationRecord
   include Auditor
 
+  before_create :set_default_header_items
+
   EMAIL_FORMAT = %r{
     \A(([^<>()\[\]\\.,;:\s@\"]+(\.[^<>()\[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.
     [0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))\z
@@ -80,7 +82,7 @@ class User < ApplicationRecord
            foreign_key: :initiator_id,
            dependent: :destroy
 
-  store :extras, accessors: [:has_seen_guidelines, :inactivity_email_sent], coder: JSON
+  store :extras, accessors: %i(has_seen_guidelines inactivity_email_sent header_items), coder: JSON
   store :cloud_resource_settings,
         accessors: %i(charges_baseline pricing_map job_limit total_limit resources),
         coder: JSON
@@ -218,10 +220,6 @@ class User < ApplicationRecord
 
   delegate :real_files, to: :user_files
 
-  def guest?
-    dxuser.start_with?("Guest-")
-  end
-
   def singular?
     org_id.blank? || org.singular
   end
@@ -339,5 +337,40 @@ class User < ApplicationRecord
     admin_groups.any?
   end
 
+  def favorite(name)
+    return false unless name.is_a?(String)
+
+    self.header_items ||= []
+    item = header_items.find { |i| i["name"] == name }
+    if item
+      item["favorite"] = true
+    else
+      header_items.push({ "name" => name, "favorite" => true })
+    end
+
+    save
+  end
+
   alias_method :site_admin?, :can_administer_site?
+
+  private
+
+  def set_default_header_items
+    self.header_items ||= [
+      { "name" => "overview", "favorite" => false },
+      { "name" => "discussions", "favorite" => false },
+      { "name" => "challenges", "favorite" => false },
+      { "name" => "experts", "favorite" => false },
+      { "name" => "home", "favorite" => true },
+      { "name" => "spaces", "favorite" => true },
+      { "name" => "notes", "favorite" => false },
+      { "name" => "comparisons", "favorite" => false },
+      { "name" => "docs", "favorite" => true },
+      { "name" => "support", "favorite" => false },
+      { "name" => "daaas", "favorite" => false },
+      { "name" => "prism", "favorite" => false },
+      { "name" => "tools", "favorite" => false },
+      { "name" => "gsrs", "favorite" => false },
+    ]
+  end
 end

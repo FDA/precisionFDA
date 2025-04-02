@@ -1,18 +1,19 @@
+import { VisibilityState } from '@tanstack/react-table'
 import { LocationKey } from '../utils'
 import { useLocalStorage } from './useLocalStorage'
 
 export interface IColumnPropsLocalStorage {
-  saveHiddenColumns: (cols: string[]) => void
-  hiddenColumns: string[]
+  columnVisibility: VisibilityState
+  setColumnVisibility: (cols: VisibilityState) => void
 }
 
 export function useHiddenColumnLocalStorage(locationKey: LocationKey): IColumnPropsLocalStorage {
-  const [hiddenColumns, setHiddenCols] = useLocalStorage<Record<LocationKey, string[]>>('columns-hidden', {})
-  const saveHiddenColumns = (cols: string[]) => {
-    setHiddenCols({ ...hiddenColumns, [locationKey]: cols })
+  const [visibleCols, setVisibleCols] = useLocalStorage<Record<LocationKey, VisibilityState>>('columns-visibility', {})
+  const setVisibleColumns = (cols: VisibilityState) => {
+    setVisibleCols({ ...visibleCols, [locationKey]: cols })
   }
   return ({
-    hiddenColumns: hiddenColumns[locationKey],
-    saveHiddenColumns,
+    columnVisibility: visibleCols[locationKey],
+    setColumnVisibility: setVisibleColumns,
   })
 }

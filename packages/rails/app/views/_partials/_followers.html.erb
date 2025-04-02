@@ -10,7 +10,6 @@
   <% if !followers.exists?(@context.user_id) && @context.logged_in? %>
     <li title="<%= @context.user.full_name %> (<%= @context.user.org.name %>)" data-toggle="tooltip" style="display: none">
       <%= link_to user_path(@context.user.dxuser), class: 'pfda-follower', data: { follower_uid: @context.user.uid, followable_uid: followable.uid } do %>
-        <%= image_tag(@context.user.gravatar_url, class: 'rounded-circle', height: '50px') %>
         <% if defined?(display_names) && display_names %><%= @context.user.first_name %> <%= @context.user.last_name[0] %><% end %>
       <% end %>
     </li>

@@ -38,6 +38,7 @@ RSpec.describe Api::Spaces::MembershipsController, type: :controller do
   before do
     allow(HttpsAppsClient).to receive(:new).and_return(node_client)
     allow(node_client).to receive(:email_send).and_return({})
+    allow(node_client).to receive(:dbcluster_sync).and_return({})
   end
 
   describe "PUT update" do

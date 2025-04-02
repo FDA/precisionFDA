@@ -1,18 +1,14 @@
 import { useQueryClient } from '@tanstack/react-query'
+import { ColumnDef } from '@tanstack/react-table'
 import React from 'react'
-import { useLocation, Link } from 'react-router-dom'
-import { Column } from 'react-table'
+import { Link, useLocation } from 'react-router-dom'
 import styled from 'styled-components'
 import { FeaturedToggle } from '../../components/FeaturedToggle'
-import {
-  DefaultColumnFilter,
-  SelectColumnFilter,
-} from '../../components/Table/filters'
+import { propertiesColumnDef, selectColumnDef } from '../../components/Table/selectColumnDef'
 import { StyledTagItem, StyledTags } from '../../components/Tags'
 import { CubeIcon } from '../../components/icons/CubeIcon'
 import { ObjectGroupIcon } from '../../components/icons/ObjectGroupIcon'
 import { StyledLinkCell, StyledNameCell, StyledRunByYouLink } from '../home/home.styles'
-import { KeyVal } from '../home/types'
 import { getBasePathFromScope } from '../home/utils'
 import { IApp } from './apps.types'
 
@@ -26,127 +22,141 @@ export const Pill = styled.div`
 `
 
 export const useAppsColumns = ({
-  colWidths,
   isAdmin = false,
   properties = [],
 }: {
-  colWidths: KeyVal
   isAdmin?: boolean
   properties?: string[]
-}) => {
+}): ColumnDef<IApp>[] => {
   const location = useLocation()
   const queryClient = useQueryClient()
-  
+
   return [
+    selectColumnDef<IApp>(),
     {
-      Header: 'Name',
-      accessor: 'name',
-      Filter: DefaultColumnFilter,
-      width: colWidths?.name || 198,
-      Cell: props => (
-        <StyledNameCell as={Link} to={`${location.pathname}/${props.cell.row.original.uid}`} state={{ from: location.pathname, fromSearch: location.search }}>
+      header: 'Name',
+      accessorKey: 'name',
+      filterFn: 'includesString',
+      size: 300,
+      cell: info => (
+        <StyledNameCell
+          as={Link}
+          to={`${location.pathname}/${info.row.original.uid}`}
+          state={{ from: location.pathname, fromSearch: location.search }}
+        >
           <CubeIcon height={14} />
-          {props.value}
+          {info.getValue<string>()}
         </StyledNameCell>
       ),
     },
     {
-      Header: 'Title',
-      accessor: 'title',
-      Filter: DefaultColumnFilter,
-      width: colWidths?.title || 300,
+      header: 'Title',
+      accessorKey: 'title',
+      filterFn: 'includesString',
+      size: 300,
+      cell: c => c.getValue(),
     },
     {
-      Header: 'Featured',
-      accessor: 'featured',
-      disableSortBy: true,
-      Filter: SelectColumnFilter,
-      options: [
-        { label: 'Yes', value: 'true' },
-        { label: 'No', value: 'false' },
-      ],
-      width: colWidths?.featured || 93,
-      Cell: props => (
+      header: 'Featured',
+      accessorKey: 'featured',
+      enableColumnFilter: false,
+      size: 93,
+      cell: props => (
         <div style={{ paddingLeft: 20 }}>
-          <FeaturedToggle resource="apps" disabled={!isAdmin} featured={props.cell.row.original.featured} uids={[props.cell.row.original.uid]} onSuccess={() => queryClient.invalidateQueries({ queryKey: ['apps']})} />
+          <FeaturedToggle
+            resource="apps"
+            disabled={!isAdmin}
+            featured={props.cell.row.original.featured}
+            uids={[props.cell.row.original.uid]}
+            onSuccess={() => queryClient.invalidateQueries({ queryKey: ['apps']})}
+          />
         </div>
       ),
     },
     {
-      Header: 'Revision',
-      accessor: 'revision',
-      disableFilters: true,
-      width: colWidths?.revision || 80,
+      header: 'Revision',
+      accessorKey: 'revision',
+      enableSorting: false,
+      enableColumnFilter: false,
+      size: 198,
+      cell: c => c.getValue(),
     },
     {
-      Header: 'Explorers',
-      accessor: 'explorers',
-      Filter: DefaultColumnFilter,
-      width: colWidths?.explorers || 100,
+      header: 'Explorers',
+      accessorKey: 'explorers',
+      enableColumnFilter: false,
+      size: 100,
+      cell: c => c.getValue(),
     },
     {
-      Header: 'Org',
-      accessor: 'org',
-      Filter: DefaultColumnFilter,
-      width: colWidths?.org || 180,
+      header: 'Org',
+      accessorKey: 'org',
+      enableColumnFilter: false,
+      size: 180,
+      cell: c => c.getValue(),
     },
     {
-      Header: 'Added By',
-      accessor: 'added_by',
-      Filter: DefaultColumnFilter,
-      width: colWidths?.added_by || 200,
-      Cell: props => (
-        <a data-turbolinks="false" href={props.cell.row.original.links.user}>{props.cell.row.original.added_by_fullname}</a>
+      header: 'Added By',
+      accessorKey: 'added_by',
+      filterFn: 'includesString',
+      size: 200,
+      cell: props => (
+        <a data-turbolinks="false" href={props.cell.row.original.links.user}>
+          {props.cell.row.original.added_by_fullname}
+        </a>
       ),
     },
     {
-      Header: 'Location',
-      accessor: 'location',
-      Filter: DefaultColumnFilter,
-      width: colWidths?.location || 250,
-      Cell: props => (
-        <StyledLinkCell to={`${props.row.original.links.space}/apps`}><ObjectGroupIcon />{props.value}</StyledLinkCell>
+      header: 'Location',
+      accessorKey: 'location',
+      filterFn: 'includesString',
+      size: 250,
+      cell: props => (
+        <StyledLinkCell to={`${props.row.original.links.space}/apps`}>
+          <ObjectGroupIcon />
+          {props.getValue<string>()}
+        </StyledLinkCell>
       ),
     },
     {
-      Header: 'Created',
-      accessor: 'created_at_date_time',
+      header: 'Created',
+      accessorKey: 'created_at_date_time',
+      filterFn: 'includesString',
       sortDescFirst: true,
-      disableFilters: true,
-      width: colWidths?.created_at_date_time || 198,
+      enableColumnFilter: false,
+      size: 198,
+      cell: c => c.getValue(),
     },
     {
-      Header: 'Run By You',
-      accessor: 'run_by_you',
-      disableFilters: true,
-      width: colWidths?.run_by_you || 100,
-      Cell: props => (
-        <StyledRunByYouLink data-turbolinks="false" href={`${getBasePathFromScope(props.row.original.scope)}/apps/${ props.row.original.uid}/jobs/new`}><Pill>{props.value}</Pill></StyledRunByYouLink>
+      header: 'Run By You',
+      accessorKey: 'run_by_you',
+      enableColumnFilter: false,
+      size: 100,
+      cell: props => (
+        <StyledRunByYouLink
+          data-turbolinks="false"
+          href={`${getBasePathFromScope(props.row.original.scope)}/apps/${props.row.original.uid}/jobs/new`}
+        >
+          <Pill>{props.getValue<string>()}</Pill>
+        </StyledRunByYouLink>
       ),
     },
     {
-      Header: 'Tags',
-      accessor: 'tags',
-      Filter: DefaultColumnFilter,
-      disableSortBy: true,
-      width: colWidths?.tags || 500,
-      Cell: props => {
+      header: 'Tags',
+      accessorKey: 'tags',
+      filterFn: 'includesString',
+      enableSorting: false,
+      size: 500,
+      cell: props => {
         return (
           <StyledTags>
-            {props.value.map(tag => (
+            {props.getValue<string[]>().map(tag => (
               <StyledTagItem key={tag}>{tag}</StyledTagItem>
             ))}
           </StyledTags>
         )
       },
     },
-    ...properties.map(property => ({
-      Header: property,
-      accessor: row => row.properties[property],
-      id: `props.${property}`,
-      disableFilters: true,
-      width: colWidths?.[property] || 200,
-    })),
-  ] as Column<IApp>[]
+    ...propertiesColumnDef<IApp>(properties),
+  ]
 }
-

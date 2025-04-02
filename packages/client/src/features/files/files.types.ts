@@ -13,7 +13,7 @@ export enum FolderActions {
 
 export type FileState = 'closed' | 'closing' | 'open' | 'removing'
 export type FileLocation = 'Public' | 'Private' | string
-export type FileType = 'UserFile' | 'Folder' | 'File'
+export type FileType = 'UserFile' | 'Folder' | 'File' | 'Asset'
 export type FileScope = 'public' | 'private' | string
 export type FileUid = `file-${string}-${number}`
 

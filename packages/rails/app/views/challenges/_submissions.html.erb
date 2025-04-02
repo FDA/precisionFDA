@@ -1,5 +1,5 @@
 <div role="tabpanel" class="tab-pane active">
-  <% if @context.logged_in_or_guest? %>
+  <% if @context.logged_in? %>
     <% if submissions_grid.present? %>
       <div class="panel">
         <% if my_entries %>

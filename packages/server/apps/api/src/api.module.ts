@@ -29,6 +29,7 @@ import { NewsApiModule } from './news/news.api.module'
 import { NodesApiModule } from './nodes/nodes.api.module'
 import { NotificationsApiModule } from './notifications/notifications.api.module'
 import { PropertiesApiModule } from './properties/properties.api.module'
+import { PublishApiModule } from './publish/publish.api.module'
 import { ReportsApiModule } from './reports/reports.api.module'
 import { SiteSettingsApiModule } from './site-settings/site-settings.api.module'
 import { SpacesApiModule } from './spaces/spaces.api.module'
@@ -38,6 +39,7 @@ import { UserContextMiddleware } from './user-context/middleware/user-context.mi
 import { UsersApiModule } from './users/users.api.module'
 import { WebsocketModule } from './websocket/websocket.module'
 import { WorkflowApiModule } from './workflows/workflow.api.module'
+import { SessionApiModule } from './session/session.api.module'
 
 @Module({
   imports: [
@@ -79,6 +81,8 @@ import { WorkflowApiModule } from './workflows/workflow.api.module'
     UsersApiModule,
     WorkflowApiModule,
     ReportsApiModule,
+    SessionApiModule,
+    PublishApiModule,
   ],
   providers: [
     ...apiExceptionFilterProviders,

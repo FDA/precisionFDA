@@ -16,7 +16,7 @@ import { AlertText } from '../data-portals/details/DataPortalNotFound'
 import { useDataPortalByIdQuery } from '../data-portals/queries'
 import { RemovePayload, Resource } from '../data-portals/resources/resources.types'
 import { canEditResources } from '../data-portals/utils'
-import { NOTIFICATION_ACTION, Notification, WEBSOCKET_MESSSAGE_TYPE, WebSocketMessage } from '../home/types'
+import { NOTIFICATION_ACTION, Notification, WEBSOCKET_MESSAGE_TYPE, WebSocketMessage } from '../home/types'
 import { ModalHeaderTop, ModalNext } from '../modal/ModalNext'
 import { ModalLoaderWrapper } from '../modal/styles'
 import { useModal } from '../modal/useModal'
@@ -131,9 +131,7 @@ export const DataPortalResources = ({
       try {
         const messageData = JSON.parse(message.data)
         const notification = messageData.data as Notification
-        return (
-          messageData.type === WEBSOCKET_MESSSAGE_TYPE.NOTIFICATION && NOTIFICATION_ACTION.FILE_CLOSED === notification.action
-        )
+        return messageData.type === WEBSOCKET_MESSAGE_TYPE.NOTIFICATION && NOTIFICATION_ACTION.FILE_CLOSED === notification.action
       } catch (e) {
         return false
       }

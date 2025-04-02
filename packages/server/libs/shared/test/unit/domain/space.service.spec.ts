@@ -6,8 +6,13 @@ import { SPACE_STATE, SPACE_TYPE } from '@shared/domain/space/space.enum'
 import { SpaceRepository } from '@shared/domain/space/space.repository'
 import { Node } from '@shared/domain/user-file/node.entity'
 import { expect } from 'chai'
-import { stub } from 'sinon'
-import { PermissionError, SpaceNotFoundError, UserNotFoundError } from '@shared/errors'
+import { SinonStub, stub } from 'sinon'
+import {
+  NotFoundError,
+  PermissionError,
+  SpaceNotFoundError,
+  UserNotFoundError,
+} from '@shared/errors'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
 import { UserRepository } from '@shared/domain/user/user.repository'
@@ -16,7 +21,9 @@ import {
   SPACE_EVENT_OBJECT_TYPE,
 } from '@shared/domain/space-event/space-event.enum'
 import { Reference } from '@mikro-orm/core'
-import { CreateSpaceDTO } from '@shared/domain/space/dto/create-space-dto'
+import { CreateSpaceDTO } from '@shared/domain/space/dto/create-space.dto'
+import { Space } from '@shared/domain/space/space.entity'
+import { User } from '@shared/domain/user/user.entity'
 
 describe('SpaceService', () => {
   const USER_ID = 1
@@ -31,6 +38,7 @@ describe('SpaceService', () => {
   let referenceStub
 
   const spaceRepoFindOneStub = stub()
+  const spaceRepoFindEditableByIdAndUser = stub()
   const buildStub = stub()
   const spaceRepoFindOneOrFailStub = stub()
   const spaceRepoFindStub = stub()
@@ -53,6 +61,7 @@ describe('SpaceService', () => {
       findOneOrFail: spaceRepoFindOneOrFailStub,
       find: spaceRepoFindStub,
       findSpacesByIdAndUser: spaceRepoFindSpacesByIdAndUserStub,
+      findEditableByIdAndUser: spaceRepoFindEditableByIdAndUser,
     } as unknown as SpaceRepository
     const spaceMembershipRepository = {
       findOne: spaceMembershipRepoFindOneStub,
@@ -80,6 +89,9 @@ describe('SpaceService', () => {
   beforeEach(async () => {
     spaceRepoFindOneStub.reset()
     spaceRepoFindOneStub.throws()
+
+    spaceRepoFindEditableByIdAndUser.reset()
+    spaceRepoFindEditableByIdAndUser.throws()
 
     buildStub.reset()
     buildStub.throws()
@@ -122,6 +134,194 @@ describe('SpaceService', () => {
 
       expect(buildStub.calledOnce).to.be.true
       expect(buildStub.firstCall.args[0]).to.deep.equal(createSpaceDto)
+    })
+  })
+
+  describe('#update', () => {
+    const user = {
+      id: USER_ID,
+      dxuser: 'dxuser',
+      isSiteAdmin: async () => false,
+    } as unknown as User
+
+    const createBaseSpace = (type: SPACE_TYPE = SPACE_TYPE.REVIEW) => {
+      const confidentialSpace1 = { name: 'a', description: 'b' }
+      const confidentialSpace2 = { name: 'b', description: 'b' }
+      const loadItemsStub = stub().resolves()
+      const getItemsStub = stub().returns([confidentialSpace1, confidentialSpace2])
+
+      const findHostLeadStub: SinonStub<[], Promise<{ dxuser: string } | null>> = stub()
+      const findGuestLeadStub: SinonStub<[], Promise<{ dxuser: string } | null>> = stub()
+
+      const space = {
+        id: SPACE_ID,
+        type,
+        name: '',
+        description: '',
+        meta: { cts: '' },
+        confidentialSpaces: {
+          loadItems: loadItemsStub,
+          getItems: getItemsStub,
+        },
+        findHostLead: findHostLeadStub,
+        findGuestLead: findGuestLeadStub,
+      } as unknown as Space & {
+        confidentialSpaces: {
+          loadItems: () => Promise<void>
+          getItems: () => Array<{ name: string; description: string }>
+        }
+        findHostLead: SinonStub<[], Promise<{ dxuser: string } | null>>
+        findGuestLead: SinonStub<[], Promise<{ dxuser: string } | null>>
+      }
+      return { space, confidentialSpace1, confidentialSpace2 }
+    }
+
+    const setupStubs = (space: Space, user: User) => {
+      userRepoFindOneStub.withArgs({ id: USER_ID }).resolves(user)
+      spaceRepoFindEditableByIdAndUser.withArgs(SPACE_ID, user).resolves(space)
+    }
+
+    const spaceInput = {
+      name: 'test-space',
+      description: 'description',
+      cts: 'cts',
+    }
+
+    it('updates when user is HOST lead for REVIEW space', async () => {
+      const { space, confidentialSpace1, confidentialSpace2 } = createBaseSpace(SPACE_TYPE.REVIEW)
+      space.findHostLead.resolves({ dxuser: 'dxuser' })
+      space.findGuestLead.resolves(null)
+      setupStubs(space, user)
+      const spaceService = createSpaceService()
+      await spaceService.update(SPACE_ID, spaceInput)
+      expect(space.name).to.equal(spaceInput.name)
+      expect(space.description).to.equal(spaceInput.description)
+      expect(confidentialSpace1.name).to.equal(spaceInput.name)
+      expect(confidentialSpace1.description).to.equal(spaceInput.description)
+      expect(confidentialSpace2.name).to.equal(spaceInput.name)
+      expect(confidentialSpace2.description).to.equal(spaceInput.description)
+    })
+
+    it('updates when user is GUEST lead for REVIEW space', async () => {
+      const { space, confidentialSpace1, confidentialSpace2 } = createBaseSpace(SPACE_TYPE.REVIEW)
+      space.findHostLead.resolves(null)
+      space.findGuestLead.resolves({ dxuser: 'dxuser' })
+      setupStubs(space, user)
+      const spaceService = createSpaceService()
+      await spaceService.update(SPACE_ID, spaceInput)
+      expect(space.name).to.equal(spaceInput.name)
+      expect(space.description).to.equal(spaceInput.description)
+      expect(confidentialSpace1.name).to.equal(spaceInput.name)
+      expect(confidentialSpace1.description).to.equal(spaceInput.description)
+      expect(confidentialSpace2.name).to.equal(spaceInput.name)
+      expect(confidentialSpace2.description).to.equal(spaceInput.description)
+    })
+
+    it('fails update for REVIEW space if not lead', async () => {
+      const { space } = createBaseSpace(SPACE_TYPE.REVIEW)
+      space.findHostLead.resolves(null)
+      space.findGuestLead.resolves(null)
+      setupStubs(space, user)
+      const spaceService = createSpaceService()
+      await expect(spaceService.update(SPACE_ID, spaceInput)).to.be.rejectedWith(
+        PermissionError,
+        'Review space can be updated only by Reviewer or Sponsor leads.',
+      )
+    })
+
+    it('updates when user is owner for GOVERNMENT space', async () => {
+      const { space } = createBaseSpace(SPACE_TYPE.GOVERNMENT)
+      space.findHostLead.resolves({ dxuser: 'dxuser' })
+      space.findGuestLead.resolves(null)
+      setupStubs(space, user)
+      const spaceService = createSpaceService()
+      await spaceService.update(SPACE_ID, spaceInput)
+      expect(space.name).to.equal(spaceInput.name)
+      expect(space.description).to.equal(spaceInput.description)
+    })
+
+    it('fails update for GOVERNMENT space if not owner', async () => {
+      const { space } = createBaseSpace(SPACE_TYPE.GOVERNMENT)
+      space.findHostLead.resolves({ dxuser: 'anotherUser' })
+      space.findGuestLead.resolves(null)
+      setupStubs(space, user)
+      const spaceService = createSpaceService()
+      await expect(spaceService.update(SPACE_ID, spaceInput)).to.be.rejectedWith(
+        PermissionError,
+        'Government space can be updated only by owner.',
+      )
+    })
+
+    it('updates when user is site admin for GROUPS space', async () => {
+      const adminUser = {
+        id: USER_ID,
+        dxuser: 'dxuser',
+        isSiteAdmin: async () => true,
+      } as unknown as User
+      const { space } = createBaseSpace(SPACE_TYPE.GROUPS)
+      space.findHostLead.resolves({ dxuser: 'notMatching' })
+      space.findGuestLead.resolves({ dxuser: 'alsoNotMatching' })
+      setupStubs(space, adminUser)
+      const spaceService = createSpaceService()
+      await spaceService.update(SPACE_ID, spaceInput)
+      expect(space.name).to.equal(spaceInput.name)
+      expect(space.description).to.equal(spaceInput.description)
+    })
+
+    it('updates when user is HOST lead for GROUPS space', async () => {
+      const { space } = createBaseSpace(SPACE_TYPE.GROUPS)
+      space.findHostLead.resolves({ dxuser: 'dxuser' })
+      space.findGuestLead.resolves(null)
+      setupStubs(space, user)
+      const spaceService = createSpaceService()
+      await spaceService.update(SPACE_ID, spaceInput)
+      expect(space.name).to.equal(spaceInput.name)
+      expect(space.description).to.equal(spaceInput.description)
+    })
+
+    it('fails update for GROUPS space if not site admin or lead', async () => {
+      const nonAdminUser = { id: USER_ID, dxuser: 'dxuser', isSiteAdmin: async () => false }
+      userRepoFindOneStub.withArgs({ id: USER_ID }).resolves(nonAdminUser)
+      const { space } = createBaseSpace(SPACE_TYPE.GROUPS)
+      space.findHostLead.resolves({ dxuser: 'notDxuser' })
+      space.findGuestLead.resolves({ dxuser: 'alsoNotDxuser' })
+      setupStubs(space, user)
+      const spaceService = createSpaceService()
+      await expect(spaceService.update(SPACE_ID, spaceInput)).to.be.rejectedWith(
+        PermissionError,
+        'Group and Admin spaces can be updated only by Host or Guest leads.',
+      )
+    })
+
+    it('updates when user is owner for PRIVATE_TYPE space', async () => {
+      const { space } = createBaseSpace(SPACE_TYPE.PRIVATE_TYPE)
+      space.findHostLead.resolves({ dxuser: 'dxuser' })
+      setupStubs(space, user)
+      const spaceService = createSpaceService()
+      await spaceService.update(SPACE_ID, spaceInput)
+      expect(space.name).to.equal(spaceInput.name)
+      expect(space.description).to.equal(spaceInput.description)
+    })
+
+    it('fails update for PRIVATE_TYPE space if not owner', async () => {
+      const { space } = createBaseSpace(SPACE_TYPE.PRIVATE_TYPE)
+      space.findHostLead.resolves({ dxuser: 'anotherUser' })
+      setupStubs(space, user)
+      const spaceService = createSpaceService()
+      await expect(spaceService.update(SPACE_ID, spaceInput)).to.be.rejectedWith(
+        PermissionError,
+        'Private space can be updated only by owner.',
+      )
+    })
+
+    it('space not found', async () => {
+      userRepoFindOneStub.withArgs({ id: USER_ID }).resolves(user)
+      spaceRepoFindEditableByIdAndUser.withArgs(SPACE_ID, user).resolves(null)
+      const spaceService = createSpaceService()
+      await expect(spaceService.update(SPACE_ID, spaceInput)).to.be.rejectedWith(
+        NotFoundError,
+        "Space not found or you don't have the permission.",
+      )
     })
   })
 

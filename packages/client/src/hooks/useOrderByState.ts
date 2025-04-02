@@ -1,20 +1,21 @@
+import { ColumnSort } from '@tanstack/react-table'
 import { useState } from 'react'
-import { SortingRule } from 'react-table'
+
 import { StringParam, useQueryParams, withDefault } from 'use-query-params'
 
-type Cols = SortingRule<string>[]
+type Cols = ColumnSort[]
 export type SortyByParamType = {
   order_by?: string | null,
   order_dir?: string | null,
 }
 
 export interface ISortByParams {
-  sortBy: SortingRule<string>[],
+  sortBy: ColumnSort[],
   sort: SortyByParamType,
   setSortBy: (cols: Cols) => void
 }
 
-export function useOrderByState({ defaultOrder, onSetSortBy }: { defaultOrder: SortyByParamType, onSetSortBy?: (cols: Cols) => void}): {sortBy: SortingRule<string>[], sort: SortyByParamType, setSortBy: (cols: Cols) => void} {
+export function useOrderByState({ defaultOrder, onSetSortBy }: { defaultOrder: SortyByParamType, onSetSortBy?: (cols: Cols) => void}): {sortBy: ColumnSort[], sort: SortyByParamType, setSortBy: (cols: Cols) => void} {
   const [sort, setSort] = useState({
     order_by: defaultOrder?.order_by,
     order_dir: defaultOrder?.order_dir,
@@ -29,7 +30,7 @@ export function useOrderByState({ defaultOrder, onSetSortBy }: { defaultOrder: S
     }
     setSort(col)
   }
-  const sortBy: SortingRule<string>[] = sort.order_by ? [{ id: sort.order_by, desc: sort.order_dir === 'DESC' }] : []
+  const sortBy: ColumnSort[] = sort.order_by ? [{ id: sort.order_by, desc: sort.order_dir === 'DESC' }] : []
   return {
     sortBy,
     sort,
@@ -52,7 +53,7 @@ export function useOrderByParams({ defaultOrder, onSetSortBy }: {defaultOrder?: 
     }
     setSortByParam(col as any, 'pushIn')
   }
-  const sortBy: SortingRule<string>[] = sortByParam.order_by ? [{ id: sortByParam.order_by, desc: sortByParam.order_dir === 'DESC' }] : []
+  const sortBy: ColumnSort[] = sortByParam.order_by ? [{ id: sortByParam.order_by, desc: sortByParam.order_dir === 'DESC' }] : []
   return {
     sortBy,
     sort: sortByParam,

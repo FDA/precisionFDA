@@ -1,6 +1,7 @@
 import axios from 'axios'
 import { Attachment, Discussion, PostAttachments } from './discussions.types'
-import { ServerScope } from '../home/types'
+import { IFilter, ServerScope } from '../home/types'
+import { Params, prepareListFetch } from '../home/utils'
 
 export type BasePayload = {
   content: string
@@ -78,8 +79,10 @@ export async function editAnswerCommentRequest(
     .then(r => r.data)
 }
 
-export async function fetchDiscussionsRequest(filters: any, params: any) {
-  const paramQ = `?${new URLSearchParams(params).toString()}`
+
+export async function fetchDiscussionsRequest(filters: IFilter[], params: Params) {
+  const query = prepareListFetch(filters, { ...params, scope: params.entityScope })
+  const paramQ = `?${new URLSearchParams(query).toString()}`
   return axios.get(`/api/v2/discussions${paramQ}`).then(r => r.data as Discussion[])
 }
 

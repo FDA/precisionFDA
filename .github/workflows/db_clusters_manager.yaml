@@ -1,0 +1,35 @@
+name: DB Cluster Manager
+on:
+  push:
+    branches:
+      - 'master'
+  pull_request:
+    branches:
+      - '*'
+    paths:
+      - 'packages/db_cluster/**'
+
+jobs:
+  test-db-cluster-manager:
+    name: Test DB Cluster Manager
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: '0'
+      - name: Install pip packages from requirement
+        shell: bash
+        run: |
+          pip3 install -r ./packages/db_cluster/requirements.txt
+      - name: Start test databases
+        shell: bash
+        run: |
+          cd packages/db_cluster && make start-dbs
+      - name: Sleep for 3 minutes
+        run: sleep 180s
+        shell: bash
+      - name: Run pytest
+        run: |
+          sed -i '1s/.*/from .core import DBPermission, DatabaseManager/' packages/db_cluster/app/pfda_db_cluster_manager/resources/home/dnanexus/mysql_manager.py
+          sed -i '1s/.*/from .core import DBPermission, DatabaseManager/' packages/db_cluster/app/pfda_db_cluster_manager/resources/home/dnanexus/postgres_manager.py
+          cd packages/db_cluster && make test

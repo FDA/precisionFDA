@@ -1,8 +1,7 @@
 class ExpertsController < ApplicationController
   include RecaptchaHelper
 
-  skip_before_action :require_login,     only: %i(index show qa ask_question blog)
-  before_action :require_login_or_guest, only: [:edit, :update, :create, :new]
+  skip_before_action :require_login, only: %i(index show qa ask_question blog)
 
   layout "react", only: %i(index show blog)
 
@@ -174,7 +173,7 @@ class ExpertsController < ApplicationController
       reverse
     # rubocop:disable Layout/LineLength
     @user_questions =
-      @context.logged_in? && !@context.guest? ? @expert.questions_by_user_id(@context.user_id).sort_by(&:created_at).reverse : []
+      @context.logged_in? ? @expert.questions_by_user_id(@context.user_id).sort_by(&:created_at).reverse : []
     # rubocop:enable Layout/LineLength
   end
 
@@ -191,8 +190,8 @@ class ExpertsController < ApplicationController
       end
     end
 
-    @answered_questions = @expert.answered_questions.sort_by{ |q| q.expert_answer.updated_at }.reverse
-    @user_questions = @context.logged_in? && !@context.guest? ? @expert.questions_by_user_id(@context.user_id).sort_by{ |q| q.created_at }.reverse : []
+    @answered_questions = @expert.answered_questions.sort_by { |q| q.expert_answer.updated_at }.reverse
+    @user_questions = @context.logged_in? ? @expert.questions_by_user_id(@context.user_id).sort_by(&:created_at).reverse : []
   end
 
   def destroy

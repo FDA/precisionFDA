@@ -12,6 +12,7 @@ import {
   Ref,
   Reference,
 } from '@mikro-orm/core'
+import { ScopedEntity } from '@shared/database/scoped.entity'
 import { Job } from '@shared/domain/job/job.entity'
 import { Asset } from '@shared/domain/user-file/asset.entity'
 import { User } from '@shared/domain/user/user.entity'
@@ -22,7 +23,6 @@ import { Uid } from '../entity/domain/uid'
 import { ENTITY_TYPE } from './app.enum'
 import type { Spec } from './app.input'
 import { AppRepository } from './app.repository'
-import { ScopedEntity } from '@shared/database/scoped.entity'
 
 const logger = getLogger('app.entity')
 
@@ -113,6 +113,10 @@ export class App extends ScopedEntity {
 
   isHTTPS() {
     return this.entityType === ENTITY_TYPE.HTTPS
+  }
+
+  isPublishable(): boolean {
+    return this.entityType !== ENTITY_TYPE.HTTPS && this.isPrivate()
   }
 
   @Property({ persist: false })

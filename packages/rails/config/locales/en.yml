@@ -25,12 +25,6 @@ en:
     header: A secure, collaborative, high-performance computing platform that builds a community
             of experts around the analysis of biological datasets in order to advance precision
             medicine, inform regulatory science, and enable improvements in health outcomes.
-    login_as_guest_warning: |
-      You are currently browsing precisionFDA as a guest. To log in and complete this
-      action, your user account must be provisioned. Your account is currently being
-      reviewed by an FDA administrator for provisioning. If you do not receive full
-      access within 14 days, please contact precisionfda@fda.hhs.gov to request an
-      upgraded account with end-level access.
   email_taken: |
     Error. This email address is already being used for a %{side} account.
     Please choose a different email address for precisionFDA.

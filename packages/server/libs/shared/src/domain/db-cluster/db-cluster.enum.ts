@@ -40,13 +40,29 @@ const allowedInstanceTypes = [
   'db_mem1_x96',
 ]
 
-const allowedEngineVersions = [
-  '8.0.mysql_aurora.3.04.1',
-  '11.9',
-  '12.9',
-  '13.9',
-  '14.6',
-]
+const allowedEngineVersions = ['8.0.mysql_aurora.3.04.1', '11.9', '12.9', '13.9', '14.6']
+
+const allowedEngines = ['aurora-mysql', 'aurora-postgresql']
+
+type EncryptedData = {
+  ciphertext: string
+  salt: string
+  iv: string
+  tag: string
+}
+
+type UserMapping = {
+  username: string
+  psw: string
+  role: string
+}
+
+type DataToEncrypt = {
+  db_cluster_id: string
+  db_cluster_admin_username: string
+  db_cluster_admin_password: string
+  users_mapping: UserMapping[]
+}
 
 export {
   ENGINE,
@@ -54,5 +70,9 @@ export {
   ENGINES,
   STATUSES,
   allowedEngineVersions,
+  allowedEngines,
   allowedInstanceTypes,
+  EncryptedData,
+  UserMapping,
+  DataToEncrypt,
 }

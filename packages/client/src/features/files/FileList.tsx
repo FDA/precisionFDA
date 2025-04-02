@@ -1,16 +1,15 @@
 import { DndContext } from '@dnd-kit/core'
 import { useQueryClient } from '@tanstack/react-query'
-import React, { useEffect, useMemo, useRef } from 'react'
+import { ColumnDefResolved, ColumnFiltersState, ColumnSizingState, ColumnSort, RowSelectionState, VisibilityState } from '@tanstack/react-table'
+import React, { useEffect, useRef } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { Column, SortingRule, UseResizeColumnsState } from 'react-table'
 import useWebSocket from 'react-use-websocket'
 import { useQueryParam } from 'use-query-params'
 import { Button } from '../../components/Button'
 import Dropdown from '../../components/Dropdown'
 import { ContentFooter } from '../../components/Page/ContentFooter'
 import { Pagination } from '../../components/Pagination'
-import Table from '../../components/Table/Table'
-import { EmptyTable } from '../../components/Table/styles'
+import Table from '../../components/Table'
 import { ClipboardCheckIcon } from '../../components/icons/ClipboardCheckIcon'
 import { ClipboardIcon } from '../../components/icons/ClipboardIcon'
 import { HoverDNAnexusLogo } from '../../components/icons/DNAnexusLogo'
@@ -20,30 +19,30 @@ import { DEFAULT_RECONNECT_ATTEMPTS, DEFAULT_RECONNECT_INTERVAL, getNodeWsUrl, S
 import { cleanObject, getSelectedObjectsFromIndexes, toArrayFromObject } from '../../utils/object'
 import { useAuthUser } from '../auth/useAuthUser'
 import { ActionsDropdownContent } from '../home/ActionDropdownContent'
-import { ActionsRow, QuickActions, StyledHomeTable } from '../home/home.styles'
-import { ActionsButton, FilesListResourceHeader, FilesListBreadcrumbHeader } from '../home/show.styles'
+import { ActionsRow, QuickActions } from '../home/home.styles'
+import { ActionsButton, FilesListBreadcrumbHeader, FilesListResourceHeader } from '../home/show.styles'
 import {
   HomeScope,
-  IFilter,
   IMeta,
-  KeyVal,
   MetaPath,
   Notification,
   NOTIFICATION_ACTION,
-  WEBSOCKET_MESSSAGE_TYPE,
+  WEBSOCKET_MESSAGE_TYPE,
   WebSocketMessage,
 } from '../home/types'
 import { useList } from '../home/useList'
 import { usePropertiesQuery } from '../home/usePropertiesQuery'
 import { ISpace } from '../spaces/spaces.types'
 import { FileBreadcrumb } from './FileBreadcrumb'
+import { centerToCursorCollisionDetection } from './centerToCursorCollisionDetection'
 import { fetchFiles } from './files.api'
 import { IFile } from './files.types'
-import { centerToCursorCollisionDetection } from './centerToCursorCollisionDetection'
 import { useFilesColumns } from './useFilesColumns'
 import { useFileDnd } from './useFilesDnd'
 import { useFilesSelectActions } from './useFilesSelectActions'
 import { useFolderActions } from './useFolderActions'
+import { ResouceQueryErrorMessage } from '../home/ResouceQueryErrorMessage'
+import { StyledPageTable } from '../../components/Table/components/styles'
 
 type ListType = { files: IFile[]; meta: IMeta }
 
@@ -81,8 +80,8 @@ export const FileList = ({
     resetSelected,
     saveColumnResizeWidth,
     colWidths,
-    hiddenColumns,
-    saveHiddenColumns,
+    columnVisibility,
+    setColumnVisibility,
   } = useList<ListType>({
     fetchList: fetchFiles,
     resource: 'files',
@@ -94,7 +93,7 @@ export const FileList = ({
   })
 
   const onRowClick = (id: string) => {
-    navigate(`${location.pathname}/${id}`, { state: { from: location.pathname, fromSearch: location.search }})
+    navigate(`${location.pathname}/${id}`, { state: { from: location.pathname, fromSearch: location.search } })
   }
 
   const { lastJsonMessage } = useWebSocket<WebSocketMessage>(getNodeWsUrl(), {
@@ -107,7 +106,7 @@ export const FileList = ({
         const messageData = JSON.parse(message.data)
         const notification = messageData.data as Notification
         return (
-          messageData.type === WEBSOCKET_MESSSAGE_TYPE.NOTIFICATION &&
+          messageData.type === WEBSOCKET_MESSAGE_TYPE.NOTIFICATION &&
           [NOTIFICATION_ACTION.NODES_REMOVED, NOTIFICATION_ACTION.NODES_COPIED, NOTIFICATION_ACTION.FILE_CLOSED].includes(
             notification.action,
           )
@@ -172,7 +171,7 @@ export const FileList = ({
   delete actions['Comments']
   delete actions['Request license approval']
 
-  const listActions = useFolderActions(homeScope, folderIdParam!, space?.id)
+  const listActions = useFolderActions(homeScope, folderIdParam!, space?.id, resetSelected)
 
   const handleCopyIds = () => {
     navigator.clipboard.writeText(selectedFileIds.join(', '))
@@ -182,10 +181,10 @@ export const FileList = ({
     }, 5000)
   }
 
-  if (error) return <div>Error! {JSON.stringify(error)}</div>
+  if (error) return <ResouceQueryErrorMessage />
 
   return (
-    <ErrorBoundary>
+    <>
       <FilesListResourceHeader>
         <ActionsRow>
           <QuickActions>
@@ -256,12 +255,12 @@ export const FileList = ({
         setSelectedRows={setSelectedIndexes}
         setSortBy={setSortBy}
         sortBy={sortBy}
-        saveColumnResizeWidth={saveColumnResizeWidth}
-        colWidths={colWidths}
+        setColumnSizing={saveColumnResizeWidth}
+        columnSizing={colWidths}
         folderId={folderIdParam ? parseInt(folderIdParam, 10) : undefined}
         shouldResetFilters={[folderIdParam, homeScope]}
-        hiddenColumns={hiddenColumns}
-        saveHiddenColumns={saveHiddenColumns}
+        columnVisibility={columnVisibility}
+        setColumnVisibility={setColumnVisibility}
       />
 
       <ContentFooter>
@@ -290,7 +289,6 @@ export const FileList = ({
       {actions['Delete']?.modal}
       {actions['Move']?.modal}
       {actions['Copy to...']?.modal}
-      {actions['Attach to...']?.modal}
       {actions['Attach License']?.modal}
       {actions['Detach License']?.modal}
       {actions['Accept License']?.modal}
@@ -298,19 +296,19 @@ export const FileList = ({
       {actions['Edit properties']?.modal}
       {actions['Lock']?.modal}
       {actions['Unlock']?.modal}
-    </ErrorBoundary>
+    </>
   )
 }
 
 export const FilesListTable = ({
   isAdmin,
   filters,
+  setFilters,
   files,
   spaceId,
   properties,
   onFolderClick,
   onFileClick,
-  setFilters,
   isLoading,
   selectedObjects,
   selectedRows,
@@ -318,101 +316,103 @@ export const FilesListTable = ({
   setSortBy,
   sortBy,
   homeScope,
-  saveColumnResizeWidth,
-  colWidths,
-  shouldResetFilters = [],
-  saveHiddenColumns,
-  hiddenColumns,
+  columnSizing,
+  setColumnSizing,
   filesMeta,
   folderId,
+  columnVisibility,
+  setColumnVisibility,
 }: {
-  spaceId?: number,
-  filesMeta?: {path: MetaPath[]},
+  spaceId?: number
+  filesMeta?: { path: MetaPath[] }
   shouldResetFilters?: any[]
   isAdmin: boolean
-  filters: IFilter[]
+  filters: ColumnFiltersState
+  setFilters: (val: ColumnFiltersState) => void
+  sortBy: ColumnSort[]
+  setSortBy: (cols: ColumnSort[]) => void
+  selectedRows: Record<string, boolean> | undefined
+  setSelectedRows: (ids: RowSelectionState) => void
   files?: IFile[]
   isLoading: boolean
   properties?: string[]
   onFolderClick: (folderId: string) => void
   onFileClick: (fileId: string) => void
-  setFilters: (val: IFilter[]) => void
   selectedObjects: IFile[]
-  selectedRows: Record<string, boolean> | undefined
-  setSelectedRows: (ids: Record<string, boolean>) => void
-  sortBy?: SortingRule<string>[]
-  setSortBy: (cols: SortingRule<string>[]) => void
   homeScope?: HomeScope
-  colWidths: KeyVal
-  saveColumnResizeWidth: (columnResizing: UseResizeColumnsState<any>['columnResizing']) => void
-  hiddenColumns: string[]
-  saveHiddenColumns: (cols: string[]) => void
+  columnSizing: ColumnSizingState
+  setColumnSizing: (columnResizing: ColumnSizingState) => void
   folderId?: number
+  setColumnVisibility: (cols: VisibilityState) => void
+  columnVisibility: VisibilityState
 }) => {
   const location = useLocation()
-  const { handleDragEnd, handleDragStart, sensors, dndMoveModal } = useFileDnd({ setSelectedRows, selectedObjects, files, spaceId })
+  const { handleDragEnd, handleDragStart, sensors, dndMoveModal } = useFileDnd({
+    setSelectedRows,
+    selectedObjects,
+    files,
+    spaceId,
+  })
 
-  function filterColsByScope(c: Column<IFile>): boolean {
+  function filterColsByScope(c: ColumnDefResolved<IFile>): boolean {
     return !(
       // If the homeScope is 'me', hide 'added_by' regardless of other conditions.
       (
-        (homeScope === 'me' && c.accessor === 'added_by') ||
+        (homeScope === 'me' && c.accessorKey === 'added_by') ||
         // Hide 'location' for all homeScopes except 'spaces'.
-        (homeScope !== 'spaces' && c.accessor === 'location') ||
+        (homeScope !== 'spaces' && c.accessorKey === 'location') ||
         // Hide 'featured' for all homeScopes except 'everybody'.
-        (homeScope !== 'everybody' && c.accessor === 'featured') ||
+        (homeScope !== 'everybody' && c.accessorKey === 'featured') ||
         // Hide 'state' if homeScope is defined to something specific.
-        (homeScope !== undefined && c.accessor === 'state')
+        (homeScope !== undefined && c.accessorKey === 'state')
       )
     )
   }
-  
+
   const col = useFilesColumns({
     onFolderClick,
     onFileClick,
-    colWidths,
     isAdmin,
     properties,
+    // @ts-expect-error filter
   }).filter(filterColsByScope)
-  
-  const columns = useMemo(() => col, [col, location.search, properties])
-  const data = useMemo(() => files || [], [files, selectedRows])
 
   return (
-    <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd} sensors={sensors} collisionDetection={centerToCursorCollisionDetection}>
+    <DndContext
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
+      sensors={sensors}
+      collisionDetection={centerToCursorCollisionDetection}
+    >
       {dndMoveModal.modalComp}
       <FilesListBreadcrumbHeader>
-        <FileBreadcrumb currentFolderId={folderId || 0} basePath={location.pathname} scope={homeScope} metaPath={filesMeta?.path} labelText="You are here:" />
-      </FilesListBreadcrumbHeader>
-      <StyledHomeTable>
-        <Table<IFile>
-          name="files"
-          columns={columns}
-          enableColumnSelect
-          hiddenColumns={hiddenColumns}
-          saveHiddenColumns={saveHiddenColumns}
-          data={data}
-          properties={properties}
-          isSelectable
-          isSortable
-          isFilterable
-          loading={isLoading}
-          loadingComponent={<div>Loading...</div>}
-          selectedRows={selectedRows}
-          setSelectedRows={setSelectedRows}
-          setSortByPreference={setSortBy}
-          sortByPreference={sortBy}
-          manualFilters
-          filters={filters}
-          shouldResetFilters={shouldResetFilters}
-          setFilters={setFilters}
-          emptyComponent={<EmptyTable>You have no files here.</EmptyTable>}
-          isColsResizable
-          saveColumnResizeWidth={saveColumnResizeWidth}
-          rowProps={r => ({ id: r.original.id })}
-          dnd
+        <FileBreadcrumb
+          currentFolderId={folderId || 0}
+          basePath={location.pathname}
+          scope={homeScope}
+          metaPath={filesMeta?.path}
+          labelText="You are here:"
         />
-      </StyledHomeTable>
+      </FilesListBreadcrumbHeader>
+      <StyledPageTable>
+        <Table<IFile>
+          isLoading={isLoading}
+          data={files || []}
+          columns={col}
+          columnSizing={columnSizing}
+          setColumnSizing={setColumnSizing}
+          rowSelection={selectedRows ?? {}}
+          setSelectedRows={setSelectedRows}
+          setColumnFilters={setFilters}
+          columnSortBy={sortBy}
+          setColumnSortBy={setSortBy}
+          columnFilters={filters}
+          enableDnd
+          columnVisibility={columnVisibility}
+          setColumnVisibility={setColumnVisibility}
+          emptyText="You don't have any files yet."
+        />
+      </StyledPageTable>
     </DndContext>
   )
 }

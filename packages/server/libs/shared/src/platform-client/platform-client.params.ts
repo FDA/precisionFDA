@@ -72,11 +72,13 @@ type AppPublishParams = {
 }
 
 type JobFindParams = {
-  id: string[] // job dxid
+  id?: string[] // job dxid
   project?: string // ID of the project context, or the project in which the job was launched
 
   includeSubjobs?: boolean
   describe: boolean
+  name?: string
+  state?: string[]
 }
 
 type JobCreateParams = {
@@ -85,8 +87,8 @@ type JobCreateParams = {
   name?: string
   costLimit: number
   input: AnyObject
-  systemRequirements: AnyObject
-  timeoutPolicyByExecutable: AnyObject
+  systemRequirements?: AnyObject
+  timeoutPolicyByExecutable?: AnyObject
   snapshot?: {
     $dnanexus_link: {
       project?: string

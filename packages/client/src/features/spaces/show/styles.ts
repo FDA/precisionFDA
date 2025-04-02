@@ -55,7 +55,7 @@ export const ButtonRow = styled.div`
 
 export const Tab = styled.div`
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 900;
   box-sizing: border-box;
   background-color: var(--success-600);
   border: 2px solid white;
@@ -115,7 +115,7 @@ export const Tab = styled.div`
   p {
     margin-top: 4px;
     font-size: 12px;
-    font-weight: 300;
+    font-weight: 400;
     text-wrap: pretty;
   }
 `

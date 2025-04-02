@@ -7,12 +7,7 @@ import { StyledTab, StyledTabList, StyledTabPanel } from '../../../components/Ta
 import { StyledPropertyItem, StyledPropertyKey, StyledTagItem, StyledTags } from '../../../components/Tags'
 import { CogsIcon } from '../../../components/icons/Cogs'
 import { RESOURCE_LABELS } from '../../../types/user'
-import {
-  DEFAULT_RECONNECT_ATTEMPTS,
-  DEFAULT_RECONNECT_INTERVAL,
-  getNodeWsUrl,
-  SHOULD_RECONNECT,
-} from '../../../utils/config'
+import { DEFAULT_RECONNECT_ATTEMPTS, DEFAULT_RECONNECT_INTERVAL, getNodeWsUrl, SHOULD_RECONNECT } from '../../../utils/config'
 import { getBackPathNext } from '../../../utils/getBackPath'
 import { ActionsRow, StyledBackLink, StyledLink } from '../../home/home.styles'
 import {
@@ -30,11 +25,11 @@ import {
   Topbox,
 } from '../../home/show.styles'
 import {
-  EmmitScope,
+  EmitScope,
   HomeScope,
   Notification,
   NOTIFICATION_ACTION,
-  WEBSOCKET_MESSSAGE_TYPE,
+  WEBSOCKET_MESSAGE_TYPE,
   WebSocketMessage,
 } from '../../home/types'
 import { getBasePath } from '../../home/utils'
@@ -53,7 +48,7 @@ export const ExecutionDetails = ({
   spaceId,
   homeScope,
 }: {
-  emitScope?: EmmitScope
+  emitScope?: EmitScope
   spaceId?: number
   homeScope?: HomeScope
 }) => {
@@ -80,7 +75,7 @@ export const ExecutionDetails = ({
         const messageData = JSON.parse(message.data)
         const notification = messageData.data as Notification
         return (
-          messageData.type === WEBSOCKET_MESSSAGE_TYPE.NOTIFICATION &&
+          messageData.type === WEBSOCKET_MESSAGE_TYPE.NOTIFICATION &&
           [
             NOTIFICATION_ACTION.JOB_RUNNABLE,
             NOTIFICATION_ACTION.JOB_RUNNING,
@@ -108,7 +103,6 @@ export const ExecutionDetails = ({
 
   const execution = data?.job
 
-
   const [currentCost, setCurrentCost] = useState('$0')
   const [currentDuration, setCurrentDuration] = useState('0s')
 
@@ -127,13 +121,13 @@ export const ExecutionDetails = ({
 
     // Create a human-readable string
     const durationString = `${days > 0 ? `${days}  ${pluralize('day', days)}` : ''}${
-        hours > 0 ? `${hours} ${pluralize('hour', hours)} ` : ''
+      hours > 0 ? `${hours} ${pluralize('hour', hours)} ` : ''
     }${minutes > 0 ? `${minutes} ${pluralize('minute', minutes)} ` : ''}${seconds} ${pluralize('second', seconds)}`
 
     setCurrentDuration(durationString)
     const runtimeHours = durationInSeconds / (60 * 60)
     const perHourCost: number = PricingMap[e.instance_type as keyof typeof PricingMap]
-    setCurrentCost(`$${(parseFloat((runtimeHours * perHourCost).toFixed(2)))}`)
+    setCurrentCost(`$${parseFloat((runtimeHours * perHourCost).toFixed(2))}`)
   }
 
   useEffect(() => {
@@ -161,8 +155,9 @@ export const ExecutionDetails = ({
 
   const getCostMetadataItem = (e: IExecution) => {
     const isActiveState = e.state === 'running' || e.state === 'terminating'
-    const calculatedCost = `$${(e.duration_in_seconds / 3600 * PricingMap[e.instance_type as keyof typeof PricingMap])
-        .toFixed(2)}`
+    const calculatedCost = `$${((e.duration_in_seconds / 3600) * PricingMap[e.instance_type as keyof typeof PricingMap]).toFixed(
+      2,
+    )}`
 
     let finalCost: string
     if (!isActiveState) {
@@ -172,10 +167,10 @@ export const ExecutionDetails = ({
     }
 
     return (
-        <MetadataItem>
-          <MetadataKey>{isActiveState ? 'Estimated Cost' : 'Cost'}</MetadataKey>
-          <MetadataVal data-testid="execution-cost">{finalCost}</MetadataVal>
-        </MetadataItem>
+      <MetadataItem>
+        <MetadataKey>{isActiveState ? 'Estimated Cost' : 'Cost'}</MetadataKey>
+        <MetadataVal data-testid="execution-cost">{finalCost}</MetadataVal>
+      </MetadataItem>
     )
   }
 
@@ -185,10 +180,10 @@ export const ExecutionDetails = ({
 
   if (!execution || !execution.id)
     return (
-        <NotFound>
-          <h1>Execution not found</h1>
-          <div>Sorry, this execution does not exist or is not accessible by you.</div>
-        </NotFound>
+      <NotFound>
+        <h1>Execution not found</h1>
+        <div>Sorry, this execution does not exist or is not accessible by you.</div>
+      </NotFound>
     )
 
   return (
@@ -224,9 +219,11 @@ export const ExecutionDetails = ({
 
         <MetadataSection>
           <MetadataRow>
-          <MetadataItem>
+            <MetadataItem>
               <MetadataKey>STATE</MetadataKey>
-              <MetadataVal data-testid="execution-status"><StateCell state={execution.state} /></MetadataVal>
+              <MetadataVal data-testid="execution-status">
+                <StateCell state={execution.state} />
+              </MetadataVal>
             </MetadataItem>
 
             <MetadataItem>
@@ -258,7 +255,7 @@ export const ExecutionDetails = ({
               <MetadataKey>APP</MetadataKey>
               {/* TODO: do not rely on link to get app id */}
               <MetadataVal data-testid="execution-app-title">
-                <StyledLink to={`${getBasePath(spaceId)}/apps/${execution.app_uid}`} disable={!execution.app_active}>
+                <StyledLink to={`${getBasePath(spaceId)}/apps/${execution.app_uid}`} $disable={!execution.app_active}>
                   {execution.app_title}
                 </StyledLink>
               </MetadataVal>
@@ -353,7 +350,13 @@ export const ExecutionDetails = ({
         <Routes>
           <Route
             path="/"
-            element={<InputsAndOutputs executionState={execution.state} runInputData={execution.run_input_data} runOutputData={execution.run_output_data} />}
+            element={
+              <InputsAndOutputs
+                executionState={execution.state}
+                runInputData={execution.run_input_data}
+                runOutputData={execution.run_output_data}
+              />
+            }
           />
           <Route path="logs" element={<Logs jobUid={execution.uid} jobState={execution.state} />} />
         </Routes>

@@ -1,33 +1,31 @@
-import React, { useMemo } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { SortingRule, UseResizeColumnsState } from 'react-table'
+import { ColumnFiltersState, ColumnSizingState, ColumnSort, VisibilityState } from '@tanstack/react-table'
+import React from 'react'
+import { Link } from 'react-router-dom'
 import styled from 'styled-components'
+import { Button } from '../../components/Button'
 import Dropdown from '../../components/Dropdown'
 import { ContentFooter } from '../../components/Page/ContentFooter'
 import { BackLink } from '../../components/Page/PageBackLink'
 import { Refresh } from '../../components/Page/styles'
 import { Pagination } from '../../components/Pagination'
-import Table from '../../components/Table/Table'
-import { EmptyTable } from '../../components/Table/styles'
+import Table from '../../components/Table'
+import { StyledPageTable } from '../../components/Table/components/styles'
 import { HoverDNAnexusLogo } from '../../components/icons/DNAnexusLogo'
 import { PlusIcon } from '../../components/icons/PlusIcon'
 import { SyncIcon } from '../../components/icons/SyncIcon'
 import { getSelectedObjectsFromIndexes, toArrayFromObject } from '../../utils/object'
 import { ActionsDropdownContent } from '../home/ActionDropdownContent'
-import {
-  ActionsRow,
-  QuickActions,
-  StyledHomeTable, StyledRight,
-} from '../home/home.styles'
+import { ActionsRow, QuickActions, StyledRight } from '../home/home.styles'
 import { ActionsButton, ResourceHeader } from '../home/show.styles'
-import { IFilter, IMeta, KeyVal, HomeScope } from '../home/types'
+import { HomeScope, IMeta } from '../home/types'
 import { useList } from '../home/useList'
 import { usePropertiesQuery } from '../home/usePropertiesQuery'
+import { getBasePath } from '../home/utils'
 import { fetchDatabaseList } from './databases.api'
 import { IDatabase } from './databases.types'
 import { useDatabaseColumns } from './useDatabaseColumns'
 import { useDatabaseSelectActions } from './useDatabaseSelectActions'
-import { Button } from '../../components/Button'
+import { ResouceQueryErrorMessage } from '../home/ResouceQueryErrorMessage'
 
 const DBStyledRight = styled(StyledRight)`
   gap: 20px;
@@ -39,21 +37,18 @@ const NoDatabases = styled.div`
   gap: 16px;
 `
 
-type ListType = { dbclusters: IDatabase[]; meta: IMeta }
+type ListType = { data: IDatabase[]; meta: IMeta }
 
-export const DatabaseList = ({ homeScope }: { homeScope?: HomeScope }) => {
-  if (homeScope !== 'me') {
+export const DatabaseList = ({ homeScope, spaceId }: { homeScope?: HomeScope, spaceId?: number }) => {
+  const basePath = getBasePath(spaceId)
+  if (homeScope && homeScope !== 'me' && homeScope !== 'spaces') {
     return (
       <NoDatabases>
-        <div>Scope: "{homeScope}", does not have any databases.</div>
-        <BackLink linkTo="/home/databases?scope=me">
-          Go to the "My" scope
-        </BackLink>
+        <div>Scope: &quot;{homeScope}&quot;, does not have any databases.</div>
+        <BackLink linkTo="/home/databases?scope=me">Go to the &quot;My&quot; scope</BackLink>
       </NoDatabases>
     )
   }
-  const navigate = useNavigate()
-  const onRowClick = (id: string) => navigate(`/home/databases/${id}`)
   const {
     setSortBy,
     sortBy,
@@ -67,12 +62,13 @@ export const DatabaseList = ({ homeScope }: { homeScope?: HomeScope }) => {
     setSelectedIndexes,
     saveColumnResizeWidth,
     colWidths,
-    hiddenColumns,
-    saveHiddenColumns,
+    setColumnVisibility,
+    columnVisibility,
   } = useList<ListType>({
     fetchList: fetchDatabaseList,
     resource: 'dbclusters',
     params: {
+      spaceId: spaceId || undefined,
       scope: homeScope || undefined,
     },
   })
@@ -81,16 +77,11 @@ export const DatabaseList = ({ homeScope }: { homeScope?: HomeScope }) => {
 
   const selectedObjects = getSelectedObjectsFromIndexes(
     selectedIndexes,
-    data?.dbclusters,
+    data?.data,
   )
   const actions = useDatabaseSelectActions(selectedObjects, ['dbclusters'])
 
-  if (error)
-    return (
-      <ActionsRow>
-        Error! Something broke, or this resource type does not exist.
-      </ActionsRow>
-    )
+  if (error) return <ResouceQueryErrorMessage />
 
   return (
     <>
@@ -99,9 +90,9 @@ export const DatabaseList = ({ homeScope }: { homeScope?: HomeScope }) => {
           <QuickActions>
             <Button
               data-variant='primary'
-              data-testid="home-databases-create-link"
+              data-testid="databases-create-link"
               as={Link}
-              to="/home/databases/create"
+              to={`${basePath}/databases/create`}
             >
               <PlusIcon height={12} /> Create Database
             </Button>
@@ -113,14 +104,11 @@ export const DatabaseList = ({ homeScope }: { homeScope?: HomeScope }) => {
               </Refresh>
               Refresh
             </Button>
-            <Dropdown
-              trigger="click"
-              content={<ActionsDropdownContent actions={actions} />}
-            >
+            <Dropdown trigger="click" content={<ActionsDropdownContent actions={actions} />}>
               {dropdownProps => (
                 <ActionsButton
                   {...dropdownProps}
-                  data-testid="home-databases-actions-button"
+                  data-testid="databases-actions-button"
                   active={dropdownProps.isActive}
                 />
               )}
@@ -134,24 +122,23 @@ export const DatabaseList = ({ homeScope }: { homeScope?: HomeScope }) => {
         setFilters={setSearchFilter}
         // TODO(samuel) Typescript fix
         filters={toArrayFromObject(filterQuery as any)}
-        data={data?.dbclusters}
+        data={data?.data}
         properties={propertiesData?.keys}
         isLoading={isLoading}
-        handleRowClick={onRowClick}
         selectedRows={selectedIndexes}
         setSelectedRows={setSelectedIndexes}
+        setColumnSizing={saveColumnResizeWidth}
+        columnSizing={colWidths}
+        columnVisibility={columnVisibility}
+        setColumnVisibility={setColumnVisibility}
         setSortBy={setSortBy}
         sortBy={sortBy}
-        saveColumnResizeWidth={saveColumnResizeWidth}
-        colWidths={colWidths}
-        hiddenColumns={hiddenColumns}
-        saveHiddenColumns={saveHiddenColumns}
       />
       <ContentFooter>
         <Pagination
-          page={data?.meta?.pagination?.current_page}
-          totalCount={data?.meta?.pagination?.total_count}
-          totalPages={data?.meta?.pagination?.total_pages}
+          page={data?.meta?.page}
+          totalCount={data?.meta?.total}
+          totalPages={data?.meta?.totalPages}
           perPage={perPageParam}
           isHidden={false}
           isPreviousData={data?.meta?.pagination?.prev_page !== null}
@@ -177,71 +164,55 @@ export const DatabaseList = ({ homeScope }: { homeScope?: HomeScope }) => {
 
 export const DatabaseListTable = ({
   filters,
+  setFilters,
   data,
   properties,
-  handleRowClick,
   isLoading,
-  setFilters,
   selectedRows,
   setSelectedRows,
   setSortBy,
   sortBy,
-  homeScope,
-  saveColumnResizeWidth,
-  colWidths,
-  hiddenColumns,
-  saveHiddenColumns,
+  columnSizing,
+  setColumnSizing,
+  columnVisibility,
+  setColumnVisibility,
 }: {
-  filters: IFilter[]
+  filters: ColumnFiltersState
+  setFilters: (val: ColumnFiltersState) => void
+  sortBy: ColumnSort[]
+  setSortBy: (cols: ColumnSort[]) => void
   data?: IDatabase[]
   properties?: string[]
-  handleRowClick: (fileId: string) => void
-  setFilters: (val: IFilter[]) => void
   selectedRows?: Record<string, boolean>
   setSelectedRows: (ids: Record<string, boolean>) => void
-  sortBy?: SortingRule<string>[]
-  setSortBy: (cols: SortingRule<string>[]) => void
   isLoading: boolean
   homeScope?: HomeScope
-  colWidths: KeyVal
-  saveColumnResizeWidth: (
-    columnResizing: UseResizeColumnsState<any>['columnResizing'],
-  ) => void
-  saveHiddenColumns: (cols: string[]) => void
-  hiddenColumns: string[]
+  columnSizing: ColumnSizingState
+  setColumnSizing: (columnResizing: ColumnSizingState) => void
+  setColumnVisibility: (cols: VisibilityState) => void
+  columnVisibility: VisibilityState
 }) => {
-  const col = useDatabaseColumns({ handleRowClick, colWidths, properties })
 
-  const columns = useMemo(() => col, [col, properties])
-  const memoData = useMemo(() => data || [], [data, selectedRows])
+  const col = useDatabaseColumns({ properties })
 
   return (
-    <StyledHomeTable>
+    <StyledPageTable>
       <Table<IDatabase>
-        name="apps"
-        columns={columns}
-        enableColumnSelect
-        hiddenColumns={hiddenColumns}
-        saveHiddenColumns={saveHiddenColumns}
-        data={memoData}
-        properties={properties}
-        isSelectable
-        isSortable
-        isFilterable
-        loading={isLoading}
-        loadingComponent={<div>Loading...</div>}
-        selectedRows={selectedRows}
+        isLoading={isLoading}
+        data={data || []}
+        columns={col}
+        columnSizing={columnSizing}
+        setColumnSizing={setColumnSizing}
+        rowSelection={selectedRows ?? {}}
         setSelectedRows={setSelectedRows}
-        sortByPreference={sortBy}
-        setSortByPreference={setSortBy}
-        manualFilters
-        shouldResetFilters={[homeScope]}
-        filters={filters}
-        setFilters={setFilters}
-        emptyComponent={<EmptyTable>You have no databases here.</EmptyTable>}
-        isColsResizable
-        saveColumnResizeWidth={saveColumnResizeWidth}
+        setColumnFilters={setFilters}
+        columnSortBy={sortBy}
+        setColumnSortBy={setSortBy}
+        columnFilters={filters}
+        columnVisibility={columnVisibility}
+        setColumnVisibility={setColumnVisibility}
+        emptyText="You don't have any databases yet."
       />
-    </StyledHomeTable>
+    </StyledPageTable>
   )
 }
