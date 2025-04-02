@@ -19,7 +19,7 @@
       <div class="pull-right">
         <span class="btn-static text-muted" data-bind="visible: !isNewApp" style="display: none"><span data-bind="text: 'Revision ' + revision()"></span>&nbsp;<span class="fa fa-long-arrow-right fa-fw"></span></span>
         <div class="btn-group">
-          <button class="btn btn-primary" <%= guest_hide %> data-bind="click: save, disable: !isSaveReady(), css: {'disabled': !isSaveReady()}">
+          <button class="btn btn-primary" data-bind="click: save, disable: !isSaveReady(), css: {'disabled': !isSaveReady()}">
             <span data-bind="css: saveIcon"></span> <span data-bind="text: saveButtonText"></span>
           </button>
         </div>

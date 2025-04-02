@@ -2,7 +2,7 @@ import axios from 'axios'
 import { checkStatus, getApiRequestOpts } from '../../utils/api'
 import { FileScope, FileState, IFile } from '../files/files.types'
 import { IFilter, IMeta } from '../home/types'
-import { formatScopeQ, Params, prepareListFetch } from '../home/utils'
+import { formatScopeQuery, Params, prepareListFetch } from '../home/utils'
 import { IDatabase, MethodType } from './databases.types'
 
 export interface FetchDatabaseListQuery {
@@ -10,18 +10,15 @@ export interface FetchDatabaseListQuery {
   meta: IMeta
 }
 
-export async function fetchDatabaseList(
-  filters: IFilter[],
-  params: Params,
-): Promise<FetchDatabaseListQuery> {
+export async function fetchDatabaseList(filters: IFilter[], params: Params): Promise<FetchDatabaseListQuery> {
   const query = prepareListFetch(filters, params)
-  const paramQ = '?' + new URLSearchParams(query as {}).toString()
-  const scopeQ = formatScopeQ(params.scope)
-  return await axios.get(`/api/dbclusters/${scopeQ}${paramQ}`).then(r => r.data)
+  const paramQ = '&' + new URLSearchParams(query as {}).toString()
+  const scopeQ = formatScopeQuery(params.scope, params.spaceId)
+  return axios.get(`/api/v2/dbclusters/${scopeQ}${paramQ.replace('per_page', 'pageSize')}`).then(r => r.data)
 }
 
- interface AllowedInstance {
-  value: string,
+interface AllowedInstance {
+  value: string
   label: string
 }
 export async function getDatabaseAllowedInstances() {
@@ -33,7 +30,7 @@ interface FetchDatabaseRequest {
 }
 
 export async function fetchDatabaseRequest(uid: string): Promise<IDatabase> {
-  return axios.get<FetchDatabaseRequest>(`/api/dbclusters/${uid}`).then(r => r.data.db_cluster)
+  return axios.get<FetchDatabaseRequest>(`/api/v2/dbclusters/${uid}`).then(r => r.data.db_cluster)
 }
 
 export interface IAccessibleFile extends IFile {
@@ -69,28 +66,19 @@ export async function fetchAccessibleFilesByUID(body: FetchAccessibleFilesReques
 export interface CreateDatabasePayload {
   name: string
   description: string
-  adminPassword: string
-  confirmPassword: string
   engine: string
   dxInstanceClass: string
   engineVersion: string
-  ddl_file_uid: string
 }
-
 
 export interface Error {
-  type: string;
-  code: string;
-  message: string;
+  type: string
+  code: string
+  message: string
 }
 
-export interface CreateDatabaseResponse {
-  db_cluster: IDatabase
-  error?: Error;
-}
-
-export async function createDatabaseRequest(payload: CreateDatabasePayload): Promise<CreateDatabaseResponse> {
-  return axios.post('/api/dbclusters/', { db_cluster: payload }).then(r => r.data)
+export async function createDatabaseRequest(payload: CreateDatabasePayload): Promise<IDatabase> {
+  return axios.post('/api/v2/dbclusters/', payload).then(r => r.data)
 }
 
 export interface EditDatabasePayload {
@@ -99,11 +87,11 @@ export interface EditDatabasePayload {
 }
 
 export async function editDatabaseRequest(payload: EditDatabasePayload, uid: string) {
-  return await axios.put(`/api/dbclusters/${uid}`, payload).then(r => r.data)
+  return axios.put(`/api/v2/dbclusters/${uid}`, payload).then(r => r.data)
 }
 
 export async function copyDatabasesRequest(scope: string, ids: string[]) {
-  return await axios.post('/api/dbclusters/copy', { item_ids: ids, scope }).then(r => r.data)
+  return axios.post('/api/dbclusters/copy', { item_ids: ids, scope }).then(r => r.data)
 }
 
 export async function databaseMethodRequest(method: MethodType, dxids: string[]) {

@@ -14,8 +14,7 @@ class ComparisonsController < ApplicationController
     track
   )
 
-  before_action :require_login_or_guest, only: %i(index featured explore show track)
-  before_action :redirect_guest, only: %i(index)
+  before_action :require_login, only: %i(index featured explore show track)
 
   layout "react", only: [:track]
 
@@ -494,11 +493,6 @@ class ComparisonsController < ApplicationController
     remapped["ref_vcf"] = remapped.delete("benchmark_vcf") if remapped.key?("benchmark_vcf")
     remapped["ref_bed"] = remapped.delete("benchmark_bed") if remapped.key?("benchmark_bed")
     remapped
-  end
-
-  # Redirects guest to comparisons' root.
-  def redirect_guest
-    redirect_to explore_comparisons_path if @context.guest?
   end
 
   # Tries to find real accessible by user file by file's UID.

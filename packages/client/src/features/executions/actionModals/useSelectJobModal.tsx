@@ -172,7 +172,7 @@ export const useSelectJobModal = (
     <ModalNext id="select-job-modal" headerText={title} isShown={isShown} hide={() => setShowModal(false)}>
       <ModalHeaderTop headerText={title} hide={() => setShowModal(false)} />
       {subtitle && <StyledSubtitle>{subtitle}</StyledSubtitle>}
-      <Tabs>
+      <Tabs nonSelected={selectedJobs.length === 0}>
         <Tab title={`Selected ${selectedJobs.length}`} key="selected">
           {selectedJobs.length === 0 && <StyledRow>No selected jobs</StyledRow>}
           {selectedJobs.length > 0 && (

@@ -61,10 +61,6 @@ export const PageContent = styled.div`
   }
 `
 
-export const StyledTextArea = styled.textarea`
-  width: 100%;
-`
-
 export const ImageContainer = styled.div`
   position: relative;
 `
@@ -72,6 +68,8 @@ export const ImageContainer = styled.div`
 export const AttachmentsLabel = styled.span`
   font-weight: bold;
   margin: 0.25rem 0;
+  padding-left: 8px;
+  padding-right: 8px;
 `
 
 export const StyledCommentCard = styled.div<{ $isAnswer?: boolean }>`
@@ -178,6 +176,7 @@ export const StyledMarkdown = styled.div<{ $isAnswer?: boolean }>`
   h5,
   h6 {
     margin: 1rem 0;
+    font-weight: bold;
   }
 
   h1 {
@@ -198,7 +197,7 @@ export const StyledMarkdown = styled.div<{ $isAnswer?: boolean }>`
     margin: 1em 0;
   }
 
-  ul {
+  ul, ol {
     padding-inline-start: 1rem;
 
     li {

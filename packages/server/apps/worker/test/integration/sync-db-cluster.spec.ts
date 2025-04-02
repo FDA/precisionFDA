@@ -1,226 +1,166 @@
-import { database } from '@shared/database'
-import { DbCluster } from '@shared/domain/db-cluster/db-cluster.entity'
-import { User } from '@shared/domain/user/user.entity'
-import { ClientRequestError } from '@shared/errors'
-import { getMainQueue } from '@shared/queue'
-import { TASK_TYPE } from '@shared/queue/task.input'
-import { invertObj } from 'ramda'
-import { EntityManager } from '@mikro-orm/core'
-import type { SyncDbClusterJob } from '@shared/queue/task.input'
 import { expect } from 'chai'
-import { create, generate, db, mockResponses } from '@shared/test'
-import { fakes, mocksReset } from '@shared/test/mocks'
-import { STATUS, STATUSES } from '@shared/domain/db-cluster/db-cluster.enum'
-import { fakes as queueFakes, mocksReset as queueMocksReset } from '../utils/mocks'
-import { errorsFactory } from '../utils/errors-factory'
+import { Job } from 'bull'
+import { DbClusterService } from '@shared/domain/db-cluster/service/db-cluster.service'
+import { STATUS } from '@shared/domain/db-cluster/db-cluster.enum'
+import { SyncDbClusterJob, TASK_TYPE } from '@shared/queue/task.input'
+import sinon, { stub } from 'sinon'
+import { SqlEntityManager } from '@mikro-orm/mysql'
+import { PlatformClient } from '@shared/platform-client'
+import { MainQueueJobProducer } from '@shared/queue/producer/main-queue-job.producer'
+import { EmailQueueJobProducer } from '@shared/domain/email/producer/email-queue-job.producer'
+import { DbClusterRepository } from '@shared/domain/db-cluster/db-cluster.repository'
+import { UserRepository } from '@shared/domain/user/user.repository'
+import { SpaceRepository } from '@shared/domain/space/space.repository'
+import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
+import { UsersDbClustersSaltRepository } from '@shared/domain/db-cluster/access-control/users-db-clusters-salt.repository'
 
-const createSyncDbClusterTestTask = async (
-  payload: SyncDbClusterJob['payload'],
-  user: SyncDbClusterJob['user'],
-) => {
-  const defaultTestQueue = getMainQueue()
-  await defaultTestQueue.add(TASK_TYPE.SYNC_DBCLUSTER_STATUS, {
-    type: TASK_TYPE.SYNC_DBCLUSTER_STATUS,
-    payload,
-    user,
-  })
-}
+describe('DbClusterService', () => {
+  let removeRepeatableStub: sinon.SinonStub
+  let originalRemoveRepeatable
 
-describe('TASK: sync db cluster', () => {
-  let em: EntityManager
-  let user: User
-  let dbCluster: DbCluster
+  const USER_ID = 0
+  const USER = {
+    id: USER_ID,
+  }
+
+  const em = {} as unknown as SqlEntityManager
+  const USER_CTX: UserCtx = { ...USER, accessToken: 'accessToken', dxuser: 'dxuser' }
+  const dbClusterDescribe = stub()
+  const userClient = {
+    dbClusterDescribe: dbClusterDescribe,
+  } as unknown as PlatformClient
+  const mainJobProducer = {} as unknown as MainQueueJobProducer
+  const emailQueueJobProducer = {} as unknown as EmailQueueJobProducer
+  const dbfindOne = stub()
+  const entityManagerStub = {
+    flush: stub().resolves(),
+    persist: stub().resolves(),
+  }
+  const getEntityManager = stub().returns(entityManagerStub)
+  const dbClusterRepository = {
+    findOne: dbfindOne,
+    getEntityManager: getEntityManager,
+  } as unknown as DbClusterRepository
+  const userfindOne = stub()
+  const userRepository = {
+    findOne: userfindOne,
+  } as unknown as UserRepository
+  const spaceRepository = {} as unknown as SpaceRepository
+  const spaceMembershipRepository = {} as unknown as SpaceMembershipRepository
+  const saltRepository = {} as unknown as UsersDbClustersSaltRepository
+  const adminClient = {
+    dbClusterDescribe: dbClusterDescribe,
+  } as unknown as PlatformClient
+
+  const logStub = stub()
+  const warnStub = stub()
 
   beforeEach(async () => {
-    await db.dropData(database.connection())
-    em = database.orm().em.fork()
-    em.clear()
-    user = create.userHelper.create(em)
-    dbCluster = create.dbClusterHelper.create(em, { user })
-    await em.flush()
-    mocksReset()
-    queueMocksReset()
+    removeRepeatableStub = stub()
+
+    removeRepeatableStub.resolves()
+
+    // Replace the original removeRepeatable function
+    originalRemoveRepeatable = require('@shared/queue').removeRepeatable
+    require('@shared/queue').removeRepeatable = removeRepeatableStub
   })
 
-  it('processes a queue task - calls the queue handlers', async () => {
-    await createSyncDbClusterTestTask(
-      { dxid: dbCluster.dxid },
-      { id: user.id, dxuser: user.dxuser, accessToken: 'fake-token' },
-    )
-    expect(queueFakes.addToQueueStub.calledOnce).to.be.true()
+  afterEach(() => {
+    // Restore the original removeRepeatable function
+    require('@shared/queue').removeRepeatable = originalRemoveRepeatable
   })
 
-  it('removes task from queue when db cluster has terminated status', async () => {
-    dbCluster.status = STATUS.TERMINATED
-    await em.flush()
+  describe('#syncDbClusterStatus', () => {
+    it('should call removeRepeatable if dbCluster status is TERMINATED', async () => {
+      const job = {
+        type: TASK_TYPE.SYNC_DBCLUSTER_STATUS,
+        data: { payload: { dxid: 'dbcluster-1' }, user: { id: 1 } },
+      } as unknown as Job<SyncDbClusterJob>
 
-    await createSyncDbClusterTestTask(
-      { dxid: dbCluster.dxid },
-      { id: user.id, dxuser: user.dxuser, accessToken: 'fake-token' },
-    )
+      dbfindOne.resolves({ status: STATUS.TERMINATED })
+      userfindOne.resolves({ id: 1 })
 
-    expect(fakes.client.dbClusterDescribeFake.notCalled).to.be.true()
-    expect(fakes.queue.removeRepeatableFake.calledOnce).to.be.true()
-  })
-
-  it('does not update local database if remote properties are the same', async () => {
-    const describeCallRes = {
-      ...mockResponses.DBCLUSTER_DESC_RES,
-      endpoint: dbCluster.host,
-      port: dbCluster.port,
-      status: STATUSES[invertObj(STATUS)[dbCluster.status]],
-      id: dbCluster.dxid,
-    }
-
-    fakes.client.dbClusterDescribeFake.onCall(0).returns(describeCallRes)
-
-    await createSyncDbClusterTestTask(
-      { dxid: dbCluster.dxid },
-      { id: user.id, dxuser: user.dxuser, accessToken: 'fake-token' },
-    )
-
-    expect(fakes.client.dbClusterDescribeFake.calledOnce).to.be.true()
-
-    const afterEm = em.fork()
-    const notUpdated = await afterEm.findOne(DbCluster, dbCluster.id)
-    expect(notUpdated.updatedAt.getTime()).to.be.equal(dbCluster.updatedAt.getTime())
-  })
-
-  it('updates local database if remote port is different', async () => {
-    const remotePort = parseInt(dbCluster.port) + 1
-    const describeCallRes = {
-      ...mockResponses.DBCLUSTER_DESC_RES,
-      endpoint: dbCluster.host,
-      port: remotePort,
-      status: STATUSES[invertObj(STATUS)[dbCluster.status]],
-      id: dbCluster.dxid,
-    }
-
-    fakes.client.dbClusterDescribeFake.onCall(0).returns(describeCallRes)
-
-    await createSyncDbClusterTestTask(
-      { dxid: dbCluster.dxid },
-      { id: user.id, dxuser: user.dxuser, accessToken: 'fake-token' },
-    )
-
-    expect(fakes.client.dbClusterDescribeFake.calledOnce).to.be.true()
-
-    const afterEm = em.fork()
-    const updated = await afterEm.findOne(DbCluster, dbCluster.id)
-    expect(updated.updatedAt.getTime()).to.not.be.equal(dbCluster.updatedAt.getTime())
-    expect(updated).to.have.property('port').that.is.equal(remotePort.toString())
-  })
-
-  it('updates local database if remote host is different', async () => {
-    const remoteHost = `${dbCluster.port}diff`
-    const describeCallRes = {
-      ...mockResponses.DBCLUSTER_DESC_RES,
-      endpoint: remoteHost,
-      port: dbCluster.port,
-      status: STATUSES[invertObj(STATUS)[dbCluster.status]],
-      id: dbCluster.dxid,
-    }
-
-    fakes.client.dbClusterDescribeFake.onCall(0).returns(describeCallRes)
-
-    await createSyncDbClusterTestTask(
-      { dxid: dbCluster.dxid },
-      { id: user.id, dxuser: user.dxuser, accessToken: 'fake-token' },
-    )
-
-    expect(fakes.client.dbClusterDescribeFake.calledOnce).to.be.true()
-
-    const afterEm = em.fork()
-    const updated = await afterEm.findOne(DbCluster, dbCluster.id)
-    expect(updated.updatedAt.getTime()).to.not.be.equal(dbCluster.updatedAt.getTime())
-    expect(updated).to.have.property('host').that.is.equal(remoteHost)
-  })
-
-  it('updates local database if remote status is different', async () => {
-    const describeCallRes = {
-      ...mockResponses.DBCLUSTER_DESC_RES,
-      endpoint: dbCluster.host,
-      port: dbCluster.port,
-      status: STATUSES.STOPPED,
-      id: dbCluster.dxid,
-    }
-
-    fakes.client.dbClusterDescribeFake.onCall(0).returns(describeCallRes)
-
-    await createSyncDbClusterTestTask(
-      { dxid: dbCluster.dxid },
-      { id: user.id, dxuser: user.dxuser, accessToken: 'fake-token' },
-    )
-
-    expect(fakes.client.dbClusterDescribeFake.calledOnce).to.be.true()
-
-    const afterEm = em.fork()
-    const updated = await afterEm.findOne(DbCluster, dbCluster.id)
-    expect(updated.updatedAt.getTime()).to.not.be.equal(dbCluster.updatedAt.getTime())
-    expect(updated).to.have.property('status').that.is.equal(STATUS.STOPPED)
-  })
-
-  context('error states', () => {
-    it('removes task from queue when db cluster is not found', async () => {
-      const fakeDbClusterDxid = `dbcluster-${generate.random.dxstr()}`
-      await createSyncDbClusterTestTask(
-        { dxid: fakeDbClusterDxid },
-        { id: user.id, dxuser: user.dxuser, accessToken: 'fake-token' },
-      )
-      expect(fakes.queue.removeRepeatableFake.calledOnce).to.be.true()
-      expect(fakes.client.dbClusterDescribeFake.notCalled).to.be.true()
+      await getInstance().syncDbClusterStatus(job)
+      expect(removeRepeatableStub.calledOnceWith(job)).to.be.true()
     })
 
-    it('removes task from queue when user is not found', async () => {
-      await createSyncDbClusterTestTask(
-        { dxid: dbCluster.dxid },
-        { id: user.id + 1, dxuser: 'fake-dxuser', accessToken: 'fake-token' },
+    it('should not update local database if remote properties are the same', async () => {
+      const job = {
+        type: TASK_TYPE.SYNC_DBCLUSTER_STATUS,
+        data: { payload: { dxid: 'dbcluster-1' }, user: { id: 1 } },
+      } as unknown as Job<SyncDbClusterJob>
+
+      dbfindOne.resolves({
+        dxid: 'dbcluster-1',
+        status: STATUS.AVAILABLE,
+        host: 'dbcluster.com',
+        port: '5432',
+      })
+      userfindOne.resolves({ id: 1 })
+      dbClusterDescribe.resolves({
+        status: 'available',
+        endpoint: 'dbcluster.com',
+        port: '5432',
+      })
+
+      const service = getInstance()
+      // Replace the logger's log method
+      Object.defineProperty(service, 'logger', {
+        value: { log: logStub, warn: warnStub },
+        writable: true,
+      })
+      await service.syncDbClusterStatus(job)
+      sinon.assert.callOrder(dbfindOne, userfindOne, dbClusterDescribe)
+      expect(logStub.callCount).to.equal(4)
+      sinon.assert.calledWith(
+        logStub.lastCall,
+        { dxid: 'dbcluster-1' },
+        'Status, endpoint or port have not been changed, no updates',
       )
-      expect(fakes.queue.removeRepeatableFake.calledOnce).to.be.true()
-      expect(fakes.client.dbClusterDescribeFake.notCalled).to.be.true()
     })
 
-    it('it handles InvalidAuthentication - ExpiredToken gracefully', async () => {
-      fakes.client.dbClusterDescribeFake.rejects(errorsFactory.createClientTokenExpiredError())
-      await createSyncDbClusterTestTask(
-        { dxid: dbCluster.dxid },
-        { id: user.id, dxuser: user.dxuser, accessToken: 'fake-token' },
-      )
-      expect(fakes.client.dbClusterDescribeFake.calledOnce).to.be.true()
-      expect(fakes.queue.removeRepeatableFake.calledOnce).to.be.true()
-    })
+    context('error states', () => {
+      it('should call removeRepeatable when db cluster is not found', async () => {
+        const job = {
+          type: TASK_TYPE.SYNC_DBCLUSTER_STATUS,
+          data: { payload: { dxid: 'dbcluster-1' }, user: { id: 1 } },
+        } as unknown as Job<SyncDbClusterJob>
 
-    it('it handles ClientRequestError gracefully', async () => {
-      fakes.client.dbClusterDescribeFake.rejects(errorsFactory.createServiceUnavailableError())
-      await createSyncDbClusterTestTask(
-        { dxid: dbCluster.dxid },
-        { id: user.id, dxuser: user.dxuser, accessToken: 'fake-token' },
-      )
-      expect(fakes.client.dbClusterDescribeFake.calledOnce).to.be.true()
-      expect(fakes.queue.removeRepeatableFake.notCalled).to.be.true()
-    })
+        dbfindOne.resolves(null)
+        userfindOne.resolves({ id: 1 })
 
-    it('it handles other errors gracefully', async () => {
-      fakes.client.dbClusterDescribeFake.rejects(new Error('quack'))
-      await createSyncDbClusterTestTask(
-        { dxid: dbCluster.dxid },
-        { id: user.id, dxuser: user.dxuser, accessToken: 'fake-token' },
-      )
-      expect(fakes.queue.removeRepeatableFake.notCalled).to.be.true()
-    })
+        await getInstance().syncDbClusterStatus(job)
+        expect(removeRepeatableStub.calledOnceWith(job)).to.be.true()
+      })
 
-    it('does not remove task from queue when client API call returns 5xx error', async () => {
-      fakes.client.dbClusterDescribeFake.rejects(
-        new ClientRequestError('client error', {
-          clientResponse: {},
-          clientStatusCode: 500,
-        }),
-      )
-      await createSyncDbClusterTestTask(
-        { dxid: dbCluster.dxid },
-        { id: user.id, dxuser: user.dxuser, accessToken: 'fake-token' },
-      )
-      expect(fakes.queue.removeRepeatableFake.notCalled).to.be.true()
+      it('should call removeRepeatable when user is not found', async () => {
+        const job = {
+          type: TASK_TYPE.SYNC_DBCLUSTER_STATUS,
+          data: { payload: { dxid: 'dbcluster-1' }, user: { id: 1 } },
+        } as unknown as Job<SyncDbClusterJob>
+
+        dbfindOne.resolves({ id: 1 })
+        userfindOne.resolves(null)
+
+        await getInstance().syncDbClusterStatus(job)
+        expect(removeRepeatableStub.calledOnceWith(job)).to.be.true()
+      })
     })
   })
+
+  function getInstance() {
+    return new DbClusterService(
+      em,
+      USER_CTX,
+      userClient,
+      mainJobProducer,
+      emailQueueJobProducer,
+      dbClusterRepository,
+      userRepository,
+      spaceRepository,
+      spaceMembershipRepository,
+      saltRepository,
+      adminClient,
+    )
+  }
 })

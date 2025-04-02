@@ -3,17 +3,10 @@ class AppsController < ApplicationController
   include ErrorProcessable
   include CloudResourcesConcern
 
-  skip_before_action :require_login, only: %i(index featured explore show fork new)
-  before_action :require_login_or_guest, only: %i(index featured explore show fork new)
   before_action :validate_app_before_export, only: %i(export cwl_export wdl_export)
   before_action :check_total_and_job_charges_limit, only: %i(batch_app run)
 
   def index
-    if @context.guest?
-      redirect_to explore_apps_path
-      return
-    end
-
     @app = nil
     @assignable_challenges = []
 
@@ -176,11 +169,6 @@ class AppsController < ApplicationController
   end
 
   def new
-    if @context.guest?
-      redirect_to login_url
-      return
-    end
-
     if user_has_no_compute_resources_allowed
       flash[:error] = I18n.t("api.errors.no_allowed_instance_types")
       redirect_to apps_path

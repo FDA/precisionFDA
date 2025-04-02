@@ -4,8 +4,6 @@ class JobsController < ApplicationController
   include ErrorProcessable
   include CloudResourcesConcern
 
-  skip_before_action :require_login,     only: [:show]
-  before_action :require_login_or_guest, only: [:show]
   before_action :check_total_and_job_charges_limit, only: :new
 
   layout "react", only: [:new]

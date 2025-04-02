@@ -1,91 +1,79 @@
-import React, { useEffect, useMemo, useState } from 'react'
-import axios from 'axios'
 import { UseMutationResult, useQuery } from '@tanstack/react-query'
-import { Column } from 'react-table'
+import { ColumnDef } from '@tanstack/react-table'
+import axios from 'axios'
+import React, { MouseEvent, useEffect, useState } from 'react'
 import { toast } from 'react-toastify'
 import styled from 'styled-components'
+import { Button } from '../../components/Button'
 import { Loader } from '../../components/Loader'
-import { EmptyTable } from '../../components/Table/styles'
-import Table from '../../components/Table/Table'
+import Table from '../../components/Table'
+import { selectColumnDef } from '../../components/Table/selectColumnDef'
 import { getSelectedObjectsFromIndexes } from '../../utils/object'
+import { useListSelect } from '../home/useListSelect'
+import { ModalHeaderTop, ModalNext } from '../modal/ModalNext'
 import { ButtonRow, Footer, ModalScroll } from '../modal/styles'
 import { useModal } from '../modal/useModal'
-import { IApp } from '../apps/apps.types'
-import { ModalHeaderTop, ModalNext } from '../modal/ModalNext'
-import { Button } from '../../components/Button'
+import { Empty } from '../home/home.styles'
 
 const StyledName = styled.div`
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 `
-const StyledLoader = styled.div`
-  padding: 12px;
-`
 
 type ResourceTypes = 'apps' | 'workflows'
 
-async function fetchResourceListRequest(resource: ResourceTypes): Promise<any> {
+async function fetchResourceListRequest<T>(resource: ResourceTypes) {
   return axios
     .post(`/api/list_${resource}`, {
       scopes: ['private'],
     })
-    .then(res => res.data)
+    .then(res => res.data as T[])
 }
 
-const ResourceTable = ({
+function ResourceTable<T extends { id: number; uid: string; name: string; revision: number }>({
   resource,
   setSelectedUids,
 }: {
   resource: ResourceTypes
   setSelectedUids: (a: string[]) => void
-}) => {
-  const [selected, setSelected] = useState<Record<string, boolean> | undefined>(
-    {},
-  )
-  const { data, isLoading } = useQuery({
+}) {
+  const { selectedIndexes, setSelectedIndexes } = useListSelect()
+  const { data, isLoading, error } = useQuery({
     queryKey: ['resource_list', resource],
-    queryFn: () => fetchResourceListRequest(resource).catch(() => toast.error('Error: Fetching resource data list')),
+    queryFn: () => fetchResourceListRequest<T>(resource),
   })
-  const col: Column[] = [
+  const col: ColumnDef<T>[] = [
+    selectColumnDef<T>(),
     {
-      Header: 'Name',
-      accessor: 'name',
-      minWidth: 450,
-      // eslint-disable-next-line react/no-unstable-nested-components
-      Cell: ({ value }) => <StyledName>{value}</StyledName>,
+      header: 'Name',
+      accessorKey: 'name',
+      size: 250,
+      enableColumnFilter: false,
+      enableSorting: false,
+      enableResizing: false,
+      cell: c => <StyledName>{c.row.original.name}</StyledName>,
     },
     {
-      Header: 'Revision',
-      accessor: 'revision',
-      minWidth: 80,
-      maxWidth: 80,
+      header: 'Revision',
+      accessorKey: 'revision',
+      enableColumnFilter: false,
+      enableSorting: false,
+      enableResizing: false,
+      size: 200,
     },
   ]
 
+  
   useEffect(() => {
-    const uids = getSelectedObjectsFromIndexes(selected, data).map(i => i.uid)
+    const uids = getSelectedObjectsFromIndexes(selectedIndexes, data).map(i => i.uid)
     setSelectedUids(uids)
-  }, [selected])
-  const columns = useMemo(() => col, [col])
-  const d = useMemo(() => data, [data])
+  }, [selectedIndexes])
+  if(error) toast.error('Fetching resource data list')
+  if(isLoading) return <div className="p-4"><Loader /></div>
+  if(!data) return <Empty>There are no resources here</Empty>
 
-  if (isLoading) return <StyledLoader>Loading....</StyledLoader>
-
-  return (
-    <Table<IApp>
-      displayColFiller={false}
-      name="apps"
-      columns={columns as any}
-      data={d as any}
-      isSelectable
-      loading={isLoading}
-      loadingComponent={<div>Loading...</div>}
-      selectedRows={selected}
-      setSelectedRows={setSelected}
-      emptyComponent={<EmptyTable>You have no {resource} in My Home.</EmptyTable>}
-    />
-  )
+  return <Table<T> enableColumnFilters={false} isLoading={isLoading} columns={col} data={data} rowSelection={selectedIndexes} setSelectedRows={setSelectedIndexes} />
 }
 
 export function useAddResourceToModal({
@@ -97,7 +85,7 @@ export function useAddResourceToModal({
   spaceId: string
   resource: ResourceTypes
   mutation?: UseMutationResult<
-    any,
+    unknown,
     unknown,
     {
       spaceId: string
@@ -105,12 +93,12 @@ export function useAddResourceToModal({
     },
     unknown
   >
-  onSuccess: (res: any) => void
+  onSuccess: (res: unknown) => void
 }) {
   const { isShown, setShowModal } = useModal()
   const [selectedUids, setSelectedUids] = useState<string[]>([])
 
-  const handleSubmit = (e: any) => {
+  const handleSubmit = (e: MouseEvent) => {
     e.preventDefault()
     if (mutation && selectedUids) {
       mutation.mutateAsync({ spaceId, uids: selectedUids }).then(onSuccess)
@@ -124,21 +112,14 @@ export function useAddResourceToModal({
       isShown={isShown}
       hide={() => setShowModal(false)}
     >
-      <ModalHeaderTop
-        disableClose={false}
-        headerText={`Add ${resource} to space`}
-        hide={() => setShowModal(false)}
-      />
+      <ModalHeaderTop disableClose={false} headerText={`Add ${resource} to space`} hide={() => setShowModal(false)} />
       <ModalScroll>
         <ResourceTable resource={resource} setSelectedUids={setSelectedUids} />
       </ModalScroll>
       <Footer>
         <ButtonRow>
           {mutation?.isPending && <Loader height={14} />}
-          <Button
-            onClick={() => setShowModal(false)}
-            disabled={mutation?.isPending}
-          >
+          <Button onClick={() => setShowModal(false)} disabled={mutation?.isPending}>
             Cancel
           </Button>
           <Button

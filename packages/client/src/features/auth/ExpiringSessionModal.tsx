@@ -11,6 +11,8 @@ import { useAuthUserQuery } from './api'
 import {
   onLogInWithSSO, useSiteSettingsQuery,
 } from './useSiteSettingsQuery'
+import { sessionService } from '../../utils/sessionService'
+import { useAuthUser } from './useAuthUser'
 
 export const ExpiringSessionModal: React.FC<{ modal: UseModal }> = ({
   modal,
@@ -26,13 +28,29 @@ export const ExpiringSessionModal: React.FC<{ modal: UseModal }> = ({
   const hasExpirationReachedLimit = sessionExpirationApproaching && subSeconds(expiredAt, 59) < currentTime
   const calcDiff = differenceInSeconds(expiredAt, currentTime)
   const { data: ssoButtonResponse } = useSiteSettingsQuery()
+  const user = useAuthUser()
+
+  // Start/stop automatic session refreshing on user activity
+  useEffect(() => {
+    if (user) {
+      sessionService.startSessionRefreshing()
+    } else {
+      sessionService.stopSessionRefreshing()
+    }
+
+    // Cleanup
+    return () => {
+      sessionService.stopSessionRefreshing()
+    }
+  }, [user?.id])
 
   useEffect(() => {
     if (hasExpirationReachedLimit) {
       if (calcDiff > 0) setTimer(calcDiff)
+      sessionService.stopSessionRefreshing()
       modal.setShowModal(true)
     }
-  }, [currentTime])
+  }, [hasExpirationReachedLimit, calcDiff])
 
   useInterval(() => {
     setExpiredAtTimer(getSessionExpiredAt())
@@ -53,13 +71,15 @@ export const ExpiringSessionModal: React.FC<{ modal: UseModal }> = ({
     await userQuery.refetch()
     setExpiredAtTimer(getSessionExpiredAt())
     modal.setShowModal(false)
+    sessionService.startSessionRefreshing()
   }
+
+  const ssoUrl = ssoButtonResponse?.ssoButton.isEnabled ? ssoButtonResponse.ssoButton.data?.ssoUrl : undefined
 
   return (
     <ModalNext
       id="expiring-session-modal"
       isShown={modal.isShown}
-      disableClose
       blur
       hide={() => {}}
     >
@@ -76,12 +96,12 @@ export const ExpiringSessionModal: React.FC<{ modal: UseModal }> = ({
       <Footer>
         {sessionExpirationPassed ? (
           <>
-            {ssoButtonResponse?.ssoButton.isEnabled && (
-              <Button data-variant="primary" onClick={() => onLogInWithSSO(ssoButtonResponse.ssoButton.data.ssoUrl)}>
+            {ssoUrl && (
+              <Button data-variant="primary" onClick={() => onLogInWithSSO(ssoUrl)}>
                 Log In with SSO
               </Button>
             )}
-            {/*{TODO: this does not consider location to return to after login.}*/}
+            {/* {TODO: this does not consider location to return to after login.} */}
             <Button data-variant="primary" onClick={() => window.location.assign('/login')}>
               Log In again
             </Button>

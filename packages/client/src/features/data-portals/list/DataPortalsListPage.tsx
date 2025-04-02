@@ -12,7 +12,7 @@ import { UserLayout } from '../../../layouts/UserLayout'
 import { theme } from '../../../styles/theme'
 import { DEFAULT_RECONNECT_ATTEMPTS, DEFAULT_RECONNECT_INTERVAL, getNodeWsUrl, SHOULD_RECONNECT } from '../../../utils/config'
 import { useAuthUser } from '../../auth/useAuthUser'
-import { Notification, NOTIFICATION_ACTION, WEBSOCKET_MESSSAGE_TYPE, WebSocketMessage } from '../../home/types'
+import { Notification, NOTIFICATION_ACTION, WEBSOCKET_MESSAGE_TYPE, WebSocketMessage } from '../../home/types'
 import { StyledPageCenter } from '../../spaces/form/styles'
 import { dataPortalsListRequest } from '../api'
 import { AlertText } from '../details/DataPortalNotFound'
@@ -69,7 +69,7 @@ const DataPortalsListPage = () => {
         const messageData = JSON.parse(message.data)
         const notification = messageData.data as Notification
         return (
-          messageData.type === WEBSOCKET_MESSSAGE_TYPE.NOTIFICATION &&
+          messageData.type === WEBSOCKET_MESSAGE_TYPE.NOTIFICATION &&
           NOTIFICATION_ACTION.DATA_PORTAL_CARD_IMAGE_URL_UPDATED === notification.action
         )
       } catch (e) {
@@ -82,7 +82,7 @@ const DataPortalsListPage = () => {
     if (lastJsonMessage == null) {
       return
     }
-    queryClient.invalidateQueries({ queryKey: ['data-portals-list']})
+    queryClient.invalidateQueries({ queryKey: ['data-portals-list'] })
   }, [lastJsonMessage])
 
   return (

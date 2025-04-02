@@ -3,7 +3,6 @@ module Permissions
 
   module ClassMethods
     def accessible_by(context)
-      return accessible_by_public if context.guest?
       return none unless context.logged_in?
 
       accessible_by_user(context.user)
@@ -32,13 +31,10 @@ module Permissions
     end
 
     def editable_in_space(context, ids)
-      if context.guest?
-        none
-      else
-        return false if try(:space_object).try(:verified?)
-        raise unless context.user_id.present?
-        where(user_id: ids)
-      end
+      return false if try(:space_object).try(:verified?)
+      raise if context.user_id.blank?
+
+      where(user_id: ids)
     end
 
     def accessible_by_public
@@ -88,9 +84,7 @@ module Permissions
   end
 
   def accessible_by?(context)
-    if context.guest?
-      public?
-    elsif context.logged_in?
+    if context.logged_in?
       return true if public?
       return true if !in_space? && user_id == context.user_id
       return true if context.user.space_uids.include?(scope)
@@ -102,7 +96,7 @@ module Permissions
   end
 
   def editable_by?(context)
-    return false if context.guest? || in_locked_verification_space?
+    return false if in_locked_verification_space?
 
     return user_id == context.user_id unless in_space?
 
@@ -118,7 +112,7 @@ module Permissions
   end
 
   def core_publishable_by?(context)
-    return false if context.guest? || user_id != context.user_id
+    return false if user_id != context.user_id
 
     core_publishable_by_user?(context.user)
   end
@@ -146,6 +140,7 @@ module Permissions
 
   def copyable_to_cooperative?
     return false unless in_confidential_space?
+
     self.class.where(dxid: dxid, scope: space_object.shared_space.uid).empty?
   end
 

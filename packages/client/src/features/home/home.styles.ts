@@ -16,6 +16,15 @@ export const MenuText = styled.span`
   font-weight: ${fontWeight.bold};
 `
 
+export const Empty = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 50;
+  padding: 20px;
+  white-space: normal;
+`
+
 export const MenuItem = styled(NavLink)`
   justify-self: normal;
   display: flex;
@@ -112,13 +121,6 @@ export const Fill = styled.div`
   min-height: 20px;
 `
 
-export const StyledHomeTable = styled.div`
-  overflow-y: auto;
-  font-size: 14px;
-  flex: 1;
-  ${compactScrollBarV2}
-`
-
 export const QuickActions = styled.div`
   display: flex;
   gap: 4px;
@@ -158,9 +160,9 @@ export const StyledNameCell = styled.div<{ color?: string }>`
   min-width: max-content;
 `
 
-export const StyledLink = styled(Link)<{ disable?: boolean }>`
-  ${({ disable }) =>
-    disable &&
+export const StyledLink = styled(Link)<{ $disable?: boolean }>`
+  ${({ $disable }) =>
+    $disable &&
     css`
       pointer-events: none;
       color: var(--c-text-400);

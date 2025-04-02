@@ -3,19 +3,8 @@ import { DropdownNext } from '../../../components/Dropdown/DropdownNext'
 import { StarIcon } from '../../../components/icons/StarIcon'
 import { ThreeDotsIcon } from '../../../components/icons/ThreeDotsIcon'
 import { formatDiscussionDate } from '../helpers'
-import {
-  CardLeft,
-  CardRight,
-  Li,
-  Ol,
-  StyledAnswerLabel,
-  StyledCardHeader,
-  StyledEditButton,
-  UsernameLink,
-} from '../styles'
-import { Identicon } from '../../../components/Identicon'
+import { CardLeft, CardRight, Li, Ol, StyledAnswerLabel, StyledCardHeader, StyledEditButton, UsernameLink } from '../styles'
 import { CardType, SimpleUser } from '../discussions.types'
-
 
 const EDIT_TEXT = {
   answer: 'Edit Answer',
@@ -47,18 +36,19 @@ export const CardHeader = ({
   return (
     <StyledCardHeader>
       <CardLeft>
-        <Identicon dxuser={user.dxuser} />
-        <span>
-          <UsernameLink href={`/users/${user.dxuser}`}>{user.fullName}</UsernameLink> on {formatDiscussionDate(timestamp)}
-        </span>
+        <UsernameLink href={`/users/${user.dxuser}`}>{user.fullName}</UsernameLink> on {formatDiscussionDate(timestamp)}
       </CardLeft>
       <CardRight>
-        {cardType === 'answer' && <StyledAnswerLabel><StarIcon height={12} />Answer</StyledAnswerLabel>}
+        {cardType === 'answer' && (
+          <StyledAnswerLabel>
+            <StarIcon height={12} />
+            Answer
+          </StyledAnswerLabel>
+        )}
         {canUserEdit && (
           <DropdownNext
             placement="bottom-end"
             trigger="click"
-            // eslint-disable-next-line react/no-unstable-nested-components
             content={() => (
               <Ol>
                 <Li onClick={() => onClickEdit()}>{EDIT_TEXT[cardType]}</Li>
@@ -67,7 +57,9 @@ export const CardHeader = ({
             )}
           >
             {dropdownProps => (
-              <StyledEditButton tabIndex={0} {...dropdownProps}><ThreeDotsIcon width={16} /></StyledEditButton>
+              <StyledEditButton data-testid={`${cardType}-dropdown`} tabIndex={0} {...dropdownProps}>
+                <ThreeDotsIcon width={16} />
+              </StyledEditButton>
             )}
           </DropdownNext>
         )}

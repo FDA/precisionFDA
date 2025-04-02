@@ -1,4 +1,3 @@
-/* eslint-disable react/jsx-fragments */
 import { QueryClientProvider } from '@tanstack/react-query'
 import React, { useEffect, useState } from 'react'
 import { Navigate, Outlet, RouterProvider, createBrowserRouter } from 'react-router-dom'
@@ -6,27 +5,26 @@ import 'react-toastify/dist/ReactToastify.css'
 import { QueryParamProvider } from 'use-query-params'
 import { ReactRouter6Adapter } from 'use-query-params/adapters/react-router-6'
 import Header from './components/Header/HeaderNext'
-import { NavFavoritesProvider } from './components/Header/useNavFavoritesLocalStorage'
-import { NavOrderProvider } from './components/Header/useNavOrderLocalStorage'
 import { AlertDismissedProvider } from './features/admin/alerts/useAlertDismissedLocalStorage'
-import { SessionExpiredModal } from './features/auth/SessionExpiredModal'
 import { ExpiringSessionModal } from './features/auth/ExpiringSessionModal'
+import { SessionExpiredModal } from './features/auth/SessionExpiredModal'
 import DataPortalRoutes from './features/data-portals/routes'
 import ExpertsSinglePage from './features/experts/details/index'
 import { useModal } from './features/modal/useModal'
+import { TrackPage } from './features/tracks/TrackPage'
 import { LayoutLoader, UserLayout } from './layouts/UserLayout'
 import NoFoundPage from './pages/NoFoundPage'
 import GlobalStyle from './styles/global'
 import { ColorModeProvider } from './utils/ThemeContext'
 import queryClient from './utils/queryClient'
-import { TrackPage } from './features/tracks/TrackPage'
 
 import 'react-tooltip/dist/react-tooltip.css'
-import { PFDAToastContainer } from './utils/PFDAToastContainer'
 import AuthWall from './AuthWall'
-import { ChallengeDetailsLayout } from './features/challenges/details/ChallengeDetailsLayout'
 import ContentEditorPage from './features/challenges/content/ContentEditorPage'
+import { ChallengeDetailsLayout } from './features/challenges/details/ChallengeDetailsLayout'
 import EditChallengePage from './features/challenges/form/EditChallengePage'
+import { PublishingPage } from './features/publishing/PublishingPage'
+import { PFDAToastContainer } from './utils/PFDAToastContainer'
 
 const Admin = React.lazy(() => import('./features/admin'))
 const Home2 = React.lazy(() => import('./features/home'))
@@ -56,7 +54,7 @@ const RootComponent = () => {
     // Calculate the height of the rails-alert element
     const alertElement = document.querySelector('.rails-alert')
     if (alertElement) {
-        setRailsAlertHeight(alertElement.clientHeight as number)
+      setRailsAlertHeight(alertElement.clientHeight as number)
     }
   }, [])
 
@@ -70,19 +68,15 @@ const RootComponent = () => {
           })}
         >
           <AlertDismissedProvider>
-            <NavOrderProvider>
-              <NavFavoritesProvider>
-                <Header />
-                <QueryParamProvider adapter={ReactRouter6Adapter}>
-                  <React.Suspense fallback={<LayoutLoader />}>
-                    <Outlet />
-                  </React.Suspense>
-                </QueryParamProvider>
-                <PFDAToastContainer />
-                <SessionExpiredModal {...sessionExpiredModal} />
-                <ExpiringSessionModal modal={expiringSessionModal} />
-              </NavFavoritesProvider>
-            </NavOrderProvider>
+            <Header />
+            <QueryParamProvider adapter={ReactRouter6Adapter}>
+              <React.Suspense fallback={<LayoutLoader />}>
+                <Outlet />
+              </React.Suspense>
+            </QueryParamProvider>
+            <PFDAToastContainer />
+            <SessionExpiredModal {...sessionExpiredModal} />
+            <ExpiringSessionModal modal={expiringSessionModal} />
           </AlertDismissedProvider>
         </QueryClientProvider>
       </React.Fragment>
@@ -117,11 +111,26 @@ const router = createBrowserRouter([
           { path: 'admin/*', element: <Admin /> },
           { path: 'challenges/create', element: <CreateChallengePage /> },
           { path: 'challenges/:challengeId/content', element: <Navigate to="info" replace /> },
-          { path: 'challenges/:challengeId/content/*', element: <UserLayout innerScroll><ContentEditorPage /></UserLayout> },
-          { path: 'challenges/:challengeId/settings', element: <UserLayout><EditChallengePage /></UserLayout> },
+          {
+            path: 'challenges/:challengeId/content/*',
+            element: (
+              <UserLayout innerScroll>
+                <ContentEditorPage />
+              </UserLayout>
+            ),
+          },
+          {
+            path: 'challenges/:challengeId/settings',
+            element: (
+              <UserLayout>
+                <EditChallengePage />
+              </UserLayout>
+            ),
+          },
           { path: 'home/*', element: <Home2 /> },
           { path: 'account/notifications', element: <NotificationsPage /> },
           { path: 'spaces/*', element: <Spaces /> },
+          { path: 'publish/*', element: <PublishingPage /> },
           { path: 'workflows/:workflowUid/analyses/new', element: <WorkflowRunPage /> },
           { path: 'admin/news', element: <ListAdminNews /> },
           { path: 'admin/news/create', element: <CreateNewsItemPage /> },
@@ -136,9 +145,7 @@ const router = createBrowserRouter([
 ])
 
 const root = () => {
-  return (
-    <RouterProvider router={router} />
-  )
+  return <RouterProvider router={router} />
 }
 
 root.displayName = 'Root'

@@ -7,6 +7,7 @@ import { Asset } from '@shared/domain/user-file/asset.entity'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { PARENT_TYPE } from '@shared/domain/user-file/user-file.types'
 import { User } from '@shared/domain/user/user.entity'
+import { STATIC_SCOPE } from '@shared/enums'
 import { EntityUtils } from '@shared/utils/entity.utils'
 import { expect } from 'chai'
 import { SinonStub, stub } from 'sinon'
@@ -89,6 +90,7 @@ describe('FileProvenanceDataService', () => {
         url: LINK,
         title: NAME,
         identifier: UID,
+        scope: STATIC_SCOPE.PRIVATE,
       })
     })
   })
@@ -157,6 +159,7 @@ describe('FileProvenanceDataService', () => {
       uid: UID,
       parentId,
       parentType,
+      scope: STATIC_SCOPE.PRIVATE,
     } as unknown as UserFile
 
     getEntityUiLinkStub.withArgs(file).resolves(LINK)

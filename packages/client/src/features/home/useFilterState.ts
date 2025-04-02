@@ -1,9 +1,10 @@
 import debounce from 'lodash/debounce'
 import { useCallback, useState } from 'react'
-import { DelimitedNumericArrayParam, QueryParamConfig, StringParam, useQueryParams, withDefault } from 'use-query-params'
-import { defaultFilterValues } from '../../hooks/useFilterParams'
+import { DelimitedArrayParam, DelimitedNumericArrayParam, QueryParamConfig, StringParam, useQueryParams, withDefault } from 'use-query-params'
+import { ColumnFiltersState } from '@tanstack/react-table'
 import { toObjectFromArray } from '../../utils/object'
-import { IFilter } from './types'
+
+export const defaultFilterValues = (arr: string[]) => arr.reduce((acc: any, curr: any) => (acc[curr] = undefined, acc), {})
 
 function fileSizeParamMap(fileSize?: [number | null, number | null]) {
   if (fileSize) {
@@ -21,6 +22,16 @@ function fileSizeParamMap(fileSize?: [number | null, number | null]) {
     return fileSize
   }
   return fileSize
+}
+
+function rangeParamMap(range?: [string | null, string | null]) {
+  if (range) {
+    if (range[0] === '' && range[1] === '') {
+      range = undefined
+    }
+    return range
+  }
+  return range
 }
 
 const KEYS = [
@@ -43,10 +54,14 @@ const KEYS = [
   'guest_lead',
   'host_lead',
   'workflow_title',
+  'dxuser',
+  'email',
+  'userState',
+  'lastLogin',
 ]
-function getObjectKeys<T>(a: string[]) {
-  const o = {} as any
-  a.forEach(k => (o[k] = undefined))
+function getObjectKeys(a: string[]) {
+  const o = {} as Record<string, string | number | null | undefined>
+  a.forEach(k => {o[k] = undefined})
   return o
 }
 
@@ -54,10 +69,10 @@ export function useFilterState({ onSetFilter }: { onSetFilter?: (values: any) =>
   const [filterQuery, setFilterParam] = useState(getObjectKeys(KEYS))
   const debouncedSetFilterQuery = debounce(v => {
     setFilterParam(v)
-    onSetFilter && onSetFilter(v)
+    if(onSetFilter) onSetFilter(v)
   }, 500)
 
-  const setSearchFilter = useCallback((val: IFilter[]) => {
+  const setSearchFilter = useCallback((val: ColumnFiltersState) => {
     debouncedSetFilterQuery({ ...defaultFilterValues(KEYS), ...toObjectFromArray(val) })
   }, [])
 
@@ -79,16 +94,20 @@ export function useFilterParams({ filters, onSetFilter }: { filters: FilterArgs;
     if (filters[v] === 'range') {
       params[v] = withDefault(DelimitedNumericArrayParam, undefined)
     }
+    if (filters[v] === 'date_range') {
+      params[v] = withDefault(DelimitedArrayParam, undefined)
+    }
   })
+  
   const [filterQuery, setFilterParam] = useQueryParams(params)
-
   const debouncedSetFilterQuery = debounce(v => {
-    v.file_size = fileSizeParamMap(v.file_size)
+    v.file_size = fileSizeParamMap([v.file_size?.from ?? null, v.file_size?.to ?? null])
+    v.lastLogin = rangeParamMap([v.lastLogin?.from ?? '', v.lastLogin?.to ?? ''])
     setFilterParam(v, 'replaceIn')
     if (onSetFilter) onSetFilter(v)
   }, 500)
 
-  const setSearchFilter = useCallback((val: IFilter[]) => {
+  const setSearchFilter = useCallback((val: ColumnFiltersState) => {
     debouncedSetFilterQuery({ ...defaultFilterValues(KEYS), ...toObjectFromArray(val) })
   }, [])
 

@@ -3,7 +3,6 @@ import { pick } from 'ramda'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import { displayPayloadMessage } from '../../utils/api'
-import { useAttachToModal } from '../actionModals/useAttachToModal'
 import { useEditPropertiesModal } from '../actionModals/useEditPropertiesModal'
 import { useEditTagsModal } from '../actionModals/useEditTagsModal'
 import { useFeatureMutation } from '../actionModals/useFeatureMutation'
@@ -25,36 +24,32 @@ import { useOpenFileModal } from './actionModals/useOpenFileModal'
 import { useSelectFolderModal } from './actionModals/useSelectFolderModal'
 import { moveFilesRequest } from './files.api'
 
-import { IFile, TreeOnSelectInfo } from './files.types'
 import { pluralize, sanitizeFileName } from '../../utils/formatting'
-
+import { IFile, TreeOnSelectInfo } from './files.types'
 
 export type FileActions =
-  'Track' |
-  'Open' |
-  'Download' |
-  'Edit file info' |
-  'Edit folder info' |
-  'Make file public' |
-  'Make folder public' |
-  'Feature' |
-  'Unfeature' |
-  'Delete' |
-  'Move' |
-  'Copy to...' |
-  'Attach to...' |
-  'Attach License' |
-  'Detach License' |
-  'Request license approval' |
-  'Accept License' |
-  'Edit tags' |
-  'Edit properties' |
-  'Lock' |
-  'Unlock' |
-  'Rename' |
-  'Comments' |
-  'Load into GSRS'
-
+  | 'Track'
+  | 'Open'
+  | 'Download'
+  | 'Edit file info'
+  | 'Edit folder info'
+  | 'Make public'
+  | 'Feature'
+  | 'Unfeature'
+  | 'Delete'
+  | 'Move'
+  | 'Copy to...'
+  | 'Attach License'
+  | 'Detach License'
+  | 'Request license approval'
+  | 'Accept License'
+  | 'Edit tags'
+  | 'Edit properties'
+  | 'Lock'
+  | 'Unlock'
+  | 'Rename'
+  | 'Comments'
+  | 'Load into GSRS'
 
 const getFileScope = (scope: HomeScope | undefined, space: ISpace | undefined): ServerScope => {
   if (scope) {
@@ -242,12 +237,13 @@ export const useFilesSelectActions = ({
     submitCaption: 'Move',
     scope: getFileScope(homeScope, space),
     onHandleSubmit: (selectedFolderId: number, info: TreeOnSelectInfo) => {
-      moveFilesMutation.mutateAsync(selectedFolderId)
+      moveFilesMutation
+        .mutateAsync(selectedFolderId)
         .then(() => {
           setMoveFileModal(false)
           toast.success(`Successfully moved ${selected.length} ${pluralize('item', selected.length)} to ${info.node.title}`)
         })
-        .catch((error) => {
+        .catch(error => {
           toast.error(`Error moving files: ${error}`)
         })
     },
@@ -268,14 +264,6 @@ export const useFilesSelectActions = ({
       queryClient.invalidateQueries({ queryKey: resourceKeys })
     },
   })
-  const {
-    modalComp: attachToModal,
-    setShowModal: setAttachToModal,
-    isShown: isShownAttachToModal,
-  } = useAttachToModal(
-    selected.map(s => s.id),
-    'FILE',
-  )
   const {
     modalComp: tagsModal,
     setShowModal: setTagsModal,
@@ -337,7 +325,11 @@ export const useFilesSelectActions = ({
       type: 'modal',
       func: () => setEditFileModal(true),
       modal: editFileModal,
-      isDisabled: selected.length !== 1 || user?.full_name !== selected[0].added_by || selected.some(e => e.locked) || selected.some(e => e.resource),
+      isDisabled:
+        selected.length !== 1 ||
+        user?.full_name !== selected[0].added_by ||
+        selected.some(e => e.locked) ||
+        selected.some(e => e.resource),
       showModal: isShownEditFileModal,
       shouldHide: isFolder || selected.length !== 1 || homeScope === 'spaces' || openSelected,
     },
@@ -349,11 +341,11 @@ export const useFilesSelectActions = ({
       showModal: isShownEditFolderModal,
       shouldHide: !isFolder || selected.length !== 1 || homeScope === 'spaces',
     },
-    'Make file public': {
+    'Make public': {
       type: 'link',
       link: {
-        method: 'POST',
-        url: `${selected[0]?.links?.publish}&scope=public`,
+        method: 'GET',
+        url: `/publish?identifier=${selected[0]?.uid}&type=file`,
       },
       isDisabled: selected.length !== 1 || selected[0].location === 'Public' || !user?.allowed_to_publish,
       shouldHide:
@@ -428,18 +420,6 @@ export const useFilesSelectActions = ({
       modal: copyToModal,
       showModal: isShownCopyToModal,
     },
-    'Attach to...': {
-      type: 'modal',
-      func: () => setAttachToModal(true),
-      // TODO: filesAttachTo is missing
-      isDisabled:
-        selected.length === 0 ||
-        selected.some(e => !e.links.attach_to) ||
-        openSelected ||
-        isActionDisabledBasedOnLocked(selected, user?.id, space),
-      modal: attachToModal,
-      showModal: isShownAttachToModal,
-    },
     'Attach License': {
       type: 'modal',
       func: () => setAttachLicensesModal(true),
@@ -493,7 +473,10 @@ export const useFilesSelectActions = ({
     'Load into GSRS': {
       type: 'link',
       isDisabled: selected.length !== 1 || !selected[0].tags.includes('GSRS'),
-      link: selected.length === 1 ? `/ginas/app/ui/substances/register?action=pfda-file-import&file-uri=${encodeURIComponent(`/api/files/${selected[0].uid}/${sanitizeFileName(selected[0].name)}?inline=true`)}` : '',
+      link:
+        selected.length === 1
+          ? `/ginas/app/ui/substances/register?action=pfda-file-import&file-uri=${encodeURIComponent(`/api/files/${selected[0].uid}/${sanitizeFileName(selected[0].name)}?inline=true`)}`
+          : '',
     },
   }
 

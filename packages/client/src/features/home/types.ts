@@ -26,6 +26,7 @@ export type ResourceTypeUrlNames =
   | 'discussions'
 
 export type APIResource =
+  | 'admin-users'
   | 'files'
   | 'folders'
   | 'apps'
@@ -45,7 +46,7 @@ export type PropertiesResource = 'node' | 'asset' | 'workflowSeries' | 'job' | '
 
 export type DialogType = 'radio' | 'checkbox'
 
-export type EmmitScope = (scope: ServerScope, featured: boolean) => void
+export type EmitScope = (scope: ServerScope, featured: boolean) => void
 
 export interface DownloadListResponse {
   id: number
@@ -138,10 +139,7 @@ export interface IMeta {
 }
 
 export type Size = null | number
-export interface IFilter {
-  id: string
-  value: string | number | Size[]
-}
+export type IFilter = Record<string,  Size[] | any>
 
 export interface SortBy {
   order_by: string
@@ -205,13 +203,13 @@ export type JobLogItem = {
   msg: string
 }
 
-export enum WEBSOCKET_MESSSAGE_TYPE {
+export enum WEBSOCKET_MESSAGE_TYPE {
   NOTIFICATION = 'notification',
   JOB_LOG = 'jobLog',
 }
 
 export type WebSocketMessage = {
-  type: WEBSOCKET_MESSSAGE_TYPE
+  type: WEBSOCKET_MESSAGE_TYPE
   data: Notification | JobLogItem
 }
 

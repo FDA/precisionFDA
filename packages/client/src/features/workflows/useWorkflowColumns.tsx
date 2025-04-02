@@ -1,114 +1,119 @@
 import { useQueryClient } from '@tanstack/react-query'
+import { ColumnDef } from '@tanstack/react-table'
 import React from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { Column } from 'react-table'
 import { FeaturedToggle } from '../../components/FeaturedToggle'
-import {
-  DefaultColumnFilter, SelectColumnFilter,
-} from '../../components/Table/filters'
+import { propertiesColumnDef, selectColumnDef } from '../../components/Table/selectColumnDef'
 import { StyledTagItem, StyledTags } from '../../components/Tags'
 import { ObjectGroupIcon } from '../../components/icons/ObjectGroupIcon'
 import { StyledLinkCell, StyledNameCell } from '../home/home.styles'
-import { KeyVal } from '../home/types'
 import { IWorkflow } from './workflows.types'
 import { NetworkIcon } from '../../components/icons/NetworkIcon'
 
 export const useWorkflowColumns = ({
   isAdmin = false,
-  handleRowClick,
-  colWidths,
   properties = [],
 }: {
-  isAdmin?: boolean,
-  handleRowClick: (id: string) => void
-  colWidths?: KeyVal
+  isAdmin?: boolean
   properties?: string[]
-}) => {
+}): ColumnDef<IWorkflow>[] => {
   const location = useLocation()
   const queryClient = useQueryClient()
 
   return [
+    selectColumnDef<IWorkflow>(),
     {
-      Header: 'Name',
-      accessor: 'name',
-      Filter: DefaultColumnFilter,
-      width: colWidths?.name || 198,
-      Cell: props => (
+      header: 'Name',
+      accessorKey: 'name',
+      filterFn: 'includesString',
+      size: 198,
+      cell: props => (
         <StyledNameCell
           as={Link}
           to={`${location.pathname}/${props.cell.row.original.uid}`}
           state={{ from: location.pathname, fromSearch: location.search }}
         >
           <NetworkIcon height={18} />
-          {props.value}
+          {props.row.original.name}
         </StyledNameCell>
       ),
     },
     {
-      Header: 'Title',
-      accessor: 'title',
-      Filter: DefaultColumnFilter,
-      width: colWidths?.title || 300,
+      header: 'Title',
+      accessorKey: 'title',
+      filterFn: 'includesString',
+      size: 300,
+      cell: c => c.getValue(),
     },
     {
-      Header: 'Location',
-      accessor: 'location',
-      Filter: DefaultColumnFilter,
-      width: colWidths?.location || 250,
-      Cell: props => (
-        <StyledLinkCell to={`${props.row.original.links.space}/workflows`}><ObjectGroupIcon />{props.value}</StyledLinkCell>
+      header: 'Location',
+      accessorKey: 'location',
+      filterFn: 'includesString',
+      size: 250,
+      cell: props => (
+        <StyledLinkCell to={`${props.row.original.links.space}/workflows`}>
+          <ObjectGroupIcon />
+          {props.row.original.location}
+        </StyledLinkCell>
       ),
     },
     {
-      Header: 'Featured',
-      accessor: 'featured',
-      Filter: SelectColumnFilter,
-      disableSortBy: true,
-      options: [{ label: 'Yes', value: 'true' }, { label: 'No', value: 'false'}],
-      width: colWidths?.featured || 93,
-      Cell: props => (
-        <div style={{ paddingLeft: 20 }}><FeaturedToggle disabled={!isAdmin} resource="workflows" featured={props.cell.row.original.featured} uids={[props.cell.row.original.uid]} onSuccess={() => queryClient.invalidateQueries({ queryKey: ['workflows']})} /></div>
+      header: 'Featured',
+      accessorKey: 'featured',
+      enableSorting: false,
+      enableColumnFilter: false,
+      // options: [
+      //   { label: 'Yes', value: 'true' },
+      //   { label: 'No', value: 'false' },
+      // ],
+      size: 93,
+      cell: props => (
+        <div style={{ paddingLeft: 20 }}>
+          <FeaturedToggle
+            disabled={!isAdmin}
+            resource="workflows"
+            featured={props.cell.row.original.featured}
+            uids={[props.cell.row.original.uid]}
+            onSuccess={() => queryClient.invalidateQueries({ queryKey: ['workflows']})}
+          />
+        </div>
       ),
     },
     {
-      Header: 'Added By',
-      accessor: 'added_by',
-      Filter: DefaultColumnFilter,
-      width: colWidths?.added_by || 200,
-      Cell: props => (
+      header: 'Added By',
+      accessorKey: 'added_by',
+      filterFn: 'includesString',
+      size: 200,
+      cell: props => (
         <a data-turbolinks="false" href={props.cell.row.original.links.user}>
-          {props.value}
+          {props.cell.row.original.added_by}
         </a>
       ),
     },
     {
-      Header: 'Created',
-      accessor: 'created_at_date_time',
+      header: 'Created',
+      accessorKey: 'created_at_date_time',
       sortDescFirst: true,
-      width: colWidths?.created_at_date_time || 198,
-      disableFilters: true,
+      size: 198,
+      enableColumnFilter: false,
+      cell: c => c.getValue(),
     },
     {
-      Header: 'Tags',
-      accessor: 'tags',
-      Filter: DefaultColumnFilter,
-      disableSortBy: true,
-      width: colWidths?.tags || 500,
-      Cell: props => {
-        return(
+      header: 'Tags',
+      accessorKey: 'tags',
+      filterFn: 'includesString',
+      enableSorting: false,
+      size: 500,
+      cell: props => {
+        return (
           <StyledTags>
-            {props.value.map(tag => (
+            {props.cell.row.original.tags.map(tag => (
               <StyledTagItem key={tag}>{tag}</StyledTagItem>
             ))}
           </StyledTags>
-      )},
+        )
+      },
     },
-    ...properties.map(property => ({
-      Header: property,
-      accessor: row => row.properties[property],
-      id: `props.${property}`,
-      disableFilters: true,
-      width: colWidths?.[property] || 200,
-    })),
-  ] as Column<IWorkflow>[]
+    ...propertiesColumnDef<IWorkflow>(properties),
+  ]
 }

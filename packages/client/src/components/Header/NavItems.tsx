@@ -47,7 +47,7 @@ export const siteNavItems: SiteNavItemType[] = [
     icon: DiscussionIcon,
     iconHeight: 17,
     text: 'Discussions',
-    alink: '/home/discussions?scope=everybody',
+    link: '/home/discussions?scope=everybody',
     external: false,
   },
   {

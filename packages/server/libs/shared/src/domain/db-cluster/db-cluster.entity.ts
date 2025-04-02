@@ -17,8 +17,10 @@ import { DxId } from '../entity/domain/dxid'
 import { User } from '../user/user.entity'
 import { ENGINE, STATUS } from './db-cluster.enum'
 import { ScopedEntity } from '@shared/database/scoped.entity'
+import { Tagging } from '../tagging/tagging.entity'
+import { DbClusterRepository } from './db-cluster.repository'
 
-@Entity({ tableName: 'dbclusters' })
+@Entity({ tableName: 'dbclusters', repository: () => DbClusterRepository })
 @Filter({ name: 'ownedBy', cond: (args) => ({ user: { id: args.userId } }) })
 @Filter({
   name: 'isNonTerminal',
@@ -61,6 +63,9 @@ export class DbCluster extends ScopedEntity {
   @Property()
   statusAsOf: Date
 
+  @Property()
+  salt!: string
+
   @Enum()
   status!: STATUS
 
@@ -76,6 +81,9 @@ export class DbCluster extends ScopedEntity {
     orphanRemoval: true,
   })
   properties = new Collection<DbClusterProperty>(this)
+
+  @OneToMany(() => Tagging, (tagging) => tagging.dbCluster, { orphanRemoval: true })
+  taggings = new Collection<Tagging>(this)
 
   constructor(user: User) {
     super()

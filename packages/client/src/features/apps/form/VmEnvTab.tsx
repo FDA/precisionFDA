@@ -2,15 +2,9 @@ import React, { useRef } from 'react'
 import { Control, Controller } from 'react-hook-form'
 import { Link } from 'react-router-dom'
 import styled from 'styled-components'
-import {
-  TransparentButton, Button,
-} from '../../../components/Button'
+import { TransparentButton, Button } from '../../../components/Button'
 import ExternalLink from '../../../components/Controls/ExternalLink'
-import {
-  FieldGroup,
-  FieldLabelRow,
-  SelectFieldLabel,
-} from '../../../components/form/styles'
+import { FieldGroup, FieldLabelRow, SelectFieldLabel } from '../../../components/form/styles'
 import { ArrowLeftIcon } from '../../../components/icons/ArrowLeftIcon'
 import { CrossIcon } from '../../../components/icons/PlusIcon'
 import { Svg } from '../../../components/icons/Svg'
@@ -66,12 +60,9 @@ const AssetButtonRow = styled.div`
   justify-content: space-between;
   a {
     display: flex;
-    align-items: center;
     gap: 8px;
     font-size: 14px;
-    display: flex;
     align-items: center;
-    gap: 8px;
   }
 
   ${Svg} {
@@ -92,16 +83,16 @@ const AssetSelect = ({
     <Area>
       <LabelRow>
         <Label>Assets</Label>
-        <LearnMoreLink to="/docs/creating-apps#dev-assets" target='_blank'>
+        <LearnMoreLink to="/docs/creating-apps#dev-assets" target="_blank">
           Learn More
         </LearnMoreLink>
       </LabelRow>
       <Box>
         <AssetButtonRow>
           <Button type="button" onClick={() => setShowModal(true)}>
-            Attach Assets
+            Manage App Assets
           </Button>
-          <Link to="/home/assets" target='_blank'>
+          <Link to="/home/assets" target="_blank">
             Manage your Assets <ArrowLeftIcon />
           </Link>
         </AssetButtonRow>
@@ -109,7 +100,9 @@ const AssetSelect = ({
         {value.length > 0 && (
           <AssetList>
             {value.map(item => (
-              <Link key={item.uid} to={`/home/assets/${item.uid}`} target="_blank">{item.name}</Link>
+              <Link key={item.uid} to={`/home/assets/${item.uid}`} target="_blank">
+                {item.name}
+              </Link>
             ))}
           </AssetList>
         )}
@@ -182,15 +175,13 @@ const UbuntuPackageSelect = ({
       <Box>
         <PackagesInputRow>
           <InputTextS ref={inputRef} placeholder="Package name" />
-          <Button data-variant='primary' type="button" onClick={addItem}>
+          <Button data-variant="primary" type="button" onClick={addItem}>
             Add
           </Button>
         </PackagesInputRow>
         <Tip>
           <b>TIP:</b> Find packages within the distribution using{' '}
-          <ExternalLink to="http://packages.ubuntu.com/">
-            Ubuntu Package Search
-          </ExternalLink>
+          <ExternalLink to="http://packages.ubuntu.com/">Ubuntu Package Search</ExternalLink>
         </Tip>
         {value.length > 0 && (
           <PackageList>
@@ -198,10 +189,7 @@ const UbuntuPackageSelect = ({
               <li key={item}>
                 <PackageRow>
                   {item}
-                  <TransparentButton
-                    type="button"
-                    onClick={() => handleDeleteClick(i)}
-                  >
+                  <TransparentButton type="button" onClick={() => handleDeleteClick(i)}>
                     <CrossIcon height={12} />
                   </TransparentButton>
                 </PackageRow>
@@ -214,12 +202,12 @@ const UbuntuPackageSelect = ({
   )
 }
 
-export const VmEnvTab = ({ control }: { control: Control<CreateAppForm>}) => {
+export const VmEnvTab = ({ control }: { control: Control<CreateAppForm> }) => {
   return (
     <FormFields>
       <Help>
         <span>Need help?</span>
-        <Link target='_blank' to="/docs/creating-apps#dev-vm-env">
+        <Link target="_blank" to="/docs/creating-apps#dev-vm-env">
           {' '}
           Learn more about the virtual machine environment
         </Link>
@@ -230,7 +218,7 @@ export const VmEnvTab = ({ control }: { control: Control<CreateAppForm>}) => {
           control={control}
           render={({ field }) => (
             <FieldLabelRow>
-              <Checkbox {...field} checked={field.value}  />
+              <Checkbox {...field} checked={field.value} />
               Enable Internet Access
             </FieldLabelRow>
           )}
@@ -248,7 +236,7 @@ export const VmEnvTab = ({ control }: { control: Control<CreateAppForm>}) => {
             </SelectFieldLabel>
           )}
         />
-        <LearnMoreLink to="/docs/creating-apps#app-instance-types" target='_blank'>
+        <LearnMoreLink to="/docs/creating-apps#app-instance-types" target="_blank">
           See full list
         </LearnMoreLink>
       </FieldGroup>
@@ -257,9 +245,7 @@ export const VmEnvTab = ({ control }: { control: Control<CreateAppForm>}) => {
         <Controller
           name="ordered_assets"
           control={control}
-          render={({ field }) => (
-            <AssetSelect onChange={field.onChange} value={field.value} />
-          )}
+          render={({ field }) => <AssetSelect onChange={field.onChange} value={field.value} />}
         />
       </FieldGroup>
 
@@ -267,12 +253,7 @@ export const VmEnvTab = ({ control }: { control: Control<CreateAppForm>}) => {
         <Controller
           name="packages"
           control={control}
-          render={({ field }) => (
-            <UbuntuPackageSelect
-              onChange={field.onChange}
-              value={field.value}
-            />
-          )}
+          render={({ field }) => <UbuntuPackageSelect onChange={field.onChange} value={field.value} />}
         />
       </FieldGroup>
     </FormFields>

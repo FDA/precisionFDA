@@ -97,7 +97,7 @@ ${({ theme }) => theme.colorMode === 'dark' && css`
   }
 
   h1, h2, h3, h4 {
-    font-weight: bold;
+    font-weight: bolder;
     margin-top: 2rem;
     margin-bottom: 1rem;
   }
@@ -110,6 +110,12 @@ ${({ theme }) => theme.colorMode === 'dark' && css`
   }
   h2 {
     font-size: 20px;
+  }
+  h3 {
+    font-size: 18px;
+  }
+  strong {
+    font-weight: bolder;
   }
 
   code.inline {
@@ -169,7 +175,6 @@ export const NavItem = styled(NavLink)<{$active?: boolean}>`
     background-color: var(--primary-500);
     color: #ffffff;
   }
-
 `
 export const DocsTitle = styled.div`
   padding: 8px 16px 8px 32px;

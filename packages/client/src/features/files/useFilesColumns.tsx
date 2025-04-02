@@ -1,22 +1,22 @@
 import { useQueryClient } from '@tanstack/react-query'
+import { Column, ColumnDef } from '@tanstack/react-table'
 import React from 'react'
-import { Column } from 'react-table'
 import { Tooltip } from 'react-tooltip'
 import styled from 'styled-components'
 import { FeaturedToggle } from '../../components/FeaturedToggle'
-import { CogsIcon } from '../../components/icons/Cogs'
-import { DefaultColumnFilter, NumberRangeColumnFilter, SelectColumnFilter } from '../../components/Table/filters'
-import { StyledTagItem, StyledTags } from '../../components/Tags'
 import { AreaChartIcon } from '../../components/icons/AreaChartIcon'
 import { ClipboardCheckIcon } from '../../components/icons/ClipboardCheckIcon'
 import { ClipboardIcon } from '../../components/icons/ClipboardIcon'
+import { CogsIcon } from '../../components/icons/Cogs'
 import { FileIcon } from '../../components/icons/FileIcon'
 import { FolderIcon } from '../../components/icons/FolderIcon'
 import { LockIcon } from '../../components/icons/LockIcon'
 import { ObjectGroupIcon } from '../../components/icons/ObjectGroupIcon'
+import NumberRangeFilter, { numberRangeFilterFn } from '../../components/Table/components/NumberRangeFilter'
+import { propertiesColumnDef, selectColumnDef } from '../../components/Table/selectColumnDef'
+import { StyledTagItem, StyledTags } from '../../components/Tags'
 import { colors } from '../../styles/theme'
 import { StyledLinkCell, StyledNameCell } from '../home/home.styles'
-import { KeyVal } from '../home/types'
 import { IFile } from './files.types'
 
 const StyledLocked = styled.div<{ $isLocked: boolean }>`
@@ -33,84 +33,77 @@ export const useFilesColumns = ({
   isAdmin = false,
   onFileClick,
   onFolderClick,
-  colWidths,
   properties = [],
 }: {
   onFileClick: (fileId: string) => void
   onFolderClick: (folderId: string) => void
-  colWidths?: KeyVal
   isAdmin?: boolean
   properties?: string[]
-  selectedFileIds?: any
-}) => {
+}): ColumnDef<IFile>[] => {
   const queryClient = useQueryClient()
 
   return [
+    selectColumnDef<IFile>(),
     {
-      Header: 'Name',
-      accessor: 'name',
-      Filter: DefaultColumnFilter,
-      width: colWidths?.name || 400,
-      styles: { display: 'relative' },
-      Cell: ({ cell, value }) => {
+      header: 'Name',
+      accessorKey: 'name',
+      filterFn: 'includesString',
+      size: 400,
+      cell: ({ cell }) => {
         const node = cell.row.original
         return (
-          // eslint-disable-next-line react/jsx-no-useless-fragment
-          <>
-            <StyledLocked $isLocked={node.locked}>
-              {node.type === 'UserFile' || node.type === 'File' || node.type === 'Asset' ? (
-                <>
-                  <StyledNameCell
-                    data-tooltip-id={`fileNameTooltip${node.uid}`}
-                    data-tooltip-content={`File is in ${node.state} state.`}
-                    color={
-                      // TODO: Use css className or data attr
-                      isIncompleteFile(node.state) ? 'var(--tertiary-600)' : 'var(--c-link)'
-                    }
-                    onClick={() => onFileClick(node.uid)}
-                  >
-                    <FileIcon height={14} />
-                    {node.locked && <LockIcon height={12} color={colors.darkYellow} />}
-
-                    {value}
-                  </StyledNameCell>
-                  {isIncompleteFile(node.state) && (
-                    <Tooltip id={`fileNameTooltip${node.uid}`} style={{ zIndex: 2 }} />
-                  )}
-                </>
-              ) : (
-                <StyledNameCell onClick={() => onFolderClick(node.id.toString())}>
-                  <FolderIcon height={14} />
+          <StyledLocked $isLocked={node.locked}>
+            {node.type === 'UserFile' || node.type === 'File' || node.type === 'Asset' ? (
+              <>
+                <StyledNameCell
+                  data-tooltip-id={`fileNameTooltip${node.uid}`}
+                  data-tooltip-content={`File is in ${node.state} state.`}
+                  color={
+                    // TODO: Use css className or data attr
+                    isIncompleteFile(node.state) ? 'var(--tertiary-600)' : 'var(--c-link)'
+                  }
+                  onClick={() => onFileClick(node.uid)}
+                >
+                  <FileIcon height={14} />
                   {node.locked && <LockIcon height={12} color={colors.darkYellow} />}
-                  {value}
+
+                  {node.name}
                 </StyledNameCell>
-              )}
-            </StyledLocked>
-          </>
+                {isIncompleteFile(node.state) && <Tooltip id={`fileNameTooltip${node.uid}`} style={{ zIndex: 2 }} />}
+              </>
+            ) : (
+              <StyledNameCell onClick={() => onFolderClick(node.id.toString())}>
+                <FolderIcon height={14} />
+                {node.locked && <LockIcon height={12} color={colors.darkYellow} />}
+                {node.name}
+              </StyledNameCell>
+            )}
+          </StyledLocked>
         )
       },
     },
     {
-      Header: 'ID',
-      accessor: 'uid',
-      disableSortBy: true,
-      disableFilters: true,
-      width: colWidths?.uid || 280,
-      Cell: ({ cell }) => {
+      header: 'ID',
+      accessorKey: 'uid',
+      enableSorting: false,
+      enableColumnFilter: false,
+      size: 280,
+      cell: ({ cell }) => {
         const [isCopiedId, setIsCopiedId] = React.useState<boolean>(false)
+        const val = cell.getValue<string>()
         return (
           <div style={{}}>
-            {cell.value?.length > 0 && (
+            {val && (
               <StyledNameCell
                 onClick={() => {
-                  navigator.clipboard.writeText(cell.value)
+                  navigator.clipboard.writeText(val)
                   setIsCopiedId(true)
                   setTimeout(() => setIsCopiedId(false), 5000)
                 }}
               >
                 {isCopiedId && <ClipboardCheckIcon height={14} />}
                 {!isCopiedId && <ClipboardIcon height={14} />}
-                <span>{cell.value}</span>
+                <span>{val}</span>
               </StyledNameCell>
             )}
           </div>
@@ -127,28 +120,23 @@ export const useFilesColumns = ({
     //   Cell: ({ row, value }) => row.original.locked && (<LockIcon />),
     // },
     {
-      Header: 'Location',
-      accessor: 'location',
-      Filter: DefaultColumnFilter,
-      width: colWidths?.location || 250,
-      Cell: ({ row, value }) => (
+      header: 'Location',
+      accessorKey: 'location',
+      filterFn: 'includesString',
+      size: 250,
+      cell: ({ row, getValue }) => (
         <StyledLinkCell to={`${row.original.links.space}/files`}>
           <ObjectGroupIcon />
-          {value}
+          {getValue<string>()}
         </StyledLinkCell>
       ),
     },
     {
-      Header: 'Featured',
-      accessor: 'featured',
-      disableSortBy: true,
-      Filter: SelectColumnFilter,
-      options: [
-        { label: 'Yes', value: 'true' },
-        { label: 'No', value: 'false' },
-      ],
-      width: colWidths?.featured || 93,
-      Cell: ({ cell }) => {
+      header: 'Featured',
+      accessorKey: 'featured',
+      enableColumnFilter: false,
+      size: 93,
+      cell: ({ cell }) => {
         const id = cell.row.original.type === 'Folder' ? cell.row.original.id : cell.row.original.uid
         return (
           <div style={{ paddingLeft: 20 }}>
@@ -168,87 +156,87 @@ export const useFilesColumns = ({
       },
     },
     {
-      Header: 'Added By',
-      accessor: 'added_by',
-      Filter: DefaultColumnFilter,
-      width: colWidths?.added_by || 198,
-      Cell: ({ cell, value }) => (
+      header: 'Added By',
+      accessorKey: 'added_by',
+      filterFn: 'includesString',
+      size: 198,
+      cell: ({ cell, getValue }) => (
         <a data-turbolinks="false" href={cell.row.original.links.user || ''}>
-          {value}
+          {getValue<string>()}
         </a>
       ),
     },
     {
-      Header: 'Size',
-      accessor: 'file_size',
-      Filter: NumberRangeColumnFilter,
-      width: colWidths?.file_size || 160,
-      filterPlaceholderFrom: 'Min(KB)',
-      filterPlaceholderTo: 'Max(KB)',
+      header: 'Size',
+      accessorKey: 'file_size',
+      size: 160,
+      filterFn: numberRangeFilterFn,
+      meta: {
+        filterElement: (column: Column<IFile>) => (
+          <NumberRangeFilter column={column} fromPlaceholder="Min(KB)" toPlaceholder="Max(KB)" />
+        ),
+      },
     },
     {
-      Header: 'Created',
-      accessor: 'created_at_date_time',
+      header: 'Created',
+      accessorKey: 'created_at_date_time',
       sortDescFirst: true,
-      disableFilters: true,
-      width: colWidths?.created_at_date_time || 200,
+      enableColumnFilter: false,
+      size: 200,
     },
     {
-      Header: 'Origin',
-      accessor: 'origin',
-      disableFilters: true,
-      disableSortBy: true,
-      width: colWidths?.origin || 240,
-      Cell: ({ value, row }) => (
-        <>
-          {typeof value === 'object' && row.original.links.origin_object?.origin_type === 'Job' && (
-            <StyledLinkCell to={`${row.original.origin.href}` || '#'}>
-              <CogsIcon height={14} />
-              {value.text}
-            </StyledLinkCell>
-          )}
-          {typeof value === 'object' && row.original.links.origin_object?.origin_type === 'Comparison' && (
-            <StyledLinkCell to={`/home${value.href}` || '#'}>
-              <AreaChartIcon height={16} />
-              {value.text}
-            </StyledLinkCell>
-          )}
-          {typeof value === 'object' && row.original.links.origin_object?.origin_type === 'UserFile' && (
-            <StyledLinkCell to={`${row.original.origin.href}`}>
-              <FileIcon height={16} />
-              {value.text}
-            </StyledLinkCell>
-          )}
-          {typeof value === 'string' && value}
-        </>
-      ),
+      header: 'Origin',
+      accessorKey: 'origin',
+      enableColumnFilter: false,
+      enableSorting: false,
+      size: 240,
+      cell: ({ row }) => {
+        const value = row.original.origin
+        return (
+          <>
+            {typeof value === 'object' && row.original.links.origin_object?.origin_type === 'Job' && (
+              <StyledLinkCell to={`${value.href}` || '#'}>
+                <CogsIcon height={14} />
+                {value.text}
+              </StyledLinkCell>
+            )}
+            {typeof value === 'object' && row.original.links.origin_object?.origin_type === 'Comparison' && (
+              <StyledLinkCell to={`/home${value.href}` || '#'}>
+                <AreaChartIcon height={16} />
+                {value.text}
+              </StyledLinkCell>
+            )}
+            {typeof value === 'object' && row.original.links.origin_object?.origin_type === 'UserFile' && (
+              <StyledLinkCell to={`${value.href}`}>
+                <FileIcon height={16} />
+                {value.text}
+              </StyledLinkCell>
+            )}
+            {typeof value === 'string' && value}
+          </>
+        )
+      },
     },
     {
-      Header: 'State',
-      accessor: 'state',
-      disableFilters: true,
-      width: colWidths?.state || 120,
+      header: 'State',
+      accessorKey: 'state',
+      enableColumnFilter: false,
+      size: 120,
     },
     {
-      Header: 'Tags',
-      accessor: 'tags',
-      Filter: DefaultColumnFilter,
-      disableSortBy: true,
-      width: colWidths?.tags || 500,
-      Cell: ({ value }) => (
+      header: 'Tags',
+      accessorKey: 'tags',
+      filterFn: 'includesString',
+      enableSorting: false,
+      size: 500,
+      cell: ({ cell }) => (
         <StyledTags>
-          {value.map(tag => (
+          {cell.row.original.tags.map(tag => (
             <StyledTagItem key={tag}>{tag}</StyledTagItem>
           ))}
         </StyledTags>
       ),
     },
-    ...properties.map(property => ({
-      Header: property,
-      accessor: (row: IFile) => row.properties[property],
-      id: `props.${property}`,
-      disableFilters: true,
-      width: colWidths?.[property] || 200,
-    })),
-  ] as Column<IFile>[]
+    ...propertiesColumnDef<IFile>(properties),
+  ]
 }

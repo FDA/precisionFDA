@@ -5,6 +5,7 @@ import { Markdown } from '../../../components/Markdown'
 import { FormFields, Help } from './styles'
 import ExternalLink from '../../../components/Controls/ExternalLink'
 import MonacoEditor from '../../../components/MonacoEditor/MonacoEditor'
+import { DocsContent } from '../../docs/styles'
 
 const ButtonRow = styled.div`
   display: flex;
@@ -82,7 +83,9 @@ export const ReadMeInput = ({
       </View>
 
       <View $shouldDisplay={selected === 'preview'}>
-        <Markdown data={value} />
+        <DocsContent>
+          <Markdown data={value} />
+        </DocsContent>
       </View>
     </FormFields>
   )

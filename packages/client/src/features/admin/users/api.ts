@@ -1,5 +1,5 @@
-import axios from 'axios';
-import { User } from './types';
+import axios from 'axios'
+import { User } from './types'
 
 export async function bulkEnableResource(
   ids: number[],

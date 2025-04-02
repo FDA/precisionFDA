@@ -49,7 +49,7 @@ export const Failed = () => (
   </Svg>
 )
 const StyledInProgressSvg = styled(Svg)`
-  .spinner_Wezc{
+  .spinner{
     transform-origin:center;
     animation:spinner_Oiah .75s step-end infinite;
     fill: var(--base);
@@ -71,7 +71,7 @@ const StyledInProgressSvg = styled(Svg)`
 `
 export const Running = () => (
   <StyledInProgressSvg viewBox="0 0 24 24" width="24" height="24" xmlns="http://www.w3.org/2000/svg">
-    <g className="spinner_Wezc">
+    <g className="spinner">
       <circle cx="12" cy="2.5" r="1.5" opacity=".14" />
       <circle cx="16.75" cy="3.77" r="1.5" opacity=".29" />
       <circle cx="20.23" cy="7.25" r="1.5" opacity=".43" />

@@ -11,56 +11,52 @@ import { useModal } from '../modal/useModal'
 import { LeftBar, ModalLoader, NoteContainer, NotesMarkdown, SearchInput, StyledAttachToModal } from './AttachToModal/styles'
 import { Asset, useListAssetsQuery } from './AttachToModal/useListAssetsQuery'
 
-const AssetHeaderText = () => {
-  return (
-    <>
-      <HeaderText>Selected Assets for your VM Environment</HeaderText> <span>Manage your assets</span>
-    </>
-  )
-}
+const AssetHeaderText = () => (
+  <>
+    <HeaderText>Selected Assets for your VM Environment</HeaderText>
+    <span>Manage your assets</span>
+  </>
+)
 
-export const AssetAttachModal = ({ hideAction, isShown, values, onChange }: any) => {
+export const AssetAttachModal = ({ hideAction, isShown, values, onChange }) => {
   const { data: notesData, isLoading } = useListAssetsQuery()
   const items = notesData || []
   const [search, setSearch] = useState('')
   const [selectedItem, setSelectedItem] = useState<Asset>()
-  const [checkedItem, setCheckedItem] = useState(new Set<Asset>(values))
+  const [checkedItem, setCheckedItem] = useState(new Set(values.map(v => v.uid)))
 
   useEffect(() => {
     if (items.length) setSelectedItem(items[0])
   }, [items])
 
   const onCheckboxClick = (item: Asset) => {
-    if (checkedItem.has(item)) {
-      const newSet = checkedItem
-      newSet.delete(item)
-      setCheckedItem(new Set(newSet))
+    const newSet = new Set(checkedItem)
+    if (newSet.has(item.uid)) {
+      newSet.delete(item.uid)
     } else {
-      setCheckedItem(new Set(checkedItem.add(item)))
+      newSet.add(item.uid)
     }
+    setCheckedItem(newSet)
   }
 
-  const onClickAttachAction = async () => {
-    if (onChange) onChange(Array.from(checkedItem))
+  const onClickAttachAction = () => {
+    if (onChange) onChange(items.filter(item => checkedItem.has(item.uid)))
     hideAction()
   }
 
   const reg = new RegExp(search, 'i')
-  const filteredItems = search ? items.filter((e: any) => reg.test(e.title)) : items
+  const filteredItems = search ? items.filter(e => reg.test(e.title)) : items
 
   const itemsList = filteredItems.map(item => {
-    const classes = classNames(
-      {
-        '__menu-item--selected': item.uid === selectedItem?.uid,
-      },
-      '__menu-item',
-    )
+    const classes = classNames('__menu-item', {
+      '__menu-item--selected': item.uid === selectedItem?.uid,
+    })
 
     return (
-      <li key={item.uid} className={classes} onClick={() => setSelectedItem(item)} onKeyPress={() => setSelectedItem(item)}>
+      <li key={item.uid} className={classes} onClick={() => setSelectedItem(item)}>
         <div>
           <span className="__menu-item_label-wrapper" onClick={() => onCheckboxClick(item)}>
-            <input type="checkbox" name={item.uid} checked={checkedItem.has(item)} onChange={() => {}} />
+            <input type="checkbox" name={item.uid} checked={checkedItem.has(item.uid)} readOnly />
             <span className="__menu-item_class-label">{item.className}</span>
             <span className="__menu-item_title">{item.title}</span>
           </span>
@@ -70,14 +66,8 @@ export const AssetAttachModal = ({ hideAction, isShown, values, onChange }: any)
   })
 
   return (
-    <ModalNext
-      hide={hideAction}
-      isShown={isShown}
-      disableClose={false}
-      data-testid="modal-attachto-asset"
-      id="modal-attachto-asset"
-    >
-      <ModalHeaderTop disableClose={false} headerText={<AssetHeaderText />} hide={hideAction} />
+    <ModalNext hide={hideAction} isShown={isShown} id="modal-attachto-asset">
+      <ModalHeaderTop headerText={<AssetHeaderText />} hide={hideAction} />
       {isLoading ? (
         <ModalLoader>
           <Loader />
@@ -87,12 +77,7 @@ export const AssetAttachModal = ({ hideAction, isShown, values, onChange }: any)
           <StyledAttachToModal>
             <LeftBar>
               <SearchInput>
-                <InputText
-                  name="search"
-                  placeholder="Search..."
-                  value={search}
-                  onChange={(e: any) => setSearch(e.target.value)}
-                />
+                <InputText name="search" placeholder="Search..." value={search} onChange={e => setSearch(e.target.value)} />
                 <span className="__menu-item_search-icons">
                   {search ? (
                     <TransparentButton onClick={() => setSearch('')}>
@@ -104,19 +89,17 @@ export const AssetAttachModal = ({ hideAction, isShown, values, onChange }: any)
                 </span>
               </SearchInput>
               <ModalScroll>
-                <div>
-                  <ul className="__items-list">
-                    {itemsList}
-                    {!itemsList.length && (
-                      <div className="__menu-item">
-                        <span className="text-muted _no-content">No results found</span>
-                        <TransparentButton className="__menu-item_clear" onClick={() => setSearch('')}>
-                          Clear query
-                        </TransparentButton>
-                      </div>
-                    )}
-                  </ul>
-                </div>
+                <ul className="__items-list">
+                  {itemsList}
+                  {!itemsList.length && (
+                    <div className="__menu-item">
+                      <span className="text-muted _no-content">No results found</span>
+                      <TransparentButton className="__menu-item_clear" onClick={() => setSearch('')}>
+                        Clear query
+                      </TransparentButton>
+                    </div>
+                  )}
+                </ul>
               </ModalScroll>
             </LeftBar>
             <NoteContainer>
@@ -124,9 +107,7 @@ export const AssetAttachModal = ({ hideAction, isShown, values, onChange }: any)
                 {selectedItem && (
                   <>
                     <div className="_title">
-                      <a data-turbolinks="false" href={selectedItem.path}>
-                        {selectedItem.title}
-                      </a>
+                      <a href={selectedItem.path}>{selectedItem.title}</a>
                     </div>
                     <NotesMarkdown data={selectedItem?.content} />
                     <div className="_no-content">{!selectedItem?.content && 'No content written for this item'}</div>
@@ -135,12 +116,11 @@ export const AssetAttachModal = ({ hideAction, isShown, values, onChange }: any)
               </ModalScroll>
             </NoteContainer>
           </StyledAttachToModal>
-
           <Footer>
             <ButtonRow>
               <Button onClick={hideAction}>Cancel</Button>
-              <Button data-variant="primary" onClick={() => onClickAttachAction()} disabled={!checkedItem.size}>
-                Attach
+              <Button data-variant="primary" onClick={onClickAttachAction}>
+                Confirm
               </Button>
             </ButtonRow>
           </Footer>
@@ -150,16 +130,10 @@ export const AssetAttachModal = ({ hideAction, isShown, values, onChange }: any)
   )
 }
 
-export function useAssetAttachModal(value: Asset[], onChange: (a: any) => void) {
+export function useAssetAttachModal(value: Asset[], onChange: (a: Asset[]) => void) {
   const { isShown, setShowModal } = useModal()
-
   const modalComp = (
-    <AssetAttachModal onChange={onChange} isShown={isShown} hideAction={() => setShowModal(false)} value={value} />
+    <AssetAttachModal onChange={onChange} isShown={isShown} hideAction={() => setShowModal(false)} values={value} />
   )
-
-  return {
-    modalComp,
-    setShowModal,
-    isShown,
-  }
+  return { modalComp, setShowModal, isShown }
 }

@@ -1,4 +1,3 @@
-/* eslint-disable no-await-in-loop */
 import { Challenge } from '@shared/domain/challenge/challenge.entity'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { ClientRequestError } from '@shared/errors'
@@ -23,10 +22,7 @@ import { createFileEvent, EVENT_TYPES } from '../../event/event.helper'
 
 // Sync all files in non-closed states given a user context
 //
-class SyncFilesStateOperation extends WorkerBaseOperation<
-UserOpsCtx,
-void,
-void> {
+class SyncFilesStateOperation extends WorkerBaseOperation<UserOpsCtx, void, void> {
   platformClient: PlatformClient
   logger: any
 
@@ -41,7 +37,7 @@ void> {
 
   async syncFilesInProject(projectDxid: string, files: IFileOrAsset[], user: User): Promise<void> {
     const em = this.ctx.em
-    const fileDxids = files.map(x => x.dxid)
+    const fileDxids = files.map((x) => x.dxid)
 
     // This call can be particularly time-consuming, so log the times so we can later analyze
     this.logger.log('Starting platform findDataObjects call')
@@ -51,25 +47,21 @@ void> {
       projectDxid,
     }
     const response = await this.platformClient.fileStates(params)
-    this.logger.log({ platformFilesCount: response.length },
-      'End platform findDataObjects call',
-    )
+    this.logger.log({ platformFilesCount: response.length }, 'End platform findDataObjects call')
 
     // If there are files missing in the platform response it means
     // the file upload was abandoned and platform subsequently deleted it
     // in this case we remove the file record on our side
-    const responseFileDxids = response.map(x => x.id)
+    const responseFileDxids = response.map((x) => x.id)
     const abandonedFileDxids = difference(fileDxids, responseFileDxids)
     if (abandonedFileDxids.length > 0) {
-      this.logger.log(
-        { abandonedFileDxids },
-        'Deleting files removed by platform',
-      )
+      this.logger.log({ abandonedFileDxids }, 'Deleting files removed by platform')
     }
     for (const dxid of abandonedFileDxids) {
       const fileOrAssets = await findFileOrAssetsWithDxid(this.ctx.em, dxid)
       if (!fileOrAssets) {
-        this.logger.log({ dxid, fileOrAssets },
+        this.logger.log(
+          { dxid, fileOrAssets },
           'Error removing abandoned file. File with dxid not found',
         )
         continue
@@ -83,30 +75,36 @@ void> {
           em.remove(file)
           await em.flush()
 
-          this.logger.log({
-            dxid: file.dxid,
-            uid: file.uid,
-          }, 'Removed abandoned file')
+          this.logger.log(
+            {
+              dxid: file.dxid,
+              uid: file.uid,
+            },
+            'Removed abandoned file',
+          )
         } catch (err) {
-          this.ctx.log.log({
-            error: err,
-            dxid,
-          },
-          'Error removing abandoned file')
+          this.ctx.log.log(
+            {
+              error: err,
+              dxid,
+            },
+            'Error removing abandoned file',
+          )
         }
       }
     }
 
     // For every file info we receive from platform, update its state on pFDA
     for (const fileInfo of response) {
-      const file = files.find(f => f.dxid === fileInfo.id)
+      const file = files.find((f) => f.dxid === fileInfo.id)
       if (file && fileInfo.describe) {
         const fileOrAsset = await findFileOrAssetWithUid(this.ctx.em, file.uid)
         if (!fileOrAsset) {
           continue
         }
 
-        this.logger.log({ fileDxid: fileOrAsset.dxid, fileInfo },
+        this.logger.log(
+          { fileDxid: fileOrAsset.dxid, fileInfo },
           `Updating file state ${fileInfo.describe.state} for file with uid ${fileOrAsset.uid}`,
         )
         fileOrAsset.fileSize = fileInfo.describe.size
@@ -118,22 +116,22 @@ void> {
           const challengeRepo = this.ctx.em.getRepository(Challenge) as ChallengeRepository
           const challenge = await challengeRepo.findOneWithCardImageUid(fileOrAsset.uid)
           if (challenge) {
-            this.logger.log({ fileUid: fileOrAsset.uid },
+            this.logger.log(
+              { fileUid: fileOrAsset.uid },
               `File associated with challenge ${fileInfo.describe.state} for file with uid ${fileOrAsset.uid}`,
             )
             try {
               await new ChallengeUpdateCardImageUrlOperation(this.ctx).execute(challenge.id)
             } catch (error) {
-              this.logger.error({ fileUid: fileOrAsset.uid, error },
+              this.logger.error(
+                { fileUid: fileOrAsset.uid, error },
                 'Error invoking ChallengeUpdateCardImageUrlOperation',
               )
             }
           }
         }
       } else {
-        this.logger.warn({ fileInfo },
-          'Cannot find file or fileInfo.describe in response',
-        )
+        this.logger.warn({ fileInfo }, 'Cannot find file or fileInfo.describe in response')
       }
     }
     await this.ctx.em.flush()
@@ -150,22 +148,20 @@ void> {
       return
     }
 
-    if (user.isGuest()) {
-      this.logger.error(`User ${dxuser} is a guest`)
-      return
-    }
-
     this.platformClient = new PlatformClient(
       { accessToken: this.ctx.user.accessToken },
       this.ctx.log,
     )
     let openFiles = await findUnclosedFilesOrAssets(em, user.id)
 
-    this.logger.log({
-      dxuser,
-      numberOfOpenFiles: openFiles.length,
-      openFiles: openFiles.map(f => f.dxid),
-    }, `Starting files state sync for ${dxuser}`)
+    this.logger.log(
+      {
+        dxuser,
+        numberOfOpenFiles: openFiles.length,
+        openFiles: openFiles.map((f) => f.dxid),
+      },
+      `Starting files state sync for ${dxuser}`,
+    )
 
     try {
       // Group files based on project dxid, this is necessary to provide project hint to the
@@ -174,10 +170,17 @@ void> {
       for (const projectDxid in openFilesByProject) {
         if (openFilesByProject.hasOwnProperty(projectDxid)) {
           const openFilesInProject = openFilesByProject[projectDxid]
-          this.logger.log({
-            projectDxid,
-            openFiles: openFilesInProject.map(f => ({ name: f.name, dxid: f.dxid, uid: f.uid })),
-          }, 'Syncing files state in project')
+          this.logger.log(
+            {
+              projectDxid,
+              openFiles: openFilesInProject.map((f) => ({
+                name: f.name,
+                dxid: f.dxid,
+                uid: f.uid,
+              })),
+            },
+            'Syncing files state in project',
+          )
 
           await this.syncFilesInProject(projectDxid, openFilesInProject, user)
         }
@@ -188,8 +191,7 @@ void> {
           // Unauthorized. Expected scenario is that the user token has expired
           // Removing the sync task will allow a new sync task to be recreated
           // when user next logs in via UserCheckupTask
-          this.ctx.log.log({ error: err.props },
-            'Received 401 from platform, removing sync task')
+          this.ctx.log.log({ error: err.props }, 'Received 401 from platform, removing sync task')
           await removeRepeatable(this.ctx.job)
         }
       }
@@ -206,10 +208,17 @@ void> {
       this.logger.log('Completed and all user files closed, removing repeatable job')
       await removeRepeatable(this.ctx.job)
     } else {
-      this.logger.log({
-        dxuser: user.dxuser,
-        openFiles: openFiles.map(f => ({ name: f.name, dxid: f.dxid, uid: f.uid, createdAt: f.createdAt })),
-      }, 'Completed with open files remaining',
+      this.logger.log(
+        {
+          dxuser: user.dxuser,
+          openFiles: openFiles.map((f) => ({
+            name: f.name,
+            dxid: f.dxid,
+            uid: f.uid,
+            createdAt: f.createdAt,
+          })),
+        },
+        'Completed with open files remaining',
       )
     }
   }

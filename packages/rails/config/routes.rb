@@ -110,7 +110,7 @@ Rails.application.routes.draw do
     delete "logout" => "main#destroy"
     get "return_from_login" => "main#return_from_login"
     get "check_webapp" => "main#check_webapp"
-    post "publish" => "main#publish"
+    get "publish" => "main#publish"
     get "request_access" => "main#request_access"
     post "request_access" => "main#create_request_access"
     get "browse_access" => "main#browse_access"
@@ -277,7 +277,7 @@ Rails.application.routes.draw do
         end
       end
 
-      resources :spaces, only: %i(index show update) do
+      resources :spaces, only: %i(index show) do
         collection do
           get :cli
           get :editable_spaces
@@ -435,7 +435,7 @@ Rails.application.routes.draw do
       end
 
       resources :dbclusters, controller: :db_clusters,
-                param: :uid, only: %i(index show create update) do
+                param: :uid, only: %i(create update) do
         post ":api_method", on: :collection,
              to: "db_clusters#run",
              as: :run,
@@ -505,6 +505,7 @@ Rails.application.routes.draw do
       get "cli_latest_version"
       get "list_licenses_for_files"
       get "tracks/provenance", action: :track_provenance, as: "track_provenance"
+      post "publish"
     end
     # end API
 

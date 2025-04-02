@@ -1,42 +1,37 @@
 import { useQueryClient } from '@tanstack/react-query'
-import React, { useEffect, useMemo, useState } from 'react'
-import { SortingRule, UseResizeColumnsState } from 'react-table'
+import React, { useEffect, useState } from 'react'
 import useWebSocket from 'react-use-websocket'
+import { ColumnDefResolved, ColumnFiltersState, ColumnSizingState, ColumnSort, ExpandedState, RowSelectionState, VisibilityState } from '@tanstack/react-table'
 import { ContentFooter } from '../../components/Page/ContentFooter'
 import { Pagination, hidePagination } from '../../components/Pagination'
-import { EmptyTable } from '../../components/Table/styles'
-import Table from '../../components/Table/Table'
+import Table from '../../components/Table'
 import { useColumnWidthLocalStorage } from '../../hooks/useColumnWidthLocalStorage'
 import { useOrderByState } from '../../hooks/useOrderByState'
 import { usePaginationParams } from '../../hooks/usePaginationState'
 import { DEFAULT_RECONNECT_ATTEMPTS, DEFAULT_RECONNECT_INTERVAL, SHOULD_RECONNECT, getNodeWsUrl } from '../../utils/config'
-import { ErrorBoundary } from '../../utils/ErrorBoundry'
 import { toArrayFromObject } from '../../utils/object'
 import { IExecution } from '../executions/executions.types'
-import { ExecutionSubTable } from '../executions/ExecutionSubTable'
+import { createLocationKey } from '../../utils'
 import { useExecutionColumns } from '../executions/useExecutionColumns'
 import { columnFilters } from '../home/columnFilters'
-import { StyledHomeTable } from '../home/home.styles'
-import {
-  IFilter,
-  IMeta,
-  KeyVal,
-  NOTIFICATION_ACTION,
-  Notification,
-  WEBSOCKET_MESSSAGE_TYPE,
-  WebSocketMessage,
-} from '../home/types'
+import { IMeta, NOTIFICATION_ACTION, Notification, WEBSOCKET_MESSAGE_TYPE, WebSocketMessage } from '../home/types'
 import { useFilterParams } from '../home/useFilterState'
 import { useListQuery } from '../home/useListQuery'
 import { fetchWorkflowExecutions } from './workflows.api'
+import { ResouceQueryErrorMessage } from '../home/ResouceQueryErrorMessage'
+import { useHiddenColumnLocalStorage } from '../../hooks/useHiddenColumnLocalStorage'
+import { StyledPageTable } from '../../components/Table/components/styles'
 
 type ListType = { jobs: IExecution[]; meta: IMeta }
 
-export const WorkflowExecutionsList = ({ uid }: { uid: string }) => {
-  const resource = 'app-executions'
+export const WorkflowExecutionsList = ({ spaceId, uid }: { spaceId?: string; uid: string }) => {
+  const resource = 'workflow-executions'
+  const locationKey = createLocationKey(resource, spaceId)
   const { pageParam, perPageParam, setPageParam, setPerPageParam } = usePaginationParams()
   const { sortBy, sort, setSortBy } = useOrderByState({ defaultOrder: { order_by: 'created_at_date_time', order_dir: 'DESC' } })
-  const { colWidths, saveColumnResizeWidth } = useColumnWidthLocalStorage(resource)
+  const { colWidths, saveColumnResizeWidth } = useColumnWidthLocalStorage(locationKey)
+  const { columnVisibility, setColumnVisibility } = useHiddenColumnLocalStorage(locationKey)
+
   const queryCache = useQueryClient()
 
   const { filterQuery, setSearchFilter } = useFilterParams({
@@ -68,7 +63,7 @@ export const WorkflowExecutionsList = ({ uid }: { uid: string }) => {
         const messageData = JSON.parse(message.data)
         const notification = messageData.data as Notification
         return (
-          messageData.type === WEBSOCKET_MESSSAGE_TYPE.NOTIFICATION &&
+          messageData.type === WEBSOCKET_MESSAGE_TYPE.NOTIFICATION &&
           [
             NOTIFICATION_ACTION.JOB_RUNNABLE,
             NOTIFICATION_ACTION.JOB_RUNNING,
@@ -92,20 +87,21 @@ export const WorkflowExecutionsList = ({ uid }: { uid: string }) => {
     })
   }, [lastJsonMessage])
 
-  if (error) return <div>Error! {JSON.stringify(error)}</div>
+  if (error) return <ResouceQueryErrorMessage />
 
   return (
-    <ErrorBoundary>
+    <>
       <ExecutionsListTable
-        setFilters={setSearchFilter}
-        // TODO(samuel) fix by validating url query
-        filters={toArrayFromObject(filterQuery as any)}
         jobs={data?.jobs}
         isLoading={isLoading}
+        setFilters={setSearchFilter}
+        filters={toArrayFromObject(filterQuery as any)}
         setSortBy={setSortBy}
         sortBy={sortBy}
-        saveColumnResizeWidth={saveColumnResizeWidth}
-        colWidths={colWidths}
+        setColumnSizing={saveColumnResizeWidth}
+        columnSizing={colWidths}
+        columnVisibility={columnVisibility}
+        setColumnVisibility={setColumnVisibility}
       />
       <ContentFooter>
         <Pagination
@@ -120,66 +116,71 @@ export const WorkflowExecutionsList = ({ uid }: { uid: string }) => {
           onPerPageSelect={setPerPage}
         />
       </ContentFooter>
-    </ErrorBoundary>
+    </>
   )
 }
 
 export const ExecutionsListTable = ({
-  filters,
   jobs,
   isLoading,
-  setFilters,
-  setSortBy,
   sortBy,
-  saveColumnResizeWidth,
-  colWidths,
+  setSortBy,
+  filters,
+  setFilters,
+  selectedRows,
+  setSelectedRows,
+  columnSizing,
+  setColumnSizing,
+  columnVisibility,
+  setColumnVisibility,
 }: {
-  filters: IFilter[]
   jobs?: IExecution[]
-  setFilters: (val: IFilter[]) => void
-  sortBy?: SortingRule<string>[]
-  setSortBy: (cols: SortingRule<string>[]) => void
   isLoading: boolean
-  colWidths: KeyVal
-  saveColumnResizeWidth: (columnResizing: UseResizeColumnsState<any>['columnResizing']) => void
+  sortBy: ColumnSort[]
+  setSortBy: (cols: ColumnSort[]) => void
+  filters: ColumnFiltersState
+  setFilters: (val: ColumnFiltersState) => void
+  selectedRows?: RowSelectionState
+  setSelectedRows: (ids: RowSelectionState) => void
+  columnSizing: ColumnSizingState
+  setColumnSizing: (columnResizing: ColumnSizingState) => void
+  setColumnVisibility: (cols: VisibilityState) => void
+  columnVisibility: VisibilityState
 }) => {
-  const col = useExecutionColumns({ colWidths, filterDataTestIdPrefix: 'workflow-executions-list' }).filter(
-    col => col.id !== 'workflow_title',
-  )
-  const [hiddenColumns, sethiddenColumns] = useState<string[]>(['workflow', 'featured', 'location', 'tags'])
-  const columns = useMemo(() => col, [col])
-
-  const data = useMemo(() => jobs || [], [jobs])
+  const [expanded, setExpanded] = useState<ExpandedState>({})
+  function filterColsByScope(c: ColumnDefResolved<IExecution>): boolean {
+    // Check if any of the conditions is true, then hide the column
+    return !(
+      c.accessorKey === 'workflow' ||
+      c.accessorKey === 'featured' ||
+      c.accessorKey === 'location' ||
+      c.accessorKey === 'tags' ||
+      c.id === 'select'
+    )
+  }
+  // @ts-expect-error: type is broken from react-table library
+  const col = useExecutionColumns({ filterDataTestIdPrefix: 'workflow-executions-list' }).filter(filterColsByScope)
 
   return (
-    <StyledHomeTable>
+    <StyledPageTable>
       <Table<IExecution>
-        name="jobs"
-        columns={columns}
-        hiddenColumns={hiddenColumns}
-        data={data}
-        loading={isLoading}
-        loadingComponent={<div>Loading...</div>}
-        sortByPreference={sortBy}
-        setSortByPreference={setSortBy}
-        manualFilters
-        filters={filters}
-        setFilters={setFilters}
-        emptyComponent={<EmptyTable>You have no executions here.</EmptyTable>}
-        isColsResizable
-        isSortable
-        isFilterable
-        saveColumnResizeWidth={saveColumnResizeWidth}
-        isExpandable
-        rowProps={row => ({
-          className: 'hideExpand',
-        })}
-        updateRowState={row => ({
-          ...row,
-          hideExpand: !row.original.jobs,
-        })}
-        subcomponent={ExecutionSubTable}
+        isLoading={isLoading}
+        data={jobs || []}
+        columns={col}
+        columnSizing={columnSizing}
+        setColumnSizing={setColumnSizing}
+        rowSelection={selectedRows ?? {}}
+        setSelectedRows={setSelectedRows}
+        setColumnFilters={setFilters}
+        columnVisibility={columnVisibility}
+        setColumnVisibility={setColumnVisibility}
+        columnSortBy={sortBy}
+        setColumnSortBy={setSortBy}
+        columnFilters={filters}
+        expanded={expanded}
+        setExpanded={setExpanded}
+        subRowKey='jobs'
       />
-    </StyledHomeTable>
+    </StyledPageTable>
   )
 }

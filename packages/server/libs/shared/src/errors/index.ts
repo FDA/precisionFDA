@@ -20,6 +20,7 @@ export enum ErrorCodes {
   WORKER = 'E_WORKER',
   VALIDATION = 'E_VALIDATION',
   NOT_FOUND = 'E_NOT_FOUND',
+  NO_CONTENT = 'E_NO_CONTENT',
   NOT_PERMITTED = 'E_NOT_PERMITTED',
   INVALID_STATE = 'E_INVALID_STATE',
   INVALID_REQUEST = 'E_INVALID_REQUEST',
@@ -80,6 +81,16 @@ export class NotFoundError extends BaseError {
     super(message, {
       code: ErrorCodes.NOT_FOUND,
       statusCode: 404,
+      ...props,
+    })
+  }
+}
+
+export class NoHeaderItemsSetError extends BaseError {
+  constructor(message = 'Warn: Header items are not set', props: MaybeBaseErrorProps = {}) {
+    super(message, {
+      code: ErrorCodes.UNPROCESSABLE_ENTITY,
+      statusCode: 422,
       ...props,
     })
   }

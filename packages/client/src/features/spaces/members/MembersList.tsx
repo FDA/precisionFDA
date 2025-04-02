@@ -94,7 +94,7 @@ export const MembersList = ({ space }: { space: ISpace }) => {
             {space.type === 'review' && !isPrivateArea && (
               <RadioButtonGroup
                 options={[
-                  { value: undefined, label: 'All' },
+                  { value: undefined, label: '--' },
                   { value: 'reviewer', label: 'Reviewer' },
                   { value: 'sponsor', label: 'Sponsor' },
                 ]}

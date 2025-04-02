@@ -1,20 +1,26 @@
-import React, { useMemo } from 'react'
-import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { Column, SortingRule, UseResizeColumnsState } from 'react-table'
+import {
+  ColumnDefResolved,
+  ColumnFiltersState,
+  ColumnSizingState,
+  ColumnSort,
+  RowSelectionState,
+  VisibilityState,
+} from '@tanstack/react-table'
+import React from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 import { Button } from '../../components/Button'
 import Dropdown from '../../components/Dropdown'
 import { ContentFooter } from '../../components/Page/ContentFooter'
 import { Pagination } from '../../components/Pagination'
-import Table from '../../components/Table/Table'
-import { EmptyTable } from '../../components/Table/styles'
+import Table from '../../components/Table'
 import { HoverDNAnexusLogo } from '../../components/icons/DNAnexusLogo'
 import { PlusIcon } from '../../components/icons/PlusIcon'
 import { getSelectedObjectsFromIndexes, toArrayFromObject } from '../../utils/object'
 import { useAuthUser } from '../auth/useAuthUser'
 import { ActionsDropdownContent } from '../home/ActionDropdownContent'
-import { ActionsRow, QuickActions, StyledHomeTable } from '../home/home.styles'
+import { ActionsRow, QuickActions } from '../home/home.styles'
 import { ActionsButton, ResourceHeader } from '../home/show.styles'
-import { HomeScope, IFilter, IMeta, KeyVal } from '../home/types'
+import { HomeScope, IMeta } from '../home/types'
 import { useList } from '../home/useList'
 import { usePropertiesQuery } from '../home/usePropertiesQuery'
 import { fetchApps } from './apps.api'
@@ -22,6 +28,8 @@ import { IApp } from './apps.types'
 import { useAppListActions } from './useAppListActions'
 import { useAppSelectionActions } from './useAppSelectionActions'
 import { useAppsColumns } from './useAppsColumns'
+import { ResouceQueryErrorMessage } from '../home/ResouceQueryErrorMessage'
+import { StyledPageTable } from '../../components/Table/components/styles'
 
 type ListType = { apps: IApp[]; meta: IMeta }
 
@@ -36,7 +44,7 @@ export const AppList = ({
 }) => {
   const navigate = useNavigate()
   const user = useAuthUser()
-  const isAdmin = user?.isAdmin
+  const isAdmin = user?.isAdmin || false
 
   const onRowClick = (id: string) => navigate(`/home/apps/${id}`)
   const {
@@ -53,8 +61,8 @@ export const AppList = ({
     saveColumnResizeWidth,
     colWidths,
     resetSelected,
-    saveHiddenColumns,
-    hiddenColumns,
+    setColumnVisibility,
+    columnVisibility,
   } = useList<ListType>({
     fetchList: fetchApps,
     resource: 'apps',
@@ -90,7 +98,7 @@ export const AppList = ({
     delete actions['Make public']
   }
 
-  if (error) return <div>Error! {JSON.stringify(error)}</div>
+  if (error) return <ResouceQueryErrorMessage />
 
   return (
     <>
@@ -133,13 +141,12 @@ export const AppList = ({
           </Dropdown>
         </ActionsRow>
       </ResourceHeader>
-
       <AppsListTable
         isAdmin={isAdmin}
         homeScope={homeScope}
         setFilters={setSearchFilter}
         // TODO(samuel) Typescript fix
-        filters={toArrayFromObject(filterQuery as any)}
+        filters={toArrayFromObject(filterQuery as any).filter(i => i.value !== undefined)}
         apps={data?.apps}
         properties={propertiesData?.keys}
         isLoading={isLoading}
@@ -148,10 +155,10 @@ export const AppList = ({
         handleRowClick={onRowClick}
         selectedRows={selectedIndexes}
         setSelectedRows={setSelectedIndexes}
-        saveColumnResizeWidth={saveColumnResizeWidth}
-        colWidths={colWidths}
-        saveHiddenColumns={saveHiddenColumns}
-        hiddenColumns={hiddenColumns}
+        setColumnSizing={saveColumnResizeWidth}
+        columnSizing={colWidths}
+        columnVisibility={columnVisibility}
+        setColumnVisibility={setColumnVisibility}
       />
 
       <ContentFooter>
@@ -171,7 +178,6 @@ export const AppList = ({
 
       {actions['Delete']?.modal}
       {actions['Copy to space']?.modal}
-      {actions['Attach to...']?.modal}
       {actions['Edit tags']?.modal}
       {actions['Edit properties']?.modal}
       {actions['Export to']?.modal}
@@ -186,90 +192,77 @@ export const AppList = ({
 export const AppsListTable = ({
   isAdmin,
   filters,
+  setFilters,
   apps,
   properties,
   handleRowClick,
   isLoading,
-  setFilters,
   selectedRows,
   setSelectedRows,
   sortBy,
   setSortBy,
   homeScope,
-  saveColumnResizeWidth,
-  colWidths,
-  saveHiddenColumns,
-  hiddenColumns,
+  columnSizing,
+  setColumnSizing,
+  columnVisibility,
+  setColumnVisibility,
 }: {
   isAdmin: boolean
-  filters: IFilter[]
+  filters: ColumnFiltersState
+  setFilters: (val: ColumnFiltersState) => void
+  sortBy: ColumnSort[]
+  setSortBy: (cols: ColumnSort[]) => void
   apps?: IApp[]
   properties?: string[]
   handleRowClick: (fileId: string) => void
-  setFilters: (val: IFilter[]) => void
-  selectedRows?: Record<string, boolean>
-  setSelectedRows: (ids: Record<string, boolean>) => void
-  sortBy: SortingRule<string>[]
-  setSortBy: (cols: SortingRule<string>[]) => void
+  selectedRows?: RowSelectionState
+  setSelectedRows: (ids: RowSelectionState) => void
   isLoading: boolean
   homeScope?: HomeScope
-  colWidths: KeyVal
-  saveColumnResizeWidth: (columnResizing: UseResizeColumnsState<any>['columnResizing']) => void
-  saveHiddenColumns: (cols: string[]) => void
-  hiddenColumns: string[]
+  columnSizing: ColumnSizingState
+  setColumnSizing: (columnResizing: ColumnSizingState) => void
+  setColumnVisibility: (cols: VisibilityState) => void
+  columnVisibility: VisibilityState
 }) => {
-  const location = useLocation()
-
-  function filterColsByScope(c: Column<IApp>): boolean {
+  function filterColsByScope(c: ColumnDefResolved<IApp>) {
     // Check if any of the conditions is true, then hide the column
     return !(
       // If the homeScope is 'me', hide 'added_by' regardless of other conditions.
       (
-        (homeScope === 'me' && c.accessor === 'added_by') ||
+        (homeScope === 'me' && c.accessorKey === 'added_by') ||
         // Hide 'location' for all homeScopes except 'spaces'.
-        (homeScope !== 'spaces' && c.accessor === 'location') ||
+        (homeScope !== 'spaces' && c.accessorKey === 'location') ||
         // Hide 'featured' for all homeScopes except 'everybody'.
-        (homeScope !== 'everybody' && c.accessor === 'featured') ||
+        (homeScope !== 'everybody' && c.accessorKey === 'featured') ||
         // Hide 'explorers', 'org', 'run_by_you' if homeScope is defined to something specific.
-        (homeScope !== undefined && c.accessor === 'explorers') ||
-        (homeScope !== undefined && c.accessor === 'org') ||
-        (homeScope !== undefined && c.accessor === 'run_by_you')
+        (homeScope !== undefined && c.accessorKey === 'explorers') ||
+        (homeScope !== undefined && c.accessorKey === 'org') ||
+        (homeScope !== undefined && c.accessorKey === 'run_by_you')
       )
     )
   }
 
-  const col = useAppsColumns({ colWidths, isAdmin, properties }).filter(filterColsByScope)
-
-  const columns = useMemo(() => col, [col, location.search, properties])
-  const data = useMemo(() => apps || [], [apps, selectedRows])
+  // @ts-expect-error filter
+  const col = useAppsColumns({ isAdmin, properties }).filter(filterColsByScope)
 
   return (
-    <StyledHomeTable>
+    <StyledPageTable>
       <Table<IApp>
-        name="apps"
-        columns={columns}
-        enableColumnSelect
-        hiddenColumns={hiddenColumns}
-        saveHiddenColumns={saveHiddenColumns}
-        data={data}
-        properties={properties}
-        isSelectable
-        isSortable
-        isFilterable
-        loading={isLoading}
-        loadingComponent={<div>Loading...</div>}
-        selectedRows={selectedRows}
+        isLoading={isLoading}
+        data={apps || []}
+        columns={col}
+        columnSizing={columnSizing}
+        setColumnSizing={setColumnSizing}
+        rowSelection={selectedRows ?? {}}
         setSelectedRows={setSelectedRows}
-        sortByPreference={sortBy}
-        setSortByPreference={setSortBy}
-        manualFilters
-        shouldResetFilters={[homeScope]}
-        filters={filters}
-        setFilters={setFilters}
-        emptyComponent={<EmptyTable>You have no apps here.</EmptyTable>}
-        isColsResizable
-        saveColumnResizeWidth={saveColumnResizeWidth}
+        setColumnFilters={setFilters}
+        columnSortBy={sortBy}
+        setColumnSortBy={setSortBy}
+        columnFilters={filters}
+        columnVisibility={columnVisibility}
+        setColumnVisibility={setColumnVisibility}
+        emptyText="You don't have any apps yet."
       />
-    </StyledHomeTable>
+    </StyledPageTable>
   )
 }

@@ -5,14 +5,14 @@ import React, { useEffect, useState } from 'react'
 import { ErrorMessage } from '@hookform/error-message'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { debounce } from 'lodash'
-import { Controller, FieldValues, useForm } from 'react-hook-form'
+import { Controller, useForm } from 'react-hook-form'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import styled from 'styled-components'
 import * as Yup from 'yup'
 import { BackendError } from '../../../api/errors'
-import { FieldLabelRow, Hint, InputError } from '../../../components/form/styles'
+import { FieldLabelRow, InputError } from '../../../components/form/styles'
 import { InputText } from '../../../components/InputText'
 import { Loader } from '../../../components/Loader'
 import { StyledBackLink } from '../../home/home.styles'
@@ -27,6 +27,8 @@ import { DatabaseEngineType, versionsOptions } from './options'
 import { Select } from '../../../components/Select'
 import { Button } from '../../../components/Button'
 import { FieldGroup } from '../../../components/form/FieldGroup'
+import { getBackPathNext } from '../../../utils/getBackPath'
+import { HomeScope } from '../../home/types'
 
 const useAccessibleFiles = (inputValue: string) => useQuery({
   queryKey: ['accessible-files', inputValue],
@@ -55,22 +57,13 @@ const replaceNbspSubstring = (str: string, substringLength: number) =>
 interface CreateDatabaseForm {
   name: string
   description: string
-  adminPassword: string
-  confirmPassword: string
   engine: DatabaseEngineType | null
   dxInstanceClass: { label: string; value: string } | null
   engineVersion: { label: string; value: string } | null
-  ddl_file_uid: { label: string; value: string } | null
 }
 
 const validationSchema = Yup.object().shape({
   name: Yup.string().required('Name required'),
-  adminPassword: Yup.string()
-    .required('Password is required')
-    .min(8, 'Password must be at least 8 characters'),
-  confirmPassword: Yup.string()
-    .required('Confirm Password is required')
-    .oneOf([Yup.ref('adminPassword')], 'Passwords must match'),
   engine: Yup.string().required('Engine required').nullable().required('Required'),
   dxInstanceClass: Yup.object()
     .shape({
@@ -84,8 +77,9 @@ const validationSchema = Yup.object().shape({
     .nullable().required('Required'),
 })
 
-export const CreateDatabase = () => {
+export const CreateDatabase = ({ spaceId, homeScope }: { spaceId?: number, homeScope?: HomeScope }) => {
   const navigate = useNavigate()
+  const location = useLocation()
   const [inputValue, setInputValue] = useState('')
   const { data, isLoading } = useAccessibleFiles(inputValue)
   const allowedInstances = useQuery({
@@ -95,7 +89,14 @@ export const CreateDatabase = () => {
   const debouncedSqlFileInputSearch = debounce(v => {
     setInputValue(v)
   }, 500)
-  
+
+  const backPath = getBackPathNext({
+    location, 
+    resourceLocation: 'databases',
+    homeScope,
+    spaceId,
+  })
+
   const accessibleFiles = data || []
 
   const {
@@ -113,9 +114,6 @@ export const CreateDatabase = () => {
       name: '',
       description: '',
       engine: null,
-      adminPassword: '',
-      confirmPassword: '',
-      ddl_file_uid: null,
       dxInstanceClass: null,
       engineVersion: null,
     },
@@ -127,8 +125,8 @@ export const CreateDatabase = () => {
     mutationKey: ['create-database'],
     mutationFn: (payload: any) => createDatabaseRequest(payload),
     onSuccess: (res) => {
-      if (res?.db_cluster) {
-        navigate(`/home/databases/${res.db_cluster?.uid}`)
+      if (res?.uid) {
+        navigate(`${backPath.replace(/\?scope=(me|spaces)/, '')}/${res?.uid}`)
         queryClient.invalidateQueries({
           queryKey: ['dbclusters'],
         })
@@ -138,8 +136,9 @@ export const CreateDatabase = () => {
     onError: (e: AxiosError<BackendError>) => {
       if (e.response?.data?.error?.message) {
         toast.error(`Error: ${e.response.data.error.message}`)
+      } else {
+        toast.error('Something went wrong when creating the database!')
       }
-      toast.error('Error while creating the database!')
     },
   })
 
@@ -148,14 +147,13 @@ export const CreateDatabase = () => {
     setValue('engineVersion', null)
   }, [watch().engine])
 
-  const onSubmit = (values: FieldValues) => {
+  const onSubmit = () => {
     const vals = getValues()
     createDatabaseMutation.mutateAsync({
+      scope: spaceId ? `space-${spaceId}` : 'private',
       name: vals.name,
       description: vals.description,
       engine: vals.engine,
-      adminPassword: vals.adminPassword,
-      ddl_file_uid: vals.ddl_file_uid ? vals.ddl_file_uid.value : '',
       dxInstanceClass: vals.dxInstanceClass ? vals.dxInstanceClass.value : '',
       engineVersion: vals.engineVersion ? vals.engineVersion.value : '',
     })
@@ -172,7 +170,7 @@ export const CreateDatabase = () => {
   if (allowedInstances.data?.length === 0) {
     return (
       <>
-        <StyledBackLink linkTo="/home/databases">
+        <StyledBackLink linkTo={backPath}>
           Back to Databases
         </StyledBackLink>
         <NotFound>
@@ -187,7 +185,7 @@ export const CreateDatabase = () => {
   })) ?? []
   return (
     <>
-      <StyledBackLink linkTo="/home/databases">
+      <StyledBackLink linkTo={backPath}>
         Back to Databases
       </StyledBackLink>
       <StyledForm onSubmit={handleSubmit(onSubmit)} autoComplete="off">
@@ -207,48 +205,6 @@ export const CreateDatabase = () => {
           <ErrorMessage
             errors={errors}
             name="description"
-            render={({ message }) => <InputError>{message}</InputError>}
-          />
-        </FieldGroup>
-        <FieldGroup label="DB SQL File" required>
-          <Controller
-            name="ddl_file_uid"
-            control={control}
-            render={({ field: { value, onChange, onBlur }}) => (
-              <Select
-                options={filesOptions}
-                placeholder="Choose DDL File..."
-                onChange={onChange}
-                onInputChange={debouncedSqlFileInputSearch}
-                isLoading={isLoading}
-                defaultValue={{ label: 'Select...', value: '' }}
-                isClearable
-                isSearchable
-                // Disabled client side filtering. for some reason the following line works
-                filterOption={(a) => a as any}
-                onBlur={onBlur}
-                value={value}
-                isDisabled={isSubmitting}
-              />
-            )}
-          />
-        </FieldGroup>
-        <FieldGroup label="DB admin password" required>
-          <InputText type="password" {...register('adminPassword')} autoComplete="new-password" disabled={isSubmitting} />
-          <Hint>
-            This password must be at least 8 characters in length and is not changeable once set
-          </Hint>
-          <ErrorMessage
-            errors={errors}
-            name="adminPassword"
-            render={({ message }) => <InputError>{message}</InputError>}
-          />
-        </FieldGroup>
-        <FieldGroup label="Retype DB admin password" required>
-          <InputText type="password" {...register('confirmPassword')} autoComplete="new-password" disabled={isSubmitting} />
-          <ErrorMessage
-            errors={errors}
-            name="confirmPassword"
             render={({ message }) => <InputError>{message}</InputError>}
           />
         </FieldGroup>
@@ -287,6 +243,7 @@ export const CreateDatabase = () => {
             control={control}
             render={({ field: { value, onChange, onBlur }}) => (
               <Select
+                id="db_instance_type"
                 options={watch().engine ? dbInstanceOptions : []}
                 placeholder="Choose..."
                 onChange={onChange}
@@ -311,6 +268,7 @@ export const CreateDatabase = () => {
             control={control}
             render={({ field: { value, onChange, onBlur }}) => (
               <Select
+                id="db_engine_version"
                 options={versionsOptions(
                   watch().engine,
                   watch().dxInstanceClass?.value ?? '',

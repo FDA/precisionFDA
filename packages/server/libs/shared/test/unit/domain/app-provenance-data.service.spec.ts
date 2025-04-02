@@ -1,6 +1,7 @@
 import { App } from '@shared/domain/app/app.entity'
 import { EntityService } from '@shared/domain/entity/entity.service'
 import { AppProvenanceDataService } from '@shared/domain/provenance/service/entity-data/app-provenance-data.service'
+import { STATIC_SCOPE } from '@shared/enums'
 import { EntityUtils } from '@shared/utils/entity.utils'
 import { expect } from 'chai'
 import { SinonStub, stub } from 'sinon'
@@ -26,6 +27,7 @@ describe('AppProvenanceDataService', () => {
     revision: REVISION,
     assets: { loadItems: loadAssetsStub },
     uid: UID,
+    scope: STATIC_SCOPE.PRIVATE,
   } as unknown as App
 
   let getEntityTypeForEntityStub: SinonStub
@@ -55,6 +57,7 @@ describe('AppProvenanceDataService', () => {
         url: LINK,
         title: `${TITLE} (revision ${REVISION})`,
         identifier: UID,
+        scope: STATIC_SCOPE.PRIVATE,
       })
     })
 

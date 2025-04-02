@@ -25,7 +25,7 @@ class ApplicationController < ActionController::Base
   before_action :create_user_viewed_event
 
   # Use time zone of current user
-  around_action :user_time_zone, if: -> { !@context.guest? && current_user }
+  around_action :user_time_zone, if: -> { current_user }
   around_action :request_context
 
   helper_method :pathify, :pathify_comments, :item_from_uid, :pathify_folder, :current_user
@@ -144,29 +144,11 @@ class ApplicationController < ActionController::Base
     redirect_to return_to_login_url unless @context.logged_in?
   end
 
-  # Redirect user to login page if user is not either guest or logged in.
-  def require_login_or_guest
-    redirect_to return_to_login_url unless @context.logged_in_or_guest?
-  end
-
   def return_to_login_url
     URI.join(
       login_url,
       "?#{URI.encode_www_form(user_return_to: request.original_fullpath)}",
     ).to_s
-  end
-
-  # Tries to authorize user if the user is not authorized or guest one yet.
-  # Renders Unauthorized if it was unable to authorize user.
-  def require_api_login_or_guest
-    if @context.logged_in_or_guest?
-      return if verified_request? || Rails.env.development? || Rails.env.dev?
-    else
-      process_authorization_header
-      return if @context.logged_in?
-    end
-
-    render status: :unauthorized, json: { failure: "Authentication failure" }
   end
 
   # Tries to authorize user if the user is not authorized.
@@ -232,7 +214,7 @@ class ApplicationController < ActionController::Base
   # @param org_id [Integer] User org's ID.
   def init_context(user_id, username, token, expiration, org_id, cli_client = false)
     @context = Context.new(user_id, username, token, expiration, org_id, cli_client)
-    DIContainer.configure(@context.user, token) unless @context.guest?
+    DIContainer.configure(@context.user, token)
   end
 
   # Returns configured encryptor.

@@ -34,11 +34,11 @@ describe('AdminPlatformClientIntegration', () => {
   it('should fail with not allowed method provided', async () => {
     const { body } = await supertest(testedApp.getHttpServer())
       .post('/execute')
-      .send({ method: 'jobCreate' })
+      .send({ method: 'appCreate' })
       .expect(403)
 
     expect(body.message).to.eq(
-      'Method "jobCreate" is not allowed to be called on the admin platform client',
+      'Method "appCreate" is not allowed to be called on the admin platform client',
     )
   })
 

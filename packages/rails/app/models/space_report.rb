@@ -15,7 +15,7 @@ class SpaceReport < ApplicationRecord
   # Class methods
   module ClassMethods
     def editable_by?(context)
-      return false if context.guest? || in_locked_verification_space?
+      return false if in_locked_verification_space?
 
       return created_by == context.user_id unless in_space?
 

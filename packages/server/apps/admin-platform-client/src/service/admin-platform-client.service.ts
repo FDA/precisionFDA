@@ -14,6 +14,11 @@ export class AdminPlatformClientService {
     'removeUserFromOrganization',
     'inviteUserToOrganization',
     'jobDescribe',
+    'dbClusterCreate',
+    'dbClusterAction',
+    'jobFind',
+    'jobTerminate',
+    'jobCreate',
   ]
 
   constructor(private readonly platformClient: PlatformClient) {}
