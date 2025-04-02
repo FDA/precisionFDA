@@ -43,19 +43,27 @@ export abstract class AccessControlRepository<
     return this.paginate(pagination, mergedWhere, options)
   }
 
-  async findAccessibleOne(
+  async findAccessibleOne<
+    Hint extends string = never,
+    Fields extends string = '*',
+    Excludes extends string = never,
+  >(
     where: FilterQuery<Entity> = {},
-    options?: FindOneOptions<Entity>,
-  ): Promise<Entity | null> {
+    options?: FindOneOptions<Entity, Hint, Fields, Excludes>,
+  ): Promise<Loaded<Entity, Hint, Fields, Excludes> | null> {
     const accessibleWhere = await this.getAccessibleWhere()
     const mergedWhere = this.getMergedWhere(where, accessibleWhere)
     return this.findOne(mergedWhere, options)
   }
 
-  async findEditableOne(
+  async findEditableOne<
+    Hint extends string = never,
+    Fields extends string = '*',
+    Excludes extends string = never,
+  >(
     where: FilterQuery<Entity> = {},
-    options?: FindOneOptions<Entity>,
-  ): Promise<Entity | null> {
+    options?: FindOneOptions<Entity, Hint, Fields, Excludes>,
+  ): Promise<Loaded<Entity, Hint, Fields, Excludes> | null> {
     const editableWhere = await this.getEditableWhere()
     const mergedWhere = this.getMergedWhere(where, editableWhere)
     return this.findOne(mergedWhere, options)
