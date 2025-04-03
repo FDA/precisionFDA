@@ -135,16 +135,6 @@ export class DiscussionsController {
     return { id: result.id }
   }
 
-  @Get('/:discussionId/comments/:commentId')
-  async getDiscussionComment(@Param('commentId', ParseIntPipe) id: number) {
-    return await this.discussionService.getComment(id, 'Discussion')
-  }
-
-  @Get('/:discussionId/answers/:answerId/comments/:commentId')
-  async getAnswerComment(@Param('commentId', ParseIntPipe) id: number) {
-    return await this.discussionService.getComment(id, 'Answer')
-  }
-
   @HttpCode(200)
   @Post('/:discussionId/answers/:answerId/comments')
   async createAnswerComment(

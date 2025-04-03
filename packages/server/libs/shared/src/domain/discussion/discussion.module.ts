@@ -9,6 +9,7 @@ import { DiscussionNotificationService } from './services/discussion-notificatio
 import { MikroOrmModule } from '@mikro-orm/nestjs'
 import { Discussion } from '@shared/domain/discussion/discussion.entity'
 import { AnswerModule } from '@shared/domain/answer/answer.module'
+import { UserFileModule } from '@shared/domain/user-file/user-file.module'
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { AnswerModule } from '@shared/domain/answer/answer.module'
     EmailModule,
     SpaceModule,
     AnswerModule,
+    UserFileModule,
     MikroOrmModule.forFeature([Discussion]),
   ],
   providers: [PublisherService, DiscussionNotificationService, DiscussionService],
