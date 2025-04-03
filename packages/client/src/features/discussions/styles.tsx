@@ -1,6 +1,5 @@
 import styled, { css } from 'styled-components'
 import { TransparentButton } from '../../components/Button'
-import { imageReset } from '../../styles/commonStyles'
 
 export const CommentCount = styled.div`
   line-height: 32px;
@@ -160,55 +159,6 @@ export const StyledCardHeader = styled.div`
   overflow: hidden;
 `
 
-export const StyledMarkdown = styled.div<{ $isAnswer?: boolean }>`
-  ${({ $isAnswer }) =>
-    $isAnswer &&
-    css`
-      background: #fdfcf2;
-    `}
-  font-size: 14px;
-  align-self: stretch;
-
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6 {
-    margin: 1rem 0;
-    font-weight: bold;
-  }
-
-  h1 {
-    font-size: 28px;
-  }
-
-  h2 {
-    font-size: 21px;
-  }
-
-  h2 {
-    font-size: 17.5px;
-  }
-
-  p {
-    font-size: 14px;
-    line-height: 1.6em;
-    margin: 1em 0;
-  }
-
-  ul, ol {
-    padding-inline-start: 1rem;
-
-    li {
-      line-height: 1.6em;
-    }
-  }
-
-  img {
-    ${imageReset}
-  }
-`
 export const StyledCardList = styled.div`
   display: flex;
   padding-left: 0;
