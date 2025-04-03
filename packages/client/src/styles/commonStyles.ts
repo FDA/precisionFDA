@@ -1,5 +1,4 @@
 import styled, { css } from 'styled-components'
-import { theme } from './theme'
 
 export const imageReset = css`
   max-width: 100%;
@@ -11,141 +10,125 @@ export const imageReset = css`
   shape-margin: 0.75rem;
 `
 
-export const commonStyles = {
-  pageTitle: css`
-    font-size: ${theme.fontSize.pageTitle};
-    font-weight: ${theme.fontWeight.regular};
-  `,
+export const StyledMarkdown = styled.div`
+  font-size: 14px;
+  align-self: stretch;
 
-  bannerTitle: css`
-    font-size: ${theme.fontSize.bannerTitle};
-    font-weight: ${theme.fontWeight.bold};
-  `,
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    margin: 1rem 0;
+    font-weight: bold;
+  }
 
-  titleStyle: css`
-    font-size: ${theme.fontSize.h1};
-    font-weight: ${theme.fontWeight.bold};
-    color: ${theme.colors.textBlack};
-  `,
+  h1 {
+    font-size: 28px;
+  }
 
-  bodyTextStyle: css`
-    font-size: ${theme.fontSize.body};
-    font-weight: ${theme.fontWeight.regular};
-    color: ${theme.colors.textMediumGrey};
-  `,
+  h2 {
+    font-size: 21px;
+  }
 
-  sectionHeading: css`
-    color: ${theme.colors.textMediumGrey};
-    font-weight: ${theme.fontWeight.black};
-    font-size: ${theme.fontSize.subheading};
-    letter-spacing: 0.05em;
-    margin-top: ${theme.padding.contentMargin};
-  `,
+  h2 {
+    font-size: 17.5px;
+  }
 
-  viewAllButton: css`
-    width: 192px;
-    margin: auto 0;
-    text-align: left;
-    border-top: 1px solid ${theme.colors.highlightBlue};
-  `,
+  p {
+    font-size: 14px;
+    line-height: 1.6em;
+    margin: 1em 0;
+  }
 
-  mainContainerTwoColumns: css`
-    display: flex;
-    flex-flow: row wrap;
-    justify-content: space-around;
-    align-items: stretch;
-    max-width: ${theme.sizing.mainContainerMaxWidth};
-    margin-left: auto;
-    margin-right: auto;
+  strong {
+    font-weight: 600;
+  }
 
-    @media (min-width: 1024px) {
-      flex-flow: row nowrap;
+  em {
+    font-style: italic;
+  }
+
+  ul, ol {
+    margin: 0.8em 0;
+    padding-inline-start: 1rem;
+
+    li {
+      line-height: 1.6em;
     }
-  `,
+  }
 
-  mainContainerTwoColumns_LeftColumn: css`
-    flex-grow: 1;
-    padding-left: ${theme.padding.mainContentHorizontal};
-    padding-right: ${theme.padding.mainContentHorizontal};
-    padding-top: ${theme.padding.contentMarginLarge};
-    padding-bottom: ${theme.padding.contentMarginLarge};
-  `,
+  img {
+    ${imageReset}
+  }
 
-  mainContainerTwoColumns_RightColumn: css`
-    width: ${theme.sizing.largeColumnWidth};
-    flex: 0 0 ${theme.sizing.largeColumnWidth};
-    padding-left: 0;
-    padding-right: ${theme.padding.mainContentHorizontal};
-    padding-top: ${theme.padding.contentMarginLarge};
-    padding-bottom: ${theme.padding.contentMarginLarge};
-  `,
+  pre {
+    font-family: Menlo, Consolas, Monaco, monospace;
+    display: block;
+    line-height: 1.53;
+    font-size: 13px;
+    margin: 0;
+    margin-top: 8px;
+    margin-bottom: 8px;
+    overflow-x: auto;
+    position: relative;
+    tab-size: 2;
+  }
+  pre::-webkit-scrollbar {
+    background: transparent;
+    width: 10px;
+  }
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
 
-  listContainer: css`
-    display: flex;
-    flex-direction: column;
-    flex-wrap: nowrap;
-    align-content: stretch;
-    justify-content: center;
-    list-style: none;
-    padding-inline-start: 0px;
-    margin-top: ${theme.padding.contentMargin};
-  `,
+  u {
+    text-decoration: underline;
+  }
 
-  listPagination: css`
-    display: flex;
-    justify-content: center;
-    margin: 0 auto;
+  --c-doc-table-border: var(--c-layout-border-200);
+  --c-doc-table-header-bg: var(--background-shaded);
 
-    &__page {
-      color: ${theme.colors.textBlack};
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      padding: 6px;
-      margin: 0 6px;
-      width: auto;
-      background: none;
-      border: none;
+  table {
+    border: 1px solid var(--c-doc-table-border);
+    width: 100%;
+    max-width: 100%;
+    margin-bottom: 20px;
+    border-collapse: collapse;
+    border-spacing: 0;
 
-      &--active {
-        color: ${theme.colors.blueOnWhite};
+    * {
+      box-sizing: border-box;
+    }
+
+    thead {
+      text-align: left;
+      vertical-align: middle;
+      border-bottom: 2px solid var(--c-doc-table-border);
+
+      th {
+        border: 1px solid var(--c-doc-table-border);
+        padding: 8px;
+        background-color: var(--c-doc-table-header-bg);
       }
+    }
 
-      &--prev, &--next {
-        cursor: pointer;
-        color: ${theme.colors.highlightBlue};
-        background-image: none;
-        background-color: #ffffff;
-        border: 1px solid ${theme.colors.highlightBlue};
-        border-radius: 3px;
-        white-space: nowrap;
-        padding: 6px 12px;
-        font-size: 14px;
-        font-weight: bold;
-        text-transform: capitalize;
+    tr {
+      display: table-row;
+      vertical-align: inherit;
+      border-color: inherit;
+
+      td {
+        border: 1px solid var(--c-doc-table-border);
+        padding: 8px;
         line-height: 1.428571429;
-
-        &:not(.disabled) {
-          &:hover, &:focus, &:active, &.active {
-            color: ${theme.colors.highlightBlue};
-            border-color: #63a5de;
-            background-color: rgb(244, 248, 253);
-          }
-        }
-      }
-
-      &--prev::after {
-        content: ' Prev';
-      }
-
-      &--next::before {
-        content: 'Next ';
+        vertical-align: top;
       }
     }
-  `,
-}
-
+  }
+`
 
 export const FlexRow = styled.div`
   display: flex;

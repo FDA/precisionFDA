@@ -1,11 +1,11 @@
 /* eslint-disable react/jsx-no-useless-fragment */
 import React from 'react'
-import { ControllerRenderProps } from 'react-hook-form'
+import type { ControllerRenderProps } from 'react-hook-form'
 import styled from 'styled-components'
 import { Markdown } from '.'
 
-import { StyledMarkdown } from '../../features/discussions/styles'
-import { ITab, TabsSwitch } from '../TabsSwitch'
+import { type ITab, TabsSwitch } from '../TabsSwitch'
+import { StyledMarkdown } from '../../styles/commonStyles'
 
 export const Help = styled.div`
   padding: 6px;

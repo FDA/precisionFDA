@@ -1,6 +1,5 @@
 import styled from 'styled-components'
 import { PageContainer, pagePadding } from '../../../components/Page/styles'
-import { commonStyles } from '../../../styles/commonStyles'
 
 export const StyledNotifications = styled.div`
   display: flex;
@@ -21,7 +20,10 @@ export const FieldGroup = styled.fieldset`
 `
 
 export const SectionTitle = styled.h2`
-  ${commonStyles.sectionHeading};
+  color: var(--c-text-500);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  margin-top: 12px;
   font-size: 16px;
   text-transform: uppercase;
   margin-bottom: 0.5rem;
