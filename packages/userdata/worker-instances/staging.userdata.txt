@@ -180,6 +180,11 @@ cat <<EOF > /tmp/config.json
                          "file_path": "/opt/gsrs/logs/localhost_access_log.*",
                          "log_group_name": "staging/gsrs/access",
                          "log_stream_name": "{instance_id}"
+                     },
+                     {
+                         "file_path": "/opt/gsrs/logs/substances/spring.log",
+                         "log_group_name": "staging/gsrs/spring",
+                         "log_stream_name": "{instance_id}"
                      }
                  ]
              }
