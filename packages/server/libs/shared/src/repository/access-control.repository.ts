@@ -43,6 +43,34 @@ export abstract class AccessControlRepository<
     return this.paginate(pagination, mergedWhere, options)
   }
 
+  async findAllAccessible<
+    Hint extends string = never,
+    Fields extends string = '*',
+    Excludes extends string = never,
+  >(
+    where: FilterQuery<Entity> = {},
+    options?: Omit<FindOptions<Entity, Hint, Fields, Excludes>, 'limit' | 'offset'>,
+  ): Promise<Loaded<Entity, Hint, Fields, Excludes>[]> {
+    const accessibleWhere = await this.getAccessibleWhere()
+    const mergedWhere = this.getMergedWhere(where, accessibleWhere)
+
+    return this.find(mergedWhere, options)
+  }
+
+  async findAllEditable<
+    Hint extends string = never,
+    Fields extends string = '*',
+    Excludes extends string = never,
+  >(
+    where: FilterQuery<Entity> = {},
+    options?: Omit<FindOptions<Entity, Hint, Fields, Excludes>, 'limit' | 'offset'>,
+  ): Promise<Loaded<Entity, Hint, Fields, Excludes>[]> {
+    const editableWhere = await this.getEditableWhere()
+    const mergedWhere = this.getMergedWhere(where, editableWhere)
+
+    return this.find(mergedWhere, options)
+  }
+
   async findAccessibleOne<
     Hint extends string = never,
     Fields extends string = '*',

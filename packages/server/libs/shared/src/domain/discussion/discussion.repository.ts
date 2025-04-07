@@ -34,7 +34,11 @@ export default class DiscussionRepository extends AccessControlRepository<Discus
 
     return {
       note: {
-        $or: [{ scope: STATIC_SCOPE.PUBLIC }, { scope: { $in: scopes } }, { user: user.id }],
+        $or: [
+          { scope: STATIC_SCOPE.PUBLIC, user: user.id },
+          { scope: { $in: scopes } },
+          { user: user.id },
+        ],
       },
     }
   }

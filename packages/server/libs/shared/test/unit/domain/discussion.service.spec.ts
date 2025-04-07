@@ -32,7 +32,6 @@ describe('DiscussionService tests', () => {
   let userCtx: UserCtx
   let discussionService: DiscussionService
   let entityService: EntityService
-  let fetcher: EntityFetcherService
   let spaceRepository: SpaceRepository
   let discussionRepository: DiscussionRepository
 
@@ -56,7 +55,6 @@ describe('DiscussionService tests', () => {
     entityService = {
       getEntityLink: getEntityLinkStub,
     } as unknown as EntityService
-    fetcher = new EntityFetcherService(em, userCtx)
     spaceRepository = new SpaceRepository(em, 'space')
 
     discussionRepository = {
@@ -275,7 +273,6 @@ describe('DiscussionService tests', () => {
 
   it('create discussion with non existing user', async () => {
     userCtx = { id: 10, dxuser: 'non-existing', accessToken: 'foo' }
-    const fetcher = new EntityFetcherService(em, userCtx)
     discussionService = new DiscussionService(
       em,
       userCtx,
