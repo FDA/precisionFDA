@@ -1,4 +1,4 @@
-import { EntityRepository } from '@mikro-orm/mysql'
+import { FilterQuery } from '@mikro-orm/mysql'
 import { DxId } from '@shared/domain/entity/domain/dxid'
 import { Uid } from '@shared/domain/entity/domain/uid'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
@@ -6,6 +6,8 @@ import { STATIC_SCOPE } from '@shared/enums'
 import { SCOPE } from '@shared/types/common'
 import { FILE_STATE_DX } from './user-file.types'
 import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
+import { AccessControlRepository } from '@shared/repository/access-control.repository'
+import { User } from '@shared/domain/user/user.entity'
 
 type FindByName = {
   scope: SCOPE
@@ -14,7 +16,38 @@ type FindByName = {
   parentId: number
 }
 
-export class UserFileRepository extends EntityRepository<UserFile> {
+export class UserFileRepository extends AccessControlRepository<UserFile> {
+  protected async getAccessibleWhere(): Promise<FilterQuery<UserFile>> {
+    const user = await this.em.findOneOrFail(User, { id: this.user.id })
+    const accessibleSpaces = await user.accessibleSpaces()
+    const spaceScopes = accessibleSpaces.map((space) => space.scope)
+
+    //TODO: define rules for site-admins
+
+    return {
+      $or: [
+        { user: user.id, scope: STATIC_SCOPE.PRIVATE },
+        { scope: STATIC_SCOPE.PUBLIC },
+        { scope: { $in: spaceScopes } },
+      ],
+    }
+  }
+
+  protected async getEditableWhere(): Promise<FilterQuery<UserFile>> {
+    const user = await this.em.findOneOrFail(User, { id: this.user.id })
+    const editableSpaces = await user.editableSpaces()
+    const spaceScopes = editableSpaces.map((space) => space.scope)
+
+    //TODO: define rules for site-admins
+
+    return {
+      $or: [
+        { user: user.id, scope: STATIC_SCOPE.PRIVATE },
+        { user: user.id, scope: STATIC_SCOPE.PUBLIC },
+        { scope: { $in: spaceScopes } },
+      ],
+    }
+  }
   /**
    * Loads userfile identified by uids and verifies if they are accessible by user.
    * @param userId

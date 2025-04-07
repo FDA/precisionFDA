@@ -24,7 +24,6 @@ import { HOME_SCOPE, STATIC_SCOPE } from '@shared/enums'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import * as errors from '../../../errors'
 import { Comment, CommentableType } from '../../comment/comment.entity'
-import { EntityFetcherService } from '../../entity/entity-fetcher.service'
 import { SPACE_MEMBERSHIP_ROLE } from '../../space-membership/space-membership.enum'
 import { getIdFromScopeName } from '../../space/space.helper'
 import type { DiscussionAttachment } from '../discussion.types'
@@ -45,6 +44,10 @@ import { AttachmentsDTO } from '@shared/domain/discussion/dto/attachments.dto'
 import { UserRepository } from '@shared/domain/user/user.repository'
 import AnswerRepository from '@shared/domain/answer/answer.repository'
 import { NodeRepository } from '@shared/domain/user-file/node.repository'
+import { AppRepository } from '@shared/domain/app/app.repository'
+import { JobRepository } from '@shared/domain/job/job.repository'
+import { NoteRepository } from '@shared/domain/note/note.repository'
+import { ComparisonRepository } from '@shared/domain/comparison/comparison.repository'
 
 @Injectable()
 export class DiscussionService {
@@ -54,13 +57,16 @@ export class DiscussionService {
   constructor(
     private readonly em: SqlEntityManager,
     private readonly userCtx: UserContext,
-    private readonly fetcher: EntityFetcherService,
     private readonly entityService: EntityService,
     private readonly userRepository: UserRepository,
     private readonly spaceRepository: SpaceRepository,
     private readonly discussionRepository: DiscussionRepository,
     private readonly answerRepository: AnswerRepository,
     private readonly nodeRepository: NodeRepository,
+    private readonly appRepository: AppRepository,
+    private readonly jobRepository: JobRepository,
+    private readonly noteRepository: NoteRepository,
+    private readonly comparisonRepository: ComparisonRepository,
   ) {}
 
   async getDiscussion(discussionId: number): Promise<DiscussionDTO> {
@@ -478,7 +484,7 @@ export class DiscussionService {
       this.em.persist(attachment)
     }
     for (const id of attachmentsToSave.apps) {
-      const res = await this.fetcher.getAccessibleById(App, id)
+      const res = await this.appRepository.findAccessibleOne({ id })
       if (!res || (!res.isPublic() && res.scope !== note.scope)) {
         throw new errors.NotFoundError(
           `Unable to attach app ${res.uid ?? 'app ' + id}: app not found or is in a wrong scope.`,
@@ -500,7 +506,7 @@ export class DiscussionService {
       this.em.persist(attachment)
     }
     for (const id of attachmentsToSave.jobs) {
-      const res = await this.fetcher.getAccessibleById(Job, id)
+      const res = await this.jobRepository.findAccessibleOne({ id })
       if (!res || (!res.isPublic() && res.scope !== note.scope)) {
         throw new errors.NotFoundError(
           `Unable to attach ${res?.uid ?? 'job ' + id}: job not found or is in a wrong scope.`,
@@ -522,7 +528,7 @@ export class DiscussionService {
       this.em.persist(attachment)
     }
     for (const id of attachmentsToSave.comparisons) {
-      const res = await this.fetcher.getAccessibleById(Comparison, id)
+      const res = await this.comparisonRepository.findAccessibleOne({ id })
       if (!res || (!res.isPublic() && res.scope !== note.scope)) {
         throw new errors.NotFoundError(
           `Unable to attach comparison ${id}: comparison not found or is in a wrong scope.`,
@@ -662,10 +668,8 @@ export class DiscussionService {
 
   async getAttachments(noteId: number): Promise<DiscussionAttachment[]> {
     this.logger.log(`Getting attachments for note id: ${noteId}`)
-    const note = await this.fetcher.getAccessibleById(
-      Note,
-      noteId,
-      {},
+    const note = await this.noteRepository.findAccessibleOne(
+      { id: noteId },
       { populate: ['attachments'] },
     )
     if (!note) {
@@ -677,10 +681,9 @@ export class DiscussionService {
     const response: DiscussionAttachment[] = []
     for (const attachment of note.attachments) {
       if (attachment.itemType === 'Node') {
-        const attachmentEntity: Node | null = await this.fetcher.getById(
-          attachment.itemType,
-          attachment.itemId,
-        )
+        const attachmentEntity: Node | null = await this.nodeRepository.findOne({
+          id: attachment.itemId,
+        })
         if (!attachmentEntity) {
           throw new errors.NotFoundError('Unable to get attachments: attachment not found.')
         }
@@ -692,10 +695,9 @@ export class DiscussionService {
           link: await this.entityService.getEntityUiLink(attachmentEntity as UserFile | Asset),
         })
       } else if (attachment.itemType === 'Job') {
-        const attachmentEntity: Job | null = await this.fetcher.getById(
-          attachment.itemType,
-          attachment.itemId,
-        )
+        const attachmentEntity: Job | null = await this.jobRepository.findOne({
+          id: attachment.itemId,
+        })
         if (!attachmentEntity) {
           throw new errors.NotFoundError('Unable to get attachments: attachment not found.')
         }
@@ -707,10 +709,9 @@ export class DiscussionService {
           link: await this.entityService.getEntityUiLink(attachmentEntity),
         })
       } else if (attachment.itemType === 'Comparison') {
-        const attachmentEntity: Comparison | null = await this.fetcher.getById(
-          attachment.itemType,
-          attachment.itemId,
-        )
+        const attachmentEntity: Comparison | null = await this.comparisonRepository.findOne({
+          id: attachment.itemId,
+        })
         if (!attachmentEntity) {
           throw new errors.NotFoundError('Unable to get attachments: attachment not found.')
         }
@@ -722,10 +723,9 @@ export class DiscussionService {
           link: await this.entityService.getEntityUiLink(attachmentEntity),
         })
       } else if (attachment.itemType === 'App') {
-        const appAttachment: App | null = await this.fetcher.getById(
-          attachment.itemType,
-          attachment.itemId,
-        )
+        const appAttachment: App | null = await this.appRepository.findOne({
+          id: attachment.itemId,
+        })
         if (!appAttachment) {
           throw new errors.NotFoundError('Unable to get attachments: attachment not found.')
         }
@@ -743,11 +743,13 @@ export class DiscussionService {
 
   async getAnswer(answerId: number): Promise<AnswerDTO> {
     this.logger.log(`Getting answer with id: ${answerId}`)
-    const res = await this.fetcher.getAccessibleById(
-      Answer,
-      answerId,
-      {},
-      { populate: ['note', 'user', 'comments', 'comments.user'] },
+    const res = await this.answerRepository.findAccessibleOne(
+      {
+        id: answerId,
+      },
+      {
+        populate: ['note', 'user', 'comments', 'comments.user'],
+      },
     )
     if (!res) {
       throw new errors.NotFoundError(

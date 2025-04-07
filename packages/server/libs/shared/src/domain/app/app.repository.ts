@@ -1,11 +1,17 @@
-/* eslint-disable @typescript-eslint/explicit-function-return-type */
-/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
-import { EntityRepository } from '@mikro-orm/mysql'
+import { FilterQuery } from '@mikro-orm/mysql'
 import { DxId } from '../entity/domain/dxid'
 import { App } from './app.entity'
 import { ENTITY_TYPE } from './app.enum'
+import { AccessControlRepository } from '@shared/repository/access-control.repository'
 
-export class AppRepository extends EntityRepository<App> {
+export class AppRepository extends AccessControlRepository<App> {
+  protected getAccessibleWhere(): Promise<FilterQuery<App>> {
+    throw new Error('Method not implemented.')
+  }
+
+  protected getEditableWhere(): Promise<FilterQuery<App>> {
+    throw new Error('Method not implemented.')
+  }
   async findPublic(dxid: DxId<'app'>) {
     return await this.findOne({
       dxid,

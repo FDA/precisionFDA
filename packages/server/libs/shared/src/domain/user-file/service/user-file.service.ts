@@ -3,7 +3,6 @@ import { Inject, Injectable, Logger } from '@nestjs/common'
 import { DownloadLinkOptionsDto } from '@shared/domain/entity/domain/download-link-options.dto'
 import { DxId } from '@shared/domain/entity/domain/dxid'
 import { Uid } from '@shared/domain/entity/domain/uid'
-import { EntityFetcherService } from '@shared/domain/entity/entity-fetcher.service'
 import { EntityService } from '@shared/domain/entity/entity.service'
 import * as eventHelper from '@shared/domain/event/event.helper'
 import { NotificationService } from '@shared/domain/notification/services/notification.service'
@@ -66,7 +65,6 @@ export class UserFileService {
     private readonly fileRepo: UserFileRepository,
     private readonly userRepo: UserRepository,
     private readonly spaceRepo: SpaceRepository,
-    private readonly entityFetcherService: EntityFetcherService,
     private readonly nodeHelper: NodeHelper,
     private readonly entityService: EntityService,
     private readonly nodeService: NodeService,
@@ -227,7 +225,7 @@ export class UserFileService {
     const idsToCheck = nodes
       .filter((node) => node.stiType === FILE_STI_TYPE.USERFILE)
       .map((node) => node.id)
-    const accessibleNodes = await this.entityFetcherService.getAccessibleByIds(Node, idsToCheck)
+    const accessibleNodes = await this.nodeRepo.findAllAccessible({ id: idsToCheck })
     if (idsToCheck.length != accessibleNodes.length) {
       throw new PermissionError('You do not have permission to download all of these files')
     }
@@ -310,7 +308,9 @@ export class UserFileService {
   }
 
   async getDownloadLinkForUid(uid: Uid<'file'>, options?: DownloadLinkOptionsDto) {
-    const file = await this.entityFetcherService.getAccessibleByUid<UserFile | Asset>(Node, uid)
+    const file = (await this.nodeRepo.findAllAccessible({ uid: uid })) as unknown as
+      | UserFile
+      | Asset
 
     if (!file) {
       throw new NotFoundError('File not found')
@@ -350,12 +350,8 @@ export class UserFileService {
    * @returns
    */
   async listSelectedFiles(ids: number[]): Promise<SelectedNode[]> {
-    const selectedNodes = await this.entityFetcherService.getAccessibleByIds(
-      Node,
-      ids,
-      {
-        stiType: { $in: [FILE_STI_TYPE.USERFILE, FILE_STI_TYPE.FOLDER] },
-      },
+    const selectedNodes = await this.nodeRepo.findAllAccessible(
+      { id: ids, stiType: { $in: [FILE_STI_TYPE.USERFILE, FILE_STI_TYPE.FOLDER] } },
       {
         populate: ['parentFolder', 'scopedParentFolder'],
       },
@@ -407,9 +403,10 @@ export class UserFileService {
    */
   async validateCopyFiles(uids: Uid<'file'>[], targetScope: EntityScope): Promise<ExistingFileSet> {
     const existingFiles = {} as ExistingFileSet
-
-    const editableSpaces = await this.entityFetcherService.getEditableSpaces()
-    if (targetScope !== 'private' && editableSpaces.indexOf(targetScope) === -1) {
+    const user = await this.userRepo.findOneOrFail(this.user.id)
+    const editableSpaces = await user.editableSpaces()
+    const editableScopes = editableSpaces.map((space) => space.scope)
+    if (targetScope !== 'private' && editableScopes.indexOf(targetScope as any) === -1) {
       throw new PermissionError('You do not have permission to copy files to this scope')
     }
 
@@ -422,7 +419,7 @@ export class UserFileService {
 
     // Fetch all relevant files in a single query
     const dxids = Array.from(uidsMap.keys())
-    const checkedFiles = await this.entityFetcherService.getEditable(UserFile, {
+    const checkedFiles = await this.fileRepo.findAllEditable({
       dxid: { $in: dxids },
       scope: targetScope,
     })
