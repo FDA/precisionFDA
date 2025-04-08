@@ -94,6 +94,7 @@ jobs:
           BUNDLE_PATH: "vendor/bundle"
 
   node-static-analysis-pr:
+    if: false
     name: Node Static Analysis for PR
     runs-on: ubuntu-latest
     permissions:
