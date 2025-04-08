@@ -3,15 +3,40 @@ import { DxId } from '../entity/domain/dxid'
 import { App } from './app.entity'
 import { ENTITY_TYPE } from './app.enum'
 import { AccessControlRepository } from '@shared/repository/access-control.repository'
+import { User } from '@shared/domain/user/user.entity'
+import { STATIC_SCOPE } from '@shared/enums'
 
 export class AppRepository extends AccessControlRepository<App> {
-  protected getAccessibleWhere(): Promise<FilterQuery<App>> {
-    throw new Error('Method not implemented.')
+  protected async getAccessibleWhere(): Promise<FilterQuery<App>> {
+    const user = await this.em.findOneOrFail(User, { id: this.user.id })
+    const accessibleSpaces = await user.accessibleSpaces()
+    const scopes = accessibleSpaces.map((space) => space.scope)
+
+    return {
+      $or: [
+        { user: user.id, scope: STATIC_SCOPE.PRIVATE },
+        { scope: STATIC_SCOPE.PUBLIC },
+        { scope: { $in: scopes } },
+      ],
+    }
   }
 
-  protected getEditableWhere(): Promise<FilterQuery<App>> {
-    throw new Error('Method not implemented.')
+  protected async getEditableWhere(): Promise<FilterQuery<App>> {
+    const user = await this.em.findOneOrFail(User, { id: this.user.id })
+    const accessibleSpaces = await user.editableSpaces()
+    const scopes = accessibleSpaces.map((space) => space.scope)
+
+    // TODO: define rules for site-admins
+
+    return {
+      $or: [
+        { user: user.id, scope: STATIC_SCOPE.PRIVATE },
+        { scope: STATIC_SCOPE.PUBLIC, user: user.id },
+        { scope: { $in: scopes } },
+      ],
+    }
   }
+
   async findPublic(dxid: DxId<'app'>) {
     return await this.findOne({
       dxid,
