@@ -1,11 +1,14 @@
 import { App } from '@shared/domain/app/app.entity'
 import { Comparison } from '@shared/domain/comparison/comparison.entity'
-import { EntityFetcherService } from '@shared/domain/entity/entity-fetcher.service'
 import { EntityProvenanceService } from '@shared/domain/provenance/service/entity-provenance.service'
 import { STATIC_SCOPE } from '@shared/enums'
 import { PublishApiFacade } from 'apps/api/src/facade/publish/publish.facade'
 import { expect } from 'chai'
 import { stub } from 'sinon'
+import { AppRepository } from '@shared/domain/app/app.repository'
+import { JobRepository } from '@shared/domain/job/job.repository'
+import { NodeRepository } from '@shared/domain/user-file/node.repository'
+import { NoteRepository } from '@shared/domain/note/note.repository'
 
 describe('PublishApiFacade', () => {
   const FILE_UID = 'file-uid-1'
@@ -15,30 +18,28 @@ describe('PublishApiFacade', () => {
   const ASSET_UID = 'file-uid-2'
 
   const getEntityProvenanceStub = stub().resolves()
-  const getAccessibleByUidStub = stub().resolves()
-  const getAccessibleByIdStub = stub().resolves()
+  const findAccessibleOne = stub().resolves()
 
   beforeEach(() => {
     getEntityProvenanceStub.reset()
-    getAccessibleByUidStub.reset()
-    getAccessibleByIdStub.reset()
+    findAccessibleOne.reset()
   })
 
   it('should raise error if entity not found', async () => {
-    getAccessibleByUidStub.resolves(null)
+    findAccessibleOne.resolves(null)
     await expect(getInstance().getPublishedTreeRoot(FILE_UID, 'file')).to.be.rejected
 
-    getAccessibleByIdStub.resolves(null)
+    findAccessibleOne.resolves(null)
     await expect(getInstance().getPublishedTreeRoot(COMPARISON_ID, 'comparison')).to.be.rejected
   })
 
   it('should raise error if entity is not publishable', async () => {
     const file = { id: 1, isPublishable: () => false } as unknown as File
-    getAccessibleByUidStub.resolves(file)
+    findAccessibleOne.resolves(file)
     await expect(getInstance().getPublishedTreeRoot(FILE_UID, 'file')).to.be.rejected
 
     const comparison = { id: 1, isPublishable: () => false } as unknown as Comparison
-    getAccessibleByIdStub.resolves(comparison)
+    findAccessibleOne.resolves(comparison)
     await expect(getInstance().getPublishedTreeRoot(COMPARISON_ID, 'comparison')).to.be.rejected
   })
 
@@ -64,7 +65,7 @@ describe('PublishApiFacade', () => {
         },
       ],
     }
-    getAccessibleByUidStub.resolves(app)
+    findAccessibleOne.resolves(app)
     getEntityProvenanceStub.resolves(appTreeRoot)
 
     const res = await getInstance().getPublishedTreeRoot(APP_UID, 'app')
@@ -93,7 +94,7 @@ describe('PublishApiFacade', () => {
         },
       ],
     }
-    getAccessibleByUidStub.resolves(file)
+    findAccessibleOne.resolves(file)
     getEntityProvenanceStub.resolves(fileTreeRoot)
 
     const res = await getInstance().getPublishedTreeRoot(FILE_UID, 'file')
@@ -113,11 +114,29 @@ describe('PublishApiFacade', () => {
     const entityProvenanceService = {
       getEntityProvenance: getEntityProvenanceStub,
     } as unknown as EntityProvenanceService
-    const entityFetcherService = {
-      getAccessibleByUid: getAccessibleByUidStub,
-      getAccessibleById: getAccessibleByIdStub,
-    } as unknown as EntityFetcherService
 
-    return new PublishApiFacade(entityProvenanceService, entityFetcherService)
+    const appRepository = {
+      findAccessibleOne: findAccessibleOne,
+    } as unknown as AppRepository
+
+    const jobRepository = {
+      findAccessibleOne: findAccessibleOne,
+    } as unknown as JobRepository
+
+    const nodeRepository = {
+      findAccessibleOne: findAccessibleOne,
+    } as unknown as NodeRepository
+
+    const noteRepository = {
+      findAccessibleOne: findAccessibleOne,
+    } as unknown as NoteRepository
+
+    return new PublishApiFacade(
+      entityProvenanceService,
+      appRepository,
+      jobRepository,
+      nodeRepository,
+      noteRepository,
+    )
   }
 })

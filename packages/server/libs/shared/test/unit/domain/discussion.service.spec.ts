@@ -2,7 +2,6 @@ import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
 import { database } from '@shared/database'
 import { Discussion } from '@shared/domain/discussion/discussion.entity'
 import { DiscussionService } from '@shared/domain/discussion/services/discussion.service'
-import { EntityFetcherService } from '@shared/domain/entity/entity-fetcher.service'
 import { EntityService } from '@shared/domain/entity/entity.service'
 import {
   SPACE_MEMBERSHIP_ROLE,
