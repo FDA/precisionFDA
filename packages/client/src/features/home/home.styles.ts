@@ -4,7 +4,6 @@ import { NavLink } from '../../components/NavLink'
 import { BackLink } from '../../components/Page/PageBackLink'
 import { compactScrollBarV2 } from '../../components/Page/styles'
 import { Svg } from '../../components/icons/Svg'
-import { fontWeight } from '../../styles/theme'
 
 export const StyledBackLink = styled(BackLink)`
   margin: 16px 16px;
@@ -13,7 +12,7 @@ export const StyledBackLink = styled(BackLink)`
 export const MenuText = styled.span`
   flex: 1 0 auto;
   font-size: 14px;
-  font-weight: ${fontWeight.bold};
+  font-weight: 600;
 `
 
 export const Empty = styled.div`
@@ -160,9 +159,9 @@ export const StyledNameCell = styled.div<{ color?: string }>`
   min-width: max-content;
 `
 
-export const StyledLink = styled(Link)<{ disable?: boolean }>`
-  ${({ disable }) =>
-    disable &&
+export const StyledLink = styled(Link)<{ $disable?: boolean }>`
+  ${({ $disable }) =>
+    $disable &&
     css`
       pointer-events: none;
       color: var(--c-text-400);

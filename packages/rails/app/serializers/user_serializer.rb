@@ -15,6 +15,7 @@ class UserSerializer < ApplicationSerializer
     :pricing_map,
     :resources,
     :total_limit,
+    :header_items,
   )
 
   attribute :can_administer_site?, key: :can_administer_site

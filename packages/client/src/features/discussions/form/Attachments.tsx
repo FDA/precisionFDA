@@ -124,16 +124,16 @@ export function Attachments({
                 func: () => setFoldersShowModal(true),
                 isDisabled: scope === 'public',
               },
+              Assets: {
+                func: () => setAssetsShowModal(true),
+                isDisabled: false,
+              },
               Apps: {
                 func: () => setAppsShowModal(true),
                 isDisabled: false,
               },
               Jobs: {
                 func: () => setJobShowModal(true),
-                isDisabled: false,
-              },
-              Assets: {
-                func: () => setAssetsShowModal(true),
                 isDisabled: false,
               },
               Comparisons: {

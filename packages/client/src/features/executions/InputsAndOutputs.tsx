@@ -139,7 +139,7 @@ const Table = ({ title, config, dataTestId }: { title: string; config: any[]; da
         </tr>
       </thead>
       <tbody>{list}</tbody>
-      <tr className="empty" />
+      <tbody><tr className="empty" /></tbody>
     </table>
   )
 }

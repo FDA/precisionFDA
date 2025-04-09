@@ -29,11 +29,11 @@ const StyledSocialMediaButtons = styled.div`
   }
 
   @media (min-width: 640px) {
-    min-width: ${theme.sizing.smallColumnWidth};
+    min-width: 128px;
   }
 
   @media (min-width: 1024px) {
-    width: ${theme.sizing.largeColumnWidth};
+    width: 288px;
   }
 `
 

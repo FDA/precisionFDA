@@ -6,6 +6,7 @@ import { CreateCommentEntity } from './form/CreateCommentEntity'
 import { StyledCardList } from './styles'
 import { AnswerCard } from './card/AnswerCard'
 import { NoteScope } from './api'
+import { toast } from 'react-toastify'
 
 export const DiscussionAnswer = ({
   canEdit,
@@ -28,6 +29,7 @@ export const DiscussionAnswer = ({
     queryClient.invalidateQueries({
       queryKey: ['discussion'],
     })
+    toast.success('Answer successfully removed')
   }
 
   const inputRef = useRef<HTMLInputElement | null>(null)

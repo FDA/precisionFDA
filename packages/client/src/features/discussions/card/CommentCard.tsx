@@ -4,9 +4,11 @@ import { Markdown } from '../../../components/Markdown'
 import { CardHeader } from './CardHeader'
 import { Comment } from '../discussions.types'
 import { EditCommentEntity } from '../form/EditCommentEntity'
-import { StyledCommentCard, StyledMarkdown } from '../styles'
+import { StyledCommentCard } from '../styles'
 import { useConfirm } from '../../modal/useConfirm'
 import { deleteAnswerCommentRequest, deleteDiscussionCommentRequest } from '../api'
+import { toast } from 'react-toastify'
+import { StyledMarkdown } from '../../../styles/commonStyles'
 
 export function CommentCard({
   answerId,
@@ -34,13 +36,14 @@ export function CommentCard({
       queryClient.invalidateQueries({
         queryKey: ['discussion'],
       })
+      toast.success('Comment successfully removed')
     },
   })
 
   const { open: openConfirmation, Confirm: ConfirmSubmit } = useConfirm({
     onOk: deleteMutation.mutate,
     okText: 'OK',
-    headerText: 'You are about to delete this comment.',
+    headerText: 'You are about to delete this comment',
     body: (
       <div>
         <p>Are you sure you would like to continue?</p>

@@ -4,7 +4,7 @@ import { toast } from 'react-toastify'
 import styled from 'styled-components'
 import { Checkbox } from '../../components/Checkbox'
 import { SideTabs } from '../../components/SideTab/SideTabs'
-import { colors, fontSize } from '../../styles/theme'
+import { colors } from '../../styles/theme'
 import { Modal } from '../modal'
 import { useModal } from '../modal/useModal'
 import { acceptLicensesRequest } from './api'
@@ -24,7 +24,7 @@ const StyledTabTitle = styled.div`
 `
 
 const StyledBodyTitle = styled.div`
-  font-size: ${fontSize.h2};
+  font-size: 18px;
   color: ${colors.blueOnWhite};
 `
 

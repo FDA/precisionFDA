@@ -89,46 +89,6 @@ module Api
       render json: @space, adapter: :json
     end
 
-    # PUT /api/spaces/:id
-    # Updates a space.
-    # @param id [String] - space id in a string form: id: "9-spacename"
-    # @param update_space_params [Object] - space params from SpaceEditForm
-    def update
-      space = Space.undeleted.find(params[:id])
-
-      head(:forbidden) && return unless space.updatable_by?(current_user)
-
-      if params.key?(:protected) && params[:protected] != space[:protected]
-        raise ApiError, "Parameter protected cannot be changed!"
-      end
-
-      space_params = update_space_params.transform_keys! { |key| key.to_s.underscore.to_sym }
-
-      space_edit_params = space_params.merge(
-        current_user: current_user,
-        space_host_lead: space.host_lead_dxuser,
-        source_space_id: space.id,
-      )
-
-      space_edit_params = space_edit_params.merge(space_guest_lead: space.guest_lead_dxuser) unless space.exclusive?
-      space_update_form = SpaceEditForm.new(space_edit_params)
-
-      if space_update_form.valid?
-        space.update!(update_space_naming_params)
-        space.confidential_spaces.each { |confidential_space| confidential_space.update!(update_space_naming_params) }
-        api = DIContainer.resolve("api.admin")
-
-        space.leads_updates(space_update_form, api)
-
-        render json: space, adapter: :json
-      else
-        errors = [space_update_form.errors&.full_messages&.join("\n ")]
-
-        render json: { errors: { messages: errors } },
-               status: :unprocessable_entity, adapter: :json
-      end
-    end
-
     # GET /api/spaces/:id/members
     # Fetches space members, according to filter value.
     def members

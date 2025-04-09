@@ -10,6 +10,7 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  Put,
   UseGuards,
 } from '@nestjs/common'
 import { DEPRECATED_SQL_ENTITY_MANAGER } from '@shared/database/provider/deprecated-sql-entity-manager.provider'
@@ -32,15 +33,19 @@ import { PlatformClient } from '@shared/platform-client'
 import { UserOpsCtx } from '@shared/types'
 import { SiteAdminGuard } from '../admin/guards/site-admin.guard'
 import { UserContextGuard } from '../user-context/guard/user-context.guard'
-import { CreateSpaceDTO } from '@shared/domain/space/dto/create-space-dto'
+import { CreateSpaceDTO } from '@shared/domain/space/dto/create-space.dto'
+import { UpdateSpaceDTO } from '@shared/domain/space/dto/update-space.dto'
+import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 
 @UseGuards(UserContextGuard)
 @Controller('/spaces')
 export class SpacesController {
+  @ServiceLogger()
+  protected readonly logger: Logger
+
   constructor(
     @Inject(DEPRECATED_SQL_ENTITY_MANAGER) private readonly oldEm: SqlEntityManager,
     private readonly spaceService: SpaceService,
-    private readonly logger: Logger,
     private readonly user: UserContext,
     private readonly emailFacade: EmailFacade,
   ) {}
@@ -49,6 +54,11 @@ export class SpacesController {
   async create(@Body() space: CreateSpaceDTO) {
     const spaceId = await this.spaceService.create(space)
     return { id: spaceId }
+  }
+
+  @Put('/:id')
+  async update(@Param('id', ParseIntPipe) spaceId: number, @Body() space: UpdateSpaceDTO) {
+    return await this.spaceService.update(spaceId, space)
   }
 
   @HttpCode(204)

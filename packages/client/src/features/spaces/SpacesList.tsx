@@ -23,6 +23,7 @@ import { spacesListRequest } from './spaces.api'
 import { columnFilters, ISpace } from './spaces.types'
 import { useSpaceHiddenMutation } from './useSpaceHiddenMutation'
 import { useSpacesColumns } from './useSpacesColumns'
+import { ResouceQueryErrorMessage } from '../home/ResouceQueryErrorMessage'
 import { useListSelect } from '../home/useListSelect'
 
 const SpacesHeader = styled.div`
@@ -93,7 +94,7 @@ const SpacesList = () => {
   const meta = data?.meta
   const userCanAdministerSite = !!user?.can_administer_site
 
-  if (error) return <div>Error! {JSON.stringify(error)}</div>
+  if (error) return <ResouceQueryErrorMessage />
 
   const spaceHiddenMutation = useSpaceHiddenMutation()
   const hideSpaces = () => {
@@ -194,6 +195,7 @@ const TableTable = ({
     // Check if any of the conditions is true, then hide the column
     return !(!userCanAdministerSite && (c.accessorKey === 'hidden' || c.id === 'select'))
   }
+  // @ts-expect-error: type is broken from react-table library
   const columns = useSpacesColumns().filter(filterCols)
   return (
     <StyledTable>
