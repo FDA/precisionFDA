@@ -1,5 +1,3 @@
-/* eslint-disable react/jsx-props-no-spreading */
-/* eslint-disable dot-notation */
 import { all, any } from 'ramda'
 import React, { useEffect, useState } from 'react'
 import { useDropzone } from 'react-dropzone'
@@ -65,6 +63,7 @@ type UploadModalArgs = {
   spaceId?: string
   isAllowed: boolean
   onViolation: () => void
+  onUpload?: () => void
 }
 
 export const useFileUploadModal = ({
@@ -73,6 +72,7 @@ export const useFileUploadModal = ({
   spaceId,
   isAllowed,
   onViolation,
+  onUpload,
 }: UploadModalArgs) => {
   const queryCache = useQueryClient()
   const { isShown, setShowModal } = useConditionalModal(isAllowed, onViolation)
@@ -165,6 +165,7 @@ export const useFileUploadModal = ({
   }
 
   const handleUpload = async () => {
+    if(onUpload) onUpload()
     try {
       await multiFileUpload({
         filesBlob: blobs,

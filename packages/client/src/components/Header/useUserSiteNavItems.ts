@@ -6,7 +6,6 @@ export const useUserSiteNavItems = () => {
 
   const showGSRSLink = true
   const showCDMHLink = !!siteSettings?.data?.cdmh.isEnabled && Object.keys(siteSettings?.data?.cdmh.data).length > 0
-
   let items = siteNavItems
   if(showGSRSLink) {
     items = [...items, ...gsrsNavItems]

@@ -255,7 +255,7 @@ export const ExecutionDetails = ({
               <MetadataKey>APP</MetadataKey>
               {/* TODO: do not rely on link to get app id */}
               <MetadataVal data-testid="execution-app-title">
-                <StyledLink to={`${getBasePath(spaceId)}/apps/${execution.app_uid}`} disable={!execution.app_active}>
+                <StyledLink to={`${getBasePath(spaceId)}/apps/${execution.app_uid}`} $disable={!execution.app_active}>
                   {execution.app_title}
                 </StyledLink>
               </MetadataVal>

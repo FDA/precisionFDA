@@ -1,5 +1,7 @@
 import Editor, { loader, EditorProps, Monaco } from '@monaco-editor/react'
+import * as monacoEditor from 'monaco-editor'
 import React from 'react'
+import { useTheme } from '../../utils/ThemeContext'
 
 if(!ENABLE_DEV_MSW) {
   loader.config({
@@ -10,13 +12,14 @@ if(!ENABLE_DEV_MSW) {
 }
 
 const MonacoEditor = (props: Partial<EditorProps & { formatDocument: boolean}>) => {
-  const editorDidMountHook = (editor: any, monaco: Monaco) => {
+  const { theme } = useTheme()
+  const editorDidMountHook = (editor: monacoEditor.editor.IStandaloneCodeEditor, monaco: Monaco) => {
     const model = editor.getModel()
+    if(!model) return
     model.setEOL(monaco.editor.EndOfLineSequence.LF)
-
     if(props?.formatDocument) {
       setTimeout(() => {
-        editor.getAction('editor.action.formatDocument').run()
+        editor.getAction('editor.action.formatDocument')?.run()
       }, 300)
     }
   }
@@ -34,6 +37,7 @@ const MonacoEditor = (props: Partial<EditorProps & { formatDocument: boolean}>) 
         minimap: {
           enabled: false,
         },
+        theme: theme === 'dark' ? 'vs-dark' : 'vs-light',
       }}
       {...props}
       onMount={editorDidMountHook}

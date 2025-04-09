@@ -1,4 +1,3 @@
-/* eslint-disable import/no-extraneous-dependencies */
 import '@testing-library/jest-dom'
 import 'whatwg-fetch'
 import { render } from '@testing-library/react'
@@ -7,13 +6,10 @@ import React, { FC } from 'react'
 import { BrowserRouter } from 'react-router-dom'
 import { QueryParamProvider } from 'use-query-params'
 import { ReactRouter6Adapter } from 'use-query-params/adapters/react-router-6'
-import {
-  QueryClientProvider,
-  QueryClient,
-  QueryCache,
-} from '@tanstack/react-query'
+import { QueryClientProvider, QueryClient, QueryCache } from '@tanstack/react-query'
 import { server } from '../mocks/server'
 import { AlertDismissedProvider } from '../features/admin/alerts/useAlertDismissedLocalStorage'
+import { ColorModeProvider } from '../utils/ThemeContext'
 
 global.ResizeObserver = jest.fn().mockImplementation(() => ({
   observe: jest.fn(),
@@ -31,18 +27,18 @@ const queryClient = new QueryClient({
   },
 })
 
-export const AllTheProviders: FC<{ children: React.ReactNode }> = ({
-  children,
-}) => (
-  <BrowserRouter>
-    <QueryClientProvider client={queryClient}>
-      <QueryParamProvider adapter={ReactRouter6Adapter}>
-        <AlertDismissedProvider>
-          {children}
-        </AlertDismissedProvider>
-      </QueryParamProvider>
-    </QueryClientProvider>
-  </BrowserRouter>
+export const AllTheProviders: FC<{ children: React.ReactNode }> = ({ children }) => (
+  <ColorModeProvider>
+    <BrowserRouter>
+      <QueryClientProvider client={queryClient}>
+        <QueryParamProvider adapter={ReactRouter6Adapter}>
+          <AlertDismissedProvider>
+            {children}
+          </AlertDismissedProvider>
+        </QueryParamProvider>
+      </QueryClientProvider>
+    </BrowserRouter>
+  </ColorModeProvider>
 )
 
 const customRender = (ui: React.ReactElement, { route = '/' } = {}) => {

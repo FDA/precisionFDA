@@ -3,21 +3,26 @@ import { EMAIL_TYPES } from '@shared/domain/email/email.config'
 import { EmailQueueJobProducer } from '@shared/domain/email/producer/email-queue-job.producer'
 import { User, USER_STATE } from '@shared/domain/user/user.entity'
 import { UserService } from '@shared/domain/user/user.service'
-import { match, stub } from 'sinon'
+import sinon, { match, stub } from 'sinon'
 import { expect } from 'chai'
 import { UserRepository } from '@shared/domain/user/user.repository'
 import { UserPaginationDto } from '@shared/domain/user/dto/user-pagination.dto'
+import { NoHeaderItemsSetError, NotFoundError } from '@shared/errors'
+import { HeaderItem } from '@shared/domain/user/header-item'
 
 describe('user service tests', () => {
+  const emFlushStub = sinon.stub()
   const emTransactionalStub = stub()
   const createSendEmailTaskStub = stub()
   const userRepoPaginateStub = stub()
   const userRepoFindActiveStub = stub()
   const userRepoFindStub = stub()
+  const userRepoFindOneStub = stub()
 
   const createUserService = () => {
     const em = {
       transactional: emTransactionalStub,
+      flush: emFlushStub,
     } as unknown as EntityManager<MySqlDriver>
 
     const emailsJobProducer = {
@@ -28,13 +33,26 @@ describe('user service tests', () => {
       paginate: userRepoPaginateStub,
       findActive: userRepoFindActiveStub,
       find: userRepoFindStub,
+      findOne: userRepoFindOneStub,
     } as unknown as UserRepository
 
     emTransactionalStub.callsFake(async (callback) => {
       return callback(em)
     })
 
-    return new UserService(em, emailsJobProducer, userRepo)
+    return new UserService(em, emailsJobProducer, userRepo, {
+      id: 42,
+      dxuser: 'user1',
+      accessToken: 'access_token',
+    })
+  }
+
+  const checkHeaderItems = (expected: HeaderItem[], tested: HeaderItem[]) => {
+    expect(tested.length).eq(expected.length)
+    for (let i = 0; i < expected.length; i++) {
+      expect(tested[i].name).eq(expected[i].name)
+      expect(tested[i].favorite).eq(expected[i].favorite)
+    }
   }
 
   beforeEach(async () => {
@@ -316,6 +334,75 @@ describe('user service tests', () => {
       expect(userRepoPaginateStub.getCall(0).args[2].orderBy).to.deep.equal({
         dxuser: 'ASC',
       })
+    })
+  })
+
+  describe('#listFavoriteItems', () => {
+    it('basic', async () => {
+      const headerItems = [
+        { name: 'overview', favorite: false },
+        { name: 'docs', favorite: true },
+      ]
+      userRepoFindOneStub.resolves({ dxuser: 'user1', extras: { header_items: headerItems } })
+
+      const userService = createUserService()
+      const result = await userService.listHeaderItems()
+      checkHeaderItems(headerItems, result)
+    })
+
+    it('header items not set yet', async () => {
+      userRepoFindOneStub.resolves({ dxuser: 'user1', extras: {} })
+
+      const userService = createUserService()
+      await expect(userService.listHeaderItems()).be.rejectedWith(
+        NoHeaderItemsSetError,
+        'Header items have not been set yet for user user1',
+      )
+    })
+
+    it('non-existing user', async () => {
+      userRepoFindOneStub.resolves()
+
+      const userService = createUserService()
+      await expect(userService.listHeaderItems()).be.rejectedWith(NotFoundError, 'User not found')
+    })
+  })
+
+  describe('#updateFavoriteItems', () => {
+    it('basic', async () => {
+      const headerItemsOrig = [
+        { name: 'overview', favorite: false },
+        { name: 'docs', favorite: true },
+      ]
+      const headerItemsUpdate = [
+        { name: 'gsrs', favorite: true },
+        { name: 'overview', favorite: true },
+        { name: 'docs', favorite: false },
+      ]
+      userRepoFindOneStub.resolves({ dxuser: 'user1', extras: { header_items: headerItemsOrig } })
+
+      const userService = createUserService()
+      const beforeUpdate = await userService.listHeaderItems()
+      checkHeaderItems(headerItemsOrig, beforeUpdate)
+
+      await userService.updateHeaderItems(headerItemsUpdate)
+      const newHeaderItems = await userService.listHeaderItems()
+      checkHeaderItems(headerItemsUpdate, newHeaderItems)
+    })
+
+    it('empty array', async () => {
+      const headerItemsOrig = [
+        { name: 'overview', favorite: false },
+        { name: 'docs', favorite: true },
+      ]
+      const headerItemsUpdate = []
+      userRepoFindOneStub.resolves({ dxuser: 'user1', extras: { header_items: headerItemsOrig } })
+
+      const userService = createUserService()
+
+      await userService.updateHeaderItems(headerItemsUpdate)
+      const newHeaderItems = await userService.listHeaderItems()
+      checkHeaderItems(headerItemsUpdate, newHeaderItems)
     })
   })
 })

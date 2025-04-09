@@ -14,7 +14,7 @@ import { CHALLENGE_BOT_PLATFORM_CLIENT } from '@shared/platform-client/providers
 import { PlatformClient } from '@shared/platform-client'
 import { FILE_STATE_DX, PARENT_TYPE } from '@shared/domain/user-file/user-file.types'
 import { EntityScopeUtils } from '@shared/utils/entity-scope.utils'
-import { CreateSpaceDTO } from '@shared/domain/space/dto/create-space-dto'
+import { CreateSpaceDTO } from '@shared/domain/space/dto/create-space.dto'
 
 @Injectable()
 export class ChallengeFacade {

@@ -15,7 +15,7 @@ import { User } from '@shared/domain/user/user.entity'
 import { NotFoundError, PermissionError } from '@shared/errors'
 import { PlatformClient } from '@shared/platform-client'
 import { ADMIN_PLATFORM_CLIENT } from '@shared/platform-client/providers/admin-platform-client.provider'
-import { CreateSpaceDTO } from '@shared/domain/space/dto/create-space-dto'
+import { CreateSpaceDTO } from '@shared/domain/space/dto/create-space.dto'
 
 /**
  * Concrete subclass of {@link SpaceCreationProcess} for creating an Administrator space.
