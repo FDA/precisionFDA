@@ -25,7 +25,7 @@ export function usePaginationParams(initialPerPageCount?: number) {
     withDefault(NumberParam, defaultPage),
   )
   const [perPageParam, setPerPageParam] = useQueryParam(
-    'perPage',
+    'per_page',
     withDefault(NumberParam, initialPerPageCount ?? defaultPerPageCount),
   )
 

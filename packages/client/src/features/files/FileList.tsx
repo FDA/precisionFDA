@@ -41,6 +41,7 @@ import { useFilesColumns } from './useFilesColumns'
 import { useFileDnd } from './useFilesDnd'
 import { useFilesSelectActions } from './useFilesSelectActions'
 import { useFolderActions } from './useFolderActions'
+import { ResouceQueryErrorMessage } from '../home/ResouceQueryErrorMessage'
 import { StyledPageTable } from '../../components/Table/components/styles'
 
 type ListType = { files: IFile[]; meta: IMeta }
@@ -170,7 +171,7 @@ export const FileList = ({
   delete actions['Comments']
   delete actions['Request license approval']
 
-  const listActions = useFolderActions(homeScope, folderIdParam!, space?.id)
+  const listActions = useFolderActions(homeScope, folderIdParam!, space?.id, resetSelected)
 
   const handleCopyIds = () => {
     navigator.clipboard.writeText(selectedFileIds.join(', '))
@@ -180,10 +181,10 @@ export const FileList = ({
     }, 5000)
   }
 
-  if (error) return <div>Error! {JSON.stringify(error)}</div>
+  if (error) return <ResouceQueryErrorMessage />
 
   return (
-    <ErrorBoundary>
+    <>
       <FilesListResourceHeader>
         <ActionsRow>
           <QuickActions>
@@ -295,7 +296,7 @@ export const FileList = ({
       {actions['Edit properties']?.modal}
       {actions['Lock']?.modal}
       {actions['Unlock']?.modal}
-    </ErrorBoundary>
+    </>
   )
 }
 

@@ -14,7 +14,7 @@ type StyledPublicNavbarProps = {
 
 const StyledPublicNavbar = styled(PageContainerMargin)<StyledPublicNavbarProps>`
   display: flex;
-  height: ${theme.sizing.navigationBarHeight};
+  height: 64px;
   text-align: center;
   vertical-align: middle;
   transition: all 0.18s ease-in-out;
@@ -59,7 +59,7 @@ type StyledPFDALogoProps = {
 const pfdaLogoStyle = css`
   text-align: left;
   margin: auto;
-  margin-left: ${theme.padding.mainContentHorizontal};
+  margin-left: 32px;
   width: 180px;
   height: 40px;
 `

@@ -15,7 +15,7 @@ import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { PlatformClient } from '@shared/platform-client'
 import { Logger } from '@nestjs/common'
 import { getHandle } from '@shared/domain/org/org.utils'
-import { CreateSpaceDTO } from '@shared/domain/space/dto/create-space-dto'
+import { CreateSpaceDTO } from '@shared/domain/space/dto/create-space.dto'
 /**
  * Abstract class representing the process of creating a space.
  *

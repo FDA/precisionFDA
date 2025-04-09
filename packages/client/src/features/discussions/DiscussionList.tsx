@@ -13,6 +13,7 @@ import { HoverDNAnexusLogo } from '../../components/icons/DNAnexusLogo'
 import { PlusIcon } from '../../components/icons/PlusIcon'
 import { ContentFooter } from '../../components/Page/ContentFooter'
 import { Pagination } from '../../components/Pagination'
+import { ResouceQueryErrorMessage } from '../home/ResouceQueryErrorMessage'
 import Table from '../../components/Table'
 import { StyledPageTable } from '../../components/Table/components/styles'
 import { toArrayFromObject } from '../../utils/object'
@@ -20,7 +21,7 @@ import { ActionsRow, QuickActions } from '../home/home.styles'
 import { ResourceHeader } from '../home/show.styles'
 import { HomeScope, MetaV2 } from '../home/types'
 import { useList } from '../home/useList'
-import { fetchDiscussionsRequest, NoteScope } from './api'
+import { fetchDiscussionsRequest } from './api'
 import { Discussion } from './discussions.types'
 import { useDiscussionColumns } from './useDiscussionColumns'
 
@@ -60,6 +61,7 @@ const DiscussionListTable = ({
     return !(homeScope !== 'spaces' && c.accessorKey === 'note.scope')
   }
 
+  // @ts-expect-error: type is broken from react-table library
   const col = useDiscussionColumns().filter(filterColsByScope)
 
   return (
@@ -115,7 +117,7 @@ export const DiscussionList = ({
 
   const location = useLocation()
 
-  if (query.error) return <div>Error! {JSON.stringify(query.error)}</div>
+  if (query.error) return <ResouceQueryErrorMessage />
 
   return (
     <>
@@ -156,6 +158,7 @@ export const DiscussionList = ({
           totalPages={query.data?.meta.totalPages}
           perPage={query.data?.meta.pageSize}
           isHidden={false}
+          showPerPage={false}
           setPage={p => setPageParam(p, 'replaceIn')}
           onPerPageSelect={p => setPerPageParam(p, 'replaceIn')}
         />

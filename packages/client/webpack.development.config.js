@@ -14,7 +14,7 @@ require('events').EventEmitter.defaultMaxListeners = 20
 const base = require('./webpack.fragment.base')
 const swc = require('./webpack.fragment.swc')
 
-// const TARGET = 'https://precisionfda-dev.dnanexus.com'
+// const TARGET = 'https://dev.pfda.dnanexus.com'
 const TARGET = 'https://0.0.0.0:3000'
 
 const urlLoaderOptions = {

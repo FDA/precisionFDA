@@ -159,7 +159,7 @@ export const useSelectAppModal = (
     >
       <ModalHeaderTop headerText={title} hide={() => setShowModal(false)} />
       {subtitle && <StyledSubtitle>{subtitle}</StyledSubtitle>}
-      <Tabs>
+      <Tabs nonSelected={selectedApps.length === 0}>
         <Tab title={`Selected ${selectedApps.length}`} key="selected">
           {selectedApps.length === 0 && <StyledRow>No selected apps</StyledRow>}
           {selectedApps.length > 0 && (

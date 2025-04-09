@@ -23,7 +23,7 @@ import { ProfileIcon } from '../icons/ProfileIcon'
 import { SiteMenuIcon } from '../icons/SiteMenuIcon'
 import { StarIcon } from '../icons/StarIcon'
 import { SiteNavItemType } from './NavItems'
-import { orderArrayByReference } from './orderArrayByReference'
+import { getOrderedFavoritesOnly } from './getOrderedFavoritesOnly'
 import { getObjectsByIds } from './orderObjectById'
 import {
   DisabledSiteMenuItem,
@@ -56,8 +56,7 @@ import {
   SubLink,
 } from './styles'
 import { useEditFavoritesModal } from './useEditFavoritesModal'
-import { useNavFavoritesLocalStorage } from './useNavFavoritesLocalStorage'
-import { useNavOrderLocalStorage } from './useNavOrderLocalStorage'
+import { useNavFavorites } from './useNavFavorites'
 import { useUserSiteNavItems } from './useUserSiteNavItems'
 
 type UserMenuProps = {
@@ -161,7 +160,7 @@ const MenuLink = ({
   children: React.ReactNode
   'data-testid': string
 }) => {
-  const MenuLinkComp = navItem.alink ? 'a' : Link
+  const MenuLinkComp = navItem?.alink ? 'a' : Link
   const menuLinkProps = {
     rel: navItem.alink?.startsWith('mailto:') ? 'noreferrer' : undefined,
     target: navItem?.external ? '_blank' : undefined,
@@ -177,7 +176,7 @@ const MenuLink = ({
 const MenuItem = ({ navItem, pathname, onClick }: { navItem: SiteNavItemType; pathname: string; onClick: () => void }) => {
   return (
     <MenuLink navItem={navItem} onClick={onClick} data-testid={`sitenav-${navItem.id}`}>
-      <SiteMenuItem $active={isActiveLink(navItem.link || navItem.alink, pathname)}>
+      <SiteMenuItem $active={isActiveLink(navItem?.link || navItem.alink, pathname)}>
         <IconWrap>
           <navItem.icon height={navItem.iconHeight} />
         </IconWrap>
@@ -357,8 +356,7 @@ const Header: React.FC = () => {
   const user = useAuthUser()
   const siteSettings = useSiteSettingsQuery()
   const { isAlertDismissed, setIsAlertDismissed } = useAlertDismissed()
-  const { selFavorites } = useNavFavoritesLocalStorage()
-  const { order } = useNavOrderLocalStorage()
+  const { selFavorites } = useNavFavorites()
   const [isCloudResourcesModalShown, setCloudResourcesModalShown] = useState(false)
   const buttonRef = useRef<HTMLDivElement>(null)
   const generateCLIKeyAction = useGenerateKeyModal()
@@ -383,7 +381,7 @@ const Header: React.FC = () => {
     }, ms ?? 225)
   }
 
-  const orderedFavorites = orderArrayByReference(selFavorites, order)
+  const orderedFavorites = getOrderedFavoritesOnly(selFavorites)
 
   return (
     <>
@@ -435,7 +433,7 @@ const Header: React.FC = () => {
               const { id, iconHeight, text, icon: Icon } = i
               return (
                 <MenuLink navItem={i} key={id} data-testid={`favoritenav-${id}`}>
-                  <HeaderMenuItem $active={isActiveLink(i.link || i.alink, pathname)}>
+                  <HeaderMenuItem $active={isActiveLink(i?.link || i.alink, pathname)}>
                     <IconWrap $marginBottom={1}>
                       <Icon height={iconHeight} />
                     </IconWrap>

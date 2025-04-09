@@ -43,6 +43,7 @@ export const useAssetActions = ({ homeScope, selectedItems, resourceKeys, resetS
   const selected = selectedItems.filter(x => x !== undefined)
   const user = useAuthUser()
   const isAdmin = user?.admin
+  const selectedButNotClosed = selected.some(e => e.state !== 'closed')
 
   const featureMutation = useFeatureMutation({
     resource: 'assets',
@@ -139,14 +140,14 @@ export const useAssetActions = ({ homeScope, selectedItems, resourceKeys, resetS
   let actions: ActionFunctionsType<AssetActions> = {
     Rename: {
       type: 'modal',
-      isDisabled: selected.length !== 1,
+      isDisabled: selected.length !== 1 || selectedButNotClosed,
       func: () => setEditModal(true),
       modal: editModal,
       showModal: isShownEditModal,
     },
     Download: {
       type: 'modal',
-      isDisabled: selected.length === 0 || selected.some(e => !e.links?.download),
+      isDisabled: selected.length === 0 || selected.some(e => !e.links?.download) || selectedButNotClosed,
       func: () => setDownloadModal(true),
       modal: downloadModal,
       showModal: isShownDownloadModal,
@@ -156,7 +157,7 @@ export const useAssetActions = ({ homeScope, selectedItems, resourceKeys, resetS
       func: () => {
         featureMutation.mutateAsync({ featured: true, uids: selected.map(f => f.uid) })
       },
-      isDisabled: selected.length === 0 || !selected.every(e => !e.featured || !e.links.feature),
+      isDisabled: selected.length === 0 || !selected.every(e => !e.featured || !e.links.feature) || selectedButNotClosed,
       shouldHide: !isAdmin || homeScope !== 'everybody',
     },
     Unfeature: {
@@ -164,12 +165,12 @@ export const useAssetActions = ({ homeScope, selectedItems, resourceKeys, resetS
       func: () => {
         featureMutation.mutateAsync({ featured: false, uids: selected.map(f => f.uid) })
       },
-      isDisabled: selected.length === 0 || !selected.every(e => e.featured || !e.links.feature),
+      isDisabled: selected.length === 0 || !selected.every(e => e.featured || !e.links.feature) || selectedButNotClosed,
       shouldHide: !isAdmin || (homeScope !== 'featured' && homeScope !== 'everybody'),
     },
     'Make Public': {
       type: 'link',
-      isDisabled: selected.length !== 1 || !selected[0]?.links?.publish || !user?.allowed_to_publish,
+      isDisabled: selected.length !== 1 || selectedButNotClosed || !user?.allowed_to_publish,
       link: {
         method: 'GET',
         url: `/publish?identifier=${selected[0]?.uid}&type=asset`,
@@ -185,14 +186,14 @@ export const useAssetActions = ({ homeScope, selectedItems, resourceKeys, resetS
     },
     'Attach License': {
       type: 'modal',
-      isDisabled: selected.length !== 1 || !selected[0]?.links?.license || !availableLicenses,
+      isDisabled: selected.length !== 1 || !selected[0]?.links?.license || !availableLicenses || selectedButNotClosed,
       func: () => setAttachLicensesModal(true),
       modal: attachLicensesModal,
       showModal: isShownAttachLicensesModal,
     },
     'Detach License': {
       type: 'modal',
-      isDisabled: selected.length !== 1 || !selected[0].links.license || !availableLicenses,
+      isDisabled: selected.length !== 1 || !selected[0].links.license || !availableLicenses || selectedButNotClosed,
       func: () => setDetachLicensesModal(true),
       modal: detachLicensesModal,
       showModal: isShownDetachLicensesModal,
@@ -200,7 +201,7 @@ export const useAssetActions = ({ homeScope, selectedItems, resourceKeys, resetS
     },
     'Request license approval': {
       type: 'link',
-      isDisabled: selected.length !== 1,
+      isDisabled: selected.length !== 1 || selectedButNotClosed,
       link: selected[0]?.links.request_approval_license,
       shouldHide: !selected[0]?.links.request_approval_license,
     },
@@ -210,7 +211,7 @@ export const useAssetActions = ({ homeScope, selectedItems, resourceKeys, resetS
       modal: acceptLicensesModal,
       showModal: isShownAcceptLicensesModal,
       isDisabled: false,
-      shouldHide: selected.length !== 1 || !selected[0]?.links.accept_license_action,
+      shouldHide: selected.length !== 1 || !selected[0]?.links.accept_license_action || selectedButNotClosed,
     },
     'Edit tags': {
       type: 'modal',
@@ -218,7 +219,7 @@ export const useAssetActions = ({ homeScope, selectedItems, resourceKeys, resetS
       isDisabled: false,
       modal: tagsModal,
       showModal: isShownTagsModal,
-      shouldHide: (!isAdmin && selected[0]?.added_by !== user?.full_name) || selected.length !== 1,
+      shouldHide: (!isAdmin && selected[0]?.added_by !== user?.full_name) || selected.length !== 1 || selectedButNotClosed,
     },
     'Edit properties': {
       type: 'modal',
@@ -226,12 +227,12 @@ export const useAssetActions = ({ homeScope, selectedItems, resourceKeys, resetS
       isDisabled: selected.length === 0,
       modal: propertiesModal,
       showModal: isShownPropertiesModal,
-      shouldHide: !isAdmin && selected[0]?.added_by !== user?.full_name,
+      shouldHide: (!isAdmin && selected[0]?.added_by !== user?.full_name) || selectedButNotClosed,
     },
     Comments: {
       type: 'link',
       isDisabled: selected.length !== 1,
-      shouldHide: selected.length !== 1,
+      shouldHide: selected.length !== 1 || selectedButNotClosed,
       link: `/assets/${selected[0]?.uid}/comments`,
     },
   }

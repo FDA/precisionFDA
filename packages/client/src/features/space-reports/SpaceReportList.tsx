@@ -20,6 +20,7 @@ import { fetchReports } from './space-reports.api'
 import { useGenerateSpaceReportModal } from './useGenerateSpaceReportModal'
 import { useSpaceReportColumns } from './useSpaceReportColumns'
 import { userReportSelectActions } from './useSpaceReportSelectActions'
+import { ResouceQueryErrorMessage } from '../home/ResouceQueryErrorMessage'
 import { StyledPageTable } from '../../components/Table/components/styles'
 import { Params } from '../home/utils'
 
@@ -113,7 +114,7 @@ export const SpaceReportList = ({ scope, isContributorOrHigher }: { scope: strin
     },
   })
 
-  if (query.error) return <div>Error! {JSON.stringify(query.error)}</div>
+  if (query.error) return <ResouceQueryErrorMessage />
 
   return (
     <>

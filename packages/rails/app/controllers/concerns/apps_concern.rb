@@ -5,7 +5,17 @@ module AppsConcern
   # @return [app] An app Object if it is accessible by user.
   #   raise ApiError if not.
   def find_app
-    @app = App.accessible_by(@context).unremoved.find_by(uid: unsafe_params[:id])
+    id = unsafe_params[:id]
+    if id.start_with?("app-series-")
+      app_series_id = id.split("-").last
+      app_series = AppSeries.accessible_by(@context).find_by(id: app_series_id)
+      raise ApiError, I18n.t("app_not_accessible") if app_series.nil?
+
+      @app = app_series.latest_revision_app
+
+      return @app
+    end
+    @app = App.accessible_by(@context).unremoved.find_by(uid: id)
 
     raise ApiError, I18n.t("app_not_accessible") if @app.nil?
 

@@ -122,7 +122,7 @@ export interface SuperModalProps extends ModalNextProps {
 }
 
 const SuperModalPortal = (props: PropsWithChildren<Omit<SuperModalProps, 'isShown'>>) => {
-  const { nodeRef, variant, headerText, hide, children, blur = false, ...rest } = props
+  const { nodeRef, variant, headerText, hide, children, blur = false, disableClose, ...rest } = props
   useKeyPress('Escape', () => hide())
   return ReactDOM.createPortal(
     <StyledSuperModal onClick={hide} ref={nodeRef} data-blur={blur.toString() as BooleanString} {...rest}>

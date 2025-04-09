@@ -5,8 +5,6 @@ import 'react-toastify/dist/ReactToastify.css'
 import { QueryParamProvider } from 'use-query-params'
 import { ReactRouter6Adapter } from 'use-query-params/adapters/react-router-6'
 import Header from './components/Header/HeaderNext'
-import { NavFavoritesProvider } from './components/Header/useNavFavoritesLocalStorage'
-import { NavOrderProvider } from './components/Header/useNavOrderLocalStorage'
 import { AlertDismissedProvider } from './features/admin/alerts/useAlertDismissedLocalStorage'
 import { ExpiringSessionModal } from './features/auth/ExpiringSessionModal'
 import { SessionExpiredModal } from './features/auth/SessionExpiredModal'
@@ -70,19 +68,15 @@ const RootComponent = () => {
           })}
         >
           <AlertDismissedProvider>
-            <NavOrderProvider>
-              <NavFavoritesProvider>
-                <Header />
-                <QueryParamProvider adapter={ReactRouter6Adapter}>
-                  <React.Suspense fallback={<LayoutLoader />}>
-                    <Outlet />
-                  </React.Suspense>
-                </QueryParamProvider>
-                <PFDAToastContainer />
-                <SessionExpiredModal {...sessionExpiredModal} />
-                <ExpiringSessionModal modal={expiringSessionModal} />
-              </NavFavoritesProvider>
-            </NavOrderProvider>
+            <Header />
+            <QueryParamProvider adapter={ReactRouter6Adapter}>
+              <React.Suspense fallback={<LayoutLoader />}>
+                <Outlet />
+              </React.Suspense>
+            </QueryParamProvider>
+            <PFDAToastContainer />
+            <SessionExpiredModal {...sessionExpiredModal} />
+            <ExpiringSessionModal modal={expiringSessionModal} />
           </AlertDismissedProvider>
         </QueryClientProvider>
       </React.Fragment>

@@ -3,22 +3,23 @@ import { TabTitle } from './TabTitle'
 
 type Props = {
   children: ReactElement[]
+  nonSelected?: boolean
 }
 
-export const Tabs: React.FC<Props> = ({ children }) => {
-  const [selectedTab, setSelectedTab] = useState(0)
+export const Tabs: React.FC<Props> = ({ children, nonSelected }) => {
+  const [selectedTab, setSelectedTab] = useState(nonSelected ? 1 : 0)
 
   return (
     <div>
-        {children.map((item, index) => (
-          <TabTitle
-            key={item.key}
-            title={item.props.title}
-            index={index}
-            setSelectedTab={setSelectedTab}
-            active={selectedTab === index}
-          />
-        ))}
+      {children.map((item, index) => (
+        <TabTitle
+          key={item.key}
+          title={item.props.title}
+          index={index}
+          setSelectedTab={setSelectedTab}
+          active={selectedTab === index}
+        />
+      ))}
       {children[selectedTab]}
     </div>
   )
