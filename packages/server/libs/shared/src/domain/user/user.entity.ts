@@ -24,7 +24,10 @@ import { BaseEntity } from '../../database/base.entity'
 import { AdminMembership } from '../admin-membership/admin-membership.entity'
 import { UserRepository } from './user.repository'
 import { Space } from '@shared/domain/space/space.entity'
-import { CAN_EDIT_ROLES } from '@shared/domain/space-membership/space-membership.helper'
+import {
+  ADMIN_LEAD_ROLES,
+  CAN_EDIT_ROLES,
+} from '@shared/domain/space-membership/space-membership.helper'
 
 export enum USER_STATE {
   ENABLED = 0,
@@ -224,6 +227,14 @@ export class User extends BaseEntity {
 
     return Array.from(this.spaceMemberships)
       .filter((m) => m.active && CAN_EDIT_ROLES.includes(m.role))
+      .flatMap((spaceMembership) => Array.from(spaceMembership.spaces))
+  }
+
+  async manageableSpaces(): Promise<Space[]> {
+    await this.spaceMemberships.load({ populate: ['spaces'] })
+
+    return Array.from(this.spaceMemberships)
+      .filter((m) => m.active && ADMIN_LEAD_ROLES.includes(m.role))
       .flatMap((spaceMembership) => Array.from(spaceMembership.spaces))
   }
 

@@ -24,8 +24,8 @@ export default class DiscussionRepository extends AccessControlRepository<Discus
 
   protected async getEditableWhere(): Promise<FilterQuery<Discussion>> {
     const user = await this.em.findOneOrFail(User, { id: this.user.id })
-    const accessibleSpaces = await user.editableSpaces() //TODO for discussions the rules should differ a bit - only admin/leads and authors can edit the discussion in spaces.
-    const scopes = accessibleSpaces.map((space) => space.scope)
+    const manageableSpaces = await user.manageableSpaces()
+    const scopes = manageableSpaces.map((space) => space.scope)
 
     const isSiteAdmin = await user.isSiteAdmin()
     if (isSiteAdmin) {
