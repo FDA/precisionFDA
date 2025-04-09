@@ -22,6 +22,7 @@ import { fetchAssets } from './assets.api'
 import { IAsset } from './assets.types'
 import { useAssetColumns } from './useAssetColumns'
 import { useAssetActions } from './useAssetSelectActions'
+import { ResouceQueryErrorMessage } from '../home/ResouceQueryErrorMessage'
 import { StyledPageTable } from '../../components/Table/components/styles'
 
 type ListType = { assets: IAsset[]; meta: IMeta }
@@ -63,7 +64,7 @@ export const AssetList = ({ homeScope, spaceId }: { homeScope?: HomeScope; space
   const actions = useAssetActions({ homeScope, selectedItems: selectedFileObjects, resourceKeys: ['assets'], resetSelected })
   const generateCLIKeyAction = useGenerateKeyModal()
 
-  if (error) return <div>Error! {JSON.stringify(error)}</div>
+  if (error) return <ResouceQueryErrorMessage />
 
   return (
     <>

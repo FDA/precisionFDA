@@ -52,7 +52,6 @@ function ResourceTable<T extends { id: number; uid: string; name: string; revisi
       enableColumnFilter: false,
       enableSorting: false,
       enableResizing: false,
-      // eslint-disable-next-line react/no-unstable-nested-components
       cell: c => <StyledName>{c.row.original.name}</StyledName>,
     },
     {
@@ -74,7 +73,7 @@ function ResourceTable<T extends { id: number; uid: string; name: string; revisi
   if(isLoading) return <div className="p-4"><Loader /></div>
   if(!data) return <Empty>There are no resources here</Empty>
 
-  return <Table<T> isLoading={isLoading} columns={col} data={data} rowSelection={selectedIndexes} setSelectedRows={setSelectedIndexes} />
+  return <Table<T> enableColumnFilters={false} isLoading={isLoading} columns={col} data={data} rowSelection={selectedIndexes} setSelectedRows={setSelectedIndexes} />
 }
 
 export function useAddResourceToModal({

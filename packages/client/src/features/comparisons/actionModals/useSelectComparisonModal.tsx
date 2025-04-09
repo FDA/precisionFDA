@@ -176,7 +176,7 @@ export const useSelectComparisonModal = (
     >
       <ModalHeaderTop headerText={title} hide={() => setShowModal(false)} />
       {subtitle && <StyledSubtitle>{subtitle}</StyledSubtitle>}
-      <Tabs>
+      <Tabs nonSelected={selectedComparisons.length === 0}>
         <Tab title={`Selected ${selectedComparisons.length}`} key="selected">
           {selectedComparisons.length === 0 && (
             <StyledRow>No selected comparisons</StyledRow>

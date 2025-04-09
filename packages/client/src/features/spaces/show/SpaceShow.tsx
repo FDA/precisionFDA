@@ -6,20 +6,26 @@ import { MenuCounter } from '../../../components/MenuCounter'
 import { BoltIcon } from '../../../components/icons/BoltIcon'
 import { CogsIcon } from '../../../components/icons/Cogs'
 import { CubeIcon } from '../../../components/icons/CubeIcon'
+import { DatabaseIcon } from '../../../components/icons/DatabaseIcon'
 import { DiscussionIcon } from '../../../components/icons/DiscussionIcon'
 import { FileIcon } from '../../../components/icons/FileIcon'
 import { FlapIcon } from '../../../components/icons/FlapIcon'
+import { NetworkIcon } from '../../../components/icons/NetworkIcon'
 import { SpaceReportIcon } from '../../../components/icons/SpaceReportIcon'
 import { UsersIcon } from '../../../components/icons/UsersIcon'
 import { useLocalStorage } from '../../../hooks/useLocalStorage'
 import { usePrevious } from '../../../hooks/usePrevious'
 import { useToastWSHandler } from '../../../hooks/useToastWSHandler'
 import { UserLayout } from '../../../layouts/UserLayout'
+import { ErrorBoundary } from '../../../utils/ErrorBoundry'
 import { AppList } from '../../apps/AppList'
 import { AppsShow } from '../../apps/AppsShow'
 import { EditAppPage } from '../../apps/form/EditAppPage'
 import { ForkAppPage } from '../../apps/form/ForkAppPage'
 import { RunJobPage } from '../../apps/run/RunJobPage'
+import { DatabaseList } from '../../databases/DatabaseList'
+import { DatabaseShow } from '../../databases/DatabaseShow'
+import { CreateDatabase } from '../../databases/create/CreateDatabase'
 import { DiscussionList } from '../../discussions/DiscussionList'
 import { DiscussionShow } from '../../discussions/DiscussionShow'
 import { CreateDiscussionPage } from '../../discussions/form/CreateDiscussionPage'
@@ -53,11 +59,6 @@ import {
   SpaceTopRight,
   TopSpaceHeader,
 } from './styles'
-import { DatabaseIcon } from '../../../components/icons/DatabaseIcon'
-import { DatabaseList } from '../../databases/DatabaseList'
-import { CreateDatabase } from '../../databases/create/CreateDatabase'
-import { DatabaseShow } from '../../databases/DatabaseShow'
-import { NetworkIcon } from '../../../components/icons/NetworkIcon'
 
 const Spaces2 = ({ space, isLoading }: { space: ISpace; isLoading: boolean }) => {
   const [expandedSidebar, setExpandedSidebar] = useLocalStorage('expandedSpacesSidebar', true)
@@ -180,56 +181,58 @@ const Spaces2 = ({ space, isLoading }: { space: ISpace; isLoading: boolean }) =>
           </Expand>
         </StyledMenu>
         <Main>
-          {isLoading ? (
-            <HomeLoader />
-          ) : (
-            <Routes>
-              <Route path="files" element={<FileList space={space} showFolderActions={isContributorOrHigher} />} />
-              <Route path="files/:fileId" element={<FileShow space={space} />} />
-              <Route path="files/:identifier/track" element={<TrackInHome spaceId={space.id} />} />
-              
-              <Route path="databases" element={<DatabaseList spaceId={space.id} />} />
-              <Route path="databases/create" element={<CreateDatabase spaceId={space.id} />} />
-              <Route path="databases/:uid" element={<DatabaseShow spaceId={space.id} />}/>
-              {/* <Route path="databases/:identifier/track" element={<TrackInHome entityType="database" />} /> */}
+          <ErrorBoundary>
+            {isLoading ? (
+              <HomeLoader />
+            ) : (
+              <Routes>
+                <Route path="files" element={<FileList space={space} showFolderActions={isContributorOrHigher} />} />
+                <Route path="files/:fileId" element={<FileShow space={space} />} />
+                <Route path="files/:identifier/track" element={<TrackInHome spaceId={space.id} />} />
 
-              <Route path="apps" element={<AppList spaceId={space.id} isContributorOrHigher={isContributorOrHigher} />} />
-              <Route path="apps/:appUid/jobs/new" element={<RunJobPage spaceId={space.id} />} />
-              <Route path="apps/:appUid/edit" element={<EditAppPage spaceId={space.id} />} />
-              <Route path="apps/:appUid/fork" element={<ForkAppPage spaceId={space.id} />} />
-              <Route path="apps/:appUid/*" element={<AppsShow spaceId={space.id} />} />
-              <Route path="apps/:identifier/track" element={<TrackInHome spaceId={space.id} />} />
-              <Route
-                path="workflows"
-                element={<WorkflowList spaceId={space.id} isContributorOrHigher={isContributorOrHigher} />}
-              />
-              <Route path="workflows/:workflowUid/*" element={<WorkflowShow spaceId={space.id} />} />
-              <Route path="executions" element={<ExecutionList spaceId={space.id} />} />
-              <Route path="executions/:executionUid/*" element={<ExecutionDetails spaceId={space.id} />} />
-              <Route path="executions/:identifier/track" element={<TrackInHome entityType="execution" spaceId={space.id} />} />
-              <Route path="members" element={<MembersList space={space} />} />
-              <Route
-                path="reports"
-                element={<SpaceReportList scope={`space-${space.id}`} isContributorOrHigher={isContributorOrHigher} />}
-              />
-              <Route
-                path="discussions"
-                element={<DiscussionList canCreateDiscussion={canCreateDiscussion} spaceId={space.id} />}
-              />
-              <Route
-                path="discussions/create"
-                element={
-                  <CreateDiscussionPage
-                    displayWarning={space.type === 'review' && space.private_space_id}
-                    scope={`space-${space.id}`}
-                  />
-                }
-              />
-              <Route path="discussions/:discussionId/*" element={<DiscussionShow space={space} />} />
+                <Route path="databases" element={<DatabaseList spaceId={space.id} />} />
+                <Route path="databases/create" element={<CreateDatabase spaceId={space.id} />} />
+                <Route path="databases/:uid" element={<DatabaseShow spaceId={space.id} />} />
+                {/* <Route path="databases/:identifier/track" element={<TrackInHome entityType="database" />} /> */}
 
-              <Route path="/" element={<Navigate to="files" replace />} />
-            </Routes>
-          )}
+                <Route path="apps" element={<AppList spaceId={space.id} isContributorOrHigher={isContributorOrHigher} />} />
+                <Route path="apps/:appIdentifier/jobs/new" element={<RunJobPage spaceId={space.id} />} />
+                <Route path="apps/:appUid/edit" element={<EditAppPage spaceId={space.id} />} />
+                <Route path="apps/:appUid/fork" element={<ForkAppPage spaceId={space.id} />} />
+                <Route path="apps/:appUid/*" element={<AppsShow spaceId={space.id} />} />
+                <Route path="apps/:identifier/track" element={<TrackInHome spaceId={space.id} />} />
+                <Route
+                  path="workflows"
+                  element={<WorkflowList spaceId={space.id} isContributorOrHigher={isContributorOrHigher} />}
+                />
+                <Route path="workflows/:workflowUid/*" element={<WorkflowShow spaceId={space.id} />} />
+                <Route path="executions" element={<ExecutionList spaceId={space.id} />} />
+                <Route path="executions/:executionUid/*" element={<ExecutionDetails spaceId={space.id} />} />
+                <Route path="executions/:identifier/track" element={<TrackInHome entityType="execution" spaceId={space.id} />} />
+                <Route path="members" element={<MembersList space={space} />} />
+                <Route
+                  path="reports"
+                  element={<SpaceReportList scope={`space-${space.id}`} isContributorOrHigher={isContributorOrHigher} />}
+                />
+                <Route
+                  path="discussions"
+                  element={<DiscussionList canCreateDiscussion={canCreateDiscussion} spaceId={space.id} />}
+                />
+                <Route
+                  path="discussions/create"
+                  element={
+                    <CreateDiscussionPage
+                      displayWarning={space.type === 'review' && space.private_space_id}
+                      scope={`space-${space.id}`}
+                    />
+                  }
+                />
+                <Route path="discussions/:discussionId/*" element={<DiscussionShow space={space} />} />
+
+                <Route path="/" element={<Navigate to="files" replace />} />
+              </Routes>
+            )}
+          </ErrorBoundary>
         </Main>
       </Row>
     </>

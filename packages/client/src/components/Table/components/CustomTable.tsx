@@ -122,6 +122,7 @@ export function CustomTable<T extends RowData>({
                       key={header.id}
                       style={{ width: header.getSize() }}
                       colSpan={header.colSpan}
+                      data-testid={`table-filter-${header.column.id}`}
                     >
                       {header.column.columnDef.meta?.filterElement?.(header.column)}
                       {header.column.getCanFilter() && !header.column.columnDef.meta?.filterElement ? (
@@ -145,6 +146,7 @@ export function CustomTable<T extends RowData>({
                 className={classNames({ 'cell-select sticky-left': cell.column.id === 'select', relative: true })}
                 key={cell.id}
                 style={{ width: cell.column.getSize() }}
+                data-testid={`table-col-${cell.column.id}`}
               >
                 {flexRender(cell.column.columnDef.cell, cell.getContext())}
               </td>

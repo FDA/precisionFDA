@@ -2,10 +2,14 @@ import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Inject, Injectable } from '@nestjs/common'
 import { SpaceCreationProcess } from '@shared/domain/space/create/space-creation.process'
 import { SPACE_TYPE_TO_PROCESS_PROVIDER_MAP } from '@shared/domain/space/create/space-type-to-process-map.provider'
-import { SpaceNotFoundError, UserNotFoundError } from '@shared/errors'
+import {
+  NotFoundError,
+  PermissionError,
+  SpaceNotFoundError,
+  UserNotFoundError,
+} from '@shared/errors'
 import { SpaceRepository } from '@shared/domain/space/space.repository'
 import { Node } from '@shared/domain/user-file/node.entity'
-import { PermissionError } from '@shared/errors'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { Logger } from 'nestjs-pino'
 import { SPACE_STATE, SPACE_TYPE } from '../space.enum'
@@ -20,7 +24,9 @@ import {
 import { UserRepository } from '@shared/domain/user/user.repository'
 import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
 import { Space } from '@shared/domain/space/space.entity'
-import { CreateSpaceDTO } from '@shared/domain/space/dto/create-space-dto'
+import { CreateSpaceDTO } from '@shared/domain/space/dto/create-space.dto'
+import { UpdateSpaceDTO } from '@shared/domain/space/dto/update-space.dto'
+import { User } from '@shared/domain/user/user.entity'
 
 @Injectable()
 export class SpaceService {
@@ -39,6 +45,60 @@ export class SpaceService {
     private readonly spaceMembershipRepository: SpaceMembershipRepository,
     private readonly userRepository: UserRepository,
   ) {}
+
+  private async validateUpdate(currentUser: User, spaceInput: UpdateSpaceDTO, space: Space) {
+    const hostLead = await space.findHostLead()
+    const guestLead = await space.findGuestLead()
+    const isSiteAdmin = await currentUser.isSiteAdmin()
+    const isHostLead = this.user.dxuser === hostLead?.dxuser
+    const isLead = isHostLead || this.user.dxuser === guestLead?.dxuser
+
+    if (space.type === SPACE_TYPE.REVIEW && !isLead) {
+      throw new PermissionError('Review space can be updated only by Reviewer or Sponsor leads.')
+    }
+    if (space.type === SPACE_TYPE.GOVERNMENT && !isHostLead) {
+      throw new PermissionError('Government space can be updated only by owner.')
+    }
+    if (
+      [SPACE_TYPE.GROUPS, SPACE_TYPE.ADMINISTRATOR].includes(space.type) &&
+      !(isSiteAdmin || isLead)
+    ) {
+      throw new PermissionError(
+        'Group and Admin spaces can be updated only by Host or Guest leads.',
+      )
+    }
+    if (space.type === SPACE_TYPE.PRIVATE_TYPE && !isHostLead) {
+      throw new PermissionError('Private space can be updated only by owner.')
+    }
+  }
+
+  async update(spaceId: number, spaceInput: UpdateSpaceDTO) {
+    this.logger.log(`Editing space ${spaceInput.name}`)
+    const user = await this.userRepository.findOne({ id: this.user.id })
+    const space = await this.spaceRepository.findEditableByIdAndUser(spaceId, user)
+
+    if (!space) {
+      throw new NotFoundError("Space not found or you don't have the permission.")
+    }
+
+    await this.validateUpdate(user, spaceInput, space)
+
+    await this.em.transactional(async () => {
+      space.name = spaceInput.name
+      space.description = spaceInput.description
+      if (space.type === SPACE_TYPE.REVIEW) {
+        space.meta.cts = spaceInput.cts
+        await space.confidentialSpaces.loadItems()
+
+        space.confidentialSpaces.getItems().forEach((cs) => {
+          cs.name = spaceInput.name
+          cs.description = spaceInput.description
+        })
+      }
+    })
+
+    return space
+  }
 
   async create(space: CreateSpaceDTO): Promise<number> {
     this.logger.log(`Creating new ${SPACE_TYPE[space.spaceType]} space`)

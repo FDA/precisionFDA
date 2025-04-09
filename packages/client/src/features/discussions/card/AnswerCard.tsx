@@ -8,8 +8,9 @@ import { deleteAnswerRequest, fetchAttachmentsRequest, NoteScope } from '../api'
 import { Answer } from '../discussions.types'
 import { EditNoteEntity } from '../form/EditNoteEntity'
 import { groupByAttachmentType } from '../helpers'
-import { StyledCommentCard, StyledMarkdown, StyledReplyButton } from '../styles'
+import { StyledCommentCard, StyledReplyButton } from '../styles'
 import { CardHeader } from './CardHeader'
+import { StyledMarkdown } from '../../../styles/commonStyles'
 
 export function AnswerCard({
   canEdit,
@@ -61,7 +62,7 @@ export function AnswerCard({
 
   if (editMode) {
     return (
-      <StyledMarkdown $isAnswer>
+      <StyledMarkdown>
         <EditNoteEntity
           onSuccess={() => setEditMode(false)}
           onCancel={() => setEditMode(false)}
