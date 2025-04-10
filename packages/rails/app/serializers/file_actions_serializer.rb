@@ -6,6 +6,7 @@ class FileActionsSerializer < ApplicationSerializer
   attributes(
     :id,
     :name,
+    :uid,
   )
 
   attribute :klass, key: :type

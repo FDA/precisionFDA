@@ -88,7 +88,6 @@ export const useFilesSelectActions = ({
   const user = useAuthUser()
   const isAdmin = user?.admin
   const isViewer = space?.current_user_membership.role === 'viewer'
-  const selectedButNotClosed = selected.some(e => e.state !== 'closed')
 
   const featureMutation = useFeatureMutation({
     resource: 'files',
@@ -290,12 +289,14 @@ export const useFilesSelectActions = ({
 
   const availableLicenses = user?.links?.licenses ? user.links.licenses : false
   const isFolder = selected.every(e => e.type === 'Folder')
+  const selectedButNotClosed = selected.some(e => e.type === 'UserFile' && e.state !== 'closed')
 
   let actions: ActionFunctionsType<FileActions> = {
     Track: {
       type: 'route',
       to: `/${getBaseLink(space?.id)}/files/${selected[0]?.uid}/track`,
       isDisabled: selected.length !== 1 || selectedButNotClosed,
+      shouldHide: isFolder,
     },
     Open: {
       type: 'modal',
@@ -304,7 +305,7 @@ export const useFilesSelectActions = ({
         selected.length === 0 ||
         selected.some(e => e.locked) ||
         isActionDisabledBasedOnProtected(user?.id as number, space) ||
-        selected.some(e => e.type === 'Folder' || (e.type === 'UserFile' && !e.links.download) || e.show_license_pending) ||
+        selected.some(e => (e.type === 'UserFile' && !e.links.download) || e.show_license_pending) ||
         selectedButNotClosed,
       modal: openFileModal,
       showModal: isShownOpenFileModal,
@@ -336,7 +337,7 @@ export const useFilesSelectActions = ({
     'Edit folder info': {
       type: 'modal',
       func: () => setEditFolderModal(true),
-      isDisabled: selected.length !== 1 || selected.some(e => e.locked),
+      isDisabled: selected.length !== 1,
       modal: editFolderModal,
       showModal: isShownEditFolderModal,
       shouldHide: !isFolder || selected.length !== 1 || homeScope === 'spaces',
@@ -347,7 +348,7 @@ export const useFilesSelectActions = ({
         method: 'GET',
         url: `/publish?identifier=${selected[0]?.uid}&type=file`,
       },
-      isDisabled: selected.length !== 1 || selected[0].location === 'Public' || !user?.allowed_to_publish,
+      isDisabled: !user?.allowed_to_publish,
       shouldHide: isFolder || selected.length !== 1 || homeScope !== 'me' || selectedButNotClosed,
     },
     Feature: {
@@ -412,11 +413,7 @@ export const useFilesSelectActions = ({
     'Copy to...': {
       type: 'modal',
       func: () => setCopyToModal(true),
-      isDisabled:
-        selected.length === 0 ||
-        selected.some(e => !e.links.copy) ||
-        selectedButNotClosed ||
-        isActionDisabledBasedOnLocked(selected, user?.id, space),
+      isDisabled: selected.length === 0 || selectedButNotClosed || isActionDisabledBasedOnLocked(selected, user?.id, space),
       modal: copyToModal,
       showModal: isShownCopyToModal,
     },
