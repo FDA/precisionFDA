@@ -91,9 +91,10 @@ const PublishingForm = ({ identifier, treeRoot }: { identifier: string; treeRoot
       toast.error('Unable to publish selected object(s)')
     },
     onSuccess: res => {
-      navigate(res.data.path)
-      if (treeRoot.data.type === 'comparison') {
-        navigate(0)
+      if (['comparison', 'note'].includes(treeRoot.data.type)) {
+        window.location.href = res.data.path
+      } else {
+        navigate(res.data.path)
       }
     },
   })
