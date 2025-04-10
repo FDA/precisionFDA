@@ -1,4 +1,6 @@
-import React, { useMemo } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import React, { useState } from 'react'
+import { toast } from 'react-toastify'
 import styled from 'styled-components'
 import { Button } from '../../../components/Button'
 import { DownloadIcon } from '../../../components/icons/DownloadIcon'
@@ -6,9 +8,12 @@ import { FileIcon } from '../../../components/icons/FileIcon'
 import { VerticalCenter } from '../../../components/Page/styles'
 import { ResourceTable, StyledAction, StyledName } from '../../../components/ResourceTable'
 import { pluralize, sanitizeFileName } from '../../../utils/formatting'
+import { StyledLoader } from '../../actionModals/styles'
+import { DownloadListResponse } from '../../home/types'
 import { ModalHeaderTop, ModalNext } from '../../modal/ModalNext'
 import { ButtonRow, Footer, ModalScroll } from '../../modal/styles'
 import { useModal } from '../../modal/useModal'
+import { fetchFilesDownloadList } from '../files.api'
 import { IFile } from '../files.types'
 
 const StyledResourceTable = styled(ResourceTable)`
@@ -21,45 +26,66 @@ const StyledResourceTable = styled(ResourceTable)`
 
 export const useOpenFileModal = (selectedFiles: IFile[]) => {
   const { isShown, setShowModal } = useModal()
-  const handleOpenClick = (item: IFile) => {
+  const [seletedLength, setSelectedLength] = useState<number>(0)
+  const handleOpenClick = (item: DownloadListResponse) => {
     // TODO(PFDA-5831) - v2 endpoint
     const win = window.open(`/api/files/${item.uid}/${sanitizeFileName(item.name)}?inline=true`, '_blank')
     win?.focus()
   }
 
-  const momoSelected = useMemo(() => selectedFiles, [isShown])
+  const { data, isLoading } = useQuery({
+    queryKey: ['download_list', selectedFiles],
+    queryFn: async () => {
+      const fileIds = selectedFiles.map(file => file.id)
+
+      return fetchFilesDownloadList(fileIds, 'open', selectedFiles[0].scope)
+        .then(res => {
+          setSelectedLength(res.length)
+          return res
+        })
+        .catch(error => {
+          toast.error('Failed to load file list')
+          throw error
+        })
+    },
+  })
+  if (isLoading) return <StyledLoader>Loading...</StyledLoader>
+
   const modalComp = (
     <ModalNext
       id="modal-files-organize"
       data-testid="modal-files-organize"
-      headerText={`Open ${momoSelected.length} ${pluralize('item', momoSelected.length)}`}
+      headerText={`Open ${seletedLength} ${pluralize('item', seletedLength)}`}
       isShown={isShown}
       hide={() => setShowModal(false)}
     >
-      <ModalHeaderTop headerText={`Open ${momoSelected.length} ${pluralize('item', momoSelected.length)}`} hide={() => setShowModal(false)} />
+      <ModalHeaderTop headerText={`Open ${seletedLength} ${pluralize('item', seletedLength)}`} hide={() => setShowModal(false)} />
       <ModalScroll>
-        <StyledResourceTable
-          rows={momoSelected.map(s => {
-            return {
-              name: (
-                <StyledName data-turbolinks="false" onClick={() => handleOpenClick(s)}>
-                  <VerticalCenter>
-                    <FileIcon />
-                  </VerticalCenter>
-                  {s.name}
-                </StyledName>
-              ),
-              action: (
-                <StyledAction onClick={() => handleOpenClick(s)}>
-                  <VerticalCenter>
-                    <DownloadIcon />
-                  </VerticalCenter>
-                  Open
-                </StyledAction>
-              ),
-            }
-          })}
-        />
+        {data && (
+          <StyledResourceTable
+            rows={data.map(s => {
+              return {
+                name: (
+                  <StyledName data-turbolinks="false" onClick={() => handleOpenClick(s)}>
+                    <VerticalCenter>
+                      <FileIcon />
+                    </VerticalCenter>
+                    {s.name}
+                  </StyledName>
+                ),
+                path: <div>{s.fsPath}</div>,
+                action: (
+                  <StyledAction onClick={() => handleOpenClick(s)}>
+                    <VerticalCenter>
+                      <DownloadIcon />
+                    </VerticalCenter>
+                    Open
+                  </StyledAction>
+                ),
+              }
+            })}
+          />
+        )}
       </ModalScroll>
       <Footer>
         <ButtonRow>
