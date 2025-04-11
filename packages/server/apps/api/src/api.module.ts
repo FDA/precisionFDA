@@ -96,6 +96,6 @@ export class ApiModule {
   configure(consumer: MiddlewareConsumer) {
     consumer
       .apply(MikroOrmMiddleware, UserContextMiddleware, CSRFVerificationMiddleware)
-      .forRoutes('*')
+      .forRoutes('{*splat}')
   }
 }
