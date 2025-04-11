@@ -16,6 +16,7 @@ import {
   FOLDERS_LIST_RES,
 } from './mock-responses'
 import { createMockServiceFactory } from './mock-service-factory'
+import { random } from './generate'
 
 const mockServiceFactory = createMockServiceFactory()
 
@@ -51,6 +52,8 @@ const fakes = {
     cloneObjectFake: sinon.stub(),
     appAddAuthorizedUsersFake: sinon.stub(),
     appPublishFake: sinon.stub(),
+    appDescribeFake: sinon.stub(),
+    workflowDescribeFake: sinon.stub(),
   },
   queue: {
     findRepeatableFake: sinon.stub(),
@@ -76,12 +79,27 @@ const fakes = {
 
 const mocksSetDefaultBehaviour = () => {
   // all the stubs should be listed here
-  fakes.client.jobDescribeFake.callsFake(() => ({ result: 'yep' }))
+  fakes.client.jobDescribeFake.callsFake((jobDxId) =>
+    Promise.resolve({
+      id: jobDxId,
+      name: `platform-${jobDxId}`,
+      region: 'aws:us-east-1',
+      class: 'job',
+      state: 'done',
+      launchedBy: random.word(),
+      instanceType: 'mem1_ssd1_x2_fedramp',
+      executionPolicy: {},
+      totalPrice: 1.47,
+    }),
+  )
   fakes.client.jobCreateFake.callsFake(() => ({ id: generate.job.jobId() }))
   fakes.client.jobTerminateFake.callsFake(() => ({ id: generate.job.jobId() }))
   fakes.client.fileDescribeFake.callsFake((input: { fileDxid: string; projectDxid: string }) => ({
     id: input.fileDxid,
     project: input.projectDxid,
+    name: 'file-name',
+    class: 'file',
+    state: 'closed',
   }))
   fakes.client.fileCloseFake.callsFake((params: FileCloseParams) => ({ id: params.fileDxid }))
   fakes.client.folderRenameFake.callsFake(() => ({ id: generate.job.jobId() }))
@@ -112,6 +130,17 @@ const mocksSetDefaultBehaviour = () => {
   }))
   fakes.client.appAddAuthorizedUsersFake.callsFake(() => ({ id: generate.app.appId() }))
   fakes.client.appPublishFake.callsFake(() => ({ id: generate.app.appId() }))
+  fakes.client.appDescribeFake.callsFake((appDxId) => ({
+    id: appDxId,
+    name: 'app-name-' + appDxId,
+    inputSpec: [],
+    outputSpec: [],
+    runSpec: [],
+    details: {},
+    resources: '',
+    openSource: false,
+    version: 'r2-103448',
+  }))
 
   fakes.bull.addFake.callsFake(() => {})
   fakes.bull.getJobFake.callsFake(() => undefined)
@@ -164,6 +193,7 @@ const mocksSetup = () => {
     fakes.client.appAddAuthorizedUsersFake,
   )
   sandbox.replace(PlatformClient.prototype, 'appPublish', fakes.client.appPublishFake)
+  sandbox.replace(PlatformClient.prototype, 'appDescribe', fakes.client.appDescribeFake)
 
   sandbox.replace(PlatformClient.prototype, 'dbClusterAction', fakes.client.dbClusterActionFake)
   sandbox.replace(PlatformClient.prototype, 'dbClusterCreate', fakes.client.dbClusterCreateFake)

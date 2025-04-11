@@ -10,7 +10,6 @@ import {
   Ref,
   Reference,
 } from '@mikro-orm/core'
-import { ScopedEntity } from '@shared/database/scoped.entity'
 import { Attachment } from '@shared/domain/attachment/attachment.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { STATIC_SCOPE } from '@shared/enums'

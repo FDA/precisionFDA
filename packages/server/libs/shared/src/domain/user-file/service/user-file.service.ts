@@ -308,9 +308,7 @@ export class UserFileService {
   }
 
   async getDownloadLinkForUid(uid: Uid<'file'>, options?: DownloadLinkOptionsDto) {
-    const file = (await this.nodeRepo.findAllAccessible({ uid: uid })) as unknown as
-      | UserFile
-      | Asset
+    const file = (await this.nodeRepo.findAccessibleOne({ uid: uid })) as UserFile | Asset
 
     if (!file) {
       throw new NotFoundError('File not found')
