@@ -898,7 +898,12 @@ const workflowHelper = {
     references: { user: InstanceType<typeof User> },
     data?: Partial<InstanceType<typeof Workflow>>,
   ) => {
-    const workflow = wrap(new Workflow(references.user)).assign(data ?? { scope: 'private' }, {
+    const defaults = generate.workflow.simple()
+    const input = {
+      ...defaults,
+      ...data,
+    }
+    const workflow = wrap(new Workflow(references.user)).assign(input, {
       em,
     })
     em.persist(workflow)

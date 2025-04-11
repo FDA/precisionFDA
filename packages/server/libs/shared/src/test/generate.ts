@@ -50,6 +50,8 @@ import { STATIC_SCOPE } from '../enums'
 import { TASK_TYPE } from '../queue/task.input'
 import type { AnyObject, UserCtx } from '../types'
 import { UserExtras } from '@shared/domain/user/user-extras'
+import { Workflow } from '@shared/domain/workflow/entity/workflow.entity'
+import { DxId } from '@shared/domain/entity/domain/dxid'
 
 const chance = new Chance()
 
@@ -341,6 +343,27 @@ const workflowSeries = {
       dxid,
       name,
       scope: 'private',
+    }
+  },
+}
+
+const workflow = {
+  simple: (): Partial<InstanceType<typeof Workflow>> => {
+    const name = random.word()
+    const dxid = `workflow-${random.dxstr()}}` as DxId<'workflow'>
+    return {
+      dxid,
+      uid: `${dxid}-1` as UId,
+      name,
+      scope: 'private',
+      spec: {
+        input_spec: {
+          stages: [],
+        },
+        output_spec: {
+          stages: [],
+        },
+      },
     }
   },
 }
@@ -749,5 +772,6 @@ export {
   tagging,
   user,
   userFile,
+  workflow,
   workflowSeries,
 }
