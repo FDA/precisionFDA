@@ -19,6 +19,7 @@ import { RenameFolderInput, renameFolderSchema } from '@shared/domain/user-file/
 import { UserOpsCtx } from '@shared/types'
 import { UserContextGuard } from '../user-context/guard/user-context.guard'
 import { JsonSchemaPipe } from '../validation/pipes/json-schema.pipe'
+import { RecreateFolderDTO } from './model/recreate-folder.dto'
 
 @UseGuards(UserContextGuard)
 @Controller('/folders')
@@ -49,7 +50,7 @@ export class FolderController {
 
   @HttpCode(204)
   @Post('/recreate')
-  async recreateFolder(@Body() body: { userId: string; projectId: string }) {
+  async recreateFolder(@Body() body: RecreateFolderDTO) {
     const opsCtx: UserOpsCtx = {
       log: this.logger,
       user: this.user,
