@@ -95,9 +95,9 @@ export const DiscussionShow = ({ space }: { space?: ISpace }) => {
         ) : (
           <>
             <StyledTitle>
-              {discussion.title}
+              <div data-testid="discussion-title">{discussion.title}</div>
               {canUserEdit(discussion.user.id) && (
-                <Button data-variant='link' onClick={() => setIsEditing(true)}>
+                <Button data-testid="discussion-edit-title" data-variant='link' onClick={() => setIsEditing(true)}>
                   <PencilIcon height={16} />
                 </Button>
               )}

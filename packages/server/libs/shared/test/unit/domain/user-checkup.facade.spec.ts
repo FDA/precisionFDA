@@ -251,8 +251,8 @@ describe('UserCheckupFacade', () => {
     await em.flush()
 
     // set time to testTime
-    const clock = useFakeTimers()
-    clock.tickAsync(testTime - Date.now())
+    const clock = useFakeTimers({ now: testTime, toFake: ['Date'] })
+    await clock.tickAsync(testTime - Date.now())
     await getInstance().runCheckup(job)
     expect(createUserDataConsistencyReportJobTaskStub.callCount).to.equal(0)
     clock.restore()

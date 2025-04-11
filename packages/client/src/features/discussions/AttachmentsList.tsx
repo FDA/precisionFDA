@@ -95,7 +95,7 @@ export const AttachmentsList = ({
     }
 
     return (
-      <StyledAttachmentsList>
+      <StyledAttachmentsList data-testid={`attachments-${type.toLowerCase()}`}>
         <TypeLabel>{type}</TypeLabel>
 
         {items.map(item => (
