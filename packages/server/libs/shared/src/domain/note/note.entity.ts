@@ -10,10 +10,10 @@ import {
   Ref,
   Reference,
 } from '@mikro-orm/core'
+import { ScopedEntity } from '@shared/database/scoped.entity'
 import { Attachment } from '@shared/domain/attachment/attachment.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { STATIC_SCOPE } from '@shared/enums'
-import { ScopedEntity } from '@shared/database/scoped.entity'
 
 export type NoteType = 'Discussion' | 'Answer'
 
@@ -49,5 +49,9 @@ export class Note extends ScopedEntity {
   constructor(user: User) {
     super()
     this.user = Reference.create(user)
+  }
+
+  isPublishable(): boolean {
+    return this.isPrivate()
   }
 }
