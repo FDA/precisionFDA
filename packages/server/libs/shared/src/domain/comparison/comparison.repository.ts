@@ -17,7 +17,7 @@ export class ComparisonRepository extends AccessControlRepository<Comparison> {
   protected async getEditableWhere(): Promise<FilterQuery<Comparison>> {
     const user = await this.em.findOneOrFail(User, { id: this.user.id })
 
-    // TODO: define rules for site-admins
+    // TODO PFDA-6222: define rules for site-admins
 
     return {
       $or: [

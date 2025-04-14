@@ -20,7 +20,7 @@ export class DbClusterRepository extends AccessControlRepository<DbCluster> {
     const accessibleSpaces = await user.editableSpaces()
     const scopes = accessibleSpaces.map((space) => space.scope)
 
-    // TODO: define rules for site-admins
+    // TODO PFDA-6222: define rules for site-admins
 
     return {
       $or: [{ user: user.id, scope: STATIC_SCOPE.PRIVATE }, { scope: { $in: scopes } }],
