@@ -22,7 +22,7 @@ export class UserFileRepository extends AccessControlRepository<UserFile> {
     const accessibleSpaces = await user.accessibleSpaces()
     const spaceScopes = accessibleSpaces.map((space) => space.scope)
 
-    //TODO: define rules for site-admins
+    // TODO PFDA-6222: define rules for site-admins
 
     return {
       $or: [
@@ -38,7 +38,7 @@ export class UserFileRepository extends AccessControlRepository<UserFile> {
     const editableSpaces = await user.editableSpaces()
     const spaceScopes = editableSpaces.map((space) => space.scope)
 
-    //TODO: define rules for site-admins
+    // TODO PFDA-6222: define rules for site-admins
 
     return {
       $or: [

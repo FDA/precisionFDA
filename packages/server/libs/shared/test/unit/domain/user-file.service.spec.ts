@@ -641,8 +641,6 @@ describe.skip('UserFileService', () => {
     } as unknown as Folder
 
     it('should return empty array if nodes are not accessible', async () => {
-      // getAccessibleByIdsStub.returns([])
-
       const res = await getInstance().listSelectedFiles([1, 2])
       expect(res).to.deep.eq([])
     })

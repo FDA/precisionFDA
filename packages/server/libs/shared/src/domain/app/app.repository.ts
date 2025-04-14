@@ -23,10 +23,10 @@ export class AppRepository extends AccessControlRepository<App> {
 
   protected async getEditableWhere(): Promise<FilterQuery<App>> {
     const user = await this.em.findOneOrFail(User, { id: this.user.id })
-    const accessibleSpaces = await user.editableSpaces()
-    const scopes = accessibleSpaces.map((space) => space.scope)
+    const editableSpaces = await user.editableSpaces()
+    const scopes = editableSpaces.map((space) => space.scope)
 
-    // TODO: define rules for site-admins
+    // TODO PFDA-6222: define rules for site-admins
 
     return {
       $or: [
