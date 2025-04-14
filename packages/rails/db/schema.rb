@@ -923,8 +923,8 @@ ActiveRecord::Schema.define(version: 2025_02_02_121212) do
     t.string "salt", null: false
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
-    t.index ["dbcluster_id"], name: "fk_rails_077f7b5516"
-    t.index ["user_id"], name: "fk_rails_e5847a8e1f"
+    t.index ["dbcluster_id"], name: "fk_rails_087f59dba3"
+    t.index ["user_id"], name: "fk_rails_35beefcb02"
   end
 
   create_table "versions", id: :integer, charset: "utf8mb3", collation: "utf8mb3_unicode_ci", force: :cascade do |t|

@@ -10,6 +10,7 @@ import { AppRepository } from '@shared/domain/app/app.repository'
 import { JobRepository } from '@shared/domain/job/job.repository'
 import { NodeRepository } from '@shared/domain/user-file/node.repository'
 import { NoteRepository } from '@shared/domain/note/note.repository'
+import { Uid } from '@shared/domain/entity/domain/uid'
 
 type TrackResourceType = Extract<
   EntityType,
@@ -34,13 +35,13 @@ export class TrackApiFacade {
 
     switch (type) {
       case 'app':
-        entity = await this.appRepository.findAccessibleOne({ uid: identifier as any })
+        entity = await this.appRepository.findAccessibleOne({ uid: identifier as Uid<'app'> })
         break
       case 'job':
-        entity = await this.jobRepository.findAccessibleOne({ uid: identifier as any })
+        entity = await this.jobRepository.findAccessibleOne({ uid: identifier as Uid<'job'> })
         break
       case 'file':
-        entity = await this.nodeRepository.findAccessibleOne({ uid: identifier as any })
+        entity = await this.nodeRepository.findAccessibleOne({ uid: identifier as Uid<'file'> })
         break
       case 'note':
         entity = await this.noteRepository.findAccessibleOne({ id: Number(id) })
