@@ -675,6 +675,7 @@ const expert = {
     return {
       scope: STATIC_SCOPE.PUBLIC,
       state: EXPERT_STATE.OPEN,
+      image: chance.url(),
       meta: {
         _prefname: expertName,
         _about: `About - ${expertName}`,
