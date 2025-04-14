@@ -100,6 +100,7 @@ const mocksSetDefaultBehaviour = () => {
     name: 'file-name',
     class: 'file',
     state: 'closed',
+    hidden: false,
   }))
   fakes.client.fileCloseFake.callsFake((params: FileCloseParams) => ({ id: params.fileDxid }))
   fakes.client.folderRenameFake.callsFake(() => ({ id: generate.job.jobId() }))
@@ -140,6 +141,23 @@ const mocksSetDefaultBehaviour = () => {
     resources: '',
     openSource: false,
     version: 'r2-103448',
+  }))
+  fakes.client.workflowDescribeFake.callsFake((workflowDxId) => ({
+    id: workflowDxId.dxid,
+    project: 'project-abc',
+    class: 'workflow',
+    name: 'workflow-name',
+    inputSpec: {
+      stages: [],
+    },
+    outputSpec: {
+      stages: [],
+    },
+    stages: [],
+    runSpec: {},
+    state: 'open',
+    description: '',
+    createdBy: random.word(),
   }))
 
   fakes.bull.addFake.callsFake(() => {})
@@ -194,6 +212,7 @@ const mocksSetup = () => {
   )
   sandbox.replace(PlatformClient.prototype, 'appPublish', fakes.client.appPublishFake)
   sandbox.replace(PlatformClient.prototype, 'appDescribe', fakes.client.appDescribeFake)
+  sandbox.replace(PlatformClient.prototype, 'workflowDescribe', fakes.client.workflowDescribeFake)
 
   sandbox.replace(PlatformClient.prototype, 'dbClusterAction', fakes.client.dbClusterActionFake)
   sandbox.replace(PlatformClient.prototype, 'dbClusterCreate', fakes.client.dbClusterCreateFake)

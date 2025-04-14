@@ -9,6 +9,7 @@ import { AppRepository } from '@shared/domain/app/app.repository'
 import { NodeRepository } from '@shared/domain/user-file/node.repository'
 import { JobRepository } from '@shared/domain/job/job.repository'
 import { NoteRepository } from '@shared/domain/note/note.repository'
+import { Uid } from '@shared/domain/entity/domain/uid'
 
 @Injectable()
 export class PublishApiFacade {
@@ -24,14 +25,14 @@ export class PublishApiFacade {
 
     switch (type) {
       case 'app':
-        entity = await this.appRepository.findAccessibleOne({ uid: identifier as any })
+        entity = await this.appRepository.findAccessibleOne({ uid: identifier as Uid<'app'> })
         break
       case 'job':
-        entity = await this.jobRepository.findAccessibleOne({ uid: identifier as any })
+        entity = await this.jobRepository.findAccessibleOne({ uid: identifier as Uid<'job'> })
         break
       case 'file':
       case 'asset':
-        entity = await this.nodeRepository.findAccessibleOne({ uid: identifier as any })
+        entity = await this.nodeRepository.findAccessibleOne({ uid: identifier as Uid<'file'> })
         break
       case 'note':
         const [entityType, id] = identifier.split('-')
