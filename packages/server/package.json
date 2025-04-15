@@ -149,6 +149,9 @@
     "typescript": "^5.3.2",
     "wds": "^0.13.2"
   },
+  "overrides": {
+    "cross-spawn": "7.0.6"
+  },
   "jest": {
     "moduleFileExtensions": [
       "js",
