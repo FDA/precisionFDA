@@ -34,10 +34,10 @@
     "test:e2e": "jest --config ./apps/api/test/jest-e2e.json"
   },
   "dependencies": {
-    "@bull-board/api": "^5.9.1",
-    "@bull-board/express": "^5.9.1",
-    "@bull-board/nestjs": "^5.9.1",
-    "@bull-board/ui": "^5.9.1",
+    "@bull-board/api": "^6.9.1",
+    "@bull-board/express": "^6.9.1",
+    "@bull-board/nestjs": "^6.9.1",
+    "@bull-board/ui": "^6.9.1",
     "@mikro-orm/core": "6.2.9",
     "@mikro-orm/mysql": "6.2.9",
     "@mikro-orm/nestjs": "^5.2.3",
