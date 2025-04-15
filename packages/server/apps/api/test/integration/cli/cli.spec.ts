@@ -1,13 +1,19 @@
 import { EntityManager } from '@mikro-orm/mysql'
 import { User } from '@shared/domain/user/user.entity'
-import { create, db } from '@shared/test'
+import { create, db, generate } from '@shared/test'
 import supertest from 'supertest'
 import { database } from '@shared/database'
 import { expect } from 'chai'
 import { testedApp } from '../../index'
 import { getDefaultHeaderData } from '../../utils/expect-helper'
+import {
+  SPACE_MEMBERSHIP_ROLE,
+  SPACE_MEMBERSHIP_SIDE,
+} from '@shared/domain/space-membership/space-membership.enum'
+import { ErrorCodes } from '@shared/errors'
+import { Discussion } from '@shared/domain/discussion/discussion.entity'
 
-describe('/cli', () => {
+describe('/cli', async () => {
   let em: EntityManager
   let user: User
 
@@ -229,5 +235,218 @@ describe('/cli', () => {
     expect(body).to.have.property('updatedAt').that.is.a('string')
     expect(body).to.have.property('location').that.is.a('string')
     expect(body).to.have.property('addedBy').that.is.a('string')
+  })
+
+  it('GET job/:uid/scope returns correct private job scope', async () => {
+    const job = create.jobHelper.create(em, { user }, { scope: 'private' })
+    await em.flush()
+
+    const { body } = await supertest(testedApp.getHttpServer())
+      .get(`/cli/job/${job.dxid}/scope`)
+      .set('Accept', 'application/json')
+      .set(getDefaultHeaderData(user))
+      .expect(200)
+
+    expect(body).to.be.an('object')
+    expect(body).to.have.property('scope').that.is.a('string').that.equals('private')
+  })
+
+  it('GET job/:uid/scope returns 404 error for different user private job', async () => {
+    const user2 = create.userHelper.create(em)
+    const job = create.jobHelper.create(em, { user: user2 }, { scope: 'private' })
+    await em.flush()
+
+    const { body } = await supertest(testedApp.getHttpServer())
+      .get(`/cli/job/${job.dxid}/scope`)
+      .set('Accept', 'application/json')
+      .set(getDefaultHeaderData(user))
+      .expect(404)
+
+    expect(body).to.be.an('object')
+    expect(body).to.have.property('error').that.is.an('object')
+    expect(body.error).to.have.property('code').that.equals(ErrorCodes.NOT_FOUND)
+    expect(body.error).to.have.property('message').that.equals('Job not found or not accessible')
+    expect(body.error).to.have.property('statusCode').that.equals(404)
+    expect(body).to.have.property('stack').that.is.a('string')
+  })
+
+  it('GET job/:uid/scope returns correct space job scope', async () => {
+    const user2 = create.userHelper.create(em)
+    const groupSpace = create.spacesHelper.create(em, generate.space.group())
+    await em.flush()
+    create.spacesHelper.addMember(
+      em,
+      { user: user, space: groupSpace },
+      { role: SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR },
+    )
+    create.spacesHelper.addMember(
+      em,
+      { user: user2, space: groupSpace },
+      { role: SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR },
+    )
+
+    const job = create.jobHelper.create(em, { user: user2 }, { scope: groupSpace.scope })
+    await em.flush()
+
+    const { body } = await supertest(testedApp.getHttpServer())
+      .get(`/cli/job/${job.dxid}/scope`)
+      .set('Accept', 'application/json')
+      .set(getDefaultHeaderData(user))
+      .expect(200)
+
+    expect(body).to.be.an('object')
+    expect(body).to.have.property('scope').that.is.a('string').that.equals('space-1')
+  })
+
+  // list members endpoint returns all members correctly. set the space up before the call
+  it('GET /spaces/:id/members returns all members correctly', async () => {
+    const groupSpace = create.spacesHelper.create(em, generate.space.group())
+    await em.flush()
+    const user2 = create.userHelper.create(em)
+    const user3 = create.userHelper.create(em)
+    const user4 = create.userHelper.create(em)
+    const user5 = create.userHelper.create(em)
+    const nonMemberUser = create.userHelper.create(em)
+    create.spacesHelper.addMember(
+      em,
+      {
+        user: user,
+        space: groupSpace,
+      },
+      { role: SPACE_MEMBERSHIP_ROLE.LEAD },
+    )
+    create.spacesHelper.addMember(
+      em,
+      { user: user2, space: groupSpace },
+      { role: SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR, active: false },
+    )
+    create.spacesHelper.addMember(
+      em,
+      {
+        user: user3,
+        space: groupSpace,
+      },
+      { role: SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR, side: SPACE_MEMBERSHIP_SIDE.HOST },
+    )
+    create.spacesHelper.addMember(
+      em,
+      {
+        user: user4,
+        space: groupSpace,
+      },
+      { role: SPACE_MEMBERSHIP_ROLE.VIEWER },
+    )
+    create.spacesHelper.addMember(
+      em,
+      {
+        user: user5,
+        space: groupSpace,
+      },
+      { role: SPACE_MEMBERSHIP_ROLE.ADMIN, side: SPACE_MEMBERSHIP_SIDE.HOST },
+    )
+    await em.flush()
+
+    const { body } = await supertest(testedApp.getHttpServer())
+      .get(`/cli/spaces/${groupSpace.id}/members`)
+      .set('Accept', 'application/json')
+      .set(getDefaultHeaderData(user))
+      .expect(200)
+
+    expect(body).to.be.an('array').of.length(5)
+    expect(body[0]).to.have.property('id')
+    expect(body[0]).to.have.property('active')
+    expect(body[0]).to.have.property('role')
+    expect(body[0]).to.have.property('side')
+    expect(body[0]).to.have.property('name')
+    expect(body[0]).to.have.property('username')
+  })
+
+  // create a discussion
+  it('POST /spaces/:id/discussions creates a discussion with attachments and returns a link to it', async () => {
+    const groupSpace = create.spacesHelper.create(em, generate.space.group())
+    create.spacesHelper.addMember(
+      em,
+      { user, space: groupSpace },
+      { role: SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR },
+    )
+    await em.flush()
+    const file = create.filesHelper.createUploaded(em, { user }, { scope: groupSpace.scope })
+    const job = create.jobHelper.create(em, { user }, { scope: groupSpace.scope })
+    await em.flush()
+
+    const discussionData = {
+      title: 'Test Discussion',
+      content: 'This is a test discussion content.',
+      attachments: {
+        files: [file.uid],
+        jobs: [job.uid],
+      },
+    }
+
+    const { body } = await supertest(testedApp.getHttpServer())
+      .post(`/cli/spaces/${groupSpace.id}/discussions`)
+      .send(discussionData)
+      .set('Accept', 'application/json')
+      .set(getDefaultHeaderData(user))
+      .expect(201)
+
+    expect(body).to.be.an('object')
+    expect(body)
+      .to.have.property('url')
+      .that.is.a('string')
+      .that.contains(`/spaces/${groupSpace.id}/discussions/1`)
+    const res = await em.findAll(Discussion)
+    expect(res).to.be.an('array').of.length(1)
+    const savedDiscussion = res[0]
+    const note = await savedDiscussion.note.load()
+
+    expect(note).to.have.property('title', discussionData.title)
+    expect(note).to.have.property('content', discussionData.content)
+    // check attachments from note
+    expect(note).to.have.property('attachments')
+    const attachments = await note.attachments.load()
+    expect(attachments).to.have.length(2)
+  })
+
+  it('PUT /spaces/:id/discussions appends new content and attachment to the discussion', async () => {
+    const groupSpace = create.spacesHelper.create(em, generate.space.group())
+    create.spacesHelper.addMember(
+      em,
+      { user, space: groupSpace },
+      { role: SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR },
+    )
+    await em.flush()
+    const discussion = create.discussionHelper.createInSpace(em, { user, space: groupSpace })
+    const file = create.filesHelper.createUploaded(em, { user }, { scope: groupSpace.scope })
+    await em.flush()
+
+    const discussionData = {
+      content: 'Appendix one',
+      attachments: {
+        files: [file.uid],
+      },
+    }
+
+    const { body } = await supertest(testedApp.getHttpServer())
+      .put(`/cli/discussions/${discussion.id}`)
+      .send(discussionData)
+      .set('Accept', 'application/json')
+      .set(getDefaultHeaderData(user))
+      .expect(200)
+
+    expect(body).to.be.an('object')
+    expect(body)
+      .to.have.property('url')
+      .that.is.a('string')
+      .that.contains(`/spaces/${groupSpace.id}/discussions/1`)
+
+    em.clear()
+    const res = await em.findAll(Discussion)
+    expect(res).to.be.an('array').of.length(1)
+
+    const editedDiscussion = res[0]
+    const note = await editedDiscussion.note.load()
+    expect(note.content).to.contain('\n\nAppendix one')
+    expect(note.content).to.contain(discussion.note.getProperty('content'))
   })
 })
