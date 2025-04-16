@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2025_02_18_100212) do
+ActiveRecord::Schema.define(version: 2025_04_08_163737) do
 
   create_table "accepted_licenses", id: :integer, charset: "utf8mb3", collation: "utf8mb3_unicode_ci", force: :cascade do |t|
     t.integer "license_id"
@@ -85,6 +85,7 @@ ActiveRecord::Schema.define(version: 2025_02_18_100212) do
     t.boolean "verified", default: false, null: false
     t.boolean "featured", default: false
     t.boolean "deleted", default: false, null: false
+    t.boolean "snapshot", default: false
     t.index ["deleted"], name: "index_app_series_on_deleted"
     t.index ["dxid"], name: "index_app_series_on_dxid"
     t.index ["latest_revision_app_id"], name: "index_app_series_on_latest_revision_app_id"
