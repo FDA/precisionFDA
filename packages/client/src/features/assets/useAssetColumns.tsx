@@ -28,7 +28,7 @@ export const useAssetColumns = ({
       accessorKey: 'name',
       filterFn: 'includesString',
       size: 300,
-      cell: (c) => (
+      cell: c => (
         <>
           <StyledNameCell
             data-tooltip-id={`assetNameTooltip${c.row.original.uid}`}
@@ -39,7 +39,7 @@ export const useAssetColumns = ({
             <FileZipIcon height={14} />
             {c.row.original.name}
           </StyledNameCell>
-          {isUnclosedAsset(c.row.original) && <Tooltip id={`assetNameTooltip${c.row.original.uid}`} />}
+          {isUnclosedAsset(c.row.original) && <Tooltip id={`assetNameTooltip${c.row.original.uid}`} style={{ zIndex: 3 }} />}
         </>
       ),
     },

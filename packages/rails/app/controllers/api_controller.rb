@@ -1552,7 +1552,7 @@ class ApiController < ApplicationController
       " items have been published."
     end
 
-    path = pathify(pitem)
+    path = concat_path(pitem)
     if pitem.klass == "file"
       published_file = UserFile.find_by!(dxid: pitem.dxid, scope: "public")
       path = pathify(published_file)

@@ -1,6 +1,5 @@
 import styled, { css } from 'styled-components'
 import navBackground from '../../assets/NavbarBackground.png'
-import { commonStyles } from '../../styles/commonStyles'
 import { Button } from '../Button'
 
 export const MainBanner = styled.div`
@@ -35,7 +34,8 @@ export const ResourceBanner = styled(MainBanner)`
 `
 
 export const BannerTitle = styled.h1`
-  ${commonStyles.bannerTitle}
+  font-size: 28px;
+  font-weight: 600;
   color: var(--c-banner-base);
   margin: auto 0;
   margin-right: 16px;

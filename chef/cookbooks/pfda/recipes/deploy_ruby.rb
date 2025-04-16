@@ -153,4 +153,5 @@ template ruby_environment_file do
   source 'environment.erb'
   user 'root'
   group 'root'
+  sensitive true
 end

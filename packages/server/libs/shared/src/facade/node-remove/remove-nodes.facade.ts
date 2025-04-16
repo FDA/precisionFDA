@@ -143,7 +143,7 @@ export class RemoveNodesFacade {
       }
 
       if (fileToRemove.isInSpace()) {
-        await this.spaceEventService.createSpaceEvent({
+        await this.spaceEventService.createAndSendSpaceEvent({
           entity: { type: 'userFile', value: fileToRemove },
           spaceId: fileToRemove.getSpaceId(),
           userId: this.user.id,

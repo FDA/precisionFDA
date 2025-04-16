@@ -30,7 +30,8 @@ export class UserCheckupFacade {
   ) {}
 
   async runCheckup(job: Job): Promise<void> {
-    const user = await this.em.getRepository(User).findDxuser(this.user.dxuser)
+    const userRepo = this.em.getRepository(User)
+    const user = await userRepo.findDxuser(this.user.dxuser)
     if (!user) {
       this.logger.error(
         {

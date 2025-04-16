@@ -1,5 +1,4 @@
 import styled, { css } from 'styled-components'
-import { commonStyles } from '../../styles/commonStyles'
 import { breakPoints } from '../../styles/theme'
 import { Svg } from '../icons/Svg'
 
@@ -89,7 +88,8 @@ export const PageContainerMargin = styled.div`
 `
 
 export const PageTitle = styled.h1`
-  ${commonStyles.pageTitle};
+  font-size: 32px;
+  font-weight: 400;
   margin: 0;
 `
 

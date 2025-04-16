@@ -4,10 +4,11 @@ import { Markdown } from '../../../components/Markdown'
 import { CardHeader } from './CardHeader'
 import { Comment } from '../discussions.types'
 import { EditCommentEntity } from '../form/EditCommentEntity'
-import { StyledCommentCard, StyledMarkdown } from '../styles'
+import { StyledCommentCard } from '../styles'
 import { useConfirm } from '../../modal/useConfirm'
 import { deleteAnswerCommentRequest, deleteDiscussionCommentRequest } from '../api'
 import { toast } from 'react-toastify'
+import { StyledMarkdown } from '../../../styles/commonStyles'
 
 export function CommentCard({
   answerId,
