@@ -6,6 +6,11 @@ server {
   ssl_certificate /keys/cert.pem;
   ssl_certificate_key /keys/key.pem;
 
+  # This is a simulation of AWS ALB rule for GSRS static assets
+  location ~ ^/ginas/.*((\.(js|css|png|jpg|jpeg|gif))|(manifest\.json))$ {
+    proxy_pass http://host.docker.internal:8080;
+  }
+
   location / {
     proxy_pass ${RUBY_API_URL};
     proxy_set_header Host $host:${PROXY_PORT};

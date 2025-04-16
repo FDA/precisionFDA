@@ -1,16 +1,3 @@
-
-export const values = {
-  paddingMainContentHorizontal: 32,
-  paddingMainContentVertical: 32,
-  contentMargin: 12,
-  largeColumnWidth: 288,
-  smallColumnWidth: 128,
-  smallerColumnWidth: 96,
-  thumbnailWidth: 288,
-  thumbnailHeight: 148,
-  navigationBarHeight: 64,
-}
-
 export const colors = {
   primaryBlue: '#1F70B5',
   primaryGreen: '#3c763d',
@@ -69,15 +56,6 @@ export const colors = {
   orange: '#EB776F',
 }
 
-export const fontSize = {
-  pageTitle: '32px',
-  bannerTitle: '28px',
-  h1: '20px',
-  h2: '18px',
-  body: '14px',
-  subheading: '14px',
-}
-
 export const breakPoints = {
   xsmall: 320,
   small: 481,
@@ -86,51 +64,9 @@ export const breakPoints = {
   xlarge: 1201,
 }
 
-export const fontWeight = {
-  light: 300,
-  regular: 400,
-  medium: 500,
-  bold: 600,
-  black: 700,
-}
-
-export const padding = {
-  mainContentHorizontal: `${values.paddingMainContentHorizontal}px`,
-  mainContentHorizontalHalf: `${values.paddingMainContentHorizontal/2}px`,
-  mainContentVertical: `${values.paddingMainContentVertical}px`,
-  // TODO: Rename contentMargin to something like controlSpacing to be more accurate
-  //       In fact mainContentHorizontal above can be named contentMargin instead
-  contentMarginLarge: `${values.contentMargin*2}px`,
-  contentMargin: `${values.contentMargin}px`,
-  contentMarginHalf: `${values.contentMargin/2}px`,
-  contentMarginThird: `${values.contentMargin/3}px`,
-}
-
-export const sizing = {
-  mainContainerMaxWidth: '1330px',
-  navigationBarHeight: `${values.navigationBarHeight}px`,
-  navigationBarHeightNarrow: '50px',
-  largeColumnWidth: `${values.largeColumnWidth}px`,
-  smallColumnWidth: `${values.smallColumnWidth}px`,
-  smallerColumnWidth: `${values.smallerColumnWidth}px`,
-  mainColumnMaxImageSize: '820px',
-  thumbnailWidth: `${values.thumbnailWidth}px`,
-  thumbnailHeight: `${values.thumbnailHeight}px`,
-  thumbnailWidthSmall: '172px',
-  thumbnailHeightSmall: '90px',
-  iconSmall: '56px',
-  highlightBarWidth: '4px',
-  modalBorderRadius: '8px',
-}
-
 export const theme = {
   fontFamily: 'Lato, Helvetica, sans-serif',
   monofontFamily: 'Monaco, Courier',
   colors,
-  fontSize,
-  fontWeight,
-  padding,
-  sizing,
-  values,
   breakPoints,
 }

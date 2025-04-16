@@ -1,16 +1,16 @@
 import {
   Collection,
   Entity,
-  Ref,
   ManyToOne,
   OneToMany,
   PrimaryKey,
   Property,
+  Ref,
   Reference,
 } from '@mikro-orm/core'
+import { ScopedEntity } from '@shared/database/scoped.entity'
 import { AppSeriesProperty } from '@shared/domain/property/app-series-property.entity'
 import { User } from '@shared/domain/user/user.entity'
-import { ScopedEntity } from '@shared/database/scoped.entity'
 
 @Entity({ tableName: 'app_series' })
 export class AppSeries extends ScopedEntity {
@@ -37,6 +37,9 @@ export class AppSeries extends ScopedEntity {
 
   @Property()
   deleted: boolean
+
+  @Property()
+  snapshot: boolean
 
   @ManyToOne({ entity: () => User, serializedName: 'userId' })
   user?: Ref<User>

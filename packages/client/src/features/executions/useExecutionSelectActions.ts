@@ -152,7 +152,7 @@ export const useExecutionActions = ({
       type: 'modal',
       func: () => setSnapshotModal(true),
       isDisabled: selected.length !== 1 || selected.some(e => !e.links?.open_external),
-      shouldHide: selected.some(e => !e.workstation_api_version),
+      shouldHide: selected.some(e => !e.snapshot),
       modal: snapshotModal,
       showModal: isSnapshotModal,
     },

@@ -82,6 +82,8 @@ const Spaces2 = ({ space, isLoading }: { space: ISpace; isLoading: boolean }) =>
   const showMembers = space.type !== 'private_type'
   const isContributorOrHigher = ['lead', 'admin', 'contributor'].includes(space.current_user_membership.role)
   const canCreateDiscussion = isContributorOrHigher && !space.restricted_discussions
+  const isSharedReviewSpace = space.type === 'review' && !!space.private_space_id
+  const isPrivateReviewSpace = space.type === 'review' && !!space.shared_space_id
 
   if (space.state === 'unactivated') {
     return <Activation space={space} />
@@ -89,7 +91,7 @@ const Spaces2 = ({ space, isLoading }: { space: ISpace; isLoading: boolean }) =>
 
   return (
     <>
-      <SpaceHeader>
+      <SpaceHeader data-isshared={isSharedReviewSpace} data-isprivate={isPrivateReviewSpace}>
         <TopSpaceHeader>
           <SpaceMainInfo>
             <SpaceHeaderTitle>{space.name}</SpaceHeaderTitle>
