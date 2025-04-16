@@ -13,7 +13,7 @@ import { Workflow } from '@shared/domain/workflow/entity/workflow.entity'
 import { ENTITY_TYPE, SPACE_EVENT_OBJECT_TYPE } from '../domain/space-event/space-event.enum'
 import { AppEntityDataProvider } from './providers/app.provider'
 import { AssetEntityDataProvider } from './providers/asset.provider'
-import { CommentEntityDataProvider} from './providers/comment.provider'
+import { CommentEntityDataProvider } from './providers/comment.provider'
 import { SpaceEventJobEntityDataProvider } from './providers/job.provider'
 import { ComparisonEntityDataProvider } from './providers/comparison.provider'
 import { UserFileEntityDataProvider } from './providers/user-file.provider'
@@ -24,22 +24,21 @@ import { NoteEntityDataProvider } from './providers/note.provider'
 import { SpaceMembershipEntityDataProvider } from './providers/space-membership.provider'
 import { EntityDataProvider } from './providers/entity-data.provider'
 import { UserEntityDataProvider } from './providers/user.provider'
+import { EntityTypeWithValueDTO } from '@shared/domain/space-event/dto/entity-type-with-value-dto'
 
 interface NameToDbEntityMap {
-
-  app: App,
-  asset: Asset,
-  comment: Comment,
-  comparison: Comparison,
-  job: Job,
-  note: Note,
-  userFile: UserFile,
-  folder: Folder,
-  space: Space,
-  workflow: Workflow,
-  spaceMembership: SpaceMembership,
-  user: User,
-
+  app: App
+  asset: Asset
+  comment: Comment
+  comparison: Comparison
+  job: Job
+  note: Note
+  userFile: UserFile
+  folder: Folder
+  space: Space
+  workflow: Workflow
+  spaceMembership: SpaceMembership
+  user: User
 }
 
 type EntityType = keyof NameToDbEntityMap
@@ -55,7 +54,7 @@ type InputEntityUnion = {
 
 // Abstract class designed to retrieve relevant information about a specific entity with two descendents, one for each type of entity
 
-const ENTITY_DATA_PROVIDER_MAP: { [ T in EntityType ]: EntityDataProvider<T> } = {
+const ENTITY_DATA_PROVIDER_MAP: { [T in EntityType]: EntityDataProvider<T> } = {
   app: new AppEntityDataProvider(),
   asset: new AssetEntityDataProvider(),
   comment: new CommentEntityDataProvider(),
@@ -70,15 +69,24 @@ const ENTITY_DATA_PROVIDER_MAP: { [ T in EntityType ]: EntityDataProvider<T> } =
   user: new UserEntityDataProvider(),
 }
 
-const getEntityType = (entity: InputEntityUnion): ENTITY_TYPE => {
+const getEntityType = (entity: EntityTypeWithValueDTO): ENTITY_TYPE => {
   return ENTITY_DATA_PROVIDER_MAP[entity.type]?.entityType
 }
 
-const getObjectType = (entity: InputEntityUnion): SPACE_EVENT_OBJECT_TYPE => {
+const getObjectType = (entity: EntityTypeWithValueDTO): SPACE_EVENT_OBJECT_TYPE => {
   return ENTITY_DATA_PROVIDER_MAP[entity.type]?.spaceEventObjectType
 }
 const getSpaceEventJsonData = <T extends EntityType>(entity: InputEntity<T>): string => {
   return ENTITY_DATA_PROVIDER_MAP[entity.type]?.getSpaceEventJsonData(entity.value)
 }
 
-export { NameToDbEntityMap, EntityType, InputEntityUnion, InputEntity, getEntityType, getObjectType, getSpaceEventJsonData }
+export {
+  NameToDbEntityMap,
+  ENTITY_DATA_PROVIDER_MAP,
+  EntityType,
+  InputEntityUnion,
+  InputEntity,
+  getEntityType,
+  getObjectType,
+  getSpaceEventJsonData,
+}
