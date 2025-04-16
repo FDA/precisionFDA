@@ -52,7 +52,11 @@ const getConfirmationMessage = (title: ValType) => {
   }
 }
 
-const getExportOptions = (resource: ExportToResource, uid: string): ExportType[] => {
+const getExportOptions = (resource: ExportToResource, uid?: string): ExportType[] => {
+  if (!uid) {
+    return []
+  }
+
   const basePath = `/${resource}/${uid}`
   const options: ExportType[] = []
 
@@ -82,7 +86,7 @@ const getExportOptions = (resource: ExportToResource, uid: string): ExportType[]
 
 export type ExportToResource = 'apps' | 'workflows'
 
-export function useExportToModal({ selected, resource }: { selected: IApp | IWorkflow; resource: ExportToResource }) {
+export function useExportToModal({ selected, resource }: { selected?: IApp | IWorkflow; resource: ExportToResource }) {
   const { isShown, setShowModal } = useModal()
 
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>, ex: ExportType) => {
@@ -93,7 +97,7 @@ export function useExportToModal({ selected, resource }: { selected: IApp | IWor
       }
     }
   }
-  const exportOptions = getExportOptions(resource, selected.uid)
+  const exportOptions = getExportOptions(resource, selected?.uid)
 
   const modalComp = (
     <ModalNext id="modal-export-to" data-testid="modal-export-to" isShown={isShown} hide={() => setShowModal(false)}>
