@@ -25,6 +25,7 @@ class CopyService
         user.tag(new_app.app_series, with: app.app_series.tags, on: :tags)
         new_app
       end
+      SpaceEventService.call(Space.from_scope(new_app.scope).id, user.id, nil, new_app, :app_added) if new_app.in_space?
     end
 
     private

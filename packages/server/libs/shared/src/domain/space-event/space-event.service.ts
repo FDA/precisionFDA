@@ -1,8 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { SpaceEvent } from '@shared/domain/space-event/space-event.entity'
-import { getEntityType, getObjectType, getSpaceEventJsonData } from '@shared/utils/object-utils'
-import { SpaceEventInput } from '@shared/domain/space-event/space-event.input'
+import { getEntityType, getObjectType } from '@shared/utils/object-utils'
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { SpaceRepository } from '@shared/domain/space/space.repository'
@@ -13,6 +12,7 @@ import { SPACE_EVENT_ACTIVITY_TYPE } from '@shared/domain/space-event/space-even
 import { EmailFacade } from '@shared/domain/email/email.facade'
 import { getEnumKeyByValue } from '@shared/utils/enum-utils'
 import { SPACE_MEMBERSHIP_ROLE } from '@shared/domain/space-membership/space-membership.enum'
+import { SpaceEventDTO } from '@shared/domain/space-event/dto/space-event.dto'
 
 const CONTENT_TYPES = [
   SPACE_EVENT_ACTIVITY_TYPE.file_added,
@@ -52,7 +52,18 @@ export class SpaceEventService {
     private readonly emailFacade: EmailFacade,
   ) {}
 
-  async createSpaceEvent(input: SpaceEventInput): Promise<SpaceEvent | undefined> {
+  /**
+   * Creates a space event and sends a notification for it.
+   * @param input
+   */
+  async createAndSendSpaceEvent(input: SpaceEventDTO) {
+    const spaceEvent = await this.createSpaceEvent(input)
+    if (spaceEvent) {
+      await this.sendNotificationForEvent(spaceEvent)
+    }
+  }
+
+  async createSpaceEvent(input: SpaceEventDTO): Promise<SpaceEvent | undefined> {
     this.logger.log('Creating space event', input)
     const membership = input.membership
       ? input.membership
@@ -70,8 +81,12 @@ export class SpaceEventService {
       spaceEvent.entityType = getEntityType(input.entity)
       spaceEvent.objectType = getObjectType(input.entity)
 
-      const objectData = getSpaceEventJsonData(input.entity)
-      spaceEvent.data = objectData || undefined
+      const objectData = {
+        ...input.entity,
+        ignoreUserIds: input.ignoreUserIds ?? [],
+      }
+
+      spaceEvent.data = JSON.stringify(objectData) || undefined
 
       await this.em.persistAndFlush(spaceEvent)
 
@@ -86,14 +101,14 @@ export class SpaceEventService {
     if (CONTENT_TYPES.includes(event.activityType)) {
       const input: EmailProcessInput<EMAIL_TYPES.newContentAdded> = {
         emailTypeId: EMAIL_TYPES.newContentAdded,
-        input: { spaceEventId: event.id },
+        input: { id: event.id },
         receiverUserIds: [],
       }
       await this.emailFacade.sendEmail(input)
     } else if (COMMENT_TYPES.includes(event.activityType)) {
       const input: EmailProcessInput<EMAIL_TYPES.commentAdded> = {
         emailTypeId: EMAIL_TYPES.commentAdded,
-        input: { spaceEventId: event.id },
+        input: { id: event.id },
         receiverUserIds: [],
       }
       await this.emailFacade.sendEmail(input)

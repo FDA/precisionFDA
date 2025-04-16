@@ -4,7 +4,6 @@ import { SpaceRepository } from '@shared/domain/space/space.repository'
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { UserRepository } from '@shared/domain/user/user.repository'
 import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
-import { SpaceEventInput } from '@shared/domain/space-event/space-event.input'
 import {
   SPACE_EVENT_ACTIVITY_TYPE,
   SPACE_EVENT_OBJECT_TYPE,
@@ -23,6 +22,7 @@ import { EMAIL_TYPES } from '@shared/domain/email/email.config'
 import { Ref } from '@mikro-orm/core'
 import { EmailFacade } from '@shared/domain/email/email.facade'
 import { getEnumKeyByValue } from '@shared/utils/enum-utils'
+import { SpaceEventDTO } from '@shared/domain/space-event/dto/space-event.dto'
 
 describe('SpaceEvent service tests', () => {
   const USER_ID = 1
@@ -89,7 +89,7 @@ describe('SpaceEvent service tests', () => {
       emPersistAndFlushStub.reset()
       prepareEmailStub.returns([{ email: 'email' }])
 
-      const input: SpaceEventInput = {
+      const input: SpaceEventDTO = {
         spaceId: 1,
         userId: USER_ID,
         activityType: SPACE_EVENT_ACTIVITY_TYPE.space_deleted,
@@ -132,7 +132,7 @@ describe('SpaceEvent service tests', () => {
       prepareEmailStub.returns([
         {
           emailTypeId: EMAIL_TYPES.newContentAdded,
-          input: { spaceEventId: spaceEvent.id },
+          input: { id: spaceEvent.id },
           receiverUserIds: [],
         },
       ])
@@ -142,7 +142,7 @@ describe('SpaceEvent service tests', () => {
 
       expect(sendEmailStub.calledOnce).to.be.true
       expect(sendEmailStub.firstCall.args[0].emailTypeId).to.eq(EMAIL_TYPES.newContentAdded)
-      expect(sendEmailStub.firstCall.args[0].input.spaceEventId).to.eq(10)
+      expect(sendEmailStub.firstCall.args[0].input.id).to.eq(10)
       expect(sendEmailStub.firstCall.args[0].receiverUserIds).to.deep.eq([])
     })
 
@@ -153,7 +153,7 @@ describe('SpaceEvent service tests', () => {
       prepareEmailStub.returns([
         {
           emailTypeId: EMAIL_TYPES.commentAdded,
-          input: { spaceEventId: spaceEvent.id },
+          input: { id: spaceEvent.id },
           receiverUserIds: [],
         },
       ])
@@ -163,7 +163,7 @@ describe('SpaceEvent service tests', () => {
 
       expect(sendEmailStub.calledOnce).to.be.true
       expect(sendEmailStub.firstCall.args[0].emailTypeId).to.eq(EMAIL_TYPES.commentAdded)
-      expect(sendEmailStub.firstCall.args[0].input.spaceEventId).to.eq(10)
+      expect(sendEmailStub.firstCall.args[0].input.id).to.eq(10)
       expect(sendEmailStub.firstCall.args[0].receiverUserIds).to.deep.eq([])
     })
 
