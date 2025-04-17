@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import styled from 'styled-components'
 import challengesBannerLeft from '../../assets/ChallengesBannerBackground-Left.png'
 import challengesBannerRight from '../../assets/ChallengesBannerBackground-Right.png'
-import { colors, theme } from '../../styles/theme'
+import { colors } from '../../styles/theme'
 import { ViewAllButton } from './styles'
 
 const StyledChallengesBanner = styled.div`
@@ -42,7 +42,7 @@ const StyledChallengesBannerLeft = styled.div`
 const StyledChallengesBannerRight = styled.div`
   display: none;
   align-self: stretch;
-  padding: 32px ${theme.values.paddingMainContentVertical * 2}px 0 0;
+  padding: 32px 64px 0 0;
   background-image: url(${challengesBannerRight});
   background-repeat: no-repeat;
   background-position: 100% 50%;

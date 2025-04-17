@@ -1,6 +1,6 @@
 import styled, { css } from 'styled-components'
 import { Button } from '../../components/Button'
-import { colors, fontWeight } from '../../styles/theme'
+import { colors } from '../../styles/theme'
 import { TimeStatus } from './types'
 
 export const DateArea = styled.div`
@@ -26,7 +26,7 @@ export const DateArea = styled.div`
 `
 
 export const ViewDetailsButton = styled(Button)`
-  font-weight: ${fontWeight.bold};
+  font-weight: 600;
   width: fit-content;
 `
 

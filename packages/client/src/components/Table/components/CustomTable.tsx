@@ -122,6 +122,7 @@ export function CustomTable<T extends RowData>({
                       key={header.id}
                       style={{ width: header.getSize() }}
                       colSpan={header.colSpan}
+                      data-testid={`table-filter-${header.column.id}`}
                     >
                       {header.column.columnDef.meta?.filterElement?.(header.column)}
                       {header.column.getCanFilter() && !header.column.columnDef.meta?.filterElement ? (

@@ -5,7 +5,7 @@ import { CloudResourcesHeaderButton } from '../../components/CloudResourcesHeade
 import Dropdown from '../../components/Dropdown'
 import { RevisionDropdown } from '../../components/Dropdown/RevisionDropdown'
 import { HomeLabel } from '../../components/HomeLabel'
-import { Markdown, MarkdownStyle } from '../../components/Markdown'
+import { Markdown } from '../../components/Markdown'
 import { StyledTab, StyledTabList, StyledTabPanel } from '../../components/Tabs'
 import { StyledTagItem, StyledTags, StyledPropertyItem, StyledPropertyKey } from '../../components/Tags'
 import { CubeIcon } from '../../components/icons/CubeIcon'
@@ -36,6 +36,14 @@ import { useAppSelectionActions } from './useAppSelectionActions'
 import { useFetchAppQuery } from './useFetchAppQuery'
 import { getBasePath } from '../home/utils'
 import { getSpaceIdFromScope } from '../../utils'
+import { StyledMarkdown } from '../../styles/commonStyles'
+import styled from 'styled-components'
+
+const StyledMarkdownAppShow = styled(StyledMarkdown)`
+  padding-left: 16px;
+  padding-right: 16px;
+  max-width: 700px;
+`
 
 const renderOptions = (app: IApp, meta: { release: string }, homeScope?: HomeScope) => {
   const spaceId = getSpaceIdFromScope(app.scope)
@@ -323,9 +331,9 @@ export const AppsShow = ({
           <Route
             path="readme"
             element={
-              <MarkdownStyle>
+              <StyledMarkdownAppShow>
                 <Markdown data={app.readme} />
-              </MarkdownStyle>
+              </StyledMarkdownAppShow>
             }
           />
           <Route path="jobs" element={<AppExecutionsList appUid={app.uid} />} />
