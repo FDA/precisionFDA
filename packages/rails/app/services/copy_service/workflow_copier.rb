@@ -67,6 +67,8 @@ class CopyService
         api.workflow_update_executable(new_workflow.dxid, update_payload)
         copied_workflow_version += 1
       end
+
+      SpaceEventService.call(Space.from_scope(new_workflow.scope).id, user.id, nil, new_workflow, :workflow_added) if new_workflow.in_space?
       new_workflow
     end
 

@@ -12,6 +12,7 @@ import {
   buildIsNotificationEnabled,
   buildFilterByUserSettings,
   buildEmailTemplate,
+  ObjectIdInputDTO,
 } from '../../email.helper'
 import {
   SPACE_EVENT_ACTIVITY_TYPE,
@@ -20,10 +21,9 @@ import {
 import { newContentTemplate, NewContentTemplateInput } from '../mjml/new-content.template'
 import { BaseTemplate } from '@shared/domain/email/templates/base-template'
 import { User } from '@shared/domain/user/user.entity'
-import { SpaceEventDTO } from '@shared/domain/email/dto/space-event.dto'
 
 export class ContentChangedEmailHandler
-  extends BaseTemplate<SpaceEventDTO>
+  extends BaseTemplate<ObjectIdInputDTO>
   implements EmailTemplate<NewContentTemplateInput>
 {
   templateFile = newContentTemplate
@@ -39,10 +39,20 @@ export class ContentChangedEmailHandler
     const spaceEvent = await this.ctx.em.findOneOrFail(
       SpaceEvent,
       {
-        id: this.validatedInput.spaceEventId,
+        id: this.validatedInput.id,
       },
       { populate: ['space'] },
     )
+
+    const ignoreUserIds = (() => {
+      if (!spaceEvent.data) return []
+      try {
+        const data = JSON.parse(spaceEvent.data)
+        return data.ignoreUserIds || []
+      } catch {
+        return []
+      }
+    })()
 
     const memberships = await this.ctx.em.find(
       SpaceMembership,
@@ -60,6 +70,7 @@ export class ContentChangedEmailHandler
       // SpaceMembership[] -> User[]
       filterFn,
       filter((u: User) => u.id !== spaceEvent.user.id),
+      filter((u: User) => !ignoreUserIds.includes(u.id)),
       uniqBy((user: User) => user.id),
     )
     return filterUsers(memberships)
@@ -69,15 +80,14 @@ export class ContentChangedEmailHandler
     const spaceEvent = await this.ctx.em.findOne(
       SpaceEvent,
       {
-        id: this.validatedInput.spaceEventId,
+        id: this.validatedInput.id,
       },
       { populate: ['space', 'user'] },
     )
     if (!spaceEvent || !spaceEvent.user.unwrap() || !spaceEvent.space.unwrap()) {
-      throw new NotFoundError(
-        `SpaceEvent id ${this.validatedInput.spaceEventId.toString()} not found`,
-        { code: ErrorCodes.EMAIL_PAYLOAD_NOT_FOUND },
-      )
+      throw new NotFoundError(`SpaceEvent id ${this.validatedInput.id.toString()} not found`, {
+        code: ErrorCodes.EMAIL_PAYLOAD_NOT_FOUND,
+      })
     }
     const action = SPACE_EVENT_ACTIVITY_TYPE[spaceEvent.activityType].split('_')[1]
     if (isNil(action)) {
@@ -106,7 +116,7 @@ export class ContentChangedEmailHandler
     /**
      * Content can be resolved independently by every handler
      * in case a) it can be dynamic - different for every receiver
-     * in case b) it can be reused from class context -> determined in the contructor and then reused
+     * in case b) it can be reused from class context -> determined in the constructor and then reused
      * consider calling the getTemplateContent() externally in email-process
      */
     const content = await this.getTemplateContent()

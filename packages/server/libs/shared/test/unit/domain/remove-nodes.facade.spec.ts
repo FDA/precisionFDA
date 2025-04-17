@@ -50,7 +50,7 @@ describe('RemoveNodesFacade', () => {
   const licensedItemServiceRemoveItemLicensedForNodeStub = stub()
   const taggingServiceRemoveTaggingsStub = stub()
   const userClientFileRemoveStub = stub()
-  const spaceEventServiceCreateSpaceEventStub = stub()
+  const spaceEventServiceCreateAndSendSpaceEventStub = stub()
 
   const createRemoveNodesFacade = () => {
     const em = {
@@ -86,7 +86,7 @@ describe('RemoveNodesFacade', () => {
       removeTaggings: taggingServiceRemoveTaggingsStub,
     } as unknown as TaggingService
     const spaceEventService = {
-      createSpaceEvent: spaceEventServiceCreateSpaceEventStub,
+      createAndSendSpaceEvent: spaceEventServiceCreateAndSendSpaceEventStub,
     } as unknown as SpaceEventService
     const licensedItemService = {
       removeItemLicensedForNode: licensedItemServiceRemoveItemLicensedForNodeStub,
@@ -167,8 +167,8 @@ describe('RemoveNodesFacade', () => {
     userClientFileRemoveStub.reset()
     userClientFileRemoveStub.throws()
 
-    spaceEventServiceCreateSpaceEventStub.reset()
-    spaceEventServiceCreateSpaceEventStub.throws()
+    spaceEventServiceCreateAndSendSpaceEventStub.reset()
+    spaceEventServiceCreateAndSendSpaceEventStub.throws()
 
     getNodePathStub = stub(userFileHelper, 'getNodePath')
     createFileEventStub = stub(eventHelper, 'createFileEvent')
@@ -276,7 +276,7 @@ describe('RemoveNodesFacade', () => {
       taggingServiceRemoveTaggingsStub.reset()
       emPersistStub.reset()
       userClientFileRemoveStub.reset()
-      spaceEventServiceCreateSpaceEventStub.reset()
+      spaceEventServiceCreateAndSendSpaceEventStub.reset()
       emRemoveStub.reset()
 
       const removeNodesFacade = createRemoveNodesFacade()
@@ -308,9 +308,9 @@ describe('RemoveNodesFacade', () => {
       expect(userClientFileRemoveStub.calledOnce).to.be.true
       expect(userClientFileRemoveStub.calledWith(node1.dxid)).to.be.true
 
-      expect(spaceEventServiceCreateSpaceEventStub.calledOnce).to.be.true
+      expect(spaceEventServiceCreateAndSendSpaceEventStub.calledOnce).to.be.true
       expect(
-        spaceEventServiceCreateSpaceEventStub.calledWith({
+        spaceEventServiceCreateAndSendSpaceEventStub.calledWith({
           entity: { type: 'userFile', value: node1 },
           spaceId: node1.getSpaceId(),
           userId: USER_ID,
