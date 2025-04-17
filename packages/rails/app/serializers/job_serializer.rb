@@ -38,6 +38,7 @@ class JobSerializer < ApplicationSerializer # rubocop:disable Metrics/ClassLengt
     :entity_type,
     :logged_dxuser,
     :cost_limit,
+    :snapshot,
   )
 
   attribute :started_running, key: :startedRunning
@@ -171,6 +172,10 @@ class JobSerializer < ApplicationSerializer # rubocop:disable Metrics/ClassLengt
 
   def workstation_api_version
     object.app&.workstation_api_version
+  end
+
+  def snapshot
+    object.app&.snapshot
   end
 
   # Returns an instance_type of the app.

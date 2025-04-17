@@ -30,15 +30,16 @@ export const pinoConfig: Params = {
     serializers: {
       error: pino.stdSerializers.err,
       req: pino.stdSerializers.wrapRequestSerializer((req) => {
+        const maskedRequest = { ...req, headers: { ...req.headers } }
         if (config.logs.maskSensitive) {
-          if (req.headers['cookie']) {
-            req.headers['cookie'] = MASKED
+          if (maskedRequest.headers['cookie']) {
+            maskedRequest.headers['cookie'] = MASKED
           }
-          if (req.headers['authorization']) {
-            req.headers['authorization'] = MASKED
+          if (maskedRequest.headers['authorization']) {
+            maskedRequest.headers['authorization'] = MASKED
           }
         }
-        return req
+        return maskedRequest
       }),
       res: pino.stdSerializers.wrapResponseSerializer((res) => {
         const headers = res.raw['headers']

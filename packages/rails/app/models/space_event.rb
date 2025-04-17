@@ -37,7 +37,6 @@ class SpaceEvent < ApplicationRecord
     job_completed: 9,
     file_added: 10,
     file_deleted: 11,
-    note_added: 12,
     app_added: 13,
     asset_added: 14,
     asset_deleted: 15,

@@ -39,6 +39,7 @@ import { UserContextMiddleware } from './user-context/middleware/user-context.mi
 import { UsersApiModule } from './users/users.api.module'
 import { WebsocketModule } from './websocket/websocket.module'
 import { WorkflowApiModule } from './workflows/workflow.api.module'
+import { SpaceEventsApiModule } from './space-events/space-events.api.module'
 import { SessionApiModule } from './session/session.api.module'
 
 @Module({
@@ -67,6 +68,7 @@ import { SessionApiModule } from './session/session.api.module'
     EmailApiModule,
     ExpertsApiModule,
     FilesApiModule,
+    SpaceEventsApiModule,
     FolderApiModule,
     JobApiModule,
     LicenseApiModule,
@@ -96,6 +98,6 @@ export class ApiModule {
   configure(consumer: MiddlewareConsumer) {
     consumer
       .apply(MikroOrmMiddleware, UserContextMiddleware, CSRFVerificationMiddleware)
-      .forRoutes('*')
+      .forRoutes('{*splat}')
   }
 }

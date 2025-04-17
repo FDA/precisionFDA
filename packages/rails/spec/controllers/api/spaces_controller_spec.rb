@@ -39,6 +39,8 @@ RSpec.describe Api::SpacesController, type: :controller do
 
       allow(CopyService::WorkflowCopier).to receive(:new).and_return(workflow_copy_service)
       allow(CopyService::AppCopier).to receive(:new).and_return(app_copy_service)
+      allow(ActiveRecord::Base.connection).to receive(:commit_db_transaction)
+      stub_request(:post, "https://localhost:3001/emails/typed")
     end
 
     it "copies files" do

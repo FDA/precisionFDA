@@ -28,7 +28,7 @@ type EmailHelperCtx = OpsCtx & {
   config: EmailConfigItem
 }
 
-// is not a regular user but we still want to send some notifications to it
+// is not a regular user, but we still want to send some notifications to it
 // all templates uses only firstName
 const pfdaNoReplyUser = {
   firstName: 'precisionfda-no-reply',
@@ -65,7 +65,6 @@ const getKeyForUserSpaceRole = (
         prefix = NOTIFICATION_ROLE_PREFIXES.sponsor
     }
   }
-  // @ts-ignore
   return `${prefix}_${keyBase}`
 }
 
@@ -109,7 +108,6 @@ const buildIsNotificationEnabled =
       return defaultValue
     }
     // const dbValues = notificationsConfig.data
-    // @ts-ignore
     const settingValue: Maybe<boolean> = userConfig.data[notificationKey]
     if (isNil(settingValue)) {
       log.debug(

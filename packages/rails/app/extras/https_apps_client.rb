@@ -14,6 +14,14 @@ class HttpsAppsClient # rubocop:disable Metrics/ClassLength
     )
   end
 
+  def create_and_send_space_event(space_event)
+    request(
+      "/space-events",
+      space_event,
+      Net::HTTP::Post::METHOD,
+    )
+  end
+
   # Gets active users' usernames
   def active_users
     request(
