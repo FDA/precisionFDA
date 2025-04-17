@@ -162,6 +162,7 @@
   },
   "pnpm": {
     "overrides": {
+      "ws": "8.18.1",
       "@babel/runtime": "^7.26.10",
       "braces": "3.0.3"
     }
