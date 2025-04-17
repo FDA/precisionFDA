@@ -2,7 +2,6 @@ import styled, { css } from 'styled-components'
 import { TransparentButton } from '../../components/Button'
 import { compactScrollBarV2 } from '../../components/Page/styles'
 import { Svg } from '../../components/icons/Svg'
-import { fontSize, fontWeight, sizing } from '../../styles/theme'
 
 export const Wrapper = styled.div`
   position: fixed;
@@ -42,7 +41,7 @@ export const StyledModal = styled.div`
   color: var(--c-text-700);
   z-index: 100;
   background: var(--background);
-  border-radius: ${sizing.modalBorderRadius};
+  border-radius: 8px;
   display: flex;
   flex-direction: column;
   border: 1px solid var(--c-modal-border, transparent);
@@ -58,7 +57,7 @@ export const StyledModal = styled.div`
 `
 export const Header = styled.div``
 export const HeaderTop = styled.div`
-  border-radius: ${sizing.modalBorderRadius} ${sizing.modalBorderRadius} 0 0;
+  border-radius: 8px 8px 0 0;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -77,8 +76,8 @@ export const Footer = styled.div`
 `
 export const HeaderText = styled.div`
   align-self: center;
-  font-size: ${fontSize.h2};
-  font-weight: ${fontWeight.bold};
+  font-size: 18px;
+  font-weight: 600;
 `
 export const HeaderTextDetails = styled.div`
   font-size: 13px;

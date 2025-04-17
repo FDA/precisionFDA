@@ -3,7 +3,7 @@
 %>
 
 <% if can_be_public %>
-  <%= link_to publish_path + "?" + { identifier: item.uid, type: "comparison" }.to_param, method: :get, class: "btn btn-success #{defined?(classes) ? classes : ''}" do %>
+  <%= link_to publish_path + "?" + { identifier: item.uid, type: item.klass }.to_param, method: :get, class: "btn btn-success #{defined?(classes) ? classes : ''}" do %>
     <span class="fa fa-bullhorn"></span> Publish publicly
   <% end %>
 <% end %>
