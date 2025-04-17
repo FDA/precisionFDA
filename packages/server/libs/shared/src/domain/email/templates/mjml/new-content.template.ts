@@ -16,6 +16,10 @@ export type NewContentTemplateInput = EmailTemplateInput & {
   }
 }
 
+export const fromOrTo = (action: string): string => {
+  return action === 'added' ? 'to' : 'from'
+}
+
 export const newContentTemplate = (data: NewContentTemplateInput): string => `
   ${header}
     <mj-section css-class="header-title">
@@ -32,7 +36,7 @@ export const newContentTemplate = (data: NewContentTemplateInput): string => `
         </mj-text>
         <mj-text>
           ${data.content.objectType} ${data.content.action} by ${data.content.user.fullName}
-          to the space ${data.content.space.name}.
+          ${fromOrTo(data.content.action)} the space ${data.content.space.name}.
         </mj-text>
         ${getViewSpaceButton(data.content.space.id)}
         ${getBottomSpacer()}

@@ -145,6 +145,7 @@ module Api
       grouped = @items.group_by(&:klass)
       user_files, assets, apps, workflows = grouped.values_at("file", "asset", "app", "workflow")
       files = Array(user_files) + Array(assets)
+
       copy_files_to_space(files)
       workflows&.each { |workflow| workflow_copy_service.copy(workflow, @space.scope, params[:properties]) }
       apps&.each { |app| app_copy_service.copy(app, @space.scope, params[:properties]) }

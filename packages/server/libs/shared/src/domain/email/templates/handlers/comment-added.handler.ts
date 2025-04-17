@@ -18,14 +18,14 @@ import {
   buildEmailTemplate,
   buildFilterByUserSettings,
   buildIsNotificationEnabled,
+  ObjectIdInputDTO,
 } from '../../email.helper'
 import { BaseTemplate } from '@shared/domain/email/templates/base-template'
 import { commentAddedTemplate, CommentAddedTemplateInput } from '../mjml/comment-added.template'
 import { generateObjectCommentsLink } from '../mjml/common'
-import { SpaceEventDTO } from '@shared/domain/email/dto/space-event.dto'
 
 export class CommentAddedEmailHandler
-  extends BaseTemplate<SpaceEventDTO>
+  extends BaseTemplate<ObjectIdInputDTO>
   implements EmailTemplate<CommentAddedTemplateInput>
 {
   templateFile = commentAddedTemplate
@@ -45,7 +45,7 @@ export class CommentAddedEmailHandler
   async setupContext(): Promise<void> {
     this.spaceEvent = await this.ctx.em.findOneOrFail(
       SpaceEvent,
-      { id: this.validatedInput.spaceEventId },
+      { id: this.validatedInput.id },
       { populate: ['space'] },
     )
 
