@@ -25,6 +25,7 @@ export async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(ApiModule, options)
   app.useWebSocketAdapter(new WebsocketAdapter(app))
   app.useBodyParser('json', { limit: '16mb' })
+  app.set('query parser', 'extended')
   await setupNestApp(app)
 
   app.useGlobalPipes(new CustomValidationPipe({ transform: true }))

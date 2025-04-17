@@ -101,7 +101,12 @@ describe('Send request', () => {
       const session = create.sessionHelper.create(em, { user })
       await em.flush()
 
-      const clock = useFakeTimers(session.expiredAt() * 1000 + 10000)
+      const expirationTime = session.expiredAt() * 1000 + 10000
+      const clock = useFakeTimers({
+        now: expirationTime,
+        toFake: ['Date'],
+      })
+
       const { body } = await supertest(testedApp.getHttpServer())
         .get('/reports?scope=private')
         .set({

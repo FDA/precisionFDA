@@ -33,7 +33,7 @@ export const ExecutionActionsRow = ({
     selectedItems: [execution],
     resourceKeys: ['execution', execution.uid],
   })
-  const hasWorkstationAPI = execution.workstation_api_version !== null
+
   const isJobOwner = user?.dxuser === execution.launched_by_dxuser
 
   const onOpenWorkstationClick = () => {
@@ -112,7 +112,7 @@ export const ExecutionActionsRow = ({
           Open Workstation
         </Button>
       )}
-      {isJobOwner && hasWorkstationAPI && execution.links.open_external && (
+      {isJobOwner && execution.snapshot && execution.links.open_external && (
         <Button data-variant="primary" onClick={() => actions['Snapshot'].func()}>
           Snapshot
         </Button>

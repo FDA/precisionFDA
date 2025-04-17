@@ -26,6 +26,7 @@ class AppSerializer < ApplicationSerializer # rubocop:disable Metrics/ClassLengt
     :featured,
     :active,
     :links,
+    :snapshot,
   )
 
   attribute :all_tags_list, key: :tags

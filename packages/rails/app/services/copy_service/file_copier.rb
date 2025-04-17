@@ -53,6 +53,7 @@ class CopyService
           user.tag(copied_file, with: file.tags, on: :tags)
           @copies.push(object: copied_file, source: file)
           Event::FileCopied.create_for(file, copied_file, user)
+          SpaceEventService.call(Space.from_scope(copied_file.scope).id, user.id, nil, copied_file, :file_added) if copied_file.in_space?
         end
       end
 

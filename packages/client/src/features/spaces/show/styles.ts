@@ -181,6 +181,14 @@ export const SpaceHeader = styled.div`
   background-color: var(--background-color);
   padding: 18px 32px;
   border-bottom: 1px solid var(--border-color);
+  transition: box-shadow 0.7s;
+
+  &[data-isshared="true"] {
+    box-shadow: 0 -20px 10px -20px oklch(56% 0.15 155.65) inset;
+  }
+  &[data-isprivate="true"] {
+    box-shadow: 0 -20px 10px -20px oklch(56% 0.15 308.12) inset;
+  }
 `
 
 export const SpaceTopRight = styled.div`
