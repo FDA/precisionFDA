@@ -3,7 +3,7 @@ import React, { useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { Tooltip } from 'react-tooltip'
 import { toast } from 'react-toastify'
-import { Button, TransparentButton } from '../../components/Button'
+import { Button } from '../../components/Button'
 import { BackLink } from '../../components/Page/PageBackLink'
 import { PencilIcon } from '../../components/icons/PencilIcon'
 import { pluralize } from '../../utils/formatting'
@@ -95,9 +95,9 @@ export const DiscussionShow = ({ space }: { space?: ISpace }) => {
         ) : (
           <>
             <StyledTitle>
-              {discussion.title}
+              <div data-testid="discussion-title">{discussion.title}</div>
               {canUserEdit(discussion.user.id) && (
-                <Button data-variant='link' onClick={() => setIsEditing(true)}>
+                <Button data-testid="discussion-edit-title" data-variant='link' onClick={() => setIsEditing(true)}>
                   <PencilIcon height={16} />
                 </Button>
               )}

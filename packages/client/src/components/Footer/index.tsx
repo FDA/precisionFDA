@@ -2,7 +2,6 @@ import React from 'react'
 import { Link } from 'react-router-dom'
 import styled from 'styled-components'
 
-import { theme } from '../../styles/theme'
 import ExternalLink from '../Controls/ExternalLink'
 
 import fdaLogo from '../../assets/logo-fda.svg'
@@ -17,7 +16,7 @@ const StyledFooterContainer = styled.div`
 `
 
 const StyledFooterWrapper = styled.div`
-  max-width: ${theme.sizing.mainContainerMaxWidth};
+  max-width: 1330px;
   margin: 0 auto;
 `
 const Center = styled.div`

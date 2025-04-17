@@ -159,5 +159,8 @@
   },
   "msw": {
     "workerDirectory": "public"
+  },
+  "overrides": {
+    "braces": "3.0.3"
   }
 }

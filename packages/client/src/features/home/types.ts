@@ -56,6 +56,7 @@ export interface DownloadListResponse {
   viewURL: string
   downloadURL: string
   locked: boolean
+  uid: string
 }
 
 interface IModal {
@@ -139,7 +140,7 @@ export interface IMeta {
 }
 
 export type Size = null | number
-export type IFilter = Record<string,  Size[] | any>
+export type IFilter = Record<string, Size[] | any>
 
 export interface SortBy {
   order_by: string

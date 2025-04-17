@@ -6,10 +6,12 @@ import { toast } from 'react-toastify'
 import * as Yup from 'yup'
 import { IUser } from '../../../types/user'
 import { cleanObject } from '../../../utils/object'
+import { fetchAccessibleFilesByUID } from '../../databases/databases.api'
 import { FileUid } from '../../files/files.types'
 import { ServerScope } from '../../home/types'
 import { fetchLicensesForFiles } from '../../licenses/api'
 import { License } from '../../licenses/types'
+import { RunWorkflowFormType } from '../../workflows/run/RunWorkflowForm'
 import { fetchUserComputeInstances, RunJobRequest } from '../apps.api'
 import {
   AcceptedLicense,
@@ -23,8 +25,6 @@ import {
 } from '../apps.types'
 import { isFloatValid, isStrictlyInteger } from '../form/common'
 import { fetchAndConvertSelectableContexts, fetchAndConvertSelectableSpaces } from './job-run-helper'
-import { RunWorkflowFormType } from '../../workflows/run/RunWorkflowForm'
-import { fetchAccessibleFilesByUID } from '../../databases/databases.api'
 
 export const getLabel = (inputSpec: InputSpec) => (inputSpec.label ? inputSpec.label : inputSpec.name)
 
@@ -332,7 +332,7 @@ export const exportFormData = (event: React.MouseEvent<HTMLButtonElement>, formD
 }
 
 export const validateFile = async (fileUid: string) => {
-  const data = await fetchAccessibleFilesByUID({ uid: [fileUid]})
+  const data = await fetchAccessibleFilesByUID({ uid: [fileUid] })
 
   return data && data.length > 0
 }
@@ -371,3 +371,10 @@ export const extractFileUidsFromBatchInputs = (batchInputs: BatchInput[]): FileU
 }
 
 export const getBaseLink = (spaceId?: number) => (spaceId ? `spaces/${spaceId}` : 'home')
+
+export const generateCopyUrl = (displayData: string, url: string, app: IApp, copyType: 'app' | 'appSeries'): string => {
+  const base64Encoded = btoa(encodeURIComponent(displayData))
+  const newAppUrl = url.replace(/app-[^/]+/, copyType === 'app' ? app.uid : `app-series-${app.app_series_id.toString()}`)
+
+  return `${newAppUrl}#${base64Encoded}`
+}

@@ -304,7 +304,7 @@ class ApplicationController < ActionController::Base
 
   # Concat item path with '/home' to create a link to Home - for specific items
   def concat_path(item)
-    if %w(app app-series job workflow workflow-series).include?(item.klass)
+    if %w(app app-series workflow workflow-series).include?(item.klass)
       "/home".concat(pathify(item))
     else
       pathify(item)

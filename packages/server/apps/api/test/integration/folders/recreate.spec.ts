@@ -38,6 +38,7 @@ describe('POST /folders/recreate', () => {
     await supertest(testedApp.getHttpServer())
       .post('/folders/recreate')
       .set(getDefaultHeaderData(user))
+      .send({ userId: 'userId', projectId: 'projectId' })
       .expect(204)
     expect(fakes.client.foldersListFake.calledOnce).to.be.true()
     expect(fakes.client.folderCreateFake.notCalled).to.be.true()
@@ -54,6 +55,7 @@ describe('POST /folders/recreate', () => {
     await supertest(testedApp.getHttpServer())
       .post('/folders/recreate')
       .set(getDefaultHeaderData(user))
+      .send({ userId: 'userId', projectId: 'projectId' })
       .expect(204)
 
     expect(fakes.client.foldersListFake.calledOnce).to.be.true()
@@ -84,6 +86,7 @@ describe('POST /folders/recreate', () => {
     await supertest(testedApp.getHttpServer())
       .post('/folders/recreate')
       .set(getDefaultHeaderData(user))
+      .send({ userId: 'userId', projectId: 'projectId' })
       .expect(204)
 
     expect(fakes.client.foldersListFake.calledOnce).to.be.true()
