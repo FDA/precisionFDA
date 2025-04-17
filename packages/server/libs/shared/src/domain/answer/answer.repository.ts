@@ -34,7 +34,7 @@ export default class AnswerRepository extends AccessControlRepository<Answer> {
 
     return {
       note: {
-        $or: [{ scope: STATIC_SCOPE.PUBLIC }, { scope: { $in: scopes } }, { user: user.id }],
+        $or: [{ scope: { $in: scopes } }, { user: user.id }],
       },
     }
   }
