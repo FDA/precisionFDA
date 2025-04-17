@@ -9,6 +9,7 @@ import { ModalHeaderTop, ModalNext } from '../../modal/ModalNext'
 import { ButtonRow, Footer, ModalScroll } from '../../modal/styles'
 import { useModal } from '../../modal/useModal'
 import { IApp } from '../apps.types'
+import { generateCopyUrl } from './utils'
 
 const StyledButtonRow = styled(ButtonRow)`
   justify-content: space-between;
@@ -33,14 +34,14 @@ export const useExportInputsModal = ({ showCopyButton, app }: { showCopyButton: 
   }
 
   const handleCopy = (copyType: 'app' | 'appSeries') => {
-    const base64Encoded = btoa(encodeURIComponent(displayData))
-    const currentUrl = window.location.href
-    const url = currentUrl.replace(/app-[^/]+/, copyType === 'app' ? `${app.uid}` : `app-series-${app.app_series_id.toString()}`)
-
-    if (displayData) {
-      toast.success('The link has been copied into your clipboard')
-      navigator.clipboard.writeText(`${url}#${base64Encoded}`)
+    if (displayData === '') {
+      return
     }
+
+    const url = generateCopyUrl(displayData, window.location.href, app, copyType)
+
+    toast.success('The link has been copied into your clipboard')
+    navigator.clipboard.writeText(url)
   }
 
   const modalComp = (
@@ -81,8 +82,10 @@ export const useExportInputsModal = ({ showCopyButton, app }: { showCopyButton: 
                 Copy link for Current App
               </Button>
               <Button
+                disabled={isFetching || (areFiles && !areAllFilePublic)}
                 type="button"
                 onClick={() => handleCopy('appSeries')}
+                data-tooltip-id="selected-private-file-error"
                 data-tooltip-content="One or more files are private. Make sure to make those files public to share."
               >
                 Copy link for Latest App

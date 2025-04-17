@@ -1,6 +1,5 @@
 import styled, { css } from 'styled-components'
 import { PageContainer, pagePaddingLR } from '../../../components/Page/styles'
-import { commonStyles } from '../../../styles/commonStyles'
 import { breakPoints, colors, theme } from '../../../styles/theme'
 import { TimeStatus } from '../types'
 import { Button } from '../../../components/Button'
@@ -60,13 +59,14 @@ export const StyledChallengeDetailsBanner = styled(PageContainer)`
 `
 
 export const ChallengeName = styled.h1`
-  ${commonStyles.bannerTitle};
+  font-size: 28px;
+  font-weight:600;
   margin: 16px 0px;
 `
 
 export const ChallengeDescription = styled.p`
-  font-size: ${theme.fontSize.body};
-  font-weight: ${theme.fontWeight.regular};
+  font-size: 14px;
+  font-weight: 400;
   margin-top: 16px;
   margin-bottom: 16px;
 `
@@ -75,28 +75,32 @@ export const NoInfo = styled.div`
 `
 
 export const ChallengeStateLabel = styled.span<{$timeStatus: TimeStatus}>`
-  ${commonStyles.sectionHeading};
+  color: var(--c-text-500);
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.05em;
+  margin-top: 12px;
   text-transform: uppercase;
   padding: 3px 0px;
-  color: ${theme.colors.textWhite};
+  color: white;
 
   ${({ $timeStatus }) => {
     if ($timeStatus === 'upcoming') {
       return css`
         color: ${theme.colors.highlightYellow};
-        border-top: ${theme.sizing.highlightBarWidth} solid ${theme.colors.highlightYellow};
+        border-top: 4px solid ${theme.colors.highlightYellow};
       `
     }
     if ($timeStatus === 'current') {
       return css`
         color: ${theme.colors.highlightGreen};
-        border-top: ${theme.sizing.highlightBarWidth} solid ${theme.colors.highlightGreen};
+        border-top: 4px solid ${theme.colors.highlightGreen};
       `
     }
     if ($timeStatus === 'ended') {
       return css`
         color: ${theme.colors.stateLabelGrey};
-        border-top: ${theme.sizing.highlightBarWidth} solid ${theme.colors.stateLabelGrey};
+        border-top: 4px solid ${theme.colors.stateLabelGrey};
       `
     }
     return ''
@@ -124,10 +128,10 @@ export const ChallengeDateLabel = styled.div`
 `
 
 export const ChallengeDate = styled.div<{$timeStatus: TimeStatus}>`
-  padding: ${theme.padding.contentMarginThird} 0px;
+  padding: 4px 0px;
   padding-right: 20px;
   font-size: 13px;
-  font-weight: ${theme.fontWeight.medium};
+  font-weight: 500;
   text-align: left;
 
   ${({ $timeStatus }) => {
@@ -152,7 +156,7 @@ export const ChallengeDate = styled.div<{$timeStatus: TimeStatus}>`
 
 export const ChallengeDateRemaining = styled.div`
   padding: 16px 0px;
-  font-weight: ${theme.fontWeight.bold};
+  font-weight: 600;
   white-space: nowrap;
 `
 

@@ -3,9 +3,7 @@ import { useLocation } from 'react-router-dom'
 import styled from 'styled-components'
 
 import { SocialMediaButtons } from '../SocialMediaButtons'
-import { theme } from '../../../styles/theme'
 import { PublicNavbar } from '../PublicNavbar'
-import { commonStyles } from '../../../styles/commonStyles'
 import { MainBanner } from '../../Banner'
 import { PageContainerMargin } from '../../Page/styles'
 
@@ -24,7 +22,7 @@ const NavigationBarBanner = styled.div`
 export const NavigationBarPublicLandingTitle = styled.div`
   flex-shrink: 1;
   flex-grow: 1;
-  margin-bottom: ${theme.padding.mainContentVertical};
+  margin-bottom: 32px;
 
   h1 {
     color: #fff;
@@ -50,16 +48,17 @@ export const NavigationBarPublicLandingTitle = styled.div`
 const NavigationBarLogoAndTitle = styled.div`
   order: 1;
   text-align: left;
-  width: ${theme.sizing.thumbnailWidth};
+  width: 288px;
   margin: 0;
 
   img {
     margin-left: 3px;
-    margin-bottom: ${theme.padding.contentMargin};
+    margin-bottom: 12px;
   }
 
   h1 {
-    ${commonStyles.bannerTitle}
+    font-size: 28px;
+    font-weight:600;
     color: #fff;
     margin: 0;
   }

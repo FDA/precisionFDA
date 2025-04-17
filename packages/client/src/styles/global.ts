@@ -1,5 +1,5 @@
 import { createGlobalStyle } from 'styled-components'
-import { colors, sizing, theme } from './theme'
+import { colors, theme } from './theme'
 import { colorvars, themes } from './variables'
 import { compactScrollBarV2 } from '../components/Page/styles'
 
@@ -120,17 +120,17 @@ const GlobalStyle = createGlobalStyle<{railsAlertHeight: number}>`
 
   .Toastify__toast--error {
     border: 2px solid ${colors.primaryRed} !important;
-    border-radius: ${sizing.modalBorderRadius} !important;
+    border-radius: 5px !important;
   }
 
   .Toastify__toast--success {
     border: 2px solid ${colors.highlightGreen} !important;
-    border-radius: ${sizing.modalBorderRadius} !important;
+    border-radius: 5px !important;
   }
 
   .Toastify__toast--warning {
     border: 2px solid ${colors.primaryYellow}  !important;
-    border-radius: ${sizing.modalBorderRadius} !important;
+    border-radius: 5px !important;
   }
 `
 

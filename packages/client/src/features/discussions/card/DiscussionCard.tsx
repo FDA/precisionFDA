@@ -7,9 +7,10 @@ import { AttachmentsList } from '../AttachmentsList'
 import { deleteDiscussionRequest, fetchAttachmentsRequest } from '../api'
 import { Discussion } from '../discussions.types'
 import { groupByAttachmentType } from '../helpers'
-import { StyledCommentCard, StyledMarkdown, StyledReplyButton } from '../styles'
+import { StyledCommentCard, StyledReplyButton } from '../styles'
 import { CardHeader } from './CardHeader'
 import { EditNoteEntity } from '../form/EditNoteEntity'
+import { StyledMarkdown } from '../../../styles/commonStyles'
 
 export function DiscussionCard({
   canEdit,
@@ -60,7 +61,7 @@ export function DiscussionCard({
 
   if (editMode) {
     return (
-      <StyledMarkdown $isAnswer={false}>
+      <StyledMarkdown>
         <EditNoteEntity
           onSuccess={() => setEditMode(false)}
           onCancel={() => setEditMode(false)}
@@ -74,7 +75,7 @@ export function DiscussionCard({
   }
 
   return (
-    <StyledCommentCard $isAnswer={false}>
+    <StyledCommentCard>
       <CardHeader
         timestamp={discussion.createdAt}
         cardType="discussion"
