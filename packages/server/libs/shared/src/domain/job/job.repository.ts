@@ -38,7 +38,7 @@ export class JobRepository extends AccessControlRepository<Job> {
     return {
       $or: [
         { user: user.id, scope: STATIC_SCOPE.PRIVATE },
-        { scope: STATIC_SCOPE.PUBLIC, user: user.id },
+        { user: user.id, scope: STATIC_SCOPE.PUBLIC },
         { scope: { $in: scopes } },
       ],
     }
