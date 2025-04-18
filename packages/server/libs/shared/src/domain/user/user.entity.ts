@@ -226,6 +226,9 @@ export class User extends BaseEntity {
       .flatMap((spaceMembership) => Array.from(spaceMembership.spaces))
   }
 
+  /**
+   * Returns spaces that the user is either lead or admin.
+   */
   async manageableSpaces(): Promise<Space[]> {
     await this.spaceMemberships.load({ populate: ['spaces'] })
 

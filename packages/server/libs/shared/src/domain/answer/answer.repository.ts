@@ -25,7 +25,7 @@ export default class AnswerRepository extends AccessControlRepository<Answer> {
   protected async getEditableWhere(): Promise<FilterQuery<Answer>> {
     const user = await this.em.findOneOrFail(User, { id: this.user.id })
     const manageableSpaces = await user.manageableSpaces()
-    const scopes = manageableSpaces.map((space) => space.scope)
+    const spaceScopes = manageableSpaces.map((space) => space.scope)
 
     const isSiteAdmin = await user.isSiteAdmin()
     if (isSiteAdmin) {
@@ -34,7 +34,11 @@ export default class AnswerRepository extends AccessControlRepository<Answer> {
 
     return {
       note: {
-        $or: [{ scope: { $in: scopes } }, { user: user.id }],
+        $or: [
+          { user: user.id, scope: STATIC_SCOPE.PRIVATE },
+          { user: user.id, scope: STATIC_SCOPE.PUBLIC },
+          { scope: { $in: spaceScopes } },
+        ],
       },
     }
   }
