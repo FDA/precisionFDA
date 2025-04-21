@@ -25,7 +25,9 @@ export default class DiscussionRepository extends AccessControlRepository<Discus
   protected async getEditableWhere(): Promise<FilterQuery<Discussion>> {
     const user = await this.em.findOneOrFail(User, { id: this.user.id })
     const manageableSpaces = await user.manageableSpaces()
-    const spaceScopes = manageableSpaces.map((space) => space.scope)
+    const editableSpaces = await user.editableSpaces()
+    const manageSpaceScopes = manageableSpaces.map((space) => space.scope)
+    const editSpaceScopes = editableSpaces.map((space) => space.scope)
 
     const isSiteAdmin = await user.isSiteAdmin()
     if (isSiteAdmin) {
@@ -37,7 +39,8 @@ export default class DiscussionRepository extends AccessControlRepository<Discus
         $or: [
           { user: user.id, scope: STATIC_SCOPE.PRIVATE },
           { user: user.id, scope: STATIC_SCOPE.PUBLIC },
-          { scope: { $in: spaceScopes } },
+          { user: user.id, scope: { $in: editSpaceScopes } },
+          { scope: { $in: manageSpaceScopes } },
         ],
       },
     }
