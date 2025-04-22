@@ -33,7 +33,7 @@ export class InvitationHandler
   }
 
   async determineReceivers(): Promise<User[]> {
-    const recipients = [{ email: config.supportEmail } as User]
+    const recipients = [{ email: config.pfdaEmail } as User]
     if (config.env === 'production') {
       recipients.push({ email: config.pfdaEmail } as User)
     }
@@ -62,7 +62,7 @@ export class InvitationHandler
     return {
       emailType: EMAIL_TYPES.invitation,
       to: receiver.email,
-      replyTo: config.supportEmail,
+      replyTo: config.pfdaEmail,
       body,
       subject: `New access request from ${this.invitation.firstName} ${this.invitation.lastName}`,
     }
