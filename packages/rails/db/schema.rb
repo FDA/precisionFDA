@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2025_04_08_163737) do
+ActiveRecord::Schema.define(version: 2025_02_02_121212) do
 
   create_table "accepted_licenses", id: :integer, charset: "utf8mb3", collation: "utf8mb3_unicode_ci", force: :cascade do |t|
     t.integer "license_id"
@@ -85,7 +85,6 @@ ActiveRecord::Schema.define(version: 2025_04_08_163737) do
     t.boolean "verified", default: false, null: false
     t.boolean "featured", default: false
     t.boolean "deleted", default: false, null: false
-    t.boolean "snapshot", default: false
     t.index ["deleted"], name: "index_app_series_on_deleted"
     t.index ["dxid"], name: "index_app_series_on_dxid"
     t.index ["latest_revision_app_id"], name: "index_app_series_on_latest_revision_app_id"
@@ -348,13 +347,14 @@ ActiveRecord::Schema.define(version: 2025_04_08_163737) do
   end
 
   create_table "experts", id: :integer, charset: "utf8mb3", collation: "utf8mb3_unicode_ci", force: :cascade do |t|
-    t.integer "user_id", null: false
-    t.string "image", null: false
-    t.string "state", null: false
-    t.string "scope", null: false
-    t.text "meta", null: false
+    t.integer "user_id"
+    t.string "image"
+    t.string "state"
+    t.string "scope"
+    t.text "meta"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["image"], name: "index_experts_on_image"
     t.index ["scope"], name: "index_experts_on_scope"
     t.index ["state"], name: "index_experts_on_state"
     t.index ["user_id"], name: "index_experts_on_user_id", unique: true
