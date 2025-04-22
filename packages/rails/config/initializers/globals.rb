@@ -104,10 +104,9 @@ BILLING_INFO = {
 }.freeze
 
 PFDA_EMAIL = "precisionfda@fda.hhs.gov".freeze
-SUPPORT_EMAIL = "precisionfda-support@dnanexus.com".freeze
 
 CHALLENGE_PROPOSAL_RECIPIENTS = {
   production: [PFDA_EMAIL],
-  staging: ["swestreich+pfda@dnanexus.com", SUPPORT_EMAIL],
-  development: [SUPPORT_EMAIL],
+  staging: ["swestreich+pfda@dnanexus.com"],
+  development: [],
 }.freeze
