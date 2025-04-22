@@ -88,7 +88,7 @@ describe('InvitationHandler', () => {
     await handler.setupContext()
 
     const receivers = await handler.determineReceivers()
-    expect(receivers).to.eql([{ email: config.supportEmail } as User])
+    expect(receivers).to.eql([{ email: config.pfdaEmail } as User])
 
     if (config.env === 'production') {
       expect(receivers).to.include.deep.members([{ email: config.pfdaEmail } as User])

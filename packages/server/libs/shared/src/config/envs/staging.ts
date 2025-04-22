@@ -41,5 +41,5 @@ export const config: ConfigOverride = () => ({
       isEnabled: true,
     },
   },
-  challengeProposalRecipients: ['swestreich+pfda@dnanexus.com', defaultConfig.supportEmail],
+  challengeProposalRecipients: ['swestreich+pfda@dnanexus.com', defaultConfig.pfdaEmail],
 })

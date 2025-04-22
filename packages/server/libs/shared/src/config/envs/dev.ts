@@ -46,5 +46,5 @@ export const config: ConfigOverride = () => ({
       saveEmailToFile: false,
     },
   },
-  challengeProposalRecipients: [defaultConfig.supportEmail],
+  challengeProposalRecipients: [],
 })
