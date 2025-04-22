@@ -136,6 +136,7 @@ export class EntityProvenanceSvgResultTransformerService
     return DOMPurify.sanitize(dom.window.document.querySelector('svg.canvas')!.outerHTML, {
       ADD_TAGS: ['foreignObject'],
       ADD_ATTR: ['target'],
+      HTML_INTEGRATION_POINTS: {'foreignobject': true},
     })
   }
 
