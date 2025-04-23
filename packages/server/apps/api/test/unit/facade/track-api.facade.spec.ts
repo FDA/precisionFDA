@@ -9,6 +9,8 @@ import { AppRepository } from '@shared/domain/app/app.repository'
 import { JobRepository } from '@shared/domain/job/job.repository'
 import { NodeRepository } from '@shared/domain/user-file/node.repository'
 import { NoteRepository } from '@shared/domain/note/note.repository'
+import { DbClusterRepository } from '@shared/domain/db-cluster/db-cluster.repository'
+import { ComparisonRepository } from '@shared/domain/comparison/comparison.repository'
 import { Note } from '@shared/domain/note/note.entity'
 
 describe('TrackApiFacade', () => {
@@ -80,12 +82,21 @@ describe('TrackApiFacade', () => {
       findAccessibleOne: findAccessibleOne,
     } as unknown as NoteRepository
 
+    const dbClusterRepository = {
+      findAccessibleOne: findAccessibleOne,
+    } as unknown as DbClusterRepository
+    const comparisonRepository = {
+      findAccessibleOne: findAccessibleOne,
+    } as unknown as ComparisonRepository
+
     return new TrackApiFacade(
       entityProvenanceService,
       appRepository,
       jobRepository,
       nodeRepository,
       noteRepository,
+      dbClusterRepository,
+      comparisonRepository,
     )
   }
 })

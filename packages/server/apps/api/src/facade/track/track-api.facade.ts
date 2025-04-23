@@ -11,6 +11,8 @@ import { JobRepository } from '@shared/domain/job/job.repository'
 import { NodeRepository } from '@shared/domain/user-file/node.repository'
 import { NoteRepository } from '@shared/domain/note/note.repository'
 import { Uid } from '@shared/domain/entity/domain/uid'
+import { DbClusterRepository } from '@shared/domain/db-cluster/db-cluster.repository'
+import { ComparisonRepository } from '@shared/domain/comparison/comparison.repository'
 
 type TrackResourceType = Extract<
   EntityType,
@@ -26,6 +28,8 @@ export class TrackApiFacade {
     private readonly jobRepository: JobRepository,
     private readonly nodeRepository: NodeRepository,
     private readonly noteRepository: NoteRepository,
+    private readonly dbClusterRepository: DbClusterRepository,
+    private readonly comparisonRepository: ComparisonRepository,
   ) {}
 
   async getProvenance(identifier: EntityIdentifier) {
@@ -43,11 +47,17 @@ export class TrackApiFacade {
       case 'file':
         entity = await this.nodeRepository.findAccessibleOne({ uid: identifier as Uid<'file'> })
         break
+      case 'dbcluster':
+        entity = await this.dbClusterRepository.findAccessibleOne({
+          uid: identifier as Uid<'dbcluster'>,
+        })
+        break
       case 'note':
         entity = await this.noteRepository.findAccessibleOne({ id: Number(id) })
         break
-      case 'dbcluster':
       case 'comparison':
+        entity = await this.comparisonRepository.findAccessibleOne({ id: Number(id) })
+        break
       default:
         throw new InvalidStateError('Invalid entity type')
     }
