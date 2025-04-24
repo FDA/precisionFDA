@@ -13,7 +13,7 @@ ENVIRONMENT = os.getenv("ENVIRONMENT")
 # Repository and Image configuration
 REPOSITORY_NAME = "pfda/fumadocs"
 ORCH_ACCOUNT = "991033550868"
-REPO_URI = f"{ORCH_ACCOUNT}.dkr.ecr.{REGION}.amazonaws.com/{REPOSITORY_NAME}"
+REPO_URI = f"{ORCH_ACCOUNT}.dkr.ecr.us-east-1.amazonaws.com/{REPOSITORY_NAME}"
 IMAGE_TAG = os.getenv("IMAGE_TAG")
 IMAGE_URI = f"{REPO_URI}:{IMAGE_TAG}"
 

@@ -17,6 +17,7 @@ on:
         type: string
         required: true
 
+run-name: FumaDocs deployment ENV=${{ inputs.ENVIRONMENT }} | IMAGE_TAG=${{ inputs.IMAGE_TAG }}
 jobs:
   deploy:
     runs-on: ubuntu-latest
