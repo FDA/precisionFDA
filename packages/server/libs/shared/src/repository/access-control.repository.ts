@@ -13,7 +13,7 @@ export abstract class AccessControlRepository<
 > extends PaginatedRepository<Entity> {
   protected readonly user: UserContext = createUserContextManager(userContextStorage)
 
-  async findAccessible<
+  async paginateAccessible<
     Hint extends string = never,
     Fields extends string = '*',
     Excludes extends string = never,
@@ -28,7 +28,7 @@ export abstract class AccessControlRepository<
     return this.paginate(pagination, mergedWhere, options)
   }
 
-  async findEditable<
+  async paginateEditable<
     Hint extends string = never,
     Fields extends string = '*',
     Excludes extends string = never,
@@ -43,7 +43,7 @@ export abstract class AccessControlRepository<
     return this.paginate(pagination, mergedWhere, options)
   }
 
-  async findAllAccessible<
+  async findAccessible<
     Hint extends string = never,
     Fields extends string = '*',
     Excludes extends string = never,
@@ -57,7 +57,7 @@ export abstract class AccessControlRepository<
     return this.find(mergedWhere, options)
   }
 
-  async findAllEditable<
+  async findEditable<
     Hint extends string = never,
     Fields extends string = '*',
     Excludes extends string = never,

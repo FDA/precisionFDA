@@ -240,7 +240,7 @@ export class UserFileService {
     const idsToCheck = nodes
       .filter((node) => node.stiType === FILE_STI_TYPE.USERFILE)
       .map((node) => node.id)
-    const accessibleNodes = await this.nodeRepo.findAllAccessible({ id: idsToCheck })
+    const accessibleNodes = await this.nodeRepo.findAccessible({ id: idsToCheck })
     if (idsToCheck.length != accessibleNodes.length) {
       throw new PermissionError('You do not have permission to download all of these files')
     }
@@ -363,7 +363,7 @@ export class UserFileService {
    * @returns
    */
   async listSelectedFiles(ids: number[]): Promise<SelectedNode[]> {
-    const selectedNodes = await this.nodeRepo.findAllAccessible(
+    const selectedNodes = await this.nodeRepo.findAccessible(
       { id: ids, stiType: { $in: [FILE_STI_TYPE.USERFILE, FILE_STI_TYPE.FOLDER] } },
       {
         populate: ['parentFolder', 'scopedParentFolder'],
@@ -432,7 +432,7 @@ export class UserFileService {
 
     // Fetch all relevant files in a single query
     const dxids = Array.from(uidsMap.keys())
-    const checkedFiles = await this.fileRepo.findAllEditable({
+    const checkedFiles = await this.fileRepo.findEditable({
       dxid: { $in: dxids },
       scope: targetScope,
     })
