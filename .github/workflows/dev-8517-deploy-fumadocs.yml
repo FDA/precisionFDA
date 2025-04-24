@@ -1,0 +1,76 @@
+name: Dev deploy FumaDocs ECS Service
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy-dev:
+    runs-on: ubuntu-latest
+    environment:
+      name: dev_8517
+
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install boto3
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ vars.REGION }}
+          role-to-assume: ${{ vars.ROLE_ECS_GITHUB_ARN }}
+
+      - name: Get AWS Account ID
+        id: get_account_id
+        run: |
+          ACCOUNT_ID=$(aws sts get-caller-identity --query "Account" --output text)
+          echo "AWS Account ID: $ACCOUNT_ID"
+          echo "ACCOUNT_ID=$ACCOUNT_ID" >> $GITHUB_ENV
+
+      - name: Calculate short SHA
+        id: calc_sha
+        run: echo "short_sha=$(echo ${{ github.sha }} | cut -c1-7)" >> "$GITHUB_OUTPUT"
+
+      - name: Log in to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+        with:
+          registries: ${{ vars.ORCHESTRATION_ACCOUNT_ID }}
+
+      - name: Set image tag
+        run: |
+          echo "IMAGE_TAG=${{ github.ref_name }}-${{ steps.calc_sha.outputs.short_sha }}-$(date +%Y%m%dT%H%M)" >> $GITHUB_ENV
+
+      - name: Build and push Docker image to Orchestration Account
+        uses: docker/build-push-action@v5
+        with:
+          push: true
+          tags: ${{ vars.ORCHESTRATION_ACCOUNT_ID }}.dkr.ecr.${{ vars.REGION }}.amazonaws.com/pfda/fumadocs:${{ env.IMAGE_TAG }}
+          file: packages/docs/docker/images/isolation.Dockerfile
+          context: packages/docs
+
+      - name: Deploy ECS Service
+        env: 
+          AWS_REGION: ${{ vars.REGION }}
+          ENVIRONMENT: ${{ vars.ENVIRONMENT }}
+          IMAGE_TAG: ${{ env.IMAGE_TAG }}
+        run: |
+          echo "Deploying ECS environment..."
+          python infra/deploy-ecs-service.py
+
+      - name: Add image tag to GitHub Actions summary
+        run: |
+          echo "Image tag: ${{ env.IMAGE_TAG }}" >> $GITHUB_STEP_SUMMARY
