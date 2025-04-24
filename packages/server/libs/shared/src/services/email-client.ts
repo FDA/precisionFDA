@@ -6,6 +6,7 @@ import SMTPTransport from 'nodemailer/lib/smtp-transport'
 import fs from 'fs'
 import path from 'path'
 import { EmailSendInput } from '@shared/domain/email/email.config'
+import { randomUUID } from 'crypto'
 
 const log = getLogger('nodemailer-logger')
 
@@ -77,10 +78,12 @@ class FileEmailClient extends EmailClient {
     subject: ${input.subject}\n</pre>
     ${input.body}`
     const currentDate = new Date().toJSON().slice(0, 19)
+    const uuid = randomUUID()
+
     const targetPath = path.join(
       process.cwd(),
       'test-emails',
-      `test-email-${input.emailType}-${input.to}-${currentDate}.html`,
+      `test-email-${input.emailType}-${input.to}-${currentDate}-${uuid}.html`,
     )
     await fs.promises.writeFile(targetPath, html)
     log.log({ targetPath }, 'Email has been successfully saved to file')

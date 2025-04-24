@@ -32,6 +32,8 @@ import sinon, { SinonStub, match, stub } from 'sinon'
 import { NodeService } from '@shared/domain/user-file/node.service'
 import { SpaceRepository } from '@shared/domain/space/space.repository'
 import { Space } from '@shared/domain/space/space.entity'
+import { SpaceEventService } from '@shared/domain/space-event/space-event.service'
+import { SPACE_EVENT_ACTIVITY_TYPE } from '@shared/domain/space-event/space-event.enum'
 
 describe('UserFileService', () => {
   const USER_ID = 0
@@ -86,6 +88,8 @@ describe('UserFileService', () => {
   const renameDuplicateFilesStub = stub()
 
   const getEntityDownloadLinkStub = stub()
+
+  const createAndSendSpaceEventStub = stub()
 
   const fileDownloadLinkStub = stub()
   const fileDescribeStub = stub()
@@ -192,6 +196,10 @@ describe('UserFileService', () => {
     loadNodes: loadNodesStub,
   } as unknown as NodeService
 
+  const spaceEventService = {
+    createAndSendSpaceEvent: createAndSendSpaceEventStub,
+  } as unknown as SpaceEventService
+
   beforeEach(() => {
     referenceCreateStub = stub(Reference, 'create')
     referenceCreateStub.withArgs(USER).returns(USER)
@@ -243,6 +251,9 @@ describe('UserFileService', () => {
 
     nodeLoadIfAccessibleByUserStub.reset()
     nodeLoadIfAccessibleByUserStub.throws()
+
+    createAndSendSpaceEventStub.reset()
+    createAndSendSpaceEventStub.throws()
 
     createFileSynchronizeJobTaskStub.reset()
     createFileSynchronizeJobTaskStub.throws()
@@ -427,11 +438,11 @@ describe('UserFileService', () => {
 
   describe('#synchronizeFile', () => {
     it('should synchronize file', async () => {
-      const node = {
-        dxid: DXID,
-        name: NAME,
-        project: PROJECT,
-      } as unknown as Node
+      const node = new Node()
+      node.dxid = DXID
+      node.name = NAME
+      node.project = PROJECT
+      node.scope = 'private'
       fileDescribeStub.returns({
         state: FILE_STATE_DX.CLOSED,
         size: 10,
@@ -451,12 +462,48 @@ describe('UserFileService', () => {
       })
     })
 
+    it('should synchronize file in space', async () => {
+      const node = new Node()
+      node.dxid = DXID
+      node.name = NAME
+      node.project = PROJECT
+      node.scope = 'space-1'
+      fileDescribeStub.returns({
+        state: FILE_STATE_DX.CLOSED,
+        size: 10,
+      })
+      nodeRepoFindOneOrFailStub.withArgs({ uid: UID }).returns(node)
+      createAndSendSpaceEventStub.reset()
+
+      const res = await getInstance().synchronizeFile(UID, false)
+
+      expect(res).to.be.true
+      expect(fileDescribeStub.calledOnce).to.be.true
+      expect(createNotificationStub.calledOnce).to.be.true
+      expect(createNotificationStub.firstCall.args[0]).deep.eq({
+        message: `File ${NAME} is closed`,
+        severity: SEVERITY.INFO,
+        action: NOTIFICATION_ACTION.FILE_CLOSED,
+        userId: USER.id,
+      })
+      expect(createAndSendSpaceEventStub.calledOnce).to.be.true
+      expect(createAndSendSpaceEventStub.firstCall.args[0]).deep.eq({
+        spaceId: 1,
+        userId: 0,
+        entity: {
+          type: 'userFile',
+          value: node,
+        },
+        activityType: SPACE_EVENT_ACTIVITY_TYPE.file_added,
+      })
+    })
+
     it('should synchronize file (challenge bot file)', async () => {
-      const node = {
-        dxid: DXID,
-        name: NAME,
-        project: PROJECT,
-      } as unknown as Node
+      const node = new Node()
+      node.dxid = DXID
+      node.name = NAME
+      node.project = PROJECT
+
       challengeBotFileDescribeStub.returns({
         state: FILE_STATE_DX.CLOSED,
         size: 10,
@@ -765,6 +812,7 @@ describe('UserFileService', () => {
       nodesHelper,
       entityService,
       nodeService,
+      spaceEventService,
     )
   }
 })

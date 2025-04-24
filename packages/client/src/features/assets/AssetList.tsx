@@ -75,8 +75,9 @@ export const AssetList = ({ homeScope, spaceId }: { homeScope?: HomeScope; space
               data-variant="primary"
               as="a"
               data-turbolinks="false"
-              href="/docs/assets"
+              href="/docs/guides/assets"
               data-testid="home-assets-create-link"
+              target="_blank"
             >
               <QuestionIcon height={13} /> How to create assets
             </Button>

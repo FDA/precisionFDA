@@ -132,6 +132,7 @@ export interface IExecution {
   workflow_uid?: string
   platform_tags?: null
   workflow_title?: string
+  snapshot: boolean
 }
 
 // IExeuction's uid attribute can have the following prefixes

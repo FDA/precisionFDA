@@ -55,6 +55,7 @@ class App < ApplicationRecord
   before_update { |app| app.update_series_deleted_status(app) if app.deleted_changed? }
 
   delegate :workstation_app_state?, to: :job, allow_nil: true
+  delegate :snapshot, to: :app_series
 
   attr_accessor :current_user
 

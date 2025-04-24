@@ -14,6 +14,7 @@
 #  verified               :boolean          default(FALSE), not null
 #  featured               :boolean          default(FALSE)
 #  deleted                :boolean          default(FALSE), not null
+#  snapshot               :boolean          default(FALSE), not null
 #
 
 class AppSeries < ApplicationRecord

@@ -46,7 +46,7 @@ export class GuestAccessEmailHandler
     return {
       emailType: EMAIL_TYPES.guestAccessEmail,
       to: receiver.email,
-      bcc: config.supportEmail,
+      bcc: config.pfdaEmail,
       body,
       subject: 'Your precisionFDA access request',
     }
