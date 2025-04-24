@@ -77,7 +77,7 @@ export const OverviewPublic = () => {
 
       <OverviewCenterSection>
         <InfoRow>
-          <Button data-variant="primary" as={Link} to="/docs">
+          <Button data-variant="primary" as="a" href="/docs" target="_blank">
             Learn more about precisionFDA
           </Button>
           <a href="mailto:precisionfda@fda.hhs.gov">Feedback</a>

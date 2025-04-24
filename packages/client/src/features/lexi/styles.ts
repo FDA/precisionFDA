@@ -70,8 +70,9 @@ export const StyledInnerHTML = styled.div`
   }
 
   p {
-      margin: 1em 0;
-      line-height: 1.5;
+    margin: 0 0;
+    line-height: 1.5rem;
+    min-height: 1.5rem;
   }
   p code {
       background-color: #eee;
@@ -125,5 +126,36 @@ export const StyledInnerHTML = styled.div`
       text-align: center;
       color: grey;
   }
+  pre {
+    color: var(--c-text-700);
+    display: block;
+    position: relative;
+    padding-left: 3em;
+  }
 
+  pre:before {
+    padding: 0;
+  }
+  pre > span[data-gutter] {
+    display: block;
+    position: relative;
+    padding-left: 0.5em;
+
+  }
+  pre > span[data-gutter]::before {
+    content: attr(data-gutter);
+    display: inline-block;
+    position: absolute;
+    left: -2.5em;
+    width: 2em;
+    min-width: 2em;
+    color: #888;
+    text-align: right;
+    user-select: none;
+    font-variant-numeric: tabular-nums;
+    background-color: #eee;
+    top: 0;
+    padding-right: 4px;
+    border-right: 1px solid #ccc;
+  }
 `

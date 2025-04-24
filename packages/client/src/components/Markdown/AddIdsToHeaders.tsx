@@ -9,13 +9,13 @@ export function AddIdsToHeaders({ docRef, content, as = 'div' }: { docRef: any, 
       const headings = docRef.current.querySelectorAll('h1, h2, h3')
 
       headings.forEach((heading: any) => {
-        // eslint-disable-next-line no-param-reassign
         heading.id = heading.getAttribute('id') || heading.innerText
           .toLowerCase()
           // eslint-disable-next-line no-useless-escape
-          .replace(/[`~!@#$%^&*()_|+\-=?;:'",.<>\{\}\[\]\\\/]/gi, '')
+          .replace(/[`~!@#$%^&*()_|+\-=?;:'\",.<>\{\}\[\]\\\/]/gi, '')
           .replace(/ +/g, '-')
       })
+
     }
   }, [docRef])
   

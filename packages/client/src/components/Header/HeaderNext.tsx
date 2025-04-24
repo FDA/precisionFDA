@@ -117,7 +117,7 @@ export const UserMenu = ({
     <StyledLink data-turbolinks="false" href="/guidelines" onClick={() => hide()}>
       Guidelines
     </StyledLink>
-    <StyledLink as={Link} to="/docs" data-turbolinks="false" onClick={() => hide()}>
+    <StyledLink as="a" target="_blank" href="/docs" data-turbolinks="false" onClick={() => hide()}>
       Docs
     </StyledLink>
     <StyledDivider />

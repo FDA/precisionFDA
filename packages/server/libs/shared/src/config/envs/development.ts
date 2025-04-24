@@ -66,5 +66,5 @@ export const config: ConfigOverride = () => ({
   },
   bullBoardEnabled: true,
   nestjsDevtoolsEnabled: true,
-  challengeProposalRecipients: [defaultConfig.supportEmail],
+  challengeProposalRecipients: [],
 })

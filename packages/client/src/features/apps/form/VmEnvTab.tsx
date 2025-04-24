@@ -41,7 +41,7 @@ const Label = styled.label`
 const Area = styled.div`
   max-width: 500px;
 `
-const LearnMoreLink = styled(Link)`
+const LearnMoreLink = styled.a`
   font-size: 12px;
   max-width: fit-content;
 `
@@ -83,7 +83,7 @@ const AssetSelect = ({
     <Area>
       <LabelRow>
         <Label>Assets</Label>
-        <LearnMoreLink to="/docs/creating-apps#dev-assets" target="_blank">
+        <LearnMoreLink href="/docs/guides/assets#creating-new-assets" target="_blank">
           Learn More
         </LearnMoreLink>
       </LabelRow>
@@ -207,10 +207,10 @@ export const VmEnvTab = ({ control }: { control: Control<CreateAppForm> }) => {
     <FormFields>
       <Help>
         <span>Need help?</span>
-        <Link target="_blank" to="/docs/creating-apps#dev-vm-env">
+        <a target="_blank" href="/docs/guides/creating-apps#vm-environment">
           {' '}
           Learn more about the virtual machine environment
-        </Link>
+        </a>
       </Help>
       <FieldGroup>
         <Controller
@@ -236,7 +236,7 @@ export const VmEnvTab = ({ control }: { control: Control<CreateAppForm> }) => {
             </SelectFieldLabel>
           )}
         />
-        <LearnMoreLink to="/docs/creating-apps#app-instance-types" target="_blank">
+        <LearnMoreLink href="/docs/guides/creating-apps#available-instance-types" target="_blank">
           See full list
         </LearnMoreLink>
       </FieldGroup>
