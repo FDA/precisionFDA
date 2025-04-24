@@ -29,7 +29,7 @@ import { FileDescribeResponse } from '@shared/platform-client/platform-client.re
 import { CHALLENGE_BOT_PLATFORM_CLIENT } from '@shared/platform-client/providers/platform-client.provider'
 import { createFileSynchronizeJobTask } from '@shared/queue'
 import { UserCtx } from '@shared/types'
-import { EntityScope } from '@shared/types/common'
+import { EntityScope, SpaceScope } from '@shared/types/common'
 import { TimeUtils } from '@shared/utils/time.utils'
 import { UserFileCreate } from '../domain/user-file-create'
 import { Folder } from '../folder.entity'
@@ -419,7 +419,7 @@ export class UserFileService {
     const user = await this.userRepo.findOneOrFail(this.user.id)
     const editableSpaces = await user.editableSpaces()
     const editableScopes = editableSpaces.map((space) => space.scope)
-    if (targetScope !== 'private' && editableScopes.indexOf(targetScope as any) === -1) {
+    if (targetScope !== 'private' && editableScopes.indexOf(targetScope as SpaceScope) === -1) {
       throw new PermissionError('You do not have permission to copy files to this scope')
     }
 
