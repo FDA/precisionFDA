@@ -2,19 +2,23 @@
   "folders": [
     {
       "name": "rails",
-      "path": "./packages/rails",
+      "path": "./packages/rails"
     },
     {
       "name": "client",
-      "path": "./packages/client",
+      "path": "./packages/client"
     },
     {
       "name": "server",
-      "path": "./packages/server",
+      "path": "./packages/server"
     },
     {
       "name": "cli",
-      "path": "./packages/cli",
+      "path": "./packages/cli"
     },
-  ],
+    {
+      "name": "docs",
+      "path": "./packages/docs"
+    }
+  ]
 }

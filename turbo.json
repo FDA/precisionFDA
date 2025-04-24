@@ -8,6 +8,9 @@
     "client:build": {
       "dependsOn": ["server:build"]
     },
+    "docs:build": {
+      "dependsOn": ["client:build"]
+    },
     "dev": {
       "cache": false,
       "persistent": true

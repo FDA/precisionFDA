@@ -27,7 +27,6 @@ export const SPACE_FILES_ACTIONS = {
 export const SORT_ASC = 'ASC'
 export const SORT_DESC = 'DESC'
 
-export const SUPPORT_EMAIL = 'precisionfda-support@dnanexus.com'
 export const PFDA_EMAIL = 'precisionfda@fda.hhs.gov'
 
 export const SPACE_PREFIX = 'space-'

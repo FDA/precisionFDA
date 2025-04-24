@@ -1,0 +1,13 @@
+{
+  "title": "Design Patterns for Apps and Workflows",
+  "pages": [
+    "introduction",
+    "download-cli",
+    "first-app",
+    "second-app",
+    "utility-apps",
+    "first-workflow",
+    "second-workflow",
+    "database-apps"
+  ]
+}

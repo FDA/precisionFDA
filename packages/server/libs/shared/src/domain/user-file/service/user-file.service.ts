@@ -50,6 +50,8 @@ import {
 import { SpaceRepository } from '@shared/domain/space/space.repository'
 import { SPACE_MEMBERSHIP_ROLE } from '@shared/domain/space-membership/space-membership.enum'
 import { NodeService } from '@shared/domain/user-file/node.service'
+import { SpaceEventService } from '@shared/domain/space-event/space-event.service'
+import { SPACE_EVENT_ACTIVITY_TYPE } from '@shared/domain/space-event/space-event.enum'
 
 @Injectable()
 export class UserFileService {
@@ -70,6 +72,7 @@ export class UserFileService {
     private readonly nodeHelper: NodeHelper,
     private readonly entityService: EntityService,
     private readonly nodeService: NodeService,
+    private readonly spaceEventService: SpaceEventService,
   ) {}
 
   /**
@@ -130,6 +133,18 @@ export class UserFileService {
     node.state = fileDescribe.state as FILE_STATE
     node.fileSize = fileDescribe.size
     await this.em.flush()
+
+    if (node.isInSpace()) {
+      await this.spaceEventService.createAndSendSpaceEvent({
+        spaceId: node.getSpaceId(),
+        userId: this.user.id,
+        entity: {
+          type: 'userFile',
+          value: node as UserFile,
+        },
+        activityType: SPACE_EVENT_ACTIVITY_TYPE.file_added,
+      })
+    }
 
     try {
       await this.notificationService.createNotification({

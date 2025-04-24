@@ -7,7 +7,6 @@ import { NodeCopyInputDTO } from '@shared/domain/email/dto/node-copy-input.dto'
 import { InvitationToSpaceDTO } from '@shared/domain/email/dto/invitation-to-space.dto'
 import { JobEventDTO } from '@shared/domain/email/dto/job-event.dto'
 import { ChallengeProposalInputDTO } from '@shared/domain/email/dto/challenge-proposal.dto'
-import { SpaceEventDTO } from '@shared/domain/email/dto/space-event.dto'
 import { MemberChangedDTO } from '@shared/domain/email/dto/member-changed.dto'
 import { ChallengeOpenedDTO } from '@shared/domain/email/dto/challenge-opened.dto'
 import { SpaceChangedDTO } from '@shared/domain/email/dto/space-changed.dto'
@@ -17,10 +16,10 @@ import { UserProvisionedDto } from '@shared/domain/email/dto/user-provisioned.dt
 export const emailTypeToInputDtoMap = {
   [EMAIL_TYPES.emailWithoutTemplate]: EmptyEmailInputDTO, // emailWithoutTemplate
   [EMAIL_TYPES.jobFinished]: JobEventDTO, // jobFinished
-  [EMAIL_TYPES.newContentAdded]: SpaceEventDTO, // newContentAdded
+  [EMAIL_TYPES.newContentAdded]: ObjectIdInputDTO, // newContentAdded
   [EMAIL_TYPES.memberChangedAddedRemoved]: MemberChangedDTO, // memberChangedAddedRemoved
   [EMAIL_TYPES.spaceChanged]: SpaceChangedDTO, // spaceChanged
-  [EMAIL_TYPES.commentAdded]: SpaceEventDTO, // commentAdded
+  [EMAIL_TYPES.commentAdded]: ObjectIdInputDTO, // commentAdded
   [EMAIL_TYPES.challengeOpened]: ChallengeOpenedDTO, // challengeOpened
   [EMAIL_TYPES.challengePrereg]: ChallengeCreatedDTO, // challengePrereg
   [EMAIL_TYPES.jobTerminationWarning]: EmptyEmailInputDTO, // jobTerminationWarning

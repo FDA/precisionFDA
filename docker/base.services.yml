@@ -52,7 +52,18 @@ services:
         target: /precision-fda/dist
     working_dir: /precision-fda
     command: pnpm run watch:docker
-  # TODO(samuel) setup correct NODE_ENV here
+  docs:
+    container_name: docs
+    build:
+      context: ../packages/docs
+      dockerfile: ./docker/images/isolation.Dockerfile
+      args:
+        - FRONTEND_IMAGE_TAG=20.12.2-slim
+    ports:
+      - 4040:4040
+    volumes:
+      - ../cert.pem:/keys/cert.pem
+      - ../key.pem:/keys/key.pem
   nodejs-api:
     environment:
       - NODE_PATH_CERT=/keys/cert.pem
@@ -96,9 +107,11 @@ services:
       - 6379:6379
   nginx:
     image: nginx:1.27.0
+    container_name: nginx
     environment:
       - PROXY_PORT=3000
       - NODE_API_URL=${NODE_API_URL}
+      - DOCS_URL=${DOCS_URL}
       - RUBY_API_URL=${RUBY_API_URL}
     volumes:
       - ../cert.pem:/keys/cert.pem

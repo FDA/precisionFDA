@@ -33,7 +33,8 @@ namespace :apps do
     app_scope = Scopes::SCOPE_PUBLIC
 
     ActiveRecord::Base.transaction do
-      app_series = create_app_series(app_info["name"], created_by, app_scope)
+      app_type = app_info["httpsApp"].present? ? App::TYPE_HTTPS : App::TYPE_REGULAR
+      app_series = create_app_series(app_info["name"], created_by, app_scope, app_type)
       latest_revision_app = app_series.apps.order(revision: :desc).limit(1)[0]
       latest_revision = latest_revision_app&.revision.to_i
 
@@ -113,20 +114,21 @@ namespace :apps do
         code: nil,
         assets: assets,
         release: app_info.dig("runSpec", "release"),
-        entity_type: app_info["httpsApp"].present? ? App::TYPE_HTTPS : App::TYPE_REGULAR,
+        entity_type: app_type,
       )
 
       app_series.update!(latest_revision_app: app, latest_version_app: app, deleted: false)
     end
   end
 
-  def create_app_series(app_name, user, app_scope)
+  def create_app_series(app_name, user, app_scope, app_type)
     app_series_dxid = AppSeries.construct_dxid(user.username, app_name, app_scope)
 
     AppSeries.create_with(
       name: app_name,
       user: user,
       scope: app_scope,
+      snapshot: app_type == App::TYPE_HTTPS,
     ).find_or_create_by!(
       dxid: app_series_dxid,
     )
