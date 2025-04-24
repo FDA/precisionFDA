@@ -10,6 +10,7 @@ import { NodeRepository } from '@shared/domain/user-file/node.repository'
 import { JobRepository } from '@shared/domain/job/job.repository'
 import { NoteRepository } from '@shared/domain/note/note.repository'
 import { Uid } from '@shared/domain/entity/domain/uid'
+import { ComparisonRepository } from '@shared/domain/comparison/comparison.repository'
 
 @Injectable()
 export class PublishApiFacade {
@@ -19,6 +20,7 @@ export class PublishApiFacade {
     private readonly jobRepository: JobRepository,
     private readonly nodeRepository: NodeRepository,
     private readonly noteRepository: NoteRepository,
+    private readonly comparisonRepository: ComparisonRepository,
   ) {}
   async getPublishedTreeRoot(identifier: EntityIdentifier, type: EntityWithProvenanceType) {
     let entity = null
@@ -37,6 +39,10 @@ export class PublishApiFacade {
       case 'note':
         const [entityType, id] = identifier.split('-')
         entity = await this.noteRepository.findAccessibleOne({ id: Number(id) })
+        break
+      case 'comparison':
+        const [comparisonType, comparisonId] = identifier.split('-')
+        entity = await this.comparisonRepository.findAccessibleOne({ id: Number(comparisonId) })
         break
       default:
         throw new InvalidStateError('Invalid entity type')
