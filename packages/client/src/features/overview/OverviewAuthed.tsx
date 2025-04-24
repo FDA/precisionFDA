@@ -80,22 +80,22 @@ const GetStarted = ({ user }: { user?: IUser }) => {
       <SectionTitle>Getting Started</SectionTitle>
       <Hr />
       <div>
-        <Link data-turbolinks="false" to="/docs/introduction">
+        <a data-turbolinks="false" target="_blank" href="/docs/guides/introduction">
           Introduction to precisionFDA
-        </Link>
+        </a>
       </div>
       <div>
-        <Link data-turbolinks="false" to="/docs/files">
+        <a data-turbolinks="false" target="_blank" href="/docs/guides/files">
           Uploading Files &amp; Data
-        </Link>
+        </a>
       </div>
       <div>
-        <Link data-turbolinks="false" to="/docs/apps">
+        <a data-turbolinks="false" target="_blank" href="/docs/guides/apps">
           Running Apps
-        </Link>
+        </a>
       </div>
       <div>
-        <Link to="/docs/spaces">Collaborating with Spaces</Link>
+        <a href="/docs/guides/spaces" target="_blank">Collaborating with Spaces</a>
       </div>
       <div>
         <Link to="/home/files/file-GfkBx1j0Kj2Yj04FJVV0xXzF-2">Multi-omics App Library</Link>
@@ -268,7 +268,7 @@ export const OverviewAuthed = () => {
 
       <OverviewCenterSection>
         <InfoRow>
-          <Button data-variant="primary" as={Link} to="/docs">
+          <Button data-variant="primary" as="a" href="/docs" target="_blank">
             Learn more about precisionFDA
           </Button>
           <a href="mailto:precisionfda@fda.hhs.gov">Feedback</a>

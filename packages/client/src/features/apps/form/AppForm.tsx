@@ -307,10 +307,10 @@ export const AppForm = ({
           <PfTabContent $isShown={selectedSection === 'io'}>
             <Help>
               <span>Need help?</span>
-              <Link to="/docs/creating-apps#dev-io" target="_blank">
+              <a href="/docs/guides/creating-apps#input-and-output-spec" target="_blank">
                 {' '}
                 Learn more about app inputs and outputs
-              </Link>
+              </a>
             </Help>
             <Inputs
               control={control}
@@ -343,10 +343,10 @@ export const AppForm = ({
                   data-testid="script-editor">
                   <Help>
                     <span>Need help?</span>
-                    <Link to="/docs/creating-apps#dev-script" target="_blank">
+                    <a href="/docs/guides/creating-apps#app-script" target="_blank">
                       {' '}
                       Learn more about app scripts
-                    </Link>
+                    </a>
                   </Help>
                   <MonacoEditor
                     height="40vh"
