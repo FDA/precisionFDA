@@ -1,0 +1,8 @@
+{
+  "root": false,
+  "title": "Guides",
+  "description": "Learn how to use pFDA",
+  "icon": "Building2",
+  "defaultOpen": true,
+  "pages": ["introduction", "cli", "apps", "creating-apps", "files", "..."]
+}

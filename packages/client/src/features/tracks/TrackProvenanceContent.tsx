@@ -79,9 +79,9 @@ export const TrackHelp = () => {
   return (
     <Help>
       <span>Need help?</span>
-      <Link to="/docs/tracking" target="_blank">
+      <a to="/docs/guides/tracking" target="_blank">
         &nbsp;Learn more about tracking
-      </Link>
+      </a>
     </Help>
   )
 }

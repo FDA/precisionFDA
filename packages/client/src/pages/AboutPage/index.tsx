@@ -92,7 +92,7 @@ const AboutPage = () => {
             <PfTabTitle>Who</PfTabTitle>
             <div>The team behind the initiative</div>
           </PfTab>
-          <PfTab as={Link} to="/docs">
+          <PfTab as="a" href="/docs" target="_blank">
             <PfTabTitle>How</PfTabTitle>
             <div>Learn how to use the features</div>
           </PfTab>

@@ -35,6 +35,8 @@ RSpec.describe CopyService::NodeCopier, type: :service do
     before do
       file_two.reload
       folder_two.reload
+      allow(ActiveRecord::Base.connection).to receive(:commit_db_transaction)
+      stub_request(:post, "https://localhost:3001/emails/typed")
     end
 
     context "when copy from space to space" do

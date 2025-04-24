@@ -28,7 +28,6 @@ import { PFDAToastContainer } from './utils/PFDAToastContainer'
 
 const Admin = React.lazy(() => import('./features/admin'))
 const Home2 = React.lazy(() => import('./features/home'))
-const Docs = React.lazy(() => import('./features/docs'))
 const ChallengesList = React.lazy(() => import('./features/challenges/list/ChallengesList'))
 const Spaces = React.lazy(() => import('./features/spaces'))
 const CreateChallengePage = React.lazy(() => import('./features/challenges/form/CreateChallengePage'))
@@ -92,7 +91,6 @@ const router = createBrowserRouter([
       // Unprotected routes
       { index: true, element: <LandingPage /> },
       { path: 'about', element: <AboutPage /> },
-      { path: 'docs/*', element: <Docs /> },
       { path: 'challenges', element: <ChallengesList /> },
       { path: 'challenges/propose', element: <ProposeChallengePage /> },
       { path: 'challenges/:challengeId/*', element: <ChallengeDetailsLayout /> },

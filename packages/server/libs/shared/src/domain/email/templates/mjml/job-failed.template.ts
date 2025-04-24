@@ -60,7 +60,7 @@ export const jobCostLimitExceededTemplate = (data: JobFailedInputTemplate): stri
         <mj-text>
           There was an error running execution ${data.content.job.uid}. The execution failed after
           ${data.content.job.runTimeString} due to a limit being reached for any single execution's
-          compute cost consumption. Please email precisionfda-support@dnanexus.com if you wish to
+          compute cost consumption. Please email precisionfda@fda.hhs.gov if you wish to
           change your per-execution cost limit.
         </mj-text>
         <mj-text>
