@@ -165,9 +165,9 @@ export const PublishingPage = () => {
         <StyledCallout data-variant="info">
           Publishing items makes them publicly visible.
           <br />
-          <Link to="/docs/publishing" target="_blank">
+          <a href="/docs/guides/publishing" target="_blank">
             Review important information about publishing, and learn why it's a good idea to also publish related items.
-          </Link>
+          </a>
         </StyledCallout>
         <PublishingForm identifier={identifier!} treeRoot={treeRoot} />
       </StyledPageContainer>

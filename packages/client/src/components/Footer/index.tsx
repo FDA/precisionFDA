@@ -103,7 +103,7 @@ const PFDAFooter = () => (
                 <li><Link to="/" title="precisionFDA Home Page">precisionFDA</Link></li>
                 <li aria-hidden="true">|</li>
                 <li><Link to="/about">About</Link></li>
-                <li><Link to="/docs">Docs</Link></li>
+                <li><a href="/docs" target='_blank'>Docs</a></li>
                 <li><Link to="/terms" title="precisionFDA Terms of Service">Terms of Service</Link></li>
                 <li><Link to="/security" title="precisionFDA Security">Security Statement</Link></li>
                 <li><a data-turbolinks="false" href="/guidelines">Guidelines</a></li>

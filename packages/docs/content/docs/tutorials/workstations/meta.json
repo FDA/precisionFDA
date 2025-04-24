@@ -1,0 +1,14 @@
+{
+  "title": "Workstations & Databases",
+  "pages": [
+    "introduction",
+    "build-workstations",
+    "sass-studio",
+    "knime-workstation",
+    "data-cluster",
+    "backup-db-cluster",
+    "pfda-cli",
+    "workstations-databases",
+    "..."
+  ]
+}

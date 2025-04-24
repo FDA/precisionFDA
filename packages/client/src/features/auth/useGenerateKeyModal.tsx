@@ -102,9 +102,9 @@ const GenerateKey = ({ handleClose }: { handleClose: () => void }) => {
           <InfoCircleIcon height={15} />
           This key will expire in 24 hours
         </ExpirationInfo>
-        <Link target="_blank" to="/docs/cli">
+        <a target="_blank" href="/docs/guides/cli">
           CLI Documentation
-        </Link>
+        </a>
       </InfoRow>
       <StyledButtonRow>
         <Button data-variant="primary" onClick={copyToClipboard}>

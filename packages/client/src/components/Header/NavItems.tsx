@@ -13,7 +13,7 @@ import { PrismIcon } from '../icons/PrismIcon'
 import { ToolsIcon } from '../icons/ToolsIcon'
 import { GlobeIcon } from '../icons/GlobeIcon'
 import { QuestionIcon } from '../icons/QuestionIcon'
-import { SUPPORT_EMAIL } from '../../constants'
+import { PFDA_EMAIL } from '../../constants'
 
 export type SiteNavItemType =
   | {
@@ -103,8 +103,8 @@ export const siteNavItems: SiteNavItemType[] = [
     icon: BookIcon,
     iconHeight: 17,
     text: 'Documentation',
-    link: '/docs',
-    external: false,
+    alink: '/docs',
+    external: true,
   },
   {
     id: 'support',
@@ -112,7 +112,7 @@ export const siteNavItems: SiteNavItemType[] = [
     iconHeight: 17,
     text: 'Support',
     link: '',
-    alink: `mailto:${SUPPORT_EMAIL}`,
+    alink: `mailto:${PFDA_EMAIL}`,
     external: true,
   },
   {
