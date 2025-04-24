@@ -172,7 +172,7 @@ class SelectorModel
     else
       @error({
         type: "#{e.status}: #{e.statusText}"
-        message: "An unknown error occured. Please contact support at precisionfda-support@dnanexus.com"
+        message: "An unknown error occured. Please contact support at precisionfda@fda.hhs.gov"
       })
 
 class ObjectListModel

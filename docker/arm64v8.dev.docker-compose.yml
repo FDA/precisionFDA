@@ -9,6 +9,7 @@ volumes:
   yarn-deps-cache-client:
   yarn-deps-cache-nodejs-api:
   yarn-deps-cache-nodejs-worker:
+  yarn-deps-cache-docs:
 
 services:
   web:
@@ -50,6 +51,18 @@ services:
         target: /precision-fda/src
       - yarn-network-cache-client:${YARNV1_CACHE_DIR}
       - yarn-deps-cache-client:/precision-fda/node_modules
+  docs:
+    extends:
+      file: ./base.services.yml
+      service: docs
+    build:
+      context: ../packages/docs
+      dockerfile: ./docker/images/isolation.arm64v8.dev.Dockerfile
+    volumes:
+      - type: bind
+        source: ../packages/docs
+        target: /app
+      - yarn-deps-cache-docs:/app/node_modules
   nodejs-api:
     extends:
       file: ./base.services.yml

@@ -342,9 +342,9 @@ export const RunJobForm = ({ app, userJobLimit, spec }: { app: IApp; spec: AppSp
         <TipsRow>
           <QuestionIcon height={14} />
           Need help? &nbsp;
-          <Link to="/docs/apps#apps-run" target="_blank">
+          <a href="/docs/guides/apps#running-an-app" target="_blank">
             Learn more about running an app
-          </Link>
+          </a>
         </TipsRow>
         <Section>
           <SectionHeader>CONFIGURE</SectionHeader>

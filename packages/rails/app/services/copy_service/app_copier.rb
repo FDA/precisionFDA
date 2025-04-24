@@ -19,12 +19,15 @@ class CopyService
         opts[:createAppSeries] = properties["createAppSeries"] if properties.key?("createAppSeries")
         opts[:createAppRevision] = properties["createAppRevision"] if properties.key?("createAppRevision")
       end
+
       new_app = AppService.create_app(user, api, opts)
       ActiveRecord::Base.transaction do
         authorize_users(new_app, scope)
         user.tag(new_app.app_series, with: app.app_series.tags, on: :tags)
         new_app
       end
+      SpaceEventService.call(Space.from_scope(new_app.scope).id, user.id, nil, new_app, :app_added) if new_app.in_space?
+      new_app
     end
 
     private

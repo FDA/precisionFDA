@@ -96,7 +96,7 @@ describe('GuestAccessEmailHandler', () => {
 
     expect(result.emailType).to.eq(EMAIL_TYPES.guestAccessEmail)
     expect(result.to).to.eq(user.email)
-    expect(result.bcc).to.eq(config.supportEmail)
+    expect(result.bcc).to.eq(config.pfdaEmail)
     expect(result.subject).to.eq('Your precisionFDA access request')
     expect(result.body).to.contain('firstName')
     expect(result.body).to.contain('lastName')

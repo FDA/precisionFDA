@@ -36,9 +36,13 @@ RSpec.describe SubmissionsController, type: :controller do
   end
 
   describe "POST create" do
-    context "with invalid data" do
-      before { authenticate!(user1) }
+    before do
+      authenticate!(user1)
+      allow(ActiveRecord::Base.connection).to receive(:commit_db_transaction)
+      stub_request(:post, "https://localhost:3001/emails/typed")
+    end
 
+    context "with invalid data" do
       it "flashes a error" do
         post :create, params: { challenge_id: challenge.id, submission: { inputs: {}.to_json } }
         expect(flash[:error]).to be_present
@@ -46,8 +50,6 @@ RSpec.describe SubmissionsController, type: :controller do
     end
 
     context "with valid data" do
-      before { authenticate!(user1) }
-
       it "creates a job" do
         post :create, params: {
           challenge_id: challenge.id,
