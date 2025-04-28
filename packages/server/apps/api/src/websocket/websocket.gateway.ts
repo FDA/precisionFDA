@@ -14,8 +14,6 @@ import { COOKIE_SESSION_KEY } from '@shared/config/consts'
 import { database } from '@shared/database'
 import { OrmContextInterceptor } from '@shared/database/interceptor/orm-context.interceptor'
 import { Uid } from '@shared/domain/entity/domain/uid'
-import { EntityFetcherService } from '@shared/domain/entity/entity-fetcher.service'
-import { Job } from '@shared/domain/job/job.entity'
 import { JobLogService } from '@shared/domain/job/services/job-log.service'
 import { NotificationService } from '@shared/domain/notification/services/notification.service'
 import { Session } from '@shared/domain/session/session.entity'
@@ -30,6 +28,7 @@ import { PfdaWebSocket, WEBSOCKET_EVENTS } from '@shared/websocket/model/pfda-we
 import { IncomingMessage } from 'http'
 import { Server } from 'ws'
 import { UserContextTokenInterceptor } from '../user-context/interceptor/user-context-token.interceptor'
+import { JobRepository } from '@shared/domain/job/job.repository'
 
 @UseInterceptors(UserContextTokenInterceptor, OrmContextInterceptor)
 @WebSocketGateway()
@@ -43,7 +42,7 @@ export class WebsocketGateway implements OnGatewayDisconnect, OnGatewayInit, OnG
 
   constructor(
     private readonly notificationService: NotificationService,
-    private readonly entityFetcherService: EntityFetcherService,
+    private readonly jobRepository: JobRepository,
     private readonly jobLogService: JobLogService,
     private readonly em: SqlEntityManager,
   ) {}
@@ -147,7 +146,7 @@ export class WebsocketGateway implements OnGatewayDisconnect, OnGatewayInit, OnG
     @MessageBody() data: { jobUid: Uid<'job'> },
   ) {
     try {
-      const job = await this.entityFetcherService.getAccessibleByUid(Job, data.jobUid)
+      const job = await this.jobRepository.findAccessibleOne({ uid: data.jobUid })
       if (!job) {
         throw new PermissionError('User is not the owner of this job')
       }

@@ -10,14 +10,15 @@ import {
   Ref,
   Reference,
 } from '@mikro-orm/core'
-import { ScopedEntity } from '@shared/database/scoped.entity'
 import { Attachment } from '@shared/domain/attachment/attachment.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { STATIC_SCOPE } from '@shared/enums'
+import { ScopedEntity } from '@shared/database/scoped.entity'
+import { NoteRepository } from '@shared/domain/note/note.repository'
 
 export type NoteType = 'Discussion' | 'Answer'
 
-@Entity({ tableName: 'notes' })
+@Entity({ tableName: 'notes', repository: () => NoteRepository })
 @Filter({
   name: 'accessibleBy',
   cond: (args) => ({
