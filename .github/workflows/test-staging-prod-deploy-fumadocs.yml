@@ -1,0 +1,76 @@
+name: Test/Staging/Prod deploy FumaDocs ECS Service
+
+on:
+  workflow_dispatch:
+    inputs:
+      ENVIRONMENT:
+        description: Deployment Environment
+        type: choice
+        options:
+          - test_4711
+          - staging_4711
+          - staging
+          - production
+        default: test_4711
+      IMAGE_TAG:
+        description: FumaDocs ECR Image Tag
+        type: string
+        required: true
+
+run-name: FumaDocs deployment ENV=${{ inputs.ENVIRONMENT }} | IMAGE_TAG=${{ inputs.IMAGE_TAG }}
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.ENVIRONMENT }}
+
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Validate Branch for Deployment
+        run: |
+          if [[ "${{ inputs.ENVIRONMENT }}" =~ ^staging && "${{ github.ref }}" != "refs/heads/master" ]]; then
+            echo "❌ Staging deployments must be triggered from the master branch." >> $GITHUB_STEP_SUMMARY
+            exit 1
+          fi
+
+          if [[ "${{ inputs.ENVIRONMENT }}" == "production" && ! "${{ github.ref }}" =~ refs/heads/production/ ]]; then
+            echo "❌ Production deployments must be triggered from a branch starting with 'production/'." >> $GITHUB_STEP_SUMMARY
+            exit 1
+          fi
+
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install boto3
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ vars.REGION }}
+          role-to-assume: ${{ vars.ROLE_ECS_GITHUB_ARN }}
+
+      - name: Get AWS Account ID
+        id: get_account_id
+        run: |
+          ACCOUNT_ID=$(aws sts get-caller-identity --query "Account" --output text)
+          echo "AWS Account ID: $ACCOUNT_ID"
+          echo "ACCOUNT_ID=$ACCOUNT_ID" >> $GITHUB_ENV
+
+      - name: Run Deployment
+        env:
+          AWS_REGION: ${{ vars.REGION }}
+          ENVIRONMENT: ${{ vars.ENVIRONMENT }}
+          IMAGE_TAG: ${{ inputs.IMAGE_TAG }}
+        run: |
+          echo "🚀 Deploying to $ENVIRONMENT environment..."
+          python infra/deploy-ecs-service.py
