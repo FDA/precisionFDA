@@ -122,6 +122,7 @@ export class DiscussionsController {
     await this.discussionService.deleteComment(id, 'Answer')
   }
 
+  @HttpCode(201)
   @Post('/:discussionId/comments')
   async createDiscussionComment(
     @Param('discussionId', ParseIntPipe) discussionId: number,
@@ -135,17 +136,7 @@ export class DiscussionsController {
     return { id: result.id }
   }
 
-  @Get('/:discussionId/comments/:commentId')
-  async getDiscussionComment(@Param('commentId', ParseIntPipe) id: number) {
-    return await this.discussionService.getComment(id, 'Discussion')
-  }
-
-  @Get('/:discussionId/answers/:answerId/comments/:commentId')
-  async getAnswerComment(@Param('commentId', ParseIntPipe) id: number) {
-    return await this.discussionService.getComment(id, 'Answer')
-  }
-
-  @HttpCode(200)
+  @HttpCode(201)
   @Post('/:discussionId/answers/:answerId/comments')
   async createAnswerComment(
     @Param('answerId', ParseIntPipe) id: number,
@@ -164,13 +155,13 @@ export class DiscussionsController {
     return await this.discussionService.updateComment(commentId, body)
   }
 
-  @HttpCode(201)
+  @HttpCode(204)
   @Post('/:discussionId/follow')
   async followDiscussion(@Param('discussionId', ParseIntPipe) discussionId: number) {
     return await this.discussionService.followDiscussion(discussionId)
   }
 
-  @HttpCode(201)
+  @HttpCode(204)
   @Post('/:discussionId/unfollow')
   async unfollowDiscussion(@Param('discussionId', ParseIntPipe) discussionId: number) {
     return await this.discussionService.unfollowDiscussion(discussionId)
