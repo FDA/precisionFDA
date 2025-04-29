@@ -109,14 +109,6 @@ bash 'wipe tomcat cache' do
   notifies :restart, 'tomcat_service[gsrs]', :delayed
 end
 
-template "#{node[:gsrs][:tomcat_path]}/webapps/ROOT/WEB-INF/classes/application.yml" do
-  source 'gsrs/application.yml.erb'
-  owner node[:gsrs][:tomcat_user]
-  group node[:gsrs][:tomcat_grop]
-  mode 0o644
-  notifies :restart, 'tomcat_service[gsrs]', :delayed
-end
-
 template "#{node[:gsrs][:tomcat_path]}/webapps/frontend/WEB-INF/classes/static/assets/data/config.json" do
   source 'gsrs/config.json.erb'
   owner node[:gsrs][:tomcat_user]
