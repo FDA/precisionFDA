@@ -1,6 +1,5 @@
 import { Reference } from '@mikro-orm/core'
 import { SqlEntityManager } from '@mikro-orm/mysql'
-import { EntityFetcherService } from '@shared/domain/entity/entity-fetcher.service'
 import { EntityService } from '@shared/domain/entity/entity.service'
 import { Event } from '@shared/domain/event/event.entity'
 import * as eventHelper from '@shared/domain/event/event.helper'
@@ -35,6 +34,7 @@ import { Space } from '@shared/domain/space/space.entity'
 import { SpaceEventService } from '@shared/domain/space-event/space-event.service'
 import { SPACE_EVENT_ACTIVITY_TYPE } from '@shared/domain/space-event/space-event.enum'
 
+//TODO: PFDA-6214 - uncomment the skip when the user-file service is fixed.
 describe('UserFileService', () => {
   const USER_ID = 0
 
@@ -129,23 +129,18 @@ describe('UserFileService', () => {
     createNotification: createNotificationStub,
   } as unknown as NotificationService
 
-  const getAccessibleByIdsStub = stub()
-  const getAccessibleByUidStub = stub()
-  const getAccessibleByIdStub = stub()
-  const getEditableSpacesStub = stub()
-  const getEditableStub = stub()
-  const entityFetcherService = {
-    getAccessibleByIds: getAccessibleByIdsStub,
-    getAccessibleByUid: getAccessibleByUidStub,
-    getAccessibleById: getAccessibleByIdStub,
-    getEditableSpaces: getEditableSpacesStub,
-    getEditable: getEditableStub,
-  } as unknown as EntityFetcherService
+  const findAccessibleStub = stub()
+  const findAccessibleOneStub = stub()
+  const findEditableStub = stub()
+  const findEditableOneStub = stub()
+
+  const editableSpacesStub = stub()
 
   const USER = {
     id: USER_ID,
     isSiteAdmin: isSiteAdminStub,
     isChallengeAdmin: isChallengeAdminStub,
+    editableSpaces: editableSpacesStub,
   }
   const USER_CTX: UserCtx = { ...USER, accessToken: 'accessToken', dxuser: 'dxuser' }
 
@@ -154,6 +149,7 @@ describe('UserFileService', () => {
     findOneOrFail: fileRepoFindOneOrFailStub,
     findOne: fileRepoFindOneStub,
     count: fileRepoCountStub,
+    findEditable: findEditableStub,
   } as unknown as UserFileRepository
   const userRepository = {
     findOneOrFail: userRepoFindOneOrFailStub,
@@ -164,6 +160,10 @@ describe('UserFileService', () => {
   const nodeRepository = {
     findOneOrFail: nodeRepoFindOneOrFailStub,
     loadIfAccessibleByUser: nodeLoadIfAccessibleByUserStub,
+    findEditable: findEditableStub,
+    findAccessible: findAccessibleStub,
+    findAccessibleOne: findAccessibleOneStub,
+    findEditableOne: findEditableOneStub,
   } as unknown as NodeRepository
 
   const transactionalStub = sinon.stub()
@@ -258,8 +258,15 @@ describe('UserFileService', () => {
     createFileSynchronizeJobTaskStub.reset()
     createFileSynchronizeJobTaskStub.throws()
 
-    getAccessibleByIdsStub.reset()
-    getAccessibleByIdsStub.throws()
+    findEditableStub.reset()
+    findEditableStub.throws()
+    findAccessibleStub.reset()
+    findAccessibleStub.throws()
+
+    findEditableOneStub.reset()
+    findEditableOneStub.throws()
+    findAccessibleOneStub.reset()
+    findAccessibleOneStub.throws()
 
     fileDownloadLinkStub.reset()
     fileDownloadLinkStub.throws()
@@ -294,18 +301,6 @@ describe('UserFileService', () => {
 
     getEntityDownloadLinkStub.reset()
     getEntityDownloadLinkStub.throws()
-
-    getAccessibleByUidStub.reset()
-    getAccessibleByUidStub.throws()
-
-    getAccessibleByIdStub.reset()
-    getAccessibleByIdStub.throws()
-
-    getEditableSpacesStub.reset()
-    getEditableSpacesStub.throws()
-
-    getEditableStub.reset()
-    getEditableStub.throws()
 
     removeTaggingsStub.reset()
     removeTaggingsStub.throws()
@@ -543,7 +538,7 @@ describe('UserFileService', () => {
         { id: 234, uid: 'file-234-1', dxid: 'file-234', name: 'name-234', ...commonNode },
       ])
 
-      getAccessibleByIdsStub.returns([{} as UserFile, {} as UserFile])
+      findAccessibleStub.returns([{} as UserFile, {} as UserFile])
       getNodePathStub.withArgs(match.any, match.has('id', 123)).returns('file-123-1_path')
       getNodePathStub.withArgs(match.any, match.has('id', 234)).returns('file-234-1_path')
 
@@ -596,7 +591,7 @@ describe('UserFileService', () => {
     it("user doesn't have access to at least one file", async () => {
       loadNodesStub.returns([{ name: 'object_1' }, { name: 'object_2' }])
 
-      getAccessibleByIdsStub.returns([{} as UserFile])
+      findAccessibleStub.returns([{} as UserFile])
 
       await expect(getInstance().composeFilesForBulkDownload([10, 20])).to.be.rejectedWith(
         PermissionError,
@@ -638,11 +633,12 @@ describe('UserFileService', () => {
 
     beforeEach(() => {
       getEntityDownloadLinkStub.withArgs(FILE, FILE.name, OPTIONS).resolves('LINK')
-      getAccessibleByUidStub.withArgs(Node, FILE_UID).resolves(FILE)
+      findAccessibleOneStub.withArgs(FILE_UID).resolves(FILE)
     })
 
     it('should not catch error from entity service', async () => {
       const error = new Error('my error')
+      findAccessibleOneStub.withArgs({ uid: FILE_UID }).resolves(FILE)
       getEntityDownloadLinkStub.reset()
       getEntityDownloadLinkStub.throws(error)
 
@@ -651,13 +647,14 @@ describe('UserFileService', () => {
 
     it('should not catch error from entity fetcher', async () => {
       const error = new Error('my error')
-      getAccessibleByUidStub.reset()
-      getAccessibleByUidStub.throws(error)
+      findAccessibleOneStub.reset()
+      findAccessibleOneStub.throws(error)
 
       await expect(getInstance().getDownloadLinkForUid(FILE_UID, OPTIONS)).to.be.rejectedWith(error)
     })
 
     it('should return result from entity service', async () => {
+      findAccessibleOneStub.withArgs({ uid: FILE_UID }).resolves(FILE)
       const res = await getInstance().getDownloadLinkForUid(FILE_UID, OPTIONS)
 
       expect(res).to.eq('LINK')
@@ -665,7 +662,7 @@ describe('UserFileService', () => {
 
     it('should throw an error if file is not in CLOSED state', async () => {
       const openFile = { ...FILE, state: FILE_STATE_DX.OPEN } as unknown as UserFile
-      getAccessibleByUidStub.withArgs(Node, FILE_UID).resolves(openFile)
+      findAccessibleOneStub.withArgs({ uid: FILE_UID }).resolves(openFile)
 
       await expect(getInstance().getDownloadLinkForUid(FILE_UID, OPTIONS)).to.be.rejectedWith(
         Error,
@@ -695,15 +692,15 @@ describe('UserFileService', () => {
     } as unknown as Folder
 
     it('should return empty array if nodes are not accessible', async () => {
-      getAccessibleByIdsStub.returns([])
-
+      findAccessibleStub.resolves([])
       const res = await getInstance().listSelectedFiles([1, 2])
       expect(res).to.deep.eq([])
     })
 
     it('should return accessible files', async () => {
-      getAccessibleByIdsStub
-        .withArgs(Node, [file1.id, folder2.id], {
+      findAccessibleStub
+        .withArgs({
+          id: [file1.id, folder2.id],
           stiType: { $in: [FILE_STI_TYPE.USERFILE, FILE_STI_TYPE.FOLDER] },
         })
         .returns([file1, folder2])
@@ -738,7 +735,7 @@ describe('UserFileService', () => {
     } as unknown as UserFile
 
     it('should throw error if user does not have access to target space', async () => {
-      getEditableSpacesStub.returns([])
+      editableSpacesStub.returns([])
       const uid = 'file-uid-1'
       await expect(getInstance().validateCopyFiles([uid], `space-1`)).to.be.rejectedWith(
         PermissionError,
@@ -747,9 +744,9 @@ describe('UserFileService', () => {
     })
 
     it('should return editable files which exist in the target space', async () => {
-      getEditableSpacesStub.returns(['space-1'])
-      getEditableStub
-        .withArgs(UserFile, {
+      editableSpacesStub.returns([{ scope: 'space-1' }])
+      findEditableStub
+        .withArgs({
           dxid: { $in: [FILE_DXID1, FILE_DXID2, FILE_DXID3] },
           scope: SPACE,
         })
@@ -808,7 +805,6 @@ describe('UserFileService', () => {
       fileRepository,
       userRepository,
       spaceRepository,
-      entityFetcherService,
       nodesHelper,
       entityService,
       nodeService,

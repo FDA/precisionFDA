@@ -2,10 +2,11 @@ import { Entity, ManyToOne, PrimaryKey, Property, Ref, Reference } from '@mikro-
 import { DxId } from '@shared/domain/entity/domain/dxid'
 import { Uid } from '@shared/domain/entity/domain/uid'
 import { User } from '@shared/domain/user/user.entity'
-import { BaseEntity } from '../../../database/base.entity'
+import { BaseEntity } from '@shared/database/base.entity'
 import { WorkflowSpec } from '../model/workflow-spec'
+import WorkflowRepository from '@shared/domain/workflow/entity/workflow.repository'
 
-@Entity({ tableName: 'workflows' })
+@Entity({ tableName: 'workflows', repository: () => WorkflowRepository })
 export class Workflow extends BaseEntity {
   @PrimaryKey()
   id: number

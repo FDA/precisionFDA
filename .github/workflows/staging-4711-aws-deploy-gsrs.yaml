@@ -6,11 +6,11 @@ on:
       GSRS_BRANCH:
         description: GSRS Revision
         type: string
-        default: gsrs_241211
+        default: gsrs_250425
       GSRS_DATABASE_NAME:
         description: GSRS Database and Index Name
         type: string
-        default: ixginas20240911
+        default: ixginas20250306
       LT_VERSION:
         description: Launch Template Version
         type: string

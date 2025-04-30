@@ -1,4 +1,4 @@
-import { PaginationDto, SortDefinition } from '@shared/domain/entity/domain/pagination.dto'
+import { PaginationDTO, SortDefinition } from '@shared/domain/entity/domain/pagination.dto'
 import { IsInt, IsOptional, ValidateNested } from 'class-validator'
 import { Type } from 'class-transformer'
 import { Expert } from '@shared/domain/expert/expert.entity'
@@ -10,7 +10,8 @@ class ExpertFilter {
   @IsInt()
   year: number
 }
-export class ExpertPaginationDTO extends PaginationDto<Expert> {
+
+export class ExpertPaginationDTO extends PaginationDTO<Expert> {
   @IsOptional()
   @ValidateNested()
   @Type(() => ExpertFilter)
