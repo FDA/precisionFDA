@@ -29,7 +29,7 @@ for row in $users; do
 
     echo "Import user: $username ; $email"
     curl -H "AUTHENTICATION_USERNAME: $username" -H "AUTHENTICATION_EMAIL: $email" \
-        'http://localhost:8080/ginas/app/api/v1/buildInfo' -o /dev/null -s -w "%{http_code}\n"
+        'http://localhost:8080/substances/api/v1/buildInfo' -o /dev/null -s -w "%{http_code}\n"
 
     sleep 0.2
 done

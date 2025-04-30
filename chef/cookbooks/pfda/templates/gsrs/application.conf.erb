@@ -43,7 +43,7 @@ spring.datasource.driverClassName="org.mariadb.jdbc.Driver"
 spring.datasource.url="<%= @GSRS_DATABASE_URL %>"
 spring.datasource.username="<%= @GSRS_DATABASE_USERNAME %>"
 spring.datasource.password="<%= @GSRS_DATABASE_PASSWORD %>"
-spring.datasource.hikari.maximum-pool-size= 500 #maximum pool size
+spring.datasource.maximum-pool-size=50
 
 # Spring Boot Config
 spring.jpa.hibernate.ddl-auto=none  #### THIS IS VERY IMPORTANT, OTHERWISE Hibernate will WIPE OUT our database

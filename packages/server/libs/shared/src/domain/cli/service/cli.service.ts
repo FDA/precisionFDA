@@ -1,6 +1,5 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Injectable } from '@nestjs/common'
-import { App } from '@shared/domain/app/app.entity'
 import {
   CliAppDescribeDTO,
   CliDbClusterDescribeDTO,
@@ -18,24 +17,19 @@ import { DiscussionAttachment } from '@shared/domain/discussion/discussion.types
 import { DiscussionService } from '@shared/domain/discussion/services/discussion.service'
 import { DxId } from '@shared/domain/entity/domain/dxid'
 import { Uid } from '@shared/domain/entity/domain/uid'
-import { EntityFetcherService } from '@shared/domain/entity/entity-fetcher.service'
-import { Job } from '@shared/domain/job/job.entity'
 import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
 import { SPACE_MEMBERSHIP_ROLE } from '@shared/domain/space-membership/space-membership.enum'
 import { Space } from '@shared/domain/space/space.entity'
 import { getScopeFromSpaceId } from '@shared/domain/space/space.helper'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { Folder } from '@shared/domain/user-file/folder.entity'
-import { Node } from '@shared/domain/user-file/node.entity'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { FILE_STI_TYPE } from '@shared/domain/user-file/user-file.types'
-import { Workflow } from '@shared/domain/workflow/entity/workflow.entity'
 import { STATIC_SCOPE } from '@shared/enums'
 import { InvalidStateError, NotFoundError, PermissionError } from '@shared/errors'
 import { PlatformClient } from '@shared/platform-client'
 import { SCOPE } from '@shared/types/common'
 import { CliCreateDiscussionDTO } from '@shared/domain/cli/dto/cli-create-discussion.dto'
-import { Asset } from '@shared/domain/user-file/asset.entity'
 import { CliCreateReplyDTO } from '@shared/domain/cli/dto/cli-create-reply.dto'
 import { Discussion } from '@shared/domain/discussion/discussion.entity'
 import { Answer } from '@shared/domain/answer/answer.entity'
@@ -47,19 +41,29 @@ import { EntityLinkService } from '@shared/domain/entity/entity-link/entity-link
 import { getNodePath } from '@shared/domain/user-file/user-file.helper'
 import { UpdateDiscussionDTO } from '@shared/domain/discussion/dto/update-discussion.dto'
 import { UpdateAnswerDTO } from '@shared/domain/discussion/dto/update-answer.dto'
-import { DbCluster } from '@shared/domain/db-cluster/db-cluster.entity'
 import { CommentDTO } from '@shared/domain/discussion/dto/comment.dto'
 import { AnswerDTO } from '@shared/domain/discussion/dto/answer.dto'
 import { DiscussionDTO } from '@shared/domain/discussion/dto/discussion.dto'
+import { NodeRepository } from '@shared/domain/user-file/node.repository'
+import { AppRepository } from '@shared/domain/app/app.repository'
+import { JobRepository } from '@shared/domain/job/job.repository'
+import WorkflowRepository from '@shared/domain/workflow/entity/workflow.repository'
+import { DbClusterRepository } from '@shared/domain/db-cluster/db-cluster.repository'
+import DiscussionRepository from '@shared/domain/discussion/discussion.repository'
 
 @Injectable()
 export class CliService {
   constructor(
     private readonly em: SqlEntityManager,
     private readonly user: UserContext,
-    private readonly entityFetcherService: EntityFetcherService,
     private readonly dbclusterService: DbClusterService,
+    private readonly dbclusterRepository: DbClusterRepository,
+    private readonly nodeRepository: NodeRepository,
+    private readonly appRepository: AppRepository,
+    private readonly jobRepository: JobRepository,
+    private readonly workflowRepository: WorkflowRepository,
     private readonly discussionService: DiscussionService,
+    private readonly discussionRepository: DiscussionRepository,
     private readonly platformClient: PlatformClient,
     private readonly entityLinkService: EntityLinkService,
   ) {}
@@ -91,12 +95,8 @@ export class CliService {
   }
 
   private async describeFile(entityId: Uid<'file'>) {
-    // why isn't the type Node ??
-    // populate has to be here, I wasn't able to make it work otherwise.
-    const file = await this.entityFetcherService.getAccessibleByUid(
-      Node,
-      entityId,
-      {},
+    const file = await this.nodeRepository.findAccessibleOne(
+      { uid: entityId },
       { populate: ['taggings.tag', 'user'] },
     )
     if (!file) {
@@ -116,7 +116,7 @@ export class CliService {
   }
 
   private async describeFolder(id: number) {
-    const folder = await this.entityFetcherService.getAccessibleById(Folder, id)
+    const folder = await this.nodeRepository.findAccessibleOne({ id })
     if (!folder) {
       throw new NotFoundError('Folder not found or not accessible')
     }
@@ -125,7 +125,7 @@ export class CliService {
   }
 
   private async describeWorkflow(uid: Uid<'workflow'>) {
-    const workflow = await this.entityFetcherService.getAccessibleByUid(Workflow, uid)
+    const workflow = await this.workflowRepository.findAccessibleOne({ uid })
     if (!workflow) {
       throw new NotFoundError('Workflow not found or not accessible')
     }
@@ -137,7 +137,7 @@ export class CliService {
   }
 
   private async describeApp(entityId: Uid<'app'>) {
-    const app = await this.entityFetcherService.getAccessibleByUid(App, entityId)
+    const app = await this.appRepository.findAccessibleOne({ uid: entityId })
     if (!app) {
       throw new NotFoundError('App not found or not accessible')
     }
@@ -149,10 +149,8 @@ export class CliService {
   }
 
   private async describeExecution(entityId: Uid<'job'>) {
-    const execution = await this.entityFetcherService.getAccessibleByUid(
-      Job,
-      entityId,
-      {},
+    const execution = await this.jobRepository.findAccessibleOne(
+      { uid: entityId },
       // needed when the job is described by non-owner
       { populate: ['user'] },
     )
@@ -194,12 +192,7 @@ export class CliService {
   }
 
   async describeDbCluster(dbClusterUid: Uid<'dbcluster'>) {
-    const dbCluster = await this.entityFetcherService.getAccessibleByUid(
-      DbCluster,
-      dbClusterUid,
-      {},
-      { populate: ['taggings.tag', 'user', 'properties'] },
-    )
+    const dbCluster = await this.dbclusterRepository.findAccessibleOne({ uid: dbClusterUid })
     if (!dbCluster) {
       throw new NotFoundError('Database cluster not found or not accessible')
     }
@@ -278,11 +271,11 @@ export class CliService {
   }
 
   async getJobScope(jobDxid: DxId<'job'>) {
-    const jobs: Job[] = await this.entityFetcherService.getAccessible('Job', { dxid: jobDxid })
-    if (jobs.length !== 1) {
+    const job = await this.jobRepository.findAccessibleOne({ dxid: jobDxid })
+    if (!job) {
       throw new NotFoundError('Job not found or not accessible')
     }
-    return { scope: jobs[0].scope }
+    return { scope: job.scope }
   }
 
   async findNodes(input: CliNodeSearchDTO) {
@@ -412,7 +405,7 @@ export class CliService {
   async editDiscussion(discussionId: number, body: CliEditDiscussionDTO) {
     const newAttachments = await this.transformAttachments(body.attachments)
 
-    const discussion = await this.entityFetcherService.getEditableById(Discussion, discussionId)
+    const discussion = await this.discussionRepository.findEditableOne({ id: discussionId })
     if (!discussion) {
       throw new NotFoundError('Discussion not found or not accessible')
     }
@@ -443,6 +436,7 @@ export class CliService {
     }
 
     await this.discussionService.updateDiscussion(discussionId, updateDTO)
+    //TODO-ludvik need the discussion entity here anyway, fetch from repo is required.
     return await this.entityLinkService.getUiLink(discussion)
   }
 
@@ -503,7 +497,7 @@ export class CliService {
     }
     // iterate over uids and get ids instead - access rights are checked in discussion service.
     for (const uid of body.files) {
-      const file = await this.entityFetcherService.getByUid(UserFile, uid)
+      const file = await this.nodeRepository.findOne({ uid, stiType: FILE_STI_TYPE.USERFILE })
       if (!file) {
         throw new NotFoundError(`File ${uid} not found or not accessible`)
       }
@@ -513,21 +507,21 @@ export class CliService {
       attachments.folders.push(id)
     }
     for (const uid of body.assets) {
-      const asset = await this.entityFetcherService.getByUid(Asset, uid)
+      const asset = await this.nodeRepository.findOne({ uid, stiType: FILE_STI_TYPE.ASSET })
       if (!asset) {
         throw new NotFoundError(`Asset ${uid} not found or not accessible`)
       }
       attachments.assets.push(asset.id)
     }
     for (const uid of body.apps) {
-      const app = await this.entityFetcherService.getByUid(App, uid)
+      const app = await this.appRepository.findOne({ uid })
       if (!app) {
         throw new NotFoundError(`App ${uid} not found or not accessible`)
       }
       attachments.apps.push(app.id)
     }
     for (const uid of body.jobs) {
-      const job = await this.entityFetcherService.getByUid(Job, uid)
+      const job = await this.jobRepository.findOne({ uid })
       if (!job) {
         throw new NotFoundError(`Job ${uid} not found or not accessible`)
       }

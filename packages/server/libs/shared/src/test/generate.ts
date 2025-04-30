@@ -50,6 +50,8 @@ import { STATIC_SCOPE } from '../enums'
 import { TASK_TYPE } from '../queue/task.input'
 import type { AnyObject, UserCtx } from '../types'
 import { UserExtras } from '@shared/domain/user/user-extras'
+import { Workflow } from '@shared/domain/workflow/entity/workflow.entity'
+import { DxId } from '@shared/domain/entity/domain/dxid'
 
 const chance = new Chance()
 
@@ -345,6 +347,28 @@ const workflowSeries = {
   },
 }
 
+const workflow = {
+  simple: (): Partial<InstanceType<typeof Workflow>> => {
+    const name = random.word()
+    const dxid = `workflow-${random.dxstr()}}` as DxId<'workflow'>
+    return {
+      dxid,
+      uid: `${dxid}-1` as UId,
+      name,
+      revision: 1,
+      scope: 'private',
+      spec: {
+        input_spec: {
+          stages: [],
+        },
+        output_spec: {
+          stages: [],
+        },
+      },
+    }
+  },
+}
+
 const job = {
   simple: (app: App): Partial<InstanceType<typeof Job>> => {
     const dxid = `job-${random.dxstr()}`
@@ -409,6 +433,7 @@ const userFile = {
       uid: `${dxid}-1` as UId,
       project: `project-${random.dxstr()}`,
       name: chance.name(),
+      fileSize: random.chance.integer({ min: 100, max: 10_000_000 }),
       scope: STATIC_SCOPE.PRIVATE,
       state: FILE_STATE_DX.CLOSED,
       parentId: 1,
@@ -423,6 +448,7 @@ const userFile = {
       uid: `${dxid}-1` as UId,
       project: `project-${random.dxstr()}`,
       name: chance.name(),
+      fileSize: random.chance.integer({ min: 100, max: 10_000_000 }),
       scope: STATIC_SCOPE.PRIVATE,
       state: FILE_STATE_DX.CLOSED,
       parentId: 1,
@@ -437,6 +463,7 @@ const userFile = {
       uid: `${dxid}-1` as UId,
       project: `project-${random.dxstr()}`,
       name: chance.name(),
+      fileSize: random.chance.integer({ min: 100, max: 10_000_000 }),
       scope: STATIC_SCOPE.PRIVATE,
       state: FILE_STATE_DX.CLOSED,
       parentType: PARENT_TYPE.JOB,
@@ -454,6 +481,7 @@ const userFile = {
       uid: `${dxid}-1` as UId,
       project: `project-${random.dxstr()}`,
       name: chance.name(),
+      fileSize: random.chance.integer({ min: 100, max: 10_000_000 }),
       scope: STATIC_SCOPE.PRIVATE,
       state: FILE_STATE_DX.CLOSED,
       parentType: PARENT_TYPE.COMPARISON,
@@ -471,6 +499,7 @@ const asset = {
       uid: `${dxid}-1` as UId,
       project: `project-${random.dxstr()}`,
       name: chance.name(),
+      fileSize: random.chance.integer({ min: 100, max: 10_000_000 }),
       scope: STATIC_SCOPE.PRIVATE,
       state: FILE_STATE_DX.CLOSED,
       stiType: FILE_STI_TYPE.ASSET,
@@ -646,6 +675,7 @@ const expert = {
     return {
       scope: STATIC_SCOPE.PUBLIC,
       state: EXPERT_STATE.OPEN,
+      image: chance.url(),
       meta: {
         _prefname: expertName,
         _about: `About - ${expertName}`,
@@ -749,5 +779,6 @@ export {
   tagging,
   user,
   userFile,
+  workflow,
   workflowSeries,
 }

@@ -1,4 +1,4 @@
-import { PaginationDto } from '@shared/domain/entity/domain/pagination.dto'
+import { PaginationDTO } from '@shared/domain/entity/domain/pagination.dto'
 import { Type } from 'class-transformer'
 import { IsOptional, IsString, ValidateNested } from 'class-validator'
 import { ENGINES, STATUSES } from '../db-cluster.enum'
@@ -41,7 +41,7 @@ class DbClusterFilter {
   tags?: string
 }
 
-export class DbClusterPaginationDTO extends PaginationDto<DbCluster> {
+export class DbClusterPaginationDTO extends PaginationDTO<DbCluster> {
   @IsOptional()
   scope: 'spaces' | EntityScope
 
