@@ -6,7 +6,7 @@ import { NotificationModule } from '@shared/domain/notification/notification.mod
 import { WebsocketGateway } from './websocket.gateway'
 
 @Module({
-  imports: [NotificationModule, AuthModule, JobModule, EntityModule],
+  imports: [NotificationModule, JobModule, AuthModule, EntityModule],
   providers: [WebsocketGateway],
 })
 export class WebsocketModule {}

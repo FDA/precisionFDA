@@ -22,10 +22,8 @@ import { User, USER_STATE } from '@shared/domain/user/user.entity'
 import { Vote } from '@shared/domain/vote/vote.entity'
 import { HOME_SCOPE, STATIC_SCOPE } from '@shared/enums'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
-import type { UserCtx } from '@shared/types'
 import * as errors from '../../../errors'
 import { Comment, CommentableType } from '../../comment/comment.entity'
-import { EntityFetcherService } from '../../entity/entity-fetcher.service'
 import { SPACE_MEMBERSHIP_ROLE } from '../../space-membership/space-membership.enum'
 import { getIdFromScopeName } from '../../space/space.helper'
 import type { DiscussionAttachment } from '../discussion.types'
@@ -43,57 +41,56 @@ import { CommentDTO } from '@shared/domain/discussion/dto/comment.dto'
 import { EntityScopeUtils } from '@shared/utils/entity-scope.utils'
 import { DiscussionFollow } from '@shared/domain/follow/discussion-follow.entity'
 import { AttachmentsDTO } from '@shared/domain/discussion/dto/attachments.dto'
+import { UserRepository } from '@shared/domain/user/user.repository'
+import AnswerRepository from '@shared/domain/answer/answer.repository'
+import { NodeRepository } from '@shared/domain/user-file/node.repository'
+import { AppRepository } from '@shared/domain/app/app.repository'
+import { JobRepository } from '@shared/domain/job/job.repository'
+import { NoteRepository } from '@shared/domain/note/note.repository'
+import { ComparisonRepository } from '@shared/domain/comparison/comparison.repository'
 
 @Injectable()
 export class DiscussionService {
   @ServiceLogger()
   private readonly logger: Logger
 
-  private readonly em: SqlEntityManager
-  private readonly userCtx: UserCtx
-  private readonly fetcher: EntityFetcherService
-  private readonly entityService: EntityService
-  private readonly spaceRepository: SpaceRepository
-  private readonly discussionRepository: DiscussionRepository
-
   constructor(
-    em: SqlEntityManager,
-    userCtx: UserContext,
-    fetcher: EntityFetcherService,
-    entityService: EntityService,
-    spaceRepository: SpaceRepository,
-    discussionRepository: DiscussionRepository,
-  ) {
-    this.em = em
-    this.userCtx = userCtx
-    this.fetcher = fetcher
-    this.entityService = entityService
-    this.spaceRepository = spaceRepository
-    this.discussionRepository = discussionRepository
-    this.logger.debug('DiscussionService initialized')
-  }
+    private readonly em: SqlEntityManager,
+    private readonly userCtx: UserContext,
+    private readonly entityService: EntityService,
+    private readonly userRepository: UserRepository,
+    private readonly spaceRepository: SpaceRepository,
+    private readonly discussionRepository: DiscussionRepository,
+    private readonly answerRepository: AnswerRepository,
+    private readonly nodeRepository: NodeRepository,
+    private readonly appRepository: AppRepository,
+    private readonly jobRepository: JobRepository,
+    private readonly noteRepository: NoteRepository,
+    private readonly comparisonRepository: ComparisonRepository,
+  ) {}
 
   async getDiscussion(discussionId: number): Promise<DiscussionDTO> {
     this.logger.log(`Getting discussion id: ${discussionId}`)
 
-    const discussion = await this.em.findOne(Discussion, discussionId, {
-      populate: [
-        'note',
-        'user',
-        'answers',
-        'answers.note',
-        'answers.user',
-        'answers.comments',
-        'answers.comments.user',
-        'comments',
-        'comments.user',
-        'follows',
-      ],
-    })
+    const discussion = await this.discussionRepository.findAccessibleOne(
+      { id: discussionId },
+      {
+        populate: [
+          'note',
+          'user',
+          'answers',
+          'answers.note',
+          'answers.user',
+          'answers.comments',
+          'answers.comments.user',
+          'comments',
+          'comments.user',
+          'follows',
+        ],
+      },
+    )
 
-    const user = await this.em.findOneOrFail(User, this.userCtx.id)
-
-    if (!discussion || !(await discussion.isAccessibleBy(user))) {
+    if (!discussion) {
       throw new errors.NotFoundError(
         'Unable to get discussion: not found or insufficient permissions.',
       )
@@ -117,7 +114,7 @@ export class DiscussionService {
   async createDiscussion(dto: CreateDiscussionDTO) {
     this.logger.log(`Creating discussion: ${JSON.stringify(dto)}`)
 
-    const user = await this.fetcher.getById(User, this.userCtx.id)
+    const user = await this.userRepository.findOneOrFail({ id: this.userCtx.id })
     if (!user) {
       throw new errors.NotFoundError(`User not found ({ id: ${this.userCtx.id} })`)
     }
@@ -171,12 +168,11 @@ export class DiscussionService {
     this.logger.log(`Updating discussion: ${JSON.stringify(discussionInput)}`)
 
     return await this.em.transactional(async () => {
-      const discussion = await this.fetcher.getEditableById(
-        Discussion,
-        id,
-        {},
+      const discussion = await this.discussionRepository.findEditableOne(
+        { id },
         { populate: ['note'] },
       )
+
       if (!discussion) {
         throw new errors.NotFoundError(
           'Unable to update discussion: not found or insufficient permissions.',
@@ -200,19 +196,21 @@ export class DiscussionService {
   async deleteDiscussion(discussionId: number): Promise<void> {
     this.logger.log(`Deleting discussion: ${discussionId}`)
 
-    const user = await this.em.findOneOrFail(User, this.userCtx.id)
-    const discussion = await this.discussionRepository.findOne(discussionId, {
-      populate: [
-        'note',
-        'answers',
-        'comments',
-        'note.attachments',
-        'answers.note',
-        'answers.note.attachments',
-      ],
-    })
+    const discussion = await this.discussionRepository.findEditableOne(
+      { id: discussionId },
+      {
+        populate: [
+          'note',
+          'answers',
+          'comments',
+          'note.attachments',
+          'answers.note',
+          'answers.note.attachments',
+        ],
+      },
+    )
 
-    if (!discussion || !(await discussion.isEditableBy(user))) {
+    if (!discussion) {
       throw new errors.NotFoundError(
         'Unable to delete discussion: not found or insufficient permissions.',
       )
@@ -327,11 +325,14 @@ export class DiscussionService {
 
   async createAnswer(dto: CreateAnswerDTO) {
     this.logger.log(`Creating answer: ${JSON.stringify(dto)}`)
-    const user = await this.em.findOneOrFail(User, this.userCtx.id)
+    const user = await this.userRepository.findOneOrFail({ id: this.userCtx.id })
 
-    const discussion = await this.em.findOne(Discussion, dto.discussionId, { populate: ['note'] })
+    const discussion = await this.discussionRepository.findAccessibleOne(
+      { id: dto.discussionId },
+      { populate: ['note'] },
+    )
 
-    if (!discussion || !(await discussion.isAccessibleBy(user))) {
+    if (!discussion) {
       throw new errors.NotFoundError(
         'Unable to create answer: discussion not found or inaccessible.',
       )
@@ -358,7 +359,7 @@ export class DiscussionService {
 
   async updateAnswer(id: number, input: UpdateAnswerDTO) {
     this.logger.log(`Updating answer: ${JSON.stringify(input)}`)
-    const answer = await this.fetcher.getEditableById(Answer, id, {}, { populate: ['note'] })
+    const answer = await this.answerRepository.findEditableOne({ id }, { populate: ['note'] })
 
     if (!answer) {
       throw new errors.NotFoundError(
@@ -383,12 +384,12 @@ export class DiscussionService {
 
   async deleteAnswer(answerId: number) {
     this.logger.log(`Deleting answer with id: ${answerId}`)
-    const answer = await this.fetcher.getEditableById(
-      Answer,
-      answerId,
-      {},
+
+    const answer = await this.answerRepository.findEditableOne(
+      { id: answerId },
       { populate: ['note', 'comments', 'note.attachments'] },
     )
+
     if (answer === null) {
       throw new errors.NotFoundError(
         'Unable to delete answer: not found or insufficient permissions.',
@@ -416,7 +417,8 @@ export class DiscussionService {
 
   private async createAttachments(note: Note, attachmentsToSave: AttachmentsDTO) {
     for (const id of attachmentsToSave.files) {
-      const res = await this.fetcher.getAccessibleById(Node, id)
+      const res = await this.nodeRepository.findAccessibleOne({ id })
+
       if (!res || (!res.isPublic() && res.scope !== note.scope)) {
         throw new errors.NotFoundError(
           `Unable to attach ${res?.uid ?? 'file ' + id}: file not found or is in a wrong scope.`,
@@ -438,7 +440,7 @@ export class DiscussionService {
       this.em.persist(attachment)
     }
     for (const id of attachmentsToSave.folders) {
-      const res = await this.fetcher.getAccessibleById(Node, id)
+      const res = await this.nodeRepository.findAccessibleOne({ id })
       if (!res || (!res.isPublic() && res.scope !== note.scope)) {
         throw new errors.NotFoundError(
           `Unable to attach folder ${id}: folder not found or is in a wrong scope.`,
@@ -460,7 +462,7 @@ export class DiscussionService {
       this.em.persist(attachment)
     }
     for (const id of attachmentsToSave.assets) {
-      const res = await this.fetcher.getAccessibleById(Node, id)
+      const res = await this.nodeRepository.findAccessibleOne({ id })
       if (!res || (!res.isPublic() && res.scope !== note.scope)) {
         throw new errors.NotFoundError(
           `Unable to attach ${res?.uid ?? 'asset ' + id}: asset not found or is in a wrong scope.`,
@@ -482,7 +484,7 @@ export class DiscussionService {
       this.em.persist(attachment)
     }
     for (const id of attachmentsToSave.apps) {
-      const res = await this.fetcher.getAccessibleById(App, id)
+      const res = await this.appRepository.findAccessibleOne({ id })
       if (!res || (!res.isPublic() && res.scope !== note.scope)) {
         throw new errors.NotFoundError(
           `Unable to attach app ${res.uid ?? 'app ' + id}: app not found or is in a wrong scope.`,
@@ -504,7 +506,7 @@ export class DiscussionService {
       this.em.persist(attachment)
     }
     for (const id of attachmentsToSave.jobs) {
-      const res = await this.fetcher.getAccessibleById(Job, id)
+      const res = await this.jobRepository.findAccessibleOne({ id })
       if (!res || (!res.isPublic() && res.scope !== note.scope)) {
         throw new errors.NotFoundError(
           `Unable to attach ${res?.uid ?? 'job ' + id}: job not found or is in a wrong scope.`,
@@ -526,7 +528,7 @@ export class DiscussionService {
       this.em.persist(attachment)
     }
     for (const id of attachmentsToSave.comparisons) {
-      const res = await this.fetcher.getAccessibleById(Comparison, id)
+      const res = await this.comparisonRepository.findAccessibleOne({ id })
       if (!res || (!res.isPublic() && res.scope !== note.scope)) {
         throw new errors.NotFoundError(
           `Unable to attach comparison ${id}: comparison not found or is in a wrong scope.`,
@@ -561,19 +563,15 @@ export class DiscussionService {
   async createComment(commentInput: CreateCommentDTO) {
     this.logger.log(`Creating comment: ${JSON.stringify(commentInput)}`)
 
-    const user = await this.fetcher.getById(User, this.userCtx.id)
+    const user = await this.userRepository.findOneOrFail({ id: this.userCtx.id })
     if (!user) {
       throw new errors.NotFoundError('User not found.')
     }
 
     if (commentInput.discussionId) {
-      const target = await this.fetcher.getAccessibleById(
-        Discussion,
-        commentInput.discussionId,
-        {},
-        {
-          populate: ['note'],
-        },
+      const target = await this.discussionRepository.findAccessibleOne(
+        { id: commentInput.discussionId },
+        { populate: ['note'] },
       )
       if (!target) {
         throw new errors.NotFoundError(
@@ -587,10 +585,11 @@ export class DiscussionService {
       await this.em.persistAndFlush(newComment)
       return await CommentDTO.fromEntity(newComment)
     }
-    const target = await this.fetcher.getAccessibleById(
-      Answer,
-      commentInput.answerId,
-      {},
+
+    const target = await this.answerRepository.findAccessibleOne(
+      {
+        id: commentInput.answerId,
+      },
       { populate: ['note'] },
     )
     if (!target) {
@@ -609,7 +608,7 @@ export class DiscussionService {
   async updateComment(id: number, commentInput: UpdateCommentDTO) {
     this.logger.log(`Editing comment: ${JSON.stringify(commentInput)}`)
 
-    const user = await this.em.findOneOrFail(User, this.userCtx.id)
+    const user = await this.userRepository.findOneOrFail({ id: this.userCtx.id })
     const comment = await this.em.findOne(Comment, id)
     const commentClass = comment instanceof DiscussionComment ? DiscussionComment : AnswerComment
     const commentEntity = await this.em.findOne(commentClass, id, { populate: ['commentable'] })
@@ -627,7 +626,7 @@ export class DiscussionService {
   async deleteComment(commentId: number, type: CommentableType) {
     this.logger.log(`Deleting comment with id: ${commentId}`)
 
-    const user = await this.em.findOneOrFail(User, this.userCtx.id)
+    const user = await this.userRepository.findOneOrFail({ id: this.userCtx.id })
 
     let comment: AnswerComment | DiscussionComment | null
     if (type == 'Discussion') {
@@ -669,10 +668,8 @@ export class DiscussionService {
 
   async getAttachments(noteId: number): Promise<DiscussionAttachment[]> {
     this.logger.log(`Getting attachments for note id: ${noteId}`)
-    const note = await this.fetcher.getAccessibleById(
-      Note,
-      noteId,
-      {},
+    const note = await this.noteRepository.findAccessibleOne(
+      { id: noteId },
       { populate: ['attachments'] },
     )
     if (!note) {
@@ -684,10 +681,9 @@ export class DiscussionService {
     const response: DiscussionAttachment[] = []
     for (const attachment of note.attachments) {
       if (attachment.itemType === 'Node') {
-        const attachmentEntity: Node | null = await this.fetcher.getById(
-          attachment.itemType,
-          attachment.itemId,
-        )
+        const attachmentEntity: Node | null = await this.nodeRepository.findOne({
+          id: attachment.itemId,
+        })
         if (!attachmentEntity) {
           throw new errors.NotFoundError('Unable to get attachments: attachment not found.')
         }
@@ -699,10 +695,9 @@ export class DiscussionService {
           link: await this.entityService.getEntityUiLink(attachmentEntity as UserFile | Asset),
         })
       } else if (attachment.itemType === 'Job') {
-        const attachmentEntity: Job | null = await this.fetcher.getById(
-          attachment.itemType,
-          attachment.itemId,
-        )
+        const attachmentEntity: Job | null = await this.jobRepository.findOne({
+          id: attachment.itemId,
+        })
         if (!attachmentEntity) {
           throw new errors.NotFoundError('Unable to get attachments: attachment not found.')
         }
@@ -714,10 +709,9 @@ export class DiscussionService {
           link: await this.entityService.getEntityUiLink(attachmentEntity),
         })
       } else if (attachment.itemType === 'Comparison') {
-        const attachmentEntity: Comparison | null = await this.fetcher.getById(
-          attachment.itemType,
-          attachment.itemId,
-        )
+        const attachmentEntity: Comparison | null = await this.comparisonRepository.findOne({
+          id: attachment.itemId,
+        })
         if (!attachmentEntity) {
           throw new errors.NotFoundError('Unable to get attachments: attachment not found.')
         }
@@ -729,10 +723,9 @@ export class DiscussionService {
           link: await this.entityService.getEntityUiLink(attachmentEntity),
         })
       } else if (attachment.itemType === 'App') {
-        const appAttachment: App | null = await this.fetcher.getById(
-          attachment.itemType,
-          attachment.itemId,
-        )
+        const appAttachment: App | null = await this.appRepository.findOne({
+          id: attachment.itemId,
+        })
         if (!appAttachment) {
           throw new errors.NotFoundError('Unable to get attachments: attachment not found.')
         }
@@ -750,11 +743,13 @@ export class DiscussionService {
 
   async getAnswer(answerId: number): Promise<AnswerDTO> {
     this.logger.log(`Getting answer with id: ${answerId}`)
-    const res = await this.fetcher.getAccessibleById(
-      Answer,
-      answerId,
-      {},
-      { populate: ['note', 'user', 'comments', 'comments.user'] },
+    const res = await this.answerRepository.findAccessibleOne(
+      {
+        id: answerId,
+      },
+      {
+        populate: ['note', 'user', 'comments', 'comments.user'],
+      },
     )
     if (!res) {
       throw new errors.NotFoundError(
@@ -764,50 +759,12 @@ export class DiscussionService {
     return AnswerDTO.fromEntity(res)
   }
 
-  async getComment(commentId: number, type: CommentableType): Promise<CommentDTO> {
-    this.logger.log(`Getting comment with id: ${commentId}`)
-
-    if (type === 'Discussion') {
-      const res = await this.em.findOne(
-        DiscussionComment,
-        { id: commentId },
-        { populate: ['user'] },
-      )
-      if (!res) {
-        throw new errors.NotFoundError(
-          'Unable to get comment: not found or insufficient permissions.',
-        )
-      }
-      const discussion = this.fetcher.getAccessibleById(Discussion, res.commentable.id)
-      if (!discussion) {
-        throw new errors.NotFoundError(
-          'Unable to get comment: not found or insufficient permissions.',
-        )
-      }
-      return await CommentDTO.fromEntity(res)
-    } else {
-      const res = await this.em.findOne(AnswerComment, { id: commentId }, { populate: ['user'] })
-      if (!res) {
-        throw new errors.NotFoundError(
-          'Unable to get comment: not found or insufficient permissions.',
-        )
-      }
-      const answer = this.fetcher.getAccessibleById(Answer, res.commentable.id)
-      if (!answer) {
-        throw new errors.NotFoundError(
-          'Unable to get comment: not found or insufficient permissions.',
-        )
-      }
-      return await CommentDTO.fromEntity(res)
-    }
-  }
-
   async followDiscussion(discussionId: number): Promise<void> {
     this.logger.log(`Adding new follower (user: ${this.userCtx.id}) to discussion: ${discussionId}`)
-    const user = await this.em.findOne(User, { id: this.userCtx.id })
+    const user = await this.userRepository.findOneOrFail({ id: this.userCtx.id })
 
-    const discussion = await this.discussionRepository.findOne({ id: discussionId })
-    if (!discussion || !(await discussion.isAccessibleBy(user))) {
+    const discussion = await this.discussionRepository.findAccessibleOne({ id: discussionId })
+    if (!discussion) {
       throw new errors.NotFoundError('Discussion not found or insufficient permissions.')
     }
 
@@ -828,10 +785,10 @@ export class DiscussionService {
   async unfollowDiscussion(discussionId: number): Promise<void> {
     this.logger.log(`Removing follower (user: ${this.userCtx.id}) from discussion: ${discussionId}`)
 
-    const user = await this.em.findOne(User, { id: this.userCtx.id })
+    const user = await this.userRepository.findOneOrFail({ id: this.userCtx.id })
 
-    const discussion = await this.discussionRepository.findOne({ id: discussionId })
-    if (!discussion || !(await discussion.isAccessibleBy(user))) {
+    const discussion = await this.discussionRepository.findAccessibleOne({ id: discussionId })
+    if (!discussion) {
       throw new errors.NotFoundError('Discussion not found or insufficient permissions.')
     }
 

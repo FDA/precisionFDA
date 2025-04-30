@@ -15,8 +15,9 @@ import { Discussion } from '@shared/domain/discussion/discussion.entity'
 import { Note } from '@shared/domain/note/note.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { BaseEntity } from '../../database/base.entity'
+import AnswerRepository from '@shared/domain/answer/answer.repository'
 
-@Entity({ tableName: 'answers' })
+@Entity({ tableName: 'answers', repository: () => AnswerRepository })
 export class Answer extends BaseEntity {
   @PrimaryKey()
   id: number

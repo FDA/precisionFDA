@@ -31,9 +31,15 @@ http {
     # The following is needed to pass headers AUTHENTICATION_USERNAME and AUTHENTICATION_EMAIL
     underscores_in_headers on;
 
-    location /ginas/app {
-      proxy_pass http://localhost:8080;
-      proxy_pass_request_headers on;
+    # Replacement for ROOT routing module
+    location  /ginas/app/ui {
+      proxy_pass http://localhost:8080/frontend/ginas/app/ui;
+    }
+    location  /ginas/app/beta {
+      proxy_pass http://localhost:8080/frontend/ginas/app/ui;
+    }
+    location /ginas/app/ {
+      proxy_pass http://localhost:8080/substances/;
     }
   }
 }
