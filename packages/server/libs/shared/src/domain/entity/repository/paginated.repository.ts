@@ -1,6 +1,6 @@
 import { EntityRepository, FilterQuery, FindOptions, Loaded } from '@mikro-orm/mysql'
 import { PaginatedResult } from '@shared/domain/entity/domain/paginated.result'
-import { PaginationDto } from '@shared/domain/entity/domain/pagination.dto'
+import { PaginationDTO } from '@shared/domain/entity/domain/pagination.dto'
 
 export abstract class PaginatedRepository<T extends object> extends EntityRepository<T> {
   async paginate<
@@ -8,12 +8,12 @@ export abstract class PaginatedRepository<T extends object> extends EntityReposi
     Fields extends string = '*',
     Excludes extends string = never,
   >(
-    paginationDto: PaginationDto<T>,
+    pagination: PaginationDTO<T>,
     where: FilterQuery<T> = {},
     // options?: Omit<FindOptions<T, Hint, Fields, Excludes>, 'limit' | 'offset' | 'orderBy'>,
     options?: Omit<FindOptions<T, Hint, Fields, Excludes>, 'limit' | 'offset'>,
   ): Promise<PaginatedResult<Loaded<T, Hint, Fields, Excludes>>> {
-    const { page, pageSize: limit, sort: orderBy } = paginationDto
+    const { page, pageSize: limit, sort: orderBy } = pagination
 
     const offset = this.calculateOffset(page, limit)
 
