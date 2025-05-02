@@ -1,7 +1,7 @@
 import { NestApplicationOptions } from '@nestjs/common/interfaces/nest-application-options.interface'
 import { NestFactory } from '@nestjs/core'
 import { NestExpressApplication } from '@nestjs/platform-express'
-import { setupNestApp } from '@shared/app-initialization'
+import { setupNestApp, setupSwagger } from '@shared/app-initialization'
 import { config } from '@shared/config'
 import { CustomValidationPipe } from '@shared/validation/pipes/validation.pipe'
 import { WebsocketAdapter } from '@shared/websocket/adapter/websocket.adapter'
@@ -27,6 +27,11 @@ export async function bootstrap() {
   app.useBodyParser('json', { limit: '16mb' })
   app.set('query parser', 'extended')
   await setupNestApp(app)
+
+  if (config.setupSwagger) {
+    log.log('Setting up Swagger API documentation')
+    setupSwagger(app)
+  }
 
   app.useGlobalPipes(new CustomValidationPipe({ transform: true }))
   await app.listen(config.api.port)

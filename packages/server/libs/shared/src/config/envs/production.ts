@@ -61,5 +61,6 @@ export const config: ConfigOverride = () => ({
       isEnabled: false,
     },
   },
+  setupSwagger: false,
   challengeProposalRecipients: [defaultConfig.pfdaEmail],
 })
