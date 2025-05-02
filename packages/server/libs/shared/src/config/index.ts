@@ -225,6 +225,7 @@ const defaultConfig = {
   minusExpirationMinutes: 4,
   pfdaEmail: 'precisionfda@fda.hhs.gov',
   challengeProposalRecipients: [] as String[],
+  setupSwagger: true,
 }
 
 // lazily plug-in the overrides that are based on the NODE_ENV
