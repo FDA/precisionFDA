@@ -71,19 +71,24 @@ export abstract class SpaceCreationProcess {
     })
     await this.checkPermissions(user, input)
     const leads = await this.findLeads(input)
+    let users = []
+    let space: Space
 
-    return await this.em.transactional(async () => {
-      const space = await this.createDbRecord(input)
+    const result = await this.em.transactional(async () => {
+      space = await this.createDbRecord(input)
       await this.buildOrgs(space)
       const memberships = await this.inviteMembers(space, leads)
       if (input.forChallenge) {
         await this.inviteChallengeBot(space)
       }
       await this.buildProjects(space, memberships)
-      const users = memberships.map((m) => m.user.getEntity())
-      await this.sendEmails(space, users)
+      users = memberships.map((m) => m.user.getEntity())
       return space.id
     })
+    if (space && users.length > 0) {
+      await this.sendEmails(space, users)
+    }
+    return result
   }
 
   protected abstract validateInput(input: CreateSpaceDTO)
