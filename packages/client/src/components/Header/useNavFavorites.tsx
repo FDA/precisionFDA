@@ -23,7 +23,7 @@ export const useNavFavorites = () => {
 
     favorites.forEach(item => {
       if (validFavorites.find(validItem => validItem.name === item.name)) return
-      validFavorites.push({ name: item.name, favorite: !!item.favorite })
+      validFavorites.push({ name: item.name, favorite: item.favorite })
     })
 
     return validFavorites
@@ -70,10 +70,13 @@ export const useNavFavorites = () => {
       // Not doing anything in case of other error code. It's not a critical feature, and we don't want to bother user with it
       return []
     }
-
   }
 
-  const { data: selFavorites = getDefaultFavorites(), isLoading, error } = useQuery({
+  const {
+    data: selFavorites = getDefaultFavorites(),
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ['header_items'],
     queryFn: fetchFavorites,
     staleTime: Infinity,
@@ -85,7 +88,7 @@ export const useNavFavorites = () => {
       await axios.put('/api/v2/users/header-items', validated)
       return validated
     },
-    onSuccess: (newFavorites) => {
+    onSuccess: newFavorites => {
       queryClient.setQueryData(['header_items'], newFavorites)
     },
   })
