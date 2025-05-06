@@ -616,8 +616,9 @@ module Api
         target_folder_name = target_folder.present? ? target_folder.name : "root directory"
         type = :success
       else
-        type = :error
         text = result.value.values
+        render json: { error: { message: text.join(", ") } }, status: :unprocessable_entity
+        return
       end
 
       path = if target_folder.present?
