@@ -166,6 +166,7 @@
       "ws": "8.18.1",
       "@babel/runtime": "^7.26.10",
       "braces": "3.0.3",
+      "esbuild": "0.25.0",
       "cross-spawn": "7.0.6"
     }
   }
