@@ -12,7 +12,7 @@
   "dependencies": {
     "@r4ai/remark-callout": "^0.6.2",
     "fumadocs-core": "15.2.5",
-    "fumadocs-mdx": "11.5.8",
+    "fumadocs-mdx": "11.6.1",
     "fumadocs-ui": "15.2.5",
     "lucide-react": "^0.487.0",
     "next": "15.2.4",
