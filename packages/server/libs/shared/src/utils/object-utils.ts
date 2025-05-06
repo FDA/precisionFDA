@@ -43,6 +43,21 @@ interface NameToDbEntityMap {
 
 type EntityType = keyof NameToDbEntityMap
 
+export const ENTITY_TYPE_KEYSET: EntityType[] = [
+  'app',
+  'asset',
+  'comment',
+  'comparison',
+  'job',
+  'note',
+  'userFile',
+  'folder',
+  'space',
+  'workflow',
+  'spaceMembership',
+  'user',
+]
+
 interface InputEntity<T extends EntityType> {
   type: T
   value: NameToDbEntityMap[T]

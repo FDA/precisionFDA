@@ -33,12 +33,12 @@ else # these values are for staging, dev, development and test environments
 end
 
 if Rails.env.production? || Rails.env.staging?
-  OAUTH2_CLIENT_ID = "precision_fda_gov".freeze
+  OAUTH2_CLIENT_ID = ENV["OAUTH2_CLIENT_ID"].presence || "precision_fda_gov".freeze
   ORG_EVERYONE_HANDLE = "precisionfda".freeze
   ADMIN_USER = "user-precisionfda.admin".freeze
   ORG_DUMMY = "org-precisionfda.dummy".freeze
 else # dev, development and test environments
-  OAUTH2_CLIENT_ID = "precision_fda".freeze
+  OAUTH2_CLIENT_ID = ENV["OAUTH2_CLIENT_ID"].presence || "precision_fda".freeze
   ORG_EVERYONE_HANDLE = "precisionfda_dev".freeze
   ADMIN_USER = "user-precisionfda.admin_dev".freeze
   ORG_DUMMY = "org-precisionfda.dummy_dev".freeze
