@@ -2,7 +2,7 @@ source "https://rubygems.org"
 
 ruby "3.2.2"
 
-gem "rails", "6.1.7.7"
+gem "rails", "6.1.7.9"
 
 gem "bootstrap", "~> 4.6.2"
 

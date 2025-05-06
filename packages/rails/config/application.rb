@@ -2,6 +2,7 @@ require_relative "boot"
 require_relative "../app/middleware/rack/permanent_redirect"
 require_relative "../app/middleware/rack/capture_session"
 
+require "logger"
 require "rails/all"
 
 # Require the gems listed in Gemfile, including any gems
