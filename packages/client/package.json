@@ -98,8 +98,9 @@
     "yup": "^0.32.11"
   },
   "devDependencies": {
-    "@babel/cli": "^7.23.4",
-    "@babel/core": "^7.23.3",
+    "@babel/cli": "^7.27.0",
+    "@babel/core": "^7.26.10",
+    "@babel/helpers": "^7.27.0",
     "@babel/plugin-transform-runtime": "^7.23.4",
     "@babel/preset-env": "^7.23.3",
     "@babel/preset-react": "^7.23.3",
@@ -164,7 +165,8 @@
     "overrides": {
       "ws": "8.18.1",
       "@babel/runtime": "^7.26.10",
-      "braces": "3.0.3"
+      "braces": "3.0.3",
+      "cross-spawn": "7.0.6"
     }
   }
 }

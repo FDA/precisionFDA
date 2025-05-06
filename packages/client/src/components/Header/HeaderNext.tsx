@@ -252,16 +252,23 @@ const SiteNav = ({
   className,
   setShowSiteNav,
   ignoredOutsideClickRef,
+  isSiteAdmin = false,
 }: {
   className: string
   setShowSiteNav: (v: boolean, ms?: number) => void
   ignoredOutsideClickRef: HTMLDivElement | null
+  isSiteAdmin: boolean
 }) => {
   const { theme, toggleTheme } = useTheme()
   const clickRef = useOnOutsideClickRef(true, setShowSiteNav, ignoredOutsideClickRef)
   const { pathname } = useLocation()
   const siteSettings = useSiteSettingsQuery()
   const { userSiteNavItems, showCDMHLink, showGSRSLink } = useUserSiteNavItems()
+
+  const portalIDs = ['daaas', 'prism', 'tools']
+  if (isSiteAdmin) {
+    portalIDs.push('precisionfda-system-administration-portal')
+  }
 
   return (
     <StyledSiteNav className={className} ref={clickRef}>
@@ -291,7 +298,7 @@ const SiteNav = ({
             ))}
           </div>
           <div>
-            {getObjectsByIds(['daaas', 'prism', 'tools'], userSiteNavItems).map(i =>
+            {getObjectsByIds(portalIDs, userSiteNavItems).map(i =>
               dataPortalMenuItem(i, pathname, setShowSiteNav, siteSettings?.data?.dataPortals[i.id]),
             )}
             <HeaderSpacer />
@@ -398,6 +405,7 @@ const Header: React.FC = () => {
         className={classNames({ enter: showSiteNav, exit: !showSiteNav })}
         ignoredOutsideClickRef={buttonRef}
         setShowSiteNav={setSidebar}
+        isSiteAdmin={userCanAdministerSite}
       />
       <StyledHeader data-testid="main-header">
         <Nav>
