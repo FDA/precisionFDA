@@ -9,6 +9,7 @@ import { StickyNoteIcon } from '../icons/StickyNote'
 import { BullsEyeIcon } from '../icons/BullsEyeIcon'
 import { BookIcon } from '../icons/BookIcon'
 import { DataPortalIcon } from '../icons/DataPortalIcon'
+import { AdministrationPortalIcon } from '../icons/AdministrationPortalIcon'
 import { PrismIcon } from '../icons/PrismIcon'
 import { ToolsIcon } from '../icons/ToolsIcon'
 import { GlobeIcon } from '../icons/GlobeIcon'
@@ -137,6 +138,14 @@ export const siteNavItems: SiteNavItemType[] = [
     iconHeight: 17,
     text: 'Tools',
     link: '/data-portals/tools',
+    external: false,
+  },
+  {
+    id: 'precisionfda-system-administration-portal',
+    icon: AdministrationPortalIcon,
+    iconHeight: 17,
+    text: 'Admin',
+    link: '/data-portals/precisionfda-system-administration-portal',
     external: false,
   },
 ]

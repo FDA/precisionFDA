@@ -67,6 +67,14 @@ export class SiteSettingsController {
             'This is the FDA Use Case Toolbox Data Portal; access is available for all FDA users.',
           mailto: 'precisionFDA@fda.hhs.gov?subject=Toolbox Data Portal access request',
         },
+        'precisionfda-system-administration-portal': {
+          accessible:
+            dataPortalsList.find(
+              (portal) => portal.urlSlug === 'precisionfda-system-administration-portal',
+            ) !== undefined,
+          tooltipText: 'This is the System Administration Portal; access is controlled by the FDA.',
+          mailto: 'precisionFDA@fda.hhs.gov?subject=System Administration Portal access request',
+        },
       }
 
       body = {
