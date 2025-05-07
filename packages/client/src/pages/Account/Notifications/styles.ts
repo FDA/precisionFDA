@@ -23,8 +23,17 @@ export const SectionTitle = styled.h2`
   color: var(--c-text-500);
   font-weight: 700;
   letter-spacing: 0.05em;
-  margin-top: 12px;
+  margin-top: 2rem;
   font-size: 16px;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+`
+export const SectionTitleSmall = styled.h3`
+  color: var(--c-text-500);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  margin-top: 12px;
+  font-size: 14px;
   text-transform: uppercase;
   margin-bottom: 0.5rem;
 `
