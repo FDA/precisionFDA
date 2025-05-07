@@ -35,19 +35,19 @@ export type PrivateNotification =
   'private_challenge_preregister'
 
 export type AllNotification = ReviewerNotification |
-SponsorNotification |
-ReviewerLeadNotification |
-SponsorLeadNotification |
-ReviewSpaceAdminNotification |
-PrivateNotification
+  SponsorNotification |
+  ReviewerLeadNotification |
+  SponsorLeadNotification |
+  ReviewSpaceAdminNotification |
+  PrivateNotification
 
 export type NotificationPreferencesPayload = Record<AllNotification, 1 | 0>
 
 export type NotificationPreferences = {
-  "reviewer": Record<ReviewerNotification, boolean>,
-  "sponsor": Record<SponsorNotification, boolean>,
-  "reviewer_lead": Record<ReviewerLeadNotification, boolean>,
-  "sponsor_lead": Record<SponsorLeadNotification, boolean>,
-  "admin": Record<ReviewSpaceAdminNotification, boolean>,
-  "private": Record<PrivateNotification, boolean>,
+  'reviewer': Record<ReviewerNotification, boolean>,
+  'sponsor': Record<SponsorNotification, boolean>,
+  'reviewer_lead': Record<ReviewerLeadNotification, boolean>,
+  'sponsor_lead': Record<SponsorLeadNotification, boolean>,
+  'admin': Record<ReviewSpaceAdminNotification, boolean>,
+  'private': Record<PrivateNotification, boolean>,
 }
