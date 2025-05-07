@@ -132,6 +132,7 @@ export const useChangeMemberRoleModal = ({ spaceId, member }: { spaceId: number;
                   value={value}
                   isDisabled={mutation.isPending}
                   defaultInputValue={undefined}
+                  inputId="select_member_role"
                 />
               )}
             />
