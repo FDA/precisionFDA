@@ -1,21 +1,23 @@
 import { omit, pick } from 'ramda'
 import React, { useEffect } from 'react'
-import { Link, Route, Routes, useLocation, useParams, Navigate } from 'react-router-dom'
+import { Link, Navigate, Route, Routes, useLocation, useParams } from 'react-router-dom'
+import styled from 'styled-components'
 import { CloudResourcesHeaderButton } from '../../components/CloudResourcesHeaderButton'
 import Dropdown from '../../components/Dropdown'
 import { RevisionDropdown } from '../../components/Dropdown/RevisionDropdown'
 import { HomeLabel } from '../../components/HomeLabel'
 import { Markdown } from '../../components/Markdown'
 import { StyledTab, StyledTabList, StyledTabPanel } from '../../components/Tabs'
-import { StyledTagItem, StyledTags, StyledPropertyItem, StyledPropertyKey } from '../../components/Tags'
+import { StyledPropertyItem, StyledPropertyKey, StyledTagItem, StyledTags } from '../../components/Tags'
 import { CubeIcon } from '../../components/icons/CubeIcon'
+import { StyledMarkdown } from '../../styles/commonStyles'
 import { IChallenge } from '../../types/challenge'
+import { getSpaceIdFromScope } from '../../utils'
 import { getBackPathNext } from '../../utils/getBackPath'
 import { ActionsDropdownContent } from '../home/ActionDropdownContent'
 import { StyledBackLink, StyledRight } from '../home/home.styles'
 import {
   ActionsButton,
-  ResourceHeader,
   HeaderLeft,
   HomeLoader,
   MetadataItem,
@@ -25,19 +27,17 @@ import {
   MetadataVal,
   NotFound,
   Pill,
+  ResourceHeader,
   Title,
   Topbox,
 } from '../home/show.styles'
 import { EmitScope, HomeScope } from '../home/types'
+import { getBasePath } from '../home/utils'
 import { AppExecutionsList } from './AppExecutionsList'
 import { SpecTab } from './SpecTab'
 import { IApp } from './apps.types'
 import { useAppSelectionActions } from './useAppSelectionActions'
 import { useFetchAppQuery } from './useFetchAppQuery'
-import { getBasePath } from '../home/utils'
-import { getSpaceIdFromScope } from '../../utils'
-import { StyledMarkdown } from '../../styles/commonStyles'
-import styled from 'styled-components'
 
 const StyledMarkdownAppShow = styled(StyledMarkdown)`
   padding-left: 16px;
@@ -163,6 +163,7 @@ const DetailActionsDropdown = ({
       {actions['Copy to space']?.modal}
       {actions['Edit tags']?.modal}
       {actions['Edit properties']?.modal}
+      {actions['Fork to']?.modal}
       {actions['Export to']?.modal}
       {actions['Set as Challenge App']?.modal}
       {actions['Copy to My Home (private)']?.modal}

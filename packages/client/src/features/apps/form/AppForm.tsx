@@ -4,31 +4,30 @@ import { ErrorMessage } from '@hookform/error-message'
 import { yupResolver } from '@hookform/resolvers/yup'
 import React, { useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
-import { Link } from 'react-router-dom'
 import { Button } from '../../../components/Button'
 import { InputText } from '../../../components/InputText'
 import { Loader } from '../../../components/Loader'
+import MonacoEditor from '../../../components/MonacoEditor/MonacoEditor'
 import { PageTitle } from '../../../components/Page/styles'
 import { ButtonRow } from '../../../components/Public/styles'
+import { Select } from '../../../components/Select'
 import { PfTabContent } from '../../../components/Tabs/PfTab'
-import {
-  FieldGroup,
-  InputError,
-} from '../../../components/form/styles'
+import { FieldGroup, InputError } from '../../../components/form/styles'
 import { ArrowLeftIcon } from '../../../components/icons/ArrowLeftIcon'
+import { APP_REVISION_CREATION_NOT_REQUESTED, APP_SERIES_CREATION_NOT_REQUESTED } from '../../../constants'
+import { CONFIRM_APP_REVISION, CONFIRM_APP_SERIES } from '../../../constants/consts'
+import { getSpaceIdFromScope } from '../../../utils'
+import { useConfirmModal } from '../../files/actionModals/useConfirmModal'
 import { StyledBackLink } from '../../home/home.styles'
+import { CreateAppPayload } from '../apps.api'
 import { CreateAppForm, FileType, IApp } from '../apps.types'
+import { getBaseLink } from '../run/utils'
 import { useUploadAppConfigFile } from '../useUploadAppConfigFile'
 import { Inputs } from './Inputs'
 import { Outputs } from './Outputs'
 import { ReadMeInput } from './ReadMeInput'
 import { VmEnvTab } from './VmEnvTab'
-import {
-  getChoicesValueFromForm,
-  getDefaultValueFromForm,
-  handleSnakeNameChange,
-  validationSchema,
-} from './common'
+import { getChoicesValueFromForm, getDefaultValueFromForm, handleSnakeNameChange, validationSchema } from './common'
 import {
   FormFields,
   FormSectionTop,
@@ -41,19 +40,9 @@ import {
   TabRow,
   TabTitle,
   TopFieldGroup,
+  TopFieldGroupTarget,
   TopFieldGroupUbuntu,
 } from './styles'
-import { getBaseLink } from '../run/utils'
-import { getSpaceIdFromScope } from '../../../utils'
-import { CreateAppPayload } from '../apps.api'
-import { Select } from '../../../components/Select'
-import MonacoEditor from '../../../components/MonacoEditor/MonacoEditor'
-import { useConfirmModal } from '../../files/actionModals/useConfirmModal'
-import {
-  APP_REVISION_CREATION_NOT_REQUESTED,
-  APP_SERIES_CREATION_NOT_REQUESTED,
-} from '../../../constants'
-import { CONFIRM_APP_REVISION, CONFIRM_APP_SERIES } from '../../../constants/consts'
 
 type SelectedSection = 'io' | 'vm' | 'script' | 'readme'
 
@@ -69,6 +58,7 @@ export const AppForm = ({
   defaultVals,
   isSubmitting,
   app,
+  targetScopeName,
 }: {
   isEdit?: boolean
   isFork?: boolean
@@ -76,6 +66,7 @@ export const AppForm = ({
   defaultVals?: CreateAppForm
   isSubmitting: boolean
   app?: IApp
+  targetScopeName?: string
 }) => {
   const spaceId = getSpaceIdFromScope(app?.scope)
   const [selectedSection, setSelectedSection] = useState<SelectedSection>('io')
@@ -159,10 +150,10 @@ export const AppForm = ({
       await onSubmit(formatted)
     } catch (err) {
       const code = err.response?.data?.error?.code
-      if (code === APP_SERIES_CREATION_NOT_REQUESTED)  {
+      if (code === APP_SERIES_CREATION_NOT_REQUESTED) {
         setShowAppSeriesConfirmModal(true)
       }
-      if (code === APP_REVISION_CREATION_NOT_REQUESTED)  {
+      if (code === APP_REVISION_CREATION_NOT_REQUESTED) {
         setShowAppRevisionConfirmModal(true)
       }
     }
@@ -173,11 +164,7 @@ export const AppForm = ({
 
   return (
     <>
-      <StyledBackLink
-        linkTo={backLink}
-      >
-        {backLabel}
-      </StyledBackLink>
+      <StyledBackLink linkTo={backLink}>{backLabel}</StyledBackLink>
 
       <StyledForm onSubmit={handleSubmit(() => submitHandler(false, false))} autoComplete="off">
         <Row>
@@ -190,11 +177,7 @@ export const AppForm = ({
                 <ArrowLeftIcon right height={14} />
               </>
             )}
-            <Button
-              disabled={Object.keys(errors).length > 0 || isSubmitting}
-              data-variant='primary'
-              type="submit"
-            >
+            <Button disabled={Object.keys(errors).length > 0 || isSubmitting} data-variant="primary" type="submit">
               {isEdit && <div>Save Revision {(app?.revision || 0) + 1}</div>}
               {isFork && <div>Save Fork</div>}
               {!isFork && !isEdit && <div>Create App</div>}
@@ -202,16 +185,10 @@ export const AppForm = ({
           </SubmitRow>
         </Row>
         <ButtonRow>
-          <Button
-            type="button"
-            onClick={() => handleOpenAppConfigUpload('cwl')}
-          >
+          <Button type="button" onClick={() => handleOpenAppConfigUpload('cwl')}>
             Import from .cwl file
           </Button>
-          <Button
-            type="button"
-            onClick={() => handleOpenAppConfigUpload('wdl')}
-          >
+          <Button type="button" onClick={() => handleOpenAppConfigUpload('wdl')}>
             Import from .wdl file
           </Button>
         </ButtonRow>
@@ -226,24 +203,13 @@ export const AppForm = ({
               })}
               disabled={isEdit || isSubmitting}
             />
-            <ErrorMessage
-              errors={errors}
-              name="name"
-              render={({ message }) => <InputError>{message}</InputError>}
-            />
+            <ErrorMessage errors={errors} name="name" render={({ message }) => <InputError>{message}</InputError>} />
           </TopFieldGroup>
 
           <TopFieldGroup>
             <label>Title</label>
-            <InputText
-              {...register('title', { required: 'Title is required.' })}
-              disabled={isSubmitting}
-            />
-            <ErrorMessage
-              errors={errors}
-              name="title"
-              render={({ message }) => <InputError>{message}</InputError>}
-            />
+            <InputText {...register('title', { required: 'Title is required.' })} disabled={isSubmitting} />
+            <ErrorMessage errors={errors} name="title" render={({ message }) => <InputError>{message}</InputError>} />
           </TopFieldGroup>
 
           <FieldGroup>
@@ -257,48 +223,39 @@ export const AppForm = ({
                     {...field}
                     options={ubuntuReleasesOptions}
                     isDisabled={isSubmitting}
-                    onChange={(option) => field.onChange(option?.value)}
+                    onChange={option => field.onChange(option?.value)}
                     value={ubuntuReleasesOptions.find(option => option.value === field.value)}
-                    isOptionDisabled={(option) => option.disabled}
+                    isOptionDisabled={option => option.disabled}
                   />
-                  <ErrorMessage
-                    errors={errors}
-                    name="release"
-                    render={({ message }) => <InputError>{message}</InputError>}
-                  />
+                  <ErrorMessage errors={errors} name="release" render={({ message }) => <InputError>{message}</InputError>} />
                 </TopFieldGroupUbuntu>
               )}
             />
           </FieldGroup>
+          {isFork && (
+            <TopFieldGroupTarget>
+              <label>Target</label>
+              <InputText value={targetScopeName} disabled={true} />
+              <ErrorMessage errors={errors} name="title" render={({ message }) => <InputError>{message}</InputError>} />
+            </TopFieldGroupTarget>
+          )}
         </FormSectionTop>
 
         <div>
           <TabRow>
-            <StyledPfTab
-              $isActive={selectedSection === 'io'}
-              onClick={() => setSelectedSection('io')}
-            >
+            <StyledPfTab $isActive={selectedSection === 'io'} onClick={() => setSelectedSection('io')}>
               <TabTitle>I/O SPEC</TabTitle>
               <TabDesc>Configure Input & Output Fields</TabDesc>
             </StyledPfTab>
-            <StyledPfTab
-              $isActive={selectedSection === 'vm'}
-              onClick={() => setSelectedSection('vm')}
-            >
+            <StyledPfTab $isActive={selectedSection === 'vm'} onClick={() => setSelectedSection('vm')}>
               <TabTitle>VM ENVIRONMENT</TabTitle>
               <TabDesc>Configure your resources</TabDesc>
             </StyledPfTab>
-            <StyledPfTab
-              $isActive={selectedSection === 'script'}
-              onClick={() => setSelectedSection('script')}
-            >
+            <StyledPfTab $isActive={selectedSection === 'script'} onClick={() => setSelectedSection('script')}>
               <TabTitle>SCRIPT</TabTitle>
               <TabDesc>Write your shell script</TabDesc>
             </StyledPfTab>
-            <StyledPfTab
-              $isActive={selectedSection === 'readme'}
-              onClick={() => setSelectedSection('readme')}
-            >
+            <StyledPfTab $isActive={selectedSection === 'readme'} onClick={() => setSelectedSection('readme')}>
               <TabTitle>README</TabTitle>
               <TabDesc>Describe your app</TabDesc>
             </StyledPfTab>
@@ -312,22 +269,8 @@ export const AppForm = ({
                 Learn more about app inputs and outputs
               </a>
             </Help>
-            <Inputs
-              control={control}
-              errors={errors}
-              watch={watch}
-              register={register}
-              trigger={trigger}
-              setValue={setValue}
-            />
-            <Outputs
-              control={control}
-              errors={errors}
-              watch={watch}
-              register={register}
-              trigger={trigger}
-              setValue={setValue}
-            />
+            <Inputs control={control} errors={errors} watch={watch} register={register} trigger={trigger} setValue={setValue} />
+            <Outputs control={control} errors={errors} watch={watch} register={register} trigger={trigger} setValue={setValue} />
           </PfTabContent>
 
           <PfTabContent $isShown={selectedSection === 'vm'}>
@@ -339,8 +282,7 @@ export const AppForm = ({
               name="code"
               control={control}
               render={({ field }) => (
-                <FormFields
-                  data-testid="script-editor">
+                <FormFields data-testid="script-editor">
                   <Help>
                     <span>Need help?</span>
                     <a href="/docs/guides/creating-apps#app-script" target="_blank">
@@ -363,9 +305,7 @@ export const AppForm = ({
             <Controller
               name="readme"
               control={control}
-              render={({ field }) => (
-                <ReadMeInput onChange={field.onChange} value={field.value} />
-              )}
+              render={({ field }) => <ReadMeInput onChange={field.onChange} value={field.value} />}
             />
           </PfTabContent>
         </div>

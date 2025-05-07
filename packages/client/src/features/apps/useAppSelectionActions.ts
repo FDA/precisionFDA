@@ -9,6 +9,7 @@ import { useDeleteModal } from '../actionModals/useDeleteModal'
 import { useEditPropertiesModal } from '../actionModals/useEditPropertiesModal'
 import { useEditTagsModal } from '../actionModals/useEditTagsModal'
 import { useFeatureMutation } from '../actionModals/useFeatureMutation'
+import { useForkAppToModal } from '../actionModals/useForkAppToModal'
 import { useAuthUser } from '../auth/useAuthUser'
 import { useComparatorModal } from '../comparators/useComparatorModal'
 import { ActionFunctionsType, HomeScope } from '../home/types'
@@ -173,6 +174,12 @@ export const useAppSelectionActions = ({
     isShown: isShownExportToModal,
   } = useExportToModal({ selected: selected[0], resource: 'apps' })
 
+  const {
+    modalComp: forkToModal,
+    setShowModal: setForkToModal,
+    isShown: isShownForkToModal,
+  } = useForkAppToModal({ selectedApp: selected[0] })
+
   let actions: ActionFunctionsType<AppActions> = {
     Run: {
       type: 'route',
@@ -190,10 +197,12 @@ export const useAppSelectionActions = ({
       to: `/${getBaseLink(spaceId)}/apps/${selected[0]?.uid}/edit`,
       isDisabled: selected.length !== 1 || !selected[0].latest_revision || selected[0].added_by !== user?.dxuser,
     },
-    Fork: {
-      type: 'route',
-      to: `/${getBaseLink(spaceId)}/apps/${selected[0]?.uid}/fork`,
-      isDisabled: selected.length !== 1 || !selected[0].links.fork,
+    'Fork to': {
+      type: 'modal',
+      func: () => setForkToModal(true),
+      modal: forkToModal,
+      showModal: isShownForkToModal,
+      isDisabled: selected.length !== 1 || selected[0]?.entity_type === 'https',
     },
     'Export to': {
       type: 'modal',

@@ -6,8 +6,11 @@ import styled from 'styled-components'
 import { Button } from '../../components/Button'
 import { Loader } from '../../components/Loader'
 import { CircleCheckIcon } from '../../components/icons/CircleCheckIcon'
+import { APP_REVISION_CREATION_NOT_REQUESTED, APP_SERIES_CREATION_NOT_REQUESTED } from '../../constants'
+import { CONFIRM_APP_REVISION, CONFIRM_APP_SERIES } from '../../constants/consts'
 import { breakPoints } from '../../styles/theme'
 import { displayPayloadMessage } from '../../utils/api'
+import { useConfirmModal } from '../files/actionModals/useConfirmModal'
 import { APIResource } from '../home/types'
 import { CheckCol, Col, ColBody, HeaderRow, Table, TableRow, TitleCol } from '../modal/ModalCheckList'
 import { ModalHeaderTop, ModalNext } from '../modal/ModalNext'
@@ -16,12 +19,6 @@ import { useModal } from '../modal/useModal'
 import { FdaRestrictedIcon } from '../spaces/FdaRestrictedIcon'
 import { ProtectedIcon } from '../spaces/ProtectedIcon'
 import { fetchEditableSpacesList } from '../spaces/spaces.api'
-import { useConfirmModal } from '../files/actionModals/useConfirmModal'
-import {
-  APP_REVISION_CREATION_NOT_REQUESTED,
-  APP_SERIES_CREATION_NOT_REQUESTED,
-} from '../../constants'
-import { CONFIRM_APP_REVISION, CONFIRM_APP_SERIES } from '../../constants/consts'
 
 const SpacesList = ({
   selected,
@@ -109,7 +106,7 @@ const CopyToSpaceForm = ({
     CONFIRM_APP_REVISION,
     async () => {
       setShowAppRevisionConfirmModal(false)
-      await mutation.mutateAsync({ space: selectedTarget, properties: { createAppRevision: true }})
+      await mutation.mutateAsync({ space: selectedTarget, properties: { createAppRevision: true } })
     },
   )
 
@@ -118,13 +115,14 @@ const CopyToSpaceForm = ({
     CONFIRM_APP_SERIES,
     async () => {
       setShowAppSeriesConfirmModal(false)
-      await mutation.mutateAsync({ space: selectedTarget, properties: { createAppSeries: true }})
+      await mutation.mutateAsync({ space: selectedTarget, properties: { createAppSeries: true } })
     },
   )
 
   mutation = useMutation({
     mutationKey: ['copy-to-space', resource],
-    mutationFn: ({ space, properties }: { space: string, properties?: Record<string, any> }) => updateFunction(space, selected, properties),
+    mutationFn: ({ space, properties }: { space: string; properties?: Record<string, any> }) =>
+      updateFunction(space, selected, properties),
     onSuccess: (res: any) => {
       if (onSuccess) onSuccess(res)
       setShowModal(false)

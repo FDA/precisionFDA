@@ -5,12 +5,11 @@ import { toast } from 'react-toastify'
 import { Loader } from '../../../components/Loader'
 import { NotAllowedPage } from '../../../components/NotAllowed'
 import { cleanObject } from '../../../utils/object'
+import { getBasePath } from '../../home/utils'
 import { CreateAppPayload, CreateAppResponse, createEditAppRequest } from '../apps.api'
 import { useFetchAppQuery } from '../useFetchAppQuery'
 import { AppForm } from './AppForm'
 import { mapFromServerToForm } from './common'
-import { getBasePath } from '../../home/utils'
-
 
 export const EditAppPage = ({ spaceId }: { spaceId?: string }) => {
   const navigate = useNavigate()
@@ -27,7 +26,7 @@ export const EditAppPage = ({ spaceId }: { spaceId?: string }) => {
 
     try {
       const res: CreateAppResponse = await appMutation.mutateAsync(vals)
-      navigate(`${getBasePath(spaceId)}/apps/${res?.id}`)
+      navigate(`${getBasePath(spaceId)}/apps/${res?.uid}`)
       queryClient.invalidateQueries({
         queryKey: ['apps', 'app'],
       })
@@ -37,7 +36,6 @@ export const EditAppPage = ({ spaceId }: { spaceId?: string }) => {
       toast.error(`Error while editing app: ${message}`)
     }
   }
-
 
   if (isLoading) return <Loader className="pageloader" />
   if (isError && !data) return <NotAllowedPage />

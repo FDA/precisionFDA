@@ -1,26 +1,27 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import React from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { toast } from 'react-toastify'
-import { CreateAppPayload, CreateAppResponse, createEditAppRequest } from '../apps.api'
-import { AppForm } from './AppForm'
 import { Loader } from '../../../components/Loader'
 import { NotAllowedPage } from '../../../components/NotAllowed'
+import { APP_REVISION_CREATION_NOT_REQUESTED, APP_SERIES_CREATION_NOT_REQUESTED } from '../../../constants'
 import { cleanObject } from '../../../utils/object'
-import { useFetchAppQuery } from '../useFetchAppQuery'
-import { mapFromServerToForm } from './common'
+import { ServerScope } from '../../home/types'
 import { getBasePath } from '../../home/utils'
-import {
-  APP_REVISION_CREATION_NOT_REQUESTED,
-  APP_SERIES_CREATION_NOT_REQUESTED,
-} from '../../../constants'
+import { CreateAppPayload, CreateAppResponse, createEditAppRequest } from '../apps.api'
+import { useFetchAppQuery } from '../useFetchAppQuery'
+import { AppForm } from './AppForm'
+import { mapFromServerToForm } from './common'
 
 export const ForkAppPage = ({ spaceId }: { spaceId?: number }) => {
+  const location = useLocation()
+  const { targetScope, targetName } = location.state || {}
+
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const { appUid } = useParams<{ appUid: string }>()
 
-  const { data, isLoading, isError } = useFetchAppQuery(appUid)
+  const { data, isLoading, isError } = useFetchAppQuery(appUid!)
 
   const appMutation = useMutation({ mutationFn: createEditAppRequest })
 
@@ -30,14 +31,17 @@ export const ForkAppPage = ({ spaceId }: { spaceId?: number }) => {
 
     try {
       const res: CreateAppResponse = await appMutation.mutateAsync(vals)
-      navigate(`${getBasePath(spaceId)}/apps/${res?.id}`)
+      navigate(`${getBasePath(spaceId)}/apps/${res?.uid}`)
       queryClient.invalidateQueries({
         queryKey: ['apps', 'app'],
       })
       toast.success('App forked successfully')
     } catch (err) {
       const message = err.response?.data?.error?.message || err.message || 'Unknown error'
-      if (err.response?.status === 400 && [APP_SERIES_CREATION_NOT_REQUESTED, APP_REVISION_CREATION_NOT_REQUESTED].includes(err?.response?.data?.error.code)) {
+      if (
+        err.response?.status === 400 &&
+        [APP_SERIES_CREATION_NOT_REQUESTED, APP_REVISION_CREATION_NOT_REQUESTED].includes(err?.response?.data?.error.code)
+      ) {
         throw err
       } else {
         toast.error(`Error while forking app: ${message}`)
@@ -50,10 +54,11 @@ export const ForkAppPage = ({ spaceId }: { spaceId?: number }) => {
 
   return (
     <AppForm
-      isFork
+      isFork={true}
       onSubmit={onSubmit}
       app={data.app}
       isSubmitting={appMutation.isPending}
+      targetScopeName={targetName}
       defaultVals={{
         is_new: true,
         name: data.app.name,
@@ -63,7 +68,7 @@ export const ForkAppPage = ({ spaceId }: { spaceId?: number }) => {
         instance_type: data.meta.spec.instance_type,
         internet_access: data.meta.spec.internet_access,
         release: data.meta.release || '20.04',
-        scope: 'private',
+        scope: (targetScope as ServerScope) || 'private',
         ordered_assets: data?.meta?.assets || [],
         code: data.meta?.internal?.code || '',
         packages: data.meta?.internal?.packages || [],

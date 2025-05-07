@@ -13,11 +13,13 @@ import Dropdown from '../../components/Dropdown'
 import { ContentFooter } from '../../components/Page/ContentFooter'
 import { Pagination } from '../../components/Pagination'
 import Table from '../../components/Table'
+import { StyledPageTable } from '../../components/Table/components/styles'
 import { HoverDNAnexusLogo } from '../../components/icons/DNAnexusLogo'
 import { PlusIcon } from '../../components/icons/PlusIcon'
 import { getSelectedObjectsFromIndexes, toArrayFromObject } from '../../utils/object'
 import { useAuthUser } from '../auth/useAuthUser'
 import { ActionsDropdownContent } from '../home/ActionDropdownContent'
+import { ResouceQueryErrorMessage } from '../home/ResouceQueryErrorMessage'
 import { ActionsRow, QuickActions } from '../home/home.styles'
 import { ActionsButton, ResourceHeader } from '../home/show.styles'
 import { HomeScope, IMeta } from '../home/types'
@@ -28,8 +30,6 @@ import { IApp } from './apps.types'
 import { useAppListActions } from './useAppListActions'
 import { useAppSelectionActions } from './useAppSelectionActions'
 import { useAppsColumns } from './useAppsColumns'
-import { ResouceQueryErrorMessage } from '../home/ResouceQueryErrorMessage'
-import { StyledPageTable } from '../../components/Table/components/styles'
 
 type ListType = { apps: IApp[]; meta: IMeta }
 
@@ -180,6 +180,7 @@ export const AppList = ({
       {actions['Copy to space']?.modal}
       {actions['Edit tags']?.modal}
       {actions['Edit properties']?.modal}
+      {actions['Fork to']?.modal}
       {actions['Export to']?.modal}
       {actions['Set as Challenge App']?.modal}
       {actions['Copy to My Home (private)']?.modal}
