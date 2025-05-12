@@ -103,8 +103,6 @@ export const ChallengeDetails = () => {
   const isLoggedIn = !!user?.id
   const canCreate = user?.can_create_challenges
 
-  const isOld = undefined
-
   const wildcard = useParams()['*'] as 'intro' | 'results' | 'submissions' | 'pre-registration' | 'my-entries'
   usePageMeta({ title: `${challenge?.name} - precisionFDA Challenge` })
   const docRef = useRef(null)
@@ -143,7 +141,7 @@ export const ChallengeDetails = () => {
   const userIsChallengeAdmin = isLoggedIn && canCreate
 
   const userCanSeePreRegistration =
-    (challengePreRegistration || (userIsChallengeAdmin && challengeSetupOrPreRegistration)) && !isOld
+    (challengePreRegistration || (userIsChallengeAdmin && challengeSetupOrPreRegistration))
 
   // Introduction is visible to:
   //  - everyone when a challenge is not in pre-registration phase
@@ -273,7 +271,7 @@ export const ChallengeDetails = () => {
             />
             <Route path="/" element={<Navigate to={challengePreRegistration ? 'pre-registration' : 'intro'} replace />} />
           </Routes>
-          {!isOld && <ChallengeRightSide>{toc && toc.length > 0 && <ToC items={toc} />}</ChallengeRightSide>}
+          <ChallengeRightSide>{toc && toc.length > 0 && <ToC sticky items={toc} />}</ChallengeRightSide>
         </ChallengePageRow>
         <div>{isNoInfoProvided && <NoInfo>No information about this challenge has been provided yet.</NoInfo>}</div>
       </PageContainerMargin>
