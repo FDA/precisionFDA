@@ -44,12 +44,14 @@ export const StyledInnerHTML = styled.div`
     border: 0px;
   }
 
+  user-select: text;
+  white-space: pre-wrap;
+  word-break: break-word;
+
   h1,
   h2,
   h3,
   h4 {
-    font-weight: bold;
-    margin: 2.5rem 0 1.5rem 0;
   }
   h1 {
     font-size: 24px;

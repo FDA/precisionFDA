@@ -6,6 +6,8 @@
  *
  */
 
+import type {JSX} from 'react';
+
 import {
   $isCodeNode,
   CODE_LANGUAGE_FRIENDLY_NAME_MAP,
@@ -15,8 +17,6 @@ import {
 import {$isLinkNode, TOGGLE_LINK_COMMAND} from '@lexical/link';
 import {$isListNode, ListNode} from '@lexical/list';
 import {INSERT_EMBED_COMMAND} from '@lexical/react/LexicalAutoEmbedPlugin';
-import {useLexicalComposerContext} from '@lexical/react/LexicalComposerContext';
-import {$isDecoratorBlockNode} from '@lexical/react/LexicalDecoratorBlockNode';
 import {INSERT_HORIZONTAL_RULE_COMMAND} from '@lexical/react/LexicalHorizontalRuleNode';
 import {$isHeadingNode} from '@lexical/rich-text';
 import {
@@ -29,6 +29,7 @@ import {
   $findMatchingParent,
   $getNearestNodeOfType,
   $isEditorIsNestedEditor,
+  IS_APPLE,
   mergeRegister,
 } from '@lexical/utils';
 import {
@@ -44,6 +45,7 @@ import {
   ElementFormatType,
   FORMAT_ELEMENT_COMMAND,
   FORMAT_TEXT_COMMAND,
+  HISTORIC_TAG,
   INDENT_CONTENT_COMMAND,
   LexicalEditor,
   NodeKey,
@@ -54,7 +56,6 @@ import {
 } from 'lexical';
 import {Dispatch, useCallback, useEffect, useState} from 'react';
 import * as React from 'react';
-import {IS_APPLE} from '../../environment';
 
 import {
   blockTypeToBlockName,
@@ -610,6 +611,7 @@ export default function ToolbarPlugin({
       );
       updateToolbarState('isSubscript', selection.hasFormat('subscript'));
       updateToolbarState('isSuperscript', selection.hasFormat('superscript'));
+      updateToolbarState('isHighlight', selection.hasFormat('highlight'));
       updateToolbarState('isCode', selection.hasFormat('code'));
       updateToolbarState(
         'fontSize',
@@ -677,7 +679,7 @@ export default function ToolbarPlugin({
             $patchStyleText(selection, styles);
           }
         },
-        skipHistoryStack ? {tag: 'historic'} : {},
+        skipHistoryStack ? {tag: HISTORIC_TAG} : {},
       );
     },
     [activeEditor],
@@ -986,6 +988,20 @@ export default function ToolbarPlugin({
                 <span className="text">Superscript</span>
               </div>
               <span className="shortcut">{SHORTCUTS.SUPERSCRIPT}</span>
+            </DropDownItem>
+            <DropDownItem
+              onClick={() => {
+                activeEditor.dispatchCommand(FORMAT_TEXT_COMMAND, 'highlight');
+              }}
+              className={
+                'item wide ' + dropDownActiveClass(toolbarState.isHighlight)
+              }
+              title="Highlight"
+              aria-label="Format text with a highlight">
+              <div className="icon-text-container">
+                <i className="icon highlight" />
+                <span className="text">Highlight</span>
+              </div>
             </DropDownItem>
             <DropDownItem
               onClick={() => clearFormatting(activeEditor)}

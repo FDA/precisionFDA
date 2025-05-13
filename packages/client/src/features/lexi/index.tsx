@@ -1,5 +1,6 @@
 import { InitialConfigType, LexicalComposer } from '@lexical/react/LexicalComposer'
 import * as React from 'react'
+import type {JSX} from 'react';
 
 import { FlashMessageContext } from './context/FlashMessageContext'
 import { SettingsContext } from './context/SettingsContext'
