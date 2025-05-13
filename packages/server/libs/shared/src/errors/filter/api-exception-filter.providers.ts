@@ -3,6 +3,7 @@ import { APP_FILTER } from '@nestjs/core'
 import { BaseErrorExceptionFilter } from '@shared/errors/filter/base-error-exception.filter'
 import { DefaultExceptionFilter } from '@shared/errors/filter/default-exception.filter'
 import { HttpExceptionFilter } from '@shared/errors/filter/http-exception.filter'
+import { DatabaseExceptionFilter } from '@shared/errors/filter/database-exception.filter'
 
 export const apiExceptionFilterProviders: Provider[] = [
   {
@@ -16,5 +17,9 @@ export const apiExceptionFilterProviders: Provider[] = [
   {
     provide: APP_FILTER,
     useClass: HttpExceptionFilter,
+  },
+  {
+    provide: APP_FILTER,
+    useClass: DatabaseExceptionFilter,
   },
 ]
