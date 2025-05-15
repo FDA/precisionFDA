@@ -2,6 +2,7 @@ import { omit } from 'ramda'
 import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { toast } from 'react-toastify'
+import { Tooltip } from 'react-tooltip'
 import { Button } from '../../components/Button'
 import Dropdown from '../../components/Dropdown'
 import { Running } from '../../components/icons/StateIcons'
@@ -35,6 +36,7 @@ export const ExecutionActionsRow = ({
   })
 
   const isJobOwner = user?.dxuser === execution.launched_by_dxuser
+  const isJobStartingOrRunning = ['idle', 'runnable', 'running'].includes(execution.state)
 
   const onOpenWorkstationClick = () => {
     if (execution.launched_by === user?.full_name) {
@@ -107,13 +109,25 @@ export const ExecutionActionsRow = ({
           <Running />
         </StyledRefresh>
       )}
-      {isJobOwner && execution.links.open_external && (
-        <Button data-variant="primary" onClick={onOpenWorkstationClick}>
+      {isJobOwner && isJobStartingOrRunning && (
+        <Button
+          data-variant="primary"
+          data-tooltip-id="workstation-starting"
+          data-tooltip-content="The workstation is starting up and you can connect to it when it is ready"
+          disabled={!execution.links.open_external}
+          onClick={onOpenWorkstationClick}
+        >
           Open Workstation
         </Button>
       )}
-      {isJobOwner && execution.snapshot && execution.links.open_external && (
-        <Button data-variant="primary" onClick={() => actions['Snapshot'].func()}>
+      {isJobOwner && execution.snapshot && isJobStartingOrRunning && (
+        <Button
+          data-variant="primary"
+          data-tooltip-id="workstation-starting"
+          data-tooltip-content="The workstation is starting up and you can create a snapshot when it is ready"
+          disabled={!execution.links.open_external}
+          onClick={() => actions['Snapshot']?.func()}
+        >
           Snapshot
         </Button>
       )}
@@ -138,6 +152,7 @@ export const ExecutionActionsRow = ({
       >
         {dropdownProps => <ActionsButton {...dropdownProps} active={dropdownProps.isActive} />}
       </Dropdown>
+      {isJobStartingOrRunning && !execution.links.open_external && <Tooltip id="workstation-starting" />}
       {actions['Copy to space']?.modal}
       {actions['Edit tags']?.modal}
       {actions['Edit properties']?.modal}
