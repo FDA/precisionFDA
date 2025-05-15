@@ -19,7 +19,7 @@
     "d3": "~3.5.10",
     "fontawesome": "~4.5.0",
     "human-format": "~0.5.0",
-    "jquery-ui": "~1.12.1",
+    "jquery-ui": "https://github.com/jquery/jquery-ui.git#1.13.3",
     "knockout": "~3.4.0",
     "lodash": "~3.10.1",
     "moment": " ~2.29.4",

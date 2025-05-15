@@ -7,7 +7,7 @@ export const RightSideItem = styled.div`
   font-size: 14px;
   line-height: 20px;
   color: var(--c-text-500);
-  padding-bottom: 32px;
+  padding-bottom: 24px;
   border-bottom: 1px solid var(--tertiary-200);
 `
 export const RightSideScroll = styled.div`
@@ -24,6 +24,13 @@ export const RightSideScroll = styled.div`
   ${RightSideItem}:last-child {
     border-bottom: 0;
   }
+`
+
+export const DPSettings = styled.div`
+  padding-left: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 `
 
 export const Row = styled.div`

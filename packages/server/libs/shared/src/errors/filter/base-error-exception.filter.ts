@@ -5,7 +5,6 @@ import { AbstractExceptionFilter, ErrorPayload } from './abstract-exception.filt
 
 @Catch(BaseError)
 export class BaseErrorExceptionFilter extends AbstractExceptionFilter<BaseError> {
-
   protected getStatusCode(exception: BaseError): number {
     return exception.props.statusCode ?? 500
   }

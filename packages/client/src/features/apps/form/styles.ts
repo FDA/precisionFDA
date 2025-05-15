@@ -13,6 +13,12 @@ export const TopFieldGroupUbuntu = styled(TopFieldGroup)`
   min-width: 100px;
 `
 
+export const TopFieldGroupTarget = styled(TopFieldGroup)`
+  width: 200px;
+  min-width: 200px;
+  max-width: 200px;
+`
+
 export const StyledForm = styled.form`
   margin: 16px;
   display: flex;

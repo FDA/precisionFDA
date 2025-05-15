@@ -24,6 +24,7 @@ import { useOpenFileModal } from './actionModals/useOpenFileModal'
 import { useSelectFolderModal } from './actionModals/useSelectFolderModal'
 import { moveFilesRequest } from './files.api'
 
+import { AxiosError } from 'axios'
 import { pluralize, sanitizeFileName } from '../../utils/formatting'
 import { IFile, TreeOnSelectInfo } from './files.types'
 
@@ -108,8 +109,13 @@ export const useFilesSelectActions = ({
       displayPayloadMessage(res)
       if (resetSelected) resetSelected()
     },
-    onError: () => {
-      toast.error('Error: Moving files')
+    onError: (e: AxiosError) => {
+      const error = e?.response?.data?.error
+      if (error?.message) {
+        toast.error(error?.message)
+        return
+      }
+      toast.error('Moving items has failed')
     },
   })
 
@@ -232,19 +238,14 @@ export const useFilesSelectActions = ({
     setShowModal: setMoveFileModal,
     isShown: isShownMoveFileModal,
   } = useSelectFolderModal({
-    headerText: `Move ${selected.length} item${selected.length === 1 ? '' : 's'}`,
+    headerText: `Move ${selected.length} ${pluralize('item', selected.length)}`,
     submitCaption: 'Move',
     scope: getFileScope(homeScope, space),
     onHandleSubmit: (selectedFolderId: number, info: TreeOnSelectInfo) => {
-      moveFilesMutation
-        .mutateAsync(selectedFolderId)
-        .then(() => {
-          setMoveFileModal(false)
-          toast.success(`Successfully moved ${selected.length} ${pluralize('item', selected.length)} to ${info.node.title}`)
-        })
-        .catch(error => {
-          toast.error(`Error moving files: ${error}`)
-        })
+      moveFilesMutation.mutateAsync(selectedFolderId).then(() => {
+        toast.success(`Successfully moved ${selected.length} ${pluralize('item', selected.length)} to ${info.node.title}`)
+        setMoveFileModal(false)
+      })
     },
   })
   const sourceScopes = new Set()

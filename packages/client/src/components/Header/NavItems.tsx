@@ -8,13 +8,14 @@ import { ObjectGroupIcon } from '../icons/ObjectGroupIcon'
 import { StickyNoteIcon } from '../icons/StickyNote'
 import { BullsEyeIcon } from '../icons/BullsEyeIcon'
 import { BookIcon } from '../icons/BookIcon'
-import { DataPortalIcon } from '../icons/DataPortalIcon'
+import { DaaasPortalIcon } from '../icons/DaaasPortalIcon'
 import { AdministrationPortalIcon } from '../icons/AdministrationPortalIcon'
-import { PrismIcon } from '../icons/PrismIcon'
-import { ToolsIcon } from '../icons/ToolsIcon'
+import { PrismPortalIcon } from '../icons/PrismPortalIcon'
+import { ToolsPortalIcon } from '../icons/ToolsPortalIcon'
 import { GlobeIcon } from '../icons/GlobeIcon'
 import { QuestionIcon } from '../icons/QuestionIcon'
 import { PFDA_EMAIL } from '../../constants'
+import { DataPortalIcon } from '../icons/DataPortalIcon'
 
 export type SiteNavItemType =
   | {
@@ -41,6 +42,14 @@ export const siteNavItems: SiteNavItemType[] = [
     iconHeight: 17,
     text: 'Overview',
     link: '/',
+    external: false,
+  },
+  {
+    id: 'data-portals',
+    icon: DataPortalIcon,
+    iconHeight: 17,
+    text: 'Data-Portals',
+    link: '/data-portals',
     external: false,
   },
   {
@@ -118,7 +127,7 @@ export const siteNavItems: SiteNavItemType[] = [
   },
   {
     id: 'daaas',
-    icon: DataPortalIcon,
+    icon: DaaasPortalIcon,
     iconHeight: 18,
     text: 'DAaaS',
     link: '/data-portals/daaas',
@@ -126,7 +135,7 @@ export const siteNavItems: SiteNavItemType[] = [
   },
   {
     id: 'prism',
-    icon: PrismIcon,
+    icon: PrismPortalIcon,
     iconHeight: 17,
     text: 'PRISM',
     link: '/data-portals/prism',
@@ -134,7 +143,7 @@ export const siteNavItems: SiteNavItemType[] = [
   },
   {
     id: 'tools',
-    icon: ToolsIcon,
+    icon: ToolsPortalIcon,
     iconHeight: 17,
     text: 'Tools',
     link: '/data-portals/tools',
