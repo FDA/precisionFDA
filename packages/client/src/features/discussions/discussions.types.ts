@@ -1,13 +1,6 @@
+import { SimpleUser } from '../../types/user'
 import { ServerScope } from '../home/types'
 import { NoteScope } from './api'
-
-export type SimpleUser = {
-  id: number
-  dxuser: string
-  firstName: string
-  lastName: string
-  fullName: string
-}
 
 export interface Comment {
   id: number
@@ -84,9 +77,4 @@ export interface DiscussionForm {
   content: string
   attachments: FormAttachments
   notify: { label: string; value: string }[] | []
-}
-
-export interface CommentForm {
-  content: string
-  attachments: FormAttachments
 }
