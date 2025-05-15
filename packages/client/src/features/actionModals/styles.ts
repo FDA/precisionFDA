@@ -1,5 +1,6 @@
 import styled from 'styled-components'
 import { compactScrollBarV2 } from '../../components/Page/styles'
+import { SearchBar } from '../resources/styles'
 
 export const StyledSubtitle = styled.div`
   color: var(--c-text-500);
@@ -157,4 +158,21 @@ export const Card = styled.div`
   border: 1px solid var(--c-layout-border-200);
   border-radius: 8px;
   background-color: var(--warning-100);
+`
+
+export const ModalSearchBar = styled(SearchBar)`
+  margin-bottom: 16px;
+`
+
+export const ColScopeTitle = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 4px;
+`
+
+export const ScopeIcon = styled.div`
+  width: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 `

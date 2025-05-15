@@ -1,37 +1,42 @@
 import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
 import { database } from '@shared/database'
 import { AppSeries } from '@shared/domain/app-series/app-series.entity'
+import { AppSeriesRepository } from '@shared/domain/app-series/app-series.repository'
 import { App } from '@shared/domain/app/app.entity'
+import { ENTITY_TYPE } from '@shared/domain/app/app.enum'
+import { constructDxName } from '@shared/domain/app/app.helper'
+import { Spec } from '@shared/domain/app/app.input'
+import { AppRepository } from '@shared/domain/app/app.repository'
+import { SaveAppDto } from '@shared/domain/app/dto/save-app.dto'
 import { AppService } from '@shared/domain/app/services/app.service'
-import { User } from '@shared/domain/user/user.entity'
+import { DxId } from '@shared/domain/entity/domain/dxid'
 import { Event } from '@shared/domain/event/event.entity'
-import { ClassIdResponse } from '@shared/platform-client/platform-client.responses'
-import { create, db } from '../../../src/test'
+import { EVENT_TYPES } from '@shared/domain/event/event.helper'
+import { allowedInstanceTypes } from '@shared/domain/job/job.enum'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { Asset } from '@shared/domain/user-file/asset.entity'
+import { AssetRepository } from '@shared/domain/user-file/asset.repository'
+import { User } from '@shared/domain/user/user.entity'
+import { STATIC_SCOPE } from '@shared/enums'
+import { PermissionError, ValidationError } from '@shared/errors'
 import { PlatformClient } from '@shared/platform-client'
 import {
   AppCreateParams,
   AppletCreateParams,
   ObjectsParams,
 } from '@shared/platform-client/platform-client.params'
-import { Spec } from '@shared/domain/app/app.input'
-import { expect } from 'chai'
-import { STATIC_SCOPE } from '@shared/enums'
-import { allowedInstanceTypes } from '@shared/domain/job/job.enum'
-import { constructDxName } from '@shared/domain/app/app.helper'
-import { ENTITY_TYPE } from '@shared/domain/app/app.enum'
-import { EVENT_TYPES } from '@shared/domain/event/event.helper'
+import { ClassIdResponse } from '@shared/platform-client/platform-client.responses'
 import { codeRemap } from '@shared/utils/app'
-import { UserContext } from '@shared/domain/user-context/model/user-context'
-import { AssetRepository } from '@shared/domain/user-file/asset.repository'
-import { Asset } from '@shared/domain/user-file/asset.entity'
-import { PermissionError, ValidationError } from '@shared/errors'
-import { SaveAppDto } from '@shared/domain/app/dto/save-app.dto'
+import { expect } from 'chai'
+import { create, db } from '../../../src/test'
 
 describe('app service tests', () => {
   let em: EntityManager<MySqlDriver>
   let userCtx: UserContext
   let platformClient: PlatformClient
   let assetRepository: AssetRepository
+  let appRepository: AppRepository
+  let appSeriesRepository: AppSeriesRepository
   let user: User
 
   let appletCreateParams: AppletCreateParams
@@ -41,7 +46,7 @@ describe('app service tests', () => {
 
   const privateFilesProjectId = 'privateFilesProjectID'
   const appletId = 'applet-ID'
-  let appId = 'app-ID'
+  let appId = 'app-ID' as DxId<'app'>
   const instanceType = 'baseline-2'
   const release = '16.04'
 
@@ -49,6 +54,8 @@ describe('app service tests', () => {
     await db.dropData(database.connection())
     em = database.orm().em.fork() as EntityManager<MySqlDriver>
     assetRepository = em.getRepository(Asset)
+    appRepository = em.getRepository(App)
+    appSeriesRepository = em.getRepository(AppSeries)
     user = create.userHelper.create(em)
     user.privateFilesProject = privateFilesProjectId
     await em.flush()
@@ -68,7 +75,7 @@ describe('app service tests', () => {
         return { id: appId }
       },
       async containerRemoveObjects(
-        containerId: string,
+        containerId: DxId,
         params: ObjectsParams,
       ): Promise<ClassIdResponse> {
         removeObjectsContainerParam = containerId
@@ -100,7 +107,14 @@ describe('app service tests', () => {
   }
 
   it('save app - test call orchestration', async () => {
-    const appService = new AppService(em, userCtx, platformClient, assetRepository)
+    const appService = new AppService(
+      em,
+      userCtx,
+      platformClient,
+      assetRepository,
+      appSeriesRepository,
+      appRepository,
+    )
 
     const appInput: SaveAppDto = getDefaultApp()
     const resultId = await appService.create(appInput)
@@ -181,11 +195,18 @@ describe('app service tests', () => {
     expect(loadedAppEvent.param1).to.equal(appId)
     expect(loadedAppEvent.param2).to.equal(appInput.title)
 
-    expect(resultId).to.equal(`${appId}-1`)
+    expect(resultId).to.deep.equal({ uid: `${appId}-1` })
   })
 
   it('save app - test call app series validation', async () => {
-    const appService = new AppService(em, userCtx, platformClient, assetRepository)
+    const appService = new AppService(
+      em,
+      userCtx,
+      platformClient,
+      assetRepository,
+      appSeriesRepository,
+      appRepository,
+    )
 
     const appInput = getDefaultApp()
     appInput.createAppSeries = false
@@ -202,7 +223,14 @@ describe('app service tests', () => {
     create.appSeriesHelper.create(em, { user }, { name: appInput.name, scope: 'private' })
     await em.flush()
 
-    const appService = new AppService(em, userCtx, platformClient, assetRepository)
+    const appService = new AppService(
+      em,
+      userCtx,
+      platformClient,
+      assetRepository,
+      appSeriesRepository,
+      appRepository,
+    )
 
     appInput.createAppSeries = false
     appInput.createAppRevision = false
@@ -218,14 +246,21 @@ describe('app service tests', () => {
     appInput.scope = 'public'
     create.appSeriesHelper.create(em, { user }, { name: appInput.name, scope: 'public' })
 
-    const nonAdminUser = create.userHelper.create(em, { isAdmin: false })
+    const nonAdminUser = create.userHelper.create(em)
     await em.flush()
     const nonAdminUserCtx = {
       id: nonAdminUser.id,
       dxuser: nonAdminUser.dxuser,
     } as UserContext
 
-    const appService = new AppService(em, nonAdminUserCtx, platformClient, assetRepository)
+    const appService = new AppService(
+      em,
+      nonAdminUserCtx,
+      platformClient,
+      assetRepository,
+      appSeriesRepository,
+      appRepository,
+    )
 
     await expect(appService.create(appInput)).to.be.rejectedWith(
       PermissionError,
@@ -237,7 +272,14 @@ describe('app service tests', () => {
     const asset1 = create.assetHelper.create(em, { user }, { name: 'asset-1' })
     const asset2 = create.assetHelper.create(em, { user }, { name: 'asset-2' })
 
-    const appService = new AppService(em, userCtx, platformClient, assetRepository)
+    const appService = new AppService(
+      em,
+      userCtx,
+      platformClient,
+      assetRepository,
+      appSeriesRepository,
+      appRepository,
+    )
 
     const appInput = getDefaultApp()
     appInput.entity_type = 'https'
@@ -259,7 +301,14 @@ describe('app service tests', () => {
   })
 
   it('save app - new revision of an app', async () => {
-    const appService = new AppService(em, userCtx, platformClient, assetRepository)
+    const appService = new AppService(
+      em,
+      userCtx,
+      platformClient,
+      assetRepository,
+      appSeriesRepository,
+      appRepository,
+    )
     const appInput1 = getDefaultApp()
     const appInput2 = getDefaultApp()
     appInput2.is_new = false
@@ -305,7 +354,14 @@ describe('app service tests', () => {
   }
 
   it('save app - complex inputs and outputs', async () => {
-    const appService = new AppService(em, userCtx, platformClient, assetRepository)
+    const appService = new AppService(
+      em,
+      userCtx,
+      platformClient,
+      assetRepository,
+      appSeriesRepository,
+      appRepository,
+    )
     const appInput1 = getDefaultApp()
 
     const intSpec = getSpec('intName', 'int', 'intHelp', 'intLabel', false, 0, [])
@@ -345,7 +401,7 @@ describe('app service tests', () => {
     const result = await appService.create(appInput1)
     em.clear()
 
-    const loadedApp = await em.findOneOrFail(App, { uid: result })
+    const loadedApp = await em.findOneOrFail(App, { uid: result.uid })
     expect(JSON.stringify(loadedApp.spec.input_spec[0])).to.equal(JSON.stringify(intSpec))
     expect(JSON.stringify(loadedApp.spec.input_spec[1])).to.equal(JSON.stringify(floatSpec))
     expect(JSON.stringify(loadedApp.spec.input_spec[2])).to.equal(JSON.stringify(stringSpec))
@@ -362,7 +418,14 @@ describe('app service tests', () => {
   })
 
   it("save app - don't send default and choices to createApplet", async () => {
-    const appService = new AppService(em, userCtx, platformClient, assetRepository)
+    const appService = new AppService(
+      em,
+      userCtx,
+      platformClient,
+      assetRepository,
+      appSeriesRepository,
+      appRepository,
+    )
     const appInput1 = getDefaultApp()
     const intSpec = getSpec('intName', 'int', 'intHelp', 'intLabel', false, 1, [1, 2, 3])
     appInput1.input_spec = [intSpec]
@@ -374,35 +437,56 @@ describe('app service tests', () => {
   })
 
   it('save app - strip empty choices from input and output spec', async () => {
-    const appService = new AppService(em, userCtx, platformClient, assetRepository)
+    const appService = new AppService(
+      em,
+      userCtx,
+      platformClient,
+      assetRepository,
+      appSeriesRepository,
+      appRepository,
+    )
     const appInput = getDefaultApp()
     appInput.input_spec = [getSpec('intName', 'int', 'intHelp', 'intLabel', false, 1, [])]
     appInput.output_spec = [getSpec('intName', 'int', 'intHelp', 'intLabel', false, 1, [])]
 
-    const appUid = await appService.create(appInput)
+    const app = await appService.create(appInput)
 
-    const loadedApp = await em.findOneOrFail(App, { uid: appUid })
+    const loadedApp = await em.findOneOrFail(App, { uid: app.uid })
 
     expect(loadedApp.spec.input_spec[0]).not.to.have.property('choices')
     expect(loadedApp.spec.output_spec[0]).not.to.have.property('choices')
   })
 
   it('save app - preserve choices in input and output spec', async () => {
-    const appService = new AppService(em, userCtx, platformClient, assetRepository)
+    const appService = new AppService(
+      em,
+      userCtx,
+      platformClient,
+      assetRepository,
+      appSeriesRepository,
+      appRepository,
+    )
     const appInput = getDefaultApp()
     appInput.input_spec = [getSpec('intName', 'int', 'intHelp', 'intLabel', false, 1, [1, 2])]
     appInput.output_spec = [getSpec('intName', 'int', 'intHelp', 'intLabel', false, 1, [3, 4])]
 
-    const appUid = await appService.create(appInput)
+    const app = await appService.create(appInput)
 
-    const loadedApp = await em.findOneOrFail(App, { uid: appUid })
+    const loadedApp = await em.findOneOrFail(App, { uid: app.uid })
 
     expect(loadedApp.spec.input_spec[0].choices).to.deep.equal([1, 2])
     expect(loadedApp.spec.output_spec[0].choices).to.deep.equal([3, 4])
   })
 
   it('save app - validate release', async () => {
-    const appService = new AppService(em, userCtx, platformClient, assetRepository)
+    const appService = new AppService(
+      em,
+      userCtx,
+      platformClient,
+      assetRepository,
+      appSeriesRepository,
+      appRepository,
+    )
     const appInput = getDefaultApp()
 
     appInput.release = 'nonsense'
@@ -435,14 +519,21 @@ describe('app service tests', () => {
   const createAppWithNameAndSucceed = async (name: string, appService: AppService) => {
     const appInput = getDefaultApp()
     appInput.name = name
-    appId = name // just to make it unique
+    appId = `app-${name}` // just to make it unique
 
     const result = await appService.create(appInput)
     expect(result).not.to.be.null()
   }
 
   it('save app - validate appName', async () => {
-    const appService = new AppService(em, userCtx, platformClient, assetRepository)
+    const appService = new AppService(
+      em,
+      userCtx,
+      platformClient,
+      assetRepository,
+      appSeriesRepository,
+      appRepository,
+    )
 
     // all will fail
     await createAppWithNameAndFail('žýá', appService)
@@ -457,7 +548,14 @@ describe('app service tests', () => {
   })
 
   it('save app - validate instance', async () => {
-    const appService = new AppService(em, userCtx, platformClient, assetRepository)
+    const appService = new AppService(
+      em,
+      userCtx,
+      platformClient,
+      assetRepository,
+      appSeriesRepository,
+      appRepository,
+    )
     const appInput = getDefaultApp()
 
     appInput.instance_type = 'nonsense'
@@ -474,7 +572,14 @@ describe('app service tests', () => {
   })
 
   it('save app - validate package', async () => {
-    const appService = new AppService(em, userCtx, platformClient, assetRepository)
+    const appService = new AppService(
+      em,
+      userCtx,
+      platformClient,
+      assetRepository,
+      appSeriesRepository,
+      appRepository,
+    )
     const appInput = getDefaultApp()
 
     appInput.packages = ['nonsense']
@@ -489,12 +594,19 @@ describe('app service tests', () => {
   })
 
   it('save app - validate assets', async () => {
-    const appService = new AppService(em, userCtx, platformClient, assetRepository)
+    const appService = new AppService(
+      em,
+      userCtx,
+      platformClient,
+      assetRepository,
+      appSeriesRepository,
+      appRepository,
+    )
     const appInput = getDefaultApp()
     const asset1 = create.assetHelper.create(em, { user }, { name: 'asset-1' })
     await em.flush()
 
-    appInput.ordered_assets = [asset1.uid, 'non-existing']
+    appInput.ordered_assets = [asset1.uid, 'file-non.existing-1']
 
     try {
       await appService.create(appInput)
@@ -502,13 +614,20 @@ describe('app service tests', () => {
     } catch (error: any) {
       expect(error.name).to.equal('ValidationError')
       expect(error.message).to.equal(
-        'The app assets with uids \'["non-existing"]\' do not exist or are not accessible by you.',
+        'The app assets with uids \'["file-non.existing-1"]\' do not exist or are not accessible by you.',
       )
     }
   })
 
   it('save app - validate inputs and outputs', async () => {
-    const appService = new AppService(em, userCtx, platformClient, assetRepository)
+    const appService = new AppService(
+      em,
+      userCtx,
+      platformClient,
+      assetRepository,
+      appSeriesRepository,
+      appRepository,
+    )
     const appInput = getDefaultApp()
     const intSpec = getSpec('', 'int', 'intHelp', 'intLabel', false, 1, [1, 2, 3])
     appInput.input_spec = [intSpec]
@@ -569,7 +688,14 @@ describe('app service tests', () => {
   })
 
   it('save app - array as inputs and outputs', async () => {
-    const appService = new AppService(em, userCtx, platformClient, assetRepository)
+    const appService = new AppService(
+      em,
+      userCtx,
+      platformClient,
+      assetRepository,
+      appSeriesRepository,
+      appRepository,
+    )
     const appInput = getDefaultApp()
 
     const fileSpec = getSpec('file_array', 'array:file', '', 'inputArray', false, [], [1, 2, 3])
@@ -580,7 +706,7 @@ describe('app service tests', () => {
     const result = await appService.create(appInput)
     em.clear()
 
-    const loadedApp = await em.findOneOrFail(App, { uid: result })
+    const loadedApp = await em.findOneOrFail(App, { uid: result.uid })
     expect(loadedApp.spec.input_spec[0].class).to.equal('array:file')
     expect(loadedApp.spec.output_spec[0].class).to.equal('array:string')
   })

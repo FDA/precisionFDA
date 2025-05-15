@@ -6,6 +6,8 @@
  *
  */
 
+import type {JSX} from 'react';
+
 import {AutoFocusPlugin} from '@lexical/react/LexicalAutoFocusPlugin';
 import {CharacterLimitPlugin} from '@lexical/react/LexicalCharacterLimitPlugin';
 import {ClearEditorPlugin} from '@lexical/react/LexicalClearEditorPlugin';
@@ -21,9 +23,9 @@ import {SelectionAlwaysOnDisplay} from '@lexical/react/LexicalSelectionAlwaysOnD
 import {TabIndentationPlugin} from '@lexical/react/LexicalTabIndentationPlugin';
 import {TablePlugin} from '@lexical/react/LexicalTablePlugin';
 import {useLexicalEditable} from '@lexical/react/useLexicalEditable';
+import {CAN_USE_DOM} from '@lexical/utils';
 import * as React from 'react';
 import {useEffect, useState} from 'react';
-import {CAN_USE_DOM} from './environment';
 
 import {useSettings} from './context/SettingsContext';
 import {useSharedHistoryContext} from './context/SharedHistoryContext';
@@ -43,7 +45,6 @@ import InlineImagePlugin from './plugins/InlineImagePlugin';
 import KeywordsPlugin from './plugins/KeywordsPlugin';
 import {LayoutPlugin} from './plugins/LayoutPlugin/LayoutPlugin';
 import LinkPlugin from './plugins/LinkPlugin';
-import ListMaxIndentLevelPlugin from './plugins/ListMaxIndentLevelPlugin';
 import {MaxLengthPlugin} from './plugins/MaxLengthPlugin';
 import PageBreakPlugin from './plugins/PageBreakPlugin';
 import TabFocusPlugin from './plugins/TabFocusPlugin';
@@ -79,6 +80,7 @@ export default function Editor({ insertImageType }: { insertImageType: InsertIma
       tableHorizontalScroll,
       shouldAllowHighlightingWithBrackets,
       selectionAlwaysOnDisplay,
+      listStrictIndent,
     },
   } = useSettings();
   const isEditable = useLexicalEditable();
@@ -157,8 +159,7 @@ export default function Editor({ insertImageType }: { insertImageType: InsertIma
                 ErrorBoundary={LexicalErrorBoundary}
               />
               <CodeHighlightPlugin />
-              <ListPlugin />
-              <ListMaxIndentLevelPlugin maxDepth={7} />
+              <ListPlugin hasStrictIndent={listStrictIndent} />
               <TablePlugin
                 hasCellMerge={tableCellMerge}
                 hasCellBackgroundColor={tableCellBackgroundColor}
@@ -172,30 +173,34 @@ export default function Editor({ insertImageType }: { insertImageType: InsertIma
               <ClickableLinkPlugin disabled={isEditable} />
               <HorizontalRulePlugin />
               <TabFocusPlugin />
-              <TabIndentationPlugin />
+              <TabIndentationPlugin maxIndent={7} />
               <CollapsiblePlugin />
               <PageBreakPlugin />
               <LayoutPlugin />
+              {floatingAnchorElem && (
+                <>
+                  <FloatingLinkEditorPlugin
+                    anchorElem={floatingAnchorElem}
+                    isLinkEditMode={isLinkEditMode}
+                    setIsLinkEditMode={setIsLinkEditMode}
+                  />
+                  <TableCellActionMenuPlugin
+                    anchorElem={floatingAnchorElem}
+                    cellMerge={true}
+                  />
+                </>
+              )}
               {floatingAnchorElem && !isSmallWidthViewport && (
-              <>
-                <DraggableBlockPlugin anchorElem={floatingAnchorElem} />
-                <CodeActionMenuPlugin anchorElem={floatingAnchorElem} />
-                <FloatingLinkEditorPlugin
-                  anchorElem={floatingAnchorElem}
-                  isLinkEditMode={isLinkEditMode}
-                  setIsLinkEditMode={setIsLinkEditMode}
-                />
-                <TableCellActionMenuPlugin
-                  anchorElem={floatingAnchorElem}
-                  cellMerge={true}
-                />
-                <TableHoverActionsPlugin anchorElem={floatingAnchorElem} />
-                <FloatingTextFormatToolbarPlugin
-                  anchorElem={floatingAnchorElem}
-                  setIsLinkEditMode={setIsLinkEditMode}
-                />
-              </>
-            )}
+                <>
+                  <DraggableBlockPlugin anchorElem={floatingAnchorElem} />
+                  <CodeActionMenuPlugin anchorElem={floatingAnchorElem} />
+                  <TableHoverActionsPlugin anchorElem={floatingAnchorElem} />
+                  <FloatingTextFormatToolbarPlugin
+                    anchorElem={floatingAnchorElem}
+                    setIsLinkEditMode={setIsLinkEditMode}
+                  />
+                </>
+              )}
             </>
           ) : (
             <>

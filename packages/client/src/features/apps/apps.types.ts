@@ -1,15 +1,15 @@
 import { Asset } from '../actionModals/AttachToModal/useListAssetsQuery'
+import { IAccessibleFile } from '../databases/databases.api'
+import { FileUid } from '../files/files.types'
 import { HomeScope, ServerScope } from '../home/types'
 import { CreateAppPayload } from './apps.api'
-import { FileUid } from '../files/files.types'
-import { IAccessibleFile } from '../databases/databases.api'
 
 export type AppActions =
   | 'Run'
   | 'Run batch'
   | 'Track'
   | 'Edit'
-  | 'Fork'
+  | 'Fork to'
   | 'Export to'
   | 'Make public'
   | 'Feature'
@@ -60,7 +60,7 @@ export interface InputSpec extends IOSpec {
 
 type Links = Record<string, string>
 
-export type ResourceProperties = {[key: string]: string}
+export type ResourceProperties = { [key: string]: string }
 
 export interface IApp {
   id: number
@@ -86,11 +86,11 @@ export interface IApp {
   featured: boolean
   active: boolean
   /** @deprecated create links from client side */
-  links: Links;
-  tags: string[];
+  links: Links
+  tags: string[]
   properties: ResourceProperties
-  scope: ServerScope;
-  forked_from?: string;
+  scope: ServerScope
+  forked_from: string | null
 }
 
 export interface AppRevision {

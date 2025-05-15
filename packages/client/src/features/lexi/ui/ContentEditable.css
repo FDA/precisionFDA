@@ -6,15 +6,20 @@
  *
  *
  */
-.ContentEditable__root {
-  flex: 1;
+ .ContentEditable__root {
   border: 0;
   font-size: 15px;
   display: block;
   position: relative;
   outline: 0;
-  padding: 8px 28px 40px;
-  max-width: 900px; /* NOTE: change from main theme */
+  padding: 8px 46px 40px;
+  min-height: 150px;
+}
+@media (max-width: 1025px) {
+  .ContentEditable__root {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
 }
 
 .ContentEditable__placeholder {
@@ -24,7 +29,7 @@
   position: absolute;
   text-overflow: ellipsis;
   top: 8px;
-  left: 28px;
+  left: 46px;
   right: 28px;
   user-select: none;
   white-space: nowrap;
@@ -37,4 +42,3 @@
     right: 8px;
   }
 }
-

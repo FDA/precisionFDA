@@ -11,8 +11,9 @@ import {
 import { ScopedEntity } from '@shared/database/scoped.entity'
 import { AppSeriesProperty } from '@shared/domain/property/app-series-property.entity'
 import { User } from '@shared/domain/user/user.entity'
+import { AppSeriesRepository } from './app-series.repository'
 
-@Entity({ tableName: 'app_series' })
+@Entity({ tableName: 'app_series', repository: () => AppSeriesRepository })
 export class AppSeries extends ScopedEntity {
   @PrimaryKey()
   id: number

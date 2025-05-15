@@ -37,7 +37,7 @@ import { InstitutionIcon } from './InstitutionIcon'
 import { LockIcon } from './LockIcon'
 import { ObjectGroupIcon } from './ObjectGroupIcon'
 import { PlusIcon } from './PlusIcon'
-import { PrismIcon } from './PrismIcon'
+import { PrismPortalIcon } from './PrismPortalIcon'
 import { ProfileIcon } from './ProfileIcon'
 import { QuestionIcon } from './QuestionIcon'
 import { StarIcon } from './StarIcon'
@@ -45,9 +45,10 @@ import { StickyNoteIcon } from './StickyNote'
 import { Svg } from './Svg'
 import { SyncIcon } from './SyncIcon'
 import { TaskIcon } from './TaskIcon'
-import { ToolsIcon } from './ToolsIcon'
+import { ToolsPortalIcon } from './ToolsPortalIcon'
 import { TrashIcon } from './TrashIcon'
 import { TrophyIcon } from './TrophyIcon'
+import { DataPortalIcon } from './DataPortalIcon'
 
 export const IconNames = {
   AngleDownIcon: AngleDownIcon,
@@ -99,8 +100,9 @@ export const IconNames = {
   TaskIcon: TaskIcon,
   TrashIcon: TrashIcon,
   TrophyIcon: TrophyIcon,
-  PrismIcon: PrismIcon,
-  ToolsIcon: ToolsIcon,
+  PrismPortalIcon: PrismPortalIcon,
+  ToolsIcon: ToolsPortalIcon,
+  DataPortalIcon: DataPortalIcon,
 }
 
 export type IconType = keyof typeof IconNames

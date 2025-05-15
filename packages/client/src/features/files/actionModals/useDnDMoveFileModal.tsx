@@ -47,7 +47,7 @@ export const useDnDMoveFileModal = ({
     onError: (e: AxiosError) => {
       const error = e?.response?.data?.error
       if (error?.message) {
-        toast.error(`${error?.type}: ${error?.message}`)
+        toast.error(error?.message)
         return
       }
       toast.error('Moving items has failed')
@@ -81,13 +81,15 @@ export const useDnDMoveFileModal = ({
       />
       <ModalScroll>
         {memoSelected.map(s => {
-          const link = s.type === 'Folder' ? `${getBasePath(spaceId)}/files?folder_id=${s.id}` : `${getBasePath(spaceId)}/files/${s.uid}`
+          const link =
+            s.type === 'Folder' ? `${getBasePath(spaceId)}/files?folder_id=${s.id}` : `${getBasePath(spaceId)}/files/${s.uid}`
           return (
-          <StyledLink key={s.id} to={link} target="_blank">
-            <VerticalCenter>{s.type === 'UserFile' ? <FileIcon /> : <FolderIcon />}</VerticalCenter>
-            {s.name}
-          </StyledLink>
-        )})}
+            <StyledLink key={s.id} to={link} target="_blank">
+              <VerticalCenter>{s.type === 'UserFile' ? <FileIcon /> : <FolderIcon />}</VerticalCenter>
+              {s.name}
+            </StyledLink>
+          )
+        })}
       </ModalScroll>
       <Footer>
         <ButtonRow>
