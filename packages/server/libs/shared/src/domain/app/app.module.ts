@@ -1,12 +1,13 @@
-import { Module } from '@nestjs/common'
-import { PlatformClientModule } from '@shared/platform-client/platform-client.module'
-import { AppService } from '@shared/domain/app/services/app.service'
-import { UserFileModule } from '@shared/domain/user-file/user-file.module'
 import { MikroOrmModule } from '@mikro-orm/nestjs'
-import { App } from '@shared/domain/app/app.entity'
+import { Module } from '@nestjs/common'
+import { AppService } from '@shared/domain/app/services/app.service'
+import { PlatformClientModule } from '@shared/platform-client/platform-client.module'
+import { AppSeries } from '../app-series/app-series.entity'
+import { Asset } from '../user-file/asset.entity'
+import { App } from './app.entity'
 
 @Module({
-  imports: [PlatformClientModule, UserFileModule, MikroOrmModule.forFeature([App])],
+  imports: [PlatformClientModule, MikroOrmModule.forFeature([AppSeries, App, Asset])],
   providers: [AppService],
   exports: [AppService, MikroOrmModule],
 })

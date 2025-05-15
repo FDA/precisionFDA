@@ -6,6 +6,7 @@
  *
  */
 
+import { IS_CHROME } from '@lexical/utils'
 import {
   DOMConversionMap,
   DOMConversionOutput,
@@ -15,9 +16,8 @@ import {
   LexicalEditor,
   LexicalNode,
   SerializedElementNode,
+  
 } from 'lexical';
-import {IS_CHROME} from '../../environment';
-import invariant from '../../invariant';
 
 import {$isCollapsibleContainerNode} from './CollapsibleContainerNode';
 import {domOnBeforeMatch, setDomHiddenUntilFound} from './CollapsibleUtils';
@@ -48,10 +48,11 @@ export class CollapsibleContentNode extends ElementNode {
     if (IS_CHROME) {
       editor.getEditorState().read(() => {
         const containerNode = this.getParentOrThrow();
-        invariant(
-          $isCollapsibleContainerNode(containerNode),
-          'Expected parent node to be a CollapsibleContainerNode',
-        );
+        if (!$isCollapsibleContainerNode(containerNode)) {
+          throw new Error(
+            'Expected parent node to be a CollapsibleContainerNode',
+          );
+        }
         if (!containerNode.__open) {
           setDomHiddenUntilFound(dom);
         }
@@ -59,10 +60,11 @@ export class CollapsibleContentNode extends ElementNode {
       domOnBeforeMatch(dom, () => {
         editor.update(() => {
           const containerNode = this.getParentOrThrow().getLatest();
-          invariant(
-            $isCollapsibleContainerNode(containerNode),
-            'Expected parent node to be a CollapsibleContainerNode',
-          );
+          if (!$isCollapsibleContainerNode(containerNode)) {
+            throw new Error(
+              'Expected parent node to be a CollapsibleContainerNode',
+            );
+          }
           if (!containerNode.__open) {
             containerNode.toggleOpen();
           }

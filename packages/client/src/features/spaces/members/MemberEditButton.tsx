@@ -31,7 +31,7 @@ const MemberEditButton: React.FC<MemberEditButtonProps> = ({
         )}
       >
         {dropdownProps => (
-          <StyledEditButton tabIndex={0} {...dropdownProps}>
+          <StyledEditButton data-testid="member-edit-button" tabIndex={0} {...dropdownProps}>
             <ThreeDotsIcon width={16} />
           </StyledEditButton>
         )}

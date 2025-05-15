@@ -11,6 +11,7 @@ import {
   UseGuards,
 } from '@nestjs/common'
 import { DEPRECATED_SQL_ENTITY_MANAGER } from '@shared/database/provider/deprecated-sql-entity-manager.provider'
+import { SaveAppDto } from '@shared/domain/app/dto/save-app.dto'
 import { AppService } from '@shared/domain/app/services/app.service'
 import { DxId } from '@shared/domain/entity/domain/dxid'
 import { RunAppInput, runAppSchema } from '@shared/domain/job/job.input'
@@ -22,7 +23,6 @@ import { schemas } from '@shared/utils/base-schemas'
 import { UserContextGuard } from '../user-context/guard/user-context.guard'
 import { JsonSchemaPipe } from '../validation/pipes/json-schema.pipe'
 import { AppUidParamDto } from './model/app-uid-param.dto'
-import { SaveAppDto } from '@shared/domain/app/dto/save-app.dto'
 
 @UseGuards(UserContextGuard)
 @Controller('/apps')
