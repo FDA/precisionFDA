@@ -42,7 +42,6 @@ export const StyledChallengeDetailsBanner = styled(PageContainer)`
   justify-content: space-between;
   gap: 32px;
 
-
   a {
     display: flex;
     align-items: center;
@@ -60,8 +59,8 @@ export const StyledChallengeDetailsBanner = styled(PageContainer)`
 
 export const ChallengeName = styled.h1`
   font-size: 28px;
-  font-weight:600;
-  margin: 16px 0px;
+  font-weight: 600;
+  margin: 16px 0;
 `
 
 export const ChallengeDescription = styled.p`
@@ -74,14 +73,13 @@ export const NoInfo = styled.div`
   margin-bottom: 24px;
 `
 
-export const ChallengeStateLabel = styled.span<{$timeStatus: TimeStatus}>`
-  color: var(--c-text-500);
+export const ChallengeStateLabel = styled.span<{ $timeStatus: TimeStatus }>`
   font-weight: 700;
   font-size: 14px;
   letter-spacing: 0.05em;
   margin-top: 12px;
   text-transform: uppercase;
-  padding: 3px 0px;
+  padding: 3px 0;
   color: white;
 
   ${({ $timeStatus }) => {
@@ -127,9 +125,8 @@ export const ChallengeDateLabel = styled.div`
   white-space: nowrap;
 `
 
-export const ChallengeDate = styled.div<{$timeStatus: TimeStatus}>`
-  padding: 4px 0px;
-  padding-right: 20px;
+export const ChallengeDate = styled.div<{ $timeStatus: TimeStatus }>`
+  padding: 4px 20px 4px 0;
   font-size: 13px;
   font-weight: 500;
   text-align: left;
@@ -155,7 +152,7 @@ export const ChallengeDate = styled.div<{$timeStatus: TimeStatus}>`
 `
 
 export const ChallengeDateRemaining = styled.div`
-  padding: 16px 0px;
+  padding: 16px 0;
   font-weight: 600;
   white-space: nowrap;
 `
@@ -168,12 +165,11 @@ export const StyledTabs = styled.div`
       margin-bottom: 24px;
       margin-top: 0;
     }
+
     &__tab {
       color: ${colors.greyTextOnWhite};
       font-weight: 700;
       font-size: 14px;
-      letter-spacing: 0.05em;
-      margin-top: 12px;
       display: inline-block;
       border-bottom: 3px solid transparent;
       color: ${colors.blueOnWhite};
@@ -187,6 +183,7 @@ export const StyledTabs = styled.div`
       &:hover {
         border-bottom: 3px solid ${colors.greyTextOnWhite};
       }
+
       &--selected {
         color: ${colors.blueOnWhite};
         border-bottom: 3px solid ${colors.brownOnGrey};
@@ -202,7 +199,7 @@ export const StyledTabs = styled.div`
 export const CallToActionButton = styled(Button).attrs({ 'data-variant': 'primary' })`
   display: block;
   width: 100%;
-  margin-bottom: 0px;
+  margin-bottom: 0;
 `
 
 export const StyledChallengeSubmissionsTable = styled.div`

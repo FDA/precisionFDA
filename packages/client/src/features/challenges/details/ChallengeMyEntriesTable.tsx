@@ -94,7 +94,7 @@ export const useSubmissionTableColumns = ({
       accessorKey: 'user.dxuser',
       cell: c => (
         <StyledNameCell as="a" href={`/users/${c.row.original.user.dxuser}`}>
-          {`${c.row.original.user.first_name} ${c.row.original.user.last_name}`}
+          {c.row.original.user.fullName}
         </StyledNameCell>
       ),
     },
@@ -112,7 +112,7 @@ export const useSubmissionTableColumns = ({
   ]
 }
 
-export const ChallengeMyEntriesTable = ({ challengeId, user, isSpaceMember }: any) => {
+export const ChallengeMyEntriesTable = ({ challengeId, user, isSpaceMember }) => {
   const { data: submissionsData, isLoading } = useChallengeEntriesQuery(challengeId)
   const columns = useSubmissionTableColumns({ authUser: user, isSpaceMember })
 

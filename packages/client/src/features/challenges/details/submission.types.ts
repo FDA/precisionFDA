@@ -1,3 +1,5 @@
+import { SimpleUser } from '../../../types/user'
+
 export interface Extras {
   has_seen_guidelines: boolean
 }
@@ -17,16 +19,16 @@ export interface PricingMap {
   'baseline - 2': number
   'baseline - 4': number
   'baseline - 8': number
-  'db_mem1_x2': number
-  'db_mem1_x4': number
-  'db_mem1_x8': number
-  'db_std1_x2': number
+  db_mem1_x2: number
+  db_mem1_x4: number
+  db_mem1_x8: number
+  db_std1_x2: number
   'baseline - 16': number
   'baseline - 36': number
-  'db_mem1_x16': number
-  'db_mem1_x32': number
-  'db_mem1_x48': number
-  'db_mem1_x64': number
+  db_mem1_x16: number
+  db_mem1_x32: number
+  db_mem1_x48: number
+  db_mem1_x64: number
 }
 
 export interface ChargesBaseline {
@@ -68,28 +70,7 @@ export interface User {
   cloud_resource_settings: CloudResourceSettings
 }
 
-export interface RunInputData {
-  name: string
-  value: string
-}
-
 type JobState = 'done' | 'failed' | 'idle' | 'running' | 'terminated' | 'terminating'
-
-export interface Submission {
-  id: number
-  name: string
-  challenge_id: number
-  desc: string
-  createdAt: string
-  updatedAt: string
-  user: User
-  inputs: any[]
-  job_state: JobState
-  job_name: string
-  job_input_files: any[]
-  run_input_data: RunInputData[]
-  user_can_access_space: boolean
-}
 
 export type SubmissionInputFile = {
   id: number
@@ -105,15 +86,12 @@ export interface SubmissionV2 {
   description: string
   createdAt: string
   updatedAt: string
-  user: User
+  user: SimpleUser
   job: {
-    id: number,
+    id: number
     uid: string
     name: string
     inputFiles: SubmissionInputFile[]
     state: JobState
   }
 }
-
-
-
