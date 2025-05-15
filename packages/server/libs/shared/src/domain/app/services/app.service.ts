@@ -1,21 +1,34 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
-import { AppSeries } from '@shared/domain/app-series/app-series.entity'
-import { DxId } from '@shared/domain/entity/domain/dxid'
-import { Uid } from '@shared/domain/entity/domain/uid'
-import { Asset } from '@shared/domain/user-file/asset.entity'
-import { User } from '@shared/domain/user/user.entity'
-import { ErrorCodes, PermissionError, ValidationError } from '@shared/errors'
-import * as crypto from 'crypto'
+import { Injectable, Logger } from '@nestjs/common'
 import { UBUNTU_20, UBUNTU_RELEASES, VALID_IO_CLASSES } from '@shared/config/consts'
 import { validUbuntuPackages } from '@shared/config/ubuntu_packages'
+import { AppSeries } from '@shared/domain/app-series/app-series.entity'
+import { AppSeriesRepository } from '@shared/domain/app-series/app-series.repository'
+import { SaveAppDto } from '@shared/domain/app/dto/save-app.dto'
+import { DxId } from '@shared/domain/entity/domain/dxid'
+import { Uid } from '@shared/domain/entity/domain/uid'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { Asset } from '@shared/domain/user-file/asset.entity'
+import { User } from '@shared/domain/user/user.entity'
 import { STATIC_SCOPE } from '@shared/enums'
+import {
+  ErrorCodes,
+  InvalidRequestError,
+  NotFoundError,
+  PermissionError,
+  ValidationError,
+} from '@shared/errors'
+import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { PlatformClient } from '@shared/platform-client'
 import {
   AppCreateParams,
   AppletCreateParams,
   PackageMapping,
 } from '@shared/platform-client/platform-client.params'
+import { EntityScope } from '@shared/types/common'
 import { codeRemap } from '@shared/utils/app'
+import { EntityScopeUtils } from '@shared/utils/entity-scope.utils'
+import * as crypto from 'crypto'
 import { createAppCreated } from '../../event/event.helper'
 import { allowedInstanceTypes } from '../../job/job.enum'
 import { AssetRepository } from '../../user-file/asset.repository'
@@ -23,11 +36,7 @@ import { App, AppSpec, Internal } from '../app.entity'
 import { ENTITY_TYPE } from '../app.enum'
 import { constructDxid, constructDxName } from '../app.helper'
 import { PlatformSpec, Spec } from '../app.input'
-import { Injectable, Logger } from '@nestjs/common'
-import { ServiceLogger } from '@shared/logger/decorator/service-logger'
-import { UserContext } from '@shared/domain/user-context/model/user-context'
-import { SaveAppDto } from '@shared/domain/app/dto/save-app.dto'
-import { EntityScope } from '@shared/types/common'
+import { AppRepository } from '../app.repository'
 
 @Injectable()
 export class AppService {
@@ -39,6 +48,8 @@ export class AppService {
     private readonly user: UserContext,
     private readonly platformClient: PlatformClient,
     private readonly assetRepository: AssetRepository,
+    private readonly appSeriesRepository: AppSeriesRepository,
+    private readonly appRepository: AppRepository,
   ) {}
 
   private validateSpec(spec: Spec, type: string, alreadySeenSpec: string[]) {
@@ -49,7 +60,7 @@ export class AppService {
     if (!/^[a-zA-Z0-9._-]+$/.test(spec.name)) {
       this.throwValidationError(
         `The ${type} name \'${spec.name}\' can only contain the characters A-Z, a-z, 0-9, ` +
-        "'.' (period), '_' (underscore) and '-' (dash).",
+          "'.' (period), '_' (underscore) and '-' (dash).",
       )
     }
 
@@ -82,7 +93,7 @@ export class AppService {
     if (!/^[a-zA-Z0-9._-]+$/.test(appInput.name)) {
       this.throwValidationError(
         "The app 'name' can only contain the characters A-Z, a-z, 0-9, " +
-        "'.' (period), '_' (underscore) and '-' (dash).",
+          "'.' (period), '_' (underscore) and '-' (dash).",
       )
     }
 
@@ -105,7 +116,7 @@ export class AppService {
       if (inaccessible.length > 0) {
         this.throwValidationError(
           `The app assets with uids '${JSON.stringify(inaccessible)}' do ` +
-          'not exist or are not accessible by you.',
+            'not exist or are not accessible by you.',
         )
       }
     }
@@ -122,6 +133,14 @@ export class AppService {
     if (scope === STATIC_SCOPE.PUBLIC && !(await user.isSiteAdmin())) {
       throw new PermissionError('Only site admins can create public apps.')
     }
+    if (EntityScopeUtils.isSpaceScope(scope)) {
+      const editableSpaces = await user.editableSpaces()
+      if (!editableSpaces.map((space) => space.scope).includes(scope)) {
+        throw new PermissionError(
+          `User ${user.dxuser} does not have permission to create app in space ${scope}.`,
+        )
+      }
+    }
   }
 
   private validateAppSeriesCreation(appSeries?: AppSeries, createAppSeries?: boolean) {
@@ -132,6 +151,20 @@ export class AppService {
           code: ErrorCodes.APP_SERIES_CREATION_NOT_REQUESTED,
         },
       )
+    }
+  }
+
+  private async validateForkedApp(forkFrom?: Uid<'app'>) {
+    if (forkFrom) {
+      const forkedApp = await this.appRepository.findAccessibleOne({ uid: forkFrom })
+
+      if (!forkedApp) {
+        throw new NotFoundError('Forked app does not exist or is not accessible.')
+      }
+
+      if (forkedApp.entityType === ENTITY_TYPE.HTTPS) {
+        throw new InvalidRequestError('Forking from this app is not allowed.')
+      }
     }
   }
 
@@ -171,7 +204,7 @@ export class AppService {
   }
 
   private async getAppSeries(appName: string, scope: EntityScope) {
-    return await this.em.findOne(AppSeries, {
+    return await this.appSeriesRepository.findOne({
       name: appName,
       scope: scope,
       user: this.user.id,
@@ -190,7 +223,7 @@ export class AppService {
   }
 
   private async getAppRevision(latestRevisionAppId?: number) {
-    const latestRevisionApp = await this.em.findOne(App, { id: latestRevisionAppId })
+    const latestRevisionApp = await this.appRepository.findOne({ id: latestRevisionAppId })
     if (latestRevisionApp) {
       return latestRevisionApp.revision + 1
     }
@@ -363,6 +396,7 @@ export class AppService {
       const assets = await this.getAssets(appInput.ordered_assets ? appInput.ordered_assets : [])
 
       await this.validateScopeAndUser(user, appInput.scope)
+      await this.validateForkedApp(appInput.forked_from as Uid<'app'>)
       // - create app series
       let appSeries = await this.getAppSeries(appInput.name, appInput.scope)
       this.validateAppSeriesCreation(appSeries, appInput.createAppSeries)
@@ -416,7 +450,7 @@ export class AppService {
       await this.createAppEvent(user, app)
 
       await this.em.commit()
-      return app.uid
+      return { uid: app.uid }
     } catch (error) {
       this.logger.error('Error creating an app', error)
       await this.em.rollback()

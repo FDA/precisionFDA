@@ -87,7 +87,7 @@ export function MemberCard({ member, space }: { member: SpaceMembership; space: 
   const role = isDeactivated ? `${member.role} (disabled)` : member.role
 
   return (
-    <Card $isDeactivated={isDeactivated}>
+    <Card $isDeactivated={isDeactivated} data-testid="member-card">
       <CardHeader>
         <UserInfo>
           <Link to={`/users/${member.user_name}`} target="_blank" rel="noopener noreferrer">
