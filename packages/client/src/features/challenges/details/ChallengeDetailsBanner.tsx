@@ -33,7 +33,7 @@ import { ObjectGroupIcon } from '../../../components/icons/ObjectGroupIcon'
 const ChallengeActionRow = styled(PageContainer)`
   ${pagePadding}
   padding-top: 0px;
-  padding-bottom: 0px;
+  padding-bottom: 0;
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
