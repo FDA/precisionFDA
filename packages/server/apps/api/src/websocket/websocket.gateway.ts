@@ -56,11 +56,13 @@ export class WebsocketGateway implements OnGatewayDisconnect, OnGatewayInit, OnG
   @CreateRequestContext(() => database.orm())
   async handleConnection(client: PfdaWebSocket, message: IncomingMessage) {
     try {
-      this.logger.debug(`WebSocket client connected, IP: ${message.socket.remoteAddress}`)
+      this.logger.verbose(`WebSocket client connected, IP: ${message.socket.remoteAddress}`)
 
       const token = CookieUtils.getCookie(COOKIE_SESSION_KEY, message.headers.cookie)
       if (!token) {
-        throw new Error('Missing authentication token')
+        this.logger.verbose('WebSocket connection missing authentication token')
+        client.close(4001, 'Missing authentication token')
+        return
       }
 
       const decryptedUserSession = Encryptor.decrypt(token)
@@ -72,13 +74,20 @@ export class WebsocketGateway implements OnGatewayDisconnect, OnGatewayInit, OnG
         decryptedUserSession.session_id,
       )
 
-      const session = await this.em.findOneOrFail(Session, {
+      const session = await this.em.findOne(Session, {
         key: HashUtils.hashSessionId(client.pfdaUserContext.sessionId),
         user: client.pfdaUserContext.id,
       })
+      if (!session) {
+        this.logger.verbose(`Session with id ${client.pfdaUserContext.sessionId} was not found`)
+        client.close(4001, 'Session not found')
+        return
+      }
 
       if (session.isExpired()) {
-        throw new Error('Session expired')
+        this.logger.verbose(`Session with id ${session.id} expired`)
+        client.close(4001, 'Session expired')
+        return
       }
 
       const userId = client.pfdaUserContext.id
@@ -116,7 +125,7 @@ export class WebsocketGateway implements OnGatewayDisconnect, OnGatewayInit, OnG
       const userId = client.pfdaUserContext.id
 
       if (!userId) {
-        this.logger.warn('Disconnecting client with missing user ID')
+        this.logger.verbose('Disconnecting client with missing user ID')
         return
       }
 
