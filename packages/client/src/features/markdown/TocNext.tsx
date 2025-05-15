@@ -1,6 +1,6 @@
 /* eslint-disable react/no-array-index-key */
 import React, { useEffect, useState } from 'react'
-import styled from 'styled-components'
+import styled, { css } from 'styled-components'
 import { breakPoints } from '../../styles/theme'
 import { useScrollToHash } from '../../hooks/useScrollToHash'
 import { compactScrollBarV2 } from '../../components/Page/styles'
@@ -34,18 +34,20 @@ const StyledTOCTitle = styled.div`
   padding-bottom: 16px;
 `
 
-export const StyledToCWrap = styled.div`
+export const StyledToCWrap = styled.div<{ $sticky?: boolean }>`
   font-size: 14px;
   line-height: 20px;
   color: var(--c-text-500);
   padding-left: 12px;
-  @media (min-width: ${breakPoints.large}px) {
-    max-width: 380px;
-    top: 32px;
-    position: sticky;
-    max-height: 80vh;
-    height: fit-content;
-  }
+  ${({ $sticky }) => $sticky && css`
+    @media (min-width: ${breakPoints.large}px) {
+      max-width: 380px;
+      top: 32px;
+      position: sticky;
+      max-height: 80vh;
+      height: fit-content;
+    }
+  `}
 `
 
 export const StyledToC = styled.div`
@@ -126,9 +128,9 @@ export const TocList = ({ items }: { items?: IToCItem[] }) => {
   )
 }
 
-export const ToC = ({ items }: { items?: IToCItem[] }) => {
+export const ToC = ({ items, sticky = false }: { items?: IToCItem[], sticky?: boolean }) => {
   return (
-    <StyledToCWrap>
+    <StyledToCWrap $sticky={sticky}>
       <StyledTOCTitle>Table of Contents</StyledTOCTitle>
       <TocList items={items} />
     </StyledToCWrap>

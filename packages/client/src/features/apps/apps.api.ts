@@ -164,7 +164,7 @@ export interface CreateAppPayload {
 }
 
 export interface CreateAppResponse {
-  id: string
+  uid: string
 }
 
 export interface AppFetchResponse {
@@ -183,7 +183,7 @@ export interface AppFetchResponse {
 }
 
 export async function createEditAppRequest(payload: CreateAppPayload): Promise<CreateAppResponse> {
-  return axios.post<CreateAppResponse>('/api/apps', payload).then(r => r.data)
+  return axios.post<CreateAppResponse>('/api/v2/apps', payload).then(r => r.data)
 }
 
 export async function fetchApp(appIdentifier: string): Promise<AppFetchResponse> {

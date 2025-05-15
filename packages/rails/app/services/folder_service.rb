@@ -139,6 +139,8 @@ class FolderService # rubocop:disable Metrics/ClassLength
                      "as it is part of Locked Verification space."
       end
 
+      raise Error, "Locked items cannot be moved." if node.locked?
+
       next unless node.is_a?(Folder)
 
       raise Error, "Unexpected scope." if node.scope != target_scope && !node.private?
@@ -146,6 +148,9 @@ class FolderService # rubocop:disable Metrics/ClassLength
       if target_folder && (node == target_folder || node.has_in_children?(target_folder))
         raise Error, "Unable to move folder into itself or its child folder."
       end
+
+      child_nodes = node.sub_folders + node.files
+      validate_nodes_to_move!(child_nodes, target_folder, target_scope)
     end
   end
 

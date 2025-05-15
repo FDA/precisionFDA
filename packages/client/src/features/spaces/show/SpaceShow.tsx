@@ -94,8 +94,8 @@ const Spaces2 = ({ space, isLoading }: { space: ISpace; isLoading: boolean }) =>
       <SpaceHeader data-isshared={isSharedReviewSpace} data-isprivate={isPrivateReviewSpace}>
         <TopSpaceHeader>
           <SpaceMainInfo>
-            <SpaceHeaderTitle>{space.name}</SpaceHeaderTitle>
-            <SpaceHeaderDescrip>
+            <SpaceHeaderTitle data-testid="space-name">{space.name}</SpaceHeaderTitle>
+            <SpaceHeaderDescrip data-testid="space-description">
               {space.protected && <ProtectedIcon />}
               {space.restricted_reviewer && <FdaRestrictedIcon />}
               {space.description}

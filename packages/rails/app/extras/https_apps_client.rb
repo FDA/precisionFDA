@@ -140,7 +140,7 @@ class HttpsAppsClient # rubocop:disable Metrics/ClassLength
       "/apps",
       opts,
       Net::HTTP::Post::METHOD,
-    )
+    )[:uid]
   end
 
   # Run an app.
