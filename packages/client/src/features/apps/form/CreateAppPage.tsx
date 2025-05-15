@@ -4,13 +4,10 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
+import { APP_REVISION_CREATION_NOT_REQUESTED, APP_SERIES_CREATION_NOT_REQUESTED } from '../../../constants'
 import { cleanObject } from '../../../utils/object'
 import { CreateAppPayload, CreateAppResponse, createEditAppRequest } from '../apps.api'
 import { AppForm } from './AppForm'
-import {
-  APP_REVISION_CREATION_NOT_REQUESTED,
-  APP_SERIES_CREATION_NOT_REQUESTED,
-} from '../../../constants'
 
 export const CreateAppPage = () => {
   const navigate = useNavigate()
@@ -26,7 +23,7 @@ export const CreateAppPage = () => {
 
     try {
       const res: CreateAppResponse = await appMutation.mutateAsync(vals)
-      navigate(`/home/apps/${res.id}`)
+      navigate(`/home/apps/${res.uid}`)
       queryClient.invalidateQueries({
         queryKey: ['apps'],
       })
@@ -38,7 +35,10 @@ export const CreateAppPage = () => {
       // The default error message choice is an error we "intentionally" send from the backend
       // The second choice is a standard Error object message
       // The 'Unknown error' is a fallback in case the previous options provide nothing better than - for example - an empty string
-      if (err.response?.status === 400 && [APP_SERIES_CREATION_NOT_REQUESTED, APP_REVISION_CREATION_NOT_REQUESTED].includes(err?.response?.data?.error.code)) {
+      if (
+        err.response?.status === 400 &&
+        [APP_SERIES_CREATION_NOT_REQUESTED, APP_REVISION_CREATION_NOT_REQUESTED].includes(err?.response?.data?.error.code)
+      ) {
         throw err
       } else {
         const message = err.response?.data?.error?.message || err.message || 'Unknown error'
@@ -47,5 +47,5 @@ export const CreateAppPage = () => {
     }
   }
 
-  return <AppForm onSubmit={onSubmit} isSubmitting={appMutation.isPending}/>
+  return <AppForm onSubmit={onSubmit} isSubmitting={appMutation.isPending} />
 }

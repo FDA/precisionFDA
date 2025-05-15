@@ -19,10 +19,22 @@ import type {
   SerializedLexicalNode,
   Spread,
 } from 'lexical';
+import type {JSX} from 'react';
 
-import {$applyNodeReplacement, createEditor, DecoratorNode} from 'lexical';
+import {HashtagNode} from '@lexical/hashtag';
+import {LinkNode} from '@lexical/link';
+import {
+  $applyNodeReplacement,
+  createEditor,
+  DecoratorNode,
+  LineBreakNode,
+  ParagraphNode,
+  RootNode,
+  TextNode,
+} from 'lexical';
 import * as React from 'react';
-import {Suspense} from 'react';
+
+import {KeywordNode} from './KeywordNode';
 
 const ImageComponent = React.lazy(() => import('./ImageComponent'));
 
@@ -160,10 +172,19 @@ export class ImageNode extends DecoratorNode<JSX.Element> {
     this.__height = height || 'inherit';
     this.__showCaption = showCaption || false;
     this.__caption =
-      caption ||
-      createEditor({
-        nodes: [],
-      });
+    caption ||
+    createEditor({
+      namespace: 'Playground/ImageNodeCaption',
+      nodes: [
+        RootNode,
+        TextNode,
+        LineBreakNode,
+        ParagraphNode,
+        LinkNode,
+        HashtagNode,
+        KeywordNode,
+      ],
+    });
     this.__captionsEnabled = captionsEnabled || captionsEnabled === undefined;
   }
 
@@ -220,20 +241,18 @@ export class ImageNode extends DecoratorNode<JSX.Element> {
 
   decorate(): JSX.Element {
     return (
-      <Suspense fallback={null}>
-        <ImageComponent
-          src={this.__src}
-          altText={this.__altText}
-          width={this.__width}
-          height={this.__height}
-          maxWidth={this.__maxWidth}
-          nodeKey={this.getKey()}
-          showCaption={this.__showCaption}
-          caption={this.__caption}
-          captionsEnabled={this.__captionsEnabled}
-          resizable={true}
-        />
-      </Suspense>
+      <ImageComponent
+        src={this.__src}
+        altText={this.__altText}
+        width={this.__width}
+        height={this.__height}
+        maxWidth={this.__maxWidth}
+        nodeKey={this.getKey()}
+        showCaption={this.__showCaption}
+        caption={this.__caption}
+        captionsEnabled={this.__captionsEnabled}
+        resizable={true}
+      />
     );
   }
 }
