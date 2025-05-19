@@ -120,7 +120,7 @@ const removeRepeatable = async (job: Job, queue?: Queue) => {
 const removeRepeatableJob = async (job: JobInformation, queue: Queue) => {
   log.log({ jobId: job.id, cron: job.cron }, 'removeRepeatableJob: trying to remove repeatable job')
   // await mainQueue.removeRepeatableByKey(job.key)
-  await queue.removeRepeatable({ jobId: job.id, cron: job.cron })
+  await queue.removeRepeatable(job.name, { jobId: job.id, cron: job.cron })
 }
 
 const findRepeatable = async (bullJobId: string) => {
