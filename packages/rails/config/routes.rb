@@ -486,7 +486,6 @@ Rails.application.routes.draw do
       post "create_asset"
       post "close_asset"
       post "share_with_fda"
-      post "attach_to_notes"
       post "update_note"
       post "upvote"
       post "remove_upvote"
