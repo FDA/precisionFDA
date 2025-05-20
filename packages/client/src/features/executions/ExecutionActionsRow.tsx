@@ -109,7 +109,7 @@ export const ExecutionActionsRow = ({
           <Running />
         </StyledRefresh>
       )}
-      {isJobOwner && isJobStartingOrRunning && (
+      {isJobOwner && execution.entity_type === 'https' && isJobStartingOrRunning && (
         <Button
           data-variant="primary"
           data-tooltip-id="workstation-starting"
