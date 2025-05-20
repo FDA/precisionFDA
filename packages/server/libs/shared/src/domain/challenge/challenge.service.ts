@@ -7,7 +7,7 @@ import {
 import { Uid } from '@shared/domain/entity/domain/uid'
 import { NotificationService } from '@shared/domain/notification/services/notification.service'
 import { NotFoundError, ValidationError } from '@shared/errors'
-import { NOTIFICATION_ACTION, SEVERITY, STATIC_SCOPE } from '@shared/enums'
+import { NOTIFICATION_ACTION, SEVERITY } from '@shared/enums'
 import { PlatformClient } from '@shared/platform-client'
 import { Inject, Injectable, Logger } from '@nestjs/common'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
@@ -38,7 +38,6 @@ import { SubmissionDTO } from '@shared/domain/challenge/dto/submission.dto'
 import { JOB_STATE } from '@shared/domain/job/job.enum'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { ChallengeFollow } from '@shared/domain/follow/challenge-follow.entity'
-import { EntityScope } from '@shared/types/common'
 
 @Injectable()
 export class ChallengeService {
@@ -155,16 +154,12 @@ export class ChallengeService {
   }
 
   async getChallenge(id: number): Promise<ChallengeDTO> {
-    const challenge = await this.challengeRepo.findOne({ id })
+    const challenge = await this.challengeRepo.findAccessibleOne({ id })
     if (!challenge) {
       throw new NotFoundError('Challenge not found!')
     }
 
     const user = await this.em.findOne(User, { id: this.user.id })
-
-    if (!(await challenge.isAccessibleBy(user))) {
-      throw new NotFoundError('Challenge not found!')
-    }
 
     let appUid = null
     if (challenge.appId) {
@@ -424,17 +419,7 @@ export class ChallengeService {
         break
     }
 
-    const user = await this.em.findOne(User, { id: this.user.id })
-    if (!user) {
-      where.status = { $ne: CHALLENGE_STATUS.SETUP }
-      where.scope = STATIC_SCOPE.PUBLIC
-    } else if (!(await user.isSiteOrChallengeAdmin())) {
-      const spaces = await user.accessibleSpaces()
-      const scopes = spaces.map((space) => space.scope as EntityScope)
-      where.scope = { $in: [STATIC_SCOPE.PUBLIC, ...scopes] }
-    }
-
-    const response = await this.challengeRepo.paginate(pagination, where)
+    const response = await this.challengeRepo.paginateAccessible(pagination, where)
     const challenges = response.data.map((challenge) => ChallengeDTO.mapToDTO(challenge))
     return { ...response, data: challenges }
   }
