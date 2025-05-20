@@ -20,6 +20,18 @@ end
 
 # environment lazy { ENV.to_hash }
 
+
+ruby_block 'Log git clone details' do
+  block do
+    repo_url = node.run_state['ssm_params']['app']['app_source']['url']
+    revision = node.run_state['ssm_params']['app']['app_source']['revision']
+    puts ">>> Cloning repo from: #{repo_url}"
+    puts ">>> Using revision: #{revision}"
+    puts ">>> Cloning into: #{app_dir}"
+  end
+end
+
+
 # probably checkout the correct branch
 git app_dir do
   repository(lazy { node.run_state['ssm_params']['app']['app_source']['url'] })

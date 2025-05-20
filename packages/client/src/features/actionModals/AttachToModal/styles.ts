@@ -1,7 +1,6 @@
 import styled from 'styled-components'
 import { Svg } from '../../../components/icons/Svg'
 import { Markdown } from '../../../components/Markdown'
-import { colors } from '../../../styles/theme'
 
 export const NotesMarkdown = styled(Markdown)`
   padding: 0;
@@ -65,10 +64,10 @@ export const StyledAttachToModal = styled.div`
     border-top: 1px solid var(--c-layout-border);
 
     &:hover &_chevron {
-      color: #8198BC;
+      color: #8198bc;
     }
     &--selected {
-      background-color: #E3F3FC;
+      background-color: #e3f3fc;
 
       &:hover {
         i {
@@ -86,7 +85,7 @@ export const StyledAttachToModal = styled.div`
     }
     &_class-label {
       padding: 0 10px;
-      color: #63A5DE;
+      color: #63a5de;
       font-weight: 700;
       text-transform: uppercase;
       font-size: 75%;
@@ -105,11 +104,11 @@ export const StyledAttachToModal = styled.div`
     }
     &_clear {
       cursor: pointer;
-      color: #63A5DE;
+      color: #63a5de;
     }
     &_search-icons {
       i {
-        color: #63A5DE;
+        color: #63a5de;
         padding: 5px;
       }
       .fa-times {
@@ -117,5 +116,4 @@ export const StyledAttachToModal = styled.div`
       }
     }
   }
-
 `

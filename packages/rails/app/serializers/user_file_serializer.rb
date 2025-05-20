@@ -62,8 +62,6 @@ class UserFileSerializer < NodeSerializer
 
       # POST download_list files
       links[:download_list] = download_list_api_files_path
-      # POST /api/attach_to: api_attach_to_notes, discussions, answers
-      links[:attach_to] = api_attach_to_notes_path
       # POST: Add file
       links[:add_file] = api_create_file_path
       # POST: Add folder

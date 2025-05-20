@@ -125,8 +125,6 @@ class AppSerializer < ApplicationSerializer # rubocop:disable Metrics/ClassLengt
       links[:copy] = copy_api_apps_path
 
       if object.owned_by_user?(current_user)
-        # POST /api/attach_to: api_attach_to_notes, discussions, answers
-        links[:attach_to] = api_attach_to_notes_path
         unless object.in_space? && member_viewer?
           # PUT /api/workflows/delete soft delete
           links[:delete] = delete_api_apps_path if user_role != "viewer"
