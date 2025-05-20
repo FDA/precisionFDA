@@ -1,17 +1,71 @@
-import { MySqlDriver } from '@mikro-orm/mysql'
+import { DefaultLogger, LogContext, MySqlDriver } from '@mikro-orm/mysql'
 import { MikroOrmModuleSyncOptions } from '@mikro-orm/nestjs/typings'
 import { TsMorphMetadataProvider } from '@mikro-orm/reflection'
 import { config } from '@shared/config'
+import { LoggerOptions } from '@mikro-orm/core'
+import { Logger } from '@nestjs/common'
 
 export interface MikroOrmConfigOptions {
   distPath: string
   sourcePath: string
 }
 
+class SQLQueryLogger extends DefaultLogger {
+  logger: Logger
+
+  constructor(
+    private printValues: boolean,
+    options: LoggerOptions,
+  ) {
+    super(options)
+    this.logger = new Logger('SQL Logger')
+  }
+
+  logQuery(context: LogContext): void {
+    const queryText = this.printValues
+      ? this.fillParams(context.query, context.params || [])
+      : context.query
+
+    const parts = [`[QUERY${context.id !== undefined ? ` ${context.id}` : ''}]`, queryText]
+
+    if (context.took !== undefined) {
+      parts.push(`[took ${context.took} ms]`)
+    }
+
+    this.logger.log(parts.join(' '))
+  }
+
+  private fillParams(query: string, params: unknown[]): string {
+    let i = 0
+    return query.replace(/\?/g, () => {
+      if (i >= params.length) {
+        throw new Error('Not enough parameters for query placeholders')
+      }
+
+      const param = params[i++]
+
+      if (param === null || param === undefined) {
+        return 'NULL'
+      }
+
+      if (typeof param === 'string') {
+        return `'${param.replace(/'/g, "''")}'`
+      }
+
+      if (typeof param === 'number' || typeof param === 'boolean') {
+        return String(param)
+      }
+
+      return `'${JSON.stringify(param).replace(/'/g, "''")}'`
+    })
+  }
+}
+
 export function getMikroOrmConfig(opts: MikroOrmConfigOptions): MikroOrmModuleSyncOptions {
   return {
     clientUrl: config.database.clientUrl,
-    debug: config.database.debug,
+    loggerFactory: (options) =>
+      new SQLQueryLogger(config.database.printDBQueryValuesInLog, options),
     metadataProvider: TsMorphMetadataProvider,
     entities: [getEntityGlob(opts.distPath, 'js')],
     entitiesTs: [getEntityGlob(opts.sourcePath, 'ts'), getEntityGlob('./libs/shared/src', 'ts')],

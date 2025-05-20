@@ -1,4 +1,4 @@
-import { ConfigOverride, defaultConfig, parseIntFromProcess } from '..'
+import { ConfigOverride, parseBooleanFromProcess, parseIntFromProcess } from '..'
 import { parseIpv4Cidr } from '@shared/validation/parsers'
 
 export const config: ConfigOverride = () => ({
@@ -11,7 +11,10 @@ export const config: ConfigOverride = () => ({
     },
   },
   database: {
-    debug: true,
+    printDBQueryValuesInLog:
+      process.env.PRINT_DB_QUERY_VALUES_IN_LOG === undefined
+        ? true
+        : parseBooleanFromProcess(process.env.PRINT_DB_QUERY_VALUES_IN_LOG),
   },
   workerJobs: {
     syncJob: {
