@@ -108,16 +108,16 @@ class NoteAttachModel
       @preview(firstNote) if firstNote?
 
   attach: () ->
-    @saving(true)
-    selectedNotes = @notes.selected.peek()
-    return if !@canAttach.peek() && _.isEmpty(selectedNotes)
-    params =
-      note_uids: _.map(selectedNotes, (note) -> note.uid)
-      items: [{
-        id: @id
-        type: @type
-      }]
-    Precision.api "/api/attach_to_notes", params, (res) =>
+#     @saving(true)
+#     selectedNotes = @notes.selected.peek()
+#     return if !@canAttach.peek() && _.isEmpty(selectedNotes)
+#     params =
+#       note_uids: _.map(selectedNotes, (note) -> note.uid)
+#       items: [{
+#         id: @id
+#         type: @type
+#       }]
+#     Precision.api "/api/attach_to_notes", params, (res) =>
       location.reload()
 
   queryAction: () =>

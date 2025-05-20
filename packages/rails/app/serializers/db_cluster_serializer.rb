@@ -70,7 +70,6 @@ class DbClusterSerializer < ApplicationSerializer
       links[:space] = space_path if object.in_space?
       links[:create] = api_dbcluster_path(uid: object.uid)
       links[:update] = api_dbcluster_path(uid: object.uid)
-      links[:attach_to] = api_attach_to_notes_path
 
       licenses_links!(links)
     end

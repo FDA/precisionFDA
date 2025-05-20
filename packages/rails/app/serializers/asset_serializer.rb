@@ -90,8 +90,6 @@ class AssetSerializer < UserFileSerializer
           links[:update] = api_asset_path(object)
         end
       end
-      # POST /api/attach_to: api_attach_to_notes, discussions, answers
-      links[:attach_to] = api_attach_to_notes_path
 
       if current_user.can_administer_site?
         # PUT /api/assets/feature #
