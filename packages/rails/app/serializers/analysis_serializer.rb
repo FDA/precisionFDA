@@ -70,7 +70,6 @@ class AnalysisSerializer < ApplicationSerializer
       links[:show] = workflow_path(object.workflow) if accessible_by_user?(logged_user)
       links[:user] = user_path(object.workflow.user.dxuser)
       links[:space] = "/spaces/#{object.workflow.space_object.id}" if object.workflow.in_space?
-      links[:attach_to] = api_attach_to_notes_path
       links[:copy] = copy_api_workflows_path
       links[:run_workflow] = api_run_workflow_path
       links[:batch_run_workflow] = batch_workflow_workflow_path(object.workflow)

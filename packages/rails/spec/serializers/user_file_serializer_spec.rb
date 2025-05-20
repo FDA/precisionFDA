@@ -33,9 +33,8 @@ describe UserFileSerializer do
         expect(user_file_serialized["links"]["user"]).to eq(user_path(user.dxuser))
       end
 
-      it "links[download_list, attach_to] exist" do
+      it "links[download_list] exist" do
         expect(user_file_serialized["links"]["download_list"]).to eq(download_list_api_files_path)
-        expect(user_file_serialized["links"]["attach_to"]).to eq(api_attach_to_notes_path)
       end
 
       it "links[add_file, add_folder, update] exist" do

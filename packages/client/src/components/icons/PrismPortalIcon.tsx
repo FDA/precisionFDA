@@ -1,23 +1,8 @@
 import React from 'react'
 import { Svg } from './Svg'
 
-export const PrismIcon = ({
-  width,
-  height,
-  style,
-}: {
-  height?: number
-  width?: number
-  style?: any
-}) => (
-  <Svg
-    xmlns="http://www.w3.org/2000/svg"
-    fill="none"
-    viewBox="0 0 67 54"
-    width={width}
-    height={height}
-    style={style}
-  >
+export const PrismPortalIcon = ({ width, height, style }: { height?: number; width?: number; style?: any }) => (
+  <Svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 67 54" width={width} height={height} style={style}>
     <path
       fill="currentColor"
       fillRule="evenodd"

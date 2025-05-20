@@ -1,6 +1,5 @@
 OpenSSL::SSL::SSLContext::DEFAULT_PARAMS[:ssl_version] ="TLSv1_2"
 OpenSSL::SSL::SSLContext::DEFAULT_PARAMS[:ciphers] = "TLSv1.2+FIPS:kRSA+FIPS:!eNULL:!aNULL"
-OpenSSL.fips_mode = true unless ActiveRecord::Type::Boolean.new.cast(ENV["NO_FIPS"])
 
 module SHA256_OpenSSL
   def self.prepended(base)

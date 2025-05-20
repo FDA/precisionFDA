@@ -21,46 +21,44 @@ export const RESOURCE_LABELS = {
 
   // NOTE(samuel) unused
   // "db_std1_x1": "DB Baseline 1 x 1",
-  'db_std1_x2': 'DB Baseline 1 x 2',
-  'db_mem1_x2': 'DB Mem 1 x 2',
-  'db_mem1_x4': 'DB Mem 1 x 4',
-  'db_mem1_x8': 'DB Mem 1 x 8',
-  'db_mem1_x16': 'DB Mem 1 x 16',
-  'db_mem1_x32': 'DB Mem 1 x 32',
-  'db_mem1_x48': 'DB Mem 1 x 48',
-  'db_mem1_x64': 'DB Mem 1 x 64',
+  db_std1_x2: 'DB Baseline 1 x 2',
+  db_mem1_x2: 'DB Mem 1 x 2',
+  db_mem1_x4: 'DB Mem 1 x 4',
+  db_mem1_x8: 'DB Mem 1 x 8',
+  db_mem1_x16: 'DB Mem 1 x 16',
+  db_mem1_x32: 'DB Mem 1 x 32',
+  db_mem1_x48: 'DB Mem 1 x 48',
+  db_mem1_x64: 'DB Mem 1 x 64',
   // NOTE(samuel) unused
   // "db_mem1_x96": "DB Mem 1 x 96",
 } as const
 
 export const RESOURCES = Object.keys(RESOURCE_LABELS) as (keyof typeof RESOURCE_LABELS)[]
 export interface IUser {
-  id: number,
-  name: string,
-
-  fullName: string,
-  org: string,
-  url: string,
-  isAccepted: boolean,
-  isGovUser?: boolean,
-  isAdmin?: boolean,
-  dxuser: string,
+  id: number
+  name: string
+  fullName: string
+  org: string
+  url: string
+  isAccepted: boolean
+  isGovUser?: boolean
+  isAdmin?: boolean
+  dxuser: string
   admin: boolean
   can_access_notification_preference: boolean
   can_administer_site: boolean
   review_space_admin: boolean
   can_create_challenges: boolean
   allowed_to_publish: boolean
-
   can_create_data_portals: boolean
   can_see_spaces: boolean
   counters: {
-    files: number,
-    folders: number,
-    apps: number,
-    workflows: number,
-    jobs: number,
-    assets: number,
+    files: number
+    folders: number
+    apps: number
+    workflows: number
+    jobs: number
+    assets: number
     notes: number
   }
   resources: typeof RESOURCES
@@ -73,4 +71,12 @@ export interface IUser {
   links: any
   handle: string
   session_id: string
+}
+
+export type SimpleUser = {
+  id: number
+  dxuser: string
+  firstName: string
+  lastName: string
+  fullName: string
 }

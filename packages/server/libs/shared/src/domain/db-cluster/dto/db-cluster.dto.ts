@@ -72,7 +72,6 @@ export class DbClusterDTO {
         user: `/users/${dbcluster.user.getEntity().dxuser}`,
         create: `/api/dbclusters/${dbcluster.uid}`,
         update: `/api/dbclusters/${dbcluster.uid}`,
-        attach_to: '/api/attach_to_notes',
         start: '/api/dbclusters/start',
         stop: '/api/dbclusters/stop',
         terminate: '/api/dbclusters/terminate',
