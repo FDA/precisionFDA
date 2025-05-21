@@ -71,8 +71,8 @@ const defaultConfig = {
     dbName: process.env.NODE_DATABASE_NAME ?? 'precisionfda-test',
     clientUrl:
       process.env.NODE_DATABASE_URL ?? 'mysql://root:password@localhost:32800/precisionfda-test',
-    debug: parseBooleanFromProcess(process.env.NODE_DATABASE_DEBUG) ?? false,
     ormMetadataCacheEnabled: false,
+    printDBQueryValuesInLog: false,
   },
   validation: {
     maxStrLen: 255,
@@ -230,7 +230,7 @@ const defaultConfig = {
 
 // lazily plug-in the overrides that are based on the NODE_ENV
 const envOverride = overrides[env] ? overrides[env]() : {}
-const config: typeof defaultConfig = mergeDeepRight(defaultConfig, envOverride) as any
+const config = mergeDeepRight(defaultConfig, envOverride) as typeof defaultConfig
 Object.freeze(config)
 
 export type ConfigOverride = () => DeepPartial<typeof defaultConfig>

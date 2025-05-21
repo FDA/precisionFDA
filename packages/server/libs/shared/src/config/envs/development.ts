@@ -1,4 +1,4 @@
-import { ConfigOverride, defaultConfig, parseIntFromProcess } from '..'
+import { ConfigOverride, parseBooleanFromProcess, parseIntFromProcess } from '..'
 
 export const config: ConfigOverride = () => ({
   appName: 'https-apps-worker-dev',
@@ -9,9 +9,12 @@ export const config: ConfigOverride = () => ({
     internalEndpointsEnabled: true,
   },
   database: {
-    debug: true,
     clientUrl: process.env.NODE_DATABASE_URL ?? 'mysql://root:password@0.0.0.0:32800/precision-fda',
     ormMetadataCacheEnabled: true,
+    printDBQueryValuesInLog:
+      process.env.PRINT_DB_QUERY_VALUES_IN_LOG === undefined
+        ? true
+        : parseBooleanFromProcess(process.env.PRINT_DB_QUERY_VALUES_IN_LOG),
   },
   logs: {
     pretty: true,

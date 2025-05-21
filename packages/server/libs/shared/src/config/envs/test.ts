@@ -1,4 +1,4 @@
-import { ConfigOverride, parseIntFromProcess } from '..'
+import { ConfigOverride, parseBooleanFromProcess, parseIntFromProcess } from '..'
 import { parseIpv4Cidr } from '@shared/validation/parsers'
 
 export const config: ConfigOverride = () => ({
@@ -8,6 +8,12 @@ export const config: ConfigOverride = () => ({
     fdaSubnet: {
       allowedIpCidrBlock: parseIpv4Cidr(process.env.NODE_FDA_SUBNET_CIDR_BLOCK),
     },
+  },
+  database: {
+    printDBQueryValuesInLog:
+      process.env.PRINT_DB_QUERY_VALUES_IN_LOG === undefined
+        ? true
+        : parseBooleanFromProcess(process.env.PRINT_DB_QUERY_VALUES_IN_LOG),
   },
   workerJobs: {
     syncJob: {
