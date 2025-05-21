@@ -558,20 +558,31 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
   private
 
   def logout_from_gsrs
-    session_key = http_request(
-      "#{GSRS_URL}/api/v1/whoami",
-      {},
-      Net::HTTP::Get::METHOD,
-      {},
-      {
-        AUTHENTICATION_USERNAME: current_user.username,
-        AUTHENTICATION_EMAIL: current_user.email,
-      },
-      true,
-    )
+    cookies_hash = Rack::Utils.parse_cookies_header(request.headers["Cookie"])
+    session_key = cookies_hash["ix.session"]
+
+    # No session id and no user => no identification to be used for logout
+    return if !session_key && !current_user
+
+    begin
+      session_key ||= http_request(
+        "#{GSRS_URL}/ginas/app/api/v1/whoami",
+        {},
+        Net::HTTP::Get::METHOD,
+        {},
+        {
+          AUTHENTICATION_USERNAME: current_user.username,
+          AUTHENTICATION_EMAIL: current_user.email,
+        },
+        true,
+      ).flatten.first
+    rescue StandardError => e
+      logger.debug("Whoami GSRS request error: #{e.message}")
+      return
+    end
 
     request_headers = {}
-    request_headers["Cookie"] = "ix.session=#{session_key.flatten.first}"
+    request_headers["Cookie"] = "ix.session=#{session_key}"
     http_request(
       "#{GSRS_URL}/ginas/app/logout",
       {},
