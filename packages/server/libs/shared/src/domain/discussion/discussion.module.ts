@@ -14,11 +14,13 @@ import { AppModule } from '@shared/domain/app/app.module'
 import { JobModule } from '@shared/domain/job/job.module'
 import { NoteModule } from '@shared/domain/note/note.module'
 import { ComparisonModule } from '@shared/domain/comparison/comparison.module'
+import { EntityLinkModule } from '@shared/domain/entity/entity-link/entity-link.module'
 
 @Module({
   imports: [
     PlatformClientModule,
     EntityModule,
+    EntityLinkModule,
     EmailModule,
     SpaceModule,
     AnswerModule,

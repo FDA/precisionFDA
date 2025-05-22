@@ -1,5 +1,4 @@
 import { Module } from '@nestjs/common'
-import { DiscussionModule } from '@shared/domain/discussion/discussion.module'
 import { NotificationModule } from '@shared/domain/notification/notification.module'
 import { EntityProvenanceModule } from '@shared/domain/provenance/entity-provenance.module'
 import { SpaceReportModule } from '@shared/domain/space-report/space-report.module'
@@ -16,6 +15,8 @@ import { SpaceReportPartWorkflowResultProvider } from '@shared/facade/space-repo
 import { SpaceReportBatchResultGenerateFacade } from '@shared/facade/space-report/space-report-batch-result-generate.facade'
 import { SpaceReportResultGenerateFacade } from '@shared/facade/space-report/space-report-result-generate.facade'
 import { SpaceReportErrorFacade } from './space-report-error.facade'
+import { DiscussionModule } from '@shared/domain/discussion/discussion.module'
+import { AttachmentsFacadeModule } from '@shared/facade/discussion/attachments-facade.module'
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { SpaceReportErrorFacade } from './space-report-error.facade'
     NotificationModule,
     UserFileModule,
     DiscussionModule,
+    AttachmentsFacadeModule,
   ],
   providers: [
     SpaceReportResultGenerateFacade,

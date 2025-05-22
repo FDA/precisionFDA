@@ -2,22 +2,12 @@ import { OrderDefinition, Reference } from '@mikro-orm/core'
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Injectable, Logger } from '@nestjs/common'
 import { Answer } from '@shared/domain/answer/answer.entity'
-import { App } from '@shared/domain/app/app.entity'
-import { Attachment } from '@shared/domain/attachment/attachment.entity'
 import { AnswerComment } from '@shared/domain/comment/answer-comment.entity'
 import { DiscussionComment } from '@shared/domain/comment/discussion-comment.entity'
-import { Comparison } from '@shared/domain/comparison/comparison.entity'
 import { Discussion } from '@shared/domain/discussion/discussion.entity'
-import { EntityService } from '@shared/domain/entity/entity.service'
-import { Job } from '@shared/domain/job/job.entity'
 import { Note } from '@shared/domain/note/note.entity'
 import { Space } from '@shared/domain/space/space.entity'
-import { SPACE_TYPE } from '@shared/domain/space/space.enum'
-import { SpaceRepository } from '@shared/domain/space/space.repository'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
-import { Asset } from '@shared/domain/user-file/asset.entity'
-import { Node } from '@shared/domain/user-file/node.entity'
-import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { User, USER_STATE } from '@shared/domain/user/user.entity'
 import { Vote } from '@shared/domain/vote/vote.entity'
 import { HOME_SCOPE, STATIC_SCOPE } from '@shared/enums'
@@ -26,7 +16,6 @@ import * as errors from '../../../errors'
 import { Comment, CommentableType } from '../../comment/comment.entity'
 import { SPACE_MEMBERSHIP_ROLE } from '../../space-membership/space-membership.enum'
 import { getIdFromScopeName } from '../../space/space.helper'
-import type { DiscussionAttachment } from '../discussion.types'
 import { CreateDiscussionDTO } from '@shared/domain/discussion/dto/create-discussion.dto'
 import { CreateAnswerDTO } from '@shared/domain/discussion/dto/create-answer.dto'
 import { UpdateDiscussionDTO } from '@shared/domain/discussion/dto/update-discussion.dto'
@@ -38,16 +27,9 @@ import DiscussionRepository from '@shared/domain/discussion/discussion.repositor
 import { DiscussionDTO } from '@shared/domain/discussion/dto/discussion.dto'
 import { AnswerDTO } from '@shared/domain/discussion/dto/answer.dto'
 import { CommentDTO } from '@shared/domain/discussion/dto/comment.dto'
-import { EntityScopeUtils } from '@shared/utils/entity-scope.utils'
 import { DiscussionFollow } from '@shared/domain/follow/discussion-follow.entity'
-import { AttachmentsDTO } from '@shared/domain/discussion/dto/attachments.dto'
-import { UserRepository } from '@shared/domain/user/user.repository'
 import AnswerRepository from '@shared/domain/answer/answer.repository'
-import { NodeRepository } from '@shared/domain/user-file/node.repository'
-import { AppRepository } from '@shared/domain/app/app.repository'
-import { JobRepository } from '@shared/domain/job/job.repository'
-import { NoteRepository } from '@shared/domain/note/note.repository'
-import { ComparisonRepository } from '@shared/domain/comparison/comparison.repository'
+import { EntityLinkService } from '@shared/domain/entity/entity-link/entity-link.service'
 
 @Injectable()
 export class DiscussionService {
@@ -57,16 +39,9 @@ export class DiscussionService {
   constructor(
     private readonly em: SqlEntityManager,
     private readonly userCtx: UserContext,
-    private readonly entityService: EntityService,
-    private readonly userRepository: UserRepository,
-    private readonly spaceRepository: SpaceRepository,
     private readonly discussionRepository: DiscussionRepository,
     private readonly answerRepository: AnswerRepository,
-    private readonly nodeRepository: NodeRepository,
-    private readonly appRepository: AppRepository,
-    private readonly jobRepository: JobRepository,
-    private readonly noteRepository: NoteRepository,
-    private readonly comparisonRepository: ComparisonRepository,
+    private readonly entityLinkService: EntityLinkService,
   ) {}
 
   async getDiscussion(discussionId: number): Promise<DiscussionDTO> {
@@ -114,57 +89,30 @@ export class DiscussionService {
   async createDiscussion(dto: CreateDiscussionDTO) {
     this.logger.log(`Creating discussion: ${JSON.stringify(dto)}`)
 
-    const user = await this.userRepository.findOneOrFail({ id: this.userCtx.id })
-    if (!user) {
-      throw new errors.NotFoundError(`User not found ({ id: ${this.userCtx.id} })`)
-    }
+    const user = await this.userCtx.loadEntity()
 
-    if (EntityScopeUtils.isSpaceScope(dto.scope)) {
-      const space = await this.spaceRepository.findEditableByIdAndUser(
-        EntityScopeUtils.getSpaceIdFromScope(dto.scope),
-        user,
-      )
-
-      if (!space) {
-        throw new errors.PermissionError(
-          'Unable to create discussion: insufficient permissions to access the space.',
-        )
-      }
-
-      if (
-        space.type === SPACE_TYPE.PRIVATE_TYPE ||
-        (space.type === SPACE_TYPE.REVIEW && space.meta?.restricted_discussions)
-      ) {
-        throw new errors.InvalidStateError(
-          'Unable to create discussion: the space has restricted discussions.',
-        )
-      }
-    }
-
-    return await this.em.transactional(async (tem) => {
+    return await this.em.transactional(async () => {
       const newNote = new Note(user)
       newNote.title = dto.title
       newNote.content = dto.content
       newNote.noteType = 'Discussion'
       newNote.scope = dto.scope
-      tem.persist(newNote)
-
-      await this.createAttachments(newNote, dto.attachments)
+      this.em.persist(newNote)
 
       const newDiscussion = new Discussion(newNote, user)
-      await tem.persistAndFlush(newDiscussion)
+      await this.em.persistAndFlush(newDiscussion)
 
       const newFollow = new DiscussionFollow(newDiscussion)
       newFollow.followerId = user.id
       newFollow.followerType = 'User'
       newFollow.blocked = false
-      tem.persist(newFollow)
+      this.em.persist(newFollow)
 
       return DiscussionDTO.fromEntity(newDiscussion, true)
     })
   }
 
-  async updateDiscussion(id: number, discussionInput: UpdateDiscussionDTO): Promise<void> {
+  async updateDiscussion(id: number, discussionInput: UpdateDiscussionDTO): Promise<DiscussionDTO> {
     this.logger.log(`Updating discussion: ${JSON.stringify(discussionInput)}`)
 
     return await this.em.transactional(async () => {
@@ -185,11 +133,8 @@ export class DiscussionService {
       if (discussionInput.content) {
         note.content = discussionInput.content
       }
-      this.em.persist(note)
-
-      if (discussionInput.attachments) {
-        await this.updateAttachments(note, discussionInput.attachments)
-      }
+      await this.em.persistAndFlush(note)
+      return DiscussionDTO.fromEntity(discussion)
     })
   }
 
@@ -325,7 +270,7 @@ export class DiscussionService {
 
   async createAnswer(dto: CreateAnswerDTO) {
     this.logger.log(`Creating answer: ${JSON.stringify(dto)}`)
-    const user = await this.userRepository.findOneOrFail({ id: this.userCtx.id })
+    const user = await this.userCtx.loadEntity()
 
     const discussion = await this.discussionRepository.findAccessibleOne(
       { id: dto.discussionId },
@@ -349,7 +294,6 @@ export class DiscussionService {
       newNote.scope = discussionNote.scope
       newNote.noteType = 'Answer'
       this.em.persist(newNote)
-      await this.createAttachments(newNote, dto.attachments)
 
       const newAnswer = new Answer(newNote, discussion, user)
       await this.em.persistAndFlush(newAnswer)
@@ -367,19 +311,11 @@ export class DiscussionService {
       )
     }
     const note = answer.note.getEntity()
-
-    return await this.em.transactional(async (tem) => {
-      // answer title cannot be changed from UI. Only content and attachments can be changed.
-      if (input?.content) {
-        note.content = input.content
-      }
-      tem.persist(note)
-
-      if (input?.attachments) {
-        await this.updateAttachments(note, input.attachments)
-      }
-      await tem.commit()
-    })
+    if (input?.content) {
+      note.content = input.content
+    }
+    await this.em.persistAndFlush(note)
+    return AnswerDTO.fromEntity(answer)
   }
 
   async deleteAnswer(answerId: number) {
@@ -396,174 +332,29 @@ export class DiscussionService {
       )
     }
 
-    return await this.em.transactional(async (tem) => {
+    return await this.em.transactional(async () => {
       const answerNote = answer.note.getEntity()
-      const answerVotes = await tem.find(Vote, {
+      const answerVotes = await this.em.find(Vote, {
         votableId: answerId,
         votableType: 'Answer',
       })
-      const noteVotes = await tem.find(Vote, {
+      const noteVotes = await this.em.find(Vote, {
         votableId: answerNote.id,
         votableType: 'Note',
       })
       this.logger.log(`Deleting answer votes with ids: ${answerVotes.map((vote) => vote.id)}`)
-      tem.remove(answerVotes)
+      this.em.remove(answerVotes)
       this.logger.log(`Deleting note votes with ids: ${noteVotes.map((vote) => vote.id)}`)
-      tem.remove(noteVotes)
+      this.em.remove(noteVotes)
       this.logger.log(`Deleting answer with id: ${answer.id}`)
-      await tem.removeAndFlush(answer)
+      await this.em.removeAndFlush(answer)
     })
-  }
-
-  private async createAttachments(note: Note, attachmentsToSave: AttachmentsDTO) {
-    for (const id of attachmentsToSave.files) {
-      const res = await this.nodeRepository.findAccessibleOne({ id })
-
-      if (!res || (!res.isPublic() && res.scope !== note.scope)) {
-        throw new errors.NotFoundError(
-          `Unable to attach ${res?.uid ?? 'file ' + id}: file not found or is in a wrong scope.`,
-        )
-      }
-      const exists = await this.em.findOne(Attachment, {
-        itemId: id,
-        itemType: 'Node',
-        note: note.id,
-      })
-      if (exists) {
-        throw new errors.InvalidStateError(
-          `Unable to attach file ${res.uid}: file attachment already exists.`,
-        )
-      }
-      const attachment = new Attachment(note)
-      attachment.itemId = id
-      attachment.itemType = 'Node'
-      this.em.persist(attachment)
-    }
-    for (const id of attachmentsToSave.folders) {
-      const res = await this.nodeRepository.findAccessibleOne({ id })
-      if (!res || (!res.isPublic() && res.scope !== note.scope)) {
-        throw new errors.NotFoundError(
-          `Unable to attach folder ${id}: folder not found or is in a wrong scope.`,
-        )
-      }
-      const exists = await this.em.findOne(Attachment, {
-        itemId: id,
-        itemType: 'Node',
-        note: note.id,
-      })
-      if (exists) {
-        throw new errors.InvalidStateError(
-          `Unable to attach folder ${id}: folder attachment already exists.`,
-        )
-      }
-      const attachment = new Attachment(note)
-      attachment.itemId = id
-      attachment.itemType = 'Node'
-      this.em.persist(attachment)
-    }
-    for (const id of attachmentsToSave.assets) {
-      const res = await this.nodeRepository.findAccessibleOne({ id })
-      if (!res || (!res.isPublic() && res.scope !== note.scope)) {
-        throw new errors.NotFoundError(
-          `Unable to attach ${res?.uid ?? 'asset ' + id}: asset not found or is in a wrong scope.`,
-        )
-      }
-      const exists = await this.em.findOne(Attachment, {
-        itemId: id,
-        itemType: 'Asset',
-        note: note.id,
-      })
-      if (exists) {
-        throw new errors.InvalidStateError(
-          `Unable to attach ${res.uid}: asset attachment already exists.`,
-        )
-      }
-      const attachment = new Attachment(note)
-      attachment.itemId = id
-      attachment.itemType = 'Node'
-      this.em.persist(attachment)
-    }
-    for (const id of attachmentsToSave.apps) {
-      const res = await this.appRepository.findAccessibleOne({ id })
-      if (!res || (!res.isPublic() && res.scope !== note.scope)) {
-        throw new errors.NotFoundError(
-          `Unable to attach app ${res.uid ?? 'app ' + id}: app not found or is in a wrong scope.`,
-        )
-      }
-      const exists = await this.em.findOne(Attachment, {
-        itemId: id,
-        itemType: 'App',
-        note: note.id,
-      })
-      if (exists) {
-        throw new errors.InvalidStateError(
-          `Unable to attach ${res.uid}: app attachment already exists.`,
-        )
-      }
-      const attachment = new Attachment(note)
-      attachment.itemId = id
-      attachment.itemType = 'App'
-      this.em.persist(attachment)
-    }
-    for (const id of attachmentsToSave.jobs) {
-      const res = await this.jobRepository.findAccessibleOne({ id })
-      if (!res || (!res.isPublic() && res.scope !== note.scope)) {
-        throw new errors.NotFoundError(
-          `Unable to attach ${res?.uid ?? 'job ' + id}: job not found or is in a wrong scope.`,
-        )
-      }
-      const exists = await this.em.findOne(Attachment, {
-        itemId: id,
-        itemType: 'Job',
-        note: note.id,
-      })
-      if (exists) {
-        throw new errors.InvalidStateError(
-          `Unable to attach ${res.uid}: job attachment already exists.`,
-        )
-      }
-      const attachment = new Attachment(note)
-      attachment.itemId = id
-      attachment.itemType = 'Job'
-      this.em.persist(attachment)
-    }
-    for (const id of attachmentsToSave.comparisons) {
-      const res = await this.comparisonRepository.findAccessibleOne({ id })
-      if (!res || (!res.isPublic() && res.scope !== note.scope)) {
-        throw new errors.NotFoundError(
-          `Unable to attach comparison ${id}: comparison not found or is in a wrong scope.`,
-        )
-      }
-      const exists = await this.em.findOne(Attachment, {
-        itemId: id,
-        itemType: 'Comparison',
-        note: note.id,
-      })
-      if (exists) {
-        throw new errors.InvalidStateError(
-          `Unable to attach comparison ${id}: comparison attachment already exists.`,
-        )
-      }
-      const attachment = new Attachment(note)
-      attachment.itemId = id
-      attachment.itemType = 'Comparison'
-      this.em.persist(attachment)
-    }
-    await this.em.flush()
-  }
-
-  private async updateAttachments(note: Note, attachments: AttachmentsDTO) {
-    const oldAttachments = await this.em.find(Attachment, { note })
-    this.logger.log(`Deleting old attachments: ${oldAttachments.map((a) => a.id)}`)
-    await this.em.removeAndFlush(oldAttachments)
-    this.logger.log(`Creating new attachments: ${JSON.stringify(attachments)}`)
-    await this.createAttachments(note, attachments)
   }
 
   async createComment(commentInput: CreateCommentDTO) {
     this.logger.log(`Creating comment: ${JSON.stringify(commentInput)}`)
 
-    const user = await this.userRepository.findOneOrFail({ id: this.userCtx.id })
+    const user = await this.userCtx.loadEntity()
     if (!user) {
       throw new errors.NotFoundError('User not found.')
     }
@@ -608,7 +399,7 @@ export class DiscussionService {
   async updateComment(id: number, commentInput: UpdateCommentDTO) {
     this.logger.log(`Editing comment: ${JSON.stringify(commentInput)}`)
 
-    const user = await this.userRepository.findOneOrFail({ id: this.userCtx.id })
+    const user = await this.userCtx.loadEntity()
     const comment = await this.em.findOne(Comment, id)
     const commentClass = comment instanceof DiscussionComment ? DiscussionComment : AnswerComment
     const commentEntity = await this.em.findOne(commentClass, id, { populate: ['commentable'] })
@@ -626,7 +417,7 @@ export class DiscussionService {
   async deleteComment(commentId: number, type: CommentableType) {
     this.logger.log(`Deleting comment with id: ${commentId}`)
 
-    const user = await this.userRepository.findOneOrFail({ id: this.userCtx.id })
+    const user = await this.userCtx.loadEntity()
 
     let comment: AnswerComment | DiscussionComment | null
     if (type == 'Discussion') {
@@ -666,81 +457,6 @@ export class DiscussionService {
     throw new errors.PermissionError('Unable to delete comment: insufficient permissions.')
   }
 
-  async getAttachments(noteId: number): Promise<DiscussionAttachment[]> {
-    this.logger.log(`Getting attachments for note id: ${noteId}`)
-    const note = await this.noteRepository.findAccessibleOne(
-      { id: noteId },
-      { populate: ['attachments'] },
-    )
-    if (!note) {
-      throw new errors.NotFoundError(
-        'Unable to get attachments: note not found or insufficient permissions.',
-      )
-    }
-
-    const response: DiscussionAttachment[] = []
-    for (const attachment of note.attachments) {
-      if (attachment.itemType === 'Node') {
-        const attachmentEntity: Node | null = await this.nodeRepository.findOne({
-          id: attachment.itemId,
-        })
-        if (!attachmentEntity) {
-          throw new errors.NotFoundError('Unable to get attachments: attachment not found.')
-        }
-        response.push({
-          id: attachment.itemId,
-          uid: attachmentEntity.uid,
-          type: attachmentEntity.stiType,
-          name: attachmentEntity.name,
-          link: await this.entityService.getEntityUiLink(attachmentEntity as UserFile | Asset),
-        })
-      } else if (attachment.itemType === 'Job') {
-        const attachmentEntity: Job | null = await this.jobRepository.findOne({
-          id: attachment.itemId,
-        })
-        if (!attachmentEntity) {
-          throw new errors.NotFoundError('Unable to get attachments: attachment not found.')
-        }
-        response.push({
-          id: attachment.itemId,
-          uid: attachmentEntity.uid,
-          type: attachment.itemType,
-          name: attachmentEntity.name,
-          link: await this.entityService.getEntityUiLink(attachmentEntity),
-        })
-      } else if (attachment.itemType === 'Comparison') {
-        const attachmentEntity: Comparison | null = await this.comparisonRepository.findOne({
-          id: attachment.itemId,
-        })
-        if (!attachmentEntity) {
-          throw new errors.NotFoundError('Unable to get attachments: attachment not found.')
-        }
-        response.push({
-          id: attachment.itemId,
-          uid: attachmentEntity.id.toString(),
-          type: attachment.itemType,
-          name: attachmentEntity.name,
-          link: await this.entityService.getEntityUiLink(attachmentEntity),
-        })
-      } else if (attachment.itemType === 'App') {
-        const appAttachment: App | null = await this.appRepository.findOne({
-          id: attachment.itemId,
-        })
-        if (!appAttachment) {
-          throw new errors.NotFoundError('Unable to get attachments: attachment not found.')
-        }
-        response.push({
-          id: attachment.itemId,
-          uid: appAttachment.uid,
-          type: attachment.itemType,
-          name: appAttachment.title,
-          link: await this.entityService.getEntityUiLink(appAttachment),
-        })
-      }
-    }
-    return response
-  }
-
   async getAnswer(answerId: number): Promise<AnswerDTO> {
     this.logger.log(`Getting answer with id: ${answerId}`)
     const res = await this.answerRepository.findAccessibleOne(
@@ -759,9 +475,43 @@ export class DiscussionService {
     return AnswerDTO.fromEntity(res)
   }
 
+  async getComment(commentId: number): Promise<CommentDTO> {
+    this.logger.log(`Getting comment with id: ${commentId}`)
+    const res = await this.em.findOne(Comment, { id: commentId })
+
+    if (res.commentableType === 'Discussion') {
+      const discussionComment = await this.em.findOne(DiscussionComment, { id: commentId })
+      const targetDiscussion = await this.discussionRepository.findAccessibleOne(
+        { id: discussionComment.commentable.id },
+        { populate: ['note'] },
+      )
+      if (!targetDiscussion) {
+        throw new errors.NotFoundError(
+          'Unable to get discussion comment: not found or insufficient permissions.',
+        )
+      }
+      return CommentDTO.fromEntity(discussionComment)
+    }
+
+    if (res.commentableType === 'Answer') {
+      const answerComment = await this.em.findOne(AnswerComment, { id: commentId })
+      const targetAnswer = await this.answerRepository.findAccessibleOne(
+        { id: answerComment.commentable.id },
+        { populate: ['note'] },
+      )
+      if (!targetAnswer) {
+        throw new errors.NotFoundError(
+          'Unable to get answer comment: not found or insufficient permissions.',
+        )
+      }
+      return CommentDTO.fromEntity(answerComment)
+    }
+    throw new errors.NotFoundError('Unable to get comment.')
+  }
+
   async followDiscussion(discussionId: number): Promise<void> {
     this.logger.log(`Adding new follower (user: ${this.userCtx.id}) to discussion: ${discussionId}`)
-    const user = await this.userRepository.findOneOrFail({ id: this.userCtx.id })
+    const user = await this.userCtx.loadEntity()
 
     const discussion = await this.discussionRepository.findAccessibleOne({ id: discussionId })
     if (!discussion) {
@@ -785,7 +535,7 @@ export class DiscussionService {
   async unfollowDiscussion(discussionId: number): Promise<void> {
     this.logger.log(`Removing follower (user: ${this.userCtx.id}) from discussion: ${discussionId}`)
 
-    const user = await this.userRepository.findOneOrFail({ id: this.userCtx.id })
+    const user = await this.userCtx.loadEntity()
 
     const discussion = await this.discussionRepository.findAccessibleOne({ id: discussionId })
     if (!discussion) {
@@ -821,5 +571,25 @@ export class DiscussionService {
       .map((follow) => follow.followerId)
 
     return await this.em.find(User, { id: { $in: userIDs }, userState: USER_STATE.ENABLED })
+  }
+
+  async getDiscussionUiLink(discussionId: number): Promise<string> {
+    this.logger.log(
+      `Generating UI-link to discussion: ${discussionId} for user: ${this.userCtx.id}`,
+    )
+    const discussion = await this.discussionRepository.findOne({ id: discussionId })
+    return this.entityLinkService.getUiLink(discussion)
+  }
+
+  async getAnswerUiLink(answerId: number): Promise<string> {
+    this.logger.log(`Generating UI-link to answer: ${answerId} for user: ${this.userCtx.id}`)
+    const answer = await this.em.findOne(Answer, { id: answerId })
+    return this.entityLinkService.getUiLink(answer)
+  }
+
+  async getCommentUiLink(commentId: number): Promise<string> {
+    this.logger.log(`Generating UI-link to comment: ${commentId} for user: ${this.userCtx.id}`)
+    const comment = await this.em.findOne(Comment, { id: commentId })
+    return this.entityLinkService.getUiLink(comment)
   }
 }
