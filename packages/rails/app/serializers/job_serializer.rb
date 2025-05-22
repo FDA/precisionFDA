@@ -235,8 +235,6 @@ class JobSerializer < ApplicationSerializer # rubocop:disable Metrics/ClassLengt
 
       # GET show job's logs page: TODO: move to api/jobs
       links[:log] = log_job_path(object)
-      # POST /api/attach_to: api_attach_to_notes, discussions, answers
-      links[:attach_to] = api_attach_to_notes_path
       # POST /api/jobs/copy  copy_api_jobs
       links[:copy] = copy_api_jobs_path
       # POST /api/jobs/terminate

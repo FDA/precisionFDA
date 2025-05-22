@@ -10,6 +10,18 @@ directory app_dir do
   group node[:deploy_user_group]
 end
 
+
+ruby_block 'Log git clone details' do
+  block do
+    repo_url = node.run_state['ssm_params']['app']['app_source']['url']
+    revision = node.run_state['ssm_params']['app']['app_source']['revision']
+    puts ">>> Cloning repo from: #{repo_url}"
+    puts ">>> Using revision: #{revision}"
+    puts ">>> Cloning into: #{app_dir}"
+  end
+end
+
+
 git app_dir do
   repository(lazy { node.run_state['ssm_params']['app']['app_source']['url'] })
   revision(lazy { node.run_state['ssm_params']['app']['app_source']['revision'] })

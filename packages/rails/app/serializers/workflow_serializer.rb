@@ -106,8 +106,6 @@ class WorkflowSerializer < ApplicationSerializer
       links[:show] = workflow_path(object) if can_access?(object)
       links[:user] = user_path(object.user.dxuser)
       links[:space] = space_path if object.in_space?
-      # POST /api/attach_to: api_attach_to_notes, discussions, answers
-      links[:attach_to] = api_attach_to_notes_path
       # publish single workflow if it is not public already
       links[:publish] = publish_object unless object.public?
       # POST /api/workflows/copy  copy_api_workflows

@@ -157,7 +157,7 @@ export const validationSchema = Yup.object().shape({
   name: Yup.string().required('App Name field is required'),
   scope: Yup.string().optional(),
   title: Yup.string().required('App Title field is required'),
-  release: Yup.string().required('Release field is required').matches(/^(16\.04|20\.04)$/, 'Invalid version'),
+  release: Yup.string().required('Release field is required').matches(/^(16\.04|20\.04|24\.04)$/, 'Invalid version'),
   readme: Yup.string(),
   input_spec: Yup.array().unique('name', 'Name must be unique').of(
     Yup.object().shape({

@@ -23,7 +23,7 @@ import { CommunityParticipants, ExpertSection, Hr, InfoRow, PageOverviewMainBody
 import { AppTypeIconBlue } from '../../components/icons/AppTypeIconBlue'
 import { AppTypeIconYellow } from '../../components/icons/AppTypeIconYellow'
 import { Button } from '../../components/Button'
-import { ToolsIcon } from '../../components/icons/ToolsIcon'
+import { ToolsPortalIcon } from '../../components/icons/ToolsPortalIcon'
 import { RocketIcon } from '../../components/icons/RocketIcon'
 import { AppMarketIcon } from '../../components/icons/AppMarketIcon'
 
@@ -54,7 +54,7 @@ const GetStarted = ({ user }: { user?: IUser }) => {
         </IconLink>
 
         <IconLink data-turbolinks="false" to="/data-portals/17">
-          <ToolsIcon height={17} />
+          <ToolsPortalIcon height={17} />
           Use Case Toolbox
         </IconLink>
 
@@ -95,7 +95,9 @@ const GetStarted = ({ user }: { user?: IUser }) => {
         </a>
       </div>
       <div>
-        <a href="/docs/guides/spaces" target="_blank">Collaborating with Spaces</a>
+        <a href="/docs/guides/spaces" target="_blank">
+          Collaborating with Spaces
+        </a>
       </div>
       <div>
         <Link to="/home/files/file-GfkBx1j0Kj2Yj04FJVV0xXzF-2">Multi-omics App Library</Link>
@@ -184,7 +186,9 @@ const TopAppItem = ({ app }: { app: IApp }) => {
       </div>
       <div>
         <Title>
-          <Link data-turbolinks="false" to={linkToApp} aria-label={ariaLabel}>{app.title}</Link>
+          <Link data-turbolinks="false" to={linkToApp} aria-label={ariaLabel}>
+            {app.title}
+          </Link>
         </Title>
         <AppOrg>{app.org}</AppOrg>
         <AppUpdatedAt>Updated {timeDistance} ago</AppUpdatedAt>

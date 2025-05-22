@@ -12,6 +12,12 @@ export const config: ConfigOverride = () => ({
     },
     appKit: 'project-GYP09280XPx4p0gJ8XPY27b0:/appKit-1.2.tgz',
   },
+  database: {
+    printDBQueryValuesInLog:
+      process.env.PRINT_DB_QUERY_VALUES_IN_LOG === undefined
+        ? false
+        : parseBooleanFromProcess(process.env.PRINT_DB_QUERY_VALUES_IN_LOG),
+  },
   logs: {
     enableStackLogging: false,
   },
