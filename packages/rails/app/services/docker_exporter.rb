@@ -32,21 +32,30 @@ class DockerExporter
       # Exported app: #{@app.name}, revision: #{@app.revision}, authored by: #{@app.user.username}
       # #{@url_provider.app_url(@app)}
 
+      # How to use the dockerfile
+      # 1) Build image
+      # - in the the directory with Dockerfile run following
+      #   docker build -t <image_name> .
+      # - docker image ls # the image should appear in the list
+
+      # 2) Run inside of the container
+      # - docker run -it --entrypoint /bin/bash <image_name>
+      # - cd /usr/bin/ # going to the run directory
+      # - ./run --paramenter_name parameter_value # run script and pass parameters
+
+      # 3) Run outside of the container (file input example)
+      # - docker run -v <path_to_local_folder>:/<path_to_folder_inside_container> <image_name> --input_file_parameter_name /path_to_folder_inside_container/file.txt
+
       # For more information please consult the app export section in the precisionFDA docs
 
       # Start with Ubuntu #{@app.release} base image
       FROM ubuntu:#{@app.release}
 
       # Install default precisionFDA Ubuntu packages
-      RUN DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y #{NL_TAB}#{apt_packages}
+      RUN export DEBIAN_FRONTEND=noninteractive && apt-get update && apt-get install -y --no-install-recommends #{NL_TAB}#{apt_packages}
 
       # Install default precisionFDA python packages
       RUN pip install #{NL_TAB}#{python_packages}
-
-      # Add DNAnexus repo to apt-get
-      RUN /bin/bash -c "echo 'deb http://dnanexus-apt-prod.s3.amazonaws.com/ubuntu #{UBUNTU_CODENAMES[@app.release]}/amd64/' > /etc/apt/sources.list.d/dnanexus.list"
-      RUN /bin/bash -c "echo 'deb http://dnanexus-apt-prod.s3.amazonaws.com/ubuntu #{UBUNTU_CODENAMES[@app.release]}/all/' >> /etc/apt/sources.list.d/dnanexus.list"
-      RUN curl https://dnanexus-sdk.s3.amazonaws.com/apt/ubuntu-signing-key.gpg | apt-key add -
 
       #{apt_get_update_install}
 
@@ -80,7 +89,7 @@ class DockerExporter
   # Returns pre-installed Python packages.
   # @return [String] Concatenated for RUN command list of packages.
   def python_packages
-    PRE_INSTALLED_PYTHON_PACKAGES.join(" #{NL_TAB}")
+    PRE_INSTALLED_PYTHON_PACKAGES[@app.release].join(" #{NL_TAB}")
   end
 
   # Returns apt-related section of Dockerfile depending on selected packages.
@@ -150,8 +159,11 @@ class DockerExporter
     shell_friendly_code = { code: @app.code }.to_json.shellescape
 
     cmds = []
+    if @app.release.to_f >= 20.04
+      cmds << "RUN ln -s /usr/bin/python3 /usr/bin/python"
+    end
     cmds << "RUN " + ["/bin/bash", "-c", "echo -E #{shell_friendly_spec} > /spec.json"].to_json
-    cmds << "RUN " + ["/bin/bash", "-c", "echo -E #{shell_friendly_code} | python -c 'import sys,json; print json.load(sys.stdin)[\"code\"]' > /script.sh"].to_json
+    cmds << "RUN " + ["/bin/bash", "-c", "echo -E #{shell_friendly_code} | python -c 'import sys,json; print(json.load(sys.stdin)[\"code\"])' > /script.sh"].to_json
 
     <<~APP_SPEC
       # Write app spec and code to root folder

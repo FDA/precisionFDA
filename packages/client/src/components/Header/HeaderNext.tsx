@@ -281,7 +281,7 @@ const SiteNav = ({
       <SiteNavBody>
         <Row>
           <div>
-            {getObjectsByIds(['overview', 'discussions', 'challenges', 'experts'], userSiteNavItems).map(i => (
+            {getObjectsByIds(['overview', 'data-portals', 'discussions', 'challenges', 'experts'], userSiteNavItems).map(i => (
               <MenuItem key={i.id} navItem={i} pathname={pathname} onClick={() => setShowSiteNav(false)} />
             ))}
             <HeaderSpacer />

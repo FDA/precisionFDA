@@ -49,6 +49,7 @@ type SelectedSection = 'io' | 'vm' | 'script' | 'readme'
 const ubuntuReleasesOptions = [
   { value: '16.04', label: '16.04', disabled: true },
   { value: '20.04', label: '20.04' },
+  { value: '24.04', label: '24.04' },
 ]
 
 export const AppForm = ({
@@ -218,7 +219,7 @@ export const AppForm = ({
               control={control}
               render={({ field }) => (
                 <TopFieldGroupUbuntu>
-                  <label>Ubuntu Release</label>
+                  <label for="app-ubuntu-release">Ubuntu Release</label>
                   <Select
                     {...field}
                     options={ubuntuReleasesOptions}
@@ -226,6 +227,7 @@ export const AppForm = ({
                     onChange={option => field.onChange(option?.value)}
                     value={ubuntuReleasesOptions.find(option => option.value === field.value)}
                     isOptionDisabled={option => option.disabled}
+                    inputId="app-ubuntu-release"
                   />
                   <ErrorMessage errors={errors} name="release" render={({ message }) => <InputError>{message}</InputError>} />
                 </TopFieldGroupUbuntu>
