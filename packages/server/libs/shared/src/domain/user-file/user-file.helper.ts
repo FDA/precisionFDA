@@ -253,6 +253,7 @@ const getNodePath = async (
   }
   const folderRepo = em.getRepository(Folder)
   const parentFolder = await folderRepo.findOne({ id: parentFolderNode.id })
+
   return getNodePath(em, parentFolder as Node, folders)
 }
 

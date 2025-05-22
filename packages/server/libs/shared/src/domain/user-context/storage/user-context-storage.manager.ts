@@ -27,5 +27,8 @@ export function createUserContextManager(storage: AsyncLocalStorage<UserContext>
     get sessionId() {
       return getCurrentContext()?.sessionId
     },
+    async loadEntity() {
+      return getCurrentContext().loadEntity()
+    },
   }
 }

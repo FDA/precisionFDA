@@ -297,7 +297,7 @@ describe('POST /apps/:id/run', () => {
     expect(fakeCallArgs[0]).to.deep.equal({
       dxid: body.dxid,
     })
-    expect(fakeCallArgs[1]).to.deep.equal({
+    expect(fakeCallArgs[1]).to.deep.contain({
       id: user.id,
       accessToken: 'fake-token',
       dxuser: user.dxuser,
