@@ -133,6 +133,7 @@ export interface IExecution {
   platform_tags?: null
   workflow_title?: string
   snapshot: boolean
+  entity_type: 'regular' | 'https'
 }
 
 // IExeuction's uid attribute can have the following prefixes
