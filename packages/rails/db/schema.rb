@@ -1052,7 +1052,6 @@ ActiveRecord::Schema.define(version: 2025_04_08_163737) do
   add_foreign_key "resources", "nodes", column: "user_file_id"
   add_foreign_key "resources", "users"
   add_foreign_key "saved_queries", "users"
-  add_foreign_key "space_events", "spaces"
   add_foreign_key "space_events", "users"
   add_foreign_key "space_invitations", "spaces"
   add_foreign_key "space_invitations", "users", column: "inviter_id"
