@@ -143,7 +143,7 @@ module ApplicationHelper
 
   # Concat item path with '/home' to create a link to Home - for specific items
   def home_path_to_item(item, no_home = false)
-    if !no_home && (%w(app app-series job workflow workflow-series).include? item.klass)
+    if !no_home && (%w(app app-series workflow workflow-series).include? item.klass)
       "/home".concat(pathify(item))
     else
       pathify(item)
