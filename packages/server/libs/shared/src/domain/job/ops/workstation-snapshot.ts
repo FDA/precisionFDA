@@ -9,6 +9,7 @@ import { TASK_TYPE } from '../../../queue/task.input'
 import { UserOpsCtx } from '../../../types'
 import { JOB_STATE } from '../job.enum'
 import { WorkstationBaseOperation } from './workstation-base-operation'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
 
 export interface WorkstationSnapshotOperationParams {
   jobDxid: DxId<'job'>
@@ -59,7 +60,15 @@ export class WorkstationSnapshotOperation extends WorkstationBaseOperation<
       )
     }
 
-    const notificationService = new NotificationService(this.ctx.em, this.ctx.user)
+    const notificationService = new NotificationService(
+      this.ctx.em,
+      new UserContext(
+        this.ctx.user.id,
+        this.ctx.user.accessToken,
+        this.ctx.user.dxuser,
+        this.ctx.user.sessionId,
+      ),
+    )
 
     try {
       const workstationService = await new WorkstationService(this.ctx, input.code).initWithJob(

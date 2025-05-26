@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common'
 import { Discussion } from '@shared/domain/discussion/discussion.entity'
 import { type DiscussionAttachment } from '@shared/domain/discussion/discussion.types'
 import { AttachableEntityType } from '@shared/domain/discussion/model/attachable-entity.type'
-import { DiscussionService } from '@shared/domain/discussion/services/discussion.service'
 import {
   SpaceReportPartDiscussionResult,
   SpaceReportPartDiscussionResultAnswer,
@@ -14,6 +13,8 @@ import { SpaceReportPartResultProvider } from './space-report-part-result.provid
 import { AnswerDTO } from '@shared/domain/discussion/dto/answer.dto'
 import { CommentDTO } from '@shared/domain/discussion/dto/comment.dto'
 import { SimpleUserDTO } from '@shared/domain/user/dto/simple-user.dto'
+import { AttachmentManagementFacade } from '@shared/facade/discussion/attachment-management.facade'
+import { DiscussionService } from '@shared/domain/discussion/services/discussion.service'
 
 @Injectable()
 export class SpaceReportPartDiscussionResultProviderService extends SpaceReportPartResultProvider<'discussion'> {
@@ -29,7 +30,10 @@ export class SpaceReportPartDiscussionResultProviderService extends SpaceReportP
     Comparison: 'comparison',
   }
 
-  constructor(private readonly discussionService: DiscussionService) {
+  constructor(
+    private readonly discussionService: DiscussionService,
+    private readonly attachmentsFacade: AttachmentManagementFacade,
+  ) {
     super()
   }
 
@@ -39,7 +43,7 @@ export class SpaceReportPartDiscussionResultProviderService extends SpaceReportP
 
   protected async getHtmlResult(entity: Discussion): Promise<SpaceReportPartDiscussionResult> {
     const discussion = await this.discussionService.getDiscussion(entity.id)
-    const attachments = await this.discussionService.getAttachments(entity.note.id)
+    const attachments = await this.attachmentsFacade.getAttachments(entity.note.id)
 
     return {
       title: discussion.title,
@@ -53,7 +57,7 @@ export class SpaceReportPartDiscussionResultProviderService extends SpaceReportP
   }
 
   private async mapAnswer(answer: AnswerDTO): Promise<SpaceReportPartDiscussionResultAnswer> {
-    const attachments = await this.discussionService.getAttachments(answer.noteId)
+    const attachments = await this.attachmentsFacade.getAttachments(answer.noteId)
 
     return {
       content: answer.content,

@@ -16,6 +16,7 @@ import { Space } from '@shared/domain/space/space.entity'
 import { NodeRepository } from '@shared/domain/user-file/node.repository'
 import { NodeService } from '@shared/domain/user-file/node.service'
 import { Folder } from '@shared/domain/user-file/folder.entity'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
 
 const rollbackUnlockingState = async (em: SqlEntityManager, nodes: Node[]): Promise<void> => {
   getLogger().error(`Rolling back unlocking state for ${nodes.length} nodes`)
@@ -37,7 +38,12 @@ class NodesUnlockOperation extends BaseOperation<UserOpsCtx, NodesInputDTO, void
     const folderRepository = this.ctx.em.getRepository(Folder)
     const nodeService = new NodeService(
       this.ctx.em,
-      this.ctx.user,
+      new UserContext(
+        this.ctx.user.id,
+        this.ctx.user.accessToken,
+        this.ctx.user.dxuser,
+        this.ctx.user.sessionId,
+      ),
       spaceRepository,
       nodeRepository,
       userRepository,
