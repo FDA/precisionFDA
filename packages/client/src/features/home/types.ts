@@ -39,6 +39,7 @@ export type APIResource =
   | 'spaces'
   | 'space-reports'
   | 'discussions'
+  | 'members'
 
 export type HomeScope = 'everybody' | 'featured' | 'spaces' | 'me'
 export type ServerScope = 'public' | 'private' | `space-${string}`
