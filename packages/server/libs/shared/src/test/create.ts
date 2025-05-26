@@ -1,5 +1,5 @@
 import { wrap } from '@mikro-orm/core'
-import { EntityManager } from '@mikro-orm/mysql'
+import { EntityManager, Loaded } from '@mikro-orm/mysql'
 import { AcceptedLicense } from '@shared/domain/accepted-license/accepted-license.entity'
 import { ADMIN_GROUP_ROLES, AdminGroup } from '@shared/domain/admin-group/admin-group.entity'
 import { AdminMembership } from '@shared/domain/admin-membership/admin-membership.entity'
@@ -42,6 +42,7 @@ import { config } from '../config'
 import { getScopeFromSpaceId } from '../domain/space/space.helper'
 import { PARENT_TYPE } from '../domain/user-file/user-file.types'
 import * as generate from './generate'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
 
 const attachmentHelper = {
   create: (
@@ -51,7 +52,10 @@ const attachmentHelper = {
     },
     data: Partial<InstanceType<typeof Attachment>>,
   ) => {
-    const attachment = wrap(new Attachment(references.note)).assign(data, { em })
+    const attachment = wrap(new Attachment(data.itemId, data.itemType, references.note)).assign(
+      data,
+      { em },
+    )
     em.persist(attachment)
     return attachment
   },
@@ -892,6 +896,20 @@ const sessionHelper = {
   },
 }
 
+const contextHelper = {
+  create: (user: User): UserContext => {
+    return {
+      id: user.id,
+      dxuser: user.dxuser,
+      accessToken: generate.random.chance.hash(),
+      sessionId: '1',
+      async loadEntity(): Promise<Loaded<User, never, '*', never> | null> {
+        return user
+      },
+    }
+  },
+}
+
 const workflowHelper = {
   create: (
     em: EntityManager,
@@ -958,4 +976,5 @@ export {
   userHelper,
   workflowHelper,
   workflowSeriesHelper,
+  contextHelper,
 }

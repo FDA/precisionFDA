@@ -21,14 +21,24 @@ import { CreateCommentDTO } from '@shared/domain/discussion/dto/create-comment.d
 import { UpdateAnswerDTO } from '@shared/domain/discussion/dto/update-answer.dto'
 import { UpdateCommentDTO } from '@shared/domain/discussion/dto/update-comment.dto'
 import { DiscussionPaginationDTO } from '@shared/domain/discussion/dto/discussion-pagination.dto'
-import { DiscussionFacade } from '../facade/discussion/discussion.facade'
+import { CreateDiscussionFacade } from '../facade/discussion/create-discussion.facade'
+import { AttachmentManagementFacade } from '@shared/facade/discussion/attachment-management.facade'
+import { UpdateDiscussionFacade } from '../facade/discussion/update-discussion.facade'
+import { CreateAnswerFacade } from '../facade/discussion/create-answer.facade'
+import { UpdateAnswerFacade } from '../facade/discussion/update-answer.facade'
+import { CreateCommentFacade } from '../facade/discussion/create-comment.facade'
 
 @UseGuards(UserContextGuard)
 @Controller('/discussions')
 export class DiscussionsController {
   constructor(
     private readonly discussionService: DiscussionService,
-    private readonly discussionFacade: DiscussionFacade,
+    private readonly createDiscussionFacade: CreateDiscussionFacade,
+    private readonly createAnswerFacade: CreateAnswerFacade,
+    private readonly createCommentFacade: CreateCommentFacade,
+    private readonly updateDiscussionFacade: UpdateDiscussionFacade,
+    private readonly updateAnswerFacade: UpdateAnswerFacade,
+    private readonly attachmentFacade: AttachmentManagementFacade,
   ) {}
 
   @Get()
@@ -45,7 +55,7 @@ export class DiscussionsController {
   //  This is because we use this for both discussions and answers attachments fetch via noteId.
   @Get('/:noteId/attachments')
   async getNoteAttachments(@Param('noteId', ParseIntPipe) noteId: number) {
-    return await this.discussionService.getAttachments(noteId)
+    return await this.attachmentFacade.getAttachments(noteId)
   }
 
   @Get('/:id/answers/:answerId')
@@ -56,7 +66,7 @@ export class DiscussionsController {
   @HttpCode(201)
   @Post()
   async createDiscussion(@Body() body: CreateDiscussionDTO) {
-    const result = await this.discussionFacade.createDiscussion(body)
+    const result = await this.createDiscussionFacade.createDiscussion(body)
 
     return { id: result.id }
   }
@@ -67,7 +77,7 @@ export class DiscussionsController {
     @Param('discussionId', ParseIntPipe) discussionId: number,
     @Body() body: CreateAnswerDTO,
   ) {
-    const result = await this.discussionFacade.createAnswer({ discussionId, ...body })
+    const result = await this.createAnswerFacade.createAnswer({ discussionId, ...body })
 
     return { id: result.id }
   }
@@ -75,7 +85,7 @@ export class DiscussionsController {
   @HttpCode(204)
   @Patch('/:id')
   async updateDiscussion(@Param('id', ParseIntPipe) id: number, @Body() body: UpdateDiscussionDTO) {
-    await this.discussionService.updateDiscussion(id, body)
+    await this.updateDiscussionFacade.updateDiscussion(id, body)
   }
 
   @HttpCode(204)
@@ -95,7 +105,7 @@ export class DiscussionsController {
     @Param('answerId', ParseIntPipe) answerId: number,
     @Body() body: UpdateAnswerDTO,
   ) {
-    await this.discussionService.updateAnswer(answerId, body)
+    await this.updateAnswerFacade.updateAnswer(answerId, body)
   }
 
   @HttpCode(204)
@@ -128,7 +138,7 @@ export class DiscussionsController {
     @Param('discussionId', ParseIntPipe) discussionId: number,
     @Body() body: CreateCommentDTO,
   ) {
-    const result = await this.discussionFacade.createComment(discussionId, {
+    const result = await this.createCommentFacade.createComment({
       discussionId,
       ...body,
     })
@@ -139,10 +149,14 @@ export class DiscussionsController {
   @HttpCode(201)
   @Post('/:discussionId/answers/:answerId/comments')
   async createAnswerComment(
+    @Param('discussionId', ParseIntPipe) discussionId: number,
     @Param('answerId', ParseIntPipe) id: number,
     @Body() body: CreateCommentDTO,
   ) {
-    const result = await this.discussionService.createComment({ answerId: id, ...body })
+    const result = await this.createCommentFacade.createComment({
+      answerId: id,
+      ...body,
+    })
 
     return { id: result.id }
   }

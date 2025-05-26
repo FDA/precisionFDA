@@ -34,7 +34,6 @@ import { Space } from '@shared/domain/space/space.entity'
 import { SpaceEventService } from '@shared/domain/space-event/space-event.service'
 import { SPACE_EVENT_ACTIVITY_TYPE } from '@shared/domain/space-event/space-event.enum'
 
-//TODO: PFDA-6214 - uncomment the skip when the user-file service is fixed.
 describe('UserFileService', () => {
   const USER_ID = 0
 
