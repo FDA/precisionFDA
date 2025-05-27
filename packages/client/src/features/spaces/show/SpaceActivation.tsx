@@ -4,13 +4,6 @@ import { toast } from 'react-toastify'
 import styled from 'styled-components'
 import { Loader } from '../../../components/Loader'
 import { PageContainer } from '../../../components/Page/styles'
-import {
-  SPACE_ADMINISTRATOR,
-  SPACE_GOVERNMENT,
-  SPACE_GROUPS,
-  SPACE_REVIEW,
-} from '../../../constants'
-import { getGuestLeadLabel, getHostLeadLabel } from '../../../helpers/spaces'
 import { useAuthUser } from '../../auth/useAuthUser'
 import { acceptSpaceRequest } from '../spaces.api'
 import { ISpace } from '../spaces.types'
@@ -67,23 +60,41 @@ const acceptedLabel = (isAccepted: boolean) =>
 
 const hostLeadLabel = (spaceType: ISpace['type']) =>
   `${
-    spaceType === SPACE_REVIEW ? 'Reviewer Lead' : getHostLeadLabel(spaceType)
+    spaceType === 'review' ? 'Reviewer Lead' : getHostLeadLabel(spaceType)
   }`
 
 const guestLeadLabel = (spaceType: ISpace['type']) => {
   if (
     [
-      SPACE_REVIEW,
-      SPACE_GROUPS,
-      SPACE_GOVERNMENT,
-      SPACE_ADMINISTRATOR,
-    ].includes(spaceType)
+      'review',
+      'groups',
+      'government',
+      'administrator',
+    ].includes(spaceType as string)
   ) {
     return `${
-      spaceType === SPACE_REVIEW ? 'Sponsor Lead' : getGuestLeadLabel(spaceType)
+      spaceType === 'review' ? 'Sponsor Lead' : getGuestLeadLabel(spaceType)
     }`
   }
     return ''
+}
+
+const getHostLeadLabel = (type: ISpace['type']): string => {
+  if (type === 'review') {
+    return 'Reviewer Lead'
+  } else if (type === 'groups') {
+    return 'Host Lead'
+  }
+  return ''
+}
+
+const getGuestLeadLabel = (type: ISpace['type']): string => {
+  if (type === 'review') {
+    return 'Reviewer Lead'
+  } else if (type === 'groups') {
+    return 'Guest Lead'
+  }
+  return ''
 }
 
 export function Activation({ space }: { space: ISpace }) {
@@ -93,7 +104,7 @@ export function Activation({ space }: { space: ISpace }) {
   const acceptSpaceMutation = useMutation({
     mutationKey: ['accept-space'],
     mutationFn: acceptSpaceRequest,
-    onSuccess: (res: any) => {
+    onSuccess: (res) => {
       if (res.error) {
         toast.error('Error: Service is unavailable. Please try again later')
       } else {
