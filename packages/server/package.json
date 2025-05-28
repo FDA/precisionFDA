@@ -5,7 +5,7 @@
   "author": "",
   "private": true,
   "license": "UNLICENSED",
-  "packageManager": "pnpm@9.14.2",
+  "packageManager": "pnpm@10.10.0",
   "scripts": {
     "format": "prettier --write \"apps/**/*.ts\" \"libs/**/*.ts\"",
     "build": "npm run build:api && npm run build:worker && npm run build:admin-platform-client",
@@ -47,7 +47,7 @@
     "@nestjs/common": "^11.0.16",
     "@nestjs/core": "^11.1.1",
     "@nestjs/devtools-integration": "^0.2.0",
-    "@nestjs/platform-express": "^11.1.1",
+    "@nestjs/platform-express": "^11.1.2",
     "@nestjs/platform-ws": "^11.1.1",
     "@nestjs/swagger": "^11.2.0",
     "@nestjs/websockets": "^11.1.1",
@@ -149,13 +149,6 @@
     "tsconfig-paths": "^4.2.0",
     "typescript": "^5.3.2",
     "wds": "^0.22.0"
-  },
-  "pnpm": {
-    "overrides": {
-      "@babel/runtime": "^7.26.10",
-      "cross-spawn": "7.0.6",
-      "multer": "^2.0.0"
-    }
   },
   "jest": {
     "moduleFileExtensions": [
