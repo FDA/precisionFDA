@@ -1,8 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common'
-import { ServiceLogger } from '@shared/logger/decorator/service-logger'
+import { EmailSendService } from '@shared/domain/email/email-send.service'
 import { EMAIL_TYPES, EmailProcessInput } from '@shared/domain/email/email.config'
 import { EmailPrepareService } from '@shared/domain/email/templates/email-prepare.service'
-import { EmailSendService } from '@shared/domain/email/email-send.service'
+import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 
 @Injectable()
 export class EmailFacade {

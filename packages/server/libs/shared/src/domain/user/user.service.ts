@@ -8,15 +8,15 @@ import {
   UserInactivityAlertEmailInput,
   userInactivityAlertTemplate,
 } from '@shared/domain/email/templates/mjml/user-inactivity-alert.template'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { UserPaginationDto } from '@shared/domain/user/dto/user-pagination.dto'
+import { HeaderItem } from '@shared/domain/user/header-item'
+import { UserExtras } from '@shared/domain/user/user-extras'
 import { CloudResourceSettings, User, USER_STATE } from '@shared/domain/user/user.entity'
 import { UserRepository } from '@shared/domain/user/user.repository'
-import { ServiceLogger } from '@shared/logger/decorator/service-logger'
-import { UserPaginationDto } from '@shared/domain/user/dto/user-pagination.dto'
-import { StringUtils } from '@shared/utils/string.utils'
-import { UserContext } from '@shared/domain/user-context/model/user-context'
-import { HeaderItem } from '@shared/domain/user/header-item'
 import { NoHeaderItemsSetError, NotFoundError } from '@shared/errors'
-import { UserExtras } from '@shared/domain/user/user-extras'
+import { ServiceLogger } from '@shared/logger/decorator/service-logger'
+import { StringUtils } from '@shared/utils/string.utils'
 
 @Injectable()
 export class UserService {
@@ -51,8 +51,8 @@ export class UserService {
 
     where.cloudResourceSettings = {} as CloudResourceSettings
 
-    if (query.filters?.totalLimit) {
-      const { lower, upper } = StringUtils.parseNumberRange(query.filters.totalLimit)
+    if (query.filter?.totalLimit) {
+      const { lower, upper } = StringUtils.parseNumberRange(query.filter.totalLimit)
       where.cloudResourceSettings = {
         ...where.cloudResourceSettings,
         total_limit: {
