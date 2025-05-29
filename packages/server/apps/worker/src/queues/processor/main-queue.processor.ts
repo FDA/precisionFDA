@@ -9,14 +9,14 @@ import { SyncFilesStateOperation } from '@shared/domain/user-file/ops/sync-files
 import { UserFileService } from '@shared/domain/user-file/service/user-file.service'
 import { FOLLOW_UP_ACTION } from '@shared/domain/user-file/user-file.input'
 import { createRunFollowUpActionJobTask } from '@shared/queue'
-import { NotifyNewDiscussionJob, TASK_TYPE } from '@shared/queue/task.input'
+import { type CheckStatusJob, NotifyNewDiscussionJob, TASK_TYPE } from '@shared/queue/task.input'
 import { Job } from 'bull'
 import { FollowUpDecider } from '../../domain/user-file/follow-up-decider'
-import { jobStatusHandler } from '../../jobs/job-status.handler'
 import { ProcessWithContext } from '../decorator/process-with-context'
 import { BaseQueueProcessor } from './base-queue.processor'
 import { DbClusterService } from '@shared/domain/db-cluster/service/db-cluster.service'
 import { DiscussionNotificationService } from '@shared/domain/discussion/services/discussion-notification.service'
+import { JobSynchronizationService } from '@shared/domain/job/services/job-synchronization.service'
 
 @Processor(config.workerJobs.queues.default.name)
 export class MainQueueProcessor extends BaseQueueProcessor {
@@ -30,6 +30,7 @@ export class MainQueueProcessor extends BaseQueueProcessor {
     private readonly followUpDecider: FollowUpDecider,
     private readonly spaceReportService: SpaceReportService,
     private readonly dbClusterService: DbClusterService,
+    private readonly jobSyncService: JobSynchronizationService,
   ) {
     super()
   }
@@ -43,7 +44,8 @@ export class MainQueueProcessor extends BaseQueueProcessor {
 
   @ProcessWithContext(TASK_TYPE.SYNC_JOB_STATUS)
   async syncJobStatus(job: Job) {
-    await jobStatusHandler(job)
+    const data = job.data as CheckStatusJob
+    await this.jobSyncService.synchronizeJob(data.payload)
   }
 
   @ProcessWithContext(TASK_TYPE.SYNC_DBCLUSTER_STATUS)

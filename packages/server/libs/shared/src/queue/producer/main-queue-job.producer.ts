@@ -2,7 +2,6 @@ import { InjectQueue } from '@nestjs/bull'
 import { Injectable } from '@nestjs/common'
 import { config } from '@shared/config'
 import { SyncDbClusterOperation } from '@shared/domain/db-cluster/ops/synchronize'
-import { SyncJobOperation } from '@shared/domain/job/ops/synchronize'
 import { SyncFilesStateOperation } from '@shared/domain/user-file/ops/sync-files-state'
 import {
   FileUidInput,
@@ -20,6 +19,7 @@ import { UserCtx } from '@shared/types'
 import { JobOptions, Queue } from 'bull'
 import { NotifyType } from '@shared/domain/discussion/dto/notify.type'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { JobSynchronizationService } from '@shared/domain/job/services/job-synchronization.service'
 
 @Injectable()
 export class MainQueueJobProducer extends QueueJobProducer {
@@ -64,7 +64,7 @@ export class MainQueueJobProducer extends QueueJobProducer {
 
     const options: JobOptions = {
       // There should only be one sync job task
-      jobId: SyncJobOperation.getBullJobId(data.dxid),
+      jobId: JobSynchronizationService.getBullJobId(data.dxid),
       repeat: { cron: config.workerJobs.syncJob.repeatPattern },
     }
 

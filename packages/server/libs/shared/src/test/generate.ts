@@ -1,12 +1,10 @@
-/* eslint-disable max-len */
 import { AppSeries } from '@shared/domain/app-series/app-series.entity'
 import { Challenge } from '@shared/domain/challenge/challenge.entity'
 import { Comment } from '@shared/domain/comment/comment.entity'
 import { DbCluster } from '@shared/domain/db-cluster/db-cluster.entity'
-import { UId } from '@shared/domain/entity/domain/uid'
+import { Uid } from '@shared/domain/entity/domain/uid'
 import { Job } from '@shared/domain/job/job.entity'
 import { JobRunData } from '@shared/domain/job/job.types'
-import { SyncJobOperation } from '@shared/domain/job/ops/synchronize'
 import { NewsItem } from '@shared/domain/news-item/news-item.entity'
 import { Note } from '@shared/domain/note/note.entity'
 import { SpaceEvent } from '@shared/domain/space-event/space-event.entity'
@@ -52,6 +50,7 @@ import type { AnyObject, UserCtx } from '../types'
 import { UserExtras } from '@shared/domain/user/user-extras'
 import { Workflow } from '@shared/domain/workflow/entity/workflow.entity'
 import { DxId } from '@shared/domain/entity/domain/dxid'
+import { JobSynchronizationService } from '@shared/domain/job/services/job-synchronization.service'
 
 const chance = new Chance()
 
@@ -353,7 +352,7 @@ const workflow = {
     const dxid = `workflow-${random.dxstr()}}` as DxId<'workflow'>
     return {
       dxid,
-      uid: `${dxid}-1` as UId,
+      uid: `${dxid}-1` as Uid,
       name,
       revision: 1,
       scope: 'private',
@@ -430,7 +429,7 @@ const userFile = {
     const dxid = customDxid ?? (`file-${random.dxstr()}` as any)
     return {
       dxid,
-      uid: `${dxid}-1` as UId,
+      uid: `${dxid}-1` as Uid,
       project: `project-${random.dxstr()}`,
       name: chance.name(),
       fileSize: random.chance.integer({ min: 100, max: 10_000_000 }),
@@ -445,7 +444,7 @@ const userFile = {
     const dxid = customDxid ?? (`file-${random.dxstr()}` as any)
     return {
       dxid,
-      uid: `${dxid}-1` as UId,
+      uid: `${dxid}-1` as Uid,
       project: `project-${random.dxstr()}`,
       name: chance.name(),
       fileSize: random.chance.integer({ min: 100, max: 10_000_000 }),
@@ -460,7 +459,7 @@ const userFile = {
     const dxid = customDxid ?? (`file-${random.dxstr()}` as any)
     return {
       dxid,
-      uid: `${dxid}-1` as UId,
+      uid: `${dxid}-1` as Uid,
       project: `project-${random.dxstr()}`,
       name: chance.name(),
       fileSize: random.chance.integer({ min: 100, max: 10_000_000 }),
@@ -478,7 +477,7 @@ const userFile = {
     const dxid = customDxid ?? (`file-${random.dxstr()}` as any)
     return {
       dxid,
-      uid: `${dxid}-1` as UId,
+      uid: `${dxid}-1` as Uid,
       project: `project-${random.dxstr()}`,
       name: chance.name(),
       fileSize: random.chance.integer({ min: 100, max: 10_000_000 }),
@@ -496,7 +495,7 @@ const asset = {
     const dxid = customDxid ?? (`file-${random.dxstr()}` as any)
     return {
       dxid,
-      uid: `${dxid}-1` as UId,
+      uid: `${dxid}-1` as Uid,
       project: `project-${random.dxstr()}`,
       name: chance.name(),
       fileSize: random.chance.integer({ min: 100, max: 10_000_000 }),
@@ -640,7 +639,7 @@ const dbCluster = {
     const dxid = `dbcluster-${random.dxstr()}`
     return {
       dxid: dxid,
-      uid: `${dxid}-1` as UId,
+      uid: `${dxid}-1` as Uid,
       project: `project-${random.dxstr()}`,
       name: chance.name(),
       description: random.description(),
@@ -732,9 +731,9 @@ const bullQueueRepeatable = {
     next: Date.now() + 60 * 1000,
   }),
   syncJobStatus: (jobDxid: string) => ({
-    key: `__default__:${SyncJobOperation.getBullJobId(jobDxid)}:::*/2 * * * *`,
+    key: `__default__:${JobSynchronizationService.getBullJobId(jobDxid)}:::*/2 * * * *`,
     name: '__default__',
-    id: SyncJobOperation.getBullJobId(jobDxid),
+    id: JobSynchronizationService.getBullJobId(jobDxid),
     endDate: null,
     tz: null,
     cron: '*/2 * * * *',
@@ -744,9 +743,9 @@ const bullQueueRepeatable = {
   // In orphaned cases the 'next' timestamp (in milliseconds) has passed and
   // they sit idle in BullQueue
   syncJobStatusOrphaned: (jobDxid) => ({
-    key: `__default__:${SyncJobOperation.getBullJobId(jobDxid)}:::*/2 * * * *`,
+    key: `__default__:${JobSynchronizationService.getBullJobId(jobDxid)}:::*/2 * * * *`,
     name: '__default__',
-    id: SyncJobOperation.getBullJobId(jobDxid),
+    id: JobSynchronizationService.getBullJobId(jobDxid),
     endDate: null,
     tz: null,
     cron: '*/2 * * * *',
