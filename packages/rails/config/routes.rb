@@ -42,6 +42,7 @@ Rails.application.routes.draw do
 
       get "stats", to: "base#stats"
       get "users", to: "users#index"
+      get "invitations", to: "invitations#list"
       get "all_users", to: "users#all_users"
       get "active_users", to: "users#active"
       get "reset_mfa_user", to: "users#reset_2fa"
@@ -76,6 +77,7 @@ Rails.application.routes.draw do
           post "search"
           post "provision"
           post "browse"
+          get "list", to: "invitations#list_invitations"
         end
       end
 

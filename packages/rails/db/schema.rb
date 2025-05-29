@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2025_04_08_163737) do
+ActiveRecord::Schema.define(version: 2025_05_06_144022) do
 
   create_table "accepted_licenses", id: :integer, charset: "utf8mb3", collation: "utf8mb3_unicode_ci", force: :cascade do |t|
     t.integer "license_id"
@@ -396,6 +396,7 @@ ActiveRecord::Schema.define(version: 2025_04_08_163737) do
     t.boolean "organization_admin", default: false, null: false
     t.integer "country_id"
     t.integer "phone_country_id"
+    t.string "provisioning_state", default: "pending"
     t.index ["code"], name: "index_invitations_on_code", unique: true
     t.index ["country_id"], name: "index_invitations_on_country_id"
     t.index ["email"], name: "index_invitations_on_email"

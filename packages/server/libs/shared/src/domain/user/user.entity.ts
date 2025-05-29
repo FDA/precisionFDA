@@ -19,22 +19,25 @@ import { NewsItem } from '@shared/domain/news-item/news-item.entity'
 import { NotificationPreference } from '@shared/domain/notification-preference/notification-preference.entity'
 import { Organization } from '@shared/domain/org/org.entity'
 import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
-import { config } from '../../config'
-import { BaseEntity } from '../../database/base.entity'
-import { AdminMembership } from '../admin-membership/admin-membership.entity'
-import { UserRepository } from './user.repository'
-import { Space } from '@shared/domain/space/space.entity'
 import {
   ADMIN_LEAD_ROLES,
   CAN_EDIT_ROLES,
 } from '@shared/domain/space-membership/space-membership.helper'
+import { Space } from '@shared/domain/space/space.entity'
 import { UserExtras } from '@shared/domain/user/user-extras'
+import { config } from '../../config'
+import { BaseEntity } from '../../database/base.entity'
+import { AdminMembership } from '../admin-membership/admin-membership.entity'
+import { HeaderItem } from './header-item'
+import { UserRepository } from './user.repository'
 
 export enum USER_STATE {
   ENABLED = 0,
   LOCKED = 1,
   DEACTIVATED = 2,
 }
+
+export const CURRENT_SCHEMA_VERSION = 1
 
 export const RESOURCE_TYPES = [
   // Compute instances
@@ -65,10 +68,81 @@ export const RESOURCE_TYPES = [
   'db_mem1_x64',
 ] as const
 
+export const PRICING_MAP = {
+  // Compute instances
+  'baseline-2': 0.286,
+  'baseline-4': 0.572,
+  'baseline-8': 1.144,
+  'baseline-16': 2.288,
+  'baseline-36': 5.148,
+  'hidisk-2': 0.372,
+  'hidisk-4': 0.744,
+  'hidisk-8': 1.488,
+  'hidisk-16': 2.976,
+  'hidisk-36': 6.696,
+  'himem-2': 0.474,
+  'himem-4': 0.948,
+  'himem-8': 1.896,
+  'himem-16': 3.792,
+  'himem-32': 7.584,
+  'gpu-8': 10.787,
+  // Db instances
+  db_std1_x2: 0.273,
+  db_mem1_x2: 0.967,
+  db_mem1_x4: 1.933,
+  db_mem1_x8: 3.867,
+  db_mem1_x16: 7.733,
+  db_mem1_x32: 15.467,
+  db_mem1_x48: 23.2,
+  db_mem1_x64: 30.933,
+}
+
+export const JOB_LIMIT = 100
+export const TOTAL_LIMIT = 200
+export const RESOURCES = [
+  'baseline-2',
+  'baseline-4',
+  'hidisk-2',
+  'hidisk-4',
+  'himem-2',
+  'himem-4',
+] as Array<(typeof RESOURCE_TYPES)[number]>
+
 export type CloudResourceSettings = {
+  pricing_map: Record<(typeof RESOURCE_TYPES)[number], number>
   job_limit: number
   total_limit: number
   resources: Array<(typeof RESOURCE_TYPES)[number]>
+}
+
+export const DEFAULT_HEADER_ITEMS = [
+  { name: 'overview', favorite: false },
+  { name: 'discussions', favorite: false },
+  { name: 'challenges', favorite: false },
+  { name: 'experts', favorite: false },
+  { name: 'home', favorite: true },
+  { name: 'spaces', favorite: true },
+  { name: 'notes', favorite: false },
+  { name: 'comparisons', favorite: false },
+  { name: 'docs', favorite: true },
+  { name: 'support', favorite: false },
+  { name: 'daaas', favorite: false },
+  { name: 'prism', favorite: false },
+  { name: 'tools', favorite: false },
+  { name: 'gsrs', favorite: false },
+] as HeaderItem[]
+
+export const DEFAULT_CLOUD_RESOURCE_SETTINGS: CloudResourceSettings = {
+  pricing_map: PRICING_MAP,
+  job_limit: JOB_LIMIT,
+  total_limit: TOTAL_LIMIT,
+  resources: RESOURCES,
+}
+
+export const DEFAULT_USER_EXTRAS: UserExtras = {
+  header_items: DEFAULT_HEADER_ITEMS,
+  inactivity_email_sent: true,
+  has_seen_guidelines: true,
 }
 
 // contains the bare minimum to work with the user instance

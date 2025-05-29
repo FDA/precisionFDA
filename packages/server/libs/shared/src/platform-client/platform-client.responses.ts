@@ -131,6 +131,18 @@ export type OrgDescribeResponse = {
   phiFeaturesEnabled?: boolean
 }
 
+export type OrgUpdateBillingResponse = {
+  message: string
+  status: string
+}
+
+export type UserCreateResponse = {
+  emailSentTo: string
+  message: string
+  status: string
+  userId: string
+}
+
 type UserDescribeResponse = {
   id: string
   class?: string
@@ -336,6 +348,11 @@ type JobDescribeResponse = {
   totalPrice?: number
 } & AnyObject
 
+type UpdateBillingInformationResponse = {
+  message: string
+  status: string
+}
+
 //TODO: this will start to grow significantly, consider splitting into multiple files/modules.
 export {
   AppDescribeResponse,
@@ -362,6 +379,7 @@ export {
   ListFilesResult,
   OrgFindMembersReponse,
   PlatformMember,
+  UpdateBillingInformationResponse,
   UserDescribeResponse,
   UserInviteToOrgResponse,
   UserRemoveFromOrgResponse,
