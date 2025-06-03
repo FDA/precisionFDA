@@ -113,6 +113,11 @@ export type CloudResourceSettings = {
   job_limit: number
   total_limit: number
   resources: Array<(typeof RESOURCE_TYPES)[number]>
+  charges_baseline: {
+    computeCharges: number
+    storageCharges: number
+    dataEgressCharges: number
+  }
 }
 
 export const DEFAULT_HEADER_ITEMS = [
@@ -137,6 +142,11 @@ export const DEFAULT_CLOUD_RESOURCE_SETTINGS: CloudResourceSettings = {
   job_limit: JOB_LIMIT,
   total_limit: TOTAL_LIMIT,
   resources: RESOURCES,
+  charges_baseline: {
+    computeCharges: 0,
+    storageCharges: 0,
+    dataEgressCharges: 0,
+  },
 }
 
 export const DEFAULT_USER_EXTRAS: UserExtras = {

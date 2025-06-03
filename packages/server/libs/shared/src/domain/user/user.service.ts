@@ -17,6 +17,8 @@ import { UserRepository } from '@shared/domain/user/user.repository'
 import { NoHeaderItemsSetError, NotFoundError } from '@shared/errors'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { StringUtils } from '@shared/utils/string.utils'
+import { PlatformClient } from '@shared/platform-client'
+import { UserCloudResourcesDTO } from '@shared/domain/user/dto/user-cloud-resources.dto'
 
 @Injectable()
 export class UserService {
@@ -25,9 +27,10 @@ export class UserService {
 
   constructor(
     private readonly em: SqlEntityManager,
-    private readonly emailsJobProducer: EmailQueueJobProducer,
-    private readonly userRepo: UserRepository,
     private readonly user: UserContext,
+    private readonly userRepo: UserRepository,
+    private readonly emailsJobProducer: EmailQueueJobProducer,
+    private readonly platformClient: PlatformClient,
   ) {}
 
   async paginateUsers(query: UserPaginationDto) {
@@ -75,23 +78,6 @@ export class UserService {
     let orderByClause = this.extractOrderByClause(query)
 
     return await this.userRepo.paginate(query, where, { orderBy: orderByClause })
-  }
-
-  // PFDA-6051 TODO Ludvik Bobek will update this to use the new pagination method
-  private extractOrderByClause(query: UserPaginationDto) {
-    if (['totalLimit', 'jobLimit'].includes(query.orderBy)) {
-      if (query.orderBy === 'totalLimit') {
-        return { cloudResourceSettings: { total_limit: query.orderDir } }
-      }
-      if (query.orderBy === 'jobLimit') {
-        return { cloudResourceSettings: { job_limit: query.orderDir } }
-      }
-    } else if (query.orderBy) {
-      return {
-        [query.orderBy]: query.orderDir,
-      }
-    }
-    return {}
   }
 
   async listActiveUserNames(): Promise<string[]> {
@@ -196,5 +182,33 @@ export class UserService {
       })
     }
     // TODO - Refactor calls like ResetMFA here
+  }
+
+  async getCloudResources() {
+    this.logger.log(`Getting cloud resources for user: ${this.user.dxuser}`)
+
+    const user = await this.user.loadEntity()
+    const org = await user.organization.load()
+    const dxOrg = org.getDxOrg()
+    const result = await this.platformClient.userCloudResources(dxOrg)
+
+    return new UserCloudResourcesDTO(result, user)
+  }
+
+  // PFDA-6051 TODO Ludvik Bobek will update this to use the new pagination method
+  private extractOrderByClause(query: UserPaginationDto) {
+    if (['totalLimit', 'jobLimit'].includes(query.orderBy)) {
+      if (query.orderBy === 'totalLimit') {
+        return { cloudResourceSettings: { total_limit: query.orderDir } }
+      }
+      if (query.orderBy === 'jobLimit') {
+        return { cloudResourceSettings: { job_limit: query.orderDir } }
+      }
+    } else if (query.orderBy) {
+      return {
+        [query.orderBy]: query.orderDir,
+      }
+    }
+    return {}
   }
 }

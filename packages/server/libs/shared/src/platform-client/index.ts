@@ -55,6 +55,7 @@ import {
   AppDescribeResponse,
   ClassIdResponse,
   CloneObjectsResponse,
+  CloudResourcesResponse,
   DbClusterDescribeResponse,
   DescribeDataObjectsResponse,
   DescribeFoldersResponse,
@@ -702,6 +703,23 @@ export class PlatformClient {
       data,
       url,
     }
+    return await this.sendRequest(options)
+  }
+
+  async userCloudResources(orgDxid: string): Promise<CloudResourcesResponse> {
+    const url = `${config.platform.apiUrl}/${orgDxid}/describe`
+    const options: AxiosRequestConfig = {
+      method: 'POST',
+      data: {
+        fields: {
+          computeCharges: true,
+          storageCharges: true,
+          dataEgressCharges: true,
+        },
+      },
+      url,
+    }
+
     return await this.sendRequest(options)
   }
 
