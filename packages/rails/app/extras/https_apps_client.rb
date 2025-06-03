@@ -577,14 +577,6 @@ class HttpsAppsClient # rubocop:disable Metrics/ClassLength
     )
   end
 
-  def get_valid_property_keys(type, scope)
-    request(
-      "/properties/#{type}/scope/#{scope}/keys",
-      {},
-      Net::HTTP::Get::METHOD,
-    )
-  end
-
   def resolve_path(path, scope, type)
     request(
       "/files/path-resolver",
@@ -938,24 +930,6 @@ class HttpsAppsClient # rubocop:disable Metrics/ClassLength
       "/cli/discussions/#{discussion_id}/describe",
       {},
       Net::HTTP::Get::METHOD,
-    )
-  end
-
-  # ┌─────────────────────────┐
-  # │                         │
-  # │ site-settings endpoint  │
-  # │                         │
-  # └─────────────────────────┘
-
-  def site_settings(incoming_ip = nil)
-    request_headers = {}
-    request_headers["X-Forwarded-For"] = incoming_ip if incoming_ip
-    request(
-      "/site-settings",
-      {},
-      Net::HTTP::Get::METHOD,
-      {},
-      request_headers,
     )
   end
 

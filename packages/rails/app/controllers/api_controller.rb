@@ -648,11 +648,6 @@ class ApiController < ApplicationController
     render json: result
   end
 
-  def get_valid_property_keys
-    result = https_apps_client.get_valid_property_keys(params[:type], params[:scope])
-    render json: result, adapter: :json
-  end
-
   # Inputs
   #
   # uid (string, required): the uid of the item to describe

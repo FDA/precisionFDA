@@ -7,6 +7,7 @@ import { User, USER_STATE } from '@shared/domain/user/user.entity'
 import { UserRepository } from '@shared/domain/user/user.repository'
 import { UserService } from '@shared/domain/user/user.service'
 import { NoHeaderItemsSetError, NotFoundError } from '@shared/errors'
+import { PlatformClient } from '@shared/platform-client'
 import { expect } from 'chai'
 import sinon, { match, stub } from 'sinon'
 
@@ -40,11 +41,19 @@ describe('user service tests', () => {
       return callback(em)
     })
 
-    return new UserService(em, emailsJobProducer, userRepo, {
-      id: 42,
-      dxuser: 'user1',
-      accessToken: 'access_token',
-    })
+    const platformClient = {} as unknown as PlatformClient
+
+    return new UserService(
+      em,
+      {
+        id: 42,
+        dxuser: 'user1',
+        accessToken: 'access_token',
+      },
+      userRepo,
+      emailsJobProducer,
+      platformClient,
+    )
   }
 
   const checkHeaderItems = (expected: HeaderItem[], tested: HeaderItem[]) => {

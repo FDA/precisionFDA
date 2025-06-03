@@ -131,6 +131,13 @@ export type OrgDescribeResponse = {
   phiFeaturesEnabled?: boolean
 }
 
+export type CloudResourcesResponse = {
+  id: string
+  computeCharges: number
+  storageCharges: number
+  dataEgressCharges: number
+}
+
 export type OrgUpdateBillingResponse = {
   message: string
   status: string
