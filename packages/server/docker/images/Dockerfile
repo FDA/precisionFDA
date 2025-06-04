@@ -3,7 +3,7 @@ ARG NODEJS_IMAGE_TAG
 FROM node:${NODEJS_IMAGE_TAG}
 
 WORKDIR /app
-RUN npm i -g pnpm@9.14.2
+RUN npm i -g pnpm@10.10.0
 COPY server/package.json server/pnpm-lock.yaml ./
 # full install with devDependencies
 RUN pnpm i --frozen-lockfile

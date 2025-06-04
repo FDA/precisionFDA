@@ -18,4 +18,8 @@ export const columnFilters = {
   email: 'string',
   userState: 'string',
   lastLogin: 'date_range',
+  firstName: 'string',
+  lastName: 'string',
+  provisioningState: 'string',
+  createdAt: 'date_range',
 }

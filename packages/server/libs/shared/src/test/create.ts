@@ -1,5 +1,5 @@
 import { wrap } from '@mikro-orm/core'
-import { EntityManager } from '@mikro-orm/mysql'
+import { EntityManager, Loaded } from '@mikro-orm/mysql'
 import { AcceptedLicense } from '@shared/domain/accepted-license/accepted-license.entity'
 import { ADMIN_GROUP_ROLES, AdminGroup } from '@shared/domain/admin-group/admin-group.entity'
 import { AdminMembership } from '@shared/domain/admin-membership/admin-membership.entity'
@@ -17,6 +17,7 @@ import { DataPortal } from '@shared/domain/data-portal/data-portal.entity'
 import { DbCluster } from '@shared/domain/db-cluster/db-cluster.entity'
 import { Discussion } from '@shared/domain/discussion/discussion.entity'
 import { Expert } from '@shared/domain/expert/expert.entity'
+import { Invitation } from '@shared/domain/invitation/invitation.entity'
 import { Job } from '@shared/domain/job/job.entity'
 import { License } from '@shared/domain/license/license.entity'
 import { LicensedItem } from '@shared/domain/licensed-item/licensed-item.entity'
@@ -42,6 +43,7 @@ import { config } from '../config'
 import { getScopeFromSpaceId } from '../domain/space/space.helper'
 import { PARENT_TYPE } from '../domain/user-file/user-file.types'
 import * as generate from './generate'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
 
 const attachmentHelper = {
   create: (
@@ -51,7 +53,10 @@ const attachmentHelper = {
     },
     data: Partial<InstanceType<typeof Attachment>>,
   ) => {
-    const attachment = wrap(new Attachment(references.note)).assign(data, { em })
+    const attachment = wrap(new Attachment(data.itemId, data.itemType, references.note)).assign(
+      data,
+      { em },
+    )
     em.persist(attachment)
     return attachment
   },
@@ -849,6 +854,19 @@ const comparisonHelper = {
   },
 }
 
+const inivitationHelper = {
+  create: (em: EntityManager, data?: Partial<InstanceType<typeof Invitation>>) => {
+    const defaults = generate.invitation.simple()
+    const input = {
+      ...defaults,
+      ...data,
+    }
+    const invitation = wrap(new Invitation()).assign(input, { em })
+    em.persist(invitation)
+    return invitation
+  },
+}
+
 const expertHelper = {
   create: (
     em: EntityManager,
@@ -889,6 +907,20 @@ const sessionHelper = {
     session.key = HashUtils.hashSessionId(`session-id-${references.user.dxuser}`)
     em.persist(session)
     return session
+  },
+}
+
+const contextHelper = {
+  create: (user: User): UserContext => {
+    return {
+      id: user.id,
+      dxuser: user.dxuser,
+      accessToken: generate.random.chance.hash(),
+      sessionId: '1',
+      async loadEntity(): Promise<Loaded<User, never, '*', never> | null> {
+        return user
+      },
+    }
   },
 }
 
@@ -947,6 +979,7 @@ export {
   discussionHelper,
   expertHelper,
   filesHelper,
+  inivitationHelper,
   jobHelper,
   licenceHelper,
   newsHelper,
@@ -958,4 +991,5 @@ export {
   userHelper,
   workflowHelper,
   workflowSeriesHelper,
+  contextHelper,
 }

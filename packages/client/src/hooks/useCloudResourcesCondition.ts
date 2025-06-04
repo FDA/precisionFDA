@@ -1,4 +1,3 @@
-
 /* eslint-disable no-multi-str */
 import axios from 'axios'
 import { useQuery } from '@tanstack/react-query'
@@ -16,27 +15,29 @@ export type CloudResourcesResponse = {
 }
 
 export const fetchCloudResources = async () => {
-  return axios.get<CloudResourcesResponse>('/api/user/cloud_resources').then(r => r.data)
+  return axios.get<CloudResourcesResponse>('/api/v2/users/me/cloud-resources').then(r => r.data)
 }
 
-export const useCloudResourcesQuery = () => useQuery({
-  queryKey: ['cloud_resources'],
-  queryFn: fetchCloudResources,
-})
+export const useCloudResourcesQuery = () =>
+  useQuery({
+    queryKey: ['cloud_resources'],
+    queryFn: fetchCloudResources,
+  })
 
 // TODO(samuel) find a better place where to define this
-export const TOTAL_LIMIT_EXCEEDED_TEXT = 'This precisionFDA account has reached its cloud platform resource \
+export const TOTAL_LIMIT_EXCEEDED_TEXT =
+  'This precisionFDA account has reached its cloud platform resource \
 limit and uploads, downloads, and executions are not available.\n\
 Please email precisionFDA@fda.hhs.gov to request additional cloud \
 platform resources.'
-export const NO_RESOURCES_ALLOWED = 'This precisionFDA account does not have any instance type authorized to run execution.\n\
+export const NO_RESOURCES_ALLOWED =
+  'This precisionFDA account does not have any instance type authorized to run execution.\n\
 Pleae email precisionFDA@fda.hhs.gov to request authorization to one or more instance types.'
-export const EXECUTIONS_NOT_ALLOWED = 'This precisionFDA user is not authorized to run executions at this time.\n\
+export const EXECUTIONS_NOT_ALLOWED =
+  'This precisionFDA user is not authorized to run executions at this time.\n\
 Please email precisionFDA@fda.hhs.gov to request authorization to run executions.'
 
-export type CloudResourcesConditionType = 
-  | 'totalLimitCheck'
-  | 'all'
+export type CloudResourcesConditionType = 'totalLimitCheck' | 'all'
 
 export const useCloudResourcesCondition = (condition: CloudResourcesConditionType) => {
   const user = useAuthUser()
@@ -46,7 +47,7 @@ export const useCloudResourcesCondition = (condition: CloudResourcesConditionTyp
   const isJobLimitPositive = query.isSuccess ? query.data!.jobLimit > 0 : true
   const hasUserSomeResourcesAllowed = query.isSuccess && user?.resources ? user.resources.length > 0 : true
   switch (condition) {
-    case  'all': {
+    case 'all': {
       const state = [
         { isUserAllowed: isJobLimitPositive, errorMessage: EXECUTIONS_NOT_ALLOWED },
         { isUserAllowed: isUsageAvailable, errorMessage: TOTAL_LIMIT_EXCEEDED_TEXT },
@@ -54,7 +55,9 @@ export const useCloudResourcesCondition = (condition: CloudResourcesConditionTyp
       ] as const
       const isAllowed = state.every(({ isUserAllowed }) => isUserAllowed)
       const messages = state.filter(({ isUserAllowed }) => !isUserAllowed).map(({ errorMessage }) => errorMessage)
-      const finalMessage = (messages.length > 1 ? ['Following errors were encountered'].concat(messages) : messages).join('\n---\n')
+      const finalMessage = (messages.length > 1 ? ['Following errors were encountered'].concat(messages) : messages).join(
+        '\n---\n',
+      )
       const onViolation = () => {
         toast.error(finalMessage, { toastId: `Cloud resources exceeded - condition "${condition}"` })
       }
@@ -64,7 +67,7 @@ export const useCloudResourcesCondition = (condition: CloudResourcesConditionTyp
         onViolation,
       }
     }
-    case 'totalLimitCheck': 
+    case 'totalLimitCheck':
     default: {
       const isAllowed = isUsageAvailable
       const onViolation = () => {
@@ -77,5 +80,4 @@ export const useCloudResourcesCondition = (condition: CloudResourcesConditionTyp
       }
     }
   }
-
 }

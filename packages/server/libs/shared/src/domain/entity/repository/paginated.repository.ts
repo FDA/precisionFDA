@@ -42,4 +42,24 @@ export abstract class PaginatedRepository<T extends object> extends EntityReposi
     }
     return (page - 1) * limit
   }
+
+  persist(entity: T | Iterable<T>) {
+    this.getEntityManager().persist(entity)
+  }
+
+  async persistAndFlush(entity: T | Iterable<T>) {
+    await this.getEntityManager().persistAndFlush(entity)
+  }
+
+  async flush() {
+    await this.getEntityManager().flush()
+  }
+
+  remove(entity: T | Iterable<T>) {
+    this.getEntityManager().remove(entity)
+  }
+
+  async removeAndFlush(entity: T | Iterable<T>) {
+    await this.getEntityManager().removeAndFlush(entity)
+  }
 }

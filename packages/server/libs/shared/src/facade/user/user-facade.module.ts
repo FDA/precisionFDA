@@ -1,5 +1,9 @@
+import { MikroOrmModule } from '@mikro-orm/nestjs'
 import { Module } from '@nestjs/common'
 import { EmailModule } from '@shared/domain/email/email.module'
+import { Invitation } from '@shared/domain/invitation/invitation.entity'
+import { NotificationModule } from '@shared/domain/notification/notification.module'
+import { Organization } from '@shared/domain/org/org.entity'
 import { SpaceEventModule } from '@shared/domain/space-event/space-event.module'
 import { SpaceMembershipModule } from '@shared/domain/space-membership/space-membership.module'
 import { SpaceModule } from '@shared/domain/space/space.module'
@@ -8,6 +12,7 @@ import { UserSpaceInconsistencyFixService } from '@shared/facade/user/service/us
 import { UserCheckupFacade } from '@shared/facade/user/user-checkup.facade'
 import { UserDataConsistencyReportFacade } from '@shared/facade/user/user-data-consistency-report.facade'
 import { PlatformClientModule } from '@shared/platform-client/platform-client.module'
+import { UserProvisionFacade } from './user-provision.facade'
 
 @Module({
   imports: [
@@ -17,8 +22,15 @@ import { PlatformClientModule } from '@shared/platform-client/platform-client.mo
     SpaceEventModule,
     SpaceMembershipModule,
     EmailModule,
+    MikroOrmModule.forFeature([Organization, Invitation]),
+    NotificationModule,
   ],
-  providers: [UserDataConsistencyReportFacade, UserCheckupFacade, UserSpaceInconsistencyFixService],
-  exports: [UserDataConsistencyReportFacade, UserCheckupFacade],
+  providers: [
+    UserDataConsistencyReportFacade,
+    UserCheckupFacade,
+    UserSpaceInconsistencyFixService,
+    UserProvisionFacade,
+  ],
+  exports: [UserDataConsistencyReportFacade, UserCheckupFacade, UserProvisionFacade],
 })
 export class UserFacadeModule {}

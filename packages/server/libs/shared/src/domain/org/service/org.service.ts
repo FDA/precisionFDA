@@ -1,9 +1,8 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
-import { getLogger } from '@shared/logger'
-import { ClassIdResponse } from '@shared/platform-client/platform-client.responses'
-import { BILLING_INFO } from '@shared/config/consts'
 import { ClientErrorProps, ServiceError } from '@shared/errors'
+import { getLogger } from '@shared/logger'
 import { PlatformClient } from '@shared/platform-client'
+import { ClassIdResponse } from '@shared/platform-client/platform-client.responses'
 import { getHandle } from '../org.utils'
 
 const logger = getLogger('org.service')
@@ -53,7 +52,7 @@ export class OrgService implements IOrgService {
     // TODO add audit as in app/services/org_service/create.rb when implmenting auditing for Node
 
     if (billable) {
-      await this.userPlatformClient.updateBillingInformation(orgDxid.id, BILLING_INFO)
+      await this.userPlatformClient.updateBillingInformation(orgDxid.id)
     }
 
     return orgDxid

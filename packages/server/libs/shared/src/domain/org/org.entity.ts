@@ -1,8 +1,18 @@
-import { Collection, Entity, OneToMany, PrimaryKey, Property } from '@mikro-orm/core'
+import {
+  Collection,
+  Entity,
+  ManyToOne,
+  OneToMany,
+  PrimaryKey,
+  Property,
+  Ref,
+} from '@mikro-orm/core'
 import { User } from '@shared/domain/user/user.entity'
-import { BaseEntity } from '../../database/base.entity'
 
-@Entity({ tableName: 'orgs' })
+import { BaseEntity } from '../../database/base.entity'
+import { OrgRepository } from './org.repository'
+
+@Entity({ tableName: 'orgs', repository: () => OrgRepository })
 export class Organization extends BaseEntity {
   @PrimaryKey()
   id: number
@@ -15,8 +25,20 @@ export class Organization extends BaseEntity {
   @Property()
   name: string
 
+  @ManyToOne({ entity: () => User })
+  admin?: Ref<User>
+
   @Property()
-  adminId?: number
+  address?: string
+
+  @Property()
+  duns?: string
+
+  @Property()
+  phone?: string
+
+  @Property()
+  state: string
 
   @Property()
   singular: boolean

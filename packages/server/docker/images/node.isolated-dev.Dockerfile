@@ -7,7 +7,7 @@ RUN apt-get update && \
 
 WORKDIR /app
 
-RUN npm i -g pnpm@9.14.2
+RUN npm i -g pnpm@10.10.0
 
 COPY package.json \
     pnpm-lock.yaml \

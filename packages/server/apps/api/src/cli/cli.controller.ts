@@ -8,11 +8,25 @@ import { CliCreateDiscussionDTO } from '@shared/domain/cli/dto/cli-create-discus
 import { CliCreateReplyDTO } from '@shared/domain/cli/dto/cli-create-reply.dto'
 import { CliEditDiscussionDTO } from '@shared/domain/cli/dto/cli-edit-discussion.dto'
 import { CliEditReplyDTO } from '@shared/domain/cli/dto/cli-edit-reply.dto'
+import { CliCreateDiscussionFacade } from '../facade/discussion/cli-create-discussion.facade'
+import { CliCreateDiscussionReplyFacade } from '../facade/discussion/cli-create-discussion-reply.facade'
+import { CliUpdateDiscussionFacade } from '../facade/discussion/cli-update-discussion.facade'
+import { CliUpdateDiscussionReplyFacade } from '../facade/discussion/cli-update-discussion-reply.facade'
+import { CliDescribeEntityFacade } from '../facade/cli/cli-describe-entity.facade'
+import { CliJobScopeFacade } from '../facade/cli/cli-job-scope.facade'
 
 // SPECIAL ROUTES INTENDED FOR CLI USAGE ONLY. CONTAINS CLI SPECIFIC LOGIC & SPECIAL RESPONSE OBJECTS.
 @Controller('/cli')
 export class CliController {
-  constructor(private readonly cliService: CliService) {}
+  constructor(
+    private readonly cliService: CliService,
+    private readonly cliDescribeEntityFacade: CliDescribeEntityFacade,
+    private readonly cliCreateDiscussionFacade: CliCreateDiscussionFacade,
+    private readonly cliCreateDiscussionReplyFacade: CliCreateDiscussionReplyFacade,
+    private readonly cliUpdateDiscussionFacade: CliUpdateDiscussionFacade,
+    private readonly cliUpdateDiscussionReplyFacade: CliUpdateDiscussionReplyFacade,
+    private readonly cliJobScopeFacade: CliJobScopeFacade,
+  ) {}
 
   @UseGuards(UserContextGuard)
   @HttpCode(200)
@@ -29,13 +43,13 @@ export class CliController {
   @UseGuards(UserContextGuard)
   @Get('/:uid/describe')
   async describeEntity(@Param('uid') uid: string) {
-    return this.cliService.describeEntity(uid)
+    return this.cliDescribeEntityFacade.describeEntity(uid)
   }
 
   @UseGuards(UserContextGuard)
   @Get('/job/:dxid/scope')
   async getJobScope(@Param('dxid') jobDxid: DxId<'job'>) {
-    return this.cliService.getJobScope(jobDxid)
+    return this.cliJobScopeFacade.getJobScope(jobDxid)
   }
 
   @UseGuards(UserContextGuard)
@@ -54,7 +68,7 @@ export class CliController {
   @UseGuards(UserContextGuard)
   @Get('/discussions/:discussionId/describe')
   async describeDiscussion(@Param('discussionId') discussionId: number) {
-    return this.cliService.describeDiscussion(discussionId)
+    return this.cliDescribeEntityFacade.describeDiscussion(discussionId)
   }
 
   @UseGuards(UserContextGuard)
@@ -75,7 +89,7 @@ export class CliController {
   @HttpCode(201)
   @Post('/spaces/:id/discussions')
   async createDiscussion(@Param('id') spaceId: number, @Body() body: CliCreateDiscussionDTO) {
-    const url = await this.cliService.createDiscussion(spaceId, body)
+    const url = await this.cliCreateDiscussionFacade.createDiscussion(spaceId, body)
     return { url }
   }
 
@@ -83,21 +97,21 @@ export class CliController {
   @HttpCode(201)
   @Post('/discussions/reply')
   async replyToDiscussion(@Body() body: CliCreateReplyDTO) {
-    const url = await this.cliService.createReply(body)
+    const url = await this.cliCreateDiscussionReplyFacade.createReply(body)
     return { url }
   }
 
   @UseGuards(UserContextGuard)
   @Put('/discussions/reply')
   async editReply(@Body() body: CliEditReplyDTO) {
-    const url = await this.cliService.editReply(body)
+    const url = await this.cliUpdateDiscussionReplyFacade.updateReply(body)
     return { url }
   }
 
   @UseGuards(UserContextGuard)
   @Put('/discussions/:discussionId')
   async editDiscussion(@Param('discussionId') id: number, @Body() body: CliEditDiscussionDTO) {
-    const url = await this.cliService.editDiscussion(id, body)
+    const url = await this.cliUpdateDiscussionFacade.updateDiscussion(id, body)
     return { url }
   }
 }

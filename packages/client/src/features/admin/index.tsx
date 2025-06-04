@@ -2,13 +2,14 @@ import React from 'react'
 
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { usePageMeta } from '../../hooks/usePageMeta'
-import { AlertsPage } from './alerts/AlertsPage'
-import { AdminDashboard } from './dashboard/Dashboard'
-import UsersList from './users'
+import { useAuthUser } from '../auth/useAuthUser'
 import ListAdminNews from '../news/ListAdminNews'
 import CreateNewsItemPage from '../news/form/CreateNewsItemPage'
 import EditNewsItemPage from '../news/form/EditNewsItemPage'
-import { useAuthUser } from '../auth/useAuthUser'
+import { AlertsPage } from './alerts/AlertsPage'
+import { AdminDashboard } from './dashboard/Dashboard'
+import { InvitationsList } from './invitations'
+import UsersList from './users'
 
 const Admin = () => {
   usePageMeta({ title: 'Admin Dashboard - precisionFDA' })
@@ -27,6 +28,7 @@ const Admin = () => {
       <Route path="/" element={<AdminDashboard />} />
       <Route path="/alerts" element={<AlertsPage />} />
       <Route path="/users" element={<UsersList />} />
+      <Route path="/invitations" element={<InvitationsList />} />
       <Route path="/news" element={<ListAdminNews />} />
       <Route path="/news/create" element={<CreateNewsItemPage />} />
       <Route path="/news/:id/edit" element={<EditNewsItemPage />} />
