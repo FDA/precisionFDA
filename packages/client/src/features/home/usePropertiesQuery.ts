@@ -9,16 +9,16 @@ export type FetchProperties = {
 type PropertiesScope = ServerScope | 'spaces'
 
 async function fetchProperties(type: PropertiesResource, scope: PropertiesScope) {
-  const url = `/api/properties/${type}/scope/${scope}/keys`
+  const url = `/api/v2/properties/${type}/scope/${scope}/keys`
   const r = await axios.get<FetchProperties>(url)
   return r.data
 }
 export const usePropertiesQuery = (type: PropertiesResource, homeScope?: HomeScope, spaceId?: number) => {
   const map = {
-    'me': 'private',
-    'spaces': 'spaces',
-    'everybody': 'public',
-    'featured': 'public',
+    me: 'private',
+    spaces: 'spaces',
+    everybody: 'public',
+    featured: 'public',
   } as const
   const mappingScope: PropertiesScope = spaceId ? `space-${spaceId}` : map[homeScope ?? 'me']
   return useQuery({

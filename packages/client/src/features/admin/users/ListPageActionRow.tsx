@@ -1,21 +1,18 @@
-import React, { useState } from 'react'
-import styled from 'styled-components'
 import { useMutation, UseQueryResult } from '@tanstack/react-query'
+import React, { useState } from 'react'
+import { useNavigate } from 'react-router'
 import { toast } from 'react-toastify'
-import {
-  checkStatus,
-  displayPayloadMessage,
-  getApiRequestOpts,
-} from '../../../utils/api'
-import { UnlockIcon } from '../../../components/icons/UnlockIcon'
-import { PlusIcon } from '../../../components/icons/PlusIcon'
-import { User } from './types'
-import { ArrowIcon } from '../../../components/icons/ArrowIcon'
-import { Dropdown } from '../../../components/Dropdown'
-import { ResourceDropdownContent } from './ResourceDropdown'
-import { UserLimitForm } from './UserLimitForm'
-import { useAuthUser } from '../../auth/useAuthUser'
+import styled from 'styled-components'
 import { Button } from '../../../components/Button'
+import { Dropdown } from '../../../components/Dropdown'
+import { ArrowIcon } from '../../../components/icons/ArrowIcon'
+import { PlusIcon } from '../../../components/icons/PlusIcon'
+import { UnlockIcon } from '../../../components/icons/UnlockIcon'
+import { checkStatus, displayPayloadMessage, getApiRequestOpts } from '../../../utils/api'
+import { useAuthUser } from '../../auth/useAuthUser'
+import { ResourceDropdownContent } from './ResourceDropdown'
+import { User } from './types'
+import { UserLimitForm } from './UserLimitForm'
 
 const ButtonsRow = styled.div`
   display: flex;
@@ -43,7 +40,6 @@ const setJobLimit = async (ids: User['id'][], jobLimit: number) =>
       jobLimit,
     }),
   }).then(checkStatus)
-
 
 const bulkUnlock = async (ids: User['id'][]) =>
   fetch('/admin/bulk_unlock', {
@@ -78,16 +74,14 @@ const DropdownButton = React.forwardRef((props: any, ref) => (
 ))
 
 type UserListActionRowProps = {
-  selectedUsers: User[];
-  refetchUsers: UseQueryResult<{ users: User[] }>['refetch'];
-};
+  selectedUsers: User[]
+  refetchUsers: UseQueryResult<{ users: User[] }>['refetch']
+}
 
-export const UsersListActionRow = ({
-  selectedUsers,
-  refetchUsers,
-}: UserListActionRowProps) => {
+export const UsersListActionRow = ({ selectedUsers, refetchUsers }: UserListActionRowProps) => {
   const [totalLimitInput, setTotalLimitInput] = useState(NaN)
   const [jobLimitInput, setJobLimitInput] = useState(NaN)
+  const navigate = useNavigate()
 
   const currentUserCtx = useAuthUser()
 
@@ -149,24 +143,20 @@ export const UsersListActionRow = ({
     },
   })
   const areAllSelectedUsersInDeactivatedState =
-    selectedUsers.length > 0 &&
-    selectedUsers.every(({ userState }) => userState === 'deactivated')
+    selectedUsers.length > 0 && selectedUsers.every(({ userState }) => userState === 'deactivated')
   const areAllSelectedUsersInEnabledState =
-    selectedUsers.length > 0 &&
-    selectedUsers.every(({ userState }) => userState === 'active')
+    selectedUsers.length > 0 && selectedUsers.every(({ userState }) => userState === 'active')
   const areAllSelectedUsersInLockedState =
-    selectedUsers.length > 0 &&
-    selectedUsers.every(({ userState }) => userState === 'locked')
-  const isCurrentUserSelected = selectedUsers.some(
-    ({ id }) => id === currentUserCtx.id,
-  )
+    selectedUsers.length > 0 && selectedUsers.every(({ userState }) => userState === 'locked')
+  const isCurrentUserSelected = selectedUsers.some(({ id }) => id === currentUserCtx.id)
 
   return (
     <ButtonsRow>
       <Button
         data-variant="primary"
-        as="a"
-        href="/admin/invitations"
+        onClick={() => {
+          navigate('/admin/invitations')
+        }}
         data-testid="admin-users-provision-button"
         data-turbolinks="false"
       >
@@ -177,11 +167,7 @@ export const UsersListActionRow = ({
         <Button
           data-variant="primary"
           data-testid="admin-users-deactivate-button"
-          disabled={
-            selectedUsers.length === 0 ||
-            !areAllSelectedUsersInEnabledState ||
-            isCurrentUserSelected
-          }
+          disabled={selectedUsers.length === 0 || !areAllSelectedUsersInEnabledState || isCurrentUserSelected}
           onClick={() => deactivateMutation.mutateAsync()}
         >
           Deactivate
@@ -200,9 +186,7 @@ export const UsersListActionRow = ({
       <Button
         data-variant="primary"
         data-testid="admin-users-unlock-button"
-        disabled={
-          selectedUsers.length === 0 || !areAllSelectedUsersInLockedState
-        }
+        disabled={selectedUsers.length === 0 || !areAllSelectedUsersInLockedState}
         onClick={() => unlockMutation.mutateAsync()}
         style={{ marginRight: 16 }}
       >
@@ -223,15 +207,8 @@ export const UsersListActionRow = ({
         onChange={setJobLimitInput}
         isSubmitButtonDisabled={Number.isNaN(jobLimitInput) || jobLimitInput < 0}
       />
-      <Dropdown
-        trigger="click"
-        content={
-          <ResourceDropdownContent
-            selectedUsers={selectedUsers}
-          />
-        }
-      >
-        {(dropdownProps) => (
+      <Dropdown trigger="click" content={<ResourceDropdownContent selectedUsers={selectedUsers} />}>
+        {dropdownProps => (
           <DropdownButton
             {...dropdownProps}
             data-testid="admin-users-resource-button"

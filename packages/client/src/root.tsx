@@ -8,10 +8,7 @@ import Header from './components/Header/HeaderNext'
 import { AlertDismissedProvider } from './features/admin/alerts/useAlertDismissedLocalStorage'
 import { ExpiringSessionModal } from './features/auth/ExpiringSessionModal'
 import { SessionExpiredModal } from './features/auth/SessionExpiredModal'
-import DataPortalRoutes from './features/data-portals/routes'
-import ExpertsSinglePage from './features/experts/details/index'
 import { useModal } from './features/modal/useModal'
-import { TrackPage } from './features/tracks/TrackPage'
 import { LayoutLoader, UserLayout } from './layouts/UserLayout'
 import NoFoundPage from './pages/NoFoundPage'
 import GlobalStyle from './styles/global'
@@ -20,12 +17,15 @@ import queryClient from './utils/queryClient'
 
 import 'react-tooltip/dist/react-tooltip.css'
 import AuthWall from './AuthWall'
-import ContentEditorPage from './features/challenges/content/ContentEditorPage'
-import { ChallengeDetailsLayout } from './features/challenges/details/ChallengeDetailsLayout'
-import EditChallengePage from './features/challenges/form/EditChallengePage'
-import { PublishingPage } from './features/publishing/PublishingPage'
 import { PFDAToastContainer } from './utils/PFDAToastContainer'
 
+const DataPortalRoutes = React.lazy(() => import('./features/data-portals/routes'))
+const ExpertsSinglePage = React.lazy(() => import('./features/experts/details/index'))
+const EditChallengePage = React.lazy(() => import('./features/challenges/form/EditChallengePage'))
+const ChallengeDetailsLayout = React.lazy(() => import('./features/challenges/details/ChallengeDetailsLayout'))
+const ContentEditorPage = React.lazy(() => import('./features/challenges/content/ContentEditorPage'))
+const PublishingPage = React.lazy(() => import('./features/publishing/PublishingPage'))
+const TrackPage = React.lazy(() => import('./features/tracks/TrackPage'))
 const Admin = React.lazy(() => import('./features/admin'))
 const Home2 = React.lazy(() => import('./features/home'))
 const ChallengesList = React.lazy(() => import('./features/challenges/list/ChallengesList'))

@@ -27,6 +27,7 @@ export type ResourceTypeUrlNames =
 
 export type APIResource =
   | 'admin-users'
+  | 'admin-invitations'
   | 'files'
   | 'folders'
   | 'apps'
@@ -39,6 +40,7 @@ export type APIResource =
   | 'spaces'
   | 'space-reports'
   | 'discussions'
+  | 'members'
 
 export type HomeScope = 'everybody' | 'featured' | 'spaces' | 'me'
 export type ServerScope = 'public' | 'private' | `space-${string}`
@@ -140,7 +142,7 @@ export interface IMeta {
 }
 
 export type Size = null | number
-export type IFilter = Record<string, Size[] | any>
+export type IFilter = Record<string, NonNullable<string | string[] | number[] | undefined>>
 
 export interface SortBy {
   order_by: string
@@ -175,6 +177,8 @@ export enum NOTIFICATION_ACTION {
   WORKSTATION_SNAPSHOT_ERROR = 'WORKSTATION_SNAPSHOT_ERROR',
   SPACE_REPORT_ERROR = 'SPACE_REPORT_ERROR',
   SPACE_REPORT_DONE = 'SPACE_REPORT_DONE',
+  USER_PROVISIONED = 'USER_PROVISIONED',
+  USER_PROVISIONING_COMPLETED = 'USER_PROVISIONING_COMPLETED',
 }
 
 export type NotificationMeta = {

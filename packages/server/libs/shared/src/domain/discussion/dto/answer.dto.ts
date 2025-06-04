@@ -22,7 +22,10 @@ export class AnswerDTO {
     dto.title = note.title
     dto.content = note.content
     dto.user = SimpleUserDTO.fromEntity(await answer.user.load())
-    dto.comments = await Promise.all(answer.comments.getItems().map(CommentDTO.fromEntity))
+    dto.comments = []
+    if (answer.comments.isInitialized()) {
+      dto.comments = await Promise.all(answer.comments.getItems().map(CommentDTO.fromEntity))
+    }
     dto.createdAt = answer.createdAt
     dto.updatedAt = answer.updatedAt
     return dto

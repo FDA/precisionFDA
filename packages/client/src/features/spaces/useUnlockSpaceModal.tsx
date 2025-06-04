@@ -1,12 +1,17 @@
-import React from 'react'
 import { useMutation } from '@tanstack/react-query'
+import React from 'react'
 import { toast } from 'react-toastify'
-import { Modal } from '../modal'
-import { ButtonRow } from '../modal/styles'
+import { styled } from 'styled-components'
+import { Button } from '../../components/Button'
+import { ModalHeaderTop, ModalNext } from '../modal/ModalNext'
+import { Footer } from '../modal/styles'
 import { useModal } from '../modal/useModal'
 import { unlockSpaceRequest } from './spaces.api'
 import { ISpace } from './spaces.types'
-import { Button } from '../../components/Button'
+
+const StyledBody = styled.div`
+  padding: 20px;
+`
 
 export const useUnlockSpaceModal = ({
   space,
@@ -38,14 +43,18 @@ export const useUnlockSpaceModal = ({
   }
 
   const modalComp = (
-    <Modal
+    <ModalNext
+      id="unlock-lock-space-modal"
       data-testid="modal-unlock-lock-space"
       headerText={`${isLocked ? 'Unlock' : 'Lock'} space`}
       isShown={isShown}
       hide={handleClose}
     >
-      Are you sure you want to {isLocked ? 'unlock' : 'lock'} this space?
-      <ButtonRow>
+      <ModalHeaderTop headerText={`${isLocked ? 'Unlock' : 'Lock'} space`} hide={handleClose} />
+      <StyledBody>
+        Are you sure you want to {isLocked ? 'unlock' : 'lock'} this space?
+      </StyledBody>
+      <Footer>
         <Button type="button" onClick={handleClose}>
           Cancel
         </Button>
@@ -62,8 +71,8 @@ export const useUnlockSpaceModal = ({
         >
           {isLocked ? 'Unlock' : 'Lock'}
         </Button>
-      </ButtonRow>
-    </Modal>
+      </Footer>
+    </ModalNext>
   )
   return {
     modalComp,

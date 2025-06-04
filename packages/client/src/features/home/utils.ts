@@ -1,6 +1,6 @@
 import { getSpaceIdFromScope } from '../../utils'
 import { cleanObject } from '../../utils/object'
-import { IFilter, HomeScope, ServerScope } from './types'
+import { HomeScope, IFilter, ServerScope } from './types'
 
 // Only return the objects with keys from the pick array
 export function pickActions<T>(actions: T, pick: string[]) {
@@ -132,20 +132,19 @@ export function prepareListFetchV2(filters: IFilter[], params: Params) {
   const filterParams: { [key: string]: string } = {}
 
   modFilters.forEach((f: any) => {
-    filterParams[`filters[${f.id}]`] = f.value
+    filterParams[`filter[${f.id}]`] = f.value
   })
 
-  const order_by_key = params.sortBy?.order_by?.includes('props.')
-    ? 'order_by_property'
-    : 'order_by'
-  const order_by_val = order_by_key === 'order_by_property'
-    ? params.sortBy?.order_by.replace('props.', '')
-    : renameOrderByKeys(params?.sortBy?.order_by)
+  const order_by_key = params.sortBy?.order_by?.includes('props.') ? 'order_by_property' : 'order_by'
+  const order_by_val =
+    order_by_key === 'order_by_property'
+      ? params.sortBy?.order_by.replace('props.', '')
+      : renameOrderByKeys(params?.sortBy?.order_by)
 
   const queryParams = cleanObject({
     folder_id: params?.folderId,
     space_id: params?.spaceId,
-    perPage: params?.perPage,
+    pageSize: params?.perPage,
     page: params?.page,
     [order_by_key]: order_by_val,
     order_dir: params?.sortBy?.order_dir,

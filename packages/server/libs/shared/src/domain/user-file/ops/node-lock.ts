@@ -13,6 +13,7 @@ import { Space } from '@shared/domain/space/space.entity'
 import { Node } from '@shared/domain/user-file/node.entity'
 import { NodeRepository } from '@shared/domain/user-file/node.repository'
 import { Folder } from '@shared/domain/user-file/folder.entity'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
 
 class NodesLockOperation extends BaseOperation<UserOpsCtx, NodesInputDTO, void> {
   private readonly notificationService: NotificationService
@@ -30,7 +31,12 @@ class NodesLockOperation extends BaseOperation<UserOpsCtx, NodesInputDTO, void> 
     const folderRepository = ctx.em.getRepository(Folder)
     this.nodeService = new NodeService(
       ctx.em,
-      ctx.user,
+      new UserContext(
+        this.ctx.user.id,
+        this.ctx.user.accessToken,
+        this.ctx.user.dxuser,
+        this.ctx.user.sessionId,
+      ),
       spaceRepository,
       nodeRepository,
       userRepository,
