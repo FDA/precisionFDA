@@ -1,14 +1,21 @@
+import { DxId } from '../entity/domain/dxid'
+
 const ORG_PREFIX = 'org-'
 const PFDA_PREFIX = 'pfda..'
+const ORG_HANDLE_MAX_LENGTH = 33
 
 const constructDxOrg = (handle: string) => {
   // TODO maybe some validation?
-  return ORG_PREFIX + PFDA_PREFIX + handle
+  return (ORG_PREFIX + PFDA_PREFIX + handle) as DxId<'org'>
 }
 
 const getHandle = (id: string) => {
-  const pattern = 'org-'
+  return id.slice(id.indexOf(ORG_PREFIX) + ORG_PREFIX.length)
+}
+
+const getBaseHandle = (id: DxId<'org'>) => {
+  const pattern = `${ORG_PREFIX}${PFDA_PREFIX}`
   return id.slice(id.indexOf(pattern) + pattern.length)
 }
 
-export { ORG_PREFIX, PFDA_PREFIX, constructDxOrg, getHandle }
+export { constructDxOrg, getBaseHandle, getHandle, ORG_HANDLE_MAX_LENGTH, ORG_PREFIX, PFDA_PREFIX }

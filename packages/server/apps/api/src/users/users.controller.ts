@@ -6,9 +6,7 @@ import { HeaderItem } from '@shared/domain/user/header-item'
 @UseGuards(UserContextGuard)
 @Controller('/users')
 export class UsersController {
-  constructor(
-    private readonly userService: UserService,
-  ) {}
+  constructor(private readonly userService: UserService) {}
 
   @Get('/active')
   async listActiveUserNames() {
@@ -28,5 +26,10 @@ export class UsersController {
   @Put('/header-items')
   async updateHeaderItems(@Body(new ParseArrayPipe({ items: HeaderItem })) body: HeaderItem[]) {
     return await this.userService.updateHeaderItems(body)
+  }
+
+  @Get('me/cloud-resources')
+  async getCloudResources() {
+    return await this.userService.getCloudResources()
   }
 }

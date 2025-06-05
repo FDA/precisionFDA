@@ -25,6 +25,7 @@
 #  organization_admin :boolean          default(FALSE), not null
 #  country_id         :integer
 #  phone_country_id   :integer
+#  provisioning_state :string(255)
 #
 
 class Invitation < ApplicationRecord

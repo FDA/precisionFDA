@@ -2,7 +2,10 @@ import { AppSeries } from '@shared/domain/app-series/app-series.entity'
 import { Challenge } from '@shared/domain/challenge/challenge.entity'
 import { Comment } from '@shared/domain/comment/comment.entity'
 import { DbCluster } from '@shared/domain/db-cluster/db-cluster.entity'
+import { DxId } from '@shared/domain/entity/domain/dxid'
 import { Uid } from '@shared/domain/entity/domain/uid'
+import { Invitation } from '@shared/domain/invitation/invitation.entity'
+import { PROVISIONING_STATE } from '@shared/domain/invitation/invitation.enum'
 import { Job } from '@shared/domain/job/job.entity'
 import { JobRunData } from '@shared/domain/job/job.types'
 import { NewsItem } from '@shared/domain/news-item/news-item.entity'
@@ -16,7 +19,9 @@ import { Asset } from '@shared/domain/user-file/asset.entity'
 import { Folder } from '@shared/domain/user-file/folder.entity'
 import { SyncFilesStateOperation } from '@shared/domain/user-file/ops/sync-files-state'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
+import { UserExtras } from '@shared/domain/user/user-extras'
 import { WorkflowSeries } from '@shared/domain/workflow-series/workflow-series.entity'
+import { Workflow } from '@shared/domain/workflow/entity/workflow.entity'
 import { JobDescribeResponse } from '@shared/platform-client/platform-client.responses'
 import Chance from 'chance'
 import crypto from 'crypto'
@@ -31,7 +36,7 @@ import {
   STATUS as DB_CLUSTER_STATUS,
   ENGINES,
 } from '../domain/db-cluster/db-cluster.enum'
-import { Expert, EXPERT_STATE } from '../domain/expert/expert.entity'
+import { EXPERT_STATE, Expert } from '../domain/expert/expert.entity'
 import { JOB_DB_ENTITY_TYPE, JOB_STATE } from '../domain/job/job.enum'
 import {
   SPACE_EVENT_ACTIVITY_TYPE,
@@ -47,9 +52,6 @@ import { USER_STATE, User } from '../domain/user/user.entity'
 import { STATIC_SCOPE } from '../enums'
 import { TASK_TYPE } from '../queue/task.input'
 import type { AnyObject, UserCtx } from '../types'
-import { UserExtras } from '@shared/domain/user/user-extras'
-import { Workflow } from '@shared/domain/workflow/entity/workflow.entity'
-import { DxId } from '@shared/domain/entity/domain/dxid'
 import { JobSynchronizationService } from '@shared/domain/job/services/job-synchronization.service'
 
 const chance = new Chance()
@@ -223,7 +225,7 @@ const app = {
     } as Internal
   },
   regular: (): Partial<InstanceType<typeof App>> => {
-    const dxid = `app-${random.dxstr()}`
+    const dxid = `app-${random.dxstr()}` as DxId<'app'>
     return {
       dxid,
       uid: `${dxid}-1`,
@@ -246,7 +248,7 @@ const app = {
     }
   },
   https: (): Partial<InstanceType<typeof App>> => {
-    const dxid = `app-${random.dxstr()}`
+    const dxid = `app-${random.dxstr()}` as DxId<'app'>
     return {
       dxid,
       title: 'https-app-title',
@@ -263,7 +265,7 @@ const app = {
     }
   },
   rshiny: (): Partial<InstanceType<typeof App>> => {
-    const dxid = `app-${random.dxstr()}`
+    const dxid = `app-${random.dxstr()}` as DxId<'app'>
     return {
       dxid,
       title: 'app-rshiny-title',
@@ -352,7 +354,7 @@ const workflow = {
     const dxid = `workflow-${random.dxstr()}}` as DxId<'workflow'>
     return {
       dxid,
-      uid: `${dxid}-1` as Uid,
+      uid: `${dxid}-1` as Uid<'workflow'>,
       name,
       revision: 1,
       scope: 'private',
@@ -370,7 +372,7 @@ const workflow = {
 
 const job = {
   simple: (app: App): Partial<InstanceType<typeof Job>> => {
-    const dxid = `job-${random.dxstr()}`
+    const dxid = `job-${random.dxstr()}` as DxId<'job'>
     const runData: JobRunData = { run_inputs: {}, run_instance_type: 'baseline-8', run_outputs: {} }
     const projectId = `project-${random.dxstr()}`
     const jobName = chance.name()
@@ -407,7 +409,7 @@ const job = {
     }
   },
   regular: (): Partial<InstanceType<typeof Job>> => {
-    const dxid = `job-${random.dxstr()}`
+    const dxid = `job-${random.dxstr()}` as DxId<'job'>
     const runData: JobRunData = { run_inputs: {}, run_instance_type: 'baseline-8', run_outputs: {} }
     return {
       dxid,
@@ -426,10 +428,10 @@ const job = {
 
 const userFile = {
   simple: (customDxid?: string): Partial<InstanceType<typeof UserFile>> => {
-    const dxid = customDxid ?? (`file-${random.dxstr()}` as any)
+    const dxid = (customDxid ?? `file-${random.dxstr()}`) as DxId<'file'>
     return {
       dxid,
-      uid: `${dxid}-1` as Uid,
+      uid: `${dxid}-1` as Uid<'file'>,
       project: `project-${random.dxstr()}`,
       name: chance.name(),
       fileSize: random.chance.integer({ min: 100, max: 10_000_000 }),
@@ -441,10 +443,10 @@ const userFile = {
     }
   },
   simpleUploaded: (customDxid?: string): Partial<InstanceType<typeof UserFile>> => {
-    const dxid = customDxid ?? (`file-${random.dxstr()}` as any)
+    const dxid = (customDxid ?? `file-${random.dxstr()}`) as DxId<'file'>
     return {
       dxid,
-      uid: `${dxid}-1` as Uid,
+      uid: `${dxid}-1` as Uid<'file'>,
       project: `project-${random.dxstr()}`,
       name: chance.name(),
       fileSize: random.chance.integer({ min: 100, max: 10_000_000 }),
@@ -456,10 +458,10 @@ const userFile = {
     }
   },
   simpleJobOutput: (jobId: number, customDxid?: string): Partial<InstanceType<typeof UserFile>> => {
-    const dxid = customDxid ?? (`file-${random.dxstr()}` as any)
+    const dxid = (customDxid ?? `file-${random.dxstr()}`) as DxId<'file'>
     return {
       dxid,
-      uid: `${dxid}-1` as Uid,
+      uid: `${dxid}-1` as Uid<'file'>,
       project: `project-${random.dxstr()}`,
       name: chance.name(),
       fileSize: random.chance.integer({ min: 100, max: 10_000_000 }),
@@ -474,10 +476,10 @@ const userFile = {
     comparisonId: number,
     customDxid?: string,
   ): Partial<InstanceType<typeof UserFile>> => {
-    const dxid = customDxid ?? (`file-${random.dxstr()}` as any)
+    const dxid = (customDxid ?? `file-${random.dxstr()}`) as DxId<'file'>
     return {
       dxid,
-      uid: `${dxid}-1` as Uid,
+      uid: `${dxid}-1` as Uid<'file'>,
       project: `project-${random.dxstr()}`,
       name: chance.name(),
       fileSize: random.chance.integer({ min: 100, max: 10_000_000 }),
@@ -492,10 +494,10 @@ const userFile = {
 
 const asset = {
   simple: (customDxid?: string): Partial<InstanceType<typeof Asset>> => {
-    const dxid = customDxid ?? (`file-${random.dxstr()}` as any)
+    const dxid = (customDxid ?? `file-${random.dxstr()}`) as DxId<'file'>
     return {
       dxid,
-      uid: `${dxid}-1` as Uid,
+      uid: `${dxid}-1` as Uid<'file'>,
       project: `project-${random.dxstr()}`,
       name: chance.name(),
       fileSize: random.chance.integer({ min: 100, max: 10_000_000 }),
@@ -636,10 +638,10 @@ const comparison = {
 
 const dbCluster = {
   simple: (): Partial<InstanceType<typeof DbCluster>> => {
-    const dxid = `dbcluster-${random.dxstr()}`
+    const dxid = `dbcluster-${random.dxstr()}` as DxId<'dbcluster'>
     return {
       dxid: dxid,
-      uid: `${dxid}-1` as Uid,
+      uid: `${dxid}-1` as Uid<'dbcluster'>,
       project: `project-${random.dxstr()}`,
       name: chance.name(),
       description: random.description(),
@@ -683,6 +685,32 @@ const expert = {
         _challenge: `Challenge - ${expertName}`,
         _image_id: fileDxid,
       },
+    }
+  },
+}
+
+const invitation = {
+  simple: (): Partial<InstanceType<typeof Invitation>> => {
+    return {
+      firstName: random.firstName(),
+      lastName: random.lastName(),
+      email: random.email(),
+      ip: chance.ip(),
+      extras: {
+        participate_intent: false,
+        organize_intent: false,
+        req_reason: 'Test',
+        req_data: '',
+        req_software: '',
+        research_intent: false,
+        clinical_intent: false,
+        consistency_challenge_intent: '',
+        truth_challenge_intent: '',
+      },
+      state: 'guest',
+      code: chance.guid(),
+      organizationAdmin: false,
+      provisioningState: PROVISIONING_STATE.PENDING,
     }
   },
 }
@@ -767,6 +795,7 @@ export {
   dbCluster,
   expert,
   folder,
+  invitation,
   job,
   news,
   note,

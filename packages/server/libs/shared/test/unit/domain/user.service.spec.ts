@@ -1,14 +1,15 @@
 import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
 import { EMAIL_TYPES } from '@shared/domain/email/email.config'
 import { EmailQueueJobProducer } from '@shared/domain/email/producer/email-queue-job.producer'
-import { User, USER_STATE } from '@shared/domain/user/user.entity'
-import { UserService } from '@shared/domain/user/user.service'
-import sinon, { match, stub } from 'sinon'
-import { expect } from 'chai'
-import { UserRepository } from '@shared/domain/user/user.repository'
 import { UserPaginationDto } from '@shared/domain/user/dto/user-pagination.dto'
-import { NoHeaderItemsSetError, NotFoundError } from '@shared/errors'
 import { HeaderItem } from '@shared/domain/user/header-item'
+import { User, USER_STATE } from '@shared/domain/user/user.entity'
+import { UserRepository } from '@shared/domain/user/user.repository'
+import { UserService } from '@shared/domain/user/user.service'
+import { NoHeaderItemsSetError, NotFoundError } from '@shared/errors'
+import { PlatformClient } from '@shared/platform-client'
+import { expect } from 'chai'
+import sinon, { match, stub } from 'sinon'
 
 describe('user service tests', () => {
   const emFlushStub = sinon.stub()
@@ -40,11 +41,19 @@ describe('user service tests', () => {
       return callback(em)
     })
 
-    return new UserService(em, emailsJobProducer, userRepo, {
-      id: 42,
-      dxuser: 'user1',
-      accessToken: 'access_token',
-    })
+    const platformClient = {} as unknown as PlatformClient
+
+    return new UserService(
+      em,
+      {
+        id: 42,
+        dxuser: 'user1',
+        accessToken: 'access_token',
+      },
+      userRepo,
+      emailsJobProducer,
+      platformClient,
+    )
   }
 
   const checkHeaderItems = (expected: HeaderItem[], tested: HeaderItem[]) => {
@@ -147,7 +156,7 @@ describe('user service tests', () => {
     it('should paginate users by dxuser filter', async () => {
       userRepoPaginateStub.reset()
       const query = new UserPaginationDto()
-      query.filters = {
+      query.filter = {
         dxuser: 'user1',
       }
       query.page = 1
@@ -168,7 +177,7 @@ describe('user service tests', () => {
     it('should paginate users by email filter', async () => {
       userRepoPaginateStub.reset()
       const query = new UserPaginationDto()
-      query.filters = {
+      query.filter = {
         email: 'user2@example.com',
       }
       query.page = 1
@@ -193,7 +202,7 @@ describe('user service tests', () => {
       lastLoginDate.setDate(lastLoginDate.getDate() - 59)
 
       const query = new UserPaginationDto()
-      query.filters = {
+      query.filter = {
         lastLogin: '2024-11-01T00:00,2024-12-31T23:59',
       }
       query.page = 1
@@ -202,7 +211,7 @@ describe('user service tests', () => {
       const userService = createUserService()
       await userService.paginateUsers(query)
 
-      const [startDate, endDate] = query.filters.lastLogin
+      const [startDate, endDate] = query.filter.lastLogin
         .split(',')
         .map((dateStr) => new Date(dateStr))
       const expectedFilter = {
@@ -219,7 +228,7 @@ describe('user service tests', () => {
       userRepoPaginateStub.reset()
 
       const query = new UserPaginationDto()
-      query.filters = {
+      query.filter = {
         userState: 1,
       }
       query.page = 1
@@ -237,7 +246,7 @@ describe('user service tests', () => {
       userRepoPaginateStub.reset()
 
       const query = new UserPaginationDto()
-      query.filters = {
+      query.filter = {
         totalLimit: '10,20',
       }
       query.page = 1
@@ -260,7 +269,7 @@ describe('user service tests', () => {
       userRepoPaginateStub.reset()
 
       const query = new UserPaginationDto()
-      query.filters = {
+      query.filter = {
         jobLimit: '5,10',
       }
       query.page = 1

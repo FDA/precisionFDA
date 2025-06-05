@@ -1,26 +1,24 @@
-// TODO(samuel) fix
-
-
 import { Column, ColumnDef } from '@tanstack/react-table'
 import axios from 'axios'
 import React from 'react'
+import { Link } from 'react-router-dom'
 import styled from 'styled-components'
 import { HoverDNAnexusLogo } from '../../../components/icons/DNAnexusLogo'
 import { UsersIcon } from '../../../components/icons/UserIcon'
 import { ContentFooter } from '../../../components/Page/ContentFooter'
 import { hidePagination, Pagination } from '../../../components/Pagination'
 import Table from '../../../components/Table'
-import { selectColumnDef } from '../../../components/Table/selectColumnDef'
 import DateTimeRangeFilter, { dateRangeFilterFn } from '../../../components/Table/components/DateTimeRangeFilter'
 import SelectFilter, { selectFilterFn } from '../../../components/Table/components/SelectFilter'
-import { StyledPageTable } from '../../../components/Table/components/styles'
+import { selectColumnDef } from '../../../components/Table/selectColumnDef'
 import { usePageMeta } from '../../../hooks/usePageMeta'
 import { UserLayout } from '../../../layouts/UserLayout'
 import { IUser } from '../../../types/user'
 import { getSelectedObjectsFromIndexes, toArrayFromObject } from '../../../utils/object'
-import { IFilter, IMeta, MetaV2 } from '../../home/types'
+import { IFilter, MetaV2 } from '../../home/types'
 import { useList } from '../../home/useList'
 import { Params, prepareListFetchV2 } from '../../home/utils'
+import { AdminSectionBreadcrumbDivider, AdminSectionBreadcrumbs, AdminStyledPageTable, Title, Topbox, TopLeft } from '../styles'
 import { UsersListActionRow } from './ListPageActionRow'
 import { User } from './types'
 
@@ -36,31 +34,6 @@ export const StyledLinkCell = styled.a`
   display: flex;
   align-items: center;
   gap: 5px;
-`
-
-export const Title = styled.div`
-  display: flex;
-  font-size: 24px;
-  font-weight: bold;
-  align-items: center;
-  margin: 16px 0;
-  margin-right: 16px;
-  margin-bottom: 8px;
-  gap: 8px;
-`
-
-export const TopLeft = styled.div`
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-`
-
-export const Topbox = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  padding-left: 32px;
-  padding-right: 16px;
 `
 
 export const getAdminUserColumns = (): ColumnDef<User>[] => [
@@ -141,11 +114,8 @@ export const getAdminUserColumns = (): ColumnDef<User>[] => [
     id: 'totalLimit',
     size: 300,
     enableColumnFilter: false,
-    cell: (props) => (
-      <StyledLinkCell
-        data-turbolinks="false"
-        href={`/users/${props.row.original.dxuser}`}
-      >
+    cell: props => (
+      <StyledLinkCell data-turbolinks="false" href={`/users/${props.row.original.dxuser}`}>
         {`$${props.row.original.cloudResourceSettings.total_limit}`}
       </StyledLinkCell>
     ),
@@ -164,7 +134,7 @@ export const getAdminUserColumns = (): ColumnDef<User>[] => [
   },
 ]
 
-type ListType = { apps: IUser[]; meta: IMeta }
+type ListType = { apps: IUser[]; meta: MetaV2 }
 
 const UsersList = () => {
   usePageMeta({ title: 'precisionFDA Admin - Users' })
@@ -196,10 +166,19 @@ const UsersList = () => {
 
   const selectedObjects = getSelectedObjectsFromIndexes(selectedIndexes, data?.data)
   // console.log(filterQuery);
-  
+
   const filters = toArrayFromObject(filterQuery)
   return (
     <UserLayout innerScroll>
+      <AdminSectionBreadcrumbs>
+        <Link to="/admin" data-turbolinks="false">
+          Admin Dashboard
+        </Link>
+        <AdminSectionBreadcrumbDivider>/</AdminSectionBreadcrumbDivider>
+        <Link to="/admin/users" data-turbolinks="false">
+          Users
+        </Link>
+      </AdminSectionBreadcrumbs>
       <Topbox>
         <TopLeft>
           <UsersIcon height={20} />
@@ -208,7 +187,7 @@ const UsersList = () => {
         <UsersListActionRow selectedUsers={selectedObjects} refetchUsers={query.refetch} />
       </Topbox>
 
-      <StyledPageTable>
+      <AdminStyledPageTable>
         <Table<User>
           isLoading={isLoading}
           data={data?.data ?? []}
@@ -222,7 +201,7 @@ const UsersList = () => {
           setColumnSortBy={setSortBy}
           columnFilters={filters}
         />
-      </StyledPageTable>
+      </AdminStyledPageTable>
 
       <ContentFooter>
         <Pagination

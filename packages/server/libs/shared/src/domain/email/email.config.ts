@@ -1,30 +1,30 @@
+import { emailTypeToInputDtoMap } from '@shared/domain/email/dto/email-type-to-input.map'
+import { AlertMessageHandler } from '@shared/domain/email/templates/handlers/alert-message.handler'
 import { ChallengeOpenedEmailHandler } from '@shared/domain/email/templates/handlers/challenge-opened.handler'
 import { ChallengePreregEmailHandler } from '@shared/domain/email/templates/handlers/challenge-prereg.handler'
+import { ChallengeProposalReceivedHandler } from '@shared/domain/email/templates/handlers/challenge-proposal-received.handler'
 import { CommentAddedEmailHandler } from '@shared/domain/email/templates/handlers/comment-added.handler'
 import { ContentChangedEmailHandler } from '@shared/domain/email/templates/handlers/content-change.handler'
+import { ExpertAddedHandler } from '@shared/domain/email/templates/handlers/expert-added.handler'
+import { ExpertQuestionAddedHandler } from '@shared/domain/email/templates/handlers/expert-question-added.handler'
+import { GuestAccessEmailHandler } from '@shared/domain/email/templates/handlers/guest-access-email.handler'
+import { InvitationHandler } from '@shared/domain/email/templates/handlers/invitation.handler'
 import { JobFailedEmailHandler } from '@shared/domain/email/templates/handlers/job-failed.handler'
 import { JobFinishedEmailHandler } from '@shared/domain/email/templates/handlers/job-finished.handler'
+import { LicenseApprovalRequestHandler } from '@shared/domain/email/templates/handlers/license-approval-request.handler'
+import { LicenseApprovedHandler } from '@shared/domain/email/templates/handlers/license-approved.handler'
+import { LicenseRevokedHandler } from '@shared/domain/email/templates/handlers/license-revoked.handler'
 import { MemberChangedEmailHandler } from '@shared/domain/email/templates/handlers/member-change.handler'
+import { NodeCopyHandler } from '@shared/domain/email/templates/handlers/node-copy.handler'
+import { SpaceActivatedHandler } from '@shared/domain/email/templates/handlers/space-activated.handler'
+import { SpaceActivationHandler } from '@shared/domain/email/templates/handlers/space-activation.handler'
 import { SpaceChangedEmailHandler } from '@shared/domain/email/templates/handlers/space-change.handler'
+import { SpaceInvitationHandler } from '@shared/domain/email/templates/handlers/space-invitation.handler'
+import { UserProvisionedHandler } from '@shared/domain/email/templates/handlers/user-provisioned.handler'
 import { SpaceEvent } from '@shared/domain/space-event/space-event.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { groupBy, map, mergeAll, pipe, prop } from 'ramda'
 import { OpsCtx } from '../../types'
-import { AlertMessageHandler } from '@shared/domain/email/templates/handlers/alert-message.handler'
-import { ExpertQuestionAddedHandler } from '@shared/domain/email/templates/handlers/expert-question-added.handler'
-import { ExpertAddedHandler } from '@shared/domain/email/templates/handlers/expert-added.handler'
-import { ChallengeProposalReceivedHandler } from '@shared/domain/email/templates/handlers/challenge-proposal-received.handler'
-import { emailTypeToInputDtoMap } from '@shared/domain/email/dto/email-type-to-input.map'
-import { GuestAccessEmailHandler } from '@shared/domain/email/templates/handlers/guest-access-email.handler'
-import { LicenseApprovalRequestHandler } from '@shared/domain/email/templates/handlers/license-approval-request.handler'
-import { LicenseApprovedHandler } from '@shared/domain/email/templates/handlers/license-approved.handler'
-import { LicenseRevokedHandler } from '@shared/domain/email/templates/handlers/license-revoked.handler'
-import { SpaceActivatedHandler } from '@shared/domain/email/templates/handlers/space-activated.handler'
-import { SpaceActivationHandler } from '@shared/domain/email/templates/handlers/space-activation.handler'
-import { InvitationHandler } from '@shared/domain/email/templates/handlers/invitation.handler'
-import { SpaceInvitationHandler } from '@shared/domain/email/templates/handlers/space-invitation.handler'
-import { NodeCopyHandler } from '@shared/domain/email/templates/handlers/node-copy.handler'
-import { UserProvisionedHandler } from '@shared/domain/email/templates/handlers/user-provisioned.handler'
 
 // KEY NAMES AND DEFAULT VALUES FOR EMAIL NOTIFICATION SETTINGS
 
@@ -55,6 +55,33 @@ export const NOTIFICATION_TYPES_BASE = {
   space_invitation: true,
   node_copy: true,
   user_provisioned: true,
+}
+
+export const DEFAULT_NOTIFICATION_PREFERENCES = {
+  reviewer_membership_changed: false,
+  reviewer_comment_activity: true,
+  reviewer_content_added_or_deleted: false,
+  sponsor_membership_changed: false,
+  sponsor_comment_activity: true,
+  sponsor_content_added_or_deleted: false,
+  reviewer_lead_membership_changed: true,
+  reviewer_lead_comment_activity: true,
+  reviewer_lead_content_added_or_deleted: true,
+  reviewer_lead_member_added_to_space: true,
+  reviewer_lead_space_locked_unlocked_deleted: true,
+  sponsor_lead_membership_changed: true,
+  sponsor_lead_comment_activity: true,
+  sponsor_lead_content_added_or_deleted: true,
+  sponsor_lead_member_added_to_space: true,
+  sponsor_lead_space_locked_unlocked_deleted: true,
+  admin_membership_changed: true,
+  admin_comment_activity: true,
+  admin_content_added_or_deleted: true,
+  admin_member_added_to_space: true,
+  admin_space_locked_unlocked_deleted: true,
+  private_job_finished: false,
+  private_challenge_opened: true,
+  private_challenge_preregister: true,
 }
 
 /**
