@@ -8,6 +8,7 @@ import { ModalHeaderTop, ModalNext } from '../modal/ModalNext'
 import { ButtonRow, Footer, ModalScroll } from '../modal/styles'
 import { useModal } from '../modal/useModal'
 import { Button } from '../../components/Button'
+import { AxiosError } from 'axios'
 
 export function useDeleteModal<
   T extends { id: string; name: string; location: string },
@@ -19,7 +20,7 @@ export function useDeleteModal<
 }: {
   resource: 'app' | 'asset' | 'workflow'
   selected: T[]
-  request: (ids: string[]) => Promise<any>
+  request: (ids: number[]) => Promise<any>
   onSuccess?: (res: any) => void
 }) {
   const { isShown, setShowModal } = useModal()
@@ -27,8 +28,8 @@ export function useDeleteModal<
   const mutation = useMutation({
     mutationKey: ['delete-resource', resource],
     mutationFn: request,
-    onError: () => {
-      toast.error(`There was a problem deleting: ${resource}`)
+    onError: (error) => {
+      toast.error(error.response?.data.error.message)
     },
     onSuccess: (res: any) => {
       if (res?.meta?.messages[0].type === 'error') {
@@ -37,9 +38,10 @@ export function useDeleteModal<
       }
       if (onSuccess) onSuccess(res)
       setShowModal(false)
-      toast.success(
-        `Deleted ${itemsCountString(resource, momoSelected.length)}`,
-      )
+      if (resource !== 'asset') {
+        // asset is handled asynchronously
+        toast.success(`Deleted ${itemsCountString(resource, momoSelected.length)}`)
+      }
     },
   })
 
