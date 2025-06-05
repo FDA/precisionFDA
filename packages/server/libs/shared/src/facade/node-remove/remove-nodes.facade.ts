@@ -21,6 +21,8 @@ import { SpaceEventService } from '@shared/domain/space-event/space-event.servic
 import { UserFileRepository } from '@shared/domain/user-file/user-file.repository'
 import { LicensedItemService } from '@shared/domain/licensed-item/licensed-item.service'
 import { TAGGABLE_TYPE } from '@shared/domain/tagging/tagging.types'
+import { ArchiveEntryService } from '@shared/domain/user-file/service/archive-entry.service'
+import { Asset } from '@shared/domain/user-file/asset.entity'
 
 @Injectable()
 export class RemoveNodesFacade {
@@ -39,6 +41,7 @@ export class RemoveNodesFacade {
     private readonly taggingService: TaggingService,
     private readonly spaceEventService: SpaceEventService,
     private readonly licensedItemService: LicensedItemService,
+    private readonly archiveEntryService: ArchiveEntryService,
     private readonly fileSyncQueueJobProducer: FileSyncQueueJobProducer,
     private readonly userClient: PlatformClient,
   ) {}
@@ -52,29 +55,34 @@ export class RemoveNodesFacade {
   async removeNodes(ids: number[], skipValidation: boolean = false) {
     this.logger.log(`Removing nodes ${ids}`)
     // load all nested ids (even those not explicitly mentioned)
-    const nodes: Node[] = await this.nodeService.loadNodes(ids, {})
+    const nodes = await this.nodeService.loadNodes(ids, {})
 
     if (!skipValidation) {
       await this.validateNodes(nodes)
     }
 
+    // required because of a bug in the orm, where an entity fetched as part of a related collection to a different entity gets inserted back into the database in case it is deleted in very specific situations.
+    // this might get fixed in the future in the ORM and therefore the clear might not be needed anymore
+    // see JIRA PFDA-5169 for reproduction steps
+    this.em.clear()
+
     let removedFilesCount = 0
     let removedFoldersCount = 0
 
     try {
-      // required because of a bug in the orm, where an entity fetched as part of a related collection to a different entity gets inserted back into the database in case it is deleted in very specific situations.
-      // this might get fixed in the future in the ORM and therefore the clear might not be needed anymore
-      // see JIRA PFDA-5169 for reproduction steps
-      this.em.clear()
+      for (let i = 0; i < nodes.length; i++) {
+        const node = nodes[i]
 
-      for (const node of nodes) {
-        if (node.stiType === FILE_STI_TYPE.USERFILE) {
+        if ([FILE_STI_TYPE.USERFILE, FILE_STI_TYPE.ASSET].includes(node.stiType)) {
           await this.removeFile(node as UserFile)
           removedFilesCount++
         } else {
           await this.removeFolder(node as Folder)
           removedFoldersCount++
         }
+
+        // Mark as processed to exclude from potential rollback later
+        nodes[i] = null as unknown as Node
       }
 
       this.logger.log(
@@ -82,9 +90,11 @@ export class RemoveNodesFacade {
         'Removed total objects',
       )
     } catch (error) {
-      await this.nodeService.rollbackRemovingState(nodes)
+      const undeletedNodes = nodes.filter((node): node is Node => node !== null)
+      await this.nodeService.rollbackRemovingState(undeletedNodes)
       throw error
     }
+
     return { removedFilesCount, removedFoldersCount }
   }
 
@@ -111,6 +121,9 @@ export class RemoveNodesFacade {
         await this.comparisonService.validateComparisons(node as UserFile)
         await this.userFileService.validateSpaceReports(node as UserFile)
       }
+      if (node.stiType === FILE_STI_TYPE.ASSET) {
+        await this.userFileService.validateAssetRemoval(node as Asset)
+      }
     }
   }
 
@@ -124,6 +137,9 @@ export class RemoveNodesFacade {
     return await this.em.transactional(async () => {
       await this.licensedItemService.removeItemLicensedForNode(fileToRemove.id)
       await this.taggingService.removeTaggings(fileToRemove.id, TAGGABLE_TYPE.NODE)
+      if (fileToRemove.stiType === FILE_STI_TYPE.ASSET) {
+        await this.archiveEntryService.removeArchiveEntriesForNode(fileToRemove.id)
+      }
 
       const fileEvent = await createFileEvent(
         EVENT_TYPES.FILE_DELETED,
@@ -136,10 +152,20 @@ export class RemoveNodesFacade {
       if (lastNode) {
         // we're deleting from platform only if it's the last with given dxid
         this.logger.log(`Removing file with dxid: ${fileToRemove.dxid} from platform`)
-        await this.userClient.fileRemove({
-          projectId: fileToRemove.project,
-          ids: [fileToRemove.dxid],
-        })
+        try {
+          await this.userClient.fileRemove({
+            projectId: fileToRemove.project,
+            ids: [fileToRemove.dxid],
+          })
+        } catch (error) {
+          if (error.props?.clientStatusCode === 404) {
+            this.logger.log(
+              `File with dxid ${fileToRemove.dxid} already does not exist on platform`,
+            )
+          } else {
+            throw error
+          }
+        }
       }
 
       if (fileToRemove.isInSpace()) {
