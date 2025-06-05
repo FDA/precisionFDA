@@ -2,17 +2,24 @@ import { useSiteSettingsQuery } from '../../features/auth/useSiteSettingsQuery'
 import { cdmhNavItems, gsrsNavItems, siteNavItems } from './NavItems'
 
 export const useUserSiteNavItems = () => {
-  const siteSettings = useSiteSettingsQuery()
+  const { data, isLoading, error } = useSiteSettingsQuery()
+
+  if (isLoading || error || !data) {
+    return {
+      userSiteNavItems: siteNavItems,
+      showGSRSLink: true,
+      showCDMHLink: false,
+    }
+  }
 
   const showGSRSLink = true
-  const showCDMHLink = !!siteSettings?.data?.cdmh.isEnabled && Object.keys(siteSettings?.data?.cdmh.data).length > 0
-  let items = siteNavItems
-  if (showGSRSLink) {
-    items = [...items, ...gsrsNavItems]
-  }
-  if (showCDMHLink) {
-    items = [...items, ...cdmhNavItems]
-  }
+  const showCDMHLink = data.cdmh?.isEnabled && data.cdmh?.data && Object.keys(data.cdmh.data).length > 0
 
-  return { userSiteNavItems: items, showGSRSLink, showCDMHLink }
+  const items = showCDMHLink ? [...siteNavItems, ...gsrsNavItems, ...cdmhNavItems] : [...siteNavItems, ...gsrsNavItems]
+
+  return {
+    userSiteNavItems: items,
+    showGSRSLink,
+    showCDMHLink,
+  }
 }

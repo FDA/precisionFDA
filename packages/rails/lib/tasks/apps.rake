@@ -56,13 +56,6 @@ namespace :apps do
       input_spec = app_info["inputSpec"]
       output_spec = app_info["outputSpec"]
 
-      packages = []
-      if (exec_depends = app_info.dig("runSpec", "execDepends"))
-        packages = exec_depends.map do |package|
-          package["name"] if package["package_manager"].blank? && UBUNTU_PACKAGES[release].include?(package["name"])
-        end.compact
-      end
-
       assets = []
       if (bundled_depends = app_info.dig("runSpec", "bundledDepends"))
         assets = bundled_depends.map do |asset_data|
@@ -110,7 +103,7 @@ namespace :apps do
         instance_type: baseline,
         ordered_assets: assets.map(&:uid),
         platform_tags: applet_info["tags"],
-        packages: packages,
+        packages: [],
         code: nil,
         assets: assets,
         release: app_info.dig("runSpec", "release"),

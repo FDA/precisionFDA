@@ -6,6 +6,7 @@ import { PlatformClientFunctionKeyType } from '../model/platform-client-function
 export class AdminPlatformClientService {
   private readonly ALLOWED_METHODS: PlatformClientFunctionKeyType[] = [
     'createOrg',
+    'createUser',
     'projectCreate',
     'projectInvite',
     'projectDescribe',
@@ -13,6 +14,7 @@ export class AdminPlatformClientService {
     'projectUpdate',
     'removeUserFromOrganization',
     'inviteUserToOrganization',
+    'updateBillingInformation',
     'jobDescribe',
     'dbClusterCreate',
     'dbClusterAction',

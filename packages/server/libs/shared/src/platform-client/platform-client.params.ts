@@ -1,3 +1,4 @@
+import { DxId } from '@shared/domain/entity/domain/dxid'
 import { PlatformSpec } from '../domain/app/app.input'
 import { AnyObject } from '../types'
 
@@ -250,6 +251,15 @@ type UserUnlockParams = {
   }
 }
 
+type UserCreateData = {
+  username: string
+  email: string
+  first: string
+  last: string
+  billTo: DxId<'org'>
+  pfdasso?: boolean
+}
+
 type AppDescribeParams = {
   dxid: string
 }
@@ -303,6 +313,7 @@ export {
   RemoveFolderParams,
   RenameFolderParams,
   Starting,
+  UserCreateData,
   UserDescribeParams,
   UserInviteToOrgParams,
   UserRemoveFromOrgParams,
