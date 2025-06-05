@@ -11,19 +11,22 @@ import {
   UseGuards,
 } from '@nestjs/common'
 import { DEPRECATED_SQL_ENTITY_MANAGER } from '@shared/database/provider/deprecated-sql-entity-manager.provider'
+import { InvitationPaginationDTO } from '@shared/domain/invitation/dto/invitation-pagination.dto'
+import { ProvisionUsersDTO } from '@shared/domain/invitation/dto/provision-users.dto'
+import { InvitationService } from '@shared/domain/invitation/services/invitation.service'
+import { Organization } from '@shared/domain/org/org.entity'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { UserPaginationDto } from '@shared/domain/user/dto/user-pagination.dto'
 import { RESOURCE_TYPES, User } from '@shared/domain/user/user.entity'
+import { UserService } from '@shared/domain/user/user.service'
 import { ValidationError } from '@shared/errors'
 import { PlatformClient } from '@shared/platform-client'
-import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { ADMIN_PLATFORM_CLIENT } from '@shared/platform-client/providers/admin-platform-client.provider'
+import { MaintenanceQueueJobProducer } from '@shared/queue/producer/maintenance-queue-job.producer'
 import { UserContextGuard } from '../user-context/guard/user-context.guard'
 import { SiteAdminGuard } from './guards/site-admin.guard'
 import { getAdminBodyValidationPipe } from './pipes/admin-body-validation.pipe'
 import { enumValidator, numericBodyValidator } from './possibly-reusable-things'
-import { Organization } from '@shared/domain/org/org.entity'
-import { MaintenanceQueueJobProducer } from '@shared/queue/producer/maintenance-queue-job.producer'
-import { UserPaginationDto } from '@shared/domain/user/dto/user-pagination.dto'
-import { ADMIN_PLATFORM_CLIENT } from '@shared/platform-client/providers/admin-platform-client.provider'
-import { UserService } from '@shared/domain/user/user.service'
 
 interface ISetTotalLimitParams {
   ids: number[]
@@ -55,6 +58,7 @@ export class AdminController {
     @Inject(ADMIN_PLATFORM_CLIENT) private readonly adminClient: PlatformClient,
     private readonly userService: UserService,
     private readonly maintenanceJobProducer: MaintenanceQueueJobProducer,
+    private readonly invitationService: InvitationService,
   ) {}
 
   @Get('/stats')
@@ -74,13 +78,6 @@ export class AdminController {
 
   @Get('/users')
   async getUsers(@Query() query: UserPaginationDto) {
-    // temporarily override because new paging uses
-    // pageSize on backend and the infrastructure
-    // on FE uses perPage :-(
-    if (query.perPage) {
-      query.pageSize = query.perPage
-    }
-
     return this.userService.paginateUsers(query)
   }
 
@@ -112,6 +109,17 @@ export class AdminController {
     await this.em.getRepository(User).bulkUpdateSetJobLimit(ids, jobLimit)
 
     return 'updated'
+  }
+
+  @Get('/invitations')
+  async getInvitations(@Query() query: InvitationPaginationDTO) {
+    return this.invitationService.listInvitations(query)
+  }
+
+  @HttpCode(200)
+  @Post('/users/provision')
+  async provisionUsers(@Body() body: ProvisionUsersDTO) {
+    return this.invitationService.provisionUsers(body.ids)
   }
 
   /**

@@ -22,19 +22,6 @@ export const VALID_IO_CLASSES = [
   'array:float',
 ]
 
-export const BILLING_INFO = {
-  email: 'billing@dnanexus.com',
-  name: 'Elaine Johanson',
-  companyName: 'FDA',
-  address1: '10903 New Hampshire Ave',
-  address2: 'Bldg. 32 room 2254',
-  city: 'Silver Spring',
-  state: 'MD',
-  postCode: '20993',
-  country: 'USA',
-  phone: '(301) 706-1836',
-}
-
 export const USER_CONTEXT_HTTP_HEADERS = {
   csrfToken: 'x-csrf-token',
   userAgent: 'user-agent',

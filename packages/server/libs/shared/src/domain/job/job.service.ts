@@ -105,6 +105,14 @@ export class JobService {
     }
   }
 
+  async findAccessible(dxid: DxId<'job'>) {
+    const job = await this.jobRepo.findAccessibleOne({ dxid })
+    if (!job) {
+      throw new errors.NotFoundError(`Job ${dxid} was not found or is not accessible`)
+    }
+    return job
+  }
+
   /**
    * Asynchronously checks for stale jobs and performs necessary actions.
    *

@@ -38,7 +38,7 @@ describe('SpaceService', () => {
   let referenceStub
 
   const spaceRepoFindOneStub = stub()
-  const spaceRepoFindEditableByIdAndUser = stub()
+  const spaceRepoFindEditableOneStub = stub()
   const buildStub = stub()
   const spaceRepoFindOneOrFailStub = stub()
   const spaceRepoFindStub = stub()
@@ -61,7 +61,7 @@ describe('SpaceService', () => {
       findOneOrFail: spaceRepoFindOneOrFailStub,
       find: spaceRepoFindStub,
       findSpacesByIdAndUser: spaceRepoFindSpacesByIdAndUserStub,
-      findEditableByIdAndUser: spaceRepoFindEditableByIdAndUser,
+      findEditableOne: spaceRepoFindEditableOneStub,
     } as unknown as SpaceRepository
     const spaceMembershipRepository = {
       findOne: spaceMembershipRepoFindOneStub,
@@ -90,8 +90,8 @@ describe('SpaceService', () => {
     spaceRepoFindOneStub.reset()
     spaceRepoFindOneStub.throws()
 
-    spaceRepoFindEditableByIdAndUser.reset()
-    spaceRepoFindEditableByIdAndUser.throws()
+    spaceRepoFindEditableOneStub.reset()
+    spaceRepoFindEditableOneStub.throws()
 
     buildStub.reset()
     buildStub.throws()
@@ -178,7 +178,7 @@ describe('SpaceService', () => {
 
     const setupStubs = (space: Space, user: User) => {
       userRepoFindOneStub.withArgs({ id: USER_ID }).resolves(user)
-      spaceRepoFindEditableByIdAndUser.withArgs(SPACE_ID, user).resolves(space)
+      spaceRepoFindEditableOneStub.withArgs({ id: SPACE_ID }).resolves(space)
     }
 
     const spaceInput = {
@@ -316,7 +316,7 @@ describe('SpaceService', () => {
 
     it('space not found', async () => {
       userRepoFindOneStub.withArgs({ id: USER_ID }).resolves(user)
-      spaceRepoFindEditableByIdAndUser.withArgs(SPACE_ID, user).resolves(null)
+      spaceRepoFindEditableOneStub.withArgs({ id: SPACE_ID }).resolves(null)
       const spaceService = createSpaceService()
       await expect(spaceService.update(SPACE_ID, spaceInput)).to.be.rejectedWith(
         NotFoundError,

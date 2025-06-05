@@ -5,6 +5,7 @@ import { expect } from 'chai'
 import { stub } from 'sinon'
 import { DiscussionDTO } from '@shared/domain/discussion/dto/discussion.dto'
 import { AnswerDTO } from '@shared/domain/discussion/dto/answer.dto'
+import { AttachmentManagementFacade } from '@shared/facade/discussion/attachment-management.facade'
 
 describe('SpaceReportPartDiscussionResultProviderService', () => {
   const ID = 1
@@ -351,9 +352,12 @@ describe('SpaceReportPartDiscussionResultProviderService', () => {
   function getInstance() {
     const discussionService = {
       getDiscussion: getDiscussionStub,
-      getAttachments: getAttachmentsStub,
     } as unknown as DiscussionService
 
-    return new SpaceReportPartDiscussionResultProviderService(discussionService)
+    const attachmentsFacade = {
+      getAttachments: getAttachmentsStub,
+    } as unknown as AttachmentManagementFacade
+
+    return new SpaceReportPartDiscussionResultProviderService(discussionService, attachmentsFacade)
   }
 })

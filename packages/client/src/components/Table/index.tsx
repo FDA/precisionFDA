@@ -46,6 +46,8 @@ function Table<T extends { id: number }>({
   expanded = {},
   setExpanded,
   subRowKey,
+  manualFiltering = true,
+  manualSorting = true,
 }: {
   enableColumnFilters?: boolean
   emptyText?: string
@@ -66,6 +68,8 @@ function Table<T extends { id: number }>({
   setColumnVisibility?: (cols: VisibilityState) => void
   columnVisibility?: VisibilityState
   subRowKey?: keyof T
+  manualFiltering?: boolean
+  manualSorting?: boolean
 }) {
   // const [columnVisibility, setColumnVisibility] = React.useState({})
   const [grouping, setGrouping] = React.useState<GroupingState>([])
@@ -149,8 +153,8 @@ function Table<T extends { id: number }>({
       rowSelection,
       expanded,
     },
-    manualFiltering: true,
-    manualSorting: true,
+    manualFiltering,
+    manualSorting,
     enableColumnFilters: enableColumnFilters,
     // debugTable: true,
     // debugHeaders: true,

@@ -135,7 +135,6 @@ export const StyledForm = styled.form`
   flex-direction: column;
   gap: 1rem;
   padding: 1rem;
-  min-height: 120px;
 `
 export const ModalScroll = styled.div`
   flex: 1;

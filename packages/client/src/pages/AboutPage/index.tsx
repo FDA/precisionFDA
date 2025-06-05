@@ -119,7 +119,7 @@ const AboutPage = () => {
               </p>
               <p>
                 After conducting market research, collaborating with FDA’s{' '}
-                <a href="http://www.fda.gov<%= about_path %>FDA/CentersOffices/OfficeofMedicalProductsandTobacco/CDRH/">
+                <a rel="noreferrer" target='_blank' href="https://www.fda.gov/about-fda/fda-organization/center-devices-and-radiological-health">
                   Center for Devices and Radiological Health
                 </a>{' '}
                 and assembling a project team, the precisionFDA project was

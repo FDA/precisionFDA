@@ -35,7 +35,7 @@ export class SpaceService {
 
   constructor(
     private readonly em: SqlEntityManager,
-    private readonly user: UserContext,
+    private readonly userContext: UserContext,
 
     @Inject(SPACE_TYPE_TO_PROCESS_PROVIDER_MAP)
     private readonly spaceTypeToCreatorProviderMap: {
@@ -50,8 +50,8 @@ export class SpaceService {
     const hostLead = await space.findHostLead()
     const guestLead = await space.findGuestLead()
     const isSiteAdmin = await currentUser.isSiteAdmin()
-    const isHostLead = this.user.dxuser === hostLead?.dxuser
-    const isLead = isHostLead || this.user.dxuser === guestLead?.dxuser
+    const isHostLead = this.userContext.dxuser === hostLead?.dxuser
+    const isLead = isHostLead || this.userContext.dxuser === guestLead?.dxuser
 
     if (space.type === SPACE_TYPE.REVIEW && !isLead) {
       throw new PermissionError('Review space can be updated only by Reviewer or Sponsor leads.')
@@ -74,8 +74,8 @@ export class SpaceService {
 
   async update(spaceId: number, spaceInput: UpdateSpaceDTO) {
     this.logger.log(`Editing space ${spaceInput.name}`)
-    const user = await this.userRepository.findOne({ id: this.user.id })
-    const space = await this.spaceRepository.findEditableByIdAndUser(spaceId, user)
+    const user = await this.userRepository.findOne({ id: this.userContext.id })
+    const space = await this.spaceRepository.findEditableOne({ id: spaceId })
 
     if (!space) {
       throw new NotFoundError("Space not found or you don't have the permission.")
@@ -109,7 +109,7 @@ export class SpaceService {
 
   async lockSpace(spaceId: number) {
     const user = await this.userRepository.findOne(
-      { id: this.user.id },
+      { id: this.userContext.id },
       { populate: ['adminMemberships', 'adminMemberships.adminGroup'] },
     )
     const space = await this.spaceRepository.findOne({ id: spaceId })
@@ -150,7 +150,7 @@ export class SpaceService {
 
   async unlockSpace(spaceId: number) {
     const user = await this.userRepository.findOne(
-      { id: this.user.id },
+      { id: this.userContext.id },
       { populate: ['adminMemberships', 'adminMemberships.adminGroup'] },
     )
     const space = await this.spaceRepository.findOne({ id: spaceId })
@@ -215,10 +215,14 @@ export class SpaceService {
     const spaceIds = confidentialSpaces.map((space) => space.id)
     spaceIds.push(space.id)
 
-    return await this.spaceRepository.findSpacesByIdAndUser(spaceIds, this.user.id)
+    return await this.spaceRepository.findSpacesByIdAndUser(spaceIds, this.userContext.id)
   }
 
   async updateSpacesHiddenForAdmin(spaceIds: number[], hidden: boolean): Promise<void> {
     await this.em.nativeUpdate(Space, { id: { $in: spaceIds } }, { hidden })
+  }
+
+  async getAccessibleSpace(spaceId: number): Promise<Space | null> {
+    return this.spaceRepository.findAccessibleOne({ id: spaceId })
   }
 }

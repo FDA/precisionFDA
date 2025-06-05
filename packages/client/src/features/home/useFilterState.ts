@@ -1,10 +1,17 @@
+import { ColumnFiltersState } from '@tanstack/react-table'
 import debounce from 'lodash/debounce'
 import { useCallback, useState } from 'react'
-import { DelimitedArrayParam, DelimitedNumericArrayParam, QueryParamConfig, StringParam, useQueryParams, withDefault } from 'use-query-params'
-import { ColumnFiltersState } from '@tanstack/react-table'
+import {
+  DelimitedArrayParam,
+  DelimitedNumericArrayParam,
+  QueryParamConfig,
+  StringParam,
+  useQueryParams,
+  withDefault,
+} from 'use-query-params'
 import { toObjectFromArray } from '../../utils/object'
 
-export const defaultFilterValues = (arr: string[]) => arr.reduce((acc: any, curr: any) => (acc[curr] = undefined, acc), {})
+export const defaultFilterValues = (arr: string[]) => arr.reduce((acc: any, curr: any) => ((acc[curr] = undefined), acc), {})
 
 function fileSizeParamMap(fileSize?: [number | null, number | null]) {
   if (fileSize) {
@@ -58,10 +65,16 @@ const KEYS = [
   'email',
   'userState',
   'lastLogin',
+  'firstName',
+  'lastName',
+  'provisioningState',
+  'createdAt',
 ]
 function getObjectKeys(a: string[]) {
   const o = {} as Record<string, string | number | null | undefined>
-  a.forEach(k => {o[k] = undefined})
+  a.forEach(k => {
+    o[k] = undefined
+  })
   return o
 }
 
@@ -69,7 +82,7 @@ export function useFilterState({ onSetFilter }: { onSetFilter?: (values: any) =>
   const [filterQuery, setFilterParam] = useState(getObjectKeys(KEYS))
   const debouncedSetFilterQuery = debounce(v => {
     setFilterParam(v)
-    if(onSetFilter) onSetFilter(v)
+    if (onSetFilter) onSetFilter(v)
   }, 500)
 
   const setSearchFilter = useCallback((val: ColumnFiltersState) => {
@@ -98,11 +111,12 @@ export function useFilterParams({ filters, onSetFilter }: { filters: FilterArgs;
       params[v] = withDefault(DelimitedArrayParam, undefined)
     }
   })
-  
+
   const [filterQuery, setFilterParam] = useQueryParams(params)
   const debouncedSetFilterQuery = debounce(v => {
     v.file_size = fileSizeParamMap([v.file_size?.from ?? null, v.file_size?.to ?? null])
     v.lastLogin = rangeParamMap([v.lastLogin?.from ?? '', v.lastLogin?.to ?? ''])
+    v.createdAt = rangeParamMap([v.createdAt?.from ?? '', v.createdAt?.to ?? ''])
     setFilterParam(v, 'replaceIn')
     if (onSetFilter) onSetFilter(v)
   }, 500)

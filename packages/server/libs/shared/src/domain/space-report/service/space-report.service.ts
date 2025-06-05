@@ -226,12 +226,32 @@ export class SpaceReportService {
     [T in SpaceReportPartSourceType]: EntityInstance<T>[]
   }> {
     return {
-      file: await this.em.find(UserFile, { scope: 'private', user: this.user.id }),
-      app: await this.em.find(App, { scope: 'private', user: this.user.id }),
-      job: await this.em.find(Job, { scope: 'private', user: this.user.id }),
-      asset: await this.em.find(Asset, { scope: 'private', user: this.user.id }),
-      workflow: await this.em.find(Workflow, { scope: 'private', user: this.user.id }),
-      user: await this.em.find(User, this.user.id),
+      file: await this.em.find(
+        UserFile,
+        { scope: 'private', user: this.user.id },
+        { orderBy: { name: QueryOrder.ASC } },
+      ),
+      app: await this.em.find(
+        App,
+        { scope: 'private', user: this.user.id },
+        { orderBy: { title: QueryOrder.ASC } },
+      ),
+      job: await this.em.find(
+        Job,
+        { scope: 'private', user: this.user.id },
+        { orderBy: { name: QueryOrder.ASC } },
+      ),
+      asset: await this.em.find(
+        Asset,
+        { scope: 'private', user: this.user.id },
+        { orderBy: { name: QueryOrder.ASC } },
+      ),
+      workflow: await this.em.find(
+        Workflow,
+        { scope: 'private', user: this.user.id },
+        { orderBy: { name: QueryOrder.ASC } },
+      ),
+      user: await this.em.find(User, this.user.id, { orderBy: { lastName: QueryOrder.ASC } }),
       discussion: [],
     }
   }
@@ -243,15 +263,23 @@ export class SpaceReportService {
     const space = await this.getSpaceForUserValidated(spaceId)
 
     return {
-      file: await this.em.find(UserFile, { scope }),
-      app: await this.em.find(App, { scope }),
-      job: await this.em.find(Job, { scope }),
-      asset: await this.em.find(Asset, { scope }),
-      workflow: await this.em.find(Workflow, { scope }),
-      user: await this.em.find(User, {
-        spaceMemberships: { spaces: { id: space.id }, active: true },
-      }),
-      discussion: await this.em.find(Discussion, { note: { scope } }),
+      file: await this.em.find(UserFile, { scope }, { orderBy: { name: QueryOrder.ASC } }),
+      app: await this.em.find(App, { scope }, { orderBy: { title: QueryOrder.ASC } }),
+      job: await this.em.find(Job, { scope }, { orderBy: { name: QueryOrder.ASC } }),
+      asset: await this.em.find(Asset, { scope }, { orderBy: { name: QueryOrder.ASC } }),
+      workflow: await this.em.find(Workflow, { scope }, { orderBy: { name: QueryOrder.ASC } }),
+      user: await this.em.find(
+        User,
+        {
+          spaceMemberships: { spaces: { id: space.id }, active: true },
+        },
+        { orderBy: { lastName: QueryOrder.ASC } },
+      ),
+      discussion: await this.em.find(
+        Discussion,
+        { note: { scope } },
+        { orderBy: { note: { title: QueryOrder.ASC } } },
+      ),
     }
   }
 }

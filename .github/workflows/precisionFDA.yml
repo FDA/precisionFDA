@@ -110,7 +110,7 @@ jobs:
       - name: Setup pnpm
         run: |
           corepack enable
-          corepack prepare pnpm@9.14.2 --activate
+          corepack prepare pnpm@10.10.0 --activate
 
       - name: Install modules
         run: pnpm install
@@ -200,10 +200,10 @@ jobs:
           cache-version: 1
       - uses: pnpm/action-setup@v3
         with:
-          version: 9.14.2
+          version: 10.10.0
       - uses: actions/setup-node@v4
         with:
-          node-version: "20.18.1"
+          node-version: "22.15.0"
           cache: "pnpm"
       - name: Prepare env & db
         working-directory: ./packages/rails
@@ -245,10 +245,10 @@ jobs:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v3
         with:
-          version: 9.14.2
+          version: 10.10.0
       - uses: actions/setup-node@v4
         with:
-          node-version: "20.18.1"
+          node-version: "22.15.0"
           cache: "pnpm"
       - name: Install dependencies
         working-directory: ./packages/client
@@ -267,10 +267,10 @@ jobs:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v3
         with:
-          version: 9.14.2
+          version: 10.10.0
       - uses: actions/setup-node@v4
         with:
-          node-version: "20.18.1"
+          node-version: "22.15.0"
           cache: "pnpm"
       - name: Install dependencies
         working-directory: ./packages/client

@@ -135,14 +135,14 @@ const PublishingForm = ({ identifier, treeRoot }: { identifier: string; treeRoot
   )
 }
 
-export const PublishingPage = () => {
-  const [identifier, _] = useQueryParam('identifier', StringParam)
-  let [entityType, __] = useQueryParam('type', StringParam)
+const PublishingPage = () => {
+  const [identifier] = useQueryParam('identifier', StringParam)
+  let [entityType] = useQueryParam('type', StringParam)
   if (!entityType) {
     entityType = getEntityTypeFromIdentifier(identifier!)
   }
 
-  const { data: treeRoot, isLoading, isError, error } = usePublishingTreeRootQuery(identifier!, entityType)
+  const { data: treeRoot, isLoading, isError } = usePublishingTreeRootQuery(identifier!, entityType)
   if (isLoading) {
     return <HomeLoader />
   }
@@ -166,7 +166,7 @@ export const PublishingPage = () => {
           Publishing items makes them publicly visible.
           <br />
           <a href="/docs/guides/publishing" target="_blank">
-            Review important information about publishing, and learn why it's a good idea to also publish related items.
+            Review important information about publishing, and learn why it&apos;s a good idea to also publish related items.
           </a>
         </StyledCallout>
         <PublishingForm identifier={identifier!} treeRoot={treeRoot} />
@@ -174,3 +174,5 @@ export const PublishingPage = () => {
     </UserLayout>
   )
 }
+
+export default PublishingPage
