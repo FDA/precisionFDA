@@ -317,8 +317,9 @@ func mainInternal() int {
 		}
 	}
 
+	// use default url if not provided by user or found in config
 	serverURL := defaultURL
-	if *server != "" && *server != defaultURL {
+	if *server != "" {
 		serverURL = *server
 	} else if config != nil && config.Server != "" {
 		serverURL = config.Server

@@ -24,7 +24,7 @@ export function logout() {
 export type CDMHKey = 'cdmhPortal' | 'cdrBrowser' | 'cdrAdmin' | 'connectPortal'
 
 export async function siteSettingsRequest() {
-  return axios.get<SiteSettingsResponse>('/api/site_settings').then(r => r.data)
+  return axios.get<SiteSettingsResponse>('/api/v2/site-settings').then(r => r.data)
 }
 
 interface GenerateKeyResponse {

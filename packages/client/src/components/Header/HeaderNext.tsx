@@ -262,7 +262,7 @@ const SiteNav = ({
   const { theme, toggleTheme } = useTheme()
   const clickRef = useOnOutsideClickRef(true, setShowSiteNav, ignoredOutsideClickRef)
   const { pathname } = useLocation()
-  const siteSettings = useSiteSettingsQuery()
+  const { data: siteSettings } = useSiteSettingsQuery()
   const { userSiteNavItems, showCDMHLink, showGSRSLink } = useUserSiteNavItems()
 
   const portalIDs = ['daaas', 'prism', 'tools']
@@ -299,7 +299,7 @@ const SiteNav = ({
           </div>
           <div>
             {getObjectsByIds(portalIDs, userSiteNavItems).map(i =>
-              dataPortalMenuItem(i, pathname, setShowSiteNav, siteSettings?.data?.dataPortals[i.id]),
+              dataPortalMenuItem(i, pathname, setShowSiteNav, siteSettings?.dataPortals[i.id]),
             )}
             <HeaderSpacer />
 
@@ -327,10 +327,10 @@ const SiteNav = ({
                   </IconWrap>
                   <SiteMenuText>CDMH</SiteMenuText>
                 </SiteMenuItem>
-                {siteSettings?.data?.cdmh?.data &&
-                  Object.keys(siteSettings.data.cdmh.data).map((s: CDMHKey) => {
+                {siteSettings?.cdmh?.data &&
+                  Object.keys(siteSettings.cdmh.data).map((s: CDMHKey) => {
                     return (
-                      <SubLink as="a" key={s} target="_blank" rel="noreferrer" href={siteSettings.data.cdmh.data[s]}>
+                      <SubLink as="a" key={s} target="_blank" rel="noreferrer" href={siteSettings.cdmh.data[s]}>
                         {CDMHNames[s]}&nbsp;
                         <ArrowLeftIcon />
                       </SubLink>

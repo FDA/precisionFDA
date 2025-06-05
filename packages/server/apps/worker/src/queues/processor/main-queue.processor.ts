@@ -3,20 +3,21 @@ import { Logger } from '@nestjs/common'
 import { config } from '@shared/config'
 import { ChallengeService } from '@shared/domain/challenge/challenge.service'
 import { DataPortalService } from '@shared/domain/data-portal/service/data-portal.service'
+import { DbClusterService } from '@shared/domain/db-cluster/service/db-cluster.service'
+import { DiscussionNotificationService } from '@shared/domain/discussion/services/discussion-notification.service'
 import { SpaceReportService } from '@shared/domain/space-report/service/space-report.service'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { SyncFilesStateOperation } from '@shared/domain/user-file/ops/sync-files-state'
 import { UserFileService } from '@shared/domain/user-file/service/user-file.service'
 import { FOLLOW_UP_ACTION } from '@shared/domain/user-file/user-file.input'
+import { UserProvisionFacade } from '@shared/facade/user/user-provision.facade'
 import { createRunFollowUpActionJobTask } from '@shared/queue'
-import { NotifyNewDiscussionJob, TASK_TYPE } from '@shared/queue/task.input'
+import { NotifyNewDiscussionJob, ProvisionNewUserJob, TASK_TYPE } from '@shared/queue/task.input'
 import { Job } from 'bull'
 import { FollowUpDecider } from '../../domain/user-file/follow-up-decider'
 import { jobStatusHandler } from '../../jobs/job-status.handler'
 import { ProcessWithContext } from '../decorator/process-with-context'
 import { BaseQueueProcessor } from './base-queue.processor'
-import { DbClusterService } from '@shared/domain/db-cluster/service/db-cluster.service'
-import { DiscussionNotificationService } from '@shared/domain/discussion/services/discussion-notification.service'
 
 @Processor(config.workerJobs.queues.default.name)
 export class MainQueueProcessor extends BaseQueueProcessor {
@@ -30,6 +31,7 @@ export class MainQueueProcessor extends BaseQueueProcessor {
     private readonly followUpDecider: FollowUpDecider,
     private readonly spaceReportService: SpaceReportService,
     private readonly dbClusterService: DbClusterService,
+    private readonly userProvisionFacade: UserProvisionFacade,
   ) {
     super()
   }
@@ -119,5 +121,14 @@ export class MainQueueProcessor extends BaseQueueProcessor {
     // TODO for some reason, the type of notify is any here. Ask Ludvik
 
     await this.discussionNotificationService.notifyNewDiscussionReply(discussionId, notify)
+  }
+
+  @ProcessWithContext(TASK_TYPE.PROVISION_NEW_USERS)
+  async provisionNewUser(job: Job<ProvisionNewUserJob>) {
+    const { ids } = job.data.payload
+    for (const id of ids) {
+      this.logger.log(`Provisioning new user with invitationId ${id}`)
+      await this.userProvisionFacade.provision(id, ids)
+    }
   }
 }

@@ -2,7 +2,9 @@ import { InjectQueue } from '@nestjs/bull'
 import { Injectable } from '@nestjs/common'
 import { config } from '@shared/config'
 import { SyncDbClusterOperation } from '@shared/domain/db-cluster/ops/synchronize'
+import { NotifyType } from '@shared/domain/discussion/dto/notify.type'
 import { SyncJobOperation } from '@shared/domain/job/ops/synchronize'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { SyncFilesStateOperation } from '@shared/domain/user-file/ops/sync-files-state'
 import {
   FileUidInput,
@@ -18,8 +20,6 @@ import {
 } from '@shared/queue/task.input'
 import { UserCtx } from '@shared/types'
 import { JobOptions, Queue } from 'bull'
-import { NotifyType } from '@shared/domain/discussion/dto/notify.type'
-import { UserContext } from '@shared/domain/user-context/model/user-context'
 
 @Injectable()
 export class MainQueueJobProducer extends QueueJobProducer {
@@ -176,6 +176,18 @@ export class MainQueueJobProducer extends QueueJobProducer {
       payload: {
         discussionId,
         notify,
+      },
+      user: this.user,
+    }
+
+    return await this.addToQueue(wrapped)
+  }
+
+  async createProvisionNewUsersTask(ids: number[]) {
+    const wrapped = {
+      type: TASK_TYPE.PROVISION_NEW_USERS as const,
+      payload: {
+        ids,
       },
       user: this.user,
     }

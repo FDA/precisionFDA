@@ -16,7 +16,6 @@ import { User } from '@shared/domain/user/user.entity'
 import { BaseEntity } from '../../database/base.entity'
 import DiscussionRepository from '@shared/domain/discussion/discussion.repository'
 import { DiscussionFollow } from '@shared/domain/follow/discussion-follow.entity'
-import { SpaceScope } from '@shared/types/common'
 
 @Entity({ tableName: 'discussions', repository: () => DiscussionRepository })
 export class Discussion extends BaseEntity {
@@ -53,41 +52,5 @@ export class Discussion extends BaseEntity {
     super()
     this.note = Reference.create(note)
     this.user = Reference.create(user)
-  }
-
-  async isAccessibleBy(user: User) {
-    if (!user) {
-      return false
-    }
-
-    const note = await this.note.load()
-
-    if (this.user.id === user.id || note.isPublic()) {
-      return true
-    }
-
-    if (note.isInSpace()) {
-      const spaces = await user.accessibleSpaces()
-      const scope = note.scope as SpaceScope
-      return spaces.map((space) => space.scope).includes(scope)
-    }
-  }
-
-  async isEditableBy(user: User) {
-    if (!user) {
-      return false
-    }
-
-    if (this.user.id === user.id || (await user.isSiteAdmin())) {
-      return true
-    }
-
-    const note = await this.note.load()
-
-    if (note.isInSpace()) {
-      const spaces = await user.editableSpaces()
-      const scope = note.scope as SpaceScope
-      return spaces.map((space) => space.scope).includes(scope)
-    }
   }
 }
