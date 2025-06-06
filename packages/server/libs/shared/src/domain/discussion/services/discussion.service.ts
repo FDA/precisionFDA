@@ -30,6 +30,7 @@ import { CommentDTO } from '@shared/domain/discussion/dto/comment.dto'
 import { DiscussionFollow } from '@shared/domain/follow/discussion-follow.entity'
 import AnswerRepository from '@shared/domain/answer/answer.repository'
 import { EntityLinkService } from '@shared/domain/entity/entity-link/entity-link.service'
+import { PaginatedResult } from '@shared/domain/entity/domain/paginated.result'
 
 @Injectable()
 export class DiscussionService {
@@ -86,7 +87,7 @@ export class DiscussionService {
    * Creates discussion and related note and persists them in a database. Returns error when an error occurs.
    * @param dto
    */
-  async createDiscussion(dto: CreateDiscussionDTO) {
+  async createDiscussion(dto: CreateDiscussionDTO): Promise<DiscussionDTO> {
     this.logger.log(`Creating discussion: ${JSON.stringify(dto)}`)
 
     const user = await this.userCtx.loadEntity()
@@ -201,7 +202,7 @@ export class DiscussionService {
     })
   }
 
-  async listDiscussions(query: DiscussionPaginationDTO) {
+  async listDiscussions(query: DiscussionPaginationDTO): Promise<PaginatedResult<DiscussionDTO>> {
     // const where: ObjectQuery<Discussion> = {}
     //todo PFDA-6051: Ludvik fix type
     const where = { note: { $and: [] } }
@@ -268,7 +269,7 @@ export class DiscussionService {
     }
   }
 
-  async createAnswer(dto: CreateAnswerDTO) {
+  async createAnswer(dto: CreateAnswerDTO): Promise<AnswerDTO> {
     this.logger.log(`Creating answer: ${JSON.stringify(dto)}`)
     const user = await this.userCtx.loadEntity()
 
@@ -301,7 +302,7 @@ export class DiscussionService {
     })
   }
 
-  async updateAnswer(id: number, input: UpdateAnswerDTO) {
+  async updateAnswer(id: number, input: UpdateAnswerDTO): Promise<AnswerDTO> {
     this.logger.log(`Updating answer: ${JSON.stringify(input)}`)
     const answer = await this.answerRepository.findEditableOne({ id }, { populate: ['note'] })
 
@@ -318,7 +319,7 @@ export class DiscussionService {
     return AnswerDTO.fromEntity(answer)
   }
 
-  async deleteAnswer(answerId: number) {
+  async deleteAnswer(answerId: number): Promise<void> {
     this.logger.log(`Deleting answer with id: ${answerId}`)
 
     const answer = await this.answerRepository.findEditableOne(
@@ -351,7 +352,7 @@ export class DiscussionService {
     })
   }
 
-  async createComment(commentInput: CreateCommentDTO) {
+  async createComment(commentInput: CreateCommentDTO): Promise<CommentDTO> {
     this.logger.log(`Creating comment: ${JSON.stringify(commentInput)}`)
 
     const user = await this.userCtx.loadEntity()
@@ -396,7 +397,7 @@ export class DiscussionService {
     return await CommentDTO.fromEntity(newComment)
   }
 
-  async updateComment(id: number, commentInput: UpdateCommentDTO) {
+  async updateComment(id: number, commentInput: UpdateCommentDTO): Promise<CommentDTO> {
     this.logger.log(`Editing comment: ${JSON.stringify(commentInput)}`)
 
     const user = await this.userCtx.loadEntity()
@@ -414,7 +415,7 @@ export class DiscussionService {
     return await CommentDTO.fromEntity(commentEntity)
   }
 
-  async deleteComment(commentId: number, type: CommentableType) {
+  async deleteComment(commentId: number, type: CommentableType): Promise<void> {
     this.logger.log(`Deleting comment with id: ${commentId}`)
 
     const user = await this.userCtx.loadEntity()

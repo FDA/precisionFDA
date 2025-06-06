@@ -52,7 +52,13 @@ export class RemoveNodesFacade {
    * @param ids
    * @param skipValidation
    */
-  async removeNodes(ids: number[], skipValidation: boolean = false) {
+  async removeNodes(
+    ids: number[],
+    skipValidation: boolean = false,
+  ): Promise<{
+    removedFilesCount: number
+    removedFoldersCount: number
+  }> {
     this.logger.log(`Removing nodes ${ids}`)
     // load all nested ids (even those not explicitly mentioned)
     const nodes = await this.nodeService.loadNodes(ids, {})
@@ -98,7 +104,7 @@ export class RemoveNodesFacade {
     return { removedFilesCount, removedFoldersCount }
   }
 
-  async removeNodesAsync(ids: number[]) {
+  async removeNodesAsync(ids: number[]): Promise<void> {
     this.logger.log(`Asynchronously removing nodes ${ids}`)
     // load all nested ids (even those not explicitly mentioned)
     const nodes: Node[] = await this.nodeService.loadNodes(ids, {})
@@ -111,7 +117,7 @@ export class RemoveNodesFacade {
     })
   }
 
-  private async validateNodes(nodes: Node[]) {
+  private async validateNodes(nodes: Node[]): Promise<void> {
     for (const node of nodes) {
       await this.userFileService.validateProtectedSpaces('remove', this.user.id, node)
       await this.nodeService.validateEditableBy(node)
@@ -127,7 +133,7 @@ export class RemoveNodesFacade {
     }
   }
 
-  private async removeFile(fileToRemove: UserFile) {
+  private async removeFile(fileToRemove: UserFile): Promise<number> {
     this.logger.log(`Removing file with uid: ${fileToRemove.uid}`)
 
     const lastNode = (await this.userFileRepository.count({ dxid: fileToRemove.dxid })) === 1
@@ -183,7 +189,7 @@ export class RemoveNodesFacade {
     })
   }
 
-  private async removeFolder(folderToRemove: Folder) {
+  private async removeFolder(folderToRemove: Folder): Promise<number> {
     const user = await this.userRepository.findOne(this.user.id)
     const folderPath = await getNodePath(this.em, folderToRemove)
 

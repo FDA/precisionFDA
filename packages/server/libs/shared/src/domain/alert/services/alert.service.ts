@@ -11,8 +11,8 @@ import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 export class AlertService {
   @ServiceLogger()
   private readonly logger: Logger
-  constructor(private readonly em: SqlEntityManager) {
-  }
+
+  constructor(private readonly em: SqlEntityManager) {}
 
   async create(alert: CreateAlertDTO): Promise<AlertDTO> {
     const alertEntity = new Alert()
@@ -34,7 +34,7 @@ export class AlertService {
     })
   }
 
-  async delete(id: number) {
+  async delete(id: number): Promise<number> {
     return await this.em.transactional(async () => {
       const alert = await this.em.findOne(Alert, id)
       if (!alert) {
@@ -64,13 +64,11 @@ export class AlertService {
     return alerts.map((alert) => plainToInstance(AlertDTO, alert))
   }
 
-
-  private mapToEntity(alertEntity: Alert, alert: CreateAlertDTO) {
+  private mapToEntity(alertEntity: Alert, alert: CreateAlertDTO): void {
     alertEntity.title = alert.title
     alertEntity.content = alert.content
     alertEntity.type = alert.type
     alertEntity.startTime = alert.startTime
     alertEntity.endTime = alert.endTime
   }
-
 }

@@ -39,7 +39,7 @@ class ChallengeRepository extends AccessControlRepository<Challenge> {
     }
   }
 
-  async findChallengesByCardImageFileUid(fileUid: Uid<'file'>) {
+  async findChallengesByCardImageFileUid(fileUid: Uid<'file'>): Promise<Challenge[]> {
     return await this.createQueryBuilder('ch')
       .leftJoinAndSelect('ch.cardImage', 'ci')
       .where({ 'ci.uid': fileUid })

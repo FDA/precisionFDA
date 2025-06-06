@@ -28,7 +28,7 @@ export class CliService {
     private readonly discussionService: DiscussionService,
   ) {}
 
-  async listSpaceMembers(spaceId: number) {
+  async listSpaceMembers(spaceId: number): Promise<CliSpaceMemberDTO[]> {
     const space = await this.em.findOne(Space, {
       id: spaceId,
       spaceMemberships: { user: this.user.id },
@@ -52,7 +52,7 @@ export class CliService {
     )
   }
 
-  async listSpaceDiscussions(spaceId: number) {
+  async listSpaceDiscussions(spaceId: number): Promise<CliDiscussionDTO[]> {
     const response = await this.discussionService.listDiscussions({ scope: `space-${spaceId}` })
 
     return response.data.map((d: DiscussionDTO) => {
@@ -60,7 +60,7 @@ export class CliService {
     })
   }
 
-  async findNodes(input: CliNodeSearchDTO) {
+  async findNodes(input: CliNodeSearchDTO): Promise<UserFile[] | Folder[]> {
     const { folderId, spaceId, arg, type } = input
 
     const parentFolder = !spaceId ? folderId : null
@@ -119,11 +119,11 @@ export class CliService {
     return result
   }
 
-  async dbClusterGetPassword(dbclusterUid: Uid<'dbcluster'>) {
+  async dbClusterGetPassword(dbclusterUid: Uid<'dbcluster'>): Promise<string> {
     return await this.dbclusterService.getPassword(dbclusterUid)
   }
 
-  async dbClusterRotatePassword(dbclusterUid: Uid<'dbcluster'>) {
+  async dbClusterRotatePassword(dbclusterUid: Uid<'dbcluster'>): Promise<string> {
     return await this.dbclusterService.rotatePassword(dbclusterUid)
   }
 }

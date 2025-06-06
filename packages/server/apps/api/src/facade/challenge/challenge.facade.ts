@@ -27,7 +27,7 @@ export class ChallengeFacade {
     private readonly emailFacade: EmailFacade,
   ) {}
 
-  async createChallenge(dto: CreateChallengeDTO) {
+  async createChallenge(dto: CreateChallengeDTO): Promise<number> {
     let spaceId: number
     if (EntityScopeUtils.isSpaceScope(dto.scope)) {
       spaceId = EntityScopeUtils.getSpaceIdFromScope(dto.scope)
@@ -53,7 +53,7 @@ export class ChallengeFacade {
     return newChallenge.id
   }
 
-  async updateChallenge(challengeId: number, dto: UpdateChallengeDTO) {
+  async updateChallenge(challengeId: number, dto: UpdateChallengeDTO): Promise<void> {
     const challenge = await this.challengeService.getChallenge(challengeId)
     const sendPreRegEmail =
       dto.status === CHALLENGE_STATUS.PRE_REGISTRATION &&
@@ -87,7 +87,7 @@ export class ChallengeFacade {
     }
   }
 
-  private async provideChallengeSpace(body: CreateChallengeDTO) {
+  private async provideChallengeSpace(body: CreateChallengeDTO): Promise<number> {
     const space = new CreateSpaceDTO()
     space.name = body.name
     space.forChallenge = true
@@ -101,7 +101,13 @@ export class ChallengeFacade {
   /*
   Currently UNUSED - missing Frontend implementation
    */
-  async createChallengeResource(challengeId: number, dto: CreateChallengeResourceDTO) {
+  async createChallengeResource(
+    challengeId: number,
+    dto: CreateChallengeResourceDTO,
+  ): Promise<{
+    id: number
+    fileUid: `file-${string}-${number}`
+  }> {
     const challenge = await this.challengeService.getChallenge(challengeId)
     const challengeBot = await this.challengeService.getChallengeBotUser()
 

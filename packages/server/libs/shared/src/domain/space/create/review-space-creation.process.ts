@@ -31,7 +31,7 @@ export class ReviewSpaceCreationProcess extends SpaceCreationProcess {
     super(user, em, notificationService, adminClient)
   }
 
-  protected async validateInput(input: CreateSpaceDTO) {
+  protected async validateInput(input: CreateSpaceDTO): Promise<void> {
     if (input.guestLeadDxuser === input.hostLeadDxuser) {
       throw new Error('Sponsor and Reviewer leads must be different users')
     }
@@ -92,7 +92,7 @@ export class ReviewSpaceCreationProcess extends SpaceCreationProcess {
     return sharedSpace
   }
 
-  private async handleTags(input: CreateSpaceDTO, sharedSpace: Space) {
+  private async handleTags(input: CreateSpaceDTO, sharedSpace: Space): Promise<void> {
     if (input.protected) {
       await this.taggingService.addTaggingForEntity(
         'Protected',

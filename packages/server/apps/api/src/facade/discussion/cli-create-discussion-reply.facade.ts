@@ -15,7 +15,7 @@ export class CliCreateDiscussionReplyFacade {
     private readonly attachmentFacade: AttachmentManagementFacade,
   ) {}
 
-  async createReply(body: CliCreateReplyDTO) {
+  async createReply(body: CliCreateReplyDTO): Promise<string> {
     // user can not reply with answer to answer
     if (body.answerId && body.discussionId) {
       throw new InvalidStateError('Cannot reply to both answer and discussion')
