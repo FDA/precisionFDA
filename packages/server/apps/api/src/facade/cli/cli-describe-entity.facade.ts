@@ -2,7 +2,9 @@ import { Uid } from '@shared/domain/entity/domain/uid'
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { InvalidStateError, NotFoundError } from '@shared/errors'
 import {
+  CliAnswerDTO,
   CliAppDescribeDTO,
+  CliCommentDTO,
   CliDbClusterDescribeDTO,
   CliDiscussionDescribeDTO,
   CliExecutionDescribeDTO,
@@ -43,7 +45,17 @@ export class CliDescribeEntityFacade {
    * Consolidating both pFDA and platform data for the response.
    * @param uid - UID of the entity to describe
    */
-  async describeEntity(uid: string) {
+  async describeEntity(
+    uid: string,
+  ): Promise<
+    | CliFileDescribeDTO
+    | CliDiscussionDescribeDTO
+    | CliFolderDescribeDTO
+    | CliWorkflowDescribeDTO
+    | CliAppDescribeDTO
+    | CliExecutionDescribeDTO
+    | CliDbClusterDescribeDTO
+  > {
     switch (uid.split('-')[0]) {
       case 'file':
         return await this.describeFile(uid as Uid<'file'>)
@@ -64,7 +76,7 @@ export class CliDescribeEntityFacade {
     }
   }
 
-  private async describeFile(entityId: Uid<'file'>) {
+  private async describeFile(entityId: Uid<'file'>): Promise<CliFileDescribeDTO> {
     const file = await this.nodeRepository.findAccessibleOne(
       { uid: entityId },
       { populate: ['taggings.tag', 'user'] },
@@ -85,7 +97,7 @@ export class CliDescribeEntityFacade {
     return CliFileDescribeDTO.fromEntity(describeFile, file)
   }
 
-  private async describeFolder(id: number) {
+  private async describeFolder(id: number): Promise<CliFolderDescribeDTO> {
     const folder = await this.nodeRepository.findAccessibleOne({ id })
     if (!folder) {
       throw new NotFoundError('Folder not found or not accessible')
@@ -94,7 +106,7 @@ export class CliDescribeEntityFacade {
     return CliFolderDescribeDTO.fromEntity(folder, path)
   }
 
-  private async describeWorkflow(uid: Uid<'workflow'>) {
+  private async describeWorkflow(uid: Uid<'workflow'>): Promise<CliWorkflowDescribeDTO> {
     const workflow = await this.workflowRepository.findAccessibleOne({ uid })
     if (!workflow) {
       throw new NotFoundError('Workflow not found or not accessible')
@@ -106,7 +118,7 @@ export class CliDescribeEntityFacade {
     return CliWorkflowDescribeDTO.fromEntity(platformWorkflowData, workflow)
   }
 
-  private async describeApp(entityId: Uid<'app'>) {
+  private async describeApp(entityId: Uid<'app'>): Promise<CliAppDescribeDTO> {
     const app = await this.appRepository.findAccessibleOne({ uid: entityId })
     if (!app) {
       throw new NotFoundError('App not found or not accessible')
@@ -118,7 +130,7 @@ export class CliDescribeEntityFacade {
     return CliAppDescribeDTO.fromEntity(platformAppData, app)
   }
 
-  private async describeExecution(entityId: Uid<'job'>) {
+  private async describeExecution(entityId: Uid<'job'>): Promise<CliExecutionDescribeDTO> {
     const execution = await this.jobRepository.findAccessibleOne(
       { uid: entityId },
       // needed when the job is described by non-owner
@@ -140,11 +152,11 @@ export class CliDescribeEntityFacade {
     return CliExecutionDescribeDTO.fromEntity(platformExecutionData, execution)
   }
 
-  async describeDiscussion(discussionId: number) {
+  async describeDiscussion(discussionId: number): Promise<CliDiscussionDescribeDTO> {
     const discussion = await this.discussionService.getDiscussion(discussionId)
     const attachments = await this.fetchAttachments(discussion.noteId)
 
-    const result: CliDiscussionDescribeDTO = {
+    return {
       id: discussion.id,
       title: discussion.title,
       content: discussion.content,
@@ -157,11 +169,9 @@ export class CliDescribeEntityFacade {
       answersCount: discussion.answersCount,
       attachments,
     }
-
-    return result
   }
 
-  async describeDbCluster(dbClusterUid: Uid<'dbcluster'>) {
+  async describeDbCluster(dbClusterUid: Uid<'dbcluster'>): Promise<CliDbClusterDescribeDTO> {
     const dbCluster = await this.dbclusterRepository.findAccessibleOne({ uid: dbClusterUid })
     if (!dbCluster) {
       throw new NotFoundError('Database cluster not found or not accessible')
@@ -175,7 +185,13 @@ export class CliDescribeEntityFacade {
     return CliDbClusterDescribeDTO.fromEntity(describeResult, dbCluster)
   }
 
-  private async fetchAttachments(noteId: number) {
+  private async fetchAttachments(noteId: number): Promise<
+    {
+      uid: string | number
+      type: 'App' | 'UserFile' | 'Folder' | 'Asset' | 'Job' | 'Comparison'
+      name: string
+    }[]
+  > {
     const attachments = await this.attachmentsFacade.getAttachments(noteId)
     return attachments.map((attachment: DiscussionAttachment) => ({
       uid: attachment.uid ?? attachment.id,
@@ -184,7 +200,7 @@ export class CliDescribeEntityFacade {
     }))
   }
 
-  private mapComments(comments: CommentDTO[]) {
+  private mapComments(comments: CommentDTO[]): CliCommentDTO[] {
     return comments.map((comment) => ({
       id: comment.id,
       user: comment.user,
@@ -194,7 +210,7 @@ export class CliDescribeEntityFacade {
     }))
   }
 
-  private async mapAnswers(answers: AnswerDTO[]) {
+  private async mapAnswers(answers: AnswerDTO[]): Promise<CliAnswerDTO[]> {
     return Promise.all(
       answers.map(async (answer) => ({
         id: answer.id,

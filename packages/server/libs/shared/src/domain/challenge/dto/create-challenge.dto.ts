@@ -54,7 +54,7 @@ export class CreateChallengeDTO {
   @IsEnum(CHALLENGE_STATUS)
   status: CHALLENGE_STATUS
 
-  buildEntity() {
+  buildEntity(): Challenge {
     const challenge = new Challenge()
     challenge.name = this.name
     challenge.description = this.description

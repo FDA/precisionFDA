@@ -11,7 +11,7 @@ export class UserContext {
     // and since CLI doesn't receive async notifications, we don't need to pass it
   ) {}
 
-  async loadEntity() {
+  async loadEntity(): Promise<User | null> {
     return RequestContext.getEntityManager().findOne(User, this.id)
   }
 }

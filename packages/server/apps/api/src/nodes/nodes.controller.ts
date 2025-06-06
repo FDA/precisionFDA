@@ -23,7 +23,7 @@ export class NodesController {
 
   @HttpCode(204)
   @Post('/lock')
-  async lockNodes(@Body() input: NodesInputDTO) {
+  async lockNodes(@Body() input: NodesInputDTO): Promise<void> {
     const opsCtx: UserOpsCtx = {
       log: this.logger,
       user: this.user,
@@ -41,7 +41,7 @@ export class NodesController {
 
   @HttpCode(204)
   @Post('/unlock')
-  async unlockNodes(@Body() input: NodesInputDTO) {
+  async unlockNodes(@Body() input: NodesInputDTO): Promise<void> {
     const opsCtx: UserOpsCtx = {
       log: this.logger,
       user: this.user,
@@ -58,7 +58,7 @@ export class NodesController {
   }
 
   @Delete('/remove')
-  async removeNodes(@Body() input: NodesInputDTO) {
+  async removeNodes(@Body() input: NodesInputDTO): Promise<number> {
     const { ids, async } = input
 
     if (async) {

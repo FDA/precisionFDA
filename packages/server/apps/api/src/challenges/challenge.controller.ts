@@ -21,6 +21,9 @@ import { AssignScoringAppDTO } from '@shared/domain/challenge/dto/assign-scoring
 import { ChallengeFacade } from '../facade/challenge/challenge.facade'
 import { UserContextGuard } from '../user-context/guard/user-context.guard'
 import { CreateChallengeResourceDTO } from '@shared/domain/challenge/dto/create-challenge-resource.dto'
+import { PaginatedResult } from '@shared/domain/entity/domain/paginated.result'
+import { ChallengeDTO } from '@shared/domain/challenge/dto/challenge.dto'
+import { SubmissionDTO } from '@shared/domain/challenge/dto/submission.dto'
 
 @Controller('/challenges')
 export class ChallengeController {
@@ -30,26 +33,26 @@ export class ChallengeController {
   ) {}
 
   @Get()
-  async list(@Query() query: ChallengePaginationDto) {
+  async list(@Query() query: ChallengePaginationDto): Promise<PaginatedResult<ChallengeDTO>> {
     return await this.challengeService.listChallenges(query)
   }
 
   @HttpCode(204)
   @Post('/propose')
-  async propose(@Body() body: ProposeChallengeDTO) {
+  async propose(@Body() body: ProposeChallengeDTO): Promise<void> {
     await this.challengeService.proposeChallenge(body)
   }
 
   @UseGuards(ChallengeOrSiteAdminGuard)
   @HttpCode(201)
   @Post()
-  async create(@Body() body: CreateChallengeDTO) {
+  async create(@Body() body: CreateChallengeDTO): Promise<number> {
     return await this.challengeFacade.createChallenge(body)
   }
 
   @HttpCode(200)
   @Get(':id')
-  async get(@Param('id', ParseIntPipe) id: number) {
+  async get(@Param('id', ParseIntPipe) id: number): Promise<ChallengeDTO> {
     return await this.challengeService.getChallenge(id)
   }
 
@@ -59,28 +62,31 @@ export class ChallengeController {
   async createResource(
     @Param('id', ParseIntPipe) id: number,
     @Body() body: CreateChallengeResourceDTO,
-  ) {
+  ): Promise<{ id: number; fileUid: `file-${string}-${number}` }> {
     return await this.challengeFacade.createChallengeResource(id, body)
   }
 
   @UseGuards(UserContextGuard)
   @HttpCode(200)
   @Get(':id/entries')
-  async getOwnEntries(@Param('id', ParseIntPipe) id: number) {
+  async getOwnEntries(@Param('id', ParseIntPipe) id: number): Promise<SubmissionDTO[]> {
     return await this.challengeService.getOwnEntries(id)
   }
 
   @UseGuards(UserContextGuard)
   @HttpCode(200)
   @Get(':id/submissions')
-  async getSubmissions(@Param('id', ParseIntPipe) id: number) {
+  async getSubmissions(@Param('id', ParseIntPipe) id: number): Promise<SubmissionDTO[]> {
     return await this.challengeService.getSubmissions(id)
   }
 
   @UseGuards(ChallengeOrSiteAdminGuard)
   @HttpCode(204)
   @Put('/:id')
-  async update(@Param('id', ParseIntPipe) id: number, @Body() body: UpdateChallengeDTO) {
+  async update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() body: UpdateChallengeDTO,
+  ): Promise<void> {
     return await this.challengeFacade.updateChallenge(id, body)
   }
 
@@ -90,14 +96,17 @@ export class ChallengeController {
   async updateContent(
     @Param('id', ParseIntPipe) id: number,
     @Body() body: UpdateChallengeContentDTO,
-  ) {
+  ): Promise<void> {
     await this.challengeService.updateContent(id, body)
   }
 
   @UseGuards(UserContextGuard)
   @HttpCode(204)
   @Put(':id/app')
-  async assignScoringApp(@Param('id', ParseIntPipe) id: number, @Body() body: AssignScoringAppDTO) {
+  async assignScoringApp(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() body: AssignScoringAppDTO,
+  ): Promise<void> {
     await this.challengeService.assignApp(id, body)
   }
 }
