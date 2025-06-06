@@ -293,7 +293,7 @@ export class JobSynchronizationService {
       {
         jobId: checkStatusJob.id,
         jobDxid: checkStatusJob.dxid,
-        user: checkStatusJob.dxuser,
+        user: user.dxuser,
         recipient: checkStatusJob.email,
         bullJobId: jobId,
       },
