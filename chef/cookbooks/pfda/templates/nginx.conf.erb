@@ -83,6 +83,11 @@ http {
       proxy_http_version 1.1;
     }
 
+    location /api/docs/ {
+      proxy_pass https://localhost:3001/api/docs/;
+      proxy_http_version 1.1;
+    }
+
     error_page 500 502 503 504 /500.html;
     client_max_body_size 4G;
     client_body_timeout 5s;
