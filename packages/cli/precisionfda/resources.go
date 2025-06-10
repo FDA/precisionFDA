@@ -36,7 +36,7 @@ func (c *PFDAClient) UploadResources(args []string, portalID string) error {
 
 	maxRetries := 5
 	retryInterval := 2 * time.Second
-	getResourceApiURL := fmt.Sprintf("%s/api/data_portals/%s/resources", c.BaseURL, portalID)
+	getResourceApiURL := fmt.Sprintf("%s/api/v2/data-portals/%s/resources", c.BaseURL, portalID)
 
 	for attempt := 0; attempt < maxRetries; attempt++ {
 		if attempt != 0 {
@@ -44,7 +44,7 @@ func (c *PFDAClient) UploadResources(args []string, portalID string) error {
 			retryInterval *= 2 // exponential backoff
 		}
 
-		_, body, err := c.makeRequestFail("GET", getResourceApiURL, nil)
+		_, body, err := c.makeRequest("GET", getResourceApiURL, nil)
 		if err != nil {
 			return err
 		}
@@ -79,8 +79,7 @@ func (c *PFDAClient) UploadResources(args []string, portalID string) error {
 }
 
 func (c *PFDAClient) UploadResource(path string, portalID string, withProgressBar bool) error {
-	createURL := fmt.Sprintf("%s/api/data_portals/%s/resources", c.BaseURL, portalID)
-	closeURL := c.BaseURL + "/api/close_file"
+	createURL := fmt.Sprintf("%s/api/v2/data-portals/%s/resources", c.BaseURL, portalID)
 
 	file, err := os.Open(path)
 	if err != nil {
@@ -108,7 +107,7 @@ func (c *PFDAClient) UploadResource(path string, portalID string, withProgressBa
 		return err
 	}
 
-	_, body, err := c.makeRequestFail("POST", createURL, jsonData)
+	_, body, err := c.makeRequest("POST", createURL, jsonData)
 	if err != nil {
 		return err
 	}
@@ -126,14 +125,9 @@ func (c *PFDAClient) UploadResource(path string, portalID string, withProgressBa
 	close(chunkPool)
 	wg.Wait()
 
-	jsonData, err = json.Marshal(map[string]interface{}{
-		"uid": fileUid,
-	})
-	if err != nil {
-		return err
-	}
+	closeURL := fmt.Sprintf("%s/api/v2/files/%s/close", c.BaseURL, fileUid)
 
 	// This is async; we cannot wait for close, but some delay is called in the main function
-	c.makeRequestFail("POST", closeURL, jsonData)
+	c.makeRequest("PATCH", closeURL, jsonData)
 	return nil
 }

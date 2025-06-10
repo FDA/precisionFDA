@@ -11,6 +11,8 @@ import { DbClusterModule } from '@shared/domain/db-cluster/db-cluster.module'
 import { CliDescribeEntityFacade } from './cli-describe-entity.facade'
 import { AttachmentsFacadeModule } from '@shared/facade/discussion/attachments-facade.module'
 import { CliJobScopeFacade } from './cli-job-scope.facade'
+import { CliNodeRemoveFacade } from './cli-node-remove.facade'
+import { RemoveNodesFacadeModule } from '@shared/facade/node-remove/remove-nodes-facade.module'
 
 @Module({
   imports: [
@@ -23,8 +25,9 @@ import { CliJobScopeFacade } from './cli-job-scope.facade'
     WorkflowModule,
     DbClusterModule,
     AttachmentsFacadeModule,
+    RemoveNodesFacadeModule,
   ],
-  providers: [CliDescribeEntityFacade, CliJobScopeFacade],
-  exports: [CliDescribeEntityFacade, CliJobScopeFacade],
+  providers: [CliDescribeEntityFacade, CliJobScopeFacade, CliNodeRemoveFacade],
+  exports: [CliDescribeEntityFacade, CliJobScopeFacade, CliNodeRemoveFacade],
 })
 export class CliApiFacadeModule {}
