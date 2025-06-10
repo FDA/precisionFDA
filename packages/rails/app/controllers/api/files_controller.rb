@@ -154,6 +154,7 @@ module Api
 
     # Listing nodes based on given criteria. Supports wildcard name search.
     # Used by CLI exclusively with a custom response mapping.
+    # REMOVE THIS METHOD IN CLI 3.0
     def cli_node_search
       res = https_apps_client.cli_node_search(params[:name], params[:type], params[:space_id], params[:parent_folder_id])
       user_files = res.map do |node|
@@ -161,12 +162,12 @@ module Api
         n = {
           id: node["id"],
           uid: node["uid"],
-          type: node["stiType"],
+          type: node["type"],
           name: node["name"],
           file_size: node["fileSize"],
           created_at: node["createdAt"].to_datetime.strftime("%Y-%m-%d %H:%M:%S"),
         }
-        n.merge!({ children: node["children"].length }) if node["stiType"] == "Folder"
+        n.merge!({ children: node["children"] }) if node["type"] == "Folder"
         n
       end
       if user_files.blank?

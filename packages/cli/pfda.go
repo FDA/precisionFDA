@@ -1,5 +1,5 @@
 // PrecisionFDA CLI
-// Version 2.9.0
+// Version 2.10.0
 package main
 
 import (
@@ -26,13 +26,18 @@ const defaultChunkSize = 1 << 26 // default 64MB (min. 16MB)
 const defaultSkipVerify = "false"
 const usageString = `
 ****************************
-PFDA COMMAND LINE TOOL v2.9.0
+PFDA COMMAND LINE TOOL v2.10.0
 ****************************
 
 All available commands:
    pfda cat
+   pfda create-discussion
+   pfda create-reply
    pfda describe
    pfda download
+   pfda edit-discussion
+   pfda edit-reply
+   pfda get-password
    pfda get-scope
    pfda head
    pfda ls
@@ -46,8 +51,10 @@ All available commands:
    pfda mkdir
    pfda rm
    pfda rmdir
+   pfda rotate-password
    pfda upload-asset
    pfda upload-file
+   pfda upload-resource
    pfda view-link
 
 Command specific help section with description, examples and available flags:
@@ -56,7 +63,7 @@ Command specific help section with description, examples and available flags:
 To print version info and exit:
    pfda -version
 
-Full documentation can be found in the Docs section of the precisionFDA website - https://precision.fda.gov/docs/cli
+Full documentation can be found in the Docs section of the precisionFDA website - https://precision.fda.gov/docs/guides/cli
 `
 
 //
@@ -77,7 +84,7 @@ Full documentation can be found in the Docs section of the precisionFDA website 
 // GLOBAL VARIABLES
 var defaultURL = "precision.fda.gov"
 
-// these varaibles are populated by -ldflags -X command line options
+// these variables are populated by -ldflags -X command line options
 var (
 	commitID  string
 	Version   string
@@ -250,7 +257,7 @@ func mainInternal() int {
 	outputFilePath := flag.String("output", "", "[optional] File path to write api call response data. Defaults to stdout.")
 	inputChunkSize := flag.Int("chunksize", defaultChunkSize, "[optional] Size of each upload chunk in bytes (Min 5MB,/Max 2GB).")
 	inputNumRoutines := flag.Int("threads", defaultNumRoutines, "[optional] Maximum number of upload threads to spawn (Max 100).")
-	server := flag.String("server", defaultURL, "[optional] Server to connect and make requests to.")
+	server := flag.String("server", "", "[optional] Server to connect and make requests to.")
 	skipVerify := flag.String("skipverify", defaultSkipVerify, "[optional] Boolean string to skip certificate verification.")
 	pfda_version := flag.Bool("version", false, "[optional] Print version")
 
@@ -669,6 +676,7 @@ func mainInternal() int {
 
 		}
 
+		// REMOVE 'list-spaces' in V3.0.0
 	case "ls-spaces", "list-spaces":
 		if help {
 			return helpers.PrintLsSpacesHelp()
