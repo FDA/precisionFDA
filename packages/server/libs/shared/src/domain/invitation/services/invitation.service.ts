@@ -7,6 +7,7 @@ import { InvitationPaginationDTO } from '../dto/invitation-pagination.dto'
 import { Invitation } from '../invitation.entity'
 import { PROVISIONING_STATE } from '../invitation.enum'
 import { InvitationRepository } from '../invitation.repository'
+import { PaginatedResult } from '@shared/domain/entity/domain/paginated.result'
 
 @Injectable()
 export class InvitationService {
@@ -16,7 +17,7 @@ export class InvitationService {
     private readonly mainQueueJobProducer: MainQueueJobProducer,
   ) {}
 
-  async listInvitations(query: InvitationPaginationDTO) {
+  async listInvitations(query: InvitationPaginationDTO): Promise<PaginatedResult<Invitation>> {
     const where: FilterQuery<Invitation> = {}
     if (query.filter?.firstName) {
       where.firstName = { $like: `%${query.filter.firstName}%` }
@@ -41,12 +42,12 @@ export class InvitationService {
     return await this.invitationRepository.paginate(query, where, {})
   }
 
-  async provisionUsers(ids: number[]) {
+  async provisionUsers(ids: number[]): Promise<{ provisioningIds: number[] }> {
     const pendingInvitations = await this.invitationRepository.find({
       id: { $in: ids },
       provisioningState: PROVISIONING_STATE.PENDING,
     })
-    const provisioningIds = []
+    const provisioningIds: number[] = []
     await this.em.transactional(async () => {
       pendingInvitations.forEach((invitation) => {
         invitation.provisioningState = PROVISIONING_STATE.IN_PROGRESS

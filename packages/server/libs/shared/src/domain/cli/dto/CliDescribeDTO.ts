@@ -244,7 +244,7 @@ class CliAttachmentDTO {
   name: string
 }
 
-class CliCommentDTO {
+export class CliCommentDTO {
   id: number
   content: string
   user: SimpleUserDTO
@@ -252,7 +252,7 @@ class CliCommentDTO {
   updatedAt: Date
 }
 
-class CliAnswerDTO {
+export class CliAnswerDTO {
   id: number
   user: SimpleUserDTO
   content: string

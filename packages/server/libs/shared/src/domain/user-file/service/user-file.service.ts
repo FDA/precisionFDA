@@ -15,9 +15,9 @@ import { NodeRepository } from '@shared/domain/user-file/node.repository'
 import * as userFileHelper from '@shared/domain/user-file/user-file.helper'
 import { UserFileRepository } from '@shared/domain/user-file/user-file.repository'
 import { User } from '@shared/domain/user/user.entity'
-import { UserRepository } from '@shared/domain/user/user.repository'
 import { NOTIFICATION_ACTION, SEVERITY } from '@shared/enums'
 import {
+  ASSET_VALIDATION_ERROR,
   DeleteRelationError,
   NotFoundError,
   PermissionError,
@@ -51,6 +51,7 @@ import { SPACE_MEMBERSHIP_ROLE } from '@shared/domain/space-membership/space-mem
 import { NodeService } from '@shared/domain/user-file/node.service'
 import { SpaceEventService } from '@shared/domain/space-event/space-event.service'
 import { SPACE_EVENT_ACTIVITY_TYPE } from '@shared/domain/space-event/space-event.enum'
+import { LicensedItemRepository } from '@shared/domain/licensed-item/licensed-item.repository'
 
 @Injectable()
 export class UserFileService {
@@ -59,14 +60,14 @@ export class UserFileService {
 
   constructor(
     private readonly em: SqlEntityManager,
-    private readonly user: UserContext,
+    private readonly userCtx: UserContext,
     private readonly userClient: PlatformClient,
     @Inject(CHALLENGE_BOT_PLATFORM_CLIENT) private readonly challengeBotClient: PlatformClient,
     private readonly notificationService: NotificationService,
     private readonly nodeRepo: NodeRepository,
     private readonly fileRepo: UserFileRepository,
-    private readonly userRepo: UserRepository,
     private readonly spaceRepo: SpaceRepository,
+    private readonly licensedItemRepo: LicensedItemRepository,
     private readonly nodeHelper: NodeHelper,
     private readonly entityService: EntityService,
     private readonly nodeService: NodeService,
@@ -135,7 +136,7 @@ export class UserFileService {
     if (node.isInSpace()) {
       await this.spaceEventService.createAndSendSpaceEvent({
         spaceId: node.getSpaceId(),
-        userId: this.user.id,
+        userId: this.userCtx.id,
         entity: {
           type: 'userFile',
           value: node as UserFile,
@@ -173,10 +174,8 @@ export class UserFileService {
     fileIDs: number[],
     folderId?: number,
   ): Promise<BulkDownloadFiles> {
-    const loadedUser: User = await this.userRepo.findOneOrFail(
-      { id: this.user.id },
-      { populate: ['spaceMemberships', 'spaceMemberships.spaces'] },
-    )
+    const loadedUser = await this.userCtx.loadEntity()
+    await this.em.populate(loadedUser, ['spaceMemberships', 'spaceMemberships.spaces'])
     let nodes = await this.getAccessibleNodes(fileIDs)
 
     const warnings = this.nodeHelper.getWarningsForUnclosedFiles(nodes)
@@ -185,7 +184,7 @@ export class UserFileService {
         message: warnings,
         severity: SEVERITY.WARN,
         action: NOTIFICATION_ACTION.DOWNLOAD_FILES_WARNING,
-        userId: this.user.id,
+        userId: this.userCtx.id,
       })
     }
     nodes = nodes.filter((node) => node.state === 'closed')
@@ -251,7 +250,7 @@ export class UserFileService {
     this.logger.log(`Closing file ${fileUid}`)
 
     await this.em.transactional(async () => {
-      const user = await this.userRepo.findOneOrFail(this.user.id, {})
+      const user = await this.userCtx.loadEntity()
 
       const [file, isChallengeBotFile] = await this.getFile(user, fileUid)
 
@@ -267,7 +266,7 @@ export class UserFileService {
 
       file.state = FILE_STATE_DX.CLOSING
 
-      await this.startFileSynchronization(fileUid, isChallengeBotFile, this.user, followUpAction)
+      await this.startFileSynchronization(fileUid, isChallengeBotFile, this.userCtx, followUpAction)
     })
   }
 
@@ -288,7 +287,7 @@ export class UserFileService {
       })
       this.logger.log(`FileDescribe: ${JSON.stringify(fileDescribe)}`)
       if (fileDescribe.state === FILE_STATE_DX.CLOSED) {
-        await this.handleFileClose(fileUid, this.user.id, fileDescribe, node)
+        await this.handleFileClose(fileUid, this.userCtx.id, fileDescribe, node)
         return true
       }
       this.logger.log(`File ${fileUid} is not closed yet`)
@@ -334,6 +333,20 @@ export class UserFileService {
     }
 
     return this.getDownloadLink(file, options)
+  }
+
+  /**
+   * An asset cannot be deleted if it has an attached license and is associated with an app.
+   *
+   * @param assetToRemove
+   */
+  async validateAssetRemoval(assetToRemove: Asset) {
+    await this.em.populate(assetToRemove, ['apps'])
+    const licenseItems = await this.licensedItemRepo.getLicenseItemsForNode(assetToRemove.id)
+
+    if (assetToRemove.apps.count() > 0 && licenseItems.length > 0) {
+      throw new ValidationError(ASSET_VALIDATION_ERROR)
+    }
   }
 
   async validateSpaceReports(fileToRemove: UserFile) {
@@ -416,7 +429,7 @@ export class UserFileService {
    */
   async validateCopyFiles(uids: Uid<'file'>[], targetScope: EntityScope): Promise<ExistingFileSet> {
     const existingFiles = {} as ExistingFileSet
-    const user = await this.userRepo.findOneOrFail(this.user.id)
+    const user = await this.userCtx.loadEntity()
     const editableSpaces = await user.editableSpaces()
     const editableScopes = editableSpaces.map((space) => space.scope)
     if (targetScope !== 'private' && editableScopes.indexOf(targetScope as SpaceScope) === -1) {

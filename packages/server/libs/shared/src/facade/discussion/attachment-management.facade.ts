@@ -37,7 +37,7 @@ export class AttachmentManagementFacade {
     private readonly entityService: EntityService,
   ) {}
 
-  async createAttachments(noteId: number, attachmentsToSave: AttachmentsDTO) {
+  async createAttachments(noteId: number, attachmentsToSave: AttachmentsDTO): Promise<void> {
     const note = await this.noteRepository.findEditableOne({ id: noteId })
 
     for (const id of attachmentsToSave.files) {
@@ -161,7 +161,7 @@ export class AttachmentManagementFacade {
     await this.attachmentRepository.flush()
   }
 
-  async updateAttachments(noteId: number, attachments: AttachmentsDTO) {
+  async updateAttachments(noteId: number, attachments: AttachmentsDTO): Promise<void> {
     const oldAttachments = await this.attachmentRepository.find({ note: noteId })
     this.logger.log(`Deleting old attachments: ${oldAttachments.map((a) => a.id)}`)
     await this.attachmentRepository.removeAndFlush(oldAttachments)

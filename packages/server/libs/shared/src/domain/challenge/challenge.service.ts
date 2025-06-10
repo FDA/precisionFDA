@@ -17,7 +17,6 @@ import { CHALLENGE_BOT_PLATFORM_CLIENT } from '@shared/platform-client/providers
 import { ProposeChallengeDTO } from '@shared/domain/challenge/dto/propose-challenge.dto'
 import { CaptchaService } from '@shared/services/captcha.service'
 import { CreateChallengeDTO } from '@shared/domain/challenge/dto/create-challenge.dto'
-
 import { User, USER_STATE } from '@shared/domain/user/user.entity'
 import { Reference } from '@mikro-orm/core'
 import {
@@ -38,6 +37,7 @@ import { SubmissionDTO } from '@shared/domain/challenge/dto/submission.dto'
 import { JOB_STATE } from '@shared/domain/job/job.enum'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { ChallengeFollow } from '@shared/domain/follow/challenge-follow.entity'
+import { PaginatedResult } from '@shared/domain/entity/domain/paginated.result'
 
 @Injectable()
 export class ChallengeService {
@@ -55,7 +55,7 @@ export class ChallengeService {
     private readonly challengeResourceRepo: ChallengeResourceRepository,
   ) {}
 
-  async createChallenge(dto: CreateChallengeDTO, spaceId: number) {
+  async createChallenge(dto: CreateChallengeDTO, spaceId: number): Promise<Challenge> {
     this.logger.log(`Creating new challenge: ${dto.name}`)
 
     return this.em.transactional(async (em) => {
@@ -79,7 +79,7 @@ export class ChallengeService {
     })
   }
 
-  async updateChallenge(id: number, body: UpdateChallengeDTO) {
+  async updateChallenge(id: number, body: UpdateChallengeDTO): Promise<Challenge> {
     const challenge = await this.challengeRepo.findOneOrFail(id)
 
     if (
@@ -129,7 +129,7 @@ export class ChallengeService {
    * @param id challenge ID
    * @param body new content to replace the old one.
    */
-  async updateContent(id: number, body: UpdateChallengeContentDTO) {
+  async updateContent(id: number, body: UpdateChallengeContentDTO): Promise<void> {
     const challenge = await this.challengeRepo.findOne({ id })
 
     if (!challenge) {
@@ -196,7 +196,7 @@ export class ChallengeService {
     return ChallengeDTO.mapToDTO(challenge, appUid, follows, isSpaceMember, canEdit)
   }
 
-  async getChallengeBotUser() {
+  async getChallengeBotUser(): Promise<User> {
     const bot = await this.em.findOne(User, { dxuser: config.platform.challengeBotUser })
     if (!bot) {
       throw new NotFoundError('Challenge bot user not found!')
@@ -205,7 +205,10 @@ export class ChallengeService {
     return bot
   }
 
-  async createChallengeResource(challengeId: number, userFileId: number) {
+  async createChallengeResource(
+    challengeId: number,
+    userFileId: number,
+  ): Promise<ChallengeResource> {
     const challengeResource = new ChallengeResource(this.user.id, challengeId, userFileId)
 
     await this.em.persistAndFlush(challengeResource)
@@ -217,7 +220,7 @@ export class ChallengeService {
    * Updates the card image url for a data portal
    * @param fileUid
    */
-  async updateCardImageUrl(fileUid: Uid<'file'>) {
+  async updateCardImageUrl(fileUid: Uid<'file'>): Promise<void> {
     this.logger.log(`Updating card image url for fileUid ${fileUid}`)
     const challenges = await this.challengeRepo.findChallengesByCardImageFileUid(fileUid)
 
@@ -256,7 +259,7 @@ export class ChallengeService {
   /**
    * Updates the resource url for Challenge resource.
    */
-  async updateResourceUrl(fileUid: string) {
+  async updateResourceUrl(fileUid: string): Promise<void> {
     this.logger.log(`Updating resource url for fileUid ${fileUid}`)
     const challengeResources =
       await this.challengeResourceRepo.findChallengeResourcesByFileUid(fileUid)
@@ -298,7 +301,7 @@ export class ChallengeService {
    * WIP
    * @param body
    */
-  async proposeChallenge(body: ProposeChallengeDTO) {
+  async proposeChallenge(body: ProposeChallengeDTO): Promise<void> {
     let canProposeChallenge = true
     if (!this.user) {
       const captcha = new CaptchaService()
@@ -312,7 +315,7 @@ export class ChallengeService {
     }
   }
 
-  async assignApp(id: number, body: AssignScoringAppDTO) {
+  async assignApp(id: number, body: AssignScoringAppDTO): Promise<void> {
     const challenge = await this.challengeRepo.findOne({ id })
     const app = await this.em.findOne(App, { id: body.appId, user: { id: this.user.id } })
 
@@ -354,7 +357,7 @@ export class ChallengeService {
     await this.em.flush()
   }
 
-  async getOwnEntries(id: number) {
+  async getOwnEntries(id: number): Promise<SubmissionDTO[]> {
     const challenge = await this.challengeRepo.findOne({ id })
     if (!challenge) {
       throw new NotFoundError('Challenge not found!')
@@ -374,7 +377,7 @@ export class ChallengeService {
     })
   }
 
-  async getSubmissions(id: number) {
+  async getSubmissions(id: number): Promise<SubmissionDTO[]> {
     const challenge = await this.challengeRepo.findOne({ id })
     if (!challenge) {
       throw new NotFoundError('Challenge not found!')
@@ -396,7 +399,7 @@ export class ChallengeService {
     })
   }
 
-  async listChallenges(pagination: ChallengePaginationDto) {
+  async listChallenges(pagination: ChallengePaginationDto): Promise<PaginatedResult<ChallengeDTO>> {
     const where: FilterQuery<Challenge> = {}
     const { year, status } = pagination.filter ?? {}
 
