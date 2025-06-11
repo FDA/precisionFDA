@@ -8,6 +8,7 @@ import * as errors from '@shared/errors'
 import { SPACE_TYPE } from '@shared/domain/space/space.enum'
 import { AttachmentManagementFacade } from '@shared/facade/discussion/attachment-management.facade'
 import { SqlEntityManager } from '@mikro-orm/mysql'
+import { DiscussionDTO } from '@shared/domain/discussion/dto/discussion.dto'
 
 @Injectable()
 export class CreateDiscussionFacade {
@@ -19,7 +20,7 @@ export class CreateDiscussionFacade {
     private readonly mainQueueJobProducer: MainQueueJobProducer,
   ) {}
 
-  async createDiscussion(dto: CreateDiscussionDTO) {
+  async createDiscussion(dto: CreateDiscussionDTO): Promise<DiscussionDTO> {
     if (EntityScopeUtils.isSpaceScope(dto.scope)) {
       const spaceID = EntityScopeUtils.getSpaceIdFromScope(dto.scope)
       const space = await this.spaceService.getAccessibleSpace(spaceID)

@@ -120,19 +120,11 @@ export const ChallengeDetails = () => {
   }
 
   if (error?.status === 404) {
-    return (
-      <PageContainerMargin>
-        404 Not Found
-      </PageContainerMargin>
-    )
+    return <PageContainerMargin>404 Not Found</PageContainerMargin>
   }
 
   if (!challenge) {
-    return (
-      <PageContainerMargin>
-        Something is not working...
-      </PageContainerMargin>
-    )
+    return <PageContainerMargin>Something is not working...</PageContainerMargin>
   }
 
   const challengePreRegistration = challenge.status === 'pre-registration'
@@ -140,8 +132,7 @@ export const ChallengeDetails = () => {
 
   const userIsChallengeAdmin = isLoggedIn && canCreate
 
-  const userCanSeePreRegistration =
-    (challengePreRegistration || (userIsChallengeAdmin && challengeSetupOrPreRegistration))
+  const userCanSeePreRegistration = challengePreRegistration || (userIsChallengeAdmin && challengeSetupOrPreRegistration)
 
   // Introduction is visible to:
   //  - everyone when a challenge is not in pre-registration phase
@@ -156,7 +147,6 @@ export const ChallengeDetails = () => {
   //  - challenge admins
   //  - everyone when results are announced or challenge is archived
   const userCanSeeResults = userIsChallengeAdmin || challenge.status === 'result_announced' || challenge.status === 'archived'
-
 
   let regions: { intro: string; results: string; preReg: string }
   if (challenge.meta) {
@@ -174,15 +164,11 @@ export const ChallengeDetails = () => {
     }
   }
 
-  const isNoInfoProvided =
-    Object.keys(
-      cleanObject(regions),
-    ).length === 0
+  const isNoInfoProvided = Object.keys(cleanObject(regions)).length === 0
 
   return (
     <>
       <ChallengeDetailsBanner challenge={challenge} user={user} />
-
       <StyledChallengeNavigation>
         <NavigationInner>
           {userCanSeeIntroduction && (
@@ -228,21 +214,15 @@ export const ChallengeDetails = () => {
             <Route
               path="submissions"
               element={
-                <ChallengeSubmissionsTable
-                  user={user}
-                  challengeId={challenge.id}
-                  isSpaceMember={challenge.isSpaceMember}
-                />
+                <ChallengeSubmissionsTable user={user} challengeId={challenge.id} isSpaceMember={challenge.isSpaceMember} />
               }
             />
             <Route
               path="my-entries"
-              element={isLoggedIn &&
-                <ChallengeMyEntriesTable
-                  user={user}
-                  challengeId={challenge.id}
-                  isSpaceMember={challenge.isSpaceMember}
-                />
+              element={
+                isLoggedIn && (
+                  <ChallengeMyEntriesTable user={user} challengeId={challenge.id} isSpaceMember={challenge.isSpaceMember} />
+                )
               }
             />
             <Route

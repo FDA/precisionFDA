@@ -134,5 +134,5 @@ export class AdministratorSpaceCreationProcess extends SpaceCreationProcess {
     this.em.persist(space)
   }
 
-  protected validateInput() {}
+  protected validateInput(): void {}
 }

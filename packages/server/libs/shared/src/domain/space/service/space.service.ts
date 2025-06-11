@@ -46,7 +46,11 @@ export class SpaceService {
     private readonly userRepository: UserRepository,
   ) {}
 
-  private async validateUpdate(currentUser: User, spaceInput: UpdateSpaceDTO, space: Space) {
+  private async validateUpdate(
+    currentUser: User,
+    spaceInput: UpdateSpaceDTO,
+    space: Space,
+  ): Promise<void> {
     const hostLead = await space.findHostLead()
     const guestLead = await space.findGuestLead()
     const isSiteAdmin = await currentUser.isSiteAdmin()
@@ -72,7 +76,7 @@ export class SpaceService {
     }
   }
 
-  async update(spaceId: number, spaceInput: UpdateSpaceDTO) {
+  async update(spaceId: number, spaceInput: UpdateSpaceDTO): Promise<Space> {
     this.logger.log(`Editing space ${spaceInput.name}`)
     const user = await this.userRepository.findOne({ id: this.userContext.id })
     const space = await this.spaceRepository.findEditableOne({ id: spaceId })
@@ -107,7 +111,7 @@ export class SpaceService {
     return await process.build(space)
   }
 
-  async lockSpace(spaceId: number) {
+  async lockSpace(spaceId: number): Promise<void> {
     const user = await this.userRepository.findOne(
       { id: this.userContext.id },
       { populate: ['adminMemberships', 'adminMemberships.adminGroup'] },
@@ -148,7 +152,7 @@ export class SpaceService {
     })
   }
 
-  async unlockSpace(spaceId: number) {
+  async unlockSpace(spaceId: number): Promise<void> {
     const user = await this.userRepository.findOne(
       { id: this.userContext.id },
       { populate: ['adminMemberships', 'adminMemberships.adminGroup'] },
@@ -189,7 +193,7 @@ export class SpaceService {
     })
   }
 
-  async validateVerificationSpace(node: Node) {
+  async validateVerificationSpace(node: Node): Promise<void> {
     if (!node.isInSpace()) {
       return
     }
@@ -207,7 +211,7 @@ export class SpaceService {
    * This includes the space itself and all its confidential spaces.
    * @param spaceId
    */
-  async getSelectableSpaces(spaceId: number) {
+  async getSelectableSpaces(spaceId: number): Promise<Space[]> {
     const space = await this.spaceRepository.findOneOrFail({ id: spaceId })
 
     // collect ids of confidential spaces + space id

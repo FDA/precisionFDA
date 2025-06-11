@@ -27,6 +27,11 @@ import { UpdateDiscussionFacade } from '../facade/discussion/update-discussion.f
 import { CreateAnswerFacade } from '../facade/discussion/create-answer.facade'
 import { UpdateAnswerFacade } from '../facade/discussion/update-answer.facade'
 import { CreateCommentFacade } from '../facade/discussion/create-comment.facade'
+import { CommentDTO } from '@shared/domain/discussion/dto/comment.dto'
+import { AnswerDTO } from '@shared/domain/discussion/dto/answer.dto'
+import { PaginatedResult } from '@shared/domain/entity/domain/paginated.result'
+import { DiscussionDTO } from '@shared/domain/discussion/dto/discussion.dto'
+import { DiscussionAttachment } from '@shared/domain/discussion/discussion.types'
 
 @UseGuards(UserContextGuard)
 @Controller('/discussions')
@@ -42,30 +47,34 @@ export class DiscussionsController {
   ) {}
 
   @Get()
-  async listDiscussions(@Query() query: DiscussionPaginationDTO) {
+  async listDiscussions(
+    @Query() query: DiscussionPaginationDTO,
+  ): Promise<PaginatedResult<DiscussionDTO>> {
     return await this.discussionService.listDiscussions(query)
   }
 
   @Get('/:id')
-  async getDiscussion(@Param('id', ParseIntPipe) id: number) {
+  async getDiscussion(@Param('id', ParseIntPipe) id: number): Promise<DiscussionDTO> {
     return await this.discussionService.getDiscussion(id)
   }
 
   // TODO Jiri: refactor - we are using noteId where API standard expects discussionId.
   //  This is because we use this for both discussions and answers attachments fetch via noteId.
   @Get('/:noteId/attachments')
-  async getNoteAttachments(@Param('noteId', ParseIntPipe) noteId: number) {
+  async getNoteAttachments(
+    @Param('noteId', ParseIntPipe) noteId: number,
+  ): Promise<DiscussionAttachment[]> {
     return await this.attachmentFacade.getAttachments(noteId)
   }
 
   @Get('/:id/answers/:answerId')
-  async getAnswer(@Param('answerId', ParseIntPipe) answerId: number) {
+  async getAnswer(@Param('answerId', ParseIntPipe) answerId: number): Promise<AnswerDTO> {
     return await this.discussionService.getAnswer(answerId)
   }
 
   @HttpCode(201)
   @Post()
-  async createDiscussion(@Body() body: CreateDiscussionDTO) {
+  async createDiscussion(@Body() body: CreateDiscussionDTO): Promise<{ id: number }> {
     const result = await this.createDiscussionFacade.createDiscussion(body)
 
     return { id: result.id }
@@ -76,7 +85,7 @@ export class DiscussionsController {
   async createAnswer(
     @Param('discussionId', ParseIntPipe) discussionId: number,
     @Body() body: CreateAnswerDTO,
-  ) {
+  ): Promise<{ id: number }> {
     const result = await this.createAnswerFacade.createAnswer({ discussionId, ...body })
 
     return { id: result.id }
@@ -84,7 +93,10 @@ export class DiscussionsController {
 
   @HttpCode(204)
   @Patch('/:id')
-  async updateDiscussion(@Param('id', ParseIntPipe) id: number, @Body() body: UpdateDiscussionDTO) {
+  async updateDiscussion(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() body: UpdateDiscussionDTO,
+  ): Promise<void> {
     await this.updateDiscussionFacade.updateDiscussion(id, body)
   }
 
@@ -93,7 +105,7 @@ export class DiscussionsController {
   async editDiscussionComment(
     @Param('commentId', ParseIntPipe) commentId: number,
     @Body() body: UpdateCommentDTO,
-  ) {
+  ): Promise<{ id: number }> {
     const result = await this.discussionService.updateComment(commentId, body)
     return { id: result.id }
   }
@@ -104,31 +116,31 @@ export class DiscussionsController {
     @Param('discussionId', ParseIntPipe) discussionId: number,
     @Param('answerId', ParseIntPipe) answerId: number,
     @Body() body: UpdateAnswerDTO,
-  ) {
+  ): Promise<void> {
     await this.updateAnswerFacade.updateAnswer(answerId, body)
   }
 
   @HttpCode(204)
   @Delete('/:id')
-  async deleteDiscussion(@Param('id', ParseIntPipe) id: number) {
+  async deleteDiscussion(@Param('id', ParseIntPipe) id: number): Promise<void> {
     await this.discussionService.deleteDiscussion(id)
   }
 
   @HttpCode(204)
   @Delete('/:discussionId/answers/:id')
-  async deleteAnswer(@Param('id', ParseIntPipe) id: number) {
+  async deleteAnswer(@Param('id', ParseIntPipe) id: number): Promise<void> {
     await this.discussionService.deleteAnswer(id)
   }
 
   @HttpCode(204)
   @Delete('/:discussionId/comments/:id')
-  async deleteDiscussionComment(@Param('id', ParseIntPipe) id: number) {
+  async deleteDiscussionComment(@Param('id', ParseIntPipe) id: number): Promise<void> {
     await this.discussionService.deleteComment(id, 'Discussion')
   }
 
   @HttpCode(204)
   @Delete('/:discussionId/answers/:answerId/comments/:id')
-  async deleteAnswerComment(@Param('id', ParseIntPipe) id: number) {
+  async deleteAnswerComment(@Param('id', ParseIntPipe) id: number): Promise<void> {
     await this.discussionService.deleteComment(id, 'Answer')
   }
 
@@ -137,7 +149,7 @@ export class DiscussionsController {
   async createDiscussionComment(
     @Param('discussionId', ParseIntPipe) discussionId: number,
     @Body() body: CreateCommentDTO,
-  ) {
+  ): Promise<{ id: number }> {
     const result = await this.createCommentFacade.createComment({
       discussionId,
       ...body,
@@ -152,7 +164,7 @@ export class DiscussionsController {
     @Param('discussionId', ParseIntPipe) discussionId: number,
     @Param('answerId', ParseIntPipe) id: number,
     @Body() body: CreateCommentDTO,
-  ) {
+  ): Promise<{ id: number }> {
     const result = await this.createCommentFacade.createComment({
       answerId: id,
       ...body,
@@ -165,19 +177,21 @@ export class DiscussionsController {
   async editAnswerComment(
     @Param('commentId', ParseIntPipe) commentId: number,
     @Body() body: UpdateCommentDTO,
-  ) {
+  ): Promise<CommentDTO> {
     return await this.discussionService.updateComment(commentId, body)
   }
 
   @HttpCode(204)
   @Post('/:discussionId/follow')
-  async followDiscussion(@Param('discussionId', ParseIntPipe) discussionId: number) {
+  async followDiscussion(@Param('discussionId', ParseIntPipe) discussionId: number): Promise<void> {
     return await this.discussionService.followDiscussion(discussionId)
   }
 
   @HttpCode(204)
   @Post('/:discussionId/unfollow')
-  async unfollowDiscussion(@Param('discussionId', ParseIntPipe) discussionId: number) {
+  async unfollowDiscussion(
+    @Param('discussionId', ParseIntPipe) discussionId: number,
+  ): Promise<void> {
     return await this.discussionService.unfollowDiscussion(discussionId)
   }
 }

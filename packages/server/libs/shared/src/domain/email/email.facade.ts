@@ -13,7 +13,7 @@ export class EmailFacade {
     private readonly emailSendService: EmailSendService,
   ) {}
 
-  async sendEmail<T extends EMAIL_TYPES>(input: EmailProcessInput<T>) {
+  async sendEmail<T extends EMAIL_TYPES>(input: EmailProcessInput<T>): Promise<void> {
     this.logger.log(
       `Sending email type: ${input.emailTypeId} to user ids: ${input.receiverUserIds}`,
     )

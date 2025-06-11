@@ -51,19 +51,22 @@ export class SpacesController {
   ) {}
 
   @Post()
-  async create(@Body() space: CreateSpaceDTO) {
+  async create(@Body() space: CreateSpaceDTO): Promise<{ id: number }> {
     const spaceId = await this.spaceService.create(space)
     return { id: spaceId }
   }
 
   @Put('/:id')
-  async update(@Param('id', ParseIntPipe) spaceId: number, @Body() space: UpdateSpaceDTO) {
+  async update(
+    @Param('id', ParseIntPipe) spaceId: number,
+    @Body() space: UpdateSpaceDTO,
+  ): Promise<Space> {
     return await this.spaceService.update(spaceId, space)
   }
 
   @HttpCode(204)
   @Patch('/:id/accept')
-  async acceptSpace(@Param('id', ParseIntPipe) spaceId: number) {
+  async acceptSpace(@Param('id', ParseIntPipe) spaceId: number): Promise<void> {
     const opsCtx: UserOpsCtx = {
       log: this.logger,
       user: this.user,
@@ -75,7 +78,7 @@ export class SpacesController {
 
   @HttpCode(204)
   @Patch('/:id/lock')
-  async lockSpace(@Param('id', ParseIntPipe) spaceId: number) {
+  async lockSpace(@Param('id', ParseIntPipe) spaceId: number): Promise<void> {
     await this.spaceService.lockSpace(spaceId)
 
     await this.emailFacade.sendEmail({
@@ -91,7 +94,7 @@ export class SpacesController {
 
   @HttpCode(204)
   @Patch('/:id/unlock')
-  async unlockSpace(@Param('id', ParseIntPipe) spaceId: number) {
+  async unlockSpace(@Param('id', ParseIntPipe) spaceId: number): Promise<void> {
     await this.spaceService.unlockSpace(spaceId)
 
     await this.emailFacade.sendEmail({
@@ -107,7 +110,7 @@ export class SpacesController {
 
   @HttpCode(204)
   @Patch('/:id/fix_guest_permissions')
-  async fixGuestPermissions(@Param('id', ParseIntPipe) id: number) {
+  async fixGuestPermissions(@Param('id', ParseIntPipe) id: number): Promise<void> {
     const spaceToFix = await this.oldEm.findOne(Space, { id }, {})
 
     const membership = await this.oldEm.findOne(
@@ -167,14 +170,14 @@ export class SpacesController {
   }
 
   @Get('/:id/selectable-spaces')
-  async getSelectableSpaces(@Param('id', ParseIntPipe) id: number) {
+  async getSelectableSpaces(@Param('id', ParseIntPipe) id: number): Promise<Space[]> {
     return await this.spaceService.getSelectableSpaces(id)
   }
 
   @UseGuards(SiteAdminGuard)
   @HttpCode(204)
   @Patch('/hidden')
-  async updateSpacesHidden(@Body() spacesHiddenDto: SpacesHiddenDto) {
+  async updateSpacesHidden(@Body() spacesHiddenDto: SpacesHiddenDto): Promise<void> {
     await this.spaceService.updateSpacesHiddenForAdmin(spacesHiddenDto.ids, spacesHiddenDto.hidden)
   }
 }

@@ -14,7 +14,7 @@ export class CliUpdateDiscussionReplyFacade {
     private readonly attachmentFacade: AttachmentManagementFacade,
   ) {}
 
-  async updateReply(dto: CliEditReplyDTO) {
+  async updateReply(dto: CliEditReplyDTO): Promise<string> {
     if (dto.answerId && dto.commentId) {
       throw new InvalidStateError('Cannot edit both answer and comment')
     }
@@ -25,7 +25,7 @@ export class CliUpdateDiscussionReplyFacade {
     return await this.handleCommentUpdate(dto)
   }
 
-  private async handleAnswerUpdate(dto: CliEditReplyDTO) {
+  private async handleAnswerUpdate(dto: CliEditReplyDTO): Promise<string> {
     const answer = await this.discussionService.getAnswer(dto.answerId)
 
     let attachments: AttachmentsDTO = {
@@ -64,7 +64,7 @@ export class CliUpdateDiscussionReplyFacade {
     return await this.discussionService.getAnswerUiLink(dto.answerId)
   }
 
-  private async handleCommentUpdate(dto: CliEditReplyDTO) {
+  private async handleCommentUpdate(dto: CliEditReplyDTO): Promise<string> {
     const comment = await this.discussionService.getComment(dto.commentId)
 
     await this.discussionService.updateComment(dto.commentId, {
