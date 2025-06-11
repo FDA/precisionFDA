@@ -12,7 +12,7 @@ import {
 } from '@nestjs/common'
 import { DEPRECATED_SQL_ENTITY_MANAGER } from '@shared/database/provider/deprecated-sql-entity-manager.provider'
 import { DxId } from '@shared/domain/entity/domain/dxid'
-import { ListJobsInput } from '@shared/domain/job/job.input'
+import { ListJobsInput, PageJobs } from '@shared/domain/job/job.input'
 import { DescribeJobOperation } from '@shared/domain/job/ops/describe'
 import { ListJobsOperation } from '@shared/domain/job/ops/list'
 import { RequestTerminateJobOperation } from '@shared/domain/job/ops/terminate'
@@ -34,6 +34,7 @@ import {
   jobSnapshotBodySchema,
   workstationAliveBodySchema,
 } from './job.schemas'
+import { Job } from '@shared/domain/job/job.entity'
 
 @UseGuards(UserContextGuard)
 @Controller('/jobs')
@@ -46,7 +47,9 @@ export class JobController {
 
   // not used at the moment
   @Get()
-  async listJobs(@Query(new JsonSchemaPipe(jobListQuerySchema)) query: ListJobsInput) {
+  async listJobs(
+    @Query(new JsonSchemaPipe(jobListQuerySchema)) query: ListJobsInput,
+  ): Promise<PageJobs> {
     const opsCtx: UserOpsCtx = {
       log: this.logger,
       user: this.user,
@@ -63,7 +66,9 @@ export class JobController {
 
   // not used at the moment
   @Get('/:jobDxId')
-  async describeJob(@Param('jobDxId', new JsonSchemaPipe(schemas.dxidProp)) dxid: DxId<'job'>) {
+  async describeJob(
+    @Param('jobDxId', new JsonSchemaPipe(schemas.dxidProp)) dxid: DxId<'job'>,
+  ): Promise<Job> {
     const opsCtx: UserOpsCtx = {
       log: this.logger,
       user: this.user,
@@ -77,7 +82,9 @@ export class JobController {
   //    HTTPS Workstations
   // ------------------------
   @Patch('/:jobDxId/terminate')
-  async terminateJob(@Param('jobDxId', new JsonSchemaPipe(schemas.dxidProp)) dxid: DxId<'job'>) {
+  async terminateJob(
+    @Param('jobDxId', new JsonSchemaPipe(schemas.dxidProp)) dxid: DxId<'job'>,
+  ): Promise<Job> {
     const opsCtx: UserOpsCtx = {
       log: this.logger,
       user: this.user,
@@ -88,7 +95,11 @@ export class JobController {
   }
 
   @Patch('/:jobDxId/syncJob')
-  async syncJobStatus(@Param('jobDxId', new JsonSchemaPipe(schemas.dxidProp)) dxid: DxId<'job'>) {
+  async syncJobStatus(
+    @Param('jobDxId', new JsonSchemaPipe(schemas.dxidProp)) dxid: DxId<'job'>,
+  ): Promise<{
+    message: string
+  }> {
     await createSyncJobStatusTask({ dxid }, this.user)
     return { message: 'Job sync task created' }
   }
@@ -97,7 +108,7 @@ export class JobController {
   async checkAlive(
     @Param('jobDxId', new JsonSchemaPipe(schemas.dxidProp)) dxid: DxId<'job'>,
     @Body(new JsonSchemaPipe(workstationAliveBodySchema)) body: WorkstationAliveParams,
-  ) {
+  ): Promise<boolean> {
     const opsCtx: UserOpsCtx = {
       log: this.logger,
       user: this.user,
@@ -114,7 +125,7 @@ export class JobController {
   async setApiKey(
     @Param('jobDxId', new JsonSchemaPipe(schemas.dxidProp)) dxid: DxId<'job'>,
     @Body(new JsonSchemaPipe(jobSetAPIKeyBodySchema)) body: JobSetAPIKeyParams,
-  ) {
+  ): Promise<void> {
     const opsCtx: UserOpsCtx = {
       log: this.logger,
       user: this.user,
@@ -130,7 +141,7 @@ export class JobController {
   async createSnapshot(
     @Param('jobDxId', new JsonSchemaPipe(schemas.dxidProp)) jobDxid: DxId<'job'>,
     @Body(new JsonSchemaPipe(jobSnapshotBodySchema)) body: JobSnapshotParams,
-  ) {
+  ): Promise<{ message: string }> {
     const opsCtx: UserOpsCtx = {
       log: this.logger,
       user: this.user,

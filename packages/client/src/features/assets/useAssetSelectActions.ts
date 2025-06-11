@@ -12,8 +12,8 @@ import { useAttachLicensesModal } from '../licenses/useAttachLicensesModal'
 import { useDetachLicenseModal } from '../licenses/useDetachLicenseModal'
 import { useDownloadAssetsModal } from './actionModals/useDownloadAssetsModal'
 import { useEditAssetModal } from './actionModals/useEditAssetModal'
-import { deleteAssetsRequest } from './assets.api'
 import { IAsset } from './assets.types'
+import { deleteFilesRequest } from '../files/files.api'
 
 export type AssetActions =
   | 'Rename'
@@ -56,6 +56,7 @@ export const useAssetActions = ({ homeScope, selectedItems, resourceKeys, resetS
     setShowModal: setDownloadModal,
     isShown: isShownDownloadModal,
   } = useDownloadAssetsModal(selected)
+  const ids = selected.map(s => s.id)
   const {
     modalComp: deleteModal,
     setShowModal: setDeleteModal,
@@ -63,7 +64,7 @@ export const useAssetActions = ({ homeScope, selectedItems, resourceKeys, resetS
   } = useDeleteModal({
     resource: 'asset',
     selected: selected.map(s => ({ id: s.uid, name: s.name, location: s.location })),
-    request: deleteAssetsRequest,
+    request: () => deleteFilesRequest(ids),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ['assets'],

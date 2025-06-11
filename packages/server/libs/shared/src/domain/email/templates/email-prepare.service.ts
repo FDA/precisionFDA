@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common'
 import {
   EMAIL_TYPES,
   EmailProcessInput,
+  EmailSendInput,
   EmailTemplate,
   getEmailConfig,
 } from '@shared/domain/email/email.config'
@@ -26,7 +27,9 @@ export class EmailPrepareService {
     private readonly user: UserContext,
   ) {}
 
-  async prepareEmails<T extends EMAIL_TYPES>(input: EmailProcessInput<T>) {
+  async prepareEmails<T extends EMAIL_TYPES>(
+    input: EmailProcessInput<T>,
+  ): Promise<EmailSendInput[]> {
     const emailTemplate = await this.getEmailTemplate(input)
     const receivers = await emailTemplate.determineReceivers()
     const activeReceivers = receivers.filter(

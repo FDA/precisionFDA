@@ -3,6 +3,7 @@ import { CreatePropertyDTO } from '@shared/domain/property/dto/CreatePropertyDTO
 import { PropertyType } from '@shared/domain/property/property.entity'
 import { PropertyService } from '@shared/domain/property/services/property.service'
 import { UserContextGuard } from '../user-context/guard/user-context.guard'
+import { EntityScope } from '@shared/types/common'
 
 @UseGuards(UserContextGuard)
 @Controller('/properties')
@@ -11,7 +12,7 @@ export class PropertiesController {
 
   @HttpCode(201)
   @Post()
-  async setProperty(@Body() properties: CreatePropertyDTO) {
+  async setProperty(@Body() properties: CreatePropertyDTO): Promise<void> {
     return await this.propertyService.setProperty(properties)
   }
 
@@ -19,9 +20,9 @@ export class PropertiesController {
   // CACHING THIS WOULD HELP A LOT - but also would need Cache Eviction Policy
   @Get('/:targetType/scope/:scope/keys')
   async listPropertyKeys(
-    @Param('scope') scope: string,
+    @Param('scope') scope: EntityScope,
     @Param('targetType') targetType: PropertyType,
-  ) {
+  ): Promise<{ keys: string[] }> {
     const res = await this.propertyService.getValidKeys(scope, targetType)
     return { keys: res }
   }

@@ -15,6 +15,7 @@ import { Uid } from '@shared/domain/entity/domain/uid'
 import { LicenseService } from '@shared/domain/license/license.service'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { UserContextGuard } from '../user-context/guard/user-context.guard'
+import { License } from '@shared/domain/license/license.entity'
 
 @UseGuards(UserContextGuard)
 @Controller('/licenses')
@@ -26,7 +27,7 @@ export class LicenseController {
   ) {}
 
   @Get('/accepted')
-  async listAcceptedLicences() {
+  async listAcceptedLicences(): Promise<AcceptedLicense[]> {
     const [acceptedLicenses] = await this.em.findAndCount(AcceptedLicense, {
       user: this.user.id,
     })
@@ -38,7 +39,7 @@ export class LicenseController {
   @Post('/files')
   async listLicencesForFiles(
     @Body('uids', new ParseArrayPipe({ items: String })) uids: Uid<'file'>[],
-  ) {
+  ): Promise<License[]> {
     return this.licenseService.findLicensedItemsByNodeUids(uids)
   }
 }

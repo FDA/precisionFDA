@@ -3,6 +3,7 @@ import { NotificationInput } from '@shared/domain/notification/notification.inpu
 import { NotificationService } from '@shared/domain/notification/services/notification.service'
 import { InternalRouteGuard } from '../internal/guard/internal.guard'
 import { UserContextGuard } from '../user-context/guard/user-context.guard'
+import { Notification } from '@shared/domain/notification/notification.entity'
 
 @UseGuards(InternalRouteGuard, UserContextGuard)
 @Controller('/notifications')
@@ -11,7 +12,7 @@ export class NotificationsController {
 
   @HttpCode(204)
   @Post()
-  async createNotification(@Body() notification: NotificationInput) {
+  async createNotification(@Body() notification: NotificationInput): Promise<void> {
     await this.notificationService.createNotification(notification)
   }
 
@@ -19,7 +20,7 @@ export class NotificationsController {
   async updateNotification(
     @Param('notificationId') notificationId: number,
     @Body() input: NotificationInput,
-  ) {
+  ): Promise<Notification> {
     input.id = notificationId
 
     const updated = await this.notificationService.updateDeliveredAt(input.id, input.deliveredAt)
