@@ -9,10 +9,21 @@ func ParseArgsUntilFlag(args []string) ([]string, int) {
 
 	validArgs := make([]string, 0)
 	for index, arg := range args[offset:] {
+		// Check if this is a flag
 		if strings.HasPrefix(arg, "-") {
 			return validArgs, index + offset
 		}
-		validArgs = append(validArgs, arg)
+
+		// Split the argument by commas and process each part
+		commaSeparated := strings.Split(arg, ",")
+		for _, part := range commaSeparated {
+			// Trim whitespace from each part
+			trimmed := strings.TrimSpace(part)
+			// Only add non-empty parts
+			if trimmed != "" {
+				validArgs = append(validArgs, trimmed)
+			}
+		}
 	}
 
 	return validArgs, len(args)
