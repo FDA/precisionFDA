@@ -22,7 +22,14 @@ export class UserContextMiddleware implements NestMiddleware {
 
   constructor(private readonly em: SqlEntityManager) {}
 
-  async use(req: Request, res: Response, next: NextFunction) {
+  async use(req: Request, res: Response, next: NextFunction): Promise<void> {
+    const clientIp = req.headers[config.api.nginxIpHeader]
+    // req.url is / by default
+    const standardizedUrl = req.url?.length > 0 ? req.url.substring(1) : ''
+    this.logger.log(
+      `Started ${req.method} "${req.baseUrl}${standardizedUrl}" for ${clientIp} at ${TimeUtils.formatAtTime(new Date())}`,
+    )
+
     const userContext =
       (await this.getUserContextFromSessionCookie(req, res)) ??
       (await this.getUserContextFromAuthHeader(req)) ??
@@ -89,6 +96,7 @@ export class UserContextMiddleware implements NestMiddleware {
       userSession.token,
       userSession.username,
       userSession.session_id,
+      req.id.toString(),
     )
   }
 
@@ -110,7 +118,13 @@ export class UserContextMiddleware implements NestMiddleware {
       return null
     }
 
-    return new UserContext(userSession.user_id, userSession.token, userSession.username)
+    return new UserContext(
+      userSession.user_id,
+      userSession.token,
+      userSession.username,
+      null,
+      req.id.toString(),
+    )
   }
 
   private isValidSessionExpiration(session: UserSession | CliUserSession): boolean {
