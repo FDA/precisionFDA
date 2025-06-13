@@ -109,7 +109,7 @@ export class UserProvisionFacade {
     username: string,
     baseHandle: string,
     orgName: string,
-  ) {
+  ): Promise<void> {
     const org = constructDxOrg(baseHandle)
     const newOrg = await this.adminClient.createOrg(getHandle(org), orgName)
     await this.adminClient.updateBillingInformation(newOrg.id)
@@ -148,7 +148,11 @@ export class UserProvisionFacade {
     })
   }
 
-  private async createOrg(invitation: Invitation, orgName: string, orgBaseHandle: string) {
+  private async createOrg(
+    invitation: Invitation,
+    orgName: string,
+    orgBaseHandle: string,
+  ): Promise<Organization> {
     const org = new Organization()
     org.name = orgName
     org.handle = orgBaseHandle
@@ -177,7 +181,7 @@ export class UserProvisionFacade {
     return user
   }
 
-  private async createProfile(invitation: Invitation, user: User) {
+  private async createProfile(invitation: Invitation, user: User): Promise<Profile> {
     const profile = new Profile()
     profile.email = invitation.email
     profile.user = Reference.create(user)
@@ -185,7 +189,7 @@ export class UserProvisionFacade {
     return profile
   }
 
-  private async createNotificationPreference(user: User) {
+  private async createNotificationPreference(user: User): Promise<NotificationPreference> {
     const notificationPreference = new NotificationPreference(user)
     this.em.persist(notificationPreference)
     return notificationPreference
@@ -196,7 +200,7 @@ export class UserProvisionFacade {
     username: string,
     orgBaseHandle: string,
     orgName: string,
-  ) {
+  ): Promise<void> {
     return await this.em.transactional(async () => {
       const org = await this.createOrg(invitation, orgName, orgBaseHandle)
       const user = await this.createUser(invitation, org, username)
@@ -209,7 +213,11 @@ export class UserProvisionFacade {
     })
   }
 
-  private async sendProvisionedEmail(firstName: string, email: string, username: string) {
+  private async sendProvisionedEmail(
+    firstName: string,
+    email: string,
+    username: string,
+  ): Promise<void> {
     const emailInput = {
       emailTypeId: EMAIL_TYPES.userProvisioned,
       input: {
@@ -223,35 +231,62 @@ export class UserProvisionFacade {
     await this.emailQueueJobProducer.createSendEmailTask(emails[0], this.user)
   }
 
-  private async createNotification(ids: number[]) {
-    const completedCount = await this.invitationRepo.count({
-      id: { $in: ids },
-      provisioningState: { $nin: [PROVISIONING_STATE.PENDING, PROVISIONING_STATE.IN_PROGRESS] },
+  private async createSuccessProvisionNotification(): Promise<void> {
+    await this.notificationService.createNotification({
+      message: 'A provisioning task has been done',
+      severity: SEVERITY.INFO,
+      action: NOTIFICATION_ACTION.USER_PROVISIONING_DONE,
+      userId: this.user.id,
+      sessionId: this.user.sessionId,
     })
-    if (completedCount === ids.length) {
-      await this.notificationService.createNotification({
-        message: `Completed provisioning for ${getPluralizedTerm(ids.length, 'user')}`,
-        severity: SEVERITY.INFO,
-        action: NOTIFICATION_ACTION.USER_PROVISIONING_COMPLETED,
-        userId: this.user.id,
-        sessionId: this.user.sessionId,
-        meta: {
-          linkTitle: 'View Results',
-          linkUrl: `/admin/invitations`,
-        },
-      })
-    } else {
-      await this.notificationService.createNotification({
-        message: `A provisioning task has been completed`,
-        severity: SEVERITY.INFO,
-        action: NOTIFICATION_ACTION.USER_PROVISIONED,
-        userId: this.user.id,
-        sessionId: this.user.sessionId,
-      })
-    }
   }
 
-  async provision(invitationId: number, invitationIds: number[]) {
+  private async createFailedProvisionNotification(email: string): Promise<void> {
+    await this.notificationService.createNotification({
+      message: `Provisioning failed for the email: ${email}`,
+      severity: SEVERITY.ERROR,
+      action: NOTIFICATION_ACTION.USER_PROVISIONING_ERROR,
+      userId: this.user.id,
+      sessionId: this.user.sessionId,
+    })
+  }
+
+  private async getCompletedInvitations(
+    ids: number[],
+  ): Promise<Pick<Invitation, 'provisioningState'>[]> {
+    return await this.invitationRepo.find(
+      {
+        id: { $in: ids },
+        provisioningState: { $nin: [PROVISIONING_STATE.PENDING, PROVISIONING_STATE.IN_PROGRESS] },
+      },
+      {
+        fields: ['provisioningState'],
+      },
+    )
+  }
+
+  private async createCompletedNotification(
+    ids: number[],
+    completedInvitations: Pick<Invitation, 'provisioningState'>[],
+  ): Promise<void> {
+    const failedCount = completedInvitations.filter(
+      (invitation) => invitation.provisioningState === PROVISIONING_STATE.FAILED,
+    ).length
+    await this.notificationService.createNotification({
+      message: `Completed provisioning for ${getPluralizedTerm(ids.length, 'user')}, ${getPluralizedTerm(failedCount, 'task')} failed`,
+      severity: SEVERITY.INFO,
+      action: NOTIFICATION_ACTION.ALL_USER_PROVISIONINGS_COMPLETED,
+      userId: this.user.id,
+      sessionId: this.user.sessionId,
+      meta: {
+        linkTitle: 'View Results',
+        linkUrl: `/admin/invitations/provisioning?invitations=${ids.join(',')}`,
+        linkTarget: '_blank',
+      },
+    })
+  }
+
+  async provision(invitationId: number, invitationIds: number[]): Promise<void> {
     let invitation: Invitation
     try {
       invitation = await this.invitationRepo.findOneOrFail({
@@ -270,12 +305,17 @@ export class UserProvisionFacade {
       if (isGovEmail(invitation.email)) {
         await this.sendProvisionedEmail(invitation.firstName, invitation.email, username)
       }
+      await this.createSuccessProvisionNotification()
     } catch (error) {
       // unexpected error, mark invitation as failed
       this.logger.error(`Error provisioning user: ${error.message}`, error)
       invitation.provisioningState = PROVISIONING_STATE.FAILED
       await this.em.persistAndFlush(invitation)
+      await this.createFailedProvisionNotification(invitation.email)
     }
-    await this.createNotification(invitationIds)
+    const completedInvitations = await this.getCompletedInvitations(invitationIds)
+    if (completedInvitations.length === invitationIds.length) {
+      await this.createCompletedNotification(invitationIds, completedInvitations)
+    }
   }
 }

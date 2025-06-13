@@ -9,6 +9,7 @@ import EditNewsItemPage from '../news/form/EditNewsItemPage'
 import { AlertsPage } from './alerts/AlertsPage'
 import { AdminDashboard } from './dashboard/Dashboard'
 import { InvitationsList } from './invitations'
+import { ProvisioningList } from './invitations/ProvisioningList'
 import UsersList from './users'
 
 const Admin = () => {
@@ -29,6 +30,7 @@ const Admin = () => {
       <Route path="/alerts" element={<AlertsPage />} />
       <Route path="/users" element={<UsersList />} />
       <Route path="/invitations" element={<InvitationsList />} />
+      <Route path="/invitations/provisioning" element={<ProvisioningList />} />
       <Route path="/news" element={<ListAdminNews />} />
       <Route path="/news/create" element={<CreateNewsItemPage />} />
       <Route path="/news/:id/edit" element={<EditNewsItemPage />} />

@@ -1,4 +1,4 @@
-import { FilterQuery } from '@mikro-orm/core'
+import { FilterQuery, QueryOrder } from '@mikro-orm/core'
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Injectable } from '@nestjs/common'
 import { MainQueueJobProducer } from '@shared/queue/producer/main-queue-job.producer'
@@ -19,6 +19,10 @@ export class InvitationService {
 
   async listInvitations(query: InvitationPaginationDTO): Promise<PaginatedResult<Invitation>> {
     const where: FilterQuery<Invitation> = {}
+
+    if (query.filter?.ids) {
+      where.id = { $in: query.filter.ids }
+    }
     if (query.filter?.firstName) {
       where.firstName = { $like: `%${query.filter.firstName}%` }
     }
@@ -36,6 +40,11 @@ export class InvitationService {
       where.createdAt = {
         ...(lower && { $gte: lower }),
         ...(upper && { $lte: upper }),
+      }
+    }
+    if (query.sortBy && query.sortDir) {
+      query.sort = {
+        [query.sortBy]: query.sortDir === QueryOrder.DESC ? QueryOrder.DESC : QueryOrder.ASC,
       }
     }
 
