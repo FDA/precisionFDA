@@ -63,6 +63,7 @@ describe('app service tests', () => {
     userCtx = {
       id: user.id,
       dxuser: user.dxuser,
+      loadEntity: async () => user,
     } as UserContext
 
     platformClient = {
@@ -251,6 +252,7 @@ describe('app service tests', () => {
     const nonAdminUserCtx = {
       id: nonAdminUser.id,
       dxuser: nonAdminUser.dxuser,
+      loadEntity: async () => nonAdminUser,
     } as UserContext
 
     const appService = new AppService(

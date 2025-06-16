@@ -31,11 +31,14 @@ export class AssetRepository extends EntityRepository<Asset> {
    * Loads assets identified by uids and verifies if they are accessible by user.
    * @param userId
    * @param uids
+   * @param spaceIds
    */
-  async findAccessibleByUser(userId: number, uids: Uid<'file'>[]): Promise<Asset[]> {
-    const smRepository = this.em.getRepository(SpaceMembership)
-    const spaceUids = await smRepository.findActiveSpaceIdsByUserId(userId)
-    const scopes = spaceUids.map((id) => `space-${id}`)
+  async findAccessibleByUser(
+    userId: number,
+    uids: Uid<'file'>[],
+    spaceIds: number[],
+  ): Promise<Asset[]> {
+    const scopes = spaceIds.map((id) => `space-${id}`)
     return await this.find(
       {
         $or: [
