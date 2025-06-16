@@ -8,9 +8,9 @@ import { UserModule } from '@shared/domain/user/user.module'
 import { PlatformClient } from '@shared/platform-client'
 import { PlatformClientModule } from '@shared/platform-client/platform-client.module'
 import { JobLogService } from './services/job-log.service'
-import { JobSynchronizationService } from '@shared/domain/job/services/job-synchronization.service'
 import { MikroOrmModule } from '@mikro-orm/nestjs'
 import { Job } from '@shared/domain/job/job.entity'
+import { JobSynchronizationService } from '@shared/domain/job/services/job-synchronization.service'
 
 const imports = [
   MikroOrmModule.forFeature([Job]),
@@ -24,7 +24,7 @@ const imports = [
 @Module({
   imports,
   providers: [JobService, JobLogService, JobSynchronizationService],
-  exports: [JobService, JobLogService, JobSynchronizationService],
+  exports: [JobService, JobLogService],
 })
 export class JobServiceModule {
   static registerWithCustomPlatformClient(
