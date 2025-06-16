@@ -22,7 +22,7 @@ import { Job } from 'bull'
 import { FollowUpDecider } from '../../domain/user-file/follow-up-decider'
 import { ProcessWithContext } from '../decorator/process-with-context'
 import { BaseQueueProcessor } from './base-queue.processor'
-import { JobSynchronizationService } from '@shared/domain/job/services/job-synchronization.service'
+import { JobService } from '@shared/domain/job/job.service'
 
 @Processor(config.workerJobs.queues.default.name)
 export class MainQueueProcessor extends BaseQueueProcessor {
@@ -36,7 +36,7 @@ export class MainQueueProcessor extends BaseQueueProcessor {
     private readonly followUpDecider: FollowUpDecider,
     private readonly spaceReportService: SpaceReportService,
     private readonly dbClusterService: DbClusterService,
-    private readonly jobSyncService: JobSynchronizationService,
+    private readonly jobService: JobService,
     private readonly userProvisionFacade: UserProvisionFacade,
   ) {
     super()
@@ -52,7 +52,7 @@ export class MainQueueProcessor extends BaseQueueProcessor {
   @ProcessWithContext(TASK_TYPE.SYNC_JOB_STATUS)
   async syncJobStatus(job: Job) {
     const data = job.data as CheckStatusJob
-    await this.jobSyncService.synchronizeJob(data.payload)
+    await this.jobService.synchronizeJob(data.payload)
   }
 
   @ProcessWithContext(TASK_TYPE.SYNC_DBCLUSTER_STATUS)

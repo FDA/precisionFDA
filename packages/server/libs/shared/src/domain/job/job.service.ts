@@ -31,7 +31,7 @@ import {
   FileStateResult,
   JobOutput,
 } from '../../platform-client/platform-client.responses'
-import { UserCtx } from '../../types'
+import { Maybe, UserCtx } from '../../types'
 import { DxId } from '../entity/domain/dxid'
 import { createFileEvent, EVENT_TYPES } from '../event/event.helper'
 import { SPACE_EVENT_ACTIVITY_TYPE } from '../space-event/space-event.enum'
@@ -62,6 +62,10 @@ export class JobService {
   ) {
     this.jobRepo = em.getRepository(Job)
     this.userRepo = em.getRepository(User)
+  }
+
+  async synchronizeJob(checkStatusJob: CheckStatusJob['payload']): Promise<Maybe<Job>> {
+    return await this.jobSyncService.synchronizeJob(checkStatusJob)
   }
 
   async checkChallengeJobs() {
