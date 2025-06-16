@@ -99,9 +99,9 @@ export class PrivateSpaceCreationProcess extends SpaceCreationProcess {
     this.em.persist(space)
   }
 
-  protected validateInput() {}
+  protected validateInput(): void {}
 
-  protected async sendEmails() {
+  protected async sendEmails(): Promise<void> {
     // no emails for private space - user is creating it for themselves and is redirected into it immediately
   }
 }

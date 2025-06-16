@@ -13,7 +13,7 @@ export class CliCreateDiscussionFacade {
     private readonly discussionService: DiscussionService,
   ) {}
 
-  async createDiscussion(spaceId: number, body: CliCreateDiscussionDTO) {
+  async createDiscussion(spaceId: number, body: CliCreateDiscussionDTO): Promise<string> {
     const attachments = await this.attachmentFacade.transformCliAttachments(body.attachments)
 
     const result = await this.createDiscussionFacade.createDiscussion({

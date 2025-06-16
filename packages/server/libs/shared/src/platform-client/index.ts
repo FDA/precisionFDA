@@ -196,7 +196,7 @@ export class PlatformClient {
    * API: /system/findJobs
    * @see https://documentation.dnanexus.com/developer/api/search#api-method-system-findjobs
    */
-  async jobFind(params: JobFindParams) {
+  async jobFind(params: JobFindParams): Promise<FindJobsResponse> {
     const url = `${config.platform.apiUrl}/system/findJobs`
     const options: AxiosRequestConfig = {
       method: 'POST',
@@ -469,7 +469,7 @@ export class PlatformClient {
     return await this.sendRequest(options)
   }
 
-  async getFileUploadUrl(params: FileGetUploadUrlParams) {
+  async getFileUploadUrl(params: FileGetUploadUrlParams): Promise<GetUploadURLResponse> {
     const url = `${config.platform.apiUrl}/${params.dxid}/upload`
     const data = {
       size: params.size,
@@ -987,7 +987,7 @@ export class PlatformClient {
     return results
   }
 
-  private async sendRequest<T>(options: AxiosRequestConfig) {
+  private async sendRequest<T>(options: AxiosRequestConfig): Promise<T> {
     try {
       options.headers = this.setupHeaders()
       this.logClientRequest(options)

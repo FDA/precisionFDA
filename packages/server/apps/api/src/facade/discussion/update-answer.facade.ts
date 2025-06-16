@@ -12,7 +12,7 @@ export class UpdateAnswerFacade {
     private readonly attachmentFacade: AttachmentManagementFacade,
   ) {}
 
-  async updateAnswer(answerId: number, dto: UpdateAnswerDTO) {
+  async updateAnswer(answerId: number, dto: UpdateAnswerDTO): Promise<void> {
     await this.em.transactional(async () => {
       const answer = await this.discussionService.updateAnswer(answerId, dto)
       if (dto.attachments) {

@@ -26,7 +26,7 @@ export class NotificationService {
    * Persists notification in a database and publishes it into a channel.
    * @param notificationInput notification data
    */
-  async createNotification(notificationInput: NotificationInput) {
+  async createNotification(notificationInput: NotificationInput): Promise<void> {
     logger.debug(`NotificationService: creating notification ${JSON.stringify(notificationInput)}`)
     if (!this.redisClient) {
       logger.debug('NotificationService: creating new Redis Client')

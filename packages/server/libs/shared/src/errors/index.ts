@@ -1,4 +1,5 @@
 import type { AnyObject } from '../types'
+import { ErrorObject } from 'ajv'
 
 type BaseErrorProps = AnyObject & {
   code: ErrorCodes
@@ -10,9 +11,14 @@ type MaybeBaseErrorProps = Partial<BaseErrorProps>
 
 // TODO(samuel) check if 'code' property can be omitted instead
 export type ClientErrorProps = MaybeBaseErrorProps & {
-  clientResponse: any
+  clientResponse: string
   clientStatusCode: number
 }
+
+export const ASSET_VALIDATION_ERROR = `This asset contains a license, and has been included in one or more apps.
+Deleting it would render the license inaccessible to these apps, breaking reproducibility.
+You can either first remove the license (allowing these existing apps to run without requiring a license),
+or contact the precisionFDA team to discuss other options.`
 
 // TODO(samuel) refactor into discriminated union type
 export enum ErrorCodes {
@@ -100,7 +106,7 @@ export class NoHeaderItemsSetError extends BaseError {
 export class ValidationError extends BaseError {
   constructor(
     message = 'Error: Validation failed',
-    props: MaybeBaseErrorProps & { validationErrors?: any } = {},
+    props: MaybeBaseErrorProps & { validationErrors?: null | Array<ErrorObject> } = {},
   ) {
     super(message, {
       code: ErrorCodes.VALIDATION,
@@ -113,7 +119,7 @@ export class ValidationError extends BaseError {
 export class IncompatibleVersionError extends BaseError {
   constructor(
     message = 'Error: Incompatible version',
-    props: MaybeBaseErrorProps & { validationErrors?: any } = {},
+    props: MaybeBaseErrorProps & { validationErrors?: null | Array<ErrorObject> } = {},
   ) {
     super(message, {
       code: ErrorCodes.INCOMPATIBLE_VERSION_ERROR,
