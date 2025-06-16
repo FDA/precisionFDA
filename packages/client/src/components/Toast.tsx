@@ -1,9 +1,9 @@
 import React from 'react'
-import 'react-toastify/dist/ReactToastify.css'
 import { Link } from 'react-router-dom'
 import { toast } from 'react-toastify'
-import styled from 'styled-components'
+import 'react-toastify/dist/ReactToastify.css'
 import { Tooltip } from 'react-tooltip'
+import styled from 'styled-components'
 import { CloseAllIcon } from './icons/CloseAllIcon'
 
 const CloseAllWrapper = styled.div`
@@ -23,17 +23,24 @@ export interface ToastWithLinkProps {
   message: string
   linkUrl: string
   linkTitle: string
+  linkTarget?: '_blank' | '_self'
 }
 
-export const ToastWithLink = ({ message, linkUrl, linkTitle }: ToastWithLinkProps) => {
+export const ToastWithLink = ({ message, linkUrl, linkTitle, linkTarget }: ToastWithLinkProps) => {
   return (
     <>
       <div>
         <div>{message}</div>
-        <Link to={linkUrl}>{linkTitle}</Link>
+        <Link to={linkUrl} target={linkTarget || '_self'}>
+          {linkTitle}
+        </Link>
       </div>
       <CloseAllWrapper>
-        <CloseAllWithLink data-tooltip-id={`toast-tooltip-${message}`} data-tooltip-content="Close all notifications" onClick={() => toast.dismiss()}>
+        <CloseAllWithLink
+          data-tooltip-id={`toast-tooltip-${message}`}
+          data-tooltip-content="Close all notifications"
+          onClick={() => toast.dismiss()}
+        >
           <CloseAllIcon height={20} />
         </CloseAllWithLink>
         <Tooltip id={`toast-tooltip-${message}`} delayShow={1000} />
@@ -47,7 +54,11 @@ export const BasicToast = (message: string) => {
     <>
       <div>{message}</div>
       <CloseAllWrapper>
-        <CloseAllBasic data-tooltip-id={`toast-tooltip-${message}`} data-tooltip-content="Close all notifications" onClick={() => toast.dismiss()}>
+        <CloseAllBasic
+          data-tooltip-id={`toast-tooltip-${message}`}
+          data-tooltip-content="Close all notifications"
+          onClick={() => toast.dismiss()}
+        >
           <CloseAllIcon height={20} />
         </CloseAllBasic>
         <Tooltip id={`toast-tooltip-${message}`} delayShow={1000} />

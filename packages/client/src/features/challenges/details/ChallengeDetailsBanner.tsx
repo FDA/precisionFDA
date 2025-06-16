@@ -32,7 +32,7 @@ import { ObjectGroupIcon } from '../../../components/icons/ObjectGroupIcon'
 
 const ChallengeActionRow = styled(PageContainer)`
   ${pagePadding}
-  padding-top: 0px;
+  padding-top: 0;
   padding-bottom: 0;
   display: flex;
   justify-content: space-between;
@@ -177,7 +177,7 @@ export const ChallengeDetailsBanner = ({ challenge, user }: { challenge: Challen
           )}
         </ChallengeActionColLeft>
         <ChallengeActionCol>
-          {user?.isAdmin && (
+          {user?.can_create_challenges && (
             <>
               {challenge?.meta ? (
                 <StyledOutlineButton as="a" href={`/challenges/${challenge.id}/editor`}>
