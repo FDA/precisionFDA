@@ -5,14 +5,19 @@ import {
   Get,
   HttpCode,
   Inject,
+  Param,
+  ParseIntPipe,
   Post,
   Put,
   Query,
   UseGuards,
 } from '@nestjs/common'
 import { DEPRECATED_SQL_ENTITY_MANAGER } from '@shared/database/provider/deprecated-sql-entity-manager.provider'
+import { PaginatedResult } from '@shared/domain/entity/domain/paginated.result'
+import { EditInvitationDTO } from '@shared/domain/invitation/dto/edit-invitation.dto'
 import { InvitationPaginationDTO } from '@shared/domain/invitation/dto/invitation-pagination.dto'
 import { ProvisionUsersDTO } from '@shared/domain/invitation/dto/provision-users.dto'
+import { Invitation } from '@shared/domain/invitation/invitation.entity'
 import { InvitationService } from '@shared/domain/invitation/services/invitation.service'
 import { Organization } from '@shared/domain/org/org.entity'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
@@ -23,6 +28,7 @@ import { ValidationError } from '@shared/errors'
 import { PlatformClient } from '@shared/platform-client'
 import { ADMIN_PLATFORM_CLIENT } from '@shared/platform-client/providers/admin-platform-client.provider'
 import { MaintenanceQueueJobProducer } from '@shared/queue/producer/maintenance-queue-job.producer'
+import { Job } from 'bull'
 import { UserContextGuard } from '../user-context/guard/user-context.guard'
 import { SiteAdminGuard } from './guards/site-admin.guard'
 import { getAdminBodyValidationPipe } from './pipes/admin-body-validation.pipe'
@@ -62,7 +68,7 @@ export class AdminController {
   ) {}
 
   @Get('/stats')
-  async getStats() {
+  async getStats(): Promise<{ usersCount: number; orgsCount: number }> {
     const usersCount = await this.em.getRepository(User).count()
     const orgsCount = await this.em.getRepository(Organization).count()
     return { usersCount, orgsCount }
@@ -72,12 +78,12 @@ export class AdminController {
    * Currently unused in app. Needs to be invoked by outside HTTP request.
    */
   @Get('/checkStaleJobs')
-  async checkStaleJobs() {
+  async checkStaleJobs(): Promise<Job> {
     return await this.maintenanceJobProducer.createCheckStaleJobsTask(this.user)
   }
 
   @Get('/users')
-  async getUsers(@Query() query: UserPaginationDto) {
+  async getUsers(@Query() query: UserPaginationDto): Promise<PaginatedResult<User>> {
     return this.userService.paginateUsers(query)
   }
 
@@ -89,7 +95,7 @@ export class AdminController {
       }),
     )
     body: ISetTotalLimitParams,
-  ) {
+  ): Promise<string> {
     const { ids, totalLimit } = body
     await this.em.getRepository(User).bulkUpdateSetTotalLimit(ids, totalLimit)
 
@@ -104,7 +110,7 @@ export class AdminController {
       }),
     )
     body: ISetJobLimitParams,
-  ) {
+  ): Promise<string> {
     const { ids, jobLimit } = body
     await this.em.getRepository(User).bulkUpdateSetJobLimit(ids, jobLimit)
 
@@ -112,14 +118,27 @@ export class AdminController {
   }
 
   @Get('/invitations')
-  async getInvitations(@Query() query: InvitationPaginationDTO) {
+  async getInvitations(
+    @Query() query: InvitationPaginationDTO,
+  ): Promise<PaginatedResult<Invitation>> {
     return this.invitationService.listInvitations(query)
   }
 
   @HttpCode(200)
   @Post('/users/provision')
-  async provisionUsers(@Body() body: ProvisionUsersDTO) {
+  async provisionUsers(@Body() body: ProvisionUsersDTO): Promise<{
+    provisioningIds: number[]
+  }> {
     return this.invitationService.provisionUsers(body.ids)
+  }
+
+  @HttpCode(200)
+  @Put('invitations/:id')
+  async editInvitationBasicInfo(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() body: EditInvitationDTO,
+  ): Promise<{ id: number }> {
+    return this.invitationService.editBasicInfo(id, body)
   }
 
   /**
@@ -128,7 +147,7 @@ export class AdminController {
    */
   @HttpCode(200)
   @Post('/users/reset2fa')
-  async resetUsers2fa(@Body(getAdminBodyValidationPipe()) body: IIdListParams) {
+  async resetUsers2fa(@Body(getAdminBodyValidationPipe()) body: IIdListParams): Promise<any> {
     const { ids } = body
 
     const results = await this.em
@@ -140,7 +159,7 @@ export class AdminController {
 
   @HttpCode(200)
   @Post('/users/unlock')
-  async unlockUsers(@Body(getAdminBodyValidationPipe()) body: IIdListParams) {
+  async unlockUsers(@Body(getAdminBodyValidationPipe()) body: IIdListParams): Promise<any> {
     const { ids } = body
 
     const results = await this.em
@@ -166,7 +185,7 @@ export class AdminController {
       }),
     )
     body: IIdListParams,
-  ) {
+  ): Promise<string> {
     const { ids } = body
     await this.em.getRepository(User).bulkActivate(ids)
 
@@ -185,7 +204,7 @@ export class AdminController {
       }),
     )
     body: IIdListParams,
-  ) {
+  ): Promise<string> {
     const { ids } = body
     await this.em.getRepository(User).bulkDeactivate(ids)
 
@@ -200,7 +219,7 @@ export class AdminController {
       }),
     )
     body: IResourceTypeParams,
-  ) {
+  ): Promise<string> {
     const { ids, resource } = body
     await this.em.getRepository(User).bulkEnableResourceType(ids, resource)
 
@@ -210,7 +229,7 @@ export class AdminController {
   @Put('/users/enableAllResourceTypes')
   async enableAllResourceTypesForUsers(
     @Body(getAdminBodyValidationPipe()) body: IResourceTypeParams,
-  ) {
+  ): Promise<string> {
     const { ids } = body
     await this.em.getRepository(User).bulkEnableAll(ids)
 
@@ -225,7 +244,7 @@ export class AdminController {
       }),
     )
     body: IResourceTypeParams,
-  ) {
+  ): Promise<string> {
     const { ids, resource } = body
     await this.em.getRepository(User).bulkDisableResourceType(ids, resource)
 
@@ -233,7 +252,9 @@ export class AdminController {
   }
 
   @Put('/users/disableAllResourceTypes')
-  async disableAllResourceTypesForUsers(@Body(getAdminBodyValidationPipe()) body: IIdListParams) {
+  async disableAllResourceTypesForUsers(
+    @Body(getAdminBodyValidationPipe()) body: IIdListParams,
+  ): Promise<string> {
     const { ids } = body
     await this.em.getRepository(User).bulkDisableAll(ids)
 
