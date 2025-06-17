@@ -27,3 +27,7 @@ export async function provisionUsers(ids: number[]) {
 export const fetchInvitations = async (configs: AxiosRequestConfig) => {
   return axios.get<{ data: Invitation[] }>('/api/v2/admin/invitations', configs).then(r => r.data)
 }
+
+export async function editInvitationBasicInfo(id: number, data: Partial<{ firstName: string; lastName: string; email: string }>) {
+  return axios.put(`/api/v2/admin/invitations/${id}`, data).then(r => r.data)
+}
