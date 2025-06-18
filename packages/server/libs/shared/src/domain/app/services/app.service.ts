@@ -195,9 +195,15 @@ export class AppService {
     }
   }
 
-  private async getAssets(orderedAssets: Uid<'file'>[]) {
+  private async getAssets(orderedAssets: Uid<'file'>[]): Promise<Asset[]> {
     if (orderedAssets) {
-      return await this.assetRepository.findAccessibleByUser(this.user.id, orderedAssets)
+      const user = await this.user.loadEntity()
+      const accessibleSpaceIds = await user.accessibleSpaceIds()
+      return await this.assetRepository.findAccessibleByUser(
+        this.user.id,
+        orderedAssets,
+        accessibleSpaceIds,
+      )
     } else {
       return []
     }

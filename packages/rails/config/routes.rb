@@ -42,6 +42,8 @@ Rails.application.routes.draw do
 
       get "stats", to: "base#stats"
       get "users", to: "users#index"
+      get "invitations", to: "invitations#list"
+      get "invitations/provisioning", to: "invitations#list_provisioning"
       get "all_users", to: "users#all_users"
       get "active_users", to: "users#active"
       get "reset_mfa_user", to: "users#reset_2fa"
@@ -76,6 +78,7 @@ Rails.application.routes.draw do
           post "search"
           post "provision"
           post "browse"
+          get "list", to: "invitations#list_invitations"
         end
       end
 
@@ -174,9 +177,7 @@ Rails.application.routes.draw do
       get "auth_key" => "base#auth_key"
       get "update_active", to: "base#update_active"
 
-      resource :user, only: %i(show) do
-        get :cloud_resources
-      end
+      resource :user, only: %i(show)
 
       resources :users, only: %i(update) do
         get :active, on: :collection, to: "users#active"
@@ -201,10 +202,6 @@ Rails.application.routes.draw do
       end
 
       resources :alerts, only: %i(create update destroy) do
-        get :index, on: :collection
-      end
-
-      resources :site_settings do
         get :index, on: :collection
       end
 
@@ -497,8 +494,6 @@ Rails.application.routes.draw do
       post "create_resource_link"
       post "set_tags"
       post "set_properties"
-      get "properties/:type/scope/:scope/keys",
-          action: :get_valid_property_keys
       post "assign_app"
       get "list_licenses"
       get "cli_latest_version"

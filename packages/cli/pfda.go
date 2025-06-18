@@ -1,5 +1,5 @@
 // PrecisionFDA CLI
-// Version 2.9.0
+// Version 2.10.0
 package main
 
 import (
@@ -26,13 +26,18 @@ const defaultChunkSize = 1 << 26 // default 64MB (min. 16MB)
 const defaultSkipVerify = "false"
 const usageString = `
 ****************************
-PFDA COMMAND LINE TOOL v2.9.0
+PFDA COMMAND LINE TOOL v2.10.0
 ****************************
 
 All available commands:
    pfda cat
+   pfda create-discussion
+   pfda create-reply
    pfda describe
    pfda download
+   pfda edit-discussion
+   pfda edit-reply
+   pfda get-password
    pfda get-scope
    pfda head
    pfda ls
@@ -46,8 +51,10 @@ All available commands:
    pfda mkdir
    pfda rm
    pfda rmdir
+   pfda rotate-password
    pfda upload-asset
    pfda upload-file
+   pfda upload-resource
    pfda view-link
 
 Command specific help section with description, examples and available flags:
@@ -56,7 +63,7 @@ Command specific help section with description, examples and available flags:
 To print version info and exit:
    pfda -version
 
-Full documentation can be found in the Docs section of the precisionFDA website - https://precision.fda.gov/docs/cli
+Full documentation can be found in the Docs section of the precisionFDA website - https://precision.fda.gov/docs/guides/cli
 `
 
 //
@@ -77,7 +84,7 @@ Full documentation can be found in the Docs section of the precisionFDA website 
 // GLOBAL VARIABLES
 var defaultURL = "precision.fda.gov"
 
-// these varaibles are populated by -ldflags -X command line options
+// these variables are populated by -ldflags -X command line options
 var (
 	commitID  string
 	Version   string
@@ -232,8 +239,6 @@ func mainInternal() int {
 	// This isn't necessary for the CLI to run correctly, but we define command line flags
 	// inside mainInternal so that they can be unit tested
 	flag.CommandLine = flag.NewFlagSet(os.Args[0], flag.ExitOnError)
-
-	command := flag.String("cmd", "", "[Deprecated - please use the format ./pfda <cmd>] Command to execute.")
 	authKey := flag.String("key", "", "Authorization key. Required if a previous config doesn't exist.")
 	apiRoute := flag.String("route", "", "Name of precisionFDA API route to call.")
 	jsonInput := flag.String("json-payload", "", "JSON payload for specified API call (if any).")
@@ -250,9 +255,9 @@ func mainInternal() int {
 	outputFilePath := flag.String("output", "", "[optional] File path to write api call response data. Defaults to stdout.")
 	inputChunkSize := flag.Int("chunksize", defaultChunkSize, "[optional] Size of each upload chunk in bytes (Min 5MB,/Max 2GB).")
 	inputNumRoutines := flag.Int("threads", defaultNumRoutines, "[optional] Maximum number of upload threads to spawn (Max 100).")
-	server := flag.String("server", defaultURL, "[optional] Server to connect and make requests to.")
+	server := flag.String("server", "", "[optional] Server to connect and make requests to.")
 	skipVerify := flag.String("skipverify", defaultSkipVerify, "[optional] Boolean string to skip certificate verification.")
-	pfda_version := flag.Bool("version", false, "[optional] Print version")
+	pfdaVersion := flag.Bool("version", false, "[optional] Print version")
 
 	// help flag - does not run any command just prints help info
 	flagHelp := flag.Bool("help", false, "[optional] Print help info for the particular command")
@@ -282,31 +287,17 @@ func mainInternal() int {
 	flagPreauthenticated := flag.Bool("auth", false, "[optional] Use preauthenticated URL for viewing file")
 	flagDuration := flag.Int64("duration", 86_400, "[optional] Time to live for preauthenticated URL in seconds")
 
-	// Support for ./pfda upload-file option of specifying a command, making -cmd optional
-	var positionalCmd string
+	var command string
 	var args []string
 	var index int
-	if len(os.Args) > 1 && !strings.HasPrefix(os.Args[1], "-") {
+	if len(os.Args) > 1 {
 		// Storing first positional arg after ./pfda
-		positionalCmd = os.Args[1]
+		command = os.Args[1]
 		// check possible non-flag args
 		args, index = helpers.ParseArgsUntilFlag(os.Args)
 		flag.CommandLine.Parse(os.Args[index:])
-
 	} else {
 		flag.Parse()
-	}
-
-	//	TODO: REMOVE IN V3.0.0
-	if *command != "" {
-		fmt.Println("\nWARNING! THIS SYNTAX IS BEING DEPRECATED. PLEASE USE THE FOLLOWING SYNTAX INSTEAD: ./pfda <command> <args> \n")
-	}
-
-	if positionalCmd != "" {
-		if *command != "" {
-			return helpers.ErrorFromString("Error input >>> both positional command and -cmd option specified. Please remove one or the other", *flagJson)
-		}
-		*command = positionalCmd
 	}
 
 	// always check if config != nil
@@ -317,8 +308,9 @@ func mainInternal() int {
 		}
 	}
 
+	// use default url if not provided by user or found in config
 	serverURL := defaultURL
-	if *server != "" && *server != defaultURL {
+	if *server != "" {
 		serverURL = *server
 	} else if config != nil && config.Server != "" {
 		serverURL = config.Server
@@ -337,7 +329,7 @@ func mainInternal() int {
 		transport.TLSClientConfig = &tls.Config{MinVersion: tls.VersionTLS12}
 	}
 
-	if *pfda_version {
+	if *pfdaVersion {
 		printInfo(pfdaclient)
 		checkLatestVersion(pfdaclient)
 		return 0
@@ -347,7 +339,7 @@ func mainInternal() int {
 	parents := *flagParents || *flagParentsShort
 	help := *flagHelp || *flagHelpShort
 
-	if !help && *command != "" {
+	if !help && command != "" {
 		// Set AuthKey based on provided authKey or from config.
 		pfdaclient.AuthKey = *authKey
 		if *authKey == "" {
@@ -365,7 +357,7 @@ func mainInternal() int {
 		}
 	}
 
-	switch *command {
+	switch command {
 	case "upload-asset":
 		if help {
 			return helpers.PrintUploadAssetHelp()
@@ -668,6 +660,7 @@ func mainInternal() int {
 
 		}
 
+		// REMOVE 'list-spaces' in V3.0.0
 	case "ls-spaces", "list-spaces":
 		if help {
 			return helpers.PrintLsSpacesHelp()
@@ -933,8 +926,7 @@ func mainInternal() int {
 
 	default:
 		// Invalid, non-empty command
-		// both 'upload-resource' and 'refresh-key' are intentionally omitted.
-		return helpers.ErrorFromString(fmt.Sprintf("Command '%s' not found. Must be one of: \n'cat' \n'describe' \n'download' \n'get-scope' \n'head' \n'ls' \n'ls-apps' \n'ls-assets' \n'ls-executions' \n'ls-members' \n'ls-discussions' \n'ls-spaces' \n'ls-workflows' \n'mkdir' \n'rm' \n'rmdir' \n'upload-asset' \n'upload-file' \n'view-link'\n", *command), *flagJson)
+		return helpers.ErrorFromString(fmt.Sprintf("Command '%s' not found ! Please check all available commands via -help flag", command), *flagJson)
 	}
 
 	// Write configuration and save key

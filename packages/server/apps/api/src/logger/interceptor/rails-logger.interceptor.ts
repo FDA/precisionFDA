@@ -6,8 +6,10 @@
 import { CallHandler, ExecutionContext, Injectable, NestInterceptor } from '@nestjs/common'
 import { config } from '@shared/config'
 import { USER_CONTEXT_HTTP_HEADERS } from '@shared/config/consts'
+import { BaseError } from '@shared/errors'
+import { TimeUtils } from '@shared/utils/time.utils'
 import { STATUS_CODES } from 'http'
-import { Observable, tap } from 'rxjs'
+import { catchError, Observable, tap } from 'rxjs'
 
 @Injectable()
 export class RailsLoggerInterceptor implements NestInterceptor {
@@ -24,7 +26,7 @@ export class RailsLoggerInterceptor implements NestInterceptor {
     const url = request.url
     const clientIp = request.headers[config.api.nginxIpHeader]
     const pid = process.pid
-    const atTime = this.formatAtTime(startDate)
+    const atTime = TimeUtils.formatAtTime(startDate)
 
     this.logMessage(
       startDate,
@@ -47,39 +49,24 @@ export class RailsLoggerInterceptor implements NestInterceptor {
           `Completed ${statusCode} ${statusText} in ${responseTime}ms`,
         )
       }),
+      catchError((error: BaseError) => {
+        const statusCode = error.props.statusCode
+        const statusText = STATUS_CODES[statusCode] || ''
+        const responseTime = Date.now() - startDate.getTime()
+        this.logMessage(
+          new Date(),
+          pid,
+          request.id,
+          `Completed ${statusCode} ${statusText} in ${responseTime}ms`,
+        )
+        throw error
+      }),
     )
   }
 
-  private logMessage(time: Date, pid: number, reqId: string, message: string) {
+  private logMessage(time: Date, pid: number, reqId: string, message: string): void {
     console.log(
-      `I, [${this.formatTimestamp(time)} #${pid}]  INFO -- : ${message}. requestId: ${reqId}`,
+      `I, [${TimeUtils.formatTimestamp(time)} #${pid}]  INFO -- : ${message}. requestId: ${reqId}`,
     )
-  }
-
-  private formatTimestamp(date: Date): string {
-    const { year, month, day, hours, minutes, seconds, milliseconds, microseconds } =
-      this.getFormattedTimeSections(date)
-
-    return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}.${milliseconds}${microseconds}`
-  }
-
-  private formatAtTime(date: Date): string {
-    const { year, month, day, hours, minutes, seconds } = this.getFormattedTimeSections(date)
-
-    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds} +0000`
-  }
-
-  private getFormattedTimeSections(date: Date) {
-    return {
-      year: date.getFullYear(),
-      month: String(date.getMonth() + 1).padStart(2, '0'),
-      day: String(date.getDate()).padStart(2, '0'),
-      hours: String(date.getHours()).padStart(2, '0'),
-      minutes: String(date.getMinutes()).padStart(2, '0'),
-      seconds: String(date.getSeconds()).padStart(2, '0'),
-      milliseconds: String(date.getMilliseconds()).padStart(3, '0'),
-      // Timestamp in the RoR logs includes microseconds
-      microseconds: '000',
-    }
   }
 }

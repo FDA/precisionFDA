@@ -1,13 +1,12 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Injectable } from '@nestjs/common'
-import { CliDiscussionDTO } from '@shared/domain/cli/dto/CliDiscussionDTO'
-import { CliNodeSearchDTO } from '@shared/domain/cli/dto/CliNodeSearchDTO'
-import { CliSpaceMemberDTO } from '@shared/domain/cli/dto/CliSpaceMemberDTO'
+import { CliDiscussionDTO } from '@shared/domain/cli/dto/cli-discussion.dto'
+import { CliNodeSearchDTO } from '@shared/domain/cli/dto/cli-node-search.dto'
+import { CliSpaceMemberDTO } from '@shared/domain/cli/dto/cli-space-member.dto'
 import { DbClusterService } from '@shared/domain/db-cluster/service/db-cluster.service'
 import { DiscussionService } from '@shared/domain/discussion/services/discussion.service'
 import { Uid } from '@shared/domain/entity/domain/uid'
 import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
-import { SPACE_MEMBERSHIP_ROLE } from '@shared/domain/space-membership/space-membership.enum'
 import { Space } from '@shared/domain/space/space.entity'
 import { getScopeFromSpaceId } from '@shared/domain/space/space.helper'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
@@ -18,6 +17,7 @@ import { STATIC_SCOPE } from '@shared/enums'
 import { NotFoundError, PermissionError } from '@shared/errors'
 import { SCOPE } from '@shared/types/common'
 import { DiscussionDTO } from '@shared/domain/discussion/dto/discussion.dto'
+import { CliNodeDTO } from '@shared/domain/cli/dto/cli-node.dto'
 
 @Injectable()
 export class CliService {
@@ -28,7 +28,7 @@ export class CliService {
     private readonly discussionService: DiscussionService,
   ) {}
 
-  async listSpaceMembers(spaceId: number) {
+  async listSpaceMembers(spaceId: number): Promise<CliSpaceMemberDTO[]> {
     const space = await this.em.findOne(Space, {
       id: spaceId,
       spaceMemberships: { user: this.user.id },
@@ -52,7 +52,7 @@ export class CliService {
     )
   }
 
-  async listSpaceDiscussions(spaceId: number) {
+  async listSpaceDiscussions(spaceId: number): Promise<CliDiscussionDTO[]> {
     const response = await this.discussionService.listDiscussions({ scope: `space-${spaceId}` })
 
     return response.data.map((d: DiscussionDTO) => {
@@ -60,26 +60,15 @@ export class CliService {
     })
   }
 
-  async findNodes(input: CliNodeSearchDTO) {
+  async findNodes(input: CliNodeSearchDTO): Promise<CliNodeDTO[]> {
     const { folderId, spaceId, arg, type } = input
 
     const parentFolder = !spaceId ? folderId : null
     const scope = spaceId ? getScopeFromSpaceId(spaceId) : STATIC_SCOPE.PRIVATE
     const scopedParentFolderId = spaceId ? folderId : null
 
-    const spaces = await this.em.find(Space, {
-      spaceMemberships: {
-        user: { id: this.user.id },
-        active: true,
-        role: {
-          $in: [
-            SPACE_MEMBERSHIP_ROLE.ADMIN,
-            SPACE_MEMBERSHIP_ROLE.LEAD,
-            SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR,
-          ],
-        },
-      },
-    })
+    const user = await this.user.loadEntity()
+    const spaces = await user.editableSpaces()
 
     const spaceScopes = spaces.map((s) => `space-${s.id}`)
     if (spaceId && !spaceScopes.includes(scope)) {
@@ -116,14 +105,14 @@ export class CliService {
       })
     }
 
-    return result
+    return result.map(CliNodeDTO.fromEntity)
   }
 
-  async dbClusterGetPassword(dbclusterUid: Uid<'dbcluster'>) {
+  async dbClusterGetPassword(dbclusterUid: Uid<'dbcluster'>): Promise<string> {
     return await this.dbclusterService.getPassword(dbclusterUid)
   }
 
-  async dbClusterRotatePassword(dbclusterUid: Uid<'dbcluster'>) {
+  async dbClusterRotatePassword(dbclusterUid: Uid<'dbcluster'>): Promise<string> {
     return await this.dbclusterService.rotatePassword(dbclusterUid)
   }
 }

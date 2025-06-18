@@ -7,11 +7,12 @@ export class UserContext {
     readonly accessToken: string,
     readonly dxuser: string,
     readonly sessionId?: string, // CLI doesn't deal with session id
+    readonly requestId?: string, // requestId is used for logging and tracing purposes
     // sessionId was introduced for notifications to be sent to a given session id
     // and since CLI doesn't receive async notifications, we don't need to pass it
   ) {}
 
-  async loadEntity() {
+  async loadEntity(): Promise<User | null> {
     return RequestContext.getEntityManager().findOne(User, this.id)
   }
 }

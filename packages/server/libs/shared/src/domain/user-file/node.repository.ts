@@ -44,11 +44,10 @@ export class NodeRepository extends AccessControlRepository<Node> {
    *
    * @param user
    * @param uid
+   * @param spaceIds
    */
-  async loadIfAccessibleByUser(user: User, uid: Uid<'file'>) {
-    const smRepository = this.em.getRepository(SpaceMembership)
-    const spaceUids = await smRepository.findActiveSpaceIdsByUserId(user.id)
-    const scopes = spaceUids.map((id) => `space-${id}`)
+  async loadIfAccessibleByUser(user: User, uid: Uid<'file'>, spaceIds: number[]): Promise<Node> {
+    const scopes = spaceIds.map((id) => `space-${id}`)
     return await this.findOne(
       {
         uid: uid,

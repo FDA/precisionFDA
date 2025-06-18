@@ -93,7 +93,7 @@ export abstract class SpaceCreationProcess {
 
   protected abstract validateInput(input: CreateSpaceDTO)
 
-  protected async findLeads(input: CreateSpaceDTO) {
+  protected async findLeads(input: CreateSpaceDTO): Promise<{ host: User; guest: User }> {
     let hostLead: User, guestLead: User
 
     hostLead = await this.em.findOne(User, {
@@ -184,7 +184,7 @@ export abstract class SpaceCreationProcess {
     this.em.persist(membership)
   }
 
-  protected async createOrgForSpace(spaceId: number, organization: string) {
+  protected async createOrgForSpace(spaceId: number, organization: string): Promise<void> {
     try {
       const handle = getHandle(organization)
       const org = await this.adminClient.createOrg(handle, handle)

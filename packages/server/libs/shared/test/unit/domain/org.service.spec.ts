@@ -1,9 +1,12 @@
 import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
 import { database } from '@shared/database'
-import { ClassIdResponse } from '@shared/platform-client/platform-client.responses'
-import { expect } from 'chai'
 import { OrgService } from '@shared/domain/org/service/org.service'
 import { PlatformClient } from '@shared/platform-client'
+import {
+  ClassIdResponse,
+  UpdateBillingInformationResponse,
+} from '@shared/platform-client/platform-client.responses'
+import { expect } from 'chai'
 import { db } from '../../../src/test'
 
 describe('org service tests', () => {
@@ -14,7 +17,6 @@ describe('org service tests', () => {
   let createOrgNameParam: string
   let describeDxidParam: string
   let orgIdParam: string
-  let billingInfoParam: string
   const orgHandle = 'pfda..space_host_86cfee2ccf'
   const orgId = `org-${orgHandle}`
 
@@ -36,9 +38,12 @@ describe('org service tests', () => {
       },
     } as PlatformClient
     userPlatformClient = {
-      async updateBillingInformation(orgDxid: string, billingInfo: any): Promise<any> {
+      async updateBillingInformation(orgDxid: string): Promise<UpdateBillingInformationResponse> {
         orgIdParam = orgDxid
-        billingInfoParam = billingInfo
+        return {
+          message: 'Billing information has been forcibly set.',
+          status: 'BillingInfoForceSet',
+        }
       },
     } as PlatformClient
   })
@@ -83,6 +88,5 @@ describe('org service tests', () => {
     expect(createOrgNameParam).eq(orgHandle)
     expect(createOrgHandleParam).eq(orgHandle)
     expect(orgIdParam).eq('org-handle')
-    expect(billingInfoParam.email).eq('billing@dnanexus.com')
   })
 })

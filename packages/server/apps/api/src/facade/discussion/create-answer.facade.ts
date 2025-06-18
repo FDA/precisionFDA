@@ -4,6 +4,7 @@ import { MainQueueJobProducer } from '@shared/queue/producer/main-queue-job.prod
 import { AttachmentManagementFacade } from '@shared/facade/discussion/attachment-management.facade'
 import { CreateAnswerDTO } from '@shared/domain/discussion/dto/create-answer.dto'
 import { SqlEntityManager } from '@mikro-orm/mysql'
+import { AnswerDTO } from '@shared/domain/discussion/dto/answer.dto'
 
 @Injectable()
 export class CreateAnswerFacade {
@@ -14,7 +15,7 @@ export class CreateAnswerFacade {
     private readonly mainQueueJobProducer: MainQueueJobProducer,
   ) {}
 
-  async createAnswer(dto: CreateAnswerDTO) {
+  async createAnswer(dto: CreateAnswerDTO): Promise<AnswerDTO> {
     const newAnswer = await this.em.transactional(async () => {
       const result = await this.discussionService.createAnswer(dto)
       await this.attachmentFacade.createAttachments(result.noteId, dto.attachments)

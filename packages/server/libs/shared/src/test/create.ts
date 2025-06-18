@@ -17,6 +17,7 @@ import { DataPortal } from '@shared/domain/data-portal/data-portal.entity'
 import { DbCluster } from '@shared/domain/db-cluster/db-cluster.entity'
 import { Discussion } from '@shared/domain/discussion/discussion.entity'
 import { Expert } from '@shared/domain/expert/expert.entity'
+import { Invitation } from '@shared/domain/invitation/invitation.entity'
 import { Job } from '@shared/domain/job/job.entity'
 import { License } from '@shared/domain/license/license.entity'
 import { LicensedItem } from '@shared/domain/licensed-item/licensed-item.entity'
@@ -853,6 +854,19 @@ const comparisonHelper = {
   },
 }
 
+const inivitationHelper = {
+  create: (em: EntityManager, data?: Partial<InstanceType<typeof Invitation>>) => {
+    const defaults = generate.invitation.simple()
+    const input = {
+      ...defaults,
+      ...data,
+    }
+    const invitation = wrap(new Invitation()).assign(input, { em })
+    em.persist(invitation)
+    return invitation
+  },
+}
+
 const expertHelper = {
   create: (
     em: EntityManager,
@@ -965,6 +979,7 @@ export {
   discussionHelper,
   expertHelper,
   filesHelper,
+  inivitationHelper,
   jobHelper,
   licenceHelper,
   newsHelper,

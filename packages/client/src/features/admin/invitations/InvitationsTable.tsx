@@ -1,0 +1,112 @@
+import { ColumnDef } from '@tanstack/react-table'
+import React from 'react'
+import { ContentFooter } from '../../../components/Page/ContentFooter'
+import { hidePagination, Pagination } from '../../../components/Pagination'
+import Table from '../../../components/Table'
+import { HoverDNAnexusLogo } from '../../../components/icons/DNAnexusLogo'
+import { UsersIcon } from '../../../components/icons/UsersIcon'
+import { useToastWSHandler } from '../../../hooks/useToastWSHandler'
+import { UserLayout } from '../../../layouts/UserLayout'
+import { getSelectedObjectsFromIndexes, toArrayFromObject } from '../../../utils/object'
+import { IFilter } from '../../home/types'
+import { useList } from '../../home/useList'
+import { Params, prepareListFetchV2 } from '../../home/utils'
+import Breadcrumbs, { BreadcrumbItem } from '../Breadcrumbs'
+import { fetchInvitations, Invitation } from '../admin.api'
+import { AdminStyledPageTable, Title, Topbox, TopLeft } from '../styles'
+import InvitationActionRow from './ActionRow'
+import { InvitationListType } from './type'
+import useLastWebsocketMessage from './useLastWebsocketMessage'
+
+const fetchInvitationsList = async (filters: IFilter[], params: Params) => {
+  const filterParam = prepareListFetchV2(filters, params)
+  if (params.ids) {
+    filterParam['filter[ids]'] = params.ids
+  }
+  return fetchInvitations({
+    params: filterParam,
+  })
+}
+
+export const InvitationsTable = ({
+  breadcrumbs,
+  title,
+  additionalParams,
+  columns,
+}: {
+  breadcrumbs: BreadcrumbItem[]
+  title: string
+  additionalParams?: Record<string, string>
+  columns: ColumnDef<Invitation>[]
+}) => {
+  const {
+    setPerPageParam,
+    setPageParam,
+    setSearchFilter,
+    filterQuery,
+    perPageParam,
+    query,
+    selectedIndexes,
+    setSelectedIndexes,
+    saveColumnResizeWidth,
+    colWidths,
+  } = useList<InvitationListType>({
+    fetchList: fetchInvitationsList,
+    resource: 'admin-invitations',
+    params: {
+      ...additionalParams,
+    },
+  })
+  const { data, isLoading } = query
+  if (query.error) {
+    return <div>{JSON.stringify(query.error)}</div>
+  }
+
+  const selectedObjects = getSelectedObjectsFromIndexes(selectedIndexes, data?.data)
+  const filters = toArrayFromObject(filterQuery)
+
+  useToastWSHandler()
+  useLastWebsocketMessage()
+
+  return (
+    <UserLayout innerScroll>
+      <Breadcrumbs breadcrumbs={breadcrumbs} />
+      <Topbox>
+        <TopLeft>
+          <UsersIcon height={20} />
+          <Title>{title}</Title>
+        </TopLeft>
+        <InvitationActionRow selectedInvitations={selectedObjects} setSelectedIndexes={setSelectedIndexes} />
+      </Topbox>
+
+      <AdminStyledPageTable>
+        <Table<Invitation>
+          isLoading={isLoading}
+          data={data?.data ?? []}
+          columns={columns}
+          columnSizing={colWidths}
+          setColumnSizing={saveColumnResizeWidth}
+          rowSelection={selectedIndexes}
+          setSelectedRows={setSelectedIndexes}
+          setColumnFilters={setSearchFilter}
+          columnFilters={filters}
+          emptyText="No invitations found"
+        />
+      </AdminStyledPageTable>
+
+      <ContentFooter>
+        <Pagination
+          page={data?.meta?.page}
+          totalCount={data?.meta?.total}
+          totalPages={data?.meta?.totalPages}
+          perPage={perPageParam}
+          isHidden={hidePagination(query.isFetched, data?.data?.length, data?.meta?.totalPages)}
+          setPage={setPageParam as (n: number) => void}
+          onPerPageSelect={setPerPageParam as (n: number) => void}
+          showListCount
+        />
+        <HoverDNAnexusLogo opacity height={14} />
+      </ContentFooter>
+    </UserLayout>
+  )
+}

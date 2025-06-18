@@ -21,9 +21,8 @@ import {
   SelectedFile,
 } from '@shared/domain/user-file/user-file.types'
 import { User } from '@shared/domain/user/user.entity'
-import { UserRepository } from '@shared/domain/user/user.repository'
 import { NOTIFICATION_ACTION, SEVERITY, STATIC_SCOPE } from '@shared/enums'
-import { PermissionError } from '@shared/errors'
+import { ASSET_VALIDATION_ERROR, PermissionError, ValidationError } from '@shared/errors'
 import { PlatformClient } from '@shared/platform-client'
 import * as queue from '@shared/queue'
 import { expect } from 'chai'
@@ -33,6 +32,9 @@ import { SpaceRepository } from '@shared/domain/space/space.repository'
 import { Space } from '@shared/domain/space/space.entity'
 import { SpaceEventService } from '@shared/domain/space-event/space-event.service'
 import { SPACE_EVENT_ACTIVITY_TYPE } from '@shared/domain/space-event/space-event.enum'
+import { LicensedItemRepository } from '@shared/domain/licensed-item/licensed-item.repository'
+import { Asset } from '@shared/domain/user-file/asset.entity'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
 
 describe('UserFileService', () => {
   const USER_ID = 0
@@ -88,6 +90,8 @@ describe('UserFileService', () => {
 
   const getEntityDownloadLinkStub = stub()
 
+  const getLicenseItemsForNodeStub = stub()
+
   const createAndSendSpaceEventStub = stub()
 
   const fileDownloadLinkStub = stub()
@@ -102,6 +106,7 @@ describe('UserFileService', () => {
   const emFindOneStub = stub()
   const emFindStub = stub()
   const emCountStub = stub()
+  const emPopulateStub = stub()
   const emFindOneOrFailStub = stub()
 
   let createFileSynchronizeJobTaskStub: SinonStub
@@ -134,14 +139,21 @@ describe('UserFileService', () => {
   const findEditableOneStub = stub()
 
   const editableSpacesStub = stub()
+  const accessibleSpaceIdsStub = stub()
 
   const USER = {
     id: USER_ID,
     isSiteAdmin: isSiteAdminStub,
     isChallengeAdmin: isChallengeAdminStub,
     editableSpaces: editableSpacesStub,
+    accessibleSpaceIds: accessibleSpaceIdsStub,
+  } as unknown as User
+  const USER_CTX: UserContext = {
+    ...USER,
+    accessToken: 'accessToken',
+    dxuser: 'dxuser',
+    loadEntity: async () => USER,
   }
-  const USER_CTX: UserCtx = { ...USER, accessToken: 'accessToken', dxuser: 'dxuser' }
 
   const fileRepository = {
     loadIfAccessibleByUser: fileRepoFindOneOrFailStub,
@@ -150,9 +162,9 @@ describe('UserFileService', () => {
     count: fileRepoCountStub,
     findEditable: findEditableStub,
   } as unknown as UserFileRepository
-  const userRepository = {
-    findOneOrFail: userRepoFindOneOrFailStub,
-  } as unknown as UserRepository
+  const licesnsedItemRepo = {
+    getLicenseItemsForNode: getLicenseItemsForNodeStub,
+  } as unknown as LicensedItemRepository
   const spaceRepository = {
     findOne: spaceFindOneStub,
   } as unknown as SpaceRepository
@@ -178,6 +190,7 @@ describe('UserFileService', () => {
     transactional: transactionalStub,
     remove: removeStub,
     clear: clearStub,
+    populate: emPopulateStub,
   } as unknown as SqlEntityManager
 
   const nodesHelper = {
@@ -241,6 +254,9 @@ describe('UserFileService', () => {
     folderRepoFindOneStub.reset()
     folderRepoFindOneStub.throws()
 
+    getLicenseItemsForNodeStub.reset()
+    getLicenseItemsForNodeStub.throws()
+
     userRepoFindOneOrFailStub.reset()
     userRepoFindOneOrFailStub.throws()
     userRepoFindOneOrFailStub.withArgs(USER_ID).returns(USER)
@@ -294,6 +310,9 @@ describe('UserFileService', () => {
     clearStub.reset()
     clearStub.throws()
 
+    emPopulateStub.reset()
+    emPopulateStub.throws()
+
     transactionalStub.callsFake(async (callback) => {
       return callback(em)
     })
@@ -321,6 +340,9 @@ describe('UserFileService', () => {
 
     emFindOneOrFailStub.reset()
     emFindOneOrFailStub.throws()
+
+    accessibleSpaceIdsStub.reset()
+    accessibleSpaceIdsStub.throws()
   })
 
   afterEach(() => {
@@ -374,8 +396,11 @@ describe('UserFileService', () => {
         isCreatedByChallengeBot: () => false,
       } as unknown as UserFile
 
+      const spaceIds = [1, 2, 3]
+      accessibleSpaceIdsStub.returns(spaceIds)
+
       fileRepoFindOneOrFailStub.withArgs({ uid: UID }, match.any).returns(userFile)
-      nodeLoadIfAccessibleByUserStub.withArgs(USER, UID).returns(userFile)
+      nodeLoadIfAccessibleByUserStub.withArgs(USER, UID, spaceIds).returns(userFile)
       createFileSynchronizeJobTaskStub.reset()
 
       await getInstance().closeFile(UID, 'UPDATE_DATA_PORTAL_IMAGE_URL')
@@ -395,8 +420,11 @@ describe('UserFileService', () => {
         isCreatedByChallengeBot: () => false,
       } as unknown as UserFile
 
+      const spaceIds = [1, 2, 3]
+      accessibleSpaceIdsStub.returns(spaceIds)
+
       fileRepoFindOneOrFailStub.withArgs({ uid: UID }, match.any).returns(userFile)
-      nodeLoadIfAccessibleByUserStub.withArgs(USER, UID).returns(userFile)
+      nodeLoadIfAccessibleByUserStub.withArgs(USER, UID, spaceIds).returns(userFile)
       createFileSynchronizeJobTaskStub.reset()
 
       try {
@@ -544,6 +572,7 @@ describe('UserFileService', () => {
       fileDownloadLinkStub.returns({ url: 'http://download-link.com' })
       const fileEvent = { type: eventHelper.EVENT_TYPES.FILE_BULK_DOWNLOAD } as Event
       createFileEventStub.returns({ ...fileEvent, param1: 'file_path' })
+      emPopulateStub.reset()
 
       const IDs = [123, 234]
       const response = await getInstance().composeFilesForBulkDownload(IDs)
@@ -588,6 +617,7 @@ describe('UserFileService', () => {
     })
 
     it("user doesn't have access to at least one file", async () => {
+      emPopulateStub.reset()
       loadNodesStub.returns([{ name: 'object_1' }, { name: 'object_2' }])
 
       findAccessibleStub.returns([{} as UserFile])
@@ -793,6 +823,57 @@ describe('UserFileService', () => {
     it('throw error if not in leadership', async () => {})
   })
 
+  describe('#validateAssetRemoval', async () => {
+    it('has license and no app - no error', async () => {
+      const asset = {
+        id: 1,
+        apps: {
+          count: () => 0,
+        },
+      } as unknown as Asset
+      emPopulateStub.reset()
+      getLicenseItemsForNodeStub.withArgs(asset.id).returns([{}])
+
+      const userFileService = getInstance()
+      await userFileService.validateAssetRemoval(asset)
+
+      expect(emPopulateStub.calledOnce).to.be.true
+    })
+
+    it('has app and no license - no error', async () => {
+      const asset = {
+        id: 1,
+        apps: {
+          count: () => 1,
+        },
+      } as unknown as Asset
+      emPopulateStub.reset()
+      getLicenseItemsForNodeStub.withArgs(asset.id).returns([])
+
+      const userFileService = getInstance()
+      await userFileService.validateAssetRemoval(asset)
+
+      expect(emPopulateStub.calledOnce).to.be.true
+    })
+
+    it('has app and license - throws error', async () => {
+      const asset = {
+        id: 1,
+        apps: {
+          count: () => 1,
+        },
+      } as unknown as Asset
+      emPopulateStub.reset()
+      getLicenseItemsForNodeStub.withArgs(asset.id).returns([{}])
+
+      const userFileService = getInstance()
+      await expect(userFileService.validateAssetRemoval(asset)).to.be.rejectedWith(
+        ValidationError,
+        ASSET_VALIDATION_ERROR,
+      )
+    })
+  })
+
   function getInstance() {
     return new UserFileService(
       em,
@@ -802,8 +883,8 @@ describe('UserFileService', () => {
       notificationService,
       nodeRepository,
       fileRepository,
-      userRepository,
       spaceRepository,
+      licesnsedItemRepo,
       nodesHelper,
       entityService,
       nodeService,

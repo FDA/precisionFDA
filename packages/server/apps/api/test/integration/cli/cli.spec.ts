@@ -36,7 +36,7 @@ describe('/cli', async () => {
     expect(body).to.be.an('object')
     expect(body).to.have.property('version')
     expect(body.version).to.be.a('string')
-    expect(body.version).to.equal('2.9.0')
+    expect(body.version).to.equal('2.10.0')
   })
 
   it('GET /:uid/describe has valid app response', async () => {

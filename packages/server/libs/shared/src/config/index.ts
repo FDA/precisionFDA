@@ -4,7 +4,7 @@ import path from 'path'
 import { mergeDeepRight } from 'ramda'
 import { ENVS } from '../enums'
 import { DeepPartial } from '../types'
-import { MAX_JOB_DURATION_SECONDS } from './constants'
+import { BILLING_INFO, MAX_JOB_DURATION_SECONDS } from './constants'
 import * as overrides from './envs'
 
 // load process.env values
@@ -24,6 +24,18 @@ export const parseBooleanFromProcess = (
   value: string | undefined,
   defaultValue = false,
 ): boolean => (value ? value.toLowerCase() === 'true' : defaultValue)
+
+export const parseJSONFromProcess = (envValue: string | undefined): Maybe<any> => {
+  if (envValue) {
+    try {
+      return JSON.parse(envValue)
+    } catch (e) {
+      console.error('Error parsing JSON from environment variable', e)
+      return null
+    }
+  }
+  return null
+}
 
 const getEnv = () => {
   try {
@@ -87,6 +99,8 @@ const defaultConfig = {
     challengeBotAccessToken: process.env.CHALLENGE_BOT_TOKEN ?? '',
     findDataObjectsQueryLimit: 1000,
     orgEveryoneHandle: 'precisionfda_dev',
+    billingInfo: parseJSONFromProcess(process.env.BILLING_INFO) ?? BILLING_INFO,
+    billingConfirmation: process.env.BILLING_CONFIRMATION,
   },
   emails: {
     smtp: {

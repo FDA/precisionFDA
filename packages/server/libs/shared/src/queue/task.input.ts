@@ -1,6 +1,6 @@
+import { NotifyType } from '@shared/domain/discussion/dto/notify.type'
 import type { EmailSendInput } from '../domain/email/email.config'
 import type { UserCtx } from '../types'
-import { NotifyType } from '@shared/domain/discussion/dto/notify.type'
 
 export type Task = {
   type: TASK_TYPE
@@ -46,6 +46,7 @@ export enum TASK_TYPE {
   GENERATE_SPACE_REPORT_RESULT = 'generate_space_report_result',
   NOTIFY_NEW_DISCUSSION = 'notify_new_discussion',
   NOTIFY_NEW_DISCUSSION_REPLY = 'notify_new_discussion_reply',
+  PROVISION_NEW_USERS = 'provision_new_users',
 }
 
 // will be used in the sub-handler
@@ -110,6 +111,14 @@ export type NotifyNewDiscussionReplyJob = TaskWithAuth & {
   payload: {
     discussionId: number
     notify: NotifyType
+  }
+}
+
+export type ProvisionNewUserJob = TaskWithAuth & {
+  type: TASK_TYPE.PROVISION_NEW_USERS
+  payload: {
+    invitationId: number
+    ids: number[]
   }
 }
 

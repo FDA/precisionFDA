@@ -23,8 +23,6 @@ export class CliSpaceMemberDTO {
       side: SPACE_MEMBERSHIP_SIDE[membership.side] as keyof typeof SPACE_MEMBERSHIP_SIDE,
       name: membership.user.getEntity().fullName,
       username: membership.user.getEntity().dxuser,
-
     }
-
   }
 }
