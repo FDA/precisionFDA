@@ -43,6 +43,7 @@ import {
   RemoveFolderParams,
   RenameFolderParams,
   Starting,
+  UserCreateData,
   UserDescribeParams,
   UserInviteToOrgParams,
   UserRemoveFromOrgParams,
@@ -54,6 +55,7 @@ import {
   AppDescribeResponse,
   ClassIdResponse,
   CloneObjectsResponse,
+  CloudResourcesResponse,
   DbClusterDescribeResponse,
   DescribeDataObjectsResponse,
   DescribeFoldersResponse,
@@ -73,6 +75,8 @@ import {
   ListFilesResult,
   OrgDescribeResponse,
   OrgFindMembersReponse,
+  UpdateBillingInformationResponse,
+  UserCreateResponse,
   UserDescribeResponse,
   UserInviteToOrgResponse,
   UserRemoveFromOrgResponse,
@@ -192,7 +196,7 @@ export class PlatformClient {
    * API: /system/findJobs
    * @see https://documentation.dnanexus.com/developer/api/search#api-method-system-findjobs
    */
-  async jobFind(params: JobFindParams) {
+  async jobFind(params: JobFindParams): Promise<FindJobsResponse> {
     const url = `${config.platform.apiUrl}/system/findJobs`
     const options: AxiosRequestConfig = {
       method: 'POST',
@@ -465,7 +469,7 @@ export class PlatformClient {
     return await this.sendRequest(options)
   }
 
-  async getFileUploadUrl(params: FileGetUploadUrlParams) {
+  async getFileUploadUrl(params: FileGetUploadUrlParams): Promise<GetUploadURLResponse> {
     const url = `${config.platform.apiUrl}/${params.dxid}/upload`
     const data = {
       size: params.size,
@@ -692,6 +696,33 @@ export class PlatformClient {
     }
   }
 
+  async createUser(data: UserCreateData): Promise<UserCreateResponse> {
+    const url = `${config.platform.authApiUrl}/user/new`
+    const options: AxiosRequestConfig = {
+      method: 'POST',
+      data,
+      url,
+    }
+    return await this.sendRequest(options)
+  }
+
+  async userCloudResources(orgDxid: string): Promise<CloudResourcesResponse> {
+    const url = `${config.platform.apiUrl}/${orgDxid}/describe`
+    const options: AxiosRequestConfig = {
+      method: 'POST',
+      data: {
+        fields: {
+          computeCharges: true,
+          storageCharges: true,
+          dataEgressCharges: true,
+        },
+      },
+      url,
+    }
+
+    return await this.sendRequest(options)
+  }
+
   // ---------------------
   //    P R O J E C T S
   // ---------------------
@@ -842,15 +873,14 @@ export class PlatformClient {
     return await this.sendRequest(options)
   }
 
-  async updateBillingInformation(orgDxid: string, billingInfo: any): Promise<any> {
-    const billingConfirmation = process.env['BILLING_CONFIRMATION']
-    if (billingConfirmation) {
-      billingInfo['autoConfirm'] = billingConfirmation
-    }
-    const url = `${config.platform.apiUrl}/${orgDxid}/updateBillingInformation`
+  async updateBillingInformation(orgDxid: string): Promise<UpdateBillingInformationResponse> {
+    const url = `${config.platform.authApiUrl}/${orgDxid}/updateBillingInformation`
     const options: AxiosRequestConfig = {
       method: 'POST',
-      data: billingInfo,
+      data: {
+        autoConfirm: config.platform.billingConfirmation,
+        billingInformation: config.platform.billingInfo,
+      },
       url,
     }
     return await this.sendRequest(options)
@@ -957,7 +987,7 @@ export class PlatformClient {
     return results
   }
 
-  private async sendRequest<T>(options: AxiosRequestConfig) {
+  private async sendRequest<T>(options: AxiosRequestConfig): Promise<T> {
     try {
       options.headers = this.setupHeaders()
       this.logClientRequest(options)

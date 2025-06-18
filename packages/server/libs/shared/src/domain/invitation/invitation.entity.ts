@@ -1,6 +1,8 @@
 import { Entity, ManyToOne, PrimaryKey, Property, Ref } from '@mikro-orm/core'
-import { User } from '@shared/domain/user/user.entity'
 import { BaseEntity } from '@shared/database/base.entity'
+import { User } from '@shared/domain/user/user.entity'
+import { PROVISIONING_STATE } from './invitation.enum'
+import { InvitationRepository } from './invitation.repository'
 
 export interface Extras {
   req_reason: string
@@ -14,7 +16,7 @@ export interface Extras {
   organize_intent: boolean
 }
 
-@Entity({ tableName: 'invitations' })
+@Entity({ tableName: 'invitations', repository: () => InvitationRepository })
 export class Invitation extends BaseEntity {
   @PrimaryKey()
   id: number
@@ -40,7 +42,7 @@ export class Invitation extends BaseEntity {
   @Property()
   duns: string
 
-  @Property()
+  @Property({ hidden: true }) // do not expose IP in API responses
   ip: string
 
   @Property({ type: 'json' })
@@ -71,11 +73,20 @@ export class Invitation extends BaseEntity {
   address2: string
 
   @Property()
-  organizationalAdmin: boolean
+  organizationAdmin: boolean
 
   @Property()
   countryId: number
 
   @Property()
   phoneCountryId: number
+
+  @Property()
+  provisioningState: PROVISIONING_STATE
+
+  @Property({ hidden: false })
+  createdAt = new Date()
+
+  @Property({ onUpdate: () => new Date(), hidden: false })
+  updatedAt = new Date()
 }

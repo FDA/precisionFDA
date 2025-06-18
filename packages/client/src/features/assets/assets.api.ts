@@ -62,10 +62,3 @@ export async function editAssetRequest({ name, uid }:{ name: string, uid: string
   })
   return res.json()
 }
-
-export async function deleteAssetsRequest(ids: string[]): Promise<any> {
-  const res = await fetch(`/api/assets/${ids[0]}`, {
-    ...getApiRequestOpts('DELETE'),
-  }).then(checkStatus)
-  return res.json()
-}

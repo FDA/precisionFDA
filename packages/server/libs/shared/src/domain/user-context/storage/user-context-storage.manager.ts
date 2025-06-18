@@ -1,8 +1,9 @@
 import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { User } from '@shared/domain/user/user.entity'
 import { AsyncLocalStorage } from 'async_hooks'
 
 export function createUserContextManager(storage: AsyncLocalStorage<UserContext>): UserContext {
-  const getCurrentContext = () => {
+  const getCurrentContext = (): UserContext => {
     const store = storage.getStore()
 
     if (!store) {
@@ -15,20 +16,23 @@ export function createUserContextManager(storage: AsyncLocalStorage<UserContext>
   }
 
   return {
-    get id() {
+    get id(): number {
       return getCurrentContext()?.id
     },
-    get dxuser() {
+    get dxuser(): string {
       return getCurrentContext()?.dxuser
     },
-    get accessToken() {
+    get accessToken(): string {
       return getCurrentContext()?.accessToken
     },
-    get sessionId() {
+    get sessionId(): string {
       return getCurrentContext()?.sessionId
     },
-    async loadEntity() {
+    async loadEntity(): Promise<User | null> {
       return getCurrentContext().loadEntity()
+    },
+    get requestId(): string {
+      return getCurrentContext()?.requestId
     },
   }
 }

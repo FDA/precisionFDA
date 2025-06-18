@@ -1,8 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common'
-import { ServiceLogger } from '@shared/logger/decorator/service-logger'
+import { EmailSendService } from '@shared/domain/email/email-send.service'
 import { EMAIL_TYPES, EmailProcessInput } from '@shared/domain/email/email.config'
 import { EmailPrepareService } from '@shared/domain/email/templates/email-prepare.service'
-import { EmailSendService } from '@shared/domain/email/email-send.service'
+import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 
 @Injectable()
 export class EmailFacade {
@@ -13,7 +13,7 @@ export class EmailFacade {
     private readonly emailSendService: EmailSendService,
   ) {}
 
-  async sendEmail<T extends EMAIL_TYPES>(input: EmailProcessInput<T>) {
+  async sendEmail<T extends EMAIL_TYPES>(input: EmailProcessInput<T>): Promise<void> {
     this.logger.log(
       `Sending email type: ${input.emailTypeId} to user ids: ${input.receiverUserIds}`,
     )

@@ -46,7 +46,7 @@ export class CreateSpaceDTO {
   @IsBoolean()
   forChallenge: boolean = false
 
-  buildEntity() {
+  buildEntity(): Space {
     const uuid = crypto.randomBytes(7).toString('hex')
     const space = new Space()
     space.name = this.name

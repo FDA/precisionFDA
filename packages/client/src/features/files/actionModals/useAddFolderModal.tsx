@@ -77,7 +77,6 @@ export const useAddFolderModal = ({
       <ModalScroll>
         <StyledForm id="add-folder-form" onSubmit={handleSubmit(onSubmit)}>
           <FieldGroup>
-            <label>Folder Name</label>
             <InputText
               {...register('name')}
               placeholder="Enter Name..."

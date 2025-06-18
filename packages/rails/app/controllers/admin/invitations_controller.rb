@@ -5,6 +5,7 @@ module Admin
     include Naming
 
     layout "application"
+    layout "react", only: %i(list list_provisioning)
 
     ERROR_KEYS = %i(first_name last_name email org org_handle username).freeze
     WARNING_KEYS = %i(org org_handle username).freeze
@@ -13,11 +14,17 @@ module Admin
                   only: %i(search provision browse),
                   unless: -> { request.xhr? }
 
+    before_action :check_admin, only: %i(list_invitations)
+
     # GET
     # Lists invitations.
-    def index
-      js countries: Country.pluck(:name, :id)
-    end
+    # def index
+    #   js countries: Country.pluck(:name, :id)
+    # end
+
+    def list; end
+
+    def list_provisioning; end
 
     # POST
     # Searches invitations.
@@ -57,6 +64,10 @@ module Admin
     # POST
     # Renders list of invitations for browsing.
     def browse
+      render_invitations(nil, unsafe_params[:exclude])
+    end
+
+    def list_invitations
       render_invitations(nil, unsafe_params[:exclude])
     end
 

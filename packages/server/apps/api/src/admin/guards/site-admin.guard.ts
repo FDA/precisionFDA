@@ -11,7 +11,7 @@ export class SiteAdminGuard implements CanActivate {
     private readonly em: SqlEntityManager,
   ) {}
 
-  async canActivate() {
+  async canActivate(): Promise<boolean> {
     const userFromDb = await this.em.findOneOrFail(User, { id: this.user.id })
     const isSiteAdmin = await userFromDb.isSiteAdmin()
 

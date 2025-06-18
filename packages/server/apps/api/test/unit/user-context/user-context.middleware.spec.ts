@@ -8,6 +8,7 @@ import { HashUtils } from '@shared/utils/hash.utils'
 import { TimeUtils } from '@shared/utils/time.utils'
 import { expect } from 'chai'
 import { Request, Response } from 'express'
+import { nanoid } from 'nanoid'
 import { SinonStub, stub } from 'sinon'
 import { UserContextMiddleware } from '../../../src/user-context/middleware/user-context.middleware'
 
@@ -15,6 +16,7 @@ describe('UserContextMiddleware', () => {
   let sessionExpirationMinutes
 
   const SESSION_ID = '123'
+  const REQUEST_ID = nanoid()
   const USER_ID = 1
   const SESSION_EXPIRED_AT = 123
   const PLATFORM_TOKEN = 'platform_token'
@@ -29,7 +31,7 @@ describe('UserContextMiddleware', () => {
     user_id: USER_ID,
     username: USER_NAME,
     token: PLATFORM_TOKEN,
-    get expiration() {
+    get expiration(): number {
       const now = new Date()
       const expirationDate = new Date(
         now.getTime() + TimeUtils.minutesToMilliseconds(sessionExpirationMinutes),
@@ -116,7 +118,7 @@ describe('UserContextMiddleware', () => {
   it('should run with empty context when no session cookie or authorization key provided', async () => {
     const instance = new UserContextMiddleware(em)
 
-    await instance.use({ headers: {} } as Request, RESPONSE, nextStub)
+    await instance.use({ headers: {}, url: '/', id: REQUEST_ID } as Request, RESPONSE, nextStub)
 
     expectRunWithEmptyContext()
   })
@@ -206,6 +208,7 @@ describe('UserContextMiddleware', () => {
       accessToken: PLATFORM_TOKEN,
       dxuser: USER_NAME,
       sessionId: SESSION_ID,
+      requestId: REQUEST_ID,
     })
   })
 
@@ -238,7 +241,8 @@ describe('UserContextMiddleware', () => {
       id: USER_ID,
       accessToken: PLATFORM_TOKEN,
       dxuser: USER_NAME,
-      sessionId: undefined, // no session id in cli key
+      sessionId: null, // no session id in cli key
+      requestId: REQUEST_ID,
     })
   })
 
@@ -249,13 +253,15 @@ describe('UserContextMiddleware', () => {
     expect(userContextStorageRunStub.firstCall.args[1]).to.eq(nextStub)
   })
 
-  async function callWithSessionToken(token: string, userAgent = 'Foo') {
+  async function callWithSessionToken(token: string, userAgent = 'Foo'): Promise<void> {
     const middleware = new UserContextMiddleware(em)
     const req = {
       headers: {
         cookie: `_precision-fda_session=${token}`,
         'user-agent': userAgent,
       },
+      url: '/',
+      id: REQUEST_ID,
     } as unknown as Request
 
     const res = {
@@ -265,16 +271,16 @@ describe('UserContextMiddleware', () => {
     await middleware.use(req, res, nextStub)
   }
 
-  async function callWithAuthHeader(key: string) {
+  async function callWithAuthHeader(key: string): Promise<void> {
     const middleware = new UserContextMiddleware(em)
-    const req = { headers: { authorization: key } } as unknown as Request
+    const req = { headers: { authorization: key }, url: '/', id: REQUEST_ID } as unknown as Request
 
     const res = {} as unknown as Response
 
     await middleware.use(req, res, nextStub)
   }
 
-  function expectRunWithEmptyContext() {
+  function expectRunWithEmptyContext(): void {
     expect(userContextStorageRunStub.calledOnce).to.be.true
     const userContext = userContextStorageRunStub.firstCall.args[0]
 

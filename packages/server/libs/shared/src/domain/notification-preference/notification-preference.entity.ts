@@ -1,13 +1,7 @@
-import {
-  Entity,
-  PrimaryKey,
-  Property,
-  Reference,
-  Ref, JsonType, OneToOne,
-} from '@mikro-orm/core'
+import { Entity, JsonType, OneToOne, PrimaryKey, Property, Ref, Reference } from '@mikro-orm/core'
+import { isNil } from 'ramda'
+import { DEFAULT_NOTIFICATION_PREFERENCES, NOTIFICATION_TYPES } from '../email/email.config'
 import { User } from '../user/user.entity'
-import { NOTIFICATION_TYPES } from '../email/email.config'
-import { isNil} from 'ramda'
 
 class NotificationType extends JsonType {
   convertToJSValue(value: string | null): typeof NOTIFICATION_TYPES | null {
@@ -21,7 +15,6 @@ class NotificationType extends JsonType {
 
 @Entity({ tableName: 'notification_preferences' })
 export class NotificationPreference {
-
   @PrimaryKey()
   id: number
 
@@ -33,5 +26,6 @@ export class NotificationPreference {
 
   constructor(user: User) {
     this.user = Reference.create(user)
+    this.data = DEFAULT_NOTIFICATION_PREFERENCES
   }
 }

@@ -29,7 +29,7 @@ export class GroupsSpaceCreationProcess extends SpaceCreationProcess {
     super(user, em, notificationService, adminClient)
   }
 
-  protected validateInput(input: CreateSpaceDTO) {
+  protected validateInput(input: CreateSpaceDTO): void {
     if (input.guestLeadDxuser === input.hostLeadDxuser) {
       throw new Error('Host and Guest leads must be different users')
     }

@@ -20,6 +20,9 @@ import { FolderService } from '@shared/domain/user-file/folder.service'
 import { Asset } from '@shared/domain/user-file/asset.entity'
 import { NodeService } from '@shared/domain/user-file/node.service'
 import { SpaceModule } from '@shared/domain/space/space.module'
+import { ArchiveEntryService } from '@shared/domain/user-file/service/archive-entry.service'
+import { ArchiveEntry } from '@shared/domain/user-file/archive-entry.entity'
+import { LicensedItem } from '@shared/domain/licensed-item/licensed-item.entity'
 
 @Module({
   imports: [
@@ -39,13 +42,30 @@ import { SpaceModule } from '@shared/domain/space/space.module'
     TaggingModule,
     SpaceEventModule,
     SpaceModule,
-    MikroOrmModule.forFeature([Node, UserFile, Asset, Folder, User, Resource]),
+    MikroOrmModule.forFeature([
+      Node,
+      UserFile,
+      Asset,
+      Folder,
+      User,
+      Resource,
+      ArchiveEntry,
+      LicensedItem,
+    ]),
   ],
-  providers: [UserFileService, FolderService, NodeService, NodeHelper, FileSyncQueueJobProducer],
+  providers: [
+    UserFileService,
+    FolderService,
+    NodeService,
+    ArchiveEntryService,
+    NodeHelper,
+    FileSyncQueueJobProducer,
+  ],
   exports: [
     UserFileService,
     FolderService,
     NodeService,
+    ArchiveEntryService,
     BullQueueModule,
     FileSyncQueueJobProducer,
     MikroOrmModule,

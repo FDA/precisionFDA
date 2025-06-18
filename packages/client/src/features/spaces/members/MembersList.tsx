@@ -2,39 +2,28 @@ import React, { useEffect, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import styled from 'styled-components'
 import { RadioButtonGroup } from '../../../components/form/RadioButtonGroup'
-import { InputText } from '../../../components/InputText'
-import { Loader } from '../../../components/Loader'
-import { NoContent } from '../../../components/Public/styles'
 import { ErrorBoundary } from '../../../utils/ErrorBoundry'
-import { AlertText } from '../../data-portals/details/DataPortalNotFound'
-import { SearchBar } from '../../resources/styles'
 import { ISpace, SideRole } from '../spaces.types'
-import { MemberCard } from './MemberCard'
 import { spacesMembersListRequest } from './members.api'
 import { useAddMembersModal } from './useAddMembersModal'
-import { SpaceTitle } from '../../home/home.styles'
+import { ActionsRow, SpaceTitle } from '../../home/home.styles'
 import { PlusIcon } from '../../../components/icons/PlusIcon'
 import { Button } from '../../../components/Button'
+import { ColumnFiltersState, ColumnSort, RowSelectionState } from '@tanstack/react-table'
+import { MembersListTable } from './MembersListTable'
+import Dropdown from '../../../components/Dropdown'
+import { ActionsDropdownContent } from '../../home/ActionDropdownContent'
+import { ActionsButton } from '../../home/show.styles'
+import { useMemberSelectionActions } from './useMemberSelectionActions'
+import { useColumnWidthLocalStorage } from '../../../hooks/useColumnWidthLocalStorage'
+import { createLocationKey } from '../../../utils'
+import { useHiddenColumnLocalStorage } from '../../../hooks/useHiddenColumnLocalStorage'
 
 const StyledMemberListPage = styled.div`
-  padding: 32px;
+  flex: 1;
   display: flex;
   flex-direction: column;
   gap: 16px;
-`
-
-const SearchWrapper = styled.div`
-  display: flex;
-  align-items: flex-start;
-`
-
-const StyledMemberList = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  gap: 16px;
-  padding-left: 0;
-  align-items: flex-start;
-  align-self: stretch;
 `
 
 const StyledMemberToolRow = styled.div`
@@ -47,6 +36,8 @@ const StyledButtonGroup = styled.div`
   display: flex;
   flex-wrap: wrap;
   gap: 16px;
+  padding: 16px;
+  padding-bottom: 0;
 `
 
 const AddButton = styled(Button)`
@@ -56,9 +47,14 @@ const AddButton = styled(Button)`
 `
 
 export const MembersList = ({ space }: { space: ISpace }) => {
+  const locationKey = createLocationKey('members', space.id)
   const [sideRole, setSideRole] = useState<SideRole | undefined>()
-  const [searchQuery, setSearchQuery] = useState('')
-  const { modalComp, setShowModal } = useAddMembersModal({ spaceId: space.id })
+  const { modalComp, setShowModal } = useAddMembersModal({ spaceId: String(space.id) })
+  const { columnVisibility, setColumnVisibility } = useHiddenColumnLocalStorage(locationKey)
+  const { colWidths, saveColumnResizeWidth } = useColumnWidthLocalStorage(locationKey)
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
+  const [sortBy, setSortBy] = useState<ColumnSort[]>([])
+  const [selectedRows, setSelectedRows] = useState<RowSelectionState>({})
 
   useEffect(() => {
     setSideRole(undefined)
@@ -73,14 +69,23 @@ export const MembersList = ({ space }: { space: ISpace }) => {
   const canAddMember = space.type !== 'private_type' && space.type !== 'administrator'
   const isPrivateArea = Boolean(space.shared_space_id)
   const currentUserSide = space.current_user_membership.side
+  const isLeadOrAdmin = space.current_user_membership.role === 'admin' || space.current_user_membership.role === 'lead'
   const sideText = currentUserSide === 'host' ? 'Review' : 'Sponsor'
+  const selectedMembers = Object.keys(selectedRows)
+    .map(index => members[Number(index)])
+    .filter(Boolean)
 
-  // Filter members based on the search query
-  const filteredMembers = members.filter(member =>
-    Object.entries(member)
-      .filter(([key, value]) => key !== 'to_roles' && value !== null && value !== undefined) // Exclude 'to_roles' and null/undefined values
-      .some(([, value]) => value.toString().toLowerCase().includes(searchQuery.toLowerCase())),
-  )
+  const actions = useMemberSelectionActions({
+    space,
+    selectedItems: selectedMembers,
+    resourceKeys: ['space-members', String(space.id), sideRole || ''],
+    resetSelected: () => setSelectedRows({}),
+  })
+
+  if (!isLeadOrAdmin) {
+    delete actions['Edit Role']
+    delete actions['JSON Export']
+  }
 
   return (
     <ErrorBoundary>
@@ -108,30 +113,44 @@ export const MembersList = ({ space }: { space: ISpace }) => {
                 <PlusIcon height={12} /> Add Members
               </AddButton>
             )}
-            <SearchWrapper>
-              <SearchBar>
-                <InputText placeholder="Search members..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
-                <Button onClick={() => setSearchQuery('')}>Clear</Button>
-              </SearchBar>
-            </SearchWrapper>
           </StyledMemberToolRow>
+          {isLeadOrAdmin && (
+            <ActionsRow>
+              <div />
+              <Dropdown trigger="click" content={<ActionsDropdownContent actions={actions} />}>
+                {dropdownProps => (
+                  <ActionsButton
+                    {...dropdownProps}
+                    data-testid="members-actions-button"
+                    active={dropdownProps.isActive}
+                    disabled={selectedMembers.length === 0}
+                  />
+                )}
+              </Dropdown>
+            </ActionsRow>
+          )}
         </StyledButtonGroup>
 
-        {isLoading && <Loader />}
-        {!isLoading && filteredMembers.length === 0 && (
-          <NoContent>
-            <AlertText>No members found</AlertText>
-          </NoContent>
-        )}
-        {!isLoading && filteredMembers.length > 0 && (
-          <StyledMemberList>
-            {filteredMembers.map(member => (
-              <MemberCard key={member.id} member={member} space={space} />
-            ))}
-          </StyledMemberList>
-        )}
+        <MembersListTable
+          space={space}
+          members={members}
+          isLoading={isLoading}
+          filters={columnFilters}
+          setFilters={setColumnFilters}
+          sortBy={sortBy}
+          setSortBy={setSortBy}
+          selectedRows={selectedRows}
+          setSelectedRows={setSelectedRows}
+          columnSizing={colWidths}
+          setColumnSizing={saveColumnResizeWidth}
+          columnVisibility={columnVisibility}
+          setColumnVisibility={setColumnVisibility}
+          isLeadOrAdmin={isLeadOrAdmin}
+        />
       </StyledMemberListPage>
       {modalComp}
+      {actions['Remove']?.modal}
+      {actions['Edit Role']?.modal}
     </ErrorBoundary>
   )
 }

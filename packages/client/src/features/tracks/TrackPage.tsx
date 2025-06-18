@@ -38,7 +38,7 @@ const BlueTrackIcon = styled(TrackIcon)`
   color: ${theme.colors.darkGreyOnGrey};
 `
 
-export const TrackPage = () => {
+const TrackPage = () => {
   const identifier = useParams<TrackProvenancePageParams>()?.identifier
   const entityType = getEntityTypeFromIdentifier(identifier!)
   const { data, isLoading, isError } = useTrackProvenanceQuery(identifier!)
@@ -67,3 +67,5 @@ export const TrackPage = () => {
     </>
   )
 }
+
+export default TrackPage
