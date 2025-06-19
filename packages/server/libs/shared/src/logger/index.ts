@@ -1,7 +1,7 @@
 import { Logger } from '@nestjs/common'
 
-const getLogger = (name = 'pino-logger-name') => new Logger(name)
+const getLogger = (name = 'pino-logger-name'): Logger => new Logger(name)
 
 const defaultLogger = getLogger()
 
-export { getLogger, defaultLogger }
+export { defaultLogger, getLogger }
