@@ -1,4 +1,4 @@
-import { Meta } from '@storybook/react'
+import { Meta } from '@storybook/react-webpack5'
 import React, { useEffect } from 'react'
 import { SessionExpiredModal as AuthModalComp } from './SessionExpiredModal'
 import { useModal } from '../modal/useModal'
