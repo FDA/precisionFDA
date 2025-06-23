@@ -1,5 +1,15 @@
-import { Body, Controller, Get, HttpCode, Param, Post, Put, UseGuards } from '@nestjs/common'
-import { CliNodeSearchDTO } from '@shared/domain/cli/dto/CliNodeSearchDTO'
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  Param,
+  Post,
+  Put,
+  UseGuards,
+} from '@nestjs/common'
+import { CliNodeSearchDTO } from '@shared/domain/cli/dto/cli-node-search.dto'
 import { CliService } from '@shared/domain/cli/service/cli.service'
 import { DxId } from '@shared/domain/entity/domain/dxid'
 import { UserContextGuard } from '../user-context/guard/user-context.guard'
@@ -14,6 +24,9 @@ import { CliUpdateDiscussionFacade } from '../facade/discussion/cli-update-discu
 import { CliUpdateDiscussionReplyFacade } from '../facade/discussion/cli-update-discussion-reply.facade'
 import { CliDescribeEntityFacade } from '../facade/cli/cli-describe-entity.facade'
 import { CliJobScopeFacade } from '../facade/cli/cli-job-scope.facade'
+import { EntityScope } from '@shared/types/common'
+import { CliNodeRemoveDTO } from '@shared/domain/cli/dto/cli-node-remove.dto'
+import { CliNodeRemoveFacade } from '../facade/cli/cli-node-remove.facade'
 import {
   CliAppDescribeDTO,
   CliDbClusterDescribeDTO,
@@ -22,18 +35,17 @@ import {
   CliFileDescribeDTO,
   CliFolderDescribeDTO,
   CliWorkflowDescribeDTO,
-} from '@shared/domain/cli/dto/CliDescribeDTO'
-import { CliSpaceMemberDTO } from '@shared/domain/cli/dto/CliSpaceMemberDTO'
-import { CliDiscussionDTO } from '@shared/domain/cli/dto/CliDiscussionDTO'
-import { UserFile } from '@shared/domain/user-file/user-file.entity'
-import { Folder } from '@shared/domain/user-file/folder.entity'
-import { EntityScope } from '@shared/types/common'
+} from '@shared/domain/cli/dto/cli-describe.dto'
+import { CliSpaceMemberDTO } from '@shared/domain/cli/dto/cli-space-member.dto'
+import { CliDiscussionDTO } from '@shared/domain/cli/dto/cli-discussion.dto'
+import { CliNodeDTO } from '@shared/domain/cli/dto/cli-node.dto'
 
 // SPECIAL ROUTES INTENDED FOR CLI USAGE ONLY. CONTAINS CLI SPECIFIC LOGIC & SPECIAL RESPONSE OBJECTS.
 @Controller('/cli')
 export class CliController {
   constructor(
     private readonly cliService: CliService,
+    private readonly cliNodeRemoveFacade: CliNodeRemoveFacade,
     private readonly cliDescribeEntityFacade: CliDescribeEntityFacade,
     private readonly cliCreateDiscussionFacade: CliCreateDiscussionFacade,
     private readonly cliCreateDiscussionReplyFacade: CliCreateDiscussionReplyFacade,
@@ -45,13 +57,19 @@ export class CliController {
   @UseGuards(UserContextGuard)
   @HttpCode(200)
   @Post('/nodes')
-  async findNodes(@Body() body: CliNodeSearchDTO): Promise<UserFile[] | Folder[]> {
+  async findNodes(@Body() body: CliNodeSearchDTO): Promise<CliNodeDTO[]> {
     return this.cliService.findNodes(body)
+  }
+
+  @UseGuards(UserContextGuard)
+  @Delete('/nodes')
+  async removeNodes(@Body() body: CliNodeRemoveDTO): Promise<number> {
+    return this.cliNodeRemoveFacade.removeNodes(body)
   }
 
   @Get('/version/latest')
   getLatestVersion(): { version: string } {
-    return { version: '2.9.0' }
+    return { version: '2.10.0' }
   }
 
   @UseGuards(UserContextGuard)

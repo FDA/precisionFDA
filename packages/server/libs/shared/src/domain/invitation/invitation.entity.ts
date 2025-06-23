@@ -42,7 +42,7 @@ export class Invitation extends BaseEntity {
   @Property()
   duns: string
 
-  @Property()
+  @Property({ hidden: true }) // do not expose IP in API responses
   ip: string
 
   @Property({ type: 'json' })

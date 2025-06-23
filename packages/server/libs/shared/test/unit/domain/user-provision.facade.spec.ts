@@ -57,6 +57,7 @@ describe('UserProvisionFacade', () => {
       dxuser: siteAdmin.dxuser,
       accessToken: 'token',
       sessionId: 'sessionId',
+      loadEntity: (): Promise<User> => Promise.resolve(siteAdmin),
     }
     emailPrepareService = new EmailPrepareService(em, siteAdminContext)
 
@@ -120,16 +121,24 @@ describe('UserProvisionFacade', () => {
     expect(org.handle).to.equal(username.replace(/\./g, ''))
     const profile = await profileRepo.findOne({ user: user.id })
     expect(profile.email).to.equal(invitation.email)
-    expect(createNotificationStub.calledOnce).to.be.true()
+    expect(createNotificationStub.calledTwice).to.be.true()
     expect(createNotificationStub.firstCall.args[0]).to.deep.eq({
-      message: 'Completed provisioning for 1 user',
+      message: 'A provisioning task has been done',
       severity: SEVERITY.INFO,
-      action: NOTIFICATION_ACTION.USER_PROVISIONING_COMPLETED,
+      action: NOTIFICATION_ACTION.USER_PROVISIONING_DONE,
+      userId: siteAdmin.id,
+      sessionId: 'sessionId',
+    })
+    expect(createNotificationStub.secondCall.args[0]).to.deep.eq({
+      message: 'Completed provisioning for 1 user, 0 task failed',
+      severity: SEVERITY.INFO,
+      action: NOTIFICATION_ACTION.ALL_USER_PROVISIONINGS_COMPLETED,
       userId: siteAdmin.id,
       sessionId: 'sessionId',
       meta: {
         linkTitle: 'View Results',
-        linkUrl: '/admin/invitations',
+        linkUrl: '/admin/invitations/provisioning?invitations=1',
+        linkTarget: '_blank',
       },
     })
   })
@@ -268,16 +277,24 @@ describe('UserProvisionFacade', () => {
     expect(createSendEmailTaskStub.firstCall.args[0].subject).to.contain(
       `Welcome to precisionFDA, ${invitation.firstName}!`,
     )
-    expect(createNotificationStub.calledOnce).to.be.true()
+    expect(createNotificationStub.calledTwice).to.be.true()
     expect(createNotificationStub.firstCall.args[0]).to.deep.eq({
-      message: 'Completed provisioning for 1 user',
+      message: 'A provisioning task has been done',
       severity: SEVERITY.INFO,
-      action: NOTIFICATION_ACTION.USER_PROVISIONING_COMPLETED,
+      action: NOTIFICATION_ACTION.USER_PROVISIONING_DONE,
+      userId: siteAdmin.id,
+      sessionId: 'sessionId',
+    })
+    expect(createNotificationStub.secondCall.args[0]).to.deep.eq({
+      message: 'Completed provisioning for 1 user, 0 task failed',
+      severity: SEVERITY.INFO,
+      action: NOTIFICATION_ACTION.ALL_USER_PROVISIONINGS_COMPLETED,
       userId: siteAdmin.id,
       sessionId: 'sessionId',
       meta: {
         linkTitle: 'View Results',
-        linkUrl: '/admin/invitations',
+        linkUrl: '/admin/invitations/provisioning?invitations=1',
+        linkTarget: '_blank',
       },
     })
   })
@@ -288,16 +305,33 @@ describe('UserProvisionFacade', () => {
     })
     await em.flush()
 
-    userDescribeStub.throws({
+    const username = constructUsername(invitation.firstName, invitation.lastName)
+    const proposedOrg = constructOrgFromUsername(username)
+    const orgDxid = constructDxOrg(proposedOrg.orgBaseHandle)
+    const orgHandle = getHandle(orgDxid)
+    userDescribeStub.withArgs({ dxid: `user-${username}` }).throws({
+      props: { clientStatusCode: 404 },
+    })
+    orgDescribeStub.withArgs({ dxid: orgDxid }).throws({
+      props: { clientStatusCode: 404 },
+    })
+    createOrgStub.withArgs(orgHandle, proposedOrg.orgName).throws({
       props: { clientStatusCode: 400 },
     })
 
     await getInstance().provision(invitation.id, [invitation.id])
     const updatedInvitation = await invitationRepo.findOne({ id: invitation.id })
     expect(updatedInvitation.provisioningState).to.equal(PROVISIONING_STATE.FAILED)
+    expect(createNotificationStub.firstCall.args[0]).to.deep.eq({
+      message: `Provisioning failed for the email: ${invitation.email}`,
+      severity: SEVERITY.ERROR,
+      action: NOTIFICATION_ACTION.USER_PROVISIONING_ERROR,
+      userId: siteAdmin.id,
+      sessionId: 'sessionId',
+    })
   })
 
-  it('should create USER_PROVISIONED notification if there is still other in_progress invitation', async () => {
+  it('should create USER_PROVISIONING_DONE notification if a provisioning success', async () => {
     const invitation1 = create.inivitationHelper.create(em, {
       provisioningState: PROVISIONING_STATE.IN_PROGRESS,
     })
@@ -338,15 +372,15 @@ describe('UserProvisionFacade', () => {
     expect(profile.email).to.equal(invitation1.email)
     expect(createNotificationStub.calledOnce).to.be.true()
     expect(createNotificationStub.firstCall.args[0]).to.deep.eq({
-      message: 'A provisioning task has been completed',
+      message: 'A provisioning task has been done',
       severity: SEVERITY.INFO,
-      action: NOTIFICATION_ACTION.USER_PROVISIONED,
+      action: NOTIFICATION_ACTION.USER_PROVISIONING_DONE,
       userId: siteAdmin.id,
       sessionId: 'sessionId',
     })
   })
 
-  function getInstance() {
+  function getInstance(): UserProvisionFacade {
     const platformClient = {
       userDescribe: userDescribeStub,
       orgDescribe: orgDescribeStub,

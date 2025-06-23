@@ -43,6 +43,7 @@ Rails.application.routes.draw do
       get "stats", to: "base#stats"
       get "users", to: "users#index"
       get "invitations", to: "invitations#list"
+      get "invitations/provisioning", to: "invitations#list_provisioning"
       get "all_users", to: "users#all_users"
       get "active_users", to: "users#active"
       get "reset_mfa_user", to: "users#reset_2fa"

@@ -1,11 +1,23 @@
 import { QueryOrder } from '@mikro-orm/core'
-import { PaginationDTO, SortDefinition } from '@shared/domain/entity/domain/pagination.dto'
-import { Type } from 'class-transformer'
-import { IsEnum, IsOptional, ValidateNested } from 'class-validator'
+import { PaginationDTO } from '@shared/domain/entity/domain/pagination.dto'
+import { Transform, Type } from 'class-transformer'
+import { IsArray, IsEnum, IsNumber, IsOptional, ValidateNested } from 'class-validator'
 import { Invitation } from '../invitation.entity'
 import { PROVISIONING_STATE } from '../invitation.enum'
 
 class InvitationFilter {
+  @IsOptional()
+  @IsArray()
+  @Transform(({ value }) => {
+    if (!value) return []
+    if (typeof value === 'string') {
+      value = value.split(',')
+    }
+    return value.map((id) => parseInt(id))
+  })
+  @IsNumber({}, { each: true })
+  ids: number[]
+
   @IsOptional()
   @Type(() => String)
   firstName?: string
@@ -35,5 +47,8 @@ export class InvitationPaginationDTO extends PaginationDTO<Invitation> {
   filter?: InvitationFilter
 
   @IsOptional()
-  sort?: SortDefinition<Invitation> = { createdAt: QueryOrder.DESC }
+  sortBy?: string = 'createdAt'
+
+  @IsOptional()
+  sortDir?: string = QueryOrder.DESC
 }

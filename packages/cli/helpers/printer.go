@@ -285,14 +285,15 @@ func PrintDescribeHelp() int {
 	writeLine := newLineWriter(writer)
 
 	writeLine("  ", "  ")
-	writeLine("  For:", "Getting details about a given entity. Entity can be one of: app, job, file, workflow, discussion. Always responds in JSON format.\n")
+	writeLine("  For:", "Getting details about a given entity. Entity can be one of: app, discussion, file, folder, job, workflow. Always responds in JSON format.\n")
 	writeLine("  Usage:", "describe <ENTITY_ID>\n")
 	writeLine("  Examples:", "describe file-GJk3k5v85a4ZfgQ8bP5911Xg0-1 [Describes the file]")
 	writeLine("  ", "describe file-GJk1kpQ05xgQd8bP54kJFjzkz-1 [Describes the asset]")
 	writeLine("  ", "describe app-YZm95v85a4ZfgQB4JcAB4g0-3 [Describes the app]")
+	writeLine("  ", "describe discussion-15 [Describes the discussion]")
+	writeLine("  ", "describe folder-1234 [Describes the execution]")
 	writeLine("  ", "describe job-YZm9QpQ0b69Qd8bP454kmcf76-2 [Describes the execution]")
 	writeLine("  ", "describe workflow-GJkk5v005xggB4JcB4Zf9326V-1 [Describes the workflow]")
-	writeLine("  ", "describe discussion-15 [Describes the discussion]")
 
 	writer.Flush()
 	return 0

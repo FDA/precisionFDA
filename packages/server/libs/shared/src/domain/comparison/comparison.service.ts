@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { ComparisonRepository } from '@shared/domain/comparison/comparison.repository'
+import { InvalidStateError } from '@shared/errors'
 
 @Injectable()
 export class ComparisonService {
@@ -10,11 +11,11 @@ export class ComparisonService {
 
   constructor(private readonly comparisonRepository: ComparisonRepository) {}
 
-  async validateComparisons(fileToRemove: UserFile) {
+  async validateComparisons(fileToRemove: UserFile): Promise<void> {
     this.logger.log(`Validating comparisons for file ${fileToRemove.name}`)
     const result = await this.comparisonRepository.findComparisonsByUserFile(fileToRemove)
     if (result && result.length > 0) {
-      throw new Error(
+      throw new InvalidStateError(
         `File ${fileToRemove.name} cannot be deleted because it participates` +
           ' in one or more comparisons. Please delete all the comparisons first.',
       )
