@@ -4,9 +4,9 @@ export abstract class BaseEntity {
   @PrimaryKey()
   id!: number
 
-  @Property({ hidden: true })
+  @Property()
   createdAt = new Date()
 
-  @Property({ onUpdate: () => new Date(), hidden: true })
+  @Property({ onUpdate: () => new Date() })
   updatedAt = new Date()
 }

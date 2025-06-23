@@ -5,7 +5,6 @@ import {
   Filter,
   ManyToOne,
   OneToMany,
-  PrimaryKey,
   Property,
   Ref,
   Reference,
@@ -29,9 +28,6 @@ export type NoteType = 'Discussion' | 'Answer'
   }),
 })
 export class Note extends ScopedEntity {
-  @PrimaryKey()
-  id: number
-
   @Property()
   title: string
 

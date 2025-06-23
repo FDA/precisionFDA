@@ -8,7 +8,6 @@ import { TaggingRepository } from './tagging.repository'
 import { DbCluster } from '../db-cluster/db-cluster.entity'
 import { TAGGABLE_TYPE } from '@shared/domain/tagging/tagging.types'
 
-
 @Entity({ tableName: 'taggings', repository: () => TaggingRepository })
 export class Tagging {
   @PrimaryKey()

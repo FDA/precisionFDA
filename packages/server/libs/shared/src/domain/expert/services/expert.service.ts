@@ -13,6 +13,7 @@ import { User } from '@shared/domain/user/user.entity'
 import { RemoveNodesFacade } from '@shared/facade/node-remove/remove-nodes.facade'
 import { Uid } from '@shared/domain/entity/domain/uid'
 import { UserFileRepository } from '@shared/domain/user-file/user-file.repository'
+import { PaginatedResult } from '@shared/domain/entity/domain/paginated.result'
 
 @Injectable()
 export class ExpertService {
@@ -27,7 +28,7 @@ export class ExpertService {
     private readonly removeNodesFacade: RemoveNodesFacade,
   ) {}
 
-  async delete(expertId: number) {
+  async delete(expertId: number): Promise<void> {
     const expert = await this.expertRepository.findOne(
       { id: expertId },
       { populate: ['user', 'questions', 'answers', 'questions.comments'] },
@@ -65,7 +66,7 @@ export class ExpertService {
     return ExpertDTO.fromEntity(expert)
   }
 
-  async listExperts(pagination: ExpertPaginationDTO) {
+  async listExperts(pagination: ExpertPaginationDTO): Promise<PaginatedResult<ExpertDTO>> {
     const where: FilterQuery<Expert> = {}
     const { year } = pagination.filter ?? {}
 
@@ -93,7 +94,7 @@ export class ExpertService {
   /*
    * Get a list of years that have at least one expert
    */
-  async getYears() {
+  async getYears(): Promise<number[]> {
     const result = await this.em.execute(
       'SELECT distinct YEAR(created_at) as year FROM experts order by year desc',
     )

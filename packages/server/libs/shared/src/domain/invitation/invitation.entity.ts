@@ -1,14 +1,24 @@
-import { Entity, ManyToOne, PrimaryKey, Property, Ref } from '@mikro-orm/core'
+import { Entity, ManyToOne, Property, Ref } from '@mikro-orm/core'
 import { BaseEntity } from '@shared/database/base.entity'
 import { InvitationRepository } from '@shared/domain/invitation/invitation.repository'
 import { User } from '@shared/domain/user/user.entity'
 import { PROVISIONING_STATE } from './invitation.enum'
+import { WorkaroundJsonType } from '@shared/database/json-workaround.type'
+
+export interface Extras {
+  req_reason: string
+  req_data: string
+  req_software: string
+  research_intent: boolean
+  clinical_intent: boolean
+  consistency_challenge_intent: string
+  truth_challenge_intent: string
+  participate_intent: boolean
+  organize_intent: boolean
+}
 
 @Entity({ tableName: 'invitations', repository: () => InvitationRepository })
 export class Invitation extends BaseEntity {
-  @PrimaryKey()
-  id: number
-
   @Property()
   firstName: string
 
@@ -33,16 +43,8 @@ export class Invitation extends BaseEntity {
   @Property({ hidden: true }) // do not expose IP in API responses
   ip: string
 
-  @Property({ type: 'json' })
-  extras: {
-    participate_intent: boolean
-    req_software: string
-    req_data: string
-    research_intent: boolean
-    clinical_intent: boolean
-    req_reason: string
-    organize_intent: boolean
-  }
+  @Property({ type: WorkaroundJsonType })
+  extras: Extras
 
   @ManyToOne(() => User)
   user: Ref<User>
@@ -79,10 +81,4 @@ export class Invitation extends BaseEntity {
 
   @Property()
   provisioningState: PROVISIONING_STATE
-
-  @Property({ hidden: false })
-  createdAt = new Date()
-
-  @Property({ onUpdate: () => new Date(), hidden: false })
-  updatedAt = new Date()
 }

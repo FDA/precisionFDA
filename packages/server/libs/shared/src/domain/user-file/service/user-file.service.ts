@@ -41,6 +41,7 @@ import {
   FILE_STATE,
   FILE_STATE_DX,
   FILE_STI_TYPE,
+  FileOrAsset,
   IFileOrAsset,
   SelectedFile,
   SelectedFolder,
@@ -83,7 +84,7 @@ export class UserFileService {
    * @param fileUid
    * @private
    */
-  private async getFile(user: User, fileUid: Uid<'file'>): Promise<[Node, boolean]> {
+  private async getFile(user: User, fileUid: Uid<'file'>): Promise<[Asset | UserFile, boolean]> {
     const userIsAdmin = (await user.isSiteAdmin()) || (await user.isChallengeAdmin())
     if (userIsAdmin) {
       // first read file to find out if it's a challenge file
@@ -102,10 +103,10 @@ export class UserFileService {
     if (!file) {
       throw new PermissionError(`User ${user.dxuser} does not have access to file ${fileUid}`)
     }
-    return [file, false]
+    return [file as FileOrAsset, false]
   }
 
-  private async closeFileOnPlatform(fileDxid: string, challengeBotFile: boolean) {
+  private async closeFileOnPlatform(fileDxid: string, challengeBotFile: boolean): Promise<void> {
     this.logger.log({ fileDxid }, 'Calling close file on platform')
     const platformClient = challengeBotFile ? this.challengeBotClient : this.userClient
     const response = await platformClient.fileClose({
@@ -119,7 +120,7 @@ export class UserFileService {
     isChallengeBotFile: boolean,
     userCtx: UserCtx,
     followUpAction?: FOLLOW_UP_ACTION,
-  ) {
+  ): Promise<void> {
     await createFileSynchronizeJobTask({ fileUid, isChallengeBotFile, followUpAction }, userCtx)
   }
 
@@ -128,7 +129,7 @@ export class UserFileService {
     userId: number,
     fileDescribe: FileDescribeResponse,
     node: Node,
-  ) {
+  ): Promise<void> {
     this.logger.log(`File with uid: ${fileUid} is closed`)
     node.state = fileDescribe.state as FILE_STATE
     node.fileSize = fileDescribe.size
@@ -158,7 +159,7 @@ export class UserFileService {
     }
   }
 
-  private async getEnclosingFolderPath(tm: SqlEntityManager, folderId?: number) {
+  private async getEnclosingFolderPath(tm: SqlEntityManager, folderId?: number): Promise<string> {
     if (!folderId) {
       return null
     }
@@ -208,10 +209,10 @@ export class UserFileService {
 
   private async processFile(
     tm: SqlEntityManager,
-    node: Node,
+    node: Asset | UserFile,
     loadedUser: User,
     enclosingFolderPath: string,
-  ) {
+  ): Promise<{ url: string; path: string }> {
     const filePath = await userFileHelper.getNodePath(tm, node)
     const fileDownloadLinkResponse = await this.userClient.fileDownloadLink({
       fileDxid: node.dxid,
@@ -235,8 +236,8 @@ export class UserFileService {
     }
   }
 
-  private async getAccessibleNodes(fileIDs: number[]) {
-    const nodes: Node[] = await this.nodeService.loadNodes(fileIDs, {})
+  private async getAccessibleNodes(fileIDs: number[]): Promise<(Asset | UserFile)[]> {
+    const nodes = (await this.nodeService.loadNodes(fileIDs, {})) as (Asset | UserFile)[]
     const idsToCheck = nodes
       .filter((node) => node.stiType === FILE_STI_TYPE.USERFILE)
       .map((node) => node.id)
@@ -247,7 +248,7 @@ export class UserFileService {
     return nodes
   }
 
-  async closeFile(fileUid: Uid<'file'>, followUpAction?: FOLLOW_UP_ACTION) {
+  async closeFile(fileUid: Uid<'file'>, followUpAction?: FOLLOW_UP_ACTION): Promise<void> {
     this.logger.log(`Closing file ${fileUid}`)
 
     await this.em.transactional(async () => {
@@ -278,7 +279,7 @@ export class UserFileService {
    */
   async synchronizeFile(fileUid: Uid<'file'>, isChallengeBotFile: boolean): Promise<boolean> {
     this.logger.log(`Synchronize file: ${fileUid}`)
-    const node = await this.nodeRepo.findOneOrFail({ uid: fileUid })
+    const node = (await this.nodeRepo.findOneOrFail({ uid: fileUid })) as Asset | UserFile
     const platformClient = isChallengeBotFile ? this.challengeBotClient : this.userClient
 
     try {
@@ -298,7 +299,7 @@ export class UserFileService {
     return false
   }
 
-  async createFile(fileCreate: UserFileCreate) {
+  async createFile(fileCreate: UserFileCreate): Promise<UserFile> {
     const file = new UserFile(this.em.getReference(User, fileCreate.userId))
     file.dxid = fileCreate.dxid
     file.project = fileCreate.project
@@ -318,12 +319,12 @@ export class UserFileService {
     return file
   }
 
-  async getDownloadLink(file: UserFile | Asset, options?: DownloadLinkOptionsDto) {
+  async getDownloadLink(file: FileOrAsset, options?: DownloadLinkOptionsDto): Promise<string> {
     return this.entityService.getEntityDownloadLink(file, file.name, options)
   }
 
-  async getDownloadLinkForUid(uid: Uid<'file'>, options?: DownloadLinkOptionsDto) {
-    const file = (await this.nodeRepo.findAccessibleOne({ uid: uid })) as UserFile | Asset
+  async getDownloadLinkForUid(uid: Uid<'file'>, options?: DownloadLinkOptionsDto): Promise<string> {
+    const file = (await this.nodeRepo.findAccessibleOne({ uid: uid })) as FileOrAsset
 
     if (!file) {
       throw new NotFoundError('File not found')
@@ -341,7 +342,7 @@ export class UserFileService {
    *
    * @param assetToRemove
    */
-  async validateAssetRemoval(assetToRemove: Asset) {
+  async validateAssetRemoval(assetToRemove: Asset): Promise<void> {
     await this.em.populate(assetToRemove, ['apps'])
     const licenseItems = await this.licensedItemRepo.getLicenseItemsForNode(assetToRemove.id)
 
@@ -350,7 +351,7 @@ export class UserFileService {
     }
   }
 
-  async validateSpaceReports(fileToRemove: UserFile) {
+  async validateSpaceReports(fileToRemove: UserFile): Promise<void> {
     const count = await this.em.count(SpaceReport, { resultFile: fileToRemove })
 
     if (count > 0) {
@@ -479,7 +480,7 @@ export class UserFileService {
    * @param userId current user
    * @param node node that is being verified
    */
-  async validateProtectedSpaces(action: string, userId: number, node: Node) {
+  async validateProtectedSpaces(action: string, userId: number, node: Node): Promise<void> {
     if (!node.isInSpace()) {
       return
     }
