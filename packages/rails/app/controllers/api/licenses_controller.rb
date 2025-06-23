@@ -149,7 +149,7 @@ module Api
             user_id: @context.user.id,
             message:,
           }
-          https_apps_client.email_send(NotificationPreference.email_types[:license_request_email], [], request)
+          https_apps_client.email_send(NotificationPreference.email_types[:license_request_email], request)
           type = :success
           text = "License \"#{@license.title}\" approval requested"
         else

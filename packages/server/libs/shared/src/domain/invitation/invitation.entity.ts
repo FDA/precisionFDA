@@ -1,20 +1,8 @@
 import { Entity, ManyToOne, PrimaryKey, Property, Ref } from '@mikro-orm/core'
 import { BaseEntity } from '@shared/database/base.entity'
+import { InvitationRepository } from '@shared/domain/invitation/invitation.repository'
 import { User } from '@shared/domain/user/user.entity'
 import { PROVISIONING_STATE } from './invitation.enum'
-import { InvitationRepository } from './invitation.repository'
-
-export interface Extras {
-  req_reason: string
-  req_data: string
-  req_software: string
-  research_intent: boolean
-  clinical_intent: boolean
-  consistency_challenge_intent: string
-  truth_challenge_intent: string
-  participate_intent: boolean
-  organize_intent: boolean
-}
 
 @Entity({ tableName: 'invitations', repository: () => InvitationRepository })
 export class Invitation extends BaseEntity {
@@ -46,7 +34,15 @@ export class Invitation extends BaseEntity {
   ip: string
 
   @Property({ type: 'json' })
-  extras: Extras
+  extras: {
+    participate_intent: boolean
+    req_software: string
+    req_data: string
+    research_intent: boolean
+    clinical_intent: boolean
+    req_reason: string
+    organize_intent: boolean
+  }
 
   @ManyToOne(() => User)
   user: Ref<User>

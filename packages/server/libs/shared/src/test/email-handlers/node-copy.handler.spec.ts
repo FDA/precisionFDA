@@ -1,83 +1,78 @@
-import { EMAIL_TYPES } from '@shared/domain/email/email.config'
-import { UserOpsCtx } from '@shared/types'
-import { Logger } from '@nestjs/common'
-import { stub } from 'sinon'
-import { expect } from 'chai'
-import { EntityManager } from '@mikro-orm/mysql'
+import { NodeCopyInputDTO } from '@shared/domain/email/dto/node-copy-input.dto'
 import { User } from '@shared/domain/user/user.entity'
 import { NodeCopyHandler } from '@shared/domain/email/templates/handlers/node-copy.handler'
+import { expect } from 'chai'
+import { stub } from 'sinon'
+import { EmailClient } from '@shared/services/email-client'
+import { UserRepository } from '@shared/domain/user/user.repository'
+import { Organization } from '@shared/domain/org/org.entity'
+import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
 
 describe('NodeCopyHandler', () => {
-  let receiverUserIds: number[] = [1]
-  const emFindStub = stub()
+  const USER_ID = 11
 
-  const entityManager = {
-    find: emFindStub,
-  } as unknown as EntityManager
-  const log = {
-    log: stub(),
-    error: stub(),
-  } as unknown as Logger
+  const emailClientSendEmailStub = stub()
+  const userRepoFindStub = stub()
 
-  const userOpsCtx: UserOpsCtx = {
-    em: entityManager,
-    user: {
-      id: 1,
-      accessToken: 'accessToken',
-      dxuser: 'dxuser',
-    },
-    log,
+  const userRepo = {
+    find: userRepoFindStub,
+  } as unknown as UserRepository
+  const userEmail = {
+    sendEmail: emailClientSendEmailStub,
+  } as unknown as EmailClient
+
+  const getHandler = () => {
+    return new NodeCopyHandler(userRepo, userEmail)
   }
 
-  const nodeCopyInput = {
-    destination: 'Project XYZ',
-    notCopiedFolderNames: ['Folder A', 'Folder B'],
-    notCopiedFileNames: ['File 1.txt', 'File 2.jpg'],
-  }
+  beforeEach(async () => {
+    emailClientSendEmailStub.reset()
+    emailClientSendEmailStub.throws()
 
-  beforeEach(() => {
-    emFindStub.reset()
-    emFindStub.throws()
+    userRepoFindStub.reset()
+    userRepoFindStub.throws()
   })
 
-  const getNodeCopyHandler = () => {
-    return new NodeCopyHandler(EMAIL_TYPES.nodeCopy, nodeCopyInput, userOpsCtx, receiverUserIds)
-  }
+  describe('#sendEmail', () => {
+    it('basic', async () => {
+      const organization = new Organization()
+      const user = new User(organization)
+      user.id = USER_ID
+      user.email = 'test@email.com'
 
-  it('getNotificationKey', () => {
-    const nodeCopyHandler = getNodeCopyHandler()
+      const input = new NodeCopyInputDTO()
+      input.destination = 'test-destination'
+      input.notCopiedFileNames = ['file1', 'file2']
+      input.notCopiedFolderNames = ['folder1', 'folder2']
+      input.receiverUserIds = [USER_ID]
 
-    expect(nodeCopyHandler.getNotificationKey()).to.eq('node_copy')
-  })
+      userRepoFindStub.withArgs({ id: { $in: input.receiverUserIds } }).resolves([user])
+      emailClientSendEmailStub.reset()
 
-  it('determineReceivers', async () => {
-    const nodeCopyHandler = getNodeCopyHandler()
+      const handler = getHandler()
+      await handler.sendEmail(input)
 
-    const user = {
-      email: 'email',
-    } as unknown as User
-    emFindStub.withArgs(User, { id: { $in: receiverUserIds } }).resolves([user])
-
-    const receivers = await nodeCopyHandler.determineReceivers()
-    expect(receivers).to.deep.eq([user])
-  })
-
-  it('template', async () => {
-    const nodeCopyHandler = getNodeCopyHandler()
-
-    const receiver = {
-      email: 'email',
-    } as unknown as User
-
-    const result = await nodeCopyHandler.template(receiver)
-
-    expect(result.emailType).to.eq(EMAIL_TYPES.nodeCopy)
-    expect(result.to).to.eq(receiver.email)
-    expect(result.body).to.contain("Some items haven't been copied to Project XYZ")
-    expect(result.body).to.contain('Folder A')
-    expect(result.body).to.contain('Folder B')
-    expect(result.body).to.contain('File 1.txt')
-    expect(result.body).to.contain('File 2.jpg')
-    expect(result.subject).to.eq("Some items haven't been copied to Project XYZ")
+      expect(emailClientSendEmailStub.calledOnce).to.be.true
+      expect(emailClientSendEmailStub.firstCall.firstArg.emailType).to.eq(EMAIL_TYPES.nodeCopy)
+      expect(emailClientSendEmailStub.firstCall.firstArg.to).to.eq(user.email)
+      expect(emailClientSendEmailStub.firstCall.firstArg.subject).to.eq(
+        "Some items haven't been copied to test-destination",
+      )
+      expect(emailClientSendEmailStub.firstCall.firstArg.subject).to.eq(
+        "Some items haven't been copied to test-destination",
+      )
+      expect(emailClientSendEmailStub.firstCall.firstArg.body).to.contain(
+        `The following folders haven't been copied since they already exist in ${input.destination}`,
+      )
+      expect(emailClientSendEmailStub.firstCall.firstArg.body).to.contain(
+        `${input.notCopiedFolderNames.join(', ')}`,
+      )
+      expect(emailClientSendEmailStub.firstCall.firstArg.body).to.contain(
+        `The following files haven't been copied since they already exist in ${input.destination}`,
+      )
+      expect(emailClientSendEmailStub.firstCall.firstArg.body).to.contain(
+        `${input.notCopiedFileNames.join(', ')}`,
+      )
+    })
   })
 })
