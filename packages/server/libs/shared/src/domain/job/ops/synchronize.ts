@@ -1,5 +1,6 @@
 import { wrap } from '@mikro-orm/core'
 import { SqlEntityManager } from '@mikro-orm/mysql'
+import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
 import { RequestTerminateJobOperation } from '@shared/domain/job/ops/terminate'
 import { NotificationService } from '@shared/domain/notification/services/notification.service'
 import { Tagging } from '@shared/domain/tagging/tagging.entity'
@@ -20,7 +21,7 @@ import {
 import { CheckStatusJob, TASK_TYPE } from '@shared/queue/task.input'
 import type { Maybe, UserOpsCtx } from '@shared/types'
 import { WorkerBaseOperation } from '@shared/utils/base-operation'
-import { EMAIL_TYPES, EmailSendInput } from '../../email/email.config'
+import { EmailSendInput } from '../../email/email.config'
 import { buildEmailTemplate, getBullJobIdForEmailOperation } from '../../email/email.helper'
 import {
   JobStaleInputTemplate,

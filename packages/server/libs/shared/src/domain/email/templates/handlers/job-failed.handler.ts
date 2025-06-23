@@ -1,41 +1,55 @@
-import { BaseTemplate } from '@shared/domain/email/templates/base-template'
-import { Job } from '@shared/domain/job/job.entity'
+import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
 import { User } from '@shared/domain/user/user.entity'
-import { UserOpsCtx } from '@shared/types'
 import {
-  EmailSendInput,
-  EmailTemplate,
-  EMAIL_TYPES,
-  NOTIFICATION_TYPES_BASE,
-} from '../../email.config'
-import {
-  JobFailedInputTemplate,
   jobFailedTemplate,
   jobCostLimitExceededTemplate,
+  JobFailedInputTemplate,
 } from '../mjml/job-failed.template'
-import { buildEmailTemplate } from '../../email.helper'
 import { JobEventDTO } from '@shared/domain/email/dto/job-event.dto'
+import { Injectable } from '@nestjs/common'
+import { EmailHandler } from '@shared/domain/email/templates/handlers/email.handler'
+import { EmailClient } from '@shared/services/email-client'
+import { EmailTypeToTemplateInputMap } from '@shared/domain/email/dto/email-type-to-template-input.map'
+import { JobRepository } from '@shared/domain/job/job.repository'
+import { UserRepository } from '@shared/domain/user/user.repository'
+import {
+  EmailTypeToContextMap,
+  JobFailedContext,
+} from '@shared/domain/email/dto/email-type-to-context.map'
 
-export class JobFailedEmailHandler
-  extends BaseTemplate<JobEventDTO, UserOpsCtx>
-  implements Omit<EmailTemplate<JobFailedInputTemplate>, 'templateFile'>
-{
-  job: Job
+@Injectable()
+export class JobFailedEmailHandler extends EmailHandler<EMAIL_TYPES.jobFailed> {
+  protected emailType = EMAIL_TYPES.jobFailed as const
+  protected inputDto = JobEventDTO
 
-  getNotificationKey(): keyof typeof NOTIFICATION_TYPES_BASE {
-    return 'job_failed'
+  constructor(
+    protected readonly userRepo: UserRepository,
+    protected readonly jobRepo: JobRepository,
+    protected readonly emailClient: EmailClient,
+  ) {
+    super(emailClient)
   }
 
-  async setupContext(): Promise<void> {
-    this.job = await this.ctx.em.findOneOrFail(Job, { id: this.validatedInput.jobId })
+  protected async getContextualData(
+    input: JobEventDTO,
+  ): Promise<EmailTypeToContextMap[EMAIL_TYPES.jobFailed]> {
+    const job = await this.jobRepo.findOneOrFail({ id: input.jobId })
+    const body =
+      job.describe?.failureReason === 'CostLimitExceeded'
+        ? jobCostLimitExceededTemplate
+        : jobFailedTemplate
+    return {
+      input,
+      job,
+      body,
+    }
   }
 
   // Stolen this function from JobFinishedEmailHandler handler
-  async determineReceivers(): Promise<User[]> {
+  protected async determineReceivers(context: JobFailedContext): Promise<User[]> {
     // Notify only owner in all cases - regardless whether job is private, or runs in space
-    const owner = await this.ctx.em.findOneOrFail(
-      User,
-      { id: this.job.user.id },
+    const owner = await this.userRepo.findOneOrFail(
+      { id: context.job.user.id },
       { populate: ['notificationPreference'] },
     )
     // Note(samuel) if different recipients are required for "CostLimitExceeded" and other failures
@@ -44,31 +58,30 @@ export class JobFailedEmailHandler
     return [owner]
   }
 
-  async template(receiver: User): Promise<EmailSendInput> {
-    const body = buildEmailTemplate<JobFailedInputTemplate>(
-      this.job.describe?.failureReason === 'CostLimitExceeded'
-        ? jobCostLimitExceededTemplate
-        : jobFailedTemplate,
-      {
-        receiver,
-        content: {
-          job: {
-            id: this.job.id,
-            uid: this.job.uid,
-            name: this.job.name,
-            failureReason: this.job.describe?.failureReason ?? '',
-            failureMessage: this.job.describe?.failureMessage ?? '',
-            runTimeString: this.job.runTimeString(),
-          },
+  protected getSubject(_receiver: User, context: JobFailedContext): string {
+    return `Execution "${context.job.name}" failed`
+  }
+
+  protected getBody(_input: JobFailedInputTemplate, contextObject: JobFailedContext): string {
+    return contextObject.body(_input)
+  }
+
+  protected getTemplateInput(
+    receiver: User,
+    context: JobFailedContext,
+  ): EmailTypeToTemplateInputMap[EMAIL_TYPES.jobFailed] {
+    return {
+      receiver,
+      content: {
+        job: {
+          id: context.job.id,
+          uid: context.job.uid,
+          name: context.job.name,
+          failureReason: context.job.describe?.failureReason ?? '',
+          failureMessage: context.job.describe?.failureMessage ?? '',
+          runTimeString: context.job.runTimeString(),
         },
       },
-    )
-
-    return {
-      emailType: EMAIL_TYPES.jobFailed,
-      to: receiver.email,
-      subject: `Execution "${this.job.name}" failed`,
-      body,
     }
   }
 }

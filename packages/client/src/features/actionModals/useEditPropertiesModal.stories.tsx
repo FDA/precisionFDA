@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react'
-import { Meta, StoryObj } from '@storybook/react'
+import { Meta, StoryObj } from '@storybook/react-webpack5'
 import { StorybookProviders } from '../../stories/StorybookProviders'
 import { WithListData } from '../../stories/helpers'
 import { APIResource } from '../home/types'

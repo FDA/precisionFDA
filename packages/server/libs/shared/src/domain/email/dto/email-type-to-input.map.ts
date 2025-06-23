@@ -1,6 +1,4 @@
 import { EmptyEmailInputDTO } from '@shared/domain/email/dto/empty-email-input.dto'
-import { EMAIL_TYPES } from '@shared/domain/email/email.config'
-import { ObjectIdInputDTO } from '@shared/domain/email/email.helper'
 import { AlertMessageInputDTO } from '@shared/domain/email/dto/alert-message-input.dto'
 import { LicenseApprovalRequestDTO } from '@shared/domain/email/dto/license-approval-request.dto'
 import { NodeCopyInputDTO } from '@shared/domain/email/dto/node-copy-input.dto'
@@ -11,44 +9,44 @@ import { MemberChangedDTO } from '@shared/domain/email/dto/member-changed.dto'
 import { ChallengeOpenedDTO } from '@shared/domain/email/dto/challenge-opened.dto'
 import { SpaceChangedDTO } from '@shared/domain/email/dto/space-changed.dto'
 import { ChallengeCreatedDTO } from '@shared/domain/email/dto/challenge-created.dto'
-import { UserProvisionedDto } from '@shared/domain/email/dto/user-provisioned.dto'
+import { UserProvisionedDTO } from '@shared/domain/email/dto/user-provisioned.dto'
+import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
+import { IdWithReceiversInputDTO } from '@shared/domain/email/dto/id-with-receivers-input.dto'
+import { ObjectIdInputDTO } from '@shared/domain/email/dto/object-id.dto'
 
 export const emailTypeToInputDtoMap = {
-  [EMAIL_TYPES.emailWithoutTemplate]: EmptyEmailInputDTO, // emailWithoutTemplate
-  [EMAIL_TYPES.jobFinished]: JobEventDTO, // jobFinished
-  [EMAIL_TYPES.newContentAdded]: ObjectIdInputDTO, // newContentAdded
-  [EMAIL_TYPES.memberChangedAddedRemoved]: MemberChangedDTO, // memberChangedAddedRemoved
-  [EMAIL_TYPES.spaceChanged]: SpaceChangedDTO, // spaceChanged
-  [EMAIL_TYPES.commentAdded]: ObjectIdInputDTO, // commentAdded
-  [EMAIL_TYPES.challengeOpened]: ChallengeOpenedDTO, // challengeOpened
-  [EMAIL_TYPES.challengePrereg]: ChallengeCreatedDTO, // challengePrereg
-  [EMAIL_TYPES.jobTerminationWarning]: EmptyEmailInputDTO, // jobTerminationWarning
-  [EMAIL_TYPES.staleJobsReport]: EmptyEmailInputDTO, // staleJobsReport
-  [EMAIL_TYPES.nonTerminatedDbClusters]: EmptyEmailInputDTO, // nonTerminatedDbClusters
-  [EMAIL_TYPES.jobFailed]: JobEventDTO, // jobFailed
-  [EMAIL_TYPES.adminDataConsistencyReport]: EmptyEmailInputDTO, // adminDataConsistencyReport
-  [EMAIL_TYPES.userDataConsistencyReport]: EmptyEmailInputDTO, // userDataConsistencyReport
-  [EMAIL_TYPES.spaceDiscussion]: EmptyEmailInputDTO, // spaceDiscussion
-  [EMAIL_TYPES.spaceCreated]: EmptyEmailInputDTO, // spaceCreated
-  [EMAIL_TYPES.userInactivityAlert]: EmptyEmailInputDTO, // userInactivityAlert
-  [EMAIL_TYPES.alertMessage]: AlertMessageInputDTO, // alertMessage
-  [EMAIL_TYPES.expertQuestionAdded]: ObjectIdInputDTO, // expertQuestionAdded
-  [EMAIL_TYPES.expertAdded]: ObjectIdInputDTO, // expertQuestionAdded
-  [EMAIL_TYPES.challengeProposalReceived]: ChallengeProposalInputDTO, // challengeProposalReceived
-  [EMAIL_TYPES.guestAccessEmail]: ObjectIdInputDTO, // guestAccessEmail
-  [EMAIL_TYPES.licenseApprovalRequest]: LicenseApprovalRequestDTO, // licenseApprovalRequest
-  [EMAIL_TYPES.licenseApproved]: ObjectIdInputDTO, // licenseApproved
-  [EMAIL_TYPES.licenseRevoked]: ObjectIdInputDTO, // licenseRevoked
-  [EMAIL_TYPES.spaceActivated]: ObjectIdInputDTO, // spaceActivated
-  [EMAIL_TYPES.spaceActivation]: ObjectIdInputDTO, // spaceActivation
-  [EMAIL_TYPES.invitation]: ObjectIdInputDTO, // invitation to the pFDA
-  [EMAIL_TYPES.spaceInvitation]: InvitationToSpaceDTO, // invitation to the space
-  [EMAIL_TYPES.nodeCopy]: NodeCopyInputDTO, // some nodes weren't copied
-  [EMAIL_TYPES.userProvisioned]: UserProvisionedDto, // userProvisioned
+  [EMAIL_TYPES.emailWithoutTemplate]: EmptyEmailInputDTO,
+  [EMAIL_TYPES.jobFinished]: JobEventDTO,
+  [EMAIL_TYPES.newContentAdded]: ObjectIdInputDTO,
+  [EMAIL_TYPES.memberChangedAddedRemoved]: MemberChangedDTO,
+  [EMAIL_TYPES.spaceChanged]: SpaceChangedDTO,
+  [EMAIL_TYPES.commentAdded]: ObjectIdInputDTO,
+  [EMAIL_TYPES.challengeOpened]: ChallengeOpenedDTO,
+  [EMAIL_TYPES.challengePrereg]: ChallengeCreatedDTO,
+  [EMAIL_TYPES.jobTerminationWarning]: EmptyEmailInputDTO,
+  [EMAIL_TYPES.staleJobsReport]: EmptyEmailInputDTO,
+  [EMAIL_TYPES.nonTerminatedDbClusters]: EmptyEmailInputDTO,
+  [EMAIL_TYPES.jobFailed]: JobEventDTO,
+  [EMAIL_TYPES.adminDataConsistencyReport]: EmptyEmailInputDTO,
+  [EMAIL_TYPES.userDataConsistencyReport]: EmptyEmailInputDTO,
+  [EMAIL_TYPES.spaceDiscussion]: EmptyEmailInputDTO,
+  [EMAIL_TYPES.spaceCreated]: EmptyEmailInputDTO,
+  [EMAIL_TYPES.userInactivityAlert]: EmptyEmailInputDTO,
+  [EMAIL_TYPES.alertMessage]: AlertMessageInputDTO,
+  [EMAIL_TYPES.expertQuestionAdded]: ObjectIdInputDTO,
+  [EMAIL_TYPES.expertAdded]: ObjectIdInputDTO,
+  [EMAIL_TYPES.challengeProposalReceived]: ChallengeProposalInputDTO,
+  [EMAIL_TYPES.licenseApprovalRequest]: LicenseApprovalRequestDTO,
+  [EMAIL_TYPES.licenseApproved]: IdWithReceiversInputDTO,
+  [EMAIL_TYPES.licenseRevoked]: IdWithReceiversInputDTO,
+  [EMAIL_TYPES.spaceActivated]: ObjectIdInputDTO,
+  [EMAIL_TYPES.spaceActivation]: ObjectIdInputDTO,
+  [EMAIL_TYPES.invitation]: ObjectIdInputDTO,
+  [EMAIL_TYPES.spaceInvitation]: InvitationToSpaceDTO,
+  [EMAIL_TYPES.nodeCopy]: NodeCopyInputDTO,
+  [EMAIL_TYPES.userProvisioned]: UserProvisionedDTO,
 } satisfies Record<EMAIL_TYPES, new () => object>
 
 export type EmailTypeToInputMap = {
-  [K in keyof typeof emailTypeToInputDtoMap]: (typeof emailTypeToInputDtoMap)[K] extends new () => infer R
-    ? R
-    : (typeof emailTypeToInputDtoMap)[K]
+  [K in keyof typeof emailTypeToInputDtoMap]: InstanceType<(typeof emailTypeToInputDtoMap)[K]>
 }

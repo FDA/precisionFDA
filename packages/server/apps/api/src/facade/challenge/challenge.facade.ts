@@ -1,11 +1,11 @@
 import { Inject, Injectable } from '@nestjs/common'
+import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
 import { SpaceService } from '@shared/domain/space/service/space.service'
 import { CreateChallengeDTO } from '@shared/domain/challenge/dto/create-challenge.dto'
 import { UpdateChallengeDTO } from '@shared/domain/challenge/dto/update-challenge.dto'
-import { EmailFacade } from '@shared/domain/email/email.facade'
+import { EmailService } from '@shared/domain/email/email.service'
 import { STATIC_SCOPE } from '@shared/enums'
 import { CHALLENGE_STATUS } from '@shared/domain/challenge/challenge.enum'
-import { EMAIL_TYPES } from '@shared/domain/email/email.config'
 import { SPACE_TYPE } from '@shared/domain/space/space.enum'
 import { ChallengeService } from '@shared/domain/challenge/challenge.service'
 import { UserFileService } from '@shared/domain/user-file/service/user-file.service'
@@ -24,7 +24,7 @@ export class ChallengeFacade {
     private readonly challengeBotPlatformClient: PlatformClient,
     private readonly userFileService: UserFileService,
     private readonly spaceService: SpaceService,
-    private readonly emailFacade: EmailFacade,
+    private readonly emailService: EmailService,
   ) {}
 
   async createChallenge(dto: CreateChallengeDTO): Promise<number> {
@@ -38,8 +38,8 @@ export class ChallengeFacade {
     const newChallenge = await this.challengeService.createChallenge(dto, spaceId)
 
     if (newChallenge.status === CHALLENGE_STATUS.PRE_REGISTRATION) {
-      await this.emailFacade.sendEmail({
-        emailTypeId: EMAIL_TYPES.challengePrereg,
+      await this.emailService.sendEmail({
+        type: EMAIL_TYPES.challengePrereg,
         input: {
           challengeId: newChallenge.id,
           name: newChallenge.name,
@@ -65,8 +65,8 @@ export class ChallengeFacade {
     await this.challengeService.updateChallenge(challengeId, dto)
 
     if (sendPreRegEmail) {
-      await this.emailFacade.sendEmail({
-        emailTypeId: EMAIL_TYPES.challengePrereg,
+      await this.emailService.sendEmail({
+        type: EMAIL_TYPES.challengePrereg,
         input: {
           challengeId: challenge.id,
           name: challenge.name,
@@ -77,8 +77,8 @@ export class ChallengeFacade {
     }
 
     if (sendOpenEmail) {
-      await this.emailFacade.sendEmail({
-        emailTypeId: EMAIL_TYPES.challengeOpened,
+      await this.emailService.sendEmail({
+        type: EMAIL_TYPES.challengeOpened,
         input: {
           challengeId: challenge.id,
         },

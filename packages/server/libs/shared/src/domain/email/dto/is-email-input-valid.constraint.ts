@@ -10,6 +10,7 @@ import {
 } from 'class-validator'
 import { EmailInputFormat, TypedEmailBodyDto } from '@shared/domain/email/dto/typed-email-body.dto'
 import { emailTypeToInputDtoMap } from '@shared/domain/email/dto/email-type-to-input.map'
+import { ValidationError } from '@shared/errors'
 
 @ValidatorConstraint({ async: true })
 export class IsEmailInputValidConstraint implements ValidatorConstraintInterface {
@@ -25,9 +26,7 @@ export class IsEmailInputValidConstraint implements ValidatorConstraintInterface
     const nnOptions = value ?? {}
 
     if (!isPlainObject(nnOptions)) {
-      // Store error messages directly on the object
-      object['validationErrors'] = ['Input must be a plain object']
-      return false
+      throw new ValidationError('Input must be a plain object')
     }
 
     const instance = plainToClass(expectedType, nnOptions)
@@ -36,15 +35,12 @@ export class IsEmailInputValidConstraint implements ValidatorConstraintInterface
     const errors = await validate(instance)
 
     if (errors.length > 0) {
-      // Collect validation error messages
-      object['validationErrors'] = errors.map((error) =>
-        Object.values(error.constraints ?? {}).join(', '),
-      )
-      return false
+      const errorMessages = errors
+        .map((error) => Object.values(error.constraints ?? {}).join(', '))
+        .join('; ')
+      throw new ValidationError(errorMessages)
     }
 
-    // Clear errors if validation passes
-    delete object['validationErrors']
     return true
   }
 

@@ -18,8 +18,11 @@ import {
   FILE_STATE_DX,
   FILE_STATE_PFDA,
   FILE_STI_TYPE,
+  FileOrAsset,
   PARENT_TYPE,
 } from '../../user-file/user-file.types'
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
+import { Asset } from '@shared/domain/user-file/asset.entity'
 
 /**
  Publisher service is responsible for publishing entities to the selected scope.
@@ -94,7 +97,7 @@ export class PublisherService {
     const destinationProject = user.publicComparisonsProject
 
     // let comparisonsToPublish: Comparison[] = []
-    const projects: { [key: string]: Node[] } = {}
+    const projects: { [key: string]: FileOrAsset[] } = {}
 
     for (const comparison of comparisons) {
       if (comparison.state !== COMPARISON_STATE.DONE) {
@@ -189,7 +192,7 @@ export class PublisherService {
   // Verifies that the nodes are in publishable state.
   // Clones the nodes to the public project on platform, reflect the changes in the db and remove the nodes from original project.
   //
-  async publishNodes(nodes: Node[], user: User, scope: EntityScope): Promise<number> {
+  async publishNodes(nodes: (Asset | UserFile)[], user: User, scope: EntityScope): Promise<number> {
     if (scope !== 'public') {
       throw new errors.InvalidStateError(
         `Unable to publish nodes: scope ${scope} is not supported.`,
@@ -197,7 +200,7 @@ export class PublisherService {
     }
     let count = 0
     const destinationProject = user.publicFilesProject
-    const projects: { [key: string]: Node[] } = {}
+    const projects: { [key: string]: (Asset | UserFile)[] } = {}
 
     for (const node of nodes) {
       if (node.stiType === FILE_STI_TYPE.FOLDER) {
@@ -262,7 +265,7 @@ export class PublisherService {
     return true
   }
 
-  private async getAuthorizedUsers(scope: EntityScope) {
+  private async getAuthorizedUsers(scope: EntityScope): Promise<string[]> {
     if (scope === 'public') {
       return [config.platform.orgEveryoneHandle]
     }

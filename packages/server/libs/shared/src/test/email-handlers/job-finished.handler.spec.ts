@@ -1,86 +1,141 @@
-import { database } from '@shared/database'
-import { App } from '@shared/domain/app/app.entity'
 import { Job } from '@shared/domain/job/job.entity'
-import { NotificationPreference } from '@shared/domain/notification-preference/notification-preference.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { expect } from 'chai'
-import { EntityManager, Reference } from '@mikro-orm/core'
-import { JOB_STATE } from '@shared/domain/job/job.enum'
-import { create, generate, db } from '@shared/test'
-import { EMAIL_CONFIG } from '@shared/domain/email/email.config'
 import { JobFinishedEmailHandler } from '@shared/domain/email/templates/handlers/job-finished.handler'
-import { UserOpsCtx } from '@shared/types'
-import { defaultLogger } from '@shared/logger'
+import { UserRepository } from '@shared/domain/user/user.repository'
+import { JobRepository } from '@shared/domain/job/job.repository'
+import { EmailClient } from '@shared/services/email-client'
+import { stub } from 'sinon'
+import { Organization } from '@shared/domain/org/org.entity'
+import { STATIC_SCOPE } from '@shared/enums'
+import { JobEventDTO } from '@shared/domain/email/dto/job-event.dto'
+import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
+import { SqlEntityManager } from '@mikro-orm/mysql'
+import { config } from '@shared/config'
 
-describe('job-finished.handler', () => {
-  let em: EntityManager
-  let user: User
-  let anotherUser: User
-  let app: App
-  let job: Job
-  let ctx: UserOpsCtx
-  const config = EMAIL_CONFIG.jobFinished
+describe('JobFinishedEmailHandler', () => {
+  const JOB_ID = 12
+  const USER_ID = 16
+
+  const emailClientSendEmailStub = stub()
+  const jobRepoFindOneOrFailStub = stub()
+  const userRepoFindOneOrFailStub = stub()
+
+  const em = {} as unknown as SqlEntityManager
+  const userRepo = {
+    findOneOrFail: userRepoFindOneOrFailStub,
+  } as unknown as UserRepository
+  const jobRepo = {
+    findOneOrFail: jobRepoFindOneOrFailStub,
+  } as unknown as JobRepository
+  const emailClient = {
+    sendEmail: emailClientSendEmailStub,
+  } as unknown as EmailClient
+
+  const getHandler = () => {
+    return new JobFinishedEmailHandler(em, userRepo, jobRepo, emailClient)
+  }
 
   beforeEach(async () => {
-    await db.dropData(database.connection())
-    // create DB mocks
-    em = database.orm().em.fork()
-    em.clear()
-    user = create.userHelper.create(em, { email: generate.random.email() })
-    anotherUser = create.userHelper.create(em, { email: generate.random.email() })
+    emailClientSendEmailStub.reset()
+    emailClientSendEmailStub.throws()
 
-    app = create.appHelper.createHTTPS(em, { user }, { spec: generate.app.jupyterAppSpecData() })
-    job = create.jobHelper.create(em, { user, app }, { scope: 'private', state: JOB_STATE.IDLE })
-    const space = create.spacesHelper.create(em, { name: 'my-test-space' })
-    create.spacesHelper.addMember(em, { user, space })
-    create.spacesHelper.addMember(em, { user: anotherUser, space })
-    await em.flush()
+    jobRepoFindOneOrFailStub.reset()
+    jobRepoFindOneOrFailStub.throws()
 
-    ctx = {
-      em: database.orm().em.fork(),
-      log: defaultLogger,
-      user: { id: user.id, accessToken: 'foo', dxuser: user.dxuser },
-    }
+    userRepoFindOneOrFailStub.reset()
+    userRepoFindOneOrFailStub.throws()
   })
 
-  context('setupContext()', () => {
-    it('loads job', async () => {
-      const input = { jobId: job.id }
-      const handler = new JobFinishedEmailHandler(config.emailId, input, ctx)
-      await handler.setupContext()
-      expect(handler.job).to.exist()
-    })
-  })
+  describe('#sendEmail', () => {
+    it('private', async () => {
+      const organization = new Organization()
+      const user = new User(organization)
+      user.id = USER_ID
+      user.firstName = 'Piivoa'
+      user.lastName = 'Rumpijem'
+      user.email = 'test@email.com'
+      const job = new Job(user)
+      job.id = JOB_ID
+      job.uid = `job-${JOB_ID}-1`
+      job.name = 'job-name'
+      job.scope = STATIC_SCOPE.PRIVATE
 
-  context('determineReceivers()', () => {
-    it('returns job owner as receiver', async () => {
-      const input = { jobId: job.id }
-      const handler = new JobFinishedEmailHandler(config.emailId, input, ctx)
-      await handler.setupContext()
-      const receivers = await handler.determineReceivers()
-      expect(receivers).to.have.lengthOf(1)
-      expect(receivers.map((r) => r.id)).to.have.all.members([user.id])
+      jobRepoFindOneOrFailStub.withArgs({ id: JOB_ID }).resolves(job)
+      userRepoFindOneOrFailStub.withArgs({ id: USER_ID }).resolves(user)
+      emailClientSendEmailStub.reset()
+
+      const input = new JobEventDTO()
+      input.jobId = JOB_ID
+
+      const handler = getHandler()
+      await handler.sendEmail(input)
+
+      expect(emailClientSendEmailStub.calledOnce).to.be.true
+      expect(emailClientSendEmailStub.firstCall.firstArg.emailType).to.eq(EMAIL_TYPES.jobFinished)
+      expect(emailClientSendEmailStub.firstCall.firstArg.to).to.eq(user.email)
+      expect(emailClientSendEmailStub.firstCall.firstArg.subject).to.eq(
+        `Execution ${job.name} finished`,
+      )
+      expect(emailClientSendEmailStub.firstCall.firstArg.body).to.contain(`Hello ${user.firstName}`)
+      expect(emailClientSendEmailStub.firstCall.firstArg.body).to.contain(
+        'An execution on precisionFDA has finished successfully.',
+      )
+      expect(emailClientSendEmailStub.firstCall.firstArg.body).to.contain(
+        `${config.api.railsHost}/home/jobs/${job.uid}`,
+      )
     })
 
-    it('applies owners notification settings', async () => {
-      const settingsEntity = new NotificationPreference(user)
-      settingsEntity.data = { private_job_finished: false }
-      user.notificationPreference = Reference.create(settingsEntity)
-      await em.flush()
-      const input = { jobId: job.id }
-      const handler = new JobFinishedEmailHandler(config.emailId, input, ctx)
-      await handler.setupContext()
-      const receivers = await handler.determineReceivers()
-      expect(receivers).to.have.lengthOf(0)
-    })
-  })
+    it('public', async () => {
+      const organization = new Organization()
+      const user = new User(organization)
+      user.id = USER_ID
+      user.firstName = 'Prujem'
+      user.lastName = 'Serekrem'
+      user.email = 'test@email.com'
+      const job = new Job(user)
+      job.id = JOB_ID
+      job.uid = `job-${JOB_ID}-1`
+      job.name = 'job-name'
+      job.scope = STATIC_SCOPE.PUBLIC
 
-  context('getNotificationKey()', () => {
-    it('returns static value', () => {
-      const input = { jobId: job.id }
-      const handler = new JobFinishedEmailHandler(config.emailId, input, ctx)
-      const key = handler.getNotificationKey()
-      expect(key).to.equal('job_finished')
+      jobRepoFindOneOrFailStub.withArgs({ id: JOB_ID }).resolves(job)
+      userRepoFindOneOrFailStub.withArgs({ id: USER_ID }).resolves(user)
+      emailClientSendEmailStub.reset()
+
+      const input = new JobEventDTO()
+      input.jobId = JOB_ID
+
+      const handler = getHandler()
+      await handler.sendEmail(input)
+
+      expect(emailClientSendEmailStub.called).to.be.false
+    })
+
+    it('in a space', async () => {
+      const organization = new Organization()
+      const user = new User(organization)
+      user.id = USER_ID
+      user.firstName = 'Nastvan'
+      user.lastName = 'Kulemahazi'
+      user.email = 'test@email.com'
+      const job = new Job(user)
+      job.id = JOB_ID
+      job.uid = `job-${JOB_ID}-1`
+      job.name = 'job-name'
+      job.scope = 'space-1'
+
+      jobRepoFindOneOrFailStub.withArgs({ id: JOB_ID }).resolves(job)
+      userRepoFindOneOrFailStub.withArgs({ id: USER_ID }).resolves(user)
+      emailClientSendEmailStub.reset()
+
+      const input = new JobEventDTO()
+      input.jobId = JOB_ID
+
+      const handler = getHandler()
+      await handler.sendEmail(input)
+
+      expect(emailClientSendEmailStub.called).to.be.false
     })
   })
 })

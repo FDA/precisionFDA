@@ -1,145 +1,113 @@
-import { database } from '@shared/database'
-import { App } from '@shared/domain/app/app.entity'
-import { Job } from '@shared/domain/job/job.entity'
-import { NotificationPreference } from '@shared/domain/notification-preference/notification-preference.entity'
 import { SpaceEvent } from '@shared/domain/space-event/space-event.entity'
-import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
 import { Space } from '@shared/domain/space/space.entity'
 import { User } from '@shared/domain/user/user.entity'
-import { expect } from 'chai'
-import { EntityManager, Reference } from '@mikro-orm/core'
-import { JOB_STATE } from '@shared/domain/job/job.enum'
-import { create, generate, db } from '@shared/test'
-import { EMAIL_CONFIG } from '@shared/domain/email/email.config'
 import { ContentChangedEmailHandler } from '@shared/domain/email/templates/handlers/content-change.handler'
-import { UserOpsCtx } from '@shared/types'
-import { defaultLogger } from '@shared/logger'
-import { SPACE_MEMBERSHIP_ROLE } from '@shared/domain/space-membership/space-membership.enum'
-import { PARENT_TYPE } from '@shared/domain/space-event/space-event.enum'
+import { SqlEntityManager } from '@mikro-orm/mysql'
+import { SpaceEventRepository } from '@shared/domain/space-event/space-event.repository'
+import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
+import { EmailClient } from '@shared/services/email-client'
+import { stub } from 'sinon'
+import { expect } from 'chai'
+import { Organization } from '@shared/domain/org/org.entity'
+import {
+  ENTITY_TYPE,
+  SPACE_EVENT_ACTIVITY_TYPE,
+  SPACE_EVENT_OBJECT_TYPE,
+} from '@shared/domain/space-event/space-event.enum'
+import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
+import {
+  SPACE_MEMBERSHIP_ROLE,
+  SPACE_MEMBERSHIP_SIDE,
+} from '@shared/domain/space-membership/space-membership.enum'
+import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
+import { ObjectIdInputDTO } from '@shared/domain/email/email.helper'
 
-describe('content-change.handler', () => {
-  let em: EntityManager
-  let user: User
-  let anotherUser: User
-  let app: App
-  let job: Job
-  let ctx: UserOpsCtx
-  let space: Space
-  let spaceEventJobAdded: SpaceEvent
-  let anotherUserMembership: SpaceMembership
-  const config = EMAIL_CONFIG.newContentAdded
+describe('ContentChangedEmailHandler', () => {
+  const SPACE_EVENT_ID = 10
+  const SPACE_ID = 15
+  const EVENT_CREATOR_ID = 789
+
+  const emailClientSendEmailStub = stub()
+  const spaceEventRepoFindOneOrFailStub = stub()
+  const spaceMembershipRepoFindStub = stub()
+
+  const em = {} as unknown as SqlEntityManager
+  const spaceEventRepo = {
+    findOneOrFail: spaceEventRepoFindOneOrFailStub,
+  } as unknown as SpaceEventRepository
+  const spaceMembershipRepo = {
+    find: spaceMembershipRepoFindStub,
+  } as unknown as SpaceMembershipRepository
+  const emailClient = {
+    sendEmail: emailClientSendEmailStub,
+  } as unknown as EmailClient
+
+  const getHandler = () => {
+    return new ContentChangedEmailHandler(em, spaceEventRepo, spaceMembershipRepo, emailClient)
+  }
 
   beforeEach(async () => {
-    await db.dropData(database.connection())
-    // create DB mocks
-    em = database.orm().em.fork()
-    em.clear()
-    user = create.userHelper.create(em, { email: generate.random.email() })
-    anotherUser = create.userHelper.create(em, { email: generate.random.email() })
+    emailClientSendEmailStub.reset()
+    emailClientSendEmailStub.throws()
 
-    app = create.appHelper.createHTTPS(em, { user }, { spec: generate.app.jupyterAppSpecData() })
-    job = create.jobHelper.create(em, { user, app }, { scope: 'private', state: JOB_STATE.IDLE })
-    space = create.spacesHelper.create(em, { name: 'my-test-space' })
-    create.spacesHelper.addMember(em, { user, space })
-    anotherUserMembership = create.spacesHelper.addMember(
-      em,
-      { user: anotherUser, space },
-      { role: SPACE_MEMBERSHIP_ROLE.VIEWER },
-    )
-    await em.flush()
-    spaceEventJobAdded = create.spacesHelper.createEvent(em, { user, space }, { entityId: job.id })
-    await em.flush()
+    spaceEventRepoFindOneOrFailStub.reset()
+    spaceEventRepoFindOneOrFailStub.throws()
 
-    ctx = {
-      em: database.orm().em.fork(),
-      log: defaultLogger,
-      user: { id: user.id, accessToken: 'foo', dxuser: user.dxuser },
-    }
+    spaceMembershipRepoFindStub.reset()
+    spaceMembershipRepoFindStub.throws()
   })
 
-  context('determineReceivers()', () => {
-    it('other users from the space', async () => {
-      const input = { spaceEventId: spaceEventJobAdded.id }
-      const handler = new ContentChangedEmailHandler(config.emailId, input, ctx)
-      const receivers = await handler.determineReceivers()
-      expect(receivers).to.have.lengthOf(1)
-      expect(receivers.map((r) => r.id)).to.have.all.members([anotherUser.id])
-    })
+  describe('#sendEmail', () => {
+    it('basic', async () => {
+      const organization = new Organization()
+      const user = new User(organization)
+      const userCreator = new User(organization)
+      userCreator.firstName = 'Antonio'
+      userCreator.lastName = 'Seruti'
+      userCreator.email = 'test@email.com'
+      userCreator.id = EVENT_CREATOR_ID
+      const space = new Space()
+      space.id = SPACE_ID
+      const spaceEvent = new SpaceEvent(userCreator, space)
+      spaceEvent.id = SPACE_EVENT_ID
+      spaceEvent.objectType = SPACE_EVENT_OBJECT_TYPE.APP
+      spaceEvent.entityType = ENTITY_TYPE.APP
+      spaceEvent.activityType = SPACE_EVENT_ACTIVITY_TYPE.app_added
+      const spaceMembership = new SpaceMembership(
+        user,
+        space,
+        SPACE_MEMBERSHIP_SIDE.GUEST,
+        SPACE_MEMBERSHIP_ROLE.LEAD,
+      )
 
-    it('other users from the space with active membership', async () => {
-      anotherUserMembership.active = false
-      await em.flush()
+      spaceEventRepoFindOneOrFailStub
+        .withArgs({ id: SPACE_EVENT_ID }, { populate: ['space'] })
+        .resolves(spaceEvent)
+      spaceMembershipRepoFindStub
+        .withArgs(
+          {
+            spaces: SPACE_ID,
+            active: true,
+          },
+          { populate: ['user.notificationPreference'] },
+        )
+        .resolves([spaceMembership])
+      const input = new ObjectIdInputDTO()
+      input.id = SPACE_EVENT_ID
+      emailClientSendEmailStub.reset()
 
-      const input = { spaceEventId: spaceEventJobAdded.id }
-      const handler = new ContentChangedEmailHandler(config.emailId, input, ctx)
-      const receivers = await handler.determineReceivers()
-      expect(receivers).to.have.lengthOf(0)
-    })
+      const handler = getHandler()
+      await handler.sendEmail(input)
 
-    it('based on user settings', async () => {
-      // the key prefix has to match anotherUsers role in the space
-      const settings = { reviewer_comment_activity: true } as const
-      const settingsEntity = new NotificationPreference(anotherUser)
-      settingsEntity.data = settings
-      anotherUser.notificationPreference = Reference.create(settingsEntity)
-      await em.flush()
-
-      const input = { spaceEventId: spaceEventJobAdded.id }
-      const handler = new ContentChangedEmailHandler(config.emailId, input, ctx)
-      const receivers = await handler.determineReceivers()
-      expect(receivers).to.have.lengthOf(1)
-    })
-
-    it('notifications default value = true', async () => {
-      const input = { spaceEventId: spaceEventJobAdded.id }
-      const handler = new ContentChangedEmailHandler(config.emailId, input, ctx)
-      const receivers = await handler.determineReceivers()
-      expect(receivers).to.have.lengthOf(1)
-      expect(receivers.map((r) => r.id)).to.have.all.members([anotherUser.id])
-    })
-
-    it('prefix has to match users space role', async () => {
-      // the key prefix has to match anotherUsers role in the space
-      const settings = {
-        all_content_added_or_deleted: true,
-        admin_content_added_or_deleted: false,
-      } as const
-      const settingsEntity = new NotificationPreference(anotherUser)
-      anotherUserMembership.role = SPACE_MEMBERSHIP_ROLE.ADMIN
-      settingsEntity.data = settings
-      anotherUser.notificationPreference = Reference.create(settingsEntity)
-      await em.flush()
-
-      const input = { spaceEventId: spaceEventJobAdded.id }
-      const handler = new ContentChangedEmailHandler(config.emailId, input, ctx)
-      const receivers = await handler.determineReceivers()
-      // admin_content_added_or_deleted: false is applied
-      expect(receivers).to.have.lengthOf(0)
-    })
-  })
-
-  context('getNotificationKey()', () => {
-    it('returns static value', () => {
-      const input = { spaceEventId: spaceEventJobAdded.id }
-      const handler = new ContentChangedEmailHandler(config.emailId, input, ctx)
-      const key = handler.getNotificationKey()
-      expect(key).to.equal('content_added_or_deleted')
-    })
-  })
-
-  context('getTemplateContent()', () => {
-    it('content shape', async () => {
-      const input = { spaceEventId: spaceEventJobAdded.id }
-      const handler = new ContentChangedEmailHandler(config.emailId, input, ctx)
-      const content = await handler.getTemplateContent()
-
-      expect(content).to.be.deep.equal({
-        entityType: PARENT_TYPE.JOB,
-        space: { name: space.name, id: space.id },
-        user: { fullName: user.fullName },
-        action: 'added',
-        objectType: 'job',
-      })
+      expect(emailClientSendEmailStub.calledOnce).to.eq(true)
+      expect(emailClientSendEmailStub.firstCall.args[0].emailType).to.eq(
+        EMAIL_TYPES.newContentAdded,
+      )
+      expect(emailClientSendEmailStub.firstCall.args[0].to).to.eq(user.email)
+      expect(emailClientSendEmailStub.firstCall.args[0].subject).to.eq('Content changed')
+      expect(emailClientSendEmailStub.firstCall.args[0].body).to.contain(
+        `app added by ${userCreator.firstName} ${userCreator.lastName}`,
+      )
     })
   })
 })

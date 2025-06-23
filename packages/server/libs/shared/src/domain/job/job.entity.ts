@@ -2,11 +2,9 @@ import {
   Collection,
   Entity,
   Filter,
-  JsonType,
   ManyToMany,
   ManyToOne,
   OneToMany,
-  PrimaryKey,
   Property,
   Ref,
   Reference,
@@ -26,6 +24,7 @@ import { JOB_DB_ENTITY_TYPE, JOB_STATE, TERMINAL_STATES } from './job.enum'
 import { isStateActive, isStateTerminal } from './job.helper'
 import { Provenance } from './job.input'
 import { JobRepository } from './job.repository'
+import { WorkaroundJsonType } from '@shared/database/json-workaround.type'
 
 @Entity({ tableName: 'jobs', repository: () => JobRepository })
 @Filter({ name: 'ownedBy', cond: (args) => ({ user: { id: args.userId } }) })
@@ -60,9 +59,6 @@ import { JobRepository } from './job.repository'
   }),
 })
 export class Job extends ScopedEntity {
-  @PrimaryKey()
-  id: number
-
   @Property()
   dxid: DxId<'job'>
 
@@ -88,16 +84,16 @@ export class Job extends ScopedEntity {
   })
   properties = new Collection<JobProperty>(this)
 
-  @Property({ type: 'json' })
+  @Property({ type: WorkaroundJsonType })
   runData: JobRunData
 
   @Property({
     hidden: true,
-    type: 'json',
+    type: WorkaroundJsonType,
   })
   describe: JobDescribeResponse
 
-  @Property({ type: JsonType, hidden: true })
+  @Property({ type: WorkaroundJsonType })
   provenance: Provenance
 
   @Property({ unique: true })

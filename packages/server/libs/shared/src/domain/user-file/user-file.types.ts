@@ -5,6 +5,9 @@ import { NodeProperty } from '@shared/domain/property/node-property.entity'
 import { Tagging } from '@shared/domain/tagging/tagging.entity'
 import { EntityScope, SCOPE } from '../../types/common'
 import { User } from '../user/user.entity'
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
+import { Asset } from '@shared/domain/user-file/asset.entity'
+import { Folder } from '@shared/domain/user-file/folder.entity'
 
 // File state from the platform
 enum FILE_STATE_DX {
@@ -22,11 +25,6 @@ enum FILE_STATE_PFDA {
 
 type FILE_STATE = FILE_STATE_DX | FILE_STATE_PFDA
 type FOLDER_STATE = FILE_STATE_PFDA.REMOVING | null
-
-enum FILE_ORIGIN_TYPE {
-  REGULAR = 0,
-  HTTPS = 1,
-}
 
 enum FILE_STI_TYPE {
   USERFILE = 'UserFile',
@@ -48,7 +46,7 @@ interface IFileOrAsset {
   id: number
   dxid: DxId<'file'>
   uid: Uid<'file'>
-  project: string
+  project?: string
   name: string
   scope: EntityScope
   state: string
@@ -80,10 +78,13 @@ interface ITrackable {
   parentType: PARENT_TYPE
 }
 
+export type FileOrAsset = UserFile | Asset
+export type FileOrAssetOrFolder = UserFile | Asset | Folder
+
 interface NodeResponse {
   id: number
   name: string
-  type: 'Folder' | 'UserFile'
+  type: 'Folder' | 'UserFile' | 'Asset'
   uid?: string
   dxid?: string
   state: string | null
@@ -135,7 +136,6 @@ export {
   BulkDownloadFile,
   BulkDownloadFiles,
   ExistingFileSet,
-  FILE_ORIGIN_TYPE,
   FILE_STATE,
   FILE_STATE_DX,
   FILE_STATE_PFDA,

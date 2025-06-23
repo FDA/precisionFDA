@@ -26,8 +26,8 @@ import { EmailQueueJobProducer } from '@shared/domain/email/producer/email-queue
 import { Queue } from 'bull'
 import * as queueDomain from '@shared/queue'
 import { stub } from 'sinon'
-import { EMAIL_TYPES } from '@shared/domain/email/email.config'
-import { EmailFacade } from '@shared/domain/email/email.facade'
+import { EmailService } from '@shared/domain/email/email.service'
+import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
 
 describe('Job service tests', () => {
   let em: EntityManager<MySqlDriver>
@@ -37,7 +37,7 @@ describe('Job service tests', () => {
   let notificationService: NotificationService
   let folderService: FolderService
   let emailQueueJobProducer: EmailQueueJobProducer
-  let emailFacade: EmailFacade
+  let emailService: EmailService
   let getMainQueueStub
   const file1Dxid = 'file-GY5q9B00Q6xpbXG503kKgF68'
   const file2Dxid = 'file-GXPKG480q0jQPgXxFxKyyJ7q'
@@ -64,7 +64,7 @@ describe('Job service tests', () => {
     notificationService = new NotificationService(em, userCtx)
     folderService = new FolderService(em, userCtx)
     emailQueueJobProducer = new EmailQueueJobProducer(queue)
-    emailFacade = {} as unknown as EmailFacade
+    emailService = {} as unknown as EmailService
 
     queueAdd.reset()
     queueAdd.throws()
@@ -570,7 +570,7 @@ describe('Job service tests', () => {
       notificationService,
       folderService,
       emailQueueJobProducer,
-      emailFacade,
+      emailService,
     )
   }
 })

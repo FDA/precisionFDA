@@ -6,7 +6,6 @@ import {
   ManyToOne,
   OneToMany,
   OneToOne,
-  PrimaryKey,
   Property,
   Ref,
   Reference,
@@ -30,6 +29,7 @@ import { BaseEntity } from '../../database/base.entity'
 import { AdminMembership } from '../admin-membership/admin-membership.entity'
 import { HeaderItem } from './header-item'
 import { UserRepository } from './user.repository'
+import { WorkaroundJsonType } from '@shared/database/json-workaround.type'
 import { SPACE_STATE } from '@shared/domain/space/space.enum'
 
 export enum USER_STATE {
@@ -160,9 +160,6 @@ export const DEFAULT_USER_EXTRAS: UserExtras = {
 // might need to add more fields in the time
 @Entity({ tableName: 'users', repository: () => UserRepository })
 export class User extends BaseEntity {
-  @PrimaryKey()
-  id: number
-
   @Property()
   dxuser: string
 
@@ -220,10 +217,10 @@ export class User extends BaseEntity {
   })
   userState: USER_STATE
 
-  @Property({ type: 'json' })
+  @Property({ type: WorkaroundJsonType })
   cloudResourceSettings?: CloudResourceSettings
 
-  @Property({ type: 'json' })
+  @Property({ type: WorkaroundJsonType })
   extras?: UserExtras
 
   @OneToMany({ entity: () => Job, mappedBy: 'user' })

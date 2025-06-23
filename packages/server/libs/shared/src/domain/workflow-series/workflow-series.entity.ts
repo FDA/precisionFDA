@@ -1,22 +1,10 @@
-import {
-  Collection,
-  Entity,
-  Ref,
-  ManyToOne,
-  OneToMany,
-  PrimaryKey,
-  Property,
-  Reference,
-} from '@mikro-orm/core'
+import { Collection, Entity, Ref, ManyToOne, OneToMany, Property, Reference } from '@mikro-orm/core'
 import { WorkflowSeriesProperty } from '@shared/domain/property/workflow-series-property.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { ScopedEntity } from '@shared/database/scoped.entity'
 
 @Entity({ tableName: 'workflow_series' })
 export class WorkflowSeries extends ScopedEntity {
-  @PrimaryKey()
-  id: number
-
   @Property()
   dxid: string
 

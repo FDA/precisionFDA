@@ -9,7 +9,7 @@ import { LoggerModule as PinoLoggerModule } from 'nestjs-pino'
   providers: [
     {
       provide: Logger,
-      useFactory: () => getLogger(),
+      useFactory: (): Logger => getLogger(),
     },
   ],
   exports: [Logger],
