@@ -1,13 +1,14 @@
-import { FilterQuery } from '@mikro-orm/core'
+import { FilterQuery, QueryOrder } from '@mikro-orm/core'
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Injectable } from '@nestjs/common'
+import { PaginatedResult } from '@shared/domain/entity/domain/paginated.result'
+import { InvalidStateError } from '@shared/errors'
 import { MainQueueJobProducer } from '@shared/queue/producer/main-queue-job.producer'
 import { StringUtils } from '@shared/utils/string.utils'
 import { InvitationPaginationDTO } from '../dto/invitation-pagination.dto'
 import { Invitation } from '../invitation.entity'
 import { PROVISIONING_STATE } from '../invitation.enum'
 import { InvitationRepository } from '../invitation.repository'
-import { PaginatedResult } from '@shared/domain/entity/domain/paginated.result'
 
 @Injectable()
 export class InvitationService {
@@ -19,6 +20,10 @@ export class InvitationService {
 
   async listInvitations(query: InvitationPaginationDTO): Promise<PaginatedResult<Invitation>> {
     const where: FilterQuery<Invitation> = {}
+
+    if (query.filter?.ids) {
+      where.id = { $in: query.filter.ids }
+    }
     if (query.filter?.firstName) {
       where.firstName = { $like: `%${query.filter.firstName}%` }
     }
@@ -36,6 +41,11 @@ export class InvitationService {
       where.createdAt = {
         ...(lower && { $gte: lower }),
         ...(upper && { $lte: upper }),
+      }
+    }
+    if (query.sortBy && query.sortDir) {
+      query.sort = {
+        [query.sortBy]: query.sortDir === QueryOrder.DESC ? QueryOrder.DESC : QueryOrder.ASC,
       }
     }
 
@@ -57,5 +67,20 @@ export class InvitationService {
     })
     await this.mainQueueJobProducer.createProvisionNewUsersTask(provisioningIds)
     return { provisioningIds }
+  }
+
+  async editBasicInfo(id: number, data: Partial<Invitation>): Promise<{ id: number }> {
+    const invitation = await this.invitationRepository.findOneOrFail(id)
+    if (invitation.provisioningState !== PROVISIONING_STATE.PENDING) {
+      throw new InvalidStateError('Cannot edit invitation that is not in pending state')
+    }
+    const allowedFields = ['firstName', 'lastName', 'email']
+    for (const field of allowedFields) {
+      if (data[field]) {
+        invitation[field] = data[field]
+      }
+    }
+    await this.em.persistAndFlush(invitation)
+    return { id: invitation.id }
   }
 }

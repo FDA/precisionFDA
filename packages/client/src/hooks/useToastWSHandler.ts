@@ -21,7 +21,8 @@ const NO_TOAST_NOTIFICATIONS = [
   NOTIFICATION_ACTION.DATA_PORTAL_CARD_IMAGE_URL_UPDATED,
   NOTIFICATION_ACTION.CHALLENGE_CARD_IMAGE_URL_UPDATED,
   NOTIFICATION_ACTION.CHALLENGE_RESOURCE_URL_UPDATED,
-  NOTIFICATION_ACTION.USER_PROVISIONED,
+  NOTIFICATION_ACTION.USER_PROVISIONING_DONE,
+  NOTIFICATION_ACTION.USER_PROVISIONING_ERROR,
 ]
 
 const toastHandlers = {
@@ -60,6 +61,7 @@ export const useToastWSHandler = () => {
               message: notification.message,
               linkTitle: notification.meta?.linkTitle,
               linkUrl: notification.meta?.linkUrl,
+              linkTarget: notification.meta?.linkTarget,
             })
           : BasicToast(notification.message)
 

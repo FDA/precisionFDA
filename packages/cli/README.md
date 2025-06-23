@@ -139,6 +139,17 @@ To test for FIPS compliance we can inspect the symbols using `go tool nm ./pfda`
 
 # Version History
 
+### 2.10.0 (2025-06-17)
+
+- Improved error handling
+- Added support for comma-separated arguments
+- Optimizing performance
+
+### 2.9.0 (2025-03-31)
+
+- New feature - rotate-password; rotates password of a database cluster
+- New feature - get-password; get the password of a database cluster
+
 ### 2.8.0 (2025-01-20)
 - New feature - create-discussion; create a new discussion in a space
 - New feature - create-reply; create a reply to a discussion
