@@ -1,134 +1,117 @@
-import { SpaceEvent } from '@shared/domain/space-event/space-event.entity'
-import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
-import { ErrorCodes, NotFoundError, ValidationError } from '@shared/errors'
+import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
+import { ErrorCodes, ValidationError } from '@shared/errors'
 import { filter, pipe, uniqBy, isNil } from 'ramda'
-import {
-  EmailSendInput,
-  EmailTemplate,
-  EMAIL_TYPES,
-  NOTIFICATION_TYPES_BASE,
-} from '../../email.config'
-import {
-  buildIsNotificationEnabled,
-  buildFilterByUserSettings,
-  buildEmailTemplate,
-  ObjectIdInputDTO,
-} from '../../email.helper'
+import { EmailConfigItem } from '../../email.config'
+import { buildIsNotificationEnabled, buildFilterByUserSettings } from '../../email.helper'
 import {
   SPACE_EVENT_ACTIVITY_TYPE,
   SPACE_EVENT_OBJECT_TYPE,
 } from '../../../space-event/space-event.enum'
-import { newContentTemplate, NewContentTemplateInput } from '../mjml/new-content.template'
-import { BaseTemplate } from '@shared/domain/email/templates/base-template'
+import { newContentTemplate } from '../mjml/new-content.template'
 import { User } from '@shared/domain/user/user.entity'
+import { EmailHandler } from '@shared/domain/email/templates/handlers/email.handler'
+import { Injectable } from '@nestjs/common'
+import { EmailClient } from '@shared/services/email-client'
+import { SqlEntityManager } from '@mikro-orm/mysql'
+import { OpsCtx } from '@shared/types'
+import { SpaceEventRepository } from '@shared/domain/space-event/space-event.repository'
+import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
+import {
+  ContentChangedContext,
+  EmailTypeToContextMap,
+} from '@shared/domain/email/dto/email-type-to-context.map'
+import { ObjectIdInputDTO } from '@shared/domain/email/dto/object-id.dto'
+import { EmailTypeToTemplateInputMap } from '@shared/domain/email/dto/email-type-to-template-input.map'
 
-export class ContentChangedEmailHandler
-  extends BaseTemplate<ObjectIdInputDTO>
-  implements EmailTemplate<NewContentTemplateInput>
-{
-  templateFile = newContentTemplate
-  templateContent?: NewContentTemplateInput['content']
+@Injectable()
+export class ContentChangedEmailHandler extends EmailHandler<EMAIL_TYPES.newContentAdded> {
+  protected emailType = EMAIL_TYPES.newContentAdded as const
+  protected inputDto = ObjectIdInputDTO
+  protected getBody = newContentTemplate
 
-  async setupContext(): Promise<void> {}
-
-  getNotificationKey(): keyof typeof NOTIFICATION_TYPES_BASE {
-    return 'content_added_or_deleted'
+  constructor(
+    protected readonly em: SqlEntityManager,
+    protected readonly spaceEventRepo: SpaceEventRepository,
+    protected readonly spaceMembershipRepo: SpaceMembershipRepository,
+    protected readonly emailClient: EmailClient,
+  ) {
+    super(emailClient)
   }
 
-  async determineReceivers(): Promise<User[]> {
-    const spaceEvent = await this.ctx.em.findOneOrFail(
-      SpaceEvent,
+  protected async getContextualData(
+    input: ObjectIdInputDTO,
+  ): Promise<EmailTypeToContextMap[EMAIL_TYPES.newContentAdded]> {
+    const spaceEvent = await this.spaceEventRepo.findOneOrFail(
       {
-        id: this.validatedInput.id,
+        id: input.id,
       },
       { populate: ['space'] },
     )
+    return { input, spaceEvent }
+  }
 
-    const ignoreUserIds = (() => {
-      if (!spaceEvent.data) return []
-      try {
-        const data = JSON.parse(spaceEvent.data)
-        return data.ignoreUserIds || []
-      } catch {
-        return []
-      }
-    })()
-
-    const memberships = await this.ctx.em.find(
-      SpaceMembership,
-      { spaces: spaceEvent.space.id, active: true },
+  protected async determineReceivers(context: ContentChangedContext): Promise<User[]> {
+    const memberships = await this.spaceMembershipRepo.find(
+      { spaces: context.spaceEvent.space.id, active: true },
       { populate: ['user.notificationPreference'] },
     )
 
+    const ctx: OpsCtx = {
+      em: this.em,
+      log: this.logger,
+    }
+    const config: EmailConfigItem = {
+      emailId: this.emailType,
+      name: 'newContentAdded',
+      handlerClass: ContentChangedEmailHandler,
+    }
+
     // build determine filter functions
-    const isEnabledFn = buildIsNotificationEnabled(this.getNotificationKey(), this.ctx)
-    const filterFn = buildFilterByUserSettings({ ...this.ctx, config: this.config }, isEnabledFn)
+    const isEnabledFn = buildIsNotificationEnabled('content_added_or_deleted', ctx)
+    const filterFn = buildFilterByUserSettings({ ...ctx, config }, isEnabledFn)
     // fetch users with memberships, filter function should have extra param for it
     // this has to be bound to local
     // maybe remove from base template, maybe we do not need base template
     const filterUsers = pipe(
       // SpaceMembership[] -> User[]
       filterFn,
-      filter((u: User) => u.id !== spaceEvent.user.id),
-      filter((u: User) => !ignoreUserIds.includes(u.id)),
+      filter((u: User) => u.id !== context.spaceEvent.user.id),
       uniqBy((user: User) => user.id),
     )
     return filterUsers(memberships)
   }
 
-  async getTemplateContent(): Promise<NewContentTemplateInput['content']> {
-    const spaceEvent = await this.ctx.em.findOne(
-      SpaceEvent,
-      {
-        id: this.validatedInput.id,
-      },
-      { populate: ['space', 'user'] },
-    )
-    if (!spaceEvent || !spaceEvent.user.unwrap() || !spaceEvent.space.unwrap()) {
-      throw new NotFoundError(`SpaceEvent id ${this.validatedInput.id.toString()} not found`, {
-        code: ErrorCodes.EMAIL_PAYLOAD_NOT_FOUND,
-      })
-    }
-    const action = SPACE_EVENT_ACTIVITY_TYPE[spaceEvent.activityType].split('_')[1]
+  protected getSubject(): string {
+    return 'Content changed'
+  }
+
+  protected getTemplateInput(
+    receiver: User,
+    context: ContentChangedContext,
+  ): EmailTypeToTemplateInputMap[EMAIL_TYPES.newContentAdded] {
+    const action = SPACE_EVENT_ACTIVITY_TYPE[context.spaceEvent.activityType].split('_')[1]
     if (isNil(action)) {
       throw new ValidationError(
-        `Action code name ${SPACE_EVENT_ACTIVITY_TYPE[spaceEvent.activityType]} is not applicable`,
+        `Action code name ${SPACE_EVENT_ACTIVITY_TYPE[context.spaceEvent.activityType]} is not applicable`,
         { code: ErrorCodes.EMAIL_VALIDATION },
       )
     }
-    const objectType = SPACE_EVENT_OBJECT_TYPE[spaceEvent.objectType].toLowerCase()
-    this.templateContent = {
-      entityType: spaceEvent.entityType,
+    const objectType = SPACE_EVENT_OBJECT_TYPE[context.spaceEvent.objectType].toLowerCase()
+    const content = {
+      entityType: context.spaceEvent.entityType,
       action,
       objectType,
       user: {
-        fullName: spaceEvent.user.unwrap().fullName,
+        fullName: context.spaceEvent.user.unwrap().fullName,
       },
       space: {
-        name: spaceEvent.space.unwrap().name,
-        id: spaceEvent.space.id,
+        name: context.spaceEvent.space.unwrap().name,
+        id: context.spaceEvent.space.id,
       },
     }
-    return this.templateContent
-  }
-
-  async template(receiver: User): Promise<EmailSendInput> {
-    /**
-     * Content can be resolved independently by every handler
-     * in case a) it can be dynamic - different for every receiver
-     * in case b) it can be reused from class context -> determined in the constructor and then reused
-     * consider calling the getTemplateContent() externally in email-process
-     */
-    const content = await this.getTemplateContent()
-    const body = buildEmailTemplate<NewContentTemplateInput>(this.templateFile, {
+    return {
       receiver,
       content,
-    })
-    return {
-      emailType: EMAIL_TYPES.newContentAdded,
-      to: receiver.email,
-      body,
-      subject: 'Content changed',
     }
   }
 }

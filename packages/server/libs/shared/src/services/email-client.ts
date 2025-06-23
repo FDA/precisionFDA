@@ -43,7 +43,7 @@ class SMTPEmailClient extends EmailClient {
   async sendEmail(input: EmailSendInput): Promise<void> {
     try {
       const info = await this.transporter.sendMail({
-        from: input.from ?? config.emails.smtp.fromAddress,
+        from: config.emails.smtp.fromAddress,
         cc: [],
         to: input.to,
         replyTo: input.replyTo,

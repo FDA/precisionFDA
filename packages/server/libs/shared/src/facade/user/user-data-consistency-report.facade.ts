@@ -1,7 +1,7 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Injectable, Logger } from '@nestjs/common'
 import { config } from '@shared/config'
-import { EMAIL_TYPES, EmailSendInput } from '@shared/domain/email/email.config'
+import { EmailSendInput } from '@shared/domain/email/email.config'
 import {
   buildEmailTemplate,
   getBullJobIdForEmailOperation,
@@ -36,6 +36,7 @@ import {
 } from '@shared/facade/user/user-facade.types'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { PlatformClient } from '@shared/platform-client'
+import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
 
 // UserDataConsistencyReportOperation uses a user token to inspect the user's
 // data integrity in the database and detects inconsistencies between pFDA and platform

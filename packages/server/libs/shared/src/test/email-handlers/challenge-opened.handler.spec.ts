@@ -1,97 +1,171 @@
-import { database } from '@shared/database'
-import { Challenge } from '@shared/domain/challenge/challenge.entity'
-import { Space } from '@shared/domain/space/space.entity'
-import { User } from '@shared/domain/user/user.entity'
-import { expect } from 'chai'
-import { EntityManager } from '@mikro-orm/core'
-import { create, generate, db } from '@shared/test'
-import { EMAIL_CONFIG } from '@shared/domain/email/email.config'
+import { SqlEntityManager } from '@mikro-orm/mysql'
+import { ChallengeRepository } from '@shared/domain/challenge/challenge.repository'
+import { EmailClient } from '@shared/services/email-client'
+import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
+import { UserRepository } from '@shared/domain/user/user.repository'
 import { ChallengeOpenedEmailHandler } from '@shared/domain/email/templates/handlers/challenge-opened.handler'
-import { UserOpsCtx } from '@shared/types'
-import { defaultLogger } from '@shared/logger'
-import { CHALLENGE_STATUS } from '@shared/domain/challenge/challenge.enum'
-import { SPACE_MEMBERSHIP_ROLE } from '@shared/domain/space-membership/space-membership.enum'
+import { stub } from 'sinon'
+import { ChallengeOpenedDTO } from '@shared/domain/email/dto/challenge-opened.dto'
+import { expect } from 'chai'
+import { InternalError } from '@shared/errors'
+import { User } from '@shared/domain/user/user.entity'
+import { Organization } from '@shared/domain/org/org.entity'
+import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
+import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
+import { Space } from '@shared/domain/space/space.entity'
+import {
+  SPACE_MEMBERSHIP_ROLE,
+  SPACE_MEMBERSHIP_SIDE,
+} from '@shared/domain/space-membership/space-membership.enum'
+import { pfdaNoReplyUser } from '@shared/domain/email/email.helper'
 
-describe('challenge-opened.handler', () => {
-  let em: EntityManager
-  let user: User
-  let anotherUser: User
-  let challenge: Challenge
-  let space: Space
-  let ctx: UserOpsCtx
-  const config = EMAIL_CONFIG.challengeOpened
+describe('ChallengeOpenedEmailHandler', () => {
+  const CHALLENGE_ID = 1
+  const SPACE_ID = 2
+
+  const challengeRepoFindOneOrFailStub = stub()
+  const userRepoFindActiveStub = stub()
+  const spaceMembershipRepoFindStub = stub()
+  const emailClientSendEmailStub = stub()
+
+  const entityManager = {} as unknown as SqlEntityManager
+  const challengeRepo = {
+    findOneOrFail: challengeRepoFindOneOrFailStub,
+  } as unknown as ChallengeRepository
+  const userRepo = {
+    findActive: userRepoFindActiveStub,
+  } as unknown as UserRepository
+  const spaceMembershipRepo = {
+    find: spaceMembershipRepoFindStub,
+  } as unknown as SpaceMembershipRepository
+  const emailClient = {
+    sendEmail: emailClientSendEmailStub,
+  } as unknown as EmailClient
+
+  const getHandler = () => {
+    return new ChallengeOpenedEmailHandler(
+      entityManager,
+      challengeRepo,
+      userRepo,
+      spaceMembershipRepo,
+      emailClient,
+    )
+  }
 
   beforeEach(async () => {
-    await db.dropData(database.connection())
-    // create DB mocks
-    em = database.orm().em.fork()
-    em.clear()
-    user = create.userHelper.create(em, { email: generate.random.email(), lastLogin: new Date() })
-    anotherUser = create.userHelper.create(em, {
-      email: generate.random.email(),
-      lastLogin: new Date(),
-    })
-    challenge = create.challengeHelper.create(em, { userAndAdmin: user })
-    space = create.spacesHelper.create(em, generate.space.group())
-    create.spacesHelper.addMember(
-      em,
-      { user: anotherUser, space },
-      { role: SPACE_MEMBERSHIP_ROLE.VIEWER },
-    )
+    challengeRepoFindOneOrFailStub.reset()
+    challengeRepoFindOneOrFailStub.throws()
 
-    await em.flush()
+    userRepoFindActiveStub.reset()
+    userRepoFindActiveStub.throws()
 
-    ctx = {
-      em: database.orm().em.fork(),
-      log: defaultLogger,
-      user: { id: user.id, accessToken: 'foo', dxuser: user.dxuser },
-    }
+    spaceMembershipRepoFindStub.reset()
+    spaceMembershipRepoFindStub.throws()
+
+    emailClientSendEmailStub.reset()
+    emailClientSendEmailStub.throws()
   })
 
-  context('setupContext()', () => {
-    it('loads challenge in any state', async () => {
-      const input = { challengeId: challenge.id }
-      const handler = new ChallengeOpenedEmailHandler(config.emailId, input, ctx)
-      await handler.setupContext()
-      expect(handler.challenge).to.exist()
-      expect(challenge).to.have.property('status').that.is.not.equal(CHALLENGE_STATUS.OPEN)
-    })
-  })
+  describe('#sendEmail', () => {
+    it('not in space and not public', async () => {
+      const challenge = {
+        isPublic: () => false,
+        isInSpace: () => false,
+        scope: 'unsupported-scope',
+      }
+      const input = new ChallengeOpenedDTO()
+      input.challengeId = CHALLENGE_ID
 
-  context('determineReceivers()', () => {
-    it('return all active users as receivers (public challenge)', async () => {
-      const input = { challengeId: challenge.id }
-      const handler = new ChallengeOpenedEmailHandler(config.emailId, input, ctx)
-      await handler.setupContext()
-      const receivers = await handler.determineReceivers()
-      expect(receivers).to.have.lengthOf(3)
-    })
+      challengeRepoFindOneOrFailStub.withArgs({ id: CHALLENGE_ID }).resolves(challenge)
+      const handler = getHandler()
 
-    it('return users in given space (private challenge)', async () => {
-      const privateChallenge = create.challengeHelper.create(
-        em,
-        { userAndAdmin: user },
-        {
-          scope: `space-${space.id}`,
-        },
+      await expect(handler.sendEmail(input)).to.be.rejectedWith(
+        InternalError,
+        `Scope name ${challenge.scope} is not processable`,
       )
-      await em.flush()
-
-      const input = { challengeId: privateChallenge.id }
-      const handler = new ChallengeOpenedEmailHandler(config.emailId, input, ctx)
-      await handler.setupContext()
-      const receivers = await handler.determineReceivers()
-      expect(receivers).to.have.lengthOf(2)
-      expect(receivers[0]).to.have.property('id', anotherUser.id)
     })
-  })
 
-  context('getNotificationKey()', () => {
-    it('returns static value', () => {
-      const input = { challengeId: challenge.id }
-      const handler = new ChallengeOpenedEmailHandler(config.emailId, input, ctx)
-      const key = handler.getNotificationKey()
-      expect(key).to.equal('challenge_opened')
+    it('public', async () => {
+      const challenge = {
+        id: CHALLENGE_ID,
+        name: 'challenge-name',
+        isPublic: () => true,
+        isInSpace: () => false,
+      }
+      const organization = new Organization()
+      const user1 = new User(organization)
+      user1.email = 'user@email.com'
+      const input = new ChallengeOpenedDTO()
+      input.challengeId = CHALLENGE_ID
+
+      challengeRepoFindOneOrFailStub.withArgs({ id: CHALLENGE_ID }).resolves(challenge)
+      userRepoFindActiveStub
+        .withArgs({ populate: ['notificationPreference'] as never[] })
+        .resolves([user1])
+      emailClientSendEmailStub.reset()
+      const handler = getHandler()
+
+      await handler.sendEmail(input)
+
+      expect(userRepoFindActiveStub.calledOnce).to.be.true
+      expect(userRepoFindActiveStub.firstCall.args).to.deep.equal([
+        { populate: ['notificationPreference'] },
+      ])
+      expect(spaceMembershipRepoFindStub.called).to.be.false
+      expect(emailClientSendEmailStub.calledTwice).to.be.true
+      expect(emailClientSendEmailStub.firstCall.args[0].to).to.equal(user1.email)
+      expect(emailClientSendEmailStub.firstCall.args[0].emailType).to.equal(
+        EMAIL_TYPES.challengeOpened,
+      )
+      expect(emailClientSendEmailStub.firstCall.args[0].subject).to.equal(
+        `New challenge ${challenge.name}`,
+      )
+      expect(emailClientSendEmailStub.secondCall.args[0].to).to.equal(pfdaNoReplyUser.email)
+      expect(emailClientSendEmailStub.args[0][0].body).to.contain(challenge.name)
+    })
+
+    it('in a space', async () => {
+      const challenge = {
+        id: CHALLENGE_ID,
+        name: 'challenge-name',
+        isPublic: () => false,
+        isInSpace: () => true,
+        getSpaceId: () => SPACE_ID,
+      }
+      const organization = new Organization()
+      const user1 = new User(organization)
+      user1.email = 'user@email.com'
+      const input = new ChallengeOpenedDTO()
+      input.challengeId = CHALLENGE_ID
+      const space = new Space()
+      const spaceMembership = new SpaceMembership(
+        user1,
+        space,
+        SPACE_MEMBERSHIP_SIDE.GUEST,
+        SPACE_MEMBERSHIP_ROLE.ADMIN,
+      )
+      spaceMembershipRepoFindStub
+        .withArgs({ spaces: SPACE_ID, active: true })
+        .resolves([spaceMembership])
+      challengeRepoFindOneOrFailStub.withArgs({ id: CHALLENGE_ID }).resolves(challenge)
+      emailClientSendEmailStub.reset()
+
+      const handler = getHandler()
+
+      await handler.sendEmail(input)
+
+      expect(userRepoFindActiveStub.calledOnce).to.be.false
+      expect(spaceMembershipRepoFindStub.called).to.be.true
+      expect(emailClientSendEmailStub.calledTwice).to.be.true
+      expect(emailClientSendEmailStub.firstCall.args[0].to).to.equal(user1.email)
+      expect(emailClientSendEmailStub.firstCall.args[0].emailType).to.equal(
+        EMAIL_TYPES.challengeOpened,
+      )
+      expect(emailClientSendEmailStub.firstCall.args[0].subject).to.equal(
+        `New challenge ${challenge.name}`,
+      )
+      expect(emailClientSendEmailStub.secondCall.args[0].to).to.equal(pfdaNoReplyUser.email)
+      expect(emailClientSendEmailStub.args[0][0].body).to.contain(challenge.name)
     })
   })
 })

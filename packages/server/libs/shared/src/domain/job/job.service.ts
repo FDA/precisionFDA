@@ -2,9 +2,10 @@ import { EntityManager } from '@mikro-orm/core'
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Injectable, Logger } from '@nestjs/common'
 import { config } from '@shared/config'
-import { EMAIL_TYPES, EmailSendInput } from '@shared/domain/email/email.config'
-import { EmailFacade } from '@shared/domain/email/email.facade'
+import { EmailSendInput } from '@shared/domain/email/email.config'
+import { EmailService } from '@shared/domain/email/email.service'
 import { buildEmailTemplate } from '@shared/domain/email/email.helper'
+import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
 import { EmailQueueJobProducer } from '@shared/domain/email/producer/email-queue-job.producer'
 import {
   reportStaleJobsTemplate,
@@ -58,7 +59,7 @@ export class JobService {
     private readonly notificationService: NotificationService,
     private readonly folderService: FolderService,
     private readonly emailsJobProducer: EmailQueueJobProducer,
-    private readonly emailFacade: EmailFacade,
+    private readonly emailService: EmailService,
   ) {
     this.jobRepo = em.getRepository(Job)
     this.userRepo = em.getRepository(User)
@@ -254,7 +255,7 @@ export class JobService {
           this.em.getRepository(Space),
           this.em.getRepository(User),
           this.em.getRepository(SpaceMembership),
-          this.emailFacade,
+          this.emailService,
         )
         const spaceEvent = await spaceService.createSpaceEvent({
           entity: { type: 'job', value: job },
