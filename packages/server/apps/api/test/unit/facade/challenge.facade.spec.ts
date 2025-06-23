@@ -5,14 +5,14 @@ import { CHALLENGE_STATUS } from '@shared/domain/challenge/challenge.enum'
 import { ChallengeFacade } from '../../../src/facade/challenge/challenge.facade'
 import { ChallengeService } from '@shared/domain/challenge/challenge.service'
 import { SpaceService } from '@shared/domain/space/service/space.service'
-import { EmailFacade } from '@shared/domain/email/email.facade'
+import { EmailService } from '@shared/domain/email/email.service'
 import { Challenge } from '@shared/domain/challenge/challenge.entity'
 import { UpdateChallengeDTO } from '@shared/domain/challenge/dto/update-challenge.dto'
-import { EMAIL_TYPES } from '@shared/domain/email/email.config'
 import { STATIC_SCOPE } from '@shared/enums'
 import { PlatformClient } from '@shared/platform-client'
 import { UserFileService } from '@shared/domain/user-file/service/user-file.service'
 import { SPACE_TYPE } from '@shared/domain/space/space.enum'
+import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
 
 describe('ChallengeFacade', () => {
   const CREATE_CHALLENGE_DTO = {
@@ -90,7 +90,7 @@ describe('ChallengeFacade', () => {
       })
       expect(sendEmailStub.calledOnce).to.be.true()
       expect(sendEmailStub.firstCall.args[0]).to.deep.eq({
-        emailTypeId: EMAIL_TYPES.challengePrereg,
+        type: EMAIL_TYPES.challengePrereg,
         input: {
           challengeId: 1,
           name: 'name',
@@ -169,9 +169,9 @@ describe('ChallengeFacade', () => {
       create: createSpaceStub,
     } as unknown as SpaceService
 
-    const emailFacade = {
+    const emailService = {
       sendEmail: sendEmailStub,
-    } as unknown as EmailFacade
+    } as unknown as EmailService
 
     const challengeBotClient = {
       fileCreate: fileCreateStub,
@@ -186,7 +186,7 @@ describe('ChallengeFacade', () => {
       challengeBotClient,
       userFileService,
       spaceService,
-      emailFacade,
+      emailService,
     )
   }
 })

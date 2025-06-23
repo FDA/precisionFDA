@@ -1,12 +1,4 @@
-import {
-  Collection,
-  Entity,
-  ManyToOne,
-  OneToMany,
-  PrimaryKey,
-  Property,
-  Ref,
-} from '@mikro-orm/core'
+import { Collection, Entity, ManyToOne, OneToMany, Property, Ref } from '@mikro-orm/core'
 import { User } from '@shared/domain/user/user.entity'
 
 import { BaseEntity } from '../../database/base.entity'
@@ -14,9 +6,6 @@ import { OrgRepository } from './org.repository'
 
 @Entity({ tableName: 'orgs', repository: () => OrgRepository })
 export class Organization extends BaseEntity {
-  @PrimaryKey()
-  id: number
-
   // N.B handle is not the dxid of the org on platform
   //     See createDxOrg() below for the format of org dxid on platform
   @Property()

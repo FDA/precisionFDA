@@ -1,3 +1,4 @@
+import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
 import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { TASK_TYPE } from '@shared/queue/task.input'
@@ -13,16 +14,8 @@ import {
   NOTIFICATION_ROLE_PREFIXES,
   NOTIFICATION_TYPES_BASE,
   NOTIFICATION_TYPES,
-  EMAIL_TYPES,
 } from './email.config'
 import { nanoid } from 'nanoid'
-import { IsNotEmpty, IsNumber } from 'class-validator'
-
-export class ObjectIdInputDTO {
-  @IsNumber()
-  @IsNotEmpty()
-  id: number
-}
 
 type EmailHelperCtx = OpsCtx & {
   config: EmailConfigItem

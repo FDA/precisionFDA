@@ -109,7 +109,7 @@ class LicensesController < ApplicationController
           user_id: @context.user.id,
           message:,
         }
-        https_apps_client.email_send(NotificationPreference.email_types[:license_request_email], [], request)
+        https_apps_client.email_send(NotificationPreference.email_types[:license_request_email], request)
         flash[:success] = "License approval requested"
       end
       redirect_to license_path(@license)
@@ -193,7 +193,7 @@ class LicensesController < ApplicationController
         userLicense = license.accepted_licenses.find_by(user_id: user.id)
         if !userLicense.nil?
           userLicense.destroy
-          https_apps_client.email_send(NotificationPreference.email_types[:license_revoked], [user.id], { id: userLicense.id })
+          https_apps_client.email_send(NotificationPreference.email_types[:license_revoked], { id: userLicense.id, receiverUserIds: [user.id] } )
         end
       end
     end
@@ -215,7 +215,7 @@ class LicensesController < ApplicationController
         if !accepted_license.nil?
           accepted_license.update(state: "active")
           accepted_license.reload
-          https_apps_client.email_send(NotificationPreference.email_types[:license_approved], [user.id], { id: accepted_license.id })
+          https_apps_client.email_send(NotificationPreference.email_types[:license_approved], { id: accepted_license.id, receiverUserIds: [user.id] } )
         end
       end
     end

@@ -15,6 +15,7 @@ import { DbCluster } from '@shared/domain/db-cluster/db-cluster.entity'
 import { ENGINE, ENGINES, STATUS, STATUSES } from '@shared/domain/db-cluster/db-cluster.enum'
 import { invertObj } from 'ramda'
 import { SimpleUserDTO } from '@shared/domain/user/dto/simple-user.dto'
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
 
 export class CliFileDescribeDTO {
   types: string[]
@@ -39,7 +40,7 @@ export class CliFileDescribeDTO {
 
   static async fromEntity(
     describeFile: FileDescribeResponse,
-    file: Node,
+    file: Asset | UserFile,
   ): Promise<CliFileDescribeDTO> {
     let response: CliFileDescribeDTO = {
       ...describeFile,

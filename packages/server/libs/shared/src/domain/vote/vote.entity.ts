@@ -1,11 +1,8 @@
-import { Entity, PrimaryKey, Property } from '@mikro-orm/core'
+import { Entity, Property } from '@mikro-orm/core'
 import { BaseEntity } from '../../database/base.entity'
 
 @Entity({ tableName: 'votes' })
 export class Vote extends BaseEntity {
-  @PrimaryKey()
-  id: number
-
   @Property()
   votableId: number
 

@@ -1,65 +1,70 @@
-import { Challenge } from '@shared/domain/challenge/challenge.entity'
+import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
 import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { pipe, uniqBy } from 'ramda'
 import { LoadedReference } from '@mikro-orm/core'
 import { STATIC_SCOPE } from '@shared/enums'
+import { EmailConfigItem } from '../../email.config'
 import {
-  EmailTemplate,
-  NOTIFICATION_TYPES_BASE,
-  EmailSendInput,
-  EMAIL_TYPES,
-} from '../../email.config'
-import {
-  buildEmailTemplate,
   buildFilterByUserSettings,
   buildIsNotificationEnabled,
   pfdaNoReplyUser,
 } from '../../email.helper'
-import { BaseTemplate } from '@shared/domain/email/templates/base-template'
-import {
-  challengePreregTemplate,
-  ChallengePreregTemplateInput,
-} from '../mjml/challenge-preregister.template'
+import { challengePreregTemplate } from '../mjml/challenge-preregister.template'
 import { InternalError } from '@shared/errors'
 import { getIdFromScopeName, scopeContainsId } from '../../../space/space.helper'
+import { Injectable } from '@nestjs/common'
+import { EmailHandler } from '@shared/domain/email/templates/handlers/email.handler'
 import { ChallengeCreatedDTO } from '@shared/domain/email/dto/challenge-created.dto'
+import { SqlEntityManager } from '@mikro-orm/mysql'
+import { EmailClient } from '@shared/services/email-client'
+import { OpsCtx } from '@shared/types'
+import { ChallengeRepository } from '@shared/domain/challenge/challenge.repository'
+import { UserRepository } from '@shared/domain/user/user.repository'
+import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
+import {
+  ChallengePreregContext,
+  EmailTypeToContextMap,
+} from '@shared/domain/email/dto/email-type-to-context.map'
+import { EmailTypeToTemplateInputMap } from '@shared/domain/email/dto/email-type-to-template-input.map'
 
-export class ChallengePreregEmailHandler
-  extends BaseTemplate<ChallengeCreatedDTO>
-  implements EmailTemplate<ChallengePreregTemplateInput>
-{
-  templateFile = challengePreregTemplate
-  challenge: Challenge | null
+@Injectable()
+export class ChallengePreregEmailHandler extends EmailHandler<EMAIL_TYPES.challengePrereg> {
+  protected emailType = EMAIL_TYPES.challengePrereg as const
+  protected inputDto = ChallengeCreatedDTO
+  protected getBody = challengePreregTemplate
 
-  getNotificationKey(): keyof typeof NOTIFICATION_TYPES_BASE {
-    return 'challenge_preregister'
+  constructor(
+    protected readonly em: SqlEntityManager,
+    protected readonly challengeRepo: ChallengeRepository,
+    protected readonly userRepo: UserRepository,
+    protected readonly spaceMembershipRepo: SpaceMembershipRepository,
+    protected readonly emailClient: EmailClient,
+  ) {
+    super(emailClient)
   }
 
-  async setupContext(): Promise<void> {
-    // if challenge is just created this can be null
-    this.challenge = await this.ctx.em.findOne(Challenge, {
-      id: this.validatedInput.challengeId,
+  protected async getContextualData(
+    input: ChallengeCreatedDTO,
+  ): Promise<EmailTypeToContextMap[EMAIL_TYPES.challengePrereg]> {
+    const challenge = await this.challengeRepo.findOneOrFail({
+      id: input.challengeId,
     })
-    if (!this.challenge) {
-      this.ctx.log.log(
-        { challengeId: this.validatedInput.challengeId },
-        'Email handler runs, challenge not created yet',
-      )
+    return {
+      challenge,
+      input,
     }
   }
 
-  async determineReceivers(): Promise<User[]> {
-    const userRepo = this.ctx.em.getRepository(User)
+  protected async determineReceivers(context: ChallengePreregContext): Promise<User[]> {
     let users: User[]
-    if (this.validatedInput.scope === STATIC_SCOPE.PUBLIC) {
+    if (context.input.scope === STATIC_SCOPE.PUBLIC) {
       // all active users
-      users = await userRepo.findActive({ populate: ['notificationPreference'] as never[] })
-    } else if (scopeContainsId(this.validatedInput.scope)) {
+      users = await this.userRepo.findActive({ populate: ['notificationPreference'] as never[] })
+    } else if (scopeContainsId(context.input.scope)) {
       // find space, memberships, inform only those users
-      const spaceId = getIdFromScopeName(this.validatedInput.scope)
-      const memberships = await this.ctx.em.find(
-        SpaceMembership,
+      const spaceId = getIdFromScopeName(context.input.scope)
+      const memberships = await this.spaceMembershipRepo.find(
         { spaces: spaceId, active: true },
         { populate: ['user.notificationPreference'] },
       )
@@ -68,31 +73,40 @@ export class ChallengePreregEmailHandler
         (m: SpaceMembership & { user: LoadedReference<User> }): User => m.user.unwrap(),
       )
     } else {
-      throw new InternalError(`Scope name ${this.validatedInput.scope} is not processable`)
+      throw new InternalError(`Scope name ${context.input.scope} is not processable`)
     }
-    const isEnabledFn = buildIsNotificationEnabled(this.getNotificationKey(), this.ctx)
-    const filterFn = buildFilterByUserSettings({ ...this.ctx, config: this.config }, isEnabledFn)
+    const ctx: OpsCtx = {
+      em: this.em,
+      log: this.logger,
+    }
+    const config: EmailConfigItem = {
+      emailId: this.emailType,
+      name: 'spaceChanged',
+      handlerClass: ChallengePreregEmailHandler,
+    }
+    const isEnabledFn = buildIsNotificationEnabled('challenge_preregister', ctx)
+    const filterFn = buildFilterByUserSettings({ ...ctx, config }, isEnabledFn)
     const filterPipe = pipe(
       // User[] -> User[]
       filterFn,
       uniqBy((u: User) => u.id),
     )
-    const interestedUsers = filterPipe(users).concat(pfdaNoReplyUser)
-    return interestedUsers
+    return filterPipe(users).concat(pfdaNoReplyUser)
   }
 
-  async template(receiver: User): Promise<EmailSendInput> {
-    const body = buildEmailTemplate<ChallengePreregTemplateInput>(this.templateFile, {
+  protected getSubject(_receiver: User, context: ChallengePreregContext): string {
+    return `Challenge ${context.input.name} preregistration opened`
+  }
+
+  protected getTemplateInput(
+    receiver: User,
+    context: ChallengePreregContext,
+  ): EmailTypeToTemplateInputMap[EMAIL_TYPES.challengePrereg] {
+    return {
       receiver,
       content: {
-        challenge: { name: this.validatedInput.name, id: this.validatedInput.challengeId },
+        challenge: { name: context.input.name, id: context.input.challengeId },
       },
-    })
-    return {
-      emailType: EMAIL_TYPES.challengePrereg,
-      to: receiver.email,
-      body,
-      subject: `Challenge ${this.validatedInput.name} preregistration opened`,
     }
   }
 }

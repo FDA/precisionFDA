@@ -3,6 +3,7 @@ import { SPACE_TYPE } from '@shared/domain/space/space.enum'
 import { User } from '@shared/domain/user/user.entity'
 import { SpaceReportPartUserResultProvider } from '@shared/facade/space-report/service/space-report-part-user-result-provider.service'
 import { expect } from 'chai'
+import { config } from '@shared/config'
 
 describe('SpaceReportPartUserResultProvider', () => {
   const USER_ID = 0
@@ -41,7 +42,7 @@ describe('SpaceReportPartUserResultProvider', () => {
       title: FULL_NAME,
       memberSince: MEMBERSHIP_CREATED,
       dxuser: DXUSER,
-      link: 'https://rails-host:1234/users/DXUSER',
+      link: `${config.api.railsHost}/users/DXUSER`,
     })
   })
 
@@ -54,7 +55,7 @@ describe('SpaceReportPartUserResultProvider', () => {
       title: FULL_NAME,
       memberSince: MEMBERSHIP_CREATED,
       dxuser: DXUSER,
-      link: 'https://rails-host:1234/users/DXUSER',
+      link: `${config.api.railsHost}/users/DXUSER`,
     })
   })
 

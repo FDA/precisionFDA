@@ -9,6 +9,7 @@ import { SCOPE } from '@shared/types/common'
 import { EntityUtils } from '@shared/utils/entity.utils'
 import { expect } from 'chai'
 import { match, SinonStub, stub } from 'sinon'
+import { config } from '@shared/config'
 
 describe('UIdScopedEntityLinkProvider', () => {
   const UID = 'UID'
@@ -52,7 +53,7 @@ describe('UIdScopedEntityLinkProvider', () => {
         const res = await getInstance().getLink(entity)
 
         expect(res).to.equal(
-          `https://rails-host:1234/spaces/${SPACE_ID}/${urlSegment}/${entity.uid}`,
+          `${config.api.railsHost}/spaces/${SPACE_ID}/${urlSegment}/${entity.uid}`,
         )
       }
     })
@@ -75,7 +76,7 @@ describe('UIdScopedEntityLinkProvider', () => {
       for (const { entity, urlSegment } of cases) {
         const res = await getInstance().getLink(entity)
 
-        expect(res).to.equal(`https://rails-host:1234/home/${urlSegment}/${UID}`)
+        expect(res).to.equal(`${config.api.railsHost}/home/${urlSegment}/${UID}`)
       }
     })
   }

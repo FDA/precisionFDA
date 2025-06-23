@@ -5,8 +5,6 @@ import {
   ManyToOne,
   OneToMany,
   OneToOne,
-  PrimaryKey,
-  Property,
   Ref,
   Reference,
 } from '@mikro-orm/core'
@@ -19,9 +17,6 @@ import AnswerRepository from '@shared/domain/answer/answer.repository'
 
 @Entity({ tableName: 'answers', repository: () => AnswerRepository })
 export class Answer extends BaseEntity {
-  @PrimaryKey()
-  id: number
-
   @OneToOne({ entity: () => Note, cascade: [Cascade.REMOVE] })
   note: Ref<Note>
 
@@ -37,12 +32,6 @@ export class Answer extends BaseEntity {
     cascade: [Cascade.REMOVE],
   })
   comments = new Collection<AnswerComment>(this)
-
-  @Property({ hidden: false })
-  createdAt = new Date()
-
-  @Property({ onUpdate: () => new Date(), hidden: false })
-  updatedAt = new Date()
 
   constructor(note: Note, discussion: Discussion, user: User) {
     super()

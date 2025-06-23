@@ -1,4 +1,4 @@
-import { Meta, StoryObj } from '@storybook/react'
+import { Meta, StoryObj } from '@storybook/react-webpack5'
 import React, { useEffect } from 'react'
 import { StorybookProviders } from '../../stories/StorybookProviders'
 import { WithListData } from '../../stories/helpers'

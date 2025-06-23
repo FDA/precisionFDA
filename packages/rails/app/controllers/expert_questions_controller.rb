@@ -68,12 +68,17 @@ class ExpertQuestionsController < ApplicationController
     redirect_to expert_edit_question_path(@expert, @selected_question)
   end
 
+  def https_apps_client
+    DIContainer.resolve("https_apps_client")
+  end
+
   def create
     @expert = Expert.find(unsafe_params[:expert_id])
     redirect_to experts_path and return unless @expert.editable_by?(@context)
 
     q = ExpertQuestion.provision(@expert, @context, unsafe_params[:expert][:question])
     if q
+      https_apps_client.email_send(NotificationPreference.email_types[:expert_question_added], { id: q.id })
       flash[:success] = "Your question was submitted successfully."
     else
       flash.now[:error] = "Your question was not submitted because of an unknown reason."

@@ -1,82 +1,66 @@
-import { UserOpsCtx } from '@shared/types'
-import { Logger } from '@nestjs/common'
 import { stub } from 'sinon'
-import { expect } from 'chai'
-import { EntityManager } from '@mikro-orm/mysql'
-import { User } from '@shared/domain/user/user.entity'
 import { ExpertAddedHandler } from '@shared/domain/email/templates/handlers/expert-added.handler'
-import { EMAIL_TYPES } from '@shared/domain/email/email.config'
+import { EmailClient } from '@shared/services/email-client'
+import { ExpertRepository } from '@shared/domain/expert/expert.repository'
+import { Organization } from '@shared/domain/org/org.entity'
+import { User } from '@shared/domain/user/user.entity'
+import { expect } from 'chai'
+import { Expert } from '@shared/domain/expert/expert.entity'
+import { ObjectIdInputDTO } from '@shared/domain/email/email.helper'
+import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
 
 describe('ExpertAddedHandler', () => {
-  let receiverUserIds: number[] = [1]
-  const emFindOneOrFailStub = stub()
+  const EXPERT_ID = 34
+  const expertRepoFindOneOrFailStub = stub()
+  const emailClientSendEmailStub = stub()
 
-  const entityManager = {
-    findOneOrFail: emFindOneOrFailStub,
-  } as unknown as EntityManager
+  const emailClient = {
+    sendEmail: emailClientSendEmailStub,
+  } as unknown as EmailClient
 
-  const log = {
-    log: stub(),
-    error: stub(),
-  } as unknown as Logger
+  const expertRepo = {
+    findOneOrFail: expertRepoFindOneOrFailStub,
+  } as unknown as ExpertRepository
 
-  const userOpsCtx: UserOpsCtx = {
-    em: entityManager,
-    user: {
-      id: 1,
-      accessToken: 'accessToken',
-      dxuser: 'dxuser',
-    },
-    log,
+  const getHandler = () => {
+    return new ExpertAddedHandler(expertRepo, emailClient)
   }
 
-  beforeEach(() => {
-    emFindOneOrFailStub.reset()
-    emFindOneOrFailStub.throws()
+  beforeEach(async () => {
+    emailClientSendEmailStub.reset()
+    emailClientSendEmailStub.throws()
+
+    expertRepoFindOneOrFailStub.reset()
+    expertRepoFindOneOrFailStub.throws()
   })
 
-  const getExpertAddedHandler = (id?: number) => {
-    return new ExpertAddedHandler(EMAIL_TYPES.expertAdded, { id }, userOpsCtx, receiverUserIds)
-  }
+  describe('#sendEmail', () => {
+    it('basic', async () => {
+      const organization = new Organization()
+      const user = new User(organization)
+      user.firstName = 'Skluzan'
+      user.lastName = 'Tavic'
+      user.email = 'test@email.com'
+      const expert = new Expert(user)
+      expertRepoFindOneOrFailStub
+        .withArgs({ id: EXPERT_ID }, { populate: ['user'] })
+        .resolves(expert)
+      emailClientSendEmailStub.reset()
 
-  it('getNotificationKey', () => {
-    const expertAddedHandler = getExpertAddedHandler(1)
+      const input = new ObjectIdInputDTO()
+      input.id = EXPERT_ID
+      const handler = getHandler()
+      await handler.sendEmail(input)
 
-    expect(expertAddedHandler.getNotificationKey()).to.eq('expert_added')
-  })
-
-  it('determineReceivers', async () => {
-    const expertAddedHandler = getExpertAddedHandler(1)
-
-    const user = {
-      email: 'email',
-      getEntity: () => user,
-    } as unknown as User
-    emFindOneOrFailStub.resolves({ user })
-
-    await expertAddedHandler.setupContext()
-    const receivers = await expertAddedHandler.determineReceivers()
-
-    expect(receivers).to.eql([user])
-  })
-
-  it('template', async () => {
-    const expertAddedHandler = getExpertAddedHandler(1)
-
-    const user = {
-      email: 'email',
-      firstName: 'firstName',
-      lastName: 'surname',
-      getEntity: () => user,
-    } as unknown as User
-    emFindOneOrFailStub.resolves({ user })
-
-    await expertAddedHandler.setupContext()
-    const email = await expertAddedHandler.template(user)
-
-    expect(email.emailType).to.eq(EMAIL_TYPES.expertAdded)
-    expect(email.to).to.eq(user.email)
-    expect(email.subject).to.eq('A new Expert Q&A Session was created for firstName surname')
-    expect(email.body).to.contain('Expert Q&A Session has been created featuring firstName surname')
+      expect(emailClientSendEmailStub.calledOnce).to.be.true
+      expect(emailClientSendEmailStub.firstCall.args[0].emailType).to.eq(EMAIL_TYPES.expertAdded)
+      expect(emailClientSendEmailStub.firstCall.args[0].to).to.deep.eq(user.email)
+      expect(emailClientSendEmailStub.firstCall.args[0].subject).to.eq(
+        `A new Expert Q&A Session was created for ${user.firstName} ${user.lastName}`,
+      )
+      expect(emailClientSendEmailStub.firstCall.args[0].body).to.contain(
+        `A new Expert Q&A Session has been created featuring ${user.firstName} ${user.lastName}.`,
+      )
+    })
   })
 })

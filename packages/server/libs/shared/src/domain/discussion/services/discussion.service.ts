@@ -1,4 +1,4 @@
-import { OrderDefinition, Reference } from '@mikro-orm/core'
+import { OrderDefinition, Reference, Transactional } from '@mikro-orm/core'
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Injectable, Logger } from '@nestjs/common'
 import { Answer } from '@shared/domain/answer/answer.entity'
@@ -87,56 +87,54 @@ export class DiscussionService {
    * Creates discussion and related note and persists them in a database. Returns error when an error occurs.
    * @param dto
    */
+  @Transactional()
   async createDiscussion(dto: CreateDiscussionDTO): Promise<DiscussionDTO> {
     this.logger.log(`Creating discussion: ${JSON.stringify(dto)}`)
 
     const user = await this.userCtx.loadEntity()
 
-    return await this.em.transactional(async () => {
-      const newNote = new Note(user)
-      newNote.title = dto.title
-      newNote.content = dto.content
-      newNote.noteType = 'Discussion'
-      newNote.scope = dto.scope
-      this.em.persist(newNote)
+    const newNote = new Note(user)
+    newNote.title = dto.title
+    newNote.content = dto.content
+    newNote.noteType = 'Discussion'
+    newNote.scope = dto.scope
+    this.em.persist(newNote)
 
-      const newDiscussion = new Discussion(newNote, user)
-      await this.em.persistAndFlush(newDiscussion)
+    const newDiscussion = new Discussion(newNote, user)
+    await this.em.persistAndFlush(newDiscussion)
 
-      const newFollow = new DiscussionFollow(newDiscussion)
-      newFollow.followerId = user.id
-      newFollow.followerType = 'User'
-      newFollow.blocked = false
-      this.em.persist(newFollow)
+    const newFollow = new DiscussionFollow(newDiscussion)
+    newFollow.followerId = user.id
+    newFollow.followerType = 'User'
+    newFollow.blocked = false
+    this.em.persist(newFollow)
 
-      return DiscussionDTO.fromEntity(newDiscussion, true)
-    })
+    return DiscussionDTO.fromEntity(newDiscussion, true)
   }
 
+  @Transactional()
   async updateDiscussion(id: number, discussionInput: UpdateDiscussionDTO): Promise<DiscussionDTO> {
     this.logger.log(`Updating discussion: ${JSON.stringify(discussionInput)}`)
 
-    return await this.em.transactional(async () => {
-      const discussion = await this.discussionRepository.findEditableOne(
-        { id },
-        { populate: ['note'] },
-      )
+    const discussion = await this.discussionRepository.findEditableOne(
+      { id },
+      { populate: ['note'] },
+    )
 
-      if (!discussion) {
-        throw new errors.NotFoundError(
-          'Unable to update discussion: not found or insufficient permissions.',
-        )
-      }
-      const note = discussion.note.getEntity()
-      if (discussionInput.title) {
-        note.title = discussionInput.title
-      }
-      if (discussionInput.content) {
-        note.content = discussionInput.content
-      }
-      await this.em.persistAndFlush(note)
-      return DiscussionDTO.fromEntity(discussion)
-    })
+    if (!discussion) {
+      throw new errors.NotFoundError(
+        'Unable to update discussion: not found or insufficient permissions.',
+      )
+    }
+    const note = discussion.note.getEntity()
+    if (discussionInput.title) {
+      note.title = discussionInput.title
+    }
+    if (discussionInput.content) {
+      note.content = discussionInput.content
+    }
+    await this.em.persistAndFlush(note)
+    return DiscussionDTO.fromEntity(discussion)
   }
 
   async deleteDiscussion(discussionId: number): Promise<void> {

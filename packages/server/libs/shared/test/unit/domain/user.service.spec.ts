@@ -1,7 +1,7 @@
 import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
-import { EMAIL_TYPES } from '@shared/domain/email/email.config'
 import { EmailQueueJobProducer } from '@shared/domain/email/producer/email-queue-job.producer'
 import { UserPaginationDto } from '@shared/domain/user/dto/user-pagination.dto'
+import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
 import { HeaderItem } from '@shared/domain/user/header-item'
 import { User, USER_STATE } from '@shared/domain/user/user.entity'
 import { UserRepository } from '@shared/domain/user/user.repository'
@@ -49,6 +49,7 @@ describe('user service tests', () => {
         id: 42,
         dxuser: 'user1',
         accessToken: 'access_token',
+        loadEntity: () => null,
       },
       userRepo,
       emailsJobProducer,
