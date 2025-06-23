@@ -33,6 +33,7 @@ import { DataPortalUrlSlugFormatError, NotFoundError, PermissionError } from '@s
 import { UniqueConstraintViolationException } from '@mikro-orm/core'
 import { RemoveNodesFacade } from '@shared/facade/node-remove/remove-nodes.facade'
 import { UpdateDataPortalDTO } from '@shared/domain/data-portal/dto/UpdateDataPortalDTO'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
 
 describe('DataPortalService', () => {
   const FILE_DXID = 'file-dxid'
@@ -56,11 +57,14 @@ describe('DataPortalService', () => {
   const removeNodesStub = stub()
 
   const createDataPortalService = (userId: number) => {
-    const userCtx: UserCtx = {
+    const userCtx: UserContext = {
       id: userId,
       accessToken: 'accessToken',
       dxuser: 'dxuser',
       sessionId: 'sessionId',
+      async loadEntity(): Promise<User> {
+        return this.user
+      },
     }
     dataPortalRepository = {
       findDataPortalsByCardImageUid: findDataPortalsStub,
@@ -810,6 +814,7 @@ describe('DataPortalService', () => {
       expect(userFile.name).eq('test-resource.jpg')
       expect(userFile.description).eq('description')
       expect(userFile.parentType).eq(PARENT_TYPE.USER)
+      expect(userFile.parentId).eq(user.id)
     })
 
     it('fail with lack of privileges', async () => {

@@ -1,7 +1,9 @@
 import { Injectable } from '@nestjs/common'
 import { Node } from '@shared/domain/user-file/node.entity'
 import sanitize from 'sanitize-filename'
-import {FILE_STI_TYPE} from "@shared/domain/user-file/user-file.types";
+import { FILE_STI_TYPE } from '@shared/domain/user-file/user-file.types'
+import { Asset } from '@shared/domain/user-file/asset.entity'
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
 
 interface FilesByFolder {
   [key: string]: Node[]
@@ -17,7 +19,7 @@ export class NodeHelper {
    * Returns a string with warnings for unclosed files.
    * @param nodesToCheck
    */
-  getWarningsForUnclosedFiles(nodesToCheck: Node[]) {
+  getWarningsForUnclosedFiles(nodesToCheck: Node[]): string {
     // Collect names of unclosed files
     const unclosedFileNames = nodesToCheck
       .filter((node) => node.stiType === FILE_STI_TYPE.USERFILE && node.state !== 'closed')
@@ -37,15 +39,15 @@ export class NodeHelper {
    * Sanitizes the names of the nodes.
    * @param nodes
    */
-  sanitizeNodeNames(nodes: Node[]): Node[] {
+  sanitizeNodeNames(nodes: (Asset | UserFile)[]): (Asset | UserFile)[] {
     return nodes.map((node) => {
-      const sanitizedNode = { ...node } as Node
+      const sanitizedNode = { ...node } as Asset | UserFile
       sanitizedNode.name = sanitize(node.name)
       return sanitizedNode
     })
   }
 
-  private renameFile = (name: string, index: number) => {
+  private renameFile: (name: string, index: number) => string = (name: string, index: number) => {
     const dotIndex = name.lastIndexOf('.')
     if (dotIndex !== -1) {
       // Insert index before the extension
@@ -60,7 +62,7 @@ export class NodeHelper {
    * Second file is renamed to "name 1", third to "name 2" and so on.
    * @param nodes
    */
-  renameDuplicateFiles(nodes: Node[]) {
+  renameDuplicateFiles(nodes: (Asset | UserFile)[]): (Asset | UserFile)[] {
     // Group files by their parentFolderId
     const filesByFolder = nodes.reduce<FilesByFolder>((acc, node) => {
       if (node.stiType === FILE_STI_TYPE.FOLDER) {

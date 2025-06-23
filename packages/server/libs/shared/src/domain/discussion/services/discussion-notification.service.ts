@@ -36,7 +36,11 @@ export class DiscussionNotificationService {
     private readonly discussionRepository: DiscussionRepository,
   ) {}
 
-  private async notifySpaceMembers(emailBody: string, subject: string, space: Space) {
+  private async notifySpaceMembers(
+    emailBody: string,
+    subject: string,
+    space: Space,
+  ): Promise<void> {
     const spaceMemberships = await this.em.find(
       SpaceMembership,
       { spaces: space.id, active: true },
@@ -59,7 +63,7 @@ export class DiscussionNotificationService {
     }
   }
 
-  private async notifyUser(emailBody: string, subject: String, user: User) {
+  private async notifyUser(emailBody: string, subject: String, user: User): Promise<void> {
     this.logger.log(`Sending discussion email notification to user (id: ${user.id})`)
 
     const email = user.email
@@ -72,7 +76,7 @@ export class DiscussionNotificationService {
     await this.emailQueueJobProducer.createSendEmailTask(emailTask, this.user)
   }
 
-  async notifyNewDiscussion(discussionId: number, notify: NotifyType) {
+  async notifyNewDiscussion(discussionId: number, notify: NotifyType): Promise<void> {
     const discussion = await this.discussionRepository.findOne(discussionId, {
       populate: ['note', 'user'],
     })
@@ -122,7 +126,7 @@ export class DiscussionNotificationService {
     await Promise.all(emailTasks)
   }
 
-  async notifyNewDiscussionReply(discussionId: number, notify: NotifyType) {
+  async notifyNewDiscussionReply(discussionId: number, notify: NotifyType): Promise<void> {
     const discussion = await this.discussionRepository.findOne(discussionId, {
       populate: ['note', 'user', 'follows'],
     })

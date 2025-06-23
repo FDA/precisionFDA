@@ -38,12 +38,6 @@ export class Comment extends BaseEntity {
   @ManyToOne({ entity: () => User, fieldName: 'user_id' })
   user!: Ref<User>
 
-  @Property({ hidden: false })
-  createdAt = new Date()
-
-  @Property({ onUpdate: () => new Date(), hidden: false })
-  updatedAt = new Date()
-
   constructor(user: User) {
     super()
     this.user = Reference.create(user)

@@ -1,21 +1,10 @@
-import {
-  Collection,
-  Entity,
-  Enum,
-  ManyToOne,
-  OneToMany,
-  PrimaryKey,
-  Property,
-  Ref,
-} from '@mikro-orm/core'
+import { Collection, Entity, Enum, ManyToOne, OneToMany, Property, Ref } from '@mikro-orm/core'
 import { Uid } from '@shared/domain/entity/domain/uid'
 import { NodeProperty } from '@shared/domain/property/node-property.entity'
 import { NodeRepository } from '@shared/domain/user-file/node.repository'
-import { User } from '@shared/domain/user/user.entity'
-import { DxId } from '../entity/domain/dxid'
-import { Tagging } from '../tagging/tagging.entity'
 import { FILE_STATE, FILE_STI_TYPE, FOLDER_STATE, PARENT_TYPE } from './user-file.types'
 import { ScopedEntity } from '@shared/database/scoped.entity'
+import { User } from '@shared/domain/user/user.entity'
 
 @Entity({
   abstract: true,
@@ -25,18 +14,14 @@ import { ScopedEntity } from '@shared/database/scoped.entity'
   repository: () => NodeRepository,
 })
 export class Node extends ScopedEntity {
-  @PrimaryKey()
-  id: number
-
-  // This is optional because local Folders do not have dxids
-  @Property()
-  dxid?: DxId<'file'>
-
   @Property({ unique: true })
   uid: Uid<'file'>
 
   @Property()
   name: string
+
+  @Property()
+  description?: string
 
   @Property()
   state: FILE_STATE | FOLDER_STATE
@@ -48,9 +33,6 @@ export class Node extends ScopedEntity {
   fileSize?: number
 
   @Property()
-  createdAt: Date
-
-  @Property()
   project?: string
 
   @ManyToOne(() => Node)
@@ -58,6 +40,12 @@ export class Node extends ScopedEntity {
 
   @ManyToOne(() => Node)
   scopedParentFolder?: Node
+
+  @Property()
+  parentFolderId?: number
+
+  @Property()
+  scopedParentFolderId?: number
 
   @Enum({ fieldName: 'sti_type' })
   stiType!: FILE_STI_TYPE // [Folder, UserFile, Asset] - options
@@ -72,8 +60,11 @@ export class Node extends ScopedEntity {
   @Property()
   parentId: number
 
-  @Property()
+  @Enum({ items: () => PARENT_TYPE, fieldName: 'parent_type' })
   parentType: PARENT_TYPE
+
+  @ManyToOne({ entity: () => User, serializedName: 'userId' })
+  user!: Ref<User>
 
   @Property({ persist: false })
   get isAsset(): boolean {
@@ -90,14 +81,6 @@ export class Node extends ScopedEntity {
     return this.stiType === FILE_STI_TYPE.FOLDER
   }
 
-  @ManyToOne(() => User)
-  user!: Ref<User>
-
   @Property({ hidden: true, persist: false })
   folderPath?: string
-
-  @OneToMany(() => Tagging, (tagging) => tagging.folder || tagging.asset || tagging.userFile, {
-    orphanRemoval: true,
-  })
-  taggings = new Collection<Tagging>(this)
 }
