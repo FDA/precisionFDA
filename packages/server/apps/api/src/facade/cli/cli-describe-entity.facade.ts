@@ -11,7 +11,7 @@ import {
   CliFileDescribeDTO,
   CliFolderDescribeDTO,
   CliWorkflowDescribeDTO,
-} from '@shared/domain/cli/dto/CliDescribeDTO'
+} from '@shared/domain/cli/dto/cli-describe.dto'
 import { getNodePath } from '@shared/domain/user-file/user-file.helper'
 import { NodeRepository } from '@shared/domain/user-file/node.repository'
 import { AppRepository } from '@shared/domain/app/app.repository'

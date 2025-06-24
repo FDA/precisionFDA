@@ -52,11 +52,14 @@ export class UserFileRepository extends AccessControlRepository<UserFile> {
    * Loads userfile identified by uids and verifies if they are accessible by user.
    * @param userId
    * @param uids
+   * @param spaceIds
    */
-  async findAccessibleByUser(userId: number, uids: Uid<'file'>[]): Promise<UserFile[]> {
-    const smRepository = this.em.getRepository(SpaceMembership)
-    const spaceUids = await smRepository.findActiveSpaceIdsByUserId(userId)
-    const scopes = spaceUids.map((id) => `space-${id}`)
+  async findAccessibleByUser(
+    userId: number,
+    uids: Uid<'file'>[],
+    spaceIds: number[],
+  ): Promise<UserFile[]> {
+    const scopes = spaceIds.map((id) => `space-${id}`)
 
     return await this.find(
       {

@@ -317,6 +317,7 @@ module Api
     end
 
     # GET /api/jobs/:id/scope (id is actually dxid, wont fix in ruby.)
+    # REMOVE in CLI v3.0
     def get_job_scope
       res = https_apps_client.cli_job_scope(params[:id])
       render json: res, adapter: :json

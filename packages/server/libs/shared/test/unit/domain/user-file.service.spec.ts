@@ -139,12 +139,14 @@ describe('UserFileService', () => {
   const findEditableOneStub = stub()
 
   const editableSpacesStub = stub()
+  const accessibleSpaceIdsStub = stub()
 
   const USER = {
     id: USER_ID,
     isSiteAdmin: isSiteAdminStub,
     isChallengeAdmin: isChallengeAdminStub,
     editableSpaces: editableSpacesStub,
+    accessibleSpaceIds: accessibleSpaceIdsStub,
   } as unknown as User
   const USER_CTX: UserContext = {
     ...USER,
@@ -338,6 +340,9 @@ describe('UserFileService', () => {
 
     emFindOneOrFailStub.reset()
     emFindOneOrFailStub.throws()
+
+    accessibleSpaceIdsStub.reset()
+    accessibleSpaceIdsStub.throws()
   })
 
   afterEach(() => {
@@ -391,8 +396,11 @@ describe('UserFileService', () => {
         isCreatedByChallengeBot: () => false,
       } as unknown as UserFile
 
+      const spaceIds = [1, 2, 3]
+      accessibleSpaceIdsStub.returns(spaceIds)
+
       fileRepoFindOneOrFailStub.withArgs({ uid: UID }, match.any).returns(userFile)
-      nodeLoadIfAccessibleByUserStub.withArgs(USER, UID).returns(userFile)
+      nodeLoadIfAccessibleByUserStub.withArgs(USER, UID, spaceIds).returns(userFile)
       createFileSynchronizeJobTaskStub.reset()
 
       await getInstance().closeFile(UID, 'UPDATE_DATA_PORTAL_IMAGE_URL')
@@ -412,8 +420,11 @@ describe('UserFileService', () => {
         isCreatedByChallengeBot: () => false,
       } as unknown as UserFile
 
+      const spaceIds = [1, 2, 3]
+      accessibleSpaceIdsStub.returns(spaceIds)
+
       fileRepoFindOneOrFailStub.withArgs({ uid: UID }, match.any).returns(userFile)
-      nodeLoadIfAccessibleByUserStub.withArgs(USER, UID).returns(userFile)
+      nodeLoadIfAccessibleByUserStub.withArgs(USER, UID, spaceIds).returns(userFile)
       createFileSynchronizeJobTaskStub.reset()
 
       try {

@@ -5,7 +5,7 @@ module Admin
     include Naming
 
     layout "application"
-    layout "react", only: %i(list)
+    layout "react", only: %i(list list_provisioning)
 
     ERROR_KEYS = %i(first_name last_name email org org_handle username).freeze
     WARNING_KEYS = %i(org org_handle username).freeze
@@ -23,6 +23,8 @@ module Admin
     # end
 
     def list; end
+
+    def list_provisioning; end
 
     # POST
     # Searches invitations.
