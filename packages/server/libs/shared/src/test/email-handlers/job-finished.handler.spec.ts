@@ -12,6 +12,8 @@ import { JobEventDTO } from '@shared/domain/email/dto/job-event.dto'
 import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { config } from '@shared/config'
+import { Reference } from '@mikro-orm/core'
+import { NotificationPreference } from '@shared/domain/notification-preference/notification-preference.entity'
 
 describe('JobFinishedEmailHandler', () => {
   const JOB_ID = 12
@@ -55,6 +57,12 @@ describe('JobFinishedEmailHandler', () => {
       user.firstName = 'Piivoa'
       user.lastName = 'Rumpijem'
       user.email = 'test@email.com'
+      const notificationPref = new NotificationPreference(user)
+      notificationPref.data = {
+        private_job_finished: true,
+      }
+
+      user.notificationPreference = Reference.create(notificationPref)
       const job = new Job(user)
       job.id = JOB_ID
       job.uid = `job-${JOB_ID}-1`
@@ -119,6 +127,7 @@ describe('JobFinishedEmailHandler', () => {
       user.firstName = 'Nastvan'
       user.lastName = 'Kulemahazi'
       user.email = 'test@email.com'
+
       const job = new Job(user)
       job.id = JOB_ID
       job.uid = `job-${JOB_ID}-1`

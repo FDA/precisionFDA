@@ -73,16 +73,8 @@ export abstract class EmailHandler<T extends EMAIL_TYPES> {
     const contextObject = await this.getContextualData(inputDto)
     await this.validateInput(inputDto)
     const receivers = await this.determineReceivers(contextObject)
-    const filteredReceivers = (
-      await Promise.all(
-        receivers.map(async (receiver) => {
-          const preferences = receiver.notificationPreference.getEntity().data
-          const notificationKeys = await this.getNotificationSettingKeys(contextObject, receiver)
-          const shouldReceive = notificationKeys.some((key) => preferences[key])
-          return shouldReceive ? receiver : null
-        }),
-      )
-    ).filter((receiver): receiver is NonNullable<typeof receiver> => receiver !== null)
+    const filteredReceivers = await this.filterReceiversByPreference(receivers, contextObject)
+
     for (const receiver of filteredReceivers) {
       const emailSendInput = await this.createEmailSendInput(receiver, contextObject)
       await this.emailClient.sendEmail(emailSendInput)
@@ -108,5 +100,24 @@ export abstract class EmailHandler<T extends EMAIL_TYPES> {
       bcc: this.getBcc(receiver, contextObject),
       replyTo: this.getReplyTo(receiver, contextObject),
     }
+  }
+
+  private async filterReceiversByPreference(
+    receivers: User[],
+    contextObject: EmailTypeToContextMap[T],
+  ): Promise<User[]> {
+    const filtered = await Promise.all(
+      receivers.map(async (receiver) => {
+        if (!receiver.notificationPreference) return null
+
+        const preferences = receiver.notificationPreference.getEntity().data
+        const notificationKeys = await this.getNotificationSettingKeys(contextObject, receiver)
+        const shouldReceive = notificationKeys.some((key) => preferences[key])
+
+        return shouldReceive ? receiver : null
+      }),
+    )
+
+    return filtered.filter((receiver): receiver is User => receiver !== null)
   }
 }
