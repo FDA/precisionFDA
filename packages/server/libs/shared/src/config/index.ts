@@ -110,6 +110,7 @@ const defaultConfig = {
       port: process.env.SMTP_PORT ?? 'aws-ses-port',
       host: process.env.SMTP_HOST ?? 'aws-ses-host',
       fromAddress: process.env.SMTP_FROM_ADDRESS ?? 'precisionfda-no-reply@dnanexus.com',
+      returnAddress: process.env.SMTP_RETURN_ADDRESS ?? 'precisionfda-no-reply@dnax-dev.net',
     },
     report: 'pfda-reports-dev@dnanexus.com',
   },
