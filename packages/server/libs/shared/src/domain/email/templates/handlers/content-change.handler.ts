@@ -1,8 +1,7 @@
 import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
 import { ErrorCodes, ValidationError } from '@shared/errors'
-import { filter, pipe, uniqBy, isNil } from 'ramda'
-import { EmailConfigItem } from '../../email.config'
-import { buildIsNotificationEnabled, buildFilterByUserSettings } from '../../email.helper'
+import { isNil } from 'ramda'
+import { getKeyForUserSpaceRole } from '../../email.helper'
 import {
   SPACE_EVENT_ACTIVITY_TYPE,
   SPACE_EVENT_OBJECT_TYPE,
@@ -13,7 +12,6 @@ import { EmailHandler } from '@shared/domain/email/templates/handlers/email.hand
 import { Injectable } from '@nestjs/common'
 import { EmailClient } from '@shared/services/email-client'
 import { SqlEntityManager } from '@mikro-orm/mysql'
-import { OpsCtx } from '@shared/types'
 import { SpaceEventRepository } from '@shared/domain/space-event/space-event.repository'
 import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
 import {
@@ -45,9 +43,26 @@ export class ContentChangedEmailHandler extends EmailHandler<EMAIL_TYPES.newCont
       {
         id: input.id,
       },
-      { populate: ['space'] },
+      { populate: ['space', 'space.spaceMemberships', 'space.spaceMemberships.user'] },
     )
     return { input, spaceEvent }
+  }
+
+  protected async getNotificationSettingKeys(
+    context: ContentChangedContext,
+    user: User,
+  ): Promise<string[]> {
+    const space = context.spaceEvent.space.getEntity()
+    const spaceMembership = space.spaceMemberships
+      .getItems()
+      .filter(
+        (spaceMembership) =>
+          spaceMembership.active === true && spaceMembership.user.getEntity().id === user.id,
+      )
+
+    if (Array.isArray(spaceMembership) && spaceMembership.length > 0) {
+      return [getKeyForUserSpaceRole(spaceMembership[0], 'content_added_or_deleted')]
+    }
   }
 
   protected async determineReceivers(context: ContentChangedContext): Promise<User[]> {
@@ -56,29 +71,7 @@ export class ContentChangedEmailHandler extends EmailHandler<EMAIL_TYPES.newCont
       { populate: ['user.notificationPreference'] },
     )
 
-    const ctx: OpsCtx = {
-      em: this.em,
-      log: this.logger,
-    }
-    const config: EmailConfigItem = {
-      emailId: this.emailType,
-      name: 'newContentAdded',
-      handlerClass: ContentChangedEmailHandler,
-    }
-
-    // build determine filter functions
-    const isEnabledFn = buildIsNotificationEnabled('content_added_or_deleted', ctx)
-    const filterFn = buildFilterByUserSettings({ ...ctx, config }, isEnabledFn)
-    // fetch users with memberships, filter function should have extra param for it
-    // this has to be bound to local
-    // maybe remove from base template, maybe we do not need base template
-    const filterUsers = pipe(
-      // SpaceMembership[] -> User[]
-      filterFn,
-      filter((u: User) => u.id !== context.spaceEvent.user.id),
-      uniqBy((user: User) => user.id),
-    )
-    return filterUsers(memberships)
+    return memberships.map((membership) => membership.user.getEntity())
   }
 
   protected getSubject(): string {
