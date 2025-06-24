@@ -61,12 +61,29 @@ export abstract class EmailHandler<T extends EMAIL_TYPES> {
     return null
   }
 
+  protected async getNotificationSettingKeys(
+    _contextObject: EmailTypeToContextMap[T],
+    _user: User,
+  ): Promise<string[]> {
+    return []
+  }
+
   async sendEmail(inputDto: EmailTypeToInputMap[T]): Promise<void> {
-    this.logger.log(`sending email ${inputDto}`)
+    this.logger.log(`Sending email ${inputDto}`)
     const contextObject = await this.getContextualData(inputDto)
     await this.validateInput(inputDto)
     const receivers = await this.determineReceivers(contextObject)
-    for (const receiver of receivers) {
+    const filteredReceivers = (
+      await Promise.all(
+        receivers.map(async (receiver) => {
+          const preferences = receiver.notificationPreference.getEntity().data
+          const notificationKeys = await this.getNotificationSettingKeys(contextObject, receiver)
+          const shouldReceive = notificationKeys.some((key) => preferences[key])
+          return shouldReceive ? receiver : null
+        }),
+      )
+    ).filter((receiver): receiver is NonNullable<typeof receiver> => receiver !== null)
+    for (const receiver of filteredReceivers) {
       const emailSendInput = await this.createEmailSendInput(receiver, contextObject)
       await this.emailClient.sendEmail(emailSendInput)
     }

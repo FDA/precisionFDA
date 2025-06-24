@@ -43,6 +43,13 @@ export class JobFinishedEmailHandler extends EmailHandler<EMAIL_TYPES.jobFinishe
     }
   }
 
+  protected async getNotificationSettingKeys(
+    context: JobFinishedContext,
+    _user: User,
+  ): Promise<string[]> {
+    return context.job.isPrivate() ? ['private_job_finished'] : []
+  }
+
   protected async determineReceivers(context: JobFinishedContext): Promise<User[]> {
     if (context.job.isPublic()) {
       this.logger.log({ jobId: context.job.id }, 'Job is public, no one is notified')
@@ -59,24 +66,7 @@ export class JobFinishedEmailHandler extends EmailHandler<EMAIL_TYPES.jobFinishe
       { populate: ['notificationPreference'] },
     )
 
-    const ctx: OpsCtx = {
-      em: this.em,
-      log: this.logger,
-    }
-    const config: EmailConfigItem = {
-      emailId: this.emailType,
-      name: 'jobFinished',
-      handlerClass: JobFinishedEmailHandler,
-    }
-
-    const isEnabledFn = buildIsNotificationEnabled('job_finished', ctx)
-    const filterFn = buildFilterByUserSettings({ ...ctx, config }, isEnabledFn)
-    const filterPipe = pipe(
-      // User[] -> User[]
-      filterFn,
-      uniqBy((u: User) => u.id),
-    )
-    return filterPipe([owner])
+    return [owner]
   }
 
   protected getSubject(_receiver: User, context: JobFinishedContext): string {

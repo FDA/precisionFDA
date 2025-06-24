@@ -21,7 +21,7 @@ import { SpaceRepository } from '@shared/domain/space/space.repository'
 import { UserRepository } from '@shared/domain/user/user.repository'
 import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
 import {
-  EmailTypeToContextMap,
+  EmailTypeToContextMap, JobFinishedContext,
   MemberChangedContext,
 } from '@shared/domain/email/dto/email-type-to-context.map'
 
@@ -135,6 +135,8 @@ export class MemberChangedEmailHandler extends EmailHandler<EMAIL_TYPES.memberCh
     }
     throw new Error(`Unknown activityType value ${input.activityType}`)
   }
+
+
 
   async determineReceivers(context: MemberChangedContext): Promise<User[]> {
     const memberships = await this.spaceMembershipRepo.find(
