@@ -7,26 +7,37 @@ import (
 	"strconv"
 )
 
+type jsonFindNodesResponse struct {
+	Id        int    `json:"id"`
+	Uid       string `json:"uid"`
+	Name      string `json:"name"`
+	Type      string `json:"type"`
+	CreatedAt string `json:"createdAt"`
+	Size      int64  `json:"fileSize"`
+	// populated for Folders only
+	Children int `json:"children"`
+}
+
 // RemoveFile Remove files by uid.
 func (c *PFDAClient) RemoveFile(uids []string) error {
-	deleteFileURL := c.BaseURL + "/api/files/cli_remove"
+	deleteFileURL := c.BaseURL + "/api/v2/cli/nodes"
 	data := map[string]interface{}{"uids": uids}
 	jsonData, err := json.Marshal(data)
 	if err != nil {
 		return err
 	}
-	_, body, err := c.makeRequestFail("POST", deleteFileURL, jsonData)
-	if err != nil {
-		return err
-	}
-	var resultJSON map[string]interface{}
-	err = json.Unmarshal(body, &resultJSON)
-
+	_, body, err := c.makeRequest("DELETE", deleteFileURL, jsonData)
 	if err != nil {
 		return err
 	}
 
-	if resultJSON["count"].(float64) == 0 {
+	var result float64
+	err = json.Unmarshal(body, &result)
+	if err != nil {
+		return err
+	}
+
+	if result == 0 {
 		return fmt.Errorf("File(s) %s not found or inaccessible", uids)
 	}
 
@@ -42,37 +53,37 @@ func (c *PFDAClient) RemoveFile(uids []string) error {
 	return nil
 }
 
-func (c *PFDAClient) RemoveDir(uid string) error {
-	deleteFileURL := c.BaseURL + "/api/files/cli_remove"
+func (c *PFDAClient) RemoveDir(id string) error {
+	deleteFileURL := c.BaseURL + "/api/v2/cli/nodes"
 
-	data := map[string]interface{}{"ids": []string{uid}}
+	intId, _ := strconv.Atoi(id)
+	data := map[string]interface{}{"ids": []int{intId}}
 	jsonData, err := json.Marshal(data)
 	if err != nil {
 		return err
 	}
 
-	_, body, err := c.makeRequestFail("POST", deleteFileURL, jsonData)
+	_, body, err := c.makeRequest("DELETE", deleteFileURL, jsonData)
 	if err != nil {
 		return err
 	}
 
-	var resultJSON map[string]interface{}
-	err = json.Unmarshal(body, &resultJSON)
+	var result float64
+	err = json.Unmarshal(body, &result)
 	if err != nil {
 		return err
 	}
 
-	if resultJSON["count"].(float64) == 0 {
-		return fmt.Errorf("Folder with id: %s not found or inaccessible", uid)
+	if result == 0 {
+		return fmt.Errorf("Folder with id: %s not found or inaccessible", intId)
 	}
 
 	if c.JsonResponse {
-		folderId, _ := strconv.Atoi(uid)
 		helpers.PrettyPrint(struct {
 			ID int `json:"id"`
-		}{ID: folderId})
+		}{ID: intId})
 	} else {
-		fmt.Printf("Removed dir (id: %s) \n", uid)
+		fmt.Printf("Removed dir (id: %s) \n", id)
 	}
 	return nil
 }

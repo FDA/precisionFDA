@@ -1,6 +1,7 @@
 import { config } from '@shared/config'
 import { COOKIE_SESSION_KEY } from '@shared/config/consts'
 import { userContextStorage } from '@shared/domain/user-context/storage/user-context.storage'
+import { STATUS_CODES } from 'http'
 import { nanoid } from 'nanoid'
 import { Params } from 'nestjs-pino/params'
 import pino from 'pino'
@@ -17,14 +18,21 @@ export const pinoConfig: Params = {
           },
         }
       : undefined,
+    timestamp: pino.stdTimeFunctions.isoTime,
     level: config.logs.level,
     formatters: {
       log(obj) {
         return {
           ...obj,
           userId: obj.userId || userContextStorage.getStore()?.id || 'unknown',
+          requestId: userContextStorage.getStore()?.requestId || 'unknown',
         }
       },
+    },
+    customSuccessMessage: (req, res, responseTime) => {
+      const statusCode = res.statusCode
+      const statusText = STATUS_CODES[statusCode] || ''
+      return `Completed ${res.statusCode} ${statusText} in ${responseTime}ms. RequestId: ${req.id}`
     },
     genReqId: () => nanoid(),
     serializers: {
@@ -37,6 +45,9 @@ export const pinoConfig: Params = {
           }
           if (maskedRequest.headers['authorization']) {
             maskedRequest.headers['authorization'] = MASKED
+          }
+          if (maskedRequest.headers['x-csrf-token']) {
+            maskedRequest.headers['x-csrf-token'] = MASKED
           }
         }
         return maskedRequest

@@ -32,7 +32,7 @@ import (
 	"github.com/manifoldco/promptui"
 )
 
-const userAgent = "precisionFDA CLI/2.9.0 "
+const userAgent = "precisionFDA CLI/2.10.0 "
 const defaultNumRoutines = 10
 const defaultChunkSize = 1 << 26 // default 64MB (min. 16MB)
 const minRoutines = 1
@@ -163,10 +163,10 @@ type jsonCreateFolderPayload struct {
 }
 
 type jsonRmPayload struct {
-	Name           string `json:"name"`
-	ParentFolderID string `json:"parent_folder_id,omitempty"`
-	SpaceID        string `json:"space_id,omitempty"`
-	Type           string `json:"type,omitempty"`
+	Arg      string `json:"arg"`
+	FolderID string `json:"folderId,omitempty"`
+	SpaceID  string `json:"spaceId,omitempty"`
+	Type     string `json:"type,omitempty"`
 }
 
 type jsonFileDownloadPayload struct {
@@ -818,9 +818,9 @@ func (c *PFDAClient) GetScope() error {
 		return fmt.Errorf("No space detected")
 	}
 
-	apiURL := fmt.Sprintf("%s/api/jobs/%s/scope", c.BaseURL, dxJobId)
+	apiURL := fmt.Sprintf("%s/api/v2/cli/job/%s/scope", c.BaseURL, dxJobId)
 
-	_, body, err := c.makeRequestFail("GET", apiURL, nil)
+	_, body, err := c.makeRequest("GET", apiURL, nil)
 	if err != nil {
 		return err
 	}
@@ -948,14 +948,14 @@ func (c *PFDAClient) Rmdir(args []string) error {
 			continue
 		}
 
-		jsonData, err := json.Marshal(jsonRmPayload{Name: arg, Type: "Folder"})
+		jsonData, err := json.Marshal(jsonRmPayload{Arg: arg, Type: "Folder"})
 		if err != nil {
 			return err
 		}
-		_, body, err := c.makeRequestFail("POST", c.BaseURL+"/api/files/cli_node_search", jsonData)
+		_, body, err := c.makeRequest("POST", c.BaseURL+"/api/v2/cli/nodes", jsonData)
 		c.HandleError(err)
 
-		var response []jsonFileResponse
+		var response []jsonFindNodesResponse
 		if err := json.Unmarshal(body, &response); err != nil {
 			return err
 		}
@@ -986,12 +986,12 @@ func (c *PFDAClient) Rm(args []string, folderID string, spaceID string) error {
 			continue
 		}
 
-		jsonData, err := json.Marshal(jsonRmPayload{Name: helpers.TransformToSQLWildcards(arg), Type: "UserFile", ParentFolderID: folderID, SpaceID: spaceID})
+		jsonData, err := json.Marshal(jsonRmPayload{Arg: helpers.TransformToSQLWildcards(arg), Type: "UserFile", FolderID: folderID, SpaceID: spaceID})
 		if err != nil {
 			return err
 		}
 		// first check for matching files to be deleted - filename (with wildcard) logic
-		_, body, err := c.makeRequestFail("POST", c.BaseURL+"/api/files/cli_node_search", jsonData)
+		_, body, err := c.makeRequest("POST", c.BaseURL+"/api/v2/cli/nodes", jsonData)
 		if err != nil {
 			return err
 		}

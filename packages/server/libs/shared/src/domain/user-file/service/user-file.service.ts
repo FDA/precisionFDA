@@ -97,7 +97,8 @@ export class UserFileService {
     }
 
     // if it's not challenge file then do regular search
-    const file = await this.nodeRepo.loadIfAccessibleByUser(user, fileUid)
+    const accessibleSpaceIds = await user.accessibleSpaceIds()
+    const file = await this.nodeRepo.loadIfAccessibleByUser(user, fileUid, accessibleSpaceIds)
     if (!file) {
       throw new PermissionError(`User ${user.dxuser} does not have access to file ${fileUid}`)
     }
