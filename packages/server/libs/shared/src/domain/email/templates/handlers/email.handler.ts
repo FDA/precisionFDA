@@ -111,7 +111,6 @@ export abstract class EmailHandler<T extends EMAIL_TYPES> {
 
     for (const receiver of receivers) {
       if (!receiver.notificationPreference) {
-        result.push(receiver)
         continue
       }
 
