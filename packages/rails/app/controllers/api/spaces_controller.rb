@@ -55,28 +55,6 @@ module Api
       render json: spaces
     end
 
-    # GET /api/spaces
-    # Fetches spaces list.
-    def index
-      allowed_orderings = %w(created_at name state space_type updated_at).freeze
-
-      order = order_query(params[:order_by], params[:order_dir], allowed_orderings)
-      filter_tags = params.dig(:filters, :tags)
-      order = { created_at: :desc } if order.empty?
-
-      spaces = SpaceService::SpacesFilter.
-        call(@context.user, unsafe_params[:filters]).
-        includes(:taggings).
-        search_by_tags(filter_tags).
-        order(order).page(page_from_params).per(page_size)
-
-      page_dict = pagination_dict(spaces)
-      page_meta = pagination_meta(spaces.count(:all))
-
-      render json: spaces, root: "spaces", adapter: :json,
-             meta: page_meta.merge({ pagination: page_dict })
-    end
-
     # GET /api/spaces/info
     # Responds with spaces info.
     def info

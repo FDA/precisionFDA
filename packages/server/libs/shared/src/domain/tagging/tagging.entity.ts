@@ -7,6 +7,7 @@ import { User } from '@shared/domain/user/user.entity'
 import { TaggingRepository } from './tagging.repository'
 import { DbCluster } from '../db-cluster/db-cluster.entity'
 import { TAGGABLE_TYPE } from '@shared/domain/tagging/tagging.types'
+import { Space } from '@shared/domain/space/space.entity'
 
 @Entity({ tableName: 'taggings', repository: () => TaggingRepository })
 export class Tagging {
@@ -53,6 +54,9 @@ export class Tagging {
 
   @ManyToOne(() => DbCluster, { joinColumn: 'taggable_id' })
   dbCluster: DbCluster
+
+  @ManyToOne(() => Space, { joinColumn: 'taggable_id' })
+  space: Space
 
   @ManyToOne(() => Tag, { joinColumn: 'tag_id' })
   tag?: Tag

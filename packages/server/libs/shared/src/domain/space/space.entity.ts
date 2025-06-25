@@ -16,6 +16,8 @@ import { BaseEntity } from '../../database/base.entity'
 import { SPACE_MEMBERSHIP_SIDE } from '../space-membership/space-membership.enum'
 import { SPACE_STATE, SPACE_TYPE } from './space.enum'
 import { SpaceRepository } from './space.repository'
+import { SpaceGroup } from '@shared/domain/space/space-group.entity'
+import { Tagging } from '@shared/domain/tagging/tagging.entity'
 import { WorkaroundJsonType } from '@shared/database/json-workaround.type'
 
 type SpaceMeta = {
@@ -80,6 +82,12 @@ export class Space extends BaseEntity {
     owner: true,
   })
   spaceMemberships = new Collection<SpaceMembership>(this)
+
+  @ManyToMany(() => SpaceGroup, (spaceGroup) => spaceGroup.spaces)
+  spaceGroups = new Collection<SpaceGroup>(this)
+
+  @OneToMany(() => Tagging, (tagging) => tagging.space, { orphanRemoval: true })
+  taggings = new Collection<Tagging>(this)
 
   @OneToOne(() => DataPortal, (dataPortal: DataPortal) => dataPortal.space)
   dataPortal?: DataPortal

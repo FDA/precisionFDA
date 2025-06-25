@@ -138,10 +138,11 @@ export const HomeLoader = styled(Loader)`
 export const StyledActionsButton = styled(Button)`
   gap: 6px;
 `
-export const ActionsButton = React.forwardRef((props: any, ref) => (
-  <StyledActionsButton data-variant="primary" ref={ref} {...props}>
-    Actions <ArrowIcon />
-  </StyledActionsButton>
+
+export const ActionsButton = React.forwardRef(({ label = 'Actions', ...props }: any, ref) => (
+    <StyledActionsButton data-variant="primary" ref={ref} {...props}>
+      {label} <ArrowIcon />
+    </StyledActionsButton>
 ))
 
 ActionsButton.displayName = 'ActionsButton'
