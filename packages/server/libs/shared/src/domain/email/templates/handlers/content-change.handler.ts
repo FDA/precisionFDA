@@ -61,7 +61,7 @@ export class ContentChangedEmailHandler extends EmailHandler<EMAIL_TYPES.newCont
       )
 
     if (Array.isArray(spaceMembership) && spaceMembership.length > 0) {
-      return [getKeyForUserSpaceRole(spaceMembership[0], 'content_added_or_deleted')]
+      return [getKeyForUserSpaceRole(spaceMembership[0], 'content_added_or_deleted', space)]
     }
   }
 

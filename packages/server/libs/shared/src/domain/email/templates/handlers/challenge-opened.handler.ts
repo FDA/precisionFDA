@@ -1,21 +1,14 @@
 import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
 import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
 import { User } from '@shared/domain/user/user.entity'
-import { pipe, uniqBy } from 'ramda'
 import { LoadedReference } from '@mikro-orm/core'
-import { EmailConfigItem } from '../../email.config'
-import {
-  buildFilterByUserSettings,
-  buildIsNotificationEnabled,
-  pfdaNoReplyUser,
-} from '../../email.helper'
+import { getKeyForUserSpaceRole, pfdaNoReplyUser } from '../../email.helper'
 import { challengeOpenedTemplate } from '../mjml/challenge-opened.template'
 import { InternalError } from '@shared/errors'
 import { ChallengeOpenedDTO } from '@shared/domain/email/dto/challenge-opened.dto'
 import { Injectable } from '@nestjs/common'
 import { EmailHandler } from '@shared/domain/email/templates/handlers/email.handler'
 import { EmailClient } from '@shared/services/email-client'
-import { OpsCtx } from '@shared/types'
 import { ChallengeRepository } from '@shared/domain/challenge/challenge.repository'
 import { UserRepository } from '@shared/domain/user/user.repository'
 import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
@@ -69,27 +62,18 @@ export class ChallengeOpenedEmailHandler extends EmailHandler<EMAIL_TYPES.challe
     } else {
       throw new InternalError(`Scope name ${context.challenge.scope} is not processable`)
     }
-    const ctx: OpsCtx = {
-      em: this.em,
-      log: this.logger,
-    }
-    const config: EmailConfigItem = {
-      emailId: this.emailType,
-      name: 'challengeOpened',
-      handlerClass: ChallengeOpenedEmailHandler,
-    }
-    const isEnabledFn = buildIsNotificationEnabled('challenge_opened', ctx)
-    const filterFn = buildFilterByUserSettings({ ...ctx, config }, isEnabledFn)
-    const filterPipe = pipe(
-      // User[] -> User[]
-      filterFn,
-      uniqBy((u: User) => u.id),
-    )
-    return filterPipe(users).concat(pfdaNoReplyUser)
+    return users.concat(pfdaNoReplyUser)
   }
 
   protected getSubject(_receiver: User, context: ChallengeOpenedContext): string {
     return `New challenge ${context.challenge.name}`
+  }
+
+  protected async getNotificationSettingKeys(
+    _context: ChallengeOpenedContext,
+    _user: User,
+  ): Promise<string[]> {
+    return ['private_challenge_opened']
   }
 
   protected getTemplateInput(

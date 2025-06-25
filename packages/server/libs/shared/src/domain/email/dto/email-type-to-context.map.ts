@@ -57,6 +57,7 @@ export type MemberChangedContext = {
   space: Space
   user: User
   content: MemberChangeTemplateInput['content']
+  activityType: string
   updatedMembership: SpaceMembership & {
     user: LoadedReference<User>
   }

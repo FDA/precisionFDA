@@ -22,33 +22,33 @@ const NotificationLabel: NotificationLabelType = {
   admin_member_added_to_space: 'Member Added to Space',
   admin_space_locked_unlocked_deleted: 'Space Locked, Unlocked, or Deleted',
 
-  reviewer_lead_membership_changed: 'Membership Changed',
-  reviewer_lead_comment_activity: 'Comment Activity',
-  reviewer_lead_content_added_or_deleted: 'Content Added Or Deleted',
-  reviewer_lead_member_added_to_space: 'Member Added to Space',
-  reviewer_lead_space_locked_unlocked_deleted: 'Space Locked, Unlocked, or Deleted',
+  group_lead_membership_changed: 'Membership Changed',
+  group_lead_comment_activity: 'Comment Activity',
+  group_lead_content_added_or_deleted: 'Content Added Or Deleted',
+  group_lead_member_added_to_space: 'Member Added to Space',
+  group_lead_space_locked_unlocked_deleted: 'Space Locked, Unlocked, or Deleted',
 
-  sponsor_lead_membership_changed: 'Membership Changed',
-  sponsor_lead_comment_activity: 'Comment Activity',
-  sponsor_lead_content_added_or_deleted: 'Content Added Or Deleted',
-  sponsor_lead_member_added_to_space: 'Member Added to Space',
-  sponsor_lead_space_locked_unlocked_deleted: 'Space Locked, Unlocked, or Deleted',
+  shared_lead_membership_changed: 'Membership Changed',
+  shared_lead_comment_activity: 'Comment Activity',
+  shared_lead_content_added_or_deleted: 'Content Added Or Deleted',
+  shared_lead_member_added_to_space: 'Member Added to Space',
+  shared_lead_space_locked_unlocked_deleted: 'Space Locked, Unlocked, or Deleted',
 
-  sponsor_contributor_membership_changed: 'Membership Changed',
-  sponsor_contributor_comment_activity: 'Comment Activity',
-  sponsor_contributor_content_added_or_deleted: 'Content Added or Deleted',
+  group_contributor_membership_changed: 'Membership Changed',
+  group_contributor_comment_activity: 'Comment Activity',
+  group_contributor_content_added_or_deleted: 'Content Added or Deleted',
 
-  sponsor_viewer_membership_changed: 'Membership Changed',
-  sponsor_viewer_comment_activity: 'Comment Activity',
-  sponsor_viewer_content_added_or_deleted: 'Content Added or Deleted',
+  group_viewer_membership_changed: 'Membership Changed',
+  group_viewer_comment_activity: 'Comment Activity',
+  group_viewer_content_added_or_deleted: 'Content Added or Deleted',
 
-  reviewer_contributor_membership_changed: 'Membership Changed',
-  reviewer_contributor_comment_activity: 'Comment Activity',
-  reviewer_contributor_content_added_or_deleted: 'Content Added or Deleted',
+  shared_contributor_membership_changed: 'Membership Changed',
+  shared_contributor_comment_activity: 'Comment Activity',
+  shared_contributor_content_added_or_deleted: 'Content Added or Deleted',
 
-  reviewer_viewer_membership_changed: 'Membership Changed',
-  reviewer_viewer_comment_activity: 'Comment Activity',
-  reviewer_viewer_content_added_or_deleted: 'Content Added or Deleted',
+  shared_viewer_membership_changed: 'Membership Changed',
+  shared_viewer_comment_activity: 'Comment Activity',
+  shared_viewer_content_added_or_deleted: 'Content Added or Deleted',
 }
 
 const NotificationForm = ({
@@ -159,10 +159,10 @@ const NotificationForm = ({
         <SectionTitle>Group Space Notifications</SectionTitle>
 
         <SectionTitleSmall>Lead Role</SectionTitleSmall>
-        {Object.entries(preferences.sponsor_lead).map(([notification]) => (
+        {Object.entries(preferences.group_lead).map(([notification]) => (
           <FieldGroup key={notification}>
             <Controller
-              name={`sponsor_lead.${notification}` as Path<NotificationPreferences>}
+              name={`group_lead.${notification}` as Path<NotificationPreferences>}
               control={control}
               render={({ field }) => (
                 <FieldLabelRow>
@@ -171,7 +171,7 @@ const NotificationForm = ({
                     disabled={isSubmitting}
                     checked={!!field.value}
                     onChange={e =>
-                      handleSetValue(`sponsor_lead.${notification}` as Path<NotificationPreferences>, e.target.checked)
+                      handleSetValue(`group_lead.${notification}` as Path<NotificationPreferences>, e.target.checked)
                     }
                   />
                   {NotificationLabel[notification]}
@@ -182,113 +182,113 @@ const NotificationForm = ({
         ))}
 
         <SectionTitleSmall>Contributor Role</SectionTitleSmall>
-        {Object.entries(preferences.sponsor_contributor).map(([notification]) => (
+        {Object.entries(preferences.group_contributor).map(([notification]) => (
           <FieldGroup key={notification}>
-            {/*<Controller*/}
-            {/*  name={`sponsor_contributor.${notification}` as Path<NotificationPreferences>}*/}
-            {/*  control={control}*/}
-            {/*  render={({ field }) => (*/}
-            {/*    <FieldLabelRow>*/}
-            {/*      <Checkbox*/}
-            {/*        {...field}*/}
-            {/*        disabled={isSubmitting}*/}
-            {/*        checked={!!field.value}*/}
-            {/*        onChange={e => handleSetValue(`sponsor_contributor.${notification}` as Path<NotificationPreferences>, e.target.checked)}*/}
-            {/*      />*/}
-            {/*      {NotificationLabel[notification]}*/}
-            {/*    </FieldLabelRow>*/}
-            {/*  )}*/}
-            {/*/>*/}
+            <Controller
+              name={`group_contributor.${notification}` as Path<NotificationPreferences>}
+              control={control}
+              render={({ field }) => (
+                <FieldLabelRow>
+                  <Checkbox
+                    {...field}
+                    disabled={isSubmitting}
+                    checked={!!field.value}
+                    onChange={e => handleSetValue(`group_contributor.${notification}` as Path<NotificationPreferences>, e.target.checked)}
+                  />
+                  {NotificationLabel[notification]}
+                </FieldLabelRow>
+              )}
+            />
           </FieldGroup>
         ))}
 
-        {/*<SectionTitleSmall>Viewer Role</SectionTitleSmall>*/}
-        {/*{Object.entries(preferences.sponsor_viewer).map(([notification]) => (*/}
-        {/*  <FieldGroup key={notification}>*/}
-        {/*    <Controller*/}
-        {/*      name={`sponsor_viewer.${notification}` as Path<NotificationPreferences>}*/}
-        {/*      control={control}*/}
-        {/*      render={({ field }) => (*/}
-        {/*        <FieldLabelRow>*/}
-        {/*          <Checkbox*/}
-        {/*            {...field}*/}
-        {/*            disabled={isSubmitting}*/}
-        {/*            checked={!!field.value}*/}
-        {/*            onChange={e => handleSetValue(`sponsor_viewer.${notification}` as Path<NotificationPreferences>, e.target.checked)}*/}
-        {/*          />*/}
-        {/*          {NotificationLabel[notification]}*/}
-        {/*        </FieldLabelRow>*/}
-        {/*      )}*/}
-        {/*    />*/}
-        {/*  </FieldGroup>*/}
-        {/*))}*/}
+        <SectionTitleSmall>Viewer Role</SectionTitleSmall>
+        {Object.entries(preferences.group_viewer).map(([notification]) => (
+          <FieldGroup key={notification}>
+            <Controller
+              name={`group_viewer.${notification}` as Path<NotificationPreferences>}
+              control={control}
+              render={({ field }) => (
+                <FieldLabelRow>
+                  <Checkbox
+                    {...field}
+                    disabled={isSubmitting}
+                    checked={!!field.value}
+                    onChange={e => handleSetValue(`group_viewer.${notification}` as Path<NotificationPreferences>, e.target.checked)}
+                  />
+                  {NotificationLabel[notification]}
+                </FieldLabelRow>
+              )}
+            />
+          </FieldGroup>
+        ))}
 
-        {/*<SectionTitle>Review Space Notifications</SectionTitle>*/}
+        <SectionTitle>Review Space Notifications</SectionTitle>
 
-        {/*<SectionTitleSmall>Lead Role</SectionTitleSmall>*/}
-        {/*{Object.entries(preferences.reviewer_lead).map(([notification]) => (*/}
-        {/*  <FieldGroup key={notification}>*/}
-        {/*    <Controller*/}
-        {/*      name={`reviewer_lead.${notification}` as Path<NotificationPreferences>}*/}
-        {/*      control={control}*/}
-        {/*      render={({ field }) => (*/}
-        {/*        <FieldLabelRow>*/}
-        {/*          <Checkbox*/}
-        {/*            {...field}*/}
-        {/*            disabled={isSubmitting}*/}
-        {/*            checked={!!field.value}*/}
-        {/*            onChange={e =>*/}
-        {/*              handleSetValue(`reviewer_lead.${notification}` as Path<NotificationPreferences>, e.target.checked)*/}
-        {/*            }*/}
-        {/*          />*/}
-        {/*          {NotificationLabel[notification]}*/}
-        {/*        </FieldLabelRow>*/}
-        {/*      )}*/}
-        {/*    />*/}
-        {/*  </FieldGroup>*/}
-        {/*))}*/}
+        <SectionTitleSmall>Lead Role</SectionTitleSmall>
+        {Object.entries(preferences.shared_lead).map(([notification]) => (
+          <FieldGroup key={notification}>
+            <Controller
+              name={`shared_lead.${notification}` as Path<NotificationPreferences>}
+              control={control}
+              render={({ field }) => (
+                <FieldLabelRow>
+                  <Checkbox
+                    {...field}
+                    disabled={isSubmitting}
+                    checked={!!field.value}
+                    onChange={e =>
+                      handleSetValue(`shared_lead.${notification}` as Path<NotificationPreferences>, e.target.checked)
+                    }
+                  />
+                  {NotificationLabel[notification]}
+                </FieldLabelRow>
+              )}
+            />
+          </FieldGroup>
+        ))}
 
-        {/*<SectionTitleSmall>Contributor Role</SectionTitleSmall>*/}
-        {/*{Object.entries(preferences.reviewer_contributor).map(([notification]) => (*/}
-        {/*  <FieldGroup key={notification}>*/}
-        {/*    <Controller*/}
-        {/*      name={`reviewer_contributor.${notification}` as Path<NotificationPreferences>}*/}
-        {/*      control={control}*/}
-        {/*      render={({ field }) => (*/}
-        {/*        <FieldLabelRow>*/}
-        {/*          <Checkbox*/}
-        {/*            {...field}*/}
-        {/*            disabled={isSubmitting}*/}
-        {/*            checked={!!field.value}*/}
-        {/*            onChange={e => handleSetValue(`reviewer_contributor.${notification}` as Path<NotificationPreferences>, e.target.checked)}*/}
-        {/*          />*/}
-        {/*          {NotificationLabel[notification]}*/}
-        {/*        </FieldLabelRow>*/}
-        {/*      )}*/}
-        {/*    />*/}
-        {/*  </FieldGroup>*/}
-        {/*))}*/}
+        <SectionTitleSmall>Contributor Role</SectionTitleSmall>
+        {Object.entries(preferences.shared_contributor).map(([notification]) => (
+          <FieldGroup key={notification}>
+            <Controller
+              name={`shared_contributor.${notification}` as Path<NotificationPreferences>}
+              control={control}
+              render={({ field }) => (
+                <FieldLabelRow>
+                  <Checkbox
+                    {...field}
+                    disabled={isSubmitting}
+                    checked={!!field.value}
+                    onChange={e => handleSetValue(`shared_contributor.${notification}` as Path<NotificationPreferences>, e.target.checked)}
+                  />
+                  {NotificationLabel[notification]}
+                </FieldLabelRow>
+              )}
+            />
+          </FieldGroup>
+        ))}
 
-        {/*<SectionTitleSmall>Viewer Role</SectionTitleSmall>*/}
-        {/*{Object.entries(preferences.reviewer_viewer).map(([notification]) => (*/}
-        {/*  <FieldGroup key={notification}>*/}
-        {/*    <Controller*/}
-        {/*      name={`reviewer_viewer.${notification}` as Path<NotificationPreferences>}*/}
-        {/*      control={control}*/}
-        {/*      render={({ field }) => (*/}
-        {/*        <FieldLabelRow>*/}
-        {/*          <Checkbox*/}
-        {/*            {...field}*/}
-        {/*            disabled={isSubmitting}*/}
-        {/*            checked={!!field.value}*/}
-        {/*            onChange={e => handleSetValue(`reviewer_viewer.${notification}` as Path<NotificationPreferences>, e.target.checked)}*/}
-        {/*          />*/}
-        {/*          {NotificationLabel[notification]}*/}
-        {/*        </FieldLabelRow>*/}
-        {/*      )}*/}
-        {/*    />*/}
-        {/*  </FieldGroup>*/}
-        {/*))}*/}
+        <SectionTitleSmall>Viewer Role</SectionTitleSmall>
+        {Object.entries(preferences.shared_viewer).map(([notification]) => (
+          <FieldGroup key={notification}>
+            <Controller
+              name={`shared_viewer.${notification}` as Path<NotificationPreferences>}
+              control={control}
+              render={({ field }) => (
+                <FieldLabelRow>
+                  <Checkbox
+                    {...field}
+                    disabled={isSubmitting}
+                    checked={!!field.value}
+                    onChange={e => handleSetValue(`shared_viewer.${notification}` as Path<NotificationPreferences>, e.target.checked)}
+                  />
+                  {NotificationLabel[notification]}
+                </FieldLabelRow>
+              )}
+            />
+          </FieldGroup>
+        ))}
       </StyledNotifications>
       <PageActions>
         <Button data-variant="primary" type="submit" disabled={isSubmitting}>
@@ -320,12 +320,12 @@ const NotificationsPage = () => {
 
   const handleOnsSubmit = async (variables: NotificationPreferences) => {
     const all = {
-      ...variables.reviewer_contributor,
-      ...variables.sponsor_contributor,
-      ...variables.reviewer_viewer,
-      ...variables.sponsor_viewer,
-      ...variables.reviewer_lead,
-      ...variables.sponsor_lead,
+      ...variables.group_contributor,
+      ...variables.shared_contributor,
+      ...variables.group_viewer,
+      ...variables.shared_viewer,
+      ...variables.group_lead,
+      ...variables.shared_lead,
       ...variables.admin,
       ...variables.private,
     } satisfies Record<AllNotification, boolean>

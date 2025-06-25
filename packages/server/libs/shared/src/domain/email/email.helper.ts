@@ -5,17 +5,16 @@ import { TASK_TYPE } from '@shared/queue/task.input'
 import mjml2html from 'mjml'
 import { isNil } from 'ramda'
 import { Maybe, OpsCtx } from '../../types'
-import {
-  SPACE_MEMBERSHIP_ROLE,
-  SPACE_MEMBERSHIP_SIDE,
-} from '../space-membership/space-membership.enum'
+import { SPACE_MEMBERSHIP_ROLE } from '../space-membership/space-membership.enum'
 import {
   EmailConfigItem,
-  NOTIFICATION_ROLE_PREFIXES,
+  NOTIFICATION_ROLE,
   NOTIFICATION_TYPES_BASE,
   NOTIFICATION_TYPES,
 } from './email.config'
 import { nanoid } from 'nanoid'
+import { SPACE_TYPE } from '@shared/domain/space/space.enum'
+import { Space } from '@shared/domain/space/space.entity'
 
 type EmailHelperCtx = OpsCtx & {
   config: EmailConfigItem
@@ -26,43 +25,50 @@ type EmailHelperCtx = OpsCtx & {
 const pfdaNoReplyUser = {
   firstName: 'precisionfda-no-reply',
   email: 'precisionfda-no-reply@dnanexus.com',
+  notificationPreference: {
+    getEntity: () => ({
+      data: {
+        private_challenge_opened: true,
+        private_challenge_preregister: true,
+      },
+    }),
+  },
 } as User
 
 // use this for spaceEvent type of emails
 const getKeyForUserSpaceRole = (
   membership: SpaceMembership,
-  // spaceEvent?: SpaceEvent,
   keyBase: keyof typeof NOTIFICATION_TYPES_BASE,
+  space?: Space,
 ): string => {
-  let prefix: string
-  if (membership.side === SPACE_MEMBERSHIP_SIDE.HOST) {
-    switch (membership.role) {
-      case SPACE_MEMBERSHIP_ROLE.ADMIN:
-        prefix = NOTIFICATION_ROLE_PREFIXES.admin
-        break
-      case SPACE_MEMBERSHIP_ROLE.LEAD:
-        prefix = NOTIFICATION_ROLE_PREFIXES.reviewer_lead
-        break
-      default:
-        prefix = NOTIFICATION_ROLE_PREFIXES.reviewer
-    }
-  } else if (membership.side === SPACE_MEMBERSHIP_SIDE.GUEST) {
-    switch (membership.role) {
-      case SPACE_MEMBERSHIP_ROLE.ADMIN:
-        prefix = NOTIFICATION_ROLE_PREFIXES.admin
-        break
-      case SPACE_MEMBERSHIP_ROLE.LEAD:
-        prefix = NOTIFICATION_ROLE_PREFIXES.sponsor_lead
-        break
-      default:
-        prefix = NOTIFICATION_ROLE_PREFIXES.sponsor
-    }
+  let spaceType: string | undefined
+  let roleName: string
+
+  if (space?.type === SPACE_TYPE.REVIEW) {
+    spaceType = 'shared'
+  } else if (space?.type === SPACE_TYPE.GROUPS) {
+    spaceType = 'group'
   }
-  return `${prefix}_${keyBase}`
+
+  switch (membership.role) {
+    case SPACE_MEMBERSHIP_ROLE.ADMIN:
+      roleName = NOTIFICATION_ROLE.admin
+      break
+    case SPACE_MEMBERSHIP_ROLE.LEAD:
+      roleName = NOTIFICATION_ROLE.lead
+      break
+    case SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR:
+      roleName = NOTIFICATION_ROLE.contributor
+      break
+    default:
+      roleName = NOTIFICATION_ROLE.viewer
+  }
+
+  return `${spaceType ? `${spaceType}_` : ''}${roleName}_${keyBase}`
 }
 
 const getKeyForPrivateEvent = (keyBase: keyof typeof NOTIFICATION_TYPES_BASE): string => {
-  const prefix = NOTIFICATION_ROLE_PREFIXES.privateScope
+  const prefix = NOTIFICATION_ROLE.privateScope
   return `${prefix}_${keyBase}`
 }
 
