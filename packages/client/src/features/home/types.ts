@@ -39,6 +39,7 @@ export type APIResource =
   | 'workflow-executions'
   | 'spaces'
   | 'space-reports'
+  | 'space-groups'
   | 'discussions'
   | 'members'
 

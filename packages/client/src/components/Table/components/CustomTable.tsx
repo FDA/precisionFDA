@@ -2,7 +2,7 @@
 import { flexRender, Row, RowData, Table } from '@tanstack/react-table'
 import classNames from 'classnames'
 import { range } from 'ramda'
-import React from 'react'
+import React, { DragEventHandler } from 'react'
 import styled from 'styled-components'
 import { IFile } from '../../../features/files/files.types'
 import { Draggable, Droppable } from '../DnD'
@@ -17,6 +17,8 @@ type Props<T extends RowData> = {
   table: Table<T>
   tableGroup?: TableGroup
   enableDnd?: boolean
+  enableHtmlDnd?: boolean
+  onDragStart?: DragEventHandler
   displayColSpacer?: boolean
   spacerWidth?: number
 }
@@ -53,6 +55,8 @@ export function CustomTable<T extends RowData>({
   table,
   tableGroup,
   enableDnd = false,
+  enableHtmlDnd = undefined,
+  onDragStart = undefined,
   spacerWidth = 0,
   displayColSpacer = true,
 }: Props<T>) {
@@ -162,6 +166,16 @@ export function CustomTable<T extends RowData>({
             }
 
             const isSubRow = row.depth > 0
+
+            if (enableHtmlDnd) {
+              return (
+                <tr data-testid="data-row" key={row.id} className={classNames({ 'sub-row': isSubRow })} draggable={true} onDragStart={onDragStart} id={`html-dnd-${row.original.id}`}>
+                  {cells}
+                  {colFiller('td')}
+                </tr>
+              )
+            }
+
             return (
               <tr data-testid="data-row" key={row.id} className={classNames({ 'sub-row': isSubRow })}>
                 {cells}

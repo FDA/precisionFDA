@@ -1,4 +1,4 @@
-import { SqlEntityManager } from '@mikro-orm/mysql'
+import { FilterQuery, SqlEntityManager } from '@mikro-orm/mysql'
 import { Inject, Injectable } from '@nestjs/common'
 import { SpaceCreationProcess } from '@shared/domain/space/create/space-creation.process'
 import { SPACE_TYPE_TO_PROCESS_PROVIDER_MAP } from '@shared/domain/space/create/space-type-to-process-map.provider'
@@ -27,6 +27,22 @@ import { Space } from '@shared/domain/space/space.entity'
 import { CreateSpaceDTO } from '@shared/domain/space/dto/create-space.dto'
 import { UpdateSpaceDTO } from '@shared/domain/space/dto/update-space.dto'
 import { User } from '@shared/domain/user/user.entity'
+import { SpacePaginationDTO } from '@shared/domain/space/dto/space-pagination-d-t.o'
+import { SpaceListItemDTO } from '@shared/domain/space/dto/space-list-item.dto'
+import { PaginatedResult } from '@shared/domain/entity/domain/paginated.result'
+import { SpaceGroupService } from '@shared/domain/space/service/space-group.service'
+import { SpaceGroupDTO } from '@shared/domain/space/dto/space-group.dto'
+import { CreateSpaceGroupDTO } from '@shared/domain/space/dto/create-space-group.dto'
+
+type SpaceFilter = FilterQuery<Space> & {
+  spaceMemberships?: {
+    user: number
+    active: boolean
+  }
+  spaceGroups?: {
+    id: number
+  }
+}
 
 @Injectable()
 export class SpaceService {
@@ -44,13 +60,10 @@ export class SpaceService {
     private readonly spaceRepository: SpaceRepository,
     private readonly spaceMembershipRepository: SpaceMembershipRepository,
     private readonly userRepository: UserRepository,
+    private readonly spaceGroupService: SpaceGroupService,
   ) {}
 
-  private async validateUpdate(
-    currentUser: User,
-    spaceInput: UpdateSpaceDTO,
-    space: Space,
-  ): Promise<void> {
+  private async validateUpdate(currentUser: User, space: Space): Promise<void> {
     const hostLead = await space.findHostLead()
     const guestLead = await space.findGuestLead()
     const isSiteAdmin = await currentUser.isSiteAdmin()
@@ -85,7 +98,7 @@ export class SpaceService {
       throw new NotFoundError("Space not found or you don't have the permission.")
     }
 
-    await this.validateUpdate(user, spaceInput, space)
+    await this.validateUpdate(user, space)
 
     await this.em.transactional(async () => {
       space.name = spaceInput.name
@@ -228,5 +241,177 @@ export class SpaceService {
 
   async getAccessibleSpace(spaceId: number): Promise<Space | null> {
     return this.spaceRepository.findAccessibleOne({ id: spaceId })
+  }
+
+  // Any of the returned spaces cannot have state == DELETED
+  // Regular user: All unhidden spaces they are active member
+  // Site admin:   All the spaces they are active member of + all the group spaces
+  // RSA:          All the spaces they are active member of + all the review spaces
+  // RSA + SA:     All the spaces they are active member of + all the review spaces + all the group spaces
+  async paginateSpaces(query: SpacePaginationDTO): Promise<PaginatedResult<SpaceListItemDTO>> {
+    const filterWhere = this.buildFilterWhere(query)
+    const accessWhere = await this.buildAccessWhere()
+
+    return this.fetchAndMapSpaces(query, { $and: [filterWhere, accessWhere] })
+  }
+
+  // Any of the returned spaces cannot have state == DELETED
+  // Every returned space is assigned to the space group
+  // Regular user:      All unhidden spaces of the space group as long as they are active member of at least one of them
+  // Site admin, RSA:   All unhidden spaces of the space group
+  async paginateSpaceGroupSpaces(
+    spaceGroupId: number,
+    query: SpacePaginationDTO,
+  ): Promise<PaginatedResult<SpaceListItemDTO>> {
+    const isSiteAdmin = await (await this.userContext.loadEntity()).isSiteAdmin()
+    const isReviewSpaceAdmin = await (await this.userContext.loadEntity()).isReviewSpaceAdmin()
+    const filterWhere = this.buildFilterWhere(query)
+    const accessWhere = this.buildSpaceGroupAccessWhere(
+      spaceGroupId,
+      isSiteAdmin || isReviewSpaceAdmin,
+    )
+
+    const result = await this.fetchAndMapSpaces(query, { $and: [filterWhere, accessWhere] })
+
+    const hasMembership = result.data.some((space) => !!space.currentUserMembership)
+
+    if (hasMembership || isSiteAdmin || isReviewSpaceAdmin) {
+      return result
+    }
+
+    throw new PermissionError('You do not have a permission to list spaces of this space group.')
+  }
+
+  async getSpaceGroupById(id: number): Promise<SpaceGroupDTO> {
+    return this.spaceGroupService.getById(id)
+  }
+
+  async listSpaceGroups(): Promise<SpaceGroupDTO[]> {
+    return this.spaceGroupService.list()
+  }
+
+  async createSpaceGroup(spaceGroupDto: CreateSpaceGroupDTO): Promise<number> {
+    return this.spaceGroupService.create(spaceGroupDto)
+  }
+
+  async updateSpaceGroup(
+    spaceGroupId: number,
+    spaceGroupInput: CreateSpaceGroupDTO,
+  ): Promise<void> {
+    return this.spaceGroupService.update(spaceGroupId, spaceGroupInput)
+  }
+
+  async deleteSpaceGroup(spaceGroupId: number): Promise<void> {
+    return this.spaceGroupService.delete(spaceGroupId)
+  }
+
+  async addSpacesIntoSpaceGroup(spaceGroupId: number, spaceIds: number[]): Promise<void> {
+    return this.spaceGroupService.addSpaces(spaceGroupId, spaceIds)
+  }
+
+  async removeSpacesFromSpaceGroup(spaceGroupId: number, spaceIds: number[]): Promise<void> {
+    return this.spaceGroupService.removeSpaces(spaceGroupId, spaceIds)
+  }
+
+  private async buildAccessWhere(): Promise<FilterQuery<Space>> {
+    const isSiteAdmin = await (await this.userContext.loadEntity()).isSiteAdmin()
+    const isReviewSpaceAdmin = await (await this.userContext.loadEntity()).isReviewSpaceAdmin()
+    const filters: FilterQuery<Space>[] = [
+      {
+        spaceMemberships: {
+          user: this.userContext.id,
+          active: true,
+        },
+        $or: [{ type: SPACE_TYPE.REVIEW, spaceId: null }, { type: { $ne: SPACE_TYPE.REVIEW } }],
+        state: { $ne: SPACE_STATE.DELETED },
+      },
+    ]
+
+    const hiddenFilter = isSiteAdmin && isReviewSpaceAdmin ? {} : { hidden: false }
+
+    if (isSiteAdmin) {
+      filters.push(this.siteAdminFilter())
+    }
+
+    if (isReviewSpaceAdmin) {
+      filters.push(this.rsaFilter())
+    }
+
+    return { $and: [hiddenFilter, { $or: [filters] }] }
+  }
+
+  private buildSpaceGroupAccessWhere(spaceGroupId: number, isAdmin: boolean): FilterQuery<Space> {
+    const filter: FilterQuery<Space> = {
+      $or: [{ type: SPACE_TYPE.REVIEW, spaceId: null }, { type: { $ne: SPACE_TYPE.REVIEW } }],
+      spaceGroups: { id: spaceGroupId },
+      state: { $ne: SPACE_STATE.DELETED },
+    }
+
+    if (!isAdmin) {
+      filter.hidden = false
+    }
+
+    return filter
+  }
+
+  private rsaFilter(): FilterQuery<Space> {
+    return {
+      state: { $ne: SPACE_STATE.DELETED },
+      type: SPACE_TYPE.REVIEW,
+      spaceId: null,
+    }
+  }
+
+  private siteAdminFilter(): FilterQuery<Space> {
+    return {
+      state: { $ne: SPACE_STATE.DELETED },
+      type: SPACE_TYPE.GROUPS,
+    }
+  }
+
+  private buildFilterWhere(query: SpacePaginationDTO): SpaceFilter {
+    const where: SpaceFilter = {}
+
+    if (query.filter?.id) {
+      where.id = { $like: `%${query.filter.id}%` }
+    }
+    if (query.filter?.hidden !== undefined) {
+      where.hidden = query.filter?.hidden
+    }
+    if (query.filter?.name) {
+      where.name = { $like: `%${query.filter.name}%` }
+    }
+    if (query.filter?.state !== undefined) {
+      where.state = query.filter.state
+    }
+    if (query.filter?.type !== undefined) {
+      where.type = query.filter.type
+    }
+    if (query.filter?.tags !== undefined) {
+      const cleanedTags = query.filter.tags
+        .split(',')
+        .map((t) => t.trim())
+        .filter(Boolean)
+      const likeConditions = cleanedTags.map((tag) => ({ name: { $like: `%${tag}%` } }))
+      where.taggings = { tag: { $or: likeConditions } }
+    }
+
+    return where
+  }
+
+  private async fetchAndMapSpaces(
+    query: SpacePaginationDTO,
+    where: FilterQuery<Space>,
+  ): Promise<PaginatedResult<SpaceListItemDTO>> {
+    const spaces = await this.spaceRepository.paginate(query, where, {
+      populate: ['spaceMemberships.user', 'taggings.tag'],
+    })
+
+    return {
+      meta: spaces.meta,
+      data: await Promise.all(
+        spaces.data.map((space) => SpaceListItemDTO.fromEntity(space, this.userContext.id)),
+      ),
+    }
   }
 }

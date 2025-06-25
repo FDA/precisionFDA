@@ -14,7 +14,7 @@ export const useSpaceHiddenMutation = () => {
       toast.success(
         `${variables.ids.length > 0 ? 'Spaces have' : 'Space has'} been ${variables.hidden ? 'hidden' : 'unhidden'} successfully`,
       )
-      queryClient.invalidateQueries({ queryKey: ['spaces'] })
+      queryClient.invalidateQueries({ queryKey: ['spaces']})
     },
     onError: (e: AxiosError<{ error: { message: string } }>) => {
       toast.error(e?.response?.data?.error?.message ?? 'Error hiding spaces')
