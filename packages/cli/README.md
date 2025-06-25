@@ -139,6 +139,10 @@ To test for FIPS compliance we can inspect the symbols using `go tool nm ./pfda`
 
 # Version History
 
+### 2.10.1 (2025-06-30)
+
+- fixed issue with parsing flags
+
 ### 2.10.0 (2025-06-17)
 
 - Improved error handling

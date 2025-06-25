@@ -1,9 +1,6 @@
 import { Reference, SqlEntityManager } from '@mikro-orm/mysql'
 import { Inject, Injectable, Logger } from '@nestjs/common'
 import { ORG_EVERYONE } from '@shared/config/consts'
-import { EMAIL_TYPES } from '@shared/domain/email/email.config'
-import { EmailQueueJobProducer } from '@shared/domain/email/producer/email-queue-job.producer'
-import { EmailPrepareService } from '@shared/domain/email/templates/email-prepare.service'
 import { Invitation } from '@shared/domain/invitation/invitation.entity'
 import { PROVISIONING_STATE } from '@shared/domain/invitation/invitation.enum'
 import { InvitationRepository } from '@shared/domain/invitation/invitation.repository'
@@ -32,6 +29,9 @@ import { PlatformClient } from '@shared/platform-client'
 import { UserCreateData } from '@shared/platform-client/platform-client.params'
 import { ADMIN_PLATFORM_CLIENT } from '@shared/platform-client/providers/admin-platform-client.provider'
 import { getPluralizedTerm } from '@shared/utils/format'
+import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
+import { EmailService } from '@shared/domain/email/email.service'
+import { TypedEmailBodyDto } from '@shared/domain/email/dto/typed-email-body.dto'
 
 @Injectable()
 export class UserProvisionFacade {
@@ -47,8 +47,7 @@ export class UserProvisionFacade {
     private readonly userRepo: UserRepository,
     private readonly orgRepo: OrgRepository,
     private readonly invitationRepo: InvitationRepository,
-    private readonly emailPrepareService: EmailPrepareService,
-    private readonly emailQueueJobProducer: EmailQueueJobProducer,
+    private readonly emailService: EmailService,
     private readonly notificationService: NotificationService,
   ) {}
 
@@ -218,8 +217,8 @@ export class UserProvisionFacade {
     email: string,
     username: string,
   ): Promise<void> {
-    const emailInput = {
-      emailTypeId: EMAIL_TYPES.userProvisioned,
+    const emailInput: TypedEmailBodyDto<EMAIL_TYPES.userProvisioned> = {
+      type: EMAIL_TYPES.userProvisioned,
       input: {
         firstName,
         username,
@@ -227,8 +226,7 @@ export class UserProvisionFacade {
       },
       receiverUserIds: [],
     }
-    const emails = await this.emailPrepareService.prepareEmails(emailInput)
-    await this.emailQueueJobProducer.createSendEmailTask(emails[0], this.user)
+    await this.emailService.sendEmail(emailInput)
   }
 
   private async createSuccessProvisionNotification(): Promise<void> {

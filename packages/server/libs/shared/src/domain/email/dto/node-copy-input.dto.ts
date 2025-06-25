@@ -1,4 +1,4 @@
-import { IsArray, IsNotEmpty, IsString } from 'class-validator'
+import { IsArray, IsNotEmpty, IsNumber, IsString } from 'class-validator'
 
 /**
  * Nodes (files and folders) that were not copied together
@@ -16,4 +16,8 @@ export class NodeCopyInputDTO {
   @IsArray()
   @IsString({ each: true })
   notCopiedFileNames: string[]
+
+  @IsArray()
+  @IsNumber({}, { each: true })
+  receiverUserIds: number[]
 }

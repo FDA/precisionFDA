@@ -1,22 +1,11 @@
-import {
-  Collection,
-  Entity,
-  Ref,
-  ManyToOne,
-  OneToMany,
-  PrimaryKey,
-  Property,
-  Reference,
-} from '@mikro-orm/core'
+import { Collection, Entity, Ref, ManyToOne, OneToMany, Property, Reference } from '@mikro-orm/core'
 import { LicensedItem } from '@shared/domain/licensed-item/licensed-item.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { BaseEntity } from '../../database/base.entity'
+import { LicenseRepository } from '@shared/domain/license/license.repository'
 
-@Entity({ tableName: 'licenses' })
+@Entity({ tableName: 'licenses', repository: () => LicenseRepository })
 export class License extends BaseEntity {
-  @PrimaryKey()
-  id: number
-
   @ManyToOne(() => User)
   user: Ref<User>
 

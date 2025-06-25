@@ -6,7 +6,6 @@ import {
   OneToOne,
   OneToMany,
   Collection,
-  Property,
   Cascade,
 } from '@mikro-orm/core'
 import { Answer } from '@shared/domain/answer/answer.entity'
@@ -34,12 +33,6 @@ export class Discussion extends BaseEntity {
     cascade: [Cascade.REMOVE],
   })
   comments = new Collection<DiscussionComment>(this)
-
-  @Property({ hidden: false })
-  createdAt = new Date()
-
-  @Property({ onUpdate: () => new Date(), hidden: false })
-  updatedAt = new Date()
 
   @OneToMany({
     entity: () => DiscussionFollow,

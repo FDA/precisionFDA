@@ -1,63 +1,66 @@
-import { BaseTemplate } from '@shared/domain/email/templates/base-template'
-import { UserOpsCtx } from '@shared/types'
-import {
-  EMAIL_TYPES,
-  EmailSendInput,
-  EmailTemplate,
-  NOTIFICATION_TYPES_BASE,
-} from '@shared/domain/email/email.config'
-import { ExpertQuestion } from '@shared/domain/expert-question/expert-question.entity'
+import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
 import { User } from '@shared/domain/user/user.entity'
-import {
-  expertQuestionAddedTemplate,
-  ExpertQuestionTemplateInput,
-} from '@shared/domain/email/templates/mjml/expert-question-added.template'
-import { buildEmailTemplate, ObjectIdInputDTO } from '@shared/domain/email/email.helper'
+import { expertQuestionAddedTemplate } from '@shared/domain/email/templates/mjml/expert-question-added.template'
 import { getUserTitle } from '@shared/domain/email/templates/mjml/common'
+import { EmailHandler } from '@shared/domain/email/templates/handlers/email.handler'
+import { EmailClient } from '@shared/services/email-client'
+import { Injectable } from '@nestjs/common'
+import { ExpertQuestionRepository } from '@shared/domain/expert-question/expert-question.repository'
+import {
+  EmailTypeToContextMap,
+  ExpertQuestionAddedContext,
+} from '@shared/domain/email/dto/email-type-to-context.map'
+import { ObjectIdInputDTO } from '@shared/domain/email/dto/object-id.dto'
+import { EmailTypeToTemplateInputMap } from '@shared/domain/email/dto/email-type-to-template-input.map'
 
-export class ExpertQuestionAddedHandler
-  extends BaseTemplate<ObjectIdInputDTO, UserOpsCtx>
-  implements EmailTemplate<ExpertQuestionTemplateInput>
-{
-  expertQuestionId = this.validatedInput.id
-  expertQuestion: ExpertQuestion
-  templateFile = expertQuestionAddedTemplate
+@Injectable()
+export class ExpertQuestionAddedHandler extends EmailHandler<EMAIL_TYPES.expertQuestionAdded> {
+  protected emailType = EMAIL_TYPES.expertQuestionAdded as const
+  protected inputDto = ObjectIdInputDTO
+  protected getBody = expertQuestionAddedTemplate
 
-  getNotificationKey(): keyof typeof NOTIFICATION_TYPES_BASE {
-    return 'expert_question_added'
+  constructor(
+    protected readonly expertQuestionRepo: ExpertQuestionRepository,
+    protected readonly emailClient: EmailClient,
+  ) {
+    super(emailClient)
   }
-  async setupContext(): Promise<void> {
-    this.expertQuestion = await this.ctx.em.findOneOrFail(
-      ExpertQuestion,
+
+  protected async getContextualData(
+    input: ObjectIdInputDTO,
+  ): Promise<EmailTypeToContextMap[EMAIL_TYPES.expertQuestionAdded]> {
+    const expertQuestion = await this.expertQuestionRepo.findOneOrFail(
       {
-        id: this.expertQuestionId,
+        id: input.id,
       },
-      { populate: ['expert.user'] },
+      { populate: ['expert.user', 'user'] },
     )
+    return { input, expertQuestion, questionAuthor: expertQuestion.user.getEntity() }
   }
 
-  async determineReceivers(): Promise<User[]> {
-    const expert = await this.expertQuestion.expert.load()
-    const user = await expert.user.load()
-    return [user]
+  protected async determineReceivers(context: ExpertQuestionAddedContext): Promise<User[]> {
+    const expertUser = await context.expertQuestion.expert.getEntity().user.getEntity()
+    return [expertUser]
   }
 
-  async template(receiver: User): Promise<EmailSendInput> {
-    const name = getUserTitle(receiver)
-    const body = buildEmailTemplate(this.templateFile, {
+  protected getSubject(_receiver: User, context: ExpertQuestionAddedContext): string {
+    const name = getUserTitle(context.questionAuthor)
+    return `A new question was submitted by ${name}`
+  }
+
+  protected getTemplateInput(
+    receiver: User,
+    context: ExpertQuestionAddedContext,
+  ): EmailTypeToTemplateInputMap[EMAIL_TYPES.expertQuestionAdded] {
+    const name = getUserTitle(context.questionAuthor)
+    return {
       content: {
         senderName: name,
-        questionBody: this.expertQuestion.body,
-        expertId: this.expertQuestion.expert.id,
-        questionId: this.expertQuestion.id,
+        questionBody: context.expertQuestion.body,
+        expertId: context.expertQuestion.expert.id,
+        questionId: context.expertQuestion.id,
       },
       receiver,
-    })
-    return {
-      emailType: EMAIL_TYPES.expertQuestionAdded,
-      to: receiver.email,
-      body: body,
-      subject: `A new question was submitted by ${name}`,
     }
   }
 }

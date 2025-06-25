@@ -1,42 +1,47 @@
-import { BaseTemplate } from '@shared/domain/email/templates/base-template'
-import { UserOpsCtx } from '@shared/types'
-import {
-  EMAIL_TYPES,
-  EmailSendInput,
-  EmailTemplate,
-  NOTIFICATION_TYPES_BASE,
-} from '@shared/domain/email/email.config'
+import { Injectable } from '@nestjs/common'
+import { AlertMessageInputDTO } from '@shared/domain/email/dto/alert-message-input.dto'
+import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
+import { EmailHandler } from '@shared/domain/email/templates/handlers/email.handler'
 import { alertMessageTemplate } from '@shared/domain/email/templates/mjml/alert-message.template'
 import { User } from '@shared/domain/user/user.entity'
-import { buildEmailTemplate } from '@shared/domain/email/email.helper'
-import { AlertMessageInputDTO } from '@shared/domain/email/dto/alert-message-input.dto'
+import { EmailClient } from '@shared/services/email-client'
+import { UserRepository } from '@shared/domain/user/user.repository'
+import { EmailTypeToTemplateInputMap } from '@shared/domain/email/dto/email-type-to-template-input.map'
+import { EmailTypeToContextMap } from '@shared/domain/email/dto/email-type-to-context.map'
 
-export class AlertMessageHandler
-  extends BaseTemplate<AlertMessageInputDTO, UserOpsCtx>
-  implements EmailTemplate<AlertMessageInputDTO>
-{
-  templateFile = alertMessageTemplate
-  alertMessageInput: AlertMessageInputDTO = this.validatedInput
+@Injectable()
+export class AlertMessageHandler extends EmailHandler<EMAIL_TYPES.alertMessage> {
+  protected emailType = EMAIL_TYPES.alertMessage as const
+  protected inputDto = AlertMessageInputDTO
+  protected getBody = alertMessageTemplate
 
-  getNotificationKey(): keyof typeof NOTIFICATION_TYPES_BASE {
-    return 'alert_message'
+  constructor(
+    protected readonly emailClient: EmailClient,
+    protected readonly userRepo: UserRepository,
+  ) {
+    super(emailClient)
   }
 
-  async setupContext(): Promise<void> {}
-
-  async determineReceivers(): Promise<User[]> {
-    return await this.ctx.em.find(User, {
-      id: { $in: this.receiverUserIds },
+  protected async determineReceivers(input: AlertMessageInputDTO): Promise<User[]> {
+    return await this.userRepo.find({
+      id: { $in: input.receiverUserIds },
     })
   }
 
-  async template(receiver: User): Promise<EmailSendInput> {
-    const body = buildEmailTemplate<AlertMessageInputDTO>(this.templateFile, this.alertMessageInput)
-    return {
-      emailType: EMAIL_TYPES.alertMessage,
-      to: receiver.email,
-      body,
-      subject: this.alertMessageInput.subject,
-    }
+  protected getSubject(_receiver: User, input: AlertMessageInputDTO): string {
+    return input.subject
+  }
+
+  protected getTemplateInput(
+    _receiver: User,
+    input: AlertMessageInputDTO,
+  ): EmailTypeToTemplateInputMap[EMAIL_TYPES.alertMessage] {
+    return input
+  }
+
+  protected async getContextualData(
+    input: AlertMessageInputDTO,
+  ): Promise<EmailTypeToContextMap[EMAIL_TYPES.alertMessage]> {
+    return input
   }
 }

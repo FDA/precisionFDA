@@ -96,9 +96,10 @@ class NodeCopyWorker < ApplicationWorker
       destination:,
       notCopiedFolderNames: not_copied_folders.map { |folder| folder.object.name },
       notCopiedFileNames: not_copied_files.map { |file| file.object.name },
+      receiverUserIds: [@context.user.id],
     }
 
-    https_apps_client.email_send(NotificationPreference.email_types[:node_copy], [@context.user.id], request)
+    https_apps_client.email_send(NotificationPreference.email_types[:node_copy], request)
   end
 
   def copy_service

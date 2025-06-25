@@ -10,18 +10,13 @@ class RequestAccessService
 
       if invitation.persisted?
         send_invitation_email(invitation)
-        send_guest_access_email(invitation)
       end
 
       invitation
     end
 
     def send_invitation_email(invitation)
-      https_apps_client.email_send(NotificationPreference.email_types[:invitation], [], { id: invitation.id })
-    end
-
-    def send_guest_access_email(invitation)
-      https_apps_client.email_send(NotificationPreference.email_types[:guest_access_email], [], { id: invitation.id })
+      https_apps_client.email_send(NotificationPreference.email_types[:invitation], { id: invitation.id })
     end
 
     # Creates an invitation for site access.

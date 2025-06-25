@@ -14,7 +14,7 @@ export class EntityService {
     private readonly entityIconService: EntityIconService,
   ) {}
 
-  getEntityUiLink(entity: EntityInstance<UiLinkableEntityType>) {
+  getEntityUiLink(entity: EntityInstance<UiLinkableEntityType>): Promise<string> {
     return this.entityLinkService.getUiLink(entity)
   }
 
@@ -22,11 +22,11 @@ export class EntityService {
     entity: EntityInstance<DownloadableEntityType>,
     fileName: string,
     options?: DownloadLinkOptionsDto,
-  ) {
+  ): Promise<string> {
     return this.entityLinkService.getDownloadLink(entity, fileName, options)
   }
 
-  getEntityIcon(entityType: EntityIconType) {
+  getEntityIcon(entityType: EntityIconType): Promise<string> {
     return this.entityIconService.getIcon(entityType)
   }
 }

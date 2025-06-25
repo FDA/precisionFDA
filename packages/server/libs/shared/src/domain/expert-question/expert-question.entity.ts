@@ -12,6 +12,7 @@ import { Expert } from '@shared/domain/expert/expert.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { BaseEntity } from '../../database/base.entity'
 import { ExpertQuestionComment } from '@shared/domain/comment/expert-question-comment.entity'
+import { ExpertQuestionRepository } from '@shared/domain/expert-question/expert-question.repository'
 
 export enum ExpertQuestionState {
   OPEN = 'open',
@@ -21,11 +22,10 @@ export enum ExpertQuestionState {
 
 interface QuestionMeta {
   _original: string
-  // TODO(samuel) add proper type
-  _edited: any
+  _edited: boolean
 }
 
-@Entity({ tableName: 'expert_questions' })
+@Entity({ tableName: 'expert_questions', repository: () => ExpertQuestionRepository })
 export class ExpertQuestion extends BaseEntity {
   @ManyToOne({ entity: () => User })
   user: Ref<User>

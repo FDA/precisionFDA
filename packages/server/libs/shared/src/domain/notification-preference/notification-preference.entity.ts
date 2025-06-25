@@ -1,7 +1,7 @@
-import { Entity, JsonType, OneToOne, PrimaryKey, Property, Ref, Reference } from '@mikro-orm/core'
-import { isNil } from 'ramda'
-import { DEFAULT_NOTIFICATION_PREFERENCES, NOTIFICATION_TYPES } from '../email/email.config'
+import { Entity, PrimaryKey, Property, Reference, Ref, JsonType, OneToOne } from '@mikro-orm/core'
 import { User } from '../user/user.entity'
+import { DEFAULT_NOTIFICATION_PREFERENCES, NOTIFICATION_TYPES } from '../email/email.config'
+import { isNil } from 'ramda'
 
 class NotificationType extends JsonType {
   convertToJSValue(value: string | null): typeof NOTIFICATION_TYPES | null {
