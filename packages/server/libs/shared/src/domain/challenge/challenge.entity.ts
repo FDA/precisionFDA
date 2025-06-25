@@ -1,13 +1,4 @@
-import {
-  Collection,
-  Entity,
-  ManyToOne,
-  OneToMany,
-  OneToOne,
-  PrimaryKey,
-  Property,
-  Ref,
-} from '@mikro-orm/core'
+import { Collection, Entity, ManyToOne, OneToMany, OneToOne, Property, Ref } from '@mikro-orm/core'
 import { Uid } from '@shared/domain/entity/domain/uid'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { User } from '@shared/domain/user/user.entity'
@@ -18,9 +9,6 @@ import { ScopedEntity } from '@shared/database/scoped.entity'
 
 @Entity({ tableName: 'challenges', repository: () => ChallengeRepository })
 export class Challenge extends ScopedEntity {
-  @PrimaryKey()
-  id: number
-
   @Property()
   name: string
 

@@ -12,9 +12,9 @@ import { create, db } from '../../../src/test'
 import { STATUS as DB_CLUSTER_STATUS } from '@shared/domain/db-cluster/db-cluster.enum'
 import { EmailQueueJobProducer } from '@shared/domain/email/producer/email-queue-job.producer'
 import { DbCluster } from '@shared/domain/db-cluster/db-cluster.entity'
-import { EMAIL_TYPES } from '@shared/domain/email/email.config'
 import * as queue from '@shared/queue'
 import { config } from '@shared/config'
+import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
 import { DbClusterRepository } from '@shared/domain/db-cluster/db-cluster.repository'
 import { Space } from '@shared/domain/space/space.entity'
 import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
@@ -60,7 +60,6 @@ describe('DbClusterService tests', () => {
     userCtx = { ...user, accessToken: 'foo' }
 
     getJobStub = stub(queue, 'getMainQueue')
-
     // Make describeStub return different data based on the input dxid
     describeStub.callsFake((params) => {
       const responses = {
@@ -502,13 +501,11 @@ describe('DbClusterService tests', () => {
 
   describe('list', () => {
     let space: Space
-    let privateCluster1: DbCluster
-    let spaceCluster: DbCluster
 
     it('lists private clusters when scope: private provided', async () => {
       createStub.returns({ id: 'dbcluster-GZxk9Z80Z0gvz8ky0F1yzF82' })
 
-      privateCluster1 = await dbClusterService.create({
+      await dbClusterService.create({
         name: 'private-cluster-1',
         scope: STATIC_SCOPE.PRIVATE,
         description: 'private cluster 1',
@@ -544,7 +541,7 @@ describe('DbClusterService tests', () => {
       em.persist(spaceMembership)
       await em.flush()
 
-      spaceCluster = await dbClusterService.create({
+      await dbClusterService.create({
         name: 'space-cluster-1',
         scope: `space-${space.id}`,
         description: 'space cluster',
@@ -562,7 +559,7 @@ describe('DbClusterService tests', () => {
     it('filters clusters by name', async () => {
       createStub.returns({ id: 'dbcluster-GZxk9Z80Z0gvz8ky0F1yzF82' })
 
-      privateCluster1 = await dbClusterService.create({
+      await dbClusterService.create({
         name: 'private-cluster-1',
         scope: STATIC_SCOPE.PRIVATE,
         description: 'private cluster 1',
@@ -596,7 +593,6 @@ describe('DbClusterService tests', () => {
 
   describe('listInSpaces', () => {
     let space1: Space
-    let spaceCluster1: DbCluster
 
     it('lists clusters from all user spaces', async () => {
       createStub.returns({ id: 'dbcluster-IZzk9Z80Z0gvz8ky0F1yzF84' })
@@ -618,7 +614,7 @@ describe('DbClusterService tests', () => {
       em.persist(spaceMembership)
       await em.flush()
 
-      spaceCluster1 = await dbClusterService.create({
+      await dbClusterService.create({
         name: 'space-cluster-1',
         scope: `space-${space1.id}`,
         description: 'space cluster',
@@ -652,7 +648,7 @@ describe('DbClusterService tests', () => {
       em.persist(spaceMembership)
       await em.flush()
 
-      spaceCluster1 = await dbClusterService.create({
+      await dbClusterService.create({
         name: 'space-cluster-1',
         scope: `space-${space1.id}`,
         description: 'space cluster',

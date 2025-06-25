@@ -11,14 +11,12 @@ import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { NoteRepository } from '@shared/domain/note/note.repository'
 import type { DiscussionAttachment } from '@shared/domain/discussion/discussion.types'
 import { Node } from '@shared/domain/user-file/node.entity'
-import { UserFile } from '@shared/domain/user-file/user-file.entity'
-import { Asset } from '@shared/domain/user-file/asset.entity'
 import { Job } from '@shared/domain/job/job.entity'
 import { Comparison } from '@shared/domain/comparison/comparison.entity'
 import { App } from '@shared/domain/app/app.entity'
 import { EntityService } from '@shared/domain/entity/entity.service'
 import { CliAttachmentsDTO } from '@shared/domain/cli/dto/cli-attachments.dto'
-import { FILE_STI_TYPE } from '@shared/domain/user-file/user-file.types'
+import { FILE_STI_TYPE, FileOrAsset } from '@shared/domain/user-file/user-file.types'
 import { NotFoundError } from '@shared/errors'
 import { STATIC_SCOPE } from '@shared/enums'
 
@@ -243,7 +241,7 @@ export class AttachmentManagementFacade {
           uid: attachmentEntity.uid,
           type: attachmentEntity.stiType,
           name: attachmentEntity.name,
-          link: await this.entityService.getEntityUiLink(attachmentEntity as UserFile | Asset),
+          link: await this.entityService.getEntityUiLink(attachmentEntity as FileOrAsset),
         })
       } else if (attachment.itemType === 'Job') {
         const attachmentEntity: Job | null = await this.jobRepository.findOne({

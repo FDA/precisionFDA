@@ -12,8 +12,9 @@ import { ENGINE, ENGINES, STATUS, STATUSES } from '@shared/domain/db-cluster/db-
 import { CreateDbClusterDTO } from '@shared/domain/db-cluster/dto/create-db-cluster.dto'
 import { UpdateDbClusterDTO } from '@shared/domain/db-cluster/dto/update-db-cluster.dto'
 import { SyncDbClusterOperation } from '@shared/domain/db-cluster/ops/synchronize'
-import { EMAIL_TYPES, EmailSendInput } from '@shared/domain/email/email.config'
+import { EmailSendInput } from '@shared/domain/email/email.config'
 import { buildEmailTemplate } from '@shared/domain/email/email.helper'
+import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
 import { EmailQueueJobProducer } from '@shared/domain/email/producer/email-queue-job.producer'
 import {
   reportNonTerminatedDbClustersTemplate,

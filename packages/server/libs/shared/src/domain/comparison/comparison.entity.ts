@@ -5,7 +5,6 @@ import {
   Filter,
   ManyToMany,
   ManyToOne,
-  PrimaryKey,
   Property,
   Ref,
   Reference,
@@ -34,9 +33,6 @@ enum COMPARISON_STATE {
   }),
 })
 class Comparison extends ScopedEntity {
-  @PrimaryKey()
-  id: number
-
   @Property({ nullable: false })
   name: string
 
@@ -72,7 +68,7 @@ class Comparison extends ScopedEntity {
   @ManyToOne({ entity: () => User, fieldName: 'user_id', nullable: false })
   user: Ref<User>
 
-  isPublishable() {
+  isPublishable(): boolean {
     return this.state === COMPARISON_STATE.DONE
   }
 

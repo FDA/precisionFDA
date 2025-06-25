@@ -1,21 +1,17 @@
 import { Body, Controller, HttpCode, Post, UseGuards } from '@nestjs/common'
+import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
 import { InternalRouteGuard } from '../internal/guard/internal.guard'
-import { EmailFacade } from '@shared/domain/email/email.facade'
 import { TypedEmailBodyDto } from '@shared/domain/email/dto/typed-email-body.dto'
-import { EMAIL_TYPES } from '@shared/domain/email/email.config'
+import { EmailService } from '@shared/domain/email/email.service'
 
 @UseGuards(InternalRouteGuard)
 @Controller('/emails')
 export class EmailController {
-  constructor(private readonly emailFacade: EmailFacade) {}
+  constructor(private readonly emailService: EmailService) {}
 
   @HttpCode(200)
   @Post('/typed')
-  async sendTypedEmail(@Body() body: TypedEmailBodyDto<EMAIL_TYPES>) {
-    await this.emailFacade.sendEmail({
-      input: body.input,
-      receiverUserIds: body.receiverUserIds,
-      emailTypeId: body.type,
-    })
+  async sendTypedEmail(@Body() body: TypedEmailBodyDto<EMAIL_TYPES>): Promise<void> {
+    await this.emailService.sendEmail(body)
   }
 }

@@ -14,7 +14,7 @@ import { Node } from '@shared/domain/user-file/node.entity'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { TimeUtils } from '@shared/utils/time.utils'
-import { EMAIL_TYPES, EmailSendInput } from '../domain/email/email.config'
+import { EmailSendInput } from '../domain/email/email.config'
 import {
   adminDataConsistencyReportTemplate,
   AdminDataConsistencyReportTemplateInput,
@@ -22,6 +22,7 @@ import {
 import { JobRepository } from '../domain/job/job.repository'
 import { SPACE_MEMBERSHIP_SIDE } from '../domain/space-membership/space-membership.enum'
 import { SPACE_TYPE } from '../domain/space/space.enum'
+import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
 
 export type AdminDataConsistencyReportOutput = {
   pfdaOnlyFoldersCount?: number

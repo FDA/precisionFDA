@@ -1,73 +1,80 @@
-import {
-  EMAIL_TYPES,
-  EmailSendInput,
-  EmailTemplate,
-  NOTIFICATION_TYPES_BASE,
-} from '@shared/domain/email/email.config'
-import { UserOpsCtx } from '@shared/types'
-import { BaseTemplate } from '@shared/domain/email/templates/base-template'
-import { License } from '@shared/domain/license/license.entity'
+import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
 import { User } from '@shared/domain/user/user.entity'
-import {
-  licenseApprovalRequestTemplate,
-  LicenseApprovalTemplateInput,
-} from '@shared/domain/email/templates/mjml/license-approval-request.template'
-import { buildEmailTemplate } from '@shared/domain/email/email.helper'
+import { licenseApprovalRequestTemplate } from '@shared/domain/email/templates/mjml/license-approval-request.template'
 import { LicenseApprovalRequestDTO } from '@shared/domain/email/dto/license-approval-request.dto'
 import { config } from '@shared/config'
 import { lowercaseAndDash } from '@shared/utils/format'
+import { EmailHandler } from '@shared/domain/email/templates/handlers/email.handler'
+import { EmailClient } from '@shared/services/email-client'
+import { Injectable } from '@nestjs/common'
+import { LicenseRepository } from '@shared/domain/license/license.repository'
+import { UserRepository } from '@shared/domain/user/user.repository'
+import {
+  EmailTypeToContextMap,
+  LicenseApprovalContext,
+} from '@shared/domain/email/dto/email-type-to-context.map'
+import { EmailTypeToTemplateInputMap } from '@shared/domain/email/dto/email-type-to-template-input.map'
 
-export class LicenseApprovalRequestHandler
-  extends BaseTemplate<LicenseApprovalRequestDTO, UserOpsCtx>
-  implements EmailTemplate<LicenseApprovalTemplateInput>
-{
-  templateFile = licenseApprovalRequestTemplate
-  license: License
-  requester: User
+@Injectable()
+export class LicenseApprovalRequestHandler extends EmailHandler<EMAIL_TYPES.licenseApprovalRequest> {
+  protected emailType = EMAIL_TYPES.licenseApprovalRequest as const
+  protected inputDto = LicenseApprovalRequestDTO
+  protected getBody = licenseApprovalRequestTemplate
 
-  async setupContext(): Promise<void> {
-    this.license = await this.ctx.em.findOneOrFail(
-      License,
+  constructor(
+    protected readonly licenseRepo: LicenseRepository,
+    protected readonly userRepo: UserRepository,
+    protected readonly emailClient: EmailClient,
+  ) {
+    super(emailClient)
+  }
+
+  protected async getContextualData(
+    input: LicenseApprovalRequestDTO,
+  ): Promise<EmailTypeToContextMap[EMAIL_TYPES.licenseApprovalRequest]> {
+    const license = await this.licenseRepo.findOneOrFail(
       {
-        id: this.validatedInput.license_id,
+        id: input.license_id,
       },
       { populate: ['user'] },
     )
-    this.requester = await this.ctx.em.findOneOrFail(
-      User,
+    const requester = await this.userRepo.findOneOrFail(
       {
-        id: this.validatedInput.user_id,
+        id: input.user_id,
       },
       { populate: ['organization'] },
     )
+    const requesterName = `${requester.firstName} ${requester.lastName}`
+    return {
+      input,
+      license,
+      requester,
+      requesterName,
+    }
   }
 
-  getNotificationKey(): keyof typeof NOTIFICATION_TYPES_BASE {
-    return 'license_approval_request'
+  protected async determineReceivers(context: LicenseApprovalContext): Promise<User[]> {
+    return [context.license.user.getEntity()]
   }
 
-  async determineReceivers(): Promise<User[]> {
-    return [this.license.user.getEntity()]
+  protected getSubject(_receiver: User, context: LicenseApprovalContext): string {
+    return `${context.requesterName} requested approval for license: ${context.license.title}`
   }
 
-  async template(receiver: User): Promise<EmailSendInput> {
-    const requesterName = `${this.requester.firstName} ${this.requester.lastName}`
-    const body = buildEmailTemplate<LicenseApprovalTemplateInput>(this.templateFile, {
-      userFullName: requesterName,
-      userUsername: this.requester.dxuser,
-      userOrgName: this.requester.organization.getEntity().name,
-      licenseTitle: this.license.title,
-      licenseUrl: `${config.api.railsHost}/licenses/${this.license.id}`,
-      requestUrl: `${config.api.railsHost}/licenses/${this.license.id}-${lowercaseAndDash(this.license.title)}/users`,
-      message: this.validatedInput.message,
+  protected getTemplateInput(
+    receiver: User,
+    context: LicenseApprovalContext,
+  ): EmailTypeToTemplateInputMap[EMAIL_TYPES.licenseApprovalRequest] {
+    return {
+      userFullName: context.requesterName,
+      userUsername: context.requester.dxuser,
+      userOrgName: context.requester.organization.getEntity().name,
+      licenseTitle: context.license.title,
+      licenseUrl: `${config.api.railsHost}/licenses/${context.license.id}`,
+      requestUrl: `${config.api.railsHost}/licenses/${context.license.id}-${lowercaseAndDash(context.license.title)}/users`,
+      message: context.input.message,
       userId: receiver.id,
       receiver,
-    })
-    return {
-      emailType: EMAIL_TYPES.licenseApprovalRequest,
-      to: receiver.email,
-      body,
-      subject: `${requesterName} requested approval for license: ${this.license.title}`,
     }
   }
 }
