@@ -9,7 +9,7 @@ import Root from './root'
 import { getAuthenticityToken } from './utils/api'
 
 async function enableMocking() {
-  if (!ENABLE_DEV_MSW) {
+  if (!process.env.ENABLE_DEV_MSW) {
     return
   }
 

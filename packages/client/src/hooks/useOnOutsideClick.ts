@@ -9,11 +9,11 @@ export const useOnOutsideClickRef = (
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      if (ignoredRef?.current && ignoredRef.current.contains(e.target)) {
+      if (ignoredRef?.current && ignoredRef?.current?.contains(e.target)) {
         // Click on the ignored element (e.g., toggle button)
         return
       }
-      if (node.current.contains(e.target)) {
+      if (node?.current?.contains(e.target)) {
         // inside click
         return
       }

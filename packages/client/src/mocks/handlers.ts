@@ -1,4 +1,3 @@
-/* eslint-disable import/no-extraneous-dependencies */
 import { http, HttpResponse } from 'msw'
 import { appsMocks } from '../features/apps/apps.mocks'
 import { SiteSettingsResponse } from '../features/auth/useSiteSettingsQuery'
