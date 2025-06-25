@@ -1,12 +1,22 @@
-export type ReviewerNotification =
-  'reviewer_membership_changed' |
-  'reviewer_comment_activity' |
-  'reviewer_content_added_or_deleted'
+export type ReviewerContributorNotification =
+  'reviewer_contributor_membership_changed' |
+  'reviewer_contributor_comment_activity' |
+  'reviewer_contributor_content_added_or_deleted'
 
-export type SponsorNotification =
-  'sponsor_membership_changed' |
-  'sponsor_comment_activity' |
-  'sponsor_content_added_or_deleted'
+export type SponsorContributorNotification =
+  'sponsor_contributor_membership_changed' |
+  'sponsor_contributor_comment_activity' |
+  'sponsor_contributor_content_added_or_deleted'
+
+export type ReviewerViewerNotification =
+  'reviewer_viewer_membership_changed' |
+  'reviewer_viewer_comment_activity' |
+  'reviewer_viewer_content_added_or_deleted'
+
+export type SponsorViewerNotification =
+  'sponsor_viewer_membership_changed' |
+  'sponsor_viewer_comment_activity' |
+  'sponsor_viewer_content_added_or_deleted'
 
 export type ReviewerLeadNotification =
   'reviewer_lead_membership_changed' |
@@ -34,8 +44,10 @@ export type PrivateNotification =
   'private_challenge_opened' |
   'private_challenge_preregister'
 
-export type AllNotification = ReviewerNotification |
-  SponsorNotification |
+export type AllNotification = ReviewerContributorNotification |
+  SponsorContributorNotification |
+  ReviewerViewerNotification |
+  SponsorViewerNotification |
   ReviewerLeadNotification |
   SponsorLeadNotification |
   ReviewSpaceAdminNotification |
@@ -44,8 +56,10 @@ export type AllNotification = ReviewerNotification |
 export type NotificationPreferencesPayload = Record<AllNotification, 1 | 0>
 
 export type NotificationPreferences = {
-  'reviewer': Record<ReviewerNotification, boolean>,
-  'sponsor': Record<SponsorNotification, boolean>,
+  'reviewer_contributor': Record<ReviewerContributorNotification, boolean>,
+  'sponsor_contributor': Record<SponsorContributorNotification, boolean>,
+  'reviewer_viewer': Record<ReviewerViewerNotification, boolean>,
+  'sponsor_viewer': Record<SponsorViewerNotification, boolean>,
   'reviewer_lead': Record<ReviewerLeadNotification, boolean>,
   'sponsor_lead': Record<SponsorLeadNotification, boolean>,
   'admin': Record<ReviewSpaceAdminNotification, boolean>,
