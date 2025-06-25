@@ -32,22 +32,28 @@ export const NOTIFICATION_TYPES_BASE = {
 }
 
 export const DEFAULT_NOTIFICATION_PREFERENCES = {
-  reviewer_membership_changed: false,
-  reviewer_comment_activity: true,
-  reviewer_content_added_or_deleted: false,
-  sponsor_membership_changed: false,
-  sponsor_comment_activity: true,
-  sponsor_content_added_or_deleted: false,
-  reviewer_lead_membership_changed: true,
-  reviewer_lead_comment_activity: true,
-  reviewer_lead_content_added_or_deleted: true,
-  reviewer_lead_member_added_to_space: true,
-  reviewer_lead_space_locked_unlocked_deleted: true,
-  sponsor_lead_membership_changed: true,
-  sponsor_lead_comment_activity: true,
-  sponsor_lead_content_added_or_deleted: true,
-  sponsor_lead_member_added_to_space: true,
-  sponsor_lead_space_locked_unlocked_deleted: true,
+  group_lead_membership_changed: true,
+  group_lead_comment_activity: true,
+  group_lead_content_added_or_deleted: true,
+  group_lead_member_added_to_space: true,
+  group_lead_space_locked_unlocked_deleted: true,
+  group_contributor_membership_changed: false,
+  group_contributor_comment_activity: true,
+  group_contributor_content_added_or_deleted: false,
+  group_viewer_membership_changed: false,
+  group_viewer_comment_activity: true,
+  group_viewer_content_added_or_deleted: false,
+  shared_lead_membership_changed: true,
+  shared_lead_comment_activity: true,
+  shared_lead_content_added_or_deleted: true,
+  shared_lead_member_added_to_space: true,
+  shared_lead_space_locked_unlocked_deleted: true,
+  shared_contributor_membership_changed: false,
+  shared_contributor_comment_activity: true,
+  shared_contributor_content_added_or_deleted: false,
+  shared_viewer_membership_changed: false,
+  shared_viewer_comment_activity: true,
+  shared_viewer_content_added_or_deleted: false,
   admin_membership_changed: true,
   admin_comment_activity: true,
   admin_content_added_or_deleted: true,
@@ -62,12 +68,11 @@ export const DEFAULT_NOTIFICATION_PREFERENCES = {
  * List of notification roles, roles are represented by a prefix in the DB column,
  * so we want to document this mapping.
  */
-export const NOTIFICATION_ROLE_PREFIXES = {
+export const NOTIFICATION_ROLE = {
   admin: 'admin',
-  reviewer_lead: 'reviewer_lead',
-  sponsor_lead: 'sponsor_lead',
-  reviewer: 'reviewer',
-  sponsor: 'sponsor',
+  lead: 'lead',
+  contributor: 'contributor',
+  viewer: 'viewer',
   privateScope: 'private',
 }
 /**
@@ -86,32 +91,44 @@ export const NOTIFICATION_ROLE_PREFIXES = {
  *    -> "all_content_added_or_deleted" key is used
  */
 
-const NOTIFICATION_TYPES_REVIEWER = {
-  reviewer_membership_changed: true,
-  reviewer_comment_activity: true,
-  reviewer_content_added_or_deleted: true,
+const NOTIFICATION_TYPES_GROUP_LEAD = {
+  group_lead_membership_changed: true,
+  group_lead_comment_activity: true,
+  group_lead_content_added_or_deleted: true,
+  group_lead_member_added_to_space: true,
+  group_lead_space_locked_unlocked_deleted: true,
 }
 
-const NOTIFICATION_TYPES_SPONSOR = {
-  sponsor_membership_changed: true,
-  sponsor_comment_activity: true,
-  sponsor_content_added_or_deleted: true,
+const NOTIFICATION_TYPES_GROUP_CONTRIBUTOR = {
+  group_contributor_membership_changed: true,
+  group_contributor_comment_activity: true,
+  group_contributor_content_added_or_deleted: true,
 }
 
-const NOTIFICATION_TYPES_REVIEWER_LEAD = {
-  reviewer_lead_membership_changed: true,
-  reviewer_lead_comment_activity: true,
-  reviewer_lead_content_added_or_deleted: true,
-  reviewer_lead_member_added_to_space: true,
-  reviewer_lead_space_locked_unlocked_deleted: true,
+const NOTIFICATION_TYPES_GROUP_VIEWER = {
+  group_viewer_membership_changed: true,
+  group_viewer_comment_activity: true,
+  group_viewer_content_added_or_deleted: true,
 }
 
-const NOTIFICATION_TYPES_SPONSOR_LEAD = {
-  sponsor_lead_membership_changed: true,
-  sponsor_lead_comment_activity: true,
-  sponsor_lead_content_added_or_deleted: true,
-  sponsor_lead_member_added_to_space: true,
-  sponsor_lead_space_locked_unlocked_deleted: true,
+const NOTIFICATION_TYPES_SHARED_LEAD = {
+  shared_lead_membership_changed: true,
+  shared_lead_comment_activity: true,
+  shared_lead_content_added_or_deleted: true,
+  shared_lead_member_added_to_space: true,
+  shared_lead_space_locked_unlocked_deleted: true,
+}
+
+const NOTIFICATION_TYPES_SHARED_CONTRIBUTOR = {
+  shared_contributor_membership_changed: true,
+  shared_contributor_comment_activity: true,
+  shared_contributor_content_added_or_deleted: true,
+}
+
+const NOTIFICATION_TYPES_SHARED_VIEWER = {
+  shared_viewer_membership_changed: true,
+  shared_viewer_comment_activity: true,
+  shared_viewer_content_added_or_deleted: true,
 }
 
 const NOTIFICATION_TYPES_ADMIN = {
@@ -131,16 +148,20 @@ const NOTIFICATION_PRIVATE = {
 
 // we use as any here to overwrite mergeAll type declaration
 export const NOTIFICATION_TYPES: Partial<typeof NOTIFICATION_TYPES_ADMIN> &
-  Partial<typeof NOTIFICATION_TYPES_REVIEWER> &
-  Partial<typeof NOTIFICATION_TYPES_SPONSOR> &
-  Partial<typeof NOTIFICATION_TYPES_REVIEWER_LEAD> &
-  Partial<typeof NOTIFICATION_TYPES_SPONSOR_LEAD> &
+  Partial<typeof NOTIFICATION_TYPES_GROUP_LEAD> &
+  Partial<typeof NOTIFICATION_TYPES_GROUP_CONTRIBUTOR> &
+  Partial<typeof NOTIFICATION_TYPES_GROUP_VIEWER> &
+  Partial<typeof NOTIFICATION_TYPES_SHARED_LEAD> &
+  Partial<typeof NOTIFICATION_TYPES_SHARED_CONTRIBUTOR> &
+  Partial<typeof NOTIFICATION_TYPES_SHARED_VIEWER> &
   Partial<typeof NOTIFICATION_PRIVATE> = mergeAll([
   NOTIFICATION_TYPES_ADMIN,
-  NOTIFICATION_TYPES_REVIEWER,
-  NOTIFICATION_TYPES_SPONSOR,
-  NOTIFICATION_TYPES_REVIEWER_LEAD,
-  NOTIFICATION_TYPES_SPONSOR_LEAD,
+  NOTIFICATION_TYPES_GROUP_LEAD,
+  NOTIFICATION_TYPES_GROUP_CONTRIBUTOR,
+  NOTIFICATION_TYPES_GROUP_VIEWER,
+  NOTIFICATION_TYPES_SHARED_LEAD,
+  NOTIFICATION_TYPES_SHARED_CONTRIBUTOR,
+  NOTIFICATION_TYPES_SHARED_VIEWER,
   NOTIFICATION_PRIVATE,
 ])
 

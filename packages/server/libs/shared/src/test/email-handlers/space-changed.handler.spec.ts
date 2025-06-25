@@ -18,6 +18,9 @@ import { NotFoundError } from '@shared/errors'
 import { Organization } from '@shared/domain/org/org.entity'
 import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
 import { config } from '@shared/config'
+import { NotificationPreference } from '@shared/domain/notification-preference/notification-preference.entity'
+import { Reference } from '@mikro-orm/core'
+import { SPACE_TYPE } from '@shared/domain/space/space.enum'
 
 describe('SpaceChangedEmailHandler', () => {
   const SPACE_ID = 15
@@ -44,7 +47,7 @@ describe('SpaceChangedEmailHandler', () => {
     sendEmail: emailClientSendEmailStub,
   } as unknown as EmailClient
 
-  const getHandler = () => {
+  const getHandler = (): SpaceChangedEmailHandler => {
     return new SpaceChangedEmailHandler(em, spaceRepo, userRepo, spaceMembershipRepo, emailClient)
   }
 
@@ -107,9 +110,17 @@ describe('SpaceChangedEmailHandler', () => {
       adminUser.id = ADMIN_USER_ID
       adminUser.email = 'test@email.com'
       adminUser.firstName = 'Magika'
+      const notificationPref = new NotificationPreference(user)
+      notificationPref.data = {
+        group_lead_space_locked_unlocked_deleted: true,
+      }
+
+      adminUser.notificationPreference = Reference.create(notificationPref)
+
       const space = new Space()
       space.id = SPACE_ID
       space.name = 'space-name'
+      space.type = SPACE_TYPE.GROUPS
       const spaceMembership = new SpaceMembership(
         user,
         space,

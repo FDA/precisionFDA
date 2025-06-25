@@ -23,6 +23,7 @@ import { ChallengeRepository } from '@shared/domain/challenge/challenge.reposito
 import { UserRepository } from '@shared/domain/user/user.repository'
 import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
 import {
+  ChallengeOpenedContext,
   ChallengePreregContext,
   EmailTypeToContextMap,
 } from '@shared/domain/email/dto/email-type-to-context.map'
@@ -75,23 +76,14 @@ export class ChallengePreregEmailHandler extends EmailHandler<EMAIL_TYPES.challe
     } else {
       throw new InternalError(`Scope name ${context.input.scope} is not processable`)
     }
-    const ctx: OpsCtx = {
-      em: this.em,
-      log: this.logger,
-    }
-    const config: EmailConfigItem = {
-      emailId: this.emailType,
-      name: 'spaceChanged',
-      handlerClass: ChallengePreregEmailHandler,
-    }
-    const isEnabledFn = buildIsNotificationEnabled('challenge_preregister', ctx)
-    const filterFn = buildFilterByUserSettings({ ...ctx, config }, isEnabledFn)
-    const filterPipe = pipe(
-      // User[] -> User[]
-      filterFn,
-      uniqBy((u: User) => u.id),
-    )
-    return filterPipe(users).concat(pfdaNoReplyUser)
+    return users.concat(pfdaNoReplyUser)
+  }
+
+  protected async getNotificationSettingKeys(
+    _context: ChallengeOpenedContext,
+    _user: User,
+  ): Promise<string[]> {
+    return ['private_challenge_preregister']
   }
 
   protected getSubject(_receiver: User, context: ChallengePreregContext): string {

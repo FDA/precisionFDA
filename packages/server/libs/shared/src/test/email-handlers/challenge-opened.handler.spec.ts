@@ -18,6 +18,10 @@ import {
   SPACE_MEMBERSHIP_SIDE,
 } from '@shared/domain/space-membership/space-membership.enum'
 import { pfdaNoReplyUser } from '@shared/domain/email/email.helper'
+import {
+  NotificationPreference
+} from '@shared/domain/notification-preference/notification-preference.entity'
+import { Reference } from '@mikro-orm/core'
 
 describe('ChallengeOpenedEmailHandler', () => {
   const CHALLENGE_ID = 1
@@ -42,7 +46,7 @@ describe('ChallengeOpenedEmailHandler', () => {
     sendEmail: emailClientSendEmailStub,
   } as unknown as EmailClient
 
-  const getHandler = () => {
+  const getHandler = (): ChallengeOpenedEmailHandler => {
     return new ChallengeOpenedEmailHandler(
       entityManager,
       challengeRepo,
@@ -69,8 +73,8 @@ describe('ChallengeOpenedEmailHandler', () => {
   describe('#sendEmail', () => {
     it('not in space and not public', async () => {
       const challenge = {
-        isPublic: () => false,
-        isInSpace: () => false,
+        isPublic: (): boolean => false,
+        isInSpace: (): boolean => false,
         scope: 'unsupported-scope',
       }
       const input = new ChallengeOpenedDTO()
@@ -89,12 +93,18 @@ describe('ChallengeOpenedEmailHandler', () => {
       const challenge = {
         id: CHALLENGE_ID,
         name: 'challenge-name',
-        isPublic: () => true,
-        isInSpace: () => false,
+        isPublic: (): boolean => true,
+        isInSpace: (): boolean => false,
       }
       const organization = new Organization()
       const user1 = new User(organization)
       user1.email = 'user@email.com'
+      const notificationPref = new NotificationPreference(user1)
+      notificationPref.data = {
+        private_challenge_opened: true,
+      }
+
+      user1.notificationPreference = Reference.create(notificationPref)
       const input = new ChallengeOpenedDTO()
       input.challengeId = CHALLENGE_ID
 
@@ -128,13 +138,18 @@ describe('ChallengeOpenedEmailHandler', () => {
       const challenge = {
         id: CHALLENGE_ID,
         name: 'challenge-name',
-        isPublic: () => false,
-        isInSpace: () => true,
-        getSpaceId: () => SPACE_ID,
+        isPublic: (): boolean => false,
+        isInSpace: (): boolean => true,
+        getSpaceId: (): number => SPACE_ID,
       }
       const organization = new Organization()
       const user1 = new User(organization)
       user1.email = 'user@email.com'
+      const notificationPref = new NotificationPreference(user1)
+      notificationPref.data = {
+        private_challenge_opened: true,
+      }
+      user1.notificationPreference = Reference.create(notificationPref)
       const input = new ChallengeOpenedDTO()
       input.challengeId = CHALLENGE_ID
       const space = new Space()
