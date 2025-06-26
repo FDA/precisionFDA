@@ -18,10 +18,9 @@ import {
   SPACE_MEMBERSHIP_SIDE,
 } from '@shared/domain/space-membership/space-membership.enum'
 import { pfdaNoReplyUser } from '@shared/domain/email/email.helper'
-import {
-  NotificationPreference
-} from '@shared/domain/notification-preference/notification-preference.entity'
+import { NotificationPreference } from '@shared/domain/notification-preference/notification-preference.entity'
 import { Reference } from '@mikro-orm/core'
+import { SPACE_TYPE } from '@shared/domain/space/space.enum'
 
 describe('ChallengeOpenedEmailHandler', () => {
   const CHALLENGE_ID = 1
@@ -147,12 +146,13 @@ describe('ChallengeOpenedEmailHandler', () => {
       user1.email = 'user@email.com'
       const notificationPref = new NotificationPreference(user1)
       notificationPref.data = {
-        private_challenge_opened: true,
+        group_lead_member_added_to_space: true,
       }
       user1.notificationPreference = Reference.create(notificationPref)
       const input = new ChallengeOpenedDTO()
       input.challengeId = CHALLENGE_ID
       const space = new Space()
+      space.type = SPACE_TYPE.GROUPS
       const spaceMembership = new SpaceMembership(
         user1,
         space,

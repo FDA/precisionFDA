@@ -13,6 +13,7 @@ import { UserFileWorkerModule } from '../domain/user-file/user-file.worker.modul
 import { MainQueueProcessor } from './processor/main-queue.processor'
 import { MaintenanceQueueProcessor } from './processor/maintenance-queue.processor'
 import { DiscussionModule } from '@shared/domain/discussion/discussion.module'
+import { EmailModule } from '@shared/domain/email/email.module'
 @Module({
   imports: [
     QueueModule,
@@ -28,6 +29,7 @@ import { DiscussionModule } from '@shared/domain/discussion/discussion.module'
     DiscussionModule,
     UserFacadeModule,
     DbClusterModule,
+    EmailModule,
   ],
   providers: [MainQueueProcessor, MaintenanceQueueProcessor],
 })
