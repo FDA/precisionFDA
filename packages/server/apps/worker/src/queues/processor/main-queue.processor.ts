@@ -4,7 +4,6 @@ import { config } from '@shared/config'
 import { ChallengeService } from '@shared/domain/challenge/challenge.service'
 import { DataPortalService } from '@shared/domain/data-portal/service/data-portal.service'
 import { DbClusterService } from '@shared/domain/db-cluster/service/db-cluster.service'
-import { DiscussionNotificationService } from '@shared/domain/discussion/services/discussion-notification.service'
 import { SpaceReportService } from '@shared/domain/space-report/service/space-report.service'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { SyncFilesStateOperation } from '@shared/domain/user-file/ops/sync-files-state'
@@ -18,6 +17,8 @@ import { FollowUpDecider } from '../../domain/user-file/follow-up-decider'
 import { jobStatusHandler } from '../../jobs/job-status.handler'
 import { ProcessWithContext } from '../decorator/process-with-context'
 import { BaseQueueProcessor } from './base-queue.processor'
+import { EmailService } from '@shared/domain/email/email.service'
+import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
 
 @Processor(config.workerJobs.queues.default.name)
 export class MainQueueProcessor extends BaseQueueProcessor {
@@ -27,39 +28,39 @@ export class MainQueueProcessor extends BaseQueueProcessor {
     private readonly userFileService: UserFileService,
     private readonly challengeService: ChallengeService,
     private readonly dataPortalService: DataPortalService,
-    private readonly discussionNotificationService: DiscussionNotificationService,
     private readonly followUpDecider: FollowUpDecider,
     private readonly spaceReportService: SpaceReportService,
     private readonly dbClusterService: DbClusterService,
+    private readonly emailService: EmailService,
     private readonly userProvisionFacade: UserProvisionFacade,
   ) {
     super()
   }
 
   @ProcessWithContext(TASK_TYPE.SYNC_FILES_STATE)
-  async syncFilesState(job: Job) {
+  async syncFilesState(job: Job): Promise<void> {
     await this.handleUserTask(job, async (ctx, input) => {
       return await new SyncFilesStateOperation(ctx).execute(input)
     })
   }
 
   @ProcessWithContext(TASK_TYPE.SYNC_JOB_STATUS)
-  async syncJobStatus(job: Job) {
+  async syncJobStatus(job: Job): Promise<void> {
     await jobStatusHandler(job)
   }
 
   @ProcessWithContext(TASK_TYPE.SYNC_DBCLUSTER_STATUS)
-  async syncDbClusterStatus(job: Job) {
+  async syncDbClusterStatus(job: Job): Promise<void> {
     await this.dbClusterService.syncDbClusterStatus(job)
   }
 
   @ProcessWithContext(TASK_TYPE.SYNC_DBCLUSTER_JOB_OUTPUT)
-  async syncDbClusterJobOutput(job: Job) {
+  async syncDbClusterJobOutput(job: Job): Promise<void> {
     await this.dbClusterService.syncDbClusterJobOutput(job)
   }
 
   @ProcessWithContext(TASK_TYPE.SYNC_FILE_STATE)
-  async syncFileState(job: Job) {
+  async syncFileState(job: Job): Promise<void> {
     const input = job.data.payload
     this.logger.log(`synchronizing file ${input.fileUid}`)
     const result = await this.userFileService.synchronizeFile(
@@ -88,13 +89,13 @@ export class MainQueueProcessor extends BaseQueueProcessor {
   }
 
   @ProcessWithContext(TASK_TYPE.CLOSE_FILE)
-  async closeFile(job: Job) {
+  async closeFile(job: Job): Promise<void> {
     const payload = job.data.payload
     await this.userFileService.closeFile(payload.fileUid, payload.followUpAction)
   }
 
   @ProcessWithContext(TASK_TYPE.FOLLOW_UP_ACTION)
-  async followUpAction(job: Job) {
+  async followUpAction(job: Job): Promise<void> {
     const input = job.data.payload
     const actionsMap: Record<FOLLOW_UP_ACTION, () => Promise<void>> = {
       UPDATE_DATA_PORTAL_IMAGE_URL: () => this.dataPortalService.updateCardImageUrl(input.uid),
@@ -108,23 +109,37 @@ export class MainQueueProcessor extends BaseQueueProcessor {
   }
 
   @ProcessWithContext(TASK_TYPE.NOTIFY_NEW_DISCUSSION)
-  async notifyNewDiscussion(job: Job<NotifyNewDiscussionJob>) {
+  async notifyNewDiscussion(job: Job<NotifyNewDiscussionJob>): Promise<void> {
     const { discussionId, notify } = job.data.payload
     // TODO for some reason, the type of notify is any here. Ask Ludvik
 
-    await this.discussionNotificationService.notifyNewDiscussion(discussionId, notify)
+    await this.emailService.sendEmail({
+      type: EMAIL_TYPES.newDiscussion,
+      input: {
+        discussionId,
+        notify,
+      },
+      receiverUserIds: [],
+    })
   }
 
   @ProcessWithContext(TASK_TYPE.NOTIFY_NEW_DISCUSSION_REPLY)
-  async notifyNewDiscussionReply(job: Job<NotifyNewDiscussionJob>) {
+  async notifyNewDiscussionReply(job: Job<NotifyNewDiscussionJob>): Promise<void> {
     const { discussionId, notify } = job.data.payload
     // TODO for some reason, the type of notify is any here. Ask Ludvik
 
-    await this.discussionNotificationService.notifyNewDiscussionReply(discussionId, notify)
+    await this.emailService.sendEmail({
+      type: EMAIL_TYPES.newDiscussionReply,
+      input: {
+        discussionId,
+        notify,
+      },
+      receiverUserIds: [],
+    })
   }
 
   @ProcessWithContext(TASK_TYPE.PROVISION_NEW_USERS)
-  async provisionNewUser(job: Job<ProvisionNewUserJob>) {
+  async provisionNewUser(job: Job<ProvisionNewUserJob>): Promise<void> {
     const { ids } = job.data.payload
     for (const id of ids) {
       this.logger.log(`Provisioning new user with invitationId ${id}`)

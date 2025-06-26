@@ -42,6 +42,11 @@ import { Invitation } from '@shared/domain/invitation/invitation.entity'
 import { License } from '@shared/domain/license/license.entity'
 import { SpaceChangedEmailHandler } from '@shared/domain/email/templates/handlers/space-change.handler'
 import { AcceptedLicense } from '@shared/domain/accepted-license/accepted-license.entity'
+import { NewDiscussionHandler } from '@shared/domain/email/templates/handlers/new-discussion.handler'
+import { Discussion } from '@shared/domain/discussion/discussion.entity'
+import { EntityModule } from '@shared/domain/entity/entity.module'
+import { NewDiscussionReplyHandler } from '@shared/domain/email/templates/handlers/new-discussion-reply.handler'
+import { DiscussionModule } from '@shared/domain/discussion/discussion.module'
 
 @Module({
   imports: [
@@ -60,6 +65,7 @@ import { AcceptedLicense } from '@shared/domain/accepted-license/accepted-licens
       App,
       Challenge,
       Comment,
+      Discussion,
       Expert,
       ExpertQuestion,
       Invitation,
@@ -71,6 +77,7 @@ import { AcceptedLicense } from '@shared/domain/accepted-license/accepted-licens
       User,
       UserFile,
     ]),
+    EntityModule,
   ],
   providers: [
     EmailQueueJobProducer,
@@ -98,6 +105,8 @@ import { AcceptedLicense } from '@shared/domain/accepted-license/accepted-licens
     SpaceActivatedHandler,
     SpaceActivationEmailHandler,
     SpaceChangedEmailHandler,
+    NewDiscussionHandler,
+    NewDiscussionReplyHandler,
     TypeToHandlerMapProvider,
   ],
   exports: [

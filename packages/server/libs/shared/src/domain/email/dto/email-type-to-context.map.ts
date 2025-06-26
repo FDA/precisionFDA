@@ -21,6 +21,7 @@ import { SpaceEvent } from '@shared/domain/space-event/space-event.entity'
 import { Comment } from '@shared/domain/comment/comment.entity'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { App } from '@shared/domain/app/app.entity'
+import { Discussion } from '@shared/domain/discussion/discussion.entity'
 
 export type ChallengeOpenedContext = {
   challenge: Challenge
@@ -57,7 +58,6 @@ export type MemberChangedContext = {
   space: Space
   user: User
   content: MemberChangeTemplateInput['content']
-  activityType: string
   updatedMembership: SpaceMembership & {
     user: LoadedReference<User>
   }
@@ -131,6 +131,22 @@ export type CommentAddedContext = {
   input: EmailTypeToInputMap[EMAIL_TYPES.commentAdded]
 }
 
+export type NewDiscussionContext = {
+  discussion: Discussion
+  space?: Space
+  discussionLink: string
+  spaceName: string
+  input: EmailTypeToInputMap[EMAIL_TYPES.newDiscussion]
+}
+
+// TODO maybe the same as NewDiscussionContext?
+export type NewDiscussionReplyContext = {
+  discussion: Discussion
+  space?: Space
+  discussionLink: string
+  input: EmailTypeToInputMap[EMAIL_TYPES.newDiscussionReply]
+}
+
 type EmailTypeToContextMapOverride = {
   [EMAIL_TYPES.emailWithoutTemplate]: EmptyEmailInputDTO
   [EMAIL_TYPES.jobFinished]: JobFinishedContext
@@ -161,6 +177,8 @@ type EmailTypeToContextMapOverride = {
   [EMAIL_TYPES.invitation]: InvitationContext
   [EMAIL_TYPES.spaceInvitation]: SpaceInvitationContext
   [EMAIL_TYPES.nodeCopy]: NodeCopyInputDTO
+  [EMAIL_TYPES.newDiscussion]: NewDiscussionContext
+  [EMAIL_TYPES.newDiscussionReply]: NewDiscussionReplyContext
 }
 
 export type EmailTypeToContextMap = {

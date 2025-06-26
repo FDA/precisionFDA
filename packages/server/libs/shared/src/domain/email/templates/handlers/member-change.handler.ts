@@ -97,7 +97,6 @@ export class MemberChangedEmailHandler extends EmailHandler<EMAIL_TYPES.memberCh
     return {
       input,
       space,
-      activityType: input.activityType,
       user,
       content,
       updatedMembership: updatedMembership as SpaceMembership & { user: LoadedReference<User> },
@@ -135,7 +134,7 @@ export class MemberChangedEmailHandler extends EmailHandler<EMAIL_TYPES.memberCh
       return [
         getKeyForUserSpaceRole(
           spaceMembership[0],
-          this.getNotificationKey(context.activityType),
+          this.getNotificationKey(context.input.activityType),
           space,
         ),
       ]
@@ -191,10 +190,10 @@ export class MemberChangedEmailHandler extends EmailHandler<EMAIL_TYPES.memberCh
     let receivers
     // membership_added
     if (context.input.activityType === 'membership_added') {
-      receivers = receiverMembershipForAdding.map((membership) => membership.user)
+      receivers = receiverMembershipForAdding.map((membership) => membership.user.getEntity())
     } else {
       // other actions for membership: enable/disable/role change
-      receivers = receiverMembershipForChanging.map((membership) => membership.user)
+      receivers = receiverMembershipForChanging.map((membership) => membership.user.getEntity())
       if (
         context.input.activityType === 'membership_enabled' &&
         !context.updatedMembership.active

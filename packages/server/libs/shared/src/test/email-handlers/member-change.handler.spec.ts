@@ -17,6 +17,10 @@ import {
   SPACE_MEMBERSHIP_SIDE,
 } from '@shared/domain/space-membership/space-membership.enum'
 import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
+import {
+  NotificationPreference
+} from '@shared/domain/notification-preference/notification-preference.entity'
+import { Reference } from '@mikro-orm/core'
 
 describe('MemberChangedEmailHandler', () => {
   const SPACE_ID = 15
@@ -45,7 +49,7 @@ describe('MemberChangedEmailHandler', () => {
     sendEmail: emailClientSendEmailStub,
   } as unknown as EmailClient
 
-  const getHandler = () => {
+  const getHandler = (): MemberChangedEmailHandler => {
     return new MemberChangedEmailHandler(em, spaceRepo, userRepo, spaceMembershipRepo, emailClient)
   }
 
@@ -163,6 +167,11 @@ describe('MemberChangedEmailHandler', () => {
       adminUser.firstName = 'Bangla'
       adminUser.lastName = 'Dezo'
       adminUser.email = 'test@email.com'
+      const notificationPref = new NotificationPreference(adminUser)
+      notificationPref.data = {
+        private_challenge_opened: true,
+      }
+      adminUser.notificationPreference = Reference.create(notificationPref)
       userRepoFindOneOrFailStub.withArgs({ id: USER_ID }).returns(user)
       userRepoFindOneOrFailStub.withArgs({ id: USER2_ID }).returns(adminUser)
       const space = new Space()
