@@ -26,7 +26,7 @@ export class EntityLinkService {
     inline: false,
   }
 
-  async getUiLink<T extends UiLinkableEntityType>(entity: EntityInstance<T>) {
+  async getUiLink<T extends UiLinkableEntityType>(entity: EntityInstance<T>): Promise<string> {
     const entityType = EntityUtils.getEntityTypeForEntity(entity)
     const linkProvider = this.entityTypeToLinkProviderMap[entityType]
 
@@ -41,7 +41,7 @@ export class EntityLinkService {
     entity: EntityInstance<DownloadableEntityType>,
     fileName: string,
     options?: DownloadLinkOptionsDto,
-  ) {
+  ): Promise<string> {
     const effectiveOptions = { ...EntityLinkService.DOWNLOAD_LINK_OPTIONS_DEFAULT, ...options }
     const url = await this.getDownloadLinkUrl(entity, fileName, effectiveOptions)
 

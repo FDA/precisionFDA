@@ -4,13 +4,14 @@ import { User } from '@shared/domain/user/user.entity'
 import { BaseEntity } from '../../database/base.entity'
 import { Challenge } from './challenge.entity'
 import { ChallengeResourceRepository } from '@shared/domain/challenge/challenge-resource.repository'
+import { WorkaroundJsonType } from '@shared/database/json-workaround.type'
 
 @Entity({ tableName: 'challenge_resources', repository: () => ChallengeResourceRepository })
 class ChallengeResource extends BaseEntity {
   @Property()
   url: string
 
-  @Property({ type: 'json' })
+  @Property({ type: WorkaroundJsonType })
   meta: any
 
   @ManyToOne({ entity: () => Challenge })

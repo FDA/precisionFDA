@@ -13,7 +13,6 @@ import {
   CliWorkflowDescribeDTO,
 } from '@shared/domain/cli/dto/cli-describe.dto'
 import { getNodePath } from '@shared/domain/user-file/user-file.helper'
-import { NodeRepository } from '@shared/domain/user-file/node.repository'
 import { AppRepository } from '@shared/domain/app/app.repository'
 import { JobRepository } from '@shared/domain/job/job.repository'
 import WorkflowRepository from '@shared/domain/workflow/entity/workflow.repository'
@@ -25,11 +24,17 @@ import { DiscussionService } from '@shared/domain/discussion/services/discussion
 import { CommentDTO } from '@shared/domain/discussion/dto/comment.dto'
 import { AnswerDTO } from '@shared/domain/discussion/dto/answer.dto'
 import { Injectable } from '@nestjs/common'
+import { UserFileRepository } from '@shared/domain/user-file/user-file.repository'
+import { AssetRepository } from '@shared/domain/user-file/asset.repository'
+import { FolderRepository } from '@shared/domain/user-file/folder.repository'
+import { FileOrAsset } from '@shared/domain/user-file/user-file.types'
 
 @Injectable()
 export class CliDescribeEntityFacade {
   constructor(
-    private readonly nodeRepository: NodeRepository,
+    private readonly userFileRepository: UserFileRepository,
+    private readonly assetRepository: AssetRepository,
+    private readonly folderRepository: FolderRepository,
     private readonly appRepository: AppRepository,
     private readonly jobRepository: JobRepository,
     private readonly workflowRepository: WorkflowRepository,
@@ -77,13 +82,21 @@ export class CliDescribeEntityFacade {
   }
 
   private async describeFile(entityId: Uid<'file'>): Promise<CliFileDescribeDTO> {
-    const file = await this.nodeRepository.findAccessibleOne(
+    // Try to find as user file
+    let file: FileOrAsset = await this.userFileRepository.findAccessibleOne(
       { uid: entityId },
       { populate: ['taggings.tag', 'user'] },
     )
+
+    // If not found, try as asset
     if (!file) {
-      throw new NotFoundError('File not found or not accessible')
+      file = await this.assetRepository.findOne({ uid: entityId }, { populate: ['taggings.tag'] })
     }
+
+    if (!file) {
+      throw new NotFoundError('File or asset not found or not accessible')
+    }
+
     const describeFile = await this.platformClient.fileDescribe(
       {
         fileDxid: file.dxid,
@@ -93,12 +106,11 @@ export class CliDescribeEntityFacade {
     )
 
     await file.properties.loadItems()
-
     return CliFileDescribeDTO.fromEntity(describeFile, file)
   }
 
   private async describeFolder(id: number): Promise<CliFolderDescribeDTO> {
-    const folder = await this.nodeRepository.findAccessibleOne({ id })
+    const folder = await this.folderRepository.findAccessibleOne({ id })
     if (!folder) {
       throw new NotFoundError('Folder not found or not accessible')
     }

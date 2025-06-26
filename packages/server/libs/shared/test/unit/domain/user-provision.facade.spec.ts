@@ -1,8 +1,6 @@
 import { EntityManager } from '@mikro-orm/mysql'
 import { ORG_EVERYONE } from '@shared/config/consts'
 import { database } from '@shared/database'
-import { EmailQueueJobProducer } from '@shared/domain/email/producer/email-queue-job.producer'
-import { EmailPrepareService } from '@shared/domain/email/templates/email-prepare.service'
 import { Invitation } from '@shared/domain/invitation/invitation.entity'
 import { PROVISIONING_STATE } from '@shared/domain/invitation/invitation.enum'
 import { InvitationRepository } from '@shared/domain/invitation/invitation.repository'
@@ -22,6 +20,7 @@ import { PlatformClient } from '@shared/platform-client'
 import { create, db } from '@shared/test'
 import { expect } from 'chai'
 import { stub } from 'sinon'
+import { EmailService } from '@shared/domain/email/email.service'
 
 describe('UserProvisionFacade', () => {
   let em: EntityManager
@@ -30,7 +29,7 @@ describe('UserProvisionFacade', () => {
   let orgRepo: OrgRepository
   let invitationRepo: InvitationRepository
   let profileRepo: ProfileRepository
-  let emailPrepareService: EmailPrepareService
+  let emailService: EmailService
   let siteAdminContext: UserContext
   const userDescribeStub = stub()
   const orgDescribeStub = stub()
@@ -38,8 +37,8 @@ describe('UserProvisionFacade', () => {
   const createUserStub = stub()
   const createOrgStub = stub()
   const inviteUserToOrgStub = stub()
-  const createSendEmailTaskStub = stub()
   const createNotificationStub = stub()
+  const emailServiceSendEmailStub = stub()
 
   beforeEach(async () => {
     await db.dropData(database.connection())
@@ -59,7 +58,9 @@ describe('UserProvisionFacade', () => {
       sessionId: 'sessionId',
       loadEntity: (): Promise<User> => Promise.resolve(siteAdmin),
     }
-    emailPrepareService = new EmailPrepareService(em, siteAdminContext)
+    emailService = {
+      sendEmail: emailServiceSendEmailStub,
+    } as unknown as EmailService
 
     userDescribeStub.reset()
     orgDescribeStub.reset()
@@ -77,7 +78,9 @@ describe('UserProvisionFacade', () => {
 
     inviteUserToOrgStub.reset()
     createNotificationStub.reset()
-    createSendEmailTaskStub.reset()
+
+    emailServiceSendEmailStub.reset()
+    emailServiceSendEmailStub.throws()
   })
 
   // after(() => {
@@ -233,6 +236,7 @@ describe('UserProvisionFacade', () => {
   })
 
   it('should add sso field if email is gov email', async () => {
+    emailServiceSendEmailStub.reset()
     const invitation = create.inivitationHelper.create(em, {
       email: 'testuser@fda.hhs.gov',
       provisioningState: PROVISIONING_STATE.IN_PROGRESS,
@@ -270,13 +274,11 @@ describe('UserProvisionFacade', () => {
     expect(org.handle).to.equal(username.replace(/\./g, ''))
     const profile = await profileRepo.findOne({ user: user.id })
     expect(profile.email).to.equal(invitation.email)
-    expect(createSendEmailTaskStub.calledOnce).to.be.true()
-    expect(createSendEmailTaskStub.firstCall.args[0].body).to.contain(
-      `Welcome to precisionFDA, ${invitation.firstName}!`,
-    )
-    expect(createSendEmailTaskStub.firstCall.args[0].subject).to.contain(
-      `Welcome to precisionFDA, ${invitation.firstName}!`,
-    )
+    expect(emailServiceSendEmailStub.calledOnce).to.be.true()
+    expect(emailServiceSendEmailStub.firstCall.args[0].input.firstName).to.eq(invitation.firstName)
+    expect(emailServiceSendEmailStub.firstCall.args[0].input.email).to.eq(invitation.email)
+    expect(emailServiceSendEmailStub.firstCall.args[0].input.username).to.eq(username)
+
     expect(createNotificationStub.calledTwice).to.be.true()
     expect(createNotificationStub.firstCall.args[0]).to.deep.eq({
       message: 'A provisioning task has been done',
@@ -391,9 +393,6 @@ describe('UserProvisionFacade', () => {
       inviteUserToOrganization: inviteUserToOrgStub,
       updateBillingInformation: updateBillingInformationStub,
     } as unknown as PlatformClient
-    const emailQueueJobProducer = {
-      createSendEmailTask: createSendEmailTaskStub,
-    } as unknown as EmailQueueJobProducer
     const notificationService = {
       createNotification: createNotificationStub,
     } as unknown as NotificationService
@@ -405,8 +404,7 @@ describe('UserProvisionFacade', () => {
       userRepo,
       orgRepo,
       invitationRepo,
-      emailPrepareService,
-      emailQueueJobProducer,
+      emailService,
       notificationService,
     )
   }

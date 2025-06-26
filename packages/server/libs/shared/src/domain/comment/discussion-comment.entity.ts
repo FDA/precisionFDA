@@ -14,7 +14,7 @@ export class DiscussionComment extends Comment {
     this.commentableType = 'Discussion'
   }
 
-  async isEditableBy(user: User) {
+  async isEditableBy(user: User): Promise<boolean> {
     if (!user) {
       return false
     }

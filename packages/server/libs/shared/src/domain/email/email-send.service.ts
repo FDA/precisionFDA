@@ -13,7 +13,7 @@ export class EmailSendService {
 
   constructor(private readonly emailClient: EmailClient) {}
 
-  async sendEmail(input: EmailSendInput) {
+  async sendEmail(input: EmailSendInput): Promise<boolean> {
     try {
       if (config.env !== ENVS.PRODUCTION) {
         input.subject = `[${config.env}] ${input.subject}`

@@ -1,6 +1,7 @@
 import { Discussion } from '@shared/domain/discussion/discussion.entity'
 import { DiscussionEntityLinkProvider } from '@shared/domain/entity/entity-link/discussion-entity-link.provider'
 import { expect } from 'chai'
+import { config } from '@shared/config'
 
 describe('DiscussionEntityLinkProvider', () => {
   const ID = 0
@@ -17,7 +18,7 @@ describe('DiscussionEntityLinkProvider', () => {
   it('should provide correct absolute link', async () => {
     const res = await getInstance().getLink(DISCUSSION)
 
-    expect(res).to.equal(`https://rails-host:1234/spaces/${SPACE_ID}/discussions/${ID}`)
+    expect(res).to.equal(`${config.api.railsHost}/spaces/${SPACE_ID}/discussions/${ID}`)
   })
 
   it('should provide correct relative link', async () => {

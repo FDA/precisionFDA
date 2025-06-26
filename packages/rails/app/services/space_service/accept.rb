@@ -43,7 +43,7 @@ module SpaceService
     def send_emails(space)
       https_apps_client = HttpsAppsClient.new
       space.leads.find_each do |lead|
-        https_apps_client.email_send(NotificationPreference.email_types[:space_activated], [], { id: lead.id }) # id is membership id
+        https_apps_client.email_send(NotificationPreference.email_types[:space_activated], { id: lead.id }) # id is membership id
       end
     end
   end

@@ -1,110 +1,83 @@
-import { EntityManager } from '@mikro-orm/mysql'
 import { stub } from 'sinon'
-import { expect } from 'chai'
-import { Logger } from '@nestjs/common'
-import { UserOpsCtx } from '@shared/types'
-import { EMAIL_TYPES } from '@shared/domain/email/email.config'
 import { SpaceActivatedHandler } from '@shared/domain/email/templates/handlers/space-activated.handler'
 import { User } from '@shared/domain/user/user.entity'
 import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
+import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
+import { EmailClient } from '@shared/services/email-client'
+import { Organization } from '@shared/domain/org/org.entity'
+import { Space } from '@shared/domain/space/space.entity'
+import {
+  SPACE_MEMBERSHIP_ROLE,
+  SPACE_MEMBERSHIP_SIDE,
+} from '@shared/domain/space-membership/space-membership.enum'
+import { expect } from 'chai'
+import { ObjectIdInputDTO } from '@shared/domain/email/email.helper'
+import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
+import { config } from '@shared/config'
 
 describe('SpaceActivatedHandler', () => {
-  const SPACE_ID = 1
-  const USER_ID = 2
+  const SPACE_MEMBERSHIP_ID = 10
+  const SPACE_ID = 15
 
-  const emFindOneOrFailStub = stub()
-  const entityManager = {
-    findOneOrFail: emFindOneOrFailStub,
-  } as unknown as EntityManager
+  const emailClientSendEmailStub = stub()
+  const spaceMembershipRepoFindOneOrFail = stub()
 
-  const log = {
-    log: stub(),
-    error: stub(),
-  } as unknown as Logger
+  const spaceMembershipRepo = {
+    findOneOrFail: spaceMembershipRepoFindOneOrFail,
+  } as unknown as SpaceMembershipRepository
+  const emailClient = {
+    sendEmail: emailClientSendEmailStub,
+  } as unknown as EmailClient
 
-  const userOpsCtx: UserOpsCtx = {
-    em: entityManager,
-    user: {
-      id: 1,
-      accessToken: 'accessToken',
-      dxuser: 'dxuser',
-    },
-    log,
+  const getHandler = () => {
+    return new SpaceActivatedHandler(spaceMembershipRepo, emailClient)
   }
 
-  const createMockUser = (id: number, email: string, firstName = 'John', lastName = 'Doe') =>
-    ({
-      id,
-      firstName,
-      lastName,
-      email,
-    }) as unknown as User
-
-  const createMockSpaceMembership = (id: number, user: User) =>
-    ({
-      id,
-      spaces: [
-        {
-          id: SPACE_ID,
-          name: 'Test Space',
-        },
-      ],
-      user: {
-        getEntity: () => user,
-      },
-    }) as unknown as SpaceMembership
-
-  beforeEach(() => {
-    emFindOneOrFailStub.reset()
-    emFindOneOrFailStub.throws()
+  beforeEach(async () => {
+    emailClientSendEmailStub.reset()
+    emailClientSendEmailStub.throws()
   })
 
-  const getSpaceActivatedHandler = (spaceId: number, userId: number) =>
-    new SpaceActivatedHandler(EMAIL_TYPES.spaceActivated, { id: spaceId }, userOpsCtx, [userId])
+  describe('#sendEmail', async () => {
+    it('basic', async () => {
+      const organization = new Organization()
+      const user = new User(organization)
+      user.firstName = 'Sou'
+      user.lastName = 'Čet'
+      user.email = 'test@email.com'
+      const space = new Space()
+      space.id = SPACE_ID
+      space.name = 'Test Space'
+      const spaceMembership = new SpaceMembership(
+        user,
+        space,
+        SPACE_MEMBERSHIP_SIDE.HOST,
+        SPACE_MEMBERSHIP_ROLE.LEAD,
+      )
 
-  it('getNotificationKey', () => {
-    const handler = getSpaceActivatedHandler(SPACE_ID, USER_ID)
-    expect(handler.getNotificationKey()).to.eq('space_activated')
-  })
+      spaceMembershipRepoFindOneOrFail
+        .withArgs({ id: SPACE_MEMBERSHIP_ID }, { populate: ['user', 'spaces'] })
+        .returns(spaceMembership)
+      emailClientSendEmailStub.reset()
 
-  it('determineReceivers', async () => {
-    const spaceOwnerUser = createMockUser(3, 'owner@domain.com')
-    const spaceMembership = createMockSpaceMembership(SPACE_ID, spaceOwnerUser)
+      const input = new ObjectIdInputDTO()
+      input.id = SPACE_MEMBERSHIP_ID
 
-    emFindOneOrFailStub
-      .withArgs(SpaceMembership, { id: SPACE_ID }, { populate: ['user', 'spaces'] })
-      .resolves(spaceMembership)
+      const handler = getHandler()
+      await handler.sendEmail(input)
 
-    emFindOneOrFailStub.withArgs(User, { id: USER_ID }).resolves(spaceOwnerUser)
-
-    const handler = getSpaceActivatedHandler(SPACE_ID, USER_ID)
-    await handler.setupContext()
-
-    const receivers = await handler.determineReceivers()
-    expect(receivers).to.eql([spaceOwnerUser])
-  })
-
-  it('template', async () => {
-    const spaceOwnerUser = createMockUser(3, 'owner@domain.com')
-    const spaceMembership = createMockSpaceMembership(SPACE_ID, spaceOwnerUser)
-
-    emFindOneOrFailStub
-      .withArgs(SpaceMembership, { id: SPACE_ID }, { populate: ['user', 'spaces'] })
-      .resolves(spaceMembership)
-
-    emFindOneOrFailStub.withArgs(User, { id: USER_ID }).resolves(spaceOwnerUser)
-
-    const handler = getSpaceActivatedHandler(SPACE_ID, USER_ID)
-    await handler.setupContext()
-
-    const result = await handler.template(spaceOwnerUser)
-
-    expect(result.emailType).to.eq(EMAIL_TYPES.spaceActivated)
-    expect(result.to).to.eq(spaceOwnerUser.email)
-    expect(result.subject).to.eq('Space Activated')
-    expect(result.body).to.contain('View Space')
-    expect(result.body).to.contain(
-      'has been activated, and you can now start sharing data with members of the space.',
-    )
+      expect(emailClientSendEmailStub.calledOnce).to.be.true
+      expect(emailClientSendEmailStub.firstCall.firstArg.emailType).to.eq(
+        EMAIL_TYPES.spaceActivated,
+      )
+      expect(emailClientSendEmailStub.firstCall.firstArg.to).to.eq(user.email)
+      expect(emailClientSendEmailStub.firstCall.firstArg.subject).to.eq('Space Activated')
+      expect(emailClientSendEmailStub.firstCall.firstArg.body).to.contain(
+        `Dear ${user.firstName} ${user.lastName}`,
+      )
+      expect(emailClientSendEmailStub.firstCall.firstArg.body).to.contain(
+        `${config.api.railsHost}/spaces/${space.id}`,
+      )
+    })
   })
 })

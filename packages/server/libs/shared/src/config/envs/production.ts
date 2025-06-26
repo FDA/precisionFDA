@@ -52,6 +52,9 @@ export const config: ConfigOverride = () => ({
   },
   emails: {
     report: 'pfda-reports-production@dnanexus.com',
+    smtp: {
+      returnAddress: process.env.SMTP_RETURN_ADDRESS ?? 'precisionfda-production@dnanexus.com',
+    },
   },
   redis: {
     isSecure: true,

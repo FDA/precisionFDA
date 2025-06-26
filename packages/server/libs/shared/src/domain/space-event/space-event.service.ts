@@ -1,4 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common'
+import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { SpaceEvent } from '@shared/domain/space-event/space-event.entity'
 import { getEntityType, getObjectType } from '@shared/utils/object-utils'
@@ -7,11 +8,11 @@ import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { SpaceRepository } from '@shared/domain/space/space.repository'
 import { UserRepository } from '@shared/domain/user/user.repository'
 import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
-import { EMAIL_TYPES, EmailProcessInput } from '@shared/domain/email/email.config'
 import { SPACE_EVENT_ACTIVITY_TYPE } from '@shared/domain/space-event/space-event.enum'
-import { EmailFacade } from '@shared/domain/email/email.facade'
+import { EmailService } from '@shared/domain/email/email.service'
 import { getEnumKeyByValue } from '@shared/utils/enum-utils'
 import { SPACE_MEMBERSHIP_ROLE } from '@shared/domain/space-membership/space-membership.enum'
+import { TypedEmailBodyDto } from '@shared/domain/email/dto/typed-email-body.dto'
 import { SpaceEventDTO } from '@shared/domain/space-event/dto/space-event.dto'
 
 const CONTENT_TYPES = [
@@ -49,7 +50,7 @@ export class SpaceEventService {
     private readonly spaceRepo: SpaceRepository,
     private readonly userRepo: UserRepository,
     private readonly spaceMembershipRepo: SpaceMembershipRepository,
-    private readonly emailFacade: EmailFacade,
+    private readonly emailService: EmailService,
   ) {}
 
   /**
@@ -99,22 +100,22 @@ export class SpaceEventService {
       `Sending notification for space event id: ${event.id} activityType: ${event.activityType}`,
     )
     if (CONTENT_TYPES.includes(event.activityType)) {
-      const input: EmailProcessInput<EMAIL_TYPES.newContentAdded> = {
-        emailTypeId: EMAIL_TYPES.newContentAdded,
+      const input: TypedEmailBodyDto<EMAIL_TYPES.newContentAdded> = {
+        type: EMAIL_TYPES.newContentAdded,
         input: { id: event.id },
         receiverUserIds: [],
       }
-      await this.emailFacade.sendEmail(input)
+      await this.emailService.sendEmail(input)
     } else if (COMMENT_TYPES.includes(event.activityType)) {
-      const input: EmailProcessInput<EMAIL_TYPES.commentAdded> = {
-        emailTypeId: EMAIL_TYPES.commentAdded,
+      const input: TypedEmailBodyDto<EMAIL_TYPES.commentAdded> = {
+        type: EMAIL_TYPES.commentAdded,
         input: { id: event.id },
         receiverUserIds: [],
       }
-      await this.emailFacade.sendEmail(input)
+      await this.emailService.sendEmail(input)
     } else if (SPACE_TYPES.includes(event.activityType)) {
-      const input: EmailProcessInput<EMAIL_TYPES.spaceChanged> = {
-        emailTypeId: EMAIL_TYPES.spaceChanged,
+      const input: TypedEmailBodyDto<EMAIL_TYPES.spaceChanged> = {
+        type: EMAIL_TYPES.spaceChanged,
         input: {
           initUserId: event.user.id,
           spaceId: event.space.id,
@@ -122,10 +123,10 @@ export class SpaceEventService {
         },
         receiverUserIds: [],
       }
-      await this.emailFacade.sendEmail(input)
+      await this.emailService.sendEmail(input)
     } else if (MEMBERSHIP_TYPES.includes(event.activityType)) {
-      const input: EmailProcessInput<EMAIL_TYPES.memberChangedAddedRemoved> = {
-        emailTypeId: EMAIL_TYPES.memberChangedAddedRemoved,
+      const input: TypedEmailBodyDto<EMAIL_TYPES.memberChangedAddedRemoved> = {
+        type: EMAIL_TYPES.memberChangedAddedRemoved,
         input: {
           initUserId: event.user.id,
           spaceId: event.space.id,
@@ -135,7 +136,7 @@ export class SpaceEventService {
         },
         receiverUserIds: [],
       }
-      await this.emailFacade.sendEmail(input)
+      await this.emailService.sendEmail(input)
     }
   }
 }

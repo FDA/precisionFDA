@@ -1,185 +1,97 @@
-import { EntityManager } from '@mikro-orm/mysql'
 import { stub } from 'sinon'
-import { expect } from 'chai'
-import { Logger } from '@nestjs/common'
-import { UserOpsCtx } from '@shared/types'
-import { EMAIL_TYPES } from '@shared/domain/email/email.config'
-import { SpaceActivationHandler } from '@shared/domain/email/templates/handlers/space-activation.handler'
-import { User } from '@shared/domain/user/user.entity'
+import { SpaceActivationEmailHandler } from '@shared/domain/email/templates/handlers/space-activation.handler'
+import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
+import { EmailClient } from '@shared/services/email-client'
 import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
+import { Organization } from '@shared/domain/org/org.entity'
+import { User } from '@shared/domain/user/user.entity'
+import {
+  SPACE_MEMBERSHIP_ROLE,
+  SPACE_MEMBERSHIP_SIDE,
+} from '@shared/domain/space-membership/space-membership.enum'
+import { expect } from 'chai'
+import { Space } from '@shared/domain/space/space.entity'
 import { SPACE_TYPE } from '@shared/domain/space/space.enum'
-import { SPACE_MEMBERSHIP_SIDE } from '@shared/domain/space-membership/space-membership.enum'
+import { ObjectIdInputDTO } from '@shared/domain/email/email.helper'
+import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
+import { config } from '@shared/config'
 
 describe('SpaceActivationHandler', () => {
-  const SPACE_ID = 1
-  const USER_ID = 2
+  const SPACE_MEMBERSHIP_ID = 10
+  const SPACE_ID = 15
 
-  const emFindOneOrFailStub = stub()
-  const entityManager = {
-    findOneOrFail: emFindOneOrFailStub,
-  } as unknown as EntityManager
+  const emailClientSendEmailStub = stub()
+  const spaceMembershipRepoFindOneOrFail = stub()
 
-  const log = {
-    log: stub(),
-    error: stub(),
-  } as unknown as Logger
+  const spaceMembershipRepo = {
+    findOneOrFail: spaceMembershipRepoFindOneOrFail,
+  } as unknown as SpaceMembershipRepository
+  const emailClient = {
+    sendEmail: emailClientSendEmailStub,
+  } as unknown as EmailClient
 
-  const userOpsCtx: UserOpsCtx = {
-    em: entityManager,
-    user: {
-      id: 1,
-      accessToken: 'accessToken',
-      dxuser: 'dxuser',
-    },
-    log,
+  const getHandler = () => {
+    return new SpaceActivationEmailHandler(spaceMembershipRepo, emailClient)
   }
 
-  const createMockUser = (id: number, email: string, firstName = 'John', lastName = 'Doe') =>
-    ({
-      id,
-      firstName,
-      lastName,
-      email,
-    }) as unknown as User
-
-  const createMockSpaceMembership = (
-    id: number,
-    user: User,
-    spaceType: SPACE_TYPE,
-    side: SPACE_MEMBERSHIP_SIDE,
-  ) =>
-    ({
-      id,
-      spaces: [
-        {
-          id: SPACE_ID,
-          name: 'Test Space',
-          type: spaceType,
-        },
-      ],
-      user: {
-        getEntity: () => user,
-      },
-      side,
-      getSpaceMembershipSideAlias: () => 'reviewer',
-    }) as unknown as SpaceMembership
-
-  beforeEach(() => {
-    emFindOneOrFailStub.reset()
-    emFindOneOrFailStub.throws()
+  beforeEach(async () => {
+    emailClientSendEmailStub.reset()
+    emailClientSendEmailStub.throws()
   })
 
-  const getSpaceActivationHandler = (spaceId: number, userId: number) =>
-    new SpaceActivationHandler(EMAIL_TYPES.spaceActivation, { id: spaceId }, userOpsCtx, [userId])
+  describe('#sendEmail', () => {
+    it('admin space type', async () => {
+      const organization = new Organization()
+      const user = new User(organization)
+      user.email = 'test@email.com'
+      const space = new Space()
+      space.id = SPACE_ID
+      space.name = 'space-name'
+      space.type = SPACE_TYPE.ADMINISTRATOR
 
-  it('getNotificationKey', () => {
-    const handler = getSpaceActivationHandler(SPACE_ID, USER_ID)
-    expect(handler.getNotificationKey()).to.eq('space_activation')
-  })
+      const spaceMembership = new SpaceMembership(
+        user,
+        space,
+        SPACE_MEMBERSHIP_SIDE.HOST,
+        SPACE_MEMBERSHIP_ROLE.ADMIN,
+      )
+      spaceMembership.id = SPACE_MEMBERSHIP_ID
 
-  it('determineReceivers', async () => {
-    const spaceOwnerUser = createMockUser(3, 'owner@domain.com')
-    const spaceMembership = createMockSpaceMembership(
-      SPACE_ID,
-      spaceOwnerUser,
-      SPACE_TYPE.ADMINISTRATOR,
-      SPACE_MEMBERSHIP_SIDE.HOST,
-    )
+      spaceMembershipRepoFindOneOrFail
+        .withArgs({ id: SPACE_MEMBERSHIP_ID }, { populate: ['user', 'spaces'] })
+        .returns(spaceMembership)
+      emailClientSendEmailStub.reset()
 
-    emFindOneOrFailStub
-      .withArgs(SpaceMembership, { id: SPACE_ID }, { populate: ['user', 'spaces'] })
-      .resolves(spaceMembership)
+      const input = new ObjectIdInputDTO()
+      input.id = SPACE_MEMBERSHIP_ID
 
-    emFindOneOrFailStub.withArgs(User, { id: USER_ID }).resolves(spaceOwnerUser)
+      const handler = getHandler()
+      await handler.sendEmail(input)
 
-    const handler = getSpaceActivationHandler(SPACE_ID, USER_ID)
-    await handler.setupContext()
+      expect(emailClientSendEmailStub.calledOnce).to.eq(true)
+      expect(emailClientSendEmailStub.firstCall.firstArg.emailType).to.eq(
+        EMAIL_TYPES.spaceActivation,
+      )
+      expect(emailClientSendEmailStub.firstCall.firstArg.to).to.eq(user.email)
+      expect(emailClientSendEmailStub.firstCall.firstArg.subject).to.eq(
+        `Action required to activate new space ${space.name}`,
+      )
+      expect(emailClientSendEmailStub.firstCall.firstArg.body).to.contain(
+        `Space activation request for ${space.name} as creator`,
+      )
+      expect(emailClientSendEmailStub.firstCall.firstArg.body).to.contain(
+        `${config.api.railsHost}/spaces/${SPACE_ID}`,
+      )
+      expect(emailClientSendEmailStub.firstCall.firstArg.body).to.contain(
+        'To start adding data to this space, both creator and approver lead',
+      )
 
-    const receivers = await handler.determineReceivers()
-    expect(receivers).to.eql([spaceOwnerUser])
-  })
+      space.type = SPACE_TYPE.PRIVATE_TYPE
+      await handler.sendEmail(input)
 
-  it('template should generate correct email template for ADMINISTRATOR space type and HOST side', async () => {
-    const spaceOwnerUser = createMockUser(3, 'owner@domain.com')
-    const spaceMembership = createMockSpaceMembership(
-      SPACE_ID,
-      spaceOwnerUser,
-      SPACE_TYPE.ADMINISTRATOR,
-      SPACE_MEMBERSHIP_SIDE.HOST,
-    )
-
-    emFindOneOrFailStub
-      .withArgs(SpaceMembership, { id: SPACE_ID }, { populate: ['user', 'spaces'] })
-      .resolves(spaceMembership)
-
-    emFindOneOrFailStub.withArgs(User, { id: USER_ID }).resolves(spaceOwnerUser)
-
-    const handler = getSpaceActivationHandler(SPACE_ID, USER_ID)
-    await handler.setupContext()
-
-    const result = await handler.template(spaceOwnerUser)
-
-    expect(result.emailType).to.eq(EMAIL_TYPES.spaceActivation)
-    expect(result.to).to.eq(spaceOwnerUser.email)
-    expect(result.subject).to.eq('Action required to activate new space Test Space')
-    expect(result.body).to.contain('creator')
-    expect(result.body).to.contain('creator and approver')
-    expect(result.body).to.contain('View Space Invitation')
-  })
-
-  it('template should generate correct email template for REVIEW space type', async () => {
-    const spaceOwnerUser = createMockUser(3, 'owner@domain.com')
-    const spaceMembership = createMockSpaceMembership(
-      SPACE_ID,
-      spaceOwnerUser,
-      SPACE_TYPE.REVIEW,
-      SPACE_MEMBERSHIP_SIDE.HOST,
-    )
-
-    emFindOneOrFailStub
-      .withArgs(SpaceMembership, { id: SPACE_ID }, { populate: ['user', 'spaces'] })
-      .resolves(spaceMembership)
-
-    emFindOneOrFailStub.withArgs(User, { id: USER_ID }).resolves(spaceOwnerUser)
-
-    const handler = getSpaceActivationHandler(SPACE_ID, USER_ID)
-    await handler.setupContext()
-
-    const result = await handler.template(spaceOwnerUser)
-
-    expect(result.emailType).to.eq(EMAIL_TYPES.spaceActivation)
-    expect(result.to).to.eq(spaceOwnerUser.email)
-    expect(result.subject).to.eq('Action required to activate new space Test Space')
-    expect(result.body).to.contain('host')
-    expect(result.body).to.contain('reviewer and sponsor')
-    expect(result.body).to.contain('View Space Invitation')
-  })
-
-  it('template should handle GUEST side correctly', async () => {
-    const spaceOwnerUser = createMockUser(3, 'owner@domain.com')
-    const spaceMembership = createMockSpaceMembership(
-      SPACE_ID,
-      spaceOwnerUser,
-      SPACE_TYPE.REVIEW,
-      SPACE_MEMBERSHIP_SIDE.GUEST,
-    )
-
-    emFindOneOrFailStub
-      .withArgs(SpaceMembership, { id: SPACE_ID }, { populate: ['user', 'spaces'] })
-      .resolves(spaceMembership)
-
-    emFindOneOrFailStub.withArgs(User, { id: USER_ID }).resolves(spaceOwnerUser)
-
-    const handler = getSpaceActivationHandler(SPACE_ID, USER_ID)
-    await handler.setupContext()
-
-    const result = await handler.template(spaceOwnerUser)
-
-    expect(result.emailType).to.eq(EMAIL_TYPES.spaceActivation)
-    expect(result.to).to.eq(spaceOwnerUser.email)
-    expect(result.subject).to.eq('Action required to activate new space Test Space')
-    expect(result.body).to.contain('sponsor')
-    expect(result.body).not.to.contain('host and guest')
-    expect(result.body).to.contain('View Space Invitation')
+      expect(emailClientSendEmailStub.secondCall.firstArg.body).to.contain(
+        'To start adding data to this space, both host and guest lead',
+      )
+    })
   })
 })

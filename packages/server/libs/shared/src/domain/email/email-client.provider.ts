@@ -1,8 +1,8 @@
-import { Provider } from '@nestjs/common'
+import { FactoryProvider } from '@nestjs/common'
 import { config } from '@shared/config'
 import { FileEmailClient, SMTPEmailClient, EmailClient } from '@shared/services/email-client'
 
-export const emailClientProvider: Provider = {
+export const emailClientProvider: FactoryProvider = {
   provide: EmailClient,
   useFactory: () => {
     if (config.emails.smtp.saveEmailToFile) {

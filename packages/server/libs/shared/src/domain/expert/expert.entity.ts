@@ -15,6 +15,7 @@ import { ExpertQuestion, ExpertQuestionState } from '../expert-question/expert-q
 import { ExpertRepository } from './expert.repository'
 import { ExpertAnswer } from '@shared/domain/expert-answer/expert-answer.entity'
 import { ScopedEntity } from '@shared/database/scoped.entity'
+import { WorkaroundJsonType } from '@shared/database/json-workaround.type'
 
 export enum EXPERT_STATE {
   OPEN = 'open',
@@ -32,12 +33,6 @@ export interface ExpertMeta {
 
 @Entity({ tableName: 'experts', repository: () => ExpertRepository })
 export class Expert extends ScopedEntity {
-  @Property()
-  createdAt = new Date()
-
-  @Property({ onUpdate: () => new Date() })
-  updatedAt = new Date()
-
   @OneToOne({ entity: () => User, inversedBy: 'expert' })
   user: Ref<User>
 
@@ -54,7 +49,7 @@ export class Expert extends ScopedEntity {
   @Enum()
   state: EXPERT_STATE
 
-  @Property({ type: 'json' })
+  @Property({ type: WorkaroundJsonType })
   meta?: ExpertMeta
 
   @Property({ type: 'varchar' })
@@ -67,7 +62,7 @@ export class Expert extends ScopedEntity {
     this.user = Reference.create(user)
   }
 
-  async getAnsweredQuestionsCount() {
+  async getAnsweredQuestionsCount(): Promise<number> {
     return (
       await this.questions.matching({
         where: {
@@ -77,7 +72,7 @@ export class Expert extends ScopedEntity {
     ).length
   }
 
-  async getIgnoredQuestionsCount() {
+  async getIgnoredQuestionsCount(): Promise<number> {
     return (
       await this.questions.matching({
         where: {
@@ -87,7 +82,7 @@ export class Expert extends ScopedEntity {
     ).length
   }
 
-  async getOpenQuestionsCount() {
+  async getOpenQuestionsCount(): Promise<number> {
     return (
       await this.questions.matching({
         where: {
@@ -97,7 +92,7 @@ export class Expert extends ScopedEntity {
     ).length
   }
 
-  async isAccessibleBy(user?: User) {
+  async isAccessibleBy(user?: User): Promise<boolean> {
     if (!user || !(await user.isSiteAdmin())) {
       return this.isPublic()
     }
@@ -105,7 +100,7 @@ export class Expert extends ScopedEntity {
     return await this.isEditableBy(user)
   }
 
-  async isEditableBy(user: User) {
+  async isEditableBy(user: User): Promise<boolean> {
     if (await user.isSiteAdmin()) {
       return true
     }

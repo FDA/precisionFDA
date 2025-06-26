@@ -1,62 +1,71 @@
-import { BaseTemplate } from '@shared/domain/email/templates/base-template'
-import { buildEmailTemplate, ObjectIdInputDTO } from '@shared/domain/email/email.helper'
-import { UserOpsCtx } from '@shared/types'
-import {
-  EMAIL_TYPES,
-  EmailSendInput,
-  EmailTemplate,
-  NOTIFICATION_TYPES_BASE,
-} from '@shared/domain/email/email.config'
-import {
-  licenseRevokedTemplate,
-  LicenseRevokedTemplateInput,
-} from '@shared/domain/email/templates/mjml/license-revoked.template'
+import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
+import { licenseRevokedTemplate } from '@shared/domain/email/templates/mjml/license-revoked.template'
 import { User } from '@shared/domain/user/user.entity'
-import { AcceptedLicense } from '@shared/domain/accepted-license/accepted-license.entity'
 import { config } from '@shared/config'
+import { EmailHandler } from '@shared/domain/email/templates/handlers/email.handler'
+import { Injectable } from '@nestjs/common'
+import { EmailClient } from '@shared/services/email-client'
+import { IdWithReceiversInputDTO } from '@shared/domain/email/dto/id-with-receivers-input.dto'
+import { AcceptedLicenseRepository } from '@shared/domain/accepted-license/accepted-license.repository'
+import { UserRepository } from '@shared/domain/user/user.repository'
+import {
+  EmailTypeToContextMap,
+  LicenseRevokedContext,
+} from '@shared/domain/email/dto/email-type-to-context.map'
+import { EmailTypeToTemplateInputMap } from '@shared/domain/email/dto/email-type-to-template-input.map'
 
-export class LicenseRevokedHandler
-  extends BaseTemplate<ObjectIdInputDTO, UserOpsCtx>
-  implements EmailTemplate<LicenseRevokedTemplateInput>
-{
-  templateFile = licenseRevokedTemplate
-  acceptedLicense: AcceptedLicense
+@Injectable()
+export class LicenseRevokedHandler extends EmailHandler<EMAIL_TYPES.licenseRevoked> {
+  protected emailType = EMAIL_TYPES.licenseRevoked as const
+  protected inputDto = IdWithReceiversInputDTO
+  protected getBody = licenseRevokedTemplate
 
-  async setupContext(): Promise<void> {
-    this.acceptedLicense = await this.ctx.em.findOneOrFail(
-      AcceptedLicense,
+  constructor(
+    protected readonly acceptedLicenseRepo: AcceptedLicenseRepository,
+    protected readonly userRepo: UserRepository,
+    protected readonly emailClient: EmailClient,
+  ) {
+    super(emailClient)
+  }
+
+  protected async getContextualData(
+    input: IdWithReceiversInputDTO,
+  ): Promise<EmailTypeToContextMap[EMAIL_TYPES.licenseRevoked]> {
+    const acceptedLicense = await this.acceptedLicenseRepo.findOneOrFail(
       {
-        id: this.validatedInput.id,
+        id: input.id,
       },
       { populate: ['license'] },
     )
+    const license = acceptedLicense.license.getEntity()
+    return {
+      input,
+      acceptedLicense,
+      license,
+    }
   }
 
-  async determineReceivers(): Promise<User[]> {
-    const receiver = await this.ctx.em.findOneOrFail(User, {
-      id: this.receiverUserIds[0],
+  protected async determineReceivers(context: LicenseRevokedContext): Promise<User[]> {
+    const receiver = await this.userRepo.findOneOrFail({
+      id: context.input.receiverUserIds[0],
     })
     return [receiver]
   }
 
-  getNotificationKey(): keyof typeof NOTIFICATION_TYPES_BASE {
-    return 'license_revoked'
+  protected getSubject(_receiver: User, context: LicenseRevokedContext): string {
+    return `Your license for ${context.license.title} has been revoked`
   }
 
-  async template(receiver: User): Promise<EmailSendInput> {
-    const license = this.acceptedLicense.license.getEntity()
-    const body = buildEmailTemplate<LicenseRevokedTemplateInput>(this.templateFile, {
+  protected getTemplateInput(
+    receiver: User,
+    context: LicenseRevokedContext,
+  ): EmailTypeToTemplateInputMap[EMAIL_TYPES.licenseRevoked] {
+    return {
       firstName: receiver.firstName,
       lastName: receiver.lastName,
-      licenseTitle: license.title,
-      licenseUrl: `${config.api.railsHost}/licenses/${this.acceptedLicense.license.id}`,
+      licenseTitle: context.license.title,
+      licenseUrl: `${config.api.railsHost}/licenses/${context.acceptedLicense.license.id}`,
       receiver,
-    })
-    return {
-      emailType: EMAIL_TYPES.licenseRevoked,
-      to: receiver.email,
-      body,
-      subject: `Your license for ${license.title} has been revoked`,
     }
   }
 }

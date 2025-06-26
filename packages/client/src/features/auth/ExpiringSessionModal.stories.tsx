@@ -1,4 +1,4 @@
-import { Meta } from '@storybook/react'
+import { Meta } from '@storybook/react-webpack5'
 import React, { useEffect } from 'react'
 import { ExpiringSessionModal } from './ExpiringSessionModal'
 import { useModal } from '../modal/useModal'

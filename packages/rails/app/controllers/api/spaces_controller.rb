@@ -215,7 +215,7 @@ module Api
     # Sends space activation email to leads.
     def send_emails(space)
       space.leads.find_each do |lead|
-        https_apps_client.email_send(NotificationPreference.email_types[:space_activated], [], { id: lead.id }) # id is membership id
+        https_apps_client.email_send(NotificationPreference.email_types[:space_activated], { id: lead.id }) # id is membership id
       end
     end
 

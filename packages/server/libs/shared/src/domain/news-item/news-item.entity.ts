@@ -11,9 +11,6 @@ class NewsItem extends BaseEntity {
   @Property()
   link?: string
 
-  @Property({ hidden: false })
-  createdAt = new Date()
-
   @Property({ type: 'text' })
   content?: string
 
