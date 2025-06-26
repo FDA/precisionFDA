@@ -17,9 +17,7 @@ import {
   SPACE_MEMBERSHIP_SIDE,
 } from '@shared/domain/space-membership/space-membership.enum'
 import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
-import {
-  NotificationPreference
-} from '@shared/domain/notification-preference/notification-preference.entity'
+import { NotificationPreference } from '@shared/domain/notification-preference/notification-preference.entity'
 import { Reference } from '@mikro-orm/core'
 
 describe('MemberChangedEmailHandler', () => {

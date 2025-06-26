@@ -46,7 +46,6 @@ import { NewDiscussionHandler } from '@shared/domain/email/templates/handlers/ne
 import { Discussion } from '@shared/domain/discussion/discussion.entity'
 import { EntityModule } from '@shared/domain/entity/entity.module'
 import { NewDiscussionReplyHandler } from '@shared/domain/email/templates/handlers/new-discussion-reply.handler'
-import { DiscussionModule } from '@shared/domain/discussion/discussion.module'
 
 @Module({
   imports: [
