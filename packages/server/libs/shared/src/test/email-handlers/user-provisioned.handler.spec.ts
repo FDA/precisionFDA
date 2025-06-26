@@ -1,59 +1,55 @@
-import { EMAIL_TYPES } from '@shared/domain/email/email.config'
-import { UserOpsCtx } from '@shared/types'
-import { Logger } from '@nestjs/common'
-import { stub } from 'sinon'
 import { expect } from 'chai'
-import { EntityManager } from '@mikro-orm/mysql'
-import { User } from '@shared/domain/user/user.entity'
 import { UserProvisionedHandler } from '@shared/domain/email/templates/handlers/user-provisioned.handler'
-import { UserProvisionedDto } from '@shared/domain/email/dto/user-provisioned.dto'
+import { UserProvisionedDTO } from '@shared/domain/email/dto/user-provisioned.dto'
+import { EmailClient } from '@shared/services/email-client'
+import { stub } from 'sinon'
+import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
 
 describe('UserProvisionedHandler', () => {
-  const entityManager = {} as unknown as EntityManager
+  const emailClientSendEmailStub = stub()
 
-  const userOpsCtx: UserOpsCtx = {
-    em: entityManager,
-    user: { id: 1, accessToken: 'test-token', dxuser: 'test-user' },
-    log: { log: stub(), error: stub() } as unknown as Logger,
+  const emailClient = {
+    sendEmail: emailClientSendEmailStub,
+  } as unknown as EmailClient
+
+  const getHandler = () => {
+    return new UserProvisionedHandler(emailClient)
   }
 
-  const receiverUserIds = [1]
-
-  beforeEach(() => {})
-
-  const getHandler = (dto: UserProvisionedDto) => {
-    return new UserProvisionedHandler(EMAIL_TYPES.userProvisioned, dto, userOpsCtx, receiverUserIds)
-  }
-
-  it('getNotificationKey', () => {
-    const dto: UserProvisionedDto = { firstName: 'aa', username: 'bb', email: 'email' }
-    const handler = getHandler(dto)
-    expect(handler.getNotificationKey()).to.eq('user_provisioned')
+  beforeEach(async () => {
+    emailClientSendEmailStub.reset()
+    emailClientSendEmailStub.throws()
   })
 
-  it('determineReceivers', async () => {
-    const dto: UserProvisionedDto = { firstName: 'aa', username: 'bb', email: 'email' }
-    const handler = getHandler(dto)
+  describe('#sendEmail', () => {
+    it('basic', async () => {
+      const input = new UserProvisionedDTO()
+      input.firstName = 'Pes'
+      input.username = 'pochcalström'
+      input.email = 'test@email.com'
 
-    const receivers = await handler.determineReceivers()
-    expect(receivers[0].email).to.eq(dto.email)
-  })
+      emailClientSendEmailStub.reset()
 
-  it('template', async () => {
-    const dto: UserProvisionedDto = {
-      firstName: 'firstName',
-      username: 'username',
-      email: 'email@email.com',
-    }
-    const handler = getHandler(dto)
+      const handler = getHandler()
+      await handler.sendEmail(input)
 
-    const result = await handler.template({ email: dto.email } as User)
-
-    expect(result.emailType).to.eq(EMAIL_TYPES.userProvisioned)
-    expect(result.to).to.eq(dto.email)
-    expect(result.body).to.contain(`Welcome to precisionFDA, ${dto.firstName}!`)
-    expect(result.body).to.contain(dto.email)
-    expect(result.body).to.contain(dto.username)
-    expect(result.subject).to.eq(`Welcome to precisionFDA, ${dto.firstName}!`)
+      expect(emailClientSendEmailStub.calledOnce).to.eq(true)
+      expect(emailClientSendEmailStub.firstCall.firstArg.emailType).to.eq(
+        EMAIL_TYPES.userProvisioned,
+      )
+      expect(emailClientSendEmailStub.firstCall.firstArg.subject).to.eq(
+        `Welcome to precisionFDA, ${input.firstName}!`,
+      )
+      expect(emailClientSendEmailStub.firstCall.firstArg.to).to.eq(input.email)
+      expect(emailClientSendEmailStub.firstCall.firstArg.body).to.contain(
+        `Welcome to precisionFDA, ${input.firstName}!`,
+      )
+      expect(emailClientSendEmailStub.firstCall.firstArg.body).to.contain(
+        `Your username for precisionFDA: <strong>${input.username}</strong></div>`,
+      )
+      expect(emailClientSendEmailStub.firstCall.firstArg.body).to.contain(
+        `Your email address used for this account: <strong><a href="mailto:${input.email}"`,
+      )
+    })
   })
 })

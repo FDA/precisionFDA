@@ -1,102 +1,84 @@
-import { EMAIL_TYPES } from '@shared/domain/email/email.config'
-import { UserOpsCtx } from '@shared/types'
-import { Logger } from '@nestjs/common'
 import { stub } from 'sinon'
 import { expect } from 'chai'
-import { EntityManager } from '@mikro-orm/mysql'
 import { User } from '@shared/domain/user/user.entity'
 import { ExpertQuestionAddedHandler } from '@shared/domain/email/templates/handlers/expert-question-added.handler'
 import { ExpertQuestion } from '@shared/domain/expert-question/expert-question.entity'
+import { ExpertQuestionRepository } from '@shared/domain/expert-question/expert-question.repository'
+import { EmailClient } from '@shared/services/email-client'
+import { Organization } from '@shared/domain/org/org.entity'
+import { Reference } from '@mikro-orm/core'
+import { Expert } from '@shared/domain/expert/expert.entity'
+import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
+import { ObjectIdInputDTO } from '@shared/domain/email/dto/object-id.dto'
 
 describe('ExpertQuestionAddedHandler', () => {
-  let receiverUserIds: number[] = [1]
-  const emFindOneOrFailStub = stub()
+  const EXPERT_QUESTION_ID = 10
 
-  const entityManager = {
-    findOneOrFail: emFindOneOrFailStub,
-  } as unknown as EntityManager
-  const log = {
-    log: stub(),
-    error: stub(),
-  } as unknown as Logger
+  const emailClientSendEmailStub = stub()
+  const expertQuestionRepoFindOneOrFailStub = stub()
 
-  const userOpsCtx: UserOpsCtx = {
-    em: entityManager,
-    user: {
-      id: 1,
-      accessToken: 'accessToken',
-      dxuser: 'dxuser',
-    },
-    log,
+  const expertQuestionRepo = {
+    findOneOrFail: expertQuestionRepoFindOneOrFailStub,
+  } as unknown as ExpertQuestionRepository
+  const emailClient = {
+    sendEmail: emailClientSendEmailStub,
+  } as unknown as EmailClient
+
+  const getHandler = (): ExpertQuestionAddedHandler => {
+    return new ExpertQuestionAddedHandler(expertQuestionRepo, emailClient)
   }
 
-  const user = {
-    email: 'email',
-    firstName: 'firstName',
-    lastName: 'lastName',
-    getEntity: () => user,
-  } as unknown as User
+  beforeEach(async () => {
+    emailClientSendEmailStub.reset()
+    emailClientSendEmailStub.throws()
 
-  beforeEach(() => {
-    emFindOneOrFailStub.reset()
-    emFindOneOrFailStub.throws()
+    expertQuestionRepoFindOneOrFailStub.reset()
+    expertQuestionRepoFindOneOrFailStub.throws()
   })
 
-  const getExpertQuestionAddedHandler = (id: number) => {
-    return new ExpertQuestionAddedHandler(
-      EMAIL_TYPES.expertQuestionAdded,
-      { id },
-      userOpsCtx,
-      receiverUserIds,
-    )
-  }
+  describe('#sendEmail', () => {
+    it('basic', async () => {
+      const organization = new Organization()
+      const expertUser = new User(organization)
+      expertUser.firstName = 'Battery'
+      expertUser.lastName = 'Voltas'
+      expertUser.email = 'test@email.com'
+      const authorUser = new User(organization)
+      authorUser.firstName = 'Čumi'
+      authorUser.lastName = 'Sfusaku'
+      authorUser.email = 'cumi.sfusaku@email.com'
+      const expert = new Expert(expertUser)
+      const expertQuestion = new ExpertQuestion()
+      expertQuestion.id = EXPERT_QUESTION_ID
+      expertQuestion.body = 'body'
+      expertQuestion.expert = Reference.create(expert)
+      expertQuestion.user = Reference.create(authorUser)
 
-  const getExpertQuestion = () => {
-    const expert = {
-      user: {
-        getEntity: () => user,
-      },
-    }
-    return {
-      id: 1,
-      expert,
-      body: 'expert-question-body',
-    }
-  }
+      expertQuestionRepoFindOneOrFailStub
+        .withArgs({ id: EXPERT_QUESTION_ID }, { populate: ['expert.user', 'user'] })
+        .resolves(expertQuestion)
+      const input = new ObjectIdInputDTO()
+      input.id = EXPERT_QUESTION_ID
+      emailClientSendEmailStub.reset()
 
-  it('getNotificationKey', () => {
-    const expertQuestionAddedHandler = getExpertQuestionAddedHandler(1)
+      const handler = getHandler()
+      await handler.sendEmail(input)
 
-    expect(expertQuestionAddedHandler.getNotificationKey()).to.eq('expert_question_added')
-  })
-
-  it('determineReceivers', async () => {
-    const expertQuestionAddedHandler = getExpertQuestionAddedHandler(1)
-
-    emFindOneOrFailStub
-      .withArgs(ExpertQuestion, { id: 1 }, { populate: ['expert.user'] })
-      .resolves(getExpertQuestion())
-
-    await expertQuestionAddedHandler.setupContext()
-    const receivers = await expertQuestionAddedHandler.determineReceivers()
-    expect(receivers).to.deep.eq([user])
-  })
-
-  it('template', async () => {
-    const expertQuestionAddedHandler = getExpertQuestionAddedHandler(1)
-
-    emFindOneOrFailStub
-      .withArgs(ExpertQuestion, { id: 1 }, { populate: ['expert.user'] })
-      .resolves(getExpertQuestion())
-
-    await expertQuestionAddedHandler.setupContext()
-    const result = await expertQuestionAddedHandler.template(user)
-
-    expect(result.emailType).to.eq(EMAIL_TYPES.expertQuestionAdded)
-    expect(result.to).to.eq(user.email)
-    expect(result.subject).to.eq('A new question was submitted by firstName lastName')
-    expect(result.body).to.contain('expert-question-body')
-    expect(result.body).to.contain('Submitted by: firstName lastName')
-    expect(result.body).to.contain('A new question was asked in your Expert Q&A Session')
+      expect(emailClientSendEmailStub.calledOnce).to.be.true
+      expect(emailClientSendEmailStub.firstCall.firstArg.emailType).to.eq(
+        EMAIL_TYPES.expertQuestionAdded,
+      )
+      expect(emailClientSendEmailStub.firstCall.firstArg.to).to.eq(expertUser.email)
+      expect(emailClientSendEmailStub.firstCall.firstArg.subject).to.eq(
+        `A new question was submitted by ${authorUser.firstName} ${authorUser.lastName}`,
+      )
+      expect(emailClientSendEmailStub.firstCall.firstArg.body).to.contain(
+        'A new question was asked in your Expert Q&A Session',
+      )
+      expect(emailClientSendEmailStub.firstCall.firstArg.body).to.contain(
+        `Submitted by: ${authorUser.firstName} ${authorUser.lastName}`,
+      )
+      expect(emailClientSendEmailStub.firstCall.firstArg.body).to.contain(expertQuestion.body)
+    })
   })
 })

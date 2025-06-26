@@ -1,60 +1,63 @@
-import { BaseTemplate } from '@shared/domain/email/templates/base-template'
-import { buildEmailTemplate, ObjectIdInputDTO } from '@shared/domain/email/email.helper'
-import { UserOpsCtx } from '@shared/types'
-import {
-  EMAIL_TYPES,
-  EmailSendInput,
-  EmailTemplate,
-  NOTIFICATION_TYPES_BASE,
-} from '@shared/domain/email/email.config'
-import { Expert } from '@shared/domain/expert/expert.entity'
+import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
 import { User } from '@shared/domain/user/user.entity'
-import {
-  expertAddedTemplate,
-  ExpertAddedTemplateInput,
-} from '@shared/domain/email/templates/mjml/expert-added.template'
+import { expertAddedTemplate } from '@shared/domain/email/templates/mjml/expert-added.template'
 import { getUserTitle } from '@shared/domain/email/templates/mjml/common'
+import { Injectable } from '@nestjs/common'
+import { EmailHandler } from '@shared/domain/email/templates/handlers/email.handler'
+import { EmailClient } from '@shared/services/email-client'
+import { ExpertRepository } from '@shared/domain/expert/expert.repository'
+import {
+  EmailTypeToContextMap,
+  ExpertAddedContext,
+} from '@shared/domain/email/dto/email-type-to-context.map'
+import { ObjectIdInputDTO } from '@shared/domain/email/dto/object-id.dto'
+import { EmailTypeToTemplateInputMap } from '@shared/domain/email/dto/email-type-to-template-input.map'
 
-export class ExpertAddedHandler
-  extends BaseTemplate<ObjectIdInputDTO, UserOpsCtx>
-  implements EmailTemplate<ExpertAddedTemplateInput>
-{
-  expertId = this.validatedInput.id
-  expert: Expert
-  templateFile = expertAddedTemplate
+@Injectable()
+export class ExpertAddedHandler extends EmailHandler<EMAIL_TYPES.expertAdded> {
+  protected emailType = EMAIL_TYPES.expertAdded as const
+  protected inputDto = ObjectIdInputDTO
+  protected getBody = expertAddedTemplate
 
-  async setupContext(): Promise<void> {
-    this.expert = await this.ctx.em.findOneOrFail(
-      Expert,
+  constructor(
+    protected readonly expertRepo: ExpertRepository,
+    protected readonly emailClient: EmailClient,
+  ) {
+    super(emailClient)
+  }
+
+  protected async getContextualData(
+    input: ObjectIdInputDTO,
+  ): Promise<EmailTypeToContextMap[EMAIL_TYPES.expertAdded]> {
+    const expert = await this.expertRepo.findOneOrFail(
       {
-        id: this.expertId,
+        id: input.id,
       },
       { populate: ['user'] },
     )
+    return { expert, input }
   }
 
-  async determineReceivers(): Promise<User[]> {
-    return [this.expert.user.getEntity()]
+  protected async determineReceivers(context: ExpertAddedContext): Promise<User[]> {
+    return [context.expert.user.getEntity()]
   }
 
-  async template(receiver: User): Promise<EmailSendInput> {
-    const name = getUserTitle(this.expert.user.getEntity())
-    const body = buildEmailTemplate(this.templateFile, {
+  protected getSubject(_receiver: User, context: ExpertAddedContext): string {
+    const name = getUserTitle(context.expert.user.getEntity())
+    return `A new Expert Q&A Session was created for ${name}`
+  }
+
+  protected getTemplateInput(
+    receiver: User,
+    context: ExpertAddedContext,
+  ): EmailTypeToTemplateInputMap[EMAIL_TYPES.expertAdded] {
+    const name = getUserTitle(context.expert.user.getEntity())
+    return {
       content: {
         expertName: name,
-        expertId: this.expert.id,
+        expertId: context.expert.id,
       },
       receiver,
-    })
-    return {
-      emailType: EMAIL_TYPES.expertAdded,
-      to: receiver.email,
-      body: body,
-      subject: `A new Expert Q&A Session was created for ${name}`,
     }
-  }
-
-  getNotificationKey(): keyof typeof NOTIFICATION_TYPES_BASE {
-    return 'expert_added'
   }
 }

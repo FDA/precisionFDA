@@ -1,78 +1,69 @@
 import { AlertMessageHandler } from '@shared/domain/email/templates/handlers/alert-message.handler'
-import { EMAIL_TYPES } from '@shared/domain/email/email.config'
-import { UserOpsCtx } from '@shared/types'
-import { Logger } from '@nestjs/common'
+import { AlertMessageInputDTO } from '@shared/domain/email/dto/alert-message-input.dto'
 import { stub } from 'sinon'
 import { expect } from 'chai'
-import { EntityManager } from '@mikro-orm/mysql'
+import { EmailClient } from '@shared/services/email-client'
+import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
 import { User } from '@shared/domain/user/user.entity'
+import { UserRepository } from '@shared/domain/user/user.repository'
 
 describe('AlertMessageHandler', () => {
-  let receiverUserIds: number[] = [1]
-  const emFindStub = stub()
+  const userRepoFindStub = stub()
+  const emailClientSendEmailStub = stub()
 
-  const entityManager = {
-    find: emFindStub,
-  } as unknown as EntityManager
-  const log = {
-    log: stub(),
-    error: stub(),
-  } as unknown as Logger
+  const userRepo = {
+    find: userRepoFindStub,
+  } as unknown as UserRepository
 
-  const userOpsCtx: UserOpsCtx = {
-    em: entityManager,
-    user: {
-      id: 1,
-      accessToken: 'accessToken',
-      dxuser: 'dxuser',
-    },
-    log,
-  }
+  const emailClient = {
+    sendEmail: emailClientSendEmailStub,
+  } as unknown as EmailClient
 
   beforeEach(() => {
-    emFindStub.reset()
-    emFindStub.throws()
+    userRepoFindStub.reset()
+    userRepoFindStub.throws()
+
+    emailClientSendEmailStub.reset()
+    emailClientSendEmailStub.throws()
   })
 
-  const getAlertMessageHandler = (subject?: string, message?: string) => {
-    return new AlertMessageHandler(
-      EMAIL_TYPES.alertMessage,
-      { subject, message },
-      userOpsCtx,
-      receiverUserIds,
-    )
+  const getAlertMessageHandler = () => {
+    return new AlertMessageHandler(emailClient, userRepo)
   }
 
-  it('getNotificationKey', () => {
-    const alertMessageHandler = getAlertMessageHandler('subject', 'message')
+  describe('#sendEmail', () => {
+    it('basic', async () => {
+      emailClientSendEmailStub.reset()
+      const receiverUserIds = [7, 8]
+      const receivers = [
+        { email: 'email7@email.com' } as User,
+        { email: 'email8@email.com' } as User,
+      ]
+      userRepoFindStub.withArgs({ id: { $in: receiverUserIds } }).resolves(receivers)
+      const inputDto = new AlertMessageInputDTO()
+      inputDto.subject = 'test-subject'
+      inputDto.message = 'test-message'
+      inputDto.receiverUserIds = receiverUserIds
 
-    expect(alertMessageHandler.getNotificationKey()).to.eq('alert_message')
-  })
+      const alertMessageHandler = getAlertMessageHandler()
+      await alertMessageHandler.sendEmail(inputDto)
 
-  it('determineReceivers', async () => {
-    const alertMessageHandler = getAlertMessageHandler('subject', 'message')
+      expect(userRepoFindStub.calledOnce).to.be.true
+      expect(userRepoFindStub.firstCall.args).to.deep.equal([{ id: { $in: receiverUserIds } }])
 
-    const user = {
-      email: 'email',
-    } as unknown as User
-    emFindStub.withArgs(User, { id: { $in: receiverUserIds } }).resolves([user])
-
-    const receivers = await alertMessageHandler.determineReceivers()
-    expect(receivers).to.deep.eq([user])
-  })
-
-  it('template', async () => {
-    const alertMessageHandler = getAlertMessageHandler('subject', 'message')
-
-    const receiver = {
-      email: 'email',
-    } as unknown as User
-
-    const result = await alertMessageHandler.template(receiver)
-
-    expect(result.emailType).to.eq(EMAIL_TYPES.alertMessage)
-    expect(result.to).to.eq(receiver.email)
-    expect(result.body).to.contain('message')
-    expect(result.subject).to.eq('subject')
+      expect(emailClientSendEmailStub.calledTwice).to.be.true
+      expect(emailClientSendEmailStub.firstCall.args[0].emailType).to.equal(
+        EMAIL_TYPES.alertMessage,
+      )
+      expect(emailClientSendEmailStub.firstCall.args[0].subject).to.deep.equal('test-subject')
+      expect(emailClientSendEmailStub.firstCall.args[0].to).to.deep.equal(receivers[0].email)
+      expect(emailClientSendEmailStub.firstCall.args[0].body).to.contain('test-message')
+      expect(emailClientSendEmailStub.secondCall.args[0].emailType).to.equal(
+        EMAIL_TYPES.alertMessage,
+      )
+      expect(emailClientSendEmailStub.secondCall.args[0].subject).to.deep.equal('test-subject')
+      expect(emailClientSendEmailStub.secondCall.args[0].to).to.deep.equal(receivers[1].email)
+      expect(emailClientSendEmailStub.secondCall.args[0].body).to.contain('test-message')
+    })
   })
 })

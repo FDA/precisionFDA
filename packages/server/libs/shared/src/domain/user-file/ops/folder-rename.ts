@@ -4,7 +4,7 @@ import { PlatformClient } from '@shared/platform-client'
 import { BaseOperation } from '@shared/utils/base-operation'
 import { RenameFolderInput } from '../user-file.input'
 import { getFolderPath } from '../user-file.helper'
-import { UserOpsCtx } from '../../../types'
+import { UserOpsCtx } from '@shared/types'
 
 export class FolderRenameOperation extends BaseOperation<UserOpsCtx, RenameFolderInput, Folder> {
   async run(input: RenameFolderInput): Promise<Folder> {

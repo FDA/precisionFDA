@@ -81,7 +81,7 @@ module OrgService
         username: params[:username],
         email: params[:email],
       }
-      https_apps_client.email_send(NotificationPreference.email_types[:user_provisioned], [], request)
+      https_apps_client.email_send(NotificationPreference.email_types[:user_provisioned], request)
     end
     # rubocop:enable Metrics/MethodLength
   end

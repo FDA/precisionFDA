@@ -28,7 +28,7 @@ describe('/experts', () => {
     const expertUser5 = create.userHelper.create(em)
     const expertUser6 = create.userHelper.create(em)
     create.sessionHelper.create(em, { user })
-    // Createa a series of experts
+    // Create a series of experts
 
     // 2023
     const date2023 = new Date(2023, 1)

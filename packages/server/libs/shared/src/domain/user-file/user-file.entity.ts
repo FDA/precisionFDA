@@ -10,20 +10,19 @@ import {
 } from '@mikro-orm/core'
 import { DxId } from '@shared/domain/entity/domain/dxid'
 import { Resource } from '@shared/domain/resource/resource.entity'
-import { Tagging } from '@shared/domain/tagging/tagging.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { STATIC_SCOPE } from '@shared/enums'
 import { ChallengeResource } from '../challenge/challenge-resource.entity'
 import { Node } from './node.entity'
 import { UserFileRepository } from './user-file.repository'
 import {
-  FILE_STATE,
   FILE_STATE_DX,
   FILE_STATE_PFDA,
   FILE_STI_TYPE,
   IFileOrAsset,
   ITrackable,
 } from './user-file.types'
+import { Tagging } from '@shared/domain/tagging/tagging.entity'
 
 @Entity({
   tableName: 'nodes',
@@ -56,33 +55,16 @@ class UserFile extends Node implements IFileOrAsset, ITrackable {
   @Property()
   dxid: DxId<'file'>
 
-  @Property()
-  project: string
-
-  @Property()
-  description?: string
-
-  @Property()
-  state: FILE_STATE
-
-  @Property({ type: 'numeric' })
-  fileSize?: number
-
-  @Property()
-  parentFolderId?: number
-
-  @Property()
-  scopedParentFolderId?: number
-
-  // todo: micro-orm can do single table inheritance
-  @OneToMany(() => Tagging, (tagging) => tagging.userFile, { orphanRemoval: true })
-  taggings = new Collection<Tagging>(this)
-
   @OneToMany({ entity: () => ChallengeResource, mappedBy: 'userFile', orphanRemoval: true })
   challengeResources = new Collection<ChallengeResource>(this)
 
   @OneToOne(() => Resource, (resource) => resource.userFile, { orphanRemoval: true })
-  resource!: Resource;
+  resource!: Resource
+
+  @OneToMany(() => Tagging, (tagging) => tagging.userFile, {
+    orphanRemoval: true,
+  })
+  taggings = new Collection<Tagging>(this);
 
   [EntityRepositoryType]?: UserFileRepository
   constructor(user: User) {
@@ -91,7 +73,7 @@ class UserFile extends Node implements IFileOrAsset, ITrackable {
   }
 
   @Property({ persist: false })
-  get links() {
+  get links(): { download: string } {
     return {
       download: `/api/files/${this.uid}/download`,
     }

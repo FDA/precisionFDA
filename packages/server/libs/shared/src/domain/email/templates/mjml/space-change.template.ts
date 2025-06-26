@@ -6,10 +6,10 @@ export type SpaceChangeTemplateInput = EmailTemplateInput & {
     initiator: { fullName: string }
     action: string
     space: { name: string; id: number }
-    receiversSides: object,
+    receiversSides: object
     spaceMembership: { side?: number }
-    spaceMembershipSide: string,
-    receiverMembershipSide: string,
+    spaceMembershipSide: string
+    receiverMembershipSide: string
   }
 }
 
@@ -32,10 +32,12 @@ export const spaceChangedTemplate = (data: SpaceChangeTemplateInput): string => 
         </mj-text>
         ${
           // @ts-ignore
-          (((data.content.receiversSides[data.receiver.id] === 'GUEST') &&
-            (data.content.action === 'locked')) ||
-            (data.content.action === 'deleted'))
-            ? getMiddleSpacer() : getViewSpaceButton(data.content.space.id)}
+          (data.content.receiversSides[data.receiver.id] === 'GUEST' &&
+            data.content.action === 'locked') ||
+          data.content.action === 'deleted'
+            ? getMiddleSpacer()
+            : getViewSpaceButton(data.content.space.id)
+        }
         ${getBottomSpacer()}
       </mj-column>
     </mj-section>

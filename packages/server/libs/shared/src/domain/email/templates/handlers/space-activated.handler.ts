@@ -1,59 +1,62 @@
-import { buildEmailTemplate, ObjectIdInputDTO } from '@shared/domain/email/email.helper'
-import { BaseTemplate } from '@shared/domain/email/templates/base-template'
-import {
-  EMAIL_TYPES,
-  EmailSendInput,
-  EmailTemplate,
-  NOTIFICATION_TYPES_BASE,
-} from '@shared/domain/email/email.config'
-import { UserOpsCtx } from '@shared/types'
-import {
-  spaceActivatedTemplate,
-  SpaceActivatedTemplateInput,
-} from '@shared/domain/email/templates/mjml/space-activated.template'
-import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
+import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
+import { spaceActivatedTemplate } from '@shared/domain/email/templates/mjml/space-activated.template'
 import { User } from '@shared/domain/user/user.entity'
 import { config } from '@shared/config'
+import { Injectable } from '@nestjs/common'
+import { EmailHandler } from '@shared/domain/email/templates/handlers/email.handler'
+import { EmailClient } from '@shared/services/email-client'
+import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
+import {
+  EmailTypeToContextMap,
+  SpaceActivatedContext,
+} from '@shared/domain/email/dto/email-type-to-context.map'
+import { ObjectIdInputDTO } from '@shared/domain/email/dto/object-id.dto'
+import { EmailTypeToTemplateInputMap } from '@shared/domain/email/dto/email-type-to-template-input.map'
 
-export class SpaceActivatedHandler
-  extends BaseTemplate<ObjectIdInputDTO, UserOpsCtx>
-  implements EmailTemplate<SpaceActivatedTemplateInput>
-{
-  templateFile = spaceActivatedTemplate
-  spaceMembership: SpaceMembership
+@Injectable()
+export class SpaceActivatedHandler extends EmailHandler<EMAIL_TYPES.spaceActivated> {
+  protected emailType = EMAIL_TYPES.spaceActivated as const
+  protected inputDto = ObjectIdInputDTO
+  protected getBody = spaceActivatedTemplate
 
-  getNotificationKey(): keyof typeof NOTIFICATION_TYPES_BASE {
-    return 'space_activated'
+  constructor(
+    protected readonly spaceMembershipRepo: SpaceMembershipRepository,
+    protected readonly emailClient: EmailClient,
+  ) {
+    super(emailClient)
   }
 
-  async setupContext(): Promise<void> {
-    this.spaceMembership = await this.ctx.em.findOneOrFail(
-      SpaceMembership,
+  protected async getContextualData(
+    input: ObjectIdInputDTO,
+  ): Promise<EmailTypeToContextMap[EMAIL_TYPES.spaceActivated]> {
+    const spaceMembership = await this.spaceMembershipRepo.findOneOrFail(
       {
-        id: this.validatedInput.id,
+        id: input.id,
       },
       { populate: ['user', 'spaces'] },
     )
+    return { input, spaceMembership }
   }
 
-  async determineReceivers(): Promise<User[]> {
-    return [this.spaceMembership.user.getEntity()]
+  protected async determineReceivers(context: SpaceActivatedContext): Promise<User[]> {
+    return [context.spaceMembership.user.getEntity()]
   }
 
-  async template(receiver: User): Promise<EmailSendInput> {
-    const space = this.spaceMembership.spaces[0]
-    const body = buildEmailTemplate<SpaceActivatedTemplateInput>(this.templateFile, {
+  protected getSubject(): string {
+    return 'Space Activated'
+  }
+
+  protected getTemplateInput(
+    receiver: User,
+    context: SpaceActivatedContext,
+  ): EmailTypeToTemplateInputMap[EMAIL_TYPES.spaceActivated] {
+    const space = context.spaceMembership.spaces[0]
+    return {
       firstName: receiver.firstName,
       lastName: receiver.lastName,
       spaceTitle: space.name,
       spaceUrl: `${config.api.railsHost}/spaces/${space.id}`,
       receiver,
-    })
-    return {
-      emailType: EMAIL_TYPES.spaceActivated,
-      to: receiver.email,
-      body,
-      subject: 'Space Activated',
     }
   }
 }

@@ -18,10 +18,10 @@ import {
   SPACE_MEMBERSHIP_SIDE,
 } from '@shared/domain/space-membership/space-membership.enum'
 import { SpaceEvent } from '@shared/domain/space-event/space-event.entity'
-import { EMAIL_TYPES } from '@shared/domain/email/email.config'
 import { Ref } from '@mikro-orm/core'
-import { EmailFacade } from '@shared/domain/email/email.facade'
+import { EmailService } from '@shared/domain/email/email.service'
 import { getEnumKeyByValue } from '@shared/utils/enum-utils'
+import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
 import { SpaceEventDTO } from '@shared/domain/space-event/dto/space-event.dto'
 
 describe('SpaceEvent service tests', () => {
@@ -55,9 +55,9 @@ describe('SpaceEvent service tests', () => {
     getMembership: spaceMembershipRepoGetMembershipStub,
   } as unknown as SpaceMembershipRepository
 
-  const emailFacade = {
+  const emailService = {
     sendEmail: sendEmailStub,
-  } as unknown as EmailFacade
+  } as unknown as EmailService
 
   const em = {
     persistAndFlush: emPersistAndFlushStub,
@@ -141,9 +141,9 @@ describe('SpaceEvent service tests', () => {
       await getInstance().sendNotificationForEvent(spaceEvent)
 
       expect(sendEmailStub.calledOnce).to.be.true
-      expect(sendEmailStub.firstCall.args[0].emailTypeId).to.eq(EMAIL_TYPES.newContentAdded)
-      expect(sendEmailStub.firstCall.args[0].input.id).to.eq(10)
-      expect(sendEmailStub.firstCall.args[0].receiverUserIds).to.deep.eq([])
+      expect(sendEmailStub.firstCall.firstArg.type).to.eq(EMAIL_TYPES.newContentAdded)
+      expect(sendEmailStub.firstCall.firstArg.input.id).to.eq(10)
+      expect(sendEmailStub.firstCall.firstArg.receiverUserIds).to.deep.eq([])
     })
 
     it('should send notification for event - comment types', async () => {
@@ -162,9 +162,9 @@ describe('SpaceEvent service tests', () => {
       await getInstance().sendNotificationForEvent(spaceEvent)
 
       expect(sendEmailStub.calledOnce).to.be.true
-      expect(sendEmailStub.firstCall.args[0].emailTypeId).to.eq(EMAIL_TYPES.commentAdded)
-      expect(sendEmailStub.firstCall.args[0].input.id).to.eq(10)
-      expect(sendEmailStub.firstCall.args[0].receiverUserIds).to.deep.eq([])
+      expect(sendEmailStub.firstCall.firstArg.type).to.eq(EMAIL_TYPES.commentAdded)
+      expect(sendEmailStub.firstCall.firstArg.input.id).to.eq(10)
+      expect(sendEmailStub.firstCall.firstArg.receiverUserIds).to.deep.eq([])
     })
 
     it('should send notification for event - space types', async () => {
@@ -194,10 +194,10 @@ describe('SpaceEvent service tests', () => {
       await getInstance().sendNotificationForEvent(spaceEvent)
 
       expect(sendEmailStub.calledOnce).to.be.true
-      expect(sendEmailStub.firstCall.args[0].emailTypeId).to.eq(EMAIL_TYPES.spaceChanged)
-      expect(sendEmailStub.firstCall.args[0].input.initUserId).to.eq(11)
-      expect(sendEmailStub.firstCall.args[0].input.spaceId).to.eq(12)
-      expect(sendEmailStub.firstCall.args[0].receiverUserIds).to.deep.eq([])
+      expect(sendEmailStub.firstCall.firstArg.type).to.eq(EMAIL_TYPES.spaceChanged)
+      expect(sendEmailStub.firstCall.firstArg.input.initUserId).to.eq(11)
+      expect(sendEmailStub.firstCall.firstArg.input.spaceId).to.eq(12)
+      expect(sendEmailStub.firstCall.firstArg.receiverUserIds).to.deep.eq([])
     })
 
     it('should send notification for event - membership types', async () => {
@@ -231,13 +231,11 @@ describe('SpaceEvent service tests', () => {
       await getInstance().sendNotificationForEvent(spaceEvent)
 
       expect(sendEmailStub.calledOnce).to.be.true
-      expect(sendEmailStub.firstCall.args[0].emailTypeId).to.eq(
-        EMAIL_TYPES.memberChangedAddedRemoved,
-      )
-      expect(sendEmailStub.firstCall.args[0].input.initUserId).to.eq(11)
-      expect(sendEmailStub.firstCall.args[0].input.spaceId).to.eq(12)
-      expect(sendEmailStub.firstCall.args[0].input.updatedMembershipId).to.eq(13)
-      expect(sendEmailStub.firstCall.args[0].input.newMembershipRole).to.eq(
+      expect(sendEmailStub.firstCall.firstArg.type).to.eq(EMAIL_TYPES.memberChangedAddedRemoved)
+      expect(sendEmailStub.firstCall.firstArg.input.initUserId).to.eq(11)
+      expect(sendEmailStub.firstCall.firstArg.input.spaceId).to.eq(12)
+      expect(sendEmailStub.firstCall.firstArg.input.updatedMembershipId).to.eq(13)
+      expect(sendEmailStub.firstCall.firstArg.input.newMembershipRole).to.eq(
         getEnumKeyByValue(SPACE_MEMBERSHIP_ROLE, SPACE_MEMBERSHIP_ROLE.LEAD),
       )
       expect(sendEmailStub.firstCall.args[0].receiverUserIds).to.deep.eq([])
@@ -251,7 +249,7 @@ describe('SpaceEvent service tests', () => {
       spaceRepo,
       userRepo,
       spaceMembershipRepo,
-      emailFacade,
+      emailService,
     )
   }
 })

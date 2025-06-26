@@ -55,10 +55,9 @@ describe('PATCH /folders/:id/rename', () => {
       .expect(200)
     expect(body).to.be.deep.include({
       id: folder.id,
-      dxid: null,
       project: folder.project,
       name: 'b',
-      user: user.id,
+      userId: user.id,
       stiType: FILE_STI_TYPE.FOLDER,
       taggings: [],
       scope: 'private',

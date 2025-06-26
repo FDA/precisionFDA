@@ -3,7 +3,7 @@ module SpaceEventService
     class << self
       def send(event, nodejs_api_client)
         email_type_id = NotificationPreference.email_types[:notification_comment]
-        nodejs_api_client.email_send(email_type_id, [], { id: event.id })
+        nodejs_api_client.email_send(email_type_id, { id: event.id })
       end
     end
   end

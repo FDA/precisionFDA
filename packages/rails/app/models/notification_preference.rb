@@ -70,7 +70,6 @@ class NotificationPreference < ApplicationRecord
     expert_question_added: 18,
     expert_added: 19,
     challenge_proposal_received: 20,
-    guest_access_email: 21,
     license_request_email: 22,
     license_approved: 23,
     license_revoked: 24,

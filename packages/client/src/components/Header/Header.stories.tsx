@@ -1,5 +1,5 @@
 import React from 'react'
-import { Meta, StoryObj } from '@storybook/react'
+import { Meta, StoryObj } from '@storybook/react-webpack5'
 import Header from './HeaderNext'
 import { StorybookProviders } from '../../stories/StorybookProviders'
 

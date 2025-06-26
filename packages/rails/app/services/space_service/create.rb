@@ -68,7 +68,7 @@ module SpaceService
         Rails.logger.info("Adding site admin #{user.dxuser} to space #{space.id}" \
                           " with admin membership #{admin_membership.id}")
         new_membership = SpaceMembershipService::CreateOrUpdate.call(api, space, site_admin, SpaceMembership::ROLE_ADMIN, admin_membership, false)
-        https_apps_client.email_send(NotificationPreference.email_types[:space_activated], [], { id: new_membership.id }) # id is membership id
+        https_apps_client.email_send(NotificationPreference.email_types[:space_activated], { id: new_membership.id }) # id is membership id
         # rubocop:enable Layout/LineLength
       end
     end
@@ -194,7 +194,7 @@ module SpaceService
     # @param [Space]
     def send_emails(space)
       space.leads.find_each do |lead|
-        https_apps_client.email_send(NotificationPreference.email_types[:space_activation], [], { id: lead.id }) # id is membership id
+        https_apps_client.email_send(NotificationPreference.email_types[:space_activation], { id: lead.id }) # id is membership id
       end
     end
 

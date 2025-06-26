@@ -38,7 +38,13 @@ describe('PATCH /jobs/:id/terminate', () => {
       .set(getDefaultHeaderData(user))
       .send({})
       .expect(200)
-    expect(body).to.be.deep.equal({
+
+    const { createdAt, updatedAt, ...rest } = body
+
+    expect(createdAt).not.to.be.null()
+    expect(updatedAt).not.to.be.null()
+
+    expect(rest).to.deep.equal({
       id: job.id,
       dxid: job.dxid,
       uid: job.uid,
@@ -46,6 +52,7 @@ describe('PATCH /jobs/:id/terminate', () => {
       state: JOB_STATE.TERMINATING,
       name: job.name,
       scope: job.scope,
+      provenance: null,
       entityType: ENTITY_TYPE.HTTPS,
       runData: {
         run_inputs: {},
