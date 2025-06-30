@@ -4,6 +4,7 @@ import { WithListData } from '../../stories/helpers'
 import { StorybookProviders } from '../../stories/StorybookProviders'
 import { fetchApps } from './apps.api'
 import { useExportToModal } from './useExportToModal'
+import { IApp } from './apps.types'
 
 const meta: Meta = {
   title: 'Modals/Common',
@@ -15,13 +16,14 @@ const meta: Meta = {
     ),
   ],
 }
+
 type Props = {
-  data: { id: string }[]
+  data: IApp
 }
 type Story = StoryObj<Props>
 
 const ExportToModalWrapper = (props: Props) => {
-  const { modalComp, setShowModal } = useExportToModal({ selected: props.data })
+  const { modalComp, setShowModal } = useExportToModal({ selected: props.data, resource: 'apps' })
 
   useEffect(() => {
     setShowModal(true)
@@ -32,7 +34,7 @@ const ExportToModalWrapper = (props: Props) => {
 export const ExportToModal: Story = {
   render: () => (
     <WithListData resource="apps" fetchList={fetchApps}>
-      {({ data }) => <ExportToModalWrapper data={data.apps[0]} />}
+      {({ data }) => data?.apps?.[0] ? <ExportToModalWrapper data={data.apps[0]} /> : null}
     </WithListData>
   ),
 }

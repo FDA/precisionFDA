@@ -1,46 +1,53 @@
 import { Meta, StoryObj } from '@storybook/react-webpack5'
 import React, { useEffect } from 'react'
-import { WithListData } from '../../stories/helpers'
 import { StorybookProviders } from '../../stories/StorybookProviders'
-import { fetchApps } from '../apps/apps.api'
-import { fetchFiles } from '../files/files.api'
+import { copyAppsRequest } from '../apps/apps.api'
+import { copyFilesRequest } from '../files/files.api'
 import { APIResource } from '../home/types'
+import { mockCopyToSpaceFiles } from '../../mocks/handlers/files.handlers'
+import { mockCopyToSpaceApps } from '../../mocks/handlers/apps.handlers'
 import { useCopyToSpaceModal } from './useCopyToSpace'
 
 const meta: Meta = {
   title: 'Modals/Common',
+  decorators: [
+    Story => (
+      <StorybookProviders>
+        <Story />
+      </StorybookProviders>
+    ),
+  ],
 }
+
 type Props = {
-  data: { id: string }[]
   type: APIResource
 }
 type Story = StoryObj<Props>
 
-const CopyToSpaceModalWrapper = (props: Props) => {
-  const { modalComp, setShowModal } = useCopyToSpaceModal({ selected: props.data, resource: props.type })
+const CopyToSpaceModalWrapper = ({ type }: Props) => {
+  const mockData = type === 'apps' ? mockCopyToSpaceApps : mockCopyToSpaceFiles
+  const updateFunction = type === 'apps' ? copyAppsRequest : 
+    (scope: string, ids: string[]) => copyFilesRequest(scope, ids.map(id => parseInt(id, 10)))
+
+  const { modalComp, setShowModal } = useCopyToSpaceModal({
+    selected: mockData,
+    resource: type,
+    updateFunction,
+    onSuccess: (res) => {
+      console.log('Copy successful:', res)
+    },
+  })
 
   useEffect(() => {
     setShowModal(true)
-  }, [])
+  }, [setShowModal])
+  
   return modalComp
 }
 
 export const CopyToSpaceModal: Story = {
   render: ({ type = 'files' }) => {
-    let fetchFunc: unknown
-    if (type === 'files') {
-      fetchFunc = fetchFiles
-    }
-    if (type === 'apps') {
-      fetchFunc = fetchApps
-    }
-    return (
-      <StorybookProviders>
-        <WithListData resource={type} fetchList={fetchFunc || fetchFiles}>
-          {({ data }) => <CopyToSpaceModalWrapper data={data[type]} type={type} />}
-        </WithListData>
-      </StorybookProviders>
-    )
+    return <CopyToSpaceModalWrapper type={type} />
   },
   argTypes: {
     type: {
