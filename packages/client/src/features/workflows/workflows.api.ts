@@ -4,11 +4,11 @@ import { IExecution } from '../executions/executions.types'
 import { License } from '../licenses/types'
 import { IFilter, IMeta } from '../home/types'
 import { formatScopeQ, Params, prepareListFetch } from '../home/utils'
-import { FetchWorkflowRequest, IWorkflow } from './workflows.types'
+import { FetchWorkflowRequest, IWorkflow, WorkflowMeta } from './workflows.types'
 
 export interface FetchWorkflowListQuery {
   workflows: IWorkflow[]
-  meta: IMeta
+  meta: WorkflowMeta
 }
 
 export interface RunWorkflowInput {

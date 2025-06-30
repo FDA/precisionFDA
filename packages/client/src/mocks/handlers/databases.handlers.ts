@@ -1,5 +1,30 @@
 import { http, HttpResponse } from 'msw'
 
+// Mock database data for testing
+export const mockDatabases = [
+  {
+    dxid: 'dbcluster-GPLpKVj0JqyQKvZGjyjjkF5U',
+    name: 'Test Available',
+    location: 'Private',
+    engine: 'aurora-mysql',
+    status: 'available',
+  },
+  {
+    dxid: 'dbcluster-GJVGV600JqyQ9pBj0698Fbbx',
+    name: 'Test Terminated',
+    location: 'Private',
+    engine: 'aurora-mysql',
+    status: 'terminated',
+  },
+  {
+    dxid: 'dbcluster-GPFpKVj0JqyQKvZGjyjjkF4F',
+    name: 'Test Creating',
+    location: 'Private',
+    engine: 'aurora-mysql',
+    status: 'creating',
+  },
+]
+
 export const dbclusterMocks = [
   http.post('/api/dbclusters', () =>
     HttpResponse.json(
@@ -44,6 +69,22 @@ export const dbclusterMocks = [
     ),
   ),
   http.post('/api/dbclusters/stop', () => HttpResponse.json(null, { status: 204 })),
+  http.post('/api/dbclusters/start', () =>
+    HttpResponse.json({
+      message: 'Databases start operation completed successfully',
+      meta: {
+        messages: [{ type: 'success', message: 'Database start completed' }],
+      },
+    }),
+  ),
+  http.post('/api/dbclusters/terminate', () =>
+    HttpResponse.json({
+      message: 'Databases terminate operation completed successfully',
+      meta: {
+        messages: [{ type: 'success', message: 'Database terminate completed' }],
+      },
+    }),
+  ),
   http.get('/api/dbclusters', () =>
     HttpResponse.json(
       {

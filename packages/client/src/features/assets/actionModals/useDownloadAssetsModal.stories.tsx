@@ -34,7 +34,7 @@ export const DownloadAssetsModal: Story = {
   render: () => {
     return (
       <WithListData resource="assets" fetchList={fetchAssets}>
-        {({ data }) => <DownloadAssetsModalWrapper data={data['assets']} />}
+        {({ data }) => data && <DownloadAssetsModalWrapper data={data?.assets} />}
       </WithListData>
     )
   },
