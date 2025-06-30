@@ -1,11 +1,9 @@
-import type { EntityManager } from '@mikro-orm/core'
 import { Reference } from '@mikro-orm/core'
 import { database } from '@shared/database'
 import { App } from '@shared/domain/app/app.entity'
 import { Job } from '@shared/domain/job/job.entity'
 import { JOB_STATE } from '@shared/domain/job/job.enum'
 import { Space } from '@shared/domain/space/space.entity'
-import { getScopeFromSpaceId } from '@shared/domain/space/space.helper'
 import { User } from '@shared/domain/user/user.entity'
 import { HOME_SCOPE } from '@shared/enums'
 import { ErrorCodes } from '@shared/errors'
@@ -15,12 +13,13 @@ import { expect } from 'chai'
 import supertest from 'supertest'
 import { testedApp } from '../../index'
 import { getDefaultHeaderData } from '../../utils/expect-helper'
-
+import { EntityScopeUtils } from '@shared/utils/entity-scope.utils'
+import { MySqlDriver, SqlEntityManager } from '@mikro-orm/mysql'
 
 // N.B. These tests are still work in progress as the API needs to be finalised
 //      and the tests themselves need work, thus skipping
 describe.skip('GET /jobs', () => {
-  let em: EntityManager
+  let em: SqlEntityManager<MySqlDriver>
   const jobs: Job[] = []
   let user1: User
   let user2: User
@@ -50,23 +49,24 @@ describe.skip('GET /jobs', () => {
 
     // Create two each of Everybody / Featured / Me scopes
     const getScope = (i: number) => {
-      if (i < 2)
-        return HOME_SCOPE.EVERYBODY
-      else if (i < 4)
-        return HOME_SCOPE.FEATURED
-      else
-        return HOME_SCOPE.ME
+      if (i < 2) return HOME_SCOPE.EVERYBODY
+      else if (i < 4) return HOME_SCOPE.FEATURED
+      else return HOME_SCOPE.ME
     }
 
-    Object.keys(jobsCount).forEach(key => {
+    Object.keys(jobsCount).forEach((key) => {
       const count = jobsCount[key]
       for (let i = 0; i < count; i++) {
         const user = i % 2 ? user1 : user2
-        const job = create.jobHelper.create(em, { user, app }, {
-          state: JOB_STATE.DONE,
-          scope: getScope(i),
-          user: Reference.create(user),
-        })
+        const job = create.jobHelper.create(
+          em,
+          { user, app },
+          {
+            state: JOB_STATE.DONE,
+            scope: getScope(i),
+            user: Reference.create(user),
+          },
+        )
         jobs.push(job)
       }
     })
@@ -74,11 +74,15 @@ describe.skip('GET /jobs', () => {
     // Also create a space and add some jobs to it, but only user1 for now
     const jobsInSpaceCount = 5
     for (let i = 0; i < jobsInSpaceCount; i++) {
-      const job = create.jobHelper.create(em, { user: user1, app }, {
-        state: JOB_STATE.RUNNING,
-        scope: getScopeFromSpaceId(space.id),
-        user: Reference.create(user1),
-      })
+      const job = create.jobHelper.create(
+        em,
+        { user: user1, app },
+        {
+          state: JOB_STATE.RUNNING,
+          scope: EntityScopeUtils.getScopeFromSpaceId(space.id),
+          user: Reference.create(user1),
+        },
+      )
       jobs.push(job)
     }
 
@@ -140,7 +144,8 @@ describe.skip('GET /jobs', () => {
 
   // TODO
   it.skip('returns jobs list for different scopes', async () => {
-    const { body } = await supertest(testedApp.getHttpServer()).get('/jobs')
+    const { body } = await supertest(testedApp.getHttpServer())
+      .get('/jobs')
       .set(getDefaultHeaderData(user1))
       .query({ scope: HOME_SCOPE.EVERYBODY })
       .expect(200)
@@ -151,7 +156,7 @@ describe.skip('GET /jobs', () => {
     const { body } = await supertest(testedApp.getHttpServer())
       .get('/jobs')
       .set(getDefaultHeaderData(user1))
-      .query({ scope: getScopeFromSpaceId(space.id) })
+      .query({ scope: EntityScopeUtils.getScopeFromSpaceId(space.id) })
       .expect(200)
   })
 

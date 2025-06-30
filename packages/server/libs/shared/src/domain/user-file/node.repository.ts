@@ -7,7 +7,12 @@ import { Uid } from '@shared/domain/entity/domain/uid'
 
 export class NodeRepository extends AccessControlRepository<Node> {
   protected async getAccessibleWhere(): Promise<FilterQuery<Node>> {
-    const user = await this.em.findOneOrFail(User, { id: this.user.id })
+    const user = await this.em.findOne(User, { id: this.user.id })
+
+    if (!user) {
+      return null
+    }
+
     const accessibleSpaces = await user.accessibleSpaces()
     const spaceScopes = accessibleSpaces.map((space) => space.scope)
 
@@ -22,7 +27,12 @@ export class NodeRepository extends AccessControlRepository<Node> {
   }
 
   protected async getEditableWhere(): Promise<FilterQuery<Node>> {
-    const user = await this.em.findOneOrFail(User, { id: this.user.id })
+    const user = await this.em.findOne(User, { id: this.user.id })
+
+    if (!user) {
+      return null
+    }
+
     const editableSpaces = await user.editableSpaces()
     const spaceScopes = editableSpaces.map((space) => space.scope)
 
@@ -47,6 +57,7 @@ export class NodeRepository extends AccessControlRepository<Node> {
    */
   async loadIfAccessibleByUser(user: User, uid: Uid<'file'>, spaceIds: number[]): Promise<Node> {
     const scopes = spaceIds.map((id) => `space-${id}`)
+
     return await this.findOne(
       {
         uid: uid,
