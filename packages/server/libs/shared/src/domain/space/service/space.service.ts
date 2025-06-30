@@ -348,7 +348,7 @@ export class SpaceService {
       },
     ]
 
-    const hiddenFilter = isSiteAdmin && isReviewSpaceAdmin ? {} : { hidden: false }
+    const hiddenFilter = isSiteAdmin || isReviewSpaceAdmin ? {} : { hidden: false }
 
     if (isSiteAdmin) {
       filters.push(this.siteAdminFilter())
