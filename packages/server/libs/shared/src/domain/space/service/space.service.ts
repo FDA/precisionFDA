@@ -27,6 +27,7 @@ import { Space } from '@shared/domain/space/space.entity'
 import { CreateSpaceDTO } from '@shared/domain/space/dto/create-space.dto'
 import { UpdateSpaceDTO } from '@shared/domain/space/dto/update-space.dto'
 import { User } from '@shared/domain/user/user.entity'
+import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
 import { SpacePaginationDTO } from '@shared/domain/space/dto/space-pagination-d-t.o'
 import { SpaceListItemDTO } from '@shared/domain/space/dto/space-list-item.dto'
 import { PaginatedResult } from '@shared/domain/entity/domain/paginated.result'
@@ -241,6 +242,26 @@ export class SpaceService {
 
   async getAccessibleSpace(spaceId: number): Promise<Space | null> {
     return this.spaceRepository.findAccessibleOne({ id: spaceId })
+  }
+
+  async getSpaceMembers(spaceId: number): Promise<SpaceMembership[]> {
+    const space = await this.spaceRepository.findAccessibleOne({
+      id: spaceId,
+    })
+
+    if (!space) {
+      throw new SpaceNotFoundError('Space does not exist or is not accessible')
+    }
+
+    return await this.spaceMembershipRepository.find(
+      { spaces: spaceId },
+      {
+        orderBy: {
+          side: 'ASC',
+          role: 'ASC',
+        },
+      },
+    )
   }
 
   // Any of the returned spaces cannot have state == DELETED

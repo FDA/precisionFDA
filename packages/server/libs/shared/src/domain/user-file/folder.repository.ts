@@ -1,8 +1,8 @@
+import { FilterQuery } from '@mikro-orm/mysql'
 import { STATIC_SCOPE } from '@shared/enums'
 import { SCOPE } from '@shared/types/common'
 import { Folder } from './folder.entity'
 import { AccessControlRepository } from '@shared/repository/access-control.repository'
-import { FilterQuery } from '@mikro-orm/mysql'
 import { User } from '@shared/domain/user/user.entity'
 
 type FindForUser = {
@@ -25,6 +25,42 @@ type FindByName = {
 }
 
 export class FolderRepository extends AccessControlRepository<Folder> {
+  protected async getAccessibleWhere(): Promise<FilterQuery<Folder>> {
+    const user = await this.em.findOne(User, { id: this.user.id })
+
+    if (!user) {
+      return null
+    }
+    const accessibleSpaces = await user.accessibleSpaces()
+    const scopes = accessibleSpaces.map((space) => space.scope)
+
+    return {
+      $or: [
+        { user: user.id, scope: STATIC_SCOPE.PRIVATE },
+        { scope: STATIC_SCOPE.PUBLIC },
+        { scope: { $in: scopes } },
+      ],
+    }
+  }
+
+  protected async getEditableWhere(): Promise<FilterQuery<Folder>> {
+    const user = await this.em.findOne(User, { id: this.user.id })
+
+    if (!user) {
+      return null
+    }
+    const editableSpaces = await user.editableSpaces()
+    const scopes = editableSpaces.map((space) => space.scope)
+
+    return {
+      $or: [
+        { user: user.id, scope: STATIC_SCOPE.PRIVATE },
+        { user: user.id, scope: STATIC_SCOPE.PUBLIC },
+        { scope: { $in: scopes } },
+      ],
+    }
+  }
+
   async findOneWithProject(id: number): Promise<Folder | null> {
     return await this.findOne(
       {
@@ -95,37 +131,5 @@ export class FolderRepository extends AccessControlRepository<Folder> {
     folder.taggings.getItems().forEach((tagging) => tagging.tag.taggingCount--)
     folder.taggings.removeAll()
     return folder
-  }
-
-  protected async getAccessibleWhere(): Promise<FilterQuery<Folder>> {
-    const user = await this.em.findOneOrFail(User, { id: this.user.id })
-    const accessibleSpaces = await user.accessibleSpaces()
-    const spaceScopes = accessibleSpaces.map((space) => space.scope)
-
-    // TODO PFDA-6222: define rules for site-admins
-
-    return {
-      $or: [
-        { user: user.id, scope: STATIC_SCOPE.PRIVATE },
-        { scope: STATIC_SCOPE.PUBLIC },
-        { scope: { $in: spaceScopes } },
-      ],
-    }
-  }
-
-  protected async getEditableWhere(): Promise<FilterQuery<Folder>> {
-    const user = await this.em.findOneOrFail(User, { id: this.user.id })
-    const editableSpaces = await user.editableSpaces()
-    const spaceScopes = editableSpaces.map((space) => space.scope)
-
-    // TODO PFDA-6222: define rules for site-admins
-
-    return {
-      $or: [
-        { user: user.id, scope: STATIC_SCOPE.PRIVATE },
-        { user: user.id, scope: STATIC_SCOPE.PUBLIC },
-        { scope: { $in: spaceScopes } },
-      ],
-    }
   }
 }

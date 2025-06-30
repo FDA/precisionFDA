@@ -24,7 +24,7 @@ import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
 import { App } from '@shared/domain/app/app.entity'
 import { Job } from '@shared/domain/job/job.entity'
 import { config } from '@shared/config'
-import { ObjectIdInputDTO } from '@shared/domain/email/email.helper'
+import { ObjectIdInputDTO } from '@shared/domain/email/dto/object-id.dto'
 
 describe('CommentAddedEmailHandler', () => {
   const USER_ID = 7
@@ -67,7 +67,7 @@ describe('CommentAddedEmailHandler', () => {
     sendEmail: emailClientSendEmailStub,
   } as unknown as EmailClient
 
-  const getHandler = () => {
+  const getHandler = (): CommentAddedEmailHandler => {
     return new CommentAddedEmailHandler(
       em,
       spaceEventRepo,

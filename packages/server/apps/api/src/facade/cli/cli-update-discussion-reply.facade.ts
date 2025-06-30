@@ -3,7 +3,7 @@ import { DiscussionService } from '@shared/domain/discussion/services/discussion
 import { AttachmentsDTO } from '@shared/domain/discussion/dto/attachments.dto'
 import { CliEditReplyDTO } from '@shared/domain/cli/dto/cli-edit-reply.dto'
 import { InvalidStateError } from '@shared/errors'
-import { UpdateAnswerFacade } from './update-answer.facade'
+import { UpdateAnswerFacade } from '../discussion/update-answer.facade'
 import { Injectable } from '@nestjs/common'
 
 @Injectable()
