@@ -1,5 +1,5 @@
 // PrecisionFDA CLI
-// Version 2.10.0
+// Version 2.10.1
 package main
 
 import (
@@ -26,7 +26,7 @@ const defaultChunkSize = 1 << 26 // default 64MB (min. 16MB)
 const defaultSkipVerify = "false"
 const usageString = `
 ****************************
-PFDA COMMAND LINE TOOL v2.10.0
+PFDA COMMAND LINE TOOL v2.10.1
 ****************************
 
 All available commands:
@@ -290,7 +290,7 @@ func mainInternal() int {
 	var command string
 	var args []string
 	var index int
-	if len(os.Args) > 1 {
+	if len(os.Args) > 1 && !strings.HasPrefix(os.Args[1], "-") {
 		// Storing first positional arg after ./pfda
 		command = os.Args[1]
 		// check possible non-flag args
@@ -308,7 +308,7 @@ func mainInternal() int {
 		}
 	}
 
-	// use default url if not provided by user or found in config
+	// use default url if not provided by user or not found in config
 	serverURL := defaultURL
 	if *server != "" {
 		serverURL = *server

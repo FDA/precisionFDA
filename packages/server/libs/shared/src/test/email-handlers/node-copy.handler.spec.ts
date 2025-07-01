@@ -52,7 +52,7 @@ describe('NodeCopyHandler', () => {
       const handler = getHandler()
       await handler.sendEmail(input)
 
-      expect(emailClientSendEmailStub.calledOnce).to.be.true
+      expect(emailClientSendEmailStub.calledOnce).to.be.true()
       expect(emailClientSendEmailStub.firstCall.firstArg.emailType).to.eq(EMAIL_TYPES.nodeCopy)
       expect(emailClientSendEmailStub.firstCall.firstArg.to).to.eq(user.email)
       expect(emailClientSendEmailStub.firstCall.firstArg.subject).to.eq(

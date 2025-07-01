@@ -135,23 +135,22 @@ export function prepareListFetchV2(filters: IFilter[], params: Params) {
     filterParams[`filter[${f.id}]`] = f.value
   })
 
-  const order_by_key = params.sortBy?.order_by?.includes('props.') ? 'order_by_property' : 'order_by'
-  const order_by_val =
-    order_by_key === 'order_by_property'
-      ? params.sortBy?.order_by.replace('props.', '')
-      : renameOrderByKeys(params?.sortBy?.order_by)
+  const sortField = params.sortBy?.order_by?.includes('props.')
+    ? params.sortBy.order_by.replace('props.', '')
+    : renameOrderByKeys(params?.sortBy?.order_by)
 
-  const queryParams = cleanObject({
+  const sort = sortField && params.sortBy?.order_dir
+    ? { [`sort[${sortField}]`]: params.sortBy.order_dir }
+    : {}
+
+  return cleanObject({
     folder_id: params?.folderId,
     space_id: params?.spaceId,
     pageSize: params?.perPage,
     page: params?.page,
-    [order_by_key]: order_by_val,
-    order_dir: params?.sortBy?.order_dir,
     ...filterParams,
+    ...sort,
   })
-
-  return queryParams
 }
 
 export const toTitleCase = (str: string) => str[0].toUpperCase() + str.slice(1)

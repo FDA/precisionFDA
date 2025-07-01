@@ -13,6 +13,10 @@ import { AttachmentsFacadeModule } from '@shared/facade/discussion/attachments-f
 import { CliJobScopeFacade } from './cli-job-scope.facade'
 import { CliNodeRemoveFacade } from './cli-node-remove.facade'
 import { RemoveNodesFacadeModule } from '@shared/facade/node-remove/remove-nodes-facade.module'
+import { CliListMembersFacade } from './cli-list-members.facade'
+import { SpaceModule } from '@shared/domain/space/space.module'
+import { CliListDiscussionsFacade } from './cli-list-discussions.facade'
+import { CliFindNodesFacade } from './cli-find-nodes.facade'
 
 @Module({
   imports: [
@@ -24,10 +28,25 @@ import { RemoveNodesFacadeModule } from '@shared/facade/node-remove/remove-nodes
     JobModule,
     WorkflowModule,
     DbClusterModule,
+    SpaceModule,
     AttachmentsFacadeModule,
     RemoveNodesFacadeModule,
   ],
-  providers: [CliDescribeEntityFacade, CliJobScopeFacade, CliNodeRemoveFacade],
-  exports: [CliDescribeEntityFacade, CliJobScopeFacade, CliNodeRemoveFacade],
+  providers: [
+    CliDescribeEntityFacade,
+    CliJobScopeFacade,
+    CliNodeRemoveFacade,
+    CliListMembersFacade,
+    CliListDiscussionsFacade,
+    CliFindNodesFacade,
+  ],
+  exports: [
+    CliDescribeEntityFacade,
+    CliJobScopeFacade,
+    CliNodeRemoveFacade,
+    CliListMembersFacade,
+    CliListDiscussionsFacade,
+    CliFindNodesFacade,
+  ],
 })
 export class CliApiFacadeModule {}

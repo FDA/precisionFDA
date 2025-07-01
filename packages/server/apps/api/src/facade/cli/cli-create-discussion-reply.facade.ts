@@ -1,10 +1,10 @@
 import { AttachmentManagementFacade } from '@shared/facade/discussion/attachment-management.facade'
 import { DiscussionService } from '@shared/domain/discussion/services/discussion.service'
-import { CreateAnswerFacade } from './create-answer.facade'
+import { CreateAnswerFacade } from '../discussion/create-answer.facade'
 import { CliCreateReplyDTO } from '@shared/domain/cli/dto/cli-create-reply.dto'
 import { InvalidStateError } from '@shared/errors'
 import { Injectable } from '@nestjs/common'
-import { CreateCommentFacade } from './create-comment.facade'
+import { CreateCommentFacade } from '../discussion/create-comment.facade'
 
 @Injectable()
 export class CliCreateDiscussionReplyFacade {

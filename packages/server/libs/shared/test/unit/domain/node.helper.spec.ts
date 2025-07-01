@@ -13,7 +13,7 @@ describe('NodeHelper', () => {
         { stiType: FILE_STI_TYPE.USERFILE, state: FILE_STATE_DX.CLOSED, name: 'file2' } as Node,
       ]
       const result = nodeHelper.getWarningsForUnclosedFiles(files)
-      expect(result).to.be.null
+      expect(result).to.be.null()
     })
 
     it('should return warning message if there are unclosed files', () => {

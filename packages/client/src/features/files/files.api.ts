@@ -6,7 +6,7 @@ import { Params, formatScopeQ, prepareListFetch } from '../home/utils'
 import { IExistingFileSet, IFile, IFolder, SelectedNode } from './files.types'
 
 export interface FetchFilesQuery {
-  files: IFile[]
+  files: (IFile | IFolder)[]
   meta: IMeta
 }
 

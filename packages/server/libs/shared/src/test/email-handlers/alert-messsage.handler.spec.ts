@@ -48,10 +48,10 @@ describe('AlertMessageHandler', () => {
       const alertMessageHandler = getAlertMessageHandler()
       await alertMessageHandler.sendEmail(inputDto)
 
-      expect(userRepoFindStub.calledOnce).to.be.true
+      expect(userRepoFindStub.calledOnce).to.be.true()
       expect(userRepoFindStub.firstCall.args).to.deep.equal([{ id: { $in: receiverUserIds } }])
 
-      expect(emailClientSendEmailStub.calledTwice).to.be.true
+      expect(emailClientSendEmailStub.calledTwice).to.be.true()
       expect(emailClientSendEmailStub.firstCall.args[0].emailType).to.equal(
         EMAIL_TYPES.alertMessage,
       )

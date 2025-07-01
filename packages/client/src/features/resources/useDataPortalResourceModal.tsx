@@ -72,11 +72,12 @@ const ResourcePreview = ({ resource, onCopy }: { resource?: Resource; onCopy: (l
   )
 }
 
-const useListDataPortalResourcesQuery = (id: string) =>
+const useListDataPortalResourcesQuery = (id: string | undefined) =>
   useQuery({
-    queryKey: ['resources-list-portal'],
-    queryFn: () => listDataPortalResourcesRequest(id),
+    queryKey: ['resources-list-portal', id],
+    queryFn: () => listDataPortalResourcesRequest(id!),
     select: d => d,
+    enabled: !!id,
   })
 
 const useResourceRemoveMutation = (
@@ -160,15 +161,17 @@ export const DataPortalResources = ({
     }
   }
 
-  let filteredData =
-    data
-      ?.filter(i => {
-        if (onlyImg) {
-          return isImageFromExt(getExt(i.url))
-        }
-        return true
-      })
-      .filter(resource => resource.name.toLowerCase().includes(searchQuery.toLowerCase())) ?? []
+  const filteredData =
+    data && Array.isArray(data)
+      ? data
+          .filter(i => {
+            if (onlyImg) {
+              return isImageFromExt(getExt(i.url))
+            }
+            return true
+          })
+          .filter(resource => resource.name.toLowerCase().includes(searchQuery.toLowerCase()))
+      : []
 
   const getSelected = () => data?.find(i => i.id === selected)
   const handleInsert = () => {

@@ -79,7 +79,7 @@ describe('JobFinishedEmailHandler', () => {
       const handler = getHandler()
       await handler.sendEmail(input)
 
-      expect(emailClientSendEmailStub.calledOnce).to.be.true
+      expect(emailClientSendEmailStub.calledOnce).to.be.true()
       expect(emailClientSendEmailStub.firstCall.firstArg.emailType).to.eq(EMAIL_TYPES.jobFinished)
       expect(emailClientSendEmailStub.firstCall.firstArg.to).to.eq(user.email)
       expect(emailClientSendEmailStub.firstCall.firstArg.subject).to.eq(
@@ -117,7 +117,7 @@ describe('JobFinishedEmailHandler', () => {
       const handler = getHandler()
       await handler.sendEmail(input)
 
-      expect(emailClientSendEmailStub.called).to.be.false
+      expect(emailClientSendEmailStub.called).to.be.false()
     })
 
     it('in a space', async () => {
@@ -144,7 +144,7 @@ describe('JobFinishedEmailHandler', () => {
       const handler = getHandler()
       await handler.sendEmail(input)
 
-      expect(emailClientSendEmailStub.called).to.be.false
+      expect(emailClientSendEmailStub.called).to.be.false()
     })
   })
 })

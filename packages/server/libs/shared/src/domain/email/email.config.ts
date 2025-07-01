@@ -170,6 +170,7 @@ export type EmailSendInput = {
   subject: string
   bcc?: string
   replyTo?: string
+  returnAddress?: string // where it should go if not delivered
   body?: string
 }
 
