@@ -17,6 +17,9 @@ import { NodeRepository } from '@shared/domain/user-file/node.repository'
 import { NodeService } from '@shared/domain/user-file/node.service'
 import { Folder } from '@shared/domain/user-file/folder.entity'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { SpaceRepository } from '@shared/domain/space/space.repository'
+import { FolderRepository } from '@shared/domain/user-file/folder.repository'
+import { UserRepository } from '@shared/domain/user/user.repository'
 
 const rollbackUnlockingState = async (em: SqlEntityManager, nodes: Node[]): Promise<void> => {
   getLogger().error(`Rolling back unlocking state for ${nodes.length} nodes`)
@@ -32,10 +35,10 @@ class NodesUnlockOperation extends BaseOperation<UserOpsCtx, NodesInputDTO, void
     this.ctx.log.log(input.ids, 'Unlocking ids')
     const em = this.ctx.em
     const notificationService = new NotificationService(em)
-    const spaceRepository = this.ctx.em.getRepository(Space)
+    const spaceRepository = this.ctx.em.getRepository(Space) as SpaceRepository
     const nodeRepository = this.ctx.em.getRepository(Node) as NodeRepository
-    const userRepository = this.ctx.em.getRepository(User)
-    const folderRepository = this.ctx.em.getRepository(Folder)
+    const userRepository = this.ctx.em.getRepository(User) as UserRepository
+    const folderRepository = this.ctx.em.getRepository(Folder) as FolderRepository
     const nodeService = new NodeService(
       this.ctx.em,
       new UserContext(

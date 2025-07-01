@@ -34,12 +34,12 @@ export class FileSyncQueueProcessor extends BaseQueueProcessor {
   }
 
   @ProcessWithContext(TASK_TYPE.SYNC_JOB_OUTPUTS)
-  async syncJobOutputs(job: Job<CheckStatusJob>) {
-    await this.jobServiceWithPlatformClient.syncOutputs(job.data.payload.dxid, job.data.user.id)
+  async syncJobOutputs(job: Job<CheckStatusJob>): Promise<void> {
+    await this.jobServiceWithPlatformClient.syncOutputs(job.data.payload.dxid)
   }
 
   @ProcessWithContext(TASK_TYPE.REMOVE_NODES)
-  async removeNodes(job: Job) {
+  async removeNodes(job: Job): Promise<void> {
     const ids: number[] = job.data.payload as number[]
     try {
       const { removedFilesCount, removedFoldersCount } = await this.removeNodesFacade.removeNodes(
@@ -68,24 +68,24 @@ export class FileSyncQueueProcessor extends BaseQueueProcessor {
   }
 
   @ProcessWithContext(TASK_TYPE.LOCK_NODES)
-  async lockNodes(job: Job) {
+  async lockNodes(job: Job): Promise<void> {
     await lockNodesHandler(job)
   }
 
   @ProcessWithContext(TASK_TYPE.UNLOCK_NODES)
-  async unlockNodes(job: Job) {
+  async unlockNodes(job: Job): Promise<void> {
     await unlockNodesHandler(job)
   }
 
   @ProcessWithContext(TASK_TYPE.WORKSTATION_SNAPSHOT)
-  async createWorkstationSnapshot(job: Job) {
+  async createWorkstationSnapshot(job: Job): Promise<void> {
     await this.handleUserTask(job, async (ctx, input) => {
       return await new WorkstationSnapshotOperation(ctx).execute(input)
     })
   }
 
   @ProcessWithContext(TASK_TYPE.USER_DATA_CONSISTENCY_REPORT)
-  async reportUserDataConsistency() {
+  async reportUserDataConsistency(): Promise<void> {
     const result = await this.userDataConsistencyReportFacade.createReport()
     await this.userDataConsistencyReportFacade.fixInconsistentData(result.inconsistentFixes)
   }

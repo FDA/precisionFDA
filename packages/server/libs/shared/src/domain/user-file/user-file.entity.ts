@@ -1,7 +1,6 @@
 import {
   Collection,
   Entity,
-  EntityRepositoryType,
   Filter,
   OneToMany,
   OneToOne,
@@ -64,9 +63,8 @@ class UserFile extends Node implements IFileOrAsset, ITrackable {
   @OneToMany(() => Tagging, (tagging) => tagging.userFile, {
     orphanRemoval: true,
   })
-  taggings = new Collection<Tagging>(this);
+  taggings = new Collection<Tagging>(this)
 
-  [EntityRepositoryType]?: UserFileRepository
   constructor(user: User) {
     super()
     this.user = Reference.create(user)

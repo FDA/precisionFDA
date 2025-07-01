@@ -1,13 +1,4 @@
-import {
-  Collection,
-  Entity,
-  EntityRepositoryType,
-  OneToMany,
-  OneToOne,
-  Property,
-  Ref,
-  Reference,
-} from '@mikro-orm/core'
+import { Collection, Entity, OneToMany, OneToOne, Property, Ref, Reference } from '@mikro-orm/core'
 import { Resource } from '@shared/domain/resource/resource.entity'
 import { Space } from '@shared/domain/space/space.entity'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
@@ -44,9 +35,7 @@ class DataPortal extends BaseEntity {
   space!: Ref<Space>
 
   @OneToMany(() => Resource, (resource) => resource.dataPortal)
-  resources = new Collection<Resource>(this);
-
-  [EntityRepositoryType]?: DataPortalRepository
+  resources = new Collection<Resource>(this)
   constructor(space: Space) {
     super()
     this.space = Reference.create(space)

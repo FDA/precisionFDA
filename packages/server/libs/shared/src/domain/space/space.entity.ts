@@ -1,7 +1,6 @@
 import {
   Collection,
   Entity,
-  EntityRepositoryType,
   Enum,
   ManyToMany,
   ManyToOne,
@@ -126,8 +125,6 @@ export class Space extends BaseEntity {
   private isConfidentialNonPrivateSpace(): boolean {
     return this.isConfidential() && this.type !== SPACE_TYPE.PRIVATE_TYPE
   }
-
-  [EntityRepositoryType]?: SpaceRepository
 
   async findLeadBySide(side: SPACE_MEMBERSHIP_SIDE): Promise<User | undefined> {
     await this.spaceMemberships.init()

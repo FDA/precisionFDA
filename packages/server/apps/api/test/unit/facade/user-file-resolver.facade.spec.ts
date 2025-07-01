@@ -12,6 +12,8 @@ import { spaceMembership } from '@shared/test/generate'
 import { SPACE_MEMBERSHIP_ROLE } from '@shared/domain/space-membership/space-membership.enum'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { UserFileResolverFacade } from 'apps/api/src/facade/user-file/user-file-resolver.facade'
+import { UserFileRepository } from '@shared/domain/user-file/user-file.repository'
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
 
 describe('UserFileResolverFacade', () => {
   let em: SqlEntityManager
@@ -21,10 +23,12 @@ describe('UserFileResolverFacade', () => {
   let spaceUser1: Space
   let spaceUser2: Space
   let sharedSpace: Space
+  let userFileRepo: UserFileRepository
 
   beforeEach(async () => {
     await db.dropData(database.connection())
     em = database.orm().em.fork({ useContext: true }) as SqlEntityManager
+    userFileRepo = em.getRepository(UserFile) as UserFileRepository
     user1 = create.userHelper.create(em)
     user2 = create.userHelper.create(em)
     publicUser = create.userHelper.create(em)
@@ -438,6 +442,6 @@ describe('UserFileResolverFacade', () => {
 
   function getInstance(user: User): UserFileResolverFacade {
     const userCtx = { id: user.id, dxuser: user.dxuser } as unknown as UserContext
-    return new UserFileResolverFacade(em, userCtx)
+    return new UserFileResolverFacade(em, userCtx, userFileRepo)
   }
 })

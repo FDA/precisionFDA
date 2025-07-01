@@ -1,4 +1,4 @@
-import { Entity, EntityRepositoryType, ManyToOne, PrimaryKey, Property } from '@mikro-orm/core'
+import { Entity, ManyToOne, PrimaryKey, Property } from '@mikro-orm/core'
 import { Tag } from '@shared/domain/tag/tag.entity'
 import { Asset } from '@shared/domain/user-file/asset.entity'
 import { Folder } from '@shared/domain/user-file/folder.entity'
@@ -62,7 +62,5 @@ export class Tagging {
   tag?: Tag
 
   @ManyToOne(() => User, { joinColumn: 'tagger_id' })
-  tagger: User;
-
-  [EntityRepositoryType]?: TaggingRepository
+  tagger: User
 }
