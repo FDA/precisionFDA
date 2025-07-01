@@ -7,7 +7,6 @@ import {
   ManyToMany,
   ManyToOne,
   OneToMany,
-  PrimaryKey,
   Property,
   Ref,
   Reference,
@@ -23,6 +22,7 @@ import { Uid } from '../entity/domain/uid'
 import { ENTITY_TYPE } from './app.enum'
 import type { Spec } from './app.input'
 import { AppRepository } from './app.repository'
+import { WorkaroundJsonType } from '@shared/database/json-workaround.type'
 
 const logger = getLogger('app.entity')
 
@@ -51,9 +51,6 @@ export interface Internal {
   }),
 })
 export class App extends ScopedEntity {
-  @PrimaryKey()
-  id: number
-
   @Property()
   dxid: DxId<'app'>
 
@@ -69,10 +66,10 @@ export class App extends ScopedEntity {
   @Property()
   readme: string
 
-  @Property({ type: 'json' })
+  @Property({ type: WorkaroundJsonType })
   spec: AppSpec
 
-  @Property({ type: 'json' })
+  @Property({ type: WorkaroundJsonType })
   internal: Internal
 
   @Property()
@@ -111,7 +108,7 @@ export class App extends ScopedEntity {
   @Enum()
   entityType: ENTITY_TYPE
 
-  isHTTPS() {
+  isHTTPS(): boolean {
     return this.entityType === ENTITY_TYPE.HTTPS
   }
 

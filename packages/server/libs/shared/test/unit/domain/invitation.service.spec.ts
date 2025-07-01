@@ -5,6 +5,7 @@ import { Invitation } from '@shared/domain/invitation/invitation.entity'
 import { PROVISIONING_STATE } from '@shared/domain/invitation/invitation.enum'
 import { InvitationRepository } from '@shared/domain/invitation/invitation.repository'
 import { InvitationService } from '@shared/domain/invitation/services/invitation.service'
+import { InvalidStateError } from '@shared/errors'
 import { MainQueueJobProducer } from '@shared/queue/producer/main-queue-job.producer'
 import { create, db } from '@shared/test'
 import { expect } from 'chai'
@@ -18,10 +19,11 @@ describe('InvitationService', () => {
 
   beforeEach(async () => {
     await db.dropData(database.connection())
-    invitationRepository = new InvitationRepository(em, Invitation)
-    paginateStub = stub(invitationRepository, 'paginate')
     em = database.orm().em.fork() as EntityManager
     em.clear()
+
+    invitationRepository = new InvitationRepository(em, Invitation)
+    paginateStub = stub(invitationRepository, 'paginate')
 
     paginateStub.reset()
     createProvisionNewUsersTaskStub.reset()
@@ -79,11 +81,11 @@ describe('InvitationService', () => {
 
   context('provisionUsers', () => {
     it('should only provision pending invitations', async () => {
-      const invitation1 = create.inivitationHelper.create(em, {})
-      const invitation2 = create.inivitationHelper.create(em, {
+      const invitation1 = create.invitationHelper.create(em, {})
+      const invitation2 = create.invitationHelper.create(em, {
         provisioningState: PROVISIONING_STATE.IN_PROGRESS,
       })
-      const invitation3 = create.inivitationHelper.create(em, {})
+      const invitation3 = create.invitationHelper.create(em, {})
       await em.flush()
 
       await getInstance().provisionUsers([invitation1.id, invitation2.id, invitation3.id])
@@ -95,7 +97,56 @@ describe('InvitationService', () => {
     })
   })
 
-  function getInstance() {
+  context('editBasicInfo', () => {
+    it('should throw error if invitation is not pending', async () => {
+      const invitation = create.invitationHelper.create(em, {
+        provisioningState: PROVISIONING_STATE.IN_PROGRESS,
+      })
+      await em.flush()
+
+      const updatedData = {
+        email: 'john@doe.com',
+      }
+      await expect(getInstance().editBasicInfo(invitation.id, updatedData)).to.be.rejectedWith(
+        InvalidStateError,
+        'Cannot edit invitation that is not in pending state',
+      )
+    })
+
+    it('should not update if field is undefined or null', async () => {
+      const testEmail = 'john@doe.com'
+      const invitation = create.invitationHelper.create(em, {
+        provisioningState: PROVISIONING_STATE.PENDING,
+      })
+      await em.flush()
+      const updatedData = {
+        firstName: undefined,
+        lastName: null,
+        email: testEmail,
+      }
+      const result = await getInstance().editBasicInfo(invitation.id, updatedData)
+      expect(result.id).to.equal(invitation.id)
+      const updatedInvitation = await invitationRepository.findOneOrFail(invitation.id)
+      expect(updatedInvitation.firstName).to.equal(invitation.firstName)
+      expect(updatedInvitation.lastName).to.equal(invitation.lastName)
+      expect(updatedInvitation.email).to.equal(testEmail)
+    })
+
+    it('should update invitation basic info', async () => {
+      const invitation = create.invitationHelper.create(em, {
+        provisioningState: PROVISIONING_STATE.PENDING,
+      })
+      await em.flush()
+
+      const updatedData = {
+        email: 'john@doe.com',
+      }
+      const result = await getInstance().editBasicInfo(invitation.id, updatedData)
+      expect(result.id).to.equal(invitation.id)
+    })
+  })
+
+  function getInstance(): InvitationService {
     const mainQueueJobProducer = {
       createProvisionNewUsersTask: createProvisionNewUsersTaskStub,
     } as unknown as MainQueueJobProducer

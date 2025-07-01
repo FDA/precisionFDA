@@ -1,4 +1,4 @@
-import { Entity, ManyToOne, PrimaryKey, Property, Ref } from '@mikro-orm/core'
+import { Entity, ManyToOne, Property, Ref } from '@mikro-orm/core'
 import { User } from '@shared/domain/user/user.entity'
 import { BaseEntity } from '../../database/base.entity'
 import { NOTIFICATION_ACTION, SEVERITY } from '../../enums'
@@ -11,9 +11,6 @@ export type NotificationMeta = {
 
 @Entity({ tableName: 'notifications' })
 export class Notification extends BaseEntity {
-  @PrimaryKey()
-  id: number
-
   @Property()
   action: NOTIFICATION_ACTION
 

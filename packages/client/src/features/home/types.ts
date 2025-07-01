@@ -39,6 +39,7 @@ export type APIResource =
   | 'workflow-executions'
   | 'spaces'
   | 'space-reports'
+  | 'space-groups'
   | 'discussions'
   | 'members'
 
@@ -124,14 +125,14 @@ export type MetaV2 = {
 }
 
 export interface IMeta {
-  links: {
+  links?: {
     copy_private?: string
     comments?: string
     edit_tags?: string
   }
-  path: MetaPath[]
+  path?: MetaPath[]
   count: number
-  challenges: IChallenge[] | null
+  challenges?: IChallenge[] | null
   pagination: {
     current_page: number
     next_page: null | number

@@ -9,7 +9,7 @@ import { EmailSendService } from '@shared/domain/email/email-send.service'
 export class EmailQueueProcessor {
   constructor(private readonly emailSendService: EmailSendService) {}
   @ProcessWithContext(TASK_TYPE.SEND_EMAIL)
-  async sendEmail(job: Job) {
+  async sendEmail(job: Job): Promise<void> {
     await this.emailSendService.sendEmail(job.data.payload)
   }
 }

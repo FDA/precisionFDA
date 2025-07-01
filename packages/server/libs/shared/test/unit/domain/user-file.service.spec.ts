@@ -35,6 +35,8 @@ import { SPACE_EVENT_ACTIVITY_TYPE } from '@shared/domain/space-event/space-even
 import { LicensedItemRepository } from '@shared/domain/licensed-item/licensed-item.repository'
 import { Asset } from '@shared/domain/user-file/asset.entity'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
+import { Organization } from '@shared/domain/org/org.entity'
 
 describe('UserFileService', () => {
   const USER_ID = 0
@@ -79,7 +81,6 @@ describe('UserFileService', () => {
   const fileLoadIfAccessibleByUserStub = stub()
   const folderRepoFindOneStub = stub()
   const nodeRepoFindOneOrFailStub = stub()
-  const nodeLoadIfAccessibleByUserStub = stub()
 
   const isSiteAdminStub = stub()
   const isChallengeAdminStub = stub()
@@ -137,14 +138,17 @@ describe('UserFileService', () => {
   const findAccessibleOneStub = stub()
   const findEditableStub = stub()
   const findEditableOneStub = stub()
+  const nodeLoadIfAccessibleByUserStub = stub()
 
   const editableSpacesStub = stub()
+  const accessibleSpaceIdsStub = stub()
 
   const USER = {
     id: USER_ID,
     isSiteAdmin: isSiteAdminStub,
     isChallengeAdmin: isChallengeAdminStub,
     editableSpaces: editableSpacesStub,
+    accessibleSpaceIds: accessibleSpaceIdsStub,
   } as unknown as User
   const USER_CTX: UserContext = {
     ...USER,
@@ -168,11 +172,11 @@ describe('UserFileService', () => {
   } as unknown as SpaceRepository
   const nodeRepository = {
     findOneOrFail: nodeRepoFindOneOrFailStub,
-    loadIfAccessibleByUser: nodeLoadIfAccessibleByUserStub,
     findEditable: findEditableStub,
     findAccessible: findAccessibleStub,
     findAccessibleOne: findAccessibleOneStub,
     findEditableOne: findEditableOneStub,
+    loadIfAccessibleByUser: nodeLoadIfAccessibleByUserStub,
   } as unknown as NodeRepository
 
   const transactionalStub = sinon.stub()
@@ -262,8 +266,8 @@ describe('UserFileService', () => {
       .withArgs({ id: USER_ID }, { populate: ['spaceMemberships', 'spaceMemberships.spaces'] })
       .returns(USER)
 
-    nodeLoadIfAccessibleByUserStub.reset()
-    nodeLoadIfAccessibleByUserStub.throws()
+    findAccessibleOneStub.reset()
+    findAccessibleOneStub.throws()
 
     createAndSendSpaceEventStub.reset()
     createAndSendSpaceEventStub.throws()
@@ -338,6 +342,12 @@ describe('UserFileService', () => {
 
     emFindOneOrFailStub.reset()
     emFindOneOrFailStub.throws()
+
+    accessibleSpaceIdsStub.reset()
+    accessibleSpaceIdsStub.throws()
+
+    nodeLoadIfAccessibleByUserStub.reset()
+    nodeLoadIfAccessibleByUserStub.throws()
   })
 
   afterEach(() => {
@@ -391,8 +401,11 @@ describe('UserFileService', () => {
         isCreatedByChallengeBot: () => false,
       } as unknown as UserFile
 
+      const spaceIds = [1, 2, 3]
+      accessibleSpaceIdsStub.returns(spaceIds)
+
       fileRepoFindOneOrFailStub.withArgs({ uid: UID }, match.any).returns(userFile)
-      nodeLoadIfAccessibleByUserStub.withArgs(USER, UID).returns(userFile)
+      nodeLoadIfAccessibleByUserStub.withArgs(USER, UID, spaceIds).returns(userFile)
       createFileSynchronizeJobTaskStub.reset()
 
       await getInstance().closeFile(UID, 'UPDATE_DATA_PORTAL_IMAGE_URL')
@@ -412,8 +425,11 @@ describe('UserFileService', () => {
         isCreatedByChallengeBot: () => false,
       } as unknown as UserFile
 
+      const spaceIds = [1, 2, 3]
+      accessibleSpaceIdsStub.returns(spaceIds)
+
       fileRepoFindOneOrFailStub.withArgs({ uid: UID }, match.any).returns(userFile)
-      nodeLoadIfAccessibleByUserStub.withArgs(USER, UID).returns(userFile)
+      nodeLoadIfAccessibleByUserStub.withArgs(USER, UID, spaceIds).returns(userFile)
       createFileSynchronizeJobTaskStub.reset()
 
       try {
@@ -449,7 +465,9 @@ describe('UserFileService', () => {
 
   describe('#synchronizeFile', () => {
     it('should synchronize file', async () => {
-      const node = new Node()
+      const org = new Organization()
+      const user = new User(org)
+      const node = new UserFile(user)
       node.dxid = DXID
       node.name = NAME
       node.project = PROJECT
@@ -474,7 +492,9 @@ describe('UserFileService', () => {
     })
 
     it('should synchronize file in space', async () => {
-      const node = new Node()
+      const org = new Organization()
+      const user = new User(org)
+      const node = new UserFile(user)
       node.dxid = DXID
       node.name = NAME
       node.project = PROJECT
@@ -510,7 +530,9 @@ describe('UserFileService', () => {
     })
 
     it('should synchronize file (challenge bot file)', async () => {
-      const node = new Node()
+      const org = new Organization()
+      const user = new User(org)
+      const node = new UserFile(user)
       node.dxid = DXID
       node.name = NAME
       node.project = PROJECT
@@ -796,7 +818,7 @@ describe('UserFileService', () => {
       spaceFindOneStub.returns({
         spaceMemberships: {
           getItems: () => {
-            find: (membership) => membership
+            find: (membership): SpaceMembership => membership
           },
         },
       } as unknown as Space)
@@ -863,7 +885,7 @@ describe('UserFileService', () => {
     })
   })
 
-  function getInstance() {
+  function getInstance(): UserFileService {
     return new UserFileService(
       em,
       USER_CTX,

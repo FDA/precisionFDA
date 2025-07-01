@@ -1,4 +1,4 @@
-import { Meta, StoryObj } from '@storybook/react'
+import { Meta, StoryObj } from '@storybook/react-webpack5'
 import React, { useEffect } from 'react'
 import { WithListData } from '../../../stories/helpers'
 import { StorybookProviders } from '../../../stories/StorybookProviders'
@@ -34,7 +34,7 @@ export const EditAssetsModal: Story = {
   render: () => {
     return (
       <WithListData resource="assets" fetchList={fetchAssets}>
-        {({ data }) => <EditAssetsModalWrapper data={data['assets'][0]} />}
+        {({ data }) => data && <EditAssetsModalWrapper data={data.assets[0]} />}
       </WithListData>
     )
   },

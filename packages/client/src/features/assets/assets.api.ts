@@ -5,7 +5,7 @@ import { formatScopeQ, Params, prepareListFetch } from '../home/utils'
 import { IAsset } from './assets.types'
 
 export interface FetchAssetsQuery extends BaseAPIResponse {
-  apps: IAsset[]
+  assets: IAsset[]
   meta: IMeta
 }
 

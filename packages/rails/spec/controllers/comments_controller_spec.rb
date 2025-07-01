@@ -19,7 +19,7 @@ RSpec.describe CommentsController, type: :controller do
       space_events = SpaceEvent.all
       expect(space_events.count).to eq(1)
       email_type_id = NotificationPreference.email_types[:notification_comment]
-      expect(node_client).to have_received(:email_send).with(email_type_id, [], {
+      expect(node_client).to have_received(:email_send).with(email_type_id, {
         id: space_events.first.id,
       })
     end

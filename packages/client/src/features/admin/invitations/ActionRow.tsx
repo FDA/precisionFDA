@@ -7,6 +7,7 @@ import styled from 'styled-components'
 import { Button } from '../../../components/Button'
 import { pluralize } from '../../../utils/formatting'
 import { Invitation, provisionUsers } from '../admin.api'
+import { useEditInvitationModal } from './modals/useEditInvitationModal'
 
 const ButtonsRow = styled.div`
   display: flex;
@@ -41,20 +42,37 @@ export default function InvitationActionRow({
     },
   })
 
+  const { setShowModal, modalComp } = useEditInvitationModal(selectedInvitations[0])
+
   const handleProvisioning = () => {
     provisionMutation.mutateAsync()
   }
 
+  const openEditInvitationModal = () => {
+    setShowModal(true)
+  }
+
   return (
-    <ButtonsRow>
-      <Button
-        data-variant="primary"
-        data-testid="admin-invitations-provision-button"
-        disabled={selectedInvitations.length === 0 || selectedInvitations.some(o => o.provisioningState !== 'pending')}
-        onClick={handleProvisioning}
-      >
-        Provision
-      </Button>
-    </ButtonsRow>
+    <>
+      <ButtonsRow>
+        <Button
+          data-variant="primary"
+          data-testid="admin-invitations-edit-invitation-button"
+          disabled={selectedInvitations.length !== 1 || selectedInvitations[0].provisioningState !== 'pending'}
+          onClick={openEditInvitationModal}
+        >
+          Edit invitation
+        </Button>
+        <Button
+          data-variant="primary"
+          data-testid="admin-invitations-provision-button"
+          disabled={selectedInvitations.length === 0 || selectedInvitations.some(o => o.provisioningState !== 'pending')}
+          onClick={handleProvisioning}
+        >
+          Provision
+        </Button>
+      </ButtonsRow>
+      {modalComp}
+    </>
   )
 }

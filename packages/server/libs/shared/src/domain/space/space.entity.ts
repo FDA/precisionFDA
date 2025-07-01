@@ -7,7 +7,6 @@ import {
   ManyToOne,
   OneToMany,
   OneToOne,
-  PrimaryKey,
   Property,
 } from '@mikro-orm/core'
 import { DataPortal } from '@shared/domain/data-portal/data-portal.entity'
@@ -17,6 +16,9 @@ import { BaseEntity } from '../../database/base.entity'
 import { SPACE_MEMBERSHIP_SIDE } from '../space-membership/space-membership.enum'
 import { SPACE_STATE, SPACE_TYPE } from './space.enum'
 import { SpaceRepository } from './space.repository'
+import { SpaceGroup } from '@shared/domain/space/space-group.entity'
+import { Tagging } from '@shared/domain/tagging/tagging.entity'
+import { WorkaroundJsonType } from '@shared/database/json-workaround.type'
 
 type SpaceMeta = {
   cts: string
@@ -26,9 +28,6 @@ type SpaceMeta = {
 
 @Entity({ tableName: 'spaces', repository: () => SpaceRepository })
 export class Space extends BaseEntity {
-  @PrimaryKey()
-  id: number
-
   @Property()
   name: string
 
@@ -66,7 +65,7 @@ export class Space extends BaseEntity {
   @Property()
   sponsorOrgId: number
 
-  @Property({ type: 'json' })
+  @Property({ type: WorkaroundJsonType })
   meta?: SpaceMeta
 
   @Property()
@@ -83,6 +82,12 @@ export class Space extends BaseEntity {
     owner: true,
   })
   spaceMemberships = new Collection<SpaceMembership>(this)
+
+  @ManyToMany(() => SpaceGroup, (spaceGroup) => spaceGroup.spaces)
+  spaceGroups = new Collection<SpaceGroup>(this)
+
+  @OneToMany(() => Tagging, (tagging) => tagging.space, { orphanRemoval: true })
+  taggings = new Collection<Tagging>(this)
 
   @OneToOne(() => DataPortal, (dataPortal: DataPortal) => dataPortal.space)
   dataPortal?: DataPortal
@@ -110,15 +115,15 @@ export class Space extends BaseEntity {
     return this.spaceId !== null
   }
 
-  isConfidentialReviewerSpace() {
+  isConfidentialReviewerSpace(): boolean {
     return this.isConfidentialNonPrivateSpace() && this.hostDxOrg !== null
   }
 
-  isConfidentialSponsorSpace() {
+  isConfidentialSponsorSpace(): boolean {
     return this.isConfidentialNonPrivateSpace() && this.guestDxOrg !== null
   }
 
-  private isConfidentialNonPrivateSpace() {
+  private isConfidentialNonPrivateSpace(): boolean {
     return this.isConfidential() && this.type !== SPACE_TYPE.PRIVATE_TYPE
   }
 

@@ -7,20 +7,16 @@ import SelectFilter, { selectFilterFn } from '../../components/Table/components/
 import { selectColumnDef } from '../../components/Table/selectColumnDef'
 import { StyledTagItem, StyledTags } from '../../components/Tags'
 import { AdminIcon } from '../../components/icons/AdminIcon'
-import { BoltIcon } from '../../components/icons/BoltIcon'
-import { CubeIcon } from '../../components/icons/CubeIcon'
-import { DiscussionIcon } from '../../components/icons/DiscussionIcon'
-import { FileIcon } from '../../components/icons/FileIcon'
 import { GovernmentIcon } from '../../components/icons/GovernmentIcon'
-import { NetworkIcon } from '../../components/icons/NetworkIcon'
 import { PrivateIcon } from '../../components/icons/PrivateIcon'
 import { ProfileIcon } from '../../components/icons/ProfileIcon'
 import { UsersIcon } from '../../components/icons/UsersIcon'
 import { FdaRestrictedIcon } from './FdaRestrictedIcon'
 import { ProtectedIcon } from './ProtectedIcon'
 import { SpaceTypeName } from './common'
-import { ISpace } from './spaces.types'
+import { ISpaceV2 } from './spaces.types'
 import { useSpaceHiddenMutation } from './useSpaceHiddenMutation'
+import { formatDateOnly } from '../../utils/formatting'
 
 const SpaceHiddenToggle = ({ id, hidden }: { id: number; hidden: boolean }) => {
   const spaceHiddenMutation = useSpaceHiddenMutation()
@@ -67,7 +63,7 @@ export const StyledName = styled.span<{ $isAccess: boolean }>`
 
   ${({ $isAccess }) =>
     !$isAccess &&
-    css`
+    `
       color: var(--c-text-400);
       cursor: not-allowed;
     `}
@@ -83,11 +79,11 @@ export const StatusCell = styled.div<{ $isActive: boolean }>`
   ${Dot} {
     ${({ $isActive }) =>
       $isActive
-        ? css`
+        ? `
             color: var(--success-400);
             background-color: var(--success-400);
           `
-        : css`
+        : `
             color: var(--warning-500);
             background-color: var(--warning-500);
           `};
@@ -140,16 +136,16 @@ export const findSpaceTypeIcon = (type: string | number) => {
   }
 }
 
-export const useSpacesColumns = (): ColumnDef<ISpace>[] => {
+export const useSpacesColumns = (): ColumnDef<ISpaceV2>[] => {
   return [
-    selectColumnDef<ISpace>(),
+    selectColumnDef<ISpaceV2>(),
     {
       header: 'Type',
       accessorKey: 'type',
       enableSorting: false,
       filterFn: selectFilterFn,
       meta: {
-        filterElement: (column: Column<ISpace>) => (
+        filterElement: (column: Column<ISpaceV2>) => (
           <SelectFilter
             column={column}
             options={[
@@ -179,12 +175,12 @@ export const useSpacesColumns = (): ColumnDef<ISpace>[] => {
         <SpaceTableNameCell>
           <NameRow>
             {row.original.protected && (
-              <ProtectedIcon color={row.original.current_user_membership ? undefined : 'var(--c-text-400)'} />
+              <ProtectedIcon color={row.original.currentUserMembership ? undefined : 'var(--c-text-400)'} />
             )}
-            {row.original.restricted_reviewer && (
-              <FdaRestrictedIcon color={row.original.current_user_membership ? undefined : 'var(--c-text-400)'} />
+            {row.original.restrictedReviewer && (
+              <FdaRestrictedIcon color={row.original.currentUserMembership ? undefined : 'var(--c-text-400)'} />
             )}
-            {row.original.current_user_membership ? (
+            {row.original.currentUserMembership ? (
               <StyledName $isAccess as={Link} to={{ pathname: `/spaces/${row.original.id}` }}>
                 {row.original.name}
               </StyledName>
@@ -209,7 +205,7 @@ export const useSpacesColumns = (): ColumnDef<ISpace>[] => {
       enableSorting: false,
       filterFn: selectFilterFn,
       meta: {
-        filterElement: (column: Column<ISpace>) => (
+        filterElement: (column: Column<ISpaceV2>) => (
           <SelectFilter
             column={column}
             options={[
@@ -234,7 +230,7 @@ export const useSpacesColumns = (): ColumnDef<ISpace>[] => {
       enableSorting: false,
       filterFn: selectFilterFn,
       meta: {
-        filterElement: (column: Column<ISpace>) => (
+        filterElement: (column: Column<ISpaceV2>) => (
           <SelectFilter
             column={column}
             options={[
@@ -262,63 +258,33 @@ export const useSpacesColumns = (): ColumnDef<ISpace>[] => {
     },
     {
       header: 'Created on',
-      accessorKey: 'created_at',
+      accessorKey: 'createdAt',
       sortDescFirst: true,
       enableColumnFilter: false,
       size: 150,
+      cell: ({ row }) => <div>{formatDateOnly(row.original?.createdAt)}</div>,
     },
     {
       header: 'Modified on',
-      accessorKey: 'updated_at',
+      accessorKey: 'updatedAt',
       sortDescFirst: true,
       enableColumnFilter: false,
       size: 150,
+      cell: ({ row }) => <div>{formatDateOnly(row.original?.updatedAt)}</div>,
     },
     {
       header: 'Reviewer/Host lead',
-      accessorKey: 'host_lead',
+      accessorKey: 'hostLead',
       enableSorting: false,
       enableColumnFilter: false,
       size: 200,
-      cell: ({ row }) => <div>{row.original?.host_lead?.name}</div>,
     },
     {
       header: 'Sponsor/Guest lead',
-      accessorKey: 'guest_lead',
+      accessorKey: 'guestLead',
       enableSorting: false,
       enableColumnFilter: false,
       size: 200,
-      cell: ({ row }) => <div>{row.original?.guest_lead?.name}</div>,
-    },
-    {
-      header: 'Counters',
-      accessorKey: 'counters',
-      enableSorting: false,
-      enableColumnFilter: false,
-      size: 300,
-      cell: ({ row }) => (
-        <SpaceTableCounterCell>
-          <SpaceTableCounterItem>
-            <FileIcon /> {row.original?.counters.files}
-          </SpaceTableCounterItem>
-          <SpaceTableCounterItem>
-            <CubeIcon height={14} /> {row.original?.counters.apps}
-          </SpaceTableCounterItem>
-          <SpaceTableCounterItem>
-            <NetworkIcon /> {row.original?.counters.workflows}
-          </SpaceTableCounterItem>
-          <SpaceTableCounterItem>
-            <BoltIcon height={14} />
-            {row.original?.counters.jobs}
-          </SpaceTableCounterItem>
-          <SpaceTableCounterItem>
-            <UsersIcon /> {row.original?.counters.members}
-          </SpaceTableCounterItem>
-          <SpaceTableCounterItem>
-            <DiscussionIcon /> {row.original?.counters.discussions}
-          </SpaceTableCounterItem>
-        </SpaceTableCounterCell>
-      ),
     },
   ]
 }

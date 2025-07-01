@@ -6,7 +6,6 @@ import {
   ManyToOne,
   OneToMany,
   OneToOne,
-  PrimaryKey,
   Property,
   Ref,
   Reference,
@@ -30,6 +29,8 @@ import { BaseEntity } from '../../database/base.entity'
 import { AdminMembership } from '../admin-membership/admin-membership.entity'
 import { HeaderItem } from './header-item'
 import { UserRepository } from './user.repository'
+import { WorkaroundJsonType } from '@shared/database/json-workaround.type'
+import { SPACE_STATE } from '@shared/domain/space/space.enum'
 
 export enum USER_STATE {
   ENABLED = 0,
@@ -159,9 +160,6 @@ export const DEFAULT_USER_EXTRAS: UserExtras = {
 // might need to add more fields in the time
 @Entity({ tableName: 'users', repository: () => UserRepository })
 export class User extends BaseEntity {
-  @PrimaryKey()
-  id: number
-
   @Property()
   dxuser: string
 
@@ -219,10 +217,10 @@ export class User extends BaseEntity {
   })
   userState: USER_STATE
 
-  @Property({ type: 'json' })
+  @Property({ type: WorkaroundJsonType })
   cloudResourceSettings?: CloudResourceSettings
 
-  @Property({ type: 'json' })
+  @Property({ type: WorkaroundJsonType })
   extras?: UserExtras
 
   @OneToMany({ entity: () => Job, mappedBy: 'user' })
@@ -300,6 +298,12 @@ export class User extends BaseEntity {
     return Array.from(this.spaceMemberships)
       .filter((m) => m.active)
       .flatMap((spaceMembership) => Array.from(spaceMembership.spaces))
+      .filter((space) => space.state !== SPACE_STATE.DELETED)
+  }
+
+  async accessibleSpaceIds(): Promise<number[]> {
+    const accessibleSpaces = await this.accessibleSpaces()
+    return accessibleSpaces.map((space) => space.id)
   }
 
   async editableSpaces(): Promise<Space[]> {
@@ -308,6 +312,7 @@ export class User extends BaseEntity {
     return Array.from(this.spaceMemberships)
       .filter((m) => m.active && CAN_EDIT_ROLES.includes(m.role))
       .flatMap((spaceMembership) => Array.from(spaceMembership.spaces))
+      .filter((space) => space.state !== SPACE_STATE.DELETED)
   }
 
   /**
@@ -319,6 +324,7 @@ export class User extends BaseEntity {
     return Array.from(this.spaceMemberships)
       .filter((m) => m.active && ADMIN_LEAD_ROLES.includes(m.role))
       .flatMap((spaceMembership) => Array.from(spaceMembership.spaces))
+      .filter((space) => space.state !== SPACE_STATE.DELETED)
   }
 
   isChallengeBot(): boolean {

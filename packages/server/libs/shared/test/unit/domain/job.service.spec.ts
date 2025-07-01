@@ -26,18 +26,21 @@ import { EmailQueueJobProducer } from '@shared/domain/email/producer/email-queue
 import { Queue } from 'bull'
 import * as queueDomain from '@shared/queue'
 import { stub } from 'sinon'
-import { EMAIL_TYPES } from '@shared/domain/email/email.config'
-import { EmailFacade } from '@shared/domain/email/email.facade'
+import { EmailService } from '@shared/domain/email/email.service'
+import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
+import { JobSynchronizationService } from '@shared/domain/job/services/job-synchronization.service'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
 
 describe('Job service tests', () => {
   let em: EntityManager<MySqlDriver>
   let user: User
   let jobService: JobService
-  let userCtx: UserCtx
+  let userCtx: UserContext
   let notificationService: NotificationService
   let folderService: FolderService
   let emailQueueJobProducer: EmailQueueJobProducer
-  let emailFacade: EmailFacade
+  let jobSynchronizationService: JobSynchronizationService
+  let emailService: EmailService
   let getMainQueueStub
   const file1Dxid = 'file-GY5q9B00Q6xpbXG503kKgF68'
   const file2Dxid = 'file-GXPKG480q0jQPgXxFxKyyJ7q'
@@ -59,12 +62,13 @@ describe('Job service tests', () => {
       dxuser: 'dxuser',
       accessToken: '',
       id: user.id,
-    } as UserCtx
+    } as UserContext
 
     notificationService = new NotificationService(em, userCtx)
     folderService = new FolderService(em, userCtx)
     emailQueueJobProducer = new EmailQueueJobProducer(queue)
-    emailFacade = {} as unknown as EmailFacade
+    jobSynchronizationService = {} as unknown as JobSynchronizationService
+    emailService = {} as unknown as EmailService
 
     queueAdd.reset()
     queueAdd.throws()
@@ -76,7 +80,7 @@ describe('Job service tests', () => {
     getMainQueueStub.restore()
   })
 
-  function getPlatformClientWithComplexResults() {
+  function getPlatformClientWithComplexResults(): PlatformClient {
     return {
       async jobFind(params: JobFindParams): Promise<FindJobsResponse> {
         expect(params.id.length).eq(1)
@@ -154,7 +158,7 @@ describe('Job service tests', () => {
     } as PlatformClient
   }
 
-  function getPlatformClientWithEmptyResults() {
+  function getPlatformClientWithEmptyResults(): PlatformClient {
     return {
       async jobFind(params: JobFindParams): Promise<FindJobsResponse> {
         expect(params.id.length).eq(1)
@@ -562,7 +566,7 @@ describe('Job service tests', () => {
     // })
   })
 
-  const getJobServiceInstance = (platformClient: PlatformClient) => {
+  const getJobServiceInstance = (platformClient: PlatformClient): JobService => {
     return new JobService(
       em,
       userCtx,
@@ -570,7 +574,8 @@ describe('Job service tests', () => {
       notificationService,
       folderService,
       emailQueueJobProducer,
-      emailFacade,
+      jobSynchronizationService,
+      emailService,
     )
   }
 })

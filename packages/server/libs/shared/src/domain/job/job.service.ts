@@ -2,9 +2,10 @@ import { EntityManager } from '@mikro-orm/core'
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Injectable, Logger } from '@nestjs/common'
 import { config } from '@shared/config'
-import { EMAIL_TYPES, EmailSendInput } from '@shared/domain/email/email.config'
-import { EmailFacade } from '@shared/domain/email/email.facade'
+import { EmailSendInput } from '@shared/domain/email/email.config'
+import { EmailService } from '@shared/domain/email/email.service'
 import { buildEmailTemplate } from '@shared/domain/email/email.helper'
+import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
 import { EmailQueueJobProducer } from '@shared/domain/email/producer/email-queue-job.producer'
 import {
   reportStaleJobsTemplate,
@@ -29,6 +30,7 @@ import { PlatformClient } from '../../platform-client'
 import {
   DnanexusLink,
   FileStateResult,
+  FindJobsResponse,
   JobOutput,
 } from '../../platform-client/platform-client.responses'
 import { Maybe, UserCtx } from '../../types'
@@ -41,6 +43,7 @@ import { UserRepository } from '../user/user.repository'
 import { JobRepository } from './job.repository'
 import { CheckStatusJob, TASK_TYPE } from '@shared/queue/task.input'
 import { JobSynchronizationService } from '@shared/domain/job/services/job-synchronization.service'
+import { JOB_STATE } from '@shared/domain/job/job.enum'
 
 @Injectable()
 export class JobService {
@@ -57,8 +60,8 @@ export class JobService {
     private readonly notificationService: NotificationService,
     private readonly folderService: FolderService,
     private readonly emailsJobProducer: EmailQueueJobProducer,
-    private readonly emailFacade: EmailFacade,
     private readonly jobSyncService: JobSynchronizationService,
+    private readonly emailService: EmailService,
   ) {
     this.jobRepo = em.getRepository(Job)
     this.userRepo = em.getRepository(User)
@@ -68,7 +71,7 @@ export class JobService {
     return await this.jobSyncService.synchronizeJob(checkStatusJob)
   }
 
-  async checkChallengeJobs() {
+  async checkChallengeJobs(): Promise<void> {
     this.logger.log(`checkChallengeJobs`)
     const challengeBotUser = await this.userRepo.findOneOrFail({
       dxuser: config.platform.challengeBotUser,
@@ -99,7 +102,7 @@ export class JobService {
     }
   }
 
-  async findAccessible(dxid: DxId<'job'>) {
+  async findAccessible(dxid: DxId<'job'>): Promise<Job> {
     const job = await this.jobRepo.findAccessibleOne({ dxid })
     if (!job) {
       throw new errors.NotFoundError(`Job ${dxid} was not found or is not accessible`)
@@ -158,7 +161,15 @@ export class JobService {
     // TODO(samuel) refactor into repository method instead
     const nonStaleJobs = difference(runningJobs, staleJobs)
 
-    const createJobInfo = (job: Job) => ({
+    const createJobInfo = (
+      job: Job,
+    ): {
+      duration: string
+      uid: `job-${string}-${number}`
+      name: string
+      dxuser: string
+      state: JOB_STATE
+    } => ({
       uid: job.uid,
       name: job.name,
       state: job.state,
@@ -250,7 +261,7 @@ export class JobService {
           this.em.getRepository(Space),
           this.em.getRepository(User),
           this.em.getRepository(SpaceMembership),
-          this.emailFacade,
+          this.emailService,
         )
         const spaceEvent = await spaceService.createSpaceEvent({
           entity: { type: 'job', value: job },
@@ -284,7 +295,7 @@ export class JobService {
     return null
   }
 
-  private updateJobRunData(job: Job, output: JobOutput) {
+  private updateJobRunData(job: Job, output: JobOutput): void {
     job.runData.run_outputs = output
     // describe is updated by job's synchronize.ts
     this.em.persist(job)
@@ -313,7 +324,11 @@ export class JobService {
     return outputFiles
   }
 
-  private async createNotification(jobDxId: string, userId: number, sessionId: string) {
+  private async createNotification(
+    jobDxId: string,
+    userId: number,
+    sessionId: string,
+  ): Promise<void> {
     await this.notificationService.createNotification({
       message: `Outputs for job ${jobDxId} have been synchronized`,
       severity: SEVERITY.INFO,
@@ -323,7 +338,7 @@ export class JobService {
     })
   }
 
-  private async persistFiles(outputFiles: any[], user: User) {
+  private async persistFiles(outputFiles: any[], user: User): Promise<void> {
     const filePromises = outputFiles.map(async (outputFile) => {
       await this.em.persistAndFlush(outputFile) // flush for id
 
@@ -341,7 +356,7 @@ export class JobService {
     await Promise.all(filePromises)
   }
 
-  private async getJobResult(job: Job) {
+  private async getJobResult(job: Job): Promise<FindJobsResponse> {
     const result = await this.platformClient.jobFind({
       id: [job.dxid],
       describe: true,
@@ -358,7 +373,7 @@ export class JobService {
     fileStateResult: FileStateResult,
     job: Job,
     parentFolder: Folder | null,
-  ) {
+  ): UserFile {
     if (!fileStateResult.describe) {
       throw new errors.InvalidStateError(
         `Platform didn't give describe for file id ${fileStateResult.id}`,
@@ -430,7 +445,7 @@ export class JobService {
     return output
   }
 
-  private remapArrayOfFiles(value: DnanexusLink[], output: JobOutput, key: string) {
+  private remapArrayOfFiles(value: DnanexusLink[], output: JobOutput, key: string): void {
     const linkArray: string[] = []
     value.forEach((item) => {
       if (this.isDnaNexusLink(item)) {
@@ -451,7 +466,7 @@ export class JobService {
    * @param {JobOutput} output - The job output containing potential DNA Nexus links.
    * @returns {string[]} An array of unique DNA Nexus file IDs.
    */
-  private collectIds(output: JobOutput) {
+  private collectIds(output: JobOutput): string[] {
     const uniqueFileDxIds = new Set<string>()
     for (const key in output) {
       if (output.hasOwnProperty(key)) {

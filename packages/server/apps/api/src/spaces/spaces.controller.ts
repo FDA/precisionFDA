@@ -11,11 +11,12 @@ import {
   Patch,
   Post,
   Put,
+  Query,
   UseGuards,
 } from '@nestjs/common'
 import { DEPRECATED_SQL_ENTITY_MANAGER } from '@shared/database/provider/deprecated-sql-entity-manager.provider'
-import { EMAIL_TYPES } from '@shared/domain/email/email.config'
-import { EmailFacade } from '@shared/domain/email/email.facade'
+import { EmailService } from '@shared/domain/email/email.service'
+import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
 import { SPACE_EVENT_ACTIVITY_TYPE } from '@shared/domain/space-event/space-event.enum'
 import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
 import {
@@ -36,6 +37,9 @@ import { UserContextGuard } from '../user-context/guard/user-context.guard'
 import { CreateSpaceDTO } from '@shared/domain/space/dto/create-space.dto'
 import { UpdateSpaceDTO } from '@shared/domain/space/dto/update-space.dto'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
+import { SpacePaginationDTO } from '@shared/domain/space/dto/space-pagination-d-t.o'
+import { SpaceListItemDTO } from '@shared/domain/space/dto/space-list-item.dto'
+import { PaginatedResult } from '@shared/domain/entity/domain/paginated.result'
 
 @UseGuards(UserContextGuard)
 @Controller('/spaces')
@@ -47,7 +51,7 @@ export class SpacesController {
     @Inject(DEPRECATED_SQL_ENTITY_MANAGER) private readonly oldEm: SqlEntityManager,
     private readonly spaceService: SpaceService,
     private readonly user: UserContext,
-    private readonly emailFacade: EmailFacade,
+    private readonly emailService: EmailService,
   ) {}
 
   @Post()
@@ -81,14 +85,14 @@ export class SpacesController {
   async lockSpace(@Param('id', ParseIntPipe) spaceId: number): Promise<void> {
     await this.spaceService.lockSpace(spaceId)
 
-    await this.emailFacade.sendEmail({
+    await this.emailService.sendEmail({
       input: {
         initUserId: this.user.id,
         spaceId,
         activityType: SPACE_EVENT_ACTIVITY_TYPE[SPACE_EVENT_ACTIVITY_TYPE.space_locked],
       },
       receiverUserIds: [],
-      emailTypeId: EMAIL_TYPES.spaceChanged,
+      type: EMAIL_TYPES.spaceChanged,
     })
   }
 
@@ -97,14 +101,14 @@ export class SpacesController {
   async unlockSpace(@Param('id', ParseIntPipe) spaceId: number): Promise<void> {
     await this.spaceService.unlockSpace(spaceId)
 
-    await this.emailFacade.sendEmail({
+    await this.emailService.sendEmail({
       input: {
         initUserId: this.user.id,
         spaceId,
         activityType: SPACE_EVENT_ACTIVITY_TYPE[SPACE_EVENT_ACTIVITY_TYPE.space_unlocked],
       },
       receiverUserIds: [],
-      emailTypeId: EMAIL_TYPES.spaceChanged,
+      type: EMAIL_TYPES.spaceChanged,
     })
   }
 
@@ -179,5 +183,10 @@ export class SpacesController {
   @Patch('/hidden')
   async updateSpacesHidden(@Body() spacesHiddenDto: SpacesHiddenDto): Promise<void> {
     await this.spaceService.updateSpacesHiddenForAdmin(spacesHiddenDto.ids, spacesHiddenDto.hidden)
+  }
+
+  @Get()
+  async listSpaces(@Query() query: SpacePaginationDTO): Promise<PaginatedResult<SpaceListItemDTO>> {
+    return this.spaceService.paginateSpaces(query)
   }
 }

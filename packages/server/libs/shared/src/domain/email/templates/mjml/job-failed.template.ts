@@ -1,4 +1,3 @@
-/* eslint-disable max-len */
 import { EmailTemplateInput } from '@shared/domain/email/email.config'
 import { header, footer, generateJobDetailLink } from './common'
 

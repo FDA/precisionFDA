@@ -1,0 +1,332 @@
+import { http, HttpResponse } from 'msw'
+import { FetchWorkflowRequest, IWorkflow } from '../../features/workflows/workflows.types'
+
+export const mockExportWorkflow: IWorkflow = {
+  id: 1,
+  uid: 'workflow-test-456',
+  name: 'test-workflow',
+  title: 'Test Workflow',
+  added_by: 'user@example.com',
+  created_at: '2024-01-01T10:00:00Z',
+  created_at_date_time: '2024-01-01T10:00:00Z',
+  launched_by: 'user@example.com',
+  launched_on: null,
+  app_title: 'Test Workflow Application',
+  location: 'Private',
+  revision: 1,
+  job_count: 3,
+  readme: 'Test workflow for analysis and export functionality',
+  workflow_series_id: 1,
+  version: '1.0.0',
+  scope: 'private',
+  featured: false,
+  active: true,
+  links: {
+    show: '/workflows/workflow-test-456',
+    user: '/users/test.user',
+    attach_to: '/workflows/workflow-test-456/attach_to',
+    publish: '/publish?id=workflow-test-456',
+    copy: '/api/workflows/copy',
+    run_workflow: '/api/run_workflow',
+    batch_run_workflow: '/workflows/workflow-test-456/batch_workflow',
+    edit: '/workflows/workflow-test-456/edit',
+    fork: '/workflows/workflow-test-456/fork',
+    cwl_export: '/workflows/workflow-test-456/cwl_export',
+    wdl_export: '/workflows/workflow-test-456/wdl_export',
+    set_tags: '/api/set_tags',
+    set_tags_target: 'workflow-series-1',
+    delete: '/api/workflows/delete',
+    space: '/spaces/workflow-test-456',
+    diagram: '/workflows/workflow-test-456/diagram',
+    feature: '/api/workflows/feature',
+  },
+  jobs: null,
+  logged_dxuser: 'test.user',
+  tags: ['workflow', 'test', 'analysis'],
+  properties: {
+    description: 'Test workflow for export modal',
+    category: 'analysis',
+  },
+}
+
+export const mockDeleteWorkflows = [
+  { id: '5', name: 'workflow-1', location: '/workflows/wf1' },
+  { id: '6', name: 'pipeline-test', location: '/workflows/wf2' },
+]
+
+export const workflowMocks = [
+  http.post('/api/list_workflows', () =>
+    HttpResponse.json(
+      [
+        {
+          id: 1384,
+          uid: 'workflow-GQpbZg006XykzYb401XBqZjx-1',
+          className: 'workflow',
+          fa_class: 'fa-flash',
+          scope: 'private',
+          path: '/home/workflows/workflow-GQpbZg006XykzYb401XBqZjx-1',
+          owned: true,
+          editable: true,
+          accessible: true,
+          file_path: null,
+          parent_folder_name: null,
+          public: false,
+          private: true,
+          in_space: false,
+          space_private: false,
+          space_public: false,
+          title: 'My Workflow',
+          name: 'my-workflow',
+          edit_version: '0',
+          revision: 2,
+          readme:
+            '# SOmet titel\n\nsdflskdjflksjdlfjksd sdf sd sdf sd s sdfs df sd\n\n## fskdjflksjdflk\n```\nksjdfhkjsdhf\n```\n\n',
+          spec: {
+            input_spec: {
+              stages: [
+                {
+                  name: 'asdfasd',
+                  prev_slot: null,
+                  next_slot: null,
+                  slotId: 'stage-mkzss49a340000',
+                  app_dxid: 'app-GFz6Q7Q05Jy850Jj9vvxJVK8',
+                  app_uid: 'app-GFz6Q7Q05Jy850Jj9vvxJVK8-1',
+                  inputs: [],
+                  outputs: [],
+                  instanceType: 'baseline-8',
+                  stageIndex: 0,
+                },
+              ],
+            },
+            output_spec: { stages: []},
+          },
+          dxid: 'workflow-GQpbZg006XykzYb401XBqZjx',
+        },
+        {
+          id: 1381,
+          uid: 'workflow-G7bF48Q06Xyj65JzBJVbvqV0-1',
+          className: 'workflow',
+          fa_class: 'fa-flash',
+          scope: 'private',
+          path: '/home/workflows/workflow-G7bF48Q06Xyj65JzBJVbvqV0-1',
+          owned: true,
+          editable: true,
+          accessible: true,
+          file_path: null,
+          parent_folder_name: null,
+          public: false,
+          private: true,
+          in_space: false,
+          space_private: false,
+          space_public: false,
+          title: 'asdf',
+          name: 'asdf',
+          edit_version: '0',
+          revision: 1,
+          readme: '',
+          spec: {
+            input_spec: {
+              stages: [
+                {
+                  name: 'adf',
+                  prev_slot: null,
+                  next_slot: null,
+                  slotId: 'stage-ll7yvygjq80000',
+                  app_dxid: 'app-G7YKJvj0BfFg70X4G8qbb1PG',
+                  app_uid: 'app-G7YKJvj0BfFg70X4G8qbb1PG-1',
+                  inputs: [],
+                  outputs: [],
+                  instanceType: 'baseline-8',
+                  stageIndex: 0,
+                },
+              ],
+            },
+            output_spec: { stages: []},
+          },
+          dxid: 'workflow-G7bF48Q06Xyj65JzBJVbvqV0',
+        },
+      ],
+      { status: 200 },
+    ),
+  ),
+  http.get('/api/workflows/:uid', () =>
+    HttpResponse.json<FetchWorkflowRequest>(
+      {
+        workflow: {
+          id: 5621,
+          uid: 'workflow-Gbv64680kKyPqbQ57Fqg07zb-1',
+          name: 'wf-testing-string-input-choices-with-default',
+          title: 'WF testing-string-input-choices-with-default',
+          added_by: 'PrecisionFDA Admin - Dev',
+          created_at: '12/12/2023',
+          created_at_date_time: '2023-12-12 14:37:29 CET',
+          launched_by: 'PrecisionFDA Admin - Dev',
+          launched_on: null,
+          app_title: '',
+          location: 'Private',
+          revision: 1,
+          readme: '',
+          workflow_series_id: 2982,
+          version: '0',
+          scope: 'private',
+          featured: false,
+          active: true,
+          links: {
+            show: '/workflows/workflow-Gbv64680kKyPqbQ57Fqg07zb-1',
+            user: '/users/precisionfda.admin_dev',
+            attach_to: '/workflows/workflow-Gbv64680kKyPqbQ57Fqg07zb-1/attach_to',
+            publish: '/publish?id=workflow-Gbv64680kKyPqbQ57Fqg07zb-1',
+            copy: '/api/workflows/copy',
+            run_workflow: '/api/run_workflow',
+            batch_run_workflow: '/workflows/workflow-Gbv64680kKyPqbQ57Fqg07zb-1/batch_workflow',
+            edit: '/workflows/workflow-Gbv64680kKyPqbQ57Fqg07zb-1/edit',
+            fork: '/workflows/workflow-Gbv64680kKyPqbQ57Fqg07zb-1/fork',
+            cwl_export: '/workflows/workflow-Gbv64680kKyPqbQ57Fqg07zb-1/cwl_export',
+            wdl_export: '/workflows/workflow-Gbv64680kKyPqbQ57Fqg07zb-1/wdl_export',
+            set_tags: '/api/set_tags',
+            set_tags_target: 'workflow-series-2982',
+            delete: '/api/workflows/delete',
+            space: '/spaces/workflow-Gbv64680kKyPqbQ57Fqg07zb-1',
+            diagram: '/workflows/workflow-Gbv64680kKyPqbQ57Fqg07zb-1/diagram',
+            feature: '/api/workflows/feature',
+          },
+          jobs: null,
+          logged_dxuser: 'precisionfda.admin_dev',
+          tags: [],
+          job_count: 0,
+          properties: {},
+        },
+        meta: {
+          spec: {
+            input_spec: {
+              stages: [
+                {
+                  name: 'testing-string-input-choices-with-default',
+                  prev_slot: null,
+                  next_slot: null,
+                  slotId: 'stage-2thnlmirn40000',
+                  app_dxid: 'app-GK3fq90049qbJYgX5kpxxVZy',
+                  app_uid: 'app-GK3fq90049qbJYgX5kpxxVZy-1',
+                  inputs: [
+                    {
+                      class: 'string',
+                      label: 'Input label',
+                      name: 'input_name',
+                      optional: false,
+                      parent_slot: 'stage-2thnlmirn40000',
+                      requiredRunInput: false,
+                      stageName: 'testing-string-input-choices-with-default',
+                      default_workflow_value: 'input value',
+                      choices: [],
+                      values: {
+                        id: '1',
+                        name: 'input_name',
+                      },
+                    },
+                  ],
+                  outputs: [],
+                  instanceType: 'baseline-2',
+                  stageIndex: 0,
+                },
+              ],
+            },
+            output_spec: {
+              stages: [],
+            },
+          },
+          apps: [
+            {
+              id: 5339,
+              dxid: 'app-GK3fq90049qbJYgX5kpxxVZy',
+              version: null,
+              revision: 7,
+              title: 'Testing string input choices with default',
+              readme: '',
+              user_id: 488,
+              scope: 'private',
+              spec: {
+                input_spec: [
+                  {
+                    name: 'input_name',
+                    class: 'string',
+                    optional: false,
+                    label: 'Input label',
+                    help: 'help text',
+                    default: 'anything',
+                    choices: ['value', 'something', 'anything'],
+                  },
+                ],
+                output_spec: [],
+                internet_access: false,
+                instance_type: 'baseline-2',
+              },
+              internal: {
+                packages: [],
+                code: '',
+              },
+              created_at: '2022-11-30T15:50:13.000+01:00',
+              updated_at: '2022-11-30T15:50:13.000+01:00',
+              app_series_id: 2826,
+              verified: false,
+              uid: 'app-GK3fq90049qbJYgX5kpxxVZy-1',
+              dev_group: null,
+              release: '16.04',
+              featured: false,
+              deleted: false,
+              entity_type: 'regular',
+              tag_list: [],
+            },
+          ],
+          revisions: [
+            {
+              title: 'WF testing-string-input-choices-with-default',
+              id: 5621,
+              uid: 'workflow-Gbv64680kKyPqbQ57Fqg07zb-1',
+              dxid: 'workflow-Gbv64680kKyPqbQ57Fqg07zb',
+              revision: 1,
+              tag_list: [],
+              deleted: false,
+            },
+          ],
+          executions: new Map(),
+          batches: [],
+          challenges: null,
+          comments: [],
+          links: {
+            comments: '/workflows/workflow-Gbv64680kKyPqbQ57Fqg07zb-1/comments',
+            edit_tags: '/api/set_tags',
+          },
+        },
+      },
+      { status: 200 },
+    ),
+  ),
+  
+  // Handler for /api/workflows/delete (used by useDeleteModal)
+  http.post('/api/workflows/delete', () =>
+    HttpResponse.json({
+      meta: {
+        messages: [{ type: 'success', message: 'Workflows deleted successfully' }],
+      },
+    }),
+  ),
+  
+  // Handler for /api/workflows (create workflow)
+  http.post('/api/workflows', async ({ request }) => {
+    const formData = await request.formData()
+    const name = formData.get('name') as string
+    
+    return HttpResponse.json({
+      workflow: {
+        id: 1,
+        uid: 'workflow-new-123',
+        name: name || 'new-workflow',
+        title: name || 'New Workflow',
+        created_at: new Date().toISOString(),
+      },
+      meta: {
+        messages: [{ type: 'success', message: 'Workflow created successfully' }],
+      },
+    })
+  }),
+]

@@ -1,9 +1,4 @@
-import { EntityManager } from '@mikro-orm/mysql'
 import { stub } from 'sinon'
-import { expect } from 'chai'
-import { Logger } from '@nestjs/common'
-import { UserOpsCtx } from '@shared/types'
-import { EMAIL_TYPES } from '@shared/domain/email/email.config'
 import { SpaceInvitationHandler } from '@shared/domain/email/templates/handlers/space-invitation.handler'
 import { User } from '@shared/domain/user/user.entity'
 import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
@@ -12,137 +7,95 @@ import {
   SPACE_MEMBERSHIP_ROLE,
   SPACE_MEMBERSHIP_SIDE,
 } from '@shared/domain/space-membership/space-membership.enum'
+import { expect } from 'chai'
+import { EmailClient } from '@shared/services/email-client'
+import { UserRepository } from '@shared/domain/user/user.repository'
+import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
+import { Organization } from '@shared/domain/org/org.entity'
+import { InvitationToSpaceDTO } from '@shared/domain/email/dto/invitation-to-space.dto'
+import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
+import { config } from '@shared/config'
 
 describe('SpaceInvitationHandler', () => {
-  const MEMBERSHIP_ID = 1
-  const USER_ID = 2
-  const ADMIN_ID = 3
+  const ADMIN_ID = 123
+  const USER_ID = 456
+  const SPACE_MEMBERSHIP_ID = 10
+  const SPACE_ID = 99
 
-  const emFindOneOrFailStub = stub()
+  const emailClientSendEmailStub = stub()
+  const spaceMembershipRepoFindOneOrFailStub = stub()
+  const userRepoFindOneOrFailStub = stub()
 
-  const entityManager = {
-    findOneOrFail: emFindOneOrFailStub,
-  } as unknown as EntityManager
+  const userRepo = {
+    findOneOrFail: userRepoFindOneOrFailStub,
+  } as unknown as UserRepository
+  const spaceMembershipRepo = {
+    findOneOrFail: spaceMembershipRepoFindOneOrFailStub,
+  } as unknown as SpaceMembershipRepository
+  const emailClient = {
+    sendEmail: emailClientSendEmailStub,
+  } as unknown as EmailClient
 
-  const log = {
-    log: stub(),
-    error: stub(),
-  } as unknown as Logger
-
-  const userOpsCtx: UserOpsCtx = {
-    em: entityManager,
-    user: {
-      id: 1,
-      accessToken: 'accessToken',
-      dxuser: 'dxuser',
-    },
-    log,
+  const getHandler = () => {
+    return new SpaceInvitationHandler(userRepo, spaceMembershipRepo, emailClient)
   }
 
-  const getSpaceInvitationHandler = (membershipId: number, adminId: number) =>
-    new SpaceInvitationHandler(EMAIL_TYPES.spaceInvitation, { membershipId, adminId }, userOpsCtx)
+  beforeEach(async () => {
+    emailClientSendEmailStub.reset()
+    emailClientSendEmailStub.throws()
 
-  const createMockUser = (
-    id: number,
-    email: string,
-    firstName = 'John',
-    lastName = 'Doe',
-    dxuser = 'dxuser',
-  ) =>
-    ({
-      id,
-      firstName,
-      lastName,
-      email,
-      dxuser,
-      fullName: `${firstName} ${lastName}`,
-    }) as unknown as User
+    spaceMembershipRepoFindOneOrFailStub.reset()
+    spaceMembershipRepoFindOneOrFailStub.throws()
 
-  const createMockSpace = (id: number, name: string) =>
-    ({
-      id,
-      name,
-      spaceMemberships: {
-        getItems: () => [
-          {
-            role: SPACE_MEMBERSHIP_ROLE.ADMIN,
-            user: {
-              getEntity: () => ({
-                id: 3,
-                fullName: 'Admin User',
-                email: 'admin@domain.com',
-              }),
-            },
-          },
-        ],
-      },
-    }) as unknown as Space
-
-  const createMockSpaceMembership = (id: number, user: User, space: Space) =>
-    ({
-      id,
-      user: {
-        getEntity: () => user,
-      },
-      spaces: [space],
-      role: SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR,
-      side: SPACE_MEMBERSHIP_SIDE.HOST,
-      getSpaceMembershipSideAlias: () => 'reviewer',
-      getSpaceMembershipRoleAlias: () => 'Contributor',
-    }) as unknown as SpaceMembership
-
-  beforeEach(() => {
-    emFindOneOrFailStub.reset()
-    emFindOneOrFailStub.throws()
+    userRepoFindOneOrFailStub.reset()
+    userRepoFindOneOrFailStub.throws()
   })
 
-  it('getNotificationKey', () => {
-    const handler = getSpaceInvitationHandler(MEMBERSHIP_ID, ADMIN_ID)
-    expect(handler.getNotificationKey()).to.eq('space_invitation')
-  })
+  describe('#sendEmail', () => {
+    it('basic', async () => {
+      const organization = new Organization()
+      const user = new User(organization)
+      user.id = USER_ID
+      user.email = 'user@email.com'
+      const adminUser = new User(organization)
+      adminUser.firstName = 'Šáh'
+      adminUser.lastName = 'Munato'
+      adminUser.email = 'admin@email.com'
+      const space = new Space()
+      space.id = SPACE_ID
+      space.name = 'Test Space'
+      const spaceMembership = new SpaceMembership(
+        user,
+        space,
+        SPACE_MEMBERSHIP_SIDE.HOST,
+        SPACE_MEMBERSHIP_ROLE.ADMIN,
+      )
 
-  it('determineReceivers', async () => {
-    const space = createMockSpace(1, 'Research Space')
-    const user = createMockUser(USER_ID, 'user@domain.com')
-    const adminUser = createMockUser(3, 'admin@domain.com', 'Admin', 'User')
-    const membership = createMockSpaceMembership(MEMBERSHIP_ID, user, space)
+      userRepoFindOneOrFailStub.withArgs({ id: ADMIN_ID }).returns(adminUser)
+      spaceMembershipRepoFindOneOrFailStub
+        .withArgs({ id: SPACE_MEMBERSHIP_ID }, { populate: ['spaces', 'user'] })
+        .returns(spaceMembership)
+      emailClientSendEmailStub.reset()
 
-    emFindOneOrFailStub
-      .withArgs(SpaceMembership, { id: MEMBERSHIP_ID }, { populate: ['spaces', 'user'] })
-      .resolves(membership)
-    emFindOneOrFailStub.withArgs(User, { id: adminUser.id }).resolves(adminUser)
+      const input = new InvitationToSpaceDTO()
+      input.membershipId = SPACE_MEMBERSHIP_ID
+      input.adminId = ADMIN_ID
 
-    const handler = getSpaceInvitationHandler(MEMBERSHIP_ID, ADMIN_ID)
-    await handler.setupContext()
+      const handler = getHandler()
+      await handler.sendEmail(input)
 
-    const receivers = await handler.determineReceivers()
-    expect(receivers).to.eql([user])
-  })
-
-  it('template should generate correct email template', async () => {
-    const space = createMockSpace(1, 'Research Space')
-    const user = createMockUser(USER_ID, 'user@domain.com')
-    const adminUser = createMockUser(3, 'admin@domain.com', 'Admin', 'User')
-    const membership = createMockSpaceMembership(MEMBERSHIP_ID, user, space)
-
-    emFindOneOrFailStub
-      .withArgs(SpaceMembership, { id: MEMBERSHIP_ID }, { populate: ['spaces', 'user'] })
-      .resolves(membership)
-    emFindOneOrFailStub.withArgs(User, { id: adminUser.id }).resolves(adminUser)
-
-    const handler = getSpaceInvitationHandler(MEMBERSHIP_ID, ADMIN_ID)
-    await handler.setupContext()
-
-    const result = await handler.template(user)
-
-    expect(result.emailType).to.eq(EMAIL_TYPES.spaceInvitation)
-    expect(result.to).to.eq(user.email)
-    expect(result.subject).to.eq(
-      `${adminUser.firstName} ${adminUser.lastName} added you to the space "Research Space"`,
-    )
-    expect(result.body).to.contain('View Space')
-    expect(result.body).to.contain('Research Space')
-    expect(result.body).to.contain('Role: <strong>Contributor</strong>')
-    expect(result.body).to.contain('Side: <strong>reviewer</strong>')
+      expect(emailClientSendEmailStub.calledOnce).to.eq(true)
+      expect(emailClientSendEmailStub.firstCall.firstArg.emailType).to.eq(
+        EMAIL_TYPES.spaceInvitation,
+      )
+      expect(emailClientSendEmailStub.firstCall.firstArg.to).to.eq(user.email)
+      expect(emailClientSendEmailStub.firstCall.firstArg.subject).to.eq(
+        `${adminUser.firstName} ${adminUser.lastName} added you to the space "${space.name}"`,
+      )
+      expect(emailClientSendEmailStub.firstCall.firstArg.body).to.contain(`${space.name}`)
+      expect(emailClientSendEmailStub.firstCall.firstArg.body).to.contain(
+        `${config.api.railsHost}/spaces/${space.id}`,
+      )
+    })
   })
 })

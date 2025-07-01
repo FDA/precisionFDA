@@ -1,7 +1,8 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Injectable, Logger } from '@nestjs/common'
-import { EMAIL_TYPES, EmailSendInput } from '@shared/domain/email/email.config'
+import { EmailSendInput } from '@shared/domain/email/email.config'
 import { buildEmailTemplate } from '@shared/domain/email/email.helper'
+import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
 import { EmailQueueJobProducer } from '@shared/domain/email/producer/email-queue-job.producer'
 import { EntityService } from '@shared/domain/entity/entity.service'
 import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
@@ -35,7 +36,11 @@ export class DiscussionNotificationService {
     private readonly discussionRepository: DiscussionRepository,
   ) {}
 
-  private async notifySpaceMembers(emailBody: string, subject: string, space: Space) {
+  private async notifySpaceMembers(
+    emailBody: string,
+    subject: string,
+    space: Space,
+  ): Promise<void> {
     const spaceMemberships = await this.em.find(
       SpaceMembership,
       { spaces: space.id, active: true },
@@ -58,7 +63,7 @@ export class DiscussionNotificationService {
     }
   }
 
-  private async notifyUser(emailBody: string, subject: String, user: User) {
+  private async notifyUser(emailBody: string, subject: String, user: User): Promise<void> {
     this.logger.log(`Sending discussion email notification to user (id: ${user.id})`)
 
     const email = user.email
@@ -71,7 +76,7 @@ export class DiscussionNotificationService {
     await this.emailQueueJobProducer.createSendEmailTask(emailTask, this.user)
   }
 
-  async notifyNewDiscussion(discussionId: number, notify: NotifyType) {
+  async notifyNewDiscussion(discussionId: number, notify: NotifyType): Promise<void> {
     const discussion = await this.discussionRepository.findOne(discussionId, {
       populate: ['note', 'user'],
     })
@@ -121,7 +126,7 @@ export class DiscussionNotificationService {
     await Promise.all(emailTasks)
   }
 
-  async notifyNewDiscussionReply(discussionId: number, notify: NotifyType) {
+  async notifyNewDiscussionReply(discussionId: number, notify: NotifyType): Promise<void> {
     const discussion = await this.discussionRepository.findOne(discussionId, {
       populate: ['note', 'user', 'follows'],
     })

@@ -18,15 +18,16 @@ import { CliCreateDiscussionDTO } from '@shared/domain/cli/dto/cli-create-discus
 import { CliCreateReplyDTO } from '@shared/domain/cli/dto/cli-create-reply.dto'
 import { CliEditDiscussionDTO } from '@shared/domain/cli/dto/cli-edit-discussion.dto'
 import { CliEditReplyDTO } from '@shared/domain/cli/dto/cli-edit-reply.dto'
-import { CliCreateDiscussionFacade } from '../facade/discussion/cli-create-discussion.facade'
-import { CliCreateDiscussionReplyFacade } from '../facade/discussion/cli-create-discussion-reply.facade'
-import { CliUpdateDiscussionFacade } from '../facade/discussion/cli-update-discussion.facade'
-import { CliUpdateDiscussionReplyFacade } from '../facade/discussion/cli-update-discussion-reply.facade'
+import { CliCreateDiscussionFacade } from '../facade/cli/cli-create-discussion.facade'
+import { CliCreateDiscussionReplyFacade } from '../facade/cli/cli-create-discussion-reply.facade'
+import { CliUpdateDiscussionFacade } from '../facade/cli/cli-update-discussion.facade'
+import { CliUpdateDiscussionReplyFacade } from '../facade/cli/cli-update-discussion-reply.facade'
 import { CliDescribeEntityFacade } from '../facade/cli/cli-describe-entity.facade'
 import { CliJobScopeFacade } from '../facade/cli/cli-job-scope.facade'
 import { EntityScope } from '@shared/types/common'
 import { CliNodeRemoveDTO } from '@shared/domain/cli/dto/cli-node-remove.dto'
 import { CliNodeRemoveFacade } from '../facade/cli/cli-node-remove.facade'
+import { CliListMembersFacade } from '../facade/cli/cli-list-members.facade'
 import {
   CliAppDescribeDTO,
   CliDbClusterDescribeDTO,
@@ -39,6 +40,8 @@ import {
 import { CliSpaceMemberDTO } from '@shared/domain/cli/dto/cli-space-member.dto'
 import { CliDiscussionDTO } from '@shared/domain/cli/dto/cli-discussion.dto'
 import { CliNodeDTO } from '@shared/domain/cli/dto/cli-node.dto'
+import { CliListDiscussionsFacade } from '../facade/cli/cli-list-discussions.facade'
+import { CliFindNodesFacade } from '../facade/cli/cli-find-nodes.facade'
 
 // SPECIAL ROUTES INTENDED FOR CLI USAGE ONLY. CONTAINS CLI SPECIFIC LOGIC & SPECIAL RESPONSE OBJECTS.
 @Controller('/cli')
@@ -52,13 +55,16 @@ export class CliController {
     private readonly cliUpdateDiscussionFacade: CliUpdateDiscussionFacade,
     private readonly cliUpdateDiscussionReplyFacade: CliUpdateDiscussionReplyFacade,
     private readonly cliJobScopeFacade: CliJobScopeFacade,
+    private readonly cliListMembersFacade: CliListMembersFacade,
+    private readonly cliListDiscussionsFacade: CliListDiscussionsFacade,
+    private readonly cliFindNodesFacade: CliFindNodesFacade,
   ) {}
 
   @UseGuards(UserContextGuard)
   @HttpCode(200)
   @Post('/nodes')
   async findNodes(@Body() body: CliNodeSearchDTO): Promise<CliNodeDTO[]> {
-    return this.cliService.findNodes(body)
+    return await this.cliFindNodesFacade.findNodes(body)
   }
 
   @UseGuards(UserContextGuard)
@@ -69,7 +75,7 @@ export class CliController {
 
   @Get('/version/latest')
   getLatestVersion(): { version: string } {
-    return { version: '2.10.0' }
+    return { version: '2.10.1' }
   }
 
   @UseGuards(UserContextGuard)
@@ -99,13 +105,13 @@ export class CliController {
   @UseGuards(UserContextGuard)
   @Get('/spaces/:id/members')
   async listMembers(@Param('id') spaceId: number): Promise<CliSpaceMemberDTO[]> {
-    return this.cliService.listSpaceMembers(spaceId)
+    return this.cliListMembersFacade.listSpaceMembers(spaceId)
   }
 
   @UseGuards(UserContextGuard)
   @Get('/spaces/:id/discussions')
   async listDiscussions(@Param('id') spaceId: number): Promise<CliDiscussionDTO[]> {
-    return this.cliService.listSpaceDiscussions(spaceId)
+    return this.cliListDiscussionsFacade.listDiscussions(spaceId)
   }
 
   // TODO: REMOVE IN V3.0.0, migrated to /cli/{uid}/describe
@@ -162,13 +168,11 @@ export class CliController {
   }
 
   @UseGuards(UserContextGuard)
-  @Put('/discussions/:discussionId')
+  @Put('/discussions/:id')
   async editDiscussion(
-    @Param('discussionId') id: number,
+    @Param('id') id: number,
     @Body() body: CliEditDiscussionDTO,
-  ): Promise<{
-    url: string
-  }> {
+  ): Promise<{ url: string }> {
     const url = await this.cliUpdateDiscussionFacade.updateDiscussion(id, body)
     return { url }
   }

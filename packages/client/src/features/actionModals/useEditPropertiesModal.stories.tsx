@@ -1,11 +1,13 @@
 import React, { useEffect } from 'react'
-import { Meta, StoryObj } from '@storybook/react'
+import { Meta, StoryObj } from '@storybook/react-webpack5'
 import { StorybookProviders } from '../../stories/StorybookProviders'
 import { WithListData } from '../../stories/helpers'
-import { APIResource } from '../home/types'
-import { fetchFiles } from '../files/files.api'
-import { fetchApps } from '../apps/apps.api'
+import { APIResource, PropertiesResource, ServerScope } from '../home/types'
+import { fetchFiles, FetchFilesQuery } from '../files/files.api'
+import { fetchApps, FetchAppsQuery } from '../apps/apps.api'
 import { useEditPropertiesModal } from './useEditPropertiesModal'
+import { IFile, IFolder } from '../files/files.types'
+import { IApp } from '../apps/apps.types'
 
 const meta: Meta = {
   title: 'Modals/Common',
@@ -18,45 +20,103 @@ const meta: Meta = {
   ],
 }
 
+type EditableResource = {
+  id: number
+  name: string
+  properties: { [key: string]: string }
+  scope: ServerScope
+  featured: boolean
+}
+
 type Props = {
-  data: Partial<{ uid: string }>[]
-  type: APIResource
+  data: EditableResource
+  type: PropertiesResource
 }
 
 type Story = StoryObj<Props>
 
 const EditPropertiesModalWrapper = (props: Props) => {
   const { modalComp, setShowModal } = useEditPropertiesModal({
-    resource: props.type,
     selected: [props.data],
+    type: props.type,
   })
 
   useEffect(() => {
     setShowModal(true)
-  }, [])
+  }, [setShowModal])
   return modalComp
 }
 
+const convertToEditableResource = (item: IFile | IFolder | IApp): EditableResource => ({
+  id: item.id,
+  name: item.name,
+  properties: item.properties,
+  scope: item.scope,
+  featured: item.featured,
+})
+
+const getAPIResourceFromPropertiesResource = (type: PropertiesResource): APIResource => {
+  switch (type) {
+    case 'node':
+      return 'files'
+    case 'appSeries':
+      return 'apps'
+    default:
+      return 'files' // fallback
+  }
+}
+
 export const EditPropertiesModal: Story = {
-  render: ({ type = 'files' }) => {
-    let fetchFunc: unknown
-    if (type === 'files') {
-      fetchFunc = fetchFiles
+  render: ({ type = 'node' }) => {
+    const apiResource = getAPIResourceFromPropertiesResource(type)
+    
+    if (apiResource === 'files') {
+      return (
+        <WithListData resource={apiResource} fetchList={fetchFiles}>
+          {({ data }) => {
+            if (!data) {
+              return <div>No data available</div>
+            }
+            
+            const filesData = data as FetchFilesQuery
+            const items = filesData.files || []
+            const firstItem = items[0]
+            
+            if (!firstItem) {
+              return <div>No data available</div>
+            }
+            
+            const editableData = convertToEditableResource(firstItem)
+            return <EditPropertiesModalWrapper data={editableData} type={type} />
+          }}
+        </WithListData>
+      )
+    } else {
+      return (
+        <WithListData resource={apiResource} fetchList={fetchApps}>
+          {({ data }) => {
+            if (!data) {
+              return <div>No data available</div>
+            }
+            
+            const appsData = data as FetchAppsQuery
+            const items = appsData.apps || []
+            const firstItem = items[0]
+            
+            if (!firstItem) {
+              return <div>No data available</div>
+            }
+            
+            const editableData = convertToEditableResource(firstItem)
+            return <EditPropertiesModalWrapper data={editableData} type={type} />
+          }}
+        </WithListData>
+      )
     }
-    if (type === 'apps') {
-      fetchFunc = fetchApps
-    }
-    return (
-      <WithListData resource={type} fetchList={fetchFunc || fetchFiles}>
-        {({ data }) => {
-          return <EditPropertiesModalWrapper data={data[type]?.[0]} type={type} />
-        }}
-      </WithListData>
-    )
   },
   argTypes: {
     type: {
-      options: ['files', 'apps'] as APIResource[],
+      options: ['node', 'appSeries'] as PropertiesResource[],
       control: { type: 'radio' },
     },
   },

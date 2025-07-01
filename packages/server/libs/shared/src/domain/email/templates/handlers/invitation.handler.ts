@@ -1,38 +1,44 @@
-import { buildEmailTemplate, ObjectIdInputDTO } from '@shared/domain/email/email.helper'
-import { UserOpsCtx } from '@shared/types'
-import {
-  EMAIL_TYPES,
-  EmailSendInput,
-  EmailTemplate,
-  NOTIFICATION_TYPES_BASE,
-} from '@shared/domain/email/email.config'
-import { BaseTemplate } from '@shared/domain/email/templates/base-template'
-import {
-  invitationTemplate,
-  InvitationTemplateInput,
-} from '@shared/domain/email/templates/mjml/invitation.template'
-import { Invitation } from '@shared/domain/invitation/invitation.entity'
+import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
+import { invitationTemplate } from '@shared/domain/email/templates/mjml/invitation.template'
 import { User } from '@shared/domain/user/user.entity'
 import { config } from '@shared/config'
+import { EmailHandler } from '@shared/domain/email/templates/handlers/email.handler'
+import { Injectable } from '@nestjs/common'
+import { EmailClient } from '@shared/services/email-client'
+import { InvitationRepository } from '@shared/domain/invitation/invitation.repository'
+import {
+  EmailTypeToContextMap,
+  InvitationContext,
+} from '@shared/domain/email/dto/email-type-to-context.map'
+import { ObjectIdInputDTO } from '@shared/domain/email/dto/object-id.dto'
+import { EmailTypeToTemplateInputMap } from '@shared/domain/email/dto/email-type-to-template-input.map'
 
-export class InvitationHandler
-  extends BaseTemplate<ObjectIdInputDTO, UserOpsCtx>
-  implements EmailTemplate<InvitationTemplateInput>
-{
-  templateFile = invitationTemplate
-  invitation: Invitation
+@Injectable()
+export class InvitationHandler extends EmailHandler<EMAIL_TYPES.invitation> {
+  protected emailType = EMAIL_TYPES.invitation as const
+  protected inputDto = ObjectIdInputDTO
+  protected getBody = invitationTemplate
 
-  async setupContext(): Promise<void> {
-    this.invitation = await this.ctx.em.findOneOrFail(Invitation, {
-      id: this.validatedInput.id,
+  constructor(
+    protected readonly invitationRepo: InvitationRepository,
+    protected readonly emailClient: EmailClient,
+  ) {
+    super(emailClient)
+  }
+
+  protected async getContextualData(
+    input: ObjectIdInputDTO,
+  ): Promise<EmailTypeToContextMap[EMAIL_TYPES.invitation]> {
+    const invitation = await this.invitationRepo.findOneOrFail({
+      id: input.id,
     })
+    return {
+      invitation,
+      input,
+    }
   }
 
-  getNotificationKey(): keyof typeof NOTIFICATION_TYPES_BASE {
-    return 'invitation'
-  }
-
-  async determineReceivers(): Promise<User[]> {
+  protected async determineReceivers(): Promise<User[]> {
     const recipients = [{ email: config.pfdaEmail } as User]
     if (config.env === 'production') {
       recipients.push({ email: config.pfdaEmail } as User)
@@ -40,31 +46,31 @@ export class InvitationHandler
     return recipients
   }
 
-  async template(receiver: User): Promise<EmailSendInput> {
-    const body = buildEmailTemplate<InvitationTemplateInput>(this.templateFile, {
-      firstName: this.invitation.firstName,
-      lastName: this.invitation.lastName,
-      email: this.invitation.email,
-      address1: this.invitation.address1,
-      address2: this.invitation.address2,
-      phone: this.invitation.phone,
-      duns: this.invitation.duns,
-      reqReason: this.invitation.extras.req_reason,
-      reqData: this.invitation.extras.req_data,
-      reqSoftware: this.invitation.extras.req_software,
-      researchIntent: this.invitation.extras.research_intent,
-      clinicalIntent: this.invitation.extras.clinical_intent,
-      participateIntent: this.invitation.extras.participate_intent,
-      organizeIntent: this.invitation.extras.organize_intent,
-      ip: this.invitation.ip,
-      receiver,
-    })
+  protected getSubject(_receiver: User, context: InvitationContext): string {
+    return `New access request from ${context.invitation.firstName} ${context.invitation.lastName}`
+  }
+
+  protected getTemplateInput(
+    receiver: User,
+    context: InvitationContext,
+  ): EmailTypeToTemplateInputMap[EMAIL_TYPES.invitation] {
     return {
-      emailType: EMAIL_TYPES.invitation,
-      to: receiver.email,
-      replyTo: config.pfdaEmail,
-      body,
-      subject: `New access request from ${this.invitation.firstName} ${this.invitation.lastName}`,
+      firstName: context.invitation.firstName,
+      lastName: context.invitation.lastName,
+      email: context.invitation.email,
+      address1: context.invitation.address1,
+      address2: context.invitation.address2,
+      phone: context.invitation.phone,
+      duns: context.invitation.duns,
+      reqReason: context.invitation.extras.req_reason,
+      reqData: context.invitation.extras.req_data,
+      reqSoftware: context.invitation.extras.req_software,
+      researchIntent: context.invitation.extras.research_intent,
+      clinicalIntent: context.invitation.extras.clinical_intent,
+      participateIntent: context.invitation.extras.participate_intent,
+      organizeIntent: context.invitation.extras.organize_intent,
+      ip: context.invitation.ip,
+      receiver,
     }
   }
 }
