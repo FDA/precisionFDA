@@ -410,7 +410,7 @@ describe('UserFileService', () => {
 
       await getInstance().closeFile(UID, 'UPDATE_DATA_PORTAL_IMAGE_URL')
 
-      expect(createFileSynchronizeJobTaskStub.calledOnce).to.be.true
+      expect(createFileSynchronizeJobTaskStub.calledOnce).to.be.true()
       expect(createFileSynchronizeJobTaskStub.firstCall.args[0]).deep.eq({
         fileUid: 'file-dxid-1',
         isChallengeBotFile: false,
@@ -454,7 +454,7 @@ describe('UserFileService', () => {
 
       await getInstance().closeFile(UID, 'UPDATE_DATA_PORTAL_IMAGE_URL')
 
-      expect(createFileSynchronizeJobTaskStub.calledOnce).to.be.true
+      expect(createFileSynchronizeJobTaskStub.calledOnce).to.be.true()
       expect(createFileSynchronizeJobTaskStub.firstCall.args[0]).deep.eq({
         fileUid: 'file-dxid-1',
         isChallengeBotFile: true,
@@ -480,9 +480,9 @@ describe('UserFileService', () => {
 
       const res = await getInstance().synchronizeFile(UID, false)
 
-      expect(res).to.be.true
-      expect(fileDescribeStub.calledOnce).to.be.true
-      expect(createNotificationStub.calledOnce).to.be.true
+      expect(res).to.be.true()
+      expect(fileDescribeStub.calledOnce).to.be.true()
+      expect(createNotificationStub.calledOnce).to.be.true()
       expect(createNotificationStub.firstCall.args[0]).deep.eq({
         message: `File ${NAME} is closed`,
         severity: SEVERITY.INFO,
@@ -508,16 +508,16 @@ describe('UserFileService', () => {
 
       const res = await getInstance().synchronizeFile(UID, false)
 
-      expect(res).to.be.true
-      expect(fileDescribeStub.calledOnce).to.be.true
-      expect(createNotificationStub.calledOnce).to.be.true
+      expect(res).to.be.true()
+      expect(fileDescribeStub.calledOnce).to.be.true()
+      expect(createNotificationStub.calledOnce).to.be.true()
       expect(createNotificationStub.firstCall.args[0]).deep.eq({
         message: `File ${NAME} is closed`,
         severity: SEVERITY.INFO,
         action: NOTIFICATION_ACTION.FILE_CLOSED,
         userId: USER.id,
       })
-      expect(createAndSendSpaceEventStub.calledOnce).to.be.true
+      expect(createAndSendSpaceEventStub.calledOnce).to.be.true()
       expect(createAndSendSpaceEventStub.firstCall.args[0]).deep.eq({
         spaceId: 1,
         userId: 0,
@@ -545,9 +545,9 @@ describe('UserFileService', () => {
 
       const res = await getInstance().synchronizeFile(UID, true)
 
-      expect(res).to.be.true
-      expect(fileDescribeStub.calledOnce).to.be.true
-      expect(createNotificationStub.calledOnce).to.be.true
+      expect(res).to.be.true()
+      expect(challengeBotFileDescribeStub.calledOnce).to.be.true()
+      expect(createNotificationStub.calledOnce).to.be.true()
       expect(createNotificationStub.firstCall.args[0]).deep.eq({
         message: `File ${NAME} is closed`,
         severity: SEVERITY.INFO,
@@ -589,10 +589,10 @@ describe('UserFileService', () => {
       const response = await getInstance().composeFilesForBulkDownload(IDs)
 
       // assert
-      expect(loadNodesStub.calledOnce).to.be.true
+      expect(loadNodesStub.calledOnce).to.be.true()
       expect(loadNodesStub.firstCall.args[0]).to.eq(IDs)
 
-      expect(fileDownloadLinkStub.calledTwice).to.be.true
+      expect(fileDownloadLinkStub.calledTwice).to.be.true()
       expect(fileDownloadLinkStub.firstCall.args[0]).to.deep.eq({
         fileDxid: 'file-123',
         filename: 'name-123',
@@ -606,7 +606,7 @@ describe('UserFileService', () => {
         duration: 24 * 60 * 60,
       })
 
-      expect(createFileEventStub.calledTwice).to.be.true
+      expect(createFileEventStub.calledTwice).to.be.true()
       expect(createFileEventStub.firstCall.args[0]).to.eq(EVENT_TYPES.FILE_BULK_DOWNLOAD)
       expect(createFileEventStub.firstCall.args[2]).to.eq('file-123-1_path')
       expect(createFileEventStub.firstCall.args[3]).to.deep.eq(USER)
@@ -614,7 +614,7 @@ describe('UserFileService', () => {
       expect(createFileEventStub.secondCall.args[2]).to.eq('file-234-1_path')
       expect(createFileEventStub.secondCall.args[3]).to.deep.eq(USER)
 
-      expect(persistStub.calledTwice).to.be.true
+      expect(persistStub.calledTwice).to.be.true()
       expect(persistStub.firstCall.args[0].type).to.eq(EVENT_TYPES.FILE_BULK_DOWNLOAD)
       expect(persistStub.firstCall.args[0].param1).to.eq('file_path')
       expect(persistStub.secondCall.args[0].type).to.eq(EVENT_TYPES.FILE_BULK_DOWNLOAD)
@@ -749,7 +749,7 @@ describe('UserFileService', () => {
       const res = await getInstance().listSelectedFiles([file1.id, folder2.id])
       expect(res.length).to.eq(2)
       expect((res[0] as SelectedFile).sourceFolderId).to.eq(undefined)
-      expect(collectChildrenStub.calledOnce).to.be.true
+      expect(collectChildrenStub.calledOnce).to.be.true()
     })
   })
 
@@ -824,7 +824,7 @@ describe('UserFileService', () => {
       } as unknown as Space)
 
       await userFileService.validateProtectedSpaces('action', 1, nodeInSpace)
-      expect(spaceFindOneStub.calledOnce).to.be.true
+      expect(spaceFindOneStub.calledOnce).to.be.true()
       expect(spaceFindOneStub.firstCall.args[0]).to.eq(1)
       expect(spaceFindOneStub.firstCall.args[1]).to.deep.eq({
         populate: ['spaceMemberships', 'spaceMemberships.user'],
@@ -848,7 +848,7 @@ describe('UserFileService', () => {
       const userFileService = getInstance()
       await userFileService.validateAssetRemoval(asset)
 
-      expect(emPopulateStub.calledOnce).to.be.true
+      expect(emPopulateStub.calledOnce).to.be.true()
     })
 
     it('has app and no license - no error', async () => {
@@ -864,7 +864,7 @@ describe('UserFileService', () => {
       const userFileService = getInstance()
       await userFileService.validateAssetRemoval(asset)
 
-      expect(emPopulateStub.calledOnce).to.be.true
+      expect(emPopulateStub.calledOnce).to.be.true()
     })
 
     it('has app and license - throws error', async () => {
