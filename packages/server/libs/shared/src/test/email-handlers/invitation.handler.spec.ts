@@ -64,7 +64,7 @@ describe('InvitationHandler', () => {
       const handler = getHandler()
       await handler.sendEmail(input)
 
-      expect(emailClientSendEmailStub.calledOnce).to.be.true
+      expect(emailClientSendEmailStub.calledOnce).to.be.true()
       expect(emailClientSendEmailStub.firstCall.firstArg.emailType).to.eq(EMAIL_TYPES.invitation)
       expect(emailClientSendEmailStub.firstCall.firstArg.to).to.eq(config.pfdaEmail)
       expect(emailClientSendEmailStub.firstCall.firstArg.subject).to.eq(

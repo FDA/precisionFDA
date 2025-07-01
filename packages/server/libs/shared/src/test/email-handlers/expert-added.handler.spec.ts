@@ -52,7 +52,7 @@ describe('ExpertAddedHandler', () => {
       const handler = getHandler()
       await handler.sendEmail(input)
 
-      expect(emailClientSendEmailStub.calledOnce).to.be.true
+      expect(emailClientSendEmailStub.calledOnce).to.be.true()
       expect(emailClientSendEmailStub.firstCall.args[0].emailType).to.eq(EMAIL_TYPES.expertAdded)
       expect(emailClientSendEmailStub.firstCall.args[0].to).to.deep.eq(user.email)
       expect(emailClientSendEmailStub.firstCall.args[0].subject).to.eq(

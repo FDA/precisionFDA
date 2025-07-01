@@ -1,0 +1,77 @@
+import { Meta, StoryObj } from '@storybook/react-webpack5'
+import React, { useEffect } from 'react'
+import { StorybookProviders } from '../../stories/StorybookProviders'
+import { mockDeleteApps } from '../../mocks/handlers/apps.handlers'
+import { mockDeleteAssets } from '../../mocks/handlers/assets.handlers'
+import { mockDeleteWorkflows } from '../../mocks/handlers/workflows.handlers'
+import { useDeleteModal } from './useDeleteModal'
+
+const meta: Meta = {
+  title: 'Modals/Common',
+  decorators: [
+    Story => (
+      <StorybookProviders>
+        <Story />
+      </StorybookProviders>
+    ),
+  ],
+}
+
+type Props = {
+  resource: 'app' | 'asset' | 'workflow'
+  multipleItems: boolean
+}
+type Story = StoryObj<Props>
+
+const DeleteModalWrapper = ({ resource, multipleItems }: Props) => {
+  const getSelectedData = () => {
+    switch (resource) {
+      case 'app':
+        return multipleItems ? mockDeleteApps : [mockDeleteApps[0]]
+      case 'asset':
+        return multipleItems ? mockDeleteAssets : [mockDeleteAssets[0]]
+      case 'workflow':
+        return multipleItems ? mockDeleteWorkflows : [mockDeleteWorkflows[0]]
+      default:
+        return [mockDeleteApps[0]]
+    }
+  }
+
+  const mockRequest = async (ids: number[]) => {
+    return fetch(`/api/${resource}s/delete`, {
+      method: 'POST',
+      body: JSON.stringify({ item_ids: ids }),
+      headers: { 'Content-Type': 'application/json' },
+    }).then(r => r.json())
+  }
+
+  const { modalComp, setShowModal } = useDeleteModal({
+    resource,
+    selected: getSelectedData(),
+    request: mockRequest,
+    onSuccess: (res) => console.log('Delete success:', res),
+  })
+
+  useEffect(() => {
+    setShowModal(true)
+  }, [setShowModal])
+
+  return modalComp
+}
+
+export const DeleteModal: Story = {
+  render: ({ resource = 'app', multipleItems = false }) => {
+    return <DeleteModalWrapper resource={resource} multipleItems={multipleItems} />
+  },
+  argTypes: {
+    resource: {
+      options: ['app', 'asset', 'workflow'],
+      control: { type: 'radio' },
+    },
+    multipleItems: {
+      control: { type: 'boolean' },
+    },
+  },
+}
+
+export default meta

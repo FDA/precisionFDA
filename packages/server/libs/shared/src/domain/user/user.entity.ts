@@ -1,7 +1,6 @@
 import {
   Collection,
   Entity,
-  EntityRepositoryType,
   Enum,
   ManyToOne,
   OneToMany,
@@ -237,9 +236,7 @@ export class User extends BaseEntity {
     mappedBy: 'user',
     nullable: true,
   })
-  notificationPreference: Ref<NotificationPreference>;
-
-  [EntityRepositoryType]?: UserRepository
+  notificationPreference: Ref<NotificationPreference>
 
   @OneToOne({
     entity: () => Expert,

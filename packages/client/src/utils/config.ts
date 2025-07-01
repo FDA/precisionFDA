@@ -29,4 +29,4 @@ export const notificationsConfig: ToastOptions = {
 
 export const DEFAULT_RECONNECT_INTERVAL = 1000 // ms
 export const DEFAULT_RECONNECT_ATTEMPTS = 1000 // ms
-export const SHOULD_RECONNECT = !ENABLE_DEV_MSW
+export const SHOULD_RECONNECT = !process.env.ENABLE_DEV_MSW

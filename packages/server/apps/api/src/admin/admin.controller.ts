@@ -33,6 +33,7 @@ import { UserContextGuard } from '../user-context/guard/user-context.guard'
 import { SiteAdminGuard } from './guards/site-admin.guard'
 import { getAdminBodyValidationPipe } from './pipes/admin-body-validation.pipe'
 import { enumValidator, numericBodyValidator } from './possibly-reusable-things'
+import { UserRepository } from '@shared/domain/user/user.repository'
 
 interface ISetTotalLimitParams {
   ids: number[]
@@ -65,6 +66,7 @@ export class AdminController {
     private readonly userService: UserService,
     private readonly maintenanceJobProducer: MaintenanceQueueJobProducer,
     private readonly invitationService: InvitationService,
+    private readonly userRepo: UserRepository,
   ) {}
 
   @Get('/stats')
@@ -97,7 +99,7 @@ export class AdminController {
     body: ISetTotalLimitParams,
   ): Promise<string> {
     const { ids, totalLimit } = body
-    await this.em.getRepository(User).bulkUpdateSetTotalLimit(ids, totalLimit)
+    await this.userRepo.bulkUpdateSetTotalLimit(ids, totalLimit)
 
     return 'updated'
   }
@@ -112,7 +114,7 @@ export class AdminController {
     body: ISetJobLimitParams,
   ): Promise<string> {
     const { ids, jobLimit } = body
-    await this.em.getRepository(User).bulkUpdateSetJobLimit(ids, jobLimit)
+    await this.userRepo.bulkUpdateSetJobLimit(ids, jobLimit)
 
     return 'updated'
   }
@@ -147,24 +149,44 @@ export class AdminController {
    */
   @HttpCode(200)
   @Post('/users/reset2fa')
-  async resetUsers2fa(@Body(getAdminBodyValidationPipe()) body: IIdListParams): Promise<any> {
+  async resetUsers2fa(@Body(getAdminBodyValidationPipe()) body: IIdListParams): Promise<
+    {
+      dxuser: string
+      result:
+        | {
+            status: 'success'
+            value: unknown
+            errorType?: undefined
+            message?: undefined
+            error?: undefined
+          }
+        | {}
+    }[]
+  > {
     const { ids } = body
 
-    const results = await this.em
-      .getRepository(User)
-      .bulkUpdateReset2fa(ids, this.adminClient, this.user)
-
-    return results
+    return await this.userRepo.bulkUpdateReset2fa(ids, this.adminClient, this.user)
   }
 
   @HttpCode(200)
   @Post('/users/unlock')
-  async unlockUsers(@Body(getAdminBodyValidationPipe()) body: IIdListParams): Promise<any> {
+  async unlockUsers(@Body(getAdminBodyValidationPipe()) body: IIdListParams): Promise<
+    {
+      dxuser: string
+      result:
+        | {
+            status: 'success'
+            value: unknown
+            errorType?: undefined
+            message?: undefined
+            error?: undefined
+          }
+        | {}
+    }[]
+  > {
     const { ids } = body
 
-    const results = await this.em
-      .getRepository(User)
-      .bulkUpdateUnlock(ids, this.adminClient, this.user)
+    const results = await this.userRepo.bulkUpdateUnlock(ids, this.adminClient, this.user)
 
     if (results.some(({ result }) => result.status === 'unhandledError')) {
       throw new ValidationError(undefined, { details: results })
@@ -187,7 +209,7 @@ export class AdminController {
     body: IIdListParams,
   ): Promise<string> {
     const { ids } = body
-    await this.em.getRepository(User).bulkActivate(ids)
+    await this.userRepo.bulkActivate(ids)
 
     return 'updated'
   }
@@ -206,7 +228,7 @@ export class AdminController {
     body: IIdListParams,
   ): Promise<string> {
     const { ids } = body
-    await this.em.getRepository(User).bulkDeactivate(ids)
+    await this.userRepo.bulkDeactivate(ids)
 
     return 'updated'
   }
@@ -215,13 +237,13 @@ export class AdminController {
   async enableResourceTypeForUsers(
     @Body(
       getAdminBodyValidationPipe({
-        resource: enumValidator<Resource>(RESOURCE_TYPES as any as Resource[]),
+        resource: enumValidator<Resource>(RESOURCE_TYPES as unknown as Resource[]),
       }),
     )
     body: IResourceTypeParams,
   ): Promise<string> {
     const { ids, resource } = body
-    await this.em.getRepository(User).bulkEnableResourceType(ids, resource)
+    await this.userRepo.bulkEnableResourceType(ids, resource)
 
     return 'updated'
   }
@@ -231,7 +253,7 @@ export class AdminController {
     @Body(getAdminBodyValidationPipe()) body: IResourceTypeParams,
   ): Promise<string> {
     const { ids } = body
-    await this.em.getRepository(User).bulkEnableAll(ids)
+    await this.userRepo.bulkEnableAll(ids)
 
     return 'updated'
   }
@@ -240,13 +262,13 @@ export class AdminController {
   async disableResourceTypeForUsers(
     @Body(
       getAdminBodyValidationPipe({
-        resource: enumValidator<Resource>(RESOURCE_TYPES as any as Resource[]),
+        resource: enumValidator<Resource>(RESOURCE_TYPES as unknown as Resource[]),
       }),
     )
     body: IResourceTypeParams,
   ): Promise<string> {
     const { ids, resource } = body
-    await this.em.getRepository(User).bulkDisableResourceType(ids, resource)
+    await this.userRepo.bulkDisableResourceType(ids, resource)
 
     return 'updated'
   }
@@ -256,7 +278,7 @@ export class AdminController {
     @Body(getAdminBodyValidationPipe()) body: IIdListParams,
   ): Promise<string> {
     const { ids } = body
-    await this.em.getRepository(User).bulkDisableAll(ids)
+    await this.userRepo.bulkDisableAll(ids)
 
     return 'updated'
   }

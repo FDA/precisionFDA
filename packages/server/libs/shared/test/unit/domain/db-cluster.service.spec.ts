@@ -348,7 +348,7 @@ describe('DbClusterService tests', () => {
 
       const result = await dbClusterService.getDbCluster(privateCluster.uid)
 
-      expect(result.db_cluster).to.exist
+      expect(result.db_cluster).to.exist()
       expect(result.db_cluster.name).to.equal('private-cluster-1')
       expect(result.db_cluster.scope).to.equal(STATIC_SCOPE.PRIVATE)
     })
@@ -384,7 +384,7 @@ describe('DbClusterService tests', () => {
 
       const result = await dbClusterService.getDbCluster(spaceCluster.uid)
 
-      expect(result.db_cluster).to.exist
+      expect(result.db_cluster).to.exist()
       expect(result.db_cluster.name).to.equal('space-cluster-1')
       expect(result.db_cluster.scope).to.equal(`space-${space.id}`)
     })
@@ -518,7 +518,7 @@ describe('DbClusterService tests', () => {
 
       expect(result.data).to.have.length(1)
       expect(result.data.map((c) => c.name)).to.include.members(['private-cluster-1'])
-      expect(result.data.every((c) => c.scope === STATIC_SCOPE.PRIVATE)).to.be.true
+      expect(result.data.every((c) => c.scope === STATIC_SCOPE.PRIVATE)).to.be.true()
     })
 
     it('lists space clusters when scope: space_id provided', async () => {

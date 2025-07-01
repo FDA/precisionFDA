@@ -22,6 +22,7 @@ import {
 import { JobRepository } from '../domain/job/job.repository'
 import { SPACE_MEMBERSHIP_SIDE } from '../domain/space-membership/space-membership.enum'
 import { SPACE_TYPE } from '../domain/space/space.enum'
+import { FolderRepository } from '@shared/domain/user-file/folder.repository'
 import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
 
 export type AdminDataConsistencyReportOutput = {
@@ -80,7 +81,7 @@ export class AdminDataConsistencyReportService {
 
       // Check for HTTPS files and folders
       const userFileRepo = this.em.getRepository(UserFile)
-      const folderRepo = this.em.getRepository(Folder)
+      const folderRepo = this.em.getRepository(Folder) as FolderRepository
 
       // Check for PFDA-only folders
       const pfdaOnlyFolders = await folderRepo.findAllPFDAOnlyFolders()

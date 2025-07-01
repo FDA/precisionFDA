@@ -117,12 +117,12 @@ describe('ChallengePreregEmailHandler', () => {
 
       await handler.sendEmail(input)
 
-      expect(userRepoFindActiveStub.calledOnce).to.be.true
+      expect(userRepoFindActiveStub.calledOnce).to.be.true()
       expect(userRepoFindActiveStub.firstCall.args).to.deep.equal([
         { populate: ['notificationPreference'] },
       ])
-      expect(spaceMembershipRepoFindStub.called).to.be.false
-      expect(emailClientSendEmailStub.calledTwice).to.be.true
+      expect(spaceMembershipRepoFindStub.called).to.be.false()
+      expect(emailClientSendEmailStub.calledTwice).to.be.true()
       expect(emailClientSendEmailStub.firstCall.args[0].to).to.equal(user1.email)
       expect(emailClientSendEmailStub.firstCall.args[0].emailType).to.equal(
         EMAIL_TYPES.challengePrereg,
@@ -171,9 +171,9 @@ describe('ChallengePreregEmailHandler', () => {
 
       await handler.sendEmail(input)
 
-      expect(userRepoFindActiveStub.calledOnce).to.be.false
-      expect(spaceMembershipRepoFindStub.called).to.be.true
-      expect(emailClientSendEmailStub.calledTwice).to.be.true
+      expect(userRepoFindActiveStub.calledOnce).to.be.false()
+      expect(spaceMembershipRepoFindStub.called).to.be.true()
+      expect(emailClientSendEmailStub.calledTwice).to.be.true()
       expect(emailClientSendEmailStub.firstCall.args[0].to).to.equal(user1.email)
       expect(emailClientSendEmailStub.firstCall.args[0].emailType).to.equal(
         EMAIL_TYPES.challengePrereg,

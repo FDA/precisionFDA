@@ -158,7 +158,7 @@ describe('ChallengeFacade', () => {
     expect(updateChallengeStub.calledOnce).to.be.true()
   })
 
-  function getInstance() {
+  function getInstance(): ChallengeFacade {
     const challengeService = {
       createChallenge: createChallengeStub,
       updateChallenge: updateChallengeStub,

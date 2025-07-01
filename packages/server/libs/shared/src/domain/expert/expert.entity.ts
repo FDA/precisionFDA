@@ -1,7 +1,6 @@
 import {
   Collection,
   Entity,
-  EntityRepositoryType,
   Enum,
   Ref,
   OneToMany,
@@ -53,9 +52,7 @@ export class Expert extends ScopedEntity {
   meta?: ExpertMeta
 
   @Property({ type: 'varchar' })
-  image?: string;
-
-  [EntityRepositoryType]?: ExpertRepository
+  image?: string
 
   constructor(user: User) {
     super()

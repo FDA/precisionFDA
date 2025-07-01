@@ -1,14 +1,14 @@
 import { indexBy } from 'ramda'
 import { http, HttpResponse } from 'msw'
-import { ComputeInstance, IApp } from './apps.types'
+import { ComputeInstance, IApp } from '../../features/apps/apps.types'
 
 const meta = {
   spec: { input_spec: [], output_spec: [], internet_access: false, instance_type: 'baseline-8' },
   revisions: [
-    { title: 'a', id: 5381, uid: 'app-GP8VYXj0fyJykyzv7FQ9k3Bv-1', revision: 4, version: null, tag_list: [] },
-    { title: 'a', id: 5320, uid: 'app-GJk4Fx80g4pjYzFj57yZzZfQ-1', revision: 3, version: null, tag_list: [] },
-    { title: 'a', id: 5306, uid: 'app-GJPvq600b42X5gJ5JqgY3KY3-1', revision: 2, version: null, tag_list: [] },
-    { title: 'a', id: 5262, uid: 'app-GGG9vy00Gqx2FZ1kK17jx3Z7-1', revision: 1, version: null, tag_list: [] },
+    { title: 'a', id: 5381, uid: 'app-GP8VYXj0fyJykyzv7FQ9k3Bv-1', revision: 4, version: null, tag_list: []},
+    { title: 'a', id: 5320, uid: 'app-GJk4Fx80g4pjYzFj57yZzZfQ-1', revision: 3, version: null, tag_list: []},
+    { title: 'a', id: 5306, uid: 'app-GJPvq600b42X5gJ5JqgY3KY3-1', revision: 2, version: null, tag_list: []},
+    { title: 'a', id: 5262, uid: 'app-GGG9vy00Gqx2FZ1kK17jx3Z7-1', revision: 1, version: null, tag_list: []},
   ],
   jobs: [],
   assigned_challenges: [],
@@ -19,7 +19,7 @@ const meta = {
   comparator: false,
   default_comparator: false,
   comments: [],
-  links: { comments: '/apps/app-GP8VYXj0fyJykyzv7FQ9k3Bv-1/comments', edit_tags: '/api/set_tags', comparators: {} },
+  links: { comments: '/apps/app-GP8VYXj0fyJykyzv7FQ9k3Bv-1/comments', edit_tags: '/api/set_tags', comparators: {}},
 }
 const pageMeta = {
   links: { copy_private: '/api/apps/copy', create: '/apps/new' },
@@ -105,7 +105,124 @@ const base = {
   tags: [],
   job_count: 0,
   latest_revision: true,
+  properties: {},
+  forked_from: null,
 } satisfies IApp
+
+export const mockCopyToSpaceApps = [
+  { id: '4', name: 'test-app-1', uid: 'app-1', title: 'Test App 1' },
+  { id: '5', name: 'test-app-2', uid: 'app-2', title: 'Test App 2' },
+  { id: '6', name: 'analysis-tool', uid: 'app-3', title: 'Analysis Tool' },
+]
+
+export const mockCopyApps = {
+  apps: [
+    { id: 4, name: 'test-app-1', uid: 'app-1', title: 'Test App 1' },
+    { id: 5, name: 'test-app-2', uid: 'app-2', title: 'Test App 2' },
+    { id: 6, name: 'analysis-tool', uid: 'app-3', title: 'Analysis Tool' },
+  ],
+  meta: {
+    links: { copy_private: '/api/apps/copy' },
+    count: 3,
+    pagination: { current_page: 1, next_page: null, prev_page: null, per_page: 25, total_pages: 1 },
+  },
+}
+
+export const mockDeleteApps = [
+  { id: '1', name: 'test-app-1', location: '/path/to/app1' },
+  { id: '2', name: 'analysis-tool', location: '/path/to/app2' },
+]
+
+export const mockForkApp: IApp = {
+  id: 1,
+  uid: 'app-test-123',
+  dxid: 'app-test-123',
+  entity_type: 'app',
+  name: 'test-analysis-app',
+  title: 'Test Analysis App',
+  added_by: 'user@example.com',
+  added_by_fullname: 'Test User',
+  created_at: '2024-01-01T10:00:00Z',
+  created_at_date_time: '2024-01-01T10:00:00Z',
+  updated_at: '2024-01-01T10:00:00Z',
+  location: 'Private',
+  readme: 'Test app for analysis',
+  revision: 1,
+  latest_revision: true,
+  job_count: 5,
+  app_series_id: 1,
+  run_by_you: '0',
+  org: 'test-org',
+  explorers: 2,
+  featured: false,
+  active: true,
+  links: {},
+  tags: [],
+  properties: {},
+  scope: 'private',
+  forked_from: null,
+}
+
+export const mockSelectApps: IApp[] = [
+  {
+    id: 1,
+    uid: 'app-test-123',
+    dxid: 'app-test-123',
+    entity_type: 'app',
+    name: 'test-analysis-app',
+    title: 'Test Analysis App',
+    added_by: 'user@example.com',
+    added_by_fullname: 'Test User',
+    created_at: '2024-01-01T10:00:00Z',
+    created_at_date_time: '2024-01-01T10:00:00Z',
+    updated_at: '2024-01-01T10:00:00Z',
+    location: 'Private',
+    readme: 'Test app for analysis',
+    revision: 1,
+    latest_revision: true,
+    job_count: 5,
+    app_series_id: 1,
+    run_by_you: '2',
+    org: 'Test Org',
+    explorers: 3,
+    featured: false,
+    active: true,
+    links: {},
+    tags: ['analysis', 'genomics'],
+    properties: {},
+    scope: 'private',
+    forked_from: null,
+  },
+  {
+    id: 2,
+    uid: 'app-public-456',
+    dxid: 'app-public-456',
+    entity_type: 'app',
+    name: 'public-tool',
+    title: 'Public Analysis Tool',
+    added_by: 'admin@example.com',
+    added_by_fullname: 'Admin User',
+    created_at: '2024-01-01T09:00:00Z',
+    created_at_date_time: '2024-01-01T09:00:00Z',
+    updated_at: '2024-01-01T09:00:00Z',
+    location: 'everybody',
+    readme: 'Public tool for everyone',
+    revision: 2,
+    latest_revision: true,
+    job_count: 25,
+    app_series_id: 2,
+    run_by_you: '0',
+    org: 'Public Org',
+    explorers: 15,
+    featured: true,
+    active: true,
+    links: {},
+    tags: ['public', 'tool'],
+    properties: {},
+    scope: 'public',
+    forked_from: null,
+  },
+]
 
 export const apps = [
   {
@@ -158,8 +275,30 @@ export const apps = [
 export const appsByUid = indexBy(s => s.uid, apps)
 
 export const appsMocks = [
-  http.post('/api/list_apps', () =>
-    HttpResponse.json(
+  http.post('/api/list_apps', async ({ request }) => {
+    const body = await request.json().catch(() => ({})) as Record<string, unknown>
+    
+    if (body && ('scope' in body || 'copy' in body)) {
+      return HttpResponse.json(mockCopyApps)
+    }
+    
+    if (body && ('scopes' in body || Array.isArray((body as Record<string, unknown>).scopes))) {
+      return HttpResponse.json({
+        apps: mockSelectApps,
+        meta: {
+          count: mockSelectApps.length,
+          pagination: {
+            current_page: 1,
+            next_page: null,
+            prev_page: null,
+            per_page: 25,
+            total_pages: 1,
+          },
+        },
+      })
+    }
+    
+    return HttpResponse.json(
       [
         {
           id: 1341,
@@ -353,8 +492,8 @@ export const appsMocks = [
         },
       ],
       { status: 200 },
-    ),
-  ),
+    )
+  }),
   http.get('/api/apps/user_compute_resources', () =>
     HttpResponse.json<ComputeInstance[]>(
       [
@@ -426,6 +565,64 @@ export const appsMocks = [
       { status: 200 },
     ),
   ),
-  http.get('/api/apps/:uid', ({ params }) => HttpResponse.json({ app: appsByUid[params.uid], meta }, { status: 200 })),
+  http.get('/api/apps/:uid', ({ params }) => {
+    const uid = typeof params.uid === 'string' ? params.uid : params.uid?.[0]
+    return HttpResponse.json({ app: uid ? appsByUid[uid] : undefined, meta }, { status: 200 })
+  }),
   http.get('/api/apps*', () => HttpResponse.json({ apps: apps, meta: pageMeta }, { status: 200 })),
+  
+  // Handler for /api/apps/copy (used by useCopyToPrivateModal)
+  http.post('/api/apps/copy', () =>
+    HttpResponse.json({
+      meta: {
+        messages: [{ type: 'success', message: 'Apps copied successfully' }],
+      },
+    }),
+  ),
+  
+  // Handler for /api/apps/delete (used by useDeleteModal)
+  http.post('/api/apps/delete', () =>
+    HttpResponse.json({
+      meta: {
+        messages: [{ type: 'success', message: 'Apps deleted successfully' }],
+      },
+    }),
+  ),
 ]
+
+export const mockExportApp: IApp = {
+  id: 1,
+  uid: 'app-test-123',
+  dxid: 'app-test-123',
+  entity_type: 'app',
+  name: 'test-analysis-app',
+  title: 'Test Analysis App',
+  added_by: 'user@example.com',
+  added_by_fullname: 'Test User',
+  created_at: '2024-01-01T10:00:00Z',
+  created_at_date_time: '2024-01-01T10:00:00Z',
+  updated_at: '2024-01-01T10:00:00Z',
+  location: 'Private',
+  readme: 'Test app for analysis and export functionality',
+  revision: 1,
+  latest_revision: true,
+  job_count: 5,
+  app_series_id: 1,
+  run_by_you: '0',
+  org: 'test-org',
+  explorers: 2,
+  featured: false,
+  active: true,
+  links: {
+    show: '/apps/app-test-123',
+    export: '/apps/app-test-123/export',
+    fork: '/apps/app-test-123/fork',
+  },
+  tags: ['analysis', 'test'],
+  properties: {
+    description: 'Test application for export modal',
+    category: 'analysis',
+  },
+  scope: 'private',
+  forked_from: null,
+}

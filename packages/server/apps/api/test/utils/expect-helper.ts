@@ -12,10 +12,10 @@ const stripEntityDates = (entity: BaseEntity): Omit<BaseEntity, 'createdAt' | 'u
   return omit(['createdAt', 'updatedAt'], entity)
 }
 
-const generateCSRFToken = (user?: User) =>
+const generateCSRFToken = (user?: User): string =>
   crypto.createHash('sha256').update(`csrf-token-${user?.id}`).digest('base64')
 
-const generateCookieToken = (user?: User, expiration?: number) => {
+const generateCookieToken = (user?: User, expiration?: number): string => {
   const csrfToken = generateCSRFToken(user)
   if (!user) {
     return Encryptor.encrypt({
@@ -41,10 +41,13 @@ const generateCookieToken = (user?: User, expiration?: number) => {
   })
 }
 
-const getCookieTokenString = (user?: User, expiration?: number) =>
+const getCookieTokenString = (
+  user?: User,
+  expiration?: number,
+): `_precision-fda_session=${string}` =>
   `${COOKIE_SESSION_KEY}=${generateCookieToken(user, expiration)}`
 
-const getDefaultHeaderData = (user?: User) => ({
+const getDefaultHeaderData = (user?: User): { cookie: `_precision-fda_session=${string}` } => ({
   cookie: getCookieTokenString(user),
   [USER_CONTEXT_HTTP_HEADERS.csrfToken]: CSRFUtils.generateToken(generateCSRFToken(user)),
 })

@@ -89,7 +89,7 @@ describe('UserProvisionFacade', () => {
   // })
 
   it('should provide a new user from a valid invitation', async () => {
-    const invitation = create.inivitationHelper.create(em, {
+    const invitation = create.invitationHelper.create(em, {
       provisioningState: PROVISIONING_STATE.IN_PROGRESS,
     })
     await em.flush()
@@ -147,7 +147,7 @@ describe('UserProvisionFacade', () => {
   })
 
   it('should update username and provision user if username already exists', async () => {
-    const invitation = create.inivitationHelper.create(em, {
+    const invitation = create.invitationHelper.create(em, {
       provisioningState: PROVISIONING_STATE.IN_PROGRESS,
     })
     await em.flush()
@@ -191,7 +191,7 @@ describe('UserProvisionFacade', () => {
   })
 
   it('should update org name and provision user if org name already exists', async () => {
-    const invitation = create.inivitationHelper.create(em, {
+    const invitation = create.invitationHelper.create(em, {
       provisioningState: PROVISIONING_STATE.IN_PROGRESS,
     })
     await em.flush()
@@ -236,12 +236,12 @@ describe('UserProvisionFacade', () => {
   })
 
   it('should add sso field if email is gov email', async () => {
-    emailServiceSendEmailStub.reset()
-    const invitation = create.inivitationHelper.create(em, {
+    const invitation = create.invitationHelper.create(em, {
       email: 'testuser@fda.hhs.gov',
       provisioningState: PROVISIONING_STATE.IN_PROGRESS,
     })
     await em.flush()
+    emailServiceSendEmailStub.reset()
 
     const username = constructUsername(invitation.firstName, invitation.lastName)
     const proposedOrg = constructOrgFromUsername(username)
@@ -302,7 +302,7 @@ describe('UserProvisionFacade', () => {
   })
 
   it('should run into catch block and update invitation when unexpected error occurs', async () => {
-    const invitation = create.inivitationHelper.create(em, {
+    const invitation = create.invitationHelper.create(em, {
       provisioningState: PROVISIONING_STATE.IN_PROGRESS,
     })
     await em.flush()
@@ -334,10 +334,10 @@ describe('UserProvisionFacade', () => {
   })
 
   it('should create USER_PROVISIONING_DONE notification if a provisioning success', async () => {
-    const invitation1 = create.inivitationHelper.create(em, {
+    const invitation1 = create.invitationHelper.create(em, {
       provisioningState: PROVISIONING_STATE.IN_PROGRESS,
     })
-    const invitation2 = create.inivitationHelper.create(em, {
+    const invitation2 = create.invitationHelper.create(em, {
       provisioningState: PROVISIONING_STATE.IN_PROGRESS,
     })
     await em.flush()

@@ -60,13 +60,13 @@ describe('UpdateDiscussionFacade', () => {
 
     const result = await updateDiscussionFacade.updateDiscussion(1, dto)
 
-    expect(updateDiscussionStub.calledOnce).to.be.true
-    expect(updateAttachmentsStub.calledOnce).to.be.true
+    expect(updateDiscussionStub.calledOnce).to.be.true()
+    expect(updateAttachmentsStub.calledOnce).to.be.true()
     expect(updateDiscussionStub.firstCall.args[0]).to.deep.equal(1)
     expect(updateDiscussionStub.firstCall.args[1]).to.deep.equal(dto)
     expect(updateAttachmentsStub.firstCall.args[0]).to.equal(discussion.noteId)
     expect(updateAttachmentsStub.firstCall.args[1]).to.equal(dto.attachments)
-    expect(result).to.be.undefined
+    expect(result).to.be.undefined()
   })
 
   it('should call update discussion without attachments', async () => {
@@ -88,10 +88,10 @@ describe('UpdateDiscussionFacade', () => {
 
     const result = await updateDiscussionFacade.updateDiscussion(1, dto)
 
-    expect(updateDiscussionStub.calledOnce).to.be.true
-    expect(updateAttachmentsStub.notCalled).to.be.true
+    expect(updateDiscussionStub.calledOnce).to.be.true()
+    expect(updateAttachmentsStub.notCalled).to.be.true()
     expect(updateDiscussionStub.firstCall.args[0]).to.deep.equal(1)
     expect(updateDiscussionStub.firstCall.args[1]).to.deep.equal(dto)
-    expect(result).to.be.undefined
+    expect(result).to.be.undefined()
   })
 })

@@ -4,6 +4,7 @@ import { WithListData } from '../../stories/helpers'
 import { StorybookProviders } from '../../stories/StorybookProviders'
 import { fetchDatabaseList } from './databases.api'
 import { useEditDatabaseModal } from './useEditDatabaseModal'
+import { IDatabase } from './databases.types'
 
 const meta: Meta = {
   title: 'Modals/Databases',
@@ -16,7 +17,7 @@ const meta: Meta = {
   ],
 }
 type Props = {
-  data: Partial<{ uid: string; id: string }>
+  data: IDatabase
 }
 type Story = StoryObj<Props>
 
@@ -33,7 +34,7 @@ export const EditDatabaseModal: Story = {
   render: () => {
     return (
       <WithListData resource="dbclusters" fetchList={fetchDatabaseList}>
-        {({ data }) => <EditDatabaseModalWrapper data={data['data'][0]} />}
+        {({ data }) => data && <EditDatabaseModalWrapper data={data.data[0]} />}
       </WithListData>
     )
   },

@@ -81,11 +81,11 @@ describe('InvitationService', () => {
 
   context('provisionUsers', () => {
     it('should only provision pending invitations', async () => {
-      const invitation1 = create.inivitationHelper.create(em, {})
-      const invitation2 = create.inivitationHelper.create(em, {
+      const invitation1 = create.invitationHelper.create(em, {})
+      const invitation2 = create.invitationHelper.create(em, {
         provisioningState: PROVISIONING_STATE.IN_PROGRESS,
       })
-      const invitation3 = create.inivitationHelper.create(em, {})
+      const invitation3 = create.invitationHelper.create(em, {})
       await em.flush()
 
       await getInstance().provisionUsers([invitation1.id, invitation2.id, invitation3.id])
@@ -99,7 +99,7 @@ describe('InvitationService', () => {
 
   context('editBasicInfo', () => {
     it('should throw error if invitation is not pending', async () => {
-      const invitation = create.inivitationHelper.create(em, {
+      const invitation = create.invitationHelper.create(em, {
         provisioningState: PROVISIONING_STATE.IN_PROGRESS,
       })
       await em.flush()
@@ -115,7 +115,7 @@ describe('InvitationService', () => {
 
     it('should not update if field is undefined or null', async () => {
       const testEmail = 'john@doe.com'
-      const invitation = create.inivitationHelper.create(em, {
+      const invitation = create.invitationHelper.create(em, {
         provisioningState: PROVISIONING_STATE.PENDING,
       })
       await em.flush()
@@ -133,7 +133,7 @@ describe('InvitationService', () => {
     })
 
     it('should update invitation basic info', async () => {
-      const invitation = create.inivitationHelper.create(em, {
+      const invitation = create.invitationHelper.create(em, {
         provisioningState: PROVISIONING_STATE.PENDING,
       })
       await em.flush()
