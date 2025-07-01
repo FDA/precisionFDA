@@ -8,8 +8,19 @@ import { UserModule } from '@shared/domain/user/user.module'
 import { PlatformClient } from '@shared/platform-client'
 import { PlatformClientModule } from '@shared/platform-client/platform-client.module'
 import { JobLogService } from './services/job-log.service'
+import { MikroOrmModule } from '@mikro-orm/nestjs'
+import { Job } from '@shared/domain/job/job.entity'
+import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
+import { Space } from '@shared/domain/space/space.entity'
 
-const imports = [UserModule, PlatformClientModule, NotificationModule, UserFileModule, EmailModule]
+const imports = [
+  MikroOrmModule.forFeature([Job, Space, SpaceMembership]),
+  UserModule,
+  PlatformClientModule,
+  NotificationModule,
+  UserFileModule,
+  EmailModule,
+]
 
 @Module({
   imports,

@@ -14,6 +14,7 @@ import { MainQueueJobProducer } from '@shared/queue/producer/main-queue-job.prod
 import { isJobOrphaned } from '@shared/queue/queue.utils'
 import { UserOpsCtx, WorkerOpsCtx } from '@shared/types'
 import { Job } from 'bull'
+import { UserRepository } from '@shared/domain/user/user.repository'
 
 // Check jobs for a given user, to be run when user logs in to clean up
 // old states that are stuck because sync jobs are missing.
@@ -30,7 +31,7 @@ export class UserCheckupFacade {
   ) {}
 
   async runCheckup(job: Job): Promise<void> {
-    const userRepo = this.em.getRepository(User)
+    const userRepo = this.em.getRepository(User) as UserRepository
     const user = await userRepo.findDxuser(this.user.dxuser)
     if (!user) {
       this.logger.error(
