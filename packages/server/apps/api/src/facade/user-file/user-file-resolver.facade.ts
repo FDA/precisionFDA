@@ -12,12 +12,15 @@ import {
 import { User } from '@shared/domain/user/user.entity'
 import { PermissionError } from '@shared/errors'
 import { SCOPE } from '@shared/types/common'
+import { FolderRepository } from '@shared/domain/user-file/folder.repository'
+import { UserFileRepository } from '@shared/domain/user-file/user-file.repository'
 
 @Injectable()
 export class UserFileResolverFacade {
   constructor(
     private readonly em: SqlEntityManager,
     private readonly user: UserContext,
+    private readonly userFileRepo: UserFileRepository,
   ) {}
 
   async resolvePath({ path, scope, type }: ResolvePathDTO): Promise<ResolvePath> {
@@ -57,7 +60,7 @@ export class UserFileResolverFacade {
     }
 
     if (isFetchingFolder) {
-      const folder = await this.em.getRepository(Folder).findByName(
+      const folder = await (this.em.getRepository(Folder) as FolderRepository).findByName(
         {
           name: lastItem,
           parentId,
@@ -70,7 +73,7 @@ export class UserFileResolverFacade {
     }
 
     if (isFetchingFiles) {
-      const files = await this.em.getRepository(UserFile).findAllFilesByName({
+      const files = await this.userFileRepo.findAllFilesByName({
         name: lastItem,
         parentId,
         userId,
@@ -85,7 +88,7 @@ export class UserFileResolverFacade {
   private async findFolderIdByPath(path: string[], scope: SCOPE): Promise<number | null> {
     let parentId: number | null = null
     for (const item of path) {
-      const parentFolder = await this.em.getRepository(Folder).findByName(
+      const parentFolder = await (this.em.getRepository(Folder) as FolderRepository).findByName(
         {
           name: item,
           parentId,

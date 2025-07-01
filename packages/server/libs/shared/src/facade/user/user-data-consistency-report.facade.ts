@@ -36,6 +36,7 @@ import {
 } from '@shared/facade/user/user-facade.types'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { PlatformClient } from '@shared/platform-client'
+import { UserRepository } from '@shared/domain/user/user.repository'
 import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
 
 // UserDataConsistencyReportOperation uses a user token to inspect the user's
@@ -79,7 +80,7 @@ export class UserDataConsistencyReportFacade {
       'Starting createReport()',
     )
 
-    const userRepo = this.em.getRepository(User)
+    const userRepo = this.em.getRepository(User) as UserRepository
     const user = await userRepo.findDxuser(userCtx.dxuser)
     if (!user) {
       this.logger.error(
@@ -281,10 +282,7 @@ export class UserDataConsistencyReportFacade {
       id: [`user-${config.platform.adminUser}`],
       level: 'ADMIN',
     })
-    if (findAdminUser.results.length === 0) {
-      return false
-    }
-    return true
+    return findAdminUser.results.length !== 0
   }
 
   // Check the billTo of any Spaces to which the user is a lead

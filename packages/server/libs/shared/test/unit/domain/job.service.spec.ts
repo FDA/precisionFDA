@@ -26,6 +26,12 @@ import { EmailQueueJobProducer } from '@shared/domain/email/producer/email-queue
 import { Queue } from 'bull'
 import * as queueDomain from '@shared/queue'
 import { stub } from 'sinon'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { UserRepository } from '@shared/domain/user/user.repository'
+import { JobRepository } from '@shared/domain/job/job.repository'
+import { SpaceRepository } from '@shared/domain/space/space.repository'
+import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
+import { config } from '@shared/config'
 import { EmailService } from '@shared/domain/email/email.service'
 import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
 
@@ -33,12 +39,25 @@ describe('Job service tests', () => {
   let em: EntityManager<MySqlDriver>
   let user: User
   let jobService: JobService
-  let userCtx: UserCtx
+  let userCtx: UserContext
   let notificationService: NotificationService
   let folderService: FolderService
   let emailQueueJobProducer: EmailQueueJobProducer
+  let userRepo: UserRepository
+  let jobRepo: JobRepository
+  let spaceRepo: SpaceRepository
+  let spaceMembershipRepo: SpaceMembershipRepository
   let emailService: EmailService
+
   let getMainQueueStub
+  let userContextLoadEntityStub = stub()
+  let userRepoFindOneOrFailStub = stub()
+  let userRepoFindAdminUserStub = stub()
+  let jobRepoFindOneOrFailStub = stub()
+  let jobRepoFindStub = stub()
+  let spaceMembershipRepoGetMembershipStub = stub()
+  let spaceRepoFindOneStub = stub()
+
   const file1Dxid = 'file-GY5q9B00Q6xpbXG503kKgF68'
   const file2Dxid = 'file-GXPKG480q0jQPgXxFxKyyJ7q'
   const file3Dxid = 'file-GXgzZ7j00k4KVKfBzFyq8YXx'
@@ -59,15 +78,53 @@ describe('Job service tests', () => {
       dxuser: 'dxuser',
       accessToken: '',
       id: user.id,
-    } as UserCtx
+      loadEntity: userContextLoadEntityStub,
+    } as UserContext
 
     notificationService = new NotificationService(em, userCtx)
     folderService = new FolderService(em, userCtx)
     emailQueueJobProducer = new EmailQueueJobProducer(queue)
+    userRepo = {
+      findOneOrFail: userRepoFindOneOrFailStub,
+      findAdminUser: userRepoFindAdminUserStub,
+    } as unknown as UserRepository
+    jobRepo = {
+      findOneOrFail: jobRepoFindOneOrFailStub,
+      find: jobRepoFindStub,
+    } as unknown as JobRepository
+    spaceRepo = {
+      findOne: spaceRepoFindOneStub,
+    } as unknown as SpaceRepository
+    spaceMembershipRepo = {
+      getMembership: spaceMembershipRepoGetMembershipStub,
+    } as unknown as SpaceMembershipRepository
+
     emailService = {} as unknown as EmailService
 
     queueAdd.reset()
     queueAdd.throws()
+
+    userRepoFindOneOrFailStub.reset()
+    userRepoFindOneOrFailStub.throws()
+
+    userContextLoadEntityStub.reset()
+    userContextLoadEntityStub.throws()
+
+    jobRepoFindOneOrFailStub.reset()
+    jobRepoFindOneOrFailStub.throws()
+
+    spaceMembershipRepoGetMembershipStub.reset()
+    spaceMembershipRepoGetMembershipStub.throws()
+
+    spaceRepoFindOneStub.reset()
+    spaceRepoFindOneStub.throws()
+
+    userRepoFindAdminUserStub.reset()
+    userRepoFindAdminUserStub.throws()
+
+    jobRepoFindStub.reset()
+    jobRepoFindStub.throws()
+
     getMainQueueStub = stub(queueDomain, 'getMainQueue').throws()
     getMainQueueStub.returns(queue)
   })
@@ -76,7 +133,7 @@ describe('Job service tests', () => {
     getMainQueueStub.restore()
   })
 
-  function getPlatformClientWithComplexResults() {
+  function getPlatformClientWithComplexResults(): PlatformClient {
     return {
       async jobFind(params: JobFindParams): Promise<FindJobsResponse> {
         expect(params.id.length).eq(1)
@@ -154,7 +211,7 @@ describe('Job service tests', () => {
     } as PlatformClient
   }
 
-  function getPlatformClientWithEmptyResults() {
+  function getPlatformClientWithEmptyResults(): PlatformClient {
     return {
       async jobFind(params: JobFindParams): Promise<FindJobsResponse> {
         expect(params.id.length).eq(1)
@@ -168,23 +225,27 @@ describe('Job service tests', () => {
   }
 
   it('Test Job Outputs sync - error when incorrect number of results returned', async () => {
+    userContextLoadEntityStub.returns(user)
     const platformClient = getPlatformClientWithEmptyResults()
     jobService = getJobServiceInstance(platformClient)
     const job = create.jobHelper.create(em, { user }, {})
+    jobRepoFindOneOrFailStub.withArgs({ dxid: job.dxid }).returns(job)
     await em.flush()
 
-    await expect(jobService.syncOutputs(job.dxid, user.id)).to.be.rejectedWith(
+    await expect(jobService.syncOutputs(job.dxid)).to.be.rejectedWith(
       `Incorrect number of results for job ${job.dxid}`,
     )
   })
 
   it('Test Job Outputs sync - sync job with all types of outputs', async () => {
+    userContextLoadEntityStub.returns(user)
     const platformClient = getPlatformClientWithComplexResults()
     jobService = getJobServiceInstance(platformClient)
     const job = create.jobHelper.create(em, { user }, { scope: STATIC_SCOPE.PRIVATE })
+    jobRepoFindOneOrFailStub.withArgs({ dxid: job.dxid }).returns(job)
     await em.flush()
 
-    await jobService.syncOutputs(job.dxid, user.id)
+    await jobService.syncOutputs(job.dxid)
 
     const filesCreated = await em.find(UserFile, {})
     expect(filesCreated.length).to.equal(3)
@@ -258,6 +319,7 @@ describe('Job service tests', () => {
   })
 
   it('Test Job Outputs sync - sync job outputs in a space', async () => {
+    userContextLoadEntityStub.returns(user)
     const space = create.spacesHelper.create(em, { name: 'space-name' })
     await em.flush()
     const folder = create.filesHelper.createFolder(
@@ -269,18 +331,21 @@ describe('Job service tests', () => {
       },
     )
     await em.flush()
-    create.spacesHelper.addMember(em, { space, user })
+    const spaceMembership = create.spacesHelper.addMember(em, { space, user })
     const job = create.jobHelper.create(
       em,
       { user },
       { scope: `space-${space.id}`, runData: { output_folder_path: folder.name } as JobRunData },
     )
+    jobRepoFindOneOrFailStub.withArgs({ dxid: job.dxid }).returns(job)
     await em.flush()
 
     const platformClient = getPlatformClientWithComplexResults()
     jobService = getJobServiceInstance(platformClient)
+    spaceMembershipRepoGetMembershipStub.withArgs(space.id, user.id).returns(spaceMembership)
+    spaceRepoFindOneStub.withArgs(space.id).returns(space)
 
-    await jobService.syncOutputs(job.dxid, user.id)
+    await jobService.syncOutputs(job.dxid)
 
     const filesCreated = await em.find(UserFile, {})
     expect(filesCreated.length).to.equal(3)
@@ -290,20 +355,24 @@ describe('Job service tests', () => {
   })
 
   it('Test Job Outputs sync - sync job outputs in a space and create new folder', async () => {
+    userContextLoadEntityStub.returns(user)
     const space = create.spacesHelper.create(em, { name: 'space-name' })
     await em.flush()
-    create.spacesHelper.addMember(em, { space, user })
+    const spaceMembership = create.spacesHelper.addMember(em, { space, user })
     const job = create.jobHelper.create(
       em,
       { user },
       { scope: `space-${space.id}`, runData: { output_folder_path: '/test-folder' } as JobRunData },
     )
+    jobRepoFindOneOrFailStub.withArgs({ dxid: job.dxid }).returns(job)
+    spaceMembershipRepoGetMembershipStub.withArgs(space.id, user.id).returns(spaceMembership)
+    spaceRepoFindOneStub.withArgs(space.id).returns(space)
     await em.flush()
 
     const platformClient = getPlatformClientWithComplexResults()
     jobService = getJobServiceInstance(platformClient)
 
-    await jobService.syncOutputs(job.dxid, user.id)
+    await jobService.syncOutputs(job.dxid)
 
     const filesCreated = await em.find(UserFile, {})
     expect(filesCreated.length).to.equal(3)
@@ -316,6 +385,7 @@ describe('Job service tests', () => {
   })
 
   it('Test Job Outputs sync - create files in output folder specified by path', async () => {
+    userContextLoadEntityStub.returns(user)
     await em.flush()
     const platformClient = getPlatformClientWithComplexResults()
     jobService = getJobServiceInstance(platformClient)
@@ -324,9 +394,10 @@ describe('Job service tests', () => {
       { user },
       { runData: { output_folder_path: 'folder1/folder2/folder3' } as JobRunData },
     )
+    jobRepoFindOneOrFailStub.withArgs({ dxid: job.dxid }).returns(job)
     await em.flush()
 
-    await jobService.syncOutputs(job.dxid, user.id)
+    await jobService.syncOutputs(job.dxid)
     const filesCreated = await em.find(UserFile, {})
     expect(filesCreated.length).to.equal(3)
 
@@ -347,10 +418,14 @@ describe('Job service tests', () => {
   })
 
   it('Test Job Outputs sync - job dxid null -> error', async () => {
+    userContextLoadEntityStub.returns(user)
+    const thrownError = new Error('Job not found ({ dxid: null })')
+    thrownError.name = 'NotFoundError'
+    jobRepoFindOneOrFailStub.withArgs({ dxid: null }).throws(thrownError)
     jobService = getJobServiceInstance(getPlatformClientWithEmptyResults())
 
     try {
-      await jobService.syncOutputs(null, user.id)
+      await jobService.syncOutputs(null)
       expect.fail('Expected to fail')
     } catch (error) {
       expect(error.name).eq('NotFoundError')
@@ -358,56 +433,20 @@ describe('Job service tests', () => {
     }
   })
 
-  it('Test Job Outputs sync - user id null -> error', async () => {
-    jobService = getJobServiceInstance(getPlatformClientWithEmptyResults())
-
-    const job = create.jobHelper.create(em, { user }, {})
-    await em.flush()
-
-    try {
-      await jobService.syncOutputs(job.dxid, null)
-      expect.fail('Expected to fail')
-    } catch (error) {
-      expect(error.name).eq('NotFoundError')
-      expect(error.message).to.equal('User not found ({ id: null })')
-    }
-  })
-
-  it('Test Job Outputs sync - job dxid and user id null -> error', async () => {
-    jobService = getJobServiceInstance(getPlatformClientWithEmptyResults())
-
-    try {
-      await jobService.syncOutputs(null, null)
-      expect.fail('Expected to fail')
-    } catch (error) {
-      expect(error.name).eq('NotFoundError')
-      expect(error.message).to.equal('User not found ({ id: null })')
-    }
-  })
-
   it('Test Job Outputs sync - non existing job dxid -> error', async () => {
+    const nonExistingJobDxid = 'job-non-existing'
+    userContextLoadEntityStub.returns(user)
+    const thrownError = new Error(`Job not found ({ dxid: '${nonExistingJobDxid}' })`)
+    thrownError.name = 'NotFoundError'
+    jobRepoFindOneOrFailStub.withArgs({ dxid: nonExistingJobDxid }).throws(thrownError)
     jobService = getJobServiceInstance(getPlatformClientWithEmptyResults())
 
     try {
-      await jobService.syncOutputs('job-non-existing', userId)
+      await jobService.syncOutputs(nonExistingJobDxid)
       expect.fail('Expected to fail')
     } catch (error) {
       expect(error.name).eq('NotFoundError')
-      expect(error.message).to.equal("Job not found ({ dxid: 'job-non-existing' })")
-    }
-  })
-
-  it('Test Job Outputs sync - non existing user id -> error', async () => {
-    jobService = getJobServiceInstance(getPlatformClientWithEmptyResults())
-    const job = create.jobHelper.create(em, { user }, {})
-    await em.flush()
-
-    try {
-      await jobService.syncOutputs(job.dxid, 1000000)
-      expect.fail('Expected to fail')
-    } catch (error) {
-      expect(error.name).eq('NotFoundError')
-      expect(error.message).to.equal('User not found ({ id: 1000000 })')
+      expect(error.message).to.equal(`Job not found ({ dxid: '${nonExistingJobDxid}' })`)
     }
   })
 
@@ -423,6 +462,7 @@ describe('Job service tests', () => {
       await em.flush()
       queueAdd.reset()
       const adminUser = await create.userHelper.createAdmin(em)
+      userRepoFindAdminUserStub.returns(adminUser)
       const platformClient = {
         async jobFind(params: JobFindParams): Promise<FindJobsResponse> {
           expect(params.project).contains('project-')
@@ -443,6 +483,17 @@ describe('Job service tests', () => {
       } as PlatformClient
 
       jobService = getJobServiceInstance(platformClient)
+
+      jobRepoFindStub
+        .withArgs(
+          {},
+          {
+            filters: ['isNonTerminal'],
+            orderBy: { createdAt: 'DESC' },
+            populate: ['app', 'user'],
+          },
+        )
+        .returns([staleJob])
 
       await em.flush()
 
@@ -469,8 +520,10 @@ describe('Job service tests', () => {
       await em.flush()
       const normalJob = await create.jobHelper.create(em, { user, app })
       await em.flush()
+
       queueAdd.reset()
       const adminUser = await create.userHelper.createAdmin(em)
+      userRepoFindAdminUserStub.returns(adminUser)
       const platformClient = {
         async jobFind(params: JobFindParams): Promise<FindJobsResponse> {
           expect(params.project).contains('project-')
@@ -491,6 +544,17 @@ describe('Job service tests', () => {
       } as PlatformClient
 
       jobService = getJobServiceInstance(platformClient)
+
+      jobRepoFindStub
+        .withArgs(
+          {},
+          {
+            filters: ['isNonTerminal'],
+            orderBy: { createdAt: 'DESC' },
+            populate: ['app', 'user'],
+          },
+        )
+        .returns([normalJob])
 
       await em.flush()
 
@@ -515,6 +579,11 @@ describe('Job service tests', () => {
 
   context('#checkChallengeJobs', async () => {
     it('Challenge bot not found', async () => {
+      const thrownError = new Error('User not found')
+      userRepoFindOneOrFailStub
+        .withArgs({ dxuser: config.platform.challengeBotUser })
+        .throws(thrownError)
+
       jobService = getJobServiceInstance(getPlatformClientWithEmptyResults())
 
       // For some reason rejectedWith doesn't work
@@ -562,7 +631,7 @@ describe('Job service tests', () => {
     // })
   })
 
-  const getJobServiceInstance = (platformClient: PlatformClient) => {
+  const getJobServiceInstance = (platformClient: PlatformClient): JobService => {
     return new JobService(
       em,
       userCtx,
@@ -571,6 +640,10 @@ describe('Job service tests', () => {
       folderService,
       emailQueueJobProducer,
       emailService,
+      userRepo,
+      jobRepo,
+      spaceRepo,
+      spaceMembershipRepo,
     )
   }
 })

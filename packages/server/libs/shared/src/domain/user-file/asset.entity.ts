@@ -1,7 +1,6 @@
 import {
   Collection,
   Entity,
-  EntityRepositoryType,
   Filter,
   ManyToMany,
   OneToMany,
@@ -53,8 +52,6 @@ class Asset extends Node implements IFileOrAsset, ITrackable {
   isPublishable(): boolean {
     return this.isPrivate() && this.state === FILE_STATE_DX.CLOSED
   }
-
-  [EntityRepositoryType]?: AssetRepository
 }
 
 export { Asset }

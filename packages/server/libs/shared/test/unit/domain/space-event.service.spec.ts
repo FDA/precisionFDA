@@ -23,13 +23,19 @@ import { EmailService } from '@shared/domain/email/email.service'
 import { getEnumKeyByValue } from '@shared/utils/enum-utils'
 import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
 import { SpaceEventDTO } from '@shared/domain/space-event/dto/space-event.dto'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
 
 describe('SpaceEvent service tests', () => {
   const USER_ID = 1
   const USER = {
     id: USER_ID,
   }
-  const USER_CTX: UserCtx = { ...USER, accessToken: 'accessToken', dxuser: 'dxuser' }
+  const DEFAULT_USER_CTX: UserContext = {
+    ...USER,
+    accessToken: 'accessToken',
+    dxuser: 'dxuser',
+    loadEntity: async () => null,
+  }
 
   const spaceRepoFindOneStub = stub()
 
@@ -106,7 +112,14 @@ describe('SpaceEvent service tests', () => {
         } as SpaceMembership,
       }
 
-      const result = await getInstance().createSpaceEvent(input)
+      const USER_CTX: UserContext = {
+        ...USER,
+        accessToken: 'accessToken',
+        dxuser: 'dxuser',
+        loadEntity: async () => user,
+      }
+
+      const result = await getInstance(USER_CTX).createSpaceEvent(input)
 
       expect(result.activityType).to.eq(SPACE_EVENT_ACTIVITY_TYPE.space_deleted)
       expect(result.side).to.eq(SPACE_MEMBERSHIP_SIDE.GUEST)
@@ -138,7 +151,7 @@ describe('SpaceEvent service tests', () => {
       ])
       sendEmailStub.reset()
 
-      await getInstance().sendNotificationForEvent(spaceEvent)
+      await getInstance(DEFAULT_USER_CTX).sendNotificationForEvent(spaceEvent)
 
       expect(sendEmailStub.calledOnce).to.be.true
       expect(sendEmailStub.firstCall.firstArg.type).to.eq(EMAIL_TYPES.newContentAdded)
@@ -159,7 +172,7 @@ describe('SpaceEvent service tests', () => {
       ])
       sendEmailStub.reset()
 
-      await getInstance().sendNotificationForEvent(spaceEvent)
+      await getInstance(DEFAULT_USER_CTX).sendNotificationForEvent(spaceEvent)
 
       expect(sendEmailStub.calledOnce).to.be.true
       expect(sendEmailStub.firstCall.firstArg.type).to.eq(EMAIL_TYPES.commentAdded)
@@ -191,7 +204,7 @@ describe('SpaceEvent service tests', () => {
       ])
       sendEmailStub.reset()
 
-      await getInstance().sendNotificationForEvent(spaceEvent)
+      await getInstance(DEFAULT_USER_CTX).sendNotificationForEvent(spaceEvent)
 
       expect(sendEmailStub.calledOnce).to.be.true
       expect(sendEmailStub.firstCall.firstArg.type).to.eq(EMAIL_TYPES.spaceChanged)
@@ -228,7 +241,7 @@ describe('SpaceEvent service tests', () => {
       ])
       sendEmailStub.reset()
 
-      await getInstance().sendNotificationForEvent(spaceEvent)
+      await getInstance(DEFAULT_USER_CTX).sendNotificationForEvent(spaceEvent)
 
       expect(sendEmailStub.calledOnce).to.be.true
       expect(sendEmailStub.firstCall.firstArg.type).to.eq(EMAIL_TYPES.memberChangedAddedRemoved)
@@ -242,9 +255,9 @@ describe('SpaceEvent service tests', () => {
     })
   })
 
-  function getInstance() {
+  function getInstance(userContext: UserContext): SpaceEventService {
     return new SpaceEventService(
-      USER_CTX,
+      userContext,
       em,
       spaceRepo,
       userRepo,

@@ -1,7 +1,6 @@
 import {
   Collection,
   Entity,
-  EntityRepositoryType,
   Enum,
   Filter,
   ManyToMany,
@@ -149,8 +148,6 @@ export class App extends ScopedEntity {
     const tag = this.workstationAPITag
     return tag?.split(':')[1] ?? null
   }
-
-  [EntityRepositoryType]?: AppRepository
 
   constructor(user: User) {
     super()

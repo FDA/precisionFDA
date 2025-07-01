@@ -17,7 +17,7 @@ class SyncOutputsHandler implements JobHandler<CheckStatusJob> {
   async handle(bullJob: BullJob<CheckStatusJob>): Promise<void> {
     const jobRepo = this.em.getRepository(Job)
     await jobRepo.findOneOrFail({ dxid: bullJob.data.payload.dxid })
-    await this.jobService.syncOutputs(bullJob.data.payload.dxid, bullJob.data.user.id)
+    await this.jobService.syncOutputs(bullJob.data.payload.dxid)
   }
 }
 

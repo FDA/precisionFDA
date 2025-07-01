@@ -231,7 +231,7 @@ const findFolderForPath = (
  * Returns parentFolder if scope is private, public or null, otherwise it returns scopedParentFolder
  * @param node
  */
-export const getParentFolder = (node: Node) => {
+export const getParentFolder = (node: Node): Node => {
   if (
     [STATIC_SCOPE.PUBLIC.toString(), STATIC_SCOPE.PRIVATE.toString(), null].includes(node.scope)
   ) {
@@ -257,7 +257,11 @@ const getNodePath = async (
   return getNodePath(em, parentFolder as Node, folders)
 }
 
-const filterNodesByUser = async (em: SqlEntityManager, nodes: Node[], currentUser: User) => {
+const filterNodesByUser = async (
+  em: SqlEntityManager,
+  nodes: Node[],
+  currentUser: User,
+): Promise<Node[]> => {
   for (const node of nodes) {
     if (node.isInSpace()) {
       const spaceId = node.getSpaceId()
@@ -316,8 +320,8 @@ const findUnclosedFilesOrAssets = async (
   userId: number,
 ): Promise<IFileOrAsset[]> => {
   let results: IFileOrAsset[] = []
-  const userFileRepo = em.getRepository(UserFile)
-  const assetRepo = em.getRepository(Asset)
+  const userFileRepo = em.getRepository(UserFile) as UserFileRepository
+  const assetRepo = em.getRepository(Asset) as AssetRepository
   results = results.concat((await userFileRepo.findUnclosedFiles(userId)) as IFileOrAsset[])
   results = results.concat((await assetRepo.findUnclosedAssets(userId)) as IFileOrAsset[])
   return results
@@ -330,7 +334,7 @@ const getPluralizedTerm = (itemCount: number, itemName: string): string => {
   return `${itemCount.toString()} ${itemName}s`
 }
 
-const getSuccessMessage = (filesCount: number, foldersCount: number, message: string) => {
+const getSuccessMessage = (filesCount: number, foldersCount: number, message: string): string => {
   if (foldersCount > 0 && filesCount === 0) {
     return `${message} ${getPluralizedTerm(foldersCount, 'folder')}`
   } else if (filesCount > 0 && foldersCount === 0) {

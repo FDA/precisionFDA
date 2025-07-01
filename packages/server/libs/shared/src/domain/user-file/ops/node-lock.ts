@@ -14,6 +14,9 @@ import { Node } from '@shared/domain/user-file/node.entity'
 import { NodeRepository } from '@shared/domain/user-file/node.repository'
 import { Folder } from '@shared/domain/user-file/folder.entity'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { SpaceRepository } from '@shared/domain/space/space.repository'
+import { FolderRepository } from '@shared/domain/user-file/folder.repository'
+import { UserRepository } from '@shared/domain/user/user.repository'
 
 class NodesLockOperation extends BaseOperation<UserOpsCtx, NodesInputDTO, void> {
   private readonly notificationService: NotificationService
@@ -25,10 +28,10 @@ class NodesLockOperation extends BaseOperation<UserOpsCtx, NodesInputDTO, void> 
 
     this.notificationService = new NotificationService(ctx.em)
     this.fileLockOp = new FileLockOperation(ctx)
-    const spaceRepository = ctx.em.getRepository(Space)
+    const spaceRepository = ctx.em.getRepository(Space) as SpaceRepository
     const nodeRepository = ctx.em.getRepository(Node) as NodeRepository
-    const userRepository = ctx.em.getRepository(User)
-    const folderRepository = ctx.em.getRepository(Folder)
+    const userRepository = ctx.em.getRepository(User) as UserRepository
+    const folderRepository = ctx.em.getRepository(Folder) as FolderRepository
     this.nodeService = new NodeService(
       ctx.em,
       new UserContext(
@@ -107,7 +110,7 @@ class NodesLockOperation extends BaseOperation<UserOpsCtx, NodesInputDTO, void> 
     return this.filterNodesByType(nodesByUser)
   }
 
-  private filterNodesByType(nodes: Node[]) {
+  private filterNodesByType(nodes: Node[]): Node[] {
     return nodes.filter((n) => n.stiType !== 'Folder')
   }
 

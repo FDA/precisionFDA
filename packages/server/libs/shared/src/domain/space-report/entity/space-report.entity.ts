@@ -1,7 +1,6 @@
 import {
   Collection,
   Entity,
-  EntityRepositoryType,
   JsonType,
   ManyToOne,
   OneToMany,
@@ -42,9 +41,7 @@ export class SpaceReport<T extends SpaceReportFormat = SpaceReportFormat> extend
   reportParts = new Collection<SpaceReportPart<SpaceReportPartSourceType, T>>(this)
 
   @ManyToOne({ entity: () => User, fieldName: 'created_by' })
-  createdBy: Ref<User>;
-
-  [EntityRepositoryType]?: SpaceReportRepository
+  createdBy: Ref<User>
 
   constructor(createdBy: User) {
     super()
