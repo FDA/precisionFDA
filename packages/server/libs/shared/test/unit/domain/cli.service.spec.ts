@@ -1,16 +1,11 @@
 import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
 import { expect } from 'chai'
-import { User } from '@shared/domain/user/user.entity'
-import { DiscussionService } from '@shared/domain/discussion/services/discussion.service'
-import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { database } from '@shared/database'
-import { create } from '@shared/test'
 import { CliService } from '@shared/domain/cli/service/cli.service'
 import { SinonStub, stub } from 'sinon'
 import { DbClusterService } from '@shared/domain/db-cluster/service/db-cluster.service'
 
 describe('CliService tests', () => {
-  let user: User
   let em: EntityManager<MySqlDriver>
 
   let getPasswordStub: SinonStub
@@ -18,7 +13,6 @@ describe('CliService tests', () => {
 
   beforeEach(async () => {
     em = database.orm().em.fork()
-    user = create.userHelper.create(em)
     await em.flush()
 
     getPasswordStub = stub().throws()
@@ -29,8 +23,6 @@ describe('CliService tests', () => {
     const cliService = getInstance()
     expect(cliService).to.be.not.undefined
   })
-
-  //TODO: PFDA-6328 add tests for job scope
 
   context('managing DbCluster password', () => {
     it('should get password for dbcluster', async () => {
@@ -50,14 +42,12 @@ describe('CliService tests', () => {
     })
   })
 
-  function getInstance() {
-    const userCtx = new UserContext(user.id, 'accessToken', user.dxuser, null)
-    const discussionService = {} as unknown as DiscussionService
+  function getInstance(): CliService {
     const dbClusterService = {
       getPassword: getPasswordStub,
       rotatePassword: rotatePasswordStub,
     } as unknown as DbClusterService
 
-    return new CliService(em, userCtx, dbClusterService, discussionService)
+    return new CliService(dbClusterService)
   }
 })

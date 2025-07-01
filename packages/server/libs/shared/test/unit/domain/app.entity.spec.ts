@@ -4,8 +4,8 @@ import { Job } from '@shared/domain/job/job.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { expect } from 'chai'
 import { create, db, generate } from '../../../src/test'
-import { JOB_STATE } from '../../../src/domain/job/job.enum'
-import { App, AppSpec, Internal } from '../../../src/domain/app/app.entity'
+import { JOB_STATE } from '@shared/domain/job/job.enum'
+import { App, AppSpec, Internal } from '@shared/domain/app/app.entity'
 
 describe('app.entity tests', () => {
   let em: EntityManager<MySqlDriver>
@@ -30,17 +30,33 @@ describe('app.entity tests', () => {
     app = create.appHelper.createRegular(em, { user })
     job = create.jobHelper.create(em, { user, app }, { scope: 'private', state: JOB_STATE.RUNNING })
 
-    httpsApp = create.appHelper.createHTTPS(em, { user }, {
-      spec: generate.app.ttydAppSpecData(),
-      internal: generate.app.ttydAppInternal(),
-    })
-    httpsJob = create.jobHelper.create(em, { user, app: httpsApp }, { scope: 'private', state: JOB_STATE.RUNNING })
+    httpsApp = create.appHelper.createHTTPS(
+      em,
+      { user },
+      {
+        spec: generate.app.ttydAppSpecData(),
+        internal: generate.app.ttydAppInternal(),
+      },
+    )
+    httpsJob = create.jobHelper.create(
+      em,
+      { user, app: httpsApp },
+      { scope: 'private', state: JOB_STATE.RUNNING },
+    )
 
-    httpsAppWithAPI = create.appHelper.createHTTPS(em, { user }, {
-      spec: generate.app.ttydAppSpecData(),
-      internal: generate.app.ttydAppInternalWithAPI('1.0.0'),
-    })
-    httpsJobWithAPI = create.jobHelper.create(em, { user, app: httpsAppWithAPI }, { scope: 'private', state: JOB_STATE.RUNNING })
+    httpsAppWithAPI = create.appHelper.createHTTPS(
+      em,
+      { user },
+      {
+        spec: generate.app.ttydAppSpecData(),
+        internal: generate.app.ttydAppInternalWithAPI('1.0.0'),
+      },
+    )
+    httpsJobWithAPI = create.jobHelper.create(
+      em,
+      { user, app: httpsAppWithAPI },
+      { scope: 'private', state: JOB_STATE.RUNNING },
+    )
 
     await em.flush()
   })
@@ -86,13 +102,17 @@ describe('app.entity tests', () => {
   })
 
   it('save and load JSON types appEntity.spec and appEntity.internal', async () => {
-    const app = create.appHelper.createRegular(em, { user }, {
-      spec: {
-        input_spec: [],
-        output_spec: [],
-        internet_access: true,
-        instance_type: 't2.micro',
-      } as AppSpec
-    })
+    const app = create.appHelper.createRegular(
+      em,
+      { user },
+      {
+        spec: {
+          input_spec: [],
+          output_spec: [],
+          internet_access: true,
+          instance_type: 't2.micro',
+        } as AppSpec,
+      },
+    )
   })
 })

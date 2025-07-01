@@ -42,13 +42,21 @@ class SMTPEmailClient extends EmailClient {
 
   async sendEmail(input: EmailSendInput): Promise<void> {
     try {
+      // The duplication of to is necessary
+      // The top‑level to: header for the message headers (what your recipients actually see in their inbox).
+      // The envelope.to: array for the underlying SMTP envelope (which is what SES uses to actually deliver).
+
       const info = await this.transporter.sendMail({
-        from: input.from ?? config.emails.smtp.fromAddress,
+        from: config.emails.smtp.fromAddress,
         cc: [],
         to: input.to,
         replyTo: input.replyTo,
         subject: input.subject,
         html: input.body,
+        envelope: {
+          from: input.returnAddress ?? config.emails.smtp.returnAddress,
+          to: [input.to],
+        },
       })
 
       if (info) {

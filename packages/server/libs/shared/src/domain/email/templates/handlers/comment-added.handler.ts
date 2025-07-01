@@ -1,120 +1,121 @@
 import { LoadedReference } from '@mikro-orm/core'
 import { App } from '@shared/domain/app/app.entity'
-import { Comment } from '@shared/domain/comment/comment.entity'
+import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
 import { Job } from '@shared/domain/job/job.entity'
-import { SpaceEvent } from '@shared/domain/space-event/space-event.entity'
-import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
-import { Space } from '@shared/domain/space/space.entity'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { pipe, filter, uniqBy } from 'ramda'
+import { EmailConfigItem } from '../../email.config'
+import { commentAddedTemplate } from '../mjml/comment-added.template'
+import { Injectable } from '@nestjs/common'
+import { EmailHandler } from '@shared/domain/email/templates/handlers/email.handler'
+import { OpsCtx } from '@shared/types'
+import { SqlEntityManager } from '@mikro-orm/mysql'
+import { EmailClient } from '@shared/services/email-client'
+import { SpaceEventRepository } from '@shared/domain/space-event/space-event.repository'
+import { CommentRepository } from '@shared/domain/comment/comment.repository'
+import { UserFileRepository } from '@shared/domain/user-file/user-file.repository'
+import { AppRepository } from '@shared/domain/app/app.repository'
+import { JobRepository } from '@shared/domain/job/job.repository'
+import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
+import { buildFilterByUserSettings, buildIsNotificationEnabled } from '../../email.helper'
+import { generateObjectCommentsLink } from '@shared/domain/email/templates/mjml/common'
 import {
-  EmailSendInput,
-  EmailTemplate,
-  EMAIL_TYPES,
-  NOTIFICATION_TYPES_BASE,
-} from '../../email.config'
-import {
-  buildEmailTemplate,
-  buildFilterByUserSettings,
-  buildIsNotificationEnabled,
-  ObjectIdInputDTO,
-} from '../../email.helper'
-import { BaseTemplate } from '@shared/domain/email/templates/base-template'
-import { commentAddedTemplate, CommentAddedTemplateInput } from '../mjml/comment-added.template'
-import { generateObjectCommentsLink } from '../mjml/common'
+  CommentAddedContext,
+  EmailTypeToContextMap,
+} from '@shared/domain/email/dto/email-type-to-context.map'
+import { ObjectIdInputDTO } from '@shared/domain/email/dto/object-id.dto'
+import { EmailTypeToTemplateInputMap } from '@shared/domain/email/dto/email-type-to-template-input.map'
 
-export class CommentAddedEmailHandler
-  extends BaseTemplate<ObjectIdInputDTO>
-  implements EmailTemplate<CommentAddedTemplateInput>
-{
-  templateFile = commentAddedTemplate
-  comment: Comment & { user: LoadedReference<User> }
-  spaceEvent: SpaceEvent & { space: LoadedReference<Space> }
-  userFile: UserFile & { user: LoadedReference<User> }
-  app: App & { user: LoadedReference<User> }
-  job: Job & { user: LoadedReference<User> }
-  // to add workflow commenting in Home refactoring, on Rails side
-  // workflow: Workflow
-  objectCommentsLink: any
+@Injectable()
+export class CommentAddedEmailHandler extends EmailHandler<EMAIL_TYPES.commentAdded> {
+  protected emailType = EMAIL_TYPES.commentAdded as const
+  protected inputDto = ObjectIdInputDTO
+  protected getBody = commentAddedTemplate
 
-  getNotificationKey(): keyof typeof NOTIFICATION_TYPES_BASE {
-    return 'comment_activity'
+  constructor(
+    protected readonly em: SqlEntityManager,
+    protected readonly spaceEventRepo: SpaceEventRepository,
+    protected readonly commentRepo: CommentRepository,
+    protected readonly userFileRepo: UserFileRepository,
+    protected readonly appRepo: AppRepository,
+    protected readonly jobRepo: JobRepository,
+    protected readonly spaceMembershipRepo: SpaceMembershipRepository,
+    protected readonly emailClient: EmailClient,
+  ) {
+    super(emailClient)
   }
 
-  async setupContext(): Promise<void> {
-    this.spaceEvent = await this.ctx.em.findOneOrFail(
-      SpaceEvent,
-      { id: this.validatedInput.id },
+  protected async getContextualData(
+    input: ObjectIdInputDTO,
+  ): Promise<EmailTypeToContextMap[EMAIL_TYPES.commentAdded]> {
+    const spaceEvent = await this.spaceEventRepo.findOneOrFail(
+      { id: input.id },
       { populate: ['space'] },
     )
 
-    this.comment = await this.ctx.em.findOneOrFail(
-      Comment,
-      { id: this.spaceEvent.entityId },
+    const comment = await this.commentRepo.findOneOrFail(
+      { id: spaceEvent.entityId },
       { populate: ['user'] },
     )
 
-    switch (this.comment.contentObjectType) {
+    let userFile: (UserFile & { user: LoadedReference<User> }) | undefined
+    let app: (App & { user: LoadedReference<User> }) | undefined
+    let job: (Job & { user: LoadedReference<User> }) | undefined
+    let objectCommentsLink: string | undefined
+
+    switch (comment.contentObjectType) {
       case 'Node':
-        this.userFile = await this.ctx.em.findOneOrFail(
-          UserFile,
-          { id: this.comment.contentObjectId },
+        userFile = await this.userFileRepo.findOneOrFail(
+          { id: comment.contentObjectId },
           { populate: ['user'] },
-        );
-        this.objectCommentsLink = generateObjectCommentsLink(
-          'files',
-          this.userFile.uid,
         )
-        return this.objectCommentsLink
+        objectCommentsLink = generateObjectCommentsLink('files', userFile.uid)
+        break
       case 'App':
-        this.app = await this.ctx.em.findOneOrFail(
-          App,
-          { id: this.comment.contentObjectId },
+        app = await this.appRepo.findOneOrFail(
+          { id: comment.contentObjectId },
           { populate: ['user'] },
         )
-        this.objectCommentsLink = generateObjectCommentsLink(
-          'apps',
-          this.app.uid,
-        )
-        return this.objectCommentsLink
+        objectCommentsLink = generateObjectCommentsLink('apps', app.uid)
+        break
       case 'Job':
-        this.job = await this.ctx.em.findOneOrFail(
-          Job,
-          { id: this.comment.contentObjectId },
+        job = await this.jobRepo.findOneOrFail(
+          { id: comment.contentObjectId },
           { populate: ['user'] },
-        );
-        this.objectCommentsLink = generateObjectCommentsLink(
-          'jobs',
-          this.job.uid,
         )
-        return this.objectCommentsLink
-      // to do before: Workflow commenting fix on Rails side in Home refactoring,
-      // case 'Workflow':
-      //   this.workflow = await this.ctx.em.findOneOrFail(
-      //     Workflow,
-      //     { id: this.comment.contentObjectId },
-      //     { populate: ['user'] },
-      //   );
-      //   this.objectCommentsLink = generateObjectCommentsLink(
-      //     'workflows',
-      //     this.workflow.uid,
-      //   )
-      //   console.log("In CommentAddedEmailHandler: Workflow this.objectCommentsLink = ",this.objectCommentsLink)
-      //   return this.objectCommentsLink
-      // default: return;
+        objectCommentsLink = generateObjectCommentsLink('jobs', job.uid)
+        break
+    }
+
+    return {
+      comment,
+      spaceEvent,
+      userFile,
+      app,
+      job,
+      objectCommentsLink,
+      input,
     }
   }
 
-  async determineReceivers(): Promise<User[]> {
-    const memberships = await this.ctx.em.find(
-      SpaceMembership,
-      { spaces: this.spaceEvent.space.id, active: true },
+  protected async determineReceivers(context: CommentAddedContext): Promise<User[]> {
+    const memberships = await this.spaceMembershipRepo.find(
+      { spaces: context.spaceEvent.space.id, active: true },
       { populate: ['user.notificationPreference'] },
     )
-    const isEnabledFn = buildIsNotificationEnabled(this.getNotificationKey(), this.ctx)
-    const filterFn = buildFilterByUserSettings({ ...this.ctx, config: this.config }, isEnabledFn)
-    const spaceEventCreatorId = this.spaceEvent.user.id
+    const ctx: OpsCtx = {
+      em: this.em,
+      log: this.logger,
+    }
+    const config: EmailConfigItem = {
+      emailId: this.emailType,
+      name: 'commentAdded',
+      handlerClass: CommentAddedEmailHandler,
+    }
+    const isEnabledFn = buildIsNotificationEnabled('comment_activity', ctx)
+    const filterFn = buildFilterByUserSettings({ ...ctx, config }, isEnabledFn)
+    const spaceEventCreatorId = context.spaceEvent.user.id
 
     const filterPipe = pipe(
       // SpaceMembership[] -> User[]
@@ -125,26 +126,27 @@ export class CommentAddedEmailHandler
     return filterPipe(memberships)
   }
 
-  async template(receiver: User): Promise<EmailSendInput> {
-    const body = buildEmailTemplate<CommentAddedTemplateInput>(this.templateFile, {
+  protected getSubject(_receiver: User, context: CommentAddedContext): string {
+    return `${context.comment.user.unwrap().fullName} added a comment`
+  }
+
+  protected getTemplateInput(
+    receiver: User,
+    context: CommentAddedContext,
+  ): EmailTypeToTemplateInputMap[EMAIL_TYPES.commentAdded] {
+    return {
       receiver,
       content: {
-        initiator: { fullName: this.comment.user.unwrap().fullName },
+        initiator: { fullName: context.comment.user.unwrap().fullName },
         comment: {
-          body: this.comment.body,
-          id: this.comment.id,
-          contentObjectId: this.comment.contentObjectId,
-          contentObjectType: this.comment.contentObjectType,
+          body: context.comment.body,
+          id: context.comment.id,
+          contentObjectId: context.comment.contentObjectId,
+          contentObjectType: context.comment.contentObjectType,
         },
-        space: { id: this.spaceEvent.space.id },
-        objectCommentsLink: this.objectCommentsLink,
+        space: { id: context.spaceEvent.space.id },
+        objectCommentsLink: context.objectCommentsLink,
       },
-    })
-    return {
-      emailType: EMAIL_TYPES.commentAdded,
-      to: receiver.email,
-      body,
-      subject: `${this.comment.user.unwrap().fullName} added a comment`,
     }
   }
 }

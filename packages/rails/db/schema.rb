@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2025_05_06_144022) do
+ActiveRecord::Schema.define(version: 2025_06_02_070212) do
 
   create_table "accepted_licenses", id: :integer, charset: "utf8mb3", collation: "utf8mb3_unicode_ci", force: :cascade do |t|
     t.integer "license_id"
@@ -682,6 +682,22 @@ ActiveRecord::Schema.define(version: 2025_05_06_144022) do
     t.index ["user_id"], name: "index_space_events_on_user_id"
   end
 
+  create_table "space_group_spaces", charset: "utf8mb3", collation: "utf8mb3_unicode_ci", force: :cascade do |t|
+    t.bigint "space_group_id"
+    t.integer "space_id"
+    t.datetime "created_at", default: -> { "CURRENT_TIMESTAMP" }, null: false
+    t.datetime "updated_at", default: -> { "CURRENT_TIMESTAMP" }, null: false
+    t.index ["space_group_id"], name: "fk_rails_108430c5fa"
+    t.index ["space_id"], name: "fk_rails_ae5de248be"
+  end
+
+  create_table "space_groups", charset: "utf8mb3", collation: "utf8mb3_unicode_ci", force: :cascade do |t|
+    t.string "name"
+    t.text "description"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+  end
+
   create_table "space_invitations", charset: "utf8mb3", collation: "utf8mb3_unicode_ci", force: :cascade do |t|
     t.integer "space_id", null: false
     t.integer "inviter_id"
@@ -1054,6 +1070,8 @@ ActiveRecord::Schema.define(version: 2025_05_06_144022) do
   add_foreign_key "resources", "users"
   add_foreign_key "saved_queries", "users"
   add_foreign_key "space_events", "users"
+  add_foreign_key "space_group_spaces", "space_groups", on_delete: :cascade
+  add_foreign_key "space_group_spaces", "spaces"
   add_foreign_key "space_invitations", "spaces"
   add_foreign_key "space_invitations", "users", column: "inviter_id"
   add_foreign_key "space_memberships", "users"

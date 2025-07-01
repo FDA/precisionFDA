@@ -18,7 +18,7 @@ import {
 } from '@shared/queue'
 import { CheckStatusJob, TASK_TYPE } from '@shared/queue/task.input'
 import { Maybe, UserOpsCtx, WorkerOpsCtx } from '@shared/types'
-import { EMAIL_TYPES, EmailSendInput } from '../../email/email.config'
+import { EmailSendInput } from '../../email/email.config'
 import { buildEmailTemplate, getBullJobIdForEmailOperation } from '../../email/email.helper'
 import {
   JobStaleInputTemplate,
@@ -43,6 +43,7 @@ import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { JobRepository } from '@shared/domain/job/job.repository'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { User } from '@shared/domain/user/user.entity'
+import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
 
 /**
  * JobSynchronizationService is responsible for synchronizing the job status with the platform.
@@ -64,11 +65,11 @@ export class JobSynchronizationService {
     private readonly platformClient: PlatformClient,
   ) {}
 
-  static getBullJobId(jobDxid: string) {
+  static getBullJobId(jobDxid: string): string {
     return `${TASK_TYPE.SYNC_JOB_STATUS}.${jobDxid}`
   }
 
-  static getJobDxidFromBullJobId(bullJobId: string) {
+  static getJobDxidFromBullJobId(bullJobId: string): string {
     return bullJobId.replace('sync_job_status.', '')
   }
 
@@ -332,7 +333,7 @@ export class JobSynchronizationService {
     await createSendEmailTask(email, this.userCtx, jobId)
   }
 
-  private removeTerminationEmailJob(checkStatusJob: CheckStatusJob['payload']) {
+  private removeTerminationEmailJob(checkStatusJob: CheckStatusJob['payload']): void {
     const jobId = getBullJobIdForEmailOperation(
       EMAIL_TYPES.jobTerminationWarning,
       checkStatusJob.dxid,
@@ -340,7 +341,11 @@ export class JobSynchronizationService {
     removeFromEmailQueue(jobId)
   }
 
-  private async releaseFilesLockedByJob(em: SqlEntityManager, jobDxid: string, scope: EntityScope) {
+  private async releaseFilesLockedByJob(
+    em: SqlEntityManager,
+    jobDxid: string,
+    scope: EntityScope,
+  ): Promise<void> {
     // release files if they are locked by this job
     // e.g locked by jupyterlab
     const lockedKey = `notebook-locked-by-${jobDxid}`
@@ -365,7 +370,7 @@ export class JobSynchronizationService {
     message: string,
     severity: SEVERITY,
     action: NOTIFICATION_ACTION,
-  ) {
+  ): Promise<void> {
     const meta = {
       linkTitle: 'View Execution',
       linkUrl: `/home/executions/${job.uid}`,
@@ -387,7 +392,10 @@ export class JobSynchronizationService {
   /**
    * Checks job status if notifications should be triggered.
    */
-  private async checkJobStatusForNotifications(job: Job, remoteJob: JobDescribeResponse) {
+  private async checkJobStatusForNotifications(
+    job: Job,
+    remoteJob: JobDescribeResponse,
+  ): Promise<void> {
     const remoteState = remoteJob.state
     const isJobRunning = job.state !== JOB_STATE.RUNNING && remoteState === JOB_STATE.RUNNING
     const httpsAppRunning =

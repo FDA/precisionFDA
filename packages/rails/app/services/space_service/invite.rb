@@ -6,7 +6,7 @@ module SpaceService
 
       https_apps_client = HttpsAppsClient.new
       https_apps_client.email_send(
-        NotificationPreference.email_types[:space_invitation], [], membershipId: membership.id, adminId: admin.user_id
+        NotificationPreference.email_types[:space_invitation], { membershipId: membership.id, adminId: admin.user_id }
       )
       space_event = {
         spaceId: space.id,

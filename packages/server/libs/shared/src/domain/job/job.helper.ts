@@ -1,11 +1,12 @@
-import { EMAIL_CONFIG } from '@shared/domain/email/email.config'
 import { DateTime, Duration, Interval } from 'luxon'
-import { createSendEmailTask } from '../../queue'
 import { UserOpsCtx, WorkerOpsCtx } from '../../types'
 import { config } from '../../config'
-import { EMAIL_TYPES } from '../email/email.config'
 import { Job } from './job.entity'
 import { ACTIVE_STATES, JOB_STATE, TERMINAL_STATES } from './job.enum'
+import { JobFailedEmailHandler } from '@shared/domain/email/templates/handlers/job-failed.handler'
+import { emailClientProvider } from '@shared/domain/email/email-client.provider'
+import { User } from '@shared/domain/user/user.entity'
+import { JobRepository } from '@shared/domain/job/job.repository'
 
 export const isStateTerminal = (state: string): boolean =>
   Object.values(TERMINAL_STATES).includes(state as JOB_STATE)
@@ -37,29 +38,11 @@ export const buildIsOverMaxDuration = (
 export const sendJobFailedEmails = async (
   jobId: number,
   ctx: WorkerOpsCtx<UserOpsCtx>,
-): Promise<void[]> => {
-  const handler = new EMAIL_CONFIG.jobFailed.handlerClass(EMAIL_TYPES.jobFailed, { jobId }, ctx)
-  await handler.setupContext()
-
-  const receivers = await handler.determineReceivers()
-  const emails = await Promise.all(
-    receivers.map(async (receiver) => {
-      return await handler.template(receiver)
-    }),
-  )
-
-  return await Promise.all(
-    emails.map(async (email) => {
-      ctx.log.log(
-        {
-          jobId,
-          user: ctx.user.dxuser,
-          recipient: email.to,
-        },
-        'Sending failed job email to user',
-      )
-
-      await createSendEmailTask(email, ctx.user)
-    }),
-  )
+): Promise<void> => {
+  const emailClient = emailClientProvider.useFactory()
+  const userRepo = ctx.em.getRepository(User)
+  const jobRepo: JobRepository = ctx.em.getRepository(Job)
+  const handler = new JobFailedEmailHandler(userRepo, jobRepo, emailClient)
+  const inputDto = { jobId }
+  await handler.sendEmail(inputDto)
 }

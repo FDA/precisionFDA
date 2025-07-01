@@ -1,55 +1,57 @@
-import { UserOpsCtx } from '@shared/types'
-import { BaseTemplate } from '@shared/domain/email/templates/base-template'
-import {
-  EMAIL_TYPES,
-  EmailSendInput,
-  EmailTemplate,
-  NOTIFICATION_TYPES_BASE,
-} from '@shared/domain/email/email.config'
-import {
-  nodeCopyTemplate,
-  NodeCopyTemplateInput,
-} from '@shared/domain/email/templates/mjml/node-copy.template'
+import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
+import { nodeCopyTemplate } from '@shared/domain/email/templates/mjml/node-copy.template'
 import { NodeCopyInputDTO } from '@shared/domain/email/dto/node-copy-input.dto'
 import { User } from '@shared/domain/user/user.entity'
-import { buildEmailTemplate } from '@shared/domain/email/email.helper'
+import { Injectable } from '@nestjs/common'
+import { EmailHandler } from '@shared/domain/email/templates/handlers/email.handler'
+import { EmailClient } from '@shared/services/email-client'
+import { UserRepository } from '@shared/domain/user/user.repository'
+import { EmailTypeToTemplateInputMap } from '@shared/domain/email/dto/email-type-to-template-input.map'
+import { EmailTypeToContextMap } from '@shared/domain/email/dto/email-type-to-context.map'
 
 /**
  * Notifies users if some items weren't copied.
  */
-export class NodeCopyHandler
-  extends BaseTemplate<NodeCopyInputDTO, UserOpsCtx>
-  implements EmailTemplate<NodeCopyTemplateInput>
-{
-  templateFile = nodeCopyTemplate
-  nodeCopyInput: NodeCopyInputDTO = this.validatedInput
+@Injectable()
+export class NodeCopyHandler extends EmailHandler<EMAIL_TYPES.nodeCopy> {
+  protected emailType = EMAIL_TYPES.nodeCopy as const
+  protected inputDto = NodeCopyInputDTO
+  protected getBody = nodeCopyTemplate
 
-  getNotificationKey(): keyof typeof NOTIFICATION_TYPES_BASE {
-    return 'node_copy'
+  constructor(
+    protected readonly userRepo: UserRepository,
+    protected readonly emailClient: EmailClient,
+  ) {
+    super(emailClient)
   }
 
-  async setupContext(): Promise<void> {}
-
-  async determineReceivers(): Promise<User[]> {
-    return await this.ctx.em.find(User, {
-      id: { $in: this.receiverUserIds },
+  protected async determineReceivers(input: NodeCopyInputDTO): Promise<User[]> {
+    return await this.userRepo.find({
+      id: { $in: input.receiverUserIds },
     })
   }
 
-  async template(receiver: User): Promise<EmailSendInput> {
-    const subject = `Some items haven\'t been copied to ${this.nodeCopyInput.destination}`
-    const body = buildEmailTemplate<NodeCopyTemplateInput>(this.templateFile, {
-      subject,
-      destination: this.nodeCopyInput.destination,
-      notCopiedFolderNames: this.nodeCopyInput.notCopiedFolderNames,
-      notCopiedFileNames: this.nodeCopyInput.notCopiedFileNames,
-      receiver,
-    })
+  protected getSubject(_receiver: User, input: NodeCopyInputDTO): string {
+    return `Some items haven't been copied to ${input.destination}`
+  }
+
+  protected getTemplateInput(
+    receiver: User,
+    input: NodeCopyInputDTO,
+  ): EmailTypeToTemplateInputMap[EMAIL_TYPES.nodeCopy] {
+    const subject = this.getSubject(receiver, input)
     return {
-      emailType: EMAIL_TYPES.nodeCopy,
-      to: receiver.email,
-      body,
       subject,
+      destination: input.destination,
+      notCopiedFolderNames: input.notCopiedFolderNames,
+      notCopiedFileNames: input.notCopiedFileNames,
+      receiver,
     }
+  }
+
+  protected async getContextualData(
+    input: NodeCopyInputDTO,
+  ): Promise<EmailTypeToContextMap[EMAIL_TYPES.nodeCopy]> {
+    return input
   }
 }

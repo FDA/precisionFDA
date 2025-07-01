@@ -9,6 +9,7 @@ import { AppRepository } from '@shared/domain/app/app.repository'
 import { JobRepository } from '@shared/domain/job/job.repository'
 import { NodeRepository } from '@shared/domain/user-file/node.repository'
 import { NoteRepository } from '@shared/domain/note/note.repository'
+import { ComparisonRepository } from '@shared/domain/comparison/comparison.repository'
 
 describe('PublishApiFacade', () => {
   const FILE_UID = 'file-uid-1'
@@ -110,7 +111,7 @@ describe('PublishApiFacade', () => {
     })
   })
 
-  function getInstance() {
+  function getInstance(): PublishApiFacade {
     const entityProvenanceService = {
       getEntityProvenance: getEntityProvenanceStub,
     } as unknown as EntityProvenanceService
@@ -131,12 +132,17 @@ describe('PublishApiFacade', () => {
       findAccessibleOne: findAccessibleOne,
     } as unknown as NoteRepository
 
+    const comparisonRepository = {
+      findAccessibleOne: findAccessibleOne,
+    } as unknown as ComparisonRepository
+
     return new PublishApiFacade(
       entityProvenanceService,
       appRepository,
       jobRepository,
       nodeRepository,
       noteRepository,
+      comparisonRepository,
     )
   }
 })

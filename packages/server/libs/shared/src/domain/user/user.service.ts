@@ -1,8 +1,9 @@
 import { FilterQuery, SqlEntityManager } from '@mikro-orm/mysql'
 import { Injectable, Logger } from '@nestjs/common'
 import { config } from '@shared/config'
-import { EMAIL_TYPES, EmailSendInput } from '@shared/domain/email/email.config'
+import { EmailSendInput } from '@shared/domain/email/email.config'
 import { buildEmailTemplate } from '@shared/domain/email/email.helper'
+import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
 import { EmailQueueJobProducer } from '@shared/domain/email/producer/email-queue-job.producer'
 import {
   UserInactivityAlertEmailInput,

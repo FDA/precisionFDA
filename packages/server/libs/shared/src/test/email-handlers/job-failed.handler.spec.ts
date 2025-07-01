@@ -1,115 +1,119 @@
-import { database } from '@shared/database'
-import { App } from '@shared/domain/app/app.entity'
 import { Job } from '@shared/domain/job/job.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { expect } from 'chai'
-import { EntityManager } from '@mikro-orm/core'
-import { JOB_STATE } from '@shared/domain/job/job.enum'
-import { create, generate, db } from '@shared/test'
-import { EMAIL_CONFIG, EMAIL_TYPES } from '@shared/domain/email/email.config'
 import { JobFailedEmailHandler } from '@shared/domain/email/templates/handlers/job-failed.handler'
-import { OpsCtx } from '@shared/types'
-import { defaultLogger } from '@shared/logger'
+import { UserRepository } from '@shared/domain/user/user.repository'
+import { JobRepository } from '@shared/domain/job/job.repository'
+import { stub } from 'sinon'
+import { EmailClient } from '@shared/services/email-client'
+import { Organization } from '@shared/domain/org/org.entity'
+import { JobDescribeResponse } from '@shared/platform-client/platform-client.responses'
+import { JobEventDTO } from '@shared/domain/email/dto/job-event.dto'
+import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
 
-describe('job-failed.handler', () => {
-  let em: EntityManager
-  let user: User
-  let anotherUser: User
-  let app: App
-  let job: Job
-  let ctx: OpsCtx
-  const config = EMAIL_CONFIG.jobFailed
+describe('JobFailedEmailHandler', () => {
+  const JOB_ID = 10
+  const USER_ID = 16
+
+  const emailClientSendEmailStub = stub()
+  const jobRepoFindOneOrFailStub = stub()
+  const userRepoFindOneOrFailStub = stub()
+
+  const userRepo = {
+    findOneOrFail: userRepoFindOneOrFailStub,
+  } as unknown as UserRepository
+  const jobRepo = {
+    findOneOrFail: jobRepoFindOneOrFailStub,
+  } as unknown as JobRepository
+  const emailClient = {
+    sendEmail: emailClientSendEmailStub,
+  } as unknown as EmailClient
+
+  const getHandler = () => {
+    return new JobFailedEmailHandler(userRepo, jobRepo, emailClient)
+  }
+
+  const input = new JobEventDTO()
+  input.jobId = JOB_ID
 
   beforeEach(async () => {
-    await db.dropData(database.connection())
-    // create DB mocks
-    em = database.orm().em.fork()
-    em.clear()
-    user = create.userHelper.create(em, { email: generate.random.email() })
-    anotherUser = create.userHelper.create(em, { email: generate.random.email() })
+    emailClientSendEmailStub.reset()
+    emailClientSendEmailStub.throws()
 
-    app = create.appHelper.createHTTPS(em, { user }, { spec: generate.app.jupyterAppSpecData() })
-    job = create.jobHelper.create(
-      em,
-      { user, app },
-      {
-        scope: 'private',
-        state: JOB_STATE.FAILED,
-        describe: {
-          failureReason: 'FailureReason',
-          failureMessage: 'failure message',
-        },
-      },
-    )
-    const space = create.spacesHelper.create(em, { name: 'my-test-space' })
-    create.spacesHelper.addMember(em, { user, space })
-    create.spacesHelper.addMember(em, { user: anotherUser, space })
-    await em.flush()
+    jobRepoFindOneOrFailStub.reset()
+    jobRepoFindOneOrFailStub.throws()
 
-    ctx = {
-      em: database.orm().em.fork(),
-      log: defaultLogger,
-      user: { id: user.id, accessToken: 'foo', dxuser: user.dxuser },
-    }
+    userRepoFindOneOrFailStub.reset()
+    userRepoFindOneOrFailStub.throws()
   })
 
-  context('setupContext()', () => {
-    it('loads job and parses describe json', async () => {
-      const input = { jobId: job.id }
-      const handler = new JobFailedEmailHandler(config.emailId, input, ctx)
-      await handler.setupContext()
-      expect(handler.job).to.exist()
-      expect(handler.job.describe?.failureReason).to.equal('FailureReason')
-      expect(handler.job.describe?.failureMessage).to.equal('failure message')
-    })
-  })
+  describe('#sendEmail', () => {
+    it('cost limit exceeded', async () => {
+      const organization = new Organization()
+      const user = new User(organization)
+      user.id = USER_ID
+      user.firstName = 'Huli'
+      user.lastName = 'Su Lina'
+      user.email = 'test@email.com'
+      const job = new Job(user)
+      job.uid = 'job-123-1'
+      job.name = 'job-name'
 
-  context('determineReceivers()', () => {
-    it('returns job owner as receiver', async () => {
-      const input = { jobId: job.id }
-      const handler = new JobFailedEmailHandler(config.emailId, input, ctx)
-      await handler.setupContext()
-      const receivers = await handler.determineReceivers()
-      expect(receivers).to.have.lengthOf(1)
-      expect(receivers.map((r) => r.id)).to.have.all.members([user.id])
-    })
-  })
+      jobRepoFindOneOrFailStub.withArgs({ id: JOB_ID }).resolves(job)
+      userRepoFindOneOrFailStub.withArgs({ id: USER_ID }).resolves(user)
+      emailClientSendEmailStub.reset()
 
-  context('getNotificationKey()', () => {
-    it('returns static value', () => {
-      const input = { jobId: job.id }
-      const handler = new JobFailedEmailHandler(config.emailId, input, ctx)
-      const key = handler.getNotificationKey()
-      expect(key).to.equal('job_failed')
-    })
-  })
-
-  context('template()', () => {
-    it('returns general template', async () => {
-      const input = { jobId: job.id }
-      const handler = new JobFailedEmailHandler(config.emailId, input, ctx)
-      await handler.setupContext()
-      const template = await handler.template(user)
-
-      expect(template).to.have.property('emailType', EMAIL_TYPES.jobFailed)
-      expect(template.body).to.include('FailureReason: failure message')
-    })
-
-    it('returns cost limit exceeded template', async () => {
       job.describe = {
-        id: 'job-id',
-        class: 'job',
         failureReason: 'CostLimitExceeded',
-        failureMessage: 'failure message',
-      }
-      await em.flush()
+      } as JobDescribeResponse
 
-      const input = { jobId: job.id }
-      const handler = new JobFailedEmailHandler(config.emailId, input, ctx)
-      await handler.setupContext()
-      const template = await handler.template(user)
+      const handler = getHandler()
+      await handler.sendEmail(input)
 
-      expect(template.body).to.include('limit being reached')
+      expect(emailClientSendEmailStub.calledOnce).to.eq(true)
+      expect(emailClientSendEmailStub.firstCall.firstArg.emailType).to.eq(EMAIL_TYPES.jobFailed)
+      expect(emailClientSendEmailStub.firstCall.firstArg.to).to.eq(user.email)
+      expect(emailClientSendEmailStub.firstCall.firstArg.subject).to.eq(
+        `Execution "${job.name}" failed`,
+      )
+      expect(emailClientSendEmailStub.firstCall.firstArg.body).to.contain(
+        `There was an error running execution ${job.uid}`,
+      )
+      expect(emailClientSendEmailStub.firstCall.firstArg.body).to.contain(
+        'due to a limit being reached',
+      )
+    })
+
+    it('job failed', async () => {
+      const organization = new Organization()
+      const user = new User(organization)
+      user.id = USER_ID
+      user.firstName = 'Du Ven'
+      user.lastName = 'Blejt'
+      user.email = 'test@email.com'
+      const job = new Job(user)
+      job.name = 'job-name'
+
+      jobRepoFindOneOrFailStub.withArgs({ id: JOB_ID }).resolves(job)
+      userRepoFindOneOrFailStub.withArgs({ id: USER_ID }).resolves(user)
+      emailClientSendEmailStub.reset()
+
+      job.describe = {
+        failureReason: 'Job failed for whatever reason',
+      } as JobDescribeResponse
+
+      const handler = getHandler()
+      await handler.sendEmail(input)
+
+      expect(emailClientSendEmailStub.calledOnce).to.eq(true)
+      expect(emailClientSendEmailStub.firstCall.firstArg.emailType).to.equal(EMAIL_TYPES.jobFailed)
+      expect(emailClientSendEmailStub.firstCall.firstArg.to).to.eq(user.email)
+      expect(emailClientSendEmailStub.firstCall.firstArg.subject).to.equal(
+        `Execution "${job.name}" failed`,
+      )
+      expect(emailClientSendEmailStub.firstCall.firstArg.body).to.contain(
+        job.describe.failureReason,
+      )
     })
   })
 })

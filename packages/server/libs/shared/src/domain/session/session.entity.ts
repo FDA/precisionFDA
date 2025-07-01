@@ -1,4 +1,4 @@
-import { Entity, ManyToOne, PrimaryKey, Property, Ref, Reference } from '@mikro-orm/core'
+import { Entity, ManyToOne, Property, Ref, Reference } from '@mikro-orm/core'
 import { config } from '@shared/config'
 import { User } from '@shared/domain/user/user.entity'
 import { TimeUtils } from '@shared/utils/time.utils'
@@ -6,9 +6,6 @@ import { BaseEntity } from '../../database/base.entity'
 
 @Entity({ tableName: 'sessions' })
 export class Session extends BaseEntity {
-  @PrimaryKey()
-  id: number
-
   @Property()
   key: string
 

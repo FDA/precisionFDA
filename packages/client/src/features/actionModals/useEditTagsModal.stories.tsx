@@ -1,11 +1,13 @@
-import { Meta, StoryObj } from '@storybook/react'
+import { Meta, StoryObj } from '@storybook/react-webpack5'
 import React, { useEffect } from 'react'
 import { WithListData } from '../../stories/helpers'
 import { StorybookProviders } from '../../stories/StorybookProviders'
-import { fetchApps } from '../apps/apps.api'
-import { fetchFiles } from '../files/files.api'
+import { fetchApps, FetchAppsQuery } from '../apps/apps.api'
+import { fetchFiles, FetchFilesQuery } from '../files/files.api'
 import { APIResource } from '../home/types'
 import { useEditTagsModal } from './useEditTagsModal'
+import { IFile } from '../files/files.types'
+import { IApp } from '../apps/apps.types'
 
 const meta: Meta = {
   title: 'Modals/Common',
@@ -17,8 +19,15 @@ const meta: Meta = {
     ),
   ],
 }
+
+type TaggableResource = {
+  uid: string
+  name: string
+  tags: string[]
+}
+
 type Props = {
-  data: Partial<{ uid: string }>[]
+  data: TaggableResource
   type: APIResource
 }
 type Story = StoryObj<Props>
@@ -31,24 +40,45 @@ const EditTagsModalWrapper = (props: Props) => {
 
   useEffect(() => {
     setShowModal(true)
-  }, [])
+  }, [setShowModal])
   return modalComp
 }
 
 export const EditTagsModal: Story = {
   render: ({ type = 'files' }) => {
-    let fetchFunc: unknown
     if (type === 'files') {
-      fetchFunc = fetchFiles
+      return (
+        <WithListData<FetchFilesQuery> resource={type} fetchList={fetchFiles}>
+          {({ data }) => {
+            const files = data?.files || []
+            const firstItem = files[0] as IFile
+            
+            if (!firstItem) {
+              return <div>No data available</div>
+            }
+            
+            return <EditTagsModalWrapper data={firstItem} type={type} />
+          }}
+        </WithListData>
+      )
+    } else if (type === 'apps') {
+      return (
+        <WithListData<FetchAppsQuery> resource={type} fetchList={fetchApps}>
+          {({ data }) => {
+            const apps = data?.apps || []
+            const firstItem = apps[0] as IApp
+            
+            if (!firstItem) {
+              return <div>No data available</div>
+            }
+            
+            return <EditTagsModalWrapper data={firstItem} type={type} />
+          }}
+        </WithListData>
+      )
+    } else {
+      return <div>Unsupported resource type</div>
     }
-    if (type === 'apps') {
-      fetchFunc = fetchApps
-    }
-    return (
-      <WithListData resource={type} fetchList={fetchFunc || fetchFiles}>
-        {({ data }) => <EditTagsModalWrapper data={data[type][0]} type={type} />}
-      </WithListData>
-    )
   },
   argTypes: {
     type: {

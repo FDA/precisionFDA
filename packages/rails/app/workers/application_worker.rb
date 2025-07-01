@@ -32,7 +32,8 @@ class ApplicationWorker
 
     max_mail_length = 255
     message = message[0, max_mail_length] if message.length > max_mail_length
-    https_apps_client.email_send(NotificationPreference.email_types[:alert_message], [context.user.id], { subject:, message: })
+
+    https_apps_client.email_send(NotificationPreference.email_types[:alert_message], { subject:, message:, receiverUserIds: [context.user.id] })
 
     RequestContext.end_request
   end

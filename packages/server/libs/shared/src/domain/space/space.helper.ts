@@ -17,8 +17,6 @@ const getIdFromScopeName = (name: string): number => {
   return idValue
 }
 
-const getScopeFromSpaceId = (spaceId: number): `space-${number}` => `space-${spaceId}`
-
 const scopeContainsId = (name: string): boolean => {
   try {
     getIdFromScopeName(name)
@@ -36,14 +34,14 @@ const getOrgDxid = (space: Space, spaceMembership: SpaceMembership): string =>
 const getOppositeOrgDxid = (space: Space, spaceMembership: SpaceMembership): string =>
   spaceMembership.isHost() ? space.guestDxOrg : space.hostDxOrg
 
-const setOrgDxid = (space: Space, spaceMembership: SpaceMembership, value: string) => {
+const setOrgDxid = (space: Space, spaceMembership: SpaceMembership, value: string): void => {
   spaceMembership.isHost() ? (space.hostDxOrg = value) : (space.guestDxOrg = value)
 }
 
 const getProjectDxid = (space: Space, spaceMembership: SpaceMembership): string =>
   spaceMembership.isHost() ? space.hostProject : space.guestProject
 
-const setProjectDxid = (space: Space, spaceMembership: SpaceMembership, value: string) => {
+const setProjectDxid = (space: Space, spaceMembership: SpaceMembership, value: string): void => {
   spaceMembership.isHost() ? (space.hostProject = value) : (space.guestProject = value)
 }
 
@@ -84,7 +82,6 @@ export {
   getOppositeOrgDxid,
   getOrgDxid,
   getProjectDxid,
-  getScopeFromSpaceId,
   isAcceptedBy,
   scopeContainsId,
   setOrgDxid,

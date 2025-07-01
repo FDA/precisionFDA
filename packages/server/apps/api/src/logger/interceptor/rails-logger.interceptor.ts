@@ -49,8 +49,8 @@ export class RailsLoggerInterceptor implements NestInterceptor {
           `Completed ${statusCode} ${statusText} in ${responseTime}ms`,
         )
       }),
-      catchError((error: BaseError) => {
-        const statusCode = error.props.statusCode
+      catchError((error: Error) => {
+        const statusCode = error instanceof BaseError ? error.props.statusCode : 500
         const statusText = STATUS_CODES[statusCode] || ''
         const responseTime = Date.now() - startDate.getTime()
         this.logMessage(

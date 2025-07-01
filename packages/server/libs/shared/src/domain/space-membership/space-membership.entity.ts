@@ -4,7 +4,6 @@ import {
   Ref,
   ManyToMany,
   ManyToOne,
-  PrimaryKey,
   Property,
   Reference,
   Enum,
@@ -18,9 +17,6 @@ import { SpaceMembershipRepository } from '@shared/domain/space-membership/space
 
 @Entity({ tableName: 'space_memberships', repository: () => SpaceMembershipRepository })
 export class SpaceMembership extends BaseEntity {
-  @PrimaryKey()
-  id: number
-
   @Property()
   active: boolean
 
@@ -46,31 +42,31 @@ export class SpaceMembership extends BaseEntity {
     this.role = role
   }
 
-  isHost() {
+  isHost(): boolean {
     return this.side === SPACE_MEMBERSHIP_SIDE.HOST
   }
 
-  isGuest() {
+  isGuest(): boolean {
     return this.side === SPACE_MEMBERSHIP_SIDE.GUEST
   }
 
-  isLead() {
+  isLead(): boolean {
     return this.role === SPACE_MEMBERSHIP_ROLE.LEAD
   }
 
-  isAdmin() {
+  isAdmin(): boolean {
     return this.role === SPACE_MEMBERSHIP_ROLE.ADMIN
   }
 
-  isAdminOrLead() {
+  isAdminOrLead(): boolean {
     return [SPACE_MEMBERSHIP_ROLE.ADMIN, SPACE_MEMBERSHIP_ROLE.LEAD].includes(this.role)
   }
 
-  isContributor() {
+  isContributor(): boolean {
     return this.role === SPACE_MEMBERSHIP_ROLE.CONTRIBUTOR
   }
 
-  getSpaceMembershipSideAlias() {
+  getSpaceMembershipSideAlias(): string {
     switch (this.side) {
       case SPACE_MEMBERSHIP_SIDE.HOST:
         return 'reviewer'
@@ -81,7 +77,7 @@ export class SpaceMembership extends BaseEntity {
     }
   }
 
-  getSpaceMembershipRoleAlias() {
+  getSpaceMembershipRoleAlias(): string {
     switch (this.role) {
       case SPACE_MEMBERSHIP_ROLE.ADMIN:
         return 'Administrator'

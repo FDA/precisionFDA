@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString } from 'class-validator'
+import { IsArray, IsNotEmpty, IsNumber, IsString } from 'class-validator'
 
 export class AlertMessageInputDTO {
   @IsString()
@@ -8,4 +8,8 @@ export class AlertMessageInputDTO {
   @IsString()
   @IsNotEmpty()
   message: string
+
+  @IsArray()
+  @IsNumber({}, { each: true })
+  receiverUserIds: number[]
 }
