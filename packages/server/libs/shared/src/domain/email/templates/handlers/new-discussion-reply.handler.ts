@@ -10,15 +10,15 @@ import { SpaceMembershipRepository } from '@shared/domain/space-membership/space
 import { EntityService } from '@shared/domain/entity/entity.service'
 import { EmailClient } from '@shared/services/email-client'
 import {
+  DiscussionContext,
   EmailTypeToContextMap,
-  NewDiscussionReplyContext,
 } from '@shared/domain/email/dto/email-type-to-context.map'
-import * as errors from '../../../../errors'
 import { User, USER_STATE } from '@shared/domain/user/user.entity'
 import { EntityScopeUtils } from '@shared/utils/entity-scope.utils'
 import { EmailTypeToTemplateInputMap } from '@shared/domain/email/dto/email-type-to-template-input.map'
 import { Space } from '@shared/domain/space/space.entity'
-import { getKeyForUserSpaceRole } from '@shared/domain/email/email.helper'
+import { Discussion } from '@shared/domain/discussion/discussion.entity'
+import { DiscussionFollow } from '@shared/domain/follow/discussion-follow.entity'
 
 @Injectable()
 export class NewDiscussionReplyHandler extends EmailHandler<EMAIL_TYPES.newDiscussionReply> {
@@ -61,48 +61,27 @@ export class NewDiscussionReplyHandler extends EmailHandler<EMAIL_TYPES.newDiscu
     return { discussionLink, discussion, space, input }
   }
 
-  protected async getNotificationSettingKeys(
-    context: NewDiscussionReplyContext,
-    user: User,
-  ): Promise<string[]> {
-    const space = context.space
-    await space.spaceMemberships.loadItems()
-    const spaceMembership = space.spaceMemberships
-      .getItems()
-      .filter(
-        (spaceMembership) =>
-          spaceMembership.active === true && spaceMembership.user.getEntity().id === user.id,
-      )
-
-    if (Array.isArray(spaceMembership) && spaceMembership.length > 0) {
-      return [getKeyForUserSpaceRole(spaceMembership[0], 'comment_activity', space)]
-    }
-  }
-
   /**
    * Get all users following the discussion, including the discussion owner.
    * Only currently active users are returned.
-   * @param discussionId
+   * @param discussion
    */
-  async getFollowers(discussionId: number): Promise<User[]> {
-    const discussion = await this.discussionRepo.findOne({ id: discussionId })
-    if (!discussion) {
-      throw new errors.NotFoundError('Discussion not found.')
-    }
-    await discussion.follows.load()
-    // filter out only user ids
+  async getFollowers(discussion: Discussion): Promise<User[]> {
     const userIDs = discussion.follows
       .getItems()
       .filter((follow) => follow.followerType === 'User')
       .map((follow) => follow.followerId)
 
-    return await this.userRepo.find({ id: { $in: userIDs }, userState: USER_STATE.ENABLED })
+    if (userIDs.length > 0) {
+      return await this.userRepo.find({ id: { $in: userIDs }, userState: USER_STATE.ENABLED })
+    }
+    return []
   }
 
   protected async determineReceivers(
     context: EmailTypeToContextMap[EMAIL_TYPES.newDiscussionReply],
   ): Promise<User[]> {
-    let users = await this.getFollowers(context.input.discussionId)
+    let users = await this.getFollowers(context.discussion)
 
     if (EntityScopeUtils.isSpaceScope(context.discussion.note.getEntity().scope)) {
       this.logger.log('Discussion is in space....')
@@ -110,7 +89,7 @@ export class NewDiscussionReplyHandler extends EmailHandler<EMAIL_TYPES.newDiscu
       if (context.input.notify === 'all') {
         const spaceMemberships = await this.spaceMembershipRepo.find(
           { spaces: context.space.id, active: true },
-          { populate: ['user', 'user.notificationPreference'] },
+          { populate: ['user'] },
         )
         return spaceMemberships.map((spaceMembership) => spaceMembership.user.getEntity())
       }
@@ -120,18 +99,11 @@ export class NewDiscussionReplyHandler extends EmailHandler<EMAIL_TYPES.newDiscu
       }
 
       if (Array.isArray(context.input.notify) && context.input.notify.length) {
-        const users = await Promise.all(
-          context.input.notify.map((username) =>
-            this.userRepo.findOneOrFail(
-              {
-                dxuser: username,
-                spaceMemberships: { spaces: context.space.id, active: true },
-              },
-              { populate: ['notificationPreference'] },
-            ),
-          ),
-        )
-        users.push(...users)
+        const specificUsers = await this.userRepo.find({
+          dxuser: { $in: context.input.notify },
+          spaceMemberships: { spaces: context.space.id, active: true },
+        })
+        users.push(...specificUsers)
       }
     }
     return Array.from(new Set(users.map((user) => user.id))).map(
@@ -151,7 +123,7 @@ export class NewDiscussionReplyHandler extends EmailHandler<EMAIL_TYPES.newDiscu
     }
   }
 
-  protected getSubject(_receiver: User, context: NewDiscussionReplyContext): string {
+  protected getSubject(_receiver: User, context: DiscussionContext): string {
     if (EntityScopeUtils.isSpaceScope(context.discussion.note.getEntity().scope)) {
       return `[precisionFDA] New Discussion reply notification: ${context.space.name}`
     } else {
