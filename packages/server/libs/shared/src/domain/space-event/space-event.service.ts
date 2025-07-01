@@ -57,7 +57,7 @@ export class SpaceEventService {
    * Creates a space event and sends a notification for it.
    * @param input
    */
-  async createAndSendSpaceEvent(input: SpaceEventDTO) {
+  async createAndSendSpaceEvent(input: SpaceEventDTO): Promise<void> {
     const spaceEvent = await this.createSpaceEvent(input)
     if (spaceEvent) {
       await this.sendNotificationForEvent(spaceEvent)
@@ -71,7 +71,7 @@ export class SpaceEventService {
       : await this.spaceMembershipRepo.getMembership(input.spaceId, input.userId)
 
     const space = await this.spaceRepo.findOne(input.spaceId)
-    const user = await this.userRepo.findOne(this.user.id)
+    const user = await this.user.loadEntity()
 
     if (space !== null && user !== null) {
       const spaceEvent = new SpaceEvent(user, space)
@@ -95,7 +95,7 @@ export class SpaceEventService {
     }
   }
 
-  async sendNotificationForEvent(event: SpaceEvent) {
+  async sendNotificationForEvent(event: SpaceEvent): Promise<void> {
     this.logger.log(
       `Sending notification for space event id: ${event.id} activityType: ${event.activityType}`,
     )

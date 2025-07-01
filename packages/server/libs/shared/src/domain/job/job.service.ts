@@ -15,13 +15,10 @@ import { Job } from '@shared/domain/job/job.entity'
 import { buildIsOverMaxDuration } from '@shared/domain/job/job.helper'
 import { NotificationService } from '@shared/domain/notification/services/notification.service'
 import { SpaceEventService } from '@shared/domain/space-event/space-event.service'
-import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
-import { Space } from '@shared/domain/space/space.entity'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { Folder } from '@shared/domain/user-file/folder.entity'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { User } from '@shared/domain/user/user.entity'
-import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { createSyncJobStatusTask, getMainQueue } from '@shared/queue'
 import { difference } from 'ramda'
 import { NOTIFICATION_ACTION, SEVERITY } from '../../enums'
@@ -43,15 +40,16 @@ import { UserRepository } from '../user/user.repository'
 import { JobRepository } from './job.repository'
 import { CheckStatusJob, TASK_TYPE } from '@shared/queue/task.input'
 import { JobSynchronizationService } from '@shared/domain/job/services/job-synchronization.service'
+import { Job as BullJob } from 'bull'
+import { SpaceRepository } from '@shared/domain/space/space.repository'
+import { ServiceLogger } from '@shared/logger/decorator/service-logger'
+import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
 import { JOB_STATE } from '@shared/domain/job/job.enum'
 
 @Injectable()
 export class JobService {
   @ServiceLogger()
   private readonly logger: Logger
-
-  private jobRepo: JobRepository
-  private userRepo: UserRepository
 
   constructor(
     private readonly em: EntityManager,
@@ -62,10 +60,11 @@ export class JobService {
     private readonly emailsJobProducer: EmailQueueJobProducer,
     private readonly jobSyncService: JobSynchronizationService,
     private readonly emailService: EmailService,
-  ) {
-    this.jobRepo = em.getRepository(Job)
-    this.userRepo = em.getRepository(User)
-  }
+    private readonly userRepo: UserRepository,
+    private readonly jobRepo: JobRepository,
+    private readonly spaceRepo: SpaceRepository,
+    private readonly spaceMembershipRepo: SpaceMembershipRepository,
+  ) {}
 
   async synchronizeJob(checkStatusJob: CheckStatusJob['payload']): Promise<Maybe<Job>> {
     return await this.jobSyncService.synchronizeJob(checkStatusJob)
@@ -127,8 +126,7 @@ export class JobService {
   async checkStaleJobs(): Promise<Job[]> {
     // TODO cut into smaller methods
     // find running jobs that are close to "deadline" -> 30days in production
-    const jobRepo = this.em.getRepository(Job)
-    const runningJobs = await jobRepo.find(
+    const runningJobs = await this.jobRepo.find(
       {},
       {
         filters: ['isNonTerminal'],
@@ -186,7 +184,7 @@ export class JobService {
     this.logger.log({ staleJobs: staleJobsInfo }, 'Stale jobs - should be terminated')
 
     // generate email for admin with list of jobs
-    const adminUser = await this.em.getRepository(User).findAdminUser()
+    const adminUser = await this.userRepo.findAdminUser()
     const body = buildEmailTemplate<ReportStaleJobsTemplateInput>(reportStaleJobsTemplate, {
       receiver: adminUser,
       content: {
@@ -231,12 +229,11 @@ export class JobService {
    * previously the code was in job_syncing.rb
    *
    * @param jobDxId
-   * @param userId
    */
-  async syncOutputs(jobDxId: DxId<'job'>, userId: number): Promise<void> {
+  async syncOutputs(jobDxId: DxId<'job'>): Promise<void> {
     this.logger.log(`Syncing output files for job ${jobDxId}`)
 
-    const user = await this.userRepo.findOneOrFail({ id: userId })
+    const user = await this.user.loadEntity()
     const job = await this.jobRepo.findOneOrFail({ dxid: jobDxId })
     const result = await this.getJobResult(job)
 
@@ -258,21 +255,21 @@ export class JobService {
         const spaceService = new SpaceEventService(
           this.user,
           this.em as SqlEntityManager,
-          this.em.getRepository(Space),
-          this.em.getRepository(User),
-          this.em.getRepository(SpaceMembership),
+          this.spaceRepo,
+          this.userRepo,
+          this.spaceMembershipRepo,
           this.emailService,
         )
         const spaceEvent = await spaceService.createSpaceEvent({
           entity: { type: 'job', value: job },
           spaceId: job.getSpaceId(),
-          userId,
+          userId: this.user.id,
           activityType: SPACE_EVENT_ACTIVITY_TYPE.job_completed,
         })
         await spaceService.sendNotificationForEvent(spaceEvent)
       }
 
-      await this.createNotification(jobDxId, userId, this.user.sessionId)
+      await this.createNotification(jobDxId, this.user.id, this.user.sessionId)
       await this.em.commit()
       this.logger.log(`Outputs for job ${jobDxId} have been synchronized`)
     } catch (error) {
@@ -338,7 +335,7 @@ export class JobService {
     })
   }
 
-  private async persistFiles(outputFiles: any[], user: User): Promise<void> {
+  private async persistFiles(outputFiles: UserFile[], user: User): Promise<void> {
     const filePromises = outputFiles.map(async (outputFile) => {
       await this.em.persistAndFlush(outputFile) // flush for id
 

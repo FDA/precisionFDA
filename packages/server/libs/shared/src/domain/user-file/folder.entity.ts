@@ -1,8 +1,8 @@
+import { Tagging } from '@shared/domain/tagging/tagging.entity'
 import {
   Collection,
   Entity,
   EntityDTO,
-  EntityRepositoryType,
   Filter,
   OneToMany,
   Property,
@@ -12,7 +12,6 @@ import { User } from '@shared/domain/user/user.entity'
 import { FolderRepository } from './folder.repository'
 import { Node } from './node.entity'
 import { FILE_STI_TYPE, ITrackable } from './user-file.types'
-import { Tagging } from '@shared/domain/tagging/tagging.entity'
 
 @Entity({
   tableName: 'nodes',
@@ -79,7 +78,6 @@ export class Folder extends Node implements ITrackable {
     return this.project === undefined
   }
 
-  [EntityRepositoryType]?: FolderRepository
   constructor(user: User) {
     super()
     this.user = Reference.create(user)
