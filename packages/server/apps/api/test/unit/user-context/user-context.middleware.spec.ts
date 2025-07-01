@@ -202,7 +202,7 @@ describe('UserContextMiddleware', () => {
   it('should run with user context when valid session cookie provided', async () => {
     await callWithSessionToken(VALID_TOKEN)
 
-    expect(userContextStorageRunStub.calledOnce).to.be.true
+    expect(userContextStorageRunStub.calledOnce).to.be.true()
     expect(userContextStorageRunStub.firstCall.args[0]).to.deep.eq({
       id: USER_ID,
       accessToken: PLATFORM_TOKEN,
@@ -236,7 +236,7 @@ describe('UserContextMiddleware', () => {
   it('should run with user context when valid auth header provided', async () => {
     await callWithAuthHeader(VALID_AUTH_HEADER)
 
-    expect(userContextStorageRunStub.calledOnce).to.be.true
+    expect(userContextStorageRunStub.calledOnce).to.be.true()
     expect(userContextStorageRunStub.firstCall.args[0]).to.deep.eq({
       id: USER_ID,
       accessToken: PLATFORM_TOKEN,
@@ -249,7 +249,7 @@ describe('UserContextMiddleware', () => {
   it('should forward next function to run', async () => {
     await callWithSessionToken(VALID_TOKEN)
 
-    expect(userContextStorageRunStub.calledOnce).to.be.true
+    expect(userContextStorageRunStub.calledOnce).to.be.true()
     expect(userContextStorageRunStub.firstCall.args[1]).to.eq(nextStub)
   })
 
@@ -281,7 +281,7 @@ describe('UserContextMiddleware', () => {
   }
 
   function expectRunWithEmptyContext(): void {
-    expect(userContextStorageRunStub.calledOnce).to.be.true
+    expect(userContextStorageRunStub.calledOnce).to.be.true()
     const userContext = userContextStorageRunStub.firstCall.args[0]
 
     expect(userContext.id).to.be.null()

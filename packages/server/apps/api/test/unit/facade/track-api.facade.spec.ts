@@ -33,7 +33,7 @@ describe('TrackApiFacade', () => {
   it('should raise error if entity not found', async () => {
     findAccessibleOne.rejects()
 
-    await expect(getInstance().getProvenance(FILE_UID)).to.be.rejected
+    await expect(getInstance().getProvenance(FILE_UID)).to.be.rejected()
   })
 
   it('should call getAccessibleByUid and getProvenance with correct args', async () => {

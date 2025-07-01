@@ -73,7 +73,7 @@ describe('LicenseRevokedHandler', () => {
       const handler = getHandler()
       await handler.sendEmail(input)
 
-      expect(emailClientSendEmailStub.calledOnce).to.be.true
+      expect(emailClientSendEmailStub.calledOnce).to.be.true()
       expect(emailClientSendEmailStub.firstCall.firstArg.emailType).to.eq(
         EMAIL_TYPES.licenseRevoked,
       )

@@ -502,7 +502,7 @@ describe('Job service tests', () => {
 
       await jobService.checkStaleJobs()
 
-      expect(queueAdd.calledTwice).to.be.true
+      expect(queueAdd.calledTwice).to.be.true()
       expect(queueAdd.firstCall.firstArg).to.equal('send_email')
       expect(queueAdd.firstCall.args[1].payload.emailType).to.equal(EMAIL_TYPES.staleJobsReport)
       expect(queueAdd.firstCall.args[1].payload.body).not.to.contain('No stale jobs found')
@@ -563,7 +563,7 @@ describe('Job service tests', () => {
 
       await jobService.checkStaleJobs()
 
-      expect(queueAdd.calledTwice).to.be.true
+      expect(queueAdd.calledTwice).to.be.true()
       expect(queueAdd.firstCall.firstArg).to.equal('send_email')
       expect(queueAdd.firstCall.args[1].payload.emailType).to.equal(EMAIL_TYPES.staleJobsReport)
       expect(queueAdd.firstCall.args[1].payload.body).to.contain('No stale jobs found')

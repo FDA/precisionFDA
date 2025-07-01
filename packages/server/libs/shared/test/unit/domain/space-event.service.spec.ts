@@ -41,8 +41,6 @@ describe('SpaceEvent service tests', () => {
 
   const spaceMembershipRepoGetMembershipStub = stub()
 
-  const prepareEmailStub = stub()
-
   const sendEmailStub = stub()
 
   const userRepoFindOneStub = stub()
@@ -93,7 +91,6 @@ describe('SpaceEvent service tests', () => {
       const user = createStubInstance(User)
       userRepoFindOneStub.resolves(user)
       emPersistAndFlushStub.reset()
-      prepareEmailStub.returns([{ email: 'email' }])
 
       const input: SpaceEventDTO = {
         spaceId: 1,
@@ -127,13 +124,15 @@ describe('SpaceEvent service tests', () => {
       expect(result.entityId).to.eq(1)
       expect(result.entityType).to.eq('Node')
       expect(result.objectType).to.eq(SPACE_EVENT_OBJECT_TYPE.FILE)
-      expect(result.data).to.be.undefined
+      expect(JSON.parse(result.data)).to.deep.equal({
+        type: 'userFile',
+        value: { id: 1 },
+        ignoreUserIds: [],
+      })
 
-      expect(emPersistAndFlushStub.calledOnce).to.be.true
-      expect(emPersistAndFlushStub.calledWith(result)).to.be.true
-      expect(prepareEmailStub.calledOnce).to.be.true
-      expect(sendEmailStub.calledOnce).to.be.true
-      expect(sendEmailStub.calledWith({ email: 'email' })).to.be.true
+      expect(emPersistAndFlushStub.calledOnce).to.be.true()
+      expect(emPersistAndFlushStub.calledWith(result)).to.be.true()
+      expect(sendEmailStub.called).to.be.false()
     })
   })
 
@@ -142,18 +141,11 @@ describe('SpaceEvent service tests', () => {
       const spaceEvent = createStubInstance(SpaceEvent)
       spaceEvent.id = 10
       spaceEvent.activityType = SPACE_EVENT_ACTIVITY_TYPE.file_added
-      prepareEmailStub.returns([
-        {
-          emailTypeId: EMAIL_TYPES.newContentAdded,
-          input: { id: spaceEvent.id },
-          receiverUserIds: [],
-        },
-      ])
       sendEmailStub.reset()
 
       await getInstance(DEFAULT_USER_CTX).sendNotificationForEvent(spaceEvent)
 
-      expect(sendEmailStub.calledOnce).to.be.true
+      expect(sendEmailStub.calledOnce).to.be.true()
       expect(sendEmailStub.firstCall.firstArg.type).to.eq(EMAIL_TYPES.newContentAdded)
       expect(sendEmailStub.firstCall.firstArg.input.id).to.eq(10)
       expect(sendEmailStub.firstCall.firstArg.receiverUserIds).to.deep.eq([])
@@ -163,18 +155,11 @@ describe('SpaceEvent service tests', () => {
       const spaceEvent = createStubInstance(SpaceEvent)
       spaceEvent.id = 10
       spaceEvent.activityType = SPACE_EVENT_ACTIVITY_TYPE.comment_added
-      prepareEmailStub.returns([
-        {
-          emailTypeId: EMAIL_TYPES.commentAdded,
-          input: { id: spaceEvent.id },
-          receiverUserIds: [],
-        },
-      ])
       sendEmailStub.reset()
 
       await getInstance(DEFAULT_USER_CTX).sendNotificationForEvent(spaceEvent)
 
-      expect(sendEmailStub.calledOnce).to.be.true
+      expect(sendEmailStub.calledOnce).to.be.true()
       expect(sendEmailStub.firstCall.firstArg.type).to.eq(EMAIL_TYPES.commentAdded)
       expect(sendEmailStub.firstCall.firstArg.input.id).to.eq(10)
       expect(sendEmailStub.firstCall.firstArg.receiverUserIds).to.deep.eq([])
@@ -191,22 +176,11 @@ describe('SpaceEvent service tests', () => {
         id: 12,
       } as unknown as Ref<Space>
 
-      prepareEmailStub.returns([
-        {
-          emailTypeId: EMAIL_TYPES.spaceChanged,
-          input: {
-            initUserId: spaceEvent.user.id,
-            spaceId: spaceEvent.space.id,
-            activityType: spaceEvent.activityType,
-          },
-          receiverUserIds: [],
-        },
-      ])
       sendEmailStub.reset()
 
       await getInstance(DEFAULT_USER_CTX).sendNotificationForEvent(spaceEvent)
 
-      expect(sendEmailStub.calledOnce).to.be.true
+      expect(sendEmailStub.calledOnce).to.be.true()
       expect(sendEmailStub.firstCall.firstArg.type).to.eq(EMAIL_TYPES.spaceChanged)
       expect(sendEmailStub.firstCall.firstArg.input.initUserId).to.eq(11)
       expect(sendEmailStub.firstCall.firstArg.input.spaceId).to.eq(12)
@@ -226,24 +200,11 @@ describe('SpaceEvent service tests', () => {
       spaceEvent.entityId = 13
       spaceEvent.role = SPACE_MEMBERSHIP_ROLE.LEAD
 
-      prepareEmailStub.returns([
-        {
-          emailTypeId: EMAIL_TYPES.memberChangedAddedRemoved,
-          input: {
-            initUserId: spaceEvent.user.id,
-            spaceId: spaceEvent.space.id,
-            updatedMembershipId: spaceEvent.entityId,
-            activityType: spaceEvent.activityType,
-            newMembershipRole: spaceEvent.role,
-          },
-          receiverUserIds: [],
-        },
-      ])
       sendEmailStub.reset()
 
       await getInstance(DEFAULT_USER_CTX).sendNotificationForEvent(spaceEvent)
 
-      expect(sendEmailStub.calledOnce).to.be.true
+      expect(sendEmailStub.calledOnce).to.be.true()
       expect(sendEmailStub.firstCall.firstArg.type).to.eq(EMAIL_TYPES.memberChangedAddedRemoved)
       expect(sendEmailStub.firstCall.firstArg.input.initUserId).to.eq(11)
       expect(sendEmailStub.firstCall.firstArg.input.spaceId).to.eq(12)

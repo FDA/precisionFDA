@@ -61,6 +61,9 @@ describe('TaggingService', () => {
 
     emPersistStub.reset()
     emPersistStub.throws()
+
+    emTransactionalStub.reset()
+    emTransactionalStub.callsFake((cb) => cb(em))
   })
 
   describe('#addTaggingForEntity', () => {
@@ -86,11 +89,11 @@ describe('TaggingService', () => {
         TAGGABLE_TYPE.NODE,
       )
 
-      expect(emTransactionalStub.calledOnce).to.be.true
-      expect(tagRepoFindOneStub.calledOnce).to.be.true
-      expect(emPersistAndFlushStub.calledOnce).to.be.true
+      expect(emTransactionalStub.calledOnce).to.be.true()
+      expect(tagRepoFindOneStub.calledOnce).to.be.true()
+      expect(emPersistAndFlushStub.calledOnce).to.be.true()
       expect(emPersistAndFlushStub.firstCall.args[0].name).to.eq('tag')
-      expect(emPersistStub.calledOnce).to.be.true
+      expect(emPersistStub.calledOnce).to.be.true()
       expect(emPersistStub.firstCall.args[0].tagId).to.eq(TAG_ID)
       expect(emPersistStub.firstCall.args[0].taggableType).to.eq(TAGGABLE_TYPE.NODE)
       expect(emPersistStub.firstCall.args[0].taggableId).to.eq(TAGGABLE_ID)
@@ -113,9 +116,9 @@ describe('TaggingService', () => {
         TAGGABLE_TYPE.NODE,
       )
 
-      expect(emTransactionalStub.calledOnce).to.be.true
-      expect(tagRepoFindOneStub.calledOnce).to.be.true
-      expect(emPersistStub.calledOnce).to.be.true
+      expect(emTransactionalStub.calledOnce).to.be.true()
+      expect(tagRepoFindOneStub.calledOnce).to.be.true()
+      expect(emPersistStub.calledOnce).to.be.true()
       expect(emPersistStub.firstCall.args[0].tagId).to.eq(TAG_ID)
       expect(emPersistStub.firstCall.args[0].taggableType).to.eq(TAGGABLE_TYPE.NODE)
       expect(emPersistStub.firstCall.args[0].taggableId).to.eq(TAGGABLE_ID)
@@ -137,17 +140,18 @@ describe('TaggingService', () => {
         TAGGABLE_TYPE.NODE,
       )
 
-      expect(emTransactionalStub.calledOnce).to.be.true
-      expect(tagRepoFindOneStub.calledOnce).to.be.true
-      expect(emPersistStub.notCalled).to.be.true
-      expect(emPersistAndFlushStub.notCalled).to.be.true
+      expect(emTransactionalStub.calledOnce).to.be.true()
+      expect(tagRepoFindOneStub.calledOnce).to.be.true()
+      expect(emPersistStub.notCalled).to.be.true()
+      expect(emPersistAndFlushStub.notCalled).to.be.true()
     })
   })
 
   describe('#removeTaggings', () => {
     it('should remove taggings for entity with id and type', async () => {
       const tag = { id: 5 }
-      taggingRepoFindForTaggableStub.withArgs(1, TAGGABLE_TYPE.NODE).resolves([{ tag }])
+      const tagging = { tag }
+      taggingRepoFindForTaggableStub.withArgs(1, TAGGABLE_TYPE.NODE).resolves([tagging])
       taggingRepoCountStub.reset()
       taggingRepoCountStub.withArgs({ tagId: 1 }).resolves(2)
       emRemoveStub.reset()
@@ -158,17 +162,19 @@ describe('TaggingService', () => {
 
       await service.removeTaggings(id, type)
 
-      expect(emTransactionalStub.calledOnce).to.be.true
-      expect(taggingRepoFindForTaggableStub.calledOnce).to.be.true
-      expect(emRemoveStub.calledOnce).to.be.true
-      expect(emRemoveStub.calledWith(tag)).to.be.true
+      expect(emTransactionalStub.calledOnce).to.be.true()
+      expect(taggingRepoFindForTaggableStub.calledOnce).to.be.true()
+      expect(emRemoveStub.calledOnce).to.be.true()
+      expect(emRemoveStub.calledWith(tagging)).to.be.true()
     })
 
     it('should remove also tag', async () => {
       const tag = { id: 5 }
-      taggingRepoFindForTaggableStub.withArgs(1, TAGGABLE_TYPE.NODE).resolves([{ tag }])
+      const tagging = { tag, tagId: tag.id }
+      taggingRepoFindForTaggableStub.withArgs(1, TAGGABLE_TYPE.NODE).resolves([tagging])
       taggingRepoCountStub.reset()
-      taggingRepoCountStub.withArgs({ tagId: 1 }).resolves(2)
+      taggingRepoCountStub.throws()
+      taggingRepoCountStub.withArgs({ tagId: tag.id }).resolves(1)
       emRemoveStub.reset()
 
       const service = getTaggingService()
@@ -177,12 +183,12 @@ describe('TaggingService', () => {
 
       await service.removeTaggings(id, type)
 
-      expect(emTransactionalStub.calledOnce).to.be.true
-      expect(taggingRepoFindForTaggableStub.calledOnce).to.be.true
-      expect(taggingRepoFindForTaggableStub.calledWith(id, type)).to.be.true
-      expect(emRemoveStub.calledTwice).to.be.true
-      expect(emRemoveStub.calledWith(tag)).to.be.true
-      expect(emRemoveStub.calledWith({ tag })).to.be.true
+      expect(emTransactionalStub.calledOnce).to.be.true()
+      expect(taggingRepoFindForTaggableStub.calledOnce).to.be.true()
+      expect(taggingRepoFindForTaggableStub.calledWith(id, type)).to.be.true()
+      expect(emRemoveStub.calledTwice).to.be.true()
+      expect(emRemoveStub.calledWith(tag)).to.be.true()
+      expect(emRemoveStub.calledWith(tagging)).to.be.true()
     })
   })
 })
