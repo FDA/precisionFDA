@@ -1,7 +1,6 @@
 import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
 import { User } from '@shared/domain/user/user.entity'
 import { mergeAll } from 'ramda'
-import { EmailHandler } from '@shared/domain/email/templates/handlers/email.handler'
 
 /**
  * List of all notification bases, which may be applied to a role.
@@ -175,12 +174,3 @@ export type EmailSendInput = {
 }
 
 export type EmailTemplateInput = { receiver: User }
-
-export type EmailConfigItem<T extends EMAIL_TYPES = EMAIL_TYPES> = {
-  // unique name
-  name: string
-  // API param value -> EMAIL_TYPE, must be also unique
-  emailId: T
-  // handler for given email type
-  handlerClass: new (...args: unknown[]) => EmailHandler<T>
-}
