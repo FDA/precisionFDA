@@ -81,9 +81,9 @@ describe('CreateDiscussionFacade', () => {
     createDiscussionStub.returns(newDiscussion)
     const result = await createDiscussionFacade.createDiscussion(dto)
 
-    expect(createDiscussionStub.calledOnce).to.be.true
-    expect(createAttachmentsStub.calledOnce).to.be.true
-    expect(createNewDiscussionNotificationTaskStub.calledOnce).to.be.true
+    expect(createDiscussionStub.calledOnce).to.be.true()
+    expect(createAttachmentsStub.calledOnce).to.be.true()
+    expect(createNewDiscussionNotificationTaskStub.calledOnce).to.be.true()
     expect(createDiscussionStub.firstCall.args[0]).to.deep.equal(dto)
     expect(createAttachmentsStub.firstCall.args[0]).to.equal(newDiscussion.noteId)
     expect(createAttachmentsStub.firstCall.args[1]).to.equal(dto.attachments)
@@ -116,9 +116,9 @@ describe('CreateDiscussionFacade', () => {
     createDiscussionStub.returns(newDiscussion)
     const result = await createDiscussionFacade.createDiscussion(dto)
 
-    expect(createDiscussionStub.calledOnce).to.be.true
-    expect(createAttachmentsStub.calledOnce).to.be.true
-    expect(createNewDiscussionNotificationTaskStub.calledOnce).to.be.true
+    expect(createDiscussionStub.calledOnce).to.be.true()
+    expect(createAttachmentsStub.calledOnce).to.be.true()
+    expect(createNewDiscussionNotificationTaskStub.calledOnce).to.be.true()
     expect(createDiscussionStub.firstCall.args[0]).to.deep.equal(dto)
     expect(createAttachmentsStub.firstCall.args[0]).to.equal(newDiscussion.noteId)
     expect(createAttachmentsStub.firstCall.args[1]).to.equal(dto.attachments)

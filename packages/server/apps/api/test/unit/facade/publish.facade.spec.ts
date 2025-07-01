@@ -28,20 +28,20 @@ describe('PublishApiFacade', () => {
 
   it('should raise error if entity not found', async () => {
     findAccessibleOne.resolves(null)
-    await expect(getInstance().getPublishedTreeRoot(FILE_UID, 'file')).to.be.rejected
+    await expect(getInstance().getPublishedTreeRoot(FILE_UID, 'file')).to.be.rejected()
 
     findAccessibleOne.resolves(null)
-    await expect(getInstance().getPublishedTreeRoot(COMPARISON_ID, 'comparison')).to.be.rejected
+    await expect(getInstance().getPublishedTreeRoot(COMPARISON_ID, 'comparison')).to.be.rejected()
   })
 
   it('should raise error if entity is not publishable', async () => {
     const file = { id: 1, isPublishable: () => false } as unknown as File
     findAccessibleOne.resolves(file)
-    await expect(getInstance().getPublishedTreeRoot(FILE_UID, 'file')).to.be.rejected
+    await expect(getInstance().getPublishedTreeRoot(FILE_UID, 'file')).to.be.rejected()
 
     const comparison = { id: 1, isPublishable: () => false } as unknown as Comparison
     findAccessibleOne.resolves(comparison)
-    await expect(getInstance().getPublishedTreeRoot(COMPARISON_ID, 'comparison')).to.be.rejected
+    await expect(getInstance().getPublishedTreeRoot(COMPARISON_ID, 'comparison')).to.be.rejected()
   })
 
   it('should return tree root if entity is publishable', async () => {

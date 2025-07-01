@@ -28,7 +28,7 @@ describe('ComparisonService', () => {
 
       await comparisonService.validateComparisons({ name: 'file' } as UserFile)
 
-      expect(findComparisonsByUserFileStub.calledOnce).to.be.true
+      expect(findComparisonsByUserFileStub.calledOnce).to.be.true()
       expect(findComparisonsByUserFileStub.firstCall.args[0].name).to.equal('file')
     })
 

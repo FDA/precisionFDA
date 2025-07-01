@@ -48,7 +48,7 @@ describe('/discussions', async () => {
     expect(body.id).to.equal(1)
     const discussion = await em.findOneOrFail(Discussion, { id: body.id })
     const attachments = await em.findAll(Attachment)
-    expect(discussion).to.exist
+    expect(discussion).to.exist()
 
     const note = await discussion.note.load()
 
@@ -84,7 +84,7 @@ describe('/discussions', async () => {
     expect(body.id).to.equal(1)
     const discussion = await em.findOneOrFail(Discussion, { id: body.id })
     const attachments = await em.findAll(Attachment)
-    expect(discussion).to.exist
+    expect(discussion).to.exist()
 
     const note = await discussion.note.load()
 
@@ -116,7 +116,7 @@ describe('/discussions', async () => {
 
     expect(body.id).to.equal(1)
     const answer = await em.findOneOrFail(Answer, { id: body.id })
-    expect(answer).to.exist
+    expect(answer).to.exist()
     const note = await answer.note.load()
     expect(note.title).to.equal('Discussion answer title')
     expect(note.content).to.equal('Discussion super interesting content - lorem ipsum')
@@ -163,7 +163,7 @@ describe('/discussions', async () => {
 
     expect(body.id).to.equal(1)
     const answer = await em.findOneOrFail(Answer, { id: body.id })
-    expect(answer).to.exist
+    expect(answer).to.exist()
     const note = await answer.note.load()
     expect(note.title).to.equal('Space discussion answer title')
     expect(note.content).to.equal('Discussion super interesting content - lorem ipsum')
@@ -291,10 +291,10 @@ describe('/discussions', async () => {
       .set(getDefaultHeaderData(user))
       .expect(204)
 
-    expect(body).to.be.empty
+    expect(body).to.be.empty()
 
     const discussionFollow = await em.findAll(DiscussionFollow)
-    expect(discussionFollow).to.exist
+    expect(discussionFollow).to.exist()
     expect(discussionFollow).to.have.length(1)
     expect(discussionFollow[0].followerId).to.equal(user.id)
     expect(discussionFollow[0].followerType).to.equal('User')
@@ -317,10 +317,10 @@ describe('/discussions', async () => {
       .set(getDefaultHeaderData(user))
       .expect(204)
 
-    expect(body).to.be.empty
+    expect(body).to.be.empty()
 
     const discussionFollows = await em.findAll(DiscussionFollow)
-    expect(discussionFollows).to.exist
+    expect(discussionFollows).to.exist()
     expect(discussionFollows).to.have.length(0)
   })
 

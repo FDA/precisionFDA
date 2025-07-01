@@ -37,7 +37,7 @@ describe('ChallengeProposalReceivedHandler', () => {
 
       await handler.sendEmail(input)
 
-      expect(emailClientSendEmailStub.calledOnce).to.be.true
+      expect(emailClientSendEmailStub.calledOnce).to.be.true()
       expect(emailClientSendEmailStub.firstCall.args[0].emailType).to.equal(
         EMAIL_TYPES.challengeProposalReceived,
       )
