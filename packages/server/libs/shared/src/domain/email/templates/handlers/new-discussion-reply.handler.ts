@@ -18,7 +18,6 @@ import { EntityScopeUtils } from '@shared/utils/entity-scope.utils'
 import { EmailTypeToTemplateInputMap } from '@shared/domain/email/dto/email-type-to-template-input.map'
 import { Space } from '@shared/domain/space/space.entity'
 import { Discussion } from '@shared/domain/discussion/discussion.entity'
-import { DiscussionFollow } from '@shared/domain/follow/discussion-follow.entity'
 
 @Injectable()
 export class NewDiscussionReplyHandler extends EmailHandler<EMAIL_TYPES.newDiscussionReply> {
