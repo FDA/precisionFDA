@@ -110,10 +110,6 @@ export abstract class EmailHandler<T extends EMAIL_TYPES> {
     const result: User[] = []
 
     for (const receiver of receivers) {
-      if (!receiver.notificationPreference) {
-        continue
-      }
-
       const notificationKeys = await this.getNotificationSettingKeys(contextObject, receiver)
 
       if (ArrayUtils.isEmpty(notificationKeys)) {
@@ -121,8 +117,8 @@ export abstract class EmailHandler<T extends EMAIL_TYPES> {
         continue
       }
 
-      const preferences = receiver.notificationPreference.getEntity().data
-      if (notificationKeys.some((key) => preferences[key])) {
+      const preferences = receiver.notificationPreference?.getEntity().data
+      if (preferences && notificationKeys.some((key) => preferences[key])) {
         result.push(receiver)
       }
     }

@@ -131,20 +131,13 @@ export type CommentAddedContext = {
   input: EmailTypeToInputMap[EMAIL_TYPES.commentAdded]
 }
 
-export type NewDiscussionContext = {
+export type DiscussionContext = {
   discussion: Discussion
   space?: Space
   discussionLink: string
-  spaceName: string
-  input: EmailTypeToInputMap[EMAIL_TYPES.newDiscussion]
-}
-
-// TODO maybe the same as NewDiscussionContext?
-export type NewDiscussionReplyContext = {
-  discussion: Discussion
-  space?: Space
-  discussionLink: string
-  input: EmailTypeToInputMap[EMAIL_TYPES.newDiscussionReply]
+  input:
+    | EmailTypeToInputMap[EMAIL_TYPES.newDiscussion]
+    | EmailTypeToInputMap[EMAIL_TYPES.newDiscussionReply]
 }
 
 type EmailTypeToContextMapOverride = {
@@ -177,8 +170,8 @@ type EmailTypeToContextMapOverride = {
   [EMAIL_TYPES.invitation]: InvitationContext
   [EMAIL_TYPES.spaceInvitation]: SpaceInvitationContext
   [EMAIL_TYPES.nodeCopy]: NodeCopyInputDTO
-  [EMAIL_TYPES.newDiscussion]: NewDiscussionContext
-  [EMAIL_TYPES.newDiscussionReply]: NewDiscussionReplyContext
+  [EMAIL_TYPES.newDiscussion]: DiscussionContext
+  [EMAIL_TYPES.newDiscussionReply]: DiscussionContext
 }
 
 export type EmailTypeToContextMap = {
