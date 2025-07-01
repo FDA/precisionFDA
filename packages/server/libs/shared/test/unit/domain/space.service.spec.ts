@@ -132,7 +132,7 @@ describe('SpaceService', () => {
 
       await spaceService.create(createSpaceDto)
 
-      expect(buildStub.calledOnce).to.be.true
+      expect(buildStub.calledOnce).to.be.true()
       expect(buildStub.firstCall.args[0]).to.deep.equal(createSpaceDto)
     })
   })
@@ -354,13 +354,13 @@ describe('SpaceService', () => {
       const spaceService = createSpaceService()
       await spaceService.lockSpace(SPACE_ID)
 
-      expect(spaceRepoFindOneStub.calledOnce).to.be.true
+      expect(spaceRepoFindOneStub.calledOnce).to.be.true()
       expect(spaceRepoFindOneStub.firstCall.args[0]).to.deep.equal({ id: SPACE_ID })
-      expect(userRepoFindOneStub.calledOnce).to.be.true
+      expect(userRepoFindOneStub.calledOnce).to.be.true()
       expect(userRepoFindOneStub.firstCall.args[0]).to.deep.equal({ id: USER_ID })
-      expect(spaceMembershipRepoFindOneStub.calledOnce).to.be.true
+      expect(spaceMembershipRepoFindOneStub.calledOnce).to.be.true()
       expect(spaceMembershipRepoFindOneStub.firstCall.args[0]).to.deep.equal({ spaces: SPACE_ID })
-      expect(temPersistAndFlushStub.calledOnce).to.be.true
+      expect(temPersistAndFlushStub.calledOnce).to.be.true()
       expect(temPersistAndFlushStub.firstCall.args[0].space).to.equal(space)
       expect(temPersistAndFlushStub.firstCall.args[0].user).to.equal(user)
       expect(temPersistAndFlushStub.firstCall.args[0].entityId).to.equal(SPACE_ID)
@@ -438,13 +438,13 @@ describe('SpaceService', () => {
       const spaceService = createSpaceService()
       await spaceService.unlockSpace(SPACE_ID)
 
-      expect(spaceRepoFindOneStub.calledOnce).to.be.true
+      expect(spaceRepoFindOneStub.calledOnce).to.be.true()
       expect(spaceRepoFindOneStub.firstCall.args[0]).to.deep.equal({ id: SPACE_ID })
-      expect(userRepoFindOneStub.calledOnce).to.be.true
+      expect(userRepoFindOneStub.calledOnce).to.be.true()
       expect(userRepoFindOneStub.firstCall.args[0]).to.deep.equal({ id: USER_ID })
-      expect(spaceMembershipRepoFindOneStub.calledOnce).to.be.true
+      expect(spaceMembershipRepoFindOneStub.calledOnce).to.be.true()
       expect(spaceMembershipRepoFindOneStub.firstCall.args[0]).to.deep.equal({ spaces: SPACE_ID })
-      expect(temPersistAndFlushStub.calledOnce).to.be.true
+      expect(temPersistAndFlushStub.calledOnce).to.be.true()
       expect(temPersistAndFlushStub.firstCall.args[0].space.state).to.equal(SPACE_STATE.ACTIVE)
       expect(temPersistAndFlushStub.firstCall.args[0].user).to.equal(user)
       expect(temPersistAndFlushStub.firstCall.args[0].entityId).to.equal(SPACE_ID)
@@ -519,7 +519,7 @@ describe('SpaceService', () => {
 
       await spaceService.validateVerificationSpace(node)
 
-      expect(spaceRepoFindOneStub.calledOnce).to.be.true
+      expect(spaceRepoFindOneStub.calledOnce).to.be.true()
       expect(spaceRepoFindOneStub.firstCall.args[0]).to.equal(1)
     })
 
@@ -532,7 +532,7 @@ describe('SpaceService', () => {
 
       await spaceService.validateVerificationSpace(node)
 
-      expect(spaceRepoFindOneStub.calledOnce).to.be.false
+      expect(spaceRepoFindOneStub.calledOnce).to.be.false()
     })
 
     it('validation fail', async () => {

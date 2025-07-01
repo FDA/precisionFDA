@@ -21,7 +21,7 @@ describe('CliService tests', () => {
 
   it('should be defined', () => {
     const cliService = getInstance()
-    expect(cliService).to.be.not.undefined
+    expect(cliService).to.be.not.undefined()
   })
 
   context('managing DbCluster password', () => {
