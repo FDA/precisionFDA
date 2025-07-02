@@ -9,7 +9,7 @@ import { FieldLabelRow } from '../../../components/form/styles'
 import { usePageMeta } from '../../../hooks/usePageMeta'
 import { UserLayout } from '../../../layouts/UserLayout'
 import { fetchNotificationsPreferences, saveNotificationsPreferences } from './api'
-import { FieldGroup, SectionTitle, SectionTitleSmall, StyledNotifications, StyledPageContainer } from './styles'
+import { FieldGroup, SectionTitle, SectionTitleSmall, StyledNotifications, StyledPageContainer, NotificationSectionRow, NotificationSectionColumn } from './styles'
 import { AllNotification, NotificationPreferences, NotificationPreferencesPayload } from './types'
 import { Button } from '../../../components/Button'
 
@@ -158,137 +158,153 @@ const NotificationForm = ({
 
         <SectionTitle>Group Space Notifications</SectionTitle>
 
-        <SectionTitleSmall>Lead Role</SectionTitleSmall>
-        {Object.entries(preferences.group_lead).map(([notification]) => (
-          <FieldGroup key={notification}>
-            <Controller
-              name={`group_lead.${notification}` as Path<NotificationPreferences>}
-              control={control}
-              render={({ field }) => (
-                <FieldLabelRow>
-                  <Checkbox
-                    {...field}
-                    disabled={isSubmitting}
-                    checked={!!field.value}
-                    onChange={e =>
-                      handleSetValue(`group_lead.${notification}` as Path<NotificationPreferences>, e.target.checked)
-                    }
-                  />
-                  {NotificationLabel[notification]}
-                </FieldLabelRow>
-              )}
-            />
-          </FieldGroup>
-        ))}
+        <NotificationSectionRow>
+          <NotificationSectionColumn>
+            <SectionTitleSmall>Lead Role</SectionTitleSmall>
+            {Object.entries(preferences.group_lead).map(([notification]) => (
+              <FieldGroup key={notification}>
+                <Controller
+                  name={`group_lead.${notification}` as Path<NotificationPreferences>}
+                  control={control}
+                  render={({ field }) => (
+                    <FieldLabelRow>
+                      <Checkbox
+                        {...field}
+                        disabled={isSubmitting}
+                        checked={!!field.value}
+                        onChange={e =>
+                          handleSetValue(`group_lead.${notification}` as Path<NotificationPreferences>, e.target.checked)
+                        }
+                      />
+                      {NotificationLabel[notification]}
+                    </FieldLabelRow>
+                  )}
+                />
+              </FieldGroup>
+            ))}
+          </NotificationSectionColumn>
 
-        <SectionTitleSmall>Contributor Role</SectionTitleSmall>
-        {Object.entries(preferences.group_contributor).map(([notification]) => (
-          <FieldGroup key={notification}>
-            <Controller
-              name={`group_contributor.${notification}` as Path<NotificationPreferences>}
-              control={control}
-              render={({ field }) => (
-                <FieldLabelRow>
-                  <Checkbox
-                    {...field}
-                    disabled={isSubmitting}
-                    checked={!!field.value}
-                    onChange={e => handleSetValue(`group_contributor.${notification}` as Path<NotificationPreferences>, e.target.checked)}
-                  />
-                  {NotificationLabel[notification]}
-                </FieldLabelRow>
-              )}
-            />
-          </FieldGroup>
-        ))}
+          <NotificationSectionColumn>
+            <SectionTitleSmall>Contributor Role</SectionTitleSmall>
+            {Object.entries(preferences.group_contributor).map(([notification]) => (
+              <FieldGroup key={notification}>
+                <Controller
+                  name={`group_contributor.${notification}` as Path<NotificationPreferences>}
+                  control={control}
+                  render={({ field }) => (
+                    <FieldLabelRow>
+                      <Checkbox
+                        {...field}
+                        disabled={isSubmitting}
+                        checked={!!field.value}
+                        onChange={e => handleSetValue(`group_contributor.${notification}` as Path<NotificationPreferences>, e.target.checked)}
+                      />
+                      {NotificationLabel[notification]}
+                    </FieldLabelRow>
+                  )}
+                />
+              </FieldGroup>
+            ))}
+          </NotificationSectionColumn>
 
-        <SectionTitleSmall>Viewer Role</SectionTitleSmall>
-        {Object.entries(preferences.group_viewer).map(([notification]) => (
-          <FieldGroup key={notification}>
-            <Controller
-              name={`group_viewer.${notification}` as Path<NotificationPreferences>}
-              control={control}
-              render={({ field }) => (
-                <FieldLabelRow>
-                  <Checkbox
-                    {...field}
-                    disabled={isSubmitting}
-                    checked={!!field.value}
-                    onChange={e => handleSetValue(`group_viewer.${notification}` as Path<NotificationPreferences>, e.target.checked)}
-                  />
-                  {NotificationLabel[notification]}
-                </FieldLabelRow>
-              )}
-            />
-          </FieldGroup>
-        ))}
+          <NotificationSectionColumn>
+            <SectionTitleSmall>Viewer Role</SectionTitleSmall>
+            {Object.entries(preferences.group_viewer).map(([notification]) => (
+              <FieldGroup key={notification}>
+                <Controller
+                  name={`group_viewer.${notification}` as Path<NotificationPreferences>}
+                  control={control}
+                  render={({ field }) => (
+                    <FieldLabelRow>
+                      <Checkbox
+                        {...field}
+                        disabled={isSubmitting}
+                        checked={!!field.value}
+                        onChange={e => handleSetValue(`group_viewer.${notification}` as Path<NotificationPreferences>, e.target.checked)}
+                      />
+                      {NotificationLabel[notification]}
+                    </FieldLabelRow>
+                  )}
+                />
+              </FieldGroup>
+            ))}
+          </NotificationSectionColumn>
+        </NotificationSectionRow>
 
         <SectionTitle>Review Space Notifications</SectionTitle>
 
-        <SectionTitleSmall>Lead Role</SectionTitleSmall>
-        {Object.entries(preferences.shared_lead).map(([notification]) => (
-          <FieldGroup key={notification}>
-            <Controller
-              name={`shared_lead.${notification}` as Path<NotificationPreferences>}
-              control={control}
-              render={({ field }) => (
-                <FieldLabelRow>
-                  <Checkbox
-                    {...field}
-                    disabled={isSubmitting}
-                    checked={!!field.value}
-                    onChange={e =>
-                      handleSetValue(`shared_lead.${notification}` as Path<NotificationPreferences>, e.target.checked)
-                    }
-                  />
-                  {NotificationLabel[notification]}
-                </FieldLabelRow>
-              )}
-            />
-          </FieldGroup>
-        ))}
+        <NotificationSectionRow>
+          <NotificationSectionColumn>
+            <SectionTitleSmall>Lead Role</SectionTitleSmall>
+            {Object.entries(preferences.shared_lead).map(([notification]) => (
+              <FieldGroup key={notification}>
+                <Controller
+                  name={`shared_lead.${notification}` as Path<NotificationPreferences>}
+                  control={control}
+                  render={({ field }) => (
+                    <FieldLabelRow>
+                      <Checkbox
+                        {...field}
+                        disabled={isSubmitting}
+                        checked={!!field.value}
+                        onChange={e =>
+                          handleSetValue(`shared_lead.${notification}` as Path<NotificationPreferences>, e.target.checked)
+                        }
+                      />
+                      {NotificationLabel[notification]}
+                    </FieldLabelRow>
+                  )}
+                />
+              </FieldGroup>
+            ))}
+          </NotificationSectionColumn>
 
-        <SectionTitleSmall>Contributor Role</SectionTitleSmall>
-        {Object.entries(preferences.shared_contributor).map(([notification]) => (
-          <FieldGroup key={notification}>
-            <Controller
-              name={`shared_contributor.${notification}` as Path<NotificationPreferences>}
-              control={control}
-              render={({ field }) => (
-                <FieldLabelRow>
-                  <Checkbox
-                    {...field}
-                    disabled={isSubmitting}
-                    checked={!!field.value}
-                    onChange={e => handleSetValue(`shared_contributor.${notification}` as Path<NotificationPreferences>, e.target.checked)}
-                  />
-                  {NotificationLabel[notification]}
-                </FieldLabelRow>
-              )}
-            />
-          </FieldGroup>
-        ))}
+          <NotificationSectionColumn>
+            <SectionTitleSmall>Contributor Role</SectionTitleSmall>
+            {Object.entries(preferences.shared_contributor).map(([notification]) => (
+              <FieldGroup key={notification}>
+                <Controller
+                  name={`shared_contributor.${notification}` as Path<NotificationPreferences>}
+                  control={control}
+                  render={({ field }) => (
+                    <FieldLabelRow>
+                      <Checkbox
+                        {...field}
+                        disabled={isSubmitting}
+                        checked={!!field.value}
+                        onChange={e => handleSetValue(`shared_contributor.${notification}` as Path<NotificationPreferences>, e.target.checked)}
+                      />
+                      {NotificationLabel[notification]}
+                    </FieldLabelRow>
+                  )}
+                />
+              </FieldGroup>
+            ))}
+          </NotificationSectionColumn>
 
-        <SectionTitleSmall>Viewer Role</SectionTitleSmall>
-        {Object.entries(preferences.shared_viewer).map(([notification]) => (
-          <FieldGroup key={notification}>
-            <Controller
-              name={`shared_viewer.${notification}` as Path<NotificationPreferences>}
-              control={control}
-              render={({ field }) => (
-                <FieldLabelRow>
-                  <Checkbox
-                    {...field}
-                    disabled={isSubmitting}
-                    checked={!!field.value}
-                    onChange={e => handleSetValue(`shared_viewer.${notification}` as Path<NotificationPreferences>, e.target.checked)}
-                  />
-                  {NotificationLabel[notification]}
-                </FieldLabelRow>
-              )}
-            />
-          </FieldGroup>
-        ))}
+          <NotificationSectionColumn>
+            <SectionTitleSmall>Viewer Role</SectionTitleSmall>
+            {Object.entries(preferences.shared_viewer).map(([notification]) => (
+              <FieldGroup key={notification}>
+                <Controller
+                  name={`shared_viewer.${notification}` as Path<NotificationPreferences>}
+                  control={control}
+                  render={({ field }) => (
+                    <FieldLabelRow>
+                      <Checkbox
+                        {...field}
+                        disabled={isSubmitting}
+                        checked={!!field.value}
+                        onChange={e => handleSetValue(`shared_viewer.${notification}` as Path<NotificationPreferences>, e.target.checked)}
+                      />
+                      {NotificationLabel[notification]}
+                    </FieldLabelRow>
+                  )}
+                />
+              </FieldGroup>
+            ))}
+          </NotificationSectionColumn>
+        </NotificationSectionRow>
       </StyledNotifications>
       <PageActions>
         <Button data-variant="primary" type="submit" disabled={isSubmitting}>
