@@ -7,9 +7,10 @@ import { HomeScope, IFilter, ServerScope } from './types'
  * @param value
  */
 export const formatWithSpaces = (value: number): string => {
-  return value
-    .toFixed(2)
-    .replace(/\B(?=(\d{3})+(?!\d))/g, ' ')
+  return new Intl.NumberFormat('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(value)
 }
 
 // Only return the objects with keys from the pick array
