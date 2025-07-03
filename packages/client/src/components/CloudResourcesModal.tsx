@@ -4,12 +4,7 @@ import { Loader } from './Loader'
 import { colors } from '../styles/theme'
 import { CloudResourcesResponse, useCloudResourcesQuery } from '../hooks/useCloudResourcesCondition'
 import { ModalHeaderTop, ModalNext } from '../features/modal/ModalNext'
-
-const formatWithSpaces = (value: number): string => {
-  return value
-    .toFixed(2)
-    .replace(/\B(?=(\d{3})+(?!\d))/g, ' ')
-}
+import { formatWithSpaces } from '../features/home/utils'
 
 type Props = {
   isShown: boolean
