@@ -40,8 +40,8 @@ export interface App {
   scope: string;
   spec: Spec2;
   internal: Internal;
-  created_at: Date;
-  updated_at: Date;
+  created_at: string;
+  updated_at: string;
   app_series_id: number;
   verified: boolean;
   uid: string;

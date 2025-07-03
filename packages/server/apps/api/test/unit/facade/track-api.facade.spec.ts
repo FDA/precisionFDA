@@ -1,4 +1,3 @@
-import { Comparison } from '@shared/domain/comparison/comparison.entity'
 import { EntityProvenanceService } from '@shared/domain/provenance/service/entity-provenance.service'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { EntityUtils } from '@shared/utils/entity.utils'
@@ -34,7 +33,7 @@ describe('TrackApiFacade', () => {
   it('should raise error if entity not found', async () => {
     findAccessibleOne.rejects()
 
-    await expect(getInstance().getProvenance(FILE_UID)).to.be.rejected
+    await expect(getInstance().getProvenance(FILE_UID)).to.be.rejected()
   })
 
   it('should call getAccessibleByUid and getProvenance with correct args', async () => {
@@ -61,7 +60,7 @@ describe('TrackApiFacade', () => {
     expect(res.name).to.be.equal(NOTE_NAME)
   })
 
-  function getInstance() {
+  function getInstance(): TrackApiFacade {
     const entityProvenanceService = {
       getEntityProvenance: getEntityProvenanceStub,
     } as unknown as EntityProvenanceService

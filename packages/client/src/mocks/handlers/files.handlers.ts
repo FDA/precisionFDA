@@ -1,7 +1,67 @@
 import { http, HttpResponse } from 'msw'
 import { indexBy } from 'ramda'
-import { FetchFilesQuery, FetchFolderChildrenResponse } from './files.api'
-import { IFile, IFolder } from './files.types'
+import { FetchFilesQuery, FetchFolderChildrenResponse, FetchFileQuery } from '../../features/files/files.api'
+import { IFile, IFolder } from '../../features/files/files.types'
+
+export const mockExportInputFiles: IFile[] = [
+  {
+    id: 1,
+    uid: 'file-FGpkXb80xbPGbqJX4xjjGQ47',
+    name: 'test-input.txt',
+    size: '1.2 KB',
+    type: 'File',
+    locked: false,
+    resource: false,
+    locking: false,
+    state: 'closed',
+    location: 'Private',
+    added_by: 'user@example.com',
+    created_at: '2024-01-01T10:00:00Z',
+    featured: false,
+    scope: 'private',
+    space_id: null,
+    origin: {
+      text: 'Uploaded',
+      fa: 'fa-upload',
+      href: '/uploads/file-FGpkXb80xbPGbqJX4xjjGQ47',
+    },
+    tags: ['input', 'test'],
+    properties: {
+      format: 'TXT',
+      encoding: 'UTF-8',
+    },
+    file_size: '1.2 KB',
+    created_at_date_time: '2024-01-01T10:00:00Z',
+    description: 'Test input file for export modal',
+    links: {
+      show: '/files/file-FGpkXb80xbPGbqJX4xjjGQ47',
+      download: '/api/files/file-FGpkXb80xbPGbqJX4xjjGQ47/download',
+    },
+    file_license: {},
+    show_license_pending: false,
+    private: true,
+    public: false,
+    user: {
+      dxuser: 'test.user',
+      full_name: 'Test User',
+    },
+    org: {
+      handle: 'test-org',
+      name: 'Test Organization',
+    },
+    path: [],
+  },
+]
+
+export const mockExportInputData = {
+  input_file: 'file-FGpkXb80xbPGbqJX4xjjGQ47',
+  parameter1: 'test_value',
+  parameter2: 42,
+  options: {
+    memory: '8GB',
+    cpus: 4,
+  },
+}
 
 const meta = {
   user_licenses: [
@@ -40,6 +100,7 @@ const meta = {
     comments: '/files/file-Gf023q80JqyZ083yPYZ54qpJ-1/comments',
     edit_tags: '/api/set_tags',
   },
+  path: [],
 }
 
 const folders = [
@@ -55,6 +116,7 @@ const folders = [
     scope: 'private',
     space_id: null,
     locked: false,
+    origin: null,
     tags: [],
     properties: {},
     path: [
@@ -181,6 +243,7 @@ const files = [
     scope: 'private',
     space_id: null,
     locked: false,
+    resource: false,
     origin: 'Uploaded',
     tags: [],
     properties: {},
@@ -188,6 +251,7 @@ const files = [
     file_size: '310 KB',
     created_at_date_time: '2023-11-30 15:52:02 CET',
     description: null,
+    path: [],
     links: {
       origin_object: {
         origin_type: 'User',
@@ -223,6 +287,7 @@ const files = [
     scope: 'private',
     space_id: null,
     locked: false,
+    resource: false,
     origin: 'Uploaded',
     tags: [],
     properties: {},
@@ -230,6 +295,7 @@ const files = [
     file_size: '197 KB',
     created_at_date_time: '2023-11-30 15:51:59 CET',
     description: null,
+    path: [],
     links: {
       origin_object: {
         origin_type: 'User',
@@ -265,6 +331,7 @@ const files = [
     scope: 'private',
     space_id: null,
     locked: false,
+    resource: false,
     origin: 'Uploaded',
     tags: [],
     properties: {},
@@ -272,6 +339,7 @@ const files = [
     file_size: '240 KB',
     created_at_date_time: '2023-11-30 15:51:56 CET',
     description: null,
+    path: [],
     links: {
       origin_object: {
         origin_type: 'User',
@@ -307,6 +375,7 @@ const files = [
     scope: 'private',
     space_id: null,
     locked: false,
+    resource: false,
     origin: 'Uploaded',
     tags: [],
     properties: {},
@@ -314,6 +383,7 @@ const files = [
     file_size: '82.9 KB',
     created_at_date_time: '2023-11-30 15:51:54 CET',
     description: null,
+    path: [],
     links: {
       origin_object: {
         origin_type: 'User',
@@ -349,6 +419,7 @@ const files = [
     scope: 'private',
     space_id: null,
     locked: false,
+    resource: false,
     origin: 'Uploaded',
     tags: [],
     properties: {},
@@ -356,6 +427,7 @@ const files = [
     file_size: '240 KB',
     created_at_date_time: '2023-11-28 10:34:45 CET',
     description: null,
+    path: [],
     links: {
       origin_object: {
         origin_type: 'User',
@@ -454,8 +526,8 @@ export const filesMocks = [
       status: 200,
     }),
   ),
-  http.get('/api/files/:uid', ({ params: { uid } }) =>
-    HttpResponse.json<FetchFileQuery>({ files: filesByUid[uid], meta }, { status: 200 }),
+  http.get('/api/files/:uid', ({ params: { uid }}) =>
+    HttpResponse.json<FetchFileQuery>({ files: filesByUid[uid as string], meta }, { status: 200 }),
   ),
   http.get('/api/files*', () =>
     HttpResponse.json<FetchFilesQuery>(
@@ -463,6 +535,11 @@ export const filesMocks = [
         files: [...folders, ...files],
         meta: {
           count: 5,
+          links: {
+            edit_tags: '/api/set_tags',
+          },
+          path: [],
+          challenges: null,
           pagination: {
             current_page: 1,
             next_page: null,
@@ -475,7 +552,7 @@ export const filesMocks = [
       { status: 200 },
     ),
   ),
-  http.get(`/api/spaces/:spaceId/files/subfolders*`, () =>
+  http.get('/api/spaces/:spaceId/files/subfolders*', () =>
     HttpResponse.json<FetchFolderChildrenResponse>(
       {
         nodes: spaceFolders,
@@ -493,4 +570,44 @@ export const filesMocks = [
       },
     ),
   ),
+  
+  // Handler for /api/list_files_by_uid (used by useExportInputsModal)
+  http.post('/api/list_files_by_uid', () =>
+    HttpResponse.json({
+      files: mockExportInputFiles,
+    }),
+  ),
+  
+  // Handler for /api/list_files (used by useCopyToPrivateModal)
+  http.post('/api/list_files', () =>
+    HttpResponse.json(mockCopyFiles),
+  ),
+  
+  // Handler for /api/files/copy (used by useCopyToPrivateModal)
+  http.post('/api/files/copy', () =>
+    HttpResponse.json({
+      meta: {
+        messages: [{ type: 'success', message: 'Files copied successfully' }],
+      },
+    }),
+  ),
 ]
+
+export const mockCopyToSpaceFiles = [
+  { id: '1', name: 'test-file-1.txt', uid: 'file-1' },
+  { id: '2', name: 'test-file-2.txt', uid: 'file-2' },
+  { id: '3', name: 'sample-data.csv', uid: 'file-3' },
+]
+
+export const mockCopyFiles = {
+  files: [
+    { id: 1, name: 'test-file-1.txt', uid: 'file-1' },
+    { id: 2, name: 'test-file-2.txt', uid: 'file-2' },
+    { id: 3, name: 'sample-data.csv', uid: 'file-3' },
+  ],
+  meta: {
+    links: { copy: '/api/files/copy' },
+    count: 3,
+    pagination: { current_page: 1, next_page: null, prev_page: null, per_page: 25, total_pages: 1 },
+  },
+}

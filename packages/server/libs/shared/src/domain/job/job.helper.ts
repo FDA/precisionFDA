@@ -7,6 +7,7 @@ import { JobFailedEmailHandler } from '@shared/domain/email/templates/handlers/j
 import { emailClientProvider } from '@shared/domain/email/email-client.provider'
 import { User } from '@shared/domain/user/user.entity'
 import { JobRepository } from '@shared/domain/job/job.repository'
+import { UserRepository } from '@shared/domain/user/user.repository'
 
 export const isStateTerminal = (state: string): boolean =>
   Object.values(TERMINAL_STATES).includes(state as JOB_STATE)
@@ -40,7 +41,7 @@ export const sendJobFailedEmails = async (
   ctx: WorkerOpsCtx<UserOpsCtx>,
 ): Promise<void> => {
   const emailClient = emailClientProvider.useFactory()
-  const userRepo = ctx.em.getRepository(User)
+  const userRepo = ctx.em.getRepository(User) as UserRepository
   const jobRepo: JobRepository = ctx.em.getRepository(Job)
   const handler = new JobFailedEmailHandler(userRepo, jobRepo, emailClient)
   const inputDto = { jobId }

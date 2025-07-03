@@ -8,6 +8,7 @@ import {
   Param,
   ParseArrayPipe,
   ParseBoolPipe,
+  ParseIntPipe,
   Patch,
   Post,
   Query,
@@ -28,7 +29,6 @@ import { Response } from 'express'
 import { UserFileResolverFacade } from '../facade/user-file/user-file-resolver.facade'
 import { InternalRouteGuard } from '../internal/guard/internal.guard'
 import { UserContextGuard } from '../user-context/guard/user-context.guard'
-import { OptionalParseIntPipe } from '../validation/pipes/optional-int.pipe'
 import { DownloadLinkParamDto } from './model/download-link-param.dto'
 import { FilesValidateCopyingBodyDto } from './model/file-validate-copying-body.dto'
 
@@ -56,7 +56,7 @@ export class FilesController {
   async bulkDownload(
     @Query('id', new ParseArrayPipe({ items: Number })) ids: number[],
     @Res() res: Response,
-    @Query('folder_id', new OptionalParseIntPipe()) folderId?: number,
+    @Query('folder_id', new ParseIntPipe({ optional: true })) folderId?: number,
   ) {
     const filesToBeDownloaded = await this.userFileService.composeFilesForBulkDownload(
       ids,

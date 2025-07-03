@@ -26,6 +26,7 @@ import { getIdFromScopeName, getProjectDxid } from '../../space/space.helper'
 import { MAX_PLATFORM_ALLOWED_TIMEOUT_SECONDS } from '@shared/config/constants'
 import { getPluralizedTerm } from '@shared/utils/format'
 import { JobCreateResponse } from '@shared/platform-client/platform-client.responses'
+import { AppRepository } from '@shared/domain/app/app.repository'
 
 export class CreateJobOperation extends BaseOperation<UserOpsCtx, RunAppInput, Job> {
   private input: RunAppInput
@@ -45,7 +46,8 @@ export class CreateJobOperation extends BaseOperation<UserOpsCtx, RunAppInput, J
 
     const user = await em.findOne(User, { id: this.ctx.user.id })
     // whitelist https public apps
-    const app = await em.getRepository(App).findPublic(input.appDxId)
+    const appRepo = em.getRepository(App) as AppRepository
+    const app = await appRepo.findPublic(input.appDxId)
 
     if (!user) {
       throw new errors.UserNotFoundError()

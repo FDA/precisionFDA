@@ -28,9 +28,9 @@ describe('LicensedItemService', () => {
 
       await licensedItemService.removeItemLicensedForNode(1)
 
-      expect(emTransactionalStub.calledOnce).to.be.true
-      expect(getLicenseItemsForNodeStub.calledOnce).to.be.true
-      expect(emRemoveStub.calledOnce).to.be.true
+      expect(emTransactionalStub.calledOnce).to.be.true()
+      expect(getLicenseItemsForNodeStub.calledOnce).to.be.true()
+      expect(emRemoveStub.calledOnce).to.be.true()
       expect(getLicenseItemsForNodeStub.firstCall.args[0]).to.equal(1)
       expect(emRemoveStub.firstCall.args[0].id).to.equal(2)
     })

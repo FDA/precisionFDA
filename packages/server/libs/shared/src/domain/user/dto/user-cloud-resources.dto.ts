@@ -23,8 +23,7 @@ export class UserCloudResourcesDTO {
       response.dataEgressCharges - user.cloudResourceSettings.charges_baseline.dataEgressCharges,
       0,
     )
-    this.totalCharges =
-      response.computeCharges + response.storageCharges + response.dataEgressCharges
+    this.totalCharges = this.computeCharges + this.storageCharges + this.dataEgressCharges
     this.usageLimit = user.cloudResourceSettings.total_limit
     this.jobLimit = user.cloudResourceSettings.job_limit
     this.usageAvailable = Math.max(this.usageLimit - this.totalCharges, 0)

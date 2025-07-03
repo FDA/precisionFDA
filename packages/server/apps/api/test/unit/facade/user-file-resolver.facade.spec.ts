@@ -12,6 +12,8 @@ import { spaceMembership } from '@shared/test/generate'
 import { SPACE_MEMBERSHIP_ROLE } from '@shared/domain/space-membership/space-membership.enum'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { UserFileResolverFacade } from 'apps/api/src/facade/user-file/user-file-resolver.facade'
+import { UserFileRepository } from '@shared/domain/user-file/user-file.repository'
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
 
 describe('UserFileResolverFacade', () => {
   let em: SqlEntityManager
@@ -21,10 +23,12 @@ describe('UserFileResolverFacade', () => {
   let spaceUser1: Space
   let spaceUser2: Space
   let sharedSpace: Space
+  let userFileRepo: UserFileRepository
 
   beforeEach(async () => {
     await db.dropData(database.connection())
     em = database.orm().em.fork({ useContext: true }) as SqlEntityManager
+    userFileRepo = em.getRepository(UserFile) as UserFileRepository
     user1 = create.userHelper.create(em)
     user2 = create.userHelper.create(em)
     publicUser = create.userHelper.create(em)
@@ -92,43 +96,35 @@ describe('UserFileResolverFacade', () => {
 
   context('in private scope', () => {
     it('test querying file(s) and folder(s)', async () => {
-      const folder1 = await create.filesHelper.createFolder(
-        em,
-        { user: user1 },
-        { name: 'folder1' },
-      )
-      const folder2 = await create.filesHelper.createFolder(
+      const folder1 = create.filesHelper.createFolder(em, { user: user1 }, { name: 'folder1' })
+      const folder2 = create.filesHelper.createFolder(
         em,
         { user: user1, parentFolder: folder1 },
         { name: 'folder2' },
       )
-      const rootFile = await create.filesHelper.create(em, { user: user1 }, { name: 'rootFile' })
-      const file1 = await create.filesHelper.create(
+      const rootFile = create.filesHelper.create(em, { user: user1 }, { name: 'rootFile' })
+      const file1 = create.filesHelper.create(
         em,
         { user: user1, parentFolder: folder1 },
         { name: 'file1' },
       )
-      const file2 = await create.filesHelper.create(
+      const file2 = create.filesHelper.create(
         em,
         { user: user1, parentFolder: folder2 },
         { name: 'file2' },
       )
-      const folder1User2 = await create.filesHelper.createFolder(
-        em,
-        { user: user2 },
-        { name: 'folder1' },
-      )
-      const folder2User2 = await create.filesHelper.createFolder(
+      const folder1User2 = create.filesHelper.createFolder(em, { user: user2 }, { name: 'folder1' })
+      const folder2User2 = create.filesHelper.createFolder(
         em,
         { user: user2, parentFolder: folder1User2 },
         { name: 'folder2' },
       )
-      const file1User2 = await create.filesHelper.create(
+      const file1User2 = create.filesHelper.create(
         em,
         { user: user2, parentFolder: folder1User2 },
         { name: 'file1' },
       )
-      const fileUser2 = await create.filesHelper.create(em, { user: user2 }, { name: 'fileeeeee' })
+      const fileUser2 = create.filesHelper.create(em, { user: user2 }, { name: 'fileeeeee' })
       await em.flush()
 
       const folder1Res = await getInstance(user1).resolvePath({
@@ -196,16 +192,12 @@ describe('UserFileResolverFacade', () => {
     })
 
     it('test querying file(s) and folder(s) in the same path', async () => {
-      const folder = await create.filesHelper.createFolder(
+      const folder = create.filesHelper.createFolder(
         em,
         { user: user1 },
         { name: 'test_conflicting_path' },
       )
-      const file = await create.filesHelper.create(
-        em,
-        { user: user1 },
-        { name: 'test_conflicting_path' },
-      )
+      const file = create.filesHelper.create(em, { user: user1 }, { name: 'test_conflicting_path' })
       await em.flush()
 
       const res = await getInstance(user1).resolvePath({
@@ -229,11 +221,7 @@ describe('UserFileResolverFacade', () => {
     })
 
     it('test path contains space', async () => {
-      const folder = await create.filesHelper.createFolder(
-        em,
-        { user: user1 },
-        { name: 'test space' },
-      )
+      create.filesHelper.createFolder(em, { user: user1 }, { name: 'test space' })
       await em.flush()
 
       const res = await getInstance(user1).resolvePath({
@@ -271,7 +259,7 @@ describe('UserFileResolverFacade', () => {
 
   context('in private space', () => {
     it('test space permission', async () => {
-      await create.filesHelper.createFolder(
+      create.filesHelper.createFolder(
         em,
         { user: user1 },
         { name: 'user1_space_folder', scope: `space-${spaceUser1.id}` },
@@ -286,22 +274,22 @@ describe('UserFileResolverFacade', () => {
     })
 
     it('test querying file(s) and folder(s)', async () => {
-      const spaceFolderUser1 = await create.filesHelper.createFolder(
+      const spaceFolderUser1 = create.filesHelper.createFolder(
         em,
         { user: user1 },
         { name: 'space_folder1', scope: `space-${spaceUser1.id}` },
       )
-      const spaceFileUser1 = await create.filesHelper.create(
+      const spaceFileUser1 = create.filesHelper.create(
         em,
         { user: user1, parentFolder: spaceFolderUser1 },
         { name: 'space_file1', scope: `space-${spaceUser1.id}` },
       )
-      const spaceFolderUser2 = await create.filesHelper.createFolder(
+      const spaceFolderUser2 = create.filesHelper.createFolder(
         em,
         { user: user2 },
         { name: 'space_folder1', scope: `space-${spaceUser2.id}` },
       )
-      const spaceFileUser2 = await create.filesHelper.create(
+      const spaceFileUser2 = create.filesHelper.create(
         em,
         { user: user2, parentFolder: spaceFolderUser2 },
         { name: 'space_file1', scope: `space-${spaceUser2.id}` },
@@ -337,12 +325,12 @@ describe('UserFileResolverFacade', () => {
 
   context('in shared space', () => {
     it('test querying file(s) and folder(s)', async () => {
-      const sharedFile1 = await create.filesHelper.create(
+      const sharedFile1 = create.filesHelper.create(
         em,
         { user: user1 },
         { name: 'shared_file1', scope: `space-${sharedSpace.id}` },
       )
-      const sharedFile2 = await create.filesHelper.create(
+      const sharedFile2 = create.filesHelper.create(
         em,
         { user: user2 },
         { name: 'shared_file2', scope: `space-${sharedSpace.id}` },
@@ -380,7 +368,7 @@ describe('UserFileResolverFacade', () => {
           active: true,
         },
       )
-      const sharedFile = await create.filesHelper.create(
+      const sharedFile = create.filesHelper.create(
         em,
         { user: user1 },
         { name: 'shared_file', scope: `space-${sharedSpace.id}` },
@@ -397,22 +385,22 @@ describe('UserFileResolverFacade', () => {
 
   context('in public scope', () => {
     it('test querying file(s) and folder(s)', async () => {
-      const publicFolder = await create.filesHelper.createFolder(
+      const publicFolder = create.filesHelper.createFolder(
         em,
         { user: publicUser },
         { name: 'public_folder', scope: STATIC_SCOPE.PUBLIC },
       )
-      const publicChildFolder = await create.filesHelper.createFolder(
+      const publicChildFolder = create.filesHelper.createFolder(
         em,
         { user: publicUser, parentFolder: publicFolder },
         { name: 'public_child_folder', scope: STATIC_SCOPE.PUBLIC },
       )
-      const publicFile = await create.filesHelper.create(
+      const publicFile = create.filesHelper.create(
         em,
         { user: publicUser },
         { name: 'public_file', scope: STATIC_SCOPE.PUBLIC },
       )
-      const publicChildFile = await create.filesHelper.create(
+      const publicChildFile = create.filesHelper.create(
         em,
         { user: publicUser, parentFolder: publicFolder },
         { name: 'public_child_file', scope: STATIC_SCOPE.PUBLIC },
@@ -452,8 +440,8 @@ describe('UserFileResolverFacade', () => {
     })
   })
 
-  function getInstance(user: User) {
+  function getInstance(user: User): UserFileResolverFacade {
     const userCtx = { id: user.id, dxuser: user.dxuser } as unknown as UserContext
-    return new UserFileResolverFacade(em, userCtx)
+    return new UserFileResolverFacade(em, userCtx, userFileRepo)
   }
 })

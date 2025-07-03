@@ -11,6 +11,7 @@ import {
   Patch,
   Post,
   Put,
+  Query,
   UseGuards,
 } from '@nestjs/common'
 import { DEPRECATED_SQL_ENTITY_MANAGER } from '@shared/database/provider/deprecated-sql-entity-manager.provider'
@@ -36,6 +37,9 @@ import { UserContextGuard } from '../user-context/guard/user-context.guard'
 import { CreateSpaceDTO } from '@shared/domain/space/dto/create-space.dto'
 import { UpdateSpaceDTO } from '@shared/domain/space/dto/update-space.dto'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
+import { SpacePaginationDTO } from '@shared/domain/space/dto/space-pagination-d-t.o'
+import { SpaceListItemDTO } from '@shared/domain/space/dto/space-list-item.dto'
+import { PaginatedResult } from '@shared/domain/entity/domain/paginated.result'
 
 @UseGuards(UserContextGuard)
 @Controller('/spaces')
@@ -179,5 +183,10 @@ export class SpacesController {
   @Patch('/hidden')
   async updateSpacesHidden(@Body() spacesHiddenDto: SpacesHiddenDto): Promise<void> {
     await this.spaceService.updateSpacesHiddenForAdmin(spacesHiddenDto.ids, spacesHiddenDto.hidden)
+  }
+
+  @Get()
+  async listSpaces(@Query() query: SpacePaginationDTO): Promise<PaginatedResult<SpaceListItemDTO>> {
+    return this.spaceService.paginateSpaces(query)
   }
 }

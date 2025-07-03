@@ -1,7 +1,6 @@
 import {
   Collection,
   Entity,
-  EntityRepositoryType,
   Filter,
   ManyToMany,
   ManyToOne,
@@ -72,9 +71,6 @@ class Comparison extends ScopedEntity {
     return this.state === COMPARISON_STATE.DONE
   }
 
-  // TODO: Add rest of the references in comparison.rb
-
-  [EntityRepositoryType]?: ComparisonRepository
   constructor(user: User, app: App) {
     super()
     this.user = Reference.create(user)

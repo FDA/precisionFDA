@@ -37,7 +37,7 @@ describe('space entity tests', () => {
   })
 
   it('data portals are present', async () => {
-    expect(space.dataPortal).to.undefined
+    expect(space.dataPortal).to.undefined()
 
     const portal = create.dataPortalsHelper.create(em, { space }, { name: 'portal1', urlSlug: 'portal1' })
     await em.flush()

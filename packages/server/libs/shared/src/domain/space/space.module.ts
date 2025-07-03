@@ -5,10 +5,15 @@ import { MikroOrmModule } from '@mikro-orm/nestjs'
 import { Space } from '@shared/domain/space/space.entity'
 import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
 import { User } from '@shared/domain/user/user.entity'
+import { SpaceGroup } from '@shared/domain/space/space-group.entity'
+import { SpaceGroupService } from '@shared/domain/space/service/space-group.service'
 
 @Module({
-  imports: [SpaceCreateModule, MikroOrmModule.forFeature([Space, SpaceMembership, User])],
-  providers: [SpaceService],
+  imports: [
+    SpaceCreateModule,
+    MikroOrmModule.forFeature([Space, SpaceMembership, User, SpaceGroup]),
+  ],
+  providers: [SpaceService, SpaceGroupService],
   exports: [SpaceService, MikroOrmModule],
 })
 export class SpaceModule {}

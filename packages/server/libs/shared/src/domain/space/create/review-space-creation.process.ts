@@ -73,6 +73,7 @@ export class ReviewSpaceCreationProcess extends SpaceCreationProcess {
       spaceId: sharedSpace.id,
       sponsorOrgId: null,
       spaceMemberships: [],
+      spaceGroups: [],
     })
     this.em.persist(hostPrivateSpace)
 
@@ -85,6 +86,7 @@ export class ReviewSpaceCreationProcess extends SpaceCreationProcess {
       sponsorOrgId: null,
       restrictToTemplate: false,
       spaceMemberships: [],
+      spaceGroups: [],
     })
     this.em.persist(guestPrivateSpace)
 

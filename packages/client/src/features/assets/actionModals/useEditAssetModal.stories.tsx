@@ -34,7 +34,7 @@ export const EditAssetsModal: Story = {
   render: () => {
     return (
       <WithListData resource="assets" fetchList={fetchAssets}>
-        {({ data }) => <EditAssetsModalWrapper data={data['assets'][0]} />}
+        {({ data }) => data && <EditAssetsModalWrapper data={data.assets[0]} />}
       </WithListData>
     )
   },

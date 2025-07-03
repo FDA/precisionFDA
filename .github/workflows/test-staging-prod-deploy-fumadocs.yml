@@ -28,18 +28,6 @@ jobs:
       contents: read
 
     steps:
-      - name: Validate Branch for Deployment
-        run: |
-          if [[ "${{ inputs.ENVIRONMENT }}" =~ ^staging && "${{ github.ref }}" != "refs/heads/master" ]]; then
-            echo "❌ Staging deployments must be triggered from the master branch." >> $GITHUB_STEP_SUMMARY
-            exit 1
-          fi
-
-          if [[ "${{ inputs.ENVIRONMENT }}" == "production" && ! "${{ github.ref }}" =~ refs/heads/production/ ]]; then
-            echo "❌ Production deployments must be triggered from a branch starting with 'production/'." >> $GITHUB_STEP_SUMMARY
-            exit 1
-          fi
-
       - name: Checkout code
         uses: actions/checkout@v2
 
