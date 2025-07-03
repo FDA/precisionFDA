@@ -1,4 +1,4 @@
-import { UpdateDiscussionFacade } from './update-discussion.facade'
+import { UpdateDiscussionFacade } from '../discussion/update-discussion.facade'
 import { AttachmentManagementFacade } from '@shared/facade/discussion/attachment-management.facade'
 import { CliEditDiscussionDTO } from '@shared/domain/cli/dto/cli-edit-discussion.dto'
 import { DiscussionService } from '@shared/domain/discussion/services/discussion.service'
@@ -13,9 +13,7 @@ export class CliUpdateDiscussionFacade {
     private readonly attachmentFacade: AttachmentManagementFacade,
   ) {}
 
-  async updateDiscussion(discussionId: number, dto: CliEditDiscussionDTO) {
-    // to be appended to existing ones.
-
+  async updateDiscussion(discussionId: number, dto: CliEditDiscussionDTO): Promise<string> {
     const discussion = await this.discussionService.getDiscussion(discussionId)
 
     let attachments: AttachmentsDTO = {

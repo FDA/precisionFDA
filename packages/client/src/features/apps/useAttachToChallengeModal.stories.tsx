@@ -17,12 +17,15 @@ const meta: Meta = {
   ],
 }
 type Props = {
-  data: IApp
+  data?: IApp
 }
 type Story = StoryObj<Props>
 
 const AttachToChallengeModalWrapper = (props: Props) => {
-  const { modalComp, setShowModal } = useAttachToChallengeModal({ resource: 'apps', selected: props.data })
+  const { modalComp, setShowModal } = useAttachToChallengeModal({ 
+    resource: 'apps', 
+    selected: props.data as IApp,
+  })
 
   useEffect(() => {
     setShowModal(true)
@@ -34,7 +37,7 @@ export const AttachToChallengeModal: Story = {
   render: () => {
     return (
       <WithListData resource="apps" fetchList={fetchApps}>
-        {({ data }) => <AttachToChallengeModalWrapper data={data['apps'][0]} />}
+        {({ data }) => <AttachToChallengeModalWrapper data={data?.apps[0]} />}
       </WithListData>
     )
   },

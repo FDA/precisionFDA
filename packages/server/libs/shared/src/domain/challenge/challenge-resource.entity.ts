@@ -1,4 +1,4 @@
-import { Entity, Ref, ManyToOne, Property, EntityRepositoryType, Reference } from '@mikro-orm/core'
+import { Entity, Ref, ManyToOne, Property, Reference } from '@mikro-orm/core'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { BaseEntity } from '../../database/base.entity'
@@ -21,9 +21,7 @@ class ChallengeResource extends BaseEntity {
   userFile: Ref<UserFile>
 
   @ManyToOne({ entity: () => User })
-  user!: Ref<User>;
-
-  [EntityRepositoryType]?: ChallengeResourceRepository
+  user!: Ref<User>
 
   constructor(userId: number, challengeId: number, userFileId: number) {
     super()

@@ -1,3 +1,5 @@
+import { EVENT_TYPES } from '@shared/domain/event/event.helper'
+import { TAGGABLE_TYPE } from '@shared/domain/tagging/tagging.types'
 import { RemoveNodesFacade } from '@shared/facade/node-remove/remove-nodes.facade'
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
@@ -210,7 +212,6 @@ describe('RemoveNodesFacade', () => {
       nodeServiceMarkNodesAsRemovingStub.reset()
       comparisonServiceValidateComparisonsStub.reset()
       userFileServiceValidateSpaceReportsStub.reset()
-      removeArchiveEntriesForNodeStub.reset()
       queueCreateRemoveNodesJobTaskStub.reset()
       validateAssetRemovalStub.reset()
 
@@ -218,49 +219,44 @@ describe('RemoveNodesFacade', () => {
 
       await removeNodesFacade.removeNodesAsync(ids)
 
-      expect(nodeServiceLoadNodesStub.calledOnce).to.be.true
-      expect(nodeServiceLoadNodesStub.calledWith({ ids }, {})).to.be.true
+      expect(nodeServiceLoadNodesStub.calledOnce).to.be.true()
+      expect(nodeServiceLoadNodesStub.calledWith(ids, {})).to.be.true()
 
-      expect(nodeServiceLoadNodesStub.calledOnce).to.be.true
-      expect(nodeServiceLoadNodesStub.calledWith(ids)).to.be.true
+      expect(userFileServiceValidateProtectedSpacesStub.calledThrice).to.be.true()
+      expect(
+        userFileServiceValidateProtectedSpacesStub.calledWith('remove', USER_ID, node1),
+      ).to.be.true()
+      expect(
+        userFileServiceValidateProtectedSpacesStub.calledWith('remove', USER_ID, node2),
+      ).to.be.true()
+      expect(
+        userFileServiceValidateProtectedSpacesStub.calledWith('remove', USER_ID, node3),
+      ).to.be.true()
 
-      expect(userFileServiceValidateProtectedSpacesStub.calledThrice).to.be.true
-      expect(userFileServiceValidateProtectedSpacesStub.calledWith('remove', USER_ID, node1)).to.be
-        .true
-      expect(userFileServiceValidateProtectedSpacesStub.calledWith('remove', USER_ID, node2)).to.be
-        .true
-      expect(userFileServiceValidateProtectedSpacesStub.calledWith('remove', USER_ID, node3)).to.be
-        .true
+      expect(nodeServiceValidateEditableByStub.calledThrice).to.be.true()
+      expect(nodeServiceValidateEditableByStub.calledWith(node1)).to.be.true()
+      expect(nodeServiceValidateEditableByStub.calledWith(node2)).to.be.true()
+      expect(nodeServiceValidateEditableByStub.calledWith(node3)).to.be.true()
 
-      expect(nodeServiceValidateEditableByStub.calledThrice).to.be.true
-      expect(nodeServiceValidateEditableByStub.calledWith(node1)).to.be.true
-      expect(nodeServiceValidateEditableByStub.calledWith(node2)).to.be.true
-      expect(nodeServiceValidateEditableByStub.calledWith(node3)).to.be.true
+      expect(spaceServiceValidateVerificationSpaceStub.calledThrice).to.be.true()
+      expect(spaceServiceValidateVerificationSpaceStub.calledWith(node1)).to.be.true()
+      expect(spaceServiceValidateVerificationSpaceStub.calledWith(node2)).to.be.true()
+      expect(spaceServiceValidateVerificationSpaceStub.calledWith(node3)).to.be.true()
 
-      expect(spaceServiceValidateVerificationSpaceStub.calledThrice).to.be.true
-      expect(spaceServiceValidateVerificationSpaceStub.calledWith(node1)).to.be.true
-      expect(spaceServiceValidateVerificationSpaceStub.calledWith(node2)).to.be.true
-      expect(spaceServiceValidateVerificationSpaceStub.calledWith(node3)).to.be.true
+      expect(comparisonServiceValidateComparisonsStub.calledOnce).to.be.true()
+      expect(comparisonServiceValidateComparisonsStub.calledWith(node1)).to.be.true()
 
-      expect(comparisonServiceValidateComparisonsStub.calledTwice).to.be.true
-      expect(comparisonServiceValidateComparisonsStub.calledWith(node1)).to.be.true
-      expect(comparisonServiceValidateComparisonsStub.calledWith(node2)).to.be.true
+      expect(userFileServiceValidateSpaceReportsStub.calledOnce).to.be.true()
+      expect(userFileServiceValidateSpaceReportsStub.calledWith(node1)).to.be.true()
 
-      expect(userFileServiceValidateSpaceReportsStub.calledTwice).to.be.true
-      expect(userFileServiceValidateSpaceReportsStub.calledWith(node1)).to.be.true
-      expect(userFileServiceValidateSpaceReportsStub.calledWith(node2)).to.be.true
+      expect(nodeServiceMarkNodesAsRemovingStub.calledOnce).to.be.true()
+      expect(nodeServiceMarkNodesAsRemovingStub.calledWith(ids)).to.be.true()
 
-      expect(removeArchiveEntriesForNodeStub.calledOnce).to.be.true
-      expect(removeArchiveEntriesForNodeStub.calledWith(node2.id)).to.be.true
+      expect(queueCreateRemoveNodesJobTaskStub.calledOnce).to.be.true()
+      expect(queueCreateRemoveNodesJobTaskStub.calledWith(ids, userCtx)).to.be.true()
 
-      expect(nodeServiceMarkNodesAsRemovingStub.calledOnce).to.be.true
-      expect(nodeServiceMarkNodesAsRemovingStub.calledWith(ids)).to.be.true
-
-      expect(queueCreateRemoveNodesJobTaskStub.calledOnce).to.be.true
-      expect(queueCreateRemoveNodesJobTaskStub.calledWith(ids, userCtx)).to.be.true
-
-      expect(validateAssetRemovalStub.calledOnce).to.be.true
-      expect(validateAssetRemovalStub.calledWith(node2)).to.be.true
+      expect(validateAssetRemovalStub.calledOnce).to.be.true()
+      expect(validateAssetRemovalStub.calledWith(node2)).to.be.true()
     })
   })
 
@@ -273,6 +269,7 @@ describe('RemoveNodesFacade', () => {
         isInSpace: () => true,
         getSpaceId: () => 1,
         dxid: 'file-1',
+        project: 'project-id',
         stiType: FILE_STI_TYPE.USERFILE,
       } as unknown as UserFile
       const node2 = {
@@ -308,30 +305,38 @@ describe('RemoveNodesFacade', () => {
       const result = await removeNodesFacade.removeNodes(ids, true)
       expect(result).to.deep.equal({ removedFilesCount: 2, removedFoldersCount: 1 })
 
-      expect(nodeServiceLoadNodesStub.calledOnce).to.be.true
-      expect(nodeServiceLoadNodesStub.calledWith(ids)).to.be.true
+      expect(nodeServiceLoadNodesStub.calledOnce).to.be.true()
+      expect(nodeServiceLoadNodesStub.calledWith(ids)).to.be.true()
 
-      expect(emClearStub.calledOnce).to.be.true
+      expect(emClearStub.calledOnce).to.be.true()
 
-      expect(userFileRepositoryCountStub.calledTwice).to.be.true
-      expect(userFileRepositoryCountStub.calledWith({ dxid: node1.dxid })).to.be.true
-      expect(userFileRepositoryCountStub.calledWith({ dxid: node2.dxid })).to.be.true
+      expect(userFileRepositoryCountStub.calledTwice).to.be.true()
+      expect(userFileRepositoryCountStub.calledWith({ dxid: node1.dxid })).to.be.true()
+      expect(userFileRepositoryCountStub.calledWith({ dxid: node2.dxid })).to.be.true()
 
-      expect(getNodePathStub.calledTwice).to.be.true
+      expect(getNodePathStub.calledThrice).to.be.true()
 
-      expect(licensedItemServiceRemoveItemLicensedForNodeStub.calledTwice).to.be.true
-      expect(licensedItemServiceRemoveItemLicensedForNodeStub.calledWith(node1.id)).to.be.true
-      expect(licensedItemServiceRemoveItemLicensedForNodeStub.calledWith(node2.id)).to.be.true
+      expect(licensedItemServiceRemoveItemLicensedForNodeStub.calledTwice).to.be.true()
+      expect(licensedItemServiceRemoveItemLicensedForNodeStub.calledWith(node1.id)).to.be.true()
+      expect(licensedItemServiceRemoveItemLicensedForNodeStub.calledWith(node2.id)).to.be.true()
 
-      expect(taggingServiceRemoveTaggingsStub.calledOnce).to.be.true
+      expect(taggingServiceRemoveTaggingsStub.calledTwice).to.be.true()
 
-      expect(createFileEventStub.calledTwice).to.be.true
-      expect(createFileEventStub.calledWith(node1, 'remove', USER_ID)).to.be.true
-
-      expect(userClientFileRemoveStub.calledOnce).to.be.true
-      expect(userClientFileRemoveStub.calledWith(node1.dxid)).to.be.true
-
-      expect(spaceEventServiceCreateAndSendSpaceEventStub.calledOnce).to.be.true
+      expect(createFileEventStub.calledTwice).to.be.true()
+      expect(
+        createFileEventStub.calledWith(EVENT_TYPES.FILE_DELETED, node1, '/path/to/node1', userCtx),
+      ).to.be.true()
+      expect(
+        createFileEventStub.calledWith(EVENT_TYPES.FILE_DELETED, node2, '/path/to/node2', userCtx),
+      ).to.be.true()
+      expect(userClientFileRemoveStub.calledOnce).to.be.true()
+      expect(
+        userClientFileRemoveStub.calledWith({
+          projectId: 'project-id',
+          ids: ['file-1'],
+        }),
+      ).to.be.true()
+      expect(spaceEventServiceCreateAndSendSpaceEventStub.calledOnce).to.be.true()
       expect(
         spaceEventServiceCreateAndSendSpaceEventStub.calledWith({
           entity: { type: 'userFile', value: node1 },
@@ -341,13 +346,14 @@ describe('RemoveNodesFacade', () => {
         }),
       )
 
-      expect(emRemoveStub.calledTwice).to.be.true
-      expect(emRemoveStub.calledWith(node1)).to.be.true
-      expect(emRemoveStub.calledWith(node2)).to.be.true
+      expect(emRemoveStub.calledThrice).to.be.true()
+      expect(emRemoveStub.calledWith(node1)).to.be.true()
+      expect(emRemoveStub.calledWith(node2)).to.be.true()
+      expect(emRemoveStub.calledWith(folder1)).to.be.true()
 
-      expect(emPersistStub.calledOnce).to.be.true
+      expect(emPersistStub.calledThrice).to.be.true()
 
-      expect(createFolderEventStub.calledOnce).to.be.true
+      expect(createFolderEventStub.calledOnce).to.be.true()
       expect(
         createFolderEventStub.calledWith('folder_deleted', folder1, '/path/to/folder1', {
           id: USER_ID,
@@ -403,30 +409,42 @@ describe('RemoveNodesFacade', () => {
       const result = await removeNodesFacade.removeNodes(ids, true)
       expect(result).to.deep.equal({ removedFilesCount: 2, removedFoldersCount: 0 })
 
-      expect(nodeServiceLoadNodesStub.calledOnce).to.be.true
-      expect(nodeServiceLoadNodesStub.calledWith(ids)).to.be.true
+      expect(nodeServiceLoadNodesStub.calledOnce).to.be.true()
+      expect(nodeServiceLoadNodesStub.calledWith(ids)).to.be.true()
 
-      expect(emClearStub.calledOnce).to.be.true
+      expect(emClearStub.calledOnce).to.be.true()
 
-      expect(userFileRepositoryCountStub.calledTwice).to.be.true
-      expect(userFileRepositoryCountStub.calledWith({ dxid: node1.dxid })).to.be.true
-      expect(userFileRepositoryCountStub.calledWith({ dxid: node2.dxid })).to.be.true
+      expect(userFileRepositoryCountStub.calledTwice).to.be.true()
+      expect(userFileRepositoryCountStub.calledWith({ dxid: node1.dxid })).to.be.true()
+      expect(userFileRepositoryCountStub.calledWith({ dxid: node2.dxid })).to.be.true()
 
-      expect(getNodePathStub.calledTwice).to.be.true
+      expect(getNodePathStub.calledTwice).to.be.true()
 
-      expect(licensedItemServiceRemoveItemLicensedForNodeStub.calledTwice).to.be.true
-      expect(licensedItemServiceRemoveItemLicensedForNodeStub.calledWith(node1.id)).to.be.true
-      expect(licensedItemServiceRemoveItemLicensedForNodeStub.calledWith(node2.id)).to.be.true
+      expect(licensedItemServiceRemoveItemLicensedForNodeStub.calledTwice).to.be.true()
+      expect(licensedItemServiceRemoveItemLicensedForNodeStub.calledWith(node1.id)).to.be.true()
+      expect(licensedItemServiceRemoveItemLicensedForNodeStub.calledWith(node2.id)).to.be.true()
 
-      expect(taggingServiceRemoveTaggingsStub.calledOnce).to.be.true
+      expect(taggingServiceRemoveTaggingsStub.calledTwice).to.be.true()
+      expect(taggingServiceRemoveTaggingsStub.calledWith(node1.id, TAGGABLE_TYPE.NODE)).to.be.true()
+      expect(taggingServiceRemoveTaggingsStub.calledWith(node2.id, TAGGABLE_TYPE.NODE)).to.be.true()
 
-      expect(createFileEventStub.calledTwice).to.be.true
-      expect(createFileEventStub.calledWith(node1, 'remove', USER_ID)).to.be.true
+      expect(createFileEventStub.calledTwice).to.be.true()
+      expect(
+        createFileEventStub.calledWith(EVENT_TYPES.FILE_DELETED, node1, '/path/to/node1', userCtx),
+      ).to.be.true()
+      expect(
+        createFileEventStub.calledWith(EVENT_TYPES.FILE_DELETED, node2, '/path/to/node2', userCtx),
+      ).to.be.true()
 
-      expect(userClientFileRemoveStub.calledOnce).to.be.true
-      expect(userClientFileRemoveStub.calledWith(node1.dxid)).to.be.true
+      expect(userClientFileRemoveStub.calledOnce).to.be.true()
+      expect(
+        userClientFileRemoveStub.calledWith({
+          projectId: 'project-id',
+          ids: ['file-1'],
+        }),
+      ).to.be.true()
 
-      expect(spaceEventServiceCreateAndSendSpaceEventStub.calledOnce).to.be.true
+      expect(spaceEventServiceCreateAndSendSpaceEventStub.calledOnce).to.be.true()
       expect(
         spaceEventServiceCreateAndSendSpaceEventStub.calledWith({
           entity: { type: 'userFile', value: node1 },
@@ -436,11 +454,11 @@ describe('RemoveNodesFacade', () => {
         }),
       )
 
-      expect(emRemoveStub.calledTwice).to.be.true
-      expect(emRemoveStub.calledWith(node1)).to.be.true
-      expect(emRemoveStub.calledWith(node2)).to.be.true
+      expect(emRemoveStub.calledTwice).to.be.true()
+      expect(emRemoveStub.calledWith(node1)).to.be.true()
+      expect(emRemoveStub.calledWith(node2)).to.be.true()
 
-      expect(emPersistStub.calledOnce).to.be.true
+      expect(emPersistStub.calledTwice).to.be.true()
     })
 
     it('trigger rollbackRemovingState', async () => {
@@ -487,8 +505,8 @@ describe('RemoveNodesFacade', () => {
 
       await expect(removeNodesFacade.removeNodes(ids, true)).to.be.rejectedWith(Error, 'Error')
 
-      expect(nodeServiceRollbackRemovingStateStub.calledOnce).to.be.true
-      expect(nodeServiceRollbackRemovingStateStub.calledWith([node2, node3])).to.be.true
+      expect(nodeServiceRollbackRemovingStateStub.calledOnce).to.be.true()
+      expect(nodeServiceRollbackRemovingStateStub.calledWith([node2, node3])).to.be.true()
     })
   })
 })

@@ -19,7 +19,7 @@ import {
   useReactTable,
   VisibilityState,
 } from '@tanstack/react-table'
-import React, { useMemo } from 'react'
+import React, { DragEventHandler, useMemo } from 'react'
 
 import CustomTable from './components/CustomTable'
 import { TableStyles } from './components/styles'
@@ -43,6 +43,8 @@ function Table<T extends { id: number }>({
   columnSizing = {},
   setColumnSizing,
   enableDnd,
+  enableHtmlDnd,
+  onDragStart,
   expanded = {},
   setExpanded,
   subRowKey,
@@ -63,6 +65,8 @@ function Table<T extends { id: number }>({
   columnSizing?: ColumnSizingState
   setColumnSizing?: (v: ColumnSizingState) => void
   enableDnd?: boolean
+  enableHtmlDnd?: boolean
+  onDragStart?: DragEventHandler
   expanded?: ExpandedState
   setExpanded?: (e: ExpandedState) => void
   setColumnVisibility?: (cols: VisibilityState) => void
@@ -179,7 +183,7 @@ function Table<T extends { id: number }>({
 
   return (
     <TableStyles ref={containerRef}>
-      <CustomTable isLoading={isLoading} emptyText={emptyText} table={table} enableDnd={enableDnd} spacerWidth={spacerWidth} />
+      <CustomTable isLoading={isLoading} emptyText={emptyText} table={table} enableDnd={enableDnd} enableHtmlDnd={enableHtmlDnd} onDragStart={onDragStart} spacerWidth={spacerWidth} />
     </TableStyles>
   )
 }

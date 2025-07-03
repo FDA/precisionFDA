@@ -21,6 +21,15 @@ export const formatDate = (date: Date | string) =>
     second: 'numeric',
   })
 
+// 05/29/2025
+export const formatDateOnly = (date: Date | string): string => {
+  return new Intl.DateTimeFormat('en-US', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).format(new Date(date))
+}
+
 export const sanitizeFileName = (name: string): string => {
   const re = /[<>:"/\\|?*]+/g
 

@@ -1,11 +1,11 @@
 import { Meta, StoryObj } from '@storybook/react-webpack5'
 import React, { useEffect } from 'react'
 import { StorybookProviders } from '../../stories/StorybookProviders'
-import { WithListData } from '../../stories/helpers'
-import { copyAppsToPrivate, fetchApps } from '../apps/apps.api'
-import { fetchFiles } from '../files/files.api'
+import { copyAppsToPrivate } from '../apps/apps.api'
 import { APIResource } from '../home/types'
 import { useCopyToPrivateModal } from './useCopyToPrivateModal'
+import { mockCopyApps } from '../../mocks/handlers/apps.handlers'
+import { mockCopyFiles } from '../../mocks/handlers/files.handlers'
 
 const meta: Meta = {
   title: 'Modals/Common',
@@ -17,39 +17,37 @@ const meta: Meta = {
     ),
   ],
 }
+
 type Props = {
-  data: Partial<{ uid: string }>[]
   type: APIResource
-  request: (a: any) => Promise<any>
 }
 type Story = StoryObj<Props>
 
-const CopyToPrivateModalWrapper = (props: Props) => {
+const CopyToPrivateModalWrapper = ({ type }: Props) => {
+  const mockData = type === 'apps' ? mockCopyApps.apps : mockCopyFiles.files
+  const copyFunction = type === 'apps' ? copyAppsToPrivate : 
+    (ids: number[]) => fetch('/api/files/copy', { 
+      method: 'POST', 
+      body: JSON.stringify({ item_ids: ids, scope: 'private' }),
+      headers: { 'Content-Type': 'application/json' },
+    }).then(r => r.json())
+
   const { modalComp, setShowModal } = useCopyToPrivateModal({
-    copyFunction: props.request,
-    resource: props.type,
-    selected: props.data,
+    copyFunction,
+    resource: type,
+    selected: mockData,
   })
 
   useEffect(() => {
     setShowModal(true)
-  }, [])
+  }, [setShowModal])
+  
   return modalComp
 }
 
 export const CopyToPrivateModal: Story = {
   render: ({ type = 'files' }) => {
-    let fetchFunc: unknown
-    let request = copyAppsToPrivate
-    if (type === 'apps') {
-      fetchFunc = fetchApps
-      request = copyAppsToPrivate
-    }
-    return (
-      <WithListData resource={type} fetchList={fetchFunc || fetchFiles}>
-        {({ data }) => <CopyToPrivateModalWrapper data={data[type]} type={type} request={request} />}
-      </WithListData>
-    )
+    return <CopyToPrivateModalWrapper type={type} />
   },
   argTypes: {
     type: {

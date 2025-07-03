@@ -16,13 +16,10 @@ import { buildIsOverMaxDuration } from '@shared/domain/job/job.helper'
 import { SyncJobOperation } from '@shared/domain/job/ops/synchronize'
 import { NotificationService } from '@shared/domain/notification/services/notification.service'
 import { SpaceEventService } from '@shared/domain/space-event/space-event.service'
-import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
-import { Space } from '@shared/domain/space/space.entity'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { Folder } from '@shared/domain/user-file/folder.entity'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { User } from '@shared/domain/user/user.entity'
-import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { createSyncJobStatusTask, getMainQueue } from '@shared/queue'
 import { difference } from 'ramda'
 import { NOTIFICATION_ACTION, SEVERITY } from '../../enums'
@@ -31,6 +28,7 @@ import { PlatformClient } from '../../platform-client'
 import {
   DnanexusLink,
   FileStateResult,
+  FindJobsResponse,
   JobOutput,
 } from '../../platform-client/platform-client.responses'
 import { UserCtx, UserOpsCtx, WorkerOpsCtx } from '../../types'
@@ -43,14 +41,15 @@ import { UserRepository } from '../user/user.repository'
 import { JobRepository } from './job.repository'
 import { CheckStatusJob, TASK_TYPE } from '@shared/queue/task.input'
 import { Job as BullJob } from 'bull'
+import { SpaceRepository } from '@shared/domain/space/space.repository'
+import { ServiceLogger } from '@shared/logger/decorator/service-logger'
+import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
+import { JOB_STATE } from '@shared/domain/job/job.enum'
 
 @Injectable()
 export class JobService {
   @ServiceLogger()
   private readonly logger: Logger
-
-  private jobRepo: JobRepository
-  private userRepo: UserRepository
 
   constructor(
     private readonly em: EntityManager,
@@ -60,12 +59,13 @@ export class JobService {
     private readonly folderService: FolderService,
     private readonly emailsJobProducer: EmailQueueJobProducer,
     private readonly emailService: EmailService,
-  ) {
-    this.jobRepo = em.getRepository(Job)
-    this.userRepo = em.getRepository(User)
-  }
+    private readonly userRepo: UserRepository,
+    private readonly jobRepo: JobRepository,
+    private readonly spaceRepo: SpaceRepository,
+    private readonly spaceMembershipRepo: SpaceMembershipRepository,
+  ) {}
 
-  async checkChallengeJobs() {
+  async checkChallengeJobs(): Promise<void> {
     this.logger.log(`checkChallengeJobs`)
     const challengeBotUser = await this.userRepo.findOneOrFail({
       dxuser: config.platform.challengeBotUser,
@@ -106,7 +106,7 @@ export class JobService {
     }
   }
 
-  async findAccessible(dxid: DxId<'job'>) {
+  async findAccessible(dxid: DxId<'job'>): Promise<Job> {
     const job = await this.jobRepo.findAccessibleOne({ dxid })
     if (!job) {
       throw new errors.NotFoundError(`Job ${dxid} was not found or is not accessible`)
@@ -131,8 +131,7 @@ export class JobService {
   async checkStaleJobs(): Promise<Job[]> {
     // TODO cut into smaller methods
     // find running jobs that are close to "deadline" -> 30days in production
-    const jobRepo = this.em.getRepository(Job)
-    const runningJobs = await jobRepo.find(
+    const runningJobs = await this.jobRepo.find(
       {},
       {
         filters: ['isNonTerminal'],
@@ -163,7 +162,15 @@ export class JobService {
     // TODO(samuel) refactor into repository method instead
     const nonStaleJobs = difference(runningJobs, staleJobs)
 
-    const createJobInfo = (job: Job) => ({
+    const createJobInfo = (
+      job: Job,
+    ): {
+      duration: string
+      uid: `job-${string}-${number}`
+      name: string
+      dxuser: string
+      state: JOB_STATE
+    } => ({
       uid: job.uid,
       name: job.name,
       state: job.state,
@@ -180,7 +187,7 @@ export class JobService {
     this.logger.log({ staleJobs: staleJobsInfo }, 'Stale jobs - should be terminated')
 
     // generate email for admin with list of jobs
-    const adminUser = await this.em.getRepository(User).findAdminUser()
+    const adminUser = await this.userRepo.findAdminUser()
     const body = buildEmailTemplate<ReportStaleJobsTemplateInput>(reportStaleJobsTemplate, {
       receiver: adminUser,
       content: {
@@ -225,12 +232,11 @@ export class JobService {
    * previously the code was in job_syncing.rb
    *
    * @param jobDxId
-   * @param userId
    */
-  async syncOutputs(jobDxId: DxId<'job'>, userId: number): Promise<void> {
+  async syncOutputs(jobDxId: DxId<'job'>): Promise<void> {
     this.logger.log(`Syncing output files for job ${jobDxId}`)
 
-    const user = await this.userRepo.findOneOrFail({ id: userId })
+    const user = await this.user.loadEntity()
     const job = await this.jobRepo.findOneOrFail({ dxid: jobDxId })
     const result = await this.getJobResult(job)
 
@@ -252,21 +258,21 @@ export class JobService {
         const spaceService = new SpaceEventService(
           this.user,
           this.em as SqlEntityManager,
-          this.em.getRepository(Space),
-          this.em.getRepository(User),
-          this.em.getRepository(SpaceMembership),
+          this.spaceRepo,
+          this.userRepo,
+          this.spaceMembershipRepo,
           this.emailService,
         )
         const spaceEvent = await spaceService.createSpaceEvent({
           entity: { type: 'job', value: job },
           spaceId: job.getSpaceId(),
-          userId,
+          userId: this.user.id,
           activityType: SPACE_EVENT_ACTIVITY_TYPE.job_completed,
         })
         await spaceService.sendNotificationForEvent(spaceEvent)
       }
 
-      await this.createNotification(jobDxId, userId, this.user.sessionId)
+      await this.createNotification(jobDxId, this.user.id, this.user.sessionId)
       await this.em.commit()
       this.logger.log(`Outputs for job ${jobDxId} have been synchronized`)
     } catch (error) {
@@ -289,7 +295,7 @@ export class JobService {
     return null
   }
 
-  private updateJobRunData(job: Job, output: JobOutput) {
+  private updateJobRunData(job: Job, output: JobOutput): void {
     job.runData.run_outputs = output
     // describe is updated by job's synchronize.ts
     this.em.persist(job)
@@ -318,7 +324,11 @@ export class JobService {
     return outputFiles
   }
 
-  private async createNotification(jobDxId: string, userId: number, sessionId: string) {
+  private async createNotification(
+    jobDxId: string,
+    userId: number,
+    sessionId: string,
+  ): Promise<void> {
     await this.notificationService.createNotification({
       message: `Outputs for job ${jobDxId} have been synchronized`,
       severity: SEVERITY.INFO,
@@ -328,7 +338,7 @@ export class JobService {
     })
   }
 
-  private async persistFiles(outputFiles: any[], user: User) {
+  private async persistFiles(outputFiles: UserFile[], user: User): Promise<void> {
     const filePromises = outputFiles.map(async (outputFile) => {
       await this.em.persistAndFlush(outputFile) // flush for id
 
@@ -346,7 +356,7 @@ export class JobService {
     await Promise.all(filePromises)
   }
 
-  private async getJobResult(job: Job) {
+  private async getJobResult(job: Job): Promise<FindJobsResponse> {
     const result = await this.platformClient.jobFind({
       id: [job.dxid],
       describe: true,
@@ -363,7 +373,7 @@ export class JobService {
     fileStateResult: FileStateResult,
     job: Job,
     parentFolder: Folder | null,
-  ) {
+  ): UserFile {
     if (!fileStateResult.describe) {
       throw new errors.InvalidStateError(
         `Platform didn't give describe for file id ${fileStateResult.id}`,
@@ -435,7 +445,7 @@ export class JobService {
     return output
   }
 
-  private remapArrayOfFiles(value: DnanexusLink[], output: JobOutput, key: string) {
+  private remapArrayOfFiles(value: DnanexusLink[], output: JobOutput, key: string): void {
     const linkArray: string[] = []
     value.forEach((item) => {
       if (this.isDnaNexusLink(item)) {
@@ -456,7 +466,7 @@ export class JobService {
    * @param {JobOutput} output - The job output containing potential DNA Nexus links.
    * @returns {string[]} An array of unique DNA Nexus file IDs.
    */
-  private collectIds(output: JobOutput) {
+  private collectIds(output: JobOutput): string[] {
     const uniqueFileDxIds = new Set<string>()
     for (const key in output) {
       if (output.hasOwnProperty(key)) {

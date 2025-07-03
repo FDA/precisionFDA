@@ -41,6 +41,7 @@ import { UserContextMiddleware } from './user-context/middleware/user-context.mi
 import { UsersApiModule } from './users/users.api.module'
 import { WebsocketModule } from './websocket/websocket.module'
 import { WorkflowApiModule } from './workflows/workflow.api.module'
+import { SpaceGroupsApiModule } from './space-groups/space-groups.api.module'
 
 @Module({
   imports: [
@@ -78,6 +79,7 @@ import { WorkflowApiModule } from './workflows/workflow.api.module'
     PropertiesApiModule,
     SiteSettingsApiModule,
     SpacesApiModule,
+    SpaceGroupsApiModule,
     TracksApiModule,
     AlertsApiModule,
     UsersApiModule,
