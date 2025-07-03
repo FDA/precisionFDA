@@ -1,6 +1,6 @@
 import { http, HttpResponse } from 'msw'
-import { NewsListResponse } from './api'
-import { NewsItem } from './types'
+import { NewsListResponse } from '../../features/news/api'
+import { NewsItem } from '../../features/news/types'
 
 export const newsMocks = [
   http.get('/api/news', () => HttpResponse.json<NewsListResponse>({

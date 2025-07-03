@@ -1,4 +1,4 @@
-import { Entity, EntityRepositoryType, Ref, ManyToOne, Property, Reference } from '@mikro-orm/core'
+import { Entity, Ref, ManyToOne, Property, Reference } from '@mikro-orm/core'
 import { User } from '@shared/domain/user/user.entity'
 import { BaseEntity } from '../../database/base.entity'
 import { NewsRepository } from './news-item.repository'
@@ -32,11 +32,9 @@ class NewsItem extends BaseEntity {
   @ManyToOne(() => User)
   user!: Ref<User>
 
-  get year() {
+  get year(): number {
     return this.createdAt.getFullYear()
   }
-
-  [EntityRepositoryType]?: NewsRepository
 
   constructor(user: User) {
     super()

@@ -96,13 +96,31 @@ export interface ISpace {
   tags: any[]
   spaceId?: number
   current_user_membership: SpaceMembership
-  host_lead: HostLead
+  host_lead?: HostLead
   guest_lead?: GuestLead
   private_space_id?: string
   shared_space_id?: string
   confidential_space?: ConfidentialSpace | null
   restricted_reviewer?: boolean | null
   restricted_discussions?: boolean | null
+}
+
+// Used in api v2 list endpoint
+export interface ISpaceV2 {
+  id: number
+  name: string
+  description: string
+  state: 'active' | 'unactivated' | 'locked' | 'deleted'
+  type: 'groups' | 'review' | 'private_type' | 'government' | 'administrator'
+  hidden: boolean
+  hostLead?: string
+  guestLead?: string
+  currentUserMembership: SpaceMembership
+  protected: boolean | null
+  restrictedReviewer?: boolean | null
+  tags: string[]
+  createdAt: string
+  updatedAt: string
 }
 
 export const columnFilters = {

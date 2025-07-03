@@ -3,7 +3,7 @@ import * as monacoEditor from 'monaco-editor'
 import React from 'react'
 import { useTheme } from '../../utils/ThemeContext'
 
-if(!ENABLE_DEV_MSW) {
+if(!process.env.ENABLE_DEV_MSW) {
   loader.config({
     paths: {
       vs: '/assets/monaco-editor/min/vs',

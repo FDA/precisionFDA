@@ -5,6 +5,7 @@ import { BaseOperation } from '@shared/utils/base-operation'
 import { RenameFolderInput } from '../user-file.input'
 import { getFolderPath } from '../user-file.helper'
 import { UserOpsCtx } from '@shared/types'
+import { FolderRepository } from '@shared/domain/user-file/folder.repository'
 
 export class FolderRenameOperation extends BaseOperation<UserOpsCtx, RenameFolderInput, Folder> {
   async run(input: RenameFolderInput): Promise<Folder> {
@@ -14,7 +15,7 @@ export class FolderRenameOperation extends BaseOperation<UserOpsCtx, RenameFolde
       this.ctx.log,
     )
 
-    const folderRepo = em.getRepository(Folder)
+    const folderRepo = em.getRepository(Folder) as FolderRepository
     const existingFolder = await folderRepo.findOneWithProject(input.id)
     if (!existingFolder) {
       throw new FolderNotFoundError()

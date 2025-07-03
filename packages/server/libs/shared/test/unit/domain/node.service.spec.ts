@@ -105,9 +105,9 @@ describe('NodeService', () => {
 
       await nodeService.markNodesAsRemoving([1, 2])
 
-      expect(nodeRepositoryFindStub.calledOnce).to.be.true
+      expect(nodeRepositoryFindStub.calledOnce).to.be.true()
       expect(nodeRepositoryFindStub.firstCall.args[0]).to.deep.equal({ id: { $in: [1, 2] } })
-      expect(emFlushStub.calledOnce).to.be.true
+      expect(emFlushStub.calledOnce).to.be.true()
 
       expect(nodes[0].state).to.equal(FILE_STATE_PFDA.REMOVING)
       expect(nodes[1].state).to.equal(FILE_STATE_PFDA.REMOVING)
@@ -186,7 +186,7 @@ describe('NodeService', () => {
 
       await nodeService.validateEditableBy(node)
 
-      expect(spaceRepositoryFindOneStub.calledOnce).to.be.true
+      expect(spaceRepositoryFindOneStub.calledOnce).to.be.true()
       expect(spaceRepositoryFindOneStub.firstCall.firstArg).to.deep.equal({
         id: space.id,
         state: SPACE_STATE.ACTIVE,
@@ -216,7 +216,7 @@ describe('NodeService', () => {
         `You have no permissions to remove '${node.name}'.`,
       )
 
-      expect(spaceRepositoryFindOneStub.calledOnce).to.be.true
+      expect(spaceRepositoryFindOneStub.calledOnce).to.be.true()
       expect(spaceRepositoryFindOneStub.firstCall.firstArg).to.deep.equal({
         id: space.id,
         state: SPACE_STATE.ACTIVE,
@@ -247,9 +247,9 @@ describe('NodeService', () => {
 
       await nodeService.rollbackRemovingState(nodes)
 
-      expect(emPersistAndFlushStub.calledOnce).to.be.true
+      expect(emPersistAndFlushStub.calledOnce).to.be.true()
       expect(emPersistAndFlushStub.firstCall.firstArg[0].id).to.eq(nodes[0].id)
-      expect(emPersistAndFlushStub.firstCall.firstArg[0].state).to.be.null
+      expect(emPersistAndFlushStub.firstCall.firstArg[0].state).to.be.null()
       expect(emPersistAndFlushStub.firstCall.firstArg[1].id).to.eq(nodes[1].id)
       expect(emPersistAndFlushStub.firstCall.firstArg[1].state).to.eq(FILE_STATE_DX.CLOSED)
     })
@@ -310,7 +310,7 @@ describe('NodeService', () => {
 
       const result = await nodeService.loadNodes(input, filters)
 
-      expect(nodeRepositoryFindStub.calledOnce).to.be.true
+      expect(nodeRepositoryFindStub.calledOnce).to.be.true()
       expect(nodeRepositoryFindStub.firstCall.firstArg).to.deep.equal({
         $or: [
           {
@@ -323,7 +323,7 @@ describe('NodeService', () => {
           },
         ],
       })
-      expect(emPopulateStub.calledOnce).to.be.true
+      expect(emPopulateStub.calledOnce).to.be.true()
       expect(emPopulateStub.firstCall.firstArg).to.deep.equal(nodes)
 
       const processedFolder1 = result.find((n) => n.id === folder1.id)
@@ -337,9 +337,10 @@ describe('NodeService', () => {
       expect(result[3].id).to.eq(folder2.id)
       expect(result[4].id).to.eq(folder1.id)
 
-      expect(folderRepositoryFindOneStub.calledTwice).to.be.true
+      expect(folderRepositoryFindOneStub.calledThrice).to.be.true()
       expect(folderRepositoryFindOneStub.firstCall.firstArg).to.eq(folder1.id)
       expect(folderRepositoryFindOneStub.secondCall.firstArg).to.eq(folder2.id)
+      expect(folderRepositoryFindOneStub.thirdCall.firstArg).to.eq(folder2.id)
     })
   })
 })

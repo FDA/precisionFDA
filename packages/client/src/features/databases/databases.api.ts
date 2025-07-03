@@ -6,7 +6,7 @@ import { formatScopeQuery, Params, prepareListFetch } from '../home/utils'
 import { IDatabase, MethodType } from './databases.types'
 
 export interface FetchDatabaseListQuery {
-  workflows: IDatabase[]
+  data: IDatabase[]
   meta: IMeta
 }
 

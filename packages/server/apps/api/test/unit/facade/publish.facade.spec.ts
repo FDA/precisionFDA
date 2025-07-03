@@ -9,6 +9,7 @@ import { AppRepository } from '@shared/domain/app/app.repository'
 import { JobRepository } from '@shared/domain/job/job.repository'
 import { NodeRepository } from '@shared/domain/user-file/node.repository'
 import { NoteRepository } from '@shared/domain/note/note.repository'
+import { ComparisonRepository } from '@shared/domain/comparison/comparison.repository'
 
 describe('PublishApiFacade', () => {
   const FILE_UID = 'file-uid-1'
@@ -27,20 +28,20 @@ describe('PublishApiFacade', () => {
 
   it('should raise error if entity not found', async () => {
     findAccessibleOne.resolves(null)
-    await expect(getInstance().getPublishedTreeRoot(FILE_UID, 'file')).to.be.rejected
+    await expect(getInstance().getPublishedTreeRoot(FILE_UID, 'file')).to.be.rejected()
 
     findAccessibleOne.resolves(null)
-    await expect(getInstance().getPublishedTreeRoot(COMPARISON_ID, 'comparison')).to.be.rejected
+    await expect(getInstance().getPublishedTreeRoot(COMPARISON_ID, 'comparison')).to.be.rejected()
   })
 
   it('should raise error if entity is not publishable', async () => {
     const file = { id: 1, isPublishable: () => false } as unknown as File
     findAccessibleOne.resolves(file)
-    await expect(getInstance().getPublishedTreeRoot(FILE_UID, 'file')).to.be.rejected
+    await expect(getInstance().getPublishedTreeRoot(FILE_UID, 'file')).to.be.rejected()
 
     const comparison = { id: 1, isPublishable: () => false } as unknown as Comparison
     findAccessibleOne.resolves(comparison)
-    await expect(getInstance().getPublishedTreeRoot(COMPARISON_ID, 'comparison')).to.be.rejected
+    await expect(getInstance().getPublishedTreeRoot(COMPARISON_ID, 'comparison')).to.be.rejected()
   })
 
   it('should return tree root if entity is publishable', async () => {
@@ -110,7 +111,7 @@ describe('PublishApiFacade', () => {
     })
   })
 
-  function getInstance() {
+  function getInstance(): PublishApiFacade {
     const entityProvenanceService = {
       getEntityProvenance: getEntityProvenanceStub,
     } as unknown as EntityProvenanceService
@@ -131,12 +132,17 @@ describe('PublishApiFacade', () => {
       findAccessibleOne: findAccessibleOne,
     } as unknown as NoteRepository
 
+    const comparisonRepository = {
+      findAccessibleOne: findAccessibleOne,
+    } as unknown as ComparisonRepository
+
     return new PublishApiFacade(
       entityProvenanceService,
       appRepository,
       jobRepository,
       nodeRepository,
       noteRepository,
+      comparisonRepository,
     )
   }
 })

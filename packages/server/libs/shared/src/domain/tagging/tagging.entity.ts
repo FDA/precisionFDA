@@ -1,4 +1,4 @@
-import { Entity, EntityRepositoryType, ManyToOne, PrimaryKey, Property } from '@mikro-orm/core'
+import { Entity, ManyToOne, PrimaryKey, Property } from '@mikro-orm/core'
 import { Tag } from '@shared/domain/tag/tag.entity'
 import { Asset } from '@shared/domain/user-file/asset.entity'
 import { Folder } from '@shared/domain/user-file/folder.entity'
@@ -7,6 +7,7 @@ import { User } from '@shared/domain/user/user.entity'
 import { TaggingRepository } from './tagging.repository'
 import { DbCluster } from '../db-cluster/db-cluster.entity'
 import { TAGGABLE_TYPE } from '@shared/domain/tagging/tagging.types'
+import { Space } from '@shared/domain/space/space.entity'
 
 @Entity({ tableName: 'taggings', repository: () => TaggingRepository })
 export class Tagging {
@@ -54,11 +55,12 @@ export class Tagging {
   @ManyToOne(() => DbCluster, { joinColumn: 'taggable_id' })
   dbCluster: DbCluster
 
+  @ManyToOne(() => Space, { joinColumn: 'taggable_id' })
+  space: Space
+
   @ManyToOne(() => Tag, { joinColumn: 'tag_id' })
   tag?: Tag
 
   @ManyToOne(() => User, { joinColumn: 'tagger_id' })
-  tagger: User;
-
-  [EntityRepositoryType]?: TaggingRepository
+  tagger: User
 }

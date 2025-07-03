@@ -1,16 +1,24 @@
 import axios from 'axios'
 import { getApiRequestOpts } from '../../utils/api'
-import { IFilter } from '../home/types'
-import { Params, prepareListFetch } from '../home/utils'
-import { ISpace } from './spaces.types'
+import { IFilter, MetaV2 } from '../home/types'
+import { Params, prepareListFetchV2 } from '../home/utils'
+import { ISpace, ISpaceV2 } from './spaces.types'
 
-export type FetchSpacesListResponse = { meta: unknown; spaces: ISpace[] }
+export type FetchSpacesListResponse = { meta: MetaV2; data: ISpaceV2[] }
 export type FetchSpaceDetailsResponse = { meta: unknown; space: ISpace }
 
-export async function spacesListRequest(filters: IFilter[], params: Params): Promise<{ meta: any; spaces: ISpace[] }> {
-  const query = prepareListFetch(filters, params)
+export async function spacesListRequest(filters: IFilter[], params: Params): Promise<FetchSpacesListResponse> {
+  const spaceGroupFilter = filters.find(filter => filter.id === 'spaceGroupId' && filter.value !== undefined)
+  const spaceGroupId = spaceGroupFilter ? spaceGroupFilter.value : undefined
+
+  const query = prepareListFetchV2(filters.filter(filter => filter.id !== 'spaceGroupId'), params)
   const paramQ = `?${new URLSearchParams(query as {}).toString()}`
-  return axios.get(`/api/spaces/${paramQ}`).then(res => res.data)
+
+  if (spaceGroupId) {
+    return axios.get(`/api/v2/space-groups/${spaceGroupId}/spaces/${paramQ}`).then(res => res.data)
+  }
+
+  return axios.get(`/api/v2/spaces/${paramQ}`).then(res => res.data)
 }
 
 export async function spaceRequest({ id }: { id: number }): Promise<FetchSpaceDetailsResponse> {

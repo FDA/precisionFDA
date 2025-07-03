@@ -7,7 +7,6 @@ import {
   Property,
   Reference,
   Enum,
-  EntityRepositoryType,
 } from '@mikro-orm/core'
 import { Space } from '@shared/domain/space/space.entity'
 import { User } from '@shared/domain/user/user.entity'
@@ -30,9 +29,8 @@ export class SpaceMembership extends BaseEntity {
   user!: Ref<User>
 
   @ManyToMany(() => Space, (space) => space.spaceMemberships)
-  spaces = new Collection<Space>(this);
+  spaces = new Collection<Space>(this)
 
-  [EntityRepositoryType]?: SpaceMembershipRepository
   constructor(user: User, space: Space, side: SPACE_MEMBERSHIP_SIDE, role: SPACE_MEMBERSHIP_ROLE) {
     super()
     this.user = Reference.create(user)
