@@ -2,6 +2,16 @@ import { getSpaceIdFromScope } from '../../utils'
 import { cleanObject } from '../../utils/object'
 import { HomeScope, IFilter, ServerScope } from './types'
 
+/**
+ * Formats 4000000 to 4 000 000
+ * @param value
+ */
+export const formatWithSpaces = (value: number): string => {
+  return value
+    .toFixed(2)
+    .replace(/\B(?=(\d{3})+(?!\d))/g, ' ')
+}
+
 // Only return the objects with keys from the pick array
 export function pickActions<T>(actions: T, pick: string[]) {
   return Object.fromEntries(Object.entries(actions).filter(([k, v]) => pick.some(p => p === k))) as any as T
