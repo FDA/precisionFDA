@@ -76,6 +76,11 @@ export const Dropdown: FC<{
           {...attributes.popper}
           onMouseEnter={() => trigger === 'hover' && setShowPopper(true)}
           onMouseLeave={() => trigger === 'hover' && setShowPopper(false)}
+          onMouseUp={() => {
+            if (trigger === 'click') {
+              setTimeout(() => setShowPopper(false), 0) // Close after current call stack
+            }
+          }}
         >
           <DropdownMenu>
             <div ref={setArrowRef as any} style={styles.arrow} id="arrow" />

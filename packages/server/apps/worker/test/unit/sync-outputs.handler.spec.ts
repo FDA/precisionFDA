@@ -6,6 +6,9 @@ import { SyncOutputsHandler } from '../../src/jobs/sync-outputs.handler'
 import { db, create } from '@shared/test'
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { expect } from 'chai'
+import { UserCtx } from '@shared/types'
+import { Job as BullJob } from 'bull'
+import { CheckStatusJob } from '@shared/queue/task.input'
 
 describe('SyncOutputsHandler tests', () => {
   let em: EntityManager
@@ -17,41 +20,49 @@ describe('SyncOutputsHandler tests', () => {
   beforeEach(async () => {
     await db.dropData(database.connection())
     em = database.orm().em.fork()
-    user = create.userHelper.create(em as SqlEntityManager, {id: userId})
+    user = create.userHelper.create(em as SqlEntityManager, { id: userId })
     await em.flush()
   })
 
   it('Test execute output syncing', async () => {
     let jobDxIdParam
     let userIdParam
-    const app = create.appHelper.createRegular(em as SqlEntityManager, {user}, {dxid: 'app-1'})
-    const job = create.jobHelper.create(em as SqlEntityManager, {user, app}, {dxid: 'job-1'})
+    const app = create.appHelper.createRegular(em as SqlEntityManager, { user }, { dxid: 'app-1' })
+    const job = create.jobHelper.create(em as SqlEntityManager, { user, app }, { dxid: 'job-1' })
 
     const jobService = {
-      async syncOutputs(jobDxId: string, userId: number): Promise<void> {
+      async syncOutputs(jobDxId: string): Promise<void> {
         jobDxIdParam = jobDxId
         userIdParam = userId
-      }
+      },
     } as JobService
 
     handler = new SyncOutputsHandler(em, jobService)
-    await handler.handle({ data: { payload: { dxid: job.dxid }, user } } as any)
+    const userCtx: UserCtx = {
+      ...user,
+    } as unknown as UserCtx
+    await handler.handle({
+      data: { payload: { dxid: job.dxid }, user: userCtx },
+    } as BullJob<CheckStatusJob>)
 
     expect(jobDxIdParam).to.eq(job.dxid)
     expect(userIdParam).to.eq(user.id)
   })
 
   it('Test execute fail with unknown job dxid', async () => {
-    const jobService = {
-    } as JobService
+    const jobService = {} as JobService
 
     handler = new SyncOutputsHandler(em, jobService)
+    const userCtx: UserCtx = {
+      ...user,
+    } as unknown as UserCtx
     try {
-      await handler.handle({ data: { payload: { dxid: 'unknown' }, user } } as any)
+      await handler.handle({
+        data: { payload: { dxid: 'unknown' }, user: userCtx },
+      } as BullJob<CheckStatusJob>)
       expect.fail('Should have thrown error')
-    } catch (error: any) {
-      expect(error.message).to.eq('Job not found ({ dxid: \'unknown\' })')
+    } catch (error) {
+      expect(error.message).to.eq("Job not found ({ dxid: 'unknown' })")
     }
   })
-
 })

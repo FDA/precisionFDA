@@ -1,24 +1,18 @@
-//TODO - actually write tests
 import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
 import { database } from '@shared/database'
 import { Alert } from '@shared/domain/alert/entity/alert.entity'
 import { AlertService } from '@shared/domain/alert/services/alert.service'
-import { User } from '@shared/domain/user/user.entity'
 import { create, db } from '../../../src/test'
 import { expect } from 'chai'
 
 describe('AlertService tests', () => {
   let em: EntityManager<MySqlDriver>
-  let user: User
-  let userCtx: UserCtx
   let alertService: AlertService
 
   beforeEach(async () => {
     await db.dropData(database.connection())
     em = database.orm().em.fork({ useContext: true }) as EntityManager<MySqlDriver>
-    user = create.userHelper.createAdmin(em)
     await em.flush()
-    userCtx = { ...user, accessToken: 'foo' }
     alertService = new AlertService(em)
   })
 

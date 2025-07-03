@@ -1,11 +1,4 @@
-import {
-  Collection,
-  Entity,
-  EntityRepositoryType,
-  OneToMany,
-  PrimaryKey,
-  Property,
-} from '@mikro-orm/core'
+import { Collection, Entity, OneToMany, PrimaryKey, Property } from '@mikro-orm/core'
 import { Tagging } from '@shared/domain/tagging/tagging.entity'
 import { TagRepository } from './tag.repository'
 
@@ -24,7 +17,5 @@ export class Tag {
     entity: () => Tagging,
     mappedBy: (t) => t.tag,
   })
-  taggings = new Collection<Tagging>(this);
-
-  [EntityRepositoryType]?: TagRepository
+  taggings = new Collection<Tagging>(this)
 }

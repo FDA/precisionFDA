@@ -28,10 +28,10 @@ describe('Folder service tests', () => {
     const folderName = 'folder1'
 
     const folder = await folderService.createFolder(folderName, STATIC_SCOPE.PRIVATE, userId)
-    expect(folder).to.be.not.null
+    expect(folder).to.be.not.null()
 
     const loadedFolder = await em.getRepository(Folder).findOneOrFail({ id: folder.id })
-    expect(loadedFolder).to.be.not.null
+    expect(loadedFolder).to.be.not.null()
     expect(loadedFolder.name).to.be.equal(folderName)
 
     const folderEvents = await em.getRepository(Event).find({})
@@ -56,7 +56,7 @@ describe('Folder service tests', () => {
       { type: 'user', value: user },
       parentFolder.id,
     )
-    expect(folder).to.be.not.null
+    expect(folder).to.be.not.null()
 
     const loadedFolder = await em.getRepository(Folder).findOneOrFail({ id: folder.id })
     expect(loadedFolder.name).to.be.equal(folderName)
@@ -87,7 +87,7 @@ describe('Folder service tests', () => {
       { type: 'user', value: user },
       parentFolder.id,
     )
-    expect(folder).to.be.not.null
+    expect(folder).to.be.not.null()
 
     const loadedFolder = await em
       .getRepository(Folder)
@@ -119,7 +119,7 @@ describe('Folder service tests', () => {
     expect(loadedFolders.length).to.be.equal(3)
 
     const folder1 = loadedFolders.find((f) => f.name === 'folder1')
-    expect(folder1?.parentFolder).to.be.null
+    expect(folder1?.parentFolder).to.be.undefined()
 
     const folder2 = loadedFolders.find((f) => f.name === 'folder2')
     expect(folder2?.parentFolder?.id).to.be.equal(folder1?.id)
@@ -257,8 +257,8 @@ describe('Folder service tests', () => {
 
     expect(loadedFolders.length).to.be.equal(2)
     const user1Folder = loadedFolders.find((f) => f.user.id === userId)
-    expect(user1Folder).to.be.not.null
+    expect(user1Folder).to.be.not.null()
     const user2Folder = loadedFolders.find((f) => f.user.id === userId)
-    expect(user2Folder).to.be.not.null
+    expect(user2Folder).to.be.not.null()
   })
 })

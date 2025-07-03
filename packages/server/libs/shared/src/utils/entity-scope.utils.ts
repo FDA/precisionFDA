@@ -18,4 +18,8 @@ export class EntityScopeUtils {
   static getSpaceIdFromScope(scope: SpaceScope): number {
     return Number(scope.split('-')[1])
   }
+
+  static getScopeFromSpaceId(spaceId: number): SpaceScope {
+    return `space-${spaceId}` as SpaceScope
+  }
 }

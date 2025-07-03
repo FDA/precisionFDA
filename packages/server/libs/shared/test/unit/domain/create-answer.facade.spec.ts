@@ -74,9 +74,9 @@ describe('CreateAnswerFacade', () => {
     createAnswerStub.returns(newAnswer)
     const result = await createAnswerFacade.createAnswer(dto)
 
-    expect(createAnswerStub.calledOnce).to.be.true
-    expect(createAttachmentsStub.calledOnce).to.be.true
-    expect(createNewReplyNotificationTaskStub.calledOnce).to.be.true
+    expect(createAnswerStub.calledOnce).to.be.true()
+    expect(createAttachmentsStub.calledOnce).to.be.true()
+    expect(createNewReplyNotificationTaskStub.calledOnce).to.be.true()
     expect(createAnswerStub.firstCall.args[0]).to.deep.equal(dto)
     expect(createAttachmentsStub.firstCall.args[0]).to.equal(newAnswer.noteId)
     expect(createAttachmentsStub.firstCall.args[1]).to.equal(dto.attachments)

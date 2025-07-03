@@ -6,7 +6,8 @@ import {
   Delete,
   Get,
   HttpCode,
-  Inject, Logger,
+  Inject,
+  Logger,
   Param,
   ParseIntPipe,
   Post,
@@ -28,6 +29,7 @@ import {
   newsPostRequestSchema,
 } from './news.schemas'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
+import { NewsRepository } from '@shared/domain/news-item/news-item.repository'
 
 interface NewsPositionReqBody {
   news_items: Record<number, number>
@@ -43,17 +45,21 @@ export class NewsController {
   constructor(
     private readonly user: UserContext,
     @Inject(DEPRECATED_SQL_ENTITY_MANAGER) private readonly em: SqlEntityManager,
+    private readonly newsRepo: NewsRepository,
   ) {}
 
   @Get()
-  async listNews(@Query(new ZodPipe(newsListParamsSchema)) query: NewsListReqBody) {
+  async listNews(@Query(new ZodPipe(newsListParamsSchema)) query: NewsListReqBody): Promise<{
+    news_items: NewsItem[]
+    meta: {}
+  }> {
     const page = query?.page ? parseInt(query?.page, 10) : 1
     const limit = query.limit ? parseInt(query.limit, 10) : DEFAULT_PAGE_SIZE
     const year = query?.year ? parseInt(query?.year, 10) : undefined
     const type = query?.type
     const orderBy = query?.orderBy ? { [query.orderBy]: 'DESC' } : {}
 
-    return await this.em.getRepository(NewsItem).findPaginated(
+    return await this.newsRepo.findPaginated(
       {
         page,
         limit,
@@ -69,7 +75,9 @@ export class NewsController {
 
   @UseGuards(SiteAdminGuard)
   @Get('/all')
-  async getAllNews(@Query(new ZodPipe(newsListParamsSchema)) query: NewsListReqBody) {
+  async getAllNews(
+    @Query(new ZodPipe(newsListParamsSchema)) query: NewsListReqBody,
+  ): Promise<NewsItem[]> {
     const { type } = query
 
     let whereType = {}
@@ -82,7 +90,7 @@ export class NewsController {
   }
 
   @Get('/years')
-  async listYears() {
+  async listYears(): Promise<number[]> {
     //TODO: refactor logic into service
     const allYears: { year: number }[] = await this.em.execute(
       'SELECT DISTINCT YEAR(created_at) as year FROM news_items ORDER BY year DESC',
@@ -91,14 +99,14 @@ export class NewsController {
   }
 
   @Get('/:id')
-  async getNews(@Param('id', ParseIntPipe) id: number) {
+  async getNews(@Param('id', ParseIntPipe) id: number): Promise<NewsItem> {
     return await this.em.getRepository(NewsItem).findOne({ id })
   }
 
   @UseGuards(SiteAdminGuard)
   @HttpCode(204)
   @Delete('/:id')
-  async deleteNews(@Param('id', ParseIntPipe) id: number) {
+  async deleteNews(@Param('id', ParseIntPipe) id: number): Promise<void> {
     const newsItem = this.em.getReference(NewsItem, id)
     this.logger.log(`Deleting news item with id: ${id}, title: ${newsItem.title}`)
     await this.em.remove(newsItem).flush()
@@ -107,7 +115,9 @@ export class NewsController {
   @UseGuards(SiteAdminGuard)
   @HttpCode(201)
   @Post()
-  async createNews(@Body(new ZodPipe(newsPostRequestSchema)) body: NewsPostReqBody) {
+  async createNews(
+    @Body(new ZodPipe(newsPostRequestSchema)) body: NewsPostReqBody,
+  ): Promise<NewsItem> {
     const userRepo = this.em.getRepository(User)
     const user = await userRepo.findOne({ id: this.user?.id })
     const newNewsItem = wrap(new NewsItem(user!)).assign(body)
@@ -122,7 +132,7 @@ export class NewsController {
   async updateNews(
     @Param('id', ParseIntPipe) id: number,
     @Body(new ZodPipe(newsPostRequestSchema)) body: NewsPostReqBody,
-  ) {
+  ): Promise<void> {
     const existing = await this.em.findOneOrFail(NewsItem, id)
     const to_save = wrap(existing).assign(body, { mergeObjectProperties: true })
     await this.em.persistAndFlush(to_save)
@@ -131,7 +141,7 @@ export class NewsController {
   @UseGuards(SiteAdminGuard)
   @HttpCode(201)
   @Post('/positions')
-  async createPositions(@Body() body: NewsPositionReqBody) {
+  async createPositions(@Body() body: NewsPositionReqBody): Promise<void> {
     const { news_items } = body
     const em = this.em.fork()
 
@@ -147,7 +157,7 @@ export class NewsController {
 
       await em.flush()
       await em.commit()
-    } catch (e) {
+    } catch {
       await em.rollback()
       throw new InvalidStateError()
     }

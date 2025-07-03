@@ -6,8 +6,8 @@ import { Organization } from '@shared/domain/org/org.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { expect } from 'chai'
 import { Expert } from '@shared/domain/expert/expert.entity'
-import { ObjectIdInputDTO } from '@shared/domain/email/email.helper'
 import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
+import { ObjectIdInputDTO } from '@shared/domain/email/dto/object-id.dto'
 
 describe('ExpertAddedHandler', () => {
   const EXPERT_ID = 34
@@ -52,7 +52,7 @@ describe('ExpertAddedHandler', () => {
       const handler = getHandler()
       await handler.sendEmail(input)
 
-      expect(emailClientSendEmailStub.calledOnce).to.be.true
+      expect(emailClientSendEmailStub.calledOnce).to.be.true()
       expect(emailClientSendEmailStub.firstCall.args[0].emailType).to.eq(EMAIL_TYPES.expertAdded)
       expect(emailClientSendEmailStub.firstCall.args[0].to).to.deep.eq(user.email)
       expect(emailClientSendEmailStub.firstCall.args[0].subject).to.eq(

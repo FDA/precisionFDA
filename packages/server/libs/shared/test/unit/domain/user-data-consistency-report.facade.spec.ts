@@ -146,8 +146,8 @@ describe('UserDataConsistencyReportFacade', () => {
       ['inviteAdminUserToOrg', ['org-dxid']],
     ] as InconsistentFix[]
     await getInstance().fixInconsistentData(inconsistentFixes)
-    expect(correctSpaceBillToStub.calledTwice).to.be.true
-    expect(inviteAdminUserToOrgStub.calledOnce).to.be.true
+    expect(correctSpaceBillToStub.calledTwice).to.be.true()
+    expect(inviteAdminUserToOrgStub.calledOnce).to.be.true()
   })
 
   function getInstance() {

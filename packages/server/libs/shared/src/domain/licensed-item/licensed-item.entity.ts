@@ -1,4 +1,4 @@
-import { Entity, EntityRepositoryType, Ref, ManyToOne, Property, Reference } from '@mikro-orm/core'
+import { Entity, Ref, ManyToOne, Property, Reference } from '@mikro-orm/core'
 import { License } from '@shared/domain/license/license.entity'
 import { BaseEntity } from '../../database/base.entity'
 import { LicensedItemRepository } from './licensed-item.repository'
@@ -12,9 +12,7 @@ export class LicensedItem extends BaseEntity {
   licenseableId: number // Node
 
   @Property()
-  licenseableType: string;
-
-  [EntityRepositoryType]?: LicensedItemRepository
+  licenseableType: string
 
   constructor(license: License, licenseableId: number) {
     super()

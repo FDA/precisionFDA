@@ -5,7 +5,6 @@ import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { STATIC_SCOPE } from '@shared/enums'
 import { SCOPE } from '@shared/types/common'
 import { FILE_STATE_DX } from './user-file.types'
-import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
 import { AccessControlRepository } from '@shared/repository/access-control.repository'
 import { User } from '@shared/domain/user/user.entity'
 
@@ -18,7 +17,11 @@ type FindByName = {
 
 export class UserFileRepository extends AccessControlRepository<UserFile> {
   protected async getAccessibleWhere(): Promise<FilterQuery<UserFile>> {
-    const user = await this.em.findOneOrFail(User, { id: this.user.id })
+    const user = await this.em.findOne(User, { id: this.user.id })
+
+    if (!user) {
+      return null
+    }
     const accessibleSpaces = await user.accessibleSpaces()
     const spaceScopes = accessibleSpaces.map((space) => space.scope)
 
@@ -34,7 +37,11 @@ export class UserFileRepository extends AccessControlRepository<UserFile> {
   }
 
   protected async getEditableWhere(): Promise<FilterQuery<UserFile>> {
-    const user = await this.em.findOneOrFail(User, { id: this.user.id })
+    const user = await this.em.findOne(User, { id: this.user.id })
+
+    if (!user) {
+      return null
+    }
     const editableSpaces = await user.editableSpaces()
     const spaceScopes = editableSpaces.map((space) => space.scope)
 
