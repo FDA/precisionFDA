@@ -1,9 +1,15 @@
 import React from 'react'
 import styled, { css } from 'styled-components'
 import { Loader } from './Loader'
-import { colors, theme } from '../styles/theme'
+import { colors } from '../styles/theme'
 import { CloudResourcesResponse, useCloudResourcesQuery } from '../hooks/useCloudResourcesCondition'
 import { ModalHeaderTop, ModalNext } from '../features/modal/ModalNext'
+
+const formatWithSpaces = (value: number): string => {
+  return value
+    .toFixed(2)
+    .replace(/\B(?=(\d{3})+(?!\d))/g, ' ')
+}
 
 type Props = {
   isShown: boolean
@@ -106,7 +112,7 @@ const CloudUsageReport = ({ stats }: CloudUsageReportProps) => {
             <StyledBodyCell $bold={row.bold} $textAlign='right' $bgColor={
               index % 2 === 0 ? colors.borderDefault : colors.backgroundLightGray
             }>
-              {`$${row.usage.toFixed(2)}`}
+              {`$${formatWithSpaces(row.usage)}`}
             </StyledBodyCell>
           </StyledTr>
         ))}
