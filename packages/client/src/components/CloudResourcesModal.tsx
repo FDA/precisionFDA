@@ -4,7 +4,7 @@ import { Loader } from './Loader'
 import { colors } from '../styles/theme'
 import { CloudResourcesResponse, useCloudResourcesQuery } from '../hooks/useCloudResourcesCondition'
 import { ModalHeaderTop, ModalNext } from '../features/modal/ModalNext'
-import { formatWithSpaces } from '../features/home/utils'
+import { formatNumberUS } from '../features/home/utils'
 
 type Props = {
   isShown: boolean
@@ -107,7 +107,7 @@ const CloudUsageReport = ({ stats }: CloudUsageReportProps) => {
             <StyledBodyCell $bold={row.bold} $textAlign='right' $bgColor={
               index % 2 === 0 ? colors.borderDefault : colors.backgroundLightGray
             }>
-              {`$${formatWithSpaces(row.usage)}`}
+              {`$${formatNumberUS(row.usage)}`}
             </StyledBodyCell>
           </StyledTr>
         ))}

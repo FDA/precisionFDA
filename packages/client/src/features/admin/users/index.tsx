@@ -17,7 +17,7 @@ import { IUser } from '../../../types/user'
 import { getSelectedObjectsFromIndexes, toArrayFromObject } from '../../../utils/object'
 import { IFilter, MetaV2 } from '../../home/types'
 import { useList } from '../../home/useList'
-import { formatWithSpaces, Params, prepareListFetchV2 } from '../../home/utils'
+import { formatNumberUS, Params, prepareListFetchV2 } from '../../home/utils'
 import { AdminSectionBreadcrumbDivider, AdminSectionBreadcrumbs, AdminStyledPageTable, Title, Topbox, TopLeft } from '../styles'
 import { UsersListActionRow } from './ListPageActionRow'
 import { User } from './types'
@@ -116,7 +116,7 @@ export const getAdminUserColumns = (): ColumnDef<User>[] => [
     enableColumnFilter: false,
     cell: props => (
       <StyledLinkCell data-turbolinks="false" href={`/users/${props.row.original.dxuser}`}>
-        {`$${formatWithSpaces(props.row.original.cloudResourceSettings.total_limit)}`}
+        {`$${formatNumberUS(props.row.original.cloudResourceSettings.total_limit)}`}
       </StyledLinkCell>
     ),
   },
@@ -128,7 +128,7 @@ export const getAdminUserColumns = (): ColumnDef<User>[] => [
     size: 300,
     cell: c => (
       <StyledLinkCell data-turbolinks="false" href={`/users/${c.row.original.dxuser}`}>
-        {`$${formatWithSpaces(c.row.original.cloudResourceSettings.job_limit)}`}
+        {`$${formatNumberUS(c.row.original.cloudResourceSettings.job_limit)}`}
       </StyledLinkCell>
     ),
   },
