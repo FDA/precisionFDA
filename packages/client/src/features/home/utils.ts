@@ -3,10 +3,11 @@ import { cleanObject } from '../../utils/object'
 import { HomeScope, IFilter, ServerScope } from './types'
 
 /**
- * Formats 4000000 to 4 000 000
- * @param value
+ * Formats numbers using US locale, e.g., 4000000 -> "4,000,000.00"
+ * @param value - The number to format
+ * @returns Formatted string with commas as thousand separators and two decimal places
  */
-export const formatWithSpaces = (value: number): string => {
+export const formatNumberUS = (value: number): string => {
   return new Intl.NumberFormat('en-US', {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
