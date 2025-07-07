@@ -54,6 +54,7 @@ import { USER_STATE, User } from '../domain/user/user.entity'
 import { STATIC_SCOPE } from '../enums'
 import { TASK_TYPE } from '../queue/task.input'
 import type { AnyObject, UserCtx } from '../types'
+import { SyncFilesStateService } from '@shared/domain/user-file/service/sync-files-state.service'
 
 const chance = new Chance()
 
@@ -750,9 +751,9 @@ const bullQueue = {
 
 const bullQueueRepeatable = {
   syncFilesState: (dxuser: string) => ({
-    key: `__default__:${SyncFilesStateOperation.getBullJobId(dxuser)}:::*/2 * * * *`,
+    key: `__default__:${SyncFilesStateService.getBullJobId(dxuser)}:::*/2 * * * *`,
     name: '__default__',
-    id: SyncFilesStateOperation.getBullJobId(dxuser),
+    id: SyncFilesStateService.getBullJobId(dxuser),
     endDate: null,
     tz: null,
     cron: '*/2 * * * *',

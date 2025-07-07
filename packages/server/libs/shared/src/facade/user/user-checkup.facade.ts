@@ -15,6 +15,7 @@ import { isJobOrphaned } from '@shared/queue/queue.utils'
 import { UserOpsCtx, WorkerOpsCtx } from '@shared/types'
 import { Job } from 'bull'
 import { UserRepository } from '@shared/domain/user/user.repository'
+import { SyncFilesStateService } from '@shared/domain/user-file/service/sync-files-state.service'
 
 // Check jobs for a given user, to be run when user logs in to clean up
 // old states that are stuck because sync jobs are missing.
@@ -100,7 +101,7 @@ export class UserCheckupFacade {
   }
 
   private async recreateFilesStateStatusSyncIfMissing(): Promise<void> {
-    const bullJobId = SyncFilesStateOperation.getBullJobId(this.user.dxuser)
+    const bullJobId = SyncFilesStateService.getBullJobId(this.user.dxuser)
     const bullJob = await findRepeatable(bullJobId)
     if (!bullJob) {
       this.logger.warn(
