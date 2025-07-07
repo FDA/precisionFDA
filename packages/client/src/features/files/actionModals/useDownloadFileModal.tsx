@@ -70,6 +70,7 @@ const DownloadFiles = ({
           path: <StyledPath>{s.fsPath}</StyledPath>,
           action: (
             <StyledAction
+              data-variant='primary'
               key={`${s.id}-action`}
               onClick={() => handleDownloadClick(s.downloadURL)}
             >
@@ -114,7 +115,7 @@ export const useDownloadFileModal = (selected: IFile[], scope: ServerScope) => {
             Cancel
           </Button>
 
-          <Button data-variant='primary' onClick={() => {
+          <Button onClick={() => {
             handleDownloadClick(downloadUrl(scope))
             setShowModal(false)
             toast.success('Download all has been started')
