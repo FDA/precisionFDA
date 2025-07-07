@@ -1,6 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
 import React, { useRef } from 'react'
-import { Link } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import styled from 'styled-components'
 import { InfoCircleIcon } from '../../components/icons/InfoCircleIcon'
@@ -110,7 +109,9 @@ const GenerateKey = ({ handleClose }: { handleClose: () => void }) => {
         <Button data-variant="primary" onClick={copyToClipboard}>
           Copy to Clipboard
         </Button>
-        <Button data-variant="primary" onClick={handleClose}>Close</Button>
+        <Button data-variant="primary" onClick={handleClose}>
+          Close
+        </Button>
       </StyledButtonRow>
     </>
   )
@@ -121,16 +122,8 @@ export const useGenerateKeyModal = () => {
   const handleClose = () => setShowModal(false)
 
   const modalComp = (
-    <ModalNext
-      id="generate-key"
-      data-testid="generate-key"
-      isShown={isShown}
-      hide={() => setShowModal(false)}
-    >
-      <ModalHeaderTop
-        headerText="CLI Authentication Key"
-        hide={() => setShowModal(false)}
-      />
+    <ModalNext id="generate-key" data-testid="generate-key" isShown={isShown} hide={() => setShowModal(false)}>
+      <ModalHeaderTop headerText="CLI Authentication Key" hide={() => setShowModal(false)} />
       <GenerateKey handleClose={handleClose} />
     </ModalNext>
   )
