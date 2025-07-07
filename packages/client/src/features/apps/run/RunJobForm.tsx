@@ -1,7 +1,7 @@
 import { yupResolver } from '@hookform/resolvers/yup'
 import React, { useState } from 'react'
 import { Controller, FieldErrors, useFieldArray, useForm } from 'react-hook-form'
-import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import { Button, TransparentButton } from '../../../components/Button'
 import { FieldGroup } from '../../../components/form/FieldGroup'
@@ -144,9 +144,9 @@ const importFormData = async (
       const allFileUids = Array.from(new Set(importedData.inputs.flatMap(item => collectFileUidsFromBatchInput(item))))
       setTotalFilesToValidate(allFileUids.length)
       for (const fileUid of allFileUids) {
-        await validateFile(fileUid)
+        const valid = await validateFile(fileUid)
         setTotalFilesValidated(prevCount => prevCount + 1)
-        validationCache[fileUid] = true
+        validationCache[fileUid] = valid
       }
 
       setValidatedFilesCache(validationCache)
