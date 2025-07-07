@@ -20,6 +20,7 @@ import {
 } from '@shared/queue/task.input'
 import { UserCtx } from '@shared/types'
 import { JobOptions, Queue } from 'bull'
+import { SyncFilesStateService } from '@shared/domain/user-file/service/sync-files-state.service'
 
 @Injectable()
 export class MainQueueJobProducer extends QueueJobProducer {
@@ -41,7 +42,7 @@ export class MainQueueJobProducer extends QueueJobProducer {
 
     const options: JobOptions = {
       // There should only be one sync files state task per user
-      jobId: SyncFilesStateOperation.getBullJobId(user.dxuser),
+      jobId: SyncFilesStateService.getBullJobId(user.dxuser),
       repeat: { cron: config.workerJobs.syncFiles.repeatPattern },
     }
 
