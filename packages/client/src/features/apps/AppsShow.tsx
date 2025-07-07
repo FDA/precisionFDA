@@ -1,7 +1,6 @@
 import { omit, pick } from 'ramda'
 import React, { useEffect } from 'react'
 import { Link, Navigate, Route, Routes, useLocation, useParams } from 'react-router-dom'
-import styled from 'styled-components'
 import { CloudResourcesHeaderButton } from '../../components/CloudResourcesHeaderButton'
 import Dropdown from '../../components/Dropdown'
 import { RevisionDropdown } from '../../components/Dropdown/RevisionDropdown'
@@ -10,7 +9,6 @@ import { Markdown } from '../../components/Markdown'
 import { StyledTab, StyledTabList, StyledTabPanel } from '../../components/Tabs'
 import { StyledPropertyItem, StyledPropertyKey, StyledTagItem, StyledTags } from '../../components/Tags'
 import { CubeIcon } from '../../components/icons/CubeIcon'
-import { StyledMarkdown } from '../../styles/commonStyles'
 import { IChallenge } from '../../types/challenge'
 import { getSpaceIdFromScope } from '../../utils'
 import { getBackPathNext } from '../../utils/getBackPath'
@@ -38,12 +36,8 @@ import { SpecTab } from './SpecTab'
 import { IApp } from './apps.types'
 import { useAppSelectionActions } from './useAppSelectionActions'
 import { useFetchAppQuery } from './useFetchAppQuery'
+import { StyledMarkdownAppShow } from './form/styles'
 
-const StyledMarkdownAppShow = styled(StyledMarkdown)`
-  padding-left: 16px;
-  padding-right: 16px;
-  max-width: 700px;
-`
 
 const renderOptions = (app: IApp, meta: { release: string }, homeScope?: HomeScope) => {
   const spaceId = getSpaceIdFromScope(app.scope)
