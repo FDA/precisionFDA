@@ -7,7 +7,6 @@ import { DbClusterService } from '@shared/domain/db-cluster/service/db-cluster.s
 import { DiscussionNotificationService } from '@shared/domain/discussion/services/discussion-notification.service'
 import { SpaceReportService } from '@shared/domain/space-report/service/space-report.service'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
-import { SyncFilesStateOperation } from '@shared/domain/user-file/ops/sync-files-state'
 import { UserFileService } from '@shared/domain/user-file/service/user-file.service'
 import { FOLLOW_UP_ACTION } from '@shared/domain/user-file/user-file.input'
 import { UserProvisionFacade } from '@shared/facade/user/user-provision.facade'
@@ -18,6 +17,7 @@ import { FollowUpDecider } from '../../domain/user-file/follow-up-decider'
 import { jobStatusHandler } from '../../jobs/job-status.handler'
 import { ProcessWithContext } from '../decorator/process-with-context'
 import { BaseQueueProcessor } from './base-queue.processor'
+import { SyncFilesStateFacade } from '@shared/facade/sync-file-state/sync-files-state.facade'
 
 @Processor(config.workerJobs.queues.default.name)
 export class MainQueueProcessor extends BaseQueueProcessor {
@@ -31,6 +31,7 @@ export class MainQueueProcessor extends BaseQueueProcessor {
     private readonly followUpDecider: FollowUpDecider,
     private readonly spaceReportService: SpaceReportService,
     private readonly dbClusterService: DbClusterService,
+    private readonly syncFilesStateFacade: SyncFilesStateFacade,
     private readonly userProvisionFacade: UserProvisionFacade,
   ) {
     super()
@@ -38,9 +39,7 @@ export class MainQueueProcessor extends BaseQueueProcessor {
 
   @ProcessWithContext(TASK_TYPE.SYNC_FILES_STATE)
   async syncFilesState(job: Job): Promise<void> {
-    await this.handleUserTask(job, async (ctx, input) => {
-      return await new SyncFilesStateOperation(ctx).execute(input)
-    })
+    await this.syncFilesStateFacade.syncFiles(job)
   }
 
   @ProcessWithContext(TASK_TYPE.SYNC_JOB_STATUS)

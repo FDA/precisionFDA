@@ -12,7 +12,7 @@ import { ArchiveEntry } from '@shared/domain/user-file/archive-entry.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { AssetRepository } from './asset.repository'
 import { Node } from './node.entity'
-import { FILE_STATE_DX, FILE_STI_TYPE, IFileOrAsset, ITrackable } from './user-file.types'
+import { FILE_STATE_DX, FILE_STI_TYPE, ITrackable } from './user-file.types'
 import { DxId } from '@shared/domain/entity/domain/dxid'
 import { Tagging } from '@shared/domain/tagging/tagging.entity'
 
@@ -24,7 +24,7 @@ import { Tagging } from '@shared/domain/tagging/tagging.entity'
   }),
 })
 @Entity({ tableName: 'nodes', repository: () => AssetRepository })
-class Asset extends Node implements IFileOrAsset, ITrackable {
+class Asset extends Node implements ITrackable {
   @Property()
   dxid: DxId<'file'>
 

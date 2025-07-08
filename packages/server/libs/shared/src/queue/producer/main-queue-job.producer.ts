@@ -5,7 +5,6 @@ import { SyncDbClusterOperation } from '@shared/domain/db-cluster/ops/synchroniz
 import { NotifyType } from '@shared/domain/discussion/dto/notify.type'
 import { SyncJobOperation } from '@shared/domain/job/ops/synchronize'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
-import { SyncFilesStateOperation } from '@shared/domain/user-file/ops/sync-files-state'
 import {
   FileUidInput,
   SyncFileJobInput,
@@ -20,7 +19,7 @@ import {
 } from '@shared/queue/task.input'
 import { UserCtx } from '@shared/types'
 import { JobOptions, Queue } from 'bull'
-import { SyncFilesStateService } from '@shared/domain/user-file/service/sync-files-state.service'
+import { SyncFilesStateFacade } from '@shared/facade/sync-file-state/sync-files-state.facade'
 
 @Injectable()
 export class MainQueueJobProducer extends QueueJobProducer {
@@ -42,7 +41,7 @@ export class MainQueueJobProducer extends QueueJobProducer {
 
     const options: JobOptions = {
       // There should only be one sync files state task per user
-      jobId: SyncFilesStateService.getBullJobId(user.dxuser),
+      jobId: SyncFilesStateFacade.getBullJobId(user.dxuser),
       repeat: { cron: config.workerJobs.syncFiles.repeatPattern },
     }
 

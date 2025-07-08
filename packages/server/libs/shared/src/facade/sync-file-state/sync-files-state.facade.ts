@@ -2,36 +2,36 @@ import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { Injectable, Logger } from '@nestjs/common'
 import { PlatformClient } from '@shared/platform-client'
 import { TASK_TYPE } from '@shared/queue/task.input'
-import { FILE_STATE_DX, IFileOrAsset } from '@shared/domain/user-file/user-file.types'
+import { FILE_STATE_DX, FileOrAsset } from '@shared/domain/user-file/user-file.types'
 import { User } from '@shared/domain/user/user.entity'
 import { FileStatesParams } from '@shared/platform-client/platform-client.params'
 import { difference, groupBy } from 'ramda'
 import {
   findFileOrAssetsWithDxid,
-  findFileOrAssetWithUid, findUnclosedFilesOrAssets,
-  getNodePath,
+  findFileOrAssetWithUid,
+  findUnclosedFilesOrAssets,
 } from '@shared/domain/user-file/user-file.helper'
-import { UserFile } from '@shared/domain/user-file/user-file.entity'
-import { createFileEvent, EVENT_TYPES } from '@shared/domain/event/event.helper'
 import { Challenge } from '@shared/domain/challenge/challenge.entity'
 import { ChallengeRepository } from '@shared/domain/challenge/challenge.repository'
-import {
-  ChallengeUpdateCardImageUrlOperation
-} from '@shared/domain/challenge/ops/update-challenge-card-image-url'
+import { ChallengeUpdateCardImageUrlOperation } from '@shared/domain/challenge/ops/update-challenge-card-image-url'
 import { ClientRequestError } from '@shared/errors'
+import { Job } from 'bull'
 import { removeRepeatable } from '@shared/queue'
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { UserOpsCtx } from '@shared/types'
+import { RemoveNodesFacade } from '@shared/facade/node-remove/remove-nodes.facade'
 
 @Injectable()
-export class SyncFilesStateService {
+export class SyncFilesStateFacade {
   @ServiceLogger()
   private readonly logger: Logger
 
   constructor(
     private readonly em: SqlEntityManager,
-    private readonly platformClient: PlatformClient,
     private readonly user: UserContext,
+    private readonly platformClient: PlatformClient,
+    private readonly removeNodesFacade: RemoveNodesFacade,
   ) {}
 
   static getBullJobId(userDxid: string): string {
@@ -39,8 +39,68 @@ export class SyncFilesStateService {
     return `${TASK_TYPE.SYNC_FILES_STATE}.${userDxid}`
   }
 
-  private async syncFilesInProject(projectDxid: string, files: IFileOrAsset[], user: User): Promise<void> {
-    const em = this.em
+  async syncFiles(job: Job): Promise<void> {
+    await this.user.loadEntity()
+    const dxuser = this.user.dxuser
+
+    const user = await this.em.getRepository(User).findOne({ dxuser })
+    if (!user) {
+      this.logger.error(`User ${dxuser} not found`)
+      return
+    }
+
+    let openFiles = await findUnclosedFilesOrAssets(this.em, user.id)
+
+    this.logger.log(
+      {
+        dxuser,
+        numberOfOpenFiles: openFiles.length,
+        openFiles: openFiles.map((f) => f.dxid),
+      },
+      `Starting files state sync for ${dxuser}`,
+    )
+
+    try {
+      // Group files based on project dxid, this is necessary to provide project hint to the
+      // platform API call, which is VERY slow if this is not present
+      const openFilesByProject = groupBy((file: FileOrAsset) => file.project, openFiles)
+      for (const projectDxid in openFilesByProject) {
+        if (openFilesByProject.hasOwnProperty(projectDxid)) {
+          const openFilesInProject = openFilesByProject[projectDxid]
+          this.logger.log(
+            {
+              projectDxid,
+              openFiles: openFilesInProject.map((f) => ({
+                name: f.name,
+                dxid: f.dxid,
+                uid: f.uid,
+              })),
+            },
+            'Syncing files state in project',
+          )
+
+          await this.syncFilesInProject(projectDxid, openFilesInProject)
+        }
+      }
+    } catch (err) {
+      if (err instanceof ClientRequestError && err.props?.clientStatusCode) {
+        if (err.props.clientStatusCode === 401) {
+          // Unauthorized. Expected scenario is that the user token has expired
+          // Removing the sync task will allow a new sync task to be recreated
+          // when user next logs in via UserCheckupTask
+          this.logger.log({ error: err.props }, 'Received 401 from platform, removing sync task')
+          await removeRepeatable(job)
+        }
+      } else {
+        this.logger.log({ error: err }, 'Unhandled error from platform, will retry later')
+      }
+      return
+    }
+
+    await this.removeTaskIfNoMoreUnclosedFiles(job)
+  }
+
+  private async syncFilesInProject(projectDxid: string, files: FileOrAsset[]): Promise<void> {
     const fileDxids = files.map((x) => x.dxid)
 
     // This call can be particularly time-consuming, so log the times so we can later analyze
@@ -72,29 +132,7 @@ export class SyncFilesStateService {
       }
 
       for (const file of fileOrAssets) {
-        try {
-          const filePath = await getNodePath(this.em, file as UserFile)
-          const fileEvent = await createFileEvent(EVENT_TYPES.FILE_ABANDONED, file, filePath, user)
-          em.persist(fileEvent)
-          em.remove(file)
-          await em.flush()
-
-          this.logger.log(
-            {
-              dxid: file.dxid,
-              uid: file.uid,
-            },
-            'Removed abandoned file',
-          )
-        } catch (err) {
-          this.logger.log(
-            {
-              error: err,
-              dxid,
-            },
-            'Error removing abandoned file',
-          )
-        }
+        await this.removeNodesFacade.removeFile(file)
       }
     }
 
@@ -125,7 +163,12 @@ export class SyncFilesStateService {
               `File associated with challenge ${fileInfo.describe.state} for file with uid ${fileOrAsset.uid}`,
             )
             try {
-              await new ChallengeUpdateCardImageUrlOperation(this.ctx).execute(challenge.id)
+              const opsCtx: UserOpsCtx = {
+                log: this.logger,
+                user: this.user,
+                em: this.em,
+              }
+              await new ChallengeUpdateCardImageUrlOperation(opsCtx).execute(challenge.id)
             } catch (error) {
               this.logger.error(
                 { fileUid: fileOrAsset.uid, error },
@@ -141,74 +184,16 @@ export class SyncFilesStateService {
     await this.em.flush()
   }
 
-  // TODO rename
-  async run(): Promise<void> {
-    await this.user.loadEntity()
-    const dxuser = this.user.dxuser
-
-    const user = await this.em.getRepository(User).findOne({ dxuser })
-    if (!user) {
-      this.logger.error(`User ${dxuser} not found`)
-      return
-    }
-
-    let openFiles = await findUnclosedFilesOrAssets(this.em, user.id)
-
-    this.logger.log(
-      {
-        dxuser,
-        numberOfOpenFiles: openFiles.length,
-        openFiles: openFiles.map((f) => f.dxid),
-      },
-      `Starting files state sync for ${dxuser}`,
-    )
-
-    try {
-      // Group files based on project dxid, this is necessary to provide project hint to the
-      // platform API call, which is VERY slow if this is not present
-      const openFilesByProject = groupBy((file: IFileOrAsset) => file.project, openFiles)
-      for (const projectDxid in openFilesByProject) {
-        if (openFilesByProject.hasOwnProperty(projectDxid)) {
-          const openFilesInProject = openFilesByProject[projectDxid]
-          this.logger.log(
-            {
-              projectDxid,
-              openFiles: openFilesInProject.map((f) => ({
-                name: f.name,
-                dxid: f.dxid,
-                uid: f.uid,
-              })),
-            },
-            'Syncing files state in project',
-          )
-
-          await this.syncFilesInProject(projectDxid, openFilesInProject, user)
-        }
-      }
-    } catch (err) {
-      if (err instanceof ClientRequestError && err.props?.clientStatusCode) {
-        if (err.props.clientStatusCode === 401) {
-          // Unauthorized. Expected scenario is that the user token has expired
-          // Removing the sync task will allow a new sync task to be recreated
-          // when user next logs in via UserCheckupTask
-          this.logger.log({ error: err.props }, 'Received 401 from platform, removing sync task')
-          await removeRepeatable(this.ctx.job)
-        }
-      } else {
-        this.logger.log({ error: err }, 'Unhandled error from platform, will retry later')
-      }
-      return
-    }
-
+  private async removeTaskIfNoMoreUnclosedFiles(job: Job): Promise<void> {
     // If user has no more unclosed files, remove this task
-    openFiles = await findUnclosedFilesOrAssets(this.em, user.id)
+    const openFiles = await findUnclosedFilesOrAssets(this.em, this.user.id)
     if (openFiles.length === 0) {
       this.logger.log('Completed and all user files closed, removing repeatable job')
-      await removeRepeatable(this.ctx.job)
+      await removeRepeatable(job)
     } else {
       this.logger.log(
         {
-          dxuser: user.dxuser,
+          dxuser: this.user.dxuser,
           openFiles: openFiles.map((f) => ({
             name: f.name,
             dxid: f.dxid,
