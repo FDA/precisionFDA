@@ -13,10 +13,10 @@ import { Asset } from './asset.entity'
 import { AssetRepository } from './asset.repository'
 import { FolderRepository } from './folder.repository'
 import { UserFileRepository } from './user-file.repository'
-import { IFileOrAsset } from './user-file.types'
+import { FileOrAsset } from '@shared/domain/user-file/user-file.types'
 
 // Split folder path into a list of folder names
-const splitFolderPath = (pathStr: string) => pathStr.split('/').slice(1)
+const splitFolderPath = (pathStr: string): string[] => pathStr.split('/').slice(1)
 
 // Find the set of paths on dx platform that is not on local
 const getPathsToBuild = (remote: string[], local: string[]): string[] => difference(remote, local)
@@ -290,40 +290,40 @@ const filterNodesByUser = async (
 const findFileOrAssetWithUid = async (
   em: EntityManager,
   uid: Uid<'file'>,
-): Promise<IFileOrAsset | null> => {
+): Promise<FileOrAsset | null> => {
   const userFileRepo = em.getRepository(UserFile) as UserFileRepository
   const file = await userFileRepo.findFileWithUid(uid, ['user', 'challengeResources'])
   if (file) {
-    return file as IFileOrAsset
+    return file as FileOrAsset
   }
 
   const assetRepo = em.getRepository(Asset) as AssetRepository
-  return (await assetRepo.findAssetWithUid(uid)) as IFileOrAsset
+  return (await assetRepo.findAssetWithUid(uid)) as FileOrAsset
 }
 
 const findFileOrAssetsWithDxid = async (
   em: EntityManager,
   dxid: DxId<'file'>,
-): Promise<IFileOrAsset[]> => {
+): Promise<FileOrAsset[]> => {
   const userFileRepo = em.getRepository(UserFile) as UserFileRepository
   const res = await userFileRepo.findFilesWithDxid(dxid)
   if (res.length > 0) {
-    return res as IFileOrAsset[]
+    return res as FileOrAsset[]
   }
 
   const assetRepo = em.getRepository(Asset) as AssetRepository
-  return (await assetRepo.findAllAssetsWithDxid(dxid)) as IFileOrAsset[]
+  return (await assetRepo.findAllAssetsWithDxid(dxid)) as FileOrAsset[]
 }
 
 const findUnclosedFilesOrAssets = async (
   em: EntityManager,
   userId: number,
-): Promise<IFileOrAsset[]> => {
-  let results: IFileOrAsset[] = []
+): Promise<FileOrAsset[]> => {
+  let results: FileOrAsset[] = []
   const userFileRepo = em.getRepository(UserFile) as UserFileRepository
   const assetRepo = em.getRepository(Asset) as AssetRepository
-  results = results.concat((await userFileRepo.findUnclosedFiles(userId)) as IFileOrAsset[])
-  results = results.concat((await assetRepo.findUnclosedAssets(userId)) as IFileOrAsset[])
+  results = results.concat((await userFileRepo.findUnclosedFiles(userId)) as FileOrAsset[])
+  results = results.concat((await assetRepo.findUnclosedAssets(userId)) as FileOrAsset[])
   return results
 }
 

@@ -13,6 +13,7 @@ import { UserFileWorkerModule } from '../domain/user-file/user-file.worker.modul
 import { MainQueueProcessor } from './processor/main-queue.processor'
 import { MaintenanceQueueProcessor } from './processor/maintenance-queue.processor'
 import { DiscussionModule } from '@shared/domain/discussion/discussion.module'
+import { SyncFilesStateFacadeModule } from '@shared/facade/sync-file-state/sync-files-state-facade.module'
 @Module({
   imports: [
     QueueModule,
@@ -24,6 +25,7 @@ import { DiscussionModule } from '@shared/domain/discussion/discussion.module'
     DbClusterModule,
     UserModule,
     DebugModule,
+    SyncFilesStateFacadeModule,
     JobModule,
     DiscussionModule,
     UserFacadeModule,
