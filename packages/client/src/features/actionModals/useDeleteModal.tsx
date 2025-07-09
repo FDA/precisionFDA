@@ -8,11 +8,8 @@ import { ModalHeaderTop, ModalNext } from '../modal/ModalNext'
 import { ButtonRow, Footer, ModalScroll } from '../modal/styles'
 import { useModal } from '../modal/useModal'
 import { Button } from '../../components/Button'
-import { AxiosError } from 'axios'
 
-export function useDeleteModal<
-  T extends { id: string; name: string; location: string },
->({
+export function useDeleteModal<T extends { id: string; name: string; location: string }>({
   resource,
   selected,
   request,
@@ -28,7 +25,7 @@ export function useDeleteModal<
   const mutation = useMutation({
     mutationKey: ['delete-resource', resource],
     mutationFn: request,
-    onError: (error) => {
+    onError: error => {
       toast.error(error.response?.data.error.message)
     },
     onSuccess: (res: any) => {
@@ -50,18 +47,10 @@ export function useDeleteModal<
   }
 
   const modalComp = (
-    <ModalNext
-      id="modal-resource-delete"
-      data-test-id="modal-resource-delete"
-      isShown={isShown}
-      hide={() => setShowModal(false)}
-    >
+    <ModalNext id="modal-resource-delete" data-test-id="modal-resource-delete" isShown={isShown} hide={() => setShowModal(false)}>
       <ModalHeaderTop
         disableClose={false}
-        headerText={`Delete ${itemsCountString(
-          resource,
-          momoSelected.length,
-        )}?`}
+        headerText={`Delete ${itemsCountString(resource, momoSelected.length)}?`}
         hide={() => setShowModal(false)}
       />
       <ModalScroll>

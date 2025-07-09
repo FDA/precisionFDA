@@ -26,7 +26,6 @@ import { EmailQueueJobProducer } from '@shared/domain/email/producer/email-queue
 import { Queue } from 'bull'
 import * as queueDomain from '@shared/queue'
 import { stub } from 'sinon'
-import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { UserRepository } from '@shared/domain/user/user.repository'
 import { JobRepository } from '@shared/domain/job/job.repository'
 import { SpaceRepository } from '@shared/domain/space/space.repository'
@@ -34,6 +33,8 @@ import { SpaceMembershipRepository } from '@shared/domain/space-membership/space
 import { config } from '@shared/config'
 import { EmailService } from '@shared/domain/email/email.service'
 import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
+import { JobSynchronizationService } from '@shared/domain/job/services/job-synchronization.service'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
 
 describe('Job service tests', () => {
   let em: EntityManager<MySqlDriver>
@@ -43,6 +44,7 @@ describe('Job service tests', () => {
   let notificationService: NotificationService
   let folderService: FolderService
   let emailQueueJobProducer: EmailQueueJobProducer
+  let jobSynchronizationService: JobSynchronizationService
   let userRepo: UserRepository
   let jobRepo: JobRepository
   let spaceRepo: SpaceRepository
@@ -84,6 +86,7 @@ describe('Job service tests', () => {
     notificationService = new NotificationService(em, userCtx)
     folderService = new FolderService(em, userCtx)
     emailQueueJobProducer = new EmailQueueJobProducer(queue)
+    jobSynchronizationService = {} as unknown as JobSynchronizationService
     userRepo = {
       findOneOrFail: userRepoFindOneOrFailStub,
       findAdminUser: userRepoFindAdminUserStub,
@@ -639,6 +642,7 @@ describe('Job service tests', () => {
       notificationService,
       folderService,
       emailQueueJobProducer,
+      jobSynchronizationService,
       emailService,
       userRepo,
       jobRepo,

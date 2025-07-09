@@ -7,12 +7,14 @@ export const MainBanner = styled.div`
   --c-banner-base: white;
   --c-banner-base-2: #ddd;
 
-  ${({ theme }) => theme.colorMode === 'dark' && css`
-    border-bottom: 1px solid var(--c-layout-border);
-  `}
+  ${({ theme }) =>
+    theme.colorMode === 'dark' &&
+    css`
+      border-bottom: 1px solid var(--c-layout-border);
+    `}
 
   width: 100%;
-  background-color: rgb(22,19,14);
+  background-color: rgb(22, 19, 14);
   background-image: url(${navBackground});
   background-repeat: no-repeat;
   background-size: cover;
@@ -37,8 +39,7 @@ export const BannerTitle = styled.h1`
   font-size: 28px;
   font-weight: 600;
   color: var(--c-banner-base);
-  margin: auto 0;
-  margin-right: 16px;
+  margin: auto 16px auto 0;
 `
 
 export const BannerRight = styled.div`
@@ -67,6 +68,7 @@ export const BannerPickerItem = styled(Button)<{ $isActive?: boolean }>`
   border-radius: 0;
   border-bottom: 4px solid transparent;
   cursor: pointer;
+  min-width: auto;
 
   &:hover {
     background: transparent;
@@ -74,16 +76,16 @@ export const BannerPickerItem = styled(Button)<{ $isActive?: boolean }>`
     color: var(--c-banner-base);
   }
 
-  ${({ $isActive }) => (
-    $isActive && css`
+  ${({ $isActive }) =>
+    $isActive &&
+    css`
       color: var(--c-banner-highlight);
       border-bottom: 4px solid var(--c-banner-highlight);
 
       &:hover {
         color: var(--c-banner-highlight);
       }
-    `
-  )}
+    `}
 `
 
 export const BannerDescription = styled.span`

@@ -34,6 +34,7 @@ SecureHeaders::Configuration.default do |config|
       https://stagingdl.dnanex.us
       https://dl.dnanex.us
       https://api.dnanexus.com
+      https://www.recaptcha.net/recaptcha/
       data:
     ),
     default_src: %w(https: 'self'),
