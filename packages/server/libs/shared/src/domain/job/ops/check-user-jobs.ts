@@ -6,10 +6,10 @@ import type { Maybe, UserOpsCtx, UserCtx } from '../../../types'
 import { buildIsOverMaxDuration } from '../job.helper'
 import { isJobOrphaned } from '../../../queue/queue.utils'
 import { JobRepository } from '../job.repository'
-import { SyncJobOperation } from './synchronize'
+import { JobSynchronizationService } from '@shared/domain/job/services/job-synchronization.service'
 
 const recreateJobStatusSyncIfMissing = async (job: Job, user: UserCtx, log: any): Promise<void> => {
-  const bullJobId = SyncJobOperation.getBullJobId(job.dxid)
+  const bullJobId = JobSynchronizationService.getBullJobId(job.dxid)
   const bullJob = await findRepeatable(bullJobId)
   if (!bullJob) {
     log.warn({

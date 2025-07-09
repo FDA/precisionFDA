@@ -11,14 +11,19 @@ import { UserFileService } from '@shared/domain/user-file/service/user-file.serv
 import { FOLLOW_UP_ACTION } from '@shared/domain/user-file/user-file.input'
 import { UserProvisionFacade } from '@shared/facade/user/user-provision.facade'
 import { createRunFollowUpActionJobTask } from '@shared/queue'
-import { NotifyNewDiscussionJob, ProvisionNewUserJob, TASK_TYPE } from '@shared/queue/task.input'
+import {
+  CheckStatusJob,
+  NotifyNewDiscussionJob,
+  ProvisionNewUserJob,
+  TASK_TYPE,
+} from '@shared/queue/task.input'
 import { Job } from 'bull'
 import { FollowUpDecider } from '../../domain/user-file/follow-up-decider'
-import { jobStatusHandler } from '../../jobs/job-status.handler'
 import { ProcessWithContext } from '../decorator/process-with-context'
 import { BaseQueueProcessor } from './base-queue.processor'
 import { EmailService } from '@shared/domain/email/email.service'
 import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
+import { JobService } from '@shared/domain/job/job.service'
 
 @Processor(config.workerJobs.queues.default.name)
 export class MainQueueProcessor extends BaseQueueProcessor {
@@ -32,6 +37,7 @@ export class MainQueueProcessor extends BaseQueueProcessor {
     private readonly spaceReportService: SpaceReportService,
     private readonly dbClusterService: DbClusterService,
     private readonly emailService: EmailService,
+    private readonly jobService: JobService,
     private readonly userProvisionFacade: UserProvisionFacade,
   ) {
     super()
@@ -46,7 +52,8 @@ export class MainQueueProcessor extends BaseQueueProcessor {
 
   @ProcessWithContext(TASK_TYPE.SYNC_JOB_STATUS)
   async syncJobStatus(job: Job): Promise<void> {
-    await jobStatusHandler(job)
+    const data = job.data as CheckStatusJob
+    await this.jobService.synchronizeJob(data.payload)
   }
 
   @ProcessWithContext(TASK_TYPE.SYNC_DBCLUSTER_STATUS)

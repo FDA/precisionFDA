@@ -75,7 +75,7 @@ export const useOpenFileModal = (selectedFiles: IFile[]) => {
                 ),
                 path: <div>{s.fsPath}</div>,
                 action: (
-                  <StyledAction onClick={() => handleOpenClick(s)}>
+                  <StyledAction data-variant='primary' onClick={() => handleOpenClick(s)}>
                     <VerticalCenter>
                       <DownloadIcon />
                     </VerticalCenter>

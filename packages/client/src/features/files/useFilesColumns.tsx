@@ -173,7 +173,7 @@ export const useFilesColumns = ({
       filterFn: numberRangeFilterFn,
       meta: {
         filterElement: (column: Column<IFile>) => (
-          <NumberRangeFilter column={column} fromPlaceholder="Min(KB)" toPlaceholder="Max(KB)" />
+          <NumberRangeFilter column={column} fromPlaceholder="Min (KB)" toPlaceholder="Max (KB)" />
         ),
       },
     },
