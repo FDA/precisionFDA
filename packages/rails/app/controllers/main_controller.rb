@@ -434,8 +434,10 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
     @invitation = Invitation.new
 
     token = unsafe_params.dig("g-recaptcha-response-data", :registration)
+    user_ip = request.remote_ip
+    user_agent = request.user_agent
 
-    if verify_captcha_assessment(token, "registration")
+    if verify_captcha_assessment(token, "registration", user_ip, user_agent)
       @invitation = RequestAccessService.create_request_for_access(invitation_params)
     else
       render "_partials/_error", status: :unprocessable_entity, locals: { message: "Invalid captcha verification. If this issue persists, please contact precisionFDA support." }

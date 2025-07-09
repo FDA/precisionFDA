@@ -1,5 +1,4 @@
 import { Logger } from '@nestjs/common'
-import { SyncJobOperation } from '@shared/domain/job/ops/synchronize'
 import { getEmailsQueue, getFileSyncQueue, getMainQueue } from '@shared/queue'
 import { isNil } from 'ramda'
 import { Job } from '../../domain/job/job.entity'
@@ -8,6 +7,7 @@ import { OpsCtx } from '../../types'
 import { BaseOperation } from '@shared/utils/base-operation'
 import { clearFailedJobs } from '../queue.utils'
 import { TASK_TYPE } from '../task.input'
+import { JobSynchronizationService } from '@shared/domain/job/services/job-synchronization.service'
 
 // Clean up the bull queue
 export const cleanupWorkerQueue = async (em: any, log: Logger): Promise<any> => {
@@ -26,10 +26,10 @@ export const cleanupWorkerQueue = async (em: any, log: Logger): Promise<any> => 
   const possiblyExpiredJobs: any[] = []
   for (const job of repeatableJobs) {
     const timeSinceNext = now - job.next
-    const hoursSinceNext = timeSinceNext / (60*60*1000)
+    const hoursSinceNext = timeSinceNext / (60 * 60 * 1000)
 
     if (job.id?.startsWith(TASK_TYPE.SYNC_JOB_STATUS)) {
-      const jobDxid = SyncJobOperation.getJobDxidFromBullJobId(job.id)
+      const jobDxid = JobSynchronizationService.getJobDxidFromBullJobId(job.id)
       log.log({ jobDxid, job }, 'Considering job sync task')
       const jobFromDb: Job = await jobRepo.findOne({ dxid: jobDxid })
       if (isNil(jobFromDb)) {
