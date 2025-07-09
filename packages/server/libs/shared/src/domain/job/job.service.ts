@@ -13,7 +13,6 @@ import {
 } from '@shared/domain/email/templates/mjml/report-stale-jobs.template'
 import { Job } from '@shared/domain/job/job.entity'
 import { buildIsOverMaxDuration } from '@shared/domain/job/job.helper'
-import { SyncJobOperation } from '@shared/domain/job/ops/synchronize'
 import { NotificationService } from '@shared/domain/notification/services/notification.service'
 import { SpaceEventService } from '@shared/domain/space-event/space-event.service'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
@@ -31,7 +30,7 @@ import {
   FindJobsResponse,
   JobOutput,
 } from '../../platform-client/platform-client.responses'
-import { UserCtx, UserOpsCtx, WorkerOpsCtx } from '../../types'
+import { Maybe, UserCtx } from '../../types'
 import { DxId } from '../entity/domain/dxid'
 import { createFileEvent, EVENT_TYPES } from '../event/event.helper'
 import { SPACE_EVENT_ACTIVITY_TYPE } from '../space-event/space-event.enum'
@@ -40,6 +39,7 @@ import { FILE_STATE_DX, PARENT_TYPE } from '../user-file/user-file.types'
 import { UserRepository } from '../user/user.repository'
 import { JobRepository } from './job.repository'
 import { CheckStatusJob, TASK_TYPE } from '@shared/queue/task.input'
+import { JobSynchronizationService } from '@shared/domain/job/services/job-synchronization.service'
 import { Job as BullJob } from 'bull'
 import { SpaceRepository } from '@shared/domain/space/space.repository'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
@@ -58,12 +58,17 @@ export class JobService {
     private readonly notificationService: NotificationService,
     private readonly folderService: FolderService,
     private readonly emailsJobProducer: EmailQueueJobProducer,
+    private readonly jobSyncService: JobSynchronizationService,
     private readonly emailService: EmailService,
     private readonly userRepo: UserRepository,
     private readonly jobRepo: JobRepository,
     private readonly spaceRepo: SpaceRepository,
     private readonly spaceMembershipRepo: SpaceMembershipRepository,
   ) {}
+
+  async synchronizeJob(checkStatusJob: CheckStatusJob['payload']): Promise<Maybe<Job>> {
+    return await this.jobSyncService.synchronizeJob(checkStatusJob)
+  }
 
   async checkChallengeJobs(): Promise<void> {
     this.logger.log(`checkChallengeJobs`)
@@ -89,17 +94,7 @@ export class JobService {
             dxid: job.dxid,
           },
         }
-        const bullJob = {
-          id: 1,
-          data,
-        } as unknown as BullJob
-        const ctx: WorkerOpsCtx<UserOpsCtx> = {
-          em: this.em as SqlEntityManager,
-          log: this.logger,
-          user: data.user,
-          job: bullJob,
-        }
-        await new SyncJobOperation(ctx).execute(data.payload)
+        await this.jobSyncService.synchronizeJob(data.payload)
       }
     } else {
       this.logger.log('No non-terminal jobs found for challenge bot user')
@@ -141,7 +136,9 @@ export class JobService {
     )
 
     runningJobs.map(async (job) => {
-      const runningJob = await getMainQueue().getJob(SyncJobOperation.getBullJobId(job.dxid))
+      const runningJob = await getMainQueue().getJob(
+        JobSynchronizationService.getBullJobId(job.dxid),
+      )
       if (!runningJob) {
         await createSyncJobStatusTask(job, this.user)
         this.logger.log({}, `Recreated missing SyncJobOperation for ${job.dxid}`)

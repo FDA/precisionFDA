@@ -88,8 +88,8 @@ export const useAssetColumns = ({
       accessorKey: 'file_size',
       // Filter: NumberRangeColumnFilter,
       size: 160,
-      filterPlaceholderFrom: `Min(KB)`,
-      filterPlaceholderTo: `Max(KB)`,
+      filterPlaceholderFrom: 'Min (KB)',
+      filterPlaceholderTo: 'Max (KB)',
     },
     {
       header: 'Created',
