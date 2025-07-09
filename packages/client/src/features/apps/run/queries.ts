@@ -1,5 +1,4 @@
 import { useQuery } from '@tanstack/react-query'
-import { toast } from 'react-toastify'
 import { getSpaceIdFromScope } from '../../../utils'
 import { fetchEditableSpacesList } from '../../spaces/spaces.api'
 import { ISpace, SPACE_TYPES } from '../../spaces/spaces.types'
@@ -8,9 +7,7 @@ import { IApp } from '../apps.types'
 
 const getTitle = (space: ISpace): string => {
   if (space.type === SPACE_TYPES.REVIEW) {
-    return space.spaceId
-      ? `${space.name} (Private Review)`
-      : `${space.name} (Shared Review)`
+    return space.spaceId ? `${space.name} (Private Review)` : `${space.name} (Shared Review)`
   }
   if (space.type === SPACE_TYPES.VERIFICATION) {
     return `${space.name} (Verification)`
@@ -24,28 +21,29 @@ const getTitle = (space: ISpace): string => {
   return space.name
 }
 
-export const fetchAndConvertSelectableContexts = (scope: IApp['scope'], entityType: IApp['entity_type']) => useQuery({
-  queryKey: ['selectable-context', scope],
-  queryFn: () => fetchEditableSpacesList(),
-  select: (data) => {
-    if (entityType === 'https') {
-      const options = data.map(s => ({
-        label: `${s.title} - ${s.scope}`,
-        value: s.scope,
-      }))
+export const fetchAndConvertSelectableContexts = (scope: IApp['scope'], entityType: IApp['entity_type']) =>
+  useQuery({
+    queryKey: ['selectable-context', scope],
+    queryFn: () => fetchEditableSpacesList(),
+    select: data => {
+      if (entityType === 'https') {
+        const options = data.map(s => ({
+          label: `${s.title} - ${s.scope}`,
+          value: s.scope,
+        }))
 
-      return [{ label: 'Private', value: 'private' }, ...options]
-    }
-    return []
-  },
-})
+        return [{ label: 'Private', value: 'private' }, ...options]
+      }
+      return []
+    },
+  })
 
 export const fetchAndConvertSelectableSpaces = (scope: IApp['scope']) => {
   const spaceId = getSpaceIdFromScope(scope)
   return useQuery({
     queryKey: ['selectable-space', scope],
     queryFn: () => fetchSelectableSpaces(spaceId),
-    select: (data) => {
+    select: data => {
       if (scope.includes('space')) {
         return data.map(space => ({
           isDisabled: false,

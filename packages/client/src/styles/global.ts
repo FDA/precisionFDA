@@ -5,7 +5,7 @@ import { compactScrollBarV2 } from '../components/Page/styles'
 
 import './cssHelpers.css'
 
-const GlobalStyle = createGlobalStyle<{railsAlertHeight: number}>`
+const GlobalStyle = createGlobalStyle<{ railsAlertHeight: number }>`
   ${colorvars}
   ${themes}
 
@@ -86,7 +86,7 @@ const GlobalStyle = createGlobalStyle<{railsAlertHeight: number}>`
 
 
   body:has(.rails-alert) {
-    --rails-alert-height: ${({ railsAlertHeight }) => railsAlertHeight }px;
+    --rails-alert-height: ${({ railsAlertHeight }) => railsAlertHeight}px;
   }
   #app-root:has(.site-alert-banner) {
     --site-alert-height: 20px;
@@ -150,5 +150,5 @@ export const ScrollableInnerGlobalStyles = createGlobalStyle`
   }
   ${compactScrollBarV2}
 `
- 
+
 export default GlobalStyle
