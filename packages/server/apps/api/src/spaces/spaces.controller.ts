@@ -37,7 +37,7 @@ import { UserContextGuard } from '../user-context/guard/user-context.guard'
 import { CreateSpaceDTO } from '@shared/domain/space/dto/create-space.dto'
 import { UpdateSpaceDTO } from '@shared/domain/space/dto/update-space.dto'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
-import { SpacePaginationDTO } from '@shared/domain/space/dto/space-pagination-d-t.o'
+import { SpacePaginationDTO } from '@shared/domain/space/dto/space-pagination.dto'
 import { SpaceListItemDTO } from '@shared/domain/space/dto/space-list-item.dto'
 import { PaginatedResult } from '@shared/domain/entity/domain/paginated.result'
 

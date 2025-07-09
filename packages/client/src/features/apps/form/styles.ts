@@ -1,6 +1,7 @@
 import styled, { css } from 'styled-components'
 import { FieldGroup } from '../../../components/form/styles'
 import { PfTab } from '../../../components/Tabs/PfTab'
+import { StyledMarkdown } from '../../../styles/commonStyles'
 
 export const TopFieldGroup = styled(FieldGroup)`
   flex: 1;
@@ -142,7 +143,7 @@ export const SectionTitle = styled.div`
 export const FormFields = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 16px;
 `
 
 export const StyledClassTd = styled.td`
@@ -177,4 +178,10 @@ export const Help = styled.div`
   font-size: 13px;
   line-height: 24px;
   width: fit-content;
+`
+
+export const StyledMarkdownAppShow = styled(StyledMarkdown)`
+  padding-left: 16px;
+  padding-right: 16px;
+  max-width: 700px;
 `

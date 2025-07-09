@@ -1,8 +1,8 @@
 import React, { useState } from 'react'
-import styled, { css } from 'styled-components'
+import styled from 'styled-components'
 import { Button } from '../../../components/Button'
 import { Markdown } from '../../../components/Markdown'
-import { FormFields, Help } from './styles'
+import { FormFields, Help, StyledMarkdownAppShow } from './styles'
 import ExternalLink from '../../../components/Controls/ExternalLink'
 import MonacoEditor from '../../../components/MonacoEditor/MonacoEditor'
 
@@ -11,7 +11,20 @@ const ButtonRow = styled.div`
   justify-content: flex-end;
 
   button {
+    &[data-active='true'] {
+      background-color: var(--tertiary-100);
+      
+    }
+    &[data-active='false'] {
+      background-color: var(--tertiary-50);
+    }
+
+    min-width: 77px;
+    display: flex;
+    justify-content: center;
+
     &:first-of-type {
+      border-right-width: 0;
       border-top-right-radius: 0;
       border-bottom-right-radius: 0;
     }
@@ -35,10 +48,8 @@ const TopReadme = styled.div`
 const View = styled.div<{ $shouldDisplay: boolean }>`
   display: none;
   ${({ $shouldDisplay }) =>
-    $shouldDisplay &&
-    css`
-      display: initial;
-    `}
+    $shouldDisplay && 'display: initial;'
+  }
 `
 
 type Selection = 'edit' | 'preview'
@@ -63,10 +74,10 @@ export const ReadMeInput = ({
           <ExternalLink to="https://jonschlinkert.github.io/remarkable/demo/"> Learn how to format Markdown</ExternalLink>
         </Help>
         <ButtonRow>
-          <Button type="button" onClick={() => handleClick('edit')}>
+          <Button type="button" data-active={selected === 'edit'} onClick={() => handleClick('edit')}>
             Edit
           </Button>
-          <Button type="button" onClick={() => handleClick('preview')}>
+          <Button type="button" data-active={selected === 'preview'} onClick={() => handleClick('preview')}>
             Preview
           </Button>
         </ButtonRow>
@@ -82,7 +93,9 @@ export const ReadMeInput = ({
       </View>
 
       <View $shouldDisplay={selected === 'preview'}>
-        <Markdown data={value} />
+        <StyledMarkdownAppShow>
+          <Markdown data={value} />
+        </StyledMarkdownAppShow>
       </View>
     </FormFields>
   )

@@ -28,7 +28,7 @@ import { CreateSpaceDTO } from '@shared/domain/space/dto/create-space.dto'
 import { UpdateSpaceDTO } from '@shared/domain/space/dto/update-space.dto'
 import { User } from '@shared/domain/user/user.entity'
 import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
-import { SpacePaginationDTO } from '@shared/domain/space/dto/space-pagination-d-t.o'
+import { SpacePaginationDTO } from '@shared/domain/space/dto/space-pagination.dto'
 import { SpaceListItemDTO } from '@shared/domain/space/dto/space-list-item.dto'
 import { PaginatedResult } from '@shared/domain/entity/domain/paginated.result'
 import { SpaceGroupService } from '@shared/domain/space/service/space-group.service'
@@ -425,8 +425,11 @@ export class SpaceService {
     where: FilterQuery<Space>,
   ): Promise<PaginatedResult<SpaceListItemDTO>> {
     const spaces = await this.spaceRepository.paginate(query, where, {
-      populate: ['spaceMemberships.user', 'taggings.tag'],
+      populate: [], // Do not populate deep relations here
     })
+
+    // Now populate relations separately (efficiently, one-by-one)
+    await this.spaceRepository.populate(spaces.data, ['spaceMemberships.user', 'taggings.tag'])
 
     return {
       meta: spaces.meta,

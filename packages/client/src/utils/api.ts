@@ -8,20 +8,20 @@ export const requestOpts: RequestInit = {
   cache: 'no-cache',
   credentials: 'same-origin',
   headers: {
-    'Accept': 'application/json',
+    Accept: 'application/json',
     'Content-Type': 'application/json',
   },
 }
 
 export const unauthorizedHandler = () => {
-const navigate = useNavigate()
-toast.error('Session expired. Please log in again', {
-  toastId: '401 toast',
-  position: toast.POSITION.TOP_CENTER,
-  autoClose: false,
-  closeOnClick: false,
-  onClick: () => navigate('/login'),
-})
+  const navigate = useNavigate()
+  toast.error('Session expired. Please log in again', {
+    toastId: '401 toast',
+    position: 'top-center',
+    autoClose: false,
+    closeOnClick: false,
+    onClick: () => navigate('/login'),
+  })
 }
 // TODO: separate app errors from network errors.
 // Application errors, like validations, should not throw Error.
@@ -38,12 +38,11 @@ export const checkStatus = async (res: Response) => {
         if (res.status === httpStatusCodes.UNPROCESSABLE_ENTITY) {
           toast.error(message, {
             toastId: '422 toast',
-            position: toast.POSITION.TOP_RIGHT,
+            position: 'top-right',
             closeOnClick: true,
           })
         }
-      }
-      catch {
+      } catch {
         // This code path is for certain API routes/errors where the Ruby backend returns a page and not a json
         throw new Error(message)
       }
@@ -92,8 +91,7 @@ export const displayPayloadMessage = (payload: any) => {
       default:
         break
     }
-  }
-  else if (payload.error) {
+  } else if (payload.error) {
     toast.error(payload.error.message)
   }
 }
@@ -132,12 +130,12 @@ const backendCall = (route: string, method = 'POST', data = {}, token = getAuthe
     route = queryString.stringifyUrl({ url: route, query: data })
   }
 
-  return fetch(route, opts)
-    .then(response => {
-      return response.json()
-        .then(payload => Promise.resolve({ status: response.status, payload }))
-        .catch(() => Promise.resolve({ status: response.status, payload: null }))
-    })
+  return fetch(route, opts).then(response => {
+    return response
+      .json()
+      .then(payload => Promise.resolve({ status: response.status, payload }))
+      .catch(() => Promise.resolve({ status: response.status, payload: null }))
+  })
 }
 
 export { backendCall }
