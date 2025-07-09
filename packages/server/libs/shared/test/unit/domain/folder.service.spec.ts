@@ -2,29 +2,122 @@ import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
 import { database } from '@shared/database'
 import { Folder } from '@shared/domain/user-file/folder.entity'
 import { User } from '@shared/domain/user/user.entity'
+import { Event } from '@shared/domain/event/event.entity'
 import { create, db } from '@shared/test'
 import { FolderService } from '@shared/domain/user-file/folder.service'
 import { expect } from 'chai'
 import { EVENT_TYPES } from '@shared/domain/event/event.helper'
 import { STATIC_SCOPE } from '@shared/enums'
-import { PARENT_TYPE } from '@shared/domain/user-file/user-file.types'
+import { FILE_STI_TYPE, PARENT_TYPE } from '@shared/domain/user-file/user-file.types'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { NodeRepository } from '@shared/domain/user-file/node.repository'
+import { stub } from 'sinon'
+import { SCOPE } from '@shared/types/common'
 
-describe('Folder service tests', () => {
+describe('FolderService', () => {
   let em: EntityManager<MySqlDriver>
   let user: User
   const userId = 100
   const userContext = { id: userId } as UserContext
+
+  const nodeRepoFindAccessibleStub = stub()
+
+  const nodeRepo = {
+    findAccessible: nodeRepoFindAccessibleStub,
+  } as unknown as NodeRepository
 
   beforeEach(async () => {
     await db.dropData(database.connection())
     em = database.orm().em.fork() as EntityManager<MySqlDriver>
     user = create.userHelper.create(em, { id: userId })
     await em.flush()
+
+    nodeRepoFindAccessibleStub.reset()
+    nodeRepoFindAccessibleStub.throws()
+  })
+
+  describe('#getFolderChildren', async () => {
+    it('in space', async () => {
+      nodeRepoFindAccessibleStub.reset()
+      const folderService = new FolderService(em, userContext, nodeRepo)
+      const scopes: SCOPE[] = ['space-1']
+      const parentFolderId = 1
+
+      await folderService.getFolderChildren({
+        scopes,
+        folderId: parentFolderId,
+        types: [FILE_STI_TYPE.USERFILE],
+      })
+      expect(nodeRepoFindAccessibleStub.calledOnce).to.eq(true)
+
+      const whereClause = nodeRepoFindAccessibleStub.firstCall.firstArg
+      expect(whereClause.$or).to.have.lengthOf(1)
+      expect(whereClause.$or[0].scope).to.eq(scopes[0])
+      expect(whereClause.$or[0].scopedParentFolder).to.eq(parentFolderId)
+      expect(whereClause.stiType).to.deep.eq({
+        $in: [FILE_STI_TYPE.USERFILE],
+      })
+    })
+
+    it('private', async () => {
+      nodeRepoFindAccessibleStub.reset()
+      const folderService = new FolderService(em, userContext, nodeRepo)
+
+      const scopes: SCOPE[] = ['private']
+      const parentFolderId = 2
+
+      await folderService.getFolderChildren({ scopes, folderId: parentFolderId })
+
+      expect(nodeRepoFindAccessibleStub.calledOnce).to.eq(true)
+
+      const whereClause = nodeRepoFindAccessibleStub.firstCall.firstArg
+      expect(whereClause.$or).to.have.lengthOf(1)
+      expect(whereClause.$or[0].scope).to.eq(scopes[0])
+      expect(whereClause.$or[0].parentFolder).to.eq(parentFolderId)
+      expect(whereClause.$or[0].user).to.eq(user.id)
+    })
+
+    it('multiple scopes', async () => {
+      nodeRepoFindAccessibleStub.reset()
+      const folderService = new FolderService(em, userContext, nodeRepo)
+
+      const scopes: SCOPE[] = ['private', 'space-1', 'space-2']
+      const parentFolderId = 3
+
+      await folderService.getFolderChildren({
+        scopes,
+        folderId: parentFolderId,
+        types: [FILE_STI_TYPE.FOLDER],
+      })
+
+      expect(nodeRepoFindAccessibleStub.calledOnce).to.eq(true)
+
+      const whereClause = nodeRepoFindAccessibleStub.firstCall.firstArg
+      expect(whereClause.$or).to.have.lengthOf(3)
+
+      const privateCondition = whereClause.$or[0]
+      expect(privateCondition.scope).to.eq('private')
+      expect(privateCondition.parentFolder).to.eq(parentFolderId)
+      expect(privateCondition.user).to.eq(user.id)
+
+      const space1Condition = whereClause.$or[1]
+      expect(space1Condition.scope).to.eq('space-1')
+      expect(space1Condition.scopedParentFolder).to.eq(parentFolderId)
+      expect(space1Condition.user).to.be.undefined
+
+      const space2Condition = whereClause.$or[2]
+      expect(space2Condition.scope).to.eq('space-2')
+      expect(space2Condition.scopedParentFolder).to.eq(parentFolderId)
+      expect(space2Condition.user).to.be.undefined
+
+      expect(whereClause.stiType).to.deep.eq({
+        $in: [FILE_STI_TYPE.FOLDER],
+      })
+    })
   })
 
   it('Test create single folder', async () => {
-    const folderService = new FolderService(em, userContext)
+    const folderService = new FolderService(em, userContext, nodeRepo)
     const folderName = 'folder1'
 
     const folder = await folderService.createFolder(folderName, STATIC_SCOPE.PRIVATE, userId)
@@ -40,7 +133,7 @@ describe('Folder service tests', () => {
   })
 
   it('Test create nested folder in private scope', async () => {
-    const folderService = new FolderService(em, userContext)
+    const folderService = new FolderService(em, userContext, nodeRepo)
     const parentFolder = create.filesHelper.createFolder(
       em,
       { user },
@@ -71,7 +164,7 @@ describe('Folder service tests', () => {
 
   it('Test create nested folder in space scope', async () => {
     const spaceScope = 'space-1'
-    const folderService = new FolderService(em, userContext)
+    const folderService = new FolderService(em, userContext, nodeRepo)
     const parentFolder = create.filesHelper.createFolder(
       em,
       { user },
@@ -103,7 +196,7 @@ describe('Folder service tests', () => {
   })
 
   it('Test create folders in a path - private scope', async () => {
-    const folderService = new FolderService(em, userContext)
+    const folderService = new FolderService(em, userContext, nodeRepo)
     const folderPath = 'folder1/folder2/folder3'
 
     const folders = await folderService.createFoldersOnPath(
@@ -147,7 +240,7 @@ describe('Folder service tests', () => {
     )
     await em.flush()
 
-    const folderService = new FolderService(em, userContext)
+    const folderService = new FolderService(em, userContext, nodeRepo)
     const folderPath = 'folder1/folder2/folder3'
 
     const folders = await folderService.createFoldersOnPath(folderPath, scope, userId)
@@ -186,7 +279,7 @@ describe('Folder service tests', () => {
     )
     await em.flush()
 
-    const folderService = new FolderService(em, userContext)
+    const folderService = new FolderService(em, userContext, nodeRepo)
     const folderPath = 'folder1/folder2/folder3'
 
     const folders = await folderService.createFoldersOnPath(
@@ -216,7 +309,7 @@ describe('Folder service tests', () => {
   })
 
   it('Test create folders in a path - provide non existing userId -> error', async () => {
-    const folderService = new FolderService(em, userContext)
+    const folderService = new FolderService(em, userContext, nodeRepo)
 
     try {
       await folderService.createFoldersOnPath('tmp', STATIC_SCOPE.PRIVATE, 1)
@@ -227,7 +320,7 @@ describe('Folder service tests', () => {
   })
 
   it('Test create folders in a path - null folder -> error', async () => {
-    const folderService = new FolderService(em, userContext)
+    const folderService = new FolderService(em, userContext, nodeRepo)
 
     try {
       // @ts-ignore
@@ -239,7 +332,7 @@ describe('Folder service tests', () => {
   })
 
   it('Test create folders in path - first folder is created by another user in private scope', async () => {
-    const folderService = new FolderService(em, userContext)
+    const folderService = new FolderService(em, userContext, nodeRepo)
     const folderPath = 'folder1/folder2/folder3'
 
     const user2 = create.userHelper.create(em, { id: 200 })

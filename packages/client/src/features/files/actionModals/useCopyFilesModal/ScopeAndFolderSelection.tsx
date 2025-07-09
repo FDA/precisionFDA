@@ -14,8 +14,8 @@ import { FdaRestrictedIcon } from '../../../spaces/FdaRestrictedIcon'
 import { ProtectedIcon } from '../../../spaces/ProtectedIcon'
 import { EditableSpace, fetchEditableSpacesList } from '../../../spaces/spaces.api'
 import { findSpaceTypeIcon } from '../../../spaces/useSpacesColumns'
-import { FetchFolderChildrenResponse, fetchFolderChildren } from '../../files.api'
-import { IFile, IFolderPath } from '../../files.types'
+import { fetchFolderChildren } from '../../files.api'
+import { IFile, IFolder, IFolderPath } from '../../files.types'
 import {
   CopyModalScrollPlace,
   ModalSearchBarWrapper,
@@ -109,26 +109,23 @@ const FolderList = ({
   filterString = '',
   onSelect,
 }: {
-  spaceTarget: string
+  spaceTarget: ServerScope
   folderId: number | null
   filterString: string
-  onSelect: (folder: IFile) => void
+  onSelect: (folder: IFolder) => void
 }) => {
-  const spaceTargetId = spaceTarget.split('-')[1]
-  const { data = [] as unknown as FetchFolderChildrenResponse, isLoading } = useQuery({
+  const { data = [], isLoading } = useQuery<(IFile | IFolder)[], Error>({
     queryKey: ['space_folder_list', spaceTarget, folderId],
-    queryFn: () => fetchFolderChildren(undefined, spaceTargetId, folderId?.toString()),
+    queryFn: () => fetchFolderChildren({ scopes: [spaceTarget], folderId: folderId?.toString(), types: ['Folder'] }),
   })
 
   if (isLoading) {
     return <ModalContentPadding>Loading...</ModalContentPadding>
   }
 
-  const folders = data.nodes.filter(n => n.type === 'Folder') as IFile[]
+  const filteredFolders = data.filter(f => f.name.toLowerCase().includes(filterString.toLowerCase()))
 
-  const filteredFolders = folders.filter(f => f.name.toLowerCase().includes(filterString.toLowerCase()))
-
-  return folders.length === 0 ? (
+  return filteredFolders.length === 0 ? (
     <ModalContentPadding>
       There are no folders in this directory. You can copy files directly to this location.
     </ModalContentPadding>
@@ -136,7 +133,7 @@ const FolderList = ({
     <SpaceAndFolderTable>
       <tbody>
         {filteredFolders?.map(folder => (
-          <ModalStyledRow key={folder.id} onClick={() => onSelect(folder)}>
+          <ModalStyledRow key={folder.id} onClick={() => onSelect(folder as IFolder)}>
             <ModalStyledCell>
               <SpaceStyledName data-turbolinks="false">
                 <StyledNameIcon>
@@ -182,7 +179,7 @@ export const ScopeAndFolderSelection = ({
     }
   }
 
-  const handleSelectFolder = (folder: IFile) => {
+  const handleSelectFolder = (folder: IFolder) => {
     setFolderId(folder.id)
     onSelectFolder(folder.id)
     setSearchQuery('')
@@ -255,7 +252,7 @@ export const ScopeAndFolderSelection = ({
         {selectedTarget && (
           <FolderList
             folderId={folderId}
-            spaceTarget={selectedTarget.scope}
+            spaceTarget={selectedTarget.scope as ServerScope}
             filterString={searchQuery}
             onSelect={handleSelectFolder}
           />
