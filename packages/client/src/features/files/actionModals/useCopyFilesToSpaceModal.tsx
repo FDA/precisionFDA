@@ -11,7 +11,7 @@ import { addData } from '../../spaces/spaces.api'
 import { fetchFolderChildren } from '../files.api'
 import { FileTree } from '../FileTree'
 import { findById } from '../file.utils'
-import { CustomDataNode } from '../files.types'
+import { CustomDataNode, FileType, IFile } from '../files.types'
 
 export const useCopyFilesToSpaceModal = ({ spaceId }: { spaceId?: string }) => {
   const [folderId] = useQueryParam<string | undefined>('folder_id')
@@ -44,18 +44,18 @@ export const useCopyFilesToSpaceModal = ({ spaceId }: { spaceId?: string }) => {
   }
 
   const loadData = async (node: DataNode) => {
-    const { nodes } = await fetchFolderChildren(
-      undefined,
-      undefined,
-      node.key.toString(),
-    )
+    const nodes = await fetchFolderChildren({
+      scopes: ['private', 'public'],
+      folderId: node.key.toString(),
+      types: ['UserFile', 'Folder'],
+    })
     const children = nodes.map(
       (d): CustomDataNode => ({
         key: d.id.toString(),
         title: d.name,
-        isLeaf: d.type !== 'Folder',
-        uid: d.uid,
-        checkable: d.type !== 'Folder',
+        isLeaf: d.stiType !== 'Folder',
+        uid: (d.stiType === 'UserFile') ? (d as IFile).uid : '',
+        checkable: d.stiType !== 'Folder',
       }),
     )
 

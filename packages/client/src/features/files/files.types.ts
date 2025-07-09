@@ -52,7 +52,7 @@ export interface IFile {
   id: number
   name: string
   size?: string
-  type: FileType
+  stiType: FileType
   locked: boolean
   resource: boolean
   locking?: boolean
@@ -106,6 +106,7 @@ export interface IFolder {
   name: string
   size?: string
   type: FileType
+  stiType: FileType
   locked: boolean
   locking?: boolean
   location: FileLocation

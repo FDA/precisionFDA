@@ -11,43 +11,40 @@ import { fetchFolderChildren } from '../files.api'
 import { FileTree } from '../FileTree'
 import { TreeOnSelectInfo } from '../files.types'
 import { findById } from '../file.utils'
-import { getSpaceIdFromScope } from '../../../utils'
 
 type EnhancedDataNode = DataNode & {
   path: string
 }
 
 const OrganizeFiles = ({
-  scope,
-  onSelect,
-}: {
-  scope?: ServerScope
+                         scope,
+                         onSelect,
+                       }: {
+  scope: ServerScope
   onSelect: (selectedKeys: Key[], info: TreeOnSelectInfo) => void
 }) => {
-  const spaceId = getSpaceIdFromScope(scope)
-  const [treeData, setTreeData] = useImmer<DataNode[]>([{ key: 'ROOT', title: '/', children: [] } as unknown as DataNode])
+  const [treeData, setTreeData] = useImmer<DataNode[]>([
+    { key: 'ROOT', title: '/', children: []} as unknown as DataNode,
+  ])
 
   return (
     <FileTree
-      onExpand={d => {}}
-      loadData={async (node: EnhancedDataNode) => {
-        const { nodes } = await fetchFolderChildren(
-          scope === 'private' ? 'private' : 'public', // TODO fix this in fetchFolderChildren
-          spaceId,
-          node.key.toString(),
-        )
+      onExpand={() => {}}
+      loadData={async (node?: EnhancedDataNode) => {
+        const nodes = await fetchFolderChildren({ scopes: [scope], folderId: node?.key.toString(), types: ['Folder']})
+
+        const parentPath = node?.path ?? ''
+
         const children = nodes
-          .filter(e => e.type === 'Folder')
           .map(d => ({
             key: d.id.toString(),
             title: d.name,
             children: [],
-            parent: d.path[d.path.length - 1],
-            path: node.path ? `${node.path}/${d.name}` : `/${d.name}`,
+            path: parentPath ? `${parentPath}/${d.name}` : `/${d.name}`,
           }))
 
-        setTreeData((draft: DataNode[]) => {
-          const folder = findById(draft, node.key.toString())
+        setTreeData(draft => {
+          const folder = findById(draft, node?.key.toString())
           if (folder) {
             folder.children = children
           }
