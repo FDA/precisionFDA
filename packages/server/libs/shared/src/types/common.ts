@@ -1,5 +1,3 @@
-import { STATIC_SCOPE } from '../enums'
-
 export interface PaginationParams {
   page: number
   limit: number
@@ -9,7 +7,7 @@ export type SpaceScope = `space-${number}`
 export type StaticScope = 'private' | 'public'
 export type EntityScope = StaticScope | SpaceScope
 
-export type SCOPE = STATIC_SCOPE | SpaceScope
+export type SCOPE = StaticScope | SpaceScope
 
 export type DnanexusLink = {
   $dnanexus_link: string
