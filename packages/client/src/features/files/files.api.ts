@@ -3,7 +3,7 @@ import { checkStatus, getApiRequestOpts } from '../../utils/api'
 import { cleanObject } from '../../utils/object'
 import { DownloadListResponse, HomeScope, IFilter, IMeta, MetaPath, ServerScope } from '../home/types'
 import { Params, formatScopeQ, prepareListFetch } from '../home/utils'
-import { IExistingFileSet, IFile, IFolder, SelectedNode } from './files.types'
+import { FileType, IExistingFileSet, IFile, IFolder, SelectedNode } from './files.types'
 
 export interface FetchFilesQuery {
   files: (IFile | IFolder)[]
@@ -112,21 +112,18 @@ export async function editFolderRequest({ name, folderId }: { name: string; fold
   return res
 }
 
-export interface FetchFolderChildrenResponse {
-  nodes: IFile[] | IFolder[]
+export interface FetchChildrenDTO {
+  scopes: ServerScope[]
+  folderId?: string
+  types?: FileType[]
 }
 
-export const fetchFolderChildren = async (scope?: 'private' | 'public', spaceId?: string | number, folderId?: string) => {
-  const queryParams = cleanObject({
-    folder_id: folderId === 'ROOT' ? undefined : folderId,
-    scope,
-  })
-
-  const query = `?${new URLSearchParams(queryParams as Record<string, string>).toString()}`
-  const url = spaceId ? `/api/spaces/${spaceId}/files/subfolders${query}` : `/api/folders/children${query}`
-  return axios.get(url).then(res => res.data as FetchFolderChildrenResponse)
+export async function fetchFolderChildren(params: FetchChildrenDTO): Promise<(IFile | IFolder)[]> {
+  if (params.folderId === 'ROOT') {
+    params.folderId = undefined
+  }
+  return axios.get('/api/v2/folders/children', { params }).then(res => res.data)
 }
-
 
 export type MoveFilesResponse = {count: number}
 export const moveFilesRequest = async (nodeIds: number[], targetFolderId: number | null, spaceId?: number) => {

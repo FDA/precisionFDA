@@ -1,4 +1,5 @@
 import { Folder } from '@shared/domain/user-file/folder.entity'
+import { Node } from '@shared/domain/user-file/node.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { ValidationError } from '@shared/errors'
 import { SqlEntityManager } from '@mikro-orm/mysql'
@@ -12,6 +13,8 @@ import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { STATIC_SCOPE } from '@shared/enums'
 import { FilterQuery } from '@mikro-orm/core'
+import { NodeRepository } from '@shared/domain/user-file/node.repository'
+import { FetchChildrenDTO } from 'apps/api/src/folders/model/fetch-children.dto'
 
 @Injectable()
 /**
@@ -24,8 +27,39 @@ export class FolderService {
   constructor(
     private readonly em: SqlEntityManager,
     private readonly user: UserContext,
-  ) {
-    this.em = em
+    private readonly nodeRepo: NodeRepository,
+  ) {}
+
+  async getFolderChildren(input: FetchChildrenDTO): Promise<Node[]> {
+    const parentId = input.folderId ?? null
+
+    const scopeConditions = input.scopes.map((scope) => {
+      const condition: FilterQuery<Node> = { scope }
+
+      if (scope.startsWith('space')) {
+        condition.scopedParentFolder = parentId
+      } else {
+        condition.parentFolder = parentId
+      }
+
+      if (scope === STATIC_SCOPE.PRIVATE) {
+        condition.user = this.user.id
+      }
+
+      return condition
+    })
+
+    const where: FilterQuery<Node> = {
+      $or: scopeConditions,
+    }
+
+    if (input.types?.length) {
+      where.stiType = { $in: input.types }
+    }
+
+    return this.nodeRepo.findAccessible(where, {
+      orderBy: [{ stiType: 'ASC' }, { name: 'ASC' }],
+    })
   }
 
   /**
@@ -90,17 +124,6 @@ export class FolderService {
     }
   }
 
-  /**
-   * Throws error if folder has children.
-   * @param folder
-   */
-  async validateFolderChildren(folder: Folder) {
-    await folder.children.init()
-    if (folder.children.length > 0) {
-      throw new Error(`Cannot remove folder ${folder.name} with children. Remove children first.`)
-    }
-  }
-
   private async createFolderInternal(
     name: string,
     scope: EntityScope,
@@ -135,7 +158,11 @@ export class FolderService {
     return folder
   }
 
-  private async findFolder(name: string, scope: EntityScope, parentFolderId?: number) {
+  private async findFolder(
+    name: string,
+    scope: EntityScope,
+    parentFolderId?: number,
+  ): Promise<Folder> {
     const whereClause: FilterQuery<NoInfer<Folder>> = {
       name,
       scope,
