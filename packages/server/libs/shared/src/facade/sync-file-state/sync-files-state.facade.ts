@@ -21,6 +21,7 @@ import { SqlEntityManager } from '@mikro-orm/mysql'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { UserOpsCtx } from '@shared/types'
 import { RemoveNodesFacade } from '@shared/facade/node-remove/remove-nodes.facade'
+import { UserRepository } from '@shared/domain/user/user.repository'
 
 @Injectable()
 export class SyncFilesStateFacade {
@@ -29,8 +30,10 @@ export class SyncFilesStateFacade {
 
   constructor(
     private readonly em: SqlEntityManager,
-    private readonly user: UserContext,
+    private readonly userCtx: UserContext,
     private readonly platformClient: PlatformClient,
+    private readonly userRepo: UserRepository,
+    private readonly challengeRepo: ChallengeRepository,
     private readonly removeNodesFacade: RemoveNodesFacade,
   ) {}
 
@@ -40,10 +43,10 @@ export class SyncFilesStateFacade {
   }
 
   async syncFiles(job: Job): Promise<void> {
-    await this.user.loadEntity()
-    const dxuser = this.user.dxuser
+    await this.userCtx.loadEntity()
+    const dxuser = this.userCtx.dxuser
 
-    const user = await this.em.getRepository(User).findOne({ dxuser })
+    const user = await this.userRepo.findOne({ dxuser })
     if (!user) {
       this.logger.error(`User ${dxuser} not found`)
       return
@@ -155,8 +158,7 @@ export class SyncFilesStateFacade {
         if (fileOrAsset.isCreatedByChallengeBot() && fileOrAsset.state === FILE_STATE_DX.CLOSED) {
           // Special case: If this closed file is used as a challenge card image
           // once they are uploaded and closed we need to update the cardImageUrl
-          const challengeRepo = this.em.getRepository(Challenge) as ChallengeRepository
-          const challenge = await challengeRepo.findOneWithCardImageUid(fileOrAsset.uid)
+          const challenge = await this.challengeRepo.findOneWithCardImageUid(fileOrAsset.uid)
           if (challenge) {
             this.logger.log(
               { fileUid: fileOrAsset.uid },
@@ -165,7 +167,7 @@ export class SyncFilesStateFacade {
             try {
               const opsCtx: UserOpsCtx = {
                 log: this.logger,
-                user: this.user,
+                user: this.userCtx,
                 em: this.em,
               }
               await new ChallengeUpdateCardImageUrlOperation(opsCtx).execute(challenge.id)
@@ -186,14 +188,14 @@ export class SyncFilesStateFacade {
 
   private async removeTaskIfNoMoreUnclosedFiles(job: Job): Promise<void> {
     // If user has no more unclosed files, remove this task
-    const openFiles = await findUnclosedFilesOrAssets(this.em, this.user.id)
+    const openFiles = await findUnclosedFilesOrAssets(this.em, this.userCtx.id)
     if (openFiles.length === 0) {
       this.logger.log('Completed and all user files closed, removing repeatable job')
       await removeRepeatable(job)
     } else {
       this.logger.log(
         {
-          dxuser: this.user.dxuser,
+          dxuser: this.userCtx.dxuser,
           openFiles: openFiles.map((f) => ({
             name: f.name,
             dxid: f.dxid,
