@@ -122,6 +122,7 @@ describe('ChallengeOpenedEmailHandler', () => {
       ])
       expect(spaceMembershipRepoFindStub.called).to.be.false()
       expect(emailClientSendEmailStub.calledTwice).to.be.true()
+
       expect(emailClientSendEmailStub.firstCall.args[0].to).to.equal(user1.email)
       expect(emailClientSendEmailStub.firstCall.args[0].emailType).to.equal(
         EMAIL_TYPES.challengeOpened,
