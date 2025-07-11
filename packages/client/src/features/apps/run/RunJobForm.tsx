@@ -141,7 +141,7 @@ const importFormData = async (
       }
       const validationCache: Record<string, boolean> = {}
 
-      const allFileUids = Array.from(new Set(importedData.inputs.flatMap(item => collectFileUidsFromBatchInput(item))))
+      const allFileUids = Array.from(new Set(importedData.inputs.flatMap(item => collectFileUidsFromBatchInput(item)))) as string[]
       setTotalFilesToValidate(allFileUids.length)
       for (const fileUid of allFileUids) {
         const valid = await validateFile(fileUid)

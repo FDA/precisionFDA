@@ -1,5 +1,5 @@
 import { IFile } from '../files/files.types'
-import { ISpace } from './spaces.types'
+import { ISpace, SpaceType } from './spaces.types'
 
 export const SpaceTypeName = {
   groups: 'Group',
@@ -7,9 +7,9 @@ export const SpaceTypeName = {
   private_type: 'Private',
   government: 'Government',
   administrator: 'Administrator',
-}
+} as Record<ISpace['type'], string>
 
-export const getHostLeadLabel = (type: ISpace['type']) => {
+export const getHostLeadLabel = (type: SpaceType) => {
   if (type === 'review') {
     return 'Reviewer Lead'
   }
@@ -19,7 +19,7 @@ export const getHostLeadLabel = (type: ISpace['type']) => {
   return ''
 }
 
-export const getGuestLeadLabel = (type: ISpace['type']) => {
+export const getGuestLeadLabel = (type: SpaceType) => {
   if (type === 'review') {
     return 'Reviewer Lead'
   }

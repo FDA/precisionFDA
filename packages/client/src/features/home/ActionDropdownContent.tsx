@@ -1,16 +1,22 @@
 import React from 'react'
 import styled, { css } from 'styled-components'
 import { CloudResourcesConditionalAnchor } from '../../components/ConditionalAnchor'
-import { CloudResourcesConditionType } from '../../hooks/useCloudResourcesCondition'
-import { colors } from '../../styles/theme'
-import { ActionFunctionsType, ActionGroupType, Link as LinkType } from './types'
 import { CheckIcon } from '../../components/icons/CheckIcon'
 import { NavLink } from '../../components/NavLink'
-import MagicLink from './MagicPostLink'
+import { CloudResourcesConditionType } from '../../hooks/useCloudResourcesCondition'
+import { colors } from '../../styles/theme'
+import { 
+  Action, 
+  ActionGroup, 
+  Link as LinkType,
+  ModalAction,
+  RouteAction,
+  LinkAction as LinkActionType,
+  SelectionAction,
+  FunctionAction,
+} from './action-types'
 
-// Updated disbaled text color for remediation using textMediumGrey
 export const StyledActionItem = styled.li<{ disabled?: boolean, selected?: boolean }>`
-  /* padding: 0 16px; */
   margin: 0;
   list-style: none;
   color: var(--c-text-700);
@@ -31,7 +37,6 @@ export const StyledActionItem = styled.li<{ disabled?: boolean, selected?: boole
       cursor: not-allowed;
       a {
         cursor: not-allowed;
-        /* pointer-events: none; */
         color: var(--c-dropdown-menu-text-disabled);
       }
     `}
@@ -42,8 +47,6 @@ export const StyledActionItem = styled.li<{ disabled?: boolean, selected?: boole
     background: var(--tertiary-100);
   }
 `
-
-const StyledNavLink = styled.a``
 
 const StyleSelection = styled.div`
   width: fit-content;
@@ -131,7 +134,7 @@ const LinkAction = ({
   children: React.ReactNode
 }) => {
   if (disabled) {
-    return children
+    return <>{children}</>
   }
   const url = typeof link === 'string' ? link : link.url
   const method = typeof link === 'string' ? 'GET' : link.method
@@ -139,7 +142,6 @@ const LinkAction = ({
     <CloudResourcesConditionalAnchor
       href={url}
       data-turbolinks="false"
-      dataMethod={method}
       conditionType={cloudResourcesConditionType}
     >
       {children}
@@ -151,66 +153,87 @@ const LinkAction = ({
   )
 }
 
-const ActionItem = ({ action }: { action: ActionFunctionsType<any>[number] }) => {
-  const isDisabled = action?.isDisabled ?? true
+const ActionItem = ({ action }: { action: Action }) => {
+  const isDisabled = action?.isDisabled ?? false
+  
   switch (action?.type) {
-    case 'route':
+    case 'route': {
+      const routeAction = action as RouteAction
       return (
-        <StyledActionItem key={action.key} disabled={isDisabled}>
+        <StyledActionItem key={action.name} disabled={isDisabled}>
           {isDisabled ? (
-            <span>{action.key}</span>
+            <span>{action.name}</span>
           ) : (
-            <NavLink to={action?.to}>
-              {action.key}
+            <NavLink to={routeAction.to}>
+              {action.name}
             </NavLink>
           )}
         </StyledActionItem>
       )
-    case 'link':
+    }
+    case 'link': {
+      const linkAction = action as LinkActionType
       return (
         <StyledActionItem
-          key={action.key}
-          disabled={action?.isDisabled ?? true}
+          key={action.name}
+          disabled={isDisabled}
         >
           <LinkAction
-            disabled={action?.isDisabled}
-            link={action?.link}
-            cloudResourcesConditionType={action?.cloudResourcesConditionType}
+            disabled={isDisabled}
+            link={linkAction.link}
+            cloudResourcesConditionType={linkAction.cloudResourcesConditionType}
           >
-            {action.key}
+            {action.name}
           </LinkAction>
         </StyledActionItem>
       )
-    case 'selection':
+    }
+    case 'selection': {
+      const selectionAction = action as SelectionAction
       return (
-        <StyledActionItem key={action?.key}
+        <StyledActionItem 
+          key={action.name}
           onClick={() => {
-            if (!action?.isDisabled) {
-              action?.func(!action.isSelected)
+            if (!isDisabled) {
+              selectionAction.func(!selectionAction.isSelected)
             }
           }}
-          disabled={action?.isDisabled ?? true}
-          selected={ action.isSelected }
+          disabled={isDisabled}
+          selected={selectionAction.isSelected}
         >
           <StyleSelection>
             <StyleSelectionIcon>
-              {action.isSelected && <CheckIcon color={colors.primaryBlue} height={12} />}
+              {selectionAction.isSelected && <CheckIcon color={colors.primaryBlue} height={12} />}
             </StyleSelectionIcon>
-            {action?.title}
+            {selectionAction.title}
           </StyleSelection>
         </StyledActionItem>
       )
-    case 'modal':
-    default:
+    }
+    case 'modal': {
+      const modalAction = action as ModalAction
       return (
         <StyledActionItem
-          key={action?.key}
-          onClick={() => !action?.isDisabled && action?.func()}
-          disabled={action?.isDisabled ?? true}
+          key={action.name}
+          onClick={() => !isDisabled && modalAction.func()}
+          disabled={isDisabled}
         >
-          {action?.key}
+          {action.name}
         </StyledActionItem>
       )
+    }
+    default: {
+      const functionAction = action as FunctionAction
+      return (
+        <StyledActionItem
+          key={action.name}
+          onClick={() => !isDisabled && functionAction.func()}
+          disabled={isDisabled}
+        >
+          {action.name}
+        </StyledActionItem>
+      )
+    }
   }
 }
 
@@ -218,18 +241,16 @@ export function ActionsDropdownContent({
   actions,
   message,
 }: {
-  actions: ActionFunctionsType<any>
+  actions: Action[]
   message?: React.ReactNode
 }) {
-  const visibleActions = Object.keys(actions)
-    .filter(a => !actions[a]?.shouldHide ?? true)
-    .map(v => ({ key: v, ...actions[v] }))
+  const visibleActions = actions.filter(action => !action.shouldHide)
+  
   return (
     <ActionMenu>
       {message && <StyledActionsMessage>{message}</StyledActionsMessage>}
-      {/* TODO - fix "any" cast */}
-      {visibleActions.map(a => (
-        <ActionItem key={a.key} action={a as any} />
+      {visibleActions.map(action => (
+        <ActionItem key={action.name} action={action} />
       ))}
     </ActionMenu>
   )
@@ -238,19 +259,17 @@ export function ActionsDropdownContent({
 export function ActionsDropdownGroupContent({
   content,
 }: {
-  content: ActionGroupType[]
+  content: ActionGroup[]
 }) {
   return (
     <GroupActionMenu>
       {content.map((item, index) => {
-        const visibleActions = Object.keys(item.actions)
-          .filter(a => !item.actions[a]?.shouldHide ?? true)
-          .map(v => ({ key: v, ...item.actions[v] }))
+        const visibleActions = item.actions.filter(action => !action.shouldHide)
         return (
           <div key={item.title.toLowerCase().replace(/ /g, '-')}>
             {item?.title && <StyleGroupActionTitle>{item.title}</StyleGroupActionTitle>}
-            {visibleActions.map(a => (
-              <ActionItem key={a.key} action={a as any} />
+            {visibleActions.map(action => (
+              <ActionItem key={action.name} action={action} />
             ))}
             {index !== content.length - 1 && <GroupHorizontalSeparator />}
           </div>

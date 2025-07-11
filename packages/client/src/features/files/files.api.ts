@@ -1,9 +1,9 @@
 import axios from 'axios'
-import { checkStatus, getApiRequestOpts } from '../../utils/api'
 import { cleanObject } from '../../utils/object'
 import { DownloadListResponse, HomeScope, IFilter, IMeta, MetaPath, ServerScope } from '../home/types'
 import { Params, formatScopeQ, prepareListFetch } from '../home/utils'
 import { FileType, IExistingFileSet, IFile, IFolder, SelectedNode } from './files.types'
+import { License } from '../licenses/types'
 
 export interface FetchFilesQuery {
   files: (IFile | IFolder)[]
@@ -12,7 +12,7 @@ export interface FetchFilesQuery {
 
 export async function fetchFiles(filters: IFilter[], params: Params) {
   const query = prepareListFetch(filters, params)
-  const paramQ = `?${new URLSearchParams(query as {}).toString()}`
+  const paramQ = `?${new URLSearchParams(query).toString()}`
   const scopeQ = formatScopeQ(params.scope)
   return axios.get<FetchFilesQuery>(`/api/files${scopeQ}${paramQ}`).then(r => r.data)
 }
@@ -20,6 +20,7 @@ export async function fetchFiles(filters: IFilter[], params: Params) {
 export interface FetchFileQuery {
   files: IFile
   meta: {
+    object_license?: License
     path: MetaPath[]
   }
 }
@@ -29,8 +30,7 @@ export async function fetchFile(uid: string) {
 }
 
 export async function fetchTrack(fileId: number) {
-  const res = await fetch(`/api/files/${fileId}`).then(checkStatus)
-  return res.json()
+  return axios.get(`/api/files/${fileId}`).then(r => r.data)
 }
 
 export async function fetchFilesDownloadList(ids: number[], task: string, scope?: string) {
@@ -75,19 +75,11 @@ export async function addFolderRequest(
     public: homeScope === 'everybody' ? 'true' : null,
     space_id: spaceId ?? null,
   })
-  const res = await fetch('/api/files/create_folder', {
-    ...getApiRequestOpts('POST'),
-    body: JSON.stringify(data),
-  }).then(checkStatus)
-  return res.json()
+  return axios.post('/api/files/create_folder', data).then(r => r.data)
 }
 
 export async function featureFileRequest({ ids, uids, featured }: { ids: string[]; uids: string[]; featured: boolean }) {
-  const res = await fetch('/api/files/feature', {
-    ...getApiRequestOpts('PUT'),
-    body: JSON.stringify({ item_ids: [...ids, ...uids], featured }),
-  }).then(checkStatus)
-  return res.json()
+  return axios.put('/api/files/feature', { item_ids: [...ids, ...uids], featured }).then(r => r.data)
 }
 
 export async function copyFilesRequest(scope: string, ids: number[], folderId?: number) {
@@ -95,21 +87,11 @@ export async function copyFilesRequest(scope: string, ids: number[], folderId?: 
 }
 
 export async function editFileRequest({ name, description, fileId }: { name: string; description: string; fileId: string }) {
-  const res = await fetch(`/api/files/${fileId}`, {
-    ...getApiRequestOpts('PUT'),
-    body: JSON.stringify({ file: { name, description } }),
-  }).then(checkStatus)
-  return res.json()
+  return axios.put(`/api/files/${fileId}`, { file: { name, description }}).then(r => r.data)
 }
 
 export async function editFolderRequest({ name, folderId }: { name: string; folderId?: number }) {
-  const res = await (
-    await fetch('/api/folders/rename_folder', {
-      ...getApiRequestOpts('POST'),
-      body: JSON.stringify({ name, folder_id: folderId ?? null }),
-    })
-  ).json()
-  return res
+  return axios.post('/api/folders/rename_folder', { name, folder_id: folderId ?? null }).then(r => r.data)
 }
 
 export interface FetchChildrenDTO {
@@ -136,16 +118,11 @@ export const moveFilesRequest = async (nodeIds: number[], targetFolderId: number
 }
 
 export async function createFile(name: string, scope: string, folder_id: string | null) {
-  const res = await fetch('/api/create_file', {
-    ...getApiRequestOpts('POST'),
-    body: JSON.stringify({ name, scope, folder_id }),
-  }).then(checkStatus)
-
-  return res.json()
+  return axios.post('/api/create_file', { name, scope, folder_id }).then(r => r.data)
 }
 
 export async function fetchSelectedFiles(ids: number[]): Promise<SelectedNode[]> {
-  return axios.get('/api/files/selected', { params: { ids: ids.join(',') } }).then(r => r.data)
+  return axios.get('/api/files/selected', { params: { ids: ids.join(',') }}).then(r => r.data)
 }
 
 export async function validateCopyingFiles(uids: string[], scope: ServerScope): Promise<IExistingFileSet> {

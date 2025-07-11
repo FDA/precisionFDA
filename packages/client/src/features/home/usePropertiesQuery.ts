@@ -13,7 +13,7 @@ async function fetchProperties(type: PropertiesResource, scope: PropertiesScope)
   const r = await axios.get<FetchProperties>(url)
   return r.data
 }
-export const usePropertiesQuery = (type: PropertiesResource, homeScope?: HomeScope, spaceId?: number) => {
+export const usePropertiesQuery = (type: PropertiesResource, homeScope?: HomeScope, spaceId?: number | string) => {
   const map = {
     me: 'private',
     spaces: 'spaces',

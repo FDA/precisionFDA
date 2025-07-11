@@ -3,7 +3,8 @@ import { GoogleReCaptchaProvider } from 'react-google-recaptcha-v3'
 import styled from 'styled-components'
 import { GoogleReCaptchaV3 } from '../../../components/ReCaptchaV3'
 import { theme } from '../../../styles/theme'
-import { Modal } from '../../modal'
+import { ModalHeaderTop, ModalNext } from '../../modal/ModalNext'
+import { ButtonRow, Footer as ModalFooter } from '../../modal/styles'
 import { Button } from '../../../components/Button'
 
 
@@ -22,13 +23,19 @@ const Content = styled.div`
   margin: 0 12px;
 `
 
-const Footer = ({ hideAction, action, isAskingDisabled }: any) => (
-  <>
+interface FooterProps {
+  hideAction: () => void;
+  action: () => void;
+  isAskingDisabled: boolean;
+}
+
+const Footer = ({ hideAction, action, isAskingDisabled }: FooterProps) => (
+  <ButtonRow>
     <Button onClick={hideAction}>Cancel</Button>
     <Button data-variant="primary" onClick={action} disabled={isAskingDisabled}>
       Submit
     </Button>
-  </>
+  </ButtonRow>
 )
 
 const ExpertAskQuestionModalComponent = ({
@@ -38,7 +45,14 @@ const ExpertAskQuestionModalComponent = ({
   user,
   isOpen,
   isLoggedIn,
-}: any) => {
+}: {
+    hideAction: () => void;
+    action: (fullName: string, question: string, captcha: string | null) => void;
+    title: string;
+    user: { full_name: string; dxuser: string };
+    isOpen: boolean;
+    isLoggedIn: boolean;
+}) => {
   const [askedQuestion, setAskedQuestion] = useState('')
   const [triggerCaptcha, setTriggerCaptcha] = useState(false)
   const isAskingDisabled = askedQuestion === ''
@@ -78,41 +92,43 @@ const ExpertAskQuestionModalComponent = ({
   }
 
   const renderModal = () => (
-    <Modal
+    <ModalNext
       id="ask-expert"
       isShown={isOpen}
       headerText={title}
       hide={closeAction}
-      footer={
-        <Footer
-          hideAction={closeAction}
-          action={submitQuestion}
-          isAskingDisabled={isAskingDisabled}
-        />
-      }
-      >
+      variant="medium"
+    >
+      <ModalHeaderTop headerText={title} hide={closeAction} />
       <Content>
         <Asking>
           Asking as:&nbsp;
           {submitter}
         </Asking>
 
-          <StyledTextArea
-            placeholder="Submit a question.."
-            aria-label="Ask a question to submit to Expert"
-            style={{ height: '100px' }}
-            value={askedQuestion}
-            name="asking"
-            onChange={e => setAskedQuestion(e.target.value)}
+        <StyledTextArea
+          placeholder="Submit a question.."
+          aria-label="Ask a question to submit to Expert"
+          style={{ height: '100px' }}
+          value={askedQuestion}
+          name="asking"
+          onChange={e => setAskedQuestion(e.target.value)}
+        />
+        {triggerCaptcha && (
+          <GoogleReCaptchaV3
+            callback={onCaptchaSuccess}
+            action="question"
           />
-          {triggerCaptcha && (
-            <GoogleReCaptchaV3
-              callback={onCaptchaSuccess}
-              action="question"
-            />
-          )}
+        )}
       </Content>
-    </Modal>
+      <ModalFooter>
+        <Footer
+          hideAction={closeAction}
+          action={submitQuestion}
+          isAskingDisabled={isAskingDisabled}
+        />
+      </ModalFooter>
+    </ModalNext>
   )
 
   const renderModalWithCaptcha = () => {

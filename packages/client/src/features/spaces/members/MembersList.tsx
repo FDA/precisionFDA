@@ -11,13 +11,14 @@ import { PlusIcon } from '../../../components/icons/PlusIcon'
 import { Button } from '../../../components/Button'
 import { ColumnFiltersState, ColumnSort, RowSelectionState } from '@tanstack/react-table'
 import { MembersListTable } from './MembersListTable'
-import Dropdown from '../../../components/Dropdown'
+import { DropdownNext } from '../../../components/Dropdown/DropdownNext'
 import { ActionsDropdownContent } from '../../home/ActionDropdownContent'
 import { ActionsButton } from '../../home/show.styles'
 import { useMemberSelectionActions } from './useMemberSelectionActions'
 import { useColumnWidthLocalStorage } from '../../../hooks/useColumnWidthLocalStorage'
 import { createLocationKey } from '../../../utils'
 import { useHiddenColumnLocalStorage } from '../../../hooks/useHiddenColumnLocalStorage'
+import { ActionModalsRenderer } from '../../home/ActionModalsRenderer'
 
 const StyledMemberListPage = styled.div`
   flex: 1;
@@ -75,17 +76,12 @@ export const MembersList = ({ space }: { space: ISpace }) => {
     .map(index => members[Number(index)])
     .filter(Boolean)
 
-  const actions = useMemberSelectionActions({
+  const { actions, modals } = useMemberSelectionActions({
     space,
     selectedItems: selectedMembers,
     resourceKeys: ['space-members', String(space.id), sideRole || ''],
     resetSelected: () => setSelectedRows({}),
   })
-
-  if (!isLeadOrAdmin) {
-    delete actions['Edit Role']
-    delete actions['JSON Export']
-  }
 
   return (
     <ErrorBoundary>
@@ -117,16 +113,16 @@ export const MembersList = ({ space }: { space: ISpace }) => {
           {isLeadOrAdmin && (
             <ActionsRow>
               <div />
-              <Dropdown trigger="click" content={<ActionsDropdownContent actions={actions} />}>
+              <DropdownNext trigger="click" content={() => <ActionsDropdownContent actions={actions} />}>
                 {dropdownProps => (
                   <ActionsButton
                     {...dropdownProps}
                     data-testid="members-actions-button"
-                    active={dropdownProps.isActive}
+                    active={dropdownProps.$isActive}
                     disabled={selectedMembers.length === 0}
                   />
                 )}
-              </Dropdown>
+              </DropdownNext>
             </ActionsRow>
           )}
         </StyledButtonGroup>
@@ -149,8 +145,7 @@ export const MembersList = ({ space }: { space: ISpace }) => {
         />
       </StyledMemberListPage>
       {modalComp}
-      {actions['Remove']?.modal}
-      {actions['Edit Role']?.modal}
+      <ActionModalsRenderer modals={modals} />
     </ErrorBoundary>
   )
 }

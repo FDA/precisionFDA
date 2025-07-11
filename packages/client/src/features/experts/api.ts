@@ -1,17 +1,21 @@
 import axios from 'axios'
 import { cleanObject } from '../../utils/object'
-import { Pagination, PaginationMetaV2 } from '../../types/pagination'
+import { PaginationMetaV2 } from '../../types/pagination'
 import { Expert, ExpertDetailsResponse } from './types'
-import { backendCall } from '../../utils/api'
+
+export interface IParams {
+  page?: number,
+  year?: number,
+}
 
 export interface ExpertsListResponse {
   meta?: PaginationMetaV2
   data: Expert[]
 }
 
-export async function expertsListRequest(params: any) {
-  const filters = cleanObject({ year: params.year, page: params.page })
-  const paramQ = `?${new URLSearchParams(filters as any).toString()}`
+export async function expertsListRequest(params: IParams) {
+  const filters = cleanObject({ year: params.year?.toString(), page: params.page?.toString() })
+  const paramQ = `?${new URLSearchParams(filters).toString()}`
   return axios.get(`/api/v2/experts${paramQ}`).then(response => response.data as ExpertsListResponse)
 }
 
@@ -21,7 +25,7 @@ export async function expertsYearsListRequest(): Promise<NewsYearsListResponse> 
 }
 
 export const askQuestion = (data: { userName: string; question: string; captchaValue: string }, expertId: string) =>
-  backendCall(`/api/experts/${expertId}/ask_question`, 'POST', data)
+  axios.post(`/api/experts/${expertId}/ask_question`, data).then(response => response.data)
 
 export const expertDetailsRequest = (expertId: string) =>
   axios.get(`/api/experts/${expertId}`).then(r => r.data as ExpertDetailsResponse)

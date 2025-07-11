@@ -28,7 +28,7 @@ import {
   StyledSubtitle,
   Tab,
 } from '../../actionModals/styles'
-import { DialogType } from '../../home/types'
+import { DialogType, ServerScope } from '../../home/types'
 import { fetchFilteredComparisons } from '../comparisons.api'
 import { IComparison } from '../comparisons.types'
 import { Button } from '../../../components/Button'
@@ -105,7 +105,7 @@ export const useSelectComparisonModal = (
   type: DialogType,
   handleSelect: (comparisons: IComparison[]) => void,
   subtitle?: string,
-  scopes?: string[],
+  scopes: ServerScope[] = [],
 ) => {
   const user = useAuthUser()
   const listedComparisons: IComparison[] = []
@@ -118,7 +118,7 @@ export const useSelectComparisonModal = (
 
   const { data: comparisonsData, isLoading: isLoadingComparisons, status: loadingComparisonsStatus } = useQuery({
     queryKey: ['list_comparisons', searchText],
-    queryFn: () => fetchFilteredComparisons(searchText, scopes ?? ([] as any)), // scopes: [] mean all scopes.
+    queryFn: () => fetchFilteredComparisons(searchText, scopes), // scopes: [] mean all scopes.
     enabled: isShown,
   })
 
@@ -209,7 +209,7 @@ export const useSelectComparisonModal = (
             <StyledOnlyMine>
               <input
                 type="checkbox"
-                onClick={e => toggleOnlyMine(e.target.checked)}
+                onClick={e => toggleOnlyMine((e.target as HTMLInputElement).checked)}
               />
               Only mine
             </StyledOnlyMine>

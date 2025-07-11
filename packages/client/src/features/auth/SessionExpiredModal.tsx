@@ -14,7 +14,6 @@ export const SessionExpiredModal: React.FC<UseModal> = props => {
       hide={() => props.setShowModal(false)}
       headerText="Session Expired"
       id='session-expired-modal'
-      disableClose
       blur
     >
       <ModalHeaderTop
@@ -28,11 +27,11 @@ export const SessionExpiredModal: React.FC<UseModal> = props => {
       <Footer>
         <ButtonRow>
           {data?.ssoButton.isEnabled && (
-            <Button data-variant="primary" onClick={() => onLogInWithSSO(data.ssoButton.data.ssoUrl)}>
+            <Button data-variant="primary" onClick={() => onLogInWithSSO(data.ssoButton.data?.ssoUrl)}>
               Log In with SSO
             </Button>
           )}
-          <Button data-variant="primary" onClick={() => (window.location = '/login')}>
+          <Button data-variant="primary" onClick={() => (window.location.href = '/login')}>
             Log in
           </Button>
         </ButtonRow>

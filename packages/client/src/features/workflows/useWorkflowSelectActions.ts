@@ -1,4 +1,4 @@
-import { pick } from 'ramda'
+import { useMemo } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
@@ -8,9 +8,10 @@ import { useDeleteModal } from '../actionModals/useDeleteModal'
 import { useEditTagsModal } from '../actionModals/useEditTagsModal'
 import { useFeatureMutation } from '../actionModals/useFeatureMutation'
 import { useExportToModal } from '../apps/useExportToModal'
-import { ActionFunctionsType, HomeScope } from '../home/types'
+import { HomeScope } from '../home/types'
+import { Action } from '../home/action-types'
 import { copyWorkflowsRequest, deleteWorkflowRequest } from './workflows.api'
-import { IWorkflow, WorkflowActions } from './workflows.types'
+import { IWorkflow } from './workflows.types'
 import { useEditPropertiesModal } from '../actionModals/useEditPropertiesModal'
 
 export const useWorkflowSelectActions = ({ homeScope, spaceId, selectedItems, resourceKeys, resetSelected }: { homeScope?: HomeScope, spaceId?: string, selectedItems: IWorkflow[], resourceKeys: string[], resetSelected?: () => void }) => {
@@ -27,12 +28,11 @@ export const useWorkflowSelectActions = ({ homeScope, spaceId, selectedItems, re
   const {
     modalComp: copyToSpaceModal,
     setShowModal: setCopyToSpaceModal,
-    isShown: isShownCopyToSpaceModal,
   } = useCopyToSpaceModal<IWorkflow>({
     resource: 'workflows',
     selected,
     updateFunction: copyWorkflowsRequest,
-    onSuccess: (res: any) => {
+    onSuccess: (res: { workflows?: Array<{ uid: string }> }) => {
       toast.success('The workflow has been copied to the space successfully.')
       queryClient.invalidateQueries({ queryKey: resourceKeys }).then(() => {
         if (Array.isArray(res.workflows)) {
@@ -45,7 +45,6 @@ export const useWorkflowSelectActions = ({ homeScope, spaceId, selectedItems, re
   const {
     modalComp: tagsModal,
     setShowModal: setTagsModal,
-    isShown: isShownTagsModal,
   } = useEditTagsModal({
     resource: 'workflows',
     selected: { uid: `workflow-series-${selected[0]?.workflow_series_id}`, name: selected[0]?.name, tags: selected[0]?.tags },
@@ -57,139 +56,150 @@ export const useWorkflowSelectActions = ({ homeScope, spaceId, selectedItems, re
   const {
     modalComp: propertiesModal,
     setShowModal: setPropertiesModal,
-    isShown: isShownPropertiesModal,
   } = useEditPropertiesModal({
     type: 'workflowSeries',
-    selected: selected.map(wrkflw => ({ ...wrkflw, id: wrkflw.workflow_series_id  })),
+    selected: selected.map(wrkflw => ({ ...wrkflw, id: wrkflw.workflow_series_id })),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: resourceKeys })
-      queryClient.invalidateQueries({ queryKey: ['edit-resource-properties', 'workflowSeries'] })
+      queryClient.invalidateQueries({ queryKey: ['edit-resource-properties', 'workflowSeries']})
     },
   })
 
   const {
     modalComp: deleteModal,
     setShowModal: setDeleteModal,
-    isShown: isShownDeleteModal,
   } = useDeleteModal({
     resource: 'workflow',
     selected: selected.map(s => ({ name: s.name, id: s.uid, location: s.location })),
-    request: deleteWorkflowRequest,
+    request: (ids: string[]) => deleteWorkflowRequest(ids.map(String)),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ['workflows'],
       })
-      if(spaceId) {
+      if (spaceId) {
         navigate(`/spaces/${spaceId}/workflows`)
       } else {
         navigate('/home/workflows')
       }
-      if(resetSelected) resetSelected()
+      if (resetSelected) resetSelected()
     },
   })
 
   const {
     modalComp: exportToModal,
     setShowModal: setExportToModal,
-    isShown: isShownExportToModal,
   } = useExportToModal({ selected: selected[0], resource: 'workflows' })
 
   const links = selected[0]?.links
 
-  let actions: ActionFunctionsType<WorkflowActions> = {
-    'Run': {
-      type: 'route',
-      to: `${links?.show}/analyses/new`,
-      isDisabled: selected.length !== 1 || !links?.run_workflow,
-      cloudResourcesConditionType: 'all',
-    },
-    'Run Batch': {
-      type: 'link',
-      link: links?.batch_run_workflow,
-      isDisabled: selected.length !== 1 || !links?.batch_run_workflow,
-      cloudResourcesConditionType: 'all',
-    },
-    'Diagram': {
-      type: 'link',
-      link: links?.diagram,
-      isDisabled: selected.length !== 1 || !links?.diagram,
-    },
-    'Edit': {
-      type: 'link',
-      link: links?.edit,
-      isDisabled: selected.length !== 1 || !links?.edit,
-    },
-    'Fork': {
-      type: 'link',
-      link: links?.fork,
-      isDisabled: selected.length !== 1 || !links?.fork,
-    },
-    'Export to': {
-      type: 'modal',
-      func: () => setExportToModal(true),
-      modal: exportToModal,
-      showModal: isShownExportToModal,
-      isDisabled: selected.length !== 1,
-    },
-    'Feature': {
-      type: 'modal',
-      func: () => {
-        featureMutation.mutateAsync({ featured: true, uids: selected.map(f => f.uid) })
+  const actions: Action[] = useMemo(() => {
+    const allActions: Action[] = [
+      {
+        name: 'Run',
+        type: 'route',
+        to: `${links?.show}/analyses/new`,
+        isDisabled: selected.length !== 1 || !links?.run_workflow,
+        cloudResourcesConditionType: 'all',
       },
-      isDisabled: selected.length === 0 || !selected.every(e => !e.featured || !e.links.feature),
-      shouldHide: !isAdmin || homeScope !== 'everybody',
-    },
-    'Unfeature': {
-      type: 'modal',
-      func: () => {
-        featureMutation.mutateAsync({ featured: false, uids: selected.map(f => f.uid) })
+      {
+        name: 'Run Batch',
+        type: 'link',
+        link: links?.batch_run_workflow || '',
+        isDisabled: selected.length !== 1 || !links?.batch_run_workflow,
+        cloudResourcesConditionType: 'all',
       },
-      isDisabled: selected.length === 0 || !selected.every(e => e.featured || !e.links.feature),
-      shouldHide: !isAdmin || homeScope !== 'everybody' && homeScope !== 'featured',
-    },
-    'Delete': {
-      type: 'modal',
-      func: () => setDeleteModal(true),
-      modal: deleteModal,
-      showModal: isShownDeleteModal,
-      shouldHide: homeScope === 'spaces',
-      isDisabled: selected.some((e) => !e.links?.delete) || selected.length === 0,
-    },
-    'Copy to space': {
-      type: 'modal',
-      func: () => setCopyToSpaceModal(true),
-      isDisabled:
-        selected.length === 0 || selected.some(e => !e.links?.copy),
-      modal: copyToSpaceModal,
-      showModal: isShownCopyToSpaceModal,
-    },
-    'Comments': {
-      type: 'link',
-      link: `/workflows/${selected[0]?.uid}/comments`,
-      isDisabled: false,
-      shouldHide: selected.length !== 1,
-    },
-    'Edit tags': {
-      type: 'modal',
-      func: () => setTagsModal(true),
-      isDisabled: false,
-      modal: tagsModal,
-      showModal: isShownTagsModal,
-      shouldHide: (!isAdmin && selected[0]?.added_by !== user.full_name) || (selected.length !== 1),
-    },
-    'Edit properties': {
-      type: 'modal',
-      func: () => setPropertiesModal(true),
-      isDisabled: selected.length === 0,
-      modal: propertiesModal,
-      showModal: isShownPropertiesModal,
-      shouldHide: (!isAdmin && selected[0]?.added_by !== user.full_name),
-    },
-  }
+      {
+        name: 'Diagram',
+        type: 'link',
+        link: links?.diagram || '',
+        isDisabled: selected.length !== 1 || !links?.diagram,
+      },
+      {
+        name: 'Edit',
+        type: 'link',
+        link: links?.edit || '',
+        isDisabled: selected.length !== 1 || !links?.edit,
+      },
+      {
+        name: 'Fork',
+        type: 'link',
+        link: links?.fork || '',
+        isDisabled: selected.length !== 1 || !links?.fork,
+      },
+      {
+        name: 'Export to',
+        type: 'modal',
+        func: () => setExportToModal(true),
+        isDisabled: selected.length !== 1,
+      },
+      {
+        name: 'Feature',
+        type: 'modal',
+        func: () => {
+          featureMutation.mutateAsync({ featured: true, uids: selected.map(f => f.uid) })
+        },
+        isDisabled: selected.length === 0 || !selected.every(e => !e.featured || !e.links.feature),
+        shouldHide: !isAdmin || homeScope !== 'everybody',
+      },
+      {
+        name: 'Unfeature',
+        type: 'modal',
+        func: () => {
+          featureMutation.mutateAsync({ featured: false, uids: selected.map(f => f.uid) })
+        },
+        isDisabled: selected.length === 0 || !selected.every(e => e.featured || !e.links.feature),
+        shouldHide: !isAdmin || (homeScope !== 'everybody' && homeScope !== 'featured'),
+      },
+      {
+        name: 'Delete',
+        type: 'modal',
+        func: () => setDeleteModal(true),
+        shouldHide: homeScope === 'spaces',
+        isDisabled: selected.some((e) => !e.links?.delete) || selected.length === 0,
+      },
+      {
+        name: 'Copy to space',
+        type: 'modal',
+        func: () => setCopyToSpaceModal(true),
+        isDisabled: selected.length === 0 || selected.some(e => !e.links?.copy),
+      },
+      {
+        name: 'Comments',
+        type: 'link',
+        link: `/workflows/${selected[0]?.uid}/comments`,
+        isDisabled: false,
+        shouldHide: selected.length !== 1,
+      },
+      {
+        name: 'Edit tags',
+        type: 'modal',
+        func: () => setTagsModal(true),
+        isDisabled: false,
+        shouldHide: (!isAdmin && selected[0]?.added_by !== user?.full_name) || (selected.length !== 1),
+      },
+      {
+        name: 'Edit properties',
+        type: 'modal',
+        func: () => setPropertiesModal(true),
+        isDisabled: selected.length === 0,
+        shouldHide: (!isAdmin && selected[0]?.added_by !== user?.full_name),
+      },
+    ]
 
-  if(homeScope === 'spaces') {
-    actions = pick(['Fork', 'Export to', 'Copy to space'], actions)
-  }
+    if (homeScope === 'spaces') {
+      return allActions.filter(action => ['Fork', 'Export to', 'Copy to space'].includes(action.name))
+    }
 
-  return actions
+    return allActions
+  }, [selected, links, homeScope, isAdmin, user?.full_name, featureMutation, setExportToModal, setDeleteModal, setCopyToSpaceModal, setTagsModal, setPropertiesModal])
+
+  const modals = useMemo(() => ({
+    'Copy to space': copyToSpaceModal,
+    'Delete': deleteModal,
+    'Export to': exportToModal,
+    'Edit tags': tagsModal,
+    'Edit properties': propertiesModal,
+  }), [copyToSpaceModal, deleteModal, exportToModal, tagsModal, propertiesModal])
+
+  return { actions, modals }
 }

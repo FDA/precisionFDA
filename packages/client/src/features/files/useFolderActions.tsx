@@ -1,13 +1,26 @@
+import { ReactNode } from 'react'
 import { useCloudResourcesCondition } from '../../hooks/useCloudResourcesCondition'
-import { ActionFunctionsType, HomeScope } from '../home/types'
+import { Action } from '../home/action-types'
+import { extractModalsFromActions } from '../home/extractModalsFromActions'
+import { HomeScope } from '../home/types'
 import { useAddFolderModal } from './actionModals/useAddFolderModal'
 import { useCopyFilesToSpaceModal } from './actionModals/useCopyFilesToSpaceModal'
 import { useFileUploadModal } from './actionModals/useFileUploadModal'
 import { useOptionAddFileModal } from './actionModals/useOptionAddFileModal'
-import { FolderActions } from './files.types'
 
-export const useFolderActions = (homeScope?: HomeScope, folderId?: string, spaceId?: string, resetSelected?: () => void) => {
+export interface UseFolderActionsResult {
+  actions: Action[]
+  modals: Record<string, ReactNode>
+}
+
+export const useFolderActions = (
+  homeScope?: HomeScope,
+  folderId?: string,
+  spaceId?: string,
+  resetSelected?: () => void,
+): UseFolderActionsResult => {
   const { isAllowed, onViolation } = useCloudResourcesCondition('totalLimitCheck')
+  
   const { modalComp: AddFolderModal, setShowModal: setShowAddFolderModal } = useAddFolderModal({
     homeScope,
     folderId,
@@ -15,6 +28,7 @@ export const useFolderActions = (homeScope?: HomeScope, folderId?: string, space
     isAllowed,
     onViolation,
   })
+  
   const { modalComp: FileUploadModal, setShowModal: setShowFileUploadModal } = useFileUploadModal({
     homeScope,
     folderId,
@@ -25,38 +39,46 @@ export const useFolderActions = (homeScope?: HomeScope, folderId?: string, space
       if (resetSelected) resetSelected()
     },
   })
+  
   const { modalComp: CopyFilesModal, setShowModal: setShowCopyFilesModal } = useCopyFilesToSpaceModal({ spaceId })
+  
   const { modalComp: OptionAddFileModal, setShowModal: setShowOptionAddFileModal } = useOptionAddFileModal({
     setShowFileUploadModal,
     setShowCopyFilesModal,
   })
 
-  const listActionsFunctions: ActionFunctionsType<FolderActions> = {
-    'Add Folder': {
+  const actions: Action[] = [
+    {
+      name: 'Add Folder',
       type: 'modal',
-      func: ({ showModal = false } = {}) => setShowAddFolderModal(showModal),
+      func: () => setShowAddFolderModal(true),
       isDisabled: false,
       modal: AddFolderModal,
     },
-    'Add Files': {
+    {
+      name: 'Add Files',
       type: 'modal',
-      func: ({ showModal = false } = {}) => setShowFileUploadModal(showModal),
+      func: () => setShowFileUploadModal(true),
       isDisabled: false,
       modal: FileUploadModal,
     },
-    'Copy Files': {
+    {
+      name: 'Copy Files',
       type: 'modal',
-      func: ({ showModal = false } = {}) => setShowCopyFilesModal(showModal),
+      func: () => setShowCopyFilesModal(true),
       isDisabled: false,
       modal: CopyFilesModal,
     },
-    'Choose Add Option': {
+    {
+      name: 'Choose Add Option',
       type: 'modal',
-      func: ({ showModal = false } = {}) => setShowOptionAddFileModal(showModal),
+      func: () => setShowOptionAddFileModal(true),
       isDisabled: false,
       modal: OptionAddFileModal,
     },
-  }
+  ]
 
-  return listActionsFunctions
+  const modals = extractModalsFromActions(actions)
+
+  return { actions, modals }
 }

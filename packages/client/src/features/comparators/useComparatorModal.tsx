@@ -1,15 +1,29 @@
 import React from 'react'
 import { useMutation } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
-import { checkStatus, getApiRequestOpts } from '../../utils/api'
-import { Modal } from '../modal'
-import { StyledModalContent } from '../modal/styles'
+import { ModalHeaderTop, ModalNext } from '../modal/ModalNext'
+import { ButtonRow, Footer, StyledModalContent } from '../modal/styles'
 import { useModal } from '../modal/useModal'
 import { FileLicense } from '../assets/assets.types'
 import { Button } from '../../components/Button'
+import axios from 'axios'
 
 
 type ComparatorActionTypes = 'remove_from_comparators' | 'add_to_comparators' | 'set_app'
+
+interface ComparatorPayload {
+  dxid: string
+}
+
+interface ApiResponse {
+  error?: string
+  meta?: {
+    messages?: Array<{
+      type: string
+      message: string
+    }>
+  }
+}
 
 const getMessage = (actionType?: ComparatorActionTypes) => {
   switch (actionType) {
@@ -27,26 +41,19 @@ const getMessage = (actionType?: ComparatorActionTypes) => {
 export type SetShowModalArgs = (isShown: boolean, actionType: ComparatorActionTypes) => void
 export type ComparatorActionRequest = { actionType: ComparatorActionTypes, dxid: string }
 
-
-export async function addToComparatorsRequest(payload: any) {
-  return fetch('/admin/apps/add_to_comparators', {
-    ...getApiRequestOpts('POST'),
-    body: JSON.stringify(payload),
-  }).then(checkStatus)
+export async function addToComparatorsRequest(payload: ComparatorPayload) {
+  const response = await axios.post('/admin/apps/add_to_comparators', payload)
+  return response.data
 }
 
-export async function removeFromComparatorsRequest(payload: any) {
-  return fetch('/admin/apps/remove_from_comparators', {
-    ...getApiRequestOpts('POST'),
-    body: JSON.stringify(payload),
-  }).then(checkStatus)
+export async function removeFromComparatorsRequest(payload: ComparatorPayload) {
+  const response = await axios.post('/admin/apps/remove_from_comparators', payload)
+  return response.data
 }
 
-export async function setAppDefaultComparatorsRequest(payload: any) {
-  return fetch('/admin/apps/set_comparison_app', {
-    ...getApiRequestOpts('POST'),
-    body: JSON.stringify(payload),
-  }).then(checkStatus)
+export async function setAppDefaultComparatorsRequest(payload: ComparatorPayload) {
+  const response = await axios.post('/admin/apps/set_comparison_app', payload)
+  return response.data
 }
 
 const comparatorActionRequest = (actionType: ComparatorActionTypes, dxid: string) => {
@@ -84,18 +91,18 @@ export function useComparatorModal<
 }: {
   actionType: ComparatorActionTypes
   selected: T
-  onSuccess?: (res?: any) => void
+  onSuccess?: (res?: ApiResponse) => void
 }) {
   const { isShown, setShowModal } = useModal()
   const mutation = useMutation({
     mutationKey: ['comparator-action'],
-    mutationFn: async ({ actionType, dxid }: ComparatorActionRequest) => {
-      return comparatorActionRequest(actionType, dxid)
+    mutationFn: async ({ actionType: mutationActionType, dxid }: ComparatorActionRequest) => {
+      return comparatorActionRequest(mutationActionType, dxid)
     },
-    onError: (res) => {
+    onError: () => {
       toast.error(`Error: ${comparatorActionText(actionType)} request`)
     },
-    onSuccess: (res: any) => {
+    onSuccess: (res: ApiResponse) => {
       if (res.error) {
         toast.error('Error: ' + res.error)
         setShowModal(false)
@@ -103,7 +110,7 @@ export function useComparatorModal<
       }
       const messages = res?.meta?.messages
       if (messages) {
-        messages.forEach((message: any) => {
+        messages.forEach((message) => {
           if (message.type === 'warning') {
             toast.error(message.message)
           }
@@ -120,61 +127,70 @@ export function useComparatorModal<
     setShowModal(false)
   }
 
-  const handeExternalSetShowModal = (isShown: boolean, actionType: ComparatorActionTypes) => {
-    setShowModal(isShown)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const handleExternalSetShowModal = (modalShown: boolean, modalActionType: ComparatorActionTypes) => {
+    // Note: modalActionType parameter is required by SetShowModalArgs type but not used in current implementation
+    setShowModal(modalShown)
   }
 
-  const handleComparatorSubmit = ({ actionType, dxid }: { actionType: ComparatorActionTypes, dxid?: string }) => {
-    if(actionType && dxid) mutation.mutateAsync({ actionType, dxid })
+  const handleComparatorSubmit = ({ actionType: submitActionType, dxid }: { actionType: ComparatorActionTypes, dxid?: string }) => {
+    if(submitActionType && dxid) mutation.mutateAsync({ actionType: submitActionType, dxid })
   }
 
   const getFooter = () => {
     switch (actionType) {
       case 'remove_from_comparators':
         return (
-          <>
+          <ButtonRow>
             <Button onClick={handleClose} disabled={mutation.isPending}>Cancel</Button>
             <Button data-variant="warning" onClick={() => handleComparatorSubmit({ actionType: 'remove_from_comparators', dxid: selected.dxid })} disabled={mutation.isPending}>Remove from Comparators</Button>
-          </>
+          </ButtonRow>
         )
       case 'add_to_comparators':
         return (
-          <>
+          <ButtonRow>
             <Button onClick={handleClose} disabled={mutation.isPending}>Cancel</Button>
             <Button data-variant="primary" onClick={() => handleComparatorSubmit({ actionType: 'add_to_comparators', dxid: selected.dxid })} disabled={mutation.isPending}>Add to Comparators</Button>
-          </>
+          </ButtonRow>
         )
       case 'set_app':
         return (
-          <>
+          <ButtonRow>
             <Button onClick={handleClose} disabled={mutation.isPending}>No</Button>
             <Button data-variant="primary" onClick={() => handleComparatorSubmit({ actionType: 'set_app', dxid: selected.dxid })} disabled={mutation.isPending}>Yes</Button>
-          </>
+          </ButtonRow>
         )
       default:
         return (
-          <Button onClick={handleClose}>Cancel</Button>
+          <ButtonRow>
+            <Button onClick={handleClose}>Cancel</Button>
+          </ButtonRow>
         )
     }
   }
 
 
   const modalComp = (
-    <Modal
+    <ModalNext
       data-testid={`modal-comparator-${actionType}`}
-      headerText={`Attention!`}
+      headerText='Attention!'
       isShown={isShown}
       hide={handleClose}
-      footer={getFooter()}
+      variant="small"
+      id={`comparator-modal-${actionType}`}
     >
+      <ModalHeaderTop headerText='Attention!' hide={handleClose} />
       <StyledModalContent>
         {getMessage(actionType)}
       </StyledModalContent>
-    </Modal>
+      <Footer>
+        {getFooter()}
+      </Footer>
+    </ModalNext>
   )
   return {
     modalComp,
-    setShowModal: handeExternalSetShowModal,
+    setShowModal: handleExternalSetShowModal,
     isShown,
   }
 }

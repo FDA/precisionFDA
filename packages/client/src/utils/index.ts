@@ -4,7 +4,7 @@ export function getSpaceIdFromScope(scope?: string) {
   if (!scope) return undefined
   const [resource, id] = scope.split('-')
   if (resource !== 'space') return undefined
-  return parseInt(id, 10) || undefined
+  return parseInt(id, 10).toString() || undefined
 }
 
 export function createSequenceGenerator() {

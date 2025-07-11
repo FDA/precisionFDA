@@ -115,37 +115,50 @@ export function Attachments({
         trigger="click"
         content={
           <ActionsDropdownContent
-            actions={{
-              Files: {
+            actions={[
+              {
+                name: 'Files',
+                type: 'modal',
                 func: () => setFilesShowModal(true),
                 isDisabled: false,
               },
-              Folders: {
+              {
+                name: 'Folders',
+                type: 'modal',
                 func: () => setFoldersShowModal(true),
                 isDisabled: scope === 'public',
               },
-              Assets: {
+              {
+                name: 'Assets',
+                type: 'modal',
                 func: () => setAssetsShowModal(true),
                 isDisabled: false,
               },
-              Apps: {
+              {
+                name: 'Apps',
+                type: 'modal',
                 func: () => setAppsShowModal(true),
                 isDisabled: false,
               },
-              Jobs: {
+              {
+                name: 'Jobs',
+                type: 'modal',
                 func: () => setJobShowModal(true),
                 isDisabled: false,
               },
-              Comparisons: {
+              {
+                name: 'Comparisons',
+                type: 'modal',
                 func: () => setComparisonsShowModal(true),
                 isDisabled: false,
               },
-            }}
+            ]}
           />
         }
       >
         {dropdownProps => (
-          <Button type="button" {...dropdownProps} data-testid="admin-users-resource-button" active={dropdownProps.isActive}>
+          // @ts-expect-error ref not copatible with styled-components
+          <Button type="button" {...dropdownProps} data-testid="admin-users-resource-button" active={`${dropdownProps.$isActive}`}>
             Select Attachment
           </Button>
         )}

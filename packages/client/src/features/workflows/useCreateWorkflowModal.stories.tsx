@@ -28,7 +28,6 @@ const CreateWorkflowModalWrapper = () => {
   useEffect(() => {
     setShowModal(true)
   }, [setShowModal])
-
   return modalComp
 }
 
