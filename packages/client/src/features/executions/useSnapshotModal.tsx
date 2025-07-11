@@ -60,7 +60,7 @@ const SnapshotForm = ({
   onSubmit,
 }: {
   execution: IExecution
-  onSubmit: any
+  onSubmit: (data: CreateSnapshotForm) => void
 }) => {
   const {
     register,
@@ -92,7 +92,7 @@ const SnapshotForm = ({
           <Checkbox
             {...register('terminate')}
             disabled={isSubmitting}
-            onChange={(event: any) =>
+            onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
               setValue('terminate', event.target.checked)
             }
           />
@@ -106,7 +106,7 @@ const SnapshotForm = ({
   )
 }
 
-export function useSnapshotModal<T extends { ids: string[]; name: string }>({
+export function useSnapshotModal({
   selected,
 }: {
   selected: IExecution
@@ -119,11 +119,11 @@ export function useSnapshotModal<T extends { ids: string[]; name: string }>({
     mutationFn: (vals: CreateSnapshotForm) =>
       workstationSnapshotRequest(selected.dxid, vals),
     onError: (e: AxiosError) => {
-      const payload = e.response?.data as any
+      const payload = e.response?.data as { error?: { message: string } }
       const message = payload?.error?.message ?? e.message
       toast.error(`Error creating snapshot: ${message}`)
     },
-    onSuccess: (res: any) => {
+    onSuccess: (res: { meta?: { messages: { message: string }[] } }) => {
       if (res?.meta?.messages[0]) {
         toast.error(`Error creating snapshot: ${res?.meta?.messages[0].message}`)
         return
@@ -147,6 +147,7 @@ export function useSnapshotModal<T extends { ids: string[]; name: string }>({
 
   const modalComp = (
     <ModalNext
+      id="modal-create-snapshot"
       data-testid="modal-create-snapshot"
       isShown={Boolean(isShown)}
       hide={() => setShowModal(false)}

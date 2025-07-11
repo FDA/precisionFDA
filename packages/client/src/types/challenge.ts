@@ -31,7 +31,7 @@ interface IChallenge extends IListItem {
   endAt: Date,
   createdAt: Date,
   updatedAt: Date,
-  status: "setup" | "pre-registration" | "open" | "paused" | "archived" | "result_announced",
+  status: 'setup' | 'pre-registration' | 'open' | 'paused' | 'archived' | 'result_announced',
   automated: boolean,
   cardImageUrl: string,
   cardImageId: string,
@@ -40,8 +40,8 @@ interface IChallenge extends IListItem {
   spaceId: number,
   isFollowed: boolean, // True if user has joined the challenge
   canEdit: boolean,
-  links: any,
-  timeStatus: "upcoming" | "current" | "ended",
+  links: Record<string, string>,
+  timeStatus: 'upcoming' | 'current' | 'ended',
 }
 
 export type {

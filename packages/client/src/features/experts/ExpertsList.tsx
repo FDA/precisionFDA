@@ -99,12 +99,12 @@ const ExpertsList = () => {
   const user = useAuthUser()
   const userCanCreateExpert = user?.can_administer_site
   const location = useLocation()
-  const { year }: any = queryString.parse(location.search)
+  const { year } = queryString.parse(location.search)
 
   const pagination = usePaginationParams()
 
   const { data: response, isLoading } = useExpertsListQuery({
-    year,
+    year: parseInt(year as string, 10) || undefined,
     page: pagination.pageParam,
   })
   const { data: yearsListData, isLoading: isLoadingYearsList } = useQuery({

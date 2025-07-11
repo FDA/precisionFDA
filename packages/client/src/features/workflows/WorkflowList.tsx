@@ -1,7 +1,7 @@
 import { ColumnDefResolved, ColumnFiltersState, ColumnSizingState, ColumnSort, VisibilityState } from '@tanstack/react-table'
 import React from 'react'
 import { Button } from '../../components/Button'
-import Dropdown from '../../components/Dropdown'
+import { DropdownNext } from '../../components/Dropdown/DropdownNext'
 import { ContentFooter } from '../../components/Page/ContentFooter'
 import { Pagination } from '../../components/Pagination'
 import Table from '../../components/Table'
@@ -22,6 +22,7 @@ import { useWorkflowSelectActions } from './useWorkflowSelectActions'
 import { fetchWorkflowList } from './workflows.api'
 import { IWorkflow } from './workflows.types'
 import { StyledPageTable } from '../../components/Table/components/styles'
+import { ActionModalsRenderer } from '../home/ActionModalsRenderer'
 
 type ListType = { workflows: IWorkflow[]; meta: IMeta }
 
@@ -31,7 +32,7 @@ export const WorkflowList = ({
   isContributorOrHigher,
 }: {
   homeScope?: HomeScope
-  spaceId?: number
+  spaceId?: string
   isContributorOrHigher?: boolean
 }) => {
   const user = useAuthUser()
@@ -65,14 +66,14 @@ export const WorkflowList = ({
   const { data: propetiesData } = usePropertiesQuery('workflowSeries', homeScope, spaceId)
 
   const selectedObjects = getSelectedObjectsFromIndexes(selectedIndexes, data?.workflows)
-  const actions = useWorkflowSelectActions({
+  const { actions, modals } = useWorkflowSelectActions({
     homeScope,
-    spaceId,
+    spaceId: spaceId?.toString(),
     selectedItems: selectedObjects,
     resourceKeys: ['workflows'],
     resetSelected,
   })
-  const listActions = useWorkflowListActions({ spaceId })
+  const { actions: listActions, modals: listModals } = useWorkflowListActions({ spaceId: spaceId?.toString() || '' })
   const message = homeScope === 'spaces' && 'To perform other actions on this workflow, access it from the Space'
 
   if (error) return <div>Error! {JSON.stringify(error)}</div>
@@ -98,17 +99,22 @@ export const WorkflowList = ({
               <Button
                 data-variant="primary"
                 data-testid="spaces-workflows-add-button"
-                onClick={() => listActions['Add Workflow']?.func({ showModal: true })}
+                onClick={() => {
+                  const addAction = listActions.find(action => action.name === 'Add Workflow')
+                  if (addAction && addAction.type === 'modal') {
+                    addAction.func({ showModal: true })
+                  }
+                }}
               >
                 <PlusIcon height={12} /> Add Workflow
               </Button>
             )}
           </QuickActions>
-          <Dropdown trigger="click" content={<ActionsDropdownContent actions={actions} message={message} />}>
+          <DropdownNext trigger="click" content={() => <ActionsDropdownContent actions={actions} message={message} />}>
             {dropdownProps => (
-              <ActionsButton {...dropdownProps} data-testid="home-workflows-actions-button" active={dropdownProps.isActive} />
+              <ActionsButton {...dropdownProps} data-testid="home-workflows-actions-button" active={dropdownProps.$isActive} />
             )}
-          </Dropdown>
+          </DropdownNext>
         </ActionsRow>
       </ResourceHeader>
 
@@ -116,8 +122,7 @@ export const WorkflowList = ({
         isAdmin={isAdmin}
         homeScope={homeScope}
         setFilters={setSearchFilter}
-        // TODO(samuel) Typescript fix
-        filters={toArrayFromObject(filterQuery as any)}
+        filters={toArrayFromObject(filterQuery)}
         workflows={data?.workflows}
         properties={propetiesData?.keys}
         isLoading={isLoading}
@@ -138,21 +143,14 @@ export const WorkflowList = ({
           totalPages={data?.meta?.pagination?.total_pages}
           perPage={perPageParam}
           isHidden={false}
-          isPreviousData={data?.meta?.pagination?.prev_page !== null}
-          isNextData={data?.meta?.pagination?.next_page !== null}
           setPage={p => setPageParam(p, 'replaceIn')}
           onPerPageSelect={p => setPerPageParam(p, 'replaceIn')}
         />
         <HoverDNAnexusLogo opacity height={14} />
       </ContentFooter>
 
-      {listActions['Create Workflow']?.modal}
-      {listActions['Add Workflow']?.modal}
-      {actions['Copy to space']?.modal}
-      {actions['Delete']?.modal}
-      {actions['Export to']?.modal}
-      {actions['Edit tags']?.modal}
-      {actions['Edit properties']?.modal}
+      <ActionModalsRenderer modals={listModals} />
+      <ActionModalsRenderer modals={modals} />
     </ErrorBoundary>
   )
 }

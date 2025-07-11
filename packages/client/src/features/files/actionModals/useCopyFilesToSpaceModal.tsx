@@ -11,7 +11,7 @@ import { addData } from '../../spaces/spaces.api'
 import { fetchFolderChildren } from '../files.api'
 import { FileTree } from '../FileTree'
 import { findById } from '../file.utils'
-import { CustomDataNode, FileType, IFile } from '../files.types'
+import { CustomDataNode, IFile } from '../files.types'
 
 export const useCopyFilesToSpaceModal = ({ spaceId }: { spaceId?: string }) => {
   const [folderId] = useQueryParam<string | undefined>('folder_id')
@@ -36,7 +36,7 @@ export const useCopyFilesToSpaceModal = ({ spaceId }: { spaceId?: string }) => {
   const onFileCheck = (checkedKeys: string[]) => {
     const uids = checkedKeys
       .map(c => {
-        const node: CustomDataNode = findById(treeData, c)
+        const node: CustomDataNode | null = findById(treeData, c)
         return node?.uid
       })
       .filter(i => typeof i === 'string') as string[]
@@ -82,6 +82,7 @@ export const useCopyFilesToSpaceModal = ({ spaceId }: { spaceId?: string }) => {
       />
       <StyledModalScroll>
         <FileTree
+          // @ts-expect-error not use
           onExpand={() => {}}
           loadData={loadData}
           checkable

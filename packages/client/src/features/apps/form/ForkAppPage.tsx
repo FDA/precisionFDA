@@ -6,12 +6,13 @@ import { Loader } from '../../../components/Loader'
 import { NotAllowedPage } from '../../../components/NotAllowed'
 import { APP_REVISION_CREATION_NOT_REQUESTED, APP_SERIES_CREATION_NOT_REQUESTED } from '../../../constants'
 import { cleanObject } from '../../../utils/object'
-import { ServerScope } from '../../home/types'
+import { ApiErrorResponse, ServerScope } from '../../home/types'
 import { getBasePath } from '../../home/utils'
 import { CreateAppPayload, CreateAppResponse, createEditAppRequest } from '../apps.api'
 import { useFetchAppQuery } from '../useFetchAppQuery'
 import { AppForm } from './AppForm'
 import { mapFromServerToForm } from './common'
+import { AxiosError } from 'axios'
 
 export const ForkAppPage = ({ spaceId }: { spaceId?: number }) => {
   const location = useLocation()
@@ -36,11 +37,13 @@ export const ForkAppPage = ({ spaceId }: { spaceId?: number }) => {
         queryKey: ['apps', 'app'],
       })
       toast.success('App forked successfully')
-    } catch (err) {
-      const message = err.response?.data?.error?.message || err.message || 'Unknown error'
+    } catch (err: unknown) {
+      const errorWithResponse = err as AxiosError<ApiErrorResponse>
+      const message = errorWithResponse.response?.data?.error?.message || errorWithResponse.message || 'Unknown error'
       if (
-        err.response?.status === 400 &&
-        [APP_SERIES_CREATION_NOT_REQUESTED, APP_REVISION_CREATION_NOT_REQUESTED].includes(err?.response?.data?.error.code)
+        errorWithResponse.response?.status === 400 &&
+        errorWithResponse?.response?.data?.error?.code &&
+        [APP_SERIES_CREATION_NOT_REQUESTED, APP_REVISION_CREATION_NOT_REQUESTED].includes(errorWithResponse.response.data.error.code)
       ) {
         throw err
       } else {
@@ -51,6 +54,7 @@ export const ForkAppPage = ({ spaceId }: { spaceId?: number }) => {
 
   if (isLoading) return <Loader className="pageloader" />
   if (isError && !data) return <NotAllowedPage />
+  if (!data) return null
 
   return (
     <AppForm
@@ -74,6 +78,8 @@ export const ForkAppPage = ({ spaceId }: { spaceId?: number }) => {
         packages: data.meta?.internal?.packages || [],
         input_spec: data.meta?.spec?.input_spec.map(mapFromServerToForm) || [],
         output_spec: data.meta?.spec?.output_spec || [],
+        createAppRevision: false,
+        createAppSeries: false,
       }}
     />
   )

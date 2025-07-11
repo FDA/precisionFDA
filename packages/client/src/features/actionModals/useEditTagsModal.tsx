@@ -5,13 +5,13 @@ import { toast } from 'react-toastify'
 import styled from 'styled-components'
 import { FieldGroup } from '../../components/form/styles'
 import { InputText } from '../../components/InputText'
-import { checkStatus, getApiRequestOpts } from '../../utils/api'
 import { ModalHeaderTop, ModalNext } from '../modal/ModalNext'
 import { ButtonRow, Footer } from '../modal/styles'
 import { useModal } from '../modal/useModal'
 import { APIResource } from '../home/types'
 import { RequestResponse } from './useFeatureMutation'
 import { Button } from '../../components/Button'
+import axios from 'axios'
 
 const StyledForm = styled.form`
   display: flex;
@@ -32,11 +32,11 @@ async function editTagsRequest({
   uid: string
   tags: string
 }): Promise<RequestResponse> {
-  const res = await fetch('/api/set_tags', {
-    ...getApiRequestOpts('POST'),
-    body: JSON.stringify({ taggable_uid: uid, tags }),
-  }).then(checkStatus)
-  return res.json()
+  const response = await axios.post('/api/set_tags', {
+    taggable_uid: uid,
+    tags,
+  })
+  return response.data
 }
 
 type FormInputs = {
@@ -53,7 +53,7 @@ const EditTagsForm = ({
   resource: APIResource
   uid: string
   tags: string[]
-  onSuccess?: (res: any) => void
+  onSuccess?: (res: RequestResponse) => void
   setShowModal?: (show: boolean) => void
 }) => {
   const { register, handleSubmit } = useForm<FormInputs>({
@@ -64,7 +64,7 @@ const EditTagsForm = ({
 
   const mutation = useMutation({
     mutationKey: ['edit-resource-tags', resource],
-    mutationFn: (tags: string) => editTagsRequest({ uid, tags }),
+    mutationFn: (t: string) => editTagsRequest({ uid, tags: t }),
     onSuccess: res => {
       if (onSuccess) onSuccess(res)
       if (setShowModal) setShowModal(false)
@@ -126,7 +126,7 @@ export function useEditTagsModal<
 }: {
   resource: APIResource
   selected: T
-  onSuccess?: (res: any) => void
+  onSuccess?: (res: RequestResponse) => void
 }) {
   const { isShown, setShowModal } = useModal()
   const mSelected = useMemo(() => selected, [isShown])

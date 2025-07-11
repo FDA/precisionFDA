@@ -15,7 +15,7 @@ const StyledTable = styled.table`
   width: 100%;
 `
 
-const StyledTr = styled.tr`
+const StyledTr = styled.tr<{ $main?: boolean }>`
   ${({ $main }) => $main && css`
     font-weight: bold;
     background-color: var(--tertiary-100);
@@ -36,11 +36,11 @@ const StyledBodyCell = styled.td<{
 }>`
   line-height: 32px;
 
-  ${({ $bold }) => $bold && css`
+  ${({ $bold }) => $bold && `
     font-weight: bold;
     background-color: var(--tertiary-200);
   `}
-  ${({ $textAlign, $bgColor }) => css`
+  ${({ $textAlign }) => `
     text-align: ${$textAlign};
   `}
   padding: 0 20px;

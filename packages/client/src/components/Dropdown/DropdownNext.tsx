@@ -6,8 +6,8 @@ import { useOnOutsideClickRef } from '../../hooks/useOnOutsideClick'
 import { DropdownMenu, PopperContainer } from './styles'
 
 export type DropdownChildProps = {
-  style: any
-  ref: React.MutableRefObject<any>
+  style: React.CSSProperties
+  ref: React.RefObject<HTMLElement>
   onClick: () => void
   onMouseEnter: () => void
   onMouseLeave: () => void
@@ -18,7 +18,7 @@ export const DropdownNext: FC<{
   placement?: Placement
   forceShowPopper?: boolean
   trigger?: 'click' | 'hover'
-  children: (props: DropdownChildProps, actions: { hide: () => void }) => React.ReactNode
+  children?: (props: DropdownChildProps, actions: { hide: () => void }) => React.ReactNode
   content: (props: DropdownChildProps, actions: { hide: () => void }) => React.ReactNode
 }> = ({
   forceShowPopper,
@@ -30,7 +30,7 @@ export const DropdownNext: FC<{
   const [showPopper, setShowPopper] = useState(false)
   useKeyPress('Escape', () => setShowPopper(false))
 
-  const clickRef = useOnOutsideClickRef(showPopper, setShowPopper)
+  const clickRef = useOnOutsideClickRef(showPopper, () => setShowPopper(false))
   const buttonRef = useRef(null)
   const popperRef = useRef(null)
   // the ref for the arrow must be a callback ref
@@ -57,7 +57,7 @@ export const DropdownNext: FC<{
 
   return (
     <div ref={clickRef} style={{ display: 'contents' }}>
-      {children({
+      {children && children({
         style: { cursor: 'pointer' },
         ref: buttonRef,
         onClick: () => trigger === 'click' && setShowPopper(!showPopper), // outside only
@@ -77,7 +77,7 @@ export const DropdownNext: FC<{
             onMouseLeave={handleMouseLeave}
           >
             <DropdownMenu>
-              <div ref={setArrowRef as any} style={styles.arrow} id="arrow" />
+              <div ref={setArrowRef as React.LegacyRef<HTMLDivElement>} style={styles.arrow} id="arrow" />
               {content({
                 style: { cursor: 'pointer' },
                 ref: buttonRef,

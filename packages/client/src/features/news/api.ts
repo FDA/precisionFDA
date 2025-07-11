@@ -5,18 +5,18 @@ import { NewsItem, NewsListParams } from './types'
 
 export interface NewsListResponse {
   meta?: Pagination,
-  news_items?: NewsItem[],
+  news_items: NewsItem[],
 }
 
 export async function newsListRequest(params: NewsListParams) {
-  const filters = cleanObject({ year: params.year, type: params.type, page: params.page, per_page: params.perPage, orderBy: params.orderBy })
-  const paramQ = `?${new URLSearchParams(filters as any).toString()}`
+  const filters = cleanObject({ year: params.year?.toString(), type: params.type, page: params.page?.toString(), per_page: params.perPage?.toString(), orderBy: params.orderBy })
+  const paramQ = `?${new URLSearchParams(filters).toString()}`
   return axios.get(`/api/news${paramQ}`).then(response => response.data as NewsListResponse)
 }
 
 export async function newsAdminAllRequest(params: NewsListParams) {
-  const filters = cleanObject({ year: params.year, type: params.type, page: params.page, per_page: params.perPage })
-  const paramQ = `?${new URLSearchParams(filters as any).toString()}`
+  const filters = cleanObject({ year: params.year?.toString(), type: params.type, page: params.page?.toString(), per_page: params.perPage?.toString() })
+  const paramQ = `?${new URLSearchParams(filters).toString()}`
   return axios.get(`/api/news/all${paramQ}`).then(response => response.data as NewsItem[])
 }
 
@@ -44,7 +44,7 @@ export async function editNewsItemRequest(id: string | number, payload: CreateNe
   return axios.put(`/api/news/${id}`, { news_item: payload }).then(r => r.data as CreateNewsItemResponse)
 }
 export async function deleteNewsItemRequest(id: string | number) {
-  return axios.delete(`/api/news/${id}`).then(r => r.data as any)
+  return axios.delete(`/api/news/${id}`).then(r => r.data as unknown)
 }
 
 interface NewsPositionReqBody {
@@ -52,5 +52,5 @@ interface NewsPositionReqBody {
 }
 
 export async function savePositionsRequest(payload: NewsPositionReqBody['news_items']) {
-  return axios.post('/api/news/positions', { news_items: payload }).then(r => r.data as any)
+  return axios.post('/api/news/positions', { news_items: payload }).then(r => r.data as unknown)
 }

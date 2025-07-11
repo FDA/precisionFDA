@@ -1,5 +1,5 @@
 import classNames from 'classnames'
-import React, { useRef, useState } from 'react'
+import React, { useState, useRef } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { PlacesType, Tooltip } from 'react-tooltip'
 import { useAlertDismissed } from '../../features/admin/alerts/useAlertDismissedLocalStorage'
@@ -22,7 +22,12 @@ import { CrossIcon } from '../icons/PlusIcon'
 import { ProfileIcon } from '../icons/ProfileIcon'
 import { SiteMenuIcon } from '../icons/SiteMenuIcon'
 import { StarIcon } from '../icons/StarIcon'
-import { SiteNavItemType } from './NavItems'
+import { 
+  SiteNavItemType, 
+  getNavigationPath, 
+  getNavigationTarget, 
+  getNavigationRel,
+} from './NavItems'
 import { getOrderedFavoritesOnly } from './getOrderedFavoritesOnly'
 import { getObjectsByIds } from './orderObjectById'
 import {
@@ -160,23 +165,38 @@ const MenuLink = ({
   children: React.ReactNode
   'data-testid': string
 }) => {
-  const MenuLinkComp = navItem?.alink ? 'a' : Link
-  const menuLinkProps = {
-    rel: navItem.alink?.startsWith('mailto:') ? 'noreferrer' : undefined,
-    target: navItem?.external ? '_blank' : undefined,
-    onClick,
-    href: navItem?.alink,
-    to: navItem.link,
-    title: navItem.text,
-    'data-testid': rest['data-testid'],
+  
+  if (navItem.navigation.type === 'internal') {
+    return (
+      <Link
+        to={getNavigationPath(navItem)}
+        onClick={onClick}
+        title={navItem.text}
+        data-testid={rest['data-testid']}
+      >
+        {children}
+      </Link>
+    )
   }
-  return <MenuLinkComp {...menuLinkProps}>{children}</MenuLinkComp>
+  
+  return (
+    <a
+      href={getNavigationPath(navItem)}
+      rel={getNavigationRel(navItem)}
+      target={getNavigationTarget(navItem)}
+      onClick={onClick}
+      title={navItem.text}
+      data-testid={rest['data-testid']}
+    >
+      {children}
+    </a>
+  )
 }
 
 const MenuItem = ({ navItem, pathname, onClick }: { navItem: SiteNavItemType; pathname: string; onClick: () => void }) => {
   return (
     <MenuLink navItem={navItem} onClick={onClick} data-testid={`sitenav-${navItem.id}`}>
-      <SiteMenuItem $active={isActiveLink(navItem?.link || navItem.alink, pathname)}>
+      <SiteMenuItem $active={isActiveLink(getNavigationPath(navItem), pathname)}>
         <IconWrap>
           <navItem.icon height={navItem.iconHeight} />
         </IconWrap>
@@ -230,12 +250,15 @@ const dataPortalMenuItem = (
   i: SiteNavItemType,
   pathname: string,
   setShowSiteNav: (v: boolean, ms?: number) => void,
-  siteSettingsDataPortal: SiteSettingsDataPortal,
+  siteSettingsDataPortal: SiteSettingsDataPortal | undefined,
 ) => {
   if (siteSettingsDataPortal?.accessible) {
     return <MenuItem key={i.id} navItem={i} pathname={pathname} onClick={() => setShowSiteNav(false)} />
   }
-  return <DisabledMenuItem key={i.id} navItem={i} siteSettingsDataPortal={siteSettingsDataPortal} />
+  if (siteSettingsDataPortal) {
+    return <DisabledMenuItem key={i.id} navItem={i} siteSettingsDataPortal={siteSettingsDataPortal} />
+  }
+  return <MenuItem key={i.id} navItem={i} pathname={pathname} onClick={() => setShowSiteNav(false)} />
 }
 
 const getUsername = (user: IUser) => {
@@ -256,11 +279,11 @@ const SiteNav = ({
 }: {
   className: string
   setShowSiteNav: (v: boolean, ms?: number) => void
-  ignoredOutsideClickRef: HTMLDivElement | null
+  ignoredOutsideClickRef: React.RefObject<HTMLElement> | null
   isSiteAdmin: boolean
 }) => {
   const { theme, toggleTheme } = useTheme()
-  const clickRef = useOnOutsideClickRef(true, setShowSiteNav, ignoredOutsideClickRef)
+  const clickRef = useOnOutsideClickRef(true, () => setShowSiteNav(false), ignoredOutsideClickRef)
   const { pathname } = useLocation()
   const { data: siteSettings } = useSiteSettingsQuery()
   const { userSiteNavItems, showCDMHLink, showGSRSLink } = useUserSiteNavItems()
@@ -321,19 +344,22 @@ const SiteNav = ({
                     </a>
                   </div>
                 </Tooltip>
-                <SiteMenuItem className="noHover" data-tooltip-id="menu-item.cdmh.right">
+                <SiteMenuItem $active={false} className="noHover" data-tooltip-id="menu-item.cdmh.right">
                   <IconWrap>
                     <CDMHIcon height={20} />
                   </IconWrap>
                   <SiteMenuText>CDMH</SiteMenuText>
                 </SiteMenuItem>
                 {siteSettings?.cdmh?.data &&
-                  Object.keys(siteSettings.cdmh.data).map((s: CDMHKey) => {
+                  Object.keys(siteSettings.cdmh.data).map((s) => {
+                    const cdmhKey = s as CDMHKey
                     return (
-                      <SubLink as="a" key={s} target="_blank" rel="noreferrer" href={siteSettings.cdmh.data[s]}>
-                        {CDMHNames[s]}&nbsp;
-                        <ArrowLeftIcon />
-                      </SubLink>
+                      <a key={cdmhKey} target="_blank" rel="noreferrer" href={siteSettings.cdmh.data![cdmhKey]}>
+                        <SubLink $active={false}>
+                          {CDMHNames[cdmhKey]}&nbsp;
+                          <ArrowLeftIcon />
+                        </SubLink>
+                      </a>
                     )
                   })}
                 <HeaderSpacer />
@@ -365,7 +391,7 @@ const Header: React.FC = () => {
   const { isAlertDismissed, setIsAlertDismissed } = useAlertDismissed()
   const { selFavorites } = useNavFavorites()
   const [isCloudResourcesModalShown, setCloudResourcesModalShown] = useState(false)
-  const buttonRef = useRef<HTMLDivElement>(null)
+  const buttonElement = useRef<HTMLButtonElement>(null)
   const generateCLIKeyAction = useGenerateKeyModal()
   const { isShown, modalComp, setShowModal } = useEditFavoritesModal()
   const { userSiteNavItems } = useUserSiteNavItems()
@@ -393,17 +419,16 @@ const Header: React.FC = () => {
   return (
     <>
       {modalComp}
-      {showAlertBanner && (
+      {showAlertBanner && siteSettings.data?.alerts?.[0] && (
         <AlertBanner
-          variant={siteSettings.data?.alerts[0].type}
+          variant={siteSettings.data.alerts[0].type}
           dismissAlert={() => setIsAlertDismissed(true)}
-          alertText={siteSettings.data?.alerts[0].content}
+          alertText={siteSettings.data.alerts[0].content}
         />
       )}
       <SiteNav
-        isSiteAlertVisible={showAlertBanner}
         className={classNames({ enter: showSiteNav, exit: !showSiteNav })}
-        ignoredOutsideClickRef={buttonRef}
+        ignoredOutsideClickRef={buttonElement}
         setShowSiteNav={setSidebar}
         isSiteAdmin={userCanAdministerSite}
       />
@@ -415,7 +440,7 @@ const Header: React.FC = () => {
           <MenuButton
             $active={showSiteNav}
             data-testid="button-open-menu"
-            ref={buttonRef}
+            ref={buttonElement}
             onClick={() => setSidebar(!showSiteNav, 100)}
           >
             <SiteMenuIcon height={20} />
@@ -426,22 +451,26 @@ const Header: React.FC = () => {
                 return <DisabledTopMenuItem key={i.id} navItem={i} siteSettingsDataPortal={siteSettings.data.dataPortals[i.id]} />
               }
 
+              const dynamicNavItem = { ...i }
+              
               // If CDMH item, get the correct link
               const normalizedId = i.id.replace(/-([a-z])/g, (_match, letter) => {
                 return letter.toUpperCase()
               }) as CDMHKey
               const cdmhList = siteSettings.data?.cdmh.data
               if (cdmhList !== undefined && cdmhList[normalizedId] !== undefined) {
-                i.link = cdmhList[normalizedId]
+                dynamicNavItem.navigation = { type: 'external', url: cdmhList[normalizedId] }
               }
               if (i.id === 'spaces' && !!user?.can_administer_site) {
-                i.link = '/spaces?hidden=false'
+                dynamicNavItem.navigation = { type: 'internal', path: '/spaces?hidden=false' }
               }
 
-              const { id, iconHeight, text, icon: Icon } = i
+              const { id, iconHeight, text, icon: Icon } = dynamicNavItem
+              const navigationPath = getNavigationPath(dynamicNavItem)
+              
               return (
-                <MenuLink navItem={i} key={id} data-testid={`favoritenav-${id}`}>
-                  <HeaderMenuItem $active={isActiveLink(i?.link || i.alink, pathname)}>
+                <MenuLink navItem={dynamicNavItem} key={id} data-testid={`favoritenav-${id}`}>
+                  <HeaderMenuItem $active={isActiveLink(navigationPath, pathname)}>
                     <IconWrap $marginBottom={1}>
                       <Icon height={iconHeight} />
                     </IconWrap>
@@ -463,7 +492,6 @@ const Header: React.FC = () => {
           <HeaderRight>
             <DropdownNext
               trigger="click"
-              // eslint-disable-next-line react/no-unstable-nested-components
               content={(props, { hide }) => (
                 <UserMenu
                   user={user}
@@ -476,6 +504,7 @@ const Header: React.FC = () => {
               )}
             >
               {dropdownProps => (
+                // @ts-expect-error ref types is not compatible with styled-components
                 <DropdownMenuItem {...dropdownProps} $active={dropdownProps.$isActive} data-testid="user-context-menu">
                   <IconWrap>
                     <ProfileIcon height={16} />

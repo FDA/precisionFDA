@@ -3,12 +3,10 @@ import { toArrayFromObject } from '../../utils/object'
 import { APIResource, HomeScope, IFilter } from './types'
 import { Params } from './utils'
 
-export type FetchListFn = (filter: IFilter[], params: Params) => Promise<any>
-
 interface IUseListQuery<T> {
   spaceId?: string
-  scope?: HomeScope
-  fetchList: FetchListFn
+  scope?: HomeScope | string
+  fetchList: (filter: IFilter[], params: Params) => Promise<T>
   resource: APIResource
   params?: Params
   order?: {

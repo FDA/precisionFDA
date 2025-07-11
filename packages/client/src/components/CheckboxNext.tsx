@@ -83,12 +83,13 @@ export type CheckboxProps = {
   onChange?: (e: ChangeEvent<HTMLInputElement>) => void
   checked: boolean
   indeterminate?: boolean
+  onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void
 }
 
 
 // If the layout shifts when clicking a checkbox, make sure to set the parent to position: relative;
 // The cuase is absolute positioning on the hidden checkbox.
-export const Checkbox = React.forwardRef((props: CheckboxProps, ref) => {
+export const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>((props: CheckboxProps, ref) => {
   const isChecked = props.checked ? props.checked : false
   return (
     <>

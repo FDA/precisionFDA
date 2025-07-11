@@ -32,13 +32,20 @@ import { challengesYearsListRequest } from '../api'
 import { getTimeStatusName, renderEmpty } from '../util'
 import { ChallengeListItem } from './ChallengeListItem'
 import { useChallengesListQuery } from './useChallengesListQuery'
+import { TimeStatus } from '../types'
 
 const ChallengesList = () => {
   usePageMeta({ title: 'Challenges - precisionFDA' })
   const user = useAuthUser()
   const userCanCreateChallenge = user?.can_create_challenges
   const location = useLocation()
-  const { 'filter[status]': timeStatus, 'filter[year]': year }: any = queryString.parse(location.search)
+  const {
+    'filter[status]': timeStatus,
+    'filter[year]': year,
+  } : {
+    'filter[status]'?: TimeStatus;
+    'filter[year]'?: string
+  } = queryString.parse(location.search)
 
   const queryClient = useQueryClient()
 
@@ -70,7 +77,8 @@ const ChallengesList = () => {
           messageData.type === WEBSOCKET_MESSAGE_TYPE.NOTIFICATION &&
           NOTIFICATION_ACTION.CHALLENGE_CARD_IMAGE_URL_UPDATED === notification.action
         )
-      } catch (e) {
+      } catch (e: unknown) {
+        console.error('Error parsing WebSocket message:', e)
         return false
       }
     },
@@ -112,9 +120,7 @@ const ChallengesList = () => {
                   totalCount={data?.meta?.total}
                   totalPages={data?.meta?.totalPages}
                   isHidden={hidePagination(isFetched, data?.data?.length, data?.meta?.total)}
-                  isPreviousData={data?.meta?.page > 1}
-                  isNextData={data?.meta?.page < data?.meta?.totalPages}
-                  setPage={pagination.setPageParam}
+                  setPage={p => pagination.setPageParam(p, 'replaceIn')}
                   onPerPageSelect={pagination.setPageSizeParam}
                 />
               </PageList>

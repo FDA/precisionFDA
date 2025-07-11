@@ -29,7 +29,11 @@ export interface SiteSettingsResponse {
   dataPortals: { [key: string]: SiteSettingsDataPortal }
 }
 
-export const onLogInWithSSO = (ssoUrl: string) => {
+export const onLogInWithSSO = (ssoUrl?: string) => {
+  if (!ssoUrl) {
+    console.error('SSO URL is required for login')
+    return
+  }
   window.location.assign(ssoUrl)
 }
 

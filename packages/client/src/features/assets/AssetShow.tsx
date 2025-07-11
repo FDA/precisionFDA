@@ -1,11 +1,12 @@
 import { useQuery } from '@tanstack/react-query'
 import React from 'react'
 import { Link, useParams } from 'react-router-dom'
-import Dropdown from '../../components/Dropdown'
+import { DropdownNext } from '../../components/Dropdown/DropdownNext'
 import { HomeLabel } from '../../components/HomeLabel'
 import { Markdown, MarkdownStyle } from '../../components/Markdown'
 import { StyledTagItem, StyledTags, StyledPropertyItem, StyledPropertyKey } from '../../components/Tags'
 import { ActionsDropdownContent } from '../home/ActionDropdownContent'
+import { ActionModalsRenderer } from '../home/ActionModalsRenderer'
 import { StyledBackLink } from '../home/home.styles'
 import { License } from '../licenses/License'
 import {
@@ -32,24 +33,21 @@ import { FileIcon } from '../../components/icons/FileIcon'
 import { Filler } from '../../components/Page/styles'
 
 const AssetActions = ({ homeScope, asset }: { homeScope?: HomeScope; asset: IAsset }) => {
-  const actions = useAssetActions({
+  const { actions, modals } = useAssetActions({
     homeScope,
     selectedItems: [asset],
     resourceKeys: ['asset', asset.uid],
   })
   return (
     <>
-      <Dropdown trigger="click" content={<ActionsDropdownContent actions={actions} />}>
-        {dropdownProps => <ActionsButton {...dropdownProps} active={dropdownProps.isActive} />}
-      </Dropdown>
-      {actions['Delete']?.modal}
-      {actions['Download']?.modal}
-      {actions['Attach License']?.modal}
-      {actions['Detach License']?.modal}
-      {actions['Accept License']?.modal}
-      {actions['Edit tags']?.modal}
-      {actions['Edit properties']?.modal}
-      {actions['Rename']?.modal}
+      <DropdownNext
+        trigger="click"
+        content={() => <ActionsDropdownContent actions={actions} />}
+      >
+        {dropdownProps => <ActionsButton {...dropdownProps} active={dropdownProps.$isActive} />}
+      </DropdownNext>
+
+      <ActionModalsRenderer modals={modals} />
     </>
   )
 }
@@ -60,7 +58,7 @@ export const AssetShow = ({ emitScope, homeScope }: { homeScope?: HomeScope; emi
   const { data, isLoading } = useQuery({
     queryKey: ['asset', assetUid],
     queryFn: () =>
-      fetchAsset(assetUid).then(d => {
+      fetchAsset(assetUid!).then(d => {
         if (emitScope) emitScope(d.asset.scope, d.asset.featured)
         return d
       }),

@@ -1,5 +1,5 @@
 import React from 'react'
-import Tree from 'rc-tree'
+import Tree, { TreeNodeProps } from 'rc-tree'
 import 'rc-tree/assets/index.css'
 import { FolderIcon } from '../../components/icons/FolderIcon'
 import { FolderOpenIcon } from '../../components/icons/FolderOpenIcon'
@@ -7,15 +7,9 @@ import { TreeStyles } from './FileList.styles'
 import { FileIcon } from '../../components/icons/FileIcon'
 import { FileTreeNode } from './files.types'
 
-const Icon = ({
-  loading,
-  expanded,
-  isLeaf,
-}: {
-  loading: boolean
-  expanded: boolean
-  isLeaf: boolean
-}) => {
+const Icon = (props: TreeNodeProps) => {
+  const { loading = false, expanded, isLeaf } = props
+  
   let IconState = isLeaf ? FolderIcon : FolderIcon
 
   if (!isLeaf && loading) {

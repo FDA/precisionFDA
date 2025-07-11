@@ -1,4 +1,3 @@
-/* eslint-disable react/no-array-index-key */
 import React, { useMemo } from 'react'
 import styled from 'styled-components'
 import { Button } from '../../../components/Button'
@@ -33,6 +32,7 @@ export function useDownloadAssetsModal(selectedFiles: IAsset[]) {
 
   const modalComp = (
     <ModalNext
+      id="modal-assets-download"
       data-testid="modal-assets-download"
       isShown={Boolean(isShown)}
       hide={() => setShowModal(false)}

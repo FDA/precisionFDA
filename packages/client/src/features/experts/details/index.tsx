@@ -119,7 +119,7 @@ const ExpertsSingleDetailsPage = () => {
   const { expertId } = useParams<{ expertId: string }>()
   const { isLoading, data } = useQuery({
     queryKey: ['queryExpertDetails'],
-    queryFn: () => expertDetailsRequest(expertId)
+    queryFn: () => expertDetailsRequest(expertId!),
   })
   if (isLoading) return <Loader />
   if(!data?.expert) return <div>No expert found</div>

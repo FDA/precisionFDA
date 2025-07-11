@@ -141,7 +141,7 @@ export const useExecutionColumns = ({
         }
 
         return (
-          <StyledLinkCell to={`${getBasePath(spaceId)}/apps/${row.original.app_uid}`} disable={!row.original.app_active}>
+          <StyledLinkCell to={`${getBasePath(spaceId)}/apps/${row.original.app_uid}`} $disable={!row.original.app_active}>
             <CubeIcon height={14} />
             {row.original.app_title}
           </StyledLinkCell>

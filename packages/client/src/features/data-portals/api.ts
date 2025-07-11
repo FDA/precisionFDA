@@ -23,7 +23,6 @@ export interface CreateDataPortalRequest {
   name: string
   description?: string
   urlSlug: string
-  status: string
   hostLeadDxUser: string
   guestLeadDxUser: string
   cardImageFileName: string
@@ -36,7 +35,6 @@ export interface UpdateDataPortalRequest {
   description?: string
   sortOrder?: number
   cardImageUid?: string
-  status?: string
   content?: string
   editorState?: string
 }

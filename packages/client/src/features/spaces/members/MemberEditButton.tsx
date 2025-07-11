@@ -23,7 +23,6 @@ const MemberEditButton: React.FC<MemberEditButtonProps> = ({
       <DropdownNext
         placement="bottom-end"
         trigger="click"
-        // eslint-disable-next-line react/no-unstable-nested-components
         content={() => (
           <Ol>
             <Li onClick={() => setShowModal(true)}>Change Role</Li>
@@ -31,6 +30,7 @@ const MemberEditButton: React.FC<MemberEditButtonProps> = ({
         )}
       >
         {dropdownProps => (
+          // @ts-expect-error ref is not compatible
           <StyledEditButton data-testid="member-edit-button" tabIndex={0} {...dropdownProps}>
             <ThreeDotsIcon width={16} />
           </StyledEditButton>
