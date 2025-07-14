@@ -7,7 +7,6 @@ import { TASK_TYPE } from '@shared/queue/task.input'
 import { expect } from 'chai'
 import { Job } from 'bull'
 import { User } from '@shared/domain/user/user.entity'
-import { UserRepository } from '@shared/domain/user/user.repository'
 import { SinonStub, stub } from 'sinon'
 import { Reference } from '@mikro-orm/core'
 import * as userFileHelper from '@shared/domain/user-file/user-file.helper'
@@ -22,7 +21,6 @@ describe('SyncFilesStateFacade', () => {
     dxuser: 'dxuser',
   } as unknown as User
 
-  const userRepoFindOneStub = stub()
   const platformClientFileStatesStub = stub()
   const challengeRepoFindOneWithCardImageUidStub = stub()
   const emFlushStub = stub()
@@ -46,9 +44,6 @@ describe('SyncFilesStateFacade', () => {
   const platformClient = {
     fileStates: platformClientFileStatesStub,
   } as unknown as PlatformClient
-  const userRepo = {
-    findOne: userRepoFindOneStub,
-  } as unknown as UserRepository
   const challengeRepo = {
     findOneWithCardImageUid: challengeRepoFindOneWithCardImageUidStub,
   } as unknown as ChallengeRepository
@@ -75,9 +70,6 @@ describe('SyncFilesStateFacade', () => {
     findFileOrAssetsWithDxidStub.reset()
     findFileOrAssetsWithDxidStub.throws()
 
-    userRepoFindOneStub.reset()
-    userRepoFindOneStub.throws()
-
     challengeRepoFindOneWithCardImageUidStub.reset()
     challengeRepoFindOneWithCardImageUidStub.throws()
 
@@ -102,14 +94,7 @@ describe('SyncFilesStateFacade', () => {
   })
 
   function getInstance(): SyncFilesStateFacade {
-    return new SyncFilesStateFacade(
-      em,
-      userCtx,
-      platformClient,
-      userRepo,
-      challengeRepo,
-      removeNodesFacade,
-    )
+    return new SyncFilesStateFacade(em, userCtx, platformClient, challengeRepo, removeNodesFacade)
   }
 
   describe('#getBullJobId', () => {
@@ -141,7 +126,6 @@ describe('SyncFilesStateFacade', () => {
         isCreatedByChallengeBot: () => false,
       } as unknown as FileOrAsset
 
-      userRepoFindOneStub.withArgs({ dxuser: user.dxuser }).resolves(user)
       findUnclosedFilesOrAssetsStub
         .withArgs(em, user.id)
         .onFirstCall()
@@ -197,7 +181,6 @@ describe('SyncFilesStateFacade', () => {
         isCreatedByChallengeBot: () => false,
       } as unknown as FileOrAsset
 
-      userRepoFindOneStub.withArgs({ dxuser: user.dxuser }).resolves(user)
       findUnclosedFilesOrAssetsStub
         .withArgs(em, user.id)
         .onFirstCall()
@@ -248,7 +231,6 @@ describe('SyncFilesStateFacade', () => {
         isCreatedByChallengeBot: () => false,
       } as unknown as FileOrAsset
 
-      userRepoFindOneStub.withArgs({ dxuser: user.dxuser }).resolves(user)
       findUnclosedFilesOrAssetsStub
         .withArgs(em, user.id)
         .onFirstCall()
@@ -284,7 +266,6 @@ describe('SyncFilesStateFacade', () => {
         isCreatedByChallengeBot: () => true,
       } as unknown as FileOrAsset
 
-      userRepoFindOneStub.withArgs({ dxuser: user.dxuser }).resolves(user)
       findUnclosedFilesOrAssetsStub
         .withArgs(em, user.id)
         .onFirstCall()

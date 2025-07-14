@@ -19,7 +19,6 @@ import { SqlEntityManager } from '@mikro-orm/mysql'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { UserOpsCtx } from '@shared/types'
 import { RemoveNodesFacade } from '@shared/facade/node-remove/remove-nodes.facade'
-import { UserRepository } from '@shared/domain/user/user.repository'
 
 @Injectable()
 export class SyncFilesStateFacade {
@@ -30,7 +29,6 @@ export class SyncFilesStateFacade {
     private readonly em: SqlEntityManager,
     private readonly userCtx: UserContext,
     private readonly platformClient: PlatformClient,
-    private readonly userRepo: UserRepository,
     private readonly challengeRepo: ChallengeRepository,
     private readonly removeNodesFacade: RemoveNodesFacade,
   ) {}
@@ -41,14 +39,8 @@ export class SyncFilesStateFacade {
   }
 
   async syncFiles(job: Job): Promise<void> {
-    await this.userCtx.loadEntity()
+    const user = await this.userCtx.loadEntity()
     const dxuser = this.userCtx.dxuser
-
-    const user = await this.userRepo.findOne({ dxuser })
-    if (!user) {
-      this.logger.error(`User ${dxuser} not found`)
-      return
-    }
 
     let openFiles = await findUnclosedFilesOrAssets(this.em, user.id)
 
