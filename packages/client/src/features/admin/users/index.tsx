@@ -26,7 +26,7 @@ type AdminUserListType = { data: User[]; meta: MetaV2 }
 
 export async function fetchUsers(filters: IFilter[], params: Params) {
   const query = prepareListFetchV2(filters, params)
-  const paramQ = `?${new URLSearchParams(query as {}).toString()}`
+  const paramQ = `?${new URLSearchParams(query).toString()}`
   return axios.get<AdminUserListType>(`/api/v2/admin/users/${paramQ}`).then(r => r.data)
 }
 
@@ -65,7 +65,7 @@ export const getAdminUserColumns = (): ColumnDef<User>[] => [
     accessorKey: 'lastLogin',
     filterFn: dateRangeFilterFn,
     meta: {
-      filterElement: (column: Column<IUser>) => <DateTimeRangeFilter column={column} />,
+      filterElement: (column: Column<User>) => <DateTimeRangeFilter column={column} />,
     },
     size: 320,
     cell: c => {

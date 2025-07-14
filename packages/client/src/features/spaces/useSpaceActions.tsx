@@ -1,18 +1,18 @@
+import { ReactNode } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { useLocation } from 'react-router-dom'
-import { ActionFunctionsType } from '../home/types'
+import { Action } from '../home/action-types'
+import { extractModalsFromActions } from '../home/extractModalsFromActions'
 import { ISpace } from './spaces.types'
 import { useUnlockSpaceModal } from './useUnlockSpaceModal'
 import { toast } from 'react-toastify'
 
-export enum SpaceActions {
-  'Lock/Unlock' = 'Lock/Unlock',
-  'Edit Space' = 'Edit Space',
-  'Delete' = 'Delete',
-  'Fix Permissions' = 'Fix Permissions'
+export interface UseSpaceActionsResult {
+  actions: Action[]
+  modals: Record<string, ReactNode>
 }
 
-export const useSpaceActions = ({ space }: { space: ISpace }) => {
+export const useSpaceActions = ({ space }: { space: ISpace }): UseSpaceActionsResult => {
   const queryClient = useQueryClient()
   const { search } = useLocation()
 
@@ -26,8 +26,9 @@ export const useSpaceActions = ({ space }: { space: ISpace }) => {
     },
   })
 
-  const actions: ActionFunctionsType<SpaceActions> = {
-    'Lock/Unlock': {
+  const actions: Action[] = [
+    {
+      name: 'Lock/Unlock',
       type: 'modal',
       func: () => {
         modal.setShowModal(true)
@@ -36,25 +37,30 @@ export const useSpaceActions = ({ space }: { space: ISpace }) => {
       modal: modal.modalComp,
       showModal: modal.isShown,
     },
-    'Edit Space': {
+    {
+      name: 'Edit Space',
       type: 'modal',
       func: () => {},
       isDisabled: false,
       shouldHide: !space.links.update,
     },
-    Delete: {
+    {
+      name: 'Delete',
       type: 'modal',
       func: () => {},
       isDisabled: false,
       shouldHide: !!space.links.delete,
     },
-    'Fix Permissions': {
+    {
+      name: 'Fix Permissions',
       type: 'modal',
       func: () => {},
       isDisabled: false,
       shouldHide: !(space.type === 'groups' && search === '?permissionsDebug=true'),
     },
-  }
+  ]
 
-  return actions
+  const modals = extractModalsFromActions(actions)
+
+  return { actions, modals }
 }

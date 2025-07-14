@@ -2,7 +2,7 @@
 /* eslint-disable jsx-a11y/label-has-associated-control */
 import { ErrorMessage } from '@hookform/error-message'
 import { yupResolver } from '@hookform/resolvers/yup'
-import React, { useState } from 'react'
+import React, { useState, useCallback } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { Button } from '../../../components/Button'
 import { InputText } from '../../../components/InputText'
@@ -20,7 +20,7 @@ import { getSpaceIdFromScope } from '../../../utils'
 import { useConfirmModal } from '../../files/actionModals/useConfirmModal'
 import { StyledBackLink } from '../../home/home.styles'
 import { CreateAppPayload } from '../apps.api'
-import { CreateAppForm, FileType, IApp } from '../apps.types'
+import { CreateAppForm, FileType, IApp, InputSpec } from '../apps.types'
 import { getBaseLink } from '../run/utils'
 import { useUploadAppConfigFile } from '../useUploadAppConfigFile'
 import { Inputs } from './Inputs'
@@ -51,6 +51,25 @@ const ubuntuReleasesOptions = [
   { value: '20.04', label: '20.04' },
   { value: '24.04', label: '24.04' },
 ]
+
+const initialFormValues: CreateAppForm = {
+  name: '',
+  title: '',
+  createAppRevision: false,
+  createAppSeries: false,
+  input_spec: [],
+  output_spec: [],
+  code: '',
+  readme: '',
+  is_new: true,
+  forked_from: null,
+  instance_type: 'baseline-8',
+  internet_access: false,
+  ordered_assets: [],
+  packages: [],
+  release: '20.04',
+  scope: 'private',
+}
 
 export const AppForm = ({
   isEdit = false,
@@ -86,22 +105,7 @@ export const AppForm = ({
   } = useForm<CreateAppForm>({
     resolver: yupResolver(validationSchema),
     mode: 'onBlur',
-    defaultValues: !defaultVals
-      ? {
-          input_spec: [],
-          output_spec: [],
-          code: '',
-          readme: '',
-          is_new: true,
-          forked_from: null,
-          instance_type: 'baseline-8',
-          internet_access: false,
-          ordered_assets: [],
-          packages: [],
-          release: '20.04',
-          scope: 'private',
-        }
-      : defaultVals,
+    defaultValues: defaultVals || initialFormValues,
   })
 
   const handleOpenAppConfigUpload = (ftype: FileType) => {
@@ -109,56 +113,66 @@ export const AppForm = ({
     modal.setShowModal(true)
   }
 
-  let pageTitle = 'Create App'
-  if (isEdit) pageTitle = 'Edit App'
-  if (isFork) pageTitle = 'Fork App'
+  const getPageTitle = () => {
+    if (isEdit) return 'Edit App'
+    if (isFork) return 'Fork App'
+    return 'Create App'
+  }
 
-  let submitHandler: (createAppSeries: boolean, createAppRevision: boolean) => Promise<void>
+  const getSubmitButtonText = () => {
+    if (isEdit) return `Save Revision ${(app?.revision || 0) + 1}`
+    if (isFork) return 'Save Fork'
+    return 'Create App'
+  }
+
   const { modalComp: appSeriesConfirmModal, setShowModal: setShowAppSeriesConfirmModal } = useConfirmModal(
     'Confirm',
     CONFIRM_APP_SERIES,
     async () => {
       setShowAppSeriesConfirmModal(false)
-      await submitHandler(true, false)
+      await performSubmit(true, false)
     },
   )
   const { modalComp: appRevisionConfirmModal, setShowModal: setShowAppRevisionConfirmModal } = useConfirmModal(
     'Confirm',
     CONFIRM_APP_REVISION,
     async () => {
-      setShowAppSeriesConfirmModal(false)
-      await submitHandler(false, true)
+      setShowAppRevisionConfirmModal(false)
+      await performSubmit(false, true)
     },
   )
 
-  submitHandler = async (createAppSeries: boolean, createAppRevision: boolean) => {
-    const vals = getValues() as CreateAppForm
+  const performSubmit = useCallback(async (createAppSeries: boolean, createAppRevision: boolean) => {
+    const vals = getValues()
     const formatted: CreateAppPayload = {
       ...vals,
       is_new: false,
       ordered_assets: vals.ordered_assets?.map(asset => asset.uid),
-      input_spec: vals.input_spec.map(i => {
-        return {
-          ...i,
-          default: getDefaultValueFromForm(i.class, i.default),
-          choices: i?.choices && getChoicesValueFromForm(i.class, i.choices),
-        }
-      }),
-    } as CreateAppPayload
+      input_spec: vals.input_spec.map(i => ({
+        ...i,
+        default: getDefaultValueFromForm(i.class, i.default) as InputSpec['default'],
+        choices: i?.choices && getChoicesValueFromForm(i.class, i.choices) as InputSpec['choices'],
+      })),
+    }
+
     formatted.createAppSeries = createAppSeries
     formatted.createAppRevision = createAppRevision
     try {
       await onSubmit(formatted)
-    } catch (err) {
-      const code = err.response?.data?.error?.code
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { error?: { code?: string } } } }
+      const code = error.response?.data?.error?.code
       if (code === APP_SERIES_CREATION_NOT_REQUESTED) {
         setShowAppSeriesConfirmModal(true)
-      }
-      if (code === APP_REVISION_CREATION_NOT_REQUESTED) {
+      } else if (code === APP_REVISION_CREATION_NOT_REQUESTED) {
         setShowAppRevisionConfirmModal(true)
+      } else {
+        // Optional: re-throw or handle other errors if needed
+        // console.error("Submission error:", err);
       }
     }
-  }
+  }, [getValues, onSubmit, setShowAppSeriesConfirmModal, setShowAppRevisionConfirmModal])
+
 
   const backLink = isEdit || isFork ? `/${getBaseLink(spaceId)}/apps/${app?.uid}` : `/${getBaseLink(spaceId)}/apps`
   const backLabel = isEdit || isFork ? 'Back to App' : 'Back to Apps'
@@ -167,9 +181,9 @@ export const AppForm = ({
     <>
       <StyledBackLink linkTo={backLink}>{backLabel}</StyledBackLink>
 
-      <StyledForm onSubmit={handleSubmit(() => submitHandler(false, false))} autoComplete="off">
+      <StyledForm onSubmit={handleSubmit(() => performSubmit(false, false))} autoComplete="off">
         <Row>
-          <PageTitle>{pageTitle}</PageTitle>
+          <PageTitle>{getPageTitle()}</PageTitle>
           <SubmitRow>
             {isSubmitting && <Loader />}
             {isEdit && (
@@ -179,9 +193,7 @@ export const AppForm = ({
               </>
             )}
             <Button disabled={Object.keys(errors).length > 0 || isSubmitting} data-variant="primary" type="submit">
-              {isEdit && <div>Save Revision {(app?.revision || 0) + 1}</div>}
-              {isFork && <div>Save Fork</div>}
-              {!isFork && !isEdit && <div>Create App</div>}
+              <div>{getSubmitButtonText()}</div>
             </Button>
           </SubmitRow>
         </Row>
@@ -219,7 +231,7 @@ export const AppForm = ({
               control={control}
               render={({ field }) => (
                 <TopFieldGroupUbuntu>
-                  <label for="app-ubuntu-release">Ubuntu Release</label>
+                  <label htmlFor="app-ubuntu-release">Ubuntu Release</label>
                   <Select
                     {...field}
                     options={ubuntuReleasesOptions}
@@ -238,7 +250,6 @@ export const AppForm = ({
             <TopFieldGroupTarget>
               <label>Target</label>
               <InputText value={targetScopeName} disabled={true} />
-              <ErrorMessage errors={errors} name="title" render={({ message }) => <InputError>{message}</InputError>} />
             </TopFieldGroupTarget>
           )}
         </FormSectionTop>
@@ -266,7 +277,7 @@ export const AppForm = ({
           <PfTabContent $isShown={selectedSection === 'io'}>
             <Help>
               <span>Need help?</span>
-              <a href="/docs/guides/creating-apps#input-and-output-spec" target="_blank">
+              <a href="/docs/guides/creating-apps#input-and-output-spec" target="_blank" rel="noopener noreferrer">
                 {' '}
                 Learn more about app inputs and outputs
               </a>
@@ -287,7 +298,7 @@ export const AppForm = ({
                 <FormFields data-testid="script-editor">
                   <Help>
                     <span>Need help?</span>
-                    <a href="/docs/guides/creating-apps#app-script" target="_blank">
+                    <a href="/docs/guides/creating-apps#app-script" target="_blank" rel="noopener noreferrer">
                       {' '}
                       Learn more about app scripts
                     </a>

@@ -3,6 +3,7 @@ import { BasicDataNode } from 'rc-tree/es/interface'
 import { DataNode } from 'rc-tree/lib/interface'
 import { FileOrg, FileUser } from '../apps/apps.types'
 import { ServerScope } from '../home/types'
+import { FileLicense } from '../assets/assets.types'
 
 export enum FolderActions {
   'Add Folder' = 'Add Folder',
@@ -52,7 +53,8 @@ export interface IFile {
   id: number
   name: string
   size?: string
-  stiType: FileType
+  type: FileType
+  stiType?: FileType
   locked: boolean
   resource: boolean
   locking?: boolean
@@ -78,13 +80,7 @@ export interface IFile {
   description: string | null
   /** @deprecated create links from client side */
   links: FileLinks
-  file_license:
-    | {
-        id: string
-        title: string
-        uid: string
-      }
-    | Record<string, never>
+  file_license?: FileLicense
   show_license_pending: boolean
   private?: boolean
   public?: boolean

@@ -1,16 +1,13 @@
 import { useQuery } from '@tanstack/react-query'
-import axios from 'axios'
+import axios, { AxiosError } from 'axios'
 import { IUser } from '../../types/user'
 import { SiteSettingsResponse } from './useSiteSettingsQuery'
+import { ApiErrorResponse, IMeta } from '../home/types'
 
 export function useAuthUserQuery() {
-  return useQuery({
+  return useQuery<{ user: IUser; meta: IMeta }, AxiosError<ApiErrorResponse>>({
     queryKey: ['auth-user'],
-
-    queryFn: () =>
-      axios.get('/api/user').then(r => {
-        return r.data as { user: IUser; meta: any }
-      }),
+    queryFn: () => axios.get('/api/user').then(r => r.data),
     staleTime: Infinity,
     gcTime: Infinity,
     retry: 1,

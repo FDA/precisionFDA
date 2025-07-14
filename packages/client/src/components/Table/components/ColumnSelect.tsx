@@ -68,7 +68,7 @@ export function ColumnSelect<T>({ table }: { table: Table<T> }) {
                   onChange: column.getToggleVisibilityHandler(),
                 }}
               />{' '}
-              {column.columnDef?.header}
+              {column.columnDef?.header as string}
             </Row>
           )
         })}
@@ -83,7 +83,7 @@ export function ColumnSelect<T>({ table }: { table: Table<T> }) {
                   onChange: column.getToggleVisibilityHandler(),
                 }}
               />{' '}
-              {column.columnDef?.header}
+              {column.columnDef?.header as string}
             </Row>
           )
         })}
@@ -94,7 +94,8 @@ export function ColumnSelect<T>({ table }: { table: Table<T> }) {
     <th className="col-visible">
       <Front trigger="click" content={content()}>
         {dropdownProps => (
-          <TransparentButton {...dropdownProps} active={dropdownProps.isActive} title="Column Select">
+          // @ts-expect-error ref is not compatible
+          <TransparentButton {...dropdownProps} active={dropdownProps.$isActive ? 'true' : 'false'} title="Column Select">
             <ColumnsIcon height={14} />
           </TransparentButton>
         )}

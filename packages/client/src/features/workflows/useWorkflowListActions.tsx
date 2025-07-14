@@ -3,9 +3,8 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
 import { addDataRequest } from '../spaces/spaces.api'
 import { useAddResourceToModal } from '../actionModals/useAddResourceToSpace'
-import { ActionFunctionsType } from '../home/types'
+import { Action } from '../home/action-types'
 import { useCreateWorkflowModal } from './useCreateWorkflowModal'
-
 
 export const useWorkflowListActions = ({ spaceId }: { spaceId: string }) => {
   const queryClient = useQueryClient()
@@ -25,7 +24,7 @@ export const useWorkflowListActions = ({ spaceId }: { spaceId: string }) => {
     onSuccess: () => {
       toast.success('Successfully added workflow resource(s) to space')
       queryClient.invalidateQueries({
-        queryKey: ['space', spaceId.toString()]
+        queryKey: ['space', spaceId?.toString()],
       })
       queryClient.invalidateQueries({
         queryKey: ['workflows'],
@@ -35,20 +34,25 @@ export const useWorkflowListActions = ({ spaceId }: { spaceId: string }) => {
     mutation,
   })
 
-  const actionsFunctions: ActionFunctionsType<any> = {
-    'Create Workflow': {
+  const actions: Action[] = [
+    {
+      name: 'Create Workflow',
       type: 'modal',
       func: ({ showModal = false } = {}) => setShowCreateAppModal(showModal),
       isDisabled: false,
-      modal: CreateAppModal,
     },
-    'Add Workflow': {
+    {
+      name: 'Add Workflow',
       type: 'modal',
       func: ({ showModal = false } = {}) => setShowAddWorkflowModal(showModal),
       isDisabled: false,
-      modal: AddWorkflowModal,
     },
+  ]
+
+  const modals = {
+    'Create Workflow': CreateAppModal,
+    'Add Workflow': AddWorkflowModal,
   }
 
-  return actionsFunctions
+  return { actions, modals }
 }

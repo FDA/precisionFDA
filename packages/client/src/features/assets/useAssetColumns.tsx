@@ -67,7 +67,7 @@ export const useAssetColumns = ({
             resource="assets"
             featured={props.cell.row.original.featured}
             uids={[props.cell.row.original.uid]}
-            onSuccess={() => queryClient.invalidateQueries({ queryKey: ['assets'] })}
+            onSuccess={() => queryClient.invalidateQueries({ queryKey: ['assets']})}
           />
         </div>
       ),
@@ -86,10 +86,9 @@ export const useAssetColumns = ({
     {
       header: 'Size',
       accessorKey: 'file_size',
-      // Filter: NumberRangeColumnFilter,
       size: 160,
-      filterPlaceholderFrom: 'Min (KB)',
-      filterPlaceholderTo: 'Max (KB)',
+      filterPlaceholderFrom: 'Min(KB)',
+      filterPlaceholderTo: 'Max(KB)',
     },
     {
       header: 'Created',

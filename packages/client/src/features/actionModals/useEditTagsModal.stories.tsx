@@ -2,8 +2,8 @@ import { Meta, StoryObj } from '@storybook/react-webpack5'
 import React, { useEffect } from 'react'
 import { WithListData } from '../../stories/helpers'
 import { StorybookProviders } from '../../stories/StorybookProviders'
-import { fetchApps, FetchAppsQuery } from '../apps/apps.api'
-import { fetchFiles, FetchFilesQuery } from '../files/files.api'
+import { fetchApps } from '../apps/apps.api'
+import { fetchFiles } from '../files/files.api'
 import { APIResource } from '../home/types'
 import { useEditTagsModal } from './useEditTagsModal'
 import { IFile } from '../files/files.types'
@@ -48,7 +48,7 @@ export const EditTagsModal: Story = {
   render: ({ type = 'files' }) => {
     if (type === 'files') {
       return (
-        <WithListData<FetchFilesQuery> resource={type} fetchList={fetchFiles}>
+        <WithListData resource={type} fetchList={fetchFiles}>
           {({ data }) => {
             const files = data?.files || []
             const firstItem = files[0] as IFile
@@ -63,7 +63,7 @@ export const EditTagsModal: Story = {
       )
     } else if (type === 'apps') {
       return (
-        <WithListData<FetchAppsQuery> resource={type} fetchList={fetchApps}>
+        <WithListData resource={type} fetchList={fetchApps}>
           {({ data }) => {
             const apps = data?.apps || []
             const firstItem = apps[0] as IApp

@@ -3,7 +3,6 @@ import React from 'react'
 import { Link } from 'react-router-dom'
 import styled from 'styled-components'
 import { Button } from '../../components/Button'
-import Dropdown from '../../components/Dropdown'
 import { ContentFooter } from '../../components/Page/ContentFooter'
 import { BackLink } from '../../components/Page/PageBackLink'
 import { Refresh } from '../../components/Page/styles'
@@ -15,9 +14,10 @@ import { PlusIcon } from '../../components/icons/PlusIcon'
 import { SyncIcon } from '../../components/icons/SyncIcon'
 import { getSelectedObjectsFromIndexes, toArrayFromObject } from '../../utils/object'
 import { ActionsDropdownContent } from '../home/ActionDropdownContent'
+import { ActionModalsRenderer } from '../home/ActionModalsRenderer'
 import { ActionsRow, QuickActions, StyledRight } from '../home/home.styles'
 import { ActionsButton, ResourceHeader } from '../home/show.styles'
-import { HomeScope, IMeta } from '../home/types'
+import { HomeScope, MetaV2 } from '../home/types'
 import { useList } from '../home/useList'
 import { usePropertiesQuery } from '../home/usePropertiesQuery'
 import { getBasePath } from '../home/utils'
@@ -26,6 +26,7 @@ import { IDatabase } from './databases.types'
 import { useDatabaseColumns } from './useDatabaseColumns'
 import { useDatabaseSelectActions } from './useDatabaseSelectActions'
 import { ResouceQueryErrorMessage } from '../home/ResouceQueryErrorMessage'
+import { DropdownNext } from '../../components/Dropdown/DropdownNext'
 
 const DBStyledRight = styled(StyledRight)`
   gap: 20px;
@@ -37,9 +38,12 @@ const NoDatabases = styled.div`
   gap: 16px;
 `
 
-type ListType = { data: IDatabase[]; meta: IMeta }
+type ListType = { data: IDatabase[]; meta: MetaV2 }
 
-export const DatabaseList = ({ homeScope, spaceId }: { homeScope?: HomeScope, spaceId?: number }) => {
+export const DatabaseList = ({ homeScope, spaceId }: { 
+  homeScope?: HomeScope, 
+  spaceId?: number
+}) => {
   const basePath = getBasePath(spaceId)
   if (homeScope && homeScope !== 'me' && homeScope !== 'spaces') {
     return (
@@ -79,7 +83,10 @@ export const DatabaseList = ({ homeScope, spaceId }: { homeScope?: HomeScope, sp
     selectedIndexes,
     data?.data,
   )
-  const actions = useDatabaseSelectActions(selectedObjects, ['dbclusters'])
+  const { actions, modals } = useDatabaseSelectActions({
+    selectedItems: selectedObjects,
+    resourceKeys: ['dbclusters'],
+  })
 
   if (error) return <ResouceQueryErrorMessage />
 
@@ -104,15 +111,18 @@ export const DatabaseList = ({ homeScope, spaceId }: { homeScope?: HomeScope, sp
               </Refresh>
               Refresh
             </Button>
-            <Dropdown trigger="click" content={<ActionsDropdownContent actions={actions} />}>
+            <DropdownNext
+              trigger="click"
+              content={() => <ActionsDropdownContent actions={actions} />}
+            >
               {dropdownProps => (
                 <ActionsButton
                   {...dropdownProps}
                   data-testid="databases-actions-button"
-                  active={dropdownProps.isActive}
+                  active={dropdownProps.$isActive}
                 />
               )}
-            </Dropdown>
+            </DropdownNext>
           </DBStyledRight>
         </ActionsRow>
       </ResourceHeader>
@@ -120,8 +130,7 @@ export const DatabaseList = ({ homeScope, spaceId }: { homeScope?: HomeScope, sp
       <DatabaseListTable
         homeScope={homeScope}
         setFilters={setSearchFilter}
-        // TODO(samuel) Typescript fix
-        filters={toArrayFromObject(filterQuery as any)}
+        filters={toArrayFromObject(filterQuery)}
         data={data?.data}
         properties={propertiesData?.keys}
         isLoading={isLoading}
@@ -141,23 +150,13 @@ export const DatabaseList = ({ homeScope, spaceId }: { homeScope?: HomeScope, sp
           totalPages={data?.meta?.totalPages}
           perPage={perPageParam}
           isHidden={false}
-          isPreviousData={data?.meta?.pagination?.prev_page !== null}
-          isNextData={data?.meta?.pagination?.next_page !== null}
           setPage={p => setPageParam(p, 'replaceIn')}
           onPerPageSelect={p => setPerPageParam(p, 'replaceIn')}
         />
         <HoverDNAnexusLogo opacity height={14} />
       </ContentFooter>
 
-      {actions['Copy to space']?.modal}
-      {actions['Edit tags']?.modal}
-      {actions['Edit properties']?.modal}
-      {actions['Edit Database Info']?.modal}
-      {actions['Start']?.modal}
-      {actions['Stop']?.modal}
-      {actions['Terminate']?.modal}
-      {actions['Attach License']?.modal}
-      {actions['Detach License']?.modal}
+      <ActionModalsRenderer modals={modals} />
     </>
   )
 }

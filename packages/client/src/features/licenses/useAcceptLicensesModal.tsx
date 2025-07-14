@@ -5,7 +5,8 @@ import styled from 'styled-components'
 import { Checkbox } from '../../components/Checkbox'
 import { SideTabs } from '../../components/SideTab/SideTabs'
 import { colors } from '../../styles/theme'
-import { Modal } from '../modal'
+import { ModalHeaderTop, ModalNext } from '../modal/ModalNext'
+import { ButtonRow, Footer } from '../modal/styles'
 import { useModal } from '../modal/useModal'
 import { acceptLicensesRequest } from './api'
 import { License } from './types'
@@ -45,7 +46,7 @@ const WrapSideTabs = styled.div`
   margin: 0 12px;
   margin-bottom: 24px;
 `
-const SideTab = styled.div``
+const SideTab = styled.div<{ title?: React.ReactElement }>``
 const Text = styled.div`
   margin: 24px 12px;
 `
@@ -154,12 +155,33 @@ export const useAcceptLicensesModal = () => {
   }
 
   const modalComp = (
-    <Modal
+    <ModalNext
       headerText="Accept Licenses"
       isShown={isShown}
       hide={() => setShowModal(false)}
-      footer={
-        <>
+      variant="large"
+      id="accept-licenses-modal"
+    >
+      <ModalHeaderTop headerText="Accept Licenses" hide={() => setShowModal(false)} />
+      <div style={{ padding: '1rem' }}>
+        <Text>
+          The item/s you selected require that you accept the following license/s
+          before proceeding.
+        </Text>
+        <WrapSideTabs>
+          <SideTabs>
+            {licenses.map(license => (
+              <SideTab key={license.id} title={getTitle(license)}>
+                <StyledBodyTitle>{license.title}</StyledBodyTitle>
+                <StyledSeparation />
+                {license.content}
+              </SideTab>
+            ))}
+          </SideTabs>
+        </WrapSideTabs>
+      </div>
+      <Footer>
+        <ButtonRow>
           <Button
             onClick={() => {
               setShowModal(false)
@@ -174,25 +196,9 @@ export const useAcceptLicensesModal = () => {
           >
             Accept Selected Licenses
           </Button>
-        </>
-      }
-    >
-      <Text>
-        The item/s you selected require that you accept the following license/s
-        before proceeding.
-      </Text>
-      <WrapSideTabs>
-        <SideTabs>
-          {licenses.map(license => (
-            <SideTab key={license.id} title={getTitle(license)}>
-              <StyledBodyTitle>{license.title}</StyledBodyTitle>
-              <StyledSeparation />
-              {license.content}
-            </SideTab>
-          ))}
-        </SideTabs>
-      </WrapSideTabs>
-    </Modal>
+        </ButtonRow>
+      </Footer>
+    </ModalNext>
   )
   return {
     modalComp,

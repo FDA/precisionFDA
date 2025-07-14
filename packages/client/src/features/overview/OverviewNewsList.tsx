@@ -20,7 +20,7 @@ export const ExpertImageCircleSmall = styled.img`
   border-radius: 50%;
 `
 
-export const NewsItem = styled.div`
+export const NewsItemComp = styled.div`
   display: flex;
   flex-direction: column;
 `
@@ -69,13 +69,13 @@ export const OverviewNewsList = ({ pick = 3 }: { pick?: number }) => {
   return (
     <StyledCondensedList>
       {newsList?.map(n => (
-        <NewsItem key={n.id}>
+        <NewsItemComp key={n.id}>
           <Name>{n.title}</Name>
           <Info>
             <div>{format(new Date(n.createdAt), 'MMM dd, yyyy')}</div>
             <ExternalLink to={n.link}>View &#x2192;</ExternalLink>
           </Info>
-        </NewsItem>
+        </NewsItemComp>
       ))}
     </StyledCondensedList>
   )

@@ -2,7 +2,7 @@ import { ColumnDefResolved, ColumnFiltersState, ColumnSizingState, ColumnSort, V
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '../../components/Button'
-import Dropdown from '../../components/Dropdown'
+import { DropdownNext } from '../../components/Dropdown/DropdownNext'
 import { ContentFooter } from '../../components/Page/ContentFooter'
 import { Pagination } from '../../components/Pagination'
 import Table from '../../components/Table'
@@ -13,6 +13,7 @@ import { getSelectedObjectsFromIndexes, toArrayFromObject } from '../../utils/ob
 import { useAuthUser } from '../auth/useAuthUser'
 import { useGenerateKeyModal } from '../auth/useGenerateKeyModal'
 import { ActionsDropdownContent } from '../home/ActionDropdownContent'
+import { ActionModalsRenderer } from '../home/ActionModalsRenderer'
 import { ActionsRow, QuickActions } from '../home/home.styles'
 import { ActionsButton, ResourceHeader } from '../home/show.styles'
 import { HomeScope, IMeta } from '../home/types'
@@ -61,7 +62,7 @@ export const AssetList = ({ homeScope, spaceId }: { homeScope?: HomeScope; space
   const { data: propertiesData } = usePropertiesQuery('asset', homeScope, spaceId)
 
   const selectedFileObjects = getSelectedObjectsFromIndexes(selectedIndexes, data?.assets)
-  const actions = useAssetActions({ homeScope, selectedItems: selectedFileObjects, resourceKeys: ['assets'], resetSelected })
+  const { actions, modals } = useAssetActions({ homeScope, selectedItems: selectedFileObjects, resourceKeys: ['assets'], resetSelected })
   const generateCLIKeyAction = useGenerateKeyModal()
 
   if (error) return <ResouceQueryErrorMessage />
@@ -86,19 +87,19 @@ export const AssetList = ({ homeScope, spaceId }: { homeScope?: HomeScope; space
               Generate CLI Key
             </Button>
           </QuickActions>
-          <Dropdown
+          <DropdownNext
             trigger="click"
-            content={
+            content={() => 
               <ActionsDropdownContent
                 actions={actions}
-                message={homeScope === 'spaces' && 'To perform other actions on this asset, access it from the Space'}
+                message={homeScope === 'spaces' ? 'To perform other actions on this asset, access it from the Space' : undefined}
               />
             }
           >
             {dropdownProps => (
-              <ActionsButton {...dropdownProps} data-testid="home-assets-actions-button" active={dropdownProps.isActive} />
+              <ActionsButton {...dropdownProps} data-testid="home-assets-actions-button" active={dropdownProps.$isActive} />
             )}
-          </Dropdown>
+          </DropdownNext>
         </ActionsRow>
       </ResourceHeader>
 
@@ -106,8 +107,7 @@ export const AssetList = ({ homeScope, spaceId }: { homeScope?: HomeScope; space
         isAdmin={isAdmin}
         homeScope={homeScope}
         setFilters={setSearchFilter}
-        // TODO(samuel) Typescript fix
-        filters={toArrayFromObject(filterQuery as any)}
+        filters={toArrayFromObject(filterQuery)}
         apps={data?.assets}
         properties={propertiesData?.keys}
         isLoading={isLoading}
@@ -129,22 +129,13 @@ export const AssetList = ({ homeScope, spaceId }: { homeScope?: HomeScope; space
           totalPages={data?.meta?.pagination?.total_pages}
           perPage={perPageParam}
           isHidden={false}
-          isPreviousData={data?.meta?.pagination?.prev_page !== null}
-          isNextData={data?.meta?.pagination?.next_page !== null}
           setPage={p => setPageParam(p, 'replaceIn')}
           onPerPageSelect={p => setPerPageParam(p, 'replaceIn')}
         />
         <HoverDNAnexusLogo opacity height={14} />
       </ContentFooter>
 
-      {actions['Delete']?.modal}
-      {actions['Download']?.modal}
-      {actions['Attach License']?.modal}
-      {actions['Detach License']?.modal}
-      {actions['Accept License']?.modal}
-      {actions['Edit tags']?.modal}
-      {actions['Edit properties']?.modal}
-      {actions['Rename']?.modal}
+      <ActionModalsRenderer modals={modals} />
       {generateCLIKeyAction?.modalComp}
     </>
   )
@@ -198,7 +189,7 @@ export const AssetsListTable = ({
       )
     )
   }
-
+  // @ts-expect-error types are not compatible
   const col = useAssetColumns({ handleRowClick, isAdmin, properties }).filter(filterColsByScope)
 
   return (

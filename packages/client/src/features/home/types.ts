@@ -1,6 +1,33 @@
 import { ReactNode } from 'react'
 import { CloudResourcesConditionType } from '../../hooks/useCloudResourcesCondition'
 import { IChallenge } from '../../types/challenge'
+import { IOSpec } from '../apps/apps.types'
+import { License } from '../licenses/types'
+
+
+export interface ResponseError { response?: { status: number; data?: { error?: { code?: string; message?: string } } } }
+
+export interface ApiErrorResponse {
+  error?: {
+    code?: string
+    message?: string
+    type?: string
+    failure?: string
+  }
+}
+
+export interface ApiResponse {
+  message?: {
+    type: string
+    text: string
+  }
+  meta?: {
+    messages: Array<{
+      type: string
+      message: string
+    }>
+  }
+}
 
 export interface BaseAPIResponse {
   error?: { message: string; type: 'API Error' }
@@ -45,7 +72,7 @@ export type APIResource =
 
 export type HomeScope = 'everybody' | 'featured' | 'spaces' | 'me'
 export type ServerScope = 'public' | 'private' | `space-${string}`
-export type PropertiesResource = 'node' | 'asset' | 'workflowSeries' | 'job' | 'appSeries' | 'dbCluster'
+export type PropertiesResource = 'files' | 'folders' | 'node' | 'asset' | 'workflowSeries' | 'job' | 'appSeries' | 'dbCluster'
 
 export type DialogType = 'radio' | 'checkbox'
 
@@ -81,6 +108,9 @@ export type ActionType = {
   cloudResourcesConditionType?: CloudResourcesConditionType
 } & (
   | {
+      func: (arg?: IModal) => void
+    }
+  | {
       type: 'route'
       to: string
     }
@@ -108,7 +138,7 @@ export type ActionFunctionsType<KeyT extends string> = {
 }
 
 export type ActionGroupType = {
-  actions: ActionFunctionsType<any>
+  actions: ActionFunctionsType<string>
   title: string
 }
 
@@ -130,9 +160,15 @@ export interface IMeta {
     comments?: string
     edit_tags?: string
   }
-  path?: MetaPath[]
+  spec: {
+    input_spec: IOSpec[]
+    output_spec: IOSpec[]
+  }
+  path: MetaPath[]
   count: number
-  challenges?: IChallenge[] | null
+  challenges: IChallenge[] | null
+  object_license?: License
+  session_id?: string
   pagination: {
     current_page: number
     next_page: null | number

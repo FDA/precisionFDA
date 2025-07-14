@@ -1,5 +1,5 @@
 import { useMutation, useQuery } from '@tanstack/react-query'
-import React, { useMemo, useState } from 'react'
+import React, { useState } from 'react'
 import { toast } from 'react-toastify'
 import styled from 'styled-components'
 import { CircleCheckIcon } from '../../components/icons/CircleCheckIcon'
@@ -7,9 +7,7 @@ import { TrophyIcon } from '../../components/icons/TrophyIcon'
 import { Loader } from '../../components/Loader'
 import { breakPoints } from '../../styles/theme'
 import {
-  checkStatus,
   displayPayloadMessage,
-  getApiRequestOpts,
 } from '../../utils/api'
 import {
   CheckCol,
@@ -23,7 +21,7 @@ import { ModalHeaderTop, ModalNext } from '../modal/ModalNext'
 import { ButtonRow, Footer, ModalScroll } from '../modal/styles'
 import { useModal } from '../modal/useModal'
 import { APIResource } from '../home/types'
-import { fetchApp } from './apps.api'
+import { assignToChallengeRequest, fetchApp } from './apps.api'
 import { IApp } from './apps.types'
 import { Button } from '../../components/Button'
 
@@ -49,7 +47,7 @@ const ChallengesList = ({
   })
   const meta = data?.meta
   if (isLoading) return <div>Loading...</div>
-  if (meta.challenges.length === 0) return <div>No challenges yet.</div>
+  if (meta?.challenges.length === 0) return <div>No challenges yet.</div>
 
   return (
     <Table>
@@ -57,11 +55,11 @@ const ChallengesList = ({
         <HeaderRow>
           <CheckCol />
         </HeaderRow>
-        {meta!.challenges.map((s: any, i: number) => (
+        {meta!.challenges.map((s, i) => (
           <TableRow
-            $isSelected={selected === s.id}
+            $isSelected={selected === s.id.toString()}
             key={i}
-            onClick={() => onSelect(s.id)}
+            onClick={() => onSelect(s.id.toString())}
           >
             <TitleCol>
               <ColBody>
@@ -71,7 +69,7 @@ const ChallengesList = ({
             </TitleCol>
             <StyledCheckCol>
               <CheckedColBody>
-                {selected === s.id && <CircleCheckIcon height={16} />}
+                {selected === s.id.toString() && <CircleCheckIcon height={16} />}
               </CheckedColBody>
             </StyledCheckCol>
           </TableRow>
@@ -92,30 +90,7 @@ const StyledForm = styled.form`
   }
 `
 
-export const assignToChallengeRequest = ({
-  link,
-  appId,
-  challengeId,
-}: {
-  link: string
-  appId: string
-  challengeId: string
-}) => {
-  const body = {
-    app_id: appId,
-    id: challengeId,
-  }
-  const res: any = fetch(link, {
-    ...getApiRequestOpts('POST'),
-    body: JSON.stringify(body),
-  })
-    .then(checkStatus)
-    .then(res => res.json())
-  return res
-}
-
 const ChallengeAppForm = ({
-  resource,
   app,
   setShowModal,
   onSuccess,
@@ -123,19 +98,19 @@ const ChallengeAppForm = ({
   resource: APIResource
   app: IApp
   setShowModal: (show: boolean) => void
-  onSuccess?: (res: any) => void
+  onSuccess?: (res: unknown) => void
 }) => {
   const [selectedId, setSelectedId] = useState<string>()
 
   const mutation = useMutation({
     mutationKey: ['challenge-app-form'],
     mutationFn: assignToChallengeRequest,
-    onSuccess: (res: any) => {
+    onSuccess: (res) => {
       if (onSuccess) onSuccess(res)
       setShowModal(false)
       displayPayloadMessage(res)
     },
-    onError: (error: any) => {
+    onError: (error) => {
       toast.error(error.message)
     },
   })
@@ -148,7 +123,7 @@ const ChallengeAppForm = ({
     }
   }
 
-  const handleSubmit = (e: any) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     if (selectedId) {
       mutation.mutateAsync({
@@ -192,20 +167,20 @@ const ChallengeAppForm = ({
   )
 }
 
-export function useAttachToChallengeModal<T extends { id: string | number }>({
+export function useAttachToChallengeModal({
   resource,
   selected,
   onSuccess,
 }: {
   resource: APIResource
   selected: IApp
-  onSuccess?: (res: any) => void
+  onSuccess?: (res: unknown) => void
 }) {
   const { isShown, setShowModal } = useModal()
-  const momoSelected = useMemo(() => selected, [isShown])
 
   const modalComp = (
     <ModalNext
+      id='attach-to-challenge-modal'
       data-testid={`modal-${resource}-attach-to-challenge`}
       isShown={isShown}
       hide={() => setShowModal(false)}

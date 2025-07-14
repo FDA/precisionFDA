@@ -75,6 +75,7 @@ type FormInputs = {
 
 const schema = Yup.object().shape({
   props: Yup.array()
+    // @ts-expect-error custom validator for unique keys
     .unique('key', 'Name must be unique')
     .of(
       Yup.object().shape({
@@ -137,8 +138,7 @@ const EditPropertiesForm = ({
     properties: Properties
   }[]
   setShowModal: (show: boolean) => void
-  onSuccess?: (res: any) => void
-
+  onSuccess?: (res: unknown) => void
 }) => {
   const commonProperties: Properties = selected.reduce<Properties>((acc, obj, idx) => {
     if (idx === 0) return { ...obj.properties }
@@ -201,12 +201,12 @@ const EditPropertiesForm = ({
       })
     }
 
-    onSuccess && onSuccess(mutation.data)
-    setShowModal && setShowModal(false)
+    if (onSuccess) onSuccess(mutation.data)
+    if (setShowModal) setShowModal(false)
     toast.success('Properties updated')
   }
 
-  const handleAppendProperty = (e: any) => {
+  const handleAppendProperty = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault()
     append({ key: '', value: '' })
   }
@@ -307,7 +307,7 @@ export function useEditPropertiesModal<
 }: {
   type: PropertiesResource
   selected: T[]
-  onSuccess?: (res: any) => void
+  onSuccess?: (res: unknown) => void
 }) {
   const { isShown, setShowModal } = useModal()
   const mSelected = useMemo(() => selected, [isShown])

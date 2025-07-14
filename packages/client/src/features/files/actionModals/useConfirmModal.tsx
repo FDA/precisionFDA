@@ -34,7 +34,7 @@ export const useConfirmModal = (title: string, message: React.ReactNode, onConfi
           <Button type="button" onClick={handleClose}>
             Cancel
           </Button>
-          <Button variant="primary" type="submit" onClick={onConfirm}>
+          <Button data-variant="primary" type="submit" onClick={onConfirm}>
             Confirm
           </Button>
         </ButtonRow>

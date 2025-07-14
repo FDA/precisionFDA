@@ -29,7 +29,7 @@ const ExportInputsModalWrapper = ({ showCopyButton }: Props) => {
 
   useEffect(() => {
     openModal(mockExportInputData, ['file-FGpkXb80xbPGbqJX4xjjGQ47'])
-  }, [openModal])
+  }, [])
 
   return modalComp
 }

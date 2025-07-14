@@ -1,22 +1,22 @@
-import React, { FC, createContext } from 'react'
+import React, { createContext } from 'react'
 
 export interface SelectedContextData {
   selectedIds: string[],
   selectedItems: Record<string, boolean>;
   resetSelected: () => void;
-  setSelectedItems: (items: any) => void;
+  setSelectedItems: (items: Record<string, boolean>) => void;
 }
  
 export const selectedContextDefaultValue: SelectedContextData = {
   selectedIds: [],
   selectedItems: {},
   resetSelected: () => null,
-  setSelectedItems: () => null
+  setSelectedItems: () => null,
 }
  
-export const SelectedContext = createContext<SelectedContextData>(selectedContextDefaultValue);
+export const SelectedContext = createContext<SelectedContextData>(selectedContextDefaultValue)
 
-export const SelectedProvider: FC = ({ children }) => {
+export const SelectedProvider = ({ children }: { children: React.ReactNode }) => {
   const postsContextValue = useSelectedContextValue()
   return (
     <SelectedContext.Provider value={postsContextValue} >
@@ -29,7 +29,7 @@ export function useSelectedContextValue(): SelectedContextData {
   const [selectedItems, setSelectedItems] = React.useState<Record<string, boolean>>({})
   const resetSelected = () => setSelectedItems({})
   const selectedIds = Object.keys(selectedItems).map(k => k)
-  console.log(selectedIds);
+  console.log(selectedIds)
   
   return {
     selectedIds,

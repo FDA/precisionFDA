@@ -1,8 +1,7 @@
 import { UseQueryResult } from '@tanstack/react-query'
 import React from 'react'
-import { APIResource } from '../features/home/types'
+import { APIResource, IFilter } from '../features/home/types'
 import { useListQuery } from '../features/home/useListQuery'
-import { IFilter } from '../features/home/types'
 import { Params } from '../features/home/utils'
 
 interface WithListDataProps<T> {

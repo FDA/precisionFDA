@@ -13,7 +13,7 @@ type Props = {
 
 export const ConditionalAnchor = ({ isAllowed, onViolation, children, href, dataMethod }: Props) => (isAllowed ? (
     <a href={href} data-method={dataMethod}>
-      { children as any }
+      { children }
     </a>
   ) : (
     <div onClick={onViolation}>

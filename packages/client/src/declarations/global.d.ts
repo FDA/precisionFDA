@@ -12,4 +12,13 @@ declare global {
    interface ObjectConstructor {
      fromEntries<T>(obj: T): FromEntriesWithReadOnly<T>
   }
+  
+  // Webpack hot module replacement
+  namespace NodeJS {
+    interface Module {
+      hot?: {
+        accept(): void
+      }
+    }
+  }
 }

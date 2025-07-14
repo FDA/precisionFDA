@@ -5,8 +5,8 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
 import { FieldGroup, InputError } from '../../../components/form/styles'
 import { InputText } from '../../../components/InputText'
-import { Modal } from '../../modal'
-import { ButtonRow, StyledForm } from '../../modal/styles'
+import { ModalHeaderTop, ModalNext } from '../../modal/ModalNext'
+import { ButtonRow, Footer, StyledForm } from '../../modal/styles'
 import { useModal } from '../../modal/useModal'
 import { editFolderRequest } from '../files.api'
 import { IFile } from '../files.types'
@@ -38,6 +38,7 @@ const EditFolderInfoForm = ({
     onSuccess: (res) => {
       if(res?.error?.type) {
         // parsing the error from backend to human-readable message
+        // eslint-disable-next-line no-useless-escape
         setError('name', { message: res.error.message.replace(/[\[\]"]+/g, ''), type: 'validate' })
         return
       }
@@ -57,25 +58,29 @@ const EditFolderInfoForm = ({
   }
 
   return (
-    <StyledForm onSubmit={handleSubmit(onSubmit)}>
-      <FieldGroup>
-        <label>Folder Name</label>
-        <InputText
-          {...register('name', { required: 'Name is required.' })}
-          placeholder="Edit name..."
-          disabled={isSubmitting}
-        />
-        <ErrorMessage
-          errors={errors}
-          name="name"
-          render={({ message }) => <InputError>{message}</InputError>}
-        />
-      </FieldGroup>
-      <ButtonRow>
-        <Button type="button" onClick={handleClose} disabled={isSubmitting}>Cancel</Button>
-        <Button data-variant="primary" type="submit" disabled={isSubmitting}>Edit</Button>
-      </ButtonRow>
-    </StyledForm>
+    <>
+      <StyledForm onSubmit={handleSubmit(onSubmit)}>
+        <FieldGroup>
+          <label>Folder Name</label>
+          <InputText
+            {...register('name', { required: 'Name is required.' })}
+            placeholder="Edit name..."
+            disabled={isSubmitting}
+          />
+          <ErrorMessage
+            errors={errors}
+            name="name"
+            render={({ message }) => <InputError>{message}</InputError>}
+          />
+        </FieldGroup>
+      </StyledForm>
+      <Footer>
+        <ButtonRow>
+          <Button type="button" onClick={handleClose} disabled={isSubmitting}>Cancel</Button>
+          <Button data-variant="primary" onClick={handleSubmit(onSubmit)} disabled={isSubmitting}>Edit</Button>
+        </ButtonRow>
+      </Footer>
+    </>
   )
 }
 
@@ -85,15 +90,17 @@ export const useEditFolderModal = (selectedItem: IFile) => {
   const handleClose = () => setShowModal(false)
 
   const modalComp = (
-    <Modal
+    <ModalNext
       id="modal-folder-edit"
       data-testid="modal-folder-edit"
       headerText="Edit folder info"
       isShown={isShown}
       hide={() => setShowModal(false)}
+      variant="small"
     >
+      <ModalHeaderTop headerText="Edit folder info" hide={() => setShowModal(false)} />
       <EditFolderInfoForm folder={selected} handleClose={handleClose} />
-    </Modal>
+    </ModalNext>
   )
   return {
     modalComp,

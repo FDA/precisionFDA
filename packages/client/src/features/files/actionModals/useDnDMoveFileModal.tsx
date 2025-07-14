@@ -16,6 +16,7 @@ import { ButtonRow, Footer, ModalScroll } from '../../modal/styles'
 import { useModal } from '../../modal/useModal'
 import { moveFilesRequest } from '../files.api'
 import { IFile } from '../files.types'
+import { ApiErrorResponse } from '../../home/types'
 
 const StyledLink = styled(Link)`
   display: flex;
@@ -44,7 +45,7 @@ export const useDnDMoveFileModal = ({
   const mutation = useMutation({
     mutationKey: ['move-files'],
     mutationFn: (ids: number[]) => moveFilesRequest(ids, targetNode.id === 0 ? null : targetNode.id, spaceId),
-    onError: (e: AxiosError) => {
+    onError: (e: AxiosError<ApiErrorResponse>) => {
       const error = e?.response?.data?.error
       if (error?.message) {
         toast.error(error?.message)
