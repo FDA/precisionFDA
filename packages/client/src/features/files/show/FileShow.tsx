@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import queryString from 'query-string'
 import React from 'react'
 import { Link, useLocation, useParams } from 'react-router-dom'
-import Dropdown from '../../../components/Dropdown'
+import { DropdownNext } from '../../../components/Dropdown/DropdownNext'
 import { HomeLabel } from '../../../components/HomeLabel'
 import { Filler } from '../../../components/Page/styles'
 import { ITab, TabsSwitch } from '../../../components/TabsSwitch'
@@ -12,6 +12,7 @@ import { LockIcon } from '../../../components/icons/LockIcon'
 import { theme } from '../../../styles/theme'
 import { getBackPathNext } from '../../../utils/getBackPath'
 import { ActionsDropdownContent } from '../../home/ActionDropdownContent'
+import { ActionModalsRenderer } from '../../home/ActionModalsRenderer'
 import { StyledBackLink } from '../../home/home.styles'
 import {
   ActionsButton,
@@ -49,7 +50,7 @@ const FileActionsDropdown = ({
   file: IFile
   folderId?: string
 }) => {
-  const actions = useFilesSelectActions({
+  const { actions, modals } = useFilesSelectActions({
     homeScope,
     space,
     selectedItems: [file],
@@ -59,23 +60,14 @@ const FileActionsDropdown = ({
 
   return (
     <>
-      <Dropdown trigger="click" content={<ActionsDropdownContent actions={actions} />}>
-        {dropdownProps => <ActionsButton {...dropdownProps} active={dropdownProps.isActive} />}
-      </Dropdown>
-      {actions['Open']?.modal}
-      {actions['Download']?.modal}
-      {actions['Edit file info']?.modal}
-      {actions['Edit folder info']?.modal}
-      {actions['Delete']?.modal}
-      {actions['Move']?.modal}
-      {actions['Copy to...']?.modal}
-      {actions['Attach License']?.modal}
-      {actions['Detach License']?.modal}
-      {actions['Accept License']?.modal}
-      {actions['Edit tags']?.modal}
-      {actions['Edit properties']?.modal}
-      {actions['Lock']?.modal}
-      {actions['Unlock']?.modal}
+      <DropdownNext
+        trigger="click"
+        content={() => <ActionsDropdownContent actions={actions} />}
+      >
+        {dropdownProps => <ActionsButton {...dropdownProps} active={dropdownProps.$isActive} />}
+      </DropdownNext>
+
+      <ActionModalsRenderer modals={modals} />
     </>
   )
 }
@@ -86,7 +78,7 @@ export const FileShow = ({ emitScope, space, homeScope }: { homeScope?: HomeScop
   const { data, isLoading } = useQuery({
     queryKey: ['file', fileId],
     queryFn: () =>
-      fetchFile(fileId).then(d => {
+      fetchFile(fileId!).then(d => {
         if (emitScope) emitScope(d.files.scope, d.files.featured)
         return d
       }),
@@ -110,9 +102,9 @@ export const FileShow = ({ emitScope, space, homeScope }: { homeScope?: HomeScop
 
   const tabsConfig = [
     {
-      header: `License: ${meta.object_license && meta.object_license.title}`,
-      tab: <License license={meta.object_license} link={file.links.show_license} />,
-      hide: !meta.object_license || !meta.object_license.uid,
+      header: `License: ${meta!.object_license && meta!.object_license.title}`,
+      tab: <License license={meta!.object_license!} link={file.links.show_license} />,
+      hide: !meta!.object_license || !meta!.object_license.uid,
     },
   ] as ITab[]
 
@@ -131,7 +123,7 @@ export const FileShow = ({ emitScope, space, homeScope }: { homeScope?: HomeScop
               <FileIcon height={22} />
               <span data-testid="file-name">{file.name}</span>
               {file.show_license_pending && (
-                <HomeLabel value="License Pending Approval" icon="fa-clock-o" type="warning" className="" state={file.state} />
+                <HomeLabel value="License Pending Approval" icon="fa-clock-o" type="warning" className="" state={file.state ?? undefined} />
               )}
             </Title>
           </HeaderLeft>

@@ -1,7 +1,7 @@
 import axios from 'axios'
 import queryString from 'query-string'
 import { convertDateToUserTime } from '../../utils/datetime'
-import { Challenge, ChallengeListParams } from './types'
+import { Challenge, ChallengeListParams, ChallengeOld } from './types'
 import { processFile } from '../resources/uploadImage'
 import { PaginationMetaV2 } from '../../types/pagination'
 
@@ -25,10 +25,6 @@ type ServerChallengeDates = {
   endAt: string;
   created_at: string;
   updated_at: string;
-}
-
-type ChallengeResponse = {
-  challenge: Challenge
 }
 
 type ListChallengeResponse = {
@@ -65,9 +61,9 @@ export async function challengesYearsListRequest() {
   return axios.get<NewsYearsListResponse>('/api/challenges/years').then(response => response.data.map(item => item.toString()))
 }
 
-export async function challengeDetailsRequest(challengeId: string, custom?: boolean): Promise<Challenge> {
+export async function challengeDetailsRequest(challengeId: string, custom?: boolean): Promise<ChallengeOld> {
   const params = custom ? '?custom=true' : ''
-  return axios.get(`/api/challenges/${challengeId}${params}`).then(r => r.data.challenge as ChallengeResponse['challenge']).then((d) => ({
+  return axios.get(`/api/challenges/${challengeId}${params}`).then(r => r.data.challenge as ChallengeOld).then((d) => ({
     ...d,
     start_at: convertDateToUserTime(d.start_at),
     end_at: convertDateToUserTime(d.end_at),
@@ -76,7 +72,7 @@ export async function challengeDetailsRequest(challengeId: string, custom?: bool
   }))
 }
 
-export async function challengeByID(challengeId: number, custom?: boolean) {
+export async function challengeByID(challengeId: number | string, custom?: boolean) {
   const params = custom ? '?custom=true' : ''
   return axios.get(`/api/v2/challenges/${challengeId}${params}`)
   .then(r => r.data)
@@ -90,7 +86,7 @@ export async function challengeByID(challengeId: number, custom?: boolean) {
 export type ChallengePayload = ChallengePayloadRequest & { image: File }
 type ChallengeCardImageResponse = { uid: string, id: number }
 
-export async function createChallengeImage(challengeId: number, file: File) {
+export async function createChallengeImage(challengeId: number | string, file: File) {
   const response = await axios.post<ChallengeCardImageResponse>('/api/create_challenge_card_image', { name: file.name, challengeId })
   const fileUid = response.data.uid
   const fileId = response.data.id

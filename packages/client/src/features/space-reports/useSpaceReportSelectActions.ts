@@ -1,12 +1,8 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
-import { ActionFunctionsType } from '../home/types'
+import { Action } from '../home/action-types'
 import { ISpaceReport, SpaceReportState } from './space-report.types'
 import { useDeleteSpaceReportModal } from './useDeleteSpaceReportModal'
-
-export enum ReportActions {
-  'Delete' = 'Delete',
-}
 
 const DELETABLE_STATES: SpaceReportState[] = ['DONE', 'ERROR']
 
@@ -26,7 +22,6 @@ export const userReportSelectActions = ({
   const {
     modalComp: deleteModal,
     setShowModal: setDeleteModal,
-    isShown: isShownDeleteModal,
   } = useDeleteSpaceReportModal({
     selected,
     onClose: () => {
@@ -43,13 +38,18 @@ export const userReportSelectActions = ({
     },
   })
 
-  return {
-    'Delete': {
+  const actions: Action[] = [
+    {
+      name: 'Delete',
       type: 'modal',
       func: () => setDeleteModal(true),
       isDisabled: selected.length === 0 || selected.some(r => !DELETABLE_STATES.includes(r.state)),
-      modal: deleteModal,
-      showModal: isShownDeleteModal,
     },
-  } satisfies ActionFunctionsType<ReportActions>
+  ]
+
+  const modals = {
+    'Delete': deleteModal,
+  }
+
+  return { actions, modals }
 }

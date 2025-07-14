@@ -28,7 +28,7 @@ import {
   StyledSubtitle,
   Tab,
 } from '../../actionModals/styles'
-import { DialogType } from '../../home/types'
+import { DialogType, ServerScope } from '../../home/types'
 import { fetchFilteredAssets } from '../assets.api'
 import { IAsset } from '../assets.types'
 import { Button } from '../../../components/Button'
@@ -106,7 +106,7 @@ export const useSelectAssetModal = (
   type: DialogType,
   handleSelect: (assets: IAsset[]) => void,
   subtitle?: string,
-  scopes?: string[],
+  scopes?: ServerScope[],
 ) => {
   const user = useAuthUser()
   const listedAssets: IAsset[] = []
@@ -122,7 +122,7 @@ export const useSelectAssetModal = (
     status: loadingAssetsStatus,
   } = useQuery({
     queryKey: ['list_assets', searchText],
-    queryFn: () => fetchFilteredAssets(searchText, scopes ?? ([] as any)), // scopes: [] mean all scopes.
+    queryFn: () => fetchFilteredAssets(searchText, scopes), // scopes: [] mean all scopes.
     enabled: isShown,
   })
 
@@ -199,7 +199,7 @@ export const useSelectAssetModal = (
           <StyledFilterSection>
             <InputText placeholder="Filter..." onChange={evt => setFilter(evt.target.value)} />
             <StyledOnlyMine>
-              <input type="checkbox" onClick={evt => toggleOnlyMine(evt.target.checked)} />
+              <input type="checkbox" onClick={evt => toggleOnlyMine((evt.target as HTMLInputElement).checked)} />
               Only mine
             </StyledOnlyMine>
           </StyledFilterSection>

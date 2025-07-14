@@ -1,4 +1,3 @@
-/* eslint-disable react/destructuring-assignment */
 import { ErrorMessage } from '@hookform/error-message'
 import { get } from 'lodash'
 import React from 'react'
@@ -90,7 +89,7 @@ export interface OutputSpecProps extends SpecProps {
 }
 
 export const Name = ({ base, register, index, errors }: SpecProps) => {
-  let message = ''
+  let message: string | undefined = ''
   let isError = false
   const e = get(errors, `${base}.${index}.name`)
   if (e) {
@@ -167,6 +166,7 @@ export const DefaultString = ({ base, register, index, errors }: SpecProps) => {
   return (
     <td>
       <InputTextS
+        // @ts-expect-error - dynamic field path not recognized by TypeScript
         {...register(`${base}.${index}.default`, { setValueAs: formatCSVStringToArray })}
         data-tooltip-id={`${base}.${index}.default`}
         data-tooltip-content={errorMessage}
@@ -190,6 +190,7 @@ export const DefaultFloat = ({ base, register, index, errors }: SpecProps) => {
         data-tooltip-content={errorMessage}
         placeholder="Optional default"
         $isError={isError}
+        // @ts-expect-error - dynamic field path not recognized by TypeScript
         {...register(`${base}.${index}.default`, { setValueAs: formatCSVStringToArray })}
       />
       {isError && (
@@ -209,6 +210,7 @@ export const DefaultInt = ({ base, register, index, errors }: SpecProps) => {
         data-tooltip-content={errorMessage}
         placeholder="Optional default"
         $isError={isError}
+        // @ts-expect-error - dynamic field path not recognized by TypeScript
         {...register(`${base}.${index}.default`, { setValueAs: formatCSVStringToArray })}
       />
       {isError && (
@@ -231,6 +233,7 @@ export const DefaultFile = ({
   return (
     <td data-tooltip-id={`${base}.${index}.default`} data-tooltip-content={errorMessage}>
       <Controller
+        // @ts-expect-error - dynamic field path not recognized by TypeScript
         name={`${base}.${index}.default`}
         control={control}
         render={({ field }) => {
@@ -247,9 +250,7 @@ export const DefaultFile = ({
                 }
                 field.onBlur()
               }}
-              value={
-                field.value && sClass === 'file' ? [field.value] : field.value
-              }
+              value={field.value && sClass === 'file' ? [field.value as string] : (field.value as string[])}
             />
           )
         }}
@@ -270,6 +271,7 @@ export const DefaultBoolean = ({
   return (
     <DefaultBooleanTd>
       <Controller
+        // @ts-expect-error - dynamic field path not recognized by TypeScript
         name={`${base}.${index}.default`}
         control={control}
         render={({ field }) => {
@@ -318,6 +320,7 @@ export const Choice = ({ base, register, index, errors }: SpecProps) => {
         data-tooltip-id={`${base}.${index}.choices`}
         data-tooltip-content={errorMessage}
         $isError={isError}
+        // @ts-expect-error - dynamic field path not recognized by TypeScript
         {...register(`${base}.${index}.choices`, { setValueAs: formatCSVStringToArray })}
         placeholder="Optional comma separated values"
       />
@@ -337,6 +340,7 @@ export const Optional = ({ base, index, control, errors }: SpecProps) => {
       <Controller
         data-tooltip-id={id}
         data-tooltip-content={errorMessage}
+        // @ts-expect-error - dynamic field path not recognized by TypeScript
         name={id}
         control={control}
         render={({ field }) => {
@@ -344,7 +348,7 @@ export const Optional = ({ base, index, control, errors }: SpecProps) => {
             <CheckboxWrapLabel id={id}>
               <Checkbox
                 data-testid={`${id}-checkbox`}
-                checked={field.value}
+                checked={field.value as boolean}
                 onChange={field.onChange}
                 onBlur={field.onBlur}
               />
@@ -367,6 +371,7 @@ export const IsArray = ({ base, index, control, errors }: SpecProps) => {
       <Controller
         data-tooltip-id={id}
         data-tooltip-content={errorMessage}
+        // @ts-expect-error - dynamic field path not recognized by TypeScript
         name={id}
         control={control}
         render={({ field }) => {
@@ -374,7 +379,7 @@ export const IsArray = ({ base, index, control, errors }: SpecProps) => {
             <CheckboxWrapLabel id={id}>
               <Checkbox
                 data-testid={id+'-checkbox'}
-                checked={field.value}
+                checked={field.value as boolean}
                 onChange={field.onChange}
                 onBlur={field.onBlur}
               />
@@ -490,7 +495,6 @@ export const SelectIOClass = ({
   return (
     <DropdownNext
       trigger="click"
-      // eslint-disable-next-line react/no-unstable-nested-components
       content={(props, { hide }) => (
         <StyledDropMenuLinks
           data-testid="io-items">
@@ -538,6 +542,7 @@ export const SelectIOClass = ({
       )}
     >
       {({ $isActive, ...props }) => (
+        // @ts-expect-error ref is not compatible
         <StyledButton
           type="button"
           {...props}

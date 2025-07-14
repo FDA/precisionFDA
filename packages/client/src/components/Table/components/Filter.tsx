@@ -8,6 +8,7 @@ type NumberInputProps = {
   setFilterValue: (updater: any) => void
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const NumberInput: React.FC<NumberInputProps> = ({
   columnFilterValue,
   getFacetedMinMaxValues,
@@ -54,15 +55,12 @@ type TextInputProps = {
   columnFilterValue: string
   columnSize: number
   setFilterValue: (updater: any) => void
-  sortedUniqueValues: any[]
 }
 
 const TextInput: React.FC<TextInputProps> = ({
   columnId,
   columnFilterValue,
-  columnSize,
   setFilterValue,
-  sortedUniqueValues,
 }) => {
   const dataListId = `${columnId  }list`
 
@@ -84,7 +82,7 @@ type Props<T extends RowData> = {
   table: Table<T>
 }
 
-export function Filter<T extends RowData>({ column, table }: Props<T>) {
+export function Filter<T extends RowData>({ column }: Props<T>) {
   const columnFilterValue = column.getFilterValue()
   const uniqueValues = column.getFacetedUniqueValues()
 

@@ -1,13 +1,23 @@
 import React from 'react'
-import { ControllerRenderProps, FieldValues } from 'react-hook-form'
 import styled from 'styled-components'
 import { Loader } from '../../../components/Loader'
 import { Select } from '../../../components/Select'
 import { useFetchComputeInstanceQuery } from '../useFetchComputeInstanceQuery'
+import { ControllerRenderProps, FieldValues } from 'react-hook-form'
 
 const StyledInstanceSelect = styled(Select)`
   min-width: 225px;
 `
+
+interface ComputeInstance {
+  value: string
+  label: string
+}
+
+interface SelectOption {
+  value: string
+  label: string
+}
 
 type InstanceTypeSelectProps = {
   field: ControllerRenderProps<FieldValues, 'instance_type'>
@@ -17,15 +27,19 @@ export const InstanceTypeSelect = ({ field }: InstanceTypeSelectProps) => {
   const { data, isLoading } = useFetchComputeInstanceQuery()
   if (isLoading) return <Loader />
 
-  const options = data?.map(i => ({ value: i.value, label: i.label }))
+  const options: SelectOption[] = Array.isArray(data) ? 
+    data.map((i: ComputeInstance) => ({ value: i.value, label: i.label })) : []
 
   return (
     <StyledInstanceSelect
       {...field}
       options={options}
-      onChange={option => field.onChange(option?.value)}
+      onChange={option => {
+        const selectedOption = option as SelectOption | null
+        field.onChange(selectedOption?.value || '')
+      }}
       onBlur={field.onBlur}
-      value={options?.find(option => option.value === field.value)}
+      value={options?.find((option: SelectOption) => option.value === field.value)}
     />
   )
 }

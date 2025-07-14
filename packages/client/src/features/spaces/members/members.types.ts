@@ -27,7 +27,7 @@ export interface SpaceMembership {
   domain: string
   created_at: string
   links: Links
-  to_roles: any[]
+  to_roles: MemberRole[]
 }
 
 export interface ListMembersResponse {

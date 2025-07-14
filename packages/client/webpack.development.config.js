@@ -62,6 +62,11 @@ module.exports = merge(base({ urlLoaderOptions }), swc({ swcLoaderOptions }), {
     },
     proxy: [
       {
+        context: ['/docs'],
+        target: TARGET,
+        secure: false,
+      },
+      {
         context: ['/logout'],
         target: TARGET,
         secure: false,
@@ -179,6 +184,11 @@ module.exports = merge(base({ urlLoaderOptions }), swc({ swcLoaderOptions }), {
       },
       {
         context: ['/admin/users_list'],
+        target: TARGET,
+        secure: false,
+      },
+      {
+        context: ['/admin/set_total_limit'],
         target: TARGET,
         secure: false,
       },

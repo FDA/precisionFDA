@@ -23,7 +23,7 @@ import {
   StyledSubtitle,
   Tab,
 } from '../../actionModals/styles'
-import { DialogType } from '../../home/types'
+import { DialogType, ServerScope } from '../../home/types'
 import { fetchFilteredApps } from '../apps.api'
 import { IApp } from '../apps.types'
 import { Button } from '../../../components/Button'
@@ -85,7 +85,7 @@ export const useSelectAppModal = (
   type: DialogType,
   handleSelect: (apps: IApp[]) => void,
   subtitle?: string,
-  scopes?: string[],
+  scopes?: ServerScope[],
 ) => {
   const user = useAuthUser()
   const listedApps: IApp[] = []
@@ -101,7 +101,7 @@ export const useSelectAppModal = (
     status: loadingAppsStatus,
   } = useQuery({
     queryKey: ['list_apps', searchText],
-    queryFn: () => fetchFilteredApps(searchText, scopes ?? ([] as any)), // scopes: [] mean all scopes.
+    queryFn: () => fetchFilteredApps(searchText, scopes || []),
     enabled: isShown,
   })
 
@@ -185,7 +185,7 @@ export const useSelectAppModal = (
           <StyledFilterSection>
             <InputText placeholder="Filter..." onChange={evt => setFilter(evt.target.value)} />
             <StyledOnlyMine>
-              <input type="checkbox" onClick={evt => toggleOnlyMine(evt.target.checked)} />
+              <input type="checkbox" onClick={evt => toggleOnlyMine((evt.target as HTMLInputElement).checked)} />
               Only mine
             </StyledOnlyMine>
           </StyledFilterSection>
@@ -195,7 +195,7 @@ export const useSelectAppModal = (
               <SelectableTable>
                 <tbody>
                   {apps
-                    .filter((asset: IApp) => (showOnlyMyApps ? isMyApp(asset) && showOnlyMyApps : true))
+                    .filter((app: IApp) => (showOnlyMyApps ? isMyApp(app) && showOnlyMyApps : true))
                     .map((app: IApp) => (
                       <Row
                         app={app}

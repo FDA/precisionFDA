@@ -1,7 +1,6 @@
 import React from 'react'
 import { Link, Route, Routes, useMatch, useParams } from 'react-router-dom'
 import styled from 'styled-components'
-import { TransparentButton } from '../../../components/Button'
 import { NotAllowedPage } from '../../../components/NotAllowed'
 import { useAuthUser } from '../../auth/useAuthUser'
 import { canEditContent } from '../../data-portals/utils'
@@ -43,12 +42,6 @@ const StyledTitle = styled.h1`
   padding: 0 24px;
   margin-top: 20px;
 `
-const StyledNavButton = styled(TransparentButton)`
-  flex: 1;
-  height: max-content;
-  height: 40px;
-  padding: 12px 8px;
-`
 const NavItemResource = styled(NavItem)`
   border-top: 1px solid #e0e0e0;
 `
@@ -59,7 +52,7 @@ const NavItemBack = styled(NavItem)`
   padding-bottom: 24px;
 `
 
-export default function ChallengeContentEditPage(): JSX.Element {
+export default function ChallengeContentEditPage(): React.ReactNode {
   const user = useAuthUser()
   const { challengeId } = useParams<{
     challengeId: string
@@ -91,9 +84,9 @@ export default function ChallengeContentEditPage(): JSX.Element {
         </NavItemResource>
       </StyledChallengeHeader>
       <Routes>
-        <Route path="/info" element={<ContentTypePage key="info" challengeId={challengeId} contentType="info" />} />
-        <Route path="/results" element={<ContentTypePage key="results" challengeId={challengeId} contentType="results" />} />
-        <Route path="/pre-registration" element={<ContentTypePage key="pre-registration" challengeId={challengeId} contentType="pre-registration" />} />
+        <Route path="/info" element={<ContentTypePage key="info" challengeId={challengeId!} contentType="info" />} />
+        <Route path="/results" element={<ContentTypePage key="results" challengeId={challengeId!} contentType="results" />} />
+        <Route path="/pre-registration" element={<ContentTypePage key="pre-registration" challengeId={challengeId!} contentType="pre-registration" />} />
       </Routes>
     </StyledRow>
   )

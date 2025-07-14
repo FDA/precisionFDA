@@ -13,7 +13,7 @@ import { itemsCountString } from '../../../utils/formatting'
 import { ModalHeaderTop, ModalNext } from '../../modal/ModalNext'
 import { ButtonRow, Footer, ModalScroll } from '../../modal/styles'
 import { useModal } from '../../modal/useModal'
-import { DownloadListResponse } from '../../home/types'
+import { ApiErrorResponse, DownloadListResponse } from '../../home/types'
 import { deleteFilesRequest, fetchFilesDownloadList } from '../files.api'
 import { IFile } from '../files.types'
 import { getMessage } from './modal-utils'
@@ -52,11 +52,13 @@ const DeleteFiles = ({
 
       const promises: Promise<DownloadListResponse[]>[] = []
       filesByScopes.forEach((files, scope) => {
-        promises.push(fetchFilesDownloadList(
-          files.map(s => s.id),
-          'delete',
-          scope,
-        ))
+        promises.push(
+          fetchFilesDownloadList(
+            files.map(s => s.id),
+            'delete',
+            scope,
+          ),
+        )
       })
 
       return Promise.all(promises).then(fileArrays => Promise.resolve(fileArrays.flat()))
@@ -64,35 +66,27 @@ const DeleteFiles = ({
   })
 
   useEffect(() => {
-    if(data) setNodesToBeDeleted(data)
+    if (data) setNodesToBeDeleted(data)
   }, [data])
   if (isLoading) return <StyledLoader>Loading...</StyledLoader>
-  return (
-    data ? (
-      <StyledResourceTable
-        rows={data.map(s => ({
-          name: (
-            <StyledName href={s.viewURL} target="_blank">
-              <VerticalCenter>
-                {s.type === 'file' ? <FileIcon /> : <FolderIcon />}
-              </VerticalCenter>
-              {s.name}
-            </StyledName>
-          ),
-          path: <StyledPath>{s.fsPath}</StyledPath>,
-        }))}
-      />
-    ) : <div />
+  return data ? (
+    <StyledResourceTable
+      rows={data.map(s => ({
+        name: (
+          <StyledName href={s.viewURL} target="_blank">
+            <VerticalCenter>{s.type === 'file' ? <FileIcon /> : <FolderIcon />}</VerticalCenter>
+            {s.name}
+          </StyledName>
+        ),
+        path: <StyledPath>{s.fsPath}</StyledPath>,
+      }))}
+    />
+  ) : (
+    <div />
   )
 }
 
-export const useDeleteFileModal = ({
-  selected,
-  onSuccess,
-}: {
-  selected: IFile[]
-  onSuccess: () => void
-}) => {
+export const useDeleteFileModal = ({ selected, onSuccess }: { selected: IFile[]; onSuccess: () => void }) => {
   const queryClient = useQueryClient()
   const { isShown, setShowModal } = useModal()
   const memoSelected = useMemo(() => selected, [isShown])
@@ -101,9 +95,9 @@ export const useDeleteFileModal = ({
   const mutation = useMutation({
     mutationKey: ['delete-files'],
     mutationFn: (ids: number[]) => deleteFilesRequest(ids),
-    onError: (e: AxiosError) => {
+    onError: (e: AxiosError<ApiErrorResponse>) => {
       const error = e?.response?.data?.error
-      if(error?.message) {
+      if (error?.message) {
         toast.error(error?.message)
         return
       }
@@ -128,27 +122,19 @@ export const useDeleteFileModal = ({
   }
 
   const modalComp = (
-    <ModalNext
-      id="modal-files-delete"
-      data-test-id="modal-files-delete"
-      isShown={isShown}
-      hide={() => setShowModal(false)}
-    >
+    <ModalNext id="modal-files-delete" data-test-id="modal-files-delete" isShown={isShown} hide={() => setShowModal(false)}>
       <ModalHeaderTop
         disableClose={false}
         headerText={`Delete ${nodesToBeDeleted ? itemsCountString('item', nodesToBeDeleted.length) : '...'}`}
         hide={() => setShowModal(false)}
       />
       <ModalScroll>
-        <DeleteFiles selected={memoSelected} setNodesToBeDeleted={setNodesToBeDeleted}/>
+        <DeleteFiles selected={memoSelected} setNodesToBeDeleted={setNodesToBeDeleted} />
       </ModalScroll>
       <Footer>
         <ButtonRow>
           {mutation.isPending && <Loader />}
-          <Button
-            onClick={() => setShowModal(false)}
-            disabled={mutation.isPending}
-          >
+          <Button onClick={() => setShowModal(false)} disabled={mutation.isPending}>
             Cancel
           </Button>
           <Button data-variant="warning" onClick={handleSubmit} disabled={!nodesToBeDeleted.length || mutation.isPending}>

@@ -82,13 +82,13 @@ export function useAddResourceToModal({
   mutation,
   onSuccess,
 }: {
-  spaceId: string
+  spaceId?: string
   resource: ResourceTypes
   mutation?: UseMutationResult<
     unknown,
     unknown,
     {
-      spaceId: string
+      spaceId?: string
       uids: string[]
     },
     unknown

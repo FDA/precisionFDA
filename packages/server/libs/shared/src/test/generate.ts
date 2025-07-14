@@ -1,4 +1,3 @@
-/* eslint-disable max-len */
 import { AppSeries } from '@shared/domain/app-series/app-series.entity'
 import { Challenge } from '@shared/domain/challenge/challenge.entity'
 import { Comment } from '@shared/domain/comment/comment.entity'
@@ -9,7 +8,6 @@ import { Invitation } from '@shared/domain/invitation/invitation.entity'
 import { PROVISIONING_STATE } from '@shared/domain/invitation/invitation.enum'
 import { Job } from '@shared/domain/job/job.entity'
 import { JobRunData } from '@shared/domain/job/job.types'
-import { SyncJobOperation } from '@shared/domain/job/ops/synchronize'
 import { NewsItem } from '@shared/domain/news-item/news-item.entity'
 import { Note } from '@shared/domain/note/note.entity'
 import { SpaceEvent } from '@shared/domain/space-event/space-event.entity'
@@ -54,6 +52,7 @@ import { STATIC_SCOPE } from '../enums'
 import { TASK_TYPE } from '../queue/task.input'
 import type { AnyObject, UserCtx } from '../types'
 import { SyncFilesStateFacade } from '@shared/facade/sync-file-state/sync-files-state.facade'
+import { JobSynchronizationService } from '@shared/domain/job/services/job-synchronization.service'
 
 const chance = new Chance()
 
@@ -355,7 +354,7 @@ const workflow = {
     const dxid = `workflow-${random.dxstr()}}` as DxId<'workflow'>
     return {
       dxid,
-      uid: `${dxid}-1` as UId,
+      uid: `${dxid}-1` as Uid<'workflow'>,
       name,
       revision: 1,
       scope: 'private',
@@ -760,9 +759,9 @@ const bullQueueRepeatable = {
     next: Date.now() + 60 * 1000,
   }),
   syncJobStatus: (jobDxid: string) => ({
-    key: `__default__:${SyncJobOperation.getBullJobId(jobDxid)}:::*/2 * * * *`,
+    key: `__default__:${JobSynchronizationService.getBullJobId(jobDxid)}:::*/2 * * * *`,
     name: '__default__',
-    id: SyncJobOperation.getBullJobId(jobDxid),
+    id: JobSynchronizationService.getBullJobId(jobDxid),
     endDate: null,
     tz: null,
     cron: '*/2 * * * *',
@@ -772,9 +771,9 @@ const bullQueueRepeatable = {
   // In orphaned cases the 'next' timestamp (in milliseconds) has passed and
   // they sit idle in BullQueue
   syncJobStatusOrphaned: (jobDxid) => ({
-    key: `__default__:${SyncJobOperation.getBullJobId(jobDxid)}:::*/2 * * * *`,
+    key: `__default__:${JobSynchronizationService.getBullJobId(jobDxid)}:::*/2 * * * *`,
     name: '__default__',
-    id: SyncJobOperation.getBullJobId(jobDxid),
+    id: JobSynchronizationService.getBullJobId(jobDxid),
     endDate: null,
     tz: null,
     cron: '*/2 * * * *',

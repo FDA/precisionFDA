@@ -2,7 +2,7 @@ import { formatDistance } from 'date-fns'
 import { colors } from '../../styles/theme'
 import { TimeStatus } from './types'
 
-export const renderEmpty = (ts: TimeStatus) => {
+export const renderEmpty = (ts?: TimeStatus) => {
   switch (ts) {
     case 'current':
     case 'upcoming':

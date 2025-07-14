@@ -17,23 +17,46 @@ import { QuestionIcon } from '../icons/QuestionIcon'
 import { PFDA_EMAIL } from '../../constants'
 import { DataPortalIcon } from '../icons/DataPortalIcon'
 
-export type SiteNavItemType =
-  | {
-      id: string
-      icon: React.JSX.ElementType
-      iconHeight: number
-      text: string
-      alink?: string
-      external: boolean
-    }
-  | {
-      id: string
-      icon: React.JSX.ElementType
-      iconHeight: number
-      text: string
-      link?: string
-      external: boolean
-    }
+
+export const getNavigationPath = (navItem: SiteNavItemType): string => {
+  switch (navItem.navigation.type) {
+    case 'internal':
+      return navItem.navigation.path
+    case 'external':
+      return navItem.navigation.url
+    case 'mailto':
+      return `mailto:${navItem.navigation.email}`
+    default:
+      return '#'
+  }
+}
+
+export const getNavigationTarget = (navItem: SiteNavItemType): string | undefined => {
+  return (navItem.navigation.type === 'external' || navItem.navigation.type === 'mailto') ? '_blank' : undefined
+}
+
+export const getNavigationRel = (navItem: SiteNavItemType): string | undefined => {
+  return navItem.navigation.type === 'mailto' ? 'noreferrer' : undefined
+}
+
+/**
+ * Defining different navigation targets:
+ * - internal: React Router Link navigation within the app
+ * - external: External URL opened in new tab
+ * - mailto: Email link that opens user's default email client
+ */
+export type NavigationTarget = 
+  | { type: 'internal'; path: string }
+  | { type: 'external'; url: string }
+  | { type: 'mailto'; email: string }
+
+export type SiteNavItemType = {
+  id: string
+  icon: React.JSX.ElementType
+  iconHeight: number
+  text: string
+  navigation: NavigationTarget
+}
 
 export const siteNavItems: SiteNavItemType[] = [
   {
@@ -41,121 +64,105 @@ export const siteNavItems: SiteNavItemType[] = [
     icon: HomeIcon,
     iconHeight: 17,
     text: 'Overview',
-    link: '/',
-    external: false,
+    navigation: { type: 'internal', path: '/' },
   },
   {
     id: 'data-portals',
     icon: DataPortalIcon,
     iconHeight: 17,
     text: 'Data-Portals',
-    link: '/data-portals',
-    external: false,
+    navigation: { type: 'internal', path: '/data-portals' },
   },
   {
     id: 'discussions',
     icon: DiscussionIcon,
     iconHeight: 17,
     text: 'Discussions',
-    link: '/home/discussions?scope=everybody',
-    external: false,
+    navigation: { type: 'internal', path: '/home/discussions?scope=everybody' },
   },
   {
     id: 'challenges',
     icon: TrophyIcon,
     iconHeight: 17,
     text: 'Challenges',
-    link: '/challenges',
-    external: false,
+    navigation: { type: 'internal', path: '/challenges' },
   },
   {
     id: 'experts',
     icon: LightBulbIcon,
     iconHeight: 17,
     text: 'Experts',
-    link: '/experts',
-    external: false,
+    navigation: { type: 'internal', path: '/experts' },
   },
   {
     id: 'home',
     icon: FortIcon,
     iconHeight: 17,
     text: 'My Home',
-    link: '/home',
-    external: false,
+    navigation: { type: 'internal', path: '/home' },
   },
   {
     id: 'spaces',
     icon: ObjectGroupIcon,
     iconHeight: 17,
     text: 'Spaces',
-    link: '/spaces',
-    external: false,
+    navigation: { type: 'internal', path: '/spaces' },
   },
   {
     id: 'notes',
     icon: StickyNoteIcon,
     iconHeight: 17,
     text: 'Notes',
-    alink: '/notes',
-    external: false,
+    navigation: { type: 'external', url: '/notes' },
   },
   {
     id: 'comparisons',
     icon: BullsEyeIcon,
     iconHeight: 17,
     text: 'Comparisons',
-    alink: '/comparisons',
-    external: false,
+    navigation: { type: 'external', url: '/comparisons' },
   },
   {
     id: 'docs',
     icon: BookIcon,
     iconHeight: 17,
     text: 'Documentation',
-    alink: '/docs',
-    external: true,
+    navigation: { type: 'external', url: '/docs' },
   },
   {
     id: 'support',
     icon: QuestionIcon,
     iconHeight: 17,
     text: 'Support',
-    link: '',
-    alink: `mailto:${PFDA_EMAIL}`,
-    external: true,
+    navigation: { type: 'mailto', email: PFDA_EMAIL },
   },
   {
     id: 'daaas',
     icon: DaaasPortalIcon,
     iconHeight: 18,
     text: 'DAaaS',
-    link: '/data-portals/daaas',
-    external: false,
+    navigation: { type: 'internal', path: '/data-portals/daaas' },
   },
   {
     id: 'prism',
     icon: PrismPortalIcon,
     iconHeight: 17,
     text: 'PRISM',
-    link: '/data-portals/prism',
-    external: false,
+    navigation: { type: 'internal', path: '/data-portals/prism' },
   },
   {
     id: 'tools',
     icon: ToolsPortalIcon,
     iconHeight: 17,
     text: 'Tools',
-    link: '/data-portals/tools',
-    external: false,
+    navigation: { type: 'internal', path: '/data-portals/tools' },
   },
   {
     id: 'precisionfda-system-administration-portal',
     icon: AdministrationPortalIcon,
     iconHeight: 17,
     text: 'Admin',
-    link: '/data-portals/precisionfda-system-administration-portal',
-    external: false,
+    navigation: { type: 'internal', path: '/data-portals/precisionfda-system-administration-portal' },
   },
 ]
 
@@ -165,9 +172,7 @@ export const gsrsNavItems: SiteNavItemType[] = [
     icon: GSRSIcon,
     iconHeight: 17,
     text: 'GSRS',
-    link: '',
-    alink: '/ginas/app/ui',
-    external: true,
+    navigation: { type: 'external', url: '/ginas/app/ui' },
   },
 ]
 
@@ -177,31 +182,27 @@ export const cdmhNavItems: SiteNavItemType[] = [
     icon: GlobeIcon,
     iconHeight: 17,
     text: 'CDMH Portal',
-    link: '#',
-    external: true,
+    navigation: { type: 'external', url: '#' },
   },
   {
     id: 'cdr-browser',
     icon: GlobeIcon,
     iconHeight: 17,
     text: 'CDR Browser',
-    link: '#',
-    external: true,
+    navigation: { type: 'external', url: '#' },
   },
   {
     id: 'cdr-admin',
     icon: GlobeIcon,
     iconHeight: 17,
     text: 'CDR Admin',
-    link: '#',
-    external: true,
+    navigation: { type: 'external', url: '#' },
   },
   {
     id: 'connect-portal',
     icon: GlobeIcon,
     iconHeight: 17,
     text: 'Connect Portal',
-    link: '#',
-    external: true,
+    navigation: { type: 'external', url: '#' },
   },
 ]

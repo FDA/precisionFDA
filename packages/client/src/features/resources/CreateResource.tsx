@@ -107,7 +107,6 @@ export const CreateResource = ({ pid, onSuccess }: { pid: string; onSuccess: () 
         <ModalNext
           id="add-resource-to-space"
           data-testid="modal-add-resource"
-          backdropZIndex={700}
           isShown={isShown}
           hide={() => setShowModal(false)}
         >

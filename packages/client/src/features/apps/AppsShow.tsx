@@ -1,20 +1,18 @@
-import { omit, pick } from 'ramda'
 import React, { useEffect } from 'react'
 import { Link, Navigate, Route, Routes, useLocation, useParams } from 'react-router-dom'
-import styled from 'styled-components'
 import { CloudResourcesHeaderButton } from '../../components/CloudResourcesHeaderButton'
-import Dropdown from '../../components/Dropdown'
+import { DropdownNext } from '../../components/Dropdown/DropdownNext'
 import { RevisionDropdown } from '../../components/Dropdown/RevisionDropdown'
 import { HomeLabel } from '../../components/HomeLabel'
 import { Markdown } from '../../components/Markdown'
 import { StyledTab, StyledTabList, StyledTabPanel } from '../../components/Tabs'
 import { StyledPropertyItem, StyledPropertyKey, StyledTagItem, StyledTags } from '../../components/Tags'
 import { CubeIcon } from '../../components/icons/CubeIcon'
-import { StyledMarkdown } from '../../styles/commonStyles'
 import { IChallenge } from '../../types/challenge'
 import { getSpaceIdFromScope } from '../../utils'
 import { getBackPathNext } from '../../utils/getBackPath'
 import { ActionsDropdownContent } from '../home/ActionDropdownContent'
+import { ActionModalsRenderer } from '../home/ActionModalsRenderer'
 import { StyledBackLink, StyledRight } from '../home/home.styles'
 import {
   ActionsButton,
@@ -38,12 +36,8 @@ import { SpecTab } from './SpecTab'
 import { IApp } from './apps.types'
 import { useAppSelectionActions } from './useAppSelectionActions'
 import { useFetchAppQuery } from './useFetchAppQuery'
+import { StyledMarkdownAppShow } from './form/styles'
 
-const StyledMarkdownAppShow = styled(StyledMarkdown)`
-  padding-left: 16px;
-  padding-right: 16px;
-  max-width: 700px;
-`
 
 const renderOptions = (app: IApp, meta: { release: string }, homeScope?: HomeScope) => {
   const spaceId = getSpaceIdFromScope(app.scope)
@@ -138,7 +132,7 @@ const DetailActionsDropdown = ({
   challenges?: IChallenge[]
   spaceId?: string
 }) => {
-  let actions = useAppSelectionActions({
+  const { actions, modals } = useAppSelectionActions({
     homeScope,
     spaceId,
     selectedItems: [app],
@@ -148,28 +142,24 @@ const DetailActionsDropdown = ({
     challenges,
   })
 
+  let filteredActions = actions
+
   if (homeScope === 'spaces') {
-    actions = pick(['Copy to space'], actions)
+    filteredActions = actions.filter(action => action.name === 'Copy to space')
   }
 
-  actions = omit(['Run'], actions)
+  filteredActions = filteredActions.filter(action => action.name !== 'Run')
 
   return (
     <>
-      <Dropdown trigger="click" content={<ActionsDropdownContent actions={actions} />}>
-        {dropdownProps => <ActionsButton {...dropdownProps} active={dropdownProps.isActive} />}
-      </Dropdown>
-      {actions['Delete']?.modal}
-      {actions['Copy to space']?.modal}
-      {actions['Edit tags']?.modal}
-      {actions['Edit properties']?.modal}
-      {actions['Fork to']?.modal}
-      {actions['Export to']?.modal}
-      {actions['Set as Challenge App']?.modal}
-      {actions['Copy to My Home (private)']?.modal}
-      {actions['Add to Comparators']?.modal}
-      {actions['Remove from Comparators']?.modal}
-      {actions['Set this app as comparison default']?.modal}
+      <DropdownNext
+        trigger="click"
+        content={() => <ActionsDropdownContent actions={filteredActions} />}
+      >
+        {dropdownProps => <ActionsButton {...dropdownProps} active={dropdownProps.$isActive} />}
+      </DropdownNext>
+      
+      <ActionModalsRenderer modals={modals} />
     </>
   )
 }
@@ -230,8 +220,8 @@ export const AppsShow = ({
               <span data-testid="app-title">{appTitle}</span>
               {meta.comparator && <HomeLabel value="Comparator" icon="fa-bullseye" type="success" />}
               {meta.default_comparator && <HomeLabel value="Default comparator" icon="fa-bullseye" />}
-              {meta.assigned_challenges.length
-                ? meta.assigned_challenges.map((item: any) => (
+              {meta.assigned_challenges.length > 0
+                ? meta.assigned_challenges.map(item => (
                     <HomeLabel type="warning" icon="fa-trophy" value={item.name} key={item.id} />
                   ))
                 : null}
@@ -258,7 +248,7 @@ export const AppsShow = ({
                 homeScope={homeScope}
                 spaceId={spaceId}
                 app={app}
-                comparatorLinks={meta.links?.comparators ?? []}
+                comparatorLinks={meta.links.comparators}
                 challenges={meta.challenges}
               />
             </StyledRight>

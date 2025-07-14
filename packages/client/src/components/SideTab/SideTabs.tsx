@@ -10,7 +10,7 @@ const StyledTabs = styled.div`
 `
 const StyledTitleWrapper = styled.div`
   display: flex;
-  width: 300px;
+  min-width: 300px;
   flex-direction: column;
 `
 const StyledBody = styled.div``

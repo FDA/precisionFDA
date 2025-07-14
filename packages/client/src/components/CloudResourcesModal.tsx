@@ -1,9 +1,10 @@
 import React from 'react'
 import styled, { css } from 'styled-components'
 import { Loader } from './Loader'
-import { colors, theme } from '../styles/theme'
+import { colors } from '../styles/theme'
 import { CloudResourcesResponse, useCloudResourcesQuery } from '../hooks/useCloudResourcesCondition'
 import { ModalHeaderTop, ModalNext } from '../features/modal/ModalNext'
+import { formatNumberUS } from '../features/home/utils'
 
 type Props = {
   isShown: boolean
@@ -14,7 +15,7 @@ const StyledTable = styled.table`
   width: 100%;
 `
 
-const StyledTr = styled.tr`
+const StyledTr = styled.tr<{ $main?: boolean }>`
   ${({ $main }) => $main && css`
     font-weight: bold;
     background-color: var(--tertiary-100);
@@ -35,11 +36,11 @@ const StyledBodyCell = styled.td<{
 }>`
   line-height: 32px;
 
-  ${({ $bold }) => $bold && css`
+  ${({ $bold }) => $bold && `
     font-weight: bold;
     background-color: var(--tertiary-200);
   `}
-  ${({ $textAlign, $bgColor }) => css`
+  ${({ $textAlign }) => `
     text-align: ${$textAlign};
   `}
   padding: 0 20px;
@@ -106,7 +107,7 @@ const CloudUsageReport = ({ stats }: CloudUsageReportProps) => {
             <StyledBodyCell $bold={row.bold} $textAlign='right' $bgColor={
               index % 2 === 0 ? colors.borderDefault : colors.backgroundLightGray
             }>
-              {`$${row.usage.toFixed(2)}`}
+              {`$${formatNumberUS(row.usage)}`}
             </StyledBodyCell>
           </StyledTr>
         ))}
