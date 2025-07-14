@@ -3,7 +3,6 @@ import { Injectable, Logger } from '@nestjs/common'
 import { PlatformClient } from '@shared/platform-client'
 import { TASK_TYPE } from '@shared/queue/task.input'
 import { FILE_STATE_DX, FileOrAsset } from '@shared/domain/user-file/user-file.types'
-import { User } from '@shared/domain/user/user.entity'
 import { FileStatesParams } from '@shared/platform-client/platform-client.params'
 import { difference, groupBy } from 'ramda'
 import {
@@ -11,7 +10,6 @@ import {
   findFileOrAssetWithUid,
   findUnclosedFilesOrAssets,
 } from '@shared/domain/user-file/user-file.helper'
-import { Challenge } from '@shared/domain/challenge/challenge.entity'
 import { ChallengeRepository } from '@shared/domain/challenge/challenge.repository'
 import { ChallengeUpdateCardImageUrlOperation } from '@shared/domain/challenge/ops/update-challenge-card-image-url'
 import { ClientRequestError } from '@shared/errors'
