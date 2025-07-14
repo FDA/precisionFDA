@@ -109,6 +109,7 @@ export const useEditAssetModal = (selectedItem: IAsset) => {
 
   const modalComp = (
     <ModalNext
+      id="modal-asset-edit"
       data-testid="modal-asset-edit"
       isShown={isShown}
       hide={() => setShowModal(false)}

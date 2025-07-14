@@ -1,20 +1,20 @@
-import { omit } from 'ramda'
 import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import { Tooltip } from 'react-tooltip'
 import { Button } from '../../components/Button'
-import Dropdown from '../../components/Dropdown'
+import { DropdownNext } from '../../components/Dropdown/DropdownNext'
+import { ActionsDropdownContent } from '../home/ActionDropdownContent'
 import { Running } from '../../components/icons/StateIcons'
 import { getSpaceIdFromScope } from '../../utils'
 import { getBaseLink, useSelectableSpaces, useUserComputeInstances } from '../apps/run/utils'
 import { useAuthUser } from '../auth/useAuthUser'
-import { ActionsDropdownContent } from '../home/ActionDropdownContent'
 import { ActionsButton } from '../home/show.styles'
 import { HomeScope } from '../home/types'
 import { StyledRefresh, StyledStatusText } from './details/styles'
 import { IExecution } from './executions.types'
-import { useExecutionActions } from './useExecutionSelectActions'
+import { useExecutionSelectActions } from './useExecutionSelectActions'
+import { ActionModalsRenderer } from '../home/ActionModalsRenderer'
 
 export const ExecutionActionsRow = ({
   homeScope,
@@ -29,7 +29,7 @@ export const ExecutionActionsRow = ({
   const user = useAuthUser()
   const terminalStates = ['terminated', 'failed', 'done']
 
-  const actions = useExecutionActions({
+  const { actions, modals } = useExecutionSelectActions({
     homeScope,
     selectedItems: [execution],
     resourceKeys: ['execution', execution.uid],
@@ -126,7 +126,12 @@ export const ExecutionActionsRow = ({
           data-tooltip-id="workstation-starting"
           data-tooltip-content="The workstation is starting up and you can create a snapshot when it is ready"
           disabled={!execution.links.open_external}
-          onClick={() => actions['Snapshot']?.func()}
+          onClick={() => {
+            const snapshotAction = actions.find(action => action.name === 'Snapshot')
+            if (snapshotAction && snapshotAction.type === 'modal') {
+              snapshotAction.func()
+            }
+          }}
         >
           Snapshot
         </Button>
@@ -138,26 +143,22 @@ export const ExecutionActionsRow = ({
           </Button>
         </Link>
       )}
-      <Dropdown
+      <DropdownNext
         trigger="click"
-        content={
+        content={() => (
           <ActionsDropdownContent
             actions={
               terminalStates.includes(execution.state)
-                ? omit(['Snapshot', 'Terminate'], actions)
-                : omit(['Copy to space', 'Snapshot'], actions)
+                ? actions.filter(action => !['Snapshot', 'Terminate'].includes(action.name))
+                : actions.filter(action => !['Copy to space', 'Snapshot'].includes(action.name))
             }
           />
-        }
+        )}
       >
-        {dropdownProps => <ActionsButton {...dropdownProps} active={dropdownProps.isActive} />}
-      </Dropdown>
+        {dropdownProps => <ActionsButton {...dropdownProps} active={dropdownProps.$isActive} />}
+      </DropdownNext>
       {isJobStartingOrRunning && !execution.links.open_external && <Tooltip id="workstation-starting" />}
-      {actions['Copy to space']?.modal}
-      {actions['Edit tags']?.modal}
-      {actions['Edit properties']?.modal}
-      {actions['Terminate']?.modal}
-      {actions['Snapshot']?.modal}
+      <ActionModalsRenderer modals={modals} />
     </>
   )
 }

@@ -10,6 +10,7 @@ import { PlatformClientModule } from '@shared/platform-client/platform-client.mo
 import { JobLogService } from './services/job-log.service'
 import { MikroOrmModule } from '@mikro-orm/nestjs'
 import { Job } from '@shared/domain/job/job.entity'
+import { JobSynchronizationService } from '@shared/domain/job/services/job-synchronization.service'
 import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
 import { Space } from '@shared/domain/space/space.entity'
 
@@ -24,7 +25,7 @@ const imports = [
 
 @Module({
   imports,
-  providers: [JobService, JobLogService],
+  providers: [JobService, JobLogService, JobSynchronizationService],
   exports: [JobService, JobLogService],
 })
 export class JobServiceModule {

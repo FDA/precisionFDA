@@ -142,8 +142,10 @@ export function mapInputKeyVals(inputVals: RunJobFormType['inputs'], inputSpecs:
   for (const inputVal of inputVals) {
     let inputs: { [key: string]: FormInput } = {}
     Object.keys(inputVal.fields).forEach(key => {
-      const value = inputVal.fields[key]
-      inputs[key] = getValue(key, value, inputSpecs) as FormInput
+      const value = getValue(key, inputVal.fields[key], inputSpecs)
+      if(value) {
+        inputs[key] = value
+      }
     })
     inputs = cleanObject(inputs)
     inputVal.fields = inputs
@@ -182,11 +184,13 @@ export const createRequestObject = (
   app: IApp,
   inputSpecs: InputSpec[],
 ): RunJobRequest => {
-  let inputs: { [key: string]: string | string[] | number | number[] | boolean | undefined | null } = {}
+  let inputs: { [key: string]: string | string[] | number | number[] | boolean | undefined | null | ComputeInstance } = {}
 
   Object.keys(inputsParam).forEach(key => {
-    const value = inputsParam[key]
-    inputs[key] = getValue(key, value, inputSpecs)
+    const value = getValue(key, inputsParam[key], inputSpecs)
+    if(value) {
+      inputs[key] = value
+    }
   })
 
   inputs = cleanObject(inputs)
@@ -332,7 +336,7 @@ export const exportFormData = (event: React.MouseEvent<HTMLButtonElement>, formD
 }
 
 export const validateFile = async (fileUid: string) => {
-  const data = await fetchAccessibleFilesByUID({ uid: [fileUid] })
+  const data = await fetchAccessibleFilesByUID({ uid: [fileUid]})
 
   return data && data.length > 0
 }
@@ -370,7 +374,7 @@ export const extractFileUidsFromBatchInputs = (batchInputs: BatchInput[]): FileU
   return Array.from(allFileUidsSet)
 }
 
-export const getBaseLink = (spaceId?: number) => (spaceId ? `spaces/${spaceId}` : 'home')
+export const getBaseLink = (spaceId?: number | string) => (spaceId ? `spaces/${spaceId}` : 'home')
 
 export const generateCopyUrl = (displayData: string, url: string, app: IApp, copyType: 'app' | 'appSeries'): string => {
   const base64Encoded = btoa(encodeURIComponent(displayData))

@@ -12,7 +12,7 @@ const StyledSelect = styled(Select)`
 `
 
 // ATM only used for fetching active space members, won't work for public discussions
-const useFetchNotifyMembersQuery = (spaceId: number) =>
+const useFetchNotifyMembersQuery = (spaceId: string) =>
   useQuery({
     queryKey: ['challenge-scopes'],
     queryFn: () => spacesMembersListRequest({ spaceId, sideRole: undefined }),
@@ -39,12 +39,12 @@ export const NotifyMembersSelect = ({
   value: { label: string; value: string }[] | null
   onBlur: () => void
   isSubmitting: boolean
-  onChange: (v: any) => void
+  onChange: (v: unknown) => void
   scope: NoteScope
 }) => {
-  const spaceId = getSpaceIdFromScope(scope) as number
+  const spaceId = getSpaceIdFromScope(scope)
   const ref = useRef<SelectInstance>(null)
-  const { data: options, isLoading } = useFetchNotifyMembersQuery(spaceId)
+  const { data: options, isLoading } = useFetchNotifyMembersQuery(spaceId!)
   options?.unshift({ value: 'author', label: 'Author Only' }, { value: 'all', label: 'All Space Members' })
 
   // if any of the values is 'all' or 'author', remove all other options
@@ -58,6 +58,7 @@ export const NotifyMembersSelect = ({
 
   return (
     <StyledSelect
+      // @ts-expect-error ref not compatible with styled-components
       ref={ref}
       options={options}
       placeholder="Members to notify..."

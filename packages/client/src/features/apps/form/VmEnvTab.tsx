@@ -1,5 +1,5 @@
 import React, { useRef } from 'react'
-import { Control, Controller } from 'react-hook-form'
+import { Control, Controller, FieldValues } from 'react-hook-form'
 import { Link } from 'react-router-dom'
 import styled from 'styled-components'
 import { TransparentButton, Button } from '../../../components/Button'
@@ -151,14 +151,14 @@ const UbuntuPackageSelect = ({
   onChange,
   value,
 }: {
-  onChange: (p: CreateAppForm['packages']) => void
-  value: CreateAppForm['packages']
+  onChange: (p: string[]) => void
+  value: string[]
 }) => {
-  const inputRef = useRef<HTMLInputElement>()
+  const inputRef = useRef<HTMLInputElement>(null)
 
   const addItem = () => {
     if (!inputRef?.current?.value) return
-    const inputVal = inputRef?.current?.value
+    const inputVal = inputRef.current.value
     if (value.includes(inputVal)) return
     onChange([...value, inputVal])
     inputRef.current.value = ''
@@ -202,7 +202,7 @@ const UbuntuPackageSelect = ({
   )
 }
 
-export const VmEnvTab = ({ control }: { control: Control<CreateAppForm> }) => {
+export const VmEnvTab = ({ control }: { control: Control<FieldValues> }) => {
   return (
     <FormFields>
       <Help>
@@ -253,7 +253,7 @@ export const VmEnvTab = ({ control }: { control: Control<CreateAppForm> }) => {
         <Controller
           name="packages"
           control={control}
-          render={({ field }) => <UbuntuPackageSelect onChange={field.onChange} value={field.value} />}
+          render={({ field }) => <UbuntuPackageSelect onChange={field.onChange} value={field.value as string[]} />}
         />
       </FieldGroup>
     </FormFields>

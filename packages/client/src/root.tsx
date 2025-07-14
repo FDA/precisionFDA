@@ -1,7 +1,6 @@
 import { QueryClientProvider } from '@tanstack/react-query'
 import React, { useEffect, useState } from 'react'
 import { Navigate, Outlet, RouterProvider, createBrowserRouter } from 'react-router-dom'
-import 'react-toastify/dist/ReactToastify.css'
 import { QueryParamProvider } from 'use-query-params'
 import { ReactRouter6Adapter } from 'use-query-params/adapters/react-router-6'
 import Header from './components/Header/HeaderNext'

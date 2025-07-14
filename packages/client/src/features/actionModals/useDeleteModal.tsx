@@ -8,11 +8,27 @@ import { ModalHeaderTop, ModalNext } from '../modal/ModalNext'
 import { ButtonRow, Footer, ModalScroll } from '../modal/styles'
 import { useModal } from '../modal/useModal'
 import { Button } from '../../components/Button'
-import { AxiosError } from 'axios'
 
-export function useDeleteModal<
-  T extends { id: string; name: string; location: string },
->({
+export interface DeleteResponse {
+  meta?: {
+    messages: Array<{
+      type: 'error' | 'success'
+      message: string
+    }>
+  }
+}
+
+interface ApiError extends Error {
+  response?: {
+    data: {
+      error: {
+        message: string
+      }
+    }
+  }
+}
+
+export function useDeleteModal<T extends { id: string; name: string; location: string }>({
   resource,
   selected,
   request,
@@ -20,18 +36,18 @@ export function useDeleteModal<
 }: {
   resource: 'app' | 'asset' | 'workflow'
   selected: T[]
-  request: (ids: number[]) => Promise<any>
-  onSuccess?: (res: any) => void
+  request: (ids: (string)[]) => Promise<DeleteResponse>
+  onSuccess?: (res: DeleteResponse) => void
 }) {
   const { isShown, setShowModal } = useModal()
   const momoSelected = useMemo(() => selected, [isShown])
   const mutation = useMutation({
     mutationKey: ['delete-resource', resource],
     mutationFn: request,
-    onError: (error) => {
-      toast.error(error.response?.data.error.message)
+    onError: (error: ApiError) => {
+      toast.error(error.response?.data.error.message ?? error.message)
     },
-    onSuccess: (res: any) => {
+    onSuccess: (res: DeleteResponse) => {
       if (res?.meta?.messages[0].type === 'error') {
         toast.error(`Server error: ${res?.meta?.messages[0].message}`)
         return
@@ -50,18 +66,10 @@ export function useDeleteModal<
   }
 
   const modalComp = (
-    <ModalNext
-      id="modal-resource-delete"
-      data-test-id="modal-resource-delete"
-      isShown={isShown}
-      hide={() => setShowModal(false)}
-    >
+    <ModalNext id="modal-resource-delete" data-test-id="modal-resource-delete" isShown={isShown} hide={() => setShowModal(false)}>
       <ModalHeaderTop
         disableClose={false}
-        headerText={`Delete ${itemsCountString(
-          resource,
-          momoSelected.length,
-        )}?`}
+        headerText={`Delete ${itemsCountString(resource, momoSelected.length)}?`}
         hide={() => setShowModal(false)}
       />
       <ModalScroll>

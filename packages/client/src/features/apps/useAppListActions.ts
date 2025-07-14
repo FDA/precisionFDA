@@ -1,21 +1,22 @@
+import { ReactNode } from 'react'
 import { AxiosError } from 'axios'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
 import { addDataRequest } from '../spaces/spaces.api'
 import { useAddResourceToModal } from '../actionModals/useAddResourceToSpace'
-import { ActionFunctionsType } from '../home/types'
+import { Action } from '../home/action-types'
+import { extractModalsFromActions } from '../home/extractModalsFromActions'
 
-export enum AppListActions {
-  'Add App' = 'Add App',
+export interface UseAppListActionsResult {
+  actions: Action[]
+  modals: Record<string, ReactNode>
 }
 
 export const useAppListActions = ({
   spaceId,
-  resourceKeys,
 }: {
   spaceId: string,
-  resourceKeys: string[],
-}) => {
+}): UseAppListActionsResult => {
   const queryClient = useQueryClient()
 
   const mutation = useMutation({
@@ -32,7 +33,7 @@ export const useAppListActions = ({
     onSuccess: () => {
       toast.success('Successfully added app resource(s) to space.')
       queryClient.invalidateQueries({
-        queryKey: ['space', spaceId.toString()]
+        queryKey: ['space', spaceId?.toString()],
       })
       queryClient.invalidateQueries({
         queryKey: ['apps'],
@@ -42,14 +43,17 @@ export const useAppListActions = ({
     mutation,
   })
 
-  const actions: ActionFunctionsType<AppListActions> = {
-    'Add App': {
+  const actions: Action[] = [
+    {
+      name: 'Add App',
       type: 'modal',
-      func: ({ showModal = false } = {}) => setShowAddAppModal(showModal),
+      func: () => setShowAddAppModal(true),
       isDisabled: false,
       modal: AddAppModal,
     },
-  }
+  ]
 
-  return actions
+  const modals = extractModalsFromActions(actions)
+
+  return { actions, modals }
 }

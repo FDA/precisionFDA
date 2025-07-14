@@ -1,16 +1,17 @@
-import { Column, FilterFn } from '@tanstack/react-table'
+import { Column, Row } from '@tanstack/react-table'
 import React, { useState } from 'react'
 import styled from 'styled-components'
 
-export const dateRangeFilterFn: FilterFn<any> = (row, columnId, filterValue) => {
-  if (!filterValue || !filterValue.from || !filterValue.to) return true
+export const dateRangeFilterFn = <T,>(row: Row<T>, columnId: string, filterValue: unknown): boolean => {
+  const filter = filterValue as { from?: string; to?: string } | undefined | null
+  if (!filter || !filter.from || !filter.to) return true
 
   const cellValue = row.getValue<string>(columnId)
   if (!cellValue) return false
 
   const cellDate = new Date(cellValue).getTime()
-  const fromDate = new Date(filterValue.from).getTime()
-  const toDate = new Date(filterValue.to).getTime()
+  const fromDate = new Date(filter.from).getTime()
+  const toDate = new Date(filter.to).getTime()
 
   return cellDate >= fromDate && cellDate <= toDate
 }
@@ -27,7 +28,7 @@ const DateInput = styled.input`
   height: 23px;
 `
 
-const DateTimeRangeFilter = ({ column }: { column: Column<unknown> }) => {
+const DateTimeRangeFilter = <T = unknown,>({ column }: { column: Column<T> }) => {
   const [filterValue, setFilterValue] = useState<(string|undefined)[]>([])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {

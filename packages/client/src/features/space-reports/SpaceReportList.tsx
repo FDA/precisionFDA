@@ -3,7 +3,6 @@ import { ColumnSizingState } from '@tanstack/react-table'
 import React, { useEffect } from 'react'
 import useWebSocket from 'react-use-websocket'
 import { Button } from '../../components/Button'
-import Dropdown from '../../components/Dropdown'
 import { HoverDNAnexusLogo } from '../../components/icons/DNAnexusLogo'
 import { PlusIcon } from '../../components/icons/PlusIcon'
 import { ContentFooter } from '../../components/Page/ContentFooter'
@@ -23,6 +22,8 @@ import { userReportSelectActions } from './useSpaceReportSelectActions'
 import { ResouceQueryErrorMessage } from '../home/ResouceQueryErrorMessage'
 import { StyledPageTable } from '../../components/Table/components/styles'
 import { Params } from '../home/utils'
+import { DropdownNext } from '../../components/Dropdown/DropdownNext'
+import { ActionModalsRenderer } from '../home/ActionModalsRenderer'
 
 type ListType = { reports: ISpaceReport[]; meta: IMeta }
 
@@ -85,7 +86,8 @@ export const SpaceReportList = ({ scope, isContributorOrHigher }: { scope: strin
       try {
         const messageData = JSON.parse(message.data)
         return messageData.type === WEBSOCKET_MESSAGE_TYPE.NOTIFICATION
-      } catch (e) {
+      } catch (e: unknown) {
+        console.error('Error parsing WebSocket message:', e)
         return false
       }
     },
@@ -101,7 +103,7 @@ export const SpaceReportList = ({ scope, isContributorOrHigher }: { scope: strin
 
   const selectedItems = getSelectedObjectsFromIndexes<number, ISpaceReport>(selectedIndexes, query.data?.reports)
 
-  const actions = userReportSelectActions({
+  const { actions, modals } = userReportSelectActions({
     scope,
     selectedItems,
     resetSelected,
@@ -127,9 +129,9 @@ export const SpaceReportList = ({ scope, isContributorOrHigher }: { scope: strin
               </Button>
             )}
           </QuickActions>
-          <Dropdown trigger="click" content={<ActionsDropdownContent actions={actions} />}>
-            {dropdownProps => <ActionsButton {...dropdownProps} active={dropdownProps.isActive} />}
-          </Dropdown>
+          <DropdownNext trigger="click" content={() => <ActionsDropdownContent actions={actions} />}>
+            {dropdownProps => <ActionsButton {...dropdownProps} active={dropdownProps.$isActive} />}
+          </DropdownNext>
         </ActionsRow>
       </ResourceHeader>
 
@@ -146,8 +148,8 @@ export const SpaceReportList = ({ scope, isContributorOrHigher }: { scope: strin
         <HoverDNAnexusLogo opacity height={14} />
       </ContentFooter>
 
-      {actions['Delete']?.modal}
       {generateModal}
+      <ActionModalsRenderer modals={modals} />
     </>
   )
 }

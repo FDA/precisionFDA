@@ -73,7 +73,7 @@ const NewsPage = () => {
               {!isLoading && data?.news_items?.length === 0 && (
                 <div>No news items. Try changing the filter.</div>
               )}
-              {data?.news_items?.length > 0 && query.year && <PageFilterTitle>{query.year}</PageFilterTitle>}
+              {data?.news_items && data?.news_items?.length > 0 && query.year && <PageFilterTitle>{query.year}</PageFilterTitle>}
               <PageList>
                 {data?.news_items?.map(n => (
                   <NewsListItem key={n.id}>
@@ -113,8 +113,7 @@ const NewsPage = () => {
                     data?.news_items?.length,
                     data?.meta?.total_pages,
                   )}
-                  isPreviousData={data?.meta?.prev_page !== null}
-                  isNextData={data?.meta?.next_page !== null}
+                  onPerPageSelect={() => {}}
                   setPage={n => {
                     pagination.setPageParam(n, 'replaceIn')
                   }}

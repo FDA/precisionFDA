@@ -6,7 +6,7 @@ type FetchProvenance = {
   svg: string
 }
 
-export function fetchProvenanceByUid(uid: string) {
+export async function fetchProvenanceByUid(uid: string) {
   const url = `/api/tracks/provenance?uid=${uid}`
   return axios.get<FetchProvenance>(url).then(r => r.data)
 }

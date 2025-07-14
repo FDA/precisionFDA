@@ -46,8 +46,6 @@ export const multiFileUpload = async ({ filesBlob, filesMeta, updateFileStatus, 
 
     updateFileStatus(uploadInfo)
 
-    // const createdFile = await createFile(file.name, scopeToUpload, folderId ?? null)
-
     await createFile(file.name, scopeToUpload, folderId ?? null)
       .then(response => {
         throwIfError(response.status, response.payload)

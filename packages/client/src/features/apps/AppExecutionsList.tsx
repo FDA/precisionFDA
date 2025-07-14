@@ -16,14 +16,13 @@ import { useColumnWidthLocalStorage } from '../../hooks/useColumnWidthLocalStora
 import { useHiddenColumnLocalStorage } from '../../hooks/useHiddenColumnLocalStorage'
 import { useOrderByState } from '../../hooks/useOrderByState'
 import { usePaginationParams } from '../../hooks/usePaginationState'
-import { ErrorBoundary } from '../../utils/ErrorBoundry'
 import { DEFAULT_RECONNECT_ATTEMPTS, DEFAULT_RECONNECT_INTERVAL, SHOULD_RECONNECT, getNodeWsUrl } from '../../utils/config'
 import { toArrayFromObject } from '../../utils/object'
 import { IExecution } from '../executions/executions.types'
 import { useExecutionColumns } from '../executions/useExecutionColumns'
 import { columnFilters } from '../home/columnFilters'
 import {
-  IMeta,
+  HomeScope,
   NOTIFICATION_ACTION,
   Notification,
   WEBSOCKET_MESSAGE_TYPE,
@@ -31,12 +30,10 @@ import {
 } from '../home/types'
 import { useFilterParams } from '../home/useFilterState'
 import { useListQuery } from '../home/useListQuery'
-import { fetchAppExecutions } from './apps.api'
+import { fetchAppExecutions, FetchAppsExecutionsResponse } from './apps.api'
 import { ResouceQueryErrorMessage } from '../home/ResouceQueryErrorMessage'
 import { createLocationKey } from '../../utils'
 import { StyledPageTable } from '../../components/Table/components/styles'
-
-type ListType = { jobs: IExecution[]; meta: IMeta }
 
 export const AppExecutionsList = ({ spaceId, appUid }: { spaceId?: string, appUid: string }) => {
   const resource = 'app-executions'
@@ -49,10 +46,10 @@ export const AppExecutionsList = ({ spaceId, appUid }: { spaceId?: string, appUi
 
   const { filterQuery, setSearchFilter } = useFilterParams({ filters: columnFilters })
 
-  const query = useListQuery<ListType>({
-    fetchList: fetchAppExecutions,
+  const query = useListQuery<FetchAppsExecutionsResponse>({
+    fetchList: (filters, params) => fetchAppExecutions(filters, { ...params, appUid }),
     resource,
-    scope: appUid as any,
+    scope: appUid as HomeScope,
     pagination: { page: pageParam, perPage: perPageParam },
     order: { order_by: sort.order_by, order_dir: sort.order_dir },
     filter: filterQuery,
@@ -82,7 +79,8 @@ export const AppExecutionsList = ({ spaceId, appUid }: { spaceId?: string, appUi
             NOTIFICATION_ACTION.JOB_OUTPUTS_SYNCED,
           ].includes(notification.action)
         )
-      } catch (e) {
+      } catch (e: unknown) {
+        console.error('Error parsing WebSocket message:', e)
         return false
       }
     },
@@ -107,7 +105,7 @@ export const AppExecutionsList = ({ spaceId, appUid }: { spaceId?: string, appUi
         jobs={data?.jobs}
         isLoading={isLoading}
         setFilters={setSearchFilter}
-        filters={toArrayFromObject(filterQuery as any)}
+        filters={toArrayFromObject(filterQuery)}
         setSortBy={setSortBy}
         sortBy={sortBy}
         setColumnSizing={saveColumnResizeWidth}
@@ -122,9 +120,7 @@ export const AppExecutionsList = ({ spaceId, appUid }: { spaceId?: string, appUi
           totalPages={data?.meta?.pagination?.total_pages}
           perPage={perPageParam}
           isHidden={hidePagination(query.isFetched, data?.jobs?.length, data?.meta?.pagination?.total_pages)}
-          isPreviousData={data?.meta?.pagination?.prev_page !== null}
-          isNextData={data?.meta?.pagination?.next_page !== null}
-          setPage={setPageParam}
+          setPage={p => setPageParam(p, 'replaceIn')}
           onPerPageSelect={setPerPage}
         />
       </ContentFooter>
@@ -153,7 +149,7 @@ export const ExecutionsListTable = ({
   filters: ColumnFiltersState
   setFilters: (val: ColumnFiltersState) => void
   selectedRows?: RowSelectionState
-  setSelectedRows: (ids: RowSelectionState) => void
+  setSelectedRows?: (ids: RowSelectionState) => void
   columnSizing: ColumnSizingState
   setColumnSizing: (columnResizing: ColumnSizingState) => void
   setColumnVisibility: (cols: VisibilityState) => void
@@ -163,9 +159,8 @@ export const ExecutionsListTable = ({
     // Check if any of the conditions is true, then hide the column
     return !(c.accessorKey === 'featured' || c.accessorKey === 'app_title' || c.accessorKey === 'location' || c.id === 'select')
   }
-
+  // @ts-expect-error: type is broken from react-table library
   const col = useExecutionColumns({}).filter(filterColsByScope)
-  // const columns = useMemo(() => col, [col])
 
   const data = useMemo(() => jobs || [], [jobs])
 

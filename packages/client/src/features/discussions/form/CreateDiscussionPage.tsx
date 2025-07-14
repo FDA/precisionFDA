@@ -60,15 +60,14 @@ export const CreateDiscussionPage = ({ scope, displayWarning = false }: { scope:
     mutationFn: createDiscussionRequest,
     onSuccess: async data => {
       if (scope === 'public') {
-        queryClient.invalidateQueries({ queryKey: ['discussions'] })
+        queryClient.invalidateQueries({ queryKey: ['discussions']})
         navigate(`/home/discussions/${data.id}`)
       } else {
-        queryClient.invalidateQueries({ queryKey: ['space'] })
+        queryClient.invalidateQueries({ queryKey: ['space']})
         navigate(`/spaces/${getSpaceIdFromScope(scope)}/discussions/${data.id}`)
       }
     },
-    onError: e => {
-      // todo: handle error
+    onError: () => {
       toast.error('Error while creating discussion.')
     },
   })
