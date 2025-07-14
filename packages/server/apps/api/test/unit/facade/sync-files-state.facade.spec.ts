@@ -14,6 +14,7 @@ import * as userFileHelper from '@shared/domain/user-file/user-file.helper'
 import { FILE_STATE_DX, FileOrAsset } from '@shared/domain/user-file/user-file.types'
 import { FileStateResult } from '@shared/platform-client/platform-client.responses'
 import { ChallengeRepository } from '@shared/domain/challenge/challenge.repository'
+import { Challenge } from '@shared/domain/challenge/challenge.entity'
 
 describe('SyncFilesStateFacade', () => {
   const user = {
@@ -25,11 +26,16 @@ describe('SyncFilesStateFacade', () => {
   const platformClientFileStatesStub = stub()
   const challengeRepoFindOneWithCardImageUidStub = stub()
   const emFlushStub = stub()
+  const emGetRepositoryStub = stub()
+  const removeNodesFacadeRemoveFileStub = stub()
+
   let findUnclosedFilesOrAssetsStub: SinonStub
   let findFileOrAssetWithUidStub: SinonStub
+  let findFileOrAssetsWithDxidStub: SinonStub
 
   const em = {
     flush: emFlushStub,
+    getRepository: emGetRepositoryStub,
   } as unknown as SqlEntityManager
   const userCtx = {
     dxuser: user.dxuser,
@@ -46,7 +52,9 @@ describe('SyncFilesStateFacade', () => {
   const challengeRepo = {
     findOneWithCardImageUid: challengeRepoFindOneWithCardImageUidStub,
   } as unknown as ChallengeRepository
-  const removeNodesFacade = {} as unknown as RemoveNodesFacade
+  const removeNodesFacade = {
+    removeFile: removeNodesFacadeRemoveFileStub,
+  } as unknown as RemoveNodesFacade
 
   let referenceCreateStub: SinonStub
 
@@ -56,6 +64,7 @@ describe('SyncFilesStateFacade', () => {
 
     findUnclosedFilesOrAssetsStub = stub(userFileHelper, 'findUnclosedFilesOrAssets')
     findFileOrAssetWithUidStub = stub(userFileHelper, 'findFileOrAssetWithUid')
+    findFileOrAssetsWithDxidStub = stub(userFileHelper, 'findFileOrAssetsWithDxid')
 
     findUnclosedFilesOrAssetsStub.reset()
     findUnclosedFilesOrAssetsStub.throws()
@@ -63,14 +72,23 @@ describe('SyncFilesStateFacade', () => {
     findFileOrAssetWithUidStub.reset()
     findFileOrAssetWithUidStub.throws()
 
+    findFileOrAssetsWithDxidStub.reset()
+    findFileOrAssetsWithDxidStub.throws()
+
     userRepoFindOneStub.reset()
     userRepoFindOneStub.throws()
 
     challengeRepoFindOneWithCardImageUidStub.reset()
     challengeRepoFindOneWithCardImageUidStub.throws()
 
+    removeNodesFacadeRemoveFileStub.reset()
+    removeNodesFacadeRemoveFileStub.throws()
+
     emFlushStub.reset()
     emFlushStub.throws()
+
+    emGetRepositoryStub.reset()
+    emGetRepositoryStub.throws()
 
     platformClientFileStatesStub.reset()
     platformClientFileStatesStub.throws()
@@ -80,6 +98,7 @@ describe('SyncFilesStateFacade', () => {
     referenceCreateStub.restore()
     findUnclosedFilesOrAssetsStub.restore()
     findFileOrAssetWithUidStub.restore()
+    findFileOrAssetsWithDxidStub.restore()
   })
 
   function getInstance(): SyncFilesStateFacade {
@@ -221,8 +240,88 @@ describe('SyncFilesStateFacade', () => {
       expect(file2.state).to.eq(FILE_STATE_DX.OPEN)
     })
 
-    // some are not closed
-    // remove abandoned
-    // challengebot file
+    it('remove abandoned', async () => {
+      const file1 = {
+        uid: 'file1-dxid-1',
+        dxid: 'file1-dxid',
+        project: 'project-1',
+        isCreatedByChallengeBot: () => false,
+      } as unknown as FileOrAsset
+
+      userRepoFindOneStub.withArgs({ dxuser: user.dxuser }).resolves(user)
+      findUnclosedFilesOrAssetsStub
+        .withArgs(em, user.id)
+        .onFirstCall()
+        .resolves([file1])
+        .onSecondCall()
+        .resolves([])
+      platformClientFileStatesStub
+        .withArgs({
+          fileDxids: [file1.dxid],
+          projectDxid: file1.project,
+        })
+        .resolves([])
+
+      findFileOrAssetWithUidStub.withArgs(em, file1.uid).resolves(file1)
+      findFileOrAssetsWithDxidStub.withArgs(em, file1.dxid).resolves([file1])
+      removeNodesFacadeRemoveFileStub.reset()
+
+      const job = {} as unknown as Job
+
+      const facade = getInstance()
+      await facade.syncFiles(job)
+
+      expect(removeNodesFacadeRemoveFileStub.calledOnce).to.be.true()
+      expect(removeNodesFacadeRemoveFileStub.firstCall.firstArg).to.deep.eq(file1)
+      expect(emFlushStub.calledOnce).to.be.true()
+    })
+
+    it('challenge bot file', async () => {
+      const file1 = {
+        uid: 'file1-dxid-1',
+        dxid: 'file1-dxid',
+        project: 'project-1',
+        isCreatedByChallengeBot: () => true,
+      } as unknown as FileOrAsset
+
+      userRepoFindOneStub.withArgs({ dxuser: user.dxuser }).resolves(user)
+      findUnclosedFilesOrAssetsStub
+        .withArgs(em, user.id)
+        .onFirstCall()
+        .resolves([file1])
+        .onSecondCall()
+        .resolves([])
+      platformClientFileStatesStub
+        .withArgs({
+          fileDxids: [file1.dxid],
+          projectDxid: file1.project,
+        })
+        .resolves([
+          {
+            id: file1.dxid,
+            describe: {
+              size: 10000,
+              state: FILE_STATE_DX.CLOSED,
+            },
+          } as FileStateResult,
+        ])
+
+      const challenge = {} as unknown as Challenge
+
+      findFileOrAssetWithUidStub.withArgs(em, file1.uid).resolves(file1)
+      findFileOrAssetsWithDxidStub.withArgs(em, file1.dxid).resolves([file1])
+      challengeRepoFindOneWithCardImageUidStub.withArgs(file1.uid).resolves(challenge)
+      emGetRepositoryStub.reset()
+
+      const job = {} as unknown as Job
+
+      const facade = getInstance()
+      await facade.syncFiles(job)
+
+      // here I only want to know if the ChallengeUpdateCardImageUrlOperation was called
+      // it needs to be moved into it's separate service and therefore it doesn't make much
+      // sense to test calling the inside of the operation
+      expect(emGetRepositoryStub.calledOnce).to.be.true()
+    })
   })
 })
