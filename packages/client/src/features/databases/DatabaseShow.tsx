@@ -1,7 +1,7 @@
 import React from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Link, useLocation, useParams } from 'react-router-dom'
-import Dropdown from '../../components/Dropdown'
+import { DropdownNext } from '../../components/Dropdown/DropdownNext'
 import { Loader } from '../../components/Loader'
 import { DatabaseIcon } from '../../components/icons/DatabaseIcon'
 import { SyncIcon } from '../../components/icons/SyncIcon'
@@ -9,6 +9,7 @@ import { Refresh } from '../../components/Page/styles'
 import { StyledTagItem, StyledTags, StyledPropertyItem, StyledPropertyKey } from '../../components/Tags'
 import { RESOURCE_LABELS } from '../../types/user'
 import { ActionsDropdownContent } from '../home/ActionDropdownContent'
+import { ActionModalsRenderer } from '../home/ActionModalsRenderer'
 import { StyledBackLink, StyledRight } from '../home/home.styles'
 import {
   ActionsButton,
@@ -101,24 +102,22 @@ const renderOptions = (db: IDatabase, homeScope?: HomeScope) => {
   </MetadataSection>
 )}
 
-const DetailActionsDropdown = ({ db, refetch }: { db: IDatabase; refetch: () => void }) => {
-  const actions = useDatabaseSelectActions([db], ['dbclusters', db.uid])
+const DetailActionsDropdown = ({ db }: { db: IDatabase; refetch?: () => void }) => {
+  const { actions, modals } = useDatabaseSelectActions({
+    selectedItems: [db],
+    resourceKeys: ['dbclusters', db.uid],
+  })
 
   return (
     <>
-      <Dropdown trigger="click" content={<ActionsDropdownContent actions={actions} />}>
-        {dropdownProps => <ActionsButton {...dropdownProps} active={dropdownProps.isActive} />}
-      </Dropdown>
+      <DropdownNext
+        trigger="click"
+        content={() => <ActionsDropdownContent actions={actions} />}
+      >
+        {dropdownProps => <ActionsButton {...dropdownProps} active={dropdownProps.$isActive} />}
+      </DropdownNext>
 
-      {actions['Copy to space']?.modal}
-      {actions['Edit Database Info']?.modal}
-      {actions['Edit tags']?.modal}
-      {actions['Edit properties']?.modal}
-      {actions['Start']?.modal}
-      {actions['Stop']?.modal}
-      {actions['Terminate']?.modal}
-      {actions['Attach License']?.modal}
-      {actions['Detach License']?.modal}
+      <ActionModalsRenderer modals={modals} />
     </>
   )
 }
@@ -177,7 +176,7 @@ export const DatabaseShow = ({ emitScope, homeScope, spaceId }: { homeScope?: Ho
                   Refresh
                 </Button>
               )}
-              {<DetailActionsDropdown db={data} refetch={refetch} />}
+              {<DetailActionsDropdown db={data} />}
             </StyledRight>
           </div>
         </ResourceHeader>

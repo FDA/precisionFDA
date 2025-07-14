@@ -2,13 +2,6 @@ import styled from 'styled-components'
 import { PageContainer, PageLeftColumn, PageRightColumn, pagePadding, PageContainerMargin } from '../../../components/Page/styles'
 import { breakPoints } from '../../../styles/theme'
 import { StyledToC } from '../../markdown/Toc'
-import { Button } from '../../../components/Button'
-
-
-export const CallToActionButton = styled(Button).attrs({ variant: 'primary' })`
-  display: block;
-  margin-bottom: 0px;
-`
 
 export const ExpertPageRow = styled.div`
   display: flex;

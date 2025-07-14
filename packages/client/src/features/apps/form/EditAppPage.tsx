@@ -6,10 +6,12 @@ import { Loader } from '../../../components/Loader'
 import { NotAllowedPage } from '../../../components/NotAllowed'
 import { cleanObject } from '../../../utils/object'
 import { getBasePath } from '../../home/utils'
+import { ApiErrorResponse } from '../../home/types'
 import { CreateAppPayload, CreateAppResponse, createEditAppRequest } from '../apps.api'
 import { useFetchAppQuery } from '../useFetchAppQuery'
 import { AppForm } from './AppForm'
 import { mapFromServerToForm } from './common'
+import { AxiosError } from 'axios'
 
 export const EditAppPage = ({ spaceId }: { spaceId?: string }) => {
   const navigate = useNavigate()
@@ -31,8 +33,9 @@ export const EditAppPage = ({ spaceId }: { spaceId?: string }) => {
         queryKey: ['apps', 'app'],
       })
       toast.success('New revision created')
-    } catch (err) {
-      const message = err.response?.data?.error?.message || err.message || 'Unknown error'
+    } catch (err: unknown) {
+      const errorWithResponse = err as AxiosError<ApiErrorResponse>
+      const message = errorWithResponse.response?.data?.error?.message || errorWithResponse.message || 'Unknown error'
       toast.error(`Error while editing app: ${message}`)
     }
   }
@@ -62,6 +65,8 @@ export const EditAppPage = ({ spaceId }: { spaceId?: string }) => {
         packages: data.meta?.internal?.packages || [],
         input_spec: data.meta?.spec?.input_spec.map(mapFromServerToForm) || [],
         output_spec: data.meta?.spec?.output_spec || [],
+        createAppSeries: false,
+        createAppRevision: false,
       }}
     />
   )

@@ -10,7 +10,6 @@ import {
 } from '@tanstack/react-table'
 import React, { useEffect, useMemo, useState } from 'react'
 import useWebSocket from 'react-use-websocket'
-import Dropdown from '../../components/Dropdown'
 import { ContentFooter } from '../../components/Page/ContentFooter'
 import { Pagination } from '../../components/Pagination'
 import Table from '../../components/Table'
@@ -20,6 +19,7 @@ import { DEFAULT_RECONNECT_ATTEMPTS, DEFAULT_RECONNECT_INTERVAL, SHOULD_RECONNEC
 import { getSelectedObjectsFromIndexes, toArrayFromObject } from '../../utils/object'
 import { useAuthUser } from '../auth/useAuthUser'
 import { ActionsDropdownContent } from '../home/ActionDropdownContent'
+import { ActionModalsRenderer } from '../home/ActionModalsRenderer'
 import { ActionsRow } from '../home/home.styles'
 import { ActionsButton, ResourceHeader } from '../home/show.styles'
 import { HomeScope, IMeta, NOTIFICATION_ACTION, Notification, WEBSOCKET_MESSAGE_TYPE, WebSocketMessage } from '../home/types'
@@ -28,9 +28,10 @@ import { usePropertiesQuery } from '../home/usePropertiesQuery'
 import { fetchExecutions } from './executions.api'
 import { IExecution } from './executions.types'
 import { useExecutionColumns } from './useExecutionColumns'
-import { useExecutionActions } from './useExecutionSelectActions'
+import { useExecutionSelectActions } from './useExecutionSelectActions'
 import { ResouceQueryErrorMessage } from '../home/ResouceQueryErrorMessage'
 import { StyledPageTable } from '../../components/Table/components/styles'
+import { DropdownNext } from '../../components/Dropdown/DropdownNext'
 
 type ListType = { jobs: IExecution[]; meta: IMeta }
 
@@ -84,7 +85,8 @@ export const ExecutionList = ({ homeScope, spaceId }: { homeScope?: HomeScope; s
             NOTIFICATION_ACTION.JOB_OUTPUTS_SYNCED,
           ].includes(notification.action)
         )
-      } catch (e) {
+      } catch (e: unknown) {
+        console.error('Error parsing WebSocket message:', e)
         return false
       }
     },
@@ -100,7 +102,7 @@ export const ExecutionList = ({ homeScope, spaceId }: { homeScope?: HomeScope; s
   }, [lastJsonMessage])
 
   const selectedFileObjects = getSelectedObjectsFromIndexes(selectedIndexes, data?.jobs)
-  const actions = useExecutionActions({ homeScope, selectedItems: selectedFileObjects, resourceKeys: ['jobs'] })
+  const { actions, modals } = useExecutionSelectActions({ homeScope, selectedItems: selectedFileObjects, resourceKeys: ['jobs']})
 
   if (error) return <ResouceQueryErrorMessage />
 
@@ -109,19 +111,18 @@ export const ExecutionList = ({ homeScope, spaceId }: { homeScope?: HomeScope; s
       <ResourceHeader>
         <ActionsRow>
           <div />
-          <Dropdown
+          <DropdownNext
             trigger="click"
-            content={
-              <ActionsDropdownContent
-                actions={actions}
-                message={homeScope === 'spaces' && 'To perform other actions on this file, access it from the Space'}
-              />
-            }
+            content={() => <ActionsDropdownContent actions={actions} />}
           >
             {dropdownProps => (
-              <ActionsButton {...dropdownProps} data-testid="home-executions-actions-button" active={dropdownProps.isActive} />
+              <ActionsButton
+                {...dropdownProps}
+                data-testid="home-executions-actions-button"
+                active={dropdownProps.$isActive}
+              />
             )}
-          </Dropdown>
+          </DropdownNext>
         </ActionsRow>
       </ResourceHeader>
 
@@ -129,8 +130,7 @@ export const ExecutionList = ({ homeScope, spaceId }: { homeScope?: HomeScope; s
         isAdmin={isAdmin}
         homeScope={homeScope}
         setFilters={setSearchFilter}
-        // TODO(samuel) Typescript fix
-        filters={toArrayFromObject(filterQuery as any)}
+        filters={toArrayFromObject(filterQuery)}
         jobs={data?.jobs}
         properties={propertiesData?.keys}
         isLoading={isLoading}
@@ -150,19 +150,13 @@ export const ExecutionList = ({ homeScope, spaceId }: { homeScope?: HomeScope; s
           totalPages={data?.meta?.pagination?.total_pages}
           perPage={perPageParam}
           isHidden={false}
-          isPreviousData={data?.meta?.pagination?.prev_page !== null}
-          isNextData={data?.meta?.pagination?.next_page !== null}
           setPage={p => setPageParam(p, 'replaceIn')}
           onPerPageSelect={p => setPerPageParam(p, 'replaceIn')}
         />
         <HoverDNAnexusLogo opacity height={14} />
       </ContentFooter>
 
-      {actions['Copy to space']?.modal}
-      {actions['Edit tags']?.modal}
-      {actions['Edit properties']?.modal}
-      {actions['Snapshot']?.modal}
-      {actions['Terminate']?.modal}
+      <ActionModalsRenderer modals={modals} />
     </ErrorBoundary>
   )
 }

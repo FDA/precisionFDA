@@ -1,11 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
-import { expertsListRequest } from './api'
-
-interface IParams {
-  page?: number,
-  year?: number,
-}
+import { expertsListRequest, IParams } from './api'
 
 export const useExpertsListQuery = (params: IParams) => useQuery({
   queryKey: ['experts', params?.page, params.year],

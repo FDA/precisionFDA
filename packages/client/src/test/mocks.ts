@@ -15,11 +15,12 @@ export const createMockJob = (id: number, uid: string): Job => {
     run_input_data: [],
     run_output_data: [],
     run_data_updates: {
-      run_instance_type: '',
+      output_folder_path: '',
+      run_instance_type: 'baseline-2',
       run_inputs: {},
       run_outputs: {},
     },
-    instance_type: '',
+    instance_type: 'baseline-2',
     duration: '',
     duration_in_seconds: 0,
     energy_consumption: '',
@@ -41,6 +42,7 @@ export const createMockJob = (id: number, uid: string): Job => {
       track: '',
       attach_to: '',
       copy: '',
+      app: '',
     },
     entity_type: '',
     logged_dxuser: 'user',
@@ -48,7 +50,7 @@ export const createMockJob = (id: number, uid: string): Job => {
   }
 }
 
-export const createMockExecution = (id: string, uid: string): IExecution => {
+export const createMockExecution = (id: number|string, uid: string): IExecution => {
   return {
     id,
     uid,
@@ -56,16 +58,20 @@ export const createMockExecution = (id: string, uid: string): IExecution => {
     name: `Execution name ${uid}`,
     title: `Execution title ${uid}`,
     added_by: 'user',
-    app_revision: '1',
+    app_revision: 1,
+    app_active: true,
     run_input_data: [],
     run_output_data: [],
     created_at: '',
     created_at_date_time: '',
     app_uid: '',
     energy_consumption: '1',
+    cost_limit: 0,
     duration: '1',
-    instance_type: 'instance_type',
+    duration_in_seconds: 0,
+    instance_type: 'baseline-2',
     launched_by: 'user',
+    launched_by_dxuser: 'user',
     launched_on: '',
     app_title: 'app_title',
     location: 'location',
@@ -81,10 +87,13 @@ export const createMockExecution = (id: string, uid: string): IExecution => {
     logged_dxuser: 'logged_dxuser',
     links: {},
     tags: [],
+    properties: {},
+    snapshot: false,
+    entity_type: 'regular',
   }
 }
 
-export const createMockWorkflowExecution = (id: string, uid: string, numberOfJobs: number): IExecution => {
+export const createMockWorkflowExecution = (id: number, uid: string, numberOfJobs: number): IExecution => {
   const execution = createMockExecution(id, uid)
   execution.jobs = []
   for (let i = 0; i < numberOfJobs; i++) {
@@ -99,6 +108,7 @@ export const createMockSpace = (): ISpace => {
   return {
     confidential_space: {} as ConfidentialSpace,
     protected: true,
+    hidden: false,
     host_lead: {
       id: 1,
       dxuser: 'host_lead',
@@ -122,7 +132,7 @@ export const createMockSpace = (): ISpace => {
     created_at: '12032022',
     updated_at: '12032022',
     space_create: '12032022',
-    counters: { files: 1, apps: 1, workflows: 1, jobs: 1, members: 1, reports: 1, discussions: 1 },
+    counters: { files: 1, apps: 1, workflows: 1, jobs: 1, members: 1, reports: 1, discussions: 1, dbclusters: 1 },
     links: { files: 'files', apps: 'apps', workflows: 'workflows', jobs: 'jobs', members: 'members' },
     updatable: true,
     tags: ['testing'],

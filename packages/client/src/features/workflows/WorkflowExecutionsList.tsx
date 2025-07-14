@@ -28,7 +28,7 @@ export const WorkflowExecutionsList = ({ spaceId, uid }: { spaceId?: string; uid
   const resource = 'workflow-executions'
   const locationKey = createLocationKey(resource, spaceId)
   const { pageParam, perPageParam, setPageParam, setPerPageParam } = usePaginationParams()
-  const { sortBy, sort, setSortBy } = useOrderByState({ defaultOrder: { order_by: 'created_at_date_time', order_dir: 'DESC' } })
+  const { sortBy, sort, setSortBy } = useOrderByState({ defaultOrder: { order_by: 'created_at_date_time', order_dir: 'DESC' }})
   const { colWidths, saveColumnResizeWidth } = useColumnWidthLocalStorage(locationKey)
   const { columnVisibility, setColumnVisibility } = useHiddenColumnLocalStorage(locationKey)
 
@@ -39,9 +39,9 @@ export const WorkflowExecutionsList = ({ spaceId, uid }: { spaceId?: string; uid
   })
 
   const query = useListQuery<ListType>({
-    fetchList: fetchWorkflowExecutions,
+    fetchList: (filters, params) => fetchWorkflowExecutions(filters, { ...params, uid }),
     resource,
-    scope: uid as any,
+    scope: uid,
     pagination: { page: pageParam, perPage: perPageParam },
     order: { order_by: sort?.order_by, order_dir: sort?.order_dir },
     filter: filterQuery,
@@ -72,7 +72,8 @@ export const WorkflowExecutionsList = ({ spaceId, uid }: { spaceId?: string; uid
             NOTIFICATION_ACTION.JOB_OUTPUTS_SYNCED,
           ].includes(notification.action)
         )
-      } catch (e) {
+      } catch (e: unknown) {
+        console.error('Error parsing WebSocket message:', e)
         return false
       }
     },
@@ -95,7 +96,7 @@ export const WorkflowExecutionsList = ({ spaceId, uid }: { spaceId?: string; uid
         jobs={data?.jobs}
         isLoading={isLoading}
         setFilters={setSearchFilter}
-        filters={toArrayFromObject(filterQuery as any)}
+        filters={toArrayFromObject(filterQuery)}
         setSortBy={setSortBy}
         sortBy={sortBy}
         setColumnSizing={saveColumnResizeWidth}
@@ -110,9 +111,7 @@ export const WorkflowExecutionsList = ({ spaceId, uid }: { spaceId?: string; uid
           totalPages={data?.meta?.pagination?.total_pages}
           perPage={perPageParam}
           isHidden={hidePagination(query.isFetched, data?.jobs?.length, data?.meta?.pagination?.total_pages)}
-          isPreviousData={data?.meta?.pagination?.prev_page !== null}
-          isNextData={data?.meta?.pagination?.next_page !== null}
-          setPage={setPageParam}
+          setPage={p => setPageParam(p, 'replaceIn')}
           onPerPageSelect={setPerPage}
         />
       </ContentFooter>
@@ -141,7 +140,7 @@ export const ExecutionsListTable = ({
   filters: ColumnFiltersState
   setFilters: (val: ColumnFiltersState) => void
   selectedRows?: RowSelectionState
-  setSelectedRows: (ids: RowSelectionState) => void
+  setSelectedRows?: (ids: RowSelectionState) => void
   columnSizing: ColumnSizingState
   setColumnSizing: (columnResizing: ColumnSizingState) => void
   setColumnVisibility: (cols: VisibilityState) => void

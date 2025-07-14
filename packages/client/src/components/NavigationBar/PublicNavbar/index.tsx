@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useLocation, Link } from 'react-router-dom'
 import styled, { css } from 'styled-components'
-import classNames from 'classnames/bind'
+import classNames from 'classnames'
 import { PFDALogoLight, PFDALogoDark } from '../PFDALogo'
 import { theme } from '../../../styles/theme'
 import { PageContainerMargin } from '../../Page/styles'
@@ -265,7 +265,7 @@ const PublicNavbar = ({ shouldShowLogo = false }: Props) => {
         <AccessButton onClick={onRequestAccess}>Request Access</AccessButton>
         <Button data-variant="primary" onClick={onLogIn}>Log In</Button>
         {data?.ssoButton.isEnabled && (
-          <Button data-variant="primary" onClick={() => onLogInWithSSO(data.ssoButton.data.ssoUrl)}>
+          <Button data-variant="primary" onClick={() => onLogInWithSSO(data?.ssoButton?.data?.ssoUrl)}>
             Log In with SSO
           </Button>
         )}

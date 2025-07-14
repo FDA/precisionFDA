@@ -115,6 +115,7 @@ export const RevisionDropdown = ({
       content={<>{renderRevisionsList()}</>}
     >
       {dropdownProps => (
+        // @ts-expect-error ref is not compatible
         <StyledRevisionDropdownButton
           {...dropdownProps}
           data-testid="dropdown-revision-button"

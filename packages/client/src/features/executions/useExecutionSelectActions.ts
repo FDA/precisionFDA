@@ -1,5 +1,5 @@
+import { ReactNode } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
-import { omit, pick } from 'ramda'
 import { getSpaceIdFromScope } from '../../utils'
 import { useCopyToSpaceModal } from '../actionModals/useCopyToSpace'
 import { useEditPropertiesModal } from '../actionModals/useEditPropertiesModal'
@@ -7,26 +7,21 @@ import { useEditTagsModal } from '../actionModals/useEditTagsModal'
 import { useFeatureMutation } from '../actionModals/useFeatureMutation'
 import { getBaseLink } from '../apps/run/utils'
 import { useAuthUser } from '../auth/useAuthUser'
-import { ActionFunctionsType, HomeScope } from '../home/types'
+import { Action } from '../home/action-types'
+import { extractModalsFromActions } from '../home/extractModalsFromActions'
+import { HomeScope } from '../home/types'
 import { copyJobsRequest } from './executions.api'
 import { IExecution } from './executions.types'
 import { getExecutionJobsList } from './executions.util'
 import { useSnapshotModal } from './useSnapshotModal'
 import { useTerminateModal } from './useTerminateModal'
 
-export type ExecutionAction =
-  | 'Terminate'
-  | 'Track'
-  | 'Copy to space'
-  | 'Feature'
-  | 'Snapshot'
-  | 'Unfeature'
-  | 'Make Public'
-  | 'Comments'
-  | 'Edit tags'
-  | 'Edit properties'
+export interface UseExecutionSelectActionsResult {
+  actions: Action[]
+  modals: Record<string, ReactNode>
+}
 
-export const useExecutionActions = ({
+export const useExecutionSelectActions = ({
   homeScope,
   selectedItems,
   resourceKeys,
@@ -34,7 +29,7 @@ export const useExecutionActions = ({
   homeScope?: HomeScope
   selectedItems: IExecution[]
   resourceKeys: string[]
-}) => {
+}): UseExecutionSelectActionsResult => {
   const queryClient = useQueryClient()
   const selected = selectedItems.filter(x => x !== undefined)
   const user = useAuthUser()
@@ -102,8 +97,9 @@ export const useExecutionActions = ({
 
   const spaceId = getSpaceIdFromScope(selected[0]?.scope)
 
-  let actions: ActionFunctionsType<ExecutionAction> = {
-    Terminate: {
+  let actions: Action[] = [
+    {
+      name: 'Terminate',
       type: 'modal',
       func: () => setTerminateModal(true),
       isDisabled:
@@ -111,31 +107,36 @@ export const useExecutionActions = ({
       modal: terminateModal,
       showModal: isShownTerminateModal,
     },
-    Track: {
+    {
+      name: 'Track',
       type: 'route',
       to: `/${getBaseLink(spaceId)}/executions/${selected[0]?.uid}/track`,
       isDisabled: selected.length !== 1,
     },
-    'Copy to space': {
+    {
+      name: 'Copy to space',
       type: 'modal',
       func: () => setCopyToSpaceModal(true),
       isDisabled: selected.length === 0 || selected.some(e => !e.links?.copy),
       modal: copyToSpaceModal,
       showModal: isShownCopyToSpaceModal,
     },
-    Feature: {
+    {
+      name: 'Feature',
       type: 'modal',
       func: () => featureMutation.mutateAsync({ featured: true, uids: selected.map(f => f.uid) }),
       isDisabled: selected.length === 0 || !selected.every(e => !e.featured || !e.links.feature),
       shouldHide: !isAdmin || homeScope !== 'everybody',
     },
-    Unfeature: {
+    {
+      name: 'Unfeature',
       type: 'modal',
       func: () => featureMutation.mutateAsync({ featured: false, uids: selected.map(f => f.uid) }),
       isDisabled: selected.length === 0 || !selected.every(e => e.featured || !e.links.feature),
       shouldHide: !isAdmin || (homeScope !== 'everybody' && homeScope !== 'featured'),
     },
-    'Make Public': {
+    {
+      name: 'Make Public',
       type: 'link',
       isDisabled:
         selected.length !== 1 ||
@@ -148,7 +149,8 @@ export const useExecutionActions = ({
       },
       shouldHide: selected.length !== 1 || homeScope !== 'me',
     },
-    Snapshot: {
+    {
+      name: 'Snapshot',
       type: 'modal',
       func: () => setSnapshotModal(true),
       isDisabled: selected.length !== 1 || selected.some(e => !e.links?.open_external),
@@ -156,12 +158,14 @@ export const useExecutionActions = ({
       modal: snapshotModal,
       showModal: isSnapshotModal,
     },
-    Comments: {
+    {
+      name: 'Comments',
       type: 'link',
       isDisabled: selected.length !== 1,
       link: `/jobs/${selected[0]?.uid}/comments`,
     },
-    'Edit tags': {
+    {
+      name: 'Edit tags',
       type: 'modal',
       func: () => setTagsModal(true),
       isDisabled: false,
@@ -169,7 +173,8 @@ export const useExecutionActions = ({
       showModal: isShownTagsModal,
       shouldHide: (!isAdmin && !isJobOwner) || selected.length !== 1,
     },
-    'Edit properties': {
+    {
+      name: 'Edit properties',
       type: 'modal',
       func: () => setPropertiesModal(true),
       isDisabled: selected.length === 0,
@@ -177,17 +182,19 @@ export const useExecutionActions = ({
       showModal: isShownPropertiesModal,
       shouldHide: !isAdmin && !isJobOwner,
     },
-  }
+  ]
 
   if (homeScope === 'spaces') {
     if (isJobOwner) {
-      actions = omit(['Make Public', 'Feature', 'Unfeature'], actions)
+      actions = actions.filter(action => !['Make Public', 'Feature', 'Unfeature'].includes(action.name))
     } else {
       // If the user is not the owner of the job in a space, they cannot connect
       // to the workstation or perform other actions where ownership is needed
-      actions = pick(['Track', 'Copy to space', 'Comments', 'Edit tags', 'Edit properties'], actions)
+      actions = actions.filter(action => ['Track', 'Copy to space', 'Comments', 'Edit tags', 'Edit properties'].includes(action.name))
     }
   }
 
-  return actions
+  const modals = extractModalsFromActions(actions)
+
+  return { actions, modals }
 }

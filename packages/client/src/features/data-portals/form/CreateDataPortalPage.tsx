@@ -11,7 +11,22 @@ import { StyledPageCenter, StyledPageContent } from '../../spaces/form/styles'
 import { createDataPortalRequest } from '../api'
 import { CreateDataPortalData } from '../types'
 import { DataPortalForm } from './DataPortalForm'
+import { AxiosError } from 'axios'
+import { ApiErrorResponse } from '../../home/types'
 
+interface DataPortalFormData {
+  name: string
+  description: string
+  url_slug: string
+  sort_order: number
+  card_image_file: File[] | null
+  host_lead_dxuser: SelectItem | null
+  guest_lead_dxuser: SelectItem | null
+}
+
+interface SelectItem {
+  value: string
+}
 
 const CreateDataPortalPage = () => {
   const navigate = useNavigate()
@@ -19,18 +34,18 @@ const CreateDataPortalPage = () => {
   const queryClient = useQueryClient()
   const dataPortalMutation = useMutation({ mutationFn: createDataPortalRequest })
 
-  const onSubmit = async (v: any) => {
+  const onSubmit = async (v: DataPortalFormData) => {
     const payload = {
       dataPortal: {
         name: v.name,
         description: v.description,
         urlSlug: v.url_slug,
-        cardImageFileName: v.card_image_file[0]?.name,
+        cardImageFileName: v.card_image_file?.[0]?.name,
         hostLeadDxUser: v.host_lead_dxuser?.value,
         guestLeadDxUser: v.guest_lead_dxuser?.value,
         sortOrder: Number(v.sort_order),
       },
-      image: v.card_image_file[0],
+      image: v.card_image_file?.[0],
     } as CreateDataPortalData
 
     try {
@@ -40,8 +55,9 @@ const CreateDataPortalPage = () => {
         queryKey: ['data-portal-list'],
       })
       toast.success('Data Portal created')
-    } catch (err) {
-      const message = err.response?.data?.error?.message || err.message || 'Unknown error'
+    } catch (err: unknown) {
+      const error = err as AxiosError<ApiErrorResponse>
+      const message = error.response?.data?.error?.message || error.message || 'Unknown error'
       toast.error(`Error while creating data portal: ${message}`)
     }
   }

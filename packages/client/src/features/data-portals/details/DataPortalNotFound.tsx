@@ -35,7 +35,7 @@ export const Content = styled.div`
   height: 100%;
 `
 
-export function DataPortalError({ message }: { message: string }) {
+export function DataPortalError({ message }: { message?: string }) {
   return (
     <PageContainerMargin>
       <Content>

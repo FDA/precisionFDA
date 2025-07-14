@@ -22,11 +22,11 @@ export const Name = styled.div`
   flex-grow: 1;
   gap: 12px;
 `
-export const Item = styled.div<{ $selected: boolean }>`
+export const Item = styled.div`
   display: flex;
 `
 
-const ItemButton = styled(TransparentButton)`
+const ItemButton = styled(TransparentButton)<{ $selected?: boolean }>`
   display: flex;
   align-items: center;
   gap: 8px;
@@ -60,7 +60,7 @@ export const StyledFavorites = styled.div`
   padding: 4px var(--modal-padding-LR);
 `
 
-const SiteNavItem = props => {
+const SiteNavItem = (props: { item: SiteNavItemType; onClick: () => void; children: React.ReactNode }) => {
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: props.item.id })
 
   return (

@@ -1,5 +1,3 @@
-/* eslint-disable react/jsx-props-no-spreading */
-/* eslint-disable jsx-a11y/label-has-associated-control */
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
@@ -8,6 +6,8 @@ import { APP_REVISION_CREATION_NOT_REQUESTED, APP_SERIES_CREATION_NOT_REQUESTED 
 import { cleanObject } from '../../../utils/object'
 import { CreateAppPayload, CreateAppResponse, createEditAppRequest } from '../apps.api'
 import { AppForm } from './AppForm'
+import { ApiErrorResponse } from '../../home/types'
+import { AxiosError } from 'axios'
 
 export const CreateAppPage = () => {
   const navigate = useNavigate()
@@ -31,17 +31,19 @@ export const CreateAppPage = () => {
         queryKey: ['counters'],
       })
       toast.success('Your app was created successfully')
-    } catch (err) {
+    } catch (err: unknown) {
       // The default error message choice is an error we "intentionally" send from the backend
       // The second choice is a standard Error object message
       // The 'Unknown error' is a fallback in case the previous options provide nothing better than - for example - an empty string
+      const errorWithResponse = err as AxiosError<ApiErrorResponse>
       if (
-        err.response?.status === 400 &&
-        [APP_SERIES_CREATION_NOT_REQUESTED, APP_REVISION_CREATION_NOT_REQUESTED].includes(err?.response?.data?.error.code)
+        errorWithResponse.response?.status === 400 &&
+        errorWithResponse?.response?.data?.error?.code &&
+        [APP_SERIES_CREATION_NOT_REQUESTED, APP_REVISION_CREATION_NOT_REQUESTED].includes(errorWithResponse.response.data.error.code)
       ) {
         throw err
       } else {
-        const message = err.response?.data?.error?.message || err.message || 'Unknown error'
+        const message = errorWithResponse.response?.data?.error?.message || (err as Error).message || 'Unknown error'
         toast.error(`Error while creating app: ${message}`)
       }
     }

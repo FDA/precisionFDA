@@ -4,14 +4,14 @@ import { toast } from 'react-toastify'
 import { Loader } from '../../components/Loader'
 import { ResourceTable } from '../../components/ResourceTable'
 import { pluralize } from '../../utils/formatting'
-import { Modal } from '../modal'
-import { ButtonRow } from '../modal/styles'
+import { ModalHeaderTop, ModalNext } from '../modal/ModalNext'
+import { ButtonRow, Footer } from '../modal/styles'
 import { useModal } from '../modal/useModal'
 import { databaseMethodRequest } from './databases.api'
 import { MethodType } from './databases.types'
 import { Button } from '../../components/Button'
 
-export function useMethodModal<T extends { dxid: string; name: string }>({
+export function useMethodModal<T extends { dxid: string; name: string; location?: string }>({
   method,
   selected,
   onSuccess,
@@ -49,12 +49,26 @@ export function useMethodModal<T extends { dxid: string; name: string }>({
   const methodText = method.charAt(0).toUpperCase() + method.slice(1)
 
   const modalComp = (
-    <Modal
+    <ModalNext
       data-testid="modal-dbcluster-delete"
       headerText={`${methodText} ${momoSelected.length} ${pluralize('item', momoSelected.length)}`}
       isShown={isShown}
       hide={() => setShowModal(false)}
-      footer={
+      variant="medium"
+      id="method-modal"
+    >
+      <ModalHeaderTop headerText={`${methodText} ${momoSelected.length} ${pluralize('item', momoSelected.length)}`} hide={() => setShowModal(false)} />
+      <div style={{ padding: '1rem' }}>
+        <ResourceTable
+          rows={selected.map(s => {
+            return {
+              name: <div>{s.name}</div>,
+              location: <div>{s.location || ''}</div>,
+            }
+          })}
+        />
+      </div>
+      <Footer>
         <ButtonRow>
           {mutation.isPending && <Loader />}
           <Button onClick={() => setShowModal(false)} disabled={mutation.isPending}>Cancel</Button>
@@ -62,17 +76,8 @@ export function useMethodModal<T extends { dxid: string; name: string }>({
             {methodText}
           </Button>
         </ButtonRow>
-      }
-    >
-      <ResourceTable
-        rows={selected.map(s => {
-          return {
-            name: <div>{s.name}</div>,
-            location: <div>{s.location}</div>,
-          }
-        })}
-      />
-    </Modal>
+      </Footer>
+    </ModalNext>
   )
   return {
     modalComp,
