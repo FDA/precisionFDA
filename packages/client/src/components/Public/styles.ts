@@ -73,7 +73,6 @@ export const NewsListItem = styled.div`
 `
 export const PageMainBody = styled.div`
   ${compactScrollBarV2}
-  display: flex;
   flex: 1;
   flex-grow: 1;
 `
@@ -83,7 +82,7 @@ export const OverviewCenterSection = styled.div`
   flex: 1;
   flex-grow: 1;
   justify-content: center;
-  padding: 0 16px;
+  padding: 0 8px;
 `
 
 export const PageFilterTitle = styled.h2`
@@ -168,13 +167,15 @@ export const ItemButton = styled.button<{ selected?: boolean }>`
   &:hover {
     color: var(--c-link-hover);
   }
-  ${({ selected }) => selected && css`
-    background-color: var(--primary-500);
-    color: white;
-    &:hover {
+  ${({ selected }) =>
+    selected &&
+    css`
+      background-color: var(--primary-500);
       color: white;
-    }
-  `}
+      &:hover {
+        color: white;
+      }
+    `}
 `
 
 export const NoContent = styled.div`

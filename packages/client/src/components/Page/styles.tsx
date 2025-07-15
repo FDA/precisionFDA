@@ -43,10 +43,6 @@ export const pagePaddingLR = css`
   }
 `
 
-export const PageLoadWrapper = styled.div`
-  flex: 1 0 auto;
-`
-
 export const PageLeftColumn = styled.div`
   flex: 1 1 auto;
 `
@@ -82,7 +78,7 @@ export const PageContainerMargin = styled.div`
   margin-inline: auto;
   width: min(100% - 32px, var(--container-width));
 
-  @media(min-width: 1045px) {
+  @media (min-width: 1045px) {
     width: min(100% - 64px, var(--container-width));
   }
 `
@@ -91,10 +87,6 @@ export const PageTitle = styled.h1`
   font-size: 32px;
   font-weight: 400;
   margin: 0;
-`
-
-export const Small = styled.div`
-  font-size: 13px;
 `
 
 export const PageHeader = styled.div`
@@ -134,15 +126,6 @@ export const Refresh = styled.span<{ $spin?: boolean }>`
       transform: rotate(360deg);
     }
   }
-`
-export const Row = styled.div`
-  display: flex;
-`
-export const PageContentItems = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  margin: 16px 0;
 `
 
 export const Filler = styled.div<{ $size: number }>`
