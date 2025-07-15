@@ -82,7 +82,7 @@ describe('/news', () => {
   it('GET /news public access', async () => {
     const { body } = await supertest(testedApp.getHttpServer()).get(`/news`).expect(200)
 
-    const newsItems = body.news_items
+    const newsItems = body.data
     expect(newsItems).to.have.length(10)
 
     const expectedResults = newsItems.filter((item: NewsItem) => item.published === true)
@@ -104,7 +104,7 @@ describe('/news', () => {
       .query({ page: 2 })
       .expect(200)
 
-    const newsItems = body.news_items
+    const newsItems = body.data
     expect(newsItems).to.have.length(2)
 
     newsItems.forEach((x: NewsItem) => expect(x.published).to.be.true())
@@ -116,7 +116,7 @@ describe('/news', () => {
       .query({ type: 'publication' })
       .expect(200)
 
-    const newsItems = body.news_items
+    const newsItems = body.data
     const expectedResults = news.filter((item: NewsItem) => {
       return item.published && item.isPublication
     })
@@ -137,7 +137,7 @@ describe('/news', () => {
     let expectedResults = news.filter((item: NewsItem) => {
       return item.published && item.year === 2022
     })
-    expect(response.body.news_items).to.have.length(expectedResults.length)
+    expect(response.body.data).to.have.length(expectedResults.length)
 
     response = await supertest(testedApp.getHttpServer())
       .get(`/news`)
@@ -147,7 +147,7 @@ describe('/news', () => {
     expectedResults = news.filter((item: NewsItem) => {
       return item.published && item.year === 2020
     })
-    expect(response.body.news_items).to.have.length(expectedResults.length)
+    expect(response.body.data).to.have.length(expectedResults.length)
   })
 
   // TODO: Complete this test, but first need to define what htis API does
@@ -158,7 +158,7 @@ describe('/news', () => {
       .set(getDefaultHeaderData(user1))
       .expect(200)
 
-    const newsItems = body.news_items
+    const newsItems = body.data
     const expectedResults = news.filter((item: NewsItem) => {
       return item.published
     })

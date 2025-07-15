@@ -1,23 +1,18 @@
 import axios from 'axios'
-import { Pagination } from '../../types/pagination'
-import { cleanObject } from '../../utils/object'
+import { PaginationMetaV2 } from '../../types/pagination'
 import { NewsItem, NewsListParams } from './types'
 
 export interface NewsListResponse {
-  meta?: Pagination,
-  news_items: NewsItem[],
+  meta: PaginationMetaV2
+  data: NewsItem[]
 }
 
 export async function newsListRequest(params: NewsListParams) {
-  const filters = cleanObject({ year: params.year?.toString(), type: params.type, page: params.page?.toString(), per_page: params.perPage?.toString(), orderBy: params.orderBy })
-  const paramQ = `?${new URLSearchParams(filters).toString()}`
-  return axios.get(`/api/news${paramQ}`).then(response => response.data as NewsListResponse)
+  return axios.get('/api/v2/news', { params }).then(response => response.data as NewsListResponse)
 }
 
 export async function newsAdminAllRequest(params: NewsListParams) {
-  const filters = cleanObject({ year: params.year?.toString(), type: params.type, page: params.page?.toString(), per_page: params.perPage?.toString() })
-  const paramQ = `?${new URLSearchParams(filters).toString()}`
-  return axios.get(`/api/news/all${paramQ}`).then(response => response.data as NewsItem[])
+  return axios.get('/api/v2/news/all', { params }).then(response => response.data as NewsItem[])
 }
 
 export async function newsItemRequest(id: string) {
@@ -26,14 +21,14 @@ export async function newsItemRequest(id: string) {
 
 export type NewsYearsListResponse = string[]
 export async function newsYearsListRequest(): Promise<NewsYearsListResponse> {
-  return axios.get('/api/news/years').then(response => response.data.map((item: number) => item.toString()))
+  return axios.get('/api/v2/news/years').then(response => response.data.map((item: number) => item.toString()))
 }
 export interface CreateNewsItemResponse {
-  error?: Error;
+  error?: Error
 }
 export interface CreateNewsItemPayload {
-  title?: string;
-  isPublication?: boolean;
+  title?: string
+  isPublication?: boolean
 }
 
 export async function createNewsItemRequest(payload: CreateNewsItemPayload) {

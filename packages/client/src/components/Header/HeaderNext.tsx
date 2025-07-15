@@ -9,7 +9,6 @@ import { useGenerateKeyModal } from '../../features/auth/useGenerateKeyModal'
 import { CDMHNames, SiteSettingsDataPortal, useSiteSettingsQuery } from '../../features/auth/useSiteSettingsQuery'
 import { useOnOutsideClickRef } from '../../hooks/useOnOutsideClick'
 import { IUser } from '../../types/user'
-import { useTheme } from '../../utils/ThemeContext'
 import { AlertBanner } from '../AlertBanner'
 import { TransparentButton } from '../Button'
 import { CloudResourceModal } from '../CloudResourcesModal'
@@ -17,11 +16,11 @@ import { DropdownNext } from '../Dropdown/DropdownNext'
 import { ArrowLeftIcon } from '../icons/ArrowLeftIcon'
 import { CDMHIcon } from '../icons/CDMHIcon'
 import { CaretIcon } from '../icons/CaretIcon'
-import { DarkModeIcon, LightModeIcon } from '../icons/ColorModes'
 import { CrossIcon } from '../icons/PlusIcon'
 import { ProfileIcon } from '../icons/ProfileIcon'
 import { SiteMenuIcon } from '../icons/SiteMenuIcon'
 import { StarIcon } from '../icons/StarIcon'
+import { ThemeToggle } from '../ThemeToggle'
 import { 
   SiteNavItemType, 
   getNavigationPath, 
@@ -56,8 +55,6 @@ import {
   StyledLink,
   StyledOnClickModalDiv,
   StyledSiteNav,
-  StyledToggle,
-  StyledToggleButton,
   SubLink,
 } from './styles'
 import { useEditFavoritesModal } from './useEditFavoritesModal'
@@ -279,10 +276,9 @@ const SiteNav = ({
 }: {
   className: string
   setShowSiteNav: (v: boolean, ms?: number) => void
-  ignoredOutsideClickRef: React.RefObject<HTMLElement> | null
+  ignoredOutsideClickRef: React.RefObject<HTMLButtonElement | null>
   isSiteAdmin: boolean
 }) => {
-  const { theme, toggleTheme } = useTheme()
   const clickRef = useOnOutsideClickRef(true, () => setShowSiteNav(false), ignoredOutsideClickRef)
   const { pathname } = useLocation()
   const { data: siteSettings } = useSiteSettingsQuery()
@@ -370,14 +366,7 @@ const SiteNav = ({
       </SiteNavBody>
       <SiteNavBottom>
         <div />
-        <StyledToggle>
-          <StyledToggleButton data-active={theme === 'light'} onClick={() => toggleTheme()}>
-            <LightModeIcon height={16} />
-          </StyledToggleButton>
-          <StyledToggleButton data-active={theme === 'dark'} onClick={() => toggleTheme()}>
-            <DarkModeIcon height={16} />
-          </StyledToggleButton>
-        </StyledToggle>
+        <ThemeToggle />
       </SiteNavBottom>
     </StyledSiteNav>
   )

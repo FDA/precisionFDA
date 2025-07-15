@@ -51,10 +51,6 @@ class Context
     @client_cli
   end
 
-  def gravatar_url
-    @user.gravatar_url
-  end
-
   def logged_in?
     @user_id.present? &&
       @username.present? &&
