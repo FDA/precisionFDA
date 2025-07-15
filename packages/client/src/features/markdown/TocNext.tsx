@@ -114,7 +114,7 @@ export const useMarkdownToc = (ref: React.MutableRefObject<null>, data: string) 
 }
 
 export const TocList = ({ items }: { items?: IToCItem[] }) => {
-  if(!items) return null
+  if(!items || items.length === 0) return null
   return (
     <StyledToC>
         {items.map((i, k) => {
