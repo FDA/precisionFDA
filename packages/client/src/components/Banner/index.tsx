@@ -6,13 +6,13 @@ export const MainBanner = styled.div`
   --c-banner-highlight: hsl(207, 70%, 51%);
   --c-banner-base: white;
   --c-banner-base-2: #ddd;
-
+  
   ${({ theme }) =>
     theme.colorMode === 'dark' &&
-    css`
-      border-bottom: 1px solid var(--c-layout-border);
-    `}
-
+  css`
+  border-bottom: 1px solid var(--c-layout-border);
+  `}
+  box-sizing: border-box;
   width: 100%;
   background-color: rgb(22, 19, 14);
   background-image: url(${navBackground});

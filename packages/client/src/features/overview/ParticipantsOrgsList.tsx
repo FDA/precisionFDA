@@ -22,11 +22,26 @@ const StyledParticipantsList = styled.ul`
     }
   }
 
-
   img {
     object-fit: contain;
     width: 128px;
     height: 60px;
+
+    filter: grayscale(1);
+    transition: filter 0.2s ease;
+    
+    &:hover {
+      filter: none;
+    }
+  }
+
+  [data-theme="dark"] & img {
+    filter: grayscale(1) invert(1);
+    transition: filter 0.2s ease;
+    
+    &:hover {
+      filter: none;
+    }
   }
 `
 

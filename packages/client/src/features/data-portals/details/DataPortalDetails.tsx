@@ -1,4 +1,4 @@
-import React, { useRef } from 'react'
+import React, { useRef, useState, useCallback } from 'react'
 import { Link, Route, Routes } from 'react-router-dom'
 import { Button } from '../../../components/Button'
 import { ListItem, NoContent } from '../../../components/Public/styles'
@@ -10,7 +10,7 @@ import { AddIdsToHeaders } from '../../../components/Markdown/AddIdsToHeaders'
 import { Filler } from '../../../components/Page/styles'
 import { StyledInnerHTML } from '../../lexi/styles'
 import '../../lexi/themes/PlaygroundEditorTheme.css'
-import { ToC, useMarkdownToc } from '../../markdown/TocNext'
+import { ToC, IToCItem } from '../../markdown/TocNext'
 import { useDataPortalResourceModal } from '../../resources/useDataPortalResourceModal'
 import DataPortalContentEditPage from '../form/DataPortalContentEditPage'
 import { BodyContent, DataPortalPageMainBody, DPSettings, PageWrap, RightSideItem, RightSideScroll, Row } from './styles'
@@ -30,9 +30,19 @@ export const DataPortalDetails = ({
   canEditContent: boolean
   canListPortals?: boolean
 }) => {
-  const docRef = useRef(null)
-  const toc = useMarkdownToc(docRef, portal.content ?? '')
+  const docRef = useRef<HTMLDivElement | null>(null)
+  const scrollContainerRef = useRef<HTMLDivElement | null>(null)
+  const [toc, setToc] = useState<IToCItem[]>([])
   const { modalComp, setShowModal } = useDataPortalResourceModal()
+
+  const handleHeadersUpdated = useCallback((headings: NodeListOf<Element>) => {
+    const tocItems: IToCItem[] = Array.from(headings).map(h => ({
+      id: h.id,
+      tagName: h.tagName,
+      textContent: h.textContent || '',
+    }))
+    setToc(tocItems)
+  }, [])
 
   return (
     <Row>
@@ -55,7 +65,7 @@ export const DataPortalDetails = ({
               {modalComp}
 
               {canViewResources && (
-                <ListItem style={{ cursor: 'pointer' }} onClick={() => setShowModal(true)}>
+                <ListItem to="#" style={{ cursor: 'pointer' }} onClick={() => setShowModal(true)}>
                   <span className="fa fa-file-code-o fa-fw" /> Resources
                 </ListItem>
               )}
@@ -68,12 +78,16 @@ export const DataPortalDetails = ({
           </RightSideItem>
         )}
 
-        <ToC items={toc} />
+        {toc.length > 0 && (
+          <RightSideItem>
+            <ToC items={toc} />
+          </RightSideItem>
+        )}
 
         <RightSideItem />
       </RightSideScroll>
 
-      <PageWrap>
+      <PageWrap ref={scrollContainerRef}>
         <Routes>
           <Route
             path="/"
@@ -90,7 +104,12 @@ export const DataPortalDetails = ({
                       )}
                     </NoContent>
                   )}
-                  <AddIdsToHeaders as={StyledInnerHTML} docRef={docRef} content={portal.content ?? ''} />
+                  <AddIdsToHeaders 
+                    as={StyledInnerHTML} 
+                    docRef={docRef} 
+                    content={portal.content ?? ''} 
+                    onHeadersUpdated={handleHeadersUpdated}
+                  />
                   <Filler $size={40} />
                 </BodyContent>
               </DataPortalPageMainBody>

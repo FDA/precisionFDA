@@ -83,6 +83,12 @@ const base = {
   explorers: 0,
   featured: false,
   active: true,
+  user: {
+    dxuser: 'lvoss',
+    full_name: 'Dr. Leon Voss',
+  },
+  properties: {},
+  forked_from: null,
   links: {
     show: '/apps/app-GF7GV9Q0822pG8q53X6z2Bz3-1',
     user: '/users/lvoss',
@@ -105,8 +111,6 @@ const base = {
   tags: [],
   job_count: 0,
   latest_revision: true,
-  properties: {},
-  forked_from: null,
 } satisfies IApp
 
 export const mockCopyToSpaceApps = [
@@ -161,6 +165,7 @@ export const mockForkApp: IApp = {
   properties: {},
   scope: 'private',
   forked_from: null,
+  user: {} as IApp['user'],
 }
 
 export const mockSelectApps: IApp[] = [
@@ -192,6 +197,7 @@ export const mockSelectApps: IApp[] = [
     properties: {},
     scope: 'private',
     forked_from: null,
+    user: {} as IApp['user'],
   },
   {
     id: 2,
@@ -221,6 +227,7 @@ export const mockSelectApps: IApp[] = [
     properties: {},
     scope: 'public',
     forked_from: null,
+    user: {} as IApp['user'],
   },
 ]
 
@@ -283,19 +290,7 @@ export const appsMocks = [
     }
     
     if (body && ('scopes' in body || Array.isArray((body as Record<string, unknown>).scopes))) {
-      return HttpResponse.json({
-        apps: mockSelectApps,
-        meta: {
-          count: mockSelectApps.length,
-          pagination: {
-            current_page: 1,
-            next_page: null,
-            prev_page: null,
-            per_page: 25,
-            total_pages: 1,
-          },
-        },
-      })
+      return HttpResponse.json(mockSelectApps)
     }
     
     return HttpResponse.json(
@@ -625,4 +620,5 @@ export const mockExportApp: IApp = {
   },
   scope: 'private',
   forked_from: null,
+  user: {} as IApp['user'],
 }

@@ -1,4 +1,3 @@
-/* eslint-disable no-nested-ternary */
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import React from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
@@ -8,7 +7,7 @@ import { BackLinkMargin } from '../../../components/Page/PageBackLink'
 import { PageTitle } from '../../../components/Page/styles'
 import { UserLayout } from '../../../layouts/UserLayout'
 import { AdminWrapper } from '../../admin/AdminWrapper'
-import { deleteNewsItemRequest, editNewsItemRequest, newsItemRequest } from '../api'
+import { CreateNewsItemPayload, deleteNewsItemRequest, editNewsItemRequest, newsItemRequest } from '../api'
 import { NewsItem } from '../types'
 import { CreateNewsForm, NewsItemForm } from './NewsItemForm'
 import { FormPageContainer } from './styles'
@@ -25,8 +24,8 @@ const EditNewsItemMutation = ({ data }: { data: NewsItem }) => {
   const queryClient = useQueryClient()
   const editNewsItemMutation = useMutation({
     mutationKey: ['edit-news-item'],
-    mutationFn: (payload: any) => editNewsItemRequest(data.id, payload),
-    onSuccess: res => {
+    mutationFn: (payload: CreateNewsItemPayload) => editNewsItemRequest(data.id, payload),
+    onSuccess: () => {
       navigate('/admin/news')
       queryClient.invalidateQueries({
         queryKey: ['news'],
@@ -44,7 +43,7 @@ const EditNewsItemMutation = ({ data }: { data: NewsItem }) => {
   const deleteNewsItemMutation = useMutation({
     mutationKey: ['delete-news-item'],
     mutationFn: () => deleteNewsItemRequest(data.id),
-    onSuccess: res => {
+    onSuccess: () => {
       navigate('/admin/news')
       queryClient.invalidateQueries({
         queryKey: ['news-item'],
@@ -73,7 +72,7 @@ const EditNewsItemMutation = ({ data }: { data: NewsItem }) => {
 
 const EditNewsItemPage = () => {
   const { id: idParam } = useParams<{ id: string }>()
-  const { data, isLoading } = useNewsItemRequest(idParam)
+  const { data, isLoading } = useNewsItemRequest(idParam!)
 
   return (
     <UserLayout mainScroll>

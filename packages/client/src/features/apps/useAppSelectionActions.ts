@@ -1,5 +1,5 @@
+import { ReactNode } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
-import { pick } from 'ramda'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import { IChallenge } from '../../types/challenge'
@@ -12,12 +12,19 @@ import { useFeatureMutation } from '../actionModals/useFeatureMutation'
 import { useForkAppToModal } from '../actionModals/useForkAppToModal'
 import { useAuthUser } from '../auth/useAuthUser'
 import { useComparatorModal } from '../comparators/useComparatorModal'
-import { ActionFunctionsType, HomeScope } from '../home/types'
+import { Action } from '../home/action-types'
+import { HomeScope } from '../home/types'
 import { copyAppsRequest, copyAppsToPrivate, deleteAppsRequest } from './apps.api'
-import { AppActions, IApp } from './apps.types'
+import { IApp } from './apps.types'
 import { getBaseLink } from './run/utils'
 import { useAttachToChallengeModal } from './useAttachToChallengeModal'
 import { useExportToModal } from './useExportToModal'
+import { extractModalsFromActions } from '../home/extractModalsFromActions'
+
+export interface UseAppSelectionActionsResult {
+  actions: Action[]
+  modals: Record<string, ReactNode>
+}
 
 export const useAppSelectionActions = ({
   homeScope,
@@ -29,13 +36,13 @@ export const useAppSelectionActions = ({
   challenges,
 }: {
   homeScope?: HomeScope
-  spaceId?: number
+  spaceId?: string
   selectedItems: IApp[]
   resourceKeys: string[]
   resetSelected?: () => void
   comparatorLinks: { [key: string]: string }
   challenges: IChallenge[] | undefined
-}) => {
+}): UseAppSelectionActionsResult => {
   const queryClient = useQueryClient()
   const navigate = useNavigate()
   const selected = selectedItems.filter(x => x !== undefined)
@@ -114,7 +121,7 @@ export const useAppSelectionActions = ({
     modalComp: attachToChallengeModal,
     setShowModal: setAttachToChallengeModal,
     isShown: isShownAttachToChallengeModal,
-  } = useAttachToChallengeModal<IApp>({
+  } = useAttachToChallengeModal({
     resource: 'apps',
     selected: selected[0],
     onSuccess: () => {
@@ -129,7 +136,7 @@ export const useAppSelectionActions = ({
   } = useDeleteModal({
     resource: 'app',
     selected: selected.map(s => ({ name: s.name, location: s.location, id: s.uid })),
-    request: deleteAppsRequest,
+    request: () => deleteAppsRequest(selected.map(s => s.uid)),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ['apps'],
@@ -164,7 +171,7 @@ export const useAppSelectionActions = ({
     selected: selected.map(app => ({ ...app, id: app.app_series_id })),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: resourceKeys })
-      queryClient.invalidateQueries({ queryKey: ['edit-resource-properties', 'appSeries'] })
+      queryClient.invalidateQueries({ queryKey: ['edit-resource-properties', 'appSeries']})
     },
   })
 
@@ -180,47 +187,54 @@ export const useAppSelectionActions = ({
     isShown: isShownForkToModal,
   } = useForkAppToModal({ selectedApp: selected[0] })
 
-  let actions: ActionFunctionsType<AppActions> = {
-    Run: {
+  const actions: Action[] = [
+    {
+      name: 'Run',
       type: 'route',
       to: `/${getBaseLink(spaceId)}/apps/${selected[0]?.uid}/jobs/new`,
       isDisabled: selected.length !== 1 || !selected[0].links.run_job,
       cloudResourcesConditionType: 'all',
     },
-    Track: {
+    {
+      name: 'Track',
       type: 'route',
       to: `/${getBaseLink(spaceId)}/apps/${selected[0]?.uid}/track`,
       isDisabled: selected.length !== 1,
     },
-    Edit: {
+    {
+      name: 'Edit',
       type: 'route',
       to: `/${getBaseLink(spaceId)}/apps/${selected[0]?.uid}/edit`,
       isDisabled: selected.length !== 1 || !selected[0].latest_revision || selected[0].added_by !== user?.dxuser,
     },
-    'Fork to': {
+    {
+      name: 'Fork to',
       type: 'modal',
       func: () => setForkToModal(true),
       modal: forkToModal,
       showModal: isShownForkToModal,
       isDisabled: selected.length !== 1 || selected[0]?.entity_type === 'https',
     },
-    'Export to': {
+    {
+      name: 'Export to',
       type: 'modal',
       func: () => setExportToModal(true),
       modal: exportToModal,
       showModal: isShownExportToModal,
       isDisabled: selected.length !== 1,
     },
-    'Make public': {
+    {
+      name: 'Make public',
       type: 'link',
       link: {
-        method: 'GET',
+        method: 'GET' as const,
         url: `/publish?identifier=${selected[0]?.uid}&type=app`,
       },
       isDisabled: selected.length !== 1 || !selected[0].links.publish || !user?.allowed_to_publish,
       shouldHide: selected[0]?.location !== 'Private',
     },
-    Feature: {
+    {
+      name: 'Feature',
       type: 'modal',
       func: () => {
         featureMutation.mutateAsync({ featured: true, uids: selected.map(f => f.uid) })
@@ -228,7 +242,8 @@ export const useAppSelectionActions = ({
       isDisabled: selected.length === 0 || !selected.every(e => !e.featured || !e.links.feature),
       shouldHide: !isAdmin || homeScope !== 'everybody',
     },
-    Unfeature: {
+    {
+      name: 'Unfeature',
       type: 'modal',
       func: () => {
         featureMutation.mutateAsync({ featured: false, uids: selected.map(f => f.uid) })
@@ -236,21 +251,24 @@ export const useAppSelectionActions = ({
       isDisabled: selected.length === 0 || !selected.every(e => e.featured || !e.links.feature),
       shouldHide: !isAdmin || (homeScope !== 'everybody' && homeScope !== 'featured'),
     },
-    Delete: {
+    {
+      name: 'Delete',
       type: 'modal',
       func: () => setDeleteModal(true),
       isDisabled: selected.some(e => !e.links.delete) || selected.length === 0,
       modal: deleteModal,
       showModal: isShownDeleteModal,
     },
-    'Copy to space': {
+    {
+      name: 'Copy to space',
       type: 'modal',
       func: () => setCopyToSpaceModal(true),
       isDisabled: selected.length === 0 || selected.some(e => !e.links.copy),
       modal: copyToSpaceModal,
       showModal: isShownCopyToSpaceModal,
     },
-    'Copy to My Home (private)': {
+    {
+      name: 'Copy to My Home (private)',
       type: 'modal',
       func: () => setCopyToPrivateModal(true),
       isDisabled: selected.length === 0,
@@ -258,12 +276,14 @@ export const useAppSelectionActions = ({
       showModal: isShownCopyToPrivateModal,
       shouldHide: ['private', 'public'].includes(selected[0]?.scope),
     },
-    Comments: {
+    {
+      name: 'Comments',
       type: 'link',
       link: `/apps/${selected[0]?.uid}/comments`,
       isDisabled: selected.length !== 1,
     },
-    'Set as Challenge App': {
+    {
+      name: 'Set as Challenge App',
       type: 'modal',
       func: () => setAttachToChallengeModal(true),
       isDisabled: selected.length !== 1,
@@ -271,7 +291,8 @@ export const useAppSelectionActions = ({
       showModal: isShownAttachToChallengeModal,
       shouldHide: !challenges || challenges.length === 0 || !selected[0]?.links?.assign_app,
     },
-    'Edit tags': {
+    {
+      name: 'Edit tags',
       type: 'modal',
       func: () => setTagsModal(true),
       isDisabled: selected.length !== 1,
@@ -279,7 +300,8 @@ export const useAppSelectionActions = ({
       showModal: isShownTagsModal,
       shouldHide: (!isAdmin && selected[0]?.added_by !== user?.dxuser) || selected.length !== 1,
     },
-    'Edit properties': {
+    {
+      name: 'Edit properties',
       type: 'modal',
       func: () => setPropertiesModal(true),
       modal: propertiesModal,
@@ -287,7 +309,8 @@ export const useAppSelectionActions = ({
       showModal: isShownPropertiesModal,
       shouldHide: !isAdmin && selected[0]?.added_by !== user?.dxuser,
     },
-    'Add to Comparators': {
+    {
+      name: 'Add to Comparators',
       type: 'modal',
       func: () => setShowComparatorAddModal(true, 'add_to_comparators'),
       isDisabled: false,
@@ -295,7 +318,8 @@ export const useAppSelectionActions = ({
       showModal: isShownComparatorAddModal,
       modal: comparatorAddModal,
     },
-    'Set this app as comparison default': {
+    {
+      name: 'Set this app as comparison default',
       type: 'modal',
       func: () => setShowComparatorSetModal(true, 'set_app'),
       isDisabled: false,
@@ -303,7 +327,8 @@ export const useAppSelectionActions = ({
       showModal: isShownComparatorSetModal,
       modal: comparatorSetModal,
     },
-    'Remove from Comparators': {
+    {
+      name: 'Remove from Comparators',
       type: 'modal',
       func: () => setShowComparatorRemoveModal(true, 'remove_from_comparators'),
       isDisabled: false,
@@ -311,11 +336,22 @@ export const useAppSelectionActions = ({
       showModal: isShownComparatorRemoveModal,
       modal: comparatorRemoveModal,
     },
-  }
+  ]
 
+  let filteredActions = actions
+  
+  if (homeScope) {
+    filteredActions = filteredActions.filter(action => action.name !== 'Copy to My Home (private)')
+  } else {
+    filteredActions = filteredActions.filter(action => action.name !== 'Make public')
+  }
+  
   if (homeScope === 'spaces') {
-    actions = pick(['Copy to space'], actions)
+    const allowedNames = ['Copy to space']
+    filteredActions = filteredActions.filter(action => allowedNames.includes(action.name))
   }
 
-  return actions
+  const modals = extractModalsFromActions(actions)
+
+  return { actions: filteredActions, modals }
 }

@@ -23,6 +23,15 @@ const StyledResourceTable = styled(ResourceTable)`
   min-width: 300px;
 `
 
+export interface CopyResponse {
+  meta?: {
+    messages: Array<{
+      type: string
+      message: string
+    }>
+  }
+}
+
 export function useCopyToPrivateModal<T extends { id: number; name: string }>({
   resource,
   selected,
@@ -31,39 +40,29 @@ export function useCopyToPrivateModal<T extends { id: number; name: string }>({
 }: {
   resource: APIResource
   selected: T[]
-  copyFunction: (ids: number[], properties?: Record<string, any>) => Promise<any>
-  onSuccess?: (res: any) => void
+  copyFunction: (ids: number[], properties?: Record<string, unknown>) => Promise<CopyResponse>
+  onSuccess?: (res: CopyResponse) => void
 }) {
   const { isShown, setShowModal } = useModal()
   const momoSelected = useMemo(() => selected, [isShown])
 
-  let mutation
-  const { modalComp: confirmModal, setShowModal: setShowConfirmModal } = useConfirmModal(
-    'Confirm',
-    CONFIRM_APP_REVISION,
-    async () => {
-      setShowConfirmModal(false)
-      await mutation.mutateAsync({ ids: momoSelected.map(s => s.id), properties: { createAppRevision: true }})
-    },
-  )
-
-  mutation = useMutation({
+  const mutation = useMutation({
     mutationKey: ['copy-to-private', resource],
-    mutationFn: ({ ids, properties }: { ids: number[]; properties?: Record<string, any> }) => copyFunction(ids, properties),
-    onError: (e: AxiosError) => {
+    mutationFn: ({ ids, properties }: { ids: number[]; properties?: Record<string, unknown> }) => copyFunction(ids, properties),
+    onError: (e: AxiosError<{ error: { code: string; type: string; message: string } }>) => {
       const error = e?.response?.data?.error
-      if (e.response?.status === 400 && [APP_SERIES_CREATION_NOT_REQUESTED, APP_REVISION_CREATION_NOT_REQUESTED].includes(error.code)) {
+      if (e.response?.status === 400 && error?.code && [APP_SERIES_CREATION_NOT_REQUESTED, APP_REVISION_CREATION_NOT_REQUESTED].includes(error.code)) {
         setShowConfirmModal(true)
       } else {
         if (error?.message) {
           toast.error(`${error?.type}: ${error?.message}`)
           return
         }
-        toast.error(error.message)
+        toast.error(error?.message || 'An error occurred')
       }
     },
-    onSuccess: (res: any) => {
-      if (res?.meta?.messages[0].type === 'error') {
+    onSuccess: (res: CopyResponse) => {
+      if (res?.meta?.messages[0]?.type === 'error') {
         toast.error(`Server error: ${res?.meta?.messages[0].message}`)
       } else {
         if (onSuccess) onSuccess(res)
@@ -72,6 +71,15 @@ export function useCopyToPrivateModal<T extends { id: number; name: string }>({
       }
     },
   })
+
+  const { modalComp: confirmModal, setShowModal: setShowConfirmModal } = useConfirmModal(
+    'Confirm',
+    CONFIRM_APP_REVISION,
+    async () => {
+      setShowConfirmModal(false)
+      await mutation.mutateAsync({ ids: momoSelected.map(s => s.id), properties: { createAppRevision: true }})
+    },
+  )
 
   const handleSubmit = () => {
     mutation.mutateAsync({ ids: momoSelected.map(s => s.id) })

@@ -20,6 +20,7 @@ import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { StringUtils } from '@shared/utils/string.utils'
 import { PlatformClient } from '@shared/platform-client'
 import { UserCloudResourcesDTO } from '@shared/domain/user/dto/user-cloud-resources.dto'
+import { PaginatedResult } from '@shared/domain/entity/domain/paginated.result'
 
 @Injectable()
 export class UserService {
@@ -34,7 +35,7 @@ export class UserService {
     private readonly platformClient: PlatformClient,
   ) {}
 
-  async paginateUsers(query: UserPaginationDto) {
+  async paginateUsers(query: UserPaginationDto): Promise<PaginatedResult<User>> {
     const where: FilterQuery<User> = {}
     if (query.filter?.dxuser) {
       where.dxuser = { $like: `%${query.filter.dxuser}%` }
@@ -185,7 +186,7 @@ export class UserService {
     // TODO - Refactor calls like ResetMFA here
   }
 
-  async getCloudResources() {
+  async getCloudResources(): Promise<UserCloudResourcesDTO> {
     this.logger.log(`Getting cloud resources for user: ${this.user.dxuser}`)
 
     const user = await this.user.loadEntity()
@@ -197,7 +198,12 @@ export class UserService {
   }
 
   // PFDA-6051 TODO Ludvik Bobek will update this to use the new pagination method
-  private extractOrderByClause(query: UserPaginationDto) {
+  private extractOrderByClause(query: UserPaginationDto):
+    | {
+        cloudResourceSettings: { total_limit: 'DESC' | 'ASC' }
+      }
+    | {}
+    | { [p: string]: 'DESC' | 'ASC' } {
     if (['totalLimit', 'jobLimit'].includes(query.orderBy)) {
       if (query.orderBy === 'totalLimit') {
         return { cloudResourceSettings: { total_limit: query.orderDir } }

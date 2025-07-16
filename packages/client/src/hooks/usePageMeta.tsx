@@ -1,15 +1,8 @@
 import { useEffect } from 'react'
 
-const defaultDscription =
-  'Advancing regulatory standards for bioinformatics, RWD, and AI, through community-sourced science.'
+const defaultDescription = 'Advancing regulatory standards for bioinformatics, RWD, and AI, through community-sourced science.'
 
-export const usePageMeta = ({
-  title = 'PFDA',
-  description = defaultDscription,
-}: {
-  title?: string
-  description?: string
-}) => {
+export const usePageMeta = ({ title = 'PFDA', description = defaultDescription }: { title?: string; description?: string }) => {
   useEffect(() => {
     if (document) {
       document.title = title

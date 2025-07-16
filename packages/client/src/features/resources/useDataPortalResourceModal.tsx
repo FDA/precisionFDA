@@ -81,7 +81,7 @@ const useListDataPortalResourcesQuery = (id: string | undefined) =>
   })
 
 const useResourceRemoveMutation = (
-  options?: Omit<UseMutationOptions<any, unknown, RemovePayload, unknown>, 'mutationKey' | 'mutationFn'>,
+  options?: Omit<UseMutationOptions<unknown, unknown, RemovePayload, unknown>, 'mutationKey' | 'mutationFn'>,
 ) =>
   useMutation({
     mutationKey: ['remove-resource-portal'],
@@ -99,8 +99,8 @@ export const DataPortalResources = ({
   const user = useAuthUser()
   const queryClient = useQueryClient()
   const { portalId } = useParams<{ portalId: string }>()
-  const { data: portal, isLoading: portalIsLoading } = useDataPortalByIdQuery(portalId)
-  const { data, isLoading } = useListDataPortalResourcesQuery(portalId)
+  const { data: portal, isLoading: portalIsLoading } = useDataPortalByIdQuery(portalId!)
+  const { data, isLoading } = useListDataPortalResourcesQuery(portalId!)
   const [isFinishingUpload, setIsFinishingUpload] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [selected, setSelected] = useState<null | number>(null)
@@ -113,7 +113,7 @@ export const DataPortalResources = ({
       })
     },
     onMutate: async r => {
-      await queryClient.cancelQueries({ queryKey: ['resources-list-portal'] })
+      await queryClient.cancelQueries({ queryKey: ['resources-list-portal']})
       const previousTodos = queryClient.getQueryData(['resources-list-portal'])
 
       queryClient.setQueryData<Resource[]>(['resources-list-portal'], old =>
@@ -133,7 +133,8 @@ export const DataPortalResources = ({
         const messageData = JSON.parse(message.data)
         const notification = messageData.data as Notification
         return messageData.type === WEBSOCKET_MESSAGE_TYPE.NOTIFICATION && NOTIFICATION_ACTION.FILE_CLOSED === notification.action
-      } catch (e) {
+      } catch (e: unknown) {
+        console.error('Error parsing WebSocket message:', e)
         return false
       }
     },
@@ -143,13 +144,13 @@ export const DataPortalResources = ({
     if (lastJsonMessage == null) {
       return
     }
-    queryClient.invalidateQueries({ queryKey: ['resources-list-portal'] })
+    queryClient.invalidateQueries({ queryKey: ['resources-list-portal']})
     setIsFinishingUpload(false)
   }, [lastJsonMessage])
 
   const handleRemove = async (id: number) => {
     if (confirm('Are you sure you want to delete this resource item? Pages where this file is referenced will break.')) {
-      return mutation.mutateAsync({ portalId, resourceId: id })
+      return mutation.mutateAsync({ portalId: portalId!, resourceId: id })
     }
     return undefined
   }
@@ -162,16 +163,14 @@ export const DataPortalResources = ({
   }
 
   const filteredData =
-    data && Array.isArray(data)
-      ? data
-          .filter(i => {
-            if (onlyImg) {
-              return isImageFromExt(getExt(i.url))
-            }
-            return true
-          })
-          .filter(resource => resource.name.toLowerCase().includes(searchQuery.toLowerCase()))
-      : []
+    data
+      ?.filter(i => {
+        if (onlyImg) {
+          return isImageFromExt(getExt(i.url))
+        }
+        return true
+      })
+      .filter(resource => resource.name.toLowerCase().includes(searchQuery.toLowerCase())) ?? []
 
   const getSelected = () => data?.find(i => i.id === selected)
   const handleInsert = () => {
@@ -208,7 +207,7 @@ export const DataPortalResources = ({
 
             {canEdit && (
               <CreateResource
-                pid={portalId}
+                pid={portalId!}
                 onSuccess={() => {
                   setIsFinishingUpload(true)
                 }}
@@ -228,9 +227,6 @@ export const DataPortalResources = ({
                 key={re.id}
                 onClick={id => setSelected(id)}
                 resource={re}
-                canEdit={canEdit}
-                onRemove={handleRemove}
-                onCopy={handleCopy}
               />
             ))}
             {isFinishingUpload && <Loader />}

@@ -1,5 +1,4 @@
 import React from 'react'
-import { Link } from 'react-router-dom'
 import styled from 'styled-components'
 import { AreaChartIcon } from '../../components/icons/AreaChartIcon'
 import { CogsIcon } from '../../components/icons/Cogs'
@@ -79,7 +78,7 @@ export const TrackHelp = () => {
   return (
     <Help>
       <span>Need help?</span>
-      <a to="/docs/guides/tracking" target="_blank">
+      <a href="/docs/guides/tracking" target="_blank">
         &nbsp;Learn more about tracking
       </a>
     </Help>

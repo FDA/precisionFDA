@@ -28,7 +28,7 @@ export function getBackPathNext({
   resourceLocation,
   homeScope,
 }: {
-  spaceId?: number,
+  spaceId?: number | string,
   location: Location
   resourceLocation: LocationResource
   homeScope?: HomeScope

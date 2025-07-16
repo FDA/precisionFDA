@@ -1,5 +1,5 @@
 import React from 'react'
-import classNames from 'classnames/bind'
+import classNames from 'classnames'
 
 
 const Icon = ({ icon, cssClasses, fw, pointer, ...rest }: { icon?: string, cssClasses?: string, fw?: boolean, pointer?: boolean, onClick?: () => void }) => {

@@ -57,6 +57,7 @@ export const CardHeader = ({
             )}
           >
             {dropdownProps => (
+              // @ts-expect-error ref is not compatible
               <StyledEditButton data-testid={`${cardType}-dropdown`} tabIndex={0} {...dropdownProps}>
                 <ThreeDotsIcon width={16} />
               </StyledEditButton>

@@ -7,6 +7,7 @@ import { createRoot } from 'react-dom/client'
 import ReactModal from 'react-modal'
 import Root from './root'
 import { getAuthenticityToken } from './utils/api'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
 async function enableMocking() {
   if (!process.env.ENABLE_DEV_MSW) {
@@ -25,6 +26,23 @@ async function enableMocking() {
   })
 }
 
+const queryClient = new QueryClient()
+
+async function initializeApp() {
+  try {
+    // Only prefetch if we have auth token
+    const authToken = getAuthenticityToken()
+    if (authToken) {
+      await queryClient.prefetchQuery({
+        queryKey: ['auth-user'],
+        queryFn: () => Axios.get('/api/user').then(r => r.data),
+      })
+    }
+  } catch (error) {
+    console.log('Auth prefetch failed:', error)
+    // Don't block app initialization on auth failure
+  }
+}
 Axios.defaults.headers.common['X-CSRF-Token'] = getAuthenticityToken()
 
 const renderApp = () => {
@@ -34,12 +52,18 @@ const renderApp = () => {
   if (container) {
     ReactModal.setAppElement('#app-root')
     enableMocking().then(() => {
-      root.render(<Root />)
+      initializeApp().then(() => {
+        root.render(
+          <QueryClientProvider client={queryClient}>
+            <Root />
+          </QueryClientProvider>,
+        )
+      })
     })
   }
 }
-  document.addEventListener('DOMContentLoaded', renderApp)
-  document.addEventListener('page:load', renderApp)
+document.addEventListener('DOMContentLoaded', renderApp)
+document.addEventListener('page:load', renderApp)
 
 if (NODE_ENV === 'development' && module.hot) {
   module.hot.accept()

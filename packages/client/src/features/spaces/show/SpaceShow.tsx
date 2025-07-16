@@ -46,6 +46,7 @@ import { MembersList } from '../members/MembersList'
 import { fixGuestPermissions, spaceRequest } from '../spaces.api'
 import { ISpace } from '../spaces.types'
 import { useSpaceActions } from '../useSpaceActions'
+import { ApiErrorResponse } from '../../home/types'
 import { Activation } from './SpaceActivation'
 import { SpaceLocked } from './SpaceLocked'
 import { SpaceNotAllowed } from './SpaceNotAllowed'
@@ -64,8 +65,11 @@ const Spaces2 = ({ space, isLoading }: { space: ISpace; isLoading: boolean }) =>
   const [expandedSidebar, setExpandedSidebar] = useLocalStorage('expandedSpacesSidebar', true)
   useToastWSHandler()
 
-  const spaceActions = useSpaceActions({ space })
+  const { actions } = useSpaceActions({ space })
   const [activeResource] = useActiveResourceFromUrl('spaces')
+
+  const fixPermissionsAction = actions.find(action => action.name === 'Fix Permissions')
+  const editSpaceAction = actions.find(action => action.name === 'Edit Space')
 
   const fixSpaceMutation = useMutation({
     mutationKey: ['fix-guest-permissions'],
@@ -73,8 +77,8 @@ const Spaces2 = ({ space, isLoading }: { space: ISpace; isLoading: boolean }) =>
     onSuccess: () => {
       toast.success('Permissions for guest side successfully updated')
     },
-    onError: (e: any) => {
-      toast.error(e.response.data.error.message)
+    onError: (e: { response?: { data?: ApiErrorResponse}}) => {
+      toast.error(e.response?.data?.error?.message)
     },
   })
 
@@ -102,9 +106,9 @@ const Spaces2 = ({ space, isLoading }: { space: ISpace; isLoading: boolean }) =>
             </SpaceHeaderDescrip>
           </SpaceMainInfo>
           <SpaceTopRight>
-            {!spaceActions['Fix Permissions']?.shouldHide && (
+            {!fixPermissionsAction?.shouldHide && (
               <div>
-                <ActionButton data-testid="fix-space-button" onClick={() => fixSpaceMutation.mutate({ id: space.id })}>
+                <ActionButton data-testid="fix-space-button" onClick={() => fixSpaceMutation.mutate({ id: space.id.toString() })}>
                   Fix Guest Side Permissions
                 </ActionButton>
               </div>
@@ -136,7 +140,7 @@ const Spaces2 = ({ space, isLoading }: { space: ISpace; isLoading: boolean }) =>
           >
             <DatabaseIcon height={14} />
             <MenuText>Databases</MenuText>
-            {expandedSidebar && <MenuCounter count={space.counters?.dbclusters} active={activeResource === 'databases'} />}
+            {expandedSidebar && <MenuCounter count={space.counters?.dbclusters.toString()} active={activeResource === 'databases'} />}
           </MenuItem>
           <MenuItem data-testid="workflows-link" to={`/spaces/${space.id}/workflows`} activeClassName="active">
             <NetworkIcon height={18} />
@@ -172,7 +176,7 @@ const Spaces2 = ({ space, isLoading }: { space: ISpace; isLoading: boolean }) =>
             </MenuItem>
           )}
           <Fill />
-          {!spaceActions['Edit Space']?.shouldHide && (
+          {!editSpaceAction?.shouldHide && (
             <MenuItem data-testid="edit-space-link" to={`/spaces/${space.id}/edit`} activeClassName="active">
               <CogsIcon height={14} />
               <MenuText>Space Settings</MenuText>
@@ -197,18 +201,18 @@ const Spaces2 = ({ space, isLoading }: { space: ISpace; isLoading: boolean }) =>
                 <Route path="databases/:uid" element={<DatabaseShow spaceId={space.id} />} />
                 {/* <Route path="databases/:identifier/track" element={<TrackInHome entityType="database" />} /> */}
 
-                <Route path="apps" element={<AppList spaceId={space.id} isContributorOrHigher={isContributorOrHigher} />} />
+                <Route path="apps" element={<AppList spaceId={space.id.toString()} isContributorOrHigher={isContributorOrHigher} />} />
                 <Route path="apps/:appIdentifier/jobs/new" element={<RunJobPage spaceId={space.id} />} />
-                <Route path="apps/:appUid/edit" element={<EditAppPage spaceId={space.id} />} />
+                <Route path="apps/:appUid/edit" element={<EditAppPage spaceId={space.id.toString()} />} />
                 <Route path="apps/:appUid/fork" element={<ForkAppPage spaceId={space.id} />} />
-                <Route path="apps/:appUid/*" element={<AppsShow spaceId={space.id} />} />
+                <Route path="apps/:appUid/*" element={<AppsShow spaceId={space.id.toString()} />} />
                 <Route path="apps/:identifier/track" element={<TrackInHome spaceId={space.id} />} />
                 <Route
                   path="workflows"
-                  element={<WorkflowList spaceId={space.id} isContributorOrHigher={isContributorOrHigher} />}
+                  element={<WorkflowList spaceId={space.id.toString()} isContributorOrHigher={isContributorOrHigher} />}
                 />
                 <Route path="workflows/:workflowUid/*" element={<WorkflowShow spaceId={space.id} />} />
-                <Route path="executions" element={<ExecutionList spaceId={space.id} />} />
+                <Route path="executions" element={<ExecutionList spaceId={space.id.toString()} />} />
                 <Route path="executions/:executionUid/*" element={<ExecutionDetails spaceId={space.id} />} />
                 <Route path="executions/:identifier/track" element={<TrackInHome entityType="execution" spaceId={space.id} />} />
                 <Route path="members" element={<MembersList space={space} />} />
@@ -224,7 +228,7 @@ const Spaces2 = ({ space, isLoading }: { space: ISpace; isLoading: boolean }) =>
                   path="discussions/create"
                   element={
                     <CreateDiscussionPage
-                      displayWarning={space.type === 'review' && space.private_space_id}
+                      displayWarning={space.type === 'review' && Boolean(space.private_space_id)}
                       scope={`space-${space.id}`}
                     />
                   }
@@ -247,8 +251,8 @@ export const SpaceShow = () => {
   const [isLocked, setIsLocked] = useState<boolean>(false)
   const { data, isLoading } = useQuery({
     queryKey: ['space', spaceId],
-    queryFn: () => spaceId && spaceRequest({ id: spaceId }),
-    retry: (failureCount, error: any) => {
+    queryFn: () => spaceRequest({ id: spaceId! }),
+    retry: (failureCount, error: { response: { status: number }}) => {
       if (error.response.status === 403) {
         setIsNotAllowed(true)
         return false
@@ -270,6 +274,7 @@ export const SpaceShow = () => {
   if (isLoading) return <HomeLoader />
   if (isNotAllowed) return <SpaceNotAllowed />
   if (isLocked || s?.state === 'locked') return <SpaceLocked space={s} />
+  if (!s) return <SpaceNotAllowed />
 
   return (
     <UserLayout innerScroll>

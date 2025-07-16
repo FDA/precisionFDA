@@ -10,7 +10,6 @@ import { formatMutationErrors } from '../../../hooks/useMutationErrorEffect'
 import PublicLayout from '../../../layouts/PublicLayout'
 import { useAuthUser } from '../../auth/useAuthUser'
 import { ProposeChallengePayload, proposeChallengeRequest } from './api'
-import { subtitle, title } from './common'
 import { ProposeChallengeForm, ProposeChallengeFormValues } from './ProposeChallengeForm'
 
 const StyledProposeChallengePage = styled.div`
@@ -30,7 +29,7 @@ const LeftColumn = styled.div`
   padding-bottom: 24px;
   padding-left: 32px;
   padding-right: 0;
-  
+
   p {
     margin-bottom: 8px;
   }
@@ -76,12 +75,12 @@ const ProposeChallengePage = () => {
 
   const handleSubmit = async (v: ProposeChallengeFormValues) => {
     if (!isLoggedIn && PROD_OR_STAGE) {
-        setValues(v)
-        setTriggerCaptcha(true)
+      setValues(v)
+      setTriggerCaptcha(true)
     } else {
-        await mutation.mutateAsync(v)
+      await mutation.mutateAsync(v)
     }
-}
+  }
 
   const onCaptchaSuccess = async (captchaValue: string) => {
     setTriggerCaptcha(false)
@@ -132,7 +131,7 @@ const ProposeChallengePage = () => {
 
   return (
     <PublicLayout mainScroll={!!user}>
-      <NavigationBar title={title} subtitle={subtitle} user={user} />
+      <NavigationBar user={user} />
       {!isLoggedIn && PROD_OR_STAGE ? renderContentWithCaptcha() : renderContent()}
     </PublicLayout>
   )

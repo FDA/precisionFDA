@@ -1,12 +1,13 @@
+import { ReactNode } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
-import { pick } from 'ramda'
 import { useNavigate } from 'react-router-dom'
 import { useDeleteModal } from '../actionModals/useDeleteModal'
 import { useEditPropertiesModal } from '../actionModals/useEditPropertiesModal'
 import { useEditTagsModal } from '../actionModals/useEditTagsModal'
 import { useFeatureMutation } from '../actionModals/useFeatureMutation'
 import { useAuthUser } from '../auth/useAuthUser'
-import { ActionFunctionsType, HomeScope } from '../home/types'
+import { HomeScope } from '../home/types'
+import { Action } from '../home/action-types'
 import { useAcceptLicenseModal } from '../licenses/useAcceptLicenseModal'
 import { useAttachLicensesModal } from '../licenses/useAttachLicensesModal'
 import { useDetachLicenseModal } from '../licenses/useDetachLicenseModal'
@@ -14,21 +15,12 @@ import { useDownloadAssetsModal } from './actionModals/useDownloadAssetsModal'
 import { useEditAssetModal } from './actionModals/useEditAssetModal'
 import { IAsset } from './assets.types'
 import { deleteFilesRequest } from '../files/files.api'
+import { extractModalsFromActions } from '../home/extractModalsFromActions'
 
-export type AssetActions =
-  | 'Rename'
-  | 'Download'
-  | 'Feature'
-  | 'Unfeature'
-  | 'Make Public'
-  | 'Delete'
-  | 'Attach License'
-  | 'Detach License'
-  | 'Request license approval'
-  | 'Accept License'
-  | 'Edit tags'
-  | 'Edit properties'
-  | 'Comments'
+export interface UseAssetActionsResult {
+  actions: Action[]
+  modals: Record<string, ReactNode>
+}
 
 type AssetActionArgs = {
   homeScope?: HomeScope
@@ -37,7 +29,7 @@ type AssetActionArgs = {
   resetSelected?: () => void
 }
 
-export const useAssetActions = ({ homeScope, selectedItems, resourceKeys, resetSelected }: AssetActionArgs) => {
+export const useAssetActions = ({ homeScope, selectedItems, resourceKeys, resetSelected }: AssetActionArgs): UseAssetActionsResult => {
   const queryClient = useQueryClient()
   const navigate = useNavigate()
   const selected = selectedItems.filter(x => x !== undefined)
@@ -96,7 +88,7 @@ export const useAssetActions = ({ homeScope, selectedItems, resourceKeys, resetS
     selected: selected,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: resourceKeys })
-      queryClient.invalidateQueries({ queryKey: ['edit-resource-properties', 'node'] })
+      queryClient.invalidateQueries({ queryKey: ['edit-resource-properties', 'node']})
     },
   })
 
@@ -138,22 +130,25 @@ export const useAssetActions = ({ homeScope, selectedItems, resourceKeys, resetS
 
   const availableLicenses = user?.links?.licenses ? user.links.licenses : false
 
-  let actions: ActionFunctionsType<AssetActions> = {
-    Rename: {
+  const actions: Action[] = [
+    {
+      name: 'Rename',
       type: 'modal',
       isDisabled: selected.length !== 1 || selectedButNotClosed,
       func: () => setEditModal(true),
       modal: editModal,
       showModal: isShownEditModal,
     },
-    Download: {
+    {
+      name: 'Download',
       type: 'modal',
       isDisabled: selected.length === 0 || selected.some(e => !e.links?.download) || selectedButNotClosed,
       func: () => setDownloadModal(true),
       modal: downloadModal,
       showModal: isShownDownloadModal,
     },
-    Feature: {
+    {
+      name: 'Feature',
       type: 'modal',
       func: () => {
         featureMutation.mutateAsync({ featured: true, uids: selected.map(f => f.uid) })
@@ -161,7 +156,8 @@ export const useAssetActions = ({ homeScope, selectedItems, resourceKeys, resetS
       isDisabled: selected.length === 0 || !selected.every(e => !e.featured || !e.links.feature) || selectedButNotClosed,
       shouldHide: !isAdmin || homeScope !== 'everybody',
     },
-    Unfeature: {
+    {
+      name: 'Unfeature',
       type: 'modal',
       func: () => {
         featureMutation.mutateAsync({ featured: false, uids: selected.map(f => f.uid) })
@@ -169,15 +165,17 @@ export const useAssetActions = ({ homeScope, selectedItems, resourceKeys, resetS
       isDisabled: selected.length === 0 || !selected.every(e => e.featured || !e.links.feature) || selectedButNotClosed,
       shouldHide: !isAdmin || (homeScope !== 'featured' && homeScope !== 'everybody'),
     },
-    'Make Public': {
+    {
+      name: 'Make Public',
       type: 'link',
       isDisabled: selected.length !== 1 || selectedButNotClosed || !user?.allowed_to_publish,
       link: {
-        method: 'GET',
+        method: 'GET' as const,
         url: `/publish?identifier=${selected[0]?.uid}&type=asset`,
       },
     },
-    Delete: {
+    {
+      name: 'Delete',
       type: 'modal',
       isDisabled: selected.length !== 1 || !selected[0]?.links.remove,
       func: () => setDeleteModal(true),
@@ -185,14 +183,16 @@ export const useAssetActions = ({ homeScope, selectedItems, resourceKeys, resetS
       showModal: isShownDeleteModal,
       shouldHide: homeScope === 'spaces',
     },
-    'Attach License': {
+    {
+      name: 'Attach License',
       type: 'modal',
       isDisabled: selected.length !== 1 || !selected[0]?.links?.license || !availableLicenses || selectedButNotClosed,
       func: () => setAttachLicensesModal(true),
       modal: attachLicensesModal,
       showModal: isShownAttachLicensesModal,
     },
-    'Detach License': {
+    {
+      name: 'Detach License',
       type: 'modal',
       isDisabled: selected.length !== 1 || !selected[0].links.license || !availableLicenses || selectedButNotClosed,
       func: () => setDetachLicensesModal(true),
@@ -200,13 +200,15 @@ export const useAssetActions = ({ homeScope, selectedItems, resourceKeys, resetS
       showModal: isShownDetachLicensesModal,
       shouldHide: selected.length !== 1 || !selected[0]?.links?.detach_license,
     },
-    'Request license approval': {
+    {
+      name: 'Request license approval',
       type: 'link',
       isDisabled: selected.length !== 1 || selectedButNotClosed,
-      link: selected[0]?.links.request_approval_license,
+      link: selected[0]?.links.request_approval_license || '',
       shouldHide: !selected[0]?.links.request_approval_license,
     },
-    'Accept License': {
+    {
+      name: 'Accept License',
       type: 'modal',
       func: () => setAcceptLicensesModal(true),
       modal: acceptLicensesModal,
@@ -214,7 +216,8 @@ export const useAssetActions = ({ homeScope, selectedItems, resourceKeys, resetS
       isDisabled: false,
       shouldHide: selected.length !== 1 || !selected[0]?.links.accept_license_action || selectedButNotClosed,
     },
-    'Edit tags': {
+    {
+      name: 'Edit tags',
       type: 'modal',
       func: () => setTagsModal(true),
       isDisabled: false,
@@ -222,7 +225,8 @@ export const useAssetActions = ({ homeScope, selectedItems, resourceKeys, resetS
       showModal: isShownTagsModal,
       shouldHide: (!isAdmin && selected[0]?.added_by !== user?.full_name) || selected.length !== 1 || selectedButNotClosed,
     },
-    'Edit properties': {
+    {
+      name: 'Edit properties',
       type: 'modal',
       func: () => setPropertiesModal(true),
       isDisabled: selected.length === 0,
@@ -230,17 +234,22 @@ export const useAssetActions = ({ homeScope, selectedItems, resourceKeys, resetS
       showModal: isShownPropertiesModal,
       shouldHide: (!isAdmin && selected[0]?.added_by !== user?.full_name) || selectedButNotClosed,
     },
-    Comments: {
+    {
+      name: 'Comments',
       type: 'link',
       isDisabled: selected.length !== 1,
       shouldHide: selected.length !== 1 || selectedButNotClosed,
       link: `/assets/${selected[0]?.uid}/comments`,
     },
-  }
+  ]
+
+  let filteredActions = actions
 
   if (homeScope === 'spaces') {
-    actions = pick(['Download'], actions)
+    filteredActions = actions.filter(action => action.name === 'Download')
   }
 
-  return actions
+  const modals = extractModalsFromActions(actions)
+
+  return { actions: filteredActions, modals }
 }

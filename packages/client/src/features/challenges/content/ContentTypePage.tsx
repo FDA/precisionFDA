@@ -36,7 +36,7 @@ const ContentEditButtonRow = styled.div`
   }
 `
 
-const ButtonBar = ({ challengeId, contentType }: { challengeId: number; contentType: UpdateChallengeContent['type'] }) => {
+const ButtonBar = ({ challengeId, contentType }: { challengeId: number | number; contentType: UpdateChallengeContent['type'] }) => {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const mutation = useMutation({
@@ -101,7 +101,7 @@ const ScrollBody = styled.div`
   line-height: 1.7;
 `
 
-export const ContentTypePage = ({ challengeId, contentType }: { challengeId: number; contentType: ContentType }) => {
+export const ContentTypePage = ({ challengeId, contentType }: { challengeId: number | string; contentType: ContentType }) => {
   const { data } = useChallengeByIDQuery(challengeId!, contentType)
   if(!data) return null
   return (

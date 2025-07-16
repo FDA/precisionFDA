@@ -14,10 +14,12 @@ import { useDataPortalByIdQuery } from '../queries'
 import { UpdateDataPortalData } from '../types'
 import { canEditSettings, isUserInMemberRole } from '../utils'
 import { CreateDataPortalForm, DataPortalForm } from './DataPortalForm'
+import { AxiosError } from 'axios'
+import { ApiErrorResponse } from '../../home/types'
 
 const EditDataPortalPage = () => {
   const { portalId } = useParams<{ portalId: string }>()
-  const { data: portal, isLoading } = useDataPortalByIdQuery(portalId)
+  const { data: portal, isLoading } = useDataPortalByIdQuery(portalId!)
   const navigate = useNavigate()
   const user = useAuthUser()
   const queryClient = useQueryClient()
@@ -32,7 +34,6 @@ const EditDataPortalPage = () => {
         name: v.name,
         description: v.description,
         sortOrder: v.sort_order,
-        status: v.status?.value,
       } as UpdateDataPortalRequest,
       spaceId: v.card_image_file ? portal?.spaceId : undefined,
       image: v.card_image_file ? v.card_image_file[0] : undefined,
@@ -48,8 +49,9 @@ const EditDataPortalPage = () => {
       navigate(navigateToUrl)
 
       toast.success('Data Portal updated')
-    } catch (err) {
-      const message = err.response?.data?.error?.message || err.message || 'Unknown error'
+    } catch (err: unknown) {
+      const error = err as AxiosError<ApiErrorResponse>
+      const message = error.response?.data?.error?.message || error.message || 'Unknown error'
       toast.error(`Error while editing data portal: ${message}`)
     }
   }
@@ -74,7 +76,7 @@ const EditDataPortalPage = () => {
             <PageTitle>Edit Data Portal</PageTitle>
             <DataPortalForm
               isEditMode
-              mutationErrors={dataPortalMutation.error as any}
+              mutationErrors={dataPortalMutation.error as AxiosError<ApiErrorResponse> | null}
               canEditMainDataPortal={user?.admin && isUserInMemberRole(user?.dxuser, portal?.members, ['lead'])}
               onSubmit={onSubmit}
               isSubmitting={dataPortalMutation.isPending}
@@ -94,7 +96,6 @@ const EditDataPortalPage = () => {
                   value: portal.guestLeadDxuser,
                 },
                 sort_order: portal.sortOrder,
-                status: { label: portal.status, value: portal.status },
               }}
             />
           </StyledPageContent>

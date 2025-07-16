@@ -1,10 +1,11 @@
 import { http, HttpResponse } from 'msw'
 import { SiteSettingsResponse } from '../../features/auth/useSiteSettingsQuery'
 import { CloudResourcesResponse } from '../../hooks/useCloudResourcesCondition'
+import { NavFavorite } from '../../components/Header/useNavFavorites'
 
 export const authHandlers = [
   http.get('https://localhost:3001/', () => HttpResponse.json({}, { status: 200 })),
-  
+
   http.get('/assets/*', () =>
     HttpResponse.json(
       {
@@ -18,7 +19,6 @@ export const authHandlers = [
           admin: true,
           counters: { files: 0, folders: 0, apps: 2, workflows: 2, jobs: 1, assets: 0, notes: 0 },
           links: {},
-          gravatar_url: 'https://secure.gravatar.com/avatar/4a93eb40a70557dec9c5b7582da070fb.png?d=retro\u0026r=PG',
           job_limit: 100,
           pricing_map: {
             'baseline-2': 0.286,
@@ -81,6 +81,82 @@ export const authHandlers = [
         usageLimit: 300,
         jobLimit: 100,
         usageAvailable: 86.36178467950478,
+      },
+      { status: 200 },
+    ),
+  ),
+
+  http.get('/api/v2/users/me/cloud-resources', () =>
+    HttpResponse.json<CloudResourcesResponse>(
+      {
+        computeCharges: 0.0,
+        totalCharges: 213.63821532049522,
+        storageCharges: 213.29572,
+        dataEgressCharges: 0.342495320495218,
+        usageLimit: 300,
+        jobLimit: 100,
+        usageAvailable: 86.36178467950478,
+      },
+      { status: 200 },
+    ),
+  ),
+
+  http.get('/api/v2/users/header-items', () =>
+    HttpResponse.json<NavFavorite[]>(
+      [
+        { name: 'home', favorite: true },
+        { name: 'spaces', favorite: true },
+        { name: 'docs', favorite: true },
+        { name: 'apps', favorite: false },
+        { name: 'workflows', favorite: false },
+        { name: 'databases', favorite: false },
+        { name: 'executions', favorite: false },
+        { name: 'files', favorite: false },
+        { name: 'assets', favorite: false },
+        { name: 'challenges', favorite: false },
+      ],
+      { status: 200 },
+    ),
+  ),
+
+  http.put('/api/v2/users/header-items', () =>
+    HttpResponse.json({}, { status: 200 }),
+  ),
+
+  http.get('/api/v2/site-settings', () =>
+    HttpResponse.json<SiteSettingsResponse>(
+      {
+        ssoButton: {
+          isEnabled: false,
+        },
+        cdmh: {
+          isEnabled: true,
+          data: {
+            cdmhPortal: 'https://cdmh-portal.example.com',
+            cdrBrowser: 'https://cdr-browser.example.com',
+            cdrAdmin: 'https://cdr-admin.example.com',
+            connectPortal: 'https://connect-portal.example.com',
+          },
+        },
+        alerts: [
+          {
+            id: 20,
+            createdAt: '2024-02-01T16:38:56.451Z',
+            updatedAt: '2024-02-02T10:15:45.687Z',
+            title: 'Site Maintenance',
+            content: 'Notice: This site will undergo some things you would rather not know about.',
+            type: 'warning',
+            startTime: '2024-01-31T11:15:00.000Z',
+            endTime: '2024-02-24T11:15:00.000Z',
+          },
+        ],
+        dataPortals: {
+          portal1: {
+            accessible: true,
+            tooltipText: 'Access Portal 1',
+            mailto: 'support@portal1.example.com',
+          },
+        },
       },
       { status: 200 },
     ),
@@ -156,7 +232,6 @@ export const authHandlers = [
           admin: true,
           counters: { files: 0, folders: 0, apps: 2, workflows: 2, jobs: 1, assets: 0, notes: 0 },
           links: {},
-          gravatar_url: 'https://secure.gravatar.com/avatar/4a93eb40a70557dec9c5b7582da070fb.png?d=retro\u0026r=PG',
           job_limit: 100,
           pricing_map: {
             'baseline-2': 0.286,
