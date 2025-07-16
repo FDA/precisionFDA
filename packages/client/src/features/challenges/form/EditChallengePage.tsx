@@ -1,4 +1,3 @@
-/* eslint-disable no-nested-ternary */
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { AxiosError } from 'axios'
 import React from 'react'
@@ -16,6 +15,7 @@ import { ChallengePayload, editChallengeRequest } from '../api'
 import { useChallengeDetailsQuery } from '../useChallengeDetailsQuery'
 import { ChallengeForm, IChallengeForm } from './ChallengeForm'
 import { mapFormToPayload } from './common'
+import { ApiErrorResponse } from '../../home/types'
 
 const EditChallengePage = () => {
   const navigate = useNavigate()
@@ -37,8 +37,8 @@ const EditChallengePage = () => {
       navigate('/challenges')
       toast.success('Challenge successfully edited')
     },
-    onError: (e: AxiosError) => {
-      if (e?.response?.data?.error.message) {
+    onError: (e: AxiosError<ApiErrorResponse>) => {
+      if (e?.response?.data?.error?.message) {
         toast.error(`Error: ${e?.response?.data?.error.message}`)
       } else {
         toast.error('An error occurred while editing the challenge')

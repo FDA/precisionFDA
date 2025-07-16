@@ -2,7 +2,6 @@
   <% followers.each do |follower| %>
   <li title="<%= follower.full_name %> (<%= follower.org.name %>)" data-toggle="tooltip">
     <%= link_to user_path(follower.dxuser), class: 'pfda-follower text-center', data: { follower_uid: follower.uid, followable_uid: followable.uid } do %>
-      <%= image_tag(follower.gravatar_url, class: 'rounded-circle center-block', height: '50px') %>
       <% if defined?(display_names) && display_names  %><%= follower.first_name %> <%= follower.last_name[0] %><% end %>
     <% end %>
   </li>

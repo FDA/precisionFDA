@@ -1,16 +1,15 @@
-/* eslint-disable no-nested-ternary */
-import { omit } from 'ramda'
 import React from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Link, Route, Navigate, Routes, useLocation, useParams } from 'react-router-dom'
 import { CloudResourcesHeaderButton } from '../../components/CloudResourcesHeaderButton'
-import Dropdown from '../../components/Dropdown'
+import { DropdownNext } from '../../components/Dropdown/DropdownNext'
 import { RevisionDropdown } from '../../components/Dropdown/RevisionDropdown'
 import { Markdown, MarkdownStyle } from '../../components/Markdown'
 import { StyledTab, StyledTabList, StyledTabPanel } from '../../components/Tabs'
 import { StyledTagItem, StyledTags, StyledPropertyItem, StyledPropertyKey } from '../../components/Tags'
 import { getBackPathNext } from '../../utils/getBackPath'
 import { ActionsDropdownContent } from '../home/ActionDropdownContent'
+import { ActionModalsRenderer } from '../home/ActionModalsRenderer'
 import { StyledBackLink, StyledRight } from '../home/home.styles'
 import {
   ActionsButton,
@@ -107,8 +106,8 @@ const renderOptions = (workflow: IWorkflow, homeScope?: HomeScope) => {
 }
 
 const DetailActionsDropdown = ({ workflow }: { workflow: IWorkflow }) => {
-  const actions = useWorkflowSelectActions({
-    homeScope: workflow.scope === 'private' ? 'me' : workflow.scope,
+  const { actions, modals } = useWorkflowSelectActions({
+    homeScope: workflow.scope === 'private' ? 'me' : (workflow.scope as HomeScope),
     selectedItems: [workflow],
     resourceKeys: ['workflow', workflow.uid],
   })
@@ -140,14 +139,18 @@ const DetailActionsDropdown = ({ workflow }: { workflow: IWorkflow }) => {
           <Pill>rev{workflow.revision}</Pill>
         </>
       </CloudResourcesHeaderButton>
-      <Dropdown trigger="click" content={<ActionsDropdownContent actions={omit(['Run', 'Run Batch'], actions)} />}>
-        {dropdownProps => <ActionsButton {...dropdownProps} active={dropdownProps.isActive} />}
-      </Dropdown>
-      {actions['Edit tags']?.modal}
-      {actions['Edit properties']?.modal}
-      {actions['Copy to space']?.modal}
-      {actions['Export to']?.modal}
-      {actions['Delete']?.modal}
+      <DropdownNext 
+        trigger="click" 
+        content={() => (
+          <ActionsDropdownContent 
+            actions={actions.filter(action => !['Run', 'Run Batch'].includes(action.name))} 
+          />
+        )}
+      >
+        {dropdownProps => <ActionsButton {...dropdownProps} active={dropdownProps.$isActive} />}
+      </DropdownNext>
+
+      <ActionModalsRenderer modals={modals} />
     </>
   )
 }

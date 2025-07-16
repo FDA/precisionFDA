@@ -56,6 +56,7 @@ export const useNavFavorites = () => {
     return migratedFavorites
   }
 
+  // TODO: PFDA-6176 remove this fetch as it's part of user fetch response.
   const fetchFavorites = async (): Promise<NavFavorite[]> => {
     try {
       const response = await axios.get('/api/v2/users/header-items')

@@ -49,3 +49,40 @@ export interface ChallengeListParams {
   page?: number
   pageSize?: number
 }
+
+
+export interface Regions {
+  'pre-registration'?: string;
+  'intro'?: string;
+  'results'?: string;
+  'results-details'?: string;
+}
+
+export interface Meta {
+  regions?: Regions;
+}
+
+// @deprecated Use Challenge interface instead
+export interface ChallengeOld {
+  id: number;
+  name: string;
+  description: string;
+  meta: Meta;
+  start_at: Date;
+  end_at: Date;
+  created_at: Date;
+  updated_at: Date;
+  status: ChallengeStatus;
+  scope: string;
+  card_image_url: string;
+  card_image_id: string;
+  pre_registration_url: string;
+  guest_lead_dxuser: string;
+  host_lead_dxuser: string;
+  app_owner_id: string;
+  /** @deprecated create links from client side */
+  links?: Record<string, string>[];
+  is_followed?: boolean;
+  can_edit?: boolean;
+  is_space_member: boolean;
+}

@@ -1,5 +1,4 @@
 import axios from 'axios'
-import { getApiRequestOpts } from '../../utils/api'
 import { IFilter, MetaV2 } from '../home/types'
 import { Params, prepareListFetchV2 } from '../home/utils'
 import { ISpace, ISpaceV2 } from './spaces.types'
@@ -21,7 +20,10 @@ export async function spacesListRequest(filters: IFilter[], params: Params): Pro
   return axios.get(`/api/v2/spaces/${paramQ}`).then(res => res.data)
 }
 
-export async function spaceRequest({ id }: { id: number }): Promise<FetchSpaceDetailsResponse> {
+export async function spaceRequest({ id }: { id?: string }): Promise<FetchSpaceDetailsResponse> {
+  if (!id) {
+    console.error('Space ID is required for fetching space details')
+  }
   return axios.get(`/api/spaces/${id}`).then(res => res.data)
 }
 
@@ -30,11 +32,7 @@ export async function fixGuestPermissions({ id }: { id: string }): Promise<unkno
 }
 
 export async function unlockSpaceRequest({ link = '' }: { id: string; op: 'lock' | 'unlock'; link?: string }): Promise<unknown> {
-  // const res = await fetch(`/api/spaces/${id}/${op}`, { method: 'POST'})
-  const res = await fetch(link, {
-    ...getApiRequestOpts('POST'),
-  })
-  return res.json()
+  return axios.post(link).then(res => res.data)
 }
 
 export async function addData({
@@ -46,17 +44,14 @@ export async function addData({
   folderId: string
   uids: string[]
 }): Promise<unknown> {
-  return fetch(`/api/spaces/${spaceId}/add_data/`, {
-    ...getApiRequestOpts('POST'),
-    body: JSON.stringify({ uids, folder_id: folderId }),
-  })
+  return axios.post(`/api/spaces/${spaceId}/add_data/`, {
+    uids,
+    folder_id: folderId,
+  }).then(res => res.data)
 }
 
 export async function acceptSpaceRequest({ id }: { id: string }): Promise<unknown> {
-  const res = await fetch(`/api/spaces/${id}/accept`, {
-    ...getApiRequestOpts('POST'),
-  })
-  return res.json()
+  return axios.post(`/api/spaces/${id}/accept`).then(res => res.data)
 }
 
 export async function addDataRequest({
@@ -64,10 +59,10 @@ export async function addDataRequest({
   uids,
   properties,
 }: {
-  spaceId: string
+  spaceId?: string
   uids: string[]
-  properties?: Record<string, any>
-}): Promise<any> {
+  properties?: Record<string, unknown>
+}): Promise<unknown> {
   const requestProperties = properties || { createAppSeries: true, createAppRevision: false }
   return axios
     .post(`/api/spaces/${spaceId}/add_data`, {
@@ -97,7 +92,9 @@ export interface CreateSpacePayload extends EditSpacePayload {
 export interface EditSpaceResponse {
   id: number,
   error?: Error
-  errors?: string[]
+  errors?: {
+    messages?: string[]
+  }[]
 }
 
 export interface CreateSpaceResponse {

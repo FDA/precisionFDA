@@ -53,7 +53,7 @@ const DataPortalDetailsPage = () => {
     if (lastJsonMessage == null) {
       return
     }
-    queryClient.invalidateQueries({ queryKey: ['data-portals', portalId] })
+    queryClient.invalidateQueries({ queryKey: ['data-portals', portalId]})
   }, [lastJsonMessage])
 
   // URLs /data-portals/main and /data-portals/{id} are redirected to /data-portals/{slug}
@@ -66,7 +66,7 @@ const DataPortalDetailsPage = () => {
   if (error?.response?.status === 503) {
     return (
       <UserLayout mainScroll>
-        <DataPortalError message={error?.response?.data?.error.message} />
+        <DataPortalError message={error?.response?.data?.error?.message} />
       </UserLayout>
     )
   }

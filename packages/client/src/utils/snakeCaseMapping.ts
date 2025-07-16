@@ -10,7 +10,6 @@ export const snakeToCamelMapping = {
   current_page: 'currentPage',
   first_name: 'firstName',
   full_name: 'fullName',
-  gravatar_url: 'gravatarUrl',
   is_guest: 'isGuest',
   last_name: 'lastName',
   next_page: 'nextPage',

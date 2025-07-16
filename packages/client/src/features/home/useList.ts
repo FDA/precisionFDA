@@ -7,11 +7,13 @@ import { usePaginationParams } from '../../hooks/usePaginationState'
 import { usePrevious } from '../../hooks/usePrevious'
 import { createLocationKey } from '../../utils'
 import { columnFilters } from './columnFilters'
-import { APIResource, HomeScope, IMeta, MetaV2 } from './types'
+import { APIResource, HomeScope, IFilter, IMeta, MetaV2 } from './types'
 import { useFilterParams } from './useFilterState'
-import { FetchListFn, useListQuery } from './useListQuery'
+import { useListQuery } from './useListQuery'
 import { useListSelect } from './useListSelect'
 import { Params } from './utils'
+
+export type FetchListFn<T = unknown> = (filter: IFilter[], params: Params) => Promise<T>
 
 export interface IListProps {
   pagination: ReturnType<typeof usePaginationParams>
@@ -24,7 +26,7 @@ type ListType = { [key: string]: unknown, meta: IMeta | MetaV2 }
 interface IUseList<T> {
   spaceId?: string,
   scope?: HomeScope,
-  fetchList: FetchListFn,
+  fetchList: FetchListFn<T>,
   resource: APIResource,
   params?: Params
   queryOptions?: UseQueryOptions<T>

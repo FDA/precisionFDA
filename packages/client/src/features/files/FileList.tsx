@@ -1,12 +1,12 @@
 import { DndContext } from '@dnd-kit/core'
 import { useQueryClient } from '@tanstack/react-query'
 import { ColumnDefResolved, ColumnFiltersState, ColumnSizingState, ColumnSort, RowSelectionState, VisibilityState } from '@tanstack/react-table'
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import useWebSocket from 'react-use-websocket'
 import { useQueryParam } from 'use-query-params'
 import { Button } from '../../components/Button'
-import Dropdown from '../../components/Dropdown'
+import { DropdownNext } from '../../components/Dropdown/DropdownNext'
 import { ContentFooter } from '../../components/Page/ContentFooter'
 import { Pagination } from '../../components/Pagination'
 import Table from '../../components/Table'
@@ -14,17 +14,17 @@ import { ClipboardCheckIcon } from '../../components/icons/ClipboardCheckIcon'
 import { ClipboardIcon } from '../../components/icons/ClipboardIcon'
 import { HoverDNAnexusLogo } from '../../components/icons/DNAnexusLogo'
 import { PlusIcon } from '../../components/icons/PlusIcon'
-import { ErrorBoundary } from '../../utils/ErrorBoundry'
+import { StyledPageTable } from '../../components/Table/components/styles'
 import { DEFAULT_RECONNECT_ATTEMPTS, DEFAULT_RECONNECT_INTERVAL, getNodeWsUrl, SHOULD_RECONNECT } from '../../utils/config'
 import { cleanObject, getSelectedObjectsFromIndexes, toArrayFromObject } from '../../utils/object'
 import { useAuthUser } from '../auth/useAuthUser'
 import { ActionsDropdownContent } from '../home/ActionDropdownContent'
+import { ActionModalsRenderer } from '../home/ActionModalsRenderer'
 import { ActionsRow, QuickActions } from '../home/home.styles'
 import { ActionsButton, FilesListBreadcrumbHeader, FilesListResourceHeader } from '../home/show.styles'
 import {
   HomeScope,
   IMeta,
-  MetaPath,
   Notification,
   NOTIFICATION_ACTION,
   WEBSOCKET_MESSAGE_TYPE,
@@ -42,7 +42,6 @@ import { useFileDnd } from './useFilesDnd'
 import { useFilesSelectActions } from './useFilesSelectActions'
 import { useFolderActions } from './useFolderActions'
 import { ResouceQueryErrorMessage } from '../home/ResouceQueryErrorMessage'
-import { StyledPageTable } from '../../components/Table/components/styles'
 
 type ListType = { files: IFile[]; meta: IMeta }
 
@@ -62,7 +61,7 @@ export const FileList = ({
   const user = useAuthUser()
   const isAdmin = user?.isAdmin ?? false
 
-  const [isCopiedIds, setIsCopiedIds] = React.useState<boolean>(false)
+  const [isCopiedIds, setIsCopiedIds] = useState<boolean>(false)
 
   const navigate = useNavigate()
 
@@ -93,7 +92,7 @@ export const FileList = ({
   })
 
   const onRowClick = (id: string) => {
-    navigate(`${location.pathname}/${id}`, { state: { from: location.pathname, fromSearch: location.search } })
+    navigate(`${location.pathname}/${id}`, { state: { from: location.pathname, fromSearch: location.search }})
   }
 
   const { lastJsonMessage } = useWebSocket<WebSocketMessage>(getNodeWsUrl(), {
@@ -111,7 +110,8 @@ export const FileList = ({
             notification.action,
           )
         )
-      } catch (e) {
+      } catch (e: unknown) {
+        console.error('Error parsing WebSocket message:', e)
         return false
       }
     },
@@ -131,7 +131,7 @@ export const FileList = ({
       queryKey: ['counters'],
     })
   }, [lastJsonMessage])
-  const { data: propertiesData } = usePropertiesQuery('node', homeScope, space?.id)
+  const { data: propertiesData } = usePropertiesQuery('node', homeScope, space?.id.toString())
   const { isLoading, data, error } = query
 
   const onFolderClick = (folderId: string) => {
@@ -156,10 +156,12 @@ export const FileList = ({
     setFolderIdParam(undefined, 'pushIn')
   }, [homeScope])
 
+  // @ts-expect-error sometimes shows as entries instead of files
   const files: IFile[] = data?.files || data?.entries
   const selectedObjects = getSelectedObjectsFromIndexes(selectedIndexes, files)
   const selectedFileIds = selectedObjects.map(o => o.uid).filter(Boolean)
-  const actions = useFilesSelectActions({
+  
+  const { actions, modals } = useFilesSelectActions({
     homeScope,
     space,
     folderId: folderIdParam,
@@ -168,10 +170,11 @@ export const FileList = ({
     resourceKeys: ['files'],
   })
 
-  delete actions['Comments']
-  delete actions['Request license approval']
+  const { actions: folderActions, modals: folderModals } = useFolderActions(homeScope, folderIdParam!, space?.id.toString(), resetSelected)
 
-  const listActions = useFolderActions(homeScope, folderIdParam!, space?.id, resetSelected)
+  const findAction = (actionName: string) => {
+    return folderActions.find(action => action.name === actionName)
+  }
 
   const handleCopyIds = () => {
     navigator.clipboard.writeText(selectedFileIds.join(', '))
@@ -193,14 +196,25 @@ export const FileList = ({
                 <Button
                   data-variant="primary"
                   data-testid="home-files-add-folder-button"
-                  onClick={() => listActions['Add Folder']?.func({ showModal: true })}
+                  onClick={() => {
+                    const action = findAction('Add Folder')
+                    if (action && 'func' in action) {
+                      action.func(false)
+                    }
+                  }}
                 >
                   <PlusIcon height={12} /> Add Folder
                 </Button>
                 <Button
                   data-variant="primary"
                   data-testid="home-files-add-files-button"
-                  onClick={() => listActions[space?.id ? 'Choose Add Option' : 'Add Files']?.func({ showModal: true })}
+                  onClick={() => {
+                    const actionName = space?.id ? 'Choose Add Option' : 'Add Files'
+                    const action = findAction(actionName)
+                    if (action && 'func' in action) {
+                      action.func(false)
+                    }
+                  }}
                 >
                   <PlusIcon height={12} /> Add Files
                 </Button>
@@ -221,19 +235,17 @@ export const FileList = ({
                 )}
               </Button>
             )}
-            <Dropdown
+            <DropdownNext
               trigger="click"
-              content={
+              content={() => (
                 <ActionsDropdownContent
                   actions={actions}
-                  message={homeScope === 'spaces' && 'To perform other actions on this file, access it from the Space'}
+                  message={homeScope === 'spaces' ? 'To perform other actions on this file, access it from the Space' : undefined}
                 />
-              }
-            >
-              {dropdownProps => (
-                <ActionsButton {...dropdownProps} active={dropdownProps.isActive} data-testid="home-files-actions-button" />
               )}
-            </Dropdown>
+            >
+              {dropdownProps => (<ActionsButton {...dropdownProps} active={dropdownProps.$isActive} data-testid="home-files-actions-button" />)}
+            </DropdownNext>
           </QuickActions>
         </ActionsRow>
       </FilesListResourceHeader>
@@ -258,7 +270,6 @@ export const FileList = ({
         setColumnSizing={saveColumnResizeWidth}
         columnSizing={colWidths}
         folderId={folderIdParam ? parseInt(folderIdParam, 10) : undefined}
-        shouldResetFilters={[folderIdParam, homeScope]}
         columnVisibility={columnVisibility}
         setColumnVisibility={setColumnVisibility}
       />
@@ -270,32 +281,14 @@ export const FileList = ({
           totalPages={data?.meta?.pagination?.total_pages}
           perPage={perPageParam}
           isHidden={false}
-          isPreviousData={data?.meta?.pagination?.prev_page !== null}
-          isNextData={data?.meta?.pagination?.next_page !== null}
           setPage={p => setPageParam(p, 'replaceIn')}
           onPerPageSelect={p => setPerPageParam(p, 'replaceIn')}
         />
         <HoverDNAnexusLogo opacity height={14} />
       </ContentFooter>
-
-      {listActions['Add Folder']?.modal}
-      {listActions['Add Files']?.modal}
-      {listActions['Copy Files']?.modal}
-      {listActions['Choose Add Option']?.modal}
-      {actions['Open']?.modal}
-      {actions['Download']?.modal}
-      {actions['Edit file info']?.modal}
-      {actions['Edit folder info']?.modal}
-      {actions['Delete']?.modal}
-      {actions['Move']?.modal}
-      {actions['Copy to...']?.modal}
-      {actions['Attach License']?.modal}
-      {actions['Detach License']?.modal}
-      {actions['Accept License']?.modal}
-      {actions['Edit tags']?.modal}
-      {actions['Edit properties']?.modal}
-      {actions['Lock']?.modal}
-      {actions['Unlock']?.modal}
+      
+      <ActionModalsRenderer modals={folderModals} />
+      <ActionModalsRenderer modals={modals} />
     </>
   )
 }
@@ -324,8 +317,8 @@ export const FilesListTable = ({
   setColumnVisibility,
 }: {
   spaceId?: number
-  filesMeta?: { path: MetaPath[] }
-  shouldResetFilters?: any[]
+  filesMeta?: IMeta
+  shouldResetFilters?: (string | undefined)[]
   isAdmin: boolean
   filters: ColumnFiltersState
   setFilters: (val: ColumnFiltersState) => void

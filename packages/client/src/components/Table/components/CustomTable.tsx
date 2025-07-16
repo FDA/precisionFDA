@@ -1,5 +1,5 @@
 /* eslint-disable jsx-a11y/no-static-element-interactions */
-import { flexRender, Row, RowData, Table } from '@tanstack/react-table'
+import { flexRender, Row, RowData, Table, Column } from '@tanstack/react-table'
 import classNames from 'classnames'
 import { range } from 'ramda'
 import React, { DragEventHandler } from 'react'
@@ -10,6 +10,12 @@ import { ColumnSelect } from './ColumnSelect'
 import Filter from './Filter'
 import { LoadingRows } from './LoadingRows'
 import { getRowGroup, getTableHeaderGroups, TableGroup } from './util'
+
+declare module '@tanstack/react-table' {
+  interface ColumnMeta<TData extends RowData, TValue> {
+    filterElement?: (column: Column<TData, TValue>) => React.ReactNode
+  }
+}
 
 type Props<T extends RowData> = {
   emptyText?: string
@@ -99,7 +105,6 @@ export function CustomTable<T extends RowData>({
                       })}
                     >
                       {flexRender(header.column.columnDef.header, header.getContext())}{' '}
-                      {/* eslint-disable-next-line no-nested-ternary */}
                       {header.column.getIsSorted() ? (header.column.getIsSorted() === 'asc' ? '↑' : '↓') : ''}
                     </button>
 
@@ -158,7 +163,7 @@ export function CustomTable<T extends RowData>({
 
             if (enableDnd) {
               return (
-                <DnDRow key={row.id} row={row} numSelected={numSelected}>
+                <DnDRow key={row.id} row={row as Row<IFile>} numSelected={numSelected}>
                   {cells}
                   {colFiller('td')}
                 </DnDRow>

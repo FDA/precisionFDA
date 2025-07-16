@@ -12,7 +12,7 @@ import { itemsCountString, pluralize } from '../../../utils/formatting'
 import { ModalHeaderTop, ModalNext } from '../../modal/ModalNext'
 import { Footer, ModalScroll } from '../../modal/styles'
 import { useModal } from '../../modal/useModal'
-import { DownloadListResponse, ServerScope } from '../../home/types'
+import { ApiErrorResponse, DownloadListResponse, ServerScope } from '../../home/types'
 import { fetchFilesListLockingRequest, LockUnlockActionType, lockUnlockFilesRequest } from '../files.api'
 import { IFile } from '../files.types'
 import { Button } from '../../../components/Button'
@@ -105,7 +105,7 @@ export const useLockUnlockFileModal = ({
         return d
       }),
     enabled: isShown,
-    retry: (failureCount, retryError: AxiosError) => {
+    retry: (failureCount, retryError: AxiosError<ApiErrorResponse>) => {
       if (retryError?.response?.status === 403) {
         return false
       }

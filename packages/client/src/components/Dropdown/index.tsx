@@ -13,29 +13,23 @@ export const Dropdown: FC<{
   placement? : Placement
   forceShowPopper?: boolean
   trigger?: 'click' | 'hover'
-  children: ({}: any) => React.ReactNode
+  children: (c: {
+    style: React.CSSProperties
+    ref: React.RefObject<HTMLDivElement>
+    onClick: () => void
+    onMouseEnter: () => void
+    onMouseLeave: () => void
+    $isActive: boolean
+  }) => React.ReactNode
 }> = ({ forceShowPopper, trigger = 'hover', content, children, placement = 'bottom-end', ...rest }) => {
   const [showPopper, setShowPopper] = useState(false)
-  const [delayHandler, setDelayHandler] = useState<any>(null)
   useKeyPress('Escape', () => setShowPopper(false))
 
-  const handleMouseEnter = (event: any) => {
-    setDelayHandler(
-      setTimeout(() => {
-        setShowPopper(!showPopper)
-      }, 500)
-    )
-  }
-
-  const handleMouseLeave = () => {
-    clearTimeout(delayHandler)
-  }
-
-  const clickRef = useOnOutsideClickRef(showPopper, setShowPopper)
+  const clickRef = useOnOutsideClickRef(showPopper, () => setShowPopper(false))
   const buttonRef = useRef(null)
   const popperRef = useRef(null)
   // the ref for the arrow must be a callback ref
-  const [arrowRef, setArrowRef] = useState(null)
+  const [arrowRef, setArrowRef] = useState<HTMLDivElement | null>(null)
 
   const { styles, attributes } = usePopper(
     buttonRef.current,
@@ -49,12 +43,6 @@ export const Dropdown: FC<{
             element: arrowRef,
           },
         },
-        // {
-        //   name: "offset",
-        //   options: {
-        //     offset: [0, 5],
-        //   },
-        // },
       ],
     },
   )
@@ -83,7 +71,7 @@ export const Dropdown: FC<{
           }}
         >
           <DropdownMenu>
-            <div ref={setArrowRef as any} style={styles.arrow} id="arrow" />
+            <div ref={setArrowRef} style={styles.arrow} id="arrow" />
             {content}
           </DropdownMenu>
         </PopperContainer>

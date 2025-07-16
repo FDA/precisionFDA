@@ -1,5 +1,7 @@
 import { Asset } from '../actionModals/AttachToModal/useListAssetsQuery'
+import { Note } from '../actionModals/AttachToModal/useListNotesQuery'
 import { IAccessibleFile } from '../databases/databases.api'
+import { IJob } from '../executions/executions.types'
 import { FileUid } from '../files/files.types'
 import { HomeScope, ServerScope } from '../home/types'
 import { CreateAppPayload } from './apps.api'
@@ -62,6 +64,11 @@ type Links = Record<string, string>
 
 export type ResourceProperties = { [key: string]: string }
 
+export interface AppUser {
+  dxuser: string
+  full_name: string
+}
+
 export interface IApp {
   id: number
   uid: string
@@ -85,6 +92,7 @@ export interface IApp {
   explorers: number
   featured: boolean
   active: boolean
+  user: AppUser
   /** @deprecated create links from client side */
   links: Links
   tags: string[]
@@ -122,9 +130,9 @@ export interface AppMeta {
   comparator: boolean
   default_comparator: boolean
   discussions: []
-  jobs: []
+  jobs: IJob[]
   links: Links
-  notes: []
+  notes: Note[]
   revisions: AppRevision[]
   spec: AppSpec
 }

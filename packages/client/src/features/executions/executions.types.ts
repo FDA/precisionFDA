@@ -1,12 +1,12 @@
 import { RESOURCE_LABELS } from '../../types/user'
 import { RESOURCE_TYPES } from '../admin/users/types'
-import { FileOrg, FileUser, FormInput } from '../apps/apps.types'
+import { FileOrg, FileUser, FormInput, IOSpec } from '../apps/apps.types'
 import { ServerScope } from '../home/types'
 
 type Links = Record<string, string>
 
 export type RunInputs = { [key: string]: FormInput }
-export interface RunOutputs {}
+export type RunOutputs = Record<string, string | null>
 
 interface RunDataUpdates {
   output_folder_path: string
@@ -24,9 +24,26 @@ interface Links2 {
   track: string
   attach_to: string
   copy: string
+  app: string
 }
 
 export type JobState = 'done' | 'failed' | 'idle' | 'running' | 'runnable' | 'terminated' | 'terminating'
+
+export type RunData = {
+  label: string
+  name: string
+  class: IOSpec['class']
+  value: FormInput
+  state?: 'deleted' | string
+  file_name?: string
+  scope?: ServerScope
+  file_uid?: string
+  file_names?: string[]
+  file_uids?: string[]
+  scopes?: ServerScope[]
+  type?: string
+  link?: string[] | string
+}
 
 export interface Job {
   id: number
@@ -38,8 +55,8 @@ export interface Job {
   app_active: boolean
   workflow_title: string
   workflow_uid: string
-  run_input_data: any[]
-  run_output_data: any[]
+  run_input_data: RunData[]
+  run_output_data: RunData[]
   run_data_updates: RunDataUpdates
   instance_type: keyof typeof RESOURCE_LABELS
   duration: string
@@ -58,7 +75,7 @@ export interface Job {
   links: Links2
   entity_type: string
   logged_dxuser: string
-  tags: any[]
+  tags: string[]
 }
 
 export interface IJob {
@@ -84,7 +101,7 @@ export interface IJob {
 }
 
 export interface IExecution {
-  id: number
+  id: number|string
   state: JobState
   uid: string
   dxid: string
@@ -96,8 +113,8 @@ export interface IExecution {
   app_uid: string
   app_title: string
   workstation_api_version: string | null
-  run_input_data: Array<any>
-  run_output_data: Array<any>
+  run_input_data: RunData[]
+  run_output_data: RunData[]
   run_data_updates?: RunDataUpdates
   failure_message?: string
   failure_reason?: string
@@ -109,6 +126,7 @@ export interface IExecution {
   duration_in_seconds: number
   startedRunning?: number
   stoppedRunning?: number
+  showLicensePending?: boolean
   instance_type: keyof typeof RESOURCE_LABELS
   launched_by: string
   launched_by_dxuser: string

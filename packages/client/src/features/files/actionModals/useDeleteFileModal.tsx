@@ -13,7 +13,7 @@ import { itemsCountString } from '../../../utils/formatting'
 import { ModalHeaderTop, ModalNext } from '../../modal/ModalNext'
 import { ButtonRow, Footer, ModalScroll } from '../../modal/styles'
 import { useModal } from '../../modal/useModal'
-import { DownloadListResponse } from '../../home/types'
+import { ApiErrorResponse, DownloadListResponse } from '../../home/types'
 import { deleteFilesRequest, fetchFilesDownloadList } from '../files.api'
 import { IFile } from '../files.types'
 import { getMessage } from './modal-utils'
@@ -95,7 +95,7 @@ export const useDeleteFileModal = ({ selected, onSuccess }: { selected: IFile[];
   const mutation = useMutation({
     mutationKey: ['delete-files'],
     mutationFn: (ids: number[]) => deleteFilesRequest(ids),
-    onError: (e: AxiosError) => {
+    onError: (e: AxiosError<ApiErrorResponse>) => {
       const error = e?.response?.data?.error
       if (error?.message) {
         toast.error(error?.message)

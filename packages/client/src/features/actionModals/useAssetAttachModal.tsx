@@ -18,7 +18,14 @@ const AssetHeaderText = () => (
   </>
 )
 
-export const AssetAttachModal = ({ hideAction, isShown, values, onChange }) => {
+interface AssetAttachModalProps {
+  hideAction: () => void
+  isShown: boolean
+  values: Asset[]
+  onChange: (assets: Asset[]) => void
+}
+
+export const AssetAttachModal = ({ hideAction, isShown, values, onChange }: AssetAttachModalProps) => {
   const { data: notesData, isLoading } = useListAssetsQuery()
   const items = notesData || []
   const [search, setSearch] = useState('')
@@ -53,13 +60,31 @@ export const AssetAttachModal = ({ hideAction, isShown, values, onChange }) => {
     })
 
     return (
-      <li key={item.uid} className={classes} onClick={() => setSelectedItem(item)}>
+      <li 
+        key={item.uid} 
+        className={classes}
+      >
         <div>
-          <span className="__menu-item_label-wrapper" onClick={() => onCheckboxClick(item)}>
+          <button 
+            type="button"
+            className="__menu-item_label-wrapper" 
+            onClick={() => {
+              setSelectedItem(item)
+              onCheckboxClick(item)
+            }}
+            style={{ 
+              background: 'none', 
+              border: 'none', 
+              padding: 0, 
+              width: '100%', 
+              textAlign: 'left',
+              cursor: 'pointer',
+            }}
+          >
             <input type="checkbox" name={item.uid} checked={checkedItem.has(item.uid)} readOnly />
             <span className="__menu-item_class-label">{item.className}</span>
             <span className="__menu-item_title">{item.title}</span>
-          </span>
+          </button>
         </div>
       </li>
     )
