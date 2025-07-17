@@ -15,7 +15,7 @@ const StyledTitle = styled.div`
 
 const StyledLicense = styled.div``
 
-export const License = ({ license, className, link }: { license: ILicense, className?: string, link?: string}) => {
+export const License = ({ license, className, link }: { license?: ILicense, className?: string, link?: string}) => {
   const classes = classnames({
     'home-license': true,
   }, className)

@@ -1,5 +1,4 @@
 import axios from 'axios'
-import { checkStatus, getApiRequestOpts } from '../../utils/api'
 import { IExecution } from '../executions/executions.types'
 import { License } from '../licenses/types'
 import { IFilter, IMeta } from '../home/types'
@@ -30,20 +29,17 @@ interface RunWorkflowResponse {
 }
 
 export async function runWorkflow(request: RunWorkflowRequest): Promise<RunWorkflowResponse> {
-  const res = await (await fetch('/api/run_workflow', {
-    ...getApiRequestOpts('POST'),
-    body: JSON.stringify(request),
-  })).json()
-  if(res.failure) throw new Error(res.failure)
-  return res
+  const res = await axios.post('/api/run_workflow', request)
+  if(res.data.failure) throw new Error(res.data.failure)
+  return res.data
 }
 
 export async function fetchWorkflowList(filters: IFilter[], params: Params): Promise<FetchWorkflowListQuery> {
   const query = prepareListFetch(filters, params)
-  const paramQ = '?' + new URLSearchParams(query as {}).toString()
+  const paramQ = '?' + new URLSearchParams(query).toString()
   const scopeQ = formatScopeQ(params.scope)
-  const res = await fetch(`/api/workflows${scopeQ}${paramQ}`)
-  return res.json()
+  const res = await axios.get(`/api/workflows${scopeQ}${paramQ}`)
+  return res.data
 }
 
 export async function fetchLicensesOnWorkflow(workflowUid: string) {
@@ -65,28 +61,21 @@ interface WorkflowExecutionParams extends Params {
 
 export async function fetchWorkflowExecutions(filters: IFilter[], params: WorkflowExecutionParams): Promise<FetchWorkflowExecutionsQuery> {
   const query = prepareListFetch(filters, params)
-  const paramQ = `?${new URLSearchParams(query as any).toString()}`
-  const res = await fetch(`/api/workflows/${params.uid}/jobs${paramQ}`).then(checkStatus)
-  return res.json()
+  const paramQ = `?${new URLSearchParams(query).toString()}`
+  const res = await axios.get(`/api/workflows/${params.uid}/jobs${paramQ}`)
+  return res.data
 }
-
 
 export async function createWorkflowRequest(name: string) {
-  const res = await (await fetch('/api/workflows/', {
-    method: 'POST',
-    body: JSON.stringify({ name }),
-  })).json()
-  return res
+  const res = await axios.post('/api/workflows/', { name })
+  return res.data
 }
 
-export async function copyWorkflowsRequest(scope: string, ids: string[], properties?: Record<string, any>) {
+export async function copyWorkflowsRequest(scope: string, ids: string[], properties?: Record<string, unknown>) {
   return axios.post('/api/workflows/copy', { item_ids: ids, scope, properties }).then(r => r.data)
 }
 
 export async function deleteWorkflowRequest(ids: string[]) {
-  const res = await fetch('/api/workflows/delete', {
-    ...getApiRequestOpts('POST'),
-    body: JSON.stringify({ item_ids: ids }),
-  }).then(checkStatus)
-  return res.json()
+  const res = await axios.post('/api/workflows/delete', { item_ids: ids })
+  return res.data
 }

@@ -1,4 +1,3 @@
-/* eslint-disable func-names */
 import * as Yup from 'yup'
 import { toString } from 'lodash'
 import { IOSpec, InputSpec, InputSpecForm } from '../apps.types'
@@ -159,6 +158,7 @@ export const validationSchema = Yup.object().shape({
   title: Yup.string().required('App Title field is required'),
   release: Yup.string().required('Release field is required').matches(/^(16\.04|20\.04|24\.04)$/, 'Invalid version'),
   readme: Yup.string(),
+  // @ts-expect-error custom validator for unique keys
   input_spec: Yup.array().unique('name', 'Name must be unique').of(
     Yup.object().shape({
       class: Yup.string()
@@ -266,6 +266,7 @@ export const validationSchema = Yup.object().shape({
       requiredRunInput: Yup.boolean().optional(),
     }),
   ),
+  // @ts-expect-error custom validator for unique keys
   output_spec: Yup.array().unique('name', 'Name must be unique').of(
     Yup.object().shape({
       name: IOName,

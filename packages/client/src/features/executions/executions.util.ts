@@ -10,7 +10,7 @@ export const isWorkflowExecution = (execution: IExecution) => {
 
 export const getExecutionJobsList = (executions: IExecution[]) => {
   const jobs: string[] = []
-  for (let execution of executions) {
+  for (const execution of executions) {
     if (isJobExecution(execution)) {
       jobs.push(execution.uid)
     }

@@ -8,7 +8,7 @@ import { FileCheckIcon } from '../../../../components/icons/FileCheckIcon'
 import { FileIcon } from '../../../../components/icons/FileIcon'
 import { FolderOpenIcon } from '../../../../components/icons/FolderOpenIcon'
 import { displayPayloadMessage } from '../../../../utils/api'
-import { HomeScope, ServerScope } from '../../../home/types'
+import { ApiErrorResponse, HomeScope, ServerScope } from '../../../home/types'
 import { getBasePathFromScope } from '../../../home/utils'
 import { ModalHeaderTop, ModalNext } from '../../../modal/ModalNext'
 import { ButtonRow, Footer, ModalContentPadding } from '../../../modal/styles'
@@ -29,14 +29,14 @@ import {
   FolderItem,
   NodeHeading,
   SelectedList,
-  ShorternName,
+  ShortenName,
   StyledCopyFileDetail,
   StyledFileDetailIcon,
   StyledStickyTop,
 } from './styles'
 
 const FileListItemContent = ({ file }: { file: ISelectedFile }) => {
-  const [searchParams, _] = useSearchParams()
+  const [searchParams] = useSearchParams()
   const homeScope = searchParams.get('scope') as HomeScope
   const currentPath = window.location.pathname
   const pathWithScope = homeScope ? `${currentPath}?scope=${homeScope}` : `${currentPath}?scope=me`
@@ -48,14 +48,14 @@ const FileListItemContent = ({ file }: { file: ISelectedFile }) => {
     <>
       <NodeHeading href={`${currentPath}/${file.uid}`} target="_blank">
         <FileIcon width={16} />
-        <ShorternName>{file.name}</ShorternName>
+        <ShortenName>{file.name}</ShortenName>
       </NodeHeading>
       <StyledCopyFileDetail>
         <FileDetailItem href={`${pathWithScope}${folderQ}`} target="_blank">
           <StyledFileDetailIcon>
             <FolderOpenIcon width={14} />
           </StyledFileDetailIcon>
-          <ShorternName>{file.sourceScopePath}</ShorternName>
+          <ShortenName>{file.sourceScopePath}</ShortenName>
         </FileDetailItem>
       </StyledCopyFileDetail>
       {file.isCopied && (
@@ -64,7 +64,7 @@ const FileListItemContent = ({ file }: { file: ISelectedFile }) => {
             <StyledFileDetailIcon>
               <FileCheckIcon width={14} />
             </StyledFileDetailIcon>
-            <ShorternName>{file.targetScopePath}</ShorternName>
+            <ShortenName>{file.targetScopePath}</ShortenName>
           </FileDetailItem>
         </StyledCopyFileDetail>
       )}
@@ -81,7 +81,7 @@ const SelectedFile = ({ file }: { file: ISelectedFile }) => {
 }
 
 const SelectedFolder = ({ folder }: { folder: ISelectedFolder }) => {
-  const [searchParams, _] = useSearchParams()
+  const [searchParams] = useSearchParams()
   const homeScope = searchParams.get('scope') as HomeScope
   const currentPath = window.location.pathname
   const pathWithScope = homeScope ? `${currentPath}?scope=${homeScope}&` : `${currentPath}?`
@@ -89,7 +89,7 @@ const SelectedFolder = ({ folder }: { folder: ISelectedFolder }) => {
     <FolderItem $isCopied={folder.isCopied}>
       <FolderHeading href={`${pathWithScope}folder_id=${folder.id}`} target="_blank">
         <FolderOpenIcon width={16} />
-        <ShorternName>{folder.name}</ShorternName>
+        <ShortenName>{folder.name}</ShortenName>
       </FolderHeading>
       <FolderChildrenList>
         {folder.children.map((child: ISelectedFile, index: number) => (
@@ -234,26 +234,25 @@ export const useCopyFilesModal = ({
   const mutation = useMutation({
     mutationKey: ['copy-to-space', 'files'],
     mutationFn: (space: string) => copyFilesRequest(space, Array.from(copyIds.values()), selectedFolderId),
-    onSuccess: (res: any) => {
+    onSuccess: (res: unknown) => {
       if (onSuccess) onSuccess()
       setShowModal(false)
       displayPayloadMessage(res)
     },
-    onError: (e: AxiosError) => {
+    onError: (e: AxiosError<ApiErrorResponse>) => {
       const error = e?.response?.data?.error
       if (error?.message) {
         toast.error(`${error?.type}: ${error?.message}`)
         return
       }
-      toast.error(error.message)
+      toast.error(error?.message)
     },
   })
 
   const handleSubmit = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault()
     if (!selectedScope) return
-    mutation.mutateAsync(selectedScope)
-    setShowModal(false)
+    mutation.mutate(selectedScope)
   }
 
   const modalComp = (

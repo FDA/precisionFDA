@@ -121,7 +121,8 @@ export const useSelectJobModal = (
     status: loadingJobsStatus,
   } = useQuery({
     queryKey: ['list_jobs', searchText],
-    queryFn: () => fetchFilteredJobs(searchText, scopes ?? ([] as any)), // scopes: [] mean all scopes.
+    // @ts-expect-error unusual use of scopes, but it works
+    queryFn: () => fetchFilteredJobs(searchText, scopes ?? []), // scopes: [] mean all scopes.
     enabled: isShown,
   })
 
@@ -198,7 +199,7 @@ export const useSelectJobModal = (
           <StyledFilterSection>
             <InputText placeholder="Filter..." onChange={evt => setFilter(evt.target.value)} />
             <StyledOnlyMine>
-              <input type="checkbox" onClick={e => toggleOnlyMine(e.target.checked)} />
+              <input type="checkbox" onClick={e => toggleOnlyMine((e.target as HTMLInputElement).checked)} />
               Only mine
             </StyledOnlyMine>
           </StyledFilterSection>

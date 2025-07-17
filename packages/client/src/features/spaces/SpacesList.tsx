@@ -14,9 +14,10 @@ import { useOrderByParams } from '../../hooks/useOrderByState'
 import { usePaginationParams } from '../../hooks/usePaginationState'
 import { UserLayout } from '../../layouts/UserLayout'
 import { getSelectedObjectsFromIndexes, toArrayFromObject } from '../../utils/object'
+import { createLocationKey } from '../../utils'
 import { useAuthUser } from '../auth/useAuthUser'
 import { QuickActions } from '../home/home.styles'
-import { ActionType } from '../home/types'
+import { Action } from '../home/action-types'
 import { useFilterParams } from '../home/useFilterState'
 import { useListQuery } from '../home/useListQuery'
 import { FetchSpacesListResponse, spacesListRequest } from './spaces.api'
@@ -28,7 +29,7 @@ import { useListSelect } from '../home/useListSelect'
 import { spaceGroupsListRequest } from '../space-groups/spaceGroups.api'
 import { useQuery } from '@tanstack/react-query'
 import { useRemoveFromSpaceGroupMutation } from './useRemoveFromSpaceGroupMutation'
-import Dropdown from '../../components/Dropdown'
+import { DropdownNext } from '../../components/Dropdown/DropdownNext'
 import { ActionsDropdownContent } from '../home/ActionDropdownContent'
 import { ActionsButton, HomeLoader } from '../home/show.styles'
 import { useDeleteSpaceGroupModal } from '../space-groups/useDeleteSpaceGroupModal'
@@ -178,14 +179,15 @@ const dragSelectedSpacesInSpaceGroup = (
 
 const SpacesList = () => {
   const resource = 'spaces'
+  const locationKey = createLocationKey(resource)
   const user = useAuthUser()
   const pagination = usePaginationParams()
   const { selectedIndexes, setSelectedIndexes } = useListSelect()
   const { sortBy, sort, setSortBy } = useOrderByParams({
     onSetSortBy: () => setSelectedIndexes({}),
   })
-  const { colWidths, saveColumnResizeWidth } = useColumnWidthLocalStorage(resource)
-  const { columnVisibility, setColumnVisibility } = useHiddenColumnLocalStorage(resource)
+  const { colWidths, saveColumnResizeWidth } = useColumnWidthLocalStorage(locationKey)
+  const { columnVisibility, setColumnVisibility } = useHiddenColumnLocalStorage(locationKey)
   const { filterQuery, setSearchFilter } = useFilterParams({
     filters: { ...columnFilters, spaceGroupId: 'number' },
     onSetFilter: () => {
@@ -278,23 +280,21 @@ const SpacesList = () => {
 
   const sidebarRef = useRef<{ toggleSpaceGroup: (id: number, forceOpen?: boolean) => void }>(null)
 
-  const getDropdownOptions = () => {
+  const getDropdownOptions = (): Action[] => {
     if (!spaceGroups) {
-      return {}
+      return []
     }
-    return spaceGroups.reduce((acc, sg) => {
-      acc[`ID: ${sg.id} - ${sg.name}`] = {
-        isDisabled: false,
-        type: 'modal',
-        func: async () => {
-          const selectedSpaces = getSelectedObjectsFromIndexes(selectedIndexes, data?.data) as unknown as ISpaceV2[]
-          const selectedSpacesIds = selectedSpaces.map(s => s.id)
-          addSpacesToSpaceGroup(sg.id, selectedSpacesIds)
-            .then(() => sidebarRef.current?.toggleSpaceGroup(sg.id, true))
-        },
-      }
-      return acc
-    }, {} as Record<string, ActionType>)
+    return spaceGroups.map((sg) => ({
+      name: `ID: ${sg.id} - ${sg.name}`,
+      isDisabled: false,
+      type: 'modal' as const,
+      func: async () => {
+        const selectedSpaces = getSelectedObjectsFromIndexes(selectedIndexes, data?.data) as unknown as ISpaceV2[]
+        const selectedSpacesIds = selectedSpaces.map(s => s.id)
+        addSpacesToSpaceGroup(sg.id, selectedSpacesIds)
+          .then(() => sidebarRef.current?.toggleSpaceGroup(sg.id, true))
+      },
+    }))
   }
 
   const deleteSpaceGroupAction = useDeleteSpaceGroupModal({ spaceGroup })
@@ -335,14 +335,14 @@ const SpacesList = () => {
             <>
               {!spaceGroup &&
                 <>
-                  <Dropdown
+                  <DropdownNext
                     trigger="click"
-                    content={<ActionsDropdownContent actions={getDropdownOptions()} />}
+                    content={() => <ActionsDropdownContent actions={getDropdownOptions()} />}
                   >
                     {dropdownProps => (
-                      <ActionsButton disabled={!isSelectionValidForAddingToGroup} {...dropdownProps} active={dropdownProps.isActive} label="Add to Space Group" data-testid="space-list-assign-to-group-button" />
+                      <ActionsButton disabled={!isSelectionValidForAddingToGroup} {...dropdownProps} active={dropdownProps.$isActive} label="Add to Space Group" data-testid="space-list-assign-to-group-button" />
                     )}
-                  </Dropdown>
+                  </DropdownNext>
                   <Button data-variant="primary" as={Link} to="/spaces/new-space-group">
                     Create new space group
                   </Button>

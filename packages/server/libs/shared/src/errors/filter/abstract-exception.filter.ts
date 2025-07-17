@@ -1,5 +1,5 @@
 import { ArgumentsHost, ExceptionFilter } from '@nestjs/common'
-import { ErrorCodes } from '@shared/errors'
+import { ErrorCodes, UnauthorizedRequestError } from '@shared/errors'
 import { Response } from 'express'
 
 export type ErrorPayload = {
@@ -12,13 +12,21 @@ export type ErrorPayload = {
 }
 
 export abstract class AbstractExceptionFilter<T> implements ExceptionFilter {
+  // Add a list of error codes or classes that should not be logged
+  private readonly suppressedErrors = [UnauthorizedRequestError]
+
   protected abstract getStatusCode(exception: T): number
 
   protected abstract formatError(exception: T): ErrorPayload
 
-  catch(exception: T, host: ArgumentsHost) {
+  catch(exception: T, host: ArgumentsHost): void {
     const response = host.switchToHttp().getResponse<Response>()
-    console.error(exception)
+    const shouldSuppress = this.suppressedErrors.some((err) => exception instanceof err)
+
+    if (!shouldSuppress) {
+      console.error(exception)
+    }
+
     response.status(this.getStatusCode(exception)).json(this.formatError(exception))
   }
 }

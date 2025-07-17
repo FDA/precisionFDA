@@ -1,5 +1,4 @@
 import axios from 'axios'
-import { checkStatus, getApiRequestOpts } from '../../utils/api'
 import { FileScope, FileState, IFile } from '../files/files.types'
 import { IFilter, IMeta } from '../home/types'
 import { formatScopeQuery, Params, prepareListFetch } from '../home/utils'
@@ -12,7 +11,7 @@ export interface FetchDatabaseListQuery {
 
 export async function fetchDatabaseList(filters: IFilter[], params: Params): Promise<FetchDatabaseListQuery> {
   const query = prepareListFetch(filters, params)
-  const paramQ = '&' + new URLSearchParams(query as {}).toString()
+  const paramQ = '&' + new URLSearchParams(query).toString()
   const scopeQ = formatScopeQuery(params.scope, params.spaceId)
   return axios.get(`/api/v2/dbclusters/${scopeQ}${paramQ.replace('per_page', 'pageSize')}`).then(r => r.data)
 }
@@ -38,6 +37,7 @@ export interface IAccessibleFile extends IFile {
   space_private: boolean
   space_public: boolean
   in_space: boolean
+  file_path: string
 }
 
 export interface FetchAccessibleFilesResponse {
@@ -66,7 +66,8 @@ export async function fetchAccessibleFilesByUID(body: FetchAccessibleFilesReques
 export interface CreateDatabasePayload {
   name: string
   description: string
-  engine: string
+  scope: string
+  engine: string | null
   dxInstanceClass: string
   engineVersion: string
 }
@@ -95,9 +96,5 @@ export async function copyDatabasesRequest(scope: string, ids: string[]) {
 }
 
 export async function databaseMethodRequest(method: MethodType, dxids: string[]) {
-  const res = await fetch(`/api/dbclusters/${method}`, {
-    ...getApiRequestOpts('POST'),
-    body: JSON.stringify({ api_method: method, dxids }),
-  }).then(checkStatus)
-  return res
+  return axios.post(`/api/dbclusters/${method}`, { api_method: method, dxids }).then(r => r.data)
 }

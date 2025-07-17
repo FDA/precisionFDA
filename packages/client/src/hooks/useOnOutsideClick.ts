@@ -1,24 +1,24 @@
 import { useRef, useEffect } from 'react'
 
-export const useOnOutsideClickRef = (
+export function useOnOutsideClickRef<T extends Element = HTMLDivElement>(
   shouldListenForOutsideClick: boolean,
-  cb: (isClickedOutside: boolean) => void,
-  ignoredRef?: HTMLDivElement | null,
-) => {
-  const node = useRef<HTMLDivElement | null>(null)
+  cb: () => void,
+  ignoredRef?: React.RefObject<HTMLElement> | null,
+): React.RefObject<T> {
+  const node = useRef<T>(null)
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      if (ignoredRef?.current && ignoredRef?.current?.contains(e.target)) {
+      if (ignoredRef?.current && ignoredRef.current.contains(e.target as Node)) {
         // Click on the ignored element (e.g., toggle button)
         return
       }
-      if (node?.current?.contains(e.target)) {
+      if (node.current?.contains(e.target as Node)) {
         // inside click
         return
       }
       // outside click
-      cb(false)
+      cb()
     }
 
     if (shouldListenForOutsideClick) {

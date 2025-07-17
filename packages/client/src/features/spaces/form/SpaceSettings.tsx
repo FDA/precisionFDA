@@ -14,7 +14,7 @@ import { PageTitle } from '../../../components/Page/styles'
 import { StyledTagItem, StyledTags } from '../../../components/Tags'
 import { useEditTagsModal } from '../../actionModals/useEditTagsModal'
 import { SpaceTypeName } from '../common'
-import { CreateSpacePayload, editSpaceRequest, spaceRequest } from '../spaces.api'
+import { EditSpacePayload, editSpaceRequest, spaceRequest } from '../spaces.api'
 import { ISpace } from '../spaces.types'
 import { useSpaceActions } from '../useSpaceActions'
 import { editValidationSchema } from './helpers'
@@ -67,8 +67,10 @@ export interface ISpaceSettingsForm {
 export const SpaceSettingsForm = ({ space }: ISpaceSettingsForm) => {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
-  const spaceActions = useSpaceActions({ space })
+  const { actions, modals } = useSpaceActions({ space })
   const [formError, setFormError] = useState<string | undefined>()
+
+  const lockUnlockAction = actions.find(action => action.name === 'Lock/Unlock')
 
   const {
     register,
@@ -101,8 +103,9 @@ export const SpaceSettingsForm = ({ space }: ISpaceSettingsForm) => {
         })
         toast.success('Space settings has been saved')
       } else if (res?.errors) {
-        toast.error(`Error: ${res.errors.messages.join('\r\n')}`)
-        setFormError(`Error: ${res.errors.messages.join('\r\n')}`)
+        const errorMessages = res.errors.flatMap(error => error.messages || []).join('\r\n')
+        toast.error(`Error: ${errorMessages}`)
+        setFormError(`Error: ${errorMessages}`)
       } else {
         toast.error('Something went wrong')
       }
@@ -115,19 +118,31 @@ export const SpaceSettingsForm = ({ space }: ISpaceSettingsForm) => {
   const onSubmit = () => {
     setFormError(undefined)
     const vals = getValues()
-    mutation.mutateAsync(vals)
+    const payload = {
+      ...vals,
+      cts: vals?.cts ?? undefined,
+    }
+    mutation.mutateAsync(payload)
   }
   const isSubmitting = mutation.isPending
 
   return (
     <StyledForm onSubmit={handleSubmit(onSubmit)}>
-      {!spaceActions['Lock/Unlock']?.shouldHide && (
+      {!lockUnlockAction?.shouldHide && (
         <div>
-          <Button type="button" data-testid="lock-space-button" onClick={() => spaceActions['Lock/Unlock']?.func()}>
+          <Button 
+            type="button" 
+            data-testid="lock-space-button" 
+            onClick={() => {
+              if (lockUnlockAction && 'func' in lockUnlockAction) {
+                (lockUnlockAction as { func: () => void }).func()
+              }
+            }}
+          >
             {space.links.unlock && 'Unlock Space'}
             {space.links.lock && 'Lock Space'}
           </Button>
-          {spaceActions['Lock/Unlock']?.modal}
+          {modals['Lock/Unlock']}
         </div>
       )}
       <FieldGroup label="Space Type">
@@ -173,7 +188,7 @@ export const SpaceSettings = () => {
   const { spaceId } = useParams<{ spaceId: string }>()
   const { data } = useQuery({
     queryKey: ['space', spaceId],
-    queryFn: () => spaceRequest({ id: spaceId as unknown as number }),
+    queryFn: () => spaceRequest({ id: spaceId }),
   })
 
   if (!data?.space) {

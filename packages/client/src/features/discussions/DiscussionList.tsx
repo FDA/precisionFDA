@@ -34,7 +34,6 @@ const DiscussionListTable = ({
   columnFilters,
   setColumnFilters,
   sortBy,
-  setSortBy,
   selectedRows,
   setSelectedRows,
   columnVisibility,
@@ -107,6 +106,8 @@ export const DiscussionList = ({
     setSearchFilter,
     setPageParam,
     setPerPageParam,
+    sortBy,
+    setSortBy,
   } = useList<ListType>({
     fetchList: fetchDiscussionsRequest,
     resource: 'discussions',
@@ -148,8 +149,10 @@ export const DiscussionList = ({
         setSelectedRows={setSelectedIndexes}
         setColumnSizing={saveColumnResizeWidth}
         columnSizing={colWidths}
-        columnFilters={toArrayFromObject(filterQuery as any).filter(i => i.value !== undefined)}
+        columnFilters={toArrayFromObject(filterQuery).filter(i => i.value !== undefined)}
         setColumnFilters={setSearchFilter}
+        sortBy={sortBy}
+        setSortBy={setSortBy}
       />
       <ContentFooter>
         <Pagination

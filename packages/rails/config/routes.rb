@@ -210,10 +210,7 @@ Rails.application.routes.draw do
       end
 
       # News
-      get "news" => "news_items#index"
-      get "news/all" => "news_items#all"
       post "news" => "news_items#create"
-      get "news/years" => "news_items#years"
       post "news/positions" => "news_items#positions"
       put "news/:id" => "news_items#edit"
       get "news/:id" => "news_items#show"

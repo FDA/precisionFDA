@@ -15,8 +15,7 @@ export const ModalContent = styled.div`
   display: flex;
   flex-direction: column;
   background: var(--background);
-  width: var(--modal-width, 60%);
-  box-shadow: 0px 3px 6px #00000029;
+  box-shadow: 0 3px 6px #00000029;
   border-radius: var(--modal-border-radius, 0.5rem);
   border: 1px solid var(--c-modal-border, transparent);
   min-width: 300px;
@@ -56,7 +55,7 @@ export const ModalHeaderTop = ({
   )
 }
 
-const StyledSuperModal = styled.div<{'data-blur': 'true' | 'false' }>`
+const StyledSuperModal = styled.div<{ 'data-blur': 'true' | 'false' }>`
   box-sizing: border-box;
   display: flex;
   justify-content: center;
@@ -69,7 +68,7 @@ const StyledSuperModal = styled.div<{'data-blur': 'true' | 'false' }>`
   z-index: 500;
   padding: 16px;
   background-color: rgba(0, 0, 0, 0.3);
-  
+
   [data-blur] {
     backdrop-filter: blur(6px);
   }
@@ -132,7 +131,7 @@ const SuperModalPortal = (props: PropsWithChildren<Omit<SuperModalProps, 'isShow
         tabIndex={-1}
         role="dialog"
         data-variant={variant}
-        className='modalContent'
+        className="modalContent"
         onClick={e => e.stopPropagation()}
       >
         {children}
@@ -148,8 +147,9 @@ export const ModalNext = (props: PropsWithChildren<Omit<ModalNextProps, 'nodeRef
   const { isShown, ...restProps } = props
   return (
     <CSSTransition nodeRef={nodeRef} in={isShown} timeout={200} classNames="modal" unmountOnExit>
-      <SuperModalPortal {...restProps} nodeRef={nodeRef}>{props.children}</SuperModalPortal>
+      <SuperModalPortal {...restProps} nodeRef={nodeRef}>
+        {props.children}
+      </SuperModalPortal>
     </CSSTransition>
   )
 }
-

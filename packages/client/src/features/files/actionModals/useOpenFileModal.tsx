@@ -8,7 +8,6 @@ import { FileIcon } from '../../../components/icons/FileIcon'
 import { VerticalCenter } from '../../../components/Page/styles'
 import { ResourceTable, StyledAction, StyledName } from '../../../components/ResourceTable'
 import { pluralize, sanitizeFileName } from '../../../utils/formatting'
-import { StyledLoader } from '../../actionModals/styles'
 import { DownloadListResponse } from '../../home/types'
 import { ModalHeaderTop, ModalNext } from '../../modal/ModalNext'
 import { ButtonRow, Footer, ModalScroll } from '../../modal/styles'
@@ -24,23 +23,26 @@ const StyledResourceTable = styled(ResourceTable)`
   }
 `
 
-export const useOpenFileModal = (selectedFiles: IFile[]) => {
-  const { isShown, setShowModal } = useModal()
-  const [seletedLength, setSelectedLength] = useState<number>(0)
+interface OpenFileListProps {
+  selectedFiles: IFile[]
+  onSelectedLengthChange: (length: number) => void
+}
+
+const OpenFileList: React.FC<OpenFileListProps> = ({ selectedFiles, onSelectedLengthChange }) => {
   const handleOpenClick = (item: DownloadListResponse) => {
     // TODO(PFDA-5831) - v2 endpoint
     const win = window.open(`/api/files/${item.uid}/${sanitizeFileName(item.name)}?inline=true`, '_blank')
     win?.focus()
   }
 
-  const { data, isLoading } = useQuery({
+  const { data } = useQuery({
     queryKey: ['download_list', selectedFiles],
     queryFn: async () => {
       const fileIds = selectedFiles.map(file => file.id)
 
       return fetchFilesDownloadList(fileIds, 'open', selectedFiles[0].scope)
         .then(res => {
-          setSelectedLength(res.length)
+          onSelectedLengthChange(res.length)
           return res
         })
         .catch(error => {
@@ -49,19 +51,10 @@ export const useOpenFileModal = (selectedFiles: IFile[]) => {
         })
     },
   })
-  if (isLoading) return <StyledLoader>Loading...</StyledLoader>
 
-  const modalComp = (
-    <ModalNext
-      id="modal-files-organize"
-      data-testid="modal-files-organize"
-      headerText={`Open ${seletedLength} ${pluralize('item', seletedLength)}`}
-      isShown={isShown}
-      hide={() => setShowModal(false)}
-    >
-      <ModalHeaderTop headerText={`Open ${seletedLength} ${pluralize('item', seletedLength)}`} hide={() => setShowModal(false)} />
-      <ModalScroll>
-        {data && (
+  return (
+    <>
+       {data && (
           <StyledResourceTable
             rows={data.map(s => {
               return {
@@ -86,6 +79,25 @@ export const useOpenFileModal = (selectedFiles: IFile[]) => {
             })}
           />
         )}
+    </>
+  )
+}
+
+export const useOpenFileModal = (selectedFiles: IFile[]) => {
+  const { isShown, setShowModal } = useModal()
+  const [seletedLength, setSelectedLength] = useState<number>(0)
+
+  const modalComp = (
+    <ModalNext
+      id="modal-files-organize"
+      data-testid="modal-files-organize"
+      headerText={`Open ${seletedLength} ${pluralize('item', seletedLength)}`}
+      isShown={isShown}
+      hide={() => setShowModal(false)}
+    >
+      <ModalHeaderTop headerText={`Open ${seletedLength} ${pluralize('item', seletedLength)}`} hide={() => setShowModal(false)} />
+      <ModalScroll>
+        <OpenFileList selectedFiles={selectedFiles} onSelectedLengthChange={setSelectedLength} />
       </ModalScroll>
       <Footer>
         <ButtonRow>

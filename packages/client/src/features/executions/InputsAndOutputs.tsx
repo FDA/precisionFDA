@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import styled from 'styled-components'
 import { FileIcon } from '../../components/icons/FileIcon'
 import { getBasePathFromScope } from '../home/utils'
-import { JobState } from './executions.types'
+import { JobState, RunData } from './executions.types'
 
 
 const StyledIOTable = styled.div`
@@ -91,13 +91,13 @@ const StyledIOTable = styled.div`
   }
 `
 
-const Table = ({ title, config, dataTestId }: { title: string; config: any[]; dataTestId: string }) => {
+const Table = ({ title, config, dataTestId }: { title: string; config: Partial<RunData>[]; dataTestId: string }) => {
   const list = config.map((elementConfig, i) => {
     const item = () => {
       switch (elementConfig.type) {
         case 'file':
           return elementConfig.state !== 'deleted' ? (
-            <Link to={elementConfig.link} className="cont link-file">
+            <Link to={elementConfig.link as string || ''} className="cont link-file">
               <FileIcon height={12} />
               {String(elementConfig.value)}
             </Link>
@@ -107,8 +107,8 @@ const Table = ({ title, config, dataTestId }: { title: string; config: any[]; da
         case 'array:file':
           return (
             <>
-              {elementConfig.value.map((name: any, index: any) => (
-                <Link key={elementConfig.link[index]} to={elementConfig.link[index]} className="cont link-file">
+              {Array.isArray(elementConfig?.value) && elementConfig?.value.map((name: unknown, index: number) => (
+                <Link key={Array.isArray(elementConfig.link) ? elementConfig.link[index] : `${index}`} to={Array.isArray(elementConfig.link) ? elementConfig.link[index] : ''} className="cont link-file">
                   <FileIcon height={12} />
                   {String(name)}
                 </Link>
@@ -150,22 +150,22 @@ export const InputsAndOutputs = ({
   runOutputData,
 }: {
   executionState: JobState
-  runInputData: any[]
-  runOutputData: any[]
+  runInputData: RunData[]
+  runOutputData: RunData[]
 }) => {
-  const getConfig = (config: any[]) => {
-    return config.map((e: any) => {
-      let link = ''
+  const getConfig = (config: RunData[]) => {
+    return config.map((e: RunData) => {
+      let link: string | string[] = ''
       let { value } = e
       const { state } = e
 
       if (e.class === 'file') {
         value = e.state !== 'deleted' ? e.file_name : 'Output file has been deleted'
-        link = e.state !== 'deleted' ? `${getBasePathFromScope(e.scope)}/files/${e.file_uid}` : ''
+        link = e.state !== 'deleted' && e.file_uid ? `${getBasePathFromScope(e.scope)}/files/${e.file_uid}` : ''
       }
       if (e.class === 'array:file') {
         value = e.file_names
-        link = e.file_uids.map((uid, index) => `${getBasePathFromScope(e.scopes[index])}/files/${uid}`)
+        link = e.file_uids?.map((uid, index) => `${getBasePathFromScope(e.scopes?.[index])}/files/${uid}`) || []
       }
 
       return {
@@ -174,7 +174,7 @@ export const InputsAndOutputs = ({
         link,
         value,
         state,
-      }
+      } satisfies Partial<RunData>
     })
   }
 

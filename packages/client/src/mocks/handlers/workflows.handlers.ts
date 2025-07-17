@@ -197,6 +197,7 @@ export const workflowMocks = [
           properties: {},
         },
         meta: {
+          comments: [],
           spec: {
             input_spec: {
               stages: [
@@ -291,7 +292,6 @@ export const workflowMocks = [
           executions: new Map(),
           batches: [],
           challenges: null,
-          comments: [],
           links: {
             comments: '/workflows/workflow-Gbv64680kKyPqbQ57Fqg07zb-1/comments',
             edit_tags: '/api/set_tags',

@@ -5,7 +5,6 @@ import styled from 'styled-components'
 import { CircleCheckIcon } from '../../components/icons/CircleCheckIcon'
 import { ResourceTable, StyledName } from '../../components/ResourceTable'
 import { useModal } from '../modal/useModal'
-import { FileLicense } from '../assets/assets.types'
 import { APIResource } from '../home/types'
 import { attachLicenseRequest, fetchLicensesList } from './api'
 import { License } from './types'
@@ -13,6 +12,7 @@ import { ModalHeaderTop, ModalNext } from '../modal/ModalNext'
 import { ButtonRow, Footer, ModalScroll } from '../modal/styles'
 import { Button } from '../../components/Button'
 import { Empty } from '../home/home.styles'
+import { IFile } from '../files/files.types'
 
 const HiddenElement = styled.div`
   width: 16px;
@@ -29,7 +29,7 @@ const ScrollWrapper = styled(ModalScroll)`
 `
 
 export function useAttachLicensesModal<
-  T extends { uid?: string; dxid?: string; file_license?: FileLicense },
+  T extends { uid?: string; dxid?: string; file_license?: IFile['file_license'] },
 >({
   selected,
   resource,
@@ -37,7 +37,7 @@ export function useAttachLicensesModal<
 }: {
   selected: T
   resource: APIResource
-  onSuccess?: (res: any) => void
+  onSuccess?: (res: Error | object) => void
 }) {
   const selectedId = selected?.uid || selected?.dxid
   const { isShown, setShowModal } = useModal()
@@ -73,7 +73,7 @@ export function useAttachLicensesModal<
     onError: () => {
       toast.error('Error: Attaching licenses')
     },
-    onSuccess: (res: any) => {
+    onSuccess: (res: Error | object) => {
       queryClient.invalidateQueries({
         queryKey: ['licenses'],
       })
@@ -85,9 +85,9 @@ export function useAttachLicensesModal<
   })
 
   const handleSubmit = (selectedLicenseId?: string) => {
-    selectedId &&
-      selectedLicenseId &&
+    if (selectedId && selectedLicenseId) {
       mutation.mutateAsync({ dxid: selectedId, licenseId: selectedLicenseId })
+    }
   }
 
   const modalComp = (
@@ -124,7 +124,7 @@ export function useAttachLicensesModal<
                     ),
                     action: (
                       <StyledAction
-                        key={`${i.id}-action`}
+                        key={`${s.id}-action`}
                         onClick={() => handleClickLicense(s)}
                         isCurrent={isCurrent}
                       >
@@ -135,7 +135,11 @@ export function useAttachLicensesModal<
                 })}
               />
             )}
-            {mutation.isError && mutation.error}
+            {mutation.isError && mutation.error && (
+              <div style={{ color: 'red', padding: '12px' }}>
+                {mutation.error.message || 'An error occurred'}
+              </div>
+            )}
           </>
         </ScrollWrapper>
       )}

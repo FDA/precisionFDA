@@ -8,21 +8,14 @@ import { PageContainerMargin } from '../../../components/Page/styles'
 import { usePageMeta } from '../../../hooks/usePageMeta'
 import { colors } from '../../../styles/theme'
 import NavigationBar from '../../../components/NavigationBar/NavigationBar'
-import SocialMediaButtons from '../../../components/NavigationBar/SocialMediaButtons'
+import MailButton from '../../../components/NavigationBar/SocialMediaButtons'
 import PublicLayout from '../../../layouts/PublicLayout'
 import { useAuthUser } from '../../auth/useAuthUser'
 import { expertDetailsRequest } from '../api'
 import { ExpertDetails } from '../types'
 import { ExpertAbout } from './About'
 import { ExpertBlog } from './Blog'
-import {
-  ExpertData,
-  ExpertImage,
-  ExpertRow,
-  Filler,
-  StyledTab,
-  StyledTabList,
-} from './styles'
+import { ExpertData, ExpertImage, ExpertRow, Filler, StyledTab, StyledTabList } from './styles'
 import { NavLink } from '../../../components/NavLink'
 
 const StyledNavigationBar = styled.div`
@@ -57,10 +50,7 @@ const ExpertsSingleDetails = ({ expert }: { expert: ExpertDetails }) => {
             <ExpertRow>
               <ExpertImage src={expert?.image} alt="Expert's Logo" />
               <ExpertData>
-                <BackToModulePage
-                  to={{ pathname: '/experts' }}
-                  data-turbolinks="false"
-                >
+                <BackToModulePage to={{ pathname: '/experts' }} data-turbolinks="false">
                   &larr; Back to All Experts
                 </BackToModulePage>
 
@@ -68,7 +58,7 @@ const ExpertsSingleDetails = ({ expert }: { expert: ExpertDetails }) => {
               </ExpertData>
             </ExpertRow>
             <StyledSocialMediaButtons>
-              <SocialMediaButtons />
+              <MailButton />
             </StyledSocialMediaButtons>
           </StyledNavigationBar>
         </PageContainerMargin>
@@ -78,27 +68,13 @@ const ExpertsSingleDetails = ({ expert }: { expert: ExpertDetails }) => {
           <Filler />
           <ExpertContentRow>
             <StyledTabList>
-              <StyledTab
-                as={NavLink}
-                to={`/experts/${expert?.id}/about`}
-                activeClassName="selected"
-              >
+              <StyledTab as={NavLink} to={`/experts/${expert?.id}/about`} activeClassName="selected">
                 About This Expert
               </StyledTab>
-              <StyledTab
-                as={NavLink}
-                to={`/experts/${expert?.id}/blog`}
-                activeClassName="selected"
-              >
+              <StyledTab as={NavLink} to={`/experts/${expert?.id}/blog`} activeClassName="selected">
                 Blog Post
               </StyledTab>
-              <StyledTab
-                as="a"
-                data-turbolinks="false"
-                href={`/experts/${expert?.id}/qa`}
-                target="_blank"
-                rel="noreferrer"
-              >
+              <StyledTab as="a" data-turbolinks="false" href={`/experts/${expert?.id}/qa`} target="_blank" rel="noreferrer">
                 Q&A
               </StyledTab>
             </StyledTabList>
@@ -119,10 +95,10 @@ const ExpertsSingleDetailsPage = () => {
   const { expertId } = useParams<{ expertId: string }>()
   const { isLoading, data } = useQuery({
     queryKey: ['queryExpertDetails'],
-    queryFn: () => expertDetailsRequest(expertId)
+    queryFn: () => expertDetailsRequest(expertId!),
   })
   if (isLoading) return <Loader />
-  if(!data?.expert) return <div>No expert found</div>
+  if (!data?.expert) return <div>No expert found</div>
   return <ExpertsSingleDetails expert={data.expert} />
 }
 

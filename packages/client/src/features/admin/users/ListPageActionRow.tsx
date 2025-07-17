@@ -212,7 +212,7 @@ export const UsersListActionRow = ({ selectedUsers, refetchUsers }: UserListActi
           <DropdownButton
             {...dropdownProps}
             data-testid="admin-users-resource-button"
-            active={dropdownProps.isActive}
+            active={dropdownProps.$isActive}
             disabled={selectedUsers.length === 0}
           />
         )}
