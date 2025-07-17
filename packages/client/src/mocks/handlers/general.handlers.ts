@@ -8,6 +8,10 @@ export const generalHandlers = [
     HttpResponse.json<FetchProperties>({ keys: []}, { status: 200 }),
   ),
 
+  http.get('/api/v2/properties/:type/scope/:scope/keys', () => 
+    HttpResponse.json<FetchProperties>({ keys: ['category', 'description', 'format', 'organism', 'version']}, { status: 200 }),
+  ),
+
   http.post('/api/files/download_list', () => HttpResponse.json([], { status: 200 })),
 
   http.get('/api/counters', () =>

@@ -52,7 +52,7 @@ export const ExecutionDetails = ({
   spaceId?: number
   homeScope?: HomeScope
 }) => {
-  const location = useLocation<any>()
+  const location = useLocation()
   const { executionUid } = useParams<{ executionUid: string }>()
 
   const { data, isLoading, refetch, isFetching } = useQuery({
@@ -86,7 +86,8 @@ export const ExecutionDetails = ({
             NOTIFICATION_ACTION.JOB_TERMINATED,
           ].includes(notification.action)
         )
-      } catch (e) {
+      } catch (e: unknown) {
+        console.error('Error parsing WebSocket message:', e)
         return false
       }
     },

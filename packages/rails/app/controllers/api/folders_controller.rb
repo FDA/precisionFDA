@@ -3,29 +3,6 @@ module Api
   class FoldersController < ApiController
     before_action :find_folder, only: %i(children rename_folder)
 
-    # GET /api/folders/children
-    # Responds with the children of a specified folder.
-    def children
-      params[:scope] ||= "private"
-
-      children = case params[:scope]
-      when Scopes::SCOPE_PRIVATE
-        @folder&.children ||
-        current_user.nodes.where(parent_folder_id: nil)
-      when Scopes::SCOPE_PUBLIC
-        @folder&.children ||
-        Node.where(scope: params[:scope], parent_folder_id: nil)
-      end
-
-      if [Scopes::SCOPE_PRIVATE, Scopes::SCOPE_PUBLIC].include?(params[:scope])
-        children = children.where.not(sti_type: "Asset")
-      end
-
-      children = children.where(scope: params[:scope]).order(:sti_type, :name)
-
-      render json: children, root: "nodes", adapter: :json
-    end
-
     # POST /api/folders/publish_folders
     # Makes selected folder(s) and all them children files publishable.
     # Check, whether folder(s) to be published already exist.

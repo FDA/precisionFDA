@@ -1,23 +1,18 @@
 import axios from 'axios'
-import { Pagination } from '../../types/pagination'
-import { cleanObject } from '../../utils/object'
+import { PaginationMetaV2 } from '../../types/pagination'
 import { NewsItem, NewsListParams } from './types'
 
 export interface NewsListResponse {
-  meta?: Pagination,
-  news_items?: NewsItem[],
+  meta: PaginationMetaV2
+  data: NewsItem[]
 }
 
 export async function newsListRequest(params: NewsListParams) {
-  const filters = cleanObject({ year: params.year, type: params.type, page: params.page, per_page: params.perPage, orderBy: params.orderBy })
-  const paramQ = `?${new URLSearchParams(filters as any).toString()}`
-  return axios.get(`/api/news${paramQ}`).then(response => response.data as NewsListResponse)
+  return axios.get('/api/v2/news', { params }).then(response => response.data as NewsListResponse)
 }
 
 export async function newsAdminAllRequest(params: NewsListParams) {
-  const filters = cleanObject({ year: params.year, type: params.type, page: params.page, per_page: params.perPage })
-  const paramQ = `?${new URLSearchParams(filters as any).toString()}`
-  return axios.get(`/api/news/all${paramQ}`).then(response => response.data as NewsItem[])
+  return axios.get('/api/v2/news/all', { params }).then(response => response.data as NewsItem[])
 }
 
 export async function newsItemRequest(id: string) {
@@ -26,14 +21,14 @@ export async function newsItemRequest(id: string) {
 
 export type NewsYearsListResponse = string[]
 export async function newsYearsListRequest(): Promise<NewsYearsListResponse> {
-  return axios.get('/api/news/years').then(response => response.data.map((item: number) => item.toString()))
+  return axios.get('/api/v2/news/years').then(response => response.data.map((item: number) => item.toString()))
 }
 export interface CreateNewsItemResponse {
-  error?: Error;
+  error?: Error
 }
 export interface CreateNewsItemPayload {
-  title?: string;
-  isPublication?: boolean;
+  title?: string
+  isPublication?: boolean
 }
 
 export async function createNewsItemRequest(payload: CreateNewsItemPayload) {
@@ -44,7 +39,7 @@ export async function editNewsItemRequest(id: string | number, payload: CreateNe
   return axios.put(`/api/news/${id}`, { news_item: payload }).then(r => r.data as CreateNewsItemResponse)
 }
 export async function deleteNewsItemRequest(id: string | number) {
-  return axios.delete(`/api/news/${id}`).then(r => r.data as any)
+  return axios.delete(`/api/news/${id}`).then(r => r.data as unknown)
 }
 
 interface NewsPositionReqBody {
@@ -52,5 +47,5 @@ interface NewsPositionReqBody {
 }
 
 export async function savePositionsRequest(payload: NewsPositionReqBody['news_items']) {
-  return axios.post('/api/news/positions', { news_items: payload }).then(r => r.data as any)
+  return axios.post('/api/news/positions', { news_items: payload }).then(r => r.data as unknown)
 }

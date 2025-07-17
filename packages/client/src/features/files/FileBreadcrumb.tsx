@@ -13,7 +13,7 @@ const mstyle = {
   alignItems: 'center',
 }
 
-const DroppablePathDir: React.FC<DroppableProps> = ({ id, name, children, style = {}, numSelected = 0, disabled = false, ...rest }) => {  
+const DroppablePathDir: React.FC<DroppableProps> = ({ id, name, children, style = {}, disabled = false, ...rest }) => {  
   const { setNodeRef, isOver } = useDroppable({ id, disabled, data: { name }})
 
   const dstyle = {
@@ -36,7 +36,7 @@ const createSearchParam = (params: Record<string, unknown>) => {
   return paramQ
 }
 
-export const FileBreadcrumb = ({ currentFolderId, basePath, scope, labelText, fileName, metaPath = []}: { currentFolderId: number, basePath: string, scope?: HomeScope, labelText?: string, fileName?: string, metaPath?: MetaPath[]}) => (
+export const FileBreadcrumb = ({ currentFolderId, basePath, scope, labelText, fileName, metaPath = []}: { currentFolderId?: number, basePath: string, scope?: HomeScope, labelText?: string, fileName?: string, metaPath?: MetaPath[]}) => (
   <StyledBreadcrumbs>
     {labelText && <BreadcrumbLabel>{labelText}</BreadcrumbLabel>}
     {[{ id: 0, name: 'Files', href: `${basePath}${createSearchParam({ scope })}` }]
@@ -55,7 +55,7 @@ export const FileBreadcrumb = ({ currentFolderId, basePath, scope, labelText, fi
         </DroppablePathDir>
       ))
       .concat(<div key="filename" style={mstyle}>{fileName}</div>)
-      // @ts-ignore
+      // @ts-expect-error works as intended
       .reduce((prev, curr) => [prev, <BreadcrumbDivider key={`divider-${prev.id}`}>/</BreadcrumbDivider>, curr])}
   </StyledBreadcrumbs>
 )

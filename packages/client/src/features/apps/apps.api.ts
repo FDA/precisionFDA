@@ -1,14 +1,17 @@
 import axios from 'axios'
-import { checkStatus, getApiRequestOpts } from '../../utils/api'
 import { Asset } from '../actionModals/AttachToModal/useListAssetsQuery'
+import { DeleteResponse } from '../actionModals/useDeleteModal'
+import { IChallenge } from '../../types/challenge'
 import { FetchAccessibleFilesResponse, fetchAccessibleFiles } from '../databases/databases.api'
 import { IExecution } from '../executions/executions.types'
 import { FileScope } from '../files/files.types'
-import { IFilter, IMeta, ServerScope } from '../home/types'
+import { ApiResponse, IFilter, IMeta, ServerScope } from '../home/types'
 import { Params, formatScopeQ, prepareListFetch } from '../home/utils'
 import { License } from '../licenses/types'
 import { ISpace } from '../spaces/spaces.types'
 import { AppRevision, AppSpec, ComputeInstance, IApp, IOSpec, InputSpec } from './apps.types'
+import { CopyResponse } from '../actionModals/useCopyToPrivateModal'
+import { CopyToSpaceProperties } from '../actionModals/useCopyToSpace'
 
 export interface FetchAppsQuery {
   apps: IApp[]
@@ -16,19 +19,19 @@ export interface FetchAppsQuery {
 }
 
 export interface RunJobRequest {
-  id: string // application id
-  name: string // name of the job
+  id: string
+  name: string
   job_limit: number
   instance_type: string
   scope: ServerScope
   output_folder_path: string
   inputs: {
-    [key: string]: string | number | boolean | string[] | number[] | null | undefined
+    [key: string]: string | number | boolean | string[] | number[] | null | undefined | ComputeInstance
   }
 }
 
 export interface RunJobResponse {
-  id: string // id of started job
+  id: string
   error?: Error
 }
 
@@ -38,7 +41,7 @@ export async function runJob(request: RunJobRequest) {
 
 export async function fetchApps(filters: IFilter[], params: Params): Promise<FetchAppsQuery> {
   const query = prepareListFetch(filters, params)
-  const paramQ = `?${new URLSearchParams(query as {}).toString()}`
+  const paramQ = `?${new URLSearchParams(query as Record<string, string>).toString()}`
   const scopeQ = formatScopeQ(params.scope)
   return axios.get<FetchAppsQuery>(`/api/apps/${scopeQ}${paramQ}`).then(r => r.data)
 }
@@ -101,7 +104,7 @@ export async function fetchFilteredApps(searchString: string, scopes: ServerScop
     .then(r => r.data as IApp[])
 }
 
-export interface FetchAppsExecutionsQuery {
+export interface FetchAppsExecutionsResponse {
   jobs: IExecution[]
   meta: IMeta
 }
@@ -113,27 +116,22 @@ interface FetchAppExecutionsParams extends Params {
 export async function fetchAppExecutions(
   filters: IFilter[],
   params: FetchAppExecutionsParams,
-): Promise<FetchAppsExecutionsQuery> {
+) {
   const query = prepareListFetch(filters, params)
-  const paramQ = `?${new URLSearchParams(query as any).toString()}`
-  const res = await fetch(`/api/apps/${params.appUid}/jobs${paramQ}`)
-  return res.json()
+  const paramQ = `?${new URLSearchParams(query).toString()}`
+  return axios.get<FetchAppsExecutionsResponse>(`/api/apps/${params.appUid}/jobs${paramQ}`).then(r => r.data)
 }
 
-export async function copyAppsRequest(scope: string, ids: string[], properties?: Record<string, any>) {
+export async function copyAppsRequest(scope: string, ids: string[], properties?: CopyToSpaceProperties): Promise<ApiResponse> {
   const requestProperties = properties || { createAppSeries: true, createAppRevision: false }
   return axios.post('/api/apps/copy', { item_ids: ids, scope, properties: requestProperties }).then(r => r.data)
 }
 
-export async function deleteAppsRequest(ids: string[]): Promise<any> {
-  const res = await fetch('/api/apps/delete', {
-    ...getApiRequestOpts('PUT'),
-    body: JSON.stringify({ item_ids: ids }),
-  }).then(checkStatus)
-  return res.json()
+export async function deleteAppsRequest(ids: string[]): Promise<DeleteResponse> {
+  return axios.put('/api/apps/delete', { item_ids: ids }).then(r => r.data)
 }
 
-export async function copyAppsToPrivate(ids: number[], properties?: Record<string, any>) {
+export async function copyAppsToPrivate(ids: number[], properties?: Record<string, unknown>): Promise<CopyResponse> {
   const requestProperties = properties || { createAppSeries: true, createAppRevision: false }
   return axios
     .post('/api/apps/copy', {
@@ -158,7 +156,7 @@ export interface CreateAppPayload {
   output_spec: IOSpec[]
   internet_access: boolean
   instance_type: string
-  packages: any[]
+  packages: string[]
   ordered_assets: string[]
   code: string
 }
@@ -174,11 +172,19 @@ export interface AppFetchResponse {
     spec: AppSpec
     internal: {
       code: string
-      packages: any[]
+      packages: string[]
     }
     release: string
     assets: Asset[]
     revisions: AppRevision[]
+    // fields required by AppsShow
+    comparator: boolean
+    default_comparator: boolean
+    assigned_challenges: IChallenge[]
+    challenges: IChallenge[]
+    links: {
+      comparators: Record<string, string>
+    }
   }
 }
 
@@ -201,4 +207,20 @@ export async function uploadAppConfigFileRequest(payload: FormData): Promise<Upl
       headers: { 'Content-Type': 'multipart/form-data' },
     })
     .then(r => r.data as UploadAppConfigFileResponse)
+}
+
+export async function assignToChallengeRequest({
+  link,
+  appId,
+  challengeId,
+}: {
+  link: string
+  appId: number
+  challengeId: string
+}): Promise<unknown> {
+  const body = {
+    app_id: appId,
+    id: challengeId,
+  }
+  return axios.post(link, body).then(r => r.data)
 }

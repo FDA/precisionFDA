@@ -1,7 +1,7 @@
 import { useMutation } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
-import { checkStatus, getApiRequestOpts } from '../../utils/api'
 import { APIResource } from '../home/types'
+import axios from 'axios'
 
 export interface Meta {
   type: 'success' | 'error';
@@ -14,14 +14,15 @@ export interface RequestResponse {
 }
 
 async function featureRequest(resource: APIResource, { uids, featured }: { uids: (number | string)[], featured: boolean }): Promise<RequestResponse> {
-  const res = await fetch(`/api/${resource}/feature`, {
-    ...getApiRequestOpts('PUT'),
-    body: JSON.stringify({ item_ids: uids, featured: featured || undefined }),
-  }).then(checkStatus)
-  return res.json()
+  const response = await axios.put(`/api/${resource}/feature`, {
+    item_ids: uids,
+    featured: featured || undefined,
+  })
+  
+  return response.data
 }
 
-export const useFeatureMutation = ({ resource, onSuccess }: { resource: APIResource, onSuccess?: (res: any) => void }) => {
+export const useFeatureMutation = ({ resource, onSuccess }: { resource: APIResource, onSuccess?: (res: RequestResponse) => void }) => {
   const featureMutation = useMutation({
     mutationKey: ['feature-resource', resource],
     mutationFn: (payload: { featured: boolean, uids: (number | string)[] }) => featureRequest(resource, payload),
@@ -33,7 +34,8 @@ export const useFeatureMutation = ({ resource, onSuccess }: { resource: APIResou
         toast.error(`Error: ${res.meta[0].message}`)
       }
     },
-    onError: (res) => {
+    onError: (res: unknown) => {
+      console.error('Error featuring resource:', res)
       toast.error('Error: featuring')
     },
   })

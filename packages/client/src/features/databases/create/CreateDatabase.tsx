@@ -1,10 +1,7 @@
-/* eslint-disable react/jsx-props-no-spreading */
 import { AxiosError } from 'axios'
-/* eslint-disable jsx-a11y/label-has-associated-control */
-import React, { useEffect, useState } from 'react'
+import React, { useEffect } from 'react'
 import { ErrorMessage } from '@hookform/error-message'
 import { yupResolver } from '@hookform/resolvers/yup'
-import { debounce } from 'lodash'
 import { Controller, useForm } from 'react-hook-form'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useLocation, useNavigate } from 'react-router-dom'
@@ -18,10 +15,9 @@ import { Loader } from '../../../components/Loader'
 import { StyledBackLink } from '../../home/home.styles'
 import { NotFound } from '../../home/show.styles'
 import {
+  CreateDatabasePayload,
   createDatabaseRequest,
-  fetchAccessibleFiles,
   getDatabaseAllowedInstances,
-  IAccessibleFile,
 } from '../databases.api'
 import { DatabaseEngineType, versionsOptions } from './options'
 import { Select } from '../../../components/Select'
@@ -29,11 +25,6 @@ import { Button } from '../../../components/Button'
 import { FieldGroup } from '../../../components/form/FieldGroup'
 import { getBackPathNext } from '../../../utils/getBackPath'
 import { HomeScope } from '../../home/types'
-
-const useAccessibleFiles = (inputValue: string) => useQuery({
-  queryKey: ['accessible-files', inputValue],
-  queryFn: () => fetchAccessibleFiles({ search_string: inputValue, limit: 100, offset: 0 }).then(v => v?.objects),
-})
 
 const StyledForm = styled.form`
   margin: 16px;
@@ -80,15 +71,10 @@ const validationSchema = Yup.object().shape({
 export const CreateDatabase = ({ spaceId, homeScope }: { spaceId?: number, homeScope?: HomeScope }) => {
   const navigate = useNavigate()
   const location = useLocation()
-  const [inputValue, setInputValue] = useState('')
-  const { data, isLoading } = useAccessibleFiles(inputValue)
   const allowedInstances = useQuery({
     queryKey: ['dbclusters','allowedInstances'],
     queryFn: () => getDatabaseAllowedInstances(),
   })
-  const debouncedSqlFileInputSearch = debounce(v => {
-    setInputValue(v)
-  }, 500)
 
   const backPath = getBackPathNext({
     location, 
@@ -96,8 +82,6 @@ export const CreateDatabase = ({ spaceId, homeScope }: { spaceId?: number, homeS
     homeScope,
     spaceId,
   })
-
-  const accessibleFiles = data || []
 
   const {
     control,
@@ -123,7 +107,7 @@ export const CreateDatabase = ({ spaceId, homeScope }: { spaceId?: number, homeS
   const queryClient = useQueryClient()
   const createDatabaseMutation = useMutation({
     mutationKey: ['create-database'],
-    mutationFn: (payload: any) => createDatabaseRequest(payload),
+    mutationFn: (payload: CreateDatabasePayload) => createDatabaseRequest(payload),
     onSuccess: (res) => {
       if (res?.uid) {
         navigate(`${backPath.replace(/\?scope=(me|spaces)/, '')}/${res?.uid}`)
@@ -158,12 +142,6 @@ export const CreateDatabase = ({ spaceId, homeScope }: { spaceId?: number, homeS
       engineVersion: vals.engineVersion ? vals.engineVersion.value : '',
     })
   }
-
-  const filesOptions = accessibleFiles?.filter((file: IAccessibleFile) => file.scope !== 'public')
-    .map(file => ({
-      label: file.title,
-      value: file.uid,
-    }))
 
   const isSubmitting = createDatabaseMutation.isPending
 

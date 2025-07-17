@@ -1,12 +1,11 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import httpStatusCodes from 'http-status-codes'
 import React from 'react'
 import { toast } from 'react-toastify'
 import styled from 'styled-components'
 import { useNavigate } from 'react-router'
 import { EXPERT_STATE } from '../../../constants'
 import { IUser } from '../../../types/user'
-import { ToC } from '../../markdown/Toc'
+import { IToCItem, ToC } from '../../markdown/Toc'
 import { useModal } from '../../modal/useModal'
 import { askQuestion, deleteExpertRequest } from '../api'
 import { ExpertDetails } from '../types'
@@ -20,7 +19,7 @@ const ActionRow = styled.div`
   gap: 8px;
 `
 
-export const ExpertColumnRight = ({ expert, user, toc }: { expert: ExpertDetails; user: IUser; toc?: any[] }) => {
+export const ExpertColumnRight = ({ expert, user, toc }: { expert: ExpertDetails; user: IUser; toc?:  IToCItem[] }) => {
   const modal = useModal()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
@@ -32,13 +31,25 @@ export const ExpertColumnRight = ({ expert, user, toc }: { expert: ExpertDetails
     mutationKey: ['create-question'],
     mutationFn: ({ userName, question, captchaValue }: { userName: string; question: string; captchaValue: string }) =>
       askQuestion({ userName, question, captchaValue }, expert.id.toString()),
+    onError: error => {
+      const errorMessage = error?.message || 'Your question was not submitted due to internal error'
+      toast.error(errorMessage)
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['queryExpertDetails'],
+      })
+      toast.success('Your question was submitted successfully')
+      modal.setShowModal(false)
+      navigate(`/experts/${expert.id}`)
+    },
   })
 
   const deleteMutation = useMutation({
     mutationKey: ['delete-expert'],
     mutationFn: () => deleteExpertRequest(expert.id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['experts'] })
+      queryClient.invalidateQueries({ queryKey: ['experts']})
       toast.success('Expert was deleted successfully')
       navigate('/experts')
     },
@@ -59,20 +70,8 @@ export const ExpertColumnRight = ({ expert, user, toc }: { expert: ExpertDetails
     ),
   })
 
-  const askExpert = (userName: string, question: string, captchaValue: string) => {
-    createQuestionMutation.mutateAsync({ userName, question, captchaValue }).then(response => {
-      if (response.status === httpStatusCodes.OK) {
-        queryClient.invalidateQueries({
-          queryKey: ['queryExpertDetails'],
-        })
-        toast.success('Your question was submitted successfully')
-        modal.setShowModal(false)
-        navigate(`/experts/${expert.id}`)
-      } else {
-        const errorMessage = response.payload?.error?.message
-        toast.error(errorMessage || 'Your question was not submitted')
-      }
-    })
+  const askExpert = (userName: string, question: string, captchaValue: string | null) => {
+    createQuestionMutation.mutateAsync({ userName, question, captchaValue: captchaValue ?? '' })
   }
 
   return (

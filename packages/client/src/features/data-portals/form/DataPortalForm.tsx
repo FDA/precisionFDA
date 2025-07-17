@@ -1,4 +1,3 @@
-/* eslint-disable jsx-a11y/label-has-associated-control */
 import { ErrorMessage } from '@hookform/error-message'
 import { yupResolver } from '@hookform/resolvers/yup'
 import React, { useEffect } from 'react'
@@ -12,9 +11,10 @@ import { FieldGroup } from '../../../components/form/FieldGroup'
 import { FieldInfo } from '../../../components/form/FieldInfo'
 import { InputError } from '../../../components/form/styles'
 import { SavingModal } from '../../modal/SavingModal'
-import { StatusSelect } from './StatusSelect'
 import { UsersSelect } from './UsersSelect'
 import { createValidationSchema, editValidationSchema } from './common'
+import { AxiosError } from 'axios'
+import { ApiErrorResponse } from '../../home/types'
 
 type SelectItem = { label: string; value: string }
 
@@ -24,7 +24,6 @@ export interface CreateDataPortalForm {
   url_slug: string
   host_lead_dxuser: SelectItem | null
   guest_lead_dxuser: SelectItem | null
-  status: SelectItem | null
   sort_order: number
   card_image_uid: string | null
   card_image_url: string
@@ -77,12 +76,12 @@ export const DataPortalForm = ({
   mutationErrors,
 }: {
   defaultValues?: CreateDataPortalForm
-  onSubmit: (a: any) => Promise<any>
+  onSubmit: (a: CreateDataPortalForm) => Promise<unknown>
   isSaving?: boolean
   isEditMode?: boolean
   canEditMainDataPortal?: boolean
   isSubmitting: boolean,
-  mutationErrors?: { response: { data: { error: any }} }
+  mutationErrors?: AxiosError<ApiErrorResponse> | null
 }) => {
   const [base64Image, setBase64Image] = React.useState<string | null>(null)
 
@@ -155,7 +154,7 @@ export const DataPortalForm = ({
 
   unstable_usePrompt({
     message: 'There are unsaved changes, are you sure you want to leave?',
-    when: ({ currentLocation, nextLocation }: any) =>
+    when: ({ currentLocation, nextLocation }) =>
       (!isSubmitting && Object.keys(dirtyFields).length > 0) &&
       currentLocation.pathname !== nextLocation.pathname,
   })
@@ -212,7 +211,7 @@ export const DataPortalForm = ({
           <Controller
             name="host_lead_dxuser"
             control={control}
-            render={({ field: { value, onChange, onBlur } }) => (
+            render={({ field: { value, onChange, onBlur }}) => (
               <UsersSelect
                 isDisabled={isEditMode || isSubmitting}
                 onChange={onChange}
@@ -228,7 +227,7 @@ export const DataPortalForm = ({
           <Controller
             name="guest_lead_dxuser"
             control={control}
-            render={({ field: { value, onChange, onBlur } }) => (
+            render={({ field: { value, onChange, onBlur }}) => (
               <UsersSelect
                 onChange={onChange}
                 onBlur={onBlur}

@@ -6,9 +6,6 @@ import { TransparentButton } from '../Button'
 import { StyledDropdown } from '../Dropdown'
 
 const bpSmall = '@media(min-width: 850px)'
-const bpMedium = '@media(min-width: 1045px)'
-const bpLarge = '@media(min-width: 1200px)'
-const bpSuper = '@media(min-width: 1340px)'
 
 export const MenuButton = styled(TransparentButton)<{$active: boolean}>`
   padding: 8px;

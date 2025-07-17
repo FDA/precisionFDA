@@ -31,7 +31,7 @@ const SelectAssetModalWrapper = ({ dialogType, showSubtitle }: Props) => {
       alert(`Selected ${selectedAssets.length} asset(s): ${selectedAssets.map(a => a.title).join(', ')}`)
     },
     showSubtitle ? 'Choose assets for your analysis workflow' : undefined,
-    ['private', 'public', 'space'],
+    ['private', 'public', 'space-1'],
   )
 
   useEffect(() => {

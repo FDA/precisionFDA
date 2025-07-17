@@ -380,19 +380,7 @@ export const assetsHandlers = [
     
     // If request has scopes/search_string/states, return IAsset[] format (useSelectAssetModal)
     if (body && ('scopes' in body || 'search_string' in body || 'states' in body)) {
-      return HttpResponse.json({
-        assets: mockSelectAssets,
-        meta: {
-          count: mockSelectAssets.length,
-          pagination: {
-            current_page: 1,
-            next_page: null,
-            prev_page: null,
-            per_page: 25,
-            total_pages: 1,
-          },
-        },
-      })
+      return HttpResponse.json(mockSelectAssets)
     }
     
     // Otherwise return Asset[] format (useAssetAttachModal)
