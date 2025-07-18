@@ -1,6 +1,6 @@
 import { Provider } from '@nestjs/common'
-import { config } from '@shared/config'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { CHALLENGE_BOT_USER_CONTEXT } from '@shared/domain/user-context/provider/challenge-bot-user-context.provider'
 import { PlatformClient } from '@shared/platform-client'
 
 export const CHALLENGE_BOT_PLATFORM_CLIENT = 'CHALLENGE_BOT_PLATFORM_CLIENT'
@@ -13,5 +13,6 @@ export const platformClientProvider: Provider = {
 
 export const challengeBotClientProvider: Provider = {
   provide: CHALLENGE_BOT_PLATFORM_CLIENT,
-  useFactory: () => new PlatformClient({ accessToken: config.platform.challengeBotAccessToken }),
+  inject: [CHALLENGE_BOT_USER_CONTEXT],
+  useFactory: (uc: UserContext) => new PlatformClient(uc),
 }
