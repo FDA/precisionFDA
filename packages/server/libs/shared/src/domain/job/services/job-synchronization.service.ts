@@ -49,8 +49,10 @@ import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
  * JobSynchronizationService is responsible for synchronizing the job status with the platform.
  * Works for both https and standalone apps.
  *
- * Still work in progress - it was moved from bunch of functions in synchronize.ts into a service, but
+ * Still work in progress - it was moved from a bunch of functions in synchronize.ts into a service, but
  * the service itself could use some refactoring to make it more readable and reusable within the service.
+ *
+ * Challenge bot jobs synchronization is implemented in ChallengeJobSynchronizationService.
  */
 @Injectable()
 export class JobSynchronizationService {
