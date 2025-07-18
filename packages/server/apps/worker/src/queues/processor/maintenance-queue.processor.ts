@@ -1,5 +1,4 @@
 import { Processor } from '@nestjs/bull'
-import { Inject } from '@nestjs/common'
 import { config } from '@shared/config'
 import { AdminDataConsistencyReportService } from '@shared/debug/admin-data-consistency-report.service'
 import { testHeapMemoryAllocationError } from '@shared/debug/memory-tests'
@@ -22,34 +21,32 @@ export class MaintenanceQueueProcessor extends BaseQueueProcessor {
     private readonly userService: UserService,
     private readonly userCheckupFacade: UserCheckupFacade,
     private readonly jobServiceWithPlatformClient: JobService,
-    @Inject('JOB_SERVICE_WITH_CHALLENGE_BOT_CLIENT')
-    private readonly jobServiceWithChallengeBotClient: JobService,
   ) {
     super()
   }
 
   @ProcessWithContext(TASK_TYPE.CHECK_CHALLENGE_JOBS)
-  async checkChallengeJobs() {
-    await this.jobServiceWithChallengeBotClient.checkChallengeJobs()
+  async checkChallengeJobs(): Promise<void> {
+    await this.jobServiceWithPlatformClient.checkChallengeJobs()
   }
 
   @ProcessWithContext(TASK_TYPE.CHECK_STALE_JOBS)
-  async checkStaleJobs() {
+  async checkStaleJobs(): Promise<void> {
     await this.jobServiceWithPlatformClient.checkStaleJobs()
   }
 
   @ProcessWithContext(TASK_TYPE.CHECK_NON_TERMINATED_DBCLUSTERS)
-  async checkNonTerminatedDbClusters() {
+  async checkNonTerminatedDbClusters(): Promise<void> {
     await this.dbClusterService.checkNonTerminatedDbClusters()
   }
 
   @ProcessWithContext(TASK_TYPE.SYNC_SPACES_PERMISSIONS)
-  async syncSpacesPermissions(job: Job<SyncSpacesPermissionsJob>) {
+  async syncSpacesPermissions(job: Job<SyncSpacesPermissionsJob>): Promise<void> {
     await syncSpacesPermissionsHandler(job)
   }
 
   @ProcessWithContext(TASK_TYPE.USER_CHECKUP)
-  async userCheckup(job: Job) {
+  async userCheckup(job: Job): Promise<void> {
     // This is a composite job, consisting of various checks that we can do
     // to a user's account. This should be triggered when user logs in with means
     // we have a new platform accessToken to work with
@@ -57,22 +54,22 @@ export class MaintenanceQueueProcessor extends BaseQueueProcessor {
   }
 
   @ProcessWithContext(TASK_TYPE.CHECK_USER_JOBS)
-  async checkUserJobs(job: Job) {
+  async checkUserJobs(job: Job): Promise<void> {
     await checkUserJobsHandler(job)
   }
 
   @ProcessWithContext(TASK_TYPE.ADMIN_DATA_CONSISTENCY_REPORT)
-  async reportAdminDataConsistency() {
+  async reportAdminDataConsistency(): Promise<void> {
     await this.adminDataConsistencyReportService.createReport()
   }
 
   @ProcessWithContext(TASK_TYPE.USER_INACTIVITY_ALERT)
-  async userInactivityAlert() {
+  async userInactivityAlert(): Promise<void> {
     await this.userService.sendUserInactivityAlerts()
   }
 
   @ProcessWithContext(TASK_TYPE.DEBUG_MAX_MEMORY)
-  debugMaxMemory() {
+  debugMaxMemory(): void {
     testHeapMemoryAllocationError()
   }
 }
