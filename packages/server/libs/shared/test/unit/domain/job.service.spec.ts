@@ -30,11 +30,12 @@ import { UserRepository } from '@shared/domain/user/user.repository'
 import { JobRepository } from '@shared/domain/job/job.repository'
 import { SpaceRepository } from '@shared/domain/space/space.repository'
 import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
-import { config } from '@shared/config'
 import { EmailService } from '@shared/domain/email/email.service'
 import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
 import { JobSynchronizationService } from '@shared/domain/job/services/job-synchronization.service'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { NodeRepository } from '@shared/domain/user-file/node.repository'
+import { ChallengeJobSynchronizationService } from '@shared/domain/job/services/challenge-job-synchronization.service'
 
 describe('Job service tests', () => {
   let em: EntityManager<MySqlDriver>
@@ -45,9 +46,11 @@ describe('Job service tests', () => {
   let folderService: FolderService
   let emailQueueJobProducer: EmailQueueJobProducer
   let jobSynchronizationService: JobSynchronizationService
+  let challengeJobSynchronizationService: ChallengeJobSynchronizationService
   let userRepo: UserRepository
   let jobRepo: JobRepository
   let spaceRepo: SpaceRepository
+  let nodeRepo: NodeRepository
   let spaceMembershipRepo: SpaceMembershipRepository
   let emailService: EmailService
 
@@ -83,10 +86,12 @@ describe('Job service tests', () => {
       loadEntity: userContextLoadEntityStub,
     } as UserContext
 
+    nodeRepo = {} as unknown as NodeRepository
     notificationService = new NotificationService(em, userCtx)
-    folderService = new FolderService(em, userCtx)
+    folderService = new FolderService(em, userCtx, nodeRepo)
     emailQueueJobProducer = new EmailQueueJobProducer(queue)
     jobSynchronizationService = {} as unknown as JobSynchronizationService
+    challengeJobSynchronizationService = {} as unknown as ChallengeJobSynchronizationService
     userRepo = {
       findOneOrFail: userRepoFindOneOrFailStub,
       findAdminUser: userRepoFindAdminUserStub,
@@ -580,60 +585,6 @@ describe('Job service tests', () => {
     })
   })
 
-  context('#checkChallengeJobs', async () => {
-    it('Challenge bot not found', async () => {
-      const thrownError = new Error('User not found')
-      userRepoFindOneOrFailStub
-        .withArgs({ dxuser: config.platform.challengeBotUser })
-        .throws(thrownError)
-
-      jobService = getJobServiceInstance(getPlatformClientWithEmptyResults())
-
-      // For some reason rejectedWith doesn't work
-      // const error = new NotFoundError("User not found ({ dxuser: 'challenge-bot-test' })")
-      // await expect(jobService.checkChallengeJobs()).to.be.rejectedWith(error)
-      try {
-        await jobService.checkChallengeJobs()
-      } catch (error) {
-        expect(error.message).to.contain('User not found')
-      }
-    })
-
-    // it('Sync outputs of jobs', async () => {
-    // TODO needs to be completely refactored (PFDA-5783)
-    //   const platformClient = getPlatformClientWithComplexResults()
-    //   jobService = getJobServiceInstance(platformClient)
-    //   const challengeBotUser = create.userHelper.create(em, {
-    //     dxuser: config.platform.challengeBotUser,
-    //   })
-    //   await em.flush()
-    //   const job = create.jobHelper.create(em, { user: challengeBotUser }, {})
-    //   await em.flush()
-    //
-    //   await jobService.checkChallengeJobs()
-    //
-    //   const filesCreated = await em.find(UserFile, {})
-    //   const loadedJob = await em.findOneOrFail(Job, { dxid: job.dxid })
-    //   expect(loadedJob.runData).to.deep.equal({
-    //     run_instance_type: 'baseline-8',
-    //     run_inputs: {},
-    //     run_outputs: {
-    //       string_output: 'string output',
-    //       file_output: filesCreated[0].dxid,
-    //       string_array_output: ['string1', 'string2'],
-    //       file_array_output: [filesCreated[1].dxid, filesCreated[2].dxid],
-    //     },
-    //   })
-    //
-    //   const notifications = await em.find(Notification, {})
-    //   expect(notifications.length).to.equal(1)
-    //   expect(notifications[0].action).to.equal(NOTIFICATION_ACTION.JOB_OUTPUTS_SYNCED)
-    //   expect(notifications[0].message).to.equal(
-    //     `Outputs for job ${job.dxid} have been synchronized`,
-    //   )
-    // })
-  })
-
   const getJobServiceInstance = (platformClient: PlatformClient): JobService => {
     return new JobService(
       em,
@@ -643,6 +594,7 @@ describe('Job service tests', () => {
       folderService,
       emailQueueJobProducer,
       jobSynchronizationService,
+      challengeJobSynchronizationService,
       emailService,
       userRepo,
       jobRepo,
