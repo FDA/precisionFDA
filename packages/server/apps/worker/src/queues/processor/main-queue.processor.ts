@@ -130,10 +130,10 @@ export class MainQueueProcessor extends BaseQueueProcessor {
 
   @ProcessWithContext(TASK_TYPE.PROVISION_NEW_USERS)
   async provisionNewUser(job: Job<ProvisionNewUserJob>): Promise<void> {
-    const { ids } = job.data.payload
+    const { ids, spaceIds } = job.data.payload
     for (const id of ids) {
       this.logger.log(`Provisioning new user with invitationId ${id}`)
-      await this.userProvisionFacade.provision(id, ids)
+      await this.userProvisionFacade.provision(id, spaceIds, ids)
     }
   }
 }

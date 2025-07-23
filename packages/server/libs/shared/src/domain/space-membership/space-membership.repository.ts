@@ -1,10 +1,11 @@
-import { EntityRepository, PopulateHint } from '@mikro-orm/mysql'
+import { PopulateHint } from '@mikro-orm/mysql'
 import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
 import { NotFoundError } from '@shared/errors'
 import { SPACE_STATE } from '../space/space.enum'
 import { SPACE_MEMBERSHIP_ROLE } from './space-membership.enum'
+import { PaginatedRepository } from '@shared/domain/entity/repository/paginated.repository'
 
-export class SpaceMembershipRepository extends EntityRepository<SpaceMembership> {
+export class SpaceMembershipRepository extends PaginatedRepository<SpaceMembership> {
   async getMembership(spaceId: number, userId: number): Promise<SpaceMembership> {
     const qb = this.em.createQueryBuilder(SpaceMembership)
     qb.select('*')
