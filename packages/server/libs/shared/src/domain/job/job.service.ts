@@ -38,13 +38,13 @@ import { FolderService } from '../user-file/folder.service'
 import { FILE_STATE_DX, PARENT_TYPE } from '../user-file/user-file.types'
 import { UserRepository } from '../user/user.repository'
 import { JobRepository } from './job.repository'
-import { CheckStatusJob } from '@shared/queue/task.input'
 import { JobSynchronizationService } from '@shared/domain/job/services/job-synchronization.service'
 import { SpaceRepository } from '@shared/domain/space/space.repository'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
 import { JOB_STATE } from '@shared/domain/job/job.enum'
 import { ChallengeJobSynchronizationService } from '@shared/domain/job/services/challenge-job-synchronization.service'
+import { Job as BullJob } from 'bull'
 
 @Injectable()
 export class JobService {
@@ -71,8 +71,8 @@ export class JobService {
     await this.challengeJobSynchService.checkChallengeJobs()
   }
 
-  async synchronizeJob(checkStatusJob: CheckStatusJob['payload']): Promise<Maybe<Job>> {
-    return await this.jobSyncService.synchronizeJob(checkStatusJob)
+  async synchronizeJob(jobDxid: DxId<'job'>, bullJob: BullJob): Promise<Maybe<Job>> {
+    return await this.jobSyncService.synchronizeJob(jobDxid, bullJob)
   }
 
   async findAccessible(dxid: DxId<'job'>): Promise<Job> {
