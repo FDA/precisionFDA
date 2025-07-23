@@ -16,6 +16,10 @@ import { CreateFileParamDTO } from '@shared/domain/data-portal/dto/CreateFilePar
 import { CreateDataPortalDTO } from '@shared/domain/data-portal/dto/CreateDataPortalDTO'
 import { UpdateDataPortalDTO } from '@shared/domain/data-portal/dto/UpdateDataPortalDTO'
 import { CreateDataPortalFacade } from '@shared/facade/data-portal-create/create-data-portal.facade'
+import {
+  CreateResourceResponse,
+  DataPortalParam,
+} from '@shared/domain/data-portal/service/data-portal.types'
 
 @UseGuards(UserContextGuard)
 @Controller('/data-portals')
@@ -30,7 +34,10 @@ export class DataPortalsController {
    */
   @HttpCode(201)
   @Post('/:identifier/resources')
-  async createResource(@Param('identifier') identifier: string, @Body() body: CreateFileParamDTO) {
+  async createResource(
+    @Param('identifier') identifier: string,
+    @Body() body: CreateFileParamDTO,
+  ): Promise<CreateResourceResponse> {
     return await this.dataPortalService.createResource(body, identifier)
   }
 
@@ -38,7 +45,7 @@ export class DataPortalsController {
    * Removes resource from the database.
    */
   @Delete('/:portalId/resources/:resourceId')
-  async removeResource(@Param('resourceId', ParseIntPipe) resourceId: number) {
+  async removeResource(@Param('resourceId', ParseIntPipe) resourceId: number): Promise<void> {
     return await this.dataPortalService.removeResource(resourceId)
   }
 
@@ -47,7 +54,7 @@ export class DataPortalsController {
    */
   @HttpCode(201)
   @Post()
-  async createDataPortal(@Body() body: CreateDataPortalDTO) {
+  async createDataPortal(@Body() body: CreateDataPortalDTO): Promise<DataPortalParam> {
     return await this.createDataPortalFacade.create(body)
   }
 
@@ -55,7 +62,7 @@ export class DataPortalsController {
    * Updates data portal.
    */
   @Patch('/:identifier')
-  async updateDataPortal(@Body() body: UpdateDataPortalDTO) {
+  async updateDataPortal(@Body() body: UpdateDataPortalDTO): Promise<DataPortalParam> {
     return await this.dataPortalService.update(body)
   }
 
@@ -63,7 +70,7 @@ export class DataPortalsController {
    * List is not returning content of the portal.
    */
   @Get()
-  async listDataPortals() {
+  async listDataPortals(): Promise<DataPortalParam[]> {
     return await this.dataPortalService.list()
   }
 
@@ -71,7 +78,7 @@ export class DataPortalsController {
    * Returns details of the portal (including content) by its url slug or id
    */
   @Get('/:identifier')
-  async getDataPortal(@Param('identifier') identifier: string) {
+  async getDataPortal(@Param('identifier') identifier: string): Promise<DataPortalParam> {
     return await this.dataPortalService.getByUrlSlugOrId(identifier)
   }
 
@@ -79,7 +86,9 @@ export class DataPortalsController {
    * Returns list of resources that belong to given portal
    */
   @Get('/:identifier/resources')
-  async listResources(@Param('identifier') identifier: string) {
+  async listResources(
+    @Param('identifier') identifier: string,
+  ): Promise<{ id: number; name: string; url: string }[]> {
     return await this.dataPortalService.listResources(identifier)
   }
 }

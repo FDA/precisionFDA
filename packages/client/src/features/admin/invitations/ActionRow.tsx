@@ -1,13 +1,11 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { RowSelectionState } from '@tanstack/react-table'
 import React from 'react'
-import { useNavigate } from 'react-router'
-import { toast } from 'react-toastify'
 import styled from 'styled-components'
 import { Button } from '../../../components/Button'
-import { pluralize } from '../../../utils/formatting'
-import { Invitation, provisionUsers } from '../admin.api'
+import { Invitation } from '../admin.api'
 import { useEditInvitationModal } from './modals/useEditInvitationModal'
+import { useProvisioningModal } from './modals/useProvisioningModal'
+import { useProvisionMutation } from '../../../api/mutations/invitations'
 
 const ButtonsRow = styled.div`
   display: flex;
@@ -22,34 +20,29 @@ export default function InvitationActionRow({
 }: {
   selectedInvitations: Invitation[]
   setSelectedIndexes: React.Dispatch<React.SetStateAction<RowSelectionState>>
-}): JSX.Element {
-  const selectedIds = selectedInvitations.map(({ id }) => id)
-  const queryClient = useQueryClient()
-  const navigate = useNavigate()
-  const provisionMutation = useMutation({
-    mutationKey: ['bulk-provision'],
-    mutationFn: () => provisionUsers(selectedIds),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ['admin-invitations'],
-      })
-      toast.success(`Started provisioning ${selectedIds.length} ${pluralize('user', selectedIds.length)}`)
-      navigate(`/admin/invitations/provisioning?invitations=${selectedIds.join(',')}`)
-      setSelectedIndexes({})
-    },
-    onError: () => {
-      toast.error('Error provisioning users')
-    },
+}): React.JSX.Element {
+  const { setShowModal: showEditInvitationModal, modalComp: editInvitationModal } = useEditInvitationModal(selectedInvitations[0])
+  const { setShowModal: showProvisioningModal, modalComp: provisioningModal } = useProvisioningModal(
+    selectedInvitations,
+    setSelectedIndexes,
+  )
+
+  const provisionMutation = useProvisionMutation({
+    invitations: selectedInvitations,
+    selectedSpaces: new Set(),
+    onSuccess: () => setSelectedIndexes({}),
   })
 
-  const { setShowModal, modalComp } = useEditInvitationModal(selectedInvitations[0])
-
   const handleProvisioning = () => {
-    provisionMutation.mutateAsync()
-  }
-
-  const openEditInvitationModal = () => {
-    setShowModal(true)
+    const allowPortalsSelection = selectedInvitations.some(invitation => {
+      const emailDomain = invitation.email.split('@').pop()?.toLowerCase() ?? ''
+      return ['fda.hhs.gov', 'fda.gov'].includes(emailDomain)
+    })
+    if (allowPortalsSelection) {
+      showProvisioningModal(true)
+    } else {
+      provisionMutation.mutate()
+    }
   }
 
   return (
@@ -59,7 +52,7 @@ export default function InvitationActionRow({
           data-variant="primary"
           data-testid="admin-invitations-edit-invitation-button"
           disabled={selectedInvitations.length !== 1 || selectedInvitations[0].provisioningState !== 'pending'}
-          onClick={openEditInvitationModal}
+          onClick={() => showEditInvitationModal(true)}
         >
           Edit invitation
         </Button>
@@ -72,7 +65,8 @@ export default function InvitationActionRow({
           Provision
         </Button>
       </ButtonsRow>
-      {modalComp}
+      {editInvitationModal}
+      {provisioningModal}
     </>
   )
 }

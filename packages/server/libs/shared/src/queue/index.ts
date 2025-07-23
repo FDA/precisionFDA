@@ -68,7 +68,7 @@ const createQueues = async (provider: QueueProxy): Promise<void> => {
   log.log({ removedJobs }, 'createQueues: Removed orphaned repeatable jobs.')
 }
 
-const logQueueStatus = async () => {
+const logQueueStatus = async (): Promise<void> => {
   await Promise.all(
     getQueues().map(async (q) => {
       log.log(
@@ -83,7 +83,7 @@ const logQueueStatus = async () => {
   )
 }
 
-const initMaintenanceQueue = async () => {
+const initMaintenanceQueue = async (): Promise<void> => {
   log.log({}, 'Initializing maintenance queue')
   if (config.workerJobs.queues.maintenance.onInit.checkNonterminatedClusters) {
     await maintenanceJobProducer.createCheckNonTerminatedDbClustersTask()
@@ -107,7 +107,7 @@ const initMaintenanceQueue = async () => {
 //             when a sync task such as SyncJobOperation finishes, it may be the most correct way of cleaning
 //             up repeatable jobs
 // TODO: dig deeper into bull queue's implementation to verify the above
-const removeRepeatable = async (job: Job, queue?: Queue) => {
+const removeRepeatable = async (job: Job, queue?: Queue): Promise<void> => {
   if (typeof mainQueue === 'undefined') {
     throw new Error('The queue was not started')
   }
@@ -117,13 +117,13 @@ const removeRepeatable = async (job: Job, queue?: Queue) => {
   await (queue ?? mainQueue).removeJobs(`${prefix}:${id}:*`)
 }
 
-const removeRepeatableJob = async (job: JobInformation, queue: Queue) => {
+const removeRepeatableJob = async (job: JobInformation, queue: Queue): Promise<void> => {
   log.log({ jobId: job.id, cron: job.cron }, 'removeRepeatableJob: trying to remove repeatable job')
   // await mainQueue.removeRepeatableByKey(job.key)
   await queue.removeRepeatable(job.name, { jobId: job.id, cron: job.cron })
 }
 
-const findRepeatable = async (bullJobId: string) => {
+const findRepeatable = async (bullJobId: string): Promise<Bull.JobInformation> => {
   const repeatableJobs = await mainQueue.getRepeatableJobs()
   return repeatableJobs.find((j) => j.id === bullJobId)
 }
@@ -138,8 +138,10 @@ const createSyncJobStatusTask = async (data: CheckStatusJob['payload'], user: Us
 /**
  * @deprecated Use the job producer directly within the DI
  */
-const createSyncOutputsTask = async (data: CheckStatusJob['payload'], user: UserCtx) =>
-  fileSyncJobProducer.createSyncOutputsTask(data, user)
+const createSyncOutputsTask = async (
+  data: CheckStatusJob['payload'],
+  user: UserCtx,
+): Promise<void> => fileSyncJobProducer.createSyncOutputsTask(data, user)
 
 // Specifying a taskId will prevent multiple emails of that
 // type and id to be sent
@@ -155,7 +157,7 @@ const createSendEmailTask = async (
 /**
  * @deprecated Use the job producer directly within the DI
  */
-const removeFromEmailQueue = (jobId: string) => emailsJobProducer.removeJobs(jobId)
+const removeFromEmailQueue = (jobId: string): Promise<void> => emailsJobProducer.removeJobs(jobId)
 
 /**
  * @deprecated Use the job producer directly within the DI
@@ -166,8 +168,10 @@ const createRemoveNodesJobTask = async (ids: number[], user: UserCtx) =>
 /**
  * @deprecated Use the job producer directly within the DI
  */
-const createRunFollowUpActionJobTask = async (payload: UidAndFollowUpInput, user?: UserCtx) =>
-  mainJobProducer.createRunFollowUpActionJobTask(payload, user)
+const createRunFollowUpActionJobTask = async (
+  payload: UidAndFollowUpInput,
+  user?: UserCtx,
+): Promise<void> => mainJobProducer.createRunFollowUpActionJobTask(payload, user)
 
 /**
  * @deprecated Use the job producer directly within the DI
@@ -176,12 +180,12 @@ const createFileSynchronizeJobTask = async (
   payload: SyncFileJobInput,
   user?: UserCtx,
   delayInMs?: number,
-) => mainJobProducer.createFileSynchronizeJobTask(payload, user, delayInMs)
+): Promise<void> => mainJobProducer.createFileSynchronizeJobTask(payload, user, delayInMs)
 
 /**
  * @deprecated Use the job producer directly within the DI
  */
-const createCloseFileJobTask = async (payload: FileUidInput, user?: UserCtx) =>
+const createCloseFileJobTask = async (payload: FileUidInput, user?: UserCtx): Promise<void> =>
   mainJobProducer.createCloseFileJobTask(payload, user)
 
 /**
@@ -212,8 +216,10 @@ const createTestMaxMemoryTask = async (): Promise<any> =>
 /**
  * @deprecated Use the job producer directly within the DI
  */
-const addToFileSyncQueueEnsureUnique = async <T extends Task>(task: T, jobId: string | undefined) =>
-  fileSyncJobProducer.addToQueueEnsureUnique(task, jobId)
+const addToFileSyncQueueEnsureUnique = async <T extends Task>(
+  task: T,
+  jobId: string | undefined,
+): Promise<Bull.Job<T>> => fileSyncJobProducer.addToQueueEnsureUnique(task, jobId)
 
 export * as debug from './queue.debug'
 
