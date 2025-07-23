@@ -12,7 +12,6 @@ import { FOLLOW_UP_ACTION } from '@shared/domain/user-file/user-file.input'
 import { UserProvisionFacade } from '@shared/facade/user/user-provision.facade'
 import { createRunFollowUpActionJobTask } from '@shared/queue'
 import {
-  CheckStatusJob,
   NotifyNewDiscussionJob,
   ProvisionNewUserJob,
   TASK_TYPE,
@@ -52,8 +51,7 @@ export class MainQueueProcessor extends BaseQueueProcessor {
 
   @ProcessWithContext(TASK_TYPE.SYNC_JOB_STATUS)
   async syncJobStatus(job: Job): Promise<void> {
-    const data = job.data as CheckStatusJob
-    await this.jobService.synchronizeJob(data.payload)
+    await this.jobService.synchronizeJob(job.data.payload.dxid, job)
   }
 
   @ProcessWithContext(TASK_TYPE.SYNC_DBCLUSTER_STATUS)
@@ -147,10 +145,10 @@ export class MainQueueProcessor extends BaseQueueProcessor {
 
   @ProcessWithContext(TASK_TYPE.PROVISION_NEW_USERS)
   async provisionNewUser(job: Job<ProvisionNewUserJob>): Promise<void> {
-    const { ids } = job.data.payload
+    const { ids, spaceIds } = job.data.payload
     for (const id of ids) {
       this.logger.log(`Provisioning new user with invitationId ${id}`)
-      await this.userProvisionFacade.provision(id, ids)
+      await this.userProvisionFacade.provision(id, spaceIds, ids)
     }
   }
 }

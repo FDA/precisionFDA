@@ -65,7 +65,6 @@ export interface IUser {
   email: string
   first_name: string
   full_name: string
-  gravatar_url: string
   job_limit: number
   last_name: string
   links: any

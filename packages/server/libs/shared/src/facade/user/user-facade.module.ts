@@ -13,6 +13,7 @@ import { UserCheckupFacade } from '@shared/facade/user/user-checkup.facade'
 import { UserDataConsistencyReportFacade } from '@shared/facade/user/user-data-consistency-report.facade'
 import { PlatformClientModule } from '@shared/platform-client/platform-client.module'
 import { UserProvisionFacade } from './user-provision.facade'
+import { SpaceMembershipFacadeModule } from '@shared/facade/space-membership/space-membership-facade.module'
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { UserProvisionFacade } from './user-provision.facade'
     EmailModule,
     MikroOrmModule.forFeature([Organization, Invitation]),
     NotificationModule,
+    SpaceMembershipFacadeModule,
   ],
   providers: [
     UserDataConsistencyReportFacade,

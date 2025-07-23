@@ -1,5 +1,5 @@
 /* eslint-disable no-nested-ternary */
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useRef, useState, useCallback } from 'react'
 import { Link, Navigate, Route, Routes, useParams } from 'react-router-dom'
 import styled from 'styled-components'
 import { Loader } from '../../../components/Loader'
@@ -8,7 +8,7 @@ import { PageContainer, PageContainerMargin } from '../../../components/Page/sty
 import { usePageMeta } from '../../../hooks/usePageMeta'
 import { cleanObject } from '../../../utils/object'
 import { useAuthUser } from '../../auth/useAuthUser'
-import { IToCItem, setTocFromRef, ToC } from '../../markdown/TocNext'
+import { IToCItem, ToC } from '../../markdown/TocNext'
 import { useChallengeByIDQuery } from '../useChallengeDetailsQuery'
 import { ChallengeDetailsBanner } from './ChallengeDetailsBanner'
 import { NoInfo } from './styles'
@@ -107,9 +107,15 @@ export const ChallengeDetails = () => {
   usePageMeta({ title: `${challenge?.name} - precisionFDA Challenge` })
   const docRef = useRef(null)
   const [toc, setToc] = useState<IToCItem[]>([])
-  useEffect(() => {
-    setTocFromRef(docRef, setToc)
-  }, [docRef, wildcard])
+
+  const handleHeadersUpdated = useCallback((headings: NodeListOf<Element>) => {
+    const tocItems = Array.from(headings).map(h => ({
+      id: h.id,
+      tagName: h.tagName,
+      textContent: h.textContent || '',
+    }))
+    setToc(tocItems)
+  }, [])
 
   if (isLoading) {
     return (
@@ -229,7 +235,11 @@ export const ChallengeDetails = () => {
               path="intro"
               element={
                 <MDStyles>
-                  <AddIdsToHeaders docRef={docRef} content={regions.intro} />
+                  <AddIdsToHeaders 
+                    docRef={docRef} 
+                    content={regions.intro} 
+                    onHeadersUpdated={handleHeadersUpdated}
+                  />
                 </MDStyles>
               }
             />
@@ -237,7 +247,11 @@ export const ChallengeDetails = () => {
               path="results"
               element={
                 <MDStyles>
-                  <AddIdsToHeaders docRef={docRef} content={regions.results} />
+                  <AddIdsToHeaders 
+                    docRef={docRef} 
+                    content={regions.results} 
+                    onHeadersUpdated={handleHeadersUpdated}
+                  />
                 </MDStyles>
               }
             />
@@ -245,7 +259,11 @@ export const ChallengeDetails = () => {
               path="pre-registration"
               element={
                 <MDStyles>
-                  <AddIdsToHeaders docRef={docRef} content={regions.preReg} />
+                  <AddIdsToHeaders 
+                    docRef={docRef} 
+                    content={regions.preReg} 
+                    onHeadersUpdated={handleHeadersUpdated}
+                  />
                 </MDStyles>
               }
             />

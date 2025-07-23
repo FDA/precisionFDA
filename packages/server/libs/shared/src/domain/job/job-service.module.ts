@@ -13,6 +13,7 @@ import { Job } from '@shared/domain/job/job.entity'
 import { JobSynchronizationService } from '@shared/domain/job/services/job-synchronization.service'
 import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
 import { Space } from '@shared/domain/space/space.entity'
+import { ChallengeJobSynchronizationService } from '@shared/domain/job/services/challenge-job-synchronization.service'
 
 const imports = [
   MikroOrmModule.forFeature([Job, Space, SpaceMembership]),
@@ -25,7 +26,12 @@ const imports = [
 
 @Module({
   imports,
-  providers: [JobService, JobLogService, JobSynchronizationService],
+  providers: [
+    JobService,
+    JobLogService,
+    JobSynchronizationService,
+    ChallengeJobSynchronizationService,
+  ],
   exports: [JobService, JobLogService],
 })
 export class JobServiceModule {

@@ -40,9 +40,6 @@ const userCheckupFacade = {
 
 const jobServiceUserClient = {
   checkStaleJobs: () => {},
-} as JobService
-
-const jobServiceChallengeBotClient = {
   checkChallengeJobs: () => {},
 } as JobService
 
@@ -52,17 +49,16 @@ const notificationService = {} as unknown as NotificationService
 const emailSendService = {} as EmailSendService
 
 const processor = {
-  MAIN: () => new MainQueueProcessor(),
-  MAINTENANCE: () =>
+  MAIN: (): MainQueueProcessor => new MainQueueProcessor(),
+  MAINTENANCE: (): MaintenanceQueueProcessor =>
     new MaintenanceQueueProcessor(
       adminDataConsistencyReportService,
       dbClusterService,
       userService,
       userCheckupFacade,
       jobServiceUserClient,
-      jobServiceChallengeBotClient,
     ),
-  FILE: () =>
+  FILE: (): FileSyncQueueProcessor =>
     new FileSyncQueueProcessor(
       userCtx,
       userDataConsistencyReportFacade,
@@ -70,7 +66,7 @@ const processor = {
       notificationService,
       jobServiceUserClient,
     ),
-  EMAIL: () => new EmailQueueProcessor(emailSendService),
+  EMAIL: (): EmailQueueProcessor => new EmailQueueProcessor(emailSendService),
 }
 
 const jobToProcessorMap: Partial<Record<TASK_TYPE, (job: Job) => Promise<void> | void>> = {
@@ -98,7 +94,7 @@ const jobToProcessorMap: Partial<Record<TASK_TYPE, (job: Job) => Promise<void> |
 }
 
 // TODO(PFDA-4831) - remove and replace usages by actual job creation in redis
-export const mockHandler = async (job: Job<Task>) => {
+export const mockHandler = async (job: Job<Task>): Promise<void> => {
   const processor = jobToProcessorMap[job.data.type]
 
   if (!processor) {

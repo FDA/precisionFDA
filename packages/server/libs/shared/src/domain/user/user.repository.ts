@@ -13,7 +13,13 @@ import { PaginatedRepository } from '@shared/domain/entity/repository/paginated.
 type Resource = (typeof RESOURCE_TYPES)[number]
 
 export class UserRepository extends PaginatedRepository<User> {
-  findActive(findOptions?: FindOptions<User>) {
+  findChallengeBot(): Promise<User> {
+    return this.findOneOrFail({
+      dxuser: config.platform.challengeBotUser,
+    })
+  }
+
+  findActive(findOptions?: FindOptions<User>): Promise<User[]> {
     return this.find({ lastLogin: { $ne: null }, privateFilesProject: { $ne: null } }, findOptions)
   }
 

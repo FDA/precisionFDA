@@ -34,6 +34,9 @@ import { SiteAdminGuard } from './guards/site-admin.guard'
 import { getAdminBodyValidationPipe } from './pipes/admin-body-validation.pipe'
 import { enumValidator, numericBodyValidator } from './possibly-reusable-things'
 import { UserRepository } from '@shared/domain/user/user.repository'
+import { config } from '@shared/config'
+import { SpaceService } from '@shared/domain/space/service/space.service'
+import { SpaceGroupDTO } from '@shared/domain/space/dto/space-group.dto'
 
 interface ISetTotalLimitParams {
   ids: number[]
@@ -67,6 +70,7 @@ export class AdminController {
     private readonly maintenanceJobProducer: MaintenanceQueueJobProducer,
     private readonly invitationService: InvitationService,
     private readonly userRepo: UserRepository,
+    private readonly spaceService: SpaceService,
   ) {}
 
   @Get('/stats')
@@ -131,7 +135,7 @@ export class AdminController {
   async provisionUsers(@Body() body: ProvisionUsersDTO): Promise<{
     provisioningIds: number[]
   }> {
-    return this.invitationService.provisionUsers(body.ids)
+    return this.invitationService.provisionUsers(body)
   }
 
   @HttpCode(200)
@@ -281,6 +285,13 @@ export class AdminController {
     await this.userRepo.bulkDisableAll(ids)
 
     return 'updated'
+  }
+
+  @Get('/fda-space-group')
+  async getFDASpaceGroup(): Promise<SpaceGroupDTO> {
+    const fdaSpaceGroupID = config.defaultFDASpaceGroupId
+    if (!fdaSpaceGroupID) return null
+    return await this.spaceService.getSpaceGroupById(fdaSpaceGroupID)
   }
 }
 
