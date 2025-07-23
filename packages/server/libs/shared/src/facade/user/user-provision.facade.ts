@@ -32,6 +32,11 @@ import { getPluralizedTerm } from '@shared/utils/format'
 import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
 import { EmailService } from '@shared/domain/email/email.service'
 import { TypedEmailBodyDto } from '@shared/domain/email/dto/typed-email-body.dto'
+import { SpaceMembershipCreateFacade } from '@shared/facade/space-membership/space-membership-create.facade'
+import {
+  SPACE_MEMBERSHIP_ROLE,
+  SPACE_MEMBERSHIP_SIDE,
+} from '@shared/domain/space-membership/space-membership.enum'
 
 @Injectable()
 export class UserProvisionFacade {
@@ -49,7 +54,92 @@ export class UserProvisionFacade {
     private readonly invitationRepo: InvitationRepository,
     private readonly emailService: EmailService,
     private readonly notificationService: NotificationService,
+    private readonly spaceMembershipCreateFacade: SpaceMembershipCreateFacade,
   ) {}
+
+  /**
+   * Provisions a user based on the provided invitation.
+   * This method will create an organization, user, profile, and notification preference.
+   * If the user is a government user, access to selected portals will be provisioned to the user.
+   * It will also send a provisioned email if the user's email is a government email.
+   * If any error occurs during the provisioning process, the invitation's state will be set to FAILED.
+   *
+   * @param invitationId - The ID of the invitation to provision.
+   * @param spaceIds - The IDs of the spaces that should be provisioned to the user (gov users only).
+   * @param invitationIds - The IDs of all invitations being processed.
+   */
+  async provision(
+    invitationId: number,
+    spaceIds: number[],
+    invitationIds: number[],
+  ): Promise<void> {
+    let invitation: Invitation
+    try {
+      invitation = await this.invitationRepo.findOneOrFail({
+        id: invitationId,
+        provisioningState: PROVISIONING_STATE.IN_PROGRESS,
+      })
+
+      const username = await this.findUnusedUsername(
+        constructUsername(invitation.firstName, invitation.lastName),
+      )
+      const { orgName, orgBaseHandle: proposedBaseHandle } = constructOrgFromUsername(username)
+      const orgBaseHandle = await this.findUnusedOrgName(proposedBaseHandle)
+      await this.provisionOrgOnPlatform(invitation, username, orgBaseHandle, orgName)
+      await this.storeData(invitation, username, orgBaseHandle, orgName)
+
+      // if email is gov email, send provision email to user
+      if (isGovEmail(invitation.email)) {
+        // Fire and forget - don't await, errors should not affect the main flow
+        this.provideSpacesAccess(invitation, spaceIds).catch((error) => {
+          this.logger.error(
+            `Background space access provisioning failed for invitation ${invitationId}:`,
+            error,
+          )
+        })
+        await this.sendProvisionedEmail(invitation.firstName, invitation.email, username)
+      }
+      await this.createSuccessProvisionNotification()
+    } catch (error) {
+      // unexpected error, mark invitation as failed
+      this.logger.error(`Error provisioning user: ${error.message}`, error)
+      invitation.provisioningState = PROVISIONING_STATE.FAILED
+      await this.em.persistAndFlush(invitation)
+      await this.createFailedProvisionNotification(invitation.email)
+    }
+    const completedInvitations = await this.getCompletedInvitations(invitationIds)
+    if (completedInvitations.length === invitationIds.length) {
+      await this.createCompletedNotification(invitationIds, completedInvitations)
+    }
+  }
+
+  private async provideSpacesAccess(invitation: Invitation, spaceIds: number[]): Promise<void> {
+    if (spaceIds.length === 0) {
+      return
+    }
+
+    try {
+      const userToInvite = await this.userRepo.findOneOrFail({ id: invitation.user.id })
+      this.logger.log(`Provisioning access for user: ${userToInvite.dxuser} to spaces: ${spaceIds}`)
+      for (const spaceId of spaceIds) {
+        this.logger.log(
+          `Provisioning access to space with ID: ${spaceId} for user: ${userToInvite.dxuser}`,
+        )
+        await this.spaceMembershipCreateFacade.createMembership(
+          spaceId,
+          userToInvite.id,
+          SPACE_MEMBERSHIP_SIDE.HOST,
+          SPACE_MEMBERSHIP_ROLE.VIEWER,
+          false,
+        )
+      }
+    } catch (error) {
+      this.logger.error(
+        `Error while provisioning portals access to user (id: ${invitation.user.id}: ${error.message}`,
+        error,
+      )
+    }
+  }
 
   private async isUserOnPlatform(username: string): Promise<boolean> {
     try {
@@ -77,7 +167,7 @@ export class UserProvisionFacade {
     }
   }
 
-  async findUnusedUsername(username: string): Promise<string> {
+  private async findUnusedUsername(username: string): Promise<string> {
     let i = 2
     let candidate = username
     while (true) {
@@ -90,7 +180,7 @@ export class UserProvisionFacade {
     }
   }
 
-  async findUnusedOrgName(orgBaseHandle: string): Promise<string> {
+  private async findUnusedOrgName(orgBaseHandle: string): Promise<string> {
     let i = 2
     let candidate = orgBaseHandle
     while (true) {
@@ -176,7 +266,7 @@ export class UserProvisionFacade {
     user.normalizedEmail = invitation.email.toLowerCase()
     user.cloudResourceSettings = DEFAULT_CLOUD_RESOURCE_SETTINGS
     user.extras = DEFAULT_USER_EXTRAS
-    this.em.persist(user)
+    this.userRepo.persist(user)
     return user
   }
 
@@ -282,38 +372,5 @@ export class UserProvisionFacade {
         linkTarget: '_blank',
       },
     })
-  }
-
-  async provision(invitationId: number, invitationIds: number[]): Promise<void> {
-    let invitation: Invitation
-    try {
-      invitation = await this.invitationRepo.findOneOrFail({
-        id: invitationId,
-        provisioningState: PROVISIONING_STATE.IN_PROGRESS,
-      })
-      const username = await this.findUnusedUsername(
-        constructUsername(invitation.firstName, invitation.lastName),
-      )
-      const { orgName, orgBaseHandle: proposedBaseHandle } = constructOrgFromUsername(username)
-      const orgBaseHandle = await this.findUnusedOrgName(proposedBaseHandle)
-      await this.provisionOrgOnPlatform(invitation, username, orgBaseHandle, orgName)
-      await this.storeData(invitation, username, orgBaseHandle, orgName)
-
-      // if email is gov email, send provision email to user
-      if (isGovEmail(invitation.email)) {
-        await this.sendProvisionedEmail(invitation.firstName, invitation.email, username)
-      }
-      await this.createSuccessProvisionNotification()
-    } catch (error) {
-      // unexpected error, mark invitation as failed
-      this.logger.error(`Error provisioning user: ${error.message}`, error)
-      invitation.provisioningState = PROVISIONING_STATE.FAILED
-      await this.em.persistAndFlush(invitation)
-      await this.createFailedProvisionNotification(invitation.email)
-    }
-    const completedInvitations = await this.getCompletedInvitations(invitationIds)
-    if (completedInvitations.length === invitationIds.length) {
-      await this.createCompletedNotification(invitationIds, completedInvitations)
-    }
   }
 }
