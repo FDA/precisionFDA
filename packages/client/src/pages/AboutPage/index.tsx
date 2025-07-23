@@ -1,5 +1,4 @@
 import React, { useState } from 'react'
-import { Link } from 'react-router-dom'
 import styled from 'styled-components'
 import { PageContainerMargin } from '../../components/Page/styles'
 import { useAuthUser } from '../../features/auth/useAuthUser'
@@ -11,6 +10,7 @@ import { PfTab, PfTabContent, PfTabRow, PfTabTitle } from '../../components/Tabs
 import { Button } from '../../components/Button'
 import { RichText } from '../styles'
 
+//TODO JIRI: TO BE DELETED COMPLETELY
 
 const Row = styled.div`
   display: flex;
@@ -61,8 +61,7 @@ const AboutPage = () => {
   const user = useAuthUser()
   const isLoggedIn = user?.id
 
-  const [selectedSection, setSelectedSection] =
-    useState<AboutSectionType>('why')
+  const [selectedSection, setSelectedSection] = useState<AboutSectionType>('why')
 
   const title = 'About precisionFDA'
   return (
@@ -71,24 +70,15 @@ const AboutPage = () => {
 
       <PageContainerMargin>
         <PfTabRow>
-          <PfTab
-            $isActive={selectedSection === 'why'}
-            onClick={() => setSelectedSection('why')}
-          >
+          <PfTab $isActive={selectedSection === 'why'} onClick={() => setSelectedSection('why')}>
             <PfTabTitle>Why</PfTabTitle>
             <div>Background and motivation</div>
           </PfTab>
-          <PfTab
-            $isActive={selectedSection === 'what'}
-            onClick={() => setSelectedSection('what')}
-          >
+          <PfTab $isActive={selectedSection === 'what'} onClick={() => setSelectedSection('what')}>
             <PfTabTitle>What</PfTabTitle>
             <div>A genomics community and platform</div>
           </PfTab>
-          <PfTab
-            $isActive={selectedSection === 'who'}
-            onClick={() => setSelectedSection('who')}
-          >
+          <PfTab $isActive={selectedSection === 'who'} onClick={() => setSelectedSection('who')}>
             <PfTabTitle>Who</PfTabTitle>
             <div>The team behind the initiative</div>
           </PfTab>
@@ -100,39 +90,34 @@ const AboutPage = () => {
 
         <PfTabContent $isShown={selectedSection === 'why'}>
           <MainLine>
-            The Food and Drug Administration (FDA) plays an integral role in
-            precision medicine, which foresees the day when an individual’s
-            medical care will be tailored in part based on their unique
-            characteristics and genetic make-up.
+            The Food and Drug Administration (FDA) plays an integral role in precision medicine, which foresees the day when an
+            individual’s medical care will be tailored in part based on their unique characteristics and genetic make-up.
           </MainLine>
           <hr />
           <Row>
             <RichText>
               <p>
-                To accelerate progress towards this vision, in July 2014, FDA’s
-                Chief Health Informatics Officer (CHIO), Taha Kass-Hout, M.D.,
-                began investigating the concept of a research and development
-                portal that would allow community members to test, pilot, and
-                validate existing and new bioinformatics approaches for
-                processing the vast amount of genomic data that is collected
-                using Next Generation Sequencing (NGS) technology.
+                To accelerate progress towards this vision, in July 2014, FDA’s Chief Health Informatics Officer (CHIO), Taha
+                Kass-Hout, M.D., began investigating the concept of a research and development portal that would allow community
+                members to test, pilot, and validate existing and new bioinformatics approaches for processing the vast amount of
+                genomic data that is collected using Next Generation Sequencing (NGS) technology.
               </p>
               <p>
                 After conducting market research, collaborating with FDA’s{' '}
-                <a rel="noreferrer" target='_blank' href="https://www.fda.gov/about-fda/fda-organization/center-devices-and-radiological-health">
+                <a
+                  rel="noreferrer"
+                  target="_blank"
+                  href="https://www.fda.gov/about-fda/fda-organization/center-devices-and-radiological-health"
+                >
                   Center for Devices and Radiological Health
                 </a>{' '}
-                and assembling a project team, the precisionFDA project was
-                initiated on July 22, 2015 with a scheduled beta launch date of
-                December 15, 2015.
+                and assembling a project team, the precisionFDA project was initiated on July 22, 2015 with a scheduled beta
+                launch date of December 15, 2015.
               </p>
             </RichText>
             <div>
               <p>
-                <img
-                  src="/assets/beta-release.png"
-                  alt="Beta release Timeline: Beta launch on Dec 2015"
-                />
+                <img src="/assets/beta-release.png" alt="Beta release Timeline: Beta launch on Dec 2015" />
               </p>
             </div>
           </Row>
@@ -140,24 +125,20 @@ const AboutPage = () => {
 
         <PfTabContent $isShown={selectedSection === 'what'}>
           <MainLine>
-            PrecisionFDA provides the genomics community with a secure,
-            cloud-based platform where participants can access and share
-            datasets, analysis pipelines, and bioinformatics tools, in order to
-            benchmark their approaches and advance regulatory science.
+            PrecisionFDA provides the genomics community with a secure, cloud-based platform where participants can access and
+            share datasets, analysis pipelines, and bioinformatics tools, in order to benchmark their approaches and advance
+            regulatory science.
           </MainLine>
           <hr />
           <RichText>
             <p>
-              While precisionFDA does not serve a regulatory role, it is expected
-              to generate knowledge to inform future regulatory pathways and
-              decision making.
+              While precisionFDA does not serve a regulatory role, it is expected to generate knowledge to inform future
+              regulatory pathways and decision making.
             </p>
             <p>
-              PrecisionFDA provides a private area where participants (individuals
-              or organizations) can conduct genome analysis and comparison against
-              reference material, and a community area where they can publish and
-              share results, reference materials, and tools. The precisionFDA
-              community continues to grow and includes:
+              PrecisionFDA provides a private area where participants (individuals or organizations) can conduct genome analysis
+              and comparison against reference material, and a community area where they can publish and share results, reference
+              materials, and tools. The precisionFDA community continues to grow and includes:
             </p>
 
             <ul>
@@ -175,16 +156,12 @@ const AboutPage = () => {
 
         <PfTabContent $isShown={selectedSection === 'who'}>
           <MainLine>
-            PrecisionFDA is an initiative in the Office of Health Informatics
-            (OHI) at the Food and Drug Administration led by the Chief Health
-            Informatics Officer (CHIO), Dr. Taha Kass-Hout, MD, MS.
+            PrecisionFDA is an initiative in the Office of Health Informatics (OHI) at the Food and Drug Administration led by the
+            Chief Health Informatics Officer (CHIO), Dr. Taha Kass-Hout, MD, MS.
           </MainLine>
           <hr />
           <RichText>
-            <p>
-              The core project team consists of the following individuals, in
-              alphabetical order:
-            </p>
+            <p>The core project team consists of the following individuals, in alphabetical order:</p>
             <ul>
               <li>George Asimenos*</li>
               <li>Ruth Bandler</li>
@@ -199,10 +176,7 @@ const AboutPage = () => {
               <li>Zivana Tezak</li>
             </ul>
             <hr />
-            <p>
-              The team also wishes to thank the following individuals for their
-              significant contributions to the effort:
-            </p>
+            <p>The team also wishes to thank the following individuals for their significant contributions to the effort:</p>
             <ul>
               <li>Vincent Amatrudo</li>
               <li>Angela Anderson*</li>
@@ -244,18 +218,14 @@ const AboutPage = () => {
             <div className="container">
               <div className="panel panel-info text-center">
                 <div className="panel-body">
-                  <p className="lead lead-bold">
-                    This program is in production at this time.
-                  </p>
+                  <p className="lead lead-bold">This program is in production at this time.</p>
                   <p className="lead">
-                    For further information and to express interest in
-                    participating please submit our request access form.
+                    For further information and to express interest in participating please submit our request access form.
                   </p>
                 </div>
                 <div className="panel-body">
                   <Button data-variant="primary" as="a" href="/request_access">
-                    <span className="fa fa-user-plus" aria-hidden="true" />{' '}
-                    Request Access
+                    <span className="fa fa-user-plus" aria-hidden="true" /> Request Access
                   </Button>
                 </div>
               </div>

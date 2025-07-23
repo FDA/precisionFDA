@@ -22,21 +22,17 @@ import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { InvalidStateError } from '@shared/errors'
 import { SiteAdminGuard } from '../admin/guards/site-admin.guard'
 import { ZodPipe } from '../validation/pipes/zod.pipe'
-import {
-  newsListParamsSchema,
-  NewsListReqBody,
-  NewsPostReqBody,
-  newsPostRequestSchema,
-} from './news.schemas'
+import { NewsPostReqBody, newsPostRequestSchema } from './news.schemas'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { NewsRepository } from '@shared/domain/news-item/news-item.repository'
+import { NewsListDTO, PUBLICATION_TYPE } from '@shared/domain/news-item/dto/news-list.dto'
+import { PaginatedResult } from '@shared/domain/entity/domain/paginated.result'
 
 interface NewsPositionReqBody {
   news_items: Record<number, number>
 }
 
-// NOTE inferred from "paginated_per" setting in app/models/experts.rb
-const DEFAULT_PAGE_SIZE = 10
+//TODO PFDA-6434 - move to service approach.
 
 @Controller('/news')
 export class NewsController {
@@ -49,53 +45,44 @@ export class NewsController {
   ) {}
 
   @Get()
-  async listNews(@Query(new ZodPipe(newsListParamsSchema)) query: NewsListReqBody): Promise<{
-    news_items: NewsItem[]
-    meta: {}
-  }> {
-    const page = query?.page ? parseInt(query?.page, 10) : 1
-    const limit = query.limit ? parseInt(query.limit, 10) : DEFAULT_PAGE_SIZE
-    const year = query?.year ? parseInt(query?.year, 10) : undefined
-    const type = query?.type
-    const orderBy = query?.orderBy ? { [query.orderBy]: 'DESC' } : {}
+  async listNews(@Query() query: NewsListDTO): Promise<PaginatedResult<NewsItem>> {
+    let whereYear = {}
+    let typeWhere = {}
 
-    return await this.newsRepo.findPaginated(
-      {
-        page,
-        limit,
-        year,
-        type,
-      },
-      {
-        ...orderBy,
-        createdAt: -1,
-      },
-    )
+    if (query.year) {
+      const startOfYear = new Date(query.year, 0, 1)
+      const endOfYear = new Date(query.year + 1, 0, 1)
+      whereYear = {
+        $and: [{ createdAt: { $gte: startOfYear } }, { createdAt: { $lt: endOfYear } }],
+      }
+    }
+    if (query.type != undefined) {
+      typeWhere = { isPublication: query.type !== PUBLICATION_TYPE.ARTICLE }
+    }
+
+    console.log('wheres', whereYear, typeWhere)
+
+    return await this.newsRepo.paginate(query, {
+      ...whereYear,
+      ...typeWhere,
+      published: true,
+    })
   }
 
   @UseGuards(SiteAdminGuard)
   @Get('/all')
-  async getAllNews(
-    @Query(new ZodPipe(newsListParamsSchema)) query: NewsListReqBody,
-  ): Promise<NewsItem[]> {
-    const { type } = query
-
+  async getAllNews(@Query() query: NewsListDTO): Promise<NewsItem[]> {
     let whereType = {}
-    if (type === 'article') whereType = { isPublication: false }
-    if (type === 'publication') whereType = { isPublication: true }
+    if (query.type === PUBLICATION_TYPE.ARTICLE) whereType = { isPublication: false }
+    if (query.type === PUBLICATION_TYPE.PUBLICATION) whereType = { isPublication: true }
 
-    return this.em.getRepository(NewsItem).createQueryBuilder().where(whereType).orderBy({
-      createdAt: -1,
-    })
+    return this.newsRepo.find(whereType, { orderBy: { createdAt: -1 } })
   }
 
   @Get('/years')
   async listYears(): Promise<number[]> {
-    //TODO: refactor logic into service
-    const allYears: { year: number }[] = await this.em.execute(
-      'SELECT DISTINCT YEAR(created_at) as year FROM news_items ORDER BY year DESC',
-    )
-    return allYears.map((y) => y.year)
+    //TODO PFDA-6434 - move to service approach
+    return await this.newsRepo.getDistinctYears()
   }
 
   @Get('/:id')

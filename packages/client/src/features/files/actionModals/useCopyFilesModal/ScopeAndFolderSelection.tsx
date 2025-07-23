@@ -23,7 +23,7 @@ import {
   ModalStyledCell,
   ModalStyledRow,
   MyHomeStyledName,
-  ShorternFolderName,
+  ShortenFolderName,
   SpaceAndFolderTable,
   SpaceStyledName,
   StyledBreadcrumb,
@@ -90,7 +90,7 @@ const SpacesList = ({
                 <StyledNameIcon>{findSpaceTypeIcon(s.type)}</StyledNameIcon>
                 {s.protected && <ProtectedIcon color="var(--c-text-700)" />}
                 {s.restricted_reviewer && <FdaRestrictedIcon color="var(--c-text-700)" />}
-                <ShorternFolderName>{s.name}</ShorternFolderName>
+                <ShortenFolderName>{s.name}</ShortenFolderName>
               </SpaceStyledName>
             </ModalStyledCell>
             <StyledCell>
@@ -139,7 +139,7 @@ const FolderList = ({
                 <StyledNameIcon>
                   <FolderIcon width={18} />
                 </StyledNameIcon>
-                <ShorternFolderName>{folder.name}</ShorternFolderName>
+                <ShortenFolderName>{folder.name}</ShortenFolderName>
               </SpaceStyledName>
             </ModalStyledCell>
           </ModalStyledRow>

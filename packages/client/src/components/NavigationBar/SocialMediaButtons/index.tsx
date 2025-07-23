@@ -1,14 +1,9 @@
 import React from 'react'
 import styled from 'styled-components'
-
-import ExternalLink from '../../Controls/ExternalLink'
 import { theme } from '../../../styles/theme'
 import { EnvelopeIcon } from '../../icons/EnvelopeIcon'
-import { TwitterIcon } from '../../icons/TwitterIcon'
-import { LinkedInIcon } from '../../icons/LinkedInIcon'
 
-
-const StyledSocialMediaButtons = styled.div`
+export const StyledSocialMediaButtons = styled.div`
   display: flex;
   align-items: center;
   justify-content: flex-end;
@@ -25,26 +20,18 @@ const StyledSocialMediaButtons = styled.div`
     font-weight: bold;
     padding: 3px 6px;
     cursor: pointer;
-    white-space: nowrap; 
-  }
-
-  @media (min-width: 640px) {
-    min-width: 128px;
-  }
-
-  @media (min-width: 1024px) {
-    width: 288px;
+    white-space: nowrap;
   }
 `
 
-export const SocialMediaButtons = () => {
+export const MailButton = () => {
   return (
     <StyledSocialMediaButtons>
-      <a href='mailto:precisionfda@fda.hhs.gov' aria-label='Click this icon to email the PrecisionFDA team'><EnvelopeIcon /></a>
-      <ExternalLink to='https://twitter.com/precisionfda' ariaLabel='Click this icon to view the PrecisionFDA Twitter page in a new Tab'><TwitterIcon /></ExternalLink>
-      <ExternalLink to='https://www.linkedin.com/company/fda' ariaLabel='Click this icon to view the PrecisionFDA LinkedIn page in a new tab'><LinkedInIcon /></ExternalLink>
+      <a href="mailto:precisionfda@fda.hhs.gov" aria-label="Click this icon to email the PrecisionFDA team">
+        <EnvelopeIcon />
+      </a>
     </StyledSocialMediaButtons>
   )
 }
 
-export default SocialMediaButtons
+export default MailButton

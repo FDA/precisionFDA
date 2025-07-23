@@ -1,32 +1,22 @@
 import { QueryObserverOptions, useQuery } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
-import { newsAdminAllRequest, newsListRequest, NewsListResponse } from './api'
-import { NewsItem } from './types'
+import { newsAdminAllRequest, newsListRequest } from './api'
 
-type PramasType = Record<string, number | string | null | undefined>
+type ParamsType = Record<string, number | string | null | undefined>
 
-export const useNewsListQuery = (params: PramasType, opt?: QueryObserverOptions<NewsListResponse>) => {
-  return useQuery<NewsListResponse>({
+export const useNewsListQuery = (params: ParamsType) => {
+  return useQuery({
     queryKey: ['news', params],
-    queryFn: () => newsListRequest(params).catch(err => {
-      if (err && typeof err === 'object' && 'message' in err) {
-        toast.error(err.message as string)
-      }
-      throw err
-    }),
-    ...opt,
+    queryFn: () => newsListRequest(params),
   })
 }
 
-export const useNewsAdminAllRequest = (params: PramasType, opt?: QueryObserverOptions<NewsItem[]>) => {
-  return useQuery<NewsItem[]>({
+export const useNewsAdminAllRequest = (params: ParamsType, opt?: QueryObserverOptions) =>
+  useQuery({
     queryKey: ['news/admin', params],
-    queryFn: () => newsAdminAllRequest(params).catch(err => {
-      if (err && typeof err === 'object' && 'message' in err) {
-        toast.error(err.message as string)
-      }
-      throw err
-    }),
-    ...opt,
+    queryFn: () =>
+      newsAdminAllRequest(params).catch(err => {
+        if (err && err.message) toast.error(err.message)
+      }),
+    ...(opt as any),
   })
-}

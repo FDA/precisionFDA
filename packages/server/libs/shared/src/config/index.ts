@@ -241,6 +241,7 @@ const defaultConfig = {
   pfdaEmail: 'precisionfda@fda.hhs.gov',
   challengeProposalRecipients: [] as String[],
   setupSwagger: true,
+  defaultFDASpaceGroupId: parseIntFromProcess(process.env.DEFAULT_FDA_SPACE_GROUP_ID) ?? 1,
 }
 
 // lazily plug-in the overrides that are based on the NODE_ENV

@@ -96,11 +96,7 @@ export const useFilesSelectActions = ({
     },
   })
 
-  const {
-    modalComp: openFileModal,
-    setShowModal: setOpenFileModal,
-    isShown: isShownOpenFileModal,
-  } = useOpenFileModal(selected)
+  const { modalComp: openFileModal, setShowModal: setOpenFileModal, isShown: isShownOpenFileModal } = useOpenFileModal(selected)
   const {
     modalComp: downloadModal,
     setShowModal: setDownloadModal,
@@ -263,7 +259,7 @@ export const useFilesSelectActions = ({
     selected: selected,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: resourceKeys })
-      queryClient.invalidateQueries({ queryKey: ['edit-resource-properties', 'node']})
+      queryClient.invalidateQueries({ queryKey: ['edit-resource-properties', 'node'] })
     },
   })
 
@@ -458,6 +454,13 @@ export const useFilesSelectActions = ({
       shouldHide: (!isAdmin && selected[0]?.added_by !== user?.full_name) || homeScope === 'spaces',
     },
     {
+      name: 'Comments',
+      type: 'link',
+      link: `/files/${selected[0]?.uid}/comments`,
+      isDisabled: selectedButNotClosed || selected.length !== 1 || isFolder,
+      shouldHide: selectedButNotClosed,
+    },
+    {
       name: 'Load into GSRS',
       type: 'link',
       isDisabled: selected.length !== 1 || !selected[0].tags.includes('GSRS'),
@@ -470,7 +473,7 @@ export const useFilesSelectActions = ({
 
   let filteredActions = actions
   if (homeScope === 'spaces') {
-    const allowedNames = ['Open', 'Download', 'Rename', 'Copy to...', 'Delete']
+    const allowedNames = ['Open', 'Download', 'Rename', 'Copy to...', 'Comments', 'Delete']
     filteredActions = actions.filter(action => allowedNames.includes(action.name))
   }
 

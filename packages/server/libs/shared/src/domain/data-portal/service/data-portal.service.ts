@@ -195,7 +195,7 @@ export class DataPortalService {
     return false
   }
 
-  private validateUrlSlug = async (urlSlug: string) => {
+  private validateUrlSlug: (urlSlug: string) => Promise<void> = async (urlSlug: string) => {
     // Length and regexp check
     if (
       !urlSlug ||
@@ -221,7 +221,7 @@ export class DataPortalService {
     }
   }
 
-  async create(input: CreateDataPortalDTO, spaceId: number) {
+  async create(input: CreateDataPortalDTO, spaceId: number): Promise<DataPortalParam> {
     this.logger.log('Creating data portal', input, this.user.id)
     if (!(await this.hasSiteAdminRole(this.user.id))) {
       throw new PermissionError('Only site admins can create Data Portals')
@@ -274,7 +274,7 @@ export class DataPortalService {
     options: FindOneOptions<DataPortal, any> = {
       populate: ['space.spaceMemberships.user', 'cardImage'],
     },
-  ) {
+  ): Promise<DataPortal> {
     // Try to load data portal by url slug
     let portal = await this.em.findOne(DataPortal, { urlSlug: identifier }, options)
 
@@ -338,7 +338,7 @@ export class DataPortalService {
    * Updates the card image url for a data portal
    * @param fileUid
    */
-  async updateCardImageUrl(fileUid: string) {
+  async updateCardImageUrl(fileUid: string): Promise<void> {
     this.logger.log(`Updating card image url for fileUid ${fileUid}`)
     const dataPortals = await this.dataPortalRepo.findDataPortalsByCardImageUid(fileUid)
 
@@ -378,7 +378,7 @@ export class DataPortalService {
    * Returns all the data portals where current user has membership or all data portals (regardless of membership) in case the user is a site admin
    * @param withMembershipOnly Relevant for site admins only. If true, returns only data portals where the current user is a member
    */
-  async list(withMembershipOnly: boolean = false) {
+  async list(withMembershipOnly: boolean = false): Promise<DataPortalParam[]> {
     this.logger.log('Getting data portals for user', this.user.id)
     let portals: DataPortal[]
 

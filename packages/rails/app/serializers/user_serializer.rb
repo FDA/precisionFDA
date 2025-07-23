@@ -9,8 +9,6 @@ class UserSerializer < ApplicationSerializer
     :email,
     :admin,
     :counters,
-    :links,
-    :gravatar_url,
     :job_limit,
     :pricing_map,
     :resources,
@@ -47,17 +45,6 @@ class UserSerializer < ApplicationSerializer
     }
   end
 
-  # Builds links to user.
-  # @return [Hash] Links.
-  def links
-    return unless current_user
-
-    {}.tap do |links|
-      # GET user accessible licenses list - show this link when current user has licenses
-      links[:licenses] = api_list_licenses_path(object) unless current_user.licenses.empty?
-    end
-  end
-
   delegate :can_administer_site?, to: :object
   delegate :can_create_challenges?, to: :object
   delegate :can_see_spaces?, to: :object
@@ -66,5 +53,4 @@ class UserSerializer < ApplicationSerializer
   delegate :allowed_to_publish?, to: :object
 
   delegate :full_name, to: :object
-  delegate :gravatar_url, to: :object
 end

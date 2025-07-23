@@ -3,9 +3,7 @@
   "version": "1.0.0",
   "description": "Precision FDA",
   "main": "index.js",
-  "dependencies": {},
-  "devDependencies": {},
-  "packageManager": "pnpm@10.10.0",
+  "packageManager": "pnpm@10.12.3",
   "scripts": {
     "build": "turbo run build",
     "test": "turbo run test"
