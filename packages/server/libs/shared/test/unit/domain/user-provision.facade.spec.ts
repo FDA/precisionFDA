@@ -21,6 +21,7 @@ import { create, db } from '@shared/test'
 import { expect } from 'chai'
 import { stub } from 'sinon'
 import { EmailService } from '@shared/domain/email/email.service'
+import { SpaceMembershipCreateFacade } from '@shared/facade/space-membership/space-membership-create.facade'
 
 describe('UserProvisionFacade', () => {
   let em: EntityManager
@@ -39,6 +40,7 @@ describe('UserProvisionFacade', () => {
   const inviteUserToOrgStub = stub()
   const createNotificationStub = stub()
   const emailServiceSendEmailStub = stub()
+  const createMembershipStub = stub()
 
   beforeEach(async () => {
     await db.dropData(database.connection())
@@ -79,14 +81,12 @@ describe('UserProvisionFacade', () => {
     inviteUserToOrgStub.reset()
     createNotificationStub.reset()
 
+    createMembershipStub.reset()
+    createMembershipStub.throws()
+
     emailServiceSendEmailStub.reset()
     emailServiceSendEmailStub.throws()
   })
-
-  // after(() => {
-  //   em.clear()
-  //   return db.dropData(database.connection())
-  // })
 
   it('should provide a new user from a valid invitation', async () => {
     const invitation = create.invitationHelper.create(em, {
@@ -108,7 +108,7 @@ describe('UserProvisionFacade', () => {
       id: orgDxid,
     })
 
-    await getInstance().provision(invitation.id, [invitation.id])
+    await getInstance().provision(invitation.id, [], [invitation.id])
     const updatedInvitation = await invitationRepo.findOne({ id: invitation.id })
     expect(createUserStub.calledOnce).to.be.true()
     expect(createUserStub.firstCall.args[0]).to.deep.eq({
@@ -144,6 +144,7 @@ describe('UserProvisionFacade', () => {
         linkTarget: '_blank',
       },
     })
+    expect(createMembershipStub.notCalled).to.be.true()
   })
 
   it('should update username and provision user if username already exists', async () => {
@@ -174,7 +175,7 @@ describe('UserProvisionFacade', () => {
       id: expectedOrgDxid,
     })
 
-    await getInstance().provision(invitation.id, [invitation.id])
+    await getInstance().provision(invitation.id, [], [invitation.id])
     const updatedInvitation = await invitationRepo.findOne({ id: invitation.id })
     const user = await userRepo.findOne({ id: updatedInvitation.user.id })
     expect(user.dxuser).to.equal(`${username}.3`)
@@ -219,7 +220,7 @@ describe('UserProvisionFacade', () => {
       id: expectedOrgDxid,
     })
 
-    await getInstance().provision(invitation.id, [invitation.id])
+    await getInstance().provision(invitation.id, [], [invitation.id])
     const updatedInvitation = await invitationRepo.findOne({ id: invitation.id })
     const user = await userRepo.findOne({ id: updatedInvitation.user.id })
     expect(user.dxuser).to.equal(expectedUsername)
@@ -257,7 +258,7 @@ describe('UserProvisionFacade', () => {
       id: orgDxid,
     })
 
-    await getInstance().provision(invitation.id, [invitation.id])
+    await getInstance().provision(invitation.id, [], [invitation.id])
     const updatedInvitation = await invitationRepo.findOne({ id: invitation.id })
     expect(createUserStub.calledOnce).to.be.true()
     expect(createUserStub.firstCall.args[0]).to.deep.eq({
@@ -321,7 +322,7 @@ describe('UserProvisionFacade', () => {
       props: { clientStatusCode: 400 },
     })
 
-    await getInstance().provision(invitation.id, [invitation.id])
+    await getInstance().provision(invitation.id, [], [invitation.id])
     const updatedInvitation = await invitationRepo.findOne({ id: invitation.id })
     expect(updatedInvitation.provisioningState).to.equal(PROVISIONING_STATE.FAILED)
     expect(createNotificationStub.firstCall.args[0]).to.deep.eq({
@@ -356,7 +357,7 @@ describe('UserProvisionFacade', () => {
       id: orgDxid,
     })
 
-    await getInstance().provision(invitation1.id, [invitation1.id, invitation2.id])
+    await getInstance().provision(invitation1.id, [], [invitation1.id, invitation2.id])
     const updatedInvitation = await invitationRepo.findOne({ id: invitation1.id })
     expect(createUserStub.calledOnce).to.be.true()
     expect(createUserStub.firstCall.args[0]).to.deep.eq({
@@ -396,6 +397,9 @@ describe('UserProvisionFacade', () => {
     const notificationService = {
       createNotification: createNotificationStub,
     } as unknown as NotificationService
+    const spaceMembershipCreateFacade = {
+      createMembership: createMembershipStub,
+    } as unknown as SpaceMembershipCreateFacade
     return new UserProvisionFacade(
       em,
       siteAdminContext,
@@ -406,6 +410,7 @@ describe('UserProvisionFacade', () => {
       invitationRepo,
       emailService,
       notificationService,
+      spaceMembershipCreateFacade,
     )
   }
 })

@@ -88,7 +88,10 @@ describe('InvitationService', () => {
       const invitation3 = create.invitationHelper.create(em, {})
       await em.flush()
 
-      await getInstance().provisionUsers([invitation1.id, invitation2.id, invitation3.id])
+      await getInstance().provisionUsers({
+        ids: [invitation1.id, invitation2.id, invitation3.id],
+        spaceIds: [],
+      })
       expect(createProvisionNewUsersTaskStub.callCount).to.equal(1)
       expect(createProvisionNewUsersTaskStub.firstCall.args[0]).to.deep.equal([
         invitation1.id,

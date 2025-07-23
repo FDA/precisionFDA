@@ -38,19 +38,23 @@ import {
   JobFinishedInputTemplate,
   jobFinishedTemplate,
 } from '@shared/domain/email/templates/mjml/job-finished.template'
+import { Job as BullJob } from 'bull'
 import { Injectable, Logger } from '@nestjs/common'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { JobRepository } from '@shared/domain/job/job.repository'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { User } from '@shared/domain/user/user.entity'
 import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
+import { DxId } from '@shared/domain/entity/domain/dxid'
 
 /**
  * JobSynchronizationService is responsible for synchronizing the job status with the platform.
  * Works for both https and standalone apps.
  *
- * Still work in progress - it was moved from bunch of functions in synchronize.ts into a service, but
+ * Still work in progress - it was moved from a bunch of functions in synchronize.ts into a service, but
  * the service itself could use some refactoring to make it more readable and reusable within the service.
+ *
+ * Challenge bot jobs synchronization is implemented in ChallengeJobSynchronizationService.
  */
 @Injectable()
 export class JobSynchronizationService {
@@ -73,39 +77,36 @@ export class JobSynchronizationService {
     return bullJobId.replace('sync_job_status.', '')
   }
 
-  async synchronizeJob(checkStatusJob: CheckStatusJob['payload']): Promise<Maybe<Job>> {
-    const job = await this.jobRepo.findOne({ dxid: checkStatusJob.dxid }, { populate: ['app'] })
+  async synchronizeJob(jobDxid: DxId<'job'>, bullJob: BullJob): Promise<Maybe<Job>> {
+    const job = await this.jobRepo.findOne({ dxid: jobDxid }, { populate: ['app'] })
     const user = await this.userCtx.loadEntity()
 
     // check input data
     if (!job) {
-      this.logger.error({ checkStatusJob }, 'Job does not exist')
-      await removeRepeatable(checkStatusJob)
+      this.logger.error({ jobDxid }, 'Job does not exist')
+      await removeRepeatable(bullJob)
       return
     }
 
     if (!user) {
-      this.logger.error({ checkStatusJob }, 'User does not exist')
-      await removeRepeatable(checkStatusJob)
+      this.logger.error({ userId: this.userCtx.id }, 'User does not exist')
+      await removeRepeatable(bullJob)
       return
     }
 
     this.logger.log({ jobId: job.id }, 'Processing job')
 
     if (!shouldSyncStatus(job)) {
-      this.logger.log(
-        { checkStatusJob, job },
-        'Job is already finished. Removing task from main queue',
-      )
-      await removeRepeatable(checkStatusJob, getMainQueue())
-      this.removeTerminationEmailJob(checkStatusJob)
+      this.logger.log({ job, bullJob }, 'Job is already finished. Removing task from main queue')
+      await removeRepeatable(bullJob, getMainQueue())
+      this.removeTerminationEmailJob(jobDxid)
       return
     }
     // we want to synchronize the job status if it is not yet terminated
     let platformJobData: JobDescribeResponse
     try {
       platformJobData = await this.platformClient.jobDescribe({
-        jobId: checkStatusJob.dxid,
+        jobId: jobDxid,
       })
     } catch (err) {
       if (err instanceof ClientRequestError && err.props?.clientStatusCode) {
@@ -114,7 +115,7 @@ export class JobSynchronizationService {
           // Removing the sync task will allow a new sync task to be recreated
           // when user next logs in via UserCheckupTask
           this.logger.log({ error: err.props }, 'Received 401 from platform, removing sync task')
-          await removeRepeatable(checkStatusJob)
+          await removeRepeatable(bullJob)
         }
       } else {
         this.logger.log({ error: err }, 'Unhandled error from job/describe, will retry later')
@@ -134,7 +135,7 @@ export class JobSynchronizationService {
       !isOverTerminateMaxDuration(job) &&
       !job.terminationEmailSent
     ) {
-      await this.sendTerminationEmail(user, checkStatusJob)
+      await this.sendTerminationEmail(user, job)
       job.terminationEmailSent = true
       this.em.persist(job)
     }
@@ -184,7 +185,7 @@ export class JobSynchronizationService {
           // if latest known state was 'running' then platform terminated the job
           this.logger.log(
             {
-              jobId: checkStatusJob.dxid,
+              jobId: jobDxid,
               failureReason: platformJobData.failureReason,
               failureMessage: platformJobData.failureMessage,
             },
@@ -217,7 +218,7 @@ export class JobSynchronizationService {
 
     this.logger.log(
       {
-        jobId: checkStatusJob.dxid,
+        jobId: jobDxid,
         fromState: job.state,
         toState: remoteState,
       },
@@ -250,9 +251,9 @@ export class JobSynchronizationService {
             em: this.em,
             log: this.logger,
             user: this.userCtx,
-            job: checkStatusJob,
+            job: bullJob,
           }
-          await sendJobFailedEmails(checkStatusJob.id as number, workerOpsCtx)
+          await sendJobFailedEmails(job.id as number, workerOpsCtx)
           job.terminationEmailSent = true
         } catch (e) {
           this.logger.error({ job: updatedJob }, 'Failed to send emails', e)
@@ -261,7 +262,7 @@ export class JobSynchronizationService {
     }
 
     if (remoteState === JOB_STATE.DONE && !job.terminationEmailSent) {
-      await this.sendJobFinishedEmail(user, checkStatusJob)
+      await this.sendJobFinishedEmail(user, job)
       job.terminationEmailSent = true
     }
 
@@ -277,6 +278,7 @@ export class JobSynchronizationService {
     const body = buildEmailTemplate<JobStaleInputTemplate>(jobStaleTemplate, {
       receiver: user,
       content: {
+        // TODO LUDVIK - NONE OF THESE PROPERTIES EXIST IN CheckStatusJob['payload'] and TypeScript doesn't care here ???.
         job: { id: checkStatusJob.id, name: checkStatusJob.name, uid: checkStatusJob.uid },
       },
     })
@@ -303,27 +305,24 @@ export class JobSynchronizationService {
     await createSendEmailTask(email, this.userCtx, jobId)
   }
 
-  private async sendJobFinishedEmail(
-    user: User,
-    checkStatusJob: CheckStatusJob['payload'],
-  ): Promise<void> {
+  private async sendJobFinishedEmail(user: User, job: Job): Promise<void> {
     const body = buildEmailTemplate<JobFinishedInputTemplate>(jobFinishedTemplate, {
       receiver: user,
       content: {
-        job: { id: checkStatusJob.id, name: checkStatusJob.name, uid: checkStatusJob.uid },
+        job: { id: job.id, name: job.name, uid: job.uid },
       },
     })
     const email: EmailSendInput = {
       emailType: EMAIL_TYPES.jobTerminationWarning,
       to: user.email,
-      subject: `Execution ${checkStatusJob.name} completed successfully`,
+      subject: `Execution ${job.name} completed successfully`,
       body,
     }
-    const jobId = getBullJobIdForEmailOperation(EMAIL_TYPES.jobFinished, checkStatusJob.dxid)
+    const jobId = getBullJobIdForEmailOperation(EMAIL_TYPES.jobFinished, job.dxid)
     this.logger.log(
       {
-        jobId: checkStatusJob.id,
-        jobDxid: checkStatusJob.dxid,
+        jobId: job.id,
+        jobDxid: job.dxid,
         user: user.dxuser,
         recipient: user.email,
         bullJobId: jobId,
@@ -333,11 +332,8 @@ export class JobSynchronizationService {
     await createSendEmailTask(email, this.userCtx, jobId)
   }
 
-  private removeTerminationEmailJob(checkStatusJob: CheckStatusJob['payload']): void {
-    const jobId = getBullJobIdForEmailOperation(
-      EMAIL_TYPES.jobTerminationWarning,
-      checkStatusJob.dxid,
-    )
+  private removeTerminationEmailJob(jobDxid: DxId<'job'>): void {
+    const jobId = getBullJobIdForEmailOperation(EMAIL_TYPES.jobTerminationWarning, jobDxid)
     removeFromEmailQueue(jobId)
   }
 

@@ -6,6 +6,6 @@ import { ChallengeDetails } from './ChallengeDetails'
 export default function ChallengeDetailsLayout() {
   const user = useAuthUser()
   return (
-    <PublicLayout mainScroll={!!user}><ChallengeDetails /></PublicLayout>
+    <PublicLayout mainScroll={!!user} scrollPaddingTop={60}><ChallengeDetails /></PublicLayout>
   )
 }

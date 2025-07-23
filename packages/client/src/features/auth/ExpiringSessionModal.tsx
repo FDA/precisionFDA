@@ -8,27 +8,20 @@ import { ModalHeaderTop, ModalNext } from '../modal/ModalNext'
 import { Content, Footer } from '../modal/styles'
 import { UseModal } from '../modal/useModal'
 import { useAuthUserQuery } from './api'
-import {
-  onLogInWithSSO, useSiteSettingsQuery,
-} from './useSiteSettingsQuery'
+import { onLogInWithSSO, useSiteSettingsQuery } from './useSiteSettingsQuery'
 import { sessionService } from '../../utils/sessionService'
-import { useAuthUser } from './useAuthUser'
 
-export const ExpiringSessionModal: React.FC<{ modal: UseModal }> = ({
-  modal,
-}) => {
+export const ExpiringSessionModal: React.FC<{ modal: UseModal }> = ({ modal }) => {
   const userQuery = useAuthUserQuery()
-  const [expiredAt, setExpiredAtTimer] = useState<Date|number>(
-    getSessionExpiredAt(),
-  )
+  const { data: ssoButtonResponse } = useSiteSettingsQuery()
+  const [expiredAt, setExpiredAtTimer] = useState<Date | number>(getSessionExpiredAt())
   const [timer, setTimer] = useState<number>(0)
   const [currentTime, setCurrentTime] = useState<Date>(new Date())
   const sessionExpirationPassed = expiredAt < currentTime
   const sessionExpirationApproaching = !sessionExpirationPassed
   const hasExpirationReachedLimit = sessionExpirationApproaching && subSeconds(expiredAt, 59) < currentTime
   const calcDiff = differenceInSeconds(expiredAt, currentTime)
-  const { data: ssoButtonResponse } = useSiteSettingsQuery()
-  const user = useAuthUser()
+  const user = userQuery.data?.user
 
   // Start/stop automatic session refreshing on user activity
   useEffect(() => {
@@ -77,12 +70,7 @@ export const ExpiringSessionModal: React.FC<{ modal: UseModal }> = ({
   const ssoUrl = ssoButtonResponse?.ssoButton.isEnabled ? ssoButtonResponse.ssoButton.data?.ssoUrl : undefined
 
   return (
-    <ModalNext
-      id="expiring-session-modal"
-      isShown={modal.isShown}
-      blur
-      hide={() => {}}
-    >
+    <ModalNext id="expiring-session-modal" isShown={modal.isShown} blur hide={() => {}}>
       <ModalHeaderTop
         disableClose
         headerText={sessionExpirationPassed ? 'Session Expired' : 'Session Expiring'}

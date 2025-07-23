@@ -28,7 +28,7 @@ const constructOrgFromUsername = (username: string) => {
 }
 
 const isGovEmail = (email: string): boolean => {
-  const emailDomain = email.split('@').pop()
+  const emailDomain = email.split('@').pop()?.toLowerCase() ?? ''
   return ['fda.hhs.gov', 'fda.gov'].includes(emailDomain)
 }
 

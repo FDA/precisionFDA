@@ -8,13 +8,13 @@ import { Svg } from '../../../../components/icons/Svg'
 import { SelectableTable, StyledCell, StyledFileDetail, StyledRow } from '../../../actionModals/styles'
 import { ModalPageRow } from '../../../modal/styles'
 
-export const ShorternName = styled.span`
+export const ShortenName = styled.span`
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 `
 
-export const ShorternFolderName = styled(ShorternName)`
+export const ShortenFolderName = styled(ShortenName)`
   width: calc(100% - 30px);
 `
 
@@ -58,12 +58,10 @@ export const CopyModalScrollPlace = styled.div`
   max-height: 60vh;
 `
 export const StyledStickyTop = styled.div`
-  width: calc(100% - 1px);
   position: sticky;
   top: 0;
   background-color: var(--background);
-  padding: 12px;
-  padding-bottom: 8px;
+  padding: 12px 12px 8px;
 `
 
 export const SelectedList = styled.ul`
@@ -72,9 +70,8 @@ export const SelectedList = styled.ul`
   flex-direction: column;
   gap: 8px;
   width: 100%;
-  padding: 0 12px;
   box-sizing: border-box;
-  padding-bottom: 16px;
+  padding: 0 12px 16px;
 `
 
 export const FileListItem = styled.li<{ $isCopied?: boolean }>`
@@ -171,7 +168,6 @@ export const ModalSearchBarWrapper = styled.div`
 export const ModalStyledRow = styled(StyledRow)`
   padding: 12px 8px;
   gap: 8px;
-  width: 100%;
   &:first-child {
     border-top: none;
   }

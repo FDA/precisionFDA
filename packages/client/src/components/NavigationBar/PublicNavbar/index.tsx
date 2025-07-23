@@ -1,195 +1,19 @@
-import React, { useEffect, useState } from 'react'
-import { useLocation, Link } from 'react-router-dom'
-import styled, { css } from 'styled-components'
 import classNames from 'classnames'
-import { PFDALogoLight, PFDALogoDark } from '../PFDALogo'
-import { theme } from '../../../styles/theme'
-import { PageContainerMargin } from '../../Page/styles'
+import React, { useEffect, useState } from 'react'
+import { Link, useLocation } from 'react-router-dom'
 import { onLogInWithSSO, useSiteSettingsQuery } from '../../../features/auth/useSiteSettingsQuery'
 import { Button } from '../../Button'
+import { PFDALogoDark, PFDALogoLight } from '../PFDALogo'
+import { MobileMenuOverlay, PageContainer, StyledPublicNavbar } from './styles'
 
-type StyledPublicNavbarProps = {
-  $isSticky?: boolean
-}
-
-const StyledPublicNavbar = styled(PageContainerMargin)<StyledPublicNavbarProps>`
-  display: flex;
-  height: 64px;
-  text-align: center;
-  vertical-align: middle;
-  transition: all 0.18s ease-in-out;
-  flex-direction: row;
-  gap: 32px;
-
-  nav > * {
-    vertical-align: middle;
-  }
-
-  .logo-img-dark {
-    display: none;
-  }
-
-  .pfda-navbar-logo {
-    width: 180px;
-    height: 40px;
-  }
-
-  @media (max-width: 930px) {
-    overflow-x: auto;
-  }
-
-  ${props =>
-    props.$isSticky
-      ? css`
-          position: fixed;
-          top: 0;
-          left: 0;
-          width: 100%;
-          background-color: ${theme.colors.subtleBlue};
-          border-bottom: 1px solid ${theme.colors.borderDefault};
-          z-index: 20;
-        `
-      : ''}
-`
-
-type StyledPFDALogoProps = {
-  hidden?: boolean
-}
-
-const pfdaLogoStyle = css`
-  text-align: left;
-  margin: auto;
-  margin-left: 32px;
-  width: 180px;
-  height: 40px;
-`
-
-const StyledPFDALogoLight = styled(PFDALogoLight)<StyledPFDALogoProps>`
-  margin-top: 8px;
-  ${props =>
-    props.hidden
-      ? css`
-          visibility: hidden;
-        `
-      : ''}
-`
-
-const StyledPFDALogoDark = styled(PFDALogoDark)`
-  ${pfdaLogoStyle};
-`
-const PublicNavbarCenterButtons = styled.div<StyledPublicNavbarProps>`
-  display: flex;
-  flex: 1 0 auto;
-  align-items: center;
-  justify-content: center;
-  gap: 32px;
-  padding-top: 8px;
-
-  a {
-    padding: 0;
-    height: 20px;
-    text-align: center;
-    font-size: 13px;
-    font-weight: 400;
-    white-space: nowrap;
-    border-bottom: 2px solid transparent;
-    text-decoration: none;
-    ${props =>
-      props.$isSticky
-        ? css`
-            color: ${theme.colors.textBlack};
-          `
-        : css`
-            color: white;
-          `}
-
-    &:hover {
-      ${props =>
-        props.$isSticky
-          ? css`
-              border-bottom: 2px solid black;
-            `
-          : css`
-              border-bottom: 2px solid white;
-            `}
-    }
-  }
-
-  a.current {
-    color: ${theme.colors.blueOnBlack};
-    border-bottom: 2px solid ${theme.colors.blueOnBlack};
-
-    ${props =>
-      props.$isSticky
-        ? css`
-            &:hover {
-              border-bottom: 2px solid ${theme.colors.blueOnBlack};
-              color: ${theme.colors.blueOnBlack};
-            }
-          `
-        : css`
-            &:hover {
-              color: ${theme.colors.blueOnBlack};
-            }
-          `}
-  }
-`
-
-const AccessButton = styled(Button)`
-  background: transparent;
-`
-
-const PublicNavbarRightButtons = styled.div<StyledPublicNavbarProps>`
-  display: flex;
-  flex: 0 1 auto;
-  align-items: center;
-  gap: 8px;
-  justify-self: flex-end;
-
-  button {
-    font-weight: 700;
-    letter-spacing: normal;
-  }
-
-  ${({ $isSticky }) =>
-    $isSticky &&
-    css`
-      margin-right: 32px;
-      ${AccessButton} {
-        color: var(--base);
-      }
-    `}
-`
-
-type Props = {
+type PublicNavbarProps = {
   shouldShowLogo?: boolean
 }
 
-const PublicNavbar = ({ shouldShowLogo = false }: Props) => {
-  const [sticky, setSticky] = useState(false)
+const PublicNavbar = ({ shouldShowLogo = false }: PublicNavbarProps) => {
   const { data } = useSiteSettingsQuery()
-  // Set up the sticky header
-  useEffect(() => {
-    const header = document.getElementById('pfda-navbar')
-    const entireNavigationBar = document.getElementById('navigation-bar')
-    if (!header || !entireNavigationBar) {
-      return
-    }
-
-    const stickyPosition = entireNavigationBar.clientHeight
-    const scrollCallBack = () => {
-      if (window.pageYOffset > stickyPosition) {
-        setSticky(true)
-      } else {
-        setSticky(false)
-      }
-    }
-    window.addEventListener('scroll', scrollCallBack)
-    // eslint-disable-next-line consistent-return
-    return () => {
-      window.removeEventListener('scroll', scrollCallBack)
-    }
-  }, [])
+  const { pathname } = useLocation()
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
   const onRequestAccess = () => {
     window.location.assign('/request_access')
@@ -199,81 +23,277 @@ const PublicNavbar = ({ shouldShowLogo = false }: Props) => {
     window.location.assign('/login')
   }
 
-  const { pathname } = useLocation()
-  const getLinkClassName = (linkPath: string) => {
+  const getNavLinkClassName = (linkPath: string) => {
     if (linkPath === '/') {
-      // Special case
-      return classNames({
-        current: pathname === linkPath,
+      return classNames('nav-link', {
+        'active': pathname === linkPath,
       })
     }
-    return classNames({
-      current: pathname.startsWith(linkPath),
+    return classNames('nav-link', {
+      'active': pathname.startsWith(linkPath),
     })
   }
 
+  const getMobileNavLinkClassName = (linkPath: string) => {
+    if (linkPath === '/') {
+      return classNames('menu-nav-item', {
+        'menu-nav-active': pathname === linkPath,
+      })
+    }
+    return classNames('menu-nav-item', {
+      'menu-nav-active': pathname.startsWith(linkPath),
+    })
+  }
+
+  const toggleMobileMenu = () => {
+    const newMenuState = !isMobileMenuOpen
+    setIsMobileMenuOpen(newMenuState)
+  }
+
+  const closeMobileMenu = () => {
+    setIsMobileMenuOpen(false)
+  }
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth > 1024 && isMobileMenuOpen) {
+        closeMobileMenu()
+      }
+    }
+
+    window.addEventListener('resize', handleResize)
+    return () => {
+      window.removeEventListener('resize', handleResize)
+    }
+  }, [isMobileMenuOpen])
+
+  // Close mobile menu on escape key
+  useEffect(() => {
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && isMobileMenuOpen) {
+        closeMobileMenu()
+      }
+    }
+
+    if (isMobileMenuOpen) {
+      document.addEventListener('keydown', handleEscape)
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleEscape)
+    }
+  }, [isMobileMenuOpen])
+
   return (
-    <StyledPublicNavbar as="nav" id="pfda-navbar" $isSticky={sticky}>
-      {sticky ? (
-        <StyledPFDALogoDark className="pfda-navbar-logo" />
-      ) : (
-        <StyledPFDALogoLight
-          className="pfda-navbar-logo"
-          hidden={!shouldShowLogo}
-        />
-      )}
-      <PublicNavbarCenterButtons $isSticky={sticky}>
-        <Link data-turbolinks="false" to="/" className={getLinkClassName('/')}>
-          Overview
-        </Link>
-        <Link
-          data-turbolinks="false"
-          to="/challenges"
-          className={getLinkClassName('/challenges')}
+    <>
+      <StyledPublicNavbar>
+        <PageContainer>
+        <div className="navbar-content">
+          <div className="brand-section">
+            <PFDALogoLight 
+              className={classNames('brand-logo', 'brand-logo-light', { 
+                hidden: !shouldShowLogo,
+              })}
+            />
+            <PFDALogoDark 
+              className="brand-logo brand-logo-dark" 
+            />
+          </div>
+          
+          <nav className="desktop-nav" role="navigation" aria-label="Primary navigation">
+            <Link 
+              to="/" 
+              className={getNavLinkClassName('/')}
+            >
+              Home
+            </Link>
+            <Link 
+              to="/challenges" 
+              className={getNavLinkClassName('/challenges')}
+            >
+              Challenges
+            </Link>
+            <Link 
+              to="/news" 
+              className={getNavLinkClassName('/news')}
+            >
+              News
+            </Link>
+            <Link 
+              to="/experts" 
+              className={getNavLinkClassName('/experts')}
+            >
+              Experts
+            </Link>
+            <a 
+              href="/uniisearch" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="nav-link"
+            >
+              UNII Search
+            </a>
+            <a 
+              href="/ginas/app/ui" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="nav-link"
+            >
+              GSRS
+            </a>
+          </nav>
+          
+          <div className="desktop-actions">
+            <Button 
+              className="action-btn action-btn-secondary" 
+              onClick={onRequestAccess}
+            >
+              Request Access
+            </Button>
+            <Button 
+              className="action-btn"
+              data-variant="primary" 
+              onClick={onLogIn}
+            >
+              Log In
+            </Button>
+            {data?.ssoButton.isEnabled && data.ssoButton.data && (
+              <Button 
+                className="action-btn"
+                data-variant="primary" 
+                onClick={() => onLogInWithSSO(data.ssoButton.data?.ssoUrl || '')}
+              >
+                Log In with SSO
+              </Button>
+            )}
+          </div>
+
+          <button 
+            className="mobile-menu-trigger" 
+            onClick={toggleMobileMenu}
+            aria-label={isMobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+            aria-expanded={isMobileMenuOpen}
+            type="button"
+          >
+            <div className="hamburger-icon">
+              <div className={classNames('hamburger-line', 'line-1', { 'menu-open': isMobileMenuOpen })}></div>
+              <div className={classNames('hamburger-line', 'line-2', { 'menu-open': isMobileMenuOpen })}></div>
+              <div className={classNames('hamburger-line', 'line-3', { 'menu-open': isMobileMenuOpen })}></div>
+            </div>
+          </button>
+        </div>
+        </PageContainer>
+      </StyledPublicNavbar>
+
+      <MobileMenuOverlay
+        className={classNames({ 'menu-visible': isMobileMenuOpen })}
+        onClick={closeMobileMenu}
+      >
+        <section 
+          className={classNames('menu-container', { 'menu-visible': isMobileMenuOpen })}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="mobile-menu-title"
         >
-          Challenges
-        </Link>
-        <Link
-          data-turbolinks="false"
-          to="/news"
-          className={getLinkClassName('/news')}
-        >
-          News
-        </Link>
-        <Link
-          data-turbolinks="false"
-          to="/experts"
-          className={getLinkClassName('/experts')}
-        >
-          Experts
-        </Link>
-        <Link
-          data-turbolinks="false"
-          to="/about"
-          className={getLinkClassName('/about')}
-        >
-          About
-        </Link>
-        <a href="/uniisearch" target="_blank">
-          UNII Search
-        </a>
-        <a href="/ginas/app/ui" target="_blank">
-          GSRS
-        </a>
-      </PublicNavbarCenterButtons>
-      <PublicNavbarRightButtons $isSticky={sticky}>
-        <AccessButton onClick={onRequestAccess}>Request Access</AccessButton>
-        <Button data-variant="primary" onClick={onLogIn}>Log In</Button>
-        {data?.ssoButton.isEnabled && (
-          <Button data-variant="primary" onClick={() => onLogInWithSSO(data?.ssoButton?.data?.ssoUrl)}>
-            Log In with SSO
-          </Button>
-        )}
-      </PublicNavbarRightButtons>
-    </StyledPublicNavbar>
+          <div className="menu-header">
+            <PFDALogoDark className="menu-brand" id="mobile-menu-title" />
+            <button 
+              className="menu-close-btn"
+              onClick={closeMobileMenu}
+              aria-label="Close navigation menu"
+              type="button"
+            >
+              ×
+            </button>
+          </div>
+          
+          <nav className="menu-nav" role="navigation" aria-label="Mobile navigation">
+            <Link 
+              to="/" 
+              className={getMobileNavLinkClassName('/')}
+              data-turbolinks="false"
+              onClick={closeMobileMenu}
+            >
+              Home
+            </Link>
+            <Link 
+              to="/challenges" 
+              className={getMobileNavLinkClassName('/challenges')}
+              onClick={closeMobileMenu}
+            >
+              Challenges
+            </Link>
+            <Link 
+              to="/news" 
+              className={getMobileNavLinkClassName('/news')}
+              onClick={closeMobileMenu}
+            >
+              News
+            </Link>
+            <Link 
+              to="/experts" 
+              className={getMobileNavLinkClassName('/experts')}
+              onClick={closeMobileMenu}
+            >
+              Experts
+            </Link>
+            <a 
+              href="/uniisearch" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="menu-nav-item"
+              onClick={closeMobileMenu}
+            >
+              UNII Search
+            </a>
+            <a 
+              href="/ginas/app/ui" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="menu-nav-item"
+              onClick={closeMobileMenu}
+            >
+              GSRS
+            </a>
+          </nav>
+          
+          <div className="menu-actions">
+            <Button 
+              className="menu-action-btn" 
+              onClick={() => {
+                onRequestAccess()
+                closeMobileMenu()
+              }}
+            >
+              Request Access
+            </Button>
+            <Button 
+              className="menu-action-btn"
+              data-variant="primary" 
+              onClick={() => {
+                onLogIn()
+                closeMobileMenu()
+              }}
+            >
+              Log In
+            </Button>
+            {data?.ssoButton.isEnabled && data.ssoButton.data && (
+              <Button 
+                className="menu-action-btn"
+                data-variant="primary" 
+                onClick={() => {
+                  onLogInWithSSO(data.ssoButton.data?.ssoUrl || '')
+                  closeMobileMenu()
+                }}
+              >
+                Log In with SSO
+              </Button>
+            )}
+          </div>
+        </section>
+      </MobileMenuOverlay>
+    </>
   )
 }
 
 export { PublicNavbar }
-
-export default PublicNavbar
