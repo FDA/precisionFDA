@@ -9,6 +9,7 @@ import { InvitationPaginationDTO } from '../dto/invitation-pagination.dto'
 import { Invitation } from '../invitation.entity'
 import { PROVISIONING_STATE } from '../invitation.enum'
 import { InvitationRepository } from '../invitation.repository'
+import { ProvisionUsersDTO } from '@shared/domain/invitation/dto/provision-users.dto'
 
 @Injectable()
 export class InvitationService {
@@ -52,11 +53,12 @@ export class InvitationService {
     return await this.invitationRepository.paginate(query, where, {})
   }
 
-  async provisionUsers(ids: number[]): Promise<{ provisioningIds: number[] }> {
+  async provisionUsers(body: ProvisionUsersDTO): Promise<{ provisioningIds: number[] }> {
     const pendingInvitations = await this.invitationRepository.find({
-      id: { $in: ids },
+      id: { $in: body.ids },
       provisioningState: PROVISIONING_STATE.PENDING,
     })
+
     const provisioningIds: number[] = []
     await this.em.transactional(async () => {
       pendingInvitations.forEach((invitation) => {
@@ -65,7 +67,7 @@ export class InvitationService {
         provisioningIds.push(invitation.id)
       })
     })
-    await this.mainQueueJobProducer.createProvisionNewUsersTask(provisioningIds)
+    await this.mainQueueJobProducer.createProvisionNewUsersTask(provisioningIds, body.spaceIds)
     return { provisioningIds }
   }
 
