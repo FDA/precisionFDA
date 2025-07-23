@@ -23,7 +23,7 @@ export const LayoutLoader = () => (
   </StyledLayoutLoader>
 )
 
-export const UserLayout = ({ children, mainScroll = false, innerScroll = false }: { children: ReactNode, mainScroll?: boolean, innerScroll?: boolean }) => {
+export const UserLayout = ({ children, mainScroll = false, innerScroll = false, scrollPaddingTop }: { children: ReactNode, mainScroll?: boolean, innerScroll?: boolean, scrollPaddingTop?: string|number }) => {
   const user = useAuthUserQuery()
 
   const content = () => {
@@ -41,7 +41,7 @@ export const UserLayout = ({ children, mainScroll = false, innerScroll = false }
     <>
     {mainScroll && <ScrollableMainGlobalStyles />}
     {innerScroll && <ScrollableInnerGlobalStyles />}
-    <main>
+    <main style={{ scrollPaddingTop }}>
       <ErrorBoundary>
         {content()}
       </ErrorBoundary>

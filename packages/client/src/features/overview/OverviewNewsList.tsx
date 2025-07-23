@@ -2,10 +2,8 @@ import { format } from 'date-fns'
 import React from 'react'
 import styled from 'styled-components'
 import { Loader } from '../../components/Loader'
-import { colors } from '../../styles/theme'
 import { useNewsListQuery } from '../news/useNewsListQuery'
 import ExternalLink from '../../components/Controls/ExternalLink'
-
 
 export const StyledCondensedList = styled.div`
   display: flex;
@@ -38,33 +36,10 @@ export const Info = styled.div`
   color: #646464;
 `
 
-export const StyledPreview = styled.div`
-  font-weight: normal;
-  font-size: 12px;
-  color: ${colors.textDarkGrey};
-  line-height: 20px;
-  display: -webkit-box;
-  -webkit-line-clamp: 1;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  text-overflow: ellipsis;
-`
-export const CeatedAtDate = styled.div`
-  font-weight: normal;
-  font-size: 12px;
-  color: ${colors.colorDateGrey};
-`
-
-export const ExpertMeta = styled.div`
-  display: flex;
-  gap: 16px;
-  justify-content: space-between;
-`
-
 export const OverviewNewsList = ({ pick = 3 }: { pick?: number }) => {
   const { data, isLoading } = useNewsListQuery({ orderBy: 'isPublication' })
   if (isLoading) return <Loader className="inline" />
-  const newsList = pick ? data?.news_items?.slice(0, pick) : data?.news_items
+  const newsList = pick ? data?.data?.slice(0, pick) : data?.data
 
   return (
     <StyledCondensedList>

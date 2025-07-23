@@ -205,6 +205,7 @@ export const themes = css`
   --c-tabs-selected: rgba(179, 69, 61, 1);
 
   --c-footer-bg: #f4f8fd;
+  --c-subtleblue: #f5f8fc;
 }
 
 html[data-theme="dark"] {

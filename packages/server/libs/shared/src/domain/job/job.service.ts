@@ -38,13 +38,13 @@ import { FolderService } from '../user-file/folder.service'
 import { FILE_STATE_DX, PARENT_TYPE } from '../user-file/user-file.types'
 import { UserRepository } from '../user/user.repository'
 import { JobRepository } from './job.repository'
-import { CheckStatusJob, TASK_TYPE } from '@shared/queue/task.input'
 import { JobSynchronizationService } from '@shared/domain/job/services/job-synchronization.service'
-import { Job as BullJob } from 'bull'
 import { SpaceRepository } from '@shared/domain/space/space.repository'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
 import { JOB_STATE } from '@shared/domain/job/job.enum'
+import { ChallengeJobSynchronizationService } from '@shared/domain/job/services/challenge-job-synchronization.service'
+import { Job as BullJob } from 'bull'
 
 @Injectable()
 export class JobService {
@@ -59,6 +59,7 @@ export class JobService {
     private readonly folderService: FolderService,
     private readonly emailsJobProducer: EmailQueueJobProducer,
     private readonly jobSyncService: JobSynchronizationService,
+    private readonly challengeJobSynchService: ChallengeJobSynchronizationService,
     private readonly emailService: EmailService,
     private readonly userRepo: UserRepository,
     private readonly jobRepo: JobRepository,
@@ -66,39 +67,12 @@ export class JobService {
     private readonly spaceMembershipRepo: SpaceMembershipRepository,
   ) {}
 
-  async synchronizeJob(checkStatusJob: CheckStatusJob['payload']): Promise<Maybe<Job>> {
-    return await this.jobSyncService.synchronizeJob(checkStatusJob)
+  async checkChallengeJobs(): Promise<void> {
+    await this.challengeJobSynchService.checkChallengeJobs()
   }
 
-  async checkChallengeJobs(): Promise<void> {
-    this.logger.log(`checkChallengeJobs`)
-    const challengeBotUser = await this.userRepo.findOneOrFail({
-      dxuser: config.platform.challengeBotUser,
-    })
-    const jobs = await this.getNonTerminalJobs(challengeBotUser.id)
-    if (jobs.length > 0) {
-      this.logger.log('Found non-terminal users for challenge bot user, syncing outputs')
-      for (const job of jobs) {
-        // TODO just temporary before we move to DI
-        // DI needs to take into account that the operation is run
-        // under challenge bot user
-        const user = {
-          id: challengeBotUser.id,
-          dxuser: challengeBotUser.dxuser,
-          accessToken: config.platform.challengeBotAccessToken,
-        }
-        const data: CheckStatusJob = {
-          user,
-          type: TASK_TYPE.SYNC_JOB_STATUS,
-          payload: {
-            dxid: job.dxid,
-          },
-        }
-        await this.jobSyncService.synchronizeJob(data.payload)
-      }
-    } else {
-      this.logger.log('No non-terminal jobs found for challenge bot user')
-    }
+  async synchronizeJob(jobDxid: DxId<'job'>, bullJob: BullJob): Promise<Maybe<Job>> {
+    return await this.jobSyncService.synchronizeJob(jobDxid, bullJob)
   }
 
   async findAccessible(dxid: DxId<'job'>): Promise<Job> {
@@ -212,14 +186,6 @@ export class JobService {
     } as UserCtx)
 
     return staleJobs
-  }
-
-  /**
-   * Gets non-terminal jobs for the challenge user.
-   */
-  private async getNonTerminalJobs(userId: number): Promise<Job[]> {
-    const user = this.userRepo.getReference(userId)
-    return await this.jobRepo.find({ user }, { filters: ['isNonTerminal'] })
   }
 
   /**

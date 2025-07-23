@@ -29,7 +29,7 @@ import {
   FolderItem,
   NodeHeading,
   SelectedList,
-  ShorternName,
+  ShortenName,
   StyledCopyFileDetail,
   StyledFileDetailIcon,
   StyledStickyTop,
@@ -48,14 +48,14 @@ const FileListItemContent = ({ file }: { file: ISelectedFile }) => {
     <>
       <NodeHeading href={`${currentPath}/${file.uid}`} target="_blank">
         <FileIcon width={16} />
-        <ShorternName>{file.name}</ShorternName>
+        <ShortenName>{file.name}</ShortenName>
       </NodeHeading>
       <StyledCopyFileDetail>
         <FileDetailItem href={`${pathWithScope}${folderQ}`} target="_blank">
           <StyledFileDetailIcon>
             <FolderOpenIcon width={14} />
           </StyledFileDetailIcon>
-          <ShorternName>{file.sourceScopePath}</ShorternName>
+          <ShortenName>{file.sourceScopePath}</ShortenName>
         </FileDetailItem>
       </StyledCopyFileDetail>
       {file.isCopied && (
@@ -64,7 +64,7 @@ const FileListItemContent = ({ file }: { file: ISelectedFile }) => {
             <StyledFileDetailIcon>
               <FileCheckIcon width={14} />
             </StyledFileDetailIcon>
-            <ShorternName>{file.targetScopePath}</ShorternName>
+            <ShortenName>{file.targetScopePath}</ShortenName>
           </FileDetailItem>
         </StyledCopyFileDetail>
       )}
@@ -89,7 +89,7 @@ const SelectedFolder = ({ folder }: { folder: ISelectedFolder }) => {
     <FolderItem $isCopied={folder.isCopied}>
       <FolderHeading href={`${pathWithScope}folder_id=${folder.id}`} target="_blank">
         <FolderOpenIcon width={16} />
-        <ShorternName>{folder.name}</ShorternName>
+        <ShortenName>{folder.name}</ShortenName>
       </FolderHeading>
       <FolderChildrenList>
         {folder.children.map((child: ISelectedFile, index: number) => (
@@ -252,8 +252,7 @@ export const useCopyFilesModal = ({
   const handleSubmit = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault()
     if (!selectedScope) return
-    mutation.mutateAsync(selectedScope)
-    setShowModal(false)
+    mutation.mutate(selectedScope)
   }
 
   const modalComp = (
