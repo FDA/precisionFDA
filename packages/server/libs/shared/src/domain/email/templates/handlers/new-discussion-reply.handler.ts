@@ -1,7 +1,7 @@
 import { EmailHandler } from '@shared/domain/email/templates/handlers/email.handler'
 import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
 import { Injectable } from '@nestjs/common'
-import { DiscussionDTO } from '@shared/domain/email/dto/discussion.dto'
+import { DiscussionNotificationDTO } from '@shared/domain/email/dto/discussion-notification.dto'
 import { newDiscussionReplyTemplate } from '@shared/domain/email/templates/mjml/new-discussion-reply.template'
 import DiscussionRepository from '@shared/domain/discussion/discussion.repository'
 import { SpaceRepository } from '@shared/domain/space/space.repository'
@@ -22,7 +22,7 @@ import { Discussion } from '@shared/domain/discussion/discussion.entity'
 @Injectable()
 export class NewDiscussionReplyHandler extends EmailHandler<EMAIL_TYPES.newDiscussionReply> {
   protected emailType = EMAIL_TYPES.newDiscussionReply as const
-  protected inputDto = DiscussionDTO
+  protected inputDto = DiscussionNotificationDTO
   protected getBody = newDiscussionReplyTemplate
 
   constructor(
@@ -37,7 +37,7 @@ export class NewDiscussionReplyHandler extends EmailHandler<EMAIL_TYPES.newDiscu
   }
 
   protected async getContextualData(
-    input: DiscussionDTO,
+    input: DiscussionNotificationDTO,
   ): Promise<EmailTypeToContextMap[EMAIL_TYPES.newDiscussionReply]> {
     const discussion = await this.discussionRepo.findOne(input.discussionId, {
       populate: ['note', 'user', 'follows'],

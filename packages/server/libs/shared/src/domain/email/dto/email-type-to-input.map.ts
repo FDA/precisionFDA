@@ -13,7 +13,7 @@ import { UserProvisionedDTO } from '@shared/domain/email/dto/user-provisioned.dt
 import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
 import { IdWithReceiversInputDTO } from '@shared/domain/email/dto/id-with-receivers-input.dto'
 import { ObjectIdInputDTO } from '@shared/domain/email/dto/object-id.dto'
-import { DiscussionDTO } from '@shared/domain/email/dto/discussion.dto'
+import { DiscussionNotificationDTO } from '@shared/domain/email/dto/discussion-notification.dto'
 
 export const emailTypeToInputDtoMap = {
   [EMAIL_TYPES.emailWithoutTemplate]: EmptyEmailInputDTO,
@@ -46,8 +46,8 @@ export const emailTypeToInputDtoMap = {
   [EMAIL_TYPES.spaceInvitation]: InvitationToSpaceDTO,
   [EMAIL_TYPES.nodeCopy]: NodeCopyInputDTO,
   [EMAIL_TYPES.userProvisioned]: UserProvisionedDTO,
-  [EMAIL_TYPES.newDiscussion]: DiscussionDTO,
-  [EMAIL_TYPES.newDiscussionReply]: DiscussionDTO,
+  [EMAIL_TYPES.newDiscussion]: DiscussionNotificationDTO,
+  [EMAIL_TYPES.newDiscussionReply]: DiscussionNotificationDTO,
 } satisfies Record<EMAIL_TYPES, new () => object>
 
 export type EmailTypeToInputMap = {

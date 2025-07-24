@@ -7,7 +7,7 @@ import { EmailClient } from '@shared/services/email-client'
 import { NewDiscussionHandler } from '@shared/domain/email/templates/handlers/new-discussion.handler'
 import { stub } from 'sinon'
 import { expect } from 'chai'
-import { DiscussionDTO } from '@shared/domain/email/dto/discussion.dto'
+import { DiscussionNotificationDTO } from '@shared/domain/email/dto/discussion-notification.dto'
 import { Discussion } from '@shared/domain/discussion/discussion.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { Organization } from '@shared/domain/org/org.entity'
@@ -117,7 +117,7 @@ describe('NewDiscussionHandler', () => {
         )
         .resolves([spaceMembership])
 
-      const inputDto = new DiscussionDTO()
+      const inputDto = new DiscussionNotificationDTO()
       inputDto.discussionId = discussion.id
       inputDto.notify = 'all'
 
@@ -155,7 +155,7 @@ describe('NewDiscussionHandler', () => {
       entityServiceGetEntityUiLinkStub.withArgs(discussion).resolves(entityLink)
       spaceRepoFindOneStub.withArgs(space.id).resolves(space)
 
-      const inputDto = new DiscussionDTO()
+      const inputDto = new DiscussionNotificationDTO()
       inputDto.discussionId = discussion.id
       inputDto.notify = 'author'
 
@@ -205,7 +205,7 @@ describe('NewDiscussionHandler', () => {
         })
         .resolves([user2, user3])
 
-      const inputDto = new DiscussionDTO()
+      const inputDto = new DiscussionNotificationDTO()
       inputDto.discussionId = discussion.id
       inputDto.notify = [user2.dxuser, user3.dxuser]
 
