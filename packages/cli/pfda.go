@@ -63,8 +63,7 @@ Command specific help section with description, examples and available flags:
 To print version info and exit:
    pfda -version
 
-Full documentation can be found in the Docs section of the precisionFDA website - https://precision.fda.gov/docs/guides/cli
-`
+Full documentation can be found in the Docs section of the precisionFDA website - https://precision.fda.gov/docs/guides/cli`
 
 //
 // N.B. the -cmd flag exists and is now deprecated, but the following should all work

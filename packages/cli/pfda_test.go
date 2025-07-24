@@ -112,14 +112,14 @@ func TestMainNoArgs(t *testing.T) {
 
 	os.Args = []string{"pfda"}
 	returnCode := runMainInternal(true)
-	test.Equals(t, 1, returnCode)
+	test.Equals(t, 0, returnCode)
 }
 
 func TestWrongCmdError(t *testing.T) {
 	oldArgs := os.Args
 	defer func() { os.Args = oldArgs }()
 
-	os.Args = []string{"pfda", "--cmd", "foobar"}
+	os.Args = []string{"pfda", "foobar"}
 	returnCode := runMainInternal(true)
 	test.Equals(t, 1, returnCode)
 }
@@ -136,7 +136,7 @@ func TestPositionalCmdInWrongPlace(t *testing.T) {
 
 	os.Args = []string{"pfda", "--file-id", "file-12345", "--key", "HELLO", "download"}
 	returnCode := runMainInternal(true)
-	test.Equals(t, 1, returnCode)
+	test.Equals(t, 0, returnCode)
 	test.Equals(t, false, funcWasCalled)
 
 	invokeUploadFile = func(client precisionfda.IPFDAClient, inputFilePath *string, folderID *string, spaceID *string, inputChunkSize *int, inputNumRoutines *int) error {
@@ -146,7 +146,7 @@ func TestPositionalCmdInWrongPlace(t *testing.T) {
 
 	os.Args = []string{"pfda", "--file", "./README.md", "--key", "HELLO", "upload-file"}
 	returnCode = runMainInternal(true)
-	test.Equals(t, 1, returnCode)
+	test.Equals(t, 0, returnCode)
 	test.Equals(t, false, funcWasCalled)
 }
 
@@ -159,10 +159,10 @@ func TestPositionalCmdAndCommandBothSpecified(t *testing.T) {
 		funcWasCalled = true
 		return nil
 	}
-	os.Args = []string{"pfda", "upload-file", "--cmd", "upload-file", "--file", "./README.md", "--key", "HELLO"}
+	os.Args = []string{"pfda", "upload-file", "--file", "./README.md", "--key", "HELLO"}
 	returnCode := runMainInternal(true)
-	test.Equals(t, 1, returnCode)
-	test.Equals(t, false, funcWasCalled)
+	test.Equals(t, 0, returnCode)
+	test.Equals(t, true, funcWasCalled)
 }
 
 func TestInvokeUploadFile(t *testing.T) {
@@ -185,7 +185,7 @@ func TestInvokeUploadFile(t *testing.T) {
 	}
 
 	// Case: --file is missing
-	os.Args = []string{"pfda", "--cmd", "upload-file"}
+	os.Args = []string{"pfda", "upload-file"}
 	returnCode := runMainInternal(true)
 	test.Equals(t, 1, returnCode)
 	test.Equals(t, false, funcWasCalled)
@@ -200,7 +200,7 @@ func TestInvokeUploadFile(t *testing.T) {
 	reset()
 
 	// Case: --file does not exist with --cmd
-	os.Args = []string{"pfda", "--cmd", "upload-file", "--file", "./IDoNot.Exist"}
+	os.Args = []string{"pfda", "upload-file", "--file", "./IDoNot.Exist"}
 	returnCode = runMainInternal(true)
 	test.Equals(t, 1, returnCode)
 	test.Equals(t, false, funcWasCalled)
@@ -208,7 +208,7 @@ func TestInvokeUploadFile(t *testing.T) {
 	reset()
 
 	// Case: upload-file upload success
-	os.Args = []string{"pfda", "--cmd", "upload-file", "--file", "./README.md", "--key", "HELLO"}
+	os.Args = []string{"pfda", "upload-file", "--file", "./README.md", "--key", "HELLO"}
 	returnCode = runMainInternal(false)
 	test.Equals(t, 0, returnCode)
 	test.Equals(t, true, funcWasCalled)
@@ -242,7 +242,7 @@ func TestInvokeUploadFile(t *testing.T) {
 	reset()
 
 	// Case: upload-file success with folder and space with --cmd
-	os.Args = []string{"pfda", "--cmd", "upload-file", "--file", "./Dockerfile", "--key", "HELLO", "--folder-id", "test-folder", "--space-id", "test-space"}
+	os.Args = []string{"pfda", "upload-file", "--file", "./Dockerfile", "--key", "HELLO", "--folder-id", "test-folder", "--space-id", "test-space"}
 	returnCode = runMainInternal(false)
 	test.Equals(t, 0, returnCode)
 	test.Equals(t, true, funcWasCalled)
@@ -299,7 +299,7 @@ func TestInvokeUploadAsset(t *testing.T) {
 	reset()
 
 	// Case: upload-asset with folder and space with --cmd
-	os.Args = []string{"pfda", "--cmd", "upload-asset", "--name", "test-asset.tar.gz", "--key", "HELLO", "--root", "./precisionfda", "--readme", "./README.md"}
+	os.Args = []string{"pfda", "upload-asset", "--name", "test-asset.tar.gz", "--key", "HELLO", "--root", "./precisionfda", "--readme", "./README.md"}
 	returnCode = runMainInternal(false)
 	test.Equals(t, 0, returnCode)
 	test.Equals(t, true, funcWasCalled)
@@ -329,7 +329,7 @@ func TestInvokeUploadAsset(t *testing.T) {
 	reset()
 
 	// Case: upload-asset with all parameters
-	os.Args = []string{"pfda", "--cmd", "upload-asset", "--name", "test-asset.tar.gz", "--key", "HELLO", "--root", "./", "--readme", "./README.md"}
+	os.Args = []string{"pfda", "upload-asset", "--name", "test-asset.tar.gz", "--key", "HELLO", "--root", "./", "--readme", "./README.md"}
 	returnCode = runMainInternal(false)
 	test.Equals(t, 0, returnCode)
 	test.Equals(t, true, funcWasCalled)
@@ -362,7 +362,7 @@ func TestInvokeDownloadFile(t *testing.T) {
 	}
 
 	// Case: download with --cmd
-	os.Args = []string{"pfda", "--cmd", "download", "--file-id", "file-12345", "--key", "HELLO"}
+	os.Args = []string{"pfda", "download", "--file-id", "file-12345", "--key", "HELLO"}
 	returnCode := runMainInternal(false)
 	test.Equals(t, 0, returnCode)
 	test.Equals(t, true, funcWasCalled)
@@ -443,7 +443,7 @@ func TestInvokeListing(t *testing.T) {
 	// Case: ls with help - only show help and do not call the func
 	os.Args = []string{"pfda", "ls", "--help"}
 	returnCode = runMainInternal(false)
-	test.Equals(t, 1, returnCode)
+	test.Equals(t, 0, returnCode)
 	test.Equals(t, false, funcWasCalled)
 	test.Equals(t, false, input.FlagBrief)
 	test.Equals(t, false, input.FlagFilesOnly)
@@ -474,7 +474,7 @@ func TestInvokeListing(t *testing.T) {
 	reset()
 }
 
-func TestInvokeListSpaces(t *testing.T) {
+func TestInvokeLsSpaces(t *testing.T) {
 	oldArgs := os.Args
 	defer func() { os.Args = oldArgs }()
 
@@ -485,7 +485,7 @@ func TestInvokeListSpaces(t *testing.T) {
 		input.Reset()
 	}
 
-	invokeListSpaces = func(client precisionfda.IPFDAClient, flags map[string]bool) error {
+	invokeLsSpaces = func(client precisionfda.IPFDAClient, flags map[string]bool) error {
 		funcWasCalled = true
 		input.FlagJson = flags["json"]
 		input.FlagLocked = flags["locked"]
@@ -516,7 +516,7 @@ func TestInvokeListSpaces(t *testing.T) {
 	// Case: list-spaces with help - only show help and do not call the func
 	os.Args = []string{"pfda", "list-spaces", "--help"}
 	returnCode = runMainInternal(false)
-	test.Equals(t, 1, returnCode)
+	test.Equals(t, 0, returnCode)
 	test.Equals(t, false, funcWasCalled)
 	test.Equals(t, false, input.FlagLocked)
 	test.Equals(t, false, input.FlagUnactivated)
@@ -570,10 +570,9 @@ func TestInvokeDescribeEntity(t *testing.T) {
 		input.Reset()
 	}
 
-	invokeDescribe = func(client precisionfda.IPFDAClient, entityID *string, entityType *string) error {
+	invokeDescribe = func(client precisionfda.IPFDAClient, entityID *string) error {
 		funcWasCalled = true
 		input.EntityID = entityID
-		input.EntityType = entityType
 		return nil
 	}
 
@@ -583,7 +582,6 @@ func TestInvokeDescribeEntity(t *testing.T) {
 	test.Equals(t, 0, returnCode)
 	test.Equals(t, true, funcWasCalled)
 	test.Equals(t, "APP_ID", *input.EntityID)
-	test.Equals(t, "app", *input.EntityType)
 	reset()
 
 	// Case: describe-app entity - new syntax
@@ -592,7 +590,6 @@ func TestInvokeDescribeEntity(t *testing.T) {
 	test.Equals(t, 0, returnCode)
 	test.Equals(t, true, funcWasCalled)
 	test.Equals(t, "APP_ID", *input.EntityID)
-	test.Equals(t, "app", *input.EntityType)
 	reset()
 
 	// Case: describe-workflow entity - old syntax
@@ -601,7 +598,6 @@ func TestInvokeDescribeEntity(t *testing.T) {
 	test.Equals(t, 0, returnCode)
 	test.Equals(t, true, funcWasCalled)
 	test.Equals(t, "WORKFLOW_ID", *input.EntityID)
-	test.Equals(t, "workflow", *input.EntityType)
 	reset()
 
 	// Case: describe-workflow entity - new syntax
@@ -610,7 +606,6 @@ func TestInvokeDescribeEntity(t *testing.T) {
 	test.Equals(t, 0, returnCode)
 	test.Equals(t, true, funcWasCalled)
 	test.Equals(t, "WORKFLOW_ID", *input.EntityID)
-	test.Equals(t, "workflow", *input.EntityType)
 	reset()
 }
 

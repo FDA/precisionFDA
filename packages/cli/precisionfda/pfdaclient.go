@@ -1087,7 +1087,7 @@ func (c *PFDAClient) GetLatestVersion() (string, error) {
 
 func (c *PFDAClient) SetChunkSize(chunkSize int) {
 	if chunkSize > maxChunkSize || chunkSize < minChunkSize {
-		inputError("Chunk size must be between 5MB and 5GB")
+		inputError("Chunk size must be between 16MB and 5GB")
 	} else {
 		c.ChunkSize = chunkSize
 	}
