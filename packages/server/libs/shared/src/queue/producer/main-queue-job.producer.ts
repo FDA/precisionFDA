@@ -183,11 +183,12 @@ export class MainQueueJobProducer extends QueueJobProducer {
     return await this.addToQueue(wrapped)
   }
 
-  async createProvisionNewUsersTask(ids: number[]) {
+  async createProvisionNewUsersTask(ids: number[], spaceIds: number[]) {
     const wrapped = {
       type: TASK_TYPE.PROVISION_NEW_USERS as const,
       payload: {
         ids,
+        spaceIds,
       },
       user: this.user,
     }

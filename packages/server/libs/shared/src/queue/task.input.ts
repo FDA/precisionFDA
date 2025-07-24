@@ -117,8 +117,8 @@ export type NotifyNewDiscussionReplyJob = TaskWithAuth & {
 export type ProvisionNewUserJob = TaskWithAuth & {
   type: TASK_TYPE.PROVISION_NEW_USERS
   payload: {
-    invitationId: number
     ids: number[]
+    spaceIds: number[]
   }
 }
 
