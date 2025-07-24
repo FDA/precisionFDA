@@ -7,7 +7,7 @@ import { EmailClient } from '@shared/services/email-client'
 import { NewDiscussionReplyHandler } from '@shared/domain/email/templates/handlers/new-discussion-reply.handler'
 import { stub } from 'sinon'
 import { expect } from 'chai'
-import { DiscussionDTO } from '@shared/domain/email/dto/discussion.dto'
+import { DiscussionNotificationDTO } from '@shared/domain/email/dto/discussion-notification.dto'
 import { Organization } from '@shared/domain/org/org.entity'
 import { User, USER_STATE } from '@shared/domain/user/user.entity'
 import { Space } from '@shared/domain/space/space.entity'
@@ -117,7 +117,7 @@ describe('NewDiscussionReplyHandler', () => {
         .withArgs({ spaces: space.id, active: true }, { populate: ['user'] })
         .resolves([spaceMembership])
 
-      const inputDto = new DiscussionDTO()
+      const inputDto = new DiscussionNotificationDTO()
       inputDto.discussionId = discussion.id
       inputDto.notify = 'all'
 
@@ -159,7 +159,7 @@ describe('NewDiscussionReplyHandler', () => {
       entityServiceGetEntityUiLinkStub.withArgs(discussion).resolves(entityLink)
       spaceRepoFindOneStub.withArgs(space.id).resolves(space)
 
-      const inputDto = new DiscussionDTO()
+      const inputDto = new DiscussionNotificationDTO()
       inputDto.discussionId = discussion.id
       inputDto.notify = 'author'
 
@@ -224,7 +224,7 @@ describe('NewDiscussionReplyHandler', () => {
         .resolves([user2])
       spaceRepoFindOneStub.withArgs(space.id).resolves(space)
 
-      const inputDto = new DiscussionDTO()
+      const inputDto = new DiscussionNotificationDTO()
       inputDto.discussionId = discussion.id
       inputDto.notify = [user2.dxuser]
 
@@ -286,7 +286,7 @@ describe('NewDiscussionReplyHandler', () => {
         })
         .resolves([follower])
 
-      const inputDto = new DiscussionDTO()
+      const inputDto = new DiscussionNotificationDTO()
       inputDto.discussionId = discussion.id
       inputDto.notify = 'author'
 
