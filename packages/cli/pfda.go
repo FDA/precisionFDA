@@ -1,10 +1,9 @@
 // PrecisionFDA CLI
-// Version 2.10.1
+// Version 2.10.2
 package main
 
 import (
 	"crypto/tls"
-	"encoding/json"
 	"flag"
 	"fmt"
 	"net/http"
@@ -26,7 +25,7 @@ const defaultChunkSize = 1 << 26 // default 64MB (min. 16MB)
 const defaultSkipVerify = "false"
 const usageString = `
 ****************************
-PFDA COMMAND LINE TOOL v2.10.1
+PFDA COMMAND LINE TOOL v2.10.2
 ****************************
 
 All available commands:
@@ -908,7 +907,7 @@ func mainInternal() int {
 			return helpers.ErrorFromString("API route is required - provide it as '-route <API_ROUTE_NAME>'.", *flagJson)
 		}
 
-		if *jsonInput != "" && !isValidJSON(*jsonInput) {
+		if *jsonInput != "" && !helpers.IsValidJSON(*jsonInput) {
 			return helpers.ErrorFromString(fmt.Sprintf("Provided JSON '%s' is not valid - provide the input in valid JSON format.", *jsonInput), *flagJson)
 		}
 
@@ -996,9 +995,4 @@ func GetTLSVersion(tr *http.Transport) string {
 		return "TLS 1.3"
 	}
 	return "Unknown"
-}
-
-func isValidJSON(s string) bool {
-	var js interface{}
-	return json.Unmarshal([]byte(s), &js) == nil
 }
