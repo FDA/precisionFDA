@@ -1,4 +1,6 @@
 import { NotifyType } from '@shared/domain/discussion/dto/notify.type'
+import { DxId } from '@shared/domain/entity/domain/dxid'
+import { Uid } from '@shared/domain/entity/domain/uid'
 import type { EmailSendInput } from '../domain/email/email.config'
 import type { UserCtx } from '../types'
 
@@ -9,7 +11,7 @@ export type Task = {
 export type TaskWithAuth = Task & {
   user: UserCtx
   // payload type is more strictly defined below depending on task
-  payload?: any
+  payload?: unknown
 }
 
 type TaskWithMaybeAuth = Task & {
@@ -34,7 +36,6 @@ export enum TASK_TYPE {
   USER_CHECKUP = 'user_checkup',
   DEBUG_MAX_MEMORY = 'debug_test_max_memory',
   REMOVE_NODES = 'remove_nodes',
-  OTHER_TASK = 'other',
   // TODO - Standardize on DOMAIN_ACTION naming scheme
   WORKSTATION_SNAPSHOT = 'workstation_snapshot',
   LOCK_NODES = 'lock_nodes',
@@ -56,7 +57,13 @@ export type BasicUserJob = TaskWithAuth & {
 
 export type CheckStatusJob = TaskWithAuth & {
   type: TASK_TYPE.SYNC_JOB_STATUS | TASK_TYPE.SYNC_JOB_OUTPUTS
-  payload: { dxid: string }
+  payload: {
+    dxid: DxId<'job'>
+    id?: number
+    name?: string
+    uid?: Uid<'job'>
+    email?: string
+  }
 }
 
 export type SendEmailJob = TaskWithMaybeAuth & {
@@ -64,24 +71,14 @@ export type SendEmailJob = TaskWithMaybeAuth & {
   payload: EmailSendInput
 }
 
-export type CheckStaleJobsJob = TaskWithAuth & {
-  payload: undefined
-  type: TASK_TYPE.CHECK_STALE_JOBS
-}
-
 export type SyncDbClusterJob = TaskWithAuth & {
   type: TASK_TYPE.SYNC_DBCLUSTER_STATUS
-  payload: { dxid: string }
+  payload: { dxid: DxId<'dbcluster'> }
 }
 
 export type SyncDbClusterJobOutput = TaskWithAuth & {
   type: TASK_TYPE.SYNC_DBCLUSTER_JOB_OUTPUT
-  payload: { dxid: string }
-}
-
-// NOTE(samuel) - task running without user context
-export type CheckNonTerminatedDbClustersJob = Task & {
-  type: TASK_TYPE.CHECK_NON_TERMINATED_DBCLUSTERS
+  payload: { dxid: DxId<'job'> }
 }
 
 export type SyncSpacesPermissionsJob = TaskWithAuth & {
@@ -106,26 +103,10 @@ export type NotifyNewDiscussionJob = TaskWithAuth & {
   }
 }
 
-export type NotifyNewDiscussionReplyJob = TaskWithAuth & {
-  type: TASK_TYPE.NOTIFY_NEW_DISCUSSION_REPLY
-  payload: {
-    discussionId: number
-    notify: NotifyType
-  }
-}
-
 export type ProvisionNewUserJob = TaskWithAuth & {
   type: TASK_TYPE.PROVISION_NEW_USERS
   payload: {
     ids: number[]
     spaceIds: number[]
   }
-}
-
-// ---------------------
-// Admin and Debug tasks
-// ---------------------
-
-export type AdminDataConsistencyReportTask = Task & {
-  type: TASK_TYPE.ADMIN_DATA_CONSISTENCY_REPORT
 }
