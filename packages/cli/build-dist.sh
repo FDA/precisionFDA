@@ -2,19 +2,20 @@
 #
 # N.B. run from packages/cli
 
-VERSION=2.10.1
+VERSION=2.10.2
 COMMITID=$(git rev-parse HEAD)
 SHORT_SHA=$(git rev-parse --short HEAD)
 
 if [ "$CI" = "true" ]; then
     export HOME=/go/src/dnanexus.com/precision-fda-cli
-  fi
+    USER_ARG="--user $(id -u):$(id -g)"
+fi
 BuildAndPackage() {
     PLATFORM=$1
     ARCH=$2
     BUILDTIME=$(date +%Y-%m-%d-%H%M%S)
     echo "Building pfda CLI (v$VERSION) for $PLATFORM $ARCH"
-    docker run --rm --user $(id -u):$(id -g) --mount type=bind,source="$(pwd)",target=/go/src/dnanexus.com/precision-fda-cli \
+    docker run --rm $USER_ARG --mount type=bind,source="$(pwd)",target=/go/src/dnanexus.com/precision-fda-cli \
            -e GOOS="$PLATFORM" -e GOARCH="$ARCH" -e COMMITID="$COMMITID" \
            -e VERSION="$VERSION" -e BUILDTIME="$BUILDTIME" -e HOME="$HOME" precisionfda-cli
     cd ./dist

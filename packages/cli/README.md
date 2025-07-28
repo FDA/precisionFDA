@@ -141,6 +141,10 @@ To test for FIPS compliance we can inspect the symbols using `go tool nm ./pfda`
 
 # Version History
 
+### 2.10.2 (2025-07-30)
+
+- fixed issue with parsing json args
+
 ### 2.10.1 (2025-06-30)
 
 - fixed issue with parsing flags
