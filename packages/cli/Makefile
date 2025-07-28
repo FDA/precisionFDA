@@ -1,5 +1,5 @@
 SHELL := bash
-VERSION := 2.10.1
+VERSION := 2.10.2
 ARCH := amd64
 COMMITID := $(shell git rev-parse HEAD)
 

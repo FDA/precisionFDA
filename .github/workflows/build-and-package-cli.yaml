@@ -1,0 +1,159 @@
+name: Build and Package CLI
+
+on:
+  pull_request:
+    paths:
+      - 'packages/cli/**'
+  push:
+    branches:
+      - master
+    paths:
+      - 'packages/cli/**'
+
+jobs:
+  build-cli:
+    name: Build & Package CLI
+    runs-on: ubuntu-latest
+    environment: cli
+
+    outputs:
+      version: ${{ steps.extract_version.outputs.version }}
+      short_sha: ${{ steps.extract_version.outputs.short_sha }}
+
+    permissions:
+      id-token: write
+      contents: read
+
+    env:
+      GO_VERSION: 1.23
+      BUILD_DIR: packages/cli
+      STAGING_BUCKET: pfda-staging-static-files-transition-area
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - name: Display Go version
+        run: go version
+
+      - name: Run Go unit tests
+        working-directory: ${{ env.BUILD_DIR }}
+        run: GOEXPERIMENT=boringcrypto go test -v ./...
+
+      - name: Set build script as executable
+        run: chmod +x $BUILD_DIR/build-dist.sh
+
+      - name: Build Docker image
+        uses: docker/build-push-action@4f58ea79222b3b9dc2c8bbdd6debcef730109a75
+        with:
+          context: ${{ env.BUILD_DIR }}
+          tags: precisionfda-cli:latest
+          push: false
+
+      - name: Run build script
+        working-directory: ${{ env.BUILD_DIR }}
+        run: |
+          ./build-dist.sh
+
+      - name: Extract version from build script
+        id: extract_version
+        working-directory: ${{ env.BUILD_DIR }}
+        run: |
+          VERSION=$(grep '^VERSION=' build-dist.sh | cut -d'=' -f2)
+          echo "VERSION=$VERSION"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "short_sha=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ vars.REGION }}
+          role-to-assume: ${{ vars.ROLE_CLI }}
+
+      - name: Upload to staging Bucket
+        run: |
+          aws s3 cp ${{ env.BUILD_DIR }}/dist/ s3://${STAGING_BUCKET}/cli/ --recursive
+
+  copy-to-production:
+    needs: build-cli
+    name: Copy CLI to Production
+    runs-on: ubuntu-latest
+    environment: cli
+    if: github.ref == 'refs/heads/master'
+
+    permissions:
+      id-token: write
+      contents: read
+
+    env:
+      BUILD_DIR: packages/cli
+      STAGING_BUCKET: pfda-staging-static-files-transition-area
+      PRODUCTION_BUCKET: pfda-production-static-files
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ vars.REGION }}
+          role-to-assume: ${{ vars.ROLE_CLI }}
+
+      - name: Use version and SHA from build
+        run: |
+          echo "VERSION=${{ needs.build-cli.outputs.version }}"
+          echo "SHORT_SHA=${{ needs.build-cli.outputs.short_sha }}"
+
+      - name: Copy CLI files to production
+        env:
+          STAGING_BUCKET: pfda-staging-static-files-transition-area
+          PRODUCTION_BUCKET: pfda-production-static-files
+          VERSION: ${{ needs.build-cli.outputs.version }}
+          SHORT_SHA: ${{ needs.build-cli.outputs.short_sha }}
+        run: |
+          OBJECTS=$(aws s3api list-objects-v2 \
+            --bucket "$STAGING_BUCKET" \
+            --prefix "cli/" \
+            --query "Contents[?contains(Key, '$VERSION')]" \
+            --output json)
+
+          echo "$OBJECTS" | jq -r --arg sha "$SHORT_SHA" '.[] | select(.Key | contains($sha)) | .Key' \
+          | while IFS= read -r key; do
+              echo "Processing $key..."
+
+              # Remove -SHA from the filename
+              filename=$(basename "$key")
+              dest_filename=$(echo "$filename" | sed -E "s/-${SHORT_SHA}//")
+
+              dest_key="cli/${dest_filename}"
+
+              echo "Copying to s3://${PRODUCTION_BUCKET}/${dest_key}"
+              aws s3 cp "s3://${STAGING_BUCKET}/${key}" "s3://${PRODUCTION_BUCKET}/${dest_key}"
+              aws s3api put-object-acl --bucket "${PRODUCTION_BUCKET}" --key "${dest_key}" --acl public-read
+            done
+
+      - name: Delete non-matching files from staging
+        env:
+          STAGING_BUCKET: pfda-staging-static-files-transition-area
+          VERSION: ${{ needs.build-cli.outputs.version }}
+          SHORT_SHA: ${{ needs.build-cli.outputs.short_sha }}
+        run: |
+          OBJECTS=$(aws s3api list-objects-v2 \
+            --bucket "$STAGING_BUCKET" \
+            --prefix "cli/" \
+            --query "Contents[?contains(Key, '$VERSION')]" \
+            --output json)
+
+          echo "$OBJECTS" | jq -r --arg sha "$SHORT_SHA" --arg ver "$VERSION" \
+            '.[] | select((.Key | contains($ver)) and (.Key | contains($sha) | not)) | .Key' \
+          | while IFS= read -r key; do
+              echo "Deleting $key..."
+              aws s3 rm "s3://${STAGING_BUCKET}/${key}"
+            done
+
