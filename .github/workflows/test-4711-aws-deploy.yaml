@@ -7,6 +7,8 @@ on:
         description: Launch Template Version
         type: string
         default: $Default
+  schedule:
+    - cron: '0 2 * * *'  # Daily at 02:00 UTC = 04:00 Prague (during DST)
 
 concurrency:
   group: ${{ github.workflow }}

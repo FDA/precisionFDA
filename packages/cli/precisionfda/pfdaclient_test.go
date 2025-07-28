@@ -18,11 +18,12 @@ func TestNewPFDAClient(t *testing.T) {
 
 func TestChunkSize(t *testing.T) {
 	server := "test.precisionfda.com"
+	chunkSize := 16 * 1024 * 1024
 	pfdaclient := NewPFDAClient(server)
 	test.Equals(t, pfdaclient.ChunkSize, 1<<26)
 
-	pfdaclient.SetChunkSize(10000000)
-	test.Equals(t, pfdaclient.ChunkSize, 10000000)
+	pfdaclient.SetChunkSize(chunkSize)
+	test.Equals(t, pfdaclient.ChunkSize, chunkSize)
 }
 
 func TestMaxRoutines(t *testing.T) {

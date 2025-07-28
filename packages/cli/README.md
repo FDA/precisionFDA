@@ -85,6 +85,8 @@ Make sure the goboring docker image is built, then invoke `./build-dist.sh` from
 
 Build products will be available in `./dist`
 
+#### Worfklow from GH actions
+![](./ci_for_cli_wf.png)
 
 ### Cross Compilation:
 Compiling for non-native target platforms is made easy with go. Regardless of what OS/architecture you are running locally.
@@ -138,6 +140,10 @@ To test for FIPS compliance we can inspect the symbols using `go tool nm ./pfda`
 
 
 # Version History
+
+### 2.10.2 (2025-07-30)
+
+- fixed issue with parsing json args
 
 ### 2.10.1 (2025-06-30)
 
