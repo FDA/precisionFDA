@@ -33,7 +33,7 @@ default["nodejs"]["worker"]["instances"] = 2
 default["nodejs"]["admin-platform-client"]["instances"] = 2
 
 default[:logrotate][:period] = "daily"
-default[:logrotate][:retention] = 30
+default[:logrotate][:retention] = 2
 
 default["qualys"]["version"] = "5.0.2.4"
 default["qualys"]["activate"] = true
