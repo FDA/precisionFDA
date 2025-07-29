@@ -1,7 +1,6 @@
-/* eslint-disable max-len */
 import { config } from '@shared/config'
 import { Job } from '@shared/domain/job/job.entity'
-import axios, { AxiosInstance } from 'axios'
+import axios, { AxiosInstance, AxiosRequestConfig } from 'axios'
 import { wrapper } from 'axios-cookiejar-support'
 import { compareVersions } from 'compare-versions'
 import { omit } from 'ramda'
@@ -12,6 +11,11 @@ import { UserOpsCtx } from '../../types'
 import { CLIConfigParams, IWorkstationClient } from '../../workstation-client/workstation-client'
 import { DxId } from '../entity/domain/dxid'
 import { JOB_STATE } from './job.enum'
+
+interface AxiosCookieJarConfig extends AxiosRequestConfig {
+  jar: CookieJar
+  withCredentials: boolean
+}
 
 // Service handling communicating with workstation API
 // Each instance should be paired with one particular job
@@ -25,7 +29,12 @@ class WorkstationService {
 
   constructor(userCtx: UserOpsCtx, authToken: string) {
     this.ctx = userCtx
-    this.axiosInstance = wrapper(axios.create({ jar: new CookieJar() }))
+    const jar = new CookieJar()
+    const config: AxiosCookieJarConfig = {
+      jar,
+      withCredentials: true, // required when using cookies
+    }
+    this.axiosInstance = wrapper(axios.create(config))
     this.authToken = authToken
   }
 
