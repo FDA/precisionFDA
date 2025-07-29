@@ -75,7 +75,7 @@ export class CliController {
 
   @Get('/version/latest')
   getLatestVersion(): { version: string } {
-    return { version: '2.10.1' }
+    return { version: '2.10.2' }
   }
 
   @UseGuards(UserContextGuard)

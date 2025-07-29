@@ -14,7 +14,7 @@ export abstract class BaseQueueProcessor {
   protected async handleUserTask<TJob extends TaskWithAuth>(
     bullJob: Job,
     execute: (ctx: WorkerContext, input: any) => Promise<any>,
-  ) {
+  ): Promise<void> {
     const data = bullJob.data as TJob
     const requestId = String(bullJob.id)
     const log = getChildLogger(requestId)

@@ -1,14 +1,24 @@
 import { wrap } from '@mikro-orm/core'
 import { SqlEntityManager } from '@mikro-orm/mysql'
+import { Injectable, Logger } from '@nestjs/common'
+import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
+import {
+  JobFinishedInputTemplate,
+  jobFinishedTemplate,
+} from '@shared/domain/email/templates/mjml/job-finished.template'
+import { DxId } from '@shared/domain/entity/domain/dxid'
+import { JobRepository } from '@shared/domain/job/job.repository'
 import { RequestTerminateJobOperation } from '@shared/domain/job/ops/terminate'
 import { NotificationService } from '@shared/domain/notification/services/notification.service'
 import { Tagging } from '@shared/domain/tagging/tagging.entity'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
-import { ClientRequestError } from '@shared/errors'
-import { JobDescribeResponse } from '@shared/platform-client/platform-client.responses'
-import { EntityScope } from '@shared/types/common'
+import { User } from '@shared/domain/user/user.entity'
 import { NOTIFICATION_ACTION, SEVERITY } from '@shared/enums'
+import { ClientRequestError } from '@shared/errors'
+import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { PlatformClient } from '@shared/platform-client'
+import { JobDescribeResponse } from '@shared/platform-client/platform-client.responses'
 import {
   createSendEmailTask,
   createSyncOutputsTask,
@@ -17,7 +27,9 @@ import {
   removeRepeatable,
 } from '@shared/queue'
 import { CheckStatusJob, TASK_TYPE } from '@shared/queue/task.input'
-import { Maybe, UserOpsCtx, WorkerOpsCtx } from '@shared/types'
+import { Maybe } from '@shared/types'
+import { EntityScope } from '@shared/types/common'
+import { Job as BullJob } from 'bull'
 import { EmailSendInput } from '../../email/email.config'
 import { buildEmailTemplate, getBullJobIdForEmailOperation } from '../../email/email.helper'
 import {
@@ -34,18 +46,6 @@ import {
   sendJobFailedEmails,
   shouldSyncStatus,
 } from '../job.helper'
-import {
-  JobFinishedInputTemplate,
-  jobFinishedTemplate,
-} from '@shared/domain/email/templates/mjml/job-finished.template'
-import { Job as BullJob } from 'bull'
-import { Injectable, Logger } from '@nestjs/common'
-import { UserContext } from '@shared/domain/user-context/model/user-context'
-import { JobRepository } from '@shared/domain/job/job.repository'
-import { ServiceLogger } from '@shared/logger/decorator/service-logger'
-import { User } from '@shared/domain/user/user.entity'
-import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
-import { DxId } from '@shared/domain/entity/domain/dxid'
 
 /**
  * JobSynchronizationService is responsible for synchronizing the job status with the platform.
@@ -247,13 +247,7 @@ export class JobSynchronizationService {
 
       if (!job.terminationEmailSent) {
         try {
-          const workerOpsCtx: WorkerOpsCtx<UserOpsCtx> = {
-            em: this.em,
-            log: this.logger,
-            user: this.userCtx,
-            job: bullJob,
-          }
-          await sendJobFailedEmails(job.id as number, workerOpsCtx)
+          await sendJobFailedEmails(job.id, this.em)
           job.terminationEmailSent = true
         } catch (e) {
           this.logger.error({ job: updatedJob }, 'Failed to send emails', e)

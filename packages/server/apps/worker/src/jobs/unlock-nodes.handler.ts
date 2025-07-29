@@ -6,7 +6,7 @@ import { SqlEntityManager } from '@mikro-orm/mysql'
 import { UserOpsCtx, WorkerOpsCtx } from '@shared/types'
 import { getChildLogger } from '../utils/logger'
 
-export const unlockNodesHandler = async (bullJob: Job) => {
+export const unlockNodesHandler = async (bullJob: Job): Promise<void> => {
   const ids: number[] = bullJob.data.payload as number[]
 
   const requestId = String(bullJob.id)
@@ -23,6 +23,6 @@ export const unlockNodesHandler = async (bullJob: Job) => {
     await new NodesUnlockOperation(ctx).execute({ ids, async: true })
   } catch (error) {
     log.error('Failed to lock nodes', error)
-    await sendJobFailedEmails(bullJob.id as number, ctx)
+    await sendJobFailedEmails(bullJob.id as number, ctx.em)
   }
 }
