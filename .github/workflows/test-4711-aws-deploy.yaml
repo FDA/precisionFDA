@@ -58,7 +58,7 @@ jobs:
           ENV_ASG_NAME: ${{ vars.ENV_ASG_NAME }}
           ENV_TG: ${{ vars.ENV_TG }}
           ENV_LT_NAME: ${{ vars.ENV_LT_NAME }}
-          ENV_LT_VERSION: ${{ inputs.LT_VERSION }}
+          ENV_LT_VERSION: ${{ github.event.inputs.LT_VERSION || '$Default' }} # Set value here in case of cron job
           ENV_INSTANCE_TYPE: appinstance
           ENV_MIN_SIZE: ${{ vars.ENV_MIN_SIZE }}
           ENV_MAX_SIZE: ${{ vars.ENV_MAX_SIZE }}
