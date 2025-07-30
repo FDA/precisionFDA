@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router'
 import { toast } from 'react-toastify'
 import styled from 'styled-components'
 import { Button } from '../../../components/Button'
-import { Dropdown } from '../../../components/Dropdown'
+import { DropdownNext } from '../../../components/Dropdown/DropdownNext'
 import { ArrowIcon } from '../../../components/icons/ArrowIcon'
 import { PlusIcon } from '../../../components/icons/PlusIcon'
 import { UnlockIcon } from '../../../components/icons/UnlockIcon'
@@ -207,7 +207,10 @@ export const UsersListActionRow = ({ selectedUsers, refetchUsers }: UserListActi
         onChange={setJobLimitInput}
         isSubmitButtonDisabled={Number.isNaN(jobLimitInput) || jobLimitInput < 0}
       />
-      <Dropdown trigger="click" content={<ResourceDropdownContent selectedUsers={selectedUsers} />}>
+      <DropdownNext 
+        trigger="click" 
+        content={() => <ResourceDropdownContent selectedUsers={selectedUsers} />}
+      >
         {dropdownProps => (
           <DropdownButton
             {...dropdownProps}
@@ -216,7 +219,7 @@ export const UsersListActionRow = ({ selectedUsers, refetchUsers }: UserListActi
             disabled={selectedUsers.length === 0}
           />
         )}
-      </Dropdown>
+      </DropdownNext>
     </ButtonsRow>
   )
 }
