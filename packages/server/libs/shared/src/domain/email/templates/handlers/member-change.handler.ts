@@ -164,52 +164,9 @@ export class MemberChangedEmailHandler extends EmailHandler<EMAIL_TYPES.memberCh
       { populate: ['user.notificationPreference'] },
     )
 
-    const spaceEventUserId = context.user.id
-    const userMembership = memberships.filter((memberShip) => {
-      if (memberShip.user.id === spaceEventUserId) {
-        return memberShip
-      }
-    })
+    const receivers = memberships.map((membership) => membership.user.getEntity())
 
-    const receiverMembershipForAdding = memberships.filter((membership) => {
-      if (
-        membership &&
-        membership.side === userMembership[0].side &&
-        [SPACE_MEMBERSHIP_ROLE.ADMIN, SPACE_MEMBERSHIP_ROLE.LEAD].includes(membership.role)
-      ) {
-        return membership
-      }
-    })
-
-    const receiverMembershipForChanging = memberships.filter((membership) => {
-      if (membership && membership.side === userMembership[0].side) {
-        return membership
-      }
-    })
-
-    let receivers
-    // membership_added
-    if (context.input.activityType === 'membership_added') {
-      receivers = receiverMembershipForAdding.map((membership) => membership.user.getEntity())
-    } else {
-      // other actions for membership: enable/disable/role change
-      receivers = receiverMembershipForChanging.map((membership) => membership.user.getEntity())
-      if (
-        context.input.activityType === 'membership_enabled' &&
-        !context.updatedMembership.active
-      ) {
-        const enabledUser = await this.em.findOneOrFail(
-          User,
-          {
-            id: context.updatedMembership.user.id,
-          },
-          { populate: ['notificationPreference'] },
-        )
-        receivers.push(enabledUser)
-      }
-    }
-
-    return receivers.filter((user: User) => user.id !== spaceEventUserId)
+    return receivers.filter((user: User) => user.id !== context.input.initUserId)
   }
 
   private async getTemplateContent(

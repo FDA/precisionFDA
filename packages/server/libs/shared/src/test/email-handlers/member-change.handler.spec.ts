@@ -19,6 +19,7 @@ import {
 import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
 import { NotificationPreference } from '@shared/domain/notification-preference/notification-preference.entity'
 import { Reference } from '@mikro-orm/core'
+import { SPACE_TYPE } from '@shared/domain/space/space.enum'
 
 describe('MemberChangedEmailHandler', () => {
   const SPACE_ID = 15
@@ -167,13 +168,14 @@ describe('MemberChangedEmailHandler', () => {
       adminUser.email = 'test@email.com'
       const notificationPref = new NotificationPreference(adminUser)
       notificationPref.data = {
-        private_challenge_opened: true,
+        group_lead_member_added_to_space: true,
       }
       adminUser.notificationPreference = Reference.create(notificationPref)
       userRepoFindOneOrFailStub.withArgs({ id: USER_ID }).returns(user)
       userRepoFindOneOrFailStub.withArgs({ id: USER2_ID }).returns(adminUser)
       const space = new Space()
       space.id = SPACE_ID
+      space.type = SPACE_TYPE.GROUPS
       spaceRepoFindOneOrFailStub.withArgs({ id: SPACE_ID }).returns(space)
       const spaceMembership = new SpaceMembership(
         user,
