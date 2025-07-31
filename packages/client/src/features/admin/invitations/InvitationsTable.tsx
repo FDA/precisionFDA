@@ -19,12 +19,12 @@ import { InvitationListType } from './type'
 import useLastWebsocketMessage from './useLastWebsocketMessage'
 
 const fetchInvitationsList = async (filters: IFilter[], params: Params) => {
-  const filterParam = prepareListFetchV2(filters, params)
+  const filterParam = prepareListFetchV2(filters, params) as Record<string, string>
   if (params.ids) {
     filterParam['filter[ids]'] = params.ids
   }
   return fetchInvitations({
-    params: filterParam,
+    params: new URLSearchParams(filterParam),
   })
 }
 
