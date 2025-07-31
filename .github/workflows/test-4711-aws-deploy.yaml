@@ -7,6 +7,8 @@ on:
         description: Launch Template Version
         type: string
         default: $Default
+  schedule:
+    - cron: '0 2 * * *'  # Daily at 02:00 UTC = 04:00 Prague (during DST)
 
 concurrency:
   group: ${{ github.workflow }}
@@ -56,7 +58,7 @@ jobs:
           ENV_ASG_NAME: ${{ vars.ENV_ASG_NAME }}
           ENV_TG: ${{ vars.ENV_TG }}
           ENV_LT_NAME: ${{ vars.ENV_LT_NAME }}
-          ENV_LT_VERSION: ${{ inputs.LT_VERSION }}
+          ENV_LT_VERSION: ${{ github.event.inputs.LT_VERSION || '$Default' }} # Set value here in case of cron job
           ENV_INSTANCE_TYPE: appinstance
           ENV_MIN_SIZE: ${{ vars.ENV_MIN_SIZE }}
           ENV_MAX_SIZE: ${{ vars.ENV_MAX_SIZE }}

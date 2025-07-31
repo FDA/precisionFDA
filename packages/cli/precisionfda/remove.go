@@ -75,7 +75,7 @@ func (c *PFDAClient) RemoveDir(id string) error {
 	}
 
 	if result == 0 {
-		return fmt.Errorf("Folder with id: %s not found or inaccessible", intId)
+		return fmt.Errorf("Folder with id: %d not found or inaccessible", intId)
 	}
 
 	if c.JsonResponse {
