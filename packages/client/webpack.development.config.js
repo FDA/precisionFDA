@@ -192,6 +192,11 @@ module.exports = merge(base({ urlLoaderOptions }), swc({ swcLoaderOptions }), {
         target: TARGET,
         secure: false,
       },
+      {
+        context: ['/admin/bulk_enable_resource'],
+        target: TARGET,
+        secure: false,
+      },
     ],
   },
 })
