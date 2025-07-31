@@ -4,7 +4,6 @@ import { SpaceMembership } from './space-membership.entity'
 
 @Module({
   imports: [MikroOrmModule.forFeature([SpaceMembership])],
-  providers: [],
   exports: [MikroOrmModule],
 })
 export class SpaceMembershipModule {}

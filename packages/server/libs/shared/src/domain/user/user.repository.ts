@@ -1,14 +1,14 @@
 import { FindOptions } from '@mikro-orm/core'
+import { PaginatedRepository } from '@shared/domain/entity/repository/paginated.repository'
 import { config } from '../../config'
-import { buildJsonPath } from '../../utils/path'
-import { mysqlJsonArrayAppend, mysqlJsonSet } from '../../utils/sql-json-column-utils'
 import { DNANEXUS_INVALID_EMAIL, ORG_EVERYONE } from '../../config/consts'
+import { MfaAlreadyResetError, ValidationError } from '../../errors'
 import { PlatformClient } from '../../platform-client'
 import { UserCtx } from '../../types'
-import { MfaAlreadyResetError, ValidationError } from '../../errors'
 import { classifyErrorTypes } from '../../utils/classify-error-types'
+import { buildJsonPath } from '../../utils/path'
+import { mysqlJsonArrayAppend, mysqlJsonSet } from '../../utils/sql-json-column-utils'
 import { RESOURCE_TYPES, User, USER_STATE } from './user.entity'
-import { PaginatedRepository } from '@shared/domain/entity/repository/paginated.repository'
 
 type Resource = (typeof RESOURCE_TYPES)[number]
 
@@ -27,11 +27,12 @@ export class UserRepository extends PaginatedRepository<User> {
     return this.findOneOrFail({ dxuser }, { populate: ['organization'] })
   }
 
+  /** @deprecated This should never be used, causes the checkNonTerminatedDbClusters to fail in prod */
   findAdminUser(): Promise<User> {
     return this.findDxuser(config.platform.adminUser)
   }
 
-  bulkUpdateSetTotalLimit(ids: number[], totalLimit: number) {
+  async bulkUpdateSetTotalLimit(ids: number[], totalLimit: number): Promise<void> {
     const qb = this.createQueryBuilder()
     qb.where({
       id: {
@@ -46,16 +47,16 @@ export class UserRepository extends PaginatedRepository<User> {
       cloud_resource_settings: knex.raw(
         mysqlJsonSet<User>(
           // TODO(samuel) resolve snake_case to camelCase mapping
-          'cloud_resource_settings' as any,
+          'cloud_resource_settings' as keyof User,
           buildJsonPath(['total_limit']),
           { type: 'number', value: totalLimit },
         ),
       ),
     })
-    return this.em.getConnection().execute(knexQuery)
+    await this.em.getConnection().execute(knexQuery)
   }
 
-  bulkUpdateSetJobLimit(ids: number[], jobLimit: number) {
+  async bulkUpdateSetJobLimit(ids: number[], jobLimit: number): Promise<void> {
     const qb = this.createQueryBuilder()
     qb.where({
       id: {
@@ -70,25 +71,42 @@ export class UserRepository extends PaginatedRepository<User> {
       cloud_resource_settings: knex.raw(
         mysqlJsonSet<User>(
           // TODO(samuel) resolve snake_case to camelCase mapping
-          'cloud_resource_settings' as any,
+          'cloud_resource_settings' as keyof User,
           buildJsonPath(['job_limit']),
           { type: 'number', value: jobLimit },
         ),
       ),
     })
-    return this.em.getConnection().execute(knexQuery)
+    await this.em.getConnection().execute(knexQuery)
   }
 
   // TODO - Refactor business logic to service layer instead of using repository
-  async bulkUpdateReset2fa(ids: number[], client: PlatformClient, userCtx: UserCtx) {
+  async bulkUpdateReset2fa(
+    ids: number[],
+    client: PlatformClient,
+    userCtx: UserCtx,
+  ): Promise<
+    {
+      dxuser: string
+      result:
+        | {
+            status: 'success'
+            value: unknown
+            errorType?: undefined
+            message?: undefined
+            error?: undefined
+          }
+        | {}
+    }[]
+  > {
     const users = await this.em.find(User, {
       id: {
         $in: ids,
       },
     })
 
-    return Promise.allSettled(
-      users.map(user =>
+    const results = await Promise.allSettled(
+      users.map((user) =>
         client.userResetMfa({
           dxid: `user-${userCtx.dxuser}`,
           data: {
@@ -97,22 +115,36 @@ export class UserRepository extends PaginatedRepository<User> {
           },
         }),
       ),
-    ).then(results =>
-      results.map((result, index) => ({
-        dxuser: users[index].dxuser,
-        result: classifyErrorTypes([MfaAlreadyResetError], result),
-      })),
     )
+    return results.map((result, index) => ({
+      dxuser: users[index].dxuser,
+      result: classifyErrorTypes([MfaAlreadyResetError], result),
+    }))
   }
 
-  async bulkUpdateUnlock(ids: number[], client: PlatformClient, userCtx: UserCtx) {
+  async bulkUpdateUnlock(
+    ids: number[],
+    client: PlatformClient,
+    userCtx: UserCtx,
+  ): Promise<
+    {
+      dxuser: string
+      result: {
+        status: 'success' | 'unhandledError' | 'handledError'
+        value?: unknown
+        errorType?: undefined
+        message?: undefined
+        error?: undefined
+      }
+    }[]
+  > {
     const users = await this.em.find(User, {
       id: {
         $in: ids,
       },
     })
     return Promise.allSettled(
-      users.map(user =>
+      users.map((user) =>
         client.userUnlock({
           dxid: `user-${userCtx.dxuser}`,
           data: {
@@ -121,7 +153,7 @@ export class UserRepository extends PaginatedRepository<User> {
           },
         }),
       ),
-    ).then(results =>
+    ).then((results) =>
       results.map((result, index) => ({
         dxuser: users[index].dxuser,
         result: classifyErrorTypes([], result),
@@ -130,21 +162,21 @@ export class UserRepository extends PaginatedRepository<User> {
   }
 
   // NOTE(samuel) this assumes that user isn't activating self
-  async bulkActivate(ids: number[]) {
+  async bulkActivate(ids: number[]): Promise<void> {
     const users = await this.em.find(User, {
       id: {
         $in: ids,
       },
     })
-    const invalidUsers = users.filter(user => user.userState !== USER_STATE.DEACTIVATED)
+    const invalidUsers = users.filter((user) => user.userState !== USER_STATE.DEACTIVATED)
     if (invalidUsers.length > 0) {
       throw new ValidationError(
         `Cannot activate other than deactivated users: "${JSON.stringify(
-          users.map(user => user.dxuser),
+          users.map((user) => user.dxuser),
         )}"`,
       )
     }
-    users.forEach(user => {
+    users.forEach((user) => {
       user.disableMessage = null
       if (user.email) {
         user.email = Buffer.from(
@@ -165,21 +197,21 @@ export class UserRepository extends PaginatedRepository<User> {
   }
 
   // Note(samuel) this assumes that user isn't deactivating self
-  async bulkDeactivate(ids: number[]) {
+  async bulkDeactivate(ids: number[]): Promise<void> {
     const users = await this.em.find(User, {
       id: {
         $in: ids,
       },
     })
-    const invalidUsers = users.filter(user => user.userState !== USER_STATE.ENABLED)
+    const invalidUsers = users.filter((user) => user.userState !== USER_STATE.ENABLED)
     if (invalidUsers.length > 0) {
       throw new ValidationError(
         `Cannot deactivate other than enabled users: "${JSON.stringify(
-          users.map(user => user.dxuser),
+          users.map((user) => user.dxuser),
         )}"`,
       )
     }
-    users.forEach(user => {
+    users.forEach((user) => {
       // TODO(samuel) - placeholder
       user.disableMessage = 'Bulk deactivate'
       if (user.email) {
@@ -198,7 +230,7 @@ export class UserRepository extends PaginatedRepository<User> {
     await this.em.flush()
   }
 
-  bulkEnableResourceType(ids: number[], resource: Resource) {
+  async bulkEnableResourceType(ids: number[], resource: Resource): Promise<void> {
     const qb = this.em.createQueryBuilder(User)
     qb.where({
       id: {
@@ -213,16 +245,16 @@ export class UserRepository extends PaginatedRepository<User> {
       cloud_resource_settings: knex.raw(
         mysqlJsonArrayAppend<User>(
           // TODO(samuel) resolve snake_case to camelCase mapping
-          'cloud_resource_settings' as any,
+          'cloud_resource_settings' as keyof User,
           buildJsonPath(['resources']),
           { type: 'string', value: resource },
         ),
       ),
     })
-    return this.em.getConnection().execute(knexQuery)
+    await this.em.getConnection().execute(knexQuery)
   }
 
-  bulkEnableAll(ids: number[]) {
+  async bulkEnableAll(ids: number[]): Promise<void> {
     const qb = this.createQueryBuilder()
     qb.where({
       id: {
@@ -237,19 +269,19 @@ export class UserRepository extends PaginatedRepository<User> {
       cloud_resource_settings: knex.raw(
         mysqlJsonSet<User>(
           // TODO(samuel) resolve snake_case to camelCase mapping
-          'cloud_resource_settings' as any,
+          'cloud_resource_settings' as keyof User,
           buildJsonPath(['resources']),
           {
             type: 'jsonArrayExpression',
-            value: RESOURCE_TYPES.map(v => ({ type: 'string', value: v })),
+            value: RESOURCE_TYPES.map((v) => ({ type: 'string', value: v })),
           },
         ),
       ),
     })
-    return this.em.getConnection().execute(knexQuery)
+    await this.em.getConnection().execute(knexQuery)
   }
 
-  async bulkDisableResourceType(ids: number[], resource: Resource) {
+  async bulkDisableResourceType(ids: number[], resource: Resource): Promise<void> {
     // NOTE(samuel) impossible to implement with knex query and JSON mysql functions
     // JSON functions cannot filter element out of an array
     const users = await this.em.find(User, {
@@ -257,16 +289,16 @@ export class UserRepository extends PaginatedRepository<User> {
         $in: ids,
       },
     })
-    users.forEach(user => {
+    users.forEach((user) => {
       user.cloudResourceSettings!.resources = user.cloudResourceSettings!.resources.filter(
-        userResource => userResource !== resource,
+        (userResource) => userResource !== resource,
       )
       this.em.persist(user)
     })
-    return this.em.flush()
+    await this.em.flush()
   }
 
-  bulkDisableAll(ids: number[]) {
+  async bulkDisableAll(ids: number[]): Promise<void> {
     const qb = this.createQueryBuilder()
     qb.where({
       id: {
@@ -281,12 +313,12 @@ export class UserRepository extends PaginatedRepository<User> {
       cloud_resource_settings: knex.raw(
         mysqlJsonSet<User>(
           // TODO(samuel) resolve snake_case to camelCase mapping
-          'cloud_resource_settings' as any,
+          'cloud_resource_settings' as keyof User,
           buildJsonPath(['resources']),
           { type: 'jsonArrayExpression', value: [] },
         ),
       ),
     })
-    return this.em.getConnection().execute(knexQuery)
+    await this.em.getConnection().execute(knexQuery)
   }
 }

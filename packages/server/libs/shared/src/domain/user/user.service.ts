@@ -1,6 +1,7 @@
-import { FilterQuery, SqlEntityManager } from '@mikro-orm/mysql'
+import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Injectable, Logger } from '@nestjs/common'
 import { config } from '@shared/config'
+import { ObjectFilterQuery } from '@shared/database/domain/object-filter-query'
 import { EmailSendInput } from '@shared/domain/email/email.config'
 import { buildEmailTemplate } from '@shared/domain/email/email.helper'
 import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
@@ -9,7 +10,9 @@ import {
   UserInactivityAlertEmailInput,
   userInactivityAlertTemplate,
 } from '@shared/domain/email/templates/mjml/user-inactivity-alert.template'
+import { PaginatedResult } from '@shared/domain/entity/domain/paginated.result'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { UserCloudResourcesDTO } from '@shared/domain/user/dto/user-cloud-resources.dto'
 import { UserPaginationDto } from '@shared/domain/user/dto/user-pagination.dto'
 import { HeaderItem } from '@shared/domain/user/header-item'
 import { UserExtras } from '@shared/domain/user/user-extras'
@@ -17,10 +20,8 @@ import { CloudResourceSettings, User, USER_STATE } from '@shared/domain/user/use
 import { UserRepository } from '@shared/domain/user/user.repository'
 import { NoHeaderItemsSetError, NotFoundError } from '@shared/errors'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
-import { StringUtils } from '@shared/utils/string.utils'
 import { PlatformClient } from '@shared/platform-client'
-import { UserCloudResourcesDTO } from '@shared/domain/user/dto/user-cloud-resources.dto'
-import { PaginatedResult } from '@shared/domain/entity/domain/paginated.result'
+import { StringUtils } from '@shared/utils/string.utils'
 
 @Injectable()
 export class UserService {
@@ -36,7 +37,7 @@ export class UserService {
   ) {}
 
   async paginateUsers(query: UserPaginationDto): Promise<PaginatedResult<User>> {
-    const where: FilterQuery<User> = {}
+    const where: ObjectFilterQuery<User> = {}
     if (query.filter?.dxuser) {
       where.dxuser = { $like: `%${query.filter.dxuser}%` }
     }
@@ -184,6 +185,10 @@ export class UserService {
       })
     }
     // TODO - Refactor calls like ResetMFA here
+  }
+
+  async getUserById(id: number): Promise<User> {
+    return await this.userRepo.findOne({ id: id })
   }
 
   async getCloudResources(): Promise<UserCloudResourcesDTO> {

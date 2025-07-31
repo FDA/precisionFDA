@@ -1,4 +1,3 @@
-import { EmailTemplateInput } from '@shared/domain/email/email.config'
 import { header, footer } from './common'
 
 interface ReportDbClusterInfo {
@@ -10,13 +9,13 @@ interface ReportDbClusterInfo {
   duration: string
 }
 
-export type ReportNonTerminatedDbClustersTemplateInput = EmailTemplateInput & {
+export type ReportNonTerminatedDbClustersTemplateInput = {
   content: {
     nonTerminatedDbClusters: ReportDbClusterInfo[]
   }
 }
 
-const createDbClustersTable = (dbclustersInfo: ReportDbClusterInfo[]) => {
+const createDbClustersTable = (dbclustersInfo: ReportDbClusterInfo[]): string => {
   return `
   <mj-table>
     <tr style="border-bottom:1px solid #ecedee; text-align: left;">
