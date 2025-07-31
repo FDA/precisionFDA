@@ -1,5 +1,5 @@
+import { PaginatedRepository } from '@shared/database/repository/paginated.repository'
 import { NewsItem } from './news-item.entity'
-import { PaginatedRepository } from '@shared/domain/entity/repository/paginated.repository'
 
 export class NewsRepository extends PaginatedRepository<NewsItem> {
   async getDistinctYears(): Promise<number[]> {

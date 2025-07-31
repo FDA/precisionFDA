@@ -1,5 +1,5 @@
 import { FindOptions } from '@mikro-orm/core'
-import { PaginatedRepository } from '@shared/domain/entity/repository/paginated.repository'
+import { PaginatedRepository } from '@shared/database/repository/paginated.repository'
 import { config } from '../../config'
 import { DNANEXUS_INVALID_EMAIL, ORG_EVERYONE } from '../../config/consts'
 import { MfaAlreadyResetError, ValidationError } from '../../errors'

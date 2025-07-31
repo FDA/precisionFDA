@@ -3,7 +3,7 @@ import { PaginationParams } from '../../types/common'
 import { buildEntityQueryAndFilter } from '../permissions/permissions.filters'
 import { Job } from './job.entity'
 import { JOB_STATE } from './job.enum'
-import { AccessControlRepository } from '@shared/repository/access-control.repository'
+import { AccessControlRepository } from '@shared/database/repository/access-control.repository'
 import { User } from '@shared/domain/user/user.entity'
 import { STATIC_SCOPE } from '@shared/enums'
 

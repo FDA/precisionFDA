@@ -31,6 +31,7 @@ import { NotificationsApiModule } from './notifications/notifications.api.module
 import { PropertiesApiModule } from './properties/properties.api.module'
 import { PublishApiModule } from './publish/publish.api.module'
 import { ReportsApiModule } from './reports/reports.api.module'
+import { SearchApiModule } from './search/search.api.module'
 import { SessionApiModule } from './session/session.api.module'
 import { SiteSettingsApiModule } from './site-settings/site-settings.api.module'
 import { SpaceEventsApiModule } from './space-events/space-events.api.module'
@@ -87,6 +88,7 @@ import { SpaceGroupsApiModule } from './space-groups/space-groups.api.module'
     ReportsApiModule,
     SessionApiModule,
     PublishApiModule,
+    SearchApiModule,
   ],
   providers: [
     ...apiExceptionFilterProviders,

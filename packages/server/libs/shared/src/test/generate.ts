@@ -4,7 +4,11 @@ import { Comment } from '@shared/domain/comment/comment.entity'
 import { DbCluster } from '@shared/domain/db-cluster/db-cluster.entity'
 import { DxId } from '@shared/domain/entity/domain/dxid'
 import { Uid } from '@shared/domain/entity/domain/uid'
-import { User, USER_STATE } from '../domain/user/user.entity'
+import {
+  ExpertQuestion,
+  ExpertQuestionState,
+} from '@shared/domain/expert-question/entity/expert-question.entity'
+import { Expert, EXPERT_STATE } from '@shared/domain/expert/entity/expert.entity'
 import { Invitation } from '@shared/domain/invitation/invitation.entity'
 import { PROVISIONING_STATE } from '@shared/domain/invitation/invitation.enum'
 import { Job } from '@shared/domain/job/job.entity'
@@ -40,7 +44,6 @@ import {
   ENGINES,
   STATUS as DB_CLUSTER_STATUS,
 } from '../domain/db-cluster/db-cluster.enum'
-import { Expert, EXPERT_STATE } from '../domain/expert/expert.entity'
 import { JOB_DB_ENTITY_TYPE, JOB_STATE } from '../domain/job/job.enum'
 import {
   ENTITY_TYPE as SPACE_EVENT_ENTITY_TYPE,
@@ -52,6 +55,7 @@ import {
   SPACE_MEMBERSHIP_SIDE,
 } from '../domain/space-membership/space-membership.enum'
 import { FILE_STATE_DX, FILE_STI_TYPE, PARENT_TYPE } from '../domain/user-file/user-file.types'
+import { User, USER_STATE } from '../domain/user/user.entity'
 import { STATIC_SCOPE } from '../enums'
 import { TASK_TYPE } from '../queue/task.input'
 import type { AnyObject, UserCtx } from '../types'
@@ -376,7 +380,7 @@ const workflow = {
     const dxid = `workflow-${random.dxstr()}}` as DxId<'workflow'>
     return {
       dxid,
-      uid: `${dxid}-1` as Uid<'workflow'>,
+      uid: `${dxid}-1`,
       name,
       revision: 1,
       scope: 'private',
@@ -579,9 +583,9 @@ const space = {
     type: 1, // review type
     guestDxOrg: `org-pfda..space_guest_${random.dxstr()}`,
     hostDxOrg: `org-pfda..space_host_${random.dxstr()}`,
-    spaceId: null as any,
-    hostProject: null as any,
-    guestProject: null as any,
+    spaceId: null,
+    hostProject: null,
+    guestProject: null,
     description: 'desc',
     meta: {
       restricted_discussions: false,
@@ -593,9 +597,9 @@ const space = {
     name: chance.word(),
     state: 1,
     type: 0, // GROUP type
-    spaceId: null as any,
-    hostProject: null as any,
-    guestProject: null as any,
+    spaceId: null,
+    hostProject: null,
+    guestProject: null,
   }),
   // represents space on platform
   projectId: (): string => `project-j47b1k3z8Jqqv001213v312j1`,
@@ -705,6 +709,19 @@ const expert = {
         _challenge: `Challenge - ${expertName}`,
         _image_id: fileDxid,
       },
+    }
+  },
+}
+
+const expertQuestion = {
+  simple: (): Partial<InstanceType<typeof ExpertQuestion>> => {
+    return {
+      body: chance.sentence(),
+      meta: {
+        _original: chance.sentence(),
+        _edited: true,
+      },
+      state: ExpertQuestionState.OPEN,
     }
   },
 }
@@ -824,6 +841,7 @@ export {
   comparison,
   dbCluster,
   expert,
+  expertQuestion,
   folder,
   invitation,
   job,

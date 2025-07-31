@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common'
+import { Expert } from '@shared/domain/expert/entity/expert.entity'
 
 import { ExpertService } from '@shared/domain/expert/services/expert.service'
 import { MikroOrmModule } from '@mikro-orm/nestjs'
-import { Expert } from '@shared/domain/expert/expert.entity'
 import { RemoveNodesFacadeModule } from '@shared/facade/node-remove/remove-nodes-facade.module'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 

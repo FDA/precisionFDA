@@ -1,18 +1,18 @@
 import {
+  Cascade,
+  Collection,
   Entity,
   Enum,
-  Ref,
   ManyToOne,
-  Property,
   OneToMany,
-  Collection,
-  Cascade,
+  Property,
+  Ref,
 } from '@mikro-orm/core'
-import { Expert } from '@shared/domain/expert/expert.entity'
-import { User } from '@shared/domain/user/user.entity'
-import { BaseEntity } from '../../database/base.entity'
+import { BaseEntity } from '@shared/database/base.entity'
 import { ExpertQuestionComment } from '@shared/domain/comment/expert-question-comment.entity'
-import { ExpertQuestionRepository } from '@shared/domain/expert-question/expert-question.repository'
+import { ExpertQuestionRepository } from '@shared/domain/expert-question/repository/expert-question.repository'
+import { Expert } from '@shared/domain/expert/entity/expert.entity'
+import { User } from '@shared/domain/user/user.entity'
 
 export enum ExpertQuestionState {
   OPEN = 'open',
