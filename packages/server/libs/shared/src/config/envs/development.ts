@@ -67,6 +67,9 @@ export const config: ConfigOverride = () => ({
       saveEmailToFile: true,
     },
   },
+  dbCluster: {
+    passwordSecret: process.env.DBCLUSTER_PASSWORD_SECRET ?? 'dbclusterpasswordsecret',
+  },
   bullBoardEnabled: true,
   nestjsDevtoolsEnabled: true,
   challengeProposalRecipients: [],

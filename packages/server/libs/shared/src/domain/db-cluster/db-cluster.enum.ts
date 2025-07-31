@@ -44,25 +44,12 @@ const allowedEngineVersions = ['8.0.mysql_aurora.3.04.1', '11.9', '12.9', '13.9'
 
 const allowedEngines = ['aurora-mysql', 'aurora-postgresql']
 
-type EncryptedData = {
-  ciphertext: string
-  salt: string
-  iv: string
-  tag: string
+interface ActionConfig {
+  requiredStatus: STATUS
+  errorMessage: string
 }
 
-type UserMapping = {
-  username: string
-  psw: string
-  role: string
-}
-
-type DataToEncrypt = {
-  db_cluster_id: string
-  db_cluster_admin_username: string
-  db_cluster_admin_password: string
-  users_mapping: UserMapping[]
-}
+type DbClusterStatus = (typeof STATUSES)[keyof typeof STATUSES]
 
 export {
   ENGINE,
@@ -72,7 +59,6 @@ export {
   allowedEngineVersions,
   allowedEngines,
   allowedInstanceTypes,
-  EncryptedData,
-  UserMapping,
-  DataToEncrypt,
+  ActionConfig,
+  DbClusterStatus,
 }

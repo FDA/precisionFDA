@@ -1,16 +1,16 @@
 import { Injectable } from '@nestjs/common'
-import { DbClusterService } from '@shared/domain/db-cluster/service/db-cluster.service'
 import { Uid } from '@shared/domain/entity/domain/uid'
+import { DbClusterPasswordFacade } from 'apps/api/src/facade/db-cluster/password-facade/db-cluster-password.facade'
 
 @Injectable()
 export class CliService {
-  constructor(private readonly dbclusterService: DbClusterService) {}
+  constructor(private readonly dbClusterPasswordFacade: DbClusterPasswordFacade) {}
 
   async dbClusterGetPassword(dbclusterUid: Uid<'dbcluster'>): Promise<string> {
-    return await this.dbclusterService.getPassword(dbclusterUid)
+    return await this.dbClusterPasswordFacade.getPassword(dbclusterUid)
   }
 
   async dbClusterRotatePassword(dbclusterUid: Uid<'dbcluster'>): Promise<string> {
-    return await this.dbclusterService.rotatePassword(dbclusterUid)
+    return await this.dbClusterPasswordFacade.rotatePassword(dbclusterUid)
   }
 }

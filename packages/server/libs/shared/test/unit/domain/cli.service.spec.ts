@@ -3,7 +3,7 @@ import { expect } from 'chai'
 import { database } from '@shared/database'
 import { CliService } from '@shared/domain/cli/service/cli.service'
 import { SinonStub, stub } from 'sinon'
-import { DbClusterService } from '@shared/domain/db-cluster/service/db-cluster.service'
+import { DbClusterPasswordFacade } from 'apps/api/src/facade/db-cluster/password-facade/db-cluster-password.facade'
 
 describe('CliService tests', () => {
   let em: EntityManager<MySqlDriver>
@@ -43,11 +43,11 @@ describe('CliService tests', () => {
   })
 
   function getInstance(): CliService {
-    const dbClusterService = {
+    const dbClusterPasswordFacade = {
       getPassword: getPasswordStub,
       rotatePassword: rotatePasswordStub,
-    } as unknown as DbClusterService
+    } as unknown as DbClusterPasswordFacade
 
-    return new CliService(dbClusterService)
+    return new CliService(dbClusterPasswordFacade)
   }
 })
