@@ -1,10 +1,9 @@
-/* eslint-disable max-len */
 import { config } from '@shared/config'
 import { Job } from '@shared/domain/job/job.entity'
-import axios, { AxiosInstance } from 'axios'
-import { wrapper } from 'axios-cookiejar-support'
+import axios, { AxiosInstance, AxiosRequestConfig } from 'axios'
 import { compareVersions } from 'compare-versions'
 import { omit } from 'ramda'
+import { wrapper } from 'axios-cookiejar-support'
 import { CookieJar } from 'tough-cookie'
 import * as errors from '../../errors'
 import { getServiceFactory } from '../../services/service-factory'
@@ -13,11 +12,16 @@ import { CLIConfigParams, IWorkstationClient } from '../../workstation-client/wo
 import { DxId } from '../entity/domain/dxid'
 import { JOB_STATE } from './job.enum'
 
+interface AxiosCookieJarConfig extends AxiosRequestConfig {
+  jar: CookieJar
+  withCredentials: boolean
+}
+
 // Service handling communicating with workstation API
 // Each instance should be paired with one particular job
 class WorkstationService {
   private readonly ctx: UserOpsCtx
-  private readonly axiosInstance: AxiosInstance
+  private axiosInstance: AxiosInstance
   client: IWorkstationClient
   job: Job
   jobUrl: string
@@ -25,11 +29,18 @@ class WorkstationService {
 
   constructor(userCtx: UserOpsCtx, authToken: string) {
     this.ctx = userCtx
-    this.axiosInstance = wrapper(axios.create({ jar: new CookieJar() }))
+
     this.authToken = authToken
   }
 
   async initWithJob(jobDxid: DxId<'job'>): Promise<WorkstationService> {
+    const jar = new CookieJar()
+    const config: AxiosCookieJarConfig = {
+      jar,
+      withCredentials: true, // required when using cookies
+    }
+    this.axiosInstance = wrapper(axios.create(config))
+
     if (this.job) {
       throw new errors.InternalError('WorkstationService already initialized with a job')
     }
