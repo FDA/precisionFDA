@@ -2,7 +2,7 @@ import { FilterQuery } from '@mikro-orm/mysql'
 import { Space } from './space.entity'
 import { SPACE_MEMBERSHIP_ROLE } from '../space-membership/space-membership.enum'
 import { User } from '@shared/domain/user/user.entity'
-import { AccessControlRepository } from '@shared/repository/access-control.repository'
+import { AccessControlRepository } from '@shared/database/repository/access-control.repository'
 
 export class SpaceRepository extends AccessControlRepository<Space> {
   protected async getAccessibleWhere(): Promise<FilterQuery<Space>> {

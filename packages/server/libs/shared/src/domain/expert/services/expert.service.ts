@@ -5,19 +5,20 @@ import { PaginatedResult } from '@shared/domain/entity/domain/paginated.result'
 import { Uid } from '@shared/domain/entity/domain/uid'
 import { ExpertPaginationDTO } from '@shared/domain/expert/dto/expert-pagination.dto'
 import { ExpertDTO } from '@shared/domain/expert/dto/expert.dto'
-import { Expert } from '@shared/domain/expert/expert.entity'
+import { Expert } from '@shared/domain/expert/entity/expert.entity'
+import { ExpertRepository } from '@shared/domain/expert/repository/expert.repository'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { UserFileRepository } from '@shared/domain/user-file/user-file.repository'
 import { User } from '@shared/domain/user/user.entity'
 import { STATIC_SCOPE } from '@shared/enums'
 import { NotFoundError } from '@shared/errors'
 import { RemoveNodesFacade } from '@shared/facade/node-remove/remove-nodes.facade'
+import { Searchable } from '@shared/interface/searchable'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { TimeUtils } from '@shared/utils/time.utils'
-import { ExpertRepository } from '../expert.repository'
 
 @Injectable()
-export class ExpertService {
+export class ExpertService implements Searchable<Expert> {
   @ServiceLogger()
   private readonly logger: Logger
 
@@ -101,5 +102,13 @@ export class ExpertService {
     )
 
     return result.map((y) => y.year)
+  }
+
+  async search(query: string): Promise<Expert[]> {
+    if (!query) {
+      return []
+    }
+
+    return this.expertRepository.searchByMeta(query)
   }
 }

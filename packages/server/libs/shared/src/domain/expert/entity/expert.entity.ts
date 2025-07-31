@@ -9,10 +9,13 @@ import {
   Reference,
   Cascade,
 } from '@mikro-orm/core'
+import { ExpertAnswer } from '@shared/domain/expert-answer/entity/expert-answer.entity'
+import {
+  ExpertQuestion,
+  ExpertQuestionState,
+} from '@shared/domain/expert-question/entity/expert-question.entity'
+import { ExpertRepository } from '@shared/domain/expert/repository/expert.repository'
 import { User } from '@shared/domain/user/user.entity'
-import { ExpertQuestion, ExpertQuestionState } from '../expert-question/expert-question.entity'
-import { ExpertRepository } from './expert.repository'
-import { ExpertAnswer } from '@shared/domain/expert-answer/expert-answer.entity'
 import { ScopedEntity } from '@shared/database/scoped.entity'
 import { WorkaroundJsonType } from '@shared/database/json-workaround.type'
 

@@ -1,15 +1,19 @@
 import { Provider } from '@nestjs/common'
+import { AnswerEntityLinkProvider } from '@shared/domain/entity/entity-link/answer-entity-link.provider'
+import { ChallengeEntityLinkProvider } from '@shared/domain/entity/entity-link/challenge-entity-link.provider'
+import { CommentEntityLinkProvider } from '@shared/domain/entity/entity-link/comment-entity-link.provider'
 import { ComparisonEntityLinkProvider } from '@shared/domain/entity/entity-link/comparison-entity-link.provider'
 import { DBClusterEntityLinkProvider } from '@shared/domain/entity/entity-link/dbcluster-entity-link.provider'
 import { DiscussionEntityLinkProvider } from '@shared/domain/entity/entity-link/discussion-entity-link.provider'
 import { UiLinkableEntityType } from '@shared/domain/entity/entity-link/domain/ui-linkable-entity.type'
 import { EntityLinkProvider } from '@shared/domain/entity/entity-link/entity-link.provider'
+import { ExpertAnswerEntityLinkProvider } from '@shared/domain/entity/entity-link/expert-answer-entity-link.provider'
+import { ExpertEntityLinkProvider } from '@shared/domain/entity/entity-link/expert-entity-link.provider'
+import { ExpertQuestionEntityLinkProvider } from '@shared/domain/entity/entity-link/expert-question-entity-link.provider'
 import { FolderEntityLinkProvider } from '@shared/domain/entity/entity-link/folder-entity-link.provider'
 import { NoteEntityLinkProvider } from '@shared/domain/entity/entity-link/note-entity-link.provider'
 import { UIdScopedEntityLinkProvider } from '@shared/domain/entity/entity-link/u-id-scoped-entity-link-provider'
 import { UserEntityLinkProvider } from '@shared/domain/entity/entity-link/user-entity-link.provider'
-import { AnswerEntityLinkProvider } from '@shared/domain/entity/entity-link/answer-entity-link.provider'
-import { CommentEntityLinkProvider } from '@shared/domain/entity/entity-link/comment-entity-link.provider'
 
 export const ENTITY_TYPE_TO_LINK_PROVIDER_MAP = 'ENTITY_TYPE_TO_LINK_PROVIDER_MAP'
 
@@ -25,6 +29,10 @@ export const entityTypeToLinkProviderMapProvider: Provider = {
     NoteEntityLinkProvider,
     AnswerEntityLinkProvider,
     CommentEntityLinkProvider,
+    ChallengeEntityLinkProvider,
+    ExpertEntityLinkProvider,
+    ExpertQuestionEntityLinkProvider,
+    ExpertAnswerEntityLinkProvider,
   ],
   useFactory: (
     uidScoped: UIdScopedEntityLinkProvider,
@@ -36,6 +44,10 @@ export const entityTypeToLinkProviderMapProvider: Provider = {
     note: NoteEntityLinkProvider,
     answer: AnswerEntityLinkProvider,
     comment: CommentEntityLinkProvider,
+    challenge: ChallengeEntityLinkProvider,
+    expert: ExpertEntityLinkProvider,
+    expertQuestion: ExpertQuestionEntityLinkProvider,
+    expertAnswer: ExpertAnswerEntityLinkProvider,
   ): { [T in UiLinkableEntityType]: EntityLinkProvider<T> } => {
     return {
       user,
@@ -46,6 +58,10 @@ export const entityTypeToLinkProviderMapProvider: Provider = {
       dbcluster,
       answer,
       comment,
+      challenge,
+      expert,
+      expertAnswer,
+      expertQuestion,
       file: uidScoped,
       app: uidScoped,
       job: uidScoped,
