@@ -6,6 +6,8 @@ import { RESOURCES, RESOURCE_LABELS } from '../../../types/user'
 import { bulkDisableAllResources, bulkDisableResource, bulkEnableAllResources, bulkEnableResource } from './api'
 import { User } from './types'
 
+export type ResourceState = 'all' | 'some' | 'none'
+
 const ResourceMenu = styled.ul`
   margin: 0;
   padding: 4px 0;
@@ -42,7 +44,7 @@ const StyledCheckboxInputWrapper = styled.span`
   align-items: center;
 `
 
-const getCheckboxValue = (users: User[], predicate: (user: User) => boolean) => {
+const getCheckboxValue = (users: User[], predicate: (user: User) => boolean): ResourceState => {
   const hasSome = users.some(predicate)
   const hasAll = users.every(predicate)
   return hasAll ? 'all' : hasSome ? 'some' : 'none'
@@ -63,19 +65,22 @@ const getAllResourceState = (users: User[]) =>
     ),
   )
 
-const ResourceDropdownItem = ({ status, onClick, label } : { status: any, onClick: any, label: string}) => {
+const ResourceDropdownItem = ({ status, onClick, label } : { 
+  status: ResourceState, 
+  onClick: () => Promise<unknown>, 
+  label: string,
+}) => {
   const queryClient = useQueryClient()
-
   const mutation = useMutation({
     mutationFn: () => onClick(),
     mutationKey: ['resource-dropdown', label],
     onSuccess: () => {
       toast.success('User resources updated')
-      queryClient.invalidateQueries({ queryKey: ['users'] })
+      queryClient.invalidateQueries({ queryKey: ['admin-users']})
     },
     onError: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-users']})
       toast.error('Error: Updating user resources')
-      queryClient.invalidateQueries({ queryKey: ['users'] })
     },
   })
 

@@ -1,13 +1,13 @@
+import { SqlEntityManager } from '@mikro-orm/mysql'
+import { emailClientProvider } from '@shared/domain/email/email-client.provider'
+import { JobFailedEmailHandler } from '@shared/domain/email/templates/handlers/job-failed.handler'
+import { JobRepository } from '@shared/domain/job/job.repository'
+import { User } from '@shared/domain/user/user.entity'
+import { UserRepository } from '@shared/domain/user/user.repository'
 import { DateTime, Duration, Interval } from 'luxon'
-import { UserOpsCtx, WorkerOpsCtx } from '../../types'
 import { config } from '../../config'
 import { Job } from './job.entity'
 import { ACTIVE_STATES, JOB_STATE, TERMINAL_STATES } from './job.enum'
-import { JobFailedEmailHandler } from '@shared/domain/email/templates/handlers/job-failed.handler'
-import { emailClientProvider } from '@shared/domain/email/email-client.provider'
-import { User } from '@shared/domain/user/user.entity'
-import { JobRepository } from '@shared/domain/job/job.repository'
-import { UserRepository } from '@shared/domain/user/user.repository'
 
 export const isStateTerminal = (state: string): boolean =>
   Object.values(TERMINAL_STATES).includes(state as JOB_STATE)
@@ -36,13 +36,10 @@ export const buildIsOverMaxDuration = (
   }
 }
 
-export const sendJobFailedEmails = async (
-  jobId: number,
-  ctx: WorkerOpsCtx<UserOpsCtx>,
-): Promise<void> => {
+export const sendJobFailedEmails = async (jobId: number, em: SqlEntityManager): Promise<void> => {
   const emailClient = emailClientProvider.useFactory()
-  const userRepo = ctx.em.getRepository(User) as UserRepository
-  const jobRepo: JobRepository = ctx.em.getRepository(Job)
+  const userRepo = em.getRepository(User) as UserRepository
+  const jobRepo: JobRepository = em.getRepository(Job)
   const handler = new JobFailedEmailHandler(userRepo, jobRepo, emailClient)
   const inputDto = { jobId }
   await handler.sendEmail(inputDto)
