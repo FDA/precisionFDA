@@ -28,8 +28,9 @@ const DateInput = styled.input`
   height: 23px;
 `
 
-const DateTimeRangeFilter = <T = unknown,>({ column }: { column: Column<T> }) => {
-  const [filterValue, setFilterValue] = useState<(string|undefined)[]>([])
+const DateTimeRangeFilter = <T,>({ column }: { column: Column<T> }) => {
+  const filteredValue = column.getFilterValue() as [string | undefined, string | undefined] | undefined
+  const [filterValue, setFilterValue] = useState<(string | undefined)[]>(filteredValue ?? ['', ''])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -44,7 +45,7 @@ const DateTimeRangeFilter = <T = unknown,>({ column }: { column: Column<T> }) =>
     }
 
     setFilterValue(newFilter)
-    column.setFilterValue({ from: newFilter[0], to: newFilter[1] })
+    column.setFilterValue([...newFilter])
   }
 
   return (
