@@ -3,9 +3,10 @@ import { css } from 'styled-components'
 export const fallback = css`
  /* Fallback for browsers without scroll-timeline support */
   @supports not (animation-timeline: scroll()) {
+    position: sticky;
     background-color: var(--c-subtleblue);
     border-bottom: 1px solid var(--c-layout-border-200);
-    margin-bottom:120px;
+    margin-bottom: 0px;
     
     .brand-logo-light { 
       opacity: 0; 
