@@ -24,6 +24,8 @@ import { StyledPageTable } from '../../components/Table/components/styles'
 import { Params } from '../home/utils'
 import { DropdownNext } from '../../components/Dropdown/DropdownNext'
 import { ActionModalsRenderer } from '../home/ActionModalsRenderer'
+import { useAuthUser } from '../auth/useAuthUser'
+import { useLastWSNotification } from '../../hooks/useToastWSHandler'
 
 type ListType = { reports: ISpaceReport[]; meta: IMeta }
 
@@ -62,6 +64,7 @@ const SpaceReportListTable = ({
 }
 
 export const SpaceReportList = ({ scope, isContributorOrHigher }: { scope: string; isContributorOrHigher?: boolean }) => {
+  const user = useAuthUser()
   const { query, selectedIndexes, setSelectedIndexes, saveColumnResizeWidth, colWidths, resetSelected } = useList<ListType>({
     fetchList: async (filters: IFilter[], params: Params) => {
       const reports = await fetchReports(params.scope)
@@ -77,28 +80,14 @@ export const SpaceReportList = ({ scope, isContributorOrHigher }: { scope: strin
 
   const client = useQueryClient()
 
-  const { lastJsonMessage } = useWebSocket<WebSocketMessage>(getNodeWsUrl(), {
-    share: true,
-    reconnectInterval: DEFAULT_RECONNECT_INTERVAL,
-    reconnectAttempts: DEFAULT_RECONNECT_ATTEMPTS,
-    shouldReconnect: () => SHOULD_RECONNECT,
-    filter: message => {
-      try {
-        const messageData = JSON.parse(message.data)
-        return messageData.type === WEBSOCKET_MESSAGE_TYPE.NOTIFICATION
-      } catch (e: unknown) {
-        console.error('Error parsing WebSocket message:', e)
-        return false
-      }
-    },
-  })
+  const lastJsonMessage = useLastWSNotification([NOTIFICATION_ACTION.SPACE_REPORT_DONE, NOTIFICATION_ACTION.SPACE_REPORT_ERROR])
 
   useEffect(() => {
-    const notification = lastJsonMessage?.data as Notification
-    if ([NOTIFICATION_ACTION.SPACE_REPORT_DONE, NOTIFICATION_ACTION.SPACE_REPORT_ERROR].includes(notification?.action)) {
-      query.refetch()
+    if (lastJsonMessage == null) {
+      return
     }
-    client.invalidateQueries({ queryKey: ['space', scope]})
+    query.refetch()
+    client.invalidateQueries({ queryKey: ['space', scope] })
   }, [lastJsonMessage])
 
   const selectedItems = getSelectedObjectsFromIndexes<number, ISpaceReport>(selectedIndexes, query.data?.reports)

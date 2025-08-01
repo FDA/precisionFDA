@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { toast } from 'react-toastify'
 import useWebSocket from 'react-use-websocket'
 import { BasicToast, ToastWithLink } from '../components/Toast'
+import { useAuthUser } from '../features/auth/useAuthUser'
 import { NOTIFICATION_ACTION, Notification, SEVERITY, WEBSOCKET_MESSAGE_TYPE, WebSocketMessage } from '../features/home/types'
 import { confirmNotification } from '../features/notifications/notifications.api'
 import {
@@ -31,21 +32,34 @@ const toastHandlers = {
   [SEVERITY.INFO]: toast.success,
 }
 
-export const useToastWSHandler = () => {
-  const { lastJsonMessage } = useWebSocket<WebSocketMessage>(getNodeWsUrl(), {
-    share: true,
-    reconnectInterval: DEFAULT_RECONNECT_INTERVAL,
-    reconnectAttempts: DEFAULT_RECONNECT_ATTEMPTS,
-    shouldReconnect: () => SHOULD_RECONNECT,
-    filter: message => {
-      try {
-        const data = JSON.parse(message.data)
-        return data.type === WEBSOCKET_MESSAGE_TYPE.NOTIFICATION
-      } catch (e) {
-        return false
-      }
+export const useLastWSNotification = (filteredActions: NOTIFICATION_ACTION[] = []): WebSocketMessage => {
+  const user = useAuthUser()
+  const { lastJsonMessage } = useWebSocket<WebSocketMessage>(
+    getNodeWsUrl(),
+    {
+      share: true,
+      reconnectInterval: DEFAULT_RECONNECT_INTERVAL,
+      reconnectAttempts: DEFAULT_RECONNECT_ATTEMPTS,
+      shouldReconnect: () => SHOULD_RECONNECT,
+      filter: message => {
+        try {
+          const messageDate = JSON.parse(message.data)
+          return (
+            messageDate.type === WEBSOCKET_MESSAGE_TYPE.NOTIFICATION &&
+            (filteredActions.length === 0 || filteredActions.includes(messageDate.data.action))
+          )
+        } catch {
+          return false
+        }
+      },
     },
-  })
+    !!user,
+  )
+  return lastJsonMessage
+}
+
+export const useToastWSHandler = () => {
+  const lastJsonMessage = useLastWSNotification()
 
   useEffect(() => {
     if (lastJsonMessage == null) {

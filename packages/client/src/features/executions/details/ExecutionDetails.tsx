@@ -8,7 +8,9 @@ import { StyledPropertyItem, StyledPropertyKey, StyledTagItem, StyledTags } from
 import { CogsIcon } from '../../../components/icons/Cogs'
 import { RESOURCE_LABELS } from '../../../types/user'
 import { DEFAULT_RECONNECT_ATTEMPTS, DEFAULT_RECONNECT_INTERVAL, getNodeWsUrl, SHOULD_RECONNECT } from '../../../utils/config'
+import { pluralize } from '../../../utils/formatting'
 import { getBackPathNext } from '../../../utils/getBackPath'
+import { PricingMap } from '../../apps/apps.types'
 import { ActionsRow, StyledBackLink, StyledLink } from '../../home/home.styles'
 import {
   HeaderLeft,
@@ -38,10 +40,10 @@ import { InputsAndOutputs } from '../InputsAndOutputs'
 import { Logs } from '../Log'
 import { StateCell } from '../StateCell'
 import { fetchExecution } from '../executions.api'
-import { FailureMessage, TitleLeft } from './styles'
 import { IExecution } from '../executions.types'
-import { PricingMap } from '../../apps/apps.types'
-import { pluralize } from '../../../utils/formatting'
+import { FailureMessage, TitleLeft } from './styles'
+import { useAuthUser } from '../../auth/useAuthUser'
+import { useLastWSNotification, useToastWSHandler } from '../../../hooks/useToastWSHandler'
 
 export const ExecutionDetails = ({
   emitScope,
@@ -52,6 +54,7 @@ export const ExecutionDetails = ({
   spaceId?: number
   homeScope?: HomeScope
 }) => {
+  const user = useAuthUser()
   const location = useLocation()
   const { executionUid } = useParams<{ executionUid: string }>()
 
@@ -65,33 +68,15 @@ export const ExecutionDetails = ({
   })
   const queryCache = useQueryClient()
 
-  const { lastJsonMessage } = useWebSocket<WebSocketMessage>(getNodeWsUrl(), {
-    share: true,
-    reconnectInterval: DEFAULT_RECONNECT_INTERVAL,
-    reconnectAttempts: DEFAULT_RECONNECT_ATTEMPTS,
-    shouldReconnect: () => SHOULD_RECONNECT,
-    filter: message => {
-      try {
-        const messageData = JSON.parse(message.data)
-        const notification = messageData.data as Notification
-        return (
-          messageData.type === WEBSOCKET_MESSAGE_TYPE.NOTIFICATION &&
-          [
-            NOTIFICATION_ACTION.JOB_RUNNABLE,
-            NOTIFICATION_ACTION.JOB_RUNNING,
-            NOTIFICATION_ACTION.JOB_INITIALIZING,
-            NOTIFICATION_ACTION.JOB_DONE,
-            NOTIFICATION_ACTION.JOB_FAILED,
-            NOTIFICATION_ACTION.JOB_OUTPUTS_SYNCED,
-            NOTIFICATION_ACTION.JOB_TERMINATED,
-          ].includes(notification.action)
-        )
-      } catch (e: unknown) {
-        console.error('Error parsing WebSocket message:', e)
-        return false
-      }
-    },
-  })
+  const lastJsonMessage = useLastWSNotification([
+    NOTIFICATION_ACTION.JOB_RUNNABLE,
+    NOTIFICATION_ACTION.JOB_RUNNING,
+    NOTIFICATION_ACTION.JOB_INITIALIZING,
+    NOTIFICATION_ACTION.JOB_DONE,
+    NOTIFICATION_ACTION.JOB_FAILED,
+    NOTIFICATION_ACTION.JOB_OUTPUTS_SYNCED,
+    NOTIFICATION_ACTION.JOB_TERMINATED,
+  ])
 
   useEffect(() => {
     if (lastJsonMessage == null) {

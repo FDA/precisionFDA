@@ -3,6 +3,7 @@ import queryString from 'query-string'
 import React, { useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import useWebSocket from 'react-use-websocket'
+import styled from 'styled-components'
 import { Button } from '../../../components/Button'
 import { Loader } from '../../../components/Loader'
 import NavigationBar from '../../../components/NavigationBar/NavigationBar'
@@ -23,17 +24,16 @@ import {
 } from '../../../components/Public/styles'
 import { usePageMeta } from '../../../hooks/usePageMeta'
 import { usePaginationParamsV2 } from '../../../hooks/usePaginationState'
-import { useToastWSHandler } from '../../../hooks/useToastWSHandler'
+import { useLastWSNotification, useToastWSHandler } from '../../../hooks/useToastWSHandler'
 import PublicLayout from '../../../layouts/PublicLayout'
 import { DEFAULT_RECONNECT_ATTEMPTS, DEFAULT_RECONNECT_INTERVAL, getNodeWsUrl, SHOULD_RECONNECT } from '../../../utils/config'
 import { useAuthUser } from '../../auth/useAuthUser'
 import { Notification, NOTIFICATION_ACTION, WEBSOCKET_MESSAGE_TYPE, WebSocketMessage } from '../../home/types'
 import { challengesYearsListRequest } from '../api'
+import { TimeStatus } from '../types'
 import { getTimeStatusName, renderEmpty } from '../util'
 import { ChallengeListItem } from './ChallengeListItem'
 import { useChallengesListQuery } from './useChallengesListQuery'
-import styled from 'styled-components'
-import { TimeStatus } from '../types'
 
 const HeroContent = styled.div`
   text-align: center;
@@ -96,26 +96,7 @@ const ChallengesList = () => {
   })
 
   useToastWSHandler()
-
-  const { lastJsonMessage } = useWebSocket<WebSocketMessage>(getNodeWsUrl(), {
-    share: true,
-    reconnectInterval: DEFAULT_RECONNECT_INTERVAL,
-    reconnectAttempts: DEFAULT_RECONNECT_ATTEMPTS,
-    shouldReconnect: () => SHOULD_RECONNECT,
-    filter: message => {
-      try {
-        const messageData = JSON.parse(message.data)
-        const notification = messageData.data as Notification
-        return (
-          messageData.type === WEBSOCKET_MESSAGE_TYPE.NOTIFICATION &&
-          NOTIFICATION_ACTION.CHALLENGE_CARD_IMAGE_URL_UPDATED === notification.action
-        )
-      } catch (e: unknown) {
-        console.error('Error parsing WebSocket message:', e)
-        return false
-      }
-    },
-  })
+  const lastJsonMessage = useLastWSNotification([NOTIFICATION_ACTION.CHALLENGE_CARD_IMAGE_URL_UPDATED])
 
   useEffect(() => {
     if (lastJsonMessage == null) {
