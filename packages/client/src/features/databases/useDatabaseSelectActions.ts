@@ -1,6 +1,5 @@
 import { ReactNode } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
-import { useAuthUser } from '../auth/useAuthUser'
 import { useCopyToSpaceModal } from '../actionModals/useCopyToSpace'
 import { useEditTagsModal } from '../actionModals/useEditTagsModal'
 import { useAttachLicensesModal } from '../licenses/useAttachLicensesModal'
@@ -12,6 +11,7 @@ import { DBStatus, IDatabase } from './databases.types'
 import { useEditDatabaseModal } from './useEditDatabaseModal'
 import { useMethodModal } from './useMethodModal'
 import { useEditPropertiesModal } from '../actionModals/useEditPropertiesModal'
+import { useLicensesListQuery } from '../licenses/queries'
 
 export interface UseDatabaseSelectActionsResult {
   actions: Action[]
@@ -26,9 +26,9 @@ export const useDatabaseSelectActions = ({
   resourceKeys: string[]
 }): UseDatabaseSelectActionsResult => {
   const queryClient = useQueryClient()
-  const user = useAuthUser()
+  const { data: licenses } = useLicensesListQuery()
   const selected = selectedItems.filter(x => x !== undefined)
-  const availableLicenses = user?.links?.licenses ? user.links.licenses : false
+  const availableLicenses = Boolean(licenses?.licenses.length !== 0)
 
   const {
     modalComp: copyToSpaceModal,
