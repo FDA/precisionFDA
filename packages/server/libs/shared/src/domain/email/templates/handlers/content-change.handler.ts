@@ -71,7 +71,9 @@ export class ContentChangedEmailHandler extends EmailHandler<EMAIL_TYPES.newCont
       { populate: ['user.notificationPreference'] },
     )
 
-    return memberships.map((membership) => membership.user.getEntity())
+    return memberships
+      .map((membership) => membership.user.getEntity())
+      .filter((user) => context.spaceEvent.user.getEntity().id !== user.id)
   }
 
   protected getSubject(): string {
