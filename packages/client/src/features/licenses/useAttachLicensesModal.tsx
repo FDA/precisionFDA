@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from 'react'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
 import styled from 'styled-components'
 import { CircleCheckIcon } from '../../components/icons/CircleCheckIcon'
 import { ResourceTable, StyledName } from '../../components/ResourceTable'
 import { useModal } from '../modal/useModal'
 import { APIResource } from '../home/types'
-import { attachLicenseRequest, fetchLicensesList } from './api'
+import { attachLicenseRequest } from './api'
 import { License } from './types'
+import { useLicensesListQuery } from './queries'
 import { ModalHeaderTop, ModalNext } from '../modal/ModalNext'
 import { ButtonRow, Footer, ModalScroll } from '../modal/styles'
 import { Button } from '../../components/Button'
@@ -46,10 +47,7 @@ export function useAttachLicensesModal<
   useEffect(() => {
     setSelectedLicenses(selected?.file_license?.id)
   }, [selected])
-  const { data } = useQuery({
-    queryKey: ['licenses'],
-    queryFn: fetchLicensesList,
-  })
+  const { data } = useLicensesListQuery()
 
   const resetSelected = () => {
     setSelectedLicenses(undefined)

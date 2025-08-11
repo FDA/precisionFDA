@@ -1,147 +1,83 @@
-import { SqlEntityManager } from '@mikro-orm/mysql'
-import {
-  Body,
-  Controller,
-  Get,
-  HttpCode,
-  Inject,
-  Logger,
-  Param,
-  Post,
-  Put,
-  Query,
-  UseGuards,
-} from '@nestjs/common'
-import { DEPRECATED_SQL_ENTITY_MANAGER } from '@shared/database/provider/deprecated-sql-entity-manager.provider'
+import { Body, Controller, Get, HttpCode, Param, Post, Put, Query, UseGuards } from '@nestjs/common'
+import { DbCluster } from '@shared/domain/db-cluster/db-cluster.entity'
 import { CreateDbClusterDTO } from '@shared/domain/db-cluster/dto/create-db-cluster.dto'
-import { UpdateDbClusterDTO } from '@shared/domain/db-cluster/dto/update-db-cluster.dto'
-import { StartDbClusterOperation } from '@shared/domain/db-cluster/ops/start'
-import { StopDbClusterOperation } from '@shared/domain/db-cluster/ops/stop'
-import { TerminateDbClusterOperation } from '@shared/domain/db-cluster/ops/terminate'
-import { DbClusterService } from '@shared/domain/db-cluster/service/db-cluster.service'
-import { UserContext } from '@shared/domain/user-context/model/user-context'
-import { UserOpsCtx } from '@shared/types'
-import { schemas } from '@shared/utils/base-schemas'
-import { UserContextGuard } from '../user-context/guard/user-context.guard'
-import { JsonSchemaPipe } from '../validation/pipes/json-schema.pipe'
-import { DbClusterUidParamDto } from './model/dbcluster-uid-param.dto'
-import { Uid } from '@shared/domain/entity/domain/uid'
+import { DbClusterActionDTO } from '@shared/domain/db-cluster/dto/db-cluster-action.dto'
 import { DbClusterPaginationDTO } from '@shared/domain/db-cluster/dto/db-cluster-pagination.dto'
-import { InternalRouteGuard } from '../internal/guard/internal.guard'
+import { DbClusterDTO } from '@shared/domain/db-cluster/dto/db-cluster.dto'
 import { SyncDbClusterDTO } from '@shared/domain/db-cluster/dto/sync-db-cluster.dto'
-import { ADMIN_PLATFORM_CLIENT } from '@shared/platform-client/providers/admin-platform-client.provider'
-import { PlatformClient } from '@shared/platform-client'
-
-interface IDxidListParams {
-  dxids: string[]
-}
+import { UpdateDbClusterDTO } from '@shared/domain/db-cluster/dto/update-db-cluster.dto'
+import { PaginatedResult } from '@shared/domain/entity/domain/paginated.result'
+import { Uid } from '@shared/domain/entity/domain/uid'
+import { DbClusterActionFacade } from '../facade/db-cluster/action-facade/db-cluster-action.facade'
+import { DbClusterCreateFacade } from '../facade/db-cluster/create-facade/db-cluster-create.facade'
+import { DbClusterGetFacade } from '../facade/db-cluster/get-facade/db-cluster-get.facade'
+import { DbClusterListFacade } from '../facade/db-cluster/list-facade/db-cluster-list.facade'
+import { DbClusterSynchronizeFacade } from '../facade/db-cluster/synchronize-facade/db-cluster-synchronize.facade'
+import { DbClusterUpdateFacade } from '../facade/db-cluster/update-facade/db-cluster-update.facade'
+import { InternalRouteGuard } from '../internal/guard/internal.guard'
+import { UserContextGuard } from '../user-context/guard/user-context.guard'
+import { DbClusterUidParamDto } from './model/dbcluster-uid-param.dto'
 
 @UseGuards(UserContextGuard)
 @Controller('/dbclusters')
 export class DbClusterController {
   constructor(
-    private readonly user: UserContext,
-    @Inject(DEPRECATED_SQL_ENTITY_MANAGER) private readonly em: SqlEntityManager,
-    private readonly logger: Logger,
-    private readonly dbClusterService: DbClusterService,
-    @Inject(ADMIN_PLATFORM_CLIENT)
-    private readonly adminClient: PlatformClient,
-    private readonly userClient: PlatformClient,
+    private readonly dbClusterSynchronizeFacade: DbClusterSynchronizeFacade,
+    private readonly dbClusterCreateFacade: DbClusterCreateFacade,
+    private readonly dbClusterUpdateFacade: DbClusterUpdateFacade,
+    private readonly dbClusterActionFacade: DbClusterActionFacade,
+    private readonly dbClusterGetFacade: DbClusterGetFacade,
+    private readonly dbClusterListFacade: DbClusterListFacade,
   ) {}
 
   @Get()
-  async list(@Query() query: DbClusterPaginationDTO) {
-    return await this.dbClusterService.list(query)
+  async list(@Query() query: DbClusterPaginationDTO): Promise<PaginatedResult<DbClusterDTO>> {
+    return await this.dbClusterListFacade.listDbClusters(query)
   }
 
   @HttpCode(200)
   @Get(':uid')
-  async get(@Param('uid') uid: Uid<'dbcluster'>) {
-    return await this.dbClusterService.getDbCluster(uid)
+  async get(@Param('uid') uid: Uid<'dbcluster'>): Promise<DbClusterDTO> {
+    return await this.dbClusterGetFacade.getDbCluster(uid)
   }
 
   @HttpCode(204)
   @Post('/start')
-  async startDbCluster(
-    @Body(new JsonSchemaPipe(schemas.getDxidsInputSchema('dxids'))) body: IDxidListParams,
-  ) {
-    const opsCtx: UserOpsCtx = {
-      log: this.logger,
-      user: this.user,
-      em: this.em,
-    }
-
-    await Promise.all(
-      body.dxids.map(async (dxid) => {
-        return await new StartDbClusterOperation(opsCtx, this.userClient, this.adminClient).execute(
-          {
-            dxid,
-          },
-        )
-      }),
-    )
+  async startDbCluster(@Body() body: DbClusterActionDTO): Promise<void> {
+    await Promise.all(body.dxids.map((dxid) => this.dbClusterActionFacade.startDbCluster(dxid)))
   }
 
   @HttpCode(204)
   @Post('/stop')
-  async stopDbCluster(
-    @Body(new JsonSchemaPipe(schemas.getDxidsInputSchema('dxids'))) body: IDxidListParams,
-  ) {
-    const opsCtx: UserOpsCtx = {
-      log: this.logger,
-      user: this.user,
-      em: this.em,
-    }
-
-    await Promise.all(
-      body.dxids.map(async (dxid) => {
-        return await new StopDbClusterOperation(opsCtx, this.userClient, this.adminClient).execute({
-          dxid,
-        })
-      }),
-    )
+  async stopDbCluster(@Body() body: DbClusterActionDTO): Promise<void> {
+    await Promise.all(body.dxids.map((dxid) => this.dbClusterActionFacade.stopDbCluster(dxid)))
   }
 
   @HttpCode(204)
   @Post('/terminate')
-  async terminateDbCluster(
-    @Body(new JsonSchemaPipe(schemas.getDxidsInputSchema('dxids'))) body: IDxidListParams,
-  ) {
-    const opsCtx: UserOpsCtx = {
-      log: this.logger,
-      user: this.user,
-      em: this.em,
-    }
-
-    await Promise.all(
-      body.dxids.map(async (dxid) => {
-        return await new TerminateDbClusterOperation(
-          opsCtx,
-          this.userClient,
-          this.adminClient,
-        ).execute({
-          dxid,
-        })
-      }),
-    )
+  async terminateDbCluster(@Body() body: DbClusterActionDTO): Promise<void> {
+    await Promise.all(body.dxids.map((dxid) => this.dbClusterActionFacade.terminateDbCluster(dxid)))
   }
 
   @HttpCode(201)
   @Post()
-  async createDbCluster(@Body() body: CreateDbClusterDTO) {
-    return await this.dbClusterService.create(body)
+  async createDbCluster(@Body() body: CreateDbClusterDTO): Promise<DbCluster> {
+    return await this.dbClusterCreateFacade.createDbCluster(body)
   }
 
   @HttpCode(200)
   @Put(':dbclusterUid')
-  async updateDbCluster(@Param() params: DbClusterUidParamDto, @Body() body: UpdateDbClusterDTO) {
-    return await this.dbClusterService.update(params.dbclusterUid, body)
+  async updateDbCluster(
+    @Param() params: DbClusterUidParamDto,
+    @Body() body: UpdateDbClusterDTO,
+  ): Promise<void> {
+    return await this.dbClusterUpdateFacade.updateDbCluster(params.dbclusterUid, body)
   }
 
   @UseGuards(InternalRouteGuard)
   @HttpCode(201)
   @Post('/sync')
-  async sync(@Body() body: SyncDbClusterDTO) {
-    await this.dbClusterService.synchronizeInSpace(body.spaceId)
+  async sync(@Body() body: SyncDbClusterDTO): Promise<void> {
+    await this.dbClusterSynchronizeFacade.synchronizeInSpace(body.spaceId)
   }
 }

@@ -1,13 +1,13 @@
 import React, { useMemo } from 'react'
 import { ColumnDef } from '@tanstack/react-table'
 import { Loader } from '../../../components/Loader'
-import { SimpleTable } from '../../../components/SimpleTable'
+import { ChallengeEntriesTable } from '../../../components/ChallengeEntriesTable'
 import { IUser } from '../../../types/user'
 import { StyledNameCell } from '../../home/home.styles'
-import { StyledChallengeSubmissionsTable } from './styles'
 import { SubmissionV2 } from './submission.types'
 import { InputFileCell, NameCell } from './SubmissionTable'
 import { useChallengeSubmissionQuery } from './useChallengeSubmissionQuery'
+import { formatDate } from '../../../utils/formatting'
 
 export const useSubmissionTableColumns = ({
   isSpaceMember,
@@ -36,10 +36,12 @@ export const useSubmissionTableColumns = ({
       header: 'Input File',
       accessorKey: 'job_input_files',
       cell: ({ cell }) => <InputFileCell authUser={authUser} submission={cell.row.original} isSpaceMember={isSpaceMember} />,
+      enableSorting: false,
     },
     {
       header: 'Created',
       accessorKey: 'createdAt',
+      cell: ({ cell }) => formatDate(cell.row.original.createdAt),
       size: 200,
     },
   ]
@@ -83,9 +85,5 @@ export const ChallengeSubmissionsTable = ({
     return <div>There are no submissions for this challenge yet.</div>
   }
 
-  return (
-    <StyledChallengeSubmissionsTable>
-      <SimpleTable data={data} columns={columns} />
-    </StyledChallengeSubmissionsTable>
-  )
+  return <ChallengeEntriesTable data={data} columns={columns} />
 }

@@ -1,8 +1,12 @@
 import { App } from '@shared/domain/app/app.entity'
+import { Challenge } from '@shared/domain/challenge/challenge.entity'
 import { Comparison } from '@shared/domain/comparison/comparison.entity'
 import { DbCluster } from '@shared/domain/db-cluster/db-cluster.entity'
 import { Discussion } from '@shared/domain/discussion/discussion.entity'
 import { EntityType } from '@shared/domain/entity/domain/entity.type'
+import { ExpertAnswer } from '@shared/domain/expert-answer/entity/expert-answer.entity'
+import { ExpertQuestion } from '@shared/domain/expert-question/entity/expert-question.entity'
+import { Expert } from '@shared/domain/expert/entity/expert.entity'
 import { Job } from '@shared/domain/job/job.entity'
 import { Resource } from '@shared/domain/resource/resource.entity'
 import { Note } from '@shared/domain/note/note.entity'
@@ -29,4 +33,8 @@ export const entityTypeToEntityMap = {
   dbcluster: DbCluster,
   answer: Answer,
   comment: Comment,
+  challenge: Challenge,
+  expertQuestion: ExpertQuestion,
+  expertAnswer: ExpertAnswer,
+  expert: Expert,
 } satisfies Record<EntityType, object>

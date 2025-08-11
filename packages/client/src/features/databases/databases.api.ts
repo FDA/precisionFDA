@@ -24,12 +24,8 @@ export async function getDatabaseAllowedInstances() {
   return axios.get<AllowedInstance[]>('/api/dbclusters/allowed_instances').then(r => r.data)
 }
 
-interface FetchDatabaseRequest {
-  db_cluster: IDatabase
-}
-
 export async function fetchDatabaseRequest(uid: string): Promise<IDatabase> {
-  return axios.get<FetchDatabaseRequest>(`/api/v2/dbclusters/${uid}`).then(r => r.data.db_cluster)
+  return axios.get<IDatabase>(`/api/v2/dbclusters/${uid}`).then(r => r.data)
 }
 
 export interface IAccessibleFile extends IFile {

@@ -16,6 +16,7 @@ import { useEditAssetModal } from './actionModals/useEditAssetModal'
 import { IAsset } from './assets.types'
 import { deleteFilesRequest } from '../files/files.api'
 import { extractModalsFromActions } from '../home/extractModalsFromActions'
+import { useLicensesListQuery } from '../licenses/queries'
 
 export interface UseAssetActionsResult {
   actions: Action[]
@@ -33,6 +34,7 @@ export const useAssetActions = ({ homeScope, selectedItems, resourceKeys, resetS
   const queryClient = useQueryClient()
   const navigate = useNavigate()
   const selected = selectedItems.filter(x => x !== undefined)
+  const { data: licenses } = useLicensesListQuery()
   const user = useAuthUser()
   const isAdmin = user?.admin
   const selectedButNotClosed = selected.some(e => e.state !== 'closed')
@@ -128,7 +130,7 @@ export const useAssetActions = ({ homeScope, selectedItems, resourceKeys, resetS
     },
   })
 
-  const availableLicenses = user?.links?.licenses ? user.links.licenses : false
+  const availableLicenses = Boolean(licenses?.licenses.length !== 0)
 
   const actions: Action[] = [
     {

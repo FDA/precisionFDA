@@ -1,10 +1,26 @@
 import { OrderDefinition, Reference, Transactional } from '@mikro-orm/core'
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Injectable, Logger } from '@nestjs/common'
+import { ObjectFilterQuery } from '@shared/database/domain/object-filter-query'
 import { Answer } from '@shared/domain/answer/answer.entity'
+import AnswerRepository from '@shared/domain/answer/answer.repository'
 import { AnswerComment } from '@shared/domain/comment/answer-comment.entity'
 import { DiscussionComment } from '@shared/domain/comment/discussion-comment.entity'
 import { Discussion } from '@shared/domain/discussion/discussion.entity'
+import DiscussionRepository from '@shared/domain/discussion/discussion.repository'
+import { AnswerDTO } from '@shared/domain/discussion/dto/answer.dto'
+import { CommentDTO } from '@shared/domain/discussion/dto/comment.dto'
+import { CreateAnswerDTO } from '@shared/domain/discussion/dto/create-answer.dto'
+import { CreateCommentDTO } from '@shared/domain/discussion/dto/create-comment.dto'
+import { CreateDiscussionDTO } from '@shared/domain/discussion/dto/create-discussion.dto'
+import { DiscussionPaginationDTO } from '@shared/domain/discussion/dto/discussion-pagination.dto'
+import { DiscussionDTO } from '@shared/domain/discussion/dto/discussion.dto'
+import { UpdateAnswerDTO } from '@shared/domain/discussion/dto/update-answer.dto'
+import { UpdateCommentDTO } from '@shared/domain/discussion/dto/update-comment.dto'
+import { UpdateDiscussionDTO } from '@shared/domain/discussion/dto/update-discussion.dto'
+import { PaginatedResult } from '@shared/domain/entity/domain/paginated.result'
+import { EntityLinkService } from '@shared/domain/entity/entity-link/entity-link.service'
+import { DiscussionFollow } from '@shared/domain/follow/discussion-follow.entity'
 import { Note } from '@shared/domain/note/note.entity'
 import { Space } from '@shared/domain/space/space.entity'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
@@ -15,21 +31,6 @@ import * as errors from '../../../errors'
 import { Comment, CommentableType } from '../../comment/comment.entity'
 import { SPACE_MEMBERSHIP_ROLE } from '../../space-membership/space-membership.enum'
 import { getIdFromScopeName } from '../../space/space.helper'
-import { CreateDiscussionDTO } from '@shared/domain/discussion/dto/create-discussion.dto'
-import { CreateAnswerDTO } from '@shared/domain/discussion/dto/create-answer.dto'
-import { UpdateDiscussionDTO } from '@shared/domain/discussion/dto/update-discussion.dto'
-import { CreateCommentDTO } from '@shared/domain/discussion/dto/create-comment.dto'
-import { UpdateAnswerDTO } from '@shared/domain/discussion/dto/update-answer.dto'
-import { UpdateCommentDTO } from '@shared/domain/discussion/dto/update-comment.dto'
-import { DiscussionPaginationDTO } from '@shared/domain/discussion/dto/discussion-pagination.dto'
-import DiscussionRepository from '@shared/domain/discussion/discussion.repository'
-import { DiscussionDTO } from '@shared/domain/discussion/dto/discussion.dto'
-import { AnswerDTO } from '@shared/domain/discussion/dto/answer.dto'
-import { CommentDTO } from '@shared/domain/discussion/dto/comment.dto'
-import { DiscussionFollow } from '@shared/domain/follow/discussion-follow.entity'
-import AnswerRepository from '@shared/domain/answer/answer.repository'
-import { EntityLinkService } from '@shared/domain/entity/entity-link/entity-link.service'
-import { PaginatedResult } from '@shared/domain/entity/domain/paginated.result'
 
 @Injectable()
 export class DiscussionService {
@@ -200,17 +201,14 @@ export class DiscussionService {
   }
 
   async listDiscussions(query: DiscussionPaginationDTO): Promise<PaginatedResult<DiscussionDTO>> {
-    // const where: ObjectQuery<Discussion> = {}
-    //todo PFDA-6051: Ludvik fix type
-    const where = { note: { $and: [] } }
+    const noteAnd: ObjectFilterQuery<Note>[] = []
     const { scope, sort } = query
     const { title } = query.filter ?? {}
 
     if (title) {
-      where.note.$and.push({ title: { $like: `%${title}%` } })
+      noteAnd.push({ title: { $like: `%${title}%` } })
     }
 
-    //TODO PFDA-6051: Ludvik fix everything below
     const sortCopy = { ...sort }
     const order: OrderDefinition<Discussion> = sortCopy
     if (sortCopy.title) {
@@ -222,7 +220,7 @@ export class DiscussionService {
 
     this.logger.log(`Getting discussions with scope: ${scope}`)
     if (scope === HOME_SCOPE.EVERYBODY) {
-      where.note.$and.push({ scope: STATIC_SCOPE.PUBLIC })
+      noteAnd.push({ scope: STATIC_SCOPE.PUBLIC })
     } else if (scope === HOME_SCOPE.SPACES) {
       const spaces = await this.em.find(Space, {
         spaceMemberships: {
@@ -234,7 +232,7 @@ export class DiscussionService {
       })
 
       const scopes = spaces.map((s) => s.scope)
-      where.note.$and.push({ scope: { $in: scopes } })
+      noteAnd.push({ scope: { $in: scopes } })
     } else {
       const spaceId = getIdFromScopeName(scope)
       const space = await this.em.findOne(Space, {
@@ -250,11 +248,16 @@ export class DiscussionService {
         )
       }
 
-      where.note.$and.push({ scope: scope })
+      noteAnd.push({ scope: scope })
     }
-    const result = await this.discussionRepository.paginate(query, where, {
-      populate: ['note', 'user'],
-    })
+
+    const result = await this.discussionRepository.paginate(
+      query,
+      { note: { $and: noteAnd } },
+      {
+        populate: ['note', 'user'],
+      },
+    )
 
     const discussions = await Promise.all(
       result.data.map((discussion) => DiscussionDTO.fromEntity(discussion)),

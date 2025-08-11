@@ -1,4 +1,5 @@
 import axios, { AxiosRequestConfig } from 'axios'
+import { InvitationListType } from './invitations/type'
 
 export interface AdminStats {
   usersCount: number
@@ -44,7 +45,7 @@ export async function provisionUsers(ids: number[], spaceIds: number[]) {
 }
 
 export const fetchInvitations = async (configs: AxiosRequestConfig) => {
-  return axios.get<{ data: Invitation[] }>('/api/v2/admin/invitations', configs).then(r => r.data)
+  return axios.get<InvitationListType>('/api/v2/admin/invitations', configs).then(r => r.data)
 }
 
 export async function editInvitationBasicInfo(id: number, data: Partial<{ firstName: string; lastName: string; email: string }>) {

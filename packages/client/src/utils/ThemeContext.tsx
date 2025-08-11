@@ -2,7 +2,7 @@ import React, { createContext, useContext, useEffect } from 'react'
 import { ThemeProvider } from 'styled-components'
 import { useLocalStorage } from '../hooks/useLocalStorage'
 
-type Theme = 'light' | 'dark'
+export type Theme = 'light' | 'dark'
 type ThemeContextType = {
   theme: Theme
   toggleTheme: () => void

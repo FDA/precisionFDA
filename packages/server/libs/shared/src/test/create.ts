@@ -1,4 +1,4 @@
-import { wrap } from '@mikro-orm/core'
+import { Reference, wrap } from '@mikro-orm/core'
 import { EntityManager, Loaded } from '@mikro-orm/mysql'
 import { AcceptedLicense } from '@shared/domain/accepted-license/accepted-license.entity'
 import { ADMIN_GROUP_ROLES, AdminGroup } from '@shared/domain/admin-group/admin-group.entity'
@@ -16,7 +16,8 @@ import { Comparison } from '@shared/domain/comparison/comparison.entity'
 import { DataPortal } from '@shared/domain/data-portal/data-portal.entity'
 import { DbCluster } from '@shared/domain/db-cluster/db-cluster.entity'
 import { Discussion } from '@shared/domain/discussion/discussion.entity'
-import { Expert } from '@shared/domain/expert/expert.entity'
+import { ExpertQuestion } from '@shared/domain/expert-question/entity/expert-question.entity'
+import { Expert } from '@shared/domain/expert/entity/expert.entity'
 import { Invitation } from '@shared/domain/invitation/invitation.entity'
 import { Job } from '@shared/domain/job/job.entity'
 import { License } from '@shared/domain/license/license.entity'
@@ -918,6 +919,28 @@ const expertHelper = {
   },
 }
 
+const expertQuestionHelper = {
+  create: (
+    em: EntityManager,
+    references: {
+      expert: InstanceType<typeof Expert>
+      user: InstanceType<typeof User>
+    },
+    data?: Partial<InstanceType<typeof ExpertQuestion>>,
+  ): ExpertQuestion => {
+    const defaults = generate.expertQuestion.simple()
+    const input = {
+      ...defaults,
+      ...data,
+    }
+    const expertQuestion = wrap(new ExpertQuestion()).assign(input)
+    expertQuestion.user = Reference.create(references.user)
+    expertQuestion.expert = Reference.create(references.expert)
+    em.persist(expertQuestion)
+    return expertQuestion
+  },
+}
+
 const contextHelper = {
   create: (user: User): UserContext => {
     return {
@@ -947,6 +970,7 @@ export {
   dbClusterHelper,
   discussionHelper,
   expertHelper,
+  expertQuestionHelper,
   filesHelper,
   invitationHelper,
   jobHelper,

@@ -13,6 +13,10 @@ export const entityTypes = [
   'resource',
   'note',
   'dbcluster',
+  'challenge',
+  'expert',
+  'expertQuestion',
+  'expertAnswer',
 ] as const
 
 export type EntityType = (typeof entityTypes)[number]

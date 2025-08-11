@@ -68,7 +68,7 @@ export const SiteNavTop= styled.div`
     padding: 8px;
   }
 `
-export const SiteMenuItem = styled.div<{$active: boolean}>`
+export const SiteMenuItem = styled.div<{$active?: boolean}>`
   display: flex;
   align-items: center;
   gap: 8px;
@@ -283,6 +283,10 @@ export const HeaderRight = styled.div`
   justify-self: flex-end;
   margin-left: auto;
   min-width: fit-content;
+
+  ${HeaderMenuItem} {
+    border-radius: 3px;
+  }
 
   ${HeaderMenuItem}, ${StyledDropdown} {
     flex-shrink: 0;

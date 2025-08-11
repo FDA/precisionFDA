@@ -3,7 +3,6 @@ import { Logger } from '@nestjs/common'
 import { config } from '@shared/config'
 import { ChallengeService } from '@shared/domain/challenge/challenge.service'
 import { DataPortalService } from '@shared/domain/data-portal/service/data-portal.service'
-import { DbClusterService } from '@shared/domain/db-cluster/service/db-cluster.service'
 import { SpaceReportService } from '@shared/domain/space-report/service/space-report.service'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { SyncFilesStateOperation } from '@shared/domain/user-file/ops/sync-files-state'
@@ -22,6 +21,7 @@ import { ProcessWithContext } from '../decorator/process-with-context'
 import { BaseQueueProcessor } from './base-queue.processor'
 import { EmailService } from '@shared/domain/email/email.service'
 import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
+import { DbClusterSynchronizeFacade } from 'apps/api/src/facade/db-cluster/synchronize-facade/db-cluster-synchronize.facade'
 import { JobService } from '@shared/domain/job/job.service'
 
 @Processor(config.workerJobs.queues.default.name)
@@ -34,7 +34,7 @@ export class MainQueueProcessor extends BaseQueueProcessor {
     private readonly dataPortalService: DataPortalService,
     private readonly followUpDecider: FollowUpDecider,
     private readonly spaceReportService: SpaceReportService,
-    private readonly dbClusterService: DbClusterService,
+    private readonly dbClusterSynchronizeFacade: DbClusterSynchronizeFacade,
     private readonly emailService: EmailService,
     private readonly jobService: JobService,
     private readonly userProvisionFacade: UserProvisionFacade,
@@ -56,12 +56,12 @@ export class MainQueueProcessor extends BaseQueueProcessor {
 
   @ProcessWithContext(TASK_TYPE.SYNC_DBCLUSTER_STATUS)
   async syncDbClusterStatus(job: Job): Promise<void> {
-    await this.dbClusterService.syncDbClusterStatus(job)
+    await this.dbClusterSynchronizeFacade.syncDbClusterStatus(job)
   }
 
   @ProcessWithContext(TASK_TYPE.SYNC_DBCLUSTER_JOB_OUTPUT)
   async syncDbClusterJobOutput(job: Job): Promise<void> {
-    await this.dbClusterService.syncDbClusterJobOutput(job)
+    await this.dbClusterSynchronizeFacade.syncDbClusterJobOutput(job)
   }
 
   @ProcessWithContext(TASK_TYPE.SYNC_FILE_STATE)

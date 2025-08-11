@@ -111,6 +111,9 @@ Rails.application.configure do
   # Force all access to the app over SSL, use Strict-Transport-Security, and use secure cookies.
   config.force_ssl = true
 
+  # prints values of SQL queries if given env property is set to true
+  config.active_record.verbose_query_logs = ENV["PRINT_DB_QUERY_VALUES_IN_LOG"] == "true"
+
   # Email us when an exception occurs
   Rails.application.config.middleware.use(
     ExceptionNotification::Rack,

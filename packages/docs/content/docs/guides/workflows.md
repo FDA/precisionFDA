@@ -3,7 +3,7 @@ title: Workflows
 ---
 
 > [!warning]
-> The content on this page may be outdated. Please refer to the new [tutorials](/tutorials/apps/apps).
+> The content on this page may be outdated. Please refer to the new [tutorials](/tutorials/apps/introduction).
 
 Workflows on precisionFDA allow multiple applications to be chained together, with the output from one application serving as the input for the next. A workflow is an object, just like an app. You can build a unique workflow, save it, and rerun it as many times as you choose. Workflows can be edited to update app versions, add or remove apps, and make other configuration changes whenever you choose to do so.
 

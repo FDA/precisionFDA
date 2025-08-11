@@ -5,7 +5,7 @@ import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { STATIC_SCOPE } from '@shared/enums'
 import { SCOPE } from '@shared/types/common'
 import { FILE_STATE_DX } from './user-file.types'
-import { AccessControlRepository } from '@shared/repository/access-control.repository'
+import { AccessControlRepository } from '@shared/database/repository/access-control.repository'
 import { User } from '@shared/domain/user/user.entity'
 
 type FindByName = {
