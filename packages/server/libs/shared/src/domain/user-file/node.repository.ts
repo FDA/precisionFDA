@@ -2,8 +2,8 @@ import { FilterQuery } from '@mikro-orm/mysql'
 import { User } from '@shared/domain/user/user.entity'
 import { STATIC_SCOPE } from '../../enums'
 import { Node } from './node.entity'
+import { AccessControlRepository } from '@shared/database/repository/access-control.repository'
 import { Uid } from '@shared/domain/entity/domain/uid'
-import { AccessControlRepository } from '@shared/repository/access-control.repository'
 
 export class NodeRepository extends AccessControlRepository<Node> {
   protected async getAccessibleWhere(): Promise<FilterQuery<Node>> {

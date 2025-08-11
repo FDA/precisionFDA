@@ -1,22 +1,24 @@
-import { FilterQuery, SqlEntityManager } from '@mikro-orm/mysql'
+import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Injectable, Logger } from '@nestjs/common'
-import { UserContext } from '@shared/domain/user-context/model/user-context'
-import { ServiceLogger } from '@shared/logger/decorator/service-logger'
-import { ExpertDTO } from '@shared/domain/expert/dto/expert.dto'
-import { ExpertRepository } from '../expert.repository'
-import { ExpertPaginationDTO } from '@shared/domain/expert/dto/expert-pagination.dto'
-import { TimeUtils } from '@shared/utils/time.utils'
-import { Expert } from '@shared/domain/expert/expert.entity'
-import { NotFoundError } from '@shared/errors'
-import { STATIC_SCOPE } from '@shared/enums'
-import { User } from '@shared/domain/user/user.entity'
-import { RemoveNodesFacade } from '@shared/facade/node-remove/remove-nodes.facade'
-import { Uid } from '@shared/domain/entity/domain/uid'
-import { UserFileRepository } from '@shared/domain/user-file/user-file.repository'
+import { ObjectFilterQuery } from '@shared/database/domain/object-filter-query'
 import { PaginatedResult } from '@shared/domain/entity/domain/paginated.result'
+import { Uid } from '@shared/domain/entity/domain/uid'
+import { ExpertPaginationDTO } from '@shared/domain/expert/dto/expert-pagination.dto'
+import { ExpertDTO } from '@shared/domain/expert/dto/expert.dto'
+import { Expert } from '@shared/domain/expert/entity/expert.entity'
+import { ExpertRepository } from '@shared/domain/expert/repository/expert.repository'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { UserFileRepository } from '@shared/domain/user-file/user-file.repository'
+import { User } from '@shared/domain/user/user.entity'
+import { STATIC_SCOPE } from '@shared/enums'
+import { NotFoundError } from '@shared/errors'
+import { RemoveNodesFacade } from '@shared/facade/node-remove/remove-nodes.facade'
+import { Searchable } from '@shared/interface/searchable'
+import { ServiceLogger } from '@shared/logger/decorator/service-logger'
+import { TimeUtils } from '@shared/utils/time.utils'
 
 @Injectable()
-export class ExpertService {
+export class ExpertService implements Searchable<Expert> {
   @ServiceLogger()
   private readonly logger: Logger
 
@@ -67,7 +69,7 @@ export class ExpertService {
   }
 
   async listExperts(pagination: ExpertPaginationDTO): Promise<PaginatedResult<ExpertDTO>> {
-    const where: FilterQuery<Expert> = {}
+    const where: ObjectFilterQuery<Expert> = {}
     const { year } = pagination.filter ?? {}
 
     const user = await this.em.findOne(User, { id: this.userCtx.id })
@@ -100,5 +102,13 @@ export class ExpertService {
     )
 
     return result.map((y) => y.year)
+  }
+
+  async search(query: string): Promise<Expert[]> {
+    if (!query) {
+      return []
+    }
+
+    return this.expertRepository.searchByMeta(query)
   }
 }

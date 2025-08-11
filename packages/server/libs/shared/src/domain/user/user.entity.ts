@@ -10,8 +10,8 @@ import {
   Reference,
 } from '@mikro-orm/core'
 import { ADMIN_GROUP_ROLES } from '@shared/domain/admin-group/admin-group.entity'
-import { ExpertQuestion } from '@shared/domain/expert-question/expert-question.entity'
-import { Expert } from '@shared/domain/expert/expert.entity'
+import { ExpertQuestion } from '@shared/domain/expert-question/entity/expert-question.entity'
+import { Expert } from '@shared/domain/expert/entity/expert.entity'
 import { Job } from '@shared/domain/job/job.entity'
 import { NewsItem } from '@shared/domain/news-item/news-item.entity'
 import { NotificationPreference } from '@shared/domain/notification-preference/notification-preference.entity'

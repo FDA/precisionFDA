@@ -3,7 +3,7 @@ title: Workstations
 ---
 
 > [!warning]
-> The content on this page may be outdated. Please refer to the new [tutorials](/tutorials/apps/apps).
+> The content on this page may be outdated. Please refer to the new [tutorials](/tutorials/apps/introduction).
 
 Workstations are a class of apps on precisionFDA that are "interactive". Most apps on precisionFDA are non-interactive: you provide inputs, the app follows a set script, and creates outputs if it finishes successfully. Workstations are interactive; they create an environment where the user may enter any command they choose.
 

@@ -1,7 +1,15 @@
 import { useQueryClient } from '@tanstack/react-query'
 import React, { useEffect, useState } from 'react'
 import useWebSocket from 'react-use-websocket'
-import { ColumnDefResolved, ColumnFiltersState, ColumnSizingState, ColumnSort, ExpandedState, RowSelectionState, VisibilityState } from '@tanstack/react-table'
+import {
+  ColumnDefResolved,
+  ColumnFiltersState,
+  ColumnSizingState,
+  ColumnSort,
+  ExpandedState,
+  RowSelectionState,
+  VisibilityState,
+} from '@tanstack/react-table'
 import { ContentFooter } from '../../components/Page/ContentFooter'
 import { Pagination, hidePagination } from '../../components/Pagination'
 import Table from '../../components/Table'
@@ -21,6 +29,8 @@ import { fetchWorkflowExecutions } from './workflows.api'
 import { ResouceQueryErrorMessage } from '../home/ResouceQueryErrorMessage'
 import { useHiddenColumnLocalStorage } from '../../hooks/useHiddenColumnLocalStorage'
 import { StyledPageTable } from '../../components/Table/components/styles'
+import { useAuthUser } from '../auth/useAuthUser'
+import { useLastWSNotification } from '../../hooks/useToastWSHandler'
 
 type ListType = { jobs: IExecution[]; meta: IMeta }
 
@@ -28,9 +38,10 @@ export const WorkflowExecutionsList = ({ spaceId, uid }: { spaceId?: string; uid
   const resource = 'workflow-executions'
   const locationKey = createLocationKey(resource, spaceId)
   const { pageParam, perPageParam, setPageParam, setPerPageParam } = usePaginationParams()
-  const { sortBy, sort, setSortBy } = useOrderByState({ defaultOrder: { order_by: 'created_at_date_time', order_dir: 'DESC' }})
+  const { sortBy, sort, setSortBy } = useOrderByState({ defaultOrder: { order_by: 'created_at_date_time', order_dir: 'DESC' } })
   const { colWidths, saveColumnResizeWidth } = useColumnWidthLocalStorage(locationKey)
   const { columnVisibility, setColumnVisibility } = useHiddenColumnLocalStorage(locationKey)
+  const user = useAuthUser()
 
   const queryCache = useQueryClient()
 
@@ -53,31 +64,13 @@ export const WorkflowExecutionsList = ({ spaceId, uid }: { spaceId?: string; uid
   }
   const { isLoading, data, error } = query
 
-  const { lastJsonMessage } = useWebSocket<WebSocketMessage>(getNodeWsUrl(), {
-    share: true,
-    reconnectInterval: DEFAULT_RECONNECT_INTERVAL,
-    reconnectAttempts: DEFAULT_RECONNECT_ATTEMPTS,
-    shouldReconnect: () => SHOULD_RECONNECT,
-    filter: message => {
-      try {
-        const messageData = JSON.parse(message.data)
-        const notification = messageData.data as Notification
-        return (
-          messageData.type === WEBSOCKET_MESSAGE_TYPE.NOTIFICATION &&
-          [
-            NOTIFICATION_ACTION.JOB_RUNNABLE,
-            NOTIFICATION_ACTION.JOB_RUNNING,
-            NOTIFICATION_ACTION.JOB_DONE,
-            NOTIFICATION_ACTION.JOB_FAILED,
-            NOTIFICATION_ACTION.JOB_OUTPUTS_SYNCED,
-          ].includes(notification.action)
-        )
-      } catch (e: unknown) {
-        console.error('Error parsing WebSocket message:', e)
-        return false
-      }
-    },
-  })
+  const lastJsonMessage = useLastWSNotification([
+    NOTIFICATION_ACTION.JOB_RUNNABLE,
+    NOTIFICATION_ACTION.JOB_RUNNING,
+    NOTIFICATION_ACTION.JOB_DONE,
+    NOTIFICATION_ACTION.JOB_FAILED,
+    NOTIFICATION_ACTION.JOB_OUTPUTS_SYNCED,
+  ])
 
   useEffect(() => {
     if (lastJsonMessage == null) {
@@ -178,7 +171,7 @@ export const ExecutionsListTable = ({
         columnFilters={filters}
         expanded={expanded}
         setExpanded={setExpanded}
-        subRowKey='jobs'
+        subRowKey="jobs"
       />
     </StyledPageTable>
   )

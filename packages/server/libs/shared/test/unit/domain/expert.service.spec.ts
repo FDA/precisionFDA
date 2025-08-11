@@ -1,12 +1,12 @@
 import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
 import { database } from '@shared/database'
+import { ExpertRepository } from '@shared/domain/expert/repository/expert.repository'
 import { User } from '@shared/domain/user/user.entity'
 import { expect } from 'chai'
 import { stub } from 'sinon'
 import { create, db } from '../../../src/test'
 import { ExpertService } from '@shared/domain/expert/services/expert.service'
 import { UserFileRepository } from '@shared/domain/user-file/user-file.repository'
-import { ExpertRepository } from '@shared/domain/expert/expert.repository'
 import { RemoveNodesFacade } from '@shared/facade/node-remove/remove-nodes.facade'
 import { ExpertPaginationDTO } from '@shared/domain/expert/dto/expert-pagination.dto'
 import { STATIC_SCOPE } from '@shared/enums'
@@ -24,6 +24,7 @@ describe('ExpertService tests', () => {
   const paginateStub = stub().throws()
   const findOneExpertStub = stub().throws()
   const findOneFileStub = stub().throws()
+  const searchByMetaStub = stub()
 
   beforeEach(async () => {
     await db.dropData(database.connection())
@@ -86,10 +87,34 @@ describe('ExpertService tests', () => {
     expect(nodesRemoveStub.calledOnce).to.be.true()
   })
 
-  function getInstance(context: UserContext) {
+  describe('#search', async () => {
+    const QUERY = 'QUERY'
+    const RESULT = 'RESULT'
+
+    beforeEach(() => {
+      searchByMetaStub.reset()
+      searchByMetaStub.throws()
+      searchByMetaStub.withArgs(QUERY).resolves(RESULT)
+    })
+
+    it('return empty set for empty query', async () => {
+      const res = await getInstance(userCtx).search(null)
+
+      expect(res).to.deep.equal([])
+    })
+
+    it('should return the result of repo search', async () => {
+      const res = await getInstance(userCtx).search(QUERY)
+
+      expect(res).to.equal(RESULT)
+    })
+  })
+
+  function getInstance(context: UserContext): ExpertService {
     const expertRepository = {
       paginate: paginateStub,
       findOne: findOneExpertStub,
+      searchByMeta: searchByMetaStub,
     } as unknown as ExpertRepository
     const userFileRepository = {
       findOne: findOneFileStub,

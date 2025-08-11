@@ -21,25 +21,22 @@ import { toArrayFromObject } from '../../utils/object'
 import { IExecution } from '../executions/executions.types'
 import { useExecutionColumns } from '../executions/useExecutionColumns'
 import { columnFilters } from '../home/columnFilters'
-import {
-  HomeScope,
-  NOTIFICATION_ACTION,
-  Notification,
-  WEBSOCKET_MESSAGE_TYPE,
-  WebSocketMessage,
-} from '../home/types'
+import { HomeScope, NOTIFICATION_ACTION, Notification, WEBSOCKET_MESSAGE_TYPE, WebSocketMessage } from '../home/types'
 import { useFilterParams } from '../home/useFilterState'
 import { useListQuery } from '../home/useListQuery'
 import { fetchAppExecutions, FetchAppsExecutionsResponse } from './apps.api'
 import { ResouceQueryErrorMessage } from '../home/ResouceQueryErrorMessage'
 import { createLocationKey } from '../../utils'
 import { StyledPageTable } from '../../components/Table/components/styles'
+import { useAuthUser } from '../auth/useAuthUser'
+import { useLastWSNotification } from '../../hooks/useToastWSHandler'
 
-export const AppExecutionsList = ({ spaceId, appUid }: { spaceId?: string, appUid: string }) => {
+export const AppExecutionsList = ({ spaceId, appUid }: { spaceId?: string; appUid: string }) => {
+  const user = useAuthUser()
   const resource = 'app-executions'
   const locationKey = createLocationKey(resource, spaceId)
   const { pageParam, perPageParam, setPageParam, setPerPageParam } = usePaginationParams()
-  const { sort, sortBy, setSortBy } = useOrderByState({ defaultOrder: { order_by: 'created_at_date_time', order_dir: 'DESC' }})
+  const { sort, sortBy, setSortBy } = useOrderByState({ defaultOrder: { order_by: 'created_at_date_time', order_dir: 'DESC' } })
   const { colWidths, saveColumnResizeWidth } = useColumnWidthLocalStorage(locationKey)
   const { columnVisibility, setColumnVisibility } = useHiddenColumnLocalStorage(locationKey)
   const queryCache = useQueryClient()
@@ -60,38 +57,20 @@ export const AppExecutionsList = ({ spaceId, appUid }: { spaceId?: string, appUi
     setPerPageParam(perPage, 'pushIn')
   }
 
-  const { lastJsonMessage } = useWebSocket<WebSocketMessage>(getNodeWsUrl(), {
-    share: true,
-    reconnectInterval: DEFAULT_RECONNECT_INTERVAL,
-    reconnectAttempts: DEFAULT_RECONNECT_ATTEMPTS,
-    shouldReconnect: () => SHOULD_RECONNECT,
-    filter: message => {
-      try {
-        const messageData = JSON.parse(message.data)
-        const notification = messageData.data as Notification
-        return (
-          messageData.type === WEBSOCKET_MESSAGE_TYPE.NOTIFICATION &&
-          [
-            NOTIFICATION_ACTION.JOB_RUNNABLE,
-            NOTIFICATION_ACTION.JOB_RUNNING,
-            NOTIFICATION_ACTION.JOB_DONE,
-            NOTIFICATION_ACTION.JOB_FAILED,
-            NOTIFICATION_ACTION.JOB_OUTPUTS_SYNCED,
-          ].includes(notification.action)
-        )
-      } catch (e: unknown) {
-        console.error('Error parsing WebSocket message:', e)
-        return false
-      }
-    },
-  })
+  const lastJsonMessage = useLastWSNotification([
+    NOTIFICATION_ACTION.JOB_RUNNABLE,
+    NOTIFICATION_ACTION.JOB_RUNNING,
+    NOTIFICATION_ACTION.JOB_DONE,
+    NOTIFICATION_ACTION.JOB_FAILED,
+    NOTIFICATION_ACTION.JOB_OUTPUTS_SYNCED,
+  ])
 
   useEffect(() => {
     if (lastJsonMessage == null) {
       return
     }
     queryCache.invalidateQueries({
-      queryKey: [locationKey],
+      queryKey: [resource],
     })
   }, [lastJsonMessage])
 

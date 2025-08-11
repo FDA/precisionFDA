@@ -240,6 +240,14 @@ export class SpaceService {
     await this.em.nativeUpdate(Space, { id: { $in: spaceIds } }, { hidden })
   }
 
+  async getEditableById(id: number): Promise<Space> {
+    return await this.spaceRepository.findEditableOne({ id })
+  }
+
+  async getAccessibleById(id: number): Promise<Space> {
+    return await this.spaceRepository.findAccessibleOne({ id })
+  }
+
   async getAccessibleSpace(spaceId: number): Promise<Space | null> {
     return this.spaceRepository.findAccessibleOne({ id: spaceId })
   }

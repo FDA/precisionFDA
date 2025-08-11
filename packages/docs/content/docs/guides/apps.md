@@ -3,7 +3,7 @@ title: Apps
 ---
 
 > [!warning]
-> The content on this page may be outdated. Please refer to the new [tutorials](/tutorials/apps/apps).
+> The content on this page may be outdated. Please refer to the new [tutorials](/tutorials/apps/introduction).
 
 The Apps section of precisionFDA encapsulates all the activities for managing, running and sharing software. The system uses cloud technology that allows you to run any Linux software. You can explore and run apps published by other precisionFDA members, or introduce your own.
 

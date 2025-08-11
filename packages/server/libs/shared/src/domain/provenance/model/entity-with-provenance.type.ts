@@ -1,6 +1,7 @@
 import { EntityType } from '@shared/domain/entity/domain/entity.type'
+import { Extends } from '@shared/utils/types/extends'
 
-export type EntityWithProvenanceType = Exclude<
+export type EntityWithProvenanceType = Extends<
   EntityType,
-  'discussion' | 'resource' | 'folder' | 'answer' | 'comment'
+  'app' | 'job' | 'file' | 'dbcluster' | 'user' | 'workflow' | 'note' | 'comparison' | 'asset'
 >

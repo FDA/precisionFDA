@@ -8,6 +8,7 @@ import { EntityLinkProvider } from '@shared/domain/entity/entity-link/entity-lin
 import { ENTITY_TYPE_TO_LINK_PROVIDER_MAP } from '@shared/domain/entity/entity-link/provider/entity-type-to-link-provider-map.provider'
 import { PlatformClient } from '@shared/platform-client'
 import { EntityUtils } from '@shared/utils/entity.utils'
+import { StringUtils } from '@shared/utils/string.utils'
 import { TimeUtils } from '@shared/utils/time.utils'
 
 @Injectable()
@@ -26,7 +27,10 @@ export class EntityLinkService {
     inline: false,
   }
 
-  async getUiLink<T extends UiLinkableEntityType>(entity: EntityInstance<T>): Promise<string> {
+  async getUiLink<T extends UiLinkableEntityType>(
+    entity: EntityInstance<T>,
+    suffix?: string,
+  ): Promise<string> {
     const entityType = EntityUtils.getEntityTypeForEntity(entity)
     const linkProvider = this.entityTypeToLinkProviderMap[entityType]
 
@@ -34,7 +38,13 @@ export class EntityLinkService {
       throw new Error(`No link provider found for entity type "${entityType}"`)
     }
 
-    return linkProvider.getLink(entity)
+    const link = await linkProvider.getLink(entity)
+
+    if (StringUtils.isEmpty(suffix)) {
+      return link
+    }
+
+    return `${link}${suffix}`
   }
 
   async getDownloadLink(

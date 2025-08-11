@@ -60,6 +60,8 @@ import {
 import { useEditFavoritesModal } from './useEditFavoritesModal'
 import { useNavFavorites } from './useNavFavorites'
 import { useUserSiteNavItems } from './useUserSiteNavItems'
+import { useSearchModal } from '../GlobalSearch/useSearchModal'
+import { SearchIcon } from '../icons/SearchIcon'
 
 type UserMenuProps = {
   user: IUser | null | undefined
@@ -346,18 +348,12 @@ const SiteNav = ({
                   </IconWrap>
                   <SiteMenuText>CDMH</SiteMenuText>
                 </SiteMenuItem>
-                {siteSettings?.cdmh?.data &&
-                  Object.keys(siteSettings.cdmh.data).map((s) => {
-                    const cdmhKey = s as CDMHKey
-                    return (
-                      <a key={cdmhKey} target="_blank" rel="noreferrer" href={siteSettings.cdmh.data![cdmhKey]}>
-                        <SubLink $active={false}>
-                          {CDMHNames[cdmhKey]}&nbsp;
-                          <ArrowLeftIcon />
-                        </SubLink>
-                      </a>
-                    )
-                  })}
+                {Object.entries(siteSettings?.cdmh?.data ?? {}).map(([key, url]) => (
+                  <SubLink as="a" key={key} target="_blank" rel="noreferrer" href={url}>
+                    {CDMHNames[key as CDMHKey]}&nbsp;
+                    <ArrowLeftIcon />
+                  </SubLink>
+                ))}
                 <HeaderSpacer />
               </>
             )}
@@ -383,6 +379,7 @@ const Header: React.FC = () => {
   const buttonElement = useRef<HTMLButtonElement>(null)
   const generateCLIKeyAction = useGenerateKeyModal()
   const { isShown, modalComp, setShowModal } = useEditFavoritesModal()
+  const { isShown: isSearchShown, modalComp: searchModalComp, setShowModal: setShowSearch } = useSearchModal()
   const { userSiteNavItems } = useUserSiteNavItems()
 
   if (!user) return null
@@ -408,6 +405,7 @@ const Header: React.FC = () => {
   return (
     <>
       {modalComp}
+      {searchModalComp}
       {showAlertBanner && siteSettings.data?.alerts?.[0] && (
         <AlertBanner
           variant={siteSettings.data.alerts[0].type}
@@ -479,6 +477,9 @@ const Header: React.FC = () => {
             </EditMenuWrap>
           </HeaderLeft>
           <HeaderRight>
+            <HeaderMenuItem as={TransparentButton} $active={isSearchShown} onClick={() => setShowSearch(true)} data-testid="search-button">
+              <SearchIcon />
+            </HeaderMenuItem>
             <DropdownNext
               trigger="click"
               content={(props, { hide }) => (

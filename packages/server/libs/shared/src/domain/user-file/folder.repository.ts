@@ -2,7 +2,7 @@ import { FilterQuery } from '@mikro-orm/mysql'
 import { STATIC_SCOPE } from '@shared/enums'
 import { SCOPE } from '@shared/types/common'
 import { Folder } from './folder.entity'
-import { AccessControlRepository } from '@shared/repository/access-control.repository'
+import { AccessControlRepository } from '@shared/database/repository/access-control.repository'
 import { User } from '@shared/domain/user/user.entity'
 
 type FindForUser = {

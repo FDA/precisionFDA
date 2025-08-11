@@ -1,17 +1,17 @@
-import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
-import { User } from '@shared/domain/user/user.entity'
-import { expertQuestionAddedTemplate } from '@shared/domain/email/templates/mjml/expert-question-added.template'
-import { getUserTitle } from '@shared/domain/email/templates/mjml/common'
-import { EmailHandler } from '@shared/domain/email/templates/handlers/email.handler'
-import { EmailClient } from '@shared/services/email-client'
 import { Injectable } from '@nestjs/common'
-import { ExpertQuestionRepository } from '@shared/domain/expert-question/expert-question.repository'
 import {
   EmailTypeToContextMap,
   ExpertQuestionAddedContext,
 } from '@shared/domain/email/dto/email-type-to-context.map'
-import { ObjectIdInputDTO } from '@shared/domain/email/dto/object-id.dto'
 import { EmailTypeToTemplateInputMap } from '@shared/domain/email/dto/email-type-to-template-input.map'
+import { ObjectIdInputDTO } from '@shared/domain/email/dto/object-id.dto'
+import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
+import { EmailHandler } from '@shared/domain/email/templates/handlers/email.handler'
+import { getUserTitle } from '@shared/domain/email/templates/mjml/common'
+import { expertQuestionAddedTemplate } from '@shared/domain/email/templates/mjml/expert-question-added.template'
+import { ExpertQuestionRepository } from '@shared/domain/expert-question/repository/expert-question.repository'
+import { User } from '@shared/domain/user/user.entity'
+import { EmailClient } from '@shared/services/email-client'
 
 @Injectable()
 export class ExpertQuestionAddedHandler extends EmailHandler<EMAIL_TYPES.expertQuestionAdded> {

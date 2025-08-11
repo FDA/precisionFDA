@@ -14,6 +14,9 @@ import { MainQueueProcessor } from './processor/main-queue.processor'
 import { MaintenanceQueueProcessor } from './processor/maintenance-queue.processor'
 import { DiscussionModule } from '@shared/domain/discussion/discussion.module'
 import { EmailModule } from '@shared/domain/email/email.module'
+import { DbClusterCheckNonTerminatedFacadeModule } from 'apps/api/src/facade/db-cluster/check-non-terminated-facade/db-cluster-check-non-terminated-facade.module'
+import { DbClusterSynchronizeFacadeModule } from 'apps/api/src/facade/db-cluster/synchronize-facade/db-cluster-synchronize-facade.module'
+
 @Module({
   imports: [
     QueueModule,
@@ -28,8 +31,9 @@ import { EmailModule } from '@shared/domain/email/email.module'
     JobModule,
     DiscussionModule,
     UserFacadeModule,
-    DbClusterModule,
     EmailModule,
+    DbClusterCheckNonTerminatedFacadeModule,
+    DbClusterSynchronizeFacadeModule,
   ],
   providers: [MainQueueProcessor, MaintenanceQueueProcessor],
 })

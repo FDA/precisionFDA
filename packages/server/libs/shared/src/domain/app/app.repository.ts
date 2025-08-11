@@ -2,7 +2,7 @@ import { FilterQuery } from '@mikro-orm/mysql'
 import { DxId } from '../entity/domain/dxid'
 import { App } from './app.entity'
 import { ENTITY_TYPE } from './app.enum'
-import { AccessControlRepository } from '@shared/repository/access-control.repository'
+import { AccessControlRepository } from '@shared/database/repository/access-control.repository'
 import { User } from '@shared/domain/user/user.entity'
 import { STATIC_SCOPE } from '@shared/enums'
 
@@ -37,7 +37,7 @@ export class AppRepository extends AccessControlRepository<App> {
     }
   }
 
-  async findPublic(dxid: DxId<'app'>) {
+  async findPublic(dxid: DxId<'app'>): Promise<App> {
     return await this.findOne({
       dxid,
       scope: 'public',

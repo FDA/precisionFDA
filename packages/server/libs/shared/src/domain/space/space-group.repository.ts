@@ -1,5 +1,5 @@
-import { AccessControlRepository } from '@shared/repository/access-control.repository'
 import { FilterQuery } from '@mikro-orm/core'
+import { AccessControlRepository } from '@shared/database/repository/access-control.repository'
 import { SpaceGroup } from '@shared/domain/space/space-group.entity'
 import { SPACE_STATE } from '@shared/domain/space/space.enum'
 

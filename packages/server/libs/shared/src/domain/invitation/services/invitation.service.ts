@@ -1,6 +1,7 @@
-import { FilterQuery, QueryOrder } from '@mikro-orm/core'
+import { QueryOrder } from '@mikro-orm/core'
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Injectable } from '@nestjs/common'
+import { ObjectFilterQuery } from '@shared/database/domain/object-filter-query'
 import { PaginatedResult } from '@shared/domain/entity/domain/paginated.result'
 import { InvalidStateError } from '@shared/errors'
 import { MainQueueJobProducer } from '@shared/queue/producer/main-queue-job.producer'
@@ -20,7 +21,7 @@ export class InvitationService {
   ) {}
 
   async listInvitations(query: InvitationPaginationDTO): Promise<PaginatedResult<Invitation>> {
-    const where: FilterQuery<Invitation> = {}
+    const where: ObjectFilterQuery<Invitation> = {}
 
     if (query.filter?.ids) {
       where.id = { $in: query.filter.ids }

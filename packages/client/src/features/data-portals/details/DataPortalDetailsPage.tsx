@@ -18,6 +18,7 @@ import {
   canViewSpaceLink as canViewSpaceLinkCheck,
 } from '../utils'
 import { DataPortalDetails } from './DataPortalDetails'
+import { useLastWSNotification } from '../../../hooks/useToastWSHandler'
 
 const DataPortalDetailsPage = () => {
   const user = useAuthUser()
@@ -30,30 +31,13 @@ const DataPortalDetailsPage = () => {
   const { data, isLoading, error } = useDataPortalByIdQuery(portalId === undefined ? 'main' : portalId)
   const navigate = useNavigate()
 
-  const { lastJsonMessage } = useWebSocket<WebSocketMessage>(getNodeWsUrl(), {
-    share: true,
-    reconnectInterval: DEFAULT_RECONNECT_INTERVAL,
-    reconnectAttempts: DEFAULT_RECONNECT_ATTEMPTS,
-    shouldReconnect: () => SHOULD_RECONNECT,
-    filter: message => {
-      try {
-        const messageData = JSON.parse(message.data)
-        const notification = messageData.data as Notification
-        return (
-          messageData.type === WEBSOCKET_MESSAGE_TYPE.NOTIFICATION &&
-          NOTIFICATION_ACTION.DATA_PORTAL_CARD_IMAGE_URL_UPDATED === notification.action
-        )
-      } catch (e) {
-        return false
-      }
-    },
-  })
+  const lastJsonMessage = useLastWSNotification([NOTIFICATION_ACTION.DATA_PORTAL_CARD_IMAGE_URL_UPDATED])
 
   useEffect(() => {
     if (lastJsonMessage == null) {
       return
     }
-    queryClient.invalidateQueries({ queryKey: ['data-portals', portalId]})
+    queryClient.invalidateQueries({ queryKey: ['data-portals', portalId] })
   }, [lastJsonMessage])
 
   // URLs /data-portals/main and /data-portals/{id} are redirected to /data-portals/{slug}

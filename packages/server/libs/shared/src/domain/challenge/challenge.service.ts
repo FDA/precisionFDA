@@ -1,46 +1,47 @@
-import { SqlEntityManager, FilterQuery } from '@mikro-orm/mysql'
+import { Reference } from '@mikro-orm/core'
+import { FilterQuery, SqlEntityManager } from '@mikro-orm/mysql'
+import { Inject, Injectable, Logger } from '@nestjs/common'
+import { config } from '@shared/config'
+import { App } from '@shared/domain/app/app.entity'
+import { ChallengeResource } from '@shared/domain/challenge/challenge-resource.entity'
+import { ChallengeResourceRepository } from '@shared/domain/challenge/challenge-resource.repository'
 import { Challenge } from '@shared/domain/challenge/challenge.entity'
+import { CHALLENGE_STATUS } from '@shared/domain/challenge/challenge.enum'
+import { ChallengeRepository } from '@shared/domain/challenge/challenge.repository'
+import { AssignScoringAppDTO } from '@shared/domain/challenge/dto/assign-scoring-app.dto'
 import {
   ChallengePaginationDto,
   FILTER_STATUS,
 } from '@shared/domain/challenge/dto/challenge-pagination.dto'
-import { Uid } from '@shared/domain/entity/domain/uid'
-import { NotificationService } from '@shared/domain/notification/services/notification.service'
-import { NotFoundError, ValidationError } from '@shared/errors'
-import { NOTIFICATION_ACTION, SEVERITY } from '@shared/enums'
-import { PlatformClient } from '@shared/platform-client'
-import { Inject, Injectable, Logger } from '@nestjs/common'
-import { UserContext } from '@shared/domain/user-context/model/user-context'
-import { ChallengeRepository } from '@shared/domain/challenge/challenge.repository'
-import { ChallengeResourceRepository } from '@shared/domain/challenge/challenge-resource.repository'
-import { CHALLENGE_BOT_PLATFORM_CLIENT } from '@shared/platform-client/providers/platform-client.provider'
-import { ProposeChallengeDTO } from '@shared/domain/challenge/dto/propose-challenge.dto'
-import { CaptchaService } from '@shared/services/captcha.service'
+import { ChallengeDTO } from '@shared/domain/challenge/dto/challenge.dto'
 import { CreateChallengeDTO } from '@shared/domain/challenge/dto/create-challenge.dto'
-import { User, USER_STATE } from '@shared/domain/user/user.entity'
-import { Reference } from '@mikro-orm/core'
+import { ProposeChallengeDTO } from '@shared/domain/challenge/dto/propose-challenge.dto'
+import { SubmissionDTO } from '@shared/domain/challenge/dto/submission.dto'
 import {
   CHALLENGE_CONTENT_TYPE,
   UpdateChallengeContentDTO,
 } from '@shared/domain/challenge/dto/update-challenge-content.dto'
 import { UpdateChallengeDTO } from '@shared/domain/challenge/dto/update-challenge.dto'
-import { App } from '@shared/domain/app/app.entity'
-import { AssignScoringAppDTO } from '@shared/domain/challenge/dto/assign-scoring-app.dto'
-import { CHALLENGE_STATUS } from '@shared/domain/challenge/challenge.enum'
-import { config } from '@shared/config'
-import { ChallengeDTO } from '@shared/domain/challenge/dto/challenge.dto'
-import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
-import { TimeUtils } from '@shared/utils/time.utils'
-import { ChallengeResource } from '@shared/domain/challenge/challenge-resource.entity'
 import { Submission } from '@shared/domain/challenge/submission.entity'
-import { SubmissionDTO } from '@shared/domain/challenge/dto/submission.dto'
-import { JOB_STATE } from '@shared/domain/job/job.enum'
-import { ServiceLogger } from '@shared/logger/decorator/service-logger'
-import { ChallengeFollow } from '@shared/domain/follow/challenge-follow.entity'
 import { PaginatedResult } from '@shared/domain/entity/domain/paginated.result'
+import { Uid } from '@shared/domain/entity/domain/uid'
+import { ChallengeFollow } from '@shared/domain/follow/challenge-follow.entity'
+import { JOB_STATE } from '@shared/domain/job/job.enum'
+import { NotificationService } from '@shared/domain/notification/services/notification.service'
+import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { User, USER_STATE } from '@shared/domain/user/user.entity'
+import { NOTIFICATION_ACTION, SEVERITY } from '@shared/enums'
+import { NotFoundError, ValidationError } from '@shared/errors'
+import { Searchable } from '@shared/interface/searchable'
+import { ServiceLogger } from '@shared/logger/decorator/service-logger'
+import { PlatformClient } from '@shared/platform-client'
+import { CHALLENGE_BOT_PLATFORM_CLIENT } from '@shared/platform-client/providers/platform-client.provider'
+import { CaptchaService } from '@shared/services/captcha.service'
+import { TimeUtils } from '@shared/utils/time.utils'
 
 @Injectable()
-export class ChallengeService {
+export class ChallengeService implements Searchable<Challenge> {
   @ServiceLogger()
   private readonly logger: Logger
 
@@ -425,5 +426,17 @@ export class ChallengeService {
     const response = await this.challengeRepo.paginateAccessible(pagination, where)
     const challenges = response.data.map((challenge) => ChallengeDTO.mapToDTO(challenge))
     return { ...response, data: challenges }
+  }
+
+  async search(query: string): Promise<Challenge[]> {
+    if (!query) {
+      return []
+    }
+
+    return [
+      ...(await this.challengeRepo.searchPreRegistrationByNameAndDescriptionAndContents(query)),
+      ...(await this.challengeRepo.searchOpenPausedArchivedByNameAndDescriptionAndContents(query)),
+      ...(await this.challengeRepo.searchResultAnnouncedByNameAndDescriptionAndContents(query)),
+    ]
   }
 }

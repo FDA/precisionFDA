@@ -19,8 +19,8 @@ export class DiscussionPaginationDTO extends PaginationDTO<Discussion> {
   @Type(() => DiscussionFilter)
   filter?: DiscussionFilter
 
-  @IsValidScope({ allowHomeScope: true })
-  scope: EntityScope | HOME_SCOPE
+  @IsValidScope({ allowHomeScope: { me: false, featured: false, everybody: true, spaces: true } })
+  scope: EntityScope | HOME_SCOPE.EVERYBODY | HOME_SCOPE.SPACES
 
   //TODO Ludvik: (PFDA-6051) default to descending createdAt
   @IsOptional()
