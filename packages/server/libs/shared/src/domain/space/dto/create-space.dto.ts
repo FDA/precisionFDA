@@ -38,11 +38,9 @@ export class CreateSpaceDTO {
   @IsString()
   guestLeadDxuser?: string
 
-  @ValidateIf((o) => o.spaceType === SPACE_TYPE.GROUPS)
   @IsBoolean()
   protected: boolean = false
 
-  @ValidateIf((o) => o.spaceType === SPACE_TYPE.GROUPS)
   @IsBoolean()
   forChallenge: boolean = false
 
@@ -55,9 +53,11 @@ export class CreateSpaceDTO {
     space.state = SPACE_STATE.ACTIVE
     space.protected = false
     space.hostDxOrg = constructDxOrg(`space_host_${uuid}`)
-    if (this.spaceType in [SPACE_TYPE.GROUPS, SPACE_TYPE.REVIEW]) {
-      space.guestDxOrg = constructDxOrg(`space_guest_${uuid}`)
+    if ([SPACE_TYPE.GROUPS, SPACE_TYPE.REVIEW, SPACE_TYPE.GOVERNMENT].includes(this.spaceType)) {
       space.protected = this.protected
+      if (this.spaceType !== SPACE_TYPE.GOVERNMENT) {
+        space.guestDxOrg = constructDxOrg(`space_guest_${uuid}`)
+      }
     }
     space.meta = {
       restricted_reviewer: this.restrictedReviewer,

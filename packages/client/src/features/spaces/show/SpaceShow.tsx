@@ -53,6 +53,9 @@ import { SpaceNotAllowed } from './SpaceNotAllowed'
 import { SpaceTypeTabs } from './SpaceTypeTabs'
 import {
   ActionButton,
+  DescriptionText,
+  IconBadge,
+  IconBadgeContainer,
   SpaceHeader,
   SpaceHeaderDescrip,
   SpaceHeaderTitle,
@@ -77,7 +80,7 @@ const Spaces2 = ({ space, isLoading }: { space: ISpace; isLoading: boolean }) =>
     onSuccess: () => {
       toast.success('Permissions for guest side successfully updated')
     },
-    onError: (e: { response?: { data?: ApiErrorResponse}}) => {
+    onError: (e: { response?: { data?: ApiErrorResponse } }) => {
       toast.error(e.response?.data?.error?.message)
     },
   })
@@ -100,9 +103,21 @@ const Spaces2 = ({ space, isLoading }: { space: ISpace; isLoading: boolean }) =>
           <SpaceMainInfo>
             <SpaceHeaderTitle data-testid="space-name">{space.name}</SpaceHeaderTitle>
             <SpaceHeaderDescrip data-testid="space-description">
-              {space.protected && <ProtectedIcon />}
-              {space.restricted_reviewer && <FdaRestrictedIcon />}
-              {space.description}
+              <IconBadgeContainer>
+                {space.protected && (
+                  <IconBadge data-variant="protected">
+                    <ProtectedIcon showToolTip={true} />
+                    <span>Protected</span>
+                  </IconBadge>
+                )}
+                {space.restricted_reviewer && (
+                  <IconBadge data-variant="restricted">
+                    <FdaRestrictedIcon showToolTip={true} />
+                    <span>FDA Restricted</span>
+                  </IconBadge>
+                )}
+              </IconBadgeContainer>
+              <DescriptionText>{space.description}</DescriptionText>
             </SpaceHeaderDescrip>
           </SpaceMainInfo>
           <SpaceTopRight>
@@ -113,12 +128,10 @@ const Spaces2 = ({ space, isLoading }: { space: ISpace; isLoading: boolean }) =>
                 </ActionButton>
               </div>
             )}
-
             <SpaceTypeTabs space={space} activeResource={activeResource} />
           </SpaceTopRight>
         </TopSpaceHeader>
       </SpaceHeader>
-
       <Row>
         <StyledMenu $expanded={expandedSidebar}>
           <MenuItem data-testid="files-link" to={`/spaces/${space.id}/files`} activeClassName="active">
@@ -140,7 +153,9 @@ const Spaces2 = ({ space, isLoading }: { space: ISpace; isLoading: boolean }) =>
           >
             <DatabaseIcon height={14} />
             <MenuText>Databases</MenuText>
-            {expandedSidebar && <MenuCounter count={space.counters?.dbclusters.toString()} active={activeResource === 'databases'} />}
+            {expandedSidebar && (
+              <MenuCounter count={space.counters?.dbclusters.toString()} active={activeResource === 'databases'} />
+            )}
           </MenuItem>
           <MenuItem data-testid="workflows-link" to={`/spaces/${space.id}/workflows`} activeClassName="active">
             <NetworkIcon height={18} />
@@ -201,7 +216,10 @@ const Spaces2 = ({ space, isLoading }: { space: ISpace; isLoading: boolean }) =>
                 <Route path="databases/:uid" element={<DatabaseShow spaceId={space.id} />} />
                 {/* <Route path="databases/:identifier/track" element={<TrackInHome entityType="database" />} /> */}
 
-                <Route path="apps" element={<AppList spaceId={space.id.toString()} isContributorOrHigher={isContributorOrHigher} />} />
+                <Route
+                  path="apps"
+                  element={<AppList spaceId={space.id.toString()} isContributorOrHigher={isContributorOrHigher} />}
+                />
                 <Route path="apps/:appIdentifier/jobs/new" element={<RunJobPage spaceId={space.id} />} />
                 <Route path="apps/:appUid/edit" element={<EditAppPage spaceId={space.id.toString()} />} />
                 <Route path="apps/:appUid/fork" element={<ForkAppPage spaceId={space.id} />} />
@@ -252,7 +270,7 @@ export const SpaceShow = () => {
   const { data, isLoading } = useQuery({
     queryKey: ['space', spaceId],
     queryFn: () => spaceRequest({ id: spaceId! }),
-    retry: (failureCount, error: { response: { status: number }}) => {
+    retry: (failureCount, error: { response: { status: number } }) => {
       if (error.response.status === 403) {
         setIsNotAllowed(true)
         return false
