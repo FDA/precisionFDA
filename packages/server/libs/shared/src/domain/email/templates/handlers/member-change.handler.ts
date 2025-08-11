@@ -141,21 +141,8 @@ export class MemberChangedEmailHandler extends EmailHandler<EMAIL_TYPES.memberCh
     }
   }
 
-  private getNotificationKey(activityType: string): keyof typeof NOTIFICATION_TYPES_BASE {
-    const membershipChangeKeys = [
-      SPACE_EVENT_ACTIVITY_TYPE.membership_changed,
-      SPACE_EVENT_ACTIVITY_TYPE.membership_enabled,
-      SPACE_EVENT_ACTIVITY_TYPE.membership_disabled,
-    ]
-    const membershipAddingKey = [SPACE_EVENT_ACTIVITY_TYPE.membership_added]
-    const currentKey = SPACE_EVENT_ACTIVITY_TYPE[activityType]
-    if (membershipChangeKeys.includes(currentKey)) {
-      return 'membership_changed'
-    }
-    if (membershipAddingKey.includes(currentKey)) {
-      return 'member_added_to_space'
-    }
-    throw new Error(`Unknown activityType value ${activityType}`)
+  private getNotificationKey(_activityType: string): keyof typeof NOTIFICATION_TYPES_BASE {
+    return 'membership_changed'
   }
 
   async determineReceivers(context: MemberChangedContext): Promise<User[]> {
