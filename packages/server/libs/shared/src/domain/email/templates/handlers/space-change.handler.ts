@@ -3,7 +3,6 @@ import { User } from '@shared/domain/user/user.entity'
 import { ErrorCodes, NotFoundError } from '@shared/errors'
 import { spaceChangedTemplate } from '../mjml/space-change.template'
 import { getKeyForUserSpaceRole } from '../../email.helper'
-import { SPACE_MEMBERSHIP_SIDE } from '../../../space-membership/space-membership.enum'
 import { SpaceChangedDTO } from '@shared/domain/email/dto/space-changed.dto'
 import { EmailHandler } from '@shared/domain/email/templates/handlers/email.handler'
 import { EmailClient } from '@shared/services/email-client'
@@ -17,6 +16,7 @@ import {
   EmailTypeToContextMap,
   SpaceChangedContext,
 } from '@shared/domain/email/dto/email-type-to-context.map'
+import { SPACE_MEMBERSHIP_SIDE } from '@shared/domain/space-membership/space-membership.enum'
 
 @Injectable()
 export class SpaceChangedEmailHandler extends EmailHandler<EMAIL_TYPES.spaceChanged> {
@@ -79,16 +79,13 @@ export class SpaceChangedEmailHandler extends EmailHandler<EMAIL_TYPES.spaceChan
 
   protected async getNotificationSettingKeys(
     context: SpaceChangedContext,
-    user: User,
+    _user: User,
   ): Promise<string[]> {
     const space = context.space
     await space.spaceMemberships.loadItems()
     const spaceMembership = space.spaceMemberships
       .getItems()
-      .filter(
-        (spaceMembership) =>
-          spaceMembership.active === true && spaceMembership.user.getEntity().id === user.id,
-      )
+      .filter((spaceMembership) => spaceMembership.active === true)
 
     if (Array.isArray(spaceMembership) && spaceMembership.length > 0) {
       return [getKeyForUserSpaceRole(spaceMembership[0], 'space_locked_unlocked_deleted', space)]
@@ -101,7 +98,9 @@ export class SpaceChangedEmailHandler extends EmailHandler<EMAIL_TYPES.spaceChan
       { populate: ['user.notificationPreference'] },
     )
 
-    return memberships.map((membership) => membership.user.getEntity())
+    return memberships
+      .map((membership) => membership.user.getEntity())
+      .filter((user) => context.user.id !== user.id)
   }
 
   private getAction(activityType: string): string {
