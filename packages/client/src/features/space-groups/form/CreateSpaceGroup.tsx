@@ -14,7 +14,7 @@ export const CreateSpaceGroup = () => {
   const queryClient = useQueryClient()
   const spaceGroupMutation = useMutation({
     mutationKey: ['create-space-group'],
-    mutationFn:   createSpaceGroupRequest,
+    mutationFn: createSpaceGroupRequest,
   })
 
   const onSubmit = async (formData: SpaceGroupCreateFormData) => {
@@ -41,7 +41,7 @@ export const CreateSpaceGroup = () => {
       <StyledPageCenter>
         <StyledPageContent>
           <StyledBack linkTo="/spaces">Back to Spaces</StyledBack>
-          <PageTitle>Create Space Group</PageTitle>
+          <PageTitle>Create a new Space Group</PageTitle>
           <SpaceGroupForm onSubmit={onSubmit} isSubmitting={spaceGroupMutation.isPending} />
         </StyledPageContent>
       </StyledPageCenter>

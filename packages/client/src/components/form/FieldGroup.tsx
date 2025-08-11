@@ -18,13 +18,25 @@ const Pill = styled.div`
   margin-left: 4px;
 `
 
-const RequiredPill = () => (
-  <Pill>Required</Pill>
-)
+const RequiredPill = () => <Pill>Required</Pill>
 
-export const FieldGroup = ({ children, label, className, required = false, errorMessage }: { children?: React.ReactNode, label?: ReactNode, required?: boolean, errorMessage?: string, className?: string }) => (
+export const FieldGroup = ({
+  children,
+  label,
+  className,
+  required = false,
+}: {
+  children?: React.ReactNode
+  label?: ReactNode
+  required?: boolean
+  errorMessage?: string
+  className?: string
+}) => (
   <StyledFieldGroup className={className}>
-    <Row>{label && <label>{label}</label>}{required && <RequiredPill />}</Row>
+    <Row>
+      {label && <label>{label}</label>}
+      {required && <RequiredPill />}
+    </Row>
     {children}
   </StyledFieldGroup>
 )

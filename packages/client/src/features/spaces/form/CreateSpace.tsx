@@ -51,7 +51,7 @@ export const CreateSpace = () => {
       <StyledPageCenter>
         <StyledPageContent>
           <StyledBack linkTo="/spaces">Back to Spaces</StyledBack>
-          <PageTitle>Create Space</PageTitle>
+          <PageTitle>Create a new Space</PageTitle>
           <SpaceForm mutation={mutation} />
         </StyledPageContent>
       </StyledPageCenter>

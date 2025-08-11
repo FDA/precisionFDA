@@ -668,6 +668,7 @@ describe('UserFileService', () => {
       name: FILE_NAME,
       uid: FILE_UID,
       state: FILE_STATE_DX.CLOSED,
+      isInSpace: () => false,
     } as unknown as UserFile
     const OPTIONS = { preauthenticated: true }
 
@@ -676,38 +677,11 @@ describe('UserFileService', () => {
       findAccessibleOneStub.withArgs(FILE_UID).resolves(FILE)
     })
 
-    it('should not catch error from entity service', async () => {
-      const error = new Error('my error')
-      findAccessibleOneStub.withArgs({ uid: FILE_UID }).resolves(FILE)
-      getEntityDownloadLinkStub.reset()
-      getEntityDownloadLinkStub.throws(error)
-
-      await expect(getInstance().getDownloadLinkForUid(FILE_UID, OPTIONS)).to.be.rejectedWith(error)
-    })
-
-    it('should not catch error from entity fetcher', async () => {
-      const error = new Error('my error')
-      findAccessibleOneStub.reset()
-      findAccessibleOneStub.throws(error)
-
-      await expect(getInstance().getDownloadLinkForUid(FILE_UID, OPTIONS)).to.be.rejectedWith(error)
-    })
-
     it('should return result from entity service', async () => {
       findAccessibleOneStub.withArgs({ uid: FILE_UID }).resolves(FILE)
-      const res = await getInstance().getDownloadLinkForUid(FILE_UID, OPTIONS)
+      const res = await getInstance().getDownloadLink(FILE, OPTIONS)
 
       expect(res).to.eq('LINK')
-    })
-
-    it('should throw an error if file is not in CLOSED state', async () => {
-      const openFile = { ...FILE, state: FILE_STATE_DX.OPEN } as unknown as UserFile
-      findAccessibleOneStub.withArgs({ uid: FILE_UID }).resolves(openFile)
-
-      await expect(getInstance().getDownloadLinkForUid(FILE_UID, OPTIONS)).to.be.rejectedWith(
-        Error,
-        "Files can only be downloaded if they are in the 'closed' state",
-      )
     })
   })
 

@@ -29,12 +29,12 @@ export const getSpaceTypeOptions = ({
 export const SPACE_TYPE_HINT: Record<ISpace['type'], string> = {
   private_type: 'Available to all users, and only consists of a private area.',
   groups:
-    'Site admins can create a space in which any users can be invited.\nFor challenges, a group space is automatically created to house all user submissions.\nGroup spaces has two sides (Host and Lead), ',
-  review: 'Each Review Space has 2 areas: private and cooperative ones.\nEach review Space has 2 sides: reviewers and sponsors.',
+    'Site admins can create a space in which any users can be invited.\nFor challenges, a group space is automatically created to house all user submissions.\nGroup spaces have two sides: Hosts and Guests.',
+  review: 'Each Review Space has two areas: private and cooperative ones.\nReview Spaces have two sides: Reviewers and Sponsors.',
   government:
-    'Only a government user may create or join a Government-Restricted Space.\nValidation and error message should appear in the "Create Space" and "Add Members" forms to check that an entered username belongs to a government user.\nGovernment spaces only has one side, which is the Shared area.',
+    'Only government users can create or join a Government‑Restricted Space.\nWhen adding members, a check the username belongs to a government user is performed.\nGovernment space only has one side, which is the Shared area.',
   administrator:
-    'Only site admins can be members of an Administrator Space. Membership is implicit, i.e. all site admins can access and use any Administrator Space\nAdministrator space has only one side, which is the Shared area',
+    'Only site admins can be members of an Administrator Space.\nMembership is implicit, i.e. all site admins can access and use any Administrator Space.\nAdministrator space has only one side, which is the Shared area.',
 }
 
 const nameOfLead = (leadType: 'guest' | 'host', spaceType: ISpace['type']) => {

@@ -72,7 +72,7 @@ export const SpaceGroupDescrip = styled.div`
   color: var(--c-text-500);
   display: -webkit-box;
   -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;  
+  -webkit-box-orient: vertical;
   overflow: hidden;
   max-width: 650px;
 `
@@ -87,7 +87,6 @@ const StyledTable = styled.div`
 const truncateText = (text: string, maxLength = 50) => {
   return text.length <= maxLength ? text : text.slice(0, maxLength).trim() + '…'
 }
-
 
 const createDragImage = (isValidDnD: boolean, spacesCount?: number, spaceName?: string) => {
   const dragImage = document.createElement('div')
@@ -148,7 +147,7 @@ const dragSelectedSpacesInSpaceGroup = (
 
   let selectedSpaces: ISpaceV2[]
   if (!selectedIndexes || Object.keys(selectedIndexes).length === 0) {
-    selectedSpaces = [allSpaces.find((space) => space.id === rowSpaceId)] as unknown as ISpaceV2[]
+    selectedSpaces = [allSpaces.find(space => space.id === rowSpaceId)] as unknown as ISpaceV2[]
   } else {
     selectedSpaces = getSelectedObjectsFromIndexes(selectedIndexes, allSpaces) as unknown as ISpaceV2[]
   }
@@ -246,14 +245,14 @@ const SpacesList = () => {
   const spaceGroups = querySpaceGroups.data
   const errorSpaceGroups = querySpaceGroups.error
 
-  const [spaceGroup, setSpaceGroup ] = useState<ISpaceGroup>()
+  const [spaceGroup, setSpaceGroup] = useState<ISpaceGroup>()
 
   useEffect(() => {
     if (spaceGroupId && spaceGroups) {
       const newParams = new URLSearchParams(searchParams.toString())
       newParams.set('spaceGroupId', spaceGroupId.toString())
       setSearchParams(newParams)
-      setSpaceGroup(spaceGroups?.find((sg => sg.id === spaceGroupId)))
+      setSpaceGroup(spaceGroups?.find(sg => sg.id === spaceGroupId))
     } else {
       setSpaceGroup(undefined)
     }
@@ -284,15 +283,14 @@ const SpacesList = () => {
     if (!spaceGroups) {
       return []
     }
-    return spaceGroups.map((sg) => ({
+    return spaceGroups.map(sg => ({
       name: `ID: ${sg.id} - ${sg.name}`,
       isDisabled: false,
       type: 'modal' as const,
       func: async () => {
         const selectedSpaces = getSelectedObjectsFromIndexes(selectedIndexes, data?.data) as unknown as ISpaceV2[]
         const selectedSpacesIds = selectedSpaces.map(s => s.id)
-        addSpacesToSpaceGroup(sg.id, selectedSpacesIds)
-          .then(() => sidebarRef.current?.toggleSpaceGroup(sg.id, true))
+        addSpacesToSpaceGroup(sg.id, selectedSpacesIds).then(() => sidebarRef.current?.toggleSpaceGroup(sg.id, true))
       },
     }))
   }
@@ -328,29 +326,36 @@ const SpacesList = () => {
         <SpacesQuickActions>
           {userCanAdministerSite && (
             <Button data-variant="primary" disabled={Object.keys(selectedIndexes || {}).length === 0} onClick={hideSpaces}>
-              Hide spaces
+              Hide Spaces
             </Button>
           )}
           {userCanAdministerSpaceGroups && (
             <>
-              {!spaceGroup &&
+              {!spaceGroup && (
                 <>
-                  <DropdownNext
-                    trigger="click"
-                    content={() => <ActionsDropdownContent actions={getDropdownOptions()} />}
-                  >
+                  <DropdownNext trigger="click" content={() => <ActionsDropdownContent actions={getDropdownOptions()} />}>
                     {dropdownProps => (
-                      <ActionsButton disabled={!isSelectionValidForAddingToGroup} {...dropdownProps} active={dropdownProps.$isActive} label="Add to Space Group" data-testid="space-list-assign-to-group-button" />
+                      <ActionsButton
+                        disabled={!isSelectionValidForAddingToGroup}
+                        {...dropdownProps}
+                        active={dropdownProps.$isActive}
+                        label="Add to Space Group"
+                        data-testid="space-list-assign-to-group-button"
+                      />
                     )}
                   </DropdownNext>
                   <Button data-variant="primary" as={Link} to="/spaces/new-space-group">
-                    Create new space group
+                    Create Space Group
                   </Button>
                 </>
-              }
-              {spaceGroup &&
+              )}
+              {spaceGroup && (
                 <>
-                  <Button data-variant="primary" disabled={Object.keys(selectedIndexes || {}).length === 0} onClick={removeFromSpaceGroup}>
+                  <Button
+                    data-variant="primary"
+                    disabled={Object.keys(selectedIndexes || {}).length === 0}
+                    onClick={removeFromSpaceGroup}
+                  >
                     Remove from space group
                   </Button>
                   <Button data-variant="primary" onClick={() => deleteSpaceGroupAction?.setShowModal(true)}>
@@ -360,19 +365,19 @@ const SpacesList = () => {
                     Edit space group
                   </Button>
                 </>
-              }
+              )}
             </>
           )}
-          {spaceGroupId &&
+          {spaceGroupId && (
             <Button data-variant="primary" onClick={backToSpaces}>
               Back to Spaces
             </Button>
-          }
-          {!spaceGroupId &&
+          )}
+          {!spaceGroupId && (
             <Button data-variant="primary" as={Link} to="/spaces/new">
-              Create new space
+              Create Space
             </Button>
-          }
+          )}
         </SpacesQuickActions>
       </SpacesHeader>
       <Layout>
@@ -387,26 +392,28 @@ const SpacesList = () => {
 
         <MainContent>
           <StyledTable>
-            {showTable && <Table<ISpaceV2>
-              isLoading={isLoading}
-              data={data?.data || []}
-              columns={spacesColumns}
-              columnSizing={colWidths}
-              setColumnSizing={saveColumnResizeWidth}
-              rowSelection={selectedIndexes ?? {}}
-              setSelectedRows={setSelectedIndexes}
-              setColumnFilters={setSearchFilter}
-              columnSortBy={sortBy}
-              setColumnSortBy={setSortBy}
-              columnFilters={toArrayFromObject(filterQuery)}
-              columnVisibility={columnVisibility}
-              setColumnVisibility={setColumnVisibility}
-              enableHtmlDnd={!spaceGroupId && userCanAdministerSpaceGroups}
-              emptyText="No spaces available."
-              onDragStart={(ev: DragEvent) =>
-                dragSelectedSpacesInSpaceGroup(ev, selectedIndexes, data?.data ? data?.data : [], setIsValidDragging)
-              }
-            />}
+            {showTable && (
+              <Table<ISpaceV2>
+                isLoading={isLoading}
+                data={data?.data || []}
+                columns={spacesColumns}
+                columnSizing={colWidths}
+                setColumnSizing={saveColumnResizeWidth}
+                rowSelection={selectedIndexes ?? {}}
+                setSelectedRows={setSelectedIndexes}
+                setColumnFilters={setSearchFilter}
+                columnSortBy={sortBy}
+                setColumnSortBy={setSortBy}
+                columnFilters={toArrayFromObject(filterQuery)}
+                columnVisibility={columnVisibility}
+                setColumnVisibility={setColumnVisibility}
+                enableHtmlDnd={!spaceGroupId && userCanAdministerSpaceGroups}
+                emptyText="No spaces available."
+                onDragStart={(ev: DragEvent) =>
+                  dragSelectedSpacesInSpaceGroup(ev, selectedIndexes, data?.data ? data?.data : [], setIsValidDragging)
+                }
+              />
+            )}
           </StyledTable>
         </MainContent>
       </Layout>

@@ -62,9 +62,6 @@ importers:
       '@types/bull':
         specifier: ^3.15.9
         version: 3.15.9
-      '@types/pino':
-        specifier: ^7.0.5
-        version: 7.0.5
       '@types/ramda':
         specifier: ^0.27.66
         version: 0.27.66
@@ -213,9 +210,6 @@ importers:
       '@types/dirty-chai':
         specifier: ^2.0.4
         version: 2.0.5
-      '@types/dompurify':
-        specifier: ^3.0.5
-        version: 3.2.0
       '@types/express':
         specifier: ^4.17.21
         version: 4.17.23
@@ -1728,10 +1722,6 @@ packages:
   '@types/dirty-chai@2.0.5':
     resolution: {integrity: sha512-7plNsOhNtFn/4eD47et+3CRFNX4tgUrbJRutGhBFqQrWWIyRAV1XP7BYZY0YTOr49t/ZwM/lOW6sxnEXqwVdKg==}
 
-  '@types/dompurify@3.2.0':
-    resolution: {integrity: sha512-Fgg31wv9QbLDA0SpTOXO3MaxySc4DKGLi8sna4/Utjo4r3ZRPdCt4UQee8BWr+Q5z21yifghREPJGYaEOEIACg==}
-    deprecated: This is a stub types definition. dompurify provides its own type definitions, so you do not need this installed.
-
   '@types/eslint-scope@3.7.7':
     resolution: {integrity: sha512-MzMFlSLBqNF2gcHWO0G1vP/YQyfvrxZ0bF+u7mzUdZ1/xK4A4sru+nraZz5i3iEIk1l1uyicaDVTB4QbbEkAYg==}
 
@@ -1821,10 +1811,6 @@ packages:
 
   '@types/pino@6.3.12':
     resolution: {integrity: sha512-dsLRTq8/4UtVSpJgl9aeqHvbh6pzdmjYD3C092SYgLD2TyoCqHpTJk6vp8DvCTGGc7iowZ2MoiYiVUUCcu7muw==}
-
-  '@types/pino@7.0.5':
-    resolution: {integrity: sha512-wKoab31pknvILkxAF8ss+v9iNyhw5Iu/0jLtRkUD74cNfOOLJNnqfFKAv0r7wVaTQxRZtWrMpGfShwwBjOcgcg==}
-    deprecated: This is a stub types definition. pino provides its own type definitions, so you do not need this installed.
 
   '@types/qs@6.9.15':
     resolution: {integrity: sha512-uXHQKES6DQKKCLh441Xv/dwxOq1TVS3JPUMlEqoEglvlhR6Mxnlew/Xq/LRVHpLyk7iK3zODe1qYHIMltO7XGg==}
@@ -7602,10 +7588,6 @@ snapshots:
       '@types/chai': 4.3.20
       '@types/chai-as-promised': 7.1.8
 
-  '@types/dompurify@3.2.0':
-    dependencies:
-      dompurify: 3.2.6
-
   '@types/eslint-scope@3.7.7':
     dependencies:
       '@types/eslint': 9.6.1
@@ -7716,10 +7698,6 @@ snapshots:
       '@types/pino-pretty': 5.0.0
       '@types/pino-std-serializers': 4.0.0
       sonic-boom: 2.8.0
-
-  '@types/pino@7.0.5':
-    dependencies:
-      pino: 8.21.0
 
   '@types/qs@6.9.15': {}
 
