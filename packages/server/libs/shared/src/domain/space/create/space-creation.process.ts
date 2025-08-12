@@ -16,6 +16,8 @@ import { PlatformClient } from '@shared/platform-client'
 import { Logger } from '@nestjs/common'
 import { getHandle } from '@shared/domain/org/org.utils'
 import { CreateSpaceDTO } from '@shared/domain/space/dto/create-space.dto'
+import { TAGGABLE_TYPE } from '@shared/domain/tagging/tagging.types'
+import { TaggingService } from '@shared/domain/tagging/tagging.service'
 /**
  * Abstract class representing the process of creating a space.
  *
@@ -33,6 +35,7 @@ export abstract class SpaceCreationProcess {
     protected readonly user: UserContext,
     protected readonly em: SqlEntityManager,
     protected readonly notificationService: SpaceNotificationService,
+    private readonly taggingService: TaggingService,
     protected readonly adminClient: PlatformClient,
   ) {}
 
@@ -78,7 +81,7 @@ export abstract class SpaceCreationProcess {
       space = await this.createDbRecord(input)
       await this.buildOrgs(space)
       const memberships = await this.inviteMembers(space, leads)
-      if (input.forChallenge) {
+      if (input.forChallenge && input.spaceType === SPACE_TYPE.GROUPS) {
         await this.inviteChallengeBot(space)
       }
       await this.buildProjects(space, memberships)
@@ -127,6 +130,7 @@ export abstract class SpaceCreationProcess {
     if (input.spaceType === SPACE_TYPE.PRIVATE_TYPE) {
       space.spaceId = space.id
     }
+    await this.handleTags(input, space)
     return space
   }
 
@@ -182,6 +186,27 @@ export abstract class SpaceCreationProcess {
       SPACE_MEMBERSHIP_ROLE.ADMIN,
     )
     this.em.persist(membership)
+  }
+
+  protected async handleTags(input: CreateSpaceDTO, space: Space): Promise<void> {
+    if (input.protected) {
+      await this.taggingService.addTaggingForEntity(
+        'Protected',
+        'User',
+        this.user.id,
+        space.id,
+        TAGGABLE_TYPE.SPACE,
+      )
+    }
+    if (input.restrictedReviewer) {
+      await this.taggingService.addTaggingForEntity(
+        'FDA-restricted',
+        'User',
+        this.user.id,
+        space.id,
+        TAGGABLE_TYPE.SPACE,
+      )
+    }
   }
 
   protected async createOrgForSpace(spaceId: number, organization: string): Promise<void> {

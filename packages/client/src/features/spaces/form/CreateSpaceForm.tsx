@@ -12,12 +12,8 @@ import { CreateSpacePayload, CreateSpaceResponse } from '../spaces.api'
 import { ISpace } from '../spaces.types'
 import { RadioButtonGroup } from '../../../components/form/RadioButtonGroup'
 import { HintText, Row, StyledForm } from './styles'
-import {
-  getSpaceTypeOptions,
-  SPACE_TYPE_HINT,
-  validationSchema,
-} from './helpers'
-import { Checkbox } from '../../../components/CheckboxNext'
+import { getSpaceTypeOptions, SPACE_TYPE_HINT, validationSchema } from './helpers'
+import { Checkbox } from '../../../components/Checkbox'
 import { useConfirm } from '../../modal/useConfirm'
 import { Button } from '../../../components/Button'
 
@@ -35,19 +31,11 @@ interface SpaceCreateForm {
 }
 
 export interface ISpaceForm {
-  mutation: UseMutationResult<
-    CreateSpaceResponse,
-    unknown,
-    CreateSpacePayload,
-    unknown
-  >
+  mutation: UseMutationResult<CreateSpaceResponse, unknown, CreateSpacePayload, unknown>
   defaultValues?: Partial<SpaceCreateForm>
 }
 
-export const SpaceForm = ({
-  mutation,
-  defaultValues,
-}: ISpaceForm) => {
+export const SpaceForm = ({ mutation, defaultValues }: ISpaceForm) => {
   const user = useAuthUser()
   const isGovUser = user?.isGovUser || false
   const isAdmin = user?.isAdmin || false
@@ -81,17 +69,9 @@ export const SpaceForm = ({
 
   useEffect(() => {
     const stype = watch().space_type
-    if (
-      stype === 'private_type' ||
-      stype === 'government' ||
-      stype === 'administrator'
-    ) {
+    if (stype === 'private_type' || stype === 'government' || stype === 'administrator') {
       setValue('cts', null)
-      clearErrors([
-        'host_lead_dxuser',
-        'guest_lead_dxuser',
-        'cts',
-      ])
+      clearErrors(['host_lead_dxuser', 'guest_lead_dxuser', 'cts'])
     }
   }, [watch().space_type])
 
@@ -101,8 +81,6 @@ export const SpaceForm = ({
       vals.host_lead_dxuser = user ? user.dxuser : null
       vals.guest_lead_dxuser = ''
     }
-
-    vals.restricted_discussions = vals.restricted_discussions ?? false
 
     const createSpaceRequest: CreateSpacePayload = {
       name: vals.name,
@@ -114,7 +92,7 @@ export const SpaceForm = ({
       cts: vals.cts ?? '',
       protected: vals.protected,
       restrictedReviewer: vals.restricted_reviewer ?? false,
-      restrictedDiscussions: vals.restricted_discussions,
+      restrictedDiscussions: vals.restricted_discussions ?? false,
     }
 
     mutation.mutateAsync(createSpaceRequest)
@@ -155,10 +133,7 @@ export const SpaceForm = ({
     return `The space you are about to create will be ${restrictions.join(' and ')}`
   }
 
-  const {
-    open: openConfirmation,
-    Confirm: ConfirmSubmit,
-  } = useConfirm({
+  const { open: openConfirmation, Confirm: ConfirmSubmit } = useConfirm({
     onOk: handleSubmit(onSubmit),
     headerText: getConfirmMessage(),
     body: <p>Are you sure you would like to continue?</p>,
@@ -170,7 +145,7 @@ export const SpaceForm = ({
         <Controller
           name="space_type"
           control={control}
-          render={({ field: { value, onChange, onBlur }}) => (
+          render={({ field: { value, onChange, onBlur } }) => (
             <RadioButtonGroup
               onChange={onChange}
               value={value}
@@ -180,62 +155,30 @@ export const SpaceForm = ({
             />
           )}
         />
-        <ErrorMessage
-          errors={errors}
-          name="space_type"
-          render={({ message }) => <InputError>{message}</InputError>}
-        />
+        <ErrorMessage errors={errors} name="space_type" render={({ message }) => <InputError>{message}</InputError>} />
         <HintText>{SPACE_TYPE_HINT[watch().space_type]}</HintText>
       </FieldGroup>
 
       <Divider />
 
       <FieldGroup label="Name" required>
-        <InputText
-          {...register('name', { required: 'Name is required.' })}
-          disabled={isSubmitting}
-        />
-        <ErrorMessage
-          errors={errors}
-          name="name"
-          render={({ message }) => <InputError>{message}</InputError>}
-        />
+        <InputText {...register('name', { required: 'Name is required.' })} disabled={isSubmitting} />
+        <ErrorMessage errors={errors} name="name" render={({ message }) => <InputError>{message}</InputError>} />
       </FieldGroup>
       <FieldGroup label="Description" required>
-        <InputText
-          {...register('description')}
-          disabled={isSubmitting}
-        />
-        <ErrorMessage
-          errors={errors}
-          name="description"
-          render={({ message }) => <InputError>{message}</InputError>}
-        />
+        <InputText {...register('description')} disabled={isSubmitting} />
+        <ErrorMessage errors={errors} name="description" render={({ message }) => <InputError>{message}</InputError>} />
       </FieldGroup>
 
       {watch().space_type === 'groups' && (
         <>
           <FieldGroup label="Host Lead" required>
-            <InputText
-              {...register('host_lead_dxuser')}
-              disabled={isSubmitting}
-            />
-            <ErrorMessage
-              errors={errors}
-              name="host_lead_dxuser"
-              render={({ message }) => <InputError>{message}</InputError>}
-            />
+            <InputText {...register('host_lead_dxuser')} disabled={isSubmitting} />
+            <ErrorMessage errors={errors} name="host_lead_dxuser" render={({ message }) => <InputError>{message}</InputError>} />
           </FieldGroup>
           <FieldGroup label="Guest Lead" required>
-            <InputText
-              {...register('guest_lead_dxuser')}
-              disabled={isSubmitting}
-            />
-            <ErrorMessage
-              errors={errors}
-              name="guest_lead_dxuser"
-              render={({ message }) => <InputError>{message}</InputError>}
-            />
+            <InputText {...register('guest_lead_dxuser')} disabled={isSubmitting} />
+            <ErrorMessage errors={errors} name="guest_lead_dxuser" render={({ message }) => <InputError>{message}</InputError>} />
           </FieldGroup>
         </>
       )}
@@ -243,72 +186,52 @@ export const SpaceForm = ({
       {watch().space_type === 'review' && (
         <>
           <FieldGroup label="Reviewer Lead" required>
-            <InputText
-              {...register('host_lead_dxuser')}
-              disabled={isSubmitting}
-            />
-            <ErrorMessage
-              errors={errors}
-              name="host_lead_dxuser"
-              render={({ message }) => <InputError>{message}</InputError>}
-            />
+            <InputText {...register('host_lead_dxuser')} disabled={isSubmitting} />
+            <ErrorMessage errors={errors} name="host_lead_dxuser" render={({ message }) => <InputError>{message}</InputError>} />
           </FieldGroup>
 
           <FieldGroup label="Sponsor Lead" required>
-            <InputText
-              {...register('guest_lead_dxuser')}
-              disabled={isSubmitting}
-            />
-            <ErrorMessage
-              errors={errors}
-              name="guest_lead_dxuser"
-              render={({ message }) => <InputError>{message}</InputError>}
-            />
+            <InputText {...register('guest_lead_dxuser')} disabled={isSubmitting} />
+            <ErrorMessage errors={errors} name="guest_lead_dxuser" render={({ message }) => <InputError>{message}</InputError>} />
           </FieldGroup>
 
           <FieldGroup label="Center Tracking System #">
-            <InputText
-              {...register('cts')}
-              disabled={isSubmitting}
-            />
+            <InputText {...register('cts')} disabled={isSubmitting} />
             <HintText>
-              FDA uses the Center Tracking System (CTS) to track the progress of
-              industry submitted pre-market documents through the review
-              process. CTS is a workflow/work management system that provides
-              support for the Center for Devices and Radiogical Health (CDRH)
-              business processes and business rules, for all stages of the
-              product lifecycle for medical devices.
+              FDA uses the Center Tracking System (CTS) to track the progress of industry submitted pre-market documents through
+              the review process. CTS is a workflow/work management system that provides support for the Center for Devices and
+              Radiogical Health (CDRH) business processes and business rules, for all stages of the product lifecycle for medical
+              devices.
             </HintText>
-            <ErrorMessage
-              errors={errors}
-              name="cts"
-              render={({ message }) => <InputError>{message}</InputError>}
-            />
+            <ErrorMessage errors={errors} name="cts" render={({ message }) => <InputError>{message}</InputError>} />
             <Divider />
           </FieldGroup>
         </>
       )}
 
-      {(watch().space_type === 'review' || watch().space_type === 'groups') && (
-          <FieldGroup>
-            <FieldLabelRow>
-              <Checkbox
-                {...register('protected')}
-                disabled={isSubmitting}
-                onChange={handleProtectedSelection}
-                checked={watch().protected || false}
-              />
-              Space Protection
-            </FieldLabelRow>
-            <HintText>
-              <p>When checked, the space will be subject to the following restrictions:</p>
-              <ul>
-                <li>Data in this space cannot be copied to My Home or Private Spaces, nor downloaded, except by a lead of the space.</li>
-                <li>Data in this space can only be copied to Spaces that also have protection enabled, and the copying user must be a lead member of both the source and destination spaces.</li>
-                <li>Space protection cannot be disabled for a Space or be turned off by any member, not even the leads.</li>
-              </ul>
-            </HintText>
-          </FieldGroup>
+      {['review', 'groups', 'government'].includes(watch().space_type as string) && (
+        <FieldGroup>
+          <FieldLabelRow>
+            <Checkbox
+              {...register('protected')}
+              disabled={isSubmitting}
+              onChange={handleProtectedSelection}
+              checked={watch().protected || false}
+            />
+            Space Protection
+          </FieldLabelRow>
+          <HintText>
+            <p>The space will be subject to the following restrictions:</p>
+            <ul>
+              <li>Data cannot be copied to My Home or Private Spaces, or downloaded, except by a space lead.</li>
+              <li>
+                Data can only be copied to other protected Spaces, and the user must be a lead in both source and destination
+                spaces.
+              </li>
+              <li>Space protection cannot be disabled or turned off by any member, including leads.</li>
+            </ul>
+          </HintText>
+        </FieldGroup>
       )}
 
       {watch().space_type === 'review' && (
@@ -323,9 +246,7 @@ export const SpaceForm = ({
               />
               Restrict Reviewer side of Space to FDA users only
             </FieldLabelRow>
-            <HintText>
-              When checked, only users who have a @fda.hhs.gov or @fda.gov email associated with their account can be added.
-            </HintText>
+            <HintText>Only users with an @fda.hhs.gov or @fda.gov email linked to their account can be added.</HintText>
           </FieldGroup>
           <FieldGroup>
             <FieldLabelRow>
@@ -337,19 +258,21 @@ export const SpaceForm = ({
               />
               Disable Shared Area Discussions
             </FieldLabelRow>
-            <HintText>
-              When checked, discussions in the Shared Area of the Space are disabled.
-            </HintText>
+            <HintText>Discussions in the Shared Area of the Space will be disabled for everyone.</HintText>
           </FieldGroup>
-          </>
+        </>
       )}
 
       <Row>
         <Button
-          data-variant='primary'
+          data-variant="primary"
           disabled={Object.keys(errors).length > 0 || isSubmitting}
           type="button"
-          onClick={getValues().protected || getValues().restricted_reviewer || getValues().restricted_discussions ? openConfirmation: handleSubmit(onSubmit)}
+          onClick={
+            getValues().protected || getValues().restricted_reviewer || getValues().restricted_discussions
+              ? openConfirmation
+              : handleSubmit(onSubmit)
+          }
         >
           Create Space
         </Button>

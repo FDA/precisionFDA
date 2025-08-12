@@ -19,7 +19,6 @@ import { NOTIFICATION_ACTION, SEVERITY } from '@shared/enums'
 import {
   ASSET_VALIDATION_ERROR,
   DeleteRelationError,
-  NotFoundError,
   PermissionError,
   ValidationError,
 } from '@shared/errors'
@@ -80,11 +79,11 @@ export class UserFileService {
    * Returns the node with a boolean flag indicating if it's a challenge file.
    *
    * Note: works for both UserFile and Asset
-   * @param user User with populated spaceMemberships and spaceMemberships.spaces
    * @param fileUid
    * @private
    */
-  private async getFile(user: User, fileUid: Uid<'file'>): Promise<[Asset | UserFile, boolean]> {
+  private async getFile(fileUid: Uid<'file'>): Promise<[Asset | UserFile, boolean]> {
+    const user = await this.userCtx.loadEntity()
     const userIsAdmin = (await user.isSiteAdmin()) || (await user.isChallengeAdmin())
     if (userIsAdmin) {
       // first read file to find out if it's a challenge file
@@ -104,6 +103,10 @@ export class UserFileService {
       throw new PermissionError(`User ${user.dxuser} does not have access to file ${fileUid}`)
     }
     return [file as FileOrAsset, false]
+  }
+
+  async getUserFile(fileUid: Uid<'file'>): Promise<UserFile | null> {
+    return await this.fileRepo.findAccessibleOne({ uid: fileUid })
   }
 
   private async closeFileOnPlatform(fileDxid: string, challengeBotFile: boolean): Promise<void> {
@@ -252,9 +255,7 @@ export class UserFileService {
     this.logger.log(`Closing file ${fileUid}`)
 
     await this.em.transactional(async () => {
-      const user = await this.userCtx.loadEntity()
-
-      const [file, isChallengeBotFile] = await this.getFile(user, fileUid)
+      const [file, isChallengeBotFile] = await this.getFile(fileUid)
 
       if (file.state !== FILE_STATE_DX.OPEN) {
         throw new ValidationError(
@@ -321,20 +322,6 @@ export class UserFileService {
 
   async getDownloadLink(file: FileOrAsset, options?: DownloadLinkOptionsDto): Promise<string> {
     return this.entityService.getEntityDownloadLink(file, file.name, options)
-  }
-
-  async getDownloadLinkForUid(uid: Uid<'file'>, options?: DownloadLinkOptionsDto): Promise<string> {
-    const file = (await this.nodeRepo.findAccessibleOne({ uid: uid })) as FileOrAsset
-
-    if (!file) {
-      throw new NotFoundError('File not found')
-    }
-
-    if (file.state !== FILE_STATE_DX.CLOSED) {
-      throw new ValidationError("Files can only be downloaded if they are in the 'closed' state")
-    }
-
-    return this.getDownloadLink(file, options)
   }
 
   /**
