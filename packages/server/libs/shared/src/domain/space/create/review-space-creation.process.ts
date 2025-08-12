@@ -15,7 +15,6 @@ import {
   SPACE_MEMBERSHIP_SIDE,
 } from '@shared/domain/space-membership/space-membership.enum'
 import { TaggingService } from '@shared/domain/tagging/tagging.service'
-import { TAGGABLE_TYPE } from '@shared/domain/tagging/tagging.types'
 import { CreateSpaceDTO } from '@shared/domain/space/dto/create-space.dto'
 
 @Injectable()
@@ -24,11 +23,11 @@ export class ReviewSpaceCreationProcess extends SpaceCreationProcess {
     user: UserContext,
     em: SqlEntityManager,
     notificationService: SpaceNotificationService,
+    taggingService: TaggingService,
     @Inject(ADMIN_PLATFORM_CLIENT) adminClient: PlatformClient,
-    private readonly taggingService: TaggingService,
     private readonly userRepository: UserRepository,
   ) {
-    super(user, em, notificationService, adminClient)
+    super(user, em, notificationService, taggingService, adminClient)
   }
 
   protected async validateInput(input: CreateSpaceDTO): Promise<void> {
@@ -74,6 +73,10 @@ export class ReviewSpaceCreationProcess extends SpaceCreationProcess {
       sponsorOrgId: null,
       spaceMemberships: [],
       spaceGroups: [],
+      meta: {
+        ...sharedSpace.meta,
+        restricted_discussions: false,
+      },
     })
     this.em.persist(hostPrivateSpace)
 
@@ -87,32 +90,15 @@ export class ReviewSpaceCreationProcess extends SpaceCreationProcess {
       restrictToTemplate: false,
       spaceMemberships: [],
       spaceGroups: [],
+      meta: {
+        ...sharedSpace.meta,
+        restricted_discussions: false,
+      },
     })
     this.em.persist(guestPrivateSpace)
 
     await this.em.populate(sharedSpace, ['confidentialSpaces'], { refresh: true })
     return sharedSpace
-  }
-
-  private async handleTags(input: CreateSpaceDTO, sharedSpace: Space): Promise<void> {
-    if (input.protected) {
-      await this.taggingService.addTaggingForEntity(
-        'Protected',
-        'User',
-        this.user.id,
-        sharedSpace.id,
-        TAGGABLE_TYPE.SPACE,
-      )
-    }
-    if (input.restrictedReviewer) {
-      await this.taggingService.addTaggingForEntity(
-        'FDA-restricted',
-        'User',
-        this.user.id,
-        sharedSpace.id,
-        TAGGABLE_TYPE.SPACE,
-      )
-    }
   }
 
   async buildOrgs(sharedSpace: Space): Promise<void> {

@@ -8,6 +8,7 @@ import { RowSelectionState } from '@tanstack/react-table'
 import styled from 'styled-components'
 import { useProvisionMutation } from '../../../../api/mutations/invitations'
 import { Button } from '../../../../components/Button'
+import { Checkbox } from '../../../../components/Checkbox'
 
 const ModalContainer = styled.div`
   display: flex;
@@ -156,7 +157,7 @@ const PortalCard = styled.label<{ $isSelected: boolean }>`
   }
 `
 
-const StyledCheckbox = styled.input`
+export const StyledCheckbox = styled.input`
   width: 20px;
   height: 20px;
   border: 2px solid #d1d5db;
@@ -331,11 +332,7 @@ const ProvisioningModal = ({
           <PortalGrid>
             {spaces.map(space => (
               <PortalCard key={space.id} $isSelected={selectedSpaces.has(space.id)}>
-                <StyledCheckbox
-                  type="checkbox"
-                  checked={selectedSpaces.has(space.id)}
-                  onChange={() => handleSpaceToggle(space.id)}
-                />
+                <Checkbox checked={selectedSpaces.has(space.id)} onChange={() => handleSpaceToggle(space.id)} />
                 <PortalName>{space.name}</PortalName>
               </PortalCard>
             ))}

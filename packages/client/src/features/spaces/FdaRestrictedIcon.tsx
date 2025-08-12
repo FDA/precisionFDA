@@ -14,10 +14,10 @@ export const FdaRestrictedIcon = ({ color, showToolTip = true }: { color?: strin
 
   return (
     <>
-      <StyledFdaRestrictedIcon data-tooltip-content="FDA-restricted" data-tooltip-id={`fda-restricted-${tooltipId}`}>
+      <StyledFdaRestrictedIcon data-tooltip-content="FDA members restricted" data-tooltip-id={`fda-restricted-${tooltipId}`}>
         <FdaIcon color={color} />
       </StyledFdaRestrictedIcon>
-      <Tooltip id={`fda-restricted-${tooltipId}`} />
+      <Tooltip place={'bottom-start'} id={`fda-restricted-${tooltipId}`} />
     </>
   )
 }

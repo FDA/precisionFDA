@@ -34,6 +34,7 @@ import { PaginatedResult } from '@shared/domain/entity/domain/paginated.result'
 import { SpaceGroupService } from '@shared/domain/space/service/space-group.service'
 import { SpaceGroupDTO } from '@shared/domain/space/dto/space-group.dto'
 import { CreateSpaceGroupDTO } from '@shared/domain/space/dto/create-space-group.dto'
+import { SPACE_MEMBERSHIP_ROLE } from '@shared/domain/space-membership/space-membership.enum'
 
 type SpaceFilter = FilterQuery<Space> & {
   spaceMemberships?: {
@@ -120,7 +121,6 @@ export class SpaceService {
 
   async create(space: CreateSpaceDTO): Promise<number> {
     this.logger.log(`Creating new ${SPACE_TYPE[space.spaceType]} space`)
-
     const process = this.spaceTypeToCreatorProviderMap[space.spaceType]
     return await process.build(space)
   }
@@ -218,6 +218,36 @@ export class SpaceService {
           ' it is part of Locked Verification space.',
       )
     }
+  }
+
+  /**
+   * Determines if the current user can download files/data from a specific space.
+   *
+   * A user can download from a space if either:
+   * 1. The space is not protected (protected = false) and user is active member, OR
+   * 2. The space is protected but the user is an active LEAD member of that space
+   *
+   * @param spaceId - The unique identifier of the space to check download permissions for
+   * @returns Promise<boolean> - True if the user has download permissions, false otherwise
+   *
+   **/
+  async canUserDownloadFrom(spaceId: number): Promise<boolean> {
+    const result = await this.spaceRepository.count({
+      id: spaceId,
+      $or: [
+        { protected: false, spaceMemberships: { user: this.userContext.id, active: true } },
+        {
+          protected: true,
+          spaceMemberships: {
+            user: this.userContext.id,
+            active: true,
+            role: SPACE_MEMBERSHIP_ROLE.LEAD,
+          },
+        },
+      ],
+    })
+
+    return result > 0
   }
 
   /**

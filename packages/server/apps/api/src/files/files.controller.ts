@@ -21,7 +21,6 @@ import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { ResolvePathDTO } from '@shared/domain/user-file/dto/user-file.dto'
 import { UserFileService } from '@shared/domain/user-file/service/user-file.service'
 import { createCloseFileJobTask } from '@shared/queue'
-import { TimeUtils } from '@shared/utils/time.utils'
 import { CustomValidationPipe } from '@shared/validation/pipes/validation.pipe'
 import archiver from 'archiver'
 import axios from 'axios'
@@ -31,6 +30,13 @@ import { InternalRouteGuard } from '../internal/guard/internal.guard'
 import { UserContextGuard } from '../user-context/guard/user-context.guard'
 import { DownloadLinkParamDto } from './model/download-link-param.dto'
 import { FilesValidateCopyingBodyDto } from './model/file-validate-copying-body.dto'
+import { UserFileDownloadFacade } from '../facade/user-file/user-file-download.facade'
+import {
+  ExistingFileSet,
+  ResolvePath,
+  SelectedNode,
+} from '@shared/domain/user-file/user-file.types'
+import { TimeUtils } from '@shared/utils/time.utils'
 
 @UseGuards(UserContextGuard)
 @Controller('/files')
@@ -40,14 +46,16 @@ export class FilesController {
     private readonly logger: Logger,
     private readonly userFileService: UserFileService,
     private readonly userFileResolverFacade: UserFileResolverFacade,
+    private readonly userFileDownloadFacade: UserFileDownloadFacade,
   ) {}
 
   // Triggers job that closes file
   //   Note that the file uid (not dxid) is used here, e.g.
   //   /files/file-xxxx-1/close
   // https://confluence.internal.dnanexus.com/display/XVGEN/Closing+of+the+files
+  // TODO - PFDA-6501
   @Patch('/:uid/close')
-  async closeFile(@Param('uid') fileUid: string) {
+  async closeFile(@Param('uid') fileUid: string): Promise<void> {
     await createCloseFileJobTask({ ...{ fileUid } }, this.user)
   }
 
@@ -57,7 +65,7 @@ export class FilesController {
     @Query('id', new ParseArrayPipe({ items: Number })) ids: number[],
     @Res() res: Response,
     @Query('folder_id', new ParseIntPipe({ optional: true })) folderId?: number,
-  ) {
+  ): Promise<void> {
     const filesToBeDownloaded = await this.userFileService.composeFilesForBulkDownload(
       ids,
       folderId,
@@ -76,6 +84,7 @@ export class FilesController {
     })
 
     // Process each file one at a time
+    // TODO - PFDA-6501
     for (const file of filesToBeDownloaded.files) {
       try {
         if (archiverError) break
@@ -106,7 +115,8 @@ export class FilesController {
     })
   }
 
-  private getTimestamp() {
+  // TODO - PFDA-6501
+  private getTimestamp(): string {
     const pad = (number: number) => (number < 10 ? '0' : '') + number
     const now = new Date()
     return `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`
@@ -114,25 +124,30 @@ export class FilesController {
 
   @UseGuards(InternalRouteGuard)
   @Get('/path-resolver')
-  async resolvePath(@Query(new CustomValidationPipe({ transform: true })) query: ResolvePathDTO) {
+  async resolvePath(
+    @Query(new CustomValidationPipe({ transform: true })) query: ResolvePathDTO,
+  ): Promise<ResolvePath> {
     return await this.userFileResolverFacade.resolvePath(query)
-  }
-
-  @Get('/:uid/download-link')
-  getDownloadLink(@Param() params: DownloadLinkParamDto, @Query() query: DownloadLinkOptionsDto) {
-    return this.userFileService.getDownloadLinkForUid(params.uid, query)
   }
 
   @Get('/selected')
   async getSelectedFiles(
     @Query('ids', new ParseArrayPipe({ items: Number, separator: ',' })) ids: number[],
-  ) {
+  ): Promise<SelectedNode[]> {
     return this.userFileService.listSelectedFiles(ids)
   }
 
   @Post('/copy/validate')
-  async validateCopyFiles(@Body() body: FilesValidateCopyingBodyDto) {
+  async validateCopyFiles(@Body() body: FilesValidateCopyingBodyDto): Promise<ExistingFileSet> {
     return this.userFileService.validateCopyFiles(body.uids, body.scope)
+  }
+
+  @Get('/:uid/download-link')
+  getDownloadLink(
+    @Param() params: DownloadLinkParamDto,
+    @Query() options: DownloadLinkOptionsDto,
+  ): Promise<string> {
+    return this.userFileDownloadFacade.getDownloadLink(params.uid, options)
   }
 
   @Get(':uid/:fileName')
@@ -141,7 +156,7 @@ export class FilesController {
     @Query('inline', new DefaultValuePipe(false), ParseBoolPipe) inline: boolean,
     @Res() res: Response,
   ): Promise<void> {
-    const link = await this.userFileService.getDownloadLinkForUid(uid, {
+    const link = await this.userFileDownloadFacade.getDownloadLink(uid, {
       preauthenticated: true,
       inline,
       duration: TimeUtils.minutesToSeconds(5),

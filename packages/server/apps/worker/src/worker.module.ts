@@ -1,6 +1,4 @@
 import { Module } from '@nestjs/common'
-import { DevtoolsModule } from '@nestjs/devtools-integration'
-import { config } from '@shared/config'
 import { DatabaseModule } from '@shared/database/database.module'
 import { UserContextModule } from '@shared/domain/user-context/user-context.module'
 import { LoggerModule } from '@shared/logger/logger.module'
@@ -11,10 +9,6 @@ import { QueueWorkerModule } from './queues/queue-worker.module'
 
 @Module({
   imports: [
-    DevtoolsModule.register({
-      http: config.nestjsDevtoolsEnabled,
-      port: 8001,
-    }),
     DatabaseModule.forRoot({
       distPath: './dist/apps/worker',
       sourcePath: './apps/worker/src',
