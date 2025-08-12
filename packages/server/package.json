@@ -46,7 +46,6 @@
     "@nestjs/bull": "^11.0.2",
     "@nestjs/common": "^11.1.2",
     "@nestjs/core": "^11.1.2",
-    "@nestjs/devtools-integration": "^0.2.0",
     "@nestjs/platform-express": "^11.1.2",
     "@nestjs/platform-ws": "^11.1.2",
     "@nestjs/swagger": "^11.2.0",
