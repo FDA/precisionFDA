@@ -1,8 +1,6 @@
 import { MikroOrmMiddleware } from '@mikro-orm/nestjs'
 import { MiddlewareConsumer, Module } from '@nestjs/common'
 import { APP_INTERCEPTOR } from '@nestjs/core'
-import { DevtoolsModule } from '@nestjs/devtools-integration'
-import { config } from '@shared/config'
 import { DatabaseModule } from '@shared/database/database.module'
 import { UserContextModule } from '@shared/domain/user-context/user-context.module'
 import { apiExceptionFilterProviders } from '@shared/errors/filter/api-exception-filter.providers'
@@ -46,10 +44,6 @@ import { SpaceGroupsApiModule } from './space-groups/space-groups.api.module'
 
 @Module({
   imports: [
-    DevtoolsModule.register({
-      http: config.nestjsDevtoolsEnabled,
-      port: 8000,
-    }),
     DatabaseModule.forRoot({
       distPath: './dist/apps/api',
       sourcePath: './apps/api/src',
