@@ -7,12 +7,20 @@ class SpaceMembershipSerializer < ApplicationSerializer
     :active,
     :role,
     :side,
-    :org,
     :domain,
     :created_at,
     :links,
     :to_roles,
   )
+
+  def active
+    if object.active?
+      return "Active" if object.user.user_state == "enabled"
+      return "Account deactivated" if object.user.user_state == "deactivated"
+      return "Account locked" if object.user.user_state == "locked"
+    end
+    "Inactive"
+  end
 
   # Returns a dxuser of a member user.
   # @return [String] dxuser.
@@ -24,12 +32,6 @@ class SpaceMembershipSerializer < ApplicationSerializer
   # @return [String] full_name.
   def title
     object.user.full_name
-  end
-
-  # Returns a space member user org.
-  # @return [String] handle.
-  def org
-    object.user.org&.handle
   end
 
   # Extract the email domain without the extension from the email, empty string if something's missing
