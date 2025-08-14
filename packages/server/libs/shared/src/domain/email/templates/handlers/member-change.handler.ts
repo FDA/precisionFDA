@@ -151,8 +151,16 @@ export class MemberChangedEmailHandler extends EmailHandler<EMAIL_TYPES.memberCh
       { populate: ['user.notificationPreference'] },
     )
 
-    const receivers = memberships.map((membership) => membership.user.getEntity())
+    // filter out membership that was added
+    const receivers = memberships
+      .filter(
+        (membership) =>
+          membership.id !== context.updatedMembership.id &&
+          context.input.activityType === 'membership_added',
+      )
+      .map((membership) => membership.user.getEntity())
 
+    // filter out user who initiated it
     return receivers.filter((user: User) => user.id !== context.input.initUserId)
   }
 
