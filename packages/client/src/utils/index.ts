@@ -1,6 +1,6 @@
 import { APIResource } from '../features/home/types'
 
-export function getSpaceIdFromScope(scope?: string) {
+export function getSpaceIdFromScope(scope?: string): string | undefined {
   if (!scope) return undefined
   const [resource, id] = scope.split('-')
   if (resource !== 'space') return undefined

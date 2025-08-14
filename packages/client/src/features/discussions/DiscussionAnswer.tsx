@@ -72,7 +72,8 @@ export const DiscussionAnswer = ({
             onSuccess={() => setIsEditing(false)}
             answerId={answer.id}
             onCancel={() => setIsEditing(false)}
-            markdownInputRef={inputRef}
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            markdownInputRef={inputRef as any}
             discussionId={answer.discussionId}
           />
         )}

@@ -1,4 +1,4 @@
-import { HeaderGroup, Row, RowData, Table } from "@tanstack/react-table"
+import { HeaderGroup, Row, RowData, Table } from '@tanstack/react-table'
 
 export type TableGroup = 'center' | 'left' | 'right'
 

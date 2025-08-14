@@ -7,7 +7,7 @@ import { DropdownMenu, PopperContainer } from './styles'
 
 export type DropdownChildProps = {
   style: React.CSSProperties
-  ref: React.RefObject<HTMLElement>
+  ref: React.RefObject<HTMLElement|null>
   onClick: () => void
   onMouseEnter: () => void
   onMouseLeave: () => void

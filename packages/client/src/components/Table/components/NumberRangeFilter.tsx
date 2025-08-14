@@ -1,9 +1,10 @@
-import { Column, FilterFn } from '@tanstack/react-table'
+import { Column, FilterFnOption } from '@tanstack/react-table'
 import React, { useState } from 'react'
 import styled from 'styled-components'
 
 
-export const numberRangeFilterFn: FilterFn<any> = (row, columnId, filterValue) => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const numberRangeFilterFn: FilterFnOption<any> = (row, columnId, filterValue) => {
   if (!filterValue || (filterValue.from === '' && filterValue.to === '')) {
     return true
   }

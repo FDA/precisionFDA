@@ -93,9 +93,9 @@ export const AssetShow = ({ emitScope, homeScope }: { homeScope?: HomeScope; emi
       tab: <ArchiveContents data={asset.archive_content} />,
     },
     {
-      header: `License: ${meta.object_license && meta.object_license.title}`,
-      tab: <License license={meta.object_license} link={asset.links.show_license} />,
-      hide: !meta.object_license || !meta.object_license.uid,
+      header: `License: ${meta?.object_license && meta?.object_license.title}`,
+      tab: <License license={meta?.object_license} link={asset.links.show_license} />,
+      hide: !meta?.object_license || !meta?.object_license.uid,
     },
   ] as ITab[]
 

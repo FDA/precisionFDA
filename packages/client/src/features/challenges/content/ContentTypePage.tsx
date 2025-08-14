@@ -36,7 +36,7 @@ const ContentEditButtonRow = styled.div`
   }
 `
 
-const ButtonBar = ({ challengeId, contentType }: { challengeId: number | number; contentType: UpdateChallengeContent['type'] }) => {
+const ButtonBar = ({ challengeId, contentType }: { challengeId: number | string; contentType: UpdateChallengeContent['type'] }) => {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const mutation = useMutation({

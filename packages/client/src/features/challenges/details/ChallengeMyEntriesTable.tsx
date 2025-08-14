@@ -63,12 +63,12 @@ export const useSubmissionTableColumns = ({
 }
 
 export interface ChallengeMyEntriesTableProps {
-  challengeId: string
+  challengeId: string|number
   user?: IUser
   isSpaceMember: boolean
 }
 
-export const ChallengeMyEntriesTable: React.FC<ChallengeMyEntriesTableProps> = ({ challengeId, user, isSpaceMember }) => {
+export const ChallengeMyEntriesTable = ({ challengeId, user, isSpaceMember }: ChallengeMyEntriesTableProps) => {
   const { data: submissionsData, isLoading } = useChallengeEntriesQuery(challengeId)
   const columns = useSubmissionTableColumns({ authUser: user, isSpaceMember })
 

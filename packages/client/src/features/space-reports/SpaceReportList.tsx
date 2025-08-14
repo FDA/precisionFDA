@@ -1,33 +1,30 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { ColumnSizingState } from '@tanstack/react-table'
 import React, { useEffect } from 'react'
-import useWebSocket from 'react-use-websocket'
 import { Button } from '../../components/Button'
+import { DropdownNext } from '../../components/Dropdown/DropdownNext'
 import { HoverDNAnexusLogo } from '../../components/icons/DNAnexusLogo'
 import { PlusIcon } from '../../components/icons/PlusIcon'
 import { ContentFooter } from '../../components/Page/ContentFooter'
 import Table from '../../components/Table'
-import { DEFAULT_RECONNECT_ATTEMPTS, DEFAULT_RECONNECT_INTERVAL, getNodeWsUrl, SHOULD_RECONNECT } from '../../utils/config'
+import { StyledPageTable } from '../../components/Table/components/styles'
+import { useLastWSNotification } from '../../hooks/useToastWSHandler'
 import { getSelectedObjectsFromIndexes } from '../../utils/object'
 import { ActionsDropdownContent } from '../home/ActionDropdownContent'
+import { ActionModalsRenderer } from '../home/ActionModalsRenderer'
 import { ActionsRow, QuickActions } from '../home/home.styles'
+import { ResouceQueryErrorMessage } from '../home/ResouceQueryErrorMessage'
 import { ActionsButton, ResourceHeader } from '../home/show.styles'
-import { IFilter, IMeta, Notification, NOTIFICATION_ACTION, WEBSOCKET_MESSAGE_TYPE, WebSocketMessage } from '../home/types'
+import { HomeScope, MetaV2, NOTIFICATION_ACTION } from '../home/types'
 import { useList } from '../home/useList'
+import { Params } from '../home/utils'
 import { ISpaceReport } from './space-report.types'
 import { fetchReports } from './space-reports.api'
 import { useGenerateSpaceReportModal } from './useGenerateSpaceReportModal'
 import { useSpaceReportColumns } from './useSpaceReportColumns'
 import { userReportSelectActions } from './useSpaceReportSelectActions'
-import { ResouceQueryErrorMessage } from '../home/ResouceQueryErrorMessage'
-import { StyledPageTable } from '../../components/Table/components/styles'
-import { Params } from '../home/utils'
-import { DropdownNext } from '../../components/Dropdown/DropdownNext'
-import { ActionModalsRenderer } from '../home/ActionModalsRenderer'
-import { useAuthUser } from '../auth/useAuthUser'
-import { useLastWSNotification } from '../../hooks/useToastWSHandler'
 
-type ListType = { reports: ISpaceReport[]; meta: IMeta }
+type ListType = { reports: ISpaceReport[]; meta: MetaV2 }
 
 const SpaceReportListTable = ({
   reports,
@@ -64,16 +61,8 @@ const SpaceReportListTable = ({
 }
 
 export const SpaceReportList = ({ scope, isContributorOrHigher }: { scope: string; isContributorOrHigher?: boolean }) => {
-  const user = useAuthUser()
   const { query, selectedIndexes, setSelectedIndexes, saveColumnResizeWidth, colWidths, resetSelected } = useList<ListType>({
-    fetchList: async (filters: IFilter[], params: Params) => {
-      const reports = await fetchReports(params.scope)
-
-      return {
-        reports,
-        meta: {},
-      }
-    },
+    fetchList: (_, params: Params) => fetchReports(params.scope as HomeScope).then(reports => ({ reports, meta: {} as MetaV2 })),
     resource: 'space-reports',
     params: { scope },
   })
@@ -87,7 +76,7 @@ export const SpaceReportList = ({ scope, isContributorOrHigher }: { scope: strin
       return
     }
     query.refetch()
-    client.invalidateQueries({ queryKey: ['space', scope] })
+    client.invalidateQueries({ queryKey: ['space', scope]})
   }, [lastJsonMessage])
 
   const selectedItems = getSelectedObjectsFromIndexes<number, ISpaceReport>(selectedIndexes, query.data?.reports)

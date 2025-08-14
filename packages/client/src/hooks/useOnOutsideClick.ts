@@ -3,8 +3,8 @@ import { useRef, useEffect } from 'react'
 export function useOnOutsideClickRef<T extends Element = HTMLDivElement>(
   shouldListenForOutsideClick: boolean,
   cb: () => void,
-  ignoredRef?: React.RefObject<HTMLElement> | null,
-): React.RefObject<T> {
+  ignoredRef?: React.RefObject<HTMLElement|null>,
+): React.RefObject<T|null> {
   const node = useRef<T>(null)
 
   useEffect(() => {

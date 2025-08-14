@@ -1,7 +1,6 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
 import { Loader } from '../../../components/Loader'
-import { hidePagination, Pagination } from '../../../components/Pagination'
 import { usePaginationState } from '../../../hooks/usePaginationState'
 import { pluralize } from '../../../utils/formatting'
 import { ExpertImageCircleSmall, ExpertMeta, ExpertRow, StyledCondensedList } from './styles'
@@ -9,13 +8,12 @@ import { useExpertsListCondensedQuery } from '../useExpertsListQuery'
 
 export const ExpertsCondensedList = ({ pick }: { pick?: number }) => {
   const pagination = usePaginationState()
-  const { data, isLoading, isFetched } = useExpertsListCondensedQuery({
+  const { data, isLoading } = useExpertsListCondensedQuery({
     page: pagination.page,
   })
 
   if (isLoading) return <Loader />
-  const expertsList = pick ? data?.experts.slice(0, pick) : data?.experts
-  const showPagination = !pick
+  const expertsList = pick ? data?.data.slice(0, pick) : data?.data
 
   return (
     <StyledCondensedList>
@@ -39,23 +37,6 @@ export const ExpertsCondensedList = ({ pick }: { pick?: number }) => {
           </div>
         </ExpertRow>
       ))}
-      {showPagination && <Pagination
-        showPerPage={false}
-        showPageOf={false}
-        showPageJump={false}
-        page={data?.meta?.current_page}
-        totalCount={data?.meta?.total_count}
-        totalPages={data?.meta?.total_pages}
-        isHidden={hidePagination(
-          isFetched,
-          data?.experts?.length,
-          data?.meta?.total_pages,
-        )}
-        isPreviousData={data?.meta?.prev_page !== null}
-        isNextData={data?.meta?.next_page !== null}
-        setPage={n => pagination.setPage(n)}
-      />}
-      
     </StyledCondensedList>
   )
 }

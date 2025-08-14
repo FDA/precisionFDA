@@ -14,7 +14,7 @@ export const Tabs: React.FC<Props> = ({ children, nonSelected }) => {
       {children.map((item, index) => (
         <TabTitle
           key={item.key}
-          title={item.props.title}
+          title={(item.props as {title: string}).title}
           index={index}
           setSelectedTab={setSelectedTab}
           active={selectedTab === index}

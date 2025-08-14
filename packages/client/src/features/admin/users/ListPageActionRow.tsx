@@ -3,13 +3,15 @@ import React, { useState } from 'react'
 import { useNavigate } from 'react-router'
 import { toast } from 'react-toastify'
 import styled from 'styled-components'
+import axios from 'axios'
 import { Button } from '../../../components/Button'
 import { DropdownNext } from '../../../components/Dropdown/DropdownNext'
 import { ArrowIcon } from '../../../components/icons/ArrowIcon'
 import { PlusIcon } from '../../../components/icons/PlusIcon'
 import { UnlockIcon } from '../../../components/icons/UnlockIcon'
-import { checkStatus, displayPayloadMessage, getApiRequestOpts } from '../../../utils/api'
+import { displayPayloadMessage, Payload } from '../../../utils/api'
 import { useAuthUser } from '../../auth/useAuthUser'
+import { MetaV2 } from '../../home/types'
 import { ResourceDropdownContent } from './ResourceDropdown'
 import { User } from './types'
 import { UserLimitForm } from './UserLimitForm'
@@ -24,58 +26,49 @@ const ButtonsRow = styled.div`
 // TODO(samuel) Fix incorrect error handling with react-query
 // https://react-query.tanstack.com/guides/query-functions#usage-with-fetch-and-other-clients-that-do-not-throw-by-default
 const setTotalLimit = async (ids: User['id'][], totalLimit: number) =>
-  fetch('/admin/set_total_limit', {
-    ...getApiRequestOpts('POST'),
-    body: JSON.stringify({
-      ids,
-      totalLimit,
-    }),
-  }).then(checkStatus)
+  axios.post('/admin/set_total_limit', {
+    ids,
+    totalLimit,
+  }).then(res => res.data)
 
 const setJobLimit = async (ids: User['id'][], jobLimit: number) =>
-  fetch('/admin/set_job_limit', {
-    ...getApiRequestOpts('POST'),
-    body: JSON.stringify({
-      ids,
-      jobLimit,
-    }),
-  }).then(checkStatus)
+  axios.post('/admin/set_job_limit', {
+    ids,
+    jobLimit,
+  }).then(res => res.data)
 
 const bulkUnlock = async (ids: User['id'][]) =>
-  fetch('/admin/bulk_unlock', {
-    ...getApiRequestOpts('POST'),
-    body: JSON.stringify({
-      ids,
-    }),
-  }).then(checkStatus)
+  axios.post('/admin/bulk_unlock', {
+    ids,
+  }).then(res => res.data)
 
 const bulkActivate = async (ids: User['id'][]) =>
-  fetch('/admin/bulk_activate', {
-    ...getApiRequestOpts('POST'),
-    body: JSON.stringify({
-      ids,
-    }),
-  }).then(checkStatus)
+  axios.post('/admin/bulk_activate', {
+    ids,
+  }).then(res => res.data)
 
 const bulkDeactivate = async (ids: User['id'][]) =>
-  fetch('/admin/bulk_deactivate', {
-    ...getApiRequestOpts('POST'),
-    body: JSON.stringify({
-      ids,
-    }),
-  }).then(checkStatus)
+  axios.post('/admin/bulk_deactivate', {
+    ids,
+  }).then(res => res.data)
 
 // TODO(samuel) unify with my home
-const DropdownButton = React.forwardRef((props: any, ref) => (
-  <Button data-variant="primary" ref={ref} {...props}>
-    Resources &nbsp;
-    <ArrowIcon />
-  </Button>
-))
+const DropdownButton = React.forwardRef<HTMLElement, React.ComponentProps<typeof Button> & { $isActive?: boolean }>((props, ref) => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { $isActive, ...buttonProps } = props
+  return (
+    // @ts-expect-error ref type mismatch between Dropdown and Button components
+    <Button data-variant="primary" ref={ref} {...buttonProps}>
+      Resources &nbsp;
+      <ArrowIcon />
+    </Button>
+  )
+})
+DropdownButton.displayName = 'DropdownButton'
 
 type UserListActionRowProps = {
   selectedUsers: User[]
-  refetchUsers: UseQueryResult<{ users: User[] }>['refetch']
+  refetchUsers: UseQueryResult<{ data: User[]; meta: MetaV2 }>['refetch']
 }
 
 export const UsersListActionRow = ({ selectedUsers, refetchUsers }: UserListActionRowProps) => {
@@ -89,7 +82,7 @@ export const UsersListActionRow = ({ selectedUsers, refetchUsers }: UserListActi
   const unlockMutation = useMutation({
     mutationKey: ['bulk-unlock'],
     mutationFn: () => bulkUnlock(selectedIds),
-    onSuccess: (res: any) => {
+    onSuccess: (res: Payload) => {
       displayPayloadMessage(res)
     },
     onError: () => {
@@ -99,7 +92,7 @@ export const UsersListActionRow = ({ selectedUsers, refetchUsers }: UserListActi
   const deactivateMutation = useMutation({
     mutationKey: ['bulk-deactivate'],
     mutationFn: () => bulkDeactivate(selectedIds),
-    onSuccess: (res: any) => {
+    onSuccess: (res: Payload) => {
       displayPayloadMessage(res)
       refetchUsers()
     },
@@ -110,7 +103,7 @@ export const UsersListActionRow = ({ selectedUsers, refetchUsers }: UserListActi
   const activateMutation = useMutation({
     mutationKey: ['bulk-activate'],
     mutationFn: () => bulkActivate(selectedIds),
-    onSuccess: (res: any) => {
+    onSuccess: (res: Payload) => {
       displayPayloadMessage(res)
       refetchUsers()
     },
@@ -120,9 +113,9 @@ export const UsersListActionRow = ({ selectedUsers, refetchUsers }: UserListActi
   })
   const setTotalLimitMutation = useMutation({
     mutationKey: ['set-total-limit'],
-    // Note: parseInt used because of some strange runtime errors 2lazy2fix
+    // @ts-expect-error parseInt used because of some strange runtime errors 2lazy2fix
     mutationFn: () => setTotalLimit(selectedIds, parseInt(totalLimitInput, 10)),
-    onSuccess: (res: any) => {
+    onSuccess: (res: Payload) => {
       displayPayloadMessage(res)
       refetchUsers()
     },
@@ -132,9 +125,9 @@ export const UsersListActionRow = ({ selectedUsers, refetchUsers }: UserListActi
   })
   const setJobLimitMutation = useMutation({
     mutationKey: ['set-job-limit'],
-    // Note: parseInt used because of some strange runtime errors 2lazy2fix
+    // @ts-expect-error parseInt used because of some strange runtime errors 2lazy2fix
     mutationFn: () => setJobLimit(selectedIds, parseInt(jobLimitInput, 10)),
-    onSuccess: (res: any) => {
+    onSuccess: (res: Payload) => {
       displayPayloadMessage(res)
       refetchUsers()
     },
@@ -148,7 +141,7 @@ export const UsersListActionRow = ({ selectedUsers, refetchUsers }: UserListActi
     selectedUsers.length > 0 && selectedUsers.every(({ userState }) => userState === 'active')
   const areAllSelectedUsersInLockedState =
     selectedUsers.length > 0 && selectedUsers.every(({ userState }) => userState === 'locked')
-  const isCurrentUserSelected = selectedUsers.some(({ id }) => id === currentUserCtx.id)
+  const isCurrentUserSelected = selectedUsers.some(({ id }) => id === currentUserCtx?.id)
 
   return (
     <ButtonsRow>
@@ -215,7 +208,7 @@ export const UsersListActionRow = ({ selectedUsers, refetchUsers }: UserListActi
           <DropdownButton
             {...dropdownProps}
             data-testid="admin-users-resource-button"
-            active={dropdownProps.$isActive}
+            active={dropdownProps.$isActive ? 'true' : 'false'}
             disabled={selectedUsers.length === 0}
           />
         )}

@@ -107,12 +107,11 @@ export const IconNames = {
 
 export type IconType = keyof typeof IconNames
 
-export const Icon = ({ name, ...props }: { name?: IconType; width?: number; height?: number }) => {
-  // @ts-ignore
-  const icon = IconNames[name]
+export const Icon = ({ name }: { name?: IconType; width?: number; height?: number }) => {
+  const icon = IconNames[name || 'AngleDownIcon']
   if (!icon) {
     throw new Error(`Icon with name ${name} does not exist`)
   } else {
-    return icon as JSX.Element
+    return icon as React.ReactNode
   }
 }

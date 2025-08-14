@@ -54,8 +54,9 @@ const OutputSpecRow = ({
 
   // trigger validations on 'default' if 'isArray' changes
   useEffect(() => {
+    // @ts-expect-error dynamic field name
     trigger(`output_spec.${index}.default`)
-    setValue(`output_spec.${index}.class`, setClassVal(sClass, isArray))
+    setValue(`output_spec.${index}.class`, setClassVal(sClass, Boolean(isArray)))
   }, [isArray])
 
   return (

@@ -15,7 +15,7 @@ export interface Challenge {
   id: number;
   name: string;
   description: string;
-  meta: Meta;
+  meta: string;
   startAt: Date;
   endAt: Date;
   status: ChallengeStatus;

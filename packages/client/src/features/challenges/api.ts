@@ -69,7 +69,7 @@ export async function challengeDetailsRequest(challengeId: string, custom?: bool
     end_at: convertDateToUserTime(d.end_at),
     created_at: convertDateToUserTime(d.created_at),
     updated_at: convertDateToUserTime(d.updated_at),
-  }))
+  } as ChallengeOld))
 }
 
 export async function challengeByID(challengeId: number | string, custom?: boolean) {
@@ -125,6 +125,6 @@ export type UpdateChallengeContent = {
   content: string
   editorState: string
 }
-export async function updateChallengeContentRequest(id: number, payload: UpdateChallengeContent) {
+export async function updateChallengeContentRequest(id: number|string, payload: UpdateChallengeContent) {
   return axios.put(`/api/v2/challenges/${id}/content`, payload).then(r => r.data)
 }

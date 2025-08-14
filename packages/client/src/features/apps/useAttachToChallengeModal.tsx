@@ -8,6 +8,7 @@ import { Loader } from '../../components/Loader'
 import { breakPoints } from '../../styles/theme'
 import {
   displayPayloadMessage,
+  Payload,
 } from '../../utils/api'
 import {
   CheckCol,
@@ -108,7 +109,7 @@ const ChallengeAppForm = ({
     onSuccess: (res) => {
       if (onSuccess) onSuccess(res)
       setShowModal(false)
-      displayPayloadMessage(res)
+      displayPayloadMessage(res as Payload)
     },
     onError: (error) => {
       toast.error(error.message)

@@ -8,13 +8,11 @@ import { BoolButton, BoolButtonGroup } from '../../../components/Button/BoolButt
 import { InputText } from '../../../components/InputText'
 import { FieldInfo } from '../../../components/form/FieldInfo'
 import { noAccessText } from '../../files/file.utils'
-import { useFetchFilesByUIDQuery } from '../../files/query/useFetchFilesByUIDQuery'
 import { SelectMultiFileInput } from '../SelectMultiFileInput'
 import { IOSpec, InputSpec, RunJobFormType } from '../apps.types'
 import { isFloatValid, isStrictlyInteger } from '../form/common'
 import { ErrorMessageForField } from './ErrorMessageForField'
 import { useQuery } from '@tanstack/react-query'
-import { fetchAccessibleFilesByUID } from '../../databases/databases.api'
 import { validateFile } from './utils'
 
 const getDefaultValue = val => {

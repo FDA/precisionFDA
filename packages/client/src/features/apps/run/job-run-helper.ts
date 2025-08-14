@@ -26,7 +26,7 @@ const fetchAndConvertSelectableSpaces = async (scope: string): Promise<Selectabl
   if (scope.includes('space')) {
     const spaceId = getSpaceIdFromScope(scope)
     if (spaceId) {
-      const spaces: ISpace[] = await fetchSelectableSpaces(spaceId.toString())
+      const spaces: ISpace[] = await fetchSelectableSpaces(spaceId)
       return spaces.map(space => ({
         isDisabled: false,
         label: getTitle(space),

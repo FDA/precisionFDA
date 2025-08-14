@@ -63,7 +63,7 @@ export const MembersList = ({ space }: { space: ISpace }) => {
 
   const { data, isLoading } = useQuery({
     queryKey: ['space-members', space.id, sideRole],
-    queryFn: () => spacesMembersListRequest({ spaceId: space.id, sideRole }),
+    queryFn: () => spacesMembersListRequest({ spaceId: space.id.toString(), sideRole }),
   })
 
   const members = data?.space_memberships || []
