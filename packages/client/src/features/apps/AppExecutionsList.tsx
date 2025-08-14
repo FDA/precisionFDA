@@ -8,35 +8,31 @@ import {
   VisibilityState,
 } from '@tanstack/react-table'
 import React, { useEffect, useMemo } from 'react'
-import useWebSocket from 'react-use-websocket'
 import { ContentFooter } from '../../components/Page/ContentFooter'
 import { Pagination, hidePagination } from '../../components/Pagination'
 import Table from '../../components/Table'
+import { StyledPageTable } from '../../components/Table/components/styles'
 import { useColumnWidthLocalStorage } from '../../hooks/useColumnWidthLocalStorage'
 import { useHiddenColumnLocalStorage } from '../../hooks/useHiddenColumnLocalStorage'
 import { useOrderByState } from '../../hooks/useOrderByState'
 import { usePaginationParams } from '../../hooks/usePaginationState'
-import { DEFAULT_RECONNECT_ATTEMPTS, DEFAULT_RECONNECT_INTERVAL, SHOULD_RECONNECT, getNodeWsUrl } from '../../utils/config'
+import { useLastWSNotification } from '../../hooks/useToastWSHandler'
+import { createLocationKey } from '../../utils'
 import { toArrayFromObject } from '../../utils/object'
 import { IExecution } from '../executions/executions.types'
 import { useExecutionColumns } from '../executions/useExecutionColumns'
 import { columnFilters } from '../home/columnFilters'
-import { HomeScope, NOTIFICATION_ACTION, Notification, WEBSOCKET_MESSAGE_TYPE, WebSocketMessage } from '../home/types'
+import { ResouceQueryErrorMessage } from '../home/ResouceQueryErrorMessage'
+import { HomeScope, NOTIFICATION_ACTION } from '../home/types'
 import { useFilterParams } from '../home/useFilterState'
 import { useListQuery } from '../home/useListQuery'
-import { fetchAppExecutions, FetchAppsExecutionsResponse } from './apps.api'
-import { ResouceQueryErrorMessage } from '../home/ResouceQueryErrorMessage'
-import { createLocationKey } from '../../utils'
-import { StyledPageTable } from '../../components/Table/components/styles'
-import { useAuthUser } from '../auth/useAuthUser'
-import { useLastWSNotification } from '../../hooks/useToastWSHandler'
+import { FetchAppsExecutionsResponse, fetchAppExecutions } from './apps.api'
 
 export const AppExecutionsList = ({ spaceId, appUid }: { spaceId?: string; appUid: string }) => {
-  const user = useAuthUser()
   const resource = 'app-executions'
   const locationKey = createLocationKey(resource, spaceId)
   const { pageParam, perPageParam, setPageParam, setPerPageParam } = usePaginationParams()
-  const { sort, sortBy, setSortBy } = useOrderByState({ defaultOrder: { order_by: 'created_at_date_time', order_dir: 'DESC' } })
+  const { sort, sortBy, setSortBy } = useOrderByState({ defaultOrder: { order_by: 'created_at_date_time', order_dir: 'desc' }})
   const { colWidths, saveColumnResizeWidth } = useColumnWidthLocalStorage(locationKey)
   const { columnVisibility, setColumnVisibility } = useHiddenColumnLocalStorage(locationKey)
   const queryCache = useQueryClient()
@@ -48,7 +44,7 @@ export const AppExecutionsList = ({ spaceId, appUid }: { spaceId?: string; appUi
     resource,
     scope: appUid as HomeScope,
     pagination: { page: pageParam, perPage: perPageParam },
-    order: { order_by: sort.order_by, order_dir: sort.order_dir },
+    sort: { order_by: sort.order_by, order_dir: sort.order_dir },
     filter: filterQuery,
     params: { appUid },
   })

@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { IFilter, IMeta, ServerScope } from '../home/types'
+import { HomeScope, IFilter, IMeta, ServerScope } from '../home/types'
 import { formatScopeQ, Params, prepareListFetch } from '../home/utils'
 import { IJob, IExecution } from './executions.types'
 
@@ -28,7 +28,7 @@ export async function fetchFilteredJobs(searchString: string, scopes: ServerScop
 export async function fetchExecutions(filters: IFilter[], params: Params): Promise<FetchExecutionsQuery> {
   const query = prepareListFetch(filters, params)
   const paramQ = `?${new URLSearchParams(query).toString()}`
-  const scopeQ = formatScopeQ(params.scope)
+  const scopeQ = formatScopeQ(params.scope as HomeScope)
   const res = await axios.get(`/api/jobs${scopeQ}${paramQ}`)
   return res.data
 }

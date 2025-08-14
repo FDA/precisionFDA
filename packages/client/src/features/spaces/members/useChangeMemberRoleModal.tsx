@@ -42,7 +42,7 @@ const validationSchema = Yup.object().shape({
 
 type ErrorResponse = { response?: { data?: { errors?: string } } }
 interface ChangeMemberRoleFormProps {
-  spaceId: number
+  spaceId: string|number
   member: SpaceMembership
   onClose: () => void
 }
@@ -150,7 +150,7 @@ const ChangeMemberRoleForm: React.FC<ChangeMemberRoleFormProps> = ({ spaceId, me
   )
 }
 
-export const useChangeMemberRoleModal = ({ spaceId, member }: { spaceId: number; member: SpaceMembership }) => {
+export const useChangeMemberRoleModal = ({ spaceId, member }: { spaceId: string|number; member: SpaceMembership }) => {
   const { isShown, setShowModal } = useModal()
   const modalComp = isShown && (
     <ModalNext

@@ -1,8 +1,9 @@
 import React from 'react'
 import classNames from 'classnames'
+import { InputOutput } from '../workflows.types'
 
 
-export const WorkflowSpecTable = ({ title, config, dataTestId }: { title: string, config: any[], dataTestId: string }) => {
+export const WorkflowSpecTable = ({ title, config, dataTestId }: { title: string, config: InputOutput[], dataTestId: string }) => {
   if (!config.length) {
     return (
       <div className='__table' data-testid={dataTestId}>
@@ -21,7 +22,7 @@ export const WorkflowSpecTable = ({ title, config, dataTestId }: { title: string
     })
 
     const choices = spec.choices ? spec.choices.join(', ') : null
-    const title = spec.label.length ? spec.label : spec.name
+    const name = spec.label.length ? spec.label : spec.name
 
     let defaultValue
     if (spec.default_workflow_value !== null && spec.default_workflow_value !== undefined) {
@@ -32,7 +33,7 @@ export const WorkflowSpecTable = ({ title, config, dataTestId }: { title: string
       <div className={classes} key={i}>
         <div className='__table_type'>{spec.class}</div>
         <div className='__table_value'>
-          <span className='__table_value-label'>{title}</span>
+          <span className='__table_value-label'>{name}</span>
           <span className='__table_value-help'>{spec.help}</span>
           {defaultValue && <span className='__table_value-default'>{`Default: ${defaultValue}`}</span>}
           {choices && <span className='__table_value-default'>{`Choices: [${choices}]`}</span>}

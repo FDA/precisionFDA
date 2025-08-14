@@ -38,7 +38,7 @@ export const ExpertMarkdownStyle = styled(MarkdownStyle)`
 `
 
 export const ExpertBlog = ({ expert, user }: { expert: ExpertDetails, user: IUser }) => {
-  const docRef = useRef(null)
+  const docRef = useRef<HTMLElement>(null)
   const toc = useMarkdownToc(docRef, expert.blog)
   
   return (

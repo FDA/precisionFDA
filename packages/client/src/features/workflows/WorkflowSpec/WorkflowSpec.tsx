@@ -3,6 +3,7 @@ import { StyledSpecTab } from '../../apps/SpecTab/styles'
 import { MetadataKey, MetadataVal } from '../../home/show.styles'
 import { WorkflowSpecTable } from './WorkflowSpecTable'
 import { RESOURCE_LABELS } from '../../../types/user'
+import { Stage, Spec } from '../workflows.types'
 
 
 const renderEmptySpec = (type: string) => {
@@ -18,7 +19,7 @@ const renderEmptySpec = (type: string) => {
   )
 }
 
-const renderSpecs = (stages: any[]) => {
+const renderSpecs = (stages: Stage[]) => {
   if (!stages.length) return renderEmptySpec('type')
   return (
     stages.map((stage, i) => {
@@ -36,7 +37,9 @@ const renderSpecs = (stages: any[]) => {
             </div>
             <div className='__header_item'>
               <MetadataKey>default instance type</MetadataKey>
-              <MetadataVal data-testid={`workflow-stage-${stage.stageIndex +1 }-app-default-instance-type`}>{RESOURCE_LABELS[stage.instanceType] ?? stage.instanceType}</MetadataVal>
+              <MetadataVal data-testid={`workflow-stage-${stage.stageIndex +1 }-app-default-instance-type`}>
+                {RESOURCE_LABELS[stage.instanceType] ?? stage.instanceType}
+              </MetadataVal>
             </div>
           </div>
           <div className='__table-block'>
@@ -49,7 +52,7 @@ const renderSpecs = (stages: any[]) => {
   )
 }
 
-const HomeWorkflowsSpec = ({ spec = {}}: { spec: any}) => {
+const HomeWorkflowsSpec = ({ spec = {} as Spec }: { spec?: Spec }) => {
   return (
     <StyledSpecTab>
       {spec.input_spec && renderSpecs(spec.input_spec.stages)}

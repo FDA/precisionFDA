@@ -93,7 +93,7 @@ export const createMockExecution = (id: number|string, uid: string): IExecution 
   }
 }
 
-export const createMockWorkflowExecution = (id: number, uid: string, numberOfJobs: number): IExecution => {
+export const createMockWorkflowExecution = (id: number|string, uid: string, numberOfJobs: number): IExecution => {
   const execution = createMockExecution(id, uid)
   execution.jobs = []
   for (let i = 0; i < numberOfJobs; i++) {

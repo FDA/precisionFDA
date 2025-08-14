@@ -15,7 +15,7 @@ import { Form, FormPage, PreviewBanner, StyledRow } from './alerts.styles'
 import { Alert, AlertType } from './alerts.types'
 import { alertTypesArray, alertTypesText, formatInTimeZone, validationSchema } from './alerts.common'
 
-type AlertFormType = {
+export type AlertFormType = {
   title: string
   content: string
   type: AlertType
@@ -139,7 +139,7 @@ export const EditAlertForm = ({
   const queryClient = useQueryClient()
   const createAlertMutation = useMutation({
     mutationKey: ['create-alert-item'],
-    mutationFn: (payload: any) => createAlertRequest(payload),
+    mutationFn: (payload: AlertFormType) => createAlertRequest(payload),
     onSuccess: r => {
       queryClient.invalidateQueries({ queryKey: ['site-settings']})
       queryClient.invalidateQueries({ queryKey: ['alerts-list']})
@@ -167,7 +167,7 @@ export const EditAlertForm = ({
 
   const updateAlertMutation = useMutation({
     mutationKey: ['update-alert-item'],
-    mutationFn: (payload: { id: number; vals: any }) => updateAlertRequest(payload.id, payload.vals),
+    mutationFn: (payload: { id: number; vals: AlertFormType }) => updateAlertRequest(payload.id, payload.vals),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['alerts-list']})
       queryClient.invalidateQueries({ queryKey: ['site-settings']})
@@ -183,7 +183,10 @@ export const EditAlertForm = ({
     vals.endTime = formatInTimeZone(vals.endTime, "yyyy-MM-dd'T'HH:mm", 'UTC')
 
     if (isNew) return createAlertMutation.mutateAsync(vals)
-    return updateAlertMutation.mutateAsync({ id: alertItem?.id, vals })
+    if (alertItem && typeof alertItem.id === 'number') {
+      return updateAlertMutation.mutateAsync({ id: alertItem.id, vals })
+    }
+    throw new Error('Alert item is missing or has no id')
   }
   const handleDelete = (id: number) => {
     return deleteAlertMutation.mutateAsync({ id })

@@ -42,8 +42,8 @@ export const fetchAndConvertSelectableSpaces = (scope: IApp['scope']) => {
   const spaceId = getSpaceIdFromScope(scope)
   return useQuery({
     queryKey: ['selectable-space', scope],
-    queryFn: () => fetchSelectableSpaces(spaceId),
-    select: data => {
+    queryFn: () => fetchSelectableSpaces(spaceId!),
+    select: (data) => {
       if (scope.includes('space')) {
         return data.map(space => ({
           isDisabled: false,

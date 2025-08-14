@@ -37,7 +37,7 @@ export interface IToCItem {
   textContent: string
 }
 
-export const setTocFromRef = (ref: React.RefObject<HTMLElement>, set: React.Dispatch<React.SetStateAction<IToCItem[] | undefined>>) => {
+export const setTocFromRef = (ref: React.RefObject<HTMLElement|null>, set: React.Dispatch<React.SetStateAction<IToCItem[] | undefined>>) => {
   // Remove the first H1 from table of contents list becuase it's the page title.
   const rest = Array.from(
     ref?.current?.querySelectorAll('h1, h2, h3, h4, h5, h6') || [],
@@ -52,7 +52,7 @@ export const setTocFromRef = (ref: React.RefObject<HTMLElement>, set: React.Disp
   )
 }
 
-export const useMarkdownToc = (ref: React.RefObject<HTMLElement>, data: string) => {
+export const useMarkdownToc = (ref: React.RefObject<HTMLElement|null>, data: string) => {
   const [toc, setToc] = useState<IToCItem[]>()
   useScrollToHash()
   useEffect(() => {

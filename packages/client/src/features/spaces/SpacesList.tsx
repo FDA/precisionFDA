@@ -201,7 +201,7 @@ const SpacesList = () => {
       page: pagination.pageParam,
       perPage: pagination.perPageParam,
     },
-    order: { order_by: sort.order_by, order_dir: sort.order_dir },
+    sort,
     filter: filterQuery,
   })
 

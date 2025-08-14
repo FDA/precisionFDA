@@ -14,7 +14,7 @@ export const useSubmissionTableColumns = ({
   authUser,
 }: {
   isSpaceMember: boolean
-  authUser: IUser
+  authUser?: IUser
 }): ColumnDef<SubmissionV2>[] => {
   return [
     {
@@ -53,7 +53,7 @@ export const ChallengeSubmissionsTable = ({
   isSpaceMember,
 }: {
   challengeId: number
-  user: IUser
+  user?: IUser
   isSpaceMember: boolean
 }) => {
   const { data: submissionsData, isLoading } = useChallengeSubmissionQuery(challengeId)
@@ -70,7 +70,7 @@ export const ChallengeSubmissionsTable = ({
         <a data-turbolinks="false" href="/login">
           login
         </a>
-        . If you don't have a PrecisionFDA account, please{' '}
+        . If you don&apos;t have a PrecisionFDA account, please{' '}
         <a data-turbolinks="false" href="/request_access">
           submit an access request
         </a>{' '}

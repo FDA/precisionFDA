@@ -1,4 +1,5 @@
 import * as Yup from 'yup'
+import React from 'react'
 import { toString } from 'lodash'
 import { IOSpec, InputSpec, InputSpecForm } from '../apps.types'
 import { csvToArray } from '../../../utils/csvToArray'
@@ -48,20 +49,20 @@ interface ServerType {
 }
 
 const defaultCreateDefs: { [CLASS_TYPE in IOSpec['class']]: (t: DefaultCreateType[CLASS_TYPE]) => ServerType[CLASS_TYPE] | null } = {
-  'array:file': v => v?.length > 0 ? v : null,
+  'array:file': v => (v && v.length > 0) ? v.map(file => file.uid || '') : null,
   'file': v => v ?? null,
   'boolean': v => v === 'null' ? null : v === 'true',
   'array:int': v => v?.map(i => parseInt(i, 10)) ?? null,
   'array:float': v => v?.map(i => parseFloat(i)) ?? null,
   'array:string': v => v,
-  'float': v => parseFloat(v) ?? null,
-  'int': v => parseInt(v, 10) ?? null,
+  'float': v => v ? parseFloat(v) : null,
+  'int': v => v ? parseInt(v, 10) : null,
   'string': v => String(v) || null,
 }
 
 const runDefs: { [CLASS_TYPE in IOSpec['class']]: (t: ServerType[CLASS_TYPE]) => RunType[CLASS_TYPE] | null } = {
-  'array:file': v => v?.length > 0 ? v : null,
-  'file': v => v ?? null,
+  'array:file': v => (v && v.length > 0) ? v.map(uid => ({ uid } as IAccessibleFile)) : null,
+  'file': v => v ? ({ uid: v } as IAccessibleFile) : null,
   'boolean': v => v == null ? null : v.toString(),
   'array:int': v => v?.map(i => i.toString()) ?? null,
   'array:float': v => v?.map(i => i.toString()) ?? null,
@@ -84,7 +85,7 @@ export function getChoicesValueFromForm<T extends IOSpec['class']>(sClass: T, va
   }
   return val && val
 }
-export function getDefaultValueFromServer<T extends IOSpec['class']>(sClass: T, val: RunType[T]) {
+export function getDefaultValueFromServer<T extends IOSpec['class']>(sClass: T, val: ServerType[T]) {
   return val == null ? null : runDefs[sClass]?.(val)
 }
 
@@ -92,11 +93,14 @@ export function mapServerClassToFormClass<T extends IOSpec>(spec: T): T {
   return { ...spec, class: spec.class.replace('array:', '') }
 }
 
-function formatFormDefault(val: any, sClass: IOSpec['class']) {
+function formatFormDefault(val: unknown, sClass: IOSpec['class']): null | string[] | IAccessibleFile[] {
   if(sClass === 'array:file' || sClass === 'file') {
-    return val
+    return val as IAccessibleFile[] | null
   }
-  return val?.toString() ?? null
+  if(Array.isArray(val)) {
+    return val.map(v => v?.toString() ?? '') as string[]
+  }
+  return val?.toString() ? [val.toString()] : null
 }
 
 export function mapFromServerToForm<T extends InputSpec>(spec: T): InputSpecForm {
@@ -111,7 +115,7 @@ export function removeArrayStringFromClassType(classType: InputSpec['class']) {
   return classType.replace('array:', '')
 }
 
-export function handleSnakeNameChange(e: any) {
+export function handleSnakeNameChange(e: React.ChangeEvent<HTMLInputElement>) {
   e.target.value = stringToSnakeCase(e.target.value)
   return e
 }
@@ -120,7 +124,10 @@ export function isStrictlyInteger(str: string) {
   return /^\d+$/.test(str)
 }
 
-function emptyOrNull(v?: string | null) {
+function emptyOrNull(v?: string | null | string[]) {
+  if (Array.isArray(v)) {
+    return v.length === 0
+  }
   return v === ''  || v == null
 }
 
@@ -164,81 +171,57 @@ export const validationSchema = Yup.object().shape({
       class: Yup.string()
         .oneOf(['string', 'file', 'int', 'float', 'boolean', 'array:file', 'array:string', 'array:int', 'array:float'])
         .required('Class field is required'),
-      default: Yup.array().when(['class', 'choices'], (classVal: string, choices: string[], schema: Yup.StringSchema) => {
-        const containsSchema = schema.test(
-          'val-is-not-in-choices',
-          'One of the values is not in the choices list',
-          value => {
-            if(value && choices) {
-              return areAllAValuesInB(value, choices)
-            }
-            return true
-          },
-        )
-        if(classVal === 'array:string') {
-          return containsSchema
-            .test(
-              'is-array-of-string',
-              'The field must contain valid comma separated strings',
-              value => {
+      default: Yup.mixed().when(['class', 'choices'], {
+        is: () => true,
+        then: (schema) => {
+          return schema.test(
+            'val-is-not-in-choices',
+            'One of the values is not in the choices list',
+            function(value) {
+              const { choices } = this.parent
+              if(value && choices && Array.isArray(value)) {
+                return areAllAValuesInB(value, choices)
+              }
+              return true
+            },
+          ).test(
+            'validate-by-class',
+            'Invalid value for the selected class',
+            function(value) {
+              const { class: classVal } = this.parent
+              if(classVal === 'array:string') {
                 if (emptyOrNull(value)) return true
                 return Array.isArray(value)
-              },
-            )
-            .optional().nullable()
-        }
-        if(classVal === 'string') return containsSchema.nullable().optional()
-        if(classVal === 'boolean') return schema.nullable()
-        if(classVal === 'array:file') {
-          return schema.nullable().optional()
-        }
-        if(classVal === 'file') {
-          return schema.max(1, 'Must not contain more than one file').nullable().optional()
-        }
-        if(classVal === 'array:int') {
-          return containsSchema
-          .test(
-            'is-array-of-int',
-            'The field must contain a valid comma separated array of integers',
-            value => {
-              if (emptyOrNull(value)) return true
-              return isValidaArrayOfInteger(value)},
-            )
-            .optional().nullable()
-          }
-        if(classVal === 'int') {
-          return containsSchema.test(
-            'is-int',
-            'The field must contain an integer',
-            value => {
-              if(emptyOrNull(value)) return true
-              return isIntegerValid(value)
+              }
+              if(classVal === 'string') return true
+              if(classVal === 'boolean') return true
+              if(classVal === 'array:file') {
+                return true
+              }
+              if(classVal === 'file') {
+                if (!value) return true
+                return !Array.isArray(value) || value.length <= 1
+              }
+              if(classVal === 'array:int') {
+                if (emptyOrNull(value)) return true
+                return Array.isArray(value) && isValidaArrayOfInteger(value)
+              }
+              if(classVal === 'int') {
+                if(emptyOrNull(value)) return true
+                return Array.isArray(value) && value.length === 1 && isIntegerValid(value[0])
+              }
+              if(classVal === 'array:float') {
+                if(emptyOrNull(value)) return true
+                return Array.isArray(value) && isValidaArrayOfFloat(value)
+              }
+              if(classVal === 'float') {
+                if(emptyOrNull(value)) return true
+                return Array.isArray(value) && value.length === 1 && isFloatValid(value[0])
+              }
+              return true
             },
           ).optional().nullable()
-        }
-        if(classVal === 'array:float') {
-          return containsSchema
-            .test(
-              'is-array-of-float',
-              'The field must contain a valid comma separated array of floats',
-              value => {
-                if(emptyOrNull(value)) return true
-                return isValidaArrayOfFloat(value)
-              },
-            )
-            .optional().nullable()
-        }
-        if(classVal === 'float') {
-          return containsSchema.test(
-            'is-float',
-            'The field must contain a float',
-            value => {
-              if(emptyOrNull(value)) return true
-              return isFloatValid(value)
-            },
-            ).optional().nullable()
-        }
-        return schema
+        },
       }),
       help: Yup.string().optional(),
       label: Yup.string().optional(),
@@ -250,7 +233,7 @@ export const validationSchema = Yup.object().shape({
         return schema.test(
           'is-csv-of-choices',
           `The field must contain valid comma separated values of ${noArrayStringClass}`,
-          (value) => {
+          (value: string[]) => {
             if(noArrayStringClass === 'float') {
               if(emptyOrNull(value)) return true
               return isValidaArrayOfFloat(value)

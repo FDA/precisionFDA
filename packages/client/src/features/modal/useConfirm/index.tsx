@@ -2,7 +2,7 @@ import React, { ReactNode, useState } from 'react'
 import { ModalHeaderTop, ModalNext } from '../ModalNext'
 import { Dialog, IDialogProps } from './Dialog'
 
-type DialogComponentType = (props: IDialogProps) => JSX.Element
+type DialogComponentType = (props: IDialogProps) => React.ReactNode
 
 export const useConfirm = ({
   onOk,
@@ -42,7 +42,6 @@ export const useConfirm = ({
   )
 
   const Confirm = () => (
-    // eslint-disable-next-line react/jsx-no-useless-fragment
     <>
       {isOpen && <ConfirmDialog />}
     </>

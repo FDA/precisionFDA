@@ -1,18 +1,18 @@
 import axios from 'axios'
 import { FileScope, FileState, IFile } from '../files/files.types'
-import { IFilter, IMeta } from '../home/types'
+import { HomeScope, IFilter, MetaV2 } from '../home/types'
 import { formatScopeQuery, Params, prepareListFetch } from '../home/utils'
 import { IDatabase, MethodType } from './databases.types'
 
 export interface FetchDatabaseListQuery {
   data: IDatabase[]
-  meta: IMeta
+  meta: MetaV2
 }
 
 export async function fetchDatabaseList(filters: IFilter[], params: Params): Promise<FetchDatabaseListQuery> {
   const query = prepareListFetch(filters, params)
   const paramQ = '&' + new URLSearchParams(query).toString()
-  const scopeQ = formatScopeQuery(params.scope, params.spaceId)
+  const scopeQ = formatScopeQuery(params.scope as HomeScope, params.spaceId)
   return axios.get(`/api/v2/dbclusters/${scopeQ}${paramQ.replace('per_page', 'pageSize')}`).then(r => r.data)
 }
 

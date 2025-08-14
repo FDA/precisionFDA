@@ -1,16 +1,15 @@
 import { useQueryClient } from '@tanstack/react-query'
 import React, { useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import useWebSocket from 'react-use-websocket'
 import { Loader, LoaderMargin } from '../../../components/Loader'
 import { PageContainerMargin } from '../../../components/Page/styles'
 import { UserLayout } from '../../../layouts/UserLayout'
-import { DEFAULT_RECONNECT_ATTEMPTS, DEFAULT_RECONNECT_INTERVAL, getNodeWsUrl, SHOULD_RECONNECT } from '../../../utils/config'
 import { useAuthUser } from '../../auth/useAuthUser'
-import { Notification, NOTIFICATION_ACTION, WEBSOCKET_MESSAGE_TYPE, WebSocketMessage } from '../../home/types'
+import { NOTIFICATION_ACTION } from '../../home/types'
 import { useDataPortalByIdQuery } from '../queries'
 import { DataPortalError } from './DataPortalNotFound'
 
+import { useLastWSNotification } from '../../../hooks/useToastWSHandler'
 import '../../lexi/themes/PlaygroundEditorTheme.css'
 import {
   canEditContent as canEditContentCheck,
@@ -18,7 +17,6 @@ import {
   canViewSpaceLink as canViewSpaceLinkCheck,
 } from '../utils'
 import { DataPortalDetails } from './DataPortalDetails'
-import { useLastWSNotification } from '../../../hooks/useToastWSHandler'
 
 const DataPortalDetailsPage = () => {
   const user = useAuthUser()
@@ -37,7 +35,7 @@ const DataPortalDetailsPage = () => {
     if (lastJsonMessage == null) {
       return
     }
-    queryClient.invalidateQueries({ queryKey: ['data-portals', portalId] })
+    queryClient.invalidateQueries({ queryKey: ['data-portals', portalId]})
   }, [lastJsonMessage])
 
   // URLs /data-portals/main and /data-portals/{id} are redirected to /data-portals/{slug}

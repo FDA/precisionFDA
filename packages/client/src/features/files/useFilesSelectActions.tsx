@@ -26,7 +26,7 @@ import { moveFilesRequest } from './files.api'
 import { AxiosError } from 'axios'
 import { pluralize, sanitizeFileName } from '../../utils/formatting'
 import { IFile, TreeOnSelectInfo } from './files.types'
-import { displayPayloadMessage } from '../../utils/api'
+import { displayPayloadMessage, Payload } from '../../utils/api'
 import { extractModalsFromActions } from '../home/extractModalsFromActions'
 import { useLicensesListQuery } from '../licenses/queries'
 
@@ -85,7 +85,7 @@ export const useFilesSelectActions = ({
       queryClient.invalidateQueries({
         queryKey: ['files'],
       })
-      displayPayloadMessage(res)
+      displayPayloadMessage(res as Payload)
       if (resetSelected) resetSelected()
     },
     onError: (e: AxiosError<BaseAPIResponse>) => {

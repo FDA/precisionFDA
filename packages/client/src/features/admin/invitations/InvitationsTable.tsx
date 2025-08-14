@@ -15,13 +15,13 @@ import Breadcrumbs, { BreadcrumbItem } from '../Breadcrumbs'
 import { fetchInvitations, Invitation } from '../admin.api'
 import { AdminStyledPageTable, Title, Topbox, TopLeft } from '../styles'
 import InvitationActionRow from './ActionRow'
-import { InvitationListType } from './type'
+import { InvitationListType } from './types'
 import { useQueryClient } from '@tanstack/react-query'
 
 const fetchInvitationsList = async (filters: IFilter[], params: Params) => {
   const filterParam = prepareListFetchV2(filters, params) as Record<string, string>
   if (params.ids) {
-    filterParam['filter[ids]'] = params.ids
+    filterParam['filter[ids]'] = params.ids as string
   }
   return fetchInvitations({
     params: new URLSearchParams(filterParam),

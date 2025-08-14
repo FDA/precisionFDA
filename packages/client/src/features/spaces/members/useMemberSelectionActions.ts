@@ -27,7 +27,7 @@ export const useMemberSelectionActions = ({
     modalComp: changeMemberRoleModal,
     setShowModal: setChangeMemberRoleModal,
   } = useChangeMemberRoleModal({
-    spaceId: space.id,
+    spaceId: space.id.toString(),
     member: selected?.[0],
   })
 

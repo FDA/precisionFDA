@@ -16,6 +16,7 @@ import { ChallengeSubmissionsTable } from './ChallengeSubmissionsTable'
 import { ChallengeMyEntriesTable } from './ChallengeMyEntriesTable'
 import { useNumberParams } from '../../../utils/useNumberParams'
 import { MDStyles } from '../../../components/Markdown/styles'
+import { Meta } from '../types'
 
 const StyledChallengeNavigation = styled.div`
   background-color: var(--tertiary-30);
@@ -156,11 +157,11 @@ export const ChallengeDetails = () => {
 
   let regions: { intro: string; results: string; preReg: string }
   if (challenge.meta) {
-    const meta = JSON.parse(challenge.meta)
+    const meta: Meta = JSON.parse(challenge.meta)
     regions = {
-      intro: meta.regions?.intro,
+      intro: meta.regions?.intro || '',
       results: `${meta.regions?.results || ''} ${meta.regions?.['results-details'] || ''}`,
-      preReg: meta.regions?.['pre-registration'],
+      preReg: meta.regions?.['pre-registration'] || '',
     }
   } else {
     regions = {

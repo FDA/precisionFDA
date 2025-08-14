@@ -63,7 +63,7 @@ export const useUnlockSpaceModal = ({
           type="button"
           onClick={() =>
             unlockSpaceMutation.mutateAsync({
-              id: space.id,
+              id: space.id.toString(),
               op: isLocked ? 'lock' : 'unlock',
               link: space.links.lock ? space.links.lock : space.links.unlock,
             })

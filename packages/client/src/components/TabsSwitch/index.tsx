@@ -3,7 +3,7 @@ import styled from 'styled-components'
 
 export interface ITab {
   header: string
-  tab: JSX.Element
+  tab: React.ReactNode
   hide: boolean
 }
 

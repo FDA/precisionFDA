@@ -1,38 +1,25 @@
+import { RESOURCE_LABELS } from '../../types/user'
+import { IOSpec, InputSpec as AppInputSpec } from '../apps/apps.types'
 import { IExecution } from '../executions/executions.types'
-import { ServerScope } from '../home/types'
-
-export type WorkflowActions =
-  'Run' |
-  'Run Batch' |
-  'Diagram' |
-  'Edit' |
-  'Fork' |
-  'Export to' |
-  'Feature' |
-  'Unfeature' |
-  'Delete' |
-  'Copy to space' |
-  'Comments' |
-  'Edit tags' |
-  'Edit properties'
+import { IMeta, ServerScope } from '../home/types'
 
 
 export interface Spec2 {
-  input_spec: any[];
-  output_spec: any[];
+  input_spec: AppInputSpec[];
+  output_spec: IOSpec[];
   internet_access: boolean;
   instance_type: string;
 }
 
 export interface Internal {
-  packages: any[];
+  packages: string[];
   code: string;
 }
 
 export interface App {
   id: number;
   dxid: string;
-  version?: any;
+  version?: number;
   revision: number;
   title: string;
   readme: string;
@@ -45,12 +32,11 @@ export interface App {
   app_series_id: number;
   verified: boolean;
   uid: string;
-  dev_group?: any;
   release: string;
   entity_type: string;
   featured: boolean;
   deleted: boolean;
-  tag_list: any[];
+  tag_list: string[];
 }
 
 export interface WorkflowRevision {
@@ -59,10 +45,11 @@ export interface WorkflowRevision {
   dxid: string;
   revision: number;
   uid: string;
-  tag_list: any[];
+  tag_list: string[];
   deleted: boolean;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface Batches {}
 
 export interface Links2 {
@@ -86,18 +73,19 @@ export interface InputOutput {
   requiredRunInput: boolean;
   stageName: string
   values: Value
+  help?: string;
 }
 
 export interface Stage {
   name: string;
-  prev_slot?: any;
-  next_slot?: any;
+  prev_slot?: unknown;
+  next_slot?: unknown;
   slotId: string;
   app_dxid: string;
   app_uid: string;
   inputs: InputOutput[];
   outputs: InputOutput[];
-  instanceType: string;
+  instanceType: keyof typeof RESOURCE_LABELS;
   stageIndex: number;
 }
 
@@ -106,21 +94,20 @@ export interface InputSpec {
 }
 
 export interface OutputSpec {
-  stages: any[];
+  stages: unknown[];
 }
 export interface Spec {
   input_spec: InputSpec;
   output_spec: OutputSpec;
 }
-export interface WorkflowMeta {
-  spec: Spec;
+export interface WorkflowMeta extends IMeta {
   apps: App[];
   revisions: WorkflowRevision[];
   executions: Map<number, IExecution>;
   batches: Batches;
-  challenges?: any;
-  comments: any[];
   links: Links2;
+  pagination?: IMeta['pagination'];
+  spec: Spec;
 }
 
 export interface Links {
@@ -152,7 +139,7 @@ export interface IWorkflow {
   created_at: string;
   created_at_date_time: string;
   launched_by: string;
-  launched_on?: any;
+  launched_on?: string;
   app_title: string;
   location: string;
   revision: number;
@@ -165,7 +152,7 @@ export interface IWorkflow {
   active: boolean;
   /** @deprecated create links from client side */
   links: Links;
-  jobs?: any;
+  jobs?: IExecution[];
   logged_dxuser: string;
   tags: string[];
   properties: {

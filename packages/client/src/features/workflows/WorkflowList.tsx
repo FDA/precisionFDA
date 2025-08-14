@@ -13,18 +13,18 @@ import { useAuthUser } from '../auth/useAuthUser'
 import { ActionsDropdownContent } from '../home/ActionDropdownContent'
 import { ActionsRow, QuickActions } from '../home/home.styles'
 import { ActionsButton, ResourceHeader } from '../home/show.styles'
-import { HomeScope, IMeta } from '../home/types'
+import { HomeScope } from '../home/types'
 import { useList } from '../home/useList'
 import { usePropertiesQuery } from '../home/usePropertiesQuery'
 import { useWorkflowColumns } from './useWorkflowColumns'
 import { useWorkflowListActions } from './useWorkflowListActions'
 import { useWorkflowSelectActions } from './useWorkflowSelectActions'
 import { fetchWorkflowList } from './workflows.api'
-import { IWorkflow } from './workflows.types'
+import { IWorkflow, WorkflowMeta } from './workflows.types'
 import { StyledPageTable } from '../../components/Table/components/styles'
 import { ActionModalsRenderer } from '../home/ActionModalsRenderer'
 
-type ListType = { workflows: IWorkflow[]; meta: IMeta }
+type ListType = { workflows: IWorkflow[]; meta: WorkflowMeta }
 
 export const WorkflowList = ({
   homeScope,

@@ -3,7 +3,7 @@ import styled from 'styled-components'
 import { Loader } from '../../../components/Loader'
 import { Select } from '../../../components/Select'
 import { useFetchComputeInstanceQuery } from '../useFetchComputeInstanceQuery'
-import { ControllerRenderProps, FieldValues } from 'react-hook-form'
+import { ControllerRenderProps, FieldValues, Path } from 'react-hook-form'
 
 const StyledInstanceSelect = styled(Select)`
   min-width: 225px;
@@ -19,11 +19,11 @@ interface SelectOption {
   label: string
 }
 
-type InstanceTypeSelectProps = {
-  field: ControllerRenderProps<FieldValues, 'instance_type'>
+type InstanceTypeSelectProps<T extends FieldValues = FieldValues> = {
+  field: ControllerRenderProps<T, Path<T>>
 }
 
-export const InstanceTypeSelect = ({ field }: InstanceTypeSelectProps) => {
+export const InstanceTypeSelect = <T extends FieldValues = FieldValues>({ field }: InstanceTypeSelectProps<T>) => {
   const { data, isLoading } = useFetchComputeInstanceQuery()
   if (isLoading) return <Loader />
 
