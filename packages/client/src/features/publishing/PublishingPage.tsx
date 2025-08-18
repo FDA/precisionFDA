@@ -6,11 +6,10 @@ import { StringParam, useQueryParam } from 'use-query-params'
 import { Button } from '../../components/Button'
 import { Checkbox } from '../../components/Checkbox'
 import { EntityIcon } from '../../components/EntityIcon'
-import { PageHeader, PageTitle } from '../../components/Page/styles'
 import { UserLayout } from '../../layouts/UserLayout'
 import { HomeLoader, NotFound } from '../home/show.styles'
 import { getEntityTypeFromIdentifier } from '../tracks/TrackProvenanceContent'
-import { publishObjects } from './publishing.api'
+import { publishFolder, publishObjects } from './publishing.api'
 import { TreeRoot } from './publishing.types'
 import {
   DepList,
@@ -26,6 +25,8 @@ import {
   StyledPageContainer,
 } from './styles'
 import { usePublishingTreeRootQuery } from './usePublishingTreeQuery'
+import { AxiosError } from 'axios'
+import { BackendError } from '../../api/errors'
 
 const ShowParent = ({ tree, onSelectItem }: { tree: TreeRoot; onSelectItem: (identifier: string) => void }) => {
   const [selected, setSelected] = useState<boolean>(false)
@@ -84,6 +85,17 @@ const PublishingForm = ({ identifier, treeRoot }: { identifier: string; treeRoot
     }
   }
 
+  const folderMutation = useMutation({
+    mutationKey: ['publish-objects'],
+    mutationFn: () => publishFolder(identifier),
+    onError: (e: AxiosError<BackendError>) => {
+      toast.error(`${e.response?.data.error.message}`)
+    },
+    onSuccess: () => {
+      navigate('/home/files?scope=everybody&per_page=20')
+    },
+  })
+
   const mutation = useMutation({
     mutationKey: ['publish-objects'],
     mutationFn: () => publishObjects(identifier!, publishedObjects),
@@ -100,7 +112,11 @@ const PublishingForm = ({ identifier, treeRoot }: { identifier: string; treeRoot
   })
 
   function publishSelectedObjects() {
-    mutation.mutate()
+    if (treeRoot.data.type === 'folder') {
+      folderMutation.mutate()
+    } else {
+      mutation.mutate()
+    }
     toast.success('Publishing of selected object(s) has started.')
   }
 
@@ -159,11 +175,8 @@ const PublishingPage = () => {
   return (
     <UserLayout mainScroll>
       <StyledPageContainer>
-        <PageHeader>
-          <PageTitle>Publishing</PageTitle>
-        </PageHeader>
         <StyledCallout data-variant="info">
-          Publishing items makes them publicly visible.
+          Publishing items makes them publicly visible to all logged-in precisionFDA users.
           <br />
           <a href="/docs/guides/publishing" target="_blank">
             Review important information about publishing, and learn why it&apos;s a good idea to also publish related items.

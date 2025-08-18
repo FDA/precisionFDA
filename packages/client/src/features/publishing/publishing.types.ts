@@ -1,5 +1,5 @@
 export type TreeRootItem = {
-  type: 'app' | 'job' | 'file' | 'asset' | 'comparison'
+  type: 'app' | 'job' | 'file' | 'asset' | 'comparison' | 'folder'
   title: string
   url: string
   identifier: string
