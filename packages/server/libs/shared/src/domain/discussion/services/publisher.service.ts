@@ -4,16 +4,13 @@ import { config } from '@shared/config'
 import { AppSeries } from '@shared/domain/app-series/app-series.entity'
 import { App } from '@shared/domain/app/app.entity'
 import { Job } from '@shared/domain/job/job.entity'
-import { Space } from '@shared/domain/space/space.entity'
 import { Node } from '@shared/domain/user-file/node.entity'
 import { User } from '@shared/domain/user/user.entity'
 import * as errors from '../../../errors'
-import { defaultLogger as logger } from '../../../logger'
 import { PlatformClient } from '@shared/platform-client'
 import { EntityScope } from '@shared/types/common'
 import { Comparison, COMPARISON_STATE } from '../../comparison/comparison.entity'
 import { createAppPublished } from '../../event/event.helper'
-import { getIdFromScopeName } from '../../space/space.helper'
 import {
   FILE_STATE_DX,
   FILE_STATE_PFDA,
@@ -23,26 +20,26 @@ import {
 } from '../../user-file/user-file.types'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { Asset } from '@shared/domain/user-file/asset.entity'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { STATIC_SCOPE } from '@shared/enums'
+import { Folder } from '@shared/domain/user-file/folder.entity'
+import { DxId } from '@shared/domain/entity/domain/dxid'
 
 /**
- Publisher service is responsible for publishing entities to the selected scope.
- At the moment, only publishing to PUBLIC scope is supported.
+ Publisher service is responsible for publishing entities to the public scope.
+  It handles publishing of apps, comparisons, jobs, and nodes (files, assets and folders).
+ Permissions checks are performed before publishing.
  */
-// At the moment the service is only prepared to publishing to public scope.
-// Publishing to spaces is not needed because we have a limitation in place where only items
-// already existing in the particular space can be added to space discussions (there is no need to publish them in the space).
 @Injectable()
 export class PublisherService {
-  private readonly em: SqlEntityManager
-  private readonly platformClient: PlatformClient
-  constructor(em: SqlEntityManager, client: PlatformClient) {
-    this.em = em
-    this.platformClient = client
-    logger.debug('Publisher service initialized')
-  }
+  constructor(
+    private readonly em: SqlEntityManager,
+    private readonly userContext: UserContext,
+    private readonly client: PlatformClient,
+  ) {}
 
-  async publishApps(apps: App[], user: User, scope: EntityScope): Promise<number> {
-    if (scope !== 'public') {
+  async publishApps(apps: App[], scope: EntityScope): Promise<number> {
+    if (scope !== STATIC_SCOPE.PUBLIC) {
       throw new errors.InvalidStateError(`Unable to publish apps: scope ${scope} is not supported.`)
     }
     let count = 0
@@ -55,9 +52,9 @@ export class PublisherService {
         )
       }
       // authorize users for app
-      const authorizedUsers = await this.getAuthorizedUsers(scope)
-      await this.platformClient.appAddAuthorizedUsers({ appId: app.uid, authorizedUsers })
-      await this.platformClient.appPublish({ appId: app.uid, makeDefault: false })
+      const authorizedUsers = await this.getAuthorizedUsers()
+      await this.client.appAddAuthorizedUsers({ appId: app.uid, authorizedUsers })
+      await this.client.appPublish({ appId: app.uid, makeDefault: false })
 
       app.scope = scope
       appSeries.scope = scope
@@ -76,6 +73,7 @@ export class PublisherService {
       this.em.persist(app)
       this.em.persist(appSeries)
       count++
+      const user = await this.userContext.loadEntity()
       const event = await createAppPublished(app, user, scope)
       await this.em.persistAndFlush(event)
     }
@@ -83,16 +81,13 @@ export class PublisherService {
     return count
   }
 
-  async publishComparisons(
-    comparisons: Comparison[],
-    user: User,
-    scope: EntityScope,
-  ): Promise<number> {
-    if (scope !== 'public') {
+  async publishComparisons(comparisons: Comparison[], scope: EntityScope): Promise<number> {
+    if (scope !== STATIC_SCOPE.PUBLIC) {
       throw new errors.InvalidStateError(
         `Unable to publish comparisons: scope ${scope} is not supported.`,
       )
     }
+    const user = await this.userContext.loadEntity()
     let count = 0
     const destinationProject = user.publicComparisonsProject
 
@@ -138,7 +133,7 @@ export class PublisherService {
         continue
       }
       const filesDxids: string[] = files.map((file) => file.dxid!)
-      await this.platformClient.cloneObjects({
+      await this.client.cloneObjects({
         sourceProject: project,
         destinationProject,
         objects: filesDxids,
@@ -166,14 +161,14 @@ export class PublisherService {
 
     for (const [project, files] of Object.entries(projects)) {
       const filesDxids: string[] = files.map((file) => file.dxid!)
-      await this.platformClient.fileRemove({ projectId: project, ids: filesDxids })
+      await this.client.fileRemove({ projectId: project, ids: filesDxids })
     }
 
     return count
   }
 
-  async publishJobs(jobs: Job[], user: User, scope: EntityScope): Promise<number> {
-    if (scope !== 'public') {
+  async publishJobs(jobs: Job[], scope: EntityScope): Promise<number> {
+    if (scope !== STATIC_SCOPE.PUBLIC) {
       throw new errors.InvalidStateError(`Unable to publish jobs: scope ${scope} is not supported.`)
     }
     let count = 0
@@ -187,89 +182,113 @@ export class PublisherService {
     return count
   }
 
-  //
   // Publishes selected nodes to PUBLIC scope only.
   // Verifies that the nodes are in publishable state.
   // Clones the nodes to the public project on platform, reflect the changes in the db and remove the nodes from original project.
-  //
-  async publishNodes(nodes: (Asset | UserFile)[], user: User, scope: EntityScope): Promise<number> {
-    if (scope !== 'public') {
-      throw new errors.InvalidStateError(
-        `Unable to publish nodes: scope ${scope} is not supported.`,
-      )
-    }
-    let count = 0
+  // Note: all nodes in argument must have parentFolder set to null to appear in root public folder.
+  async publishNodes(nodes: Node[]): Promise<number> {
+    const user = await this.userContext.loadEntity()
+    const sourceProject = user.privateFilesProject
     const destinationProject = user.publicFilesProject
-    const projects: { [key: string]: (Asset | UserFile)[] } = {}
+    const fileDxids: DxId<'file'>[] = []
+    const allNodesToProcess: Node[] = []
 
-    for (const node of nodes) {
+    nodes.forEach((node) => (node.parentFolder = null))
+
+    // make a copy to avoid side effects
+    const nodesToProcess = [...nodes]
+
+    while (nodesToProcess.length > 0) {
+      const node = nodesToProcess.shift()!
+      allNodesToProcess.push(node)
+
       if (node.stiType === FILE_STI_TYPE.FOLDER) {
-        throw new errors.InvalidStateError(
-          `Unable to publish node ${node.id}: folders are not supported.`,
-        )
-      }
-      if (node.state !== FILE_STATE_DX.CLOSED) {
-        throw new errors.InvalidStateError(
-          `Unable to publish file ${node.uid}: file is not closed.`,
-        )
-      }
-      if (destinationProject === node.project || node.project == null) {
-        throw new errors.InvalidStateError(
-          `Unable to publish file ${node.uid}: source and destination projects collision or is null.`,
-        )
-      }
-      if (projects.hasOwnProperty(node.project)) {
-        // @ts-ignore fixme: don't know how to avoid ts-ignore here
-        projects[node.project].push(node)
+        const folder = node as Folder
+
+        // Validate folder can be published
+        if (folder.scope !== STATIC_SCOPE.PRIVATE) {
+          throw new errors.InvalidStateError(
+            `Unable to publish folder ${folder.uid}: must be your private folder.`,
+          )
+        }
+
+        // Add all children to processing queue
+        const children = await folder.children.load()
+        nodesToProcess.push(...children)
       } else {
-        // @ts-ignore fixme: don't know how to avoid ts-ignore here
-        projects[node.project] = [node]
+        // Type assertion since we know it's not a folder
+        const file = node as UserFile | Asset
+        // Validate file can be published
+        if (file.state !== FILE_STATE_DX.CLOSED) {
+          throw new errors.InvalidStateError(
+            `Unable to publish file ${file.uid}: file is not closed.`,
+          )
+        }
+
+        if (file.scope !== STATIC_SCOPE.PRIVATE) {
+          throw new errors.InvalidStateError(
+            `Unable to publish file ${file.uid}: must be your private file.`,
+          )
+        }
+
+        if (destinationProject === file.project || file.project == null) {
+          throw new errors.InvalidStateError(
+            `Unable to publish file ${file.uid}: source and destination projects collision or is null.`,
+          )
+        }
+
+        if (file.dxid) {
+          fileDxids.push(file.dxid)
+        }
       }
     }
 
-    for (const [project, files] of Object.entries(projects)) {
-      if (files.length === 0) {
-        continue
-      }
-      const filesDxids: string[] = files.map((file) => file.dxid!)
-      await this.platformClient.cloneObjects({
-        sourceProject: project,
+    // Clone and remove files if any exist
+    if (fileDxids.length > 0) {
+      await this.client.cloneObjects({
+        sourceProject,
         destinationProject,
-        objects: filesDxids,
+        objects: fileDxids,
       })
-      for (const file of files) {
-        file.scope = scope
-        file.project = destinationProject
-        file.scopedParentFolder = undefined
-        count++
-      }
-      await this.em.persistAndFlush(files)
-      await this.platformClient.fileRemove({ projectId: project, ids: filesDxids })
+
+      await this.client.fileRemove({ projectId: sourceProject, ids: fileDxids })
     }
 
-    return count
+    const nodeIds = allNodesToProcess.map((node) => node.id)
+    const fileIds = allNodesToProcess
+      .filter((node) => node.stiType !== FILE_STI_TYPE.FOLDER)
+      .map((node) => node.id)
+
+    await this.em.nativeUpdate(Node, { id: { $in: nodeIds } }, { scope: STATIC_SCOPE.PUBLIC })
+    if (fileIds.length > 0) {
+      await this.em.nativeUpdate(Node, { id: { $in: fileIds } }, { project: destinationProject })
+    }
+    return allNodesToProcess.length
   }
 
-  // Taken from ruby code, not sure if all checks are still needed or relevant.
+  // THIS WILL BE LIKELY REMOVED SOON AS WE ARE DEPRECATING COMPARISONS.
   private consistencyCheck(node: Node, user: User): boolean {
-    if (node.scope === 'private') {
-      if (node.parentType !== PARENT_TYPE.COMPARISON) {
-        return node.project === user.privateFilesProject
-      }
-      return node.project === user.privateComparisonsProject
-    } else if (node.scope === 'public') {
-      return node.project === user.publicFilesProject
-    } else if (![FILE_STATE_DX.CLOSED, FILE_STATE_PFDA.COPYING].includes(node.state!)) {
-      return false
+    // Handle private scope nodes
+    if (node.scope === STATIC_SCOPE.PRIVATE) {
+      const expectedProject =
+        node.parentType === PARENT_TYPE.COMPARISON
+          ? user.privateComparisonsProject
+          : user.privateFilesProject
+      return node.project === expectedProject
     }
-    return true
+
+    // Handle public scope nodes
+    if (node.scope === STATIC_SCOPE.PUBLIC) {
+      return node.project === user.publicFilesProject
+    }
+
+    // Handle nodes with other scopes - check state restrictions
+    return (
+      node.state != null && ![FILE_STATE_DX.CLOSED, FILE_STATE_PFDA.COPYING].includes(node.state)
+    )
   }
 
-  private async getAuthorizedUsers(scope: EntityScope): Promise<string[]> {
-    if (scope === 'public') {
-      return [config.platform.orgEveryoneHandle]
-    }
-    const space = await this.em.findOneOrFail(Space, { id: getIdFromScopeName(scope) })
-    return [space.hostDxOrg, space.guestDxOrg]
+  private async getAuthorizedUsers(): Promise<string[]> {
+    return [config.platform.orgEveryoneHandle]
   }
 }

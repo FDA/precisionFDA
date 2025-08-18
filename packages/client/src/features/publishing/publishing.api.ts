@@ -1,9 +1,10 @@
 import axios from 'axios'
 import { TreeRoot } from './publishing.types'
 
-export function fetchPublishingTreeRoot(identifier: string, type: string) {
+export async function fetchPublishingTreeRoot(identifier: string, type: string) {
   const url = `/api/v2/publish/tree-root?identifier=${identifier}&type=${type}`
-  return axios.get<TreeRoot>(url).then(r => r.data)
+  const r = await axios.get<TreeRoot>(url)
+  return r.data
 }
 
 export function publishObjects(publishedId: string, objects: string[]) {
@@ -26,4 +27,12 @@ export function publishObjects(publishedId: string, objects: string[]) {
       },
     },
   )
+}
+
+export async function publishFolder(publishedId: string) {
+  const response = await axios.post('/api/v2/publish', {
+    identifier: publishedId,
+  })
+
+  return response.data
 }

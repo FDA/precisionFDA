@@ -261,7 +261,7 @@ export const useFilesSelectActions = ({
     selected: selected,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: resourceKeys })
-      queryClient.invalidateQueries({ queryKey: ['edit-resource-properties', 'node']})
+      queryClient.invalidateQueries({ queryKey: ['edit-resource-properties', 'node'] })
     },
   })
 
@@ -330,10 +330,13 @@ export const useFilesSelectActions = ({
       type: 'link',
       link: {
         method: 'GET' as const,
-        url: `/publish?identifier=${selected[0]?.uid}&type=file`,
+        url:
+          selected[0]?.type === 'UserFile'
+            ? `/publish?identifier=${selected[0]?.uid}&type=file`
+            : `/publish?identifier=folder-${selected[0]?.id}&type=folder`,
       },
       isDisabled: !user?.allowed_to_publish,
-      shouldHide: isFolder || selected.length !== 1 || homeScope !== 'me' || selectedButNotClosed,
+      shouldHide: selected.length !== 1 || homeScope !== 'me' || selectedButNotClosed,
     },
     {
       name: 'Feature',
