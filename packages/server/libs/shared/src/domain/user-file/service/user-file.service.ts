@@ -105,8 +105,11 @@ export class UserFileService {
     return [file as FileOrAsset, false]
   }
 
-  async getUserFile(fileUid: Uid<'file'>): Promise<UserFile | null> {
-    return await this.fileRepo.findAccessibleOne({ uid: fileUid })
+  async getUserFileOrAsset(fileUid: Uid<'file'>): Promise<FileOrAsset | null> {
+    return (await this.nodeRepo.findAccessibleOne({
+      uid: fileUid,
+      stiType: [FILE_STI_TYPE.USERFILE, FILE_STI_TYPE.ASSET],
+    })) as FileOrAsset | null
   }
 
   private async closeFileOnPlatform(fileDxid: string, challengeBotFile: boolean): Promise<void> {
