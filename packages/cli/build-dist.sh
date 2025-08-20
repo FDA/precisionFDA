@@ -8,6 +8,7 @@ SHORT_SHA=$(git rev-parse --short HEAD)
 
 if [ "$CI" = "true" ]; then
     export HOME=/go/src/dnanexus.com/precision-fda-cli
+    export CGO_ENABLED=0
     USER_ARG="--user $(id -u):$(id -g)"
 fi
 BuildAndPackage() {
@@ -17,7 +18,7 @@ BuildAndPackage() {
     echo "Building pfda CLI (v$VERSION) for $PLATFORM $ARCH"
     docker run --rm $USER_ARG --mount type=bind,source="$(pwd)",target=/go/src/dnanexus.com/precision-fda-cli \
            -e GOOS="$PLATFORM" -e GOARCH="$ARCH" -e COMMITID="$COMMITID" \
-           -e VERSION="$VERSION" -e BUILDTIME="$BUILDTIME" -e HOME="$HOME" precisionfda-cli
+           -e VERSION="$VERSION" -e BUILDTIME="$BUILDTIME" -e HOME="$HOME" -e CGO_ENABLED="$CGO_ENABLED" precisionfda-cli
     cd ./dist
 
     OUT_FILE=pfda_${PLATFORM}_${ARCH}
