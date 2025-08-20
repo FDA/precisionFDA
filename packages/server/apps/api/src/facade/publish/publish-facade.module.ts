@@ -7,6 +7,8 @@ import { AppModule } from '@shared/domain/app/app.module'
 import { JobModule } from '@shared/domain/job/job.module'
 import { NoteModule } from '@shared/domain/note/note.module'
 import { ComparisonModule } from '@shared/domain/comparison/comparison.module'
+import { DiscussionModule } from '@shared/domain/discussion/discussion.module'
+import { PublisherFacade } from './publisher.facade'
 
 @Module({
   imports: [
@@ -17,8 +19,9 @@ import { ComparisonModule } from '@shared/domain/comparison/comparison.module'
     JobModule,
     NoteModule,
     ComparisonModule,
+    DiscussionModule,
   ],
-  providers: [PublishApiFacade],
-  exports: [PublishApiFacade],
+  providers: [PublishApiFacade, PublisherFacade],
+  exports: [PublishApiFacade, PublisherFacade],
 })
 export class PublishApiFacadeModule {}

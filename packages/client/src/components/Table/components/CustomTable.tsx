@@ -174,7 +174,7 @@ export function CustomTable<T extends RowData>({
 
             if (enableHtmlDnd) {
               return (
-                <tr data-testid="data-row" key={row.id} className={classNames({ 'sub-row': isSubRow })} draggable={true} onDragStart={onDragStart} id={`html-dnd-${row.original.id}`}>
+                <tr data-testid="data-row" key={row.id} className={classNames({ 'sub-row': isSubRow })} draggable={true} onDragStart={onDragStart} id={`html-dnd-${row.id}`}>
                   {cells}
                   {colFiller('td')}
                 </tr>

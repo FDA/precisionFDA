@@ -1,16 +1,15 @@
 import { useQueryClient } from '@tanstack/react-query'
 import React, { useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import useWebSocket from 'react-use-websocket'
 import { Loader, LoaderMargin } from '../../../components/Loader'
 import { PageContainerMargin } from '../../../components/Page/styles'
 import { UserLayout } from '../../../layouts/UserLayout'
-import { DEFAULT_RECONNECT_ATTEMPTS, DEFAULT_RECONNECT_INTERVAL, getNodeWsUrl, SHOULD_RECONNECT } from '../../../utils/config'
 import { useAuthUser } from '../../auth/useAuthUser'
-import { Notification, NOTIFICATION_ACTION, WEBSOCKET_MESSAGE_TYPE, WebSocketMessage } from '../../home/types'
+import { NOTIFICATION_ACTION } from '../../home/types'
 import { useDataPortalByIdQuery } from '../queries'
 import { DataPortalError } from './DataPortalNotFound'
 
+import { useLastWSNotification } from '../../../hooks/useToastWSHandler'
 import '../../lexi/themes/PlaygroundEditorTheme.css'
 import {
   canEditContent as canEditContentCheck,
@@ -30,24 +29,7 @@ const DataPortalDetailsPage = () => {
   const { data, isLoading, error } = useDataPortalByIdQuery(portalId === undefined ? 'main' : portalId)
   const navigate = useNavigate()
 
-  const { lastJsonMessage } = useWebSocket<WebSocketMessage>(getNodeWsUrl(), {
-    share: true,
-    reconnectInterval: DEFAULT_RECONNECT_INTERVAL,
-    reconnectAttempts: DEFAULT_RECONNECT_ATTEMPTS,
-    shouldReconnect: () => SHOULD_RECONNECT,
-    filter: message => {
-      try {
-        const messageData = JSON.parse(message.data)
-        const notification = messageData.data as Notification
-        return (
-          messageData.type === WEBSOCKET_MESSAGE_TYPE.NOTIFICATION &&
-          NOTIFICATION_ACTION.DATA_PORTAL_CARD_IMAGE_URL_UPDATED === notification.action
-        )
-      } catch (e) {
-        return false
-      }
-    },
-  })
+  const lastJsonMessage = useLastWSNotification([NOTIFICATION_ACTION.DATA_PORTAL_CARD_IMAGE_URL_UPDATED])
 
   useEffect(() => {
     if (lastJsonMessage == null) {

@@ -35,6 +35,7 @@ import { Button } from '../../components/Button'
 import { DBStatus } from './DbStatus'
 import { getBackPathNext } from '../../utils/getBackPath'
 import { getSpaceIdFromScope } from '../../utils'
+import { format } from 'date-fns'
 
 const renderOptions = (db: IDatabase, homeScope?: HomeScope) => {
   const spaceId = getSpaceIdFromScope(db.scope)
@@ -64,7 +65,7 @@ const renderOptions = (db: IDatabase, homeScope?: HomeScope) => {
       </MetadataItem>
       <MetadataItem>
         <MetadataKey>Created On</MetadataKey>
-        <MetadataVal data-testid="db-created-on">{db.createdAtDateTime}</MetadataVal>
+        <MetadataVal data-testid="db-created-on">{format(new Date(db.createdAtDateTime), 'yyyy-MM-dd HH:mm:ss')}</MetadataVal>
       </MetadataItem>
     </MetadataRow>
     <MetadataRow>
@@ -92,7 +93,7 @@ const renderOptions = (db: IDatabase, homeScope?: HomeScope) => {
     <MetadataRow>
       <MetadataItem>
         <MetadataKey>Status Updated</MetadataKey>
-        <MetadataVal data-testid="db-status-updated">{db.statusUpdatedDateTime}</MetadataVal>
+        <MetadataVal data-testid="db-status-updated">{format(new Date(db.statusUpdatedDateTime), 'yyyy-MM-dd HH:mm:ss')}</MetadataVal>
       </MetadataItem>
       <MetadataItem>
         <MetadataKey>Host Endpoint</MetadataKey>
@@ -212,6 +213,18 @@ export const DatabaseShow = ({ emitScope, homeScope, spaceId }: { homeScope?: Ho
                     </StyledPropertyItem>
                   ))}
                 </StyledTags>
+              </MetadataItem>
+            </MetadataRow>
+          </MetadataSection>
+        )}
+        {data.status === 'stopped' && (
+          <MetadataSection>
+            <MetadataRow>
+              <MetadataItem>
+                <MetadataKey>Info</MetadataKey>
+                <Description>
+                  This database cluster is currently stopped. Seven days after it was stopped, the database cluster will automatically re-activate and begin incurring charges. If you do not wish to keep this database cluster, use the Terminate action to permanently stop it and delete its contents.
+                </Description>
               </MetadataItem>
             </MetadataRow>
           </MetadataSection>

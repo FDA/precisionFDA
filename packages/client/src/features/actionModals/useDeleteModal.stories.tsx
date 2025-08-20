@@ -37,19 +37,11 @@ const DeleteModalWrapper = ({ resource, multipleItems }: Props) => {
     }
   }
 
-  const mockRequest = async (ids: number[]) => {
-    return fetch(`/api/${resource}s/delete`, {
-      method: 'POST',
-      body: JSON.stringify({ item_ids: ids }),
-      headers: { 'Content-Type': 'application/json' },
-    }).then(r => r.json())
-  }
-
   const { modalComp, setShowModal } = useDeleteModal({
     resource,
     selected: getSelectedData(),
-    request: mockRequest,
     onSuccess: (res) => console.log('Delete success:', res),
+    request: () => Promise.resolve({}),
   })
 
   useEffect(() => {

@@ -1,26 +1,33 @@
 import { useQueryClient } from '@tanstack/react-query'
+import {
+  ColumnDefResolved,
+  ColumnFiltersState,
+  ColumnSizingState,
+  ColumnSort,
+  ExpandedState,
+  RowSelectionState,
+  VisibilityState,
+} from '@tanstack/react-table'
 import React, { useEffect, useState } from 'react'
-import useWebSocket from 'react-use-websocket'
-import { ColumnDefResolved, ColumnFiltersState, ColumnSizingState, ColumnSort, ExpandedState, RowSelectionState, VisibilityState } from '@tanstack/react-table'
 import { ContentFooter } from '../../components/Page/ContentFooter'
 import { Pagination, hidePagination } from '../../components/Pagination'
 import Table from '../../components/Table'
+import { StyledPageTable } from '../../components/Table/components/styles'
 import { useColumnWidthLocalStorage } from '../../hooks/useColumnWidthLocalStorage'
+import { useHiddenColumnLocalStorage } from '../../hooks/useHiddenColumnLocalStorage'
 import { useOrderByState } from '../../hooks/useOrderByState'
 import { usePaginationParams } from '../../hooks/usePaginationState'
-import { DEFAULT_RECONNECT_ATTEMPTS, DEFAULT_RECONNECT_INTERVAL, SHOULD_RECONNECT, getNodeWsUrl } from '../../utils/config'
+import { useLastWSNotification } from '../../hooks/useToastWSHandler'
+import { createLocationKey } from '../../utils'
 import { toArrayFromObject } from '../../utils/object'
 import { IExecution } from '../executions/executions.types'
-import { createLocationKey } from '../../utils'
 import { useExecutionColumns } from '../executions/useExecutionColumns'
 import { columnFilters } from '../home/columnFilters'
-import { IMeta, NOTIFICATION_ACTION, Notification, WEBSOCKET_MESSAGE_TYPE, WebSocketMessage } from '../home/types'
+import { ResouceQueryErrorMessage } from '../home/ResouceQueryErrorMessage'
+import { IMeta, NOTIFICATION_ACTION } from '../home/types'
 import { useFilterParams } from '../home/useFilterState'
 import { useListQuery } from '../home/useListQuery'
 import { fetchWorkflowExecutions } from './workflows.api'
-import { ResouceQueryErrorMessage } from '../home/ResouceQueryErrorMessage'
-import { useHiddenColumnLocalStorage } from '../../hooks/useHiddenColumnLocalStorage'
-import { StyledPageTable } from '../../components/Table/components/styles'
 
 type ListType = { jobs: IExecution[]; meta: IMeta }
 
@@ -28,7 +35,7 @@ export const WorkflowExecutionsList = ({ spaceId, uid }: { spaceId?: string; uid
   const resource = 'workflow-executions'
   const locationKey = createLocationKey(resource, spaceId)
   const { pageParam, perPageParam, setPageParam, setPerPageParam } = usePaginationParams()
-  const { sortBy, sort, setSortBy } = useOrderByState({ defaultOrder: { order_by: 'created_at_date_time', order_dir: 'DESC' }})
+  const { sortBy, sort, setSortBy } = useOrderByState({ defaultOrder: { order_by: 'created_at_date_time', order_dir: 'desc' }})
   const { colWidths, saveColumnResizeWidth } = useColumnWidthLocalStorage(locationKey)
   const { columnVisibility, setColumnVisibility } = useHiddenColumnLocalStorage(locationKey)
 
@@ -43,7 +50,7 @@ export const WorkflowExecutionsList = ({ spaceId, uid }: { spaceId?: string; uid
     resource,
     scope: uid,
     pagination: { page: pageParam, perPage: perPageParam },
-    order: { order_by: sort?.order_by, order_dir: sort?.order_dir },
+    sort,
     filter: filterQuery,
     params: { uid },
   })
@@ -53,31 +60,13 @@ export const WorkflowExecutionsList = ({ spaceId, uid }: { spaceId?: string; uid
   }
   const { isLoading, data, error } = query
 
-  const { lastJsonMessage } = useWebSocket<WebSocketMessage>(getNodeWsUrl(), {
-    share: true,
-    reconnectInterval: DEFAULT_RECONNECT_INTERVAL,
-    reconnectAttempts: DEFAULT_RECONNECT_ATTEMPTS,
-    shouldReconnect: () => SHOULD_RECONNECT,
-    filter: message => {
-      try {
-        const messageData = JSON.parse(message.data)
-        const notification = messageData.data as Notification
-        return (
-          messageData.type === WEBSOCKET_MESSAGE_TYPE.NOTIFICATION &&
-          [
-            NOTIFICATION_ACTION.JOB_RUNNABLE,
-            NOTIFICATION_ACTION.JOB_RUNNING,
-            NOTIFICATION_ACTION.JOB_DONE,
-            NOTIFICATION_ACTION.JOB_FAILED,
-            NOTIFICATION_ACTION.JOB_OUTPUTS_SYNCED,
-          ].includes(notification.action)
-        )
-      } catch (e: unknown) {
-        console.error('Error parsing WebSocket message:', e)
-        return false
-      }
-    },
-  })
+  const lastJsonMessage = useLastWSNotification([
+    NOTIFICATION_ACTION.JOB_RUNNABLE,
+    NOTIFICATION_ACTION.JOB_RUNNING,
+    NOTIFICATION_ACTION.JOB_DONE,
+    NOTIFICATION_ACTION.JOB_FAILED,
+    NOTIFICATION_ACTION.JOB_OUTPUTS_SYNCED,
+  ])
 
   useEffect(() => {
     if (lastJsonMessage == null) {
@@ -178,7 +167,7 @@ export const ExecutionsListTable = ({
         columnFilters={filters}
         expanded={expanded}
         setExpanded={setExpanded}
-        subRowKey='jobs'
+        subRowKey="jobs"
       />
     </StyledPageTable>
   )

@@ -10,7 +10,7 @@ import { UsersIcon } from '../../../components/icons/UserIcon'
 
 const StatusPill = styled.div<{ $active: boolean }>`
   border-radius: 7px;
-  background-color: ${props => (props.$active ? 'var(--success-500)' : 'var(--error-500)')};
+  background-color: ${props => (props.$active ? 'var(--success-500)' : 'var(--warning-500)')};
   color: white;
   font-size: 0.7rem;
   font-weight: bold;
@@ -75,22 +75,13 @@ export const useMembersColumns = ({
     {
       header: 'Status',
       accessorKey: 'active',
-      enableColumnFilter: false,
+      filterFn: 'includesString',
       size: 100,
-      cell: info => (
-        <StatusPill $active={info.getValue<boolean>()}>{info.getValue<boolean>() ? 'Active' : 'Inactive'}</StatusPill>
-      ),
+      cell: info => <StatusPill $active={info.getValue<string>() === 'Active'}>{info.getValue<string>()}</StatusPill>,
     },
     {
       header: 'Domain',
       accessorKey: 'domain',
-      enableColumnFilter: false,
-      size: 200,
-      cell: info => info.getValue<string>(),
-    },
-    {
-      header: 'Organization',
-      accessorKey: 'org',
       filterFn: 'includesString',
       size: 200,
       cell: info => info.getValue<string>(),

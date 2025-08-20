@@ -12,12 +12,19 @@ type ConstraintOptions = {
   allowPrivate: boolean
   allowPublic: boolean
   allowSpace: boolean
-  allowHomeScope: boolean
+  allowHomeScope: boolean | AllowHomeScopeOptions
+}
+
+type AllowHomeScopeOptions = {
+  me: boolean
+  featured: boolean
+  everybody: boolean
+  spaces: boolean
 }
 
 @ValidatorConstraint({ name: 'isValidScope', async: false })
 class IsValidScopeConstraint implements ValidatorConstraintInterface {
-  validate(scope: unknown, args: ValidationArguments) {
+  validate(scope: unknown, args: ValidationArguments): boolean {
     const [options] = args.constraints as [ConstraintOptions]
 
     if (!isString(scope)) {
@@ -32,14 +39,24 @@ class IsValidScopeConstraint implements ValidatorConstraintInterface {
       return true
     }
 
-    if (options.allowHomeScope && ['me', 'featured', 'everybody', 'spaces'].includes(scope)) {
-      return true
+    if (options.allowHomeScope) {
+      if (
+        typeof options.allowHomeScope === 'boolean' &&
+        ['me', 'featured', 'everybody', 'spaces'].includes(scope)
+      ) {
+        return true
+      } else if (
+        typeof options.allowHomeScope === 'object' &&
+        options.allowHomeScope[scope] === true
+      ) {
+        return true
+      }
     }
 
     return options.allowSpace && EntityScopeUtils.isSpaceScope(scope)
   }
 
-  defaultMessage(args: ValidationArguments) {
+  defaultMessage(args: ValidationArguments): string {
     const [options] = args.constraints as [ConstraintOptions]
     const allowedValues = []
 
@@ -70,7 +87,7 @@ export function IsValidScope(
   }
   const effectiveOptions = { ...defaultOptions, ...options }
 
-  return function (object: object, propertyName: string) {
+  return function (object: object, propertyName: string): void {
     registerDecorator({
       name: 'isValidScope',
       target: object.constructor,

@@ -3,7 +3,7 @@ import { format } from 'date-fns/esm'
 import { utcToZonedTime } from 'date-fns-tz/esm'
 import { AlertType } from './alerts.types'
 
-export const formatInTimeZone = (date: Date | string, fmt: string, tz: string) => format(utcToZonedTime(date, tz), fmt, { timeZone: tz })
+export const formatInTimeZone = (date: Date | string, fmt: string, tz: string) => format(utcToZonedTime(date, tz), fmt)
 
 export const alertTypesArray: AlertType[] = ['info', 'warning', 'danger']
 export const alertTypesText = {

@@ -105,9 +105,7 @@ export const ExpertColumnRight = ({ expert, user, toc }: { expert: ExpertDetails
       )}
       <ExpertAskQuestionModal
         isOpen={modal.isShown}
-        isLoading={!expert}
         user={user}
-        expert={expert}
         hideAction={() => modal.setShowModal(false)}
         action={askExpert}
         isLoggedIn={isLoggedIn}

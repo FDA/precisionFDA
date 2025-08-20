@@ -1,4 +1,10 @@
-import { ENGINE, ENGINES, STATUS, STATUSES } from '@shared/domain/db-cluster/db-cluster.enum'
+import {
+  DbClusterStatus,
+  ENGINE,
+  ENGINES,
+  STATUS,
+  STATUSES,
+} from '@shared/domain/db-cluster/db-cluster.enum'
 import { EntityScope } from '@shared/types/common'
 import { DbCluster } from '../db-cluster.entity'
 import { Uid } from '@shared/domain/entity/domain/uid'
@@ -11,19 +17,19 @@ export class DbClusterDTO {
   uid: Uid<'dbcluster'>
   name: string
   title: string
-  status: typeof STATUSES
+  status: DbClusterStatus
   location: string
   scopeName: string
   description?: string
   addedBy: string
   addedByFullname: string
   createdAt: Date
-  createdAtDateTime: string
+  createdAtDateTime: Date
   engine: ENGINE
   engineVersion: string
   dxInstanceClass: string
   statusAsOf: Date
-  statusUpdatedDateTime: string
+  statusUpdatedDateTime: Date
   host: string
   port: string
   showLicensePending?: boolean
@@ -50,12 +56,12 @@ export class DbClusterDTO {
       addedBy: dbcluster.user.getProperty('dxuser'),
       addedByFullname: dbcluster.user.getProperty('fullName'),
       createdAt: dbcluster.createdAt,
-      createdAtDateTime: formatDateTime(dbcluster.createdAt),
+      createdAtDateTime: dbcluster.createdAt,
       engine: ENGINES[invertObj(ENGINE)[dbcluster.engine]],
       engineVersion: dbcluster.engineVersion,
       dxInstanceClass: dbcluster.dxInstanceClass,
       statusAsOf: dbcluster.statusAsOf,
-      statusUpdatedDateTime: formatDateTime(dbcluster.statusAsOf),
+      statusUpdatedDateTime: dbcluster.statusAsOf,
       host: dbcluster.host,
       port: dbcluster.port,
       showLicensePending: false,
@@ -93,21 +99,4 @@ const getLocation = (space: Space): string => {
   }
 
   return `${space.name} - Shared`
-}
-
-const formatDateTime = (time: Date): string => {
-  return time
-    .toLocaleString('en-US', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-      timeZone: 'UTC',
-      timeZoneName: 'short',
-      hour12: false,
-    })
-    .replace(/(\d+)\/(\d+)\/(\d+)/, '$3-$1-$2')
-    .replace(',', '')
 }

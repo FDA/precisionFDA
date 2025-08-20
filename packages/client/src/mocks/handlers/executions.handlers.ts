@@ -500,11 +500,13 @@ export const executionsMocks = [
           workstation_api_version: null,
           run_input_data: [
             {
+              label: 'dddd',
               name: 'dddd',
               class: 'string',
               value: 'sdf',
             },
             {
+              label: 'dddd',
               name: 'dna_file',
               class: 'file',
               value: 'file-Gv3p08j0GKb1QjK844gpVz2K-1',
@@ -512,6 +514,7 @@ export const executionsMocks = [
           ],
           run_output_data: [
             {
+              label: 'dddd',
               name: 'Computed-Output',
               class: 'string',
               value: 'This is wht is coming out of the executino from being run.',

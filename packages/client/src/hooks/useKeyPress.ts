@@ -1,28 +1,28 @@
 // https://github.com/jacobbuck/react-use-keypress
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react'
 
-export const useKeyPress = (keys: string, handler: (e: any) => void) => {
-  const eventListenerRef: any = useRef();
+export const useKeyPress = (keys: string | string[], handler: (e: KeyboardEvent) => void) => {
+  const eventListenerRef = useRef<((event: KeyboardEvent) => void) | null>(null)
 
   useEffect(() => {
-    eventListenerRef.current = (event:any) => {
-      shimKeyboardEvent(event);
+    eventListenerRef.current = (event: KeyboardEvent) => {
+      shimKeyboardEvent(event)
       if (Array.isArray(keys) ? keys.includes(event.key) : keys === event.key) {
-        handler?.(event);
+        handler?.(event)
       }
-    };
-  }, [keys, handler]);
+    }
+  }, [keys, handler])
 
   useEffect(() => {
-    const eventListener = (event: any) => {
-      eventListenerRef.current(event);
-    };
-    window.addEventListener('keydown', eventListener);
+    const eventListener = (event: KeyboardEvent) => {
+      eventListenerRef.current?.(event)
+    }
+    window.addEventListener('keydown', eventListener)
     return () => {
-      window.removeEventListener('keydown', eventListener);
-    };
-  }, []);
-};
+      window.removeEventListener('keydown', eventListener)
+    }
+  }, [])
+}
 
 
 const aliases = new Map([
@@ -43,18 +43,18 @@ const aliases = new Map([
   ['Add', '+'],
   ['Subtract', '-'],
   ['Divide', '/'],
-]);
+])
 
-const shimKeyboardEvent = (event: any) => {
+const shimKeyboardEvent = (event: KeyboardEvent) => {
   if (aliases.has(event.key)) {
-    const key = aliases.get(event.key);
+    const key = aliases.get(event.key)
 
     Object.defineProperty(event, 'key', {
       configurable: true,
       enumerable: true,
       get() {
-        return key;
+        return key
       },
-    });
+    })
   }
-};
+}

@@ -68,11 +68,3 @@ export const getChallengeTimeRemaining = ({ startAt, endAt }: { startAt: Date, e
   }
   return timeRemainingLabel
 }
-
-
-export const extractChallengeContent = (challenge, regionName) => {
-  if (!challenge?.meta?.regions?.[regionName]) {
-    return ''
-  }
-  return challenge.meta.regions[regionName]
-}

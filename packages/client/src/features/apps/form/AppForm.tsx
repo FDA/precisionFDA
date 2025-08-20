@@ -236,9 +236,9 @@ export const AppForm = ({
                     {...field}
                     options={ubuntuReleasesOptions}
                     isDisabled={isSubmitting}
-                    onChange={option => field.onChange(option?.value)}
+                    onChange={option => field.onChange((option as { value: string })?.value)}
                     value={ubuntuReleasesOptions.find(option => option.value === field.value)}
-                    isOptionDisabled={option => option.disabled}
+                    isOptionDisabled={option => (option as { disabled: boolean }).disabled}
                     inputId="app-ubuntu-release"
                   />
                   <ErrorMessage errors={errors} name="release" render={({ message }) => <InputError>{message}</InputError>} />

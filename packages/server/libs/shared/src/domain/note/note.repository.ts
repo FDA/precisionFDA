@@ -1,4 +1,4 @@
-import { AccessControlRepository } from '@shared/repository/access-control.repository'
+import { AccessControlRepository } from '@shared/database/repository/access-control.repository'
 import { Note } from '@shared/domain/note/note.entity'
 import { FilterQuery } from '@mikro-orm/core'
 import { User } from '@shared/domain/user/user.entity'

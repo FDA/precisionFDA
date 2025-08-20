@@ -40,12 +40,12 @@ export const ModalHeaderTop = ({
   disableClose = false,
 }: {
   hide?: () => void
-  headerText?: JSX.Element | React.ReactNode | string | number
+  headerText?: React.ReactNode | string | number
   disableClose?: boolean
 }) => {
   return (
     <HeaderTop>
-      {typeof headerText === 'function' ? headerText() : <HeaderText>{headerText}</HeaderText>}
+      <HeaderText>{headerText}</HeaderText>
       {!disableClose && (
         <CloseButton data-testid="modal-close-button" type="button" data-dismiss="modal" aria-label="Close" onClick={hide}>
           <PlusIcon height={16} />
@@ -113,14 +113,16 @@ export interface ModalNextProps {
   variant?: 'large' | 'small' | 'medium'
   blur?: boolean
   id: string
-  nodeRef: React.RefObject<HTMLDivElement>
+  nodeRef: React.RefObject<HTMLDivElement | null>
 }
 
 export interface SuperModalProps extends ModalNextProps {
-  nodeRef: React.RefObject<HTMLDivElement>
+  nodeRef: React.RefObject<HTMLDivElement | null>
 }
 
 const SuperModalPortal = (props: PropsWithChildren<Omit<SuperModalProps, 'isShown'>>) => {
+  // @ts-expect-error disableClose needs to be extracted from props
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { nodeRef, variant, headerText, hide, children, blur = false, disableClose, ...rest } = props
   useKeyPress('Escape', () => hide())
   return ReactDOM.createPortal(
@@ -143,7 +145,7 @@ const SuperModalPortal = (props: PropsWithChildren<Omit<SuperModalProps, 'isShow
 }
 
 export const ModalNext = (props: PropsWithChildren<Omit<ModalNextProps, 'nodeRef'>>) => {
-  const nodeRef = React.useRef(null)
+  const nodeRef = React.useRef<HTMLDivElement>(null)
   const { isShown, ...restProps } = props
   return (
     <CSSTransition nodeRef={nodeRef} in={isShown} timeout={200} classNames="modal" unmountOnExit>

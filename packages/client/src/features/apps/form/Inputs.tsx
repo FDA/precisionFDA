@@ -56,7 +56,7 @@ const InputSpecRow = ({
   useSkipFirstRenderUseEffect(() => {
     trigger(`input_spec.${index}.default`)
     setValue(`input_spec.${index}.default`, null)
-    setValue(`input_spec.${index}.class`, setClassVal(sClass, isArray))
+    setValue(`input_spec.${index}.class`, setClassVal(sClass, Boolean(isArray)))
   }, [isArray])
 
   // trigger validations on 'default' if 'choices' changes

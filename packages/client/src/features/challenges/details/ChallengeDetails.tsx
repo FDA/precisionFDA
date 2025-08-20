@@ -16,6 +16,7 @@ import { ChallengeSubmissionsTable } from './ChallengeSubmissionsTable'
 import { ChallengeMyEntriesTable } from './ChallengeMyEntriesTable'
 import { useNumberParams } from '../../../utils/useNumberParams'
 import { MDStyles } from '../../../components/Markdown/styles'
+import { Meta } from '../types'
 
 const StyledChallengeNavigation = styled.div`
   background-color: var(--tertiary-30);
@@ -156,11 +157,11 @@ export const ChallengeDetails = () => {
 
   let regions: { intro: string; results: string; preReg: string }
   if (challenge.meta) {
-    const meta = JSON.parse(challenge.meta)
+    const meta: Meta = JSON.parse(challenge.meta)
     regions = {
-      intro: meta.regions?.intro,
+      intro: meta.regions?.intro || '',
       results: `${meta.regions?.results || ''} ${meta.regions?.['results-details'] || ''}`,
-      preReg: meta.regions?.['pre-registration'],
+      preReg: meta.regions?.['pre-registration'] || '',
     }
   } else {
     regions = {
@@ -215,62 +216,52 @@ export const ChallengeDetails = () => {
         </NavigationInner>
       </StyledChallengeNavigation>
       <PageContainerMargin>
-        <ChallengePageRow>
-          <Routes>
-            <Route
-              path="submissions"
-              element={
-                <ChallengeSubmissionsTable user={user} challengeId={challenge.id} isSpaceMember={challenge.isSpaceMember} />
-              }
-            />
-            <Route
-              path="my-entries"
-              element={
-                isLoggedIn && (
-                  <ChallengeMyEntriesTable user={user} challengeId={challenge.id} isSpaceMember={challenge.isSpaceMember} />
-                )
-              }
-            />
-            <Route
-              path="intro"
-              element={
+        <Routes>
+          <Route
+            path="submissions"
+            element={<ChallengeSubmissionsTable user={user} challengeId={challenge.id} isSpaceMember={challenge.isSpaceMember} />}
+          />
+          <Route
+            path="my-entries"
+            element={
+              isLoggedIn && (
+                <ChallengeMyEntriesTable user={user} challengeId={challenge.id} isSpaceMember={challenge.isSpaceMember} />
+              )
+            }
+          />
+          <Route
+            path="intro"
+            element={
+              <ChallengePageRow>
                 <MDStyles>
-                  <AddIdsToHeaders 
-                    docRef={docRef} 
-                    content={regions.intro} 
-                    onHeadersUpdated={handleHeadersUpdated}
-                  />
+                  <AddIdsToHeaders docRef={docRef} content={regions.intro} onHeadersUpdated={handleHeadersUpdated} />
                 </MDStyles>
-              }
-            />
-            <Route
-              path="results"
-              element={
+              </ChallengePageRow>
+            }
+          />
+          <Route
+            path="results"
+            element={
+              <ChallengePageRow>
                 <MDStyles>
-                  <AddIdsToHeaders 
-                    docRef={docRef} 
-                    content={regions.results} 
-                    onHeadersUpdated={handleHeadersUpdated}
-                  />
+                  <AddIdsToHeaders docRef={docRef} content={regions.results} onHeadersUpdated={handleHeadersUpdated} />
                 </MDStyles>
-              }
-            />
-            <Route
-              path="pre-registration"
-              element={
+              </ChallengePageRow>
+            }
+          />
+          <Route
+            path="pre-registration"
+            element={
+              <ChallengePageRow>
                 <MDStyles>
-                  <AddIdsToHeaders 
-                    docRef={docRef} 
-                    content={regions.preReg} 
-                    onHeadersUpdated={handleHeadersUpdated}
-                  />
+                  <AddIdsToHeaders docRef={docRef} content={regions.preReg} onHeadersUpdated={handleHeadersUpdated} />
                 </MDStyles>
-              }
-            />
-            <Route path="/" element={<Navigate to={challengePreRegistration ? 'pre-registration' : 'intro'} replace />} />
-          </Routes>
-          <ChallengeRightSide>{toc && toc.length > 0 && <ToC sticky items={toc} />}</ChallengeRightSide>
-        </ChallengePageRow>
+              </ChallengePageRow>
+            }
+          />
+          <Route path="/" element={<Navigate to={challengePreRegistration ? 'pre-registration' : 'intro'} replace />} />
+        </Routes>
+        <ChallengeRightSide>{toc && toc.length > 0 && <ToC sticky items={toc} />}</ChallengeRightSide>
         <div>{isNoInfoProvided && <NoInfo>No information about this challenge has been provided yet.</NoInfo>}</div>
       </PageContainerMargin>
     </>

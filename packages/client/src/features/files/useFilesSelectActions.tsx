@@ -26,8 +26,9 @@ import { moveFilesRequest } from './files.api'
 import { AxiosError } from 'axios'
 import { pluralize, sanitizeFileName } from '../../utils/formatting'
 import { IFile, TreeOnSelectInfo } from './files.types'
-import { displayPayloadMessage } from '../../utils/api'
+import { displayPayloadMessage, Payload } from '../../utils/api'
 import { extractModalsFromActions } from '../home/extractModalsFromActions'
+import { useLicensesListQuery } from '../licenses/queries'
 
 const getFileScope = (scope: HomeScope | undefined, space: ISpace | undefined): ServerScope => {
   if (scope) {
@@ -64,6 +65,7 @@ export const useFilesSelectActions = ({
   const navigate = useNavigate()
   const selected = selectedItems.filter(x => x !== undefined)
   const user = useAuthUser()
+  const { data: licenses } = useLicensesListQuery()
   const isAdmin = user?.admin
   const isViewer = space?.current_user_membership.role === 'viewer'
 
@@ -83,7 +85,7 @@ export const useFilesSelectActions = ({
       queryClient.invalidateQueries({
         queryKey: ['files'],
       })
-      displayPayloadMessage(res)
+      displayPayloadMessage(res as Payload)
       if (resetSelected) resetSelected()
     },
     onError: (e: AxiosError<BaseAPIResponse>) => {
@@ -263,9 +265,7 @@ export const useFilesSelectActions = ({
     },
   })
 
-  // TODO: Fix user.links type - seems to be wrong
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const availableLicenses = (user as any)?.links?.licenses ? (user as any).links.licenses : false
+  const availableLicenses = Boolean(licenses?.licenses.length !== 0)
   const isFolder = selected.every(e => e.type === 'Folder')
   const selectedButNotClosed = selected.some(e => e.type === 'UserFile' && e.state !== 'closed')
 
@@ -330,10 +330,13 @@ export const useFilesSelectActions = ({
       type: 'link',
       link: {
         method: 'GET' as const,
-        url: `/publish?identifier=${selected[0]?.uid}&type=file`,
+        url:
+          selected[0]?.type === 'UserFile'
+            ? `/publish?identifier=${selected[0]?.uid}&type=file`
+            : `/publish?identifier=folder-${selected[0]?.id}&type=folder`,
       },
       isDisabled: !user?.allowed_to_publish,
-      shouldHide: isFolder || selected.length !== 1 || homeScope !== 'me' || selectedButNotClosed,
+      shouldHide: selected.length !== 1 || homeScope !== 'me' || selectedButNotClosed,
     },
     {
       name: 'Feature',
@@ -412,19 +415,19 @@ export const useFilesSelectActions = ({
       name: 'Attach License',
       type: 'modal',
       func: () => setAttachLicensesModal(true),
-      isDisabled: selected.length !== 1 || !selected[0].links.license || !availableLicenses || selectedButNotClosed,
+      isDisabled: selected.length !== 1 || !availableLicenses || selectedButNotClosed,
       modal: attachLicensesModal,
       showModal: isShownAttachLicensesModal,
-      shouldHide: selected.length !== 1 || !selected[0]?.links?.license || !availableLicenses,
+      shouldHide: selected.length !== 1 || !!selected[0]?.file_license?.id || !availableLicenses,
     },
     {
       name: 'Detach License',
       type: 'modal',
       func: () => setDetachLicenseModal(true),
-      isDisabled: selected.length !== 1 || !selected[0].links.license || !availableLicenses || selectedButNotClosed,
+      isDisabled: selected.length !== 1 || !availableLicenses || selectedButNotClosed,
       modal: detachLicenseModal,
       showModal: isShownDetachLicenseModal,
-      shouldHide: selected.length !== 1 || !selected[0]?.links?.detach_license,
+      shouldHide: selected.length !== 1 || !selected[0]?.file_license?.id || !!selected[0]?.show_license_pending,
     },
     {
       name: 'Accept License',
@@ -433,7 +436,7 @@ export const useFilesSelectActions = ({
       modal: acceptLicensesModal,
       showModal: isShownAcceptLicensesModal,
       isDisabled: selectedButNotClosed,
-      shouldHide: selected.length !== 1 || !selected[0]?.links?.accept_license_action,
+      shouldHide: selected.length !== 1 || !selected[0]?.show_license_pending,
     },
     {
       name: 'Edit tags',

@@ -25,7 +25,7 @@ const EditAssetInfoForm = ({
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm({
+  } = useForm<{ name: string }>({
     defaultValues: {
       name:
         typeof asset?.origin == 'object'
@@ -57,7 +57,7 @@ const EditAssetInfoForm = ({
     },
   })
 
-  const onSubmit = (vals: any) => {
+  const onSubmit = (vals: { name: string }) => {
     editMutation.mutateAsync({ name: vals.name, uid: asset.uid })
   }
 
@@ -67,7 +67,6 @@ const EditAssetInfoForm = ({
         <FieldGroup>
           <label>Asset Name</label>
           <InputText
-            label="Asset Name"
             {...register('name', { required: 'Name is required.' })}
             placeholder="Edit name..."
             disabled={editMutation.isPending}

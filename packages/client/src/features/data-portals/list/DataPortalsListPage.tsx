@@ -17,6 +17,7 @@ import { StyledPageCenter } from '../../spaces/form/styles'
 import { dataPortalsListRequest } from '../api'
 import { AlertText } from '../details/DataPortalNotFound'
 import { DataPortalListItem } from './DataPortalListItem'
+import { useLastWSNotification } from '../../../hooks/useToastWSHandler'
 
 const List = styled.div`
   display: flex;
@@ -59,24 +60,7 @@ const DataPortalsListPage = () => {
   })
   const queryClient = useQueryClient()
 
-  const { lastJsonMessage } = useWebSocket<WebSocketMessage>(getNodeWsUrl(), {
-    share: true,
-    reconnectInterval: DEFAULT_RECONNECT_INTERVAL,
-    reconnectAttempts: DEFAULT_RECONNECT_ATTEMPTS,
-    shouldReconnect: () => SHOULD_RECONNECT,
-    filter: message => {
-      try {
-        const messageData = JSON.parse(message.data)
-        const notification = messageData.data as Notification
-        return (
-          messageData.type === WEBSOCKET_MESSAGE_TYPE.NOTIFICATION &&
-          NOTIFICATION_ACTION.DATA_PORTAL_CARD_IMAGE_URL_UPDATED === notification.action
-        )
-      } catch (e) {
-        return false
-      }
-    },
-  })
+  const lastJsonMessage = useLastWSNotification([NOTIFICATION_ACTION.DATA_PORTAL_CARD_IMAGE_URL_UPDATED])
 
   useEffect(() => {
     if (lastJsonMessage == null) {

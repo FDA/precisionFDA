@@ -13,9 +13,11 @@ export const ProtectedIcon = ({ color, showToolTip = true }: { color?: string; s
   if (!showToolTip) return <LockIcon color={color} />
 
   return (
-    <StyledProtectedIcon data-tooltip-content="Protected" data-tooltip-id={`protected-${tooltipId}`}>
-      <LockIcon color={color} />
-      <Tooltip id={`protected-${tooltipId}`} />
-    </StyledProtectedIcon>
+    <>
+      <StyledProtectedIcon data-tooltip-content="Space Data Protected" data-tooltip-id={`protected-${tooltipId}`}>
+        <LockIcon color={color} />
+      </StyledProtectedIcon>
+      <Tooltip place={'bottom-start'} id={`protected-${tooltipId}`} />
+    </>
   )
 }

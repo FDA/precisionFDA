@@ -212,6 +212,8 @@ describe('space creation process tests', () => {
 
   describe('create groups space', () => {
     it('as site admin', async () => {
+      addTaggingForEntityStub.reset()
+
       const input = new CreateSpaceDTO()
       input.spaceType = SPACE_TYPE.GROUPS
       input.name = 'test'
@@ -739,56 +741,60 @@ describe('space creation process tests', () => {
     })
   })
 
-  function reviewProcess(dxuser: string, userId: number) {
+  function reviewProcess(dxuser: string, userId: number): ReviewSpaceCreationProcess {
     userCtx = { dxuser, id: userId, accessToken: 'secret-token' }
     return new ReviewSpaceCreationProcess(
       userCtx,
       emMocked,
       spaceNotificationService,
-      adminPlatformClient,
       taggingService,
+      adminPlatformClient,
       userRepository,
     )
   }
 
-  function groupsProcess(dxuser: string, userId: number) {
+  function groupsProcess(dxuser: string, userId: number): GroupsSpaceCreationProcess {
     userCtx = { dxuser, id: userId, accessToken: 'secret-token' }
     return new GroupsSpaceCreationProcess(
       userCtx,
       emMocked,
       spaceNotificationService,
+      taggingService,
       adminPlatformClient,
     )
   }
 
-  function privateProcess(dxuser: string, userId: number) {
+  function privateProcess(dxuser: string, userId: number): PrivateSpaceCreationProcess {
     userCtx = { dxuser, id: userId, accessToken: 'secret-token' }
     return new PrivateSpaceCreationProcess(
       userCtx,
       emMocked,
       spaceNotificationService,
+      taggingService,
       platformClient,
       adminPlatformClient,
     )
   }
 
-  function administratorProcess(dxuser: string, userId: number) {
+  function administratorProcess(dxuser: string, userId: number): AdministratorSpaceCreationProcess {
     userCtx = { dxuser, id: userId, accessToken: 'secret-token' }
     return new AdministratorSpaceCreationProcess(
       userCtx,
       emMocked,
       spaceNotificationService,
+      taggingService,
       platformClient,
       adminPlatformClient,
     )
   }
 
-  function governmentProcess(dxuser: string, userId: number) {
+  function governmentProcess(dxuser: string, userId: number): GovernmentSpaceCreationProcess {
     userCtx = { dxuser, id: userId, accessToken: 'secret-token' }
     return new GovernmentSpaceCreationProcess(
       userCtx,
       emMocked,
       spaceNotificationService,
+      taggingService,
       platformClient,
       adminPlatformClient,
     )

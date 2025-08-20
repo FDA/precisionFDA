@@ -79,21 +79,20 @@ const renderOptions = (workflow: IWorkflow, homeScope?: HomeScope) => {
   const list = columns.map(e => (
     <MetadataItem key={e.header}>
       <MetadataKey>{e.header}</MetadataKey>
-      {/* eslint-disable-next-line no-nested-ternary */}
       {e.header === 'location' && !e.link ? (
         <MetadataVal>
           <Link to={`/home/workflows${scopeParamLink}`} data-testid={e.dataTestId}>
-            {homeScope === 'featured' ? 'Featured' : workflow[e.value]}
+            {homeScope === 'featured' ? 'Featured' : workflow[e.value] as string}
           </Link>
         </MetadataVal>
       ) : e.link ? (
         <MetadataVal>
           <Link to={e.link} target="_blank" data-testid={e.dataTestId}>
-            {workflow[e.value]}
+            {workflow[e.value] as string}
           </Link>
         </MetadataVal>
       ) : (
-        <MetadataVal data-testid={e.dataTestId}>{workflow[e.value]}</MetadataVal>
+        <MetadataVal data-testid={e.dataTestId}>{workflow[e.value] as string}</MetadataVal>
       )}
     </MetadataItem>
   ))

@@ -1,6 +1,6 @@
 import { EntityManager } from '@mikro-orm/mysql'
 import { database } from '@shared/database'
-import { Expert, EXPERT_STATE } from '@shared/domain/expert/expert.entity'
+import { Expert, EXPERT_STATE } from '@shared/domain/expert/entity/expert.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { create, db } from '@shared/test'
 import { mocksReset } from '@shared/test/mocks'

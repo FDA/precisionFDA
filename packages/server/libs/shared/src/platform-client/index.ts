@@ -83,7 +83,7 @@ import {
   WorkflowDescribeResponse,
 } from './platform-client.responses'
 
-type DbClusterAction = 'start' | 'stop' | 'terminate'
+export type DbClusterAction = 'start' | 'stop' | 'terminate'
 
 export enum PlatformErrors {
   ResourceNotFound = 'ResourceNotFound',
@@ -650,7 +650,7 @@ export class PlatformClient {
   }
 
   // TODO - Refactor auth API into a separate class
-  async userResetMfa(params: UserResetMfaParams) {
+  async userResetMfa(params: UserResetMfaParams): Promise<unknown> {
     const url = `${config.platform.authApiUrl}/${params.dxid}/resetUserMFA`
     const options: AxiosRequestConfig = {
       method: 'POST',
@@ -673,7 +673,7 @@ export class PlatformClient {
     }
   }
 
-  async userUnlock(params: UserUnlockParams) {
+  async userUnlock(params: UserUnlockParams): Promise<unknown> {
     const url = `${config.platform.apiUrl}/${params.dxid}/unlockUserAccount`
     const options: AxiosRequestConfig = {
       method: 'POST',

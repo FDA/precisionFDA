@@ -10,7 +10,7 @@ import { useFeatureMutation } from '../actionModals/useFeatureMutation'
 import { useExportToModal } from '../apps/useExportToModal'
 import { HomeScope } from '../home/types'
 import { Action } from '../home/action-types'
-import { copyWorkflowsRequest, deleteWorkflowRequest } from './workflows.api'
+import { copyWorkflowsRequest, deleteWorkflowRequest, WorkflowCopyResponse } from './workflows.api'
 import { IWorkflow } from './workflows.types'
 import { useEditPropertiesModal } from '../actionModals/useEditPropertiesModal'
 
@@ -32,11 +32,12 @@ export const useWorkflowSelectActions = ({ homeScope, spaceId, selectedItems, re
     resource: 'workflows',
     selected,
     updateFunction: copyWorkflowsRequest,
-    onSuccess: (res: { workflows?: Array<{ uid: string }> }) => {
+    onSuccess: (res) => {
+      const workflowRes = res as WorkflowCopyResponse
       toast.success('The workflow has been copied to the space successfully.')
       queryClient.invalidateQueries({ queryKey: resourceKeys }).then(() => {
-        if (Array.isArray(res.workflows)) {
-          navigate(`/home/workflows/${res.workflows[0].uid}`)
+        if (workflowRes.workflows && Array.isArray(workflowRes.workflows) && workflowRes.workflows.length > 0) {
+          navigate(`/home/workflows/${workflowRes.workflows[0].uid}`)
         }
       })
     },

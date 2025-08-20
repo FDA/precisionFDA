@@ -42,6 +42,7 @@ import {
   TopRow,
 } from './styles'
 import { getExt, isImageFromExt } from './util'
+import { useLastWSNotification } from '../../hooks/useToastWSHandler'
 
 const ResourcePreview = ({ resource, onCopy }: { resource?: Resource; onCopy: (link: string) => void }) => {
   if (!resource) return <StyledResourcePreview />
@@ -113,7 +114,7 @@ export const DataPortalResources = ({
       })
     },
     onMutate: async r => {
-      await queryClient.cancelQueries({ queryKey: ['resources-list-portal']})
+      await queryClient.cancelQueries({ queryKey: ['resources-list-portal'] })
       const previousTodos = queryClient.getQueryData(['resources-list-portal'])
 
       queryClient.setQueryData<Resource[]>(['resources-list-portal'], old =>
@@ -123,28 +124,13 @@ export const DataPortalResources = ({
     },
   })
 
-  const { lastJsonMessage } = useWebSocket<WebSocketMessage>(getNodeWsUrl(), {
-    share: true,
-    reconnectInterval: DEFAULT_RECONNECT_INTERVAL,
-    reconnectAttempts: DEFAULT_RECONNECT_ATTEMPTS,
-    shouldReconnect: () => SHOULD_RECONNECT,
-    filter: message => {
-      try {
-        const messageData = JSON.parse(message.data)
-        const notification = messageData.data as Notification
-        return messageData.type === WEBSOCKET_MESSAGE_TYPE.NOTIFICATION && NOTIFICATION_ACTION.FILE_CLOSED === notification.action
-      } catch (e: unknown) {
-        console.error('Error parsing WebSocket message:', e)
-        return false
-      }
-    },
-  })
+  const lastJsonMessage = useLastWSNotification([NOTIFICATION_ACTION.FILE_CLOSED])
 
   useEffect(() => {
     if (lastJsonMessage == null) {
       return
     }
-    queryClient.invalidateQueries({ queryKey: ['resources-list-portal']})
+    queryClient.invalidateQueries({ queryKey: ['resources-list-portal'] })
     setIsFinishingUpload(false)
   }, [lastJsonMessage])
 
@@ -223,11 +209,7 @@ export const DataPortalResources = ({
         ) : (
           <ResourceList>
             {filteredData.map(re => (
-              <ResourceItem
-                key={re.id}
-                onClick={id => setSelected(id)}
-                resource={re}
-              />
+              <ResourceItem key={re.id} onClick={id => setSelected(id)} resource={re} />
             ))}
             {isFinishingUpload && <Loader />}
           </ResourceList>

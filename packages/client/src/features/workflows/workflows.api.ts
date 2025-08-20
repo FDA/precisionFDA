@@ -1,9 +1,10 @@
 import axios from 'axios'
 import { IExecution } from '../executions/executions.types'
 import { License } from '../licenses/types'
-import { IFilter, IMeta } from '../home/types'
+import { IFilter, IMeta, ApiResponse, HomeScope } from '../home/types'
 import { formatScopeQ, Params, prepareListFetch } from '../home/utils'
 import { FetchWorkflowRequest, IWorkflow, WorkflowMeta } from './workflows.types'
+import { CopyToSpaceProperties } from '../actionModals/useCopyToSpace'
 
 export interface FetchWorkflowListQuery {
   workflows: IWorkflow[]
@@ -37,7 +38,7 @@ export async function runWorkflow(request: RunWorkflowRequest): Promise<RunWorkf
 export async function fetchWorkflowList(filters: IFilter[], params: Params): Promise<FetchWorkflowListQuery> {
   const query = prepareListFetch(filters, params)
   const paramQ = '?' + new URLSearchParams(query).toString()
-  const scopeQ = formatScopeQ(params.scope)
+  const scopeQ = formatScopeQ(params.scope as HomeScope)
   const res = await axios.get(`/api/workflows${scopeQ}${paramQ}`)
   return res.data
 }
@@ -71,7 +72,11 @@ export async function createWorkflowRequest(name: string) {
   return res.data
 }
 
-export async function copyWorkflowsRequest(scope: string, ids: string[], properties?: Record<string, unknown>) {
+export interface WorkflowCopyResponse extends ApiResponse {
+  workflows?: Array<{ uid: string }>
+}
+
+export async function copyWorkflowsRequest(scope: string, ids: string[], properties?: CopyToSpaceProperties): Promise<WorkflowCopyResponse> {
   return axios.post('/api/workflows/copy', { item_ids: ids, scope, properties }).then(r => r.data)
 }
 

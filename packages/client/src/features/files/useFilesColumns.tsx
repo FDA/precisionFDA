@@ -1,5 +1,5 @@
 import { useQueryClient } from '@tanstack/react-query'
-import { Column, ColumnDef } from '@tanstack/react-table'
+import { Column, ColumnDef, FilterFnOption } from '@tanstack/react-table'
 import React from 'react'
 import { Tooltip } from 'react-tooltip'
 import styled from 'styled-components'
@@ -170,7 +170,7 @@ export const useFilesColumns = ({
       header: 'Size',
       accessorKey: 'file_size',
       size: 160,
-      filterFn: numberRangeFilterFn,
+      filterFn: numberRangeFilterFn as FilterFnOption<IFile>,
       meta: {
         filterElement: (column: Column<IFile>) => (
           <NumberRangeFilter column={column} fromPlaceholder="Min (KB)" toPlaceholder="Max (KB)" />
@@ -201,7 +201,7 @@ export const useFilesColumns = ({
               </StyledLinkCell>
             )}
             {typeof value === 'object' && row.original.links.origin_object?.origin_type === 'Comparison' && (
-              <StyledLinkCell to={`/home${value.href}` || '#'}>
+              <StyledLinkCell to={`/home${value.href}` }>
                 <AreaChartIcon height={16} />
                 {value.text}
               </StyledLinkCell>

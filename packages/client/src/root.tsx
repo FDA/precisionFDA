@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react'
 import { Navigate, Outlet, RouterProvider, createBrowserRouter } from 'react-router-dom'
 import { QueryParamProvider } from 'use-query-params'
 import { ReactRouter6Adapter } from 'use-query-params/adapters/react-router-6'
+import AuthWall from './AuthWall'
 import Header from './components/Header/HeaderNext'
 import { AlertDismissedProvider } from './features/admin/alerts/useAlertDismissedLocalStorage'
 import { ExpiringSessionModal } from './features/auth/ExpiringSessionModal'
@@ -11,12 +12,11 @@ import { useModal } from './features/modal/useModal'
 import { LayoutLoader, UserLayout } from './layouts/UserLayout'
 import NoFoundPage from './pages/NoFoundPage'
 import GlobalStyle from './styles/global'
-import { ColorModeProvider } from './utils/ThemeContext'
+import { PFDAToastContainer } from './utils/PFDAToastContainer'
 import queryClient from './utils/queryClient'
 
 import 'react-tooltip/dist/react-tooltip.css'
-import AuthWall from './AuthWall'
-import { PFDAToastContainer } from './utils/PFDAToastContainer'
+import { ColorModeProvider } from './utils/ThemeContext'
 
 const DataPortalRoutes = React.lazy(() => import('./features/data-portals/routes'))
 const ExpertsSinglePage = React.lazy(() => import('./features/experts/details/index'))
@@ -40,6 +40,8 @@ const ExpertsListPage = React.lazy(() => import('./features/experts/ExpertsList'
 const WorkflowRunPage = React.lazy(() => import('./features/workflows/run/RunWorkflowForm'))
 const EditNewsItemPage = React.lazy(() => import('./features/news/form/EditNewsItemPage'))
 const ListAdminNews = React.lazy(() => import('./features/news/ListAdminNews'))
+const SearchResultPage = React.lazy(() => import('./features/search/SearchResultPage'))
+
 const ToS = React.lazy(() => import('./pages/ToS'))
 const Security = React.lazy(() => import('./pages/Security'))
 
@@ -99,6 +101,7 @@ const router = createBrowserRouter([
       { path: 'terms', element: <ToS /> },
       { path: 'security', element: <Security /> },
       { path: 'daaas', element: <Navigate to="/data-portals/main" replace /> },
+      { path: 'search', element: <SearchResultPage /> },
       { path: '*', element: <NoFoundPage /> },
 
       // Protected routes

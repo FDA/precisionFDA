@@ -82,8 +82,8 @@ export const ChallengeForm = ({
   isSaving = false,
 }: {
   challenge?: Challenge
-  defaultValues?: any
-  onSubmit: (a: any) => Promise<any>
+  defaultValues?: Partial<IChallengeForm>
+  onSubmit: (a: IChallengeForm) => Promise<unknown>
   isSaving?: boolean
 }) => {
   const [base64Image, setBase64Image] = React.useState<string | null>(null)
@@ -107,16 +107,16 @@ export const ChallengeForm = ({
     defaultValues: {
       name: '',
       description: '',
-      scope: null,
-      appOwnerId: null,
-      startAt: null,
-      endAt: null,
-      hostLeadDxuser: null,
-      guestLeadDxuser: null,
-      cardImageFile: null,
-      cardImageUrl: null,
-      cardImageId: null,
-      status: null,
+      scope: undefined,
+      appOwnerId: undefined,
+      startAt: undefined,
+      endAt: undefined,
+      hostLeadDxuser: undefined,
+      guestLeadDxuser: undefined,
+      cardImageFile: undefined,
+      cardImageUrl: undefined,
+      cardImageId: undefined,
+      status: undefined,
       preRegistrationUrl: '',
       ...defaultValues,
     },
@@ -132,7 +132,7 @@ export const ChallengeForm = ({
 
   unstable_usePrompt({
     message: 'There are unsaved changes, are you sure you want to leave?',
-    when: ({ currentLocation, nextLocation }: any) =>
+    when: ({ currentLocation, nextLocation }) =>
       (!isSubmitting && Object.keys(dirtyFields).length > 0) &&
       currentLocation.pathname !== nextLocation.pathname,
   })

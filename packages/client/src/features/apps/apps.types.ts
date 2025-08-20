@@ -6,27 +6,6 @@ import { FileUid } from '../files/files.types'
 import { HomeScope, ServerScope } from '../home/types'
 import { CreateAppPayload } from './apps.api'
 
-export type AppActions =
-  | 'Run'
-  | 'Run batch'
-  | 'Track'
-  | 'Edit'
-  | 'Fork to'
-  | 'Export to'
-  | 'Make public'
-  | 'Feature'
-  | 'Unfeature'
-  | 'Delete'
-  | 'Copy to space'
-  | 'Copy to My Home (private)'
-  | 'Comments'
-  | 'Set as Challenge App'
-  | 'Edit tags'
-  | 'Edit properties'
-  | 'Add to Comparators'
-  | 'Set this app as comparison default'
-  | 'Remove from Comparators'
-
 export enum PricingMap {
   'baseline-2' = 0.286,
   'baseline-4' = 0.572,

@@ -1,4 +1,4 @@
-import React, { ReactElement } from 'react'
+import React from 'react'
 import styled, { css } from 'styled-components'
 import { colors } from '../../styles/theme'
 
@@ -24,7 +24,7 @@ const StyledTitle = styled.div<{ $isActive: boolean }>`
 `
 
 type Props = {
-  title: ReactElement
+  title: React.ReactNode
   index: number
   setSelectedTab: (index: number) => void
   active: boolean

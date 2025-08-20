@@ -1,10 +1,9 @@
-import { Control, Controller, FieldErrors } from 'react-hook-form'
+import { Control, Controller, FieldErrors, Path } from 'react-hook-form'
 import React from 'react'
 import { FieldGroup } from '../../../components/form/FieldGroup'
 import { Select } from '../../../components/Select'
 import { ErrorMessageForField } from './ErrorMessageForField'
-import { RunJobFormType, SelectableSpace } from '../apps.types'
-import { RunWorkflowFormType } from '../../workflows/run/RunWorkflowForm'
+import { SelectableSpace, SelectType } from '../apps.types'
 
 /**
  * Component for selecting space scope if applicable.
@@ -15,21 +14,21 @@ import { RunWorkflowFormType } from '../../workflows/run/RunWorkflowForm'
  * @param errors
  * @constructor
  */
-export const SelectSpaceScope = ({
+export function SelectSpaceScope<T extends { scope: SelectType }>({
   control,
   isSubmitting,
   selectableSpaces,
   errors,
 }: {
-  control: Control<RunJobFormType | RunWorkflowFormType>
+  control: Control<T>
   isSubmitting: boolean
   selectableSpaces: SelectableSpace[] | undefined
-  errors: FieldErrors<RunJobFormType | RunWorkflowFormType>
-}) => {
+  errors: FieldErrors<T>
+}) {
   return (
   <FieldGroup label="Space scope" required>
     <Controller
-      name="scope"
+      name={'scope' as Path<T>}
       control={control}
       render={({ field }) => (
         <Select

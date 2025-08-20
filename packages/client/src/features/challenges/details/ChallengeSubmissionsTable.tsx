@@ -1,20 +1,20 @@
 import React, { useMemo } from 'react'
 import { ColumnDef } from '@tanstack/react-table'
 import { Loader } from '../../../components/Loader'
-import { SimpleTable } from '../../../components/SimpleTable'
+import { ChallengeEntriesTable } from '../../../components/ChallengeEntriesTable'
 import { IUser } from '../../../types/user'
 import { StyledNameCell } from '../../home/home.styles'
-import { StyledChallengeSubmissionsTable } from './styles'
 import { SubmissionV2 } from './submission.types'
 import { InputFileCell, NameCell } from './SubmissionTable'
 import { useChallengeSubmissionQuery } from './useChallengeSubmissionQuery'
+import { formatDate } from '../../../utils/formatting'
 
 export const useSubmissionTableColumns = ({
   isSpaceMember,
   authUser,
 }: {
   isSpaceMember: boolean
-  authUser: IUser
+  authUser?: IUser
 }): ColumnDef<SubmissionV2>[] => {
   return [
     {
@@ -36,10 +36,12 @@ export const useSubmissionTableColumns = ({
       header: 'Input File',
       accessorKey: 'job_input_files',
       cell: ({ cell }) => <InputFileCell authUser={authUser} submission={cell.row.original} isSpaceMember={isSpaceMember} />,
+      enableSorting: false,
     },
     {
       header: 'Created',
       accessorKey: 'createdAt',
+      cell: ({ cell }) => formatDate(cell.row.original.createdAt),
       size: 200,
     },
   ]
@@ -51,7 +53,7 @@ export const ChallengeSubmissionsTable = ({
   isSpaceMember,
 }: {
   challengeId: number
-  user: IUser
+  user?: IUser
   isSpaceMember: boolean
 }) => {
   const { data: submissionsData, isLoading } = useChallengeSubmissionQuery(challengeId)
@@ -68,7 +70,7 @@ export const ChallengeSubmissionsTable = ({
         <a data-turbolinks="false" href="/login">
           login
         </a>
-        . If you don't have a PrecisionFDA account, please{' '}
+        . If you don&apos;t have a PrecisionFDA account, please{' '}
         <a data-turbolinks="false" href="/request_access">
           submit an access request
         </a>{' '}
@@ -83,9 +85,5 @@ export const ChallengeSubmissionsTable = ({
     return <div>There are no submissions for this challenge yet.</div>
   }
 
-  return (
-    <StyledChallengeSubmissionsTable>
-      <SimpleTable data={data} columns={columns} />
-    </StyledChallengeSubmissionsTable>
-  )
+  return <ChallengeEntriesTable data={data} columns={columns} />
 }

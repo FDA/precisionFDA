@@ -332,7 +332,7 @@ const RunWorkflowForm = (
 
 const WorkflowRunPage = () => {
   const { workflowUid } = useParams<{ workflowUid: string }>()
-  const { data: workflowData, isLoading: loadingWorkflowIsLoading, isSuccess: loadingWorkflowIsSuccess } = useQuery({
+  const { data: workflowData, isLoading: loadingWorkflowIsLoading } = useQuery({
     queryKey: ['workflow', workflowUid],
     enabled: !!workflowUid,
     queryFn: () => fetchWorkflow(workflowUid!),

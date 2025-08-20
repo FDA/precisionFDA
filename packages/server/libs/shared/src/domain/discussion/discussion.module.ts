@@ -32,6 +32,6 @@ import { EntityLinkModule } from '@shared/domain/entity/entity-link/entity-link.
     MikroOrmModule.forFeature([Discussion]),
   ],
   providers: [PublisherService, DiscussionNotificationService, DiscussionService],
-  exports: [DiscussionService, DiscussionNotificationService, MikroOrmModule],
+  exports: [DiscussionService, DiscussionNotificationService, PublisherService, MikroOrmModule],
 })
 export class DiscussionModule {}

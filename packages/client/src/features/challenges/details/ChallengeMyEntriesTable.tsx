@@ -1,67 +1,15 @@
 import { ColumnDef } from '@tanstack/react-table'
 import React from 'react'
-import styled, { css } from 'styled-components'
+import styled from 'styled-components'
 import { Loader } from '../../../components/Loader'
-import { SimpleTable } from '../../../components/SimpleTable'
+import { ChallengeEntriesTable } from '../../../components/ChallengeEntriesTable'
 import { IUser } from '../../../types/user'
 import { StyledNameCell } from '../../home/home.styles'
-import { StyledChallengeSubmissionsTable } from './styles'
 import { SubmissionV2 } from './submission.types'
 import { InputFileCell, NameCell } from './SubmissionTable'
 import { useChallengeEntriesQuery } from './useChallengeEntriesQuery'
-
-const StyledStateCell = styled.div<{ state: SubmissionV2['job']['state'] }>`
-  color: var(--c-text-700);
-  padding: 4px 15px;
-  border-radius: 3px;
-  width: fit-content;
-  margin: 8px;
-
-  ${({ state }) => {
-    if (state === 'running' || state === 'idle') {
-      return css`
-        color: var(--primary-600);
-        background-color: var(--primary-100);
-        border: 1px solid var(--primary-300);
-      `
-    }
-    if (state === 'done') {
-      return css`
-        color: var(--success-600);
-        background-color: var(--success-100);
-        border: 1px solid var(--success-300);
-      `
-    }
-    if (state === 'failed' || state === 'terminated') {
-      return css`
-        color: var(--warning-600);
-        background-color: var(--warning-100);
-        border: 1px solid var(--warning-300);
-      `
-    }
-    return css`
-      color: var(--primary-600);
-      background-color: var(--primary-100);
-      border: 1px solid var(--primary-300);
-    `
-  }}
-`
-
-const StateCell = ({ jobState }: { jobState: SubmissionV2['job']['state'] }) => {
-  let state = ''
-  switch (jobState) {
-    case 'done':
-    case 'failed':
-      state = jobState
-      break
-    case 'running':
-      state = 'verifying...'
-      break
-    default:
-      state = 'pending verification...'
-  }
-  return <StyledStateCell state={jobState}>{state}</StyledStateCell>
-}
+import { StateCell } from '../../executions/StateCell'
+import { formatDate } from '../../../utils/formatting'
 
 const Info = styled.div`
   margin-bottom: 32px;
@@ -72,7 +20,7 @@ export const useSubmissionTableColumns = ({
   authUser,
 }: {
   isSpaceMember: boolean
-  authUser: IUser
+  authUser?: IUser
 }): ColumnDef<SubmissionV2>[] => {
   return [
     {
@@ -80,7 +28,7 @@ export const useSubmissionTableColumns = ({
       accessorKey: 'job.state',
       size: 100,
       cell: c => {
-        return <StateCell jobState={c.row.original.job.state} />
+        return <StateCell state={c.row.original.job.state} />
       },
     },
     {
@@ -103,16 +51,24 @@ export const useSubmissionTableColumns = ({
       accessorKey: 'job.inputFiles.id',
       size: 250,
       cell: ({ cell }) => <InputFileCell authUser={authUser} submission={cell.row.original} isSpaceMember={isSpaceMember} />,
+      enableSorting: false,
     },
     {
       header: 'Created',
       accessorKey: 'createdAt',
+      cell: ({ cell }) => formatDate(cell.row.original.createdAt),
       size: 200,
     },
   ]
 }
 
-export const ChallengeMyEntriesTable = ({ challengeId, user, isSpaceMember }) => {
+export interface ChallengeMyEntriesTableProps {
+  challengeId: string|number
+  user?: IUser
+  isSpaceMember: boolean
+}
+
+export const ChallengeMyEntriesTable = ({ challengeId, user, isSpaceMember }: ChallengeMyEntriesTableProps) => {
   const { data: submissionsData, isLoading } = useChallengeEntriesQuery(challengeId)
   const columns = useSubmissionTableColumns({ authUser: user, isSpaceMember })
 
@@ -139,9 +95,5 @@ export const ChallengeMyEntriesTable = ({ challengeId, user, isSpaceMember }) =>
     return <Info>No entries have been successfully submitted for this challenge.</Info>
   }
 
-  return (
-    <StyledChallengeSubmissionsTable>
-      <SimpleTable data={submissionsData} columns={columns} />
-    </StyledChallengeSubmissionsTable>
-  )
+  return <ChallengeEntriesTable data={submissionsData} columns={columns} />
 }

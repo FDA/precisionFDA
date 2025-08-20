@@ -1,30 +1,30 @@
 import { ColumnDef } from '@tanstack/react-table'
-import React from 'react'
+import React, { useEffect } from 'react'
 import { ContentFooter } from '../../../components/Page/ContentFooter'
 import { hidePagination, Pagination } from '../../../components/Pagination'
 import Table from '../../../components/Table'
 import { HoverDNAnexusLogo } from '../../../components/icons/DNAnexusLogo'
 import { UsersIcon } from '../../../components/icons/UsersIcon'
-import { useToastWSHandler } from '../../../hooks/useToastWSHandler'
+import { useLastWSNotification, useToastWSHandler } from '../../../hooks/useToastWSHandler'
 import { UserLayout } from '../../../layouts/UserLayout'
 import { getSelectedObjectsFromIndexes, toArrayFromObject } from '../../../utils/object'
-import { IFilter } from '../../home/types'
+import { IFilter, NOTIFICATION_ACTION } from '../../home/types'
 import { useList } from '../../home/useList'
 import { Params, prepareListFetchV2 } from '../../home/utils'
 import Breadcrumbs, { BreadcrumbItem } from '../Breadcrumbs'
 import { fetchInvitations, Invitation } from '../admin.api'
 import { AdminStyledPageTable, Title, Topbox, TopLeft } from '../styles'
 import InvitationActionRow from './ActionRow'
-import { InvitationListType } from './type'
-import useLastWebsocketMessage from './useLastWebsocketMessage'
+import { InvitationListType } from './types'
+import { useQueryClient } from '@tanstack/react-query'
 
 const fetchInvitationsList = async (filters: IFilter[], params: Params) => {
-  const filterParam = prepareListFetchV2(filters, params)
+  const filterParam = prepareListFetchV2(filters, params) as Record<string, string>
   if (params.ids) {
-    filterParam['filter[ids]'] = params.ids
+    filterParam['filter[ids]'] = params.ids as string
   }
   return fetchInvitations({
-    params: filterParam,
+    params: new URLSearchParams(filterParam),
   })
 }
 
@@ -64,9 +64,23 @@ export const InvitationsTable = ({
 
   const selectedObjects = getSelectedObjectsFromIndexes(selectedIndexes, data?.data)
   const filters = toArrayFromObject(filterQuery)
+  const queryClient = useQueryClient()
 
   useToastWSHandler()
-  useLastWebsocketMessage()
+  const lastJsonMessage = useLastWSNotification([
+    NOTIFICATION_ACTION.USER_PROVISIONING_DONE,
+    NOTIFICATION_ACTION.USER_PROVISIONING_ERROR,
+    NOTIFICATION_ACTION.ALL_USER_PROVISIONINGS_COMPLETED,
+  ])
+
+  useEffect(() => {
+    if (lastJsonMessage == null) {
+      return
+    }
+    queryClient.invalidateQueries({
+      queryKey: ['admin-invitations'],
+    })
+  }, [lastJsonMessage])
 
   return (
     <UserLayout innerScroll>

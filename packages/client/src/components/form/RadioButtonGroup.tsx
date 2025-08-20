@@ -72,7 +72,7 @@ export function RadioButtonGroup<T extends string | undefined>({
   onBlur,
   disabled = false,
   ariaLabel,
-  name = ''
+  name = '',
 }: {
   ariaLabel?: string
   value?: T
@@ -90,17 +90,17 @@ export function RadioButtonGroup<T extends string | undefined>({
 
   return (
     <Group role="radiogroup" aria-label={ariaLabel} onBlur={onBlur} disabled={disabled}>
-      {options.map(({ value, label }, index) => (
+      {options.map(({ value: optionValue, label }, index) => (
         <Fragment key={index}>
           <input
             type="radio"
             className="radio-button"
             name={`radioButton-${name}`}
-            value={value}
+            value={optionValue}
             id={`button-${name}-${index}`}
             autoComplete="off"
-            checked={selected === value}
-            onChange={() => setSelected(value)}
+            checked={selected === optionValue}
+            onChange={() => setSelected(optionValue)}
             disabled={disabled}
           />
 

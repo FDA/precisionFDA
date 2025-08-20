@@ -75,7 +75,7 @@ describe('POST /dbclusters/start', () => {
         .send({ dxids: [dxids[0], `dbcluster-${generate.random.dxstr()}`] })
         .expect(404)
 
-      expect(body.error).to.have.property('code', ErrorCodes.DB_CLUSTER_NOT_FOUND)
+      expect(body.error).to.have.property('code', ErrorCodes.NOT_FOUND)
     })
 
     it('throws error when the dbcluster status is not stopped', async () => {

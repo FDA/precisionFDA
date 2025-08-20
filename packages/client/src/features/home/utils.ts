@@ -1,6 +1,7 @@
 import { getSpaceIdFromScope } from '../../utils'
 import { cleanObject } from '../../utils/object'
-import { HomeScope, IFilter, ServerScope } from './types'
+import { SortConfig } from '../../types/sorting'
+import { FilterVal, HomeScope, IFilter, ServerScope } from './types'
 
 /**
  * Formats numbers using US locale, e.g., 4000000 -> "4,000,000.00"
@@ -14,42 +15,53 @@ export const formatNumberUS = (value: number): string => {
   }).format(value)
 }
 
-// Only return the objects with keys from the pick array
-export function pickActions<T>(actions: T, pick: string[]) {
-  return Object.fromEntries(Object.entries(actions).filter(([k, v]) => pick.some(p => p === k))) as any as T
-}
-
 export function mapSizeFilter(filters: IFilter[]): IFilter[] {
-  const filter: any = filters.find(f => f.id === 'file_size')
-  if (!filter) {
+  const value = filters.find(f => f.id === 'file_size')?.['value']
+  if(!value || !Array.isArray(value)) {
     return filters
   }
-  filter.value?.[0] && filters.push({ id: 'size', value: filter.value[0] } as IFilter)
-  filter.value?.[1] && filters.push({ id: 'size2', value: filter.value[1] } as IFilter)
+
+  if (value[0] != null) {
+    filters.push({ id: 'size', value: value[0] })
+  }
+  if (value[1] != null) {
+    filters.push({ id: 'size2', value: value[1] })
+  }
+
   return filters.filter(f => f.id !== 'file_size')
 }
 export function mapLastLoginFilter(filters: IFilter[]): IFilter[] {
-  const filter: any = filters.find(f => f.id === 'lastLogin')
-  if (!filter) {
+  const value = filters.find(f => f.id === 'lastLogin')
+  if (!value || !Array.isArray(value)) {
     return filters
   }
-  filter.value?.[0] && filters.push({ id: 'lastLogin', value: filter.value[0] } as IFilter)
-  filter.value?.[1] && filters.push({ id: 'lastLogin', value: filter.value[1] } as IFilter)
+
+  if (value[0] != null) {
+    filters.push({ id: 'lastLogin', value: value[0] })
+  }
+  if (value[1] != null) {
+    filters.push({ id: 'lastLogin', value: value[1] })
+  }
+
   return filters.filter(f => f.id !== 'lastLogin')
 }
 
 // Some of the list API's filter keys do not match their keys in JSON responses
 // so we need a custom mapping
+const idMappings: Record<string, string> = {
+  added_by: 'username',
+  engine: 'type',
+  dx_instance_class: 'instance',
+  launched_by: 'username',
+}
+
 export function renameFilterKeys(filters: IFilter[]) {
   return filters.map((filter: IFilter) => {
     const key = { ...filter }
-    key.id =
-      {
-        added_by: 'username',
-        engine: 'type',
-        dx_instance_class: 'instance',
-        launched_by: 'username',
-      }[key.id] ?? key.id
+    
+    if (key.id in idMappings) {
+      key.id = idMappings[key.id]
+    }
 
     return key
   })
@@ -67,7 +79,23 @@ const customKeyMappings = {
 const renameOrderByKeys = (key?: string) =>
   key && key in customKeyMappings ? customKeyMappings[key as keyof typeof customKeyMappings] : key
 
-export type Params = Partial<Record<string, any>>
+type OrderByKeys = keyof typeof customKeyMappings
+type OrderByProps = `filter[${string}]`
+export type OrderBy = OrderByKeys | OrderByProps
+
+export type SortBy = SortConfig<OrderBy>
+
+export type Params = {
+  sortBy?: SortBy
+  entityScope?: string
+  folderId?: string | number
+  spaceId?: string | number
+  perPage?: number
+  page?: number
+  scope?: string
+} & Record<string, unknown>
+
+export type QueryType = Record<string, string>
 
 export function formatScopeQ(scope?: HomeScope) {
   let scopeQ = ''
@@ -78,7 +106,7 @@ export function formatScopeQ(scope?: HomeScope) {
   return scopeQ
 }
 
-export function formatScopeQuery(scope?: HomeScope, spaceId?: string) {
+export function formatScopeQuery(scope?: HomeScope, spaceId?: string|number) {
   let scopeQ = '?scope='
   if (scope) {
     const scopeVal = scope === 'me' ? 'private' : scope
@@ -100,7 +128,7 @@ export const getBasePathFromScope = (scope?: ServerScope) => {
   return getBasePath(spaceId)
 }
 
-export function prepareListFetch(filters: IFilter[], params: Params) {
+export function prepareListFetch(filters: IFilter[], params: Params): QueryType {
   let modFilters = filters
   modFilters = renameFilterKeys(modFilters)
   modFilters = mapSizeFilter(modFilters)
@@ -108,16 +136,16 @@ export function prepareListFetch(filters: IFilter[], params: Params) {
   modFilters = modFilters.filter(f => f.value !== undefined)
 
   // Convert params in a way to work with backend - not a great way to pass params in the url
-  const filterParams: { [key: string]: string } = {}
+  const filterParams: Record<string, FilterVal> = {}
 
-  modFilters.forEach((f: any) => {
+  modFilters.forEach((f) => {
     filterParams[`filters[${f.id}]`] = f.value
   })
 
   const order_by_key = params.sortBy?.order_by?.includes('props.') ? 'order_by_property' : 'order_by'
   const order_by_val =
     order_by_key === 'order_by_property'
-      ? params.sortBy?.order_by.replace('props.', '')
+      ? params.sortBy?.order_by?.replace('props.', '')
       : renameOrderByKeys(params?.sortBy?.order_by)
 
   const queryParams = cleanObject({
@@ -129,22 +157,23 @@ export function prepareListFetch(filters: IFilter[], params: Params) {
     [order_by_key]: order_by_val,
     order_dir: params?.sortBy?.order_dir,
     ...filterParams,
-  })
+  }) as QueryType
 
   return queryParams
 }
 
-export function prepareListFetchV2(filters: IFilter[], params: Params) {
+export function prepareListFetchV2(filters: IFilter[], params: Params): QueryType {
   let modFilters = filters
   modFilters = renameFilterKeys(modFilters)
   modFilters = mapSizeFilter(modFilters)
   modFilters = modFilters.filter(f => f.value !== undefined)
 
   // Convert params in a way to work with backend - not a great way to pass params in the url
-  const filterParams: { [key: string]: string } = {}
+  const filterParams: Record<string, FilterVal> = {}
 
-  modFilters.forEach((f: any) => {
-    filterParams[`filter[${f.id}]`] = f.value
+  modFilters.forEach((f) => {
+    const id = f.id as FilterVal
+    filterParams[`filter[${id}]`] = f.value
   })
 
   const sortField = params.sortBy?.order_by?.includes('props.')
@@ -156,10 +185,10 @@ export function prepareListFetchV2(filters: IFilter[], params: Params) {
     : {}
 
   return cleanObject({
-    folder_id: params?.folderId,
-    space_id: params?.spaceId,
-    pageSize: params?.perPage,
-    page: params?.page,
+    folder_id: params?.folderId?.toString(),
+    space_id: params?.spaceId?.toString(),
+    pageSize: params?.perPage?.toString(),
+    page: params?.page?.toString(),
     ...filterParams,
     ...sort,
   })

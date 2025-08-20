@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2025_06_02_070212) do
+ActiveRecord::Schema.define(version: 2025_07_28_113402) do
 
   create_table "accepted_licenses", id: :integer, charset: "utf8mb3", collation: "utf8mb3_unicode_ci", force: :cascade do |t|
     t.integer "license_id"
@@ -204,6 +204,9 @@ ActiveRecord::Schema.define(version: 2025_06_02_070212) do
     t.index ["admin_id"], name: "index_challenges_on_admin_id"
     t.index ["app_id"], name: "index_challenges_on_app_id"
     t.index ["app_owner_id"], name: "index_challenges_on_app_owner_id"
+    t.index ["name", "description", "info_content", "results_content"], name: "ft_challenges_name_description_info_content_results_content", type: :fulltext
+    t.index ["name", "description", "info_content"], name: "ft_challenges_name_description_info_content", type: :fulltext
+    t.index ["name", "description", "pre_registration_content"], name: "ft_challenges_name_description_pre_registration_content", type: :fulltext
     t.index ["space_id"], name: "index_challenges_on_space_id"
     t.index ["status"], name: "index_challenges_on_status"
   end
@@ -329,6 +332,7 @@ ActiveRecord::Schema.define(version: 2025_06_02_070212) do
     t.string "state"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["body"], name: "ft_expert_answers_body", type: :fulltext
     t.index ["expert_id"], name: "index_expert_answers_on_expert_id"
     t.index ["expert_question_id"], name: "index_expert_answers_on_expert_question_id"
     t.index ["state"], name: "index_expert_answers_on_state"
@@ -342,6 +346,7 @@ ActiveRecord::Schema.define(version: 2025_06_02_070212) do
     t.string "state"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["body"], name: "ft_expert_questions_body", type: :fulltext
     t.index ["expert_id"], name: "index_expert_questions_on_expert_id"
     t.index ["state"], name: "index_expert_questions_on_state"
     t.index ["user_id"], name: "index_expert_questions_on_user_id"
@@ -356,6 +361,7 @@ ActiveRecord::Schema.define(version: 2025_06_02_070212) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["image"], name: "index_experts_on_image"
+    t.index ["meta"], name: "ft_experts_meta", type: :fulltext
     t.index ["scope"], name: "index_experts_on_scope"
     t.index ["state"], name: "index_experts_on_state"
     t.index ["user_id"], name: "index_experts_on_user_id", unique: true
@@ -942,8 +948,8 @@ ActiveRecord::Schema.define(version: 2025_06_02_070212) do
     t.string "salt", null: false
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
-    t.index ["dbcluster_id"], name: "fk_rails_087f59dba3"
-    t.index ["user_id"], name: "fk_rails_35beefcb02"
+    t.index ["dbcluster_id"], name: "fk_rails_077f7b5516"
+    t.index ["user_id"], name: "fk_rails_e5847a8e1f"
   end
 
   create_table "versions", id: :integer, charset: "utf8mb3", collation: "utf8mb3_unicode_ci", force: :cascade do |t|

@@ -2,10 +2,11 @@ import { UseQueryOptions } from '@tanstack/react-query'
 import { useEffect } from 'react'
 import { IColumnWidthLocalStorage, useColumnWidthLocalStorage } from '../../hooks/useColumnWidthLocalStorage'
 import { useHiddenColumnLocalStorage } from '../../hooks/useHiddenColumnLocalStorage'
-import { ISortByParams, useOrderByParams } from '../../hooks/useOrderByState'
+import { useOrderByParams } from '../../hooks/useOrderByState'
 import { usePaginationParams } from '../../hooks/usePaginationState'
 import { usePrevious } from '../../hooks/usePrevious'
 import { createLocationKey } from '../../utils'
+import { SortByParams } from '../../types/sorting'
 import { columnFilters } from './columnFilters'
 import { APIResource, HomeScope, IFilter, IMeta, MetaV2 } from './types'
 import { useFilterParams } from './useFilterState'
@@ -17,7 +18,7 @@ export type FetchListFn<T = unknown> = (filter: IFilter[], params: Params) => Pr
 
 export interface IListProps {
   pagination: ReturnType<typeof usePaginationParams>
-  sort: ISortByParams
+  sort: SortByParams
   filter: Record<string, string>
   colWidth: IColumnWidthLocalStorage
 }
@@ -74,7 +75,7 @@ export function useList<T extends ListType>({ fetchList, resource, params = {}}:
     fetchList,
     resource,
     pagination: { page: pageParam, perPage: perPageParam },
-    order: { order_by: sort.order_by, order_dir: sort.order_dir },
+    sort,
     filter: filterQuery,
     params,
   })
