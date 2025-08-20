@@ -41,7 +41,6 @@ import {
   FILE_STATE_DX,
   FILE_STI_TYPE,
   FileOrAsset,
-  IFileOrAsset,
   SelectedFile,
   SelectedFolder,
   SelectedNode,
@@ -228,7 +227,7 @@ export class UserFileService {
     })
     const fileEvent = await eventHelper.createFileEvent(
       eventHelper.EVENT_TYPES.FILE_BULK_DOWNLOAD,
-      node as unknown as IFileOrAsset,
+      node as unknown as FileOrAsset,
       filePath,
       loadedUser,
     )

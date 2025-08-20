@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
-import { FILE_STI_TYPE } from '@shared/domain/user-file/user-file.types'
+import { FILE_STI_TYPE, FileOrAsset } from '@shared/domain/user-file/user-file.types'
 import { ComparisonService } from '@shared/domain/comparison/comparison.service'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { UserFileService } from '@shared/domain/user-file/service/user-file.service'
@@ -133,7 +133,7 @@ export class RemoveNodesFacade {
     }
   }
 
-  private async removeFile(fileToRemove: UserFile): Promise<number> {
+  public async removeFile(fileToRemove: FileOrAsset): Promise<number> {
     this.logger.log(`Removing file with uid: ${fileToRemove.uid}`)
 
     const lastNode = (await this.userFileRepository.count({ dxid: fileToRemove.dxid })) === 1

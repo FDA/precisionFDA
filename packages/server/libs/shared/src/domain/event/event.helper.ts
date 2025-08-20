@@ -4,9 +4,9 @@ import { Job } from '@shared/domain/job/job.entity'
 import { Folder } from '@shared/domain/user-file/folder.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { JobDescribeResponse } from '@shared/platform-client/platform-client.responses'
-import { IFileOrAsset } from '../user-file/user-file.types'
 import { Event } from './event.entity'
 import { DbCluster } from '../db-cluster/db-cluster.entity'
+import { FileOrAsset } from '@shared/domain/user-file/user-file.types'
 
 const EVENT_TYPES = {
   FOLDER_CREATED: 'Event::FolderCreated',
@@ -122,7 +122,7 @@ const createFolderEvent = async (
 
 const createFileEvent = async (
   eventType: string,
-  file: IFileOrAsset,
+  file: FileOrAsset,
   filePath: string,
   user: User,
   param3?: string,
