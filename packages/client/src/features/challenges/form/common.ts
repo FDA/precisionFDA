@@ -56,7 +56,8 @@ const commonValidationSchema = {
     }).test(
       'is-valid-url',
       'Link must be a valid URL and start with either \'http://\' or \'https://\'',
-      value => !value || /^(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?$/.test(value)
+      // eslint-disable-next-line no-useless-escape
+      value => !value || /^(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?$/.test(value),
     ),
 }
 
@@ -103,7 +104,8 @@ export const proposeValidationSchema = Yup.object().shape({
 })
 
 export function formatMutationErrors(
-  obj?: Record<string, any> | unknown,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  obj?: any | unknown,
 ): MutationErrors | undefined {
   const nObj = obj
   if (nObj) {

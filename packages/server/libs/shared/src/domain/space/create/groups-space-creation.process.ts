@@ -14,6 +14,7 @@ import { NotFoundError, PermissionError } from '@shared/errors'
 import { PlatformClient } from '@shared/platform-client'
 import { ADMIN_PLATFORM_CLIENT } from '@shared/platform-client/providers/admin-platform-client.provider'
 import { CreateSpaceDTO } from '@shared/domain/space/dto/create-space.dto'
+import { TaggingService } from '@shared/domain/tagging/tagging.service'
 
 /**
  * Concrete subclass of {@link SpaceCreationProcess} for creating a Groups space.
@@ -24,9 +25,10 @@ export class GroupsSpaceCreationProcess extends SpaceCreationProcess {
     user: UserContext,
     em: SqlEntityManager,
     notificationService: SpaceNotificationService,
+    taggingService: TaggingService,
     @Inject(ADMIN_PLATFORM_CLIENT) adminClient: PlatformClient,
   ) {
-    super(user, em, notificationService, adminClient)
+    super(user, em, notificationService, taggingService, adminClient)
   }
 
   protected validateInput(input: CreateSpaceDTO): void {

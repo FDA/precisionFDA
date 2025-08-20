@@ -6,8 +6,9 @@ import { DatabaseIcon } from './icons/DatabaseIcon'
 import { FileIcon } from './icons/FileIcon'
 import { FileZipIcon } from './icons/FileZipIcon'
 import { StickyNoteIcon } from './icons/StickyNote'
+import { FolderIcon } from './icons/FolderIcon'
 
-export type EntityType = 'file' | 'app' | 'job' | 'database' | 'comparison' | 'note' | 'asset'
+export type EntityType = 'file' | 'app' | 'job' | 'database' | 'comparison' | 'note' | 'asset' | 'folder'
 
 export const EntityIcon = ({ entityType }: { entityType: EntityType }) => {
   switch (entityType) {
@@ -25,6 +26,8 @@ export const EntityIcon = ({ entityType }: { entityType: EntityType }) => {
       return <StickyNoteIcon width={30} height={30} />
     case 'asset':
       return <FileZipIcon height={22} />
+    case 'folder':
+      return <FolderIcon height={22} />
     default:
       return null
   }

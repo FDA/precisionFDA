@@ -1,7 +1,8 @@
 import { useQuery, UseQueryOptions } from '@tanstack/react-query'
 import { toArrayFromObject } from '../../utils/object'
-import { APIResource, HomeScope, IFilter } from './types'
-import { Params } from './utils'
+import { SortParams, toSortConfig } from '../../types/sorting'
+import { APIResource, FilterVal, HomeScope, IFilter } from './types'
+import { Params, OrderBy } from './utils'
 
 interface IUseListQuery<T> {
   spaceId?: string
@@ -9,28 +10,42 @@ interface IUseListQuery<T> {
   fetchList: (filter: IFilter[], params: Params) => Promise<T>
   resource: APIResource
   params?: Params
-  order?: {
-    order_by?: string | null
-    order_dir?: string | null
-  }
+  sort?: SortParams
   pagination?: {
     perPage?: number
     page?: number
   }
   queryOptions?: UseQueryOptions<T>
-  filter?: IFilter
+  filter?: Record<string, FilterVal>
 }
 
-
-export function useListQuery<T>({ fetchList, resource, params = {}, queryOptions, pagination = {}, order = {}, filter = {}}: IUseListQuery<T>) {
+export function useListQuery<T>({ 
+  fetchList, 
+  resource, 
+  params = {}, 
+  queryOptions, 
+  pagination = {}, 
+  sort = {}, 
+  filter = {},
+}: IUseListQuery<T>) {
+  const sortBy = toSortConfig<OrderBy>(sort)
+  
   return useQuery<T>({
-    queryKey: [resource, toArrayFromObject(filter), pagination?.page, pagination?.perPage, order?.order_by, order?.order_dir, ...Object.keys(params).map(k => `${k}=${params[k]}`)],
+    queryKey: [
+      resource, 
+      toArrayFromObject(filter), 
+      pagination?.page, 
+      pagination?.perPage, 
+      sort?.order_by, 
+      sort?.order_dir, 
+      ...Object.keys(params).map(k => `${k}=${params[k]}`),
+    ],
     queryFn: () => fetchList(
       toArrayFromObject(filter),
       {
         page: pagination?.page,
         perPage: pagination?.perPage,
-        sortBy: order, 
+        sortBy, 
         ...params,
       }),
     refetchOnWindowFocus: false,

@@ -2,7 +2,6 @@ import { Processor } from '@nestjs/bull'
 import { config } from '@shared/config'
 import { AdminDataConsistencyReportService } from '@shared/debug/admin-data-consistency-report.service'
 import { testHeapMemoryAllocationError } from '@shared/debug/memory-tests'
-import { DbClusterService } from '@shared/domain/db-cluster/service/db-cluster.service'
 import { JobService } from '@shared/domain/job/job.service'
 import { UserService } from '@shared/domain/user/user.service'
 import { UserCheckupFacade } from '@shared/facade/user/user-checkup.facade'
@@ -12,12 +11,13 @@ import { checkUserJobsHandler } from '../../jobs/check-user-jobs.handler'
 import { syncSpacesPermissionsHandler } from '../../jobs/sync-spaces-permissions.handler'
 import { ProcessWithContext } from '../decorator/process-with-context'
 import { BaseQueueProcessor } from './base-queue.processor'
+import { DbClusterCheckNonTerminatedFacade } from 'apps/api/src/facade/db-cluster/check-non-terminated-facade/db-cluster-check-non-terminated.facade'
 
 @Processor(config.workerJobs.queues.maintenance.name)
 export class MaintenanceQueueProcessor extends BaseQueueProcessor {
   constructor(
     private readonly adminDataConsistencyReportService: AdminDataConsistencyReportService,
-    private readonly dbClusterService: DbClusterService,
+    private readonly dbClusterCheckNonTerminatedFacade: DbClusterCheckNonTerminatedFacade,
     private readonly userService: UserService,
     private readonly userCheckupFacade: UserCheckupFacade,
     private readonly jobServiceWithPlatformClient: JobService,
@@ -37,7 +37,7 @@ export class MaintenanceQueueProcessor extends BaseQueueProcessor {
 
   @ProcessWithContext(TASK_TYPE.CHECK_NON_TERMINATED_DBCLUSTERS)
   async checkNonTerminatedDbClusters(): Promise<void> {
-    await this.dbClusterService.checkNonTerminatedDbClusters()
+    await this.dbClusterCheckNonTerminatedFacade.checkNonTerminatedDbClusters()
   }
 
   @ProcessWithContext(TASK_TYPE.SYNC_SPACES_PERMISSIONS)

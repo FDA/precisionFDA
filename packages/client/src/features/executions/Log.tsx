@@ -6,6 +6,7 @@ import { Button } from '../../components/Button'
 import { DEFAULT_RECONNECT_ATTEMPTS, DEFAULT_RECONNECT_INTERVAL, getNodeWsUrl, SHOULD_RECONNECT } from '../../utils/config'
 import { JobLogItem, WEBSOCKET_MESSAGE_TYPE, WebSocketMessage } from '../home/types'
 import { JobState } from './executions.types'
+import { useAuthUser } from '../auth/useAuthUser'
 
 const StyledLogsContainer = styled.div`
   padding: 4px 0 4px 12px;
@@ -54,6 +55,7 @@ type ShowingLogItem = Pick<JobLogItem, 'source' | 'line' | 'level' | 'msg'>
 const isStopSignal = (log: ShowingLogItem) => log.source === 'SYSTEM' && log.msg === 'END_LOG'
 
 export const Logs = ({ jobUid, jobState }: { jobUid: string; jobState: JobState }) => {
+  const user = useAuthUser()
   const [logs, setLogs] = useState<ShowingLogItem[]>([])
   const [isStreamingDone, setIsStreamingDone] = useState(false)
   const parentRef = useRef<HTMLDivElement | null>(null)
@@ -67,69 +69,72 @@ export const Logs = ({ jobUid, jobState }: { jobUid: string; jobState: JobState 
 
   const virtualItems = rowVirtualizer.getVirtualItems()
 
-  const { sendMessage } = useWebSocket<WebSocketMessage>(getNodeWsUrl(), {
-    share: false,
-    reconnectInterval: DEFAULT_RECONNECT_INTERVAL,
-    reconnectAttempts: DEFAULT_RECONNECT_ATTEMPTS,
-    shouldReconnect: () => SHOULD_RECONNECT,
-    filter: message => {
-      try {
-        const data = JSON.parse(message.data)
-        return data.type === WEBSOCKET_MESSAGE_TYPE.JOB_LOG
-      } catch {
-        return false
-      }
-    },
-    onOpen: () => {
-      if (!isStreamingDone && jobUid) {
-        sendMessage(JSON.stringify({ event: WEBSOCKET_MESSAGE_TYPE.JOB_LOG, data: { jobUid }}))
-      }
-    },
-    onMessage: message => {
-      try {
-        const messageData = JSON.parse(message.data)
-        if (messageData.type === WEBSOCKET_MESSAGE_TYPE.JOB_LOG) {
-          const newLog = messageData.data as JobLogItem
-          if (isStopSignal(newLog)) {
-            setIsStreamingDone(true)
-            if (logs.length === 0) {
-              setLogs([{ level: 'INFO', msg: 'No logs found', line: 0, source: 'client' }])
-            }
-            return
-          }
-          setLogs(prevLogs => [
-            ...prevLogs,
-            {
-              level: newLog.level,
-              msg: newLog.msg,
-              line: newLog.line,
-              source: newLog.source,
-            },
-          ])
+  const { sendMessage } = useWebSocket<WebSocketMessage>(
+    getNodeWsUrl(),
+    {
+      share: false,
+      reconnectInterval: DEFAULT_RECONNECT_INTERVAL,
+      reconnectAttempts: DEFAULT_RECONNECT_ATTEMPTS,
+      shouldReconnect: () => SHOULD_RECONNECT,
+      filter: message => {
+        try {
+          const data = JSON.parse(message.data)
+          return data.type === WEBSOCKET_MESSAGE_TYPE.JOB_LOG
+        } catch {
+          return false
         }
-      } catch {
-        // Ignore invalid messages
-      }
+      },
+      onOpen: () => {
+        if (!isStreamingDone && jobUid) {
+          sendMessage(JSON.stringify({ event: WEBSOCKET_MESSAGE_TYPE.JOB_LOG, data: { jobUid } }))
+        }
+      },
+      onMessage: message => {
+        try {
+          const messageData = JSON.parse(message.data)
+          if (messageData.type === WEBSOCKET_MESSAGE_TYPE.JOB_LOG) {
+            const newLog = messageData.data as JobLogItem
+            if (isStopSignal(newLog)) {
+              setIsStreamingDone(true)
+              if (logs.length === 0) {
+                setLogs([{ level: 'INFO', msg: 'No logs found', line: 0, source: 'client' }])
+              }
+              return
+            }
+            setLogs(prevLogs => [
+              ...prevLogs,
+              {
+                level: newLog.level,
+                msg: newLog.msg,
+                line: newLog.line,
+                source: newLog.source,
+              },
+            ])
+          }
+        } catch {
+          // Ignore invalid messages
+        }
+      },
+      onClose: () => {
+        if (!isStreamingDone) {
+          setLogs([])
+        }
+      },
     },
-    onClose: () => {
-      if (!isStreamingDone) {
-        setLogs([])
+    !!user,
+  )
+
+  useEffect(() => {
+    if (jobState === 'running') {
+      // Auto scroll only if scrolled near to the bottom
+      const isAtBottom =
+        parentRef.current && parentRef.current.scrollHeight - parentRef.current.scrollTop - parentRef.current.clientHeight < 50
+
+      if (isAtBottom) {
+        rowVirtualizer.scrollToIndex(logs.length - 1)
       }
-    },
-  })
-
-useEffect(() => {
-  if (jobState === 'running') {
-    // Auto scroll only if scrolled near to the bottom
-    const isAtBottom =
-      parentRef.current &&
-      parentRef.current.scrollHeight - parentRef.current.scrollTop - parentRef.current.clientHeight < 50
-
-    if (isAtBottom) {
-      rowVirtualizer.scrollToIndex(logs.length - 1)
     }
-  }
-}, [logs, jobState])
+  }, [logs, jobState])
 
   const downloadLogs = () => {
     const logText = logs.map(log => `${log.level}: ${log.msg}`).join('\n')

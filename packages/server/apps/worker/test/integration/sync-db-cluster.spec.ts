@@ -4,65 +4,63 @@ import { DbClusterService } from '@shared/domain/db-cluster/service/db-cluster.s
 import { STATUS } from '@shared/domain/db-cluster/db-cluster.enum'
 import { SyncDbClusterJob, TASK_TYPE } from '@shared/queue/task.input'
 import sinon, { stub } from 'sinon'
-import { SqlEntityManager } from '@mikro-orm/mysql'
+import { EntityManager } from '@mikro-orm/mysql'
 import { PlatformClient } from '@shared/platform-client'
 import { MainQueueJobProducer } from '@shared/queue/producer/main-queue-job.producer'
-import { EmailQueueJobProducer } from '@shared/domain/email/producer/email-queue-job.producer'
 import { DbClusterRepository } from '@shared/domain/db-cluster/db-cluster.repository'
-import { UserRepository } from '@shared/domain/user/user.repository'
-import { SpaceRepository } from '@shared/domain/space/space.repository'
-import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
-import { UsersDbClustersSaltRepository } from '@shared/domain/db-cluster/access-control/users-db-clusters-salt.repository'
+import { DbClusterSynchronizeFacade } from 'apps/api/src/facade/db-cluster/synchronize-facade/db-cluster-synchronize.facade'
+import { UserService } from '@shared/domain/user/user.service'
+import { SpaceService } from '@shared/domain/space/service/space.service'
+import { UsersDbClustersSaltService } from '@shared/domain/db-cluster/access-control/users-db-clusters-salt.service'
+import { create, db } from '@shared/test'
+import { database } from '@shared/database'
+import { User } from '@shared/domain/user/user.entity'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
 
 describe('DbClusterService', () => {
   let removeRepeatableStub: sinon.SinonStub
   let originalRemoveRepeatable
-
-  const USER_ID = 0
-  const USER = {
-    id: USER_ID,
-  }
-
-  const em = {} as unknown as SqlEntityManager
-  const USER_CTX: UserCtx = { ...USER, accessToken: 'accessToken', dxuser: 'dxuser' }
-  const dbClusterDescribe = stub()
-  const userClient = {
-    dbClusterDescribe: dbClusterDescribe,
-  } as unknown as PlatformClient
-  const mainJobProducer = {} as unknown as MainQueueJobProducer
-  const emailQueueJobProducer = {} as unknown as EmailQueueJobProducer
-  const dbfindOne = stub()
-  const entityManagerStub = {
-    flush: stub().resolves(),
-    persist: stub().resolves(),
-  }
-  const getEntityManager = stub().returns(entityManagerStub)
-  const dbClusterRepository = {
-    findOne: dbfindOne,
-    getEntityManager: getEntityManager,
-  } as unknown as DbClusterRepository
-  const userfindOne = stub()
-  const userRepository = {
-    findOne: userfindOne,
-  } as unknown as UserRepository
-  const spaceRepository = {} as unknown as SpaceRepository
-  const spaceMembershipRepository = {} as unknown as SpaceMembershipRepository
-  const saltRepository = {} as unknown as UsersDbClustersSaltRepository
-  const adminClient = {
-    dbClusterDescribe: dbClusterDescribe,
-  } as unknown as PlatformClient
+  let em: EntityManager
+  let user: User
+  let userContext: UserContext
 
   const logStub = stub()
   const warnStub = stub()
+  const debugStub = stub()
+
+  const getUserByIdStub = stub()
+  const dbClusterDescribeStub = stub()
+  const findAccessibleOneStub = stub()
 
   beforeEach(async () => {
+    await db.dropData(database.connection())
+    em = database.orm().em.fork() as EntityManager
+    em.clear()
+    user = create.userHelper.create(em, { dxuser: 'test.test' })
+    await em.flush()
+
+    userContext = {
+      id: user.id,
+      dxuser: user.dxuser,
+      accessToken: 'token',
+    } as unknown as UserContext
+
     removeRepeatableStub = stub()
 
     removeRepeatableStub.resolves()
 
+    logStub.reset()
+
     // Replace the original removeRepeatable function
     originalRemoveRepeatable = require('@shared/queue').removeRepeatable
     require('@shared/queue').removeRepeatable = removeRepeatableStub
+    findAccessibleOneStub.reset()
+    findAccessibleOneStub.throws()
+
+    getUserByIdStub.reset()
+    getUserByIdStub.throws()
+    dbClusterDescribeStub.reset()
+    dbClusterDescribeStub.throws()
   })
 
   afterEach(() => {
@@ -72,36 +70,44 @@ describe('DbClusterService', () => {
 
   describe('#syncDbClusterStatus', () => {
     it('should call removeRepeatable if dbCluster status is TERMINATED', async () => {
+      const dbCluster = create.dbClusterHelper.create(
+        em,
+        { user },
+        { name: 'db-cluster-1', status: STATUS.TERMINATED, scope: 'private' },
+      )
       const job = {
         type: TASK_TYPE.SYNC_DBCLUSTER_STATUS,
-        data: { payload: { dxid: 'dbcluster-1' }, user: { id: 1 } },
+        data: { payload: { dxid: dbCluster.dxid }, user: { id: user.id } },
       } as unknown as Job<SyncDbClusterJob>
 
-      dbfindOne.resolves({ status: STATUS.TERMINATED })
-      userfindOne.resolves({ id: 1 })
+      getUserByIdStub.withArgs(user.id).resolves(user)
+      findAccessibleOneStub.withArgs({ dxid: dbCluster.dxid }).resolves(dbCluster)
 
       await getInstance().syncDbClusterStatus(job)
       expect(removeRepeatableStub.calledOnceWith(job)).to.be.true()
     })
 
     it('should not update local database if remote properties are the same', async () => {
+      const dbCluster = create.dbClusterHelper.create(
+        em,
+        { user },
+        { name: 'db-cluster-1', status: STATUS.AVAILABLE, scope: 'private' },
+      )
       const job = {
         type: TASK_TYPE.SYNC_DBCLUSTER_STATUS,
-        data: { payload: { dxid: 'dbcluster-1' }, user: { id: 1 } },
+        data: { payload: { dxid: dbCluster.dxid }, user: { id: user.id } },
       } as unknown as Job<SyncDbClusterJob>
 
-      dbfindOne.resolves({
-        dxid: 'dbcluster-1',
-        status: STATUS.AVAILABLE,
-        host: 'dbcluster.com',
-        port: '5432',
-      })
-      userfindOne.resolves({ id: 1 })
-      dbClusterDescribe.resolves({
-        status: 'available',
-        endpoint: 'dbcluster.com',
-        port: '5432',
-      })
+      getUserByIdStub.withArgs(user.id).resolves(user)
+      findAccessibleOneStub.withArgs({ dxid: dbCluster.dxid }).resolves(dbCluster)
+
+      dbClusterDescribeStub
+        .withArgs({ dxid: dbCluster.dxid, project: dbCluster.project })
+        .resolves({
+          status: 'available',
+          endpoint: dbCluster.host,
+          port: dbCluster.port,
+        })
 
       const service = getInstance()
       // Replace the logger's log method
@@ -110,37 +116,76 @@ describe('DbClusterService', () => {
         writable: true,
       })
       await service.syncDbClusterStatus(job)
-      sinon.assert.callOrder(dbfindOne, userfindOne, dbClusterDescribe)
+      sinon.assert.callOrder(getUserByIdStub, dbClusterDescribeStub)
       expect(logStub.callCount).to.equal(4)
       sinon.assert.calledWith(
         logStub.lastCall,
-        { dxid: 'dbcluster-1' },
+        { dxid: dbCluster.dxid },
         'Status, endpoint or port have not been changed, no updates',
       )
     })
 
-    context('error states', () => {
+    it('should update local database if remote properties changed', async () => {
+      const dbCluster = create.dbClusterHelper.create(
+        em,
+        { user },
+        { name: 'db-cluster-1', status: STATUS.AVAILABLE, scope: 'private' },
+      )
+      const job = {
+        type: TASK_TYPE.SYNC_DBCLUSTER_STATUS,
+        data: { payload: { dxid: dbCluster.dxid }, user: { id: user.id } },
+      } as unknown as Job<SyncDbClusterJob>
+
+      getUserByIdStub.withArgs(user.id).resolves(user)
+      findAccessibleOneStub.withArgs({ dxid: dbCluster.dxid }).resolves(dbCluster)
+
+      dbClusterDescribeStub
+        .withArgs({ dxid: dbCluster.dxid, project: dbCluster.project })
+        .resolves({
+          status: 'available',
+          endpoint: dbCluster.host,
+          port: 1111,
+        })
+
+      const service = getInstance()
+      // Replace the logger's log method
+      Object.defineProperty(service, 'logger', {
+        value: { log: logStub, warn: warnStub, debug: debugStub },
+        writable: true,
+      })
+      await service.syncDbClusterStatus(job)
+      sinon.assert.callOrder(getUserByIdStub, dbClusterDescribeStub)
+      expect(logStub.callCount).to.equal(4)
+      sinon.assert.calledWith(debugStub.lastCall, { dbCluster: dbCluster }, 'Updated DbCluster')
+      expect(dbCluster.port).to.equal('1111')
+    })
+
+    describe('error states', () => {
       it('should call removeRepeatable when db cluster is not found', async () => {
         const job = {
           type: TASK_TYPE.SYNC_DBCLUSTER_STATUS,
           data: { payload: { dxid: 'dbcluster-1' }, user: { id: 1 } },
         } as unknown as Job<SyncDbClusterJob>
 
-        dbfindOne.resolves(null)
-        userfindOne.resolves({ id: 1 })
+        getUserByIdStub.withArgs(user.id).resolves(user)
+        findAccessibleOneStub.withArgs({ dxid: 'dbcluster-1' }).resolves(null)
 
         await getInstance().syncDbClusterStatus(job)
         expect(removeRepeatableStub.calledOnceWith(job)).to.be.true()
       })
 
       it('should call removeRepeatable when user is not found', async () => {
+        const dbCluster = create.dbClusterHelper.create(
+          em,
+          { user },
+          { name: 'db-cluster-1', status: STATUS.AVAILABLE, scope: 'private' },
+        )
         const job = {
           type: TASK_TYPE.SYNC_DBCLUSTER_STATUS,
-          data: { payload: { dxid: 'dbcluster-1' }, user: { id: 1 } },
+          data: { payload: { dxid: dbCluster.dxid }, user: { id: user.id } },
         } as unknown as Job<SyncDbClusterJob>
 
-        dbfindOne.resolves({ id: 1 })
-        userfindOne.resolves(null)
+        getUserByIdStub.withArgs(user.id).resolves(null)
 
         await getInstance().syncDbClusterStatus(job)
         expect(removeRepeatableStub.calledOnceWith(job)).to.be.true()
@@ -148,19 +193,31 @@ describe('DbClusterService', () => {
     })
   })
 
-  function getInstance() {
-    return new DbClusterService(
+  function getInstance(): DbClusterSynchronizeFacade {
+    const dbClusterRepo = {
+      findAccessibleOne: findAccessibleOneStub,
+    } as unknown as DbClusterRepository
+    const dbClusterService = new DbClusterService(em, dbClusterRepo)
+    const userClient = {
+      dbClusterDescribe: dbClusterDescribeStub,
+    } as unknown as PlatformClient
+    const adminClient = {} as unknown as PlatformClient
+    const userService = {
+      getUserById: getUserByIdStub,
+    } as unknown as UserService
+    const spaceService = {} as unknown as SpaceService
+    const usersDbClustersSaltService = {} as unknown as UsersDbClustersSaltService
+    const mainJobProducer = {} as unknown as MainQueueJobProducer
+    return new DbClusterSynchronizeFacade(
       em,
-      USER_CTX,
+      dbClusterService,
+      userService,
+      userContext,
       userClient,
-      mainJobProducer,
-      emailQueueJobProducer,
-      dbClusterRepository,
-      userRepository,
-      spaceRepository,
-      spaceMembershipRepository,
-      saltRepository,
       adminClient,
+      spaceService,
+      usersDbClustersSaltService,
+      mainJobProducer,
     )
   }
 })

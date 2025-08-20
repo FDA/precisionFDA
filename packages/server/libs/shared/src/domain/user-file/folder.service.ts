@@ -15,6 +15,7 @@ import { STATIC_SCOPE } from '@shared/enums'
 import { FilterQuery } from '@mikro-orm/core'
 import { NodeRepository } from '@shared/domain/user-file/node.repository'
 import { FetchChildrenDTO } from 'apps/api/src/folders/model/fetch-children.dto'
+import { FolderRepository } from '@shared/domain/user-file/folder.repository'
 
 @Injectable()
 /**
@@ -28,6 +29,7 @@ export class FolderService {
     private readonly em: SqlEntityManager,
     private readonly user: UserContext,
     private readonly nodeRepo: NodeRepository,
+    private readonly folderRepository: FolderRepository,
   ) {}
 
   async getFolderChildren(input: FetchChildrenDTO): Promise<Node[]> {
@@ -122,6 +124,10 @@ export class FolderService {
       await this.em.rollback()
       throw error
     }
+  }
+
+  async getFolderEntity(folderId: number): Promise<Folder | null> {
+    return await this.folderRepository.findEditableOne({ id: folderId })
   }
 
   private async createFolderInternal(

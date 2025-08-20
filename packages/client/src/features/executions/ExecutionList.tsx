@@ -10,9 +10,11 @@ import {
 } from '@tanstack/react-table'
 import React, { useEffect, useMemo, useState } from 'react'
 import useWebSocket from 'react-use-websocket'
+import { DropdownNext } from '../../components/Dropdown/DropdownNext'
 import { ContentFooter } from '../../components/Page/ContentFooter'
 import { Pagination } from '../../components/Pagination'
 import Table from '../../components/Table'
+import { StyledPageTable } from '../../components/Table/components/styles'
 import { HoverDNAnexusLogo } from '../../components/icons/DNAnexusLogo'
 import { ErrorBoundary } from '../../utils/ErrorBoundry'
 import { DEFAULT_RECONNECT_ATTEMPTS, DEFAULT_RECONNECT_INTERVAL, SHOULD_RECONNECT, getNodeWsUrl } from '../../utils/config'
@@ -20,6 +22,7 @@ import { getSelectedObjectsFromIndexes, toArrayFromObject } from '../../utils/ob
 import { useAuthUser } from '../auth/useAuthUser'
 import { ActionsDropdownContent } from '../home/ActionDropdownContent'
 import { ActionModalsRenderer } from '../home/ActionModalsRenderer'
+import { ResouceQueryErrorMessage } from '../home/ResouceQueryErrorMessage'
 import { ActionsRow } from '../home/home.styles'
 import { ActionsButton, ResourceHeader } from '../home/show.styles'
 import { HomeScope, IMeta, NOTIFICATION_ACTION, Notification, WEBSOCKET_MESSAGE_TYPE, WebSocketMessage } from '../home/types'
@@ -29,9 +32,7 @@ import { fetchExecutions } from './executions.api'
 import { IExecution } from './executions.types'
 import { useExecutionColumns } from './useExecutionColumns'
 import { useExecutionSelectActions } from './useExecutionSelectActions'
-import { ResouceQueryErrorMessage } from '../home/ResouceQueryErrorMessage'
-import { StyledPageTable } from '../../components/Table/components/styles'
-import { DropdownNext } from '../../components/Dropdown/DropdownNext'
+import { useLastWSNotification } from '../../hooks/useToastWSHandler'
 
 type ListType = { jobs: IExecution[]; meta: IMeta }
 
@@ -66,31 +67,13 @@ export const ExecutionList = ({ homeScope, spaceId }: { homeScope?: HomeScope; s
   const { isLoading, data, error } = query
   const { data: propertiesData } = usePropertiesQuery('job', homeScope, spaceId)
 
-  const { lastJsonMessage } = useWebSocket<WebSocketMessage>(getNodeWsUrl(), {
-    share: true,
-    reconnectInterval: DEFAULT_RECONNECT_INTERVAL,
-    reconnectAttempts: DEFAULT_RECONNECT_ATTEMPTS,
-    shouldReconnect: () => SHOULD_RECONNECT,
-    filter: message => {
-      try {
-        const messageData = JSON.parse(message.data)
-        const notification = messageData.data as Notification
-        return (
-          messageData.type === WEBSOCKET_MESSAGE_TYPE.NOTIFICATION &&
-          [
-            NOTIFICATION_ACTION.JOB_RUNNABLE,
-            NOTIFICATION_ACTION.JOB_RUNNING,
-            NOTIFICATION_ACTION.JOB_DONE,
-            NOTIFICATION_ACTION.JOB_FAILED,
-            NOTIFICATION_ACTION.JOB_OUTPUTS_SYNCED,
-          ].includes(notification.action)
-        )
-      } catch (e: unknown) {
-        console.error('Error parsing WebSocket message:', e)
-        return false
-      }
-    },
-  })
+  const lastJsonMessage = useLastWSNotification([
+    NOTIFICATION_ACTION.JOB_RUNNABLE,
+    NOTIFICATION_ACTION.JOB_RUNNING,
+    NOTIFICATION_ACTION.JOB_DONE,
+    NOTIFICATION_ACTION.JOB_FAILED,
+    NOTIFICATION_ACTION.JOB_OUTPUTS_SYNCED,
+  ])
 
   useEffect(() => {
     if (lastJsonMessage == null) {
@@ -102,7 +85,7 @@ export const ExecutionList = ({ homeScope, spaceId }: { homeScope?: HomeScope; s
   }, [lastJsonMessage])
 
   const selectedFileObjects = getSelectedObjectsFromIndexes(selectedIndexes, data?.jobs)
-  const { actions, modals } = useExecutionSelectActions({ homeScope, selectedItems: selectedFileObjects, resourceKeys: ['jobs']})
+  const { actions, modals } = useExecutionSelectActions({ homeScope, selectedItems: selectedFileObjects, resourceKeys: ['jobs'] })
 
   if (error) return <ResouceQueryErrorMessage />
 
@@ -111,16 +94,9 @@ export const ExecutionList = ({ homeScope, spaceId }: { homeScope?: HomeScope; s
       <ResourceHeader>
         <ActionsRow>
           <div />
-          <DropdownNext
-            trigger="click"
-            content={() => <ActionsDropdownContent actions={actions} />}
-          >
+          <DropdownNext trigger="click" content={() => <ActionsDropdownContent actions={actions} />}>
             {dropdownProps => (
-              <ActionsButton
-                {...dropdownProps}
-                data-testid="home-executions-actions-button"
-                active={dropdownProps.$isActive}
-              />
+              <ActionsButton {...dropdownProps} data-testid="home-executions-actions-button" active={dropdownProps.$isActive} />
             )}
           </DropdownNext>
         </ActionsRow>

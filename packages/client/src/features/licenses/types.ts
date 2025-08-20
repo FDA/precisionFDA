@@ -10,7 +10,7 @@ export interface License {
   created_at_date_time: string;
   location: string;
   approval_required: boolean;
-  tags: any[];
+  tags: string[];
   state: string;
 }
 

@@ -1,5 +1,4 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { AxiosError } from 'axios'
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
@@ -7,7 +6,6 @@ import NavigationBar from '../../../components/NavigationBar/NavigationBar'
 import { NotAllowedPage } from '../../../components/NotAllowed'
 import { BackLinkMargin } from '../../../components/Page/PageBackLink'
 import { PageTitle } from '../../../components/Page/styles'
-import { formatMutationErrors } from '../../../hooks/useMutationErrorEffect'
 import { UserLayout } from '../../../layouts/UserLayout'
 import { useAuthUser } from '../../auth/useAuthUser'
 import { StyledPageCenter, StyledPageContent } from '../../spaces/form/styles'
@@ -35,12 +33,6 @@ const CreateChallengePage = () => {
     },
   })
 
-  const mutationErrors = formatMutationErrors(
-    mutation.error instanceof AxiosError
-      ? mutation.error.response?.data
-      : undefined,
-  )
-
   const handleSubmit = async (v: IChallengeForm) => {
     await mutation.mutateAsync(mapFormToPayload(v))
   }
@@ -59,7 +51,6 @@ const CreateChallengePage = () => {
               <ChallengeForm
                 onSubmit={handleSubmit}
                 isSaving={mutation.isPending}
-                mutationErrors={mutationErrors}
               />
             </>
           ) : (

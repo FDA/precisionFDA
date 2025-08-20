@@ -9,6 +9,8 @@ import { Loader } from '../../../components/Loader'
 import { Row, StyledForm } from '../../spaces/form/styles'
 import { Button } from '../../../components/Button'
 import { spaceGroupValidationSchema } from './helpers'
+import { ApiErrorResponse } from '../../home/types'
+import { AxiosError } from 'axios'
 
 export interface SpaceGroupCreateFormData {
   name: string
@@ -17,20 +19,13 @@ export interface SpaceGroupCreateFormData {
 
 export interface ISpaceGroupForm {
   defaultValues?: Partial<SpaceGroupCreateFormData>
-  onSubmit: (a: any) => Promise<void>
+  onSubmit: (a: SpaceGroupCreateFormData) => Promise<void>
   isSaving?: boolean
   isSubmitting: boolean,
-  mutationErrors?: { response: { data: { error: any }} }
+  mutationErrors?: AxiosError<ApiErrorResponse>
 }
 
-export const SpaceGroupForm = ({
-  defaultValues,
-  onSubmit,
-  isSaving = false,
-  isSubmitting,
-  mutationErrors,
-}: ISpaceGroupForm) => {
-
+export const SpaceGroupForm = ({ defaultValues, onSubmit, isSaving = false, isSubmitting, mutationErrors }: ISpaceGroupForm) => {
   const {
     register,
     handleSubmit,
@@ -60,35 +55,17 @@ export const SpaceGroupForm = ({
   return (
     <StyledForm onSubmit={handleSubmit(onSubmit)}>
       <FieldGroup label="Name" required>
-        <InputText
-          {...register('name', { required: 'Name is required.' })}
-          disabled={isSubmitting}
-        />
-        <ErrorMessage
-          errors={errors}
-          name="name"
-          render={({ message }) => <InputError>{message}</InputError>}
-        />
+        <InputText {...register('name', { required: 'Name is required.' })} disabled={isSubmitting} />
+        <ErrorMessage errors={errors} name="name" render={({ message }) => <InputError>{message}</InputError>} />
       </FieldGroup>
       <FieldGroup label="Description" required>
-        <InputText
-          {...register('description')}
-          disabled={isSubmitting}
-        />
-        <ErrorMessage
-          errors={errors}
-          name="description"
-          render={({ message }) => <InputError>{message}</InputError>}
-        />
+        <InputText {...register('description')} disabled={isSubmitting} />
+        <ErrorMessage errors={errors} name="description" render={({ message }) => <InputError>{message}</InputError>} />
       </FieldGroup>
 
       <Row>
-        <Button
-          data-variant="primary"
-          disabled={Object.keys(submitErrors).length > 0 || isSubmitting || isSaving}
-          type="submit"
-        >
-          Submit
+        <Button data-variant="primary" disabled={Object.keys(submitErrors).length > 0 || isSubmitting || isSaving} type="submit">
+          Create Space Group
         </Button>
         {isSubmitting && <Loader />}
       </Row>

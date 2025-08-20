@@ -10,7 +10,7 @@ import {
 import { DXEnityType, DXEntities } from '../domain/dxid'
 
 @ValidatorConstraint({ async: true })
-class IsValidEntittyIdentifierConstraint implements ValidatorConstraintInterface {
+class IsValidEntityIdentifierConstraint implements ValidatorConstraintInterface {
   async validate(value: any, args: ValidationArguments) {
     let entityType: EntityType = args.constraints[0]
     if (!entityType) {
@@ -45,7 +45,7 @@ export function IsValidEntityIdentifier(
       propertyName: propertyName,
       constraints: [options],
       options: validationOptions,
-      validator: IsValidEntittyIdentifierConstraint,
+      validator: IsValidEntityIdentifierConstraint,
     })
   }
 }

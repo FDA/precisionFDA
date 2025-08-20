@@ -61,7 +61,8 @@ export const useNavFavorites = () => {
     try {
       const response = await axios.get('/api/v2/users/header-items')
       return response.data
-    } catch (err: any) {
+    } catch (error: unknown) {
+      const err = error as { status: number }
       // TODO: PFDA-6176
       // This is a temporary code for migrating navigation items from local storage to backend
       // Should be removed once (almost) all the active users have "header_items" property in their "extras" column in the DB table "users"

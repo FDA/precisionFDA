@@ -10,7 +10,7 @@ export const StyledPublicNavbar = styled.div`
   --bg: var(--background-shaded);
   height: 64px;
   position: fixed;
-  top: 0;
+  top: var(--rails-alert-height);
   left: 0;
   right: 0;
   z-index: 100;
@@ -27,10 +27,12 @@ export const StyledPublicNavbar = styled.div`
     from {
       background-color: transparent;
       border-bottom-color: transparent;
+      top: var(--rails-alert-height);
     }
     to {
       background-color: var(--bg);
       border-bottom-color: var(--c-layout-border-200);
+      top: 0px;
     }
   }
 
@@ -136,7 +138,7 @@ export const StyledPublicNavbar = styled.div`
       --border-color: white;
     }
     to { 
-      --text-color: hsl(240, 4%, 16%);
+      --text-color: var(--base);
       --border-color: hsl(240, 4%, 16%)
     }
   }
@@ -270,9 +272,9 @@ export const StyledPublicNavbar = styled.div`
     --bg: var(--c-subtleblue);
   `}
 
-    ${fallback}
-  
- 
+  ${fallback}
+
+
 `
 
 /* Mobile menu overlay */

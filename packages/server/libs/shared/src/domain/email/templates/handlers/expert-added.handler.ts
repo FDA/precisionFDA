@@ -1,11 +1,11 @@
 import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
+import { ExpertRepository } from '@shared/domain/expert/repository/expert.repository'
 import { User } from '@shared/domain/user/user.entity'
 import { expertAddedTemplate } from '@shared/domain/email/templates/mjml/expert-added.template'
 import { getUserTitle } from '@shared/domain/email/templates/mjml/common'
 import { Injectable } from '@nestjs/common'
 import { EmailHandler } from '@shared/domain/email/templates/handlers/email.handler'
 import { EmailClient } from '@shared/services/email-client'
-import { ExpertRepository } from '@shared/domain/expert/expert.repository'
 import {
   EmailTypeToContextMap,
   ExpertAddedContext,

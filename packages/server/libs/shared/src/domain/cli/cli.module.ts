@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common'
 import { CliService } from '@shared/domain/cli/service/cli.service'
-import { DbClusterModule } from '@shared/domain/db-cluster/db-cluster.module'
+import { DbClusterPasswordFacadeModule } from 'apps/api/src/facade/db-cluster/password-facade/db-cluster-password-facade.module'
 
 @Module({
-  imports: [DbClusterModule],
+  imports: [DbClusterPasswordFacadeModule],
   providers: [CliService],
   exports: [CliService],
 })

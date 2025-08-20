@@ -10,3 +10,4 @@ export { appsMocks, mockExportApp, mockCopyApps, mockCopyToSpaceApps, mockDelete
 export { workflowMocks, mockExportWorkflow, mockDeleteWorkflows } from './workflows.handlers'
 export { filesMocks, mockExportInputFiles, mockExportInputData, mockCopyFiles, mockCopyToSpaceFiles } from './files.handlers'
 export { dbclusterMocks as databasesHandlers, mockDatabases } from './databases.handlers'
+export { challengeHandlers, mockChallengeSubmissions, mockEmptySubmissions } from './challenges.handlers'

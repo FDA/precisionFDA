@@ -1,7 +1,7 @@
 import { Entity, ManyToOne, Ref } from '@mikro-orm/core'
 import { Comment } from '@shared/domain/comment/comment.entity'
+import { ExpertQuestion } from '@shared/domain/expert-question/entity/expert-question.entity'
 import { User } from '@shared/domain/user/user.entity'
-import { ExpertQuestion } from '@shared/domain/expert-question/expert-question.entity'
 
 @Entity({ discriminatorValue: 'ExpertQuestion' })
 export class ExpertQuestionComment extends Comment {

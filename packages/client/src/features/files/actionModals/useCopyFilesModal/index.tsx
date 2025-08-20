@@ -7,7 +7,7 @@ import { Button } from '../../../../components/Button'
 import { FileCheckIcon } from '../../../../components/icons/FileCheckIcon'
 import { FileIcon } from '../../../../components/icons/FileIcon'
 import { FolderOpenIcon } from '../../../../components/icons/FolderOpenIcon'
-import { displayPayloadMessage } from '../../../../utils/api'
+import { displayPayloadMessage, Payload } from '../../../../utils/api'
 import { ApiErrorResponse, HomeScope, ServerScope } from '../../../home/types'
 import { getBasePathFromScope } from '../../../home/utils'
 import { ModalHeaderTop, ModalNext } from '../../../modal/ModalNext'
@@ -237,7 +237,7 @@ export const useCopyFilesModal = ({
     onSuccess: (res: unknown) => {
       if (onSuccess) onSuccess()
       setShowModal(false)
-      displayPayloadMessage(res)
+      displayPayloadMessage(res as Payload)
     },
     onError: (e: AxiosError<ApiErrorResponse>) => {
       const error = e?.response?.data?.error

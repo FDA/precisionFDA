@@ -159,7 +159,8 @@ export const DiscussionShow = ({ space }: { space?: ISpace }) => {
             canUserAnswer={canUserAnswer}
             onSuccess={handleSuccess}
             onCancel={() => setIsEditing(false)}
-            markdownInputRef={markdownInputRef}
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            markdownInputRef={markdownInputRef as any}
             discussionId={discussionId}
             scope={discussion.scope}
           />

@@ -15,6 +15,8 @@ import { StyledFields, StyledFooter } from './members.styles'
 import { Select } from '../../../components/Select'
 import { Button } from '../../../components/Button'
 import { ModalNext, ModalHeaderTop } from '../../modal/ModalNext'
+import { AxiosError } from 'axios'
+import { ApiRailsError } from '../../home/types'
 
 interface FormValues {
   invitees_role: { label: string; value: MemberRole }
@@ -55,7 +57,7 @@ export const useAddMembersModal = ({ spaceId }: { spaceId: string }) => {
         invitees: invitees.toLowerCase(),
         invitees_role: invitees_role.value,
       }),
-    onSuccess: res => {
+    onSuccess: () => {
       reset()
       queryClient.invalidateQueries({
         queryKey: ['space-members'],
@@ -66,8 +68,8 @@ export const useAddMembersModal = ({ spaceId }: { spaceId: string }) => {
       setShowModal(false)
       toast.success('Success: Adding members')
     },
-    onError: (e: any) => {
-      toast.error(`Error: Adding members. ${e.response.data.errors}`)
+    onError: (e: AxiosError<ApiRailsError>) => {
+      toast.error(`Error: Adding members. ${e.response?.data.errors}`)
     },
   })
 
@@ -96,9 +98,9 @@ export const useAddMembersModal = ({ spaceId }: { spaceId: string }) => {
         <FieldGroup>
           <label>Username List</label>
           <InputText
-            label="Username List"
             {...register('invitees')}
             placeholder=""
+            // eslint-disable-next-line jsx-a11y/no-autofocus
             autoFocus
             disabled={mutation.isPending}
           />

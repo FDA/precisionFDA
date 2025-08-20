@@ -12,12 +12,12 @@ import { MarkdownEditor } from '../../../components/Markdown/MarkdownEditor'
 import { InputError } from '../../../components/form/styles'
 import { ButtonRow } from '../../modal/styles'
 import { AttachmentsList } from '../AttachmentsList'
-import { NoteForm } from '../discussions.types'
+import { AttachmentKey, NoteForm } from '../discussions.types'
 import { groupByAttachmentType, pickIdsFromFormAttachments } from '../helpers'
 import { Attachments } from './Attachments'
 import { Button } from '../../../components/Button'
 
-const StyledForm = styled.div`
+const StyledForm = styled.form`
   display: flex;
   flex-direction: column;
   padding-top: 8px;
@@ -78,14 +78,17 @@ export const EditNoteForm = ({
     await onSubmit(getValues())
   }
 
-  const deleteAttachment = (key: any, id: number) => {
-    const v = getValues(key) as { id: number }[]
+  const deleteAttachment = (key: `attachments.${AttachmentKey}`, id: number|string) => {
+    const v = getValues(key)
     const newAttachments = v.filter(a => a.id !== id)
     setValue(key, newAttachments)
   }
 
   return (
-    <StyledForm id="commentForm" autoComplete="off">
+    <StyledForm
+      id="commentForm"
+      autoComplete="off"
+    >
       <Controller
         control={control}
         name="content"
@@ -103,7 +106,7 @@ export const EditNoteForm = ({
           disabled={isSubmitting || Object.keys(errors).length > 0}
           onClick={handleSubmit(onSubmitForm)}
         >
-          {isSubmitting ? 'Saving' : 'Edit'}
+          {isSubmitting ? 'Saving' : 'Save'}
         </Button>
       </ButtonRow>
     </StyledForm>

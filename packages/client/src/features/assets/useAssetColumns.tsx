@@ -9,6 +9,7 @@ import { FileZipIcon } from '../../components/icons/FileZipIcon'
 import { ObjectGroupIcon } from '../../components/icons/ObjectGroupIcon'
 import { StyledLinkCell, StyledNameCell } from '../home/home.styles'
 import { IAsset } from './assets.types'
+import NumberRangeFilter, { numberRangeFilterFn } from '../../components/Table/components/NumberRangeFilter'
 
 const isUnclosedAsset = (asset: IAsset): boolean => asset.state === 'open' || asset.state === 'closing'
 
@@ -86,9 +87,13 @@ export const useAssetColumns = ({
     {
       header: 'Size',
       accessorKey: 'file_size',
-      size: 160,
-      filterPlaceholderFrom: 'Min(KB)',
-      filterPlaceholderTo: 'Max(KB)',
+      size: 170,
+      filterFn: numberRangeFilterFn,
+      meta: {
+        filterElement: column => (
+          <NumberRangeFilter column={column} fromPlaceholder="Min(KB)" toPlaceholder="Max(KB)" />
+        ),
+      },
     },
     {
       header: 'Created',

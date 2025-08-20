@@ -2,7 +2,7 @@ import { FilterQuery } from '@mikro-orm/core'
 import { Discussion } from '@shared/domain/discussion/discussion.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { STATIC_SCOPE } from '@shared/enums'
-import { AccessControlRepository } from '@shared/repository/access-control.repository'
+import { AccessControlRepository } from '@shared/database/repository/access-control.repository'
 
 export default class DiscussionRepository extends AccessControlRepository<Discussion> {
   protected async getAccessibleWhere(): Promise<FilterQuery<Discussion>> {

@@ -1,6 +1,13 @@
 import { DndContext } from '@dnd-kit/core'
 import { useQueryClient } from '@tanstack/react-query'
-import { ColumnDefResolved, ColumnFiltersState, ColumnSizingState, ColumnSort, RowSelectionState, VisibilityState } from '@tanstack/react-table'
+import {
+  ColumnDefResolved,
+  ColumnFiltersState,
+  ColumnSizingState,
+  ColumnSort,
+  RowSelectionState,
+  VisibilityState,
+} from '@tanstack/react-table'
 import React, { useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import useWebSocket from 'react-use-websocket'
@@ -22,28 +29,22 @@ import { ActionsDropdownContent } from '../home/ActionDropdownContent'
 import { ActionModalsRenderer } from '../home/ActionModalsRenderer'
 import { ActionsRow, QuickActions } from '../home/home.styles'
 import { ActionsButton, FilesListBreadcrumbHeader, FilesListResourceHeader } from '../home/show.styles'
-import {
-  HomeScope,
-  IMeta,
-  Notification,
-  NOTIFICATION_ACTION,
-  WEBSOCKET_MESSAGE_TYPE,
-  WebSocketMessage,
-} from '../home/types'
+import { HomeScope, IMeta, Notification, NOTIFICATION_ACTION, WEBSOCKET_MESSAGE_TYPE, WebSocketMessage } from '../home/types'
 import { useList } from '../home/useList'
 import { usePropertiesQuery } from '../home/usePropertiesQuery'
 import { ISpace } from '../spaces/spaces.types'
 import { FileBreadcrumb } from './FileBreadcrumb'
 import { centerToCursorCollisionDetection } from './centerToCursorCollisionDetection'
 import { fetchFiles } from './files.api'
-import { IFile } from './files.types'
+import { IFile, IFolder } from './files.types'
 import { useFilesColumns } from './useFilesColumns'
 import { useFileDnd } from './useFilesDnd'
 import { useFilesSelectActions } from './useFilesSelectActions'
 import { useFolderActions } from './useFolderActions'
 import { ResouceQueryErrorMessage } from '../home/ResouceQueryErrorMessage'
+import { useLastWSNotification } from '../../hooks/useToastWSHandler'
 
-type ListType = { files: IFile[]; meta: IMeta }
+type ListType = { files: (IFile|IFolder)[]; meta: IMeta }
 
 export const FileList = ({
   homeScope,
@@ -92,30 +93,14 @@ export const FileList = ({
   })
 
   const onRowClick = (id: string) => {
-    navigate(`${location.pathname}/${id}`, { state: { from: location.pathname, fromSearch: location.search }})
+    navigate(`${location.pathname}/${id}`, { state: { from: location.pathname, fromSearch: location.search } })
   }
 
-  const { lastJsonMessage } = useWebSocket<WebSocketMessage>(getNodeWsUrl(), {
-    share: true,
-    reconnectInterval: DEFAULT_RECONNECT_INTERVAL,
-    reconnectAttempts: DEFAULT_RECONNECT_ATTEMPTS,
-    shouldReconnect: () => SHOULD_RECONNECT,
-    filter: message => {
-      try {
-        const messageData = JSON.parse(message.data)
-        const notification = messageData.data as Notification
-        return (
-          messageData.type === WEBSOCKET_MESSAGE_TYPE.NOTIFICATION &&
-          [NOTIFICATION_ACTION.NODES_REMOVED, NOTIFICATION_ACTION.NODES_COPIED, NOTIFICATION_ACTION.FILE_CLOSED].includes(
-            notification.action,
-          )
-        )
-      } catch (e: unknown) {
-        console.error('Error parsing WebSocket message:', e)
-        return false
-      }
-    },
-  })
+  const lastJsonMessage = useLastWSNotification([
+    NOTIFICATION_ACTION.NODES_REMOVED,
+    NOTIFICATION_ACTION.NODES_COPIED,
+    NOTIFICATION_ACTION.FILE_CLOSED,
+  ])
 
   useEffect(() => {
     if (lastJsonMessage == null) {
@@ -160,7 +145,7 @@ export const FileList = ({
   const files: IFile[] = data?.files || data?.entries
   const selectedObjects = getSelectedObjectsFromIndexes(selectedIndexes, files)
   const selectedFileIds = selectedObjects.map(o => o.uid).filter(Boolean)
-  
+
   const { actions, modals } = useFilesSelectActions({
     homeScope,
     space,
@@ -170,7 +155,12 @@ export const FileList = ({
     resourceKeys: ['files'],
   })
 
-  const { actions: folderActions, modals: folderModals } = useFolderActions(homeScope, folderIdParam!, space?.id.toString(), resetSelected)
+  const { actions: folderActions, modals: folderModals } = useFolderActions(
+    homeScope,
+    folderIdParam!,
+    space?.id.toString(),
+    resetSelected,
+  )
 
   const findAction = (actionName: string) => {
     return folderActions.find(action => action.name === actionName)
@@ -244,7 +234,9 @@ export const FileList = ({
                 />
               )}
             >
-              {dropdownProps => (<ActionsButton {...dropdownProps} active={dropdownProps.$isActive} data-testid="home-files-actions-button" />)}
+              {dropdownProps => (
+                <ActionsButton {...dropdownProps} active={dropdownProps.$isActive} data-testid="home-files-actions-button" />
+              )}
             </DropdownNext>
           </QuickActions>
         </ActionsRow>
@@ -286,7 +278,7 @@ export const FileList = ({
         />
         <HoverDNAnexusLogo opacity height={14} />
       </ContentFooter>
-      
+
       <ActionModalsRenderer modals={folderModals} />
       <ActionModalsRenderer modals={modals} />
     </>

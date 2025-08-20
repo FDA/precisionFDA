@@ -115,8 +115,8 @@ export function useFilterParams({ filters, onSetFilter }: { filters: FilterArgs;
   const [filterQuery, setFilterParam] = useQueryParams(params)
   const debouncedSetFilterQuery = debounce(v => {
     v.file_size = fileSizeParamMap([v.file_size?.from ?? null, v.file_size?.to ?? null])
-    v.lastLogin = rangeParamMap([v.lastLogin?.from ?? '', v.lastLogin?.to ?? ''])
-    v.createdAt = rangeParamMap([v.createdAt?.from ?? '', v.createdAt?.to ?? ''])
+    v.lastLogin = rangeParamMap([v.lastLogin?.[0] ?? '', v.lastLogin?.[1] ?? ''])
+    v.createdAt = rangeParamMap([v.createdAt?.[0] ?? '', v.createdAt?.[1] ?? ''])
     setFilterParam(v, 'replaceIn')
     if (onSetFilter) onSetFilter(v)
   }, 500)

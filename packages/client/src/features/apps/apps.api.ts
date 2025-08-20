@@ -5,7 +5,7 @@ import { IChallenge } from '../../types/challenge'
 import { FetchAccessibleFilesResponse, fetchAccessibleFiles } from '../databases/databases.api'
 import { IExecution } from '../executions/executions.types'
 import { FileScope } from '../files/files.types'
-import { ApiResponse, IFilter, IMeta, ServerScope } from '../home/types'
+import { ApiResponse, HomeScope, IFilter, IMeta, ServerScope } from '../home/types'
 import { Params, formatScopeQ, prepareListFetch } from '../home/utils'
 import { License } from '../licenses/types'
 import { ISpace } from '../spaces/spaces.types'
@@ -42,7 +42,7 @@ export async function runJob(request: RunJobRequest) {
 export async function fetchApps(filters: IFilter[], params: Params): Promise<FetchAppsQuery> {
   const query = prepareListFetch(filters, params)
   const paramQ = `?${new URLSearchParams(query as Record<string, string>).toString()}`
-  const scopeQ = formatScopeQ(params.scope)
+  const scopeQ = formatScopeQ(params.scope as HomeScope)
   return axios.get<FetchAppsQuery>(`/api/apps/${scopeQ}${paramQ}`).then(r => r.data)
 }
 

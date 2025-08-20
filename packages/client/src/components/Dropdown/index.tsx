@@ -15,7 +15,7 @@ export const Dropdown: FC<{
   trigger?: 'click' | 'hover'
   children: (c: {
     style: React.CSSProperties
-    ref: React.RefObject<HTMLDivElement>
+    ref: React.RefObject<HTMLDivElement|null>
     onClick: () => void
     onMouseEnter: () => void
     onMouseLeave: () => void

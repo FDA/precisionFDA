@@ -10,6 +10,7 @@ import { JobProvenanceDataService } from '@shared/domain/provenance/service/enti
 import { NoteProvenanceDataService } from '../service/entity-data/note-provenance-data.service'
 import { UserProvenanceDataService } from '@shared/domain/provenance/service/entity-data/user-provenance-data.service'
 import { WorkflowProvenanceDataService } from '@shared/domain/provenance/service/entity-data/workflow-provenance-data.service'
+import { FolderProvenanceDataService } from '@shared/domain/provenance/service/entity-data/folder-provenance-data.service'
 
 export const ENTITY_TYPE_TO_PARENT_RESOLVER_MAP = 'ENTITY_TYPE_TO_PARENT_RESOLVER_MAP'
 
@@ -25,9 +26,10 @@ export const entityTypeToParentResolverMapProvider: Provider = {
     NoteProvenanceDataService,
     UserProvenanceDataService,
     WorkflowProvenanceDataService,
+    FolderProvenanceDataService,
   ],
-  useFactory: (app, asset, comparison, dbcluster, file, job, note, user, workflow) =>
-    ({ file, job, user, comparison, dbcluster, note, asset, app, workflow }) satisfies {
+  useFactory: (app, asset, comparison, dbcluster, file, job, note, user, workflow, folder) =>
+    ({ file, job, user, comparison, dbcluster, note, asset, app, workflow, folder }) satisfies {
       [T in EntityWithProvenanceType]: EntityProvenanceDataService<T>
     },
 }

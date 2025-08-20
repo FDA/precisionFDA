@@ -1,12 +1,61 @@
-import { Uid } from '@shared/domain/entity/domain/uid'
-import { Challenge } from './challenge.entity'
-import { AccessControlRepository } from '@shared/repository/access-control.repository'
-import { FilterQuery } from '@mikro-orm/core'
-import { User } from '@shared/domain/user/user.entity'
+import { FilterQuery } from '@mikro-orm/mysql'
+import { AccessControlRepository } from '@shared/database/repository/access-control.repository'
 import { CHALLENGE_STATUS } from '@shared/domain/challenge/challenge.enum'
+import { Uid } from '@shared/domain/entity/domain/uid'
+import { User } from '@shared/domain/user/user.entity'
 import { STATIC_SCOPE } from '@shared/enums'
+import { Challenge } from './challenge.entity'
 
 class ChallengeRepository extends AccessControlRepository<Challenge> {
+  private readonly PRE_REGISTRATION_SQL = `
+    SELECT *
+    FROM challenges
+    WHERE MATCH(name, description, pre_registration_content)
+                AGAINST(? IN NATURAL LANGUAGE MODE)
+      AND status = 'pre-registration'
+    ORDER BY MATCH(name, description, pre_registration_content)
+                   AGAINST(? IN NATURAL LANGUAGE MODE) DESC
+  `
+
+  private readonly OPEN_PAUSED_ARCHIVED_SQL = `
+    SELECT *
+    FROM challenges
+    WHERE MATCH(name, description, info_content)
+                AGAINST(? IN NATURAL LANGUAGE MODE)
+      AND status in ('open', 'paused', 'archived')
+    ORDER BY MATCH(name, description, info_content)
+                   AGAINST(? IN NATURAL LANGUAGE MODE) DESC
+  `
+
+  private readonly RESULT_ANNOUNCED_SQL = `
+    SELECT *
+    FROM challenges
+    WHERE MATCH(name, description, info_content, results_content)
+                AGAINST(? IN NATURAL LANGUAGE MODE)
+      AND status = 'result_announced'
+    ORDER BY MATCH(name, description, info_content, results_content)
+                   AGAINST(? IN NATURAL LANGUAGE MODE) DESC
+  `
+
+  async searchPreRegistrationByNameAndDescriptionAndContents(query: string): Promise<Challenge[]> {
+    return this.executeAndMapQuery(this.PRE_REGISTRATION_SQL, query)
+  }
+
+  async searchOpenPausedArchivedByNameAndDescriptionAndContents(
+    query: string,
+  ): Promise<Challenge[]> {
+    return this.executeAndMapQuery(this.OPEN_PAUSED_ARCHIVED_SQL, query)
+  }
+
+  async searchResultAnnouncedByNameAndDescriptionAndContents(query: string): Promise<Challenge[]> {
+    return this.executeAndMapQuery(this.RESULT_ANNOUNCED_SQL, query)
+  }
+
+  private async executeAndMapQuery(sql: string, query: string): Promise<Challenge[]> {
+    const results = await this.em.execute(sql, [query, query])
+    return results.map((row) => this.em.map(Challenge, row))
+  }
+
   protected async getAccessibleWhere(): Promise<FilterQuery<Challenge>> {
     const user = await this.em.findOne(User, { id: this.user.id })
 

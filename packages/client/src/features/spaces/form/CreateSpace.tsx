@@ -8,6 +8,7 @@ import { createSpaceRequest, spaceRequest } from '../spaces.api'
 import { SpaceForm } from './CreateSpaceForm'
 import { StyledBack, StyledPageCenter, StyledPageContent } from './styles'
 import { UserLayout } from '../../../layouts/UserLayout'
+import { ApiErrorResponse } from '../../home/types'
 
 export const CreateSpace = () => {
   const navigate = useNavigate()
@@ -20,7 +21,8 @@ export const CreateSpace = () => {
         try {
           const spaceDetails = await spaceRequest({ id: res.id })
           navigate(`/spaces/${spaceDetails?.space.id}`)
-        } catch (err: any) {
+        } catch (e) {
+          const err = e as AxiosError<ApiErrorResponse>
           if (err.response && err.response.status === 403) {
             navigate('/spaces')
           } else {
@@ -31,13 +33,13 @@ export const CreateSpace = () => {
         queryClient.invalidateQueries({
           queryKey: ['spaces'],
         })
-      } else if (res?.errors) {
+      } else if ('errors' in res && res?.errors && Array.isArray(res.errors)) {
         toast.error(`${res.errors[0]}`)
       } else {
         toast.error('Something went wrong')
       }
     },
-    onError: (error: AxiosError) => {
+    onError: (error: AxiosError<ApiErrorResponse>) => {
       if (error?.response?.data?.error?.message) {
         toast.error(error?.response?.data?.error?.message)
         return
@@ -51,7 +53,7 @@ export const CreateSpace = () => {
       <StyledPageCenter>
         <StyledPageContent>
           <StyledBack linkTo="/spaces">Back to Spaces</StyledBack>
-          <PageTitle>Create Space</PageTitle>
+          <PageTitle>Create a new Space</PageTitle>
           <SpaceForm mutation={mutation} />
         </StyledPageContent>
       </StyledPageCenter>

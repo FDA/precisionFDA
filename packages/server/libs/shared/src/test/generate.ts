@@ -4,10 +4,16 @@ import { Comment } from '@shared/domain/comment/comment.entity'
 import { DbCluster } from '@shared/domain/db-cluster/db-cluster.entity'
 import { DxId } from '@shared/domain/entity/domain/dxid'
 import { Uid } from '@shared/domain/entity/domain/uid'
+import {
+  ExpertQuestion,
+  ExpertQuestionState,
+} from '@shared/domain/expert-question/entity/expert-question.entity'
+import { Expert, EXPERT_STATE } from '@shared/domain/expert/entity/expert.entity'
 import { Invitation } from '@shared/domain/invitation/invitation.entity'
 import { PROVISIONING_STATE } from '@shared/domain/invitation/invitation.enum'
 import { Job } from '@shared/domain/job/job.entity'
 import { JobRunData } from '@shared/domain/job/job.types'
+import { JobSynchronizationService } from '@shared/domain/job/services/job-synchronization.service'
 import { NewsItem } from '@shared/domain/news-item/news-item.entity'
 import { Note } from '@shared/domain/note/note.entity'
 import { SpaceEvent } from '@shared/domain/space-event/space-event.entity'
@@ -15,6 +21,7 @@ import { SpaceMembership } from '@shared/domain/space-membership/space-membershi
 import { Space } from '@shared/domain/space/space.entity'
 import { Tag } from '@shared/domain/tag/tag.entity'
 import { Tagging } from '@shared/domain/tagging/tagging.entity'
+import { TAGGABLE_TYPE } from '@shared/domain/tagging/tagging.types'
 import { Asset } from '@shared/domain/user-file/asset.entity'
 import { Folder } from '@shared/domain/user-file/folder.entity'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
@@ -22,24 +29,24 @@ import { UserExtras } from '@shared/domain/user/user-extras'
 import { WorkflowSeries } from '@shared/domain/workflow-series/workflow-series.entity'
 import { Workflow } from '@shared/domain/workflow/entity/workflow.entity'
 import { JobDescribeResponse } from '@shared/platform-client/platform-client.responses'
+import { JobInformation } from 'bull'
 import Chance from 'chance'
 import crypto from 'crypto'
 import { DateTime } from 'luxon'
-import { nanoid } from 'nanoid'
+import { customAlphabet } from 'nanoid'
 import { App, AppSpec, Internal } from '../domain/app/app.entity'
 import { ENTITY_TYPE } from '../domain/app/app.enum'
 import { CHALLENGE_STATUS } from '../domain/challenge/challenge.enum'
-import { COMPARISON_STATE, Comparison } from '../domain/comparison/comparison.entity'
+import { Comparison, COMPARISON_STATE } from '../domain/comparison/comparison.entity'
 import {
   ENGINE as DB_CLUSTER_ENGINE,
-  STATUS as DB_CLUSTER_STATUS,
   ENGINES,
+  STATUS as DB_CLUSTER_STATUS,
 } from '../domain/db-cluster/db-cluster.enum'
-import { EXPERT_STATE, Expert } from '../domain/expert/expert.entity'
 import { JOB_DB_ENTITY_TYPE, JOB_STATE } from '../domain/job/job.enum'
 import {
-  SPACE_EVENT_ACTIVITY_TYPE,
   ENTITY_TYPE as SPACE_EVENT_ENTITY_TYPE,
+  SPACE_EVENT_ACTIVITY_TYPE,
   SPACE_EVENT_OBJECT_TYPE,
 } from '../domain/space-event/space-event.enum'
 import {
@@ -47,7 +54,7 @@ import {
   SPACE_MEMBERSHIP_SIDE,
 } from '../domain/space-membership/space-membership.enum'
 import { FILE_STATE_DX, FILE_STI_TYPE, PARENT_TYPE } from '../domain/user-file/user-file.types'
-import { USER_STATE, User } from '../domain/user/user.entity'
+import { User, USER_STATE } from '../domain/user/user.entity'
 import { STATIC_SCOPE } from '../enums'
 import { TASK_TYPE } from '../queue/task.input'
 import type { AnyObject, UserCtx } from '../types'
@@ -56,14 +63,16 @@ import { JobSynchronizationService } from '@shared/domain/job/services/job-synch
 
 const chance = new Chance()
 
+const nanoidDxstr = customAlphabet('abcdefghijklmnopqrstuvwxyz', 10)
+
 const random = {
-  firstName: () => chance.first(),
-  lastName: () => chance.last(),
-  email: () => chance.email(),
-  password: () => crypto.randomBytes(64).toString('hex'),
-  dxstr: (): string => nanoid(),
-  word: () => chance.word(),
-  description: () => chance.sentence({ words: 2 }),
+  firstName: (): string => chance.first(),
+  lastName: (): string => chance.last(),
+  email: (): string => chance.email(),
+  password: (): string => crypto.randomBytes(64).toString('hex'),
+  dxstr: (): string => nanoidDxstr(),
+  word: (): string => chance.word(),
+  description: (): string => chance.sentence({ words: 2 }),
   chance,
 }
 
@@ -92,7 +101,13 @@ const user = {
 }
 
 const alert = {
-  active: () => {
+  active: (): {
+    title: string
+    content: string
+    type: 'danger' | 'info' | 'warning'
+    startTime: Date
+    endTime: Date
+  } => {
     const now = new Date()
     const startTime = new Date(now.getTime())
     const endTime = new Date(now.getTime())
@@ -107,7 +122,13 @@ const alert = {
       endTime: endTime,
     }
   },
-  expired: () => {
+  expired: (): {
+    title: string
+    content: string
+    type: 'danger' | 'info' | 'warning'
+    startTime: Date
+    endTime: Date
+  } => {
     const now = new Date()
     const startTime = new Date(now.getTime())
     const endTime = new Date(now.getTime())
@@ -122,7 +143,13 @@ const alert = {
       endTime: endTime,
     }
   },
-  future: () => {
+  future: (): {
+    title: string
+    content: string
+    type: 'danger' | 'info' | 'warning'
+    startTime: Date
+    endTime: Date
+  } => {
     const now = new Date()
     const startTime = new Date(now.getTime())
     const endTime = new Date(now.getTime())
@@ -139,7 +166,7 @@ const alert = {
   },
 }
 const app = {
-  jupyterAppSpecData: () => {
+  jupyterAppSpecData: (): AppSpec => {
     return {
       internet_access: true,
       instance_type: 'baseline-2',
@@ -193,7 +220,7 @@ const app = {
       ],
     } as AppSpec
   },
-  ttydAppSpecData: () => {
+  ttydAppSpecData: (): AppSpec => {
     return {
       internet_access: true,
       instance_type: 'baseline-2',
@@ -211,13 +238,13 @@ const app = {
       ],
     } as AppSpec
   },
-  ttydAppInternal: () => {
+  ttydAppInternal: (): Internal => {
     return {
       ordered_assets: ['file-GQX1jP800Q42p0p3f2QY1zgb-1'],
       packages: ['ipython', 'pkg-config'],
     } as Internal
   },
-  ttydAppInternalWithAPI: (version: string) => {
+  ttydAppInternalWithAPI: (version: string): Internal => {
     return {
       ordered_assets: ['file-GQX1jP800Q42p0p3f2QY1zgb-1'],
       platform_tags: [`pfda_workstation_api:${version}`],
@@ -296,14 +323,14 @@ const app = {
       duration: 30,
     },
   }),
-  runTtydAppInput: () => ({
+  runTtydAppInput: (): AnyObject => ({
     scope: 'private',
     jobLimit: 50,
     input: {
       port: 8080,
     },
   }),
-  runRshinyAppInput: () => ({
+  runRshinyAppInput: (): AnyObject => ({
     scope: 'private',
     jobLimit: 50,
     input: {
@@ -321,7 +348,7 @@ const app = {
       scope: 'private',
     }
   },
-  appId: () => 'app-GP3J1V00XbPPz5qP4QPGxQ08',
+  appId: (): string => 'app-GP3J1V00XbPPz5qP4QPGxQ08',
 }
 
 const appSeries = {
@@ -354,7 +381,7 @@ const workflow = {
     const dxid = `workflow-${random.dxstr()}}` as DxId<'workflow'>
     return {
       dxid,
-      uid: `${dxid}-1` as Uid<'workflow'>,
+      uid: `${dxid}-1`,
       name,
       revision: 1,
       scope: 'private',
@@ -423,7 +450,7 @@ const job = {
       entityType: JOB_DB_ENTITY_TYPE.REGULAR,
     }
   },
-  jobId: () => 'job-FyZg2z000B72xG6b3yVY5BBK',
+  jobId: (): string => 'job-FyZg2z000B72xG6b3yVY5BBK',
 }
 
 const userFile = {
@@ -515,7 +542,6 @@ const folder = {
     return {
       name: chance.name(),
       project: undefined,
-      dxid: undefined,
       scope: STATIC_SCOPE.PRIVATE,
       parentId: 1,
       parentType: PARENT_TYPE.JOB,
@@ -527,7 +553,6 @@ const folder = {
     return {
       name: chance.word(),
       project: undefined,
-      dxid: undefined,
       scope: STATIC_SCOPE.PRIVATE,
       parentId: 1,
       parentType: PARENT_TYPE.USER,
@@ -546,7 +571,7 @@ const tag = {
 
 const tagging = {
   userfileDefaults: (): Partial<InstanceType<typeof Tagging>> => ({
-    taggableType: 'Node',
+    taggableType: TAGGABLE_TYPE.NODE,
     taggerType: 'User',
     context: 'tags',
   }),
@@ -559,9 +584,9 @@ const space = {
     type: 1, // review type
     guestDxOrg: `org-pfda..space_guest_${random.dxstr()}`,
     hostDxOrg: `org-pfda..space_host_${random.dxstr()}`,
-    spaceId: null as any,
-    hostProject: null as any,
-    guestProject: null as any,
+    spaceId: null,
+    hostProject: null,
+    guestProject: null,
     description: 'desc',
     meta: {
       restricted_discussions: false,
@@ -573,12 +598,12 @@ const space = {
     name: chance.word(),
     state: 1,
     type: 0, // GROUP type
-    spaceId: null as any,
-    hostProject: null as any,
-    guestProject: null as any,
+    spaceId: null,
+    hostProject: null,
+    guestProject: null,
   }),
   // represents space on platform
-  projectId: () => `project-j47b1k3z8Jqqv001213v312j1`,
+  projectId: (): string => `project-j47b1k3z8Jqqv001213v312j1`,
 }
 
 const spaceMembership = {
@@ -689,6 +714,19 @@ const expert = {
   },
 }
 
+const expertQuestion = {
+  simple: (): Partial<InstanceType<typeof ExpertQuestion>> => {
+    return {
+      body: chance.sentence(),
+      meta: {
+        _original: chance.sentence(),
+        _edited: true,
+      },
+      state: ExpertQuestionState.OPEN,
+    }
+  },
+}
+
 const invitation = {
   simple: (): Partial<InstanceType<typeof Invitation>> => {
     return {
@@ -727,7 +765,12 @@ const news = {
 }
 
 const bullQueue = {
-  syncDbClusterStatus: (dbClusterDxid: string, userContext: UserCtx) => ({
+  syncDbClusterStatus: (
+    dbClusterDxid: string,
+    userContext: UserCtx,
+  ): {
+    data: { payload: { dxid: string }; type: TASK_TYPE; user: UserCtx }
+  } => ({
     data: {
       payload: {
         dxid: dbClusterDxid,
@@ -736,7 +779,12 @@ const bullQueue = {
       user: userContext,
     },
   }),
-  syncJobStatus: (jobDxid: string, userContext: UserCtx) => ({
+  syncJobStatus: (
+    jobDxid: string,
+    userContext: UserCtx,
+  ): {
+    data: { payload: { dxid: string }; type: TASK_TYPE; user: UserCtx }
+  } => ({
     data: {
       payload: {
         dxid: jobDxid,
@@ -758,7 +806,7 @@ const bullQueueRepeatable = {
     every: null,
     next: Date.now() + 60 * 1000,
   }),
-  syncJobStatus: (jobDxid: string) => ({
+  syncJobStatus: (jobDxid: string): JobInformation => ({
     key: `__default__:${JobSynchronizationService.getBullJobId(jobDxid)}:::*/2 * * * *`,
     name: '__default__',
     id: JobSynchronizationService.getBullJobId(jobDxid),
@@ -770,7 +818,7 @@ const bullQueueRepeatable = {
   }),
   // In orphaned cases the 'next' timestamp (in milliseconds) has passed and
   // they sit idle in BullQueue
-  syncJobStatusOrphaned: (jobDxid) => ({
+  syncJobStatusOrphaned: (jobDxid): JobInformation => ({
     key: `__default__:${JobSynchronizationService.getBullJobId(jobDxid)}:::*/2 * * * *`,
     name: '__default__',
     id: JobSynchronizationService.getBullJobId(jobDxid),
@@ -794,6 +842,7 @@ export {
   comparison,
   dbCluster,
   expert,
+  expertQuestion,
   folder,
   invitation,
   job,

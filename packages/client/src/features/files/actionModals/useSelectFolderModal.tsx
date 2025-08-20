@@ -17,34 +17,32 @@ type EnhancedDataNode = DataNode & {
 }
 
 const OrganizeFiles = ({
-                         scope,
-                         onSelect,
-                       }: {
-  scope: ServerScope
+  scope,
+  onSelect,
+}: {
+  scope?: ServerScope
   onSelect: (selectedKeys: Key[], info: TreeOnSelectInfo) => void
 }) => {
-  const [treeData, setTreeData] = useImmer<DataNode[]>([
-    { key: 'ROOT', title: '/', children: []} as unknown as DataNode,
-  ])
+  const [treeData, setTreeData] = useImmer<DataNode[]>([{ key: 'ROOT', title: '/', children: []} as unknown as DataNode])
 
   return (
     <FileTree
+      // @ts-expect-error not use
       onExpand={() => {}}
       loadData={async (node?: EnhancedDataNode) => {
-        const nodes = await fetchFolderChildren({ scopes: [scope], folderId: node?.key.toString(), types: ['Folder']})
+        const nodes = await fetchFolderChildren({ scopes: scope ? [scope] : [], folderId: node?.key.toString(), types: ['Folder']})
 
         const parentPath = node?.path ?? ''
 
-        const children = nodes
-          .map(d => ({
-            key: d.id.toString(),
-            title: d.name,
-            children: [],
-            path: parentPath ? `${parentPath}/${d.name}` : `/${d.name}`,
-          }))
+        const children = nodes.map(d => ({
+          key: d.id.toString(),
+          title: d.name,
+          children: [],
+          path: parentPath ? `${parentPath}/${d.name}` : `/${d.name}`,
+        }))
 
         setTreeData(draft => {
-          const folder = findById(draft, node?.key.toString())
+          const folder = findById(draft, node?.key.toString() as React.Key)
           if (folder) {
             folder.children = children
           }
@@ -73,7 +71,7 @@ export const useSelectFolderModal = ({
 }) => {
   const { isShown, setShowModal } = useModal()
   const [selectedTarget, setSelectedTarget] = useState<string>()
-  const [selectedTargetInfo, setSelectedTargetInfo] = useState<any>()
+  const [selectedTargetInfo, setSelectedTargetInfo] = useState<TreeOnSelectInfo>()
   const [submitEnabled, setSubmitEnabled] = useState(false)
 
   const handleSelect = (selectedKey: string, selectedInfo: TreeOnSelectInfo) => {
@@ -83,20 +81,14 @@ export const useSelectFolderModal = ({
   }
 
   const handleSubmit = () => {
-    if (onHandleSubmit && selectedTarget) {
+    if (onHandleSubmit && selectedTarget && selectedTargetInfo) {
       onHandleSubmit(parseInt(selectedTarget, 10), selectedTargetInfo)
       setSubmitEnabled(false)
     }
   }
 
   const modalComp = (
-    <ModalNext
-      id="modal-select-folder"
-      data-testid="modal-select-folder"
-      hide={() => setShowModal(false)}
-      isShown={isShown}
-      disableClose={false}
-    >
+    <ModalNext id="modal-select-folder" data-testid="modal-select-folder" hide={() => setShowModal(false)} isShown={isShown}>
       <ModalHeaderTop disableClose={false} headerText={headerText} hide={() => setShowModal(false)} />
       <ModalScroll>
         <StyledForm as="div">

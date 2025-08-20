@@ -24,7 +24,7 @@ interface Links2 {
   track: string
   attach_to: string
   copy: string
-  app: string
+  app?: string
 }
 
 export type JobState = 'done' | 'failed' | 'idle' | 'running' | 'runnable' | 'terminated' | 'terminating'

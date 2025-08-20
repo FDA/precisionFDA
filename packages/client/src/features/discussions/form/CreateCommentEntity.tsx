@@ -12,6 +12,7 @@ import {
 import { NoteForm } from '../discussions.types'
 import { pickIdsFromFormAttachments } from '../helpers'
 import { MarkdownForm } from './MarkdownForm'
+import { RefCallBack } from 'react-hook-form'
 
 export const CreateCommentEntity = ({
   canUserAnswer,
@@ -24,10 +25,10 @@ export const CreateCommentEntity = ({
 }: {
   canUserAnswer: boolean
   scope: NoteScope
-  markdownInputRef?: React.MutableRefObject<HTMLInputElement | null>
+  markdownInputRef?: RefCallBack
   discussionId: number
   answerId?: number
-  onCancel?: (vals?: any) => void
+  onCancel?: (vals?: unknown) => void
   onSuccess?: () => void
 }) => {
   const queryClient = useQueryClient()

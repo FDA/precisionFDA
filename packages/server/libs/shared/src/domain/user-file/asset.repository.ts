@@ -1,10 +1,10 @@
 import { FilterQuery } from '@mikro-orm/mysql'
+import { AccessControlRepository } from '@shared/database/repository/access-control.repository'
 import { DxId } from '@shared/domain/entity/domain/dxid'
 import { Uid } from '@shared/domain/entity/domain/uid'
 import { STATIC_SCOPE } from '../../enums'
 import { Asset } from './asset.entity'
 import { FILE_STATE_DX } from './user-file.types'
-import { AccessControlRepository } from '@shared/repository/access-control.repository'
 import { User } from '@shared/domain/user/user.entity'
 
 export class AssetRepository extends AccessControlRepository<Asset> {

@@ -12,7 +12,7 @@ export async function createSpaceGroupRequest(payload: SpaceGroupPayload): Promi
   return axios.post('/api/v2/space-groups', payload).then(res => res.data)
 }
 
-export async function updateSpaceGroupRequest(payload: SpaceGroupPayload): Promise<void> {
+export async function updateSpaceGroupRequest(payload: SpaceGroupPayload) {
   return axios.put(`/api/v2/space-groups/${payload.id}`, payload).then(res => res.data)
 }
 
@@ -24,7 +24,7 @@ export async function spaceGroupsListRequest(): Promise<ISpaceGroup[]> {
   return axios.get('/api/v2/space-groups').then(res => res.data)
 }
 
-export async function spaceGroupByIdRequest(id: number) {
+export async function spaceGroupByIdRequest(id: number|string) {
   return axios.get(`/api/v2/space-groups/${id}`).then(res => res.data as ISpaceGroup)
 }
 
