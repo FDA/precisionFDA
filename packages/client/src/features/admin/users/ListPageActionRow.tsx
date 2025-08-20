@@ -1,6 +1,6 @@
 import { useMutation, UseQueryResult } from '@tanstack/react-query'
 import React, { useState } from 'react'
-import { useNavigate } from 'react-router'
+import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import styled from 'styled-components'
 import axios from 'axios'
@@ -26,44 +26,56 @@ const ButtonsRow = styled.div`
 // TODO(samuel) Fix incorrect error handling with react-query
 // https://react-query.tanstack.com/guides/query-functions#usage-with-fetch-and-other-clients-that-do-not-throw-by-default
 const setTotalLimit = async (ids: User['id'][], totalLimit: number) =>
-  axios.post('/admin/set_total_limit', {
-    ids,
-    totalLimit,
-  }).then(res => res.data)
+  axios
+    .post('/admin/set_total_limit', {
+      ids,
+      totalLimit,
+    })
+    .then(res => res.data)
 
 const setJobLimit = async (ids: User['id'][], jobLimit: number) =>
-  axios.post('/admin/set_job_limit', {
-    ids,
-    jobLimit,
-  }).then(res => res.data)
+  axios
+    .post('/admin/set_job_limit', {
+      ids,
+      jobLimit,
+    })
+    .then(res => res.data)
 
 const bulkUnlock = async (ids: User['id'][]) =>
-  axios.post('/admin/bulk_unlock', {
-    ids,
-  }).then(res => res.data)
+  axios
+    .post('/admin/bulk_unlock', {
+      ids,
+    })
+    .then(res => res.data)
 
 const bulkActivate = async (ids: User['id'][]) =>
-  axios.post('/admin/bulk_activate', {
-    ids,
-  }).then(res => res.data)
+  axios
+    .post('/admin/bulk_activate', {
+      ids,
+    })
+    .then(res => res.data)
 
 const bulkDeactivate = async (ids: User['id'][]) =>
-  axios.post('/admin/bulk_deactivate', {
-    ids,
-  }).then(res => res.data)
+  axios
+    .post('/admin/bulk_deactivate', {
+      ids,
+    })
+    .then(res => res.data)
 
 // TODO(samuel) unify with my home
-const DropdownButton = React.forwardRef<HTMLElement, React.ComponentProps<typeof Button> & { $isActive?: boolean }>((props, ref) => {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { $isActive, ...buttonProps } = props
-  return (
-    // @ts-expect-error ref type mismatch between Dropdown and Button components
-    <Button data-variant="primary" ref={ref} {...buttonProps}>
-      Resources &nbsp;
-      <ArrowIcon />
-    </Button>
-  )
-})
+const DropdownButton = React.forwardRef<HTMLElement, React.ComponentProps<typeof Button> & { $isActive?: boolean }>(
+  (props, ref) => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { $isActive, ...buttonProps } = props
+    return (
+      // @ts-expect-error ref type mismatch between Dropdown and Button components
+      <Button data-variant="primary" ref={ref} {...buttonProps}>
+        Resources &nbsp;
+        <ArrowIcon />
+      </Button>
+    )
+  },
+)
 DropdownButton.displayName = 'DropdownButton'
 
 type UserListActionRowProps = {
@@ -200,10 +212,7 @@ export const UsersListActionRow = ({ selectedUsers, refetchUsers }: UserListActi
         onChange={setJobLimitInput}
         isSubmitButtonDisabled={Number.isNaN(jobLimitInput) || jobLimitInput < 0}
       />
-      <DropdownNext 
-        trigger="click" 
-        content={() => <ResourceDropdownContent selectedUsers={selectedUsers} />}
-      >
+      <DropdownNext trigger="click" content={() => <ResourceDropdownContent selectedUsers={selectedUsers} />}>
         {dropdownProps => (
           <DropdownButton
             {...dropdownProps}

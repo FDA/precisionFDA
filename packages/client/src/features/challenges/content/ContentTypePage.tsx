@@ -1,5 +1,5 @@
 import React from 'react'
-import { useNavigate } from 'react-router'
+import { useNavigate } from 'react-router-dom'
 import { $generateHtmlFromNodes } from '@lexical/html'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
@@ -36,7 +36,13 @@ const ContentEditButtonRow = styled.div`
   }
 `
 
-const ButtonBar = ({ challengeId, contentType }: { challengeId: number | string; contentType: UpdateChallengeContent['type'] }) => {
+const ButtonBar = ({
+  challengeId,
+  contentType,
+}: {
+  challengeId: number | string
+  contentType: UpdateChallengeContent['type']
+}) => {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const mutation = useMutation({
@@ -103,7 +109,7 @@ const ScrollBody = styled.div`
 
 export const ContentTypePage = ({ challengeId, contentType }: { challengeId: number | string; contentType: ContentType }) => {
   const { data } = useChallengeByIDQuery(challengeId!, contentType)
-  if(!data) return null
+  if (!data) return null
   return (
     <LexiContext editorState={data[mapContentTypeToKey(contentType)]}>
       <ScrollBody className="editor-shell" style={{ margin: 0 }}>
