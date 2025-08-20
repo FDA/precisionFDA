@@ -37,7 +37,7 @@ export class UserFileDownloadFacade {
   async getDownloadLink(uid: Uid<'file'>, options: DownloadLinkOptionsDto): Promise<string> {
     this.logger.debug('Attempting to generate download link', { fileUid: uid, options })
 
-    const file = await this.userFileService.getUserFile(uid)
+    const file = await this.userFileService.getUserFileOrAsset(uid)
 
     if (!file) {
       throw new NotFoundError(`File with UID ${uid} not found`)

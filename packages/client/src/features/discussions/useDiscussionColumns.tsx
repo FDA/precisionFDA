@@ -1,6 +1,6 @@
 import { ColumnDef } from '@tanstack/react-table'
 import React from 'react'
-import { useLocation } from 'react-router'
+import { useLocation } from 'react-router-dom'
 import { ObjectGroupIcon } from '../../components/icons/ObjectGroupIcon'
 import { getSpaceIdFromScope } from '../../utils'
 import { formatDate } from '../../utils/formatting'
