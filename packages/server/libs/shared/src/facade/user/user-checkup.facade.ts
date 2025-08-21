@@ -4,7 +4,6 @@ import { config } from '@shared/config'
 import { CheckUserDbClustersOperation } from '@shared/domain/db-cluster/ops/check-user-dbs'
 import { CheckUserJobsOperation } from '@shared/domain/job/ops/check-user-jobs'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
-import { SyncFilesStateOperation } from '@shared/domain/user-file/ops/sync-files-state'
 import { FileSyncQueueJobProducer } from '@shared/domain/user-file/producer/file-sync-queue-job.producer'
 import { findUnclosedFilesOrAssets } from '@shared/domain/user-file/user-file.helper'
 import { User } from '@shared/domain/user/user.entity'
@@ -15,6 +14,7 @@ import { isJobOrphaned } from '@shared/queue/queue.utils'
 import { UserOpsCtx, WorkerOpsCtx } from '@shared/types'
 import { Job } from 'bull'
 import { UserRepository } from '@shared/domain/user/user.repository'
+import { SyncFilesStateFacade } from '@shared/facade/sync-file-state/sync-files-state.facade'
 
 // Check jobs for a given user, to be run when user logs in to clean up
 // old states that are stuck because sync jobs are missing.
@@ -100,7 +100,7 @@ export class UserCheckupFacade {
   }
 
   private async recreateFilesStateStatusSyncIfMissing(): Promise<void> {
-    const bullJobId = SyncFilesStateOperation.getBullJobId(this.user.dxuser)
+    const bullJobId = SyncFilesStateFacade.getBullJobId(this.user.dxuser)
     const bullJob = await findRepeatable(bullJobId)
     if (!bullJob) {
       this.logger.warn(

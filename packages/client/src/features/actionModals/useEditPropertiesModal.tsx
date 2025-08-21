@@ -91,7 +91,7 @@ async function editPropertiesRequest({
   type,
   properties,
 }: {
-  id: number
+  id: number|string
   type: PropertiesResource
   properties: Properties
 }) {
@@ -133,7 +133,7 @@ const EditPropertiesForm = ({
 }: {
   type: PropertiesResource
   selected: {
-    id: number
+    id: number|string
     name: string
     properties: Properties
   }[]
@@ -178,7 +178,7 @@ const EditPropertiesForm = ({
 
   const mutation = useMutation({
     mutationKey: ['edit-resource-properties', type],
-    mutationFn: (payload: { id: number, properties: Properties }) => editPropertiesRequest({
+    mutationFn: (payload: { id: number|string, properties: Properties }) => editPropertiesRequest({
       id: payload.id,
       type,
       properties: payload.properties,
@@ -294,7 +294,7 @@ const EditPropertiesForm = ({
 
 export function useEditPropertiesModal<
   T extends {
-    id: number
+    id: number|string
     name: string
     properties: Properties
     scope: ServerScope

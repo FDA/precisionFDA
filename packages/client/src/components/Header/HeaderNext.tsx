@@ -260,7 +260,7 @@ const dataPortalMenuItem = (
   return <MenuItem key={i.id} navItem={i} pathname={pathname} onClick={() => setShowSiteNav(false)} />
 }
 
-const getUsername = (user: IUser) => {
+const getUsername = (user?: IUser) => {
   if (user) {
     if (user.full_name === ' ') {
       return user.dxuser
@@ -278,7 +278,7 @@ const SiteNav = ({
 }: {
   className: string
   setShowSiteNav: (v: boolean, ms?: number) => void
-  ignoredOutsideClickRef: React.RefObject<HTMLButtonElement | null>
+  ignoredOutsideClickRef: React.RefObject<HTMLElement> | React.RefObject<HTMLButtonElement|null>
   isSiteAdmin: boolean
 }) => {
   const clickRef = useOnOutsideClickRef(true, () => setShowSiteNav(false), ignoredOutsideClickRef)
@@ -384,7 +384,7 @@ const Header: React.FC = () => {
 
   if (!user) return null
 
-  const userCanAdministerSite = user.can_administer_site
+  const userCanAdministerSite = user.can_administer_site || false
   const showAlertBanner = !isAlertDismissed && !!siteSettings.data?.alerts?.[0]
 
   const handleLogout = async () => {

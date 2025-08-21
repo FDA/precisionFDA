@@ -14,7 +14,7 @@ export const useRemoveMemberModal = ({
   members,
   onSuccess,
 }: { 
-  spaceId: number;
+  spaceId: string|number;
   members: SpaceMembership[];
   onSuccess?: () => void;
 }) => {

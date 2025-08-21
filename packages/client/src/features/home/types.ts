@@ -10,10 +10,14 @@ export interface ResponseError { response?: { status: number; data?: { error?: {
 export interface ApiErrorResponse {
   error?: {
     code?: string
+    statusCode?: string
     message?: string
     type?: string
     failure?: string
   }
+}
+export interface ApiRailsError {
+  errors?: Error[]
 }
 
 export interface ApiResponse {
@@ -179,7 +183,11 @@ export interface IMeta {
 }
 
 export type Size = null | number
-export type IFilter = Record<string, NonNullable<string | string[] | number[] | undefined>>
+export type FilterVal = NonNullable<string | string[] | number | number[] | undefined>
+export interface IFilter {
+  id: string
+  value: FilterVal
+}
 
 export interface SortBy {
   order_by: string

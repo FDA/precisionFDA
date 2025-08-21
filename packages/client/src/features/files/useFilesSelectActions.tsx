@@ -26,7 +26,7 @@ import { moveFilesRequest } from './files.api'
 import { AxiosError } from 'axios'
 import { pluralize, sanitizeFileName } from '../../utils/formatting'
 import { IFile, TreeOnSelectInfo } from './files.types'
-import { displayPayloadMessage } from '../../utils/api'
+import { displayPayloadMessage, Payload } from '../../utils/api'
 import { extractModalsFromActions } from '../home/extractModalsFromActions'
 import { useLicensesListQuery } from '../licenses/queries'
 
@@ -85,7 +85,7 @@ export const useFilesSelectActions = ({
       queryClient.invalidateQueries({
         queryKey: ['files'],
       })
-      displayPayloadMessage(res)
+      displayPayloadMessage(res as Payload)
       if (resetSelected) resetSelected()
     },
     onError: (e: AxiosError<BaseAPIResponse>) => {
@@ -261,7 +261,7 @@ export const useFilesSelectActions = ({
     selected: selected,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: resourceKeys })
-      queryClient.invalidateQueries({ queryKey: ['edit-resource-properties', 'node']})
+      queryClient.invalidateQueries({ queryKey: ['edit-resource-properties', 'node'] })
     },
   })
 
@@ -330,10 +330,13 @@ export const useFilesSelectActions = ({
       type: 'link',
       link: {
         method: 'GET' as const,
-        url: `/publish?identifier=${selected[0]?.uid}&type=file`,
+        url:
+          selected[0]?.type === 'UserFile'
+            ? `/publish?identifier=${selected[0]?.uid}&type=file`
+            : `/publish?identifier=folder-${selected[0]?.id}&type=folder`,
       },
       isDisabled: !user?.allowed_to_publish,
-      shouldHide: isFolder || selected.length !== 1 || homeScope !== 'me' || selectedButNotClosed,
+      shouldHide: selected.length !== 1 || homeScope !== 'me' || selectedButNotClosed,
     },
     {
       name: 'Feature',

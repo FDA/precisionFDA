@@ -8,6 +8,8 @@ import { UserLayout } from '../../../layouts/UserLayout'
 import { SpaceGroupForm } from './SpaceGroupForm'
 import { createSpaceGroupRequest } from '../spaceGroups.api'
 import { SpaceGroupCreateFormData } from './SpaceGroupForm'
+import { AxiosError } from 'axios'
+import { ApiErrorResponse } from '../../home/types'
 
 export const CreateSpaceGroup = () => {
   const navigate = useNavigate()
@@ -30,7 +32,8 @@ export const CreateSpaceGroup = () => {
         queryKey: ['space-group-list'],
       })
       toast.success('Space Group created')
-    } catch (err) {
+    } catch (e: unknown) {
+      const err = e as AxiosError<ApiErrorResponse>
       const message = err.response?.data?.error?.message || err.message || 'Unknown error'
       toast.error(`Error while creating Space Group: ${message}`)
     }

@@ -37,11 +37,12 @@ export function Attachments({
       const newAttachments: Attachment[] = attachments[k] || []
       selected.forEach(attachment => {
         const isNew = newAttachments.every(newAtt => newAtt.id !== attachment.id)
+        const name = 'title' in attachment ? attachment.title : 'name' in attachment ? attachment.name : ''
         if (isNew) {
           newAttachments.push({
             id: attachment.id,
             type,
-            name: attachment.title,
+            name,
             scope: attachment.scope,
             link: '',
           })

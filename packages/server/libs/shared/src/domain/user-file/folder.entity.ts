@@ -78,6 +78,10 @@ export class Folder extends Node implements ITrackable {
     return this.project === undefined
   }
 
+  isPublishable(): boolean {
+    return this.isPrivate()
+  }
+
   constructor(user: User) {
     super()
     this.user = Reference.create(user)

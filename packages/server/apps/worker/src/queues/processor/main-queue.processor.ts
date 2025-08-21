@@ -5,22 +5,18 @@ import { ChallengeService } from '@shared/domain/challenge/challenge.service'
 import { DataPortalService } from '@shared/domain/data-portal/service/data-portal.service'
 import { SpaceReportService } from '@shared/domain/space-report/service/space-report.service'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
-import { SyncFilesStateOperation } from '@shared/domain/user-file/ops/sync-files-state'
 import { UserFileService } from '@shared/domain/user-file/service/user-file.service'
 import { FOLLOW_UP_ACTION } from '@shared/domain/user-file/user-file.input'
 import { UserProvisionFacade } from '@shared/facade/user/user-provision.facade'
 import { createRunFollowUpActionJobTask } from '@shared/queue'
-import {
-  NotifyNewDiscussionJob,
-  ProvisionNewUserJob,
-  TASK_TYPE,
-} from '@shared/queue/task.input'
+import { NotifyNewDiscussionJob, ProvisionNewUserJob, TASK_TYPE } from '@shared/queue/task.input'
 import { Job } from 'bull'
 import { FollowUpDecider } from '../../domain/user-file/follow-up-decider'
 import { ProcessWithContext } from '../decorator/process-with-context'
 import { BaseQueueProcessor } from './base-queue.processor'
 import { EmailService } from '@shared/domain/email/email.service'
 import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
+import { SyncFilesStateFacade } from '@shared/facade/sync-file-state/sync-files-state.facade'
 import { DbClusterSynchronizeFacade } from 'apps/api/src/facade/db-cluster/synchronize-facade/db-cluster-synchronize.facade'
 import { JobService } from '@shared/domain/job/job.service'
 
@@ -34,6 +30,7 @@ export class MainQueueProcessor extends BaseQueueProcessor {
     private readonly dataPortalService: DataPortalService,
     private readonly followUpDecider: FollowUpDecider,
     private readonly spaceReportService: SpaceReportService,
+    private readonly syncFilesStateFacade: SyncFilesStateFacade,
     private readonly dbClusterSynchronizeFacade: DbClusterSynchronizeFacade,
     private readonly emailService: EmailService,
     private readonly jobService: JobService,
@@ -44,9 +41,7 @@ export class MainQueueProcessor extends BaseQueueProcessor {
 
   @ProcessWithContext(TASK_TYPE.SYNC_FILES_STATE)
   async syncFilesState(job: Job): Promise<void> {
-    await this.handleUserTask(job, async (ctx, input) => {
-      return await new SyncFilesStateOperation(ctx).execute(input)
-    })
+    await this.syncFilesStateFacade.syncFiles(job)
   }
 
   @ProcessWithContext(TASK_TYPE.SYNC_JOB_STATUS)

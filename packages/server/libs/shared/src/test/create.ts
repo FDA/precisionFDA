@@ -493,7 +493,7 @@ const filesHelper = {
     const file = wrap(new UserFile(references.user)).assign(input, { em })
 
     if (references.parentFolder) {
-      if (!EntityScopeUtils.isSpaceScope(data.scope)) {
+      if (!EntityScopeUtils.isSpaceScope(file.scope)) {
         file.parentFolder = references.parentFolder
       } else {
         file.scopedParentFolder = references.parentFolder
@@ -597,7 +597,7 @@ const filesHelper = {
     })
 
     if (references.parentFolder) {
-      if (!EntityScopeUtils.isSpaceScope(data.scope)) {
+      if (!EntityScopeUtils.isSpaceScope(folder.scope)) {
         folder.parentFolder = references.parentFolder
       } else {
         folder.scopedParentFolder = references.parentFolder

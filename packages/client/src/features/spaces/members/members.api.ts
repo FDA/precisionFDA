@@ -17,9 +17,11 @@ export async function addMembersToSpaceRequest({ spaceId, invitees, invitees_rol
   return res.data as Promise<unknown>
 }
 
+export interface ChangeMembershipRoleResponse { member: string, role: MemberRole }
+
 export async function changeMembershipRoleRequest({ spaceId, memberId, role }: { spaceId: number|string, memberId: number, role: MemberRole }) {
   const res = await axios.patch(`/api/spaces/${spaceId}/memberships/${memberId}`, {
     role,
   })
-  return res.data as Promise<unknown>
+  return res.data as ChangeMembershipRoleResponse
 }

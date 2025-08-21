@@ -14,13 +14,7 @@ import { STATIC_SCOPE } from '@shared/enums'
 import { ChallengeResource } from '../challenge/challenge-resource.entity'
 import { Node } from './node.entity'
 import { UserFileRepository } from './user-file.repository'
-import {
-  FILE_STATE_DX,
-  FILE_STATE_PFDA,
-  FILE_STI_TYPE,
-  IFileOrAsset,
-  ITrackable,
-} from './user-file.types'
+import { FILE_STATE_DX, FILE_STATE_PFDA, FILE_STI_TYPE, ITrackable } from './user-file.types'
 import { Tagging } from '@shared/domain/tagging/tagging.entity'
 
 @Entity({
@@ -50,7 +44,7 @@ import { Tagging } from '@shared/domain/tagging/tagging.entity'
     ],
   }),
 })
-class UserFile extends Node implements IFileOrAsset, ITrackable {
+class UserFile extends Node implements ITrackable {
   @Property()
   dxid: DxId<'file'>
 

@@ -41,7 +41,6 @@ import {
   FILE_STATE_DX,
   FILE_STI_TYPE,
   FileOrAsset,
-  IFileOrAsset,
   SelectedFile,
   SelectedFolder,
   SelectedNode,
@@ -105,8 +104,11 @@ export class UserFileService {
     return [file as FileOrAsset, false]
   }
 
-  async getUserFile(fileUid: Uid<'file'>): Promise<UserFile | null> {
-    return await this.fileRepo.findAccessibleOne({ uid: fileUid })
+  async getUserFileOrAsset(fileUid: Uid<'file'>): Promise<FileOrAsset | null> {
+    return (await this.nodeRepo.findAccessibleOne({
+      uid: fileUid,
+      stiType: [FILE_STI_TYPE.USERFILE, FILE_STI_TYPE.ASSET],
+    })) as FileOrAsset | null
   }
 
   private async closeFileOnPlatform(fileDxid: string, challengeBotFile: boolean): Promise<void> {
@@ -225,7 +227,7 @@ export class UserFileService {
     })
     const fileEvent = await eventHelper.createFileEvent(
       eventHelper.EVENT_TYPES.FILE_BULK_DOWNLOAD,
-      node as unknown as IFileOrAsset,
+      node as unknown as FileOrAsset,
       filePath,
       loadedUser,
     )

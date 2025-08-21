@@ -94,7 +94,7 @@ const meta = {
       created_at_date_time: '2022-12-20 15:57:24 CET',
     },
   ],
-  object_license: {},
+  object_license: undefined,
   comments: [],
   discussions: [],
   answers: [],

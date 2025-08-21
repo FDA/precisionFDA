@@ -36,7 +36,7 @@ import { ISpace } from '../spaces/spaces.types'
 import { FileBreadcrumb } from './FileBreadcrumb'
 import { centerToCursorCollisionDetection } from './centerToCursorCollisionDetection'
 import { fetchFiles } from './files.api'
-import { IFile } from './files.types'
+import { IFile, IFolder } from './files.types'
 import { useFilesColumns } from './useFilesColumns'
 import { useFileDnd } from './useFilesDnd'
 import { useFilesSelectActions } from './useFilesSelectActions'
@@ -44,7 +44,7 @@ import { useFolderActions } from './useFolderActions'
 import { ResouceQueryErrorMessage } from '../home/ResouceQueryErrorMessage'
 import { useLastWSNotification } from '../../hooks/useToastWSHandler'
 
-type ListType = { files: IFile[]; meta: IMeta }
+type ListType = { files: (IFile|IFolder)[]; meta: IMeta }
 
 export const FileList = ({
   homeScope,

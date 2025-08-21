@@ -16,8 +16,8 @@ export function useAuthUser(withLoading = false): { user: IUser | undefined; loa
     return {
       user: data?.user === undefined ? undefined : { ...data.user, ...user, session_id: data.meta.session_id },
       loading: isLoading,
-    }
+  }
   } else {
-    return data?.user === undefined ? undefined : { ...data.user, ...user, session_id: data.meta.session_id }
+    return data?.user === undefined ? undefined : { ...data.user, ...user, session_id: data.meta.session_id! }
   }
 }

@@ -11,7 +11,7 @@ export async function spacesListRequest(filters: IFilter[], params: Params): Pro
   const spaceGroupId = spaceGroupFilter ? spaceGroupFilter.value : undefined
 
   const query = prepareListFetchV2(filters.filter(filter => filter.id !== 'spaceGroupId'), params)
-  const paramQ = `?${new URLSearchParams(query as {}).toString()}`
+  const paramQ = `?${new URLSearchParams(query).toString()}`
 
   if (spaceGroupId) {
     return axios.get(`/api/v2/space-groups/${spaceGroupId}/spaces/${paramQ}`).then(res => res.data)
@@ -20,18 +20,18 @@ export async function spacesListRequest(filters: IFilter[], params: Params): Pro
   return axios.get(`/api/v2/spaces/${paramQ}`).then(res => res.data)
 }
 
-export async function spaceRequest({ id }: { id?: string }): Promise<FetchSpaceDetailsResponse> {
+export async function spaceRequest({ id }: { id?: string|number }): Promise<FetchSpaceDetailsResponse> {
   if (!id) {
     console.error('Space ID is required for fetching space details')
   }
   return axios.get(`/api/spaces/${id}`).then(res => res.data)
 }
 
-export async function fixGuestPermissions({ id }: { id: string }): Promise<unknown> {
+export async function fixGuestPermissions({ id }: { id: string|number }): Promise<unknown> {
   return axios.patch(`/api/spaces/${id}/fix_guest_permissions`).then(res => res.data)
 }
 
-export async function unlockSpaceRequest({ link = '' }: { id: string; op: 'lock' | 'unlock'; link?: string }): Promise<unknown> {
+export async function unlockSpaceRequest({ link = '' }: { id: string|number; op: 'lock' | 'unlock'; link?: string }): Promise<unknown> {
   return axios.post(link).then(res => res.data)
 }
 
@@ -50,7 +50,7 @@ export async function addData({
   }).then(res => res.data)
 }
 
-export async function acceptSpaceRequest({ id }: { id: string }): Promise<unknown> {
+export async function acceptSpaceRequest({ id }: { id: string|number }): Promise<unknown> {
   return axios.post(`/api/spaces/${id}/accept`).then(res => res.data)
 }
 

@@ -11,7 +11,7 @@ import { FieldGroup } from '../../../components/form/FieldGroup'
 import { InputError } from '../../../components/form/styles'
 import { AttachmentsList } from '../AttachmentsList'
 import { NoteScope } from '../api'
-import { DiscussionForm as DiscussionFormType } from '../discussions.types'
+import { AttachmentKey, DiscussionForm as DiscussionFormType } from '../discussions.types'
 import { Attachments } from './Attachments'
 import { StyledPage } from './styles'
 import { NotifyMembersSelect } from './NotifyMembersSelect'
@@ -102,7 +102,7 @@ export const DiscussionForm = ({
     if (onDelete) onDelete()
   }
 
-  const deleteAttachment = (key: any, id: number) => {
+  const deleteAttachment = (key: `attachments.${AttachmentKey}`, id: number|string) => {
     const v = getValues(key)
     const newAttachments = v.filter(a => a.id !== id)
     setValue(key, newAttachments)
@@ -114,7 +114,7 @@ export const DiscussionForm = ({
     <StyledPage>
       <StyledForm id="discussionForm" autoComplete="off" className="mb-10">
         <FieldGroup label="Title" required className="mb-4">
-          <InputText label="Title" {...register('title', { required: 'title is required.' })} disabled={isSubmitting} />
+          <InputText {...register('title', { required: 'title is required.' })} disabled={isSubmitting} />
           <ErrorMessage errors={errors} name="title" render={({ message }) => <InputError>{message}</InputError>} />
         </FieldGroup>
         <FieldGroup label="Content" required>
@@ -133,7 +133,7 @@ export const DiscussionForm = ({
               <Controller
                 name="notify"
                 control={control}
-                render={({ field: { onChange, onBlur, value } }) => (
+                render={({ field: { onChange, onBlur, value }}) => (
                   <NotifyMembersSelect
                     onChange={onChange}
                     onBlur={onBlur}
