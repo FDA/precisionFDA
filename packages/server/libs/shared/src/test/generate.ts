@@ -24,7 +24,6 @@ import { Tagging } from '@shared/domain/tagging/tagging.entity'
 import { TAGGABLE_TYPE } from '@shared/domain/tagging/tagging.types'
 import { Asset } from '@shared/domain/user-file/asset.entity'
 import { Folder } from '@shared/domain/user-file/folder.entity'
-import { SyncFilesStateOperation } from '@shared/domain/user-file/ops/sync-files-state'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { UserExtras } from '@shared/domain/user/user-extras'
 import { WorkflowSeries } from '@shared/domain/workflow-series/workflow-series.entity'
@@ -59,6 +58,8 @@ import { User, USER_STATE } from '../domain/user/user.entity'
 import { STATIC_SCOPE } from '../enums'
 import { TASK_TYPE } from '../queue/task.input'
 import type { AnyObject, UserCtx } from '../types'
+import { SyncFilesStateFacade } from '@shared/facade/sync-file-state/sync-files-state.facade'
+import { JobSynchronizationService } from '@shared/domain/job/services/job-synchronization.service'
 
 const chance = new Chance()
 
@@ -795,10 +796,10 @@ const bullQueue = {
 }
 
 const bullQueueRepeatable = {
-  syncFilesState: (dxuser: string): JobInformation => ({
-    key: `__default__:${SyncFilesStateOperation.getBullJobId(dxuser)}:::*/2 * * * *`,
+  syncFilesState: (dxuser: string) => ({
+    key: `__default__:${SyncFilesStateFacade.getBullJobId(dxuser)}:::*/2 * * * *`,
     name: '__default__',
-    id: SyncFilesStateOperation.getBullJobId(dxuser),
+    id: SyncFilesStateFacade.getBullJobId(dxuser),
     endDate: null,
     tz: null,
     cron: '*/2 * * * *',

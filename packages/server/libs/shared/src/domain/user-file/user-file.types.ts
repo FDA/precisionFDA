@@ -1,10 +1,5 @@
-import { Collection, Ref } from '@mikro-orm/core'
-import { DxId } from '@shared/domain/entity/domain/dxid'
 import { Uid } from '@shared/domain/entity/domain/uid'
-import { NodeProperty } from '@shared/domain/property/node-property.entity'
-import { Tagging } from '@shared/domain/tagging/tagging.entity'
 import { EntityScope, SCOPE } from '../../types/common'
-import { User } from '../user/user.entity'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { Asset } from '@shared/domain/user-file/asset.entity'
 import { Folder } from '@shared/domain/user-file/folder.entity'
@@ -38,27 +33,6 @@ enum PARENT_TYPE {
   ASSET = 'Asset',
   COMPARISON = 'Comparison',
   NODE = 'Node',
-}
-
-// IFileOrAsset is for methods that operate on UserFiles and Assets
-// but not all nodes (not Folders)
-interface IFileOrAsset {
-  id: number
-  dxid: DxId<'file'>
-  uid: Uid<'file'>
-  project?: string
-  name: string
-  scope: EntityScope
-  state: string
-  fileSize?: number
-  user: Ref<User>
-  createdAt: Date
-  updatedAt: Date
-  taggings: Collection<Tagging>
-  properties: Collection<NodeProperty>
-  isFile: boolean
-  isAsset: boolean
-  isCreatedByChallengeBot: () => boolean
 }
 
 interface BulkDownloadFile {
@@ -141,7 +115,6 @@ export {
   FILE_STATE_PFDA,
   FILE_STI_TYPE,
   FOLDER_STATE,
-  IFileOrAsset,
   ITrackable,
   NodeResponse,
   PARENT_TYPE,

@@ -21,7 +21,6 @@ import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { Node } from '@shared/domain/user-file/node.entity'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { findUnclosedFilesOrAssets, getNodePath } from '@shared/domain/user-file/user-file.helper'
-import { IFileOrAsset } from '@shared/domain/user-file/user-file.types'
 import { User } from '@shared/domain/user/user.entity'
 import { NotFoundError } from '@shared/errors'
 import { UserSpaceInconsistencyFixService } from '@shared/facade/user/service/user-space-inconsistency-fix.service'
@@ -38,6 +37,7 @@ import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { PlatformClient } from '@shared/platform-client'
 import { UserRepository } from '@shared/domain/user/user.repository'
 import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
+import { FileOrAsset } from '@shared/domain/user-file/user-file.types'
 
 // UserDataConsistencyReportOperation uses a user token to inspect the user's
 // data integrity in the database and detects inconsistencies between pFDA and platform
@@ -177,7 +177,7 @@ export class UserDataConsistencyReportFacade {
 
       // Check if users have any unclosed files or assets remaining
       const now = new Date()
-      const fileInfoMapping = (f: IFileOrAsset): FileOrAssetInfo => {
+      const fileInfoMapping = (f: FileOrAsset): FileOrAssetInfo => {
         return {
           id: f.id,
           uid: f.uid,
