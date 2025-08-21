@@ -130,13 +130,19 @@ export class UserDataConsistencyReportFacade {
         errors: [],
       }
       output.billableOrgErrorsCount = 0
-      if (!(await this.isAdminUserInOrg(billToOrg))) {
-        output.billableOrg.errors.push('Admin user not found in billable org')
-        output.billableOrgErrorsCount = 1
-        inconsistentFixes.push([
-          this.userSpaceInconsistencyFixService.inviteAdminUserToOrg.name,
-          [billToOrg],
-        ])
+      try {
+        const isAdminInOrg = await this.isAdminUserInOrg(billToOrg)
+        if (!isAdminInOrg) {
+          output.billableOrg.errors.push('Admin user not found in billable org')
+          output.billableOrgErrorsCount = 1
+          inconsistentFixes.push([
+            this.userSpaceInconsistencyFixService.inviteAdminUserToOrg.name,
+            [billToOrg],
+          ])
+        }
+      } catch (error) {
+        // Handle any errors that occur during the admin check
+        this.logger.error({ error }, "Error checking admin user in user's billable org")
       }
 
       // Check user's private projects' billTo
@@ -144,22 +150,32 @@ export class UserDataConsistencyReportFacade {
       const generateProjectInfo = async (
         projectDxid: string | undefined,
       ): Promise<ProjectInfo | string> => {
-        if (!projectDxid) {
-          return 'Does not exist'
-        }
+        if (!projectDxid) return 'Does not exist'
 
-        const projectDescribe = await this.platformClient.projectDescribe({
-          projectDxid,
-          body: {},
-        })
-        const correctBillTo = projectDescribe.billTo === user.billTo()
-        return {
-          status: correctBillTo
+        try {
+          const projectDescribe = await this.platformClient.projectDescribe({
+            projectDxid,
+            body: {},
+          })
+
+          const correctBillTo = projectDescribe.billTo === user.billTo()
+          const status = correctBillTo
             ? `billTo is correct (${projectDescribe.billTo})`
-            : `Error: Project billTo (${projectDescribe.billTo}) does not match user's org (${user.billTo()})`,
-          projectDescribe,
+            : `Error: Project billTo (${projectDescribe.billTo}) does not match user's org (${user.billTo()})`
+
+          return { status, projectDescribe }
+        } catch (error) {
+          this.logger.error(
+            { error },
+            `Error describing project ${projectDxid} for user data consistency report`,
+          )
+          return {
+            status: `Error: Platform error while describing project ${projectDxid}`,
+            projectDescribe: null,
+          }
         }
       }
+
       privateProjects['user.privateFilesProject'] = await generateProjectInfo(
         user.privateFilesProject,
       )
@@ -270,8 +286,15 @@ export class UserDataConsistencyReportFacade {
   }
 
   async fixInconsistentData(inconsistentFixes: InconsistentFix[]): Promise<void> {
-    const fixPromises: Promise<void>[] = inconsistentFixes.map(([funcName, params]) => {
-      return this.userSpaceInconsistencyFixService[funcName](...params)
+    const fixPromises: Promise<void>[] = inconsistentFixes.map(async ([funcName, params]) => {
+      try {
+        await this.userSpaceInconsistencyFixService[funcName](...params)
+      } catch (error) {
+        this.logger.error(
+          { error },
+          `Error executing fix function ${funcName} with params: ${params}`,
+        )
+      }
     })
     await Promise.all(fixPromises)
   }
