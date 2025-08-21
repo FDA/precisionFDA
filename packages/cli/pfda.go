@@ -1,5 +1,5 @@
 // PrecisionFDA CLI
-// Version 2.10.2
+// Version 2.10.3
 package main
 
 import (
@@ -25,7 +25,7 @@ const defaultChunkSize = 1 << 26 // default 64MB (min. 16MB)
 const defaultSkipVerify = "false"
 const usageString = `
 ****************************
-PFDA COMMAND LINE TOOL v2.10.2
+PFDA COMMAND LINE TOOL v2.10.3
 ****************************
 
 All available commands:
