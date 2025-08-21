@@ -286,7 +286,7 @@ export const SpaceShow = () => {
   const space = data?.space
 
   // Lazy load the space if it's not loaded yet
-  const prevSpace = usePrevious(space)
+  const prevSpace = usePrevious(space!)
   const s = useMemo(() => space || prevSpace, [space])
 
   if (isLoading) return <HomeLoader />

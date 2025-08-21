@@ -86,7 +86,7 @@ const ButtonBar = ({ data }: { data: DataPortal }) => {
   )
 }
 
-export default function DataPortalContentEditPage(): JSX.Element {
+export default function DataPortalContentEditPage() {
   const user = useAuthUser()
   const { portalId } = useParams<{
     portalId: string

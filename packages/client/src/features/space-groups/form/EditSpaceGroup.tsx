@@ -11,6 +11,8 @@ import { useSpaceGroupByIdQuery } from '../queries'
 import { Loader } from '../../../components/Loader'
 import { SpaceGroupCreateFormData } from './SpaceGroupForm'
 import { ResouceQueryErrorMessage } from '../../home/ResouceQueryErrorMessage'
+import { ApiErrorResponse } from '../../home/types'
+import { AxiosError } from 'axios'
 
 export const EditSpaceGroup = () => {
   const { spaceGroupId } = useParams<{ spaceGroupId: string }>()
@@ -42,7 +44,8 @@ export const EditSpaceGroup = () => {
         navigate(`/spaces?spaceGroupId=${spaceGroupId}`)
 
         toast.success('Space Group updated')
-      } catch (err) {
+      } catch (e: unknown) {
+        const err = e as AxiosError<ApiErrorResponse>
         const message = err.response?.data?.error?.message || err.message || 'Unknown error'
         toast.error(`Error while editing space group: ${message}`)
       }
@@ -62,7 +65,7 @@ export const EditSpaceGroup = () => {
           <StyledBack linkTo={`/spaces?spaceGroupId=${spaceGroupId}`}>Back to Space Group</StyledBack>
           <PageTitle>Edit Space Group</PageTitle>
           <SpaceGroupForm
-            mutationErrors={spaceGroupMutation.error as any}
+            mutationErrors={spaceGroupMutation.error as AxiosError<ApiErrorResponse>}
             onSubmit={onSubmit}
             isSubmitting={spaceGroupMutation.isPending}
             defaultValues={{

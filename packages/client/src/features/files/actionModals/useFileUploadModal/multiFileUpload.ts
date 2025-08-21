@@ -1,5 +1,3 @@
-/* eslint-disable no-restricted-syntax */
-/* eslint-disable no-await-in-loop */
 import httpStatusCodes from 'http-status-codes'
 import 'regenerator-runtime/runtime'
 import sparkMD5 from 'spark-md5'

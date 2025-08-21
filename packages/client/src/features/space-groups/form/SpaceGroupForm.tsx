@@ -9,6 +9,8 @@ import { Loader } from '../../../components/Loader'
 import { Row, StyledForm } from '../../spaces/form/styles'
 import { Button } from '../../../components/Button'
 import { spaceGroupValidationSchema } from './helpers'
+import { ApiErrorResponse } from '../../home/types'
+import { AxiosError } from 'axios'
 
 export interface SpaceGroupCreateFormData {
   name: string
@@ -17,10 +19,10 @@ export interface SpaceGroupCreateFormData {
 
 export interface ISpaceGroupForm {
   defaultValues?: Partial<SpaceGroupCreateFormData>
-  onSubmit: (a: any) => Promise<void>
+  onSubmit: (a: SpaceGroupCreateFormData) => Promise<void>
   isSaving?: boolean
-  isSubmitting: boolean
-  mutationErrors?: { response: { data: { error: any } } }
+  isSubmitting: boolean,
+  mutationErrors?: AxiosError<ApiErrorResponse>
 }
 
 export const SpaceGroupForm = ({ defaultValues, onSubmit, isSaving = false, isSubmitting, mutationErrors }: ISpaceGroupForm) => {

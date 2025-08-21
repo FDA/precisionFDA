@@ -608,7 +608,7 @@ export const spacesMocks = [
             total_pages: 57,
             total_count: 1135,
           },
-        
+          challenges: [],
         },
       },
       { status: 200 },

@@ -10,7 +10,7 @@ export async function createReport<T extends SpaceReportFormat>(
 }
 
 export async function fetchReports(scope: string) {
-  return axios.get<ISpaceReport[]>('/api/v2/reports', { params: { scope } }).then(res => res.data)
+  return axios.get<ISpaceReport[]>('/api/v2/reports', { params: { scope }}).then(res => res.data)
 }
 
 export async function deleteReports(ids: number[]): Promise<number[]> {

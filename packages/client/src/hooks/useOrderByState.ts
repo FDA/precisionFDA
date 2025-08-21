@@ -1,36 +1,33 @@
 import { ColumnSort } from '@tanstack/react-table'
 import { useState } from 'react'
-
 import { StringParam, useQueryParams, withDefault } from 'use-query-params'
+import {
+  OrderDirParam,
+  SortParams,
+  SortByParams,
+  columnSortToParams,
+  paramsToColumnSort,
+} from '../types/sorting'
 
-type Cols = ColumnSort[]
-export type SortyByParamType = {
-  order_by?: string | null,
-  order_dir?: string | null,
-}
-
-export interface ISortByParams {
-  sortBy: ColumnSort[],
-  sort: SortyByParamType,
-  setSortBy: (cols: Cols) => void
-}
-
-export function useOrderByState({ defaultOrder, onSetSortBy }: { defaultOrder: SortyByParamType, onSetSortBy?: (cols: Cols) => void}): {sortBy: ColumnSort[], sort: SortyByParamType, setSortBy: (cols: Cols) => void} {
-  const [sort, setSort] = useState({
+export function useOrderByState({ 
+  defaultOrder, 
+  onSetSortBy, 
+}: { 
+  defaultOrder: SortParams
+  onSetSortBy?: (cols: ColumnSort[]) => void
+}): SortByParams {
+  const [sort, setSort] = useState<SortParams>({
     order_by: defaultOrder?.order_by,
     order_dir: defaultOrder?.order_dir,
   })
-  const handleSetSortBy = (cols: Cols) => {
-    if(onSetSortBy) onSetSortBy(cols)
-    let col: any
-    if (cols.length === 0) {
-      col = { order_by: undefined, order_dir: undefined }
-    } else if (cols[0].id) {
-      col = { order_by: cols[0].id, order_dir: cols[0].desc ? 'DESC' : 'ASC' }
-    }
-    setSort(col)
+  
+  const handleSetSortBy = (cols: ColumnSort[]) => {
+    if (onSetSortBy) onSetSortBy(cols)
+    setSort(columnSortToParams(cols))
   }
-  const sortBy: ColumnSort[] = sort.order_by ? [{ id: sort.order_by, desc: sort.order_dir === 'DESC' }] : []
+  
+  const sortBy = paramsToColumnSort(sort)
+  
   return {
     sortBy,
     sort,
@@ -38,22 +35,25 @@ export function useOrderByState({ defaultOrder, onSetSortBy }: { defaultOrder: S
   }
 }
 
-export function useOrderByParams({ defaultOrder, onSetSortBy }: {defaultOrder?: SortyByParamType, onSetSortBy?: (cols: Cols) => void}): ISortByParams {
+export function useOrderByParams({ 
+  defaultOrder, 
+  onSetSortBy,
+}: {
+  defaultOrder?: SortParams
+  onSetSortBy?: (cols: ColumnSort[]) => void
+}): SortByParams {
   const [sortByParam, setSortByParam] = useQueryParams({
     order_by: withDefault(StringParam, defaultOrder?.order_by),
-    order_dir: withDefault(StringParam,  defaultOrder?.order_dir),
+    order_dir: withDefault(OrderDirParam, defaultOrder?.order_dir),
   })
-  const handleSetSortBy = (cols: Cols) => {
-    if(onSetSortBy) onSetSortBy(cols)
-    let col: any
-    if (cols.length === 0) {
-      col = { order_by: undefined, order_dir: undefined }
-    } else if (cols[0].id) {
-      col = { order_by: cols[0].id, order_dir: cols[0].desc ? 'DESC' : 'ASC' }
-    }
-    setSortByParam(col as any, 'pushIn')
+  
+  const handleSetSortBy = (cols: ColumnSort[]) => {
+    if (onSetSortBy) onSetSortBy(cols)
+    setSortByParam(columnSortToParams(cols), 'pushIn')
   }
-  const sortBy: ColumnSort[] = sortByParam.order_by ? [{ id: sortByParam.order_by, desc: sortByParam.order_dir === 'DESC' }] : []
+  
+  const sortBy = paramsToColumnSort(sortByParam)
+  
   return {
     sortBy,
     sort: sortByParam,

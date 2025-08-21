@@ -79,7 +79,9 @@ export const ChallengeDetailsBanner = ({ challenge, user }: { challenge: Challen
 
   const onClickPreRegistrationButton = () => {
     if (challenge.preRegistrationUrl) {
-      window?.open(challenge.preRegistrationUrl, '_blank').focus()
+      if(window) {
+        window.open(challenge.preRegistrationUrl || '#', '_blank')!.focus()
+      }
     }
   }
 

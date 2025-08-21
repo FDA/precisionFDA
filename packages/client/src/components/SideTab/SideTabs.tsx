@@ -28,7 +28,7 @@ export const SideTabs: React.FC<Props> = ({ children }) => {
         {children.map((item, index) => (
           <SideTabTitle
             key={item.key}
-            title={item.props.title}
+            title={(item.props as { title: string}).title}
             index={index}
             setSelectedTab={setSelectedTab}
             active={selectedTab === index}

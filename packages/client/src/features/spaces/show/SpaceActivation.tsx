@@ -11,6 +11,7 @@ import { SpaceHeaderDescrip, SpaceHeaderTitle, SpaceMainInfo } from './styles'
 import { ProtectedIcon } from '../ProtectedIcon'
 import { FdaRestrictedIcon } from '../FdaRestrictedIcon'
 import { Button } from '../../../components/Button'
+import { ApiErrorResponse } from '../../home/types'
 
 const Row = styled.div`
   display: flex;
@@ -105,7 +106,8 @@ export function Activation({ space }: { space: ISpace }) {
     mutationKey: ['accept-space'],
     mutationFn: acceptSpaceRequest,
     onSuccess: (res) => {
-      if (res.error) {
+      const response = res as ApiErrorResponse
+      if (response?.error) {
         toast.error('Error: Service is unavailable. Please try again later')
       } else {
         queryCache.invalidateQueries({

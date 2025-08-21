@@ -26,7 +26,7 @@ import { TableStyles } from './components/styles'
 import { useComponentWidth } from './useComponentWidth'
 import { useDebounce } from './useDebounce'
 
-function Table<T extends { id: number }>({
+function Table<T extends { id: number | string }>({
   enableColumnFilters = true,
   emptyText,
   isLoading,

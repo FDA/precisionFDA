@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import React from 'react'
 import { toast } from 'react-toastify'
 import styled from 'styled-components'
-import { useNavigate } from 'react-router'
+import { useNavigate } from 'react-router-dom'
 import { EXPERT_STATE } from '../../../constants'
 import { IUser } from '../../../types/user'
 import { IToCItem, ToC } from '../../markdown/Toc'
@@ -19,7 +19,7 @@ const ActionRow = styled.div`
   gap: 8px;
 `
 
-export const ExpertColumnRight = ({ expert, user, toc }: { expert: ExpertDetails; user: IUser; toc?:  IToCItem[] }) => {
+export const ExpertColumnRight = ({ expert, user, toc }: { expert: ExpertDetails; user: IUser; toc?: IToCItem[] }) => {
   const modal = useModal()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
@@ -49,7 +49,7 @@ export const ExpertColumnRight = ({ expert, user, toc }: { expert: ExpertDetails
     mutationKey: ['delete-expert'],
     mutationFn: () => deleteExpertRequest(expert.id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['experts']})
+      queryClient.invalidateQueries({ queryKey: ['experts'] })
       toast.success('Expert was deleted successfully')
       navigate('/experts')
     },
@@ -105,9 +105,7 @@ export const ExpertColumnRight = ({ expert, user, toc }: { expert: ExpertDetails
       )}
       <ExpertAskQuestionModal
         isOpen={modal.isShown}
-        isLoading={!expert}
         user={user}
-        expert={expert}
         hideAction={() => modal.setShowModal(false)}
         action={askExpert}
         isLoggedIn={isLoggedIn}

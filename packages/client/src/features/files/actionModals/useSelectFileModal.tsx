@@ -89,7 +89,7 @@ const Row = ({
 }: {
   file: IAccessibleFile
   type: DialogType
-  viewOnly: boolean
+  viewOnly?: boolean
   radioCallback: (file: IAccessibleFile) => void
   checkboxCallback: (checked: boolean, file: IAccessibleFile) => void
   checked?: boolean
@@ -121,7 +121,7 @@ const Row = ({
       </StyledFileDetail>
     </StyledCell>
     <StyledCellNoShrink>
-      <StyledAction href={file.path} target="_blank">
+      <StyledAction href={file.path as unknown as string} target="_blank">
         <ArrowUpRightFromSquareIcon height={18} />
       </StyledAction>
     </StyledCellNoShrink>
@@ -200,7 +200,7 @@ const FileSelectTabs = ({ type, scopes, setShowModal, handleSelect, uids }: File
     setShowModal(false)
   }
 
-  const isMyFile = (file: IAccessibleFile): boolean => file.user.dxuser === user?.dxuser
+  const isMyFile = (file: IAccessibleFile): boolean => file?.user?.dxuser === user?.dxuser
 
   const files = filesData?.objects ?? []
 
@@ -274,6 +274,7 @@ const FileSelectTabs = ({ type, scopes, setShowModal, handleSelect, uids }: File
                   <Row
                     file={file}
                     type={type}
+                    viewOnly={false}
                     key={file.uid}
                     radioCallback={radioCallback}
                     checkboxCallback={checkboxCallback}
@@ -327,19 +328,17 @@ export const useSelectFileModal = (
   const modalComp = (
     <ModalNext
       id="select-file-modal"
-      disableClose={false}
       headerText={title}
       hide={() => setShowModal(false)}
       isShown={isShown}
     >
       <ModalHeaderTop
-        disableClose={false}
         headerText={title}
         hide={() => setShowModal(false)}
       />
 
       {subtitle && <StyledSubtitle>{subtitle}</StyledSubtitle>}
-      <FileSelectTabs type={type} scopes={scopes} setShowModal={setShowModal} handleSelect={handleSelect} uids={uids} />
+      <FileSelectTabs type={type} scopes={scopes} setShowModal={setShowModal} handleSelect={handleSelect} uids={uids || []} />
     </ModalNext>
   )
   return {

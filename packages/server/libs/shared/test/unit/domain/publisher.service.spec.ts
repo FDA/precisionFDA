@@ -22,8 +22,13 @@ describe('PublisherService tests', () => {
     await db.dropData(database.connection())
     em = database.orm().em.fork() as EntityManager<MySqlDriver>
     user = create.userHelper.create(em)
+    const userContext = create.contextHelper.create(user)
     await em.flush()
-    publisherService = new PublisherService(em, new PlatformClient({ accessToken: 'foo' }))
+    publisherService = new PublisherService(
+      em,
+      userContext,
+      new PlatformClient({ accessToken: 'foo' }),
+    )
     // using mocked platform client to avoid actual calls to platform
     mocksReset()
   })
@@ -33,11 +38,7 @@ describe('PublisherService tests', () => {
     const node2 = create.filesHelper.createAsset(em, { user }, {})
     const node3 = create.filesHelper.createUploaded(em, { user }, {})
     await em.flush()
-    const count = await publisherService.publishNodes(
-      [node1, node2, node3],
-      user,
-      STATIC_SCOPE.PUBLIC,
-    )
+    const count = await publisherService.publishNodes([node1, node2, node3])
     em.clear()
     const loadedNode1 = await em.findOneOrFail(Node, { id: node1.id })
     const loadedNode2 = await em.findOneOrFail(Node, { id: node2.id })
@@ -75,7 +76,7 @@ describe('PublisherService tests', () => {
     app2.appSeriesId = appSeries2.id
     await em.flush()
 
-    const count = await publisherService.publishApps([app1, app2], user, STATIC_SCOPE.PUBLIC)
+    const count = await publisherService.publishApps([app1, app2], STATIC_SCOPE.PUBLIC)
     em.clear()
     const loadedApp1 = await em.findOneOrFail(App, { id: app1.id })
     const loadedApp2 = await em.findOneOrFail(App, { id: app2.id })
@@ -90,7 +91,7 @@ describe('PublisherService tests', () => {
     const job1 = create.jobHelper.create(em, { user }, { scope: STATIC_SCOPE.PRIVATE })
     await em.flush()
 
-    const count = await publisherService.publishJobs([job1], user, STATIC_SCOPE.PUBLIC)
+    const count = await publisherService.publishJobs([job1], STATIC_SCOPE.PUBLIC)
     expect(count).eq(1)
     em.clear()
     const loadedJob1 = await em.findOneOrFail(Job, { id: job1.id })
@@ -139,7 +140,6 @@ describe('PublisherService tests', () => {
     await em.flush()
     const count = await publisherService.publishComparisons(
       [comparison1, comparison2],
-      user,
       STATIC_SCOPE.PUBLIC,
     )
     expect(count).eq(2)
@@ -150,22 +150,14 @@ describe('PublisherService tests', () => {
     expect(loadedComparison2.isPublic()).is.true()
   })
 
-  it('publish folder to public - fail', async () => {
+  it('publish folder to public', async () => {
     const folder = create.filesHelper.createFolder(em, { user }, {})
     const node = create.filesHelper.create(em, { user }, {})
     await em.flush()
-    try {
-      await publisherService.publishNodes([node, folder], user, STATIC_SCOPE.PUBLIC)
-      expect.fail('Operation is expected to fail.')
-    } catch (error) {
-      expect(error.name).eq('InvalidStateError')
-      expect(error.message).eq(`Unable to publish node ${folder.id}: folders are not supported.`)
-    }
-    em.clear()
+    await publisherService.publishNodes([node, folder])
     const loadedFolder = await em.findOneOrFail(Node, { id: folder.id })
     const loadedNode = await em.findOneOrFail(Node, { id: node.id })
-    // scope should stay private after an error
-    expect(loadedFolder.scope).eq(STATIC_SCOPE.PRIVATE)
-    expect(loadedNode.scope).eq(STATIC_SCOPE.PRIVATE)
+    expect(loadedFolder.scope).eq(STATIC_SCOPE.PUBLIC)
+    expect(loadedNode.scope).eq(STATIC_SCOPE.PUBLIC)
   })
 })

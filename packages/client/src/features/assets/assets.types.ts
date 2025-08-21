@@ -2,8 +2,6 @@ import { ServerScope } from '../home/types'
 import { FileState } from '../files/files.types'
 import { FileOrg, FileUser } from '../apps/apps.types'
 
-export type AppsListActions = 'Create App'
-
 type Links = Record<string, string>
 
 export interface FileLicense {

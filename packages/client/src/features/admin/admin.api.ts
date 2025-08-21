@@ -1,5 +1,5 @@
 import axios, { AxiosRequestConfig } from 'axios'
-import { InvitationListType } from './invitations/type'
+import { InvitationListType } from './invitations/types'
 
 export interface AdminStats {
   usersCount: number

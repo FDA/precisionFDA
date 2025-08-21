@@ -5,13 +5,6 @@ import { FileOrg, FileUser } from '../apps/apps.types'
 import { ServerScope } from '../home/types'
 import { FileLicense } from '../assets/assets.types'
 
-export enum FolderActions {
-  'Add Folder' = 'Add Folder',
-  'Add Files' = 'Add Files',
-  'Copy Files' = 'Copy Files',
-  'Choose Add Option' = 'Choose Add Option',
-}
-
 export type FileState = 'closed' | 'closing' | 'open' | 'removing'
 export type FileLocation = 'Public' | 'Private' | string
 export type FileType = 'UserFile' | 'Folder' | 'File' | 'Asset'
@@ -19,6 +12,13 @@ export type FileScope = 'public' | 'private' | string
 export type FileUid = `file-${string}-${number}`
 
 export type OriginType = 'User' | 'Job' | 'Comparison' | 'UserFile' | 'Folder'
+
+export interface FileOrigin {
+  text?: string
+  fa?: string
+  href?: string
+}
+
 export interface FileLinks {
   origin_object?: {
     origin_type?: OriginType
@@ -65,11 +65,7 @@ export interface IFile {
   featured: boolean
   scope: ServerScope
   space_id: string | null
-  origin: string | {
-        text?: string
-        fa?: string
-        href?: string
-      }
+  origin: FileOrigin | 'Uploaded'
   tags: string[]
   properties: {
     [key: string]: string

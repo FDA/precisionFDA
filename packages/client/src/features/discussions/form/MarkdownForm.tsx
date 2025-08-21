@@ -1,6 +1,6 @@
 import { yupResolver } from '@hookform/resolvers/yup'
-import React, { useEffect } from 'react'
-import { Controller, useForm } from 'react-hook-form'
+import React, { ChangeEvent, useEffect } from 'react'
+import { Controller, RefCallBack, useForm } from 'react-hook-form'
 import { Tooltip } from 'react-tooltip'
 import styled from 'styled-components'
 import * as Yup from 'yup'
@@ -11,10 +11,9 @@ import { MarkdownEditor, StyledMarkdownHelper, WeMarkdown } from '../../../compo
 import { CheckboxLabel, InputError } from '../../../components/form/styles'
 import { AttachmentsList } from '../AttachmentsList'
 import { NoteScope } from '../api'
-import { NoteForm } from '../discussions.types'
+import { AttachmentKey, NoteForm } from '../discussions.types'
 import { Attachments } from './Attachments'
 import { NotifyMembersSelect } from './NotifyMembersSelect'
-import { TabPanel } from '../../../components/TabsSwitch'
 import ExternalLink from '../../../components/Controls/ExternalLink'
 import { MarkdownIcon } from '../../../components/icons/MarkdownIcon'
 
@@ -70,7 +69,7 @@ export const MarkdownForm = ({
   isEdit?: boolean
   isComment?: boolean
   isAnswerComment?: boolean
-  markdownInputRef?: React.MutableRefObject<HTMLInputElement | null>
+  markdownInputRef?: RefCallBack
   onCancel?: (vals: NoteForm) => void
   onSubmit: (vals: NoteForm) => void
   defaultValues?: NoteForm
@@ -110,11 +109,9 @@ export const MarkdownForm = ({
 
   const onSubmitForm = async () => onSubmit(getValues())
 
-  const deleteAttachment = (key: any, id: number) => {
-    setValue(
-      key,
-      getValues(key).filter((a: { id: number }) => a.id !== id),
-    )
+  const deleteAttachment = (key: `attachments.${AttachmentKey}`, id: number|string) => {
+    const values = getValues(key)
+    setValue(key, values.filter((a: { id: number }) => a.id !== id))
   }
 
   const { attachments, isAnswer } = watch()
@@ -162,7 +159,7 @@ export const MarkdownForm = ({
                   <Checkbox
                     {...register('isAnswer')}
                     disabled={isSubmitting || !canUserAnswer}
-                    onChange={e => setValue('isAnswer', e.target.checked)}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => setValue('isAnswer', e.target.checked)}
                   />
                   Mark as Answer
                 </CheckboxLabel>
@@ -179,7 +176,7 @@ export const MarkdownForm = ({
             <Controller
               name="notify"
               control={control}
-              render={({ field: { onChange, onBlur, value } }) => (
+              render={({ field: { onChange, onBlur, value }}) => (
                 <NotifyMembersSelect
                   onChange={onChange}
                   onBlur={onBlur}

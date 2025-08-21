@@ -4,7 +4,8 @@ import { StarIcon } from '../../../components/icons/StarIcon'
 import { ThreeDotsIcon } from '../../../components/icons/ThreeDotsIcon'
 import { formatDiscussionDate } from '../helpers'
 import { CardLeft, CardRight, Li, Ol, StyledAnswerLabel, StyledCardHeader, StyledEditButton, UsernameLink } from '../styles'
-import { CardType, SimpleUser } from '../discussions.types'
+import { CardType } from '../discussions.types'
+import { SimpleUser } from '../../../types/user'
 
 const EDIT_TEXT = {
   answer: 'Edit Answer',

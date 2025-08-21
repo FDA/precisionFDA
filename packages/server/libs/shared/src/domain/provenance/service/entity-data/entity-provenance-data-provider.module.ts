@@ -12,6 +12,7 @@ import { NoteProvenanceDataService } from './note-provenance-data.service'
 import { UserProvenanceDataService } from '@shared/domain/provenance/service/entity-data/user-provenance-data.service'
 import { WorkflowProvenanceDataService } from '@shared/domain/provenance/service/entity-data/workflow-provenance-data.service'
 import { WorkflowModule } from '@shared/domain/workflow/workflow.module'
+import { FolderProvenanceDataService } from '@shared/domain/provenance/service/entity-data/folder-provenance-data.service'
 
 @Module({
   imports: [WorkflowModule, EntityModule],
@@ -25,6 +26,7 @@ import { WorkflowModule } from '@shared/domain/workflow/workflow.module'
     NoteProvenanceDataService,
     UserProvenanceDataService,
     WorkflowProvenanceDataService,
+    FolderProvenanceDataService,
     entityTypeToParentResolverMapProvider,
     EntityProvenanceDataProviderService,
   ],

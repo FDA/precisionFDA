@@ -13,7 +13,7 @@ export interface FetchFilesQuery {
 export async function fetchFiles(filters: IFilter[], params: Params) {
   const query = prepareListFetch(filters, params)
   const paramQ = `?${new URLSearchParams(query).toString()}`
-  const scopeQ = formatScopeQ(params.scope)
+  const scopeQ = formatScopeQ(params.scope as HomeScope)
   return axios.get<FetchFilesQuery>(`/api/files${scopeQ}${paramQ}`).then(r => r.data)
 }
 

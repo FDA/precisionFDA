@@ -13,7 +13,6 @@ import SelectFilter, { selectFilterFn } from '../../../components/Table/componen
 import { selectColumnDef } from '../../../components/Table/selectColumnDef'
 import { usePageMeta } from '../../../hooks/usePageMeta'
 import { UserLayout } from '../../../layouts/UserLayout'
-import { IUser } from '../../../types/user'
 import { getSelectedObjectsFromIndexes, toArrayFromObject } from '../../../utils/object'
 import { IFilter, MetaV2 } from '../../home/types'
 import { useList } from '../../home/useList'
@@ -134,8 +133,6 @@ export const getAdminUserColumns = (): ColumnDef<User>[] => [
   },
 ]
 
-type ListType = { apps: IUser[]; meta: MetaV2 }
-
 const UsersList = () => {
   usePageMeta({ title: 'precisionFDA Admin - Users' })
 
@@ -152,7 +149,7 @@ const UsersList = () => {
     setSelectedIndexes,
     saveColumnResizeWidth,
     colWidths,
-  } = useList<ListType>({
+  } = useList<AdminUserListType>({
     fetchList: fetchUsers,
     resource: 'admin-users',
     params: {},

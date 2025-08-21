@@ -36,14 +36,23 @@ export class PublishApiFacade {
       case 'asset':
         entity = await this.nodeRepository.findAccessibleOne({ uid: identifier as Uid<'file'> })
         break
-      case 'note':
-        const [entityType, id] = identifier.split('-')
+      case 'folder': {
+        const [, id] = identifier.split('-')
+        entity = await this.nodeRepository.findAccessibleOne({
+          id: Number(id),
+        })
+        break
+      }
+      case 'note': {
+        const [, id] = identifier.split('-')
         entity = await this.noteRepository.findAccessibleOne({ id: Number(id) })
         break
-      case 'comparison':
-        const [comparisonType, comparisonId] = identifier.split('-')
-        entity = await this.comparisonRepository.findAccessibleOne({ id: Number(comparisonId) })
+      }
+      case 'comparison': {
+        const [, id] = identifier.split('-')
+        entity = await this.comparisonRepository.findAccessibleOne({ id: Number(id) })
         break
+      }
       default:
         throw new InvalidStateError('Invalid entity type')
     }

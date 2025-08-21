@@ -9,7 +9,7 @@ import { CircleCheckIcon } from '../../components/icons/CircleCheckIcon'
 import { APP_REVISION_CREATION_NOT_REQUESTED, APP_SERIES_CREATION_NOT_REQUESTED } from '../../constants'
 import { CONFIRM_APP_REVISION, CONFIRM_APP_SERIES } from '../../constants/consts'
 import { breakPoints } from '../../styles/theme'
-import { displayPayloadMessage } from '../../utils/api'
+import { displayPayloadMessage, Payload } from '../../utils/api'
 import { useConfirmModal } from '../files/actionModals/useConfirmModal'
 import { ApiErrorResponse, APIResource, ApiResponse } from '../home/types'
 import { CheckCol, Col, ColBody, HeaderRow, Table, TableRow, TitleCol } from '../modal/ModalCheckList'
@@ -23,6 +23,7 @@ import { fetchEditableSpacesList } from '../spaces/spaces.api'
 export interface CopyToSpaceProperties {
   createAppRevision?: boolean
   createAppSeries?: boolean
+  [key: string]: unknown
 }
 
 const SpacesList = ({
@@ -110,10 +111,10 @@ const CopyToSpaceForm = ({
     mutationKey: ['copy-to-space', resource],
     mutationFn: ({ space, properties }: { space: string; properties?: CopyToSpaceProperties }) =>
       updateFunction(space, selected, properties),
-    onSuccess: (res: ApiResponse) => {
+    onSuccess: (res) => {
       if (onSuccess) onSuccess(res)
       setShowModal(false)
-      displayPayloadMessage(res)
+      displayPayloadMessage(res as Payload)
     },
     onError: (err: AxiosError<ApiErrorResponse>) => {
       const code = err.response?.data?.error?.code

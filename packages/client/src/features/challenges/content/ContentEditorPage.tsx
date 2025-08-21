@@ -3,7 +3,6 @@ import { Link, Route, Routes, useMatch, useParams } from 'react-router-dom'
 import styled from 'styled-components'
 import { NotAllowedPage } from '../../../components/NotAllowed'
 import { useAuthUser } from '../../auth/useAuthUser'
-import { canEditContent } from '../../data-portals/utils'
 import { ContentTypePage } from './ContentTypePage'
 
 
@@ -46,19 +45,18 @@ const NavItemResource = styled(NavItem)`
   border-top: 1px solid #e0e0e0;
 `
 const NavItemBack = styled(NavItem)`
-  /* margin: 16px 0; */
   font-size: 14px;
   height: 60px;
   padding-bottom: 24px;
 `
 
-export default function ChallengeContentEditPage(): React.ReactNode {
+export default function ChallengeContentEditPage() {
   const user = useAuthUser()
   const { challengeId } = useParams<{
     challengeId: string
   }>()
 
-  if (canEditContent(user?.isAdmin)) {
+  if (!user?.isAdmin) {
     return <NotAllowedPage />
   }
 

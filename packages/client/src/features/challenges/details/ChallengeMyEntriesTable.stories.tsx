@@ -39,7 +39,6 @@ const mockUser: IUser = {
   full_name: 'Test User',
   job_limit: 100,
   last_name: 'User',
-  links: {},
   handle: 'testuser',
   session_id: 'test-session-id',
 }

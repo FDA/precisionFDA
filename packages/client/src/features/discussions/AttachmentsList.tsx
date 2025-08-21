@@ -9,7 +9,7 @@ import { FileIcon } from '../../components/icons/FileIcon'
 import { FileZipIcon } from '../../components/icons/FileZipIcon'
 import { FolderIcon } from '../../components/icons/FolderIcon'
 import { TrashIcon } from '../../components/icons/TrashIcon'
-import { Attachment, AttachmentType, FormAttachments } from './discussions.types'
+import { Attachment, AttachmentKey, AttachmentType, FormAttachments } from './discussions.types'
 import { areAttachmentsEmpty, typeAttachmentKey } from './helpers'
 import { AttachmentsLabel } from './styles'
 
@@ -72,13 +72,13 @@ export const AttachmentsList = ({
   onRemoveAttachment,
 }: {
   attachments: FormAttachments | undefined
-  onRemoveAttachment?: (field: any, id: number) => void
+  onRemoveAttachment?: (field: `attachments.${AttachmentKey}`, id: string | number) => void
 }) => {
   if (areAttachmentsEmpty(attachments)) {
     return null
   }
 
-  const { files = [], folders = [], assets = [], apps = [], jobs = [], comparisons = [] } = attachments!
+  const { files = [], folders = [], assets = [], apps = [], jobs = [], comparisons = []} = attachments!
 
   const typeIcon = {
     UserFile: <FileIcon height={14} />,
