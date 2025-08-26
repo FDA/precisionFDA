@@ -44,7 +44,7 @@ export const licenseRequestApprovedTemplate = (
           You may now <a href="${data.itemsLicenseUrl}">use or download items</a> associated with this license.
         </mj-text>
 
-        <mj-button href="${data.itemsLicenseUrl}" background-color="#007bff" color="white">
+        <mj-button href="${data.itemsLicenseUrl}" background-color="#1F70B5" color="white">
           View Licensed Items
         </mj-button>
       </mj-column>
