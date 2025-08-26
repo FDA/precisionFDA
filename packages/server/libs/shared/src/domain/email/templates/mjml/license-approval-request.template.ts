@@ -47,7 +47,7 @@ export const licenseApprovalRequestTemplate = (data: LicenseApprovalTemplateInpu
         </mj-footer>
       </mj-blockquote>
 
-      <mj-button href="${data.requestUrl}" background-color="#007bff" color="white">
+      <mj-button href="${data.requestUrl}" background-color="#1F70B5" color="white">
         View Request
       </mj-button>
     </mj-column>

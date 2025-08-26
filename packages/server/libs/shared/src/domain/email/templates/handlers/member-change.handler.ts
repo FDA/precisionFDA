@@ -155,8 +155,9 @@ export class MemberChangedEmailHandler extends EmailHandler<EMAIL_TYPES.memberCh
     const receivers = memberships
       .filter(
         (membership) =>
-          membership.id !== context.updatedMembership.id &&
-          context.input.activityType === 'membership_added',
+          (context.input.activityType === 'membership_added' &&
+            membership.id !== context.updatedMembership.id) ||
+          context.input.activityType === 'membership_changed',
       )
       .map((membership) => membership.user.getEntity())
 

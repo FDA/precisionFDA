@@ -38,7 +38,7 @@ export const spaceActivationTemplate = (data: SpaceActivationTemplateInput): str
           To start adding data to this space, both ${data.isReviewSpace ? 'reviewer and sponsor' : data.leadsNames} lead admin(s) must accept the invitation. Please visit the space and click on "Accept space".
         </mj-text>
 
-        <mj-button href="${data.spaceUrl}" background-color="#007bff" color="white">
+        <mj-button href="${data.spaceUrl}" background-color="#1F70B5" color="white">
           View Space Invitation
         </mj-button>
       </mj-column>
