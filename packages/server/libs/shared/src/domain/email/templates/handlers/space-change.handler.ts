@@ -1,15 +1,11 @@
 import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
 import { User } from '@shared/domain/user/user.entity'
 import { ErrorCodes, NotFoundError } from '@shared/errors'
-import { pipe, filter, uniqBy } from 'ramda'
-import { EmailConfigItem } from '../../email.config'
 import { spaceChangedTemplate } from '../mjml/space-change.template'
-import { buildFilterByUserSettings, buildIsNotificationEnabled } from '../../email.helper'
-import { SPACE_MEMBERSHIP_SIDE } from '../../../space-membership/space-membership.enum'
+import { getKeyForUserSpaceRole } from '../../email.helper'
 import { SpaceChangedDTO } from '@shared/domain/email/dto/space-changed.dto'
 import { EmailHandler } from '@shared/domain/email/templates/handlers/email.handler'
 import { EmailClient } from '@shared/services/email-client'
-import { OpsCtx } from '@shared/types'
 import { EmailTypeToTemplateInputMap } from '@shared/domain/email/dto/email-type-to-template-input.map'
 import { Injectable } from '@nestjs/common'
 import { SpaceRepository } from '@shared/domain/space/space.repository'
@@ -20,6 +16,7 @@ import {
   EmailTypeToContextMap,
   SpaceChangedContext,
 } from '@shared/domain/email/dto/email-type-to-context.map'
+import { SPACE_MEMBERSHIP_SIDE } from '@shared/domain/space-membership/space-membership.enum'
 
 @Injectable()
 export class SpaceChangedEmailHandler extends EmailHandler<EMAIL_TYPES.spaceChanged> {
@@ -80,48 +77,30 @@ export class SpaceChangedEmailHandler extends EmailHandler<EMAIL_TYPES.spaceChan
     }
   }
 
+  protected async getNotificationSettingKeys(
+    context: SpaceChangedContext,
+    _user: User,
+  ): Promise<string[]> {
+    const space = context.space
+    await space.spaceMemberships.loadItems()
+    const spaceMembership = space.spaceMemberships
+      .getItems()
+      .filter((spaceMembership) => spaceMembership.active === true)
+
+    if (Array.isArray(spaceMembership) && spaceMembership.length > 0) {
+      return [getKeyForUserSpaceRole(spaceMembership[0], 'space_locked_unlocked_deleted', space)]
+    }
+  }
+
   protected async determineReceivers(context: SpaceChangedContext): Promise<User[]> {
     const memberships = await this.spaceMembershipRepo.find(
       { spaces: context.space.id, active: true },
       { populate: ['user.notificationPreference'] },
     )
-    const ctx: OpsCtx = {
-      em: this.em,
-      log: this.logger,
-    }
-    const config: EmailConfigItem = {
-      emailId: this.emailType,
-      name: 'spaceChanged',
-      handlerClass: SpaceChangedEmailHandler,
-    }
-    const isEnabledFn = buildIsNotificationEnabled('space_locked_unlocked_deleted', ctx)
-    const filterFn = buildFilterByUserSettings({ ...ctx, config: config }, isEnabledFn)
-    const spaceEventUserId = context.user.id
 
-    // this has to be bound to local
-    const filterUsers = pipe(
-      // SpaceMembership[] -> User[]
-      filterFn,
-      // this user triggered the SpaceEvent
-      filter((u: User) => u.id !== spaceEventUserId),
-      uniqBy((user: User) => user.id),
-    )
-    const receivers = filterUsers(memberships)
-    // based on email type, find who will be the receiver
-    // users who are in the space + active ?
-    const receiversSidesArr = receivers.map((a) => [
-      a.id.toString(),
-      SPACE_MEMBERSHIP_SIDE[memberships.find((membership) => membership.user.id === a.id).side],
-    ])
-    context.receiversSides = Object.fromEntries(receiversSidesArr)
-    const receiverMembership = memberships.filter((membership) => {
-      if (receivers && membership.user.id === receivers[0].id) {
-        return membership
-      }
-    })
-    context.receiverMembershipSide = SPACE_MEMBERSHIP_SIDE[receiverMembership[0]?.side]
-
-    return receivers
+    return memberships
+      .map((membership) => membership.user.getEntity())
+      .filter((user) => context.user.id !== user.id)
   }
 
   private getAction(activityType: string): string {

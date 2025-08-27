@@ -37,7 +37,7 @@ export const spaceActivatedTemplate = (data: SpaceActivatedTemplateInput): strin
           The space <strong><a href="${data.spaceUrl}">${data.spaceTitle}</a></strong> has been activated, and you can now start sharing data with members of the space.
         </mj-text>
 
-        <mj-button href="${data.spaceUrl}" background-color="#007bff" color="white">
+        <mj-button href="${data.spaceUrl}" background-color="#1F70B5" color="white">
           View Space
         </mj-button>
       </mj-column>

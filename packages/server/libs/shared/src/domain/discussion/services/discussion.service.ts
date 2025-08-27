@@ -24,7 +24,6 @@ import { DiscussionFollow } from '@shared/domain/follow/discussion-follow.entity
 import { Note } from '@shared/domain/note/note.entity'
 import { Space } from '@shared/domain/space/space.entity'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
-import { User, USER_STATE } from '@shared/domain/user/user.entity'
 import { Vote } from '@shared/domain/vote/vote.entity'
 import { HOME_SCOPE, STATIC_SCOPE } from '@shared/enums'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
@@ -553,26 +552,6 @@ export class DiscussionService {
     if (follow) {
       await this.em.removeAndFlush(follow)
     }
-  }
-
-  /**
-   * Get all users following the discussion, including the discussion owner.
-   * Only currently active users are returned.
-   * @param discussionId
-   */
-  async getFollowers(discussionId: number): Promise<User[]> {
-    const discussion = await this.discussionRepository.findOne({ id: discussionId })
-    if (!discussion) {
-      throw new errors.NotFoundError('Discussion not found.')
-    }
-    await discussion.follows.load()
-    // filter out only user ids
-    const userIDs = discussion.follows
-      .getItems()
-      .filter((follow) => follow.followerType === 'User')
-      .map((follow) => follow.followerId)
-
-    return await this.em.find(User, { id: { $in: userIDs }, userState: USER_STATE.ENABLED })
   }
 
   async getDiscussionUiLink(discussionId: number): Promise<string> {

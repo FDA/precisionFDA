@@ -1,15 +1,9 @@
 import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
 import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
 import { User } from '@shared/domain/user/user.entity'
-import { pipe, uniqBy } from 'ramda'
 import { LoadedReference } from '@mikro-orm/core'
 import { STATIC_SCOPE } from '@shared/enums'
-import { EmailConfigItem } from '../../email.config'
-import {
-  buildFilterByUserSettings,
-  buildIsNotificationEnabled,
-  pfdaNoReplyUser,
-} from '../../email.helper'
+import { pfdaNoReplyUser } from '../../email.helper'
 import { challengePreregTemplate } from '../mjml/challenge-preregister.template'
 import { InternalError } from '@shared/errors'
 import { getIdFromScopeName, scopeContainsId } from '../../../space/space.helper'
@@ -18,11 +12,11 @@ import { EmailHandler } from '@shared/domain/email/templates/handlers/email.hand
 import { ChallengeCreatedDTO } from '@shared/domain/email/dto/challenge-created.dto'
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { EmailClient } from '@shared/services/email-client'
-import { OpsCtx } from '@shared/types'
 import { ChallengeRepository } from '@shared/domain/challenge/challenge.repository'
 import { UserRepository } from '@shared/domain/user/user.repository'
 import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
 import {
+  ChallengeOpenedContext,
   ChallengePreregContext,
   EmailTypeToContextMap,
 } from '@shared/domain/email/dto/email-type-to-context.map'
@@ -75,23 +69,14 @@ export class ChallengePreregEmailHandler extends EmailHandler<EMAIL_TYPES.challe
     } else {
       throw new InternalError(`Scope name ${context.input.scope} is not processable`)
     }
-    const ctx: OpsCtx = {
-      em: this.em,
-      log: this.logger,
-    }
-    const config: EmailConfigItem = {
-      emailId: this.emailType,
-      name: 'spaceChanged',
-      handlerClass: ChallengePreregEmailHandler,
-    }
-    const isEnabledFn = buildIsNotificationEnabled('challenge_preregister', ctx)
-    const filterFn = buildFilterByUserSettings({ ...ctx, config }, isEnabledFn)
-    const filterPipe = pipe(
-      // User[] -> User[]
-      filterFn,
-      uniqBy((u: User) => u.id),
-    )
-    return filterPipe(users).concat(pfdaNoReplyUser)
+    return users.concat(pfdaNoReplyUser)
+  }
+
+  protected async getNotificationSettingKeys(
+    _context: ChallengeOpenedContext,
+    _user: User,
+  ): Promise<string[]> {
+    return ['private_challenge_preregister']
   }
 
   protected getSubject(_receiver: User, context: ChallengePreregContext): string {

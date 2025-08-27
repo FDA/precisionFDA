@@ -10,32 +10,44 @@
 # The current class is responsible only for storing user's preferences
 #   (not the rights to receive a notification).
 class NotificationPreference < ApplicationRecord
-  REVIEWER_KEYS = %i(
-    reviewer_membership_changed
-    reviewer_comment_activity
-    reviewer_content_added_or_deleted
+  GROUP_CONTRIBUTOR_KEYS = %i(
+    group_contributor_membership_changed
+    group_contributor_comment_activity
+    group_contributor_content_added_or_deleted
   ).freeze
 
-  SPONSOR_KEYS = %i(
-    sponsor_membership_changed
-    sponsor_comment_activity
-    sponsor_content_added_or_deleted
+  SHARED_CONTRIBUTOR_KEYS = %i(
+    shared_contributor_membership_changed
+    shared_contributor_comment_activity
+    shared_contributor_content_added_or_deleted
   ).freeze
 
-  REVIEWER_LEAD_KEYS = %i(
-    reviewer_lead_membership_changed
-    reviewer_lead_comment_activity
-    reviewer_lead_content_added_or_deleted
-    reviewer_lead_member_added_to_space
-    reviewer_lead_space_locked_unlocked_deleted
+  GROUP_VIEWER_KEYS = %i(
+    group_viewer_membership_changed
+    group_viewer_comment_activity
+    group_viewer_content_added_or_deleted
   ).freeze
 
-  SPONSOR_LEAD_KEYS = %i(
-    sponsor_lead_membership_changed
-    sponsor_lead_comment_activity
-    sponsor_lead_content_added_or_deleted
-    sponsor_lead_member_added_to_space
-    sponsor_lead_space_locked_unlocked_deleted
+  SHARED_VIEWER_KEYS = %i(
+    shared_viewer_membership_changed
+    shared_viewer_comment_activity
+    shared_viewer_content_added_or_deleted
+  ).freeze
+
+  GROUP_LEAD_KEYS = %i(
+    group_lead_membership_changed
+    group_lead_comment_activity
+    group_lead_content_added_or_deleted
+    group_lead_member_added_to_space
+    group_lead_space_locked_unlocked_deleted
+  ).freeze
+
+  SHARED_LEAD_KEYS = %i(
+    shared_lead_membership_changed
+    shared_lead_comment_activity
+    shared_lead_content_added_or_deleted
+    shared_lead_member_added_to_space
+    shared_lead_space_locked_unlocked_deleted
   ).freeze
 
   ADMIN_KEYS = %i(
@@ -81,7 +93,9 @@ class NotificationPreference < ApplicationRecord
     user_provisioned: 30,
   }.freeze
 
-  ALL_KEYS = REVIEWER_KEYS + SPONSOR_KEYS + REVIEWER_LEAD_KEYS + SPONSOR_LEAD_KEYS +
+  ALL_KEYS = GROUP_CONTRIBUTOR_KEYS + SHARED_CONTRIBUTOR_KEYS +
+             GROUP_VIEWER_KEYS + SHARED_VIEWER_KEYS +
+             GROUP_LEAD_KEYS + SHARED_LEAD_KEYS +
              ADMIN_KEYS + PRIVATE_SCOPE_KEYS
 
   ALL_KEYS.each do |key|
@@ -106,26 +120,32 @@ class NotificationPreference < ApplicationRecord
       {
         # flags - enabled only for comment_activity
         # https://jira.internal.dnanexus.com/browse/PFDA-3094
-        reviewer_membership_changed: 0,
-        reviewer_comment_activity: 1,
-        reviewer_content_added_or_deleted: 0,
-        sponsor_membership_changed: 0,
-        sponsor_comment_activity: 1,
-        sponsor_content_added_or_deleted: 0,
-        reviewer_lead_membership_changed: 1,
-        reviewer_lead_comment_activity: 1,
-        reviewer_lead_content_added_or_deleted: 1,
-        reviewer_lead_member_added_to_space: 1,
-        reviewer_lead_space_locked_unlocked_deleted: 1,
-        sponsor_lead_membership_changed: 1,
-        sponsor_lead_comment_activity: 1,
-        sponsor_lead_content_added_or_deleted: 1,
-        sponsor_lead_member_added_to_space: 1,
-        sponsor_lead_space_locked_unlocked_deleted: 1,
-        admin_membership_changed: 1,
-        admin_comment_activity: 1,
-        admin_content_added_or_deleted: 1,
-        admin_member_added_to_space: 1,
+        group_contributor_membership_changed: 0,
+        group_contributor_comment_activity: 0,
+        group_contributor_content_added_or_deleted: 0,
+        shared_contributor_membership_changed: 0,
+        shared_contributor_comment_activity: 0,
+        shared_contributor_content_added_or_deleted: 0,
+        group_viewer_membership_changed: 0,
+        group_viewer_comment_activity: 0,
+        group_viewer_content_added_or_deleted: 0,
+        shared_viewer_membership_changed: 0,
+        shared_viewer_comment_activity: 0,
+        shared_viewer_content_added_or_deleted: 0,
+        group_lead_membership_changed: 0,
+        group_lead_comment_activity: 0,
+        group_lead_content_added_or_deleted: 0,
+        group_lead_member_added_to_space: 0,
+        group_lead_space_locked_unlocked_deleted: 0,
+        shared_lead_membership_changed: 0,
+        shared_lead_comment_activity: 0,
+        shared_lead_content_added_or_deleted: 0,
+        shared_lead_member_added_to_space: 0,
+        shared_lead_space_locked_unlocked_deleted: 0,
+        admin_membership_changed: 0,
+        admin_comment_activity: 0,
+        admin_content_added_or_deleted: 0,
+        admin_member_added_to_space: 0,
         admin_space_locked_unlocked_deleted: 1,
         private_job_finished: 0,
         private_challenge_opened: 1,
@@ -146,10 +166,12 @@ class NotificationPreference < ApplicationRecord
 
   def all_attributes
     {
-      reviewer: keys_list(REVIEWER_KEYS),
-      sponsor: keys_list(SPONSOR_KEYS),
-      reviewer_lead: keys_list(REVIEWER_LEAD_KEYS),
-      sponsor_lead: keys_list(SPONSOR_LEAD_KEYS),
+      group_contributor: keys_list(GROUP_CONTRIBUTOR_KEYS),
+      shared_contributor: keys_list(SHARED_CONTRIBUTOR_KEYS),
+      group_viewer: keys_list(GROUP_VIEWER_KEYS),
+      shared_viewer: keys_list(SHARED_VIEWER_KEYS),
+      group_lead: keys_list(GROUP_LEAD_KEYS),
+      shared_lead: keys_list(SHARED_LEAD_KEYS),
       admin: keys_list(ADMIN_KEYS),
       private: keys_list(PRIVATE_SCOPE_KEYS),
     }

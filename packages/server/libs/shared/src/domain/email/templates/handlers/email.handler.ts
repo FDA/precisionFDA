@@ -1,4 +1,5 @@
 import { Logger, Type } from '@nestjs/common'
+import { EmailTypeToContextMap } from '@shared/domain/email/dto/email-type-to-context.map'
 import { EmailTypeToInputMap } from '@shared/domain/email/dto/email-type-to-input.map'
 import { EmailTypeToTemplateInputMap } from '@shared/domain/email/dto/email-type-to-template-input.map'
 import { IsEmailInputValidConstraint } from '@shared/domain/email/dto/is-email-input-valid.constraint'
@@ -8,10 +9,10 @@ import { User } from '@shared/domain/user/user.entity'
 import { ValidationError } from '@shared/errors'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { EmailClient } from '@shared/services/email-client'
+import { ArrayUtils } from '@shared/utils/array.utils'
 import { plainToInstance } from 'class-transformer'
 import { ValidationArguments } from 'class-validator'
 import mjml2html from 'mjml'
-import { EmailTypeToContextMap } from '@shared/domain/email/dto/email-type-to-context.map'
 
 export abstract class EmailHandler<T extends EMAIL_TYPES> {
   @ServiceLogger()
@@ -61,12 +62,21 @@ export abstract class EmailHandler<T extends EMAIL_TYPES> {
     return null
   }
 
+  protected async getNotificationSettingKeys(
+    _contextObject: EmailTypeToContextMap[T],
+    _user: User,
+  ): Promise<string[]> {
+    return []
+  }
+
   async sendEmail(inputDto: EmailTypeToInputMap[T]): Promise<void> {
-    this.logger.log(`sending email ${inputDto}`)
+    this.logger.log(`Sending email ${inputDto}`)
     const contextObject = await this.getContextualData(inputDto)
     await this.validateInput(inputDto)
     const receivers = await this.determineReceivers(contextObject)
-    for (const receiver of receivers) {
+    const filteredReceivers = await this.filterReceiversByPreference(receivers, contextObject)
+
+    for (const receiver of filteredReceivers) {
       const emailSendInput = await this.createEmailSendInput(receiver, contextObject)
       await this.emailClient.sendEmail(emailSendInput)
     }
@@ -91,5 +101,28 @@ export abstract class EmailHandler<T extends EMAIL_TYPES> {
       bcc: this.getBcc(receiver, contextObject),
       replyTo: this.getReplyTo(receiver, contextObject),
     }
+  }
+
+  private async filterReceiversByPreference(
+    receivers: User[],
+    contextObject: EmailTypeToContextMap[T],
+  ): Promise<User[]> {
+    const result: User[] = []
+
+    for (const receiver of receivers) {
+      const notificationKeys = await this.getNotificationSettingKeys(contextObject, receiver)
+
+      if (ArrayUtils.isEmpty(notificationKeys)) {
+        result.push(receiver)
+        continue
+      }
+
+      const preferences = receiver.notificationPreference?.getEntity().data
+      if (preferences && notificationKeys.some((key) => preferences[key])) {
+        result.push(receiver)
+      }
+    }
+
+    return result
   }
 }

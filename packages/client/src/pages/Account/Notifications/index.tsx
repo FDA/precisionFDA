@@ -1,86 +1,77 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import React, { useState } from 'react'
-import { Controller, useForm } from 'react-hook-form'
+import React from 'react'
+import { Controller, useForm, Path, PathValue } from 'react-hook-form'
 import { toast } from 'react-toastify'
 import { Checkbox } from '../../../components/CheckboxNext'
 import { Loader } from '../../../components/Loader'
 import { PageActions, PageHeader, PageTitle } from '../../../components/Page/styles'
-import { Select } from '../../../components/Select'
 import { FieldLabelRow } from '../../../components/form/styles'
-import { useAuthUser } from '../../../features/auth/useAuthUser'
 import { usePageMeta } from '../../../hooks/usePageMeta'
 import { UserLayout } from '../../../layouts/UserLayout'
 import { fetchNotificationsPreferences, saveNotificationsPreferences } from './api'
-import { FieldGroup, SectionTitle, StyledNotifications, StyledPageContainer, StyledSelectWrap } from './styles'
+import { FieldGroup, SectionTitle, SectionTitleSmall, StyledNotifications, StyledPageContainer, NotificationSectionRow, NotificationSectionColumn } from './styles'
 import { AllNotification, NotificationPreferences, NotificationPreferencesPayload } from './types'
 import { Button } from '../../../components/Button'
 
-enum Roles {
-  'reviewer' = 'reviewer',
-  'sponsor' = 'sponsor',
-  'reviewer_lead' = 'reviewer_lead',
-  'sponsor_lead' = 'sponsor_lead',
-  'admin' = 'admin',
-}
+type NotificationLabelType = Record<string, string>
 
-enum StaticRoles {
-  'private' = 'private',
-}
-
-const RoleLabel = {
-  [Roles['reviewer']]: 'Reviewer',
-  [Roles['sponsor']]: 'Sponsor',
-  [Roles['reviewer_lead']]: 'Reviewer Lead',
-  [Roles['sponsor_lead']]: 'Sponsor Lead',
-  [Roles['admin']]: 'Review Space Admin',
-}
-
-const NotificationLabel: any = {
+const NotificationLabel: NotificationLabelType = {
   admin_membership_changed: 'Membership Changed',
   admin_comment_activity: 'Comment Activity',
   admin_content_added_or_deleted: 'Content Added Or Deleted',
   admin_member_added_to_space: 'Member Added to Space',
   admin_space_locked_unlocked_deleted: 'Space Locked, Unlocked, or Deleted',
 
-  reviewer_lead_membership_changed: 'Membership Changed',
-  reviewer_lead_comment_activity: 'Comment Activity',
-  reviewer_lead_content_added_or_deleted: 'Content Added Or Deleted',
-  reviewer_lead_member_added_to_space: 'Member Added to Space',
-  reviewer_lead_space_locked_unlocked_deleted: 'Space Locked, Unlocked, or Deleted',
+  group_lead_membership_changed: 'Membership Changed',
+  group_lead_comment_activity: 'Comment Activity',
+  group_lead_content_added_or_deleted: 'Content Added Or Deleted',
+  group_lead_member_added_to_space: 'Member Added to Space',
+  group_lead_space_locked_unlocked_deleted: 'Space Locked, Unlocked, or Deleted',
 
-  sponsor_lead_membership_changed: 'Membership Changed',
-  sponsor_lead_comment_activity: 'Comment Activity',
-  sponsor_lead_content_added_or_deleted: 'Content Added Or Deleted',
-  sponsor_lead_member_added_to_space: 'Member Added to Space',
-  sponsor_lead_space_locked_unlocked_deleted: 'Space Locked, Unlocked, or Deleted',
+  shared_lead_membership_changed: 'Membership Changed',
+  shared_lead_comment_activity: 'Comment Activity',
+  shared_lead_content_added_or_deleted: 'Content Added Or Deleted',
+  shared_lead_member_added_to_space: 'Member Added to Space',
+  shared_lead_space_locked_unlocked_deleted: 'Space Locked, Unlocked, or Deleted',
 
-  sponsor_membership_changed: 'Membership Changed',
-  sponsor_comment_activity: 'Comment Activity',
-  sponsor_content_added_or_deleted: 'Content Added or Deleted',
+  group_contributor_membership_changed: 'Membership Changed',
+  group_contributor_comment_activity: 'Comment Activity',
+  group_contributor_content_added_or_deleted: 'Content Added or Deleted',
 
-  reviewer_membership_changed: 'Membership Changed',
-  reviewer_comment_activity: 'Comment Activity',
-  reviewer_content_added_or_deleted: 'Content Added or Deleted',
+  group_viewer_membership_changed: 'Membership Changed',
+  group_viewer_comment_activity: 'Comment Activity',
+  group_viewer_content_added_or_deleted: 'Content Added or Deleted',
+
+  shared_contributor_membership_changed: 'Membership Changed',
+  shared_contributor_comment_activity: 'Comment Activity',
+  shared_contributor_content_added_or_deleted: 'Content Added or Deleted',
+
+  shared_viewer_membership_changed: 'Membership Changed',
+  shared_viewer_comment_activity: 'Comment Activity',
+  shared_viewer_content_added_or_deleted: 'Content Added or Deleted',
 }
 
-type NotificationPreferencesForm = NotificationPreferences
-
-const NotificationForm = ({ preferences, onSave }: { preferences: NotificationPreferences; onSave: (v: NotificationPreferences) => void }) => {
-  const [selectedRole, setSelectedRole] = useState<Roles>(Roles['reviewer'])
-  const spaceNotificationRoles = Object.keys(preferences).filter(i => i !== 'private') as Array<Roles>
-  const options = spaceNotificationRoles.map(value => ({ value, label: RoleLabel[value] }))
-  const { control, handleSubmit, setValue, getValues, watch, formState: { isSubmitting }} = useForm<NotificationPreferencesForm>({
+const NotificationForm = ({
+  preferences,
+  onSave,
+}: {
+  preferences: NotificationPreferences
+  onSave: (v: NotificationPreferences) => void
+}) => {
+  const {
+    control,
+    handleSubmit,
+    setValue,
+    formState: { isSubmitting },
+  } = useForm<NotificationPreferences>({
     defaultValues: preferences,
   })
 
-  const handleSelectAll = (role: Roles, checked: boolean) => {
-    Object.keys(getValues(role)).forEach(notification => {
-      setValue(`${role}.${notification}`, checked)
-    })
-  }
-
-  const isAllChecked = (role: Roles) => {
-    return Object.values(watch()[role])?.every(value => value)
+  const handleSetValue = (
+    path: Path<NotificationPreferences>,
+    value: PathValue<NotificationPreferences, Path<NotificationPreferences>>,
+  ) => {
+    setValue(path, value, { shouldValidate: true })
   }
 
   return (
@@ -93,12 +84,12 @@ const NotificationForm = ({ preferences, onSave }: { preferences: NotificationPr
             defaultValue={false}
             control={control}
             render={({ field }) => (
-              <FieldLabelRow >
+              <FieldLabelRow>
                 <Checkbox
                   {...field}
                   disabled={isSubmitting}
                   checked={field.value}
-                  onChange={e => setValue(field.name, e.target.checked)}
+                  onChange={e => handleSetValue('private.private_challenge_opened', e.target.checked)}
                 />
                 Notify me when a new precisionFDA challenge is opened.
               </FieldLabelRow>
@@ -116,7 +107,7 @@ const NotificationForm = ({ preferences, onSave }: { preferences: NotificationPr
                   {...field}
                   disabled={isSubmitting}
                   checked={field.value}
-                  onChange={e => setValue(`${StaticRoles.private}.private_challenge_preregister`, e.target.checked)}
+                  onChange={e => handleSetValue('private.private_challenge_preregister', e.target.checked)}
                 />
                 Notify me when a new precisionFDA challenge is open for pre-registration.
               </FieldLabelRow>
@@ -133,9 +124,8 @@ const NotificationForm = ({ preferences, onSave }: { preferences: NotificationPr
                 <Checkbox
                   {...field}
                   disabled={isSubmitting}
-                  id="finishedExecution"
                   checked={field.value}
-                  onChange={e => setValue('private.private_job_finished', e.target.checked)}
+                  onChange={e => handleSetValue('private.private_job_finished', e.target.checked)}
                 />
                 Notify me when an execution has finished.
               </FieldLabelRow>
@@ -145,52 +135,181 @@ const NotificationForm = ({ preferences, onSave }: { preferences: NotificationPr
 
         <SectionTitle>Space Notifications</SectionTitle>
 
-        <StyledSelectWrap>
-          <Select
-            options={options}
-            isDisabled={isSubmitting}
-            value={options.find(i => i.value === selectedRole)}
-            onChange={(selected: any) => setSelectedRole(selected?.value)}
-          />
-        </StyledSelectWrap>
-
-        <FieldGroup>
-          <FieldLabelRow id="all">
-            <Checkbox
-              id="all"
-              disabled={isSubmitting}
-              checked={isAllChecked(selectedRole)}
-              onChange={e => handleSelectAll(selectedRole, e.target.checked)}
+        <SectionTitleSmall>Admin Role</SectionTitleSmall>
+        {Object.entries(preferences.admin).map(([notification]) => (
+          <FieldGroup key={notification}>
+            <Controller
+              name={`admin.${notification}` as Path<NotificationPreferences>}
+              control={control}
+              render={({ field }) => (
+                <FieldLabelRow>
+                  <Checkbox
+                    {...field}
+                    disabled={isSubmitting}
+                    checked={!!field.value}
+                    onChange={e => handleSetValue(`admin.${notification}` as Path<NotificationPreferences>, e.target.checked)}
+                  />
+                  {NotificationLabel[notification]}
+                </FieldLabelRow>
+              )}
             />
-            All
-          </FieldLabelRow>
-        </FieldGroup>
+          </FieldGroup>
+        ))}
 
-        {Object.keys(watch()[selectedRole]).map(notification => {
-          const name = `${selectedRole}.${notification}`
-          return (
-            <FieldGroup key={name}>
-              <Controller
-                name={name}
-                disabled={isSubmitting}
-                control={control}
-                render={({ field }) => (
-                  <FieldLabelRow id={name}>
-                    <Checkbox
-                      {...field}
-                      checked={field.value}
-                      onChange={e => setValue(name, e.target.checked)}
-                    />
-                    {NotificationLabel[notification]}
-                  </FieldLabelRow>
-                )}
-              />
-            </FieldGroup>
-          )
-        })}
+        <SectionTitle>Group Space Notifications</SectionTitle>
+
+        <NotificationSectionRow>
+          <NotificationSectionColumn>
+            <SectionTitleSmall>Lead Role</SectionTitleSmall>
+            {Object.entries(preferences.group_lead).map(([notification]) => (
+              <FieldGroup key={notification}>
+                <Controller
+                  name={`group_lead.${notification}` as Path<NotificationPreferences>}
+                  control={control}
+                  render={({ field }) => (
+                    <FieldLabelRow>
+                      <Checkbox
+                        {...field}
+                        disabled={isSubmitting}
+                        checked={!!field.value}
+                        onChange={e =>
+                          handleSetValue(`group_lead.${notification}` as Path<NotificationPreferences>, e.target.checked)
+                        }
+                      />
+                      {NotificationLabel[notification]}
+                    </FieldLabelRow>
+                  )}
+                />
+              </FieldGroup>
+            ))}
+          </NotificationSectionColumn>
+
+          <NotificationSectionColumn>
+            <SectionTitleSmall>Contributor Role</SectionTitleSmall>
+            {Object.entries(preferences.group_contributor).map(([notification]) => (
+              <FieldGroup key={notification}>
+                <Controller
+                  name={`group_contributor.${notification}` as Path<NotificationPreferences>}
+                  control={control}
+                  render={({ field }) => (
+                    <FieldLabelRow>
+                      <Checkbox
+                        {...field}
+                        disabled={isSubmitting}
+                        checked={!!field.value}
+                        onChange={e => handleSetValue(`group_contributor.${notification}` as Path<NotificationPreferences>, e.target.checked)}
+                      />
+                      {NotificationLabel[notification]}
+                    </FieldLabelRow>
+                  )}
+                />
+              </FieldGroup>
+            ))}
+          </NotificationSectionColumn>
+
+          <NotificationSectionColumn>
+            <SectionTitleSmall>Viewer Role</SectionTitleSmall>
+            {Object.entries(preferences.group_viewer).map(([notification]) => (
+              <FieldGroup key={notification}>
+                <Controller
+                  name={`group_viewer.${notification}` as Path<NotificationPreferences>}
+                  control={control}
+                  render={({ field }) => (
+                    <FieldLabelRow>
+                      <Checkbox
+                        {...field}
+                        disabled={isSubmitting}
+                        checked={!!field.value}
+                        onChange={e => handleSetValue(`group_viewer.${notification}` as Path<NotificationPreferences>, e.target.checked)}
+                      />
+                      {NotificationLabel[notification]}
+                    </FieldLabelRow>
+                  )}
+                />
+              </FieldGroup>
+            ))}
+          </NotificationSectionColumn>
+        </NotificationSectionRow>
+
+        <SectionTitle>Review Space Notifications</SectionTitle>
+
+        <NotificationSectionRow>
+          <NotificationSectionColumn>
+            <SectionTitleSmall>Lead Role</SectionTitleSmall>
+            {Object.entries(preferences.shared_lead).map(([notification]) => (
+              <FieldGroup key={notification}>
+                <Controller
+                  name={`shared_lead.${notification}` as Path<NotificationPreferences>}
+                  control={control}
+                  render={({ field }) => (
+                    <FieldLabelRow>
+                      <Checkbox
+                        {...field}
+                        disabled={isSubmitting}
+                        checked={!!field.value}
+                        onChange={e =>
+                          handleSetValue(`shared_lead.${notification}` as Path<NotificationPreferences>, e.target.checked)
+                        }
+                      />
+                      {NotificationLabel[notification]}
+                    </FieldLabelRow>
+                  )}
+                />
+              </FieldGroup>
+            ))}
+          </NotificationSectionColumn>
+
+          <NotificationSectionColumn>
+            <SectionTitleSmall>Contributor Role</SectionTitleSmall>
+            {Object.entries(preferences.shared_contributor).map(([notification]) => (
+              <FieldGroup key={notification}>
+                <Controller
+                  name={`shared_contributor.${notification}` as Path<NotificationPreferences>}
+                  control={control}
+                  render={({ field }) => (
+                    <FieldLabelRow>
+                      <Checkbox
+                        {...field}
+                        disabled={isSubmitting}
+                        checked={!!field.value}
+                        onChange={e => handleSetValue(`shared_contributor.${notification}` as Path<NotificationPreferences>, e.target.checked)}
+                      />
+                      {NotificationLabel[notification]}
+                    </FieldLabelRow>
+                  )}
+                />
+              </FieldGroup>
+            ))}
+          </NotificationSectionColumn>
+
+          <NotificationSectionColumn>
+            <SectionTitleSmall>Viewer Role</SectionTitleSmall>
+            {Object.entries(preferences.shared_viewer).map(([notification]) => (
+              <FieldGroup key={notification}>
+                <Controller
+                  name={`shared_viewer.${notification}` as Path<NotificationPreferences>}
+                  control={control}
+                  render={({ field }) => (
+                    <FieldLabelRow>
+                      <Checkbox
+                        {...field}
+                        disabled={isSubmitting}
+                        checked={!!field.value}
+                        onChange={e => handleSetValue(`shared_viewer.${notification}` as Path<NotificationPreferences>, e.target.checked)}
+                      />
+                      {NotificationLabel[notification]}
+                    </FieldLabelRow>
+                  )}
+                />
+              </FieldGroup>
+            ))}
+          </NotificationSectionColumn>
+        </NotificationSectionRow>
       </StyledNotifications>
       <PageActions>
-        <Button data-variant="primary" type="submit" disabled={isSubmitting}>Save Settings</Button>
+        <Button data-variant="primary" type="submit" disabled={isSubmitting}>
+          Save Settings
+        </Button>
       </PageActions>
     </form>
   )
@@ -198,7 +317,6 @@ const NotificationForm = ({ preferences, onSave }: { preferences: NotificationPr
 
 const NotificationsPage = () => {
   usePageMeta({ title: 'Notifications - precisionFDA' })
-  const user = useAuthUser()
   const { data, isLoading } = useQuery({
     queryKey: ['notifications'],
     queryFn: fetchNotificationsPreferences,
@@ -218,19 +336,19 @@ const NotificationsPage = () => {
 
   const handleOnsSubmit = async (variables: NotificationPreferences) => {
     const all = {
-      ...variables.reviewer,
-      ...variables.sponsor,
-      ...variables.reviewer_lead,
-      ...variables.sponsor_lead,
+      ...variables.group_contributor,
+      ...variables.shared_contributor,
+      ...variables.group_viewer,
+      ...variables.shared_viewer,
+      ...variables.group_lead,
+      ...variables.shared_lead,
       ...variables.admin,
       ...variables.private,
     } satisfies Record<AllNotification, boolean>
 
-    const payload = {} as NotificationPreferencesPayload
-    Object.entries(all).forEach(([key, value]) => {
-      const newValue = value === true ? 1 : 0
-      payload[key] = newValue
-    })
+    const payload: NotificationPreferencesPayload = Object.fromEntries(
+      Object.entries(all).map(([key, value]) => [key, value ? 1 : 0]),
+    ) as NotificationPreferencesPayload
 
     return notificationsMutation(payload)
   }

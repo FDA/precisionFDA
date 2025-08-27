@@ -29,7 +29,12 @@ class WorkstationService {
 
   constructor(userCtx: UserOpsCtx, authToken: string) {
     this.ctx = userCtx
-
+    const jar = new CookieJar()
+    const config: AxiosCookieJarConfig = {
+      jar,
+      withCredentials: true, // required when using cookies
+    }
+    this.axiosInstance = wrapper(axios.create(config))
     this.authToken = authToken
   }
 

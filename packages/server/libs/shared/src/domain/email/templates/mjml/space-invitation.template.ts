@@ -50,7 +50,7 @@ export const spaceInvitationTemplate = (data: SpaceInvitationTemplateInput): str
         Spaces let you move data from your private area and share it with space members to access. You can then publish the data out of the space to the precisionFDA community.
       </mj-text>
 
-      <mj-button href="${data.spaceUrl}" background-color="#007bff" color="white">
+      <mj-button href="${data.spaceUrl}" background-color="#1F70B5" color="white">
         View Space
       </mj-button>
     </mj-column>

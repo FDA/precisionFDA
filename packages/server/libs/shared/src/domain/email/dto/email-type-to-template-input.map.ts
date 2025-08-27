@@ -22,6 +22,7 @@ import { LicenseRevokedTemplateInput } from '@shared/domain/email/templates/mjml
 import { MemberChangeTemplateInput } from '@shared/domain/email/templates/mjml/member-change.template'
 import { SpaceActivatedTemplateInput } from '@shared/domain/email/templates/mjml/space-activated.template'
 import { SpaceActivationTemplateInput } from '@shared/domain/email/templates/mjml/space-activation.template'
+import { DiscussionEmailInput } from '@shared/domain/email/templates/mjml/new-discussion.template'
 
 export type EmailTypeToTemplateInputMap = {
   [EMAIL_TYPES.emailWithoutTemplate]: EmptyEmailInputDTO
@@ -54,4 +55,6 @@ export type EmailTypeToTemplateInputMap = {
   [EMAIL_TYPES.spaceInvitation]: SpaceInvitationTemplateInput
   [EMAIL_TYPES.nodeCopy]: NodeCopyTemplateInput
   [EMAIL_TYPES.userProvisioned]: UserProvisionedDTO
+  [EMAIL_TYPES.newDiscussion]: DiscussionEmailInput
+  [EMAIL_TYPES.newDiscussionReply]: DiscussionEmailInput
 }
