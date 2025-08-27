@@ -4,12 +4,9 @@ import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
 import { Job } from '@shared/domain/job/job.entity'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { User } from '@shared/domain/user/user.entity'
-import { pipe, filter, uniqBy } from 'ramda'
-import { EmailConfigItem } from '../../email.config'
 import { commentAddedTemplate } from '../mjml/comment-added.template'
 import { Injectable } from '@nestjs/common'
 import { EmailHandler } from '@shared/domain/email/templates/handlers/email.handler'
-import { OpsCtx } from '@shared/types'
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { EmailClient } from '@shared/services/email-client'
 import { SpaceEventRepository } from '@shared/domain/space-event/space-event.repository'
@@ -18,7 +15,7 @@ import { UserFileRepository } from '@shared/domain/user-file/user-file.repositor
 import { AppRepository } from '@shared/domain/app/app.repository'
 import { JobRepository } from '@shared/domain/job/job.repository'
 import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
-import { buildFilterByUserSettings, buildIsNotificationEnabled } from '../../email.helper'
+import { getKeyForUserSpaceRole } from '../../email.helper'
 import { generateObjectCommentsLink } from '@shared/domain/email/templates/mjml/common'
 import {
   CommentAddedContext,
@@ -99,31 +96,33 @@ export class CommentAddedEmailHandler extends EmailHandler<EMAIL_TYPES.commentAd
     }
   }
 
+  protected async getNotificationSettingKeys(
+    context: EmailTypeToContextMap[EMAIL_TYPES.commentAdded],
+    user: User,
+  ): Promise<string[]> {
+    const space = context.spaceEvent.space.getEntity()
+    await space.spaceMemberships.loadItems()
+    const spaceMembership = space.spaceMemberships
+      .getItems()
+      .filter(
+        (spaceMembership) =>
+          spaceMembership.active === true && spaceMembership.user.getEntity().id === user.id,
+      )
+
+    if (Array.isArray(spaceMembership) && spaceMembership.length > 0) {
+      return [getKeyForUserSpaceRole(spaceMembership[0], 'comment_activity', space)]
+    }
+  }
+
   protected async determineReceivers(context: CommentAddedContext): Promise<User[]> {
     const memberships = await this.spaceMembershipRepo.find(
       { spaces: context.spaceEvent.space.id, active: true },
       { populate: ['user.notificationPreference'] },
     )
-    const ctx: OpsCtx = {
-      em: this.em,
-      log: this.logger,
-    }
-    const config: EmailConfigItem = {
-      emailId: this.emailType,
-      name: 'commentAdded',
-      handlerClass: CommentAddedEmailHandler,
-    }
-    const isEnabledFn = buildIsNotificationEnabled('comment_activity', ctx)
-    const filterFn = buildFilterByUserSettings({ ...ctx, config }, isEnabledFn)
     const spaceEventCreatorId = context.spaceEvent.user.id
-
-    const filterPipe = pipe(
-      // SpaceMembership[] -> User[]
-      filterFn,
-      filter((u: User) => u.id !== spaceEventCreatorId),
-      uniqBy((u: User) => u.id),
-    )
-    return filterPipe(memberships)
+    return memberships
+      .map((membership) => membership.user.getEntity())
+      .filter((user) => user.id !== spaceEventCreatorId)
   }
 
   protected getSubject(_receiver: User, context: CommentAddedContext): string {

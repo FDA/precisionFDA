@@ -21,6 +21,8 @@ import { MemberChangedEmailHandler } from '@shared/domain/email/templates/handle
 import { SpaceActivatedHandler } from '@shared/domain/email/templates/handlers/space-activated.handler'
 import { SpaceActivationEmailHandler } from '@shared/domain/email/templates/handlers/space-activation.handler'
 import { SpaceChangedEmailHandler } from '@shared/domain/email/templates/handlers/space-change.handler'
+import { NewDiscussionHandler } from '@shared/domain/email/templates/handlers/new-discussion.handler'
+import { NewDiscussionReplyHandler } from '@shared/domain/email/templates/handlers/new-discussion-reply.handler'
 
 const TYPE_TO_HANDLER_PROVIDER_MAP = 'TYPE_TO_HANDLER_PROVIDER_MAP'
 
@@ -46,6 +48,8 @@ type TypeToHandlerMap = {
   [EMAIL_TYPES.spaceActivated]: SpaceActivatedHandler
   [EMAIL_TYPES.spaceActivation]: SpaceActivationEmailHandler
   [EMAIL_TYPES.spaceChanged]: SpaceChangedEmailHandler
+  [EMAIL_TYPES.newDiscussion]: NewDiscussionHandler
+  [EMAIL_TYPES.newDiscussionReply]: NewDiscussionReplyHandler
 }
 
 const TypeToHandlerMapProvider: Provider = {
@@ -72,6 +76,8 @@ const TypeToHandlerMapProvider: Provider = {
     SpaceActivatedHandler,
     SpaceActivationEmailHandler,
     SpaceChangedEmailHandler,
+    NewDiscussionHandler,
+    NewDiscussionReplyHandler,
   ],
   useFactory: (
     alertMessageHandler: AlertMessageHandler,
@@ -95,6 +101,8 @@ const TypeToHandlerMapProvider: Provider = {
     spaceActivatedHandler: SpaceActivatedHandler,
     spaceActivationHandler: SpaceActivationEmailHandler,
     spaceChangedEmailHandler: SpaceChangedEmailHandler,
+    newDicussionHandler: NewDiscussionHandler,
+    newDicussionReplyHandler: NewDiscussionReplyHandler,
   ): TypeToHandlerMap => {
     return {
       [EMAIL_TYPES.alertMessage]: alertMessageHandler,
@@ -118,6 +126,8 @@ const TypeToHandlerMapProvider: Provider = {
       [EMAIL_TYPES.spaceActivated]: spaceActivatedHandler,
       [EMAIL_TYPES.spaceActivation]: spaceActivationHandler,
       [EMAIL_TYPES.spaceChanged]: spaceChangedEmailHandler,
+      [EMAIL_TYPES.newDiscussion]: newDicussionHandler,
+      [EMAIL_TYPES.newDiscussionReply]: newDicussionReplyHandler,
     }
   },
 }

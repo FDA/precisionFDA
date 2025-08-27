@@ -20,7 +20,10 @@ import {
   SPACE_MEMBERSHIP_SIDE,
 } from '@shared/domain/space-membership/space-membership.enum'
 import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
-import { ObjectIdInputDTO } from '@shared/domain/email/email.helper'
+import { ObjectIdInputDTO } from '@shared/domain/email/dto/object-id.dto'
+import { NotificationPreference } from '@shared/domain/notification-preference/notification-preference.entity'
+import { Reference } from '@mikro-orm/core'
+import { SPACE_TYPE } from '@shared/domain/space/space.enum'
 
 describe('ContentChangedEmailHandler', () => {
   const SPACE_EVENT_ID = 10
@@ -66,8 +69,15 @@ describe('ContentChangedEmailHandler', () => {
       userCreator.lastName = 'Seruti'
       userCreator.email = 'test@email.com'
       userCreator.id = EVENT_CREATOR_ID
+      const notificationPref = new NotificationPreference(user)
+      notificationPref.data = {
+        group_lead_content_added_or_deleted: true,
+      }
+
+      user.notificationPreference = Reference.create(notificationPref)
       const space = new Space()
       space.id = SPACE_ID
+      space.type = SPACE_TYPE.GROUPS
       const spaceEvent = new SpaceEvent(userCreator, space)
       spaceEvent.id = SPACE_EVENT_ID
       spaceEvent.objectType = SPACE_EVENT_OBJECT_TYPE.APP
@@ -81,7 +91,10 @@ describe('ContentChangedEmailHandler', () => {
       )
 
       spaceEventRepoFindOneOrFailStub
-        .withArgs({ id: SPACE_EVENT_ID }, { populate: ['space'] })
+        .withArgs(
+          { id: SPACE_EVENT_ID },
+          { populate: ['space', 'space.spaceMemberships', 'space.spaceMemberships.user'] },
+        )
         .resolves(spaceEvent)
       spaceMembershipRepoFindStub
         .withArgs(

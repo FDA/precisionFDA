@@ -21,6 +21,7 @@ import { SpaceEvent } from '@shared/domain/space-event/space-event.entity'
 import { Comment } from '@shared/domain/comment/comment.entity'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { App } from '@shared/domain/app/app.entity'
+import { Discussion } from '@shared/domain/discussion/discussion.entity'
 
 export type ChallengeOpenedContext = {
   challenge: Challenge
@@ -130,6 +131,15 @@ export type CommentAddedContext = {
   input: EmailTypeToInputMap[EMAIL_TYPES.commentAdded]
 }
 
+export type DiscussionContext = {
+  discussion: Discussion
+  space?: Space
+  discussionLink: string
+  input:
+    | EmailTypeToInputMap[EMAIL_TYPES.newDiscussion]
+    | EmailTypeToInputMap[EMAIL_TYPES.newDiscussionReply]
+}
+
 type EmailTypeToContextMapOverride = {
   [EMAIL_TYPES.emailWithoutTemplate]: EmptyEmailInputDTO
   [EMAIL_TYPES.jobFinished]: JobFinishedContext
@@ -160,6 +170,8 @@ type EmailTypeToContextMapOverride = {
   [EMAIL_TYPES.invitation]: InvitationContext
   [EMAIL_TYPES.spaceInvitation]: SpaceInvitationContext
   [EMAIL_TYPES.nodeCopy]: NodeCopyInputDTO
+  [EMAIL_TYPES.newDiscussion]: DiscussionContext
+  [EMAIL_TYPES.newDiscussionReply]: DiscussionContext
 }
 
 export type EmailTypeToContextMap = {

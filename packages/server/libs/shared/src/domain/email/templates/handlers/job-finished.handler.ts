@@ -1,15 +1,11 @@
 import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
 import { User } from '@shared/domain/user/user.entity'
-import { pipe, uniqBy } from 'ramda'
-import { EmailConfigItem } from '../../email.config'
 import { jobFinishedTemplate } from '../mjml/job-finished.template'
-import { buildFilterByUserSettings, buildIsNotificationEnabled } from '../../email.helper'
 import { JobEventDTO } from '@shared/domain/email/dto/job-event.dto'
 import { Injectable } from '@nestjs/common'
 import { EmailHandler } from '@shared/domain/email/templates/handlers/email.handler'
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { EmailClient } from '@shared/services/email-client'
-import { OpsCtx } from '@shared/types'
 import { JobRepository } from '@shared/domain/job/job.repository'
 import { UserRepository } from '@shared/domain/user/user.repository'
 import {
@@ -43,6 +39,13 @@ export class JobFinishedEmailHandler extends EmailHandler<EMAIL_TYPES.jobFinishe
     }
   }
 
+  protected async getNotificationSettingKeys(
+    context: JobFinishedContext,
+    _user: User,
+  ): Promise<string[]> {
+    return context.job.isPrivate() ? ['private_job_finished'] : []
+  }
+
   protected async determineReceivers(context: JobFinishedContext): Promise<User[]> {
     if (context.job.isPublic()) {
       this.logger.log({ jobId: context.job.id }, 'Job is public, no one is notified')
@@ -59,24 +62,7 @@ export class JobFinishedEmailHandler extends EmailHandler<EMAIL_TYPES.jobFinishe
       { populate: ['notificationPreference'] },
     )
 
-    const ctx: OpsCtx = {
-      em: this.em,
-      log: this.logger,
-    }
-    const config: EmailConfigItem = {
-      emailId: this.emailType,
-      name: 'jobFinished',
-      handlerClass: JobFinishedEmailHandler,
-    }
-
-    const isEnabledFn = buildIsNotificationEnabled('job_finished', ctx)
-    const filterFn = buildFilterByUserSettings({ ...ctx, config }, isEnabledFn)
-    const filterPipe = pipe(
-      // User[] -> User[]
-      filterFn,
-      uniqBy((u: User) => u.id),
-    )
-    return filterPipe([owner])
+    return [owner]
   }
 
   protected getSubject(_receiver: User, context: JobFinishedContext): string {

@@ -29,4 +29,6 @@ export enum EMAIL_TYPES {
   spaceInvitation = 28,
   nodeCopy = 29,
   userProvisioned = 30,
+  newDiscussion = 31,
+  newDiscussionReply = 32,
 }

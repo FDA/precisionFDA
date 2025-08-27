@@ -3,19 +3,17 @@ import { SpaceMembership } from '@shared/domain/space-membership/space-membershi
 import { Space } from '@shared/domain/space/space.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { ErrorCodes, NotFoundError } from '@shared/errors'
-import { filter, pipe, uniqBy } from 'ramda'
 import { LoadedReference } from '@mikro-orm/core'
-import { EmailConfigItem, NOTIFICATION_TYPES_BASE } from '../../email.config'
+import { NOTIFICATION_TYPES_BASE } from '../../email.config'
 import { SPACE_EVENT_ACTIVITY_TYPE } from '../../../space-event/space-event.enum'
 import { SPACE_MEMBERSHIP_ROLE } from '../../../space-membership/space-membership.enum'
 import { memberChangedTemplate } from '../mjml/member-change.template'
-import { buildFilterByUserSettings, buildIsNotificationEnabled } from '../../email.helper'
+import { getKeyForUserSpaceRole } from '../../email.helper'
 import { MemberChangedDTO } from '@shared/domain/email/dto/member-changed.dto'
 import { Injectable } from '@nestjs/common'
 import { EmailHandler } from '@shared/domain/email/templates/handlers/email.handler'
 import { SqlEntityManager } from '@mikro-orm/mysql'
 import { EmailClient } from '@shared/services/email-client'
-import { OpsCtx } from '@shared/types'
 import { EmailTypeToTemplateInputMap } from '@shared/domain/email/dto/email-type-to-template-input.map'
 import { SpaceRepository } from '@shared/domain/space/space.repository'
 import { UserRepository } from '@shared/domain/user/user.repository'
@@ -119,21 +117,32 @@ export class MemberChangedEmailHandler extends EmailHandler<EMAIL_TYPES.memberCh
     return actionValue
   }
 
-  private getNotificationKey(input: MemberChangedDTO): keyof typeof NOTIFICATION_TYPES_BASE {
-    const membershipChangeKeys = [
-      SPACE_EVENT_ACTIVITY_TYPE.membership_changed,
-      SPACE_EVENT_ACTIVITY_TYPE.membership_enabled,
-      SPACE_EVENT_ACTIVITY_TYPE.membership_disabled,
-    ]
-    const membershipAddingKey = [SPACE_EVENT_ACTIVITY_TYPE.membership_added]
-    const currentKey = SPACE_EVENT_ACTIVITY_TYPE[input.activityType]
-    if (membershipChangeKeys.includes(currentKey)) {
-      return 'membership_changed'
+  protected async getNotificationSettingKeys(
+    context: MemberChangedContext,
+    user: User,
+  ): Promise<string[]> {
+    const space = context.space
+    await space.spaceMemberships.loadItems()
+    const spaceMembership = space.spaceMemberships
+      .getItems()
+      .filter(
+        (spaceMembership) =>
+          spaceMembership.active === true && spaceMembership.user.getEntity().id === user.id,
+      )
+
+    if (Array.isArray(spaceMembership) && spaceMembership.length > 0) {
+      return [
+        getKeyForUserSpaceRole(
+          spaceMembership[0],
+          this.getNotificationKey(context.input.activityType),
+          space,
+        ),
+      ]
     }
-    if (membershipAddingKey.includes(currentKey)) {
-      return 'member_added_to_space'
-    }
-    throw new Error(`Unknown activityType value ${input.activityType}`)
+  }
+
+  private getNotificationKey(_activityType: string): keyof typeof NOTIFICATION_TYPES_BASE {
+    return 'membership_changed'
   }
 
   async determineReceivers(context: MemberChangedContext): Promise<User[]> {
@@ -141,72 +150,19 @@ export class MemberChangedEmailHandler extends EmailHandler<EMAIL_TYPES.memberCh
       { spaces: context.space.id, active: true },
       { populate: ['user.notificationPreference'] },
     )
-    const ctx: OpsCtx = {
-      em: this.em,
-      log: this.logger,
-    }
-    const config: EmailConfigItem = {
-      emailId: this.emailType,
-      name: 'memberChangedAddedRemoved',
-      handlerClass: MemberChangedEmailHandler,
-    }
-    const isEnabledFn = buildIsNotificationEnabled(this.getNotificationKey(context.input), ctx)
-    const filterFn = buildFilterByUserSettings({ ...ctx, config }, isEnabledFn)
-    const spaceEventUserId = context.user.id
-    const userMembership = memberships.filter((memberShip) => {
-      if (memberShip.user.id === spaceEventUserId) {
-        return memberShip
-      }
-    })
 
-    const receiverMembershipForAdding = memberships.filter((membership) => {
-      if (
-        membership &&
-        membership.side === userMembership[0].side &&
-        membership.user.id !== spaceEventUserId &&
-        [SPACE_MEMBERSHIP_ROLE.ADMIN, SPACE_MEMBERSHIP_ROLE.LEAD].includes(membership.role)
-      ) {
-        return membership
-      }
-    })
+    // filter out membership that was added
+    const receivers = memberships
+      .filter(
+        (membership) =>
+          (context.input.activityType === 'membership_added' &&
+            membership.id !== context.updatedMembership.id) ||
+          context.input.activityType === 'membership_changed',
+      )
+      .map((membership) => membership.user.getEntity())
 
-    const receiverMembershipForChanging = memberships.filter((membership) => {
-      if (
-        membership &&
-        membership.side === userMembership[0].side &&
-        membership.user.id !== spaceEventUserId
-      ) {
-        return membership
-      }
-    })
-
-    // this has to be bound to local
-    const filterUsers = pipe(
-      // SpaceMembership[] -> User[]
-      filterFn,
-      // this user triggered the SpaceEvent
-      filter((u: User) => u.id !== spaceEventUserId),
-      filter((u: User) => !u.isChallengeBot()),
-      uniqBy((user: User) => user.id),
-    )
-    let receivers
-    // membership_added
-    if (context.input.activityType === 'membership_added') {
-      receivers = filterUsers(receiverMembershipForAdding)
-    } else {
-      // other actions for membership: enable/disable/role change
-      receivers = filterUsers(receiverMembershipForChanging)
-      if (
-        context.input.activityType === 'membership_enabled' &&
-        !context.updatedMembership.active
-      ) {
-        const enabledUser = await this.em.findOneOrFail(User, {
-          id: context.updatedMembership.user.id,
-        })
-        receivers.push(enabledUser)
-      }
-    }
-    return receivers
+    // filter out user who initiated it
+    return receivers.filter((user: User) => user.id !== context.input.initUserId)
   }
 
   private async getTemplateContent(
