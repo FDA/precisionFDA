@@ -131,7 +131,7 @@ const importFormData = async (
       // Convert FileReader to promise-based API
       const content = await readFileAsText(file)
 
-      const importedData = JSON.parse(content)
+      const importedData: RunJobFormType = JSON.parse(content)
       if (importedData.inputs && Array.isArray(importedData.inputs)) {
         // Add ids to each input item
         importedData.inputs = importedData.inputs.map((item: BatchInput, index: number) => ({

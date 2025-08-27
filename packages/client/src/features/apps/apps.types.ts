@@ -1,6 +1,5 @@
 import { Asset } from '../actionModals/AttachToModal/useListAssetsQuery'
 import { Note } from '../actionModals/AttachToModal/useListNotesQuery'
-import { IAccessibleFile } from '../databases/databases.api'
 import { IJob } from '../executions/executions.types'
 import { FileUid } from '../files/files.types'
 import { HomeScope, ServerScope } from '../home/types'
@@ -163,7 +162,7 @@ export interface RunJobFormType {
 
 export interface InputSpecForm extends Omit<InputSpec, 'choices' | 'default'> {
   choices: string[] | null
-  default: null | string[] | IAccessibleFile[]
+  default: null | string[]
 }
 
 export interface CreateAppForm extends Omit<CreateAppPayload, 'ordered_assets' | 'input_spec'> {
