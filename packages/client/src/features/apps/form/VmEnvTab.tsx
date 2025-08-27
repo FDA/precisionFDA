@@ -1,5 +1,5 @@
 import React, { useRef } from 'react'
-import { Control, Controller, FieldValues } from 'react-hook-form'
+import { Control, Controller } from 'react-hook-form'
 import { Link } from 'react-router-dom'
 import styled from 'styled-components'
 import { TransparentButton, Button } from '../../../components/Button'
@@ -202,7 +202,7 @@ const UbuntuPackageSelect = ({
   )
 }
 
-export const VmEnvTab = ({ control }: { control: Control<FieldValues> }) => {
+export const VmEnvTab = ({ control }: { control: Control<CreateAppForm> }) => {
   return (
     <FormFields>
       <Help>

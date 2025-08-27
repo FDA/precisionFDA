@@ -4,7 +4,6 @@ import { toString } from 'lodash'
 import { IOSpec, InputSpec, InputSpecForm } from '../apps.types'
 import { csvToArray } from '../../../utils/csvToArray'
 import { stringToSnakeCase } from '../../../utils/stringToSnakeCase'
-import { IAccessibleFile } from '../../databases/databases.api'
 import '../../../utils/yupValidators'
 
 export const formatCSVStringToArray = (csvVal: string | null) => {
@@ -15,7 +14,7 @@ export const formatCSVStringToArray = (csvVal: string | null) => {
 }
 
 interface DefaultCreateType {
-  'array:file': IAccessibleFile[] | null
+  'array:file': string[] | null
   'file': string | null
   'boolean': string | null
   'array:int': string[] | null
@@ -26,8 +25,8 @@ interface DefaultCreateType {
   'string': string | null
 }
 interface RunType {
-  'array:file': IAccessibleFile[] | null
-  'file': IAccessibleFile | null
+  'array:file': string[] | null
+  'file': string | null
   'boolean': string | null
   'array:int': string[] | null
   'array:float': string[] | null
@@ -49,7 +48,7 @@ interface ServerType {
 }
 
 const defaultCreateDefs: { [CLASS_TYPE in IOSpec['class']]: (t: DefaultCreateType[CLASS_TYPE]) => ServerType[CLASS_TYPE] | null } = {
-  'array:file': v => (v && v.length > 0) ? v.map(file => file.uid || '') : null,
+  'array:file': v => (v && v.length > 0) ? v : null,
   'file': v => v ?? null,
   'boolean': v => v === 'null' ? null : v === 'true',
   'array:int': v => v?.map(i => parseInt(i, 10)) ?? null,
@@ -61,8 +60,8 @@ const defaultCreateDefs: { [CLASS_TYPE in IOSpec['class']]: (t: DefaultCreateTyp
 }
 
 const runDefs: { [CLASS_TYPE in IOSpec['class']]: (t: ServerType[CLASS_TYPE]) => RunType[CLASS_TYPE] | null } = {
-  'array:file': v => (v && v.length > 0) ? v.map(uid => ({ uid } as IAccessibleFile)) : null,
-  'file': v => v ? ({ uid: v } as IAccessibleFile) : null,
+  'array:file': v => (v && v.length > 0) ? v : null,
+  'file': v => v ?? null,
   'boolean': v => v == null ? null : v.toString(),
   'array:int': v => v?.map(i => i.toString()) ?? null,
   'array:float': v => v?.map(i => i.toString()) ?? null,
@@ -93,9 +92,9 @@ export function mapServerClassToFormClass<T extends IOSpec>(spec: T): T {
   return { ...spec, class: spec.class.replace('array:', '') }
 }
 
-function formatFormDefault(val: unknown, sClass: IOSpec['class']): null | string[] | IAccessibleFile[] {
+function formatFormDefault(val: string | number | string[] | null, sClass: IOSpec['class']): null | string[] {
   if(sClass === 'array:file' || sClass === 'file') {
-    return val as IAccessibleFile[] | null
+    return val as string[] | null
   }
   if(Array.isArray(val)) {
     return val.map(v => v?.toString() ?? '') as string[]
