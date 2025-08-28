@@ -20,7 +20,7 @@ export interface SpaceMembership {
   id: number
   user_name: string
   title: string
-  active: boolean
+  active: 'Active' | 'Inactive' | 'Account deactivated'
   role: MemberRole
   side: MemberSide
   org: string
@@ -32,4 +32,10 @@ export interface SpaceMembership {
 
 export interface ListMembersResponse {
   space_memberships: SpaceMembership[]
+}
+
+export interface ChangeMemberRoleResponse {
+  member: string
+  role: MemberRole
+  active: 'Active' | 'Inactive'
 }

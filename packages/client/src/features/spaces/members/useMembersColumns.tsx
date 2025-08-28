@@ -61,7 +61,7 @@ export const useMembersColumns = ({
       filterFn: 'includesString',
       size: 150,
       cell: info => {
-        const isDeactivated = !info.row.original.active
+        const isDeactivated = info.row.original.active === 'Inactive'
         return isDeactivated ? `${info.getValue<string>()} (disabled)` : info.getValue<string>()
       },
     },

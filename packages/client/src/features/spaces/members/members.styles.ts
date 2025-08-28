@@ -10,4 +10,5 @@ export const StyledFields = styled.div`
 
 export const StyledFooter = styled(Footer)`
   padding: var(--modal-padding-TB) var(--modal-padding-LR);
+  justify-content: space-between;
 `
