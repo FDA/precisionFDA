@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useState } from 'react'
+import React, { Fragment, useEffect, useId, useState } from 'react'
 import styled, { css } from 'styled-components'
 import { colors } from '../../styles/theme'
 
@@ -72,17 +72,19 @@ export function RadioButtonGroup<T extends string | undefined>({
   onBlur,
   disabled = false,
   ariaLabel,
-  name = '',
+  name,
 }: {
   ariaLabel?: string
   value?: T
   disabled?: boolean
-  options: { value?: T; label: string }[]
+  options: { value?: T; label: string | React.ReactNode }[]
   onChange: (value?: T) => void
   onBlur?: () => void
   name?: string
 }) {
   const [selected, setSelected] = useState(value || options[0].value)
+  const autoId = useId()
+  const groupName = `radioButton-${name || autoId}`
 
   useEffect(() => {
     onChange(selected)
@@ -90,21 +92,21 @@ export function RadioButtonGroup<T extends string | undefined>({
 
   return (
     <Group role="radiogroup" aria-label={ariaLabel} onBlur={onBlur} disabled={disabled}>
-      {options.map(({ value: optionValue, label }, index) => (
+      {options.map(({ value: v, label }, index) => (
         <Fragment key={index}>
           <input
             type="radio"
             className="radio-button"
-            name={`radioButton-${name}`}
-            value={optionValue}
-            id={`button-${name}-${index}`}
+            name={groupName}
+            value={v}
+            id={`button-${groupName}-${index}`}
             autoComplete="off"
-            checked={selected === optionValue}
-            onChange={() => setSelected(optionValue)}
+            checked={selected === v}
+            onChange={() => setSelected(v)}
             disabled={disabled}
           />
 
-          <label aria-checked="false" htmlFor={`button-${name}-${index}`}>{label}</label>
+          <label aria-checked={selected === v} htmlFor={`button-${groupName}-${index}`}>{label}</label>
         </Fragment>
       ))}
     </Group>

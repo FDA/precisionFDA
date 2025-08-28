@@ -9,7 +9,7 @@ import * as Yup from 'yup'
 import { Button } from '../../../components/Button'
 import { Callout } from '../../../components/Callout'
 import { InputText } from '../../../components/InputText'
-import { FieldGroup, Hint, InputError } from '../../../components/form/styles'
+import { ErrorHint, FieldGroup, Hint, InputError } from '../../../components/form/styles'
 import { capitalize } from '../../../utils/formatting'
 import { useAuthUser } from '../../auth/useAuthUser'
 import { ModalHeaderTop, ModalNext } from '../../modal/ModalNext'
@@ -42,7 +42,7 @@ const validationSchema = Yup.object().shape({
 
 type ErrorResponse = { response?: { data?: { errors?: string } } }
 interface ChangeMemberRoleFormProps {
-  spaceId: string|number
+  spaceId: string | number
   member: SpaceMembership
   onClose: () => void
 }
@@ -84,19 +84,44 @@ const ChangeMemberRoleForm: React.FC<ChangeMemberRoleFormProps> = ({ spaceId, me
       }
     },
   })
+
+  const disableMutation = useMutation({
+    mutationFn: (action: 'disable' | 'enable') => changeMembershipRoleRequest({ spaceId, memberId: member.id, role: action }),
+    onSuccess: res => {
+      if (authUser?.dxuser === res.member && res.role === 'disable') {
+        navigate('/spaces')
+        toast.success('Disabled yourself from the space')
+      } else {
+        reset()
+        queryClient.invalidateQueries({ queryKey: ['space-members']})
+        onClose()
+        const msg = `${capitalize(res.role)}d member ${res.member} in the space`
+        toast.success(msg)
+      }
+    },
+  })
+
   const roleOptions = [
     { value: 'admin' as MemberRole, label: LABEL.admin },
     { value: 'contributor' as MemberRole, label: LABEL.contributor },
     { value: 'viewer' as MemberRole, label: LABEL.viewer },
     { value: 'lead' as MemberRole, label: LABEL.lead },
-    { value: 'disable' as MemberRole, label: LABEL.disable },
-    { value: 'enable' as MemberRole, label: LABEL.enable },
   ].filter(r => member.to_roles.includes(r.value))
+
   const onSubmit = (data: FormValues) => mutation.mutate(data)
   const onCancel = () => {
     reset()
     onClose()
   }
+
+  const onDisableToggle = () => {
+    const action = member.active === 'Active' ? 'disable' : 'enable'
+    disableMutation.mutate(action)
+  }
+
+  const canDisableOrEnable = member.to_roles.includes('disable') || member.to_roles.includes('enable')
+  const isSubmitting = mutation.isPending || disableMutation.isPending
+  const isMemberDisabled = member.active === 'Inactive' || member.active === 'Account deactivated'
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <StyledFields>
@@ -106,7 +131,7 @@ const ChangeMemberRoleForm: React.FC<ChangeMemberRoleFormProps> = ({ spaceId, me
         </FieldGroup>
         <FieldGroup>
           <label>Current role</label>
-          <InputText value={member.active ? member.role : `${member.role} (disabled)`} disabled />
+          <InputText value={isMemberDisabled ? `${member.role} (disabled)` : member.role} disabled />
         </FieldGroup>
         <FieldGroup>
           <label>Change to role</label>
@@ -117,13 +142,19 @@ const ChangeMemberRoleForm: React.FC<ChangeMemberRoleFormProps> = ({ spaceId, me
               <Select
                 options={roleOptions}
                 {...field}
-                isLoading={mutation.isPending}
-                isDisabled={mutation.isPending}
+                isLoading={isSubmitting}
+                isDisabled={isSubmitting || isMemberDisabled}
                 inputId="select_member_role"
               />
             )}
           />
-          <Hint>Select the members role</Hint>
+          <Hint>
+            {member.active === 'Active' && 'Select the members role.'}
+          </Hint>
+          <ErrorHint>
+            {member.active === 'Inactive' && 'Enable the member first to change their role.'}
+            {member.active === 'Account deactivated' && 'Account is deactivated in precisionFDA and cannot be modified. An admin must reactivate the account first.'}
+          </ErrorHint>
           <ErrorMessage errors={errors} name="role" render={({ message }) => <InputError>{message}</InputError>} />
         </FieldGroup>
         {isLeadSelected && (
@@ -134,23 +165,39 @@ const ChangeMemberRoleForm: React.FC<ChangeMemberRoleFormProps> = ({ spaceId, me
         )}
       </StyledFields>
       <StyledFooter>
-        <Button type="button" onClick={onCancel} disabled={mutation.isPending} aria-label="Close modal">
-          Cancel
-        </Button>
-        <Button
-          data-variant="primary"
-          type="submit"
-          disabled={Object.keys(errors).length > 0 || mutation.isPending}
-          aria-label="Change member role"
-        >
-          Change Role
-        </Button>
+        <div>
+
+          {canDisableOrEnable && (
+            <Button
+              type="button"
+              onClick={onDisableToggle}
+              disabled={isSubmitting || member.active === 'Account deactivated'}
+              data-variant={member.active === 'Active' ? 'warning' : 'success'}
+              aria-label={member.active === 'Active' ? 'Disable member' : 'Enable member'}
+            >
+              {!isMemberDisabled ? 'Disable Member' : 'Enable Member'}
+            </Button>
+          )}
+        </div>
+        <div className='flex align-center gap-2'>
+          <Button type="button" onClick={onCancel} disabled={isSubmitting} aria-label="Close modal">
+            Cancel
+          </Button>
+          <Button
+            data-variant="primary"
+            type="submit"
+            disabled={Object.keys(errors).length > 0 || isSubmitting || isMemberDisabled}
+            aria-label="Change member role"
+          >
+            Change Role
+          </Button>
+        </div>
       </StyledFooter>
     </form>
   )
 }
 
-export const useChangeMemberRoleModal = ({ spaceId, member }: { spaceId: string|number; member: SpaceMembership }) => {
+export const useChangeMemberRoleModal = ({ spaceId, member }: { spaceId: string | number; member: SpaceMembership }) => {
   const { isShown, setShowModal } = useModal()
   const modalComp = isShown && (
     <ModalNext

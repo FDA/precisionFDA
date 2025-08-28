@@ -62,7 +62,7 @@ const Layout = styled.div`
 
 const MainContent = styled.div`
   flex: 1;
-  margin: 0 2rem 0 2rem;
+  margin: 0 0 0 1rem;
   overflow-x: auto;
   height: 100%;
 `

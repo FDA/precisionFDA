@@ -49,6 +49,10 @@ export const Hint = styled.div`
   color: var(--c-text-500);
   font-size: 14px;
 `
+export const ErrorHint = styled.div`
+  color: var(--warning-500);
+  font-size: 14px;
+`
 
 export const inputFocus = css`
   &:focus {

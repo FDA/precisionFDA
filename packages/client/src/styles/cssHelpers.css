@@ -19,6 +19,8 @@
 .mb-10 { margin-bottom: 2.5rem; }
 
 .flex { display: flex; }
+.align-center { align-items: center; }
+
 .gap-0 { gap: 0; }
 .gap-1 { gap: 0.25rem; }
 .gap-2 { gap: 0.5rem; }

@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import styled from 'styled-components'
 import { RadioButtonGroup } from '../../../components/form/RadioButtonGroup'
 import { ErrorBoundary } from '../../../utils/ErrorBoundry'
+import { useLocalSpaceSettings } from '../../../hooks/useLocalSpaceSettings'
 import { ISpace, SideRole } from '../spaces.types'
 import { spacesMembersListRequest } from './members.api'
 import { useAddMembersModal } from './useAddMembersModal'
@@ -11,6 +12,7 @@ import { PlusIcon } from '../../../components/icons/PlusIcon'
 import { Button } from '../../../components/Button'
 import { ColumnFiltersState, ColumnSort, RowSelectionState } from '@tanstack/react-table'
 import { MembersListTable } from './MembersListTable'
+import { MemberCard } from './MemberCard'
 import { DropdownNext } from '../../../components/Dropdown/DropdownNext'
 import { ActionsDropdownContent } from '../../home/ActionDropdownContent'
 import { ActionsButton } from '../../home/show.styles'
@@ -19,6 +21,8 @@ import { useColumnWidthLocalStorage } from '../../../hooks/useColumnWidthLocalSt
 import { createLocationKey } from '../../../utils'
 import { useHiddenColumnLocalStorage } from '../../../hooks/useHiddenColumnLocalStorage'
 import { ActionModalsRenderer } from '../../home/ActionModalsRenderer'
+import { ListIcon } from '../../../components/icons/ListIcon'
+import { Grid2x2Icon } from '../../../components/icons/Grid2x2Icon'
 
 const StyledMemberListPage = styled.div`
   flex: 1;
@@ -47,9 +51,23 @@ const AddButton = styled(Button)`
   }
 `
 
+const CardsGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 12px;
+  padding: 16px;
+`
+
 export const MembersList = ({ space }: { space: ISpace }) => {
   const locationKey = createLocationKey('members', space.id)
   const [sideRole, setSideRole] = useState<SideRole | undefined>()
+  const { settings, updateSettings } = useLocalSpaceSettings(space.id)
+  const viewMode = settings.membershipView || 'table'
+  
+  const setViewMode = (mode: 'table' | 'cards') => {
+    updateSettings({ membershipView: mode })
+  }
+  
   const { modalComp, setShowModal } = useAddMembersModal({ spaceId: String(space.id) })
   const { columnVisibility, setColumnVisibility } = useHiddenColumnLocalStorage(locationKey)
   const { colWidths, saveColumnResizeWidth } = useColumnWidthLocalStorage(locationKey)
@@ -104,13 +122,24 @@ export const MembersList = ({ space }: { space: ISpace }) => {
               />
             )}
 
+            <RadioButtonGroup
+              options={[
+                { value: 'table', label: <div className='flex align-center gap-1'><ListIcon height={16} />Table</div> },
+                { value: 'cards', label: <div className='flex align-center gap-1'><Grid2x2Icon height={16} />Cards</div> },
+              ]}
+              value={viewMode}
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              onChange={(v: any) => setViewMode(v)}
+              ariaLabel="View mode"
+            />
+
             {space.updatable && canAddMember && (
               <AddButton data-variant="primary" onClick={() => setShowModal(true)}>
                 <PlusIcon height={12} /> Add Members
               </AddButton>
             )}
           </StyledMemberToolRow>
-          {isLeadOrAdmin && (
+          {isLeadOrAdmin && viewMode === 'table' && (
             <ActionsRow>
               <div />
               <DropdownNext trigger="click" content={() => <ActionsDropdownContent actions={actions} />}>
@@ -126,23 +155,32 @@ export const MembersList = ({ space }: { space: ISpace }) => {
             </ActionsRow>
           )}
         </StyledButtonGroup>
-
-        <MembersListTable
-          space={space}
-          members={members}
-          isLoading={isLoading}
-          filters={columnFilters}
-          setFilters={setColumnFilters}
-          sortBy={sortBy}
-          setSortBy={setSortBy}
-          selectedRows={selectedRows}
-          setSelectedRows={setSelectedRows}
-          columnSizing={colWidths}
-          setColumnSizing={saveColumnResizeWidth}
-          columnVisibility={columnVisibility}
-          setColumnVisibility={setColumnVisibility}
-          isLeadOrAdmin={isLeadOrAdmin}
-        />
+        {viewMode === 'table' ? (
+          <MembersListTable
+            space={space}
+            members={members}
+            isLoading={isLoading}
+            filters={columnFilters}
+            setFilters={setColumnFilters}
+            sortBy={sortBy}
+            setSortBy={setSortBy}
+            selectedRows={selectedRows}
+            setSelectedRows={setSelectedRows}
+            columnSizing={colWidths}
+            setColumnSizing={saveColumnResizeWidth}
+            columnVisibility={columnVisibility}
+            setColumnVisibility={setColumnVisibility}
+            isLeadOrAdmin={isLeadOrAdmin}
+          />
+        ) : isLoading ? (
+          <div style={{ padding: '16px' }}>Loading...</div>
+        ) : (
+          <CardsGrid>
+            {members.map((m) => (
+              <MemberCard key={`${m.user_name}-${m.side}`} member={m} space={space} />
+            ))}
+          </CardsGrid>
+        )}
       </StyledMemberListPage>
       {modalComp}
       <ActionModalsRenderer modals={modals} />
