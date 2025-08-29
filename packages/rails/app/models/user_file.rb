@@ -66,20 +66,24 @@ class UserFile < Node
 
   has_many :attachments, as: :item, dependent: :destroy
   has_many :notes, through: :attachments
-  has_many :comparison_inputs
+  has_many :comparison_inputs, foreign_key: :user_file_id
   has_many :comparisons, ->{ distinct },
            through: :comparison_inputs,
            dependent: :restrict_with_exception
 
   has_many :participants, inverse_of: :file, foreign_key: :node_id, dependent: :destroy
 
-  has_and_belongs_to_many :jobs_as_input, join_table: "job_inputs", class_name: "Job"
+  has_and_belongs_to_many :jobs_as_input,
+                          join_table: "job_inputs",
+                          class_name: "Job",
+                          foreign_key: :user_file_id,
+                          association_foreign_key: :job_id
 
   has_one :licensed_item, as: :licenseable, dependent: :destroy
   has_one :license, through: :licensed_item
   has_many :accepted_licenses, through: :license
 
-  has_many :challenge_resources
+  has_many :challenge_resources, foreign_key: :user_file_id
 
   acts_as_commentable
   acts_as_votable

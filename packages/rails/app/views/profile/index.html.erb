@@ -119,7 +119,7 @@
           end
 
           g.column name: 'Joined', attribute: 'created_at', auto_reload: true, filter_type: :standard do |user|
-            user.created_at.to_s(:human)
+            user.created_at.to_formatted_s(:human)
           end
 
           if user_org_admin?

@@ -691,8 +691,8 @@ ActiveRecord::Schema.define(version: 2025_08_27_090909) do
   create_table "space_group_spaces", charset: "utf8mb3", collation: "utf8mb3_unicode_ci", force: :cascade do |t|
     t.bigint "space_group_id"
     t.integer "space_id"
-    t.datetime "created_at", default: -> { "CURRENT_TIMESTAMP" }, null: false
-    t.datetime "updated_at", default: -> { "CURRENT_TIMESTAMP" }, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.index ["space_group_id"], name: "fk_rails_108430c5fa"
     t.index ["space_id"], name: "fk_rails_ae5de248be"
   end

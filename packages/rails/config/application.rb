@@ -122,7 +122,11 @@ module PrecisionFda
     err_logger.formatter = ::Logger::Formatter.new
     err_logger.progname = "Ruby"
 
-    main_logger.extend(ActiveSupport::Logger.broadcast(err_logger))
+    if ActiveSupport::Logger.respond_to?(:broadcast)
+      main_logger.extend(ActiveSupport::Logger.broadcast(err_logger))
+    else
+      Rails.logger = main_logger
+    end
 
     # The logger is tagged, meaning one can tag the log messages, eg. in order ro assign them to a specific topic
     # https://api.rubyonrails.org/classes/ActiveSupport/TaggedLogging.html

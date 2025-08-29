@@ -26,7 +26,7 @@
   end
 
   g.column name: "Created" do |app|
-    app.created_at.to_s(:human)
+    app.created_at.to_formatted_s(:human)
   end
 
   g.column name: "" do |app|

@@ -126,10 +126,13 @@ class Expert < ApplicationRecord
 
   def self.provision(context, expert_params)
     e = nil
+    should_return_early = false
+
     Expert.transaction do
       u = User.find_by(dxuser: expert_params[:username])
       if u.nil?
-        return e
+        should_return_early = true
+        next
       end
 
       expert_params[:image] = Expert.get_perm_link(context, expert_params[:_image_id])
@@ -137,6 +140,8 @@ class Expert < ApplicationRecord
       expert_params[:user_id] = u.id
       e = Expert.create!(expert_params)
     end
-    return e
+
+    return nil if should_return_early
+    e
   end
 end

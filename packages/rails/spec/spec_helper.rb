@@ -1,7 +1,7 @@
 require "sidekiq/testing"
 require "simplecov"
 require "webmock/rspec"
-require "database_cleaner"
+require "database_cleaner/active_record"
 require "ffaker"
 
 SimpleCov.start "rails" do

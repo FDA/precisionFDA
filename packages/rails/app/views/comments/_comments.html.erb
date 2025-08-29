@@ -15,7 +15,7 @@
                 <li><%= link_to "Edit", edit_polymorphic_path(items_from_params + [comment]) %></li>
                 <li><%= link_to "Delete", polymorphic_path(items_from_params + [comment]), method: :delete, data: { confirm: 'Are you certain you want to delete this?' } %></li>
                 <% end %>
-                <li><%= comment.created_at.to_s(:human) %></li>
+                <li><%= comment.created_at.to_formatted_s(:human) %></li>
               </ul>
             <% else %>
               <div>DELETED</div>

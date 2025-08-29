@@ -333,6 +333,7 @@ describe('/discussions', async () => {
     )
     await em.flush()
     const discussion1 = create.discussionHelper.createInSpace(em, { user, space: groupSpace })
+    await em.flush()
     const discussion2 = create.discussionHelper.createInSpace(em, { user, space: groupSpace })
     await em.flush()
 
@@ -343,8 +344,8 @@ describe('/discussions', async () => {
       .expect(200)
 
     expect(body.data).to.be.an('array').of.length(2)
-    expect(body.data[0]).to.have.property('id', discussion1.id)
-    expect(body.data[1]).to.have.property('id', discussion2.id)
+    expect(body.data[0]).to.have.property('id', discussion2.id)
+    expect(body.data[1]).to.have.property('id', discussion1.id)
   })
 
   it('should get the list of public discussions', async () => {
@@ -352,6 +353,7 @@ describe('/discussions', async () => {
     const user3 = create.userHelper.create(em)
     await em.flush()
     const discussion1 = create.discussionHelper.createPublic(em, { user: user2 })
+    await em.flush()
     const discussion2 = create.discussionHelper.createPublic(em, { user: user3 })
     await em.flush()
 
@@ -362,7 +364,7 @@ describe('/discussions', async () => {
       .expect(200)
 
     expect(body.data).to.be.an('array').of.length(2)
-    expect(body.data[0]).to.have.property('id', discussion1.id)
-    expect(body.data[1]).to.have.property('id', discussion2.id)
+    expect(body.data[0]).to.have.property('id', discussion2.id)
+    expect(body.data[1]).to.have.property('id', discussion1.id)
   })
 })

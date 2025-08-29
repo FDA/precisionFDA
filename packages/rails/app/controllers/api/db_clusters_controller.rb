@@ -31,12 +31,20 @@ module Api
       end
 
       dbclusters = dbclusters.order(order_from_params).page(page_from_params).per(page_size)
-      
+
       dbclusters = DbClusters::Filter.call(dbclusters, params[:filters])
 
       page_dict = pagination_dict(dbclusters.reload)
 
-      return render(plain: page_dict[:total_count]) if show_count
+      return page_dict[:total_count] if show_count
+
+      render json: dbclusters,
+             root: DbCluster.model_name.plural,
+             adapter: :json,
+             meta: db_clusters_meta.merge(
+               count: page_dict[:total_count],
+               pagination: page_dict,
+             )
     end
 
     def everybody; end
@@ -53,7 +61,7 @@ module Api
         dbclusters = DbClusters::Filter.call(dbclusters, params[:filters]).to_a
 
       if show_count
-        render plain: dbclusters.count
+        return dbclusters.count
       end
     end
 
