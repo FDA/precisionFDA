@@ -1,12 +1,14 @@
 import { BaseError, ClientErrorProps, ErrorCodes } from '../errors'
-// import { ResolveSchemaReturnTypes } from './generics'
 import { JsonPath } from './path'
 
 // TODO(samuel) in node 15 and onwards we can subclass AggregateError
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/AggregateError/AggregateError
 // or polyfill with core-js
 export class CustomAggregateError extends BaseError {
-  private static appendNestedMessages(topMessage: string, nestedErrors: Array<{ error: BaseError, message: string }>) {
+  private static appendNestedMessages(
+    topMessage: string,
+    nestedErrors: Array<{ error: BaseError; message: string }>,
+  ) {
     return [
       topMessage,
       ...nestedErrors.map(({ message, error: { stack } }) => `${message}\n${stack}`),
@@ -16,7 +18,7 @@ export class CustomAggregateError extends BaseError {
 
   constructor(
     message: string,
-    nestedErrors: Array<{ error: BaseError, message: string }>,
+    nestedErrors: Array<{ error: BaseError; message: string }>,
     props: ClientErrorProps,
   ) {
     super(CustomAggregateError.appendNestedMessages(message, nestedErrors), {
@@ -32,7 +34,11 @@ type AggregatedErrorEntry = {
   path: JsonPath
 }
 
-const resolveSchemaEffectsVisitor = <SchemaT extends any>(schema: SchemaT, caughtErrors: AggregatedErrorEntry[], path: Array<string | number>): any => {
+const resolveSchemaEffectsVisitor = <SchemaT extends any>(
+  schema: SchemaT,
+  caughtErrors: AggregatedErrorEntry[],
+  path: Array<string | number>,
+): any => {
   if (typeof schema === 'function') {
     try {
       return schema()
@@ -46,14 +52,16 @@ const resolveSchemaEffectsVisitor = <SchemaT extends any>(schema: SchemaT, caugh
   }
   if (Array.isArray(schema)) {
     return schema.map((entry, index) =>
-      resolveSchemaEffectsVisitor(entry, caughtErrors, [...path, index])
+      resolveSchemaEffectsVisitor(entry, caughtErrors, [...path, index]),
     )
   }
   if (typeof schema === 'object') {
-    return Object.fromEntries(Object.entries(schema as any).map(([key, value]) => [
-      key,
-      resolveSchemaEffectsVisitor(value, caughtErrors, [...path, key]),
-    ]))
+    return Object.fromEntries(
+      Object.entries(schema as any).map(([key, value]) => [
+        key,
+        resolveSchemaEffectsVisitor(value, caughtErrors, [...path, key]),
+      ]),
+    )
   }
   // Otherwise primitive value expected - string | number | boolean
   return schema
@@ -81,5 +89,5 @@ export const formatAggregatedError = (
       error,
       message: `At "${path}" - ${message}`,
     })),
-    props
+    props,
   )

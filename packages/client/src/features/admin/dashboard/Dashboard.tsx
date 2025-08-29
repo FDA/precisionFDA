@@ -11,9 +11,8 @@ import LinkButton from './LinkButton'
 import { HandshakeIcon } from '../../../components/icons/HandshakeIcon'
 import { ChartLineIcon } from '../../../components/icons/ChartLineIcon'
 import { NewspaperIcon } from '../../../components/icons/NewspaperIcon'
-import { fetchAdminStats } from '../admin.api'
 import { Loader } from '../../../components/Loader'
-
+import { fetchAdminStats } from '../users/api'
 
 const PageHeader = styled.div`
   margin: 0;
@@ -56,7 +55,7 @@ const InfoTableTh = styled.th`
   text-transform: uppercase;
   color: var(--c-text-300);
   font-weight: 300;
-  border-right: 1px solid var(--c-layout-border);;
+  border-right: 1px solid var(--c-layout-border);
 `
 
 const InfoTableTd = styled.td`
@@ -74,57 +73,61 @@ const ButtonBar = styled.div`
 
 export function AdminDashboard() {
   const { data, isLoading } = useQuery({
-    queryKey: ['admin_stats'],
+    queryKey: ['admin-stats'],
     queryFn: () => fetchAdminStats(),
+    initialData: { usersCount: 0, orgsCount: 0 },
   })
 
   return (
     <UserLayout mainScroll>
       <PageHeader>
         <TopLeft>
-          <ChartColumnIcon height={24} />Admin Dashboard
+          <ChartColumnIcon height={24} />
+          Admin Dashboard
         </TopLeft>
       </PageHeader>
       <Infoframe>
-          <InfoframeTitle>Site administration</InfoframeTitle>
-          <InfoTable>
-            <thead>
-              <tr>
-                <InfoTableTh>Contributors</InfoTableTh>
-                <InfoTableTh>Contributor orgs</InfoTableTh>
-              </tr>
-            </thead>
-            <tbody>
+        <InfoframeTitle>Site administration</InfoframeTitle>
+        <InfoTable>
+          <thead>
             <tr>
-              <InfoTableTd>
-                {isLoading ? (
-                  <Loader height={6} />
-                ) : (data?.usersCount)}
-              </InfoTableTd>
-              <InfoTableTd>
-                {isLoading ? (
-                  <Loader height={6} />
-                ) : (data?.orgsCount)}
-              </InfoTableTd>
+              <InfoTableTh>Contributors</InfoTableTh>
+              <InfoTableTh>Contributor orgs</InfoTableTh>
             </tr>
-            </tbody>
-          </InfoTable>
-          <ButtonBar>
-            <LinkButton to='/admin/users' icon={<UsersIcon height={12} />} label='Users' />
-            <LinkButton nonReact to='/admin/admin_memberships?group=site' icon={<AdminIcon height={12} />} label='Admins' />
-            <LinkButton nonReact to='/admin/sidekiq' icon={<ChartColumnIcon height={12} />} label='Sidekiq' />
-            <LinkButton nonReact to='/admin/comparator_settings' icon={<BullsEyeIcon height={12} />} label='Comparator Settings' />
-            <LinkButton to='/admin/alerts' icon={<BellIcon height={12} />} label='Site Alerts' />
-          </ButtonBar>
+          </thead>
+          <tbody>
+            <tr>
+              <InfoTableTd>{isLoading ? <Loader height={6} /> : data.usersCount}</InfoTableTd>
+              <InfoTableTd>{isLoading ? <Loader height={6} /> : data.orgsCount}</InfoTableTd>
+            </tr>
+          </tbody>
+        </InfoTable>
+        <ButtonBar>
+          <LinkButton to="/admin/users" icon={<UsersIcon height={12} />} label="Users" />
+          <LinkButton nonReact to="/admin/admin_memberships?group=site" icon={<AdminIcon height={12} />} label="Admins" />
+          <LinkButton nonReact to="/admin/sidekiq" icon={<ChartColumnIcon height={12} />} label="Sidekiq" />
+          <LinkButton nonReact to="/admin/comparator_settings" icon={<BullsEyeIcon height={12} />} label="Comparator Settings" />
+          <LinkButton to="/admin/alerts" icon={<BellIcon height={12} />} label="Site Alerts" />
+        </ButtonBar>
       </Infoframe>
       <Infoframe>
         <InfoframeTitle>Site activity</InfoframeTitle>
         <ButtonBar>
-          <LinkButton nonReact to='/admin/activity_reports' icon={<ChartLineIcon height={12} />} label='Site Activity reporting' />
-          <LinkButton nonReact to='/admin/pending_users' icon={<UsersIcon height={12} />} label='Pending Users' />
-          <LinkButton nonReact to='/admin/org_action_requests' icon={<UsersIcon height={12} />} label='Organizations Action Requests' />
-          <LinkButton to='/admin/news' icon={<NewspaperIcon height={12} />} label='News' />
-          <LinkButton nonReact to='/admin/participants' icon={<HandshakeIcon height={12} />} label='Participants' />
+          <LinkButton
+            nonReact
+            to="/admin/activity_reports"
+            icon={<ChartLineIcon height={12} />}
+            label="Site Activity reporting"
+          />
+          <LinkButton nonReact to="/admin/pending_users" icon={<UsersIcon height={12} />} label="Pending Users" />
+          <LinkButton
+            nonReact
+            to="/admin/org_action_requests"
+            icon={<UsersIcon height={12} />}
+            label="Organizations Action Requests"
+          />
+          <LinkButton to="/admin/news" icon={<NewspaperIcon height={12} />} label="News" />
+          <LinkButton nonReact to="/admin/participants" icon={<HandshakeIcon height={12} />} label="Participants" />
         </ButtonBar>
       </Infoframe>
     </UserLayout>

@@ -2,7 +2,7 @@
 
 This packages covers spec of DNAnexus platform APIs that precisionFDA is using.
 
-## Strutures
+## Structures
 
 ### auth.yaml
 

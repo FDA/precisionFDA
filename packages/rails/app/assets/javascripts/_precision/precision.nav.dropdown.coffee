@@ -51,7 +51,7 @@ class NavBarDropdownModel
   loadStats: (isLoadingObservable, resourceTableObservable) ->
     error = false
     isLoadingObservable(true)
-    $.ajax('/api/user/cloud_resources', {
+    $.ajax('/api/v2/users/me/cloud-resources', {
       method: 'GET',
       contentType: 'application/json',
       dataType: 'json',

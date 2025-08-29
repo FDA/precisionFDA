@@ -68,6 +68,8 @@ export const RESOURCE_TYPES = [
   'db_mem1_x64',
 ] as const
 
+export type Resource = (typeof RESOURCE_TYPES)[number]
+
 export const PRICING_MAP = {
   // Compute instances
   'baseline-2': 0.286,

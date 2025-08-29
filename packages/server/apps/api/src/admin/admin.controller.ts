@@ -22,7 +22,7 @@ import { InvitationService } from '@shared/domain/invitation/services/invitation
 import { Organization } from '@shared/domain/org/org.entity'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { UserPaginationDto } from '@shared/domain/user/dto/user-pagination.dto'
-import { RESOURCE_TYPES, User } from '@shared/domain/user/user.entity'
+import { User } from '@shared/domain/user/user.entity'
 import { UserService } from '@shared/domain/user/user.service'
 import { ValidationError } from '@shared/errors'
 import { PlatformClient } from '@shared/platform-client'
@@ -31,33 +31,13 @@ import { MaintenanceQueueJobProducer } from '@shared/queue/producer/maintenance-
 import { Job } from 'bull'
 import { UserContextGuard } from '../user-context/guard/user-context.guard'
 import { SiteAdminGuard } from './guards/site-admin.guard'
-import { getAdminBodyValidationPipe } from './pipes/admin-body-validation.pipe'
-import { enumValidator, numericBodyValidator } from './possibly-reusable-things'
 import { UserRepository } from '@shared/domain/user/user.repository'
 import { config } from '@shared/config'
 import { SpaceService } from '@shared/domain/space/service/space.service'
 import { SpaceGroupDTO } from '@shared/domain/space/dto/space-group.dto'
-
-interface ISetTotalLimitParams {
-  ids: number[]
-  totalLimit: number
-}
-
-interface ISetJobLimitParams {
-  ids: number[]
-  jobLimit: number
-}
-
-interface IIdListParams {
-  ids: number[]
-}
-
-type Resource = (typeof RESOURCE_TYPES)[number]
-
-interface IResourceTypeParams {
-  ids: number[]
-  resource: Resource
-}
+import { AdminRequestDTO } from '@shared/domain/admin/dto/admin-request.dto'
+import { LimitAdminRequestDTO } from '@shared/domain/admin/dto/limit-admin-request.dto'
+import { ResourceAdminRequestDTO } from '@shared/domain/admin/dto/resource-admin-request.dto'
 
 @UseGuards(UserContextGuard, SiteAdminGuard)
 @Controller('/admin')
@@ -93,32 +73,20 @@ export class AdminController {
     return this.userService.paginateUsers(query)
   }
 
-  @Put('/users/setTotalLimit')
-  async setUsersTotalLimit(
-    @Body(
-      getAdminBodyValidationPipe({
-        totalLimit: numericBodyValidator,
-      }),
-    )
-    body: ISetTotalLimitParams,
-  ): Promise<string> {
-    const { ids, totalLimit } = body
-    await this.userRepo.bulkUpdateSetTotalLimit(ids, totalLimit)
+  @HttpCode(204)
+  @Put('/users/set-total-limit')
+  async setUsersTotalLimit(@Body() body: LimitAdminRequestDTO): Promise<string> {
+    const { ids, limit } = body
+    await this.userRepo.bulkUpdateSetTotalLimit(ids, limit)
 
     return 'updated'
   }
 
-  @Put('/users/setJobLimit')
-  async setUsersJobLimit(
-    @Body(
-      getAdminBodyValidationPipe({
-        jobLimit: numericBodyValidator,
-      }),
-    )
-    body: ISetJobLimitParams,
-  ): Promise<string> {
-    const { ids, jobLimit } = body
-    await this.userRepo.bulkUpdateSetJobLimit(ids, jobLimit)
+  @HttpCode(204)
+  @Put('/users/set-job-limit')
+  async setUsersJobLimit(@Body() body: LimitAdminRequestDTO): Promise<string> {
+    const { ids, limit } = body
+    await this.userRepo.bulkUpdateSetJobLimit(ids, limit)
 
     return 'updated'
   }
@@ -153,7 +121,7 @@ export class AdminController {
    */
   @HttpCode(200)
   @Post('/users/reset2fa')
-  async resetUsers2fa(@Body(getAdminBodyValidationPipe()) body: IIdListParams): Promise<
+  async resetUsers2fa(@Body() body: AdminRequestDTO): Promise<
     {
       dxuser: string
       result:
@@ -174,7 +142,7 @@ export class AdminController {
 
   @HttpCode(200)
   @Post('/users/unlock')
-  async unlockUsers(@Body(getAdminBodyValidationPipe()) body: IIdListParams): Promise<
+  async unlockUsers(@Body() body: AdminRequestDTO): Promise<
     {
       dxuser: string
       result:
@@ -190,97 +158,61 @@ export class AdminController {
   > {
     const { ids } = body
 
-    const results = await this.userRepo.bulkUpdateUnlock(ids, this.adminClient, this.user)
-
-    if (results.some(({ result }) => result.status === 'unhandledError')) {
-      throw new ValidationError(undefined, { details: results })
-    }
-
-    return results
+    return await this.userRepo.bulkUpdateUnlock(ids, this.adminClient, this.user)
   }
 
   @Put('/users/activate')
-  async activateUsers(
-    @Body(
-      getAdminBodyValidationPipe({
-        ids: (value: number[], _: string, user: UserContext) => {
-          if (value.includes(user.id)) {
-            throw new ValidationError('Cannot activate self')
-          }
-        },
-      }),
-    )
-    body: IIdListParams,
-  ): Promise<string> {
+  async activateUsers(@Body() body: AdminRequestDTO): Promise<string> {
     const { ids } = body
+
+    // validate that user is not trying to activate themselves
+    if (ids.includes(this.user.id)) {
+      throw new ValidationError('Cannot activate self')
+    }
     await this.userRepo.bulkActivate(ids)
 
     return 'updated'
   }
 
   @Put('/users/deactivate')
-  async deactivateUsers(
-    @Body(
-      getAdminBodyValidationPipe({
-        ids: (value: number[], _: string, user: UserContext) => {
-          if (value.includes(user.id)) {
-            throw new ValidationError('Cannot deactivate self')
-          }
-        },
-      }),
-    )
-    body: IIdListParams,
-  ): Promise<string> {
+  async deactivateUsers(@Body() body: AdminRequestDTO): Promise<string> {
     const { ids } = body
+
+    // validate that user is not trying to deactivate themselves
+    if (ids.includes(this.user.id)) {
+      throw new ValidationError('Cannot deactivate self')
+    }
     await this.userRepo.bulkDeactivate(ids)
 
     return 'updated'
   }
 
-  @Put('/users/enableResourceType')
-  async enableResourceTypeForUsers(
-    @Body(
-      getAdminBodyValidationPipe({
-        resource: enumValidator<Resource>(RESOURCE_TYPES as unknown as Resource[]),
-      }),
-    )
-    body: IResourceTypeParams,
-  ): Promise<string> {
+  @Put('/users/enable-resource')
+  async enableResourceTypeForUsers(@Body() body: ResourceAdminRequestDTO): Promise<string> {
     const { ids, resource } = body
     await this.userRepo.bulkEnableResourceType(ids, resource)
 
     return 'updated'
   }
 
-  @Put('/users/enableAllResourceTypes')
-  async enableAllResourceTypesForUsers(
-    @Body(getAdminBodyValidationPipe()) body: IResourceTypeParams,
-  ): Promise<string> {
+  @Put('/users/enable-all-resources')
+  async enableAllResourceTypesForUsers(@Body() body: AdminRequestDTO): Promise<string> {
     const { ids } = body
     await this.userRepo.bulkEnableAll(ids)
 
     return 'updated'
   }
 
-  @Put('/users/disableResourceType')
-  async disableResourceTypeForUsers(
-    @Body(
-      getAdminBodyValidationPipe({
-        resource: enumValidator<Resource>(RESOURCE_TYPES as unknown as Resource[]),
-      }),
-    )
-    body: IResourceTypeParams,
-  ): Promise<string> {
+  @Put('/users/disable-resource')
+  async disableResourceTypeForUsers(@Body() body: ResourceAdminRequestDTO): Promise<string> {
     const { ids, resource } = body
     await this.userRepo.bulkDisableResourceType(ids, resource)
 
     return 'updated'
   }
 
-  @Put('/users/disableAllResourceTypes')
-  async disableAllResourceTypesForUsers(
-    @Body(getAdminBodyValidationPipe()) body: IIdListParams,
-  ): Promise<string> {
+  @Put('/users/disable-all-resources')
+  async disableAllResourceTypesForUsers(@Body() body: AdminRequestDTO): Promise<string> {
     const { ids } = body
     await this.userRepo.bulkDisableAll(ids)
 

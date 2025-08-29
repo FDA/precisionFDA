@@ -5,13 +5,15 @@ import styled from 'styled-components'
 import { RESOURCES, RESOURCE_LABELS } from '../../../types/user'
 import { bulkDisableAllResources, bulkDisableResource, bulkEnableAllResources, bulkEnableResource } from './api'
 import { User } from './types'
+import { BackendError } from '../../../api/errors'
+import { AxiosError } from 'axios'
 
 export type ResourceState = 'all' | 'some' | 'none'
 
 const ResourceMenu = styled.ul`
   margin: 0;
   padding: 4px 0;
-  border: 1px solid rgba(0,0,0,0.15);
+  border: 1px solid rgba(0, 0, 0, 0.15);
   border-radius: 3px;
 `
 
@@ -51,36 +53,38 @@ const getCheckboxValue = (users: User[], predicate: (user: User) => boolean): Re
 }
 
 const getResourceStates = (users: User[]) =>
-  RESOURCES.map((resource) => ({
+  RESOURCES.map(resource => ({
     resource,
-    state: getCheckboxValue(users, (user) =>
-      user.cloudResourceSettings.resources.includes(resource),
-    ),
+    state: getCheckboxValue(users, user => user.cloudResourceSettings.resources.includes(resource)),
   }))
 
 const getAllResourceState = (users: User[]) =>
-  getCheckboxValue(users, (user) =>
-    RESOURCES.every((resource) =>
-      user.cloudResourceSettings.resources.includes(resource),
-    ),
-  )
+  getCheckboxValue(users, user => RESOURCES.every(resource => user.cloudResourceSettings.resources.includes(resource)))
 
-const ResourceDropdownItem = ({ status, onClick, label } : { 
-  status: ResourceState, 
-  onClick: () => Promise<unknown>, 
-  label: string,
+const ResourceDropdownItem = ({
+  status,
+  onClick,
+  label,
+}: {
+  status: ResourceState
+  onClick: () => Promise<unknown>
+  label: string
 }) => {
   const queryClient = useQueryClient()
   const mutation = useMutation({
     mutationFn: () => onClick(),
     mutationKey: ['resource-dropdown', label],
     onSuccess: () => {
-      toast.success('User resources updated')
-      queryClient.invalidateQueries({ queryKey: ['admin-users']})
+      toast.success('User resources were successfully updated')
+      queryClient.invalidateQueries({ queryKey: ['admin-users'] })
     },
-    onError: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin-users']})
-      toast.error('Error: Updating user resources')
+    onError: (e: AxiosError<BackendError>) => {
+      queryClient.invalidateQueries({ queryKey: ['admin-users'] })
+      if (e.response?.data?.error?.message) {
+        toast.error(`Error: ${e.response.data.error.message}`)
+      } else {
+        toast.error('Error while updating user resources!')
+      }
     },
   })
 
@@ -112,19 +116,21 @@ export const ResourceDropdownContent = ({ selectedUsers }: { selectedUsers: User
 
   return (
     <ResourceMenu>
-      <ResourceDropdownItem
-        status={allResourceState}
-        onClick={handleAllClick}
-        label="All"
-      />
+      <ResourceDropdownItem status={allResourceState} onClick={handleAllClick} label="All" />
       {resourceStates.map(({ resource, state }) => (
         <ResourceDropdownItem
           key={resource}
           status={state}
           onClick={() =>
             state === 'all'
-              ? bulkDisableResource(selectedUsers.map((user) => user.id), resource)
-              : bulkEnableResource(selectedUsers.map((user) => user.id), resource)
+              ? bulkDisableResource(
+                  selectedUsers.map(user => user.id),
+                  resource,
+                )
+              : bulkEnableResource(
+                  selectedUsers.map(user => user.id),
+                  resource,
+                )
           }
           label={RESOURCE_LABELS[resource]}
         />

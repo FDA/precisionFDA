@@ -12,11 +12,11 @@ import { IFilter, NOTIFICATION_ACTION } from '../../home/types'
 import { useList } from '../../home/useList'
 import { Params, prepareListFetchV2 } from '../../home/utils'
 import Breadcrumbs, { BreadcrumbItem } from '../Breadcrumbs'
-import { fetchInvitations, Invitation } from '../admin.api'
 import { AdminStyledPageTable, Title, Topbox, TopLeft } from '../styles'
 import InvitationActionRow from './ActionRow'
 import { InvitationListType } from './types'
 import { useQueryClient } from '@tanstack/react-query'
+import { fetchInvitations, Invitation } from '../users/api'
 
 const fetchInvitationsList = async (filters: IFilter[], params: Params) => {
   const filterParam = prepareListFetchV2(filters, params) as Record<string, string>

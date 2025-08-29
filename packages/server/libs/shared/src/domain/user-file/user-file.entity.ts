@@ -78,6 +78,10 @@ class UserFile extends Node implements ITrackable {
   isPublishable(): boolean {
     return this.isPrivate() && this.state === FILE_STATE_DX.CLOSED
   }
+
+  isResource(): boolean {
+    return !!this.resource
+  }
 }
 
 export { UserFile }

@@ -66,85 +66,6 @@ module Admin
     # │                                                           │
     # └───────────────────────────────────────────────────────────┘
 
-    def set_total_limit
-      response = https_apps_client.users_set_total_limit(
-        unsafe_params[:ids],
-        unsafe_params[:totalLimit],
-      )
-      respond_to do |format|
-        format.json { render json: response }
-      end
-    end
-
-    def set_job_limit
-      response = https_apps_client.users_set_job_limit(
-        unsafe_params[:ids],
-        unsafe_params[:jobLimit],
-      )
-      respond_to do |format|
-        format.json { render json: response }
-      end
-    end
-
-    def bulk_unlock
-      response = https_apps_client.users_unlock(
-        unsafe_params[:ids],
-      )
-      respond_to do |format|
-        format.json { render json: response }
-      end
-    end
-
-    def bulk_activate
-      response = https_apps_client.users_activate(
-        unsafe_params[:ids],
-      )
-      respond_to do |format|
-        format.json { render json: response }
-      end
-    end
-
-    def bulk_deactivate
-      response = https_apps_client.users_deactivate(
-        unsafe_params[:ids],
-      )
-      respond_to do |format|
-        format.json { render json: response }
-      end
-    end
-
-    def bulk_enable_resource
-      response = https_apps_client.users_enable_resource(
-        unsafe_params[:ids],
-        unsafe_params[:resource],
-      )
-      render json: response
-    end
-
-    def bulk_enable_all_resources
-      response = https_apps_client.users_enable_all_resources(unsafe_params[:ids])
-      render json: response
-    end
-
-    def bulk_disable_resource
-      response = https_apps_client.users_disable_resource(
-        unsafe_params[:ids],
-        unsafe_params[:resource],
-      )
-      render json: response
-    end
-
-    def bulk_disable_all_resources
-      response = https_apps_client.users_disable_all_resources(unsafe_params[:ids])
-      render json: response
-    end
-
-    # ┌───────────────────────────────────────────────────────┐
-    # │                                                       │
-    # │  Bulk methods implemented in server end here  │
-    # │                                                       │
-    # └───────────────────────────────────────────────────────┘
-
     # GET
     # Renders deactivated users.
     def deactivated_users
@@ -168,6 +89,9 @@ module Admin
 
     # POST
     # Sends activation email.
+    #    TODO PFDA-5953 - remove this method once we have user profile page in React.
+    #     # The feature is already implemented in Node - admin controller.
+
     def resend_activation_email
       user = User.find_by(dxuser: unsafe_params[:dxuser])
 
@@ -186,6 +110,8 @@ module Admin
 
     # POST
     # Resets 2FA.
+    # TODO PFDA-5953 - remove this method once we have user profile page in React.
+    # The feature is already implemented in Node - admin controller.
     def reset_2fa
       user = User.find_by(dxuser: unsafe_params[:dxuser])
 
@@ -209,6 +135,10 @@ module Admin
       end
     end
 
+    # TODO PFDA-5953 - remove this method once we have user profile page in React.
+    # The feature is already implemented in Node - admin controller.
+    # Rails is using paths generation and other stuff we dont want to break at the moment.
+    # precision-fda/app/views/users/show.html.erb
     # POST
     # Unlocks user.
     def unlock_user
