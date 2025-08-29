@@ -11,6 +11,7 @@ export const config: ConfigOverride = () => ({
       allowedIpCidrBlock: parseIpv4Cidr(process.env.NODE_FDA_SUBNET_CIDR_BLOCK),
     },
     appKit: 'project-GYP09280XPx4p0gJ8XPY27b0:/appKit-1.2.tgz',
+    captchaEnabled: true,
   },
   database: {
     printDBQueryValuesInLog:
@@ -49,6 +50,7 @@ export const config: ConfigOverride = () => ({
     adminUser: 'precisionfda.admin',
     challengeBotUser: 'challenge.bot',
     orgEveryoneHandle: 'precisionfda',
+    orgDummyHandle: 'precisionfda.dummy',
   },
   emails: {
     report: 'pfda-reports-production@dnanexus.com',

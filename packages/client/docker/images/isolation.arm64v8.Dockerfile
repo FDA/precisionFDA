@@ -16,6 +16,7 @@ COPY webpack.fragment.base.js \
     webpack.docker.development.config.js \
     .swcrc \
     tsconfig.json \
+    .env* \
     /precision-fda/
 COPY src/ /precision-fda/src/
 CMD [ "pnpm run watch:docker" ]

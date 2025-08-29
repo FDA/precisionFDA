@@ -2,7 +2,7 @@ declare const NODE_ENV: 'development' | 'staging' | 'production'
 declare const ENABLE_DEV_MSW: boolean = false
 declare const ALERT_HEIGHT: number = 0
 declare const RECAPTCHA_SITE_KEY: string
-declare const PROD_OR_STAGE: boolean
+declare const CAPTCHA_ENABLED: boolean
 declare const process: {
   env: {
     ENABLE_DEV_MSW: boolean

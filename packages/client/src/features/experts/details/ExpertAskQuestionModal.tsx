@@ -1,12 +1,11 @@
 import React, { useState } from 'react'
 import { GoogleReCaptchaProvider } from 'react-google-recaptcha-v3'
 import styled from 'styled-components'
+import { Button } from '../../../components/Button'
 import { GoogleReCaptchaV3 } from '../../../components/ReCaptchaV3'
 import { theme } from '../../../styles/theme'
 import { ModalHeaderTop, ModalNext } from '../../modal/ModalNext'
 import { ButtonRow, Footer as ModalFooter } from '../../modal/styles'
-import { Button } from '../../../components/Button'
-
 
 const Asking = styled.div`
   display: flex;
@@ -24,9 +23,9 @@ const Content = styled.div`
 `
 
 interface FooterProps {
-  hideAction: () => void;
-  action: () => void;
-  isAskingDisabled: boolean;
+  hideAction: () => void
+  action: () => void
+  isAskingDisabled: boolean
 }
 
 const Footer = ({ hideAction, action, isAskingDisabled }: FooterProps) => (
@@ -46,12 +45,12 @@ const ExpertAskQuestionModalComponent = ({
   isOpen,
   isLoggedIn,
 }: {
-    hideAction: () => void;
-    action: (fullName: string, question: string, captcha: string | null) => void;
-    title: string;
-    user: { full_name: string; dxuser: string };
-    isOpen: boolean;
-    isLoggedIn: boolean;
+  hideAction: () => void
+  action: (fullName: string, question: string, captcha: string | null) => void
+  title: string
+  user: { full_name: string; dxuser: string }
+  isOpen: boolean
+  isLoggedIn: boolean
 }) => {
   const [askedQuestion, setAskedQuestion] = useState('')
   const [triggerCaptcha, setTriggerCaptcha] = useState(false)
@@ -78,12 +77,7 @@ const ExpertAskQuestionModalComponent = ({
   let submitter: string | React.ReactElement
   if (isLoggedIn) {
     submitter = (
-      <a
-        data-turbolinks="false"
-        href={`/users/${user.dxuser}`}
-        target="_blank"
-        rel="noopener noreferrer"
-      >
+      <a data-turbolinks="false" href={`/users/${user.dxuser}`} target="_blank" rel="noopener noreferrer">
         {user.full_name}
       </a>
     )
@@ -92,13 +86,7 @@ const ExpertAskQuestionModalComponent = ({
   }
 
   const renderModal = () => (
-    <ModalNext
-      id="ask-expert"
-      isShown={isOpen}
-      headerText={title}
-      hide={closeAction}
-      variant="medium"
-    >
+    <ModalNext id="ask-expert" isShown={isOpen} headerText={title} hide={closeAction} variant="medium">
       <ModalHeaderTop headerText={title} hide={closeAction} />
       <Content>
         <Asking>
@@ -114,30 +102,18 @@ const ExpertAskQuestionModalComponent = ({
           name="asking"
           onChange={e => setAskedQuestion(e.target.value)}
         />
-        {triggerCaptcha && (
-          <GoogleReCaptchaV3
-            callback={onCaptchaSuccess}
-            action="question"
-          />
-        )}
+        {triggerCaptcha && <GoogleReCaptchaV3 callback={onCaptchaSuccess} action="question" />}
       </Content>
       <ModalFooter>
-        <Footer
-          hideAction={closeAction}
-          action={submitQuestion}
-          isAskingDisabled={isAskingDisabled}
-        />
+        <Footer hideAction={closeAction} action={submitQuestion} isAskingDisabled={isAskingDisabled} />
       </ModalFooter>
     </ModalNext>
   )
 
   const renderModalWithCaptcha = () => {
-    if (PROD_OR_STAGE) {
+    if (CAPTCHA_ENABLED) {
       return (
-        <GoogleReCaptchaProvider
-          reCaptchaKey={RECAPTCHA_SITE_KEY}
-          useEnterprise
-        >
+        <GoogleReCaptchaProvider reCaptchaKey={RECAPTCHA_SITE_KEY} useEnterprise>
           {renderModal()}
         </GoogleReCaptchaProvider>
       )

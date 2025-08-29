@@ -1,21 +1,24 @@
 import { EntityManager, MySqlDriver } from '@mikro-orm/mysql'
+import { CaptchaService } from '@shared/captcha/captcha.service'
 import { database } from '@shared/database'
-import { ChallengeService } from '@shared/domain/challenge/challenge.service'
-import { User } from '@shared/domain/user/user.entity'
-import { expect } from 'chai'
-import { NotificationService } from '@shared/domain/notification/services/notification.service'
-import { NotificationInput } from '@shared/domain/notification/notification.input'
-import { PlatformClient } from '@shared/platform-client'
-import { create, db } from '../../../src/test'
-import { NotFoundError } from '@shared/errors'
-import { stub } from 'sinon'
-import { ChallengeRepository } from '@shared/domain/challenge/challenge.repository'
 import { ChallengeResourceRepository } from '@shared/domain/challenge/challenge-resource.repository'
+import { ChallengeRepository } from '@shared/domain/challenge/challenge.repository'
+import { ChallengeService } from '@shared/domain/challenge/challenge.service'
+import { NotificationInput } from '@shared/domain/notification/notification.input'
+import { NotificationService } from '@shared/domain/notification/services/notification.service'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { UserFile } from '@shared/domain/user-file/user-file.entity'
+import { User } from '@shared/domain/user/user.entity'
+import { NotFoundError } from '@shared/errors'
+import { PlatformClient } from '@shared/platform-client'
+import { expect } from 'chai'
+import { stub } from 'sinon'
+import { create, db } from '../../../src/test'
 
 describe('ChallengeService', () => {
   let em: EntityManager<MySqlDriver>
   let user: User
-  let userCtx: UserCtx
+  let userCtx: UserContext
 
   let challengeService: ChallengeService
   let notificationService: NotificationService
@@ -48,6 +51,11 @@ describe('ChallengeService', () => {
     fileDownloadLink: fileDownloadLinkStub,
   } as unknown as PlatformClient
 
+  const verifyCaptchaAssessmentStub = stub().resolves(true)
+  const captchaService = {
+    verifyCaptchaAssessment: verifyCaptchaAssessmentStub,
+  } as unknown as CaptchaService
+
   beforeEach(async () => {
     await db.dropData(database.connection())
     em = database.orm().em.fork() as EntityManager<MySqlDriver>
@@ -59,6 +67,7 @@ describe('ChallengeService', () => {
       accessToken: 'accessToken',
       dxuser: 'dxuser',
       sessionId: 'sessionId',
+      loadEntity: async (): Promise<User> => Promise.resolve(user),
     }
 
     findChallengesStub.reset()
@@ -66,11 +75,12 @@ describe('ChallengeService', () => {
       {
         name: CHALLENGE_NAME,
         cardImage: {
-          getEntity: () => ({
-            dxid: FILE_DXID,
-            name: FILE_NAME,
-            project: PROJECT,
-          }),
+          getEntity: (): UserFile =>
+            ({
+              dxid: FILE_DXID,
+              name: FILE_NAME,
+              project: PROJECT,
+            }) as unknown as UserFile,
         },
       },
     ])
@@ -79,11 +89,12 @@ describe('ChallengeService', () => {
       {
         name: FILE_NAME,
         userFile: {
-          getEntity: () => ({
-            dxid: FILE_DXID,
-            name: FILE_NAME,
-            project: PROJECT,
-          }),
+          getEntity: (): UserFile =>
+            ({
+              dxid: FILE_DXID,
+              name: FILE_NAME,
+              project: PROJECT,
+            }) as unknown as UserFile,
         },
       },
     ])
@@ -109,6 +120,7 @@ describe('ChallengeService', () => {
       notificationService,
       challengeRepository,
       challengeResourceRepository,
+      captchaService,
     )
   })
 

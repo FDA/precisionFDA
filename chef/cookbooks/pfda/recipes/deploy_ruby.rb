@@ -3,6 +3,7 @@ include_recipe('::configure_ssh')
 app_dir = node[:app_root_dir]
 app_log_dir = File.join(app_dir, 'log')
 rails_dir = File.join(app_dir, 'packages', 'rails')
+client_dir = File.join(app_dir, 'packages', 'client')
 env_file = File.join(rails_dir, '.env')
 
 directory app_dir do
@@ -120,6 +121,12 @@ template ::File.join(rails_dir, 'config', 'database.yml') do
                 sslca: node[:mysql_rds_sslca_path]
               }
             end)
+end
+
+# create .env file to client_dir
+template File.join(client_dir, '.env') do
+  source 'client_env.erb'
+  variables(lazy { ENV.to_hash })
 end
 
 execute 'Install node deps' do

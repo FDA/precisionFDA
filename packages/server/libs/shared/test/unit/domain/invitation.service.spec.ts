@@ -149,6 +149,40 @@ describe('InvitationService', () => {
     })
   })
 
+  it('should create invitation with right data', async () => {
+    const requestData = {
+      firstName: 'John',
+      lastName: 'Doe',
+      email: '',
+      duns: '123456789',
+      reason: 'Testing',
+      participateIntent: true,
+      organizeIntent: false,
+      reqData: 'Data request',
+      reqSoftware: 'Software request',
+      researchIntent: true,
+      clinicalIntent: false,
+    }
+    const instance = getInstance()
+    const result = await instance.createInvitation(requestData)
+    expect(result).to.have.property('id')
+
+    const invitation = await invitationRepository.findOneOrFail(result.id)
+    expect(invitation.firstName).to.equal(requestData.firstName)
+    expect(invitation.lastName).to.equal(requestData.lastName)
+    expect(invitation.email).to.equal(requestData.email)
+    expect(invitation.duns).to.equal(requestData.duns)
+    expect(invitation.extras.req_reason).to.equal(requestData.reason)
+    expect(invitation.extras.req_data).to.equal(requestData.reqData)
+    expect(invitation.extras.req_software).to.equal(requestData.reqSoftware)
+    expect(invitation.extras.research_intent).to.equal(requestData.researchIntent)
+    expect(invitation.extras.clinical_intent).to.equal(requestData.clinicalIntent)
+    expect(invitation.extras.participate_intent).to.equal(requestData.participateIntent)
+    expect(invitation.extras.organize_intent).to.equal(requestData.organizeIntent)
+    expect(invitation.provisioningState).to.equal(PROVISIONING_STATE.PENDING)
+    expect(invitation.state).to.equal('guest')
+  })
+
   function getInstance(): InvitationService {
     const mainQueueJobProducer = {
       createProvisionNewUsersTask: createProvisionNewUsersTaskStub,

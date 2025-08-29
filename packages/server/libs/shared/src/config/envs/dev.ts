@@ -1,5 +1,5 @@
-import { ConfigOverride, parseBooleanFromProcess, parseIntFromProcess } from '..'
 import { parseIpv4Cidr } from '@shared/validation/parsers'
+import { ConfigOverride, parseBooleanFromProcess, parseIntFromProcess } from '..'
 
 export const config: ConfigOverride = () => ({
   // NOTE(samuel) copied from "staging.ts" configuration, so to avoid breaking changes, left unchanged
@@ -9,6 +9,7 @@ export const config: ConfigOverride = () => ({
     fdaSubnet: {
       allowedIpCidrBlock: parseIpv4Cidr(process.env.NODE_FDA_SUBNET_CIDR_BLOCK),
     },
+    captchaEnabled: true,
   },
   database: {
     printDBQueryValuesInLog:

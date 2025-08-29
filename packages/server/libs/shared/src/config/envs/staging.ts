@@ -8,6 +8,7 @@ export const config: ConfigOverride = () => ({
     fdaSubnet: {
       allowedIpCidrBlock: parseIpv4Cidr(process.env.NODE_FDA_SUBNET_CIDR_BLOCK),
     },
+    captchaEnabled: true,
   },
   database: {
     printDBQueryValuesInLog:
@@ -37,6 +38,7 @@ export const config: ConfigOverride = () => ({
   },
   platform: {
     orgEveryoneHandle: 'precisionfda',
+    orgDummyHandle: 'precisionfda.dummy',
     adminUser: 'precisionfda.admin',
   },
   redis: {

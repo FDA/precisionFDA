@@ -62,7 +62,7 @@ module.exports = {
 
   // A set of global variables that need to be available in all test environments
   globals: {
-    'PROD_OR_STAGE': 'false',
+    'CAPTCHA_ENABLED': 'false',
     'RECAPTCHA_SITE_KEY': 'some-key',
     ENABLE_DEV_MSW: false,
   },

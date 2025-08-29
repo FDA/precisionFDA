@@ -74,7 +74,7 @@ const ProposeChallengePage = () => {
   const mutationErrors = formatMutationErrors(mutation.error instanceof AxiosError ? mutation.error.response?.data : undefined)
 
   const handleSubmit = async (v: ProposeChallengeFormValues) => {
-    if (!isLoggedIn && PROD_OR_STAGE) {
+    if (!isLoggedIn && CAPTCHA_ENABLED) {
       setValues(v)
       setTriggerCaptcha(true)
     } else {
@@ -84,9 +84,9 @@ const ProposeChallengePage = () => {
 
   const onCaptchaSuccess = async (captchaValue: string) => {
     setTriggerCaptcha(false)
-    let data = values
+    const data = values as ProposeChallengePayload
     data.captchaValue = captchaValue
-    await mutation.mutateAsync(values)
+    await mutation.mutateAsync(data)
   }
 
   const thankYouMessage = () => {
@@ -132,7 +132,7 @@ const ProposeChallengePage = () => {
   return (
     <PublicLayout mainScroll={!!user}>
       <NavigationBar user={user} />
-      {!isLoggedIn && PROD_OR_STAGE ? renderContentWithCaptcha() : renderContent()}
+      {!isLoggedIn && CAPTCHA_ENABLED ? renderContentWithCaptcha() : renderContent()}
     </PublicLayout>
   )
 }

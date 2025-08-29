@@ -16,7 +16,6 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
                                                login
                                                return_from_login
                                                request_access
-                                               create_request_access
                                                guidelines
                                                browse_access
                                                destroy
@@ -27,9 +26,7 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
                                                home)
   # rubocop:enable Rails/LexicallyScopedActionFilter
 
-  before_action :init_countries, only: %i(request_access create_request_access)
-
-  layout "react", only: %i(about index news terms security data_portals home publish)
+  layout "react", only: %i(about index news terms security data_portals home publish request_access)
 
   def index # rubocop:todo Metrics/MethodLength
     show_guidelines = false
@@ -165,6 +162,8 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
   def security; end
 
   def publish; end
+
+  def request_access; end
 
   def presskit # rubocop:todo Metrics/MethodLength
     @images = [
@@ -420,31 +419,6 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
       "NONE",
       "user-#{CHALLENGE_BOT_DX_USER}",
     )
-  end
-
-  def request_access
-    @invitation = Invitation.new
-
-    js usa_id: Country.usa.id,
-       country_codes: Country.countries_for_codes,
-       phone_confirmed: unsafe_params.dig(:invitation, :phone_confirmed)
-  end
-
-  def create_request_access
-    @invitation = Invitation.new
-
-    token = unsafe_params.dig("g-recaptcha-response-data", :registration)
-    user_ip = request.remote_ip
-    user_agent = request.user_agent
-
-    if verify_captcha_assessment(token, "registration", user_ip, user_agent)
-      @invitation = RequestAccessService.create_request_for_access(invitation_params)
-    else
-      render "_partials/_error", status: :unprocessable_entity, locals: { message: "Invalid captcha verification. If this issue persists, please contact precisionFDA support." }
-      return
-    end
-
-    render :request_access
   end
 
   def browse_access

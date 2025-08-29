@@ -79,11 +79,58 @@ export const useInvitationColumns = (withSelectColumn: boolean): ColumnDef<Invit
       header: 'Requested At',
       accessorKey: 'createdAt',
       filterFn: dateRangeFilterFn,
+      minSize: 400,
       enableSorting: false,
       meta: {
         filterElement: (column: Column<unknown>) => <DateTimeRangeFilter column={column} />,
       },
       cell: c => <span>{convertDateToUserTime(c.row.original.createdAt).toString()}</span>,
+    },
+    {
+      header: 'Reason/Goals',
+      accessorKey: 'extras.req_reason',
+      enableColumnFilter: false,
+      enableSorting: false,
+    },
+    {
+      header: 'Contribution Data',
+      accessorKey: 'extras.req_data',
+      enableColumnFilter: false,
+      enableSorting: false,
+    },
+    {
+      header: 'Contribution Software',
+      accessorKey: 'extras.req_software',
+      enableColumnFilter: false,
+      enableSorting: false,
+    },
+    {
+      header: 'Challenge Participation Intent',
+      accessorKey: 'extras.participate_intent',
+      enableColumnFilter: false,
+      enableSorting: false,
+      cell: c => (c.row.original.extras.participate_intent ? 'Yes' : 'No'),
+    },
+    {
+      header: 'Challenge Organization Intent',
+      accessorKey: 'extras.organize_intent',
+      enableColumnFilter: false,
+      enableSorting: false,
+      cell: c => (c.row.original.extras.organize_intent ? 'Yes' : 'No'),
+    },
+    {
+      header: 'Research Intent',
+      accessorKey: 'extras.research_intent',
+      enableColumnFilter: false,
+      enableSorting: false,
+      cell: c => (c.row.original.extras.research_intent ? 'Yes' : 'No'),
+    },
+    {
+      header: 'Clinical Intent',
+      accessorKey: 'extras.clinical_intent',
+      enableColumnFilter: false,
+      enableSorting: false,
+      cell: c => (c.row.original.extras.clinical_intent ? 'Yes' : 'No'),
     },
   ] as ColumnDef<Invitation>[]
   return withSelectColumn ? [selectColumnDef<Invitation>(), ...columns] : columns
