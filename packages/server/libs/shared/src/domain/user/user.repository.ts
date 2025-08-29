@@ -1,4 +1,4 @@
-import { FindOptions } from '@mikro-orm/core'
+import { FindOptions, raw } from '@mikro-orm/core'
 import { PaginatedRepository } from '@shared/database/repository/paginated.repository'
 import { config } from '../../config'
 import { DNANEXUS_INVALID_EMAIL, ORG_EVERYONE } from '../../config/consts'
@@ -6,8 +6,6 @@ import { MfaAlreadyResetError, ValidationError } from '../../errors'
 import { PlatformClient } from '../../platform-client'
 import { UserCtx } from '../../types'
 import { classifyErrorTypes } from '../../utils/classify-error-types'
-import { buildJsonPath } from '../../utils/path'
-import { mysqlJsonArrayAppend, mysqlJsonSet } from '../../utils/sql-json-column-utils'
 import { RESOURCE_TYPES, User, USER_STATE } from './user.entity'
 
 type Resource = (typeof RESOURCE_TYPES)[number]
@@ -33,51 +31,31 @@ export class UserRepository extends PaginatedRepository<User> {
   }
 
   async bulkUpdateSetTotalLimit(ids: number[], totalLimit: number): Promise<void> {
-    const qb = this.createQueryBuilder()
-    qb.where({
-      id: {
-        $in: ids,
-      },
-    })
-    // NOTE(samuel) mikro-orm is using outdated query builder
-    // and its own query resolves JSON_SET as string, instead of mysql function
-    const knex = this.em.getConnection().getKnex()
-    const knexQuery = qb.getKnexQuery()
-    knexQuery.update({
-      cloud_resource_settings: knex.raw(
-        mysqlJsonSet<User>(
-          // TODO(samuel) resolve snake_case to camelCase mapping
-          'cloud_resource_settings' as keyof User,
-          buildJsonPath(['total_limit']),
-          { type: 'number', value: totalLimit },
-        ),
-      ),
-    })
-    await this.em.getConnection().execute(knexQuery)
+    await this.createQueryBuilder()
+      .update({
+        cloudResourceSettings: raw(`JSON_SET(cloud_resource_settings, '$.total_limit', ?)`, [
+          totalLimit,
+        ]),
+        updatedAt: new Date(),
+      })
+      .where({
+        id: { $in: ids },
+      })
+      .execute()
   }
 
   async bulkUpdateSetJobLimit(ids: number[], jobLimit: number): Promise<void> {
-    const qb = this.createQueryBuilder()
-    qb.where({
-      id: {
-        $in: ids,
-      },
-    })
-    // NOTE(samuel) mikro-orm is using outdated query builder
-    // and its own query resolves JSON_SET as string, instead of mysql function
-    const knex = this.em.getConnection().getKnex()
-    const knexQuery = qb.getKnexQuery()
-    knexQuery.update({
-      cloud_resource_settings: knex.raw(
-        mysqlJsonSet<User>(
-          // TODO(samuel) resolve snake_case to camelCase mapping
-          'cloud_resource_settings' as keyof User,
-          buildJsonPath(['job_limit']),
-          { type: 'number', value: jobLimit },
-        ),
-      ),
-    })
-    await this.em.getConnection().execute(knexQuery)
+    await this.createQueryBuilder()
+      .update({
+        cloudResourceSettings: raw(`JSON_SET(cloud_resource_settings, '$.job_limit', ?)`, [
+          jobLimit,
+        ]),
+        updatedAt: new Date(),
+      })
+      .where({
+        id: { $in: ids },
+      })
+      .execute()
   }
 
   // TODO - Refactor business logic to service layer instead of using repository
@@ -196,129 +174,106 @@ export class UserRepository extends PaginatedRepository<User> {
     return this.em.flush()
   }
 
-  // Note(samuel) this assumes that user isn't deactivating self
   async bulkDeactivate(ids: number[]): Promise<void> {
     const users = await this.em.find(User, {
-      id: {
-        $in: ids,
-      },
+      id: { $in: ids },
     })
+
     const invalidUsers = users.filter((user) => user.userState !== USER_STATE.ENABLED)
     if (invalidUsers.length > 0) {
       throw new ValidationError(
-        `Cannot deactivate other than enabled users: "${JSON.stringify(
-          users.map((user) => user.dxuser),
-        )}"`,
+        `Cannot deactivate non-enabled users: ${invalidUsers.map((user) => user.dxuser).join(', ')}`,
       )
     }
+
+    const encodeEmail = (email: string): string =>
+      Buffer.from(email, 'utf8').toString('base64').replace('\n', '') + DNANEXUS_INVALID_EMAIL
+
     users.forEach((user) => {
-      // TODO(samuel) - placeholder
-      user.disableMessage = 'Bulk deactivate'
+      user.disableMessage = 'Deactivated by admin'
+      user.userState = USER_STATE.DEACTIVATED
+
       if (user.email) {
-        user.email =
-          Buffer.from(user.email, 'utf8').toString('base64').replace('\n', '') +
-          DNANEXUS_INVALID_EMAIL
+        user.email = encodeEmail(user.email)
       }
       if (user.normalizedEmail) {
-        user.normalizedEmail =
-          Buffer.from(user.normalizedEmail, 'utf8').toString('base64').replace('\n', '') +
-          DNANEXUS_INVALID_EMAIL
+        user.normalizedEmail = encodeEmail(user.normalizedEmail)
       }
-      user.userState = USER_STATE.DEACTIVATED
+
       this.em.persist(user)
     })
+
     await this.em.flush()
   }
 
   async bulkEnableResourceType(ids: number[], resource: Resource): Promise<void> {
-    const qb = this.em.createQueryBuilder(User)
-    qb.where({
-      id: {
-        $in: ids,
-      },
-    })
-    // NOTE(samuel) mikro-orm is using outdated query builder
-    // and its own query resolves JSON_SET as string, instead of mysql function
-    const knex = this.em.getConnection().getKnex()
-    const knexQuery = qb.getKnexQuery()
-    knexQuery.update({
-      cloud_resource_settings: knex.raw(
-        mysqlJsonArrayAppend<User>(
-          // TODO(samuel) resolve snake_case to camelCase mapping
-          'cloud_resource_settings' as keyof User,
-          buildJsonPath(['resources']),
-          { type: 'string', value: resource },
-        ),
-      ),
-    })
-    await this.em.getConnection().execute(knexQuery)
+    await this.createQueryBuilder()
+      .update({
+        cloudResourceSettings: raw(`JSON_ARRAY_APPEND(cloud_resource_settings, '$.resources', ?)`, [
+          resource,
+        ]),
+        updatedAt: new Date(),
+      })
+      .where({
+        id: {
+          $in: ids,
+        },
+      })
+      .execute()
   }
 
   async bulkEnableAll(ids: number[]): Promise<void> {
-    const qb = this.createQueryBuilder()
-    qb.where({
-      id: {
-        $in: ids,
-      },
-    })
-    // NOTE(samuel) mikro-orm is using outdated query builder
-    // and its own query resolves JSON_SET as string, instead of mysql function
-    const knex = this.em.getConnection().getKnex()
-    const knexQuery = qb.getKnexQuery()
-    knexQuery.update({
-      cloud_resource_settings: knex.raw(
-        mysqlJsonSet<User>(
-          // TODO(samuel) resolve snake_case to camelCase mapping
-          'cloud_resource_settings' as keyof User,
-          buildJsonPath(['resources']),
-          {
-            type: 'jsonArrayExpression',
-            value: RESOURCE_TYPES.map((v) => ({ type: 'string', value: v })),
-          },
+    // Convert RESOURCE_TYPES array to a JSON array string for MySQL
+    const resourcesJson = JSON.stringify(RESOURCE_TYPES)
+
+    await this.createQueryBuilder()
+      .update({
+        cloudResourceSettings: raw(
+          `JSON_SET(cloud_resource_settings, '$.resources', CAST(? AS JSON))`,
+          [resourcesJson],
         ),
-      ),
-    })
-    await this.em.getConnection().execute(knexQuery)
+        updatedAt: new Date(),
+      })
+      .where({
+        id: {
+          $in: ids,
+        },
+      })
+      .execute()
   }
 
   async bulkDisableResourceType(ids: number[], resource: Resource): Promise<void> {
-    // NOTE(samuel) impossible to implement with knex query and JSON mysql functions
-    // JSON functions cannot filter element out of an array
     const users = await this.em.find(User, {
       id: {
         $in: ids,
       },
     })
+
     users.forEach((user) => {
-      user.cloudResourceSettings!.resources = user.cloudResourceSettings!.resources.filter(
-        (userResource) => userResource !== resource,
-      )
+      if (user.cloudResourceSettings?.resources) {
+        user.cloudResourceSettings.resources = user.cloudResourceSettings.resources.filter(
+          (userResource) => userResource !== resource,
+        )
+      }
       this.em.persist(user)
     })
+
     await this.em.flush()
   }
 
   async bulkDisableAll(ids: number[]): Promise<void> {
-    const qb = this.createQueryBuilder()
-    qb.where({
-      id: {
-        $in: ids,
-      },
-    })
-    // NOTE(samuel) mikro-orm is using outdated query builder
-    // and its own query resolves JSON_SET as string, instead of mysql function
-    const knex = this.em.getConnection().getKnex()
-    const knexQuery = qb.getKnexQuery()
-    knexQuery.update({
-      cloud_resource_settings: knex.raw(
-        mysqlJsonSet<User>(
-          // TODO(samuel) resolve snake_case to camelCase mapping
-          'cloud_resource_settings' as keyof User,
-          buildJsonPath(['resources']),
-          { type: 'jsonArrayExpression', value: [] },
+    await this.createQueryBuilder()
+      .update({
+        cloudResourceSettings: raw(
+          `JSON_SET(cloud_resource_settings, '$.resources', JSON_ARRAY())`,
         ),
-      ),
-    })
-    await this.em.getConnection().execute(knexQuery)
+        updatedAt: new Date(),
+      })
+      .where({
+        id: {
+          $in: ids,
+        },
+      })
+      .execute()
   }
 }

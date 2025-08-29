@@ -41,7 +41,7 @@ export const getAdminUserColumns = (): ColumnDef<User>[] => [
     header: 'Username',
     accessorKey: 'dxuser',
     filterFn: 'includesString',
-    size: 198,
+    size: 200,
     cell: c => (
       <StyledLinkCell data-turbolinks="false" href={`/users/${c.row.original.dxuser}`}>
         {c.row.original.dxuser}
@@ -60,13 +60,13 @@ export const getAdminUserColumns = (): ColumnDef<User>[] => [
     ),
   },
   {
-    header: 'Login Date',
+    header: 'Last Login Date',
     accessorKey: 'lastLogin',
     filterFn: dateRangeFilterFn,
     meta: {
       filterElement: (column: Column<User>) => <DateTimeRangeFilter column={column} />,
     },
-    size: 320,
+    size: 300,
     cell: c => {
       return (
         <StyledLinkCell data-turbolinks="false" href={`/users/${c.row.original.dxuser}`}>
@@ -100,7 +100,7 @@ export const getAdminUserColumns = (): ColumnDef<User>[] => [
         />
       ),
     },
-    size: 300,
+    size: 250,
     cell: c => (
       <StyledLinkCell data-turbolinks="false" href={`/users/${c.row.original.dxuser}`}>
         {c.row.original.userState.toUpperCase()}
@@ -111,7 +111,7 @@ export const getAdminUserColumns = (): ColumnDef<User>[] => [
     header: 'Total Limit',
     accessorKey: 'cloudResourceSettings.total_limit',
     id: 'totalLimit',
-    size: 300,
+    size: 250,
     enableColumnFilter: false,
     cell: props => (
       <StyledLinkCell data-turbolinks="false" href={`/users/${props.row.original.dxuser}`}>
@@ -124,7 +124,7 @@ export const getAdminUserColumns = (): ColumnDef<User>[] => [
     id: 'jobLimit',
     accessorKey: 'cloudResourceSettings.job_limit',
     enableColumnFilter: false,
-    size: 300,
+    size: 250,
     cell: c => (
       <StyledLinkCell data-turbolinks="false" href={`/users/${c.row.original.dxuser}`}>
         {`$${formatNumberUS(c.row.original.cloudResourceSettings.job_limit)}`}
@@ -156,9 +156,9 @@ const UsersList = () => {
   })
 
   const columns = getAdminUserColumns()
-  const { data, isLoading } = query
-  if (query.error) {
-    return <div>{JSON.stringify(query.error)}</div>
+  const { data, isLoading, error } = query
+  if (error) {
+    return <div>{JSON.stringify(error)}</div>
   }
 
   const selectedObjects = getSelectedObjectsFromIndexes(selectedIndexes, data?.data)

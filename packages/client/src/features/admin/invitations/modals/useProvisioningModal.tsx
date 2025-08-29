@@ -2,13 +2,13 @@ import { useQuery } from '@tanstack/react-query'
 import React, { useState, useEffect } from 'react'
 import { ModalNext } from '../../../modal/ModalNext'
 import { useModal } from '../../../modal/useModal'
-import { fetchFDAPortals, Invitation } from '../../admin.api'
 import { pluralize } from '../../../../utils/formatting'
 import { RowSelectionState } from '@tanstack/react-table'
 import styled from 'styled-components'
 import { useProvisionMutation } from '../../../../api/mutations/invitations'
 import { Button } from '../../../../components/Button'
 import { Checkbox } from '../../../../components/Checkbox'
+import { fetchFDAPortals, Invitation } from '../../users/api'
 
 const ModalContainer = styled.div`
   display: flex;

@@ -6,9 +6,7 @@ import { config } from '../config'
 import { getLogger } from '../logger'
 import { PlatformClientBase } from './platform-client-base'
 
-
 const defaultLog = getLogger('platform-auth-client-logger')
-
 
 // Putting the Params/Responses here for now
 type NewAuthTokenResponse = {
@@ -23,12 +21,10 @@ type UserResetMfaParams = {
   }
 }
 
-
 interface IPlatformAuthClient {
   newAuthToken(redirectUri: string): Promise<NewAuthTokenResponse>
   userResetMfa(params: UserResetMfaParams): Promise<any>
 }
-
 
 // Client for communicating with Platform's auth server
 //
@@ -79,11 +75,14 @@ class PlatformAuthClient extends PlatformClientBase implements IPlatformAuthClie
 
     this.logger.log({ options }, 'Sending newAuthToken request')
     const res = await this.axiosInstance.request(options)
-    this.logger.log({
-      headers: res.headers,
-      config: res.config,
-      data: res.data,
-    }, 'Received newAuthToken response')
+    this.logger.log(
+      {
+        headers: res.headers,
+        config: res.config,
+        data: res.data,
+      },
+      'Received newAuthToken response',
+    )
     return res.data
   }
 
@@ -114,7 +113,4 @@ class PlatformAuthClient extends PlatformClientBase implements IPlatformAuthClie
   }
 }
 
-export {
-  IPlatformAuthClient,
-  PlatformAuthClient,
-}
+export { IPlatformAuthClient, PlatformAuthClient }

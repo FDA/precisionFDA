@@ -1,8 +1,8 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
-import { Invitation, provisionUsers } from '../../features/admin/admin.api'
 import { toast } from 'react-toastify'
 import { pluralize } from '../../utils/formatting'
+import { Invitation, provisionUsers } from '../../features/admin/users/api'
 
 interface UseProvisionMutationProps {
   invitations: Invitation[]

@@ -3,18 +3,20 @@ import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import styled from 'styled-components'
-import axios from 'axios'
 import { Button } from '../../../components/Button'
 import { DropdownNext } from '../../../components/Dropdown/DropdownNext'
 import { ArrowIcon } from '../../../components/icons/ArrowIcon'
 import { PlusIcon } from '../../../components/icons/PlusIcon'
 import { UnlockIcon } from '../../../components/icons/UnlockIcon'
-import { displayPayloadMessage, Payload } from '../../../utils/api'
 import { useAuthUser } from '../../auth/useAuthUser'
 import { MetaV2 } from '../../home/types'
 import { ResourceDropdownContent } from './ResourceDropdown'
 import { User } from './types'
 import { UserLimitForm } from './UserLimitForm'
+import { bulkActivate, bulkDeactivate, bulkUnlock, setJobLimit, setTotalLimit } from './api'
+import { AxiosError } from 'axios'
+import { BackendError } from '../../../api/errors'
+import { resourceCountString } from '../../../utils/formatting'
 
 const ButtonsRow = styled.div`
   display: flex;
@@ -23,46 +25,6 @@ const ButtonsRow = styled.div`
   gap: 8px;
 `
 
-// TODO(samuel) Fix incorrect error handling with react-query
-// https://react-query.tanstack.com/guides/query-functions#usage-with-fetch-and-other-clients-that-do-not-throw-by-default
-const setTotalLimit = async (ids: User['id'][], totalLimit: number) =>
-  axios
-    .post('/admin/set_total_limit', {
-      ids,
-      totalLimit,
-    })
-    .then(res => res.data)
-
-const setJobLimit = async (ids: User['id'][], jobLimit: number) =>
-  axios
-    .post('/admin/set_job_limit', {
-      ids,
-      jobLimit,
-    })
-    .then(res => res.data)
-
-const bulkUnlock = async (ids: User['id'][]) =>
-  axios
-    .post('/admin/bulk_unlock', {
-      ids,
-    })
-    .then(res => res.data)
-
-const bulkActivate = async (ids: User['id'][]) =>
-  axios
-    .post('/admin/bulk_activate', {
-      ids,
-    })
-    .then(res => res.data)
-
-const bulkDeactivate = async (ids: User['id'][]) =>
-  axios
-    .post('/admin/bulk_deactivate', {
-      ids,
-    })
-    .then(res => res.data)
-
-// TODO(samuel) unify with my home
 const DropdownButton = React.forwardRef<HTMLElement, React.ComponentProps<typeof Button> & { $isActive?: boolean }>(
   (props, ref) => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -89,62 +51,79 @@ export const UsersListActionRow = ({ selectedUsers, refetchUsers }: UserListActi
   const navigate = useNavigate()
 
   const currentUserCtx = useAuthUser()
-
   const selectedIds = selectedUsers.map(({ id }) => id)
   const unlockMutation = useMutation({
     mutationKey: ['bulk-unlock'],
     mutationFn: () => bulkUnlock(selectedIds),
-    onSuccess: (res: Payload) => {
-      displayPayloadMessage(res)
+    onSuccess: () => {
+      toast.success(`${resourceCountString('User', selectedIds.length)} successfully unlocked!`)
     },
-    onError: () => {
-      toast.error('Error unlocking users')
+    onError: (e: AxiosError<BackendError>) => {
+      if (e.response?.data?.error?.message) {
+        toast.error(`Error: ${e.response.data.error.message}`)
+      } else {
+        toast.error('Error unlocking users!')
+      }
     },
   })
   const deactivateMutation = useMutation({
     mutationKey: ['bulk-deactivate'],
     mutationFn: () => bulkDeactivate(selectedIds),
-    onSuccess: (res: Payload) => {
-      displayPayloadMessage(res)
+    onSuccess: () => {
+      toast.success(`${resourceCountString('User', selectedIds.length)} successfully deactivated!`)
       refetchUsers()
     },
-    onError: () => {
-      toast.error('Error deactivating users')
+    onError: (e: AxiosError<BackendError>) => {
+      if (e.response?.data?.error?.message) {
+        toast.error(`Error: ${e.response.data.error.message}`)
+      } else {
+        toast.error('Error deactivating users')
+      }
     },
   })
   const activateMutation = useMutation({
     mutationKey: ['bulk-activate'],
     mutationFn: () => bulkActivate(selectedIds),
-    onSuccess: (res: Payload) => {
-      displayPayloadMessage(res)
+    onSuccess: () => {
+      toast.success(`${resourceCountString('User', selectedIds.length)} successfully activated!`)
       refetchUsers()
     },
-    onError: () => {
-      toast.error('Error activating users')
+    onError: (e: AxiosError<BackendError>) => {
+      if (e.response?.data?.error?.message) {
+        toast.error(`Error: ${e.response.data.error.message}`)
+      } else {
+        toast.error('Error activating users')
+      }
     },
   })
   const setTotalLimitMutation = useMutation({
     mutationKey: ['set-total-limit'],
-    // @ts-expect-error parseInt used because of some strange runtime errors 2lazy2fix
-    mutationFn: () => setTotalLimit(selectedIds, parseInt(totalLimitInput, 10)),
-    onSuccess: (res: Payload) => {
-      displayPayloadMessage(res)
+    mutationFn: () => setTotalLimit(selectedIds, totalLimitInput),
+    onSuccess: () => {
+      toast.success(`Total limit successfully set to $${totalLimitInput}!`)
       refetchUsers()
     },
-    onError: () => {
-      toast.error('Error setting total limit')
+    onError: (e: AxiosError<BackendError>) => {
+      if (e.response?.data?.error?.message) {
+        toast.error(`Error: ${e.response.data.error.message}`)
+      } else {
+        toast.error('Error setting total limit')
+      }
     },
   })
   const setJobLimitMutation = useMutation({
     mutationKey: ['set-job-limit'],
-    // @ts-expect-error parseInt used because of some strange runtime errors 2lazy2fix
-    mutationFn: () => setJobLimit(selectedIds, parseInt(jobLimitInput, 10)),
-    onSuccess: (res: Payload) => {
-      displayPayloadMessage(res)
+    mutationFn: () => setJobLimit(selectedIds, jobLimitInput),
+    onSuccess: () => {
+      toast.success(`Job limit successfully set to $${jobLimitInput}!`)
       refetchUsers()
     },
-    onError: () => {
-      toast.error('Error setting job limit')
+    onError: (e: AxiosError<BackendError>) => {
+      if (e.response?.data?.error?.message) {
+        toast.error(`Error: ${e.response.data.error.message}`)
+      } else {
+        toast.error('Error setting job limit')
+      }
     },
   })
   const areAllSelectedUsersInDeactivatedState =

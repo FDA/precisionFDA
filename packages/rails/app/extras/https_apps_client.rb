@@ -736,66 +736,6 @@ class HttpsAppsClient # rubocop:disable Metrics/ClassLength
   # │                          │
   # └──────────────────────────┘
 
-  def admin_stats
-    request(
-      "/admin/stats",
-      {},
-      Net::HTTP::Get::METHOD,
-    )
-  end
-
-  def users_set_total_limit(ids, total_limit)
-    request(
-      "/admin/users/setTotalLimit",
-      {
-        ids: ids,
-        totalLimit: total_limit,
-      },
-      Net::HTTP::Put::METHOD,
-    )
-  end
-
-  def users_set_job_limit(ids, job_limit)
-    request(
-      "/admin/users/setJobLimit",
-      {
-        ids: ids,
-        jobLimit: job_limit,
-      },
-      Net::HTTP::Put::METHOD,
-    )
-  end
-
-  def users_unlock(ids)
-    request(
-      "/admin/users/unlock",
-      {
-        ids: ids,
-      },
-      Net::HTTP::Post::METHOD,
-    )
-  end
-
-  def users_activate(ids)
-    request(
-      "/admin/users/activate",
-      {
-        ids: ids,
-      },
-      Net::HTTP::Put::METHOD,
-    )
-  end
-
-  def users_deactivate(ids)
-    request(
-      "/admin/users/deactivate",
-      {
-        ids: ids,
-      },
-      Net::HTTP::Put::METHOD,
-    )
-  end
-
   def users_enable_resource(ids, resource)
     request(
       "/admin/users/enableResourceType",

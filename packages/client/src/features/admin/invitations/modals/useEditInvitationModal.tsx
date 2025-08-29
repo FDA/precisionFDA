@@ -11,7 +11,7 @@ import { InputText } from '../../../../components/InputText'
 import { ModalHeaderTop, ModalNext } from '../../../modal/ModalNext'
 import { ButtonRow, Footer, StyledForm, StyledModalScroll } from '../../../modal/styles'
 import { useModal } from '../../../modal/useModal'
-import { editInvitationBasicInfo, Invitation } from '../../admin.api'
+import { editInvitationBasicInfo, Invitation } from '../../users/api'
 
 const editInvitationSchema = Yup.object().shape({
   firstName: Yup.string().min(1).max(255).required(),

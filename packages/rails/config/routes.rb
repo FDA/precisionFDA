@@ -40,7 +40,6 @@ Rails.application.routes.draw do
         post :update_custom_range, on: :collection
       end
 
-      get "stats", to: "base#stats"
       get "users", to: "users#index"
       get "invitations", to: "invitations#list"
       get "invitations/provisioning", to: "invitations#list_provisioning"
@@ -55,15 +54,6 @@ Rails.application.routes.draw do
       get "org_action_requests", to: "org_requests#index"
       get "deactivated_users", to: "users#deactivated_users"
       get "resend_activation_email", to: "users#resend_activation_email"
-      post "set_total_limit", to: "users#set_total_limit"
-      post "set_job_limit", to: "users#set_job_limit"
-      post "bulk_unlock", to: "users#bulk_unlock"
-      post "bulk_activate", to: "users#bulk_activate"
-      post "bulk_deactivate", to: "users#bulk_deactivate"
-      post "bulk_enable_resource", to: "users#bulk_enable_resource"
-      post "bulk_enable_all_resources", to: "users#bulk_enable_all_resources"
-      post "bulk_disable_resource", to: "users#bulk_disable_resource"
-      post "bulk_disable_all_resources", to: "users#bulk_disable_all_resources"
 
       resources :apps, only: [], param: :uid do
         collection do

@@ -674,26 +674,14 @@ export class PlatformClient {
   }
 
   async userUnlock(params: UserUnlockParams): Promise<unknown> {
-    const url = `${config.platform.apiUrl}/${params.dxid}/unlockUserAccount`
+    const url = `${config.platform.authApiUrl}/${params.dxid}/unlockUserAccount`
     const options: AxiosRequestConfig = {
       method: 'POST',
       data: params.data,
       url,
     }
 
-    try {
-      options.headers = this.setupHeaders()
-      this.logClientRequest(options)
-      const res = await axios.request(options)
-      return res.data
-    } catch (err) {
-      this.logClientFailed(options)
-      return this.handleFailed(err, (_, __, message) => {
-        if (message.includes('must be an admin')) {
-          throw new OrgMembershipError()
-        }
-      })
-    }
+    return await this.sendRequest(options)
   }
 
   async createUser(data: UserCreateData): Promise<UserCreateResponse> {

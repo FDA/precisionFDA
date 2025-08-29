@@ -11,9 +11,5 @@ module Admin
 
     def alerts; end
 
-    def stats
-      response = https_apps_client.admin_stats
-      render json: response, adapter: :json
-    end
   end
 end
