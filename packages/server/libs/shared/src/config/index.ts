@@ -25,7 +25,9 @@ export const parseBooleanFromProcess = (
   defaultValue = false,
 ): boolean => (value ? value.toLowerCase() === 'true' : defaultValue)
 
-export const parseJSONFromProcess = (envValue: string | undefined): Maybe<any> => {
+export const parseJSONFromProcess = (
+  envValue: string | undefined,
+): Maybe<Record<string, unknown> | null> => {
   if (envValue) {
     try {
       return JSON.parse(envValue)
@@ -37,7 +39,7 @@ export const parseJSONFromProcess = (envValue: string | undefined): Maybe<any> =
   return null
 }
 
-const getEnv = () => {
+const getEnv = (): ENVS => {
   try {
     return parseEnumValueFromString(Object.values(ENVS))(process.env.NODE_ENV)
   } catch {
@@ -72,6 +74,7 @@ const defaultConfig = {
     nginxIpHeader: 'x-forwarded-for',
     enableForgeryProtection: true,
     internalEndpointsEnabled: process.argv.includes('--internal'),
+    captchaEnabled: false,
   },
   logs: {
     pretty: false,
@@ -99,6 +102,7 @@ const defaultConfig = {
     challengeBotAccessToken: process.env.CHALLENGE_BOT_TOKEN ?? '',
     findDataObjectsQueryLimit: 1000,
     orgEveryoneHandle: 'precisionfda_dev',
+    orgDummyHandle: 'precisionfda.dummy_dev',
     billingInfo: parseJSONFromProcess(process.env.BILLING_INFO) ?? BILLING_INFO,
     billingConfirmation: process.env.BILLING_CONFIRMATION,
   },

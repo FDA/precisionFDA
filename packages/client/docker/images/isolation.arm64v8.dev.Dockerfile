@@ -12,6 +12,7 @@ COPY package.json \
     webpack.docker.development.config.js \
     .swcrc \
     tsconfig.json \
+    .env* \
     /precision-fda/
 
 COPY docker/entrypoint/dev.entrypoint.sh /usr/local/bin

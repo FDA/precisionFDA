@@ -1,5 +1,5 @@
-import type { AnyObject } from '../types'
 import { ErrorObject } from 'ajv'
+import type { AnyObject } from '../types'
 
 type BaseErrorProps = AnyObject & {
   code: ErrorCodes
@@ -30,6 +30,7 @@ export enum ErrorCodes {
   NOT_PERMITTED = 'E_NOT_PERMITTED',
   INVALID_STATE = 'E_INVALID_STATE',
   INVALID_REQUEST = 'E_INVALID_REQUEST',
+  INVALID_CAPTCHA = 'E_INVALID_CAPTCHA',
   UNAUTHORIZED_REQUEST = 'E_UNAUTHORIZED_REQUEST',
   // for specific situations
   USER_CONTEXT_QUERY_INVALID = 'E_USER_CONTEXT_QUERY_INVALID',
@@ -42,6 +43,7 @@ export enum ErrorCodes {
   SPACE_NOT_FOUND = 'E_SPACE_NOT_FOUND',
   NEXUS_REQUEST_FAILED = 'E_DNANEXUS_PLATFORM_REQUEST_FAILED',
   EMAIL_VALIDATION = 'E_EMAIL_VALIDATION',
+  EMAIL_EXISTS = 'E_EMAIL_EXISTS',
   EMAIL_PAYLOAD_NOT_FOUND = 'E_EMAIL_PAYLOAD_NOT_FOUND',
   EXTERNAL_SERVICE_ERROR = 'E_EXTERNAL_SERVICE_FAILED',
   AWS_SES_SERVICE_ERROR = 'E_AWS_SES_SERVICE_FAILED',
@@ -156,6 +158,16 @@ export class InvalidRequestError extends BaseError {
   constructor(message = 'Error: Invalid request', props: MaybeBaseErrorProps = {}) {
     super(message, {
       code: ErrorCodes.INVALID_REQUEST,
+      statusCode: 400,
+      ...props,
+    })
+  }
+}
+
+export class InvalidCaptchaError extends BaseError {
+  constructor(message = 'Error: Invalid captcha', props: MaybeBaseErrorProps = {}) {
+    super(message, {
+      code: ErrorCodes.INVALID_CAPTCHA,
       statusCode: 400,
       ...props,
     })

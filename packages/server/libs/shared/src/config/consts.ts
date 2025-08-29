@@ -1,5 +1,6 @@
 import { config } from '.'
 export const ORG_EVERYONE = `org-${config.platform.orgEveryoneHandle}`
+export const ORG_DUMMY = `org-${config.platform.orgDummyHandle}`
 
 export const DNANEXUS_INVALID_EMAIL = '@dnanexus.invalid'
 

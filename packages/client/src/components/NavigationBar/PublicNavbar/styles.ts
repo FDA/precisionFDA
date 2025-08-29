@@ -9,17 +9,18 @@ export const PageContainer = styled(PageContainerMargin)`
 export const StyledPublicNavbar = styled.div`
   --bg: var(--background-shaded);
   height: 64px;
+  min-height: 64px;
   position: fixed;
   top: var(--rails-alert-height);
   left: 0;
   right: 0;
   z-index: 100;
-  
+
   /* Scroll-triggered animations */
   animation: navbar-background linear both;
   animation-timeline: scroll(root);
   animation-range: 0px 100px;
-  
+
   background-color: transparent;
   border-bottom: 1px solid transparent;
 
@@ -68,27 +69,35 @@ export const StyledPublicNavbar = styled.div`
     animation: logo-fade-out linear both;
     animation-timeline: scroll(root);
     animation-range: 0px 100px;
-    
+
     &.hidden {
       visibility: hidden;
     }
   }
-  
+
   .brand-logo-dark {
     opacity: 0;
     animation: logo-fade-in linear both;
     animation-timeline: scroll(root);
     animation-range: 0px 100px;
   }
-  
+
   @keyframes logo-fade-out {
-    from { opacity: 1; }
-    to { opacity: 0; }
+    from {
+      opacity: 1;
+    }
+    to {
+      opacity: 0;
+    }
   }
-  
+
   @keyframes logo-fade-in {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
   }
 
   .desktop-nav {
@@ -102,7 +111,7 @@ export const StyledPublicNavbar = styled.div`
   .nav-link {
     --text-color: white;
     --border-color: white;
-    
+
     position: relative;
     padding: 8px 0;
     font-size: 14px;
@@ -112,15 +121,15 @@ export const StyledPublicNavbar = styled.div`
     border-bottom: 2px solid transparent;
     transition: all 0.2s ease-in-out;
     white-space: nowrap;
-    
+
     animation: nav-link-colors linear both;
     animation-timeline: scroll(root);
     animation-range: 0px 100px;
-    
+
     &:hover {
       border-bottom-color: var(--border-color);
     }
-    
+
     &.active {
       color: var(--primary-400);
       border-bottom-color: var(--primary-400);
@@ -131,15 +140,15 @@ export const StyledPublicNavbar = styled.div`
       }
     }
   }
-  
+
   @keyframes nav-link-colors {
-    from { 
+    from {
       --text-color: white;
       --border-color: white;
     }
-    to { 
+    to {
       --text-color: var(--base);
-      --border-color: hsl(240, 4%, 16%)
+      --border-color: hsl(240, 4%, 16%);
     }
   }
 
@@ -166,13 +175,13 @@ export const StyledPublicNavbar = styled.div`
     animation-range: 0px 100px;
     color: white;
   }
-  
+
   @keyframes secondary-btn-colors {
-    from { 
+    from {
       color: white;
       border-color: white;
     }
-    to { 
+    to {
       color: var(--base);
       border-color: var(--base);
     }
@@ -186,11 +195,11 @@ export const StyledPublicNavbar = styled.div`
     padding: 8px;
     border-radius: 4px;
     transition: background-color 0.2s ease-in-out;
-    
+
     &:hover {
       background-color: rgba(255, 255, 255, 0.1);
     }
-    
+
     &:focus {
       outline: 2px solid var(--primary-400);
       outline-offset: 2px;
@@ -216,24 +225,28 @@ export const StyledPublicNavbar = styled.div`
     animation: hamburger-line-colors linear both;
     animation-timeline: scroll(root);
     animation-range: 0px 100px;
-    
+
     &.line-1.menu-open {
       transform: rotate(45deg) translate(5px, 5px);
     }
-    
+
     &.line-2.menu-open {
       opacity: 0;
       transform: scale(0);
     }
-    
+
     &.line-3.menu-open {
       transform: rotate(-45deg) translate(7px, -6px);
     }
   }
-  
+
   @keyframes hamburger-line-colors {
-    from { background-color: white; }
-    to { background-color: var(--tertiary-900); }
+    from {
+      background-color: white;
+    }
+    to {
+      background-color: var(--tertiary-900);
+    }
   }
 
   /* Responsive behavior */
@@ -241,7 +254,7 @@ export const StyledPublicNavbar = styled.div`
     .desktop-actions {
       display: none;
     }
-    
+
     .mobile-menu-trigger {
       display: block;
     }
@@ -255,26 +268,27 @@ export const StyledPublicNavbar = styled.div`
     }
   }
 
-  ${({ theme }) => theme.colorMode === 'dark' ? css`
-    --bg: var(--background-shaded);
-    
-    /* In dark mode, use light logo */
-    .brand-logo-light {
-      opacity: 1;
-      animation: none;
-    }
-    
-    .brand-logo-dark {
-      opacity: 0;
-      animation: none;
-    }
-  `: `
+  ${({ theme }) =>
+    theme.colorMode === 'dark'
+      ? css`
+          --bg: var(--background-shaded);
+
+          /* In dark mode, use light logo */
+          .brand-logo-light {
+            opacity: 1;
+            animation: none;
+          }
+
+          .brand-logo-dark {
+            opacity: 0;
+            animation: none;
+          }
+        `
+      : `
     --bg: var(--c-subtleblue);
   `}
 
   ${fallback}
-
-
 `
 
 /* Mobile menu overlay */
@@ -288,8 +302,10 @@ export const MobileMenuOverlay = styled.div`
   z-index: 200;
   opacity: 0;
   visibility: hidden;
-  transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
-  
+  transition:
+    opacity 0.3s ease-in-out,
+    visibility 0.3s ease-in-out;
+
   &.menu-visible {
     opacity: 1;
     visibility: visible;
@@ -308,7 +324,7 @@ export const MobileMenuOverlay = styled.div`
     z-index: 201;
     display: flex;
     flex-direction: column;
-    
+
     &.menu-visible {
       right: 0;
     }
@@ -327,7 +343,9 @@ export const MobileMenuOverlay = styled.div`
     height: 32px;
   }
 
-  ${({ theme }) => theme.colorMode === 'dark' && `
+  ${({ theme }) =>
+    theme.colorMode === 'dark' &&
+    `
     .menu-brand {
       filter: invert(1);
     }
@@ -343,12 +361,12 @@ export const MobileMenuOverlay = styled.div`
     font-size: 24px;
     line-height: 1;
     transition: all 0.2s ease-in-out;
-    
+
     &:hover {
       background-color: var(--c-layout-border-200);
       color: var(--primary-600);
     }
-    
+
     &:focus {
       outline: 2px solid var(--primary-600);
       outline-offset: 2px;
@@ -370,17 +388,17 @@ export const MobileMenuOverlay = styled.div`
     font-weight: 500;
     border-bottom: 1px solid var(--c-layout-border-200);
     transition: background-color 0.2s ease-in-out;
-    
+
     &:hover {
       background-color: var(--c-app-header-menu-hover);
     }
-    
+
     &.menu-nav-active {
       color: var(--primary-600);
       background-color: var(--c-layout-border-200);
       font-weight: 600;
     }
-    
+
     &:last-child {
       border-bottom: none;
     }
@@ -411,7 +429,7 @@ export const MobileMenuOverlay = styled.div`
     .menu-container {
       width: 100vw;
       right: -100vw;
-      
+
       &.menu-visible {
         right: 0;
       }

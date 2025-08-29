@@ -1,6 +1,7 @@
 import { Reference } from '@mikro-orm/core'
 import { FilterQuery, SqlEntityManager } from '@mikro-orm/mysql'
 import { Inject, Injectable, Logger } from '@nestjs/common'
+import { CaptchaService } from '@shared/captcha/captcha.service'
 import { config } from '@shared/config'
 import { App } from '@shared/domain/app/app.entity'
 import { ChallengeResource } from '@shared/domain/challenge/challenge-resource.entity'
@@ -37,7 +38,6 @@ import { Searchable } from '@shared/interface/searchable'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { PlatformClient } from '@shared/platform-client'
 import { CHALLENGE_BOT_PLATFORM_CLIENT } from '@shared/platform-client/providers/platform-client.provider'
-import { CaptchaService } from '@shared/services/captcha.service'
 import { TimeUtils } from '@shared/utils/time.utils'
 
 @Injectable()
@@ -54,6 +54,7 @@ export class ChallengeService implements Searchable<Challenge> {
     private readonly notificationService: NotificationService,
     private readonly challengeRepo: ChallengeRepository,
     private readonly challengeResourceRepo: ChallengeResourceRepository,
+    private readonly captchaService: CaptchaService,
   ) {}
 
   async createChallenge(dto: CreateChallengeDTO, spaceId: number): Promise<Challenge> {
@@ -304,9 +305,12 @@ export class ChallengeService implements Searchable<Challenge> {
    */
   async proposeChallenge(body: ProposeChallengeDTO): Promise<void> {
     let canProposeChallenge = true
-    if (!this.user) {
-      const captcha = new CaptchaService()
-      canProposeChallenge = await captcha.verifyCaptchaAssessment(body.captchaValue!, 'propose')
+
+    if (!this.user.id || !this.user.accessToken || !this.user.sessionId) {
+      canProposeChallenge = await this.captchaService.verifyCaptchaAssessment(
+        body.captchaValue!,
+        'propose',
+      )
     }
 
     if (canProposeChallenge) {

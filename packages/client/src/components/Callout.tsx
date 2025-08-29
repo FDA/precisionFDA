@@ -1,6 +1,6 @@
 import styled from 'styled-components'
 
-type CalloutType = 'primary' | 'warning' | 'info'
+type CalloutType = 'primary' | 'warning' | 'info' | 'error'
 
 export const Callout = styled.div<{ 'data-variant': CalloutType }>`
   text-align: left;
@@ -10,6 +10,7 @@ export const Callout = styled.div<{ 'data-variant': CalloutType }>`
   padding: 6px;
   padding-right: 12px;
   border-left: 4px solid var(--tertiary-200);
+  box-sizing: border-box;
 
   &[data-variant='primary'] {
     background-color: var(--primary-50);

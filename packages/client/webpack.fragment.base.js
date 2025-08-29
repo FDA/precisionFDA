@@ -1,17 +1,18 @@
 /* globals module __dirname */
 /* eslint-disable no-undef */
 /* eslint-disable @typescript-eslint/no-var-requires */
+/* eslint-disable @typescript-eslint/no-require-imports */
 
 const path = require('path')
+require('dotenv').config()
 
 const webpack = require('webpack')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const CopyWebpackPlugin = require('copy-webpack-plugin')
 
-const captchaKey = process.env.RECAPTCHA_SITE_KEY
-const isProdOrStage = process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'staging'
+const captchaEnabled = ['production', 'staging', 'dev'].includes(process.env.NODE_ENV)
 
-module.exports = ({ urlLoaderOptions }) => ({
+module.exports = () => ({
   entry: './src/index.tsx',
   output: {
     path: path.resolve(__dirname, '../rails/app/assets/packs/'),
@@ -23,8 +24,8 @@ module.exports = ({ urlLoaderOptions }) => ({
       ignoreOrder: true,
     }),
     new webpack.DefinePlugin({
-      RECAPTCHA_SITE_KEY: JSON.stringify(captchaKey),
-      PROD_OR_STAGE: JSON.stringify(isProdOrStage),
+      RECAPTCHA_SITE_KEY: JSON.stringify(process.env.RECAPTCHA_SITE_KEY),
+      CAPTCHA_ENABLED: JSON.stringify(Boolean(captchaEnabled)),
       NODE_ENV: JSON.stringify(process.env.NODE_ENV),
       ENABLE_DEV_MSW: JSON.stringify(Boolean(process.env.ENABLE_DEV_MSW)),
       'process.env.ENABLE_DEV_MSW': JSON.stringify(Boolean(process.env.ENABLE_DEV_MSW)),

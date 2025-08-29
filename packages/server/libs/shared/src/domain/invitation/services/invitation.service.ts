@@ -3,14 +3,16 @@ import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Injectable } from '@nestjs/common'
 import { ObjectFilterQuery } from '@shared/database/domain/object-filter-query'
 import { PaginatedResult } from '@shared/domain/entity/domain/paginated.result'
+import { ProvisionUsersDTO } from '@shared/domain/invitation/dto/provision-users.dto'
 import { InvalidStateError } from '@shared/errors'
 import { MainQueueJobProducer } from '@shared/queue/producer/main-queue-job.producer'
 import { StringUtils } from '@shared/utils/string.utils'
+import { randomUUID } from 'crypto'
 import { InvitationPaginationDTO } from '../dto/invitation-pagination.dto'
-import { Invitation } from '../invitation.entity'
+import { RequestAccessDTO } from '../dto/request-access.dto'
+import { Extras, Invitation } from '../invitation.entity'
 import { PROVISIONING_STATE } from '../invitation.enum'
 import { InvitationRepository } from '../invitation.repository'
-import { ProvisionUsersDTO } from '@shared/domain/invitation/dto/provision-users.dto'
 
 @Injectable()
 export class InvitationService {
@@ -83,6 +85,29 @@ export class InvitationService {
         invitation[field] = data[field]
       }
     }
+    await this.em.persistAndFlush(invitation)
+    return { id: invitation.id }
+  }
+
+  async createInvitation(dto: RequestAccessDTO): Promise<{ id: number }> {
+    const invitation = new Invitation()
+    invitation.firstName = dto.firstName
+    invitation.lastName = dto.lastName
+    invitation.email = dto.email
+    invitation.duns = dto.duns
+    invitation.ip = dto.ip
+    invitation.state = 'guest'
+    invitation.code = randomUUID()
+    invitation.extras = {
+      req_reason: dto.reason,
+      req_data: dto.reqData,
+      req_software: dto.reqSoftware,
+      research_intent: dto.researchIntent,
+      clinical_intent: dto.clinicalIntent,
+      participate_intent: dto.participateIntent,
+      organize_intent: dto.organizeIntent,
+    } as Extras
+    invitation.provisioningState = PROVISIONING_STATE.PENDING
     await this.em.persistAndFlush(invitation)
     return { id: invitation.id }
   }

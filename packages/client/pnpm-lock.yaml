@@ -309,6 +309,9 @@ importers:
       css-loader:
         specifier: ^7.1.2
         version: 7.1.2(webpack@5.101.1)
+      dotenv:
+        specifier: ^8.6.0
+        version: 8.6.0
       eslint:
         specifier: ^9.31.0
         version: 9.32.0
@@ -3115,6 +3118,10 @@ packages:
 
   dot-case@3.0.4:
     resolution: {integrity: sha512-Kv5nKlh6yRrdrGvxeJ2e5y2eRUpkUosIW4A2AS38zwSz27zu7ufDwQPi5Jhs3XAlGNetl3bmnGhQsMtkKJnj3w==}
+
+  dotenv@8.6.0:
+    resolution: {integrity: sha512-IrPdXQsk2BbzvCBGBOTmmSH5SodmqZNt4ERAZDmW4CT+tL8VtvinqywuANaFu4bOMWki16nqf0e4oC0QIaDr/g==}
+    engines: {node: '>=10'}
 
   dunder-proto@1.0.1:
     resolution: {integrity: sha512-KIN/nDJBQRcXw0MLVhZE9iQHmG68qAVIBg9CqmUYjmQIhgij9U5MFvrqkUL5FbtyyzZuOeOt0zdeRe4UY7ct+A==}
@@ -9554,6 +9561,8 @@ snapshots:
     dependencies:
       no-case: 3.0.4
       tslib: 2.6.2
+
+  dotenv@8.6.0: {}
 
   dunder-proto@1.0.1:
     dependencies:

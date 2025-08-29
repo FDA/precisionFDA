@@ -22,6 +22,7 @@ export class AdminPlatformClientService {
     'jobTerminate',
     'jobCreate',
     'userUnlock',
+    'orgFindMembers',
   ]
 
   constructor(private readonly platformClient: PlatformClient) {}

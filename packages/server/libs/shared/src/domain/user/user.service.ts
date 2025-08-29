@@ -1,6 +1,7 @@
 import { SqlEntityManager } from '@mikro-orm/mysql'
-import { Injectable, Logger } from '@nestjs/common'
+import { Inject, Injectable, Logger } from '@nestjs/common'
 import { config } from '@shared/config'
+import { ORG_DUMMY } from '@shared/config/consts'
 import { ObjectFilterQuery } from '@shared/database/domain/object-filter-query'
 import { EmailSendInput } from '@shared/domain/email/email.config'
 import { buildEmailTemplate } from '@shared/domain/email/email.helper'
@@ -18,9 +19,10 @@ import { HeaderItem } from '@shared/domain/user/header-item'
 import { UserExtras } from '@shared/domain/user/user-extras'
 import { CloudResourceSettings, User, USER_STATE } from '@shared/domain/user/user.entity'
 import { UserRepository } from '@shared/domain/user/user.repository'
-import { NoHeaderItemsSetError, NotFoundError } from '@shared/errors'
+import { ClientRequestError, NoHeaderItemsSetError, NotFoundError } from '@shared/errors'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import { PlatformClient } from '@shared/platform-client'
+import { ADMIN_PLATFORM_CLIENT } from '@shared/platform-client/providers/admin-platform-client.provider'
 import { StringUtils } from '@shared/utils/string.utils'
 
 @Injectable()
@@ -34,6 +36,8 @@ export class UserService {
     private readonly userRepo: UserRepository,
     private readonly emailsJobProducer: EmailQueueJobProducer,
     private readonly platformClient: PlatformClient,
+    @Inject(ADMIN_PLATFORM_CLIENT)
+    private readonly adminClient: PlatformClient,
   ) {}
 
   async paginateUsers(query: UserPaginationDto): Promise<PaginatedResult<User>> {
@@ -200,6 +204,45 @@ export class UserService {
     const result = await this.platformClient.userCloudResources(dxOrg)
 
     return new UserCloudResourcesDTO(result, user)
+  }
+
+  async emailExistsOnDB(email: string): Promise<boolean> {
+    const user = await this.userRepo.findOne({ email: email.toLowerCase() })
+    return !!user
+  }
+
+  async emailExistsOnPlatform(email: string): Promise<boolean> {
+    try {
+      await this.adminClient.inviteUserToOrganization({
+        orgDxId: ORG_DUMMY,
+        data: {
+          invitee: email.toLowerCase(),
+          suppressEmailNotification: true,
+          level: 'MEMBER',
+        },
+      })
+    } catch (error: unknown) {
+      if (error instanceof ClientRequestError && error.props.clientStatusCode === 404) {
+        // User not found, so email does not exist
+        return false
+      }
+    }
+
+    // clean up the dummy organization by removing the user
+    // needs to be done by this way because we don't know the user ID
+    const members = await this.adminClient.orgFindMembers({ orgDxid: ORG_DUMMY })
+    const userIds = members.results
+      .filter((member) => member.level === 'MEMBER' && member.id !== config.platform.adminUser)
+      .map((member) => member.id)
+
+    for (const userId of userIds) {
+      await this.adminClient.removeUserFromOrganization({
+        orgDxId: ORG_DUMMY,
+        data: { user: userId },
+      })
+    }
+
+    return true
   }
 
   // PFDA-6051 TODO Ludvik Bobek will update this to use the new pagination method

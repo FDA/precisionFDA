@@ -16,6 +16,7 @@ import { PFDAToastContainer } from './utils/PFDAToastContainer'
 import queryClient from './utils/queryClient'
 
 import 'react-tooltip/dist/react-tooltip.css'
+import RequestAccessPage from './features/request-access/RequestAccessPage'
 import { ColorModeProvider } from './utils/ThemeContext'
 
 const DataPortalRoutes = React.lazy(() => import('./features/data-portals/routes'))
@@ -99,6 +100,8 @@ const router = createBrowserRouter([
       { path: 'experts/:expertId/*', element: <ExpertsSinglePage /> },
       { path: 'experts', element: <ExpertsListPage /> },
       { path: 'terms', element: <ToS /> },
+      // keep the snake case route for old content in Rails
+      { path: '/request_access', element: <RequestAccessPage /> },
       { path: 'security', element: <Security /> },
       { path: 'daaas', element: <Navigate to="/data-portals/main" replace /> },
       { path: 'search', element: <SearchResultPage /> },

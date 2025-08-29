@@ -105,7 +105,6 @@ Rails.application.routes.draw do
     get "check_webapp" => "main#check_webapp"
     get "publish" => "main#publish"
     get "request_access" => "main#request_access"
-    post "request_access" => "main#create_request_access"
     get "browse_access" => "main#browse_access"
     post "browse_access" => "main#browse_access"
     get "about" => "main#about"

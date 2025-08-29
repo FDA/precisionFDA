@@ -29,10 +29,12 @@ import { NotificationsApiModule } from './notifications/notifications.api.module
 import { PropertiesApiModule } from './properties/properties.api.module'
 import { PublishApiModule } from './publish/publish.api.module'
 import { ReportsApiModule } from './reports/reports.api.module'
+import { RequestAccessApiModule } from './request-access/request-access.api.module'
 import { SearchApiModule } from './search/search.api.module'
 import { SessionApiModule } from './session/session.api.module'
 import { SiteSettingsApiModule } from './site-settings/site-settings.api.module'
 import { SpaceEventsApiModule } from './space-events/space-events.api.module'
+import { SpaceGroupsApiModule } from './space-groups/space-groups.api.module'
 import { SpacesApiModule } from './spaces/spaces.api.module'
 import { TracksApiModule } from './tracks/tracks.api.module'
 import { CSRFVerificationMiddleware } from './user-context/middleware/csrf-verification.middleware'
@@ -40,7 +42,6 @@ import { UserContextMiddleware } from './user-context/middleware/user-context.mi
 import { UsersApiModule } from './users/users.api.module'
 import { WebsocketModule } from './websocket/websocket.module'
 import { WorkflowApiModule } from './workflows/workflow.api.module'
-import { SpaceGroupsApiModule } from './space-groups/space-groups.api.module'
 
 @Module({
   imports: [
@@ -80,6 +81,7 @@ import { SpaceGroupsApiModule } from './space-groups/space-groups.api.module'
     UsersApiModule,
     WorkflowApiModule,
     ReportsApiModule,
+    RequestAccessApiModule,
     SessionApiModule,
     PublishApiModule,
     SearchApiModule,
