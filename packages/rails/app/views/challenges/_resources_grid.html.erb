@@ -26,7 +26,7 @@
   end
 
   g.column name: 'Uploaded', attribute: 'created_at', auto_reload: true, filter_type: :standard do |resource|
-    resource.user_file.created_at.to_s(:db)
+    resource.user_file.created_at.to_formatted_s(:db)
   end
 
 end -%>

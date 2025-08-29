@@ -62,7 +62,7 @@ module Api
         eager_load(user: :org).
         search_by_tags(filter_tags)
 
-      return render(plain: files.size) if show_count
+      return files.size if show_count
 
       files = files.where(parent_folder_id: @parent_folder_id)
       files = FileService::FilesFilter.call(files, params[:filters])
@@ -211,13 +211,20 @@ module Api
         search_by_tags(filter_tags)
       folders = FileService::FilesFilter.call(folders, params[:filters])
 
-      render_files_list(files: files, folders: folders)
+      if show_count
+        # Return a single value for the count
+        return files.count + folders.count
+      end
+
+      # Otherwise, render the data from the helper method
+      render render_files_list(files: files, folders: folders)
     end
 
     # GET /api/files/everybody
     # A fetch method for files, accessible by public and of latest revisions.
     # @param created_at [String] Param for ordering.
     # @return files [UserFile] Array of UserFile objects if they exist OR files: [].
+    # app/controllers/api/files_controller.rb
     def everybody
       filter_tags = params.dig(:filters, :tags)
 
@@ -235,7 +242,15 @@ module Api
         eager_load(user: :org).search_by_tags(filter_tags)
       folders = FileService::FilesFilter.call(folders, params[:filters])
 
-      render_files_list(files: files, folders: folders)
+      if show_count
+        # Return a single value if `show_count` is true
+        filtered_files = FileService::FilesFilter.call(files, params[:filters])
+        page_dict = pagination_dict(filtered_files)
+        return page_dict[:total_count]
+      end
+
+      # Call the helper method and render the returned hash
+      render render_files_list(files: files, folders: folders)
     end
 
     # GET /api/files/spaces
@@ -267,18 +282,11 @@ module Api
       folders = FileService::FilesFilter.call(folders, params[:filters])
 
       if show_count
-        render plain: files.size
+        # Return the count directly
+        return files.size
       else
-        # TODO: try if this method can be used instead of commented-out code below.
+        # Your existing code for when show_count is false
         render_files_list(files: files, folders: folders)
-
-        # nodes = Node.where(id: files + folders).eager_load(user: :org).to_a
-        #
-        # nodes = sort_array_by_fields(nodes, "created_at")
-        # page_meta = pagination_meta(nodes.count)
-        # nodes = paginate_array(nodes)
-        #
-        # render json: nodes, root: "files", adapter: :json, meta: files_meta.merge(page_meta)
       end
     end
 

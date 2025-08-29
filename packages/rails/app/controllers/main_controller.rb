@@ -657,7 +657,7 @@ class MainController < ApplicationController # rubocop:todo Metrics/ClassLength
   def collect_feed
     [Note, Answer, Discussion, UserFile, Comparison, App, Asset].map do |klass|
       klass.where(user: User.real).accessible_by_public.order(updated_at: :desc).limit(4)
-    end.sum.sort_by(&:updated_at).reverse
+    end.flatten.sort_by(&:updated_at).reverse
   end
 
   def set_time_zone(user) # rubocop:todo Naming/AccessorMethodName

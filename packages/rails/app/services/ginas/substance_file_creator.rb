@@ -49,6 +49,8 @@ module Ginas
         scope: Scopes::SCOPE_PRIVATE,
       )
 
+      early_exit = false
+
       Node.transaction do
         unless target_folder
           result = folder_service.add_folder(folder_name)
@@ -57,7 +59,8 @@ module Ginas
 
         unless target_folder
           logger.error "Can't create a folder for the substance file"
-          return
+          early_exit = true
+          next
         end
 
         target_folder.tag_list.add(GSRS_TAG)
@@ -66,11 +69,12 @@ module Ginas
         result = folder_service.move([file], target_folder)
 
         if result.failure?
-          logger.error "Can't move the substance file to the folder due to: " +
-                       result.value[:message]
+          logger.error "Can't move the substance file to the folder due to: #{result.value[:message]}"
           raise ActiveRecord::Rollback
         end
       end
+
+      return if early_exit
     end
 
     def substance_file_name(request, substance_name, substance_uuid)

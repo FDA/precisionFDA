@@ -30,7 +30,7 @@
     <% end %>
     <li class="list-group-item">
       <h5 class="list-group-item-heading">Created</h5>
-      <p class="list-group-item-text"><%= @workflow.created_at.to_s(:db) %></p>
+      <p class="list-group-item-text"><%= @workflow.created_at.to_formatted_s(:db) %></p>
     </li>
   </ul>
 </div>

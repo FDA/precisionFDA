@@ -30,7 +30,7 @@
     <% end %>
     <li class="list-group-item">
       <h5 class="list-group-item-heading">Created</h5>
-      <p class="list-group-item-text"><%= app.created_at.to_s(:human) %></p>
+      <p class="list-group-item-text"><%= app.created_at.to_formatted_s(:human) %></p>
     </li>
   </ul>
 </div>

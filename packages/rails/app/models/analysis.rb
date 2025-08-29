@@ -52,7 +52,7 @@ class Analysis < ApplicationRecord
                  app_title: batch_item.jobs.first.app.title,
                  batch_id: batch_item.batch_id,
                  duration: humanize_seconds(batch_item.analysis_duration),
-                 created: batch_item.jobs.first.created_at.to_s(:db),
+                 created: batch_item.jobs.first.created_at.to_formatted_s(:db),
                 jobs: batch_item.jobs.map do |job|
               {
                  id: job.id,
@@ -67,7 +67,7 @@ class Analysis < ApplicationRecord
                  app_title: job.app.title,
                  batch_id: batch_item.batch_id,
                  duration: humanize_seconds(job.runtime),
-                 created: job.created_at.to_s(:db),
+                 created: job.created_at.to_formatted_s(:db),
                  links: analysis.job_links(job),
               }
             end
@@ -101,7 +101,7 @@ class Analysis < ApplicationRecord
           batch_id: analysis.batch_id,
           batch_children: options[:stop].nil? && analysis.batch_id.present? ? self.job_hash(analysis.batch_items, options.merge({stop: true})) : nil,
           duration: humanize_seconds(job.runtime),
-          created: job.created_at.to_s(:db)
+          created: job.created_at.to_formatted_s(:db)
         }
         formatted_job[:links] = analysis.job_links(job)
 

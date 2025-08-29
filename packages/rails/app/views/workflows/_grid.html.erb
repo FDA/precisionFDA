@@ -15,7 +15,7 @@
   end
 
   g.column name: 'Created', attribute: 'created_at', filter_type: :standard do |workflow|
-    workflow.created_at.to_s(:human)
+    workflow.created_at.to_formatted_s(:human)
   end
 
 end -%>

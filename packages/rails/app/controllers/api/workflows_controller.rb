@@ -38,7 +38,7 @@ module Api
         page_dict = pagination_dict(workflows)
 
         if show_count
-          render plain: page_dict[:total_count]
+          return page_dict[:total_count]
         else
           render json: workflows,
                  root: Workflow.model_name.plural,
@@ -67,6 +67,10 @@ module Api
           latest if Workflows::WorkflowFilter.match(latest, filters)
         end.compact
 
+      if show_count
+        return workflows.size
+      end
+
       render_workflows_list workflows
     end
 
@@ -93,9 +97,14 @@ module Api
           latest if Workflows::WorkflowFilter.match(latest, filters)
         end.compact
 
+      if show_count
+        return workflows.count
+      end
+
       render_workflows_list workflows
     end
 
+    # app/controllers/api/workflows_controller.rb
     def everybody
       filters = params[:filters]
       workflows = WorkflowSeries.unremoved.
@@ -112,7 +121,11 @@ module Api
         latest = series.latest_accessible(@context)
         latest if Workflows::WorkflowFilter.match(latest, filters)
       end.compact
-      
+
+      if show_count
+        return workflows.count
+      end
+
       render_workflows_list workflows
     end
 
@@ -134,6 +147,10 @@ module Api
             series_wf
           end
         end.compact
+
+      if show_count
+        return workflows.count
+      end
 
       render_workflows_list workflows
     end

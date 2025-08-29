@@ -45,7 +45,7 @@
     </li>
     <li class="list-group-item">
       <h5 class="list-group-item-heading">Created</h5>
-      <p class="list-group-item-text"><%= @comparison.created_at.to_s(:human) %></p>
+      <p class="list-group-item-text"><%= @comparison.created_at.to_formatted_s(:human) %></p>
     </li>
     <%if @comparison.app_dxid != DEFAULT_COMPARISON_APP %>
       <li class="list-group-item">
@@ -314,7 +314,7 @@
         end
 
         g.column name: 'Created', auto_reload: true, filter_type: :standard do |file|
-          file.created_at.to_s(:human)
+          file.created_at.to_formatted_s(:human)
         end
       end -%>
     </div>

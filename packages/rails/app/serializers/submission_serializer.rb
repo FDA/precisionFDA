@@ -23,11 +23,11 @@ class SubmissionSerializer < ApplicationSerializer
   end
 
   def created_at
-    object.created_at.to_s(:human)
+    object.created_at.to_formatted_s(:human)
   end
 
   def updated_at
-    object.updated_at.to_s(:human)
+    object.updated_at.to_formatted_s(:human)
   end
 
   def job_state

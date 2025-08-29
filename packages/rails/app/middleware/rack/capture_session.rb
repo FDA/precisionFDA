@@ -12,8 +12,10 @@ module Rack
         user_id = env["rack.session"]["user_id"]
         session_cookie_key = Rails.application.config.session_options[:key]
         session_cookie_value = headers["Set-Cookie"]&.match(/#{session_cookie_key}=([^;]*)/).to_a[1]
-        Rails.logger.tagged("user_id: #{user_id}") do
-          post_login_checks("#{session_cookie_key}=#{session_cookie_value}") if session_cookie_value.present?
+        if Rails.logger.respond_to?(:tagged)
+          Rails.logger.tagged("user_id: #{user_id}") do
+            post_login_checks("#{session_cookie_key}=#{session_cookie_value}") if session_cookie_value.present?
+          end
         end
       end
 

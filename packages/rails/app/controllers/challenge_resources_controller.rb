@@ -22,6 +22,7 @@ class ChallengeResourcesController < ApplicationController
     end
 
     resource.destroy!
+
     DNAnexusAPI.new(CHALLENGE_BOT_TOKEN).call(CHALLENGE_BOT_PRIVATE_FILES_PROJECT, "removeObjects", objects: [file.dxid])
 
     flash[:success] = "Challenge Resource \"#{resource.name}\" has been successfully deleted"

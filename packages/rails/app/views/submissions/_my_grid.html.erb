@@ -51,7 +51,7 @@
   end
 
   g.column name: 'Created', attribute: 'created_at', auto_reload: true, filter_type: :standard do |submission|
-    submission.created_at.to_s(:human)
+    submission.created_at.to_formatted_s(:human)
   end
 
 end %>

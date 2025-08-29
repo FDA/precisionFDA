@@ -44,6 +44,12 @@ module Api
         includes(:taggings).
         search_by_tags(params.dig(:filters, :tags))
 
+      if show_count
+        filtered_assets = FileService::FilesFilter.call(assets, params[:filters])
+        page_dict = pagination_dict(filtered_assets)
+        return page_dict[:total_count]  # Return count instead of rendering
+      end
+
       render_assets_list assets
     end
 
@@ -58,6 +64,13 @@ module Api
         includes(:taggings).
         search_by_tags(params.dig(:filters, :tags))
 
+      if show_count
+        filtered_assets = FileService::FilesFilter.call(assets, params[:filters])
+        page_dict = pagination_dict(filtered_assets)
+        return page_dict[:total_count]
+      end
+
+      # This will be called if `show_count` is false
       render_assets_list assets
     end
 
@@ -73,6 +86,13 @@ module Api
         includes(:taggings).
         search_by_tags(params.dig(:filters, :tags))
 
+      if show_count
+        filtered_assets = FileService::FilesFilter.call(assets, params[:filters])
+        page_dict = pagination_dict(filtered_assets)
+        return page_dict[:total_count]
+      end
+
+      # This will be called if `show_count` is false
       render_assets_list assets
     end
 
@@ -92,7 +112,8 @@ module Api
       assets = FileService::FilesFilter.call(assets, params[:filters]).to_a
 
       if show_count
-        render plain: assets.count
+        # Return a simple integer count instead of rendering it
+        return assets.count
       else
         assets = sort_array_by_fields(assets, "created_at")
         page_meta = pagination_meta(assets.count)
@@ -141,12 +162,14 @@ module Api
       @file = Asset.find_by(uid: params[:id])
       unless @file.editable_by?(@context)
         type = :warning
-        text = "You have no permission to deleted this Asset \"#{@file.prefix}\""
+        text = "You have no permission to delete this Asset \"#{@file.prefix}\""
         path = api_assets_path
 
         render json: { path: path, message: { type: type, text: text } }, adapter: :json
         return
       end
+
+      type = text = path = nil
 
       UserFile.transaction do
         @file.reload
@@ -154,23 +177,23 @@ module Api
         if @file.license.present? && !@file.apps.empty?
           type = :error
           text = "This asset contains a license, and has been included in one or more apps. " \
-                 "Deleting it would render the license inaccessible to these apps,  " \
+                 "Deleting it would render the license inaccessible to these apps, " \
                  "breaking reproducibility. You can either first remove the license " \
                  "(allowing these existing apps to run without requiring a license) " \
                  "or contact the precisionFDA team to discuss other options."
           path = api_asset_path(@file)
-
-          render json: { path: path, message: { type: type, text: text } }, adapter: :json
-          return
+        else
+          @file.destroy
         end
-        @file.destroy
       end
 
-      DNAnexusAPI.new(@context.token).call(@file.project, "removeObjects", objects: [@file.dxid])
+      unless type == :error
+        DNAnexusAPI.new(@context.token).call(@file.project, "removeObjects", objects: [@file.dxid])
 
-      type = :success
-      text = "Asset \"#{@file.prefix}\" has been successfully deleted"
-      path = api_assets_path
+        type = :success
+        text = "Asset \"#{@file.prefix}\" has been successfully deleted"
+        path = api_assets_path
+      end
 
       render json: { path: path, message: { type: type, text: text } }, adapter: :json
     end
@@ -255,15 +278,17 @@ module Api
 
       page_dict = pagination_dict(filtered_assets)
 
-      return render(plain: page_dict[:total_count]) if show_count
-
-      render json: filtered_assets,
-             root: Asset.model_name.plural,
-             adapter: :json,
-             meta: assets_meta.merge(
-               count: page_dict[:total_count],
-               pagination: page_dict,
-             )
+      if show_count
+        render(plain: page_dict[:total_count])
+      else
+        render json: filtered_assets,
+               root: Asset.model_name.plural,
+               adapter: :json,
+               meta: assets_meta.merge(
+                 count: page_dict[:total_count],
+                 pagination: page_dict,
+               )
+      end
     end
 
     def asset_params

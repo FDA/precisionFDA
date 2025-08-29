@@ -34,7 +34,7 @@
   end
 
   g.column name: 'Created', attribute: 'created_at', auto_reload: true, filter_type: :standard do |analysis|
-    analysis.created_at.to_s(:db)
+    analysis.created_at.to_formatted_s(:db)
   end
 
   g.column name: 'Terminate' do |analysis|

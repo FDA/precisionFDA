@@ -16,7 +16,7 @@ class ChallengeResource < ApplicationRecord
   include Auditor
 
   belongs_to :challenge
-  belongs_to :user_file, dependent: :destroy
+  belongs_to :user_file, foreign_key: :user_file_id, dependent: :destroy
   belongs_to :user
 
   store :meta, accessors: [], coder: JSON
@@ -53,4 +53,5 @@ class ChallengeResource < ApplicationRecord
   def self.from_challenge(challenge_id)
     where(challenge_id: challenge_id)
   end
+
 end

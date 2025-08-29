@@ -13,12 +13,12 @@
         <li class="list-group-item list-group-item-transparent-bg">
           <h5 class="list-group-item-heading">Starts</h5>
           <h5 class="list-group-item-text">
-            <%= challenge.start_at.to_s(:human) %>
+            <%= challenge.start_at.to_formatted_s(:human) %>
           </h5>
         </li>
         <li class="list-group-item list-group-item-transparent-bg">
           <h5 class="list-group-item-heading">Ends</h5>
-          <h5 class="list-group-item-text"><%= challenge.end_at.to_s(:human) %></h5>
+          <h5 class="list-group-item-text"><%= challenge.end_at.to_formatted_s(:human) %></h5>
         </li>
       </ul>
       <% if challenge.active? %>
