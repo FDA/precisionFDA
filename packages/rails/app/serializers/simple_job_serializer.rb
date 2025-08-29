@@ -10,6 +10,7 @@ class SimpleJobSerializer < ApplicationSerializer
     :name,
     :app_title,
     :app_uid,
+    :app_active,
     :workflow_uid,
     :duration,
     :duration_in_seconds,

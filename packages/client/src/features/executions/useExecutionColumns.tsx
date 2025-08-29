@@ -44,10 +44,9 @@ export const useExecutionColumns = ({
         const pathname = `${getBasePath(spaceId)}/${rowType}/${row.original.uid}`
 
         return rowType === 'workflows' ? (
-          <StyledLinkCell to={pathname} state={{ from: location.pathname, fromSearch: location.search }}>
-            <NetworkIcon width={14} height={14} />
+          <>
             {row.original.name}
-          </StyledLinkCell>
+          </>
         ) : (
           <StyledLinkCell to={pathname} state={{ from: location.pathname, fromSearch: location.search }}>
             <BoltIcon height={14} />
@@ -93,13 +92,18 @@ export const useExecutionColumns = ({
       filterFn: 'includesString',
       size: 200,
       cell: ({ row }) => {
+        const rowType = row.original.workflow_series_id ? 'workflows' : 'executions'
         const value = row.original.workflow_title
         const spaceId = getSpaceIdFromScope(row.original.scope)
+        const pathname = `${getBasePath(spaceId)}/${rowType}/${row.original.uid}`
         if (value === 'N/A') {
           return value
         }
+        if ( rowType === 'executions'){
+          return
+        }
         return (
-          <StyledLinkCell to={`${getBasePath(spaceId)}/workflows/${row.original.workflow_uid}`}>
+          <StyledLinkCell to={pathname} state={{ from: location.pathname, fromSearch: location.search }}>
             <NetworkIcon height={16} />
             {value}
           </StyledLinkCell>
@@ -141,7 +145,7 @@ export const useExecutionColumns = ({
         }
 
         return (
-          <StyledLinkCell to={`${getBasePath(spaceId)}/apps/${row.original.app_uid}`} $disable={!row.original.app_active}>
+          <StyledLinkCell to={`${getBasePath(spaceId)}/apps/${row.original.app_uid}`} $disable={!row.original.app_active} >
             <CubeIcon height={14} />
             {row.original.app_title}
           </StyledLinkCell>
