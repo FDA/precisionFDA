@@ -5,9 +5,8 @@ module OrgService
 
     # Constructor.
     # @param admin [User] FDA admin.
-    def initialize(admin, mailer)
+    def initialize(admin)
       @admin = admin
-      @mailer = mailer
       @request = nil
     end
 

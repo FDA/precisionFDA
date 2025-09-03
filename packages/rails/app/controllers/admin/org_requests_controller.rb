@@ -28,14 +28,13 @@ module Admin
 
     # Approves leave request.
     def approve_leave_request
-      OrgService::LeaveOrgApprove.new(@context.user, NotificationsMailer).call(@request)
+      OrgService::LeaveOrgApprove.new(@context.user).call(@request)
     end
 
     # Approves dissolve request.
     def approve_dissolve_request
       OrgService::DissolveOrgApprove.new(
         @context.user,
-        NotificationsMailer,
         DIContainer.resolve("orgs.leave_org_request_creator"),
       ).call(@request)
     end
