@@ -46,6 +46,7 @@ export interface SelectionAction extends BaseAction {
 export interface FunctionAction extends BaseAction {
   type?: undefined // explicitly no type for function actions
   func: (arg?: IModal) => void
+  children?: ReactNode
 }
 
 export type Action = ModalAction | RouteAction | LinkAction | SelectionAction | FunctionAction
@@ -54,4 +55,3 @@ export type ActionGroup = {
   actions: Action[]
   title: string
 }
-

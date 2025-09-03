@@ -1,40 +1,41 @@
 import { FilterQuery, SqlEntityManager } from '@mikro-orm/mysql'
 import { Inject, Injectable } from '@nestjs/common'
-import { SpaceCreationProcess } from '@shared/domain/space/create/space-creation.process'
-import { SPACE_TYPE_TO_PROCESS_PROVIDER_MAP } from '@shared/domain/space/create/space-type-to-process-map.provider'
-import {
-  NotFoundError,
-  PermissionError,
-  SpaceNotFoundError,
-  UserNotFoundError,
-} from '@shared/errors'
-import { SpaceRepository } from '@shared/domain/space/space.repository'
-import { Node } from '@shared/domain/user-file/node.entity'
-import { ServiceLogger } from '@shared/logger/decorator/service-logger'
-import { Logger } from 'nestjs-pino'
-import { SPACE_STATE, SPACE_TYPE } from '../space.enum'
-import { UserContext } from '@shared/domain/user-context/model/user-context'
-import { spaceActionPolicy } from '@shared/domain/space/space.action-policy'
+import { PaginatedResult } from '@shared/domain/entity/domain/paginated.result'
 import { SpaceEvent } from '@shared/domain/space-event/space-event.entity'
 import {
   ENTITY_TYPE,
   SPACE_EVENT_ACTIVITY_TYPE,
   SPACE_EVENT_OBJECT_TYPE,
 } from '@shared/domain/space-event/space-event.enum'
-import { UserRepository } from '@shared/domain/user/user.repository'
-import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
-import { Space } from '@shared/domain/space/space.entity'
-import { CreateSpaceDTO } from '@shared/domain/space/dto/create-space.dto'
-import { UpdateSpaceDTO } from '@shared/domain/space/dto/update-space.dto'
-import { User } from '@shared/domain/user/user.entity'
 import { SpaceMembership } from '@shared/domain/space-membership/space-membership.entity'
-import { SpacePaginationDTO } from '@shared/domain/space/dto/space-pagination.dto'
-import { SpaceListItemDTO } from '@shared/domain/space/dto/space-list-item.dto'
-import { PaginatedResult } from '@shared/domain/entity/domain/paginated.result'
-import { SpaceGroupService } from '@shared/domain/space/service/space-group.service'
-import { SpaceGroupDTO } from '@shared/domain/space/dto/space-group.dto'
-import { CreateSpaceGroupDTO } from '@shared/domain/space/dto/create-space-group.dto'
 import { SPACE_MEMBERSHIP_ROLE } from '@shared/domain/space-membership/space-membership.enum'
+import { SpaceMembershipRepository } from '@shared/domain/space-membership/space-membership.repository'
+import { SpaceCreationProcess } from '@shared/domain/space/create/space-creation.process'
+import { SPACE_TYPE_TO_PROCESS_PROVIDER_MAP } from '@shared/domain/space/create/space-type-to-process-map.provider'
+import { CreateSpaceGroupDTO } from '@shared/domain/space/dto/create-space-group.dto'
+import { CreateSpaceDTO } from '@shared/domain/space/dto/create-space.dto'
+import { SpaceGroupDTO } from '@shared/domain/space/dto/space-group.dto'
+import { SpaceListItemDTO } from '@shared/domain/space/dto/space-list-item.dto'
+import { SpacePaginationDTO } from '@shared/domain/space/dto/space-pagination.dto'
+import { UpdateSpaceDTO } from '@shared/domain/space/dto/update-space.dto'
+import { SpaceGroupService } from '@shared/domain/space/service/space-group.service'
+import { spaceActionPolicy } from '@shared/domain/space/space.action-policy'
+import { Space } from '@shared/domain/space/space.entity'
+import { SpaceRepository } from '@shared/domain/space/space.repository'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { Node } from '@shared/domain/user-file/node.entity'
+import { User } from '@shared/domain/user/user.entity'
+import { UserRepository } from '@shared/domain/user/user.repository'
+import {
+  NotFoundError,
+  PermissionError,
+  SpaceNotFoundError,
+  UserNotFoundError,
+} from '@shared/errors'
+import { ServiceLogger } from '@shared/logger/decorator/service-logger'
+import { StringUtils } from '@shared/utils/string.utils'
+import { Logger } from 'nestjs-pino'
+import { SPACE_STATE, SPACE_TYPE } from '../space.enum'
 
 type SpaceFilter = FilterQuery<Space> & {
   spaceMemberships?: {
@@ -451,7 +452,10 @@ export class SpaceService {
         .split(',')
         .map((t) => t.trim())
         .filter(Boolean)
-      const likeConditions = cleanedTags.map((tag) => ({ name: { $like: `%${tag}%` } }))
+      const likeConditions = cleanedTags.map((tag) => {
+        const safePattern = StringUtils.escapeRegExp(tag)
+        return { name: new RegExp(safePattern, 'i') }
+      })
       where.taggings = { tag: { $or: likeConditions } }
     }
 

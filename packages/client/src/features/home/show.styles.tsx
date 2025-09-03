@@ -135,14 +135,19 @@ export const HomeLoader = styled(Loader)`
   justify-self: center;
   padding: 20px;
 `
-export const StyledActionsButton = styled(Button)`
+export const StyledActionsButton = styled(Button)<{ disabled?: boolean }>`
   gap: 6px;
+  ${({ disabled }) =>
+    disabled &&
+    css`
+      cursor: not-allowed !important;
+    `}
 `
 
 export const ActionsButton = React.forwardRef(({ label = 'Actions', ...props }: any, ref) => (
-    <StyledActionsButton data-variant="primary" ref={ref} {...props}>
-      {label} <ArrowIcon />
-    </StyledActionsButton>
+  <StyledActionsButton data-variant="primary" ref={ref} {...props}>
+    {label} <ArrowIcon />
+  </StyledActionsButton>
 ))
 
 ActionsButton.displayName = 'ActionsButton'

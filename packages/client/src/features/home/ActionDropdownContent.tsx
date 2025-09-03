@@ -5,18 +5,18 @@ import { CheckIcon } from '../../components/icons/CheckIcon'
 import { NavLink } from '../../components/NavLink'
 import { CloudResourcesConditionType } from '../../hooks/useCloudResourcesCondition'
 import { colors } from '../../styles/theme'
-import { 
-  Action, 
-  ActionGroup, 
+import {
+  Action,
+  ActionGroup,
+  FunctionAction,
+  LinkAction as LinkActionType,
   Link as LinkType,
   ModalAction,
   RouteAction,
-  LinkAction as LinkActionType,
   SelectionAction,
-  FunctionAction,
 } from './action-types'
 
-export const StyledActionItem = styled.li<{ disabled?: boolean, selected?: boolean }>`
+export const StyledActionItem = styled.li<{ disabled?: boolean; selected?: boolean }>`
   margin: 0;
   list-style: none;
   color: var(--c-text-700);
@@ -40,7 +40,9 @@ export const StyledActionItem = styled.li<{ disabled?: boolean, selected?: boole
         color: var(--c-dropdown-menu-text-disabled);
       }
     `}
-  ${({ selected }) => selected && css`
+  ${({ selected }) =>
+    selected &&
+    css`
       font-weight: 600;
     `}
   &:hover {
@@ -139,11 +141,7 @@ const LinkAction = ({
   const url = typeof link === 'string' ? link : link.url
   const method = typeof link === 'string' ? 'GET' : link.method
   return cloudResourcesConditionType ? (
-    <CloudResourcesConditionalAnchor
-      href={url}
-      data-turbolinks="false"
-      conditionType={cloudResourcesConditionType}
-    >
+    <CloudResourcesConditionalAnchor href={url} data-turbolinks="false" conditionType={cloudResourcesConditionType}>
       {children}
     </CloudResourcesConditionalAnchor>
   ) : (
@@ -155,29 +153,20 @@ const LinkAction = ({
 
 const ActionItem = ({ action }: { action: Action }) => {
   const isDisabled = action?.isDisabled ?? false
-  
+
   switch (action?.type) {
     case 'route': {
       const routeAction = action as RouteAction
       return (
         <StyledActionItem key={action.name} disabled={isDisabled}>
-          {isDisabled ? (
-            <span>{action.name}</span>
-          ) : (
-            <NavLink to={routeAction.to}>
-              {action.name}
-            </NavLink>
-          )}
+          {isDisabled ? <span>{action.name}</span> : <NavLink to={routeAction.to}>{action.name}</NavLink>}
         </StyledActionItem>
       )
     }
     case 'link': {
       const linkAction = action as LinkActionType
       return (
-        <StyledActionItem
-          key={action.name}
-          disabled={isDisabled}
-        >
+        <StyledActionItem key={action.name} disabled={isDisabled}>
           <LinkAction
             disabled={isDisabled}
             link={linkAction.link}
@@ -191,7 +180,7 @@ const ActionItem = ({ action }: { action: Action }) => {
     case 'selection': {
       const selectionAction = action as SelectionAction
       return (
-        <StyledActionItem 
+        <StyledActionItem
           key={action.name}
           onClick={() => {
             if (!isDisabled) {
@@ -213,11 +202,7 @@ const ActionItem = ({ action }: { action: Action }) => {
     case 'modal': {
       const modalAction = action as ModalAction
       return (
-        <StyledActionItem
-          key={action.name}
-          onClick={() => !isDisabled && modalAction.func()}
-          disabled={isDisabled}
-        >
+        <StyledActionItem key={action.name} onClick={() => !isDisabled && modalAction.func()} disabled={isDisabled}>
           {action.name}
         </StyledActionItem>
       )
@@ -227,25 +212,25 @@ const ActionItem = ({ action }: { action: Action }) => {
       return (
         <StyledActionItem
           key={action.name}
-          onClick={() => !isDisabled && functionAction.func()}
+          onClick={(e: React.MouseEvent) => {
+            e.preventDefault()
+            e.stopPropagation()
+            if (!isDisabled) {
+              functionAction.func()
+            }
+          }}
           disabled={isDisabled}
         >
-          {action.name}
+          {functionAction?.children || action.name}
         </StyledActionItem>
       )
     }
   }
 }
 
-export function ActionsDropdownContent({
-  actions,
-  message,
-}: {
-  actions: Action[]
-  message?: React.ReactNode
-}) {
+export function ActionsDropdownContent({ actions, message }: { actions: Action[]; message?: React.ReactNode }) {
   const visibleActions = actions.filter(action => !action.shouldHide)
-  
+
   return (
     <ActionMenu>
       {message && <StyledActionsMessage>{message}</StyledActionsMessage>}
@@ -256,11 +241,7 @@ export function ActionsDropdownContent({
   )
 }
 
-export function ActionsDropdownGroupContent({
-  content,
-}: {
-  content: ActionGroup[]
-}) {
+export function ActionsDropdownGroupContent({ content }: { content: ActionGroup[] }) {
   return (
     <GroupActionMenu>
       {content.map((item, index) => {

@@ -96,7 +96,7 @@ export const DescriptionText = styled.div`
 `
 
 export const SpaceHeaderTitle = styled.div`
-  font-size: 24px;
+  font-size: 28px;
   font-weight: 600;
   color: var(--c-text-700);
   margin: auto 0;

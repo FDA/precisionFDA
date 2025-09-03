@@ -7,11 +7,11 @@ import { DropdownMenu, PopperContainer } from './styles'
 
 export type DropdownChildProps = {
   style: React.CSSProperties
-  ref: React.RefObject<HTMLElement|null>
-  onClick: () => void
+  ref: React.RefObject<HTMLElement | HTMLButtonElement | null>
+  onClick: (e?: React.MouseEvent) => void
   onMouseEnter: () => void
   onMouseLeave: () => void
-  $isActive: boolean,
+  $isActive: boolean
 }
 
 export const DropdownNext: FC<{
@@ -20,13 +20,7 @@ export const DropdownNext: FC<{
   trigger?: 'click' | 'hover'
   children?: (props: DropdownChildProps, actions: { hide: () => void }) => React.ReactNode
   content: (props: DropdownChildProps, actions: { hide: () => void }) => React.ReactNode
-}> = ({
-  forceShowPopper,
-  trigger = 'hover',
-  content,
-  children,
-  placement = 'bottom-end',
-}) => {
+}> = ({ forceShowPopper, trigger = 'hover', content, children, placement = 'bottom-end' }) => {
   const [showPopper, setShowPopper] = useState(false)
   useKeyPress('Escape', () => setShowPopper(false))
 
@@ -36,37 +30,37 @@ export const DropdownNext: FC<{
   // the ref for the arrow must be a callback ref
   const [arrowRef, setArrowRef] = useState(null)
 
-  const { styles, attributes } = usePopper(
-    buttonRef.current,
-    popperRef.current,
-    {
-      placement,
-      modifiers: [
-        {
-          name: 'arrow',
-          options: {
-            element: arrowRef,
-          },
+  const { styles, attributes } = usePopper(buttonRef.current, popperRef.current, {
+    placement,
+    modifiers: [
+      {
+        name: 'arrow',
+        options: {
+          element: arrowRef,
         },
-      ],
-    },
-  )
+      },
+    ],
+  })
 
   const handleMouseEnter = () => trigger === 'hover' && setShowPopper(true)
   const handleMouseLeave = () => trigger === 'hover' && setShowPopper(false)
 
   return (
     <div ref={clickRef} style={{ display: 'contents' }}>
-      {children && children({
-        style: { cursor: 'pointer' },
-        ref: buttonRef,
-        onClick: () => trigger === 'click' && setShowPopper(!showPopper), // outside only
-        onMouseEnter: handleMouseEnter,
-        onMouseLeave: handleMouseLeave,
-        $isActive: showPopper,
-      }, {
-        hide: () => setShowPopper(false),
-      })}
+      {children &&
+        children(
+          {
+            style: { cursor: 'pointer' },
+            ref: buttonRef,
+            onClick: () => trigger === 'click' && setShowPopper(!showPopper), // outside only
+            onMouseEnter: handleMouseEnter,
+            onMouseLeave: handleMouseLeave,
+            $isActive: showPopper,
+          },
+          {
+            hide: () => setShowPopper(false),
+          },
+        )}
       {forceShowPopper ||
         (showPopper && (
           <PopperContainer
@@ -78,15 +72,17 @@ export const DropdownNext: FC<{
           >
             <DropdownMenu>
               <div ref={setArrowRef as React.LegacyRef<HTMLDivElement>} style={styles.arrow} id="arrow" />
-              {content({
-                style: { cursor: 'pointer' },
-                ref: buttonRef,
-                onClick: () =>
-                  trigger === 'click' && setShowPopper(!showPopper), // outside only
-                onMouseEnter: handleMouseEnter,
-                onMouseLeave: handleMouseLeave,
-                $isActive: showPopper,
-              }, { hide: () => setShowPopper(false) })}
+              {content(
+                {
+                  style: { cursor: 'pointer' },
+                  ref: buttonRef,
+                  onClick: () => trigger === 'click' && setShowPopper(!showPopper), // outside only
+                  onMouseEnter: handleMouseEnter,
+                  onMouseLeave: handleMouseLeave,
+                  $isActive: showPopper,
+                },
+                { hide: () => setShowPopper(false) },
+              )}
             </DropdownMenu>
           </PopperContainer>
         ))}

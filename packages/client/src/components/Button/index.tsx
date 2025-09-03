@@ -154,6 +154,23 @@ export const TransparentButton = styled(Button)`
   }
 `
 
+export const IconButton = styled(TransparentButton)`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  min-width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  &:active {
+    top: 0;
+  }
+  &:hover,
+  &:focus {
+    background-color: rgba(0, 0, 0, 0.05);
+  }
+`
+
 export const SwitchButton = styled.div`
   box-sizing: content-box !important;
   display: flex;

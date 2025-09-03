@@ -1,3 +1,8 @@
+export interface SpaceGroupFormData {
+  name: string
+  description: string
+}
+
 export interface ISpaceGroupSpace {
   id: number
   name: string

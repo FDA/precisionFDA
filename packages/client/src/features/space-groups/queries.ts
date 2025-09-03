@@ -1,7 +1,7 @@
-import { AxiosError } from 'axios'
 import { useQuery } from '@tanstack/react-query'
-import { ISpaceGroup } from './spaceGroups.types'
-import { spaceGroupByIdRequest } from './spaceGroups.api'
+import { AxiosError } from 'axios'
+import { spaceGroupByIdRequest } from './api'
+import { ISpaceGroup } from './types'
 
 export const useSpaceGroupByIdQuery = (id: number | string | undefined) => {
   return useQuery<ISpaceGroup, AxiosError>({

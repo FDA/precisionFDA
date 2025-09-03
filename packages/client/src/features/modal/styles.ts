@@ -147,6 +147,15 @@ export const StyledModalScroll = styled(ModalScroll)`
   padding-left: 12px;
 `
 
+export const ModalScrollPadding = styled(ModalScroll)`
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-left: var(--modal-padding-LR);
+  padding-top: var(--modal-padding-TB);
+  padding-bottom: var(--modal-padding-TB);
+`
+
 export const StyledModalContent = styled.div`
   padding: 1rem;
   max-width: 600px;
