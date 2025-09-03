@@ -1,17 +1,11 @@
 require "rails_helper"
 
 describe OrgService::LeaveOrgApprove do
-  subject(:service) { described_class.new(admin, mailer) }
+  subject(:service) { described_class.new(admin) }
 
-  let(:mailer) { double }
-  let(:mail) { double }
   let(:admin) { build(:user) }
   let(:request) { build(:org_action_request_leave) }
   let(:remove_request) { build(:org_action_request_remove_member) }
-
-  before do
-    allow(mail).to receive(:deliver_now!).and_return(nil)
-  end
 
   context "when admin is not FDA admin" do
     before do
