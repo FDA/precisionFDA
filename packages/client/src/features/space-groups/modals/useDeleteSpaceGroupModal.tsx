@@ -1,17 +1,17 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { isAxiosError } from 'axios'
 import React from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import styled from 'styled-components'
-import { ISpaceGroup } from './spaceGroups.types'
-import { InfoCircleIcon } from '../../components/icons/InfoCircleIcon'
-import { useModal } from '../modal/useModal'
-import { ModalHeaderTop, ModalNext } from '../modal/ModalNext'
-import { ButtonRow, Footer } from '../modal/styles'
-import { Loader } from '../../components/Loader'
-import { Button } from '../../components/Button'
-import { useNavigate } from 'react-router-dom'
-import { deleteSpaceGroupRequest } from './spaceGroups.api'
-import { isAxiosError } from 'axios'
+import { Button } from '../../../components/Button'
+import { InfoCircleIcon } from '../../../components/icons/InfoCircleIcon'
+import { Loader } from '../../../components/Loader'
+import { ModalHeaderTop, ModalNext } from '../../modal/ModalNext'
+import { ButtonRow, Footer } from '../../modal/styles'
+import { useModal } from '../../modal/useModal'
+import { deleteSpaceGroupRequest } from '../api'
+import { ISpaceGroup } from '../types'
 
 const Wrapper = styled.div`
   display: flex;
@@ -60,25 +60,12 @@ const DeleteSpaceGroup = ({ spaceGroup }: { spaceGroup: ISpaceGroup }) => {
   )
 }
 
-export const useDeleteSpaceGroupModal = ({
-   spaceGroup,
- }: {
-  spaceGroup?: ISpaceGroup
-}) => {
+export const useDeleteSpaceGroupModal = ({ spaceGroup }: { spaceGroup: ISpaceGroup }) => {
   const queryClient = useQueryClient()
+  const [searchParams, setSearchParams] = useSearchParams()
   const { isShown, setShowModal } = useModal()
-  const navigate = useNavigate()
 
   const mutation = useMutation({ mutationFn: (id: number) => deleteSpaceGroupRequest(id) })
-
-  // Fallback
-  if (!spaceGroup) {
-    return {
-      modalComp: <></>,
-      setShowModal,
-      isShown,
-    }
-  }
 
   const handleSubmit = async () => {
     try {
@@ -91,7 +78,12 @@ export const useDeleteSpaceGroupModal = ({
       queryClient.invalidateQueries({
         queryKey: ['space-groups', spaceGroup.id],
       })
-      navigate('/spaces')
+      const currentGroupId = searchParams.get('spaceGroupId')
+      if (currentGroupId === String(spaceGroup.id)) {
+        const newParams = new URLSearchParams(searchParams.toString())
+        newParams.delete('spaceGroupId')
+        setSearchParams(newParams)
+      }
     } catch (err: unknown) {
       if (isAxiosError(err)) {
         toast.error(`Deleting of space group ${spaceGroup.name} has failed due to: ${err?.response?.data?.error?.message}`)
@@ -102,25 +94,13 @@ export const useDeleteSpaceGroupModal = ({
   }
 
   const modalComp = (
-    <ModalNext
-      id="delete-space-group"
-      data-testid="delete-space-group"
-      isShown={isShown}
-      hide={() => setShowModal(false)}
-    >
-      <ModalHeaderTop
-        disableClose={false}
-        headerText="Delete Space Group"
-        hide={() => setShowModal(false)}
-      />
+    <ModalNext id="delete-space-group" data-testid="delete-space-group" isShown={isShown} hide={() => setShowModal(false)}>
+      <ModalHeaderTop disableClose={false} headerText="Delete Space Group" hide={() => setShowModal(false)} />
       <DeleteSpaceGroup spaceGroup={spaceGroup} />
       <Footer>
         <ButtonRow>
           {mutation.isPending && <Loader />}
-          <Button
-            onClick={() => setShowModal(false)}
-            disabled={mutation.isPending}
-          >
+          <Button onClick={() => setShowModal(false)} disabled={mutation.isPending}>
             Cancel
           </Button>
           <Button data-variant="warning" onClick={handleSubmit} disabled={mutation.isPending}>

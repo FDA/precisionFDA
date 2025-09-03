@@ -1,16 +1,14 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable max-classes-per-file */
-import React, { MouseEvent, TouchEvent } from 'react'
 import {
+  DragOverlay,
   MouseSensor as LibMouseSensor,
   TouchSensor as LibTouchSensor,
   useDraggable,
   useDroppable,
-  DragOverlay,
 } from '@dnd-kit/core'
 import { snapCenterToCursor } from '@dnd-kit/modifiers'
-import { useSortable } from '@dnd-kit/sortable'
-import { CSS } from '@dnd-kit/utilities'
+import React, { MouseEvent, TouchEvent } from 'react'
 import styled, { css } from 'styled-components'
 import { pluralize } from '../../utils/formatting'
 
@@ -70,12 +68,14 @@ export interface DroppableProps {
   style?: Record<string, string>
 }
 
-const Component = styled.tr<{$isOver?: boolean }>`
-  ${({ $isOver }) => $isOver && css`
-    td {
-      background-color: var(--highlight-50) !important;
-    }
-  `}
+const Component = styled.tr<{ $isOver?: boolean }>`
+  ${({ $isOver }) =>
+    $isOver &&
+    css`
+      td {
+        background-color: var(--highlight-50) !important;
+      }
+    `}
 `
 
 export const Draggable: React.FC<DraggableProps> = ({ as, id, children, style = {}, numSelected = 0, ...rest }) => {
@@ -90,20 +90,22 @@ export const Draggable: React.FC<DraggableProps> = ({ as, id, children, style = 
     <Component as={as} ref={setNodeRef} {...listeners} {...attributes} {...rest} style={dstyle}>
       {children}
       {isDragging && (
-        <DragOverlay modifiers={[snapCenterToCursor]}>
-          <div style={bubbleOverlayStyle}>
-            <div style={bubbleStyle}>
-              Moving {numSelected} {pluralize('item', numSelected)}
+        <td>
+          <DragOverlay modifiers={[snapCenterToCursor]}>
+            <div style={bubbleOverlayStyle}>
+              <div style={bubbleStyle}>
+                Moving {numSelected} {pluralize('item', numSelected)}
+              </div>
             </div>
-          </div>
-        </DragOverlay>
+          </DragOverlay>
+        </td>
       )}
     </Component>
   )
 }
 
-export const Droppable: React.FC<DraggableProps> = ({ as, id, name, children, numSelected, ...rest }) => {  
-  const { setNodeRef, isOver } = useDroppable({ id, data: { name }})
+export const Droppable: React.FC<DraggableProps> = ({ as, id, name, children, numSelected, ...rest }) => {
+  const { setNodeRef, isOver } = useDroppable({ id, data: { name } })
 
   return (
     <Component as={as} ref={setNodeRef} {...rest} $isOver={isOver}>

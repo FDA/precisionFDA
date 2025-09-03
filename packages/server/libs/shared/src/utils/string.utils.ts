@@ -21,8 +21,19 @@ export class StringUtils {
     return { lower, upper }
   }
 
-  static parseNumberRange(range: string) {
+  static parseNumberRange(
+    range: string,
+  ): { lower: number | undefined; upper: number | undefined } | undefined {
+    if (range === ',') {
+      return { lower: undefined, upper: undefined }
+    }
     const [lower, upper] = range.split(',').map((value) => (value ? parseFloat(value) : undefined))
     return { lower, upper }
+  }
+
+  // Escape special characters for use in a regular expression
+  // Based on Regex.Escape in .NET: https://learn.microsoft.com/en-us/dotnet/api/system.text.regularexpressions.regex.escape?view=net-9.0
+  static escapeRegExp(str: string): string {
+    return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
   }
 }

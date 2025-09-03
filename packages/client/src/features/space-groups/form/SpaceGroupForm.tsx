@@ -1,37 +1,42 @@
 import { ErrorMessage } from '@hookform/error-message'
 import { yupResolver } from '@hookform/resolvers/yup'
+import { AxiosError } from 'axios'
 import React, { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
-import { InputError } from '../../../components/form/styles'
-import { FieldGroup } from '../../../components/form/FieldGroup'
-import { InputText } from '../../../components/InputText'
-import { Loader } from '../../../components/Loader'
-import { Row, StyledForm } from '../../spaces/form/styles'
 import { Button } from '../../../components/Button'
-import { spaceGroupValidationSchema } from './helpers'
+import { FieldGroup } from '../../../components/form/FieldGroup'
+import { InputError } from '../../../components/form/styles'
+import { InputText, InputTextArea } from '../../../components/InputText'
+import { Loader } from '../../../components/Loader'
 import { ApiErrorResponse } from '../../home/types'
-import { AxiosError } from 'axios'
-
-export interface SpaceGroupCreateFormData {
-  name: string
-  description: string
-}
+import { Footer, StyledForm, StyledModalScroll } from '../../modal/styles'
+import { SpaceGroupFormData } from '../types'
+import { spaceGroupValidationSchema } from './helpers'
 
 export interface ISpaceGroupForm {
-  defaultValues?: Partial<SpaceGroupCreateFormData>
-  onSubmit: (a: SpaceGroupCreateFormData) => Promise<void>
+  defaultValues?: Partial<SpaceGroupFormData>
+  onSubmit: (data: SpaceGroupFormData) => Promise<void>
   isSaving?: boolean
-  isSubmitting: boolean,
+  isSubmitting: boolean
   mutationErrors?: AxiosError<ApiErrorResponse>
+  action: 'create' | 'edit'
+  setShowModal: (val: boolean) => void
 }
 
-export const SpaceGroupForm = ({ defaultValues, onSubmit, isSaving = false, isSubmitting, mutationErrors }: ISpaceGroupForm) => {
+export const SpaceGroupForm = ({
+  defaultValues,
+  onSubmit,
+  isSaving = false,
+  isSubmitting,
+  mutationErrors,
+  action,
+}: ISpaceGroupForm) => {
   const {
     register,
     handleSubmit,
     formState: { errors },
     setError,
-  } = useForm<SpaceGroupCreateFormData>({
+  } = useForm<SpaceGroupFormData>({
     mode: 'onBlur',
     resolver: yupResolver(spaceGroupValidationSchema),
     defaultValues: defaultValues || {
@@ -53,22 +58,30 @@ export const SpaceGroupForm = ({ defaultValues, onSubmit, isSaving = false, isSu
   delete submitErrors['root']
 
   return (
-    <StyledForm onSubmit={handleSubmit(onSubmit)}>
-      <FieldGroup label="Name" required>
-        <InputText {...register('name', { required: 'Name is required.' })} disabled={isSubmitting} />
-        <ErrorMessage errors={errors} name="name" render={({ message }) => <InputError>{message}</InputError>} />
-      </FieldGroup>
-      <FieldGroup label="Description" required>
-        <InputText {...register('description')} disabled={isSubmitting} />
-        <ErrorMessage errors={errors} name="description" render={({ message }) => <InputError>{message}</InputError>} />
-      </FieldGroup>
-
-      <Row>
-        <Button data-variant="primary" disabled={Object.keys(submitErrors).length > 0 || isSubmitting || isSaving} type="submit">
-          Create Space Group
+    <>
+      <StyledModalScroll>
+        <StyledForm id={`${action}-space-group-form`} onSubmit={handleSubmit(onSubmit)}>
+          <FieldGroup label="Name" required>
+            <InputText {...register('name', { required: 'Name is required.' })} disabled={isSubmitting} />
+            <ErrorMessage errors={errors} name="name" render={({ message }) => <InputError>{message}</InputError>} />
+          </FieldGroup>
+          <FieldGroup label="Description" required>
+            <InputTextArea {...register('description')} disabled={isSubmitting} />
+            <ErrorMessage errors={errors} name="description" render={({ message }) => <InputError>{message}</InputError>} />
+          </FieldGroup>
+        </StyledForm>
+      </StyledModalScroll>
+      <Footer>
+        <Button
+          data-variant="primary"
+          form={`${action}-space-group-form`}
+          disabled={Object.keys(submitErrors).length > 0 || isSubmitting || isSaving}
+          type="submit"
+        >
+          {action === 'create' ? 'Create' : 'Edit'} Space Group
         </Button>
         {isSubmitting && <Loader />}
-      </Row>
-    </StyledForm>
+      </Footer>
+    </>
   )
 }

@@ -1,9 +1,9 @@
 import axios from 'axios'
-import { ISpaceGroup } from './spaceGroups.types'
 import { IdResponse } from '../discussions/api'
+import { ISpaceGroup } from './spaceGroups.types'
 
 export interface SpaceGroupPayload {
-  id?: number,
+  id?: number
   name: string
   description: string
 }
@@ -24,12 +24,12 @@ export async function spaceGroupsListRequest(): Promise<ISpaceGroup[]> {
   return axios.get('/api/v2/space-groups').then(res => res.data)
 }
 
-export async function spaceGroupByIdRequest(id: number|string) {
+export async function spaceGroupByIdRequest(id: number | string) {
   return axios.get(`/api/v2/space-groups/${id}`).then(res => res.data as ISpaceGroup)
 }
 
-export async function addSpaces(spaceClusterId: number, spaceIds: number[]): Promise<void> {
-  return axios.post(`/api/v2/space-groups/${spaceClusterId}/spaces`, { spaceIds }).then(res => res.data)
+export async function addSpacesToSpaceGroup(spaceGroupId: number, spaceIds: number[]): Promise<void> {
+  return axios.post(`/api/v2/space-groups/${spaceGroupId}/spaces`, { spaceIds }).then(res => res.data)
 }
 
 export async function removeSpaces(spaceGroupId: number, spaceIds: number[]): Promise<void> {

@@ -1,7 +1,7 @@
 import { Column, ColumnDef } from '@tanstack/react-table'
 import React, { useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import styled, { css } from 'styled-components'
+import styled from 'styled-components'
 import { SwitchButton } from '../../components/Button'
 import SelectFilter, { selectFilterFn } from '../../components/Table/components/SelectFilter'
 import { selectColumnDef } from '../../components/Table/selectColumnDef'
@@ -11,12 +11,12 @@ import { GovernmentIcon } from '../../components/icons/GovernmentIcon'
 import { PrivateIcon } from '../../components/icons/PrivateIcon'
 import { ProfileIcon } from '../../components/icons/ProfileIcon'
 import { UsersIcon } from '../../components/icons/UsersIcon'
+import { formatDateOnly } from '../../utils/formatting'
 import { FdaRestrictedIcon } from './FdaRestrictedIcon'
 import { ProtectedIcon } from './ProtectedIcon'
 import { SpaceTypeName } from './common'
 import { ISpaceV2 } from './spaces.types'
 import { useSpaceHiddenMutation } from './useSpaceHiddenMutation'
-import { formatDateOnly } from '../../utils/formatting'
 
 const SpaceHiddenToggle = ({ id, hidden }: { id: number; hidden: boolean }) => {
   const spaceHiddenMutation = useSpaceHiddenMutation()
@@ -149,7 +149,7 @@ export const useSpacesColumns = (): ColumnDef<ISpaceV2>[] => {
           <SelectFilter
             column={column}
             options={[
-              { label: 'Groups', option: 'groups' },
+              { label: 'Group', option: 'groups' },
               { label: 'Review', option: 'review' },
               { label: 'Private', option: 'private_type' },
               { label: 'Government', option: 'government' },
@@ -240,7 +240,11 @@ export const useSpacesColumns = (): ColumnDef<ISpaceV2>[] => {
           />
         ),
       },
-      cell: (c) => <div><SpaceHiddenToggle id={c.row.original.id} hidden={c.row.original.hidden} /></div>,
+      cell: c => (
+        <div>
+          <SpaceHiddenToggle id={c.row.original.id} hidden={c.row.original.hidden} />
+        </div>
+      ),
     },
     {
       header: 'Tags',
