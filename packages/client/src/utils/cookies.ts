@@ -1,4 +1,4 @@
-import { fromUnixTime } from 'date-fns/esm'
+import { fromUnixTime } from 'date-fns'
 
 export function getCookie(name: string) {
   const cookieArr = document.cookie.split(';')

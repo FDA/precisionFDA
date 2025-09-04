@@ -144,10 +144,13 @@ export const StyledActionsButton = styled(Button)<{ disabled?: boolean }>`
     `}
 `
 
-export const ActionsButton = React.forwardRef(({ label = 'Actions', ...props }: any, ref) => (
-  <StyledActionsButton data-variant="primary" ref={ref} {...props}>
-    {label} <ArrowIcon />
-  </StyledActionsButton>
-))
+export const ActionsButton = React.forwardRef(({ label = 'Actions', ...props }: any, ref) => {
+  const { active, ...restProps } = props
+  return (
+    <StyledActionsButton data-variant="primary" ref={ref} $active={active} {...restProps}>
+      {label} <ArrowIcon />
+    </StyledActionsButton>
+  )
+})
 
 ActionsButton.displayName = 'ActionsButton'

@@ -1,6 +1,3 @@
-/* eslint-disable no-nested-ternary */
-import { format } from 'date-fns-tz'
-import enUS from 'date-fns/locale/en-US'
 import React from 'react'
 import { Link } from 'react-router-dom'
 import styled from 'styled-components'
@@ -29,6 +26,9 @@ import { CogsIcon } from '../../../components/icons/Cogs'
 import { PencilIcon } from '../../../components/icons/PencilIcon'
 import { ArrowLeftIcon } from '../../../components/icons/ArrowLeftIcon'
 import { ObjectGroupIcon } from '../../../components/icons/ObjectGroupIcon'
+import { format } from 'date-fns'
+import { TZDate } from '@date-fns/tz'
+import { enUS } from 'date-fns/locale/en-US'
 
 const ChallengeActionRow = styled(PageContainer)`
   ${pagePadding}
@@ -137,18 +137,12 @@ export const ChallengeDetailsBanner = ({ challenge, user }: { challenge: Challen
             <StartEnd>
               <ChallengeDateLabel>Starts</ChallengeDateLabel>
               <ChallengeDate $timeStatus={timeStatus}>
-                {format(challenge.startAt, 'MM/dd/yyyy HH:mm:ss z', {
-                  timeZone: userTimeZone,
-                  locale: enUS,
-                })}
+                {format(new TZDate(challenge.startAt, userTimeZone), 'MM/dd/yyyy HH:mm:ss z', { locale: enUS })}
               </ChallengeDate>
 
               <ChallengeDateLabel>Ends</ChallengeDateLabel>
               <ChallengeDate $timeStatus={timeStatus}>
-                {format(challenge.endAt, 'MM/dd/yyyy HH:mm:ss z', {
-                  timeZone: userTimeZone,
-                  locale: enUS,
-                })}
+                {format(new TZDate(challenge.endAt, userTimeZone), 'MM/dd/yyyy HH:mm:ss z', { locale: enUS })}
               </ChallengeDate>
             </StartEnd>
             <ChallengeDateRemaining>

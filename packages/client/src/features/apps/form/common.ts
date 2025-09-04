@@ -162,100 +162,119 @@ export const validationSchema = Yup.object().shape({
   name: Yup.string().required('App Name field is required'),
   scope: Yup.string().optional(),
   title: Yup.string().required('App Title field is required'),
-  release: Yup.string().required('Release field is required').matches(/^(16\.04|20\.04|24\.04)$/, 'Invalid version'),
+  release: Yup.string()
+    .required('Release field is required')
+    .matches(/^(16\.04|20\.04|24\.04)$/, 'Invalid version'),
   readme: Yup.string(),
-  // @ts-expect-error custom validator for unique keys
-  input_spec: Yup.array().unique('name', 'Name must be unique').of(
-    Yup.object().shape({
-      class: Yup.string()
-        .oneOf(['string', 'file', 'int', 'float', 'boolean', 'array:file', 'array:string', 'array:int', 'array:float'])
-        .required('Class field is required'),
-      default: Yup.mixed().when(['class', 'choices'], {
-        is: () => true,
-        then: (schema) => {
-          return schema.test(
-            'val-is-not-in-choices',
-            'One of the values is not in the choices list',
-            function(value) {
-              const { choices } = this.parent
-              if(value && choices && Array.isArray(value)) {
-                return areAllAValuesInB(value, choices)
-              }
-              return true
-            },
-          ).test(
-            'validate-by-class',
-            'Invalid value for the selected class',
-            function(value) {
-              const { class: classVal } = this.parent
-              if(classVal === 'array:string') {
-                if (emptyOrNull(value)) return true
-                return Array.isArray(value)
-              }
-              if(classVal === 'string') return true
-              if(classVal === 'boolean') return true
-              if(classVal === 'array:file') {
+  input_spec: Yup.array()
+    // @ts-expect-error custom validator for unique keys
+    .unique('name', 'Name must be unique')
+    .of(
+      Yup.object().shape({
+        class: Yup.string()
+          .oneOf(['string', 'file', 'int', 'float', 'boolean', 'array:file', 'array:string', 'array:int', 'array:float'])
+          .required('Class field is required'),
+        default: Yup.mixed().when(['class', 'choices'], {
+          is: () => true,
+          then: (schema) => {
+            return schema.test(
+              'val-is-not-in-choices',
+              'One of the values is not in the choices list',
+              function(value) {
+                const { choices } = this.parent
+                if(value && choices && Array.isArray(value)) {
+                  return areAllAValuesInB(value, choices)
+                }
                 return true
-              }
-              if(classVal === 'file') {
-                if (!value) return true
-                return !Array.isArray(value) || value.length <= 1
-              }
-              if(classVal === 'array:int') {
-                if (emptyOrNull(value)) return true
-                return Array.isArray(value) && isValidaArrayOfInteger(value)
-              }
-              if(classVal === 'int') {
-                if(emptyOrNull(value)) return true
-                return Array.isArray(value) && value.length === 1 && isIntegerValid(value[0])
-              }
-              if(classVal === 'array:float') {
-                if(emptyOrNull(value)) return true
-                return Array.isArray(value) && isValidaArrayOfFloat(value)
-              }
-              if(classVal === 'float') {
-                if(emptyOrNull(value)) return true
-                return Array.isArray(value) && value.length === 1 && isFloatValid(value[0])
-              }
-              return true
-            },
-          ).optional().nullable()
-        },
-      }),
-      help: Yup.string().optional(),
-      label: Yup.string().optional(),
-      name: IOName,
-      optional: Yup.boolean().optional(),
-      choices: Yup.array().when(['class'], (classVal, schema) => {
-        const noArrayStringClass = classVal.replace('array:', '')
-
-        return schema.test(
-          'is-csv-of-choices',
-          `The field must contain valid comma separated values of ${noArrayStringClass}`,
-          (value: string[]) => {
-            if(noArrayStringClass === 'float') {
-              if(emptyOrNull(value)) return true
-              return isValidaArrayOfFloat(value)
-            }
-            if(noArrayStringClass === 'int') {
-              if(emptyOrNull(value)) return true
-              return isValidaArrayOfInteger(value)
-            }
-            return true
+              },
+            ).test(
+              'validate-by-class',
+              'Invalid value for the selected class',
+              function(val) {
+                const value = val as string[] | null | undefined
+                const { class: classVal } = this.parent
+                if(classVal === 'array:string') {
+                  if (emptyOrNull(value)) return true
+                  return Array.isArray(value)
+                }
+                if(classVal === 'string') return true
+                if(classVal === 'boolean') return true
+                if(classVal === 'array:file') {
+                  return true
+                }
+                if(classVal === 'file') {
+                  if (!value) return true
+                  return !Array.isArray(value) || value.length <= 1
+                }
+                if(classVal === 'array:int') {
+                  if (emptyOrNull(value)) return true
+                  return Array.isArray(value) && isValidaArrayOfInteger(value)
+                }
+                if(classVal === 'int') {
+                  if(emptyOrNull(value)) return true
+                  return Array.isArray(value) && value.length === 1 && isIntegerValid(value[0])
+                }
+                if(classVal === 'array:float') {
+                  if(emptyOrNull(value)) return true
+                  return Array.isArray(value) && isValidaArrayOfFloat(value)
+                }
+                if(classVal === 'float') {
+                  if(emptyOrNull(value)) return true
+                  return Array.isArray(value) && value.length === 1 && isFloatValid(value[0])
+                }
+                return true
+              },
+            ).optional().nullable()
           },
-        ).optional().nullable()
+        }),
+        help: Yup.string().optional(),
+        label: Yup.string().optional(),
+        name: IOName,
+        optional: Yup.boolean().optional(),
+        choices: Yup.array()
+          .transform((value, originalValue) => {
+            if (originalValue === '') return null
+            return value
+          })
+          .when(['class'], ([classVal], schema) => {
+            if (typeof classVal !== 'string') {
+              return schema.optional().nullable()
+            }
+
+            const noArrayStringClass = classVal.replace('array:', '')
+
+            return schema
+              .test(
+                'is-csv-of-choices',
+                `The field must contain valid comma separated values of ${noArrayStringClass}`,
+                (value: string | string[] | null | undefined) => {
+                  if (noArrayStringClass === 'float') {
+                    if (emptyOrNull(value)) return true
+                    return Array.isArray(value) && isValidaArrayOfFloat(value as string[])
+                  }
+                  if (noArrayStringClass === 'int') {
+                    if (emptyOrNull(value)) return true
+                    return Array.isArray(value) && isValidaArrayOfInteger(value as string[])
+                  }
+                  return true
+                },
+              )
+              .optional()
+              .nullable()
+          }),
+        requiredRunInput: Yup.boolean().optional(),
       }),
-      requiredRunInput: Yup.boolean().optional(),
-    }),
-  ),
-  // @ts-expect-error custom validator for unique keys
-  output_spec: Yup.array().unique('name', 'Name must be unique').of(
-    Yup.object().shape({
-      name: IOName,
-      label: Yup.string().optional(),
-      help: Yup.string().optional(),
-    }),
-  ),
+    ),
+  output_spec: Yup.array()
+    // @ts-expect-error custom validator for unique keys
+    .unique('name', 'Name must be unique')
+    .of(
+      Yup.object().shape({
+        name: IOName,
+        label: Yup.string().optional(),
+        help: Yup.string().optional(),
+      }),
+    ),
   internet_access: Yup.boolean().optional(),
   instance_type: Yup.string().required('Instance Type is required'),
   packages: Yup.array().of(Yup.string()).optional(),
