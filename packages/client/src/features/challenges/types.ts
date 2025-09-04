@@ -18,6 +18,8 @@ export interface Challenge {
   meta: string;
   startAt: Date;
   endAt: Date;
+  createdAt: Date;
+  updatedAt: Date;
   status: ChallengeStatus;
   scope: string;
   appUid: string;

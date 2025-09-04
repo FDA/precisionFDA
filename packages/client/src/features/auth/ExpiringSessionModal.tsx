@@ -1,4 +1,4 @@
-import { differenceInSeconds, subSeconds } from 'date-fns/esm'
+import { differenceInSeconds, subSeconds } from 'date-fns'
 import React, { useEffect, useState } from 'react'
 import { Button } from '../../components/Button'
 import { useInterval } from '../../hooks/useInterval'

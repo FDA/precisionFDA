@@ -17,6 +17,8 @@ export class ChallengeDTO {
   preRegistrationUrl: string
   startAt: Date
   endAt: Date
+  createdAt: Date
+  updatedAt: Date
   status: string
   scope: string
   appUid: Uid<'app'>
@@ -48,6 +50,8 @@ export class ChallengeDTO {
       preRegistrationEditorState: challenge.preRegistrationEditorState,
       startAt: challenge.startAt,
       endAt: challenge.endAt,
+      createdAt: challenge.createdAt,
+      updatedAt: challenge.updatedAt,
       status: challenge.status,
       scope: challenge.scope,
       follows,

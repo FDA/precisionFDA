@@ -1,15 +1,15 @@
-import { parseISO } from 'date-fns'
-import { utcToZonedTime, formatInTimeZone } from 'date-fns-tz'
+import { parseISO, format } from 'date-fns'
+import { TZDate } from '@date-fns/tz'
 
-
-const convertDateToUserTime = (date: string): Date => {
+const convertDateToUserTime = (date: string): TZDate => {
   const userTimeZone = (new Intl.DateTimeFormat()).resolvedOptions().timeZone
-  return utcToZonedTime(parseISO(date), userTimeZone)
+  return new TZDate(parseISO(date), userTimeZone)
 }
 
-const dateToInput = (date: Date | number | string) : string => {
-  const userTimeZone = (new Intl.DateTimeFormat()).resolvedOptions().timeZone
-  return formatInTimeZone(date, userTimeZone, 'yyyy-MM-dd HH:mm:ss')
+const dateToInput = (date: Date | number | string): string => {
+  const userTimeZone = new Intl.DateTimeFormat().resolvedOptions().timeZone
+  const zoned = new TZDate(new Date(date), userTimeZone)
+  return format(zoned, 'yyyy-MM-dd HH:mm:ss')
 }
 
 export {

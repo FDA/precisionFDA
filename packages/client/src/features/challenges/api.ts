@@ -50,8 +50,8 @@ export async function challengesRequest(params: ChallengeListParams): Promise<Li
       ...c,
       startAt: convertDateToUserTime(c.startAt),
       endAt: convertDateToUserTime(c.endAt),
-      created_at: convertDateToUserTime(c.created_at),
-      updated_at: convertDateToUserTime(c.updated_at),
+      created_at: convertDateToUserTime(c.createdAt),
+      updated_at: convertDateToUserTime(c.updatedAt),
     })),
   }))
 }

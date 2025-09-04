@@ -1,4 +1,4 @@
-import { format, parseISO } from 'date-fns/esm'
+import { format, parseISO } from 'date-fns'
 import {
   Attachment,
   AttachmentKey,
@@ -6,7 +6,6 @@ import {
   FormAttachments,
   PostAttachments,
 } from './discussions.types'
-
 
 export const typeAttachmentKey = {
   App: 'apps',

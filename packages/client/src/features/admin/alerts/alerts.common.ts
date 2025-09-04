@@ -1,9 +1,9 @@
 import * as Yup from 'yup'
-import { format } from 'date-fns/esm'
-import { utcToZonedTime } from 'date-fns-tz/esm'
+import { format } from 'date-fns'
 import { AlertType } from './alerts.types'
+import { TZDate } from '@date-fns/tz'
 
-export const formatInTimeZone = (date: Date | string, fmt: string, tz: string) => format(utcToZonedTime(date, tz), fmt)
+export const formatInTimeZone = (date: Date | string, fmt: string, tz: string) => format(new TZDate(new Date(date), tz), fmt)
 
 export const alertTypesArray: AlertType[] = ['info', 'warning', 'danger']
 export const alertTypesText = {
