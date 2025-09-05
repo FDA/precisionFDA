@@ -4,6 +4,7 @@ require_relative "../app/middleware/rack/capture_session"
 
 require "logger"
 require "rails/all"
+require "sidekiq/rails"
 
 # Require the gems listed in Gemfile, including any gems
 # you've limited to :test, :development, or :production.
