@@ -25,13 +25,23 @@ const SidebarContainer = styled.div`
   display: flex;
   flex-direction: column;
   position: relative;
-  padding-top: 24px;
+`
+
+const SpaceGroupItemWrapper = styled.div`
+  width: 100%;
+  height: 100%;
+  max-height: 100%;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-gutter: stable;
+  scrollbar-color: var(--c-scrollbar) transparent;
 `
 
 const SpaceGroupItem = styled.div<{ $isActive?: boolean; $isHighlighted?: boolean }>`
   background-color: transparent;
   transition: background-color 0.2s ease;
   cursor: pointer;
+  border-radius: 2px;
   &:hover {
     background-color: var(--tertiary-100);
   }
@@ -52,7 +62,7 @@ const SpaceGroupHeading = styled.div`
   align-items: center;
   justify-content: space-between;
   gap: 4px;
-  padding: 12px 1rem;
+  padding: 12px;
   color: var(--c-text-700);
   h2 {
     font-weight: 600;
@@ -86,7 +96,7 @@ const CaretButton = styled(TransparentButton)`
 const SpaceList = styled.ul`
   list-style: none;
   padding-left: 2rem;
-  margin: 0 0 1rem;
+  padding-bottom: 1rem;
 `
 
 const SpaceItem = styled.li`
@@ -158,9 +168,8 @@ const SpaceGroupTitle = styled.div`
   font-size: 0.875rem;
   font-weight: bold;
   text-transform: uppercase;
-  padding: 0 1rem;
+  padding: 16px 12px;
   color: var(--c-text-500);
-  margin-bottom: 0.5rem;
 
   button {
     width: fit-content;
@@ -286,12 +295,14 @@ const SpaceGroupsSidebar = ({ spaceGroups, isLoading, userCanAdministerSpaceGrou
             </Button>
           )}
         </SpaceGroupTitle>
-        {isLoading && <SpaceGroupsMessage>Loading...</SpaceGroupsMessage>}
-        {!isLoading && !spaceGroups?.length && <SpaceGroupsMessage>No Space group available</SpaceGroupsMessage>}
-        {!isLoading &&
-          spaceGroups?.map(sg => (
-            <SpaceGroupItemRender userCanAdministerSpaceGroups={userCanAdministerSpaceGroups} key={sg.id} spaceGroup={sg} />
-          ))}
+        <SpaceGroupItemWrapper>
+          {isLoading && <SpaceGroupsMessage>Loading...</SpaceGroupsMessage>}
+          {!isLoading && !spaceGroups?.length && <SpaceGroupsMessage>No Space group available</SpaceGroupsMessage>}
+          {!isLoading &&
+            spaceGroups?.map(sg => (
+              <SpaceGroupItemRender userCanAdministerSpaceGroups={userCanAdministerSpaceGroups} key={sg.id} spaceGroup={sg} />
+            ))}
+        </SpaceGroupItemWrapper>
       </SidebarContainer>
       {createSpaceGroupModal}
     </>
