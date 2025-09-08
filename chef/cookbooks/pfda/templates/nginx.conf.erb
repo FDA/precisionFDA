@@ -48,8 +48,9 @@ http {
     server_name <%= @app_domain %>;
     access_log <%= node[:nginx][:log_dir] %>/<%= @app_domain %>-ssl.access.log json_analytics;
 
-    listen 443 ssl http2;
-    listen [::]:443 ssl http2;
+    listen 443 ssl;
+    listen [::]:443 ssl;
+    http2 on;
 
     <%= render 'ssl_settings.conf.erb' %>
 
