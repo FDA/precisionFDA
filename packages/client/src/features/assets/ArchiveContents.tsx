@@ -21,7 +21,7 @@ const Label = styled(Item)`
   font-weight: 300;
 `
 
-export const ArchiveContents = ({ data = [] }: { data: string[] }) => {
+export const ArchiveContents = ({ data = []}: { data: string[] }) => {
   if (!data.length) {
     return <div>No archive contents</div>
   }

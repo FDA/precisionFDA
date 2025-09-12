@@ -2,8 +2,7 @@ export interface Org {
   id: number;
   title: string;
   image_url: string;
-  node_id?: any;
-  public?: any;
+  public?: boolean;
   kind: string;
   position: number;
   created_at: Date;

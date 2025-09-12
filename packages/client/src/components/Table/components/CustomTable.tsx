@@ -29,13 +29,7 @@ type Props<T extends RowData> = {
   spacerWidth?: number
 }
 
-type DnDRowProps = {
-  row: Row<IFile>
-  children: React.ReactNode
-  numSelected?: number
-}
-
-const DnDRow: React.FC<DnDRowProps> = ({ row, numSelected, children }) => {
+const DnDRow = ({ row, numSelected, children }: {row: Row<IFile>, numSelected: number, children: React.ReactNode }) => {
   const isSelected = row.getIsSelected()
 
   let DnDComp = isSelected ? Draggable : 'tr'

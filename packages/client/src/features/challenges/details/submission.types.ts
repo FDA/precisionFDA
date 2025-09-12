@@ -66,7 +66,6 @@ export interface User {
   review_app_developers_org: string
   user_state: string
   expiration: number
-  disable_message?: any
   cloud_resource_settings: CloudResourceSettings
 }
 

@@ -1,5 +1,3 @@
-/* eslint-disable */
-
 export function csvToArray(text: string): string[][] {
   let p = ''
   let row = ['']

@@ -22,7 +22,7 @@ const StyledForm = styled.form`
   flex-direction: column;
   padding-top: 8px;
   border-radius: 6px;
-  border: 1px solid #cbcbcb;
+  border: 1px solid var(--c-layout-border);
 
   ${ButtonRow} {
     align-self: flex-end;

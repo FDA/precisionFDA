@@ -1,8 +1,16 @@
+import { TZDate } from '@date-fns/tz'
+import { format } from 'date-fns-tz'
+import { enUS } from 'date-fns/locale'
 import React from 'react'
 import { Link } from 'react-router-dom'
 import styled from 'styled-components'
 import { Button, OutlineButton } from '../../../components/Button'
 import NavigationBar from '../../../components/NavigationBar/NavigationBar'
+import { PageContainer, pagePadding } from '../../../components/Page/styles'
+import { ArrowLeftIcon } from '../../../components/icons/ArrowLeftIcon'
+import { CogsIcon } from '../../../components/icons/Cogs'
+import { ObjectGroupIcon } from '../../../components/icons/ObjectGroupIcon'
+import { PencilIcon } from '../../../components/icons/PencilIcon'
 import { IUser } from '../../../types/user'
 import { Challenge } from '../types'
 import { getChallengeTimeRemaining, getTimeStatus } from '../util'
@@ -21,14 +29,6 @@ import {
   StartEnd,
   StyledChallengeDetailsBanner,
 } from './styles'
-import { PageContainer, pagePadding } from '../../../components/Page/styles'
-import { CogsIcon } from '../../../components/icons/Cogs'
-import { PencilIcon } from '../../../components/icons/PencilIcon'
-import { ArrowLeftIcon } from '../../../components/icons/ArrowLeftIcon'
-import { ObjectGroupIcon } from '../../../components/icons/ObjectGroupIcon'
-import { format } from 'date-fns'
-import { TZDate } from '@date-fns/tz'
-import { enUS } from 'date-fns/locale/en-US'
 
 const ChallengeActionRow = styled(PageContainer)`
   ${pagePadding}
@@ -79,7 +79,7 @@ export const ChallengeDetailsBanner = ({ challenge, user }: { challenge: Challen
 
   const onClickPreRegistrationButton = () => {
     if (challenge.preRegistrationUrl) {
-      if(window) {
+      if (window) {
         window.open(challenge.preRegistrationUrl || '#', '_blank')!.focus()
       }
     }

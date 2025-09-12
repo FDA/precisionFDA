@@ -60,7 +60,7 @@ export const HomeLabel = ({
   value: React.ReactNode
   state?: string
 }) => {
-  let classes = classnames(
+  const classes = classnames(
     {
       [`home-label--${type}`]: type,
       [`home-label__state-${state}`]: state,

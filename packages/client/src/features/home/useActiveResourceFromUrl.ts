@@ -7,7 +7,7 @@ export const useActiveResourceFromUrl = (area: 'spaces' | 'myhome') => {
   const [activeResource, setActiveResource] = useState<ResourceTypeUrlNames>()
   useEffect(() => {
     const [,,myHomeResource,spacesResource] = location.pathname.split('/')
-    setActiveResource((area === 'spaces' ? spacesResource : myHomeResource) as any)
+    setActiveResource((area === 'spaces' ? spacesResource : myHomeResource) as ResourceTypeUrlNames)
   }, [location])
 
   return [activeResource]

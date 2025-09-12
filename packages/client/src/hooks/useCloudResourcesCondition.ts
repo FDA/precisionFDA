@@ -1,4 +1,3 @@
-/* eslint-disable no-multi-str */
 import axios from 'axios'
 import { useQuery } from '@tanstack/react-query'
 import { toast } from 'react-toastify'

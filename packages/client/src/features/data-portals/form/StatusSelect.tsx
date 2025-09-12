@@ -10,7 +10,7 @@ export const StatusSelect = ({
   value: { label: string; value: string } | null
   onBlur: () => void
   isDisabled: boolean
-  onChange: (v: any) => void
+  onChange: (v: unknown) => void
 }) => {
   const statusOptions = ['open', 'closed']
   const options = statusOptions.map(option => ({

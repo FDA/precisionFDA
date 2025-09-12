@@ -37,9 +37,9 @@ export function usePaginationParams(initialPerPageCount?: number) {
     }
   }
 
-  const handleSetPerPageParam = (v: number, updateType: UrlUpdateType) => {
+  const handleSetPerPageParam = (v: number, updateType: UrlUpdateType = 'pushIn') => {
     setPageParam(undefined)
-    setPerPageParam(v, 'pushIn')
+    setPerPageParam(v, updateType)
   }
 
   return { pageParam, perPageParam, setPerPageParam: handleSetPerPageParam, setPageParam: handleSetPageParam }

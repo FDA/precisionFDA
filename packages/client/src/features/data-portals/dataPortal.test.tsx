@@ -3,7 +3,6 @@ import { canEditSettings, canEditContent } from './utils'
 
 
 describe('canEditSettings', () => {
-  const admin = 'john.doe'
   const viewer = 'alex.brown'
   const lead = 'bank.jeff'
   const noUser = 'unknown.user'

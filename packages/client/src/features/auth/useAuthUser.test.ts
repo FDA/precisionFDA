@@ -1,5 +1,6 @@
 import { useAuthUser } from './useAuthUser'
 import { IUser } from '../../types/user'
+import { IMeta } from '../home/types'
 
 let email = 'test'
 jest.mock('./api', () => {
@@ -13,7 +14,7 @@ jest.mock('./api', () => {
                         dxuser: 'antonio',
                         email,
                     } as IUser,
-                    meta: {} as any,
+                    meta: {} as IMeta,
                 },
             }
         ),

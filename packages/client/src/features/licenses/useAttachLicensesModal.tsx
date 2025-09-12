@@ -38,7 +38,7 @@ export function useAttachLicensesModal<
 }: {
   selected: T
   resource: APIResource
-  onSuccess?: (res: Error | object) => void
+  onSuccess?: (res: unknown) => void
 }) {
   const selectedId = selected?.uid || selected?.dxid
   const { isShown, setShowModal } = useModal()
@@ -65,13 +65,11 @@ export function useAttachLicensesModal<
   const licenses = data?.licenses
   const mutation = useMutation({
     mutationKey: ['attach-license', resource],
-    mutationFn: ({ dxid, licenseId }: { dxid: string; licenseId: string }) => {
-      return attachLicenseRequest({ dxid, licenseId })
-    },
+    mutationFn: async (payload: { dxid: string; licenseId: string }) => attachLicenseRequest(payload),
     onError: () => {
       toast.error('Error: Attaching licenses')
     },
-    onSuccess: (res: Error | object) => {
+    onSuccess: (res) => {
       queryClient.invalidateQueries({
         queryKey: ['licenses'],
       })

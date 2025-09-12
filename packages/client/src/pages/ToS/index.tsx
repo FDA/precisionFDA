@@ -25,7 +25,7 @@ const ToS = () => {
           <h1>Terms of Service</h1>
           <p>Last modified: January 24, 2024</p>
           <hr />
-          <p>WE'RE IN PRODUCTION!</p>
+          <p>WE&apos;RE IN PRODUCTION!</p>
           <p>
             PrecisionFDA is a production research project and not for clinical
             use. We may limit or otherwise restrict your access to the services
@@ -51,7 +51,7 @@ const ToS = () => {
             use of PrecisionFDA services, are an agreement between the User and
             the FDA and govern all access to, and use of, the services we
             provide through the website at https://precision.fda.gov (the
-            "Site"). A “User” is a PrecisionFDA User or other entity to whom the
+            &ldquo;Site&rdquo;). A “User” is a PrecisionFDA User or other entity to whom the
             User has granted permission to access the Services. “User Data”
             means the data, software and other information shared by a User to
             or through the services or derived from the data, software and other

@@ -11,6 +11,7 @@ import { EditDatabasePayload, editDatabaseRequest } from './databases.api'
 import { IDatabase } from './databases.types'
 import { ModalHeaderTop, ModalNext } from '../modal/ModalNext'
 import { Button } from '../../components/Button'
+import { ApiErrorResponse } from '../home/types'
 
 const EditDatabaseInfoForm = ({
   db,
@@ -46,10 +47,9 @@ const EditDatabaseInfoForm = ({
       handleClose()
       toast.success('Success: Editing database info')
     },
-    onError: (error: any) => {
-      const payload = error.response?.data as any
-      const message = payload?.error?.message ?? error.message
-      toast.error(`Error: ${message}`)
+    onError: (error: unknown) => {
+      const err = error as ApiErrorResponse
+      toast.error(`Error: ${err?.error?.message}`)
     },
   })
 

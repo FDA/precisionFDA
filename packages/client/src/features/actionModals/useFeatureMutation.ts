@@ -8,12 +8,12 @@ export interface Meta {
   message: string;
 }
 
-export interface RequestResponse {
-  items: any[];
+export interface RequestResponse<T> {
+  items: T[];
   meta: Meta[];
 }
 
-async function featureRequest(resource: APIResource, { uids, featured }: { uids: (number | string)[], featured: boolean }): Promise<RequestResponse> {
+async function featureRequest<T>(resource: APIResource, { uids, featured }: { uids: (number | string)[], featured: boolean }): Promise<RequestResponse<T>> {
   const response = await axios.put(`/api/${resource}/feature`, {
     item_ids: uids,
     featured: featured || undefined,
@@ -22,10 +22,10 @@ async function featureRequest(resource: APIResource, { uids, featured }: { uids:
   return response.data
 }
 
-export const useFeatureMutation = ({ resource, onSuccess }: { resource: APIResource, onSuccess?: (res: RequestResponse) => void }) => {
+export const useFeatureMutation = <T extends {id: string|number}>({ resource, onSuccess }: { resource: APIResource, onSuccess?: (res: RequestResponse<T>) => void }) => {
   const featureMutation = useMutation({
     mutationKey: ['feature-resource', resource],
-    mutationFn: (payload: { featured: boolean, uids: (number | string)[] }) => featureRequest(resource, payload),
+    mutationFn: (payload: { featured: boolean, uids: (number | string)[] }) => featureRequest<T>(resource, payload),
     onSuccess: async (res) => {
       if (res.meta[0].type === 'success') {
         toast.success(`Success: ${res.meta[0].message}`)

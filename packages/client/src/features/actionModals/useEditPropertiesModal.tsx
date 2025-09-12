@@ -17,7 +17,6 @@ import { ButtonRow, Footer, ModalScroll } from '../modal/styles'
 import { useModal } from '../modal/useModal'
 import { InputTextS } from '../apps/form/Fields'
 import { PropertiesResource, ServerScope } from '../home/types'
-import { RequestResponse } from './useFeatureMutation'
 
 const StyledForm = styled.form`
   min-width: 450px;
@@ -96,7 +95,7 @@ async function editPropertiesRequest({
   properties: Properties
 }) {
   return axios
-    .post<RequestResponse>('/api/set_properties', {
+    .post('/api/set_properties', {
       item_id: id,
       type,
       properties,

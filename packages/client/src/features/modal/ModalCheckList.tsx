@@ -2,7 +2,7 @@ import styled from 'styled-components'
 import { Svg } from '../../components/icons/Svg'
 import { colors } from '../../styles/theme'
 
-export const TableRow = styled.tr<{ $isSelected?: boolean; onClick?: any }>`
+export const TableRow = styled.tr<{ $isSelected?: boolean; onClick?: () => void }>`
   ${({ $isSelected }) => $isSelected && `color: ${colors.primaryBlue};`}
   ${({ onClick }) => onClick && 'cursor: pointer;'}
 `

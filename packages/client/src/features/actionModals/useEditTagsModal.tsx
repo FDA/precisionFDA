@@ -9,7 +9,6 @@ import { ModalHeaderTop, ModalNext } from '../modal/ModalNext'
 import { ButtonRow, Footer } from '../modal/styles'
 import { useModal } from '../modal/useModal'
 import { APIResource } from '../home/types'
-import { RequestResponse } from './useFeatureMutation'
 import { Button } from '../../components/Button'
 import axios from 'axios'
 
@@ -31,7 +30,7 @@ async function editTagsRequest({
 }: {
   uid: string
   tags: string
-}): Promise<RequestResponse> {
+}) {
   const response = await axios.post('/api/set_tags', {
     taggable_uid: uid,
     tags,
@@ -53,7 +52,7 @@ const EditTagsForm = ({
   resource: APIResource
   uid: string
   tags: string[]
-  onSuccess?: (res: RequestResponse) => void
+  onSuccess?: (res: unknown) => void
   setShowModal?: (show: boolean) => void
 }) => {
   const { register, handleSubmit } = useForm<FormInputs>({
@@ -126,7 +125,7 @@ export function useEditTagsModal<
 }: {
   resource: APIResource
   selected: T
-  onSuccess?: (res: RequestResponse) => void
+  onSuccess?: (res: unknown) => void
 }) {
   const { isShown, setShowModal } = useModal()
   const mSelected = useMemo(() => selected, [isShown])

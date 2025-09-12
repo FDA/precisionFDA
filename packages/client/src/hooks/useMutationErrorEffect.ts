@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { UseFormSetError } from 'react-hook-form'
+import { FieldValues, Path, UseFormSetError } from 'react-hook-form'
 import { MutationErrors } from '../types/utils'
 
 export function formatMutationErrors(
@@ -15,10 +15,10 @@ export function formatMutationErrors(
   return undefined
 }
 
-export const useMutationErrorEffect = (setError: UseFormSetError<any>, mutationErrors?: MutationErrors) => useEffect(() => {
+export const useMutationErrorEffect = <T extends FieldValues>(setError: UseFormSetError<T>, mutationErrors?: MutationErrors) => useEffect(() => {
     if (mutationErrors) {
       Object.keys(mutationErrors.fieldErrors).forEach((e: string) => {
-        setError(e, { message: mutationErrors.fieldErrors[e].join('; '), type: 'onChange' })
+        setError(e as Path<T>, { message: mutationErrors.fieldErrors[e].join('; '), type: 'onChange' })
       })
     }
   }, [mutationErrors])

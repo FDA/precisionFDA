@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useDnDMoveFileModal } from './actionModals/useDnDMoveFileModal'
 import { IFile } from './files.types'
 
-export const useFileDnd = ({ setSelectedRows, selectedObjects, files, spaceId }: { files?: IFile[], setSelectedRows: (ids: Record<string, boolean>) => void, selectedObjects: any[], spaceId?: number }) => {
+export const useFileDnd = ({ setSelectedRows, selectedObjects, files, spaceId }: { files?: IFile[], setSelectedRows: (ids: Record<string, boolean>) => void, selectedObjects: IFile[], spaceId?: number }) => {
   const [draggingRowIds, setDraggingRowIds] = useState<UniqueIdentifier[]>([])
   const sensors = useSensors( useSensor(MouseSensor, { activationConstraint: { distance: 5 }}))
   const dndMoveModal = useDnDMoveFileModal({
@@ -21,7 +21,7 @@ export const useFileDnd = ({ setSelectedRows, selectedObjects, files, spaceId }:
     const { active } = event
     const sr = selectedObjects.map(i => i.id)
     
-    if (sr.includes(active.id)) {
+    if (sr.includes(active.id as number)) {
       setDraggingRowIds(sr)
     } else {
       setDraggingRowIds([active.id])

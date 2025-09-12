@@ -1,22 +1,27 @@
 import React from 'react'
-import {theme} from '../styles/theme'
+import { theme } from '../styles/theme'
 
 interface IState {
   hasError: boolean;
   message: string;
 }
 
-export class ErrorBoundary extends React.Component<any, IState> {
-  constructor(props: any) {
+interface ErrorBoundaryProps {
+  children: React.ReactNode;
+}
+
+export class ErrorBoundary extends React.Component<ErrorBoundaryProps, Pick<IState, 'hasError'>> {
+  constructor(props: ErrorBoundaryProps) {
     super(props)
-    this.state = { hasError: false } as any
+    this.state = { hasError: false }
   }
 
-  static getDerivedStateFromError(error: any) {
+  static getDerivedStateFromError(/* error: Error */): Pick<IState, 'hasError'> {
     // Update state so the next render will show the fallback UI.
     return { hasError: true }
   }
-  componentDidCatch(error: any, errorInfo: any) {
+  
+  componentDidCatch(/* error: Error, errorInfo: React.ErrorInfo */): void {
     // You can also log the error to an error reporting service
     // logErrorToMyService(error, errorInfo)
   }
@@ -29,17 +34,18 @@ export class ErrorBoundary extends React.Component<any, IState> {
   }
 }
 
-export class ErrorBoundaryDetails extends React.Component<any, IState> {
-  constructor(props: any) {
+export class ErrorBoundaryDetails extends React.Component<ErrorBoundaryProps, IState> {
+  constructor(props: ErrorBoundaryProps) {
     super(props)
-    this.state = { hasError: false, message: '' } as { hasError: boolean, message: string}
+    this.state = { hasError: false, message: '' }
   }
 
-  static getDerivedStateFromError(error: any) {
+  static getDerivedStateFromError(error: Error): IState {
     // Update state so the next render will show the fallback UI.
     return { hasError: true, message: error.message }
   }
-  componentDidCatch(error: any, errorInfo: any) {
+  
+  componentDidCatch(/* error: Error, errorInfo: React.ErrorInfo */): void {
     // You can also log the error to an error reporting service
     // logErrorToMyService(error, errorInfo)
   }
