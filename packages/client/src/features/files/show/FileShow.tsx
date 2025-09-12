@@ -174,12 +174,13 @@ export const FileShow = ({ emitScope, space, homeScope }: { homeScope?: HomeScop
             <MetadataItem>
               <MetadataKey>Origin</MetadataKey>
               <MetadataVal data-testid="file-origin">
-                {['Job', 'Comparison'].includes(file.links?.origin_object?.origin_type ?? '') ? (
-                  <Link target="_blank" to={(file.origin as {href: string})?.href || '#'}>
-                    {(file.origin as {text: string})?.text}
+                {['Job', 'Comparison'].includes(file.links?.origin_object?.origin_type ?? '') &&
+                file.origin && typeof file.origin === 'object' && file.origin.href ? (
+                  <Link target="_blank" to={file.origin.href}>
+                    {file.origin.text || file.origin.href}
                   </Link>
                 ) : (
-                  <>{(file.origin as {text: string})?.text}</>
+                  <>{typeof file.origin === 'object' ? file.origin?.text : file.origin}</>
                 )}
               </MetadataVal>
             </MetadataItem>
