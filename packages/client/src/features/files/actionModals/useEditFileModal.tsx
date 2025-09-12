@@ -66,7 +66,7 @@ const EditFileInfoForm = ({
         toast.success('Success: Editing file info')
       }
     },
-    onError: e => {
+    onError: () => {
       toast.error('Error: Editing file info')
     },
   })

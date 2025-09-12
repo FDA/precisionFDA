@@ -57,6 +57,7 @@
     "classnames": "^2.5.1",
     "core-js": "^3.45.1",
     "date-fns": "^4.1.0",
+    "date-fns-tz": "^3.2.0",
     "dompurify": "^3.2.6",
     "highlight.js": "^11.11.1",
     "http-status-codes": "^2.3.0",

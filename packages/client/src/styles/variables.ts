@@ -163,6 +163,7 @@ export const themes = css`
   --base: hsl(0, 0%, 20%);
   --background: var(--tertiary-50);
   --background-shaded: var(--tertiary-200); // shadedBG
+  --background-shaded-100: var(--tertiary-100); // shadedBG
   --c-layout-border: var(--tertiary-300); //borderDefault
   --c-layout-border-200: var(--tertiary-200);
   --c-dropdown-menu-border: var(--c-layout-border-200);

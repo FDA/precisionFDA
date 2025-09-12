@@ -33,7 +33,14 @@ import {
   UploadFilesHeader,
 } from './styles'
 
-const FileUploadTable = ({ filesMeta, showRemove, uploadInProgress, handleRemoveFile }) => {
+interface FileUploadTableProps {
+  filesMeta: FilesMeta[]
+  showRemove: boolean
+  uploadInProgress: boolean
+  handleRemoveFile: (id: string) => void
+}
+
+const FileUploadTable = ({ filesMeta, showRemove, uploadInProgress, handleRemoveFile }: FileUploadTableProps) => {
   if (filesMeta.length === 0) {
     return null
   }
@@ -45,7 +52,7 @@ const FileUploadTable = ({ filesMeta, showRemove, uploadInProgress, handleRemove
         <div>Status</div>
         {showRemove && <div>Action</div>}
       </UploadFilesHeader>
-      {filesMeta.map(file => (
+      {filesMeta.map((file) => (
         <FileItem key={file.id} showRemove={showRemove}>
           <FileName>
             <div className="file-name-text" title={file.name}>
@@ -84,9 +91,14 @@ export const FileUploadStatus = ({ status }: { status: FileStatusTypes }) => {
 }
 const idGenerator = createSequenceGenerator()
 
-const isUniqFile = (blobs: any, file: any) =>
+interface DropzoneFile extends File {
+  path?: string
+  generatedId: string
+}
+
+const isUniqFile = (blobs: DropzoneFile[], file: DropzoneFile): boolean =>
   !blobs.find(
-    (blob: any) =>
+    (blob: DropzoneFile) =>
       blob.name === file.name &&
       blob.lastModified === file.lastModified &&
       blob.size === file.size &&
@@ -107,7 +119,7 @@ export const useFileUploadModal = ({ homeScope, folderId, spaceId, isAllowed, on
   const queryCache = useQueryClient()
   const { isShown, setShowModal } = useConditionalModal(isAllowed, onViolation)
   const [filesMeta, setFilesMeta] = useImmer<FilesMeta[]>([])
-  const [blobs, setBlobs] = useState<any[]>([])
+  const [blobs, setBlobs] = useState<DropzoneFile[]>([])
 
   const statuses = filesMeta.map(file => file.status)
   const uploadInProgress = any(
@@ -121,19 +133,19 @@ export const useFileUploadModal = ({ homeScope, folderId, spaceId, isAllowed, on
 
   const { getRootProps, getInputProps } = useDropzone({
     disabled: uploadInProgress,
-    onDropAccepted: accepted => {
-      const uniqBlob: any[] = []
-      const fil: any[] = []
-      accepted.forEach((file: any) => {
-        const f = file
+    onDropAccepted: (accepted: File[]) => {
+      const uniqBlob: DropzoneFile[] = []
+      const fil: FilesMeta[] = []
+      accepted.forEach((file: File) => {
+        const f = file as DropzoneFile
         if (isUniqFile(blobs, f)) {
-          f.generatedId = idGenerator.next().value
+          f.generatedId = idGenerator.next().value!.toString()
           uniqBlob.push(f)
           fil.push({
             id: f.generatedId,
             name: f.name,
             size: f.size,
-            status: FILE_STATUS['added'],
+            status: FILE_STATUS.added as FileStatusTypes,
             uploadedSize: 0,
           })
         }
@@ -173,8 +185,8 @@ export const useFileUploadModal = ({ homeScope, folderId, spaceId, isAllowed, on
   }
 
   const updateFilesStatus = (info: IUploadInfo) => {
-    setFilesMeta((draft: any) => {
-      const f = draft.find((file: any) => file.id === info.id)
+    setFilesMeta((draft: FilesMeta[]) => {
+      const f = draft.find((file: FilesMeta) => file.id === info.id)
       if (f) {
         f.status = info.status
         f.uploadedSize = info.uploadedSize
@@ -193,8 +205,8 @@ export const useFileUploadModal = ({ homeScope, folderId, spaceId, isAllowed, on
         spaceId,
         folderId,
       })
-    } catch (error: any) {
-      toast.error(error.message)
+    } catch (error: unknown) {
+      toast.error(error instanceof Error ? error.message : 'An error occurred during upload')
     }
   }
 

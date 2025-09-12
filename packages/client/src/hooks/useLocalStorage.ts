@@ -22,7 +22,8 @@ export function useLocalStorage<T>(key: string, initialValue: T, storageType: 'l
     try {
       const item = window[storageType].getItem(key)
       return item ? JSON.parse(item) : initialValue
-    } catch (error) {
+    } catch (error: unknown) {
+      console.error(`Error reading ${storageType} for key "${key}":`, error)
       return initialValue
     }
   })

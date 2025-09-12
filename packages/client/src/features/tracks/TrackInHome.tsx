@@ -25,25 +25,23 @@ const BackLink = ({ spaceId, entityType, identifier }: { spaceId?: number; entit
 
 export const TrackInHome = ({ entityType, spaceId }: { entityType?: EntityType; spaceId?: number }) => {
   const identifier = useParams<TrackProvenancePageParams>()?.identifier
-  if (!entityType) {
-    entityType = getEntityTypeFromIdentifier(identifier!)
-  }
+  const resolvedEntityType = entityType ?? getEntityTypeFromIdentifier(identifier!)
   const { data, isLoading, isError } = useTrackProvenanceQuery(identifier!)
   if (isLoading) {
     return <HomeLoader />
   }
 
   return isError ? (
-    <NotFoundEntity entityType={entityType} />
+    <NotFoundEntity entityType={resolvedEntityType} />
   ) : (
     <>
-      <BackLink spaceId={spaceId} entityType={entityType} identifier={identifier!} />
+      <BackLink spaceId={spaceId} entityType={resolvedEntityType} identifier={identifier!} />
       <ResourceHeader>
         <HeaderLeft>
-          <Title data-testid={`${entityType}-title`}>
+          <Title data-testid={`${resolvedEntityType}-title`}>
             <TrackIcon width={24} height={20} />
             Track
-            <EntityIcon entityType={entityType} />
+            <EntityIcon entityType={resolvedEntityType} />
             &nbsp;{data?.name}
           </Title>
         </HeaderLeft>

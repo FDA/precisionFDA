@@ -18,7 +18,7 @@ export function useDetachLicenseModal<
 }: {
   selected: T
   resource: APIResource
-  onSuccess?: (res: object) => void
+  onSuccess?: (res: unknown) => void
 }) {
   const selectedId = selected?.uid || selected?.dxid
   const { isShown, setShowModal } = useModal()
@@ -30,7 +30,7 @@ export function useDetachLicenseModal<
   const editFileMutation = useMutation({
     mutationKey: ['detach-license', resource],
     mutationFn: (payload: { licenseId: string, dxid: string }) => detachLicenseRequest(payload),
-    onSuccess: (res: object) => {
+    onSuccess: (res) => {
       if(onSuccess) onSuccess(res)
       handleClose()
       toast.success('Success: Detaching license.')

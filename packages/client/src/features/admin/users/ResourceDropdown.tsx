@@ -1,5 +1,5 @@
 import React from 'react'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { MutationFunction, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
 import styled from 'styled-components'
 import { RESOURCES, RESOURCE_LABELS } from '../../../types/user'
@@ -61,15 +61,13 @@ const getResourceStates = (users: User[]) =>
 const getAllResourceState = (users: User[]) =>
   getCheckboxValue(users, user => RESOURCES.every(resource => user.cloudResourceSettings.resources.includes(resource)))
 
-const ResourceDropdownItem = ({
-  status,
-  onClick,
-  label,
-}: {
-  status: ResourceState
-  onClick: () => Promise<unknown>
+type ResourceDropdownItemProps = {
+  status: 'none' | 'some' | 'all',
+  onClick: MutationFunction<unknown, void>
   label: string
-}) => {
+}
+
+const ResourceDropdownItem = ({ status, onClick, label }: ResourceDropdownItemProps) => {
   const queryClient = useQueryClient()
   const mutation = useMutation({
     mutationFn: () => onClick(),
@@ -120,7 +118,7 @@ export const ResourceDropdownContent = ({ selectedUsers }: { selectedUsers: User
       {resourceStates.map(({ resource, state }) => (
         <ResourceDropdownItem
           key={resource}
-          status={state}
+          status={state as ResourceDropdownItemProps['status']}
           onClick={() =>
             state === 'all'
               ? bulkDisableResource(

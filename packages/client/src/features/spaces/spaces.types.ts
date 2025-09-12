@@ -69,7 +69,7 @@ export interface ConfidentialSpace {
   links: Links
   updatable: boolean
   shared_space_id: number
-  tags: any[]
+  tags: string[]
   current_user_membership: SpaceMembership
   host_lead: HostLead
 }
@@ -85,7 +85,7 @@ export interface ISpace {
   state: 'active' | 'unactivated' | 'locked' | 'deleted'
   name: string
   type: SpaceType | number // number is the value from DB, string is value from db translated to human readable
-  cts?: any
+  cts?: string
   hidden: boolean
   protected: boolean | null
   created_at: string
@@ -95,7 +95,7 @@ export interface ISpace {
   /** @deprecated create links from client side */
   links: Links
   updatable: boolean
-  tags: any[]
+  tags: string[]
   spaceId?: number
   current_user_membership: SpaceMembership
   host_lead?: HostLead

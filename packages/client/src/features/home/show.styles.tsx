@@ -1,5 +1,5 @@
 import React from 'react'
-import styled, { css } from 'styled-components'
+import styled from 'styled-components'
 import { Button } from '../../components/Button'
 import { ArrowIcon } from '../../components/icons/ArrowIcon'
 import { Svg } from '../../components/icons/Svg'
@@ -88,7 +88,7 @@ export const StyledCloudResourcesHeaderButton = styled(Button).attrs({ 'data-var
   box-sizing: border-box;
   ${({ disabled }) =>
     disabled &&
-    css`
+    `
       background-color: ${theme.colors.lightBlue};
       border-color: ${theme.colors.lightBlue};
       cursor: not-allowed;
@@ -144,13 +144,13 @@ export const StyledActionsButton = styled(Button)<{ disabled?: boolean }>`
     `}
 `
 
-export const ActionsButton = React.forwardRef(({ label = 'Actions', ...props }: any, ref) => {
-  const { active, ...restProps } = props
+export const ActionsButton = ({ label = 'Actions', ...props }: { label?: string, disabled?: boolean, active?: boolean | BooleanString, ref: React.Ref<HTMLElement|null> }) => {
   return (
-    <StyledActionsButton data-variant="primary" ref={ref} $active={active} {...restProps}>
+    // @ts-expect-error react 19 passes ref through props
+    <StyledActionsButton data-variant="primary" {...props}>
       {label} <ArrowIcon />
     </StyledActionsButton>
   )
-})
+}
 
 ActionsButton.displayName = 'ActionsButton'

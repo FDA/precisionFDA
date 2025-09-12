@@ -21,6 +21,7 @@ export interface DataPortal {
   content: string | null
   editorState: string
   members: DataPortalMember[]
+  error?: string
 }
 
 export interface CreateDataPortalData {

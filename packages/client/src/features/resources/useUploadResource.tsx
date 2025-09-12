@@ -25,7 +25,7 @@ export const useUploadResource = ({
   id,
   onSuccess,
 }: {
-  id: string
+  id: string|number
   onSuccess: () => void
 }) => {
   const createResourceMutation = useCreateResourceMutation(id)
@@ -37,7 +37,7 @@ export const useUploadResource = ({
     index: number,
   ) => {
     const name = s.customName === '' ? s.originalName : s.customName
-    const { fileUid, id: resourceId } =
+    const { fileUid } =
       await createResourceMutation.mutateAsync({ name })
     const newFiles = [...selectedFiles]
 
@@ -56,7 +56,6 @@ export const useUploadResource = ({
       const fileWithPreviewArray: FileWithPreview[] = []
       for (let i = 0; i < files.length; i++) {
         const { name } = files[i]
-        // eslint-disable-next-line no-await-in-loop
         const preview = await toBase64(files[i])
         fileWithPreviewArray.push({
           rid: crypto.randomUUID(),
@@ -144,9 +143,9 @@ export const Item = ({
 }: {
   file: FileWithPreview,
   disabled: boolean
-  index: string | number
-  removeItemByIndex: any
-  handleNameChange: any
+  index: number
+  removeItemByIndex: (rid: string) => void
+  handleNameChange: (event: ChangeEvent<HTMLInputElement>, index: number) => void
 }) => {
   return (
     <FileRow key={file.rid}>

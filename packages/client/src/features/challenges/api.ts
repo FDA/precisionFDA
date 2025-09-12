@@ -65,9 +65,13 @@ export async function challengeDetailsRequest(challengeId: string, custom?: bool
   const params = custom ? '?custom=true' : ''
   return axios.get(`/api/challenges/${challengeId}${params}`).then(r => r.data.challenge as ChallengeOld).then((d) => ({
     ...d,
+    // @ts-expect-error at this point still string type
     start_at: convertDateToUserTime(d.start_at),
+    // @ts-expect-error at this point still string type
     end_at: convertDateToUserTime(d.end_at),
+    // @ts-expect-error at this point still string type
     created_at: convertDateToUserTime(d.created_at),
+    // @ts-expect-error at this point still string type
     updated_at: convertDateToUserTime(d.updated_at),
   } as ChallengeOld))
 }

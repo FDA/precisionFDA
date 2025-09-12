@@ -10,7 +10,7 @@ export function expanderColumnDef<T extends { id: string | number }>(): ColumnDe
     size: 50,
     enableResizing: false,
     enableHiding: false,
-    // eslint-disable-next-line react/no-unstable-nested-components
+     
     cell: c => {
       return c.row.getCanExpand() ? (
         <TransparentButton

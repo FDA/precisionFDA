@@ -26,5 +26,6 @@
   },
   "include": [
     "src"
-  ]
+  ],
+  "exclude": ["src/features/lexi/**/*"]
 }

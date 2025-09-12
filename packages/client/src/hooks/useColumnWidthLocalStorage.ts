@@ -11,8 +11,8 @@ export interface IColumnWidthLocalStorage {
 
 export function useColumnWidthLocalStorage(locationKey: string): IColumnWidthLocalStorage {
   const [colWidths, setColWidths] = useLocalStorage<Record<string, ColumnSizingState>>(
-    "columns-width",
-    {}
+    'columns-width',
+    {},
   )
 
   const debouncedSave = useMemo(() => {

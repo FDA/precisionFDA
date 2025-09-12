@@ -80,6 +80,7 @@ export const useAddFolderModal = ({
             <InputText
               {...register('name')}
               placeholder="Enter Name..."
+              // eslint-disable-next-line jsx-a11y/no-autofocus
               autoFocus
               disabled={mutation.isPending}
             />

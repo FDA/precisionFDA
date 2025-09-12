@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable max-classes-per-file */
+import React, { MouseEvent, TouchEvent } from 'react'
 import {
   DragOverlay,
   MouseSensor as LibMouseSensor,
@@ -8,7 +8,6 @@ import {
   useDroppable,
 } from '@dnd-kit/core'
 import { snapCenterToCursor } from '@dnd-kit/modifiers'
-import React, { MouseEvent, TouchEvent } from 'react'
 import styled, { css } from 'styled-components'
 import { pluralize } from '../../utils/formatting'
 

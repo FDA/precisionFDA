@@ -32,7 +32,9 @@ export const UserLayout = ({ children, mainScroll = false, innerScroll = false, 
     if (user.error) {
       if (user.error?.response?.status === 401)
         return <NotAllowedPage info="401 Unauthorized" />
-      if (user.error?.response?.data?.failure)
+        // @ts-expect-error unknonwn type
+        if (user.error?.response?.data?.failure)
+          // @ts-expect-error unknonwn type
         return user.error.response.data.failure
     }
     return children

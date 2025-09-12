@@ -7,6 +7,7 @@ import { CubeIcon } from '../../../components/icons/CubeIcon'
 import { Loader } from '../../../components/Loader'
 import { StyledWorkflowDiagram } from './styles'
 import { useWorkflowDiagramQuery } from './useWorkflowDiagramQuery'
+import type { InputOutput, Stage as WorkflowStage } from '../workflows.types'
 
 const NoData = () => {
   return <div className="text-center">No data found</div>
@@ -16,7 +17,7 @@ const AppOutputs = ({
   outputs,
   slotId,
 }: {
-  outputs: any[]
+  outputs: InputOutput[]
   slotId: string
 }) => {
   if (outputs.length === 0) return null
@@ -48,7 +49,7 @@ const AppOutputs = ({
   )
 }
 
-const AppInputs = ({ inputs, slotId }: { inputs: any[]; slotId: string }) => {
+const AppInputs = ({ inputs, slotId }: { inputs: InputOutput[]; slotId: string }) => {
   if (inputs.length === 0) return null
 
   return (
@@ -67,8 +68,8 @@ const AppInputs = ({ inputs, slotId }: { inputs: any[]; slotId: string }) => {
 
         const appArrows = refs ? (
           <Xarrow
-            start={outputRef as any}
-            end={inputRef as any}
+            start={outputRef as string}
+            end={inputRef as string}
             startAnchor="bottom"
             endAnchor="top"
             curveness={1.5}
@@ -89,7 +90,7 @@ const AppInputs = ({ inputs, slotId }: { inputs: any[]; slotId: string }) => {
   )
 }
 
-const SlotApp = ({ app }: { app: any }) => {
+const SlotApp = ({ app }: { app: WorkflowStage }) => {
   const appUri = `/home/apps/${app.app_uid}`
 
   return (
@@ -116,12 +117,12 @@ const SlotApp = ({ app }: { app: any }) => {
   )
 }
 
-const Stage = ({ apps, stageIndex }: { apps?: any; stageIndex: number }) => {
-  if (apps.length === 0) return <NoData />
+const Stage = ({ apps, stageIndex }: { apps?: WorkflowStage[]; stageIndex: number }) => {
+  if (!apps || apps.length === 0) return <NoData />
 
-  const stageApps = apps.map((app: any, idx: string) => {
+  const stageApps = apps.map((app: WorkflowStage, idx: number) => {
     return (
-      <div key={uniqid(idx)} className="wf-diagram-slot">
+      <div key={uniqid(idx.toString())} className="wf-diagram-slot">
         <SlotApp app={app} />
       </div>
     )
@@ -141,7 +142,7 @@ const WorkflowsDiagram = ({ workflowId }: { workflowId: string }) => {
 
   const stageList = Object.entries(data!.stages).map((apps, idx) => {
     return (
-      <Stage key={uniqid(`${idx}`)} stageIndex={idx} apps={apps[1] as any} />
+      <Stage key={uniqid(`${idx}`)} stageIndex={idx} apps={apps[1] as WorkflowStage[]} />
     )
   })
 

@@ -18,8 +18,9 @@ const StyledAttachmentsContainer = styled.div``
 const TableRow = styled.div`
   display: flex;
   justify-content: space-between;
+  border-radius: 3px;
   &:hover {
-    background-color: #f5f5f5;
+    background-color: var(--background-shaded-100);
   }
 `
 const TableCell = styled.span`

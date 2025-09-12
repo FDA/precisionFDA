@@ -1,10 +1,10 @@
-export type GetObjValues<T> = T extends Record<any, infer V> ? V : never
+export type GetObjValues<T> = T extends Record<PropertyKey, infer V> ? V : never
 
 export type FlipKeysAndValues<
   ObjT extends Record<string | symbol | number, string | symbol | number>,
   Ast extends Record<string, {
     key: keyof ObjT
-    value: any
+    value: ObjT[keyof ObjT]
   }> = {
     [key in keyof ObjT]: {
       key: key
@@ -22,7 +22,7 @@ export type MapKeysByObj<
   Mapper extends Record<string, string>,
   MappedAstT extends Record<string, {
     key: string,
-    value: any
+    value: ObjT[keyof ObjT]
   }> = {
     [key in Extract<keyof Mapper, keyof ObjT>]: {
       key: Mapper[key]

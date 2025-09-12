@@ -1,19 +1,8 @@
 import React from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { fetchActiveUsers, fetchGovUsers } from '../api'
+import { fetchActiveUsers } from '../api'
 import { Select } from '../../../components/Select'
 
-const useFetchGovUsersQuery = () =>
-  useQuery({
-    queryKey: ['gov-users'],
-    queryFn: fetchGovUsers,
-    select(data) {
-      return data?.map(s => ({
-        label: s,
-        value: s,
-      }))
-    },
-  })
 const useFetchActiveUsersQuery = () =>
   useQuery({
     queryKey: ['gov-users'],
@@ -36,7 +25,7 @@ export const UsersSelect = ({
   value: {label: string, value: string} | null
   onBlur: () => void
   isDisabled: boolean
-  onChange: (v:any) => void
+  onChange: (v:unknown) => void
   inputId?: string
 }) => {
   const { data, isLoading } = useFetchActiveUsersQuery()

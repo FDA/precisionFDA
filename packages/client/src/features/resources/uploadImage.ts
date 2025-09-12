@@ -16,7 +16,7 @@ const throwIfError = (status: number, payload?: any) => {
 const getUploadURL = (id: string, index: number, size: number, md5: string) =>
   axios.post('/api/get_upload_url', { id, index, size, md5 }).then(r => ({ payload: r.data as GetUploadURLResponse, status: r.status }))
 
-const uploadChunk = (url: string, chunk: ArrayBuffer, headers: any) => (
+const uploadChunk = (url: string, chunk: ArrayBuffer, headers: HeadersInit) => (
   fetch(url, {
     method: 'PUT',
     body: chunk,

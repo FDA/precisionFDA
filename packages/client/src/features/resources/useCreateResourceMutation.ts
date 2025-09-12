@@ -10,9 +10,9 @@ interface CreateResourceBody {
   name: string
 }
 
-export const createResourceRequest = (portalId: string, body: CreateResourceBody) => axios.post(`/api/v2/data-portals/${portalId}/resources`, body).then(r => r.data as CreateResourceResponse)
+export const createResourceRequest = (portalId: string|number, body: CreateResourceBody) => axios.post(`/api/v2/data-portals/${portalId}/resources`, body).then(r => r.data as CreateResourceResponse)
 
-export const useCreateResourceMutation = (portalId: string) => useMutation({
+export const useCreateResourceMutation = (portalId: string|number) => useMutation({
   mutationKey: ['create-resource'],
   mutationFn: (body: CreateResourceBody) => createResourceRequest(portalId, body),
 })

@@ -1,4 +1,3 @@
-/* eslint-disable react/no-array-index-key */
 import React, { useEffect, useState } from 'react'
 import styled, { css } from 'styled-components'
 import { breakPoints } from '../../styles/theme'

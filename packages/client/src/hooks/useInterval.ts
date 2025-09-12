@@ -4,6 +4,7 @@
 import { useEffect, useRef } from 'react'
 
 export const useInterval = (callback: (a: unknown) => void, delay: number | null) => {
+  // @ts-expect-error unknonwn type
   const savedCallback = useRef()
 
   useEffect(() => {
@@ -12,6 +13,7 @@ export const useInterval = (callback: (a: unknown) => void, delay: number | null
 
   useEffect(() => {
     function tick() {
+      // @ts-expect-error unknonwn type
       savedCallback.current()
     }
     if (delay !== null) {

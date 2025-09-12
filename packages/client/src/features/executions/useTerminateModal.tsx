@@ -16,7 +16,7 @@ const StyledResourceTable = styled(ResourceTable)`
   min-width: 300px;
 `
 
-export function useTerminateModal<T extends { ids: string[]; name: string }>({
+export function useTerminateModal({
   selected,
 }: {
   selected: IExecution[]
@@ -28,9 +28,9 @@ export function useTerminateModal<T extends { ids: string[]; name: string }>({
     mutationKey: ['terminate-job'],
     mutationFn: terminateJobsRequest,
     onError: () => {
-      toast.error(`Error: terminating execution`)
+      toast.error('Error: terminating execution')
     },
-    onSuccess: (res: any) => {
+    onSuccess: (res) => {
       if (res?.meta?.messages[0]) {
         toast.error(`Server error: ${res?.meta?.messages[0].message}`)
         return
@@ -52,9 +52,9 @@ export function useTerminateModal<T extends { ids: string[]; name: string }>({
 
   const modalComp = (
     <ModalNext
-      id={'terminate-executions-modal'}
-      data-testid={`modal-execution-terminate`}
-      headerText={`Terminate selected execution?`}
+      id="terminate-executions-modal"
+      data-testid="modal-execution-terminate"
+      headerText="Terminate selected execution?"
       isShown={isShown}
       hide={() => setShowModal(false)}
     >

@@ -29,13 +29,16 @@ export interface FilesMeta {
 }
 
 export interface IUploadInfo {
-  id: number
-  status?: string,
+  id: string
+  status: FileStatusTypes,
   uploadedSize: number,
 }
 
 export interface IUploadFile {
-  generatedId: number
+  generatedId: string
   name: string
   size: number
+  lastModified: number
+  type: string
+  path?: string
 }

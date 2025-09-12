@@ -1,23 +1,21 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import React, { useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import useWebSocket from 'react-use-websocket'
 import styled from 'styled-components'
 import { Button } from '../../../components/Button'
 import { Loader } from '../../../components/Loader'
 import { PageContainerMargin, PageTitle } from '../../../components/Page/styles'
 import { PageLoaderWrapper } from '../../../components/Public/styles'
 import { usePageMeta } from '../../../hooks/usePageMeta'
+import { useLastWSNotification } from '../../../hooks/useToastWSHandler'
 import { UserLayout } from '../../../layouts/UserLayout'
 import { theme } from '../../../styles/theme'
-import { DEFAULT_RECONNECT_ATTEMPTS, DEFAULT_RECONNECT_INTERVAL, getNodeWsUrl, SHOULD_RECONNECT } from '../../../utils/config'
 import { useAuthUser } from '../../auth/useAuthUser'
-import { Notification, NOTIFICATION_ACTION, WEBSOCKET_MESSAGE_TYPE, WebSocketMessage } from '../../home/types'
+import { NOTIFICATION_ACTION } from '../../home/types'
 import { StyledPageCenter } from '../../spaces/form/styles'
 import { dataPortalsListRequest } from '../api'
 import { AlertText } from '../details/DataPortalNotFound'
 import { DataPortalListItem } from './DataPortalListItem'
-import { useLastWSNotification } from '../../../hooks/useToastWSHandler'
 
 const List = styled.div`
   display: flex;
@@ -66,7 +64,7 @@ const DataPortalsListPage = () => {
     if (lastJsonMessage == null) {
       return
     }
-    queryClient.invalidateQueries({ queryKey: ['data-portals-list'] })
+    queryClient.invalidateQueries({ queryKey: ['data-portals-list']})
   }, [lastJsonMessage])
 
   return (

@@ -1,7 +1,7 @@
 import { ErrorMessage } from '@hookform/error-message'
 import { yupResolver } from '@hookform/resolvers/yup'
 import React from 'react'
-import { Controller, useForm } from 'react-hook-form'
+import { Controller, useForm, UseFormSetValue } from 'react-hook-form'
 import styled from 'styled-components'
 import * as Yup from 'yup'
 import { Button } from '../../../components/Button'
@@ -11,7 +11,7 @@ import { FieldGroup } from '../../../components/form/FieldGroup'
 import { InputError } from '../../../components/form/styles'
 import { AttachmentsList } from '../AttachmentsList'
 import { NoteScope } from '../api'
-import { AttachmentKey, DiscussionForm as DiscussionFormType } from '../discussions.types'
+import { AttachmentKey, DiscussionForm as DiscussionFormType, NoteForm } from '../discussions.types'
 import { Attachments } from './Attachments'
 import { StyledPage } from './styles'
 import { NotifyMembersSelect } from './NotifyMembersSelect'
@@ -147,7 +147,7 @@ export const DiscussionForm = ({
             </div>
           )}
           <div className="flex gap-2">
-            <Attachments scope={scope} attachments={attachments} setValue={setValue} />
+            <Attachments scope={scope} attachments={attachments} setValue={setValue as unknown as UseFormSetValue<NoteForm>} />
             {onDelete && (
               <Button data-variant="warning" type="button" onClick={deleteDiscussion}>
                 Delete
