@@ -197,84 +197,64 @@ export class ReviewSpaceCreationProcess extends SpaceCreationProcess {
 
     await this.em.populate([hostLead, guestLead], ['user.organization'])
 
-    const hostProject = await this.adminClient.projectCreate({
-      name: `precisionfda-${sharedSpace.scope}-HOST`,
-      billTo: hostLead.user.getEntity().billTo(),
-    })
+    const hostProject = await this.adminClient.projectCreate(
+      `precisionfda-${sharedSpace.scope}-HOST`,
+      hostLead.user.getEntity().billTo(),
+    )
     this.logger.log(
       `created host project: ${hostProject.id} with lead: ${hostLead.user.getProperty('dxuser')}`,
     )
 
-    const guestProject = await this.adminClient.projectCreate({
-      name: `precisionfda-${sharedSpace.scope}-GUEST`,
-      billTo: guestLead.user.getEntity().billTo(),
-    })
+    const guestProject = await this.adminClient.projectCreate(
+      `precisionfda-${sharedSpace.scope}-GUEST`,
+      guestLead.user.getEntity().billTo(),
+    )
     this.logger.log(
       `created guest project: ${guestProject.id} with lead: ${guestLead.user.getProperty('dxuser')}`,
     )
 
-    const hostPrivateProject = await this.adminClient.projectCreate({
-      name: `precisionfda-${sharedSpace.scope}-REVIEWER-PRIVATE`,
-      billTo: hostLead.user.getEntity().billTo(),
-    })
+    const hostPrivateProject = await this.adminClient.projectCreate(
+      `precisionfda-${sharedSpace.scope}-REVIEWER-PRIVATE`,
+      hostLead.user.getEntity().billTo(),
+    )
     this.logger.log(`created host private project: ${hostPrivateProject.id}`)
 
-    const guestPrivateProject = await this.adminClient.projectCreate({
-      name: `precisionfda-${sharedSpace.scope}-SPONSOR-PRIVATE`,
-      billTo: guestLead.user.getEntity().billTo(),
-    })
+    const guestPrivateProject = await this.adminClient.projectCreate(
+      `precisionfda-${sharedSpace.scope}-SPONSOR-PRIVATE`,
+      guestLead.user.getEntity().billTo(),
+    )
     this.logger.log(`created guest private project: ${guestPrivateProject.id}`)
 
     // we could do two parallel calls to each project,
     // but not to the same one - you will get cannot acquire lock error from platform
-    await this.adminClient.projectInvite({
-      projectDxid: hostProject.id,
-      invitee: sharedSpace.hostDxOrg,
-      level: 'CONTRIBUTE',
-    })
+    await this.adminClient.projectInvite(hostProject.id, sharedSpace.hostDxOrg, 'CONTRIBUTE')
     this.logger.log(`invited host org: ${sharedSpace.hostDxOrg} to host project: ${hostProject.id}`)
 
-    await this.adminClient.projectInvite({
-      projectDxid: hostProject.id,
-      invitee: sharedSpace.guestDxOrg,
-      level: 'CONTRIBUTE',
-    })
+    await this.adminClient.projectInvite(hostProject.id, sharedSpace.guestDxOrg, 'CONTRIBUTE')
     this.logger.log(
       `invited guest org: ${sharedSpace.guestDxOrg} to host project: ${hostProject.id}`,
     )
 
-    await this.adminClient.projectInvite({
-      projectDxid: guestProject.id,
-      invitee: sharedSpace.hostDxOrg,
-      level: 'CONTRIBUTE',
-    })
+    await this.adminClient.projectInvite(guestProject.id, sharedSpace.hostDxOrg, 'CONTRIBUTE')
     this.logger.log(
       `invited host org: ${sharedSpace.hostDxOrg} to guest project: ${guestProject.id}`,
     )
 
-    await this.adminClient.projectInvite({
-      projectDxid: guestProject.id,
-      invitee: sharedSpace.guestDxOrg,
-      level: 'CONTRIBUTE',
-    })
+    await this.adminClient.projectInvite(guestProject.id, sharedSpace.guestDxOrg, 'CONTRIBUTE')
     this.logger.log(
       `invited guest org: ${sharedSpace.guestDxOrg} to guest project: ${guestProject.id}`,
     )
 
-    await this.adminClient.projectInvite({
-      projectDxid: hostPrivateProject.id,
-      invitee: sharedSpace.hostDxOrg,
-      level: 'CONTRIBUTE',
-    })
+    await this.adminClient.projectInvite(hostPrivateProject.id, sharedSpace.hostDxOrg, 'CONTRIBUTE')
     this.logger.log(
       `invited host org: ${sharedSpace.hostDxOrg} to host private project: ${hostPrivateProject.id}`,
     )
 
-    await this.adminClient.projectInvite({
-      projectDxid: guestPrivateProject.id,
-      invitee: sharedSpace.guestDxOrg,
-      level: 'CONTRIBUTE',
-    })
+    await this.adminClient.projectInvite(
+      guestPrivateProject.id,
+      sharedSpace.guestDxOrg,
+      'CONTRIBUTE',
+    )
     this.logger.log(
       `invited guest org: ${sharedSpace.guestDxOrg} to guest private project: ${guestPrivateProject.id}`,
     )

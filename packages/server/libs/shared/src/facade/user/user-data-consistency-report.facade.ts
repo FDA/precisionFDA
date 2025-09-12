@@ -38,6 +38,7 @@ import { PlatformClient } from '@shared/platform-client'
 import { UserRepository } from '@shared/domain/user/user.repository'
 import { EMAIL_TYPES } from '@shared/domain/email/model/email-types'
 import { FileOrAsset } from '@shared/domain/user-file/user-file.types'
+import { DxId } from '@shared/domain/entity/domain/dxid'
 
 // UserDataConsistencyReportOperation uses a user token to inspect the user's
 // data integrity in the database and detects inconsistencies between pFDA and platform
@@ -148,15 +149,12 @@ export class UserDataConsistencyReportFacade {
       // Check user's private projects' billTo
       const privateProjects: PrivateProject = {}
       const generateProjectInfo = async (
-        projectDxid: string | undefined,
+        projectDxid?: DxId<'project'>,
       ): Promise<ProjectInfo | string> => {
         if (!projectDxid) return 'Does not exist'
 
         try {
-          const projectDescribe = await this.platformClient.projectDescribe({
-            projectDxid,
-            body: {},
-          })
+          const projectDescribe = await this.platformClient.projectDescribe(projectDxid, {})
 
           const correctBillTo = projectDescribe.billTo === user.billTo()
           const status = correctBillTo
@@ -323,7 +321,7 @@ export class UserDataConsistencyReportFacade {
       for (const space of membership.spaces) {
         const errors: string[] = []
         const projectDxid = isHostSide ? space.hostProject : space.guestProject
-        const projectInfo = await this.platformClient.projectDescribe({ projectDxid, body: {} })
+        const projectInfo = await this.platformClient.projectDescribe(projectDxid, {})
         if (user.billTo() !== projectInfo.billTo) {
           errors.push(
             `[space-${space.id} (type: ${SPACE_TYPE[space.type]})] Project billTo (${projectInfo.id} - ${projectInfo.billTo}) does not match lead's org (${user.billTo()})`,

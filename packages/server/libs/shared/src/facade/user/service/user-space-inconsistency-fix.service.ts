@@ -18,8 +18,8 @@ export class UserSpaceInconsistencyFixService {
   async correctSpaceBillTo(billTo: string, projectDxid: DxId<'project'>): Promise<void> {
     try {
       this.logger.log(`Correcting space billTo for project ${projectDxid}`)
-      await this.adminClient.projectUpdate({ projectDxid, data: { billTo } })
-    } catch (error: any) {
+      await this.adminClient.projectUpdate(projectDxid, { billTo })
+    } catch (error) {
       this.logger.error(`Update project billTo failed: ${error.message}`)
     }
   }
@@ -35,7 +35,7 @@ export class UserSpaceInconsistencyFixService {
           suppressEmailNotification: true,
         },
       })
-    } catch (error: any) {
+    } catch (error) {
       this.logger.error(`Invite admin user to space org failed: ${error.message}`)
     }
   }

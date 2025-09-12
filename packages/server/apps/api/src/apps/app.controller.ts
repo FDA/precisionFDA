@@ -23,6 +23,9 @@ import { schemas } from '@shared/utils/base-schemas'
 import { UserContextGuard } from '../user-context/guard/user-context.guard'
 import { JsonSchemaPipe } from '../validation/pipes/json-schema.pipe'
 import { AppUidParamDto } from './model/app-uid-param.dto'
+import { Uid } from '@shared/domain/entity/domain/uid'
+import { License } from '@shared/domain/license/license.entity'
+import { Job } from '@shared/domain/job/job.entity'
 
 @UseGuards(UserContextGuard)
 @Controller('/apps')
@@ -36,12 +39,13 @@ export class AppController {
 
   @HttpCode(200)
   @Post()
-  async createApp(@Body() body: SaveAppDto) {
-    return await this.appService.create(body)
+  async createApp(@Body() body: SaveAppDto): Promise<{ uid: Uid<'app'> }> {
+    const appUid = await this.appService.create(body)
+    return { uid: appUid }
   }
 
   @Get('/:appUid/licenses-to-accept')
-  async getLicences(@Param() params: AppUidParamDto) {
+  async getLicences(@Param() params: AppUidParamDto): Promise<License[]> {
     const opsCtx: UserOpsCtx = {
       log: this.logger,
       user: this.user,
@@ -57,7 +61,7 @@ export class AppController {
   async run(
     @Param('appDxId', new JsonSchemaPipe(schemas.dxidProp)) appDxId: DxId<'app'>,
     @Body(new JsonSchemaPipe(runAppSchema)) body: Omit<RunAppInput, 'appDxid'>,
-  ) {
+  ): Promise<Job> {
     const opsCtx: UserOpsCtx = {
       log: this.logger,
       user: this.user,

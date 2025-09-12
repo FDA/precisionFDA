@@ -24,6 +24,7 @@ import {
 import { config } from '@shared/config'
 import { ADMIN_GROUP_ROLES } from '@shared/domain/admin-group/admin-group.entity'
 import { CreateSpaceDTO } from '@shared/domain/space/dto/create-space.dto'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
 
 describe('space creation process tests', () => {
   const SHARED_SPACE_ID = 2
@@ -33,7 +34,7 @@ describe('space creation process tests', () => {
   const GUEST_ORG_ID = 20
   const HOST_ORG_ID = 25
 
-  let userCtx: UserCtx
+  let userCtx: UserContext
   let emMocked: EntityManager<MySqlDriver>
   let platformClient: PlatformClient
   let adminPlatformClient: PlatformClient
@@ -60,14 +61,14 @@ describe('space creation process tests', () => {
   const siteAdmin = {
     id: 1,
     dxuser: 'siteAdminDxuser',
-    getEntity: () => {
+    getEntity: (): User => {
       return {
         billTo: () => 'admin-bill-to',
-      }
+      } as User
     },
-    isSiteAdmin: () => true,
-    isGovUser: () => false,
-    getProperty: (prop: string) => {
+    isSiteAdmin: (): boolean => true,
+    isGovUser: (): boolean => false,
+    getProperty: (prop: string): string => {
       if (prop === 'dxuser') return 'siteAdminDxuser'
       return undefined
     },
@@ -75,15 +76,15 @@ describe('space creation process tests', () => {
   const hostLeadUser = {
     id: 3,
     dxuser: 'hostLeadDxuser',
-    isSiteAdmin: () => false,
-    isReviewSpaceAdmin: () => true,
-    isGovUser: () => true,
-    getEntity: () => {
+    isSiteAdmin: (): boolean => false,
+    isReviewSpaceAdmin: (): boolean => true,
+    isGovUser: (): boolean => true,
+    getEntity: (): User => {
       return {
-        billTo: () => 'host-bill-to',
-      }
+        billTo: (): string => 'host-bill-to',
+      } as User
     },
-    getProperty: (prop: string) => {
+    getProperty: (prop: string): string => {
       if (prop === 'dxuser') return 'hostLeadDxuser'
       return undefined
     },
@@ -92,12 +93,12 @@ describe('space creation process tests', () => {
     id: 4,
     dxuser: 'guestLeadDxuser',
     organization: { id: GUEST_ORG_ID },
-    getEntity: () => {
+    getEntity: (): User => {
       return {
         billTo: () => 'guest-bill-to',
-      }
+      } as User
     },
-    getProperty: (prop: string) => {
+    getProperty: (prop: string): string => {
       if (prop === 'dxuser') return 'guestLeadDxuser'
       return undefined
     },
@@ -269,8 +270,8 @@ describe('space creation process tests', () => {
       const nonAdminUser = {
         id: 2,
         dxuser: 'nonAdminDxuser',
-        isSiteAdmin: () => false,
-        isReviewSpaceAdmin: () => false,
+        isSiteAdmin: (): boolean => false,
+        isReviewSpaceAdmin: (): boolean => false,
       }
 
       const input = new CreateSpaceDTO()
@@ -514,7 +515,7 @@ describe('space creation process tests', () => {
       const hostUser = {
         id: 1,
         dxuser: 'host',
-        isGovUser: () => false,
+        isGovUser: (): boolean => false,
       }
       userRepoFindOneStub.reset()
       userRepoFindOneStub.withArgs({ dxuser: 'hostLeadDxuser' }).resolves(hostUser)
@@ -547,7 +548,7 @@ describe('space creation process tests', () => {
       input.guestLeadDxuser = 'guestLeadDxuser'
       input.hostLeadDxuser = 'hostLeadDxuser'
       const user = {
-        isReviewSpaceAdmin: () => false,
+        isReviewSpaceAdmin: (): boolean => false,
       }
 
       emFindOneStub.withArgs(User, { id: USER_ID, userState: USER_STATE.ENABLED }).resolves(user)
@@ -678,42 +679,38 @@ describe('space creation process tests', () => {
       expect(emPopulateStub.secondCall.args[0][1].side).to.eq(SPACE_MEMBERSHIP_SIDE.GUEST)
 
       expect(projectCreateStub.callCount).to.eq(4)
-      expect(projectCreateStub.firstCall.args[0].name).to.eq('precisionfda-space-2-HOST')
-      expect(projectCreateStub.firstCall.args[0].billTo).to.eq('host-bill-to')
-      expect(projectCreateStub.secondCall.args[0].name).to.eq('precisionfda-space-2-GUEST')
-      expect(projectCreateStub.secondCall.args[0].billTo).to.eq('guest-bill-to')
-      expect(projectCreateStub.thirdCall.args[0].name).to.eq(
-        'precisionfda-space-2-REVIEWER-PRIVATE',
-      )
-      expect(projectCreateStub.thirdCall.args[0].billTo).to.eq('host-bill-to')
-      expect(projectCreateStub.getCall(3).args[0].name).to.eq(
-        'precisionfda-space-2-SPONSOR-PRIVATE',
-      )
+      expect(projectCreateStub.firstCall.args[0]).to.eq('precisionfda-space-2-HOST')
+      expect(projectCreateStub.firstCall.args[1]).to.eq('host-bill-to')
+      expect(projectCreateStub.secondCall.args[0]).to.eq('precisionfda-space-2-GUEST')
+      expect(projectCreateStub.secondCall.args[1]).to.eq('guest-bill-to')
+      expect(projectCreateStub.thirdCall.args[0]).to.eq('precisionfda-space-2-REVIEWER-PRIVATE')
+      expect(projectCreateStub.thirdCall.args[1]).to.eq('host-bill-to')
+      expect(projectCreateStub.getCall(3).args[0]).to.eq('precisionfda-space-2-SPONSOR-PRIVATE')
       const guestProjectId = projectCreateStub.firstCall.returnValue.id
       const hostProjectId = projectCreateStub.secondCall.returnValue.id
       const hostPrivateProjectId = projectCreateStub.thirdCall.returnValue.id
       const guestPrivateProjectId = projectCreateStub.getCall(3).returnValue.id
 
-      expect(projectCreateStub.getCall(3).args[0].billTo).to.eq('guest-bill-to')
+      expect(projectCreateStub.getCall(3).args[1]).to.eq('guest-bill-to')
       expect(projectInviteStub.callCount).to.eq(6)
-      expect(projectInviteStub.firstCall.args[0].projectDxid).to.eq(hostProjectId)
-      expect(projectInviteStub.firstCall.args[0].invitee).to.contain('host')
-      expect(projectInviteStub.firstCall.args[0].level).to.contain('CONTRIBUTE')
-      expect(projectInviteStub.secondCall.args[0].projectDxid).to.eq(hostProjectId)
-      expect(projectInviteStub.secondCall.args[0].invitee).to.contain('guest')
-      expect(projectInviteStub.secondCall.args[0].level).to.contain('CONTRIBUTE')
-      expect(projectInviteStub.thirdCall.args[0].projectDxid).to.eq(guestProjectId)
-      expect(projectInviteStub.thirdCall.args[0].invitee).to.contain('host')
-      expect(projectInviteStub.thirdCall.args[0].level).to.contain('CONTRIBUTE')
-      expect(projectInviteStub.getCall(3).args[0].projectDxid).to.eq(guestProjectId)
-      expect(projectInviteStub.getCall(3).args[0].invitee).to.contain('guest')
-      expect(projectInviteStub.getCall(3).args[0].level).to.contain('CONTRIBUTE')
-      expect(projectInviteStub.getCall(4).args[0].projectDxid).to.eq(hostPrivateProjectId)
-      expect(projectInviteStub.getCall(4).args[0].invitee).to.contain('host')
-      expect(projectInviteStub.getCall(4).args[0].level).to.contain('CONTRIBUTE')
-      expect(projectInviteStub.getCall(5).args[0].projectDxid).to.eq(guestPrivateProjectId)
-      expect(projectInviteStub.getCall(5).args[0].invitee).to.contain('guest')
-      expect(projectInviteStub.getCall(5).args[0].level).to.contain('CONTRIBUTE')
+      expect(projectInviteStub.firstCall.args[0]).to.eq(hostProjectId)
+      expect(projectInviteStub.firstCall.args[1]).to.contain('host')
+      expect(projectInviteStub.firstCall.args[2]).to.contain('CONTRIBUTE')
+      expect(projectInviteStub.secondCall.args[0]).to.eq(hostProjectId)
+      expect(projectInviteStub.secondCall.args[1]).to.contain('guest')
+      expect(projectInviteStub.secondCall.args[2]).to.contain('CONTRIBUTE')
+      expect(projectInviteStub.thirdCall.args[0]).to.eq(guestProjectId)
+      expect(projectInviteStub.thirdCall.args[1]).to.contain('host')
+      expect(projectInviteStub.thirdCall.args[2]).to.contain('CONTRIBUTE')
+      expect(projectInviteStub.getCall(3).args[0]).to.eq(guestProjectId)
+      expect(projectInviteStub.getCall(3).args[1]).to.contain('guest')
+      expect(projectInviteStub.getCall(3).args[2]).to.contain('CONTRIBUTE')
+      expect(projectInviteStub.getCall(4).args[0]).to.eq(hostPrivateProjectId)
+      expect(projectInviteStub.getCall(4).args[1]).to.contain('host')
+      expect(projectInviteStub.getCall(4).args[2]).to.contain('CONTRIBUTE')
+      expect(projectInviteStub.getCall(5).args[0]).to.eq(guestPrivateProjectId)
+      expect(projectInviteStub.getCall(5).args[1]).to.contain('guest')
+      expect(projectInviteStub.getCall(5).args[2]).to.contain('CONTRIBUTE')
 
       expect(emPersistStub.callCount).to.eq(6)
       expect(emPersistStub.firstCall.args[0].spaceId).to.be.eq(SHARED_SPACE_ID)
@@ -742,7 +739,12 @@ describe('space creation process tests', () => {
   })
 
   function reviewProcess(dxuser: string, userId: number): ReviewSpaceCreationProcess {
-    userCtx = { dxuser, id: userId, accessToken: 'secret-token' }
+    userCtx = {
+      dxuser,
+      id: userId,
+      accessToken: 'secret-token',
+      loadEntity: async (): Promise<User> => null,
+    }
     return new ReviewSpaceCreationProcess(
       userCtx,
       emMocked,
@@ -754,7 +756,12 @@ describe('space creation process tests', () => {
   }
 
   function groupsProcess(dxuser: string, userId: number): GroupsSpaceCreationProcess {
-    userCtx = { dxuser, id: userId, accessToken: 'secret-token' }
+    userCtx = {
+      dxuser,
+      id: userId,
+      accessToken: 'secret-token',
+      loadEntity: async (): Promise<User> => null,
+    }
     return new GroupsSpaceCreationProcess(
       userCtx,
       emMocked,
@@ -765,7 +772,12 @@ describe('space creation process tests', () => {
   }
 
   function privateProcess(dxuser: string, userId: number): PrivateSpaceCreationProcess {
-    userCtx = { dxuser, id: userId, accessToken: 'secret-token' }
+    userCtx = {
+      dxuser,
+      id: userId,
+      accessToken: 'secret-token',
+      loadEntity: async (): Promise<User> => null,
+    }
     return new PrivateSpaceCreationProcess(
       userCtx,
       emMocked,
@@ -777,7 +789,12 @@ describe('space creation process tests', () => {
   }
 
   function administratorProcess(dxuser: string, userId: number): AdministratorSpaceCreationProcess {
-    userCtx = { dxuser, id: userId, accessToken: 'secret-token' }
+    userCtx = {
+      dxuser,
+      id: userId,
+      accessToken: 'secret-token',
+      loadEntity: async (): Promise<User> => null,
+    }
     return new AdministratorSpaceCreationProcess(
       userCtx,
       emMocked,
@@ -789,7 +806,12 @@ describe('space creation process tests', () => {
   }
 
   function governmentProcess(dxuser: string, userId: number): GovernmentSpaceCreationProcess {
-    userCtx = { dxuser, id: userId, accessToken: 'secret-token' }
+    userCtx = {
+      dxuser,
+      id: userId,
+      accessToken: 'secret-token',
+      loadEntity: async (): Promise<User> => null,
+    }
     return new GovernmentSpaceCreationProcess(
       userCtx,
       emMocked,

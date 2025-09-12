@@ -18,6 +18,7 @@ import { SpaceRepository } from './space.repository'
 import { SpaceGroup } from '@shared/domain/space/space-group.entity'
 import { Tagging } from '@shared/domain/tagging/tagging.entity'
 import { WorkaroundJsonType } from '@shared/database/json-workaround.type'
+import { DxId } from '@shared/domain/entity/domain/dxid'
 
 type SpaceMeta = {
   cts: string
@@ -39,12 +40,12 @@ export class Space extends BaseEntity {
   @Property({ fieldName: 'guest_dxorg' })
   guestDxOrg: string
 
-  // this should never be null i think??
+  // this should never be null I think??
   @Property({ fieldName: 'host_project', nullable: true })
-  hostProject: string
+  hostProject: DxId<'project'>
 
   @Property({ fieldName: 'guest_project', nullable: true })
-  guestProject: string
+  guestProject: DxId<'project'>
 
   @Enum(() => SPACE_STATE)
   state: SPACE_STATE

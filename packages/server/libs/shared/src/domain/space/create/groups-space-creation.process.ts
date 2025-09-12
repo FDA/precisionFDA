@@ -128,50 +128,34 @@ export class GroupsSpaceCreationProcess extends SpaceCreationProcess {
 
     await this.em.populate([hostLead, guestLead], ['user.organization'])
 
-    const hostProject = await this.adminClient.projectCreate({
-      name: `precisionfda-${space.scope}-HOST`,
-      billTo: hostLead.user.getEntity().billTo(),
-    })
+    const hostProject = await this.adminClient.projectCreate(
+      `precisionfda-${space.scope}-HOST`,
+      hostLead.user.getEntity().billTo(),
+    )
     this.logger.log(
       `created host project: ${hostProject.id} with lead: ${hostLead.user.getProperty('dxuser')}`,
     )
 
-    const guestProject = await this.adminClient.projectCreate({
-      name: `precisionfda-${space.scope}-GUEST`,
-      billTo: guestLead.user.getEntity().billTo(),
-    })
+    const guestProject = await this.adminClient.projectCreate(
+      `precisionfda-${space.scope}-GUEST`,
+      guestLead.user.getEntity().billTo(),
+    )
     this.logger.log(
       `created guest project: ${guestProject.id} with lead: ${guestLead.user.getProperty('dxuser')}`,
     )
 
     // we could do two parallel calls to each project,
     // but not to the same one - you will get cannot acquire lock error from platform
-    await this.adminClient.projectInvite({
-      projectDxid: hostProject.id,
-      invitee: space.hostDxOrg,
-      level: 'CONTRIBUTE',
-    })
+    await this.adminClient.projectInvite(hostProject.id, space.hostDxOrg, 'CONTRIBUTE')
     this.logger.log(`invited host org: ${space.hostDxOrg} to host project: ${hostProject.id}`)
 
-    await this.adminClient.projectInvite({
-      projectDxid: hostProject.id,
-      invitee: space.guestDxOrg,
-      level: 'CONTRIBUTE',
-    })
+    await this.adminClient.projectInvite(hostProject.id, space.guestDxOrg, 'CONTRIBUTE')
     this.logger.log(`invited guest org: ${space.guestDxOrg} to host project: ${hostProject.id}`)
 
-    await this.adminClient.projectInvite({
-      projectDxid: guestProject.id,
-      invitee: space.hostDxOrg,
-      level: 'CONTRIBUTE',
-    })
+    await this.adminClient.projectInvite(guestProject.id, space.hostDxOrg, 'CONTRIBUTE')
     this.logger.log(`invited host org: ${space.hostDxOrg} to guest project: ${guestProject.id}`)
 
-    await this.adminClient.projectInvite({
-      projectDxid: guestProject.id,
-      invitee: space.guestDxOrg,
-      level: 'CONTRIBUTE',
-    })
+    await this.adminClient.projectInvite(guestProject.id, space.guestDxOrg, 'CONTRIBUTE')
     this.logger.log(`invited guest org: ${space.guestDxOrg} to guest project: ${guestProject.id}`)
 
     space.hostProject = hostProject.id
