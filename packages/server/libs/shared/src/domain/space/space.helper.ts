@@ -4,6 +4,7 @@ import { InternalError } from '@shared/errors'
 import { defaultLogger as log } from '../../logger'
 import { SPACE_MEMBERSHIP_ROLE } from '../space-membership/space-membership.enum'
 import { SPACE_TYPE } from './space.enum'
+import { DxId } from '@shared/domain/entity/domain/dxid'
 
 const getIdFromScopeName = (name: string): number => {
   const [prefix, id] = name.split('-')
@@ -38,10 +39,14 @@ const setOrgDxid = (space: Space, spaceMembership: SpaceMembership, value: strin
   spaceMembership.isHost() ? (space.hostDxOrg = value) : (space.guestDxOrg = value)
 }
 
-const getProjectDxid = (space: Space, spaceMembership: SpaceMembership): string =>
+const getProjectDxid = (space: Space, spaceMembership: SpaceMembership): DxId<'project'> =>
   spaceMembership.isHost() ? space.hostProject : space.guestProject
 
-const setProjectDxid = (space: Space, spaceMembership: SpaceMembership, value: string): void => {
+const setProjectDxid = (
+  space: Space,
+  spaceMembership: SpaceMembership,
+  value: DxId<'project'>,
+): void => {
   spaceMembership.isHost() ? (space.hostProject = value) : (space.guestProject = value)
 }
 

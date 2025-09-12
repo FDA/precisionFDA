@@ -1,12 +1,10 @@
 import type { Logger } from '@nestjs/common'
-// just a bunch of api calls that will be easy to mock
 import { DxId } from '@shared/domain/entity/domain/dxid'
 import axios, { AxiosRequestConfig } from 'axios'
 import { isNil, omit } from 'ramda'
 import { WebSocket } from 'ws'
 import { config } from '../config'
-import { SPACE_MEMBERSHIP_SIDE } from '../domain/space-membership/space-membership.enum'
-import { ClientRequestError, MfaAlreadyResetError, OrgMembershipError } from '../errors'
+import { ClientRequestError, MfaAlreadyResetError } from '../errors'
 import { getLogger } from '../logger'
 import type { AnyObject } from '../types'
 import { maskAuthHeader } from '../utils/logging'
@@ -36,7 +34,6 @@ import {
   JobTerminateParams,
   ListFilesParams,
   MoveFilesParams,
-  ObjectsParams,
   OrgDescribeParams,
   OrgFindMembersParams,
   ProjectLeaveParams,
@@ -415,12 +412,11 @@ export class PlatformClient {
       data.starting = starting
     }
 
-    const scope = {
+    data.scope = {
       project: params.project,
       folder: params.folder ?? '/',
       recurse: false,
     }
-    data.scope = scope
     if (!isNil(params.includeDescProps)) {
       data.describe = {
         fields: {
@@ -721,15 +717,12 @@ export class PlatformClient {
    * @param {string[]} objects - IDs to be removed from the container
    * @return [id string ID of the manipulated data container]
    */
-  async containerRemoveObjects(
-    containerDxid: string,
-    params: ObjectsParams,
-  ): Promise<ClassIdResponse> {
+  async containerRemoveObjects(containerDxid: string, objects: string[]): Promise<ClassIdResponse> {
     const url = `${config.platform.apiUrl}/${containerDxid}/removeObjects`
     const options: AxiosRequestConfig = {
       method: 'POST',
       data: {
-        objects: params.objects,
+        objects,
       },
       url,
     }
@@ -739,20 +732,16 @@ export class PlatformClient {
   /**
    * Creates a new project
    * @see https://documentation.dnanexus.com/developer/api/data-containers/projects#api-method-project-new
-   * @param {string} name - OPTIONAL - overrides new project name.
-   * @param {string} billTo - OPTIONAL - overrides new project billTo.
-   * @param {Space} space - used for project name, can be overriden by name param.
-   * @param {SpaceMembership} admin - used for project's billTo and project name (name can be overriden by name param)
+   * @param {string} name - new project name.
+   * @param {string} billTo - new project billTo.
    */
-  async projectCreate(params: any): Promise<ClassIdResponse> {
+  async projectCreate(name: string, billTo: string): Promise<ClassIdResponse<'project'>> {
     const url = `${config.platform.apiUrl}/project/new`
     const options: AxiosRequestConfig = {
       method: 'POST',
       data: {
-        name:
-          params.name ??
-          `precisionfda-${params.space.uid}-${SPACE_MEMBERSHIP_SIDE[params.admin.side]}`,
-        billTo: params.billTo ?? params.admin.user.getEntity().organization.getEntity().getDxOrg(),
+        name,
+        billTo,
       },
       url,
     }
@@ -762,17 +751,22 @@ export class PlatformClient {
   /**
    * Invite org or user in project.
    *  @see https://documentation.dnanexus.com/developer/api/data-containers/project-permissions-and-sharing#api-method-project-xxxx-invite
+   *  @param {string} projectDxid - dxid of the project
    *  @param {string} invitee - OrgDxID, UserID or user's email.
    *  @param {string} level - Permission level.
    *  @return [don't know yet]
    */
-  async projectInvite(params: any): Promise<{ id: string; state: string }> {
-    const url = `${config.platform.apiUrl}/${params.projectDxid}/invite`
+  async projectInvite(
+    projectDxid: string,
+    invitee: string,
+    level: string,
+  ): Promise<{ id: string; state: string }> {
+    const url = `${config.platform.apiUrl}/${projectDxid}/invite`
     const options: AxiosRequestConfig = {
       method: 'POST',
       data: {
-        invitee: params.invitee,
-        level: params.level,
+        invitee,
+        level,
         // might add to params later for optional configuration
         suppressEmailNotification: true,
         suppressAllNotifications: true,
@@ -789,11 +783,11 @@ export class PlatformClient {
    * @param {object} body - OPTIONAL - Inputs.
    * @return {any}
    */
-  async projectDescribe(params: any): Promise<any> {
-    const url = `${config.platform.apiUrl}/${params.projectDxid}/describe`
+  async projectDescribe(projectDxid: DxId<'project'>, body?: unknown): Promise<any> {
+    const url = `${config.platform.apiUrl}/${projectDxid}/describe`
     const options: AxiosRequestConfig = {
       method: 'POST',
-      data: params.body ?? {},
+      data: body ?? {},
       url,
     }
     return await this.sendRequest(options)
@@ -802,19 +796,20 @@ export class PlatformClient {
   /**
    * Accept billing responsibility for the project, possibly on behalf of an org.
    * @see https://documentation.dnanexus.com/developer/api/data-containers/project-permissions-and-sharing#api-method-project-xxxx-accepttransfer
+   * @param {string} projectDxid - project dxid
    * @param {string} billTo - billing account (user or org ID).
    * @return {any}
    */
-  async projectAcceptTransfer(params: any): Promise<any> {
-    const url = `${config.platform.apiUrl}/${params.projectDxid}/acceptTransfer`
+  async projectAcceptTransfer(projectDxid: DxId<'project'>, billTo: string): Promise<void> {
+    const url = `${config.platform.apiUrl}/${projectDxid}/acceptTransfer`
     const options: AxiosRequestConfig = {
       method: 'POST',
       data: {
-        billTo: params.billTo,
+        billTo: billTo,
       },
       url,
     }
-    return await this.sendRequest(options)
+    await this.sendRequest(options)
   }
 
   async projectLeave(params: ProjectLeaveParams): Promise<ClassIdResponse> {
@@ -827,11 +822,11 @@ export class PlatformClient {
     return await this.sendRequest(options)
   }
 
-  async projectUpdate(params: any): Promise<ClassIdResponse> {
-    const url = `${config.platform.apiUrl}/${params.projectDxid}/update`
+  async projectUpdate(projectDxid: DxId<'project'>, data: unknown): Promise<ClassIdResponse> {
+    const url = `${config.platform.apiUrl}/${projectDxid}/update`
     const options: AxiosRequestConfig = {
       method: 'POST',
-      data: params.data,
+      data: data,
       url,
     }
     return await this.sendRequest(options)
@@ -932,8 +927,6 @@ export class PlatformClient {
   /**
    * Describe data objects
    * @see https://documentation.dnanexus.com/developer/api/system-methods#api-method-system-describedataobjects
-   * @param {any[]} objects
-   * @param {any} classDescribeOptions
    * For param details look at platform API page
    */
   async describeDataObjects(): Promise<DescribeDataObjectsResponse> {

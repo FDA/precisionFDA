@@ -44,7 +44,7 @@ describe('app service tests', () => {
   let removeObjectsContainerParam: string
   let removeObjectsParam: any
 
-  const privateFilesProjectId = 'privateFilesProjectID'
+  const privateFilesProjectId = 'project-privateFilesProjectID'
   const appletId = 'applet-ID'
   let appId = 'app-ID' as DxId<'app'>
   const instanceType = 'baseline-2'
@@ -164,7 +164,7 @@ describe('app service tests', () => {
 
     // validate containerRemoveObjects
     expect(removeObjectsContainerParam).to.equal(privateFilesProjectId)
-    expect(JSON.stringify(removeObjectsParam)).to.equal(JSON.stringify({ objects: [appletId] }))
+    expect(removeObjectsParam).to.deep.equal([appletId])
 
     // validate saveAppInDB
     const loadedApp = await em.findOneOrFail(App, { dxid: appId }, { populate: ['assets'] })
@@ -196,7 +196,7 @@ describe('app service tests', () => {
     expect(loadedAppEvent.param1).to.equal(appId)
     expect(loadedAppEvent.param2).to.equal(appInput.title)
 
-    expect(resultId).to.deep.equal({ uid: `${appId}-1` })
+    expect(resultId).to.deep.equal(`${appId}-1`)
   })
 
   it('save app - test call app series validation', async () => {
@@ -403,7 +403,7 @@ describe('app service tests', () => {
     const result = await appService.create(appInput1)
     em.clear()
 
-    const loadedApp = await em.findOneOrFail(App, { uid: result.uid })
+    const loadedApp = await em.findOneOrFail(App, { uid: result })
     expect(JSON.stringify(loadedApp.spec.input_spec[0])).to.equal(JSON.stringify(intSpec))
     expect(JSON.stringify(loadedApp.spec.input_spec[1])).to.equal(JSON.stringify(floatSpec))
     expect(JSON.stringify(loadedApp.spec.input_spec[2])).to.equal(JSON.stringify(stringSpec))
@@ -451,9 +451,9 @@ describe('app service tests', () => {
     appInput.input_spec = [getSpec('intName', 'int', 'intHelp', 'intLabel', false, 1, [])]
     appInput.output_spec = [getSpec('intName', 'int', 'intHelp', 'intLabel', false, 1, [])]
 
-    const app = await appService.create(appInput)
+    const appUid = await appService.create(appInput)
 
-    const loadedApp = await em.findOneOrFail(App, { uid: app.uid })
+    const loadedApp = await em.findOneOrFail(App, { uid: appUid })
 
     expect(loadedApp.spec.input_spec[0]).not.to.have.property('choices')
     expect(loadedApp.spec.output_spec[0]).not.to.have.property('choices')
@@ -472,9 +472,9 @@ describe('app service tests', () => {
     appInput.input_spec = [getSpec('intName', 'int', 'intHelp', 'intLabel', false, 1, [1, 2])]
     appInput.output_spec = [getSpec('intName', 'int', 'intHelp', 'intLabel', false, 1, [3, 4])]
 
-    const app = await appService.create(appInput)
+    const appUid = await appService.create(appInput)
 
-    const loadedApp = await em.findOneOrFail(App, { uid: app.uid })
+    const loadedApp = await em.findOneOrFail(App, { uid: appUid })
 
     expect(loadedApp.spec.input_spec[0].choices).to.deep.equal([1, 2])
     expect(loadedApp.spec.output_spec[0].choices).to.deep.equal([3, 4])
@@ -708,7 +708,7 @@ describe('app service tests', () => {
     const result = await appService.create(appInput)
     em.clear()
 
-    const loadedApp = await em.findOneOrFail(App, { uid: result.uid })
+    const loadedApp = await em.findOneOrFail(App, { uid: result })
     expect(loadedApp.spec.input_spec[0].class).to.equal('array:file')
     expect(loadedApp.spec.output_spec[0].class).to.equal('array:string')
   })

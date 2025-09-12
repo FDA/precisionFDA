@@ -20,7 +20,7 @@ export class JobLogService {
     private readonly em: SqlEntityManager,
   ) {}
 
-  async streamJobLogs(job: Job, client: PfdaWebSocket) {
+  async streamJobLogs(job: Job, client: PfdaWebSocket): Promise<void> {
     const jobDxId = job.dxid
     const isAccessible = await this.isJobAccessible(jobDxId)
     const ws = isAccessible
@@ -54,16 +54,19 @@ export class JobLogService {
     })
   }
 
-  private async isJobAccessible(jobDxId) {
+  private async isJobAccessible(jobDxId): Promise<boolean> {
     try {
       await this.userClient.jobDescribe({ jobId: jobDxId })
       return true
-    } catch (e) {
+    } catch {
       return false
     }
   }
 
-  private async askAdminForJobLogs(jobDxId: DxId<'job'>, client: PfdaWebSocket) {
+  private async askAdminForJobLogs(
+    jobDxId: DxId<'job'>,
+    client: PfdaWebSocket,
+  ): Promise<WebSocket> {
     try {
       const jobDescribe = await this.adminClient
         .jobDescribe({ jobId: jobDxId })
@@ -77,11 +80,11 @@ export class JobLogService {
       if (!jobDescribe) {
         const job = await this.em.findOne(Job, { dxid: jobDxId }, { orderBy: { createdAt: 'ASC' } })
         originalProject = job.project
-        await this.adminClient.projectInvite({
-          projectDxid: originalProject,
-          invitee: `user-${config.platform.adminUser}`,
-          level: 'VIEW',
-        })
+        await this.adminClient.projectInvite(
+          originalProject,
+          `user-${config.platform.adminUser}`,
+          'VIEW',
+        )
       }
       const ws = this.adminClient.streamJobLogs(jobDxId)
       ws.on('close', async () => {

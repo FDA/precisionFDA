@@ -138,10 +138,7 @@ export class SpacesController {
     if (membership.side === SPACE_MEMBERSHIP_SIDE.GUEST) {
       try {
         // try to get some data from host project - should fail.
-        await platformClient.projectDescribe({
-          projectDxid: spaceToFix.hostProject,
-          body: {},
-        })
+        await platformClient.projectDescribe(spaceToFix.hostProject, {})
       } catch {
         throw new PermissionError(
           'Please contact host lead of this space to perform the same action. You can copy the URL and send it to the lead.',
@@ -151,12 +148,9 @@ export class SpacesController {
       throw new PermissionError('Permissions are already corrected for guest side.')
     } else {
       // check project first.
-      const res = await platformClient.projectDescribe({
-        projectDxid: spaceToFix.hostProject,
-        body: {
-          fields: {
-            permissions: true,
-          },
+      const res = await platformClient.projectDescribe(spaceToFix.hostProject, {
+        fields: {
+          permissions: true,
         },
       })
 
@@ -164,11 +158,11 @@ export class SpacesController {
         throw new PermissionError('Permissions are already corrected for guest side.')
       }
 
-      const response = await platformClient.projectInvite({
-        projectDxid: spaceToFix.hostProject,
-        invitee: spaceToFix.guestDxOrg,
-        level: 'CONTRIBUTE',
-      })
+      const response = await platformClient.projectInvite(
+        spaceToFix.hostProject,
+        spaceToFix.guestDxOrg,
+        'CONTRIBUTE',
+      )
       this.logger.log({ response }, 'Guest organization invited to host project.')
     }
   }

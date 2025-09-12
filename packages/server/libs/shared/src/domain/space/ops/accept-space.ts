@@ -108,7 +108,7 @@ export class SpaceAcceptOperation extends BaseOperation<UserOpsCtx, SpaceAcceptI
     )
   }
 
-  async activate(space: Space, confidentialSpaces: Space[]) {
+  async activate(space: Space, confidentialSpaces: Space[]): Promise<void> {
     space.state = 1
     confidentialSpaces.forEach((cs: Space) => {
       cs.state = 1
@@ -132,12 +132,20 @@ export class SpaceAcceptOperation extends BaseOperation<UserOpsCtx, SpaceAcceptI
     // TODO: notification email still on ruby side, missing template in node
   }
 
-  async acceptSpace(space: Space, confidentialSpaces: Space[], admin: SpaceMembership) {
+  async acceptSpace(
+    space: Space,
+    confidentialSpaces: Space[],
+    admin: SpaceMembership,
+  ): Promise<void> {
     await this.acceptSpaceByType(space, confidentialSpaces, admin)
     await this.em.flush()
   }
 
-  async acceptSpaceByType(space: Space, confidentialSpaces: Space[], admin: SpaceMembership) {
+  async acceptSpaceByType(
+    space: Space,
+    confidentialSpaces: Space[],
+    admin: SpaceMembership,
+  ): Promise<void> {
     switch (space.type) {
       case SPACE_TYPE.REVIEW:
         await this.handleReviewSpaceAccept(space, confidentialSpaces, admin)
@@ -154,7 +162,11 @@ export class SpaceAcceptOperation extends BaseOperation<UserOpsCtx, SpaceAcceptI
     }
   }
 
-  async handleReviewSpaceAccept(space: Space, confidentialSpaces: Space[], admin: SpaceMembership) {
+  async handleReviewSpaceAccept(
+    space: Space,
+    confidentialSpaces: Space[],
+    admin: SpaceMembership,
+  ): Promise<void> {
     if (admin.side === SPACE_MEMBERSHIP_SIDE.HOST) {
       await this.handleHostProjectAcceptTransfer(space, admin)
 
@@ -185,58 +197,48 @@ export class SpaceAcceptOperation extends BaseOperation<UserOpsCtx, SpaceAcceptI
     })
     await this.em.persistAndFlush(newSpace)
 
-    const newProjectRes = await this.platformClient.projectCreate({
-      name: `precisionfda-${newSpace.scope}-${SPACE_MEMBERSHIP_SIDE[admin.side]}-PRIVATE`,
-      admin,
-    })
+    const newProjectRes = await this.platformClient.projectCreate(
+      `precisionfda-${newSpace.scope}-${SPACE_MEMBERSHIP_SIDE[admin.side]}-PRIVATE`,
+      admin.user.getEntity().organization.getEntity().getDxOrg(),
+    )
 
     const contributeOrg = getOrgDxid(space, admin)
     setOrgDxid(newSpace, admin, contributeOrg)
     setProjectDxid(newSpace, admin, newProjectRes.id)
 
-    await this.platformClient.projectInvite({
-      projectDxid: newProjectRes.id,
-      invitee: contributeOrg,
-      level: 'CONTRIBUTE',
-    })
+    await this.platformClient.projectInvite(newProjectRes.id, contributeOrg, 'CONTRIBUTE')
 
     newSpace.spaceMemberships.add(admin)
   }
 
-  private async handleHostProjectAcceptTransfer(space: Space, admin: SpaceMembership) {
-    const project = await this.platformClient.projectDescribe({
-      projectDxid: space.hostProject,
-      body: { fields: { pendingTransfer: true } },
+  private async handleHostProjectAcceptTransfer(
+    space: Space,
+    admin: SpaceMembership,
+  ): Promise<void> {
+    const project = await this.platformClient.projectDescribe(space.hostProject, {
+      fields: { pendingTransfer: true },
     })
     if (project.pendingTransfer) {
-      await this.platformClient.projectAcceptTransfer({
-        projectDxid: space.hostProject,
-        billTo: `org-pfda..${admin.user.getProperty('organization').getProperty('handle')}`,
-      })
+      await this.platformClient.projectAcceptTransfer(
+        space.hostProject,
+        `org-pfda..${admin.user.getProperty('organization').getProperty('handle')}`,
+      )
     }
   }
 
-  private async handleSpaceAccept(space: Space, admin: SpaceMembership) {
-    const newProjectRes = await this.platformClient.projectCreate({
-      space,
-      admin,
-    })
+  private async handleSpaceAccept(space: Space, admin: SpaceMembership): Promise<void> {
+    const newProjectRes = await this.platformClient.projectCreate(
+      `precisionfda-${space.scope}-${SPACE_MEMBERSHIP_SIDE[admin.side]}`,
+      admin.user.getEntity().organization.getEntity().getDxOrg(),
+    )
 
     const contributeOrg = getOrgDxid(space, admin)
     const oppositeOrg = getOppositeOrgDxid(space, admin)
 
-    // THIS CANNOT RUN IN PARALLEL - will cause 'failed to aquire lock to change object' platform error
-    await this.platformClient.projectInvite({
-      projectDxid: newProjectRes.id,
-      invitee: contributeOrg,
-      level: 'CONTRIBUTE',
-    })
+    // THIS CANNOT RUN IN PARALLEL - will cause 'failed to acquire lock to change object' platform error
+    await this.platformClient.projectInvite(newProjectRes.id, contributeOrg, 'CONTRIBUTE')
 
-    await this.platformClient.projectInvite({
-      projectDxid: newProjectRes.id,
-      invitee: oppositeOrg,
-      level: 'CONTRIBUTE',
-    })
+    await this.platformClient.projectInvite(newProjectRes.id, oppositeOrg, 'CONTRIBUTE')
     // previously there was a call to project invite review_app_developers_org as well. Trying spaces without it.
 
     if (admin.isHost()) {

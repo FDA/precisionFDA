@@ -52,7 +52,7 @@ export class AppService {
     private readonly appRepository: AppRepository,
   ) {}
 
-  private validateSpec(spec: Spec, type: string, alreadySeenSpec: string[]) {
+  private validateSpec(spec: Spec, type: string, alreadySeenSpec: string[]): void {
     if (!spec.name || spec.name.length === 0) {
       this.throwValidationError(`The ${type} name cannot be empty.`)
     }
@@ -78,12 +78,12 @@ export class AppService {
     }
   }
 
-  private throwValidationError(message: string) {
+  private throwValidationError(message: string): void {
     this.logger.error(message)
     throw new ValidationError(message)
   }
 
-  private async validateAppInput(appInput: SaveAppDto) {
+  private async validateAppInput(appInput: SaveAppDto): Promise<void> {
     this.logger.log('Starting app validations')
 
     if (!UBUNTU_RELEASES.includes(appInput.release)) {
@@ -129,7 +129,7 @@ export class AppService {
     this.logger.log('App validations finished successfully')
   }
 
-  private async validateScopeAndUser(user: User, scope: EntityScope) {
+  private async validateScopeAndUser(user: User, scope: EntityScope): Promise<void> {
     if (scope === STATIC_SCOPE.PUBLIC && !(await user.isSiteAdmin())) {
       throw new PermissionError('Only site admins can create public apps.')
     }
@@ -143,7 +143,7 @@ export class AppService {
     }
   }
 
-  private validateAppSeriesCreation(appSeries?: AppSeries, createAppSeries?: boolean) {
+  private validateAppSeriesCreation(appSeries?: AppSeries, createAppSeries?: boolean): void {
     if (!appSeries && !createAppSeries) {
       throw new ValidationError(
         'This would create a new app series and client did not request its creation.',
@@ -154,7 +154,7 @@ export class AppService {
     }
   }
 
-  private async validateForkedApp(forkFrom?: Uid<'app'>) {
+  private async validateForkedApp(forkFrom?: Uid<'app'>): Promise<void> {
     if (forkFrom) {
       const forkedApp = await this.appRepository.findAccessibleOne({ uid: forkFrom })
 
@@ -168,7 +168,7 @@ export class AppService {
     }
   }
 
-  private validateAppRevisionCreation(appSeries?: AppSeries, createAppRevision?: boolean) {
+  private validateAppRevisionCreation(appSeries?: AppSeries, createAppRevision?: boolean): void {
     if (appSeries && !createAppRevision) {
       throw new ValidationError(
         'This would create a new app revision and client did not request its creation.',
@@ -179,15 +179,11 @@ export class AppService {
     }
   }
 
-  private getAssetDxids(assets: Asset[]) {
-    if (assets.length === 1) {
-      return [assets[0].dxid]
-    } else {
-      return assets.map((asset) => asset.dxid)
-    }
+  private getAssetDxids(assets: Asset[]): DxId<'file'>[] {
+    return assets.map(asset => asset.dxid)
   }
 
-  private getEntityType(entityType: string) {
+  private getEntityType(entityType: string): ENTITY_TYPE {
     if (entityType && entityType === 'https') {
       return ENTITY_TYPE.HTTPS
     } else {
@@ -209,7 +205,7 @@ export class AppService {
     }
   }
 
-  private async getAppSeries(appName: string, scope: EntityScope) {
+  private async getAppSeries(appName: string, scope: EntityScope): Promise<AppSeries> {
     return await this.appSeriesRepository.findOne({
       name: appName,
       scope: scope,
@@ -217,7 +213,11 @@ export class AppService {
     })
   }
 
-  private async createAppSeries(appName: string, user: User, scope?: EntityScope) {
+  private async createAppSeries(
+    appName: string,
+    user: User,
+    scope?: EntityScope,
+  ): Promise<AppSeries> {
     const appSeriesDxid = constructDxid(this.user.dxuser, appName, scope)
     const appSeries = new AppSeries(user)
     appSeries.name = appName
@@ -228,7 +228,7 @@ export class AppService {
     return appSeries
   }
 
-  private async getAppRevision(latestRevisionAppId?: number) {
+  private async getAppRevision(latestRevisionAppId?: number): Promise<number> {
     const latestRevisionApp = await this.appRepository.findOne({ id: latestRevisionAppId })
     if (latestRevisionApp) {
       return latestRevisionApp.revision + 1
@@ -259,7 +259,11 @@ export class AppService {
    * @param appInput
    * @param release
    */
-  private async createApplet(user: User, appInput: SaveAppDto, release: string) {
+  private async createApplet(
+    user: User,
+    appInput: SaveAppDto,
+    release: string,
+  ): Promise<DxId<'applet'>> {
     this.logger.log('Creating applet in platform')
     const appletCreateParams: AppletCreateParams = {
       project: user.privateFilesProject,
@@ -283,7 +287,7 @@ export class AppService {
     }
     const appletCreateResponse = await this.platformClient.appletCreate(appletCreateParams)
     this.logger.log(`Applet with id ${appletCreateResponse.id} created successfully`)
-    return appletCreateResponse.id
+    return appletCreateResponse.id as DxId<'applet'>
   }
 
   private async createAppInPlatform(
@@ -292,7 +296,7 @@ export class AppService {
     revision: number,
     user: User,
     assets: Asset[],
-  ) {
+  ): Promise<DxId<'app'>> {
     this.logger.log(`Creating app in platform for applet id ${appletId}`)
     const assetDxids = this.getAssetDxids(assets)
     const appCreateParams: AppCreateParams = {
@@ -315,13 +319,17 @@ export class AppService {
     return appCreateResponse.id
   }
 
-  private async createAppEvent(user: User, app: App) {
+  private async createAppEvent(user: User, app: App): Promise<void> {
     this.logger.log(`Creating app event for app ${app.uid} and user ${user.id}`)
     const createAppEvent = await createAppCreated(user, app)
     await this.em.persistAndFlush(createAppEvent)
   }
 
-  private async updateAppSeries(appSeries: AppSeries, appInput: SaveAppDto, app: App) {
+  private async updateAppSeries(
+    appSeries: AppSeries,
+    appInput: SaveAppDto,
+    app: App,
+  ): Promise<void> {
     this.logger.log(`Updating app series ${appSeries.dxid}`)
     appSeries.latestRevisionAppId = app.id
     if (appInput.scope && appInput.scope !== STATIC_SCOPE.PRIVATE) {
@@ -352,7 +360,7 @@ export class AppService {
     assets: Asset[],
     appInput: SaveAppDto,
     appSeriesId: number,
-  ) {
+  ): Promise<App> {
     this.logger.log(`Saving app in DB with platformAppId: ${platformAppId}`)
     const app = new App(user)
     app.dxid = platformAppId
@@ -387,7 +395,7 @@ export class AppService {
    * @param appInput properties of newly created app
    * @return uid of newly created app
    */
-  async create(appInput: SaveAppDto) {
+  async create(appInput: SaveAppDto): Promise<Uid<'app'>> {
     this.logger.log(
       `Creating app for user: ${this.user.dxuser}, createAppSeries ${appInput.createAppSeries}`,
     )
@@ -434,9 +442,7 @@ export class AppService {
 
       // - remove project objects (what the hell does this do???)
       if (user.privateFilesProject) {
-        await this.platformClient.containerRemoveObjects(user.privateFilesProject, {
-          objects: [appletId],
-        })
+        await this.platformClient.containerRemoveObjects(user.privateFilesProject, [appletId])
       }
       // - store app in a database
       const app = await this.saveAppInDB(
@@ -456,7 +462,7 @@ export class AppService {
       await this.createAppEvent(user, app)
 
       await this.em.commit()
-      return { uid: app.uid }
+      return app.uid
     } catch (error) {
       this.logger.error('Error creating an app', error)
       await this.em.rollback()

@@ -30,6 +30,7 @@ import { HeaderItem } from './header-item'
 import { UserRepository } from './user.repository'
 import { WorkaroundJsonType } from '@shared/database/json-workaround.type'
 import { SPACE_STATE } from '@shared/domain/space/space.enum'
+import { DxId } from '@shared/domain/entity/domain/dxid'
 
 export enum USER_STATE {
   ENABLED = 0,
@@ -165,16 +166,16 @@ export class User extends BaseEntity {
   dxuser: string
 
   @Property({ nullable: true })
-  privateFilesProject?: string
+  privateFilesProject?: DxId<'project'>
 
   @Property({ nullable: true })
-  publicFilesProject: string
+  publicFilesProject: DxId<'project'>
 
   @Property({ nullable: true })
-  privateComparisonsProject?: string
+  privateComparisonsProject?: DxId<'project'>
 
   @Property({ nullable: true })
-  publicComparisonsProject: string
+  publicComparisonsProject: DxId<'project'>
 
   @Property({ nullable: true })
   schemaVersion?: number

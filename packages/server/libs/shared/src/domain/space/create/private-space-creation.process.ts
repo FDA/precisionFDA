@@ -83,19 +83,15 @@ export class PrivateSpaceCreationProcess extends SpaceCreationProcess {
     await this.em.populate(hostLead, ['user.organization'])
 
     // create project as user creating the space
-    const hostProject = await this.userClient.projectCreate({
-      name: `precisionfda-${space.scope}-HOST`,
-      billTo: hostLead.user.getEntity().billTo(),
-    })
+    const hostProject = await this.userClient.projectCreate(
+      `precisionfda-${space.scope}-HOST`,
+      hostLead.user.getEntity().billTo(),
+    )
     this.logger.log(
       `created host project: ${hostProject.id} with lead: ${hostLead.user.getProperty('dxuser')}`,
     )
 
-    await this.userClient.projectInvite({
-      projectDxid: hostProject.id,
-      invitee: space.hostDxOrg,
-      level: 'CONTRIBUTE',
-    })
+    await this.userClient.projectInvite(hostProject.id, space.hostDxOrg, 'CONTRIBUTE')
     this.logger.log(`invited host org: ${space.hostDxOrg} to host project: ${hostProject.id}`)
 
     space.hostProject = hostProject.id
