@@ -93,7 +93,7 @@ export const MDStyles = styled.div`
   img {
     max-width: 100%;
     height: auto;
-    display: block;
+    display: inline-block;
   }
 
   hr {

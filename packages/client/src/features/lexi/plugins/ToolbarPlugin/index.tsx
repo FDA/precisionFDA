@@ -1059,12 +1059,18 @@ export default function ToolbarPlugin({
                 </DropDownItem>
                 <DropDownItem
                   onClick={() => {
-                    showModal('Insert Table', (onClose) => (
-                      <InsertTableDialog
-                        activeEditor={activeEditor}
-                        onClose={onClose}
-                      />
-                    ));
+                    showModal('Insert Inline Image', onClose => (
+                      <InsertInlineImageDialog insertImageType={insertImageType} activeEditor={activeEditor} onClose={onClose} />
+                    ))
+                  }}
+                  className="item"
+                >
+                  <i className="icon image" />
+                  <span className="text">Full-Width Image</span>
+                </DropDownItem>
+                <DropDownItem
+                  onClick={() => {
+                    showModal('Insert Table', onClose => <InsertTableDialog activeEditor={activeEditor} onClose={onClose} />)
                   }}
                   className="item">
                   <i className="icon table" />
