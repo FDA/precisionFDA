@@ -1,5 +1,5 @@
 import React from 'react'
-import styled from 'styled-components'
+import styled, { css } from 'styled-components'
 import { Button } from '../../components/Button'
 import { ArrowIcon } from '../../components/icons/ArrowIcon'
 import { Svg } from '../../components/icons/Svg'
@@ -144,7 +144,15 @@ export const StyledActionsButton = styled(Button)<{ disabled?: boolean }>`
     `}
 `
 
-export const ActionsButton = ({ label = 'Actions', ...props }: { label?: string, disabled?: boolean, active?: boolean | BooleanString, ref: React.Ref<HTMLElement|null> }) => {
+export const ActionsButton = ({
+  label = 'Actions',
+  ...props
+}: {
+  label?: string
+  disabled?: boolean
+  active?: boolean | BooleanString
+  ref: React.Ref<HTMLElement | null>
+}) => {
   return (
     // @ts-expect-error react 19 passes ref through props
     <StyledActionsButton data-variant="primary" {...props}>
