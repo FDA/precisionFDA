@@ -1,8 +1,8 @@
-import httpStatusCodes from 'http-status-codes'
 import 'regenerator-runtime/runtime'
 import sparkMD5 from 'spark-md5'
 import { closeFile, createFile, getUploadURL, uploadChunk } from '../../../../api/files'
 import { CHUNK_SIZE, FILE_STATUS, FilesMeta, IUploadFile, IUploadInfo } from './constants'
+import { HTTP_STATUS } from '../../../../constants'
 
 const filterFiles = (filesBlob: any[], filesMeta: any[]) =>
   filesBlob.filter(b => {
@@ -15,7 +15,7 @@ const filterFiles = (filesBlob: any[], filesMeta: any[]) =>
   })
 
 const throwIfError = (status: number, payload?: any) => {
-  if (status !== httpStatusCodes.OK) {
+  if (status !== HTTP_STATUS.OK) {
     const errorMessage = payload?.error?.message ?? 'Unknown upload failure'
     throw new Error(errorMessage)
   }
@@ -87,7 +87,7 @@ export const multiFileUpload = async ({ filesBlob, filesMeta, updateFileStatus, 
 
                     return closeFile(fileUid)
                   }
-                  return { status: httpStatusCodes.OK }
+                  return { status: HTTP_STATUS.OK }
                 })
                 .then(res => {
                   throwIfError(res!.status)
