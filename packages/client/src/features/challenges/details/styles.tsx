@@ -3,6 +3,7 @@ import { PageContainer, pagePaddingLR } from '../../../components/Page/styles'
 import { breakPoints, colors, theme } from '../../../styles/theme'
 import { TimeStatus } from '../types'
 import { Button } from '../../../components/Button'
+import { Link } from 'react-router-dom'
 
 export const LeftColumn = styled.div`
   display: flex;
@@ -200,4 +201,80 @@ export const CallToActionButton = styled(Button).attrs({ 'data-variant': 'primar
   display: block;
   width: 100%;
   margin-bottom: 0;
+`
+
+export const StyledChallengeNavigation = styled.div`
+  background-color: var(--tertiary-30);
+  list-style: none;
+  border-bottom: 1px solid var(--c-layout-border-200);
+  position: sticky;
+  top: 0;
+  z-index: 1;
+`
+export const ChallengeRightSide = styled.div`
+  flex: 1 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  position: unset;
+  height: min-content;
+`
+export const ChallengePageRow = styled.div`
+  display: flex;
+  width: 100%;
+  flex-direction: column-reverse;
+  gap: 64px;
+  padding: 24px 0;
+  order: -1;
+  @media (min-width: 960px) {
+    flex-direction: row;
+    justify-content: space-between;
+    ${ChallengeRightSide} {
+      position: sticky;
+      flex: 0 1 auto;
+      min-width: 256px;
+      max-width: 256px;
+    }
+  }
+`
+
+export const NavigationInner = styled(PageContainer)`
+  display: flex;
+  padding: 0 32px;
+  flex-direction: row;
+  gap: 4px;
+`
+export const ItemLink = styled(Link)``
+
+export const StyledChallengeNavigationItem = styled.div`
+  padding: 16px 0;
+  border-bottom: 3px solid transparent;
+  font-weight: bold;
+  color: var(--c-text-400);
+  margin-bottom: -1px;
+
+  &[data-active='true'] {
+    border-color: var(--c-tabs-selected);
+    color: var(--c-text-500);
+  }
+
+  ${ItemLink} {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2px;
+    all: unset;
+    padding: 8px 12px;
+    outline: none;
+    -webkit-user-select: none;
+    user-select: none;
+    line-height: 1;
+    border-radius: 4px;
+    font-size: 15px;
+
+    &:hover {
+      background-color: var(--tertiary-70);
+      cursor: pointer;
+    }
+  }
 `

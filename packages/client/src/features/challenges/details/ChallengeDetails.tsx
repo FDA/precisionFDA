@@ -1,98 +1,29 @@
 /* eslint-disable no-nested-ternary */
-import React, { useRef, useState, useCallback } from 'react'
+import React, { useCallback, useRef, useState } from 'react'
 import { Link, Navigate, Route, Routes, useParams } from 'react-router-dom'
-import styled from 'styled-components'
 import { Loader } from '../../../components/Loader'
 import { AddIdsToHeaders } from '../../../components/Markdown/AddIdsToHeaders'
-import { PageContainer, PageContainerMargin } from '../../../components/Page/styles'
+import { PageContainerMargin } from '../../../components/Page/styles'
 import { usePageMeta } from '../../../hooks/usePageMeta'
 import { cleanObject } from '../../../utils/object'
 import { useAuthUser } from '../../auth/useAuthUser'
 import { IToCItem, ToC } from '../../markdown/TocNext'
 import { useChallengeByIDQuery } from '../useChallengeDetailsQuery'
 import { ChallengeDetailsBanner } from './ChallengeDetailsBanner'
-import { NoInfo } from './styles'
+import {
+  ChallengePageRow,
+  ChallengeRightSide,
+  ItemLink,
+  NavigationInner,
+  NoInfo,
+  StyledChallengeNavigation,
+  StyledChallengeNavigationItem,
+} from './styles'
 import { ChallengeSubmissionsTable } from './ChallengeSubmissionsTable'
 import { ChallengeMyEntriesTable } from './ChallengeMyEntriesTable'
 import { useNumberParams } from '../../../utils/useNumberParams'
 import { MDStyles } from '../../../components/Markdown/styles'
 import { Meta } from '../types'
-
-const StyledChallengeNavigation = styled.div`
-  background-color: var(--tertiary-30);
-  list-style: none;
-  border-bottom: 1px solid var(--c-layout-border-200);
-  position: sticky;
-  top: 0;
-  z-index: 1;
-`
-const ChallengeRightSide = styled.div`
-  flex: 1 0 auto;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  position: unset;
-  top: 76px;
-  height: min-content;
-`
-export const ChallengePageRow = styled.div`
-  display: flex;
-  width: 100%;
-  flex-direction: column-reverse;
-  gap: 64px;
-  padding: 44px 0;
-  order: -1;
-  @media (min-width: 960px) {
-    flex-direction: row;
-    justify-content: space-between;
-    ${ChallengeRightSide} {
-      position: sticky;
-      flex: 0 1 auto;
-      min-width: 256px;
-      max-width: 256px;
-    }
-  }
-`
-
-const NavigationInner = styled(PageContainer)`
-  display: flex;
-  padding: 0 32px;
-  flex-direction: row;
-  gap: 4px;
-`
-const ItemLink = styled(Link)``
-const StyledChallengeNavigationItem = styled.div`
-  padding: 16px 0;
-  border-bottom: 3px solid transparent;
-  font-weight: bold;
-  color: var(--c-text-400);
-  margin-bottom: -1px;
-
-  &[data-active='true'] {
-    border-color: var(--c-tabs-selected);
-    color: var(--c-text-500);
-  }
-
-  ${ItemLink} {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 2px;
-    all: unset;
-    padding: 8px 12px;
-    outline: none;
-    -webkit-user-select: none;
-    user-select: none;
-    line-height: 1;
-    border-radius: 4px;
-    font-size: 15px;
-
-    &:hover {
-      background-color: var(--tertiary-70);
-      cursor: pointer;
-    }
-  }
-`
 
 export const ChallengeDetails = () => {
   usePageMeta({ title: 'Challenge - precisionFDA' })
@@ -236,6 +167,7 @@ export const ChallengeDetails = () => {
                 <MDStyles>
                   <AddIdsToHeaders docRef={docRef} content={regions.intro} onHeadersUpdated={handleHeadersUpdated} />
                 </MDStyles>
+                <ChallengeRightSide>{toc?.length > 0 && <ToC sticky items={toc} />}</ChallengeRightSide>
               </ChallengePageRow>
             }
           />
@@ -246,6 +178,7 @@ export const ChallengeDetails = () => {
                 <MDStyles>
                   <AddIdsToHeaders docRef={docRef} content={regions.results} onHeadersUpdated={handleHeadersUpdated} />
                 </MDStyles>
+                <ChallengeRightSide>{toc?.length > 0 && <ToC sticky items={toc} />}</ChallengeRightSide>
               </ChallengePageRow>
             }
           />
@@ -256,12 +189,12 @@ export const ChallengeDetails = () => {
                 <MDStyles>
                   <AddIdsToHeaders docRef={docRef} content={regions.preReg} onHeadersUpdated={handleHeadersUpdated} />
                 </MDStyles>
+                <ChallengeRightSide>{toc?.length > 0 && <ToC sticky items={toc} />}</ChallengeRightSide>
               </ChallengePageRow>
             }
           />
           <Route path="/" element={<Navigate to={challengePreRegistration ? 'pre-registration' : 'intro'} replace />} />
         </Routes>
-        <ChallengeRightSide>{toc && toc.length > 0 && <ToC sticky items={toc} />}</ChallengeRightSide>
         <div>{isNoInfoProvided && <NoInfo>No information about this challenge has been provided yet.</NoInfo>}</div>
       </PageContainerMargin>
     </>
