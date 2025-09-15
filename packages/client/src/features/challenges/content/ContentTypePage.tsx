@@ -27,6 +27,7 @@ const ContentEditButtonRow = styled.div`
   padding: 0 12px;
   position: sticky;
   bottom: 16px;
+  z-index: 1;
 
   ${Button} {
     filter: drop-shadow(-7px 2px 7px rgba(112, 112, 112, 0.6));

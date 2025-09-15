@@ -1,4 +1,4 @@
-import React, { useRef, useState, useCallback } from 'react'
+import React, { useCallback, useRef, useState } from 'react'
 import { Link, Route, Routes } from 'react-router-dom'
 import { Button } from '../../../components/Button'
 import { ListItem, NoContent } from '../../../components/Public/styles'
@@ -10,7 +10,7 @@ import { AddIdsToHeaders } from '../../../components/Markdown/AddIdsToHeaders'
 import { Filler } from '../../../components/Page/styles'
 import { StyledInnerHTML } from '../../lexi/styles'
 import '../../lexi/themes/PlaygroundEditorTheme.css'
-import { ToC, IToCItem } from '../../markdown/TocNext'
+import { IToCItem, ToC } from '../../markdown/TocNext'
 import { useDataPortalResourceModal } from '../../resources/useDataPortalResourceModal'
 import DataPortalContentEditPage from '../form/DataPortalContentEditPage'
 import { BodyContent, DataPortalPageMainBody, DPSettings, PageWrap, RightSideItem, RightSideScroll, Row } from './styles'
@@ -61,9 +61,7 @@ export const DataPortalDetails = ({
                   <span className="fa fa-file-code-o fa-fw" /> Edit Content
                 </ListItem>
               )}
-
               {modalComp}
-
               {canViewResources && (
                 <ListItem to="#" style={{ cursor: 'pointer' }} onClick={() => setShowModal(true)}>
                   <span className="fa fa-file-code-o fa-fw" /> Resources
@@ -104,10 +102,10 @@ export const DataPortalDetails = ({
                       )}
                     </NoContent>
                   )}
-                  <AddIdsToHeaders 
-                    as={StyledInnerHTML} 
-                    docRef={docRef} 
-                    content={portal.content ?? ''} 
+                  <AddIdsToHeaders
+                    as={StyledInnerHTML}
+                    docRef={docRef}
+                    content={portal.content ?? ''}
                     onHeadersUpdated={handleHeadersUpdated}
                   />
                   <Filler $size={40} />
