@@ -23,9 +23,6 @@ import { CommunityParticipants, ExpertSection, Hr, InfoRow, PageOverviewMainBody
 import { AppTypeIconBlue } from '../../components/icons/AppTypeIconBlue'
 import { AppTypeIconYellow } from '../../components/icons/AppTypeIconYellow'
 import { Button } from '../../components/Button'
-import { ToolsPortalIcon } from '../../components/icons/ToolsPortalIcon'
-import { RocketIcon } from '../../components/icons/RocketIcon'
-import { AppMarketIcon } from '../../components/icons/AppMarketIcon'
 
 const StyledGetStarted = styled.div`
   background-color: var(--tertiary-70);
@@ -35,41 +32,127 @@ const StyledGetStarted = styled.div`
   line-height: 26px;
 `
 
-const IconLink = styled(Link)`
-  display: flex;
-  gap: 8px;
-  align-items: center;
-`
-
 const GetStarted = ({ user }: { user?: IUser }) => {
   // for FDA users
   if (user && user.isGovUser) {
     return (
       <StyledGetStarted>
-        <SectionTitle>Getting Started</SectionTitle>
+        <SectionTitle>LEARN</SectionTitle>
         <Hr />
-        <IconLink data-turbolinks="false" to="/data-portals/19">
-          <RocketIcon height={17} />
-          Introduction and Next Steps
-        </IconLink>
-
-        <IconLink data-turbolinks="false" to="/data-portals/17">
-          <ToolsPortalIcon height={17} />
-          Use Case Toolbox
-        </IconLink>
-
-        <IconLink data-turbolinks="false" to="/data-portals/20">
-          <AppMarketIcon height={17} />
-          Multi-omics App Library
-        </IconLink>
+        <div>
+          <a href="/data-portals/tools" target="_blank" rel="noopener noreferrer">
+            Introduction to precisionFDA
+          </a>
+        </div>
+        <div>
+          <a href="/data-portals/tools#managing-your-account" target="_blank" rel="noopener noreferrer">
+            Your Account
+          </a>
+        </div>
+        <div>
+          <a href="/data-portals/tools#collaborating-with-spaces" target="_blank" rel="noopener noreferrer">
+            Collaborating in Spaces
+          </a>
+        </div>
+        <div>
+          <a href="/data-portals/tools#working-with-files-and-folders" target="_blank" rel="noopener noreferrer">
+            Files and Folders
+          </a>
+        </div>
+        <div>
+          <a href="/data-portals/tools#running-an-app" target="_blank" rel="noopener noreferrer">
+            Running an App
+          </a>
+        </div>
+        <div>
+          <a href="/data-portals/tools#running-a-workflow" target="_blank" rel="noopener noreferrer">
+            Running a Workflow
+          </a>
+        </div>
+        <div>
+          <a href="/data-portals/tools#working-with-databases" target="_blank" rel="noopener noreferrer">
+            Working with Databases
+          </a>
+        </div>
+        <div>
+          <a href="/ginas/app/ui/home" target="_blank" rel="noopener noreferrer">
+            GSRS Portal
+          </a>
+        </div>
+        <br />
+        <SectionTitle>LAUNCH</SectionTitle>
         <Hr />
-        <a
-          href="https://public.govdelivery.com/accounts/USFDA/subscriber/new?topic_id=USFDA_564"
-          target="_blank"
-          rel="noreferrer"
-        >
-          precisionFDA Mailing List
-        </a>
+        <div>
+          <a href="/data-portals/gsrs-user-portal" target="_blank" rel="noopener noreferrer">
+            GSRS Station
+          </a>
+        </div>
+        <div>
+          <a
+            href="/data-portals/use-case-toolbox#fhir-stations---load-and-query-fhir-data"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            CDMH FHIR Station
+          </a>
+        </div>
+        <div>
+          <a
+            href="/data-portals/precisionfda-multi-omics-analysis-toolbox#ai-workstation"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            AI Station
+          </a>
+        </div>
+        <div>
+          <a href="/docs/tutorials/workstations/knime-workstation" target="_blank" rel="noopener noreferrer">
+            KNIME Workstation
+          </a>
+        </div>
+        <div>
+          <a
+            href="/docs/tutorials/workstations/build-workstations#deploy-postgresql-psql-pgadmin-and-rstudio"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            RStudio + PostgreSQL
+          </a>
+        </div>
+        <div>
+          <a href="/docs/tutorials/workstations/sass-studio" target="_blank" rel="noopener noreferrer">
+            SAS Studio
+          </a>
+        </div>
+        <div>
+          <a href="/docs/tutorials/workstations/workstations-databases" target="_blank" rel="noopener noreferrer">
+            Jupyter Notebook
+          </a>
+        </div>
+        <div>
+          <a
+            href="/docs/tutorials/workstations/workstations-databases#build-epidemiology-data-analysis-notebooks"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Epidemiological Notebook
+          </a>
+        </div>
+        <div>
+          <a href="/data-portals/precisionfda-multi-omics-analysis-toolbox" target="_blank" rel="noopener noreferrer">
+            App Library
+          </a>
+        </div>
+        <Hr />
+        <div>
+          <a
+            href="https://public.govdelivery.com/accounts/USFDA/subscriber/new?topic_id=USFDA_564"
+            target="_blank"
+            rel="noreferrer"
+          >
+            precisionFDA Mailing List
+          </a>
+        </div>
       </StyledGetStarted>
     )
   }
@@ -99,19 +182,7 @@ const GetStarted = ({ user }: { user?: IUser }) => {
           Collaborating with Spaces
         </a>
       </div>
-      <div>
-        <Link to="/home/files/file-GfkBx1j0Kj2Yj04FJVV0xXzF-2">Multi-omics App Library</Link>
-      </div>
-      <Hr />
-      <div>
-        <a
-          href="https://public.govdelivery.com/accounts/USFDA/subscriber/new?topic_id=USFDA_564"
-          target="_blank"
-          rel="noreferrer"
-        >
-          precisionFDA Mailing List
-        </a>
-      </div>
+      <Link to="/home/files/file-GfkBx1j0Kj2Yj04FJVV0xXzF-2">Multi-omics App Library</Link>
     </StyledGetStarted>
   )
 }
