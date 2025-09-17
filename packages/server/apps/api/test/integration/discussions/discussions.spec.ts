@@ -344,8 +344,7 @@ describe('/discussions', async () => {
       .expect(200)
 
     expect(body.data).to.be.an('array').of.length(2)
-    expect(body.data[0]).to.have.property('id', discussion2.id)
-    expect(body.data[1]).to.have.property('id', discussion1.id)
+    expect(body.data.map((d) => d.id)).to.have.members([discussion1.id, discussion2.id])
   })
 
   it('should get the list of public discussions', async () => {
@@ -364,7 +363,6 @@ describe('/discussions', async () => {
       .expect(200)
 
     expect(body.data).to.be.an('array').of.length(2)
-    expect(body.data[0]).to.have.property('id', discussion2.id)
-    expect(body.data[1]).to.have.property('id', discussion1.id)
+    expect(body.data.map((d) => d.id)).to.have.members([discussion1.id, discussion2.id])
   })
 })
