@@ -1,8 +1,13 @@
 import { Injectable } from '@nestjs/common'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
+import { PlatformClient } from '@shared/platform-client'
+import { FileCreateParams } from '@shared/platform-client/platform-client.params'
+import {
+  ClassIdResponse,
+  GetUploadURLResponse,
+} from '@shared/platform-client/platform-client.responses'
+import axios from 'axios'
 import { createHash } from 'crypto'
-import { PlatformClient } from '../../../platform-client'
-import type { FileCreateParams } from '../../../platform-client/platform-client.params'
 
 @Injectable()
 export class PlatformFileService {
@@ -10,27 +15,23 @@ export class PlatformFileService {
 
   constructor(private readonly platformClient: PlatformClient) {}
 
-  async createFile(params: FileCreateParams) {
+  async createFile(params: FileCreateParams): Promise<ClassIdResponse<'file'>> {
     return await this.platformClient.fileCreate(params)
   }
 
-  async uploadFileContent(file: UserFile, content: string) {
+  async uploadFileContent(file: UserFile, content: string): Promise<void> {
     const chunks = this.getChunksFromString(content)
 
     await Promise.all(chunks.map((ch, i) => this.uploadChunk(file.dxid, ch, i)))
   }
 
-  private async uploadChunk(fileUid: string, content: Buffer, index: number) {
+  private async uploadChunk(fileUid: string, content: Buffer, index: number): Promise<Response> {
     const { url, headers } = await this.getUploadURL(fileUid, content, index + 1)
 
-    return fetch(url, {
-      method: 'PUT',
-      body: content,
-      headers,
-    })
+    return axios.put(url, content, { headers })
   }
 
-  private getChunksFromString(str: string) {
+  private getChunksFromString(str: string): Buffer[] {
     const buffer = Buffer.from(str ?? '')
     const chunkBuffers: Buffer[] = []
 
@@ -41,7 +42,11 @@ export class PlatformFileService {
     return chunkBuffers
   }
 
-  private async getUploadURL(dxid: string, content: Buffer, index: number) {
+  private async getUploadURL(
+    dxid: string,
+    content: Buffer,
+    index: number,
+  ): Promise<GetUploadURLResponse> {
     const md5 = createHash('md5').update(content).digest('hex')
     const size = content.byteLength
 

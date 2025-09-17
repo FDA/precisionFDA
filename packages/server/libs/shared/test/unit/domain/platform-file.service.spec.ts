@@ -1,6 +1,7 @@
 import { PlatformFileService } from '@shared/domain/platform/service/platform-file.service'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { PlatformClient } from '@shared/platform-client'
+import axios from 'axios'
 import { expect } from 'chai'
 import { match, SinonStub, stub } from 'sinon'
 
@@ -32,7 +33,7 @@ describe('PlatformFileService', () => {
       expect(clientCreateFileStub.calledOnce).to.be.true()
     })
 
-    function getInstance() {
+    function getInstance(): PlatformFileService {
       const platformClient = { fileCreate: clientCreateFileStub } as unknown as PlatformClient
 
       return new PlatformFileService(platformClient)
@@ -62,10 +63,7 @@ describe('PlatformFileService', () => {
     const UPLOAD_URL_RESULT_2 = { url: UPLOAD_URL_2, headers: UPLOAD_HEADERS_2 }
     let clientGetFileUploadUrlStub: SinonStub
 
-    // It seems newer versions of nodejs initialize the fetch property on the global object lazily.
-    // The stub does not work unless the fetch function has been accessed at least once before the stub.
-    void fetch
-    const fetchStub: SinonStub = stub(global, 'fetch')
+    const axiosPutStub: SinonStub = stub(axios, 'put')
 
     beforeEach(() => {
       clientGetFileUploadUrlStub = stub().throws()
@@ -86,25 +84,25 @@ describe('PlatformFileService', () => {
         })
         .resolves(UPLOAD_URL_RESULT_2)
 
-      fetchStub.throws()
-      fetchStub
-        .withArgs(UPLOAD_URL_1, {
-          method: 'PUT',
-          body: match((val: Buffer) => val.toString() === CONTENT_PART_1),
-          headers: UPLOAD_HEADERS_1,
-        })
+      axiosPutStub.throws()
+      axiosPutStub
+        .withArgs(
+          UPLOAD_URL_1,
+          match((val: Buffer) => val.toString() === CONTENT_PART_1),
+          { headers: UPLOAD_HEADERS_1 },
+        )
         .resolves(undefined)
-      fetchStub
-        .withArgs(UPLOAD_URL_2, {
-          method: 'PUT',
-          body: match((val: Buffer) => val.toString() === CONTENT_PART_2),
-          headers: UPLOAD_HEADERS_2,
-        })
+      axiosPutStub
+        .withArgs(
+          UPLOAD_URL_2,
+          match((val: Buffer) => val.toString() === CONTENT_PART_2),
+          { headers: UPLOAD_HEADERS_2 },
+        )
         .resolves(undefined)
     })
 
     afterEach(() => {
-      fetchStub.reset()
+      axiosPutStub.reset()
     })
 
     it('should not catch error from getFileUploadUrl', async () => {
@@ -118,8 +116,8 @@ describe('PlatformFileService', () => {
 
     it('should not catch error from fetch', async () => {
       const error = new Error('my error')
-      fetchStub.resetBehavior()
-      fetchStub.throws(error)
+      axiosPutStub.resetBehavior()
+      axiosPutStub.throws(error)
 
       await expect(getInstance().uploadFileContent(FILE as UserFile, CONTENT)).to.be.rejectedWith(
         error,
@@ -129,22 +127,22 @@ describe('PlatformFileService', () => {
     it('should upload two parts', async () => {
       await getInstance().uploadFileContent(FILE as UserFile, CONTENT)
 
-      expect(fetchStub.calledTwice).to.be.true()
+      expect(axiosPutStub.calledTwice).to.be.true()
     })
 
     it('should not upload anything with empty content', async () => {
       await getInstance().uploadFileContent(FILE as UserFile, '')
 
-      expect(fetchStub.called).to.be.false()
+      expect(axiosPutStub.called).to.be.false()
     })
 
     it('should not upload anything with null content', async () => {
       await getInstance().uploadFileContent(FILE as UserFile, null)
 
-      expect(fetchStub.called).to.be.false()
+      expect(axiosPutStub.called).to.be.false()
     })
 
-    function getInstance() {
+    function getInstance(): PlatformFileService {
       const platformClient = {
         getFileUploadUrl: clientGetFileUploadUrlStub,
       } as unknown as PlatformClient
