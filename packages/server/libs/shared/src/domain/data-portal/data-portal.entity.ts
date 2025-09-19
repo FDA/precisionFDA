@@ -1,9 +1,9 @@
 import { Collection, Entity, OneToMany, OneToOne, Property, Ref, Reference } from '@mikro-orm/core'
+import { DataPortalRepository } from '@shared/domain/data-portal/data-portal.repository'
 import { Resource } from '@shared/domain/resource/resource.entity'
 import { Space } from '@shared/domain/space/space.entity'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
 import { BaseEntity } from '../../database/base.entity'
-import { DataPortalRepository } from '@shared/domain/data-portal/data-portal.repository'
 
 @Entity({ tableName: 'data_portals', repository: () => DataPortalRepository })
 class DataPortal extends BaseEntity {
@@ -25,7 +25,7 @@ class DataPortal extends BaseEntity {
   @Property()
   cardImageUrl: string
 
-  @OneToOne(() => UserFile)
+  @OneToOne(() => UserFile, { nullable: true })
   cardImage: Ref<UserFile>
 
   @Property()

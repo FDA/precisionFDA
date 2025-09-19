@@ -8,30 +8,26 @@ import {
   ParseIntPipe,
   Patch,
   Post,
-  Put,
   Query,
   UseGuards,
 } from '@nestjs/common'
-import { DiscussionService } from '@shared/domain/discussion/services/discussion.service'
-import { UserContextGuard } from '../user-context/guard/user-context.guard'
-import { CreateDiscussionDTO } from '@shared/domain/discussion/dto/create-discussion.dto'
-import { CreateAnswerDTO } from '@shared/domain/discussion/dto/create-answer.dto'
-import { UpdateDiscussionDTO } from '@shared/domain/discussion/dto/update-discussion.dto'
-import { CreateCommentDTO } from '@shared/domain/discussion/dto/create-comment.dto'
-import { UpdateAnswerDTO } from '@shared/domain/discussion/dto/update-answer.dto'
-import { UpdateCommentDTO } from '@shared/domain/discussion/dto/update-comment.dto'
-import { DiscussionPaginationDTO } from '@shared/domain/discussion/dto/discussion-pagination.dto'
-import { CreateDiscussionFacade } from '../facade/discussion/create-discussion.facade'
-import { AttachmentManagementFacade } from '@shared/facade/discussion/attachment-management.facade'
-import { UpdateDiscussionFacade } from '../facade/discussion/update-discussion.facade'
-import { CreateAnswerFacade } from '../facade/discussion/create-answer.facade'
-import { UpdateAnswerFacade } from '../facade/discussion/update-answer.facade'
-import { CreateCommentFacade } from '../facade/discussion/create-comment.facade'
-import { CommentDTO } from '@shared/domain/discussion/dto/comment.dto'
-import { AnswerDTO } from '@shared/domain/discussion/dto/answer.dto'
-import { PaginatedResult } from '@shared/domain/entity/domain/paginated.result'
-import { DiscussionDTO } from '@shared/domain/discussion/dto/discussion.dto'
+import { DISCUSSION_REPLY_TYPE } from '@shared/domain/discussion-reply/discussion-reply.types'
 import { DiscussionAttachment } from '@shared/domain/discussion/discussion.types'
+import { AnswerDTO } from '@shared/domain/discussion/dto/answer.dto'
+import { CreateDiscussionDTO } from '@shared/domain/discussion/dto/create-discussion.dto'
+import { CreateReplyDTO } from '@shared/domain/discussion/dto/create-reply.dto'
+import { DiscussionPaginationDTO } from '@shared/domain/discussion/dto/discussion-pagination.dto'
+import { DiscussionDTO } from '@shared/domain/discussion/dto/discussion.dto'
+import { UpdateDiscussionDTO } from '@shared/domain/discussion/dto/update-discussion.dto'
+import { UpdateReplyDTO } from '@shared/domain/discussion/dto/update-reply.dto'
+import { DiscussionService } from '@shared/domain/discussion/services/discussion.service'
+import { PaginatedResult } from '@shared/domain/entity/domain/paginated.result'
+import { AttachmentManagementFacade } from '@shared/facade/discussion/attachment-management.facade'
+import { CreateDiscussionReplyFacade } from '../facade/discussion/create-discussion-reply.facade'
+import { CreateDiscussionFacade } from '../facade/discussion/create-discussion.facade'
+import { UpdateDiscussionFacade } from '../facade/discussion/update-discussion.facade'
+import { UpdateDiscussionReplyFacade } from '../facade/discussion/update-reply.facade'
+import { UserContextGuard } from '../user-context/guard/user-context.guard'
 
 @UseGuards(UserContextGuard)
 @Controller('/discussions')
@@ -39,10 +35,9 @@ export class DiscussionsController {
   constructor(
     private readonly discussionService: DiscussionService,
     private readonly createDiscussionFacade: CreateDiscussionFacade,
-    private readonly createAnswerFacade: CreateAnswerFacade,
-    private readonly createCommentFacade: CreateCommentFacade,
+    private readonly createDiscussionReplyFacade: CreateDiscussionReplyFacade,
     private readonly updateDiscussionFacade: UpdateDiscussionFacade,
-    private readonly updateAnswerFacade: UpdateAnswerFacade,
+    private readonly updateDiscussionReplyFacade: UpdateDiscussionReplyFacade,
     private readonly attachmentFacade: AttachmentManagementFacade,
   ) {}
 
@@ -81,12 +76,12 @@ export class DiscussionsController {
   }
 
   @HttpCode(201)
-  @Post('/:discussionId/answers')
-  async createAnswer(
+  @Post('/:discussionId/replies')
+  async createDiscussionReply(
     @Param('discussionId', ParseIntPipe) discussionId: number,
-    @Body() body: CreateAnswerDTO,
+    @Body() body: CreateReplyDTO,
   ): Promise<{ id: number }> {
-    const result = await this.createAnswerFacade.createAnswer({ discussionId, ...body })
+    const result = await this.createDiscussionReplyFacade.createReply(discussionId, body)
 
     return { id: result.id }
   }
@@ -101,23 +96,13 @@ export class DiscussionsController {
   }
 
   @HttpCode(204)
-  @Put('/:discussionId/comments/:commentId')
-  async editDiscussionComment(
-    @Param('commentId', ParseIntPipe) commentId: number,
-    @Body() body: UpdateCommentDTO,
-  ): Promise<{ id: number }> {
-    const result = await this.discussionService.updateComment(commentId, body)
-    return { id: result.id }
-  }
-
-  @HttpCode(204)
-  @Patch('/:discussionId/answers/:answerId')
-  async updateAnswer(
+  @Patch('/:discussionId/replies/:replyId')
+  async updateDiscussionReply(
     @Param('discussionId', ParseIntPipe) discussionId: number,
-    @Param('answerId', ParseIntPipe) answerId: number,
-    @Body() body: UpdateAnswerDTO,
+    @Param('replyId', ParseIntPipe) replyId: number,
+    @Body() body: UpdateReplyDTO,
   ): Promise<void> {
-    await this.updateAnswerFacade.updateAnswer(answerId, body)
+    await this.updateDiscussionReplyFacade.updateReply(replyId, body)
   }
 
   @HttpCode(204)
@@ -127,58 +112,22 @@ export class DiscussionsController {
   }
 
   @HttpCode(204)
-  @Delete('/:discussionId/answers/:id')
-  async deleteAnswer(@Param('id', ParseIntPipe) id: number): Promise<void> {
-    await this.discussionService.deleteAnswer(id)
+  @Delete('/:discussionId/replies/:id')
+  async deleteDiscussionReply(@Param('id', ParseIntPipe) id: number): Promise<void> {
+    await this.discussionService.deleteReply(id, DISCUSSION_REPLY_TYPE.ANSWER)
   }
 
+  // TODO PFDA-5997 - part 1: remove delete routes after deprecating `comments` table
   @HttpCode(204)
   @Delete('/:discussionId/comments/:id')
   async deleteDiscussionComment(@Param('id', ParseIntPipe) id: number): Promise<void> {
-    await this.discussionService.deleteComment(id, 'Discussion')
+    await this.discussionService.deleteReply(id, DISCUSSION_REPLY_TYPE.COMMENT)
   }
 
   @HttpCode(204)
   @Delete('/:discussionId/answers/:answerId/comments/:id')
   async deleteAnswerComment(@Param('id', ParseIntPipe) id: number): Promise<void> {
-    await this.discussionService.deleteComment(id, 'Answer')
-  }
-
-  @HttpCode(201)
-  @Post('/:discussionId/comments')
-  async createDiscussionComment(
-    @Param('discussionId', ParseIntPipe) discussionId: number,
-    @Body() body: CreateCommentDTO,
-  ): Promise<{ id: number }> {
-    const result = await this.createCommentFacade.createComment({
-      discussionId,
-      ...body,
-    })
-
-    return { id: result.id }
-  }
-
-  @HttpCode(201)
-  @Post('/:discussionId/answers/:answerId/comments')
-  async createAnswerComment(
-    @Param('discussionId', ParseIntPipe) discussionId: number,
-    @Param('answerId', ParseIntPipe) id: number,
-    @Body() body: CreateCommentDTO,
-  ): Promise<{ id: number }> {
-    const result = await this.createCommentFacade.createComment({
-      answerId: id,
-      ...body,
-    })
-
-    return { id: result.id }
-  }
-
-  @Put('/:discussionId/answers/:answerId/comments/:commentId')
-  async editAnswerComment(
-    @Param('commentId', ParseIntPipe) commentId: number,
-    @Body() body: UpdateCommentDTO,
-  ): Promise<CommentDTO> {
-    return await this.discussionService.updateComment(commentId, body)
+    await this.discussionService.deleteReply(id, DISCUSSION_REPLY_TYPE.COMMENT)
   }
 
   @HttpCode(204)

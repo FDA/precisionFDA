@@ -1,18 +1,11 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import React from 'react'
+import { RefCallBack } from 'react-hook-form'
 import { toast } from 'react-toastify'
-import {
-  CommentPayload,
-  CreateAnswerPayload,
-  NoteScope,
-  createAnswerCommentRequest,
-  createAnswerRequest,
-  createDiscussionCommentRequest,
-} from '../api'
+import { CommentPayload, CreateReplyPayload, NoteScope, createReplyRequest } from '../api'
 import { NoteForm } from '../discussions.types'
 import { pickIdsFromFormAttachments } from '../helpers'
 import { MarkdownForm } from './MarkdownForm'
-import { RefCallBack } from 'react-hook-form'
 
 export const CreateCommentEntity = ({
   canUserAnswer,
@@ -28,23 +21,26 @@ export const CreateCommentEntity = ({
   markdownInputRef?: RefCallBack
   discussionId: number
   answerId?: number
-  onCancel?: (vals?: unknown) => void
+  onCancel?: (vals: NoteForm) => void
   onSuccess?: () => void
 }) => {
   const queryClient = useQueryClient()
 
-
   const createCommentMutation = useMutation({
     mutationKey: ['create-comment'],
     mutationFn: ({ isAnswer, ...payload }: CommentPayload) => {
+      const p = payload as CreateReplyPayload
       if (isAnswer) {
-        const p = payload as CreateAnswerPayload
         p.title = 'answer'
-        return createAnswerRequest(discussionId, p)
+        p.type = 'Answer'
+      } else {
+        p.title = 'comment'
+        p.type = 'Comment'
       }
-      return answerId
-        ? createAnswerCommentRequest(discussionId, answerId, { ...payload, isAnswer })
-        : createDiscussionCommentRequest(discussionId, { ...payload, isAnswer })
+      if (answerId) {
+        p.parentId = answerId
+      }
+      return createReplyRequest(discussionId, p)
     },
     onSuccess: () => {
       if (onSuccess) onSuccess()
@@ -63,8 +59,8 @@ export const CreateCommentEntity = ({
   })
 
   const handleSubmit = (vals: NoteForm) => {
-
-    const notify = vals.notify.length && ['author', 'all'].includes(vals.notify[0].value)
+    const notify =
+      vals.notify.length && ['author', 'all'].includes(vals.notify[0].value)
         ? vals.notify[0].value
         : vals.notify.map(n => n.value)
 

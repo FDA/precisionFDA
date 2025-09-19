@@ -1,15 +1,16 @@
-import { AttachmentManagementFacade } from '@shared/facade/discussion/attachment-management.facade'
-import { DiscussionService } from '@shared/domain/discussion/services/discussion.service'
-import { AttachmentsDTO } from '@shared/domain/discussion/dto/attachments.dto'
-import { CliEditReplyDTO } from '@shared/domain/cli/dto/cli-edit-reply.dto'
-import { InvalidStateError } from '@shared/errors'
-import { UpdateAnswerFacade } from '../discussion/update-answer.facade'
 import { Injectable } from '@nestjs/common'
+import { CliEditReplyDTO } from '@shared/domain/cli/dto/cli-edit-reply.dto'
+import { DISCUSSION_REPLY_TYPE } from '@shared/domain/discussion-reply/discussion-reply.types'
+import { AttachmentsDTO } from '@shared/domain/discussion/dto/attachments.dto'
+import { DiscussionService } from '@shared/domain/discussion/services/discussion.service'
+import { InvalidStateError } from '@shared/errors'
+import { AttachmentManagementFacade } from '@shared/facade/discussion/attachment-management.facade'
+import { UpdateDiscussionReplyFacade } from '../discussion/update-reply.facade'
 
 @Injectable()
 export class CliUpdateDiscussionReplyFacade {
   constructor(
-    private readonly updateAnswerFacade: UpdateAnswerFacade,
+    private readonly updateDiscussionReplyFacade: UpdateDiscussionReplyFacade,
     private readonly discussionService: DiscussionService,
     private readonly attachmentFacade: AttachmentManagementFacade,
   ) {}
@@ -56,9 +57,13 @@ export class CliUpdateDiscussionReplyFacade {
       attachments.comparisons.push(...newAttachments.comparisons)
     }
 
-    await this.updateAnswerFacade.updateAnswer(dto.answerId, {
-      content: dto.content ? `${answer.content}\n\n${dto.content}` : answer.content,
-      attachments: dto.attachments ? attachments : null,
+    const content = dto.content ? `${answer.content}\n\n${dto.content}` : answer.content
+    const updatedAttachments = dto.attachments ? attachments : null
+
+    await this.updateDiscussionReplyFacade.updateReply(dto.answerId, {
+      content,
+      attachments: updatedAttachments,
+      type: DISCUSSION_REPLY_TYPE.ANSWER,
     })
 
     return await this.discussionService.getAnswerUiLink(dto.answerId)
@@ -66,10 +71,14 @@ export class CliUpdateDiscussionReplyFacade {
 
   private async handleCommentUpdate(dto: CliEditReplyDTO): Promise<string> {
     const comment = await this.discussionService.getComment(dto.commentId)
+    const content = dto.content ? `${comment.body}\n\n${dto.content}` : comment.body
 
-    await this.discussionService.updateComment(dto.commentId, {
-      content: dto.content ? `${comment.body}\n\n${dto.content}` : comment.body,
+    await this.updateDiscussionReplyFacade.updateReply(dto.commentId, {
+      content,
+      attachments: null,
+      type: DISCUSSION_REPLY_TYPE.COMMENT,
     })
+
     return await this.discussionService.getCommentUiLink(dto.commentId)
   }
 }

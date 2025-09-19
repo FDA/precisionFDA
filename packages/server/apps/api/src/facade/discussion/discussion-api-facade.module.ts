@@ -1,41 +1,38 @@
 import { Module } from '@nestjs/common'
-import { EmailModule } from '@shared/domain/email/email.module'
 import { DiscussionModule } from '@shared/domain/discussion/discussion.module'
-import { CreateDiscussionFacade } from './create-discussion.facade'
-import { AttachmentsFacadeModule } from '@shared/facade/discussion/attachments-facade.module'
+import { EmailModule } from '@shared/domain/email/email.module'
 import { SpaceModule } from '@shared/domain/space/space.module'
-import { UpdateDiscussionFacade } from './update-discussion.facade'
-import { CreateAnswerFacade } from './create-answer.facade'
-import { UpdateAnswerFacade } from './update-answer.facade'
-import { CliCreateDiscussionFacade } from '../cli/cli-create-discussion.facade'
+import { AttachmentsFacadeModule } from '@shared/facade/discussion/attachments-facade.module'
 import { CliCreateDiscussionReplyFacade } from '../cli/cli-create-discussion-reply.facade'
-import { CliUpdateDiscussionFacade } from '../cli/cli-update-discussion.facade'
+import { CliCreateDiscussionFacade } from '../cli/cli-create-discussion.facade'
 import { CliUpdateDiscussionReplyFacade } from '../cli/cli-update-discussion-reply.facade'
-import { CreateCommentFacade } from './create-comment.facade'
+import { CliUpdateDiscussionFacade } from '../cli/cli-update-discussion.facade'
+import { CreateDiscussionReplyFacade } from './create-discussion-reply.facade'
+import { CreateDiscussionFacade } from './create-discussion.facade'
+import { UpdateDiscussionFacade } from './update-discussion.facade'
+import { UpdateDiscussionReplyFacade } from './update-reply.facade'
 
 @Module({
   imports: [DiscussionModule, EmailModule, SpaceModule, AttachmentsFacadeModule],
   providers: [
     CreateDiscussionFacade,
     UpdateDiscussionFacade,
-    CreateAnswerFacade,
-    UpdateAnswerFacade,
+    CreateDiscussionReplyFacade,
+    UpdateDiscussionReplyFacade,
     CliCreateDiscussionFacade,
     CliCreateDiscussionReplyFacade,
     CliUpdateDiscussionFacade,
     CliUpdateDiscussionReplyFacade,
-    CreateCommentFacade,
   ],
   exports: [
     CreateDiscussionFacade,
     UpdateDiscussionFacade,
-    CreateAnswerFacade,
-    UpdateAnswerFacade,
+    UpdateDiscussionReplyFacade,
+    CreateDiscussionReplyFacade,
     CliCreateDiscussionFacade,
     CliCreateDiscussionReplyFacade,
     CliUpdateDiscussionFacade,
     CliUpdateDiscussionReplyFacade,
-    CreateCommentFacade,
   ],
 })
 export class DiscussionApiFacadeModule {}

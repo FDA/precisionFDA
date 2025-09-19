@@ -1,6 +1,6 @@
-import { EntityScope } from '@shared/types/common'
 import { Discussion } from '@shared/domain/discussion/discussion.entity'
 import { SimpleUserDTO } from '@shared/domain/user/dto/simple-user.dto'
+import { EntityScope } from '@shared/types/common'
 import { AnswerDTO } from './answer.dto'
 import { CommentDTO } from './comment.dto'
 
@@ -37,6 +37,8 @@ export class DiscussionDTO {
     dto.scope = note.scope
     dto.answersCount = await discussion.answers.loadCount()
     dto.commentsCount = await discussion.comments.loadCount()
+    // safety load user
+    await discussion.user.load()
     dto.user = SimpleUserDTO.fromEntity(discussion.user.getEntity())
     dto.following = following
 

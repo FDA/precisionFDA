@@ -8,7 +8,9 @@
 #  created_at    :datetime         not null
 #  updated_at    :datetime         not null
 #  note_id       :integer
-#
+#  reply_type    :string(255)      not null
+#  parent_id     :integer
+#  old_comment_id :integer
 
 class Answer < ApplicationRecord
   include Auditor
@@ -18,7 +20,7 @@ class Answer < ApplicationRecord
   include CommonPermissions
   include TagsContainer
 
-  validates :discussion_id, uniqueness: { scope: :user_id }
+  validates :discussion_id, uniqueness: { scope: :user_id }, if: -> { reply_type == "answer" }
   belongs_to :user
   belongs_to :discussion
   belongs_to :note, dependent: :destroy

@@ -1,13 +1,13 @@
-import { Injectable } from '@nestjs/common'
-import { DiscussionService } from '@shared/domain/discussion/services/discussion.service'
-import { MainQueueJobProducer } from '@shared/queue/producer/main-queue-job.producer'
-import { AttachmentManagementFacade } from '@shared/facade/discussion/attachment-management.facade'
-import { CreateAnswerDTO } from '@shared/domain/discussion/dto/create-answer.dto'
 import { SqlEntityManager } from '@mikro-orm/mysql'
-import { AnswerDTO } from '@shared/domain/discussion/dto/answer.dto'
+import { Injectable } from '@nestjs/common'
+import { CreateReplyDTO } from '@shared/domain/discussion/dto/create-reply.dto'
+import { DiscussionReplyDTO } from '@shared/domain/discussion/dto/discussion-reply.dto'
+import { DiscussionService } from '@shared/domain/discussion/services/discussion.service'
+import { AttachmentManagementFacade } from '@shared/facade/discussion/attachment-management.facade'
+import { MainQueueJobProducer } from '@shared/queue/producer/main-queue-job.producer'
 
 @Injectable()
-export class CreateAnswerFacade {
+export class CreateDiscussionReplyFacade {
   constructor(
     private readonly em: SqlEntityManager,
     private readonly discussionService: DiscussionService,
@@ -15,9 +15,9 @@ export class CreateAnswerFacade {
     private readonly mainQueueJobProducer: MainQueueJobProducer,
   ) {}
 
-  async createAnswer(dto: CreateAnswerDTO): Promise<AnswerDTO> {
+  async createReply(discussionId: number, dto: CreateReplyDTO): Promise<DiscussionReplyDTO> {
     const newAnswer = await this.em.transactional(async () => {
-      const result = await this.discussionService.createAnswer(dto)
+      const result = await this.discussionService.createReply(discussionId, dto)
       await this.attachmentFacade.createAttachments(result.noteId, dto.attachments)
       return result
     })

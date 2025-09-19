@@ -68,8 +68,13 @@ ActiveRecord::Schema.define(version: 2025_08_27_090909) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "note_id"
+    t.string "reply_type"
+    t.integer "parent_id"
+    t.integer "old_comment_id"
     t.index ["discussion_id"], name: "index_answers_on_discussion_id"
     t.index ["note_id"], name: "index_answers_on_note_id"
+    t.index ["old_comment_id"], name: "index_answers_on_old_comment_id"
+    t.index ["parent_id"], name: "index_answers_on_parent_id"
     t.index ["user_id"], name: "index_answers_on_user_id"
   end
 
@@ -1020,6 +1025,7 @@ ActiveRecord::Schema.define(version: 2025_08_27_090909) do
   add_foreign_key "admin_memberships", "admin_groups"
   add_foreign_key "admin_memberships", "users"
   add_foreign_key "analyses", "workflows"
+  add_foreign_key "answers", "comments", column: "old_comment_id"
   add_foreign_key "answers", "discussions"
   add_foreign_key "answers", "notes"
   add_foreign_key "answers", "users"

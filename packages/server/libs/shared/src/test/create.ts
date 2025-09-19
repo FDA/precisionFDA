@@ -15,6 +15,8 @@ import { ComparisonInput } from '@shared/domain/comparison-input/comparison-inpu
 import { Comparison } from '@shared/domain/comparison/comparison.entity'
 import { DataPortal } from '@shared/domain/data-portal/data-portal.entity'
 import { DbCluster } from '@shared/domain/db-cluster/db-cluster.entity'
+import { DiscussionReply } from '@shared/domain/discussion-reply/discussion-reply.entity'
+import { DISCUSSION_REPLY_TYPE } from '@shared/domain/discussion-reply/discussion-reply.types'
 import { Discussion } from '@shared/domain/discussion/discussion.entity'
 import { ExpertQuestion } from '@shared/domain/expert-question/entity/expert-question.entity'
 import { Expert } from '@shared/domain/expert/entity/expert.entity'
@@ -32,6 +34,7 @@ import { SpaceMembership } from '@shared/domain/space-membership/space-membershi
 import { Space } from '@shared/domain/space/space.entity'
 import { Tag } from '@shared/domain/tag/tag.entity'
 import { Tagging } from '@shared/domain/tagging/tagging.entity'
+import { UserContext } from '@shared/domain/user-context/model/user-context'
 import { Asset } from '@shared/domain/user-file/asset.entity'
 import { Folder } from '@shared/domain/user-file/folder.entity'
 import { UserFile } from '@shared/domain/user-file/user-file.entity'
@@ -39,12 +42,12 @@ import { User } from '@shared/domain/user/user.entity'
 import { WorkflowSeries } from '@shared/domain/workflow-series/workflow-series.entity'
 import { Workflow } from '@shared/domain/workflow/entity/workflow.entity'
 import { STATIC_SCOPE } from '@shared/enums'
+import { SCOPE } from '@shared/types/common'
+import { EntityScopeUtils } from '@shared/utils/entity-scope.utils'
 import { HashUtils } from '@shared/utils/hash.utils'
 import { config } from '../config'
 import { PARENT_TYPE } from '../domain/user-file/user-file.types'
 import * as generate from './generate'
-import { UserContext } from '@shared/domain/user-context/model/user-context'
-import { EntityScopeUtils } from '@shared/utils/entity-scope.utils'
 
 const attachmentHelper = {
   create: (
@@ -341,14 +344,16 @@ const discussionHelper = {
     references: {
       user: User
       discussion: Discussion
+      scope?: SCOPE
+      parent?: DiscussionReply
     },
-    data?: Partial<Answer>,
-  ): Answer => {
+    data?: Partial<DiscussionReply>,
+  ): DiscussionReply => {
     const note = wrap(new Note(references.user)).assign({
       title: generate.random.word(),
       content: generate.random.chance.paragraph(),
-      scope: STATIC_SCOPE.PRIVATE,
-      noteType: 'Answer',
+      scope: references.scope ?? STATIC_SCOPE.PRIVATE,
+      noteType: DISCUSSION_REPLY_TYPE.ANSWER,
     })
     em.persist(note)
 
@@ -358,6 +363,33 @@ const discussionHelper = {
     )
     em.persist(answer)
     return answer
+  },
+
+  createReply: (
+    em: EntityManager,
+    type: DISCUSSION_REPLY_TYPE,
+    references: {
+      user: User
+      discussion: Discussion
+      scope?: SCOPE
+      parent?: DiscussionReply
+    },
+    data?: Partial<DiscussionReply>,
+  ): DiscussionReply => {
+    const note = wrap(new Note(references.user)).assign({
+      title: generate.random.word(),
+      content: generate.random.chance.paragraph(),
+      scope: references.scope ?? STATIC_SCOPE.PRIVATE,
+      noteType: type,
+    })
+    em.persist(note)
+
+    const reply = wrap(
+      new DiscussionReply(note, references.discussion, references.user, references.parent),
+    ).assign(data ?? {}, { em })
+    reply.replyType = type
+    em.persist(reply)
+    return reply
   },
 }
 
@@ -966,6 +998,7 @@ export {
   challengeResourceHelper,
   commentHelper,
   comparisonHelper,
+  contextHelper,
   dataPortalsHelper,
   dbClusterHelper,
   discussionHelper,
@@ -984,5 +1017,4 @@ export {
   userHelper,
   workflowHelper,
   workflowSeriesHelper,
-  contextHelper,
 }
