@@ -1,7 +1,7 @@
 import axios from 'axios'
-import { Attachment, Discussion, PostAttachments } from './discussions.types'
 import { HomeScope, IFilter, MetaV2, ServerScope } from '../home/types'
 import { Params, prepareListFetch } from '../home/utils'
+import { Attachment, Discussion, PostAttachments } from './discussions.types'
 
 export type BasePayload = {
   content: string
@@ -24,10 +24,12 @@ export type DiscussionPayload = BasePayload & {
   scope: ServerScope
 }
 
-export type CreateAnswerPayload = BasePayload & {
+export type CreateReplyPayload = BasePayload & {
   title: string
   notify: string[] | string
   scope: ServerScope
+  type: 'Answer' | 'Comment'
+  parentId?: number
 }
 
 export type IdResponse = {
@@ -35,33 +37,23 @@ export type IdResponse = {
 }
 export type EditDiscussionPayload = Partial<DiscussionPayload & IdResponse>
 
-export type EditAnswerPayload = Partial<CreateAnswerPayload & IdResponse>
+export type EditDiscussionReplyPayload = Partial<CreateReplyPayload & IdResponse>
 export type NoteScope = 'public' | `space-${number}`
 
 export async function createDiscussionRequest(payload: DiscussionPayload) {
   return axios.post<IdResponse>('/api/v2/discussions', payload).then(r => r.data)
 }
 
-export async function createAnswerRequest(discussionId: number, payload: CreateAnswerPayload) {
-  return axios.post<IdResponse>(`/api/v2/discussions/${discussionId}/answers`, { discussionId, ...payload }).then(r => r.data)
-}
-
-export async function createDiscussionCommentRequest(discussionId: number, payload: CommentPayload) {
-  return axios.post<IdResponse>(`/api/v2/discussions/${discussionId}/comments`, { discussionId, ...payload }).then(r => r.data)
-}
-
-export async function createAnswerCommentRequest(discussionId: number, answerId: number, payload: CommentPayload) {
-  return axios
-    .post<IdResponse>(`/api/v2/discussions/${discussionId}/answers/${answerId}/comments`, { answerId, ...payload })
-    .then(r => r.data)
+export async function createReplyRequest(discussionId: number, payload: CreateReplyPayload) {
+  return axios.post<IdResponse>(`/api/v2/discussions/${discussionId}/replies`, { discussionId, ...payload }).then(r => r.data)
 }
 
 export async function editDiscussionRequest(discussionId: number, payload: EditDiscussionPayload) {
   return axios.patch<IdResponse>(`/api/v2/discussions/${discussionId}`, payload).then(r => r.data)
 }
 
-export async function editAnswerRequest(discussionId: number, answerId: number, payload: EditAnswerPayload) {
-  return axios.patch<IdResponse>(`/api/v2/discussions/${discussionId}/answers/${answerId}`, payload).then(r => r.data)
+export async function editReplyRequest(discussionId: number, replyId: number, payload: EditDiscussionReplyPayload) {
+  return axios.patch<IdResponse>(`/api/v2/discussions/${discussionId}/replies/${replyId}`, payload).then(r => r.data)
 }
 
 export async function editDiscussionCommentRequest(discussionId: number, commentId: number, payload: CommentPayload) {
@@ -104,8 +96,8 @@ export async function deleteDiscussionRequest(discussionId: number) {
   return axios.delete(`/api/v2/discussions/${discussionId}`).then(r => r.data) // no response except http code
 }
 
-export async function deleteAnswerRequest(discussionId: number, answerId: number) {
-  return axios.delete(`/api/v2/discussions/${discussionId}/answers/${answerId}`).then(r => r.data) // no response except http code
+export async function deleteAnswerRequest(discussionId: number, replyId: number) {
+  return axios.delete(`/api/v2/discussions/${discussionId}/replies/${replyId}`).then(r => r.data) // no response except http code
 }
 
 export async function deleteDiscussionCommentRequest(discussionId: number, commentId: number) {

@@ -1,42 +1,19 @@
-import {
-  Cascade,
-  Collection,
-  Entity,
-  ManyToOne,
-  OneToMany,
-  OneToOne,
-  Ref,
-  Reference,
-} from '@mikro-orm/core'
-import { AnswerComment } from '@shared/domain/comment/answer-comment.entity'
-import { Discussion } from '@shared/domain/discussion/discussion.entity'
-import { Note } from '@shared/domain/note/note.entity'
-import { User } from '@shared/domain/user/user.entity'
-import { BaseEntity } from '../../database/base.entity'
+import { Cascade, Collection, Entity, OneToMany } from '@mikro-orm/core'
 import AnswerRepository from '@shared/domain/answer/answer.repository'
+import { AnswerComment } from '../comment/answer-comment.entity'
+import { DiscussionReply } from '../discussion-reply/discussion-reply.entity'
+import { DISCUSSION_REPLY_TYPE } from '../discussion-reply/discussion-reply.types'
 
-@Entity({ tableName: 'answers', repository: () => AnswerRepository })
-export class Answer extends BaseEntity {
-  @OneToOne({ entity: () => Note, cascade: [Cascade.REMOVE] })
-  note: Ref<Note>
-
-  @ManyToOne({ entity: () => Discussion })
-  discussion: Ref<Discussion>
-
-  @ManyToOne({ entity: () => User })
-  user: Ref<User>
-
+@Entity({
+  repository: () => AnswerRepository,
+  discriminatorValue: DISCUSSION_REPLY_TYPE.ANSWER,
+})
+export class Answer extends DiscussionReply {
+  // TODO PFDA-5997 - part 1: replace comments by newComments
   @OneToMany({
     entity: () => AnswerComment,
     mappedBy: (ac) => ac.commentable,
     cascade: [Cascade.REMOVE],
   })
   comments = new Collection<AnswerComment>(this)
-
-  constructor(note: Note, discussion: Discussion, user: User) {
-    super()
-    this.note = Reference.create(note)
-    this.discussion = Reference.create(discussion)
-    this.user = Reference.create(user)
-  }
 }

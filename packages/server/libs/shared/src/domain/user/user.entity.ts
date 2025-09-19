@@ -9,7 +9,9 @@ import {
   Ref,
   Reference,
 } from '@mikro-orm/core'
+import { WorkaroundJsonType } from '@shared/database/json-workaround.type'
 import { ADMIN_GROUP_ROLES } from '@shared/domain/admin-group/admin-group.entity'
+import { DxId } from '@shared/domain/entity/domain/dxid'
 import { ExpertQuestion } from '@shared/domain/expert-question/entity/expert-question.entity'
 import { Expert } from '@shared/domain/expert/entity/expert.entity'
 import { Job } from '@shared/domain/job/job.entity'
@@ -22,15 +24,14 @@ import {
   CAN_EDIT_ROLES,
 } from '@shared/domain/space-membership/space-membership.helper'
 import { Space } from '@shared/domain/space/space.entity'
+import { SPACE_STATE } from '@shared/domain/space/space.enum'
 import { UserExtras } from '@shared/domain/user/user-extras'
 import { config } from '../../config'
 import { BaseEntity } from '../../database/base.entity'
 import { AdminMembership } from '../admin-membership/admin-membership.entity'
+import { SPACE_MEMBERSHIP_ROLE } from '../space-membership/space-membership.enum'
 import { HeaderItem } from './header-item'
 import { UserRepository } from './user.repository'
-import { WorkaroundJsonType } from '@shared/database/json-workaround.type'
-import { SPACE_STATE } from '@shared/domain/space/space.enum'
-import { DxId } from '@shared/domain/entity/domain/dxid'
 
 export enum USER_STATE {
   ENABLED = 0,
@@ -323,6 +324,15 @@ export class User extends BaseEntity {
 
     return Array.from(this.spaceMemberships)
       .filter((m) => m.active && ADMIN_LEAD_ROLES.includes(m.role))
+      .flatMap((spaceMembership) => Array.from(spaceMembership.spaces))
+      .filter((space) => space.state !== SPACE_STATE.DELETED)
+  }
+
+  async leadableSpaces(): Promise<Space[]> {
+    await this.spaceMemberships.load({ populate: ['spaces'] })
+
+    return Array.from(this.spaceMemberships)
+      .filter((m) => m.active && m.role === SPACE_MEMBERSHIP_ROLE.LEAD)
       .flatMap((spaceMembership) => Array.from(spaceMembership.spaces))
       .filter((space) => space.state !== SPACE_STATE.DELETED)
   }

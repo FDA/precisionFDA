@@ -1,19 +1,21 @@
 import { EntityManager } from '@mikro-orm/mysql'
-import { User } from '@shared/domain/user/user.entity'
-import { create, db, generate } from '@shared/test'
-import supertest from 'supertest'
 import { database } from '@shared/database'
-import { expect } from 'chai'
-import { testedApp } from '../../index'
-import { getDefaultHeaderData } from '../../utils/expect-helper'
-import { Discussion } from '@shared/domain/discussion/discussion.entity'
+import { Answer } from '@shared/domain/answer/answer.entity'
 import { Attachment } from '@shared/domain/attachment/attachment.entity'
+import { DISCUSSION_REPLY_TYPE } from '@shared/domain/discussion-reply/discussion-reply.types'
+import { Discussion } from '@shared/domain/discussion/discussion.entity'
+import { DiscussionFollow } from '@shared/domain/follow/discussion-follow.entity'
 import {
   SPACE_MEMBERSHIP_ROLE,
   SPACE_MEMBERSHIP_SIDE,
 } from '@shared/domain/space-membership/space-membership.enum'
-import { Answer } from '@shared/domain/answer/answer.entity'
-import { DiscussionFollow } from '@shared/domain/follow/discussion-follow.entity'
+import { User } from '@shared/domain/user/user.entity'
+import { STATIC_SCOPE } from '@shared/enums'
+import { create, db, generate } from '@shared/test'
+import { expect } from 'chai'
+import supertest from 'supertest'
+import { testedApp } from '../../index'
+import { getDefaultHeaderData } from '../../utils/expect-helper'
 
 describe('/discussions', async () => {
   let em: EntityManager
@@ -103,7 +105,7 @@ describe('/discussions', async () => {
     await em.flush()
 
     const { body } = await supertest(testedApp.getHttpServer())
-      .post(`/discussions/${discussion.id}/answers`)
+      .post(`/discussions/${discussion.id}/replies`)
       .set(getDefaultHeaderData(user))
       .send({
         discussionId: discussion.id,
@@ -111,6 +113,7 @@ describe('/discussions', async () => {
         content: 'Discussion super interesting content - lorem ipsum',
         attachments: { files: [file.id] },
         notify: [],
+        type: DISCUSSION_REPLY_TYPE.ANSWER,
       })
       .expect(201)
 
@@ -150,7 +153,7 @@ describe('/discussions', async () => {
     await em.flush()
 
     const { body } = await supertest(testedApp.getHttpServer())
-      .post(`/discussions/${discussion.id}/answers`)
+      .post(`/discussions/${discussion.id}/replies`)
       .set(getDefaultHeaderData(user))
       .send({
         discussionId: discussion.id,
@@ -158,6 +161,7 @@ describe('/discussions', async () => {
         content: 'Discussion super interesting content - lorem ipsum',
         attachments: { files: [file.id] },
         notify: [],
+        type: DISCUSSION_REPLY_TYPE.ANSWER,
       })
       .expect(201)
 
@@ -179,12 +183,15 @@ describe('/discussions', async () => {
     await em.flush()
 
     const { body } = await supertest(testedApp.getHttpServer())
-      .post(`/discussions/${discussion.id}/comments`)
+      .post(`/discussions/${discussion.id}/replies`)
       .set(getDefaultHeaderData(user))
       .send({
         discussionId: discussion.id,
+        title: 'comment',
         content: 'Discussion super interesting content - lorem ipsum',
+        attachments: {},
         notify: [],
+        type: DISCUSSION_REPLY_TYPE.COMMENT,
       })
       .expect(201)
 
@@ -196,16 +203,24 @@ describe('/discussions', async () => {
     const discussion = create.discussionHelper.createPublic(em, { user: author })
     await em.flush()
 
-    const answer = create.discussionHelper.createAnswer(em, { user: author, discussion })
+    const answer = create.discussionHelper.createAnswer(em, {
+      user: author,
+      discussion,
+      scope: STATIC_SCOPE.PUBLIC,
+    })
     await em.flush()
 
     const { body } = await supertest(testedApp.getHttpServer())
-      .post(`/discussions/${discussion.id}/answers/${answer.id}/comments`)
+      .post(`/discussions/${discussion.id}/replies`)
       .set(getDefaultHeaderData(user))
       .send({
         discussionId: discussion.id,
+        title: 'comment',
         content: 'Discussion super interesting content - lorem ipsum',
+        attachments: {},
         notify: [],
+        parentId: answer.id,
+        type: DISCUSSION_REPLY_TYPE.COMMENT,
       })
       .expect(201)
 
@@ -233,12 +248,15 @@ describe('/discussions', async () => {
     await em.flush()
 
     const { body } = await supertest(testedApp.getHttpServer())
-      .post(`/discussions/${discussion.id}/comments`)
+      .post(`/discussions/${discussion.id}/replies`)
       .set(getDefaultHeaderData(user))
       .send({
         discussionId: discussion.id,
+        title: 'comment',
         content: 'Discussion super interesting content - lorem ipsum',
+        attachments: {},
         notify: [],
+        type: DISCUSSION_REPLY_TYPE.COMMENT,
       })
       .expect(201)
 
@@ -265,16 +283,24 @@ describe('/discussions', async () => {
     })
     await em.flush()
 
-    const answer = create.discussionHelper.createAnswer(em, { user: author, discussion })
+    const answer = create.discussionHelper.createAnswer(em, {
+      user: author,
+      discussion,
+      scope: `space-${groupSpace.id}`,
+    })
     await em.flush()
 
     const { body } = await supertest(testedApp.getHttpServer())
-      .post(`/discussions/${discussion.id}/answers/${answer.id}/comments`)
+      .post(`/discussions/${discussion.id}/replies`)
       .set(getDefaultHeaderData(user))
       .send({
         discussionId: discussion.id,
+        title: 'comment',
         content: 'Discussion super interesting content - lorem ipsum',
+        attachments: {},
         notify: [],
+        parentId: answer.id,
+        type: DISCUSSION_REPLY_TYPE.COMMENT,
       })
       .expect(201)
 

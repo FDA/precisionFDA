@@ -1,9 +1,9 @@
+import { LoadStrategy, LoggerOptions } from '@mikro-orm/core'
 import { DefaultLogger, LogContext, MySqlDriver } from '@mikro-orm/mysql'
 import { MikroOrmModuleSyncOptions } from '@mikro-orm/nestjs/typings'
 import { TsMorphMetadataProvider } from '@mikro-orm/reflection'
-import { config } from '@shared/config'
-import { LoggerOptions } from '@mikro-orm/core'
 import { Logger } from '@nestjs/common'
+import { config } from '@shared/config'
 
 export interface MikroOrmConfigOptions {
   distPath: string
@@ -81,9 +81,10 @@ export function getMikroOrmConfig(opts: MikroOrmConfigOptions): MikroOrmModuleSy
     // https://jira.internal.dnanexus.com/browse/PFDA-5349
     discovery: { checkDuplicateFieldNames: false },
     registerRequestContext: false,
+    loadStrategy: LoadStrategy.BALANCED,
   }
 }
 
-function getEntityGlob(path: string, ext: string) {
+function getEntityGlob(path: string, ext: string): string {
   return `${path}/**/*.entity.${ext}`
 }

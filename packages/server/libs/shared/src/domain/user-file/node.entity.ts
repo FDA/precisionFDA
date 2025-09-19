@@ -1,10 +1,10 @@
 import { Collection, Entity, Enum, ManyToOne, OneToMany, Property, Ref } from '@mikro-orm/core'
+import { ScopedEntity } from '@shared/database/scoped.entity'
 import { Uid } from '@shared/domain/entity/domain/uid'
 import { NodeProperty } from '@shared/domain/property/node-property.entity'
 import { NodeRepository } from '@shared/domain/user-file/node.repository'
-import { FILE_STATE, FILE_STI_TYPE, FOLDER_STATE, PARENT_TYPE } from './user-file.types'
-import { ScopedEntity } from '@shared/database/scoped.entity'
 import { User } from '@shared/domain/user/user.entity'
+import { FILE_STATE, FILE_STI_TYPE, FOLDER_STATE, PARENT_TYPE } from './user-file.types'
 
 @Entity({
   abstract: true,
@@ -35,10 +35,10 @@ export class Node extends ScopedEntity {
   @Property()
   project?: string
 
-  @ManyToOne(() => Node)
+  @ManyToOne(() => Node, { nullable: true })
   parentFolder: Node
 
-  @ManyToOne(() => Node)
+  @ManyToOne(() => Node, { nullable: true })
   scopedParentFolder?: Node
 
   @Property()

@@ -1,8 +1,8 @@
+import { FilterQuery } from '@mikro-orm/core'
 import { AccessControlRepository } from '@shared/database/repository/access-control.repository'
 import { Answer } from '@shared/domain/answer/answer.entity'
-import { FilterQuery } from '@mikro-orm/core'
-import { User } from '@shared/domain/user/user.entity'
 import { STATIC_SCOPE } from '@shared/enums'
+import { User } from '../user/user.entity'
 
 export default class AnswerRepository extends AccessControlRepository<Answer> {
   protected async getAccessibleWhere(): Promise<FilterQuery<Answer>> {
@@ -24,9 +24,9 @@ export default class AnswerRepository extends AccessControlRepository<Answer> {
 
   protected async getEditableWhere(): Promise<FilterQuery<Answer>> {
     const user = await this.em.findOneOrFail(User, { id: this.user.id })
-    const manageableSpaces = await user.manageableSpaces()
+    const leadableSpaces = await user.leadableSpaces()
     const editableSpaces = await user.editableSpaces()
-    const manageSpaceScopes = manageableSpaces.map((space) => space.scope)
+    const leadSpaceScopes = leadableSpaces.map((space) => space.scope)
     const editSpaceScopes = editableSpaces.map((space) => space.scope)
 
     const isSiteAdmin = await user.isSiteAdmin()
@@ -40,7 +40,7 @@ export default class AnswerRepository extends AccessControlRepository<Answer> {
           { user: user.id, scope: STATIC_SCOPE.PRIVATE },
           { user: user.id, scope: STATIC_SCOPE.PUBLIC },
           { user: user.id, scope: { $in: editSpaceScopes } },
-          { scope: { $in: manageSpaceScopes } },
+          { scope: { $in: leadSpaceScopes } },
         ],
       },
     }

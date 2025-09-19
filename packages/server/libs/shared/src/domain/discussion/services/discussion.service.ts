@@ -6,17 +6,16 @@ import { Answer } from '@shared/domain/answer/answer.entity'
 import AnswerRepository from '@shared/domain/answer/answer.repository'
 import { AnswerComment } from '@shared/domain/comment/answer-comment.entity'
 import { DiscussionComment } from '@shared/domain/comment/discussion-comment.entity'
+import { DiscussionReply } from '@shared/domain/discussion-reply/discussion-reply.entity'
+import { DiscussionReplyRepository } from '@shared/domain/discussion-reply/discussion-reply.repository'
+import { DISCUSSION_REPLY_TYPE } from '@shared/domain/discussion-reply/discussion-reply.types'
 import { Discussion } from '@shared/domain/discussion/discussion.entity'
 import DiscussionRepository from '@shared/domain/discussion/discussion.repository'
 import { AnswerDTO } from '@shared/domain/discussion/dto/answer.dto'
 import { CommentDTO } from '@shared/domain/discussion/dto/comment.dto'
-import { CreateAnswerDTO } from '@shared/domain/discussion/dto/create-answer.dto'
-import { CreateCommentDTO } from '@shared/domain/discussion/dto/create-comment.dto'
 import { CreateDiscussionDTO } from '@shared/domain/discussion/dto/create-discussion.dto'
 import { DiscussionPaginationDTO } from '@shared/domain/discussion/dto/discussion-pagination.dto'
 import { DiscussionDTO } from '@shared/domain/discussion/dto/discussion.dto'
-import { UpdateAnswerDTO } from '@shared/domain/discussion/dto/update-answer.dto'
-import { UpdateCommentDTO } from '@shared/domain/discussion/dto/update-comment.dto'
 import { UpdateDiscussionDTO } from '@shared/domain/discussion/dto/update-discussion.dto'
 import { PaginatedResult } from '@shared/domain/entity/domain/paginated.result'
 import { EntityLinkService } from '@shared/domain/entity/entity-link/entity-link.service'
@@ -24,13 +23,17 @@ import { DiscussionFollow } from '@shared/domain/follow/discussion-follow.entity
 import { Note } from '@shared/domain/note/note.entity'
 import { Space } from '@shared/domain/space/space.entity'
 import { UserContext } from '@shared/domain/user-context/model/user-context'
+import { User } from '@shared/domain/user/user.entity'
 import { Vote } from '@shared/domain/vote/vote.entity'
 import { HOME_SCOPE, STATIC_SCOPE } from '@shared/enums'
 import { ServiceLogger } from '@shared/logger/decorator/service-logger'
 import * as errors from '../../../errors'
-import { Comment, CommentableType } from '../../comment/comment.entity'
+import { Comment } from '../../comment/comment.entity'
 import { SPACE_MEMBERSHIP_ROLE } from '../../space-membership/space-membership.enum'
 import { getIdFromScopeName } from '../../space/space.helper'
+import { CreateReplyDTO } from '../dto/create-reply.dto'
+import { DiscussionReplyDTO } from '../dto/discussion-reply.dto'
+import { UpdateReplyDTO } from '../dto/update-reply.dto'
 
 @Injectable()
 export class DiscussionService {
@@ -42,6 +45,7 @@ export class DiscussionService {
     private readonly userCtx: UserContext,
     private readonly discussionRepository: DiscussionRepository,
     private readonly answerRepository: AnswerRepository,
+    private readonly discussionReplyRepository: DiscussionReplyRepository,
     private readonly entityLinkService: EntityLinkService,
   ) {}
 
@@ -269,23 +273,52 @@ export class DiscussionService {
     }
   }
 
-  async createAnswer(dto: CreateAnswerDTO): Promise<AnswerDTO> {
-    this.logger.log(`Creating answer: ${JSON.stringify(dto)}`)
+  async createReply(discussionId: number, dto: CreateReplyDTO): Promise<DiscussionReplyDTO> {
+    this.logger.log(`Creating reply: ${JSON.stringify(dto)}`)
     const user = await this.userCtx.loadEntity()
 
     const discussion = await this.discussionRepository.findAccessibleOne(
-      { id: dto.discussionId },
+      { id: discussionId },
       { populate: ['note'] },
     )
 
     if (!discussion) {
       throw new errors.NotFoundError(
-        'Unable to create answer: discussion not found or inaccessible.',
+        'Unable to create reply: discussion not found or inaccessible.',
       )
     }
     const discussionNote = discussion.note.getEntity()
     if (discussionNote.scope === 'private') {
-      throw new errors.PermissionError('Unable to create answer: unpublished discussion.')
+      throw new errors.PermissionError('Unable to create reply: unpublished discussion.')
+    }
+
+    // TODO PFDA-5997 - part 1: use DiscussionReplyRepository to find parent reply
+    let parentReply: Answer | null = null
+    if (dto.parentId) {
+      parentReply = await this.answerRepository.findAccessibleOne(
+        { id: dto.parentId, note: { scope: discussionNote.scope } },
+        {
+          populate: ['note'],
+        },
+      )
+
+      if (!parentReply) {
+        throw new errors.NotFoundError(
+          `Unable to create reply: parent reply (id:${dto.parentId}) not found or inaccessible.`,
+        )
+      }
+    }
+
+    if (dto.type === DISCUSSION_REPLY_TYPE.ANSWER) {
+      const existingAnswer = await this.answerRepository.findOne({
+        discussion: discussionId,
+        user: user.id,
+      })
+      if (existingAnswer) {
+        throw new errors.ValidationError(
+          'Unable to create reply: user already has an answer for this discussion.',
+        )
+      }
     }
 
     return await this.em.transactional(async () => {
@@ -293,169 +326,126 @@ export class DiscussionService {
       newNote.title = dto.title
       newNote.content = dto.content
       newNote.scope = discussionNote.scope
-      newNote.noteType = 'Answer'
+      newNote.noteType = dto.type
       this.em.persist(newNote)
+      const newReply = new DiscussionReply(newNote, discussion, user, parentReply)
+      newReply.replyType = dto.type
 
-      const newAnswer = new Answer(newNote, discussion, user)
-      await this.em.persistAndFlush(newAnswer)
-      return AnswerDTO.fromEntity(newAnswer)
+      // TODO PFDA-5997 - part 1: remove this after deprecating `comments` table
+      if (dto.type === DISCUSSION_REPLY_TYPE.COMMENT) {
+        const oldComment = this.createComment(user, dto, discussion, parentReply)
+        newReply.oldComment = Reference.create(oldComment)
+      }
+
+      await this.em.persistAndFlush(newReply)
+      return DiscussionReplyDTO.fromEntity(newReply)
     })
   }
 
-  async updateAnswer(id: number, input: UpdateAnswerDTO): Promise<AnswerDTO> {
-    this.logger.log(`Updating answer: ${JSON.stringify(input)}`)
-    const answer = await this.answerRepository.findEditableOne({ id }, { populate: ['note'] })
-
-    if (!answer) {
-      throw new errors.NotFoundError(
-        'Unable to update answer: not found or insufficient permissions.',
+  async updateReply(replyId: number, input: UpdateReplyDTO): Promise<DiscussionReplyDTO> {
+    let reply: DiscussionReply | null = null
+    // TODO PFDA-5997 - part 1: query DiscussionReply only
+    if (input.type === DISCUSSION_REPLY_TYPE.COMMENT) {
+      reply = await this.discussionReplyRepository.findEditableOne(
+        { oldComment: replyId },
+        {
+          populate: ['note', 'oldComment'],
+        },
+      )
+    } else {
+      reply = await this.discussionReplyRepository.findEditableOne(
+        { id: replyId },
+        {
+          populate: ['note'],
+        },
       )
     }
-    const note = answer.note.getEntity()
-    if (input?.content) {
-      note.content = input.content
-    }
-    await this.em.persistAndFlush(note)
-    return AnswerDTO.fromEntity(answer)
-  }
 
-  async deleteAnswer(answerId: number): Promise<void> {
-    this.logger.log(`Deleting answer with id: ${answerId}`)
-
-    const answer = await this.answerRepository.findEditableOne(
-      { id: answerId },
-      { populate: ['note', 'comments', 'note.attachments'] },
-    )
-
-    if (answer === null) {
+    if (!reply) {
       throw new errors.NotFoundError(
-        'Unable to delete answer: not found or insufficient permissions.',
+        'Unable to update reply: not found or insufficient permissions.',
       )
     }
 
     return await this.em.transactional(async () => {
-      const answerNote = answer.note.getEntity()
-      const answerVotes = await this.em.find(Vote, {
-        votableId: answerId,
-        votableType: 'Answer',
-      })
-      const noteVotes = await this.em.find(Vote, {
-        votableId: answerNote.id,
-        votableType: 'Note',
-      })
-      this.logger.log(`Deleting answer votes with ids: ${answerVotes.map((vote) => vote.id)}`)
-      this.em.remove(answerVotes)
-      this.logger.log(`Deleting note votes with ids: ${noteVotes.map((vote) => vote.id)}`)
-      this.em.remove(noteVotes)
-      this.logger.log(`Deleting answer with id: ${answer.id}`)
-      await this.em.removeAndFlush(answer)
+      const note = reply.note.getEntity()
+      if (input?.content) {
+        note.content = input.content
+      }
+      await this.em.persistAndFlush(note)
+
+      // TODO PFDA-5997 - part 1: remove this after deprecating `comments` table
+      if (input.type === DISCUSSION_REPLY_TYPE.COMMENT) {
+        reply.oldComment.getEntity().body = input.content
+      }
+
+      return DiscussionReplyDTO.fromEntity(reply)
     })
   }
 
-  async createComment(commentInput: CreateCommentDTO): Promise<CommentDTO> {
+  async deleteReply(replyId: number, type: DISCUSSION_REPLY_TYPE): Promise<void> {
+    this.logger.log(`Deleting reply with id: ${replyId}`)
+
+    // TODO PFDA-5997 - part 1: query DiscussionReply only and load comments if type is ANSWER
+    let reply: Answer | DiscussionReply | null = null
+    if (type === DISCUSSION_REPLY_TYPE.COMMENT) {
+      reply = await this.discussionReplyRepository.findEditableOne(
+        {
+          oldComment: replyId,
+        },
+        {
+          populate: ['note', 'note.attachments', 'oldComment'],
+        },
+      )
+    } else {
+      reply = await this.answerRepository.findEditableOne(
+        {
+          id: replyId,
+        },
+        {
+          populate: [
+            'note',
+            'note.attachments',
+            'comments',
+            'newComments',
+            'newComments.note',
+            'newComments.note.attachments',
+          ],
+        },
+      )
+    }
+
+    if (!reply) {
+      throw new errors.NotFoundError(
+        'Unable to delete reply: not found or insufficient permissions.',
+      )
+    }
+
+    // TODO PFDA-5997 - part 1: cleanup answerVotes and noteVotes
+
+    return this.em.removeAndFlush(reply)
+  }
+
+  private createComment(
+    user: User,
+    commentInput: CreateReplyDTO,
+    discussion: Discussion,
+    parentReply?: Answer,
+  ): DiscussionComment | AnswerComment {
     this.logger.log(`Creating comment: ${JSON.stringify(commentInput)}`)
 
-    const user = await this.userCtx.loadEntity()
-    if (!user) {
-      throw new errors.NotFoundError('User not found.')
+    let commentClass: typeof DiscussionComment | typeof AnswerComment = DiscussionComment
+    let target: Discussion | Answer = discussion
+    if (parentReply) {
+      commentClass = AnswerComment
+      target = parentReply
     }
 
-    if (commentInput.discussionId) {
-      const target = await this.discussionRepository.findAccessibleOne(
-        { id: commentInput.discussionId },
-        { populate: ['note'] },
-      )
-      if (!target) {
-        throw new errors.NotFoundError(
-          `Unable to create comment: Discussion (id:${commentInput.discussionId}) not found or insufficient permissions.`,
-        )
-      }
-      const newComment = new DiscussionComment(user)
-      newComment.body = commentInput.content
-      newComment.commentable = Reference.create(target)
-      // other params are intentionally null.
-      await this.em.persistAndFlush(newComment)
-      return await CommentDTO.fromEntity(newComment)
-    }
-
-    const target = await this.answerRepository.findAccessibleOne(
-      {
-        id: commentInput.answerId,
-      },
-      { populate: ['note'] },
-    )
-    if (!target) {
-      throw new errors.NotFoundError(
-        `Unable to create comment: Answer (id: ${commentInput.answerId}) not found or insufficient permissions.`,
-      )
-    }
-    const newComment = new AnswerComment(user)
+    const newComment = new commentClass(user)
     newComment.body = commentInput.content
     newComment.commentable = Reference.create(target)
     // other params are intentionally null.
-    await this.em.persistAndFlush(newComment)
-    return await CommentDTO.fromEntity(newComment)
-  }
-
-  async updateComment(id: number, commentInput: UpdateCommentDTO): Promise<CommentDTO> {
-    this.logger.log(`Editing comment: ${JSON.stringify(commentInput)}`)
-
-    const user = await this.userCtx.loadEntity()
-    const comment = await this.em.findOne(Comment, id)
-    const commentClass = comment instanceof DiscussionComment ? DiscussionComment : AnswerComment
-    const commentEntity = await this.em.findOne(commentClass, id, { populate: ['commentable'] })
-
-    if (!commentEntity || !(await commentEntity.isEditableBy(user))) {
-      throw new errors.NotFoundError(
-        'Unable to edit comment: comment not found or insufficient permissions.',
-      )
-    }
-    commentEntity.body = commentInput.content
-    await this.em.persistAndFlush(comment)
-    return await CommentDTO.fromEntity(commentEntity)
-  }
-
-  async deleteComment(commentId: number, type: CommentableType): Promise<void> {
-    this.logger.log(`Deleting comment with id: ${commentId}`)
-
-    const user = await this.userCtx.loadEntity()
-
-    let comment: AnswerComment | DiscussionComment | null
-    if (type == 'Discussion') {
-      comment = await this.em.findOne(DiscussionComment, commentId, { populate: ['commentable'] })
-    } else if (type === 'Answer') {
-      comment = await this.em.findOne(AnswerComment, commentId, { populate: ['commentable'] })
-    } else throw new errors.InvalidStateError('Invalid comment type.')
-
-    if (!comment || !(await comment.isEditableBy(user))) {
-      throw new errors.NotFoundError(
-        'Unable to delete comment: comment not found or insufficient permissions.',
-      )
-    }
-
-    // remove this in favor of isEditableBy
-    if (comment.user.id === this.userCtx.id) {
-      this.logger.log(`Deleting comment with id: ${comment.id}`)
-      await this.em.removeAndFlush(comment)
-      return
-    } else {
-      const note = await comment.commentable.getEntity().note.load()
-      const spaceId = note.getSpaceId()
-      const space = await this.em.findOne(Space, {
-        id: spaceId,
-        spaceMemberships: {
-          user: this.userCtx.id,
-          role: SPACE_MEMBERSHIP_ROLE.LEAD,
-        },
-      })
-      if (space) {
-        this.logger.log(`Deleting comment with id: ${comment.id}`)
-        await this.em.removeAndFlush(comment)
-        return
-      }
-    }
-
-    throw new errors.PermissionError('Unable to delete comment: insufficient permissions.')
+    return newComment
   }
 
   async getAnswer(answerId: number): Promise<AnswerDTO> {
@@ -469,9 +459,7 @@ export class DiscussionService {
       },
     )
     if (!res) {
-      throw new errors.NotFoundError(
-        'Unable to get discussion: not found or insufficient permissions.',
-      )
+      throw new errors.NotFoundError('Unable to get answer: not found or insufficient permissions.')
     }
     return AnswerDTO.fromEntity(res)
   }
@@ -565,7 +553,8 @@ export class DiscussionService {
   async getAnswerUiLink(answerId: number): Promise<string> {
     this.logger.log(`Generating UI-link to answer: ${answerId} for user: ${this.userCtx.id}`)
     const answer = await this.em.findOne(Answer, { id: answerId })
-    return this.entityLinkService.getUiLink(answer)
+    // answer was returned as DiscussionReply, cast it to Answer
+    return this.entityLinkService.getUiLink(Object.setPrototypeOf(answer, Answer.prototype))
   }
 
   async getCommentUiLink(commentId: number): Promise<string> {

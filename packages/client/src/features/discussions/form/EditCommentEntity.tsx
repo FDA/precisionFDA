@@ -1,12 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import React from 'react'
 import { toast } from 'react-toastify'
-import {
-  CommentPayload,
-  editAnswerCommentRequest,
-  editDiscussionCommentRequest,
-  NoteScope,
-} from '../api'
+import { CommentPayload, EditDiscussionReplyPayload, editReplyRequest, NoteScope } from '../api'
 import { NoteForm } from '../discussions.types'
 import { MarkdownForm } from './MarkdownForm'
 
@@ -30,21 +25,15 @@ export const EditCommentEntity = ({
   const editCommentMutation = useMutation({
     mutationKey: ['edit-comment'],
     mutationFn: (payload: CommentPayload) => {
+      const p: EditDiscussionReplyPayload = { ...payload, type: 'Comment' }
       if (answerId) {
-        return editAnswerCommentRequest(
-          discussionId,
-          answerId,
-          commentId,
-          payload,
-        )
+        p.parentId = answerId
       }
-      return editDiscussionCommentRequest(discussionId, commentId, payload)
+      return editReplyRequest(discussionId, commentId, p)
     },
     onSuccess: () => {
       if (onSuccess) onSuccess()
-      toast.success(
-        `${answerId && !commentId ? 'Answer' : 'Comment'} has been updated`,
-      )
+      toast.success(`${answerId && !commentId ? 'Answer' : 'Comment'} has been updated`)
       queryClient.invalidateQueries({
         queryKey: ['discussion'],
       })

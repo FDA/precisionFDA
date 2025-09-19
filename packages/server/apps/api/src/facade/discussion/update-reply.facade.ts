@@ -1,22 +1,22 @@
+import { SqlEntityManager } from '@mikro-orm/mysql'
 import { Injectable } from '@nestjs/common'
+import { UpdateReplyDTO } from '@shared/domain/discussion/dto/update-reply.dto'
 import { DiscussionService } from '@shared/domain/discussion/services/discussion.service'
 import { AttachmentManagementFacade } from '@shared/facade/discussion/attachment-management.facade'
-import { UpdateAnswerDTO } from '@shared/domain/discussion/dto/update-answer.dto'
-import { SqlEntityManager } from '@mikro-orm/mysql'
 
 @Injectable()
-export class UpdateAnswerFacade {
+export class UpdateDiscussionReplyFacade {
   constructor(
     private readonly em: SqlEntityManager,
     private readonly discussionService: DiscussionService,
     private readonly attachmentFacade: AttachmentManagementFacade,
   ) {}
 
-  async updateAnswer(answerId: number, dto: UpdateAnswerDTO): Promise<void> {
+  async updateReply(replyId: number, dto: UpdateReplyDTO): Promise<void> {
     await this.em.transactional(async () => {
-      const answer = await this.discussionService.updateAnswer(answerId, dto)
+      const reply = await this.discussionService.updateReply(replyId, dto)
       if (dto.attachments) {
-        await this.attachmentFacade.updateAttachments(answer.noteId, dto.attachments)
+        await this.attachmentFacade.updateAttachments(reply.noteId, dto.attachments)
       }
     })
   }
