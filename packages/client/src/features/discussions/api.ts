@@ -56,10 +56,6 @@ export async function editReplyRequest(discussionId: number, replyId: number, pa
   return axios.patch<IdResponse>(`/api/v2/discussions/${discussionId}/replies/${replyId}`, payload).then(r => r.data)
 }
 
-export async function editDiscussionCommentRequest(discussionId: number, commentId: number, payload: CommentPayload) {
-  return axios.put<IdResponse>(`/api/v2/discussions/${discussionId}/comments/${commentId}`, payload).then(r => r.data)
-}
-
 export async function editAnswerCommentRequest(
   discussionId: number,
   answerId: number,

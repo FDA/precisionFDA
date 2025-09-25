@@ -2,15 +2,15 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import React, { useState } from 'react'
 import { Markdown } from '../../../components/Markdown'
 import { ReplyArrowIcon } from '../../../components/icons/ReplyArrowIcon'
+import { StyledMarkdown } from '../../../styles/commonStyles'
 import { useConfirm } from '../../modal/useConfirm'
 import { AttachmentsList } from '../AttachmentsList'
 import { deleteDiscussionRequest, fetchAttachmentsRequest } from '../api'
 import { Discussion } from '../discussions.types'
+import { EditNoteEntity } from '../form/EditNoteEntity'
 import { groupByAttachmentType } from '../helpers'
 import { StyledCommentCard, StyledReplyButton } from '../styles'
 import { CardHeader } from './CardHeader'
-import { EditNoteEntity } from '../form/EditNoteEntity'
-import { StyledMarkdown } from '../../../styles/commonStyles'
 
 export function DiscussionCard({
   canEdit,
@@ -61,16 +61,14 @@ export function DiscussionCard({
 
   if (editMode) {
     return (
-      <StyledMarkdown>
-        <EditNoteEntity
-          onSuccess={() => setEditMode(false)}
-          onCancel={() => setEditMode(false)}
-          discussionId={discussion.id}
-          content={discussion.content}
-          scope={discussion.scope}
-          noteId={discussion.noteId}
-        />
-      </StyledMarkdown>
+      <EditNoteEntity
+        onSuccess={() => setEditMode(false)}
+        onCancel={() => setEditMode(false)}
+        discussionId={discussion.id}
+        content={discussion.content}
+        scope={discussion.scope}
+        noteId={discussion.noteId}
+      />
     )
   }
 

@@ -1,11 +1,5 @@
 import { format, parseISO } from 'date-fns'
-import {
-  Attachment,
-  AttachmentKey,
-  AttachmentType,
-  FormAttachments,
-  PostAttachments,
-} from './discussions.types'
+import { Attachment, AttachmentKey, AttachmentType, FormAttachments, PostAttachments } from './discussions.types'
 
 export const typeAttachmentKey = {
   App: 'apps',
@@ -19,11 +13,11 @@ export const typeAttachmentKey = {
 
 export function formatDiscussionDate(timestamp: string) {
   const date = parseISO(timestamp)
-  return format(date, "MMM d 'at' HH:mm")
+  return format(date, "MMM d, yyyy 'at' HH:mm")
 }
 
 export function areAttachmentsEmpty(attachments?: FormAttachments): boolean {
-  if(!attachments) return true
+  if (!attachments) return true
   return Object.values(attachments).every(attachmentArray => attachmentArray.length === 0)
 }
 
@@ -59,4 +53,3 @@ export function groupByAttachmentType(attachments: Attachment[]): FormAttachment
 
   return grouped
 }
-
