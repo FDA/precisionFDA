@@ -6,8 +6,9 @@ import { Controller, useForm } from 'react-hook-form'
 import { toast } from 'react-toastify'
 import styled from 'styled-components'
 import * as Yup from 'yup'
-import { NotePayload, NoteScope, editAnswerRequest, editDiscussionRequest, fetchAttachmentsRequest } from '../api'
+import { NotePayload, NoteScope, editDiscussionRequest, editReplyRequest, fetchAttachmentsRequest } from '../api'
 
+import { Button } from '../../../components/Button'
 import { MarkdownEditor } from '../../../components/Markdown/MarkdownEditor'
 import { InputError } from '../../../components/form/styles'
 import { ButtonRow } from '../../modal/styles'
@@ -15,10 +16,10 @@ import { AttachmentsList } from '../AttachmentsList'
 import { AttachmentKey, NoteForm } from '../discussions.types'
 import { groupByAttachmentType, pickIdsFromFormAttachments } from '../helpers'
 import { Attachments } from './Attachments'
-import { Button } from '../../../components/Button'
 
 const StyledForm = styled.form`
   display: flex;
+  align-self: stretch;
   flex-direction: column;
   padding-top: 8px;
   border-radius: 6px;
@@ -78,17 +79,14 @@ export const EditNoteForm = ({
     await onSubmit(getValues())
   }
 
-  const deleteAttachment = (key: `attachments.${AttachmentKey}`, id: number|string) => {
+  const deleteAttachment = (key: `attachments.${AttachmentKey}`, id: number | string) => {
     const v = getValues(key)
     const newAttachments = v.filter(a => a.id !== id)
     setValue(key, newAttachments)
   }
 
   return (
-    <StyledForm
-      id="commentForm"
-      autoComplete="off"
-    >
+    <StyledForm id="commentForm" autoComplete="off">
       <Controller
         control={control}
         name="content"
@@ -136,7 +134,7 @@ export const EditNoteEntity = ({
     mutationKey: ['edit-discussion'],
     mutationFn: (payload: NotePayload) => {
       if (answerId) {
-        return editAnswerRequest(discussionId, answerId, payload)
+        return editReplyRequest(discussionId, answerId, { ...payload, type: 'Answer' })
       }
       return editDiscussionRequest(discussionId, payload)
     },
