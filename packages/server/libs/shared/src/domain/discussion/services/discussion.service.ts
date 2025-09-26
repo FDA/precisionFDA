@@ -149,11 +149,11 @@ export class DiscussionService {
       {
         populate: [
           'note',
-          'answers',
-          'comments',
           'note.attachments',
-          'answers.note',
-          'answers.note.attachments',
+          'discussionReplies',
+          'discussionReplies.note',
+          'discussionReplies.note.attachments',
+          'discussionReplies.oldComment', // TODO PFDA-5997 - part 1: remove this after deprecating `comments` table
         ],
       },
     )

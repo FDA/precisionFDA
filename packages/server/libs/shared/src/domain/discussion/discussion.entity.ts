@@ -1,20 +1,21 @@
 import {
-  Entity,
-  Ref,
-  ManyToOne,
-  Reference,
-  OneToOne,
-  OneToMany,
-  Collection,
   Cascade,
+  Collection,
+  Entity,
+  ManyToOne,
+  OneToMany,
+  OneToOne,
+  Ref,
+  Reference,
 } from '@mikro-orm/core'
 import { Answer } from '@shared/domain/answer/answer.entity'
 import { DiscussionComment } from '@shared/domain/comment/discussion-comment.entity'
+import DiscussionRepository from '@shared/domain/discussion/discussion.repository'
+import { DiscussionFollow } from '@shared/domain/follow/discussion-follow.entity'
 import { Note } from '@shared/domain/note/note.entity'
 import { User } from '@shared/domain/user/user.entity'
 import { BaseEntity } from '../../database/base.entity'
-import DiscussionRepository from '@shared/domain/discussion/discussion.repository'
-import { DiscussionFollow } from '@shared/domain/follow/discussion-follow.entity'
+import { DiscussionReply } from '../discussion-reply/discussion-reply.entity'
 
 @Entity({ tableName: 'discussions', repository: () => DiscussionRepository })
 export class Discussion extends BaseEntity {
@@ -23,6 +24,9 @@ export class Discussion extends BaseEntity {
 
   @ManyToOne(() => User)
   user: Ref<User>
+
+  @OneToMany({ entity: () => DiscussionReply, mappedBy: 'discussion', cascade: [Cascade.REMOVE] })
+  discussionReplies = new Collection<DiscussionReply>(this)
 
   @OneToMany({ entity: () => Answer, mappedBy: 'discussion', cascade: [Cascade.REMOVE] })
   answers = new Collection<Answer>(this)
