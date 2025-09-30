@@ -114,7 +114,7 @@ const ArrayFileInput = ({
   })
 
   const allFilesValidated = fileListQuery?.data?.every((isValid: boolean) => isValid) ?? false
-  const error = fileUids.length > 0 && !(areAllFilesPreValidated || allFilesValidated)
+  const error = fileUids.length > 0 && !areAllFilesPreValidated && fileListQuery.isSuccess && !allFilesValidated
 
   useEffect(() => {
     if (error) {
