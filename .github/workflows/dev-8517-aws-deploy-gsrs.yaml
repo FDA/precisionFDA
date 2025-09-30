@@ -10,7 +10,7 @@ on:
       GSRS_DATABASE_NAME:
         description: GSRS Database and Index Name
         type: string
-        default: ixginas20250306
+        default: ixginas20250829
       LT_VERSION:
         description: Launch Template Version
         type: string
