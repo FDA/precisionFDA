@@ -102,11 +102,10 @@ export const useDatabaseSelectActions = ({
     setShowModal: setPropertiesModal,
     isShown: isShownPropertiesModal,
   } = useEditPropertiesModal<IDatabase>({
-    type: 'dbCluster',
     selected: selected,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: resourceKeys })
-      queryClient.invalidateQueries({ queryKey: ['edit-resource-properties', 'dbCluster']})
+      queryClient.invalidateQueries({ queryKey: ['edit-resource-properties'] })
     },
   })
 

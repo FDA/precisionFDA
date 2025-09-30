@@ -680,7 +680,8 @@ RSpec.describe ApiController, type: :controller do
           guest_lead_id: guest_lead.id,
         )
       end
-      let(:workflow) { create(:workflow, user: host_lead) }
+      let(:workflow_series) { create(:workflow_series, user: host_lead) }
+      let(:workflow) { create(:workflow, user: host_lead, workflow_series: workflow_series) }
       let(:tag_list) { ["Simulation", "Read Mapping", "Variation Calling"] }
       let(:set_tags_payload) do
         {
@@ -700,7 +701,7 @@ RSpec.describe ApiController, type: :controller do
         aggregate_failures do
           expect(response.content_type).to eq "application/json; charset=utf-8"
           expect(response).to be_successful
-          expect(workflow.tags.map(&:name)).to eq(tag_list)
+          expect(workflow.workflow_series.tags.map(&:name)).to eq(tag_list)
         end
       end
     end

@@ -166,12 +166,11 @@ export const useAppSelectionActions = ({
     modalComp: propertiesModal,
     setShowModal: setPropertiesModal,
     isShown: isShownPropertiesModal,
-  } = useEditPropertiesModal({
-    type: 'appSeries',
-    selected: selected.map(app => ({ ...app, id: app.app_series_id })),
+  } = useEditPropertiesModal<IApp>({
+    selected: selected,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: resourceKeys })
-      queryClient.invalidateQueries({ queryKey: ['edit-resource-properties', 'appSeries']})
+      queryClient.invalidateQueries({ queryKey: ['edit-resource-properties'] })
     },
   })
 
@@ -339,13 +338,13 @@ export const useAppSelectionActions = ({
   ]
 
   let filteredActions = actions
-  
+
   if (homeScope) {
     filteredActions = filteredActions.filter(action => action.name !== 'Copy to My Home (private)')
   } else {
     filteredActions = filteredActions.filter(action => action.name !== 'Make public')
   }
-  
+
   if (homeScope === 'spaces') {
     const allowedNames = ['Copy to space']
     filteredActions = filteredActions.filter(action => allowedNames.includes(action.name))

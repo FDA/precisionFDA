@@ -45,9 +45,11 @@ import { SpaceMembershipRepository } from '@shared/domain/space-membership/space
 import { JOB_STATE } from '@shared/domain/job/job.enum'
 import { ChallengeJobSynchronizationService } from '@shared/domain/job/services/challenge-job-synchronization.service'
 import { Job as BullJob } from 'bull'
+import { SearchableByUid } from '@shared/domain/entity/interface/searchable-by-uid.interface'
+import { Uid } from '@shared/domain/entity/domain/uid'
 
 @Injectable()
-export class JobService {
+export class JobService implements SearchableByUid<'job'> {
   @ServiceLogger()
   private readonly logger: Logger
 
@@ -66,6 +68,12 @@ export class JobService {
     private readonly spaceRepo: SpaceRepository,
     private readonly spaceMembershipRepo: SpaceMembershipRepository,
   ) {}
+  getAccessibleEntityByUid(uid: Uid<'job'>): Promise<Job | null> {
+    return this.jobRepo.findAccessibleOne({ uid })
+  }
+  getEditableEntityByUid(uid: Uid<'job'>): Promise<Job | null> {
+    return this.jobRepo.findEditableOne({ uid })
+  }
 
   async checkChallengeJobs(): Promise<void> {
     await this.challengeJobSynchService.checkChallengeJobs()

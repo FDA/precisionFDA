@@ -56,7 +56,7 @@ class FileCopyWorker < ApplicationWorker
       new.source.properties.each do |property|
         property_hash[property.property_name] = property.property_value
       end
-      https_apps_client.set_properties(new.object.id, "node", property_hash)
+      https_apps_client.set_properties(new.object.uid, property_hash)
     end
 
     # replace COPYING state by a source file state.

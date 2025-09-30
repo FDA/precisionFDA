@@ -566,12 +566,11 @@ class HttpsAppsClient # rubocop:disable Metrics/ClassLength
     )
   end
 
-  def set_properties(target_id, target_type, properties)
+  def set_properties(target_uid, properties)
     request(
       "/properties",
       {
-        targetId: target_id,
-        targetType: target_type,
+        targetId: target_uid,
         properties: properties,
       },
     )

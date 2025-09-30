@@ -30,7 +30,12 @@ type AssetActionArgs = {
   resetSelected?: () => void
 }
 
-export const useAssetActions = ({ homeScope, selectedItems, resourceKeys, resetSelected }: AssetActionArgs): UseAssetActionsResult => {
+export const useAssetActions = ({
+  homeScope,
+  selectedItems,
+  resourceKeys,
+  resetSelected,
+}: AssetActionArgs): UseAssetActionsResult => {
   const queryClient = useQueryClient()
   const navigate = useNavigate()
   const selected = selectedItems.filter(x => x !== undefined)
@@ -86,11 +91,10 @@ export const useAssetActions = ({ homeScope, selectedItems, resourceKeys, resetS
     setShowModal: setPropertiesModal,
     isShown: isShownPropertiesModal,
   } = useEditPropertiesModal<IAsset>({
-    type: 'node',
     selected: selected,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: resourceKeys })
-      queryClient.invalidateQueries({ queryKey: ['edit-resource-properties', 'node']})
+      queryClient.invalidateQueries({ queryKey: ['edit-resource-properties'] })
     },
   })
 

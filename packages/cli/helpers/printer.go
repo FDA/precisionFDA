@@ -546,3 +546,33 @@ func PrintRotatePasswordHelp() int {
 	writer.Flush()
 	return 0
 }
+
+func PrintSetTagsHelp() int {
+	writer := tabwriter.NewWriter(os.Stdout, 0, 8, 1, '\t', tabwriter.AlignRight)
+	writeLine := newLineWriter(writer)
+	writeLine("  ", "  ")
+
+	writeLine("  For:", "Setting tags on a given entity. Supported entities: app, asset, file, folder, job, workflow. Tags are provided as a comma-separated string.\n\tPlease note that this operation replaces any existing tags on the entity with the new set of tags provided.\n")
+
+	writeLine("  Usage:", "set-tags <ENTITY_ID> 'TAG1,TAG2,...' [FLAG...]\n")
+	writeLine("  Examples:", "set-tags file-GJk1kpQ05xgQd8bP54kJFjzkz-1 'projectA,important' [Sets tags 'projectA' and 'important' on the specified file]")
+	writeLine("  Flags:", "All flags listed below are OPTIONAL")
+	writeLine("   -h, -help", "Displays the help message and exit")
+
+	writer.Flush()
+	return 0
+}
+
+func PrintSetPropertiesHelp() int {
+	writer := tabwriter.NewWriter(os.Stdout, 0, 8, 1, '\t', tabwriter.AlignRight)
+	writeLine := newLineWriter(writer)
+	writeLine("  ", "  ")
+	writeLine("  For:", "Setting properties on a given entity. Supported entities: app, asset, file, folder, job, workflow. Properties are provided as a JSON string.\n\tPlease note that this operation replaces any existing properties on the entity with the new set of properties provided.\n")
+	writeLine("  Usage:", "set-properties <ENTITY_ID> '<JSON_PROPERTIES>' [FLAG...]\n")
+	writeLine("  Examples:", "set-properties file-GJk1kpQ05xgQd8bP54kJFjzkz-1 '{\"project\":\"F664-P3\",\"importance\":\"low\"}' [Sets properties 'project' and 'importance' on the specified file]")
+	writeLine("  Flags:", "All flags listed below are OPTIONAL")
+	writeLine("   -h, -help", "Displays the help message and exit")
+
+	writer.Flush()
+	return 0
+}

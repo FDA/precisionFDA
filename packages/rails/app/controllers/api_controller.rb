@@ -611,6 +611,14 @@ class ApiController < ApplicationController
     tag_context = unsafe_params[:tag_context] # Optional
 
     taggable = item_from_uid(taggable_uid) if taggable_uid
+
+    # if the taggable is app, get the series instead - CLI users sends app or workflow uid.
+    if taggable.is_a?(App)
+      taggable = taggable.app_series
+    elsif taggable.is_a?(Workflow)
+      taggable = taggable.workflow_series
+    end
+
     taggable = Folder.accessible_by(@context).find_by(id: taggable_folder_id) if taggable_folder_id
 
     verify_nodes_for_protection([taggable], "set tags") if taggable.is_a?(UserFile)
@@ -635,17 +643,6 @@ class ApiController < ApplicationController
     render json: { path: path, message: message }
   rescue RuntimeError => e
     raise ApiError, e.message
-  end
-
-  def set_properties
-    # doesnt work for folders yet. might force FE to send id and type? for spaces and folders we only have id anyway..
-    item_id = params[:item_id]
-    item_type = params[:type]
-    properties = unsafe_params[:properties]
-    verify_nodes_for_protection([Node.find_by(id: item_id)], "set properties") if item_type == "node"
-
-    result = https_apps_client.set_properties(item_id.to_i, item_type, properties)
-    render json: result
   end
 
   # Inputs

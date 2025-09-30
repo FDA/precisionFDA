@@ -257,11 +257,10 @@ export const useFilesSelectActions = ({
     setShowModal: setPropertiesModal,
     isShown: isShownPropertiesModal,
   } = useEditPropertiesModal<IFile>({
-    type: 'node',
     selected: selected,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: resourceKeys })
-      queryClient.invalidateQueries({ queryKey: ['edit-resource-properties', 'node'] })
+      queryClient.invalidateQueries({ queryKey: ['edit-resource-properties'] })
     },
   })
 

@@ -1,4 +1,4 @@
-import { DXEnityType, DxId } from '@shared/domain/entity/domain/dxid'
+import { DXEntityType, DxId } from '@shared/domain/entity/domain/dxid'
 import { PlatformEntityType } from '@shared/domain/entity/domain/platform.entity.type'
 import { JOB_STATE } from '../domain/job/job.enum'
 import { FILE_STATE_DX } from '../domain/user-file/user-file.types'
@@ -190,7 +190,7 @@ type FindJobsResponse = {
 type JobTerminateResponse = JobCreateResponse
 
 type ClassIdResponse<
-  ENTITY extends DXEnityType | PlatformEntityType = DXEnityType | PlatformEntityType,
+  ENTITY extends DXEntityType | PlatformEntityType = DXEntityType | PlatformEntityType,
 > = {
   id: DxId<ENTITY>
 }
